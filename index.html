@@ -387,9 +387,34 @@
     padding: 2px 0 12px 14px; border-left: 2px solid var(--amber-dim); margin-bottom:12px;
   }
   .trade-notes-col li:last-child{ margin-bottom:0; }
-  .trade-chart{ width:100%; height: var(--chart-height, 200px); display:block; }
+  .trade-chart{ width:100%; height: var(--chart-height, 200px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
   .grid-label{ fill: var(--muted); font-size: 10px; font-family:'IBM Plex Mono',monospace; }
+
+  .chart-toolbar{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    margin-bottom:8px; flex-wrap:wrap;
+  }
+  .chart-hint{ font-size:10.5px; color: var(--muted); }
+  .chart-toolbar-btns{ display:flex; gap:4px; }
+  .chart-tool-btn{
+    background: transparent; border:1px solid var(--border); color: var(--muted);
+    padding:4px 10px; font-size:10.5px; border-radius:4px; cursor:pointer; transition: all .15s ease;
+  }
+  .chart-tool-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .chart-tool-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
+  .chart-canvas-wrap{ position:relative; }
+  .chart-crosshair-readout{
+    position:absolute; top:4px; left:4px; z-index:5; pointer-events:none;
+    background: var(--panel-raised); border:1px solid var(--border); border-radius:4px;
+    padding:5px 9px; font-family:'IBM Plex Mono', monospace; font-size:10.5px; color: var(--muted);
+    display:flex; gap:10px; white-space:nowrap;
+  }
+  .chart-crosshair-readout[hidden]{ display:none; }
+  .chart-crosshair-readout .cr-date{ color: var(--paper); }
+  .chart-crosshair-readout .cr-up{ color: var(--gain); }
+  .chart-crosshair-readout .cr-down{ color: var(--loss); }
+  .crosshair-line{ stroke: var(--muted); stroke-width:1; stroke-dasharray:3,3; pointer-events:none; }
 
   @media (max-width: 900px){
     .trade-columns.head{ display:none; }
@@ -1383,6 +1408,7 @@
     var up = change >= 0;
     var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
     var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
+    var curScale = (chartStates[t.sym] && chartStates[t.sym].scale) || 'linear';
 
     return '' +
       '<div class="trade-block" data-symbol="' + t.sym + '">' +
@@ -1405,7 +1431,18 @@
         '</div>' +
         '<div class="trade-detail" id="chartwrap-' + t.sym + '">' +
           '<div class="trade-chart-col">' +
-            '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>' +
+            '<div class="chart-toolbar">' +
+              '<div class="chart-hint">Scroll to zoom · drag to pan</div>' +
+              '<div class="chart-toolbar-btns">' +
+                '<button class="chart-tool-btn' + (curScale==='linear'?' active':'') + '" data-scale="linear" data-sym="' + t.sym + '">Linear</button>' +
+                '<button class="chart-tool-btn' + (curScale==='log'?' active':'') + '" data-scale="log" data-sym="' + t.sym + '">Log</button>' +
+                '<button class="chart-tool-btn chart-reset-btn" data-sym="' + t.sym + '">Reset</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="chart-canvas-wrap">' +
+              '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>' +
+              '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
+            '</div>' +
           '</div>' +
           '<div class="trade-notes-col">' +
             '<h3>Why this trade</h3>' +
@@ -1441,6 +1478,23 @@
       btn.addEventListener('click', function(){ jumpToJournalDate(btn.dataset.date); });
     });
 
+    el.querySelectorAll('.chart-tool-btn[data-scale]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.sym;
+        if(chartStates[sym]){ chartStates[sym].scale = btn.dataset.scale; }
+        document.querySelectorAll('.chart-tool-btn[data-scale][data-sym="' + sym + '"]').forEach(function(b){
+          b.classList.toggle('active', b === btn);
+        });
+        renderChartView(sym);
+      });
+    });
+
+    el.querySelectorAll('.chart-reset-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ resetChartZoom(btn.dataset.sym); });
+    });
+
+    trades.forEach(function(t){ setupChartInteractivity(t.sym); });
+
     renderAllTradeCharts(currentTF);
   }
 
@@ -1457,14 +1511,16 @@
     });
   }
 
-  // ---------- Candlestick rendering ----------
+  // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
   var tfConfig = {
-    '1D': { count:40, volFactor:0.0035 },
-    '1W': { count:34, volFactor:0.006 },
-    '1M': { count:26, volFactor:0.012 },
-    '1Y': { count:44, volFactor:0.03 }
+    '1D': { volFactor:0.0035, mockCount:80,  defaultVisible:40 },
+    '1W': { volFactor:0.006,  fetchSize:30,  defaultVisible:7  },
+    '1M': { volFactor:0.012,  fetchSize:90,  defaultVisible:30 },
+    '1Y': { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
   };
   var currentTF = '1D';
+  var chartStates = {}; // per-symbol: { data, viewStart, viewEnd, scale }
+  var MIN_VISIBLE_CANDLES = 8;
 
   function genOHLC(count, base, vol){
     var price = base - vol * count * 0.15;
@@ -1488,19 +1544,14 @@
   var TWELVE_DATA_API_KEY = 'd71a3d8d70e04286b10e8cf67b4c710d';
   var TWELVE_DATA_URL = 'https://api.twelvedata.com/time_series';
   var historyCache = {};
-  var historyParams = {
-    '1W': { interval:'1day',  outputsize:7 },
-    '1M': { interval:'1day',  outputsize:30 },
-    '1Y': { interval:'1week', outputsize:52 }
-  };
+  var historyIntervals = { '1W':'1day', '1M':'1day', '1Y':'1week' };
 
   function fetchHistory(sym, tf){
     var cacheKey = sym + '_' + tf;
     if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
 
-    var params = historyParams[tf];
     var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
-      '&interval=' + params.interval + '&outputsize=' + params.outputsize +
+      '&interval=' + historyIntervals[tf] + '&outputsize=' + tfConfig[tf].fetchSize +
       '&apikey=' + TWELVE_DATA_API_KEY;
 
     return fetch(url)
@@ -1521,14 +1572,21 @@
       });
   }
 
-  function drawCandles(svg, data){
+  function drawCandles(svg, data, scale){
     var W = 760, H = 200, padTop=12, padBottom=18, padRight=54;
     var plotW = W - padRight, plotH = H - padTop - padBottom;
 
     var lo = Math.min.apply(null, data.map(function(d){return d.l;}));
     var hi = Math.max.apply(null, data.map(function(d){return d.h;}));
-    var range = hi - lo || 1;
-    function y(v){ return padTop + (1 - (v - lo)/range) * plotH; }
+    var useLog = (scale === 'log') && lo > 0;
+    var loT = useLog ? Math.log(lo) : lo;
+    var hiT = useLog ? Math.log(hi) : hi;
+    var range = (hiT - loT) || 1;
+
+    function y(v){
+      var t = useLog ? Math.log(Math.max(v, 0.0001)) : v;
+      return padTop + (1 - (t - loT)/range) * plotH;
+    }
 
     var xStep = plotW / data.length;
     var cw = Math.max(2, xStep * 0.55);
@@ -1536,7 +1594,7 @@
 
     var glCount = 3;
     for(var g=0; g<=glCount; g++){
-      var gv = lo + (range/glCount)*g;
+      var gv = useLog ? Math.exp(loT + (range/glCount)*g) : (lo + (range/glCount)*g);
       var gy = y(gv);
       parts.push('<line class="grid-line" x1="0" y1="'+gy+'" x2="'+plotW+'" y2="'+gy+'"/>');
       parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(1)+'</text>');
@@ -1556,10 +1614,41 @@
     svg.innerHTML = parts.join('');
   }
 
+  function renderChartView(sym){
+    var state = chartStates[sym];
+    var svg = document.getElementById('chart-' + sym);
+    if(!state || !svg) return;
+    var visible = state.data.slice(state.viewStart, state.viewEnd);
+    drawCandles(svg, visible, state.scale);
+  }
+
+  function initChartState(sym, tf, data){
+    var cfg = tfConfig[tf];
+    var defaultVisible = Math.min(cfg.defaultVisible, data.length);
+    var prevScale = (chartStates[sym] && chartStates[sym].scale) || 'linear';
+    chartStates[sym] = {
+      data: data,
+      viewStart: data.length - defaultVisible,
+      viewEnd: data.length,
+      scale: prevScale
+    };
+  }
+
+  function resetChartZoom(sym){
+    var state = chartStates[sym];
+    if(!state) return;
+    var cfg = tfConfig[currentTF];
+    var defaultVisible = Math.min(cfg.defaultVisible, state.data.length);
+    state.viewStart = state.data.length - defaultVisible;
+    state.viewEnd = state.data.length;
+    renderChartView(sym);
+  }
+
   function renderChartInto(svg, sym, base, tf){
     if(tf === '1D'){
       var cfg1d = tfConfig['1D'];
-      drawCandles(svg, genOHLC(cfg1d.count, base, base * cfg1d.volFactor));
+      initChartState(sym, tf, genOHLC(cfg1d.mockCount, base, base * cfg1d.volFactor));
+      renderChartView(sym);
       return;
     }
     fetchHistory(sym, tf).then(function(bars){
@@ -1569,11 +1658,13 @@
       var adjusted = bars.slice(0, -1).concat([{
         o: lastBar.o, h: Math.max(lastBar.h, base), l: Math.min(lastBar.l, base), c: base
       }]);
-      drawCandles(svg, adjusted);
+      initChartState(sym, tf, adjusted);
+      renderChartView(sym);
     }).catch(function(err){
       console.error('History fetch failed for', sym, tf, err);
       var cfg = tfConfig[tf];
-      drawCandles(svg, genOHLC(cfg.count, base, base * cfg.volFactor));
+      initChartState(sym, tf, genOHLC(cfg.fetchSize, base, base * cfg.volFactor));
+      renderChartView(sym);
     });
   }
 
@@ -1594,6 +1685,123 @@
     currentTF = btn.dataset.tf;
     renderAllTradeCharts(currentTF);
   });
+
+  // ---------- Chart interactivity: wheel zoom, drag pan, crosshair ----------
+  function svgLocalX(svg, clientX){
+    var rect = svg.getBoundingClientRect();
+    var vb = svg.viewBox.baseVal;
+    var fraction = (clientX - rect.left) / rect.width;
+    return vb.x + fraction * vb.width;
+  }
+
+  function zoomChart(sym, cursorFraction, zoomFactor){
+    var state = chartStates[sym];
+    if(!state) return;
+    var currentCount = state.viewEnd - state.viewStart;
+    var cursorIndex = state.viewStart + cursorFraction * currentCount;
+    var newCount = Math.round(currentCount * zoomFactor);
+    newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, state.data.length));
+    var newStart = Math.round(cursorIndex - cursorFraction * newCount);
+    var newEnd = newStart + newCount;
+    if(newStart < 0){ newEnd -= newStart; newStart = 0; }
+    if(newEnd > state.data.length){ newStart -= (newEnd - state.data.length); newEnd = state.data.length; }
+    newStart = Math.max(0, newStart);
+    state.viewStart = newStart;
+    state.viewEnd = newEnd;
+    renderChartView(sym);
+  }
+
+  function hideCrosshair(sym){
+    var readout = document.getElementById('crosshair-' + sym);
+    if(readout) readout.setAttribute('hidden', '');
+    var svg = document.getElementById('chart-' + sym);
+    if(svg){ var line = svg.querySelector('.crosshair-line'); if(line) line.remove(); }
+  }
+
+  function updateCrosshair(sym, clientX){
+    var state = chartStates[sym];
+    var svg = document.getElementById('chart-' + sym);
+    var readout = document.getElementById('crosshair-' + sym);
+    if(!state || !svg || !readout) return;
+
+    var plotW = 760 - 54;
+    var localX = svgLocalX(svg, clientX);
+    if(localX < 0 || localX > plotW){ hideCrosshair(sym); return; }
+
+    var count = state.viewEnd - state.viewStart;
+    var xStep = plotW / count;
+    var idx = Math.max(0, Math.min(Math.floor(localX / xStep), count - 1));
+    var bar = state.data[state.viewStart + idx];
+    if(!bar) return;
+    var up = bar.c >= bar.o;
+    var cls = up ? 'cr-up' : 'cr-down';
+
+    readout.innerHTML =
+      '<span>O <span class="' + cls + '">' + bar.o.toFixed(2) + '</span></span>' +
+      '<span>H <span class="' + cls + '">' + bar.h.toFixed(2) + '</span></span>' +
+      '<span>L <span class="' + cls + '">' + bar.l.toFixed(2) + '</span></span>' +
+      '<span>C <span class="' + cls + '">' + bar.c.toFixed(2) + '</span></span>';
+    readout.removeAttribute('hidden');
+
+    var existingLine = svg.querySelector('.crosshair-line');
+    if(existingLine){ existingLine.remove(); }
+    var lineX = idx * xStep + xStep / 2;
+    var lineEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    lineEl.setAttribute('class', 'crosshair-line');
+    lineEl.setAttribute('x1', lineX); lineEl.setAttribute('x2', lineX);
+    lineEl.setAttribute('y1', 0); lineEl.setAttribute('y2', 200);
+    svg.appendChild(lineEl);
+  }
+
+  function setupChartInteractivity(sym){
+    var svg = document.getElementById('chart-' + sym);
+    if(!svg || svg.dataset.wired) return;
+    svg.dataset.wired = '1';
+
+    svg.addEventListener('wheel', function(e){
+      e.preventDefault();
+      var plotW = 760 - 54;
+      var localX = svgLocalX(svg, e.clientX);
+      var fraction = Math.max(0, Math.min(1, localX / plotW));
+      zoomChart(sym, fraction, e.deltaY < 0 ? 0.85 : 1.18);
+    }, { passive: false });
+
+    var dragState = null;
+    svg.addEventListener('pointerdown', function(e){
+      var state = chartStates[sym];
+      if(!state) return;
+      dragState = { startX: e.clientX, startViewStart: state.viewStart };
+      svg.setPointerCapture(e.pointerId);
+      svg.style.cursor = 'grabbing';
+    });
+    svg.addEventListener('pointermove', function(e){
+      if(dragState){
+        var state = chartStates[sym];
+        if(!state) return;
+        var rect = svg.getBoundingClientRect();
+        var count = state.viewEnd - state.viewStart;
+        var pixelsPerCandle = (rect.width * (706/760)) / count;
+        var dxPixels = e.clientX - dragState.startX;
+        var deltaCandles = Math.round(dxPixels / pixelsPerCandle);
+        var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, state.data.length - count));
+        state.viewStart = newStart;
+        state.viewEnd = newStart + count;
+        renderChartView(sym);
+        hideCrosshair(sym);
+      } else {
+        updateCrosshair(sym, e.clientX);
+      }
+    });
+    svg.addEventListener('pointerup', function(){
+      dragState = null;
+      svg.style.cursor = 'crosshair';
+    });
+    svg.addEventListener('pointerleave', function(){
+      dragState = null;
+      svg.style.cursor = 'crosshair';
+      hideCrosshair(sym);
+    });
+  }
 
   // ---------- Live quotes (Finnhub, free tier) ----------
   // Free-tier key: no billing attached, so it's acceptable to keep client-side
