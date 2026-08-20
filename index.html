@@ -140,7 +140,7 @@
   .nav-menu{
     position:absolute; top:calc(100% + 6px); left:0; min-width:220px;
     background:var(--panel-raised); border:1px solid var(--border); border-radius:6px;
-    overflow:hidden; z-index:30; box-shadow:0 12px 28px rgba(0,0,0,0.45);
+    overflow:hidden; z-index:150; box-shadow:0 12px 28px rgba(0,0,0,0.45);
   }
   .nav-item{
     display:flex; flex-direction:column; align-items:flex-start; width:100%; text-align:left;
@@ -156,9 +156,20 @@
   .clock{ color: var(--muted); font-size: 13px; text-align:right; }
   .clock .time{ color: var(--paper); font-size: 15px; }
 
-  .theme-switcher{ display:flex; align-items:center; gap:8px; }
+  .settings-dropdown{ position:relative; }
+  .settings-menu{
+    position:absolute; top:calc(100% + 6px); right:0; min-width:200px;
+    background:var(--panel-raised); border:1px solid var(--border); border-radius:6px;
+    padding:14px; z-index:150; box-shadow:0 12px 28px rgba(0,0,0,0.45);
+  }
+  .settings-menu[hidden]{ display:none; }
+  .settings-menu-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted);
+    margin-bottom:10px;
+  }
+  .theme-switcher{ display:flex; align-items:center; gap:10px; }
   .theme-swatch{
-    width:16px; height:16px; border-radius:50%; padding:0; cursor:pointer;
+    width:18px; height:18px; border-radius:50%; padding:0; cursor:pointer;
     border:1px solid var(--border); box-shadow: 0 0 0 2px transparent;
     transition: box-shadow .15s ease;
   }
@@ -449,11 +460,20 @@
       </div>
     </div>
 
-    <div class="theme-switcher" role="group" aria-label="Color theme">
-      <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
-      <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
-      <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
-      <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
+    <div class="settings-dropdown">
+      <button class="nav-toggle" id="settingsToggle" aria-haspopup="true" aria-expanded="false">
+        <span>Settings</span>
+        <span class="caret">▾</span>
+      </button>
+      <div class="settings-menu" id="settingsMenu" hidden>
+        <div class="settings-menu-label">Color theme</div>
+        <div class="theme-switcher" role="group" aria-label="Color theme">
+          <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
+          <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
+          <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
+          <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
+        </div>
+      </div>
     </div>
 
     <div class="clock">
@@ -911,13 +931,31 @@
     try{ window.localStorage.setItem('daybreak:theme', name); }catch(e){}
   }
   document.querySelectorAll('.theme-swatch').forEach(function(btn){
-    btn.addEventListener('click', function(){ applyTheme(btn.dataset.theme); });
+    btn.addEventListener('click', function(){
+      applyTheme(btn.dataset.theme);
+      settingsMenu.setAttribute('hidden','');
+      settingsToggle.setAttribute('aria-expanded','false');
+    });
   });
   (function initTheme(){
     var saved = 'amber';
     try{ saved = window.localStorage.getItem('daybreak:theme') || 'amber'; }catch(e){}
     applyTheme(saved);
   })();
+
+  var settingsToggle = document.getElementById('settingsToggle');
+  var settingsMenu = document.getElementById('settingsMenu');
+  settingsToggle.addEventListener('click', function(){
+    var open = !settingsMenu.hasAttribute('hidden');
+    if(open){ settingsMenu.setAttribute('hidden',''); settingsToggle.setAttribute('aria-expanded','false'); }
+    else{ settingsMenu.removeAttribute('hidden'); settingsToggle.setAttribute('aria-expanded','true'); }
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.settings-dropdown')){
+      settingsMenu.setAttribute('hidden','');
+      settingsToggle.setAttribute('aria-expanded','false');
+    }
+  });
 
   // ---------- Layout controls (chart width, chart height, text size) ----------
   var layoutPrefs = { width:62, height:200, text:12.5 };
