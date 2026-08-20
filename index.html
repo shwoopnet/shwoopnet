@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daybreak — Personal Market Terminal</title>
+<title>Shwoopnet — Personal Market Terminal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -123,9 +123,13 @@
     flex-wrap: wrap; gap: 14px;
     border-bottom: 1px solid var(--border);
   }
-  .brand{ display:flex; align-items:center; gap:12px; }
-  .brand-mark{ color: var(--amber); font-size: 22px; line-height:1; }
-  .brand-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; letter-spacing: 0.04em; }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+    background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
+  }
+  .brand:hover .brand-name{ color: var(--amber); }
+  .brand-mark{ flex-shrink:0; }
+  .brand-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; letter-spacing: 0.04em; transition: color .15s ease; }
   .brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
 
   .nav-dropdown{ position:relative; }
@@ -580,10 +584,13 @@
   .journal-entry-result.up{ color: var(--gain); }
   .journal-entry-result.down{ color: var(--loss); }
 
-  .note{
-    text-align:center; color: var(--muted); font-size: 11px;
-    margin: 10px 28px 0 28px; padding: 16px 0 0 0; border-top: 1px solid var(--border);
+  .site-footer{
+    text-align:center; color: var(--muted); font-size: 11px; line-height:1.6;
+    margin: 10px 28px 24px 28px; padding: 18px 0 0 0; border-top: 1px solid var(--border);
   }
+  .site-footer .footer-copyright{ color: var(--paper); font-size:11.5px; font-weight:600; margin-bottom:6px; }
+  .site-footer p{ margin:0 0 6px 0; max-width:680px; margin-left:auto; margin-right:auto; }
+  .site-footer p:last-child{ margin-bottom:0; }
 
   @media (prefers-reduced-motion: reduce){
     .ticker-track{ animation: none; }
@@ -606,13 +613,19 @@
   </div>
 
   <div class="topbar">
-    <div class="brand">
-      <span class="brand-mark">◈</span>
+    <button class="brand" id="brandHomeBtn" aria-label="Go to home page">
+      <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
+        <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+        <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+        <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+        <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
+        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">SN</text>
+      </svg>
       <div>
-        <div class="brand-name">DAYBREAK</div>
+        <div class="brand-name">SHWOOPNET</div>
         <div class="brand-sub">Personal market terminal — design prototype</div>
       </div>
-    </div>
+    </button>
 
     <div class="topbar-right">
       <div class="clock">
@@ -641,6 +654,10 @@
           <button class="nav-item" id="notepadToggle" data-action="notepad">
             Notepad
             <span class="nav-item-sub">Quick scratchpad</span>
+          </button>
+          <button class="nav-item" id="historyNavItem" data-action="history">
+            History
+            <span class="nav-item-sub">Today's market alerts</span>
           </button>
           <button class="nav-item" data-page="settings">
             Settings
@@ -790,7 +807,7 @@
       </div>
       <button class="cta-btn" id="ctaToTrades">View Trade Overview →</button>
     </div>
-    <div class="cta-caption">This brief opens automatically the first time you visit Daybreak each day. After that, you'll land on Trade Overview — use the menu above to come back here anytime.</div>
+    <div class="cta-caption">This brief opens automatically the first time you visit Shwoopnet each day. After that, you'll land on Trade Overview — use the menu above to come back here anytime.</div>
   </main>
 
   <!-- ================= TRADE OVERVIEW ================= -->
@@ -950,19 +967,11 @@
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Market alerts</div>
-          <div class="settings-row-desc">Track today's market alerts (feeds the history log below).</div>
+          <div class="settings-row-desc">Track today's market alerts (feeds History in the menu above).</div>
         </div>
         <button class="settings-toggle-switch" id="alertsToggle" role="switch" aria-checked="true" aria-label="Toggle market alerts">
           <span class="toggle-knob"></span>
         </button>
-      </div>
-
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Alert history</div>
-          <div class="settings-row-desc" id="historySettingsDesc">No alerts logged today.</div>
-        </div>
-        <button class="settings-view-btn" id="openHistoryBtn">View history</button>
       </div>
 
       <div class="settings-row">
@@ -987,7 +996,11 @@
     </div>
   </main>
 
-  <div class="note">Simulated prices for this prototype — connect a live feed when you're ready to wire up real data. Nothing here is investment advice.</div>
+  <footer class="site-footer">
+    <div class="footer-copyright">© 2026 Shwoopnet. All rights reserved.</div>
+    <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
+    <p>All prices, charts, trade setups, and journal entries shown are simulated for demonstration purposes and do not reflect real market activity. Nothing on this site constitutes financial, investment, or trading advice.</p>
+  </footer>
 
 </div>
 
@@ -1292,14 +1305,14 @@
     document.querySelectorAll('.theme-swatch').forEach(function(btn){
       btn.setAttribute('aria-pressed', btn.dataset.theme === name ? 'true' : 'false');
     });
-    try{ window.localStorage.setItem('daybreak:theme', name); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:theme', name); }catch(e){}
   }
   document.querySelectorAll('.theme-swatch').forEach(function(btn){
     btn.addEventListener('click', function(){ applyTheme(btn.dataset.theme); });
   });
   (function initTheme(){
     var saved = 'amber';
-    try{ saved = window.localStorage.getItem('daybreak:theme') || 'amber'; }catch(e){}
+    try{ saved = window.localStorage.getItem('shwoopnet:theme') || 'amber'; }catch(e){}
     applyTheme(saved);
   })();
 
@@ -1309,14 +1322,14 @@
     landingChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
       b.classList.toggle('active', b.dataset.value === val);
     });
-    try{ window.localStorage.setItem('daybreak:landingPref', val); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:landingPref', val); }catch(e){}
   }
   landingChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
     b.addEventListener('click', function(){ applyLandingPref(b.dataset.value); });
   });
   (function initLandingPref(){
     var saved = 'auto';
-    try{ saved = window.localStorage.getItem('daybreak:landingPref') || 'auto'; }catch(e){}
+    try{ saved = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     applyLandingPref(saved);
   })();
 
@@ -1327,7 +1340,7 @@
     clockFormatEl.querySelectorAll('.tf-btn').forEach(function(b){
       b.classList.toggle('active', b.dataset.value === val);
     });
-    try{ window.localStorage.setItem('daybreak:clockFormat', val); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:clockFormat', val); }catch(e){}
     updateClock();
   }
   clockFormatEl.querySelectorAll('.tf-btn').forEach(function(b){
@@ -1335,7 +1348,7 @@
   });
   (function initClockFormat(){
     var saved = '24';
-    try{ saved = window.localStorage.getItem('daybreak:clockFormat') || '24'; }catch(e){}
+    try{ saved = window.localStorage.getItem('shwoopnet:clockFormat') || '24'; }catch(e){}
     applyClockFormat(saved);
   })();
 
@@ -1345,7 +1358,7 @@
   function applyAlertsPref(enabled){
     alertsEnabledPref = enabled;
     alertsToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
-    try{ window.localStorage.setItem('daybreak:alertsEnabled', enabled ? 'true' : 'false'); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:alertsEnabled', enabled ? 'true' : 'false'); }catch(e){}
   }
   alertsToggleBtn.addEventListener('click', function(){
     var enabled = alertsToggleBtn.getAttribute('aria-checked') !== 'true';
@@ -1354,7 +1367,7 @@
   });
   (function initAlertsPref(){
     var saved = 'true';
-    try{ var stored = window.localStorage.getItem('daybreak:alertsEnabled'); if(stored !== null) saved = stored; }catch(e){}
+    try{ var stored = window.localStorage.getItem('shwoopnet:alertsEnabled'); if(stored !== null) saved = stored; }catch(e){}
     applyAlertsPref(saved === 'true');
   })();
 
@@ -1363,14 +1376,14 @@
   function applyMotionPref(reduced){
     motionToggleBtn.setAttribute('aria-checked', reduced ? 'true' : 'false');
     document.documentElement.setAttribute('data-reduce-motion', reduced ? 'true' : 'false');
-    try{ window.localStorage.setItem('daybreak:reduceMotion', reduced ? 'true' : 'false'); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:reduceMotion', reduced ? 'true' : 'false'); }catch(e){}
   }
   motionToggleBtn.addEventListener('click', function(){
     applyMotionPref(motionToggleBtn.getAttribute('aria-checked') !== 'true');
   });
   (function initMotionPref(){
     var saved = 'false';
-    try{ saved = window.localStorage.getItem('daybreak:reduceMotion') || 'false'; }catch(e){}
+    try{ saved = window.localStorage.getItem('shwoopnet:reduceMotion') || 'false'; }catch(e){}
     applyMotionPref(saved === 'true');
   })();
 
@@ -1378,7 +1391,7 @@
   document.getElementById('resetPrefsBtn').addEventListener('click', function(){
     try{
       Object.keys(window.localStorage).forEach(function(k){
-        if(k.indexOf('daybreak:') === 0 && k !== 'daybreak:journalEntries'){
+        if(k.indexOf('shwoopnet:') === 0 && k !== 'shwoopnet:journalEntries'){
           window.localStorage.removeItem(k);
         }
       });
@@ -1410,7 +1423,7 @@
     document.getElementById('textDec').disabled = layoutPrefs.text <= layoutLimits.text[0];
     document.getElementById('textInc').disabled = layoutPrefs.text >= layoutLimits.text[1];
 
-    try{ window.localStorage.setItem('daybreak:layout', JSON.stringify(layoutPrefs)); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:layout', JSON.stringify(layoutPrefs)); }catch(e){}
   }
 
   function stepLayout(key, dir){
@@ -1429,7 +1442,7 @@
 
   (function initLayout(){
     try{
-      var saved = JSON.parse(window.localStorage.getItem('daybreak:layout') || 'null');
+      var saved = JSON.parse(window.localStorage.getItem('shwoopnet:layout') || 'null');
       if(saved && typeof saved.width === 'number'){ layoutPrefs = saved; }
     }catch(e){}
     applyLayout();
@@ -1472,12 +1485,20 @@
         showPage(item.dataset.page);
       } else if(item.dataset.action === 'notepad'){
         toggleNotepad(true);
+      } else if(item.dataset.action === 'history'){
+        openHistory();
       }
       navMenu.setAttribute('hidden','');
       navToggle.setAttribute('aria-expanded','false');
     });
   });
   document.getElementById('ctaToTrades').addEventListener('click', function(){ showPage('trades'); });
+
+  document.getElementById('brandHomeBtn').addEventListener('click', function(){
+    var pref = 'auto';
+    try{ pref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
+    showPage(pref === 'trades' ? 'trades' : 'brief');
+  });
 
   // ---------- Notepad (floating, carries over across pages) ----------
   function toggleNotepad(open){
@@ -1490,9 +1511,9 @@
   document.getElementById('notepadClose').addEventListener('click', function(){ toggleNotepad(false); });
   (function initNotepad(){
     var area = document.getElementById('notepadArea');
-    try{ area.value = window.localStorage.getItem('daybreak:notepad') || ''; }catch(e){}
+    try{ area.value = window.localStorage.getItem('shwoopnet:notepad') || ''; }catch(e){}
     area.addEventListener('input', function(){
-      try{ window.localStorage.setItem('daybreak:notepad', area.value); }catch(e){}
+      try{ window.localStorage.setItem('shwoopnet:notepad', area.value); }catch(e){}
     });
   })();
 
@@ -1505,7 +1526,7 @@
 
   function saveNotepadGeometry(){
     try{
-      window.localStorage.setItem('daybreak:notepadGeo', JSON.stringify({
+      window.localStorage.setItem('shwoopnet:notepadGeo', JSON.stringify({
         left: notepadPanel.style.left, top: notepadPanel.style.top,
         width: notepadPanel.style.width, height: notepadPanel.style.height
       }));
@@ -1517,7 +1538,7 @@
     notepadPanel.classList.toggle('unlocked', !locked);
     notepadLockBtn.textContent = locked ? 'Unlock' : 'Lock';
     notepadLockBtn.setAttribute('aria-label', locked ? 'Unlock to move or resize' : 'Lock in place');
-    try{ window.localStorage.setItem('daybreak:notepadLocked', locked ? 'true' : 'false'); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:notepadLocked', locked ? 'true' : 'false'); }catch(e){}
   }
   notepadLockBtn.addEventListener('click', function(){ applyNotepadLock(!notepadLocked); });
 
@@ -1566,10 +1587,10 @@
 
   (function initNotepadGeometry(){
     var lockedSaved = 'true';
-    try{ lockedSaved = window.localStorage.getItem('daybreak:notepadLocked') || 'true'; }catch(e){}
+    try{ lockedSaved = window.localStorage.getItem('shwoopnet:notepadLocked') || 'true'; }catch(e){}
     applyNotepadLock(lockedSaved === 'true');
     try{
-      var geo = JSON.parse(window.localStorage.getItem('daybreak:notepadGeo') || 'null');
+      var geo = JSON.parse(window.localStorage.getItem('shwoopnet:notepadGeo') || 'null');
       if(geo){
         if(geo.left){ notepadPanel.style.left = geo.left; notepadPanel.style.right = 'auto'; }
         if(geo.top){ notepadPanel.style.top = geo.top; notepadPanel.style.bottom = 'auto'; }
@@ -1596,13 +1617,13 @@
 
   (function loadJournalEntries(){
     try{
-      var saved = JSON.parse(window.localStorage.getItem('daybreak:journalEntries') || 'null');
+      var saved = JSON.parse(window.localStorage.getItem('shwoopnet:journalEntries') || 'null');
       if(saved && Array.isArray(saved)){ journalEntries = saved; }
     }catch(e){}
   })();
 
   function saveJournalEntries(){
-    try{ window.localStorage.setItem('daybreak:journalEntries', JSON.stringify(journalEntries)); }catch(e){}
+    try{ window.localStorage.setItem('shwoopnet:journalEntries', JSON.stringify(journalEntries)); }catch(e){}
   }
 
   function computePL(e){
@@ -2005,30 +2026,18 @@
     }).join('');
   }
 
-  function updateHistorySettingsDesc(){
-    var el = document.getElementById('historySettingsDesc');
-    if(!el) return;
-    el.textContent = alertHistory.length > 0
-      ? alertHistory.length + ' alert' + (alertHistory.length !== 1 ? 's' : '') + ' logged today.'
-      : 'No alerts logged today.';
-  }
-
   function loadTodaysAlerts(){
     var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
     alertHistory = mockAlerts.map(function(n){
       return { sym: n.sym, tag: n.tag, text: n.text, url: n.url, time: stamp };
     });
     renderHistoryList();
-    updateHistorySettingsDesc();
   }
 
   function clearAlerts(){
     alertHistory = [];
     renderHistoryList();
-    updateHistorySettingsDesc();
   }
-
-  document.getElementById('openHistoryBtn').addEventListener('click', openHistory);
 
   // ---------- Init ----------
   renderTicker();
@@ -2040,12 +2049,11 @@
     loadTodaysAlerts();
   } else {
     renderHistoryList();
-    updateHistorySettingsDesc();
   }
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
-  // default to the brief, unless we've already opened Daybreak today.
+  // default to the brief, unless we've already opened Shwoopnet today.
   (function initLanding(){
     var hashPage = (location.hash || '').replace('#', '');
     if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal' || hashPage === 'settings'){
@@ -2054,7 +2062,7 @@
     }
 
     var pref = 'auto';
-    try{ pref = window.localStorage.getItem('daybreak:landingPref') || 'auto'; }catch(e){}
+    try{ pref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     if(pref === 'brief' || pref === 'trades'){
       showPage(pref);
       return;
@@ -2063,11 +2071,11 @@
     var landing = 'brief';
     try{
       var today = new Date().toISOString().slice(0,10);
-      var last = window.localStorage.getItem('daybreak:lastVisitDate');
+      var last = window.localStorage.getItem('shwoopnet:lastVisitDate');
       if(last === today){
         landing = 'trades';
       }
-      window.localStorage.setItem('daybreak:lastVisitDate', today);
+      window.localStorage.setItem('shwoopnet:lastVisitDate', today);
     }catch(e){
       // localStorage unavailable (e.g. private browsing) — always land on the brief
     }
