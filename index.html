@@ -18,6 +18,7 @@
     --amber: #F2A93C;
     --amber-dim: #A97A2E;
     --amber-glow: rgba(242,169,60,0.16);
+    --amber-contrast: #151008;
     --gain: #33C17E;
     --gain-glow: rgba(51,193,126,0.16);
     --loss: #E85C51;
@@ -39,17 +40,31 @@
     --amber: #4C9AF2;
     --amber-dim: #3670AD;
     --amber-glow: rgba(76,154,242,0.16);
+    --amber-contrast: #071522;
   }
-  :root[data-theme="violet"]{
-    --ink: #0D0B14;
-    --panel: #161220;
-    --panel-raised: #1C1729;
-    --border: #2C2640;
-    --paper: #ECE9F3;
-    --muted: #8983A0;
-    --amber: #9B7CF2;
-    --amber-dim: #6C52B0;
-    --amber-glow: rgba(155,124,242,0.16);
+  :root[data-theme="mono"]{
+    --ink: #000000;
+    --panel: #0D0D0D;
+    --panel-raised: #161616;
+    --border: #2A2A2A;
+    --paper: #FFFFFF;
+    --muted: #8A8A8A;
+    --amber: #FFFFFF;
+    --amber-dim: #B5B5B5;
+    --amber-glow: rgba(255,255,255,0.12);
+    --amber-contrast: #0A0A0A;
+  }
+  :root[data-theme="light"]{
+    --ink: #FFFFFF;
+    --panel: #F5F4F1;
+    --panel-raised: #ECEAE4;
+    --border: #DEDBD3;
+    --paper: #14140F;
+    --muted: #6B6B66;
+    --amber: #171712;
+    --amber-dim: #46453F;
+    --amber-glow: rgba(20,20,15,0.08);
+    --amber-contrast: #FFFFFF;
   }
 
   *{ box-sizing:border-box; }
@@ -148,7 +163,8 @@
   }
   .theme-swatch[data-theme="amber"]{ background:#F2A93C; }
   .theme-swatch[data-theme="cobalt"]{ background:#4C9AF2; }
-  .theme-swatch[data-theme="violet"]{ background:#9B7CF2; }
+  .theme-swatch[data-theme="mono"]{ background:#000000; }
+  .theme-swatch[data-theme="light"]{ background:#FFFFFF; }
   .theme-swatch[aria-pressed="true"]{ box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--paper); }
 
   .page{ padding: 0 28px 40px 28px; }
@@ -158,7 +174,7 @@
   .brief-hero{ padding: 44px 0 8px 0; max-width: 760px; }
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
   .brief-headline{ font-family:'Space Grotesk', sans-serif; font-size: 32px; font-weight:700; margin:0 0 18px 0; line-height:1.2; }
-  .brief-lede{ font-size:15px; line-height:1.75; color:#C9C6BE; margin:0 0 32px 0; }
+  .brief-lede{ font-size:15px; line-height:1.75; color:var(--muted); margin:0 0 32px 0; }
 
   .brief-indices{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
   .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
@@ -196,7 +212,7 @@
     padding:12px 20px; border-radius:6px; font-size:13.5px; cursor:pointer;
     font-family:'Space Grotesk', sans-serif; font-weight:600; white-space:nowrap;
   }
-  .cta-btn:hover{ background: var(--amber); color:#151008; }
+  .cta-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
   .cta-caption{ font-size:10.5px; color:var(--muted); margin: 10px 2px 0 2px; }
 
   /* ---------- Trade Overview page ---------- */
@@ -272,7 +288,7 @@
   }
   .trade-notes-col ul{ list-style:none; margin:0; padding:0; }
   .trade-notes-col li{
-    font-size:12.5px; line-height:1.55; color:#C9C6BE;
+    font-size:12.5px; line-height:1.55; color:var(--muted);
     padding: 2px 0 12px 14px; border-left: 2px solid var(--amber-dim); margin-bottom:12px;
   }
   .trade-notes-col li:last-child{ margin-bottom:0; }
@@ -346,7 +362,8 @@
     <div class="theme-switcher" role="group" aria-label="Color theme">
       <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
       <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
-      <button class="theme-swatch" data-theme="violet" aria-label="Violet theme" aria-pressed="false"></button>
+      <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
+      <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
     </div>
 
     <div class="clock">
