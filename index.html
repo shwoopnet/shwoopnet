@@ -343,14 +343,10 @@
     .trade-notes-col{ flex: 1 1 auto; width:100%; }
   }
 
-  .news-toast-stack{
-    position: fixed; top: 88px; right: 20px; width: 320px; z-index: 100;
-    display:flex; flex-direction:column; gap:12px;
-  }
   .news-stack-head{
-    display:flex; justify-content:space-between; align-items:center;
+    display:flex; justify-content:flex-end; align-items:center;
     font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em;
-    padding: 0 2px;
+    padding: 0 2px 8px 2px;
   }
   .news-dismiss-all{
     background:none; border:none; color: var(--amber-dim); font-size:11px;
@@ -359,10 +355,9 @@
   .news-dismiss-all:hover{ color: var(--amber); }
   .news-toast{
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 16px; box-shadow: 0 10px 26px rgba(0,0,0,0.35);
-    animation: newsSlideIn .25s ease;
+    padding: 14px 16px; margin-bottom:12px;
   }
-  @keyframes newsSlideIn{ from{ transform: translateX(16px); opacity:0; } to{ transform: translateX(0); opacity:1; } }
+  .news-toast:last-child{ margin-bottom:0; }
   .news-toast-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
   .news-toast-tags{ display:flex; align-items:center; gap:8px; }
   .news-toast-sym{ font-weight:600; color: var(--amber); font-size:12px; }
@@ -381,19 +376,12 @@
   .news-toast-link:hover{ text-decoration:underline; }
   .news-toast-time{ font-size:10px; color: var(--muted); opacity:.7; }
 
-  .history-tab{
-    position:fixed; top:50%; right:0; transform:translateY(-50%); z-index:120;
-    background: var(--panel-raised); border:1px solid var(--border); border-right:none;
-    border-radius:6px 0 0 6px; color: var(--muted); font-size:11px; padding:12px 7px;
-    writing-mode:vertical-rl; cursor:pointer; letter-spacing:.05em; text-transform:uppercase;
-  }
-  .history-tab:hover{ color: var(--amber); border-color: var(--amber-dim); }
   .history-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:240; }
   .history-backdrop[hidden]{ display:none; }
   .history-sidebar{
-    position:fixed; top:0; right:0; bottom:0; width:340px; max-width:90vw;
-    background: var(--panel); border-left:1px solid var(--border); z-index:250;
-    display:flex; flex-direction:column; box-shadow:-12px 0 30px rgba(0,0,0,0.4);
+    position:fixed; top:0; left:0; bottom:0; width:340px; max-width:90vw;
+    background: var(--panel); border-right:1px solid var(--border); z-index:250;
+    display:flex; flex-direction:column; box-shadow:12px 0 30px rgba(0,0,0,0.4);
   }
   .history-sidebar[hidden]{ display:none; }
   .history-sidebar-head{
@@ -412,13 +400,13 @@
   .history-item-link:hover{ text-decoration:underline; }
   .history-empty{ font-size:12px; color: var(--muted); padding-top:10px; }
 
-  @media (max-width: 900px){
-    .news-toast-stack{ left:16px; right:16px; width:auto; top:76px; }
+  .settings-view-btn{
+    background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
+    padding:8px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
   }
-  @media (prefers-reduced-motion: reduce){
-    .news-toast{ animation:none; }
-  }
-  [data-reduce-motion="true"] .news-toast{ animation:none; }
+  .settings-view-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
+
 
   .notepad-panel{
     position: fixed; bottom: 20px; right: 20px; width: 300px; height: 260px; z-index: 110;
@@ -663,9 +651,6 @@
     </div>
   </div>
 
-  <div class="news-toast-stack" id="newsStack"></div>
-
-  <button class="history-tab" id="historyTab" aria-label="Alert history">History</button>
   <div class="history-backdrop" id="historyBackdrop" hidden></div>
   <div class="history-sidebar" id="historySidebar" hidden>
     <div class="history-sidebar-head">
@@ -965,11 +950,19 @@
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Market alerts</div>
-          <div class="settings-row-desc">Show news pop-ups when you open the site.</div>
+          <div class="settings-row-desc">Track today's market alerts (feeds the history log below).</div>
         </div>
         <button class="settings-toggle-switch" id="alertsToggle" role="switch" aria-checked="true" aria-label="Toggle market alerts">
           <span class="toggle-knob"></span>
         </button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Alert history</div>
+          <div class="settings-row-desc" id="historySettingsDesc">No alerts logged today.</div>
+        </div>
+        <button class="settings-view-btn" id="openHistoryBtn">View history</button>
       </div>
 
       <div class="settings-row">
@@ -1355,7 +1348,9 @@
     try{ window.localStorage.setItem('daybreak:alertsEnabled', enabled ? 'true' : 'false'); }catch(e){}
   }
   alertsToggleBtn.addEventListener('click', function(){
-    applyAlertsPref(alertsToggleBtn.getAttribute('aria-checked') !== 'true');
+    var enabled = alertsToggleBtn.getAttribute('aria-checked') !== 'true';
+    applyAlertsPref(enabled);
+    if(enabled){ loadTodaysAlerts(); } else { clearAlerts(); }
   });
   (function initAlertsPref(){
     var saved = 'true';
@@ -1979,18 +1974,16 @@
     historySidebar.setAttribute('hidden','');
     historyBackdrop.setAttribute('hidden','');
   }
-  document.getElementById('historyTab').addEventListener('click', openHistory);
   document.getElementById('historyClose').addEventListener('click', closeHistory);
   historyBackdrop.addEventListener('click', closeHistory);
 
-  // ---------- News alerts ----------
-  var newsItems = [
-    { id:'n1', sym:'NVDA', tag:'Earnings watch', text:'Data-center order backlog reportedly expanded ahead of tonight\'s print.', url:'https://finance.yahoo.com/quote/NVDA/news' },
-    { id:'n2', sym:'TSLA', tag:'Risk', text:'Analysts flag softer delivery estimates for the quarter, adding pressure to the short thesis.', url:'https://finance.yahoo.com/quote/TSLA/news' },
-    { id:'n3', sym:'AMD', tag:'Momentum', text:'Extending gains on positive read-through from NVDA\'s commentary this week.', url:'https://finance.yahoo.com/quote/AMD/news' }
+  // ---------- Market alerts (feeds the history log only) ----------
+  var mockAlerts = [
+    { sym:'NVDA', tag:'Earnings watch', text:'Data-center order backlog reportedly expanded ahead of tonight\'s print.', url:'https://finance.yahoo.com/quote/NVDA/news' },
+    { sym:'TSLA', tag:'Risk', text:'Analysts flag softer delivery estimates for the quarter, adding pressure to the short thesis.', url:'https://finance.yahoo.com/quote/TSLA/news' },
+    { sym:'AMD', tag:'Momentum', text:'Extending gains on positive read-through from NVDA\'s commentary this week.', url:'https://finance.yahoo.com/quote/AMD/news' }
   ];
 
-  var newsShownAt = null;
   var alertHistory = [];
 
   function renderHistoryList(){
@@ -2012,51 +2005,30 @@
     }).join('');
   }
 
-  function renderNews(){
-    var stack = document.getElementById('newsStack');
-    if(newsItems.length === 0){ stack.innerHTML = ''; return; }
-    if(!newsShownAt){
-      newsShownAt = new Date();
-      var stampNow = newsShownAt.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-      alertHistory = newsItems.map(function(n){
-        return { sym: n.sym, tag: n.tag, text: n.text, url: n.url, time: stampNow };
-      });
-      renderHistoryList();
-    }
-    var stamp = newsShownAt.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-
-    var head = '<div class="news-stack-head"><span>Market alerts</span>' +
-      (newsItems.length > 1 ? '<button class="news-dismiss-all" id="dismissAllNews">Dismiss all</button>' : '') +
-      '</div>';
-
-    var cards = newsItems.map(function(n){
-      return '<div class="news-toast" data-id="' + n.id + '">' +
-        '<div class="news-toast-head">' +
-          '<div class="news-toast-tags"><span class="news-toast-sym mono">' + n.sym + '</span><span class="news-toast-tag">' + n.tag + '</span></div>' +
-          '<button class="news-toast-close" data-dismiss="' + n.id + '" aria-label="Dismiss alert">×</button>' +
-        '</div>' +
-        '<p class="news-toast-body">' + n.text + '</p>' +
-        '<div class="news-toast-foot">' +
-          '<a class="news-toast-link" href="' + n.url + '" target="_blank" rel="noopener noreferrer">Read more →</a>' +
-          '<span class="news-toast-time">' + stamp + '</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    stack.innerHTML = head + cards;
-
-    var dismissAll = document.getElementById('dismissAllNews');
-    if(dismissAll){
-      dismissAll.addEventListener('click', function(){ newsItems = []; renderNews(); });
-    }
-    stack.querySelectorAll('[data-dismiss]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var id = btn.dataset.dismiss;
-        newsItems = newsItems.filter(function(n){ return n.id !== id; });
-        renderNews();
-      });
-    });
+  function updateHistorySettingsDesc(){
+    var el = document.getElementById('historySettingsDesc');
+    if(!el) return;
+    el.textContent = alertHistory.length > 0
+      ? alertHistory.length + ' alert' + (alertHistory.length !== 1 ? 's' : '') + ' logged today.'
+      : 'No alerts logged today.';
   }
+
+  function loadTodaysAlerts(){
+    var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+    alertHistory = mockAlerts.map(function(n){
+      return { sym: n.sym, tag: n.tag, text: n.text, url: n.url, time: stamp };
+    });
+    renderHistoryList();
+    updateHistorySettingsDesc();
+  }
+
+  function clearAlerts(){
+    alertHistory = [];
+    renderHistoryList();
+    updateHistorySettingsDesc();
+  }
+
+  document.getElementById('openHistoryBtn').addEventListener('click', openHistory);
 
   // ---------- Init ----------
   renderTicker();
@@ -2064,8 +2036,12 @@
   renderTradeBlocks();
   statCta();
   updateClock();
-  renderHistoryList();
-  if(alertsEnabledPref){ setTimeout(renderNews, 700); }
+  if(alertsEnabledPref){
+    loadTodaysAlerts();
+  } else {
+    renderHistoryList();
+    updateHistorySettingsDesc();
+  }
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
