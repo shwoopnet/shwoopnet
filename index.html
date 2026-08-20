@@ -215,8 +215,9 @@
 
   /* ---------- Market Brief (home) page ---------- */
   .brief-hero{ padding: 44px 0 8px 0; max-width: 760px; }
+  .brief-page-header{ margin-bottom:22px; }
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
-  .brief-headline{ font-family:'Space Grotesk', sans-serif; font-size: 32px; font-weight:700; margin:0 0 18px 0; line-height:1.2; }
+  .brief-headline{ font-family:'Space Grotesk', sans-serif; font-size: 19px; font-weight:700; margin:0 0 14px 0; line-height:1.35; }
   .brief-lede{ font-size:15px; line-height:1.75; color:var(--muted); margin:0 0 32px 0; }
 
   .brief-indices{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
@@ -267,9 +268,18 @@
   }
   .trades-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; }
   .trades-sub{ color:var(--muted); font-size:12.5px; margin-top:4px; }
+  .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .timeframes{ display:flex; gap:4px; }
 
-  .layout-controls{ display:flex; align-items:center; gap:22px; flex-wrap:wrap; padding: 0 0 18px 0; }
+  .layout-dropdown{ position:relative; }
+  .layout-menu{
+    position:absolute; top:calc(100% + 6px); right:0; min-width:230px;
+    background: var(--panel-raised); border:1px solid var(--border); border-radius:6px;
+    padding:14px; z-index:150; box-shadow:0 12px 28px rgba(0,0,0,0.45);
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .layout-menu[hidden]{ display:none; }
+  .layout-menu .layout-stepper{ justify-content:space-between; }
   .layout-stepper{ display:flex; align-items:center; gap:8px; }
   .layout-stepper .step-name{ font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em; }
   .zoom-btn{
@@ -515,6 +525,34 @@
   }
   .modal-btn-submit:hover{ background: var(--amber); color: var(--amber-contrast); }
 
+  .auth-gate{
+    position:fixed; inset:0; z-index:500; background: var(--ink);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .auth-gate[hidden]{ display:none; }
+  .auth-box{
+    width:100%; max-width:340px; background: var(--panel); border:1px solid var(--border);
+    border-radius: var(--radius); padding:32px 28px; text-align:center;
+  }
+  .auth-brand{
+    display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:26px;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; letter-spacing:.05em;
+  }
+  .auth-title{ font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
+  .auth-status{ font-size:12px; color: var(--muted); margin-bottom:14px; }
+  .auth-gate form{ text-align:left; }
+  .auth-submit{ width:100%; margin-top:4px; }
+  .auth-switch{ margin-top:16px; font-size:12px; color: var(--muted); }
+  .auth-switch button{
+    background:none; border:none; color: var(--amber); cursor:pointer; font-size:12px;
+    text-decoration:underline; padding:0; margin-left:4px;
+  }
+  .auth-forgot{
+    background:none; border:none; color: var(--muted); font-size:11px; cursor:pointer;
+    margin-top:16px; text-decoration:underline;
+  }
+  .auth-forgot:hover{ color: var(--paper); }
+
   .exit-trade-btn{
     background:transparent; border:1px solid var(--border); color: var(--muted);
     padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer;
@@ -617,6 +655,98 @@
 </style>
 </head>
 <body>
+
+<script>
+  // Decouples the deferred Firebase module from the rest of the app so
+  // neither side has to worry about load-order timing.
+  window.__shwoopQueue = [];
+  window.__shwoopAPI = null;
+  window.__shwoopReady = function(api){
+    window.__shwoopAPI = api;
+    window.__shwoopQueue.forEach(function(fn){ fn(api); });
+    window.__shwoopQueue = [];
+  };
+  window.__onShwoopReady = function(fn){
+    if(window.__shwoopAPI){ fn(window.__shwoopAPI); }
+    else { window.__shwoopQueue.push(fn); }
+  };
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged, sendPasswordResetEmail
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAwzn8oibFBrMDT54eVp70LWaiJwaE0_zE",
+    authDomain: "shwoopnet.firebaseapp.com",
+    projectId: "shwoopnet",
+    storageBucket: "shwoopnet.firebasestorage.app",
+    messagingSenderId: "1096890100007",
+    appId: "1:1096890100007:web:1d9e3cf353c77ffb9ba102"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  window.__shwoopReady({
+    signUp: function(email, password){ return createUserWithEmailAndPassword(auth, email, password); },
+    signIn: function(email, password){ return signInWithEmailAndPassword(auth, email, password); },
+    signOutUser: function(){ return signOut(auth); },
+    resetPassword: function(email){ return sendPasswordResetEmail(auth, email); },
+    onAuthChange: function(callback){ return onAuthStateChanged(auth, callback); },
+    saveJournal: function(uid, entries){
+      return setDoc(doc(db, 'users', uid), { journalEntries: entries }, { merge: true });
+    },
+    watchJournal: function(uid, callback){
+      return onSnapshot(doc(db, 'users', uid), function(snap){
+        callback(snap.exists() ? (snap.data().journalEntries || []) : []);
+      }, function(err){
+        console.error('Journal sync error:', err);
+      });
+    }
+  });
+</script>
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-box">
+    <div class="auth-brand">
+      <svg viewBox="0 0 100 100" width="24" height="24" aria-hidden="true">
+        <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+        <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+        <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+        <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
+        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">SN</text>
+      </svg>
+      SHWOOPNET
+    </div>
+    <div class="auth-title" id="authTitle">Sign in</div>
+    <div class="auth-status" id="authStatus">Connecting…</div>
+    <form id="authForm" hidden>
+      <div class="modal-field">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" autocomplete="email" required>
+      </div>
+      <div class="modal-field">
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" autocomplete="current-password" minlength="6" required>
+      </div>
+      <div class="modal-error" id="authError"></div>
+      <button type="submit" class="modal-btn-submit auth-submit" id="authSubmitBtn">Sign in</button>
+    </form>
+    <div class="auth-switch">
+      <span id="authSwitchText">Don't have an account?</span>
+      <button type="button" id="authSwitchBtn">Create one</button>
+    </div>
+    <button type="button" id="authForgotBtn" class="auth-forgot">Forgot password?</button>
+  </div>
+</div>
 
 <div class="app">
 
@@ -771,6 +901,10 @@
   <!-- ================= MARKET BRIEF (HOME) ================= -->
   <main class="page" id="page-brief">
     <div class="brief-hero">
+      <div class="brief-page-header">
+        <div class="trades-title">Market Brief</div>
+        <div class="trades-sub">Today's read on what's moving the tape.</div>
+      </div>
       <div class="brief-eyebrow" id="briefDate">—</div>
       <h1 class="brief-headline">Good morning. Semis are setting the tone again.</h1>
       <p class="brief-lede">Futures point higher after a late rally in semiconductors carried into the close. NVDA leads the tape into tonight's report — expect wider spreads and elevated volume through the print. The dollar is softer, giving risk assets a bit more room to run.</p>
@@ -829,32 +963,39 @@
         <div class="trades-title">Trade Overview</div>
         <div class="trades-sub">Simulated entries, stops and targets — chart below each row.</div>
       </div>
-      <div class="timeframes" id="timeframes">
-        <button class="tf-btn active" data-tf="1D">1D</button>
-        <button class="tf-btn" data-tf="1W">1W</button>
-        <button class="tf-btn" data-tf="1M">1M</button>
-        <button class="tf-btn" data-tf="1Y">1Y</button>
-      </div>
-    </div>
-
-    <div class="layout-controls">
-      <div class="layout-stepper">
-        <span class="step-name">Chart width</span>
-        <button class="zoom-btn" id="widthDec" aria-label="Decrease chart width">−</button>
-        <span class="zoom-label mono" id="widthLabel">62%</span>
-        <button class="zoom-btn" id="widthInc" aria-label="Increase chart width">+</button>
-      </div>
-      <div class="layout-stepper">
-        <span class="step-name">Chart height</span>
-        <button class="zoom-btn" id="heightDec" aria-label="Decrease chart height">−</button>
-        <span class="zoom-label mono" id="heightLabel">200px</span>
-        <button class="zoom-btn" id="heightInc" aria-label="Increase chart height">+</button>
-      </div>
-      <div class="layout-stepper">
-        <span class="step-name">Text size</span>
-        <button class="zoom-btn" id="textDec" aria-label="Decrease text size">−</button>
-        <span class="zoom-label mono" id="textLabel">12.5px</span>
-        <button class="zoom-btn" id="textInc" aria-label="Increase text size">+</button>
+      <div class="trades-header-right">
+        <div class="timeframes" id="timeframes">
+          <button class="tf-btn active" data-tf="1D">1D</button>
+          <button class="tf-btn" data-tf="1W">1W</button>
+          <button class="tf-btn" data-tf="1M">1M</button>
+          <button class="tf-btn" data-tf="1Y">1Y</button>
+        </div>
+        <div class="layout-dropdown">
+          <button class="nav-toggle" id="layoutToggle" aria-haspopup="true" aria-expanded="false">
+            <span>Layout</span>
+            <span class="caret">▾</span>
+          </button>
+          <div class="layout-menu" id="layoutMenu" hidden>
+            <div class="layout-stepper">
+              <span class="step-name">Chart width</span>
+              <button class="zoom-btn" id="widthDec" aria-label="Decrease chart width">−</button>
+              <span class="zoom-label mono" id="widthLabel">62%</span>
+              <button class="zoom-btn" id="widthInc" aria-label="Increase chart width">+</button>
+            </div>
+            <div class="layout-stepper">
+              <span class="step-name">Chart height</span>
+              <button class="zoom-btn" id="heightDec" aria-label="Decrease chart height">−</button>
+              <span class="zoom-label mono" id="heightLabel">200px</span>
+              <button class="zoom-btn" id="heightInc" aria-label="Increase chart height">+</button>
+            </div>
+            <div class="layout-stepper">
+              <span class="step-name">Text size</span>
+              <button class="zoom-btn" id="textDec" aria-label="Decrease text size">−</button>
+              <span class="zoom-label mono" id="textLabel">12.5px</span>
+              <button class="zoom-btn" id="textInc" aria-label="Increase text size">+</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -940,6 +1081,14 @@
     </div>
 
     <div class="settings-page">
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Account</div>
+          <div class="settings-row-desc" id="accountEmailDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="signOutBtn">Sign out</button>
+      </div>
+
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Color theme</div>
@@ -1438,6 +1587,20 @@
   });
 
   // ---------- Layout controls (chart width, chart height, text size) ----------
+  var layoutToggle = document.getElementById('layoutToggle');
+  var layoutMenu = document.getElementById('layoutMenu');
+  layoutToggle.addEventListener('click', function(){
+    var open = !layoutMenu.hasAttribute('hidden');
+    if(open){ layoutMenu.setAttribute('hidden',''); layoutToggle.setAttribute('aria-expanded','false'); }
+    else{ layoutMenu.removeAttribute('hidden'); layoutToggle.setAttribute('aria-expanded','true'); }
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.layout-dropdown')){
+      layoutMenu.setAttribute('hidden','');
+      layoutToggle.setAttribute('aria-expanded','false');
+    }
+  });
+
   var layoutPrefs = { width:62, height:200, text:12.5 };
   var layoutLimits = {
     width:  [40, 85, 5],
@@ -1638,30 +1801,16 @@
     }catch(e){}
   })();
 
-  // ---------- Trade Journal (calendar + logged trades) ----------
-  function daysAgoStr(n){
-    var d = new Date();
-    d.setDate(d.getDate() - n);
-    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-  }
-
-  var journalEntries = [
-    { id:'j1', date: daysAgoStr(2),  sym:'AMD',  direction:'Long',  entry:168.00, qty:100, exit:176.40, status:'closed' },
-    { id:'j2', date: daysAgoStr(5),  sym:'NVDA', direction:'Long',  entry:112.30, qty:50,  exit:108.10, status:'closed' },
-    { id:'j3', date: daysAgoStr(5),  sym:'AAPL', direction:'Long',  entry:225.00, qty:75,  exit:231.80, status:'closed' },
-    { id:'j4', date: daysAgoStr(9),  sym:'TSLA', direction:'Short', entry:258.00, qty:40,  exit:249.50, status:'closed' },
-    { id:'j5', date: daysAgoStr(14), sym:'MSFT', direction:'Long',  entry:498.00, qty:20,  exit:489.20, status:'closed' }
-  ];
-
-  (function loadJournalEntries(){
-    try{
-      var saved = JSON.parse(window.localStorage.getItem('shwoopnet:journalEntries') || 'null');
-      if(saved && Array.isArray(saved)){ journalEntries = saved; }
-    }catch(e){}
-  })();
+  // ---------- Trade Journal (calendar + logged trades, synced via Firebase) ----------
+  var journalEntries = [];
+  var journalUnsubscribe = null;
+  var currentUid = null;
 
   function saveJournalEntries(){
-    try{ window.localStorage.setItem('shwoopnet:journalEntries', JSON.stringify(journalEntries)); }catch(e){}
+    if(!window.__shwoopAPI || !currentUid) return;
+    window.__shwoopAPI.saveJournal(currentUid, journalEntries).catch(function(err){
+      console.error('Failed to save journal:', err);
+    });
   }
 
   function computePL(e){
@@ -2076,6 +2225,117 @@
     alertHistory = [];
     renderHistoryList();
   }
+
+  // ---------- Auth (sign in / sign up / sign out) ----------
+  var authMode = 'signin';
+  var authTitleEl = document.getElementById('authTitle');
+  var authStatusEl = document.getElementById('authStatus');
+  var authFormEl = document.getElementById('authForm');
+  var authErrorEl = document.getElementById('authError');
+  var authSwitchTextEl = document.getElementById('authSwitchText');
+  var authSwitchBtn = document.getElementById('authSwitchBtn');
+  var authSubmitBtn = document.getElementById('authSubmitBtn');
+  var authGateEl = document.getElementById('authGate');
+
+  function setAuthMode(mode){
+    authMode = mode;
+    if(mode === 'signup'){
+      authTitleEl.textContent = 'Create your account';
+      authSubmitBtn.textContent = 'Create account';
+      authSwitchTextEl.textContent = 'Already have an account?';
+      authSwitchBtn.textContent = 'Sign in';
+    } else {
+      authTitleEl.textContent = 'Sign in';
+      authSubmitBtn.textContent = 'Sign in';
+      authSwitchTextEl.textContent = "Don't have an account?";
+      authSwitchBtn.textContent = 'Create one';
+    }
+    authErrorEl.classList.remove('show');
+  }
+  authSwitchBtn.addEventListener('click', function(){
+    setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+  });
+
+  function friendlyAuthError(err){
+    var code = (err && err.code) || '';
+    if(code.indexOf('wrong-password') > -1 || code.indexOf('invalid-credential') > -1) return 'Incorrect email or password.';
+    if(code.indexOf('user-not-found') > -1) return 'No account found with that email.';
+    if(code.indexOf('email-already-in-use') > -1) return 'An account already exists with that email.';
+    if(code.indexOf('weak-password') > -1) return 'Password should be at least 6 characters.';
+    if(code.indexOf('invalid-email') > -1) return 'Enter a valid email address.';
+    if(code.indexOf('unauthorized-domain') > -1) return 'This domain isn\'t authorized in Firebase yet.';
+    if(code.indexOf('network-request-failed') > -1) return 'Network error — check your connection.';
+    return 'Something went wrong. Please try again.';
+  }
+
+  document.getElementById('authForgotBtn').addEventListener('click', function(){
+    if(!window.__shwoopAPI) return;
+    var email = document.getElementById('authEmail').value;
+    if(!email){
+      authErrorEl.textContent = 'Enter your email above first, then tap Forgot password.';
+      authErrorEl.classList.add('show');
+      return;
+    }
+    window.__shwoopAPI.resetPassword(email).then(function(){
+      authErrorEl.classList.remove('show');
+      authStatusEl.textContent = 'Password reset email sent — check your inbox.';
+    }).catch(function(err){
+      authErrorEl.textContent = friendlyAuthError(err);
+      authErrorEl.classList.add('show');
+    });
+  });
+
+  authFormEl.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!window.__shwoopAPI) return;
+    var email = document.getElementById('authEmail').value;
+    var password = document.getElementById('authPassword').value;
+    authErrorEl.classList.remove('show');
+    authSubmitBtn.disabled = true;
+    var action = authMode === 'signup'
+      ? window.__shwoopAPI.signUp(email, password)
+      : window.__shwoopAPI.signIn(email, password);
+    action.catch(function(err){
+      authErrorEl.textContent = friendlyAuthError(err);
+      authErrorEl.classList.add('show');
+    }).finally(function(){
+      authSubmitBtn.disabled = false;
+    });
+  });
+
+  var accountEmailDesc = document.getElementById('accountEmailDesc');
+  document.getElementById('signOutBtn').addEventListener('click', function(){
+    if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
+  });
+
+  window.__onShwoopReady(function(api){
+    authStatusEl.textContent = '';
+    authFormEl.hidden = false;
+
+    api.onAuthChange(function(user){
+      if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
+
+      if(user){
+        currentUid = user.uid;
+        authGateEl.setAttribute('hidden', '');
+        if(accountEmailDesc){ accountEmailDesc.textContent = 'Signed in as ' + user.email; }
+        journalUnsubscribe = api.watchJournal(user.uid, function(entries){
+          journalEntries = entries;
+          renderCalendar();
+          renderJournalDetail();
+          renderTradeBlocks();
+          renderPLSummary();
+        });
+      } else {
+        currentUid = null;
+        journalEntries = [];
+        authGateEl.removeAttribute('hidden');
+        document.getElementById('authEmail').value = '';
+        document.getElementById('authPassword').value = '';
+        setAuthMode('signin');
+      }
+    });
+  });
 
   // ---------- Init ----------
   renderTicker();
