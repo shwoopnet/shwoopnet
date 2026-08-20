@@ -210,6 +210,43 @@
   .settings-reset-btn:hover{ background: var(--loss-glow); }
   .settings-note{ font-size:11px; color: var(--muted); margin-top:20px; line-height:1.6; }
 
+  .changelog-list{ margin-top:24px; }
+  .changelog-entry{ padding:22px 0; border-bottom:1px solid var(--border); }
+  .changelog-entry:last-child{ border-bottom:none; }
+  .changelog-version{ font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:700; color: var(--amber); margin-bottom:10px; }
+  .changelog-items{ margin:0; padding-left:18px; }
+  .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
+
+  .tour-overlay{ position:fixed; inset:0; z-index:450; pointer-events:none; }
+  .tour-overlay[hidden]{ display:none; }
+  .tour-spotlight{
+    position:fixed; border-radius:8px; pointer-events:none;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
+    border:2px solid var(--amber);
+    transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease;
+  }
+  .tour-spotlight.centered{ box-shadow: 0 0 0 9999px rgba(0,0,0,0.7); border:none; }
+  .tour-bubble{
+    position:fixed; width:300px; max-width:88vw;
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    padding:18px 20px; box-shadow:0 16px 36px rgba(0,0,0,0.5);
+    pointer-events:auto;
+    transition: top .25s ease, left .25s ease;
+  }
+  .tour-bubble-step{ font-size:10.5px; color: var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+  .tour-bubble-title{ font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
+  .tour-bubble-text{ font-size:12.5px; line-height:1.6; color: var(--muted); margin:0 0 16px 0; }
+  .tour-bubble-actions{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .tour-skip-link{ background:none; border:none; color: var(--muted); font-size:11.5px; cursor:pointer; text-decoration:underline; padding:0; }
+  .tour-skip-link:hover{ color: var(--paper); }
+  .tour-nav-btns{ display:flex; align-items:center; gap:8px; }
+  .tour-next-btn{
+    background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
+    padding:7px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .tour-next-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
+
   .page{ padding: 0 28px 40px 28px; }
   .page[hidden]{ display:none; }
 
@@ -509,6 +546,15 @@
     padding:9px 10px; color: var(--paper); font-family:'IBM Plex Mono', monospace; font-size:13px;
   }
   .modal-field input:focus{ outline:2px solid var(--amber); outline-offset:1px; border-color: var(--amber-dim); }
+  .password-field{ position:relative; }
+  .password-field input{ padding-right:38px; }
+  .password-toggle{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color: var(--muted); cursor:pointer;
+    width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+    padding:0; border-radius:4px;
+  }
+  .password-toggle:hover{ color: var(--paper); }
   .modal-error{ font-size:11px; color: var(--loss); margin-top:2px; display:none; }
   .modal-error.show{ display:block; }
   .modal-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -648,6 +694,7 @@
   [data-reduce-motion="true"] .ticker-track{ animation: none; }
   [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
+  [data-reduce-motion="true"] .tour-spotlight, [data-reduce-motion="true"] .tour-bubble{ transition: none; }
   .flash-up{ animation: flashUp .6s ease; }
   .flash-down{ animation: flashDown .6s ease; }
   @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
@@ -735,7 +782,17 @@
       </div>
       <div class="modal-field">
         <label for="authPassword">Password</label>
-        <input type="password" id="authPassword" autocomplete="current-password" minlength="6" required>
+        <div class="password-field">
+          <input type="password" id="authPassword" autocomplete="current-password" minlength="6" required>
+          <button type="button" class="password-toggle" id="authPasswordToggle" aria-label="Show password"></button>
+        </div>
+      </div>
+      <div class="modal-field" id="authConfirmField" hidden>
+        <label for="authConfirmPassword">Confirm password</label>
+        <div class="password-field">
+          <input type="password" id="authConfirmPassword" autocomplete="new-password" minlength="6">
+          <button type="button" class="password-toggle" id="authConfirmPasswordToggle" aria-label="Show password"></button>
+        </div>
       </div>
       <div class="modal-error" id="authError"></div>
       <button type="submit" class="modal-btn-submit auth-submit" id="authSubmitBtn">Sign in</button>
@@ -801,6 +858,14 @@
             History
             <span class="nav-item-sub">Today's market alerts</span>
           </button>
+          <button class="nav-item" data-action="tour">
+            Walkthrough
+            <span class="nav-item-sub">See what Shwoopnet can do</span>
+          </button>
+          <button class="nav-item" data-page="changelog">
+            Changelog
+            <span class="nav-item-sub">What's new</span>
+          </button>
           <button class="nav-item" data-page="settings">
             Settings
             <span class="nav-item-sub">Theme &amp; preferences</span>
@@ -829,6 +894,22 @@
     </div>
     <textarea class="notepad-area mono" id="notepadArea" placeholder="Quick notes — saved automatically on this device."></textarea>
     <div class="notepad-resize-handle" id="notepadResizeHandle"></div>
+  </div>
+
+  <div class="tour-overlay" id="tourOverlay" hidden>
+    <div class="tour-spotlight" id="tourSpotlight"></div>
+    <div class="tour-bubble" id="tourBubble">
+      <div class="tour-bubble-step" id="tourStepCount">1 / 10</div>
+      <div class="tour-bubble-title" id="tourTitle"></div>
+      <p class="tour-bubble-text" id="tourText"></p>
+      <div class="tour-bubble-actions">
+        <button type="button" class="tour-skip-link" id="tourSkipBtn">Skip tour</button>
+        <div class="tour-nav-btns">
+          <button type="button" class="zoom-btn" id="tourPrevBtn" aria-label="Previous step">‹</button>
+          <button type="button" class="tour-next-btn" id="tourNextBtn">Next ›</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="modal-overlay" id="logTradeModal" hidden>
@@ -1163,7 +1244,68 @@
         <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
       </div>
 
-      <div class="settings-note">These preferences are saved only in this browser, on this device — they're stored locally, not tied to an account, so they won't carry over to another browser or device. Universal, synced settings would need real user accounts and a backend, which this prototype doesn't have yet.</div>
+      <div class="settings-note">Your Trade Journal syncs to your account and follows you across devices. Everything else on this page — theme, layout, notepad, and alert settings — stays local to this browser only.</div>
+    </div>
+  </main>
+
+  <!-- ================= CHANGELOG ================= -->
+  <main class="page" id="page-changelog" hidden>
+    <div class="trades-header">
+      <div>
+        <div class="trades-title">Changelog</div>
+        <div class="trades-sub">What's new in Shwoopnet.</div>
+      </div>
+    </div>
+
+    <div class="changelog-list">
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.5 — Accounts &amp; Sync</div>
+        <ul class="changelog-items">
+          <li>Real sign-up and sign-in with email + password</li>
+          <li>Trade Journal now syncs across devices in real time</li>
+          <li>Confirm-password field and show/hide password toggle</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.4 — Journal Upgrades</div>
+        <ul class="changelog-items">
+          <li>Log real trades straight from Trade Overview, pre-filled from the setup</li>
+          <li>Exit tracking with automatic P&amp;L in % and $</li>
+          <li>Calendar-based journal with date-range filtering</li>
+          <li>Remove a trade you logged by mistake</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.3 — Personalization</div>
+        <ul class="changelog-items">
+          <li>Four color themes, including true white-on-black</li>
+          <li>Adjustable chart width, height, and text size</li>
+          <li>Notepad: lockable, movable, and resizable</li>
+          <li>Reduce-motion and ticker on/off controls</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.2 — Alerts &amp; Navigation</div>
+        <ul class="changelog-items">
+          <li>Market alerts with a persistent History log</li>
+          <li>Consolidated page navigator dropdown</li>
+          <li>Dedicated Settings page for every preference</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.1 — Rebrand</div>
+        <ul class="changelog-items">
+          <li>Renamed from Daybreak to Shwoopnet</li>
+          <li>New SN diamond brand mark with motion animation</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.0 — Initial Launch</div>
+        <ul class="changelog-items">
+          <li>Market Brief, Trade Overview, and live ticker tape</li>
+          <li>Simulated pricing and candlestick charts</li>
+        </ul>
+      </div>
     </div>
   </main>
 
@@ -1650,13 +1792,14 @@
   })();
 
   // ---------- Navigation ----------
-  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings' };
+  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog' };
 
   function showPage(name){
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
     document.getElementById('page-settings').hidden = (name !== 'settings');
+    document.getElementById('page-changelog').hidden = (name !== 'changelog');
     document.getElementById('navCurrentLabel').textContent = navLabels[name];
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
@@ -1688,6 +1831,8 @@
         toggleNotepad(true);
       } else if(item.dataset.action === 'history'){
         openHistory();
+      } else if(item.dataset.action === 'tour'){
+        startTour();
       }
       navMenu.setAttribute('hidden','');
       navToggle.setAttribute('aria-expanded','false');
@@ -2168,7 +2313,11 @@
       closeLogModal();
       closeExitModal();
       closeHistory();
+      endTour();
     }
+    var tourOpen = !document.getElementById('tourOverlay').hasAttribute('hidden');
+    if(tourOpen && e.key === 'ArrowRight'){ document.getElementById('tourNextBtn').click(); }
+    if(tourOpen && e.key === 'ArrowLeft'){ document.getElementById('tourPrevBtn').click(); }
   });
 
   // ---------- History sidebar ----------
@@ -2239,22 +2388,45 @@
 
   function setAuthMode(mode){
     authMode = mode;
+    var confirmField = document.getElementById('authConfirmField');
+    var confirmInput = document.getElementById('authConfirmPassword');
     if(mode === 'signup'){
       authTitleEl.textContent = 'Create your account';
       authSubmitBtn.textContent = 'Create account';
       authSwitchTextEl.textContent = 'Already have an account?';
       authSwitchBtn.textContent = 'Sign in';
+      confirmField.hidden = false;
+      confirmInput.required = true;
     } else {
       authTitleEl.textContent = 'Sign in';
       authSubmitBtn.textContent = 'Sign in';
       authSwitchTextEl.textContent = "Don't have an account?";
       authSwitchBtn.textContent = 'Create one';
+      confirmField.hidden = true;
+      confirmInput.required = false;
+      confirmInput.value = '';
     }
     authErrorEl.classList.remove('show');
   }
   authSwitchBtn.addEventListener('click', function(){
     setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
   });
+
+  function setupPasswordToggle(toggleBtnId, inputId){
+    var btn = document.getElementById(toggleBtnId);
+    var input = document.getElementById(inputId);
+    var eyeOpen = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var eyeClosed = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.6 18.6 0 0 1 4.22-5.19M9.9 4.24A10.9 10.9 0 0 1 12 4c7 0 11 7 11 7a18.6 18.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    btn.innerHTML = eyeOpen;
+    btn.addEventListener('click', function(){
+      var showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.innerHTML = showing ? eyeOpen : eyeClosed;
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    });
+  }
+  setupPasswordToggle('authPasswordToggle', 'authPassword');
+  setupPasswordToggle('authConfirmPasswordToggle', 'authConfirmPassword');
 
   function friendlyAuthError(err){
     var code = (err && err.code) || '';
@@ -2265,6 +2437,8 @@
     if(code.indexOf('invalid-email') > -1) return 'Enter a valid email address.';
     if(code.indexOf('unauthorized-domain') > -1) return 'This domain isn\'t authorized in Firebase yet.';
     if(code.indexOf('network-request-failed') > -1) return 'Network error — check your connection.';
+    if(code.indexOf('operation-not-allowed') > -1) return "Email/Password sign-in isn't enabled yet in Firebase — check Authentication > Sign-in method.";
+    if(code) return 'Something went wrong (' + code + '). Please try again.';
     return 'Something went wrong. Please try again.';
   }
 
@@ -2291,6 +2465,16 @@
     var email = document.getElementById('authEmail').value;
     var password = document.getElementById('authPassword').value;
     authErrorEl.classList.remove('show');
+
+    if(authMode === 'signup'){
+      var confirmPassword = document.getElementById('authConfirmPassword').value;
+      if(password !== confirmPassword){
+        authErrorEl.textContent = "Passwords don't match.";
+        authErrorEl.classList.add('show');
+        return;
+      }
+    }
+
     authSubmitBtn.disabled = true;
     var action = authMode === 'signup'
       ? window.__shwoopAPI.signUp(email, password)
@@ -2332,10 +2516,162 @@
         authGateEl.removeAttribute('hidden');
         document.getElementById('authEmail').value = '';
         document.getElementById('authPassword').value = '';
+        document.getElementById('authConfirmPassword').value = '';
         setAuthMode('signin');
       }
     });
   });
+
+  // ---------- Walkthrough tour ----------
+  var tourSteps = [
+    {
+      title: 'Welcome to Shwoopnet',
+      text: "A quick look at what's here. Use the arrows below, or skip anytime — nothing here is required reading."
+    },
+    {
+      page: 'brief',
+      selector: '.ticker-tape',
+      title: 'Live ticker tape',
+      text: 'Your watchlist scrolls continuously at the very top, on every page — it never leaves your sight while you work.'
+    },
+    {
+      page: 'brief',
+      selector: '.brief-cta-row',
+      title: 'Your daily brief',
+      text: "Opens automatically the first time you visit each day — a quick read on what's moving before you dive into trades."
+    },
+    {
+      page: 'trades',
+      selector: '.log-trade-btn',
+      title: 'Log real trades',
+      text: 'Took a setup? One click pre-fills entry, stop, and targets from the idea — you just add size and confirm.'
+    },
+    {
+      page: 'trades',
+      selector: '#layoutToggle',
+      title: 'Make it yours',
+      text: 'Resize charts and adjust text size, tucked into one dropdown so the page stays clean until you need it.'
+    },
+    {
+      page: 'journal',
+      selector: '.journal-calendar',
+      title: 'Trade journal, by day',
+      text: 'Every logged trade lands on its date. Click any marked day to see what happened, exit an open position, or fix a mistake.'
+    },
+    {
+      page: 'journal',
+      selector: '.pl-summary',
+      title: 'P&L at a glance',
+      text: 'One box for a custom date range, one for your all-time total — both update the moment you close a trade.'
+    },
+    {
+      page: 'brief',
+      before: function(){ toggleNotepad(true); },
+      selector: '#notepadPanel',
+      title: 'Quick scratchpad',
+      text: 'Jot notes without losing your place — it floats above every page and saves automatically. Unlock it to move or resize.'
+    },
+    {
+      page: 'brief',
+      before: function(){ toggleNotepad(false); openHistory(); },
+      selector: '.history-sidebar',
+      title: "Today's alerts, on record",
+      text: "Every market alert gets logged here for the day, even ones you've already dismissed — nothing gets lost."
+    },
+    {
+      page: 'settings',
+      before: function(){ closeHistory(); },
+      selector: '.theme-switcher',
+      title: 'Four color modes',
+      text: 'Including true white-on-black and black-on-white. Pick whatever is easiest on your eyes, switch anytime.'
+    }
+  ];
+
+  var tourIndex = 0;
+  var tourSpotlightEl = document.getElementById('tourSpotlight');
+  var tourBubbleEl = document.getElementById('tourBubble');
+
+  function resetTourUI(){
+    toggleNotepad(false);
+    closeHistory();
+    var lm = document.getElementById('layoutMenu');
+    if(lm){ lm.setAttribute('hidden',''); }
+    navMenu.setAttribute('hidden','');
+  }
+
+  function centerTourBubble(){
+    tourSpotlightEl.classList.add('centered');
+    tourSpotlightEl.style.width = '0px';
+    tourSpotlightEl.style.height = '0px';
+    tourBubbleEl.style.top = '50%';
+    tourBubbleEl.style.left = '50%';
+    tourBubbleEl.style.transform = 'translate(-50%, -50%)';
+  }
+
+  function renderTourStep(){
+    var step = tourSteps[tourIndex];
+    resetTourUI();
+    if(step.page){ showPage(step.page); }
+    if(step.before){ step.before(); }
+
+    document.getElementById('tourStepCount').textContent = (tourIndex + 1) + ' / ' + tourSteps.length;
+    document.getElementById('tourTitle').textContent = step.title;
+    document.getElementById('tourText').textContent = step.text;
+    document.getElementById('tourPrevBtn').disabled = (tourIndex === 0);
+    document.getElementById('tourNextBtn').textContent = (tourIndex === tourSteps.length - 1) ? 'Done' : 'Next ›';
+
+    if(!step.selector){
+      centerTourBubble();
+      return;
+    }
+
+    tourBubbleEl.style.transform = 'none';
+
+    requestAnimationFrame(function(){
+      var target = document.querySelector(step.selector);
+      if(!target){ centerTourBubble(); return; }
+      // Always instant: measuring position right after a smooth scroll would
+      // race the scroll animation and read the pre-scroll location.
+      target.scrollIntoView({ block:'center', behavior:'instant' });
+      requestAnimationFrame(function(){
+        var rect = target.getBoundingClientRect();
+        var pad = 8;
+        tourSpotlightEl.classList.remove('centered');
+        tourSpotlightEl.style.top = (rect.top - pad) + 'px';
+        tourSpotlightEl.style.left = (rect.left - pad) + 'px';
+        tourSpotlightEl.style.width = (rect.width + pad * 2) + 'px';
+        tourSpotlightEl.style.height = (rect.height + pad * 2) + 'px';
+
+        var bubbleW = tourBubbleEl.offsetWidth;
+        var bubbleH = tourBubbleEl.offsetHeight;
+        var spaceBelow = window.innerHeight - rect.bottom;
+        var top = (spaceBelow > bubbleH + 24) ? (rect.bottom + 16) : Math.max(16, rect.top - bubbleH - 16);
+        var left = Math.min(Math.max(rect.left, 16), window.innerWidth - bubbleW - 16);
+        tourBubbleEl.style.top = top + 'px';
+        tourBubbleEl.style.left = left + 'px';
+      });
+    });
+  }
+
+  function startTour(){
+    tourIndex = 0;
+    document.getElementById('tourOverlay').removeAttribute('hidden');
+    renderTourStep();
+  }
+  function endTour(){
+    document.getElementById('tourOverlay').setAttribute('hidden', '');
+  }
+  document.getElementById('tourNextBtn').addEventListener('click', function(){
+    if(tourIndex === tourSteps.length - 1){ endTour(); return; }
+    tourIndex++;
+    renderTourStep();
+  });
+  document.getElementById('tourPrevBtn').addEventListener('click', function(){
+    if(tourIndex === 0) return;
+    tourIndex--;
+    renderTourStep();
+  });
+  document.getElementById('tourSkipBtn').addEventListener('click', endTour);
 
   // ---------- Init ----------
   renderTicker();
@@ -2354,7 +2690,7 @@
   // default to the brief, unless we've already opened Shwoopnet today.
   (function initLanding(){
     var hashPage = (location.hash || '').replace('#', '');
-    if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal' || hashPage === 'settings'){
+    if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal' || hashPage === 'settings' || hashPage === 'changelog'){
       showPage(hashPage);
       return;
     }
