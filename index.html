@@ -156,17 +156,6 @@
   .clock{ color: var(--muted); font-size: 13px; text-align:right; }
   .clock .time{ color: var(--paper); font-size: 15px; }
 
-  .settings-dropdown{ position:relative; }
-  .settings-menu{
-    position:absolute; top:calc(100% + 6px); right:0; min-width:200px;
-    background:var(--panel-raised); border:1px solid var(--border); border-radius:6px;
-    padding:14px; z-index:150; box-shadow:0 12px 28px rgba(0,0,0,0.45);
-  }
-  .settings-menu[hidden]{ display:none; }
-  .settings-menu-label{
-    font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted);
-    margin-bottom:10px;
-  }
   .theme-switcher{ display:flex; align-items:center; gap:10px; }
   .theme-swatch{
     width:18px; height:18px; border-radius:50%; padding:0; cursor:pointer;
@@ -178,6 +167,33 @@
   .theme-swatch[data-theme="mono"]{ background:#000000; }
   .theme-swatch[data-theme="light"]{ background:#FFFFFF; }
   .theme-swatch[aria-pressed="true"]{ box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--paper); }
+
+  .settings-page{ display:flex; flex-direction:column; gap:0; margin-top:24px; }
+  .settings-row{
+    display:flex; justify-content:space-between; align-items:center; gap:20px;
+    padding:18px 4px; border-bottom:1px solid var(--border); flex-wrap:wrap;
+  }
+  .settings-row:last-of-type{ border-bottom:none; }
+  .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
+  .settings-row-desc{ font-size:11.5px; color: var(--muted); }
+  .settings-choice-group{ display:flex; gap:4px; }
+  .settings-toggle-switch{
+    width:38px; height:22px; border-radius:11px; border:1px solid var(--border);
+    background: var(--panel-raised); position:relative; cursor:pointer; padding:0; flex-shrink:0;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .settings-toggle-switch .toggle-knob{
+    position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background: var(--muted); transition: transform .15s ease, background .15s ease;
+  }
+  .settings-toggle-switch[aria-checked="true"]{ border-color: var(--amber-dim); background: var(--amber-glow); }
+  .settings-toggle-switch[aria-checked="true"] .toggle-knob{ background: var(--amber); transform: translateX(16px); }
+  .settings-reset-btn{
+    background: transparent; border:1px solid var(--loss); color: var(--loss);
+    padding:8px 16px; border-radius:5px; font-size:12px; cursor:pointer;
+  }
+  .settings-reset-btn:hover{ background: var(--loss-glow); }
+  .settings-note{ font-size:11px; color: var(--muted); margin-top:20px; line-height:1.6; }
 
   .page{ padding: 0 28px 40px 28px; }
   .page[hidden]{ display:none; }
@@ -368,6 +384,7 @@
   @media (prefers-reduced-motion: reduce){
     .news-toast{ animation:none; }
   }
+  [data-reduce-motion="true"] .news-toast{ animation:none; }
 
   .notepad-panel{
     position: fixed; bottom: 20px; right: 20px; width: 300px; z-index: 110;
@@ -389,6 +406,65 @@
     outline:none;
   }
   .notepad-area::placeholder{ color: var(--muted); }
+
+  .trade-action-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:14px 16px; border-top:1px solid var(--border); flex-wrap:wrap;
+  }
+  .log-trade-btn{
+    background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
+    padding:8px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .log-trade-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
+  .open-position-badge{
+    font-size:11.5px; color: var(--amber); cursor:pointer; background:none; border:none; padding:0;
+    font-family:inherit;
+  }
+  .open-position-badge:hover{ text-decoration:underline; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:300;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay[hidden]{ display:none; }
+  .modal-box{
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    width:100%; max-width:380px; max-height:90vh; overflow-y:auto; padding:22px;
+  }
+  .modal-title{ font-family:'Space Grotesk', sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
+  .modal-sub{ font-size:12px; color: var(--muted); margin-bottom:18px; }
+  .modal-field{ margin-bottom:14px; }
+  .modal-field label{
+    display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color: var(--muted); margin-bottom:6px;
+  }
+  .modal-field input{
+    width:100%; background: var(--panel-raised); border:1px solid var(--border); border-radius:5px;
+    padding:9px 10px; color: var(--paper); font-family:'IBM Plex Mono', monospace; font-size:13px;
+  }
+  .modal-field input:focus{ outline:2px solid var(--amber); outline-offset:1px; border-color: var(--amber-dim); }
+  .modal-error{ font-size:11px; color: var(--loss); margin-top:2px; display:none; }
+  .modal-error.show{ display:block; }
+  .modal-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
+  .modal-btn-cancel{
+    background:transparent; border:1px solid var(--border); color: var(--muted);
+    padding:9px 16px; border-radius:5px; font-size:12.5px; cursor:pointer;
+  }
+  .modal-btn-cancel:hover{ color: var(--paper); border-color: var(--amber-dim); }
+  .modal-btn-submit{
+    background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
+    padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:600; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .modal-btn-submit:hover{ background: var(--amber); color: var(--amber-contrast); }
+
+  .exit-trade-btn{
+    background:transparent; border:1px solid var(--border); color: var(--muted);
+    padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer;
+  }
+  .exit-trade-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
 
   @media (max-width: 900px){
     .notepad-panel{ left:16px; right:16px; width:auto; bottom:16px; }
@@ -437,6 +513,8 @@
     .ticker-track{ animation: none; }
     .flash-up, .flash-down{ animation: none; }
   }
+  [data-reduce-motion="true"] .ticker-track{ animation: none; }
+  [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
   .flash-up{ animation: flashUp .6s ease; }
   .flash-down{ animation: flashDown .6s ease; }
   @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
@@ -457,22 +535,6 @@
       <div>
         <div class="brand-name">DAYBREAK</div>
         <div class="brand-sub">Personal market terminal — design prototype</div>
-      </div>
-    </div>
-
-    <div class="settings-dropdown">
-      <button class="nav-toggle" id="settingsToggle" aria-haspopup="true" aria-expanded="false">
-        <span>Settings</span>
-        <span class="caret">▾</span>
-      </button>
-      <div class="settings-menu" id="settingsMenu" hidden>
-        <div class="settings-menu-label">Color theme</div>
-        <div class="theme-switcher" role="group" aria-label="Color theme">
-          <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
-          <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
-          <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
-          <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
-        </div>
       </div>
     </div>
 
@@ -503,6 +565,10 @@
           Notepad
           <span class="nav-item-sub">Quick scratchpad</span>
         </button>
+        <button class="nav-item" data-page="settings">
+          Settings
+          <span class="nav-item-sub">Theme &amp; preferences</span>
+        </button>
       </div>
     </div>
   </div>
@@ -515,6 +581,73 @@
       <button class="notepad-close" id="notepadClose" aria-label="Close notepad">×</button>
     </div>
     <textarea class="notepad-area mono" id="notepadArea" placeholder="Quick notes — saved automatically on this device."></textarea>
+  </div>
+
+  <div class="modal-overlay" id="logTradeModal" hidden>
+    <div class="modal-box">
+      <div class="modal-title">Log this trade</div>
+      <div class="modal-sub mono" id="logModalSym">—</div>
+      <form id="logTradeForm">
+        <div class="modal-row-2">
+          <div class="modal-field">
+            <label for="logEntry">Entry price</label>
+            <input type="number" id="logEntry" step="any" min="0" required>
+          </div>
+          <div class="modal-field">
+            <label for="logQty">Shares / contracts</label>
+            <input type="number" id="logQty" step="any" min="0" required>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label for="logDate">Date entered</label>
+          <input type="date" id="logDate" required>
+        </div>
+        <div class="modal-row-2">
+          <div class="modal-field">
+            <label for="logStop">Stop</label>
+            <input type="number" id="logStop" step="any" min="0" required>
+          </div>
+          <div class="modal-field"></div>
+        </div>
+        <div class="modal-row-2">
+          <div class="modal-field">
+            <label for="logT1">Target 1</label>
+            <input type="number" id="logT1" step="any" min="0" required>
+          </div>
+          <div class="modal-field">
+            <label for="logT2">Target 2</label>
+            <input type="number" id="logT2" step="any" min="0" required>
+          </div>
+        </div>
+        <div class="modal-error" id="logModalError"></div>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn-cancel" id="logModalCancel">Cancel</button>
+          <button type="submit" class="modal-btn-submit">Log trade</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="exitTradeModal" hidden>
+    <div class="modal-box">
+      <div class="modal-title">Exit trade</div>
+      <div class="modal-sub mono" id="exitModalSym">—</div>
+      <form id="exitTradeForm">
+        <div class="modal-field">
+          <label for="exitPrice">Exit price</label>
+          <input type="number" id="exitPrice" step="any" min="0" required>
+        </div>
+        <div class="modal-field">
+          <label for="exitDate">Date exited</label>
+          <input type="date" id="exitDate" required>
+        </div>
+        <div class="modal-error" id="exitModalError"></div>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn-cancel" id="exitModalCancel">Cancel</button>
+          <button type="submit" class="modal-btn-submit">Confirm exit</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- ================= MARKET BRIEF (HOME) ================= -->
@@ -645,6 +778,84 @@
     <div class="journal-detail" id="journalDetail"></div>
   </main>
 
+  <!-- ================= SETTINGS ================= -->
+  <main class="page" id="page-settings" hidden>
+    <div class="trades-header">
+      <div>
+        <div class="trades-title">Settings</div>
+        <div class="trades-sub">Preferences for this browser.</div>
+      </div>
+    </div>
+
+    <div class="settings-page">
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Color theme</div>
+          <div class="settings-row-desc">Applies across the whole site. Candle colors stay fixed.</div>
+        </div>
+        <div class="theme-switcher" role="group" aria-label="Color theme">
+          <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
+          <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
+          <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
+          <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Default landing page</div>
+          <div class="settings-row-desc">What opens when you return later today.</div>
+        </div>
+        <div class="settings-choice-group" id="landingChoice">
+          <button class="tf-btn" data-value="auto">Auto</button>
+          <button class="tf-btn" data-value="brief">Brief</button>
+          <button class="tf-btn" data-value="trades">Trades</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Clock format</div>
+          <div class="settings-row-desc">12-hour or 24-hour time in the header.</div>
+        </div>
+        <div class="settings-choice-group" id="clockFormatChoice">
+          <button class="tf-btn" data-value="24">24-hour</button>
+          <button class="tf-btn" data-value="12">12-hour</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Market alerts</div>
+          <div class="settings-row-desc">Show news pop-ups when you open the site.</div>
+        </div>
+        <button class="settings-toggle-switch" id="alertsToggle" role="switch" aria-checked="true" aria-label="Toggle market alerts">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Reduce motion</div>
+          <div class="settings-row-desc">Turns off the ticker scroll and flash animations.</div>
+        </div>
+        <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Reset preferences</div>
+          <div class="settings-row-desc">Clears theme, layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
+        </div>
+        <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
+      </div>
+
+      <div class="settings-note">These preferences are saved only in this browser, on this device — they're stored locally, not tied to an account, so they won't carry over to another browser or device. Universal, synced settings would need real user accounts and a backend, which this prototype doesn't have yet.</div>
+    </div>
+  </main>
+
   <div class="note">Simulated prices for this prototype — connect a live feed when you're ready to wire up real data. Nothing here is investment advice.</div>
 
 </div>
@@ -742,6 +953,7 @@
     var change = pct(q.price, q.prevClose);
     var up = change >= 0;
     var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
+    var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
 
     return '' +
       '<div class="trade-block" data-symbol="' + t.sym + '">' +
@@ -771,6 +983,10 @@
             '<ul>' + t.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
           '</div>' +
         '</div>' +
+        '<div class="trade-action-bar">' +
+          '<button class="log-trade-btn" data-sym="' + t.sym + '">I took this trade →</button>' +
+          (openEntry ? '<button class="open-position-badge" data-date="' + openEntry.date + '">● Open position — view in journal</button>' : '') +
+        '</div>' +
       '</div>';
   }
 
@@ -786,6 +1002,14 @@
         if(open){ wrap.setAttribute('hidden',''); btn.setAttribute('aria-expanded','false'); btn.textContent = '›'; }
         else{ wrap.removeAttribute('hidden'); btn.setAttribute('aria-expanded','true'); btn.textContent = '⌄'; }
       });
+    });
+
+    el.querySelectorAll('.log-trade-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ openLogModal(btn.dataset.sym); });
+    });
+
+    el.querySelectorAll('.open-position-badge').forEach(function(btn){
+      btn.addEventListener('click', function(){ jumpToJournalDate(btn.dataset.date); });
     });
 
     renderAllTradeCharts(currentTF);
@@ -910,12 +1134,21 @@
     }
   }
 
+  var clockFormatPref = '24';
   function updateClock(){
     var now = new Date();
-    var h = now.getHours().toString().padStart(2,'0');
+    var hours24 = now.getHours();
     var m = now.getMinutes().toString().padStart(2,'0');
     var s = now.getSeconds().toString().padStart(2,'0');
-    document.getElementById('clockTime').textContent = h+':'+m+':'+s;
+    var timeStr;
+    if(clockFormatPref === '12'){
+      var suffix = hours24 >= 12 ? 'PM' : 'AM';
+      var h12 = hours24 % 12; if(h12 === 0){ h12 = 12; }
+      timeStr = h12 + ':' + m + ':' + s + ' ' + suffix;
+    } else {
+      timeStr = hours24.toString().padStart(2,'0') + ':' + m + ':' + s;
+    }
+    document.getElementById('clockTime').textContent = timeStr;
     document.getElementById('clockTz').textContent = getTzAbbrev(now) + ' · Markets open';
     var opts = { weekday:'long', month:'long', day:'numeric' };
     document.getElementById('briefDate').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
@@ -931,11 +1164,7 @@
     try{ window.localStorage.setItem('daybreak:theme', name); }catch(e){}
   }
   document.querySelectorAll('.theme-swatch').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      applyTheme(btn.dataset.theme);
-      settingsMenu.setAttribute('hidden','');
-      settingsToggle.setAttribute('aria-expanded','false');
-    });
+    btn.addEventListener('click', function(){ applyTheme(btn.dataset.theme); });
   });
   (function initTheme(){
     var saved = 'amber';
@@ -943,18 +1172,85 @@
     applyTheme(saved);
   })();
 
-  var settingsToggle = document.getElementById('settingsToggle');
-  var settingsMenu = document.getElementById('settingsMenu');
-  settingsToggle.addEventListener('click', function(){
-    var open = !settingsMenu.hasAttribute('hidden');
-    if(open){ settingsMenu.setAttribute('hidden',''); settingsToggle.setAttribute('aria-expanded','false'); }
-    else{ settingsMenu.removeAttribute('hidden'); settingsToggle.setAttribute('aria-expanded','true'); }
+  // ---------- Settings: default landing page ----------
+  var landingChoiceEl = document.getElementById('landingChoice');
+  function applyLandingPref(val){
+    landingChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.value === val);
+    });
+    try{ window.localStorage.setItem('daybreak:landingPref', val); }catch(e){}
+  }
+  landingChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
+    b.addEventListener('click', function(){ applyLandingPref(b.dataset.value); });
   });
-  document.addEventListener('click', function(e){
-    if(!e.target.closest('.settings-dropdown')){
-      settingsMenu.setAttribute('hidden','');
-      settingsToggle.setAttribute('aria-expanded','false');
-    }
+  (function initLandingPref(){
+    var saved = 'auto';
+    try{ saved = window.localStorage.getItem('daybreak:landingPref') || 'auto'; }catch(e){}
+    applyLandingPref(saved);
+  })();
+
+  // ---------- Settings: clock format ----------
+  var clockFormatEl = document.getElementById('clockFormatChoice');
+  function applyClockFormat(val){
+    clockFormatPref = val;
+    clockFormatEl.querySelectorAll('.tf-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.value === val);
+    });
+    try{ window.localStorage.setItem('daybreak:clockFormat', val); }catch(e){}
+    updateClock();
+  }
+  clockFormatEl.querySelectorAll('.tf-btn').forEach(function(b){
+    b.addEventListener('click', function(){ applyClockFormat(b.dataset.value); });
+  });
+  (function initClockFormat(){
+    var saved = '24';
+    try{ saved = window.localStorage.getItem('daybreak:clockFormat') || '24'; }catch(e){}
+    applyClockFormat(saved);
+  })();
+
+  // ---------- Settings: market alerts toggle ----------
+  var alertsToggleBtn = document.getElementById('alertsToggle');
+  var alertsEnabledPref = true;
+  function applyAlertsPref(enabled){
+    alertsEnabledPref = enabled;
+    alertsToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+    try{ window.localStorage.setItem('daybreak:alertsEnabled', enabled ? 'true' : 'false'); }catch(e){}
+  }
+  alertsToggleBtn.addEventListener('click', function(){
+    applyAlertsPref(alertsToggleBtn.getAttribute('aria-checked') !== 'true');
+  });
+  (function initAlertsPref(){
+    var saved = 'true';
+    try{ var stored = window.localStorage.getItem('daybreak:alertsEnabled'); if(stored !== null) saved = stored; }catch(e){}
+    applyAlertsPref(saved === 'true');
+  })();
+
+  // ---------- Settings: reduce motion ----------
+  var motionToggleBtn = document.getElementById('motionToggle');
+  function applyMotionPref(reduced){
+    motionToggleBtn.setAttribute('aria-checked', reduced ? 'true' : 'false');
+    document.documentElement.setAttribute('data-reduce-motion', reduced ? 'true' : 'false');
+    try{ window.localStorage.setItem('daybreak:reduceMotion', reduced ? 'true' : 'false'); }catch(e){}
+  }
+  motionToggleBtn.addEventListener('click', function(){
+    applyMotionPref(motionToggleBtn.getAttribute('aria-checked') !== 'true');
+  });
+  (function initMotionPref(){
+    var saved = 'false';
+    try{ saved = window.localStorage.getItem('daybreak:reduceMotion') || 'false'; }catch(e){}
+    applyMotionPref(saved === 'true');
+  })();
+
+  // ---------- Settings: reset all preferences ----------
+  document.getElementById('resetPrefsBtn').addEventListener('click', function(){
+    try{
+      Object.keys(window.localStorage).forEach(function(k){
+        if(k.indexOf('daybreak:') === 0 && k !== 'daybreak:journalEntries'){
+          window.localStorage.removeItem(k);
+        }
+      });
+    }catch(e){}
+    location.reload();
   });
 
   // ---------- Layout controls (chart width, chart height, text size) ----------
@@ -1007,12 +1303,13 @@
   })();
 
   // ---------- Navigation ----------
-  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal' };
+  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings' };
 
   function showPage(name){
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
+    document.getElementById('page-settings').hidden = (name !== 'settings');
     document.getElementById('navCurrentLabel').textContent = navLabels[name];
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
@@ -1066,23 +1363,49 @@
     });
   })();
 
-  // ---------- Trade Journal (calendar + closed trades) ----------
-  var journalEntries = [
-    { date: daysAgoStr(2),  sym:'AMD',  direction:'Long',  entry:168.00, exit:176.40, outcome:'target' },
-    { date: daysAgoStr(5),  sym:'NVDA', direction:'Long',  entry:112.30, exit:108.10, outcome:'stopped' },
-    { date: daysAgoStr(5),  sym:'AAPL', direction:'Long',  entry:225.00, exit:231.80, outcome:'target' },
-    { date: daysAgoStr(9),  sym:'TSLA', direction:'Short', entry:258.00, exit:249.50, outcome:'target' },
-    { date: daysAgoStr(14), sym:'MSFT', direction:'Long',  entry:498.00, exit:489.20, outcome:'stopped' }
-  ];
-
+  // ---------- Trade Journal (calendar + logged trades) ----------
   function daysAgoStr(n){
     var d = new Date();
     d.setDate(d.getDate() - n);
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
+  var journalEntries = [
+    { id:'j1', date: daysAgoStr(2),  sym:'AMD',  direction:'Long',  entry:168.00, qty:100, exit:176.40, status:'closed' },
+    { id:'j2', date: daysAgoStr(5),  sym:'NVDA', direction:'Long',  entry:112.30, qty:50,  exit:108.10, status:'closed' },
+    { id:'j3', date: daysAgoStr(5),  sym:'AAPL', direction:'Long',  entry:225.00, qty:75,  exit:231.80, status:'closed' },
+    { id:'j4', date: daysAgoStr(9),  sym:'TSLA', direction:'Short', entry:258.00, qty:40,  exit:249.50, status:'closed' },
+    { id:'j5', date: daysAgoStr(14), sym:'MSFT', direction:'Long',  entry:498.00, qty:20,  exit:489.20, status:'closed' }
+  ];
+
+  (function loadJournalEntries(){
+    try{
+      var saved = JSON.parse(window.localStorage.getItem('daybreak:journalEntries') || 'null');
+      if(saved && Array.isArray(saved)){ journalEntries = saved; }
+    }catch(e){}
+  })();
+
+  function saveJournalEntries(){
+    try{ window.localStorage.setItem('daybreak:journalEntries', JSON.stringify(journalEntries)); }catch(e){}
+  }
+
+  function computePL(e){
+    var sign = e.direction === 'Short' ? -1 : 1;
+    var pctVal = (e.exit - e.entry) / e.entry * 100 * sign;
+    var dollarVal = (e.exit - e.entry) * (e.qty || 0) * sign;
+    return { pct: pctVal, dollar: dollarVal };
+  }
+
   var calendarViewDate = new Date();
   var selectedJournalDate = null;
+
+  function jumpToJournalDate(dateStr){
+    showPage('journal');
+    calendarViewDate = new Date(dateStr + 'T00:00:00');
+    selectedJournalDate = dateStr;
+    renderCalendar();
+    renderJournalDetail();
+  }
 
   function renderCalendar(){
     var y = calendarViewDate.getFullYear();
@@ -1120,7 +1443,7 @@
   function renderJournalDetail(){
     var el = document.getElementById('journalDetail');
     if(!selectedJournalDate){
-      el.innerHTML = '<div class="journal-empty">Click a marked date to see that day\'s closed trades.</div>';
+      el.innerHTML = '<div class="journal-empty">Click a marked date to see that day\'s trades.</div>';
       return;
     }
     var entries = journalEntries.filter(function(e){ return e.date === selectedJournalDate; });
@@ -1131,27 +1454,49 @@
       return;
     }
 
-    var wins = entries.filter(function(e){ return e.outcome === 'target'; }).length;
-    var losses = entries.length - wins;
-    var netPct = entries.reduce(function(sum, e){
-      var pct = (e.exit - e.entry) / e.entry * 100 * (e.direction === 'Short' ? -1 : 1);
-      return sum + pct;
-    }, 0);
-    var recap = 'Closed ' + entries.length + ' position' + (entries.length > 1 ? 's' : '') + ' — ' +
-      wins + ' target hit, ' + losses + ' stopped out. Net simulated result: ' + (netPct >= 0 ? '+' : '') + netPct.toFixed(1) + '%.';
+    var closed = entries.filter(function(e){ return e.status === 'closed'; });
+    var open = entries.filter(function(e){ return e.status === 'open'; });
+    var wins = closed.filter(function(e){ return computePL(e).pct >= 0; }).length;
+    var losses = closed.length - wins;
+    var netPct = closed.reduce(function(sum, e){ return sum + computePL(e).pct; }, 0);
+
+    var recapParts = [];
+    if(closed.length){
+      recapParts.push('Closed ' + closed.length + ' position' + (closed.length > 1 ? 's' : '') + ' — ' +
+        wins + ' win' + (wins !== 1 ? 's' : '') + ', ' + losses + ' loss' + (losses !== 1 ? 'es' : '') +
+        '. Net: ' + (netPct >= 0 ? '+' : '') + netPct.toFixed(1) + '%.');
+    }
+    if(open.length){
+      recapParts.push(open.length + ' still open.');
+    }
 
     var rows = entries.map(function(e){
-      var pct = (e.exit - e.entry) / e.entry * 100 * (e.direction === 'Short' ? -1 : 1);
-      var up = pct >= 0;
+      if(e.status === 'open'){
+        return '<div class="journal-entry">' +
+          '<span class="journal-entry-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span></span>' +
+          '<span class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' · ' + e.qty + ' sh</span>' +
+          '<span class="status-badge active">Open</span>' +
+          '<button class="exit-trade-btn" data-id="' + e.id + '">Exit trade</button>' +
+        '</div>';
+      }
+      var pl = computePL(e);
+      var up = pl.pct >= 0;
+      var pctStr = (up ? '+' : '') + pl.pct.toFixed(1) + '%';
+      var dollarStr = (pl.dollar >= 0 ? '+$' : '−$') + Math.abs(pl.dollar).toFixed(0);
       return '<div class="journal-entry">' +
         '<span class="journal-entry-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span></span>' +
         '<span class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' → ' + e.exit.toFixed(2) + '</span>' +
-        '<span class="journal-entry-result mono ' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + pct.toFixed(1) + '%</span>' +
+        '<span class="journal-entry-result mono ' + (up ? 'up' : 'down') + '">' + pctStr + ' · ' + dollarStr + '</span>' +
       '</div>';
     }).join('');
 
     el.innerHTML = '<div class="journal-detail-date">' + niceDate + '</div>' +
-      '<div class="journal-recap">' + recap + ' <em>(simulated recap — not a live AI call)</em></div>' + rows;
+      (recapParts.length ? '<div class="journal-recap">' + recapParts.join(' ') + (closed.length ? ' <em>(simulated recap — not a live AI call)</em>' : '') + '</div>' : '') +
+      rows;
+
+    el.querySelectorAll('.exit-trade-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ openExitModal(btn.dataset.id); });
+    });
   }
 
   document.getElementById('calPrev').addEventListener('click', function(){
@@ -1163,6 +1508,115 @@
     renderCalendar();
   });
   renderJournalDetail();
+
+  // ---------- Log Trade modal ----------
+  var logModalTradeSym = null;
+
+  function openLogModal(sym){
+    var t = trades.filter(function(tr){ return tr.sym === sym; })[0];
+    if(!t) return;
+    logModalTradeSym = sym;
+    document.getElementById('logModalSym').textContent = t.sym + ' — ' + t.direction;
+    document.getElementById('logEntry').value = t.entry;
+    document.getElementById('logQty').value = '';
+    document.getElementById('logStop').value = t.stop;
+    document.getElementById('logT1').value = t.t1;
+    document.getElementById('logT2').value = t.t2;
+    document.getElementById('logDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('logModalError').classList.remove('show');
+    document.getElementById('logTradeModal').removeAttribute('hidden');
+    document.getElementById('logQty').focus();
+  }
+  function closeLogModal(){ document.getElementById('logTradeModal').setAttribute('hidden',''); }
+
+  document.getElementById('logModalCancel').addEventListener('click', closeLogModal);
+  document.getElementById('logTradeModal').addEventListener('click', function(e){
+    if(e.target === this){ closeLogModal(); }
+  });
+
+  document.getElementById('logTradeForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var entry = parseFloat(document.getElementById('logEntry').value);
+    var qty = parseFloat(document.getElementById('logQty').value);
+    var stop = parseFloat(document.getElementById('logStop').value);
+    var t1 = parseFloat(document.getElementById('logT1').value);
+    var t2 = parseFloat(document.getElementById('logT2').value);
+    var date = document.getElementById('logDate').value;
+    var errEl = document.getElementById('logModalError');
+
+    var valid = entry > 0 && qty > 0 && stop > 0 && t1 > 0 && t2 > 0 && !!date;
+    if(!valid){
+      errEl.textContent = 'Enter valid, positive numbers for all fields.';
+      errEl.classList.add('show');
+      return;
+    }
+    errEl.classList.remove('show');
+
+    var t = trades.filter(function(tr){ return tr.sym === logModalTradeSym; })[0];
+    journalEntries.push({
+      id: 'j' + Date.now(),
+      date: date, sym: t.sym, direction: t.direction,
+      entry: entry, qty: qty, stop: stop, t1: t1, t2: t2,
+      exit: null, status: 'open'
+    });
+    saveJournalEntries();
+    closeLogModal();
+    renderCalendar();
+    renderTradeBlocks();
+  });
+
+  // ---------- Exit Trade modal ----------
+  var exitModalEntryId = null;
+
+  function openExitModal(id){
+    var entry = journalEntries.filter(function(j){ return j.id === id; })[0];
+    if(!entry) return;
+    exitModalEntryId = id;
+    document.getElementById('exitModalSym').textContent =
+      entry.sym + ' — ' + entry.direction + ' · entered ' + entry.entry.toFixed(2) + ' × ' + entry.qty;
+    document.getElementById('exitPrice').value = '';
+    document.getElementById('exitDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('exitModalError').classList.remove('show');
+    document.getElementById('exitTradeModal').removeAttribute('hidden');
+    document.getElementById('exitPrice').focus();
+  }
+  function closeExitModal(){ document.getElementById('exitTradeModal').setAttribute('hidden',''); }
+
+  document.getElementById('exitModalCancel').addEventListener('click', closeExitModal);
+  document.getElementById('exitTradeModal').addEventListener('click', function(e){
+    if(e.target === this){ closeExitModal(); }
+  });
+
+  document.getElementById('exitTradeForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var exitPrice = parseFloat(document.getElementById('exitPrice').value);
+    var exitDate = document.getElementById('exitDate').value;
+    var errEl = document.getElementById('exitModalError');
+
+    if(!(exitPrice > 0) || !exitDate){
+      errEl.textContent = 'Enter a valid exit price and date.';
+      errEl.classList.add('show');
+      return;
+    }
+    errEl.classList.remove('show');
+
+    var entry = journalEntries.filter(function(j){ return j.id === exitModalEntryId; })[0];
+    entry.exit = exitPrice;
+    entry.exitDate = exitDate;
+    entry.status = 'closed';
+    saveJournalEntries();
+    closeExitModal();
+    renderCalendar();
+    renderJournalDetail();
+    renderTradeBlocks();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      closeLogModal();
+      closeExitModal();
+    }
+  });
 
   // ---------- News alerts ----------
   var newsItems = [
@@ -1218,16 +1672,25 @@
   renderTradeBlocks();
   statCta();
   updateClock();
-  setTimeout(renderNews, 700);
+  if(alertsEnabledPref){ setTimeout(renderNews, 700); }
 
-  // A direct link (e.g. #trades) always wins. Otherwise: default to the
-  // brief, unless we've already opened Daybreak today on this browser.
+  // A direct link (e.g. #trades) always wins. Then the Settings > Default
+  // landing page preference, if set to something other than Auto. Otherwise:
+  // default to the brief, unless we've already opened Daybreak today.
   (function initLanding(){
     var hashPage = (location.hash || '').replace('#', '');
-    if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal'){
+    if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal' || hashPage === 'settings'){
       showPage(hashPage);
       return;
     }
+
+    var pref = 'auto';
+    try{ pref = window.localStorage.getItem('daybreak:landingPref') || 'auto'; }catch(e){}
+    if(pref === 'brief' || pref === 'trades'){
+      showPage(pref);
+      return;
+    }
+
     var landing = 'brief';
     try{
       var today = new Date().toISOString().slice(0,10);
