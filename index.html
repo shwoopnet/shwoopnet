@@ -270,17 +270,19 @@
     letter-spacing:.08em; color:var(--muted); font-weight:600; margin: 0 0 16px 0;
   }
 
-  .timeline{ display:flex; overflow-x:auto; gap:0; border-top: 1px solid var(--border); margin-bottom: 40px; }
-  .tl-item{ flex: 0 0 220px; padding: 16px 18px 0 0; border-right: 1px solid var(--border); margin-right: 18px; }
-  .tl-time{ font-family:'IBM Plex Mono', monospace; color: var(--amber); font-size: 12px; margin-bottom: 6px; }
-  .tl-tag{
-    display:inline-block; font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--muted); border: 1px solid var(--border); border-radius: 3px; padding: 1px 6px; margin-bottom: 8px;
+  .watch-trades{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom: 40px; }
+  .watch-trade-card{
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    padding:16px 18px; cursor:pointer; transition: border-color .15s ease;
   }
-  .tl-title{ font-size: 13px; margin: 0 0 4px 0; }
-  .tl-link{ color: var(--paper); text-decoration:none; }
-  .tl-link:hover{ color: var(--amber); text-decoration:underline; }
-  .tl-desc{ font-size: 11.5px; color: var(--muted); line-height:1.5; margin:0; }
+  .watch-trade-card:hover{ border-color: var(--amber-dim); }
+  .watch-trade-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
+  .watch-trade-sym{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:14px; }
+  .watch-trade-sym .t-dir{ font-size:10px; color: var(--muted); font-weight:400; margin-left:6px; }
+  .watch-trade-reason{ font-size:12.5px; color: var(--muted); line-height:1.55; margin:0 0 12px 0; }
+  .watch-trade-link{ font-size:11px; color: var(--amber); }
+  .watch-trade-card:hover .watch-trade-link{ text-decoration:underline; }
+  .trade-block-highlight{ border-color: var(--amber) !important; box-shadow: 0 0 0 2px var(--amber-glow); transition: border-color .3s ease, box-shadow .3s ease; }
 
   .brief-cta-row{
     display:flex; align-items:center; gap:18px; flex-wrap:wrap;
@@ -994,38 +996,7 @@
     <div class="brief-indices" id="indexSnapshot"></div>
 
     <div class="brief-section-title">What to Watch — Today</div>
-    <div class="timeline">
-      <div class="tl-item">
-        <div class="tl-time">8:30 AM ET</div>
-        <span class="tl-tag">Data</span>
-        <p class="tl-title"><a class="tl-link" href="https://www.dol.gov/ui/data.pdf" target="_blank" rel="noopener noreferrer">Initial Jobless Claims</a></p>
-        <p class="tl-desc">Watch for a surprise miss — could shift near-term rate-cut odds.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">10:00 AM ET</div>
-        <span class="tl-tag">Data</span>
-        <p class="tl-title"><a class="tl-link" href="https://www.nar.realtor/research-and-statistics/housing-statistics/existing-home-sales" target="_blank" rel="noopener noreferrer">Existing Home Sales</a></p>
-        <p class="tl-desc">Secondary read on consumer resilience heading into Q3.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">1:00 PM ET</div>
-        <span class="tl-tag">Rates</span>
-        <p class="tl-title"><a class="tl-link" href="https://www.treasurydirect.gov/auctions/auction-query/" target="_blank" rel="noopener noreferrer">20-Year Bond Auction</a></p>
-        <p class="tl-desc">Weak demand here has moved yields in recent sessions.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">4:00 PM ET</div>
-        <span class="tl-tag">Earnings</span>
-        <p class="tl-title"><a class="tl-link" href="https://finance.yahoo.com/quote/NVDA/news" target="_blank" rel="noopener noreferrer">NVDA reports after close</a></p>
-        <p class="tl-desc">Headline number, but data-center guidance is what moves it.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-time">4:30 PM ET</div>
-        <span class="tl-tag">Fed</span>
-        <p class="tl-title"><a class="tl-link" href="https://www.federalreserve.gov/newsevents/speeches.htm" target="_blank" rel="noopener noreferrer">Fed speaker — Waller</a></p>
-        <p class="tl-desc">Any language on the path of cuts gets parsed line by line.</p>
-      </div>
-    </div>
+    <div class="watch-trades" id="whatToWatchList"></div>
 
     <div class="brief-cta-row">
       <div class="brief-cta-copy">
@@ -2459,6 +2430,8 @@
     });
   });
 
+  var isNewSignup = false;
+
   authFormEl.addEventListener('submit', function(e){
     e.preventDefault();
     if(!window.__shwoopAPI) return;
@@ -2476,10 +2449,12 @@
     }
 
     authSubmitBtn.disabled = true;
+    if(authMode === 'signup'){ isNewSignup = true; }
     var action = authMode === 'signup'
       ? window.__shwoopAPI.signUp(email, password)
       : window.__shwoopAPI.signIn(email, password);
     action.catch(function(err){
+      isNewSignup = false;
       authErrorEl.textContent = friendlyAuthError(err);
       authErrorEl.classList.add('show');
     }).finally(function(){
@@ -2510,6 +2485,10 @@
           renderTradeBlocks();
           renderPLSummary();
         });
+        if(isNewSignup){
+          isNewSignup = false;
+          setTimeout(function(){ startTour(); }, 500);
+        }
       } else {
         currentUid = null;
         journalEntries = [];
@@ -2526,64 +2505,55 @@
   var tourSteps = [
     {
       title: 'Welcome to Shwoopnet',
-      text: "A quick look at what's here. Use the arrows below, or skip anytime — nothing here is required reading."
+      text: "A quick map of where everything lives. Use the arrows below, or skip anytime — nothing here is required reading."
     },
     {
-      page: 'brief',
-      selector: '.ticker-tape',
-      title: 'Live ticker tape',
-      text: 'Your watchlist scrolls continuously at the very top, on every page — it never leaves your sight while you work.'
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="brief"]',
+      title: 'Market Brief',
+      text: "Home base. Opens automatically the first time you visit each day — a quick read on what's moving before you dive into trades."
     },
     {
-      page: 'brief',
-      selector: '.brief-cta-row',
-      title: 'Your daily brief',
-      text: "Opens automatically the first time you visit each day — a quick read on what's moving before you dive into trades."
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="trades"]',
+      title: 'Trade Overview',
+      text: 'Your active setups live here — full charts, entry/stop/targets, and a button to log a trade for real once you take it.'
     },
     {
-      page: 'trades',
-      selector: '.log-trade-btn',
-      title: 'Log real trades',
-      text: 'Took a setup? One click pre-fills entry, stop, and targets from the idea — you just add size and confirm.'
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="journal"]',
+      title: 'Trade Journal',
+      text: 'Every trade you log lands here on its date. Click into a day to see what happened, exit a position, or track P&L by range.'
     },
     {
-      page: 'trades',
-      selector: '#layoutToggle',
-      title: 'Make it yours',
-      text: 'Resize charts and adjust text size, tucked into one dropdown so the page stays clean until you need it.'
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '#notepadToggle',
+      title: 'Notepad',
+      text: 'A floating scratchpad you can open from any page. Saves automatically — click here anytime you need to jot something down.'
     },
     {
-      page: 'journal',
-      selector: '.journal-calendar',
-      title: 'Trade journal, by day',
-      text: 'Every logged trade lands on its date. Click any marked day to see what happened, exit an open position, or fix a mistake.'
-    },
-    {
-      page: 'journal',
-      selector: '.pl-summary',
-      title: 'P&L at a glance',
-      text: 'One box for a custom date range, one for your all-time total — both update the moment you close a trade.'
-    },
-    {
-      page: 'brief',
-      before: function(){ toggleNotepad(true); },
-      selector: '#notepadPanel',
-      title: 'Quick scratchpad',
-      text: 'Jot notes without losing your place — it floats above every page and saves automatically. Unlock it to move or resize.'
-    },
-    {
-      page: 'brief',
-      before: function(){ toggleNotepad(false); openHistory(); },
-      selector: '.history-sidebar',
-      title: "Today's alerts, on record",
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '#historyNavItem',
+      title: 'History',
       text: "Every market alert gets logged here for the day, even ones you've already dismissed — nothing gets lost."
     },
     {
-      page: 'settings',
-      before: function(){ closeHistory(); },
-      selector: '.theme-switcher',
-      title: 'Four color modes',
-      text: 'Including true white-on-black and black-on-white. Pick whatever is easiest on your eyes, switch anytime.'
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="changelog"]',
+      title: 'Changelog',
+      text: "See what's changed, any time you're curious what's new."
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="settings"]',
+      title: 'Settings',
+      text: 'Color themes (including true white-on-black), your account, and every other preference — all in one place.'
+    },
+    {
+      before: function(){ navMenu.setAttribute('hidden', ''); },
+      selector: '.ticker-tape',
+      title: 'Live ticker tape',
+      text: 'Always on, at the very top of every page — your watchlist scrolls continuously so it never leaves your sight.'
     }
   ];
 
@@ -2610,8 +2580,6 @@
 
   function renderTourStep(){
     var step = tourSteps[tourIndex];
-    resetTourUI();
-    if(step.page){ showPage(step.page); }
     if(step.before){ step.before(); }
 
     document.getElementById('tourStepCount').textContent = (tourIndex + 1) + ' / ' + tourSteps.length;
@@ -2654,28 +2622,67 @@
   }
 
   function startTour(){
+    resetTourUI();
     tourIndex = 0;
     document.getElementById('tourOverlay').removeAttribute('hidden');
     renderTourStep();
   }
   function endTour(){
     document.getElementById('tourOverlay').setAttribute('hidden', '');
+    resetTourUI();
   }
-  document.getElementById('tourNextBtn').addEventListener('click', function(){
+  document.getElementById('tourNextBtn').addEventListener('click', function(e){
+    e.stopPropagation();
     if(tourIndex === tourSteps.length - 1){ endTour(); return; }
     tourIndex++;
     renderTourStep();
   });
-  document.getElementById('tourPrevBtn').addEventListener('click', function(){
+  document.getElementById('tourPrevBtn').addEventListener('click', function(e){
+    e.stopPropagation();
     if(tourIndex === 0) return;
     tourIndex--;
     renderTourStep();
   });
-  document.getElementById('tourSkipBtn').addEventListener('click', endTour);
+  document.getElementById('tourSkipBtn').addEventListener('click', function(e){
+    e.stopPropagation();
+    endTour();
+  });
+
+  // ---------- What to Watch (Brief page recap of the actual trades) ----------
+  function renderWhatToWatch(){
+    var el = document.getElementById('whatToWatchList');
+    el.innerHTML = trades.map(function(t){
+      var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
+      return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
+        '<div class="watch-trade-head">' +
+          '<span class="watch-trade-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span></span>' +
+          '<span class="status-badge ' + badgeClass + '">' + t.statusLabel + '</span>' +
+        '</div>' +
+        '<p class="watch-trade-reason">' + t.notes[0] + '</p>' +
+        '<span class="watch-trade-link">View full setup →</span>' +
+      '</div>';
+    }).join('');
+
+    el.querySelectorAll('.watch-trade-card').forEach(function(card){
+      card.addEventListener('click', function(){ jumpToTrade(card.dataset.symbol); });
+    });
+  }
+
+  function jumpToTrade(sym){
+    showPage('trades');
+    requestAnimationFrame(function(){
+      var block = document.querySelector('.trade-block[data-symbol="' + sym + '"]');
+      if(!block) return;
+      block.scrollIntoView({ block:'center', behavior:'instant' });
+      block.classList.add('trade-block-highlight');
+      setTimeout(function(){ block.classList.remove('trade-block-highlight'); }, 1500);
+    });
+  }
 
   // ---------- Init ----------
   renderTicker();
   renderIndices();
+  renderWhatToWatch();
   renderTradeBlocks();
   statCta();
   updateClock();
