@@ -627,6 +627,18 @@
     margin-top:16px; text-decoration:underline;
   }
   .auth-forgot:hover{ color: var(--paper); }
+  .auth-divider{
+    display:flex; align-items:center; gap:10px; margin:16px 0 12px 0;
+    font-size:10.5px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em;
+  }
+  .auth-divider::before, .auth-divider::after{ content:""; flex:1; height:1px; background: var(--border); }
+  .auth-guest-btn{
+    width:100%; background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
+    padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:600; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .auth-guest-btn:hover{ border-color: var(--amber-dim); color: var(--amber); }
+  .auth-guest-note{ font-size:10.5px; color: var(--muted); margin-top:8px; line-height:1.5; }
 
   .exit-trade-btn{
     background:transparent; border:1px solid var(--border); color: var(--muted);
@@ -861,6 +873,9 @@
       <span id="authSwitchText">Don't have an account?</span>
       <button type="button" id="authSwitchBtn">Create one</button>
     </div>
+    <div class="auth-divider"><span>or</span></div>
+    <button type="button" class="auth-guest-btn" id="guestBtn">Continue as guest</button>
+    <div class="auth-guest-note">Simulated data only — nothing you do is saved, and it resets every visit.</div>
     <button type="button" id="authForgotBtn" class="auth-forgot">Forgot password?</button>
   </div>
 </div>
@@ -1074,12 +1089,6 @@
         <div class="trades-sub">Simulated entries, stops and targets — chart below each row.</div>
       </div>
       <div class="trades-header-right">
-        <div class="timeframes" id="timeframes">
-          <button class="tf-btn active" data-tf="1D">1D</button>
-          <button class="tf-btn" data-tf="1W">1W</button>
-          <button class="tf-btn" data-tf="1M">1M</button>
-          <button class="tf-btn" data-tf="1Y">1Y</button>
-        </div>
         <div class="layout-dropdown">
           <button class="nav-toggle" id="layoutToggle" aria-haspopup="true" aria-expanded="false">
             <span>Layout</span>
@@ -1370,32 +1379,52 @@
     { sym:'AMD',  name:'Adv Micro Devices', price:172.10, prevClose:169.50 }
   ];
 
+  // entry/stop/t1/t2 are computed from the live price (see calibrateTradeLevels),
+  // not hardcoded — otherwise these drift completely out of sync with reality
+  // the moment the real stock price moves.
   var trades = [
-    { sym:'NVDA', direction:'Long',  entry:126.00, stop:121.50, t1:130.50, t2:134.80, status:'active',   statusLabel:'Active',
+    { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, t2PctFromEntry:0.0698, status:'active',   statusLabel:'Active',
       notes: [
-        'Holding above the 50-day moving average after the semis rally',
-        'Volume running well above average heading into tonight\'s print',
-        'Data-center guidance is the number that moves this, not the headline'
+        "Holding above the 50-day moving average through the recent semis rally, a level that's held on every pullback this month.",
+        "Volume has been running well above the 20-day average heading into tonight's print — the market is clearly positioning ahead of the number.",
+        "Data-center guidance is what actually moves this stock, not the headline EPS beat or miss — that's where the real signal lives.",
+        "Options activity skews call-heavy into earnings, suggesting positioning for an upside surprise rather than a hedge."
       ] },
-    { sym:'AAPL', direction:'Long',  entry:233.00, stop:228.00, t1:238.50, t2:243.00, status:'watching', statusLabel:'Watching',
+    { sym:'AAPL', direction:'Long', entryPct:0.008, stopPctFromEntry:-0.0215, t1PctFromEntry:0.0236, t2PctFromEntry:0.0429, status:'watching', statusLabel:'Watching',
       notes: [
-        'Coiling just under resistance at 233',
-        'Waiting for a breakout with volume confirmation before sizing in',
-        'Broader tech tape needs to hold up for this setup to trigger'
+        'Coiling just under resistance for the third session in a row, with each test slightly higher than the last.',
+        'Waiting for a breakout on real volume confirmation before sizing in — a low-volume push through resistance is a trap, not a signal.',
+        "Broader tech tape needs to hold up for this setup to trigger; a rotation out of growth names would stall this regardless of AAPL's own chart.",
+        'No entry until the breakout actually happens — this stays on watch, not in the book, until price proves it.'
       ] },
-    { sym:'TSLA', direction:'Short', entry:250.00, stop:258.00, t1:242.00, t2:235.00, status:'active',   statusLabel:'Active',
+    { sym:'TSLA', direction:'Short', entryPct:0.017, stopPctFromEntry:0.0320, t1PctFromEntry:-0.0320, t2PctFromEntry:-0.0600, status:'active',   statusLabel:'Active',
       notes: [
-        'Rejected twice from 250 this week on declining volume',
-        'Momentum has turned negative on the daily chart',
-        'Delivery numbers next week are a real risk to this thesis'
+        'Rejected twice this week on declining volume, a classic sign buyers are losing conviction at this level.',
+        'Momentum has turned negative on the daily chart, with the 10-day moving average now rolling over.',
+        'Delivery numbers next week are a real risk to this thesis — a beat could squeeze the short hard, so sizing stays conservative.',
+        'Options skew has shifted toward puts over the past week, suggesting the market is starting to price in the same downside.'
       ] },
-    { sym:'AMD',  direction:'Long',  entry:168.00, stop:163.50, t1:172.50, t2:176.00, status:'hit',      statusLabel:'Target hit',
+    { sym:'AMD',  direction:'Long', entryPct:-0.024, stopPctFromEntry:-0.0268, t1PctFromEntry:0.0268, t2PctFromEntry:0.0476, status:'hit',      statusLabel:'Target hit',
       notes: [
-        'Reached Target 2 on strong data-center commentary',
-        'Stop trailed up along the way to lock in the gain',
-        'Watching for a pullback toward the breakout level to re-enter'
+        'Reached Target 2 on strong data-center commentary that came in well ahead of expectations.',
+        'Stop trailed up along the way to lock in the gain rather than risk giving it back on a reversal.',
+        'Watching for a pullback toward the breakout level to consider re-entering, rather than chasing it further extended here.',
+        'This one played out close to the original thesis — a useful reference for how the setup was supposed to work.'
       ] }
   ];
+
+  function calibrateTradeLevels(){
+    trades.forEach(function(t){
+      var q = findQuote(t.sym);
+      if(!q || !q.price) return;
+      var entry = q.price * (1 + t.entryPct);
+      t.entry = entry;
+      t.stop = entry * (1 + t.stopPctFromEntry);
+      t.t1 = entry * (1 + t.t1PctFromEntry);
+      t.t2 = entry * (1 + t.t2PctFromEntry);
+    });
+  }
+  calibrateTradeLevels();
 
   function fmt(n){ return n.toFixed(2); }
   function pct(a,b){ return ((a-b)/b*100); }
@@ -1716,9 +1745,10 @@
   }
 
   function renderChartInto(svg, sym, base, tf){
-    if(tf === '1D'){
-      var cfg1d = tfConfig['1D'];
-      initChartState(sym, tf, genOHLC(cfg1d.mockCount, base, base * cfg1d.volFactor));
+    if(tf === '1D' || isGuestMode){
+      var cfg1d = tfConfig[tf];
+      var mockCount = tf === '1D' ? cfg1d.mockCount : cfg1d.fetchSize;
+      initChartState(sym, tf, genOHLC(mockCount, base, base * cfg1d.volFactor));
       renderChartView(sym);
       return;
     }
@@ -1922,6 +1952,8 @@
       });
   }
 
+  var hasLiveCalibrated = false;
+
   function fetchAllQuotes(){
     var results = [];
     var pending = watchlist.length;
@@ -1935,15 +1967,28 @@
         }
         pending--;
         results.push(true);
-        if(pending === 0){ updateQuoteSyncStatus(results); }
+        if(pending === 0){ onQuoteBatchDone(results); }
       }).catch(function(err){
         // Leave the last known price in place rather than breaking the UI.
         console.error('Quote fetch failed for', item.sym, err);
         pending--;
         results.push(false);
-        if(pending === 0){ updateQuoteSyncStatus(results); }
+        if(pending === 0){ onQuoteBatchDone(results); }
       });
     });
+  }
+
+  function onQuoteBatchDone(results){
+    updateQuoteSyncStatus(results);
+    // Recalibrate entry/stop/targets against real pricing exactly once, the
+    // first time live data actually lands — not on every refresh, or the
+    // trade plan would visibly shift every 45 seconds.
+    if(!hasLiveCalibrated && !isGuestMode && results.some(function(r){ return r; })){
+      hasLiveCalibrated = true;
+      calibrateTradeLevels();
+      renderTradeBlocks();
+      renderWhatToWatch();
+    }
   }
 
   function updateQuoteSyncStatus(results){
@@ -1961,8 +2006,34 @@
     }
   }
 
-  fetchAllQuotes();
-  setInterval(fetchAllQuotes, 45000);
+  var priceLoopInterval = null;
+
+  function startRealQuoteLoop(){
+    if(priceLoopInterval){ clearInterval(priceLoopInterval); }
+    fetchAllQuotes();
+    priceLoopInterval = setInterval(fetchAllQuotes, 45000);
+  }
+
+  function jitterGuestPrices(){
+    watchlist.forEach(function(item){
+      var delta = item.price * (Math.random() - 0.5) * 0.006;
+      item.price = Math.max(0.5, item.price + delta);
+    });
+    renderTicker();
+    if(!document.getElementById('page-trades').hidden){
+      updateTradeRowPrices();
+    }
+  }
+
+  function startGuestQuoteLoop(){
+    if(priceLoopInterval){ clearInterval(priceLoopInterval); }
+    var el = document.getElementById('quoteSyncStatus');
+    if(el){
+      el.textContent = 'Simulated (guest mode) — not real market data';
+      el.className = 'quote-sync-status';
+    }
+    priceLoopInterval = setInterval(jitterGuestPrices, 2200);
+  }
 
   // ---------- Clock ----------
   function getTzAbbrev(date){
@@ -2345,8 +2416,10 @@
   var journalEntries = [];
   var journalUnsubscribe = null;
   var currentUid = null;
+  var isGuestMode = false;
 
   function saveJournalEntries(){
+    if(isGuestMode) return; // guest edits are session-only, never persisted
     if(!window.__shwoopAPI || !currentUid) return;
     window.__shwoopAPI.saveJournal(currentUid, journalEntries).catch(function(err){
       console.error('Failed to save journal:', err);
@@ -2990,9 +3063,75 @@
   });
 
   var accountEmailDesc = document.getElementById('accountEmailDesc');
-  document.getElementById('signOutBtn').addEventListener('click', function(){
-    if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
+  var signOutBtn = document.getElementById('signOutBtn');
+  signOutBtn.addEventListener('click', function(){
+    if(isGuestMode){
+      exitGuestMode();
+    } else if(window.__shwoopAPI){
+      window.__shwoopAPI.signOutUser();
+    }
   });
+
+  // ---------- Guest mode: simulated data, nothing persists ----------
+  function buildGuestJournalSeed(){
+    function daysAgoStr(n){
+      var d = new Date();
+      d.setDate(d.getDate() - n);
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    return [
+      { id:'g1', date: daysAgoStr(2),  sym:'AMD',  direction:'Long',  entry:168.00, qty:100, exit:176.40, status:'closed' },
+      { id:'g2', date: daysAgoStr(5),  sym:'NVDA', direction:'Long',  entry:112.30, qty:50,  exit:108.10, status:'closed' },
+      { id:'g3', date: daysAgoStr(5),  sym:'AAPL', direction:'Long',  entry:225.00, qty:75,  exit:231.80, status:'closed' },
+      { id:'g4', date: daysAgoStr(9),  sym:'TSLA', direction:'Short', entry:258.00, qty:40,  exit:249.50, status:'closed' },
+      { id:'g5', date: daysAgoStr(14), sym:'MSFT', direction:'Long',  entry:498.00, qty:20,  exit:489.20, status:'closed' }
+    ];
+  }
+
+  function generateGuestAlerts(){
+    var today = new Date().toISOString().slice(0,10);
+    var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+    alertHistory = trades.map(function(t){
+      var price = findQuote(t.sym).price;
+      var evald = evaluateTradeAlert(t, price);
+      return {
+        id: 'guest_' + t.sym, date: today, sym: t.sym, tag: evald.tag, text: evald.text,
+        url: 'https://finance.yahoo.com/quote/' + t.sym + '/news', time: stamp
+      };
+    });
+    renderHistoryList();
+  }
+
+  function enterGuestMode(){
+    isGuestMode = true;
+    currentUid = null;
+    authGateEl.setAttribute('hidden', '');
+
+    if(accountEmailDesc){ accountEmailDesc.textContent = 'Guest mode — simulated data, nothing is saved'; }
+    if(signOutBtn){ signOutBtn.textContent = 'Sign in / Sign up'; }
+
+    journalEntries = buildGuestJournalSeed();
+    renderCalendar();
+    renderJournalDetail();
+    renderTradeBlocks();
+    renderPLSummary();
+
+    startGuestQuoteLoop();
+    renderAllTradeCharts(currentTF);
+    generateGuestAlerts();
+  }
+
+  function exitGuestMode(){
+    isGuestMode = false;
+    journalEntries = [];
+    alertHistory = [];
+    renderHistoryList();
+    if(priceLoopInterval){ clearInterval(priceLoopInterval); priceLoopInterval = null; }
+    authGateEl.removeAttribute('hidden');
+    setAuthMode('signin');
+  }
+
+  document.getElementById('guestBtn').addEventListener('click', enterGuestMode);
 
   window.__onShwoopReady(function(api){
     authStatusEl.textContent = '';
@@ -3002,9 +3141,11 @@
       if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
 
       if(user){
+        isGuestMode = false;
         currentUid = user.uid;
         authGateEl.setAttribute('hidden', '');
         if(accountEmailDesc){ accountEmailDesc.textContent = 'Signed in as ' + user.email; }
+        if(signOutBtn){ signOutBtn.textContent = 'Sign out'; }
         journalUnsubscribe = api.watchJournal(user.uid, function(entries){
           journalEntries = entries;
           renderCalendar();
@@ -3013,11 +3154,13 @@
           renderPLSummary();
         });
         loadAlertsForUser(user.uid);
+        startRealQuoteLoop();
+        renderAllTradeCharts(currentTF); // refresh from simulated to real, in case a guest signed in
         if(isNewSignup){
           isNewSignup = false;
           setTimeout(function(){ startTour(); }, 500);
         }
-      } else {
+      } else if(!isGuestMode){
         currentUid = null;
         journalEntries = [];
         clearAlerts();
