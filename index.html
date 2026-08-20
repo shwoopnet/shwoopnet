@@ -19,12 +19,13 @@
     --amber-dim: #A97A2E;
     --amber-glow: rgba(242,169,60,0.16);
     --amber-contrast: #151008;
+    --ticker-fg: #EDEAE2;
+    --ticker-fg-dim: #7C8791;
     --gain: #33C17E;
     --gain-glow: rgba(51,193,126,0.16);
     --loss: #E85C51;
     --loss-glow: rgba(232,92,81,0.16);
     --radius: 6px;
-    --detail-zoom: 100%;
   }
 
   /* Alternate color templates for the overall site chrome.
@@ -110,8 +111,8 @@
     padding: 0 22px; font-size: 12px; letter-spacing: 0.02em;
     border-right: 1px solid #1c1c1c;
   }
-  .ticker-item .t-sym{ color: var(--muted); }
-  .ticker-item .t-price{ color: var(--paper); }
+  .ticker-item .t-sym{ color: var(--ticker-fg-dim); }
+  .ticker-item .t-price{ color: var(--ticker-fg); }
   .ticker-item .t-chg.up{ color: var(--gain); }
   .ticker-item .t-chg.down{ color: var(--loss); }
 
@@ -224,7 +225,9 @@
   .trades-sub{ color:var(--muted); font-size:12.5px; margin-top:4px; }
   .timeframes{ display:flex; gap:4px; }
 
-  .zoom-control{ display:flex; align-items:center; gap:8px; }
+  .layout-controls{ display:flex; align-items:center; gap:22px; flex-wrap:wrap; padding: 0 0 18px 0; }
+  .layout-stepper{ display:flex; align-items:center; gap:8px; }
+  .layout-stepper .step-name{ font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em; }
   .zoom-btn{
     background: transparent; border:1px solid var(--border); color: var(--muted);
     width:26px; height:26px; border-radius:4px; font-size:15px; line-height:1;
@@ -233,7 +236,7 @@
   .zoom-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .zoom-btn:disabled{ opacity:.35; cursor:default; }
   .zoom-btn:disabled:hover{ border-color: var(--border); color: var(--muted); }
-  .zoom-label{ font-size:12px; color: var(--muted); min-width:38px; text-align:center; }
+  .zoom-label{ font-size:12px; color: var(--muted); min-width:44px; text-align:center; }
   .tf-btn{
     background: transparent; border: 1px solid var(--border); color: var(--muted);
     padding: 6px 12px; font-size: 11.5px; border-radius: 4px; cursor:pointer; transition: all .15s ease;
@@ -277,22 +280,21 @@
   .trade-detail{
     display:flex; gap:22px; align-items:flex-start;
     padding: 16px 16px 18px 16px; border-top:1px solid var(--border);
-    zoom: var(--detail-zoom, 100%);
   }
   .trade-detail[hidden]{ display:none; }
-  .trade-chart-col{ flex: 1 1 62%; min-width:0; }
-  .trade-notes-col{ flex: 1 1 34%; min-width:200px; }
+  .trade-chart-col{ flex: 0 0 var(--chart-width, 62%); min-width:0; }
+  .trade-notes-col{ flex: 1 1 auto; min-width:200px; }
   .trade-notes-col h3{
     font-family:'Space Grotesk', sans-serif; font-size:11px; text-transform:uppercase;
     letter-spacing:.06em; color:var(--muted); font-weight:600; margin:2px 0 12px 0;
   }
   .trade-notes-col ul{ list-style:none; margin:0; padding:0; }
   .trade-notes-col li{
-    font-size:12.5px; line-height:1.55; color:var(--muted);
+    font-size: var(--notes-text-size, 12.5px); line-height:1.55; color:var(--muted);
     padding: 2px 0 12px 14px; border-left: 2px solid var(--amber-dim); margin-bottom:12px;
   }
   .trade-notes-col li:last-child{ margin-bottom:0; }
-  .trade-chart{ width:100%; height:auto; display:block; }
+  .trade-chart{ width:100%; height: var(--chart-height, 200px); display:block; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
   .grid-label{ fill: var(--muted); font-size: 10px; font-family:'IBM Plex Mono',monospace; }
 
@@ -307,8 +309,113 @@
       text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;
     }
     .trade-detail{ flex-direction: column; }
+    .trade-chart-col{ flex: 0 0 auto; width:100%; }
     .trade-notes-col{ flex: 1 1 auto; width:100%; }
   }
+
+  .news-toast-stack{
+    position: fixed; top: 88px; right: 20px; width: 320px; z-index: 100;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .news-stack-head{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em;
+    padding: 0 2px;
+  }
+  .news-dismiss-all{
+    background:none; border:none; color: var(--amber-dim); font-size:11px;
+    text-transform:none; letter-spacing:0; cursor:pointer; padding:0;
+  }
+  .news-dismiss-all:hover{ color: var(--amber); }
+  .news-toast{
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: 0 10px 26px rgba(0,0,0,0.35);
+    animation: newsSlideIn .25s ease;
+  }
+  @keyframes newsSlideIn{ from{ transform: translateX(16px); opacity:0; } to{ transform: translateX(0); opacity:1; } }
+  .news-toast-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
+  .news-toast-tags{ display:flex; align-items:center; gap:8px; }
+  .news-toast-sym{ font-weight:600; color: var(--amber); font-size:12px; }
+  .news-toast-tag{
+    font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted);
+    border:1px solid var(--border); border-radius:3px; padding:1px 6px;
+  }
+  .news-toast-close{
+    background:none; border:none; color: var(--muted); cursor:pointer;
+    font-size:15px; line-height:1; padding:0 2px;
+  }
+  .news-toast-close:hover{ color: var(--paper); }
+  .news-toast-body{ font-size:12.5px; line-height:1.5; color: var(--muted); margin:0; }
+  .news-toast-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+  .news-toast-link{ font-size:11.5px; color: var(--amber); text-decoration:none; }
+  .news-toast-link:hover{ text-decoration:underline; }
+  .news-toast-time{ font-size:10px; color: var(--muted); opacity:.7; }
+
+  @media (max-width: 900px){
+    .news-toast-stack{ left:16px; right:16px; width:auto; top:76px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .news-toast{ animation:none; }
+  }
+
+  .notepad-panel{
+    position: fixed; bottom: 20px; right: 20px; width: 300px; z-index: 110;
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4); display:flex; flex-direction:column;
+  }
+  .notepad-panel[hidden]{ display:none; }
+  .notepad-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 14px; border-bottom:1px solid var(--border);
+    font-family:'Space Grotesk', sans-serif; font-size:12px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.05em; color: var(--muted);
+  }
+  .notepad-close{ background:none; border:none; color: var(--muted); cursor:pointer; font-size:16px; line-height:1; padding:0 2px; }
+  .notepad-close:hover{ color: var(--paper); }
+  .notepad-area{
+    border:none; background: transparent; color: var(--paper);
+    font-size:12.5px; line-height:1.6; padding:14px; height:200px; resize:vertical;
+    outline:none;
+  }
+  .notepad-area::placeholder{ color: var(--muted); }
+
+  @media (max-width: 900px){
+    .notepad-panel{ left:16px; right:16px; width:auto; bottom:16px; }
+  }
+
+  .journal-calendar{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; margin-bottom:20px; }
+  .calendar-head{ display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:16px; }
+  .calendar-month{ font-size:13px; color: var(--paper); min-width:150px; text-align:center; }
+  .calendar-dow-row{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
+  .calendar-dow{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); text-align:center; }
+  .calendar-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .calendar-day{
+    aspect-ratio: 1; border:1px solid var(--border); border-radius:4px;
+    background: var(--panel-raised); color: var(--paper); font-size:12px;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    cursor:pointer;
+  }
+  .calendar-day:hover{ border-color: var(--amber-dim); }
+  .calendar-day.empty{ visibility:hidden; cursor:default; }
+  .calendar-day.has-entry::after{
+    content:""; position:absolute; bottom:6px; width:5px; height:5px; border-radius:50%; background: var(--amber);
+  }
+  .calendar-day.selected{ border-color: var(--amber); background: var(--amber-glow); color: var(--amber); }
+
+  .journal-detail{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; }
+  .journal-detail-date{ font-family:'Space Grotesk', sans-serif; font-size:14px; margin-bottom:14px; }
+  .journal-empty{ font-size:12.5px; color: var(--muted); }
+  .journal-recap{
+    font-size:12.5px; line-height:1.6; color: var(--muted); padding:2px 0 14px 14px;
+    border-left:2px solid var(--amber-dim); margin-bottom:16px;
+  }
+  .journal-entry{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:12.5px; }
+  .journal-entry:last-child{ border-bottom:none; }
+  .journal-entry-sym{ font-weight:600; }
+  .journal-entry-sym .t-dir{ font-size:10px; color: var(--muted); font-weight:400; margin-left:6px; }
+  .journal-entry-prices{ color: var(--muted); }
+  .journal-entry-result.up{ color: var(--gain); }
+  .journal-entry-result.down{ color: var(--loss); }
 
   .note{
     text-align:center; color: var(--muted); font-size: 11px;
@@ -342,6 +449,18 @@
       </div>
     </div>
 
+    <div class="theme-switcher" role="group" aria-label="Color theme">
+      <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
+      <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
+      <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
+      <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
+    </div>
+
+    <div class="clock">
+      <div class="time mono" id="clockTime">--:--:--</div>
+      <div id="clockTz">Local · Markets open</div>
+    </div>
+
     <div class="nav-dropdown">
       <button class="nav-toggle" id="navToggle" aria-haspopup="true" aria-expanded="false">
         <span id="navCurrentLabel">Market Brief</span>
@@ -356,20 +475,26 @@
           Trade Overview
           <span class="nav-item-sub">Active setups &amp; charts</span>
         </button>
+        <button class="nav-item" data-page="journal">
+          Trade Journal
+          <span class="nav-item-sub">Calendar &amp; closed trades</span>
+        </button>
+        <button class="nav-item" id="notepadToggle" data-action="notepad">
+          Notepad
+          <span class="nav-item-sub">Quick scratchpad</span>
+        </button>
       </div>
     </div>
+  </div>
 
-    <div class="theme-switcher" role="group" aria-label="Color theme">
-      <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
-      <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
-      <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
-      <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
-    </div>
+  <div class="news-toast-stack" id="newsStack"></div>
 
-    <div class="clock">
-      <div class="time mono" id="clockTime">--:--:--</div>
-      <div>ET · Markets open</div>
+  <div class="notepad-panel" id="notepadPanel" hidden>
+    <div class="notepad-head">
+      <span>Notepad</span>
+      <button class="notepad-close" id="notepadClose" aria-label="Close notepad">×</button>
     </div>
+    <textarea class="notepad-area mono" id="notepadArea" placeholder="Quick notes — saved automatically on this device."></textarea>
   </div>
 
   <!-- ================= MARKET BRIEF (HOME) ================= -->
@@ -439,10 +564,26 @@
         <button class="tf-btn" data-tf="1M">1M</button>
         <button class="tf-btn" data-tf="1Y">1Y</button>
       </div>
-      <div class="zoom-control" role="group" aria-label="Chart and notes zoom">
-        <button class="zoom-btn" id="zoomOut" aria-label="Zoom out">−</button>
-        <span class="zoom-label mono" id="zoomLabel">100%</span>
-        <button class="zoom-btn" id="zoomIn" aria-label="Zoom in">+</button>
+    </div>
+
+    <div class="layout-controls">
+      <div class="layout-stepper">
+        <span class="step-name">Chart width</span>
+        <button class="zoom-btn" id="widthDec" aria-label="Decrease chart width">−</button>
+        <span class="zoom-label mono" id="widthLabel">62%</span>
+        <button class="zoom-btn" id="widthInc" aria-label="Increase chart width">+</button>
+      </div>
+      <div class="layout-stepper">
+        <span class="step-name">Chart height</span>
+        <button class="zoom-btn" id="heightDec" aria-label="Decrease chart height">−</button>
+        <span class="zoom-label mono" id="heightLabel">200px</span>
+        <button class="zoom-btn" id="heightInc" aria-label="Increase chart height">+</button>
+      </div>
+      <div class="layout-stepper">
+        <span class="step-name">Text size</span>
+        <button class="zoom-btn" id="textDec" aria-label="Decrease text size">−</button>
+        <span class="zoom-label mono" id="textLabel">12.5px</span>
+        <button class="zoom-btn" id="textInc" aria-label="Increase text size">+</button>
       </div>
     </div>
 
@@ -457,6 +598,31 @@
     </div>
 
     <div id="tradeBlocks"></div>
+  </main>
+
+  <!-- ================= TRADE JOURNAL ================= -->
+  <main class="page" id="page-journal" hidden>
+    <div class="trades-header">
+      <div>
+        <div class="trades-title">Trade Journal</div>
+        <div class="trades-sub">Closed trades by day — click a date to see what happened.</div>
+      </div>
+    </div>
+
+    <div class="journal-calendar">
+      <div class="calendar-head">
+        <button class="zoom-btn" id="calPrev" aria-label="Previous month">‹</button>
+        <span class="calendar-month mono" id="calMonthLabel">—</span>
+        <button class="zoom-btn" id="calNext" aria-label="Next month">›</button>
+      </div>
+      <div class="calendar-dow-row">
+        <span class="calendar-dow">Sun</span><span class="calendar-dow">Mon</span><span class="calendar-dow">Tue</span>
+        <span class="calendar-dow">Wed</span><span class="calendar-dow">Thu</span><span class="calendar-dow">Fri</span><span class="calendar-dow">Sat</span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="journal-detail" id="journalDetail"></div>
   </main>
 
   <div class="note">Simulated prices for this prototype — connect a live feed when you're ready to wire up real data. Nothing here is investment advice.</div>
@@ -714,12 +880,23 @@
   setInterval(jitterPrices, 2200);
 
   // ---------- Clock ----------
+  function getTzAbbrev(date){
+    try{
+      var parts = new Intl.DateTimeFormat('en-US', { timeZoneName:'short' }).formatToParts(date);
+      var tz = parts.filter(function(p){ return p.type === 'timeZoneName'; })[0];
+      return tz ? tz.value : 'Local';
+    }catch(e){
+      return 'Local';
+    }
+  }
+
   function updateClock(){
     var now = new Date();
     var h = now.getHours().toString().padStart(2,'0');
     var m = now.getMinutes().toString().padStart(2,'0');
     var s = now.getSeconds().toString().padStart(2,'0');
     document.getElementById('clockTime').textContent = h+':'+m+':'+s;
+    document.getElementById('clockTz').textContent = getTzAbbrev(now) + ' · Markets open';
     var opts = { weekday:'long', month:'long', day:'numeric' };
     document.getElementById('briefDate').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
   }
@@ -742,35 +919,68 @@
     applyTheme(saved);
   })();
 
-  // ---------- Zoom (chart + trade-thesis panel only) ----------
-  var detailZoom = 100;
-  function applyZoom(){
-    document.documentElement.style.setProperty('--detail-zoom', detailZoom + '%');
-    document.getElementById('zoomLabel').textContent = detailZoom + '%';
-    document.getElementById('zoomOut').disabled = detailZoom <= 70;
-    document.getElementById('zoomIn').disabled = detailZoom >= 150;
+  // ---------- Layout controls (chart width, chart height, text size) ----------
+  var layoutPrefs = { width:62, height:200, text:12.5 };
+  var layoutLimits = {
+    width:  [40, 85, 5],
+    height: [120, 340, 20],
+    text:   [10, 16, 0.5]
+  };
+
+  function applyLayout(){
+    document.documentElement.style.setProperty('--chart-width', layoutPrefs.width + '%');
+    document.documentElement.style.setProperty('--chart-height', layoutPrefs.height + 'px');
+    document.documentElement.style.setProperty('--notes-text-size', layoutPrefs.text + 'px');
+
+    document.getElementById('widthLabel').textContent = layoutPrefs.width + '%';
+    document.getElementById('heightLabel').textContent = layoutPrefs.height + 'px';
+    document.getElementById('textLabel').textContent = layoutPrefs.text + 'px';
+
+    document.getElementById('widthDec').disabled = layoutPrefs.width <= layoutLimits.width[0];
+    document.getElementById('widthInc').disabled = layoutPrefs.width >= layoutLimits.width[1];
+    document.getElementById('heightDec').disabled = layoutPrefs.height <= layoutLimits.height[0];
+    document.getElementById('heightInc').disabled = layoutPrefs.height >= layoutLimits.height[1];
+    document.getElementById('textDec').disabled = layoutPrefs.text <= layoutLimits.text[0];
+    document.getElementById('textInc').disabled = layoutPrefs.text >= layoutLimits.text[1];
+
+    try{ window.localStorage.setItem('daybreak:layout', JSON.stringify(layoutPrefs)); }catch(e){}
   }
-  document.getElementById('zoomOut').addEventListener('click', function(){
-    detailZoom = Math.max(70, detailZoom - 10);
-    applyZoom();
-  });
-  document.getElementById('zoomIn').addEventListener('click', function(){
-    detailZoom = Math.min(150, detailZoom + 10);
-    applyZoom();
-  });
-  applyZoom();
+
+  function stepLayout(key, dir){
+    var lim = layoutLimits[key];
+    var next = layoutPrefs[key] + dir * lim[2];
+    layoutPrefs[key] = Math.min(lim[1], Math.max(lim[0], Math.round(next * 10) / 10));
+    applyLayout();
+  }
+
+  document.getElementById('widthDec').addEventListener('click', function(){ stepLayout('width', -1); });
+  document.getElementById('widthInc').addEventListener('click', function(){ stepLayout('width', 1); });
+  document.getElementById('heightDec').addEventListener('click', function(){ stepLayout('height', -1); });
+  document.getElementById('heightInc').addEventListener('click', function(){ stepLayout('height', 1); });
+  document.getElementById('textDec').addEventListener('click', function(){ stepLayout('text', -1); });
+  document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
+
+  (function initLayout(){
+    try{
+      var saved = JSON.parse(window.localStorage.getItem('daybreak:layout') || 'null');
+      if(saved && typeof saved.width === 'number'){ layoutPrefs = saved; }
+    }catch(e){}
+    applyLayout();
+  })();
 
   // ---------- Navigation ----------
-  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview' };
+  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal' };
 
   function showPage(name){
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-trades').hidden = (name !== 'trades');
+    document.getElementById('page-journal').hidden = (name !== 'journal');
     document.getElementById('navCurrentLabel').textContent = navLabels[name];
-    document.querySelectorAll('.nav-item').forEach(function(item){
+    document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
     if(name === 'trades'){ renderAllTradeCharts(currentTF); }
+    if(name === 'journal'){ renderCalendar(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
@@ -790,12 +1000,179 @@
   });
   document.querySelectorAll('.nav-item').forEach(function(item){
     item.addEventListener('click', function(){
-      showPage(item.dataset.page);
+      if(item.dataset.page){
+        showPage(item.dataset.page);
+      } else if(item.dataset.action === 'notepad'){
+        toggleNotepad(true);
+      }
       navMenu.setAttribute('hidden','');
       navToggle.setAttribute('aria-expanded','false');
     });
   });
   document.getElementById('ctaToTrades').addEventListener('click', function(){ showPage('trades'); });
+
+  // ---------- Notepad (floating, carries over across pages) ----------
+  function toggleNotepad(open){
+    var panel = document.getElementById('notepadPanel');
+    var isOpen = open !== undefined ? open : panel.hasAttribute('hidden');
+    if(isOpen){ panel.removeAttribute('hidden'); }
+    else{ panel.setAttribute('hidden',''); }
+    document.getElementById('notepadToggle').classList.toggle('current', isOpen);
+  }
+  document.getElementById('notepadClose').addEventListener('click', function(){ toggleNotepad(false); });
+  (function initNotepad(){
+    var area = document.getElementById('notepadArea');
+    try{ area.value = window.localStorage.getItem('daybreak:notepad') || ''; }catch(e){}
+    area.addEventListener('input', function(){
+      try{ window.localStorage.setItem('daybreak:notepad', area.value); }catch(e){}
+    });
+  })();
+
+  // ---------- Trade Journal (calendar + closed trades) ----------
+  var journalEntries = [
+    { date: daysAgoStr(2),  sym:'AMD',  direction:'Long',  entry:168.00, exit:176.40, outcome:'target' },
+    { date: daysAgoStr(5),  sym:'NVDA', direction:'Long',  entry:112.30, exit:108.10, outcome:'stopped' },
+    { date: daysAgoStr(5),  sym:'AAPL', direction:'Long',  entry:225.00, exit:231.80, outcome:'target' },
+    { date: daysAgoStr(9),  sym:'TSLA', direction:'Short', entry:258.00, exit:249.50, outcome:'target' },
+    { date: daysAgoStr(14), sym:'MSFT', direction:'Long',  entry:498.00, exit:489.20, outcome:'stopped' }
+  ];
+
+  function daysAgoStr(n){
+    var d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  var calendarViewDate = new Date();
+  var selectedJournalDate = null;
+
+  function renderCalendar(){
+    var y = calendarViewDate.getFullYear();
+    var m = calendarViewDate.getMonth();
+    document.getElementById('calMonthLabel').textContent =
+      calendarViewDate.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+
+    var firstDow = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    for(var i = 0; i < firstDow; i++){
+      var empty = document.createElement('div');
+      empty.className = 'calendar-day empty';
+      grid.appendChild(empty);
+    }
+
+    for(var day = 1; day <= daysInMonth; day++){
+      var dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+      var hasEntry = journalEntries.some(function(e){ return e.date === dateStr; });
+      var cell = document.createElement('div');
+      cell.className = 'calendar-day' + (hasEntry ? ' has-entry' : '') + (dateStr === selectedJournalDate ? ' selected' : '');
+      cell.textContent = day;
+      cell.addEventListener('click', function(){
+        selectedJournalDate = this.dataset.date;
+        renderCalendar();
+        renderJournalDetail();
+      });
+      cell.dataset.date = dateStr;
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderJournalDetail(){
+    var el = document.getElementById('journalDetail');
+    if(!selectedJournalDate){
+      el.innerHTML = '<div class="journal-empty">Click a marked date to see that day\'s closed trades.</div>';
+      return;
+    }
+    var entries = journalEntries.filter(function(e){ return e.date === selectedJournalDate; });
+    var niceDate = new Date(selectedJournalDate + 'T00:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+    if(entries.length === 0){
+      el.innerHTML = '<div class="journal-detail-date">' + niceDate + '</div><div class="journal-empty">No trades logged this day.</div>';
+      return;
+    }
+
+    var wins = entries.filter(function(e){ return e.outcome === 'target'; }).length;
+    var losses = entries.length - wins;
+    var netPct = entries.reduce(function(sum, e){
+      var pct = (e.exit - e.entry) / e.entry * 100 * (e.direction === 'Short' ? -1 : 1);
+      return sum + pct;
+    }, 0);
+    var recap = 'Closed ' + entries.length + ' position' + (entries.length > 1 ? 's' : '') + ' — ' +
+      wins + ' target hit, ' + losses + ' stopped out. Net simulated result: ' + (netPct >= 0 ? '+' : '') + netPct.toFixed(1) + '%.';
+
+    var rows = entries.map(function(e){
+      var pct = (e.exit - e.entry) / e.entry * 100 * (e.direction === 'Short' ? -1 : 1);
+      var up = pct >= 0;
+      return '<div class="journal-entry">' +
+        '<span class="journal-entry-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span></span>' +
+        '<span class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' → ' + e.exit.toFixed(2) + '</span>' +
+        '<span class="journal-entry-result mono ' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + pct.toFixed(1) + '%</span>' +
+      '</div>';
+    }).join('');
+
+    el.innerHTML = '<div class="journal-detail-date">' + niceDate + '</div>' +
+      '<div class="journal-recap">' + recap + ' <em>(simulated recap — not a live AI call)</em></div>' + rows;
+  }
+
+  document.getElementById('calPrev').addEventListener('click', function(){
+    calendarViewDate.setMonth(calendarViewDate.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById('calNext').addEventListener('click', function(){
+    calendarViewDate.setMonth(calendarViewDate.getMonth() + 1);
+    renderCalendar();
+  });
+  renderJournalDetail();
+
+  // ---------- News alerts ----------
+  var newsItems = [
+    { id:'n1', sym:'NVDA', tag:'Earnings watch', text:'Data-center order backlog reportedly expanded ahead of tonight\'s print.', url:'https://finance.yahoo.com/quote/NVDA/news' },
+    { id:'n2', sym:'TSLA', tag:'Risk', text:'Analysts flag softer delivery estimates for the quarter, adding pressure to the short thesis.', url:'https://finance.yahoo.com/quote/TSLA/news' },
+    { id:'n3', sym:'AMD', tag:'Momentum', text:'Extending gains on positive read-through from NVDA\'s commentary this week.', url:'https://finance.yahoo.com/quote/AMD/news' }
+  ];
+
+  var newsShownAt = null;
+
+  function renderNews(){
+    var stack = document.getElementById('newsStack');
+    if(newsItems.length === 0){ stack.innerHTML = ''; return; }
+    if(!newsShownAt){ newsShownAt = new Date(); }
+    var stamp = newsShownAt.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+
+    var head = '<div class="news-stack-head"><span>Market alerts</span>' +
+      (newsItems.length > 1 ? '<button class="news-dismiss-all" id="dismissAllNews">Dismiss all</button>' : '') +
+      '</div>';
+
+    var cards = newsItems.map(function(n){
+      return '<div class="news-toast" data-id="' + n.id + '">' +
+        '<div class="news-toast-head">' +
+          '<div class="news-toast-tags"><span class="news-toast-sym mono">' + n.sym + '</span><span class="news-toast-tag">' + n.tag + '</span></div>' +
+          '<button class="news-toast-close" data-dismiss="' + n.id + '" aria-label="Dismiss alert">×</button>' +
+        '</div>' +
+        '<p class="news-toast-body">' + n.text + '</p>' +
+        '<div class="news-toast-foot">' +
+          '<a class="news-toast-link" href="' + n.url + '" target="_blank" rel="noopener noreferrer">Read more →</a>' +
+          '<span class="news-toast-time">' + stamp + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    stack.innerHTML = head + cards;
+
+    var dismissAll = document.getElementById('dismissAllNews');
+    if(dismissAll){
+      dismissAll.addEventListener('click', function(){ newsItems = []; renderNews(); });
+    }
+    stack.querySelectorAll('[data-dismiss]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.dataset.dismiss;
+        newsItems = newsItems.filter(function(n){ return n.id !== id; });
+        renderNews();
+      });
+    });
+  }
 
   // ---------- Init ----------
   renderTicker();
@@ -803,12 +1180,13 @@
   renderTradeBlocks();
   statCta();
   updateClock();
+  setTimeout(renderNews, 700);
 
   // A direct link (e.g. #trades) always wins. Otherwise: default to the
   // brief, unless we've already opened Daybreak today on this browser.
   (function initLanding(){
     var hashPage = (location.hash || '').replace('#', '');
-    if(hashPage === 'brief' || hashPage === 'trades'){
+    if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal'){
       showPage(hashPage);
       return;
     }
