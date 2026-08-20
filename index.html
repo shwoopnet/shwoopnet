@@ -310,7 +310,6 @@
   .trades-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; }
   .trades-sub{ color:var(--muted); font-size:12.5px; margin-top:4px; }
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-  .timeframes{ display:flex; gap:4px; }
 
   .layout-dropdown{ position:relative; }
   .layout-menu{
@@ -398,6 +397,7 @@
     margin-bottom:8px; flex-wrap:wrap;
   }
   .chart-hint{ font-size:10.5px; color: var(--muted); }
+  .chart-tf-btns{ display:flex; gap:4px; }
   .chart-toolbar-btns{ display:flex; gap:4px; }
   .chart-tool-btn{
     background: transparent; border:1px solid var(--border); color: var(--muted);
@@ -1479,6 +1479,10 @@
     var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
     var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
     var curScale = (chartStates[t.sym] && chartStates[t.sym].scale) || 'linear';
+    var curTf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
+    function tfBtn(tf){
+      return '<button class="chart-tool-btn' + (curTf===tf?' active':'') + '" data-tf="' + tf + '" data-sym="' + t.sym + '">' + tf + '</button>';
+    }
 
     return '' +
       '<div class="trade-block" data-symbol="' + t.sym + '">' +
@@ -1502,7 +1506,7 @@
         '<div class="trade-detail" id="chartwrap-' + t.sym + '">' +
           '<div class="trade-chart-col">' +
             '<div class="chart-toolbar">' +
-              '<div class="chart-hint">Scroll to zoom · drag to pan · drag price axis to scale</div>' +
+              '<div class="chart-tf-btns">' + tfBtn('1D') + tfBtn('1W') + tfBtn('1M') + tfBtn('1Y') + '</div>' +
               '<div class="chart-toolbar-btns">' +
                 '<button class="chart-tool-btn' + (curScale==='linear'?' active':'') + '" data-scale="linear" data-sym="' + t.sym + '">Linear</button>' +
                 '<button class="chart-tool-btn' + (curScale==='log'?' active':'') + '" data-scale="log" data-sym="' + t.sym + '">Log</button>' +
@@ -1563,9 +1567,22 @@
       btn.addEventListener('click', function(){ resetChartZoom(btn.dataset.sym); });
     });
 
+    el.querySelectorAll('.chart-tool-btn[data-tf]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.sym;
+        var tf = btn.dataset.tf;
+        document.querySelectorAll('.chart-tool-btn[data-tf][data-sym="' + sym + '"]').forEach(function(b){
+          b.classList.toggle('active', b === btn);
+        });
+        var q = findQuote(sym);
+        var svg = document.getElementById('chart-' + sym);
+        if(svg && q){ renderChartInto(svg, sym, q.price, tf); }
+      });
+    });
+
     trades.forEach(function(t){ setupChartInteractivity(t.sym); });
 
-    renderAllTradeCharts(currentTF);
+    renderAllTradeCharts();
   }
 
   function updateTradeRowPrices(){
@@ -1588,8 +1605,7 @@
     '1M': { volFactor:0.012,  fetchSize:90,  defaultVisible:30 },
     '1Y': { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
   };
-  var currentTF = '1D';
-  var chartStates = {}; // per-symbol: { data, viewStart, viewEnd, scale }
+  var chartStates = {}; // per-symbol: { data, viewStart, viewEnd, scale, tf }
   var MIN_VISIBLE_CANDLES = 8;
 
   function genOHLC(count, base, vol){
@@ -1717,7 +1733,7 @@
     var svg = document.getElementById('chart-' + sym);
     if(!state || !svg) return;
     var visible = state.data.slice(state.viewStart, state.viewEnd);
-    drawCandles(svg, visible, state.scale, state.priceScaleFactor, currentTF);
+    drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf);
   }
 
   function initChartState(sym, tf, data){
@@ -1729,14 +1745,15 @@
       viewStart: data.length - defaultVisible,
       viewEnd: data.length,
       scale: prevScale,
-      priceScaleFactor: 1
+      priceScaleFactor: 1,
+      tf: tf
     };
   }
 
   function resetChartZoom(sym){
     var state = chartStates[sym];
     if(!state) return;
-    var cfg = tfConfig[currentTF];
+    var cfg = tfConfig[state.tf];
     var defaultVisible = Math.min(cfg.defaultVisible, state.data.length);
     state.viewStart = state.data.length - defaultVisible;
     state.viewEnd = state.data.length;
@@ -1769,23 +1786,16 @@
     });
   }
 
-  function renderAllTradeCharts(tf){
+  // Each trade remembers its own timeframe now — no single global one.
+  function renderAllTradeCharts(){
     trades.forEach(function(t){
       var svg = document.getElementById('chart-' + t.sym);
       if(!svg) return;
       var q = findQuote(t.sym);
+      var tf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
       renderChartInto(svg, t.sym, q.price, tf);
     });
   }
-
-  document.getElementById('timeframes').addEventListener('click', function(e){
-    var btn = e.target.closest('.tf-btn');
-    if(!btn) return;
-    document.querySelectorAll('.tf-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    currentTF = btn.dataset.tf;
-    renderAllTradeCharts(currentTF);
-  });
 
   // ---------- Chart interactivity: wheel zoom, drag pan, crosshair ----------
   function svgLocalX(svg, clientX){
@@ -1794,6 +1804,16 @@
     var fraction = (clientX - rect.left) / rect.width;
     return vb.x + fraction * vb.width;
   }
+
+  function svgLocalY(svg, clientY){
+    var rect = svg.getBoundingClientRect();
+    var vb = svg.viewBox.baseVal;
+    var fraction = (clientY - rect.top) / rect.height;
+    return vb.y + fraction * vb.height;
+  }
+
+  // Bottom margin where date labels live — matches padTop(12)+plotH(158) in drawCandles.
+  var CHART_PLOT_BOTTOM_Y = 170;
 
   function zoomChart(sym, cursorFraction, zoomFactor){
     var state = chartStates[sym];
@@ -1873,16 +1893,22 @@
       if(!state) return;
       var plotW = 760 - 54;
       var localX = svgLocalX(svg, e.clientX);
-      var mode = (localX > plotW) ? 'scale' : 'pan';
+      var localY = svgLocalY(svg, e.clientY);
+      var mode = 'pan';
+      if(localX > plotW){ mode = 'scale'; }
+      else if(localY > CHART_PLOT_BOTTOM_Y){ mode = 'timescale'; }
+      var count = state.viewEnd - state.viewStart;
       dragState = {
         mode: mode,
         startX: e.clientX,
         startY: e.clientY,
         startViewStart: state.viewStart,
+        startCount: count,
+        startFraction: Math.max(0, Math.min(1, localX / plotW)),
         startFactor: state.priceScaleFactor || 1
       };
       svg.setPointerCapture(e.pointerId);
-      svg.style.cursor = (mode === 'scale') ? 'ns-resize' : 'grabbing';
+      svg.style.cursor = (mode === 'scale') ? 'ns-resize' : (mode === 'timescale') ? 'ew-resize' : 'grabbing';
     });
     svg.addEventListener('pointermove', function(e){
       if(dragState){
@@ -1895,22 +1921,41 @@
           var factor = dragState.startFactor * Math.exp(-dyPixels / 150);
           state.priceScaleFactor = Math.max(0.2, Math.min(5, factor));
           renderChartView(sym);
+        } else if(dragState.mode === 'timescale'){
+          // Dragging right on the time axis zooms in (fewer, wider candles);
+          // dragging left zooms out — anchored to where the drag started.
+          var dxScale = e.clientX - dragState.startX;
+          var scaleFactor = Math.exp(-dxScale / 200);
+          var newCount = Math.round(dragState.startCount * scaleFactor);
+          newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, state.data.length));
+          var anchorIdx = dragState.startViewStart + dragState.startFraction * dragState.startCount;
+          var newStart = Math.round(anchorIdx - dragState.startFraction * newCount);
+          var newEnd = newStart + newCount;
+          if(newStart < 0){ newEnd -= newStart; newStart = 0; }
+          if(newEnd > state.data.length){ newStart -= (newEnd - state.data.length); newEnd = state.data.length; }
+          newStart = Math.max(0, newStart);
+          state.viewStart = newStart;
+          state.viewEnd = newEnd;
+          renderChartView(sym);
         } else {
           var rect = svg.getBoundingClientRect();
-          var count = state.viewEnd - state.viewStart;
-          var pixelsPerCandle = (rect.width * (706/760)) / count;
+          var count2 = state.viewEnd - state.viewStart;
+          var pixelsPerCandle = (rect.width * (706/760)) / count2;
           var dxPixels = e.clientX - dragState.startX;
           var deltaCandles = Math.round(dxPixels / pixelsPerCandle);
-          var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, state.data.length - count));
+          var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, state.data.length - count2));
           state.viewStart = newStart;
-          state.viewEnd = newStart + count;
+          state.viewEnd = newStart + count2;
           renderChartView(sym);
           hideCrosshair(sym);
         }
       } else {
         var plotWHover = 760 - 54;
         var localXHover = svgLocalX(svg, e.clientX);
-        svg.style.cursor = (localXHover > plotWHover) ? 'ns-resize' : 'crosshair';
+        var localYHover = svgLocalY(svg, e.clientY);
+        if(localXHover > plotWHover){ svg.style.cursor = 'ns-resize'; }
+        else if(localYHover > CHART_PLOT_BOTTOM_Y){ svg.style.cursor = 'ew-resize'; }
+        else { svg.style.cursor = 'crosshair'; }
         updateCrosshair(sym, e.clientX);
       }
     });
@@ -2270,7 +2315,7 @@
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
-    if(name === 'trades'){ renderAllTradeCharts(currentTF); }
+    if(name === 'trades'){ renderAllTradeCharts(); }
     if(name === 'journal'){ renderCalendar(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
@@ -3030,6 +3075,23 @@
     });
   });
 
+  // Bump this whenever a big structural update ships and everyone currently
+  // signed in should be forced to re-authenticate (fresh state, no stale
+  // client assumptions carried over). Harmless for first-time visitors —
+  // storedNum is null, so nothing fires; the epoch is just recorded.
+  var APP_AUTH_EPOCH = 1;
+  var forceReauthPending = false;
+
+  (function checkAuthEpoch(){
+    var stored = null;
+    try{ stored = window.localStorage.getItem('shwoopnet:authEpoch'); }catch(e){}
+    var storedNum = (stored !== null && stored !== '') ? parseInt(stored, 10) : null;
+    if(storedNum !== null && !isNaN(storedNum) && storedNum < APP_AUTH_EPOCH){
+      forceReauthPending = true;
+    }
+    try{ window.localStorage.setItem('shwoopnet:authEpoch', String(APP_AUTH_EPOCH)); }catch(e){}
+  })();
+
   var isNewSignup = false;
 
   authFormEl.addEventListener('submit', function(e){
@@ -3103,8 +3165,24 @@
   }
 
   function enterGuestMode(){
+    // Set this FIRST, synchronously — the real onAuthChange handler checks
+    // isGuestMode and will refuse to accept a racing real-session restore
+    // once this is true (see below).
     isGuestMode = true;
     currentUid = null;
+
+    // Always tear down any real session/listeners, even if we don't think
+    // one is active — a real sign-in can be mid-flight (page just loaded,
+    // Firebase hasn't confirmed a persisted session yet) and calling
+    // signOutUser() on an already-signed-out session is a harmless no-op.
+    if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
+    if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
+    if(window.__shwoopAPI){
+      window.__shwoopAPI.signOutUser().catch(function(err){
+        console.error('Sign-out before entering guest mode failed:', err);
+      });
+    }
+
     authGateEl.setAttribute('hidden', '');
 
     if(accountEmailDesc){ accountEmailDesc.textContent = 'Guest mode — simulated data, nothing is saved'; }
@@ -3117,7 +3195,7 @@
     renderPLSummary();
 
     startGuestQuoteLoop();
-    renderAllTradeCharts(currentTF);
+    renderAllTradeCharts();
     generateGuestAlerts();
   }
 
@@ -3141,7 +3219,19 @@
       if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
 
       if(user){
-        isGuestMode = false;
+        if(isGuestMode){
+          // Already committed to guest mode — this is a racing real-session
+          // restore (e.g. a persisted session confirming itself just after
+          // the guest button was clicked). Reject it and stay a guest.
+          if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
+          return;
+        }
+        if(forceReauthPending){
+          forceReauthPending = false;
+          if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
+          authStatusEl.textContent = "We've shipped an update — please sign in again to continue.";
+          return;
+        }
         currentUid = user.uid;
         authGateEl.setAttribute('hidden', '');
         if(accountEmailDesc){ accountEmailDesc.textContent = 'Signed in as ' + user.email; }
@@ -3155,7 +3245,7 @@
         });
         loadAlertsForUser(user.uid);
         startRealQuoteLoop();
-        renderAllTradeCharts(currentTF); // refresh from simulated to real, in case a guest signed in
+        renderAllTradeCharts(); // refresh from simulated to real, in case a guest signed in
         if(isNewSignup){
           isNewSignup = false;
           setTimeout(function(){ startTour(); }, 500);
