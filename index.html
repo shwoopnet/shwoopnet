@@ -191,6 +191,8 @@
   .settings-row:last-of-type{ border-bottom:none; }
   .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
   .settings-row-desc{ font-size:11.5px; color: var(--muted); }
+  .quote-sync-status.ok{ color: var(--gain); }
+  .quote-sync-status.fail{ color: var(--loss); }
   .settings-choice-group{ display:flex; gap:4px; }
   .settings-toggle-switch{
     width:38px; height:22px; border-radius:11px; border:1px solid var(--border);
@@ -674,21 +676,41 @@
   .pl-card-value.up{ color: var(--gain); }
   .pl-card-value.down{ color: var(--loss); }
   .pl-card-sub{ font-size:11.5px; color: var(--muted); margin-top:6px; }
-  .calendar-dow-row{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
+  .calendar-dow-row{ display:grid; grid-template-columns:repeat(7,1fr) 1.1fr; gap:6px; margin-bottom:6px; }
   .calendar-dow{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); text-align:center; }
-  .calendar-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .calendar-dow-weekly{ color: var(--amber-dim); }
+  .calendar-grid{ display:grid; grid-template-columns:repeat(7,1fr) 1.1fr; gap:6px; }
   .calendar-day{
-    aspect-ratio: 1; border:1px solid var(--border); border-radius:4px;
-    background: var(--panel-raised); color: var(--paper); font-size:12px;
-    display:flex; align-items:center; justify-content:center; position:relative;
-    cursor:pointer;
+    min-height:64px; border:1px solid var(--border); border-radius:4px;
+    background: var(--panel-raised); color: var(--paper); font-size:11px;
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start;
+    padding:6px 7px; position:relative; cursor:pointer; gap:2px;
   }
   .calendar-day:hover{ border-color: var(--amber-dim); }
   .calendar-day.empty{ visibility:hidden; cursor:default; }
-  .calendar-day.has-entry::after{
-    content:""; position:absolute; bottom:6px; width:5px; height:5px; border-radius:50%; background: var(--amber);
+  .calendar-day .cal-daynum{ font-family:'IBM Plex Mono', monospace; color: var(--muted); font-size:10.5px; }
+  .calendar-day.day-win{ background: var(--gain-glow); border-color: rgba(51,193,126,0.35); }
+  .calendar-day.day-loss{ background: var(--loss-glow); border-color: rgba(232,92,81,0.35); }
+  .calendar-day .cal-day-pl{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:12.5px; }
+  .calendar-day.day-win .cal-day-pl{ color: var(--gain); }
+  .calendar-day.day-loss .cal-day-pl{ color: var(--loss); }
+  .calendar-day .cal-day-meta{ font-size:9px; color: var(--muted); line-height:1.4; }
+  .calendar-day.selected{ border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+  .calendar-week-cell{
+    min-height:64px; border:1px dashed var(--border); border-radius:4px;
+    background: var(--panel); display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+    padding:6px 8px; gap:2px;
   }
-  .calendar-day.selected{ border-color: var(--amber); background: var(--amber-glow); color: var(--amber); }
+  .calendar-week-cell.day-win{ border-color: rgba(51,193,126,0.35); }
+  .calendar-week-cell.day-loss{ border-color: rgba(232,92,81,0.35); }
+  .cal-week-label{ font-size:9px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); }
+  .cal-week-empty{ font-size:12px; color: var(--muted); }
+
+  @media (max-width: 900px){
+    .calendar-dow-row{ display:none; }
+    .calendar-grid{ grid-template-columns:repeat(7,1fr); }
+    .calendar-week-cell{ grid-column: 1 / -1; flex-direction:row; align-items:center; gap:10px; min-height:auto; }
+  }
 
   .journal-detail{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; }
   .journal-detail-date{ font-family:'Space Grotesk', sans-serif; font-size:14px; margin-bottom:14px; }
@@ -783,6 +805,17 @@
         callback(snap.exists() ? (snap.data().journalEntries || []) : []);
       }, function(err){
         console.error('Journal sync error:', err);
+      });
+    },
+    saveAlerts: function(uid, alertHistory, lastDate){
+      return setDoc(doc(db, 'users', uid), { alertHistory: alertHistory, alertsLastDate: lastDate }, { merge: true });
+    },
+    watchAlerts: function(uid, callback){
+      return onSnapshot(doc(db, 'users', uid), function(snap){
+        var data = snap.exists() ? snap.data() : {};
+        callback({ alertHistory: data.alertHistory || [], alertsLastDate: data.alertsLastDate || null });
+      }, function(err){
+        console.error('Alerts sync error:', err);
       });
     }
   });
@@ -1141,6 +1174,7 @@
       <div class="calendar-dow-row">
         <span class="calendar-dow">Sun</span><span class="calendar-dow">Mon</span><span class="calendar-dow">Tue</span>
         <span class="calendar-dow">Wed</span><span class="calendar-dow">Thu</span><span class="calendar-dow">Fri</span><span class="calendar-dow">Sat</span>
+        <span class="calendar-dow calendar-dow-weekly">Weekly</span>
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
     </div>
@@ -1164,6 +1198,13 @@
           <div class="settings-row-desc" id="accountEmailDesc">—</div>
         </div>
         <button class="settings-reset-btn" id="signOutBtn">Sign out</button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Live data</div>
+          <div class="settings-row-desc quote-sync-status" id="quoteSyncStatus">Connecting…</div>
+        </div>
       </div>
 
       <div class="settings-row">
@@ -1432,7 +1473,7 @@
         '<div class="trade-detail" id="chartwrap-' + t.sym + '">' +
           '<div class="trade-chart-col">' +
             '<div class="chart-toolbar">' +
-              '<div class="chart-hint">Scroll to zoom · drag to pan</div>' +
+              '<div class="chart-hint">Scroll to zoom · drag to pan · drag price axis to scale</div>' +
               '<div class="chart-toolbar-btns">' +
                 '<button class="chart-tool-btn' + (curScale==='linear'?' active':'') + '" data-scale="linear" data-sym="' + t.sym + '">Linear</button>' +
                 '<button class="chart-tool-btn' + (curScale==='log'?' active':'') + '" data-scale="log" data-sym="' + t.sym + '">Log</button>' +
@@ -1525,13 +1566,16 @@
   function genOHLC(count, base, vol){
     var price = base - vol * count * 0.15;
     var arr = [];
+    var now = new Date();
     for(var i=0;i<count;i++){
       var open = price;
       var change = (Math.random()-0.5) * vol;
       var close = open + change;
       var high = Math.max(open,close) + Math.random()*vol*0.4;
       var low = Math.min(open,close) - Math.random()*vol*0.4;
-      arr.push({o:open,h:high,l:low,c:close});
+      // Synthetic intraday timestamps, ~5 min apart, ending now.
+      var t = new Date(now.getTime() - (count - 1 - i) * 5 * 60000);
+      arr.push({o:open,h:high,l:low,c:close,t:t});
       price = close;
     }
     arr[arr.length-1].c = base;
@@ -1565,22 +1609,34 @@
         }
         // Twelve Data returns most-recent-first; we render oldest-first.
         var bars = data.values.map(function(v){
-          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close) };
+          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
         }).reverse();
         historyCache[cacheKey] = bars;
         return bars;
       });
   }
 
-  function drawCandles(svg, data, scale){
-    var W = 760, H = 200, padTop=12, padBottom=18, padRight=54;
-    var plotW = W - padRight, plotH = H - padTop - padBottom;
+  function formatAxisDate(d, tf){
+    if(!d || isNaN(d.getTime())) return '';
+    if(tf === '1D'){
+      return d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+    }
+    return d.toLocaleDateString([], { month:'short', day:'numeric' });
+  }
 
-    var lo = Math.min.apply(null, data.map(function(d){return d.l;}));
-    var hi = Math.max.apply(null, data.map(function(d){return d.h;}));
-    var useLog = (scale === 'log') && lo > 0;
-    var loT = useLog ? Math.log(lo) : lo;
-    var hiT = useLog ? Math.log(hi) : hi;
+  function drawCandles(svg, data, scale, priceScaleFactor, tf){
+    var W = 760, H = 200, padTop=12, padBottom=30, padRight=54;
+    var plotW = W - padRight, plotH = H - padTop - padBottom;
+    priceScaleFactor = priceScaleFactor || 1;
+
+    var loRaw = Math.min.apply(null, data.map(function(d){return d.l;}));
+    var hiRaw = Math.max.apply(null, data.map(function(d){return d.h;}));
+    var useLog = (scale === 'log') && loRaw > 0;
+    var loT0 = useLog ? Math.log(loRaw) : loRaw;
+    var hiT0 = useLog ? Math.log(hiRaw) : hiRaw;
+    var mid = (loT0 + hiT0) / 2;
+    var halfRange = ((hiT0 - loT0) || (Math.abs(mid) * 0.02) || 1) / 2 / priceScaleFactor;
+    var loT = mid - halfRange, hiT = mid + halfRange;
     var range = (hiT - loT) || 1;
 
     function y(v){
@@ -1594,10 +1650,23 @@
 
     var glCount = 3;
     for(var g=0; g<=glCount; g++){
-      var gv = useLog ? Math.exp(loT + (range/glCount)*g) : (lo + (range/glCount)*g);
+      var gv = useLog ? Math.exp(loT + (range/glCount)*g) : (loT + (range/glCount)*g);
       var gy = y(gv);
       parts.push('<line class="grid-line" x1="0" y1="'+gy+'" x2="'+plotW+'" y2="'+gy+'"/>');
       parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(1)+'</text>');
+    }
+
+    // Time axis: show roughly 4-5 evenly spaced date/time labels.
+    var axisY = H - 8;
+    parts.push('<line class="grid-line" x1="0" y1="'+(padTop+plotH)+'" x2="'+plotW+'" y2="'+(padTop+plotH)+'"/>');
+    var labelCount = Math.min(5, data.length);
+    for(var li = 0; li < labelCount; li++){
+      var idx = Math.round(li * (data.length - 1) / Math.max(1, labelCount - 1));
+      var lx = idx * xStep + xStep/2;
+      var label = formatAxisDate(data[idx].t, tf);
+      if(label){
+        parts.push('<text class="grid-label" x="'+lx+'" y="'+axisY+'" text-anchor="middle">'+label+'</text>');
+      }
     }
 
     data.forEach(function(d, i){
@@ -1619,7 +1688,7 @@
     var svg = document.getElementById('chart-' + sym);
     if(!state || !svg) return;
     var visible = state.data.slice(state.viewStart, state.viewEnd);
-    drawCandles(svg, visible, state.scale);
+    drawCandles(svg, visible, state.scale, state.priceScaleFactor, currentTF);
   }
 
   function initChartState(sym, tf, data){
@@ -1630,7 +1699,8 @@
       data: data,
       viewStart: data.length - defaultVisible,
       viewEnd: data.length,
-      scale: prevScale
+      scale: prevScale,
+      priceScaleFactor: 1
     };
   }
 
@@ -1641,6 +1711,7 @@
     var defaultVisible = Math.min(cfg.defaultVisible, state.data.length);
     state.viewStart = state.data.length - defaultVisible;
     state.viewEnd = state.data.length;
+    state.priceScaleFactor = 1;
     renderChartView(sym);
   }
 
@@ -1770,25 +1841,46 @@
     svg.addEventListener('pointerdown', function(e){
       var state = chartStates[sym];
       if(!state) return;
-      dragState = { startX: e.clientX, startViewStart: state.viewStart };
+      var plotW = 760 - 54;
+      var localX = svgLocalX(svg, e.clientX);
+      var mode = (localX > plotW) ? 'scale' : 'pan';
+      dragState = {
+        mode: mode,
+        startX: e.clientX,
+        startY: e.clientY,
+        startViewStart: state.viewStart,
+        startFactor: state.priceScaleFactor || 1
+      };
       svg.setPointerCapture(e.pointerId);
-      svg.style.cursor = 'grabbing';
+      svg.style.cursor = (mode === 'scale') ? 'ns-resize' : 'grabbing';
     });
     svg.addEventListener('pointermove', function(e){
       if(dragState){
         var state = chartStates[sym];
         if(!state) return;
-        var rect = svg.getBoundingClientRect();
-        var count = state.viewEnd - state.viewStart;
-        var pixelsPerCandle = (rect.width * (706/760)) / count;
-        var dxPixels = e.clientX - dragState.startX;
-        var deltaCandles = Math.round(dxPixels / pixelsPerCandle);
-        var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, state.data.length - count));
-        state.viewStart = newStart;
-        state.viewEnd = newStart + count;
-        renderChartView(sym);
-        hideCrosshair(sym);
+        if(dragState.mode === 'scale'){
+          var dyPixels = e.clientY - dragState.startY;
+          // Dragging down compresses the range (zooms out on price),
+          // dragging up expands it (zooms in) — matches TradingView.
+          var factor = dragState.startFactor * Math.exp(-dyPixels / 150);
+          state.priceScaleFactor = Math.max(0.2, Math.min(5, factor));
+          renderChartView(sym);
+        } else {
+          var rect = svg.getBoundingClientRect();
+          var count = state.viewEnd - state.viewStart;
+          var pixelsPerCandle = (rect.width * (706/760)) / count;
+          var dxPixels = e.clientX - dragState.startX;
+          var deltaCandles = Math.round(dxPixels / pixelsPerCandle);
+          var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, state.data.length - count));
+          state.viewStart = newStart;
+          state.viewEnd = newStart + count;
+          renderChartView(sym);
+          hideCrosshair(sym);
+        }
       } else {
+        var plotWHover = 760 - 54;
+        var localXHover = svgLocalX(svg, e.clientX);
+        svg.style.cursor = (localXHover > plotWHover) ? 'ns-resize' : 'crosshair';
         updateCrosshair(sym, e.clientX);
       }
     });
@@ -1810,6 +1902,8 @@
   var FINNHUB_API_KEY = 'da3nb3pr01qual4qug80da3nb3pr01qual4qug8g';
   var FINNHUB_QUOTE_URL = 'https://finnhub.io/api/v1/quote';
 
+  var lastQuoteSyncOk = false;
+
   function fetchQuote(sym){
     var url = FINNHUB_QUOTE_URL + '?symbol=' + encodeURIComponent(sym) + '&token=' + FINNHUB_API_KEY;
     return fetch(url)
@@ -1818,14 +1912,19 @@
         return res.json();
       })
       .then(function(data){
-        // Finnhub returns c=current, pc=previous close. A quote of exactly
-        // zero across the board means the symbol wasn't recognized.
-        if(!data || (data.c === 0 && data.pc === 0)) throw new Error('No data for ' + sym);
+        // Guard against undefined/non-numeric bodies, not just an all-zero
+        // quote (invalid symbol) — a raw !== 0 check lets `undefined` through.
+        if(!data || typeof data.c !== 'number' || typeof data.pc !== 'number' || !isFinite(data.c)){
+          throw new Error('Unexpected Finnhub response for ' + sym + ': ' + JSON.stringify(data));
+        }
+        if(data.c === 0 && data.pc === 0) throw new Error('No data for ' + sym);
         return { price: data.c, prevClose: data.pc };
       });
   }
 
   function fetchAllQuotes(){
+    var results = [];
+    var pending = watchlist.length;
     watchlist.forEach(function(item){
       fetchQuote(item.sym).then(function(q){
         item.price = q.price;
@@ -1834,12 +1933,34 @@
         if(!document.getElementById('page-trades').hidden){
           updateTradeRowPrices();
         }
+        pending--;
+        results.push(true);
+        if(pending === 0){ updateQuoteSyncStatus(results); }
       }).catch(function(err){
         // Leave the last known price in place rather than breaking the UI.
         console.error('Quote fetch failed for', item.sym, err);
+        pending--;
+        results.push(false);
+        if(pending === 0){ updateQuoteSyncStatus(results); }
       });
     });
   }
+
+  function updateQuoteSyncStatus(results){
+    var anyOk = results.some(function(r){ return r; });
+    lastQuoteSyncOk = anyOk;
+    var el = document.getElementById('quoteSyncStatus');
+    if(!el) return;
+    var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit', second:'2-digit' });
+    if(anyOk){
+      el.textContent = 'Live · synced ' + now;
+      el.className = 'quote-sync-status ok';
+    } else {
+      el.textContent = 'Sync failed — showing last known prices (check console)';
+      el.className = 'quote-sync-status fail';
+    }
+  }
+
   fetchAllQuotes();
   setInterval(fetchAllQuotes, 45000);
 
@@ -1931,6 +2052,17 @@
   // ---------- Settings: market alerts toggle ----------
   var alertsToggleBtn = document.getElementById('alertsToggle');
   var alertsEnabledPref = true;
+  function checkAlertsNow(){
+    if(!alertsUid || !alertsEnabledPref) return;
+    var today = new Date().toISOString().slice(0,10);
+    var alreadyToday = alertHistory.some(function(a){ return a.date === today; });
+    if(!alreadyToday){
+      generateAndSaveDailyAlerts(alertHistory);
+    } else {
+      renderHistoryList();
+    }
+  }
+
   function applyAlertsPref(enabled){
     alertsEnabledPref = enabled;
     alertsToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
@@ -1939,7 +2071,7 @@
   alertsToggleBtn.addEventListener('click', function(){
     var enabled = alertsToggleBtn.getAttribute('aria-checked') !== 'true';
     applyAlertsPref(enabled);
-    if(enabled){ loadTodaysAlerts(); } else { clearAlerts(); }
+    if(enabled){ checkAlertsNow(); } else { renderHistoryList(); }
   });
   (function initAlertsPref(){
     var saved = 'true';
@@ -2239,6 +2371,19 @@
     renderJournalDetail();
   }
 
+  function computeDayStats(dateStr){
+    var entries = journalEntries.filter(function(e){ return e.date === dateStr && e.status === 'closed'; });
+    if(entries.length === 0) return null;
+    var dollar = 0, wins = 0;
+    entries.forEach(function(e){
+      var pl = computePL(e);
+      dollar += pl.dollar;
+      if(pl.pct >= 0) wins++;
+    });
+    var avgPct = entries.reduce(function(s,e){ return s + computePL(e).pct; }, 0) / entries.length;
+    return { dollar: dollar, symbols: entries.length, pct: avgPct, winRate: (wins / entries.length) * 100 };
+  }
+
   function renderCalendar(){
     var y = calendarViewDate.getFullYear();
     var m = calendarViewDate.getMonth();
@@ -2250,26 +2395,63 @@
     var grid = document.getElementById('calendarGrid');
     grid.innerHTML = '';
 
-    for(var i = 0; i < firstDow; i++){
-      var empty = document.createElement('div');
-      empty.className = 'calendar-day empty';
-      grid.appendChild(empty);
+    function dayCellHTML(dateStr, dayNum){
+      if(!dateStr){ return '<div class="calendar-day empty"></div>'; }
+      var stats = computeDayStats(dateStr);
+      var hasEntry = journalEntries.some(function(e){ return e.date === dateStr; });
+      var cls = 'calendar-day' + (hasEntry ? ' has-entry' : '') + (dateStr === selectedJournalDate ? ' selected' : '');
+      if(stats){ cls += stats.dollar >= 0 ? ' day-win' : ' day-loss'; }
+      var inner = '<span class="cal-daynum">' + dayNum + '</span>';
+      if(stats){
+        var sign = stats.dollar >= 0 ? '+' : '−';
+        inner += '<span class="cal-day-pl">' + sign + '$' + Math.abs(stats.dollar).toFixed(0) + '</span>' +
+          '<span class="cal-day-meta">' + stats.symbols + ' sym · ' + stats.winRate.toFixed(0) + '% WR</span>';
+      }
+      return '<div class="' + cls + '" data-date="' + dateStr + '">' + inner + '</div>';
     }
 
+    function weekCellHTML(datesInRow){
+      var all = datesInRow.filter(Boolean).reduce(function(acc, d){
+        var s = computeDayStats(d);
+        if(s){ acc.dollar += s.dollar; acc.days++; }
+        return acc;
+      }, { dollar:0, days:0 });
+      if(all.days === 0){
+        return '<div class="calendar-week-cell"><span class="cal-week-label">Week</span><span class="cal-week-empty">—</span></div>';
+      }
+      var sign = all.dollar >= 0 ? '+' : '−';
+      return '<div class="calendar-week-cell ' + (all.dollar >= 0 ? 'day-win' : 'day-loss') + '">' +
+        '<span class="cal-week-label">Week</span>' +
+        '<span class="cal-day-pl">' + sign + '$' + Math.abs(all.dollar).toFixed(0) + '</span>' +
+        '<span class="cal-day-meta">' + all.days + ' day' + (all.days !== 1 ? 's' : '') + '</span>' +
+      '</div>';
+    }
+
+    var cells = [];
+    for(var i = 0; i < firstDow; i++){ cells.push(null); }
     for(var day = 1; day <= daysInMonth; day++){
-      var dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
-      var hasEntry = journalEntries.some(function(e){ return e.date === dateStr; });
-      var cell = document.createElement('div');
-      cell.className = 'calendar-day' + (hasEntry ? ' has-entry' : '') + (dateStr === selectedJournalDate ? ' selected' : '');
-      cell.textContent = day;
+      cells.push(y + '-' + String(m+1).padStart(2,'0') + '-' + String(day).padStart(2,'0'));
+    }
+    while(cells.length % 7 !== 0){ cells.push(null); }
+
+    var html = '';
+    for(var row = 0; row < cells.length / 7; row++){
+      var rowDates = cells.slice(row*7, row*7+7);
+      rowDates.forEach(function(dateStr){
+        var dayNum = dateStr ? parseInt(dateStr.slice(-2), 10) : '';
+        html += dayCellHTML(dateStr, dayNum);
+      });
+      html += weekCellHTML(rowDates);
+    }
+    grid.innerHTML = html;
+
+    grid.querySelectorAll('.calendar-day[data-date]').forEach(function(cell){
       cell.addEventListener('click', function(){
         selectedJournalDate = this.dataset.date;
         renderCalendar();
         renderJournalDetail();
       });
-      cell.dataset.date = dateStr;
-      grid.appendChild(cell);
-    }
+    });
   }
 
   function renderJournalDetail(){
@@ -2597,27 +2779,24 @@
   document.getElementById('historyClose').addEventListener('click', closeHistory);
   historyBackdrop.addEventListener('click', closeHistory);
 
-  // ---------- Market alerts (feeds the history log only) ----------
-  var mockAlerts = [
-    { sym:'NVDA', tag:'Earnings watch', text:'Data-center order backlog reportedly expanded ahead of tonight\'s print.', url:'https://finance.yahoo.com/quote/NVDA/news' },
-    { sym:'TSLA', tag:'Risk', text:'Analysts flag softer delivery estimates for the quarter, adding pressure to the short thesis.', url:'https://finance.yahoo.com/quote/TSLA/news' },
-    { sym:'AMD', tag:'Momentum', text:'Extending gains on positive read-through from NVDA\'s commentary this week.', url:'https://finance.yahoo.com/quote/AMD/news' }
-  ];
-
+  // ---------- Market alerts: real, condition-based, persisted per day ----------
   var alertHistory = [];
+  var alertsUid = null;
+  var alertsUnsubscribe = null;
 
   function renderHistoryList(){
     var el = document.getElementById('historyList');
     if(alertHistory.length === 0){
-      el.innerHTML = '<div class="history-empty">No alerts yet today.</div>';
+      el.innerHTML = '<div class="history-empty">No alerts yet.</div>';
       return;
     }
     el.innerHTML = alertHistory.map(function(n){
+      var niceDate = n.date ? new Date(n.date + 'T00:00:00').toLocaleDateString([], { month:'short', day:'numeric' }) : '';
       return '<div class="history-item">' +
         '<div class="history-item-head">' +
           '<span class="history-item-sym mono">' + n.sym + '</span>' +
           '<span class="news-toast-tag">' + n.tag + '</span>' +
-          '<span class="history-item-time mono">' + n.time + '</span>' +
+          '<span class="history-item-time mono">' + niceDate + (niceDate && n.time ? ' · ' : '') + (n.time || '') + '</span>' +
         '</div>' +
         '<p class="history-item-body">' + n.text + '</p>' +
         '<a class="history-item-link" href="' + n.url + '" target="_blank" rel="noopener noreferrer">Read more →</a>' +
@@ -2625,16 +2804,72 @@
     }).join('');
   }
 
-  function loadTodaysAlerts(){
+  // Genuine alert derived from live price vs. this trade's actual levels —
+  // not static flavor text.
+  function evaluateTradeAlert(t, price){
+    var isLong = t.direction !== 'Short';
+    var hitStop = isLong ? price <= t.stop : price >= t.stop;
+    var hitT2 = isLong ? price >= t.t2 : price <= t.t2;
+    var hitT1 = isLong ? price >= t.t1 : price <= t.t1;
+
+    if(hitStop){
+      return { tag:'Stop hit', text: t.sym + ' hit its stop at $' + t.stop.toFixed(2) + ' — currently $' + price.toFixed(2) + '.' };
+    }
+    if(hitT2){
+      return { tag:'Target 2', text: t.sym + ' reached Target 2 at $' + t.t2.toFixed(2) + ' — currently $' + price.toFixed(2) + '.' };
+    }
+    if(hitT1){
+      return { tag:'Target 1', text: t.sym + ' reached Target 1 at $' + t.t1.toFixed(2) + ' — currently $' + price.toFixed(2) + '.' };
+    }
+    var range = Math.abs(t.t1 - t.entry) || 1;
+    var progressed = isLong ? (price - t.entry) : (t.entry - price);
+    var pct = Math.max(0, Math.min(100, (progressed / range) * 100));
+    return { tag:'Watching', text: t.sym + ' is ' + pct.toFixed(0) + '% of the way from entry to Target 1 — currently $' + price.toFixed(2) + '.' };
+  }
+
+  function generateAndSaveDailyAlerts(existingHistory){
+    var today = new Date().toISOString().slice(0,10);
     var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-    alertHistory = mockAlerts.map(function(n){
-      return { sym: n.sym, tag: n.tag, text: n.text, url: n.url, time: stamp };
+    var newAlerts = trades.map(function(t){
+      var price = findQuote(t.sym).price;
+      var evald = evaluateTradeAlert(t, price);
+      return {
+        id: 'a' + Date.now() + '_' + t.sym,
+        date: today, sym: t.sym, tag: evald.tag, text: evald.text,
+        url: 'https://finance.yahoo.com/quote/' + t.sym + '/news', time: stamp
+      };
     });
+    alertHistory = newAlerts.concat(existingHistory || []);
     renderHistoryList();
+    if(window.__shwoopAPI && alertsUid){
+      window.__shwoopAPI.saveAlerts(alertsUid, alertHistory, today).catch(function(err){
+        console.error('Failed to save alerts:', err);
+      });
+    }
+  }
+
+  function loadAlertsForUser(uid){
+    alertsUid = uid;
+    if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
+    alertsUnsubscribe = window.__shwoopAPI.watchAlerts(uid, function(data){
+      var today = new Date().toISOString().slice(0,10);
+      alertHistory = data.alertHistory || [];
+      if(!alertsEnabledPref){
+        renderHistoryList();
+        return;
+      }
+      if(data.alertsLastDate === today){
+        renderHistoryList();
+      } else {
+        generateAndSaveDailyAlerts(alertHistory);
+      }
+    });
   }
 
   function clearAlerts(){
     alertHistory = [];
+    alertsUid = null;
+    if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
     renderHistoryList();
   }
 
@@ -2777,6 +3012,7 @@
           renderTradeBlocks();
           renderPLSummary();
         });
+        loadAlertsForUser(user.uid);
         if(isNewSignup){
           isNewSignup = false;
           setTimeout(function(){ startTour(); }, 500);
@@ -2784,6 +3020,7 @@
       } else {
         currentUid = null;
         journalEntries = [];
+        clearAlerts();
         authGateEl.removeAttribute('hidden');
         document.getElementById('authEmail').value = '';
         document.getElementById('authPassword').value = '';
@@ -2797,55 +3034,97 @@
   var tourSteps = [
     {
       title: 'Welcome to Shwoopnet',
-      text: "A quick map of where everything lives. Use the arrows below, or skip anytime — nothing here is required reading."
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="brief"]',
-      title: 'Market Brief',
-      text: "Home base. Opens automatically the first time you visit each day — a quick read on what's moving before you dive into trades."
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="trades"]',
-      title: 'Trade Overview',
-      text: 'Your active setups live here — full charts, entry/stop/targets, and a button to log a trade for real once you take it.'
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="journal"]',
-      title: 'Trade Journal',
-      text: 'Every trade you log lands here on its date. Click into a day to see what happened, exit a position, or track P&L by range.'
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '#notepadToggle',
-      title: 'Notepad',
-      text: 'A floating scratchpad you can open from any page. Saves automatically — click here anytime you need to jot something down.'
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '#historyNavItem',
-      title: 'History',
-      text: "Every market alert gets logged here for the day, even ones you've already dismissed — nothing gets lost."
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="changelog"]',
-      title: 'Changelog',
-      text: "See what's changed, any time you're curious what's new."
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="settings"]',
-      title: 'Settings',
-      text: 'Color themes (including true white-on-black), your account, and every other preference — all in one place.'
+      text: "A quick tour of what's here and where to find it. Use the arrows below, or skip anytime."
     },
     {
       before: function(){ navMenu.setAttribute('hidden', ''); },
       selector: '.ticker-tape',
       title: 'Live ticker tape',
       text: 'Always on, at the very top of every page — your watchlist scrolls continuously so it never leaves your sight.'
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="brief"]',
+      title: 'Market Brief',
+      text: "Home base — opens automatically the first time you visit each day. Let's take a look."
+    },
+    {
+      page: 'brief',
+      selector: '.brief-cta-row',
+      title: "Here's your Brief",
+      text: "A quick read on what's moving, plus a recap of your actual tracked trades before you dive in."
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="trades"]',
+      title: 'Trade Overview',
+      text: 'Your active setups live here — full charts, entry/stop/targets. Click through to see it.'
+    },
+    {
+      page: 'trades',
+      selector: '.log-trade-btn',
+      title: "Here's Trade Overview",
+      text: 'Charts you can zoom, pan, and rescale, plus this button to log a trade for real once you take it.'
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="journal"]',
+      title: 'Trade Journal',
+      text: 'Every trade you log lands here on its date, with P&L tracked automatically. Take a look.'
+    },
+    {
+      page: 'journal',
+      selector: '.journal-calendar',
+      title: "Here's your Journal",
+      text: 'Click into any day to see what happened, exit an open position, or fix a mistake.'
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '#notepadToggle',
+      title: 'Notepad',
+      text: "A floating scratchpad you can open from any page. Here's what it looks like."
+    },
+    {
+      before: function(){ toggleNotepad(true); },
+      selector: '#notepadPanel',
+      title: 'Your Notepad',
+      text: 'Saves automatically as you type. Unlock it to move or resize, close it whenever.'
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '#historyNavItem',
+      title: 'History',
+      text: "Every market alert gets logged here for the day, even ones you've dismissed. Here it is."
+    },
+    {
+      before: function(){ openHistory(); },
+      selector: '.history-sidebar',
+      title: 'Your alert history',
+      text: 'Nothing gets lost — browse back through everything that came in today.'
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="changelog"]',
+      title: 'Changelog',
+      text: "See what's changed, any time you're curious. Quick look:"
+    },
+    {
+      page: 'changelog',
+      selector: '.changelog-list',
+      title: "Here's the Changelog",
+      text: 'A running log of what shipped and when.'
+    },
+    {
+      before: function(){ navMenu.removeAttribute('hidden'); },
+      selector: '.nav-item[data-page="settings"]',
+      title: 'Settings',
+      text: 'Themes, your account, and every preference lives here. Last stop:'
+    },
+    {
+      page: 'settings',
+      selector: '.theme-switcher',
+      title: "Here's Settings",
+      text: 'Four color modes including true white-on-black — pick whatever is easiest on your eyes.'
     }
   ];
 
@@ -2872,6 +3151,8 @@
 
   function renderTourStep(){
     var step = tourSteps[tourIndex];
+    resetTourUI();
+    if(step.page){ showPage(step.page); }
     if(step.before){ step.before(); }
 
     document.getElementById('tourStepCount').textContent = (tourIndex + 1) + ' / ' + tourSteps.length;
@@ -2978,11 +3259,7 @@
   renderTradeBlocks();
   statCta();
   updateClock();
-  if(alertsEnabledPref){
-    loadTodaysAlerts();
-  } else {
-    renderHistoryList();
-  }
+  renderHistoryList();
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
