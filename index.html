@@ -1283,7 +1283,8 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoopnet. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>All prices, charts, trade setups, and journal entries shown are simulated for demonstration purposes and do not reflect real market activity. Nothing on this site constitutes financial, investment, or trading advice.</p>
+    <p>Current prices are live quotes from Finnhub. 1W/1M/1Y chart history is real historical data from Twelve Data; the 1D view and all trade setups and journal entries remain simulated for demonstration purposes. Nothing on this site constitutes financial, investment, or trading advice.</p>
+    <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a> and <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>.</p>
   </footer>
 
 </div>
@@ -1481,11 +1482,46 @@
     return arr;
   }
 
-  function renderChartInto(svg, base, tf){
-    var cfg = tfConfig[tf];
-    var vol = base * cfg.volFactor;
-    var data = genOHLC(cfg.count, base, vol);
+  // ---------- Historical candles (Twelve Data, free tier) ----------
+  // Same key-handling note as Finnhub: free tier, no billing, fine client-side
+  // for now, must move behind a proxy before ever upgrading to a paid plan.
+  var TWELVE_DATA_API_KEY = 'd71a3d8d70e04286b10e8cf67b4c710d';
+  var TWELVE_DATA_URL = 'https://api.twelvedata.com/time_series';
+  var historyCache = {};
+  var historyParams = {
+    '1W': { interval:'1day',  outputsize:7 },
+    '1M': { interval:'1day',  outputsize:30 },
+    '1Y': { interval:'1week', outputsize:52 }
+  };
 
+  function fetchHistory(sym, tf){
+    var cacheKey = sym + '_' + tf;
+    if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
+
+    var params = historyParams[tf];
+    var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
+      '&interval=' + params.interval + '&outputsize=' + params.outputsize +
+      '&apikey=' + TWELVE_DATA_API_KEY;
+
+    return fetch(url)
+      .then(function(res){
+        if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 2){
+          throw new Error('No usable history for ' + sym + ' (' + tf + ')');
+        }
+        // Twelve Data returns most-recent-first; we render oldest-first.
+        var bars = data.values.map(function(v){
+          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close) };
+        }).reverse();
+        historyCache[cacheKey] = bars;
+        return bars;
+      });
+  }
+
+  function drawCandles(svg, data){
     var W = 760, H = 200, padTop=12, padBottom=18, padRight=54;
     var plotW = W - padRight, plotH = H - padTop - padBottom;
 
@@ -1520,12 +1556,33 @@
     svg.innerHTML = parts.join('');
   }
 
+  function renderChartInto(svg, sym, base, tf){
+    if(tf === '1D'){
+      var cfg1d = tfConfig['1D'];
+      drawCandles(svg, genOHLC(cfg1d.count, base, base * cfg1d.volFactor));
+      return;
+    }
+    fetchHistory(sym, tf).then(function(bars){
+      // Keep the chart anchored to the live current price rather than
+      // whatever Twelve Data's most recent close happened to be.
+      var lastBar = bars[bars.length - 1];
+      var adjusted = bars.slice(0, -1).concat([{
+        o: lastBar.o, h: Math.max(lastBar.h, base), l: Math.min(lastBar.l, base), c: base
+      }]);
+      drawCandles(svg, adjusted);
+    }).catch(function(err){
+      console.error('History fetch failed for', sym, tf, err);
+      var cfg = tfConfig[tf];
+      drawCandles(svg, genOHLC(cfg.count, base, base * cfg.volFactor));
+    });
+  }
+
   function renderAllTradeCharts(tf){
     trades.forEach(function(t){
       var svg = document.getElementById('chart-' + t.sym);
       if(!svg) return;
       var q = findQuote(t.sym);
-      renderChartInto(svg, q.price, tf);
+      renderChartInto(svg, t.sym, q.price, tf);
     });
   }
 
@@ -1538,18 +1595,45 @@
     renderAllTradeCharts(currentTF);
   });
 
-  // ---------- Live jitter ----------
-  function jitterPrices(){
-    watchlist.forEach(function(item){
-      var delta = item.price * (Math.random() - 0.5) * 0.006;
-      item.price = Math.max(0.5, item.price + delta);
-    });
-    renderTicker();
-    if(!document.getElementById('page-trades').hidden){
-      updateTradeRowPrices();
-    }
+  // ---------- Live quotes (Finnhub, free tier) ----------
+  // Free-tier key: no billing attached, so it's acceptable to keep client-side
+  // for now. Move behind a proxy (Cloudflare Worker) before ever upgrading
+  // this key to a paid plan.
+  var FINNHUB_API_KEY = 'da3nb3pr01qual4qug80da3nb3pr01qual4qug8g';
+  var FINNHUB_QUOTE_URL = 'https://finnhub.io/api/v1/quote';
+
+  function fetchQuote(sym){
+    var url = FINNHUB_QUOTE_URL + '?symbol=' + encodeURIComponent(sym) + '&token=' + FINNHUB_API_KEY;
+    return fetch(url)
+      .then(function(res){
+        if(!res.ok) throw new Error('Finnhub HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        // Finnhub returns c=current, pc=previous close. A quote of exactly
+        // zero across the board means the symbol wasn't recognized.
+        if(!data || (data.c === 0 && data.pc === 0)) throw new Error('No data for ' + sym);
+        return { price: data.c, prevClose: data.pc };
+      });
   }
-  setInterval(jitterPrices, 2200);
+
+  function fetchAllQuotes(){
+    watchlist.forEach(function(item){
+      fetchQuote(item.sym).then(function(q){
+        item.price = q.price;
+        item.prevClose = q.prevClose;
+        renderTicker();
+        if(!document.getElementById('page-trades').hidden){
+          updateTradeRowPrices();
+        }
+      }).catch(function(err){
+        // Leave the last known price in place rather than breaking the UI.
+        console.error('Quote fetch failed for', item.sym, err);
+      });
+    });
+  }
+  fetchAllQuotes();
+  setInterval(fetchAllQuotes, 45000);
 
   // ---------- Clock ----------
   function getTzAbbrev(date){
