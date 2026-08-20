@@ -128,7 +128,17 @@
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
   }
   .brand:hover .brand-name{ color: var(--amber); }
-  .brand-mark{ flex-shrink:0; }
+  .brand-mark{
+    flex-shrink:0; transform-origin: 50% 90%;
+    animation: brandBounce 2s cubic-bezier(0.45,0,0.55,1) infinite;
+  }
+  @keyframes brandBounce{
+    0%, 55%, 100%{ transform: translateY(0) rotate(0deg) scale(1,1); }
+    15%{ transform: translateY(-7px) rotate(-14deg) scale(1,1); }
+    30%{ transform: translateY(0) rotate(0deg) scale(1,1); }
+    33%{ transform: translateY(0) rotate(0deg) scale(1.1,0.88); }
+    40%{ transform: translateY(0) rotate(0deg) scale(1,1); }
+  }
   .brand-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; letter-spacing: 0.04em; transition: color .15s ease; }
   .brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
 
@@ -595,9 +605,11 @@
   @media (prefers-reduced-motion: reduce){
     .ticker-track{ animation: none; }
     .flash-up, .flash-down{ animation: none; }
+    .brand-mark{ animation: none; }
   }
   [data-reduce-motion="true"] .ticker-track{ animation: none; }
   [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
+  [data-reduce-motion="true"] .brand-mark{ animation: none; }
   .flash-up{ animation: flashUp .6s ease; }
   .flash-down{ animation: flashDown .6s ease; }
   @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
@@ -608,7 +620,7 @@
 
 <div class="app">
 
-  <div class="ticker-tape">
+  <div class="ticker-tape" id="tickerTape">
     <div class="ticker-track" id="tickerTrack"></div>
   </div>
 
@@ -934,9 +946,9 @@
           <div class="settings-row-desc">Applies across the whole site. Candle colors stay fixed.</div>
         </div>
         <div class="theme-switcher" role="group" aria-label="Color theme">
-          <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="true"></button>
+          <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="false"></button>
           <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
-          <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="false"></button>
+          <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="true"></button>
           <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
         </div>
       </div>
@@ -977,9 +989,19 @@
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Reduce motion</div>
-          <div class="settings-row-desc">Turns off the ticker scroll and flash animations.</div>
+          <div class="settings-row-desc">Turns off the ticker scroll, flash, and logo bounce animations.</div>
         </div>
         <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Ticker tape</div>
+          <div class="settings-row-desc">Show the scrolling price strip at the very top.</div>
+        </div>
+        <button class="settings-toggle-switch" id="tickerToggle" role="switch" aria-checked="true" aria-label="Toggle ticker tape">
           <span class="toggle-knob"></span>
         </button>
       </div>
@@ -1311,8 +1333,8 @@
     btn.addEventListener('click', function(){ applyTheme(btn.dataset.theme); });
   });
   (function initTheme(){
-    var saved = 'amber';
-    try{ saved = window.localStorage.getItem('shwoopnet:theme') || 'amber'; }catch(e){}
+    var saved = 'mono';
+    try{ saved = window.localStorage.getItem('shwoopnet:theme') || 'mono'; }catch(e){}
     applyTheme(saved);
   })();
 
@@ -1385,6 +1407,22 @@
     var saved = 'false';
     try{ saved = window.localStorage.getItem('shwoopnet:reduceMotion') || 'false'; }catch(e){}
     applyMotionPref(saved === 'true');
+  })();
+
+  // ---------- Settings: ticker tape on/off ----------
+  var tickerToggleBtn = document.getElementById('tickerToggle');
+  function applyTickerPref(enabled){
+    tickerToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+    document.getElementById('tickerTape').style.display = enabled ? '' : 'none';
+    try{ window.localStorage.setItem('shwoopnet:tickerEnabled', enabled ? 'true' : 'false'); }catch(e){}
+  }
+  tickerToggleBtn.addEventListener('click', function(){
+    applyTickerPref(tickerToggleBtn.getAttribute('aria-checked') !== 'true');
+  });
+  (function initTickerPref(){
+    var saved = 'true';
+    try{ saved = window.localStorage.getItem('shwoopnet:tickerEnabled') || 'true'; }catch(e){}
+    applyTickerPref(saved === 'true');
   })();
 
   // ---------- Settings: reset all preferences ----------
