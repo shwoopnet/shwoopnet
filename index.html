@@ -227,6 +227,57 @@
   .changelog-entry:last-child{ border-bottom:none; }
   .changelog-version{ font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:700; color: var(--amber); margin-bottom:10px; }
   .changelog-items{ margin:0; padding-left:18px; }
+
+  .labs-method-card, .labs-backtest-card{
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    padding:24px 26px; margin-bottom: 20px;
+  }
+  .labs-method-intro, .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
+  .labs-method-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px 28px; }
+  @media (max-width:900px){ .labs-method-grid{ grid-template-columns:1fr; } }
+  .labs-method-item{ display:flex; gap:14px; }
+  .labs-method-step{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%; border:1px solid var(--amber-dim);
+    color: var(--amber); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .labs-method-title{ font-weight:600; font-size:13.5px; margin-bottom:6px; }
+  .labs-method-body{ font-size:12.5px; line-height:1.6; color: var(--muted); }
+  .labs-honesty-box{
+    margin-top:24px; padding:16px 18px; border-left:3px solid var(--amber-dim);
+    background: var(--panel-raised); border-radius:4px;
+  }
+  .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
+  .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
+
+  .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .labs-control-field{ display:flex; flex-direction:column; gap:6px; }
+  .labs-control-field label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); }
+  .labs-control-field select{
+    background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
+    padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'IBM Plex Mono', monospace; min-width:160px;
+  }
+  .labs-backtest-status{ font-size:12px; color: var(--muted); margin-bottom:16px; }
+  .labs-backtest-status.ok{ color: var(--gain); }
+  .labs-backtest-status.fail{ color: var(--loss); }
+
+  .backtest-summary{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:22px; }
+  .backtest-stat{ background: var(--panel-raised); border:1px solid var(--border); border-radius:6px; padding:14px 16px; }
+  .backtest-stat-label{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); margin-bottom:6px; }
+  .backtest-stat-value{ font-size:20px; font-family:'IBM Plex Mono', monospace; font-weight:600; }
+  .backtest-stat-value.up{ color: var(--gain); }
+  .backtest-stat-value.down{ color: var(--loss); }
+
+  .backtest-trades-table{ width:100%; border-collapse:collapse; font-size:12px; }
+  .backtest-trades-table th{
+    text-align:left; padding:8px 10px; color: var(--muted); font-size:10px; text-transform:uppercase;
+    letter-spacing:.04em; border-bottom:1px solid var(--border); font-weight:600;
+  }
+  .backtest-trades-table td{ padding:8px 10px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono', monospace; }
+  .backtest-outcome-hit{ color: var(--gain); }
+  .backtest-outcome-stopped{ color: var(--loss); }
+  .backtest-outcome-unresolved{ color: var(--muted); }
+
   .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
 
   .tour-overlay{ position:fixed; inset:0; z-index:450; pointer-events:none; }
@@ -288,6 +339,18 @@
     padding: 32px 24px; text-align:center; color: var(--muted); font-size:13px; line-height:1.6;
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
   }
+
+  .finished-trades-section{ margin-top: 28px; }
+  .finished-toggle{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    padding:14px 18px; font-size:12.5px; color: var(--muted); cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .finished-toggle:hover{ color: var(--paper); border-color: var(--amber-dim); }
+  .finished-toggle .caret{ font-size:10px; color: var(--amber); }
+  .finished-trades-list{ margin-top:14px; display:flex; flex-direction:column; gap:14px; opacity:.85; }
+  .finished-trades-list .trade-block{ border-color: var(--border); }
 
   .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
   @media (max-width: 900px){ .brief-two-col{ grid-template-columns:1fr; gap:24px; } }
@@ -567,8 +630,8 @@
   .news-toast-body{ font-size:12.5px; line-height:1.5; color: var(--muted); margin:0; }
 
   .toast-container{
-    position:fixed; top:76px; right:20px; z-index:900;
-    display:flex; flex-direction:column; gap:10px; max-width:340px; width:calc(100% - 40px);
+    position:fixed; bottom:20px; right:20px; z-index:900;
+    display:flex; flex-direction:column-reverse; gap:10px; max-width:340px; width:calc(100% - 40px);
   }
   .alert-toast{
     background: var(--panel); border:1px solid var(--amber-dim); border-radius: var(--radius);
@@ -590,7 +653,7 @@
   .toast-text{ font-size:12.5px; line-height:1.5; margin:0 0 8px 0; color: var(--paper); }
   .toast-link{ font-size:11px; color: var(--amber); text-decoration:none; }
   .toast-link:hover{ text-decoration:underline; }
-  @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; top:64px; } }
+  @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; bottom:12px; } }
   .news-toast-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
   .news-toast-link{ font-size:11.5px; color: var(--amber); text-decoration:none; }
   .news-toast-link:hover{ text-decoration:underline; }
@@ -875,6 +938,10 @@
     border-left:2px solid var(--amber-dim); margin-bottom:16px;
   }
   .journal-entry{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:12.5px; flex-wrap:wrap; }
+  .journal-source-tag{
+    font-size:9.5px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
+    border:1px solid var(--amber-dim); border-radius:3px; padding:2px 6px;
+  }
   .journal-entry:last-child{ border-bottom:none; }
   .journal-entry-sym{ font-weight:600; }
   .journal-entry-sym .t-dir{ font-size:10px; color: var(--muted); font-weight:400; margin-left:6px; }
@@ -930,7 +997,7 @@
     signOut, onAuthStateChanged, sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, onSnapshot
+    getFirestore, doc, setDoc, getDoc, onSnapshot
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -993,6 +1060,22 @@
         callback({ alpacaKeyId: data.alpacaKeyId || '', alpacaSecretKey: data.alpacaSecretKey || '' });
       }, function(err){
         console.error('Alpaca credentials sync error:', err);
+      });
+    },
+    // Internal only for now — not shown anywhere in the UI. One document
+    // per (day, symbol) rather than one document per day holding an array:
+    // when multiple picks resolve in the same tick, concurrent updates to
+    // a single shared array-document race each other (last write wins,
+    // silently dropping the others) — independent documents can't collide.
+    saveDailyPickLog: function(uid, key, record){
+      return setDoc(doc(db, 'users', uid, 'pickHistory', key), record, { merge: true });
+    },
+    getDailyPickLog: function(uid, key){
+      return getDoc(doc(db, 'users', uid, 'pickHistory', key)).then(function(snap){
+        return snap.exists() ? snap.data() : null;
+      }).catch(function(err){
+        console.error('Pick history read failed:', err);
+        return null;
       });
     }
   });
@@ -1101,6 +1184,10 @@
           <button class="nav-item" data-action="tour">
             Walkthrough
             <span class="nav-item-sub">See what Shwoopnet can do</span>
+          </button>
+          <button class="nav-item" data-page="labs">
+            Labs
+            <span class="nav-item-sub">Strategy &amp; backtesting</span>
           </button>
           <button class="nav-item" data-page="changelog">
             Changelog
@@ -1621,6 +1708,96 @@
     </div>
   </main>
 
+  <main class="page" id="page-labs" hidden>
+    <div class="trades-header">
+      <div>
+        <div class="trades-title">Labs</div>
+        <div class="trades-sub">The method behind the screener, and a real backtest — not a demo.</div>
+      </div>
+    </div>
+
+    <div class="brief-section-title">The Method</div>
+    <div class="labs-method-card">
+      <p class="labs-method-intro">
+        The daily screener isn't a black box. Here's the entire thing, in plain language — including what it
+        can't tell you yet.
+      </p>
+      <div class="labs-method-grid">
+        <div class="labs-method-item">
+          <div class="labs-method-step">1</div>
+          <div>
+            <div class="labs-method-title">A curated universe, not "the market"</div>
+            <div class="labs-method-body">41 stocks, deliberately mixed across market cap and sector — semiconductors,
+            retail, industrials, energy, healthcare, financials — not just the handful of household mega-caps.
+            It's not a full-market scanner; it's a fixed, transparent pool.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">2</div>
+          <div>
+            <div class="labs-method-title">Trend alignment is required, not optional</div>
+            <div class="labs-method-body">The 20-day and 50-day moving averages have to actually agree with the
+            trade direction. A stock with a big recent price swing but no real trend structure gets excluded
+            entirely — momentum alone was never enough to make the list.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">3</div>
+          <div>
+            <div class="labs-method-title">Entry, stop, and target come from real price structure</div>
+            <div class="labs-method-body">Entry sits at the 20-day moving average. Stop sits just past the actual
+            20-day low or high. Target is the real 20-day resistance or support level — not a fixed multiple of
+            risk, which would make every trade's reward ratio an identical, meaningless constant.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">4</div>
+          <div>
+            <div class="labs-method-title">Ranked by momentum, capped at 4</div>
+            <div class="labs-method-body">Everything that clears the alignment bar gets ranked by 5-day momentum
+            magnitude. The top 4 become the day's picks. On a day when nothing in the universe cleans up, fewer
+            than 4 show up — a forced pick would be worse than an honest zero.</div>
+          </div>
+        </div>
+      </div>
+      <div class="labs-honesty-box">
+        <div class="labs-honesty-title">What this isn't (yet)</div>
+        <p>This scoring is a heuristic I designed, not something empirically validated against real returns. There's
+        an internal log quietly tracking every pick's actual outcome — hit, stopped, or unresolved — building toward
+        real, earned statistics instead of a guess. It's not enough data yet to report a trustworthy hit rate. The
+        backtest below is the honest next step: the same logic, run against real history, so you can see how it
+        would have actually performed instead of taking my word for it.</p>
+      </div>
+    </div>
+
+    <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
+    <div class="labs-backtest-card">
+      <p class="labs-backtest-intro">
+        Runs the exact same scoring and target/stop logic used live, day by day, against real historical prices —
+        using only data that would have existed at the time. No lookahead, no cherry-picking. One symbol at a time,
+        not the full 41-stock universe (simulating "would this have been today's top pick" across the whole universe
+        historically is a bigger lift — this tests whether the underlying signal itself holds up).
+      </p>
+      <div class="labs-backtest-controls">
+        <div class="labs-control-field">
+          <label for="backtestSymbol">Symbol</label>
+          <select id="backtestSymbol"></select>
+        </div>
+        <div class="labs-control-field">
+          <label for="backtestLookback">Lookback</label>
+          <select id="backtestLookback">
+            <option value="150">6 months</option>
+            <option value="260" selected>1 year</option>
+            <option value="500">2 years</option>
+          </select>
+        </div>
+        <button class="settings-reset-btn" id="runBacktestBtn">Run backtest</button>
+      </div>
+      <div class="labs-backtest-status" id="backtestStatus"></div>
+      <div id="backtestResults"></div>
+    </div>
+  </main>
+
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoopnet. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
@@ -1906,6 +2083,65 @@
     });
   }
 
+  // ---------- Internal pick-outcome log (not shown in the UI yet) ----------
+  // The foundation for eventually validating whether the screener's scoring
+  // actually correlates with real outcomes. Every pick gets logged when it's
+  // generated; its outcome gets filled in later, either by the live price
+  // loop catching a real hit/stop, or — if the app wasn't open when that
+  // happened — marked "unresolved" the next time the screener runs, so we
+  // never silently lose track of what a pick was supposed to have done.
+  function resolveYesterdaysPendingPicks(today){
+    if(!window.__shwoopAPI || !currentUid) return Promise.resolve();
+    var yesterday = new Date(new Date(today + 'T00:00:00').getTime() - 24*60*60*1000).toISOString().slice(0,10);
+    return window.__shwoopAPI.getDailyPickLog(currentUid, yesterday + '_index').then(function(index){
+      if(!index || !Array.isArray(index.syms)) return;
+      return Promise.all(index.syms.map(function(sym){
+        var key = yesterday + '_' + sym;
+        return window.__shwoopAPI.getDailyPickLog(currentUid, key).then(function(pick){
+          if(!pick || pick.outcome !== 'pending') return;
+          pick.outcome = 'unresolved_replaced';
+          pick.resolvedAt = Date.now();
+          return window.__shwoopAPI.saveDailyPickLog(currentUid, key, pick);
+        });
+      }));
+    }).catch(function(err){
+      console.error('Failed to resolve prior-day pick log:', err);
+    });
+  }
+
+  function logTodaysPicksInternally(candidates, today){
+    if(!window.__shwoopAPI || !currentUid) return;
+    window.__shwoopAPI.saveDailyPickLog(currentUid, today + '_index', { date: today, syms: candidates.map(function(c){ return c.sym; }) })
+      .catch(function(err){ console.error('Failed to save today\'s pick index:', err); });
+    candidates.forEach(function(c){
+      var record = {
+        date: today, sym: c.sym, direction: c.analysis.direction, entry: c.analysis.entry, stop: c.analysis.stop, t1: c.analysis.t1,
+        score: c.score, generatedAt: Date.now(), outcome: 'pending', resolvedAt: null, resolvedPrice: null
+      };
+      window.__shwoopAPI.saveDailyPickLog(currentUid, today + '_' + c.sym, record).catch(function(err){
+        console.error('Failed to log pick internally for', c.sym, err);
+      });
+    });
+  }
+
+  function logPickOutcomeInternally(sym, outcome, price){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var today = new Date().toISOString().slice(0,10);
+    var key = today + '_' + sym;
+    // Each symbol has its own independent document — safe even if several
+    // picks resolve in the very same tick, unlike a shared array-document
+    // where concurrent writes would race and silently drop updates.
+    window.__shwoopAPI.getDailyPickLog(currentUid, key).then(function(pick){
+      if(!pick || pick.outcome !== 'pending') return;
+      pick.outcome = outcome;
+      pick.resolvedAt = Date.now();
+      pick.resolvedPrice = price;
+      return window.__shwoopAPI.saveDailyPickLog(currentUid, key, pick);
+    }).catch(function(err){
+      console.error('Failed to log pick outcome internally:', err);
+    });
+  }
+
   function runScreener(){
     if(isRunningScreener || isGuestMode) return;
     isRunningScreener = true;
@@ -1915,6 +2151,7 @@
     // limit, not anything happening at this call site.
     updateAnalysisStatus('Screening ' + SCREENER_UNIVERSE.length + ' stocks (takes a few minutes)…', null);
     var today = new Date().toISOString().slice(0,10);
+    resolveYesterdaysPendingPicks(today);
 
     Promise.all(SCREENER_UNIVERSE.map(fetchScreenerCandidate)).then(function(results){
       isRunningScreener = false;
@@ -1968,6 +2205,7 @@
           console.error('Failed to save screener picks:', err);
         });
       }
+      logTodaysPicksInternally(candidates, today);
     });
   }
 
@@ -2188,11 +2426,32 @@
     submitAlpacaBracketOrder(sym, side, qty, t.stop, t.t1).then(function(order){
       if(btn){ btn.textContent = 'Sent to Alpaca ✓'; }
       console.log('Alpaca paper order submitted:', order);
+      // One button means one button — since we already know exactly what
+      // was submitted (entry, qty, stop, target), there's no reason to
+      // make the user re-type it into the manual log form afterward.
+      logAlpacaTradeToJournal(t, qty, order);
     }).catch(function(err){
       if(btn){ btn.disabled = false; btn.textContent = 'Send to Alpaca (Paper)'; }
       alert('Paper order failed: ' + err.message);
       console.error('Alpaca order failed:', err);
     });
+  }
+
+  function logAlpacaTradeToJournal(t, qty, order){
+    // Market orders don't always return a fill price immediately in the
+    // submission response — fall back to the planned entry level, which
+    // for a paper market order during market hours is a close proxy.
+    var fillPrice = (order && order.filled_avg_price) ? parseFloat(order.filled_avg_price) : t.entry;
+    journalEntries.push({
+      id: 'j' + Date.now(),
+      date: new Date().toISOString().slice(0,10), sym: t.sym, direction: t.direction,
+      entry: fillPrice, qty: qty, stop: t.stop, t1: t.t1,
+      exit: null, status: 'open', source: 'alpaca'
+    });
+    saveJournalEntries();
+    renderTradeBlocks();
+    renderCalendar();
+    renderPLSummary();
   }
 
   // Risk = distance from entry to stop (what you stand to lose). Reward =
@@ -2289,7 +2548,35 @@
       el.innerHTML = '<div class="trades-empty-state">No trades to show right now. Either today\'s screener couldn\'t reach real market data (check your connection and refresh), or it ran successfully and nothing in the universe cleared today\'s quality bar — either way, nothing simulated shows in its place.</div>';
       return;
     }
-    el.innerHTML = trades.map(renderTradeRow).join('');
+
+    var active = trades.filter(function(t){ return t.status === 'active' || t.status === 'watching'; });
+    var finished = trades.filter(function(t){ return t.status === 'hit' || t.status === 'stopped'; });
+
+    var html = active.map(renderTradeRow).join('');
+    if(active.length === 0 && finished.length > 0){
+      html = '<div class="trades-empty-state">Everything today already played out — see "Finished today" below for how it went.</div>';
+    }
+    if(finished.length > 0){
+      html += '<div class="finished-trades-section">' +
+        '<button class="finished-toggle" id="finishedToggle" aria-expanded="false">' +
+          '<span class="caret">▸</span> Finished today (' + finished.length + ')' +
+        '</button>' +
+        '<div class="finished-trades-list" id="finishedTradesList" hidden>' +
+          finished.map(renderTradeRow).join('') +
+        '</div>' +
+      '</div>';
+    }
+    el.innerHTML = html;
+
+    var finishedToggleBtn = document.getElementById('finishedToggle');
+    if(finishedToggleBtn){
+      finishedToggleBtn.addEventListener('click', function(){
+        var list = document.getElementById('finishedTradesList');
+        var isHidden = list.hasAttribute('hidden');
+        if(isHidden){ list.removeAttribute('hidden'); finishedToggleBtn.setAttribute('aria-expanded','true'); finishedToggleBtn.querySelector('.caret').textContent = '▾'; }
+        else{ list.setAttribute('hidden',''); finishedToggleBtn.setAttribute('aria-expanded','false'); finishedToggleBtn.querySelector('.caret').textContent = '▸'; }
+      });
+    }
 
     el.querySelectorAll('.chevron').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -2374,7 +2661,11 @@
       cell.classList.add(up ? 'flash-up' : 'flash-down');
       setTimeout(function(){ cell.classList.remove('flash-up','flash-down'); }, 600);
 
+      var statusBefore = t.status;
       recomputeTradeStatus(t, q.price);
+      if(statusBefore !== t.status && (t.status === 'hit' || t.status === 'stopped')){
+        logPickOutcomeInternally(t.sym, t.status, q.price);
+      }
       var badgeEl = document.getElementById('status-badge-' + t.sym);
       if(badgeEl){
         var badge = computeBadgeInfo(t);
@@ -2416,7 +2707,7 @@
     '5m':  { volFactor:0.0035, mockCount:160, fetchSize:160, defaultVisible:60 },
     '15m': { volFactor:0.006,  mockCount:140, fetchSize:140, defaultVisible:45 },
     '30m': { volFactor:0.0085, mockCount:120, fetchSize:120, defaultVisible:35 },
-    '1D':  { volFactor:0.0035, mockCount:80,  fetchSize:80, defaultVisible:40 },
+    '1D':  { volFactor:0.0035, mockCount:100, fetchSize:100, defaultVisible:40 },
     '1W':  { volFactor:0.006,  fetchSize:30,  defaultVisible:7  },
     '1M':  { volFactor:0.012,  fetchSize:90,  defaultVisible:30 },
     '1Y':  { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
@@ -2594,6 +2885,160 @@
     }, priority);
   }
 
+  // ---------- Backtest engine (Labs page) ----------
+  // Re-runs the exact same computeTechnicalAnalysis/scoreCandidate logic
+  // the live screener uses, day by day against real history, using only
+  // data that would have existed at the time — no lookahead. Not a demo:
+  // this is the actual signal, tested honestly.
+  function fetchBacktestHistory(sym, totalDays){
+    return scheduleTwelveDataCall(function(){
+      var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
+        '&interval=1day&outputsize=' + Math.min(totalDays, 5000) + '&apikey=' + TWELVE_DATA_API_KEY;
+      return fetch(url).then(function(res){
+        if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
+        return res.json();
+      }).then(function(data){
+        if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 60){
+          throw new Error('Not enough historical data for ' + sym);
+        }
+        return data.values.map(function(v){
+          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
+        }).reverse();
+      });
+    }, 'high'); // the user is actively waiting on this
+  }
+
+  function simulateForwardFromDay(bars, entryIdx, analysis){
+    var isLong = analysis.direction === 'Long';
+    for(var j = entryIdx + 1; j < bars.length; j++){
+      var bar = bars[j];
+      // Conservative tie-break: daily bars can't tell us which happened
+      // first within a single day, so if a bar's range could plausibly
+      // have touched both stop and target, assume the worse outcome
+      // (stop) resolved first.
+      if(isLong){
+        if(bar.l <= analysis.stop) return { result:'stopped', days: j - entryIdx, price: analysis.stop, date: bar.t };
+        if(bar.h >= analysis.t1) return { result:'hit', days: j - entryIdx, price: analysis.t1, date: bar.t };
+      } else {
+        if(bar.h >= analysis.stop) return { result:'stopped', days: j - entryIdx, price: analysis.stop, date: bar.t };
+        if(bar.l <= analysis.t1) return { result:'hit', days: j - entryIdx, price: analysis.t1, date: bar.t };
+      }
+    }
+    return { result:'unresolved', days: bars.length - 1 - entryIdx, price: bars[bars.length-1].c, date: bars[bars.length-1].t };
+  }
+
+  function runBacktestSimulation(bars, lookbackDays){
+    // The window before lookback starts is context only (SMA seeding) —
+    // the same "need real history before a signal counts" rule the live
+    // screener follows, not special treatment for the backtest.
+    var startIdx = Math.max(50, bars.length - lookbackDays);
+    var trades = [];
+    var i = startIdx;
+    while(i < bars.length){
+      var historySlice = bars.slice(0, i + 1); // no lookahead: only up to and including day i
+      var currentPrice = bars[i].c;
+      var analysis = computeTechnicalAnalysis(historySlice, currentPrice);
+      var score = scoreCandidate(analysis);
+      if(score >= MIN_SCREENER_SCORE){
+        var outcome = simulateForwardFromDay(bars, i, analysis);
+        trades.push({
+          date: bars[i].t, direction: analysis.direction, entry: analysis.entry,
+          stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days
+        });
+        i = i + outcome.days + 1; // don't open an overlapping signal while this one is still live
+      } else {
+        i++;
+      }
+    }
+    return trades;
+  }
+
+  function summarizeBacktestTrades(trades){
+    var resolved = trades.filter(function(t){ return t.outcome !== 'unresolved'; });
+    var hits = resolved.filter(function(t){ return t.outcome === 'hit'; });
+    var winRate = resolved.length > 0 ? (hits.length / resolved.length * 100) : 0;
+    var avgDays = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.days; }, 0) / resolved.length) : 0;
+    return {
+      totalSignals: trades.length, hitCount: hits.length, stoppedCount: resolved.length - hits.length,
+      unresolvedCount: trades.length - resolved.length, winRate: winRate, avgDays: avgDays
+    };
+  }
+
+  function renderBacktestResults(trades, summary, sym){
+    var statusEl = document.getElementById('backtestStatus');
+    var resultsEl = document.getElementById('backtestResults');
+    if(trades.length === 0){
+      statusEl.textContent = 'No qualifying signals found for ' + sym + ' in this window.';
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = 'Found ' + trades.length + ' historical signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.';
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Still open at end</div><div class="backtest-stat-value">' + summary.unresolvedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days to resolve</div><div class="backtest-stat-value">' + summary.avgDays.toFixed(0) + '</div></div>' +
+      '</div>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Days</th></tr></thead>' +
+        '<tbody>' + trades.slice().reverse().map(function(t){
+          var outcomeClass = 'backtest-outcome-' + t.outcome;
+          var outcomeLabel = t.outcome === 'hit' ? 'Hit target' : t.outcome === 'stopped' ? 'Stopped out' : 'Unresolved';
+          return '<tr>' +
+            '<td>' + t.date.toLocaleDateString([], {month:'short', day:'numeric', year:'2-digit'}) + '</td>' +
+            '<td>' + t.direction + '</td>' +
+            '<td>' + t.entry.toFixed(2) + '</td>' +
+            '<td>' + t.stop.toFixed(2) + '</td>' +
+            '<td>' + t.target.toFixed(2) + '</td>' +
+            '<td class="' + outcomeClass + '">' + outcomeLabel + '</td>' +
+            '<td>' + t.days + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody>' +
+      '</table>';
+  }
+
+  function runBacktestClicked(){
+    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
+    var sym = document.getElementById('backtestSymbol').value;
+    var lookbackDays = parseInt(document.getElementById('backtestLookback').value, 10);
+    var statusEl = document.getElementById('backtestStatus');
+    var btn = document.getElementById('runBacktestBtn');
+    var resultsEl = document.getElementById('backtestResults');
+
+    btn.disabled = true;
+    statusEl.textContent = 'Fetching ' + sym + ' history and running the simulation…';
+    statusEl.className = 'labs-backtest-status';
+    resultsEl.innerHTML = '';
+
+    var totalDays = lookbackDays + 60; // buffer so SMA50 is seeded before the window starts
+    fetchBacktestHistory(sym, totalDays).then(function(bars){
+      var trades = runBacktestSimulation(bars, lookbackDays);
+      var summary = summarizeBacktestTrades(trades);
+      renderBacktestResults(trades, summary, sym);
+      btn.disabled = false;
+    }).catch(function(err){
+      statusEl.textContent = 'Backtest failed: ' + err.message;
+      statusEl.className = 'labs-backtest-status fail';
+      btn.disabled = false;
+      console.error('Backtest failed:', err);
+    });
+  }
+
+  function populateBacktestSymbolSelect(){
+    var sel = document.getElementById('backtestSymbol');
+    if(!sel) return;
+    sel.innerHTML = SCREENER_UNIVERSE.map(function(sym){
+      return '<option value="' + sym + '">' + sym + ' — ' + (COMPANY_NAMES[sym] || sym) + '</option>';
+    }).join('');
+  }
+
   function fetchHistory(sym, tf, priority){
     var cacheKey = sym + '_' + tf;
     if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
@@ -2759,7 +3204,10 @@
       });
     }
 
-    // Time axis: show roughly 4-5 evenly spaced date/time labels.
+    // Time axis: show roughly 4-5 evenly spaced date/time labels. The
+    // first and last labels anchor inward (not centered) so their text
+    // grows toward the middle of the chart instead of overflowing past
+    // the left/right edge and getting clipped.
     var axisY = H - 8;
     parts.push('<line class="grid-line" x1="0" y1="'+(padTop+plotH)+'" x2="'+plotW+'" y2="'+(padTop+plotH)+'"/>');
     var labelCount = Math.min(5, data.length);
@@ -2769,8 +3217,9 @@
       var lx = idx * xStep + xStep/2;
       var barDate = data[idx].t;
       var label = formatAxisLabel(barDate, tf, prevLabelDate);
+      var anchor = li === 0 ? 'start' : (li === labelCount - 1 ? 'end' : 'middle');
       if(label){
-        parts.push('<text class="grid-label" x="'+lx+'" y="'+axisY+'" text-anchor="middle">'+label+'</text>');
+        parts.push('<text class="grid-label" x="'+lx+'" y="'+axisY+'" text-anchor="'+anchor+'">'+label+'</text>');
       }
       prevLabelDate = barDate;
     }
@@ -3608,7 +4057,7 @@
   })();
 
   // ---------- Navigation ----------
-  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog' };
+  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
 
   function showPage(name){
     document.getElementById('page-brief').hidden = (name !== 'brief');
@@ -3616,6 +4065,7 @@
     document.getElementById('page-journal').hidden = (name !== 'journal');
     document.getElementById('page-settings').hidden = (name !== 'settings');
     document.getElementById('page-changelog').hidden = (name !== 'changelog');
+    document.getElementById('page-labs').hidden = (name !== 'labs');
     document.getElementById('navCurrentLabel').textContent = navLabels[name];
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
@@ -3908,9 +4358,11 @@
     }
 
     var rows = entries.map(function(e){
+      var sourceTag = e.source === 'alpaca' ? '<span class="journal-source-tag">via Alpaca</span>' : '';
       if(e.status === 'open'){
         return '<div class="journal-entry">' +
           '<span class="journal-entry-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span></span>' +
+          sourceTag +
           '<span class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' · ' + e.qty + ' sh</span>' +
           '<span class="status-badge active">Open</span>' +
           '<button class="exit-trade-btn" data-id="' + e.id + '">Exit trade</button>' +
@@ -3923,6 +4375,7 @@
       var dollarStr = (pl.dollar >= 0 ? '+$' : '−$') + Math.abs(pl.dollar).toFixed(0);
       return '<div class="journal-entry">' +
         '<span class="journal-entry-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span></span>' +
+        sourceTag +
         '<span class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' → ' + e.exit.toFixed(2) + '</span>' +
         '<span class="journal-entry-result mono ' + (up ? 'up' : 'down') + '">' + pctStr + ' · ' + dollarStr + '</span>' +
         '<button class="journal-remove-btn" data-id="' + e.id + '" aria-label="Remove trade">Remove</button>' +
@@ -4329,10 +4782,39 @@
     setTimeout(function(){ dismissToast(toastEl); }, 12000);
   }
 
+  var MAX_VISIBLE_TOASTS = 2;
+
   function showAlertToasts(newAlerts){
-    newAlerts.forEach(function(alert, i){
+    var shown = newAlerts.slice(0, MAX_VISIBLE_TOASTS);
+    var rest = newAlerts.slice(MAX_VISIBLE_TOASTS);
+    shown.forEach(function(alert, i){
       setTimeout(function(){ showToast(alert); }, i * 500);
     });
+    if(rest.length > 0){
+      setTimeout(function(){ showMoreAlertsToast(rest.length); }, shown.length * 500);
+    }
+  }
+
+  function showMoreAlertsToast(count){
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    var toastEl = document.createElement('div');
+    toastEl.className = 'alert-toast';
+    toastEl.innerHTML =
+      '<div class="toast-head">' +
+        '<span class="toast-sym mono">+' + count + ' more</span>' +
+        '<button class="toast-close" aria-label="Dismiss">×</button>' +
+      '</div>' +
+      '<p class="toast-text">' + count + ' more alert' + (count > 1 ? 's' : '') + ' today.</p>' +
+      '<a class="toast-link" href="#" data-open-history="1">View in History →</a>';
+    container.appendChild(toastEl);
+    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
+    toastEl.querySelector('[data-open-history]').addEventListener('click', function(e){
+      e.preventDefault();
+      dismissToast(toastEl);
+      openHistory();
+    });
+    setTimeout(function(){ dismissToast(toastEl); }, 12000);
   }
 
   function generateAndSaveDailyAlerts(existingHistory){
@@ -5051,6 +5533,8 @@
   statCta();
   updateClock();
   renderHistoryList();
+  populateBacktestSymbolSelect();
+  document.getElementById('runBacktestBtn').addEventListener('click', runBacktestClicked);
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
