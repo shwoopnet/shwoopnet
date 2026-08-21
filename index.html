@@ -764,9 +764,13 @@
   .alpaca-dock-panel{
     position:fixed; bottom:42px; right:380px; z-index:441; width:440px; max-width:calc(100% - 40px);
     background: var(--panel); border:1px solid var(--border); border-radius:8px;
-    display:flex; flex-direction:column; height:50vh; min-height:220px;
+    display:flex; flex-direction:column; height:40vh; max-height:480px; min-height:220px;
     box-shadow:0 16px 36px rgba(0,0,0,0.5);
+    opacity:0; transform: translateY(10px); pointer-events:none;
+    transition: opacity .18s ease, transform .18s ease;
   }
+  .alpaca-dock-panel.open{ opacity:1; transform: translateY(0); pointer-events:auto; }
+  [data-reduce-motion="true"] .alpaca-dock-panel{ transition:none; }
   .alpaca-dock-panel-head{
     display:flex; justify-content:space-between; align-items:center; padding:10px 14px;
     border-bottom:1px solid var(--border); font-size:12px; font-weight:600; flex-shrink:0; cursor:default;
@@ -1295,10 +1299,10 @@
 
   <div class="alpaca-dock" id="alpacaDock" hidden>
     <button class="alpaca-dock-tab" id="alpacaDockTab">
-      <span>Alpaca Paper Account</span>
+      <span id="alpacaDockTitle">Paper Trading Account</span>
       <span class="alpaca-dock-caret" id="alpacaDockCaret">▲</span>
     </button>
-    <div class="alpaca-dock-panel" id="alpacaDockPanel" hidden>
+    <div class="alpaca-dock-panel" id="alpacaDockPanel">
       <div class="alpaca-dock-panel-head" id="alpacaDockPanelHead">
         <span>Account</span>
         <button class="notepad-lock-btn" id="alpacaDockLockBtn">Unlock</button>
@@ -1750,6 +1754,16 @@
     </div>
 
     <div class="changelog-list">
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.7.4.0.0 — Reliability &amp; Journal Accuracy</div>
+        <ul class="changelog-items">
+          <li>Account panel now gives up quickly if any single request stalls, instead of getting stuck on "Loading…"</li>
+          <li>Bracket order exits (hitting stop or target) now sync back to the journal automatically, even if they filled while this tab was closed</li>
+          <li>Basic stats added to the Journal: win rate, avg win, avg loss, best trade, worst trade</li>
+          <li>Fixed a tour bug where the Changelog step's highlight could land off-screen</li>
+          <li>Layout settings cleaned up: removed dead code, clearer labels, added a reset-to-defaults button</li>
+        </ul>
+      </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.7.3.0.0 — Account Panel &amp; Auto-Send</div>
         <ul class="changelog-items">
@@ -2505,6 +2519,14 @@
   // keys. Shwoop never holds funds or credentials centrally — this is
   // literally the same as if the person wrote this fetch call themselves.
   var ALPACA_PAPER_BASE = 'https://paper-api.alpaca.markets';
+  // Shwoop only ever connects to Alpaca's paper endpoint today — there's
+  // no live-account connection built. This stays hardcoded until that's
+  // deliberately added, at which point the tab title below would need to
+  // reflect whichever is actually connected.
+  var alpacaAccountType = 'paper';
+  function alpacaAccountLabel(){
+    return alpacaAccountType === 'live' ? 'Live Broker Account' : 'Paper Trading Account';
+  }
   var alpacaCreds = { keyId: '', secretKey: '' };
   var alpacaConnected = false;
 
@@ -2532,6 +2554,7 @@
     document.getElementById('alpacaConnectedRow').removeAttribute('hidden');
     document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(alpacaCreds.keyId);
     document.getElementById('alpacaDock').removeAttribute('hidden');
+    document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
     document.getElementById('alpacaAutoTradeRow').removeAttribute('hidden');
   }
 
@@ -2810,9 +2833,9 @@
   document.getElementById('alpacaDockTab').addEventListener('click', function(){
     var panel = document.getElementById('alpacaDockPanel');
     var caret = document.getElementById('alpacaDockCaret');
-    var isHidden = panel.hasAttribute('hidden');
-    if(isHidden){
-      panel.removeAttribute('hidden');
+    var isOpen = panel.classList.contains('open');
+    if(!isOpen){
+      panel.classList.add('open');
       caret.textContent = '▼';
       renderAlpacaDock();
       // Keeps balance/positions genuinely live while you're actually
@@ -2822,7 +2845,7 @@
       if(alpacaDockRefreshInterval) clearInterval(alpacaDockRefreshInterval);
       alpacaDockRefreshInterval = setInterval(renderAlpacaDock, 45000);
     } else {
-      panel.setAttribute('hidden', '');
+      panel.classList.remove('open');
       caret.textContent = '▲';
       if(alpacaDockRefreshInterval){ clearInterval(alpacaDockRefreshInterval); alpacaDockRefreshInterval = null; }
     }
@@ -3149,13 +3172,17 @@
     if(inPosition.length === 0 && needsEntry.length === 0 && watching.length === 0 && finished.length > 0){
       html = '<div class="trades-empty-state">Everything today already played out — see "Finished today" below for how it went.</div>';
     }
-    if(finished.length > 0){
+    // Target hits are excluded from the visible list here — hit ones
+    // still count as "finished" for keeping them out of the main list
+    // above, they just don't clutter this dropdown once they're won.
+    var shownFinished = finished.filter(function(t){ return t.status !== 'hit'; });
+    if(shownFinished.length > 0){
       html += '<div class="finished-trades-section">' +
         '<button class="finished-toggle" id="finishedToggle" aria-expanded="false">' +
-          '<span class="caret">▸</span> Finished today (' + finished.length + ')' +
+          '<span class="caret">▸</span> Finished today (' + shownFinished.length + ')' +
         '</button>' +
         '<div class="finished-trades-list" id="finishedTradesList" hidden>' +
-          finished.map(function(t){ return renderTradeRow(t); }).join('') +
+          shownFinished.map(function(t){ return renderTradeRow(t); }).join('') +
         '</div>' +
       '</div>';
     }
