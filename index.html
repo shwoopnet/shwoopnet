@@ -1787,28 +1787,36 @@
     };
   }
 
+  // The actual rate-limit fix lives in fetchHistory's shared queue below —
+  // every Twelve Data call in the app funnels through it, so this screener
+  // can fire all 33 requests without worrying about pacing itself.
+
+  function fetchScreenerCandidate(sym){
+    return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M')]).then(function(results){
+      var quote = results[0], bars = results[1];
+      if(!quote || !bars || bars.length < 25) return null;
+      var analysis = computeTechnicalAnalysis(bars, quote.price);
+      return {
+        sym: sym, price: quote.price, prevClose: quote.prevClose,
+        score: scoreCandidate(analysis), analysis: analysis
+      };
+    }).catch(function(err){
+      console.error('Screener fetch failed for', sym, err);
+      return null;
+    });
+  }
+
   function runScreener(){
     if(isRunningScreener || isGuestMode) return;
     isRunningScreener = true;
-    updateAnalysisStatus('Screening ' + SCREENER_UNIVERSE.length + ' stocks…', null);
+    // Every one of these history fetches is paced by the shared Twelve
+    // Data queue (see fetchHistory above), so firing them all here is
+    // safe — the queue is what actually keeps the app under the rate
+    // limit, not anything happening at this call site.
+    updateAnalysisStatus('Screening ' + SCREENER_UNIVERSE.length + ' stocks (takes a few minutes)…', null);
     var today = new Date().toISOString().slice(0,10);
 
-    var promises = SCREENER_UNIVERSE.map(function(sym){
-      return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M')]).then(function(results){
-        var quote = results[0], bars = results[1];
-        if(!quote || !bars || bars.length < 25) return null;
-        var analysis = computeTechnicalAnalysis(bars, quote.price);
-        return {
-          sym: sym, price: quote.price, prevClose: quote.prevClose,
-          score: scoreCandidate(analysis), analysis: analysis
-        };
-      }).catch(function(err){
-        console.error('Screener fetch failed for', sym, err);
-        return null;
-      });
-    });
-
-    Promise.all(promises).then(function(results){
+    Promise.all(SCREENER_UNIVERSE.map(fetchScreenerCandidate)).then(function(results){
       isRunningScreener = false;
       var candidates = results.filter(Boolean).sort(function(a,b){ return b.score - a.score; }).slice(0, SCREENER_PICK_COUNT);
 
@@ -2228,44 +2236,109 @@
   var historyCache = {};
   var historyIntervals = { '5m':'5min', '15m':'15min', '30m':'30min', '1D':'5min', '1W':'1day', '1M':'1day', '1Y':'1week' };
 
+  // Every Twelve Data request in the app — screener, chart rendering,
+  // timeframe switches, all of it — funnels through this one queue. The
+  // free tier allows roughly 8 requests/minute *total*, not per-feature,
+  // so throttling just the screener's own calls isn't enough: chart
+  // rendering for whatever's currently on screen fires its own Twelve Data
+  // calls independently, and the two together can still blow the limit
+  // even if each is individually well-behaved. A single shared, rolling
+  // 60-second window is the only way to guarantee the app-wide total stays
+  // under the ceiling no matter which feature is asking.
+  var TWELVE_DATA_MAX_PER_MINUTE = 7; // a little under ~8 for safety margin
+  var twelveDataQueue = [];
+  var twelveDataCallTimestamps = [];
+
+  function scheduleTwelveDataCall(fn){
+    return new Promise(function(resolve, reject){
+      twelveDataQueue.push({ fn: fn, resolve: resolve, reject: reject });
+      processTwelveDataQueue();
+    });
+  }
+
+  function processTwelveDataQueue(){
+    var now = Date.now();
+    twelveDataCallTimestamps = twelveDataCallTimestamps.filter(function(t){ return now - t < 60000; });
+
+    if(twelveDataQueue.length === 0) return;
+    if(twelveDataCallTimestamps.length >= TWELVE_DATA_MAX_PER_MINUTE){
+      var waitMs = 60000 - (now - twelveDataCallTimestamps[0]) + 250;
+      setTimeout(processTwelveDataQueue, waitMs);
+      return;
+    }
+
+    var next = twelveDataQueue.shift();
+    twelveDataCallTimestamps.push(now);
+    next.fn().then(next.resolve, next.reject);
+    if(twelveDataQueue.length > 0){ processTwelveDataQueue(); }
+  }
+
   function fetchHistory(sym, tf){
     var cacheKey = sym + '_' + tf;
     if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
 
-    var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
-      '&interval=' + historyIntervals[tf] + '&outputsize=' + tfConfig[tf].fetchSize +
-      '&apikey=' + TWELVE_DATA_API_KEY;
+    return scheduleTwelveDataCall(function(){
+      var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
+        '&interval=' + historyIntervals[tf] + '&outputsize=' + tfConfig[tf].fetchSize +
+        '&apikey=' + TWELVE_DATA_API_KEY;
 
-    return fetch(url)
-      .then(function(res){
-        if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function(data){
-        if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 2){
-          throw new Error('No usable history for ' + sym + ' (' + tf + ')');
-        }
-        // Twelve Data returns most-recent-first; we render oldest-first.
-        var bars = data.values.map(function(v){
-          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
-        }).reverse();
-        historyCache[cacheKey] = bars;
-        return bars;
-      });
+      return fetch(url)
+        .then(function(res){
+          if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function(data){
+          if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 2){
+            throw new Error('No usable history for ' + sym + ' (' + tf + ')');
+          }
+          // Twelve Data returns most-recent-first; we render oldest-first.
+          var bars = data.values.map(function(v){
+            return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
+          }).reverse();
+          historyCache[cacheKey] = bars;
+          return bars;
+        });
+    });
   }
 
-  function formatAxisDate(d, tf){
+  function formatAxisLabel(d, tf, prevD){
     if(!d || isNaN(d.getTime())) return '';
-    if(tf === '1D'){
-      return d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+    var isIntraday = INTRADAY_TFS.indexOf(tf) > -1;
+    if(isIntraday){
+      var timeStr = d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+      if(tf === '1D'){
+        // Guaranteed single session — always just the time, like every
+        // platform's intraday-of-the-day view.
+        return timeStr;
+      }
+      // 5m/15m/30m scroll across multiple days. Real charting platforms
+      // don't repeat the date on every tick here — they show times, and
+      // mark the day boundary itself with a date instead of a time.
+      var isNewDay = !prevD || d.toDateString() !== prevD.toDateString();
+      return isNewDay ? d.toLocaleDateString([], { month:'short', day:'numeric' }) : timeStr;
     }
+    // Daily/weekly views. 1Y in particular spans roughly two years of
+    // weekly bars, so a bare "Jan 15" would be ambiguous about which
+    // year — add it whenever the label isn't in the current year, or a
+    // year boundary falls between this label and the last one.
+    var currentYear = new Date().getFullYear();
+    var needsYear = d.getFullYear() !== currentYear || (prevD && prevD.getFullYear() !== d.getFullYear());
+    return d.toLocaleDateString([], needsYear ? { month:'short', day:'numeric', year:'2-digit' } : { month:'short', day:'numeric' });
+  }
+
+  // Unlike the passive axis ticks above, the crosshair's date tag is
+  // pinned to one specific hovered bar and should always show full
+  // context — there's no "previous tick" to lean on for disambiguation.
+  function formatCrosshairDate(d, tf){
+    if(!d || isNaN(d.getTime())) return '';
     if(INTRADAY_TFS.indexOf(tf) > -1){
-      // 5m/15m/30m are scrollable across multiple days — a bare time would
-      // be ambiguous about which day it's from once you pan back.
-      return d.toLocaleDateString([], { month:'short', day:'numeric' }) + ' ' +
-        d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+      var timeStr = d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+      if(tf === '1D') return timeStr;
+      return d.toLocaleDateString([], { month:'short', day:'numeric' }) + ' ' + timeStr;
     }
-    return d.toLocaleDateString([], { month:'short', day:'numeric' });
+    var currentYear2 = new Date().getFullYear();
+    var needsYear2 = d.getFullYear() !== currentYear2;
+    return d.toLocaleDateString([], needsYear2 ? { month:'short', day:'numeric', year:'2-digit' } : { month:'short', day:'numeric' });
   }
 
   // Standard "nice numbers for graph labels" algorithm (Heckbert) — snaps
@@ -2363,13 +2436,16 @@
     var axisY = H - 8;
     parts.push('<line class="grid-line" x1="0" y1="'+(padTop+plotH)+'" x2="'+plotW+'" y2="'+(padTop+plotH)+'"/>');
     var labelCount = Math.min(5, data.length);
+    var prevLabelDate = null;
     for(var li = 0; li < labelCount; li++){
       var idx = Math.round(li * (data.length - 1) / Math.max(1, labelCount - 1));
       var lx = idx * xStep + xStep/2;
-      var label = formatAxisDate(data[idx].t, tf);
+      var barDate = data[idx].t;
+      var label = formatAxisLabel(barDate, tf, prevLabelDate);
       if(label){
         parts.push('<text class="grid-label" x="'+lx+'" y="'+axisY+'" text-anchor="middle">'+label+'</text>');
       }
+      prevLabelDate = barDate;
     }
 
     data.forEach(function(d, i){
@@ -2612,7 +2688,7 @@
     svg.appendChild(priceTag);
 
     // Date tag on the bottom axis, under the hovered bar.
-    var dateLabel = formatAxisDate(bar.t, state.tf);
+    var dateLabel = formatCrosshairDate(bar.t, state.tf);
     if(dateLabel){
       var dateTag = document.createElementNS(ns, 'g');
       dateTag.setAttribute('class', 'crosshair-tag');
