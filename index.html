@@ -1619,6 +1619,7 @@
     trades = DEFAULT_TRADES.map(cloneDefaultTrade);
     watchlist = watchlist.filter(function(w){ return DEFAULT_WATCHLIST_SYMS.indexOf(w.sym) > -1; });
     calibrateTradeLevels();
+    renderTicker();
     statCta();
     var subtitleEl = document.getElementById('tradesSubtitle');
     if(subtitleEl){ subtitleEl.textContent = 'Simulated entries, stops and targets — chart below each row.'; }
@@ -1784,6 +1785,7 @@
 
       renderTradeBlocks();
       renderWhatToWatch();
+      renderTicker();
       statCta();
       updateAnalysisStatus('Screened today · ' + new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }), true);
       var subtitleEl = document.getElementById('tradesSubtitle');
@@ -1811,6 +1813,7 @@
     // meantime so the page doesn't show blank current-price cells.
     renderTradeBlocks();
     renderWhatToWatch();
+    renderTicker();
     statCta();
     updateAnalysisStatus("Today's screener picks loaded", true);
     var subtitleEl2 = document.getElementById('tradesSubtitle');
