@@ -735,6 +735,33 @@
     cursor: nwse-resize; display:none;
   }
   .notepad-panel.unlocked .notepad-resize-handle{ display:block; }
+  .alpaca-dock{ position:fixed; bottom:0; left:20px; z-index:440; width:340px; max-width:calc(100% - 40px); }
+  .alpaca-dock-tab{
+    width:100%; display:flex; justify-content:space-between; align-items:center;
+    background: var(--panel); border:1px solid var(--border); border-bottom:none;
+    border-radius:8px 8px 0 0; padding:10px 16px; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-size:12.5px; font-weight:600; color: var(--paper);
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
+  }
+  .alpaca-dock-caret{ color: var(--amber); font-size:10px; }
+  .alpaca-dock-panel{
+    background: var(--panel); border:1px solid var(--border); border-bottom:none;
+    padding:16px; max-height:50vh; overflow-y:auto;
+  }
+  .alpaca-dock-equity{ font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; }
+  .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
+  .alpaca-dock-daychange.up{ color: var(--gain); }
+  .alpaca-dock-daychange.down{ color: var(--loss); }
+  .alpaca-dock-bp{ font-size:11.5px; color: var(--muted); margin-top:8px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .alpaca-dock-empty{ font-size:12px; color: var(--muted); padding-top:12px; }
+  .alpaca-dock-table{ width:100%; border-collapse:collapse; font-size:11.5px; margin-top:12px; }
+  .alpaca-dock-table th{
+    text-align:left; padding:6px 4px; color: var(--muted); font-size:9.5px; text-transform:uppercase;
+    letter-spacing:.04em; border-bottom:1px solid var(--border);
+  }
+  .alpaca-dock-table td{ padding:7px 4px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono', monospace; }
+  .alpaca-dock-table td.up{ color: var(--gain); }
+  .alpaca-dock-table td.down{ color: var(--loss); }
   .notepad-resize-handle::before{
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
@@ -1231,6 +1258,17 @@
     <div class="notepad-resize-handle" id="notepadResizeHandle"></div>
   </div>
 
+  <div class="alpaca-dock" id="alpacaDock" hidden>
+    <button class="alpaca-dock-tab" id="alpacaDockTab">
+      <span>Alpaca Paper Account</span>
+      <span class="alpaca-dock-caret" id="alpacaDockCaret">▲</span>
+    </button>
+    <div class="alpaca-dock-panel" id="alpacaDockPanel" hidden>
+      <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
+      <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
+    </div>
+  </div>
+
   <div class="tour-overlay" id="tourOverlay" hidden>
     <div class="tour-spotlight" id="tourSpotlight"></div>
     <svg class="tour-connector-svg" id="tourConnectorSvg">
@@ -1511,6 +1549,7 @@
         <div>
           <div class="settings-row-title">Live data</div>
           <div class="settings-row-desc quote-sync-status" id="quoteSyncStatus">Connecting…</div>
+          <div class="settings-row-desc" style="margin-top:4px;">Finnhub's free feed is genuinely real-time for US stocks — connecting Alpaca below doesn't fix a delay, it just consolidates prices and your broker onto one account instead of two.</div>
         </div>
       </div>
 
@@ -1539,6 +1578,18 @@
           </div>
           <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
         </div>
+      </div>
+
+      <div class="settings-row" id="alpacaAutoTradeRow" hidden>
+        <div>
+          <div class="settings-row-title">Auto-send new picks (10 shares)</div>
+          <div class="settings-row-desc">
+            Every new daily pick gets sent to Alpaca automatically the moment the screener finds it — no manual
+            click. Only runs while this browser tab is open; it does not run overnight or in the background.
+            Paper money only.
+          </div>
+        </div>
+        <button class="chart-tool-btn" id="alpacaAutoTradeToggle" role="switch" aria-checked="false">Off</button>
       </div>
 
       <div class="settings-row">
@@ -1630,33 +1681,41 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
+        <div class="changelog-version">v1.7.3.0.0 — Account Panel &amp; Auto-Send</div>
+        <ul class="changelog-items">
+          <li>New account panel (bottom-left tab) shows your real Alpaca balance and open positions at a glance</li>
+          <li>Optional auto-send: new picks can go to Alpaca automatically at a fixed size, no manual click — off by default, and only runs while this tab is open</li>
+          <li>API keys are now hidden once connected, shown only as a masked version</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
         <div class="changelog-version">v1.7.2.0.0 — Chart &amp; Wording Polish</div>
         <ul class="changelog-items">
-          <li>Time-axis labels now read like a real charting platform's — day numbers by default, times only where needed to tell same-day labels apart</li>
+          <li>Chart date labels now show plain day numbers, not a repeated time on every tick</li>
           <li>Trade plan wording simplified: "Take profit at $X" / "Stop loss at $Y"</li>
         </ul>
       </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.7.1.0.0 — UI Bug Fixes</div>
         <ul class="changelog-items">
-          <li>Alert toasts no longer cover the Layout menu or bury trade notes further down the page</li>
-          <li>Fixed clipped chart axis labels and moving-average lines that didn't span the full visible chart</li>
-          <li>Fixed a tab-switching bug that delayed real quotes/charts by up to 10 seconds after every refresh</li>
+          <li>Alert pop-ups no longer cover the Layout menu or bury trade notes further down the page</li>
+          <li>Fixed chart labels getting cut off at the edges, and moving averages not covering the full chart</li>
+          <li>Fixed a bug where switching tabs could delay real prices and charts by up to 10 seconds after a refresh</li>
         </ul>
       </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.7.0.0.0 — Alpaca Paper Trading</div>
         <ul class="changelog-items">
-          <li>Connect a free Alpaca paper account in Settings — "Send to Alpaca" places a real bracket order and logs it to the journal in one click</li>
-          <li>Trades now carry a single target instead of two, matching Alpaca's bracket order structure</li>
-          <li>Quietly started tracking every screener pick's real outcome behind the scenes — the foundation for eventually validating the strategy with real numbers</li>
+          <li>Connect a free Alpaca paper account in Settings — "Send to Alpaca" places a real order and logs it to the journal in one click</li>
+          <li>Trades now carry a single target instead of two, matching how Alpaca's order type works</li>
+          <li>Started quietly tracking what actually happens to every pick, aiming toward real numbers on how well this works instead of a guess</li>
         </ul>
       </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.6.5.0.0 — Screener Quality &amp; Trade Management</div>
         <ul class="changelog-items">
-          <li>Universe diversified beyond mega-caps across more sectors and market caps</li>
-          <li>Trend alignment is now required to make the list, not just scored — a clean zero beats a forced pick on a weak day</li>
+          <li>The stock list is more varied now, not just the biggest household names</li>
+          <li>A stock now has to show a real trend to make the list, not just a big price move — some days nothing qualifies, and that's fine</li>
           <li>"Finished today" section separates resolved trades from what's still active, so old hits don't clutter the page</li>
         </ul>
       </div>
@@ -1670,18 +1729,18 @@
       <div class="changelog-entry">
         <div class="changelog-version">v1.5.4.0.2 — Session &amp; Rate-Limit Hardening</div>
         <ul class="changelog-items">
-          <li>Chart data fetches now prioritized: what you're looking at loads before background screening</li>
+          <li>Chart data now loads for whatever you're actively looking at first, before background screening</li>
           <li>Clear button added to alert history; alerts scoped to only today's actual picks</li>
-          <li>Single active tab per browser now handles live data, preventing duplicate rate-limited traffic</li>
+          <li>If you have multiple tabs open, only one now pulls live data — keeps us under the data provider's limits</li>
         </ul>
       </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.5.3.0.1 — Chart Data Reliability</div>
         <ul class="changelog-items">
-          <li>Chart history now persists to the browser — instant reload instead of a full refetch</li>
+          <li>Chart history now saves to your browser — instant reload instead of a full refetch</li>
           <li>Stale data refreshes quietly in the background rather than blocking on the network</li>
-          <li>Global rate limiter added so all Twelve Data requests, from anywhere in the app, share one budget</li>
-          <li>Dragging, zooming, and panning throttled to the screen's actual refresh rate</li>
+          <li>Added a shared limit so all chart requests, from anywhere in the app, stay under the data provider's cap</li>
+          <li>Dragging, zooming, and panning smoothed out to match your screen's refresh rate</li>
         </ul>
       </div>
       <div class="changelog-entry">
@@ -1697,7 +1756,7 @@
         <div class="changelog-version">v1.5.1.0.0 — Charting Overhaul</div>
         <ul class="changelog-items">
           <li>Added 5m/15m/30m intraday timeframes alongside 1D/1W/1M/1Y</li>
-          <li>Nice-number gridlines, live price line, full crosshair with axis tags</li>
+          <li>Cleaner price gridlines, a live price line, and a full crosshair when you hover the chart</li>
           <li>Vertical and diagonal chart panning, not just horizontal</li>
           <li>Time axis now matches each timeframe's real granularity, with day/year boundary markers</li>
         </ul>
@@ -1854,7 +1913,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Current prices are live quotes from Finnhub. Chart history on every timeframe, including 1D intraday, is real historical data from Twelve Data for signed-in accounts — if real data can't be reached, the chart shows an honest "couldn't load" message rather than substituting anything simulated. Trade direction, entry/stop/targets, and reasoning are calculated daily from real technical levels (moving averages, recent support/resistance, momentum) — not hand-written. Guest mode is the only place simulated data appears, throughout, on every timeframe. Nothing on this site constitutes financial, investment, or trading advice.</p>
+    <p>Prices are live quotes from Finnhub. Chart history is real data from Twelve Data for signed-in accounts — if it can't be reached, you'll see an honest "couldn't load" message instead of fake data. Entry, stop, targets, and the reasoning behind each trade are calculated daily from real price data, not written by hand. Guest mode is the only place you'll see simulated numbers. Nothing here is financial or trading advice.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a> and <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>.</p>
   </footer>
 
@@ -2259,6 +2318,7 @@
         });
       }
       logTodaysPicksInternally(candidates, today);
+      autoSendNewPicksIfEnabled();
     });
   }
 
@@ -2280,6 +2340,7 @@
     updateAnalysisStatus("Today's screener picks loaded", true);
     var subtitleEl2 = document.getElementById('tradesSubtitle');
     if(subtitleEl2){ subtitleEl2.textContent = 'Auto-picked daily from ' + SCREENER_UNIVERSE.length + ' major stocks by real technical analysis.'; }
+    autoSendNewPicksIfEnabled();
   }
 
   function loadScreenerForUser(uid){
@@ -2400,11 +2461,15 @@
     document.getElementById('alpacaInputsRow').setAttribute('hidden', '');
     document.getElementById('alpacaConnectedRow').removeAttribute('hidden');
     document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(alpacaCreds.keyId);
+    document.getElementById('alpacaDock').removeAttribute('hidden');
+    document.getElementById('alpacaAutoTradeRow').removeAttribute('hidden');
   }
 
   function showAlpacaInputsView(){
     document.getElementById('alpacaConnectedRow').setAttribute('hidden', '');
     document.getElementById('alpacaInputsRow').removeAttribute('hidden');
+    document.getElementById('alpacaDock').setAttribute('hidden', '');
+    document.getElementById('alpacaAutoTradeRow').setAttribute('hidden', '');
   }
 
   function testAlpacaConnection(){
@@ -2436,6 +2501,70 @@
       });
   }
 
+  // ---------- Auto-send new picks (opt-in, browser-tab-dependent) ----------
+  var AUTO_TRADE_QTY = 10;
+  var alpacaAutoTradeEnabled = false;
+
+  function setAlpacaAutoTradeEnabled(enabled){
+    alpacaAutoTradeEnabled = enabled;
+    var btn = document.getElementById('alpacaAutoTradeToggle');
+    if(btn){
+      btn.textContent = enabled ? 'On' : 'Off';
+      btn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+      btn.classList.toggle('active', enabled);
+    }
+    try { window.localStorage.setItem('shwoopnet:alpacaAutoTrade', enabled ? 'true' : 'false'); } catch(e){}
+  }
+
+  function loadAlpacaAutoTradePref(){
+    var saved = false;
+    try { saved = window.localStorage.getItem('shwoopnet:alpacaAutoTrade') === 'true'; } catch(e){}
+    setAlpacaAutoTradeEnabled(saved);
+  }
+
+  document.getElementById('alpacaAutoTradeToggle').addEventListener('click', function(){
+    setAlpacaAutoTradeEnabled(!alpacaAutoTradeEnabled);
+  });
+
+  function showAutoSendToast(sym, direction, qty){
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    var toastEl = document.createElement('div');
+    toastEl.className = 'alert-toast';
+    toastEl.innerHTML =
+      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">Auto-sent</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<p class="toast-text">Sent ' + qty + ' shares (' + direction + ') to Alpaca paper automatically.</p>';
+    container.appendChild(toastEl);
+    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
+    setTimeout(function(){ dismissToast(toastEl); }, 12000);
+  }
+
+  // Reuses the internal pick-history log's per-symbol document as the
+  // dedup record — marking a pick "autoSent" BEFORE placing the order
+  // (not after) closes the race where a second call (e.g. a fast reload)
+  // could see the still-pending flag and double-submit while the first
+  // order is still in flight.
+  function autoSendNewPicksIfEnabled(){
+    if(!alpacaAutoTradeEnabled || !alpacaConnected || !window.__shwoopAPI || !currentUid) return;
+    var today = new Date().toISOString().slice(0,10);
+    trades.forEach(function(t){
+      var key = today + '_' + t.sym;
+      window.__shwoopAPI.getDailyPickLog(currentUid, key).then(function(pick){
+        if(!pick || pick.autoSent) return;
+        pick.autoSent = true;
+        return window.__shwoopAPI.saveDailyPickLog(currentUid, key, pick).then(function(){
+          var side = t.direction === 'Long' ? 'buy' : 'sell';
+          return submitAlpacaBracketOrder(t.sym, side, AUTO_TRADE_QTY, t.stop, t.t1);
+        }).then(function(order){
+          logAlpacaTradeToJournal(t, AUTO_TRADE_QTY, order);
+          showAutoSendToast(t.sym, t.direction, AUTO_TRADE_QTY);
+        });
+      }).catch(function(err){
+        console.error('Auto-send failed for', t.sym, err);
+      });
+    });
+  }
+
   function loadAlpacaCredentialsForUser(uid){
     if(!window.__shwoopAPI) return;
     window.__shwoopAPI.watchAlpacaCredentials(uid, function(data){
@@ -2461,7 +2590,80 @@
     if(secEl) secEl.value = '';
     setAlpacaStatus('Not connected', null);
     showAlpacaInputsView();
+    document.getElementById('alpacaDock').setAttribute('hidden', '');
   }
+
+  // ---------- Alpaca account/positions dock (Messenger-tab style) ----------
+  function fetchAlpacaAccountSummary(){
+    return fetch(ALPACA_PAPER_BASE + '/v2/account', { headers: alpacaHeaders() }).then(function(res){
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
+  function fetchAlpacaPositions(){
+    return fetch(ALPACA_PAPER_BASE + '/v2/positions', { headers: alpacaHeaders() }).then(function(res){
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
+  function renderAlpacaDock(){
+    var summaryEl = document.getElementById('alpacaDockSummary');
+    var positionsEl = document.getElementById('alpacaDockPositions');
+    summaryEl.textContent = 'Loading…';
+    positionsEl.innerHTML = '';
+    Promise.all([fetchAlpacaAccountSummary(), fetchAlpacaPositions()]).then(function(results){
+      var acct = results[0], positions = results[1];
+      var equity = parseFloat(acct.equity || 0);
+      var lastEquity = parseFloat(acct.last_equity || equity) || equity;
+      var dayChange = equity - lastEquity;
+      var dayChangePct = lastEquity ? (dayChange / lastEquity * 100) : 0;
+      var changeClass = dayChange >= 0 ? 'up' : 'down';
+      summaryEl.innerHTML =
+        '<div class="alpaca-dock-equity">$' + equity.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</div>' +
+        '<div class="alpaca-dock-daychange ' + changeClass + '">' + (dayChange >= 0 ? '+' : '−') + '$' + Math.abs(dayChange).toFixed(2) +
+          ' (' + (dayChangePct >= 0 ? '+' : '') + dayChangePct.toFixed(2) + '%) today</div>' +
+        '<div class="alpaca-dock-bp">Buying power: $' + parseFloat(acct.buying_power || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</div>';
+
+      if(!Array.isArray(positions) || positions.length === 0){
+        positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions.</div>';
+        return;
+      }
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Current</th><th>P/L</th></tr></thead><tbody>' +
+        positions.map(function(p){
+          var pl = parseFloat(p.unrealized_pl || 0);
+          var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
+          var plClass = pl >= 0 ? 'up' : 'down';
+          return '<tr>' +
+            '<td>' + p.symbol + '</td>' +
+            '<td>' + p.qty + '</td>' +
+            '<td>' + p.side + '</td>' +
+            '<td>' + parseFloat(p.avg_entry_price).toFixed(2) + '</td>' +
+            '<td>' + parseFloat(p.current_price).toFixed(2) + '</td>' +
+            '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
+          '</tr>';
+        }).join('') + '</tbody></table>';
+    }).catch(function(err){
+      summaryEl.textContent = 'Couldn\'t load account data.';
+      positionsEl.innerHTML = '';
+      console.error('Alpaca dock fetch failed:', err);
+    });
+  }
+
+  document.getElementById('alpacaDockTab').addEventListener('click', function(){
+    var panel = document.getElementById('alpacaDockPanel');
+    var caret = document.getElementById('alpacaDockCaret');
+    var isHidden = panel.hasAttribute('hidden');
+    if(isHidden){
+      panel.removeAttribute('hidden');
+      caret.textContent = '▼';
+      renderAlpacaDock();
+    } else {
+      panel.setAttribute('hidden', '');
+      caret.textContent = '▲';
+    }
+  });
 
   // A bracket order: the entry itself, plus a stop-loss leg and a
   // take-profit leg, submitted as one order — maps directly onto our
@@ -3717,7 +3919,66 @@
 
   var lastQuoteSyncOk = false;
 
+  // ---------- Alpaca market data (primary when connected, Finnhub/Twelve
+  // Data as automatic fallback) ----------
+  // Alpaca's data endpoint (data.alpaca.markets) is a DIFFERENT subdomain
+  // from the trading endpoint (paper-api.alpaca.markets) already verified
+  // to support direct browser calls — this one has had CORS issues in the
+  // past and it's genuinely unclear if that's still true. Built
+  // defensively: if any Alpaca data call fails for any reason (network,
+  // CORS, auth), it falls straight back to Finnhub with zero visible
+  // disruption — worst case, nothing changes from today.
+  var ALPACA_DATA_BASE = 'https://data.alpaca.markets';
+  var alpacaPrevCloseCache = {}; // sym -> prev close, fetched once per day, not every poll
+
+  function fetchAlpacaLatestTrade(sym){
+    return fetch(ALPACA_DATA_BASE + '/v2/stocks/' + encodeURIComponent(sym) + '/trades/latest', { headers: alpacaHeaders() })
+      .then(function(res){
+        if(!res.ok) throw new Error('Alpaca trade HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        if(!data.trade || typeof data.trade.p !== 'number') throw new Error('No trade data for ' + sym);
+        return data.trade.p;
+      });
+  }
+
+  function fetchAlpacaPrevClose(sym){
+    if(alpacaPrevCloseCache[sym]) return Promise.resolve(alpacaPrevCloseCache[sym]);
+    return fetch(ALPACA_DATA_BASE + '/v2/stocks/' + encodeURIComponent(sym) + '/bars?timeframe=1Day&limit=2', { headers: alpacaHeaders() })
+      .then(function(res){
+        if(!res.ok) throw new Error('Alpaca bars HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        var bars = data.bars || [];
+        if(bars.length < 1) throw new Error('No daily bars for ' + sym);
+        var prevBar = bars.length >= 2 ? bars[bars.length - 2] : bars[bars.length - 1];
+        alpacaPrevCloseCache[sym] = prevBar.c;
+        return prevBar.c;
+      });
+  }
+
+  function fetchQuoteViaAlpaca(sym){
+    return Promise.all([fetchAlpacaLatestTrade(sym), fetchAlpacaPrevClose(sym)]).then(function(results){
+      return { price: results[0], prevClose: results[1] };
+    });
+  }
+
   function fetchQuote(sym){
+    if(alpacaConnected){
+      return fetchQuoteViaAlpaca(sym).then(function(q){
+        q.source = 'alpaca';
+        return q;
+      }).catch(function(err){
+        console.error('Alpaca quote failed for ' + sym + ', falling back to Finnhub:', err);
+        return fetchQuoteViaFinnhub(sym).then(function(q){ q.source = 'finnhub'; return q; });
+      });
+    }
+    return fetchQuoteViaFinnhub(sym).then(function(q){ q.source = 'finnhub'; return q; });
+  }
+
+  function fetchQuoteViaFinnhub(sym){
     var url = FINNHUB_QUOTE_URL + '?symbol=' + encodeURIComponent(sym) + '&token=' + FINNHUB_API_KEY;
     return fetch(url)
       .then(function(res){
@@ -3738,24 +3999,28 @@
   var hasLiveCalibrated = false;
   var pendingAnalysisUid = null;
 
+  var lastQuoteBatchSources = [];
+
   function fetchAllQuotes(){
     var results = [];
+    var sources = [];
     var pending = watchlist.length;
     watchlist.forEach(function(item){
       fetchQuote(item.sym).then(function(q){
         item.price = q.price;
         item.prevClose = q.prevClose;
+        sources.push(q.source);
         renderTicker();
         updateTradeRowPrices();
         pending--;
         results.push(true);
-        if(pending === 0){ onQuoteBatchDone(results); }
+        if(pending === 0){ lastQuoteBatchSources = sources; onQuoteBatchDone(results); }
       }).catch(function(err){
         // Leave the last known price in place rather than breaking the UI.
         console.error('Quote fetch failed for', item.sym, err);
         pending--;
         results.push(false);
-        if(pending === 0){ onQuoteBatchDone(results); }
+        if(pending === 0){ lastQuoteBatchSources = sources; onQuoteBatchDone(results); }
       });
     });
   }
@@ -3794,8 +4059,13 @@
     var el = document.getElementById('quoteSyncStatus');
     if(!el) return;
     var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit', second:'2-digit' });
+    // Reflects what actually happened this cycle, not just whether Alpaca
+    // trading is connected — if every data call quietly fell back to
+    // Finnhub (e.g. a CORS block), this correctly still says Finnhub.
+    var usedAlpaca = lastQuoteBatchSources.length > 0 && lastQuoteBatchSources.every(function(s){ return s === 'alpaca'; });
+    var sourceLabel = usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub';
     if(anyOk){
-      el.textContent = 'Live · synced ' + now;
+      el.textContent = 'Live via ' + sourceLabel + ' · synced ' + now;
       el.className = 'quote-sync-status ok';
     } else {
       el.textContent = 'Sync failed — showing last known prices (check console)';
@@ -5654,6 +5924,7 @@
   updateClock();
   renderHistoryList();
   populateBacktestSymbolSelect();
+  loadAlpacaAutoTradePref();
   document.getElementById('runBacktestBtn').addEventListener('click', runBacktestClicked);
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
