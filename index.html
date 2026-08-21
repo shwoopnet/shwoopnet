@@ -1495,7 +1495,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoopnet. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Current prices are live quotes from Finnhub. 1W/1M/1Y chart history is real historical data from Twelve Data. For signed-in accounts, trade direction, entry/stop/targets, and reasoning are calculated daily from real technical levels (moving averages, recent support/resistance, momentum) — not hand-written. Guest mode uses simulated data throughout. The 1D chart view stays simulated for everyone. Nothing on this site constitutes financial, investment, or trading advice.</p>
+    <p>Current prices are live quotes from Finnhub. Chart history (including 1D intraday) is real historical data from Twelve Data for signed-in accounts, falling back to a simulated view if intraday data isn't available on the connected plan. For signed-in accounts, trade direction, entry/stop/targets, and reasoning are calculated daily from real technical levels (moving averages, recent support/resistance, momentum) — not hand-written. Guest mode uses simulated data throughout, on every timeframe. Nothing on this site constitutes financial, investment, or trading advice.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a> and <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>.</p>
   </footer>
 
@@ -1808,9 +1808,12 @@
       ensureInWatchlist(saved.sym, saved.name || COMPANY_NAMES[saved.sym] || saved.sym, saved.entry, saved.entry);
     });
     trades = list.map(buildTradeFromPick);
-    // Live quotes will correct this placeholder price on the next refresh —
-    // ensureInWatchlist above just needs *something* non-zero in the
-    // meantime so the page doesn't show blank current-price cells.
+    // The line above is a placeholder (current = entry, 0% change) only
+    // until this immediate fetch corrects it — without this, a newly
+    // loaded pick could show a fake "already at entry" price for up to
+    // 45 seconds, which makes an otherwise-correct Watching status look
+    // nonsensical (as if there's nothing left to wait for).
+    if(!isGuestMode){ fetchAllQuotes(); }
     renderTradeBlocks();
     renderWhatToWatch();
     renderTicker();
@@ -1891,8 +1894,10 @@
       return { done: true, html: '<span class="trade-action-verb done">Done —</span> already stopped out at $' + fmt(t.stop) + '. This setup is closed, no action needed.' };
     }
     if(t.status === 'watching'){
+      var enterVerb = isLong ? 'buying' : 'shorting';
+      var enterVerbClass = isLong ? 'buy' : 'short';
       return { done: false, html:
-        'Wait for ' + t.sym + ' to reach <strong>$' + fmt(t.entry) + '</strong> before entering. Once triggered: ' +
+        'Wait for ' + t.sym + ' to reach <strong>$' + fmt(t.entry) + '</strong> before <span class="trade-action-verb ' + enterVerbClass + '">' + enterVerb + '</span>. Once triggered: ' +
         exitVerb.toLowerCase() + ' half at Target 1 ($' + fmt(t.t1) + '), the rest at Target 2 ($' + fmt(t.t2) + '). ' +
         'Exit everything if price ' + stopVerb + ' $' + fmt(t.stop) + ' first.'
       };
@@ -1935,10 +1940,10 @@
           '<div class="t-t1 mono" data-label="Target 1">' + fmt(t.t1) + '</div>' +
           '<div class="t-t2-status" data-label="Target 2 / Status">' +
             '<div class="t-t2 mono" style="margin-bottom:6px;">' + fmt(t.t2) + '</div>' +
-            '<span class="status-badge ' + badgeClass + '">' + t.statusLabel + '</span>' +
+            '<span class="status-badge ' + badgeClass + '" id="status-badge-' + t.sym + '">' + t.statusLabel + '</span>' +
           '</div>' +
         '</div>' +
-        '<div class="trade-action-banner' + (action.done ? ' done' : '') + '">' +
+        '<div class="trade-action-banner' + (action.done ? ' done' : '') + '" id="action-banner-' + t.sym + '">' +
           '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span>' +
           '<span class="action-text">' + action.html + '</span>' +
         '</div>' +
@@ -2024,6 +2029,23 @@
     renderAllTradeCharts();
   }
 
+  // Entry/stop/targets stay fixed for the day once set — but status (and
+  // therefore the action sentence) needs to stay honest against whatever
+  // price is showing right now, or "Watching, wait to reach $X" can end up
+  // displayed right next to a current price that already equals $X.
+  function recomputeTradeStatus(t, currentPrice){
+    var isLong = t.direction !== 'Short';
+    var distFromEntryPct = Math.abs((currentPrice - t.entry) / t.entry * 100);
+    var status = 'watching', statusLabel = 'Watching';
+    if(distFromEntryPct < 2){ status = 'active'; statusLabel = 'Active'; }
+    if(isLong && currentPrice >= t.t2){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(!isLong && currentPrice <= t.t2){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(isLong && currentPrice <= t.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+    if(!isLong && currentPrice >= t.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+    t.status = status;
+    t.statusLabel = statusLabel;
+  }
+
   function updateTradeRowPrices(){
     trades.forEach(function(t){
       var q = findQuote(t.sym);
@@ -2034,12 +2056,27 @@
       cell.innerHTML = fmt(q.price) + '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>';
       cell.classList.add(up ? 'flash-up' : 'flash-down');
       setTimeout(function(){ cell.classList.remove('flash-up','flash-down'); }, 600);
+
+      recomputeTradeStatus(t, q.price);
+      var badgeEl = document.getElementById('status-badge-' + t.sym);
+      if(badgeEl){
+        var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
+        badgeEl.className = 'status-badge ' + badgeClass;
+        badgeEl.textContent = t.statusLabel;
+      }
+      var bannerEl = document.getElementById('action-banner-' + t.sym);
+      if(bannerEl){
+        var action = buildActionHTML(t);
+        bannerEl.className = 'trade-action-banner' + (action.done ? ' done' : '');
+        bannerEl.innerHTML = '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span><span class="action-text">' + action.html + '</span>';
+      }
     });
+    renderWhatToWatch();
   }
 
   // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
   var tfConfig = {
-    '1D': { volFactor:0.0035, mockCount:80,  defaultVisible:40 },
+    '1D': { volFactor:0.0035, mockCount:80,  fetchSize:80, defaultVisible:40 },
     '1W': { volFactor:0.006,  fetchSize:30,  defaultVisible:7  },
     '1M': { volFactor:0.012,  fetchSize:90,  defaultVisible:30 },
     '1Y': { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
@@ -2080,7 +2117,7 @@
   var TWELVE_DATA_API_KEY = 'd71a3d8d70e04286b10e8cf67b4c710d';
   var TWELVE_DATA_URL = 'https://api.twelvedata.com/time_series';
   var historyCache = {};
-  var historyIntervals = { '1W':'1day', '1M':'1day', '1Y':'1week' };
+  var historyIntervals = { '1D':'5min', '1W':'1day', '1M':'1day', '1Y':'1week' };
 
   function fetchHistory(sym, tf){
     var cacheKey = sym + '_' + tf;
@@ -2306,10 +2343,10 @@
   }
 
   function renderChartInto(svg, sym, base, tf){
-    if(tf === '1D' || isGuestMode){
-      var cfg1d = tfConfig[tf];
-      var mockCount = tf === '1D' ? cfg1d.mockCount : cfg1d.fetchSize;
-      initChartState(sym, tf, genOHLC(mockCount, base, base * cfg1d.volFactor));
+    if(isGuestMode){
+      var cfgGuest = tfConfig[tf];
+      var mockCountGuest = tf === '1D' ? cfgGuest.mockCount : cfgGuest.fetchSize;
+      initChartState(sym, tf, genOHLC(mockCountGuest, base, base * cfgGuest.volFactor));
       renderChartView(sym);
       return;
     }
@@ -2323,9 +2360,12 @@
       initChartState(sym, tf, adjusted);
       renderChartView(sym);
     }).catch(function(err){
+      // Real intraday access for 1D isn't guaranteed on every API plan —
+      // fall back to the simulated walk rather than showing a broken chart.
       console.error('History fetch failed for', sym, tf, err);
       var cfg = tfConfig[tf];
-      initChartState(sym, tf, genOHLC(cfg.fetchSize, base, base * cfg.volFactor));
+      var mockCount = tf === '1D' ? cfg.mockCount : cfg.fetchSize;
+      initChartState(sym, tf, genOHLC(mockCount, base, base * cfg.volFactor));
       renderChartView(sym);
     });
   }
@@ -2593,9 +2633,7 @@
         item.price = q.price;
         item.prevClose = q.prevClose;
         renderTicker();
-        if(!document.getElementById('page-trades').hidden){
-          updateTradeRowPrices();
-        }
+        updateTradeRowPrices();
         pending--;
         results.push(true);
         if(pending === 0){ onQuoteBatchDone(results); }
@@ -2667,9 +2705,7 @@
     renderTicker();
     renderBreadth();
     renderMovers();
-    if(!document.getElementById('page-trades').hidden){
-      updateTradeRowPrices();
-    }
+    updateTradeRowPrices();
   }
 
   function startGuestQuoteLoop(){
@@ -4261,7 +4297,6 @@
   renderTicker();
   renderIndices();
   renderWhatToWatch();
-  renderTradeBlocks();
   renderBreadth();
   renderMovers();
   statCta();
