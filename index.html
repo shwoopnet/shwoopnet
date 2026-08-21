@@ -757,7 +757,8 @@
     font-family:'Space Grotesk', sans-serif; font-size:12.5px; font-weight:600; color: var(--paper);
     box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
   }
-  @media (max-width:820px){ .alpaca-dock-tab{ right:20px; } }
+  .alpaca-dock.docked-left .alpaca-dock-tab{ right:auto; left:20px; }
+  @media (max-width:820px){ .alpaca-dock-tab, .alpaca-dock.docked-left .alpaca-dock-tab{ right:20px; left:auto; } }
   .alpaca-dock-caret{ color: var(--amber); font-size:10px; }
   .alpaca-dock-panel{
     position:fixed; bottom:42px; right:380px; z-index:441; width:340px; max-width:calc(100% - 40px);
@@ -765,12 +766,12 @@
     display:flex; flex-direction:column; height:50vh; min-height:220px;
     box-shadow:0 16px 36px rgba(0,0,0,0.5);
   }
-  @media (max-width:820px){ .alpaca-dock-panel{ right:20px; } }
+  .alpaca-dock.docked-left .alpaca-dock-panel{ right:auto; left:20px; }
+  @media (max-width:820px){ .alpaca-dock-panel, .alpaca-dock.docked-left .alpaca-dock-panel{ right:20px; left:auto; } }
   .alpaca-dock-panel-head{
     display:flex; justify-content:space-between; align-items:center; padding:10px 14px;
-    border-bottom:1px solid var(--border); font-size:12px; font-weight:600; flex-shrink:0; cursor:default;
+    border-bottom:1px solid var(--border); font-size:12px; font-weight:600; flex-shrink:0;
   }
-  .alpaca-dock.unlocked .alpaca-dock-panel-head{ cursor:move; }
   .alpaca-dock-body{ padding:14px 16px; overflow-y:auto; flex:1; }
   .alpaca-dock-equity{ font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; }
   .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
@@ -792,8 +793,7 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
-  .alpaca-dock-panel .notepad-resize-handle{ position:absolute; right:2px; bottom:2px; width:16px; height:16px; cursor:nwse-resize; display:none; }
-  .alpaca-dock.unlocked .notepad-resize-handle{ display:block; }
+  .alpaca-dock-panel .notepad-resize-handle{ position:absolute; right:2px; bottom:2px; width:16px; height:16px; cursor:nwse-resize; display:block; }
   .notepad-resize-handle::before{
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
@@ -1298,7 +1298,7 @@
     <div class="alpaca-dock-panel" id="alpacaDockPanel" hidden>
       <div class="alpaca-dock-panel-head" id="alpacaDockPanelHead">
         <span>Account</span>
-        <button class="notepad-lock-btn" id="alpacaDockLockBtn">Unlock</button>
+        <button class="notepad-lock-btn" id="alpacaDockLockBtn">Move to left</button>
       </div>
       <div class="alpaca-dock-body">
         <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
@@ -2746,60 +2746,35 @@
     }
   });
 
-  // ---------- Alpaca dock: lock / move / resize (same pattern as Notepad) ----------
+  // ---------- Alpaca dock: side toggle (left/right) + resize ----------
+  // Deliberately not a free-drag panel — the tab and panel always stay
+  // connected as one unit and only ever move horizontally, between the
+  // two sides of the screen, never vertically and never detached from
+  // each other.
   var alpacaDockOuter = document.getElementById('alpacaDock');
   var alpacaDockPanelEl = document.getElementById('alpacaDockPanel');
-  var alpacaDockPanelHead = document.getElementById('alpacaDockPanelHead');
   var alpacaDockLockBtn = document.getElementById('alpacaDockLockBtn');
   var alpacaDockResizeHandle = document.getElementById('alpacaDockResizeHandle');
-  var alpacaDockLocked = true;
+  var alpacaDockOnLeft = false;
 
   function saveAlpacaDockGeometry(){
     try{
       window.localStorage.setItem('shwoopnet:alpacaDockGeo', JSON.stringify({
-        left: alpacaDockPanelEl.style.left, top: alpacaDockPanelEl.style.top,
         width: alpacaDockPanelEl.style.width, height: alpacaDockPanelEl.style.height
       }));
     }catch(e){}
   }
 
-  function applyAlpacaDockLock(locked){
-    alpacaDockLocked = locked;
-    alpacaDockOuter.classList.toggle('unlocked', !locked);
-    alpacaDockLockBtn.textContent = locked ? 'Unlock' : 'Lock';
-    alpacaDockLockBtn.setAttribute('aria-label', locked ? 'Unlock to move or resize' : 'Lock in place');
-    try{ window.localStorage.setItem('shwoopnet:alpacaDockLocked', locked ? 'true' : 'false'); }catch(e){}
+  function applyAlpacaDockSide(onLeft){
+    alpacaDockOnLeft = onLeft;
+    alpacaDockOuter.classList.toggle('docked-left', onLeft);
+    alpacaDockLockBtn.textContent = onLeft ? 'Move to right' : 'Move to left';
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockSide', onLeft ? 'left' : 'right'); }catch(e){}
   }
-  alpacaDockLockBtn.addEventListener('click', function(){ applyAlpacaDockLock(!alpacaDockLocked); });
-
-  var alpacaDockDragState = null;
-  alpacaDockPanelHead.addEventListener('pointerdown', function(e){
-    if(alpacaDockLocked || e.target.closest('button')) return;
-    var rect = alpacaDockPanelEl.getBoundingClientRect();
-    alpacaDockPanelEl.style.left = rect.left + 'px';
-    alpacaDockPanelEl.style.top = rect.top + 'px';
-    alpacaDockPanelEl.style.right = 'auto';
-    alpacaDockPanelEl.style.bottom = 'auto';
-    alpacaDockDragState = { startX: e.clientX, startY: e.clientY, startLeft: rect.left, startTop: rect.top };
-    alpacaDockPanelHead.setPointerCapture(e.pointerId);
-  });
-  alpacaDockPanelHead.addEventListener('pointermove', function(e){
-    if(!alpacaDockDragState) return;
-    var dx = e.clientX - alpacaDockDragState.startX;
-    var dy = e.clientY - alpacaDockDragState.startY;
-    var maxLeft = window.innerWidth - alpacaDockPanelEl.offsetWidth;
-    var maxTop = window.innerHeight - alpacaDockPanelEl.offsetHeight;
-    var newLeft = Math.max(0, Math.min(maxLeft, alpacaDockDragState.startLeft + dx));
-    var newTop = Math.max(0, Math.min(maxTop, alpacaDockDragState.startTop + dy));
-    alpacaDockPanelEl.style.left = newLeft + 'px';
-    alpacaDockPanelEl.style.top = newTop + 'px';
-  });
-  alpacaDockPanelHead.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
-  alpacaDockPanelHead.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
+  alpacaDockLockBtn.addEventListener('click', function(){ applyAlpacaDockSide(!alpacaDockOnLeft); });
 
   var alpacaDockResizeState = null;
   alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
-    if(alpacaDockLocked) return;
     e.stopPropagation();
     var rect = alpacaDockPanelEl.getBoundingClientRect();
     alpacaDockResizeState = { startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height };
@@ -2816,20 +2791,14 @@
   alpacaDockResizeHandle.addEventListener('pointercancel', function(){ alpacaDockResizeState = null; });
 
   (function initAlpacaDockGeometry(){
-    var lockedSaved = 'true';
-    try{ lockedSaved = window.localStorage.getItem('shwoopnet:alpacaDockLocked') || 'true'; }catch(e){}
-    applyAlpacaDockLock(lockedSaved === 'true');
+    var sideSaved = 'right';
+    try{ sideSaved = window.localStorage.getItem('shwoopnet:alpacaDockSide') || 'right'; }catch(e){}
+    applyAlpacaDockSide(sideSaved === 'left');
     try{
       var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
       if(geo && geo.width){
         alpacaDockPanelEl.style.width = geo.width;
         alpacaDockPanelEl.style.height = geo.height;
-        if(!alpacaDockLocked && geo.left){
-          alpacaDockPanelEl.style.left = geo.left;
-          alpacaDockPanelEl.style.top = geo.top;
-          alpacaDockPanelEl.style.right = 'auto';
-          alpacaDockPanelEl.style.bottom = 'auto';
-        }
       }
     }catch(e){}
   })();
@@ -5733,94 +5702,57 @@
       text: "A quick tour of what's here and where to find it. Use the arrows below, or skip anytime."
     },
     {
-      before: function(){ navMenu.setAttribute('hidden', ''); },
       selector: '.ticker-tape',
       title: 'Live ticker tape',
       text: 'Always on, at the very top of every page — your watchlist scrolls continuously so it never leaves your sight.'
     },
     {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="brief"]',
-      title: 'Market Brief',
-      text: "Home base — opens automatically the first time you visit each day. Let's take a look."
-    },
-    {
       page: 'brief',
       selector: '.brief-cta-row',
-      title: "Here's your Brief",
-      text: "A quick read on what's moving, plus a recap of your actual tracked trades before you dive in."
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="trades"]',
-      title: 'Trade Overview',
-      text: 'Your active setups live here — full charts, entry/stop/targets. Click through to see it.'
+      title: 'Market Brief',
+      text: "Home base — opens automatically the first time you visit each day. A quick read on what's moving, plus a recap of your actual tracked trades."
     },
     {
       page: 'trades',
       selector: '.log-trade-btn',
-      title: "Here's Trade Overview",
-      text: 'Charts you can zoom, pan, and rescale, plus this button to log a trade for real once you take it.'
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="journal"]',
-      title: 'Trade Journal',
-      text: 'Every trade you log lands here on its date, with P&L tracked automatically. Take a look.'
+      title: 'Trade Overview',
+      text: "Your active setups — full charts, entry/stop/targets, sorted by what needs your attention first. Log a trade here once you take it, or send it straight to Alpaca."
     },
     {
       page: 'journal',
       selector: '.journal-calendar',
-      title: "Here's your Journal",
-      text: 'Click into any day to see what happened, exit an open position, or fix a mistake.'
+      title: 'Trade Journal',
+      text: 'Every trade you log lands here on its date, with P&L tracked automatically. Click into any day to see what happened or exit an open position.'
     },
     {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '#notepadToggle',
-      title: 'Notepad',
-      text: "A floating scratchpad you can open from any page. Here's what it looks like."
+      page: 'labs',
+      selector: '.labs-method-card',
+      title: 'Labs',
+      text: 'The method behind the screener, in plain language, plus a real backtest tool — run the actual logic against real history for any symbol.'
     },
     {
       before: function(){ toggleNotepad(true); },
       selector: '#notepadPanel',
-      title: 'Your Notepad',
-      text: 'Saves automatically as you type. Unlock it to move or resize, close it whenever.'
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '#historyNavItem',
-      title: 'History',
-      text: "Every market alert gets logged here for the day, even ones you've dismissed. Here it is."
+      title: 'Notepad',
+      text: 'A floating scratchpad, open from any page. Saves automatically as you type — unlock it to move or resize, close it whenever.'
     },
     {
       before: function(){ openHistory(); },
       selector: '.history-sidebar',
-      title: 'Your alert history',
-      text: 'Nothing gets lost — browse back through everything that came in today.'
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="changelog"]',
-      title: 'Changelog',
-      text: "See what's changed, any time you're curious. Quick look:"
+      title: 'History',
+      text: "Every market alert gets logged here for the day, even ones you've dismissed. Nothing gets lost."
     },
     {
       page: 'changelog',
       selector: '.changelog-list',
-      title: "Here's the Changelog",
-      text: 'A running log of what shipped and when.'
-    },
-    {
-      before: function(){ navMenu.removeAttribute('hidden'); },
-      selector: '.nav-item[data-page="settings"]',
-      title: 'Settings',
-      text: 'Themes, your account, and every preference lives here. Last stop:'
+      title: 'Changelog',
+      text: "See what's changed, any time you're curious."
     },
     {
       page: 'settings',
       selector: '.theme-switcher',
-      title: "Here's Settings",
-      text: 'Four color modes including true white-on-black — pick whatever is easiest on your eyes.'
+      title: 'Settings',
+      text: 'Themes, your Alpaca connection, auto-send, and every other preference lives here.'
     }
   ];
 
