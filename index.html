@@ -197,6 +197,8 @@
   .quote-sync-status.fail{ color: var(--loss); }
   .alpaca-row-full{ width:100%; }
   .alpaca-row-full a{ color: var(--amber); }
+  .alpaca-connected-row{ display:flex; align-items:center; gap:12px; margin:10px 0 8px 0; }
+  .alpaca-connected-keyid{ font-size:12px; color: var(--muted); letter-spacing:.03em; }
   .alpaca-inputs{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 8px 0; }
   .alpaca-inputs input{
     flex:1 1 160px; background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
@@ -289,12 +291,13 @@
     transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease;
   }
   .tour-spotlight.centered{ box-shadow: 0 0 0 9999px rgba(0,0,0,0.7); border:none; }
+  .tour-connector-svg{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:451; }
   .tour-bubble{
     position:fixed; width:300px; max-width:88vw;
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     padding:18px 20px; box-shadow:0 16px 36px rgba(0,0,0,0.5);
-    pointer-events:auto;
-    transition: top .25s ease, left .25s ease;
+    pointer-events:auto; z-index:452;
+    top:50%; left:50%; transform:translate(-50%, -50%);
   }
   .tour-bubble-step{ font-size:10.5px; color: var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
   .tour-bubble-title{ font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
@@ -1145,7 +1148,7 @@
       </svg>
       <div>
         <div class="brand-name">SHWOOP</div>
-        <div class="brand-sub">Personal market terminal — design prototype</div>
+        <div class="brand-sub">Personal market terminal</div>
       </div>
     </button>
 
@@ -1230,6 +1233,14 @@
 
   <div class="tour-overlay" id="tourOverlay" hidden>
     <div class="tour-spotlight" id="tourSpotlight"></div>
+    <svg class="tour-connector-svg" id="tourConnectorSvg">
+      <defs>
+        <marker id="tourArrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="var(--amber)"/>
+        </marker>
+      </defs>
+      <line id="tourConnectorLine" stroke="var(--amber)" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#tourArrowhead)" opacity="0"/>
+    </svg>
     <div class="tour-bubble" id="tourBubble">
       <div class="tour-bubble-step" id="tourStepCount">1 / 10</div>
       <div class="tour-bubble-title" id="tourTitle"></div>
@@ -1517,10 +1528,14 @@
             Simulated money only — no real trades are ever placed. Get free paper keys at
             <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer">alpaca.markets</a>.
           </div>
-          <div class="alpaca-inputs">
+          <div class="alpaca-inputs" id="alpacaInputsRow">
             <input type="text" id="alpacaKeyIdInput" placeholder="API Key ID" autocomplete="off" spellcheck="false">
             <input type="password" id="alpacaSecretInput" placeholder="Secret Key" autocomplete="off" spellcheck="false">
             <button class="settings-reset-btn" id="alpacaSaveBtn">Connect</button>
+          </div>
+          <div class="alpaca-connected-row" id="alpacaConnectedRow" hidden>
+            <span class="alpaca-connected-keyid mono" id="alpacaConnectedKeyMasked"></span>
+            <button class="settings-reset-btn" id="alpacaChangeBtn">Change keys</button>
           </div>
           <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
         </div>
@@ -1757,64 +1772,64 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        The daily screener isn't a black box. Here's the entire thing, in plain language — including what it
+        The daily screener isn't a black box. Here's the whole thing, in plain language — including what it
         can't tell you yet.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
           <div class="labs-method-step">1</div>
           <div>
-            <div class="labs-method-title">A curated universe, not "the market"</div>
-            <div class="labs-method-body">41 stocks, deliberately mixed across market cap and sector — semiconductors,
-            retail, industrials, energy, healthcare, financials — not just the handful of household mega-caps.
-            It's not a full-market scanner; it's a fixed, transparent pool.</div>
+            <div class="labs-method-title">A fixed list of 41 stocks, not the whole market</div>
+            <div class="labs-method-body">Mixed across sectors and company sizes — chips, retail, industrials,
+            energy, healthcare, banks — not just the same handful of giant names. It only ever picks from
+            this list.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">2</div>
           <div>
-            <div class="labs-method-title">Trend alignment is required, not optional</div>
-            <div class="labs-method-body">The 20-day and 50-day moving averages have to actually agree with the
-            trade direction. A stock with a big recent price swing but no real trend structure gets excluded
-            entirely — momentum alone was never enough to make the list.</div>
+            <div class="labs-method-title">The trend has to actually agree with the trade</div>
+            <div class="labs-method-body">The 20-day and 50-day averages have to line up with the direction of
+            the trade. A stock that just had a big price swing but has no real trend gets skipped — a wild week
+            isn't enough on its own.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">3</div>
           <div>
-            <div class="labs-method-title">Entry, stop, and target come from real price structure</div>
-            <div class="labs-method-body">Entry sits at the 20-day moving average. Stop sits just past the actual
-            20-day low or high. Target is the real 20-day resistance or support level — not a fixed multiple of
-            risk, which would make every trade's reward ratio an identical, meaningless constant.</div>
+            <div class="labs-method-title">Entry, stop, and target come from the actual chart</div>
+            <div class="labs-method-body">Entry is the 20-day average. Stop is just past the actual 20-day low
+            or high. Target is the real 20-day resistance or support — not some fixed multiple of the risk, which
+            would just make every trade's ratio the same number no matter what.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">4</div>
           <div>
-            <div class="labs-method-title">Ranked by momentum, capped at 4</div>
-            <div class="labs-method-body">Everything that clears the alignment bar gets ranked by 5-day momentum
-            magnitude. The top 4 become the day's picks. On a day when nothing in the universe cleans up, fewer
-            than 4 show up — a forced pick would be worse than an honest zero.</div>
+            <div class="labs-method-title">Ranked by momentum, top 4 make the list</div>
+            <div class="labs-method-body">Everything that passes the trend check gets ranked by how much it's
+            moved in the last 5 days. Top 4 become the day's picks. If nothing passes on a given day, fewer than
+            4 show up — that's fine, better than forcing a bad pick.</div>
           </div>
         </div>
       </div>
       <div class="labs-honesty-box">
         <div class="labs-honesty-title">What this isn't (yet)</div>
-        <p>This scoring is a heuristic I designed, not something empirically validated against real returns. There's
-        an internal log quietly tracking every pick's actual outcome — hit, stopped, or unresolved — building toward
-        real, earned statistics instead of a guess. It's not enough data yet to report a trustworthy hit rate. The
-        backtest below is the honest next step: the same logic, run against real history, so you can see how it
-        would have actually performed instead of taking my word for it.</p>
+        <p>This scoring is a heuristic I came up with — not something proven against real results yet. There's
+        a log quietly tracking what actually happens to every pick: hit, stopped, or never resolved. It's building
+        toward real numbers instead of a guess, but there isn't enough history yet to trust a win rate. The
+        backtest below is the honest next step: same logic, run against real history, so you can see how it
+        actually would have done instead of just taking my word for it.</p>
       </div>
     </div>
 
     <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
-        Runs the exact same scoring and target/stop logic used live, day by day, against real historical prices —
-        using only data that would have existed at the time. No lookahead, no cherry-picking. One symbol at a time,
-        not the full 41-stock universe (simulating "would this have been today's top pick" across the whole universe
-        historically is a bigger lift — this tests whether the underlying signal itself holds up).
+        Runs the same scoring and stop/target logic used live, day by day, against real historical prices — only
+        ever using data that would have actually existed at that point in time, no peeking ahead. One symbol at a
+        time, not the full 41-stock list (testing "would this have been today's pick" across the whole list is a
+        much bigger job — this checks whether the underlying signal itself actually works).
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -2373,10 +2388,30 @@
     el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
   }
 
+  // Masked, not fully hidden — enough to confirm which account is
+  // connected (e.g. if you have more than one) without leaving the real
+  // key sitting in plain view once there's no reason to still see it.
+  function maskAlpacaKeyId(keyId){
+    if(!keyId || keyId.length <= 8) return '••••••••';
+    return keyId.slice(0, 4) + '••••••••' + keyId.slice(-4);
+  }
+
+  function showAlpacaConnectedView(){
+    document.getElementById('alpacaInputsRow').setAttribute('hidden', '');
+    document.getElementById('alpacaConnectedRow').removeAttribute('hidden');
+    document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(alpacaCreds.keyId);
+  }
+
+  function showAlpacaInputsView(){
+    document.getElementById('alpacaConnectedRow').setAttribute('hidden', '');
+    document.getElementById('alpacaInputsRow').removeAttribute('hidden');
+  }
+
   function testAlpacaConnection(){
     if(!alpacaCreds.keyId || !alpacaCreds.secretKey){
       alpacaConnected = false;
       setAlpacaStatus('Not connected', null);
+      showAlpacaInputsView();
       return;
     }
     setAlpacaStatus('Connecting…', null);
@@ -2389,11 +2424,13 @@
         alpacaConnected = true;
         var bp = parseFloat(acct.buying_power || 0);
         setAlpacaStatus('Connected — $' + bp.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' paper buying power', true);
+        showAlpacaConnectedView();
         renderTradeBlocks();
       })
       .catch(function(err){
         alpacaConnected = false;
         setAlpacaStatus('Connection failed — check your keys', false);
+        showAlpacaInputsView();
         console.error('Alpaca connection test failed:', err);
         renderTradeBlocks();
       });
@@ -2404,11 +2441,14 @@
     window.__shwoopAPI.watchAlpacaCredentials(uid, function(data){
       alpacaCreds.keyId = data.alpacaKeyId || '';
       alpacaCreds.secretKey = data.alpacaSecretKey || '';
-      var keyEl = document.getElementById('alpacaKeyIdInput');
-      var secEl = document.getElementById('alpacaSecretInput');
-      if(keyEl) keyEl.value = alpacaCreds.keyId;
-      if(secEl) secEl.value = alpacaCreds.secretKey;
-      if(alpacaCreds.keyId && alpacaCreds.secretKey){ testAlpacaConnection(); }
+      // Deliberately not populating the visible input fields here — on a
+      // fresh page load there's no reason for the saved keys to ever sit
+      // in an open text box. Straight to testing the connection instead.
+      if(alpacaCreds.keyId && alpacaCreds.secretKey){
+        testAlpacaConnection();
+      } else {
+        showAlpacaInputsView();
+      }
     });
   }
 
@@ -2420,6 +2460,7 @@
     if(keyEl) keyEl.value = '';
     if(secEl) secEl.value = '';
     setAlpacaStatus('Not connected', null);
+    showAlpacaInputsView();
   }
 
   // A bracket order: the entry itself, plus a stop-loss leg and a
@@ -2740,19 +2781,22 @@
 
   // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
   var tfConfig = {
-    '5m':  { volFactor:0.0035, mockCount:160, fetchSize:160, defaultVisible:60 },
-    '15m': { volFactor:0.006,  mockCount:140, fetchSize:140, defaultVisible:45 },
-    '30m': { volFactor:0.0085, mockCount:120, fetchSize:120, defaultVisible:35 },
-    '1D':  { volFactor:0.0035, mockCount:100, fetchSize:100, defaultVisible:40 },
-    '1W':  { volFactor:0.006,  fetchSize:30,  defaultVisible:7  },
-    '1M':  { volFactor:0.012,  fetchSize:90,  defaultVisible:30 },
-    '1Y':  { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
+    '5m':  { volFactor:0.0035, fetchSize:210, maxVisible:160, defaultVisible:60 },
+    '15m': { volFactor:0.006,  fetchSize:190, maxVisible:140, defaultVisible:45 },
+    '30m': { volFactor:0.0085, fetchSize:170, maxVisible:120, defaultVisible:35 },
+    '1D':  { volFactor:0.012,  fetchSize:150, maxVisible:100, defaultVisible:25 },
+    '1W':  { volFactor:0.006,  fetchSize:30,  maxVisible:30,  defaultVisible:7  },
+    '1M':  { volFactor:0.012,  fetchSize:140, maxVisible:90,  defaultVisible:30 },
+    '1Y':  { volFactor:0.03,   fetchSize:154, maxVisible:104, defaultVisible:52 }
   };
   var chartStates = {}; // per-symbol: { data, viewStart, viewEnd, scale, tf }
   var showMovingAverages = true;
   var showOHLCReadout = true;
   var MIN_VISIBLE_CANDLES = 8;
-  var INTRADAY_TFS = ['5m', '15m', '30m', '1D'];
+  // 1D now shows one candle per day (matching how 1W/1M/1Y already work,
+  // and how 5m/15m/30m are named after their own candle interval) — it's
+  // no longer an intraday view, so it gets date labels, not times.
+  var INTRADAY_TFS = ['5m', '15m', '30m'];
 
   // Real minutes-per-bar for each timeframe's actual interval, so guest
   // mode's simulated candles are spaced correctly — matching the real
@@ -2760,7 +2804,7 @@
   // historyIntervals below). Without this, every timeframe button looked
   // the same in guest mode: "1W" and "1Y" would show only a few hours of
   // 5-minute-spaced candles instead of actual weeks or years of data.
-  var tfSpacingMinutes = { '5m':5, '15m':15, '30m':30, '1D':5, '1W':1440, '1M':1440, '1Y':10080 };
+  var tfSpacingMinutes = { '5m':5, '15m':15, '30m':30, '1D':1440, '1W':1440, '1M':1440, '1Y':10080 };
 
   function genOHLC(count, base, vol, spacingMinutes){
     spacingMinutes = spacingMinutes || 5;
@@ -2793,7 +2837,7 @@
   var TWELVE_DATA_API_KEY = 'd71a3d8d70e04286b10e8cf67b4c710d';
   var TWELVE_DATA_URL = 'https://api.twelvedata.com/time_series';
   var historyCache = {};
-  var historyIntervals = { '5m':'5min', '15m':'15min', '30m':'30min', '1D':'5min', '1W':'1day', '1M':'1day', '1Y':'1week' };
+  var historyIntervals = { '5m':'5min', '15m':'15min', '30m':'30min', '1D':'1day', '1W':'1day', '1M':'1day', '1Y':'1week' };
 
   // Every Twelve Data request in the app — screener, chart rendering,
   // timeframe switches, all of it — funnels through this one queue. The
@@ -3114,11 +3158,6 @@
     var isIntraday = INTRADAY_TFS.indexOf(tf) > -1;
     if(isIntraday){
       var timeStr = d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-      if(tf === '1D'){
-        // Guaranteed single session — always just the time, like every
-        // platform's intraday-of-the-day view.
-        return timeStr;
-      }
       // 5m/15m/30m scroll across multiple days — each label is more
       // naturally "which day is this" than "what time is this" (the
       // convention real charting platforms use here). A time only shows
@@ -3150,7 +3189,6 @@
     if(!d || isNaN(d.getTime())) return '';
     if(INTRADAY_TFS.indexOf(tf) > -1){
       var timeStr = d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-      if(tf === '1D') return timeStr;
       return d.toLocaleDateString([], { month:'short', day:'numeric' }) + ' ' + timeStr;
     }
     var currentYear2 = new Date().getFullYear();
@@ -3397,8 +3435,7 @@
   function renderChartInto(svg, sym, base, tf){
     if(isGuestMode){
       var cfgGuest = tfConfig[tf];
-      var mockCountGuest = tf === '1D' ? cfgGuest.mockCount : cfgGuest.fetchSize;
-      initChartState(sym, tf, genOHLC(mockCountGuest, base, base * cfgGuest.volFactor, tfSpacingMinutes[tf]));
+      initChartState(sym, tf, genOHLC(cfgGuest.fetchSize, base, base * cfgGuest.volFactor, tfSpacingMinutes[tf]));
       renderChartView(sym);
       return;
     }
@@ -3460,7 +3497,8 @@
     var currentCount = state.viewEnd - state.viewStart;
     var cursorIndex = state.viewStart + cursorFraction * currentCount;
     var newCount = Math.round(currentCount * zoomFactor);
-    newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, state.data.length));
+    var maxCount = Math.min(tfConfig[state.tf].maxVisible, state.data.length);
+    newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, maxCount));
     var newStart = Math.round(cursorIndex - cursorFraction * newCount);
     var newEnd = newStart + newCount;
     if(newStart < 0){ newEnd -= newStart; newStart = 0; }
@@ -3618,7 +3656,8 @@
           var dxScale = e.clientX - dragState.startX;
           var scaleFactor = Math.exp(-dxScale / 200);
           var newCount = Math.round(dragState.startCount * scaleFactor);
-          newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, state.data.length));
+          var maxCountTs = Math.min(tfConfig[state.tf].maxVisible, state.data.length);
+          newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, maxCountTs));
           var anchorIdx = dragState.startViewStart + dragState.startFraction * dragState.startCount;
           var newStart = Math.round(anchorIdx - dragState.startFraction * newCount);
           var newEnd = newStart + newCount;
@@ -4726,6 +4765,16 @@
     testAlpacaConnection();
   });
 
+  document.getElementById('alpacaChangeBtn').addEventListener('click', function(){
+    // Key ID isn't especially sensitive on its own (it's an identifier,
+    // not a secret) so repopulating it is a convenience — but the secret
+    // always has to be re-typed, never shown again once saved.
+    document.getElementById('alpacaKeyIdInput').value = alpacaCreds.keyId;
+    document.getElementById('alpacaSecretInput').value = '';
+    showAlpacaInputsView();
+    setAlpacaStatus('Enter new keys to reconnect', null);
+  });
+
   // ---------- Market alerts: real, condition-based, persisted per day ----------
   var alertHistory = [];
   var alertsUid = null;
@@ -5304,6 +5353,7 @@
   var tourIndex = 0;
   var tourSpotlightEl = document.getElementById('tourSpotlight');
   var tourBubbleEl = document.getElementById('tourBubble');
+  var tourConnectorLine = document.getElementById('tourConnectorLine');
 
   function resetTourUI(){
     toggleNotepad(false);
@@ -5313,13 +5363,42 @@
     navMenu.setAttribute('hidden','');
   }
 
-  function centerTourBubble(){
+  function clearTourHighlight(){
     tourSpotlightEl.classList.add('centered');
     tourSpotlightEl.style.width = '0px';
     tourSpotlightEl.style.height = '0px';
-    tourBubbleEl.style.top = '50%';
-    tourBubbleEl.style.left = '50%';
-    tourBubbleEl.style.transform = 'translate(-50%, -50%)';
+    tourConnectorLine.setAttribute('opacity', '0');
+  }
+
+  // The bubble never moves — it's always centered (set once in CSS). Only
+  // the spotlight and this connector move, so the tour points at and
+  // highlights whatever's being described instead of the whole card
+  // floating around the screen to chase each target.
+  function drawTourConnector(targetRect){
+    var bubbleRect = tourBubbleEl.getBoundingClientRect();
+    var bubbleCx = bubbleRect.left + bubbleRect.width / 2;
+    var bubbleCy = bubbleRect.top + bubbleRect.height / 2;
+    var targetCx = targetRect.left + targetRect.width / 2;
+    var targetCy = targetRect.top + targetRect.height / 2;
+
+    // Find where a straight line from the bubble's center to the target's
+    // center exits the bubble's own rectangle, so the line starts at the
+    // bubble's edge, not from the middle of the text.
+    var dx = targetCx - bubbleCx, dy = targetCy - bubbleCy;
+    var halfW = bubbleRect.width / 2, halfH = bubbleRect.height / 2;
+    var scale = Math.min(
+      dx !== 0 ? Math.abs(halfW / dx) : Infinity,
+      dy !== 0 ? Math.abs(halfH / dy) : Infinity
+    );
+    if(!isFinite(scale)) scale = 0;
+    var startX = bubbleCx + dx * scale;
+    var startY = bubbleCy + dy * scale;
+
+    tourConnectorLine.setAttribute('x1', startX);
+    tourConnectorLine.setAttribute('y1', startY);
+    tourConnectorLine.setAttribute('x2', targetCx);
+    tourConnectorLine.setAttribute('y2', targetCy);
+    tourConnectorLine.setAttribute('opacity', '1');
   }
 
   function renderTourStep(){
@@ -5335,15 +5414,13 @@
     document.getElementById('tourNextBtn').textContent = (tourIndex === tourSteps.length - 1) ? 'Done' : 'Next ›';
 
     if(!step.selector){
-      centerTourBubble();
+      clearTourHighlight();
       return;
     }
 
-    tourBubbleEl.style.transform = 'none';
-
     requestAnimationFrame(function(){
       var target = document.querySelector(step.selector);
-      if(!target){ centerTourBubble(); return; }
+      if(!target){ clearTourHighlight(); return; }
       // Always instant: measuring position right after a smooth scroll would
       // race the scroll animation and read the pre-scroll location.
       target.scrollIntoView({ block:'center', behavior:'instant' });
@@ -5355,14 +5432,7 @@
         tourSpotlightEl.style.left = (rect.left - pad) + 'px';
         tourSpotlightEl.style.width = (rect.width + pad * 2) + 'px';
         tourSpotlightEl.style.height = (rect.height + pad * 2) + 'px';
-
-        var bubbleW = tourBubbleEl.offsetWidth;
-        var bubbleH = tourBubbleEl.offsetHeight;
-        var spaceBelow = window.innerHeight - rect.bottom;
-        var top = (spaceBelow > bubbleH + 24) ? (rect.bottom + 16) : Math.max(16, rect.top - bubbleH - 16);
-        var left = Math.min(Math.max(rect.left, 16), window.innerWidth - bubbleW - 16);
-        tourBubbleEl.style.top = top + 'px';
-        tourBubbleEl.style.left = left + 'px';
+        drawTourConnector(rect);
       });
     });
   }
