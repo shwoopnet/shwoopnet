@@ -264,6 +264,7 @@
   .brief-indices{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
   .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
   .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
+  .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
   .index-card .ix-val{ font-size:21px; display:block; }
   .index-card .ix-chg{ font-size:12px; margin-top:7px; display:block; }
   .index-card .ix-chg.up{ color:var(--gain); }
@@ -281,13 +282,16 @@
   .brief-col .brief-section-title{ margin-bottom:12px; }
 
   .breadth-widget{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:18px 20px; }
-  .breadth-bar{ height:10px; border-radius:5px; background: var(--loss-glow); overflow:hidden; margin-bottom:12px; }
+  .breadth-bar{ height:10px; border-radius:5px; background: var(--loss-glow); overflow:hidden; margin-bottom:14px; }
   .breadth-bar-up{ height:100%; background: var(--gain); }
+  .sentiment-rows{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .sentiment-row{ display:flex; align-items:center; justify-content:space-between; font-size:13px; }
+  .sentiment-name{ color: var(--paper); }
+  .sentiment-chg{ font-family:'IBM Plex Mono', monospace; font-weight:600; }
+  .sentiment-chg.up{ color: var(--gain); }
+  .sentiment-chg.down{ color: var(--loss); }
   .breadth-meta{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:12.5px; }
-  .breadth-count{ font-family:'IBM Plex Mono', monospace; font-weight:600; }
-  .breadth-count.up{ color: var(--gain); }
-  .breadth-count.down{ color: var(--loss); }
-  .breadth-label{ margin-left:auto; font-size:11.5px; padding:3px 9px; border-radius:3px; border:1px solid var(--border); color: var(--muted); }
+  .breadth-label{ font-size:11.5px; padding:4px 10px; border-radius:3px; border:1px solid var(--border); color: var(--muted); }
   .breadth-label.up{ border-color: rgba(51,193,126,0.35); color: var(--gain); }
   .breadth-label.down{ border-color: rgba(232,92,81,0.35); color: var(--loss); }
 
@@ -399,8 +403,12 @@
 
   .trade-columns{
     display:grid;
-    grid-template-columns: 28px 1.6fr 1fr 1fr 1fr 1fr 1.2fr;
+    grid-template-columns: 28px 1.4fr 0.9fr 0.9fr 0.9fr 0.9fr 1.1fr 1.1fr;
     gap: 10px; align-items:center; padding: 10px 16px;
+  }
+  .trade-row [data-label]::before{
+    content: attr(data-label); display:block; font-size:9px; color: var(--muted);
+    text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;
   }
   .trade-columns.head{
     color:var(--muted); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em;
@@ -429,6 +437,11 @@
   .status-badge.watching{ border-color: var(--border); color: var(--muted); }
   .status-badge.hit{ border-color: var(--gain); color: var(--gain); background: var(--gain-glow); }
   .status-badge.stopped{ border-color: var(--loss); color: var(--loss); background: var(--loss-glow); }
+
+  .t-rr .rr-ratio{ font-weight:600; font-size:13px; margin-bottom:4px; }
+  .t-rr .rr-detail{ font-size:10.5px; color: var(--muted); white-space:nowrap; }
+  .t-rr .rr-risk{ color: var(--loss); }
+  .t-rr .rr-reward{ color: var(--gain); }
 
   .trade-action-banner{
     display:flex; align-items:flex-start; gap:10px;
@@ -1158,7 +1171,7 @@
 
     <div class="brief-two-col">
       <div class="brief-col">
-        <div class="brief-section-title">Market Breadth</div>
+        <div class="brief-section-title">Market Sentiment</div>
         <div class="breadth-widget" id="breadthWidget"></div>
       </div>
       <div class="brief-col">
@@ -1256,6 +1269,7 @@
       <div>Stop</div>
       <div>Target 1</div>
       <div>Target 2 / Status</div>
+      <div>Risk / Reward</div>
     </div>
 
     <div id="tradeBlocks"></div>
@@ -1856,22 +1870,25 @@
   }
 
   // ---------- Index snapshot (brief page) ----------
-  var indices = [
-    { name:'S&P 500', val:5920.14, chg:0.42 },
-    { name:'Nasdaq 100', val:20841.33, chg:0.68 },
-    { name:'Dow Jones', val:41230.02, chg:-0.11 }
-  ];
   function renderIndices(){
     var el = document.getElementById('indexSnapshot');
     el.innerHTML = '';
-    indices.forEach(function(ix){
-      var up = ix.chg >= 0;
+    INDEX_PROXIES.forEach(function(ix){
+      var q = findQuote(ix.sym);
+      var val, chg;
+      if(q && q.price){
+        val = q.price; chg = pct(q.price, q.prevClose);
+      } else {
+        var fb = FALLBACK_INDEX_VALUES[ix.sym];
+        val = fb.val; chg = fb.chg;
+      }
+      var up = chg >= 0;
       var card = document.createElement('div');
       card.className = 'index-card';
       card.innerHTML =
-        '<span class="ix-name">' + ix.name + '</span>' +
-        '<span class="ix-val mono">' + ix.val.toLocaleString('en-US',{minimumFractionDigits:2}) + '</span>' +
-        '<span class="ix-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(ix.chg) + '% today</span>';
+        '<span class="ix-name">' + ix.name + ' <span class="ix-proxy">(' + ix.sym + ')</span></span>' +
+        '<span class="ix-val mono">' + val.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}) + '</span>' +
+        '<span class="ix-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(chg).toFixed(2) + '% today</span>';
       el.appendChild(card);
     });
   }
@@ -1911,6 +1928,18 @@
     };
   }
 
+  // Risk = distance from entry to stop (what you stand to lose). Reward =
+  // the average of the distance to Target 1 and Target 2 (since the plan
+  // scales out half at each) — what you stand to gain if it plays out.
+  function computeRiskReward(t){
+    var riskPct = Math.abs((t.entry - t.stop) / t.entry * 100);
+    var rewardT1Pct = Math.abs((t.t1 - t.entry) / t.entry * 100);
+    var rewardT2Pct = Math.abs((t.t2 - t.entry) / t.entry * 100);
+    var rewardPct = (rewardT1Pct + rewardT2Pct) / 2;
+    var ratio = riskPct > 0 ? (rewardPct / riskPct) : 0;
+    return { riskPct: riskPct, rewardPct: rewardPct, ratio: ratio };
+  }
+
   function renderTradeRow(t){
     var q = findQuote(t.sym);
     var change = pct(q.price, q.prevClose);
@@ -1920,6 +1949,7 @@
     var curScale = (chartStates[t.sym] && chartStates[t.sym].scale) || 'linear';
     var curTf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
     var action = buildActionHTML(t);
+    var rr = computeRiskReward(t);
     function tfBtn(tf){
       return '<button class="chart-tool-btn' + (curTf===tf?' active':'') + '" data-tf="' + tf + '" data-sym="' + t.sym + '">' + tf + '</button>';
     }
@@ -1941,6 +1971,10 @@
           '<div class="t-t2-status" data-label="Target 2 / Status">' +
             '<div class="t-t2 mono" style="margin-bottom:6px;">' + fmt(t.t2) + '</div>' +
             '<span class="status-badge ' + badgeClass + '" id="status-badge-' + t.sym + '">' + t.statusLabel + '</span>' +
+          '</div>' +
+          '<div class="t-rr" data-label="Risk / Reward">' +
+            '<div class="rr-ratio mono">1 : ' + rr.ratio.toFixed(1) + '</div>' +
+            '<div class="rr-detail"><span class="rr-risk">Risk ' + rr.riskPct.toFixed(1) + '%</span> · <span class="rr-reward">Reward ' + rr.rewardPct.toFixed(1) + '%</span></div>' +
           '</div>' +
         '</div>' +
         '<div class="trade-action-banner' + (action.done ? ' done' : '') + '" id="action-banner-' + t.sym + '">' +
@@ -2509,7 +2543,14 @@
       var plotW = 760 - 54;
       var localX = svgLocalX(svg, e.clientX);
       var fraction = Math.max(0, Math.min(1, localX / plotW));
-      zoomChart(sym, fraction, e.deltaY < 0 ? 0.85 : 1.18);
+      // A fixed zoom step per wheel event works fine for a mouse (one
+      // discrete "notch" per event) but is wildly too fast on a trackpad,
+      // which fires many more events per gesture. Scale continuously with
+      // the actual scroll distance instead, clamped so no single event
+      // (some trackpads occasionally spike) causes a jarring jump.
+      var clampedDelta = Math.max(-200, Math.min(200, e.deltaY));
+      var factor = Math.exp(clampedDelta * 0.0016);
+      zoomChart(sym, fraction, factor);
     }, { passive: false });
 
     var dragState = null;
@@ -2651,8 +2692,9 @@
     updateQuoteSyncStatus(results);
     var anySuccess = results.some(function(r){ return r; });
 
-    renderBreadth();
+    renderSentiment();
     renderMovers();
+    renderIndices();
 
     // Recalibrate entry/stop/targets against real pricing exactly once, the
     // first time live data actually lands — not on every refresh, or the
@@ -2703,7 +2745,7 @@
       item.price = Math.max(0.5, item.price + delta);
     });
     renderTicker();
-    renderBreadth();
+    renderSentiment();
     renderMovers();
     updateTradeRowPrices();
   }
@@ -3925,6 +3967,10 @@
         pendingAnalysisUid = user.uid;
         loadMarketNewsIfSignedIn();
         loadEarningsIfSignedIn();
+        INDEX_PROXIES.forEach(function(ix){
+          var fb = FALLBACK_INDEX_VALUES[ix.sym];
+          ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
+        });
         startRealQuoteLoop();
         renderAllTradeCharts(); // refresh from simulated to real, in case a guest signed in
         if(isNewSignup){
@@ -4162,21 +4208,49 @@
   }
 
   // ---------- Market Breadth & Today's Movers (computed, no extra API calls) ----------
-  function renderBreadth(){
+  // Real ETF proxies for the major indices — SPY/QQQ/DIA are liquid,
+  // quotable stand-ins for the S&P 500/Nasdaq 100/Dow Jones. Their % change
+  // tracks the underlying index almost exactly, even though their own share
+  // price isn't the index level itself (SPY trades near 1/10th the S&P 500,
+  // for example) — that's why the cards label them as proxies, not as if
+  // SPY's price *is* "the S&P 500."
+  var INDEX_PROXIES = [
+    { sym:'SPY', name:'S&P 500' },
+    { sym:'QQQ', name:'Nasdaq 100' },
+    { sym:'DIA', name:'Dow Jones' }
+  ];
+  var FALLBACK_INDEX_VALUES = {
+    SPY: { val: 592.01, chg: 0.42 },
+    QQQ: { val: 521.03, chg: 0.68 },
+    DIA: { val: 412.30, chg: -0.11 }
+  };
+
+  function renderSentiment(){
     var el = document.getElementById('breadthWidget');
-    if(!el || watchlist.length === 0) return;
-    var up = watchlist.filter(function(w){ return pct(w.price, w.prevClose) >= 0; }).length;
-    var down = watchlist.length - up;
-    var total = watchlist.length;
+    if(!el) return;
+    var reads = INDEX_PROXIES.map(function(ix){
+      var q = findQuote(ix.sym);
+      var chg = (q && q.price) ? pct(q.price, q.prevClose) : FALLBACK_INDEX_VALUES[ix.sym].chg;
+      return { name: ix.name, chg: chg };
+    });
+    var up = reads.filter(function(r){ return r.chg >= 0; }).length;
+    var total = reads.length;
+    var label = up === total ? 'Broadly positive' : up === 0 ? 'Broadly negative' :
+      up > total / 2 ? 'Mixed, leaning positive' : up < total / 2 ? 'Mixed, leaning negative' : 'Mixed';
+    var labelClass = up === total ? 'up' : up === 0 ? 'down' : '';
     var upPct = (up / total) * 100;
-    var label = upPct >= 65 ? 'Broadly positive' : upPct <= 35 ? 'Broadly negative' : 'Mixed';
-    var labelClass = upPct >= 65 ? 'up' : upPct <= 35 ? 'down' : '';
+
     el.innerHTML =
       '<div class="breadth-bar"><div class="breadth-bar-up" style="width:' + upPct + '%"></div></div>' +
+      '<div class="sentiment-rows">' +
+        reads.map(function(r){
+          var isUp = r.chg >= 0;
+          return '<div class="sentiment-row"><span class="sentiment-name">' + r.name + '</span>' +
+            '<span class="sentiment-chg ' + (isUp?'up':'down') + '">' + (isUp?'▲':'▼') + ' ' + Math.abs(r.chg).toFixed(2) + '%</span></div>';
+        }).join('') +
+      '</div>' +
       '<div class="breadth-meta">' +
-        '<span class="breadth-count up">' + up + ' up</span>' +
-        '<span class="breadth-count down">' + down + ' down</span>' +
-        '<span class="breadth-label ' + labelClass + '">' + label + '</span>' +
+        '<span class="breadth-label ' + labelClass + '">' + label + ' — that\'s the bias going into today</span>' +
       '</div>';
   }
 
@@ -4297,7 +4371,7 @@
   renderTicker();
   renderIndices();
   renderWhatToWatch();
-  renderBreadth();
+  renderSentiment();
   renderMovers();
   statCta();
   updateClock();
