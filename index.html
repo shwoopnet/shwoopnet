@@ -25,6 +25,8 @@
     --gain-glow: rgba(51,193,126,0.16);
     --loss: #E85C51;
     --loss-glow: rgba(232,92,81,0.16);
+    --ma20-color: #E9A23B;
+    --ma50-color: #6FA8DC;
     --radius: 6px;
   }
 
@@ -273,6 +275,45 @@
   }
 
   .watch-trades{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom: 40px; }
+
+  .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
+  @media (max-width: 900px){ .brief-two-col{ grid-template-columns:1fr; gap:24px; } }
+  .brief-col .brief-section-title{ margin-bottom:12px; }
+
+  .breadth-widget{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:18px 20px; }
+  .breadth-bar{ height:10px; border-radius:5px; background: var(--loss-glow); overflow:hidden; margin-bottom:12px; }
+  .breadth-bar-up{ height:100%; background: var(--gain); }
+  .breadth-meta{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:12.5px; }
+  .breadth-count{ font-family:'IBM Plex Mono', monospace; font-weight:600; }
+  .breadth-count.up{ color: var(--gain); }
+  .breadth-count.down{ color: var(--loss); }
+  .breadth-label{ margin-left:auto; font-size:11.5px; padding:3px 9px; border-radius:3px; border:1px solid var(--border); color: var(--muted); }
+  .breadth-label.up{ border-color: rgba(51,193,126,0.35); color: var(--gain); }
+  .breadth-label.down{ border-color: rgba(232,92,81,0.35); color: var(--loss); }
+
+  .movers-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .movers-col{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; }
+  .movers-col-title{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color: var(--muted); margin-bottom:10px; }
+  .mover-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; font-size:12px; }
+  .mover-row + .mover-row{ border-top:1px solid var(--border); }
+  .mover-sym{ font-weight:600; }
+  .mover-price{ color: var(--muted); }
+  .mover-chg{ font-family:'IBM Plex Mono', monospace; font-weight:600; }
+  .mover-chg.up{ color: var(--gain); }
+  .mover-chg.down{ color: var(--loss); }
+
+  .market-news-list, .earnings-list{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:6px 16px; min-height:60px; }
+  .news-placeholder{ padding:14px 0; font-size:12px; color: var(--muted); }
+  .news-item{ display:flex; flex-direction:column; gap:3px; padding:11px 0; text-decoration:none; color: var(--paper); }
+  .news-item + .news-item{ border-top:1px solid var(--border); }
+  .news-item:hover .news-item-headline{ color: var(--amber); }
+  .news-item-headline{ font-size:12.5px; line-height:1.5; }
+  .news-item-meta{ font-size:10.5px; color: var(--muted); }
+  .earnings-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; font-size:12.5px; }
+  .earnings-row + .earnings-row{ border-top:1px solid var(--border); }
+  .earnings-sym{ font-weight:600; flex:0 0 60px; }
+  .earnings-date{ color: var(--muted); flex:1; }
+  .earnings-hour{ font-size:11px; color: var(--amber); }
   .watch-trade-card{
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     padding:16px 18px; cursor:pointer; transition: border-color .15s ease;
@@ -322,6 +363,24 @@
   .layout-menu .layout-stepper{ justify-content:space-between; }
   .layout-stepper{ display:flex; align-items:center; gap:8px; }
   .layout-stepper .step-name{ font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .layout-divider{ height:1px; background: var(--border); margin:2px 0; }
+  .layout-toggle-group{ display:flex; gap:4px; }
+
+  #tradeBlocks.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  #tradeBlocks.two-col .trade-row{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
+  #tradeBlocks.two-col .trade-row > *{ flex:1 1 40%; }
+  #tradeBlocks.two-col .trade-row .chevron{ flex: 0 0 auto; }
+  #tradeBlocks.two-col .trade-row .t-sym-cell{ flex: 1 1 100%; }
+  #tradeBlocks.two-col [data-label]::before{
+    content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;
+  }
+  #tradeBlocks.two-col .trade-detail{ flex-direction: column; }
+  #tradeBlocks.two-col .trade-chart-col{ flex: 0 0 auto; width:100%; }
+  #tradeBlocks.two-col .trade-notes-col{ flex: 1 1 auto; width:100%; }
+  @media (max-width: 900px){
+    #tradeBlocks.two-col{ grid-template-columns: 1fr; }
+  }
   .zoom-btn{
     background: transparent; border:1px solid var(--border); color: var(--muted);
     width:26px; height:26px; border-radius:4px; font-size:15px; line-height:1;
@@ -848,15 +907,15 @@
         console.error('Alerts sync error:', err);
       });
     },
-    saveTradeAnalysis: function(uid, analysis, forDate){
-      return setDoc(doc(db, 'users', uid), { tradeAnalysis: analysis, tradeAnalysisDate: forDate }, { merge: true });
+    saveScreenerPicks: function(uid, picks, forDate){
+      return setDoc(doc(db, 'users', uid), { screenerPicks: picks, screenerDate: forDate }, { merge: true });
     },
-    watchTradeAnalysis: function(uid, callback){
+    watchScreenerPicks: function(uid, callback){
       return onSnapshot(doc(db, 'users', uid), function(snap){
         var data = snap.exists() ? snap.data() : {};
-        callback({ tradeAnalysis: data.tradeAnalysis || null, tradeAnalysisDate: data.tradeAnalysisDate || null });
+        callback({ screenerPicks: data.screenerPicks || null, screenerDate: data.screenerDate || null });
       }, function(err){
-        console.error('Trade analysis sync error:', err);
+        console.error('Screener sync error:', err);
       });
     }
   });
@@ -1097,6 +1156,32 @@
 
     <div class="brief-indices" id="indexSnapshot"></div>
 
+    <div class="brief-two-col">
+      <div class="brief-col">
+        <div class="brief-section-title">Market Breadth</div>
+        <div class="breadth-widget" id="breadthWidget"></div>
+      </div>
+      <div class="brief-col">
+        <div class="brief-section-title">Today's Movers</div>
+        <div class="movers-grid" id="moversGrid"></div>
+      </div>
+    </div>
+
+    <div class="brief-two-col">
+      <div class="brief-col">
+        <div class="brief-section-title">Market News</div>
+        <div class="market-news-list" id="marketNewsList">
+          <div class="news-placeholder">Sign in to see real market headlines.</div>
+        </div>
+      </div>
+      <div class="brief-col">
+        <div class="brief-section-title">Earnings This Week</div>
+        <div class="earnings-list" id="earningsList">
+          <div class="news-placeholder">Sign in to see upcoming earnings for your tracked stocks.</div>
+        </div>
+      </div>
+    </div>
+
     <div class="brief-section-title">What to Watch — Today</div>
     <div class="watch-trades" id="whatToWatchList"></div>
 
@@ -1141,6 +1226,22 @@
               <button class="zoom-btn" id="textDec" aria-label="Decrease text size">−</button>
               <span class="zoom-label mono" id="textLabel">12.5px</span>
               <button class="zoom-btn" id="textInc" aria-label="Increase text size">+</button>
+            </div>
+            <div class="layout-divider"></div>
+            <div class="layout-stepper">
+              <span class="step-name">Trades layout</span>
+              <div class="layout-toggle-group">
+                <button class="chart-tool-btn active" id="cols1Btn" data-cols="1">1 column</button>
+                <button class="chart-tool-btn" id="cols2Btn" data-cols="2">2 columns</button>
+              </div>
+            </div>
+            <div class="layout-stepper">
+              <span class="step-name">Moving averages</span>
+              <button class="chart-tool-btn active" id="maToggleBtn">On</button>
+            </div>
+            <div class="layout-stepper">
+              <span class="step-name">OHLC readout</span>
+              <button class="chart-tool-btn active" id="ohlcToggleBtn">On</button>
             </div>
           </div>
         </div>
@@ -1247,7 +1348,7 @@
 
       <div class="settings-row">
         <div>
-          <div class="settings-row-title">Trade analysis</div>
+          <div class="settings-row-title">Screener</div>
           <div class="settings-row-desc quote-sync-status" id="analysisSyncStatus">—</div>
         </div>
       </div>
@@ -1404,6 +1505,29 @@
 (function(){
 
   // ---------- Shared quote data ----------
+  // Well-known, liquid large-cap symbols the screener picks from. Not a
+  // full-market scanner (that needs a dedicated screener API) — a curated
+  // pool of "high profile" names, screened daily with real technical
+  // analysis rather than picked by hand.
+  var SCREENER_UNIVERSE = [
+    'AAPL','MSFT','GOOGL','AMZN','NVDA','META','TSLA','AMD','NFLX','CRM','ORCL','ADBE','INTC','CSCO',
+    'JPM','V','MA','GS','BAC',
+    'JNJ','UNH','PFE',
+    'WMT','HD','MCD','NKE','KO','PEP','PG','DIS',
+    'BA','XOM','CVX'
+  ];
+  var COMPANY_NAMES = {
+    AAPL:'Apple Inc', MSFT:'Microsoft', GOOGL:'Alphabet Cl A', AMZN:'Amazon.com', NVDA:'NVIDIA Corp',
+    META:'Meta Platforms', TSLA:'Tesla Inc', AMD:'Adv Micro Devices', NFLX:'Netflix Inc', CRM:'Salesforce',
+    ORCL:'Oracle Corp', ADBE:'Adobe Inc', INTC:'Intel Corp', CSCO:'Cisco Systems',
+    JPM:'JPMorgan Chase', V:'Visa Inc', MA:'Mastercard', GS:'Goldman Sachs', BAC:'Bank of America',
+    JNJ:'Johnson & Johnson', UNH:'UnitedHealth Group', PFE:'Pfizer Inc',
+    WMT:'Walmart Inc', HD:'Home Depot', MCD:"McDonald's Corp", NKE:'Nike Inc', KO:'Coca-Cola Co',
+    PEP:'PepsiCo Inc', PG:'Procter & Gamble', DIS:'Walt Disney Co',
+    BA:'Boeing Co', XOM:'Exxon Mobil', CVX:'Chevron Corp'
+  };
+  var DEFAULT_WATCHLIST_SYMS = ['NVDA','AAPL','MSFT','AMZN','GOOGL','META','TSLA','AMD'];
+
   var watchlist = [
     { sym:'NVDA', name:'NVIDIA Corp', price:128.40, prevClose:126.90 },
     { sym:'AAPL', name:'Apple Inc',   price:231.15, prevClose:229.80 },
@@ -1415,10 +1539,21 @@
     { sym:'AMD',  name:'Adv Micro Devices', price:172.10, prevClose:169.50 }
   ];
 
+  function ensureInWatchlist(sym, name, price, prevClose){
+    var existing = watchlist.filter(function(w){ return w.sym === sym; })[0];
+    if(existing){
+      existing.price = price; existing.prevClose = prevClose;
+    } else {
+      watchlist.push({ sym: sym, name: name || sym, price: price, prevClose: prevClose });
+    }
+  }
+
   // entry/stop/t1/t2 are computed from the live price (see calibrateTradeLevels),
   // not hardcoded — otherwise these drift completely out of sync with reality
-  // the moment the real stock price moves.
-  var trades = [
+  // the moment the real stock price moves. This is also the simulated
+  // fallback: what guest mode shows, and what signed-in accounts fall back
+  // to before the screener has run for the day.
+  var DEFAULT_TRADES = [
     { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, t2PctFromEntry:0.0698, status:'active',   statusLabel:'Active',
       notes: [
         "Holding above the 50-day moving average through the recent semis rally, a level that's held on every pullback this month.",
@@ -1449,10 +1584,21 @@
       ] }
   ];
 
-  // Snapshot the original simulated direction/status/notes before anything
-  // (real analysis) can overwrite them in place, so we can cleanly restore
-  // this baseline for guest mode or after signing out.
-  var defaultTradeMeta = trades.map(function(t){
+  function cloneDefaultTrade(t){
+    return {
+      sym: t.sym, direction: t.direction,
+      entryPct: t.entryPct, stopPctFromEntry: t.stopPctFromEntry, t1PctFromEntry: t.t1PctFromEntry, t2PctFromEntry: t.t2PctFromEntry,
+      status: t.status, statusLabel: t.statusLabel, notes: t.notes.slice(), analysisIsReal: false
+    };
+  }
+
+  var trades = DEFAULT_TRADES.map(cloneDefaultTrade);
+
+  // Snapshot of the original simulated direction/status/notes, so guest mode
+  // and post-sign-out always have a clean baseline to fall back to,
+  // regardless of what the screener replaced `trades` with during the
+  // session.
+  var defaultTradeMeta = DEFAULT_TRADES.map(function(t){
     return { sym: t.sym, direction: t.direction, status: t.status, statusLabel: t.statusLabel, notes: t.notes.slice() };
   });
 
@@ -1470,17 +1616,10 @@
   calibrateTradeLevels();
 
   function resetTradesToDefault(){
-    trades.forEach(function(t){
-      var def = defaultTradeMeta.filter(function(d){ return d.sym === t.sym; })[0];
-      if(def){
-        t.direction = def.direction;
-        t.status = def.status;
-        t.statusLabel = def.statusLabel;
-        t.notes = def.notes.slice();
-      }
-      t.analysisIsReal = false;
-    });
+    trades = DEFAULT_TRADES.map(cloneDefaultTrade);
+    watchlist = watchlist.filter(function(w){ return DEFAULT_WATCHLIST_SYMS.indexOf(w.sym) > -1; });
     calibrateTradeLevels();
+    statCta();
     var subtitleEl = document.getElementById('tradesSubtitle');
     if(subtitleEl){ subtitleEl.textContent = 'Simulated entries, stops and targets — chart below each row.'; }
     var statusEl = document.getElementById('analysisSyncStatus');
@@ -1495,6 +1634,21 @@
     if(closes.length < period) return null;
     var slice = closes.slice(closes.length - period);
     return slice.reduce(function(a,b){ return a + b; }, 0) / period;
+  }
+
+  // Rolling SMA across a full bar series, for drawing as a line on the
+  // chart — different from computeSMA above, which only returns the single
+  // latest value used in the "why this trade" text.
+  function computeSMASeries(bars, period){
+    var closes = bars.map(function(b){ return b.c; });
+    var series = new Array(closes.length).fill(null);
+    var runningSum = 0;
+    for(var i = 0; i < closes.length; i++){
+      runningSum += closes[i];
+      if(i >= period){ runningSum -= closes[i - period]; }
+      if(i >= period - 1){ series[i] = runningSum / period; }
+    }
+    return series;
   }
 
   function computeTechnicalAnalysis(bars, currentPrice){
@@ -1544,11 +1698,28 @@
     notes.push('Price is ' + (momentum5d >= 0 ? 'up' : 'down') + ' ' + Math.abs(momentum5d).toFixed(1) + '% over the last 5 sessions' + (Math.abs(momentum5d) > 3 ? ', a meaningful recent move' : '') + '.');
     notes.push('Entry sits near the 20-day average, stop just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan.');
 
-    return { direction: direction, entry: entry, stop: stop, t1: t1, t2: t2, status: status, statusLabel: statusLabel, notes: notes };
+    return {
+      direction: direction, entry: entry, stop: stop, t1: t1, t2: t2, status: status, statusLabel: statusLabel, notes: notes,
+      sma20: sma20, sma50: sma50, momentum5d: momentum5d
+    };
   }
 
-  var tradeAnalysisUnsubscribe = null;
-  var isRunningTradeAnalysis = false;
+  // Ranks a candidate for the screener: clean trend alignment (price and
+  // both moving averages agreeing on direction) plus real recent momentum.
+  // Not a black box — just the two things that already justify the trade
+  // in plain English above.
+  function scoreCandidate(analysis){
+    var aligned = false;
+    if(analysis.sma20 !== null && analysis.sma50 !== null){
+      aligned = (analysis.direction === 'Long' && analysis.sma20 > analysis.sma50) ||
+                (analysis.direction === 'Short' && analysis.sma20 < analysis.sma50);
+    }
+    return (aligned ? 3 : 0) + Math.abs(analysis.momentum5d || 0);
+  }
+
+  var screenerUnsubscribe = null;
+  var isRunningScreener = false;
+  var SCREENER_PICK_COUNT = 4;
 
   function updateAnalysisStatus(text, ok){
     var el = document.getElementById('analysisSyncStatus');
@@ -1557,73 +1728,104 @@
     el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
   }
 
-  function runRealTradeAnalysis(){
-    if(isRunningTradeAnalysis || isGuestMode) return;
-    isRunningTradeAnalysis = true;
+  function buildTradeFromPick(pick){
+    var isLong = pick.direction === 'Long';
+    return {
+      sym: pick.sym, direction: pick.direction,
+      entryPct: 0, stopPctFromEntry: (pick.stop - pick.entry) / pick.entry,
+      t1PctFromEntry: (pick.t1 - pick.entry) / pick.entry, t2PctFromEntry: (pick.t2 - pick.entry) / pick.entry,
+      entry: pick.entry, stop: pick.stop, t1: pick.t1, t2: pick.t2,
+      status: pick.status, statusLabel: pick.statusLabel, notes: pick.notes.slice(),
+      analysisIsReal: true
+    };
+  }
+
+  function runScreener(){
+    if(isRunningScreener || isGuestMode) return;
+    isRunningScreener = true;
+    updateAnalysisStatus('Screening ' + SCREENER_UNIVERSE.length + ' stocks…', null);
     var today = new Date().toISOString().slice(0,10);
 
-    var promises = trades.map(function(t){
-      return fetchHistory(t.sym, '1M').then(function(bars){
-        var q = findQuote(t.sym);
-        if(!q || !bars || bars.length < 10) return;
-        var result = computeTechnicalAnalysis(bars, q.price);
-        t.direction = result.direction;
-        t.entry = result.entry;
-        t.stop = result.stop;
-        t.t1 = result.t1;
-        t.t2 = result.t2;
-        t.status = result.status;
-        t.statusLabel = result.statusLabel;
-        t.notes = result.notes;
-        t.analysisIsReal = true;
+    var promises = SCREENER_UNIVERSE.map(function(sym){
+      return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M')]).then(function(results){
+        var quote = results[0], bars = results[1];
+        if(!quote || !bars || bars.length < 25) return null;
+        var analysis = computeTechnicalAnalysis(bars, quote.price);
+        return {
+          sym: sym, price: quote.price, prevClose: quote.prevClose,
+          score: scoreCandidate(analysis), analysis: analysis
+        };
       }).catch(function(err){
-        console.error('Real analysis failed for', t.sym, '— keeping calibrated fallback.', err);
+        console.error('Screener fetch failed for', sym, err);
+        return null;
       });
     });
 
-    Promise.all(promises).then(function(){
-      isRunningTradeAnalysis = false;
+    Promise.all(promises).then(function(results){
+      isRunningScreener = false;
+      var candidates = results.filter(Boolean).sort(function(a,b){ return b.score - a.score; }).slice(0, SCREENER_PICK_COUNT);
+
+      if(candidates.length === 0){
+        updateAnalysisStatus('Screener failed — showing simulated picks (check console)', false);
+        return;
+      }
+
+      candidates.forEach(function(c){
+        ensureInWatchlist(c.sym, COMPANY_NAMES[c.sym] || c.sym, c.price, c.prevClose);
+      });
+
+      trades = candidates.map(function(c){
+        return buildTradeFromPick({
+          sym: c.sym, direction: c.analysis.direction,
+          entry: c.analysis.entry, stop: c.analysis.stop, t1: c.analysis.t1, t2: c.analysis.t2,
+          status: c.analysis.status, statusLabel: c.analysis.statusLabel, notes: c.analysis.notes
+        });
+      });
+
       renderTradeBlocks();
       renderWhatToWatch();
-      updateAnalysisStatus('Recalculated today · ' + new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }), true);
+      statCta();
+      updateAnalysisStatus('Screened today · ' + new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }), true);
       var subtitleEl = document.getElementById('tradesSubtitle');
-      if(subtitleEl){ subtitleEl.textContent = 'Real technical analysis, recalculated daily — chart below each row.'; }
+      if(subtitleEl){ subtitleEl.textContent = 'Auto-picked daily from ' + SCREENER_UNIVERSE.length + ' major stocks by real technical analysis.'; }
+
       if(window.__shwoopAPI && currentUid){
         var snapshot = trades.map(function(t){
-          return { sym:t.sym, direction:t.direction, entry:t.entry, stop:t.stop, t1:t.t1, t2:t.t2, status:t.status, statusLabel:t.statusLabel, notes:t.notes };
+          return { sym:t.sym, direction:t.direction, entry:t.entry, stop:t.stop, t1:t.t1, t2:t.t2, status:t.status, statusLabel:t.statusLabel, notes:t.notes,
+            name: (findQuote(t.sym) || {}).name || t.sym };
         });
-        window.__shwoopAPI.saveTradeAnalysis(currentUid, snapshot, today).catch(function(err){
-          console.error('Failed to save trade analysis:', err);
+        window.__shwoopAPI.saveScreenerPicks(currentUid, snapshot, today).catch(function(err){
+          console.error('Failed to save screener picks:', err);
         });
       }
     });
   }
 
-  function applyStoredTradeAnalysis(list){
+  function applyStoredScreenerPicks(list){
     list.forEach(function(saved){
-      var t = trades.filter(function(x){ return x.sym === saved.sym; })[0];
-      if(!t) return;
-      t.direction = saved.direction;
-      t.entry = saved.entry; t.stop = saved.stop; t.t1 = saved.t1; t.t2 = saved.t2;
-      t.status = saved.status; t.statusLabel = saved.statusLabel; t.notes = saved.notes;
-      t.analysisIsReal = true;
+      ensureInWatchlist(saved.sym, saved.name || COMPANY_NAMES[saved.sym] || saved.sym, saved.entry, saved.entry);
     });
+    trades = list.map(buildTradeFromPick);
+    // Live quotes will correct this placeholder price on the next refresh —
+    // ensureInWatchlist above just needs *something* non-zero in the
+    // meantime so the page doesn't show blank current-price cells.
     renderTradeBlocks();
     renderWhatToWatch();
-    updateAnalysisStatus("Today's analysis loaded", true);
+    statCta();
+    updateAnalysisStatus("Today's screener picks loaded", true);
     var subtitleEl2 = document.getElementById('tradesSubtitle');
-    if(subtitleEl2){ subtitleEl2.textContent = 'Real technical analysis, recalculated daily — chart below each row.'; }
+    if(subtitleEl2){ subtitleEl2.textContent = 'Auto-picked daily from ' + SCREENER_UNIVERSE.length + ' major stocks by real technical analysis.'; }
   }
 
-  function loadTradeAnalysisForUser(uid){
-    if(tradeAnalysisUnsubscribe){ tradeAnalysisUnsubscribe(); tradeAnalysisUnsubscribe = null; }
+  function loadScreenerForUser(uid){
+    if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
     updateAnalysisStatus('Calculating…', null);
-    tradeAnalysisUnsubscribe = window.__shwoopAPI.watchTradeAnalysis(uid, function(data){
+    screenerUnsubscribe = window.__shwoopAPI.watchScreenerPicks(uid, function(data){
       var today = new Date().toISOString().slice(0,10);
-      if(data.tradeAnalysisDate === today && data.tradeAnalysis && data.tradeAnalysis.length){
-        applyStoredTradeAnalysis(data.tradeAnalysis);
+      if(data.screenerDate === today && data.screenerPicks && data.screenerPicks.length){
+        applyStoredScreenerPicks(data.screenerPicks);
       } else {
-        runRealTradeAnalysis();
+        runScreener();
       }
     });
   }
@@ -1840,24 +2042,32 @@
     '1Y': { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
   };
   var chartStates = {}; // per-symbol: { data, viewStart, viewEnd, scale, tf }
+  var showMovingAverages = true;
+  var showOHLCReadout = true;
   var MIN_VISIBLE_CANDLES = 8;
 
   function genOHLC(count, base, vol){
-    var price = base - vol * count * 0.15;
+    // Built backwards from the known live price, not forward with a
+    // patched-on override — guarantees every candle (including the last)
+    // is internally consistent, with no risk of a body outgrowing its own
+    // wick if the walk happens to drift far from `base`.
+    var closes = new Array(count);
+    closes[count - 1] = base;
+    for(var i = count - 2; i >= 0; i--){
+      var step = (Math.random() - 0.5) * vol;
+      closes[i] = closes[i + 1] - step;
+    }
     var arr = [];
     var now = new Date();
-    for(var i=0;i<count;i++){
-      var open = price;
-      var change = (Math.random()-0.5) * vol;
-      var close = open + change;
-      var high = Math.max(open,close) + Math.random()*vol*0.4;
-      var low = Math.min(open,close) - Math.random()*vol*0.4;
+    for(var j = 0; j < count; j++){
+      var open = j === 0 ? closes[0] - (Math.random() - 0.5) * vol * 0.6 : closes[j - 1];
+      var close = closes[j];
+      var high = Math.max(open, close) + Math.random() * vol * 0.4;
+      var low = Math.min(open, close) - Math.random() * vol * 0.4;
       // Synthetic intraday timestamps, ~5 min apart, ending now.
-      var t = new Date(now.getTime() - (count - 1 - i) * 5 * 60000);
-      arr.push({o:open,h:high,l:low,c:close,t:t});
-      price = close;
+      var t = new Date(now.getTime() - (count - 1 - j) * 5 * 60000);
+      arr.push({ o:open, h:high, l:low, c:close, t:t });
     }
-    arr[arr.length-1].c = base;
     return arr;
   }
 
@@ -1937,7 +2147,8 @@
     return { lo: niceLo, hi: niceHi, ticks: ticks, spacing: spacing };
   }
 
-  function drawCandles(svg, data, scale, priceScaleFactor, tf){
+  function drawCandles(svg, data, scale, priceScaleFactor, tf, opts){
+    opts = opts || {};
     var W = 760, H = 200, padTop=12, padBottom=30, padRight=54;
     var plotW = W - padRight, plotH = H - padTop - padBottom;
     priceScaleFactor = priceScaleFactor || 1;
@@ -2016,6 +2227,29 @@
       parts.push('<rect x="'+(x-cw/2)+'" y="'+bodyTop+'" width="'+cw+'" height="'+bodyH+'" fill="'+color+'"/>');
     });
 
+    // Moving averages — computed from the FULL dataset (not just the visible
+    // slice) so the line has correct lookback even when zoomed into a
+    // narrow recent window, then only the visible portion is drawn.
+    if(opts.showMA && opts.fullData && opts.fullData.length >= 2){
+      var viewStart = opts.viewStart || 0;
+      function buildMALine(period, color){
+        var series = computeSMASeries(opts.fullData, period);
+        var pts = [];
+        for(var i = 0; i < data.length; i++){
+          var seriesIdx = viewStart + i;
+          var val = series[seriesIdx];
+          if(val === null || val === undefined) continue;
+          var px = i * xStep + xStep / 2;
+          pts.push(px + ',' + y(val));
+        }
+        if(pts.length > 1){
+          parts.push('<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + color + '" stroke-width="1.5" opacity="0.9"/>');
+        }
+      }
+      buildMALine(20, 'var(--ma20-color)');
+      buildMALine(50, 'var(--ma50-color)');
+    }
+
     // Live price line — the signature "where are we right now" reference
     // every real trading platform shows, dashed across the chart with a
     // colored tag on the axis.
@@ -2038,7 +2272,9 @@
     var svg = document.getElementById('chart-' + sym);
     if(!state || !svg) return;
     var visible = state.data.slice(state.viewStart, state.viewEnd);
-    state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf);
+    state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
+      showMA: showMovingAverages, fullData: state.data, viewStart: state.viewStart
+    });
   }
 
   function initChartState(sym, tf, data){
@@ -2168,12 +2404,16 @@
     var up = bar.c >= bar.o;
     var cls = up ? 'cr-up' : 'cr-down';
 
-    readout.innerHTML =
-      '<span>O <span class="' + cls + '">' + bar.o.toFixed(2) + '</span></span>' +
-      '<span>H <span class="' + cls + '">' + bar.h.toFixed(2) + '</span></span>' +
-      '<span>L <span class="' + cls + '">' + bar.l.toFixed(2) + '</span></span>' +
-      '<span>C <span class="' + cls + '">' + bar.c.toFixed(2) + '</span></span>';
-    readout.removeAttribute('hidden');
+    if(showOHLCReadout){
+      readout.innerHTML =
+        '<span>O <span class="' + cls + '">' + bar.o.toFixed(2) + '</span></span>' +
+        '<span>H <span class="' + cls + '">' + bar.h.toFixed(2) + '</span></span>' +
+        '<span>L <span class="' + cls + '">' + bar.l.toFixed(2) + '</span></span>' +
+        '<span>C <span class="' + cls + '">' + bar.c.toFixed(2) + '</span></span>';
+      readout.removeAttribute('hidden');
+    } else {
+      readout.setAttribute('hidden', '');
+    }
 
     svg.querySelectorAll('.crosshair-line, .crosshair-hline, .crosshair-tag').forEach(function(el){ el.remove(); });
 
@@ -2370,6 +2610,9 @@
     updateQuoteSyncStatus(results);
     var anySuccess = results.some(function(r){ return r; });
 
+    renderBreadth();
+    renderMovers();
+
     // Recalibrate entry/stop/targets against real pricing exactly once, the
     // first time live data actually lands — not on every refresh, or the
     // trade plan would visibly shift every 45 seconds.
@@ -2386,7 +2629,7 @@
     if(pendingAnalysisUid && anySuccess){
       var analysisUid = pendingAnalysisUid;
       pendingAnalysisUid = null;
-      loadTradeAnalysisForUser(analysisUid);
+      loadScreenerForUser(analysisUid);
     }
   }
 
@@ -2419,6 +2662,8 @@
       item.price = Math.max(0.5, item.price + delta);
     });
     renderTicker();
+    renderBreadth();
+    renderMovers();
     if(!document.getElementById('page-trades').hidden){
       updateTradeRowPrices();
     }
@@ -2608,7 +2853,7 @@
     }
   });
 
-  var layoutPrefs = { width:62, height:200, text:12.5 };
+  var layoutPrefs = { width:62, height:200, text:12.5, cols:1, showMA:true, showOHLC:true };
   var layoutLimits = {
     width:  [40, 85, 5],
     height: [120, 340, 20],
@@ -2631,6 +2876,22 @@
     document.getElementById('textDec').disabled = layoutPrefs.text <= layoutLimits.text[0];
     document.getElementById('textInc').disabled = layoutPrefs.text >= layoutLimits.text[1];
 
+    var tradeBlocksEl = document.getElementById('tradeBlocks');
+    var headerEl = document.querySelector('.trade-columns.head');
+    if(tradeBlocksEl){ tradeBlocksEl.classList.toggle('two-col', layoutPrefs.cols === 2); }
+    if(headerEl){ headerEl.hidden = (layoutPrefs.cols === 2); }
+    document.getElementById('cols1Btn').classList.toggle('active', layoutPrefs.cols === 1);
+    document.getElementById('cols2Btn').classList.toggle('active', layoutPrefs.cols === 2);
+
+    showMovingAverages = layoutPrefs.showMA;
+    showOHLCReadout = layoutPrefs.showOHLC;
+    var maBtn = document.getElementById('maToggleBtn');
+    var ohlcBtn = document.getElementById('ohlcToggleBtn');
+    maBtn.textContent = layoutPrefs.showMA ? 'On' : 'Off';
+    maBtn.classList.toggle('active', layoutPrefs.showMA);
+    ohlcBtn.textContent = layoutPrefs.showOHLC ? 'On' : 'Off';
+    ohlcBtn.classList.toggle('active', layoutPrefs.showOHLC);
+
     try{ window.localStorage.setItem('shwoopnet:layout', JSON.stringify(layoutPrefs)); }catch(e){}
   }
 
@@ -2648,10 +2909,30 @@
   document.getElementById('textDec').addEventListener('click', function(){ stepLayout('text', -1); });
   document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
 
+  document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); });
+  document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); });
+
+  document.getElementById('maToggleBtn').addEventListener('click', function(){
+    layoutPrefs.showMA = !layoutPrefs.showMA;
+    applyLayout();
+    trades.forEach(function(t){ renderChartView(t.sym); });
+  });
+  document.getElementById('ohlcToggleBtn').addEventListener('click', function(){
+    layoutPrefs.showOHLC = !layoutPrefs.showOHLC;
+    applyLayout();
+  });
+
   (function initLayout(){
     try{
       var saved = JSON.parse(window.localStorage.getItem('shwoopnet:layout') || 'null');
-      if(saved && typeof saved.width === 'number'){ layoutPrefs = saved; }
+      if(saved && typeof saved.width === 'number'){
+        layoutPrefs.width = saved.width;
+        layoutPrefs.height = saved.height;
+        layoutPrefs.text = saved.text;
+        if(saved.cols === 1 || saved.cols === 2){ layoutPrefs.cols = saved.cols; }
+        if(typeof saved.showMA === 'boolean'){ layoutPrefs.showMA = saved.showMA; }
+        if(typeof saved.showOHLC === 'boolean'){ layoutPrefs.showOHLC = saved.showOHLC; }
+      }
     }catch(e){}
     applyLayout();
   })();
@@ -3531,9 +3812,10 @@
     // signOutUser() on an already-signed-out session is a harmless no-op.
     if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
     if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
-    if(tradeAnalysisUnsubscribe){ tradeAnalysisUnsubscribe(); tradeAnalysisUnsubscribe = null; }
+    if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
     pendingAnalysisUid = null;
     resetTradesToDefault();
+    resetNewsAndEarnings();
     if(window.__shwoopAPI){
       window.__shwoopAPI.signOutUser().catch(function(err){
         console.error('Sign-out before entering guest mode failed:', err);
@@ -3602,6 +3884,8 @@
         });
         loadAlertsForUser(user.uid);
         pendingAnalysisUid = user.uid;
+        loadMarketNewsIfSignedIn();
+        loadEarningsIfSignedIn();
         startRealQuoteLoop();
         renderAllTradeCharts(); // refresh from simulated to real, in case a guest signed in
         if(isNewSignup){
@@ -3612,9 +3896,10 @@
         currentUid = null;
         journalEntries = [];
         clearAlerts();
-        if(tradeAnalysisUnsubscribe){ tradeAnalysisUnsubscribe(); tradeAnalysisUnsubscribe = null; }
+        if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
         pendingAnalysisUid = null;
         resetTradesToDefault();
+        resetNewsAndEarnings();
         renderTradeBlocks();
         renderWhatToWatch();
         authGateEl.removeAttribute('hidden');
@@ -3837,6 +4122,127 @@
     });
   }
 
+  // ---------- Market Breadth & Today's Movers (computed, no extra API calls) ----------
+  function renderBreadth(){
+    var el = document.getElementById('breadthWidget');
+    if(!el || watchlist.length === 0) return;
+    var up = watchlist.filter(function(w){ return pct(w.price, w.prevClose) >= 0; }).length;
+    var down = watchlist.length - up;
+    var total = watchlist.length;
+    var upPct = (up / total) * 100;
+    var label = upPct >= 65 ? 'Broadly positive' : upPct <= 35 ? 'Broadly negative' : 'Mixed';
+    var labelClass = upPct >= 65 ? 'up' : upPct <= 35 ? 'down' : '';
+    el.innerHTML =
+      '<div class="breadth-bar"><div class="breadth-bar-up" style="width:' + upPct + '%"></div></div>' +
+      '<div class="breadth-meta">' +
+        '<span class="breadth-count up">' + up + ' up</span>' +
+        '<span class="breadth-count down">' + down + ' down</span>' +
+        '<span class="breadth-label ' + labelClass + '">' + label + '</span>' +
+      '</div>';
+  }
+
+  function renderMovers(){
+    var el = document.getElementById('moversGrid');
+    if(!el || watchlist.length === 0) return;
+    var withChange = watchlist.map(function(w){
+      return { sym: w.sym, price: w.price, change: pct(w.price, w.prevClose) };
+    });
+    var sorted = withChange.slice().sort(function(a,b){ return b.change - a.change; });
+    var gainers = sorted.slice(0, 3);
+    var losers = sorted.slice(-3).reverse();
+    function row(m){
+      var up = m.change >= 0;
+      return '<div class="mover-row">' +
+        '<span class="mover-sym mono">' + m.sym + '</span>' +
+        '<span class="mover-price mono">' + fmt(m.price) + '</span>' +
+        '<span class="mover-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(m.change).toFixed(2) + '%</span>' +
+      '</div>';
+    }
+    el.innerHTML =
+      '<div class="movers-col"><div class="movers-col-title">Top Gainers</div>' + gainers.map(row).join('') + '</div>' +
+      '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(row).join('') + '</div>';
+  }
+
+  // ---------- Market News & Earnings Calendar (Finnhub, signed-in accounts only) ----------
+  var FINNHUB_NEWS_URL = 'https://finnhub.io/api/v1/news';
+  var FINNHUB_EARNINGS_URL = 'https://finnhub.io/api/v1/calendar/earnings';
+
+  function renderMarketNews(articles){
+    var el = document.getElementById('marketNewsList');
+    if(!el) return;
+    if(!articles || !articles.length){
+      el.innerHTML = '<div class="news-placeholder">No headlines available right now.</div>';
+      return;
+    }
+    el.innerHTML = articles.slice(0, 6).map(function(a){
+      var time = a.datetime ? new Date(a.datetime * 1000).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) : '';
+      return '<a class="news-item" href="' + a.url + '" target="_blank" rel="noopener noreferrer">' +
+        '<span class="news-item-headline">' + a.headline + '</span>' +
+        '<span class="news-item-meta">' + (a.source || '') + (time ? ' · ' + time : '') + '</span>' +
+      '</a>';
+    }).join('');
+  }
+
+  function loadMarketNewsIfSignedIn(){
+    if(isGuestMode || !currentUid) return;
+    var el = document.getElementById('marketNewsList');
+    var url = FINNHUB_NEWS_URL + '?category=general&token=' + FINNHUB_API_KEY;
+    fetch(url).then(function(res){
+      if(!res.ok) throw new Error('Finnhub news HTTP ' + res.status);
+      return res.json();
+    }).then(renderMarketNews).catch(function(err){
+      console.error('Market news fetch failed:', err);
+      if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load headlines right now.</div>'; }
+    });
+  }
+
+  function renderEarningsCalendar(data){
+    var el = document.getElementById('earningsList');
+    if(!el) return;
+    var trackedSyms = watchlist.map(function(w){ return w.sym; });
+    var events = (data && Array.isArray(data.earningsCalendar))
+      ? data.earningsCalendar.filter(function(e){ return trackedSyms.indexOf(e.symbol) > -1; })
+      : [];
+    if(!events.length){
+      el.innerHTML = '<div class="news-placeholder">No earnings from your tracked stocks in the next 7 days.</div>';
+      return;
+    }
+    events.sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+    el.innerHTML = events.map(function(e){
+      var dateLabel = new Date(e.date + 'T00:00:00').toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
+      var hourLabel = e.hour === 'bmo' ? 'Before open' : e.hour === 'amc' ? 'After close' : 'Time TBD';
+      return '<div class="earnings-row">' +
+        '<span class="earnings-sym mono">' + e.symbol + '</span>' +
+        '<span class="earnings-date">' + dateLabel + '</span>' +
+        '<span class="earnings-hour">' + hourLabel + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function loadEarningsIfSignedIn(){
+    if(isGuestMode || !currentUid) return;
+    var el = document.getElementById('earningsList');
+    var today = new Date();
+    var weekOut = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    var fromStr = today.toISOString().slice(0, 10);
+    var toStr = weekOut.toISOString().slice(0, 10);
+    var url = FINNHUB_EARNINGS_URL + '?from=' + fromStr + '&to=' + toStr + '&token=' + FINNHUB_API_KEY;
+    fetch(url).then(function(res){
+      if(!res.ok) throw new Error('Finnhub earnings HTTP ' + res.status);
+      return res.json();
+    }).then(renderEarningsCalendar).catch(function(err){
+      console.error('Earnings calendar fetch failed:', err);
+      if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load earnings calendar right now.</div>'; }
+    });
+  }
+
+  function resetNewsAndEarnings(){
+    var newsEl = document.getElementById('marketNewsList');
+    var earningsEl = document.getElementById('earningsList');
+    if(newsEl){ newsEl.innerHTML = '<div class="news-placeholder">Sign in to see real market headlines.</div>'; }
+    if(earningsEl){ earningsEl.innerHTML = '<div class="news-placeholder">Sign in to see upcoming earnings for your tracked stocks.</div>'; }
+  }
+
   function jumpToTrade(sym){
     showPage('trades');
     requestAnimationFrame(function(){
@@ -3853,6 +4259,8 @@
   renderIndices();
   renderWhatToWatch();
   renderTradeBlocks();
+  renderBreadth();
+  renderMovers();
   statCta();
   updateClock();
   renderHistoryList();
