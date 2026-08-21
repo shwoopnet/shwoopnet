@@ -195,6 +195,14 @@
   .settings-row-desc{ font-size:11.5px; color: var(--muted); }
   .quote-sync-status.ok{ color: var(--gain); }
   .quote-sync-status.fail{ color: var(--loss); }
+  .alpaca-row-full{ width:100%; }
+  .alpaca-row-full a{ color: var(--amber); }
+  .alpaca-inputs{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 8px 0; }
+  .alpaca-inputs input{
+    flex:1 1 160px; background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
+    padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'IBM Plex Mono', monospace;
+  }
+  .alpaca-inputs input:focus{ outline:none; border-color: var(--amber-dim); }
   .settings-choice-group{ display:flex; gap:4px; }
   .settings-toggle-switch{
     width:38px; height:22px; border-radius:11px; border:1px solid var(--border);
@@ -407,7 +415,7 @@
 
   .trade-columns{
     display:grid;
-    grid-template-columns: 28px 1.4fr 0.9fr 0.9fr 0.9fr 0.9fr 1.1fr 1.1fr;
+    grid-template-columns: 28px 1.5fr 1fr 1fr 1fr 1.1fr 1.1fr;
     gap: 10px; align-items:center; padding: 10px 16px;
   }
   .trade-row [data-label]::before{
@@ -433,7 +441,7 @@
   .t-current .chg.up{ color:var(--gain); }
   .t-current .chg.down{ color:var(--loss); }
   .t-stop{ color: var(--loss); }
-  .t-t1, .t-t2{ color: var(--gain); }
+  .t-t1{ color: var(--gain); }
   .status-badge{
     font-size:10.5px; padding:3px 8px; border-radius:3px; border:1px solid var(--muted);
     color:var(--muted); display:inline-block; white-space:nowrap;
@@ -601,6 +609,12 @@
     border-bottom:1px solid var(--border); font-family:'Space Grotesk', sans-serif;
     font-size:13px; font-weight:600; color: var(--paper); flex-shrink:0;
   }
+  .history-head-actions{ display:flex; align-items:center; gap:10px; }
+  .history-clear-btn{
+    background:none; border:1px solid var(--border); color: var(--muted);
+    font-size:11px; font-weight:400; padding:3px 9px; border-radius:4px; cursor:pointer;
+  }
+  .history-clear-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .history-list{ flex:1; overflow-y:auto; padding:8px 18px 18px 18px; }
   .history-item{ padding:14px 0; border-bottom:1px solid var(--border); }
   .history-item:last-child{ border-bottom:none; }
@@ -670,6 +684,13 @@
     font-family:'Space Grotesk', sans-serif;
   }
   .log-trade-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
+  .alpaca-send-btn{
+    background: transparent; border:1px solid var(--border); color: var(--muted);
+    padding:8px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .alpaca-send-btn:not(:disabled):hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .alpaca-send-btn:disabled{ opacity:.5; cursor:not-allowed; }
   .open-position-badge{
     font-size:11.5px; color: var(--amber); cursor:pointer; background:none; border:none; padding:0;
     font-family:inherit;
@@ -962,6 +983,17 @@
       }, function(err){
         console.error('Screener sync error:', err);
       });
+    },
+    saveAlpacaCredentials: function(uid, keyId, secretKey){
+      return setDoc(doc(db, 'users', uid), { alpacaKeyId: keyId, alpacaSecretKey: secretKey }, { merge: true });
+    },
+    watchAlpacaCredentials: function(uid, callback){
+      return onSnapshot(doc(db, 'users', uid), function(snap){
+        var data = snap.exists() ? snap.data() : {};
+        callback({ alpacaKeyId: data.alpacaKeyId || '', alpacaSecretKey: data.alpacaSecretKey || '' });
+      }, function(err){
+        console.error('Alpaca credentials sync error:', err);
+      });
     }
   });
 </script>
@@ -1089,7 +1121,10 @@
   <div class="history-sidebar" id="historySidebar" hidden>
     <div class="history-sidebar-head">
       <span>Today's alerts</span>
-      <button class="notepad-close" id="historyClose" aria-label="Close history">×</button>
+      <div class="history-head-actions">
+        <button class="history-clear-btn" id="historyClearBtn">Clear</button>
+        <button class="notepad-close" id="historyClose" aria-label="Close history">×</button>
+      </div>
     </div>
     <div class="history-list" id="historyList"></div>
   </div>
@@ -1150,13 +1185,10 @@
         </div>
         <div class="modal-row-2">
           <div class="modal-field">
-            <label for="logT1">Target 1</label>
+            <label for="logT1">Target</label>
             <input type="number" id="logT1" step="any" min="0" required>
           </div>
-          <div class="modal-field">
-            <label for="logT2">Target 2</label>
-            <input type="number" id="logT2" step="any" min="0" required>
-          </div>
+          <div class="modal-field"></div>
         </div>
         <div class="modal-error" id="logModalError"></div>
         <div class="modal-actions">
@@ -1391,6 +1423,22 @@
         </div>
       </div>
 
+      <div class="settings-row alpaca-row">
+        <div class="alpaca-row-full">
+          <div class="settings-row-title">Broker connection — Alpaca (Paper)</div>
+          <div class="settings-row-desc">
+            Simulated money only — no real trades are ever placed. Get free paper keys at
+            <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer">alpaca.markets</a>.
+          </div>
+          <div class="alpaca-inputs">
+            <input type="text" id="alpacaKeyIdInput" placeholder="API Key ID" autocomplete="off" spellcheck="false">
+            <input type="password" id="alpacaSecretInput" placeholder="Secret Key" autocomplete="off" spellcheck="false">
+            <button class="settings-reset-btn" id="alpacaSaveBtn">Connect</button>
+          </div>
+          <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
+        </div>
+      </div>
+
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Color theme</div>
@@ -1480,6 +1528,49 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
+        <div class="changelog-version">v1.5.4.0.2 — Session &amp; Rate-Limit Hardening</div>
+        <ul class="changelog-items">
+          <li>Chart data fetches now prioritized: what you're looking at loads before background screening</li>
+          <li>Clear button added to alert history; alerts scoped to only today's actual picks</li>
+          <li>Single active tab per browser now handles live data, preventing duplicate rate-limited traffic</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.5.3.0.1 — Chart Data Reliability</div>
+        <ul class="changelog-items">
+          <li>Chart history now persists to the browser — instant reload instead of a full refetch</li>
+          <li>Stale data refreshes quietly in the background rather than blocking on the network</li>
+          <li>Global rate limiter added so all Twelve Data requests, from anywhere in the app, share one budget</li>
+          <li>Dragging, zooming, and panning throttled to the screen's actual refresh rate</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.5.2.0.0 — Real Screener &amp; Analysis</div>
+        <ul class="changelog-items">
+          <li>Daily screener auto-picks trades from 33 major stocks using real technical analysis</li>
+          <li>Entry, stop, and targets calculated from real moving averages and price structure — no more fixed-ratio targets</li>
+          <li>Risk/Reward column added, genuinely varying per trade</li>
+          <li>Signed-in accounts never show simulated data — an honest "couldn't load" state instead</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.5.1.0.0 — Charting Overhaul</div>
+        <ul class="changelog-items">
+          <li>Added 5m/15m/30m intraday timeframes alongside 1D/1W/1M/1Y</li>
+          <li>Nice-number gridlines, live price line, full crosshair with axis tags</li>
+          <li>Vertical and diagonal chart panning, not just horizontal</li>
+          <li>Time axis now matches each timeframe's real granularity, with day/year boundary markers</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.5.0.0.1 — Market Brief Expansion</div>
+        <ul class="changelog-items">
+          <li>Market Sentiment (real S&amp;P/Nasdaq/Dow proxies) replaces watchlist-only breadth</li>
+          <li>Today's Movers, Market News, and Earnings This Week added</li>
+          <li>Real pop-up alert notifications, not just a silent history list</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
         <div class="changelog-version">v1.5 — Accounts &amp; Sync</div>
         <ul class="changelog-items">
           <li>Real sign-up and sign-in with email + password</li>
@@ -1547,22 +1638,36 @@
   // full-market scanner (that needs a dedicated screener API) — a curated
   // pool of "high profile" names, screened daily with real technical
   // analysis rather than picked by hand.
+  // A mix across market caps and sectors, not just the household mega-caps
+  // — a screener that only ever looks at the 10 biggest names in the
+  // market is more likely to be picking from stocks that are already
+  // heavily analyzed and efficiently priced, with less room for a clean
+  // technical edge to show up.
   var SCREENER_UNIVERSE = [
-    'AAPL','MSFT','GOOGL','AMZN','NVDA','META','TSLA','AMD','NFLX','CRM','ORCL','ADBE','INTC','CSCO',
-    'JPM','V','MA','GS','BAC',
-    'JNJ','UNH','PFE',
-    'WMT','HD','MCD','NKE','KO','PEP','PG','DIS',
-    'BA','XOM','CVX'
+    'AAPL','MSFT','GOOGL','TSLA','AMD','CRM','ADBE',
+    'JPM','V',
+    'JNJ','UNH',
+    'WMT','HD','DIS',
+    'XOM',
+    'PYPL','ROKU','SNAP','ETSY','MU','QCOM','TXN','AMAT','LRCX',
+    'TGT','LULU','SBUX','CMG',
+    'SCHW','AXP','GILD','VRTX',
+    'CAT','DE','HON','GE','LMT','RTX',
+    'OXY','SLB','COP'
   ];
   var COMPANY_NAMES = {
-    AAPL:'Apple Inc', MSFT:'Microsoft', GOOGL:'Alphabet Cl A', AMZN:'Amazon.com', NVDA:'NVIDIA Corp',
-    META:'Meta Platforms', TSLA:'Tesla Inc', AMD:'Adv Micro Devices', NFLX:'Netflix Inc', CRM:'Salesforce',
-    ORCL:'Oracle Corp', ADBE:'Adobe Inc', INTC:'Intel Corp', CSCO:'Cisco Systems',
-    JPM:'JPMorgan Chase', V:'Visa Inc', MA:'Mastercard', GS:'Goldman Sachs', BAC:'Bank of America',
-    JNJ:'Johnson & Johnson', UNH:'UnitedHealth Group', PFE:'Pfizer Inc',
-    WMT:'Walmart Inc', HD:'Home Depot', MCD:"McDonald's Corp", NKE:'Nike Inc', KO:'Coca-Cola Co',
-    PEP:'PepsiCo Inc', PG:'Procter & Gamble', DIS:'Walt Disney Co',
-    BA:'Boeing Co', XOM:'Exxon Mobil', CVX:'Chevron Corp'
+    AAPL:'Apple Inc', MSFT:'Microsoft', GOOGL:'Alphabet Cl A', TSLA:'Tesla Inc', AMD:'Adv Micro Devices',
+    CRM:'Salesforce', ADBE:'Adobe Inc',
+    JPM:'JPMorgan Chase', V:'Visa Inc',
+    JNJ:'Johnson & Johnson', UNH:'UnitedHealth Group',
+    WMT:'Walmart Inc', HD:'Home Depot', DIS:'Walt Disney Co',
+    XOM:'Exxon Mobil',
+    PYPL:'PayPal Holdings', ROKU:'Roku Inc', SNAP:'Snap Inc', ETSY:'Etsy Inc', MU:'Micron Technology',
+    QCOM:'Qualcomm Inc', TXN:'Texas Instruments', AMAT:'Applied Materials', LRCX:'Lam Research',
+    TGT:'Target Corp', LULU:'Lululemon', SBUX:'Starbucks Corp', CMG:'Chipotle Mexican Grill',
+    SCHW:'Charles Schwab', AXP:'American Express', GILD:'Gilead Sciences', VRTX:'Vertex Pharma',
+    CAT:'Caterpillar Inc', DE:'Deere & Co', HON:'Honeywell', GE:'GE Aerospace', LMT:'Lockheed Martin', RTX:'RTX Corp',
+    OXY:'Occidental Petroleum', SLB:'SLB', COP:'ConocoPhillips'
   };
   var DEFAULT_WATCHLIST_SYMS = ['NVDA','AAPL','MSFT','AMZN','GOOGL','META','TSLA','AMD'];
 
@@ -1592,30 +1697,30 @@
   // fallback: what guest mode shows, and what signed-in accounts fall back
   // to before the screener has run for the day.
   var DEFAULT_TRADES = [
-    { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, t2PctFromEntry:0.0785, status:'active',   statusLabel:'Active',
+    { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, status:'active',   statusLabel:'Active',
       notes: [
         "Holding above the 50-day moving average through the recent semis rally, a level that's held on every pullback this month.",
         "Volume has been running well above the 20-day average heading into tonight's print — the market is clearly positioning ahead of the number.",
         "Data-center guidance is what actually moves this stock, not the headline EPS beat or miss — that's where the real signal lives.",
         "Options activity skews call-heavy into earnings, suggesting positioning for an upside surprise rather than a hedge."
       ] },
-    { sym:'AAPL', direction:'Long', entryPct:0.008, stopPctFromEntry:-0.0215, t1PctFromEntry:0.0236, t2PctFromEntry:0.0366, status:'watching', statusLabel:'Watching',
+    { sym:'AAPL', direction:'Long', entryPct:0.008, stopPctFromEntry:-0.0215, t1PctFromEntry:0.0236, status:'watching', statusLabel:'Watching',
       notes: [
         'Coiling just under resistance for the third session in a row, with each test slightly higher than the last.',
         'Waiting for a breakout on real volume confirmation before sizing in — a low-volume push through resistance is a trap, not a signal.',
         "Broader tech tape needs to hold up for this setup to trigger; a rotation out of growth names would stall this regardless of AAPL's own chart.",
         'No entry until the breakout actually happens — this stays on watch, not in the book, until price proves it.'
       ] },
-    { sym:'TSLA', direction:'Short', entryPct:0.017, stopPctFromEntry:0.0320, t1PctFromEntry:-0.0320, t2PctFromEntry:-0.0512, status:'active',   statusLabel:'Active',
+    { sym:'TSLA', direction:'Short', entryPct:0.017, stopPctFromEntry:0.0320, t1PctFromEntry:-0.0320, status:'active',   statusLabel:'Active',
       notes: [
         'Rejected twice this week on declining volume, a classic sign buyers are losing conviction at this level.',
         'Momentum has turned negative on the daily chart, with the 10-day moving average now rolling over.',
         'Delivery numbers next week are a real risk to this thesis — a beat could squeeze the short hard, so sizing stays conservative.',
         'Options skew has shifted toward puts over the past week, suggesting the market is starting to price in the same downside.'
       ] },
-    { sym:'AMD',  direction:'Long', entryPct:-0.024, stopPctFromEntry:-0.0268, t1PctFromEntry:0.0268, t2PctFromEntry:0.0670, status:'hit',      statusLabel:'Target hit',
+    { sym:'AMD',  direction:'Long', entryPct:-0.024, stopPctFromEntry:-0.0268, t1PctFromEntry:0.0268, status:'hit',      statusLabel:'Target hit',
       notes: [
-        'Reached Target 2 on strong data-center commentary that came in well ahead of expectations.',
+        'Reached target on strong data-center commentary that came in well ahead of expectations.',
         'Stop trailed up along the way to lock in the gain rather than risk giving it back on a reversal.',
         'Watching for a pullback toward the breakout level to consider re-entering, rather than chasing it further extended here.',
         'This one played out close to the original thesis — a useful reference for how the setup was supposed to work.'
@@ -1625,7 +1730,7 @@
   function cloneDefaultTrade(t){
     return {
       sym: t.sym, direction: t.direction,
-      entryPct: t.entryPct, stopPctFromEntry: t.stopPctFromEntry, t1PctFromEntry: t.t1PctFromEntry, t2PctFromEntry: t.t2PctFromEntry,
+      entryPct: t.entryPct, stopPctFromEntry: t.stopPctFromEntry, t1PctFromEntry: t.t1PctFromEntry,
       status: t.status, statusLabel: t.statusLabel, notes: t.notes.slice(), analysisIsReal: false
     };
   }
@@ -1648,7 +1753,6 @@
       t.entry = entry;
       t.stop = entry * (1 + t.stopPctFromEntry);
       t.t1 = entry * (1 + t.t1PctFromEntry);
-      t.t2 = entry * (1 + t.t2PctFromEntry);
     });
   }
   calibrateTradeLevels();
@@ -1704,34 +1808,26 @@
     var direction = (sma50 !== null) ? (currentPrice >= sma50 ? 'Long' : 'Short') : 'Long';
 
     var entry = sma20 !== null ? sma20 : currentPrice;
-    // A meaningful floor on the range so an unusually flat 20 days doesn't
-    // collapse the target math toward zero.
-    var rangeSize = Math.max(high20 - low20, entry * 0.01);
-    var stop, t1, t2;
+    var stop, t1;
     if(direction === 'Long'){
       stop = low20 * 0.995;
       if(stop >= entry){ stop = entry * 0.965; }
-      // Targets come from this stock's own actual price structure — real
-      // 20-day resistance, then a measured-move extension beyond it — not
-      // a fixed multiple of the stop distance. A fixed multiple would make
-      // the reward/risk ratio the exact same constant for every trade,
-      // regardless of what the chart actually looks like.
+      // Target comes from this stock's own actual price structure — real
+      // 20-day resistance — not a fixed multiple of the stop distance. A
+      // fixed multiple would make the reward/risk ratio the exact same
+      // constant for every trade, regardless of what the chart looks like.
       t1 = Math.max(high20, entry * 1.01);
-      t2 = entry + rangeSize * 1.5;
-      if(t2 <= t1){ t2 = t1 + rangeSize * 0.5; }
     } else {
       stop = high20 * 1.005;
       if(stop <= entry){ stop = entry * 1.035; }
       t1 = Math.min(low20, entry * 0.99);
-      t2 = entry - rangeSize * 1.5;
-      if(t2 >= t1){ t2 = t1 - rangeSize * 0.5; }
     }
 
     var distFromEntryPct = Math.abs((currentPrice - entry) / entry * 100);
     var status = 'watching', statusLabel = 'Watching';
     if(distFromEntryPct < 2){ status = 'active'; statusLabel = 'Active'; }
-    if(direction === 'Long' && currentPrice >= t2){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(direction === 'Short' && currentPrice <= t2){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(direction === 'Long' && currentPrice >= t1){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(direction === 'Short' && currentPrice <= t1){ status = 'hit'; statusLabel = 'Target hit'; }
     if(direction === 'Long' && currentPrice <= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
     if(direction === 'Short' && currentPrice >= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
 
@@ -1746,7 +1842,7 @@
     notes.push('Entry sits near the 20-day average, stop just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan.');
 
     return {
-      direction: direction, entry: entry, stop: stop, t1: t1, t2: t2, status: status, statusLabel: statusLabel, notes: notes,
+      direction: direction, entry: entry, stop: stop, t1: t1, status: status, statusLabel: statusLabel, notes: notes,
       sma20: sma20, sma50: sma50, momentum5d: momentum5d
     };
   }
@@ -1755,13 +1851,17 @@
   // both moving averages agreeing on direction) plus real recent momentum.
   // Not a black box — just the two things that already justify the trade
   // in plain English above.
+  // Trend alignment is now a requirement, not just a bonus — a stock with
+  // no genuine trend (price/SMA20/SMA50 not agreeing) shouldn't make the
+  // list just because it had a volatile week. Fewer, cleaner picks beats
+  // padding the list with noise.
+  var MIN_SCREENER_SCORE = 0;
   function scoreCandidate(analysis){
-    var aligned = false;
-    if(analysis.sma20 !== null && analysis.sma50 !== null){
-      aligned = (analysis.direction === 'Long' && analysis.sma20 > analysis.sma50) ||
-                (analysis.direction === 'Short' && analysis.sma20 < analysis.sma50);
-    }
-    return (aligned ? 3 : 0) + Math.abs(analysis.momentum5d || 0);
+    if(analysis.sma20 === null || analysis.sma50 === null) return -1;
+    var aligned = (analysis.direction === 'Long' && analysis.sma20 > analysis.sma50) ||
+                  (analysis.direction === 'Short' && analysis.sma20 < analysis.sma50);
+    if(!aligned) return -1;
+    return Math.abs(analysis.momentum5d || 0);
   }
 
   var screenerUnsubscribe = null;
@@ -1780,8 +1880,8 @@
     return {
       sym: pick.sym, direction: pick.direction,
       entryPct: 0, stopPctFromEntry: (pick.stop - pick.entry) / pick.entry,
-      t1PctFromEntry: (pick.t1 - pick.entry) / pick.entry, t2PctFromEntry: (pick.t2 - pick.entry) / pick.entry,
-      entry: pick.entry, stop: pick.stop, t1: pick.t1, t2: pick.t2,
+      t1PctFromEntry: (pick.t1 - pick.entry) / pick.entry,
+      entry: pick.entry, stop: pick.stop, t1: pick.t1,
       status: pick.status, statusLabel: pick.statusLabel, notes: pick.notes.slice(),
       analysisIsReal: true
     };
@@ -1792,7 +1892,7 @@
   // can fire all 33 requests without worrying about pacing itself.
 
   function fetchScreenerCandidate(sym){
-    return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M')]).then(function(results){
+    return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M', 'low')]).then(function(results){
       var quote = results[0], bars = results[1];
       if(!quote || !bars || bars.length < 25) return null;
       var analysis = computeTechnicalAnalysis(bars, quote.price);
@@ -1818,7 +1918,9 @@
 
     Promise.all(SCREENER_UNIVERSE.map(fetchScreenerCandidate)).then(function(results){
       isRunningScreener = false;
-      var candidates = results.filter(Boolean).sort(function(a,b){ return b.score - a.score; }).slice(0, SCREENER_PICK_COUNT);
+      var successfulFetches = results.filter(Boolean).length;
+      var candidates = results.filter(function(c){ return c && c.score >= MIN_SCREENER_SCORE; })
+        .sort(function(a,b){ return b.score - a.score; }).slice(0, SCREENER_PICK_COUNT);
 
       if(candidates.length === 0){
         trades = [];
@@ -1826,9 +1928,14 @@
         renderTradeBlocks();
         renderWhatToWatch();
         statCta();
-        updateAnalysisStatus('Screener failed — no real data available (check console)', false);
         var subtitleFail = document.getElementById('tradesSubtitle');
-        if(subtitleFail){ subtitleFail.textContent = 'Screener unavailable right now — check your connection.'; }
+        if(successfulFetches === 0){
+          updateAnalysisStatus('Screener failed — no real data available (check console)', false);
+          if(subtitleFail){ subtitleFail.textContent = 'Screener unavailable right now — check your connection.'; }
+        } else {
+          updateAnalysisStatus('Screened ' + successfulFetches + ' stocks — no clean setups today', true);
+          if(subtitleFail){ subtitleFail.textContent = 'No stock in the universe cleared the bar today — better a clean zero than a forced pick.'; }
+        }
         return;
       }
 
@@ -1839,7 +1946,7 @@
       trades = candidates.map(function(c){
         return buildTradeFromPick({
           sym: c.sym, direction: c.analysis.direction,
-          entry: c.analysis.entry, stop: c.analysis.stop, t1: c.analysis.t1, t2: c.analysis.t2,
+          entry: c.analysis.entry, stop: c.analysis.stop, t1: c.analysis.t1,
           status: c.analysis.status, statusLabel: c.analysis.statusLabel, notes: c.analysis.notes
         });
       });
@@ -1854,7 +1961,7 @@
 
       if(window.__shwoopAPI && currentUid){
         var snapshot = trades.map(function(t){
-          return { sym:t.sym, direction:t.direction, entry:t.entry, stop:t.stop, t1:t.t1, t2:t.t2, status:t.status, statusLabel:t.statusLabel, notes:t.notes,
+          return { sym:t.sym, direction:t.direction, entry:t.entry, stop:t.stop, t1:t.t1, status:t.status, statusLabel:t.statusLabel, notes:t.notes,
             name: (findQuote(t.sym) || {}).name || t.sym };
         });
         window.__shwoopAPI.saveScreenerPicks(currentUid, snapshot, today).catch(function(err){
@@ -1952,7 +2059,7 @@
     var stopVerb = isLong ? 'drops to' : 'rises to';
 
     if(t.status === 'hit'){
-      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already reached Target 2 at $' + fmt(t.t2) + '. This setup has played out, no action needed.' };
+      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already reached target at $' + fmt(t.t1) + '. This setup has played out, no action needed.' };
     }
     if(t.status === 'stopped'){
       return { done: true, html: '<span class="trade-action-verb done">Done —</span> already stopped out at $' + fmt(t.stop) + '. This setup is closed, no action needed.' };
@@ -1962,7 +2069,7 @@
       var enterVerbClass = isLong ? 'buy' : 'short';
       return { done: false, html:
         'Wait for ' + t.sym + ' to reach <strong>$' + fmt(t.entry) + '</strong> before <span class="trade-action-verb ' + enterVerbClass + '">' + enterVerb + '</span>. Once triggered: ' +
-        exitVerb.toLowerCase() + ' half at Target 1 ($' + fmt(t.t1) + '), the rest at Target 2 ($' + fmt(t.t2) + '). ' +
+        exitVerb.toLowerCase() + ' fully at Target ($' + fmt(t.t1) + '). ' +
         'Exit everything if price ' + stopVerb + ' $' + fmt(t.stop) + ' first.'
       };
     }
@@ -1970,9 +2077,122 @@
     var verbClass = isLong ? 'buy' : 'short';
     return { done: false, html:
       '<span class="trade-action-verb ' + verbClass + '">' + verb + '</span> ' + t.sym + ' near <strong>$' + fmt(t.entry) + '</strong>. ' +
-      exitVerb + ' half at Target 1 ($' + fmt(t.t1) + '), the rest at Target 2 ($' + fmt(t.t2) + '). ' +
+      exitVerb + ' fully at Target ($' + fmt(t.t1) + '). ' +
       'Exit everything immediately if price ' + stopVerb + ' <strong>$' + fmt(t.stop) + '</strong>.'
     };
+  }
+
+  // ---------- Alpaca paper trading (simulated money only) ----------
+  // Bring-your-own-account: each user connects their own free Alpaca paper
+  // keys. Shwoopnet never holds funds or credentials centrally — this is
+  // literally the same as if the person wrote this fetch call themselves.
+  var ALPACA_PAPER_BASE = 'https://paper-api.alpaca.markets';
+  var alpacaCreds = { keyId: '', secretKey: '' };
+  var alpacaConnected = false;
+
+  function alpacaHeaders(){
+    return { 'APCA-API-KEY-ID': alpacaCreds.keyId, 'APCA-API-SECRET-KEY': alpacaCreds.secretKey };
+  }
+
+  function setAlpacaStatus(text, ok){
+    var el = document.getElementById('alpacaStatus');
+    if(!el) return;
+    el.textContent = text;
+    el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
+  }
+
+  function testAlpacaConnection(){
+    if(!alpacaCreds.keyId || !alpacaCreds.secretKey){
+      alpacaConnected = false;
+      setAlpacaStatus('Not connected', null);
+      return;
+    }
+    setAlpacaStatus('Connecting…', null);
+    fetch(ALPACA_PAPER_BASE + '/v2/account', { headers: alpacaHeaders() })
+      .then(function(res){
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(acct){
+        alpacaConnected = true;
+        var bp = parseFloat(acct.buying_power || 0);
+        setAlpacaStatus('Connected — $' + bp.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' paper buying power', true);
+        renderTradeBlocks();
+      })
+      .catch(function(err){
+        alpacaConnected = false;
+        setAlpacaStatus('Connection failed — check your keys', false);
+        console.error('Alpaca connection test failed:', err);
+        renderTradeBlocks();
+      });
+  }
+
+  function loadAlpacaCredentialsForUser(uid){
+    if(!window.__shwoopAPI) return;
+    window.__shwoopAPI.watchAlpacaCredentials(uid, function(data){
+      alpacaCreds.keyId = data.alpacaKeyId || '';
+      alpacaCreds.secretKey = data.alpacaSecretKey || '';
+      var keyEl = document.getElementById('alpacaKeyIdInput');
+      var secEl = document.getElementById('alpacaSecretInput');
+      if(keyEl) keyEl.value = alpacaCreds.keyId;
+      if(secEl) secEl.value = alpacaCreds.secretKey;
+      if(alpacaCreds.keyId && alpacaCreds.secretKey){ testAlpacaConnection(); }
+    });
+  }
+
+  function resetAlpacaConnection(){
+    alpacaCreds = { keyId: '', secretKey: '' };
+    alpacaConnected = false;
+    var keyEl = document.getElementById('alpacaKeyIdInput');
+    var secEl = document.getElementById('alpacaSecretInput');
+    if(keyEl) keyEl.value = '';
+    if(secEl) secEl.value = '';
+    setAlpacaStatus('Not connected', null);
+  }
+
+  // A bracket order: the entry itself, plus a stop-loss leg and a
+  // take-profit leg, submitted as one order — maps directly onto our
+  // Entry/Stop/Target structure, one-to-one.
+  function submitAlpacaBracketOrder(sym, side, qty, stopPrice, takeProfitPrice){
+    var body = {
+      symbol: sym, qty: String(qty), side: side, type: 'market', time_in_force: 'day',
+      order_class: 'bracket',
+      take_profit: { limit_price: takeProfitPrice.toFixed(2) },
+      stop_loss: { stop_price: stopPrice.toFixed(2) }
+    };
+    return fetch(ALPACA_PAPER_BASE + '/v2/orders', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()),
+      body: JSON.stringify(body)
+    }).then(function(res){
+      return res.json().then(function(data){
+        if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); }
+        return data;
+      });
+    });
+  }
+
+  function sendTradeToAlpaca(sym){
+    if(!alpacaConnected){ alert('Connect your Alpaca paper account in Settings first.'); return; }
+    var t = trades.filter(function(x){ return x.sym === sym; })[0];
+    if(!t) return;
+    var qtyStr = prompt('Paper shares of ' + sym + ' to buy/sell for this trade?', '10');
+    if(!qtyStr) return;
+    var qty = parseInt(qtyStr, 10);
+    if(!qty || qty <= 0){ alert('Enter a valid whole number of shares.'); return; }
+
+    var side = t.direction === 'Long' ? 'buy' : 'sell';
+    var btn = document.getElementById('alpaca-btn-' + sym);
+    if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+
+    submitAlpacaBracketOrder(sym, side, qty, t.stop, t.t1).then(function(order){
+      if(btn){ btn.textContent = 'Sent to Alpaca ✓'; }
+      console.log('Alpaca paper order submitted:', order);
+    }).catch(function(err){
+      if(btn){ btn.disabled = false; btn.textContent = 'Send to Alpaca (Paper)'; }
+      alert('Paper order failed: ' + err.message);
+      console.error('Alpaca order failed:', err);
+    });
   }
 
   // Risk = distance from entry to stop (what you stand to lose). Reward =
@@ -1980,9 +2200,7 @@
   // scales out half at each) — what you stand to gain if it plays out.
   function computeRiskReward(t){
     var riskPct = Math.abs((t.entry - t.stop) / t.entry * 100);
-    var rewardT1Pct = Math.abs((t.t1 - t.entry) / t.entry * 100);
-    var rewardT2Pct = Math.abs((t.t2 - t.entry) / t.entry * 100);
-    var rewardPct = (rewardT1Pct + rewardT2Pct) / 2;
+    var rewardPct = Math.abs((t.t1 - t.entry) / t.entry * 100);
     var ratio = riskPct > 0 ? (rewardPct / riskPct) : 0;
     return { riskPct: riskPct, rewardPct: rewardPct, ratio: ratio };
   }
@@ -2028,10 +2246,7 @@
           '</div>' +
           '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
           '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
-          '<div class="t-t1 mono" data-label="Target 1">' + fmt(t.t1) + '</div>' +
-          '<div class="t-t2-status" data-label="Target 2">' +
-            '<div class="t-t2 mono">' + fmt(t.t2) + '</div>' +
-          '</div>' +
+          '<div class="t-t1 mono" data-label="Target">' + fmt(t.t1) + '</div>' +
           '<div class="t-rr" data-label="Risk / Reward">' +
             '<div class="rr-ratio mono">1 : ' + rr.ratio.toFixed(1) + '</div>' +
           '</div>' +
@@ -2062,6 +2277,7 @@
         '</div>' +
         '<div class="trade-action-bar">' +
           '<button class="log-trade-btn" data-sym="' + t.sym + '">I took this trade →</button>' +
+          (!isGuestMode ? '<button class="alpaca-send-btn" id="alpaca-btn-' + t.sym + '" data-sym="' + t.sym + '"' + (alpacaConnected ? '' : ' disabled title="Connect Alpaca in Settings first"') + '>Send to Alpaca (Paper)</button>' : '') +
           (openEntry ? '<button class="open-position-badge" data-date="' + openEntry.date + '">● Open position — view in journal</button>' : '') +
         '</div>' +
       '</div>';
@@ -2070,7 +2286,7 @@
   function renderTradeBlocks(){
     var el = document.getElementById('tradeBlocks');
     if(trades.length === 0){
-      el.innerHTML = '<div class="trades-empty-state">Couldn\'t reach real market data for today\'s screener. Check your connection and refresh — nothing simulated will show in its place.</div>';
+      el.innerHTML = '<div class="trades-empty-state">No trades to show right now. Either today\'s screener couldn\'t reach real market data (check your connection and refresh), or it ran successfully and nothing in the universe cleared today\'s quality bar — either way, nothing simulated shows in its place.</div>';
       return;
     }
     el.innerHTML = trades.map(renderTradeRow).join('');
@@ -2087,6 +2303,10 @@
 
     el.querySelectorAll('.log-trade-btn').forEach(function(btn){
       btn.addEventListener('click', function(){ openLogModal(btn.dataset.sym); });
+    });
+
+    el.querySelectorAll('.alpaca-send-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ sendTradeToAlpaca(btn.dataset.sym); });
     });
 
     el.querySelectorAll('.open-position-badge').forEach(function(btn){
@@ -2135,8 +2355,8 @@
     var distFromEntryPct = Math.abs((currentPrice - t.entry) / t.entry * 100);
     var status = 'watching', statusLabel = 'Watching';
     if(distFromEntryPct < 2){ status = 'active'; statusLabel = 'Active'; }
-    if(isLong && currentPrice >= t.t2){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(!isLong && currentPrice <= t.t2){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(isLong && currentPrice >= t.t1){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(!isLong && currentPrice <= t.t1){ status = 'hit'; statusLabel = 'Target hit'; }
     if(isLong && currentPrice <= t.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
     if(!isLong && currentPrice >= t.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
     t.status = status;
@@ -2261,9 +2481,23 @@
   var twelveDataQueue = [];
   var twelveDataCallTimestamps = [];
 
-  function scheduleTwelveDataCall(fn){
+  function scheduleTwelveDataCall(fn, priority){
     return new Promise(function(resolve, reject){
-      twelveDataQueue.push({ fn: fn, resolve: resolve, reject: reject });
+      var item = { fn: fn, resolve: resolve, reject: reject };
+      // Charts the user is actively looking at should never sit queued
+      // behind the screener's 33-symbol background scoring pass — that's
+      // exactly what made a visible chart look broken/blank while a
+      // background scan was quietly working through its own rate limit.
+      if(priority === 'high'){
+        var insertAt = twelveDataQueue.length;
+        for(var i = 0; i < twelveDataQueue.length; i++){
+          if(!twelveDataQueue[i].isHigh){ insertAt = i; break; }
+        }
+        item.isHigh = true;
+        twelveDataQueue.splice(insertAt, 0, item);
+      } else {
+        twelveDataQueue.push(item);
+      }
       processTwelveDataQueue();
     });
   }
@@ -2285,10 +2519,59 @@
     if(twelveDataQueue.length > 0){ processTwelveDataQueue(); }
   }
 
-  function fetchHistory(sym, tf){
-    var cacheKey = sym + '_' + tf;
-    if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
+  // Persisting fetched history to localStorage means a page refresh shows
+  // real data instantly instead of waiting through the rate-limited fetch
+  // queue again — and it's why the chart looked like it kept changing on
+  // every reload: each refresh re-ran the whole fetch from scratch, so
+  // whichever requests happened to succeed or fail against the ~7/min
+  // limit that particular time produced a slightly different result.
+  var HISTORY_STORAGE_PREFIX = 'shwoop_history_';
 
+  function saveHistoryToStorage(cacheKey, bars){
+    try {
+      var serializable = bars.map(function(b){
+        return { o:b.o, h:b.h, l:b.l, c:b.c, t:b.t.toISOString() };
+      });
+      localStorage.setItem(HISTORY_STORAGE_PREFIX + cacheKey, JSON.stringify({ bars: serializable, savedAt: Date.now() }));
+    } catch(e){
+      console.error('Could not persist chart history to localStorage:', e);
+    }
+  }
+
+  function loadHistoryFromStorage(cacheKey){
+    try {
+      var raw = localStorage.getItem(HISTORY_STORAGE_PREFIX + cacheKey);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      if(!parsed || !Array.isArray(parsed.bars) || parsed.bars.length < 2) return null;
+      var bars = parsed.bars.map(function(b){
+        return { o:b.o, h:b.h, l:b.l, c:b.c, t:new Date(b.t) };
+      });
+      // A corrupted or partially-written entry (bad numbers, bad dates)
+      // would otherwise silently produce a chart with NaN coordinates,
+      // which SVG renders as nothing at all — reject it here instead and
+      // fall through to a fresh network fetch.
+      var allValid = bars.every(function(b){
+        return isFinite(b.o) && isFinite(b.h) && isFinite(b.l) && isFinite(b.c) && !isNaN(b.t.getTime());
+      });
+      if(!allValid) return null;
+      return { bars: bars, savedAt: parsed.savedAt };
+    } catch(e){
+      console.error('Could not read persisted chart history:', e);
+      return null;
+    }
+  }
+
+  function isHistoryStale(tf, savedAt){
+    if(!savedAt) return true;
+    if(INTRADAY_TFS.indexOf(tf) > -1){
+      return (Date.now() - savedAt) > 5 * 60 * 1000; // 5 minutes
+    }
+    // Daily/weekly views only need refreshing once per calendar day.
+    return new Date(savedAt).toDateString() !== new Date().toDateString();
+  }
+
+  function fetchHistoryFromNetwork(sym, tf, priority){
     return scheduleTwelveDataCall(function(){
       var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
         '&interval=' + historyIntervals[tf] + '&outputsize=' + tfConfig[tf].fetchSize +
@@ -2304,12 +2587,44 @@
             throw new Error('No usable history for ' + sym + ' (' + tf + ')');
           }
           // Twelve Data returns most-recent-first; we render oldest-first.
-          var bars = data.values.map(function(v){
+          return data.values.map(function(v){
             return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
           }).reverse();
-          historyCache[cacheKey] = bars;
-          return bars;
         });
+    }, priority);
+  }
+
+  function fetchHistory(sym, tf, priority){
+    var cacheKey = sym + '_' + tf;
+    if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
+
+    var stored = loadHistoryFromStorage(cacheKey);
+    if(stored && stored.bars && stored.bars.length > 1){
+      historyCache[cacheKey] = stored.bars;
+      if(isHistoryStale(tf, stored.savedAt)){
+        // Show what we have immediately; refresh quietly in the background
+        // so next time (and this chart, if it's still open) has fresh data
+        // without ever blocking on the network first.
+        var staleBarsRef = stored.bars;
+        fetchHistoryFromNetwork(sym, tf, priority).then(function(freshBars){
+          historyCache[cacheKey] = freshBars;
+          saveHistoryToStorage(cacheKey, freshBars);
+          var state = chartStates[sym];
+          if(state && state.tf === tf && state.data === staleBarsRef){
+            initChartState(sym, tf, freshBars);
+            renderChartView(sym);
+          }
+        }).catch(function(err){
+          console.error('Background history refresh failed for', sym, tf, err);
+        });
+      }
+      return Promise.resolve(stored.bars);
+    }
+
+    return fetchHistoryFromNetwork(sym, tf, priority).then(function(bars){
+      historyCache[cacheKey] = bars;
+      saveHistoryToStorage(cacheKey, bars);
+      return bars;
     });
   }
 
@@ -2593,7 +2908,7 @@
       renderChartView(sym);
       return;
     }
-    fetchHistory(sym, tf).then(function(bars){
+    fetchHistory(sym, tf, 'high').then(function(bars){
       // Keep the chart anchored to the live current price rather than
       // whatever Twelve Data's most recent close happened to be.
       var lastBar = bars[bars.length - 1];
@@ -2951,6 +3266,61 @@
   }
 
   var priceLoopInterval = null;
+
+  // If the same account is open in multiple tabs, each one independently
+  // running the quote loop and daily screener would multiply the
+  // rate-limited API traffic per real user for no benefit — only one tab
+  // needs to actually be live. A simple localStorage heartbeat elects one
+  // "leader" tab to do that work; others stay passive and just show
+  // whatever's already loaded/synced.
+  var TAB_ID = 'tab_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  var LEADER_KEY = 'shwoop_leader_tab';
+  var LEADER_HEARTBEAT_MS = 4000;
+  var LEADER_STALE_MS = 10000;
+  var isLeaderTab = false;
+
+  function isAnotherTabLeading(){
+    try {
+      var raw = localStorage.getItem(LEADER_KEY);
+      if(!raw) return false;
+      var data = JSON.parse(raw);
+      return data.tabId !== TAB_ID && (Date.now() - data.ts) < LEADER_STALE_MS;
+    } catch(e){
+      return false;
+    }
+  }
+
+  function claimLeadership(){
+    try {
+      localStorage.setItem(LEADER_KEY, JSON.stringify({ tabId: TAB_ID, ts: Date.now() }));
+    } catch(e){}
+  }
+
+  function becomeLeaderIfAvailable(){
+    if(isAnotherTabLeading()){
+      isLeaderTab = false;
+      // Check again shortly in case the other tab closes.
+      setTimeout(becomeLeaderIfAvailable, LEADER_STALE_MS);
+      return;
+    }
+    isLeaderTab = true;
+    claimLeadership();
+    setInterval(claimLeadership, LEADER_HEARTBEAT_MS);
+    startRealQuoteLoop();
+  }
+
+  // Without this, a refresh leaves the OLD tab's claim sitting in
+  // localStorage with a recent heartbeat timestamp (the interval that was
+  // updating it just got destroyed by the reload, but the last write
+  // lingers) — the NEW page load then sees what looks like "another tab
+  // still active" and waits out the full stale-timeout before retrying,
+  // delaying real quotes and charts on every single refresh. Releasing the
+  // claim cleanly on unload means a normal refresh starts immediately.
+  window.addEventListener('pagehide', function(){
+    if(isLeaderTab){
+      try { localStorage.removeItem(LEADER_KEY); } catch(e){}
+    }
+  });
 
   function startRealQuoteLoop(){
     if(priceLoopInterval){ clearInterval(priceLoopInterval); }
@@ -3715,7 +4085,6 @@
     document.getElementById('logQty').value = '';
     document.getElementById('logStop').value = t.stop;
     document.getElementById('logT1').value = t.t1;
-    document.getElementById('logT2').value = t.t2;
     document.getElementById('logDate').value = new Date().toISOString().slice(0,10);
     document.getElementById('logModalError').classList.remove('show');
     document.getElementById('logTradeModal').removeAttribute('hidden');
@@ -3734,11 +4103,10 @@
     var qty = parseFloat(document.getElementById('logQty').value);
     var stop = parseFloat(document.getElementById('logStop').value);
     var t1 = parseFloat(document.getElementById('logT1').value);
-    var t2 = parseFloat(document.getElementById('logT2').value);
     var date = document.getElementById('logDate').value;
     var errEl = document.getElementById('logModalError');
 
-    var valid = entry > 0 && qty > 0 && stop > 0 && t1 > 0 && t2 > 0 && !!date;
+    var valid = entry > 0 && qty > 0 && stop > 0 && t1 > 0 && !!date;
     if(!valid){
       errEl.textContent = 'Enter valid, positive numbers for all fields.';
       errEl.classList.add('show');
@@ -3750,7 +4118,7 @@
     journalEntries.push({
       id: 'j' + Date.now(),
       date: date, sym: t.sym, direction: t.direction,
-      entry: entry, qty: qty, stop: stop, t1: t1, t2: t2,
+      entry: entry, qty: qty, stop: stop, t1: t1,
       exit: null, status: 'open'
     });
     saveJournalEntries();
@@ -3830,7 +4198,30 @@
     historyBackdrop.setAttribute('hidden','');
   }
   document.getElementById('historyClose').addEventListener('click', closeHistory);
+  document.getElementById('historyClearBtn').addEventListener('click', function(){
+    alertHistory = [];
+    renderHistoryList();
+    if(window.__shwoopAPI && alertsUid){
+      window.__shwoopAPI.saveAlerts(alertsUid, [], new Date().toISOString().slice(0,10)).catch(function(err){
+        console.error('Failed to clear alerts:', err);
+      });
+    }
+  });
   historyBackdrop.addEventListener('click', closeHistory);
+
+  document.getElementById('alpacaSaveBtn').addEventListener('click', function(){
+    if(isGuestMode){ alert('Sign in with a real account to connect a broker.'); return; }
+    var keyId = document.getElementById('alpacaKeyIdInput').value.trim();
+    var secretKey = document.getElementById('alpacaSecretInput').value.trim();
+    alpacaCreds.keyId = keyId;
+    alpacaCreds.secretKey = secretKey;
+    if(window.__shwoopAPI && currentUid){
+      window.__shwoopAPI.saveAlpacaCredentials(currentUid, keyId, secretKey).catch(function(err){
+        console.error('Failed to save Alpaca credentials:', err);
+      });
+    }
+    testAlpacaConnection();
+  });
 
   // ---------- Market alerts: real, condition-based, persisted per day ----------
   var alertHistory = [];
@@ -3862,22 +4253,18 @@
   function evaluateTradeAlert(t, price){
     var isLong = t.direction !== 'Short';
     var hitStop = isLong ? price <= t.stop : price >= t.stop;
-    var hitT2 = isLong ? price >= t.t2 : price <= t.t2;
     var hitT1 = isLong ? price >= t.t1 : price <= t.t1;
 
     if(hitStop){
       return { tag:'Stop hit', text: t.sym + ' hit its stop at $' + t.stop.toFixed(2) + ' — currently $' + price.toFixed(2) + '.' };
     }
-    if(hitT2){
-      return { tag:'Target 2', text: t.sym + ' reached Target 2 at $' + t.t2.toFixed(2) + ' — currently $' + price.toFixed(2) + '.' };
-    }
     if(hitT1){
-      return { tag:'Target 1', text: t.sym + ' reached Target 1 at $' + t.t1.toFixed(2) + ' — currently $' + price.toFixed(2) + '.' };
+      return { tag:'Target hit', text: t.sym + ' reached target at $' + t.t1.toFixed(2) + ' — currently $' + price.toFixed(2) + '.' };
     }
     var range = Math.abs(t.t1 - t.entry) || 1;
     var progressed = isLong ? (price - t.entry) : (t.entry - price);
     var pct = Math.max(0, Math.min(100, (progressed / range) * 100));
-    return { tag:'Watching', text: t.sym + ' is ' + pct.toFixed(0) + '% of the way from entry to Target 1 — currently $' + price.toFixed(2) + '.' };
+    return { tag:'Watching', text: t.sym + ' is ' + pct.toFixed(0) + '% of the way from entry to target — currently $' + price.toFixed(2) + '.' };
   }
 
   // Real news specific to a tracked trade's own symbol — not general market
@@ -3953,7 +4340,9 @@
     var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
 
     Promise.all(trades.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
-      alertHistory = newAlerts.concat(existingHistory || []);
+      // Only today's actual picks, not an ever-growing mix of old alerts
+      // for symbols that may not even be on the board anymore.
+      alertHistory = newAlerts;
       renderHistoryList();
       showAlertToasts(newAlerts);
       if(window.__shwoopAPI && alertsUid){
@@ -4180,6 +4569,7 @@
     pendingAnalysisUid = null;
     resetTradesToDefault();
     resetNewsAndEarnings();
+    resetAlpacaConnection();
     if(window.__shwoopAPI){
       window.__shwoopAPI.signOutUser().catch(function(err){
         console.error('Sign-out before entering guest mode failed:', err);
@@ -4250,11 +4640,12 @@
         pendingAnalysisUid = user.uid;
         loadMarketNewsIfSignedIn();
         loadEarningsIfSignedIn();
+        loadAlpacaCredentialsForUser(user.uid);
         INDEX_PROXIES.forEach(function(ix){
           var fb = FALLBACK_INDEX_VALUES[ix.sym];
           ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
         });
-        startRealQuoteLoop();
+        becomeLeaderIfAvailable();
         renderAllTradeCharts(); // refresh from simulated to real, in case a guest signed in
         if(isNewSignup){
           isNewSignup = false;
@@ -4268,6 +4659,7 @@
         pendingAnalysisUid = null;
         resetTradesToDefault();
         resetNewsAndEarnings();
+    resetAlpacaConnection();
         renderTradeBlocks();
         renderWhatToWatch();
         authGateEl.removeAttribute('hidden');
