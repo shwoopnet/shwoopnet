@@ -276,6 +276,10 @@
   }
 
   .watch-trades{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom: 40px; }
+  .trades-empty-state{
+    padding: 32px 24px; text-align:center; color: var(--muted); font-size:13px; line-height:1.6;
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+  }
 
   .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
   @media (max-width: 900px){ .brief-two-col{ grid-template-columns:1fr; gap:24px; } }
@@ -423,6 +427,7 @@
   .t-sym-cell{ display:flex; flex-direction:column; }
   .t-sym{ font-weight:600; letter-spacing:.02em; }
   .t-sym .t-dir{ font-size:10px; color:var(--muted); font-weight:400; margin-left:6px; }
+  .t-sym .status-badge{ margin-left:10px; vertical-align:middle; }
   .t-name{ font-size:10.5px; color:var(--muted); }
   .t-current .chg{ display:block; font-size:11px; margin-top:2px; }
   .t-current .chg.up{ color:var(--gain); }
@@ -430,11 +435,13 @@
   .t-stop{ color: var(--loss); }
   .t-t1, .t-t2{ color: var(--gain); }
   .status-badge{
-    font-size:10.5px; padding:4px 9px; border-radius:3px; border:1px solid var(--muted);
+    font-size:10.5px; padding:3px 8px; border-radius:3px; border:1px solid var(--muted);
     color:var(--muted); display:inline-block; white-space:nowrap;
   }
+  .status-badge.watching{ border-color: var(--border); color: var(--paper); }
   .status-badge.active{ border-color: var(--amber-dim); color: var(--amber); }
-  .status-badge.watching{ border-color: var(--border); color: var(--muted); }
+  .status-badge.buying{ border-color: rgba(51,193,126,0.4); color: var(--gain); background: var(--gain-glow); }
+  .status-badge.selling{ border-color: rgba(232,92,81,0.4); color: var(--loss); background: var(--loss-glow); }
   .status-badge.hit{ border-color: var(--gain); color: var(--gain); background: var(--gain-glow); }
   .status-badge.stopped{ border-color: var(--loss); color: var(--loss); background: var(--loss-glow); }
 
@@ -474,6 +481,8 @@
   .trade-chart{ width:100%; height: var(--chart-height, 200px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
   .grid-label{ fill: var(--muted); font-size: 10px; font-family:'IBM Plex Mono',monospace; }
+  .chart-error-text{ fill: var(--paper); font-size:13px; font-family:'Space Grotesk', sans-serif; }
+  .chart-error-sub{ fill: var(--muted); font-size:11px; font-family:'IBM Plex Mono', monospace; }
 
   .chart-toolbar{
     display:flex; justify-content:space-between; align-items:center; gap:10px;
@@ -548,6 +557,32 @@
   }
   .news-toast-close:hover{ color: var(--paper); }
   .news-toast-body{ font-size:12.5px; line-height:1.5; color: var(--muted); margin:0; }
+
+  .toast-container{
+    position:fixed; top:76px; right:20px; z-index:900;
+    display:flex; flex-direction:column; gap:10px; max-width:340px; width:calc(100% - 40px);
+  }
+  .alert-toast{
+    background: var(--panel); border:1px solid var(--amber-dim); border-radius: var(--radius);
+    padding:14px 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    animation: toastSlideIn .25s ease;
+  }
+  [data-reduce-motion="true"] .alert-toast{ animation: none; }
+  .alert-toast.toast-hide{ animation: toastSlideOut .25s ease forwards; }
+  [data-reduce-motion="true"] .alert-toast.toast-hide{ animation: none; opacity:0; }
+  @keyframes toastSlideIn{ from{ opacity:0; transform:translateX(24px); } to{ opacity:1; transform:translateX(0); } }
+  @keyframes toastSlideOut{ from{ opacity:1; transform:translateX(0); } to{ opacity:0; transform:translateX(24px); } }
+  .toast-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .toast-sym{ font-weight:600; font-size:13px; }
+  .toast-close{
+    margin-left:auto; background:none; border:none; color: var(--muted); cursor:pointer;
+    font-size:16px; line-height:1; padding:0 2px;
+  }
+  .toast-close:hover{ color: var(--paper); }
+  .toast-text{ font-size:12.5px; line-height:1.5; margin:0 0 8px 0; color: var(--paper); }
+  .toast-link{ font-size:11px; color: var(--amber); text-decoration:none; }
+  .toast-link:hover{ text-decoration:underline; }
+  @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; top:64px; } }
   .news-toast-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
   .news-toast-link{ font-size:11.5px; color: var(--amber); text-decoration:none; }
   .news-toast-link:hover{ text-decoration:underline; }
@@ -1049,6 +1084,8 @@
   </div>
 
   <div class="history-backdrop" id="historyBackdrop" hidden></div>
+  <div class="toast-container" id="toastContainer"></div>
+
   <div class="history-sidebar" id="historySidebar" hidden>
     <div class="history-sidebar-head">
       <span>Today's alerts</span>
@@ -1496,7 +1533,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoopnet. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Current prices are live quotes from Finnhub. Chart history (including 1D intraday) is real historical data from Twelve Data for signed-in accounts, falling back to a simulated view if intraday data isn't available on the connected plan. For signed-in accounts, trade direction, entry/stop/targets, and reasoning are calculated daily from real technical levels (moving averages, recent support/resistance, momentum) — not hand-written. Guest mode uses simulated data throughout, on every timeframe. Nothing on this site constitutes financial, investment, or trading advice.</p>
+    <p>Current prices are live quotes from Finnhub. Chart history on every timeframe, including 1D intraday, is real historical data from Twelve Data for signed-in accounts — if real data can't be reached, the chart shows an honest "couldn't load" message rather than substituting anything simulated. Trade direction, entry/stop/targets, and reasoning are calculated daily from real technical levels (moving averages, recent support/resistance, momentum) — not hand-written. Guest mode is the only place simulated data appears, throughout, on every timeframe. Nothing on this site constitutes financial, investment, or trading advice.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a> and <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>.</p>
   </footer>
 
@@ -1768,7 +1805,14 @@
       var candidates = results.filter(Boolean).sort(function(a,b){ return b.score - a.score; }).slice(0, SCREENER_PICK_COUNT);
 
       if(candidates.length === 0){
-        updateAnalysisStatus('Screener failed — showing simulated picks (check console)', false);
+        trades = [];
+        watchlist = watchlist.filter(function(w){ return DEFAULT_WATCHLIST_SYMS.indexOf(w.sym) > -1; });
+        renderTradeBlocks();
+        renderWhatToWatch();
+        statCta();
+        updateAnalysisStatus('Screener failed — no real data available (check console)', false);
+        var subtitleFail = document.getElementById('tradesSubtitle');
+        if(subtitleFail){ subtitleFail.textContent = 'Screener unavailable right now — check your connection.'; }
         return;
       }
 
@@ -1927,11 +1971,24 @@
     return { riskPct: riskPct, rewardPct: rewardPct, ratio: ratio };
   }
 
+  // Shared across the trade row, live price updates, and the Brief page's
+  // "What to Watch" cards — one place decides the badge color/label so all
+  // three stay consistent. Active is now direction-aware (green for a long
+  // you'd be buying, red for a short you'd be selling) instead of a neutral
+  // amber that didn't tell you which way you're positioned.
+  function computeBadgeInfo(t){
+    if(t.status === 'hit'){ return { cls: 'hit', label: 'Target hit' }; }
+    if(t.status === 'stopped'){ return { cls: 'stopped', label: 'Stopped out' }; }
+    if(t.status === 'watching'){ return { cls: 'watching', label: 'Watching' }; }
+    var isLong = t.direction !== 'Short';
+    return isLong ? { cls: 'buying', label: 'Buying' } : { cls: 'selling', label: 'Selling' };
+  }
+
   function renderTradeRow(t){
     var q = findQuote(t.sym);
     var change = pct(q.price, q.prevClose);
     var up = change >= 0;
-    var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
+    var badge = computeBadgeInfo(t);
     var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
     var curScale = (chartStates[t.sym] && chartStates[t.sym].scale) || 'linear';
     var curTf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
@@ -1946,7 +2003,8 @@
         '<div class="trade-columns trade-row">' +
           '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="true" aria-label="Toggle chart">⌄</button>' +
           '<div class="t-sym-cell">' +
-            '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span></span>' +
+            '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
+              '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
             '<span class="t-name">' + q.name + '</span>' +
           '</div>' +
           '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' + fmt(q.price) +
@@ -1955,9 +2013,8 @@
           '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
           '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
           '<div class="t-t1 mono" data-label="Target 1">' + fmt(t.t1) + '</div>' +
-          '<div class="t-t2-status" data-label="Target 2 / Status">' +
-            '<div class="t-t2 mono" style="margin-bottom:6px;">' + fmt(t.t2) + '</div>' +
-            '<span class="status-badge ' + badgeClass + '" id="status-badge-' + t.sym + '">' + t.statusLabel + '</span>' +
+          '<div class="t-t2-status" data-label="Target 2">' +
+            '<div class="t-t2 mono">' + fmt(t.t2) + '</div>' +
           '</div>' +
           '<div class="t-rr" data-label="Risk / Reward">' +
             '<div class="rr-ratio mono">1 : ' + rr.ratio.toFixed(1) + '</div>' +
@@ -1996,6 +2053,10 @@
 
   function renderTradeBlocks(){
     var el = document.getElementById('tradeBlocks');
+    if(trades.length === 0){
+      el.innerHTML = '<div class="trades-empty-state">Couldn\'t reach real market data for today\'s screener. Check your connection and refresh — nothing simulated will show in its place.</div>';
+      return;
+    }
     el.innerHTML = trades.map(renderTradeRow).join('');
 
     el.querySelectorAll('.chevron').forEach(function(btn){
@@ -2080,9 +2141,9 @@
       recomputeTradeStatus(t, q.price);
       var badgeEl = document.getElementById('status-badge-' + t.sym);
       if(badgeEl){
-        var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
-        badgeEl.className = 'status-badge ' + badgeClass;
-        badgeEl.textContent = t.statusLabel;
+        var badge = computeBadgeInfo(t);
+        badgeEl.className = 'status-badge ' + badge.cls;
+        badgeEl.textContent = badge.label;
       }
       var bannerEl = document.getElementById('action-banner-' + t.sym);
       if(bannerEl){
@@ -2234,9 +2295,10 @@
     var useLog = (scale === 'log') && loRaw > 0;
 
     var loT, hiT, niceTicks;
+    var priceCenterOffset = opts.priceCenterOffset || 0;
     if(useLog){
       var loT0 = Math.log(loRaw), hiT0 = Math.log(hiRaw);
-      var mid = (loT0 + hiT0) / 2;
+      var mid = (loT0 + hiT0) / 2 + priceCenterOffset;
       var halfRange = ((hiT0 - loT0) || (Math.abs(mid) * 0.02) || 1) / 2 / priceScaleFactor;
       loT = mid - halfRange; hiT = mid + halfRange;
       niceTicks = null;
@@ -2246,7 +2308,7 @@
       // constantly re-stretching as you pan through the data.
       var padAmt = (hiRaw - loRaw) * 0.08 || hiRaw * 0.01 || 1;
       var paddedLo = loRaw - padAmt, paddedHi = hiRaw + padAmt;
-      var mid2 = (paddedLo + paddedHi) / 2;
+      var mid2 = (paddedLo + paddedHi) / 2 + priceCenterOffset;
       var half2 = (paddedHi - paddedLo) / 2 / priceScaleFactor;
       var nice = computeNiceScale(mid2 - half2, mid2 + half2, 5);
       loT = nice.lo; hiT = nice.hi; niceTicks = nice.ticks;
@@ -2349,7 +2411,8 @@
     if(!state || !svg) return;
     var visible = state.data.slice(state.viewStart, state.viewEnd);
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
-      showMA: showMovingAverages, fullData: state.data, viewStart: state.viewStart
+      showMA: showMovingAverages, fullData: state.data, viewStart: state.viewStart,
+      priceCenterOffset: state.priceCenterOffset
     });
   }
 
@@ -2363,6 +2426,7 @@
       viewEnd: data.length,
       scale: prevScale,
       priceScaleFactor: 1,
+      priceCenterOffset: 0,
       tf: tf
     };
   }
@@ -2375,7 +2439,16 @@
     state.viewStart = state.data.length - defaultVisible;
     state.viewEnd = state.data.length;
     state.priceScaleFactor = 1;
+    state.priceCenterOffset = 0;
     renderChartView(sym);
+  }
+
+  function renderChartError(svg, sym){
+    var W = 760, H = 200;
+    svg.innerHTML =
+      '<text x="' + (W/2) + '" y="' + (H/2 - 8) + '" text-anchor="middle" class="chart-error-text">Couldn\'t load real chart data</text>' +
+      '<text x="' + (W/2) + '" y="' + (H/2 + 14) + '" text-anchor="middle" class="chart-error-sub">Try a different timeframe, or check back shortly.</text>';
+    delete chartStates[sym];
   }
 
   function renderChartInto(svg, sym, base, tf){
@@ -2396,13 +2469,11 @@
       initChartState(sym, tf, adjusted);
       renderChartView(sym);
     }).catch(function(err){
-      // Real intraday access for 1D isn't guaranteed on every API plan —
-      // fall back to the simulated walk rather than showing a broken chart.
+      // Signed-in accounts never see simulated data, on any timeframe —
+      // show an honest "couldn't load" state instead of silently
+      // substituting a fake chart that looks real.
       console.error('History fetch failed for', sym, tf, err);
-      var cfg = tfConfig[tf];
-      var mockCount = tf === '1D' ? cfg.mockCount : cfg.fetchSize;
-      initChartState(sym, tf, genOHLC(mockCount, base, base * cfg.volFactor));
-      renderChartView(sym);
+      renderChartError(svg, sym);
     });
   }
 
@@ -2566,6 +2637,7 @@
       if(localX > plotW){ mode = 'scale'; }
       else if(localY > CHART_PLOT_BOTTOM_Y){ mode = 'timescale'; }
       var count = state.viewEnd - state.viewStart;
+      var sc = state.lastScale;
       dragState = {
         mode: mode,
         startX: e.clientX,
@@ -2573,7 +2645,10 @@
         startViewStart: state.viewStart,
         startCount: count,
         startFraction: Math.max(0, Math.min(1, localX / plotW)),
-        startFactor: state.priceScaleFactor || 1
+        startFactor: state.priceScaleFactor || 1,
+        startPriceOffset: state.priceCenterOffset || 0,
+        startRange: sc ? sc.range : 1,
+        startPlotH: sc ? sc.plotH : 158
       };
       svg.setPointerCapture(e.pointerId);
       svg.style.cursor = (mode === 'scale') ? 'ns-resize' : (mode === 'timescale') ? 'ew-resize' : 'grabbing';
@@ -2614,6 +2689,14 @@
           var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, state.data.length - count2));
           state.viewStart = newStart;
           state.viewEnd = newStart + count2;
+
+          // Vertical drag repositions the price window without changing
+          // zoom — dragging down shifts the view up (revealing headroom
+          // below), matching a natural "grab and move the content" feel.
+          var dyPixels = e.clientY - dragState.startY;
+          var pricePerPixel = dragState.startRange / dragState.startPlotH;
+          state.priceCenterOffset = dragState.startPriceOffset + dyPixels * pricePerPixel;
+
           renderChartView(sym);
           hideCrosshair(sym);
         }
@@ -3663,25 +3746,88 @@
     return { tag:'Watching', text: t.sym + ' is ' + pct.toFixed(0) + '% of the way from entry to Target 1 — currently $' + price.toFixed(2) + '.' };
   }
 
-  function generateAndSaveDailyAlerts(existingHistory){
-    var today = new Date().toISOString().slice(0,10);
-    var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-    var newAlerts = trades.map(function(t){
+  // Real news specific to a tracked trade's own symbol — not general market
+  // headlines. Used as the preferred alert content; falls back to the
+  // computed price-level alert when nothing recent exists for that symbol.
+  function fetchCompanyNews(sym){
+    var today = new Date();
+    var lookback = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
+    var toStr = today.toISOString().slice(0, 10);
+    var fromStr = lookback.toISOString().slice(0, 10);
+    var url = 'https://finnhub.io/api/v1/company-news?symbol=' + encodeURIComponent(sym) +
+      '&from=' + fromStr + '&to=' + toStr + '&token=' + FINNHUB_API_KEY;
+    return fetch(url).then(function(res){
+      if(!res.ok) throw new Error('Finnhub company-news HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
+  function buildAlertForTrade(t, today, stamp){
+    return fetchCompanyNews(t.sym).then(function(articles){
+      if(!Array.isArray(articles) || !articles.length || !articles[0].headline){
+        throw new Error('no usable company news for ' + t.sym);
+      }
+      var top = articles[0];
+      return {
+        id: 'a' + Date.now() + '_' + t.sym, date: today, sym: t.sym, tag: 'News',
+        text: top.headline, url: top.url, time: stamp
+      };
+    }).catch(function(){
       var price = findQuote(t.sym).price;
       var evald = evaluateTradeAlert(t, price);
       return {
-        id: 'a' + Date.now() + '_' + t.sym,
-        date: today, sym: t.sym, tag: evald.tag, text: evald.text,
+        id: 'a' + Date.now() + '_' + t.sym, date: today, sym: t.sym, tag: evald.tag, text: evald.text,
         url: 'https://finance.yahoo.com/quote/' + t.sym + '/news', time: stamp
       };
     });
-    alertHistory = newAlerts.concat(existingHistory || []);
-    renderHistoryList();
-    if(window.__shwoopAPI && alertsUid){
-      window.__shwoopAPI.saveAlerts(alertsUid, alertHistory, today).catch(function(err){
-        console.error('Failed to save alerts:', err);
-      });
-    }
+  }
+
+  // Actual floating pop-ups, shown once per day right when new alerts are
+  // generated — not on every reload of already-generated alerts (that
+  // would re-fire the same pop-ups every time the page loads).
+  function dismissToast(toastEl){
+    toastEl.classList.add('toast-hide');
+    setTimeout(function(){ toastEl.remove(); }, 300);
+  }
+
+  function showToast(alert){
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    var toastEl = document.createElement('div');
+    toastEl.className = 'alert-toast';
+    toastEl.innerHTML =
+      '<div class="toast-head">' +
+        '<span class="toast-sym mono">' + alert.sym + '</span>' +
+        '<span class="news-toast-tag">' + alert.tag + '</span>' +
+        '<button class="toast-close" aria-label="Dismiss">×</button>' +
+      '</div>' +
+      '<p class="toast-text">' + alert.text + '</p>' +
+      '<a class="toast-link" href="' + alert.url + '" target="_blank" rel="noopener noreferrer">View →</a>';
+    container.appendChild(toastEl);
+    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
+    setTimeout(function(){ dismissToast(toastEl); }, 12000);
+  }
+
+  function showAlertToasts(newAlerts){
+    newAlerts.forEach(function(alert, i){
+      setTimeout(function(){ showToast(alert); }, i * 500);
+    });
+  }
+
+  function generateAndSaveDailyAlerts(existingHistory){
+    var today = new Date().toISOString().slice(0,10);
+    var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+
+    Promise.all(trades.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
+      alertHistory = newAlerts.concat(existingHistory || []);
+      renderHistoryList();
+      showAlertToasts(newAlerts);
+      if(window.__shwoopAPI && alertsUid){
+        window.__shwoopAPI.saveAlerts(alertsUid, alertHistory, today).catch(function(err){
+          console.error('Failed to save alerts:', err);
+        });
+      }
+    });
   }
 
   function loadAlertsForUser(uid){
@@ -3880,6 +4026,7 @@
       };
     });
     renderHistoryList();
+    showAlertToasts(alertHistory);
   }
 
   function enterGuestMode(){
@@ -4193,11 +4340,11 @@
   function renderWhatToWatch(){
     var el = document.getElementById('whatToWatchList');
     el.innerHTML = trades.map(function(t){
-      var badgeClass = t.status === 'hit' ? 'hit' : t.status === 'stopped' ? 'stopped' : t.status === 'watching' ? 'watching' : 'active';
+      var badge = computeBadgeInfo(t);
       return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
         '<div class="watch-trade-head">' +
           '<span class="watch-trade-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span></span>' +
-          '<span class="status-badge ' + badgeClass + '">' + t.statusLabel + '</span>' +
+          '<span class="status-badge ' + badge.cls + '">' + badge.label + '</span>' +
         '</div>' +
         '<p class="watch-trade-reason">' + t.notes[0] + '</p>' +
         '<span class="watch-trade-link">View full setup →</span>' +
