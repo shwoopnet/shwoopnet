@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shwoopnet — Personal Market Terminal</title>
+<title>Shwoop — Personal Market Terminal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1089,9 +1089,9 @@
         <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
         <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
         <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
-        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">SN</text>
+        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
       </svg>
-      SHWOOPNET
+      SHWOOP
     </div>
     <div class="auth-title" id="authTitle">Sign in</div>
     <div class="auth-status" id="authStatus">Connecting…</div>
@@ -1141,10 +1141,10 @@
         <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
         <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
         <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
-        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">SN</text>
+        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
       </svg>
       <div>
-        <div class="brand-name">SHWOOPNET</div>
+        <div class="brand-name">SHWOOP</div>
         <div class="brand-sub">Personal market terminal — design prototype</div>
       </div>
     </button>
@@ -1183,7 +1183,7 @@
           </button>
           <button class="nav-item" data-action="tour">
             Walkthrough
-            <span class="nav-item-sub">See what Shwoopnet can do</span>
+            <span class="nav-item-sub">See what Shwoop can do</span>
           </button>
           <button class="nav-item" data-page="labs">
             Labs
@@ -1358,7 +1358,7 @@
       </div>
       <button class="cta-btn" id="ctaToTrades">View Trade Overview →</button>
     </div>
-    <div class="cta-caption">This brief opens automatically the first time you visit Shwoopnet each day. After that, you'll land on Trade Overview — use the menu above to come back here anytime.</div>
+    <div class="cta-caption">This brief opens automatically the first time you visit Shwoop each day. After that, you'll land on Trade Overview — use the menu above to come back here anytime.</div>
   </main>
 
   <!-- ================= TRADE OVERVIEW ================= -->
@@ -1609,11 +1609,49 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Changelog</div>
-        <div class="trades-sub">What's new in Shwoopnet.</div>
+        <div class="trades-sub">What's new in Shwoop.</div>
       </div>
     </div>
 
     <div class="changelog-list">
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.7.2.0.0 — Chart &amp; Wording Polish</div>
+        <ul class="changelog-items">
+          <li>Time-axis labels now read like a real charting platform's — day numbers by default, times only where needed to tell same-day labels apart</li>
+          <li>Trade plan wording simplified: "Take profit at $X" / "Stop loss at $Y"</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.7.1.0.0 — UI Bug Fixes</div>
+        <ul class="changelog-items">
+          <li>Alert toasts no longer cover the Layout menu or bury trade notes further down the page</li>
+          <li>Fixed clipped chart axis labels and moving-average lines that didn't span the full visible chart</li>
+          <li>Fixed a tab-switching bug that delayed real quotes/charts by up to 10 seconds after every refresh</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.7.0.0.0 — Alpaca Paper Trading</div>
+        <ul class="changelog-items">
+          <li>Connect a free Alpaca paper account in Settings — "Send to Alpaca" places a real bracket order and logs it to the journal in one click</li>
+          <li>Trades now carry a single target instead of two, matching Alpaca's bracket order structure</li>
+          <li>Quietly started tracking every screener pick's real outcome behind the scenes — the foundation for eventually validating the strategy with real numbers</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.6.5.0.0 — Screener Quality &amp; Trade Management</div>
+        <ul class="changelog-items">
+          <li>Universe diversified beyond mega-caps across more sectors and market caps</li>
+          <li>Trend alignment is now required to make the list, not just scored — a clean zero beats a forced pick on a weak day</li>
+          <li>"Finished today" section separates resolved trades from what's still active, so old hits don't clutter the page</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version">v1.6.0.0.0 — Renamed to Shwoop, Labs Added</div>
+        <ul class="changelog-items">
+          <li>Renamed from Shwoopnet to Shwoop</li>
+          <li>New Labs page: a plain-language writeup of exactly how the screener works, plus a real backtest tool</li>
+        </ul>
+      </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.5.4.0.2 — Session &amp; Rate-Limit Hardening</div>
         <ul class="changelog-items">
@@ -1799,7 +1837,7 @@
   </main>
 
   <footer class="site-footer">
-    <div class="footer-copyright">© 2026 Shwoopnet. All rights reserved.</div>
+    <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
     <p>Current prices are live quotes from Finnhub. Chart history on every timeframe, including 1D intraday, is real historical data from Twelve Data for signed-in accounts — if real data can't be reached, the chart shows an honest "couldn't load" message rather than substituting anything simulated. Trade direction, entry/stop/targets, and reasoning are calculated daily from real technical levels (moving averages, recent support/resistance, momentum) — not hand-written. Guest mode is the only place simulated data appears, throughout, on every timeframe. Nothing on this site constitutes financial, investment, or trading advice.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a> and <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>.</p>
@@ -2293,8 +2331,6 @@
 
   function buildActionHTML(t){
     var isLong = t.direction !== 'Short';
-    var exitVerb = isLong ? 'Sell' : 'Cover';
-    var stopVerb = isLong ? 'drops to' : 'rises to';
 
     if(t.status === 'hit'){
       return { done: true, html: '<span class="trade-action-verb done">Done —</span> already reached target at $' + fmt(t.t1) + '. This setup has played out, no action needed.' };
@@ -2307,22 +2343,20 @@
       var enterVerbClass = isLong ? 'buy' : 'short';
       return { done: false, html:
         'Wait for ' + t.sym + ' to reach <strong>$' + fmt(t.entry) + '</strong> before <span class="trade-action-verb ' + enterVerbClass + '">' + enterVerb + '</span>. Once triggered: ' +
-        exitVerb.toLowerCase() + ' fully at Target ($' + fmt(t.t1) + '). ' +
-        'Exit everything if price ' + stopVerb + ' $' + fmt(t.stop) + ' first.'
+        'take profit at $' + fmt(t.t1) + '. Stop loss at $' + fmt(t.stop) + '.'
       };
     }
     var verb = isLong ? 'Buy' : 'Short';
     var verbClass = isLong ? 'buy' : 'short';
     return { done: false, html:
       '<span class="trade-action-verb ' + verbClass + '">' + verb + '</span> ' + t.sym + ' near <strong>$' + fmt(t.entry) + '</strong>. ' +
-      exitVerb + ' fully at Target ($' + fmt(t.t1) + '). ' +
-      'Exit everything immediately if price ' + stopVerb + ' <strong>$' + fmt(t.stop) + '</strong>.'
+      'Take profit at $' + fmt(t.t1) + '. Stop loss at $' + fmt(t.stop) + '.'
     };
   }
 
   // ---------- Alpaca paper trading (simulated money only) ----------
   // Bring-your-own-account: each user connects their own free Alpaca paper
-  // keys. Shwoopnet never holds funds or credentials centrally — this is
+  // keys. Shwoop never holds funds or credentials centrally — this is
   // literally the same as if the person wrote this fetch call themselves.
   var ALPACA_PAPER_BASE = 'https://paper-api.alpaca.markets';
   var alpacaCreds = { keyId: '', secretKey: '' };
@@ -2692,9 +2726,11 @@
     var state = chartStates[sym];
     if(!state || !state.data || !state.data.length || !newPrice) return;
     var lastBar = state.data[state.data.length - 1];
+    // Close tracks the live quote (keeps the price tag/dashed line
+    // accurate); high/low stay exactly what Twelve Data reported for this
+    // bar, rather than stretching to bridge a gap between two data
+    // sources that can genuinely disagree on "right now."
     lastBar.c = newPrice;
-    lastBar.h = Math.max(lastBar.h, newPrice);
-    lastBar.l = Math.min(lastBar.l, newPrice);
     // The underlying data actually changed here (unlike a pure pan/zoom,
     // which only changes the viewport) — the cached MA series is now
     // stale and needs to be recomputed on the next render.
@@ -3083,18 +3119,27 @@
         // platform's intraday-of-the-day view.
         return timeStr;
       }
-      // 5m/15m/30m scroll across multiple days. Real charting platforms
-      // don't repeat the date on every tick here — they show times, and
-      // mark the day boundary itself with a date instead of a time.
-      var isNewDay = !prevD || d.toDateString() !== prevD.toDateString();
-      return isNewDay ? d.toLocaleDateString([], { month:'short', day:'numeric' }) : timeStr;
+      // 5m/15m/30m scroll across multiple days — each label is more
+      // naturally "which day is this" than "what time is this" (the
+      // convention real charting platforms use here). A time only shows
+      // up when this label falls on the SAME day as the previous one —
+      // zoomed in tight enough that repeating the date wouldn't actually
+      // distinguish anything.
+      var isSameDayAsPrev = prevD && d.toDateString() === prevD.toDateString();
+      if(isSameDayAsPrev) return timeStr;
+      // Otherwise fall through to the shared day-number/month-name logic
+      // below, same as daily+ views.
     }
-    // Daily/weekly views. 1Y in particular spans roughly two years of
-    // weekly bars, so a bare "Jan 15" would be ambiguous about which
-    // year — add it whenever the label isn't in the current year, or a
-    // year boundary falls between this label and the last one.
+    // Daily/weekly/intraday-day-boundary labels all share one convention:
+    // a bare day number within the same month (e.g. "16"), the month name
+    // only when actually crossing into a new month (e.g. "Jun 16"), and
+    // the year only when it isn't the current year.
     var currentYear = new Date().getFullYear();
     var needsYear = d.getFullYear() !== currentYear || (prevD && prevD.getFullYear() !== d.getFullYear());
+    var isNewMonth = !prevD || d.getMonth() !== prevD.getMonth() || d.getFullYear() !== prevD.getFullYear();
+    if(!isNewMonth && !needsYear){
+      return String(d.getDate());
+    }
     return d.toLocaleDateString([], needsYear ? { month:'short', day:'numeric', year:'2-digit' } : { month:'short', day:'numeric' });
   }
 
@@ -3359,10 +3404,15 @@
     }
     fetchHistory(sym, tf, 'high').then(function(bars){
       // Keep the chart anchored to the live current price rather than
-      // whatever Twelve Data's most recent close happened to be.
+      // whatever Twelve Data's most recent close happened to be — but
+      // only the close, not the high/low. Twelve Data's free tier can lag
+      // real-time by a meaningful amount, so stretching the wick to
+      // always reach the live quote was bridging two data sources that
+      // sometimes genuinely disagree, producing a wick shooting far past
+      // where the rest of the candle series actually sits.
       var lastBar = bars[bars.length - 1];
       var adjusted = bars.slice(0, -1).concat([{
-        o: lastBar.o, h: Math.max(lastBar.h, base), l: Math.min(lastBar.l, base), c: base
+        o: lastBar.o, h: lastBar.h, l: lastBar.l, c: base
       }]);
       initChartState(sym, tf, adjusted);
       renderChartView(sym);
@@ -5156,7 +5206,7 @@
   // ---------- Walkthrough tour ----------
   var tourSteps = [
     {
-      title: 'Welcome to Shwoopnet',
+      title: 'Welcome to Shwoop',
       text: "A quick tour of what's here and where to find it. Use the arrows below, or skip anytime."
     },
     {
@@ -5538,7 +5588,7 @@
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
-  // default to the brief, unless we've already opened Shwoopnet today.
+  // default to the brief, unless we've already opened Shwoop today.
   (function initLanding(){
     var hashPage = (location.hash || '').replace('#', '');
     if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal' || hashPage === 'settings' || hashPage === 'changelog'){
