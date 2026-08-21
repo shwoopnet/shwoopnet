@@ -125,6 +125,23 @@
     flex-wrap: wrap; gap: 14px;
     border-bottom: 1px solid var(--border);
   }
+  .app-layout{ display:flex; align-items:flex-start; }
+  .app-pages{ flex:1; min-width:0; }
+  .quick-nav{
+    flex-shrink:0; width:88px; display:flex; flex-direction:column; gap:2px;
+    padding: 18px 10px; position:sticky; top:0; align-self:flex-start;
+    border-right:1px solid var(--border);
+  }
+  @media (max-width: 900px){ .quick-nav{ display:none; } }
+  .quick-nav-item{
+    background:none; border:none; color: var(--muted); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    padding:10px 4px; border-radius:8px; font-size:10.5px; font-weight:600;
+    font-family:'Space Grotesk', sans-serif; text-align:center;
+  }
+  .quick-nav-item:hover{ background: var(--panel); color: var(--paper); }
+  .quick-nav-item.current{ background: var(--panel-raised); color: var(--amber); }
+  .quick-nav-icon{ font-size:17px; line-height:1; }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -465,7 +482,9 @@
   .layout-reset-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .layout-toggle-group{ display:flex; gap:4px; }
 
-  #tradeBlocks.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  #tradeBlocks.two-col{ display:block; }
+  #tradeBlocks.two-col .masonry-row{ display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; }
+  #tradeBlocks.two-col .masonry-col{ flex:1; display:flex; flex-direction:column; gap:20px; min-width:0; }
   #tradeBlocks.two-col .trade-row{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
   #tradeBlocks.two-col .trade-row > *{ flex:1 1 40%; }
   #tradeBlocks.two-col .trade-row .chevron{ flex: 0 0 auto; }
@@ -752,30 +771,28 @@
     cursor: nwse-resize; display:none;
   }
   .notepad-panel.unlocked .notepad-resize-handle{ display:block; }
-  .alpaca-dock-tab{
-    position:fixed; bottom:0; right:380px; z-index:440; width:440px; max-width:calc(100% - 40px);
+  .alpaca-dock-header{
+    position:fixed; bottom:0; right:380px; z-index:441; width:440px; max-width:calc(100% - 40px);
     display:flex; justify-content:space-between; align-items:center;
     background: var(--panel); border:1px solid var(--border); border-bottom:none;
-    border-radius:8px 8px 0 0; padding:10px 16px; cursor:pointer;
+    border-radius:8px 8px 0 0; padding:10px 16px; cursor:default;
     font-family:'Space Grotesk', sans-serif; font-size:12.5px; font-weight:600; color: var(--paper);
     box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
   }
+  .alpaca-dock.unlocked .alpaca-dock-header{ cursor:ew-resize; }
+  .alpaca-dock-header-controls{ display:flex; align-items:center; gap:10px; }
+  .alpaca-dock-toggle-btn{ background:none; border:none; cursor:pointer; padding:2px; color: var(--amber); }
   .alpaca-dock-caret{ color: var(--amber); font-size:10px; }
-  .alpaca-dock-panel{
-    position:fixed; bottom:42px; right:380px; z-index:441; width:440px; max-width:calc(100% - 40px);
+  .alpaca-dock-body-wrap{
+    position:fixed; bottom:42px; right:380px; z-index:440; width:440px; max-width:calc(100% - 40px);
     background: var(--panel); border:1px solid var(--border); border-radius:8px;
     display:flex; flex-direction:column; height:40vh; max-height:480px; min-height:220px;
     box-shadow:0 16px 36px rgba(0,0,0,0.5);
     opacity:0; transform: translateY(10px); pointer-events:none;
     transition: opacity .18s ease, transform .18s ease;
   }
-  .alpaca-dock-panel.open{ opacity:1; transform: translateY(0); pointer-events:auto; }
-  [data-reduce-motion="true"] .alpaca-dock-panel{ transition:none; }
-  .alpaca-dock-panel-head{
-    display:flex; justify-content:space-between; align-items:center; padding:10px 14px;
-    border-bottom:1px solid var(--border); font-size:12px; font-weight:600; flex-shrink:0; cursor:default;
-  }
-  .alpaca-dock.unlocked .alpaca-dock-panel-head{ cursor:ew-resize; }
+  .alpaca-dock-body-wrap.open{ opacity:1; transform: translateY(0); pointer-events:auto; }
+  [data-reduce-motion="true"] .alpaca-dock-body-wrap{ transition:none; }
   .alpaca-dock-body{ padding:14px 16px; overflow-y:auto; overflow-x:auto; flex:1; }
   .alpaca-dock-equity{ font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; }
   .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
@@ -797,7 +814,7 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
-  .alpaca-dock-panel .notepad-resize-handle{ position:absolute; right:2px; bottom:2px; width:16px; height:16px; cursor:nwse-resize; display:block; }
+  .alpaca-dock-body-wrap .notepad-resize-handle{ position:absolute; right:2px; bottom:2px; width:16px; height:16px; cursor:nwse-resize; display:block; }
   .notepad-resize-handle::before{
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
@@ -1190,9 +1207,9 @@
       <span id="authSwitchText">Don't have an account?</span>
       <button type="button" id="authSwitchBtn">Create one</button>
     </div>
-    <div class="auth-divider"><span>or</span></div>
-    <button type="button" class="auth-guest-btn" id="guestBtn">Continue as guest</button>
-    <div class="auth-guest-note">Simulated data only — nothing you do is saved, and it resets every visit.</div>
+    <div class="auth-divider" hidden><span>or</span></div>
+    <button type="button" class="auth-guest-btn" id="guestBtn" hidden>Continue as guest</button>
+    <div class="auth-guest-note" hidden>Simulated data only — nothing you do is saved, and it resets every visit.</div>
     <button type="button" id="authForgotBtn" class="auth-forgot">Forgot password?</button>
   </div>
 </div>
@@ -1298,15 +1315,16 @@
   </div>
 
   <div class="alpaca-dock" id="alpacaDock" hidden>
-    <button class="alpaca-dock-tab" id="alpacaDockTab">
+    <div class="alpaca-dock-header" id="alpacaDockHeader">
       <span id="alpacaDockTitle">Paper Trading Account</span>
-      <span class="alpaca-dock-caret" id="alpacaDockCaret">▲</span>
-    </button>
-    <div class="alpaca-dock-panel" id="alpacaDockPanel">
-      <div class="alpaca-dock-panel-head" id="alpacaDockPanelHead">
-        <span>Account</span>
+      <div class="alpaca-dock-header-controls">
         <button class="notepad-lock-btn" id="alpacaDockLockBtn">Unlock</button>
+        <button class="alpaca-dock-toggle-btn" id="alpacaDockToggleBtn" aria-label="Expand or collapse account panel" aria-expanded="false">
+          <span class="alpaca-dock-caret" id="alpacaDockCaret">▲</span>
+        </button>
       </div>
+    </div>
+    <div class="alpaca-dock-body-wrap" id="alpacaDockBodyWrap">
       <div class="alpaca-dock-body">
         <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
         <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
@@ -1404,6 +1422,28 @@
   </div>
 
   <!-- ================= MARKET BRIEF (HOME) ================= -->
+  <div class="app-layout">
+    <nav class="quick-nav" id="quickNav">
+      <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
+        <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
+        <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
+        <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
+        <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
+        <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
+        <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
+      </button>
+    </nav>
+    <div class="app-pages">
   <main class="page" id="page-brief">
     <div class="brief-hero">
       <div class="brief-page-header">
@@ -1993,6 +2033,8 @@
       <div id="backtestResults"></div>
     </div>
   </main>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
@@ -2716,12 +2758,23 @@
 
   function findBracketLevels(orders, sym){
     var order = (orders || []).filter(function(o){ return o.symbol === sym && o.limit_price; })[0];
-    if(!order) return { target: null, stop: null };
-    var stopLeg = (order.legs || []).filter(function(l){ return l.stop_price; })[0];
-    return {
-      target: order.limit_price ? parseFloat(order.limit_price) : null,
-      stop: stopLeg ? parseFloat(stopLeg.stop_price) : null
-    };
+    var stopLeg = order ? (order.legs || []).filter(function(l){ return l.stop_price; })[0] : null;
+    var target = order && order.limit_price ? parseFloat(order.limit_price) : null;
+    var stop = stopLeg ? parseFloat(stopLeg.stop_price) : null;
+
+    // Falls back to what was recorded in the journal at the moment this
+    // trade was placed. The live-order lookup can come up empty for a
+    // given symbol even when the position genuinely has real bracket
+    // protection sitting on Alpaca's side — this is data Shwoop already
+    // has and trusts, since it wrote it there itself.
+    if(target === null || stop === null){
+      var journalMatch = journalEntries.filter(function(j){ return j.sym === sym && j.status === 'open'; })[0];
+      if(journalMatch){
+        if(target === null && journalMatch.t1 !== undefined && journalMatch.t1 !== null) target = journalMatch.t1;
+        if(stop === null && journalMatch.stop !== undefined && journalMatch.stop !== null) stop = journalMatch.stop;
+      }
+    }
+    return { target: target, stop: stop };
   }
 
   // Alpaca's dedicated endpoint closes the entire position with a single
@@ -2785,7 +2838,7 @@
         positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions.</div>';
         return;
       }
-      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Current</th><th>Target</th><th>Stop</th><th>P/L</th><th></th></tr></thead><tbody>' +
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Target</th><th>Current</th><th>Stop</th><th>P/L</th><th></th></tr></thead><tbody>' +
         positions.map(function(p){
           var pl = parseFloat(p.unrealized_pl || 0);
           var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
@@ -2796,8 +2849,8 @@
             '<td>' + p.qty + '</td>' +
             '<td>' + p.side + '</td>' +
             '<td>' + parseFloat(p.avg_entry_price).toFixed(2) + '</td>' +
-            '<td>' + parseFloat(p.current_price).toFixed(2) + '</td>' +
             '<td class="up">' + (levels.target !== null ? levels.target.toFixed(2) : '—') + '</td>' +
+            '<td>' + parseFloat(p.current_price).toFixed(2) + '</td>' +
             '<td class="down">' + (levels.stop !== null ? levels.stop.toFixed(2) : '—') + '</td>' +
             '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
             '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
@@ -2830,13 +2883,15 @@
 
   var alpacaDockRefreshInterval = null;
 
-  document.getElementById('alpacaDockTab').addEventListener('click', function(){
-    var panel = document.getElementById('alpacaDockPanel');
+  function toggleAlpacaDockOpen(){
+    var bodyWrap = document.getElementById('alpacaDockBodyWrap');
     var caret = document.getElementById('alpacaDockCaret');
-    var isOpen = panel.classList.contains('open');
+    var toggleBtn = document.getElementById('alpacaDockToggleBtn');
+    var isOpen = bodyWrap.classList.contains('open');
     if(!isOpen){
-      panel.classList.add('open');
+      bodyWrap.classList.add('open');
       caret.textContent = '▼';
+      toggleBtn.setAttribute('aria-expanded', 'true');
       renderAlpacaDock();
       // Keeps balance/positions genuinely live while you're actually
       // looking at the panel — same 45s cadence as the rest of the app's
@@ -2845,21 +2900,22 @@
       if(alpacaDockRefreshInterval) clearInterval(alpacaDockRefreshInterval);
       alpacaDockRefreshInterval = setInterval(renderAlpacaDock, 45000);
     } else {
-      panel.classList.remove('open');
+      bodyWrap.classList.remove('open');
       caret.textContent = '▲';
+      toggleBtn.setAttribute('aria-expanded', 'false');
       if(alpacaDockRefreshInterval){ clearInterval(alpacaDockRefreshInterval); alpacaDockRefreshInterval = null; }
     }
-  });
+  }
+  document.getElementById('alpacaDockToggleBtn').addEventListener('click', toggleAlpacaDockOpen);
 
-  // ---------- Alpaca dock: side toggle (left/right) + resize ----------
-  // Deliberately not a free-drag panel — the tab and panel always stay
-  // connected as one unit and only ever move horizontally, between the
-  // two sides of the screen, never vertically and never detached from
-  // each other.
+  // ---------- Alpaca dock: one unified header (title + lock + toggle), ----------
+  // drag-left/right + resize. The header is always visible and is both the
+  // drag handle (when unlocked) and the home of the dedicated expand/
+  // collapse button — a separate button rather than making the whole
+  // header double as a click target avoids any click-vs-drag ambiguity.
   var alpacaDockOuter = document.getElementById('alpacaDock');
-  var alpacaDockTabEl = document.getElementById('alpacaDockTab');
-  var alpacaDockPanelEl = document.getElementById('alpacaDockPanel');
-  var alpacaDockPanelHead = document.getElementById('alpacaDockPanelHead');
+  var alpacaDockHeaderEl = document.getElementById('alpacaDockHeader');
+  var alpacaDockBodyWrapEl = document.getElementById('alpacaDockBodyWrap');
   var alpacaDockLockBtn = document.getElementById('alpacaDockLockBtn');
   var alpacaDockResizeHandle = document.getElementById('alpacaDockResizeHandle');
   var alpacaDockLocked = true;
@@ -2867,8 +2923,8 @@
   function saveAlpacaDockGeometry(){
     try{
       window.localStorage.setItem('shwoopnet:alpacaDockGeo', JSON.stringify({
-        left: alpacaDockPanelEl.style.left,
-        width: alpacaDockPanelEl.style.width, height: alpacaDockPanelEl.style.height
+        left: alpacaDockBodyWrapEl.style.left,
+        width: alpacaDockBodyWrapEl.style.width, height: alpacaDockBodyWrapEl.style.height
       }));
     }catch(e){}
   }
@@ -2882,36 +2938,36 @@
   }
   alpacaDockLockBtn.addEventListener('click', function(){ applyAlpacaDockLock(!alpacaDockLocked); });
 
-  // Moves both the tab and panel together to the same horizontal position —
-  // they're one visual unit and must never drift apart.
+  // Moves both the header and body together to the same horizontal
+  // position — they're one visual unit and must never drift apart.
   function setAlpacaDockLeft(px){
-    alpacaDockTabEl.style.left = px + 'px';
-    alpacaDockTabEl.style.right = 'auto';
-    alpacaDockPanelEl.style.left = px + 'px';
-    alpacaDockPanelEl.style.right = 'auto';
+    alpacaDockHeaderEl.style.left = px + 'px';
+    alpacaDockHeaderEl.style.right = 'auto';
+    alpacaDockBodyWrapEl.style.left = px + 'px';
+    alpacaDockBodyWrapEl.style.right = 'auto';
   }
 
   var alpacaDockDragState = null;
-  alpacaDockPanelHead.addEventListener('pointerdown', function(e){
+  alpacaDockHeaderEl.addEventListener('pointerdown', function(e){
     if(alpacaDockLocked || e.target.closest('button')) return;
-    var rect = alpacaDockPanelEl.getBoundingClientRect();
+    var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
     alpacaDockDragState = { startX: e.clientX, startLeft: rect.left };
-    alpacaDockPanelHead.setPointerCapture(e.pointerId);
+    alpacaDockHeaderEl.setPointerCapture(e.pointerId);
   });
-  alpacaDockPanelHead.addEventListener('pointermove', function(e){
+  alpacaDockHeaderEl.addEventListener('pointermove', function(e){
     if(!alpacaDockDragState) return;
     var dx = e.clientX - alpacaDockDragState.startX;
-    var maxLeft = window.innerWidth - alpacaDockPanelEl.offsetWidth;
+    var maxLeft = window.innerWidth - alpacaDockBodyWrapEl.offsetWidth;
     var newLeft = Math.max(0, Math.min(maxLeft, alpacaDockDragState.startLeft + dx));
     setAlpacaDockLeft(newLeft);
   });
-  alpacaDockPanelHead.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
-  alpacaDockPanelHead.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
+  alpacaDockHeaderEl.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
+  alpacaDockHeaderEl.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
 
   var alpacaDockResizeState = null;
   alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
     e.stopPropagation();
-    var rect = alpacaDockPanelEl.getBoundingClientRect();
+    var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
     alpacaDockResizeState = { startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height };
     alpacaDockResizeHandle.setPointerCapture(e.pointerId);
   });
@@ -2919,8 +2975,8 @@
     if(!alpacaDockResizeState) return;
     var newW = Math.max(280, alpacaDockResizeState.startW + (e.clientX - alpacaDockResizeState.startX));
     var newH = Math.max(200, alpacaDockResizeState.startH + (e.clientY - alpacaDockResizeState.startY));
-    alpacaDockPanelEl.style.width = newW + 'px';
-    alpacaDockPanelEl.style.height = newH + 'px';
+    alpacaDockBodyWrapEl.style.width = newW + 'px';
+    alpacaDockBodyWrapEl.style.height = newH + 'px';
   });
   alpacaDockResizeHandle.addEventListener('pointerup', function(){ alpacaDockResizeState = null; saveAlpacaDockGeometry(); });
   alpacaDockResizeHandle.addEventListener('pointercancel', function(){ alpacaDockResizeState = null; });
@@ -2932,8 +2988,8 @@
     try{
       var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
       if(geo && geo.width){
-        alpacaDockPanelEl.style.width = geo.width;
-        alpacaDockPanelEl.style.height = geo.height;
+        alpacaDockBodyWrapEl.style.width = geo.width;
+        alpacaDockBodyWrapEl.style.height = geo.height;
       }
       if(geo && geo.left){
         setAlpacaDockLeft(parseFloat(geo.left));
@@ -2944,9 +3000,14 @@
   // A bracket order: the entry itself, plus a stop-loss leg and a
   // take-profit leg, submitted as one order — maps directly onto our
   // Entry/Stop/Target structure, one-to-one.
+  // GTC, not day: a "day" bracket cancels its stop-loss leg at close along
+  // with everything else if neither the stop nor the target was hit yet —
+  // meaning a filled position could be left with zero automated downside
+  // protection overnight. GTC keeps the stop and target genuinely live
+  // until one of them actually triggers, however many sessions that takes.
   function submitAlpacaBracketOrder(sym, side, qty, stopPrice, takeProfitPrice){
     var body = {
-      symbol: sym, qty: String(qty), side: side, type: 'market', time_in_force: 'day',
+      symbol: sym, qty: String(qty), side: side, type: 'market', time_in_force: 'gtc',
       order_class: 'bracket',
       take_profit: { limit_price: takeProfitPrice.toFixed(2) },
       stop_loss: { stop_price: stopPrice.toFixed(2) }
@@ -3138,6 +3199,42 @@
       '</div>';
   }
 
+  // Packs a same-tier group of cards into two columns, always adding the
+  // next card to whichever column currently has less total height —
+  // mirrors how a real chart-layout manager fills available space instead
+  // of leaving a gap under a shorter card while the next one starts a new
+  // row anyway. Only meaningful with 2+ cards and only on screens wide
+  // enough for two real columns.
+  function applyMasonryLayout(tierSymbolGroups){
+    if(layoutPrefs.cols !== 2 || window.innerWidth <= 900) return;
+    var el = document.getElementById('tradeBlocks');
+    tierSymbolGroups.forEach(function(syms){
+      if(syms.length < 2) return;
+      var items = syms.map(function(sym){ return el.querySelector('.trade-block[data-symbol="' + sym + '"]'); }).filter(Boolean);
+      if(items.length < 2) return;
+      var anchor = items[0];
+      var parent = anchor.parentNode;
+      if(!parent) return;
+      var row = document.createElement('div');
+      row.className = 'masonry-row';
+      var colA = document.createElement('div'); colA.className = 'masonry-col';
+      var colB = document.createElement('div'); colB.className = 'masonry-col';
+      row.appendChild(colA);
+      row.appendChild(colB);
+      // Inserted while the anchor is still in its original position —
+      // moving items into the columns happens only after this, so the
+      // anchor is never used as a reference node once it's already been
+      // relocated.
+      parent.insertBefore(row, anchor);
+      var heightA = 0, heightB = 0;
+      items.forEach(function(item){
+        var h = item.offsetHeight;
+        if(heightA <= heightB){ colA.appendChild(item); heightA += h; }
+        else { colB.appendChild(item); heightB += h; }
+      });
+    });
+  }
+
   function renderTradeBlocks(){
     var el = document.getElementById('tradeBlocks');
     if(trades.length === 0){
@@ -3251,6 +3348,11 @@
     trades.forEach(function(t){ setupChartInteractivity(t.sym); });
 
     renderAllTradeCharts();
+    applyMasonryLayout([
+      inPosition.map(function(t){ return t.sym; }),
+      needsEntry.map(function(t){ return t.sym; }),
+      watching.map(function(t){ return t.sym; })
+    ]);
   }
 
   // Entry/stop/targets stay fixed for the day once set — but status (and
@@ -3970,11 +4072,22 @@
     var svg = document.getElementById('chart-' + sym);
     if(!state || !svg) return;
     var visible = state.data.slice(state.viewStart, state.viewEnd);
+    // The real, held position takes priority over today's fresh screener
+    // pick for the same symbol — if a position was opened on an earlier
+    // day, the chart should show what's actually being held (its real
+    // entry/stop/target), not whatever levels today's re-run produced.
+    var openPosition = journalEntries.filter(function(j){ return j.sym === sym && j.status === 'open'; })[0];
     var trade = trades.filter(function(t){ return t.sym === sym; })[0];
+    var levels = null;
+    if(openPosition){
+      levels = { entry: openPosition.entry, stop: openPosition.stop, target: openPosition.t1 };
+    } else if(trade){
+      levels = { entry: trade.entry, stop: trade.stop, target: trade.t1 };
+    }
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
       showMA: showMovingAverages, fullData: state.data, viewStart: state.viewStart,
       priceCenterOffset: state.priceCenterOffset, maCacheHost: state,
-      levels: trade ? { entry: trade.entry, stop: trade.stop, target: trade.t1 } : null
+      levels: levels
     });
   }
 
@@ -4767,11 +4880,11 @@
   document.getElementById('layoutResetBtn').addEventListener('click', function(){
     layoutPrefs = { width:62, height:200, text:12.5, cols:1, showMA:true, showOHLC:true };
     applyLayout();
-    renderAllTradeCharts();
+    renderTradeBlocks();
   });
 
-  document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); });
-  document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); });
+  document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); renderTradeBlocks(); });
+  document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); renderTradeBlocks(); });
 
   document.getElementById('maToggleBtn').addEventListener('click', function(){
     layoutPrefs.showMA = !layoutPrefs.showMA;
@@ -5877,6 +5990,11 @@
 
   document.getElementById('guestBtn').addEventListener('click', enterGuestMode);
 
+  // Private for now — only this account is allowed to actually use the
+  // app once signed in. See the corresponding note where this is checked
+  // for what real (server-side) enforcement would additionally require.
+  var SHWOOP_OWNER_EMAIL = 'heiszcam@gmail.com';
+
   window.__onShwoopReady(function(api){
     authStatusEl.textContent = '';
     authFormEl.hidden = false;
@@ -5896,6 +6014,17 @@
           forceReauthPending = false;
           if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
           authStatusEl.textContent = "We've shipped an update — please sign in again to continue.";
+          return;
+        }
+        // This app is private — rejects anyone other than the one owner
+        // account, whether it's a brand-new sign-up or a restored session
+        // from an old sign-in. Client-side only: real enforcement against
+        // someone bypassing the UI entirely needs a matching Firestore
+        // security rule, which has to be set in the Firebase console.
+        if(user.email !== SHWOOP_OWNER_EMAIL){
+          if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
+          authGateEl.removeAttribute('hidden');
+          authStatusEl.textContent = 'This app is private right now and not accepting other accounts.';
           return;
         }
         currentUid = user.uid;
