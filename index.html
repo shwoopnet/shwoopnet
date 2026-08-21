@@ -349,13 +349,11 @@
   }
   .priority-label:first-child{ margin-top:0; }
   .priority-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-  .in-position-label{ color: var(--gain); }
-  .in-position-label .priority-dot{ background: var(--gain); box-shadow: 0 0 8px var(--gain-glow); animation: priorityPulse 2s ease-in-out infinite; }
+  .in-position-label{ color: var(--muted); }
+  .in-position-label .priority-dot{ background: var(--muted); }
   .needs-entry-label{ color: var(--amber); }
   .needs-entry-label .priority-dot{ background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); }
-  @keyframes priorityPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
   [data-reduce-motion="true"] .priority-dot{ animation:none; }
-  .trade-block-in-position{ border-color: var(--gain); box-shadow: 0 0 0 1px var(--gain), 0 8px 24px rgba(0,0,0,.3); }
   .trade-block-needs-entry{ border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber), 0 8px 24px rgba(0,0,0,.3); }
   .finished-trades-section{ margin-top: 28px; }
   .finished-toggle{
@@ -750,29 +748,26 @@
   }
   .notepad-panel.unlocked .notepad-resize-handle{ display:block; }
   .alpaca-dock-tab{
-    position:fixed; bottom:0; right:380px; z-index:440; width:340px; max-width:calc(100% - 40px);
+    position:fixed; bottom:0; right:380px; z-index:440; width:440px; max-width:calc(100% - 40px);
     display:flex; justify-content:space-between; align-items:center;
     background: var(--panel); border:1px solid var(--border); border-bottom:none;
     border-radius:8px 8px 0 0; padding:10px 16px; cursor:pointer;
     font-family:'Space Grotesk', sans-serif; font-size:12.5px; font-weight:600; color: var(--paper);
     box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
   }
-  .alpaca-dock.docked-left .alpaca-dock-tab{ right:auto; left:20px; }
-  @media (max-width:820px){ .alpaca-dock-tab, .alpaca-dock.docked-left .alpaca-dock-tab{ right:20px; left:auto; } }
   .alpaca-dock-caret{ color: var(--amber); font-size:10px; }
   .alpaca-dock-panel{
-    position:fixed; bottom:42px; right:380px; z-index:441; width:340px; max-width:calc(100% - 40px);
+    position:fixed; bottom:42px; right:380px; z-index:441; width:440px; max-width:calc(100% - 40px);
     background: var(--panel); border:1px solid var(--border); border-radius:8px;
     display:flex; flex-direction:column; height:50vh; min-height:220px;
     box-shadow:0 16px 36px rgba(0,0,0,0.5);
   }
-  .alpaca-dock.docked-left .alpaca-dock-panel{ right:auto; left:20px; }
-  @media (max-width:820px){ .alpaca-dock-panel, .alpaca-dock.docked-left .alpaca-dock-panel{ right:20px; left:auto; } }
   .alpaca-dock-panel-head{
     display:flex; justify-content:space-between; align-items:center; padding:10px 14px;
-    border-bottom:1px solid var(--border); font-size:12px; font-weight:600; flex-shrink:0;
+    border-bottom:1px solid var(--border); font-size:12px; font-weight:600; flex-shrink:0; cursor:default;
   }
-  .alpaca-dock-body{ padding:14px 16px; overflow-y:auto; flex:1; }
+  .alpaca-dock.unlocked .alpaca-dock-panel-head{ cursor:ew-resize; }
+  .alpaca-dock-body{ padding:14px 16px; overflow-y:auto; overflow-x:auto; flex:1; }
   .alpaca-dock-equity{ font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; }
   .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
   .alpaca-dock-daychange.up{ color: var(--gain); }
@@ -1298,7 +1293,7 @@
     <div class="alpaca-dock-panel" id="alpacaDockPanel" hidden>
       <div class="alpaca-dock-panel-head" id="alpacaDockPanelHead">
         <span>Account</span>
-        <button class="notepad-lock-btn" id="alpacaDockLockBtn">Move to left</button>
+        <button class="notepad-lock-btn" id="alpacaDockLockBtn">Unlock</button>
       </div>
       <div class="alpaca-dock-body">
         <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
@@ -2635,17 +2630,39 @@
 
   // ---------- Alpaca account/positions dock (Messenger-tab style) ----------
   function fetchAlpacaAccountSummary(){
-    return fetch(ALPACA_PAPER_BASE + '/v2/account', { headers: alpacaHeaders() }).then(function(res){
+    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/account', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     });
   }
 
   function fetchAlpacaPositions(){
-    return fetch(ALPACA_PAPER_BASE + '/v2/positions', { headers: alpacaHeaders() }).then(function(res){
+    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/positions', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     });
+  }
+
+  // Once a bracket's entry order fills, the take-profit and stop-loss legs
+  // become independently open orders — nested=true rolls the stop-loss
+  // leg under the take-profit's own "legs" array, per Alpaca's own
+  // documented behavior. Fetched once for every symbol at once, not a
+  // separate call per position.
+  function fetchAlpacaOpenOrders(){
+    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/orders?status=open&nested=true&limit=500', { headers: alpacaHeaders() }).then(function(res){
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
+  function findBracketLevels(orders, sym){
+    var order = (orders || []).filter(function(o){ return o.symbol === sym && o.limit_price; })[0];
+    if(!order) return { target: null, stop: null };
+    var stopLeg = (order.legs || []).filter(function(l){ return l.stop_price; })[0];
+    return {
+      target: order.limit_price ? parseFloat(order.limit_price) : null,
+      stop: stopLeg ? parseFloat(stopLeg.stop_price) : null
+    };
   }
 
   // Alpaca's dedicated endpoint closes the entire position with a single
@@ -2662,13 +2679,38 @@
     });
   }
 
+  // Without a timeout, a single hung request (network stall, a slow
+  // endpoint, anything short of an outright error) leaves Promise.all
+  // waiting forever — the exact "stuck on Loading…" symptom. This forces
+  // every Alpaca dock fetch to fail cleanly instead of hanging.
+  function fetchWithTimeout(url, options, timeoutMs){
+    var controller = new AbortController();
+    var timer = setTimeout(function(){ controller.abort(); }, timeoutMs || 10000);
+    var opts = Object.assign({}, options, { signal: controller.signal });
+    return fetch(url, opts).finally(function(){ clearTimeout(timer); });
+  }
+
+  var alpacaDockRenderGen = 0;
+
   function renderAlpacaDock(){
+    var myGen = ++alpacaDockRenderGen;
     var summaryEl = document.getElementById('alpacaDockSummary');
     var positionsEl = document.getElementById('alpacaDockPositions');
     summaryEl.textContent = 'Loading…';
     positionsEl.innerHTML = '';
-    Promise.all([fetchAlpacaAccountSummary(), fetchAlpacaPositions()]).then(function(results){
-      var acct = results[0], positions = results[1];
+    // Open orders (for the Target/Stop columns) is treated as optional —
+    // a failure there degrades gracefully to "—" rather than blocking the
+    // account summary and positions themselves from ever showing up.
+    var ordersPromise = fetchAlpacaOpenOrders().catch(function(err){
+      console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
+      return [];
+    });
+    Promise.all([fetchAlpacaAccountSummary(), fetchAlpacaPositions(), ordersPromise]).then(function(results){
+      // A newer render (from a later reopen, or the next 45s tick) has
+      // already started — this response is stale, discard it rather than
+      // overwriting more current data with an out-of-order result.
+      if(myGen !== alpacaDockRenderGen) return;
+      var acct = results[0], positions = results[1], openOrders = results[2];
       var equity = parseFloat(acct.equity || 0);
       var lastEquity = parseFloat(acct.last_equity || equity) || equity;
       var dayChange = equity - lastEquity;
@@ -2684,17 +2726,20 @@
         positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions.</div>';
         return;
       }
-      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Current</th><th>P/L</th><th></th></tr></thead><tbody>' +
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Current</th><th>Target</th><th>Stop</th><th>P/L</th><th></th></tr></thead><tbody>' +
         positions.map(function(p){
           var pl = parseFloat(p.unrealized_pl || 0);
           var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
           var plClass = pl >= 0 ? 'up' : 'down';
+          var levels = findBracketLevels(openOrders, p.symbol);
           return '<tr>' +
             '<td>' + p.symbol + '</td>' +
             '<td>' + p.qty + '</td>' +
             '<td>' + p.side + '</td>' +
             '<td>' + parseFloat(p.avg_entry_price).toFixed(2) + '</td>' +
             '<td>' + parseFloat(p.current_price).toFixed(2) + '</td>' +
+            '<td class="up">' + (levels.target !== null ? levels.target.toFixed(2) : '—') + '</td>' +
+            '<td class="down">' + (levels.stop !== null ? levels.stop.toFixed(2) : '—') + '</td>' +
             '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
             '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
           '</tr>';
@@ -2717,6 +2762,7 @@
         });
       });
     }).catch(function(err){
+      if(myGen !== alpacaDockRenderGen) return;
       summaryEl.textContent = 'Couldn\'t load account data.';
       positionsEl.innerHTML = '';
       console.error('Alpaca dock fetch failed:', err);
@@ -2752,26 +2798,56 @@
   // two sides of the screen, never vertically and never detached from
   // each other.
   var alpacaDockOuter = document.getElementById('alpacaDock');
+  var alpacaDockTabEl = document.getElementById('alpacaDockTab');
   var alpacaDockPanelEl = document.getElementById('alpacaDockPanel');
+  var alpacaDockPanelHead = document.getElementById('alpacaDockPanelHead');
   var alpacaDockLockBtn = document.getElementById('alpacaDockLockBtn');
   var alpacaDockResizeHandle = document.getElementById('alpacaDockResizeHandle');
-  var alpacaDockOnLeft = false;
+  var alpacaDockLocked = true;
 
   function saveAlpacaDockGeometry(){
     try{
       window.localStorage.setItem('shwoopnet:alpacaDockGeo', JSON.stringify({
+        left: alpacaDockPanelEl.style.left,
         width: alpacaDockPanelEl.style.width, height: alpacaDockPanelEl.style.height
       }));
     }catch(e){}
   }
 
-  function applyAlpacaDockSide(onLeft){
-    alpacaDockOnLeft = onLeft;
-    alpacaDockOuter.classList.toggle('docked-left', onLeft);
-    alpacaDockLockBtn.textContent = onLeft ? 'Move to right' : 'Move to left';
-    try{ window.localStorage.setItem('shwoopnet:alpacaDockSide', onLeft ? 'left' : 'right'); }catch(e){}
+  function applyAlpacaDockLock(locked){
+    alpacaDockLocked = locked;
+    alpacaDockOuter.classList.toggle('unlocked', !locked);
+    alpacaDockLockBtn.textContent = locked ? 'Unlock' : 'Lock';
+    alpacaDockLockBtn.setAttribute('aria-label', locked ? 'Unlock to drag left or right' : 'Lock in place');
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockLocked', locked ? 'true' : 'false'); }catch(e){}
   }
-  alpacaDockLockBtn.addEventListener('click', function(){ applyAlpacaDockSide(!alpacaDockOnLeft); });
+  alpacaDockLockBtn.addEventListener('click', function(){ applyAlpacaDockLock(!alpacaDockLocked); });
+
+  // Moves both the tab and panel together to the same horizontal position —
+  // they're one visual unit and must never drift apart.
+  function setAlpacaDockLeft(px){
+    alpacaDockTabEl.style.left = px + 'px';
+    alpacaDockTabEl.style.right = 'auto';
+    alpacaDockPanelEl.style.left = px + 'px';
+    alpacaDockPanelEl.style.right = 'auto';
+  }
+
+  var alpacaDockDragState = null;
+  alpacaDockPanelHead.addEventListener('pointerdown', function(e){
+    if(alpacaDockLocked || e.target.closest('button')) return;
+    var rect = alpacaDockPanelEl.getBoundingClientRect();
+    alpacaDockDragState = { startX: e.clientX, startLeft: rect.left };
+    alpacaDockPanelHead.setPointerCapture(e.pointerId);
+  });
+  alpacaDockPanelHead.addEventListener('pointermove', function(e){
+    if(!alpacaDockDragState) return;
+    var dx = e.clientX - alpacaDockDragState.startX;
+    var maxLeft = window.innerWidth - alpacaDockPanelEl.offsetWidth;
+    var newLeft = Math.max(0, Math.min(maxLeft, alpacaDockDragState.startLeft + dx));
+    setAlpacaDockLeft(newLeft);
+  });
+  alpacaDockPanelHead.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
+  alpacaDockPanelHead.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
 
   var alpacaDockResizeState = null;
   alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
@@ -2791,14 +2867,17 @@
   alpacaDockResizeHandle.addEventListener('pointercancel', function(){ alpacaDockResizeState = null; });
 
   (function initAlpacaDockGeometry(){
-    var sideSaved = 'right';
-    try{ sideSaved = window.localStorage.getItem('shwoopnet:alpacaDockSide') || 'right'; }catch(e){}
-    applyAlpacaDockSide(sideSaved === 'left');
+    var lockedSaved = 'true';
+    try{ lockedSaved = window.localStorage.getItem('shwoopnet:alpacaDockLocked') || 'true'; }catch(e){}
+    applyAlpacaDockLock(lockedSaved === 'true');
     try{
       var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
       if(geo && geo.width){
         alpacaDockPanelEl.style.width = geo.width;
         alpacaDockPanelEl.style.height = geo.height;
+      }
+      if(geo && geo.left){
+        setAlpacaDockLeft(parseFloat(geo.left));
       }
     }catch(e){}
   })();
@@ -3727,6 +3806,25 @@
       buildMALine(50, 'var(--ma50-color)');
     }
 
+    // Entry/stop/target reference lines — the same levels shown as text in
+    // the row above, now visible directly against price action. Drawn only
+    // when they actually fall within the visible price range, so a
+    // zoomed-in view doesn't get its axis stretched out just to fit a
+    // level that's currently way off the visible chart.
+    if(opts.levels){
+      var lv = opts.levels;
+      function levelLine(price, color, label){
+        if(price === null || price === undefined || !isFinite(price)) return;
+        var ly2 = y(price);
+        if(ly2 < padTop - 1 || ly2 > padTop + plotH + 1) return;
+        parts.push('<line x1="0" y1="'+ly2+'" x2="'+plotW+'" y2="'+ly2+'" stroke="'+color+'" stroke-width="1" stroke-dasharray="2,4" opacity="0.85"/>');
+        parts.push('<text class="grid-label" x="4" y="'+(ly2-3)+'" fill="'+color+'">'+label+' '+price.toFixed(2)+'</text>');
+      }
+      levelLine(lv.target, 'var(--gain)', 'T');
+      levelLine(lv.entry, 'var(--amber)', 'E');
+      levelLine(lv.stop, 'var(--loss)', 'S');
+    }
+
     // Live price line — the signature "where are we right now" reference
     // every real trading platform shows, dashed across the chart with a
     // colored tag on the axis.
@@ -3766,9 +3864,11 @@
     var svg = document.getElementById('chart-' + sym);
     if(!state || !svg) return;
     var visible = state.data.slice(state.viewStart, state.viewEnd);
+    var trade = trades.filter(function(t){ return t.sym === sym; })[0];
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
       showMA: showMovingAverages, fullData: state.data, viewStart: state.viewStart,
-      priceCenterOffset: state.priceCenterOffset, maCacheHost: state
+      priceCenterOffset: state.priceCenterOffset, maCacheHost: state,
+      levels: trade ? { entry: trade.entry, stop: trade.stop, target: trade.t1 } : null
     });
   }
 
@@ -5744,7 +5844,7 @@
     },
     {
       page: 'changelog',
-      selector: '.changelog-list',
+      selector: '.changelog-entry:first-child',
       title: 'Changelog',
       text: "See what's changed, any time you're curious."
     },
