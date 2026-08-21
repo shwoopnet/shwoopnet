@@ -2184,6 +2184,10 @@
     lastBar.c = newPrice;
     lastBar.h = Math.max(lastBar.h, newPrice);
     lastBar.l = Math.min(lastBar.l, newPrice);
+    // The underlying data actually changed here (unlike a pure pan/zoom,
+    // which only changes the viewport) — the cached MA series is now
+    // stale and needs to be recomputed on the next render.
+    state._maCache = null;
     renderChartView(sym);
   }
 
@@ -2203,7 +2207,16 @@
   var MIN_VISIBLE_CANDLES = 8;
   var INTRADAY_TFS = ['5m', '15m', '30m', '1D'];
 
-  function genOHLC(count, base, vol){
+  // Real minutes-per-bar for each timeframe's actual interval, so guest
+  // mode's simulated candles are spaced correctly — matching the real
+  // Twelve Data intervals used for signed-in accounts (see
+  // historyIntervals below). Without this, every timeframe button looked
+  // the same in guest mode: "1W" and "1Y" would show only a few hours of
+  // 5-minute-spaced candles instead of actual weeks or years of data.
+  var tfSpacingMinutes = { '5m':5, '15m':15, '30m':30, '1D':5, '1W':1440, '1M':1440, '1Y':10080 };
+
+  function genOHLC(count, base, vol, spacingMinutes){
+    spacingMinutes = spacingMinutes || 5;
     // Built backwards from the known live price, not forward with a
     // patched-on override — guarantees every candle (including the last)
     // is internally consistent, with no risk of a body outgrowing its own
@@ -2221,8 +2234,7 @@
       var close = closes[j];
       var high = Math.max(open, close) + Math.random() * vol * 0.4;
       var low = Math.min(open, close) - Math.random() * vol * 0.4;
-      // Synthetic intraday timestamps, ~5 min apart, ending now.
-      var t = new Date(now.getTime() - (count - 1 - j) * 5 * 60000);
+      var t = new Date(now.getTime() - (count - 1 - j) * spacingMinutes * 60000);
       arr.push({ o:open, h:high, l:low, c:close, t:t });
     }
     return arr;
@@ -2464,8 +2476,19 @@
     // narrow recent window, then only the visible portion is drawn.
     if(opts.showMA && opts.fullData && opts.fullData.length >= 2){
       var viewStart = opts.viewStart || 0;
+      var cacheHost = opts.maCacheHost;
+      function getMASeries(period){
+        if(cacheHost){
+          if(!cacheHost._maCache){ cacheHost._maCache = {}; }
+          if(!cacheHost._maCache[period]){
+            cacheHost._maCache[period] = computeSMASeries(opts.fullData, period);
+          }
+          return cacheHost._maCache[period];
+        }
+        return computeSMASeries(opts.fullData, period);
+      }
       function buildMALine(period, color){
-        var series = computeSMASeries(opts.fullData, period);
+        var series = getMASeries(period);
         var pts = [];
         for(var i = 0; i < data.length; i++){
           var seriesIdx = viewStart + i;
@@ -2499,6 +2522,23 @@
     return { loT: loT, hiT: hiT, range: range, useLog: useLog, padTop: padTop, plotH: plotH, plotW: plotW };
   }
 
+  // Dragging fires pointermove far more often than the screen can even
+  // paint — rendering synchronously on every single event does a full DOM
+  // rebuild (candles, gridlines, MA lines, all of it) more times than the
+  // browser can display, which is wasted work and is exactly what makes a
+  // drag feel chunky/scroll-like instead of smooth. Coalescing to at most
+  // one real render per animation frame fixes that at the source, without
+  // touching the rendering logic itself.
+  var chartRenderScheduled = {};
+  function scheduleChartRender(sym){
+    if(chartRenderScheduled[sym]) return;
+    chartRenderScheduled[sym] = true;
+    requestAnimationFrame(function(){
+      chartRenderScheduled[sym] = false;
+      renderChartView(sym);
+    });
+  }
+
   function renderChartView(sym){
     var state = chartStates[sym];
     var svg = document.getElementById('chart-' + sym);
@@ -2506,7 +2546,7 @@
     var visible = state.data.slice(state.viewStart, state.viewEnd);
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
       showMA: showMovingAverages, fullData: state.data, viewStart: state.viewStart,
-      priceCenterOffset: state.priceCenterOffset
+      priceCenterOffset: state.priceCenterOffset, maCacheHost: state
     });
   }
 
@@ -2549,7 +2589,7 @@
     if(isGuestMode){
       var cfgGuest = tfConfig[tf];
       var mockCountGuest = tf === '1D' ? cfgGuest.mockCount : cfgGuest.fetchSize;
-      initChartState(sym, tf, genOHLC(mockCountGuest, base, base * cfgGuest.volFactor));
+      initChartState(sym, tf, genOHLC(mockCountGuest, base, base * cfgGuest.volFactor, tfSpacingMinutes[tf]));
       renderChartView(sym);
       return;
     }
@@ -2614,7 +2654,7 @@
     newStart = Math.max(0, newStart);
     state.viewStart = newStart;
     state.viewEnd = newEnd;
-    renderChartView(sym);
+    scheduleChartRender(sym);
   }
 
   function hideCrosshair(sym){
@@ -2757,7 +2797,7 @@
           // dragging up expands it (zooms in) — matches TradingView.
           var factor = dragState.startFactor * Math.exp(-dyPixels / 150);
           state.priceScaleFactor = Math.max(0.2, Math.min(5, factor));
-          renderChartView(sym);
+          scheduleChartRender(sym);
         } else if(dragState.mode === 'timescale'){
           // Dragging right on the time axis zooms in (fewer, wider candles);
           // dragging left zooms out — anchored to where the drag started.
@@ -2773,7 +2813,7 @@
           newStart = Math.max(0, newStart);
           state.viewStart = newStart;
           state.viewEnd = newEnd;
-          renderChartView(sym);
+          scheduleChartRender(sym);
         } else {
           var rect = svg.getBoundingClientRect();
           var count2 = state.viewEnd - state.viewStart;
@@ -2791,7 +2831,7 @@
           var pricePerPixel = dragState.startRange / dragState.startPlotH;
           state.priceCenterOffset = dragState.startPriceOffset + dyPixels * pricePerPixel;
 
-          renderChartView(sym);
+          scheduleChartRender(sym);
           hideCrosshair(sym);
         }
       } else {
