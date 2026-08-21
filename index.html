@@ -438,10 +438,7 @@
   .status-badge.hit{ border-color: var(--gain); color: var(--gain); background: var(--gain-glow); }
   .status-badge.stopped{ border-color: var(--loss); color: var(--loss); background: var(--loss-glow); }
 
-  .t-rr .rr-ratio{ font-weight:600; font-size:13px; margin-bottom:4px; }
-  .t-rr .rr-detail{ font-size:10.5px; color: var(--muted); white-space:nowrap; }
-  .t-rr .rr-risk{ color: var(--loss); }
-  .t-rr .rr-reward{ color: var(--gain); }
+  .t-rr .rr-ratio{ font-weight:600; font-size:13px; }
 
   .trade-action-banner{
     display:flex; align-items:flex-start; gap:10px;
@@ -1261,16 +1258,6 @@
       </div>
     </div>
 
-    <div class="trade-columns head">
-      <div></div>
-      <div>Symbol</div>
-      <div>Current</div>
-      <div>Entry</div>
-      <div>Stop</div>
-      <div>Target 1</div>
-      <div>Target 2 / Status</div>
-      <div>Risk / Reward</div>
-    </div>
 
     <div id="tradeBlocks"></div>
   </main>
@@ -1974,7 +1961,6 @@
           '</div>' +
           '<div class="t-rr" data-label="Risk / Reward">' +
             '<div class="rr-ratio mono">1 : ' + rr.ratio.toFixed(1) + '</div>' +
-            '<div class="rr-detail"><span class="rr-risk">Risk ' + rr.riskPct.toFixed(1) + '%</span> · <span class="rr-reward">Reward ' + rr.rewardPct.toFixed(1) + '%</span></div>' +
           '</div>' +
         '</div>' +
         '<div class="trade-action-banner' + (action.done ? ' done' : '') + '" id="action-banner-' + t.sym + '">' +
@@ -2104,8 +2090,24 @@
         bannerEl.className = 'trade-action-banner' + (action.done ? ' done' : '');
         bannerEl.innerHTML = '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span><span class="action-text">' + action.html + '</span>';
       }
+      updateChartLivePrice(t.sym, q.price);
     });
     renderWhatToWatch();
+  }
+
+  // The chart's rightmost candle and live-price line are only as fresh as
+  // the last time the chart itself was rendered — without this, they'd
+  // silently drift out of sync with the Current price shown in the row
+  // above every time a new quote comes in, since nothing else touches the
+  // chart's own stored data on a refresh.
+  function updateChartLivePrice(sym, newPrice){
+    var state = chartStates[sym];
+    if(!state || !state.data || !state.data.length || !newPrice) return;
+    var lastBar = state.data[state.data.length - 1];
+    lastBar.c = newPrice;
+    lastBar.h = Math.max(lastBar.h, newPrice);
+    lastBar.l = Math.min(lastBar.l, newPrice);
+    renderChartView(sym);
   }
 
   // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
@@ -2549,7 +2551,7 @@
       // the actual scroll distance instead, clamped so no single event
       // (some trackpads occasionally spike) causes a jarring jump.
       var clampedDelta = Math.max(-200, Math.min(200, e.deltaY));
-      var factor = Math.exp(clampedDelta * 0.0016);
+      var factor = Math.exp(clampedDelta * 0.0026);
       zoomChart(sym, fraction, factor);
     }, { passive: false });
 
