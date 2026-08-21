@@ -297,38 +297,17 @@
   .backtest-outcome-stopped{ color: var(--loss); }
   .backtest-outcome-unresolved{ color: var(--muted); }
 
-  .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
+  .activity-log-row{ padding:12px 0; border-bottom:1px solid var(--border); }
+  .activity-log-row:last-child{ border-bottom:none; }
+  .activity-log-meta{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .activity-log-tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
+    background: var(--amber-glow); border:1px solid var(--amber-dim); border-radius:4px; padding:2px 7px;
+  }
+  .activity-log-time{ font-size:11px; color: var(--muted); margin-left:auto; }
+  .activity-log-text{ font-size:12.5px; line-height:1.5; color: var(--muted); }
 
-  .tour-overlay{ position:fixed; inset:0; z-index:450; pointer-events:none; }
-  .tour-overlay[hidden]{ display:none; }
-  .tour-spotlight{
-    position:fixed; border-radius:8px; pointer-events:none;
-    box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
-    border:2px solid var(--amber);
-    transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease;
-  }
-  .tour-spotlight.centered{ box-shadow: 0 0 0 9999px rgba(0,0,0,0.7); border:none; }
-  .tour-connector-svg{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:451; }
-  .tour-bubble{
-    position:fixed; width:300px; max-width:88vw;
-    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
-    padding:18px 20px; box-shadow:0 16px 36px rgba(0,0,0,0.5);
-    pointer-events:auto; z-index:452;
-    top:50%; left:50%; transform:translate(-50%, -50%);
-  }
-  .tour-bubble-step{ font-size:10.5px; color: var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
-  .tour-bubble-title{ font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
-  .tour-bubble-text{ font-size:12.5px; line-height:1.6; color: var(--muted); margin:0 0 16px 0; }
-  .tour-bubble-actions{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  .tour-skip-link{ background:none; border:none; color: var(--muted); font-size:11.5px; cursor:pointer; text-decoration:underline; padding:0; }
-  .tour-skip-link:hover{ color: var(--paper); }
-  .tour-nav-btns{ display:flex; align-items:center; gap:8px; }
-  .tour-next-btn{
-    background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
-    padding:7px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
-    font-family:'Space Grotesk', sans-serif;
-  }
-  .tour-next-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
+  .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
 
   .page{ padding: 0 28px 40px 28px; }
   .page[hidden]{ display:none; }
@@ -1051,7 +1030,6 @@
   [data-reduce-motion="true"] .ticker-track{ animation: none; }
   [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
-  [data-reduce-motion="true"] .tour-spotlight, [data-reduce-motion="true"] .tour-bubble{ transition: none; }
   .flash-up{ animation: flashUp .6s ease; }
   .flash-down{ animation: flashDown .6s ease; }
   @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
@@ -1124,6 +1102,17 @@
         callback({ alertHistory: data.alertHistory || [], alertsLastDate: data.alertsLastDate || null });
       }, function(err){
         console.error('Alerts sync error:', err);
+      });
+    },
+    saveActivityLog: function(uid, activityLog){
+      return setDoc(doc(db, 'users', uid), { activityLog: activityLog }, { merge: true });
+    },
+    watchActivityLog: function(uid, callback){
+      return onSnapshot(doc(db, 'users', uid), function(snap){
+        var data = snap.exists() ? snap.data() : {};
+        callback(data.activityLog || []);
+      }, function(err){
+        console.error('Activity log sync error:', err);
       });
     },
     saveScreenerPicks: function(uid, picks, forDate){
@@ -1203,12 +1192,16 @@
       <div class="modal-error" id="authError"></div>
       <button type="submit" class="modal-btn-submit auth-submit" id="authSubmitBtn">Sign in</button>
     </form>
-    <div class="auth-switch">
+    <!-- Hidden, not removed: this is a locked-down single-owner tool right
+         now, so there's no path to create a second account. The signup
+         mode, form fields, and submit logic all still work underneath —
+         drop the "hidden" attribute below to bring this back if a future
+         account holder ever needs it. -->
+    <div class="auth-switch" hidden>
       <span id="authSwitchText">Don't have an account?</span>
       <button type="button" id="authSwitchBtn">Create one</button>
     </div>
     <div class="auth-divider" hidden><span>or</span></div>
-    <button type="button" class="auth-guest-btn" id="guestBtn" hidden>Continue as guest</button>
     <div class="auth-guest-note" hidden>Simulated data only — nothing you do is saved, and it resets every visit.</div>
     <button type="button" id="authForgotBtn" class="auth-forgot">Forgot password?</button>
   </div>
@@ -1251,6 +1244,10 @@
             Market Brief
             <span class="nav-item-sub">Home — today's read</span>
           </button>
+          <button class="nav-item" data-page="status">
+            Status
+            <span class="nav-item-sub">Account, positions &amp; activity log</span>
+          </button>
           <button class="nav-item" data-page="trades">
             Trade Overview
             <span class="nav-item-sub">Active setups &amp; charts</span>
@@ -1266,10 +1263,6 @@
           <button class="nav-item" id="historyNavItem" data-action="history">
             History
             <span class="nav-item-sub">Today's market alerts</span>
-          </button>
-          <button class="nav-item" data-action="tour">
-            Walkthrough
-            <span class="nav-item-sub">See what Shwoop can do</span>
           </button>
           <button class="nav-item" data-page="labs">
             Labs
@@ -1330,30 +1323,6 @@
         <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
       </div>
       <div class="notepad-resize-handle" id="alpacaDockResizeHandle"></div>
-    </div>
-  </div>
-
-  <div class="tour-overlay" id="tourOverlay" hidden>
-    <div class="tour-spotlight" id="tourSpotlight"></div>
-    <svg class="tour-connector-svg" id="tourConnectorSvg">
-      <defs>
-        <marker id="tourArrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L6,3 L0,6 Z" fill="var(--amber)"/>
-        </marker>
-      </defs>
-      <line id="tourConnectorLine" stroke="var(--amber)" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#tourArrowhead)" opacity="0"/>
-    </svg>
-    <div class="tour-bubble" id="tourBubble">
-      <div class="tour-bubble-step" id="tourStepCount">1 / 10</div>
-      <div class="tour-bubble-title" id="tourTitle"></div>
-      <p class="tour-bubble-text" id="tourText"></p>
-      <div class="tour-bubble-actions">
-        <button type="button" class="tour-skip-link" id="tourSkipBtn">Skip tour</button>
-        <div class="tour-nav-btns">
-          <button type="button" class="zoom-btn" id="tourPrevBtn" aria-label="Previous step">‹</button>
-          <button type="button" class="tour-next-btn" id="tourNextBtn">Next ›</button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1427,6 +1396,9 @@
       <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
         <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
       </button>
+      <button class="nav-item quick-nav-item" data-page="status" title="Status">
+        <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
+      </button>
       <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
         <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
       </button>
@@ -1451,8 +1423,8 @@
         <div class="trades-sub">Today's read on what's moving the tape.</div>
       </div>
       <div class="brief-eyebrow" id="briefDate">—</div>
-      <h1 class="brief-headline">Good morning. Semis are setting the tone again.</h1>
-      <p class="brief-lede">Futures point higher after a late rally in semiconductors carried into the close. NVDA leads the tape into tonight's report — expect wider spreads and elevated volume through the print. The dollar is softer, giving risk assets a bit more room to run.</p>
+      <h1 class="brief-headline">Loading today's brief…</h1>
+      <p class="brief-lede"></p>
     </div>
 
     <div class="brief-indices" id="indexSnapshot"></div>
@@ -1496,12 +1468,40 @@
     <div class="cta-caption">This brief opens automatically the first time you visit Shwoop each day. After that, you'll land on Trade Overview — use the menu above to come back here anytime.</div>
   </main>
 
+  <!-- ================= STATUS ================= -->
+  <main class="page" id="page-status" hidden>
+    <div class="trades-header">
+      <div>
+        <div class="trades-title">Status</div>
+        <div class="trades-sub">Account health, open positions, and everything the automated systems have done — the one page to check when you check in.</div>
+      </div>
+    </div>
+
+    <div class="backtest-summary" id="statusAccountSummary"></div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">System Health</div>
+      <div id="statusHealthRows"></div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Open Positions</div>
+      <div id="statusPositionsBody"></div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log</div>
+      <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
+      <div id="statusActivityList"></div>
+    </div>
+  </main>
+
   <!-- ================= TRADE OVERVIEW ================= -->
   <main class="page" id="page-trades" hidden>
     <div class="trades-header">
       <div>
         <div class="trades-title">Trade Overview</div>
-        <div class="trades-sub" id="tradesSubtitle">Simulated entries, stops and targets — chart below each row.</div>
+        <div class="trades-sub" id="tradesSubtitle">Real-time — 15-min bars, re-screened every 15 minutes during market hours.</div>
       </div>
       <div class="trades-header-right">
         <div class="layout-dropdown">
@@ -1551,8 +1551,17 @@
       </div>
     </div>
 
+    <div class="intraday-section" id="intradaySection" hidden>
+      <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
+      <div id="intradayBlocks"></div>
+    </div>
 
-    <div id="tradeBlocks"></div>
+    <div class="daily-section">
+      <button class="finished-toggle" id="dailySectionToggle" aria-expanded="false" style="margin-top:24px;">
+        <span class="caret">▸</span> Daily picks (slower-moving — re-screened once a day)
+      </button>
+      <div id="tradeBlocks" hidden></div>
+    </div>
   </main>
 
   <!-- ================= TRADE JOURNAL ================= -->
@@ -1694,16 +1703,59 @@
         </div>
       </div>
 
+      <div class="settings-row" id="alpacaRiskRow" hidden>
+        <div>
+          <div class="settings-row-title">Risk per trade</div>
+          <div class="settings-row-desc">
+            Share of your account to risk on any single trade, based on the actual distance between entry and
+            stop — not a fixed share count. Recalculated from your real account balance each time, then rounded
+            down to a whole share, since fractional shares can't carry stop-loss/target protection on Alpaca. A
+            trade that would round to 0 shares is skipped rather than forced through at the wrong size.
+          </div>
+        </div>
+        <div class="layout-stepper">
+          <button class="zoom-btn" id="riskPercentDec" aria-label="Decrease risk percent">−</button>
+          <span class="zoom-label mono" id="riskPercentLabel">2.0%</span>
+          <button class="zoom-btn" id="riskPercentInc" aria-label="Increase risk percent">+</button>
+        </div>
+      </div>
+
       <div class="settings-row" id="alpacaAutoTradeRow" hidden>
         <div>
-          <div class="settings-row-title">Auto-send new picks (10 shares)</div>
+          <div class="settings-row-title">Auto-send new picks (risk-sized)</div>
           <div class="settings-row-desc">
-            Every new daily pick gets sent to Alpaca automatically the moment the screener finds it — no manual
-            click. Only runs while this browser tab is open; it does not run overnight or in the background.
-            Paper money only.
+            Every new daily pick gets sent to Alpaca automatically the moment the screener finds it, sized per
+            the risk setting above — no manual click. Only runs while this browser tab is open; it does not run
+            overnight or in the background. Paper money only.
           </div>
         </div>
         <button class="chart-tool-btn" id="alpacaAutoTradeToggle" role="switch" aria-checked="false">Off</button>
+      </div>
+
+      <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
+        <div>
+          <div class="settings-row-title">Auto-send new intraday picks (risk-sized)</div>
+          <div class="settings-row-desc">
+            Separate from the daily toggle above. Sends a new intraday pick the moment it's found, sized per the
+            risk setting above, and allows genuine re-entry on the same symbol later the same day once a prior
+            position has actually closed — unlike daily, which only ever sends once per symbol per day. Capped
+            at 5 auto-sent trades per day as a hard safety backstop. Only runs while this tab is open. Paper
+            money only.
+          </div>
+        </div>
+        <button class="chart-tool-btn" id="alpacaAutoTradeIntradayToggle" role="switch" aria-checked="false">Off</button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Intraday screener</div>
+          <div class="settings-row-desc">
+            A separate, faster-moving screener on 15-min bars across a smaller 10-symbol list, re-checked every
+            15 minutes during market hours. Shows up as its own section on Trade Overview — the daily screener
+            keeps running independently either way. Only runs while this tab is open.
+          </div>
+        </div>
+        <button class="chart-tool-btn active" id="intradayToggle" role="switch" aria-checked="true">On</button>
       </div>
 
       <div class="settings-row">
@@ -2010,9 +2062,10 @@
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
         Runs the same scoring and stop/target logic used live, day by day, against real historical prices — only
-        ever using data that would have actually existed at that point in time, no peeking ahead. One symbol at a
-        time, not the full 41-stock list (testing "would this have been today's pick" across the whole list is a
-        much bigger job — this checks whether the underlying signal itself actually works).
+        ever using data that would have actually existed at that point in time, no peeking ahead. Check one
+        symbol, or run the whole 41-stock universe at once for an aggregate read on whether the underlying signal
+        itself actually works — that second option takes a few minutes, since it's rate-limited the same way the
+        live screener is.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -2028,6 +2081,7 @@
           </select>
         </div>
         <button class="settings-reset-btn" id="runBacktestBtn">Run backtest</button>
+        <button class="settings-reset-btn" id="runUniverseBacktestBtn">Run whole universe</button>
       </div>
       <div class="labs-backtest-status" id="backtestStatus"></div>
       <div id="backtestResults"></div>
@@ -2262,6 +2316,60 @@
     };
   }
 
+  // Same underlying math as computeTechnicalAnalysis (SMA/range/momentum
+  // are bar-size-agnostic) — every wording difference below exists because
+  // "20-day" and "5 sessions" would be flatly wrong when the bars are
+  // actually 15 minutes each.
+  function computeIntradayAnalysis(bars, currentPrice, barMinutes){
+    var closes = bars.map(function(b){ return b.c; });
+    var sma20 = computeSMA(closes, 20);
+    var sma50 = computeSMA(closes, 50);
+    var recent20 = bars.slice(-20);
+    var high20 = Math.max.apply(null, recent20.map(function(b){ return b.h; }));
+    var low20 = Math.min.apply(null, recent20.map(function(b){ return b.l; }));
+    var priorIdx = closes.length >= 6 ? closes.length - 6 : 0;
+    var priorClose = closes[priorIdx];
+    var momentumPct = priorClose ? ((currentPrice - priorClose) / priorClose * 100) : 0;
+    var lookbackHrs = (20 * (barMinutes || 15) / 60).toFixed(1);
+    var momentumHrs = (5 * (barMinutes || 15) / 60).toFixed(1);
+
+    var direction = (sma50 !== null) ? (currentPrice >= sma50 ? 'Long' : 'Short') : 'Long';
+    var entry = sma20 !== null ? sma20 : currentPrice;
+    var stop, t1;
+    if(direction === 'Long'){
+      stop = low20 * 0.997;
+      if(stop >= entry){ stop = entry * 0.985; }
+      t1 = Math.max(high20, entry * 1.005);
+    } else {
+      stop = high20 * 1.003;
+      if(stop <= entry){ stop = entry * 1.015; }
+      t1 = Math.min(low20, entry * 0.995);
+    }
+
+    var distFromEntryPct = Math.abs((currentPrice - entry) / entry * 100);
+    var status = 'watching', statusLabel = 'Watching';
+    if(distFromEntryPct < 1){ status = 'active'; statusLabel = 'Active'; }
+    if(direction === 'Long' && currentPrice >= t1){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(direction === 'Short' && currentPrice <= t1){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(direction === 'Long' && currentPrice <= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+    if(direction === 'Short' && currentPrice >= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+
+    var notes = [];
+    if(sma20 !== null && sma50 !== null){
+      notes.push('Trading ' + (currentPrice > sma20 ? 'above' : 'below') + ' its 20-bar (15-min) average of $' + sma20.toFixed(2) + ', with the 50-bar average at $' + sma50.toFixed(2) + '.');
+    } else {
+      notes.push('Not enough intraday history yet for a full moving-average read — using recent price action instead.');
+    }
+    notes.push('Range over the last ' + lookbackHrs + ' hours runs from $' + low20.toFixed(2) + ' support up to $' + high20.toFixed(2) + ' resistance.');
+    notes.push('Price is ' + (momentumPct >= 0 ? 'up' : 'down') + ' ' + Math.abs(momentumPct).toFixed(1) + '% over the last ' + momentumHrs + ' hours.');
+    notes.push('Entry sits near the 20-bar average, stop just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan. This is intraday — expect it to resolve or need re-checking well before the close, not over days.');
+
+    return {
+      direction: direction, entry: entry, stop: stop, t1: t1, status: status, statusLabel: statusLabel, notes: notes,
+      sma20: sma20, sma50: sma50, momentum5d: momentumPct
+    };
+  }
+
   // Ranks a candidate for the screener: clean trend alignment (price and
   // both moving averages agreeing on direction) plus real recent momentum.
   // Not a black box — just the two things that already justify the trade
@@ -2282,6 +2390,43 @@
   var screenerUnsubscribe = null;
   var isRunningScreener = false;
   var SCREENER_PICK_COUNT = 4;
+
+  // A much smaller universe than the daily screener's 41 symbols — 15-min
+  // bars re-fetched every 15 minutes across a wide list would blow past
+  // Twelve Data's free-tier daily cap almost immediately. This set is also
+  // deliberately liquid/well-known names, which matters more for intraday
+  // trading than for the daily screener's longer holding window.
+  var INTRADAY_UNIVERSE = ['AAPL', 'MSFT', 'NVDA', 'AMD', 'TSLA', 'GOOGL', 'AMZN', 'META', 'SPY', 'QQQ'];
+  var INTRADAY_PICK_COUNT = 3;
+  var INTRADAY_TF = '15m';
+  var intradayTrades = [];
+  var isRunningIntradayScreener = false;
+  var intradayScreenerInterval = null;
+  var alpacaIntradayEnabled = false;
+
+  function isUsMarketOpen(){
+    var parts = {};
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit'
+    }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
+    if(parts.weekday === 'Sat' || parts.weekday === 'Sun') return false;
+    var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
+    return minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60);
+  }
+
+  // Last 15 minutes before the 4:00pm ET close — the window where an
+  // open intraday position needs a decision made about it before the
+  // session ends, one way or the other.
+  function isMarketClosingSoon(){
+    var parts = {};
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit'
+    }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
+    if(parts.weekday === 'Sat' || parts.weekday === 'Sun') return false;
+    var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
+    var closeMinutes = 16 * 60;
+    return minutesSinceMidnight >= (closeMinutes - 15) && minutesSinceMidnight < closeMinutes;
+  }
 
   function updateAnalysisStatus(text, ok){
     var el = document.getElementById('analysisSyncStatus');
@@ -2306,8 +2451,8 @@
   // every Twelve Data call in the app funnels through it, so this screener
   // can fire all 33 requests without worrying about pacing itself.
 
-  function fetchScreenerCandidate(sym){
-    return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M', 'low')]).then(function(results){
+  function fetchScreenerCandidate(sym, priority){
+    return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M', priority || 'low')]).then(function(results){
       var quote = results[0], bars = results[1];
       if(!quote || !bars || bars.length < 25) return null;
       var analysis = computeTechnicalAnalysis(bars, quote.price);
@@ -2319,6 +2464,80 @@
       console.error('Screener fetch failed for', sym, err);
       return null;
     });
+  }
+
+  function fetchIntradayCandidate(sym, priority){
+    return Promise.all([fetchQuote(sym), fetchHistory(sym, INTRADAY_TF, priority || 'medium')]).then(function(results){
+      var quote = results[0], bars = results[1];
+      if(!quote || !bars || bars.length < 25) return null;
+      var analysis = computeIntradayAnalysis(bars, quote.price, 15);
+      return {
+        sym: sym, price: quote.price, prevClose: quote.prevClose,
+        score: scoreCandidate(analysis), analysis: analysis
+      };
+    }).catch(function(err){
+      console.error('Intraday screener fetch failed for', sym, err);
+      return null;
+    });
+  }
+
+  // Mirrors runScreener's structure, but into its own separate state
+  // (intradayTrades) rather than replacing the daily picks — this is an
+  // additional, opt-in view, not a swap-out of what's already there.
+  function runIntradayScreener(){
+    if(isRunningIntradayScreener || isGuestMode || !alpacaIntradayEnabled) return;
+    if(!isUsMarketOpen()){
+      updateIntradayStatus('Market closed — resumes screening when it opens', null);
+      return;
+    }
+    isRunningIntradayScreener = true;
+    updateIntradayStatus('Screening ' + INTRADAY_UNIVERSE.length + ' stocks…', null);
+    Promise.all(INTRADAY_UNIVERSE.map(function(sym){ return fetchIntradayCandidate(sym); })).then(function(results){
+      isRunningIntradayScreener = false;
+      var successfulFetches = results.filter(Boolean).length;
+      var qualifying = results.filter(function(c){ return c && c.score >= MIN_SCREENER_SCORE; });
+
+      return fetchCurrentEquityForSizing().then(function(equity){
+      var candidates = filterCandidatesBySizeability(qualifying, equity)
+        .sort(function(a,b){ return b.score - a.score; }).slice(0, INTRADAY_PICK_COUNT);
+
+      if(candidates.length === 0){
+        intradayTrades = [];
+        renderIntradayBlocks();
+        if(successfulFetches === 0){
+          updateIntradayStatus('Intraday screener failed — no real data available', false);
+        } else {
+          updateIntradayStatus('Screened ' + successfulFetches + ' stocks — no clean intraday setups right now', true);
+        }
+        return;
+      }
+
+      candidates.forEach(function(c){
+        ensureInWatchlist(c.sym, COMPANY_NAMES[c.sym] || c.sym, c.price, c.prevClose);
+      });
+
+      intradayTrades = candidates.map(function(c){
+        return buildTradeFromPick({
+          sym: c.sym, direction: c.analysis.direction,
+          entry: c.analysis.entry, stop: c.analysis.stop, t1: c.analysis.t1,
+          status: c.analysis.status, statusLabel: c.analysis.statusLabel, notes: c.analysis.notes
+        });
+      });
+      renderIntradayBlocks();
+      var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+      updateIntradayStatus('Updated ' + now + ' · next check in 15 min', true);
+      autoSendIntradayPicksIfEnabled();
+      closeInvalidatedPositions('intraday');
+      handleIntradayMarketClose();
+      });
+    });
+  }
+
+  function updateIntradayStatus(text, ok){
+    var el = document.getElementById('intradaySyncStatus');
+    if(!el) return;
+    el.textContent = text;
+    el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
   }
 
   // ---------- Internal pick-outcome log (not shown in the UI yet) ----------
@@ -2380,6 +2599,32 @@
     });
   }
 
+  // Fetches current equity once per screener run (not once per
+  // candidate) so the viability filter below scales automatically as the
+  // account grows, without a separate setting to maintain. Returns null
+  // if no account is connected or the fetch fails — absence of sizing
+  // data isn't a reason to show zero picks, so callers should leave
+  // candidates unfiltered in that case rather than block on it.
+  function fetchCurrentEquityForSizing(){
+    if(!alpacaConnected) return Promise.resolve(null);
+    return fetchAlpacaAccountSummary().then(function(acct){
+      var equity = parseFloat(acct.equity || 0);
+      return equity > 0 ? equity : null;
+    }).catch(function(){ return null; });
+  }
+
+  // Filters out candidates that would round to 0 shares at the account's
+  // actual current balance and risk setting — this is deliberately tied
+  // to the exact same math that decides real order size, not a separate
+  // price cutoff, since two stocks at the same price can have very
+  // different real dollar risk depending on their own stop distance.
+  function filterCandidatesBySizeability(candidates, equity){
+    if(equity === null) return candidates;
+    return candidates.filter(function(c){
+      return calculatePositionSize(equity, riskPercent, c.analysis.entry, c.analysis.stop) >= 1;
+    });
+  }
+
   function runScreener(){
     if(isRunningScreener || isGuestMode) return;
     isRunningScreener = true;
@@ -2391,10 +2636,13 @@
     var today = new Date().toISOString().slice(0,10);
     resolveYesterdaysPendingPicks(today);
 
-    Promise.all(SCREENER_UNIVERSE.map(fetchScreenerCandidate)).then(function(results){
+    Promise.all(SCREENER_UNIVERSE.map(function(sym){ return fetchScreenerCandidate(sym); })).then(function(results){
       isRunningScreener = false;
       var successfulFetches = results.filter(Boolean).length;
-      var candidates = results.filter(function(c){ return c && c.score >= MIN_SCREENER_SCORE; })
+      var qualifying = results.filter(function(c){ return c && c.score >= MIN_SCREENER_SCORE; });
+
+      return fetchCurrentEquityForSizing().then(function(equity){
+      var candidates = filterCandidatesBySizeability(qualifying, equity)
         .sort(function(a,b){ return b.score - a.score; }).slice(0, SCREENER_PICK_COUNT);
 
       if(candidates.length === 0){
@@ -2402,11 +2650,11 @@
         watchlist = watchlist.filter(function(w){ return DEFAULT_WATCHLIST_SYMS.indexOf(w.sym) > -1; });
         renderTradeBlocks();
         renderWhatToWatch();
+        renderBriefHeadline();
         statCta();
         var subtitleFail = document.getElementById('tradesSubtitle');
         if(successfulFetches === 0){
           updateAnalysisStatus('Screener failed — no real data available (check console)', false);
-          if(subtitleFail){ subtitleFail.textContent = 'Screener unavailable right now — check your connection.'; }
         } else {
           updateAnalysisStatus('Screened ' + successfulFetches + ' stocks — no clean setups today', true);
           if(subtitleFail){ subtitleFail.textContent = 'No stock in the universe cleared the bar today — better a clean zero than a forced pick.'; }
@@ -2429,10 +2677,9 @@
       renderTradeBlocks();
       renderWhatToWatch();
       renderTicker();
+      renderBriefHeadline();
       statCta();
       updateAnalysisStatus('Screened today · ' + new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }), true);
-      var subtitleEl = document.getElementById('tradesSubtitle');
-      if(subtitleEl){ subtitleEl.textContent = 'Auto-picked daily from ' + SCREENER_UNIVERSE.length + ' major stocks by real technical analysis.'; }
 
       if(window.__shwoopAPI && currentUid){
         var snapshot = trades.map(function(t){
@@ -2445,6 +2692,8 @@
       }
       logTodaysPicksInternally(candidates, today);
       autoSendNewPicksIfEnabled();
+      closeInvalidatedPositions('daily');
+      });
     });
   }
 
@@ -2462,11 +2711,11 @@
     renderTradeBlocks();
     renderWhatToWatch();
     renderTicker();
+    renderBriefHeadline();
     statCta();
     updateAnalysisStatus("Today's screener picks loaded", true);
-    var subtitleEl2 = document.getElementById('tradesSubtitle');
-    if(subtitleEl2){ subtitleEl2.textContent = 'Auto-picked daily from ' + SCREENER_UNIVERSE.length + ' major stocks by real technical analysis.'; }
     autoSendNewPicksIfEnabled();
+    closeInvalidatedPositions('daily');
   }
 
   function loadScreenerForUser(uid){
@@ -2597,14 +2846,18 @@
     document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(alpacaCreds.keyId);
     document.getElementById('alpacaDock').removeAttribute('hidden');
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
+    document.getElementById('alpacaRiskRow').removeAttribute('hidden');
     document.getElementById('alpacaAutoTradeRow').removeAttribute('hidden');
+    document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
   }
 
   function showAlpacaInputsView(){
     document.getElementById('alpacaConnectedRow').setAttribute('hidden', '');
     document.getElementById('alpacaInputsRow').removeAttribute('hidden');
     document.getElementById('alpacaDock').setAttribute('hidden', '');
+    document.getElementById('alpacaRiskRow').setAttribute('hidden', '');
     document.getElementById('alpacaAutoTradeRow').setAttribute('hidden', '');
+    document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
   }
 
   function testAlpacaConnection(){
@@ -2637,8 +2890,91 @@
   }
 
   // ---------- Auto-send new picks (opt-in, browser-tab-dependent) ----------
-  var AUTO_TRADE_QTY = 10;
   var alpacaAutoTradeEnabled = false;
+  var alpacaAutoTradeIntradayEnabled = false;
+
+  // ---------- Risk-based position sizing ----------
+  var DEFAULT_RISK_PERCENT = 2.0;
+  var riskPercent = DEFAULT_RISK_PERCENT;
+  // A blunt backstop against too many simultaneous positions
+  // compounding risk, not a strategy parameter — 3x the per-trade risk
+  // caps total open exposure at roughly 3 full-sized positions at once,
+  // regardless of how many symbols the screener happens to surface on a
+  // given day.
+  var MAX_TOTAL_RISK_MULTIPLIER = 3;
+
+  function setRiskPercent(value){
+    riskPercent = Math.max(0.1, Math.min(10, value));
+    var label = document.getElementById('riskPercentLabel');
+    if(label){ label.textContent = riskPercent.toFixed(1) + '%'; }
+    try { window.localStorage.setItem('shwoopnet:riskPercent', String(riskPercent)); } catch(e){}
+  }
+
+  function loadRiskPercentPref(){
+    var saved = DEFAULT_RISK_PERCENT;
+    try {
+      var stored = window.localStorage.getItem('shwoopnet:riskPercent');
+      if(stored !== null){ var parsed = parseFloat(stored); if(!isNaN(parsed)) saved = parsed; }
+    } catch(e){}
+    setRiskPercent(saved);
+  }
+
+  // Pure function, deliberately simple and easy to test in isolation:
+  // dollars risked divided by dollars risked per share, floored to a
+  // whole share — never fractional. Alpaca doesn't support fractional
+  // quantities on bracket or OCO orders, and fractional shares can't be
+  // sold short at all, so a fractional result here would silently break
+  // the exact stop-loss/target protection this app exists to provide.
+  function calculatePositionSize(equity, riskPct, entry, stop){
+    var riskDollars = equity * (riskPct / 100);
+    var perShareRisk = Math.abs(entry - stop);
+    if(perShareRisk <= 0) return 0;
+    return Math.floor(riskDollars / perShareRisk);
+  }
+
+  // Fetches real, current account data — never assumes a cached or
+  // stale balance — and works out a safe order size for one trade: the
+  // risk-based share count, reduced further if it would exceed
+  // available cash, and skipped entirely if it would push total risk
+  // across all open positions past a hard ceiling. Returns
+  // { qty, skipReason }: qty is 0 whenever skipReason is set, so callers
+  // only need to check one field either way.
+  function computeSizedOrder(t){
+    return fetchAlpacaAccountSummary().then(function(acct){
+      var equity = parseFloat(acct.equity || 0);
+      var cash = parseFloat(acct.cash || 0);
+      if(!equity || equity <= 0){
+        return { qty: 0, skipReason: 'Could not read a valid account balance.' };
+      }
+      var qty = calculatePositionSize(equity, riskPercent, t.entry, t.stop);
+      if(qty < 1){
+        return { qty: 0, skipReason: 'Position would round to 0 shares at the current risk setting (' +
+          riskPercent.toFixed(1) + '% of $' + equity.toFixed(2) + ') — too tight or too expensive a setup for this account balance.' };
+      }
+      var positionCost = qty * t.entry;
+      if(positionCost > cash){
+        // Take the largest whole-share size that actually fits in
+        // available cash rather than refusing outright — still capped
+        // at the risk-based qty above, never higher than it.
+        var affordableQty = Math.floor(cash / t.entry);
+        if(affordableQty < 1){
+          return { qty: 0, skipReason: 'Not enough available cash ($' + cash.toFixed(2) + ') to buy even 1 share at $' + t.entry.toFixed(2) + '.' };
+        }
+        qty = Math.min(qty, affordableQty);
+      }
+      var openRisk = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; })
+        .reduce(function(sum, j){ return sum + (j.qty * Math.abs(j.entry - j.stop)); }, 0);
+      var thisRisk = qty * Math.abs(t.entry - t.stop);
+      var riskCeiling = equity * (riskPercent / 100) * MAX_TOTAL_RISK_MULTIPLIER;
+      if(openRisk + thisRisk > riskCeiling){
+        return { qty: 0, skipReason: 'Skipped — total risk across open positions ($' + openRisk.toFixed(2) +
+          ') plus this trade would exceed the ' + (riskPercent * MAX_TOTAL_RISK_MULTIPLIER).toFixed(1) + '% total-risk ceiling.' };
+      }
+      return { qty: qty, skipReason: null };
+    }).catch(function(err){
+      return { qty: 0, skipReason: 'Could not fetch account data to size this trade: ' + err.message };
+    });
+  }
 
   function setAlpacaAutoTradeEnabled(enabled){
     alpacaAutoTradeEnabled = enabled;
@@ -2651,6 +2987,17 @@
     try { window.localStorage.setItem('shwoopnet:alpacaAutoTrade', enabled ? 'true' : 'false'); } catch(e){}
   }
 
+  function setAlpacaAutoTradeIntradayEnabled(enabled){
+    alpacaAutoTradeIntradayEnabled = enabled;
+    var btn = document.getElementById('alpacaAutoTradeIntradayToggle');
+    if(btn){
+      btn.textContent = enabled ? 'On' : 'Off';
+      btn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+      btn.classList.toggle('active', enabled);
+    }
+    try { window.localStorage.setItem('shwoopnet:alpacaAutoTradeIntraday', enabled ? 'true' : 'false'); } catch(e){}
+  }
+
   function loadAlpacaAutoTradePref(){
     var saved = false;
     try { saved = window.localStorage.getItem('shwoopnet:alpacaAutoTrade') === 'true'; } catch(e){}
@@ -2661,7 +3008,55 @@
     setAlpacaAutoTradeEnabled(!alpacaAutoTradeEnabled);
   });
 
+  function loadAlpacaAutoTradeIntradayPref(){
+    var saved = false;
+    try { saved = window.localStorage.getItem('shwoopnet:alpacaAutoTradeIntraday') === 'true'; } catch(e){}
+    setAlpacaAutoTradeIntradayEnabled(saved);
+  }
+
+  document.getElementById('alpacaAutoTradeIntradayToggle').addEventListener('click', function(){
+    setAlpacaAutoTradeIntradayEnabled(!alpacaAutoTradeIntradayEnabled);
+  });
+
+  // ---------- Intraday screener (opt-in, separate from the daily one) ----------
+  function setIntradayEnabled(enabled){
+    alpacaIntradayEnabled = enabled;
+    var btn = document.getElementById('intradayToggle');
+    if(btn){
+      btn.textContent = enabled ? 'On' : 'Off';
+      btn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+      btn.classList.toggle('active', enabled);
+    }
+    try { window.localStorage.setItem('shwoopnet:intradayEnabled', enabled ? 'true' : 'false'); } catch(e){}
+    var section = document.getElementById('intradaySection');
+    if(section){ section.hidden = !enabled; }
+    if(enabled){
+      runIntradayScreener();
+      if(intradayScreenerInterval) clearInterval(intradayScreenerInterval);
+      intradayScreenerInterval = setInterval(runIntradayScreener, 15 * 60 * 1000);
+    } else {
+      if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
+      intradayTrades = [];
+      renderIntradayBlocks();
+    }
+  }
+
+  function loadIntradayPref(){
+    // Defaults to ON — intraday is now the primary Trade Overview
+    // experience, not an opt-in extra. Pure screening/viewing has no
+    // financial-risk implication on its own; auto-trade is a completely
+    // separate, still off-by-default toggle for the part that actually
+    // acts on these picks.
+    var saved = true;
+    try {
+      var stored = window.localStorage.getItem('shwoopnet:intradayEnabled');
+      if(stored !== null) saved = stored === 'true';
+    } catch(e){}
+    setIntradayEnabled(saved);
+  }
+
   function showAutoSendToast(sym, direction, qty){
+    logSystemActivity('sent', sym, 'Sent ' + qty + ' shares (' + direction + ') to Alpaca automatically.');
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -2669,6 +3064,20 @@
     toastEl.innerHTML =
       '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">Auto-sent</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
       '<p class="toast-text">Sent ' + qty + ' shares (' + direction + ') to Alpaca paper automatically.</p>';
+    container.appendChild(toastEl);
+    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
+    setTimeout(function(){ dismissToast(toastEl); }, 12000);
+  }
+
+  function showSizingSkippedToast(sym, reason){
+    logSystemActivity('skipped', sym, reason);
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    var toastEl = document.createElement('div');
+    toastEl.className = 'alert-toast';
+    toastEl.innerHTML =
+      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">Skipped</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<p class="toast-text">' + reason + '</p>';
     container.appendChild(toastEl);
     toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
     setTimeout(function(){ dismissToast(toastEl); }, 12000);
@@ -2688,14 +3097,61 @@
         if(!pick || pick.autoSent) return;
         pick.autoSent = true;
         return window.__shwoopAPI.saveDailyPickLog(currentUid, key, pick).then(function(){
+          return computeSizedOrder(t);
+        }).then(function(sized){
+          if(sized.qty < 1){
+            showSizingSkippedToast(t.sym, sized.skipReason);
+            return;
+          }
           var side = t.direction === 'Long' ? 'buy' : 'sell';
-          return submitAlpacaBracketOrder(t.sym, side, AUTO_TRADE_QTY, t.stop, t.t1);
-        }).then(function(order){
-          logAlpacaTradeToJournal(t, AUTO_TRADE_QTY, order);
-          showAutoSendToast(t.sym, t.direction, AUTO_TRADE_QTY);
+          return submitAlpacaBracketOrder(t.sym, side, sized.qty, t.stop, t.t1).then(function(order){
+            logAlpacaTradeToJournal(t, sized.qty, order, 'daily');
+            showAutoSendToast(t.sym, t.direction, sized.qty);
+          });
         });
       }).catch(function(err){
         console.error('Auto-send failed for', t.sym, err);
+      });
+    });
+  }
+
+  // Intraday auto-send is deliberately different from the daily version.
+  // Daily dedups by "already sent once today", which is correct for a
+  // once-a-day pick — but intraday can legitimately mean several genuine
+  // round-trips on the same symbol in one day (that's the whole point of
+  // "short-term, ever-updating"). So instead it dedups by "is there
+  // already an open position in this symbol" — blocks duplicates on a
+  // position that's still live, but allows real re-entry once a prior one
+  // has actually closed. A hard daily cap is a separate, blunt safety
+  // net against something going wrong and cycling trades unexpectedly —
+  // it isn't a strategy parameter, just a backstop.
+  var INTRADAY_AUTO_TRADE_MAX_PER_DAY = 5;
+  var intradayAutoTradeCountDate = null;
+  var intradayAutoTradeCountToday = 0;
+
+  function autoSendIntradayPicksIfEnabled(){
+    if(!alpacaAutoTradeIntradayEnabled || !alpacaConnected || !window.__shwoopAPI || !currentUid) return;
+    var today = new Date().toISOString().slice(0,10);
+    if(intradayAutoTradeCountDate !== today){ intradayAutoTradeCountDate = today; intradayAutoTradeCountToday = 0; }
+    intradayTrades.forEach(function(t){
+      if(intradayAutoTradeCountToday >= INTRADAY_AUTO_TRADE_MAX_PER_DAY) return;
+      var hasOpenPosition = journalEntries.some(function(j){ return j.sym === t.sym && j.status === 'open'; });
+      if(hasOpenPosition) return;
+      intradayAutoTradeCountToday++;
+      computeSizedOrder(t).then(function(sized){
+        if(sized.qty < 1){
+          intradayAutoTradeCountToday--; // a skipped trade isn't a trade -- don't spend the cap on it
+          showSizingSkippedToast(t.sym, sized.skipReason);
+          return;
+        }
+        var side = t.direction === 'Long' ? 'buy' : 'sell';
+        return submitAlpacaBracketOrder(t.sym, side, sized.qty, t.stop, t.t1).then(function(order){
+          logAlpacaTradeToJournal(t, sized.qty, order, 'intraday');
+          showAutoSendToast(t.sym, t.direction, sized.qty);
+        });
+      }).catch(function(err){
+        intradayAutoTradeCountToday--; // failed submissions shouldn't count against the cap
+        console.error('Intraday auto-send failed for', t.sym, err);
       });
     });
   }
@@ -3024,34 +3480,102 @@
     });
   }
 
-  function sendTradeToAlpaca(sym){
-    if(!alpacaConnected){ alert('Connect your Alpaca paper account in Settings first.'); return; }
-    var t = trades.filter(function(x){ return x.sym === sym; })[0];
-    if(!t) return;
-    var qtyStr = prompt('Paper shares of ' + sym + ' to buy/sell for this trade?', '10');
-    if(!qtyStr) return;
-    var qty = parseInt(qtyStr, 10);
-    if(!qty || qty <= 0){ alert('Enter a valid whole number of shares.'); return; }
-
-    var side = t.direction === 'Long' ? 'buy' : 'sell';
-    var btn = document.getElementById('alpaca-btn-' + sym);
-    if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
-
-    submitAlpacaBracketOrder(sym, side, qty, t.stop, t.t1).then(function(order){
-      if(btn){ btn.textContent = 'Sent to Alpaca ✓'; }
-      console.log('Alpaca paper order submitted:', order);
-      // One button means one button — since we already know exactly what
-      // was submitted (entry, qty, stop, target), there's no reason to
-      // make the user re-type it into the manual log form afterward.
-      logAlpacaTradeToJournal(t, qty, order);
-    }).catch(function(err){
-      if(btn){ btn.disabled = false; btn.textContent = 'Send to Alpaca (Paper)'; }
-      alert('Paper order failed: ' + err.message);
-      console.error('Alpaca order failed:', err);
+  function cancelAlpacaOrder(orderId){
+    return fetch(ALPACA_PAPER_BASE + '/v2/orders/' + orderId, {
+      method: 'DELETE', headers: alpacaHeaders()
+    }).then(function(res){
+      if(!res.ok && res.status !== 404){ throw new Error('HTTP ' + res.status); }
     });
   }
 
-  function logAlpacaTradeToJournal(t, qty, order){
+  // OCO — not bracket — is the correct order type here: bracket is for a
+  // new entry (market/limit order plus two exit legs), while OCO is
+  // specifically "a pair of exit orders for an existing position", which
+  // is exactly the case when refreshing protection on something already
+  // held. Deliberately not using Alpaca's order-replace endpoint for
+  // this — sources on whether replace is actually reliable for bracket/
+  // OCO legs conflict (Alpaca's own docs disagree with each other
+  // depending on the page, and there are real reports of it failing) —
+  // so this cancels the old exit orders outright and submits a fresh
+  // pair instead, which is unambiguously supported.
+  function submitAlpacaOcoExit(sym, exitSide, qty, stopPrice, takeProfitPrice){
+    var body = {
+      symbol: sym, qty: String(qty), side: exitSide, type: 'limit', time_in_force: 'gtc',
+      order_class: 'oco',
+      take_profit: { limit_price: takeProfitPrice.toFixed(2) },
+      stop_loss: { stop_price: stopPrice.toFixed(2) }
+    };
+    return fetch(ALPACA_PAPER_BASE + '/v2/orders', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()),
+      body: JSON.stringify(body)
+    }).then(function(res){
+      return res.json().then(function(data){
+        if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); }
+        return data;
+      });
+    });
+  }
+
+  // Cancels every currently-open order for a symbol (the take-profit
+  // parent plus its nested stop-loss leg) before submitting the new OCO
+  // pair — never submits the replacement until the old one is
+  // confirmed gone, so a position is never left with two conflicting
+  // sets of exit orders live at once.
+  function refreshPositionBracket(entry, analysis){
+    return fetchAlpacaOpenOrders().then(function(orders){
+      var matches = (orders || []).filter(function(o){ return o.symbol === entry.sym; });
+      return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
+    }).then(function(){
+      var exitSide = entry.direction === 'Long' ? 'sell' : 'buy';
+      return submitAlpacaOcoExit(entry.sym, exitSide, entry.qty, analysis.stop, analysis.t1);
+    });
+  }
+
+  function sendTradeToAlpaca(sym){
+    if(!alpacaConnected){ alert('Connect your Alpaca paper account in Settings first.'); return; }
+    var screenerType = 'daily';
+    var t = trades.filter(function(x){ return x.sym === sym; })[0];
+    if(!t){
+      t = intradayTrades.filter(function(x){ return x.sym === sym; })[0];
+      screenerType = 'intraday';
+    }
+    if(!t) return;
+
+    var btn = document.getElementById('alpaca-btn-' + sym);
+    if(btn){ btn.disabled = true; btn.textContent = 'Sizing…'; }
+
+    computeSizedOrder(t).then(function(sized){
+      if(btn){ btn.disabled = false; btn.textContent = 'Send to Alpaca (Paper)'; }
+      var suggested = sized.qty >= 1 ? String(sized.qty) : '';
+      var promptMsg = 'Paper shares of ' + sym + ' to buy/sell for this trade?\n\n' +
+        (sized.qty >= 1
+          ? '(Suggested size at ' + riskPercent.toFixed(1) + '% risk per trade — override if you want a different amount.)'
+          : '(' + sized.skipReason + ' — enter a size manually if you want to override.)');
+      var qtyStr = prompt(promptMsg, suggested);
+      if(!qtyStr) return;
+      var qty = parseInt(qtyStr, 10);
+      if(!qty || qty <= 0){ alert('Enter a valid whole number of shares.'); return; }
+
+      var side = t.direction === 'Long' ? 'buy' : 'sell';
+      if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+
+      submitAlpacaBracketOrder(sym, side, qty, t.stop, t.t1).then(function(order){
+        if(btn){ btn.textContent = 'Sent to Alpaca ✓'; }
+        console.log('Alpaca paper order submitted:', order);
+        // One button means one button — since we already know exactly what
+        // was submitted (entry, qty, stop, target), there's no reason to
+        // make the user re-type it into the manual log form afterward.
+        logAlpacaTradeToJournal(t, qty, order, screenerType);
+      }).catch(function(err){
+        if(btn){ btn.disabled = false; btn.textContent = 'Send to Alpaca (Paper)'; }
+        alert('Paper order failed: ' + err.message);
+        console.error('Alpaca order failed:', err);
+      });
+    });
+  }
+
+  function logAlpacaTradeToJournal(t, qty, order, screenerType){
     // Market orders don't always return a fill price immediately in the
     // submission response — fall back to the planned entry level, which
     // for a paper market order during market hours is a close proxy.
@@ -3060,7 +3584,7 @@
       id: 'j' + Date.now(),
       date: new Date().toISOString().slice(0,10), sym: t.sym, direction: t.direction,
       entry: fillPrice, qty: qty, stop: t.stop, t1: t.t1,
-      exit: null, status: 'open', source: 'alpaca'
+      exit: null, status: 'open', source: 'alpaca', screenerType: screenerType || 'daily'
     });
     saveJournalEntries();
     renderTradeBlocks();
@@ -3110,7 +3634,109 @@
     });
   }
 
-  // Risk = distance from entry to stop (what you stand to lose). Reward =
+  // ---------- Position validity checks & safety closes ----------
+  // Re-runs the exact same analysis that originally justified a held
+  // position, using current data. If the direction no longer matches or
+  // the trend is no longer aligned (the same requirement the screener
+  // itself enforces), the original thesis for holding this position no
+  // longer exists — closing it out is a risk decision, not a strategy
+  // one. Missing/failed data intentionally defaults to "still valid"
+  // rather than closing on incomplete information.
+  function checkPositionStillValid(entry){
+    var isIntraday = entry.screenerType === 'intraday';
+    // 'high' priority, not 'medium' or the bulk screener's default 'low' —
+    // this is protecting an existing position from a thesis that may no
+    // longer hold, which is more time-critical than finding new
+    // candidates (daily or intraday). It should never be waiting behind
+    // either kind of background scan.
+    var fetchPromise = isIntraday ? fetchIntradayCandidate(entry.sym, 'high') : fetchScreenerCandidate(entry.sym, 'high');
+    return fetchPromise.then(function(candidate){
+      if(!candidate) return true;
+      var stillAligned = candidate.score >= 0;
+      var directionMatches = candidate.analysis.direction === entry.direction;
+      return stillAligned && directionMatches;
+    }).catch(function(){
+      return true;
+    });
+  }
+
+  function showPositionClosedToast(sym, reason){
+    logSystemActivity('position_action', sym, reason);
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    var toastEl = document.createElement('div');
+    toastEl.className = 'alert-toast';
+    toastEl.innerHTML =
+      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">Auto-closed</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<p class="toast-text">' + reason + '</p>';
+    container.appendChild(toastEl);
+    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
+    setTimeout(function(){ dismissToast(toastEl); }, 12000);
+  }
+
+  function closeInvalidatedPositions(screenerType){
+    if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
+    var openEntries = journalEntries.filter(function(j){
+      return j.status === 'open' && j.source === 'alpaca' && (j.screenerType || 'daily') === screenerType;
+    });
+    openEntries.forEach(function(entry){
+      checkPositionStillValid(entry).then(function(stillValid){
+        if(stillValid) return;
+        closeAlpacaPosition(entry.sym).then(function(){
+          // The actual fill price/date gets picked up by the existing
+          // exit-sync pass on its next cycle — not duplicating that here.
+          showPositionClosedToast(entry.sym, 'No longer a valid setup — direction or trend alignment changed, so the position was closed.');
+        }).catch(function(err){
+          console.error('Failed to close invalidated position', entry.sym, err);
+        });
+      });
+    });
+  }
+
+  // For intraday positions specifically: in the closing window, each
+  // still-open one needs an explicit decision rather than just being
+  // left to whatever the day's exit orders happen to do. Still a valid
+  // setup -> the bracket gets refreshed with a current stop/target and
+  // carries into the next day rather than expiring into nothing. No
+  // longer valid -> closed outright rather than held on a thesis that's
+  // no longer there. Guarded by date so this only fires once per
+  // position per closing window, not every time the interval ticks
+  // during those 15 minutes.
+  function handleIntradayMarketClose(){
+    if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
+    if(!isMarketClosingSoon()) return;
+    var today = new Date().toISOString().slice(0,10);
+    var openIntradayEntries = journalEntries.filter(function(j){
+      return j.status === 'open' && j.source === 'alpaca' && j.screenerType === 'intraday' && j.marketCloseHandledDate !== today;
+    });
+    openIntradayEntries.forEach(function(entry){
+      fetchIntradayCandidate(entry.sym, 'high').then(function(candidate){
+        var stillValid = candidate && candidate.score >= 0 && candidate.analysis.direction === entry.direction;
+        if(stillValid){
+          refreshPositionBracket(entry, candidate.analysis).then(function(){
+            entry.marketCloseHandledDate = today;
+            entry.stop = candidate.analysis.stop;
+            entry.t1 = candidate.analysis.t1;
+            saveJournalEntries();
+            renderTradeBlocks();
+            showPositionClosedToast(entry.sym, 'Still a valid setup at the close — carried into tomorrow with a refreshed stop and target.');
+          }).catch(function(err){
+            console.error('Failed to refresh bracket at close for', entry.sym, err);
+          });
+        } else {
+          closeAlpacaPosition(entry.sym).then(function(){
+            entry.marketCloseHandledDate = today;
+            saveJournalEntries();
+            showPositionClosedToast(entry.sym, 'No longer a valid setup at the close — closed rather than held overnight.');
+          }).catch(function(err){
+            console.error('Failed to close at market-close for', entry.sym, err);
+          });
+        }
+      });
+    });
+  }
+
+
   // the average of the distance to Target 1 and Target 2 (since the plan
   // scales out half at each) — what you stand to gain if it plays out.
   function computeRiskReward(t){
@@ -3232,6 +3858,68 @@
         if(heightA <= heightB){ colA.appendChild(item); heightA += h; }
         else { colB.appendChild(item); heightB += h; }
       });
+    });
+  }
+
+  function renderIntradayBlocks(){
+    var el = document.getElementById('intradayBlocks');
+    if(!el) return;
+    if(intradayTrades.length === 0){
+      el.innerHTML = '<div class="trades-empty-state">No intraday setups right now — screener runs every 15 minutes during market hours.</div>';
+      return;
+    }
+    el.innerHTML = intradayTrades.map(function(t){ return renderTradeRow(t); }).join('');
+
+    el.querySelectorAll('.chevron').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.toggle;
+        var wrap = document.getElementById('chartwrap-' + sym);
+        var open = wrap.hasAttribute('hidden') === false;
+        if(open){ wrap.setAttribute('hidden',''); btn.setAttribute('aria-expanded','false'); btn.textContent = '›'; }
+        else{ wrap.removeAttribute('hidden'); btn.setAttribute('aria-expanded','true'); btn.textContent = '⌄'; }
+      });
+    });
+    el.querySelectorAll('.log-trade-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ openLogModal(btn.dataset.sym); });
+    });
+    el.querySelectorAll('.alpaca-send-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ sendTradeToAlpaca(btn.dataset.sym); });
+    });
+    el.querySelectorAll('.open-position-badge').forEach(function(btn){
+      btn.addEventListener('click', function(){ jumpToJournalDate(btn.dataset.date); });
+    });
+    el.querySelectorAll('.chart-tool-btn[data-scale]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.sym, scale = btn.dataset.scale;
+        document.querySelectorAll('.chart-tool-btn[data-scale][data-sym="' + sym + '"]').forEach(function(b){
+          b.classList.toggle('active', b === btn);
+        });
+        var state = chartStates[sym];
+        if(state){ state.scale = scale; renderChartView(sym); }
+      });
+    });
+    el.querySelectorAll('.chart-reset-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ resetChartZoom(btn.dataset.sym); });
+    });
+    el.querySelectorAll('.chart-tool-btn[data-tf]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.sym, tf = btn.dataset.tf;
+        document.querySelectorAll('.chart-tool-btn[data-tf][data-sym="' + sym + '"]').forEach(function(b){
+          b.classList.toggle('active', b === btn);
+        });
+        var q = findQuote(sym);
+        var svg = document.getElementById('chart-' + sym);
+        if(svg && q){ renderChartInto(svg, sym, q.price, tf); }
+      });
+    });
+
+    intradayTrades.forEach(function(t){
+      setupChartInteractivity(t.sym);
+      var svg = document.getElementById('chart-' + t.sym);
+      if(!svg) return;
+      var q = findQuote(t.sym);
+      var tf = (chartStates[t.sym] && chartStates[t.sym].tf) || '5m';
+      renderChartInto(svg, t.sym, q.price, tf);
     });
   }
 
@@ -3446,7 +4134,7 @@
     '5m':  { volFactor:0.0035, fetchSize:210, maxVisible:160, defaultVisible:60 },
     '15m': { volFactor:0.006,  fetchSize:190, maxVisible:140, defaultVisible:45 },
     '30m': { volFactor:0.0085, fetchSize:170, maxVisible:120, defaultVisible:35 },
-    '1D':  { volFactor:0.012,  fetchSize:150, maxVisible:100, defaultVisible:25 },
+    '1D':  { volFactor:0.006,  fetchSize:200, maxVisible:100, defaultVisible:100 },
     '1W':  { volFactor:0.006,  fetchSize:30,  maxVisible:30,  defaultVisible:7  },
     '1M':  { volFactor:0.012,  fetchSize:140, maxVisible:90,  defaultVisible:30 },
     '1Y':  { volFactor:0.03,   fetchSize:154, maxVisible:104, defaultVisible:52 }
@@ -3455,10 +4143,14 @@
   var showMovingAverages = true;
   var showOHLCReadout = true;
   var MIN_VISIBLE_CANDLES = 8;
-  // 1D now shows one candle per day (matching how 1W/1M/1Y already work,
-  // and how 5m/15m/30m are named after their own candle interval) — it's
-  // no longer an intraday view, so it gets date labels, not times.
-  var INTRADAY_TFS = ['5m', '15m', '30m'];
+  // 1D is genuinely intraday — today's actual session, 5-minute bars —
+  // matching what "1D" means on essentially every other trading platform.
+  // fetchHistoryFromNetwork fetches a couple of days' worth of 5-min bars
+  // and trims to just the most recent trading day, so the chart always
+  // shows one real session (today's, or the last one if the market's
+  // currently closed) rather than months of daily candles under a "1D"
+  // label.
+  var INTRADAY_TFS = ['5m', '15m', '30m', '1D'];
 
   // Real minutes-per-bar for each timeframe's actual interval, so guest
   // mode's simulated candles are spaced correctly — matching the real
@@ -3466,7 +4158,7 @@
   // historyIntervals below). Without this, every timeframe button looked
   // the same in guest mode: "1W" and "1Y" would show only a few hours of
   // 5-minute-spaced candles instead of actual weeks or years of data.
-  var tfSpacingMinutes = { '5m':5, '15m':15, '30m':30, '1D':1440, '1W':1440, '1M':1440, '1Y':10080 };
+  var tfSpacingMinutes = { '5m':5, '15m':15, '30m':30, '1D':5, '1W':1440, '1M':1440, '1Y':10080 };
 
   function genOHLC(count, base, vol, spacingMinutes){
     spacingMinutes = spacingMinutes || 5;
@@ -3499,7 +4191,7 @@
   var TWELVE_DATA_API_KEY = 'd71a3d8d70e04286b10e8cf67b4c710d';
   var TWELVE_DATA_URL = 'https://api.twelvedata.com/time_series';
   var historyCache = {};
-  var historyIntervals = { '5m':'5min', '15m':'15min', '30m':'30min', '1D':'1day', '1W':'1day', '1M':'1day', '1Y':'1week' };
+  var historyIntervals = { '5m':'5min', '15m':'15min', '30m':'30min', '1D':'5min', '1W':'1day', '1M':'1day', '1Y':'1week' };
 
   // Every Twelve Data request in the app — screener, chart rendering,
   // timeframe switches, all of it — funnels through this one queue. The
@@ -3517,10 +4209,15 @@
   function scheduleTwelveDataCall(fn, priority){
     return new Promise(function(resolve, reject){
       var item = { fn: fn, resolve: resolve, reject: reject };
-      // Charts the user is actively looking at should never sit queued
-      // behind the screener's 33-symbol background scoring pass — that's
-      // exactly what made a visible chart look broken/blank while a
-      // background scan was quietly working through its own rate limit.
+      // Three tiers, not two: a chart the user is actively looking at
+      // ('high') always goes first. Below that, the intraday screener
+      // ('medium') is a small, time-sensitive batch (10 symbols) that
+      // needs to actually finish inside its own 15-minute window — it
+      // must never sit stuck behind the daily screener's much larger
+      // 41-symbol background scan ('low'), which isn't time-critical the
+      // same way. Without this, the daily screener firing first (the
+      // common case, since it starts right at sign-in) could block
+      // intraday results for several minutes.
       if(priority === 'high'){
         var insertAt = twelveDataQueue.length;
         for(var i = 0; i < twelveDataQueue.length; i++){
@@ -3528,6 +4225,13 @@
         }
         item.isHigh = true;
         twelveDataQueue.splice(insertAt, 0, item);
+      } else if(priority === 'medium'){
+        var insertAtM = twelveDataQueue.length;
+        for(var j = 0; j < twelveDataQueue.length; j++){
+          if(!twelveDataQueue[j].isHigh && !twelveDataQueue[j].isMedium){ insertAtM = j; break; }
+        }
+        item.isMedium = true;
+        twelveDataQueue.splice(insertAtM, 0, item);
       } else {
         twelveDataQueue.push(item);
       }
@@ -3620,9 +4324,22 @@
             throw new Error('No usable history for ' + sym + ' (' + tf + ')');
           }
           // Twelve Data returns most-recent-first; we render oldest-first.
-          return data.values.map(function(v){
+          var bars = data.values.map(function(v){
             return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
           }).reverse();
+          // 1D fetches a couple of days of 5-min bars as a buffer (so
+          // there's always a full prior session available), then keeps
+          // only the most recent date actually present in the data —
+          // today's session if the market's open or already traded today,
+          // otherwise the last completed session. Grouping by whatever
+          // date is actually in the data (rather than assuming "today" in
+          // some specific timezone) sidesteps any exchange-vs-local
+          // timezone mismatch entirely.
+          if(tf === '1D'){
+            var mostRecentDateKey = bars[bars.length - 1].t.toDateString();
+            bars = bars.filter(function(b){ return b.t.toDateString() === mostRecentDateKey; });
+          }
+          return bars;
         });
     }, priority);
   }
@@ -3683,9 +4400,12 @@
       var score = scoreCandidate(analysis);
       if(score >= MIN_SCREENER_SCORE){
         var outcome = simulateForwardFromDay(bars, i, analysis);
+        var isLong = analysis.direction === 'Long';
+        var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
         trades.push({
           date: bars[i].t, direction: analysis.direction, entry: analysis.entry,
-          stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days
+          stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
+          exitPrice: outcome.price, pctReturn: pctReturn
         });
         i = i + outcome.days + 1; // don't open an overlapping signal while this one is still live
       } else {
@@ -3695,14 +4415,25 @@
     return trades;
   }
 
+  // Win rate alone can't answer whether a strategy is actually
+  // profitable — a 55% win rate with small wins and large losses can
+  // still lose money overall, and a 40% win rate with big wins and small
+  // losses can still make money. Expectancy (average % return per trade,
+  // wins and losses both counted) and profit factor (gross gains divided
+  // by gross losses) are what actually answer that question.
   function summarizeBacktestTrades(trades){
     var resolved = trades.filter(function(t){ return t.outcome !== 'unresolved'; });
     var hits = resolved.filter(function(t){ return t.outcome === 'hit'; });
     var winRate = resolved.length > 0 ? (hits.length / resolved.length * 100) : 0;
     var avgDays = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.days; }, 0) / resolved.length) : 0;
+    var avgPctReturn = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.pctReturn; }, 0) / resolved.length) : 0;
+    var grossGains = resolved.filter(function(t){ return t.pctReturn > 0; }).reduce(function(s,t){ return s + t.pctReturn; }, 0);
+    var grossLosses = resolved.filter(function(t){ return t.pctReturn < 0; }).reduce(function(s,t){ return s + Math.abs(t.pctReturn); }, 0);
+    var profitFactor = grossLosses > 0 ? (grossGains / grossLosses) : (grossGains > 0 ? Infinity : 0);
     return {
       totalSignals: trades.length, hitCount: hits.length, stoppedCount: resolved.length - hits.length,
-      unresolvedCount: trades.length - resolved.length, winRate: winRate, avgDays: avgDays
+      unresolvedCount: trades.length - resolved.length, winRate: winRate, avgDays: avgDays,
+      avgPctReturn: avgPctReturn, profitFactor: profitFactor
     };
   }
 
@@ -3719,20 +4450,27 @@
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
     resultsEl.innerHTML =
       '<div class="backtest-summary">' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Still open at end</div><div class="backtest-stat-value">' + summary.unresolvedCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg days to resolve</div><div class="backtest-stat-value">' + summary.avgDays.toFixed(0) + '</div></div>' +
       '</div>' +
+      '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — a high win rate with small wins and large losses can still lose overall. Expectancy and profit factor (above) account for the size of wins and losses, not just how often each happened.</p>' +
       '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Days</th></tr></thead>' +
+        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Days</th></tr></thead>' +
         '<tbody>' + trades.slice().reverse().map(function(t){
           var outcomeClass = 'backtest-outcome-' + t.outcome;
           var outcomeLabel = t.outcome === 'hit' ? 'Hit target' : t.outcome === 'stopped' ? 'Stopped out' : 'Unresolved';
+          var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
           return '<tr>' +
             '<td>' + t.date.toLocaleDateString([], {month:'short', day:'numeric', year:'2-digit'}) + '</td>' +
             '<td>' + t.direction + '</td>' +
@@ -3740,6 +4478,7 @@
             '<td>' + t.stop.toFixed(2) + '</td>' +
             '<td>' + t.target.toFixed(2) + '</td>' +
             '<td class="' + outcomeClass + '">' + outcomeLabel + '</td>' +
+            '<td class="' + returnClass + '">' + (t.pctReturn >= 0 ? '+' : '') + t.pctReturn.toFixed(2) + '%</td>' +
             '<td>' + t.days + '</td>' +
           '</tr>';
         }).join('') + '</tbody>' +
@@ -3771,6 +4510,102 @@
       btn.disabled = false;
       console.error('Backtest failed:', err);
     });
+  }
+
+  // Runs the identical per-symbol simulation across the whole screener
+  // universe, one symbol at a time (not in parallel — keeps this
+  // readable against the rate limit and gives honest progress feedback
+  // rather than a silent multi-minute wait). Aggregates every symbol's
+  // trades into one combined set so the summary reflects the strategy's
+  // real performance across the universe, not just one name's history.
+  function runUniverseBacktestClicked(){
+    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
+    var lookbackDays = parseInt(document.getElementById('backtestLookback').value, 10);
+    var statusEl = document.getElementById('backtestStatus');
+    var btn = document.getElementById('runUniverseBacktestBtn');
+    var singleBtn = document.getElementById('runBacktestBtn');
+    var resultsEl = document.getElementById('backtestResults');
+
+    btn.disabled = true;
+    singleBtn.disabled = true;
+    resultsEl.innerHTML = '';
+    statusEl.className = 'labs-backtest-status';
+
+    var totalDays = lookbackDays + 60;
+    var allTrades = [];
+    var perSymbolResults = [];
+
+    function processNext(index){
+      if(index >= SCREENER_UNIVERSE.length){
+        btn.disabled = false;
+        singleBtn.disabled = false;
+        var summary = summarizeBacktestTrades(allTrades);
+        renderUniverseBacktestResults(perSymbolResults, summary);
+        return;
+      }
+      var sym = SCREENER_UNIVERSE[index];
+      statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + SCREENER_UNIVERSE.length + ', this takes a few minutes)';
+      fetchBacktestHistory(sym, totalDays).then(function(bars){
+        var trades = runBacktestSimulation(bars, lookbackDays);
+        allTrades = allTrades.concat(trades);
+        perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
+        processNext(index + 1);
+      }).catch(function(err){
+        console.error('Universe backtest: skipping', sym, err);
+        processNext(index + 1);
+      });
+    }
+
+    processNext(0);
+  }
+
+  function renderUniverseBacktestResults(perSymbolResults, summary){
+    var statusEl = document.getElementById('backtestStatus');
+    var resultsEl = document.getElementById('backtestResults');
+
+    if(summary.totalSignals === 0){
+      statusEl.textContent = 'No qualifying signals found across the universe in this window.';
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total signals across the universe.';
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+
+    var perSymbolRows = perSymbolResults
+      .filter(function(r){ return r.summary.totalSignals > 0; })
+      .sort(function(a,b){ return b.summary.avgPctReturn - a.summary.avgPctReturn; })
+      .map(function(r){
+        var s = r.summary;
+        var rowClass = s.avgPctReturn >= 0 ? 'up' : 'down';
+        return '<tr>' +
+          '<td class="mono">' + r.sym + '</td>' +
+          '<td>' + s.totalSignals + '</td>' +
+          '<td>' + s.winRate.toFixed(0) + '%</td>' +
+          '<td class="' + rowClass + '">' + (s.avgPctReturn >= 0 ? '+' : '') + s.avgPctReturn.toFixed(2) + '%</td>' +
+        '</tr>';
+      }).join('');
+
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+      '</div>' +
+      '<p class="labs-backtest-note">Aggregated across every symbol that produced at least one signal in this window. Win rate alone doesn\'t show profitability — expectancy and profit factor account for the size of wins and losses, not just how often each happened.</p>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
+        '<tbody>' + perSymbolRows + '</tbody>' +
+      '</table>';
   }
 
   function populateBacktestSymbolSelect(){
@@ -4077,7 +4912,7 @@
     // day, the chart should show what's actually being held (its real
     // entry/stop/target), not whatever levels today's re-run produced.
     var openPosition = journalEntries.filter(function(j){ return j.sym === sym && j.status === 'open'; })[0];
-    var trade = trades.filter(function(t){ return t.sym === sym; })[0];
+    var trade = trades.filter(function(t){ return t.sym === sym; })[0] || intradayTrades.filter(function(t){ return t.sym === sym; })[0];
     var levels = null;
     if(openPosition){
       levels = { entry: openPosition.entry, stop: openPosition.stop, target: openPosition.t1 };
@@ -4143,7 +4978,7 @@
       // where the rest of the candle series actually sits.
       var lastBar = bars[bars.length - 1];
       var adjusted = bars.slice(0, -1).concat([{
-        o: lastBar.o, h: lastBar.h, l: lastBar.l, c: base
+        o: lastBar.o, h: lastBar.h, l: lastBar.l, c: base, t: lastBar.t
       }]);
       initChartState(sym, tf, adjusted);
       renderChartView(sym);
@@ -4524,6 +5359,9 @@
     renderSentiment();
     renderMovers();
     renderIndices();
+    renderBriefHeadline();
+    var statusPageEl = document.getElementById('page-status');
+    if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
 
     // Recalibrate entry/stop/targets against real pricing exactly once, the
     // first time live data actually lands — not on every refresh, or the
@@ -4626,27 +5464,6 @@
     if(priceLoopInterval){ clearInterval(priceLoopInterval); }
     fetchAllQuotes();
     priceLoopInterval = setInterval(fetchAllQuotes, 45000);
-  }
-
-  function jitterGuestPrices(){
-    watchlist.forEach(function(item){
-      var delta = item.price * (Math.random() - 0.5) * 0.006;
-      item.price = Math.max(0.5, item.price + delta);
-    });
-    renderTicker();
-    renderSentiment();
-    renderMovers();
-    updateTradeRowPrices();
-  }
-
-  function startGuestQuoteLoop(){
-    if(priceLoopInterval){ clearInterval(priceLoopInterval); }
-    var el = document.getElementById('quoteSyncStatus');
-    if(el){
-      el.textContent = 'Simulated (guest mode) — not real market data';
-      el.className = 'quote-sync-status';
-    }
-    priceLoopInterval = setInterval(jitterGuestPrices, 2200);
   }
 
   // ---------- Clock ----------
@@ -4886,6 +5703,25 @@
   document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); renderTradeBlocks(); });
   document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); renderTradeBlocks(); });
 
+  document.getElementById('dailySectionToggle').addEventListener('click', function(){
+    var btn = document.getElementById('dailySectionToggle');
+    var list = document.getElementById('tradeBlocks');
+    var isHidden = list.hasAttribute('hidden');
+    if(isHidden){
+      list.removeAttribute('hidden');
+      btn.setAttribute('aria-expanded','true');
+      btn.querySelector('.caret').textContent = '▾';
+      // A hidden container measures every child's height as zero — if
+      // 2-column masonry ran while this was still collapsed, it needs a
+      // real re-render now that heights can actually be measured.
+      renderTradeBlocks();
+    } else {
+      list.setAttribute('hidden','');
+      btn.setAttribute('aria-expanded','false');
+      btn.querySelector('.caret').textContent = '▸';
+    }
+  });
+
   document.getElementById('maToggleBtn').addEventListener('click', function(){
     layoutPrefs.showMA = !layoutPrefs.showMA;
     applyLayout();
@@ -4912,10 +5748,11 @@
   })();
 
   // ---------- Navigation ----------
-  var navLabels = { brief: 'Market Brief', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
+  var navLabels = { brief: 'Market Brief', status: 'Status', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
 
   function showPage(name){
     document.getElementById('page-brief').hidden = (name !== 'brief');
+    document.getElementById('page-status').hidden = (name !== 'status');
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
     document.getElementById('page-settings').hidden = (name !== 'settings');
@@ -4925,6 +5762,7 @@
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
+    if(name === 'status'){ renderStatusPage(); }
     if(name === 'trades'){ renderAllTradeCharts(); }
     if(name === 'journal'){ renderCalendar(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
@@ -4952,8 +5790,6 @@
         toggleNotepad(true);
       } else if(item.dataset.action === 'history'){
         openHistory();
-      } else if(item.dataset.action === 'tour'){
-        startTour();
       }
       navMenu.setAttribute('hidden','');
       navToggle.setAttribute('aria-expanded','false');
@@ -5526,11 +6362,7 @@
       closeLogModal();
       closeExitModal();
       closeHistory();
-      endTour();
     }
-    var tourOpen = !document.getElementById('tourOverlay').hasAttribute('hidden');
-    if(tourOpen && e.key === 'ArrowRight'){ document.getElementById('tourNextBtn').click(); }
-    if(tourOpen && e.key === 'ArrowLeft'){ document.getElementById('tourPrevBtn').click(); }
   });
 
   // ---------- History sidebar ----------
@@ -5764,6 +6596,154 @@
     renderHistoryList();
   }
 
+  // ---------- System activity log: persistent record of automated actions ----------
+  // The toasts (auto-sent, skipped, auto-closed, bracket-refreshed) are
+  // ephemeral — they vanish if nobody's looking at the screen when they
+  // fire, which defeats the whole point of "leave it running, check in
+  // later." This is the same information, persisted, so it survives a
+  // page reload and can actually be reviewed whenever you check in.
+  var systemActivityLog = [];
+  var activityLogUnsubscribe = null;
+  var SYSTEM_ACTIVITY_LOG_MAX = 200;
+
+  function logSystemActivity(type, sym, text){
+    var entry = {
+      id: 'act' + Date.now() + Math.random().toString(36).slice(2, 6),
+      timestamp: Date.now(), type: type, sym: sym, text: text
+    };
+    systemActivityLog.unshift(entry);
+    if(systemActivityLog.length > SYSTEM_ACTIVITY_LOG_MAX){ systemActivityLog = systemActivityLog.slice(0, SYSTEM_ACTIVITY_LOG_MAX); }
+    renderActivityLog();
+    if(window.__shwoopAPI && currentUid){
+      window.__shwoopAPI.saveActivityLog(currentUid, systemActivityLog).catch(function(err){
+        console.error('Failed to save activity log:', err);
+      });
+    }
+  }
+
+  function loadActivityLogForUser(uid){
+    if(activityLogUnsubscribe){ activityLogUnsubscribe(); activityLogUnsubscribe = null; }
+    activityLogUnsubscribe = window.__shwoopAPI.watchActivityLog(uid, function(log){
+      systemActivityLog = log || [];
+      renderActivityLog();
+    });
+  }
+
+  function clearActivityLog(){
+    systemActivityLog = [];
+    if(activityLogUnsubscribe){ activityLogUnsubscribe(); activityLogUnsubscribe = null; }
+    renderActivityLog();
+  }
+
+  // ---------- Status page: the one place to check in ----------
+  function renderStatusPage(){
+    renderStatusHealth();
+    renderStatusPositions();
+    renderActivityLog();
+
+    var summaryEl = document.getElementById('statusAccountSummary');
+    if(!summaryEl) return;
+    if(!alpacaConnected){
+      summaryEl.innerHTML = '<div class="backtest-stat"><div class="backtest-stat-label">Account</div><div class="backtest-stat-value">Not connected</div></div>';
+      return;
+    }
+    fetchAlpacaAccountSummary().then(function(acct){
+      var equity = parseFloat(acct.equity || 0);
+      // last_equity is the account's equity as of the previous session's
+      // close — comparing against it, not against a fixed baseline, is
+      // what actually answers "how did today go."
+      var lastEquity = parseFloat(acct.last_equity || equity);
+      var cash = parseFloat(acct.cash || 0);
+      var buyingPower = parseFloat(acct.buying_power || 0);
+      var todayPL = equity - lastEquity;
+      var todayPLPct = lastEquity > 0 ? (todayPL / lastEquity * 100) : 0;
+      var plClass = todayPL >= 0 ? 'up' : 'down';
+
+      summaryEl.innerHTML =
+        '<div class="backtest-stat"><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value">$' + equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Today\'s P&L</div><div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value">$' + cash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value">$' + buyingPower.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>';
+    }).catch(function(err){
+      summaryEl.innerHTML = '<div class="backtest-stat"><div class="backtest-stat-label">Account</div><div class="backtest-stat-value down">Failed to load</div></div>';
+      console.error('Status page account fetch failed:', err);
+    });
+  }
+
+  function renderStatusHealth(){
+    var el = document.getElementById('statusHealthRows');
+    if(!el) return;
+    function row(label, ok, text){
+      return '<div class="settings-row"><div><div class="settings-row-title">' + label + '</div></div>' +
+        '<span class="quote-sync-status ' + (ok ? 'ok' : '') + '">' + text + '</span></div>';
+    }
+    // Reuses the exact status text the screener pages already maintain,
+    // rather than tracking a second, separate copy of the same state.
+    var dailyStatusEl = document.getElementById('analysisSyncStatus');
+    var intradayStatusEl = document.getElementById('intradaySyncStatus');
+    var dailyStatusText = (dailyStatusEl && dailyStatusEl.textContent) || 'Not yet run this session';
+    var intradayStatusText = (intradayStatusEl && intradayStatusEl.textContent) || '';
+
+    el.innerHTML =
+      row('Alpaca connection', alpacaConnected, alpacaConnected ? 'Connected' : 'Not connected') +
+      row('Daily screener', true, dailyStatusText) +
+      row('Daily auto-trade', alpacaAutoTradeEnabled, alpacaAutoTradeEnabled ? 'On' : 'Off') +
+      row('Intraday screener', alpacaIntradayEnabled, alpacaIntradayEnabled ? (intradayStatusText || 'On') : 'Off') +
+      row('Intraday auto-trade', alpacaAutoTradeIntradayEnabled, alpacaAutoTradeIntradayEnabled ? 'On' : 'Off');
+  }
+
+  function renderStatusPositions(){
+    var el = document.getElementById('statusPositionsBody');
+    if(!el) return;
+    var openPositions = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; });
+    if(openPositions.length === 0){
+      el.innerHTML = '<div class="labs-backtest-status">No open positions right now.</div>';
+      return;
+    }
+    el.innerHTML =
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Symbol</th><th>Dir</th><th>Qty</th><th>Entry</th><th>Current</th><th>P&L</th><th>Stop</th><th>Target</th></tr></thead>' +
+        '<tbody>' + openPositions.map(function(j){
+          var q = findQuote(j.sym);
+          var current = (q && q.price) ? q.price : j.entry;
+          var isLong = j.direction === 'Long';
+          var pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
+          var plPct = (current - j.entry) / j.entry * 100 * (isLong ? 1 : -1);
+          var plClass = pl >= 0 ? 'up' : 'down';
+          return '<tr>' +
+            '<td class="mono">' + j.sym + '</td>' +
+            '<td>' + j.direction + '</td>' +
+            '<td>' + j.qty + '</td>' +
+            '<td>' + fmt(j.entry) + '</td>' +
+            '<td>' + fmt(current) + '</td>' +
+            '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</td>' +
+            '<td>' + fmt(j.stop) + '</td>' +
+            '<td>' + fmt(j.t1) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody>' +
+      '</table>';
+  }
+
+  function renderActivityLog(){
+    var el = document.getElementById('statusActivityList');
+    var emptyEl = document.getElementById('statusActivityEmpty');
+    if(!el) return;
+    if(systemActivityLog.length === 0){
+      el.innerHTML = '';
+      if(emptyEl) emptyEl.removeAttribute('hidden');
+      return;
+    }
+    if(emptyEl) emptyEl.setAttribute('hidden', '');
+    var typeLabels = { sent: 'Sent', skipped: 'Skipped', position_action: 'Position' };
+    el.innerHTML = systemActivityLog.map(function(entry){
+      var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+      return '<div class="activity-log-row">' +
+        '<div class="activity-log-meta"><span class="mono">' + entry.sym + '</span><span class="activity-log-tag">' + (typeLabels[entry.type] || entry.type) + '</span><span class="activity-log-time">' + time + '</span></div>' +
+        '<div class="activity-log-text">' + entry.text + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
   // ---------- Auth (sign in / sign up / sign out) ----------
   var authMode = 'signin';
   var authTitleEl = document.getElementById('authTitle');
@@ -5865,8 +6845,6 @@
     try{ window.localStorage.setItem('shwoopnet:authEpoch', String(APP_AUTH_EPOCH)); }catch(e){}
   })();
 
-  var isNewSignup = false;
-
   authFormEl.addEventListener('submit', function(e){
     e.preventDefault();
     if(!window.__shwoopAPI) return;
@@ -5884,12 +6862,10 @@
     }
 
     authSubmitBtn.disabled = true;
-    if(authMode === 'signup'){ isNewSignup = true; }
     var action = authMode === 'signup'
       ? window.__shwoopAPI.signUp(email, password)
       : window.__shwoopAPI.signIn(email, password);
     action.catch(function(err){
-      isNewSignup = false;
       authErrorEl.textContent = friendlyAuthError(err);
       authErrorEl.classList.add('show');
     }).finally(function(){
@@ -5900,95 +6876,11 @@
   var accountEmailDesc = document.getElementById('accountEmailDesc');
   var signOutBtn = document.getElementById('signOutBtn');
   signOutBtn.addEventListener('click', function(){
-    if(isGuestMode){
-      exitGuestMode();
-    } else if(window.__shwoopAPI){
+    if(window.__shwoopAPI){
       window.__shwoopAPI.signOutUser();
     }
   });
 
-  // ---------- Guest mode: simulated data, nothing persists ----------
-  function buildGuestJournalSeed(){
-    function daysAgoStr(n){
-      var d = new Date();
-      d.setDate(d.getDate() - n);
-      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    }
-    return [
-      { id:'g1', date: daysAgoStr(2),  sym:'AMD',  direction:'Long',  entry:168.00, qty:100, exit:176.40, status:'closed' },
-      { id:'g2', date: daysAgoStr(5),  sym:'NVDA', direction:'Long',  entry:112.30, qty:50,  exit:108.10, status:'closed' },
-      { id:'g3', date: daysAgoStr(5),  sym:'AAPL', direction:'Long',  entry:225.00, qty:75,  exit:231.80, status:'closed' },
-      { id:'g4', date: daysAgoStr(9),  sym:'TSLA', direction:'Short', entry:258.00, qty:40,  exit:249.50, status:'closed' },
-      { id:'g5', date: daysAgoStr(14), sym:'MSFT', direction:'Long',  entry:498.00, qty:20,  exit:489.20, status:'closed' }
-    ];
-  }
-
-  function generateGuestAlerts(){
-    var today = new Date().toISOString().slice(0,10);
-    var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-    alertHistory = trades.map(function(t){
-      var price = findQuote(t.sym).price;
-      var evald = evaluateTradeAlert(t, price);
-      return {
-        id: 'guest_' + t.sym, date: today, sym: t.sym, tag: evald.tag, text: evald.text,
-        url: 'https://finance.yahoo.com/quote/' + t.sym + '/news', time: stamp
-      };
-    });
-    renderHistoryList();
-    showAlertToasts(alertHistory);
-  }
-
-  function enterGuestMode(){
-    // Set this FIRST, synchronously — the real onAuthChange handler checks
-    // isGuestMode and will refuse to accept a racing real-session restore
-    // once this is true (see below).
-    isGuestMode = true;
-    currentUid = null;
-
-    // Always tear down any real session/listeners, even if we don't think
-    // one is active — a real sign-in can be mid-flight (page just loaded,
-    // Firebase hasn't confirmed a persisted session yet) and calling
-    // signOutUser() on an already-signed-out session is a harmless no-op.
-    if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
-    if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
-    if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
-    pendingAnalysisUid = null;
-    resetTradesToDefault();
-    resetNewsAndEarnings();
-    resetAlpacaConnection();
-    if(window.__shwoopAPI){
-      window.__shwoopAPI.signOutUser().catch(function(err){
-        console.error('Sign-out before entering guest mode failed:', err);
-      });
-    }
-
-    authGateEl.setAttribute('hidden', '');
-
-    if(accountEmailDesc){ accountEmailDesc.textContent = 'Guest mode — simulated data, nothing is saved'; }
-    if(signOutBtn){ signOutBtn.textContent = 'Sign in / Sign up'; }
-
-    journalEntries = buildGuestJournalSeed();
-    renderCalendar();
-    renderJournalDetail();
-    renderTradeBlocks();
-    renderPLSummary();
-
-    startGuestQuoteLoop();
-    renderAllTradeCharts();
-    generateGuestAlerts();
-  }
-
-  function exitGuestMode(){
-    isGuestMode = false;
-    journalEntries = [];
-    alertHistory = [];
-    renderHistoryList();
-    if(priceLoopInterval){ clearInterval(priceLoopInterval); priceLoopInterval = null; }
-    authGateEl.removeAttribute('hidden');
-    setAuthMode('signin');
-  }
-
-  document.getElementById('guestBtn').addEventListener('click', enterGuestMode);
 
   // Private for now — only this account is allowed to actually use the
   // app once signed in. See the corresponding note where this is checked
@@ -6039,6 +6931,7 @@
           renderPLSummary();
         });
         loadAlertsForUser(user.uid);
+        loadActivityLogForUser(user.uid);
         pendingAnalysisUid = user.uid;
         loadMarketNewsIfSignedIn();
         loadEarningsIfSignedIn();
@@ -6048,20 +6941,20 @@
           ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
         });
         becomeLeaderIfAvailable();
-        renderAllTradeCharts(); // refresh from simulated to real, in case a guest signed in
-        if(isNewSignup){
-          isNewSignup = false;
-          setTimeout(function(){ startTour(); }, 500);
-        }
+        renderAllTradeCharts();
       } else if(!isGuestMode){
         currentUid = null;
         journalEntries = [];
         clearAlerts();
+        clearActivityLog();
         if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
         pendingAnalysisUid = null;
         resetTradesToDefault();
         resetNewsAndEarnings();
     resetAlpacaConnection();
+        if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
+        intradayTrades = [];
+        renderIntradayBlocks();
         renderTradeBlocks();
         renderWhatToWatch();
         authGateEl.removeAttribute('hidden');
@@ -6071,181 +6964,6 @@
         setAuthMode('signin');
       }
     });
-  });
-
-  // ---------- Walkthrough tour ----------
-  var tourSteps = [
-    {
-      title: 'Welcome to Shwoop',
-      text: "A quick tour of what's here and where to find it. Use the arrows below, or skip anytime."
-    },
-    {
-      selector: '.ticker-tape',
-      title: 'Live ticker tape',
-      text: 'Always on, at the very top of every page — your watchlist scrolls continuously so it never leaves your sight.'
-    },
-    {
-      page: 'brief',
-      selector: '.brief-cta-row',
-      title: 'Market Brief',
-      text: "Home base — opens automatically the first time you visit each day. A quick read on what's moving, plus a recap of your actual tracked trades."
-    },
-    {
-      page: 'trades',
-      selector: '.log-trade-btn',
-      title: 'Trade Overview',
-      text: "Your active setups — full charts, entry/stop/targets, sorted by what needs your attention first. Log a trade here once you take it, or send it straight to Alpaca."
-    },
-    {
-      page: 'journal',
-      selector: '.journal-calendar',
-      title: 'Trade Journal',
-      text: 'Every trade you log lands here on its date, with P&L tracked automatically. Click into any day to see what happened or exit an open position.'
-    },
-    {
-      page: 'labs',
-      selector: '.labs-method-card',
-      title: 'Labs',
-      text: 'The method behind the screener, in plain language, plus a real backtest tool — run the actual logic against real history for any symbol.'
-    },
-    {
-      before: function(){ toggleNotepad(true); },
-      selector: '#notepadPanel',
-      title: 'Notepad',
-      text: 'A floating scratchpad, open from any page. Saves automatically as you type — unlock it to move or resize, close it whenever.'
-    },
-    {
-      before: function(){ openHistory(); },
-      selector: '.history-sidebar',
-      title: 'History',
-      text: "Every market alert gets logged here for the day, even ones you've dismissed. Nothing gets lost."
-    },
-    {
-      page: 'changelog',
-      selector: '.changelog-entry:first-child',
-      title: 'Changelog',
-      text: "See what's changed, any time you're curious."
-    },
-    {
-      page: 'settings',
-      selector: '.theme-switcher',
-      title: 'Settings',
-      text: 'Themes, your Alpaca connection, auto-send, and every other preference lives here.'
-    }
-  ];
-
-  var tourIndex = 0;
-  var tourSpotlightEl = document.getElementById('tourSpotlight');
-  var tourBubbleEl = document.getElementById('tourBubble');
-  var tourConnectorLine = document.getElementById('tourConnectorLine');
-
-  function resetTourUI(){
-    toggleNotepad(false);
-    closeHistory();
-    var lm = document.getElementById('layoutMenu');
-    if(lm){ lm.setAttribute('hidden',''); }
-    navMenu.setAttribute('hidden','');
-  }
-
-  function clearTourHighlight(){
-    tourSpotlightEl.classList.add('centered');
-    tourSpotlightEl.style.width = '0px';
-    tourSpotlightEl.style.height = '0px';
-    tourConnectorLine.setAttribute('opacity', '0');
-  }
-
-  // The bubble never moves — it's always centered (set once in CSS). Only
-  // the spotlight and this connector move, so the tour points at and
-  // highlights whatever's being described instead of the whole card
-  // floating around the screen to chase each target.
-  function drawTourConnector(targetRect){
-    var bubbleRect = tourBubbleEl.getBoundingClientRect();
-    var bubbleCx = bubbleRect.left + bubbleRect.width / 2;
-    var bubbleCy = bubbleRect.top + bubbleRect.height / 2;
-    var targetCx = targetRect.left + targetRect.width / 2;
-    var targetCy = targetRect.top + targetRect.height / 2;
-
-    // Find where a straight line from the bubble's center to the target's
-    // center exits the bubble's own rectangle, so the line starts at the
-    // bubble's edge, not from the middle of the text.
-    var dx = targetCx - bubbleCx, dy = targetCy - bubbleCy;
-    var halfW = bubbleRect.width / 2, halfH = bubbleRect.height / 2;
-    var scale = Math.min(
-      dx !== 0 ? Math.abs(halfW / dx) : Infinity,
-      dy !== 0 ? Math.abs(halfH / dy) : Infinity
-    );
-    if(!isFinite(scale)) scale = 0;
-    var startX = bubbleCx + dx * scale;
-    var startY = bubbleCy + dy * scale;
-
-    tourConnectorLine.setAttribute('x1', startX);
-    tourConnectorLine.setAttribute('y1', startY);
-    tourConnectorLine.setAttribute('x2', targetCx);
-    tourConnectorLine.setAttribute('y2', targetCy);
-    tourConnectorLine.setAttribute('opacity', '1');
-  }
-
-  function renderTourStep(){
-    var step = tourSteps[tourIndex];
-    resetTourUI();
-    if(step.page){ showPage(step.page); }
-    if(step.before){ step.before(); }
-
-    document.getElementById('tourStepCount').textContent = (tourIndex + 1) + ' / ' + tourSteps.length;
-    document.getElementById('tourTitle').textContent = step.title;
-    document.getElementById('tourText').textContent = step.text;
-    document.getElementById('tourPrevBtn').disabled = (tourIndex === 0);
-    document.getElementById('tourNextBtn').textContent = (tourIndex === tourSteps.length - 1) ? 'Done' : 'Next ›';
-
-    if(!step.selector){
-      clearTourHighlight();
-      return;
-    }
-
-    requestAnimationFrame(function(){
-      var target = document.querySelector(step.selector);
-      if(!target){ clearTourHighlight(); return; }
-      // Always instant: measuring position right after a smooth scroll would
-      // race the scroll animation and read the pre-scroll location.
-      target.scrollIntoView({ block:'center', behavior:'instant' });
-      requestAnimationFrame(function(){
-        var rect = target.getBoundingClientRect();
-        var pad = 8;
-        tourSpotlightEl.classList.remove('centered');
-        tourSpotlightEl.style.top = (rect.top - pad) + 'px';
-        tourSpotlightEl.style.left = (rect.left - pad) + 'px';
-        tourSpotlightEl.style.width = (rect.width + pad * 2) + 'px';
-        tourSpotlightEl.style.height = (rect.height + pad * 2) + 'px';
-        drawTourConnector(rect);
-      });
-    });
-  }
-
-  function startTour(){
-    resetTourUI();
-    tourIndex = 0;
-    document.getElementById('tourOverlay').removeAttribute('hidden');
-    renderTourStep();
-  }
-  function endTour(){
-    document.getElementById('tourOverlay').setAttribute('hidden', '');
-    resetTourUI();
-  }
-  document.getElementById('tourNextBtn').addEventListener('click', function(e){
-    e.stopPropagation();
-    if(tourIndex === tourSteps.length - 1){ endTour(); return; }
-    tourIndex++;
-    renderTourStep();
-  });
-  document.getElementById('tourPrevBtn').addEventListener('click', function(e){
-    e.stopPropagation();
-    if(tourIndex === 0) return;
-    tourIndex--;
-    renderTourStep();
-  });
-  document.getElementById('tourSkipBtn').addEventListener('click', function(e){
-    e.stopPropagation();
-    endTour();
   });
 
   // ---------- What to Watch (Brief page recap of the actual trades) ----------
@@ -6313,6 +7031,64 @@
       '<div class="breadth-meta">' +
         '<span class="breadth-label ' + labelClass + '">' + label + ' — that\'s the bias going into today</span>' +
       '</div>';
+  }
+
+  // ---------- Market Brief headline & lede (generated, not written) ----------
+  // Built entirely from data already on this page — the same index
+  // proxies renderSentiment uses, and the same trades array Trade
+  // Overview shows. No separate data source, no AI call: just describing,
+  // in plain language, what the page already knows to be true right now.
+  function renderBriefHeadline(){
+    var headlineEl = document.querySelector('.brief-headline');
+    var ledeEl = document.querySelector('.brief-lede');
+    if(!headlineEl || !ledeEl) return;
+
+    var hour = new Date().getHours();
+    var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+    var reads = INDEX_PROXIES.map(function(ix){
+      var q = findQuote(ix.sym);
+      var chg = (q && q.price) ? pct(q.price, q.prevClose) : FALLBACK_INDEX_VALUES[ix.sym].chg;
+      return { name: ix.name, sym: ix.sym, chg: chg };
+    });
+    var avgChg = reads.reduce(function(sum, r){ return sum + r.chg; }, 0) / reads.length;
+    var spy = reads.filter(function(r){ return r.sym === 'SPY'; })[0];
+    var qqq = reads.filter(function(r){ return r.sym === 'QQQ'; })[0];
+    var marketOpen = isUsMarketOpen();
+
+    var tone;
+    if(Math.abs(avgChg) < 0.15) tone = 'markets are quiet so far';
+    else if(avgChg >= 0.6) tone = 'markets are pushing higher';
+    else if(avgChg > 0) tone = 'markets are modestly higher';
+    else if(avgChg <= -0.6) tone = 'markets are under real pressure';
+    else tone = 'markets are drifting lower';
+
+    headlineEl.textContent = greeting + '. ' + tone.charAt(0).toUpperCase() + tone.slice(1) +
+      (marketOpen ? '' : ' (markets closed right now)') + '.';
+
+    var ledeParts = [];
+    ledeParts.push('The S&P is ' + (spy.chg >= 0 ? 'up' : 'down') + ' ' + Math.abs(spy.chg).toFixed(2) +
+      '%, the Nasdaq ' + (qqq.chg >= 0 ? 'up' : 'down') + ' ' + Math.abs(qqq.chg).toFixed(2) + '%.');
+
+    if(Math.abs(qqq.chg - spy.chg) > 0.3){
+      ledeParts.push(qqq.chg > spy.chg ? 'Tech is outperforming the broader market today.' : 'Tech is lagging the broader market today.');
+    }
+
+    if(isGuestMode){
+      ledeParts.push('Everything below is simulated — sign in for real, live-screened picks.');
+    } else {
+      var realTrades = trades.filter(function(t){ return t.analysisIsReal; });
+      if(realTrades.length === 0){
+        ledeParts.push("Today's screener hasn't cleared any setups yet — check Trade Overview for the latest.");
+      } else {
+        var longs = realTrades.filter(function(t){ return t.direction === 'Long'; }).length;
+        var shorts = realTrades.length - longs;
+        var splitDesc = longs === realTrades.length ? 'all long' : shorts === realTrades.length ? 'all short' : longs + ' long, ' + shorts + ' short';
+        ledeParts.push("Today's screener surfaced " + realTrades.length + (realTrades.length === 1 ? ' setup' : ' setups') + ' (' + splitDesc + ').');
+      }
+    }
+
+    ledeEl.textContent = ledeParts.join(' ');
   }
 
   function renderMovers(){
@@ -6434,12 +7210,22 @@
   renderWhatToWatch();
   renderSentiment();
   renderMovers();
+  renderBriefHeadline();
   statCta();
   updateClock();
   renderHistoryList();
   populateBacktestSymbolSelect();
   loadAlpacaAutoTradePref();
+  document.getElementById('riskPercentDec').addEventListener('click', function(){ setRiskPercent(riskPercent - 0.5); });
+  document.getElementById('riskPercentInc').addEventListener('click', function(){ setRiskPercent(riskPercent + 0.5); });
+  loadRiskPercentPref();
+  loadAlpacaAutoTradeIntradayPref();
+  document.getElementById('intradayToggle').addEventListener('click', function(){
+    setIntradayEnabled(!alpacaIntradayEnabled);
+  });
+  loadIntradayPref();
   document.getElementById('runBacktestBtn').addEventListener('click', runBacktestClicked);
+  document.getElementById('runUniverseBacktestBtn').addEventListener('click', runUniverseBacktestClicked);
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
