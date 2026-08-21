@@ -371,6 +371,20 @@
   .status-badge.hit{ border-color: var(--gain); color: var(--gain); background: var(--gain-glow); }
   .status-badge.stopped{ border-color: var(--loss); color: var(--loss); background: var(--loss-glow); }
 
+  .trade-action-banner{
+    display:flex; align-items:flex-start; gap:10px;
+    margin:0 16px 14px 16px; padding:11px 15px;
+    background: var(--panel-raised); border-left:3px solid var(--amber); border-radius:4px;
+    font-size:12.5px; line-height:1.6; color: var(--paper);
+  }
+  .trade-action-banner .action-icon{ color: var(--amber); font-weight:700; flex-shrink:0; line-height:1.6; }
+  .trade-action-banner.done{ border-left-color: var(--border); }
+  .trade-action-banner.done .action-icon{ color: var(--muted); }
+  .trade-action-verb{ font-weight:700; }
+  .trade-action-verb.buy{ color: var(--gain); }
+  .trade-action-verb.short{ color: var(--loss); }
+  .trade-action-verb.done{ color: var(--muted); }
+
   .trade-detail{
     display:flex; gap:22px; align-items:flex-start;
     padding: 16px 16px 18px 16px; border-top:1px solid var(--border);
@@ -417,6 +431,10 @@
   .chart-crosshair-readout .cr-up{ color: var(--gain); }
   .chart-crosshair-readout .cr-down{ color: var(--loss); }
   .crosshair-line{ stroke: var(--muted); stroke-width:1; stroke-dasharray:3,3; pointer-events:none; }
+  .crosshair-hline{ stroke: var(--muted); stroke-width:1; stroke-dasharray:3,3; pointer-events:none; }
+  .crosshair-tag{ pointer-events:none; }
+  .crosshair-tag text{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; }
+  .axis-tag-text{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; font-weight:700; }
 
   @media (max-width: 900px){
     .trade-columns.head{ display:none; }
@@ -829,6 +847,17 @@
       }, function(err){
         console.error('Alerts sync error:', err);
       });
+    },
+    saveTradeAnalysis: function(uid, analysis, forDate){
+      return setDoc(doc(db, 'users', uid), { tradeAnalysis: analysis, tradeAnalysisDate: forDate }, { merge: true });
+    },
+    watchTradeAnalysis: function(uid, callback){
+      return onSnapshot(doc(db, 'users', uid), function(snap){
+        var data = snap.exists() ? snap.data() : {};
+        callback({ tradeAnalysis: data.tradeAnalysis || null, tradeAnalysisDate: data.tradeAnalysisDate || null });
+      }, function(err){
+        console.error('Trade analysis sync error:', err);
+      });
     }
   });
 </script>
@@ -1086,7 +1115,7 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Trade Overview</div>
-        <div class="trades-sub">Simulated entries, stops and targets — chart below each row.</div>
+        <div class="trades-sub" id="tradesSubtitle">Simulated entries, stops and targets — chart below each row.</div>
       </div>
       <div class="trades-header-right">
         <div class="layout-dropdown">
@@ -1213,6 +1242,13 @@
         <div>
           <div class="settings-row-title">Live data</div>
           <div class="settings-row-desc quote-sync-status" id="quoteSyncStatus">Connecting…</div>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Trade analysis</div>
+          <div class="settings-row-desc quote-sync-status" id="analysisSyncStatus">—</div>
         </div>
       </div>
 
@@ -1358,7 +1394,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoopnet. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Current prices are live quotes from Finnhub. 1W/1M/1Y chart history is real historical data from Twelve Data; the 1D view and all trade setups and journal entries remain simulated for demonstration purposes. Nothing on this site constitutes financial, investment, or trading advice.</p>
+    <p>Current prices are live quotes from Finnhub. 1W/1M/1Y chart history is real historical data from Twelve Data. For signed-in accounts, trade direction, entry/stop/targets, and reasoning are calculated daily from real technical levels (moving averages, recent support/resistance, momentum) — not hand-written. Guest mode uses simulated data throughout. The 1D chart view stays simulated for everyone. Nothing on this site constitutes financial, investment, or trading advice.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a> and <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>.</p>
   </footer>
 
@@ -1413,6 +1449,13 @@
       ] }
   ];
 
+  // Snapshot the original simulated direction/status/notes before anything
+  // (real analysis) can overwrite them in place, so we can cleanly restore
+  // this baseline for guest mode or after signing out.
+  var defaultTradeMeta = trades.map(function(t){
+    return { sym: t.sym, direction: t.direction, status: t.status, statusLabel: t.statusLabel, notes: t.notes.slice() };
+  });
+
   function calibrateTradeLevels(){
     trades.forEach(function(t){
       var q = findQuote(t.sym);
@@ -1425,6 +1468,165 @@
     });
   }
   calibrateTradeLevels();
+
+  function resetTradesToDefault(){
+    trades.forEach(function(t){
+      var def = defaultTradeMeta.filter(function(d){ return d.sym === t.sym; })[0];
+      if(def){
+        t.direction = def.direction;
+        t.status = def.status;
+        t.statusLabel = def.statusLabel;
+        t.notes = def.notes.slice();
+      }
+      t.analysisIsReal = false;
+    });
+    calibrateTradeLevels();
+    var subtitleEl = document.getElementById('tradesSubtitle');
+    if(subtitleEl){ subtitleEl.textContent = 'Simulated entries, stops and targets — chart below each row.'; }
+    var statusEl = document.getElementById('analysisSyncStatus');
+    if(statusEl){ statusEl.textContent = '—'; statusEl.className = 'quote-sync-status'; }
+  }
+
+  // ---------- Real technical analysis (signed-in accounts only) ----------
+  // Computed from actual historical daily closes (Twelve Data), not
+  // fictional narrative. Guest mode intentionally keeps the simulated
+  // percentage-offset version above and never runs this.
+  function computeSMA(closes, period){
+    if(closes.length < period) return null;
+    var slice = closes.slice(closes.length - period);
+    return slice.reduce(function(a,b){ return a + b; }, 0) / period;
+  }
+
+  function computeTechnicalAnalysis(bars, currentPrice){
+    var closes = bars.map(function(b){ return b.c; });
+    var sma20 = computeSMA(closes, 20);
+    var sma50 = computeSMA(closes, 50);
+    var recent20 = bars.slice(-20);
+    var high20 = Math.max.apply(null, recent20.map(function(b){ return b.h; }));
+    var low20 = Math.min.apply(null, recent20.map(function(b){ return b.l; }));
+    var priorIdx = closes.length >= 6 ? closes.length - 6 : 0;
+    var priorClose = closes[priorIdx];
+    var momentum5d = priorClose ? ((currentPrice - priorClose) / priorClose * 100) : 0;
+
+    var direction = (sma50 !== null) ? (currentPrice >= sma50 ? 'Long' : 'Short') : 'Long';
+
+    var entry = sma20 !== null ? sma20 : currentPrice;
+    var stop, t1, t2;
+    if(direction === 'Long'){
+      stop = low20 * 0.995;
+      if(stop >= entry){ stop = entry * 0.965; }
+      var risk = entry - stop;
+      t1 = entry + risk * 1.5;
+      t2 = entry + risk * 2.75;
+    } else {
+      stop = high20 * 1.005;
+      if(stop <= entry){ stop = entry * 1.035; }
+      var risk2 = stop - entry;
+      t1 = entry - risk2 * 1.5;
+      t2 = entry - risk2 * 2.75;
+    }
+
+    var distFromEntryPct = Math.abs((currentPrice - entry) / entry * 100);
+    var status = 'watching', statusLabel = 'Watching';
+    if(distFromEntryPct < 2){ status = 'active'; statusLabel = 'Active'; }
+    if(direction === 'Long' && currentPrice >= t2){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(direction === 'Short' && currentPrice <= t2){ status = 'hit'; statusLabel = 'Target hit'; }
+    if(direction === 'Long' && currentPrice <= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+    if(direction === 'Short' && currentPrice >= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+
+    var notes = [];
+    if(sma20 !== null && sma50 !== null){
+      notes.push('Trading ' + (currentPrice > sma20 ? 'above' : 'below') + ' its 20-day moving average of $' + sma20.toFixed(2) + ', with the 50-day at $' + sma50.toFixed(2) + '.');
+    } else {
+      notes.push('Not enough history yet for a full moving-average read — using recent price action instead.');
+    }
+    notes.push('20-day range runs from $' + low20.toFixed(2) + ' support up to $' + high20.toFixed(2) + ' resistance.');
+    notes.push('Price is ' + (momentum5d >= 0 ? 'up' : 'down') + ' ' + Math.abs(momentum5d).toFixed(1) + '% over the last 5 sessions' + (Math.abs(momentum5d) > 3 ? ', a meaningful recent move' : '') + '.');
+    notes.push('Entry sits near the 20-day average, stop just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan.');
+
+    return { direction: direction, entry: entry, stop: stop, t1: t1, t2: t2, status: status, statusLabel: statusLabel, notes: notes };
+  }
+
+  var tradeAnalysisUnsubscribe = null;
+  var isRunningTradeAnalysis = false;
+
+  function updateAnalysisStatus(text, ok){
+    var el = document.getElementById('analysisSyncStatus');
+    if(!el) return;
+    el.textContent = text;
+    el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
+  }
+
+  function runRealTradeAnalysis(){
+    if(isRunningTradeAnalysis || isGuestMode) return;
+    isRunningTradeAnalysis = true;
+    var today = new Date().toISOString().slice(0,10);
+
+    var promises = trades.map(function(t){
+      return fetchHistory(t.sym, '1M').then(function(bars){
+        var q = findQuote(t.sym);
+        if(!q || !bars || bars.length < 10) return;
+        var result = computeTechnicalAnalysis(bars, q.price);
+        t.direction = result.direction;
+        t.entry = result.entry;
+        t.stop = result.stop;
+        t.t1 = result.t1;
+        t.t2 = result.t2;
+        t.status = result.status;
+        t.statusLabel = result.statusLabel;
+        t.notes = result.notes;
+        t.analysisIsReal = true;
+      }).catch(function(err){
+        console.error('Real analysis failed for', t.sym, '— keeping calibrated fallback.', err);
+      });
+    });
+
+    Promise.all(promises).then(function(){
+      isRunningTradeAnalysis = false;
+      renderTradeBlocks();
+      renderWhatToWatch();
+      updateAnalysisStatus('Recalculated today · ' + new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }), true);
+      var subtitleEl = document.getElementById('tradesSubtitle');
+      if(subtitleEl){ subtitleEl.textContent = 'Real technical analysis, recalculated daily — chart below each row.'; }
+      if(window.__shwoopAPI && currentUid){
+        var snapshot = trades.map(function(t){
+          return { sym:t.sym, direction:t.direction, entry:t.entry, stop:t.stop, t1:t.t1, t2:t.t2, status:t.status, statusLabel:t.statusLabel, notes:t.notes };
+        });
+        window.__shwoopAPI.saveTradeAnalysis(currentUid, snapshot, today).catch(function(err){
+          console.error('Failed to save trade analysis:', err);
+        });
+      }
+    });
+  }
+
+  function applyStoredTradeAnalysis(list){
+    list.forEach(function(saved){
+      var t = trades.filter(function(x){ return x.sym === saved.sym; })[0];
+      if(!t) return;
+      t.direction = saved.direction;
+      t.entry = saved.entry; t.stop = saved.stop; t.t1 = saved.t1; t.t2 = saved.t2;
+      t.status = saved.status; t.statusLabel = saved.statusLabel; t.notes = saved.notes;
+      t.analysisIsReal = true;
+    });
+    renderTradeBlocks();
+    renderWhatToWatch();
+    updateAnalysisStatus("Today's analysis loaded", true);
+    var subtitleEl2 = document.getElementById('tradesSubtitle');
+    if(subtitleEl2){ subtitleEl2.textContent = 'Real technical analysis, recalculated daily — chart below each row.'; }
+  }
+
+  function loadTradeAnalysisForUser(uid){
+    if(tradeAnalysisUnsubscribe){ tradeAnalysisUnsubscribe(); tradeAnalysisUnsubscribe = null; }
+    updateAnalysisStatus('Calculating…', null);
+    tradeAnalysisUnsubscribe = window.__shwoopAPI.watchTradeAnalysis(uid, function(data){
+      var today = new Date().toISOString().slice(0,10);
+      if(data.tradeAnalysisDate === today && data.tradeAnalysis && data.tradeAnalysis.length){
+        applyStoredTradeAnalysis(data.tradeAnalysis);
+      } else {
+        runRealTradeAnalysis();
+      }
+    });
+  }
 
   function fmt(n){ return n.toFixed(2); }
   function pct(a,b){ return ((a-b)/b*100); }
@@ -1472,6 +1674,33 @@
     document.getElementById('ctaStat').textContent = trades.length + ' trades on the board today, ' + active + ' active';
   }
 
+  function buildActionHTML(t){
+    var isLong = t.direction !== 'Short';
+    var exitVerb = isLong ? 'Sell' : 'Cover';
+    var stopVerb = isLong ? 'drops to' : 'rises to';
+
+    if(t.status === 'hit'){
+      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already reached Target 2 at $' + fmt(t.t2) + '. This setup has played out, no action needed.' };
+    }
+    if(t.status === 'stopped'){
+      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already stopped out at $' + fmt(t.stop) + '. This setup is closed, no action needed.' };
+    }
+    if(t.status === 'watching'){
+      return { done: false, html:
+        'Wait for ' + t.sym + ' to reach <strong>$' + fmt(t.entry) + '</strong> before entering. Once triggered: ' +
+        exitVerb.toLowerCase() + ' half at Target 1 ($' + fmt(t.t1) + '), the rest at Target 2 ($' + fmt(t.t2) + '). ' +
+        'Exit everything if price ' + stopVerb + ' $' + fmt(t.stop) + ' first.'
+      };
+    }
+    var verb = isLong ? 'Buy' : 'Short';
+    var verbClass = isLong ? 'buy' : 'short';
+    return { done: false, html:
+      '<span class="trade-action-verb ' + verbClass + '">' + verb + '</span> ' + t.sym + ' near <strong>$' + fmt(t.entry) + '</strong>. ' +
+      exitVerb + ' half at Target 1 ($' + fmt(t.t1) + '), the rest at Target 2 ($' + fmt(t.t2) + '). ' +
+      'Exit everything immediately if price ' + stopVerb + ' <strong>$' + fmt(t.stop) + '</strong>.'
+    };
+  }
+
   function renderTradeRow(t){
     var q = findQuote(t.sym);
     var change = pct(q.price, q.prevClose);
@@ -1480,6 +1709,7 @@
     var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
     var curScale = (chartStates[t.sym] && chartStates[t.sym].scale) || 'linear';
     var curTf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
+    var action = buildActionHTML(t);
     function tfBtn(tf){
       return '<button class="chart-tool-btn' + (curTf===tf?' active':'') + '" data-tf="' + tf + '" data-sym="' + t.sym + '">' + tf + '</button>';
     }
@@ -1502,6 +1732,10 @@
             '<div class="t-t2 mono" style="margin-bottom:6px;">' + fmt(t.t2) + '</div>' +
             '<span class="status-badge ' + badgeClass + '">' + t.statusLabel + '</span>' +
           '</div>' +
+        '</div>' +
+        '<div class="trade-action-banner' + (action.done ? ' done' : '') + '">' +
+          '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span>' +
+          '<span class="action-text">' + action.html + '</span>' +
         '</div>' +
         '<div class="trade-detail" id="chartwrap-' + t.sym + '">' +
           '<div class="trade-chart-col">' +
@@ -1669,6 +1903,40 @@
     return d.toLocaleDateString([], { month:'short', day:'numeric' });
   }
 
+  // Standard "nice numbers for graph labels" algorithm (Heckbert) — snaps
+  // gridlines to clean round values instead of arbitrary computed decimals.
+  function niceNum(range, round){
+    if(range <= 0) return 1;
+    var exponent = Math.floor(Math.log10(range));
+    var fraction = range / Math.pow(10, exponent);
+    var niceFraction;
+    if(round){
+      if(fraction < 1.5) niceFraction = 1;
+      else if(fraction < 3) niceFraction = 2;
+      else if(fraction < 7) niceFraction = 5;
+      else niceFraction = 10;
+    } else {
+      if(fraction <= 1) niceFraction = 1;
+      else if(fraction <= 2) niceFraction = 2;
+      else if(fraction <= 5) niceFraction = 5;
+      else niceFraction = 10;
+    }
+    return niceFraction * Math.pow(10, exponent);
+  }
+
+  function computeNiceScale(lo, hi, tickCount){
+    if(hi <= lo){ hi = lo + 1; }
+    var range = niceNum(hi - lo, false);
+    var spacing = niceNum(range / Math.max(1, tickCount - 1), true);
+    var niceLo = Math.floor(lo / spacing) * spacing;
+    var niceHi = Math.ceil(hi / spacing) * spacing;
+    var ticks = [];
+    for(var v = niceLo; v <= niceHi + spacing * 0.5; v += spacing){
+      ticks.push(Math.round(v * 10000) / 10000);
+    }
+    return { lo: niceLo, hi: niceHi, ticks: ticks, spacing: spacing };
+  }
+
   function drawCandles(svg, data, scale, priceScaleFactor, tf){
     var W = 760, H = 200, padTop=12, padBottom=30, padRight=54;
     var plotW = W - padRight, plotH = H - padTop - padBottom;
@@ -1677,11 +1945,25 @@
     var loRaw = Math.min.apply(null, data.map(function(d){return d.l;}));
     var hiRaw = Math.max.apply(null, data.map(function(d){return d.h;}));
     var useLog = (scale === 'log') && loRaw > 0;
-    var loT0 = useLog ? Math.log(loRaw) : loRaw;
-    var hiT0 = useLog ? Math.log(hiRaw) : hiRaw;
-    var mid = (loT0 + hiT0) / 2;
-    var halfRange = ((hiT0 - loT0) || (Math.abs(mid) * 0.02) || 1) / 2 / priceScaleFactor;
-    var loT = mid - halfRange, hiT = mid + halfRange;
+
+    var loT, hiT, niceTicks;
+    if(useLog){
+      var loT0 = Math.log(loRaw), hiT0 = Math.log(hiRaw);
+      var mid = (loT0 + hiT0) / 2;
+      var halfRange = ((hiT0 - loT0) || (Math.abs(mid) * 0.02) || 1) / 2 / priceScaleFactor;
+      loT = mid - halfRange; hiT = mid + halfRange;
+      niceTicks = null;
+    } else {
+      // A little breathing room before snapping to round numbers — keeps
+      // wicks off the very edge and stops the scale from feeling like it's
+      // constantly re-stretching as you pan through the data.
+      var padAmt = (hiRaw - loRaw) * 0.08 || hiRaw * 0.01 || 1;
+      var paddedLo = loRaw - padAmt, paddedHi = hiRaw + padAmt;
+      var mid2 = (paddedLo + paddedHi) / 2;
+      var half2 = (paddedHi - paddedLo) / 2 / priceScaleFactor;
+      var nice = computeNiceScale(mid2 - half2, mid2 + half2, 5);
+      loT = nice.lo; hiT = nice.hi; niceTicks = nice.ticks;
+    }
     var range = (hiT - loT) || 1;
 
     function y(v){
@@ -1693,12 +1975,21 @@
     var cw = Math.max(2, xStep * 0.55);
     var parts = [];
 
-    var glCount = 3;
-    for(var g=0; g<=glCount; g++){
-      var gv = useLog ? Math.exp(loT + (range/glCount)*g) : (loT + (range/glCount)*g);
-      var gy = y(gv);
-      parts.push('<line class="grid-line" x1="0" y1="'+gy+'" x2="'+plotW+'" y2="'+gy+'"/>');
-      parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(1)+'</text>');
+    if(useLog){
+      var glCount = 3;
+      for(var g=0; g<=glCount; g++){
+        var gv = Math.exp(loT + (range/glCount)*g);
+        var gy = y(gv);
+        parts.push('<line class="grid-line" x1="0" y1="'+gy+'" x2="'+plotW+'" y2="'+gy+'"/>');
+        parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(1)+'</text>');
+      }
+    } else {
+      niceTicks.forEach(function(gv){
+        var gy = y(gv);
+        if(gy < padTop - 1 || gy > padTop + plotH + 1) return;
+        parts.push('<line class="grid-line" x1="0" y1="'+gy+'" x2="'+plotW+'" y2="'+gy+'"/>');
+        parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(2)+'</text>');
+      });
     }
 
     // Time axis: show roughly 4-5 evenly spaced date/time labels.
@@ -1725,7 +2016,21 @@
       parts.push('<rect x="'+(x-cw/2)+'" y="'+bodyTop+'" width="'+cw+'" height="'+bodyH+'" fill="'+color+'"/>');
     });
 
+    // Live price line — the signature "where are we right now" reference
+    // every real trading platform shows, dashed across the chart with a
+    // colored tag on the axis.
+    var lastBar = data[data.length - 1];
+    if(lastBar){
+      var lastUp = lastBar.c >= lastBar.o;
+      var priceColor = lastUp ? 'var(--gain)' : 'var(--loss)';
+      var ly = y(lastBar.c);
+      parts.push('<line x1="0" y1="'+ly+'" x2="'+plotW+'" y2="'+ly+'" stroke="'+priceColor+'" stroke-width="1" stroke-dasharray="3,3"/>');
+      parts.push('<rect x="'+plotW+'" y="'+(ly-8)+'" width="'+padRight+'" height="16" fill="'+priceColor+'"/>');
+      parts.push('<text class="axis-tag-text" x="'+(plotW+8)+'" y="'+(ly+4)+'" fill="var(--ink)">'+lastBar.c.toFixed(2)+'</text>');
+    }
+
     svg.innerHTML = parts.join('');
+    return { loT: loT, hiT: hiT, range: range, useLog: useLog, padTop: padTop, plotH: plotH, plotW: plotW };
   }
 
   function renderChartView(sym){
@@ -1733,7 +2038,7 @@
     var svg = document.getElementById('chart-' + sym);
     if(!state || !svg) return;
     var visible = state.data.slice(state.viewStart, state.viewEnd);
-    drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf);
+    state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf);
   }
 
   function initChartState(sym, tf, data){
@@ -1836,21 +2141,27 @@
     var readout = document.getElementById('crosshair-' + sym);
     if(readout) readout.setAttribute('hidden', '');
     var svg = document.getElementById('chart-' + sym);
-    if(svg){ var line = svg.querySelector('.crosshair-line'); if(line) line.remove(); }
+    if(svg){
+      svg.querySelectorAll('.crosshair-line, .crosshair-hline, .crosshair-tag').forEach(function(el){ el.remove(); });
+    }
   }
 
-  function updateCrosshair(sym, clientX){
+  function updateCrosshair(sym, clientX, clientY){
     var state = chartStates[sym];
     var svg = document.getElementById('chart-' + sym);
     var readout = document.getElementById('crosshair-' + sym);
-    if(!state || !svg || !readout) return;
+    var sc = state && state.lastScale;
+    if(!state || !svg || !readout || !sc) return;
 
-    var plotW = 760 - 54;
     var localX = svgLocalX(svg, clientX);
-    if(localX < 0 || localX > plotW){ hideCrosshair(sym); return; }
+    var localY = svgLocalY(svg, clientY);
+    if(localX < 0 || localX > sc.plotW || localY < sc.padTop || localY > sc.padTop + sc.plotH){
+      hideCrosshair(sym);
+      return;
+    }
 
     var count = state.viewEnd - state.viewStart;
-    var xStep = plotW / count;
+    var xStep = sc.plotW / count;
     var idx = Math.max(0, Math.min(Math.floor(localX / xStep), count - 1));
     var bar = state.data[state.viewStart + idx];
     if(!bar) return;
@@ -1864,14 +2175,45 @@
       '<span>C <span class="' + cls + '">' + bar.c.toFixed(2) + '</span></span>';
     readout.removeAttribute('hidden');
 
-    var existingLine = svg.querySelector('.crosshair-line');
-    if(existingLine){ existingLine.remove(); }
+    svg.querySelectorAll('.crosshair-line, .crosshair-hline, .crosshair-tag').forEach(function(el){ el.remove(); });
+
+    var ns = 'http://www.w3.org/2000/svg';
     var lineX = idx * xStep + xStep / 2;
-    var lineEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    lineEl.setAttribute('class', 'crosshair-line');
-    lineEl.setAttribute('x1', lineX); lineEl.setAttribute('x2', lineX);
-    lineEl.setAttribute('y1', 0); lineEl.setAttribute('y2', 200);
-    svg.appendChild(lineEl);
+
+    var vLine = document.createElementNS(ns, 'line');
+    vLine.setAttribute('class', 'crosshair-line');
+    vLine.setAttribute('x1', lineX); vLine.setAttribute('x2', lineX);
+    vLine.setAttribute('y1', sc.padTop); vLine.setAttribute('y2', sc.padTop + sc.plotH);
+    svg.appendChild(vLine);
+
+    var hLine = document.createElementNS(ns, 'line');
+    hLine.setAttribute('class', 'crosshair-hline');
+    hLine.setAttribute('x1', 0); hLine.setAttribute('x2', sc.plotW);
+    hLine.setAttribute('y1', localY); hLine.setAttribute('y2', localY);
+    svg.appendChild(hLine);
+
+    // Price tag on the right axis, at the exact cursor position (not
+    // snapped to a bar) — matches TradingView/Tradovate's axis-anchored tag.
+    var frac = 1 - (localY - sc.padTop) / sc.plotH;
+    var priceAtCursor = sc.useLog ? Math.exp(sc.loT + frac * sc.range) : (sc.loT + frac * sc.range);
+    var priceTag = document.createElementNS(ns, 'g');
+    priceTag.setAttribute('class', 'crosshair-tag');
+    priceTag.innerHTML =
+      '<rect x="' + sc.plotW + '" y="' + (localY - 8) + '" width="54" height="16" fill="var(--paper)"/>' +
+      '<text class="axis-tag-text" x="' + (sc.plotW + 8) + '" y="' + (localY + 4) + '" fill="var(--ink)">' + priceAtCursor.toFixed(2) + '</text>';
+    svg.appendChild(priceTag);
+
+    // Date tag on the bottom axis, under the hovered bar.
+    var dateLabel = formatAxisDate(bar.t, state.tf);
+    if(dateLabel){
+      var dateTag = document.createElementNS(ns, 'g');
+      dateTag.setAttribute('class', 'crosshair-tag');
+      var tagW = Math.max(46, dateLabel.length * 6.2);
+      dateTag.innerHTML =
+        '<rect x="' + (lineX - tagW/2) + '" y="' + (sc.padTop + sc.plotH + 2) + '" width="' + tagW + '" height="16" fill="var(--paper)"/>' +
+        '<text class="axis-tag-text" x="' + lineX + '" y="' + (sc.padTop + sc.plotH + 14) + '" text-anchor="middle" fill="var(--ink)">' + dateLabel + '</text>';
+      svg.appendChild(dateTag);
+    }
   }
 
   function setupChartInteractivity(sym){
@@ -1956,7 +2298,7 @@
         if(localXHover > plotWHover){ svg.style.cursor = 'ns-resize'; }
         else if(localYHover > CHART_PLOT_BOTTOM_Y){ svg.style.cursor = 'ew-resize'; }
         else { svg.style.cursor = 'crosshair'; }
-        updateCrosshair(sym, e.clientX);
+        updateCrosshair(sym, e.clientX, e.clientY);
       }
     });
     svg.addEventListener('pointerup', function(){
@@ -1998,6 +2340,7 @@
   }
 
   var hasLiveCalibrated = false;
+  var pendingAnalysisUid = null;
 
   function fetchAllQuotes(){
     var results = [];
@@ -2025,14 +2368,25 @@
 
   function onQuoteBatchDone(results){
     updateQuoteSyncStatus(results);
+    var anySuccess = results.some(function(r){ return r; });
+
     // Recalibrate entry/stop/targets against real pricing exactly once, the
     // first time live data actually lands — not on every refresh, or the
     // trade plan would visibly shift every 45 seconds.
-    if(!hasLiveCalibrated && !isGuestMode && results.some(function(r){ return r; })){
+    if(!hasLiveCalibrated && !isGuestMode && anySuccess){
       hasLiveCalibrated = true;
       calibrateTradeLevels();
       renderTradeBlocks();
       renderWhatToWatch();
+    }
+
+    // Separate from the one-time calibration above: a pending analysis
+    // request should fire on ANY successful batch, including a second
+    // sign-in later in the session after hasLiveCalibrated already fired.
+    if(pendingAnalysisUid && anySuccess){
+      var analysisUid = pendingAnalysisUid;
+      pendingAnalysisUid = null;
+      loadTradeAnalysisForUser(analysisUid);
     }
   }
 
@@ -3177,6 +3531,9 @@
     // signOutUser() on an already-signed-out session is a harmless no-op.
     if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
     if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
+    if(tradeAnalysisUnsubscribe){ tradeAnalysisUnsubscribe(); tradeAnalysisUnsubscribe = null; }
+    pendingAnalysisUid = null;
+    resetTradesToDefault();
     if(window.__shwoopAPI){
       window.__shwoopAPI.signOutUser().catch(function(err){
         console.error('Sign-out before entering guest mode failed:', err);
@@ -3244,6 +3601,7 @@
           renderPLSummary();
         });
         loadAlertsForUser(user.uid);
+        pendingAnalysisUid = user.uid;
         startRealQuoteLoop();
         renderAllTradeCharts(); // refresh from simulated to real, in case a guest signed in
         if(isNewSignup){
@@ -3254,6 +3612,11 @@
         currentUid = null;
         journalEntries = [];
         clearAlerts();
+        if(tradeAnalysisUnsubscribe){ tradeAnalysisUnsubscribe(); tradeAnalysisUnsubscribe = null; }
+        pendingAnalysisUid = null;
+        resetTradesToDefault();
+        renderTradeBlocks();
+        renderWhatToWatch();
         authGateEl.removeAttribute('hidden');
         document.getElementById('authEmail').value = '';
         document.getElementById('authPassword').value = '';
