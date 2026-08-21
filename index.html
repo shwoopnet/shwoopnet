@@ -343,6 +343,20 @@
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
   }
 
+  .priority-label{
+    display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; margin: 24px 2px 10px 2px;
+  }
+  .priority-label:first-child{ margin-top:0; }
+  .priority-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .in-position-label{ color: var(--gain); }
+  .in-position-label .priority-dot{ background: var(--gain); box-shadow: 0 0 8px var(--gain-glow); animation: priorityPulse 2s ease-in-out infinite; }
+  .needs-entry-label{ color: var(--amber); }
+  .needs-entry-label .priority-dot{ background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); }
+  @keyframes priorityPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
+  [data-reduce-motion="true"] .priority-dot{ animation:none; }
+  .trade-block-in-position{ border-color: var(--gain); box-shadow: 0 0 0 1px var(--gain), 0 8px 24px rgba(0,0,0,.3); }
+  .trade-block-needs-entry{ border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber), 0 8px 24px rgba(0,0,0,.3); }
   .finished-trades-section{ margin-top: 28px; }
   .finished-toggle{
     display:flex; align-items:center; gap:8px; width:100%; text-align:left;
@@ -735,19 +749,29 @@
     cursor: nwse-resize; display:none;
   }
   .notepad-panel.unlocked .notepad-resize-handle{ display:block; }
-  .alpaca-dock{ position:fixed; bottom:0; left:20px; z-index:440; width:340px; max-width:calc(100% - 40px); }
   .alpaca-dock-tab{
-    width:100%; display:flex; justify-content:space-between; align-items:center;
+    position:fixed; bottom:0; right:380px; z-index:440; width:340px; max-width:calc(100% - 40px);
+    display:flex; justify-content:space-between; align-items:center;
     background: var(--panel); border:1px solid var(--border); border-bottom:none;
     border-radius:8px 8px 0 0; padding:10px 16px; cursor:pointer;
     font-family:'Space Grotesk', sans-serif; font-size:12.5px; font-weight:600; color: var(--paper);
     box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
   }
+  @media (max-width:820px){ .alpaca-dock-tab{ right:20px; } }
   .alpaca-dock-caret{ color: var(--amber); font-size:10px; }
   .alpaca-dock-panel{
-    background: var(--panel); border:1px solid var(--border); border-bottom:none;
-    padding:16px; max-height:50vh; overflow-y:auto;
+    position:fixed; bottom:42px; right:380px; z-index:441; width:340px; max-width:calc(100% - 40px);
+    background: var(--panel); border:1px solid var(--border); border-radius:8px;
+    display:flex; flex-direction:column; height:50vh; min-height:220px;
+    box-shadow:0 16px 36px rgba(0,0,0,0.5);
   }
+  @media (max-width:820px){ .alpaca-dock-panel{ right:20px; } }
+  .alpaca-dock-panel-head{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 14px;
+    border-bottom:1px solid var(--border); font-size:12px; font-weight:600; flex-shrink:0; cursor:default;
+  }
+  .alpaca-dock.unlocked .alpaca-dock-panel-head{ cursor:move; }
+  .alpaca-dock-body{ padding:14px 16px; overflow-y:auto; flex:1; }
   .alpaca-dock-equity{ font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:700; }
   .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
   .alpaca-dock-daychange.up{ color: var(--gain); }
@@ -762,6 +786,14 @@
   .alpaca-dock-table td{ padding:7px 4px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono', monospace; }
   .alpaca-dock-table td.up{ color: var(--gain); }
   .alpaca-dock-table td.down{ color: var(--loss); }
+  .alpaca-close-pos-btn{
+    background:none; border:1px solid var(--loss); color: var(--loss); font-family:'Space Grotesk', sans-serif;
+    font-size:10.5px; padding:3px 8px; border-radius:4px; cursor:pointer;
+  }
+  .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
+  .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .alpaca-dock-panel .notepad-resize-handle{ position:absolute; right:2px; bottom:2px; width:16px; height:16px; cursor:nwse-resize; display:none; }
+  .alpaca-dock.unlocked .notepad-resize-handle{ display:block; }
   .notepad-resize-handle::before{
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
@@ -1264,8 +1296,15 @@
       <span class="alpaca-dock-caret" id="alpacaDockCaret">▲</span>
     </button>
     <div class="alpaca-dock-panel" id="alpacaDockPanel" hidden>
-      <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
-      <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
+      <div class="alpaca-dock-panel-head" id="alpacaDockPanelHead">
+        <span>Account</span>
+        <button class="notepad-lock-btn" id="alpacaDockLockBtn">Unlock</button>
+      </div>
+      <div class="alpaca-dock-body">
+        <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
+        <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
+      </div>
+      <div class="notepad-resize-handle" id="alpacaDockResizeHandle"></div>
     </div>
   </div>
 
@@ -2591,6 +2630,7 @@
     setAlpacaStatus('Not connected', null);
     showAlpacaInputsView();
     document.getElementById('alpacaDock').setAttribute('hidden', '');
+    if(alpacaDockRefreshInterval){ clearInterval(alpacaDockRefreshInterval); alpacaDockRefreshInterval = null; }
   }
 
   // ---------- Alpaca account/positions dock (Messenger-tab style) ----------
@@ -2605,6 +2645,20 @@
     return fetch(ALPACA_PAPER_BASE + '/v2/positions', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
+    });
+  }
+
+  // Alpaca's dedicated endpoint closes the entire position with a single
+  // market order in the opposite direction — no need to work out side/qty
+  // ourselves.
+  function closeAlpacaPosition(sym){
+    return fetch(ALPACA_PAPER_BASE + '/v2/positions/' + encodeURIComponent(sym), {
+      method: 'DELETE', headers: alpacaHeaders()
+    }).then(function(res){
+      if(!res.ok){
+        return res.json().then(function(data){ throw new Error(data.message || ('HTTP ' + res.status)); }).catch(function(){ throw new Error('HTTP ' + res.status); });
+      }
+      return res.json().catch(function(){ return {}; });
     });
   }
 
@@ -2630,7 +2684,7 @@
         positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions.</div>';
         return;
       }
-      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Current</th><th>P/L</th></tr></thead><tbody>' +
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Current</th><th>P/L</th><th></th></tr></thead><tbody>' +
         positions.map(function(p){
           var pl = parseFloat(p.unrealized_pl || 0);
           var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
@@ -2642,14 +2696,34 @@
             '<td>' + parseFloat(p.avg_entry_price).toFixed(2) + '</td>' +
             '<td>' + parseFloat(p.current_price).toFixed(2) + '</td>' +
             '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
+            '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
           '</tr>';
         }).join('') + '</tbody></table>';
+
+      positionsEl.querySelectorAll('.alpaca-close-pos-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var sym = btn.dataset.sym;
+          if(!confirm('Close the entire ' + sym + ' paper position at market?')) return;
+          btn.disabled = true;
+          btn.textContent = '…';
+          closeAlpacaPosition(sym).then(function(){
+            renderAlpacaDock();
+          }).catch(function(err){
+            alert('Failed to close ' + sym + ': ' + err.message);
+            btn.disabled = false;
+            btn.textContent = 'Close';
+            console.error('Close position failed:', err);
+          });
+        });
+      });
     }).catch(function(err){
       summaryEl.textContent = 'Couldn\'t load account data.';
       positionsEl.innerHTML = '';
       console.error('Alpaca dock fetch failed:', err);
     });
   }
+
+  var alpacaDockRefreshInterval = null;
 
   document.getElementById('alpacaDockTab').addEventListener('click', function(){
     var panel = document.getElementById('alpacaDockPanel');
@@ -2659,11 +2733,106 @@
       panel.removeAttribute('hidden');
       caret.textContent = '▼';
       renderAlpacaDock();
+      // Keeps balance/positions genuinely live while you're actually
+      // looking at the panel — same 45s cadence as the rest of the app's
+      // quotes, stopped the moment you collapse it so it's not silently
+      // burning API calls in the background for a panel nobody's watching.
+      if(alpacaDockRefreshInterval) clearInterval(alpacaDockRefreshInterval);
+      alpacaDockRefreshInterval = setInterval(renderAlpacaDock, 45000);
     } else {
       panel.setAttribute('hidden', '');
       caret.textContent = '▲';
+      if(alpacaDockRefreshInterval){ clearInterval(alpacaDockRefreshInterval); alpacaDockRefreshInterval = null; }
     }
   });
+
+  // ---------- Alpaca dock: lock / move / resize (same pattern as Notepad) ----------
+  var alpacaDockOuter = document.getElementById('alpacaDock');
+  var alpacaDockPanelEl = document.getElementById('alpacaDockPanel');
+  var alpacaDockPanelHead = document.getElementById('alpacaDockPanelHead');
+  var alpacaDockLockBtn = document.getElementById('alpacaDockLockBtn');
+  var alpacaDockResizeHandle = document.getElementById('alpacaDockResizeHandle');
+  var alpacaDockLocked = true;
+
+  function saveAlpacaDockGeometry(){
+    try{
+      window.localStorage.setItem('shwoopnet:alpacaDockGeo', JSON.stringify({
+        left: alpacaDockPanelEl.style.left, top: alpacaDockPanelEl.style.top,
+        width: alpacaDockPanelEl.style.width, height: alpacaDockPanelEl.style.height
+      }));
+    }catch(e){}
+  }
+
+  function applyAlpacaDockLock(locked){
+    alpacaDockLocked = locked;
+    alpacaDockOuter.classList.toggle('unlocked', !locked);
+    alpacaDockLockBtn.textContent = locked ? 'Unlock' : 'Lock';
+    alpacaDockLockBtn.setAttribute('aria-label', locked ? 'Unlock to move or resize' : 'Lock in place');
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockLocked', locked ? 'true' : 'false'); }catch(e){}
+  }
+  alpacaDockLockBtn.addEventListener('click', function(){ applyAlpacaDockLock(!alpacaDockLocked); });
+
+  var alpacaDockDragState = null;
+  alpacaDockPanelHead.addEventListener('pointerdown', function(e){
+    if(alpacaDockLocked || e.target.closest('button')) return;
+    var rect = alpacaDockPanelEl.getBoundingClientRect();
+    alpacaDockPanelEl.style.left = rect.left + 'px';
+    alpacaDockPanelEl.style.top = rect.top + 'px';
+    alpacaDockPanelEl.style.right = 'auto';
+    alpacaDockPanelEl.style.bottom = 'auto';
+    alpacaDockDragState = { startX: e.clientX, startY: e.clientY, startLeft: rect.left, startTop: rect.top };
+    alpacaDockPanelHead.setPointerCapture(e.pointerId);
+  });
+  alpacaDockPanelHead.addEventListener('pointermove', function(e){
+    if(!alpacaDockDragState) return;
+    var dx = e.clientX - alpacaDockDragState.startX;
+    var dy = e.clientY - alpacaDockDragState.startY;
+    var maxLeft = window.innerWidth - alpacaDockPanelEl.offsetWidth;
+    var maxTop = window.innerHeight - alpacaDockPanelEl.offsetHeight;
+    var newLeft = Math.max(0, Math.min(maxLeft, alpacaDockDragState.startLeft + dx));
+    var newTop = Math.max(0, Math.min(maxTop, alpacaDockDragState.startTop + dy));
+    alpacaDockPanelEl.style.left = newLeft + 'px';
+    alpacaDockPanelEl.style.top = newTop + 'px';
+  });
+  alpacaDockPanelHead.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
+  alpacaDockPanelHead.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
+
+  var alpacaDockResizeState = null;
+  alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
+    if(alpacaDockLocked) return;
+    e.stopPropagation();
+    var rect = alpacaDockPanelEl.getBoundingClientRect();
+    alpacaDockResizeState = { startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height };
+    alpacaDockResizeHandle.setPointerCapture(e.pointerId);
+  });
+  alpacaDockResizeHandle.addEventListener('pointermove', function(e){
+    if(!alpacaDockResizeState) return;
+    var newW = Math.max(280, alpacaDockResizeState.startW + (e.clientX - alpacaDockResizeState.startX));
+    var newH = Math.max(200, alpacaDockResizeState.startH + (e.clientY - alpacaDockResizeState.startY));
+    alpacaDockPanelEl.style.width = newW + 'px';
+    alpacaDockPanelEl.style.height = newH + 'px';
+  });
+  alpacaDockResizeHandle.addEventListener('pointerup', function(){ alpacaDockResizeState = null; saveAlpacaDockGeometry(); });
+  alpacaDockResizeHandle.addEventListener('pointercancel', function(){ alpacaDockResizeState = null; });
+
+  (function initAlpacaDockGeometry(){
+    var lockedSaved = 'true';
+    try{ lockedSaved = window.localStorage.getItem('shwoopnet:alpacaDockLocked') || 'true'; }catch(e){}
+    applyAlpacaDockLock(lockedSaved === 'true');
+    try{
+      var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
+      if(geo && geo.width){
+        alpacaDockPanelEl.style.width = geo.width;
+        alpacaDockPanelEl.style.height = geo.height;
+        if(!alpacaDockLocked && geo.left){
+          alpacaDockPanelEl.style.left = geo.left;
+          alpacaDockPanelEl.style.top = geo.top;
+          alpacaDockPanelEl.style.right = 'auto';
+          alpacaDockPanelEl.style.bottom = 'auto';
+        }
+      }
+    }catch(e){}
+  })();
 
   // A bracket order: the entry itself, plus a stop-loss leg and a
   // take-profit leg, submitted as one order — maps directly onto our
@@ -2754,7 +2923,7 @@
     return isLong ? { cls: 'buying', label: 'Buying' } : { cls: 'selling', label: 'Selling' };
   }
 
-  function renderTradeRow(t){
+  function renderTradeRow(t, tier){
     var q = findQuote(t.sym);
     var change = pct(q.price, q.prevClose);
     var up = change >= 0;
@@ -2764,12 +2933,13 @@
     var curTf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
     var action = buildActionHTML(t);
     var rr = computeRiskReward(t);
+    var tierClass = tier ? ' trade-block-' + tier : '';
     function tfBtn(tf){
       return '<button class="chart-tool-btn' + (curTf===tf?' active':'') + '" data-tf="' + tf + '" data-sym="' + t.sym + '">' + tf + '</button>';
     }
 
     return '' +
-      '<div class="trade-block" data-symbol="' + t.sym + '">' +
+      '<div class="trade-block' + tierClass + '" data-symbol="' + t.sym + '">' +
         '<div class="trade-columns trade-row">' +
           '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="true" aria-label="Toggle chart">⌄</button>' +
           '<div class="t-sym-cell">' +
@@ -2826,11 +2996,31 @@
       return;
     }
 
-    var active = trades.filter(function(t){ return t.status === 'active' || t.status === 'watching'; });
-    var finished = trades.filter(function(t){ return t.status === 'hit' || t.status === 'stopped'; });
+    // Four tiers, in priority order: real exposure (open position) always
+    // comes first regardless of the underlying signal's own status, then
+    // what needs action right now, then what's still just being watched,
+    // then whatever's already played out.
+    var inPosition = [], needsEntry = [], watching = [], finished = [];
+    trades.forEach(function(t){
+      var hasOpenPosition = journalEntries.some(function(j){ return j.sym === t.sym && j.status === 'open'; });
+      if(hasOpenPosition){ inPosition.push(t); }
+      else if(t.status === 'active'){ needsEntry.push(t); }
+      else if(t.status === 'watching'){ watching.push(t); }
+      else { finished.push(t); }
+    });
 
-    var html = active.map(renderTradeRow).join('');
-    if(active.length === 0 && finished.length > 0){
+    var html = '';
+    if(inPosition.length > 0){
+      html += '<div class="priority-label in-position-label"><span class="priority-dot"></span>In position — you\'re holding ' + inPosition.length + ' right now</div>';
+      html += inPosition.map(function(t){ return renderTradeRow(t, 'in-position'); }).join('');
+    }
+    if(needsEntry.length > 0){
+      html += '<div class="priority-label needs-entry-label"><span class="priority-dot"></span>Ready to enter now</div>';
+      html += needsEntry.map(function(t){ return renderTradeRow(t, 'needs-entry'); }).join('');
+    }
+    html += watching.map(function(t){ return renderTradeRow(t); }).join('');
+
+    if(inPosition.length === 0 && needsEntry.length === 0 && watching.length === 0 && finished.length > 0){
       html = '<div class="trades-empty-state">Everything today already played out — see "Finished today" below for how it went.</div>';
     }
     if(finished.length > 0){
@@ -2839,7 +3029,7 @@
           '<span class="caret">▸</span> Finished today (' + finished.length + ')' +
         '</button>' +
         '<div class="finished-trades-list" id="finishedTradesList" hidden>' +
-          finished.map(renderTradeRow).join('') +
+          finished.map(function(t){ return renderTradeRow(t); }).join('') +
         '</div>' +
       '</div>';
     }
@@ -2928,6 +3118,7 @@
   }
 
   function updateTradeRowPrices(){
+    var anyStatusChanged = false;
     trades.forEach(function(t){
       var q = findQuote(t.sym);
       var change = pct(q.price, q.prevClose);
@@ -2940,23 +3131,36 @@
 
       var statusBefore = t.status;
       recomputeTradeStatus(t, q.price);
-      if(statusBefore !== t.status && (t.status === 'hit' || t.status === 'stopped')){
-        logPickOutcomeInternally(t.sym, t.status, q.price);
-      }
-      var badgeEl = document.getElementById('status-badge-' + t.sym);
-      if(badgeEl){
-        var badge = computeBadgeInfo(t);
-        badgeEl.className = 'status-badge ' + badge.cls;
-        badgeEl.textContent = badge.label;
-      }
-      var bannerEl = document.getElementById('action-banner-' + t.sym);
-      if(bannerEl){
-        var action = buildActionHTML(t);
-        bannerEl.className = 'trade-action-banner' + (action.done ? ' done' : '');
-        bannerEl.innerHTML = '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span><span class="action-text">' + action.html + '</span>';
+      if(statusBefore !== t.status){
+        anyStatusChanged = true;
+        if(t.status === 'hit' || t.status === 'stopped'){
+          logPickOutcomeInternally(t.sym, t.status, q.price);
+        }
       }
       updateChartLivePrice(t.sym, q.price);
     });
+    // A status flip (e.g. hitting target mid-session) means a trade needs
+    // to physically move to a different priority section — a full
+    // re-render handles that. Otherwise, cheaper in-place badge/banner
+    // updates are enough and avoid rebuilding the whole list every tick.
+    if(anyStatusChanged){
+      renderTradeBlocks();
+    } else {
+      trades.forEach(function(t){
+        var badgeEl = document.getElementById('status-badge-' + t.sym);
+        if(badgeEl){
+          var badge = computeBadgeInfo(t);
+          badgeEl.className = 'status-badge ' + badge.cls;
+          badgeEl.textContent = badge.label;
+        }
+        var bannerEl = document.getElementById('action-banner-' + t.sym);
+        if(bannerEl){
+          var action = buildActionHTML(t);
+          bannerEl.className = 'trade-action-banner' + (action.done ? ' done' : '');
+          bannerEl.innerHTML = '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span><span class="action-text">' + action.html + '</span>';
+        }
+      });
+    }
     renderWhatToWatch();
   }
 
