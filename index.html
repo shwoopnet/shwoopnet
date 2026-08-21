@@ -1592,28 +1592,28 @@
   // fallback: what guest mode shows, and what signed-in accounts fall back
   // to before the screener has run for the day.
   var DEFAULT_TRADES = [
-    { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, t2PctFromEntry:0.0698, status:'active',   statusLabel:'Active',
+    { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, t2PctFromEntry:0.0785, status:'active',   statusLabel:'Active',
       notes: [
         "Holding above the 50-day moving average through the recent semis rally, a level that's held on every pullback this month.",
         "Volume has been running well above the 20-day average heading into tonight's print — the market is clearly positioning ahead of the number.",
         "Data-center guidance is what actually moves this stock, not the headline EPS beat or miss — that's where the real signal lives.",
         "Options activity skews call-heavy into earnings, suggesting positioning for an upside surprise rather than a hedge."
       ] },
-    { sym:'AAPL', direction:'Long', entryPct:0.008, stopPctFromEntry:-0.0215, t1PctFromEntry:0.0236, t2PctFromEntry:0.0429, status:'watching', statusLabel:'Watching',
+    { sym:'AAPL', direction:'Long', entryPct:0.008, stopPctFromEntry:-0.0215, t1PctFromEntry:0.0236, t2PctFromEntry:0.0366, status:'watching', statusLabel:'Watching',
       notes: [
         'Coiling just under resistance for the third session in a row, with each test slightly higher than the last.',
         'Waiting for a breakout on real volume confirmation before sizing in — a low-volume push through resistance is a trap, not a signal.',
         "Broader tech tape needs to hold up for this setup to trigger; a rotation out of growth names would stall this regardless of AAPL's own chart.",
         'No entry until the breakout actually happens — this stays on watch, not in the book, until price proves it.'
       ] },
-    { sym:'TSLA', direction:'Short', entryPct:0.017, stopPctFromEntry:0.0320, t1PctFromEntry:-0.0320, t2PctFromEntry:-0.0600, status:'active',   statusLabel:'Active',
+    { sym:'TSLA', direction:'Short', entryPct:0.017, stopPctFromEntry:0.0320, t1PctFromEntry:-0.0320, t2PctFromEntry:-0.0512, status:'active',   statusLabel:'Active',
       notes: [
         'Rejected twice this week on declining volume, a classic sign buyers are losing conviction at this level.',
         'Momentum has turned negative on the daily chart, with the 10-day moving average now rolling over.',
         'Delivery numbers next week are a real risk to this thesis — a beat could squeeze the short hard, so sizing stays conservative.',
         'Options skew has shifted toward puts over the past week, suggesting the market is starting to price in the same downside.'
       ] },
-    { sym:'AMD',  direction:'Long', entryPct:-0.024, stopPctFromEntry:-0.0268, t1PctFromEntry:0.0268, t2PctFromEntry:0.0476, status:'hit',      statusLabel:'Target hit',
+    { sym:'AMD',  direction:'Long', entryPct:-0.024, stopPctFromEntry:-0.0268, t1PctFromEntry:0.0268, t2PctFromEntry:0.0670, status:'hit',      statusLabel:'Target hit',
       notes: [
         'Reached Target 2 on strong data-center commentary that came in well ahead of expectations.',
         'Stop trailed up along the way to lock in the gain rather than risk giving it back on a reversal.',
@@ -1704,19 +1704,27 @@
     var direction = (sma50 !== null) ? (currentPrice >= sma50 ? 'Long' : 'Short') : 'Long';
 
     var entry = sma20 !== null ? sma20 : currentPrice;
+    // A meaningful floor on the range so an unusually flat 20 days doesn't
+    // collapse the target math toward zero.
+    var rangeSize = Math.max(high20 - low20, entry * 0.01);
     var stop, t1, t2;
     if(direction === 'Long'){
       stop = low20 * 0.995;
       if(stop >= entry){ stop = entry * 0.965; }
-      var risk = entry - stop;
-      t1 = entry + risk * 1.5;
-      t2 = entry + risk * 2.75;
+      // Targets come from this stock's own actual price structure — real
+      // 20-day resistance, then a measured-move extension beyond it — not
+      // a fixed multiple of the stop distance. A fixed multiple would make
+      // the reward/risk ratio the exact same constant for every trade,
+      // regardless of what the chart actually looks like.
+      t1 = Math.max(high20, entry * 1.01);
+      t2 = entry + rangeSize * 1.5;
+      if(t2 <= t1){ t2 = t1 + rangeSize * 0.5; }
     } else {
       stop = high20 * 1.005;
       if(stop <= entry){ stop = entry * 1.035; }
-      var risk2 = stop - entry;
-      t1 = entry - risk2 * 1.5;
-      t2 = entry - risk2 * 2.75;
+      t1 = Math.min(low20, entry * 0.99);
+      t2 = entry - rangeSize * 1.5;
+      if(t2 >= t1){ t2 = t1 - rangeSize * 0.5; }
     }
 
     var distFromEntryPct = Math.abs((currentPrice - entry) / entry * 100);
@@ -2027,7 +2035,7 @@
         '<div class="trade-detail" id="chartwrap-' + t.sym + '">' +
           '<div class="trade-chart-col">' +
             '<div class="chart-toolbar">' +
-              '<div class="chart-tf-btns">' + tfBtn('1D') + tfBtn('1W') + tfBtn('1M') + tfBtn('1Y') + '</div>' +
+              '<div class="chart-tf-btns">' + tfBtn('5m') + tfBtn('15m') + tfBtn('30m') + tfBtn('1D') + tfBtn('1W') + tfBtn('1M') + tfBtn('1Y') + '</div>' +
               '<div class="chart-toolbar-btns">' +
                 '<button class="chart-tool-btn' + (curScale==='linear'?' active':'') + '" data-scale="linear" data-sym="' + t.sym + '">Linear</button>' +
                 '<button class="chart-tool-btn' + (curScale==='log'?' active':'') + '" data-scale="log" data-sym="' + t.sym + '">Log</button>' +
@@ -2173,15 +2181,19 @@
 
   // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
   var tfConfig = {
-    '1D': { volFactor:0.0035, mockCount:80,  fetchSize:80, defaultVisible:40 },
-    '1W': { volFactor:0.006,  fetchSize:30,  defaultVisible:7  },
-    '1M': { volFactor:0.012,  fetchSize:90,  defaultVisible:30 },
-    '1Y': { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
+    '5m':  { volFactor:0.0035, mockCount:160, fetchSize:160, defaultVisible:60 },
+    '15m': { volFactor:0.006,  mockCount:140, fetchSize:140, defaultVisible:45 },
+    '30m': { volFactor:0.0085, mockCount:120, fetchSize:120, defaultVisible:35 },
+    '1D':  { volFactor:0.0035, mockCount:80,  fetchSize:80, defaultVisible:40 },
+    '1W':  { volFactor:0.006,  fetchSize:30,  defaultVisible:7  },
+    '1M':  { volFactor:0.012,  fetchSize:90,  defaultVisible:30 },
+    '1Y':  { volFactor:0.03,   fetchSize:104, defaultVisible:52 }
   };
   var chartStates = {}; // per-symbol: { data, viewStart, viewEnd, scale, tf }
   var showMovingAverages = true;
   var showOHLCReadout = true;
   var MIN_VISIBLE_CANDLES = 8;
+  var INTRADAY_TFS = ['5m', '15m', '30m', '1D'];
 
   function genOHLC(count, base, vol){
     // Built backwards from the known live price, not forward with a
@@ -2214,7 +2226,7 @@
   var TWELVE_DATA_API_KEY = 'd71a3d8d70e04286b10e8cf67b4c710d';
   var TWELVE_DATA_URL = 'https://api.twelvedata.com/time_series';
   var historyCache = {};
-  var historyIntervals = { '1D':'5min', '1W':'1day', '1M':'1day', '1Y':'1week' };
+  var historyIntervals = { '5m':'5min', '15m':'15min', '30m':'30min', '1D':'5min', '1W':'1day', '1M':'1day', '1Y':'1week' };
 
   function fetchHistory(sym, tf){
     var cacheKey = sym + '_' + tf;
@@ -2246,6 +2258,12 @@
     if(!d || isNaN(d.getTime())) return '';
     if(tf === '1D'){
       return d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+    }
+    if(INTRADAY_TFS.indexOf(tf) > -1){
+      // 5m/15m/30m are scrollable across multiple days — a bare time would
+      // be ambiguous about which day it's from once you pan back.
+      return d.toLocaleDateString([], { month:'short', day:'numeric' }) + ' ' +
+        d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
     }
     return d.toLocaleDateString([], { month:'short', day:'numeric' });
   }
