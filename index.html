@@ -458,6 +458,11 @@
   .layout-stepper{ display:flex; align-items:center; gap:8px; }
   .layout-stepper .step-name{ font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em; }
   .layout-divider{ height:1px; background: var(--border); margin:2px 0; }
+  .layout-reset-btn{
+    background:none; border:1px solid var(--border); color: var(--muted); font-family:'Space Grotesk', sans-serif;
+    font-size:11.5px; padding:8px; border-radius:6px; cursor:pointer; width:100%;
+  }
+  .layout-reset-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .layout-toggle-group{ display:flex; gap:4px; }
 
   #tradeBlocks.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
@@ -946,6 +951,9 @@
 
   .pl-summary{ display:flex; gap:14px; flex-wrap:wrap; margin: 20px 0; }
   .pl-card{ flex:1; min-width:200px; background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:16px 18px; }
+  .journal-stats-row{ margin-top:-6px; }
+  .journal-stats-row .pl-card{ min-width:130px; padding:12px 14px; }
+  .journal-stats-row .pl-card-value{ font-size:18px; }
   .pl-card-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color: var(--muted); margin-bottom:8px; }
   .pl-card-value{ font-size:22px; }
   .pl-card-value.up{ color: var(--gain); }
@@ -1471,10 +1479,10 @@
               <button class="zoom-btn" id="heightInc" aria-label="Increase chart height">+</button>
             </div>
             <div class="layout-stepper">
-              <span class="step-name">Text size</span>
-              <button class="zoom-btn" id="textDec" aria-label="Decrease text size">−</button>
+              <span class="step-name">Notes text size</span>
+              <button class="zoom-btn" id="textDec" aria-label="Decrease notes text size">−</button>
               <span class="zoom-label mono" id="textLabel">12.5px</span>
-              <button class="zoom-btn" id="textInc" aria-label="Increase text size">+</button>
+              <button class="zoom-btn" id="textInc" aria-label="Increase notes text size">+</button>
             </div>
             <div class="layout-divider"></div>
             <div class="layout-stepper">
@@ -1492,6 +1500,8 @@
               <span class="step-name">OHLC readout</span>
               <button class="chart-tool-btn active" id="ohlcToggleBtn">On</button>
             </div>
+            <div class="layout-divider"></div>
+            <button class="layout-reset-btn" id="layoutResetBtn">Reset layout to defaults</button>
           </div>
         </div>
       </div>
@@ -1520,6 +1530,32 @@
         <div class="pl-card-label">Overall P&amp;L</div>
         <div class="pl-card-value mono" id="overallPLValue">—</div>
         <div class="pl-card-sub" id="overallPLSub"></div>
+      </div>
+    </div>
+
+    <div class="pl-summary journal-stats-row">
+      <div class="pl-card">
+        <div class="pl-card-label">Win Rate</div>
+        <div class="pl-card-value mono" id="statWinRate">—</div>
+        <div class="pl-card-sub" id="statWinRateSub"></div>
+      </div>
+      <div class="pl-card">
+        <div class="pl-card-label">Avg Win</div>
+        <div class="pl-card-value mono up" id="statAvgWin">—</div>
+      </div>
+      <div class="pl-card">
+        <div class="pl-card-label">Avg Loss</div>
+        <div class="pl-card-value mono down" id="statAvgLoss">—</div>
+      </div>
+      <div class="pl-card">
+        <div class="pl-card-label">Best Trade</div>
+        <div class="pl-card-value mono up" id="statBest">—</div>
+        <div class="pl-card-sub" id="statBestSub"></div>
+      </div>
+      <div class="pl-card">
+        <div class="pl-card-label">Worst Trade</div>
+        <div class="pl-card-value mono down" id="statWorst">—</div>
+        <div class="pl-card-sub" id="statWorstSub"></div>
       </div>
     </div>
 
@@ -2649,7 +2685,7 @@
   // documented behavior. Fetched once for every symbol at once, not a
   // separate call per position.
   function fetchAlpacaOpenOrders(){
-    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/orders?status=open&nested=true&limit=500', { headers: alpacaHeaders() }).then(function(res){
+    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/orders?status=open&nested=true&limit=500', { headers: alpacaHeaders() }, 4000).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     });
@@ -2685,7 +2721,7 @@
   // every Alpaca dock fetch to fail cleanly instead of hanging.
   function fetchWithTimeout(url, options, timeoutMs){
     var controller = new AbortController();
-    var timer = setTimeout(function(){ controller.abort(); }, timeoutMs || 10000);
+    var timer = setTimeout(function(){ controller.abort(); }, timeoutMs || 6000);
     var opts = Object.assign({}, options, { signal: controller.signal });
     return fetch(url, opts).finally(function(){ clearTimeout(timer); });
   }
@@ -2946,6 +2982,48 @@
     renderTradeBlocks();
     renderCalendar();
     renderPLSummary();
+  }
+
+  // ---------- Syncing bracket-order exits back to the journal ----------
+  // A bracket order's stop-loss/take-profit legs fill on Alpaca's own
+  // servers, independent of whether this tab is open — so the position
+  // itself genuinely closes correctly either way. But nothing else in
+  // Shwoop watches for that fill, which means the journal entry stays
+  // marked "open" forever until the fill is actively checked for here.
+  function syncAlpacaFilledExits(){
+    if(!alpacaConnected || isGuestMode) return;
+    var openAlpacaEntries = journalEntries.filter(function(e){ return e.status === 'open' && e.source === 'alpaca'; });
+    if(openAlpacaEntries.length === 0) return;
+    fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/orders?status=closed&limit=200', { headers: alpacaHeaders() }).then(function(res){
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function(orders){
+      var filled = orders.filter(function(o){ return o.status === 'filled' && o.filled_at && o.filled_avg_price; });
+      var changed = false;
+      openAlpacaEntries.forEach(function(entry){
+        var entryTime = new Date(entry.date).getTime();
+        var exitSide = entry.direction === 'Long' ? 'sell' : 'buy';
+        var candidates = filled.filter(function(o){
+          return o.symbol === entry.sym && o.side === exitSide && new Date(o.filled_at).getTime() >= entryTime;
+        }).sort(function(a, b){ return new Date(a.filled_at) - new Date(b.filled_at); });
+        var match = candidates[0];
+        if(match){
+          entry.exit = parseFloat(match.filled_avg_price);
+          entry.exitDate = match.filled_at.slice(0, 10);
+          entry.status = 'closed';
+          changed = true;
+        }
+      });
+      if(changed){
+        saveJournalEntries();
+        renderCalendar();
+        renderJournalDetail();
+        renderTradeBlocks();
+        renderPLSummary();
+      }
+    }).catch(function(err){
+      console.error('Alpaca exit sync failed:', err);
+    });
   }
 
   // Risk = distance from entry to stop (what you stand to lose). Reward =
@@ -3210,6 +3288,7 @@
       });
     }
     renderWhatToWatch();
+    syncAlpacaFilledExits();
   }
 
   // The chart's rightmost candle and live-price line are only as fresh as
@@ -4628,9 +4707,7 @@
     document.getElementById('textInc').disabled = layoutPrefs.text >= layoutLimits.text[1];
 
     var tradeBlocksEl = document.getElementById('tradeBlocks');
-    var headerEl = document.querySelector('.trade-columns.head');
     if(tradeBlocksEl){ tradeBlocksEl.classList.toggle('two-col', layoutPrefs.cols === 2); }
-    if(headerEl){ headerEl.hidden = (layoutPrefs.cols === 2); }
     document.getElementById('cols1Btn').classList.toggle('active', layoutPrefs.cols === 1);
     document.getElementById('cols2Btn').classList.toggle('active', layoutPrefs.cols === 2);
 
@@ -4659,6 +4736,12 @@
   document.getElementById('heightInc').addEventListener('click', function(){ stepLayout('height', 1); });
   document.getElementById('textDec').addEventListener('click', function(){ stepLayout('text', -1); });
   document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
+
+  document.getElementById('layoutResetBtn').addEventListener('click', function(){
+    layoutPrefs = { width:62, height:200, text:12.5, cols:1, showMA:true, showOHLC:true };
+    applyLayout();
+    renderAllTradeCharts();
+  });
 
   document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); });
   document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); });
@@ -5053,13 +5136,24 @@
     var closed = entries.filter(function(e){ return e.status === 'closed'; });
     if(closed.length === 0) return null;
     var totalDollar = 0, totalPctSum = 0, wins = 0;
+    var winDollarSum = 0, lossDollarSum = 0, winCount = 0, lossCount = 0;
+    var best = null, worst = null;
     closed.forEach(function(e){
       var pl = computePL(e);
       totalDollar += pl.dollar;
       totalPctSum += pl.pct;
-      if(pl.pct >= 0) wins++;
+      if(pl.pct >= 0){ wins++; winDollarSum += pl.dollar; winCount++; }
+      else { lossDollarSum += pl.dollar; lossCount++; }
+      if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
+      if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
     });
-    return { count: closed.length, wins: wins, losses: closed.length - wins, totalDollar: totalDollar, avgPct: totalPctSum / closed.length };
+    return {
+      count: closed.length, wins: wins, losses: closed.length - wins, totalDollar: totalDollar, avgPct: totalPctSum / closed.length,
+      winRate: (wins / closed.length) * 100,
+      avgWinDollar: winCount ? winDollarSum / winCount : 0,
+      avgLossDollar: lossCount ? lossDollarSum / lossCount : 0,
+      best: best, worst: worst
+    };
   }
 
   function renderPLSummary(){
@@ -5075,6 +5169,34 @@
       overallValEl.textContent = (upO ? '+$' : '−$') + Math.abs(overall.totalDollar).toFixed(0);
       overallValEl.className = 'pl-card-value mono ' + (upO ? 'up' : 'down');
       overallSubEl.textContent = overall.count + ' closed · ' + overall.wins + 'W / ' + overall.losses + 'L · avg ' + (overall.avgPct >= 0 ? '+' : '') + overall.avgPct.toFixed(1) + '%';
+    }
+
+    var winRateEl = document.getElementById('statWinRate');
+    var winRateSubEl = document.getElementById('statWinRateSub');
+    var avgWinEl = document.getElementById('statAvgWin');
+    var avgLossEl = document.getElementById('statAvgLoss');
+    var bestEl = document.getElementById('statBest');
+    var bestSubEl = document.getElementById('statBestSub');
+    var worstEl = document.getElementById('statWorst');
+    var worstSubEl = document.getElementById('statWorstSub');
+    if(!overall){
+      winRateEl.textContent = '—'; winRateSubEl.textContent = '';
+      avgWinEl.textContent = '—'; avgLossEl.textContent = '—';
+      bestEl.textContent = '—'; bestSubEl.textContent = '';
+      worstEl.textContent = '—'; worstSubEl.textContent = '';
+    } else {
+      winRateEl.textContent = overall.winRate.toFixed(0) + '%';
+      winRateSubEl.textContent = overall.count + ' total trades';
+      avgWinEl.textContent = '+$' + overall.avgWinDollar.toFixed(0);
+      avgLossEl.textContent = '−$' + Math.abs(overall.avgLossDollar).toFixed(0);
+      if(overall.best){
+        bestEl.textContent = (overall.best.dollar >= 0 ? '+$' : '−$') + Math.abs(overall.best.dollar).toFixed(0);
+        bestSubEl.textContent = overall.best.sym;
+      } else { bestEl.textContent = '—'; bestSubEl.textContent = ''; }
+      if(overall.worst){
+        worstEl.textContent = (overall.worst.dollar >= 0 ? '+$' : '−$') + Math.abs(overall.worst.dollar).toFixed(0);
+        worstSubEl.textContent = overall.worst.sym;
+      } else { worstEl.textContent = '—'; worstSubEl.textContent = ''; }
     }
 
     var rangeValEl = document.getElementById('rangePLValue');
