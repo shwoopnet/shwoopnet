@@ -2298,7 +2298,16 @@
   // no genuine trend (price/SMA20/SMA50 not agreeing) shouldn't make the
   // list just because it had a volatile week. Fewer, cleaner picks beats
   // padding the list with noise.
-  var MIN_SCREENER_SCORE = 0;
+  // Was 0 (any positive, trend-aligned momentum qualified, however tiny).
+  // The 60-day backtest with the R:R filter showed win/loss size ratio
+  // already favorable (~1.47x) but win rate (37%) under the ~40.5%
+  // breakeven line that ratio requires. That's a win-RATE problem, not a
+  // win-SIZE problem -- raising the bar for how much real momentum a
+  // setup needs before it counts targets that directly: a stock barely,
+  // technically trending shouldn't score the same as one moving with
+  // real conviction. 0.5 requires at least half a percent of movement
+  // over the last 5 bars (~75 min) before a signal qualifies at all.
+  var MIN_SCREENER_SCORE = 0.5;
   function scoreCandidate(analysis){
     if(analysis.sma20 === null || analysis.sma50 === null) return -1;
     var aligned = (analysis.direction === 'Long' && analysis.sma20 > analysis.sma50) ||
