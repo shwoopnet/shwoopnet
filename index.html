@@ -1911,54 +1911,57 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        The daily screener isn't a black box. Here's the whole thing, in plain language — including what it
+        The intraday screener isn't a black box. Here's the whole thing, in plain language — including what it
         can't tell you yet.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
           <div class="labs-method-step">1</div>
           <div>
-            <div class="labs-method-title">A fixed list of 41 stocks, not the whole market</div>
-            <div class="labs-method-body">Mixed across sectors and company sizes — chips, retail, industrials,
-            energy, healthcare, banks — not just the same handful of giant names. It only ever picks from
-            this list.</div>
+            <div class="labs-method-title">A fixed list of 8 stocks, not the whole market</div>
+            <div class="labs-method-body">AAPL, MSFT, NVDA, AMD, TSLA, GOOGL, AMZN, META — large, liquid names
+            chosen for how cleanly they trade intraday, not a cross-section of the market. It only ever picks
+            from this list. (Two index ETFs, SPY and QQQ, were tested and removed — their basket-averaged
+            behavior didn't produce the kind of sharp momentum this screener looks for.)</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">2</div>
           <div>
             <div class="labs-method-title">The trend has to actually agree with the trade</div>
-            <div class="labs-method-body">The 20-day and 50-day averages have to line up with the direction of
-            the trade. A stock that just had a big price swing but has no real trend gets skipped — a wild week
-            isn't enough on its own.</div>
+            <div class="labs-method-body">The 20-bar and 50-bar averages (on 15-minute bars — roughly the last
+            5 and 12.5 hours of trading) have to line up with the direction of the trade. A stock that just had
+            a sharp move but has no real trend behind it gets skipped.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">3</div>
           <div>
-            <div class="labs-method-title">Entry, stop, and target come from the actual chart</div>
-            <div class="labs-method-body">Entry is the 20-day average. Stop is just past the actual 20-day low
-            or high. Target is the real 20-day resistance or support — not some fixed multiple of the risk, which
-            would just make every trade's ratio the same number no matter what.</div>
+            <div class="labs-method-title">Entry is the real price, right now — stop and target come from the actual chart</div>
+            <div class="labs-method-body">Entry is whatever the stock is trading at the moment the signal fires
+            — this executes as a real market order immediately, not a limit order waiting for a better price.
+            Stop sits just past the actual 20-bar low or high; target is the real 20-bar resistance or support —
+            not a fixed multiple of the risk, which would make every trade's ratio identical regardless of the
+            stock's actual behavior.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">4</div>
           <div>
-            <div class="labs-method-title">Ranked by momentum, top 4 make the list</div>
+            <div class="labs-method-title">Ranked by momentum, top 3 make the list</div>
             <div class="labs-method-body">Everything that passes the trend check gets ranked by how much it's
-            moved in the last 5 days. Top 4 become the day's picks. If nothing passes on a given day, fewer than
-            4 show up — that's fine, better than forcing a bad pick.</div>
+            moved in the last 5 bars (about the last hour and a quarter). Top 3 become the current picks. If
+            nothing passes, fewer than 3 show up — that's fine, better than forcing a bad pick.</div>
           </div>
         </div>
       </div>
       <div class="labs-honesty-box">
         <div class="labs-honesty-title">What this isn't (yet)</div>
         <p>This scoring is a heuristic I came up with — not something proven against real results yet. There's
-        a log quietly tracking what actually happens to every pick: hit, stopped, or never resolved. It's building
-        toward real numbers instead of a guess, but there isn't enough history yet to trust a win rate. The
-        backtest below is the honest next step: same logic, run against real history, so you can see how it
-        actually would have done instead of just taking my word for it.</p>
+        an activity log quietly tracking what actually happens to every pick: sent, skipped, closed. It's building
+        toward real numbers instead of a guess. The backtest below is the honest next step: same logic, run
+        against real history, so you can see how it actually would have done instead of just taking my word
+        for it.</p>
       </div>
     </div>
 
@@ -2308,11 +2311,10 @@
   var isRunningScreener = false;
   var SCREENER_PICK_COUNT = 4;
 
-  // A much smaller universe than the daily screener's 41 symbols — 15-min
-  // bars re-fetched every 15 minutes across a wide list would blow past
-  // Twelve Data's free-tier daily cap almost immediately. This set is also
-  // deliberately liquid/well-known names, which matters more for intraday
-  // trading than for the daily screener's longer holding window.
+  // Deliberately small and liquid — a short list of well-known names
+  // that trade cleanly intraday. 15-min bars re-fetched every 15
+  // minutes across a wide list would blow past Twelve Data's free-tier
+  // daily cap almost immediately.
   // SPY and QQQ removed (2026-08-22): both were the only two index ETFs
   // in this universe, and both were the only two entries with negative
   // expectancy in the first real backtest run against this universe.
