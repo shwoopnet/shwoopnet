@@ -143,7 +143,6 @@
     width:100%; padding:11px 4px; border-radius:10px; font-size:9.5px; font-weight:600;
     font-family:'Space Grotesk', sans-serif; text-align:center; flex-shrink:0;
     transition: background .25s ease, color .25s ease, transform .2s cubic-bezier(.2,.8,.3,1.3), box-shadow .25s ease;
-    overflow:hidden;
   }
   /* The animated hover "glow" -- a soft white radial highlight that fades
      in behind the icon, combined with a slight lift/scale on the whole
@@ -165,6 +164,27 @@
   .side-nav-icon{ font-size:18px; line-height:1; transition: transform .2s cubic-bezier(.2,.8,.3,1.3); }
   .side-nav-item:hover .side-nav-icon{ transform: scale(1.15); }
   .side-nav-label{ letter-spacing:.02em; }
+
+  /* Geometry Dash-style diamond shard burst -- a small starburst of tiny
+     diamonds pops outward from the icon on hover, echoing the diamond
+     player-icon shape used in the brand mark itself. Each shard shares
+     one keyframe but launches at its own fixed angle (--angle, set
+     inline per shard), so rotating the local coordinate frame first and
+     then translating along its own X-axis sends every shard outward in
+     a different direction with no per-shard math needed beyond the angle. */
+  .nav-shard{
+    position:absolute; top:50%; left:50%; width:5px; height:5px;
+    background:#fff; opacity:0; pointer-events:none; z-index:1;
+    transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) rotate(45deg);
+  }
+  .side-nav-item:hover .nav-shard{
+    animation: shardBurst .6s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes shardBurst{
+    0%{ opacity:0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) rotate(45deg) scale(1); }
+    18%{ opacity:1; }
+    100%{ opacity:0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(24px) rotate(45deg) scale(.35); }
+  }
 
   @media (max-width: 900px){
     .side-nav{
@@ -191,6 +211,7 @@
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
   }
   .brand:hover .brand-name{ color: var(--amber); }
+  .brand-mark-wrap{ position:relative; display:inline-flex; flex-shrink:0; }
   .brand-mark{
     flex-shrink:0; transform-origin: 50% 90%;
     animation: brandBounce 2s cubic-bezier(0.45,0,0.55,1) infinite;
@@ -202,12 +223,33 @@
     33%{ transform: translateY(0) rotate(0deg) scale(1.1,0.88); }
     40%{ transform: translateY(0) rotate(0deg) scale(1,1); }
   }
+  /* The impact ring is a separate element, not a pseudo-element on the
+     SVG, so it can sit at the logo's actual "ground contact" point
+     (matching brand-mark's own transform-origin of 50% 90%) independent
+     of whatever the SVG's internal artwork looks like. Same 2s duration
+     as brandBounce, started at the same time, so the two stay
+     permanently phase-locked -- the ring always fires exactly as the
+     cube lands (30-33%), like a Geometry Dash landing shockwave. */
+  .brand-impact-ring{
+    position:absolute; left:50%; bottom:-1px; width:14px; height:14px;
+    border:1.5px solid var(--amber); border-radius:2px; pointer-events:none;
+    transform: translateX(-50%) rotate(45deg) scale(.2); opacity:0;
+    animation: brandImpactRing 2s cubic-bezier(.2,.8,.3,1) infinite;
+  }
+  @keyframes brandImpactRing{
+    0%, 29%{ opacity:0; transform: translateX(-50%) rotate(45deg) scale(.2); }
+    30%{ opacity:.85; transform: translateX(-50%) rotate(45deg) scale(.5); }
+    48%, 100%{ opacity:0; transform: translateX(-50%) rotate(45deg) scale(1.8); }
+  }
   .brand-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; letter-spacing: 0.04em; transition: color .15s ease; }
   .brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
 
   .topbar-right{ display:flex; align-items:center; gap:18px; }
   .clock{ color: var(--muted); font-size: 13px; text-align:right; }
   .clock .time{ color: var(--paper); font-size: 15px; }
+  .header-live-status{ font-size:11.5px; font-weight:600; margin-bottom:2px; }
+  .header-live-status.ok{ color: var(--gain); }
+  .header-live-status.fail{ color: var(--loss); }
 
   .theme-switcher{ display:flex; align-items:center; gap:10px; }
   .theme-swatch{
@@ -481,6 +523,14 @@
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 
   .layout-dropdown{ position:relative; }
+  .layout-toggle-btn{
+    background: var(--panel-raised); border:1px solid var(--border); color:var(--paper);
+    padding:9px 14px; border-radius:5px; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:10px;
+  }
+  .layout-toggle-btn:hover{ border-color: var(--amber-dim); }
+  .layout-toggle-btn .caret{ color:var(--muted); font-size:10px; transition: transform .15s ease; }
+  .layout-toggle-btn[aria-expanded="true"] .caret{ transform: rotate(180deg); }
   .layout-menu{
     position:absolute; top:calc(100% + 6px); right:0; min-width:230px;
     background: var(--panel-raised); border:1px solid var(--border); border-radius:6px;
@@ -852,10 +902,6 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
-  .alpaca-dock-header .notepad-resize-handle{
-    position:absolute; right:2px; bottom:-8px; width:16px; height:16px; cursor:nwse-resize; display:none;
-  }
-  .alpaca-dock.unlocked .alpaca-dock-header .notepad-resize-handle{ display:block; }
   .notepad-resize-handle::before{
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
@@ -1088,10 +1134,14 @@
     .ticker-track{ animation: none; }
     .flash-up, .flash-down{ animation: none; }
     .brand-mark{ animation: none; }
+    .brand-impact-ring{ animation: none; display:none; }
+    .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   }
   [data-reduce-motion="true"] .ticker-track{ animation: none; }
   [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
+  [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
+  [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   .flash-up{ animation: flashUp .6s ease; }
   .flash-down{ animation: flashDown .6s ease; }
   @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
@@ -1303,13 +1353,16 @@
 
   <div class="topbar">
     <button class="brand" id="brandHomeBtn" aria-label="Go to home page">
-      <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
-        <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
-        <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
-        <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-        <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
-        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
-      </svg>
+      <span class="brand-mark-wrap">
+        <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
+          <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+          <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+          <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+          <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
+          <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
+        </svg>
+        <span class="brand-impact-ring"></span>
+      </span>
       <div>
         <div class="brand-name">SHWOOP</div>
         <div class="brand-sub">Personal market terminal</div>
@@ -1318,8 +1371,8 @@
 
     <div class="topbar-right">
       <div class="clock">
+        <div class="header-live-status" id="headerLiveStatus">Connecting…</div>
         <div class="time mono" id="clockTime">--:--:--</div>
-        <div id="clockTz">Local · Markets open</div>
       </div>
     </div>
   </div>
@@ -1391,7 +1444,6 @@
           <span class="alpaca-dock-caret" id="alpacaDockCaret">▲</span>
         </button>
       </div>
-      <div class="notepad-resize-handle" id="alpacaDockResizeHandle"></div>
     </div>
     <div class="alpaca-dock-body-wrap" id="alpacaDockBodyWrap">
       <div class="alpaca-dock-body">
@@ -1537,6 +1589,30 @@
     </div>
 
     <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Auto-Trading Controls</div>
+      <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
+        <div>
+          <div class="settings-row-title">Auto-send new intraday picks (risk-sized)</div>
+          <div class="settings-row-desc">
+            Sends a new pick the moment it's found, sized per the account's risk caps (1% per trade, 20% max
+            per position, 5.5% total risk ceiling). Allows re-entry on the same symbol later the same day once
+            a prior position closes. Failed orders retry 3 times, then auto-trading pauses and alerts you — see
+            status below. Only runs while this tab is open. Paper money only.
+          </div>
+        </div>
+        <button class="chart-tool-btn" id="alpacaAutoTradeIntradayToggle" role="switch" aria-checked="false">Off</button>
+      </div>
+      <div class="settings-row" id="tradingPausedRow" hidden>
+        <div>
+          <div class="settings-row-title">Auto-trading status</div>
+          <div class="settings-row-desc" id="tradingPausedDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="resumeTradingBtn">Resume trading</button>
+      </div>
+      <div class="labs-backtest-status" id="autoTradeControlsEmpty" hidden>Connect Alpaca in Settings to enable auto-trading.</div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
       <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Open Positions</div>
       <div id="statusPositionsBody"></div>
     </div>
@@ -1563,7 +1639,7 @@
       </div>
       <div class="trades-header-right">
         <div class="layout-dropdown">
-          <button class="nav-toggle" id="layoutToggle" aria-haspopup="true" aria-expanded="false">
+          <button class="layout-toggle-btn" id="layoutToggle" aria-haspopup="true" aria-expanded="false">
             <span>Layout</span>
             <span class="caret">▾</span>
           </button>
@@ -1719,14 +1795,6 @@
         <button class="settings-reset-btn" id="signOutBtn">Sign out</button>
       </div>
 
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Live data</div>
-          <div class="settings-row-desc quote-sync-status" id="quoteSyncStatus">Connecting…</div>
-          <div class="settings-row-desc" style="margin-top:4px;">Finnhub's free feed is real-time for US stocks — connecting Alpaca below doesn't fix a delay, it just consolidates prices and your broker onto one account instead of two.</div>
-        </div>
-      </div>
-
       <div class="settings-row alpaca-row">
         <div class="alpaca-row-full">
           <div class="settings-row-title">Broker connection — Alpaca (Paper)</div>
@@ -1745,54 +1813,6 @@
           </div>
           <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
         </div>
-      </div>
-
-      <div class="settings-row" id="alpacaRiskRow" hidden>
-        <div>
-          <div class="settings-row-title">Risk per trade</div>
-          <div class="settings-row-desc">
-            Fixed by the strategy itself, not user-adjustable — changing this manually would skew the
-            reliability numbers the strategy was actually tested against. Based on the real distance between
-            entry and stop, recalculated from your actual balance each time, rounded down to a whole share.
-            Two caps apply on top of this: no position over 20% of equity, and no more than 5.5% of equity at
-            risk across all open positions combined (not a limit on how many positions — just on total risk).
-          </div>
-        </div>
-        <div class="layout-stepper">
-          <span class="zoom-label mono" id="riskPercentLabel">1.0%</span>
-        </div>
-      </div>
-
-      <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
-        <div>
-          <div class="settings-row-title">Auto-send new intraday picks (risk-sized)</div>
-          <div class="settings-row-desc">
-            Sends a new pick the moment it's found, sized per the caps above. Allows re-entry on the same
-            symbol later the same day once a prior position closes. Failed orders retry 3 times, then
-            auto-trading pauses and alerts you — see status below. Only runs while this tab is open. Paper
-            money only.
-          </div>
-        </div>
-        <button class="chart-tool-btn" id="alpacaAutoTradeIntradayToggle" role="switch" aria-checked="false">Off</button>
-      </div>
-
-      <div class="settings-row" id="tradingPausedRow" hidden>
-        <div>
-          <div class="settings-row-title">Auto-trading status</div>
-          <div class="settings-row-desc" id="tradingPausedDesc">—</div>
-        </div>
-        <button class="settings-reset-btn" id="resumeTradingBtn">Resume trading</button>
-      </div>
-
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Intraday screener</div>
-          <div class="settings-row-desc">
-            Scans a small list of individual stocks on 15-min bars, re-checked every 15 minutes during
-            market hours. Shows up as its own section on Trade Overview. Only runs while this tab is open.
-          </div>
-        </div>
-        <button class="chart-tool-btn active" id="intradayToggle" role="switch" aria-checked="true">On</button>
       </div>
 
       <div class="settings-row">
@@ -1829,16 +1849,6 @@
           <button class="tf-btn" data-value="24">24-hour</button>
           <button class="tf-btn" data-value="12">12-hour</button>
         </div>
-      </div>
-
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Market alerts</div>
-          <div class="settings-row-desc">Tracks today's market alerts, viewable later in History.</div>
-        </div>
-        <button class="settings-toggle-switch" id="alertsToggle" role="switch" aria-checked="true" aria-label="Toggle market alerts">
-          <span class="toggle-knob"></span>
-        </button>
       </div>
 
       <div class="settings-row">
@@ -2088,8 +2098,9 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Prices are live quotes from Finnhub. Chart history is real data from Twelve Data for signed-in accounts — if it can't be reached, you'll see an honest "couldn't load" message instead of fake data. Entry, stop, targets, and the reasoning behind each trade are calculated daily from real price data, not written by hand. Guest mode is the only place you'll see simulated numbers. Nothing here is financial or trading advice.</p>
-    <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a> and <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>.</p>
+    <p>Screens a fixed list of 8 large-cap stocks on 15-minute bars, re-checked every 15 minutes during market hours. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades can be sent to a connected Alpaca paper account — simulated money only, no real trades are ever placed. This is a single-owner personal tool, not a public product, and the underlying strategy is still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
+    <p>Prices are live quotes from Finnhub. Chart history is real data from Twelve Data — if it can't be reached, you'll see an honest "couldn't load" message instead of fake data.</p>
+    <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
 
 </div>
@@ -2611,6 +2622,7 @@
       if(candidates.length === 0){
         intradayTrades = [];
         renderIntradayBlocks();
+        statCta();
         if(successfulFetches === 0){
           updateIntradayStatus('Intraday screener failed — no real data available', false);
         } else {
@@ -2631,6 +2643,7 @@
         });
       });
       renderIntradayBlocks();
+      statCta();
       var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
       updateIntradayStatus('Updated ' + now + ' · next check in 15 min', true);
       autoSendIntradayPicksIfEnabled();
@@ -2905,8 +2918,8 @@
 
   // ---------- Trade Overview rows ----------
   function statCta(){
-    var active = trades.filter(function(t){ return t.status==='active'; }).length;
-    document.getElementById('ctaStat').textContent = trades.length + ' stocks you\'re tracking today, ' + active + ' with open positions';
+    var active = intradayTrades.filter(function(t){ return t.status==='active'; }).length;
+    document.getElementById('ctaStat').textContent = intradayTrades.length + ' stocks you\'re tracking today, ' + active + ' with open positions';
   }
 
   function buildActionHTML(t){
@@ -2975,16 +2988,18 @@
     document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(alpacaCreds.keyId);
     document.getElementById('alpacaDock').removeAttribute('hidden');
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
-    document.getElementById('alpacaRiskRow').removeAttribute('hidden');
     document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
+    var emptyEl = document.getElementById('autoTradeControlsEmpty');
+    if(emptyEl) emptyEl.setAttribute('hidden', '');
   }
 
   function showAlpacaInputsView(){
     document.getElementById('alpacaConnectedRow').setAttribute('hidden', '');
     document.getElementById('alpacaInputsRow').removeAttribute('hidden');
     document.getElementById('alpacaDock').setAttribute('hidden', '');
-    document.getElementById('alpacaRiskRow').setAttribute('hidden', '');
     document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
+    var emptyEl = document.getElementById('autoTradeControlsEmpty');
+    if(emptyEl) emptyEl.removeAttribute('hidden');
   }
 
   function testAlpacaConnection(){
@@ -3002,8 +3017,7 @@
       })
       .then(function(acct){
         alpacaConnected = true;
-        var bp = parseFloat(acct.buying_power || 0);
-        setAlpacaStatus('Connected — $' + bp.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' paper buying power', true);
+        setAlpacaStatus('Connected', true);
         showAlpacaConnectedView();
         renderTradeBlocks();
       })
@@ -3173,17 +3187,11 @@
   }
 
   function loadIntradayPref(){
-    // Defaults to ON — intraday is now the primary Trade Overview
-    // experience, not an opt-in extra. Pure screening/viewing has no
-    // financial-risk implication on its own; auto-trade is a completely
-    // separate, still off-by-default toggle for the part that actually
-    // acts on these picks.
-    var saved = true;
-    try {
-      var stored = window.localStorage.getItem('shwoopnet:intradayEnabled');
-      if(stored !== null) saved = stored === 'true';
-    } catch(e){}
-    setIntradayEnabled(saved);
+    // Always on now -- there's no toggle UI anymore, so this always
+    // enables it regardless of any old stored preference (an old 'false'
+    // value from before this toggle was removed would otherwise silently
+    // leave screening off with no way to turn it back on).
+    setIntradayEnabled(true);
   }
 
   function showAutoSendToast(sym, direction, qty){
@@ -3541,14 +3549,12 @@
   var alpacaDockHeaderEl = document.getElementById('alpacaDockHeader');
   var alpacaDockBodyWrapEl = document.getElementById('alpacaDockBodyWrap');
   var alpacaDockLockBtn = document.getElementById('alpacaDockLockBtn');
-  var alpacaDockResizeHandle = document.getElementById('alpacaDockResizeHandle');
   var alpacaDockLocked = true;
 
   function saveAlpacaDockGeometry(){
     try{
       window.localStorage.setItem('shwoopnet:alpacaDockGeo', JSON.stringify({
-        left: alpacaDockBodyWrapEl.style.left,
-        width: alpacaDockBodyWrapEl.style.width, height: alpacaDockBodyWrapEl.style.height
+        left: alpacaDockBodyWrapEl.style.left
       }));
     }catch(e){}
   }
@@ -3571,6 +3577,26 @@
     alpacaDockBodyWrapEl.style.right = 'auto';
   }
 
+  // A hard stop so the dock can never be dragged underneath the persistent
+  // sidebar -- it stops flush against it instead of sliding past or
+  // overlapping. On narrow screens the sidebar becomes a horizontal bottom
+  // bar (not a right-side rail), so there's no horizontal collision to
+  // guard against there -- detected by comparing the sidebar's own height
+  // to the viewport height, rather than hardcoding the 900px breakpoint
+  // here too.
+  function maxAlpacaDockLeft(){
+    var sideNav = document.getElementById('sideNav');
+    var dockWidth = alpacaDockBodyWrapEl.offsetWidth;
+    if(sideNav){
+      var navRect = sideNav.getBoundingClientRect();
+      var navIsVerticalRail = navRect.height > window.innerHeight * 0.5;
+      if(navIsVerticalRail){
+        return Math.max(0, navRect.left - dockWidth);
+      }
+    }
+    return window.innerWidth - dockWidth;
+  }
+
   var alpacaDockDragState = null;
   alpacaDockHeaderEl.addEventListener('pointerdown', function(e){
     if(alpacaDockLocked || e.target.closest('button')) return;
@@ -3581,30 +3607,12 @@
   alpacaDockHeaderEl.addEventListener('pointermove', function(e){
     if(!alpacaDockDragState) return;
     var dx = e.clientX - alpacaDockDragState.startX;
-    var maxLeft = window.innerWidth - alpacaDockBodyWrapEl.offsetWidth;
+    var maxLeft = maxAlpacaDockLeft();
     var newLeft = Math.max(0, Math.min(maxLeft, alpacaDockDragState.startLeft + dx));
     setAlpacaDockLeft(newLeft);
   });
   alpacaDockHeaderEl.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
   alpacaDockHeaderEl.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
-
-  var alpacaDockResizeState = null;
-  alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
-    if(alpacaDockLocked) return; // now gated by the same lock as dragging -- was never gated before
-    e.stopPropagation();
-    var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
-    alpacaDockResizeState = { startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height };
-    alpacaDockResizeHandle.setPointerCapture(e.pointerId);
-  });
-  alpacaDockResizeHandle.addEventListener('pointermove', function(e){
-    if(!alpacaDockResizeState) return;
-    var newW = Math.max(280, alpacaDockResizeState.startW + (e.clientX - alpacaDockResizeState.startX));
-    var newH = Math.max(200, alpacaDockResizeState.startH + (e.clientY - alpacaDockResizeState.startY));
-    alpacaDockBodyWrapEl.style.width = newW + 'px';
-    alpacaDockBodyWrapEl.style.height = newH + 'px';
-  });
-  alpacaDockResizeHandle.addEventListener('pointerup', function(){ alpacaDockResizeState = null; saveAlpacaDockGeometry(); });
-  alpacaDockResizeHandle.addEventListener('pointercancel', function(){ alpacaDockResizeState = null; });
 
   (function initAlpacaDockGeometry(){
     var lockedSaved = 'true';
@@ -3612,10 +3620,6 @@
     applyAlpacaDockLock(lockedSaved === 'true');
     try{
       var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
-      if(geo && geo.width){
-        alpacaDockBodyWrapEl.style.width = geo.width;
-        alpacaDockBodyWrapEl.style.height = geo.height;
-      }
       if(geo && geo.left){
         setAlpacaDockLeft(parseFloat(geo.left));
       }
@@ -5811,20 +5815,19 @@
   function updateQuoteSyncStatus(results){
     var anyOk = results.some(function(r){ return r; });
     lastQuoteSyncOk = anyOk;
-    var el = document.getElementById('quoteSyncStatus');
+    var el = document.getElementById('headerLiveStatus');
     if(!el) return;
-    var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit', second:'2-digit' });
     // Reflects what actually happened this cycle, not just whether Alpaca
     // trading is connected — if every data call quietly fell back to
     // Finnhub (e.g. a CORS block), this correctly still says Finnhub.
     var usedAlpaca = lastQuoteBatchSources.length > 0 && lastQuoteBatchSources.every(function(s){ return s === 'alpaca'; });
     var sourceLabel = usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub';
     if(anyOk){
-      el.textContent = 'Live via ' + sourceLabel + ' · synced ' + now;
-      el.className = 'quote-sync-status ok';
+      el.textContent = 'Live via ' + sourceLabel;
+      el.className = 'header-live-status ok';
     } else {
-      el.textContent = 'Sync failed — showing last known prices (check console)';
-      el.className = 'quote-sync-status fail';
+      el.textContent = 'Sync failed — last known prices';
+      el.className = 'header-live-status fail';
     }
   }
 
@@ -5916,8 +5919,7 @@
     } else {
       timeStr = hours24.toString().padStart(2,'0') + ':' + m + ':' + s;
     }
-    document.getElementById('clockTime').textContent = timeStr;
-    document.getElementById('clockTz').textContent = getTzAbbrev(now) + ' · Markets open';
+    document.getElementById('clockTime').textContent = timeStr + ' ' + getTzAbbrev(now);
     var opts = { weekday:'long', month:'long', day:'numeric' };
     document.getElementById('briefDate').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
   }
@@ -5984,11 +5986,10 @@
     applyClockFormat(saved);
   })();
 
-  // ---------- Settings: market alerts toggle ----------
-  var alertsToggleBtn = document.getElementById('alertsToggle');
+  // ---------- Market alerts: always on, no toggle UI anymore ----------
   var alertsEnabledPref = true;
   function checkAlertsNow(){
-    if(!alertsUid || !alertsEnabledPref) return;
+    if(!alertsUid) return;
     var today = new Date().toISOString().slice(0,10);
     var alreadyToday = alertHistory.some(function(a){ return a.date === today; });
     if(!alreadyToday){
@@ -5997,22 +5998,6 @@
       renderHistoryList();
     }
   }
-
-  function applyAlertsPref(enabled){
-    alertsEnabledPref = enabled;
-    alertsToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
-    try{ window.localStorage.setItem('shwoopnet:alertsEnabled', enabled ? 'true' : 'false'); }catch(e){}
-  }
-  alertsToggleBtn.addEventListener('click', function(){
-    var enabled = alertsToggleBtn.getAttribute('aria-checked') !== 'true';
-    applyAlertsPref(enabled);
-    if(enabled){ checkAlertsNow(); } else { renderHistoryList(); }
-  });
-  (function initAlertsPref(){
-    var saved = 'true';
-    try{ var stored = window.localStorage.getItem('shwoopnet:alertsEnabled'); if(stored !== null) saved = stored; }catch(e){}
-    applyAlertsPref(saved === 'true');
-  })();
 
   // ---------- Settings: reduce motion ----------
   var motionToggleBtn = document.getElementById('motionToggle');
@@ -6192,6 +6177,21 @@
       }
     });
   });
+
+  // Geometry Dash-style shard burst: 5 tiny diamonds injected into each
+  // sidebar item, evenly spaced around a circle (360/5 = 72 degrees
+  // apart) so the burst radiates symmetrically outward on hover,
+  // regardless of which item it is.
+  document.querySelectorAll('.side-nav-item').forEach(function(item){
+    for(var i = 0; i < 5; i++){
+      var shard = document.createElement('span');
+      shard.className = 'nav-shard';
+      shard.style.setProperty('--angle', (i * 72) + 'deg');
+      shard.style.animationDelay = (i * 0.02) + 's';
+      item.appendChild(shard);
+    }
+  });
+
   document.getElementById('ctaToTrades').addEventListener('click', function(){ showPage('trades'); });
 
   document.getElementById('brandHomeBtn').addEventListener('click', function(){
@@ -7644,9 +7644,6 @@
   loadAlpacaAutoTradePref();
   renderRiskPercentLabel();
   loadAlpacaAutoTradeIntradayPref();
-  document.getElementById('intradayToggle').addEventListener('click', function(){
-    setIntradayEnabled(!alpacaIntradayEnabled);
-  });
   loadIntradayPref();
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
