@@ -131,6 +131,12 @@
     display:flex; flex-direction:row; align-items:center; gap:2px;
   }
   @media (max-width: 900px){ .quick-nav{ display:none; } }
+  /* Above 900px, quick-nav is already visible in the topbar, so the
+     plain page-navigation entries in the dropdown menu would just be a
+     second, redundant way to do the exact same thing. Notepad and
+     History aren't available anywhere else, so those stay visible at
+     every width -- this only hides the entries that duplicate quick-nav. */
+  @media (min-width: 901px){ #navMenu .nav-menu-page-link{ display:none; } }
   .quick-nav-item{
     background:none; border:none; color: var(--muted); cursor:pointer;
     display:flex; flex-direction:column; align-items:center; gap:3px;
@@ -275,6 +281,17 @@
     padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'IBM Plex Mono', monospace; min-width:160px;
   }
   .labs-backtest-status{ font-size:12px; color: var(--muted); margin-bottom:16px; }
+  .labs-export-section{ margin-top:8px; }
+  .labs-export-divider{ height:1px; background: var(--border); margin:24px 0 20px 0; }
+  .labs-export-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:12px; }
+  .labs-export-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; margin-bottom:4px; }
+  .labs-export-desc{ font-size:12px; color: var(--muted); max-width:640px; }
+  .labs-export-textarea{
+    width:100%; background: var(--panel); border:1px solid var(--border); border-radius:6px;
+    color: var(--paper); font-family:'IBM Plex Mono', monospace; font-size:11px; padding:12px;
+    resize:vertical; white-space:pre;
+  }
+  .labs-export-copy-confirm{ font-size:12px; color: var(--gain); margin-left:10px; }
   .labs-backtest-status.ok{ color: var(--gain); }
   .labs-backtest-status.fail{ color: var(--loss); }
 
@@ -776,10 +793,18 @@
   .alpaca-dock-body-wrap{
     position:fixed; bottom:42px; right:380px; z-index:440; width:440px; max-width:calc(100% - 40px);
     background: var(--panel); border:1px solid var(--border); border-radius:8px;
-    display:flex; flex-direction:column; height:40vh; max-height:480px; min-height:220px;
+    display:flex; flex-direction:column; height:40vh; max-height:min(480px, calc(100vh - 140px)); min-height:180px;
     box-shadow:0 16px 36px rgba(0,0,0,0.5);
     opacity:0; transform: translateY(10px); pointer-events:none;
     transition: opacity .18s ease, transform .18s ease;
+    /* max-height is capped relative to viewport height (not just a flat
+       480px) so on a shorter browser window, the panel can never grow
+       tall enough to reach up into the topbar -- 140px leaves headroom
+       for the topbar itself plus the 42px this panel is already offset
+       from the bottom. min-height was also nudged down slightly (from
+       220 to 180) so it can never itself exceed the max-height cap on a
+       genuinely tiny viewport, which would otherwise let min-height win
+       out over the safety cap. */
   }
   .alpaca-dock-body-wrap.open{ opacity:1; transform: translateY(0); pointer-events:auto; }
   [data-reduce-motion="true"] .alpaca-dock-body-wrap{ transition:none; }
@@ -1242,31 +1267,31 @@
       </div>
     </button>
 
-    <nav class="quick-nav" id="quickNav">
-      <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
-        <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="status" title="Status">
-        <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
-        <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
-        <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
-        <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
-        <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
-        <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
-      </button>
-    </nav>
-
     <div class="topbar-right">
+      <nav class="quick-nav" id="quickNav">
+        <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
+          <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
+        </button>
+        <button class="nav-item quick-nav-item" data-page="status" title="Status">
+          <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
+        </button>
+        <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
+          <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
+        </button>
+        <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
+          <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
+        </button>
+        <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
+          <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
+        </button>
+        <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
+          <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
+        </button>
+        <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
+          <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
+        </button>
+      </nav>
+
       <div class="clock">
         <div class="time mono" id="clockTime">--:--:--</div>
         <div id="clockTz">Local · Markets open</div>
@@ -1278,19 +1303,19 @@
           <span class="caret">▾</span>
         </button>
         <div class="nav-menu" id="navMenu" hidden>
-          <button class="nav-item" data-page="brief">
+          <button class="nav-item nav-menu-page-link" data-page="brief">
             Market Brief
             <span class="nav-item-sub">Home — today's read</span>
           </button>
-          <button class="nav-item" data-page="status">
+          <button class="nav-item nav-menu-page-link" data-page="status">
             Status
             <span class="nav-item-sub">Account, positions &amp; activity log</span>
           </button>
-          <button class="nav-item" data-page="trades">
+          <button class="nav-item nav-menu-page-link" data-page="trades">
             Trade Overview
             <span class="nav-item-sub">Active setups &amp; charts</span>
           </button>
-          <button class="nav-item" data-page="journal">
+          <button class="nav-item nav-menu-page-link" data-page="journal">
             Trade Journal
             <span class="nav-item-sub">Calendar &amp; closed trades</span>
           </button>
@@ -1302,15 +1327,15 @@
             History
             <span class="nav-item-sub">Today's market alerts</span>
           </button>
-          <button class="nav-item" data-page="labs">
+          <button class="nav-item nav-menu-page-link" data-page="labs">
             Labs
             <span class="nav-item-sub">Strategy &amp; backtesting</span>
           </button>
-          <button class="nav-item" data-page="changelog">
+          <button class="nav-item nav-menu-page-link" data-page="changelog">
             Changelog
             <span class="nav-item-sub">What's new</span>
           </button>
-          <button class="nav-item" data-page="settings">
+          <button class="nav-item nav-menu-page-link" data-page="settings">
             Settings
             <span class="nav-item-sub">Theme &amp; preferences</span>
           </button>
@@ -2006,6 +2031,25 @@
       </div>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
+
+      <div class="labs-export-section" id="labsExportSection" hidden>
+        <div class="labs-export-divider"></div>
+        <div class="labs-export-header">
+          <div>
+            <div class="labs-export-title">Export raw historical data</div>
+            <div class="labs-export-desc">Pulls the exact same 15-min bars the backtest above uses, for every
+              symbol in the universe, using the current Lookback setting — packaged as plain JSON to hand off
+              elsewhere. Owner-only, since this consumes real API quota on every run.</div>
+          </div>
+          <button class="settings-reset-btn" id="exportHistoricalDataBtn">Export historical data</button>
+        </div>
+        <div class="labs-backtest-status" id="exportStatus"></div>
+        <div id="exportResultWrap" hidden>
+          <textarea id="exportResultTextarea" class="labs-export-textarea" readonly rows="10"></textarea>
+          <button class="settings-reset-btn" id="exportCopyBtn" style="margin-top:10px;">Copy to clipboard</button>
+          <span id="exportCopyConfirm" class="labs-export-copy-confirm" hidden>Copied.</span>
+        </div>
+      </div>
     </div>
   </main>
     </div>
@@ -4696,6 +4740,59 @@
     processNext(0);
   }
 
+  // Owner-only (gated via the currentUid/onAuthChange flow above, not a
+  // separate check here). Exports the exact same raw bars the backtest
+  // above fetches -- reusing fetchIntradayBacktestHistory means this
+  // automatically respects the same rate-limited queue everything else
+  // already goes through, so this can't blow through Twelve Data's
+  // free-tier daily cap any differently than a normal backtest run would.
+  function exportHistoricalDataClicked(){
+    var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
+    var statusEl = document.getElementById('exportStatus');
+    var btn = document.getElementById('exportHistoricalDataBtn');
+    var resultWrap = document.getElementById('exportResultWrap');
+    var textarea = document.getElementById('exportResultTextarea');
+
+    btn.disabled = true;
+    resultWrap.setAttribute('hidden', '');
+    statusEl.className = 'labs-backtest-status';
+    statusEl.textContent = 'Fetching…';
+
+    var out = {};
+    var failedSymbols = [];
+
+    function processNext(index){
+      if(index >= INTRADAY_UNIVERSE.length){
+        btn.disabled = false;
+        var summary = failedSymbols.length > 0
+          ? ' (' + failedSymbols.length + ' symbol(s) failed: ' + failedSymbols.join(', ') + ')'
+          : '';
+        statusEl.textContent = 'Done. ' + Object.keys(out).length + ' of ' + INTRADAY_UNIVERSE.length + ' symbols exported.' + summary;
+        statusEl.className = 'labs-backtest-status ok';
+        textarea.value = JSON.stringify({
+          exportedAt: new Date().toISOString(),
+          lookbackBars: lookbackBars,
+          barIntervalMinutes: 15,
+          symbols: out
+        });
+        resultWrap.removeAttribute('hidden');
+        return;
+      }
+      var sym = INTRADAY_UNIVERSE[index];
+      statusEl.textContent = 'Fetching ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
+      fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
+        out[sym] = bars.map(function(b){ return { o: b.o, h: b.h, l: b.l, c: b.c, t: b.t.toISOString() }; });
+        processNext(index + 1);
+      }).catch(function(err){
+        console.error('Export: failed to fetch', sym, err);
+        failedSymbols.push(sym);
+        processNext(index + 1);
+      });
+    }
+
+    processNext(0);
+  }
+
   function fetchHistory(sym, tf, priority){
     var cacheKey = sym + '_' + tf;
     if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
@@ -7020,6 +7117,8 @@
         }
         currentUid = user.uid;
         authGateEl.setAttribute('hidden', '');
+        var exportSectionEl = document.getElementById('labsExportSection');
+        if(exportSectionEl) exportSectionEl.removeAttribute('hidden');
         if(accountEmailDesc){ accountEmailDesc.textContent = 'Signed in as ' + user.email; }
         if(signOutBtn){ signOutBtn.textContent = 'Sign out'; }
         journalUnsubscribe = api.watchJournal(user.uid, function(entries){
@@ -7043,6 +7142,8 @@
         renderAllTradeCharts();
       } else if(!isGuestMode){
         currentUid = null;
+        var exportSectionEl2 = document.getElementById('labsExportSection');
+        if(exportSectionEl2) exportSectionEl2.setAttribute('hidden', '');
         journalEntries = [];
         clearAlerts();
         clearActivityLog();
@@ -7325,6 +7426,26 @@
   loadIntradayPref();
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
+  document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
+  document.getElementById('exportCopyBtn').addEventListener('click', function(){
+    var textarea = document.getElementById('exportResultTextarea');
+    var confirmEl = document.getElementById('exportCopyConfirm');
+    textarea.select();
+    // navigator.clipboard requires a secure context (https or localhost),
+    // which GitHub Pages satisfies -- falls back to the older
+    // execCommand only if that API is ever unavailable.
+    var done = function(){
+      confirmEl.removeAttribute('hidden');
+      setTimeout(function(){ confirmEl.setAttribute('hidden', ''); }, 2500);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(textarea.value).then(done).catch(function(){
+        try{ document.execCommand('copy'); done(); }catch(e){}
+      });
+    } else {
+      try{ document.execCommand('copy'); done(); }catch(e){}
+    }
+  });
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
