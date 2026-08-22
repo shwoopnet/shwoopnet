@@ -127,25 +127,35 @@
   }
   .app-layout{ display:flex; align-items:flex-start; }
   .app-pages{ flex:1; min-width:0; }
-  .quick-nav{
-    display:flex; flex-direction:row; align-items:center; gap:2px;
-  }
-  @media (max-width: 900px){ .quick-nav{ display:none; } }
-  /* Above 900px, quick-nav is already visible in the topbar, so the
-     plain page-navigation entries in the dropdown menu would just be a
-     second, redundant way to do the exact same thing. Notepad and
+  .waffle-nav{ position:relative; }
+  /* Above 900px, the waffle grid already covers full page navigation, so
+     the plain page-navigation entries in the dropdown menu would just be
+     a second, redundant way to do the exact same thing. Notepad and
      History aren't available anywhere else, so those stay visible at
-     every width -- this only hides the entries that duplicate quick-nav. */
+     every width -- this only hides the entries that duplicate the waffle grid. */
   @media (min-width: 901px){ #navMenu .nav-menu-page-link{ display:none; } }
+  .waffle-btn{
+    background:none; border:1px solid var(--border); border-radius:6px; color: var(--muted);
+    width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .waffle-btn:hover{ background: var(--panel); color: var(--paper); }
+  .waffle-btn[aria-expanded="true"]{ background: var(--panel-raised); color: var(--amber); }
+  .waffle-grid{
+    position:absolute; top:calc(100% + 8px); right:0; z-index:150;
+    display:grid; grid-template-columns:repeat(3, 76px); gap:2px; padding:10px;
+    background:var(--panel-raised); border:1px solid var(--border); border-radius:8px;
+    box-shadow:0 12px 28px rgba(0,0,0,0.45);
+  }
+  @media (max-width: 900px){ .waffle-nav{ display:none; } }
   .quick-nav-item{
     background:none; border:none; color: var(--muted); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    padding:6px 10px; border-radius:8px; font-size:9.5px; font-weight:600;
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    padding:12px 4px; border-radius:8px; font-size:10.5px; font-weight:600;
     font-family:'Space Grotesk', sans-serif; text-align:center;
   }
   .quick-nav-item:hover{ background: var(--panel); color: var(--paper); }
-  .quick-nav-item.current{ background: var(--panel-raised); color: var(--amber); }
-  .quick-nav-icon{ font-size:15px; line-height:1; }
+  .quick-nav-item.current{ background: var(--panel); color: var(--amber); }
+  .quick-nav-icon{ font-size:17px; line-height:1; }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -829,7 +839,10 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
-  .alpaca-dock-body-wrap .notepad-resize-handle{ position:absolute; right:2px; bottom:2px; width:16px; height:16px; cursor:nwse-resize; display:block; }
+  .alpaca-dock-header .notepad-resize-handle{
+    position:absolute; right:2px; bottom:-8px; width:16px; height:16px; cursor:nwse-resize; display:none;
+  }
+  .alpaca-dock.unlocked .alpaca-dock-header .notepad-resize-handle{ display:block; }
   .notepad-resize-handle::before{
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
@@ -1268,29 +1281,38 @@
     </button>
 
     <div class="topbar-right">
-      <nav class="quick-nav" id="quickNav">
-        <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
-          <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
+      <div class="waffle-nav">
+        <button class="waffle-btn" id="waffleNavBtn" aria-haspopup="true" aria-expanded="false" aria-label="Open navigation">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <circle cx="5" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="19" cy="5" r="2" fill="currentColor"/>
+            <circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/>
+            <circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="19" r="2" fill="currentColor"/>
+          </svg>
         </button>
-        <button class="nav-item quick-nav-item" data-page="status" title="Status">
-          <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
-        </button>
-        <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
-          <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
-        </button>
-        <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
-          <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
-        </button>
-        <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
-          <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
-        </button>
-        <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
-          <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
-        </button>
-        <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
-          <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
-        </button>
-      </nav>
+        <div class="waffle-grid" id="waffleGrid" hidden>
+          <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
+            <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
+          </button>
+          <button class="nav-item quick-nav-item" data-page="status" title="Status">
+            <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
+          </button>
+          <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
+            <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
+          </button>
+          <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
+            <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
+          </button>
+          <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
+            <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
+          </button>
+          <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
+            <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
+          </button>
+          <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
+            <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
+          </button>
+        </div>
+      </div>
 
       <div class="clock">
         <div class="time mono" id="clockTime">--:--:--</div>
@@ -1379,13 +1401,13 @@
           <span class="alpaca-dock-caret" id="alpacaDockCaret">▲</span>
         </button>
       </div>
+      <div class="notepad-resize-handle" id="alpacaDockResizeHandle"></div>
     </div>
     <div class="alpaca-dock-body-wrap" id="alpacaDockBodyWrap">
       <div class="alpaca-dock-body">
         <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
         <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
       </div>
-      <div class="notepad-resize-handle" id="alpacaDockResizeHandle"></div>
     </div>
   </div>
 
@@ -3515,6 +3537,7 @@
 
   var alpacaDockResizeState = null;
   alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
+    if(alpacaDockLocked) return; // now gated by the same lock as dragging -- was never gated before
     e.stopPropagation();
     var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
     alpacaDockResizeState = { startX: e.clientX, startY: e.clientY, startW: rect.width, startH: rect.height };
@@ -5942,16 +5965,27 @@
 
   var navToggle = document.getElementById('navToggle');
   var navMenu = document.getElementById('navMenu');
+  var waffleNavBtn = document.getElementById('waffleNavBtn');
+  var waffleGrid = document.getElementById('waffleGrid');
 
   navToggle.addEventListener('click', function(){
     var open = !navMenu.hasAttribute('hidden');
     if(open){ navMenu.setAttribute('hidden',''); navToggle.setAttribute('aria-expanded','false'); }
     else{ navMenu.removeAttribute('hidden'); navToggle.setAttribute('aria-expanded','true'); }
   });
+  waffleNavBtn.addEventListener('click', function(){
+    var open = !waffleGrid.hasAttribute('hidden');
+    if(open){ waffleGrid.setAttribute('hidden',''); waffleNavBtn.setAttribute('aria-expanded','false'); }
+    else{ waffleGrid.removeAttribute('hidden'); waffleNavBtn.setAttribute('aria-expanded','true'); }
+  });
   document.addEventListener('click', function(e){
     if(!e.target.closest('.nav-dropdown')){
       navMenu.setAttribute('hidden','');
       navToggle.setAttribute('aria-expanded','false');
+    }
+    if(!e.target.closest('.waffle-nav')){
+      waffleGrid.setAttribute('hidden','');
+      waffleNavBtn.setAttribute('aria-expanded','false');
     }
   });
   document.querySelectorAll('.nav-item').forEach(function(item){
@@ -5965,6 +5999,8 @@
       }
       navMenu.setAttribute('hidden','');
       navToggle.setAttribute('aria-expanded','false');
+      waffleGrid.setAttribute('hidden','');
+      waffleNavBtn.setAttribute('aria-expanded','false');
     });
   });
   document.getElementById('ctaToTrades').addEventListener('click', function(){ showPage('trades'); });
