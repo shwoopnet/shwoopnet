@@ -128,20 +128,18 @@
   .app-layout{ display:flex; align-items:flex-start; }
   .app-pages{ flex:1; min-width:0; }
   .quick-nav{
-    flex-shrink:0; width:88px; display:flex; flex-direction:column; gap:2px;
-    padding: 18px 10px; position:sticky; top:0; align-self:flex-start;
-    border-right:1px solid var(--border);
+    display:flex; flex-direction:row; align-items:center; gap:2px;
   }
   @media (max-width: 900px){ .quick-nav{ display:none; } }
   .quick-nav-item{
     background:none; border:none; color: var(--muted); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:5px;
-    padding:10px 4px; border-radius:8px; font-size:10.5px; font-weight:600;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:6px 10px; border-radius:8px; font-size:9.5px; font-weight:600;
     font-family:'Space Grotesk', sans-serif; text-align:center;
   }
   .quick-nav-item:hover{ background: var(--panel); color: var(--paper); }
   .quick-nav-item.current{ background: var(--panel-raised); color: var(--amber); }
-  .quick-nav-icon{ font-size:17px; line-height:1; }
+  .quick-nav-icon{ font-size:15px; line-height:1; }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -1244,6 +1242,30 @@
       </div>
     </button>
 
+    <nav class="quick-nav" id="quickNav">
+      <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
+        <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="status" title="Status">
+        <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
+        <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
+        <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
+        <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
+        <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
+      </button>
+      <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
+        <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
+      </button>
+    </nav>
+
     <div class="topbar-right">
       <div class="clock">
         <div class="time mono" id="clockTime">--:--:--</div>
@@ -1408,29 +1430,6 @@
 
   <!-- ================= MARKET BRIEF (HOME) ================= -->
   <div class="app-layout">
-    <nav class="quick-nav" id="quickNav">
-      <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
-        <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="status" title="Status">
-        <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
-        <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
-        <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
-        <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
-        <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
-      </button>
-      <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
-        <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
-      </button>
-    </nav>
     <div class="app-pages">
   <main class="page" id="page-brief">
     <div class="brief-hero">
