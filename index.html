@@ -211,48 +211,63 @@
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
   }
   .brand:hover .brand-name{ color: var(--amber); }
-  /* The classic side-scroller trick: a keyframe animation that ends at
-     one position and loops back to 0% is a hard cut, not a smooth
-     reverse -- so ending at "moved left" and starting fresh at
-     "resting position" on every loop produces exactly the run-then-
-     teleport-back motion of an old side-scrolling game sprite, for free. */
+  .brand-text{ position:relative; }
+  /* Centered over the SHWOOP text horizontally, resting near the
+     Personal market terminal line beneath it -- the jump lifts it up
+     toward SHWOOP, and gravity brings it back down to "land" on the
+     subtitle each cycle. */
   .brand-mark-scroller{
-    display:inline-flex; margin-left:12px;
-    animation: brandSideScroll 3.2s linear infinite;
-  }
-  @keyframes brandSideScroll{
-    0%{ transform: translateX(0); }
-    100%{ transform: translateX(-78px); }
+    position:absolute; left:50%; bottom:-2px; transform:translateX(-50%);
+    pointer-events:none;
   }
   .brand-mark-wrap{ position:relative; display:inline-flex; flex-shrink:0; }
   .brand-mark{
     flex-shrink:0; transform-origin: 50% 90%;
-    animation: brandBounce 2s cubic-bezier(0.45,0,0.55,1) infinite;
+    animation: brandBounce 2.2s infinite;
   }
+  /* Real gravity, not a symmetric mirror: decelerating on the way up
+     (cubic-bezier easing out), accelerating on the way down (easing
+     in) -- sets animation-timing-function per keyframe step, which
+     applies to the transition INTO that step, not the animation as a
+     whole. A longer rest at the bottom (68-100%) reads as a deliberate
+     pause between hops rather than a constant, mechanical cycle. */
   @keyframes brandBounce{
-    0%, 55%, 100%{ transform: translateY(0) rotate(0deg) scale(1,1); }
-    15%{ transform: translateY(-7px) rotate(-14deg) scale(1,1); }
-    30%{ transform: translateY(0) rotate(0deg) scale(1,1); }
-    33%{ transform: translateY(0) rotate(0deg) scale(1.1,0.88); }
-    40%{ transform: translateY(0) rotate(0deg) scale(1,1); }
+    0%{ transform: translateY(0) rotate(0deg) scale(1,1); animation-timing-function: cubic-bezier(.28,.7,.35,1); }
+    32%{ transform: translateY(-19px) rotate(-16deg) scale(1,1); animation-timing-function: cubic-bezier(.55,0,.75,.5); }
+    54%{ transform: translateY(0) rotate(0deg) scale(1,1); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+    60%{ transform: translateY(0) rotate(0deg) scale(1.14,0.85); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+    68%, 100%{ transform: translateY(0) rotate(0deg) scale(1,1); }
+  }
+  /* A simple ground line that flashes in right as the icon lands,
+     synced to the same 2.2s cycle -- a quick, understated "impact"
+     mark rather than anything elaborate. */
+  .brand-ground{
+    position:absolute; left:50%; bottom:-5px; transform:translateX(-50%) scaleX(.3);
+    width:30px; height:1.5px; background: var(--amber); opacity:0; border-radius:1px;
+    animation: brandGroundFlash 2.2s infinite;
+  }
+  @keyframes brandGroundFlash{
+    0%, 51%{ opacity:0; transform:translateX(-50%) scaleX(.3); }
+    54%{ opacity:.85; transform:translateX(-50%) scaleX(1); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+    72%, 100%{ opacity:0; transform:translateX(-50%) scaleX(1); }
   }
   /* The impact ring is a separate element, not a pseudo-element on the
      SVG, so it can sit at the logo's actual "ground contact" point
      (matching brand-mark's own transform-origin of 50% 90%) independent
-     of whatever the SVG's internal artwork looks like. Same 2s duration
-     as brandBounce, started at the same time, so the two stay
+     of whatever the SVG's internal artwork looks like. Same 2.2s
+     duration as brandBounce, started at the same time, so the two stay
      permanently phase-locked -- the ring always fires exactly as the
-     cube lands (30-33%), like a Geometry Dash landing shockwave. */
+     cube lands (~54%), like a Geometry Dash landing shockwave. */
   .brand-impact-ring{
     position:absolute; left:50%; bottom:-1px; width:14px; height:14px;
     border:1.5px solid var(--amber); border-radius:2px; pointer-events:none;
     transform: translateX(-50%) rotate(45deg) scale(.2); opacity:0;
-    animation: brandImpactRing 2s cubic-bezier(.2,.8,.3,1) infinite;
+    animation: brandImpactRing 2.2s infinite;
   }
   @keyframes brandImpactRing{
-    0%, 29%{ opacity:0; transform: translateX(-50%) rotate(45deg) scale(.2); }
-    30%{ opacity:.85; transform: translateX(-50%) rotate(45deg) scale(.5); }
-    48%, 100%{ opacity:0; transform: translateX(-50%) rotate(45deg) scale(1.8); }
+    0%, 51%{ opacity:0; transform: translateX(-50%) rotate(45deg) scale(.2); }
+    54%{ opacity:.85; transform: translateX(-50%) rotate(45deg) scale(.5); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+    72%, 100%{ opacity:0; transform: translateX(-50%) rotate(45deg) scale(1.8); }
   }
   .brand-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; letter-spacing: 0.04em; transition: color .15s ease; }
   .brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
@@ -278,7 +293,8 @@
   .trade-bubble.positive{ background: var(--gain); color:#06210f; }
   .trade-bubble.negative{ background: var(--loss); color:#2a0a06; }
   .trade-bubble.neutral{ background:#F2C94C; color:#2a2205; }
-  #dockTradeBubble{ margin-left:8px; }
+  .alpaca-dock-title-group{ display:flex; align-items:center; gap:6px; }
+  #dockTradeBubble{ margin-left:0; }
 
   .side-nav-icon-wrap{ position:relative; display:inline-block; }
   .trade-bubble-badge{
@@ -851,7 +867,7 @@
 
 
   .notepad-panel{
-    position: fixed; bottom: 20px; right: 100px; width: 300px; height: 260px; z-index: 110;
+    position: fixed; bottom: 20px; right: 100px; width: 300px; height: 260px; z-index: 450;
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     box-shadow: 0 12px 30px rgba(0,0,0,0.4); display:flex; flex-direction:column;
   }
@@ -1168,14 +1184,14 @@
     .ticker-track{ animation: none; }
     .flash-up, .flash-down{ animation: none; }
     .brand-mark{ animation: none; }
-    .brand-mark-scroller{ animation: none; }
+    .brand-ground{ animation: none; display:none; }
     .brand-impact-ring{ animation: none; display:none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   }
   [data-reduce-motion="true"] .ticker-track{ animation: none; }
   [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
-  [data-reduce-motion="true"] .brand-mark-scroller{ animation: none; }
+  [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   .flash-up{ animation: flashUp .6s ease; }
@@ -1389,22 +1405,23 @@
 
   <div class="topbar">
     <button class="brand" id="brandHomeBtn" aria-label="Go to home page">
-      <div>
+      <div class="brand-text">
         <div class="brand-name">SHWOOP</div>
         <div class="brand-sub">Personal market terminal</div>
-      </div>
-      <span class="brand-mark-scroller">
-        <span class="brand-mark-wrap">
-          <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
-            <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
-            <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
-            <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-            <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
-            <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
-          </svg>
-          <span class="brand-impact-ring"></span>
+        <span class="brand-mark-scroller">
+          <span class="brand-mark-wrap">
+            <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
+              <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+              <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+              <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+              <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
+              <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
+            </svg>
+            <span class="brand-impact-ring"></span>
+          </span>
         </span>
-      </span>
+        <span class="brand-ground"></span>
+      </div>
     </button>
 
     <div class="topbar-right">
@@ -1475,7 +1492,7 @@
 
   <div class="alpaca-dock" id="alpacaDock" hidden>
     <div class="alpaca-dock-header" id="alpacaDockHeader">
-      <span id="alpacaDockTitle">Paper Trading Account</span><span class="trade-bubble" id="dockTradeBubble" hidden>0</span>
+      <span class="alpaca-dock-title-group"><span id="alpacaDockTitle">Paper Trading Account</span><span class="trade-bubble" id="dockTradeBubble" hidden>0</span></span>
       <div class="alpaca-dock-header-controls">
         <button class="notepad-lock-btn" id="alpacaDockLockBtn">Unlock</button>
         <button class="alpaca-dock-toggle-btn" id="alpacaDockToggleBtn" aria-label="Expand or collapse account panel" aria-expanded="false">
@@ -3763,6 +3780,14 @@
     var maxLeft = maxAlpacaDockLeft();
     var newLeft = Math.max(0, Math.min(maxLeft, alpacaDockDragState.startLeft + dx));
     setAlpacaDockLeft(newLeft);
+    // The dock moved -- if the notepad is open, it needs to re-check
+    // whether it's now sitting where the dock just moved to, and bounce
+    // out of the way if so (the same avoidance the notepad's own drag
+    // already does, just triggered from the other side).
+    var notepadEl = document.getElementById('notepadPanel');
+    if(notepadEl && !notepadEl.hasAttribute('hidden') && typeof clampNotepadPosition === 'function'){
+      clampNotepadPosition();
+    }
   });
   alpacaDockHeaderEl.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
   alpacaDockHeaderEl.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
@@ -4836,36 +4861,55 @@
     });
   }
 
-  function runIntradayBacktestSimulation(bars, lookbackBars){
-    var startIdx = Math.max(50, bars.length - lookbackBars);
-    var trades = [];
-    // A fresh, isolated store for this single backtest run -- never the
-    // live orbSignalsToday global, so running a backtest can never
-    // affect live trading state and vice versa.
-    var localSignalStore = {};
-    var i = startIdx;
-    while(i < bars.length){
-      var historySlice = bars.slice(0, i + 1);
-      var currentPrice = bars[i].c;
-      var beforeSignal = localSignalStore['SYM'];
-      var analysis = computeORBAnalysis('SYM', historySlice, currentPrice, localSignalStore);
-      var afterSignal = localSignalStore['SYM'];
-      var isFreshSignal = analysis && afterSignal && afterSignal !== beforeSignal && afterSignal.dateFired === bars[i].t.toISOString().slice(0,10);
-      if(isFreshSignal){
-        var outcome = simulateORBForwardSameDay(bars, i, analysis);
-        var isLong = analysis.direction === 'Long';
-        var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
-        trades.push({
-          date: bars[i].t, direction: analysis.direction, entry: analysis.entry,
-          stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
-          exitPrice: outcome.price, pctReturn: pctReturn
-        });
-        i = i + outcome.days + 1;
-      } else {
-        i++;
+  // Runs in yielding chunks rather than one long synchronous loop --
+  // for a full 365-day lookback (or the whole-universe backtest, which
+  // runs this once per symbol), a single uninterrupted pass could
+  // occupy the main thread long enough to freeze any other interaction
+  // happening at the same time, including something as simple as
+  // dragging a floating panel. Yielding back to the browser every 300
+  // iterations via setTimeout lets pending UI events (like a drag's
+  // pointermove) get processed between chunks, without meaningfully
+  // slowing down the backtest itself.
+  function runIntradayBacktestSimulationAsync(bars, lookbackBars){
+    return new Promise(function(resolve){
+      var startIdx = Math.max(50, bars.length - lookbackBars);
+      var trades = [];
+      var localSignalStore = {};
+      var i = startIdx;
+      var ITERATIONS_PER_CHUNK = 300;
+
+      function step(){
+        var processedThisChunk = 0;
+        while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
+          var historySlice = bars.slice(0, i + 1);
+          var currentPrice = bars[i].c;
+          var beforeSignal = localSignalStore['SYM'];
+          var analysis = computeORBAnalysis('SYM', historySlice, currentPrice, localSignalStore);
+          var afterSignal = localSignalStore['SYM'];
+          var isFreshSignal = analysis && afterSignal && afterSignal !== beforeSignal && afterSignal.dateFired === bars[i].t.toISOString().slice(0,10);
+          if(isFreshSignal){
+            var outcome = simulateORBForwardSameDay(bars, i, analysis);
+            var isLong = analysis.direction === 'Long';
+            var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
+            trades.push({
+              date: bars[i].t, direction: analysis.direction, entry: analysis.entry,
+              stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
+              exitPrice: outcome.price, pctReturn: pctReturn
+            });
+            i = i + outcome.days + 1;
+          } else {
+            i++;
+          }
+          processedThisChunk++;
+        }
+        if(i < bars.length){
+          setTimeout(step, 0);
+        } else {
+          resolve(trades);
+        }
       }
-    }
-    return trades;
+      step();
+    });
   }
 
   // "days" on these trade objects is actually a bar count here (15-min
@@ -5005,7 +5049,8 @@
     resultsEl.innerHTML = '';
 
     fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-      var trades = runIntradayBacktestSimulation(bars, lookbackBars);
+      return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+    }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderIntradayBacktestResults(trades, summary, sym);
       btn.disabled = false;
@@ -5044,7 +5089,8 @@
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
       fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        var trades = runIntradayBacktestSimulation(bars, lookbackBars);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+      }).then(function(trades){
         allTrades = allTrades.concat(trades);
         perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
         processNext(index + 1);
@@ -6404,7 +6450,10 @@
   function toggleNotepad(open){
     var panel = document.getElementById('notepadPanel');
     var isOpen = open !== undefined ? open : panel.hasAttribute('hidden');
-    if(isOpen){ panel.removeAttribute('hidden'); }
+    if(isOpen){
+      panel.removeAttribute('hidden');
+      if(typeof clampNotepadPosition === 'function'){ clampNotepadPosition(); }
+    }
     else{ panel.setAttribute('hidden',''); }
     document.getElementById('notepadToggle').classList.toggle('current', isOpen);
   }
@@ -6442,6 +6491,64 @@
   }
   notepadLockBtn.addEventListener('click', function(){ applyNotepadLock(!notepadLocked); });
 
+  // Keeps the notepad from overlapping the Alpaca dock -- pushes it to
+  // whichever side (left or right of the dock) needs the smaller nudge
+  // from its current position, but only when the two would actually
+  // overlap vertically too (no need to dodge a dock that's nowhere near
+  // the notepad's current height).
+  function avoidDockOverlap(left, top, width, height){
+    var dockOuter = document.getElementById('alpacaDock');
+    if(!dockOuter || dockOuter.hasAttribute('hidden')) return left;
+    var dockRect = alpacaDockBodyWrapEl.getBoundingClientRect();
+    var verticalOverlap = top < dockRect.bottom && (top + height) > dockRect.top;
+    if(!verticalOverlap) return left;
+    var horizontalOverlap = left < dockRect.right && (left + width) > dockRect.left;
+    if(!horizontalOverlap) return left;
+
+    var maxLeft = maxLeftClearingSidebar(width);
+    var pushLeftOption = Math.max(0, dockRect.left - width); // just to the left of the dock
+    var pushRightOption = Math.min(maxLeft, dockRect.right); // just to the right of the dock, but never past the sidebar
+
+    // Clamping alone doesn't guarantee an option is actually clear of the
+    // dock -- if the sidebar forces pushRightOption to sit at maxLeft,
+    // and the dock itself extends past maxLeft, that "option" is really
+    // still overlapping. Only consider options that genuinely clear it.
+    var leftIsClear = (pushLeftOption + width) <= dockRect.left;
+    var rightIsClear = pushRightOption >= dockRect.right;
+
+    if(leftIsClear && rightIsClear){
+      return Math.abs(left - pushLeftOption) <= Math.abs(left - pushRightOption) ? pushLeftOption : pushRightOption;
+    }
+    if(leftIsClear) return pushLeftOption;
+    if(rightIsClear) return pushRightOption;
+    // Neither option is fully clear (a genuinely cramped window) -- pick
+    // whichever pushes furthest from the dock's own center as the best
+    // available compromise.
+    var dockCenter = (dockRect.left + dockRect.right) / 2;
+    return left < dockCenter ? 0 : maxLeft;
+  }
+
+  // Full clamp: keeps the ENTIRE panel (not just its header) within the
+  // viewport, clears the sidebar, and dodges the Alpaca dock -- reused
+  // whenever the notepad's position needs to be validated, not just
+  // during an active drag: after restoring a saved position (which may
+  // have been saved on a differently-sized window) and on browser
+  // resize (so shrinking the window can never strand the panel
+  // partially or fully off-screen).
+  function clampNotepadPosition(){
+    var rect = notepadPanel.getBoundingClientRect();
+    var maxLeft = maxLeftClearingSidebar(notepadPanel.offsetWidth);
+    var maxTop = Math.max(0, window.innerHeight - notepadPanel.offsetHeight);
+    var newLeft = Math.max(0, Math.min(maxLeft, rect.left));
+    var newTop = Math.max(0, Math.min(maxTop, rect.top));
+    newLeft = avoidDockOverlap(newLeft, newTop, notepadPanel.offsetWidth, notepadPanel.offsetHeight);
+    newLeft = Math.max(0, Math.min(maxLeft, newLeft));
+    notepadPanel.style.left = newLeft + 'px';
+    notepadPanel.style.top = newTop + 'px';
+    notepadPanel.style.right = 'auto';
+    notepadPanel.style.bottom = 'auto';
+  }
+
   var dragState = null;
   notepadHead.addEventListener('pointerdown', function(e){
     if(notepadLocked || e.target.closest('button')) return;
@@ -6458,9 +6565,11 @@
     var dx = e.clientX - dragState.startX;
     var dy = e.clientY - dragState.startY;
     var maxLeft = maxLeftClearingSidebar(notepadPanel.offsetWidth);
-    var maxTop = window.innerHeight - 40;
+    var maxTop = Math.max(0, window.innerHeight - notepadPanel.offsetHeight);
     var newLeft = Math.max(0, Math.min(maxLeft, dragState.startLeft + dx));
     var newTop = Math.max(0, Math.min(maxTop, dragState.startTop + dy));
+    newLeft = avoidDockOverlap(newLeft, newTop, notepadPanel.offsetWidth, notepadPanel.offsetHeight);
+    newLeft = Math.max(0, Math.min(maxLeft, newLeft));
     notepadPanel.style.left = newLeft + 'px';
     notepadPanel.style.top = newTop + 'px';
   });
@@ -6482,7 +6591,7 @@
     notepadPanel.style.width = newW + 'px';
     notepadPanel.style.height = newH + 'px';
   });
-  notepadResizeHandle.addEventListener('pointerup', function(){ resizeState = null; saveNotepadGeometry(); });
+  notepadResizeHandle.addEventListener('pointerup', function(){ resizeState = null; clampNotepadPosition(); saveNotepadGeometry(); });
   notepadResizeHandle.addEventListener('pointercancel', function(){ resizeState = null; });
 
   (function initNotepadGeometry(){
@@ -6498,7 +6607,15 @@
         if(geo.height){ notepadPanel.style.height = geo.height; }
       }
     }catch(e){}
+    // The saved position may have come from a different window size (or
+    // none may exist yet, leaving the panel at its default bottom/right
+    // CSS) -- validate it against the CURRENT viewport either way.
+    if(!notepadPanel.hasAttribute('hidden')){ clampNotepadPosition(); }
   })();
+
+  window.addEventListener('resize', function(){
+    if(!notepadPanel.hasAttribute('hidden')){ clampNotepadPosition(); }
+  });
 
   // ---------- Trade Journal (calendar + logged trades, synced via Firebase) ----------
   var journalEntries = [];
