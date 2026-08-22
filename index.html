@@ -1970,14 +1970,11 @@
       <p class="labs-backtest-intro">
         Runs the same scoring and stop/target logic used live, on 15-minute bars, against real historical
         prices — only ever using data that would have actually existed at that point in time, no peeking
-        ahead. Position sizing now works exactly like the live system: each trade is sized against a starting
-        balance you set, using the same real risk-based formula, and the balance compounds as trades resolve —
-        a signal that doesn't size to at least 1 share at the current balance gets skipped entirely, same as
-        it would live. One honest limit: each symbol in "Run whole universe" is tested with its own independent
-        starting balance, not one shared account juggling all 8 at once — that fuller simulation is a bigger
-        build, not done yet. Intraday history is also far more data-dense than daily (roughly 26 bars per
-        trading day), and whether the free data tier hands back enough of it for a further-back lookback is
-        genuinely untested — if a lookback fails, try a shorter one.
+        ahead. This measures raw signal quality (% return per trade), independent of account size, so
+        account-size effects never blur the read on whether the underlying edge itself is real. Intraday
+        history is far more data-dense than daily (roughly 26 bars per trading day), and whether the free
+        data tier hands back enough of it for a further-back lookback is genuinely untested — if a lookback
+        fails, try a shorter one.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -1991,10 +1988,6 @@
             <option value="1610">~60 trading days</option>
             <option value="2390">~90 trading days</option>
           </select>
-        </div>
-        <div class="labs-control-field">
-          <label for="intradayBacktestBalance">Starting balance ($)</label>
-          <input type="number" id="intradayBacktestBalance" value="500" min="1" step="50">
         </div>
         <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
         <button class="settings-reset-btn" id="runIntradayUniverseBacktestBtn">Run whole universe</button>
@@ -4466,11 +4459,9 @@
     }, 'high');
   }
 
-  function runIntradayBacktestSimulation(bars, lookbackBars, startingBalance, riskPercent){
+  function runIntradayBacktestSimulation(bars, lookbackBars){
     var startIdx = Math.max(50, bars.length - lookbackBars);
     var trades = [];
-    var balance = startingBalance;
-    var skippedForSizing = 0;
     var i = startIdx;
     while(i < bars.length){
       var historySlice = bars.slice(0, i + 1);
@@ -4478,36 +4469,23 @@
       var analysis = computeIntradayAnalysis(historySlice, currentPrice, 15);
       var score = scoreCandidate(analysis);
       if(score >= MIN_SCREENER_SCORE){
-        // Same sizing formula the live system uses -- a signal that
-        // doesn't size to at least 1 share at the CURRENT (compounding)
-        // balance was never actually tradeable, so it's skipped
-        // entirely rather than silently assumed away.
-        var qty = calculatePositionSize(balance, riskPercent, analysis.entry, analysis.stop);
-        if(qty < 1){
-          skippedForSizing++;
-          i++;
-          continue;
-        }
         var outcome = simulateForwardFromDay(bars, i, analysis);
         var isLong = analysis.direction === 'Long';
         // Same fix as the daily backtest: measured from the real price
         // at signal time, not the SMA-based reference level — that's
         // what a live market-order fill would actually be near.
         var pctReturn = (outcome.price - currentPrice) / currentPrice * (isLong ? 1 : -1) * 100;
-        var dollarPnl = (outcome.price - currentPrice) * qty * (isLong ? 1 : -1);
-        balance += dollarPnl; // compounds -- the NEXT trade sizes against this new balance
         trades.push({
           date: bars[i].t, direction: analysis.direction, entry: currentPrice,
           stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
-          exitPrice: outcome.price, pctReturn: pctReturn,
-          qty: qty, dollarPnl: dollarPnl, balanceAfter: balance
+          exitPrice: outcome.price, pctReturn: pctReturn
         });
         i = i + outcome.days + 1;
       } else {
         i++;
       }
     }
-    return { trades: trades, endingBalance: balance, skippedForSizing: skippedForSizing };
+    return trades;
   }
 
   // "days" on these trade objects is actually a bar count here (15-min
@@ -4523,76 +4501,66 @@
     return '~' + tradingDays + ' trading day' + (tradingDays === 1 ? '' : 's');
   }
 
-  function renderIntradayBacktestResults(result, summary, sym, startingBalance){
-    var trades = result.trades;
+  function renderIntradayBacktestResults(trades, summary, sym){
     var statusEl = document.getElementById('intradayBacktestStatus');
     var resultsEl = document.getElementById('intradayBacktestResults');
     if(trades.length === 0){
-      var skipNote = result.skippedForSizing > 0 ? (' (' + result.skippedForSizing + ' signal' + (result.skippedForSizing !== 1 ? 's' : '') + ' found but none sized to at least 1 share at $' + startingBalance.toFixed(0) + ')') : '';
-      statusEl.textContent = 'No tradeable intraday signals for ' + sym + ' in this window' + skipNote + '.';
+      statusEl.textContent = 'No qualifying intraday signals found for ' + sym + ' in this window.';
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = '';
       return;
     }
-    var skipText = result.skippedForSizing > 0 ? (' (' + result.skippedForSizing + ' more found but skipped — too small to size at this balance)') : '';
-    statusEl.textContent = 'Found ' + trades.length + ' tradeable intraday signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + skipText + '.';
+    statusEl.textContent = 'Found ' + trades.length + ' intraday signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.';
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
     var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
     var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
     var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
-    var balanceChange = result.endingBalance - startingBalance;
-    var balanceClass = balanceChange >= 0 ? 'up' : 'down';
     resultsEl.innerHTML =
       '<div class="backtest-summary">' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Starting balance</div><div class="backtest-stat-value">$' + startingBalance.toFixed(2) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Ending balance</div><div class="backtest-stat-value ' + balanceClass + '">$' + result.endingBalance.toFixed(2) + ' (' + (balanceChange >= 0 ? '+' : '') + balanceChange.toFixed(2) + ')</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Tradeable signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Skipped (too small to size)</div><div class="backtest-stat-value">' + result.skippedForSizing + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
       '</div>' +
-      '<p class="labs-backtest-note">Ending balance reflects real, compounding position sizing at each trade\'s point in the sequence — not just the average % per trade. Win rate alone still doesn\'t show whether this made money; expectancy and profit factor account for the size of wins and losses.</p>' +
+      '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — expectancy and profit factor account for the size of wins and losses, not just how often each happened.</p>' +
       '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Shares</th><th>Outcome</th><th>P&L</th><th>Balance</th><th>Time</th></tr></thead>' +
+        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Time</th></tr></thead>' +
         '<tbody>' + trades.map(function(t){
           var outcomeClass = t.outcome === 'hit' ? 'backtest-outcome-hit' : (t.outcome === 'stopped' ? 'backtest-outcome-stopped' : 'backtest-outcome-unresolved');
-          var pnlClass = t.dollarPnl >= 0 ? 'up' : 'down';
+          var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
           return '<tr>' +
             '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
             '<td>' + t.direction + '</td>' +
             '<td>' + fmt(t.entry) + '</td>' +
             '<td>' + fmt(t.stop) + '</td>' +
             '<td>' + fmt(t.target) + '</td>' +
-            '<td>' + t.qty + '</td>' +
             '<td class="' + outcomeClass + '">' + t.outcome + '</td>' +
-            '<td class="' + pnlClass + '">' + (t.dollarPnl >= 0 ? '+' : '-') + '$' + Math.abs(t.dollarPnl).toFixed(2) + '</td>' +
-            '<td>$' + t.balanceAfter.toFixed(2) + '</td>' +
+            '<td class="' + returnClass + '">' + (t.pctReturn >= 0 ? '+' : '') + t.pctReturn.toFixed(2) + '%</td>' +
             '<td>' + formatIntradayDuration(t.days) + '</td>' +
           '</tr>';
         }).join('') + '</tbody>' +
       '</table>';
   }
 
-  function renderIntradayUniverseBacktestResults(perSymbolResults, summary, startingBalance){
+  function renderIntradayUniverseBacktestResults(perSymbolResults, summary){
     var statusEl = document.getElementById('intradayBacktestStatus');
     var resultsEl = document.getElementById('intradayBacktestResults');
 
     if(summary.totalSignals === 0){
-      statusEl.textContent = 'No tradeable intraday signals found across the universe in this window.';
+      statusEl.textContent = 'No qualifying intraday signals found across the universe in this window.';
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = '';
       return;
     }
 
-    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total tradeable intraday signals.';
+    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total intraday signals.';
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -4606,33 +4574,29 @@
       .map(function(r){
         var s = r.summary;
         var rowClass = s.avgPctReturn >= 0 ? 'up' : 'down';
-        var balChange = r.endingBalance - startingBalance;
-        var balClass = balChange >= 0 ? 'up' : 'down';
         return '<tr>' +
           '<td class="mono">' + r.sym + '</td>' +
           '<td>' + s.totalSignals + '</td>' +
           '<td>' + s.winRate.toFixed(0) + '%</td>' +
           '<td class="' + rowClass + '">' + (s.avgPctReturn >= 0 ? '+' : '') + s.avgPctReturn.toFixed(2) + '%</td>' +
-          '<td class="' + balClass + '">$' + r.endingBalance.toFixed(2) + '</td>' +
         '</tr>';
       }).join('');
 
     resultsEl.innerHTML =
       '<div class="backtest-summary">' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Starting balance (each symbol)</div><div class="backtest-stat-value">$' + startingBalance.toFixed(2) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Total tradeable signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
       '</div>' +
-      '<p class="labs-backtest-note">Aggregated across every symbol that produced at least one tradeable signal in this window. Each symbol below started from the same balance independently — this is not one shared account split across all 8 at once, so treat the per-symbol ending balances as separate "what if this were your only position" scenarios, not something that adds up to a single real total.</p>' +
+      '<p class="labs-backtest-note">Aggregated across every symbol in the intraday universe that produced at least one signal in this window.</p>' +
       '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th><th>Ending balance</th></tr></thead>' +
+        '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
         '<tbody>' + perSymbolRows + '</tbody>' +
       '</table>';
   }
@@ -4649,7 +4613,6 @@
     if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
     var sym = document.getElementById('intradayBacktestSymbol').value;
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
-    var startingBalance = parseFloat(document.getElementById('intradayBacktestBalance').value) || 500;
     var statusEl = document.getElementById('intradayBacktestStatus');
     var btn = document.getElementById('runIntradayBacktestBtn');
     var resultsEl = document.getElementById('intradayBacktestResults');
@@ -4660,9 +4623,9 @@
     resultsEl.innerHTML = '';
 
     fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
-      var result = runIntradayBacktestSimulation(bars, lookbackBars, startingBalance, riskPercent);
-      var summary = summarizeBacktestTrades(result.trades);
-      renderIntradayBacktestResults(result, summary, sym, startingBalance);
+      var trades = runIntradayBacktestSimulation(bars, lookbackBars);
+      var summary = summarizeBacktestTrades(trades);
+      renderIntradayBacktestResults(trades, summary, sym);
       btn.disabled = false;
     }).catch(function(err){
       statusEl.textContent = 'Intraday backtest failed: ' + err.message;
@@ -4675,7 +4638,6 @@
   function runIntradayUniverseBacktestClicked(){
     if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
-    var startingBalance = parseFloat(document.getElementById('intradayBacktestBalance').value) || 500;
     var statusEl = document.getElementById('intradayBacktestStatus');
     var btn = document.getElementById('runIntradayUniverseBacktestBtn');
     var singleBtn = document.getElementById('runIntradayBacktestBtn');
@@ -4694,15 +4656,15 @@
         btn.disabled = false;
         singleBtn.disabled = false;
         var summary = summarizeBacktestTrades(allTrades);
-        renderIntradayUniverseBacktestResults(perSymbolResults, summary, startingBalance);
+        renderIntradayUniverseBacktestResults(perSymbolResults, summary);
         return;
       }
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
       fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
-        var result = runIntradayBacktestSimulation(bars, lookbackBars, startingBalance, riskPercent);
-        allTrades = allTrades.concat(result.trades);
-        perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(result.trades), endingBalance: result.endingBalance, skippedForSizing: result.skippedForSizing });
+        var trades = runIntradayBacktestSimulation(bars, lookbackBars);
+        allTrades = allTrades.concat(trades);
+        perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
         processNext(index + 1);
       }).catch(function(err){
         console.error('Intraday universe backtest: skipping', sym, err);
