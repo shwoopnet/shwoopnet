@@ -1894,6 +1894,17 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
+        <div class="changelog-version">v2.1 — Navigation Redesign &amp; Safety Overhaul</div>
+        <ul class="changelog-items">
+          <li>Navigation rebuilt as a single, persistent sidebar — no more separate popups to open and close, and every destination (including Notepad and History) now lives in one place</li>
+          <li>Position sizing tightened: 1% risk per trade, a 20% cap on any single position, and a 5.5% ceiling on total risk across every open position at once — not user-adjustable, since changing it manually would skew the numbers the strategy was actually tested against</li>
+          <li>Auto-trading now retries a failed order 3 times before pausing itself and alerting you, rather than silently failing — pause state persists through a restart and only clears when you resume it manually</li>
+          <li>Live data status moved into the header as an always-visible, color-coded indicator instead of a buried Settings row</li>
+          <li>Removed several settings that were either redundant, always-on with no real reason to toggle off, or better placed elsewhere — Intraday screener and Market alerts are simply always on now; Auto-send moved to the Status page next to the rest of account health</li>
+          <li>Ongoing: extensive backtesting against a real, year-plus historical dataset (with realistic trading costs modeled, not just a frictionless best case) is actively comparing the current live strategy against newer candidates — see the honesty box on the Labs page for exactly where that stands</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
         <div class="changelog-version">v2.0 — Intraday-First &amp; Backend Server</div>
         <ul class="changelog-items">
           <li>Intraday is now the primary strategy — Trade Overview, the Market Brief, and backtesting are all built around short-term, real-time setups instead of once-a-day picks</li>
@@ -2013,11 +2024,14 @@
         </div>
       </div>
       <div class="labs-honesty-box">
-        <div class="labs-honesty-title">What this isn't (yet)</div>
-        <p>This scoring is a heuristic, not something proven against real results yet. The activity log tracks
-        what actually happens to every pick — sent, skipped, closed — building toward real performance numbers
-        over time. The backtest below runs the same logic against real historical prices, so you can see how it
-        would have actually done rather than take this description on faith.</p>
+        <div class="labs-honesty-title">What's actually live right now</div>
+        <p>This exact scoring is what's running today — but it's not the strategy currently believed to be
+        the strongest one found. Backtested against over a year of real historical data, including realistic
+        trading costs, this approach sits close to breakeven — sometimes slightly ahead, sometimes behind,
+        depending on the period. A different approach (an opening-range breakout, confirmed by trading volume,
+        on a different set of more volatile stocks) has tested meaningfully better in the same rigorous process,
+        but hasn't been built into the live screener yet. This page will be rewritten once that happens — until
+        then, what's below is an honest test of what's actually running, not the best result found so far.</p>
       </div>
     </div>
 
@@ -2395,22 +2409,16 @@
 
   // Ranks a candidate for the screener: clean trend alignment (price and
   // both moving averages agreeing on direction) plus real recent momentum.
-  // Not a black box — just the two things that already justify the trade
-  // in plain English above.
-  // Trend alignment is now a requirement, not just a bonus — a stock with
-  // no genuine trend (price/SMA20/SMA50 not agreeing) shouldn't make the
-  // list just because it had a volatile week. Fewer, cleaner picks beats
-  // padding the list with noise.
-  // Was 0 (any positive, trend-aligned momentum qualified, however tiny).
-  // The 60-day backtest with the R:R filter showed win/loss size ratio
-  // already favorable (~1.47x) but win rate (37%) under the ~40.5%
-  // breakeven line that ratio requires. That's a win-RATE problem, not a
-  // win-SIZE problem -- raising the bar for how much real momentum a
-  // setup needs before it counts targets that directly: a stock barely,
-  // technically trending shouldn't score the same as one moving with
-  // real conviction. 0.5 requires at least half a percent of movement
-  // over the last 5 bars (~75 min) before a signal qualifies at all.
-  var MIN_SCREENER_SCORE = 0.5;
+  // Trend alignment is a requirement, not just a bonus — a stock with no
+  // genuine trend (price/SMA20/SMA50 not agreeing) shouldn't make the
+  // list just because it had a volatile week.
+  // Set to 0 (any positive, trend-aligned momentum qualifies) -- a stricter
+  // 0.5 threshold was tried and directly tested against real historical
+  // data: it produced fewer signals with a WORSE win rate and profit
+  // factor (31% win rate / PF 0.75) than the plain 0 threshold (37% win
+  // rate / PF 0.85). Raising this bar was the intuitive move, not the
+  // one the data actually supported, so it was reverted.
+  var MIN_SCREENER_SCORE = 0;
   function scoreCandidate(analysis){
     if(analysis.sma20 === null || analysis.sma50 === null) return -1;
     var aligned = (analysis.direction === 'Long' && analysis.sma20 > analysis.sma50) ||
