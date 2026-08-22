@@ -1564,13 +1564,6 @@
       <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
       <div id="intradayBlocks"></div>
     </div>
-
-    <div class="daily-section">
-      <button class="finished-toggle" id="dailySectionToggle" aria-expanded="false" style="margin-top:24px;">
-        <span class="caret">▸</span> Daily picks (slower-moving — re-screened once a day)
-      </button>
-      <div id="tradeBlocks" hidden></div>
-    </div>
   </main>
 
   <!-- ================= TRADE JOURNAL ================= -->
@@ -1729,25 +1722,13 @@
         </div>
       </div>
 
-      <div class="settings-row" id="alpacaAutoTradeRow" hidden>
-        <div>
-          <div class="settings-row-title">Auto-send new picks (risk-sized)</div>
-          <div class="settings-row-desc">
-            Every new daily pick gets sent to Alpaca automatically the moment the screener finds it, sized per
-            the risk setting above — no manual click. Only runs while this browser tab is open; it does not run
-            overnight or in the background. Paper money only.
-          </div>
-        </div>
-        <button class="chart-tool-btn" id="alpacaAutoTradeToggle" role="switch" aria-checked="false">Off</button>
-      </div>
-
       <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
         <div>
           <div class="settings-row-title">Auto-send new intraday picks (risk-sized)</div>
           <div class="settings-row-desc">
-            Separate from the daily toggle above. Sends a new intraday pick the moment it's found, sized per the
+            Sends a new intraday pick the moment it's found, sized per the
             risk setting above, and allows genuine re-entry on the same symbol later the same day once a prior
-            position has actually closed — unlike daily, which only ever sends once per symbol per day. Capped
+            position has actually closed. Capped
             at 5 auto-sent trades per day as a hard safety backstop. Only runs while this tab is open. Paper
             money only.
           </div>
@@ -1980,35 +1961,6 @@
         backtest below is the honest next step: same logic, run against real history, so you can see how it
         actually would have done instead of just taking my word for it.</p>
       </div>
-    </div>
-
-    <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
-    <div class="labs-backtest-card">
-      <p class="labs-backtest-intro">
-        Runs the same scoring and stop/target logic used live, day by day, against real historical prices — only
-        ever using data that would have actually existed at that point in time, no peeking ahead. Check one
-        symbol, or run the whole 41-stock universe at once for an aggregate read on whether the underlying signal
-        itself actually works — that second option takes a few minutes, since it's rate-limited the same way the
-        live screener is.
-      </p>
-      <div class="labs-backtest-controls">
-        <div class="labs-control-field">
-          <label for="backtestSymbol">Symbol</label>
-          <select id="backtestSymbol"></select>
-        </div>
-        <div class="labs-control-field">
-          <label for="backtestLookback">Lookback</label>
-          <select id="backtestLookback">
-            <option value="150">6 months</option>
-            <option value="260" selected>1 year</option>
-            <option value="500">2 years</option>
-          </select>
-        </div>
-        <button class="settings-reset-btn" id="runBacktestBtn">Run backtest</button>
-        <button class="settings-reset-btn" id="runUniverseBacktestBtn">Run whole universe</button>
-      </div>
-      <div class="labs-backtest-status" id="backtestStatus"></div>
-      <div id="backtestResults"></div>
     </div>
 
     <div class="brief-section-title" style="margin-top:36px;">Intraday Backtest</div>
@@ -2287,7 +2239,18 @@
     var momentumHrs = (5 * (barMinutes || 15) / 60).toFixed(1);
 
     var direction = (sma50 !== null) ? (currentPrice >= sma50 ? 'Long' : 'Short') : 'Long';
-    var entry = sma20 !== null ? sma20 : currentPrice;
+    // Entry is the real, tradeable price — not the lagging SMA20
+    // reference. The live intraday system fires via market order
+    // immediately, so "wait for a pullback to sma20" was never actually
+    // how this executes. Anchoring stop/target to sma20 instead of the
+    // real current price created a systematic mismatch: by the time
+    // price reaches where the trade actually starts, it's often already
+    // partway to a target measured from the older, lower reference
+    // point, while the stop — also measured from that stale point —
+    // ends up farther away than intended. That combination is what
+    // produced fast, small wins and slow, large losses netting out to
+    // roughly nothing (backtest: +0.01% expectancy, profit factor 1.03).
+    var entry = currentPrice;
     var stop, t1;
     if(direction === 'Long'){
       stop = low20 * 0.997;
@@ -2315,7 +2278,7 @@
     }
     notes.push('Range over the last ' + lookbackHrs + ' hours runs from $' + low20.toFixed(2) + ' support up to $' + high20.toFixed(2) + ' resistance.');
     notes.push('Price is ' + (momentumPct >= 0 ? 'up' : 'down') + ' ' + Math.abs(momentumPct).toFixed(1) + '% over the last ' + momentumHrs + ' hours.');
-    notes.push('Entry sits near the 20-bar average, stop just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan. This is intraday — expect it to resolve or need re-checking well before the close, not over days.');
+    notes.push('Entry is the current price — this fires immediately, not a limit order waiting for a pullback. Stop sits just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan. This is intraday — expect it to resolve or need re-checking well before the close, not over days.');
 
     return {
       direction: direction, entry: entry, stop: stop, t1: t1, status: status, statusLabel: statusLabel, notes: notes,
@@ -2357,12 +2320,83 @@
   var intradayScreenerInterval = null;
   var alpacaIntradayEnabled = false;
 
+  // ---------- US market holidays ----------
+  // Computed algorithmically rather than a hardcoded date list that
+  // would silently go stale every year. Without this, isUsMarketOpen
+  // only checked weekday + time-of-day — on an actual holiday that
+  // falls on a weekday (Thanksgiving, Christmas, July 4th, etc.), it
+  // would incorrectly report the market as open, which an unattended
+  // run would never catch on its own. Ported from the backend's
+  // usMarketHolidays.js, verified there against well-documented Easter
+  // dates and cross-checked against independent native-Date iteration.
+  function getEasterMonthDay(year){
+    var a = year % 19;
+    var b = Math.floor(year / 100);
+    var c = year % 100;
+    var d = Math.floor(b / 4);
+    var e = b % 4;
+    var f = Math.floor((b + 8) / 25);
+    var g = Math.floor((b - f + 1) / 3);
+    var h = (19 * a + b - d - g + 15) % 30;
+    var i = Math.floor(c / 4);
+    var k = c % 4;
+    var l = (32 + 2 * e + 2 * i - h - k) % 7;
+    var m = Math.floor((a + 11 * h + 22 * l) / 451);
+    var monthOneIndexed = Math.floor((h + l - 7 * m + 114) / 31);
+    var day = ((h + l - 7 * m + 114) % 31) + 1;
+    return { month: monthOneIndexed - 1, day: day };
+  }
+  function ymdKey(year, month, day){
+    var d = new Date(Date.UTC(year, month, day));
+    return d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate();
+  }
+  function weekdayOf(year, month, day){
+    return new Date(Date.UTC(year, month, day)).getUTCDay();
+  }
+  function nthWeekday(year, month, weekday, n){
+    var firstWeekday = weekdayOf(year, month, 1);
+    return 1 + ((weekday - firstWeekday + 7) % 7) + (n - 1) * 7;
+  }
+  function lastWeekday(year, month, weekday){
+    var lastDate = new Date(Date.UTC(year, month + 1, 0));
+    var lastDay = lastDate.getUTCDate();
+    var lastDayWeekday = lastDate.getUTCDay();
+    return lastDay - ((lastDayWeekday - weekday + 7) % 7);
+  }
+  function observedDay(year, month, day){
+    var wd = weekdayOf(year, month, day);
+    if(wd === 6) return day - 1;
+    if(wd === 0) return day + 1;
+    return day;
+  }
+  function getUsMarketHolidayKeys(year){
+    var keys = [];
+    keys.push(ymdKey(year, 0, observedDay(year, 0, 1)));
+    keys.push(ymdKey(year, 0, nthWeekday(year, 0, 1, 3)));
+    keys.push(ymdKey(year, 1, nthWeekday(year, 1, 1, 3)));
+    var easter = getEasterMonthDay(year);
+    keys.push(ymdKey(year, easter.month, easter.day - 2));
+    keys.push(ymdKey(year, 4, lastWeekday(year, 4, 1)));
+    if(year >= 2022) keys.push(ymdKey(year, 5, observedDay(year, 5, 19)));
+    keys.push(ymdKey(year, 6, observedDay(year, 6, 4)));
+    keys.push(ymdKey(year, 8, nthWeekday(year, 8, 1, 1)));
+    keys.push(ymdKey(year, 10, nthWeekday(year, 10, 4, 4)));
+    keys.push(ymdKey(year, 11, observedDay(year, 11, 25)));
+    return keys;
+  }
+  function isUsMarketHoliday(etYear, etMonth, etDay){
+    var key = ymdKey(etYear, etMonth - 1, etDay);
+    return getUsMarketHolidayKeys(etYear).indexOf(key) > -1;
+  }
+
   function isUsMarketOpen(){
     var parts = {};
     new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York', hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit'
+      timeZone: 'America/New_York', hour12: false, weekday: 'short',
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
     }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
     if(parts.weekday === 'Sat' || parts.weekday === 'Sun') return false;
+    if(isUsMarketHoliday(parseInt(parts.year, 10), parseInt(parts.month, 10), parseInt(parts.day, 10))) return false;
     var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
     return minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60);
   }
@@ -2373,9 +2407,11 @@
   function isMarketClosingSoon(){
     var parts = {};
     new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York', hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit'
+      timeZone: 'America/New_York', hour12: false, weekday: 'short',
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
     }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
     if(parts.weekday === 'Sat' || parts.weekday === 'Sun') return false;
+    if(isUsMarketHoliday(parseInt(parts.year, 10), parseInt(parts.month, 10), parseInt(parts.day, 10))) return false;
     var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
     var closeMinutes = 16 * 60;
     return minutesSinceMidnight >= (closeMinutes - 15) && minutesSinceMidnight < closeMinutes;
@@ -2579,6 +2615,16 @@
   }
 
   function runScreener(){
+    // Daily/swing screening has been fully retired — intraday is the
+    // only live strategy now. This is a deliberate no-op rather than a
+    // full removal: the trades array, DEFAULT_TRADES, and related
+    // rendering functions are still referenced in a few other places in
+    // this file, and fully excising them carries real risk of breaking
+    // something unrelated. Not running this means the daily screener
+    // never scans, never picks, and never auto-trades — which is the
+    // actual goal — without touching that deeper, riskier surface.
+    return;
+
     if(isRunningScreener || isGuestMode) return;
     isRunningScreener = true;
     // Every one of these history fetches is paced by the shared Twelve
@@ -2812,7 +2858,6 @@
     document.getElementById('alpacaDock').removeAttribute('hidden');
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
     document.getElementById('alpacaRiskRow').removeAttribute('hidden');
-    document.getElementById('alpacaAutoTradeRow').removeAttribute('hidden');
     document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
   }
 
@@ -2821,7 +2866,6 @@
     document.getElementById('alpacaInputsRow').removeAttribute('hidden');
     document.getElementById('alpacaDock').setAttribute('hidden', '');
     document.getElementById('alpacaRiskRow').setAttribute('hidden', '');
-    document.getElementById('alpacaAutoTradeRow').setAttribute('hidden', '');
     document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
   }
 
@@ -2968,10 +3012,6 @@
     try { saved = window.localStorage.getItem('shwoopnet:alpacaAutoTrade') === 'true'; } catch(e){}
     setAlpacaAutoTradeEnabled(saved);
   }
-
-  document.getElementById('alpacaAutoTradeToggle').addEventListener('click', function(){
-    setAlpacaAutoTradeEnabled(!alpacaAutoTradeEnabled);
-  });
 
   function loadAlpacaAutoTradeIntradayPref(){
     var saved = false;
@@ -3805,6 +3845,7 @@
   function applyMasonryLayout(tierSymbolGroups){
     if(layoutPrefs.cols !== 2 || window.innerWidth <= 900) return;
     var el = document.getElementById('tradeBlocks');
+    if(!el) return; // daily section removed from the DOM
     tierSymbolGroups.forEach(function(syms){
       if(syms.length < 2) return;
       var items = syms.map(function(sym){ return el.querySelector('.trade-block[data-symbol="' + sym + '"]'); }).filter(Boolean);
@@ -3896,6 +3937,7 @@
 
   function renderTradeBlocks(){
     var el = document.getElementById('tradeBlocks');
+    if(!el) return; // daily section removed from the DOM -- intraday is the only live surface now
     if(trades.length === 0){
       el.innerHTML = '<div class="trades-empty-state">No trades to show right now. Either today\'s screener couldn\'t reach real market data (check your connection and refresh), or it ran successfully and nothing in the universe cleared today\'s quality bar — either way, nothing simulated shows in its place.</div>';
       return;
@@ -4320,24 +4362,6 @@
   // the live screener uses, day by day against real history, using only
   // data that would have existed at the time — no lookahead. Not a demo:
   // this is the actual signal, tested honestly.
-  function fetchBacktestHistory(sym, totalDays){
-    return scheduleTwelveDataCall(function(){
-      var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
-        '&interval=1day&outputsize=' + Math.min(totalDays, 5000) + '&apikey=' + TWELVE_DATA_API_KEY;
-      return fetch(url).then(function(res){
-        if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
-        return res.json();
-      }).then(function(data){
-        if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 60){
-          throw new Error('Not enough historical data for ' + sym);
-        }
-        return data.values.map(function(v){
-          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
-        }).reverse();
-      });
-    }, 'high'); // the user is actively waiting on this
-  }
-
   function simulateForwardFromDay(bars, entryIdx, analysis){
     var isLong = analysis.direction === 'Long';
     for(var j = entryIdx + 1; j < bars.length; j++){
@@ -4355,46 +4379,6 @@
       }
     }
     return { result:'unresolved', days: bars.length - 1 - entryIdx, price: bars[bars.length-1].c, date: bars[bars.length-1].t };
-  }
-
-  function runBacktestSimulation(bars, lookbackDays){
-    // The window before lookback starts is context only (SMA seeding) —
-    // the same "need real history before a signal counts" rule the live
-    // screener follows, not special treatment for the backtest.
-    var startIdx = Math.max(50, bars.length - lookbackDays);
-    var trades = [];
-    var i = startIdx;
-    while(i < bars.length){
-      var historySlice = bars.slice(0, i + 1); // no lookahead: only up to and including day i
-      var currentPrice = bars[i].c;
-      var analysis = computeTechnicalAnalysis(historySlice, currentPrice);
-      var score = scoreCandidate(analysis);
-      if(score >= MIN_SCREENER_SCORE){
-        var outcome = simulateForwardFromDay(bars, i, analysis);
-        var isLong = analysis.direction === 'Long';
-        // Returns are measured from currentPrice (the actual close on
-        // the signal day), not analysis.entry (a reference level near
-        // the 20-day average) — currentPrice is what a real market-order
-        // fill would be near, which is how the live auto-trade system
-        // actually enters (type:'market', not a limit order waiting for
-        // a pullback to a specific level). Using the reference level
-        // instead silently assumed a "free discount" on every single
-        // trade that was never actually achievable — on a simple steady
-        // uptrend this discount alone runs close to 6% of the stock's
-        // price, which is large enough to explain most of an inflated
-        // expectancy on its own, with no real edge required.
-        var pctReturn = (outcome.price - currentPrice) / currentPrice * (isLong ? 1 : -1) * 100;
-        trades.push({
-          date: bars[i].t, direction: analysis.direction, entry: currentPrice,
-          stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
-          exitPrice: outcome.price, pctReturn: pctReturn
-        });
-        i = i + outcome.days + 1; // don't open an overlapping signal while this one is still live
-      } else {
-        i++;
-      }
-    }
-    return trades;
   }
 
   // Win rate alone can't answer whether a strategy is actually
@@ -4426,189 +4410,6 @@
     };
   }
 
-  function renderBacktestResults(trades, summary, sym){
-    var statusEl = document.getElementById('backtestStatus');
-    var resultsEl = document.getElementById('backtestResults');
-    if(trades.length === 0){
-      statusEl.textContent = 'No qualifying signals found for ' + sym + ' in this window.';
-      statusEl.className = 'labs-backtest-status';
-      resultsEl.innerHTML = '';
-      return;
-    }
-    statusEl.textContent = 'Found ' + trades.length + ' historical signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.';
-    statusEl.className = 'labs-backtest-status ok';
-
-    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
-    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
-    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
-    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
-    resultsEl.innerHTML =
-      '<div class="backtest-summary">' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Still open at end</div><div class="backtest-stat-value">' + summary.unresolvedCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days to resolve</div><div class="backtest-stat-value">' + summary.avgDays.toFixed(1) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — wins</div><div class="backtest-stat-value up">' + summary.avgDaysWin.toFixed(1) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — losses</div><div class="backtest-stat-value down">' + summary.avgDaysLoss.toFixed(1) + '</div></div>' +
-      '</div>' +
-      '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — a high win rate with small wins and large losses can still lose overall. Expectancy and profit factor (above) account for the size of wins and losses, not just how often each happened.</p>' +
-      '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Days</th></tr></thead>' +
-        '<tbody>' + trades.slice().reverse().map(function(t){
-          var outcomeClass = 'backtest-outcome-' + t.outcome;
-          var outcomeLabel = t.outcome === 'hit' ? 'Hit target' : t.outcome === 'stopped' ? 'Stopped out' : 'Unresolved';
-          var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
-          return '<tr>' +
-            '<td>' + t.date.toLocaleDateString([], {month:'short', day:'numeric', year:'2-digit'}) + '</td>' +
-            '<td>' + t.direction + '</td>' +
-            '<td>' + t.entry.toFixed(2) + '</td>' +
-            '<td>' + t.stop.toFixed(2) + '</td>' +
-            '<td>' + t.target.toFixed(2) + '</td>' +
-            '<td class="' + outcomeClass + '">' + outcomeLabel + '</td>' +
-            '<td class="' + returnClass + '">' + (t.pctReturn >= 0 ? '+' : '') + t.pctReturn.toFixed(2) + '%</td>' +
-            '<td>' + t.days + '</td>' +
-          '</tr>';
-        }).join('') + '</tbody>' +
-      '</table>';
-  }
-
-  function runBacktestClicked(){
-    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
-    var sym = document.getElementById('backtestSymbol').value;
-    var lookbackDays = parseInt(document.getElementById('backtestLookback').value, 10);
-    var statusEl = document.getElementById('backtestStatus');
-    var btn = document.getElementById('runBacktestBtn');
-    var resultsEl = document.getElementById('backtestResults');
-
-    btn.disabled = true;
-    statusEl.textContent = 'Fetching ' + sym + ' history and running the simulation…';
-    statusEl.className = 'labs-backtest-status';
-    resultsEl.innerHTML = '';
-
-    var totalDays = lookbackDays + 60; // buffer so SMA50 is seeded before the window starts
-    fetchBacktestHistory(sym, totalDays).then(function(bars){
-      var trades = runBacktestSimulation(bars, lookbackDays);
-      var summary = summarizeBacktestTrades(trades);
-      renderBacktestResults(trades, summary, sym);
-      btn.disabled = false;
-    }).catch(function(err){
-      statusEl.textContent = 'Backtest failed: ' + err.message;
-      statusEl.className = 'labs-backtest-status fail';
-      btn.disabled = false;
-      console.error('Backtest failed:', err);
-    });
-  }
-
-  // Runs the identical per-symbol simulation across the whole screener
-  // universe, one symbol at a time (not in parallel — keeps this
-  // readable against the rate limit and gives honest progress feedback
-  // rather than a silent multi-minute wait). Aggregates every symbol's
-  // trades into one combined set so the summary reflects the strategy's
-  // real performance across the universe, not just one name's history.
-  function runUniverseBacktestClicked(){
-    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
-    var lookbackDays = parseInt(document.getElementById('backtestLookback').value, 10);
-    var statusEl = document.getElementById('backtestStatus');
-    var btn = document.getElementById('runUniverseBacktestBtn');
-    var singleBtn = document.getElementById('runBacktestBtn');
-    var resultsEl = document.getElementById('backtestResults');
-
-    btn.disabled = true;
-    singleBtn.disabled = true;
-    resultsEl.innerHTML = '';
-    statusEl.className = 'labs-backtest-status';
-
-    var totalDays = lookbackDays + 60;
-    var allTrades = [];
-    var perSymbolResults = [];
-
-    function processNext(index){
-      if(index >= SCREENER_UNIVERSE.length){
-        btn.disabled = false;
-        singleBtn.disabled = false;
-        var summary = summarizeBacktestTrades(allTrades);
-        renderUniverseBacktestResults(perSymbolResults, summary);
-        return;
-      }
-      var sym = SCREENER_UNIVERSE[index];
-      statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + SCREENER_UNIVERSE.length + ', this takes a few minutes)';
-      fetchBacktestHistory(sym, totalDays).then(function(bars){
-        var trades = runBacktestSimulation(bars, lookbackDays);
-        allTrades = allTrades.concat(trades);
-        perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
-        processNext(index + 1);
-      }).catch(function(err){
-        console.error('Universe backtest: skipping', sym, err);
-        processNext(index + 1);
-      });
-    }
-
-    processNext(0);
-  }
-
-  function renderUniverseBacktestResults(perSymbolResults, summary){
-    var statusEl = document.getElementById('backtestStatus');
-    var resultsEl = document.getElementById('backtestResults');
-
-    if(summary.totalSignals === 0){
-      statusEl.textContent = 'No qualifying signals found across the universe in this window.';
-      statusEl.className = 'labs-backtest-status';
-      resultsEl.innerHTML = '';
-      return;
-    }
-
-    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total signals across the universe.';
-    statusEl.className = 'labs-backtest-status ok';
-
-    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
-    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
-    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
-    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
-
-    var perSymbolRows = perSymbolResults
-      .filter(function(r){ return r.summary.totalSignals > 0; })
-      .sort(function(a,b){ return b.summary.avgPctReturn - a.summary.avgPctReturn; })
-      .map(function(r){
-        var s = r.summary;
-        var rowClass = s.avgPctReturn >= 0 ? 'up' : 'down';
-        return '<tr>' +
-          '<td class="mono">' + r.sym + '</td>' +
-          '<td>' + s.totalSignals + '</td>' +
-          '<td>' + s.winRate.toFixed(0) + '%</td>' +
-          '<td class="' + rowClass + '">' + (s.avgPctReturn >= 0 ? '+' : '') + s.avgPctReturn.toFixed(2) + '%</td>' +
-        '</tr>';
-      }).join('');
-
-    resultsEl.innerHTML =
-      '<div class="backtest-summary">' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days to resolve</div><div class="backtest-stat-value">' + summary.avgDays.toFixed(1) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — wins</div><div class="backtest-stat-value up">' + summary.avgDaysWin.toFixed(1) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — losses</div><div class="backtest-stat-value down">' + summary.avgDaysLoss.toFixed(1) + '</div></div>' +
-      '</div>' +
-      '<p class="labs-backtest-note">Aggregated across every symbol that produced at least one signal in this window. Win rate alone doesn\'t show profitability — expectancy and profit factor account for the size of wins and losses, not just how often each happened.</p>' +
-      '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
-        '<tbody>' + perSymbolRows + '</tbody>' +
-      '</table>';
-  }
-
-  function populateBacktestSymbolSelect(){
-    var sel = document.getElementById('backtestSymbol');
-    if(!sel) return;
-    sel.innerHTML = SCREENER_UNIVERSE.map(function(sym){
-      return '<option value="' + sym + '">' + sym + ' — ' + (COMPANY_NAMES[sym] || sym) + '</option>';
-    }).join('');
-  }
 
   // ---------- Intraday backtest ----------
   // Same simulation shape as the daily backtest (no lookahead, real
@@ -5952,25 +5753,6 @@
   document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); renderTradeBlocks(); });
   document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); renderTradeBlocks(); });
 
-  document.getElementById('dailySectionToggle').addEventListener('click', function(){
-    var btn = document.getElementById('dailySectionToggle');
-    var list = document.getElementById('tradeBlocks');
-    var isHidden = list.hasAttribute('hidden');
-    if(isHidden){
-      list.removeAttribute('hidden');
-      btn.setAttribute('aria-expanded','true');
-      btn.querySelector('.caret').textContent = '▾';
-      // A hidden container measures every child's height as zero — if
-      // 2-column masonry ran while this was still collapsed, it needs a
-      // real re-render now that heights can actually be measured.
-      renderTradeBlocks();
-    } else {
-      list.setAttribute('hidden','');
-      btn.setAttribute('aria-expanded','false');
-      btn.querySelector('.caret').textContent = '▸';
-    }
-  });
-
   document.getElementById('maToggleBtn').addEventListener('click', function(){
     layoutPrefs.showMA = !layoutPrefs.showMA;
     applyLayout();
@@ -6927,17 +6709,13 @@
       return '<div class="settings-row"><div><div class="settings-row-title">' + label + '</div></div>' +
         '<span class="quote-sync-status ' + (ok ? 'ok' : '') + '">' + text + '</span></div>';
     }
-    // Reuses the exact status text the screener pages already maintain,
+    // Reuses the exact status text the screener page already maintains,
     // rather than tracking a second, separate copy of the same state.
-    var dailyStatusEl = document.getElementById('analysisSyncStatus');
     var intradayStatusEl = document.getElementById('intradaySyncStatus');
-    var dailyStatusText = (dailyStatusEl && dailyStatusEl.textContent) || 'Not yet run this session';
     var intradayStatusText = (intradayStatusEl && intradayStatusEl.textContent) || '';
 
     el.innerHTML =
       row('Alpaca connection', alpacaConnected, alpacaConnected ? 'Connected' : 'Not connected') +
-      row('Daily screener', true, dailyStatusText) +
-      row('Daily auto-trade', alpacaAutoTradeEnabled, alpacaAutoTradeEnabled ? 'On' : 'Off') +
       row('Intraday screener', alpacaIntradayEnabled, alpacaIntradayEnabled ? (intradayStatusText || 'On') : 'Off') +
       row('Intraday auto-trade', alpacaAutoTradeIntradayEnabled, alpacaAutoTradeIntradayEnabled ? 'On' : 'Off');
   }
@@ -7246,7 +7024,7 @@
   // ---------- What to Watch (Brief page recap of the actual trades) ----------
   function renderWhatToWatch(){
     var el = document.getElementById('whatToWatchList');
-    el.innerHTML = trades.map(function(t){
+    el.innerHTML = intradayTrades.map(function(t){
       var badge = computeBadgeInfo(t);
       return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
         '<div class="watch-trade-head">' +
@@ -7354,9 +7132,9 @@
     if(isGuestMode){
       ledeParts.push('Everything below is simulated — sign in for real, live-screened picks.');
     } else {
-      var realTrades = trades.filter(function(t){ return t.analysisIsReal; });
+      var realTrades = intradayTrades.filter(function(t){ return t.analysisIsReal; });
       if(realTrades.length === 0){
-        ledeParts.push("Today's screener hasn't cleared any setups yet — check Trade Overview for the latest.");
+        ledeParts.push("The intraday screener hasn't cleared any setups yet — check Trade Overview for the latest.");
       } else {
         var longs = realTrades.filter(function(t){ return t.direction === 'Long'; }).length;
         var shorts = realTrades.length - longs;
@@ -7491,7 +7269,6 @@
   statCta();
   updateClock();
   renderHistoryList();
-  populateBacktestSymbolSelect();
   populateIntradayBacktestSymbolSelect();
   loadAlpacaAutoTradePref();
   document.getElementById('riskPercentDec').addEventListener('click', function(){ setRiskPercent(riskPercent - 0.5); });
@@ -7502,8 +7279,6 @@
     setIntradayEnabled(!alpacaIntradayEnabled);
   });
   loadIntradayPref();
-  document.getElementById('runBacktestBtn').addEventListener('click', runBacktestClicked);
-  document.getElementById('runUniverseBacktestBtn').addEventListener('click', runUniverseBacktestClicked);
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
 
