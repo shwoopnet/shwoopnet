@@ -1121,7 +1121,10 @@
     watchScreenerPicks: function(uid, callback){
       return onSnapshot(doc(db, 'users', uid), function(snap){
         var data = snap.exists() ? snap.data() : {};
-        callback({ screenerPicks: data.screenerPicks || null, screenerDate: data.screenerDate || null });
+        callback({
+          screenerPicks: data.screenerPicks || null, screenerDate: data.screenerDate || null,
+          intradayScreenerPicks: data.intradayScreenerPicks || null, intradayScreenerUpdatedAt: data.intradayScreenerUpdatedAt || null
+        });
       }, function(err){
         console.error('Screener sync error:', err);
       });
@@ -1490,6 +1493,12 @@
     </div>
 
     <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Intraday Screener</div>
+      <div class="labs-backtest-note" style="margin-bottom:10px;">What the 24/7 server last saw — separate from this tab's own live view, and updates even when no browser is open.</div>
+      <div id="statusIntradayBody"></div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
       <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log</div>
       <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
       <div id="statusActivityList"></div>
@@ -1847,52 +1856,29 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
-        <div class="changelog-version">v1.7.4.0.0 — Reliability &amp; Journal Accuracy</div>
+        <div class="changelog-version">v2.0 — Intraday-First &amp; Backend Server</div>
         <ul class="changelog-items">
-          <li>Account panel now gives up quickly if any single request stalls, instead of getting stuck on "Loading…"</li>
-          <li>Bracket order exits (hitting stop or target) now sync back to the journal automatically, even if they filled while this tab was closed</li>
-          <li>Basic stats added to the Journal: win rate, avg win, avg loss, best trade, worst trade</li>
-          <li>Fixed a tour bug where the Changelog step's highlight could land off-screen</li>
-          <li>Layout settings cleaned up: removed dead code, clearer labels, added a reset-to-defaults button</li>
+          <li>Intraday is now the primary strategy — Trade Overview, the Market Brief, and backtesting are all built around short-term, real-time setups instead of once-a-day picks</li>
+          <li>Position sizing is now risk-based, computed fresh from your real account balance every time — scales automatically as the account grows instead of a fixed share count</li>
+          <li>Full automated safety layer: positions close automatically if their original thesis breaks, get refreshed or closed at market close, and stay in sync with what Alpaca actually filled</li>
+          <li>New backend server: the screener, sizing, and safety checks now run on a real 24/7 schedule, independent of a browser tab being open, with SMS alerts on crashes</li>
+          <li>New Status page: real account equity, today's P&amp;L, open positions with live P&amp;L, and a persistent log of everything the automated systems have done</li>
+          <li>Backtest results now show expectancy and profit factor, not just win rate — and a real entry-price bug that was inflating returns has been found and fixed</li>
+          <li>Guest mode and the onboarding tour removed — this is a single-owner tool now, not a public demo</li>
         </ul>
       </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.7.3.0.0 — Account Panel &amp; Auto-Send</div>
         <ul class="changelog-items">
-          <li>New account panel (bottom-left tab) shows your real Alpaca balance and open positions at a glance</li>
-          <li>Optional auto-send: new picks can go to Alpaca automatically at a fixed size, no manual click — off by default, and only runs while this tab is open</li>
-          <li>API keys are now hidden once connected, shown only as a masked version</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.7.2.0.0 — Chart &amp; Wording Polish</div>
-        <ul class="changelog-items">
-          <li>Chart date labels now show plain day numbers, not a repeated time on every tick</li>
-          <li>Trade plan wording simplified: "Take profit at $X" / "Stop loss at $Y"</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.7.1.0.0 — UI Bug Fixes</div>
-        <ul class="changelog-items">
-          <li>Alert pop-ups no longer cover the Layout menu or bury trade notes further down the page</li>
-          <li>Fixed chart labels getting cut off at the edges, and moving averages not covering the full chart</li>
-          <li>Fixed a bug where switching tabs could delay real prices and charts by up to 10 seconds after a refresh</li>
+          <li>New account panel shows your real Alpaca balance and open positions at a glance</li>
+          <li>Optional auto-send: new picks can go to Alpaca automatically, no manual click — off by default</li>
         </ul>
       </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.7.0.0.0 — Alpaca Paper Trading</div>
         <ul class="changelog-items">
           <li>Connect a free Alpaca paper account in Settings — "Send to Alpaca" places a real order and logs it to the journal in one click</li>
-          <li>Trades now carry a single target instead of two, matching how Alpaca's order type works</li>
           <li>Started quietly tracking what actually happens to every pick, aiming toward real numbers on how well this works instead of a guess</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.6.5.0.0 — Screener Quality &amp; Trade Management</div>
-        <ul class="changelog-items">
-          <li>The stock list is more varied now, not just the biggest household names</li>
-          <li>A stock now has to show a real trend to make the list, not just a big price move — some days nothing qualifies, and that's fine</li>
-          <li>"Finished today" section separates resolved trades from what's still active, so old hits don't clutter the page</li>
         </ul>
       </div>
       <div class="changelog-entry">
@@ -1903,46 +1889,11 @@
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.5.4.0.2 — Session &amp; Rate-Limit Hardening</div>
-        <ul class="changelog-items">
-          <li>Chart data now loads for whatever you're actively looking at first, before background screening</li>
-          <li>Clear button added to alert history; alerts scoped to only today's actual picks</li>
-          <li>If you have multiple tabs open, only one now pulls live data — keeps us under the data provider's limits</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.5.3.0.1 — Chart Data Reliability</div>
-        <ul class="changelog-items">
-          <li>Chart history now saves to your browser — instant reload instead of a full refetch</li>
-          <li>Stale data refreshes quietly in the background rather than blocking on the network</li>
-          <li>Added a shared limit so all chart requests, from anywhere in the app, stay under the data provider's cap</li>
-          <li>Dragging, zooming, and panning smoothed out to match your screen's refresh rate</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
         <div class="changelog-version">v1.5.2.0.0 — Real Screener &amp; Analysis</div>
         <ul class="changelog-items">
-          <li>Daily screener auto-picks trades from 33 major stocks using real technical analysis</li>
+          <li>Daily screener auto-picks trades from real technical analysis, replacing simulated data entirely</li>
           <li>Entry, stop, and targets calculated from real moving averages and price structure — no more fixed-ratio targets</li>
-          <li>Risk/Reward column added, genuinely varying per trade</li>
-          <li>Signed-in accounts never show simulated data — an honest "couldn't load" state instead</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.5.1.0.0 — Charting Overhaul</div>
-        <ul class="changelog-items">
-          <li>Added 5m/15m/30m intraday timeframes alongside 1D/1W/1M/1Y</li>
-          <li>Cleaner price gridlines, a live price line, and a full crosshair when you hover the chart</li>
-          <li>Vertical and diagonal chart panning, not just horizontal</li>
-          <li>Time axis now matches each timeframe's real granularity, with day/year boundary markers</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.5.0.0.1 — Market Brief Expansion</div>
-        <ul class="changelog-items">
-          <li>Market Sentiment (real S&amp;P/Nasdaq/Dow proxies) replaces watchlist-only breadth</li>
-          <li>Today's Movers, Market News, and Earnings This Week added</li>
-          <li>Real pop-up alert notifications, not just a silent history list</li>
+          <li>Signed-in accounts never show simulated data again — an honest "couldn't load" state instead</li>
         </ul>
       </div>
       <div class="changelog-entry">
@@ -1950,40 +1901,13 @@
         <ul class="changelog-items">
           <li>Real sign-up and sign-in with email + password</li>
           <li>Trade Journal now syncs across devices in real time</li>
-          <li>Confirm-password field and show/hide password toggle</li>
         </ul>
       </div>
       <div class="changelog-entry">
         <div class="changelog-version">v1.4 — Journal Upgrades</div>
         <ul class="changelog-items">
           <li>Log real trades straight from Trade Overview, pre-filled from the setup</li>
-          <li>Exit tracking with automatic P&amp;L in % and $</li>
-          <li>Calendar-based journal with date-range filtering</li>
-          <li>Remove a trade you logged by mistake</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.3 — Personalization</div>
-        <ul class="changelog-items">
-          <li>Four color themes, including true white-on-black</li>
-          <li>Adjustable chart width, height, and text size</li>
-          <li>Notepad: lockable, movable, and resizable</li>
-          <li>Reduce-motion and ticker on/off controls</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.2 — Alerts &amp; Navigation</div>
-        <ul class="changelog-items">
-          <li>Market alerts with a persistent History log</li>
-          <li>Consolidated page navigator dropdown</li>
-          <li>Dedicated Settings page for every preference</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version">v1.1 — Rebrand</div>
-        <ul class="changelog-items">
-          <li>Renamed from Daybreak to Shwoopnet</li>
-          <li>New SN diamond brand mark with motion animation</li>
+          <li>Exit tracking with automatic P&amp;L, calendar-based journal with date-range filtering</li>
         </ul>
       </div>
       <div class="changelog-entry">
@@ -2085,6 +2009,35 @@
       </div>
       <div class="labs-backtest-status" id="backtestStatus"></div>
       <div id="backtestResults"></div>
+    </div>
+
+    <div class="brief-section-title" style="margin-top:36px;">Intraday Backtest</div>
+    <div class="labs-backtest-card">
+      <p class="labs-backtest-intro">
+        Same idea as the backtest above, but against the actual intraday strategy — 15-minute bars, the
+        10-symbol intraday universe, and the same real-time scoring logic the live intraday screener uses.
+        One real thing worth knowing going in: intraday history is far more data-dense than daily (roughly
+        26 bars per trading day), and whether the free data tier hands back enough of it for a further-back
+        lookback is genuinely untested — if a lookback fails, try a shorter one.
+      </p>
+      <div class="labs-backtest-controls">
+        <div class="labs-control-field">
+          <label for="intradayBacktestSymbol">Symbol</label>
+          <select id="intradayBacktestSymbol"></select>
+        </div>
+        <div class="labs-control-field">
+          <label for="intradayBacktestLookback">Lookback</label>
+          <select id="intradayBacktestLookback">
+            <option value="180">~5 trading days</option>
+            <option value="310" selected>~10 trading days</option>
+            <option value="570">~20 trading days</option>
+          </select>
+        </div>
+        <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
+        <button class="settings-reset-btn" id="runIntradayUniverseBacktestBtn">Run whole universe</button>
+      </div>
+      <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
+      <div id="intradayBacktestResults"></div>
     </div>
   </main>
     </div>
@@ -2718,6 +2671,9 @@
     closeInvalidatedPositions('daily');
   }
 
+  var backendIntradayPicks = null;
+  var backendIntradayUpdatedAt = null;
+
   function loadScreenerForUser(uid){
     if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
     updateAnalysisStatus('Calculating…', null);
@@ -2728,6 +2684,15 @@
       } else {
         runScreener();
       }
+      // Purely for display — this is the backend server's own intraday
+      // screener view, kept entirely separate from this tab's own
+      // independent intradayTrades (which the tab computes itself when
+      // open). Shows what the 24/7 backend last saw, whether or not
+      // this browser tab is the one doing any screening right now.
+      backendIntradayPicks = data.intradayScreenerPicks;
+      backendIntradayUpdatedAt = data.intradayScreenerUpdatedAt;
+      var statusPageEl = document.getElementById('page-status');
+      if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
     });
   }
 
@@ -3583,7 +3548,13 @@
     journalEntries.push({
       id: 'j' + Date.now(),
       date: new Date().toISOString().slice(0,10), sym: t.sym, direction: t.direction,
-      entry: fillPrice, qty: qty, stop: t.stop, t1: t.t1,
+      // entry is the real, account-position price (the actual fill, once
+      // known) — plannedEntry is the original screener-computed "ideal"
+      // level at signal time, kept separately so it's never lost once a
+      // real position exists. These can genuinely differ (a market order
+      // fills at whatever the live price is, not the theoretical SMA20
+      // level), and conflating them into one number would hide that.
+      entry: fillPrice, plannedEntry: t.entry, qty: qty, stop: t.stop, t1: t.t1,
       exit: null, status: 'open', source: 'alpaca', screenerType: screenerType || 'daily'
     });
     saveJournalEntries();
@@ -4401,9 +4372,20 @@
       if(score >= MIN_SCREENER_SCORE){
         var outcome = simulateForwardFromDay(bars, i, analysis);
         var isLong = analysis.direction === 'Long';
-        var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
+        // Returns are measured from currentPrice (the actual close on
+        // the signal day), not analysis.entry (a reference level near
+        // the 20-day average) — currentPrice is what a real market-order
+        // fill would be near, which is how the live auto-trade system
+        // actually enters (type:'market', not a limit order waiting for
+        // a pullback to a specific level). Using the reference level
+        // instead silently assumed a "free discount" on every single
+        // trade that was never actually achievable — on a simple steady
+        // uptrend this discount alone runs close to 6% of the stock's
+        // price, which is large enough to explain most of an inflated
+        // expectancy on its own, with no real edge required.
+        var pctReturn = (outcome.price - currentPrice) / currentPrice * (isLong ? 1 : -1) * 100;
         trades.push({
-          date: bars[i].t, direction: analysis.direction, entry: analysis.entry,
+          date: bars[i].t, direction: analysis.direction, entry: currentPrice,
           stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
           exitPrice: outcome.price, pctReturn: pctReturn
         });
@@ -4424,8 +4406,14 @@
   function summarizeBacktestTrades(trades){
     var resolved = trades.filter(function(t){ return t.outcome !== 'unresolved'; });
     var hits = resolved.filter(function(t){ return t.outcome === 'hit'; });
+    var stops = resolved.filter(function(t){ return t.outcome === 'stopped'; });
     var winRate = resolved.length > 0 ? (hits.length / resolved.length * 100) : 0;
     var avgDays = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.days; }, 0) / resolved.length) : 0;
+    // A single blended average can hide something important — a strategy
+    // where wins take much longer than losses (or vice versa) behaves
+    // very differently day to day than the overall number alone suggests.
+    var avgDaysWin = hits.length > 0 ? (hits.reduce(function(s,t){ return s + t.days; }, 0) / hits.length) : 0;
+    var avgDaysLoss = stops.length > 0 ? (stops.reduce(function(s,t){ return s + t.days; }, 0) / stops.length) : 0;
     var avgPctReturn = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.pctReturn; }, 0) / resolved.length) : 0;
     var grossGains = resolved.filter(function(t){ return t.pctReturn > 0; }).reduce(function(s,t){ return s + t.pctReturn; }, 0);
     var grossLosses = resolved.filter(function(t){ return t.pctReturn < 0; }).reduce(function(s,t){ return s + Math.abs(t.pctReturn); }, 0);
@@ -4433,6 +4421,7 @@
     return {
       totalSignals: trades.length, hitCount: hits.length, stoppedCount: resolved.length - hits.length,
       unresolvedCount: trades.length - resolved.length, winRate: winRate, avgDays: avgDays,
+      avgDaysWin: avgDaysWin, avgDaysLoss: avgDaysLoss,
       avgPctReturn: avgPctReturn, profitFactor: profitFactor
     };
   }
@@ -4462,7 +4451,9 @@
         '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Still open at end</div><div class="backtest-stat-value">' + summary.unresolvedCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days to resolve</div><div class="backtest-stat-value">' + summary.avgDays.toFixed(0) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days to resolve</div><div class="backtest-stat-value">' + summary.avgDays.toFixed(1) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — wins</div><div class="backtest-stat-value up">' + summary.avgDaysWin.toFixed(1) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — losses</div><div class="backtest-stat-value down">' + summary.avgDaysLoss.toFixed(1) + '</div></div>' +
       '</div>' +
       '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — a high win rate with small wins and large losses can still lose overall. Expectancy and profit factor (above) account for the size of wins and losses, not just how often each happened.</p>' +
       '<table class="backtest-trades-table">' +
@@ -4600,6 +4591,9 @@
         '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days to resolve</div><div class="backtest-stat-value">' + summary.avgDays.toFixed(1) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — wins</div><div class="backtest-stat-value up">' + summary.avgDaysWin.toFixed(1) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg days — losses</div><div class="backtest-stat-value down">' + summary.avgDaysLoss.toFixed(1) + '</div></div>' +
       '</div>' +
       '<p class="labs-backtest-note">Aggregated across every symbol that produced at least one signal in this window. Win rate alone doesn\'t show profitability — expectancy and profit factor account for the size of wins and losses, not just how often each happened.</p>' +
       '<table class="backtest-trades-table">' +
@@ -4614,6 +4608,247 @@
     sel.innerHTML = SCREENER_UNIVERSE.map(function(sym){
       return '<option value="' + sym + '">' + sym + ' — ' + (COMPANY_NAMES[sym] || sym) + '</option>';
     }).join('');
+  }
+
+  // ---------- Intraday backtest ----------
+  // Same simulation shape as the daily backtest (no lookahead, real
+  // history, the same fixed entry-price basis), pointed at the intraday
+  // universe and computeIntradayAnalysis instead. simulateForwardFromDay
+  // and summarizeBacktestTrades are timeframe-agnostic already (they
+  // only ever check bar highs/lows against stop/target), so both are
+  // reused as-is rather than duplicated.
+  function fetchIntradayBacktestHistory(sym, totalBars){
+    return scheduleTwelveDataCall(function(){
+      var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
+        '&interval=15min&outputsize=' + Math.min(totalBars, 5000) + '&apikey=' + TWELVE_DATA_API_KEY;
+      return fetch(url).then(function(res){
+        if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
+        return res.json();
+      }).then(function(data){
+        if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 60){
+          throw new Error('Not enough intraday history for ' + sym + ' — the free data tier may not go back this far at 15-minute granularity. Try a shorter lookback.');
+        }
+        return data.values.map(function(v){
+          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
+        }).reverse();
+      });
+    }, 'high');
+  }
+
+  function runIntradayBacktestSimulation(bars, lookbackBars){
+    var startIdx = Math.max(50, bars.length - lookbackBars);
+    var trades = [];
+    var i = startIdx;
+    while(i < bars.length){
+      var historySlice = bars.slice(0, i + 1);
+      var currentPrice = bars[i].c;
+      var analysis = computeIntradayAnalysis(historySlice, currentPrice, 15);
+      var score = scoreCandidate(analysis);
+      if(score >= MIN_SCREENER_SCORE){
+        var outcome = simulateForwardFromDay(bars, i, analysis);
+        var isLong = analysis.direction === 'Long';
+        // Same fix as the daily backtest: measured from the real price
+        // at signal time, not the SMA-based reference level — that's
+        // what a live market-order fill would actually be near.
+        var pctReturn = (outcome.price - currentPrice) / currentPrice * (isLong ? 1 : -1) * 100;
+        trades.push({
+          date: bars[i].t, direction: analysis.direction, entry: currentPrice,
+          stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
+          exitPrice: outcome.price, pctReturn: pctReturn
+        });
+        i = i + outcome.days + 1;
+      } else {
+        i++;
+      }
+    }
+    return trades;
+  }
+
+  // "days" on these trade objects is actually a bar count here (15-min
+  // bars) — this turns that into something a human can read, snapping
+  // to trading-day units once it stretches past a single session, since
+  // the market isn't open continuously and "14 hours" would be misleading.
+  function formatIntradayDuration(bars){
+    var totalMinutes = bars * 15;
+    if(totalMinutes < 60) return totalMinutes + ' min';
+    var hours = totalMinutes / 60;
+    if(hours <= 6.5) return (Math.round(hours * 10) / 10) + ' hr' + (hours === 1 ? '' : 's');
+    var tradingDays = Math.max(1, Math.round(hours / 6.5));
+    return '~' + tradingDays + ' trading day' + (tradingDays === 1 ? '' : 's');
+  }
+
+  function renderIntradayBacktestResults(trades, summary, sym){
+    var statusEl = document.getElementById('intradayBacktestStatus');
+    var resultsEl = document.getElementById('intradayBacktestResults');
+    if(trades.length === 0){
+      statusEl.textContent = 'No qualifying intraday signals found for ' + sym + ' in this window.';
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = 'Found ' + trades.length + ' intraday signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.';
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
+      '</div>' +
+      '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — expectancy and profit factor (above) account for the size of wins and losses, not just how often each happened.</p>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Time</th></tr></thead>' +
+        '<tbody>' + trades.map(function(t){
+          var outcomeClass = t.outcome === 'hit' ? 'backtest-outcome-hit' : (t.outcome === 'stopped' ? 'backtest-outcome-stopped' : 'backtest-outcome-unresolved');
+          var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
+          return '<tr>' +
+            '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
+            '<td>' + t.direction + '</td>' +
+            '<td>' + fmt(t.entry) + '</td>' +
+            '<td>' + fmt(t.stop) + '</td>' +
+            '<td>' + fmt(t.target) + '</td>' +
+            '<td class="' + outcomeClass + '">' + t.outcome + '</td>' +
+            '<td class="' + returnClass + '">' + (t.pctReturn >= 0 ? '+' : '') + t.pctReturn.toFixed(2) + '%</td>' +
+            '<td>' + formatIntradayDuration(t.days) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody>' +
+      '</table>';
+  }
+
+  function renderIntradayUniverseBacktestResults(perSymbolResults, summary){
+    var statusEl = document.getElementById('intradayBacktestStatus');
+    var resultsEl = document.getElementById('intradayBacktestResults');
+
+    if(summary.totalSignals === 0){
+      statusEl.textContent = 'No qualifying intraday signals found across the universe in this window.';
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total intraday signals.';
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+
+    var perSymbolRows = perSymbolResults
+      .filter(function(r){ return r.summary.totalSignals > 0; })
+      .sort(function(a,b){ return b.summary.avgPctReturn - a.summary.avgPctReturn; })
+      .map(function(r){
+        var s = r.summary;
+        var rowClass = s.avgPctReturn >= 0 ? 'up' : 'down';
+        return '<tr>' +
+          '<td class="mono">' + r.sym + '</td>' +
+          '<td>' + s.totalSignals + '</td>' +
+          '<td>' + s.winRate.toFixed(0) + '%</td>' +
+          '<td class="' + rowClass + '">' + (s.avgPctReturn >= 0 ? '+' : '') + s.avgPctReturn.toFixed(2) + '%</td>' +
+        '</tr>';
+      }).join('');
+
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
+      '</div>' +
+      '<p class="labs-backtest-note">Aggregated across every symbol in the 10-stock intraday universe that produced at least one signal in this window.</p>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
+        '<tbody>' + perSymbolRows + '</tbody>' +
+      '</table>';
+  }
+
+  function populateIntradayBacktestSymbolSelect(){
+    var sel = document.getElementById('intradayBacktestSymbol');
+    if(!sel) return;
+    sel.innerHTML = INTRADAY_UNIVERSE.map(function(sym){
+      return '<option value="' + sym + '">' + sym + ' — ' + (COMPANY_NAMES[sym] || sym) + '</option>';
+    }).join('');
+  }
+
+  function runIntradayBacktestClicked(){
+    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
+    var sym = document.getElementById('intradayBacktestSymbol').value;
+    var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
+    var statusEl = document.getElementById('intradayBacktestStatus');
+    var btn = document.getElementById('runIntradayBacktestBtn');
+    var resultsEl = document.getElementById('intradayBacktestResults');
+
+    btn.disabled = true;
+    statusEl.textContent = 'Fetching ' + sym + ' 15-min history and running the simulation…';
+    statusEl.className = 'labs-backtest-status';
+    resultsEl.innerHTML = '';
+
+    fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
+      var trades = runIntradayBacktestSimulation(bars, lookbackBars);
+      var summary = summarizeBacktestTrades(trades);
+      renderIntradayBacktestResults(trades, summary, sym);
+      btn.disabled = false;
+    }).catch(function(err){
+      statusEl.textContent = 'Intraday backtest failed: ' + err.message;
+      statusEl.className = 'labs-backtest-status fail';
+      btn.disabled = false;
+      console.error('Intraday backtest failed:', err);
+    });
+  }
+
+  function runIntradayUniverseBacktestClicked(){
+    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
+    var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
+    var statusEl = document.getElementById('intradayBacktestStatus');
+    var btn = document.getElementById('runIntradayUniverseBacktestBtn');
+    var singleBtn = document.getElementById('runIntradayBacktestBtn');
+    var resultsEl = document.getElementById('intradayBacktestResults');
+
+    btn.disabled = true;
+    singleBtn.disabled = true;
+    resultsEl.innerHTML = '';
+    statusEl.className = 'labs-backtest-status';
+
+    var allTrades = [];
+    var perSymbolResults = [];
+
+    function processNext(index){
+      if(index >= INTRADAY_UNIVERSE.length){
+        btn.disabled = false;
+        singleBtn.disabled = false;
+        var summary = summarizeBacktestTrades(allTrades);
+        renderIntradayUniverseBacktestResults(perSymbolResults, summary);
+        return;
+      }
+      var sym = INTRADAY_UNIVERSE[index];
+      statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
+      fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
+        var trades = runIntradayBacktestSimulation(bars, lookbackBars);
+        allTrades = allTrades.concat(trades);
+        perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
+        processNext(index + 1);
+      }).catch(function(err){
+        console.error('Intraday universe backtest: skipping', sym, err);
+        processNext(index + 1);
+      });
+    }
+
+    processNext(0);
   }
 
   function fetchHistory(sym, tf, priority){
@@ -4856,16 +5091,21 @@
     // level that's currently way off the visible chart.
     if(opts.levels){
       var lv = opts.levels;
-      function levelLine(price, color, label){
+      function levelLine(price, color, label, dashArray, opacity){
         if(price === null || price === undefined || !isFinite(price)) return;
         var ly2 = y(price);
         if(ly2 < padTop - 1 || ly2 > padTop + plotH + 1) return;
-        parts.push('<line x1="0" y1="'+ly2+'" x2="'+plotW+'" y2="'+ly2+'" stroke="'+color+'" stroke-width="1" stroke-dasharray="2,4" opacity="0.85"/>');
+        parts.push('<line x1="0" y1="'+ly2+'" x2="'+plotW+'" y2="'+ly2+'" stroke="'+color+'" stroke-width="1" stroke-dasharray="'+dashArray+'" opacity="'+opacity+'"/>');
         parts.push('<text class="grid-label" x="4" y="'+(ly2-3)+'" fill="'+color+'">'+label+' '+price.toFixed(2)+'</text>');
       }
-      levelLine(lv.target, 'var(--gain)', 'T');
-      levelLine(lv.entry, 'var(--amber)', 'E');
-      levelLine(lv.stop, 'var(--loss)', 'S');
+      levelLine(lv.target, 'var(--gain)', 'T', '2,4', 0.85);
+      levelLine(lv.entry, 'var(--amber)', 'E', '2,4', 0.85);
+      // Only ever present alongside a real, open position's own entry
+      // line above — a separate, de-emphasized reference showing where
+      // the original plan said to get in, distinct from where the
+      // account actually got filled.
+      levelLine(lv.planEntry, 'var(--muted)', 'Plan', '1,3', 0.6);
+      levelLine(lv.stop, 'var(--loss)', 'S', '2,4', 0.85);
     }
 
     // Live price line — the signature "where are we right now" reference
@@ -4915,8 +5155,17 @@
     var trade = trades.filter(function(t){ return t.sym === sym; })[0] || intradayTrades.filter(function(t){ return t.sym === sym; })[0];
     var levels = null;
     if(openPosition){
-      levels = { entry: openPosition.entry, stop: openPosition.stop, target: openPosition.t1 };
+      // Two genuinely different things: entry is the real, account
+      // position price (what actually happened); planEntry is the
+      // original ideal level the screener computed at signal time
+      // (what the plan said). Kept as separate lines rather than
+      // collapsed into one — a market-order fill can land meaningfully
+      // away from the theoretical SMA20-based plan level, and that gap
+      // is worth being able to see, not hide.
+      levels = { entry: openPosition.entry, planEntry: openPosition.plannedEntry, stop: openPosition.stop, target: openPosition.t1 };
     } else if(trade){
+      // Nothing's been traded yet — there's only one entry concept at
+      // this stage (the plan itself), so no separate planEntry line.
       levels = { entry: trade.entry, stop: trade.stop, target: trade.t1 };
     }
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
@@ -6639,6 +6888,7 @@
   function renderStatusPage(){
     renderStatusHealth();
     renderStatusPositions();
+    renderStatusIntraday();
     renderActivityLog();
 
     var summaryEl = document.getElementById('statusAccountSummary');
@@ -6719,6 +6969,33 @@
             '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</td>' +
             '<td>' + fmt(j.stop) + '</td>' +
             '<td>' + fmt(j.t1) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody>' +
+      '</table>';
+  }
+
+  function renderStatusIntraday(){
+    var el = document.getElementById('statusIntradayBody');
+    if(!el) return;
+    if(!backendIntradayPicks || backendIntradayPicks.length === 0){
+      el.innerHTML = '<div class="labs-backtest-status">No picks yet — either the backend hasn\'t run an intraday cycle, or its intraday screener is currently disabled.</div>';
+      return;
+    }
+    var updatedText = backendIntradayUpdatedAt
+      ? 'Last updated ' + new Date(backendIntradayUpdatedAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })
+      : '';
+    el.innerHTML =
+      (updatedText ? '<div class="labs-backtest-status ok" style="margin-bottom:10px;">' + updatedText + '</div>' : '') +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Symbol</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Status</th></tr></thead>' +
+        '<tbody>' + backendIntradayPicks.map(function(p){
+          return '<tr>' +
+            '<td class="mono">' + p.sym + '</td>' +
+            '<td>' + p.direction + '</td>' +
+            '<td>' + fmt(p.entry) + '</td>' +
+            '<td>' + fmt(p.stop) + '</td>' +
+            '<td>' + fmt(p.t1) + '</td>' +
+            '<td>' + (p.statusLabel || p.status || '') + '</td>' +
           '</tr>';
         }).join('') + '</tbody>' +
       '</table>';
@@ -7215,6 +7492,7 @@
   updateClock();
   renderHistoryList();
   populateBacktestSymbolSelect();
+  populateIntradayBacktestSymbolSelect();
   loadAlpacaAutoTradePref();
   document.getElementById('riskPercentDec').addEventListener('click', function(){ setRiskPercent(riskPercent - 0.5); });
   document.getElementById('riskPercentInc').addEventListener('click', function(){ setRiskPercent(riskPercent + 0.5); });
@@ -7226,6 +7504,8 @@
   loadIntradayPref();
   document.getElementById('runBacktestBtn').addEventListener('click', runBacktestClicked);
   document.getElementById('runUniverseBacktestBtn').addEventListener('click', runUniverseBacktestClicked);
+  document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
+  document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
