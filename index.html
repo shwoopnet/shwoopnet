@@ -1740,9 +1740,8 @@
         <div>
           <div class="settings-row-title">Intraday screener</div>
           <div class="settings-row-desc">
-            A separate, faster-moving screener on 15-min bars across a smaller 10-symbol list, re-checked every
-            15 minutes during market hours. Shows up as its own section on Trade Overview — the daily screener
-            keeps running independently either way. Only runs while this tab is open.
+            Scans a small list of individual stocks on 15-min bars, re-checked every 15 minutes during
+            market hours. Shows up as its own section on Trade Overview. Only runs while this tab is open.
           </div>
         </div>
         <button class="chart-tool-btn active" id="intradayToggle" role="switch" aria-checked="true">On</button>
@@ -1963,14 +1962,16 @@
       </div>
     </div>
 
-    <div class="brief-section-title" style="margin-top:36px;">Intraday Backtest</div>
+    <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
-        Same idea as the backtest above, but against the actual intraday strategy — 15-minute bars, the
-        10-symbol intraday universe, and the same real-time scoring logic the live intraday screener uses.
-        One real thing worth knowing going in: intraday history is far more data-dense than daily (roughly
-        26 bars per trading day), and whether the free data tier hands back enough of it for a further-back
-        lookback is genuinely untested — if a lookback fails, try a shorter one.
+        Runs the same scoring and stop/target logic used live, on 15-minute bars, against real historical
+        prices — only ever using data that would have actually existed at that point in time, no peeking
+        ahead. Check one symbol, or run the whole intraday universe at once for an aggregate read on whether
+        the underlying signal itself actually works. One real thing worth knowing going in: intraday history
+        is far more data-dense than daily (roughly 26 bars per trading day), and whether the free data tier
+        hands back enough of it for a further-back lookback is genuinely untested — if a lookback fails, try
+        a shorter one.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -2312,7 +2313,16 @@
   // Twelve Data's free-tier daily cap almost immediately. This set is also
   // deliberately liquid/well-known names, which matters more for intraday
   // trading than for the daily screener's longer holding window.
-  var INTRADAY_UNIVERSE = ['AAPL', 'MSFT', 'NVDA', 'AMD', 'TSLA', 'GOOGL', 'AMZN', 'META', 'SPY', 'QQQ'];
+  // SPY and QQQ removed (2026-08-22): both were the only two index ETFs
+  // in this universe, and both were the only two entries with negative
+  // expectancy in the first real backtest run against this universe.
+  // That's not a coincidence to explain away -- an index ETF is a
+  // diversified basket, structurally different from a single stock, and
+  // dampens exactly the kind of sharp individual-stock momentum this
+  // trend/breakout strategy is built to catch. One change at a time:
+  // this removes the ETF category only, nothing else, so its effect on
+  // the next backtest run is isolated and measurable.
+  var INTRADAY_UNIVERSE = ['AAPL', 'MSFT', 'NVDA', 'AMD', 'TSLA', 'GOOGL', 'AMZN', 'META'];
   var INTRADAY_PICK_COUNT = 3;
   var INTRADAY_TF = '15m';
   var intradayTrades = [];
@@ -4571,7 +4581,7 @@
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
       '</div>' +
-      '<p class="labs-backtest-note">Aggregated across every symbol in the 10-stock intraday universe that produced at least one signal in this window.</p>' +
+      '<p class="labs-backtest-note">Aggregated across every symbol in the intraday universe that produced at least one signal in this window.</p>' +
       '<table class="backtest-trades-table">' +
         '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
         '<tbody>' + perSymbolRows + '</tbody>' +
