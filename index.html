@@ -127,35 +127,65 @@
   }
   .app-layout{ display:flex; align-items:flex-start; }
   .app-pages{ flex:1; min-width:0; }
-  .waffle-nav{ position:relative; }
-  /* Above 900px, the waffle grid already covers full page navigation, so
-     the plain page-navigation entries in the dropdown menu would just be
-     a second, redundant way to do the exact same thing. Notepad and
-     History aren't available anywhere else, so those stay visible at
-     every width -- this only hides the entries that duplicate the waffle grid. */
-  @media (min-width: 901px){ #navMenu .nav-menu-page-link{ display:none; } }
-  .waffle-btn{
-    background:none; border:1px solid var(--border); border-radius:6px; color: var(--muted);
-    width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+
+  .side-nav{
+    position:fixed; top:0; right:0; height:100vh; z-index:140;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:88px 10px 20px 10px; width:72px;
+    background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(10,10,10,0.94));
+    border-left:1px solid var(--border);
+    overflow-y:auto; overflow-x:hidden;
   }
-  .waffle-btn:hover{ background: var(--panel); color: var(--paper); }
-  .waffle-btn[aria-expanded="true"]{ background: var(--panel-raised); color: var(--amber); }
-  .waffle-grid{
-    position:absolute; top:calc(100% + 8px); right:0; z-index:150;
-    display:grid; grid-template-columns:repeat(3, 76px); gap:2px; padding:10px;
-    background:var(--panel-raised); border:1px solid var(--border); border-radius:8px;
-    box-shadow:0 12px 28px rgba(0,0,0,0.45);
+  .side-nav-divider{ width:32px; height:1px; background:var(--border); margin:6px 0; flex-shrink:0; }
+  .side-nav-item{
+    position:relative; background:none; border:none; color:var(--muted); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    width:100%; padding:11px 4px; border-radius:10px; font-size:9.5px; font-weight:600;
+    font-family:'Space Grotesk', sans-serif; text-align:center; flex-shrink:0;
+    transition: background .25s ease, color .25s ease, transform .2s cubic-bezier(.2,.8,.3,1.3), box-shadow .25s ease;
+    overflow:hidden;
   }
-  @media (max-width: 900px){ .waffle-nav{ display:none; } }
-  .quick-nav-item{
-    background:none; border:none; color: var(--muted); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:5px;
-    padding:12px 4px; border-radius:8px; font-size:10.5px; font-weight:600;
-    font-family:'Space Grotesk', sans-serif; text-align:center;
+  /* The animated hover "glow" -- a soft white radial highlight that fades
+     in behind the icon, combined with a slight lift/scale on the whole
+     button. Kept separate from the .current (active page) state below so
+     the page you're already on reads as calm/settled, not glowing. */
+  .side-nav-item::before{
+    content:""; position:absolute; inset:0; border-radius:10px;
+    background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.16), transparent 70%);
+    opacity:0; transition: opacity .3s ease;
+    pointer-events:none;
   }
-  .quick-nav-item:hover{ background: var(--panel); color: var(--paper); }
-  .quick-nav-item.current{ background: var(--panel); color: var(--amber); }
-  .quick-nav-icon{ font-size:17px; line-height:1; }
+  .side-nav-item:hover::before{ opacity:1; }
+  .side-nav-item:hover{
+    color:#fff; transform: translateX(-3px) scale(1.05);
+    box-shadow: 0 0 18px rgba(255,255,255,0.12), inset 0 0 0 1px rgba(255,255,255,0.1);
+  }
+  .side-nav-item:active{ transform: translateX(-1px) scale(0.98); }
+  .side-nav-item.current{ color: var(--amber); background: var(--panel-raised); }
+  .side-nav-icon{ font-size:18px; line-height:1; transition: transform .2s cubic-bezier(.2,.8,.3,1.3); }
+  .side-nav-item:hover .side-nav-icon{ transform: scale(1.15); }
+  .side-nav-label{ letter-spacing:.02em; }
+
+  @media (max-width: 900px){
+    .side-nav{
+      top:auto; bottom:0; left:0; right:0; height:auto; width:100%;
+      flex-direction:row; justify-content:space-around; align-items:center;
+      padding:8px 4px; overflow-x:auto; overflow-y:hidden;
+      border-left:none; border-top:1px solid var(--border);
+    }
+    .side-nav-divider{ display:none; }
+    .side-nav-item{ width:auto; min-width:50px; padding:6px 4px; }
+    .side-nav-item:hover{ transform: translateY(-3px) scale(1.05); }
+  }
+  /* Room for the fixed sidebar so page content never sits underneath it --
+     right-side padding on wide screens where the sidebar is a vertical
+     rail, bottom padding on narrow screens where it becomes a bottom bar. */
+  .app{ padding-right: 92px; }
+  @media (max-width: 900px){ .app{ padding-right:0; padding-bottom:76px; } }
+  @media (max-width: 900px){
+    .alpaca-dock-header{ bottom:76px; }
+    .alpaca-dock-body-wrap{ bottom:118px; }
+  }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -174,31 +204,6 @@
   }
   .brand-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 20px; letter-spacing: 0.04em; transition: color .15s ease; }
   .brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
-
-  .nav-dropdown{ position:relative; }
-  .nav-toggle{
-    background: var(--panel-raised); border:1px solid var(--border); color:var(--paper);
-    padding:9px 14px; border-radius:5px; font-size:13px; cursor:pointer;
-    display:flex; align-items:center; gap:10px;
-  }
-  .nav-toggle:hover{ border-color: var(--amber-dim); }
-  .nav-toggle .caret{ color:var(--muted); font-size:10px; transition: transform .15s ease; }
-  .nav-toggle[aria-expanded="true"] .caret{ transform: rotate(180deg); }
-  .nav-menu{
-    position:absolute; top:calc(100% + 6px); left:0; min-width:220px;
-    background:var(--panel-raised); border:1px solid var(--border); border-radius:6px;
-    overflow:hidden; z-index:150; box-shadow:0 12px 28px rgba(0,0,0,0.45);
-  }
-  .nav-item{
-    display:flex; flex-direction:column; align-items:flex-start; width:100%; text-align:left;
-    border:none; color:var(--paper); padding:11px 14px; font-size:13px; cursor:pointer;
-    border-bottom:1px solid var(--border);
-  }
-  .nav-item:last-child{ border-bottom:none; }
-  .nav-item:hover{ background: var(--amber-glow); color:var(--amber); }
-  .nav-item.current{ color:var(--amber); }
-  .nav-item-sub{ font-size:10.5px; color:var(--muted); }
-  .nav-item:hover .nav-item-sub{ color: var(--amber-dim); }
 
   .topbar-right{ display:flex; align-items:center; gap:18px; }
   .clock{ color: var(--muted); font-size: 13px; text-align:right; }
@@ -681,7 +686,7 @@
   .news-toast-body{ font-size:12.5px; line-height:1.5; color: var(--muted); margin:0; }
 
   .toast-container{
-    position:fixed; bottom:20px; right:20px; z-index:900;
+    position:fixed; bottom:20px; right:100px; z-index:900;
     display:flex; flex-direction:column-reverse; gap:10px; max-width:340px; width:calc(100% - 40px);
     max-height:60vh; overflow-y:auto; overflow-x:visible;
     pointer-events:none;
@@ -717,7 +722,7 @@
   .toast-text{ font-size:12.5px; line-height:1.5; margin:0 0 8px 0; color: var(--paper); }
   .toast-link{ font-size:11px; color: var(--amber); text-decoration:none; }
   .toast-link:hover{ text-decoration:underline; }
-  @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; bottom:12px; } }
+  @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; bottom:84px; } }
   .news-toast-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
   .news-toast-link{ font-size:11.5px; color: var(--amber); text-decoration:none; }
   .news-toast-link:hover{ text-decoration:underline; }
@@ -762,7 +767,7 @@
 
 
   .notepad-panel{
-    position: fixed; bottom: 20px; right: 20px; width: 300px; height: 260px; z-index: 110;
+    position: fixed; bottom: 20px; right: 100px; width: 300px; height: 260px; z-index: 110;
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     box-shadow: 0 12px 30px rgba(0,0,0,0.4); display:flex; flex-direction:column;
   }
@@ -976,7 +981,7 @@
   .journal-remove-btn:hover{ color: var(--loss); text-decoration:underline; }
 
   @media (max-width: 900px){
-    .notepad-panel{ left:16px; right:16px; width:auto; bottom:16px; }
+    .notepad-panel{ left:16px; right:16px; width:auto; bottom:84px; }
   }
 
   .journal-calendar{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; margin-bottom:20px; }
@@ -1312,90 +1317,44 @@
     </button>
 
     <div class="topbar-right">
-      <div class="waffle-nav">
-        <button class="waffle-btn" id="waffleNavBtn" aria-haspopup="true" aria-expanded="false" aria-label="Open navigation">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <circle cx="5" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="19" cy="5" r="2" fill="currentColor"/>
-            <circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/>
-            <circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="19" r="2" fill="currentColor"/>
-          </svg>
-        </button>
-        <div class="waffle-grid" id="waffleGrid" hidden>
-          <button class="nav-item quick-nav-item" data-page="brief" title="Market Brief">
-            <span class="quick-nav-icon">◆</span><span class="quick-nav-label">Brief</span>
-          </button>
-          <button class="nav-item quick-nav-item" data-page="status" title="Status">
-            <span class="quick-nav-icon">⬤</span><span class="quick-nav-label">Status</span>
-          </button>
-          <button class="nav-item quick-nav-item" data-page="trades" title="Trade Overview">
-            <span class="quick-nav-icon">▲</span><span class="quick-nav-label">Trades</span>
-          </button>
-          <button class="nav-item quick-nav-item" data-page="journal" title="Trade Journal">
-            <span class="quick-nav-icon">▦</span><span class="quick-nav-label">Journal</span>
-          </button>
-          <button class="nav-item quick-nav-item" data-page="labs" title="Labs">
-            <span class="quick-nav-icon">◈</span><span class="quick-nav-label">Labs</span>
-          </button>
-          <button class="nav-item quick-nav-item" data-page="changelog" title="Changelog">
-            <span class="quick-nav-icon">≡</span><span class="quick-nav-label">Log</span>
-          </button>
-          <button class="nav-item quick-nav-item" data-page="settings" title="Settings">
-            <span class="quick-nav-icon">⚙</span><span class="quick-nav-label">Settings</span>
-          </button>
-        </div>
-      </div>
-
       <div class="clock">
         <div class="time mono" id="clockTime">--:--:--</div>
         <div id="clockTz">Local · Markets open</div>
       </div>
-
-      <div class="nav-dropdown">
-        <button class="nav-toggle" id="navToggle" aria-haspopup="true" aria-expanded="false">
-          <span id="navCurrentLabel">Market Brief</span>
-          <span class="caret">▾</span>
-        </button>
-        <div class="nav-menu" id="navMenu" hidden>
-          <button class="nav-item nav-menu-page-link" data-page="brief">
-            Market Brief
-            <span class="nav-item-sub">Home — today's read</span>
-          </button>
-          <button class="nav-item nav-menu-page-link" data-page="status">
-            Status
-            <span class="nav-item-sub">Account, positions &amp; activity log</span>
-          </button>
-          <button class="nav-item nav-menu-page-link" data-page="trades">
-            Trade Overview
-            <span class="nav-item-sub">Active setups &amp; charts</span>
-          </button>
-          <button class="nav-item nav-menu-page-link" data-page="journal">
-            Trade Journal
-            <span class="nav-item-sub">Calendar &amp; closed trades</span>
-          </button>
-          <button class="nav-item" id="notepadToggle" data-action="notepad">
-            Notepad
-            <span class="nav-item-sub">Quick scratchpad</span>
-          </button>
-          <button class="nav-item" id="historyNavItem" data-action="history">
-            History
-            <span class="nav-item-sub">Today's market alerts</span>
-          </button>
-          <button class="nav-item nav-menu-page-link" data-page="labs">
-            Labs
-            <span class="nav-item-sub">Strategy &amp; backtesting</span>
-          </button>
-          <button class="nav-item nav-menu-page-link" data-page="changelog">
-            Changelog
-            <span class="nav-item-sub">What's new</span>
-          </button>
-          <button class="nav-item nav-menu-page-link" data-page="settings">
-            Settings
-            <span class="nav-item-sub">Theme &amp; preferences</span>
-          </button>
-        </div>
-      </div>
     </div>
   </div>
+
+  <nav class="side-nav" id="sideNav" aria-label="Main navigation">
+    <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
+      <span class="side-nav-icon">◆</span><span class="side-nav-label">Brief</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="status" title="Status">
+      <span class="side-nav-icon">⬤</span><span class="side-nav-label">Status</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="trades" title="Trade Overview">
+      <span class="side-nav-icon">▲</span><span class="side-nav-label">Trades</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="journal" title="Trade Journal">
+      <span class="side-nav-icon">▦</span><span class="side-nav-label">Journal</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="labs" title="Labs">
+      <span class="side-nav-icon">◈</span><span class="side-nav-label">Labs</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="changelog" title="Changelog">
+      <span class="side-nav-icon">≡</span><span class="side-nav-label">Log</span>
+    </button>
+    <div class="side-nav-divider"></div>
+    <button class="side-nav-item nav-item" id="notepadToggle" data-action="notepad" title="Notepad">
+      <span class="side-nav-icon">✎</span><span class="side-nav-label">Notes</span>
+    </button>
+    <button class="side-nav-item nav-item" id="historyNavItem" data-action="history" title="History">
+      <span class="side-nav-icon">↻</span><span class="side-nav-label">History</span>
+    </button>
+    <div class="side-nav-divider"></div>
+    <button class="side-nav-item nav-item" data-page="settings" title="Settings">
+      <span class="side-nav-icon">⚙</span><span class="side-nav-label">Settings</span>
+    </button>
+  </nav>
 
   <div class="history-backdrop" id="historyBackdrop" hidden></div>
   <div class="toast-container" id="toastContainer"></div>
@@ -1558,7 +1517,7 @@
       </div>
       <button class="cta-btn" id="ctaToTrades">View Trade Overview →</button>
     </div>
-    <div class="cta-caption">This brief opens automatically the first time you visit Shwoop each day. After that, you'll land on Trade Overview — tap the grid icon in the top right to come back here anytime.</div>
+    <div class="cta-caption">This brief opens automatically the first time you visit Shwoop each day. After that, you'll land on Trade Overview — use Brief in the sidebar to come back here anytime.</div>
   </main>
 
   <!-- ================= STATUS ================= -->
@@ -2072,6 +2031,7 @@
             <option value="1610">~60 trading days</option>
             <option value="2390">~90 trading days</option>
             <option value="4730">~180 trading days</option>
+            <option value="9540">~365 trading days (2 requests, slower)</option>
           </select>
         </div>
         <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
@@ -2109,9 +2069,9 @@
           <div>
             <div class="labs-export-title">Test Alpaca as a data feed</div>
             <div class="labs-export-desc">Fetches a real past week of 15-min bars directly from Alpaca's data API
-              (not Twelve Data) using your connected paper account, and reports exactly what hours of the trading
-              day come back — this is how we find out for real whether extended hours are included on the free
-              (IEX) feed, rather than guessing from documentation. Uses a real past date range, so this works
+              (not Twelve Data) across 4 symbols, using your connected paper account, and reports both the hours
+              covered AND the volume behind any extended-hours bars — thin, near-zero volume outside regular
+              hours means sparse IEX prints, not real depth. Uses a real past date range, so this works
               correctly even on a day the market happens to be closed.</div>
           </div>
           <button class="settings-reset-btn" id="testAlpacaDataFeedBtn">Test Alpaca data feed</button>
@@ -4640,6 +4600,48 @@
     }, 'high');
   }
 
+  // Single-request cap -- both our own code and Twelve Data's own
+  // outputsize parameter max out at 5000, which is roughly 190 trading
+  // days at 26 bars/day. Anything longer needs a second request further
+  // back in time, stitched onto the first.
+  var TWELVE_DATA_SINGLE_REQUEST_BAR_CAP = 5000;
+
+  function fetchIntradayBacktestHistoryChunked(sym, totalBars){
+    if(totalBars <= TWELVE_DATA_SINGLE_REQUEST_BAR_CAP){
+      return fetchIntradayBacktestHistory(sym, totalBars);
+    }
+    // First chunk: the most recent ~190 days, exactly as a normal request
+    // already works today.
+    return fetchIntradayBacktestHistory(sym, TWELVE_DATA_SINGLE_REQUEST_BAR_CAP).then(function(recentChunk){
+      var earliestInRecentChunk = recentChunk[0].t;
+      var endDateForOlderChunk = new Date(earliestInRecentChunk.getTime() - 15 * 60 * 1000);
+      var endDateStr = endDateForOlderChunk.toISOString().slice(0, 19).replace('T', ' ');
+      var remainingBars = Math.min(totalBars - TWELVE_DATA_SINGLE_REQUEST_BAR_CAP, TWELVE_DATA_SINGLE_REQUEST_BAR_CAP);
+
+      return scheduleTwelveDataCall(function(){
+        var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
+          '&interval=15min&outputsize=' + remainingBars + '&end_date=' + encodeURIComponent(endDateStr) +
+          '&apikey=' + TWELVE_DATA_API_KEY;
+        return fetch(url).then(function(res){
+          if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
+          return res.json();
+        }).then(function(data){
+          if(!data || data.status === 'error' || !Array.isArray(data.values)){
+            // The older chunk failing isn't fatal -- a shorter continuous
+            // history is still useful, just report what actually happened.
+            console.warn('Older chunk for ' + sym + ' unavailable -- returning the ~190-day chunk only.', data && data.message);
+            return [];
+          }
+          return data.values.map(function(v){
+            return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
+          }).reverse();
+        });
+      }, 'high').then(function(olderChunk){
+        return olderChunk.concat(recentChunk);
+      });
+    });
+  }
+
   function runIntradayBacktestSimulation(bars, lookbackBars){
     var startIdx = Math.max(50, bars.length - lookbackBars);
     var trades = [];
@@ -4803,7 +4805,7 @@
     statusEl.className = 'labs-backtest-status';
     resultsEl.innerHTML = '';
 
-    fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
+    fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
       var trades = runIntradayBacktestSimulation(bars, lookbackBars);
       var summary = summarizeBacktestTrades(trades);
       renderIntradayBacktestResults(trades, summary, sym);
@@ -4842,7 +4844,7 @@
       }
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
-      fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
+      fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
         var trades = runIntradayBacktestSimulation(bars, lookbackBars);
         allTrades = allTrades.concat(trades);
         perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
@@ -4916,7 +4918,7 @@
       }
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Fetching ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
-      fetchIntradayBacktestHistory(sym, lookbackBars).then(function(bars){
+      fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
         out[sym] = bars.map(function(b){ return { o: b.o, h: b.h, l: b.l, c: b.c, t: b.t.toISOString() }; });
         processNext(index + 1);
       }).catch(function(err){
@@ -4948,63 +4950,78 @@
     btn.disabled = true;
     resultEl.textContent = '';
     statusEl.className = 'labs-backtest-status';
-    statusEl.textContent = 'Fetching a real past week from Alpaca...';
+    statusEl.textContent = 'Fetching a real past week from Alpaca across 4 symbols...';
 
-    // A real past date range -- explicit dates, never "today"/"latest", so
-    // this works correctly regardless of whether the market happens to be
-    // open right now. Deliberately spans a full prior week to comfortably
-    // land on real past trading days no matter what day this test is run.
     var end = new Date();
     var start = new Date(end.getTime() - 9 * 24 * 60 * 60 * 1000);
     var startStr = start.toISOString().slice(0, 10);
     var endStr = end.toISOString().slice(0, 10);
+    var testSymbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA'];
 
-    var url = ALPACA_DATA_BASE + '/v2/stocks/AAPL/bars?timeframe=15Min&start=' + startStr +
-      '&end=' + endStr + '&limit=1000&feed=iex&adjustment=raw';
+    // Real regular session in UTC during EDT: 13:30-20:00.
+    function isRegularHours(timeStr){
+      return timeStr >= '13:30' && timeStr < '20:00';
+    }
 
-    fetch(url, { headers: alpacaHeaders() }).then(function(res){
-      if(!res.ok){
-        return res.text().then(function(body){
-          throw new Error('HTTP ' + res.status + ': ' + body.slice(0, 200));
+    Promise.all(testSymbols.map(function(sym){
+      var url = ALPACA_DATA_BASE + '/v2/stocks/' + sym + '/bars?timeframe=15Min&start=' + startStr +
+        '&end=' + endStr + '&limit=1000&feed=iex&adjustment=raw';
+      return fetch(url, { headers: alpacaHeaders() }).then(function(res){
+        if(!res.ok){
+          return res.text().then(function(body){ throw new Error('HTTP ' + res.status + ': ' + body.slice(0, 150)); });
+        }
+        return res.json();
+      }).then(function(data){
+        var bars = (data.bars && data.bars[sym]) || [];
+        return { sym: sym, bars: bars, error: null };
+      }).catch(function(err){
+        return { sym: sym, bars: [], error: err.message };
+      });
+    })).then(function(results){
+      var lines = ['Feed: IEX (free tier) | Symbols: ' + testSymbols.join(', ') + ' | Timeframe: 15Min', ''];
+
+      results.forEach(function(r){
+        lines.push('=== ' + r.sym + ' ===');
+        if(r.error){
+          lines.push('  Request failed: ' + r.error);
+          lines.push('');
+          return;
+        }
+        if(!r.bars.length){
+          lines.push('  No bars returned.');
+          lines.push('');
+          return;
+        }
+        var byDay = {};
+        r.bars.forEach(function(b){
+          var day = b.t.slice(0, 10);
+          if(!byDay[day]) byDay[day] = [];
+          byDay[day].push({ time: b.t.slice(11, 16), v: b.v });
         });
-      }
-      return res.json();
-    }).then(function(data){
-      var bars = (data.bars && data.bars.AAPL) || data.bars || [];
-      if(!Array.isArray(bars) || bars.length === 0){
-        statusEl.className = 'labs-backtest-status fail';
-        statusEl.textContent = 'No bars came back -- see raw response below.';
-        resultEl.textContent = JSON.stringify(data, null, 2).slice(0, 2000);
-        btn.disabled = false;
-        return;
-      }
-      // Group by real calendar day (UTC date portion of the timestamp) and
-      // report the first/last bar time-of-day per day, in both UTC and
-      // ET, so we can see directly whether pre-market/after-hours bars
-      // are actually present -- true regular session is 13:30-20:00 UTC
-      // (9:30 AM-4:00 PM ET) during EDT.
-      var byDay = {};
-      bars.forEach(function(b){
-        var day = b.t.slice(0, 10);
-        if(!byDay[day]) byDay[day] = [];
-        byDay[day].push(b.t.slice(11, 16));
+        var days = Object.keys(byDay).sort();
+        days.forEach(function(day){
+          var dayBars = byDay[day];
+          var regular = dayBars.filter(function(b){ return isRegularHours(b.time); });
+          var extended = dayBars.filter(function(b){ return !isRegularHours(b.time); });
+          var avgRegularVol = regular.length ? Math.round(regular.reduce(function(s,b){ return s + b.v; }, 0) / regular.length) : 0;
+          lines.push('  ' + day + ':  ' + regular.length + ' regular-hours bars (avg vol ' + avgRegularVol.toLocaleString() + ')');
+          if(extended.length){
+            extended.forEach(function(b){
+              lines.push('      EXTENDED: ' + b.time + ' UTC, volume ' + b.v.toLocaleString() +
+                (avgRegularVol > 0 ? '  (' + Math.round(100 * b.v / avgRegularVol) + '% of a typical regular-hours bar)' : ''));
+            });
+          } else {
+            lines.push('      (no extended-hours bars this day)');
+          }
+        });
+        lines.push('');
       });
-      var days = Object.keys(byDay).sort();
-      var lines = ['Feed: IEX (free tier) | Symbol: AAPL | Timeframe: 15Min', ''];
-      days.forEach(function(day){
-        var times = byDay[day];
-        lines.push(day + ':  first bar ' + times[0] + ' UTC  ->  last bar ' + times[times.length-1] + ' UTC   (' + times.length + ' bars)');
-      });
-      lines.push('');
-      lines.push('True regular session (EDT) is 13:30-20:00 UTC (9:30 AM-4:00 PM ET).');
-      lines.push('Anything outside that range above = extended hours actually came back on the free feed.');
+
+      lines.push('A volume figure well under 100% of a typical regular-hours bar suggests thin, sparse');
+      lines.push('extended-hours activity on the IEX feed specifically -- not full pre/post-market depth.');
       resultEl.textContent = lines.join('\n');
       statusEl.className = 'labs-backtest-status ok';
-      statusEl.textContent = 'Done -- ' + days.length + ' day(s) returned. See the breakdown below.';
-      btn.disabled = false;
-    }).catch(function(err){
-      statusEl.className = 'labs-backtest-status fail';
-      statusEl.textContent = 'Request failed: ' + err.message;
+      statusEl.textContent = 'Done -- see the volume breakdown below.';
       btn.disabled = false;
     });
   }
@@ -6155,7 +6172,6 @@
     document.getElementById('page-settings').hidden = (name !== 'settings');
     document.getElementById('page-changelog').hidden = (name !== 'changelog');
     document.getElementById('page-labs').hidden = (name !== 'labs');
-    document.getElementById('navCurrentLabel').textContent = navLabels[name];
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
@@ -6165,31 +6181,6 @@
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
-  var navToggle = document.getElementById('navToggle');
-  var navMenu = document.getElementById('navMenu');
-  var waffleNavBtn = document.getElementById('waffleNavBtn');
-  var waffleGrid = document.getElementById('waffleGrid');
-
-  navToggle.addEventListener('click', function(){
-    var open = !navMenu.hasAttribute('hidden');
-    if(open){ navMenu.setAttribute('hidden',''); navToggle.setAttribute('aria-expanded','false'); }
-    else{ navMenu.removeAttribute('hidden'); navToggle.setAttribute('aria-expanded','true'); }
-  });
-  waffleNavBtn.addEventListener('click', function(){
-    var open = !waffleGrid.hasAttribute('hidden');
-    if(open){ waffleGrid.setAttribute('hidden',''); waffleNavBtn.setAttribute('aria-expanded','false'); }
-    else{ waffleGrid.removeAttribute('hidden'); waffleNavBtn.setAttribute('aria-expanded','true'); }
-  });
-  document.addEventListener('click', function(e){
-    if(!e.target.closest('.nav-dropdown')){
-      navMenu.setAttribute('hidden','');
-      navToggle.setAttribute('aria-expanded','false');
-    }
-    if(!e.target.closest('.waffle-nav')){
-      waffleGrid.setAttribute('hidden','');
-      waffleNavBtn.setAttribute('aria-expanded','false');
-    }
-  });
   document.querySelectorAll('.nav-item').forEach(function(item){
     item.addEventListener('click', function(){
       if(item.dataset.page){
@@ -6199,10 +6190,6 @@
       } else if(item.dataset.action === 'history'){
         openHistory();
       }
-      navMenu.setAttribute('hidden','');
-      navToggle.setAttribute('aria-expanded','false');
-      waffleGrid.setAttribute('hidden','');
-      waffleNavBtn.setAttribute('aria-expanded','false');
     });
   });
   document.getElementById('ctaToTrades').addEventListener('click', function(){ showPage('trades'); });
