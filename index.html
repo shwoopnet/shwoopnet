@@ -2055,11 +2055,17 @@
         <div class="labs-export-header">
           <div>
             <div class="labs-export-title">Export raw historical data</div>
-            <div class="labs-export-desc">Pulls the exact same 15-min bars the backtest above uses, for every
-              symbol in the universe, using the current Lookback setting — saves as a real .json file you can
-              upload directly, no copy-paste needed. Owner-only, since this consumes real API quota on every run.</div>
+            <div class="labs-export-desc">Pulls 15-min bars (including volume) for the symbols listed below, using
+              the current Lookback setting — saves as a real .json file you can upload directly, no copy-paste
+              needed. Defaults to the live trading universe, but you can replace it with any other symbols for
+              research — this never changes what the live screener actually trades. Owner-only, since this
+              consumes real API quota on every run.</div>
           </div>
           <button class="settings-reset-btn" id="exportHistoricalDataBtn">Export historical data</button>
+        </div>
+        <div class="labs-control-field" style="margin-bottom:14px;">
+          <label for="exportSymbolsInput">Symbols to export (comma-separated)</label>
+          <input type="text" id="exportSymbolsInput" style="width:100%; max-width:520px; background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'IBM Plex Mono', monospace;">
         </div>
         <div class="labs-backtest-status" id="exportStatus"></div>
         <div id="exportResultWrap" hidden>
@@ -4598,7 +4604,7 @@
           throw new Error('Not enough intraday history for ' + sym + ' — the free data tier may not go back this far at 15-minute granularity. Try a shorter lookback.');
         }
         return data.values.map(function(v){
-          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
+          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), vol:parseFloat(v.volume || 0), t:new Date(v.datetime) };
         }).reverse();
       });
     }, 'high');
@@ -4637,7 +4643,7 @@
             return [];
           }
           return data.values.map(function(v){
-            return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), t:new Date(v.datetime) };
+            return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), vol:parseFloat(v.volume || 0), t:new Date(v.datetime) };
           }).reverse();
         });
       }, 'high').then(function(olderChunk){
@@ -4794,6 +4800,8 @@
     sel.innerHTML = INTRADAY_UNIVERSE.map(function(sym){
       return '<option value="' + sym + '">' + sym + ' — ' + (COMPANY_NAMES[sym] || sym) + '</option>';
     }).join('');
+    var symbolsInput = document.getElementById('exportSymbolsInput');
+    if(symbolsInput && !symbolsInput.value){ symbolsInput.value = INTRADAY_UNIVERSE.join(', '); }
   }
 
   function runIntradayBacktestClicked(){
@@ -4876,6 +4884,10 @@
     var textarea = document.getElementById('exportResultTextarea');
     var downloadLink = document.getElementById('exportDownloadLink');
 
+    var symbolsInput = document.getElementById('exportSymbolsInput');
+    var exportSymbols = symbolsInput.value.split(',').map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
+    if(exportSymbols.length === 0){ exportSymbols = INTRADAY_UNIVERSE.slice(); }
+
     btn.disabled = true;
     resultWrap.setAttribute('hidden', '');
     document.getElementById('exportRawWrap').setAttribute('hidden', '');
@@ -4886,12 +4898,12 @@
     var failedSymbols = [];
 
     function processNext(index){
-      if(index >= INTRADAY_UNIVERSE.length){
+      if(index >= exportSymbols.length){
         btn.disabled = false;
         var summary = failedSymbols.length > 0
           ? ' (' + failedSymbols.length + ' symbol(s) failed: ' + failedSymbols.join(', ') + ')'
           : '';
-        statusEl.textContent = 'Done. ' + Object.keys(out).length + ' of ' + INTRADAY_UNIVERSE.length + ' symbols exported.' + summary;
+        statusEl.textContent = 'Done. ' + Object.keys(out).length + ' of ' + exportSymbols.length + ' symbols exported.' + summary;
         statusEl.className = 'labs-backtest-status ok';
         var json = JSON.stringify({
           exportedAt: new Date().toISOString(),
@@ -4920,10 +4932,10 @@
         resultWrap.removeAttribute('hidden');
         return;
       }
-      var sym = INTRADAY_UNIVERSE[index];
-      statusEl.textContent = 'Fetching ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
+      var sym = exportSymbols[index];
+      statusEl.textContent = 'Fetching ' + sym + '… (' + (index + 1) + ' of ' + exportSymbols.length + ')';
       fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        out[sym] = bars.map(function(b){ return { o: b.o, h: b.h, l: b.l, c: b.c, t: b.t.toISOString() }; });
+        out[sym] = bars.map(function(b){ return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.vol || 0, t: b.t.toISOString() }; });
         processNext(index + 1);
       }).catch(function(err){
         console.error('Export: failed to fetch', sym, err);
