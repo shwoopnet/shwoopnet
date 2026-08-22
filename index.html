@@ -650,11 +650,24 @@
   .toast-container{
     position:fixed; bottom:20px; right:20px; z-index:900;
     display:flex; flex-direction:column-reverse; gap:10px; max-width:340px; width:calc(100% - 40px);
+    max-height:60vh; overflow-y:auto; overflow-x:visible;
+    pointer-events:none;
+    /* Without a height cap, a growing stack of alerts (this grows
+       upward, column-reverse) could reach far enough up the screen to
+       overlap real page content underneath — which is exactly what
+       happened. Capping it and scrolling internally means the stack
+       never grows past a bounded area, regardless of how many alerts
+       queue up or how tall/short the page content happens to be.
+       pointer-events:none on the container (with :auto restored on each
+       actual toast below) means empty space within this box never
+       blocks clicks on whatever real content sits underneath it. */
   }
+  .toast-container::-webkit-scrollbar{ width:0; }
   .alert-toast{
     background: var(--panel); border:1px solid var(--amber-dim); border-radius: var(--radius);
     padding:14px 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);
     animation: toastSlideIn .25s ease;
+    pointer-events:auto;
   }
   [data-reduce-motion="true"] .alert-toast{ animation: none; }
   .alert-toast.toast-hide{ animation: toastSlideOut .25s ease forwards; }
