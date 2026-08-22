@@ -221,6 +221,14 @@
     display:flex; justify-content:space-between; align-items:center; gap:20px;
     padding:18px 4px; border-bottom:1px solid var(--border); flex-wrap:wrap;
   }
+  /* Without this, the hidden attribute alone has no visual effect: the
+     flex display set above has the same specificity as the browser's
+     built-in [hidden]{display:none} rule, and author styles win ties
+     over the UA stylesheet -- so every conditionally-hidden settings row
+     (Alpaca fields, risk row, auto-trade toggle, pause status) would
+     stay visibly flexed even with hidden set, exactly like every other
+     [hidden] override already present elsewhere in this file. */
+  .settings-row[hidden]{ display:none; }
   .settings-row:last-of-type{ border-bottom:none; }
   .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
   .settings-row-desc{ font-size:11.5px; color: var(--muted); }
@@ -1189,6 +1197,29 @@
         console.error('Alpaca credentials sync error:', err);
       });
     },
+    // The server sets intradayAutoTradePaused after exhausting its retry
+    // budget on a failed order (see autoTrade.js) — this just surfaces
+    // that same field to the Settings page in real time, and lets the
+    // person manually clear it once the underlying issue is resolved.
+    watchTradingPauseState: function(uid, callback){
+      return onSnapshot(doc(db, 'users', uid), function(snap){
+        var data = snap.exists() ? snap.data() : {};
+        callback({
+          paused: Boolean(data.intradayAutoTradePaused),
+          pausedAt: data.intradayAutoTradePausedAt || null,
+          pausedReason: data.intradayAutoTradePausedReason || null,
+        });
+      }, function(err){
+        console.error('Trading pause state sync error:', err);
+      });
+    },
+    resumeTrading: function(uid){
+      return setDoc(doc(db, 'users', uid), {
+        intradayAutoTradePaused: false,
+        intradayAutoTradePausedAt: null,
+        intradayAutoTradePausedReason: null,
+      }, { merge: true });
+    },
     // Internal only for now — not shown anywhere in the UI. One document
     // per (day, symbol) rather than one document per day holding an array:
     // when multiple picks resolve in the same tick, concurrent updates to
@@ -1527,7 +1558,7 @@
       </div>
       <button class="cta-btn" id="ctaToTrades">View Trade Overview →</button>
     </div>
-    <div class="cta-caption">This brief opens automatically the first time you visit Shwoop each day. After that, you'll land on Trade Overview — use the menu above to come back here anytime.</div>
+    <div class="cta-caption">This brief opens automatically the first time you visit Shwoop each day. After that, you'll land on Trade Overview — tap the grid icon in the top right to come back here anytime.</div>
   </main>
 
   <!-- ================= STATUS ================= -->
@@ -1733,14 +1764,7 @@
         <div>
           <div class="settings-row-title">Live data</div>
           <div class="settings-row-desc quote-sync-status" id="quoteSyncStatus">Connecting…</div>
-          <div class="settings-row-desc" style="margin-top:4px;">Finnhub's free feed is genuinely real-time for US stocks — connecting Alpaca below doesn't fix a delay, it just consolidates prices and your broker onto one account instead of two.</div>
-        </div>
-      </div>
-
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Screener</div>
-          <div class="settings-row-desc quote-sync-status" id="analysisSyncStatus">—</div>
+          <div class="settings-row-desc" style="margin-top:4px;">Finnhub's free feed is real-time for US stocks — connecting Alpaca below doesn't fix a delay, it just consolidates prices and your broker onto one account instead of two.</div>
         </div>
       </div>
 
@@ -1768,16 +1792,15 @@
         <div>
           <div class="settings-row-title">Risk per trade</div>
           <div class="settings-row-desc">
-            Share of your account to risk on any single trade, based on the actual distance between entry and
-            stop — not a fixed share count. Recalculated from your real account balance each time, then rounded
-            down to a whole share, since fractional shares can't carry stop-loss/target protection on Alpaca. A
-            trade that would round to 0 shares is skipped rather than forced through at the wrong size.
+            Fixed by the strategy itself, not user-adjustable — changing this manually would skew the
+            reliability numbers the strategy was actually tested against. Based on the real distance between
+            entry and stop, recalculated from your actual balance each time, rounded down to a whole share.
+            Two caps apply on top of this: no position over 20% of equity, and no more than 5.5% of equity at
+            risk across all open positions combined (not a limit on how many positions — just on total risk).
           </div>
         </div>
         <div class="layout-stepper">
-          <button class="zoom-btn" id="riskPercentDec" aria-label="Decrease risk percent">−</button>
-          <span class="zoom-label mono" id="riskPercentLabel">2.0%</span>
-          <button class="zoom-btn" id="riskPercentInc" aria-label="Increase risk percent">+</button>
+          <span class="zoom-label mono" id="riskPercentLabel">1.0%</span>
         </div>
       </div>
 
@@ -1785,14 +1808,21 @@
         <div>
           <div class="settings-row-title">Auto-send new intraday picks (risk-sized)</div>
           <div class="settings-row-desc">
-            Sends a new intraday pick the moment it's found, sized per the
-            risk setting above, and allows genuine re-entry on the same symbol later the same day once a prior
-            position has actually closed. Capped
-            at 5 auto-sent trades per day as a hard safety backstop. Only runs while this tab is open. Paper
+            Sends a new pick the moment it's found, sized per the caps above. Allows re-entry on the same
+            symbol later the same day once a prior position closes. Failed orders retry 3 times, then
+            auto-trading pauses and alerts you — see status below. Only runs while this tab is open. Paper
             money only.
           </div>
         </div>
         <button class="chart-tool-btn" id="alpacaAutoTradeIntradayToggle" role="switch" aria-checked="false">Off</button>
+      </div>
+
+      <div class="settings-row" id="tradingPausedRow" hidden>
+        <div>
+          <div class="settings-row-title">Auto-trading status</div>
+          <div class="settings-row-desc" id="tradingPausedDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="resumeTradingBtn">Resume trading</button>
       </div>
 
       <div class="settings-row">
@@ -1845,7 +1875,7 @@
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Market alerts</div>
-          <div class="settings-row-desc">Track today's market alerts (feeds History in the menu above).</div>
+          <div class="settings-row-desc">Tracks today's market alerts, viewable later in History.</div>
         </div>
         <button class="settings-toggle-switch" id="alertsToggle" role="switch" aria-checked="true" aria-label="Toggle market alerts">
           <span class="toggle-knob"></span>
@@ -1970,8 +2000,7 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        The intraday screener isn't a black box. Here's the whole thing, in plain language — including what it
-        can't tell you yet.
+        How the intraday screener actually works, in plain language.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
@@ -2016,11 +2045,10 @@
       </div>
       <div class="labs-honesty-box">
         <div class="labs-honesty-title">What this isn't (yet)</div>
-        <p>This scoring is a heuristic I came up with — not something proven against real results yet. There's
-        an activity log quietly tracking what actually happens to every pick: sent, skipped, closed. It's building
-        toward real numbers instead of a guess. The backtest below is the honest next step: same logic, run
-        against real history, so you can see how it actually would have done instead of just taking my word
-        for it.</p>
+        <p>This scoring is a heuristic, not something proven against real results yet. The activity log tracks
+        what actually happens to every pick — sent, skipped, closed — building toward real performance numbers
+        over time. The backtest below runs the same logic against real historical prices, so you can see how it
+        would have actually done rather than take this description on faith.</p>
       </div>
     </div>
 
@@ -2028,12 +2056,9 @@
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
         Runs the same scoring and stop/target logic used live, on 15-minute bars, against real historical
-        prices — only ever using data that would have actually existed at that point in time, no peeking
-        ahead. This measures raw signal quality (% return per trade), independent of account size, so
-        account-size effects never blur the read on whether the underlying edge itself is real. Intraday
-        history is far more data-dense than daily (roughly 26 bars per trading day), and whether the free
-        data tier hands back enough of it for a further-back lookback is genuinely untested — if a lookback
-        fails, try a shorter one.
+        prices — only ever using data that would have existed at that point in time. Measures raw % return
+        per trade, independent of account size, so sizing effects don't blur whether the underlying edge is
+        real. If a longer lookback fails to load, try a shorter one — the free data tier's depth isn't fully known.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -2046,6 +2071,7 @@
             <option value="830" selected>~30 trading days</option>
             <option value="1610">~60 trading days</option>
             <option value="2390">~90 trading days</option>
+            <option value="4730">~180 trading days</option>
           </select>
         </div>
         <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
@@ -2060,17 +2086,39 @@
           <div>
             <div class="labs-export-title">Export raw historical data</div>
             <div class="labs-export-desc">Pulls the exact same 15-min bars the backtest above uses, for every
-              symbol in the universe, using the current Lookback setting — packaged as plain JSON to hand off
-              elsewhere. Owner-only, since this consumes real API quota on every run.</div>
+              symbol in the universe, using the current Lookback setting — saves as a real .json file you can
+              upload directly, no copy-paste needed. Owner-only, since this consumes real API quota on every run.</div>
           </div>
           <button class="settings-reset-btn" id="exportHistoricalDataBtn">Export historical data</button>
         </div>
         <div class="labs-backtest-status" id="exportStatus"></div>
         <div id="exportResultWrap" hidden>
-          <textarea id="exportResultTextarea" class="labs-export-textarea" readonly rows="10"></textarea>
-          <button class="settings-reset-btn" id="exportCopyBtn" style="margin-top:10px;">Copy to clipboard</button>
-          <span id="exportCopyConfirm" class="labs-export-copy-confirm" hidden>Copied.</span>
+          <a id="exportDownloadLink" class="settings-reset-btn" download style="display:inline-block; text-decoration:none;">Download .json file</a>
+          <div style="margin-top:10px;">
+            <button class="settings-reset-btn" id="exportShowRawBtn" style="font-size:11px; padding:6px 10px;">Show raw text instead</button>
+          </div>
+          <div id="exportRawWrap" hidden style="margin-top:10px;">
+            <textarea id="exportResultTextarea" class="labs-export-textarea" readonly rows="10"></textarea>
+            <button class="settings-reset-btn" id="exportCopyBtn" style="margin-top:10px;">Copy to clipboard</button>
+            <span id="exportCopyConfirm" class="labs-export-copy-confirm" hidden>Copied.</span>
+          </div>
         </div>
+
+        <div class="labs-export-divider"></div>
+        <div class="labs-export-header">
+          <div>
+            <div class="labs-export-title">Test Alpaca as a data feed</div>
+            <div class="labs-export-desc">Fetches a real past week of 15-min bars directly from Alpaca's data API
+              (not Twelve Data) using your connected paper account, and reports exactly what hours of the trading
+              day come back — this is how we find out for real whether extended hours are included on the free
+              (IEX) feed, rather than guessing from documentation. Uses a real past date range, so this works
+              correctly even on a day the market happens to be closed.</div>
+          </div>
+          <button class="settings-reset-btn" id="testAlpacaDataFeedBtn">Test Alpaca data feed</button>
+        </div>
+        <div class="labs-backtest-status" id="alpacaDataFeedTestStatus"></div>
+        <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'IBM Plex Mono', monospace; margin-top:8px;"></div>
+      </div>
       </div>
     </div>
   </main>
@@ -2898,7 +2946,7 @@
   // ---------- Trade Overview rows ----------
   function statCta(){
     var active = trades.filter(function(t){ return t.status==='active'; }).length;
-    document.getElementById('ctaStat').textContent = trades.length + ' trades on the board today, ' + active + ' active';
+    document.getElementById('ctaStat').textContent = trades.length + ' stocks you\'re tracking today, ' + active + ' with open positions';
   }
 
   function buildActionHTML(t){
@@ -3013,29 +3061,27 @@
   var alpacaAutoTradeIntradayEnabled = false;
 
   // ---------- Risk-based position sizing ----------
-  var DEFAULT_RISK_PERCENT = 2.0;
-  var riskPercent = DEFAULT_RISK_PERCENT;
-  // A blunt backstop against too many simultaneous positions
-  // compounding risk, not a strategy parameter — 3x the per-trade risk
-  // caps total open exposure at roughly 3 full-sized positions at once,
-  // regardless of how many symbols the screener happens to surface on a
-  // given day.
-  var MAX_TOTAL_RISK_MULTIPLIER = 3;
+  // Fixed by the strategy itself -- not user-adjustable. Manually
+  // changing this would skew the reliability numbers the strategy was
+  // actually calibrated and tested against (see the walk-forward
+  // validation this value came out of). Kept in exact lockstep with
+  // RISK_PERCENT on the server; if one changes, the other must too.
+  var riskPercent = 1.0;
+  // Total open risk across ALL positions is capped at a fixed % of
+  // equity, independent of per-trade risk% -- there's no hard cap on how
+  // many positions can be open at once, just on how much can be at risk
+  // in total. Kept in exact lockstep with src/lib/positionSizing.js on
+  // the server; if one changes, the other must too.
+  var TOTAL_RISK_CEILING_PERCENT = 5.5;
+  // No single symbol can eat more than this share of equity, regardless
+  // of what the risk-based share count works out to -- a tight-stop,
+  // low-volatility stock can otherwise size into a very large dollar
+  // position while risking very little per share.
+  var MAX_POSITION_EQUITY_PERCENT = 20;
 
-  function setRiskPercent(value){
-    riskPercent = Math.max(0.1, Math.min(10, value));
+  function renderRiskPercentLabel(){
     var label = document.getElementById('riskPercentLabel');
     if(label){ label.textContent = riskPercent.toFixed(1) + '%'; }
-    try { window.localStorage.setItem('shwoopnet:riskPercent', String(riskPercent)); } catch(e){}
-  }
-
-  function loadRiskPercentPref(){
-    var saved = DEFAULT_RISK_PERCENT;
-    try {
-      var stored = window.localStorage.getItem('shwoopnet:riskPercent');
-      if(stored !== null){ var parsed = parseFloat(stored); if(!isNaN(parsed)) saved = parsed; }
-    } catch(e){}
-    setRiskPercent(saved);
   }
 
   // Pure function, deliberately simple and easy to test in isolation:
@@ -3081,13 +3127,23 @@
         }
         qty = Math.min(qty, affordableQty);
       }
+      // Max-per-position cap, checked independently of the risk-based
+      // qty — whichever constraint is tighter wins.
+      var maxPositionDollars = equity * (MAX_POSITION_EQUITY_PERCENT / 100);
+      if(qty * t.entry > maxPositionDollars){
+        var capQty = Math.floor(maxPositionDollars / t.entry);
+        if(capQty < 1){
+          return { qty: 0, skipReason: 'Entry price too high relative to the ' + MAX_POSITION_EQUITY_PERCENT + '% max-per-position cap on this account balance.' };
+        }
+        qty = capQty;
+      }
       var openRisk = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; })
         .reduce(function(sum, j){ return sum + (j.qty * Math.abs(j.entry - j.stop)); }, 0);
       var thisRisk = qty * Math.abs(t.entry - t.stop);
-      var riskCeiling = equity * (riskPercent / 100) * MAX_TOTAL_RISK_MULTIPLIER;
+      var riskCeiling = equity * (TOTAL_RISK_CEILING_PERCENT / 100);
       if(openRisk + thisRisk > riskCeiling){
         return { qty: 0, skipReason: 'Skipped — total risk across open positions ($' + openRisk.toFixed(2) +
-          ') plus this trade would exceed the ' + (riskPercent * MAX_TOTAL_RISK_MULTIPLIER).toFixed(1) + '% total-risk ceiling.' };
+          ') plus this trade would exceed the ' + TOTAL_RISK_CEILING_PERCENT.toFixed(1) + '% total-risk ceiling. This isn\'t a position-count limit — as many positions can stay open as the account can carry within this risk ceiling.' };
       }
       return { qty: qty, skipReason: null };
     }).catch(function(err){
@@ -3286,6 +3342,43 @@
       }
     });
   }
+
+  var tradingPauseUnsubscribe = null;
+  function loadTradingPauseStateForUser(uid){
+    if(!window.__shwoopAPI) return;
+    if(tradingPauseUnsubscribe){ tradingPauseUnsubscribe(); }
+    tradingPauseUnsubscribe = window.__shwoopAPI.watchTradingPauseState(uid, function(state){
+      renderTradingPauseState(state);
+    });
+  }
+
+  function renderTradingPauseState(state){
+    var row = document.getElementById('tradingPausedRow');
+    var desc = document.getElementById('tradingPausedDesc');
+    if(!row || !desc) return;
+    if(!state.paused){
+      row.setAttribute('hidden', '');
+      return;
+    }
+    row.removeAttribute('hidden');
+    var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
+    desc.textContent = 'Auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
+      (state.pausedReason || 'unknown') + '. Review the activity log, then resume once resolved.';
+  }
+
+  document.getElementById('resumeTradingBtn').addEventListener('click', function(){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var btn = document.getElementById('resumeTradingBtn');
+    btn.disabled = true;
+    btn.textContent = 'Resuming…';
+    window.__shwoopAPI.resumeTrading(currentUid).catch(function(err){
+      console.error('Failed to resume trading:', err);
+      alert('Could not resume trading — please try again. (' + err.message + ')');
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Resume trading';
+    });
+  });
 
   function resetAlpacaConnection(){
     alpacaCreds = { keyId: '', secretKey: '' };
@@ -4775,9 +4868,11 @@
     var btn = document.getElementById('exportHistoricalDataBtn');
     var resultWrap = document.getElementById('exportResultWrap');
     var textarea = document.getElementById('exportResultTextarea');
+    var downloadLink = document.getElementById('exportDownloadLink');
 
     btn.disabled = true;
     resultWrap.setAttribute('hidden', '');
+    document.getElementById('exportRawWrap').setAttribute('hidden', '');
     statusEl.className = 'labs-backtest-status';
     statusEl.textContent = 'Fetching…';
 
@@ -4792,12 +4887,30 @@
           : '';
         statusEl.textContent = 'Done. ' + Object.keys(out).length + ' of ' + INTRADAY_UNIVERSE.length + ' symbols exported.' + summary;
         statusEl.className = 'labs-backtest-status ok';
-        textarea.value = JSON.stringify({
+        var json = JSON.stringify({
           exportedAt: new Date().toISOString(),
           lookbackBars: lookbackBars,
           barIntervalMinutes: 15,
           symbols: out
         });
+        textarea.value = json;
+        // A genuine file download -- this is the actual fix for the old
+        // copy-paste flow, which relied on the person manually pasting
+        // into a text editor and saving it themselves. That path had a
+        // real failure mode: pasting into a rich-text app (TextEdit,
+        // WordPad) by default saves as .rtf, not plain text, silently
+        // escaping every brace in the JSON -- which then has to be
+        // detected and unpicked byte-by-byte before it's usable. A
+        // browser-triggered download saves the exact bytes below,
+        // correctly, every time, with no manual re-typing step at all.
+        var blob = new Blob([json], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        if(downloadLink.href && downloadLink.href.indexOf('blob:') === 0){
+          URL.revokeObjectURL(downloadLink.href);
+        }
+        var today = new Date().toISOString().slice(0, 10);
+        downloadLink.href = url;
+        downloadLink.setAttribute('download', 'shwoop-export-' + lookbackBars + 'bars-' + today + '.json');
         resultWrap.removeAttribute('hidden');
         return;
       }
@@ -4815,6 +4928,87 @@
 
     processNext(0);
   }
+
+  // Diagnostic only -- not part of the live strategy. Fetches a real past
+  // week of bars straight from Alpaca's own data API (not Twelve Data) to
+  // see, definitively, what hours of the trading day actually come back
+  // on the free IEX feed -- rather than trusting documentation alone,
+  // which can be ambiguous about exact tier boundaries in practice.
+  function testAlpacaDataFeedClicked(){
+    var statusEl = document.getElementById('alpacaDataFeedTestStatus');
+    var resultEl = document.getElementById('alpacaDataFeedTestResult');
+    var btn = document.getElementById('testAlpacaDataFeedBtn');
+
+    if(!alpacaCreds.keyId || !alpacaCreds.secretKey){
+      statusEl.className = 'labs-backtest-status fail';
+      statusEl.textContent = 'Connect Alpaca in Settings first -- this test needs your real paper account credentials.';
+      return;
+    }
+
+    btn.disabled = true;
+    resultEl.textContent = '';
+    statusEl.className = 'labs-backtest-status';
+    statusEl.textContent = 'Fetching a real past week from Alpaca...';
+
+    // A real past date range -- explicit dates, never "today"/"latest", so
+    // this works correctly regardless of whether the market happens to be
+    // open right now. Deliberately spans a full prior week to comfortably
+    // land on real past trading days no matter what day this test is run.
+    var end = new Date();
+    var start = new Date(end.getTime() - 9 * 24 * 60 * 60 * 1000);
+    var startStr = start.toISOString().slice(0, 10);
+    var endStr = end.toISOString().slice(0, 10);
+
+    var url = ALPACA_DATA_BASE + '/v2/stocks/AAPL/bars?timeframe=15Min&start=' + startStr +
+      '&end=' + endStr + '&limit=1000&feed=iex&adjustment=raw';
+
+    fetch(url, { headers: alpacaHeaders() }).then(function(res){
+      if(!res.ok){
+        return res.text().then(function(body){
+          throw new Error('HTTP ' + res.status + ': ' + body.slice(0, 200));
+        });
+      }
+      return res.json();
+    }).then(function(data){
+      var bars = (data.bars && data.bars.AAPL) || data.bars || [];
+      if(!Array.isArray(bars) || bars.length === 0){
+        statusEl.className = 'labs-backtest-status fail';
+        statusEl.textContent = 'No bars came back -- see raw response below.';
+        resultEl.textContent = JSON.stringify(data, null, 2).slice(0, 2000);
+        btn.disabled = false;
+        return;
+      }
+      // Group by real calendar day (UTC date portion of the timestamp) and
+      // report the first/last bar time-of-day per day, in both UTC and
+      // ET, so we can see directly whether pre-market/after-hours bars
+      // are actually present -- true regular session is 13:30-20:00 UTC
+      // (9:30 AM-4:00 PM ET) during EDT.
+      var byDay = {};
+      bars.forEach(function(b){
+        var day = b.t.slice(0, 10);
+        if(!byDay[day]) byDay[day] = [];
+        byDay[day].push(b.t.slice(11, 16));
+      });
+      var days = Object.keys(byDay).sort();
+      var lines = ['Feed: IEX (free tier) | Symbol: AAPL | Timeframe: 15Min', ''];
+      days.forEach(function(day){
+        var times = byDay[day];
+        lines.push(day + ':  first bar ' + times[0] + ' UTC  ->  last bar ' + times[times.length-1] + ' UTC   (' + times.length + ' bars)');
+      });
+      lines.push('');
+      lines.push('True regular session (EDT) is 13:30-20:00 UTC (9:30 AM-4:00 PM ET).');
+      lines.push('Anything outside that range above = extended hours actually came back on the free feed.');
+      resultEl.textContent = lines.join('\n');
+      statusEl.className = 'labs-backtest-status ok';
+      statusEl.textContent = 'Done -- ' + days.length + ' day(s) returned. See the breakdown below.';
+      btn.disabled = false;
+    }).catch(function(err){
+      statusEl.className = 'labs-backtest-status fail';
+      statusEl.textContent = 'Request failed: ' + err.message;
+      btn.disabled = false;
+    });
+  }
+
 
   function fetchHistory(sym, tf, priority){
     var cacheKey = sym + '_' + tf;
@@ -5711,6 +5905,14 @@
     document.getElementById('briefDate').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
   }
   setInterval(updateClock, 1000);
+  // The Market Brief greeting ("Good morning/afternoon/evening") only
+  // used to get recomputed as a side effect of quote batches finishing
+  // or the screener re-running -- both of which can go quiet for long
+  // stretches (market closed, tab backgrounded, etc.), leaving a stale
+  // greeting sitting on screen well past when it should have changed.
+  // A dedicated, independent timer means it's never more than a minute
+  // out of date regardless of what else is or isn't happening on the page.
+  setInterval(renderBriefHeadline, 60000);
 
   // ---------- Color theme ----------
   function applyTheme(name){
@@ -7170,6 +7372,7 @@
         loadMarketNewsIfSignedIn();
         loadEarningsIfSignedIn();
         loadAlpacaCredentialsForUser(user.uid);
+        loadTradingPauseStateForUser(user.uid);
         INDEX_PROXIES.forEach(function(ix){
           var fb = FALLBACK_INDEX_VALUES[ix.sym];
           ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
@@ -7452,9 +7655,7 @@
   renderHistoryList();
   populateIntradayBacktestSymbolSelect();
   loadAlpacaAutoTradePref();
-  document.getElementById('riskPercentDec').addEventListener('click', function(){ setRiskPercent(riskPercent - 0.5); });
-  document.getElementById('riskPercentInc').addEventListener('click', function(){ setRiskPercent(riskPercent + 0.5); });
-  loadRiskPercentPref();
+  renderRiskPercentLabel();
   loadAlpacaAutoTradeIntradayPref();
   document.getElementById('intradayToggle').addEventListener('click', function(){
     setIntradayEnabled(!alpacaIntradayEnabled);
@@ -7463,6 +7664,7 @@
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
   document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
+  document.getElementById('testAlpacaDataFeedBtn').addEventListener('click', testAlpacaDataFeedClicked);
   document.getElementById('exportCopyBtn').addEventListener('click', function(){
     var textarea = document.getElementById('exportResultTextarea');
     var confirmEl = document.getElementById('exportCopyConfirm');
@@ -7481,6 +7683,13 @@
     } else {
       try{ document.execCommand('copy'); done(); }catch(e){}
     }
+  });
+  document.getElementById('exportShowRawBtn').addEventListener('click', function(){
+    var rawWrap = document.getElementById('exportRawWrap');
+    var btn = document.getElementById('exportShowRawBtn');
+    var open = !rawWrap.hasAttribute('hidden');
+    if(open){ rawWrap.setAttribute('hidden', ''); btn.textContent = 'Show raw text instead'; }
+    else{ rawWrap.removeAttribute('hidden'); btn.textContent = 'Hide raw text'; }
   });
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
