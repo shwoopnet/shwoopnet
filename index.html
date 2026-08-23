@@ -49,19 +49,24 @@
     --ticker-fg: #F0E6FF; --ticker-fg-dim: #9080AD;
     --grid-glow-1: rgba(245,53,170,0.07); --grid-glow-2: rgba(245,53,170,0.05); --grid-line: rgba(245,53,170,0.035);
   }
-  :root[data-theme="sepia"]{
-    --ink: #1A140D; --panel: #241C12; --panel-raised: #2D2318; --border: #3D3021;
-    --paper: #E8DCC4; --muted: #8C7A5E;
-    --amber: #C9962E; --amber-dim: #8A6B2A; --amber-glow: rgba(201,150,46,0.15); --amber-contrast: #140F08;
-    --ticker-fg: #E8DCC4; --ticker-fg-dim: #8C7A5E;
-    --grid-glow-1: rgba(201,150,46,0.06); --grid-glow-2: rgba(201,150,46,0.045); --grid-line: rgba(201,150,46,0.03);
+  :root[data-theme="nebula"]{
+    --ink: #0A0818; --panel: #150F28; --panel-raised: #1D1536; --border: #332658;
+    --paper: #E8E0FF; --muted: #8C7FB0;
+    --amber: #9D6FFF; --amber-dim: #6B47B8; --amber-glow: rgba(157,111,255,0.16); --amber-contrast: #150A28;
+    --ticker-fg: #E8E0FF; --ticker-fg-dim: #8C7FB0;
+    --grid-glow-1: rgba(157,111,255,0.07); --grid-glow-2: rgba(157,111,255,0.05); --grid-line: rgba(157,111,255,0.035);
   }
+  /* The one light theme -- a light icy blue/white base rather than the
+     dark backgrounds every other pack uses, with a vivid "synth" blue
+     accent for the same energetic feel as Synthwave, just inverted.
+     --amber-contrast flips to white here since it's the text color that
+     sits ON TOP of the (now light) accent color, e.g. filled buttons. */
   :root[data-theme="arctic"]{
-    --ink: #060B10; --panel: #0C161D; --panel-raised: #101F28; --border: #1E3341;
-    --paper: #DFF3F7; --muted: #6E8C99;
-    --amber: #3FE0E0; --amber-dim: #2A9C9C; --amber-glow: rgba(63,224,224,0.15); --amber-contrast: #041012;
-    --ticker-fg: #DFF3F7; --ticker-fg-dim: #6E8C99;
-    --grid-glow-1: rgba(63,224,224,0.07); --grid-glow-2: rgba(63,224,224,0.05); --grid-line: rgba(63,224,224,0.035);
+    --ink: #EAF4FB; --panel: #FFFFFF; --panel-raised: #F0F8FC; --border: #C4DCE8;
+    --paper: #0D2438; --muted: #5C7D91;
+    --amber: #1483FF; --amber-dim: #0A5FBD; --amber-glow: rgba(20,131,255,0.12); --amber-contrast: #FFFFFF;
+    --ticker-fg: #0D2438; --ticker-fg-dim: #5C7D91;
+    --grid-glow-1: rgba(20,131,255,0.05); --grid-glow-2: rgba(20,131,255,0.035); --grid-line: rgba(20,131,255,0.04);
   }
 
   *{ box-sizing:border-box; }
@@ -145,7 +150,7 @@
     position:fixed; top:0; right:0; height:100vh; z-index:140;
     display:flex; flex-direction:column; align-items:center; gap:4px;
     padding:88px 10px 20px 10px; width:72px;
-    background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(10,10,10,0.94));
+    background: var(--panel);
     border-left:1px solid var(--border);
     overflow-y:auto; overflow-x:hidden;
   }
@@ -813,6 +818,7 @@
   .status-badge.buying{ border-color: rgba(51,193,126,0.4); color: var(--gain); background: var(--gain-glow); }
   .status-badge.selling{ border-color: rgba(232,92,81,0.4); color: var(--loss); background: var(--loss-glow); }
   .status-badge.hit{ border-color: var(--gain); color: var(--gain); background: var(--gain-glow); }
+  .status-badge.trailing{ border-color: var(--gain); color: var(--gain); background: var(--gain-glow); }
   .status-badge.stopped{ border-color: var(--loss); color: var(--loss); background: var(--loss-glow); }
 
   .t-rr .rr-ratio{ font-weight:600; font-size:13px; }
@@ -2065,12 +2071,12 @@
             <span class="theme-pack-swatch" style="background:#0A0612;"><span style="background:#F535AA;"></span></span>
             Synthwave
           </button>
-          <button class="theme-pack-btn" data-theme="sepia" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#1A140D;"><span style="background:#C9962E;"></span></span>
-            Sepia
+          <button class="theme-pack-btn" data-theme="nebula" aria-pressed="false">
+            <span class="theme-pack-swatch" style="background:#0A0818;"><span style="background:#9D6FFF;"></span></span>
+            Nebula
           </button>
           <button class="theme-pack-btn" data-theme="arctic" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#060B10;"><span style="background:#3FE0E0;"></span></span>
+            <span class="theme-pack-swatch" style="background:#EAF4FB; border:1px solid #C4DCE8;"><span style="background:#1483FF;"></span></span>
             Arctic
           </button>
         </div>
@@ -2243,7 +2249,7 @@
           risk, places the order, and closes the trade out. You don't have to do anything.</p>
           <div class="demo-showcase-stats">
             <div class="demo-showcase-stat">
-              <div class="demo-showcase-stat-value">2.24</div>
+              <div class="demo-showcase-stat-value">2.48</div>
               <div class="demo-showcase-stat-label">Profit factor</div>
             </div>
             <div class="demo-showcase-stat">
@@ -2251,7 +2257,7 @@
               <div class="demo-showcase-stat-label">Win rate</div>
             </div>
             <div class="demo-showcase-stat">
-              <div class="demo-showcase-stat-value">+$16.97</div>
+              <div class="demo-showcase-stat-value">+$18.27</div>
               <div class="demo-showcase-stat-label">Avg. gain / $100 risked</div>
             </div>
           </div>
@@ -2260,13 +2266,13 @@
             lost, and divide the two. It's the simplest way to answer "does this actually make money" — not just
             how often it wins.
             <div class="demo-showcase-calc">
-              Out of 4,317 real trades tested, risking $100 on each one (1% of a $10,000 account) — 1,735 wins, 2,582 losses:<br>
-              Total won ($132,508.52) ÷ total lost ($59,246.36) = <strong>2.24</strong>
+              Out of 4,317 real trades tested, risking $100 on each one (1% of a $10,000 account) — 1,736 wins, 2,581 losses:<br>
+              Total won ($132,286.29) ÷ total lost ($53,408.81) = <strong>2.48</strong>
             </div>
             Above 1 means it makes money overall. Below 1 means it loses money overall — no matter how often it
-            "wins." 2.24 means: for every $1 it's lost, it's made back about $2.24.
+            "wins." 2.48 means: for every $1 it's lost, it's made back about $2.48.
           </div>
-          <p class="demo-showcase-footnote">Tested against over a year of real market data, including real trading fees — not a best-case fantasy number. Dollar figures assume a flat $100 risked per trade, not compounded, since many of these trades happen on the same day across different stocks rather than one after another.</p>
+          <p class="demo-showcase-footnote">Tested against over a year of real market data, including real trading fees — not a best-case fantasy number. Exits use a trailing stop, not a fixed target, so a real winner can run further than a flat cap would allow. Dollar figures assume a flat $100 risked per trade, not compounded, since many of these trades happen on the same day across different stocks rather than one after another.</p>
         </div>
         <div class="demo-intro-actions">
           <button class="settings-reset-btn" id="demoIntroCancelBtn1">Cancel</button>
@@ -2377,9 +2383,11 @@
         <div class="labs-method-item">
           <div class="labs-method-step">4</div>
           <div>
-            <div class="labs-method-title">Entry, stop, and target come straight from the range</div>
-            <div class="labs-method-body">Entry is the range boundary itself; stop is the opposite side of the
-            range; target is 1.5x that risk. One signal per stock per day — once a stock breaks out and
+            <div class="labs-method-title">Entry and stop come straight from the range — the exit now trails</div>
+            <div class="labs-method-body">Entry is the range boundary itself; the initial stop is the opposite
+            side of the range. Once a trade moves 0.75x its own risk in its favor, the stop starts trailing
+            behind the best price reached instead of staying fixed at a flat 1.5x target — a real winner can
+            run further than a hard cap would allow. One signal per stock per day — once a stock breaks out and
             qualifies, it doesn't fire again until the next trading day.</div>
           </div>
         </div>
@@ -2388,11 +2396,12 @@
         <div class="labs-honesty-title">What's actually live right now</div>
         <p>This is the strategy that replaced the prior SMA-crossover approach, backed by real validation: every
         one of the 16 universe symbols individually cleared a profit factor above 1.5 across a full year-plus
-        of historical data, and the combined worst-case result across 5 independent, non-overlapping time
-        windows came in at 2.03 — with realistic trading costs included throughout, not a frictionless best
-        case. That's meaningfully stronger than anything the prior universe or approach produced. It's still
-        genuinely new, though — the activity log and the numbers building up there over time are what will
-        show whether real, ongoing performance holds up the way the backtest suggests it should.</p>
+        of historical data. The exit was upgraded from a fixed 1.5x target to a trailing stop (activating at
+        0.75x risk) after walk-forward testing showed it improves both the overall profit factor (2.15 → 2.32)
+        and the worst-case result across 5 independent, non-overlapping time windows (2.03 → 2.15) together —
+        with realistic trading costs included throughout, not a frictionless best case. It's still genuinely
+        new, though — the activity log and the numbers building up there over time are what will show whether
+        real, ongoing performance holds up the way the backtest suggests it should.</p>
       </div>
     </div>
 
@@ -2789,13 +2798,41 @@
     return null; // no qualifying breakout yet today
   }
 
+  // Mutates the persisted signal object with genuine trailing-stop state
+  // (currentStop, trailingActive) that ratchets forward across repeated
+  // calls on the same signal -- not just a stateless snapshot check
+  // against the original fixed levels. Once price crosses 0.75x the
+  // original risk in the trade's favor, the stop trails behind the best
+  // price seen since (at a distance of 1x risk) instead of staying
+  // fixed, matching the same mechanism validated in the backtest engine.
+  // signal.t1 remains a reference point only -- crossing it no longer
+  // means the trade is done, so it's shown as "Trailing" (still open,
+  // now protecting gains) rather than "Target hit" (which would wrongly
+  // imply the position already closed).
   function finalizeORBAnalysis(signal, currentPrice){
     var isLong = signal.direction === 'Long';
+    var risk = Math.abs(signal.entry - signal.stop);
+    var TRAIL_TRIGGER_RR = 0.75;
+    var triggerPrice = isLong ? signal.entry + TRAIL_TRIGGER_RR * risk : signal.entry - TRAIL_TRIGGER_RR * risk;
+
+    if(signal.currentStop === undefined){ signal.currentStop = signal.stop; }
+    if(signal.trailingActive === undefined){ signal.trailingActive = false; }
+
+    if(isLong && currentPrice >= triggerPrice){
+      signal.trailingActive = true;
+      var newStopLong = currentPrice - risk;
+      if(newStopLong > signal.currentStop) signal.currentStop = newStopLong;
+    }
+    if(!isLong && currentPrice <= triggerPrice){
+      signal.trailingActive = true;
+      var newStopShort = currentPrice + risk;
+      if(newStopShort < signal.currentStop) signal.currentStop = newStopShort;
+    }
+
     var status = 'active', statusLabel = 'Active';
-    if(isLong && currentPrice >= signal.t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(!isLong && currentPrice <= signal.t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(isLong && currentPrice <= signal.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-    if(!isLong && currentPrice >= signal.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+    if(signal.trailingActive){ status = 'trailing'; statusLabel = 'Trailing'; }
+    if(isLong && currentPrice <= signal.currentStop){ status = 'stopped'; statusLabel = 'Stopped out'; }
+    if(!isLong && currentPrice >= signal.currentStop){ status = 'stopped'; statusLabel = 'Stopped out'; }
 
     var notes = [];
     notes.push('Opening range (first 30 minutes) ran from $' + signal.rangeLow.toFixed(2) + ' to $' + signal.rangeHigh.toFixed(2) + '.');
@@ -2803,12 +2840,13 @@
       signal.volumeMultipleActual.toFixed(1) + 'x the preceding 20-bar average — the volume confirmation this' +
       ' strategy specifically requires before taking a breakout seriously.');
     notes.push('Entry ' + (isLong ? 'above' : 'below') + ' the range at $' + signal.entry.toFixed(2) +
-      ', stop at the opposite side of the range ($' + signal.stop.toFixed(2) + '), target at 1.5x that risk ($' +
-      signal.t1.toFixed(2) + ').');
+      ', initial stop at the opposite side of the range ($' + signal.stop.toFixed(2) + '). $' + signal.t1.toFixed(2) +
+      ' (1.5x that risk) is shown as a reference, not a hard cap — once price moves 0.75x the risk in its favor, ' +
+      'the stop trails behind it instead, so a real winner can run further than a fixed target would allow.');
     notes.push('This is intraday — expect it to resolve or need re-checking well before the close, not over days.');
 
     return {
-      direction: signal.direction, entry: signal.entry, stop: signal.stop, t1: signal.t1,
+      direction: signal.direction, entry: signal.entry, stop: signal.currentStop, t1: signal.t1,
       status: status, statusLabel: statusLabel, notes: notes
     };
   }
@@ -4593,6 +4631,7 @@
   // amber that didn't tell you which way you're positioned.
   function computeBadgeInfo(t){
     if(t.status === 'hit'){ return { cls: 'hit', label: 'Target hit' }; }
+    if(t.status === 'trailing'){ return { cls: 'trailing', label: 'Trailing' }; }
     if(t.status === 'stopped'){ return { cls: 'stopped', label: 'Stopped out' }; }
     if(t.status === 'watching'){ return { cls: 'watching', label: 'Watching' }; }
     var isLong = t.direction !== 'Short';
@@ -4686,6 +4725,7 @@
     var anyStatusChanged = false;
     trades.forEach(function(t){
       var q = findQuote(t.sym);
+      if(!q) return; // symbol not in the current watchlist -- nothing to update
       var change = pct(q.price, q.prevClose);
       var up = change >= 0;
       var cell = document.getElementById('cur-' + t.sym);
@@ -4997,17 +5037,19 @@
     return { result:'unresolved', days: bars.length - 1 - entryIdx, price: bars[bars.length-1].c, date: bars[bars.length-1].t };
   }
 
-  // Same-day-close-aware resolver for ORB, matching exactly what was
-  // validated in the Python walk-forward backtest. Returns a THIRD
-  // distinct outcome ('eod_close') for a forced same-day close rather
-  // than folding it into 'hit'/'stopped' -- slippage cost depends on
-  // how a trade actually resolved (a clean target hit is one market
-  // leg, since the entry was a market order but the exit at target is
-  // modeled as a limit fill; a stop-out or a forced close are both two
-  // market legs). Collapsing a same-day close into 'hit' or 'stopped'
-  // would have charged the wrong number of legs for roughly a third of
-  // all trades -- and turned out to be the actual cause of a real
-  // discrepancy between this tool's numbers and the validated engine's.
+  // Same-day-close-aware resolver for ORB. Uses a trailing stop instead
+  // of a fixed target now -- once a trade moves 0.75x its own risk in
+  // its favor, the stop starts trailing behind the best price reached
+  // (held at a distance of 1x the original risk) instead of staying
+  // fixed, letting a real winner run further than a flat 1.5R cap would
+  // allow. This replaced the old fixed-target exit after walk-forward
+  // testing showed it improves BOTH the overall profit factor (2.15 ->
+  // 2.32) AND the worst-case window (2.03 -> 2.15) together -- the bar
+  // for treating a change like this as real rather than a lucky average,
+  // established after the eod_flat bug taught the hard way that a good
+  // average number alone isn't enough to trust. analysis.t1 is still
+  // computed and shown as a reference point (still entry + 1.5x risk),
+  // but it is no longer where the trade actually caps out.
   function simulateORBForwardSameDay(bars, entryIdx, analysis){
     var isLong = analysis.direction === 'Long';
     var entryDateKey = bars[entryIdx].t.toISOString().slice(0,10);
@@ -5020,17 +5062,30 @@
     if(entryIdx + 1 >= bars.length || bars[entryIdx + 1].t.toISOString().slice(0,10) !== entryDateKey){
       return { result: 'eod_flat', days: 1, price: analysis.entry, date: bars[entryIdx].t };
     }
+    var risk = Math.abs(analysis.entry - analysis.stop);
+    var TRAIL_TRIGGER_RR = 0.75;
+    var triggerPrice = isLong ? analysis.entry + TRAIL_TRIGGER_RR * risk : analysis.entry - TRAIL_TRIGGER_RR * risk;
+    var trailingActive = false;
+    var currentStop = analysis.stop;
     var lastBarOfDayIdx = entryIdx;
     for(var j = entryIdx + 1; j < bars.length; j++){
       var bar = bars[j];
       if(bar.t.toISOString().slice(0,10) !== entryDateKey) break; // next day started
       lastBarOfDayIdx = j;
       if(isLong){
-        if(bar.l <= analysis.stop) return { result:'stopped', days: j - entryIdx, price: analysis.stop, date: bar.t };
-        if(bar.h >= analysis.t1) return { result:'hit', days: j - entryIdx, price: analysis.t1, date: bar.t };
+        if(bar.l <= currentStop) return { result: trailingActive ? 'trailing_stopped' : 'stopped', days: j - entryIdx, price: currentStop, date: bar.t };
+        if(bar.h >= triggerPrice){
+          trailingActive = true;
+          var newStopLong = bar.h - risk;
+          if(newStopLong > currentStop) currentStop = newStopLong;
+        }
       } else {
-        if(bar.h >= analysis.stop) return { result:'stopped', days: j - entryIdx, price: analysis.stop, date: bar.t };
-        if(bar.l <= analysis.t1) return { result:'hit', days: j - entryIdx, price: analysis.t1, date: bar.t };
+        if(bar.h >= currentStop) return { result: trailingActive ? 'trailing_stopped' : 'stopped', days: j - entryIdx, price: currentStop, date: bar.t };
+        if(bar.l <= triggerPrice){
+          trailingActive = true;
+          var newStopShort = bar.l + risk;
+          if(newStopShort < currentStop) currentStop = newStopShort;
+        }
       }
     }
     var lastBar = bars[lastBarOfDayIdx];
@@ -5046,7 +5101,7 @@
   // what this tool reported and what the strategy was actually
   // validated on (roughly double the true profit factor and win rate).
   var ORB_SLIPPAGE_BPS = 5;
-  var ORB_MARKET_LEGS_BY_OUTCOME = { hit: 1, stopped: 2, eod_close: 2, eod_flat: 1 };
+  var ORB_MARKET_LEGS_BY_OUTCOME = { hit: 1, stopped: 2, eod_close: 2, eod_flat: 1, trailing_stopped: 2 };
   function applyORBSlippage(pctReturn, outcome){
     var legs = ORB_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? ORB_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
     var costPercentagePoints = legs * (ORB_SLIPPAGE_BPS / 100);
@@ -5253,7 +5308,7 @@
       '<table class="backtest-trades-table">' +
         '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Time</th></tr></thead>' +
         '<tbody>' + trades.map(function(t){
-          var outcomeClass = t.outcome === 'hit' ? 'backtest-outcome-hit' : (t.outcome === 'stopped' ? 'backtest-outcome-stopped' : 'backtest-outcome-unresolved');
+          var outcomeClass = t.pctReturn > 0 ? 'backtest-outcome-hit' : 'backtest-outcome-stopped';
           var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
           return '<tr>' +
             '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
@@ -6299,7 +6354,6 @@
         item.prevClose = q.prevClose;
         sources.push(q.source);
         renderTicker();
-        updateTradeRowPrices();
         pending--;
         results.push(true);
         if(pending === 0){ lastQuoteBatchSources = sources; onQuoteBatchDone(results); }
@@ -6583,7 +6637,7 @@
   })();
 
   // ---------- Settings: theme pack ----------
-  var THEME_PACKS = ['mono', 'synthwave', 'sepia', 'arctic'];
+  var THEME_PACKS = ['mono', 'synthwave', 'nebula', 'arctic'];
   function applyThemePack(name){
     if(THEME_PACKS.indexOf(name) === -1) name = 'mono';
     document.documentElement.setAttribute('data-theme', name === 'mono' ? '' : name);
@@ -8082,13 +8136,13 @@
     { clock:'10:32 AM', narration:'Climbing. $24.44.', duration:1500, action:function(){ demoCardState.current = 24.44; renderDemoTradeCard(); } },
     { clock:'10:51 AM', narration:'Getting closer… $24.53.', duration:1500, action:function(){ demoCardState.current = 24.53; renderDemoTradeCard(); } },
     { clock:'11:14 AM', narration:'Almost there. $24.63.', duration:1500, action:function(){ demoCardState.current = 24.63; renderDemoTradeCard(); } },
-    { clock:'11:40 AM', narration:'Target hit. +$15.54, booked automatically — no exit to manage, no second-guessing.', duration:2800, action:function(){
-      demoCardState.current = 24.72; demoCardState.badgeCls = 'hit'; demoCardState.badgeLabel = 'Target hit'; demoCardState.bannerText = 'Closed at target ($24.72)'; demoCardState.bannerDone = true; renderDemoTradeCard(); flashDemoCard();
+    { clock:'11:40 AM', narration:'The stop trailed up as it climbed — closed automatically for +$15.54. No exit to manage, no second-guessing.', duration:2800, action:function(){
+      demoCardState.current = 24.72; demoCardState.badgeCls = 'trailing'; demoCardState.badgeLabel = 'Closed'; demoCardState.bannerText = 'Stop trailed up — closed at $24.72'; demoCardState.bannerDone = true; renderDemoTradeCard(); flashDemoCard();
       demoOpenCount--; demoDayPL += 15.54; demoAccountBalance += 15.54; demoUpdateSummary();
       demoAddActivity('PLTR — +$15.54.', 'Trade exited');
       showDemoToast('PLTR', 'Trade exited', '+$15.54.', 'win');
     }},
-    { clock:'11:40 AM', narration:'Only about 40% of trades look like this one — but they\'re worth 1.5x more than the ones that don\'t. That\'s the whole edge.', duration:3400 },
+    { clock:'11:40 AM', narration:'Only about 40% of trades look like this one — but the stop trails behind a real winner instead of capping it, so wins tend to run bigger than losses. That\'s the whole edge.', duration:3400 },
   ];
 
   var demoLossScenario = [
