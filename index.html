@@ -9,43 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink: #0A0D10;
-    --panel: #12171D;
-    --panel-raised: #171D24;
-    --border: #232B33;
-    --paper: #EDEAE2;
-    --muted: #7C8791;
-    --amber: #F2A93C;
-    --amber-dim: #A97A2E;
-    --amber-glow: rgba(242,169,60,0.16);
-    --amber-contrast: #151008;
-    --ticker-fg: #EDEAE2;
-    --ticker-fg-dim: #7C8791;
-    --gain: #33C17E;
-    --gain-glow: rgba(51,193,126,0.16);
-    --loss: #E85C51;
-    --loss-glow: rgba(232,92,81,0.16);
-    --ma20-color: #E9A23B;
-    --ma50-color: #6FA8DC;
-    --radius: 6px;
-  }
-
-  /* Alternate color templates for the overall site chrome.
-     Candle/chart colors (--gain / --loss) are intentionally left
-     out of these overrides so charts stay consistent across themes. */
-  :root[data-theme="cobalt"]{
-    --ink: #0A0D14;
-    --panel: #101623;
-    --panel-raised: #141B2B;
-    --border: #232C3F;
-    --paper: #E8EBF3;
-    --muted: #78839A;
-    --amber: #4C9AF2;
-    --amber-dim: #3670AD;
-    --amber-glow: rgba(76,154,242,0.16);
-    --amber-contrast: #071522;
-  }
-  :root[data-theme="mono"]{
     --ink: #000000;
     --panel: #0D0D0D;
     --panel-raised: #161616;
@@ -56,25 +19,28 @@
     --amber-dim: #B5B5B5;
     --amber-glow: rgba(255,255,255,0.12);
     --amber-contrast: #0A0A0A;
-  }
-  :root[data-theme="light"]{
-    --ink: #FFFFFF;
-    --panel: #F5F4F1;
-    --panel-raised: #ECEAE4;
-    --border: #DEDBD3;
-    --paper: #14140F;
-    --muted: #6B6B66;
-    --amber: #171712;
-    --amber-dim: #46453F;
-    --amber-glow: rgba(20,20,15,0.08);
-    --amber-contrast: #FFFFFF;
+    --ticker-fg: #FFFFFF;
+    --ticker-fg-dim: #8A8A8A;
+    --gain: #33C17E;
+    --gain-glow: rgba(51,193,126,0.16);
+    --loss: #E85C51;
+    --loss-glow: rgba(232,92,81,0.16);
+    --ma20-color: #E9A23B;
+    --ma50-color: #6FA8DC;
+    --radius: 6px;
   }
 
   *{ box-sizing:border-box; }
 
   html,body{
     margin:0; padding:0;
-    background: var(--ink);
+    background-color: var(--ink);
+    background-image:
+      radial-gradient(ellipse 1000px 700px at 8% 4%, rgba(255,255,255,0.06), transparent 60%),
+      radial-gradient(ellipse 900px 650px at 92% 98%, rgba(255,255,255,0.045), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 64px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 64px);
+    background-attachment: fixed;
     color: var(--paper);
     font-family: 'IBM Plex Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -212,13 +178,12 @@
   }
   .brand:hover .brand-name{ color: var(--amber); }
   .brand-text{ position:relative; }
-  /* Centered over the SHWOOP text horizontally, resting near the
-     Personal market terminal line beneath it -- the jump lifts it up
-     toward SHWOOP, and gravity brings it back down to "land" on the
-     subtitle each cycle. */
+  .brand-name-row{ display:flex; align-items:center; gap:8px; }
+  /* Sits in normal flex flow now, beside SHWOOP specifically -- centered
+     vertically against just that line (not the full two-line block),
+     off to the right rather than floating above the text. */
   .brand-mark-scroller{
-    position:absolute; left:50%; bottom:-2px; transform:translateX(-50%);
-    pointer-events:none;
+    position:relative; display:inline-flex; flex-shrink:0;
   }
   .brand-mark-wrap{ position:relative; display:inline-flex; flex-shrink:0; }
   .brand-mark{
@@ -238,12 +203,13 @@
     60%{ transform: translateY(0) rotate(0deg) scale(1.14,0.85); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
     68%, 100%{ transform: translateY(0) rotate(0deg) scale(1,1); }
   }
-  /* A simple ground line that flashes in right as the icon lands,
-     synced to the same 2.2s cycle -- a quick, understated "impact"
-     mark rather than anything elaborate. */
+  /* A simple ground line that flashes in right beneath the icon itself
+     as it lands, synced to the same 2.2s cycle -- anchored to the
+     icon's own small container now, not the wider text block, since
+     the icon no longer sits above the subtitle line. */
   .brand-ground{
-    position:absolute; left:50%; bottom:-5px; transform:translateX(-50%) scaleX(.3);
-    width:30px; height:1.5px; background: var(--amber); opacity:0; border-radius:1px;
+    position:absolute; left:50%; bottom:-6px; transform:translateX(-50%) scaleX(.3);
+    width:26px; height:1.5px; background: var(--amber); opacity:0; border-radius:1px;
     animation: brandGroundFlash 2.2s infinite;
   }
   @keyframes brandGroundFlash{
@@ -300,18 +266,6 @@
   .trade-bubble-badge{
     position:absolute; top:-6px; right:-9px; min-width:13px; height:13px; font-size:8px; padding:0 2px;
   }
-
-  .theme-switcher{ display:flex; align-items:center; gap:10px; }
-  .theme-swatch{
-    width:18px; height:18px; border-radius:50%; padding:0; cursor:pointer;
-    border:1px solid var(--border); box-shadow: 0 0 0 2px transparent;
-    transition: box-shadow .15s ease;
-  }
-  .theme-swatch[data-theme="amber"]{ background:#F2A93C; }
-  .theme-swatch[data-theme="cobalt"]{ background:#4C9AF2; }
-  .theme-swatch[data-theme="mono"]{ background:#000000; }
-  .theme-swatch[data-theme="light"]{ background:#FFFFFF; }
-  .theme-swatch[aria-pressed="true"]{ box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--paper); }
 
   .settings-page{ display:flex; flex-direction:column; gap:0; margin-top:24px; }
   .settings-row{
@@ -387,6 +341,24 @@
   }
   .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
+
+  .demo-controls{ display:flex; gap:10px; }
+  .demo-clock-row{
+    display:flex; align-items:center; gap:16px; margin-bottom:20px;
+    padding:14px 18px; background: var(--panel); border:1px solid var(--border); border-radius:8px;
+  }
+  .demo-clock{ font-size:20px; font-weight:700; color: var(--amber); flex-shrink:0; min-width:76px; }
+  .demo-narration{ font-size:13px; color: var(--paper); line-height:1.5; transition: opacity .2s ease; }
+  .demo-trade-card-enter{ animation: demoCardIn .4s cubic-bezier(.2,.8,.3,1); }
+  @keyframes demoCardIn{
+    0%{ opacity:0; transform: translateY(8px) scale(.98); }
+    100%{ opacity:1; transform: translateY(0) scale(1); }
+  }
+  .demo-activity-enter{ animation: demoActivityIn .35s ease; }
+  @keyframes demoActivityIn{
+    0%{ opacity:0; transform: translateX(-6px); }
+    100%{ opacity:1; transform: translateX(0); }
+  }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
   .labs-control-field{ display:flex; flex-direction:column; gap:6px; }
@@ -1406,21 +1378,23 @@
   <div class="topbar">
     <button class="brand" id="brandHomeBtn" aria-label="Go to home page">
       <div class="brand-text">
-        <div class="brand-name">SHWOOP</div>
-        <div class="brand-sub">Personal market terminal</div>
-        <span class="brand-mark-scroller">
-          <span class="brand-mark-wrap">
-            <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
-              <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
-              <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
-              <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-              <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
-              <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
-            </svg>
-            <span class="brand-impact-ring"></span>
+        <div class="brand-name-row">
+          <div class="brand-name">SHWOOP</div>
+          <span class="brand-mark-scroller">
+            <span class="brand-mark-wrap">
+              <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
+                <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+                <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+                <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+                <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
+                <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Space Grotesk', sans-serif">S</text>
+              </svg>
+              <span class="brand-impact-ring"></span>
+            </span>
+            <span class="brand-ground"></span>
           </span>
-        </span>
-        <span class="brand-ground"></span>
+        </div>
+        <div class="brand-sub">Personal market terminal</div>
       </div>
     </button>
 
@@ -1450,6 +1424,9 @@
     </button>
     <button class="side-nav-item nav-item" data-page="changelog" title="Changelog">
       <span class="side-nav-icon">≡</span><span class="side-nav-label">Log</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="demo" title="Demo">
+      <span class="side-nav-icon">▶</span><span class="side-nav-label">Demo</span>
     </button>
     <div class="side-nav-divider"></div>
     <button class="side-nav-item nav-item" id="notepadToggle" data-action="notepad" title="Notepad">
@@ -1872,19 +1849,6 @@
 
       <div class="settings-row">
         <div>
-          <div class="settings-row-title">Color theme</div>
-          <div class="settings-row-desc">Applies across the whole site. Candle colors stay fixed.</div>
-        </div>
-        <div class="theme-switcher" role="group" aria-label="Color theme">
-          <button class="theme-swatch" data-theme="amber" aria-label="Amber theme" aria-pressed="false"></button>
-          <button class="theme-swatch" data-theme="cobalt" aria-label="Cobalt theme" aria-pressed="false"></button>
-          <button class="theme-swatch" data-theme="mono" aria-label="Mono dark theme" aria-pressed="true"></button>
-          <button class="theme-swatch" data-theme="light" aria-label="Light theme" aria-pressed="false"></button>
-        </div>
-      </div>
-
-      <div class="settings-row">
-        <div>
           <div class="settings-row-title">Default landing page</div>
           <div class="settings-row-desc">What opens when you return later today.</div>
         </div>
@@ -1904,6 +1868,16 @@
           <button class="tf-btn" data-value="24">24-hour</button>
           <button class="tf-btn" data-value="12">12-hour</button>
         </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Sound alerts</div>
+          <div class="settings-row-desc">A short tone plays alongside trade pop-ups — sent, closed in profit, or closed at a loss each sound different. Applies in the live app and the Demo page.</div>
+        </div>
+        <button class="settings-toggle-switch" id="soundAlertsToggle" role="switch" aria-checked="true" aria-label="Toggle sound alerts">
+          <span class="toggle-knob"></span>
+        </button>
       </div>
 
       <div class="settings-row">
@@ -1929,12 +1903,12 @@
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Reset preferences</div>
-          <div class="settings-row-desc">Clears theme, layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
+          <div class="settings-row-desc">Clears layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
         </div>
         <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
       </div>
 
-      <div class="settings-note">Your Trade Journal syncs to your account and follows you across devices. Everything else on this page — theme, layout, notepad, and alert settings — stays local to this browser only.</div>
+      <div class="settings-note">Your Trade Journal syncs to your account and follows you across devices. Everything else on this page — layout, notepad, and alert settings — stays local to this browser only.</div>
     </div>
   </main>
 
@@ -2021,6 +1995,47 @@
           <li>Simulated pricing and candlestick charts</li>
         </ul>
       </div>
+    </div>
+  </main>
+
+  <main class="page" id="page-demo" hidden>
+    <div class="trades-header">
+      <div>
+        <div class="trades-title">Demo</div>
+        <div class="trades-sub">A simulated trading day, start to finish — every number on this page is fake.</div>
+      </div>
+      <div class="demo-controls">
+        <button class="settings-reset-btn" id="demoPlayPauseBtn">Pause</button>
+        <button class="settings-reset-btn" id="demoRestartBtn">Restart</button>
+      </div>
+    </div>
+
+    <div class="labs-honesty-box" style="margin-bottom:24px;">
+      <div class="labs-honesty-title">This is not real</div>
+      <p>Nothing here is connected to Alpaca, Firestore, or any live price feed. It's a scripted loop showing what
+      the opening-range-breakout strategy looks like end to end — a range forming, a volume-confirmed breakout,
+      an auto-sent order, and a resolution — so you can see the shape of it before it's live in your account.
+      It alternates between a winning and a losing outcome each loop, since a real ~40% win rate means losses
+      happen more often than not, even though they're smaller than the wins.</p>
+    </div>
+
+    <div class="demo-clock-row">
+      <div class="demo-clock mono" id="demoClock">9:30 AM</div>
+      <div class="demo-narration" id="demoNarration">Market opens. Watching PLTR's opening range form…</div>
+    </div>
+
+    <div class="backtest-summary" style="margin-bottom:20px;">
+      <div class="backtest-stat"><div class="backtest-stat-label">Open positions</div><div class="backtest-stat-value" id="demoOpenCount">0</div></div>
+      <div class="backtest-stat"><div class="backtest-stat-label">Today's P&amp;L (simulated)</div><div class="backtest-stat-value" id="demoDayPL">+$0.00</div></div>
+      <div class="backtest-stat"><div class="backtest-stat-label">Trades today</div><div class="backtest-stat-value" id="demoTradeCount">0</div></div>
+    </div>
+
+    <div id="demoTradeCardWrap"></div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log (simulated)</div>
+      <div class="labs-backtest-status" id="demoActivityEmpty">Nothing yet — the demo will populate this as it runs.</div>
+      <div id="demoActivityList"></div>
     </div>
   </main>
 
@@ -2171,7 +2186,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including NVDA, AAPL, MSFT, AMZN, GOOGL, META, TSLA, and AMD) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Screens a fixed list of 8 large-cap stocks on 15-minute bars, re-checked every 15 minutes during market hours. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades can be sent to a connected Alpaca paper account — simulated money only, no real trades are ever placed. This is a single-owner personal tool, not a public product, and the underlying strategy is still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
+    <p>Screens a fixed list of 16 stocks — chosen for how they're priced, not their size — on 15-minute bars, re-checked every 15 minutes during market hours. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades can be sent to a connected Alpaca paper account — simulated money only, no real trades are ever placed. This is a single-owner personal tool, not a public product, and the underlying strategy is still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
     <p>Prices are live quotes from Finnhub. Chart history is real data from Twelve Data — if it can't be reached, you'll see an honest "couldn't load" message instead of fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
@@ -3357,6 +3372,7 @@
 
   function showAutoSendToast(sym, direction, qty){
     logSystemActivity('sent', sym, 'Sent ' + qty + ' shares (' + direction + ') to Alpaca automatically.');
+    playAlertSound('sent');
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -3371,6 +3387,7 @@
 
   function showSizingSkippedToast(sym, reason){
     logSystemActivity('skipped', sym, reason);
+    playAlertSound('neutral');
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -3973,10 +3990,12 @@
         }).sort(function(a, b){ return new Date(a.filled_at) - new Date(b.filled_at); });
         var match = candidates[0];
         if(match){
-          entry.exit = parseFloat(match.filled_avg_price);
+          var exitPrice = parseFloat(match.filled_avg_price);
+          entry.exit = exitPrice;
           entry.exitDate = match.filled_at.slice(0, 10);
           entry.status = 'closed';
           changed = true;
+          showTradeResolvedToast(entry.sym, entry.direction, entry.entry, exitPrice);
         }
       });
       if(changed){
@@ -4017,8 +4036,28 @@
     });
   }
 
+  function showTradeResolvedToast(sym, direction, entryPrice, exitPrice){
+    var isLong = direction === 'Long';
+    var pnlPct = (exitPrice - entryPrice) / entryPrice * (isLong ? 1 : -1) * 100;
+    var isWin = pnlPct > 0;
+    logSystemActivity('position_action', sym, (isWin ? 'Closed in profit' : 'Closed at a loss') + ' — ' +
+      (isWin ? '+' : '') + pnlPct.toFixed(2) + '% (exit $' + exitPrice.toFixed(2) + ').');
+    playAlertSound(isWin ? 'win' : 'loss');
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    var toastEl = document.createElement('div');
+    toastEl.className = 'alert-toast';
+    toastEl.innerHTML =
+      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">' + (isWin ? 'Closed +' : 'Closed −') + '</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<p class="toast-text">' + (isWin ? 'Closed in profit' : 'Closed at a loss') + ' — ' + (isWin ? '+' : '') + pnlPct.toFixed(2) + '% (exit $' + exitPrice.toFixed(2) + ').</p>';
+    container.appendChild(toastEl);
+    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
+    setTimeout(function(){ dismissToast(toastEl); }, 12000);
+  }
+
   function showPositionClosedToast(sym, reason){
     logSystemActivity('position_action', sym, reason);
+    playAlertSound('neutral');
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -4736,16 +4775,28 @@
   }
 
   // Same-day-close-aware resolver for ORB, matching exactly what was
-  // validated in the Python walk-forward backtest: a position that
-  // hasn't hit its stop or target by the last bar of the SAME trading
-  // day it entered closes there instead of carrying overnight. Reuses
-  // the 'hit'/'stopped' labels for a same-day close too (classified by
-  // whether the exit was profitable), so the existing summary/rendering
-  // code needs no changes -- the underlying % return is what actually
-  // drives every real statistic either way.
+  // validated in the Python walk-forward backtest. Returns a THIRD
+  // distinct outcome ('eod_close') for a forced same-day close rather
+  // than folding it into 'hit'/'stopped' -- slippage cost depends on
+  // how a trade actually resolved (a clean target hit is one market
+  // leg, since the entry was a market order but the exit at target is
+  // modeled as a limit fill; a stop-out or a forced close are both two
+  // market legs). Collapsing a same-day close into 'hit' or 'stopped'
+  // would have charged the wrong number of legs for roughly a third of
+  // all trades -- and turned out to be the actual cause of a real
+  // discrepancy between this tool's numbers and the validated engine's.
   function simulateORBForwardSameDay(bars, entryIdx, analysis){
     var isLong = analysis.direction === 'Long';
     var entryDateKey = bars[entryIdx].t.toISOString().slice(0,10);
+    // If the entry bar is already the last bar of its own day, there's
+    // no room left to simulate an exit at all -- Python's validated
+    // engine treats this as a flat, zero-return trade rather than
+    // resolving it against the entry bar's own close, which is almost
+    // always past the entry level (having just broken out through it)
+    // and would otherwise manufacture a fake win out of nothing.
+    if(entryIdx + 1 >= bars.length || bars[entryIdx + 1].t.toISOString().slice(0,10) !== entryDateKey){
+      return { result: 'eod_flat', days: 1, price: analysis.entry, date: bars[entryIdx].t };
+    }
     var lastBarOfDayIdx = entryIdx;
     for(var j = entryIdx + 1; j < bars.length; j++){
       var bar = bars[j];
@@ -4760,8 +4811,23 @@
       }
     }
     var lastBar = bars[lastBarOfDayIdx];
-    var closedFavorably = isLong ? (lastBar.c >= analysis.entry) : (lastBar.c <= analysis.entry);
-    return { result: closedFavorably ? 'hit' : 'stopped', days: lastBarOfDayIdx - entryIdx, price: lastBar.c, date: lastBar.t };
+    return { result: 'eod_close', days: lastBarOfDayIdx - entryIdx, price: lastBar.c, date: lastBar.t };
+  }
+
+  // Basis points of adverse cost per market-order leg, deducted from
+  // every trade's return regardless of direction -- a real trading
+  // cost, not a directional price shift. Matches exactly what every
+  // Python validation run of this strategy used throughout -- the live
+  // backtest tool previously had no cost model at all, which turned out
+  // to be the actual explanation for a real, substantial gap between
+  // what this tool reported and what the strategy was actually
+  // validated on (roughly double the true profit factor and win rate).
+  var ORB_SLIPPAGE_BPS = 5;
+  var ORB_MARKET_LEGS_BY_OUTCOME = { hit: 1, stopped: 2, eod_close: 2, eod_flat: 1 };
+  function applyORBSlippage(pctReturn, outcome){
+    var legs = ORB_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? ORB_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
+    var costPercentagePoints = legs * (ORB_SLIPPAGE_BPS / 100);
+    return pctReturn - costPercentagePoints;
   }
 
   // Win rate alone can't answer whether a strategy is actually
@@ -4772,21 +4838,27 @@
   // by gross losses) are what actually answer that question.
   function summarizeBacktestTrades(trades){
     var resolved = trades.filter(function(t){ return t.outcome !== 'unresolved'; });
-    var hits = resolved.filter(function(t){ return t.outcome === 'hit'; });
-    var stops = resolved.filter(function(t){ return t.outcome === 'stopped'; });
-    var winRate = resolved.length > 0 ? (hits.length / resolved.length * 100) : 0;
+    // Win/loss is classified by the actual post-slippage return, not the
+    // outcome label -- matching the validated engine exactly. A clean
+    // target hit or stop-out is unambiguous either way, but an
+    // eod_close trade's sign can only be known from its real return,
+    // and after slippage a small handful of eod_close trades that
+    // looked marginally favorable can flip negative.
+    var wins = resolved.filter(function(t){ return t.pctReturn > 0; });
+    var losses = resolved.filter(function(t){ return t.pctReturn <= 0; });
+    var winRate = resolved.length > 0 ? (wins.length / resolved.length * 100) : 0;
     var avgDays = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.days; }, 0) / resolved.length) : 0;
     // A single blended average can hide something important — a strategy
     // where wins take much longer than losses (or vice versa) behaves
     // very differently day to day than the overall number alone suggests.
-    var avgDaysWin = hits.length > 0 ? (hits.reduce(function(s,t){ return s + t.days; }, 0) / hits.length) : 0;
-    var avgDaysLoss = stops.length > 0 ? (stops.reduce(function(s,t){ return s + t.days; }, 0) / stops.length) : 0;
+    var avgDaysWin = wins.length > 0 ? (wins.reduce(function(s,t){ return s + t.days; }, 0) / wins.length) : 0;
+    var avgDaysLoss = losses.length > 0 ? (losses.reduce(function(s,t){ return s + t.days; }, 0) / losses.length) : 0;
     var avgPctReturn = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.pctReturn; }, 0) / resolved.length) : 0;
-    var grossGains = resolved.filter(function(t){ return t.pctReturn > 0; }).reduce(function(s,t){ return s + t.pctReturn; }, 0);
-    var grossLosses = resolved.filter(function(t){ return t.pctReturn < 0; }).reduce(function(s,t){ return s + Math.abs(t.pctReturn); }, 0);
+    var grossGains = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+    var grossLosses = losses.reduce(function(s,t){ return s + Math.abs(t.pctReturn); }, 0);
     var profitFactor = grossLosses > 0 ? (grossGains / grossLosses) : (grossGains > 0 ? Infinity : 0);
     return {
-      totalSignals: trades.length, hitCount: hits.length, stoppedCount: resolved.length - hits.length,
+      totalSignals: trades.length, hitCount: wins.length, stoppedCount: losses.length,
       unresolvedCount: trades.length - resolved.length, winRate: winRate, avgDays: avgDays,
       avgDaysWin: avgDaysWin, avgDaysLoss: avgDaysLoss,
       avgPctReturn: avgPctReturn, profitFactor: profitFactor
@@ -4891,6 +4963,7 @@
             var outcome = simulateORBForwardSameDay(bars, i, analysis);
             var isLong = analysis.direction === 'Long';
             var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
+            pctReturn = applyORBSlippage(pctReturn, outcome.result);
             trades.push({
               date: bars[i].t, direction: analysis.direction, entry: analysis.entry,
               stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
@@ -4947,8 +5020,8 @@
         '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
@@ -5012,8 +5085,8 @@
         '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Hit target</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Stopped out</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
@@ -6179,23 +6252,6 @@
   // out of date regardless of what else is or isn't happening on the page.
   setInterval(renderBriefHeadline, 60000);
 
-  // ---------- Color theme ----------
-  function applyTheme(name){
-    document.documentElement.setAttribute('data-theme', name);
-    document.querySelectorAll('.theme-swatch').forEach(function(btn){
-      btn.setAttribute('aria-pressed', btn.dataset.theme === name ? 'true' : 'false');
-    });
-    try{ window.localStorage.setItem('shwoopnet:theme', name); }catch(e){}
-  }
-  document.querySelectorAll('.theme-swatch').forEach(function(btn){
-    btn.addEventListener('click', function(){ applyTheme(btn.dataset.theme); });
-  });
-  (function initTheme(){
-    var saved = 'mono';
-    try{ saved = window.localStorage.getItem('shwoopnet:theme') || 'mono'; }catch(e){}
-    applyTheme(saved);
-  })();
-
   // ---------- Settings: default landing page ----------
   var landingChoiceEl = document.getElementById('landingChoice');
   function applyLandingPref(val){
@@ -6244,6 +6300,74 @@
       renderHistoryList();
     }
   }
+
+  // ---------- Sound alerts ----------
+  // Generated tones via the Web Audio API rather than audio files -- no
+  // assets to load or fail to load, and it keeps this a single self-
+  // contained file. One shared context, created lazily on first use
+  // since browsers block audio until a real user interaction has
+  // happened anyway.
+  var soundAlertsEnabled = true;
+  var sharedAudioCtx = null;
+  function getAudioCtx(){
+    if(!sharedAudioCtx){
+      try{ sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return null; }
+    }
+    if(sharedAudioCtx.state === 'suspended'){ sharedAudioCtx.resume(); }
+    return sharedAudioCtx;
+  }
+  // Each note: { freq, startOffset (seconds from now), duration }. Kept
+  // short and simple -- a couple of clean tones read as an alert, not a
+  // jingle. 'sent' is a single neutral ping; 'win' rises (two ascending
+  // notes); 'loss' falls (two descending notes); 'neutral' is a soft,
+  // low single tick for lower-stakes events (a skipped order, etc).
+  var ALERT_SOUND_NOTES = {
+    sent:    [{ freq: 740, start: 0,    dur: 0.11 }],
+    win:     [{ freq: 660, start: 0,    dur: 0.10 }, { freq: 880, start: 0.11, dur: 0.16 }],
+    loss:    [{ freq: 520, start: 0,    dur: 0.11 }, { freq: 380, start: 0.12, dur: 0.18 }],
+    neutral: [{ freq: 420, start: 0,    dur: 0.09 }]
+  };
+  function playAlertSound(type){
+    if(!soundAlertsEnabled) return;
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    var notes = ALERT_SOUND_NOTES[type] || ALERT_SOUND_NOTES.neutral;
+    notes.forEach(function(note){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = note.freq;
+      var startTime = ctx.currentTime + note.start;
+      var endTime = startTime + note.dur;
+      // A quick fade in/out on the gain envelope avoids a sharp, clicky
+      // edge at the start/end of each note.
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.16, startTime + 0.012);
+      gain.gain.linearRampToValueAtTime(0, endTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(endTime + 0.02);
+    });
+  }
+
+  // ---------- Settings: sound alerts ----------
+  var soundAlertsToggleBtn = document.getElementById('soundAlertsToggle');
+  function applySoundAlertsPref(enabled){
+    soundAlertsEnabled = enabled;
+    soundAlertsToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+    try{ window.localStorage.setItem('shwoopnet:soundAlerts', enabled ? 'true' : 'false'); }catch(e){}
+  }
+  soundAlertsToggleBtn.addEventListener('click', function(){
+    var enabling = soundAlertsToggleBtn.getAttribute('aria-checked') !== 'true';
+    applySoundAlertsPref(enabling);
+    if(enabling){ playAlertSound('sent'); } // immediate confirmation the toggle actually did something audible
+  });
+  (function initSoundAlertsPref(){
+    var saved = 'true';
+    try{ saved = window.localStorage.getItem('shwoopnet:soundAlerts') || 'true'; }catch(e){}
+    applySoundAlertsPref(saved === 'true');
+  })();
 
   // ---------- Settings: reduce motion ----------
   var motionToggleBtn = document.getElementById('motionToggle');
@@ -6403,12 +6527,14 @@
     document.getElementById('page-settings').hidden = (name !== 'settings');
     document.getElementById('page-changelog').hidden = (name !== 'changelog');
     document.getElementById('page-labs').hidden = (name !== 'labs');
+    document.getElementById('page-demo').hidden = (name !== 'demo');
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
     if(name === 'status'){ renderStatusPage(); }
     if(name === 'trades'){ renderAllTradeCharts(); }
     if(name === 'journal'){ renderCalendar(); }
+    if(name === 'demo'){ startDemo(); } else { stopDemo(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
@@ -7522,6 +7648,179 @@
       '</div>';
     }).join('');
   }
+
+  // ---------- Demo page: a scripted, simulated trading day ----------
+  // Entirely self-contained -- no real data, no real API calls, no
+  // connection to journalEntries/Alpaca/Firestore. Alternates a winning
+  // and a losing scenario each loop, since a real ~40% win rate means
+  // losses happen more often than wins, even though each win outsizes
+  // a loss (1.5:1 reward:risk).
+  var demoTimer = null;
+  var demoStepIndex = 0;
+  var demoScenarioIndex = 0; // 0 = win scenario, 1 = loss scenario, alternating
+  var demoPlaying = true;
+  var demoDayPL = 0;
+  var demoOpenCount = 0;
+  var demoTradeCount = 0;
+  var demoCardState = null;
+
+  function demoFmt(n){ return '$' + n.toFixed(2); }
+
+  function renderDemoTradeCard(){
+    var wrap = document.getElementById('demoTradeCardWrap');
+    if(!wrap) return;
+    if(!demoCardState){ wrap.innerHTML = ''; return; }
+    var s = demoCardState;
+    var change = ((s.current - s.entry) / s.entry * 100) * (s.direction === 'Long' ? 1 : -1);
+    var up = change >= 0;
+    wrap.innerHTML =
+      '<div class="trade-block' + (wrap.dataset.rendered ? '' : ' demo-trade-card-enter') + '" data-symbol="' + s.sym + '">' +
+        '<div class="trade-columns trade-row">' +
+          '<button class="chevron" aria-label="Toggle" disabled>⌄</button>' +
+          '<div class="t-sym-cell">' +
+            '<span class="t-sym">' + s.sym + '<span class="t-dir">' + s.direction + '</span>' +
+              '<span class="status-badge ' + s.badgeCls + '">' + s.badgeLabel + '</span></span>' +
+            '<span class="t-name">' + s.name + '</span>' +
+          '</div>' +
+          '<div class="t-current mono" data-label="Current">' + demoFmt(s.current) +
+            '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
+          '</div>' +
+          '<div class="t-entry mono" data-label="Entry">' + demoFmt(s.entry) + '</div>' +
+          '<div class="t-stop mono" data-label="Stop">' + demoFmt(s.stop) + '</div>' +
+          '<div class="t-t1 mono" data-label="Target">' + demoFmt(s.target) + '</div>' +
+          '<div class="t-rr" data-label="Risk / Reward"><div class="rr-ratio mono">1 : 1.5</div></div>' +
+        '</div>' +
+        '<div class="trade-action-banner' + (s.bannerDone ? ' done' : '') + '">' +
+          '<span class="action-icon">' + (s.bannerDone ? '✓' : '→') + '</span>' +
+          '<span class="action-text">' + s.bannerText + '</span>' +
+        '</div>' +
+      '</div>';
+    wrap.dataset.rendered = 'true';
+  }
+
+  function demoAddActivity(text, tag){
+    var list = document.getElementById('demoActivityList');
+    var empty = document.getElementById('demoActivityEmpty');
+    if(!list) return;
+    if(empty) empty.setAttribute('hidden', '');
+    var row = document.createElement('div');
+    row.className = 'activity-log-row demo-activity-enter';
+    var time = document.getElementById('demoClock').textContent;
+    row.innerHTML = '<div class="activity-log-meta"><span class="activity-log-tag">' + tag + '</span><span class="activity-log-time">' + time + ' (simulated)</span></div>' +
+      '<div class="activity-log-text">' + text + '</div>';
+    list.insertBefore(row, list.firstChild);
+    // Keep the feed short -- this is a loop, not a real growing history.
+    while(list.children.length > 6){ list.removeChild(list.lastChild); }
+  }
+
+  function demoUpdateSummary(){
+    document.getElementById('demoOpenCount').textContent = demoOpenCount;
+    document.getElementById('demoTradeCount').textContent = demoTradeCount;
+    var plEl = document.getElementById('demoDayPL');
+    plEl.textContent = (demoDayPL >= 0 ? '+' : '-') + '$' + Math.abs(demoDayPL).toFixed(2);
+    plEl.className = 'backtest-stat-value ' + (demoDayPL >= 0 ? 'up' : 'down');
+  }
+
+  // Each step: clock/narration text, how long to hold before advancing,
+  // and an optional action that mutates demoCardState/counters/log.
+  var demoWinScenario = [
+    { clock:'9:30 AM', narration:"Market opens. Watching PLTR's opening range form…", duration:2400, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
+    { clock:'10:00 AM', narration:'Opening range set: $24.10 – $24.35.', duration:2200 },
+    { clock:'10:15 AM', narration:'Price breaks above $24.35 — checking volume before taking it seriously…', duration:2200 },
+    { clock:'10:15 AM', narration:'Volume confirmed: 2.3x the preceding 20-bar average ✓ — signal fires.', duration:1800, action:function(){
+      demoCardState = { sym:'PLTR', name:'Palantir Technologies', direction:'Long', entry:24.35, stop:24.10, target:24.72, current:24.35, badgeCls:'watching', badgeLabel:'Watching', bannerText:'Signal fired — sizing the order…', bannerDone:false };
+      wrapResetFlag(); renderDemoTradeCard();
+    }},
+    { clock:'10:16 AM', narration:'Sent to Alpaca automatically — 42 shares, sized to 1% account risk.', duration:2000, action:function(){
+      demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 42 shares (Long)'; renderDemoTradeCard();
+      demoOpenCount++; demoTradeCount++; demoUpdateSummary();
+      demoAddActivity('Sent 42 shares (Long) to Alpaca automatically.', 'Sent');
+      playAlertSound('sent');
+    }},
+    { clock:'10:32 AM', narration:'Position open. Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.44; renderDemoTradeCard(); } },
+    { clock:'10:51 AM', narration:'Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.53; renderDemoTradeCard(); } },
+    { clock:'11:14 AM', narration:'Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.63; renderDemoTradeCard(); } },
+    { clock:'11:40 AM', narration:'Target hit — position closed automatically.', duration:2600, action:function(){
+      demoCardState.current = 24.72; demoCardState.badgeCls = 'hit'; demoCardState.badgeLabel = 'Target hit'; demoCardState.bannerText = 'Closed at target ($24.72)'; demoCardState.bannerDone = true; renderDemoTradeCard();
+      demoOpenCount--; demoDayPL += 15.54; demoUpdateSummary();
+      demoAddActivity('PLTR closed at target — +$15.54 (+1.5R).', 'Position');
+      playAlertSound('win');
+    }},
+  ];
+
+  var demoLossScenario = [
+    { clock:'9:30 AM', narration:"Market opens. Watching SOFI's opening range form…", duration:2400, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
+    { clock:'10:00 AM', narration:'Opening range set: $8.20 – $8.35.', duration:2200 },
+    { clock:'10:20 AM', narration:'Price breaks above $8.35 — checking volume before taking it seriously…', duration:2200 },
+    { clock:'10:20 AM', narration:'Volume confirmed: 2.1x the preceding 20-bar average ✓ — signal fires.', duration:1800, action:function(){
+      demoCardState = { sym:'SOFI', name:'SoFi Technologies', direction:'Long', entry:8.35, stop:8.20, target:8.575, current:8.35, badgeCls:'watching', badgeLabel:'Watching', bannerText:'Signal fired — sizing the order…', bannerDone:false };
+      wrapResetFlag(); renderDemoTradeCard();
+    }},
+    { clock:'10:21 AM', narration:'Sent to Alpaca automatically — 118 shares, sized to 1% account risk.', duration:2000, action:function(){
+      demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 118 shares (Long)'; renderDemoTradeCard();
+      demoOpenCount++; demoTradeCount++; demoUpdateSummary();
+      demoAddActivity('Sent 118 shares (Long) to Alpaca automatically.', 'Sent');
+      playAlertSound('sent');
+    }},
+    { clock:'10:38 AM', narration:'Position open. Price ticking…', duration:1600, action:function(){ demoCardState.current = 8.30; renderDemoTradeCard(); } },
+    { clock:'10:55 AM', narration:'Price giving back the move…', duration:1600, action:function(){ demoCardState.current = 8.24; renderDemoTradeCard(); } },
+    { clock:'11:05 AM', narration:'Stopped out — position closed automatically.', duration:2600, action:function(){
+      demoCardState.current = 8.20; demoCardState.badgeCls = 'stopped'; demoCardState.badgeLabel = 'Stopped out'; demoCardState.bannerText = 'Closed at stop ($8.20)'; demoCardState.bannerDone = true; renderDemoTradeCard();
+      demoOpenCount--; demoDayPL -= 17.70; demoUpdateSummary();
+      demoAddActivity('SOFI stopped out — -$17.70 (-1R).', 'Position');
+      playAlertSound('loss');
+    }},
+  ];
+
+  function wrapResetFlag(){ var wrap = document.getElementById('demoTradeCardWrap'); if(wrap){ wrap.dataset.rendered = ''; } }
+
+  function demoRunStep(){
+    var scenario = demoScenarioIndex === 0 ? demoWinScenario : demoLossScenario;
+    if(demoStepIndex >= scenario.length){
+      demoStepIndex = 0;
+      demoScenarioIndex = demoScenarioIndex === 0 ? 1 : 0;
+      scenario = demoScenarioIndex === 0 ? demoWinScenario : demoLossScenario;
+    }
+    var step = scenario[demoStepIndex];
+    document.getElementById('demoClock').textContent = step.clock;
+    var narrEl = document.getElementById('demoNarration');
+    narrEl.style.opacity = '0';
+    setTimeout(function(){ narrEl.textContent = step.narration; narrEl.style.opacity = '1'; }, 120);
+    if(step.action){ step.action(); }
+    demoStepIndex++;
+    if(demoPlaying){
+      demoTimer = setTimeout(demoRunStep, step.duration);
+    }
+  }
+
+  function startDemo(){
+    if(demoTimer) return; // already running
+    demoPlaying = true;
+    document.getElementById('demoPlayPauseBtn').textContent = 'Pause';
+    demoRunStep();
+  }
+  function stopDemo(){
+    if(demoTimer){ clearTimeout(demoTimer); demoTimer = null; }
+  }
+  function resetDemoState(){
+    stopDemo();
+    demoStepIndex = 0; demoScenarioIndex = 0; demoDayPL = 0; demoOpenCount = 0; demoTradeCount = 0; demoCardState = null;
+    document.getElementById('demoActivityList').innerHTML = '';
+    document.getElementById('demoActivityEmpty').removeAttribute('hidden');
+    demoUpdateSummary();
+    renderDemoTradeCard();
+  }
+  document.getElementById('demoPlayPauseBtn').addEventListener('click', function(){
+    demoPlaying = !demoPlaying;
+    this.textContent = demoPlaying ? 'Pause' : 'Play';
+    if(demoPlaying){ demoRunStep(); } else { stopDemo(); }
+  });
+  document.getElementById('demoRestartBtn').addEventListener('click', function(){
+    resetDemoState();
+    demoPlaying = true;
+    document.getElementById('demoPlayPauseBtn').textContent = 'Pause';
+    demoRunStep();
+  });
 
   // ---------- Auth (sign in / sign up / sign out) ----------
   var authMode = 'signin';
