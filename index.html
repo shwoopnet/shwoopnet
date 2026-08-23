@@ -375,6 +375,15 @@
   .demo-showcase-stat-value{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:20px; color: var(--paper); }
   .demo-showcase-stat-label{ font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--muted); margin-top:4px; }
   .demo-showcase-footnote{ font-size:10.5px; color: var(--muted); line-height:1.5; margin:0; }
+  .demo-showcase-explainer{
+    font-size:12px; line-height:1.6; color: var(--paper); margin-bottom:14px;
+    padding:12px 14px; background: var(--ink); border:1px solid var(--border); border-radius:6px;
+  }
+  .demo-showcase-calc{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color: var(--muted);
+    margin:10px 0; padding:8px 10px; background: var(--panel); border-radius:4px;
+  }
+  .demo-showcase-calc strong{ color: var(--paper); }
   .demo-intro-divider{ height:1px; background: var(--border); margin-bottom:20px; }
   .demo-clock-row{
     display:flex; align-items:center; gap:16px; margin-bottom:20px;
@@ -2036,13 +2045,13 @@
     <div class="demo-intro-modal" id="demoIntroModal" hidden>
       <div class="demo-showcase">
         <div class="demo-showcase-title">What Shwoop actually does</div>
-        <p class="demo-showcase-text">A fully automated, all-in-one trading platform — it screens a 16-stock
-        universe, detects a volume-confirmed opening-range breakout, sizes the position by real account risk,
-        sends the order, and manages the exit, start to finish, with no manual step required.</p>
+        <p class="demo-showcase-text">It's a robot trader. It watches a list of 16 stocks, waits for one to make
+        a strong, real move early in the trading day, then buys or sells it automatically — picks how much to
+        risk, places the order, and closes the trade out. You don't have to do anything.</p>
         <div class="demo-showcase-stats">
           <div class="demo-showcase-stat">
-            <div class="demo-showcase-stat-value">1 : 1.5</div>
-            <div class="demo-showcase-stat-label">Reward : Risk</div>
+            <div class="demo-showcase-stat-value">2.15</div>
+            <div class="demo-showcase-stat-label">Profit factor</div>
           </div>
           <div class="demo-showcase-stat">
             <div class="demo-showcase-stat-value">40.2%</div>
@@ -2050,22 +2059,32 @@
           </div>
           <div class="demo-showcase-stat">
             <div class="demo-showcase-stat-value">+0.49%</div>
-            <div class="demo-showcase-stat-label">Expectancy / trade</div>
+            <div class="demo-showcase-stat-label">Avg. gain per trade</div>
           </div>
         </div>
-        <p class="demo-showcase-footnote">Validated via walk-forward backtesting across ~369 trading days, with realistic trading costs included — not a frictionless best case.</p>
+        <div class="demo-showcase-explainer">
+          <strong>What "profit factor" means:</strong> add up everything it's won, add up everything it's lost,
+          and divide the two. It's the simplest way to answer "does this actually make money" — not just how
+          often it wins.
+          <div class="demo-showcase-calc">
+            Out of 4,317 real trades tested — 1,735 wins, 2,582 losses:<br>
+            Total won (3,971.2%) ÷ total lost (1,847.1%) = <strong>2.15</strong>
+          </div>
+          Above 1 means it makes money overall. Below 1 means it loses money overall — no matter how often it
+          "wins." 2.15 means: for every $1 it's lost, it's made back about $2.15.
+        </div>
+        <p class="demo-showcase-footnote">Tested against over a year of real market data, including real trading fees — not a best-case fantasy number.</p>
       </div>
       <div class="demo-intro-divider"></div>
       <div class="demo-intro-title">Before this demo starts</div>
-      <p class="demo-intro-text">This plays a scripted, fake trading day on a loop — a stock's opening range
-      forming, a volume-confirmed breakout, an order auto-sent to Alpaca, and a resolution, so you can see the
-      whole opening-range-breakout strategy end to end before it's live in your account.</p>
-      <p class="demo-intro-text">It alternates a winning and a losing outcome each loop, matching the real win
-      rate above — losses happen more often than wins, even though each win is bigger. It plays a sound and
-      shows a real pop-up notification (clearly marked "Demo") every time a simulated trade is sent or closed,
-      exactly like a real trade would alert you.</p>
-      <p class="demo-intro-text"><strong>The demo itself is not real.</strong> No connection to Alpaca,
-      Firestore, or any live price feed — every number in the loop below is scripted.</p>
+      <p class="demo-intro-text">This plays a made-up trading day, on repeat — a stock sets its range, breaks
+      out, gets bought automatically, and the trade closes. It's a preview of exactly how the real thing works,
+      before it's live with your account.</p>
+      <p class="demo-intro-text">One loop shows a win, the next shows a loss — matching real life, where it
+      loses more often than it wins but still comes out ahead overall. Every time a trade happens, you'll hear
+      a sound and see a pop-up, clearly marked "Demo" so it's never confused with a real alert.</p>
+      <p class="demo-intro-text"><strong>None of this is real.</strong> It's not connected to your broker,
+      your account, or any real prices — every number below is made up for this preview.</p>
       <div class="demo-intro-actions">
         <button class="settings-reset-btn" id="demoIntroCancelBtn">Cancel</button>
         <button class="demo-intro-start-btn" id="demoIntroStartBtn">Start demo</button>
@@ -2085,11 +2104,10 @@
 
     <div class="labs-honesty-box" style="margin-bottom:24px;">
       <div class="labs-honesty-title">This is not real</div>
-      <p>Nothing here is connected to Alpaca, Firestore, or any live price feed. It's a scripted loop showing what
-      the opening-range-breakout strategy looks like end to end — a range forming, a volume-confirmed breakout,
-      an auto-sent order, and a resolution — so you can see the shape of it before it's live in your account.
-      It alternates between a winning and a losing outcome each loop, since a real ~40% win rate means losses
-      happen more often than not, even though they're smaller than the wins.</p>
+      <p>This isn't connected to your real broker, account, or live prices — it's a made-up loop. It shows the
+      shape of how the strategy actually works: a stock sets its range, breaks out, gets bought, and the trade
+      closes out. It alternates a win, then a loss, on repeat, because in real life it loses more often than it
+      wins — just by smaller amounts each time.</p>
     </div>
 
     <div class="demo-clock-row">
@@ -3446,6 +3464,7 @@
   function showAutoSendToast(sym, direction, qty){
     logSystemActivity('sent', sym, 'Sent ' + qty + ' shares (' + direction + ') to Alpaca automatically.');
     playAlertSound('sent');
+    repositionToastContainer();
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -3461,6 +3480,7 @@
   function showSizingSkippedToast(sym, reason){
     logSystemActivity('skipped', sym, reason);
     playAlertSound('neutral');
+    repositionToastContainer();
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -3857,6 +3877,37 @@
     return maxLeftClearingSidebar(alpacaDockBodyWrapEl.offsetWidth);
   }
 
+  // Same bump logic every other floating panel already has, applied to
+  // the toast container -- it isn't user-draggable, but it defaults to
+  // the same general bottom-right area as the Notepad and the Alpaca
+  // dock, and by default genuinely does overlap both. Rather than a
+  // fixed CSS offset, this checks whichever of those two panels is
+  // currently visible (wherever they've been dragged to) and pushes the
+  // toast container clear of the furthest-protruding one. Called right
+  // before any toast is shown, so it's always accurate to the current
+  // layout regardless of what moved and when.
+  function repositionToastContainer(){
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    if(window.innerWidth <= 600) return; // mobile has its own fixed layout via media query
+    var baseRight = 100; // matches the CSS default, already clears the sidebar
+    var neededRight = baseRight;
+
+    var dockOuter = document.getElementById('alpacaDock');
+    if(dockOuter && !dockOuter.hasAttribute('hidden')){
+      var dockRect = alpacaDockBodyWrapEl.getBoundingClientRect();
+      neededRight = Math.max(neededRight, (window.innerWidth - dockRect.left) + 12);
+    }
+
+    var notepadPanelEl = document.getElementById('notepadPanel');
+    if(notepadPanelEl && !notepadPanelEl.hasAttribute('hidden')){
+      var notepadRect = notepadPanelEl.getBoundingClientRect();
+      neededRight = Math.max(neededRight, (window.innerWidth - notepadRect.left) + 12);
+    }
+
+    container.style.right = neededRight + 'px';
+  }
+
   var alpacaDockDragState = null;
   alpacaDockHeaderEl.addEventListener('pointerdown', function(e){
     if(alpacaDockLocked || e.target.closest('button')) return;
@@ -4116,6 +4167,7 @@
     logSystemActivity('position_action', sym, (isWin ? 'Closed in profit' : 'Closed at a loss') + ' — ' +
       (isWin ? '+' : '') + pnlPct.toFixed(2) + '% (exit $' + exitPrice.toFixed(2) + ').');
     playAlertSound(isWin ? 'win' : 'loss');
+    repositionToastContainer();
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -4131,6 +4183,7 @@
   function showPositionClosedToast(sym, reason){
     logSystemActivity('position_action', sym, reason);
     playAlertSound('neutral');
+    repositionToastContainer();
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -7414,6 +7467,7 @@
   }
 
   function showToast(alert){
+    repositionToastContainer();
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -7445,6 +7499,7 @@
   }
 
   function showMoreAlertsToast(count){
+    repositionToastContainer();
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -7781,6 +7836,7 @@
   // attention-grabbing container everything else already uses.
   function showDemoToast(sym, tag, text, soundType){
     playAlertSound(soundType);
+    repositionToastContainer();
     var container = document.getElementById('toastContainer');
     if(!container) return;
     var toastEl = document.createElement('div');
@@ -7829,8 +7885,8 @@
     { clock:'10:16 AM', narration:'Sent to Alpaca automatically — 42 shares, sized to 1% account risk.', duration:2000, action:function(){
       demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 42 shares (Long)'; renderDemoTradeCard();
       demoOpenCount++; demoTradeCount++; demoUpdateSummary();
-      demoAddActivity('Sent 42 shares (Long) to Alpaca automatically.', 'Sent');
-      showDemoToast('PLTR', 'Sent', 'Sent 42 shares (Long) to Alpaca automatically.', 'sent');
+      demoAddActivity('PLTR — Long, 42 shares.', 'Trade entered');
+      showDemoToast('PLTR', 'Trade entered', 'Long, 42 shares.', 'sent');
     }},
     { clock:'10:32 AM', narration:'Position open. Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.44; renderDemoTradeCard(); } },
     { clock:'10:51 AM', narration:'Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.53; renderDemoTradeCard(); } },
@@ -7838,8 +7894,8 @@
     { clock:'11:40 AM', narration:'Target hit — position closed automatically.', duration:2600, action:function(){
       demoCardState.current = 24.72; demoCardState.badgeCls = 'hit'; demoCardState.badgeLabel = 'Target hit'; demoCardState.bannerText = 'Closed at target ($24.72)'; demoCardState.bannerDone = true; renderDemoTradeCard();
       demoOpenCount--; demoDayPL += 15.54; demoUpdateSummary();
-      demoAddActivity('PLTR closed at target — +$15.54 (+1.5R).', 'Position');
-      showDemoToast('PLTR', 'Closed +', 'Closed at target — +$15.54 (+1.5R).', 'win');
+      demoAddActivity('PLTR — +$15.54.', 'Trade exited');
+      showDemoToast('PLTR', 'Trade exited', '+$15.54.', 'win');
     }},
   ];
 
@@ -7854,16 +7910,16 @@
     { clock:'10:21 AM', narration:'Sent to Alpaca automatically — 118 shares, sized to 1% account risk.', duration:2000, action:function(){
       demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 118 shares (Long)'; renderDemoTradeCard();
       demoOpenCount++; demoTradeCount++; demoUpdateSummary();
-      demoAddActivity('Sent 118 shares (Long) to Alpaca automatically.', 'Sent');
-      showDemoToast('SOFI', 'Sent', 'Sent 118 shares (Long) to Alpaca automatically.', 'sent');
+      demoAddActivity('SOFI — Long, 118 shares.', 'Trade entered');
+      showDemoToast('SOFI', 'Trade entered', 'Long, 118 shares.', 'sent');
     }},
     { clock:'10:38 AM', narration:'Position open. Price ticking…', duration:1600, action:function(){ demoCardState.current = 8.30; renderDemoTradeCard(); } },
     { clock:'10:55 AM', narration:'Price giving back the move…', duration:1600, action:function(){ demoCardState.current = 8.24; renderDemoTradeCard(); } },
     { clock:'11:05 AM', narration:'Stopped out — position closed automatically.', duration:2600, action:function(){
       demoCardState.current = 8.20; demoCardState.badgeCls = 'stopped'; demoCardState.badgeLabel = 'Stopped out'; demoCardState.bannerText = 'Closed at stop ($8.20)'; demoCardState.bannerDone = true; renderDemoTradeCard();
       demoOpenCount--; demoDayPL -= 17.70; demoUpdateSummary();
-      demoAddActivity('SOFI stopped out — -$17.70 (-1R).', 'Position');
-      showDemoToast('SOFI', 'Closed −', 'Stopped out — -$17.70 (-1R).', 'loss');
+      demoAddActivity('SOFI — -$17.70.', 'Trade exited');
+      showDemoToast('SOFI', 'Trade exited', '-$17.70.', 'loss');
     }},
   ];
 
