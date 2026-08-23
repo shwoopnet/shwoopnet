@@ -343,6 +343,39 @@
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
   .demo-controls{ display:flex; gap:10px; }
+  .demo-intro-modal{
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:241; width:min(92vw, 520px); max-height:85vh; overflow-y:auto;
+    background: var(--panel-raised); border:1px solid var(--border); border-radius:10px;
+    padding:26px 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .demo-intro-modal[hidden]{ display:none; }
+  .demo-intro-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:18px; margin-bottom:14px; }
+  .demo-intro-text{ font-size:13px; line-height:1.6; color: var(--paper); margin:0 0 14px 0; }
+  .demo-intro-text:last-of-type{ margin-bottom:20px; }
+  .demo-intro-actions{ display:flex; justify-content:flex-end; gap:10px; }
+  .demo-intro-start-btn{
+    background: var(--paper); border:1px solid var(--paper); color: var(--ink);
+    padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:700; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .demo-intro-start-btn:hover{ opacity:.85; }
+
+  .demo-showcase{
+    background: linear-gradient(160deg, var(--panel) 0%, var(--panel-raised) 100%);
+    border:1px solid var(--border); border-radius:8px; padding:18px 20px; margin-bottom:20px;
+  }
+  .demo-showcase-title{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px; margin-bottom:8px; }
+  .demo-showcase-text{ font-size:12.5px; line-height:1.55; color: var(--paper); margin:0 0 16px 0; }
+  .demo-showcase-stats{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:12px; }
+  .demo-showcase-stat{
+    background: var(--ink); border:1px solid var(--border); border-radius:6px;
+    padding:12px 8px; text-align:center;
+  }
+  .demo-showcase-stat-value{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:20px; color: var(--paper); }
+  .demo-showcase-stat-label{ font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--muted); margin-top:4px; }
+  .demo-showcase-footnote{ font-size:10.5px; color: var(--muted); line-height:1.5; margin:0; }
+  .demo-intro-divider{ height:1px; background: var(--border); margin-bottom:20px; }
   .demo-clock-row{
     display:flex; align-items:center; gap:16px; margin-bottom:20px;
     padding:14px 18px; background: var(--panel); border:1px solid var(--border); border-radius:8px;
@@ -1999,6 +2032,46 @@
   </main>
 
   <main class="page" id="page-demo" hidden>
+    <div class="history-backdrop" id="demoIntroBackdrop" hidden></div>
+    <div class="demo-intro-modal" id="demoIntroModal" hidden>
+      <div class="demo-showcase">
+        <div class="demo-showcase-title">What Shwoop actually does</div>
+        <p class="demo-showcase-text">A fully automated, all-in-one trading platform — it screens a 16-stock
+        universe, detects a volume-confirmed opening-range breakout, sizes the position by real account risk,
+        sends the order, and manages the exit, start to finish, with no manual step required.</p>
+        <div class="demo-showcase-stats">
+          <div class="demo-showcase-stat">
+            <div class="demo-showcase-stat-value">1 : 1.5</div>
+            <div class="demo-showcase-stat-label">Reward : Risk</div>
+          </div>
+          <div class="demo-showcase-stat">
+            <div class="demo-showcase-stat-value">40.2%</div>
+            <div class="demo-showcase-stat-label">Win rate</div>
+          </div>
+          <div class="demo-showcase-stat">
+            <div class="demo-showcase-stat-value">+0.49%</div>
+            <div class="demo-showcase-stat-label">Expectancy / trade</div>
+          </div>
+        </div>
+        <p class="demo-showcase-footnote">Validated via walk-forward backtesting across ~369 trading days, with realistic trading costs included — not a frictionless best case.</p>
+      </div>
+      <div class="demo-intro-divider"></div>
+      <div class="demo-intro-title">Before this demo starts</div>
+      <p class="demo-intro-text">This plays a scripted, fake trading day on a loop — a stock's opening range
+      forming, a volume-confirmed breakout, an order auto-sent to Alpaca, and a resolution, so you can see the
+      whole opening-range-breakout strategy end to end before it's live in your account.</p>
+      <p class="demo-intro-text">It alternates a winning and a losing outcome each loop, matching the real win
+      rate above — losses happen more often than wins, even though each win is bigger. It plays a sound and
+      shows a real pop-up notification (clearly marked "Demo") every time a simulated trade is sent or closed,
+      exactly like a real trade would alert you.</p>
+      <p class="demo-intro-text"><strong>The demo itself is not real.</strong> No connection to Alpaca,
+      Firestore, or any live price feed — every number in the loop below is scripted.</p>
+      <div class="demo-intro-actions">
+        <button class="settings-reset-btn" id="demoIntroCancelBtn">Cancel</button>
+        <button class="demo-intro-start-btn" id="demoIntroStartBtn">Start demo</button>
+      </div>
+    </div>
+
     <div class="trades-header">
       <div>
         <div class="trades-title">Demo</div>
@@ -6534,7 +6607,7 @@
     if(name === 'status'){ renderStatusPage(); }
     if(name === 'trades'){ renderAllTradeCharts(); }
     if(name === 'journal'){ renderCalendar(); }
-    if(name === 'demo'){ startDemo(); } else { stopDemo(); }
+    if(name === 'demo'){ showDemoIntro(); } else { stopDemo(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
@@ -7698,6 +7771,28 @@
     wrap.dataset.rendered = 'true';
   }
 
+  // A real floating toast, using the exact same visual system live
+  // trades use -- this is the actual fix for "easy to miss": a row in a
+  // page list only gets seen if you're looking right at it, but a
+  // floating pop-up (plus the matching sound) demands attention the
+  // same way a real trade alert would. Deliberately does NOT call
+  // logSystemActivity or touch journalEntries/Firestore -- the demo
+  // stays fully isolated from anything real, it just borrows the same
+  // attention-grabbing container everything else already uses.
+  function showDemoToast(sym, tag, text, soundType){
+    playAlertSound(soundType);
+    var container = document.getElementById('toastContainer');
+    if(!container) return;
+    var toastEl = document.createElement('div');
+    toastEl.className = 'alert-toast';
+    toastEl.innerHTML =
+      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">' + tag + ' (Demo)</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<p class="toast-text">' + text + '</p>';
+    container.appendChild(toastEl);
+    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
+    setTimeout(function(){ dismissToast(toastEl); }, 12000);
+  }
+
   function demoAddActivity(text, tag){
     var list = document.getElementById('demoActivityList');
     var empty = document.getElementById('demoActivityEmpty');
@@ -7735,7 +7830,7 @@
       demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 42 shares (Long)'; renderDemoTradeCard();
       demoOpenCount++; demoTradeCount++; demoUpdateSummary();
       demoAddActivity('Sent 42 shares (Long) to Alpaca automatically.', 'Sent');
-      playAlertSound('sent');
+      showDemoToast('PLTR', 'Sent', 'Sent 42 shares (Long) to Alpaca automatically.', 'sent');
     }},
     { clock:'10:32 AM', narration:'Position open. Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.44; renderDemoTradeCard(); } },
     { clock:'10:51 AM', narration:'Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.53; renderDemoTradeCard(); } },
@@ -7744,7 +7839,7 @@
       demoCardState.current = 24.72; demoCardState.badgeCls = 'hit'; demoCardState.badgeLabel = 'Target hit'; demoCardState.bannerText = 'Closed at target ($24.72)'; demoCardState.bannerDone = true; renderDemoTradeCard();
       demoOpenCount--; demoDayPL += 15.54; demoUpdateSummary();
       demoAddActivity('PLTR closed at target — +$15.54 (+1.5R).', 'Position');
-      playAlertSound('win');
+      showDemoToast('PLTR', 'Closed +', 'Closed at target — +$15.54 (+1.5R).', 'win');
     }},
   ];
 
@@ -7760,7 +7855,7 @@
       demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 118 shares (Long)'; renderDemoTradeCard();
       demoOpenCount++; demoTradeCount++; demoUpdateSummary();
       demoAddActivity('Sent 118 shares (Long) to Alpaca automatically.', 'Sent');
-      playAlertSound('sent');
+      showDemoToast('SOFI', 'Sent', 'Sent 118 shares (Long) to Alpaca automatically.', 'sent');
     }},
     { clock:'10:38 AM', narration:'Position open. Price ticking…', duration:1600, action:function(){ demoCardState.current = 8.30; renderDemoTradeCard(); } },
     { clock:'10:55 AM', narration:'Price giving back the move…', duration:1600, action:function(){ demoCardState.current = 8.24; renderDemoTradeCard(); } },
@@ -7768,7 +7863,7 @@
       demoCardState.current = 8.20; demoCardState.badgeCls = 'stopped'; demoCardState.badgeLabel = 'Stopped out'; demoCardState.bannerText = 'Closed at stop ($8.20)'; demoCardState.bannerDone = true; renderDemoTradeCard();
       demoOpenCount--; demoDayPL -= 17.70; demoUpdateSummary();
       demoAddActivity('SOFI stopped out — -$17.70 (-1R).', 'Position');
-      playAlertSound('loss');
+      showDemoToast('SOFI', 'Closed −', 'Stopped out — -$17.70 (-1R).', 'loss');
     }},
   ];
 
@@ -7820,6 +7915,33 @@
     demoPlaying = true;
     document.getElementById('demoPlayPauseBtn').textContent = 'Pause';
     demoRunStep();
+  });
+
+  // Shown every time the Demo page is freshly navigated to -- the demo
+  // itself doesn't start (no timer, no sound) until "Start demo" is
+  // explicitly clicked. Restarting an already-running demo (the button
+  // above) doesn't re-show this, since that's a continuation of a
+  // session the person already confirmed into.
+  function showDemoIntro(){
+    resetDemoState();
+    document.getElementById('demoIntroBackdrop').removeAttribute('hidden');
+    document.getElementById('demoIntroModal').removeAttribute('hidden');
+  }
+  function hideDemoIntro(){
+    document.getElementById('demoIntroBackdrop').setAttribute('hidden', '');
+    document.getElementById('demoIntroModal').setAttribute('hidden', '');
+  }
+  document.getElementById('demoIntroStartBtn').addEventListener('click', function(){
+    hideDemoIntro();
+    demoPlaying = true;
+    document.getElementById('demoPlayPauseBtn').textContent = 'Pause';
+    startDemo();
+  });
+  document.getElementById('demoIntroCancelBtn').addEventListener('click', function(){
+    hideDemoIntro();
+    var pref = 'auto';
+    try{ pref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
+    showPage(pref === 'trades' ? 'trades' : 'brief');
   });
 
   // ---------- Auth (sign in / sign up / sign out) ----------
