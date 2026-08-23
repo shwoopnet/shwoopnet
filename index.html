@@ -343,9 +343,10 @@
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
   .demo-controls{ display:flex; gap:10px; }
+  #demoIntroBackdrop{ z-index:940; }
   .demo-intro-modal{
     position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    z-index:241; width:min(92vw, 520px); max-height:85vh; overflow-y:auto;
+    z-index:950; width:min(92vw, 520px); max-height:85vh; overflow-y:auto;
     background: var(--panel-raised); border:1px solid var(--border); border-radius:10px;
     padding:26px 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
   }
@@ -821,6 +822,7 @@
     animation: toastSlideIn .25s ease;
     pointer-events:auto;
   }
+  @media (max-width:600px){ .alert-toast{ padding:10px 12px; } .alert-toast .toast-text{ font-size:12px; margin-bottom:4px; } }
   [data-reduce-motion="true"] .alert-toast{ animation: none; }
   .alert-toast.toast-hide{ animation: toastSlideOut .25s ease forwards; }
   [data-reduce-motion="true"] .alert-toast.toast-hide{ animation: none; opacity:0; }
@@ -836,7 +838,7 @@
   .toast-text{ font-size:12.5px; line-height:1.5; margin:0 0 8px 0; color: var(--paper); }
   .toast-link{ font-size:11px; color: var(--amber); text-decoration:none; }
   .toast-link:hover{ text-decoration:underline; }
-  @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; bottom:84px; } }
+  @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; bottom:84px; max-height:32vh; } }
   .news-toast-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
   .news-toast-link{ font-size:11.5px; color: var(--amber); text-decoration:none; }
   .news-toast-link:hover{ text-decoration:underline; }
@@ -2050,7 +2052,7 @@
         risk, places the order, and closes the trade out. You don't have to do anything.</p>
         <div class="demo-showcase-stats">
           <div class="demo-showcase-stat">
-            <div class="demo-showcase-stat-value">2.15</div>
+            <div class="demo-showcase-stat-value">2.24</div>
             <div class="demo-showcase-stat-label">Profit factor</div>
           </div>
           <div class="demo-showcase-stat">
@@ -2058,22 +2060,22 @@
             <div class="demo-showcase-stat-label">Win rate</div>
           </div>
           <div class="demo-showcase-stat">
-            <div class="demo-showcase-stat-value">+0.49%</div>
-            <div class="demo-showcase-stat-label">Avg. gain per trade</div>
+            <div class="demo-showcase-stat-value">+$16.97</div>
+            <div class="demo-showcase-stat-label">Avg. gain / $100 risked</div>
           </div>
         </div>
         <div class="demo-showcase-explainer">
-          <strong>What "profit factor" means:</strong> add up everything it's won, add up everything it's lost,
-          and divide the two. It's the simplest way to answer "does this actually make money" — not just how
-          often it wins.
+          <strong>What "profit factor" means:</strong> add up every dollar it's won, add up every dollar it's
+          lost, and divide the two. It's the simplest way to answer "does this actually make money" — not just
+          how often it wins.
           <div class="demo-showcase-calc">
-            Out of 4,317 real trades tested — 1,735 wins, 2,582 losses:<br>
-            Total won (3,971.2%) ÷ total lost (1,847.1%) = <strong>2.15</strong>
+            Out of 4,317 real trades tested, risking $100 on each one (1% of a $10,000 account) — 1,735 wins, 2,582 losses:<br>
+            Total won ($132,508.52) ÷ total lost ($59,246.36) = <strong>2.24</strong>
           </div>
           Above 1 means it makes money overall. Below 1 means it loses money overall — no matter how often it
-          "wins." 2.15 means: for every $1 it's lost, it's made back about $2.15.
+          "wins." 2.24 means: for every $1 it's lost, it's made back about $2.24.
         </div>
-        <p class="demo-showcase-footnote">Tested against over a year of real market data, including real trading fees — not a best-case fantasy number.</p>
+        <p class="demo-showcase-footnote">Tested against over a year of real market data, including real trading fees — not a best-case fantasy number. Dollar figures assume a flat $100 risked per trade, not compounded, since many of these trades happen on the same day across different stocks rather than one after another.</p>
       </div>
       <div class="demo-intro-divider"></div>
       <div class="demo-intro-title">Before this demo starts</div>
