@@ -2119,6 +2119,7 @@
       <div class="backtest-stat"><div class="backtest-stat-label">Open positions</div><div class="backtest-stat-value" id="demoOpenCount">0</div></div>
       <div class="backtest-stat"><div class="backtest-stat-label">Today's P&amp;L (simulated)</div><div class="backtest-stat-value" id="demoDayPL">+$0.00</div></div>
       <div class="backtest-stat"><div class="backtest-stat-label">Trades today</div><div class="backtest-stat-value" id="demoTradeCount">0</div></div>
+      <div class="backtest-stat"><div class="backtest-stat-label">Account balance (simulated)</div><div class="backtest-stat-value" id="demoAccountBalance">$10,000.00</div></div>
     </div>
 
     <div id="demoTradeCardWrap"></div>
@@ -7790,6 +7791,7 @@
   var demoDayPL = 0;
   var demoOpenCount = 0;
   var demoTradeCount = 0;
+  var demoAccountBalance = 10000;
   var demoCardState = null;
 
   function demoFmt(n){ return '$' + n.toFixed(2); }
@@ -7870,6 +7872,7 @@
     var plEl = document.getElementById('demoDayPL');
     plEl.textContent = (demoDayPL >= 0 ? '+' : '-') + '$' + Math.abs(demoDayPL).toFixed(2);
     plEl.className = 'backtest-stat-value ' + (demoDayPL >= 0 ? 'up' : 'down');
+    document.getElementById('demoAccountBalance').textContent = '$' + demoAccountBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   // Each step: clock/narration text, how long to hold before advancing,
@@ -7893,7 +7896,7 @@
     { clock:'11:14 AM', narration:'Price ticking…', duration:1600, action:function(){ demoCardState.current = 24.63; renderDemoTradeCard(); } },
     { clock:'11:40 AM', narration:'Target hit — position closed automatically.', duration:2600, action:function(){
       demoCardState.current = 24.72; demoCardState.badgeCls = 'hit'; demoCardState.badgeLabel = 'Target hit'; demoCardState.bannerText = 'Closed at target ($24.72)'; demoCardState.bannerDone = true; renderDemoTradeCard();
-      demoOpenCount--; demoDayPL += 15.54; demoUpdateSummary();
+      demoOpenCount--; demoDayPL += 15.54; demoAccountBalance += 15.54; demoUpdateSummary();
       demoAddActivity('PLTR — +$15.54.', 'Trade exited');
       showDemoToast('PLTR', 'Trade exited', '+$15.54.', 'win');
     }},
@@ -7917,7 +7920,7 @@
     { clock:'10:55 AM', narration:'Price giving back the move…', duration:1600, action:function(){ demoCardState.current = 8.24; renderDemoTradeCard(); } },
     { clock:'11:05 AM', narration:'Stopped out — position closed automatically.', duration:2600, action:function(){
       demoCardState.current = 8.20; demoCardState.badgeCls = 'stopped'; demoCardState.badgeLabel = 'Stopped out'; demoCardState.bannerText = 'Closed at stop ($8.20)'; demoCardState.bannerDone = true; renderDemoTradeCard();
-      demoOpenCount--; demoDayPL -= 17.70; demoUpdateSummary();
+      demoOpenCount--; demoDayPL -= 17.70; demoAccountBalance -= 17.70; demoUpdateSummary();
       demoAddActivity('SOFI — -$17.70.', 'Trade exited');
       showDemoToast('SOFI', 'Trade exited', '-$17.70.', 'loss');
     }},
@@ -7955,7 +7958,7 @@
   }
   function resetDemoState(){
     stopDemo();
-    demoStepIndex = 0; demoScenarioIndex = 0; demoDayPL = 0; demoOpenCount = 0; demoTradeCount = 0; demoCardState = null;
+    demoStepIndex = 0; demoScenarioIndex = 0; demoDayPL = 0; demoOpenCount = 0; demoTradeCount = 0; demoAccountBalance = 10000; demoCardState = null;
     document.getElementById('demoActivityList').innerHTML = '';
     document.getElementById('demoActivityEmpty').removeAttribute('hidden');
     demoUpdateSummary();
