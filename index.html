@@ -32,6 +32,19 @@
 
   *{ box-sizing:border-box; }
 
+  /* Guarantees the hidden attribute always actually hides an element,
+     regardless of what display value its own class sets. Without this,
+     any element using both hidden and a class like display:flex has
+     equal CSS specificity to the browser's default [hidden]{display:none}
+     rule, and since this stylesheet loads after the UA one, the class
+     wins on source order alone -- the element LOOKS hidden by the DOM
+     (hasAttribute('hidden') === true) while still visibly rendering.
+     That's exactly what was happening to the disconnected Alpaca
+     connection row ("Change keys" showing with no connection at all) --
+     found by checking the DOM state directly and seeing it disagree
+     with what was on screen. */
+  [hidden]{ display:none !important; }
+
   html,body{
     margin:0; padding:0;
     background-color: var(--ink);
@@ -286,6 +299,44 @@
   .quote-sync-status.ok{ color: var(--gain); }
   .quote-sync-status.fail{ color: var(--loss); }
   .alpaca-row-full{ width:100%; }
+
+  /* Live trading mode -- deliberately loud. This is real money, so the
+     visual language intentionally breaks from the rest of the app's
+     calm, amber-accented style the moment it's active. */
+  .live-mode-banner{
+    background: var(--loss); color:#fff; font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:12.5px; letter-spacing:.03em;
+    padding:10px 16px; border-radius:6px; margin-bottom:20px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .live-mode-banner[hidden]{ display:none; }
+  .live-mode-banner-dot{
+    width:8px; height:8px; border-radius:50%; background:#fff; flex-shrink:0;
+    animation: liveDotPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes liveDotPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+  [data-reduce-motion="true"] .live-mode-banner-dot{ animation:none; }
+
+  .alpaca-env-selector{ display:flex; gap:8px; margin:10px 0 12px 0; }
+  .alpaca-env-btn{
+    background: var(--panel); border:1px solid var(--border); color: var(--muted);
+    padding:7px 14px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .alpaca-env-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .alpaca-env-btn.active[data-env="paper"]{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
+  .alpaca-env-btn.active[data-env="live"]{ background: var(--loss-glow); border-color: var(--loss); color: var(--loss); }
+  .alpaca-env-btn[data-env="live"].confirming{ background: var(--loss); color:#fff; animation: flattenPulse 1s ease-in-out infinite; }
+
+  /* Once live mode is active, the account dock itself carries the same
+     warning color permanently -- not just a one-time banner you might
+     scroll past, but a persistent, ambient reminder anywhere the dock
+     is visible, which is everywhere. */
+  [data-alpaca-env="live"] .alpaca-dock-header,
+  [data-alpaca-env="live"] .alpaca-dock-body-wrap{
+    border-color: var(--loss) !important;
+    box-shadow: 0 -4px 16px rgba(232,92,81,0.25);
+  }
   .alpaca-row-full a{ color: var(--amber); }
   .alpaca-connected-row{ display:flex; align-items:center; gap:12px; margin:10px 0 8px 0; }
   .alpaca-connected-keyid{ font-size:12px; color: var(--muted); letter-spacing:.03em; }
@@ -312,6 +363,14 @@
     padding:8px 16px; border-radius:5px; font-size:12px; cursor:pointer;
   }
   .settings-reset-btn:hover{ background: var(--loss-glow); }
+  .flatten-all-btn{
+    background: var(--loss); border:1px solid var(--loss); color:#fff;
+    padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:700; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .flatten-all-btn:hover{ opacity:.85; }
+  .flatten-all-btn.confirming{ background: transparent; color: var(--loss); animation: flattenPulse 1s ease-in-out infinite; }
+  @keyframes flattenPulse{ 0%,100%{ box-shadow: 0 0 0 0 var(--loss-glow); } 50%{ box-shadow: 0 0 0 6px transparent; } }
   .settings-note{ font-size:11px; color: var(--muted); margin-top:20px; line-height:1.6; }
 
   .changelog-list{ margin-top:24px; }
@@ -739,6 +798,7 @@
   }
   .chart-tool-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .chart-tool-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
+  .chart-tool-btn.confirming{ background: var(--loss); border-color: var(--loss); color:#fff; animation: flattenPulse 1s ease-in-out infinite; }
   .chart-canvas-wrap{ position:relative; }
   .chart-crosshair-readout{
     position:absolute; top:4px; left:4px; z-index:5; pointer-events:none;
@@ -1309,13 +1369,22 @@
         console.error('Screener sync error:', err);
       });
     },
-    saveAlpacaCredentials: function(uid, keyId, secretKey){
-      return setDoc(doc(db, 'users', uid), { alpacaKeyId: keyId, alpacaSecretKey: secretKey }, { merge: true });
+    saveAlpacaCredentials: function(uid, keyId, secretKey, environment){
+      var field = environment === 'live' ? { alpacaLiveKeyId: keyId, alpacaLiveSecretKey: secretKey }
+                                          : { alpacaKeyId: keyId, alpacaSecretKey: secretKey };
+      return setDoc(doc(db, 'users', uid), field, { merge: true });
+    },
+    saveAlpacaEnvironmentPref: function(uid, environment){
+      return setDoc(doc(db, 'users', uid), { alpacaEnvironment: environment }, { merge: true });
     },
     watchAlpacaCredentials: function(uid, callback){
       return onSnapshot(doc(db, 'users', uid), function(snap){
         var data = snap.exists() ? snap.data() : {};
-        callback({ alpacaKeyId: data.alpacaKeyId || '', alpacaSecretKey: data.alpacaSecretKey || '' });
+        callback({
+          alpacaKeyId: data.alpacaKeyId || '', alpacaSecretKey: data.alpacaSecretKey || '',
+          alpacaLiveKeyId: data.alpacaLiveKeyId || '', alpacaLiveSecretKey: data.alpacaLiveSecretKey || '',
+          alpacaEnvironment: data.alpacaEnvironment || 'paper'
+        });
       }, function(err){
         console.error('Alpaca credentials sync error:', err);
       });
@@ -1454,11 +1523,8 @@
     <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
       <span class="side-nav-icon">◆</span><span class="side-nav-label">Brief</span>
     </button>
-    <button class="side-nav-item nav-item" data-page="status" title="Status">
-      <span class="side-nav-icon-wrap"><span class="side-nav-icon">⬤</span><span class="trade-bubble trade-bubble-badge" id="sidebarTradeBubble" hidden>0</span></span><span class="side-nav-label">Status</span>
-    </button>
     <button class="side-nav-item nav-item" data-page="trades" title="Trade Overview">
-      <span class="side-nav-icon">▲</span><span class="side-nav-label">Trades</span>
+      <span class="side-nav-icon-wrap"><span class="side-nav-icon">▲</span><span class="trade-bubble trade-bubble-badge" id="sidebarTradeBubble" hidden>0</span></span><span class="side-nav-label">Trades</span>
     </button>
     <button class="side-nav-item nav-item" data-page="journal" title="Trade Journal">
       <span class="side-nav-icon">▦</span><span class="side-nav-label">Journal</span>
@@ -1649,69 +1715,12 @@
   </main>
 
   <!-- ================= STATUS ================= -->
-  <main class="page" id="page-status" hidden>
-    <div class="trades-header">
-      <div>
-        <div class="trades-title">Status</div>
-        <div class="trades-sub">Account health, open positions, and everything the automated systems have done — the one page to check when you check in.</div>
-      </div>
-    </div>
-
-    <div class="backtest-summary" id="statusAccountSummary"></div>
-
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">System Health</div>
-      <div id="statusHealthRows"></div>
-    </div>
-
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Auto-Trading Controls</div>
-      <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
-        <div>
-          <div class="settings-row-title">Auto-send new intraday picks (risk-sized)</div>
-          <div class="settings-row-desc">
-            Sends a new pick the moment it's found, sized per the account's risk caps (1% per trade, 20% max
-            per position, 5.5% total risk ceiling). Allows re-entry on the same symbol later the same day once
-            a prior position closes. Failed orders retry 3 times, then auto-trading pauses and alerts you — see
-            status below. Only runs while this tab is open. Paper money only.
-          </div>
-        </div>
-        <button class="chart-tool-btn" id="alpacaAutoTradeIntradayToggle" role="switch" aria-checked="false">Off</button>
-      </div>
-      <div class="settings-row" id="tradingPausedRow" hidden>
-        <div>
-          <div class="settings-row-title">Auto-trading status</div>
-          <div class="settings-row-desc" id="tradingPausedDesc">—</div>
-        </div>
-        <button class="settings-reset-btn" id="resumeTradingBtn">Resume trading</button>
-      </div>
-      <div class="labs-backtest-status" id="autoTradeControlsEmpty" hidden>Connect Alpaca in Settings to enable auto-trading.</div>
-    </div>
-
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Open Positions</div>
-      <div id="statusPositionsBody"></div>
-    </div>
-
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Intraday Screener</div>
-      <div class="labs-backtest-note" style="margin-bottom:10px;">What the 24/7 server last saw — separate from this tab's own live view, and updates even when no browser is open.</div>
-      <div id="statusIntradayBody"></div>
-    </div>
-
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log</div>
-      <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
-      <div id="statusActivityList"></div>
-    </div>
-  </main>
-
-  <!-- ================= TRADE OVERVIEW ================= -->
+  <!-- ================= TRADE OVERVIEW (merged with Status) ================= -->
   <main class="page" id="page-trades" hidden>
     <div class="trades-header">
       <div>
         <div class="trades-title">Trade Overview</div>
-        <div class="trades-sub" id="tradesSubtitle">Real-time — 15-min bars, re-screened every 15 minutes during market hours.</div>
+        <div class="trades-sub" id="tradesSubtitle">Everything in one place — account health, open positions, controls, and today's setups.</div>
       </div>
       <div class="trades-header-right">
         <div class="layout-dropdown">
@@ -1761,9 +1770,69 @@
       </div>
     </div>
 
-    <div class="intraday-section" id="intradaySection" hidden>
+    <div class="backtest-summary" id="statusAccountSummary"></div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Auto-Trading Controls</div>
+      <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
+        <div>
+          <div class="settings-row-title">Auto-send new intraday picks (risk-sized)</div>
+          <div class="settings-row-desc" id="autoTradeIntradayDesc">
+            Sends a new pick the moment it's found, sized per the account's risk caps (1% per trade, 20% max
+            per position, 5.5% total risk ceiling). Allows re-entry on the same symbol later the same day once
+            a prior position closes. Failed orders retry 3 times, then auto-trading pauses and alerts you — see
+            status below. Only runs while this tab is open. Paper money only.
+          </div>
+        </div>
+        <button class="chart-tool-btn" id="alpacaAutoTradeIntradayToggle" role="switch" aria-checked="false">Off</button>
+      </div>
+      <div class="settings-row" id="tradingPausedRow" hidden>
+        <div>
+          <div class="settings-row-title">Auto-trading status</div>
+          <div class="settings-row-desc" id="tradingPausedDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="resumeTradingBtn">Resume trading</button>
+      </div>
+      <div class="settings-row" id="flattenAllRow" hidden>
+        <div>
+          <div class="settings-row-title">Flatten all positions</div>
+          <div class="settings-row-desc">
+            Closes every open position right now, at market, regardless of whether its own setup is still
+            valid — and turns off auto-send so nothing re-enters immediately after. For when something feels
+            wrong and you want everything closed first, questions later.
+          </div>
+        </div>
+        <button class="flatten-all-btn" id="flattenAllBtn">Flatten all</button>
+      </div>
+      <div class="labs-backtest-status" id="autoTradeControlsEmpty" hidden>Connect Alpaca in Settings to enable auto-trading.</div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Open Positions</div>
+      <div id="statusPositionsBody"></div>
+    </div>
+
+    <div class="intraday-section" id="intradaySection" hidden style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Today's Setups</div>
       <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
       <div id="intradayBlocks"></div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">System Health</div>
+      <div id="statusHealthRows"></div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Intraday Screener</div>
+      <div class="labs-backtest-note" style="margin-bottom:10px;">What the 24/7 server last saw — separate from this tab's own live view, and updates even when no browser is open.</div>
+      <div id="statusIntradayBody"></div>
+    </div>
+
+    <div class="labs-backtest-card" style="margin-top:20px;">
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log</div>
+      <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
+      <div id="statusActivityList"></div>
     </div>
   </main>
 
@@ -1871,10 +1940,19 @@
         <button class="settings-reset-btn" id="signOutBtn">Sign out</button>
       </div>
 
+      <div id="liveModeBanner" class="live-mode-banner" hidden>
+        <span class="live-mode-banner-dot"></span>
+        LIVE TRADING ACTIVE — every order placed right now uses real money in a real brokerage account.
+      </div>
+
       <div class="settings-row alpaca-row">
         <div class="alpaca-row-full">
-          <div class="settings-row-title">Broker connection — Alpaca (Paper)</div>
-          <div class="settings-row-desc">
+          <div class="settings-row-title" id="alpacaSectionTitle">Broker connection — Alpaca (Paper)</div>
+          <div class="alpaca-env-selector">
+            <button class="alpaca-env-btn active" id="alpacaEnvPaperBtn" data-env="paper">Paper (simulated)</button>
+            <button class="alpaca-env-btn" id="alpacaEnvLiveBtn" data-env="live">Live (real money)</button>
+          </div>
+          <div class="settings-row-desc" id="alpacaEnvDesc">
             Simulated money only — no real trades are ever placed. Get free paper keys at
             <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer">alpaca.markets</a>.
           </div>
@@ -2190,7 +2268,7 @@
         <p>This is the strategy that replaced the prior SMA-crossover approach, backed by real validation: every
         one of the 16 universe symbols individually cleared a profit factor above 1.5 across a full year-plus
         of historical data, and the combined worst-case result across 5 independent, non-overlapping time
-        windows came in at 1.96 — with realistic trading costs included throughout, not a frictionless best
+        windows came in at 2.03 — with realistic trading costs included throughout, not a frictionless best
         case. That's meaningfully stronger than anything the prior universe or approach produced. It's still
         genuinely new, though — the activity log and the numbers building up there over time are what will
         show whether real, ongoing performance holds up the way the backtest suggests it should.</p>
@@ -2332,16 +2410,25 @@
   };
   var DEFAULT_WATCHLIST_SYMS = ['PLTR','SOFI','RIVN','COIN','MARA','AFRM','DKNG','CVNA'];
 
-  var watchlist = [
-    { sym:'NVDA', name:'NVIDIA Corp', price:128.40, prevClose:126.90 },
-    { sym:'AAPL', name:'Apple Inc',   price:231.15, prevClose:229.80 },
-    { sym:'MSFT', name:'Microsoft',   price:512.30, prevClose:514.10 },
-    { sym:'AMZN', name:'Amazon.com',  price:228.70, prevClose:226.40 },
-    { sym:'GOOGL',name:'Alphabet Cl A',price:198.55, prevClose:199.90 },
-    { sym:'META', name:'Meta Platforms',price:612.40, prevClose:606.20 },
-    { sym:'TSLA', name:'Tesla Inc',   price:245.80, prevClose:251.30 },
-    { sym:'AMD',  name:'Adv Micro Devices', price:172.10, prevClose:169.50 }
-  ];
+  // Varied on purpose, not a uniform +0.50% for every symbol -- an
+  // identical placeholder change across the board meant "Top Losers"
+  // had nothing genuinely negative to show, so it displayed the
+  // relatively-lowest gainers with green up-arrows under a "Losers"
+  // label. Real quotes overwrite this within moments anyway; this is
+  // purely about what a brief flash of placeholder data looks like.
+  var DEFAULT_WATCHLIST_STARTING_PRICES = {
+    PLTR: 24.50, SOFI: 8.40, RIVN: 12.80, COIN: 205.00,
+    MARA: 16.20, AFRM: 62.00, DKNG: 42.50, CVNA: 245.00
+  };
+  var DEFAULT_WATCHLIST_STARTING_CHANGE_PCT = {
+    PLTR: 0.012, SOFI: 0.008, RIVN: -0.015, COIN: 0.021,
+    MARA: -0.009, AFRM: 0.004, DKNG: -0.006, CVNA: 0.017
+  };
+  var watchlist = DEFAULT_WATCHLIST_SYMS.map(function(sym){
+    var price = DEFAULT_WATCHLIST_STARTING_PRICES[sym] || 100;
+    var changePct = DEFAULT_WATCHLIST_STARTING_CHANGE_PCT[sym] || 0;
+    return { sym: sym, name: COMPANY_NAMES[sym] || sym, price: price, prevClose: price / (1 + changePct) };
+  });
 
   function ensureInWatchlist(sym, name, price, prevClose){
     var existing = watchlist.filter(function(w){ return w.sym === sym; })[0];
@@ -2708,7 +2795,7 @@
   // windows across ~369 trading days, realistic slippage included) with
   // an opening-range-breakout + volume-confirmation strategy: every
   // single symbol individually cleared a profit factor above 1.5, and
-  // the combined worst-case window across all 16 came in at 1.96 --
+  // the combined worst-case window across all 16 came in at 2.03 --
   // meaningfully different from the near-breakeven results the prior
   // mega-cap universe produced under the same rigor.
   var INTRADAY_UNIVERSE = ['PLTR', 'SOFI', 'RIVN', 'COIN', 'MARA', 'AFRM', 'DKNG', 'CVNA',
@@ -2929,30 +3016,6 @@
   }
 
   // ---------- Internal pick-outcome log (not shown in the UI yet) ----------
-  // The foundation for eventually validating whether the screener's scoring
-  // actually correlates with real outcomes. Every pick gets logged when it's
-  // generated; its outcome gets filled in later, either by the live price
-  // loop catching a real hit/stop, or — if the app wasn't open when that
-  // happened — marked "unresolved" the next time the screener runs, so we
-  // never silently lose track of what a pick was supposed to have done.
-  function resolveYesterdaysPendingPicks(today){
-    if(!window.__shwoopAPI || !currentUid) return Promise.resolve();
-    var yesterday = new Date(new Date(today + 'T00:00:00').getTime() - 24*60*60*1000).toISOString().slice(0,10);
-    return window.__shwoopAPI.getDailyPickLog(currentUid, yesterday + '_index').then(function(index){
-      if(!index || !Array.isArray(index.syms)) return;
-      return Promise.all(index.syms.map(function(sym){
-        var key = yesterday + '_' + sym;
-        return window.__shwoopAPI.getDailyPickLog(currentUid, key).then(function(pick){
-          if(!pick || pick.outcome !== 'pending') return;
-          pick.outcome = 'unresolved_replaced';
-          pick.resolvedAt = Date.now();
-          return window.__shwoopAPI.saveDailyPickLog(currentUid, key, pick);
-        });
-      }));
-    }).catch(function(err){
-      console.error('Failed to resolve prior-day pick log:', err);
-    });
-  }
 
   function logTodaysPicksInternally(candidates, today){
     if(!window.__shwoopAPI || !currentUid) return;
@@ -3046,7 +3109,6 @@
       if(candidates.length === 0){
         trades = [];
         watchlist = watchlist.filter(function(w){ return DEFAULT_WATCHLIST_SYMS.indexOf(w.sym) > -1; });
-        renderTradeBlocks();
         renderWhatToWatch();
         renderBriefHeadline();
         statCta();
@@ -3072,7 +3134,6 @@
         });
       });
 
-      renderTradeBlocks();
       renderWhatToWatch();
       renderTicker();
       renderBriefHeadline();
@@ -3106,7 +3167,6 @@
     // 45 seconds, which makes an otherwise-correct Watching status look
     // nonsensical (as if there's nothing left to wait for).
     if(!isGuestMode){ fetchAllQuotes(); }
-    renderTradeBlocks();
     renderWhatToWatch();
     renderTicker();
     renderBriefHeadline();
@@ -3136,7 +3196,7 @@
       // this browser tab is the one doing any screening right now.
       backendIntradayPicks = data.intradayScreenerPicks;
       backendIntradayUpdatedAt = data.intradayScreenerUpdatedAt;
-      var statusPageEl = document.getElementById('page-status');
+      var statusPageEl = document.getElementById('page-trades');
       if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
     });
@@ -3216,24 +3276,38 @@
     };
   }
 
-  // ---------- Alpaca paper trading (simulated money only) ----------
-  // Bring-your-own-account: each user connects their own free Alpaca paper
-  // keys. Shwoop never holds funds or credentials centrally — this is
+  // ---------- Alpaca trading: paper AND live, kept deliberately separate ----------
+  // Bring-your-own-account: each user connects their own Alpaca keys.
+  // Shwoop never holds funds or credentials centrally — this is
   // literally the same as if the person wrote this fetch call themselves.
-  var ALPACA_PAPER_BASE = 'https://paper-api.alpaca.markets';
-  // Shwoop only ever connects to Alpaca's paper endpoint today — there's
-  // no live-account connection built. This stays hardcoded until that's
-  // deliberately added, at which point the tab title below would need to
-  // reflect whichever is actually connected.
-  var alpacaAccountType = 'paper';
+  //
+  // Paper and live are two genuinely separate accounts with separate
+  // credentials, separate positions, separate everything -- switching
+  // environments is switching WHICH account every API call talks to, not
+  // a display filter on one shared account. alpacaAccountType is the
+  // single source of truth for which one is currently active; every
+  // trading call (orders, positions, account info) reads it fresh via
+  // ALPACA_TRADING_BASE() rather than assuming paper the way this used to.
+  var alpacaAccountType = 'paper'; // 'paper' | 'live' -- which environment is currently active
+  function ALPACA_TRADING_BASE(){
+    return alpacaAccountType === 'live' ? 'https://api.alpaca.markets' : 'https://paper-api.alpaca.markets';
+  }
   function alpacaAccountLabel(){
     return alpacaAccountType === 'live' ? 'Live Broker Account' : 'Paper Trading Account';
   }
-  var alpacaCreds = { keyId: '', secretKey: '' };
+  var alpacaCredsPaper = { keyId: '', secretKey: '' };
+  var alpacaCredsLive = { keyId: '', secretKey: '' };
+  // Returns whichever environment's credentials are currently active --
+  // called fresh at each use rather than cached, so it's never possible
+  // for a stale reference to point at the wrong environment's keys.
+  function activeAlpacaCreds(){
+    return alpacaAccountType === 'live' ? alpacaCredsLive : alpacaCredsPaper;
+  }
   var alpacaConnected = false;
 
   function alpacaHeaders(){
-    return { 'APCA-API-KEY-ID': alpacaCreds.keyId, 'APCA-API-SECRET-KEY': alpacaCreds.secretKey };
+    var creds = activeAlpacaCreds();
+    return { 'APCA-API-KEY-ID': creds.keyId, 'APCA-API-SECRET-KEY': creds.secretKey };
   }
 
   function setAlpacaStatus(text, ok){
@@ -3254,10 +3328,11 @@
   function showAlpacaConnectedView(){
     document.getElementById('alpacaInputsRow').setAttribute('hidden', '');
     document.getElementById('alpacaConnectedRow').removeAttribute('hidden');
-    document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(alpacaCreds.keyId);
+    document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(activeAlpacaCreds().keyId);
     document.getElementById('alpacaDock').removeAttribute('hidden');
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
     document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
+    document.getElementById('flattenAllRow').removeAttribute('hidden');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.setAttribute('hidden', '');
     updateTradeBubbles();
@@ -3268,19 +3343,49 @@
     document.getElementById('alpacaInputsRow').removeAttribute('hidden');
     document.getElementById('alpacaDock').setAttribute('hidden', '');
     document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
+    document.getElementById('flattenAllRow').setAttribute('hidden', '');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.removeAttribute('hidden');
   }
 
+  // The single place that keeps every visual signal of "which
+  // environment is active" in sync -- a data attribute on <html> drives
+  // the persistent live-mode banner and red accents via CSS, so nothing
+  // showing real-money status can silently fall out of sync with a
+  // JS-only flag somewhere. Anything that visually distinguishes live
+  // from paper should hang off this attribute, not its own separate check.
+  function applyAlpacaEnvironmentUI(){
+    document.documentElement.setAttribute('data-alpaca-env', alpacaAccountType);
+    var paperBtn = document.getElementById('alpacaEnvPaperBtn');
+    var liveBtn = document.getElementById('alpacaEnvLiveBtn');
+    if(paperBtn && liveBtn){
+      paperBtn.classList.toggle('active', alpacaAccountType === 'paper');
+      liveBtn.classList.toggle('active', alpacaAccountType === 'live');
+    }
+    var banner = document.getElementById('liveModeBanner');
+    if(banner){ banner.hidden = (alpacaAccountType !== 'live'); }
+    var autoTradeDesc = document.getElementById('autoTradeIntradayDesc');
+    if(autoTradeDesc){
+      var moneyClause = alpacaAccountType === 'live'
+        ? '<strong style="color:var(--loss);">Real money — every order placed here is a genuine trade in a live brokerage account.</strong>'
+        : 'Paper money only — nothing here is a real trade.';
+      autoTradeDesc.innerHTML = 'Sends a new pick the moment it\'s found, sized per the account\'s risk caps ' +
+        '(1% per trade, 20% max per position, 5.5% total risk ceiling). Allows re-entry on the same symbol ' +
+        'later the same day once a prior position closes. Failed orders retry 3 times, then auto-trading ' +
+        'pauses and alerts you — see status below. Only runs while this tab is open. ' + moneyClause;
+    }
+  }
+
   function testAlpacaConnection(){
-    if(!alpacaCreds.keyId || !alpacaCreds.secretKey){
+    var creds = activeAlpacaCreds();
+    if(!creds.keyId || !creds.secretKey){
       alpacaConnected = false;
       setAlpacaStatus('Not connected', null);
       showAlpacaInputsView();
       return;
     }
     setAlpacaStatus('Connecting…', null);
-    fetch(ALPACA_PAPER_BASE + '/v2/account', { headers: alpacaHeaders() })
+    fetch(ALPACA_TRADING_BASE() + '/v2/account', { headers: alpacaHeaders() })
       .then(function(res){
         if(!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
@@ -3289,14 +3394,12 @@
         alpacaConnected = true;
         setAlpacaStatus('Connected', true);
         showAlpacaConnectedView();
-        renderTradeBlocks();
       })
       .catch(function(err){
         alpacaConnected = false;
         setAlpacaStatus('Connection failed — check your keys', false);
         showAlpacaInputsView();
         console.error('Alpaca connection test failed:', err);
-        renderTradeBlocks();
       });
   }
 
@@ -3429,8 +3532,34 @@
     setAlpacaAutoTradeIntradayEnabled(saved);
   }
 
+  // Turning auto-trade OFF, or toggling it at all in paper mode, stays a
+  // simple one click -- but turning it ON while live is active gets the
+  // same click-to-confirm friction as Flatten All, since "accidentally
+  // leaving this on" has real financial consequences in live mode that
+  // it simply doesn't have in paper.
+  var liveAutoTradeConfirmTimer = null;
   document.getElementById('alpacaAutoTradeIntradayToggle').addEventListener('click', function(){
-    setAlpacaAutoTradeIntradayEnabled(!alpacaAutoTradeIntradayEnabled);
+    var btn = this;
+    var turningOn = !alpacaAutoTradeIntradayEnabled;
+    if(turningOn && alpacaAccountType === 'live'){
+      if(btn.dataset.armed === 'true'){
+        clearTimeout(liveAutoTradeConfirmTimer);
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        setAlpacaAutoTradeIntradayEnabled(true);
+        return;
+      }
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Confirm — real money';
+      liveAutoTradeConfirmTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        btn.textContent = 'Off';
+      }, 4000);
+      return;
+    }
+    setAlpacaAutoTradeIntradayEnabled(turningOn);
   });
 
   // ---------- Intraday screener (opt-in, separate from the daily one) ----------
@@ -3535,25 +3664,24 @@
   // "short-term, ever-updating"). So instead it dedups by "is there
   // already an open position in this symbol" — blocks duplicates on a
   // position that's still live, but allows real re-entry once a prior one
-  // has actually closed. A hard daily cap is a separate, blunt safety
-  // net against something going wrong and cycling trades unexpectedly —
-  // it isn't a strategy parameter, just a backstop.
-  var INTRADAY_AUTO_TRADE_MAX_PER_DAY = 5;
-  var intradayAutoTradeCountDate = null;
-  var intradayAutoTradeCountToday = 0;
-
+  // has actually closed.
+  //
+  // The real safety backstop against runaway trading is the 5.5% total
+  // risk ceiling (in computeSizedOrder/filterCandidatesBySizeability) --
+  // it scales with actual exposure, unlike a flat count. A hard daily
+  // trade-count cap used to sit here too, but it was a leftover from the
+  // old daily-screener era and silently throttled the validated
+  // strategy well below what it's actually supposed to do (it averages
+  // ~9-10 trades/day across all 16 symbols when unrestricted). Removed
+  // in favor of the risk ceiling plus a manual "flatten all" override
+  // for the actual "something's gone wrong" scenario.
   function autoSendIntradayPicksIfEnabled(){
     if(!alpacaAutoTradeIntradayEnabled || !alpacaConnected || !window.__shwoopAPI || !currentUid) return;
-    var today = new Date().toISOString().slice(0,10);
-    if(intradayAutoTradeCountDate !== today){ intradayAutoTradeCountDate = today; intradayAutoTradeCountToday = 0; }
     intradayTrades.forEach(function(t){
-      if(intradayAutoTradeCountToday >= INTRADAY_AUTO_TRADE_MAX_PER_DAY) return;
       var hasOpenPosition = journalEntries.some(function(j){ return j.sym === t.sym && j.status === 'open'; });
       if(hasOpenPosition) return;
-      intradayAutoTradeCountToday++;
       computeSizedOrder(t).then(function(sized){
         if(sized.qty < 1){
-          intradayAutoTradeCountToday--; // a skipped trade isn't a trade -- don't spend the cap on it
           showSizingSkippedToast(t.sym, sized.skipReason);
           return;
         }
@@ -3563,7 +3691,6 @@
           showAutoSendToast(t.sym, t.direction, sized.qty);
         });
       }).catch(function(err){
-        intradayAutoTradeCountToday--; // failed submissions shouldn't count against the cap
         console.error('Intraday auto-send failed for', t.sym, err);
       });
     });
@@ -3572,12 +3699,17 @@
   function loadAlpacaCredentialsForUser(uid){
     if(!window.__shwoopAPI) return;
     window.__shwoopAPI.watchAlpacaCredentials(uid, function(data){
-      alpacaCreds.keyId = data.alpacaKeyId || '';
-      alpacaCreds.secretKey = data.alpacaSecretKey || '';
+      alpacaCredsPaper.keyId = data.alpacaKeyId || '';
+      alpacaCredsPaper.secretKey = data.alpacaSecretKey || '';
+      alpacaCredsLive.keyId = data.alpacaLiveKeyId || '';
+      alpacaCredsLive.secretKey = data.alpacaLiveSecretKey || '';
+      alpacaAccountType = data.alpacaEnvironment === 'live' ? 'live' : 'paper';
+      applyAlpacaEnvironmentUI();
       // Deliberately not populating the visible input fields here — on a
       // fresh page load there's no reason for the saved keys to ever sit
       // in an open text box. Straight to testing the connection instead.
-      if(alpacaCreds.keyId && alpacaCreds.secretKey){
+      var creds = activeAlpacaCreds();
+      if(creds.keyId && creds.secretKey){
         testAlpacaConnection();
       } else {
         showAlpacaInputsView();
@@ -3622,8 +3754,109 @@
     });
   });
 
+  // Click-to-confirm rather than a modal -- this needs to be fast to
+  // use in a genuine "something's wrong, stop everything" moment, but
+  // a single accidental click on a button that closes every open
+  // position is exactly the kind of mistake this pattern exists to
+  // prevent. First click arms it for 4 seconds; a second click within
+  // that window actually executes it; letting it time out cancels
+  // safely with no action taken.
+  var flattenConfirmTimer = null;
+  function updateAlpacaSectionCopy(){
+    var titleEl = document.getElementById('alpacaSectionTitle');
+    var descEl = document.getElementById('alpacaEnvDesc');
+    if(alpacaAccountType === 'live'){
+      titleEl.textContent = 'Broker connection — Alpaca (Live)';
+      descEl.innerHTML = '<strong style="color:var(--loss);">Real money.</strong> Orders placed here use actual funds in a real brokerage account, not a simulation. Requires a live Alpaca account with trading approved — see <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer">alpaca.markets</a>.';
+    } else {
+      titleEl.textContent = 'Broker connection — Alpaca (Paper)';
+      descEl.innerHTML = 'Simulated money only — no real trades are ever placed. Get free paper keys at <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer">alpaca.markets</a>.';
+    }
+  }
+
+  // Switching environments means switching which real account every
+  // trading call talks to -- clears whatever's in the input boxes (they
+  // belonged to the environment being left), re-checks connection status
+  // for the one being entered, and persists the choice so it's still
+  // selected next time this account signs in anywhere.
+  function switchAlpacaEnvironment(newEnv){
+    alpacaAccountType = newEnv;
+    applyAlpacaEnvironmentUI();
+    updateAlpacaSectionCopy();
+    document.getElementById('alpacaKeyIdInput').value = '';
+    document.getElementById('alpacaSecretInput').value = '';
+    if(window.__shwoopAPI && currentUid){
+      window.__shwoopAPI.saveAlpacaEnvironmentPref(currentUid, newEnv).catch(function(err){
+        console.error('Failed to save environment preference:', err);
+      });
+    }
+    testAlpacaConnection();
+    renderStatusPage();
+  }
+
+  document.getElementById('alpacaEnvPaperBtn').addEventListener('click', function(){
+    if(alpacaAccountType === 'paper') return;
+    switchAlpacaEnvironment('paper');
+  });
+
+  var liveEnvConfirmTimer = null;
+  document.getElementById('alpacaEnvLiveBtn').addEventListener('click', function(){
+    if(alpacaAccountType === 'live') return;
+    var btn = this;
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(liveEnvConfirmTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      btn.textContent = 'Live (real money)';
+      switchAlpacaEnvironment('live');
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again — real money';
+      liveEnvConfirmTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        btn.textContent = 'Live (real money)';
+      }, 4000);
+    }
+  });
+
+  document.getElementById('flattenAllBtn').addEventListener('click', function(){
+    var btn = this;
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(flattenConfirmTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      btn.disabled = true;
+      btn.textContent = 'Flattening…';
+      flattenAllPositions().then(function(result){
+        if(result.closed.length === 0 && result.failed.length === 0){
+          showPositionClosedToast('—', 'Flatten all: no open positions to close.');
+        } else {
+          var msg = result.closed.length > 0 ? ('Closed: ' + result.closed.join(', ') + '.') : '';
+          if(result.failed.length > 0){ msg += (msg ? ' ' : '') + 'Failed to close: ' + result.failed.join(', ') + ' — check the dock and retry manually.'; }
+          showPositionClosedToast('Flatten all', msg);
+        }
+      }).finally(function(){
+        btn.disabled = false;
+        btn.textContent = 'Flatten all';
+      });
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again to confirm';
+      flattenConfirmTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        btn.textContent = 'Flatten all';
+      }, 4000);
+    }
+  });
+
   function resetAlpacaConnection(){
-    alpacaCreds = { keyId: '', secretKey: '' };
+    var creds = activeAlpacaCreds();
+    creds.keyId = '';
+    creds.secretKey = '';
     alpacaConnected = false;
     var keyEl = document.getElementById('alpacaKeyIdInput');
     var secEl = document.getElementById('alpacaSecretInput');
@@ -3637,14 +3870,14 @@
 
   // ---------- Alpaca account/positions dock (Messenger-tab style) ----------
   function fetchAlpacaAccountSummary(){
-    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/account', { headers: alpacaHeaders() }).then(function(res){
+    return fetchWithTimeout(ALPACA_TRADING_BASE() + '/v2/account', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     });
   }
 
   function fetchAlpacaPositions(){
-    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/positions', { headers: alpacaHeaders() }).then(function(res){
+    return fetchWithTimeout(ALPACA_TRADING_BASE() + '/v2/positions', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     });
@@ -3656,7 +3889,7 @@
   // documented behavior. Fetched once for every symbol at once, not a
   // separate call per position.
   function fetchAlpacaOpenOrders(){
-    return fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/orders?status=open&nested=true&limit=500', { headers: alpacaHeaders() }, 4000).then(function(res){
+    return fetchWithTimeout(ALPACA_TRADING_BASE() + '/v2/orders?status=open&nested=true&limit=500', { headers: alpacaHeaders() }, 4000).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     });
@@ -3687,7 +3920,7 @@
   // market order in the opposite direction — no need to work out side/qty
   // ourselves.
   function closeAlpacaPosition(sym){
-    return fetch(ALPACA_PAPER_BASE + '/v2/positions/' + encodeURIComponent(sym), {
+    return fetch(ALPACA_TRADING_BASE() + '/v2/positions/' + encodeURIComponent(sym), {
       method: 'DELETE', headers: alpacaHeaders()
     }).then(function(res){
       if(!res.ok){
@@ -3963,7 +4196,7 @@
       take_profit: { limit_price: takeProfitPrice.toFixed(2) },
       stop_loss: { stop_price: stopPrice.toFixed(2) }
     };
-    return fetch(ALPACA_PAPER_BASE + '/v2/orders', {
+    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
       method: 'POST',
       headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()),
       body: JSON.stringify(body)
@@ -3976,7 +4209,7 @@
   }
 
   function cancelAlpacaOrder(orderId){
-    return fetch(ALPACA_PAPER_BASE + '/v2/orders/' + orderId, {
+    return fetch(ALPACA_TRADING_BASE() + '/v2/orders/' + orderId, {
       method: 'DELETE', headers: alpacaHeaders()
     }).then(function(res){
       if(!res.ok && res.status !== 404){ throw new Error('HTTP ' + res.status); }
@@ -4000,7 +4233,7 @@
       take_profit: { limit_price: takeProfitPrice.toFixed(2) },
       stop_loss: { stop_price: stopPrice.toFixed(2) }
     };
-    return fetch(ALPACA_PAPER_BASE + '/v2/orders', {
+    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
       method: 'POST',
       headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()),
       body: JSON.stringify(body)
@@ -4088,7 +4321,6 @@
       exit: null, status: 'open', source: 'alpaca', screenerType: screenerType || 'daily'
     });
     saveJournalEntries();
-    renderTradeBlocks();
     renderCalendar();
     renderPLSummary();
   }
@@ -4103,7 +4335,7 @@
     if(!alpacaConnected || isGuestMode) return;
     var openAlpacaEntries = journalEntries.filter(function(e){ return e.status === 'open' && e.source === 'alpaca'; });
     if(openAlpacaEntries.length === 0) return;
-    fetchWithTimeout(ALPACA_PAPER_BASE + '/v2/orders?status=closed&limit=200', { headers: alpacaHeaders() }).then(function(res){
+    fetchWithTimeout(ALPACA_TRADING_BASE() + '/v2/orders?status=closed&limit=200', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function(orders){
@@ -4129,7 +4361,6 @@
         saveJournalEntries();
         renderCalendar();
         renderJournalDetail();
-        renderTradeBlocks();
         renderPLSummary();
       }
     }).catch(function(err){
@@ -4199,6 +4430,38 @@
     setTimeout(function(){ dismissToast(toastEl); }, 12000);
   }
 
+  // Manual emergency override, separate from anything automatic --
+  // closes EVERY currently open Alpaca position right now, regardless of
+  // whether its own thesis is still valid, and turns off auto-send so
+  // nothing immediately re-enters right after. Uses the exact same
+  // closeAlpacaPosition mechanism already proven for individual closes,
+  // just applied to everything at once. One position failing to close
+  // doesn't block the rest -- each is tracked independently.
+  function flattenAllPositions(){
+    if(!alpacaConnected || !window.__shwoopAPI || !currentUid){
+      return Promise.resolve({ closed: [], failed: [] });
+    }
+    var openEntries = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; });
+    if(alpacaAutoTradeIntradayEnabled){
+      setAlpacaAutoTradeIntradayEnabled(false);
+    }
+    if(openEntries.length === 0){
+      return Promise.resolve({ closed: [], failed: [] });
+    }
+    var closed = [];
+    var failed = [];
+    return Promise.all(openEntries.map(function(entry){
+      return closeAlpacaPosition(entry.sym).then(function(){
+        closed.push(entry.sym);
+      }).catch(function(err){
+        console.error('Flatten all: failed to close', entry.sym, err);
+        failed.push(entry.sym);
+      });
+    })).then(function(){
+      return { closed: closed, failed: failed };
+    });
+  }
+
   function closeInvalidatedPositions(screenerType){
     if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
     var openEntries = journalEntries.filter(function(j){
@@ -4243,7 +4506,6 @@
             entry.stop = candidate.analysis.stop;
             entry.t1 = candidate.analysis.t1;
             saveJournalEntries();
-            renderTradeBlocks();
             showPositionClosedToast(entry.sym, 'Still a valid setup at the close — carried into tomorrow with a refreshed stop and target.');
           }).catch(function(err){
             console.error('Failed to refresh bracket at close for', entry.sym, err);
@@ -4302,7 +4564,7 @@
     return '' +
       '<div class="trade-block' + tierClass + '" data-symbol="' + t.sym + '">' +
         '<div class="trade-columns trade-row">' +
-          '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="true" aria-label="Toggle chart">⌄</button>' +
+          '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
           '<div class="t-sym-cell">' +
             '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
               '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
@@ -4322,7 +4584,7 @@
           '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span>' +
           '<span class="action-text">' + action.html + '</span>' +
         '</div>' +
-        '<div class="trade-detail" id="chartwrap-' + t.sym + '">' +
+        '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
           '<div class="trade-chart-col">' +
             '<div class="chart-toolbar">' +
               '<div class="chart-tf-btns">' + tfBtn('5m') + tfBtn('15m') + tfBtn('30m') + tfBtn('1D') + tfBtn('1W') + tfBtn('1M') + tfBtn('1Y') + '</div>' +
@@ -4348,226 +4610,6 @@
           (openEntry ? '<button class="open-position-badge" data-date="' + openEntry.date + '">● Open position — view in journal</button>' : '') +
         '</div>' +
       '</div>';
-  }
-
-  // Packs a same-tier group of cards into two columns, always adding the
-  // next card to whichever column currently has less total height —
-  // mirrors how a real chart-layout manager fills available space instead
-  // of leaving a gap under a shorter card while the next one starts a new
-  // row anyway. Only meaningful with 2+ cards and only on screens wide
-  // enough for two real columns.
-  function applyMasonryLayout(tierSymbolGroups){
-    if(layoutPrefs.cols !== 2 || window.innerWidth <= 900) return;
-    var el = document.getElementById('tradeBlocks');
-    if(!el) return; // daily section removed from the DOM
-    tierSymbolGroups.forEach(function(syms){
-      if(syms.length < 2) return;
-      var items = syms.map(function(sym){ return el.querySelector('.trade-block[data-symbol="' + sym + '"]'); }).filter(Boolean);
-      if(items.length < 2) return;
-      var anchor = items[0];
-      var parent = anchor.parentNode;
-      if(!parent) return;
-      var row = document.createElement('div');
-      row.className = 'masonry-row';
-      var colA = document.createElement('div'); colA.className = 'masonry-col';
-      var colB = document.createElement('div'); colB.className = 'masonry-col';
-      row.appendChild(colA);
-      row.appendChild(colB);
-      // Inserted while the anchor is still in its original position —
-      // moving items into the columns happens only after this, so the
-      // anchor is never used as a reference node once it's already been
-      // relocated.
-      parent.insertBefore(row, anchor);
-      var heightA = 0, heightB = 0;
-      items.forEach(function(item){
-        var h = item.offsetHeight;
-        if(heightA <= heightB){ colA.appendChild(item); heightA += h; }
-        else { colB.appendChild(item); heightB += h; }
-      });
-    });
-  }
-
-  function renderIntradayBlocks(){
-    var el = document.getElementById('intradayBlocks');
-    if(!el) return;
-    if(intradayTrades.length === 0){
-      el.innerHTML = '<div class="trades-empty-state">No intraday setups right now — screener runs every 15 minutes during market hours.</div>';
-      return;
-    }
-    el.innerHTML = intradayTrades.map(function(t){ return renderTradeRow(t); }).join('');
-
-    el.querySelectorAll('.chevron').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.toggle;
-        var wrap = document.getElementById('chartwrap-' + sym);
-        var open = wrap.hasAttribute('hidden') === false;
-        if(open){ wrap.setAttribute('hidden',''); btn.setAttribute('aria-expanded','false'); btn.textContent = '›'; }
-        else{ wrap.removeAttribute('hidden'); btn.setAttribute('aria-expanded','true'); btn.textContent = '⌄'; }
-      });
-    });
-    el.querySelectorAll('.log-trade-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ openLogModal(btn.dataset.sym); });
-    });
-    el.querySelectorAll('.alpaca-send-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ sendTradeToAlpaca(btn.dataset.sym); });
-    });
-    el.querySelectorAll('.open-position-badge').forEach(function(btn){
-      btn.addEventListener('click', function(){ jumpToJournalDate(btn.dataset.date); });
-    });
-    el.querySelectorAll('.chart-tool-btn[data-scale]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.sym, scale = btn.dataset.scale;
-        document.querySelectorAll('.chart-tool-btn[data-scale][data-sym="' + sym + '"]').forEach(function(b){
-          b.classList.toggle('active', b === btn);
-        });
-        var state = chartStates[sym];
-        if(state){ state.scale = scale; renderChartView(sym); }
-      });
-    });
-    el.querySelectorAll('.chart-reset-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ resetChartZoom(btn.dataset.sym); });
-    });
-    el.querySelectorAll('.chart-tool-btn[data-tf]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.sym, tf = btn.dataset.tf;
-        document.querySelectorAll('.chart-tool-btn[data-tf][data-sym="' + sym + '"]').forEach(function(b){
-          b.classList.toggle('active', b === btn);
-        });
-        var q = findQuote(sym);
-        var svg = document.getElementById('chart-' + sym);
-        if(svg && q){ renderChartInto(svg, sym, q.price, tf); }
-      });
-    });
-
-    intradayTrades.forEach(function(t){
-      setupChartInteractivity(t.sym);
-      var svg = document.getElementById('chart-' + t.sym);
-      if(!svg) return;
-      var q = findQuote(t.sym);
-      var tf = (chartStates[t.sym] && chartStates[t.sym].tf) || '5m';
-      renderChartInto(svg, t.sym, q.price, tf);
-    });
-  }
-
-  function renderTradeBlocks(){
-    var el = document.getElementById('tradeBlocks');
-    if(!el) return; // daily section removed from the DOM -- intraday is the only live surface now
-    if(trades.length === 0){
-      el.innerHTML = '<div class="trades-empty-state">No trades to show right now. Either today\'s screener couldn\'t reach real market data (check your connection and refresh), or it ran successfully and nothing in the universe cleared today\'s quality bar — either way, nothing simulated shows in its place.</div>';
-      return;
-    }
-
-    // Four tiers, in priority order: real exposure (open position) always
-    // comes first regardless of the underlying signal's own status, then
-    // what needs action right now, then what's still just being watched,
-    // then whatever's already played out.
-    var inPosition = [], needsEntry = [], watching = [], finished = [];
-    trades.forEach(function(t){
-      var hasOpenPosition = journalEntries.some(function(j){ return j.sym === t.sym && j.status === 'open'; });
-      if(hasOpenPosition){ inPosition.push(t); }
-      else if(t.status === 'active'){ needsEntry.push(t); }
-      else if(t.status === 'watching'){ watching.push(t); }
-      else { finished.push(t); }
-    });
-
-    var html = '';
-    if(inPosition.length > 0){
-      html += '<div class="priority-label in-position-label"><span class="priority-dot"></span>In position — you\'re holding ' + inPosition.length + ' right now</div>';
-      html += inPosition.map(function(t){ return renderTradeRow(t, 'in-position'); }).join('');
-    }
-    if(needsEntry.length > 0){
-      html += '<div class="priority-label needs-entry-label"><span class="priority-dot"></span>Ready to enter now</div>';
-      html += needsEntry.map(function(t){ return renderTradeRow(t, 'needs-entry'); }).join('');
-    }
-    html += watching.map(function(t){ return renderTradeRow(t); }).join('');
-
-    if(inPosition.length === 0 && needsEntry.length === 0 && watching.length === 0 && finished.length > 0){
-      html = '<div class="trades-empty-state">Everything today already played out — see "Finished today" below for how it went.</div>';
-    }
-    // Target hits are excluded from the visible list here — hit ones
-    // still count as "finished" for keeping them out of the main list
-    // above, they just don't clutter this dropdown once they're won.
-    var shownFinished = finished.filter(function(t){ return t.status !== 'hit'; });
-    if(shownFinished.length > 0){
-      html += '<div class="finished-trades-section">' +
-        '<button class="finished-toggle" id="finishedToggle" aria-expanded="false">' +
-          '<span class="caret">▸</span> Finished today (' + shownFinished.length + ')' +
-        '</button>' +
-        '<div class="finished-trades-list" id="finishedTradesList" hidden>' +
-          shownFinished.map(function(t){ return renderTradeRow(t); }).join('') +
-        '</div>' +
-      '</div>';
-    }
-    el.innerHTML = html;
-
-    var finishedToggleBtn = document.getElementById('finishedToggle');
-    if(finishedToggleBtn){
-      finishedToggleBtn.addEventListener('click', function(){
-        var list = document.getElementById('finishedTradesList');
-        var isHidden = list.hasAttribute('hidden');
-        if(isHidden){ list.removeAttribute('hidden'); finishedToggleBtn.setAttribute('aria-expanded','true'); finishedToggleBtn.querySelector('.caret').textContent = '▾'; }
-        else{ list.setAttribute('hidden',''); finishedToggleBtn.setAttribute('aria-expanded','false'); finishedToggleBtn.querySelector('.caret').textContent = '▸'; }
-      });
-    }
-
-    el.querySelectorAll('.chevron').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.toggle;
-        var wrap = document.getElementById('chartwrap-' + sym);
-        var open = wrap.hasAttribute('hidden') === false;
-        if(open){ wrap.setAttribute('hidden',''); btn.setAttribute('aria-expanded','false'); btn.textContent = '›'; }
-        else{ wrap.removeAttribute('hidden'); btn.setAttribute('aria-expanded','true'); btn.textContent = '⌄'; }
-      });
-    });
-
-    el.querySelectorAll('.log-trade-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ openLogModal(btn.dataset.sym); });
-    });
-
-    el.querySelectorAll('.alpaca-send-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ sendTradeToAlpaca(btn.dataset.sym); });
-    });
-
-    el.querySelectorAll('.open-position-badge').forEach(function(btn){
-      btn.addEventListener('click', function(){ jumpToJournalDate(btn.dataset.date); });
-    });
-
-    el.querySelectorAll('.chart-tool-btn[data-scale]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.sym;
-        if(chartStates[sym]){ chartStates[sym].scale = btn.dataset.scale; }
-        document.querySelectorAll('.chart-tool-btn[data-scale][data-sym="' + sym + '"]').forEach(function(b){
-          b.classList.toggle('active', b === btn);
-        });
-        renderChartView(sym);
-      });
-    });
-
-    el.querySelectorAll('.chart-reset-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ resetChartZoom(btn.dataset.sym); });
-    });
-
-    el.querySelectorAll('.chart-tool-btn[data-tf]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.sym;
-        var tf = btn.dataset.tf;
-        document.querySelectorAll('.chart-tool-btn[data-tf][data-sym="' + sym + '"]').forEach(function(b){
-          b.classList.toggle('active', b === btn);
-        });
-        var q = findQuote(sym);
-        var svg = document.getElementById('chart-' + sym);
-        if(svg && q){ renderChartInto(svg, sym, q.price, tf); }
-      });
-    });
-
-    trades.forEach(function(t){ setupChartInteractivity(t.sym); });
-
-    renderAllTradeCharts();
-    applyMasonryLayout([
-      inPosition.map(function(t){ return t.sym; }),
-      needsEntry.map(function(t){ return t.sym; }),
-      watching.map(function(t){ return t.sym; })
-    ]);
   }
 
   // Entry/stop/targets stay fixed for the day once set — but status (and
@@ -4614,7 +4656,6 @@
     // re-render handles that. Otherwise, cheaper in-place badge/banner
     // updates are enough and avoid rebuilding the whole list every tick.
     if(anyStatusChanged){
-      renderTradeBlocks();
     } else {
       trades.forEach(function(t){
         var badgeEl = document.getElementById('status-badge-' + t.sym);
@@ -5392,9 +5433,9 @@
     var resultEl = document.getElementById('alpacaDataFeedTestResult');
     var btn = document.getElementById('testAlpacaDataFeedBtn');
 
-    if(!alpacaCreds.keyId || !alpacaCreds.secretKey){
+    if(!alpacaCredsPaper.keyId || !alpacaCredsPaper.secretKey){
       statusEl.className = 'labs-backtest-status fail';
-      statusEl.textContent = 'Connect Alpaca in Settings first -- this test needs your real paper account credentials.';
+      statusEl.textContent = 'Connect Alpaca (paper) in Settings first -- this test needs your real paper account credentials.';
       return;
     }
 
@@ -5417,7 +5458,8 @@
     Promise.all(testSymbols.map(function(sym){
       var url = ALPACA_DATA_BASE + '/v2/stocks/' + sym + '/bars?timeframe=15Min&start=' + startStr +
         '&end=' + endStr + '&limit=1000&feed=iex&adjustment=raw';
-      return fetch(url, { headers: alpacaHeaders() }).then(function(res){
+      var paperHeaders = { 'APCA-API-KEY-ID': alpacaCredsPaper.keyId, 'APCA-API-SECRET-KEY': alpacaCredsPaper.secretKey };
+      return fetch(url, { headers: paperHeaders }).then(function(res){
         if(!res.ok){
           return res.text().then(function(body){ throw new Error('HTTP ' + res.status + ': ' + body.slice(0, 150)); });
         }
@@ -5868,16 +5910,6 @@
   }
 
   // Each trade remembers its own timeframe now — no single global one.
-  function renderAllTradeCharts(){
-    trades.forEach(function(t){
-      var svg = document.getElementById('chart-' + t.sym);
-      if(!svg) return;
-      var q = findQuote(t.sym);
-      var tf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
-      renderChartInto(svg, t.sym, q.price, tf);
-    });
-  }
-
   // ---------- Chart interactivity: wheel zoom, drag pan, crosshair ----------
   function svgLocalX(svg, clientX){
     var rect = svg.getBoundingClientRect();
@@ -6236,7 +6268,7 @@
     renderMovers();
     renderIndices();
     renderBriefHeadline();
-    var statusPageEl = document.getElementById('page-status');
+    var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
 
@@ -6246,7 +6278,6 @@
     if(!hasLiveCalibrated && !isGuestMode && anySuccess){
       hasLiveCalibrated = true;
       calibrateTradeLevels();
-      renderTradeBlocks();
       renderWhatToWatch();
     }
 
@@ -6614,11 +6645,10 @@
   document.getElementById('layoutResetBtn').addEventListener('click', function(){
     layoutPrefs = { width:62, height:200, text:12.5, cols:1, showMA:true, showOHLC:true };
     applyLayout();
-    renderTradeBlocks();
   });
 
-  document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); renderTradeBlocks(); });
-  document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); renderTradeBlocks(); });
+  document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); });
+  document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); });
 
   document.getElementById('maToggleBtn').addEventListener('click', function(){
     layoutPrefs.showMA = !layoutPrefs.showMA;
@@ -6650,7 +6680,6 @@
 
   function showPage(name){
     document.getElementById('page-brief').hidden = (name !== 'brief');
-    document.getElementById('page-status').hidden = (name !== 'status');
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
     document.getElementById('page-settings').hidden = (name !== 'settings');
@@ -6660,8 +6689,7 @@
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
-    if(name === 'status'){ renderStatusPage(); }
-    if(name === 'trades'){ renderAllTradeCharts(); }
+    if(name === 'trades'){ renderStatusPage(); }
     if(name === 'journal'){ renderCalendar(); }
     if(name === 'demo'){ showDemoIntro(); } else { stopDemo(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
@@ -7062,7 +7090,6 @@
     saveJournalEntries();
     renderCalendar();
     renderJournalDetail();
-    renderTradeBlocks();
     renderPLSummary();
   }
 
@@ -7275,7 +7302,6 @@
     });
     saveJournalEntries();
     closeLogModal();
-    renderTradeBlocks();
     jumpToJournalDate(date);
   });
 
@@ -7322,7 +7348,6 @@
     closeExitModal();
     renderCalendar();
     renderJournalDetail();
-    renderTradeBlocks();
     renderPLSummary();
   });
 
@@ -7361,10 +7386,11 @@
     if(isGuestMode){ alert('Sign in with a real account to connect a broker.'); return; }
     var keyId = document.getElementById('alpacaKeyIdInput').value.trim();
     var secretKey = document.getElementById('alpacaSecretInput').value.trim();
-    alpacaCreds.keyId = keyId;
-    alpacaCreds.secretKey = secretKey;
+    var creds = activeAlpacaCreds();
+    creds.keyId = keyId;
+    creds.secretKey = secretKey;
     if(window.__shwoopAPI && currentUid){
-      window.__shwoopAPI.saveAlpacaCredentials(currentUid, keyId, secretKey).catch(function(err){
+      window.__shwoopAPI.saveAlpacaCredentials(currentUid, keyId, secretKey, alpacaAccountType).catch(function(err){
         console.error('Failed to save Alpaca credentials:', err);
       });
     }
@@ -7375,7 +7401,7 @@
     // Key ID isn't especially sensitive on its own (it's an identifier,
     // not a secret) so repopulating it is a convenience — but the secret
     // always has to be re-typed, never shown again once saved.
-    document.getElementById('alpacaKeyIdInput').value = alpacaCreds.keyId;
+    document.getElementById('alpacaKeyIdInput').value = activeAlpacaCreds().keyId;
     document.getElementById('alpacaSecretInput').value = '';
     showAlpacaInputsView();
     setAlpacaStatus('Enter new keys to reconnect', null);
@@ -7452,7 +7478,8 @@
         text: top.headline, url: top.url, time: stamp
       };
     }).catch(function(){
-      var price = findQuote(t.sym).price;
+      var q = findQuote(t.sym);
+      var price = q ? q.price : (t.entry || 0);
       var evald = evaluateTradeAlert(t, price);
       return {
         id: 'a' + Date.now() + '_' + t.sym, date: today, sym: t.sym, tag: evald.tag, text: evald.text,
@@ -7528,7 +7555,17 @@
     var today = new Date().toISOString().slice(0,10);
     var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
 
-    Promise.all(trades.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
+    if(intradayTrades.length === 0){
+      // Nothing real to alert on yet (market closed, or no signals have
+      // fired today) -- an empty, honest state beats falling back to
+      // alerts about symbols that aren't even part of the current
+      // universe anymore.
+      alertHistory = [];
+      renderHistoryList();
+      return;
+    }
+
+    Promise.all(intradayTrades.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
       // Only today's actual picks, not an ever-growing mix of old alerts
       // for symbols that may not even be on the board anymore.
       alertHistory = newAlerts;
@@ -8190,7 +8227,6 @@
           journalEntries = entries;
           renderCalendar();
           renderJournalDetail();
-          renderTradeBlocks();
           renderPLSummary();
         });
         loadAlertsForUser(user.uid);
@@ -8205,7 +8241,6 @@
           ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
         });
         becomeLeaderIfAvailable();
-        renderAllTradeCharts();
       } else if(!isGuestMode){
         currentUid = null;
         var exportSectionEl2 = document.getElementById('labsExportSection');
@@ -8221,7 +8256,6 @@
         if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
         intradayTrades = [];
         renderIntradayBlocks();
-        renderTradeBlocks();
         renderWhatToWatch();
         authGateEl.removeAttribute('hidden');
         document.getElementById('authEmail').value = '';
@@ -8360,7 +8394,14 @@
   function renderMovers(){
     var el = document.getElementById('moversGrid');
     if(!el || watchlist.length === 0) return;
-    var withChange = watchlist.map(function(w){
+    // Scoped to the actual trading universe -- watchlist also carries the
+    // S&P/Nasdaq/Dow benchmark ETFs for the index cards above, and mixing
+    // those into gainers/losers meant an index sitting at a flat 0.00%
+    // could out-"lose" real stocks just for having a smaller move,
+    // despite being a different category of thing entirely.
+    var withChange = watchlist.filter(function(w){
+      return INTRADAY_UNIVERSE.indexOf(w.sym) > -1;
+    }).map(function(w){
       return { sym: w.sym, price: w.price, change: pct(w.price, w.prevClose) };
     });
     var sorted = withChange.slice().sort(function(a,b){ return b.change - a.change; });
