@@ -860,23 +860,6 @@
   .symbol-toggle-btn:hover{ border-color: var(--amber-dim); }
   .symbol-toggle-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
 
-  #tradeBlocks.two-col{ display:block; }
-  #tradeBlocks.two-col .masonry-row{ display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; }
-  #tradeBlocks.two-col .masonry-col{ flex:1; display:flex; flex-direction:column; gap:20px; min-width:0; }
-  #tradeBlocks.two-col .trade-row{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
-  #tradeBlocks.two-col .trade-row > *{ flex:1 1 40%; }
-  #tradeBlocks.two-col .trade-row .chevron{ flex: 0 0 auto; }
-  #tradeBlocks.two-col .trade-row .t-sym-cell{ flex: 1 1 100%; }
-  #tradeBlocks.two-col [data-label]::before{
-    content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
-    text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;
-  }
-  #tradeBlocks.two-col .trade-detail{ flex-direction: column; }
-  #tradeBlocks.two-col .trade-chart-col{ flex: 0 0 auto; width:100%; }
-  #tradeBlocks.two-col .trade-notes-col{ flex: 1 1 auto; width:100%; }
-  @media (max-width: 900px){
-    #tradeBlocks.two-col{ grid-template-columns: 1fr; }
-  }
   .zoom-btn{
     background: transparent; border:1px solid var(--border); color: var(--muted);
     width:26px; height:26px; border-radius:4px; font-size:15px; line-height:1;
@@ -1233,29 +1216,6 @@
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
   }
-
-  .trade-action-bar{
-    display:flex; align-items:center; justify-content:space-between; gap:14px;
-    padding:14px 16px; border-top:1px solid var(--border); flex-wrap:wrap;
-  }
-  .log-trade-btn{
-    background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
-    padding:8px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
-    font-family:'Space Grotesk', sans-serif;
-  }
-  .log-trade-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
-  .alpaca-send-btn{
-    background: transparent; border:1px solid var(--border); color: var(--muted);
-    padding:8px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
-    font-family:'Space Grotesk', sans-serif;
-  }
-  .alpaca-send-btn:not(:disabled):hover{ border-color: var(--amber-dim); color: var(--paper); }
-  .alpaca-send-btn:disabled{ opacity:.5; cursor:not-allowed; }
-  .open-position-badge{
-    font-size:11.5px; color: var(--amber); cursor:pointer; background:none; border:none; padding:0;
-    font-family:inherit;
-  }
-  .open-position-badge:hover{ text-decoration:underline; }
 
   .modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:300;
@@ -1656,22 +1616,6 @@
         intradayAutoTradePausedReason: null,
       }, { merge: true });
     },
-    // Internal only for now — not shown anywhere in the UI. One document
-    // per (day, symbol) rather than one document per day holding an array:
-    // when multiple picks resolve in the same tick, concurrent updates to
-    // a single shared array-document race each other (last write wins,
-    // silently dropping the others) — independent documents can't collide.
-    saveDailyPickLog: function(uid, key, record){
-      return setDoc(doc(db, 'users', uid, 'pickHistory', key), record, { merge: true });
-    },
-    getDailyPickLog: function(uid, key){
-      return getDoc(doc(db, 'users', uid, 'pickHistory', key)).then(function(snap){
-        return snap.exists() ? snap.data() : null;
-      }).catch(function(err){
-        console.error('Pick history read failed:', err);
-        return null;
-      });
-    },
     // Each wraps a Cloud Function callable -- .data is the raw Finnhub
     // JSON response, unwrapped from the {data: ...} envelope callable
     // functions return, so callers don't need to know a function is
@@ -1850,48 +1794,6 @@
         <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
         <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
       </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="logTradeModal" hidden>
-    <div class="modal-box">
-      <div class="modal-title">Log this trade</div>
-      <div class="modal-sub mono" id="logModalSym">—</div>
-      <form id="logTradeForm">
-        <div class="modal-row-2">
-          <div class="modal-field">
-            <label for="logEntry">Entry price</label>
-            <input type="number" id="logEntry" step="any" min="0" required>
-          </div>
-          <div class="modal-field">
-            <label for="logQty">Shares / contracts</label>
-            <input type="number" id="logQty" step="any" min="0" required>
-          </div>
-        </div>
-        <div class="modal-field">
-          <label for="logDate">Date entered</label>
-          <input type="date" id="logDate" required>
-        </div>
-        <div class="modal-row-2">
-          <div class="modal-field">
-            <label for="logStop">Stop</label>
-            <input type="number" id="logStop" step="any" min="0" required>
-          </div>
-          <div class="modal-field"></div>
-        </div>
-        <div class="modal-row-2">
-          <div class="modal-field">
-            <label for="logT1">Target</label>
-            <input type="number" id="logT1" step="any" min="0" required>
-          </div>
-          <div class="modal-field"></div>
-        </div>
-        <div class="modal-error" id="logModalError"></div>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn-cancel" id="logModalCancel">Cancel</button>
-          <button type="submit" class="modal-btn-submit">Log trade</button>
-        </div>
-      </form>
     </div>
   </div>
 
@@ -2838,83 +2740,6 @@
     }
   }
 
-  // entry/stop/t1/t2 are computed from the live price (see calibrateTradeLevels),
-  // not hardcoded — otherwise these drift completely out of sync with reality
-  // the moment the real stock price moves. This is the simulated fallback
-  // shown before the screener has run for the day.
-  var DEFAULT_TRADES = [
-    { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, status:'active',   statusLabel:'Active',
-      notes: [
-        "Holding above the 50-day moving average through the recent semis rally, a level that's held on every pullback this month.",
-        "Volume has been running well above the 20-day average heading into tonight's print — the market is clearly positioning ahead of the number.",
-        "Data-center guidance is what actually moves this stock, not the headline EPS beat or miss — that's where the real signal lives.",
-        "Options activity skews call-heavy into earnings, suggesting positioning for an upside surprise rather than a hedge."
-      ] },
-    { sym:'AAPL', direction:'Long', entryPct:0.008, stopPctFromEntry:-0.0215, t1PctFromEntry:0.0236, status:'watching', statusLabel:'Watching',
-      notes: [
-        'Coiling just under resistance for the third session in a row, with each test slightly higher than the last.',
-        'Waiting for a breakout on real volume confirmation before sizing in — a low-volume push through resistance is a trap, not a signal.',
-        "Broader tech tape needs to hold up for this setup to trigger; a rotation out of growth names would stall this regardless of AAPL's own chart.",
-        'No entry until the breakout actually happens — this stays on watch, not in the book, until price proves it.'
-      ] },
-    { sym:'TSLA', direction:'Short', entryPct:0.017, stopPctFromEntry:0.0320, t1PctFromEntry:-0.0320, status:'active',   statusLabel:'Active',
-      notes: [
-        'Rejected twice this week on declining volume, a classic sign buyers are losing conviction at this level.',
-        'Momentum has turned negative on the daily chart, with the 10-day moving average now rolling over.',
-        'Delivery numbers next week are a real risk to this thesis — a beat could squeeze the short hard, so sizing stays conservative.',
-        'Options skew has shifted toward puts over the past week, suggesting the market is starting to price in the same downside.'
-      ] },
-    { sym:'AMD',  direction:'Long', entryPct:-0.024, stopPctFromEntry:-0.0268, t1PctFromEntry:0.0268, status:'hit',      statusLabel:'Target hit',
-      notes: [
-        'Reached target on strong data-center commentary that came in well ahead of expectations.',
-        'Stop trailed up along the way to lock in the gain rather than risk giving it back on a reversal.',
-        'Watching for a pullback toward the breakout level to consider re-entering, rather than chasing it further extended here.',
-        'This one played out close to the original thesis — a useful reference for how the setup was supposed to work.'
-      ] }
-  ];
-
-  function cloneDefaultTrade(t){
-    return {
-      sym: t.sym, direction: t.direction,
-      entryPct: t.entryPct, stopPctFromEntry: t.stopPctFromEntry, t1PctFromEntry: t.t1PctFromEntry,
-      status: t.status, statusLabel: t.statusLabel, notes: t.notes.slice(), analysisIsReal: false
-    };
-  }
-
-  var trades = DEFAULT_TRADES.map(cloneDefaultTrade);
-
-  // Snapshot of the original simulated direction/status/notes, so
-  // post-sign-out always has a clean baseline to fall back to,
-  // regardless of what the screener replaced `trades` with during the
-  // session.
-  var defaultTradeMeta = DEFAULT_TRADES.map(function(t){
-    return { sym: t.sym, direction: t.direction, status: t.status, statusLabel: t.statusLabel, notes: t.notes.slice() };
-  });
-
-  function calibrateTradeLevels(){
-    trades.forEach(function(t){
-      var q = findQuote(t.sym);
-      if(!q || !q.price) return;
-      var entry = q.price * (1 + t.entryPct);
-      t.entry = entry;
-      t.stop = entry * (1 + t.stopPctFromEntry);
-      t.t1 = entry * (1 + t.t1PctFromEntry);
-    });
-  }
-  calibrateTradeLevels();
-
-  function resetTradesToDefault(){
-    trades = DEFAULT_TRADES.map(cloneDefaultTrade);
-    watchlist = watchlist.filter(function(w){ return DEFAULT_WATCHLIST_SYMS.indexOf(w.sym) > -1; });
-    calibrateTradeLevels();
-    renderTicker();
-    statCta();
-    var subtitleEl = document.getElementById('tradesSubtitle');
-    if(subtitleEl){ subtitleEl.textContent = 'Simulated entries, stops and targets — chart below each row.'; }
-    var statusEl = document.getElementById('analysisSyncStatus');
-    if(statusEl){ statusEl.textContent = '—'; statusEl.className = 'quote-sync-status'; }
-  }
-
   // Rolling SMA across a full bar series, for drawing as a line on the chart.
   function computeSMASeries(bars, period){
     var closes = bars.map(function(b){ return b.c; });
@@ -3199,13 +3024,6 @@
     return { session: 'overnight', label: 'Overnight session (extended hours)' };
   }
 
-  function updateAnalysisStatus(text, ok){
-    var el = document.getElementById('analysisSyncStatus');
-    if(!el) return;
-    el.textContent = text;
-    el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
-  }
-
   function buildTradeFromPick(pick){
     var isLong = pick.direction === 'Long';
     return {
@@ -3235,9 +3053,7 @@
     });
   }
 
-  // Mirrors runScreener's structure, but into its own separate state
-  // (intradayTrades) rather than replacing the daily picks — this is an
-  // additional, opt-in view, not a swap-out of what's already there.
+  // Its own separate state (intradayTrades) purely for local display.
   // Event-based, not ranked: an opening-range breakout either happened
   // for a given symbol today (with volume confirmation) or it didn't --
   // there's no "top 3 by score" the way the old momentum-ranking system
@@ -3314,41 +3130,6 @@
     el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
   }
 
-  // ---------- Internal pick-outcome log (not shown in the UI yet) ----------
-
-  function logTodaysPicksInternally(candidates, today){
-    if(!window.__shwoopAPI || !currentUid) return;
-    window.__shwoopAPI.saveDailyPickLog(currentUid, today + '_index', { date: today, syms: candidates.map(function(c){ return c.sym; }) })
-      .catch(function(err){ console.error('Failed to save today\'s pick index:', err); });
-    candidates.forEach(function(c){
-      var record = {
-        date: today, sym: c.sym, direction: c.analysis.direction, entry: c.analysis.entry, stop: c.analysis.stop, t1: c.analysis.t1,
-        score: c.score, generatedAt: Date.now(), outcome: 'pending', resolvedAt: null, resolvedPrice: null
-      };
-      window.__shwoopAPI.saveDailyPickLog(currentUid, today + '_' + c.sym, record).catch(function(err){
-        console.error('Failed to log pick internally for', c.sym, err);
-      });
-    });
-  }
-
-  function logPickOutcomeInternally(sym, outcome, price){
-    if(!window.__shwoopAPI || !currentUid) return;
-    var today = new Date().toISOString().slice(0,10);
-    var key = today + '_' + sym;
-    // Each symbol has its own independent document — safe even if several
-    // picks resolve in the very same tick, unlike a shared array-document
-    // where concurrent writes would race and silently drop updates.
-    window.__shwoopAPI.getDailyPickLog(currentUid, key).then(function(pick){
-      if(!pick || pick.outcome !== 'pending') return;
-      pick.outcome = outcome;
-      pick.resolvedAt = Date.now();
-      pick.resolvedPrice = price;
-      return window.__shwoopAPI.saveDailyPickLog(currentUid, key, pick);
-    }).catch(function(err){
-      console.error('Failed to log pick outcome internally:', err);
-    });
-  }
-
   // Fetches current equity once per screener run (not once per
   // candidate) so the viability filter below scales automatically as the
   // account grows, without a separate setting to maintain. Returns null
@@ -3373,37 +3154,6 @@
     return candidates.filter(function(c){
       return calculatePositionSize(equity, riskPercent, c.analysis.entry, c.analysis.stop) >= 1;
     });
-  }
-
-  function runScreener(){
-    // Daily/swing screening has been fully retired — intraday is the
-    // only live strategy now. This is a deliberate no-op rather than a
-    // full removal: the trades array, DEFAULT_TRADES, and related
-    // rendering functions are still referenced in a few other places in
-    // this file, and fully excising them carries real risk of breaking
-    // something unrelated. Not running this means the daily screener
-    // never scans, never picks, and never auto-trades — which is the
-    // actual goal — without touching that deeper, riskier surface.
-    return;
-  }
-
-  function applyStoredScreenerPicks(list){
-    list.forEach(function(saved){
-      ensureInWatchlist(saved.sym, saved.name || COMPANY_NAMES[saved.sym] || saved.sym, saved.entry, saved.entry);
-    });
-    trades = list.map(buildTradeFromPick);
-    // The line above is a placeholder (current = entry, 0% change) only
-    // until this immediate fetch corrects it — without this, a newly
-    // loaded pick could show a fake "already at entry" price for up to
-    // 45 seconds, which makes an otherwise-correct Watching status look
-    // nonsensical (as if there's nothing left to wait for).
-    fetchAllQuotes();
-    renderWhatToWatch();
-    renderTicker();
-    renderBriefHeadline();
-    statCta();
-    updateAnalysisStatus("Today's screener picks loaded", true);
-    autoSendNewPicksIfEnabled();
   }
 
   var backendIntradayPicks = null;
@@ -3437,14 +3187,7 @@
 
   function loadScreenerForUser(uid){
     if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
-    updateAnalysisStatus('Calculating…', null);
     screenerUnsubscribe = window.__shwoopAPI.watchScreenerPicks(uid, function(data){
-      var today = new Date().toISOString().slice(0,10);
-      if(data.screenerDate === today && data.screenerPicks && data.screenerPicks.length){
-        applyStoredScreenerPicks(data.screenerPicks);
-      } else {
-        runScreener();
-      }
       // Purely for display — this is the backend server's own intraday
       // screener view, kept entirely separate from this tab's own
       // independent intradayTrades (which the tab computes itself when
@@ -3783,7 +3526,6 @@
   }
 
   // ---------- Auto-send new picks (opt-in, browser-tab-dependent) ----------
-  var alpacaAutoTradeEnabled = false;
   var alpacaAutoTradeIntradayEnabled = false;
 
   // ---------- Risk-based position sizing ----------
@@ -4008,17 +3750,6 @@
     });
   }
 
-  function setAlpacaAutoTradeEnabled(enabled){
-    alpacaAutoTradeEnabled = enabled;
-    var btn = document.getElementById('alpacaAutoTradeToggle');
-    if(btn){
-      btn.textContent = enabled ? 'On' : 'Off';
-      btn.setAttribute('aria-checked', enabled ? 'true' : 'false');
-      btn.classList.toggle('active', enabled);
-    }
-    try { window.localStorage.setItem('shwoopnet:alpacaAutoTrade', enabled ? 'true' : 'false'); } catch(e){}
-  }
-
   function setAlpacaAutoTradeIntradayEnabled(enabled){
     alpacaAutoTradeIntradayEnabled = enabled;
     var btn = document.getElementById('alpacaAutoTradeIntradayToggle');
@@ -4030,17 +3761,6 @@
     try { window.localStorage.setItem('shwoopnet:alpacaAutoTradeIntraday', enabled ? 'true' : 'false'); } catch(e){}
   }
 
-  function loadAlpacaAutoTradePref(){
-    var saved = false;
-    try { saved = window.localStorage.getItem('shwoopnet:alpacaAutoTrade') === 'true'; } catch(e){}
-    setAlpacaAutoTradeEnabled(saved);
-  }
-
-  function loadAlpacaAutoTradeIntradayPref(){
-    var saved = false;
-    try { saved = window.localStorage.getItem('shwoopnet:alpacaAutoTradeIntraday') === 'true'; } catch(e){}
-    setAlpacaAutoTradeIntradayEnabled(saved);
-  }
 
   // The local "Auto-send new intraday picks" toggle and its click-to-arm
   // live-mode confirmation used to live here. Removed: with the backend
@@ -4053,7 +3773,7 @@
   // is intentionally never set anywhere anymore, so it stays permanently
   // false and every check gated on it below stays permanently a no-op.
 
-  // ---------- Intraday screener (opt-in, separate from the daily one) ----------
+  // ---------- Intraday screener ----------
   function setIntradayEnabled(enabled){
     alpacaIntradayEnabled = enabled;
     var btn = document.getElementById('intradayToggle');
@@ -4114,38 +3834,6 @@
     container.appendChild(toastEl);
     toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
     setTimeout(function(){ dismissToast(toastEl); }, 12000);
-  }
-
-  // Reuses the internal pick-history log's per-symbol document as the
-  // dedup record — marking a pick "autoSent" BEFORE placing the order
-  // (not after) closes the race where a second call (e.g. a fast reload)
-  // could see the still-pending flag and double-submit while the first
-  // order is still in flight.
-  function autoSendNewPicksIfEnabled(){
-    if(!alpacaAutoTradeEnabled || !alpacaConnected || !window.__shwoopAPI || !currentUid) return;
-    var today = new Date().toISOString().slice(0,10);
-    trades.forEach(function(t){
-      var key = today + '_' + t.sym;
-      window.__shwoopAPI.getDailyPickLog(currentUid, key).then(function(pick){
-        if(!pick || pick.autoSent) return;
-        pick.autoSent = true;
-        return window.__shwoopAPI.saveDailyPickLog(currentUid, key, pick).then(function(){
-          return computeSizedOrder(t);
-        }).then(function(sized){
-          if(sized.qty < 1){
-            showSizingSkippedToast(t.sym, sized.skipReason);
-            return;
-          }
-          var side = t.direction === 'Long' ? 'buy' : 'sell';
-          return submitAlpacaBracketOrder(t.sym, side, sized.qty, t.stop, t.t1).then(function(order){
-            logAlpacaTradeToJournal(t, sized.qty, order, 'daily');
-            showAutoSendToast(t.sym, t.direction, sized.qty);
-          });
-        });
-      }).catch(function(err){
-        console.error('Auto-send failed for', t.sym, err);
-      });
-    });
   }
 
   // Intraday auto-send is deliberately different from the daily version.
@@ -4900,49 +4588,6 @@
     });
   }
 
-  function sendTradeToAlpaca(sym){
-    if(!alpacaConnected){ alert('Connect your Alpaca paper account in Settings first.'); return; }
-    var screenerType = 'daily';
-    var t = trades.filter(function(x){ return x.sym === sym; })[0];
-    if(!t){
-      t = intradayTrades.filter(function(x){ return x.sym === sym; })[0];
-      screenerType = 'intraday';
-    }
-    if(!t) return;
-
-    var btn = document.getElementById('alpaca-btn-' + sym);
-    if(btn){ btn.disabled = true; btn.textContent = 'Sizing…'; }
-
-    computeSizedOrder(t).then(function(sized){
-      if(btn){ btn.disabled = false; btn.textContent = 'Send to Alpaca (Paper)'; }
-      var suggested = sized.qty >= 1 ? String(sized.qty) : '';
-      var promptMsg = 'Paper shares of ' + sym + ' to buy/sell for this trade?\n\n' +
-        (sized.qty >= 1
-          ? '(Suggested size at ' + riskPercent.toFixed(1) + '% risk per trade — override if you want a different amount.)'
-          : '(' + sized.skipReason + ' — enter a size manually if you want to override.)');
-      var qtyStr = prompt(promptMsg, suggested);
-      if(!qtyStr) return;
-      var qty = parseInt(qtyStr, 10);
-      if(!qty || qty <= 0){ alert('Enter a valid whole number of shares.'); return; }
-
-      var side = t.direction === 'Long' ? 'buy' : 'sell';
-      if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
-
-      submitAlpacaBracketOrder(sym, side, qty, t.stop, t.t1).then(function(order){
-        if(btn){ btn.textContent = 'Sent to Alpaca ✓'; }
-        console.log('Alpaca paper order submitted:', order);
-        // One button means one button — since we already know exactly what
-        // was submitted (entry, qty, stop, target), there's no reason to
-        // make the user re-type it into the manual log form afterward.
-        logAlpacaTradeToJournal(t, qty, order, screenerType);
-      }).catch(function(err){
-        if(btn){ btn.disabled = false; btn.textContent = 'Send to Alpaca (Paper)'; }
-        alert('Paper order failed: ' + err.message);
-        console.error('Alpaca order failed:', err);
-      });
-    });
-  }
-
   function logAlpacaTradeToJournal(t, qty, order, screenerType){
     // Market orders don't always return a fill price immediately in the
     // submission response — fall back to the planned entry level, which
@@ -5122,86 +4767,10 @@
     return isLong ? { cls: 'buying', label: 'Buying' } : { cls: 'selling', label: 'Selling' };
   }
 
-  function renderTradeRow(t, tier){
-    var q = findQuote(t.sym);
-    var change = pct(q.price, q.prevClose);
-    var up = change >= 0;
-    var badge = computeBadgeInfo(t);
-    var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
-    var curScale = (chartStates[t.sym] && chartStates[t.sym].scale) || 'linear';
-    var curTf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
-    var action = buildActionHTML(t);
-    var rr = computeRiskReward(t);
-    var tierClass = tier ? ' trade-block-' + tier : '';
-    function tfBtn(tf){
-      return '<button class="chart-tool-btn' + (curTf===tf?' active':'') + '" data-tf="' + tf + '" data-sym="' + t.sym + '">' + tf + '</button>';
-    }
-
-    return '' +
-      '<div class="trade-block' + tierClass + '" data-symbol="' + t.sym + '">' +
-        '<div class="trade-columns trade-row">' +
-          '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
-          '<div class="t-sym-cell">' +
-            '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
-              '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
-            '<span class="t-name">' + q.name + '</span>' +
-          '</div>' +
-          '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' + fmt(q.price) +
-            '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
-          '</div>' +
-          '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
-          '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
-          '<div class="t-t1 mono" data-label="Target">' + fmt(t.t1) + '</div>' +
-          '<div class="t-rr" data-label="Risk / Reward">' +
-            '<div class="rr-ratio mono">1 : ' + rr.ratio.toFixed(1) + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="trade-action-banner' + (action.done ? ' done' : '') + '" id="action-banner-' + t.sym + '">' +
-          '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span>' +
-          '<span class="action-text">' + action.html + '</span>' +
-        '</div>' +
-        '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
-          '<div class="trade-chart-col">' +
-            '<div class="chart-toolbar">' +
-              '<div class="chart-tf-btns">' + tfBtn('5m') + tfBtn('15m') + tfBtn('30m') + tfBtn('1D') + tfBtn('1W') + tfBtn('1M') + tfBtn('1Y') + '</div>' +
-              '<div class="chart-toolbar-btns">' +
-                '<button class="chart-tool-btn' + (curScale==='linear'?' active':'') + '" data-scale="linear" data-sym="' + t.sym + '">Linear</button>' +
-                '<button class="chart-tool-btn' + (curScale==='log'?' active':'') + '" data-scale="log" data-sym="' + t.sym + '">Log</button>' +
-                '<button class="chart-tool-btn chart-reset-btn" data-sym="' + t.sym + '">Reset</button>' +
-              '</div>' +
-            '</div>' +
-            '<div class="chart-canvas-wrap">' +
-              '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>' +
-              '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="trade-notes-col">' +
-            '<h3>Why this trade</h3>' +
-            '<ul>' + t.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
-          '</div>' +
-        '</div>' +
-        '<div class="trade-action-bar">' +
-          '<button class="log-trade-btn" data-sym="' + t.sym + '">I took this trade →</button>' +
-          '<button class="alpaca-send-btn" id="alpaca-btn-' + t.sym + '" data-sym="' + t.sym + '"' + (alpacaConnected ? '' : ' disabled title="Connect Alpaca in Settings first"') + '>Send to Alpaca (Paper)</button>' +
-          (openEntry ? '<button class="open-position-badge" data-date="' + openEntry.date + '">● Open position — view in journal</button>' : '') +
-        '</div>' +
-      '</div>';
-  }
-
-  // The function these render calls always assumed existed, but never
-  // actually did -- calling it threw an uncaught ReferenceError every
-  // time the screener finished a pass, which aborted the rest of that
-  // callback before auto-trade's own order-sending logic ever ran.
-  // That's the real reason auto-trade could be "on" and still never
-  // send anything: it never got the chance to try.
-  //
-  // Deliberately doesn't include renderTradeRow's manual "log trade" /
-  // "send to Alpaca" buttons -- neither had a click handler wired up
-  // anywhere in the app, so they were exactly the same kind of
-  // silently-broken UI as the Layout menu's dead column toggle. Since
-  // auto-trade already handles sending orders automatically, adding
-  // more non-functional buttons here would repeat that mistake rather
-  // than fix it.
+  // Deliberately has no manual "log trade" / "send to Alpaca" buttons --
+  // auto-trade already handles sending orders automatically, and a manual
+  // override belongs in Open Positions (the Close button) and Settings
+  // (Auto-Trading Controls), not duplicated again here per setup.
   function renderIntradayBlocks(){
     var el = document.getElementById('intradayBlocks');
     if(!el) return;
@@ -5277,92 +4846,6 @@
         }
       });
     });
-  }
-
-  // Entry/stop/targets stay fixed for the day once set — but status (and
-  // therefore the action sentence) needs to stay honest against whatever
-  // price is showing right now, or "Watching, wait to reach $X" can end up
-  // displayed right next to a current price that already equals $X.
-  function recomputeTradeStatus(t, currentPrice){
-    var isLong = t.direction !== 'Short';
-    var distFromEntryPct = Math.abs((currentPrice - t.entry) / t.entry * 100);
-    var status = 'watching', statusLabel = 'Watching';
-    if(distFromEntryPct < 2){ status = 'active'; statusLabel = 'Active'; }
-    if(isLong && currentPrice >= t.t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(!isLong && currentPrice <= t.t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(isLong && currentPrice <= t.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-    if(!isLong && currentPrice >= t.stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-    t.status = status;
-    t.statusLabel = statusLabel;
-  }
-
-  function updateTradeRowPrices(){
-    var anyStatusChanged = false;
-    trades.forEach(function(t){
-      var q = findQuote(t.sym);
-      if(!q) return; // symbol not in the current watchlist -- nothing to update
-      var change = pct(q.price, q.prevClose);
-      var up = change >= 0;
-      var cell = document.getElementById('cur-' + t.sym);
-      if(!cell) return;
-      cell.innerHTML = fmt(q.price) + '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>';
-      cell.classList.add(up ? 'flash-up' : 'flash-down');
-      setTimeout(function(){ cell.classList.remove('flash-up','flash-down'); }, 600);
-
-      var statusBefore = t.status;
-      recomputeTradeStatus(t, q.price);
-      if(statusBefore !== t.status){
-        anyStatusChanged = true;
-        if(t.status === 'hit' || t.status === 'stopped'){
-          logPickOutcomeInternally(t.sym, t.status, q.price);
-        }
-      }
-      updateChartLivePrice(t.sym, q.price);
-    });
-    // A status flip (e.g. hitting target mid-session) means a trade needs
-    // to physically move to a different priority section — a full
-    // re-render handles that. Otherwise, cheaper in-place badge/banner
-    // updates are enough and avoid rebuilding the whole list every tick.
-    if(anyStatusChanged){
-    } else {
-      trades.forEach(function(t){
-        var badgeEl = document.getElementById('status-badge-' + t.sym);
-        if(badgeEl){
-          var badge = computeBadgeInfo(t);
-          badgeEl.className = 'status-badge ' + badge.cls;
-          badgeEl.textContent = badge.label;
-        }
-        var bannerEl = document.getElementById('action-banner-' + t.sym);
-        if(bannerEl){
-          var action = buildActionHTML(t);
-          bannerEl.className = 'trade-action-banner' + (action.done ? ' done' : '');
-          bannerEl.innerHTML = '<span class="action-icon">' + (action.done ? '✓' : '→') + '</span><span class="action-text">' + action.html + '</span>';
-        }
-      });
-    }
-    renderWhatToWatch();
-    syncAlpacaFilledExits();
-  }
-
-  // The chart's rightmost candle and live-price line are only as fresh as
-  // the last time the chart itself was rendered — without this, they'd
-  // silently drift out of sync with the Current price shown in the row
-  // above every time a new quote comes in, since nothing else touches the
-  // chart's own stored data on a refresh.
-  function updateChartLivePrice(sym, newPrice){
-    var state = chartStates[sym];
-    if(!state || !state.data || !state.data.length || !newPrice) return;
-    var lastBar = state.data[state.data.length - 1];
-    // Close tracks the live quote (keeps the price tag/dashed line
-    // accurate); high/low stay exactly what Twelve Data reported for this
-    // bar, rather than stretching to bridge a gap between two data
-    // sources that can genuinely disagree on "right now."
-    lastBar.c = newPrice;
-    // The underlying data actually changed here (unlike a pure pan/zoom,
-    // which only changes the viewport) — the cached MA series is now
-    // stale and needs to be recomputed on the next render.
-    state._maCache = null;
-    renderChartView(sym);
   }
 
   // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
@@ -6850,18 +6333,17 @@
       });
   }
 
-  var hasLiveCalibrated = false;
   var pendingAnalysisUid = null;
 
   var lastQuoteBatchSources = [];
 
   // Per-symbol fetch counter -- fetchAllQuotes() runs both on the 45s
-  // priceLoopInterval below AND independently from applyStoredScreenerPicks,
-  // which fires on every write to the shared account document, including
-  // the backend's own ~60s heartbeat -- so two batches for the same symbol
-  // can genuinely be in flight at once. Without this, a slower, earlier
-  // request landing after a faster, later one already wrote a fresher price
-  // would silently overwrite it with a stale one.
+  // priceLoopInterval below AND independently from the journal-entries
+  // listener, which fires on every write to the shared account document,
+  // including the backend's own ~60s heartbeat -- so two batches for the
+  // same symbol can genuinely be in flight at once. Without this, a
+  // slower, earlier request landing after a faster, later one already
+  // wrote a fresher price would silently overwrite it with a stale one.
   var quoteFetchGen = {};
 
   function fetchAllQuotes(){
@@ -6903,18 +6385,8 @@
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
 
-    // Recalibrate entry/stop/targets against real pricing exactly once, the
-    // first time live data actually lands — not on every refresh, or the
-    // trade plan would visibly shift every 45 seconds.
-    if(!hasLiveCalibrated && anySuccess){
-      hasLiveCalibrated = true;
-      calibrateTradeLevels();
-      renderWhatToWatch();
-    }
-
-    // Separate from the one-time calibration above: a pending analysis
-    // request should fire on ANY successful batch, including a second
-    // sign-in later in the session after hasLiveCalibrated already fired.
+    // A pending analysis request should fire on ANY successful batch,
+    // including a second sign-in later in the session.
     if(pendingAnalysisUid && anySuccess){
       var analysisUid = pendingAnalysisUid;
       pendingAnalysisUid = null;
@@ -7993,58 +7465,6 @@
   });
   renderPLSummary();
 
-  // ---------- Log Trade modal ----------
-  var logModalTradeSym = null;
-
-  function openLogModal(sym){
-    var t = trades.filter(function(tr){ return tr.sym === sym; })[0];
-    if(!t) return;
-    logModalTradeSym = sym;
-    document.getElementById('logModalSym').textContent = t.sym + ' — ' + t.direction;
-    document.getElementById('logEntry').value = t.entry;
-    document.getElementById('logQty').value = '';
-    document.getElementById('logStop').value = t.stop;
-    document.getElementById('logT1').value = t.t1;
-    document.getElementById('logDate').value = new Date().toISOString().slice(0,10);
-    document.getElementById('logModalError').classList.remove('show');
-    document.getElementById('logTradeModal').removeAttribute('hidden');
-    document.getElementById('logQty').focus();
-  }
-  function closeLogModal(){ document.getElementById('logTradeModal').setAttribute('hidden',''); }
-
-  document.getElementById('logModalCancel').addEventListener('click', closeLogModal);
-  document.getElementById('logTradeModal').addEventListener('click', function(e){
-    if(e.target === this){ closeLogModal(); }
-  });
-
-  document.getElementById('logTradeForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var entry = parseFloat(document.getElementById('logEntry').value);
-    var qty = parseFloat(document.getElementById('logQty').value);
-    var stop = parseFloat(document.getElementById('logStop').value);
-    var t1 = parseFloat(document.getElementById('logT1').value);
-    var date = document.getElementById('logDate').value;
-    var errEl = document.getElementById('logModalError');
-
-    var valid = entry > 0 && qty > 0 && stop > 0 && t1 > 0 && !!date;
-    if(!valid){
-      errEl.textContent = 'Enter valid, positive numbers for all fields.';
-      errEl.classList.add('show');
-      return;
-    }
-    errEl.classList.remove('show');
-
-    var t = trades.filter(function(tr){ return tr.sym === logModalTradeSym; })[0];
-    journalEntries.push({
-      id: 'j' + Date.now(),
-      date: date, sym: t.sym, direction: t.direction,
-      entry: entry, qty: qty, stop: stop, t1: t1,
-      exit: null, status: 'open'
-    });
-    saveJournalEntries();
-    closeLogModal();
-    jumpToJournalDate(date);
-  });
 
   // ---------- Exit Trade modal ----------
   var exitModalEntryId = null;
@@ -8094,7 +7514,6 @@
 
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape'){
-      closeLogModal();
       closeExitModal();
       closeHistory();
     }
@@ -9471,7 +8890,6 @@
         clearActivityLog();
         if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
         pendingAnalysisUid = null;
-        resetTradesToDefault();
         resetNewsAndEarnings();
     resetAlpacaConnection();
         if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
@@ -9746,21 +9164,7 @@
   updateClock();
   renderHistoryList();
   populateIntradayBacktestSymbolSelect();
-  // loadAlpacaAutoTradePref() intentionally not called anymore -- the
-  // local daily auto-trade toggle (alpacaAutoTradeToggle) was removed
-  // from this page same as the intraday one below, but this call was
-  // missed when that happened. Without this fix, a "true" left over in
-  // an old browser's localStorage from back when the button existed
-  // would silently set alpacaAutoTradeEnabled = true on load, with no
-  // toggle anywhere in the UI to see or turn it back off -- and
-  // autoSendNewPicksIfEnabled() would keep sending real bracket orders
-  // off of it the moment a stored screener pick ever matched today's
-  // date.
   renderRiskPercentLabel();
-  // loadAlpacaAutoTradeIntradayPref() intentionally not called anymore --
-  // the local intraday auto-trade toggle was removed (see comment above
-  // its old click handler); this stops a stale "true" left over in an
-  // old browser's localStorage from silently re-enabling it.
   loadIntradayPref();
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
