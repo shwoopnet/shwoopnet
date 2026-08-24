@@ -1942,20 +1942,20 @@
       <div class="backtest-summary" id="statusAccountSummary"></div>
     </div>
 
-    <div class="to-card" id="toCard-backendPulse">
-      <div class="labs-backtest-card" id="backendPulseCard" hidden>
+    <div class="to-card" id="toCard-backendStatus">
+      <div class="labs-backtest-card" id="backendStatusCard" hidden>
         <div class="to-card-head">
           <div class="to-card-head-left">
-            <span class="to-card-dot" id="backendPulseHeadDot"></span>
-            <span class="to-card-title">Backend Pulse</span>
+            <span class="to-card-dot" id="backendStatusHeadDot"></span>
+            <span class="to-card-title">Backend Status</span>
           </div>
-          <span class="to-card-meta" id="backendPulseHeadMeta"></span>
+          <span class="to-card-meta" id="backendStatusHeadMeta"></span>
         </div>
         <div class="labs-backtest-note" style="margin-bottom:10px;">
           Live proof the 24/7 server is actually up and running its scan → size → send cycle — not just a
           timestamp of whatever it last found.
         </div>
-        <div id="backendPulseBody"></div>
+        <div id="backendStatusBody"></div>
       </div>
     </div>
 
@@ -2058,30 +2058,8 @@
           <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
         </div>
         <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
+        <button class="settings-reset-btn" id="todaysSetupsFilterBtn" style="margin-bottom:14px; display:none;"></button>
         <div id="intradayBlocks"></div>
-      </div>
-    </div>
-
-    <div class="to-card" id="toCard-systemHealth">
-      <div class="labs-backtest-card">
-        <div class="to-card-head">
-          <div class="to-card-head-left">
-            <span class="to-card-dot" id="systemHealthHeadDot"></span>
-            <span class="to-card-title">System Health</span>
-          </div>
-        </div>
-        <div id="statusHealthRows"></div>
-      </div>
-    </div>
-
-    <div class="to-card" id="toCard-backendScreener">
-      <div class="labs-backtest-card">
-        <div class="to-card-head">
-          <span class="to-card-title">Backend Intraday Screener</span>
-          <span class="to-card-meta" id="backendScreenerHeadMeta"></span>
-        </div>
-        <div class="labs-backtest-note" style="margin-bottom:10px;">What the 24/7 server last saw — separate from this tab's own live view, and updates even when no browser is open.</div>
-        <div id="statusIntradayBody"></div>
       </div>
     </div>
 
@@ -3075,7 +3053,7 @@
     // let it collide with the backend's own requests -- this alone
     // should roughly halve real-world Twelve Data usage.
     if(!alpacaAutoTradeIntradayEnabled){
-      updateIntradayStatus('Screening handled by the 24/7 backend now — see Backend Pulse on Trade Overview', true);
+      updateIntradayStatus('Screening handled by the 24/7 backend now — see Backend Status on Trade Overview', true);
       return;
     }
     if(!isUsMarketOpen()){
@@ -4141,6 +4119,11 @@
     }
   });
 
+  document.getElementById('todaysSetupsFilterBtn').addEventListener('click', function(){
+    todaysSetupsShowAll = !todaysSetupsShowAll;
+    renderIntradayBlocks();
+  });
+
   function resetAlpacaConnection(){
     var creds = activeAlpacaCreds();
     creds.keyId = '';
@@ -4771,12 +4754,55 @@
   // auto-trade already handles sending orders automatically, and a manual
   // override belongs in Open Positions (the Close button) and Settings
   // (Auto-Trading Controls), not duplicated again here per setup.
+  //
+  // Off by default -- with all 16 symbols scanned every cycle, most sit at
+  // "Watching" most of the time, which used to bury the handful that
+  // actually qualified. Shows only non-Watching setups (Active, Trailing,
+  // Stopped, Target hit) until toggled open to the full universe.
+  var todaysSetupsShowAll = false;
+  // The array actually rendered this pass -- referenced by the chevron
+  // click handler below so it looks up chart data from whichever source
+  // (backend or local) was actually shown, not always intradayTrades.
+  var lastRenderedSetups = [];
+
   function renderIntradayBlocks(){
     var el = document.getElementById('intradayBlocks');
     if(!el) return;
+    // Prefers the backend's own picks (computed 24/7, independent of
+    // whether this tab is open) over this tab's local re-scan -- same
+    // preference order renderWhatToWatch already uses, for the same
+    // reason: the backend is the authoritative, always-on source now.
+    var source = (backendIntradayPicks && backendIntradayPicks.length)
+      ? backendIntradayPicks.map(buildTradeFromPick)
+      : intradayTrades;
+    lastRenderedSetups = source;
+    var hiddenCount = source.filter(function(t){ return t.status === 'watching'; }).length;
+    var visible = todaysSetupsShowAll ? source : source.filter(function(t){ return t.status !== 'watching'; });
+
     var headMeta = document.getElementById('todaysSetupsHeadMeta');
-    if(headMeta){ headMeta.textContent = intradayTrades.length ? (intradayTrades.length + ' setup' + (intradayTrades.length === 1 ? '' : 's')) : ''; }
-    el.innerHTML = intradayTrades.map(function(t){
+    if(headMeta){
+      headMeta.textContent = source.length
+        ? (visible.length + ' of ' + source.length + ' setup' + (source.length === 1 ? '' : 's'))
+        : '';
+    }
+    var filterBtn = document.getElementById('todaysSetupsFilterBtn');
+    if(filterBtn){
+      if(hiddenCount > 0){
+        filterBtn.style.display = '';
+        filterBtn.textContent = todaysSetupsShowAll
+          ? 'Show active only'
+          : 'Show all ' + source.length + ' (' + hiddenCount + ' watching)';
+      } else {
+        filterBtn.style.display = 'none';
+      }
+    }
+
+    if(visible.length === 0 && source.length > 0){
+      el.innerHTML = '<div class="labs-backtest-status">No active setups right now — all ' + source.length + ' symbols are still watching. Click "Show all" above to see them.</div>';
+      return;
+    }
+
+    el.innerHTML = visible.map(function(t){
       var q = findQuote(t.sym) || { price: t.entry, prevClose: t.entry, name: t.sym };
       var change = pct(q.price, q.prevClose);
       var up = change >= 0;
@@ -4830,7 +4856,7 @@
           // actually expanded, not rendered into every hidden card up
           // front -- rendering into a zero-dimension hidden SVG
           // produces a broken chart, and most cards are never opened.
-          var trade = intradayTrades.filter(function(x){ return x.sym === sym; })[0];
+          var trade = lastRenderedSetups.filter(function(x){ return x.sym === sym; })[0];
           if(trade){
             var svg = document.getElementById('chart-' + sym);
             if(svg && !svg.dataset.rendered){
@@ -6758,11 +6784,9 @@
   // them are customizable.
   var TO_CARD_DEFS = [
     { key:'accountSummary', label:'Account Summary' },
-    { key:'backendPulse', label:'Backend Pulse' },
+    { key:'backendStatus', label:'Backend Status' },
     { key:'openPositions', label:'Open Positions' },
     { key:'todaysSetups', label:"Today's Setups" },
-    { key:'systemHealth', label:'System Health' },
-    { key:'backendScreener', label:'Backend Intraday Screener' },
     { key:'activityLog', label:'Activity Log' }
   ];
   var TO_CARD_LABELS = {};
@@ -7922,10 +7946,9 @@
 
   // ---------- Status page: the one place to check in ----------
   function renderStatusPage(){
-    renderBackendPulse();
-    renderStatusHealth();
+    renderBackendStatus();
     renderStatusPositions();
-    renderStatusIntraday();
+    renderIntradayBlocks();
     renderActivityLog();
 
     var summaryEl = document.getElementById('statusAccountSummary');
@@ -7981,32 +8004,46 @@
   // The single card meant to answer the user's actual question on
   // reopening the app: "is the scanner, sizing, and auto-trade actually
   // all still running together, or did something quietly die overnight."
-  // Three independent signals, each capable of being wrong on its own --
+  // Four independent signals, each capable of being wrong on its own --
   // together they can't all lie at once:
-  //  1) Heartbeat -- proves the *process* is alive, even when there's
+  //  1) Alpaca connection -- proves this account has broker credentials
+  //     on file at all, the precondition for everything else below.
+  //  2) Heartbeat -- proves the *process* is alive, even when there's
   //     nothing to trade (market closed) and nothing else on the
   //     document would otherwise change.
-  //  2) Cycle status -- proves the *15-minute intraday cycle itself* is
+  //  3) Cycle status -- proves the *15-minute intraday cycle itself* is
   //     actually executing (scanning -> idle/error), not just that the
   //     process happens to be up.
-  //  3) The last cycle's summary -- proves the scan, the sizing, and the
+  //  4) Server settings truth -- proves the scan, the sizing, and the
   //     auto-send are genuinely wired together end to end, in plain
   //     language, not just three components that each look fine alone.
-  function renderBackendPulse(){
-    var card = document.getElementById('backendPulseCard');
-    var body = document.getElementById('backendPulseBody');
+  // Previously three separate cards (Backend Pulse, System Health,
+  // Backend Intraday Screener) that all answered some version of "is the
+  // backend alive and doing its job" -- merged into one so there's a
+  // single place to look, not three that could each say something
+  // slightly different.
+  function renderBackendStatus(){
+    var card = document.getElementById('backendStatusCard');
+    var body = document.getElementById('backendStatusBody');
     if(!card || !body) return;
-    if(!alpacaConnected){ card.hidden = true; return; }
     card.hidden = false;
 
     var rows = [];
-    var headDot = document.getElementById('backendPulseHeadDot');
-    var headMeta = document.getElementById('backendPulseHeadMeta');
+    var headDot = document.getElementById('backendStatusHeadDot');
+    var headMeta = document.getElementById('backendStatusHeadMeta');
 
-    // ---- Row 1: heartbeat ----
+    // ---- Row 1: Alpaca connection ----
+    rows.push(
+      '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (alpacaConnected ? 'ok' : 'warn') + '"></div><div>' +
+        '<div class="backend-pulse-label">' + (alpacaConnected ? 'Alpaca connected' : 'Alpaca not connected') + '</div>' +
+        '<div class="backend-pulse-sub">' + (alpacaConnected ? 'Broker credentials are on file for this account.' : 'Connect a paper account in Settings before anything below can trade.') + '</div>' +
+      '</div></div>'
+    );
+
+    // ---- Row 2: heartbeat ----
     if(!backendHeartbeatAt){
       if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
-      if(headMeta){ headMeta.textContent = 'No heartbeat yet'; }
+      if(headMeta){ headMeta.textContent = alpacaConnected ? 'No heartbeat yet' : 'Not connected'; }
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
           '<div class="backend-pulse-label">No heartbeat received yet</div>' +
@@ -8018,7 +8055,7 @@
       var heartbeatStale = heartbeatAge > BACKEND_HEARTBEAT_STALE_MS;
       var marketNote = backendMarketOpenAtHeartbeat === true ? 'market open per the server'
         : backendMarketOpenAtHeartbeat === false ? 'market closed per the server' : '';
-      if(headDot){ headDot.classList.toggle('ok', !heartbeatStale); headDot.classList.toggle('warn', heartbeatStale); }
+      if(headDot){ headDot.classList.toggle('ok', !heartbeatStale && alpacaConnected); headDot.classList.toggle('warn', heartbeatStale || !alpacaConnected); }
       if(headMeta){ headMeta.textContent = 'checked in ' + formatAgo(heartbeatAge); }
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (heartbeatStale ? 'stale' : 'ok') + '"></div><div>' +
@@ -8030,7 +8067,7 @@
       );
     }
 
-    // ---- Row 2: this cycle's status ----
+    // ---- Row 3: this cycle's status ----
     if(backendCycleStatus === 'scanning'){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
@@ -8063,7 +8100,7 @@
       );
     }
 
-    // ---- Row 3: server-side settings truth (env vars, not this browser's toggle) ----
+    // ---- Row 4: server-side settings truth (env vars, not this browser's toggle) ----
     if(backendScreenerEnabledOnServer !== null){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
@@ -8074,6 +8111,18 @@
     }
 
     body.innerHTML = rows.join('');
+
+    // Server's own auto-trade setting, not a local toggle -- this tab has
+    // no auto-trade switch of its own anymore; this is the actual source
+    // of truth for "is the program auto-trading right now," reflected
+    // onto the separate, always-pinned Auto-Trading Controls card.
+    var badge = document.getElementById('serverAutoTradeStatusBadge');
+    if(badge){
+      badge.textContent = backendAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
+      badge.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer));
+    }
+    var autoTradeDot = document.getElementById('autoTradeHeadDot');
+    if(autoTradeDot){ autoTradeDot.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer)); }
   }
 
   // Keeps the "Xs ago" text moving and lets a stale heartbeat get caught
@@ -8082,40 +8131,8 @@
   // bothers while the Trade Overview / Status page is actually visible.
   setInterval(function(){
     var statusPageEl = document.getElementById('page-trades');
-    if(statusPageEl && !statusPageEl.hidden){ renderBackendPulse(); }
+    if(statusPageEl && !statusPageEl.hidden){ renderBackendStatus(); }
   }, 5000);
-
-  function renderStatusHealth(){
-    var el = document.getElementById('statusHealthRows');
-    if(!el) return;
-    function row(label, ok, text){
-      return '<div class="settings-row"><div><div class="settings-row-title">' + label + '</div></div>' +
-        '<span class="quote-sync-status ' + (ok ? 'ok' : '') + '">' + text + '</span></div>';
-    }
-    // Reuses the exact status text the screener page already maintains,
-    // rather than tracking a second, separate copy of the same state.
-    var intradayStatusEl = document.getElementById('intradaySyncStatus');
-    var intradayStatusText = (intradayStatusEl && intradayStatusEl.textContent) || '';
-
-    el.innerHTML =
-      row('Alpaca connection', alpacaConnected, alpacaConnected ? 'Connected' : 'Not connected') +
-      row('Intraday screener (this tab)', alpacaIntradayEnabled, alpacaIntradayEnabled ? (intradayStatusText || 'On') : 'Off') +
-      // Server's own setting, not a local toggle -- this tab no longer
-      // has its own auto-trade switch (see the removed click handler
-      // above); this is the actual source of truth for "is the program
-      // auto-trading right now."
-      row('Auto-trading (server)', backendAutoTradeEnabledOnServer, backendAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off');
-
-    var badge = document.getElementById('serverAutoTradeStatusBadge');
-    if(badge){
-      badge.textContent = backendAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
-      badge.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer));
-    }
-    var autoTradeDot = document.getElementById('autoTradeHeadDot');
-    if(autoTradeDot){ autoTradeDot.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer)); }
-    var healthDot = document.getElementById('systemHealthHeadDot');
-    if(healthDot){ healthDot.classList.toggle('ok', alpacaConnected); healthDot.classList.toggle('warn', !alpacaConnected); }
-  }
 
   // ---------- Trade notification bubbles (dock header + sidebar badge) ----------
   // Unconditional -- unlike renderStatusPage, this updates regardless of
@@ -8306,47 +8323,6 @@
       console.error('Failed to fetch live positions:', err);
       el.innerHTML = '<div class="labs-backtest-status down">Could not load live position data — will retry on next refresh.</div>';
     });
-  }
-
-  function renderStatusIntraday(){
-    var el = document.getElementById('statusIntradayBody');
-    var headMeta = document.getElementById('backendScreenerHeadMeta');
-    if(!el) return;
-    if(!backendIntradayPicks || backendIntradayPicks.length === 0){
-      if(headMeta){ headMeta.textContent = ''; }
-      el.innerHTML = '<div class="labs-backtest-status">No picks yet — either the backend hasn\'t run an intraday cycle, or its intraday screener is currently disabled.</div>';
-      return;
-    }
-    if(headMeta){
-      headMeta.textContent = backendIntradayUpdatedAt
-        ? 'updated ' + new Date(backendIntradayUpdatedAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })
-        : '';
-    }
-    // Matches the backend's OWN duplicate-position check (autoTrade.js:
-    // sym + status:'open' + source:'alpaca', no account-key involved --
-    // journal entries the backend creates don't carry one) rather than
-    // isOpenAlpacaPositionForCurrentAccount, which would wrongly filter
-    // these out. Without this column, a symbol the backend already has a
-    // real open position in still shows "Active" here exactly like a
-    // fresh, un-acted-on signal -- reading as a missed trade when it's
-    // actually the correct, intentional "don't double-enter a position
-    // you're already holding" behavior.
-    el.innerHTML =
-      '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Symbol</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Status</th><th>Position</th></tr></thead>' +
-        '<tbody>' + backendIntradayPicks.map(function(p){
-          var alreadyOpen = journalEntries.some(function(j){ return j.sym === p.sym && j.status === 'open' && j.source === 'alpaca'; });
-          return '<tr>' +
-            '<td class="mono">' + p.sym + '</td>' +
-            '<td>' + p.direction + '</td>' +
-            '<td>' + fmt(p.entry) + '</td>' +
-            '<td>' + fmt(p.stop) + '</td>' +
-            '<td>' + fmt(p.t1) + '</td>' +
-            '<td>' + (p.statusLabel || p.status || '') + '</td>' +
-            '<td>' + (alreadyOpen ? '<span class="status-badge active">Already open</span>' : '—') + '</td>' +
-          '</tr>';
-        }).join('') + '</tbody>' +
-      '</table>';
   }
 
   function renderActivityLog(){
