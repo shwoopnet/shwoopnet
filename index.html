@@ -3928,6 +3928,19 @@
           if(result.failed.length > 0){ msg += (msg ? ' ' : '') + 'Failed to close: ' + result.failed.join(', ') + ' — check the dock and retry manually.'; }
           showPositionClosedToast('Flatten all', msg);
         }
+        if(result.closed.length > 0){
+          // closeAlpacaPosition submits a market order to close -- it
+          // doesn't wait for that order to actually fill, so the
+          // journal (and anything reading it, like Open Positions)
+          // would otherwise sit stale until the next periodic sync
+          // happens to run, which could be a while. Two checks a few
+          // seconds apart give Alpaca a real chance to have filled by
+          // the time either one runs, without waiting on the normal
+          // cycle -- the periodic sync remains the ultimate safety net
+          // either way.
+          setTimeout(function(){ syncAlpacaFilledExits(); }, 2000);
+          setTimeout(function(){ syncAlpacaFilledExits(); }, 6000);
+        }
       }).finally(function(){
         btn.disabled = false;
         btn.textContent = 'Flatten all';
@@ -4453,6 +4466,8 @@
         renderCalendar();
         renderJournalDetail();
         renderPLSummary();
+        renderStatusPositions();
+        updateTradeBubbles();
       }
     }).catch(function(err){
       console.error('Alpaca exit sync failed:', err);
