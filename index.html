@@ -3528,6 +3528,23 @@
     return j.status === 'open' && j.source === 'alpaca' && j.accountKeyId === activeAlpacaCreds().keyId;
   }
   var alpacaConnected = false;
+  // Self-healing connection check state -- see testAlpacaConnection below
+  // for why this exists: a single transient failure (network blip,
+  // Alpaca briefly unreachable) used to flip the whole UI to "Not
+  // connected" immediately and then stay that way until some unrelated
+  // write to the shared Firestore doc happened to re-trigger a retry.
+  var alpacaReconnectTimer = null;
+  var alpacaConsecutiveFailures = 0;
+  var ALPACA_FIRST_RETRY_DELAY_MS = 10000; // double-check once before believing a single miss
+  var ALPACA_RECONNECT_DELAY_MS = 45000; // steady retry cadence once genuinely down -- matches the dock's own poll interval
+
+  function scheduleAlpacaReconnect(delayMs){
+    if(alpacaReconnectTimer) return; // one pending retry at a time, never stack them
+    alpacaReconnectTimer = setTimeout(function(){
+      alpacaReconnectTimer = null;
+      testAlpacaConnection();
+    }, delayMs);
+  }
 
   function alpacaHeaders(){
     var creds = activeAlpacaCreds();
@@ -3601,32 +3618,67 @@
   }
 
   function testAlpacaConnection(){
+    if(alpacaReconnectTimer){ clearTimeout(alpacaReconnectTimer); alpacaReconnectTimer = null; }
     var creds = activeAlpacaCreds();
     if(!creds.keyId || !creds.secretKey){
       alpacaConnected = false;
+      alpacaConsecutiveFailures = 0;
       setAlpacaStatus('Not connected', null);
       showAlpacaInputsView();
       updateTradeBubbles();
       return;
     }
-    setAlpacaStatus('Connecting…', null);
+    setAlpacaStatus(alpacaConnected ? 'Re-checking connection…' : 'Connecting…', null);
     fetch(ALPACA_TRADING_BASE() + '/v2/account', { headers: alpacaHeaders() })
       .then(function(res){
-        if(!res.ok) throw new Error('HTTP ' + res.status);
+        if(!res.ok){
+          var httpErr = new Error('HTTP ' + res.status);
+          httpErr.status = res.status;
+          throw httpErr;
+        }
         return res.json();
       })
       .then(function(acct){
+        alpacaConsecutiveFailures = 0;
         alpacaConnected = true;
         setAlpacaStatus('Connected', true);
         showAlpacaConnectedView();
         updateTradeBubbles();
       })
       .catch(function(err){
+        console.error('Alpaca connection test failed:', err);
+        // 401/403 means the keys themselves are the problem -- retrying
+        // the identical request won't fix that, so this is shown right
+        // away rather than treated as a maybe-transient blip.
+        var isAuthFailure = err && (err.status === 401 || err.status === 403);
+        if(isAuthFailure){
+          alpacaConsecutiveFailures = 0;
+          alpacaConnected = false;
+          setAlpacaStatus('Connection failed — check your keys', false);
+          showAlpacaInputsView();
+          updateTradeBubbles();
+          return;
+        }
+        // Everything else (network blip, Alpaca briefly unreachable, a
+        // transient 5xx) gets a second opinion before being believed --
+        // one miss quietly retries once 10s later rather than immediately
+        // flipping every "Not connected" surface in the app (this flag
+        // drives all of them: Trade Overview's account summary, System
+        // Health, the Backend Pulse card, the dock). Only a second
+        // consecutive failure actually surfaces as down, and from there
+        // it keeps retrying itself every 45s until it recovers -- no
+        // manual action, and no longer dependent on some unrelated write
+        // to the shared Firestore doc happening to re-trigger a check.
+        alpacaConsecutiveFailures++;
+        if(alpacaConsecutiveFailures < 2){
+          scheduleAlpacaReconnect(ALPACA_FIRST_RETRY_DELAY_MS);
+          return;
+        }
         alpacaConnected = false;
-        setAlpacaStatus('Connection failed — check your keys', false);
+        setAlpacaStatus('Connection check failed — retrying…', false);
         showAlpacaInputsView();
         updateTradeBubbles();
-        console.error('Alpaca connection test failed:', err);
+        scheduleAlpacaReconnect(ALPACA_RECONNECT_DELAY_MS);
       });
   }
 
@@ -3929,21 +3981,45 @@
   function loadAlpacaCredentialsForUser(uid){
     if(!window.__shwoopAPI) return;
     window.__shwoopAPI.watchAlpacaCredentials(uid, function(data){
-      alpacaCredsPaper.keyId = data.alpacaKeyId || '';
-      alpacaCredsPaper.secretKey = data.alpacaSecretKey || '';
-      alpacaCredsLive.keyId = data.alpacaLiveKeyId || '';
-      alpacaCredsLive.secretKey = data.alpacaLiveSecretKey || '';
-      alpacaAccountType = data.alpacaEnvironment === 'live' ? 'live' : 'paper';
+      var newEnv = data.alpacaEnvironment === 'live' ? 'live' : 'paper';
+      var newPaperKey = data.alpacaKeyId || '', newPaperSecret = data.alpacaSecretKey || '';
+      var newLiveKey = data.alpacaLiveKeyId || '', newLiveSecret = data.alpacaLiveSecretKey || '';
+      var credsUnchanged =
+        alpacaCredsPaper.keyId === newPaperKey && alpacaCredsPaper.secretKey === newPaperSecret &&
+        alpacaCredsLive.keyId === newLiveKey && alpacaCredsLive.secretKey === newLiveSecret &&
+        alpacaAccountType === newEnv;
+
+      alpacaCredsPaper.keyId = newPaperKey;
+      alpacaCredsPaper.secretKey = newPaperSecret;
+      alpacaCredsLive.keyId = newLiveKey;
+      alpacaCredsLive.secretKey = newLiveSecret;
+      alpacaAccountType = newEnv;
       applyAlpacaEnvironmentUI();
       // Deliberately not populating the visible input fields here — on a
       // fresh page load there's no reason for the saved keys to ever sit
       // in an open text box. Straight to testing the connection instead.
       var creds = activeAlpacaCreds();
-      if(creds.keyId && creds.secretKey){
-        testAlpacaConnection();
-      } else {
+      if(!creds.keyId || !creds.secretKey){
+        alpacaConnected = false;
         showAlpacaInputsView();
+        return;
       }
+      // This listener sits on the WHOLE shared account document — journal
+      // entries, activity log, screener picks, and (once deployed) the
+      // backend's once-a-minute heartbeat all live on that same doc — so
+      // it fires on every write to ANY of those, not just a credential
+      // change. Re-testing the live Alpaca connection on every one of
+      // those was harmless-but-wasteful before; once the heartbeat ships
+      // it would mean a real Alpaca API call every single minute, 24/7,
+      // for no reason. Skip the network round-trip when nothing about
+      // the credentials or environment actually changed and the last
+      // check already succeeded — testAlpacaConnection's own retry loop
+      // (see above) is what's responsible for recovering from a bad
+      // state, not this listener re-firing.
+      if(credsUnchanged && alpacaConnected){
+        return;
+      }
+      testAlpacaConnection();
     });
   }
 
