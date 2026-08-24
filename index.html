@@ -3781,15 +3781,32 @@
   }
   // A journal entry only counts as a real, currently-relevant open
   // position if it belongs to the account that's actually connected
-  // right now -- entries from a previous account (or legacy entries
-  // from before this tracking existed, which have no accountKeyId at
-  // all) never match, so switching accounts can't accidentally show a
-  // brand new account's positions as if they included a different
-  // account's leftover trades. This is the one place this check lives;
-  // every other filter that used to repeat this logic now calls here
-  // instead, so it can't drift out of sync between call sites again.
+  // right now -- entries from a previous account never match, so
+  // switching accounts can't accidentally show a brand new account's
+  // positions as if they included a different account's leftover
+  // trades. This is the one place this check lives; every other filter
+  // that used to repeat this logic now calls here instead, so it can't
+  // drift out of sync between call sites again.
+  //
+  // Exception: an entry with NO accountKeyId at all. That used to mean
+  // "legacy, from before this tracking existed" and never matched --
+  // but every entry shwoop-server's backend creates for a real
+  // auto-trade has always had this gap (fixed going forward, see its
+  // orchestrator.js), and the backend only ever operates on the single
+  // paper-account credentials on the user doc (it has no concept of a
+  // separate live environment at all). So a no-accountKeyId 'alpaca'
+  // entry can only ever be one of the backend's own paper-account
+  // positions -- there's no genuine ambiguity to guard against here,
+  // and treating it as "doesn't match" was hiding real, currently-open
+  // backend positions from Open Positions, chart overlays, and the
+  // duplicate-entry check, indistinguishable from nothing having
+  // happened. Never extends this to the live environment, since a
+  // position that's actually live-money should never be able to hide
+  // behind an assumption that defaults to paper.
   function isOpenAlpacaPositionForCurrentAccount(j){
-    return j.status === 'open' && j.source === 'alpaca' && j.accountKeyId === activeAlpacaCreds().keyId;
+    if(j.status !== 'open' || j.source !== 'alpaca') return false;
+    if(!j.accountKeyId) return alpacaAccountType === 'paper';
+    return j.accountKeyId === activeAlpacaCreds().keyId;
   }
   // Same idea, but for spots that need "is this genuinely still an open
   // position I should show/act on right now" rather than specifically an
@@ -9224,10 +9241,20 @@
         ? 'updated ' + new Date(backendIntradayUpdatedAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })
         : '';
     }
+    // Matches the backend's OWN duplicate-position check (autoTrade.js:
+    // sym + status:'open' + source:'alpaca', no account-key involved --
+    // journal entries the backend creates don't carry one) rather than
+    // isOpenAlpacaPositionForCurrentAccount, which would wrongly filter
+    // these out. Without this column, a symbol the backend already has a
+    // real open position in still shows "Active" here exactly like a
+    // fresh, un-acted-on signal -- reading as a missed trade when it's
+    // actually the correct, intentional "don't double-enter a position
+    // you're already holding" behavior.
     el.innerHTML =
       '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Symbol</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Status</th></tr></thead>' +
+        '<thead><tr><th>Symbol</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Status</th><th>Position</th></tr></thead>' +
         '<tbody>' + backendIntradayPicks.map(function(p){
+          var alreadyOpen = journalEntries.some(function(j){ return j.sym === p.sym && j.status === 'open' && j.source === 'alpaca'; });
           return '<tr>' +
             '<td class="mono">' + p.sym + '</td>' +
             '<td>' + p.direction + '</td>' +
@@ -9235,6 +9262,7 @@
             '<td>' + fmt(p.stop) + '</td>' +
             '<td>' + fmt(p.t1) + '</td>' +
             '<td>' + (p.statusLabel || p.status || '') + '</td>' +
+            '<td>' + (alreadyOpen ? '<span class="status-badge active">Already open</span>' : '—') + '</td>' +
           '</tr>';
         }).join('') + '</tbody>' +
       '</table>';
