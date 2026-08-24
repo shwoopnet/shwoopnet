@@ -3230,7 +3230,6 @@
   var intradayTrades = [];
   var isRunningIntradayScreener = false;
   var intradayScreenerInterval = null;
-  var intradayMarketCloseInterval = null;
   var alpacaIntradayEnabled = false;
 
   // ---------- US market holidays ----------
@@ -3360,22 +3359,6 @@
     return { session: 'overnight', label: 'Overnight session (extended hours)' };
   }
 
-  // Last 15 minutes before the 4:00pm ET close — the window where an
-  // open intraday position needs a decision made about it before the
-  // session ends, one way or the other.
-  function isMarketClosingSoon(){
-    var parts = {};
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York', hour12: false, weekday: 'short',
-      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-    }).formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
-    if(parts.weekday === 'Sat' || parts.weekday === 'Sun') return false;
-    if(isUsMarketHoliday(parseInt(parts.year, 10), parseInt(parts.month, 10), parseInt(parts.day, 10))) return false;
-    var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
-    var closeMinutes = 16 * 60;
-    return minutesSinceMidnight >= (closeMinutes - 15) && minutesSinceMidnight < closeMinutes;
-  }
-
   function updateAnalysisStatus(text, ok){
     var el = document.getElementById('analysisSyncStatus');
     if(!el) return;
@@ -3398,21 +3381,6 @@
   // The actual rate-limit fix lives in fetchHistory's shared queue below —
   // every Twelve Data call in the app funnels through it, so this screener
   // can fire all 33 requests without worrying about pacing itself.
-
-  function fetchScreenerCandidate(sym, priority){
-    return Promise.all([fetchQuote(sym), fetchHistory(sym, '1M', priority || 'low')]).then(function(results){
-      var quote = results[0], bars = results[1];
-      if(!quote || !bars || bars.length < 25) return null;
-      var analysis = computeTechnicalAnalysis(bars, quote.price);
-      return {
-        sym: sym, price: quote.price, prevClose: quote.prevClose,
-        score: scoreCandidate(analysis), analysis: analysis
-      };
-    }).catch(function(err){
-      console.error('Screener fetch failed for', sym, err);
-      return null;
-    });
-  }
 
   function fetchIntradayCandidate(sym, priority){
     return Promise.all([fetchQuote(sym), fetchHistory(sym, INTRADAY_TF, priority || 'medium')]).then(function(results){
@@ -3495,8 +3463,6 @@
       var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
       updateIntradayStatus('Updated ' + now + ' · next check in 15 min', true);
       autoSendIntradayPicksIfEnabled();
-      closeInvalidatedPositions('intraday');
-      handleIntradayMarketClose();
       });
     });
   }
@@ -3598,7 +3564,6 @@
     statCta();
     updateAnalysisStatus("Today's screener picks loaded", true);
     autoSendNewPicksIfEnabled();
-    closeInvalidatedPositions('daily');
   }
 
   var backendIntradayPicks = null;
@@ -4264,11 +4229,8 @@
       runIntradayScreener();
       if(intradayScreenerInterval) clearInterval(intradayScreenerInterval);
       intradayScreenerInterval = setInterval(runIntradayScreener, 15 * 60 * 1000);
-      if(intradayMarketCloseInterval) clearInterval(intradayMarketCloseInterval);
-      intradayMarketCloseInterval = setInterval(handleIntradayMarketClose, 60 * 1000);
     } else {
       if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
-      if(intradayMarketCloseInterval){ clearInterval(intradayMarketCloseInterval); intradayMarketCloseInterval = null; }
       intradayTrades = [];
       renderIntradayBlocks();
     }
@@ -5215,32 +5177,6 @@
     });
   }
 
-  // ---------- Position validity checks & safety closes ----------
-  // Re-runs the exact same analysis that originally justified a held
-  // position, using current data. If the direction no longer matches or
-  // the trend is no longer aligned (the same requirement the screener
-  // itself enforces), the original thesis for holding this position no
-  // longer exists — closing it out is a risk decision, not a strategy
-  // one. Missing/failed data intentionally defaults to "still valid"
-  // rather than closing on incomplete information.
-  function checkPositionStillValid(entry){
-    var isIntraday = entry.screenerType === 'intraday';
-    // 'high' priority, not 'medium' or the bulk screener's default 'low' —
-    // this is protecting an existing position from a thesis that may no
-    // longer hold, which is more time-critical than finding new
-    // candidates (daily or intraday). It should never be waiting behind
-    // either kind of background scan.
-    var fetchPromise = isIntraday ? fetchIntradayCandidate(entry.sym, 'high') : fetchScreenerCandidate(entry.sym, 'high');
-    return fetchPromise.then(function(candidate){
-      if(!candidate) return true;
-      var stillAligned = candidate.score >= 0;
-      var directionMatches = candidate.analysis.direction === entry.direction;
-      return stillAligned && directionMatches;
-    }).catch(function(){
-      return true;
-    });
-  }
-
   function showTradeResolvedToast(sym, direction, entryPrice, exitPrice){
     var isLong = direction === 'Long';
     var pnlPct = (exitPrice - entryPrice) / entryPrice * (isLong ? 1 : -1) * 100;
@@ -5309,79 +5245,18 @@
     });
   }
 
-  // Guards against the same symbol getting a second, overlapping
-  // validity check started while its first one is still in flight.
-  // applyStoredScreenerPicks (the only caller of this function) fires on
-  // EVERY write to the shared account document -- including the backend's
-  // own ~60s heartbeat, not just an actual change to screener picks -- so
-  // without this, a check that's still pending when the next heartbeat
-  // re-triggers this function would start a second check for the same
-  // still-"open" symbol. If both independently conclude "no longer
-  // valid" (plausible once a few checks queue up against the shared
-  // Twelve Data rate limit), both would submit a close order for the same
-  // position before the journal has had a chance to mark it closed.
-  var invalidationCheckInFlight = {};
-
-  function closeInvalidatedPositions(screenerType){
-    if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
-    var openEntries = journalEntries.filter(function(j){
-      return isOpenAlpacaPositionForCurrentAccount(j) && (j.screenerType || 'daily') === screenerType;
-    });
-    openEntries.forEach(function(entry){
-      if(invalidationCheckInFlight[entry.sym]) return;
-      invalidationCheckInFlight[entry.sym] = true;
-      checkPositionStillValid(entry).then(function(stillValid){
-        if(stillValid) return;
-        return closeAlpacaPositionSafely(entry.sym).then(function(){
-          // The actual fill price/date gets picked up by the existing
-          // exit-sync pass on its next cycle — not duplicating that here.
-          showPositionClosedToast(entry.sym, 'No longer a valid setup — direction or trend alignment changed, so the position was closed.');
-        }).catch(function(err){
-          console.error('Failed to close invalidated position', entry.sym, err);
-        });
-      }).then(function(){
-        invalidationCheckInFlight[entry.sym] = false;
-      });
-    });
-  }
-
-  // For intraday positions specifically: in the closing window, each
-  // still-open one needs an explicit decision rather than just being
-  // left to whatever the day's exit orders happen to do. Still a valid
-  // setup -> the bracket gets refreshed with a current stop/target and
-  // carries into the next day rather than expiring into nothing. No
-  // longer valid -> closed outright rather than held on a thesis that's
-  // no longer there. Guarded by date so this only fires once per
-  // position per closing window, not every time the interval ticks
-  // during those 15 minutes.
-  // Every open intraday position closes here, unconditionally -- no
-  // "still a valid setup, carry it forward" branch. That branch used to
-  // exist, but it's genuinely unsafe given what bracket orders actually
-  // do: Alpaca's bracket/OCO order type is structurally ineligible for
-  // extended-hours execution, so a position "carried forward" with a
-  // freshly-refreshed bracket right before the close would still be
-  // completely unprotected the moment the regular session ends -- its
-  // stop simply can't fire overnight no matter how recently it was
-  // set. Same-day close isn't just about matching the backtest; it's
-  // the only thing standing between a position and being left exposed
-  // with a stop that can't function.
-  function handleIntradayMarketClose(){
-    if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
-    if(!isMarketClosingSoon()) return;
-    var today = new Date().toISOString().slice(0,10);
-    var openIntradayEntries = journalEntries.filter(function(j){
-      return isOpenAlpacaPositionForCurrentAccount(j) && j.screenerType === 'intraday' && j.marketCloseHandledDate !== today;
-    });
-    openIntradayEntries.forEach(function(entry){
-      closeAlpacaPositionSafely(entry.sym).then(function(){
-        entry.marketCloseHandledDate = today;
-        saveJournalEntries();
-        showPositionClosedToast(entry.sym, 'End-of-day flatten order submitted — intraday positions never carry overnight regardless of setup.');
-      }).catch(function(err){
-        console.error('Failed to close at market-close for', entry.sym, err);
-      });
-    });
-  }
+  // Both position-closing decisions that used to live here -- checking
+  // whether a held setup is still valid, and flattening intraday
+  // positions at end of day -- are now handled exclusively by the
+  // backend, which runs the same checks every 60 seconds/15 minutes
+  // regardless of whether this tab is even open. Having the frontend run
+  // its own independent copy whenever a tab happened to be open meant two
+  // uncoordinated systems could both decide to act on the same position
+  // at the same time -- that's how the same close-position bug ended up
+  // needing to be found and fixed twice in one session. The backend is
+  // now the single source of truth for automated trade management; this
+  // tab is for viewing and manual action (the Close button, Flatten All)
+  // only.
 
 
   // the average of the distance to Target 1 and Target 2 (since the plan
