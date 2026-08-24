@@ -1813,7 +1813,7 @@
       <div class="trades-header-right">
         <div class="layout-dropdown">
           <button class="layout-toggle-btn" id="layoutToggle" aria-haspopup="true" aria-expanded="false">
-            <span>Layout</span>
+            <span>Chart settings</span>
             <span class="caret">▾</span>
           </button>
           <div class="layout-menu" id="layoutMenu" hidden>
@@ -1837,13 +1837,6 @@
             </div>
             <div class="layout-divider"></div>
             <div class="layout-stepper">
-              <span class="step-name">Trades layout</span>
-              <div class="layout-toggle-group">
-                <button class="chart-tool-btn active" id="cols1Btn" data-cols="1">1 column</button>
-                <button class="chart-tool-btn" id="cols2Btn" data-cols="2">2 columns</button>
-              </div>
-            </div>
-            <div class="layout-stepper">
               <span class="step-name">Moving averages</span>
               <button class="chart-tool-btn active" id="maToggleBtn">On</button>
             </div>
@@ -1852,7 +1845,7 @@
               <button class="chart-tool-btn active" id="ohlcToggleBtn">On</button>
             </div>
             <div class="layout-divider"></div>
-            <button class="layout-reset-btn" id="layoutResetBtn">Reset layout to defaults</button>
+            <button class="layout-reset-btn" id="layoutResetBtn">Reset chart settings to defaults</button>
           </div>
         </div>
       </div>
@@ -6735,7 +6728,7 @@
     }
   });
 
-  var layoutPrefs = { width:62, height:200, text:12.5, cols:1, showMA:true, showOHLC:true };
+  var layoutPrefs = { width:62, height:200, text:12.5, showMA:true, showOHLC:true };
   var layoutLimits = {
     width:  [40, 85, 5],
     height: [120, 340, 20],
@@ -6757,11 +6750,6 @@
     document.getElementById('heightInc').disabled = layoutPrefs.height >= layoutLimits.height[1];
     document.getElementById('textDec').disabled = layoutPrefs.text <= layoutLimits.text[0];
     document.getElementById('textInc').disabled = layoutPrefs.text >= layoutLimits.text[1];
-
-    var tradeBlocksEl = document.getElementById('tradeBlocks');
-    if(tradeBlocksEl){ tradeBlocksEl.classList.toggle('two-col', layoutPrefs.cols === 2); }
-    document.getElementById('cols1Btn').classList.toggle('active', layoutPrefs.cols === 1);
-    document.getElementById('cols2Btn').classList.toggle('active', layoutPrefs.cols === 2);
 
     showMovingAverages = layoutPrefs.showMA;
     showOHLCReadout = layoutPrefs.showOHLC;
@@ -6790,17 +6778,14 @@
   document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
 
   document.getElementById('layoutResetBtn').addEventListener('click', function(){
-    layoutPrefs = { width:62, height:200, text:12.5, cols:1, showMA:true, showOHLC:true };
+    layoutPrefs = { width:62, height:200, text:12.5, showMA:true, showOHLC:true };
     applyLayout();
   });
-
-  document.getElementById('cols1Btn').addEventListener('click', function(){ layoutPrefs.cols = 1; applyLayout(); });
-  document.getElementById('cols2Btn').addEventListener('click', function(){ layoutPrefs.cols = 2; applyLayout(); });
 
   document.getElementById('maToggleBtn').addEventListener('click', function(){
     layoutPrefs.showMA = !layoutPrefs.showMA;
     applyLayout();
-    trades.forEach(function(t){ renderChartView(t.sym); });
+    renderAllTradeCharts();
   });
   document.getElementById('ohlcToggleBtn').addEventListener('click', function(){
     layoutPrefs.showOHLC = !layoutPrefs.showOHLC;
@@ -6814,7 +6799,6 @@
         layoutPrefs.width = saved.width;
         layoutPrefs.height = saved.height;
         layoutPrefs.text = saved.text;
-        if(saved.cols === 1 || saved.cols === 2){ layoutPrefs.cols = saved.cols; }
         if(typeof saved.showMA === 'boolean'){ layoutPrefs.showMA = saved.showMA; }
         if(typeof saved.showOHLC === 'boolean'){ layoutPrefs.showOHLC = saved.showOHLC; }
       }
