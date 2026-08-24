@@ -3473,6 +3473,7 @@
       alpacaConnected = false;
       setAlpacaStatus('Not connected', null);
       showAlpacaInputsView();
+      updateTradeBubbles();
       return;
     }
     setAlpacaStatus('Connecting…', null);
@@ -3485,11 +3486,13 @@
         alpacaConnected = true;
         setAlpacaStatus('Connected', true);
         showAlpacaConnectedView();
+        updateTradeBubbles();
       })
       .catch(function(err){
         alpacaConnected = false;
         setAlpacaStatus('Connection failed — check your keys', false);
         showAlpacaInputsView();
+        updateTradeBubbles();
         console.error('Alpaca connection test failed:', err);
       });
   }
@@ -3968,6 +3971,7 @@
     if(secEl) secEl.value = '';
     setAlpacaStatus('Not connected', null);
     showAlpacaInputsView();
+    updateTradeBubbles();
     document.getElementById('alpacaDock').setAttribute('hidden', '');
     if(alpacaDockRefreshInterval){ clearInterval(alpacaDockRefreshInterval); alpacaDockRefreshInterval = null; }
   }
@@ -7902,6 +7906,12 @@
     var openCount = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; }).length;
 
     fetchAlpacaAccountSummary().then(function(acct){
+      // Re-check rather than trust the closure's snapshot of
+      // alpacaConnected -- this fetch can take a moment, and if the
+      // connection was lost or explicitly reset while it was in
+      // flight, showing the bubble now would resurrect stale data
+      // right after something else correctly hid it.
+      if(!alpacaConnected) return;
       var equity = parseFloat(acct.equity || 0);
       var lastEquity = parseFloat(acct.last_equity || equity);
       var todayPLPct = lastEquity > 0 ? ((equity - lastEquity) / lastEquity * 100) : 0;
@@ -7915,6 +7925,7 @@
         el.removeAttribute('hidden');
       });
     }).catch(function(){
+      if(!alpacaConnected) return;
       // Account fetch failing shouldn't hide the bubble entirely --
       // still show the position count, just without a color read yet.
       [dockBubble, sidebarBubble].forEach(function(el){
