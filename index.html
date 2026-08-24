@@ -615,6 +615,16 @@
     letter-spacing:.04em; border-bottom:1px solid var(--border); font-weight:600;
   }
   .backtest-trades-table td{ padding:8px 10px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono', monospace; }
+  .backtest-trades-table th.sortable-col{ cursor:pointer; user-select:none; }
+  .backtest-trades-table th.sortable-col:hover{ color: var(--paper); }
+  .position-close-btn{
+    background:none; border:1px solid var(--border); color: var(--loss);
+    font-family:'Space Grotesk', sans-serif; font-size:11px; padding:5px 10px;
+    border-radius:5px; cursor:pointer;
+  }
+  .position-close-btn:hover{ border-color: var(--loss); }
+  .position-close-btn.confirming{ background: var(--loss); border-color: var(--loss); color:#fff; animation: flattenPulse 1s ease-in-out infinite; }
+  .position-close-btn:disabled{ opacity:.5; cursor:default; }
   .backtest-outcome-hit{ color: var(--gain); }
   .backtest-outcome-stopped{ color: var(--loss); }
   .backtest-outcome-unresolved{ color: var(--muted); }
@@ -8978,6 +8988,17 @@
   // shown twice. Both panels now trace back to the same broker data, so
   // they can't drift apart. Falls back to the local-quote estimate only
   // for a row Alpaca's response doesn't (yet) include.
+  // Sort state persists across re-renders (this function gets called
+  // repeatedly on every refresh cycle) so a chosen sort sticks instead
+  // of resetting back to journal-insertion order each time.
+  var statusPositionsSortKey = null; // null = insertion order (no header clicked yet)
+  var statusPositionsSortDir = 1; // 1 = ascending, -1 = descending
+  var STATUS_POSITIONS_COLUMNS = [
+    { key:'sym', label:'Symbol' }, { key:'direction', label:'Dir' }, { key:'qty', label:'Qty' },
+    { key:'entry', label:'Entry' }, { key:'current', label:'Current' }, { key:'pl', label:'P&L' },
+    { key:'stop', label:'Stop' }, { key:'t1', label:'Target' }, { key:'opened', label:'Opened' }
+  ];
+
   function renderStatusPositions(){
     var el = document.getElementById('statusPositionsBody');
     if(!el) return;
@@ -8993,40 +9014,105 @@
     fetchAlpacaPositions().then(function(positions){
       var bySym = {};
       (positions || []).forEach(function(p){ bySym[p.symbol] = p; });
+      var rows = openPositions.map(function(j){
+        var live = bySym[j.sym];
+        var current, pl, plPct;
+        if(live){
+          current = parseFloat(live.current_price);
+          pl = parseFloat(live.unrealized_pl);
+          plPct = parseFloat(live.unrealized_plpc) * 100;
+        } else {
+          // No matching live position from Alpaca yet (e.g. order
+          // just filled and hasn't shown up in this fetch) -- fall
+          // back to the same local-quote estimate as before rather
+          // than showing nothing.
+          var q = findQuote(j.sym);
+          current = (q && q.price) ? q.price : j.entry;
+          var isLong = j.direction === 'Long';
+          pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
+          plPct = (current - j.entry) / j.entry * 100 * (isLong ? 1 : -1);
+        }
+        return { j: j, current: current, pl: pl, plPct: plPct };
+      });
+
+      if(statusPositionsSortKey){
+        var key = statusPositionsSortKey, dir = statusPositionsSortDir;
+        rows.sort(function(a, b){
+          var av = key === 'current' ? a.current : key === 'pl' ? a.pl : key === 'opened' ? (a.j.date || '') : a.j[key];
+          var bv = key === 'current' ? b.current : key === 'pl' ? b.pl : key === 'opened' ? (b.j.date || '') : b.j[key];
+          if(av < bv) return -1 * dir;
+          if(av > bv) return 1 * dir;
+          return 0;
+        });
+      }
+
       el.innerHTML =
         '<table class="backtest-trades-table">' +
-          '<thead><tr><th>Symbol</th><th>Dir</th><th>Qty</th><th>Entry</th><th>Current</th><th>P&L</th><th>Stop</th><th>Target</th></tr></thead>' +
-          '<tbody>' + openPositions.map(function(j){
-            var live = bySym[j.sym];
-            var current, pl, plPct;
-            if(live){
-              current = parseFloat(live.current_price);
-              pl = parseFloat(live.unrealized_pl);
-              plPct = parseFloat(live.unrealized_plpc) * 100;
-            } else {
-              // No matching live position from Alpaca yet (e.g. order
-              // just filled and hasn't shown up in this fetch) -- fall
-              // back to the same local-quote estimate as before rather
-              // than showing nothing.
-              var q = findQuote(j.sym);
-              current = (q && q.price) ? q.price : j.entry;
-              var isLong = j.direction === 'Long';
-              pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
-              plPct = (current - j.entry) / j.entry * 100 * (isLong ? 1 : -1);
-            }
-            var plClass = pl >= 0 ? 'up' : 'down';
+          '<thead><tr>' + STATUS_POSITIONS_COLUMNS.map(function(col){
+            var arrow = statusPositionsSortKey === col.key ? (statusPositionsSortDir === 1 ? ' ▲' : ' ▼') : '';
+            return '<th class="sortable-col" data-sort-key="' + col.key + '">' + col.label + arrow + '</th>';
+          }).join('') + '<th></th></tr></thead>' +
+          '<tbody>' + rows.map(function(r){
+            var j = r.j, plClass = r.pl >= 0 ? 'up' : 'down';
+            var openedLabel = j.date ? new Date(j.date + 'T00:00:00').toLocaleDateString([], { month:'short', day:'numeric' }) : '—';
             return '<tr>' +
               '<td class="mono">' + j.sym + '</td>' +
               '<td>' + j.direction + '</td>' +
               '<td>' + j.qty + '</td>' +
               '<td>' + fmt(j.entry) + '</td>' +
-              '<td>' + fmt(current) + '</td>' +
-              '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</td>' +
+              '<td>' + fmt(r.current) + '</td>' +
+              '<td class="' + plClass + '">' + (r.pl >= 0 ? '+' : '-') + '$' + Math.abs(r.pl).toFixed(2) + ' (' + (r.plPct >= 0 ? '+' : '') + r.plPct.toFixed(2) + '%)</td>' +
               '<td>' + fmt(j.stop) + '</td>' +
               '<td>' + fmt(j.t1) + '</td>' +
+              '<td>' + openedLabel + '</td>' +
+              '<td><button class="position-close-btn" data-sym="' + j.sym + '" data-armed="false">Close</button></td>' +
             '</tr>';
           }).join('') + '</tbody>' +
         '</table>';
+
+      el.querySelectorAll('.sortable-col').forEach(function(th){
+        th.addEventListener('click', function(){
+          var key = th.dataset.sortKey;
+          statusPositionsSortDir = (statusPositionsSortKey === key) ? -statusPositionsSortDir : 1;
+          statusPositionsSortKey = key;
+          renderStatusPositions();
+        });
+      });
+
+      // Same click-to-arm confirmation as Flatten All -- this submits a
+      // real market order to close the one position, so a single
+      // accidental click can't do it.
+      el.querySelectorAll('.position-close-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var sym = btn.dataset.sym;
+          if(btn.dataset.armed === 'true'){
+            clearTimeout(btn._armTimer);
+            btn.dataset.armed = 'false';
+            btn.classList.remove('confirming');
+            btn.disabled = true;
+            btn.textContent = 'Closing…';
+            closeAlpacaPosition(sym).then(function(){
+              showPositionClosedToast(sym, 'Closed manually from Open Positions.');
+              setTimeout(function(){ syncAlpacaFilledExits(); }, 2000);
+              setTimeout(function(){ syncAlpacaFilledExits(); }, 6000);
+            }).catch(function(err){
+              console.error('Manual close failed for', sym, err);
+              btn.disabled = false;
+              btn.textContent = 'Close';
+              alert('Failed to close ' + sym + ': ' + err.message);
+            });
+          } else {
+            btn.dataset.armed = 'true';
+            btn.classList.add('confirming');
+            btn.textContent = 'Confirm?';
+            btn._armTimer = setTimeout(function(){
+              btn.dataset.armed = 'false';
+              btn.classList.remove('confirming');
+              btn.textContent = 'Close';
+            }, 4000);
+          }
+        });
+      });
     }).catch(function(err){
       console.error('Failed to fetch live positions:', err);
       el.innerHTML = '<div class="labs-backtest-status down">Could not load live position data — will retry on next refresh.</div>';
