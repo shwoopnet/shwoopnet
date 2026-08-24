@@ -9274,10 +9274,20 @@
     if(!el) return;
     // Same account-scoping as journal entries -- an activity log entry
     // from a previous account shouldn't appear as if it happened on
-    // whatever account is connected now. Legacy entries from before
-    // this tracking existed (no accountKeyId at all) are excluded the
-    // same way legacy journal entries are.
+    // whatever account is connected now.
+    //
+    // Same exception as isOpenAlpacaPositionForCurrentAccount, and for
+    // the same reason: shwoop-server never stamped accountKeyId on the
+    // activity entries it writes until just now (see its
+    // orchestrator.js), so EVERY entry the backend has ever created --
+    // which in practice is nearly all of them -- had accountKeyId
+    // undefined and was being silently excluded here, making the
+    // Activity Log look empty/broken regardless of how much the backend
+    // had actually done. The backend only ever operates on the single
+    // paper-account credentials, so a no-accountKeyId entry can only be
+    // one of its own -- never extended to the live environment.
     var currentAccountLog = systemActivityLog.filter(function(entry){
+      if(!entry.accountKeyId) return alpacaAccountType === 'paper';
       return entry.accountKeyId === activeAlpacaCreds().keyId;
     });
     var headMeta = document.getElementById('activityLogHeadMeta');
