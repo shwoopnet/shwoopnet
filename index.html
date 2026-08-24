@@ -2915,18 +2915,7 @@
     if(statusEl){ statusEl.textContent = '—'; statusEl.className = 'quote-sync-status'; }
   }
 
-  // ---------- Real technical analysis ----------
-  // Computed from actual historical daily closes (Twelve Data), not
-  // fictional narrative.
-  function computeSMA(closes, period){
-    if(closes.length < period) return null;
-    var slice = closes.slice(closes.length - period);
-    return slice.reduce(function(a,b){ return a + b; }, 0) / period;
-  }
-
-  // Rolling SMA across a full bar series, for drawing as a line on the
-  // chart — different from computeSMA above, which only returns the single
-  // latest value used in the "why this trade" text.
+  // Rolling SMA across a full bar series, for drawing as a line on the chart.
   function computeSMASeries(bars, period){
     var closes = bars.map(function(b){ return b.c; });
     var series = new Array(closes.length).fill(null);
@@ -2939,63 +2928,6 @@
     return series;
   }
 
-  function computeTechnicalAnalysis(bars, currentPrice){
-    var closes = bars.map(function(b){ return b.c; });
-    var sma20 = computeSMA(closes, 20);
-    var sma50 = computeSMA(closes, 50);
-    var recent20 = bars.slice(-20);
-    var high20 = Math.max.apply(null, recent20.map(function(b){ return b.h; }));
-    var low20 = Math.min.apply(null, recent20.map(function(b){ return b.l; }));
-    var priorIdx = closes.length >= 6 ? closes.length - 6 : 0;
-    var priorClose = closes[priorIdx];
-    var momentum5d = priorClose ? ((currentPrice - priorClose) / priorClose * 100) : 0;
-
-    var direction = (sma50 !== null) ? (currentPrice >= sma50 ? 'Long' : 'Short') : 'Long';
-
-    var entry = sma20 !== null ? sma20 : currentPrice;
-    var stop, t1;
-    if(direction === 'Long'){
-      stop = low20 * 0.995;
-      if(stop >= entry){ stop = entry * 0.965; }
-      // Target comes from this stock's own actual price structure — real
-      // 20-day resistance — not a fixed multiple of the stop distance. A
-      // fixed multiple would make the reward/risk ratio the exact same
-      // constant for every trade, regardless of what the chart looks like.
-      t1 = Math.max(high20, entry * 1.01);
-    } else {
-      stop = high20 * 1.005;
-      if(stop <= entry){ stop = entry * 1.035; }
-      t1 = Math.min(low20, entry * 0.99);
-    }
-
-    var distFromEntryPct = Math.abs((currentPrice - entry) / entry * 100);
-    var status = 'watching', statusLabel = 'Watching';
-    if(distFromEntryPct < 2){ status = 'active'; statusLabel = 'Active'; }
-    if(direction === 'Long' && currentPrice >= t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(direction === 'Short' && currentPrice <= t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(direction === 'Long' && currentPrice <= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-    if(direction === 'Short' && currentPrice >= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-
-    var notes = [];
-    if(sma20 !== null && sma50 !== null){
-      notes.push('Trading ' + (currentPrice > sma20 ? 'above' : 'below') + ' its 20-day moving average of $' + sma20.toFixed(2) + ', with the 50-day at $' + sma50.toFixed(2) + '.');
-    } else {
-      notes.push('Not enough history yet for a full moving-average read — using recent price action instead.');
-    }
-    notes.push('20-day range runs from $' + low20.toFixed(2) + ' support up to $' + high20.toFixed(2) + ' resistance.');
-    notes.push('Price is ' + (momentum5d >= 0 ? 'up' : 'down') + ' ' + Math.abs(momentum5d).toFixed(1) + '% over the last 5 sessions' + (Math.abs(momentum5d) > 3 ? ', a meaningful recent move' : '') + '.');
-    notes.push('Entry sits near the 20-day average, stop just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan.');
-
-    return {
-      direction: direction, entry: entry, stop: stop, t1: t1, status: status, statusLabel: statusLabel, notes: notes,
-      sma20: sma20, sma50: sma50, momentum5d: momentum5d
-    };
-  }
-
-  // Same underlying math as computeTechnicalAnalysis (SMA/range/momentum
-  // are bar-size-agnostic) — every wording difference below exists because
-  // "20-day" and "5 sessions" would be flatly wrong when the bars are
-  // actually 15 minutes each.
   // ---------- Opening-range breakout + volume confirmation ----------
   // Replaces the old SMA-crossover intraday logic below (kept for
   // reference / potential comparison, but no longer called from the
@@ -3116,98 +3048,6 @@
       direction: signal.direction, entry: signal.entry, stop: signal.currentStop, t1: signal.t1,
       status: status, statusLabel: statusLabel, notes: notes
     };
-  }
-
-  function computeIntradayAnalysis(bars, currentPrice, barMinutes){
-    var closes = bars.map(function(b){ return b.c; });
-    var sma20 = computeSMA(closes, 20);
-    var sma50 = computeSMA(closes, 50);
-    var recent20 = bars.slice(-20);
-    var high20 = Math.max.apply(null, recent20.map(function(b){ return b.h; }));
-    var low20 = Math.min.apply(null, recent20.map(function(b){ return b.l; }));
-    var priorIdx = closes.length >= 6 ? closes.length - 6 : 0;
-    var priorClose = closes[priorIdx];
-    var momentumPct = priorClose ? ((currentPrice - priorClose) / priorClose * 100) : 0;
-    var lookbackHrs = (20 * (barMinutes || 15) / 60).toFixed(1);
-    var momentumHrs = (5 * (barMinutes || 15) / 60).toFixed(1);
-
-    var direction = (sma50 !== null) ? (currentPrice >= sma50 ? 'Long' : 'Short') : 'Long';
-    // Entry is the real, tradeable price — not the lagging SMA20
-    // reference. The live intraday system fires via market order
-    // immediately, so "wait for a pullback to sma20" was never actually
-    // how this executes. Anchoring stop/target to sma20 instead of the
-    // real current price created a systematic mismatch: by the time
-    // price reaches where the trade actually starts, it's often already
-    // partway to a target measured from the older, lower reference
-    // point, while the stop — also measured from that stale point —
-    // ends up farther away than intended. That combination is what
-    // produced fast, small wins and slow, large losses netting out to
-    // roughly nothing (backtest: +0.01% expectancy, profit factor 1.03).
-    var entry = currentPrice;
-    var stop, t1;
-    if(direction === 'Long'){
-      stop = low20 * 0.997;
-      if(stop >= entry){ stop = entry * 0.985; }
-      t1 = Math.max(high20, entry * 1.005);
-    } else {
-      stop = high20 * 1.003;
-      if(stop <= entry){ stop = entry * 1.015; }
-      t1 = Math.min(low20, entry * 0.995);
-    }
-
-    var distFromEntryPct = Math.abs((currentPrice - entry) / entry * 100);
-    var status = 'watching', statusLabel = 'Watching';
-    if(distFromEntryPct < 1){ status = 'active'; statusLabel = 'Active'; }
-    if(direction === 'Long' && currentPrice >= t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(direction === 'Short' && currentPrice <= t1){ status = 'hit'; statusLabel = 'Target hit'; }
-    if(direction === 'Long' && currentPrice <= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-    if(direction === 'Short' && currentPrice >= stop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-
-    var notes = [];
-    if(sma20 !== null && sma50 !== null){
-      notes.push('Trading ' + (currentPrice > sma20 ? 'above' : 'below') + ' its 20-bar (15-min) average of $' + sma20.toFixed(2) + ', with the 50-bar average at $' + sma50.toFixed(2) + '.');
-    } else {
-      notes.push('Not enough intraday history yet for a full moving-average read — using recent price action instead.');
-    }
-    notes.push('Range over the last ' + lookbackHrs + ' hours runs from $' + low20.toFixed(2) + ' support up to $' + high20.toFixed(2) + ' resistance.');
-    notes.push('Price is ' + (momentumPct >= 0 ? 'up' : 'down') + ' ' + Math.abs(momentumPct).toFixed(1) + '% over the last ' + momentumHrs + ' hours.');
-    notes.push('Entry is the current price — this fires immediately, not a limit order waiting for a pullback. Stop sits just ' + (direction === 'Long' ? 'below the recent low' : 'above the recent high') + ' — about ' + (Math.abs(entry - stop) / entry * 100).toFixed(1) + '% risk on the plan. This is intraday — expect it to resolve or need re-checking well before the close, not over days.');
-
-    return {
-      direction: direction, entry: entry, stop: stop, t1: t1, status: status, statusLabel: statusLabel, notes: notes,
-      sma20: sma20, sma50: sma50, momentum5d: momentumPct
-    };
-  }
-
-  // Ranks a candidate for the screener: clean trend alignment (price and
-  // both moving averages agreeing on direction) plus real recent momentum.
-  // Trend alignment is a requirement, not just a bonus — a stock with no
-  // genuine trend (price/SMA20/SMA50 not agreeing) shouldn't make the
-  // list just because it had a volatile week.
-  // Set to 0 (any positive, trend-aligned momentum qualifies) -- a stricter
-  // 0.5 threshold was tried and directly tested against real historical
-  // data: it produced fewer signals with a WORSE win rate and profit
-  // factor (31% win rate / PF 0.75) than the plain 0 threshold (37% win
-  // rate / PF 0.85). Raising this bar was the intuitive move, not the
-  // one the data actually supported, so it was reverted.
-  var MIN_SCREENER_SCORE = 0;
-  function scoreCandidate(analysis){
-    if(analysis.sma20 === null || analysis.sma50 === null) return -1;
-    var aligned = (analysis.direction === 'Long' && analysis.sma20 > analysis.sma50) ||
-                  (analysis.direction === 'Short' && analysis.sma20 < analysis.sma50);
-    if(!aligned) return -1;
-    // Minimum 1:1 reward:risk. The 60-day backtest showed a 79% win rate
-    // still losing money overall (expectancy -0.12%, profit factor 0.82)
-    // because average win size was only ~22% of average loss size --
-    // target is capped at the recent high (often already close to
-    // current price in a running trend), while stop can sit far away at
-    // the recent low. This doesn't change how stop/target are computed;
-    // it filters out exactly the lopsided setups driving that number
-    // negative before they're ever taken.
-    var risk = Math.abs(analysis.entry - analysis.stop);
-    var reward = Math.abs(analysis.t1 - analysis.entry);
-    if(risk <= 0 || reward < risk) return -1;
-    return Math.abs(analysis.momentum5d || 0);
   }
 
   var screenerUnsubscribe = null;
@@ -5716,28 +5556,10 @@
   }
 
   // ---------- Backtest engine (Labs page) ----------
-  // Re-runs the exact same computeTechnicalAnalysis/scoreCandidate logic
-  // the live screener uses, day by day against real history, using only
-  // data that would have existed at the time — no lookahead. Not a demo:
-  // this is the actual signal, tested honestly.
-  function simulateForwardFromDay(bars, entryIdx, analysis){
-    var isLong = analysis.direction === 'Long';
-    for(var j = entryIdx + 1; j < bars.length; j++){
-      var bar = bars[j];
-      // Conservative tie-break: daily bars can't tell us which happened
-      // first within a single day, so if a bar's range could plausibly
-      // have touched both stop and target, assume the worse outcome
-      // (stop) resolved first.
-      if(isLong){
-        if(bar.l <= analysis.stop) return { result:'stopped', days: j - entryIdx, price: analysis.stop, date: bar.t };
-        if(bar.h >= analysis.t1) return { result:'hit', days: j - entryIdx, price: analysis.t1, date: bar.t };
-      } else {
-        if(bar.h >= analysis.stop) return { result:'stopped', days: j - entryIdx, price: analysis.stop, date: bar.t };
-        if(bar.l <= analysis.t1) return { result:'hit', days: j - entryIdx, price: analysis.t1, date: bar.t };
-      }
-    }
-    return { result:'unresolved', days: bars.length - 1 - entryIdx, price: bars[bars.length-1].c, date: bars[bars.length-1].t };
-  }
+  // Re-runs the exact same scoring and stop/target logic the live ORB
+  // screener uses, day by day against real history, using only data that
+  // would have existed at the time — no lookahead. Not a demo: this is
+  // the actual signal, tested honestly.
 
   // Same-day-close-aware resolver for ORB. Uses a trailing stop instead
   // of a fixed target now -- once a trade moves 0.75x its own risk in
@@ -5847,12 +5669,11 @@
 
 
   // ---------- Intraday backtest ----------
-  // Same simulation shape as the daily backtest (no lookahead, real
-  // history, the same fixed entry-price basis), pointed at the intraday
-  // universe and computeIntradayAnalysis instead. simulateForwardFromDay
-  // and summarizeBacktestTrades are timeframe-agnostic already (they
-  // only ever check bar highs/lows against stop/target), so both are
-  // reused as-is rather than duplicated.
+  // Same simulation shape as the backtest engine above (no lookahead,
+  // real history), pointed at the intraday universe and computeORBAnalysis
+  // instead. summarizeBacktestTrades is timeframe-agnostic already (it
+  // only ever checks trade outcomes, not bar size), so it's reused as-is
+  // rather than duplicated.
   function fetchIntradayBacktestHistory(sym, totalBars){
     return scheduleTwelveDataCall(function(){
       var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
