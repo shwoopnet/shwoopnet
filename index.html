@@ -3599,6 +3599,16 @@
   function isOpenAlpacaPositionForCurrentAccount(j){
     return j.status === 'open' && j.source === 'alpaca' && j.accountKeyId === activeAlpacaCreds().keyId;
   }
+  // Same idea, but for spots that need "is this genuinely still an open
+  // position I should show/act on right now" rather than specifically an
+  // Alpaca one -- a manually-logged entry (the Log Trade modal, no
+  // Alpaca order behind it at all) isn't tied to either environment and
+  // should never be hidden by an account switch, but an Alpaca-sourced
+  // entry from the OTHER environment still needs to be excluded exactly
+  // like above.
+  function isOpenPositionForCurrentAccount(j){
+    return j.status === 'open' && (j.source !== 'alpaca' || j.accountKeyId === activeAlpacaCreds().keyId);
+  }
   var alpacaConnected = false;
   // Self-healing connection check state -- see testAlpacaConnection below
   // for why this exists: a single transient failure (network blip,
@@ -4352,7 +4362,7 @@
     // protection sitting on Alpaca's side — this is data Shwoop already
     // has and trusts, since it wrote it there itself.
     if(target === null || stop === null){
-      var journalMatch = journalEntries.filter(function(j){ return j.sym === sym && j.status === 'open'; })[0];
+      var journalMatch = journalEntries.filter(function(j){ return j.sym === sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
       if(journalMatch){
         if(target === null && journalMatch.t1 !== undefined && journalMatch.t1 !== null) target = journalMatch.t1;
         if(stop === null && journalMatch.stop !== undefined && journalMatch.stop !== null) stop = journalMatch.stop;
@@ -4936,21 +4946,38 @@
     });
   }
 
+  // Guards against the same symbol getting a second, overlapping
+  // validity check started while its first one is still in flight.
+  // applyStoredScreenerPicks (the only caller of this function) fires on
+  // EVERY write to the shared account document -- including the backend's
+  // own ~60s heartbeat, not just an actual change to screener picks -- so
+  // without this, a check that's still pending when the next heartbeat
+  // re-triggers this function would start a second check for the same
+  // still-"open" symbol. If both independently conclude "no longer
+  // valid" (plausible once a few checks queue up against the shared
+  // Twelve Data rate limit), both would submit a close order for the same
+  // position before the journal has had a chance to mark it closed.
+  var invalidationCheckInFlight = {};
+
   function closeInvalidatedPositions(screenerType){
     if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
     var openEntries = journalEntries.filter(function(j){
       return isOpenAlpacaPositionForCurrentAccount(j) && (j.screenerType || 'daily') === screenerType;
     });
     openEntries.forEach(function(entry){
+      if(invalidationCheckInFlight[entry.sym]) return;
+      invalidationCheckInFlight[entry.sym] = true;
       checkPositionStillValid(entry).then(function(stillValid){
         if(stillValid) return;
-        closeAlpacaPosition(entry.sym).then(function(){
+        return closeAlpacaPosition(entry.sym).then(function(){
           // The actual fill price/date gets picked up by the existing
           // exit-sync pass on its next cycle — not duplicating that here.
           showPositionClosedToast(entry.sym, 'No longer a valid setup — direction or trend alignment changed, so the position was closed.');
         }).catch(function(err){
           console.error('Failed to close invalidated position', entry.sym, err);
         });
+      }).then(function(){
+        invalidationCheckInFlight[entry.sym] = false;
       });
     });
   }
@@ -5106,7 +5133,7 @@
       var up = change >= 0;
       var badge = computeBadgeInfo(t);
       var rr = computeRiskReward(t);
-      var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
+      var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
@@ -6396,7 +6423,7 @@
     // pick for the same symbol — if a position was opened on an earlier
     // day, the chart should show what's actually being held (its real
     // entry/stop/target), not whatever levels today's re-run produced.
-    var openPosition = journalEntries.filter(function(j){ return j.sym === sym && j.status === 'open'; })[0];
+    var openPosition = journalEntries.filter(function(j){ return j.sym === sym && isOpenPositionForCurrentAccount(j); })[0];
     var trade = trades.filter(function(t){ return t.sym === sym; })[0] || intradayTrades.filter(function(t){ return t.sym === sym; })[0];
     var levels = null;
     if(openPosition){
@@ -6808,14 +6835,27 @@
 
   var lastQuoteBatchSources = [];
 
+  // Per-symbol fetch counter -- fetchAllQuotes() runs both on the 45s
+  // priceLoopInterval below AND independently from applyStoredScreenerPicks,
+  // which fires on every write to the shared account document, including
+  // the backend's own ~60s heartbeat -- so two batches for the same symbol
+  // can genuinely be in flight at once. Without this, a slower, earlier
+  // request landing after a faster, later one already wrote a fresher price
+  // would silently overwrite it with a stale one.
+  var quoteFetchGen = {};
+
   function fetchAllQuotes(){
     var results = [];
     var sources = [];
     var pending = watchlist.length;
     watchlist.forEach(function(item){
+      quoteFetchGen[item.sym] = (quoteFetchGen[item.sym] || 0) + 1;
+      var myGen = quoteFetchGen[item.sym];
       fetchQuote(item.sym).then(function(q){
-        item.price = q.price;
-        item.prevClose = q.prevClose;
+        if(quoteFetchGen[item.sym] === myGen){
+          item.price = q.price;
+          item.prevClose = q.prevClose;
+        }
         sources.push(q.source);
         renderTicker();
         pending--;
