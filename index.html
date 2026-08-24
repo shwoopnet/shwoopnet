@@ -850,16 +850,6 @@
   .card-reorder-btn:disabled{ opacity:.3; cursor:default; }
   .card-reorder-btn:disabled:hover{ border-color: var(--border); color: var(--muted); }
 
-  /* ---------- Auto-Trading Controls: risk stepper + per-symbol grid ---------- */
-  .symbol-toggle-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap:8px; }
-  .symbol-toggle-btn{
-    background: var(--panel-raised); border:1px solid var(--border); color:var(--muted);
-    font-family:'IBM Plex Mono', monospace; font-size:12px; padding:8px 4px;
-    border-radius:5px; cursor:pointer; text-align:center;
-  }
-  .symbol-toggle-btn:hover{ border-color: var(--amber-dim); }
-  .symbol-toggle-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
-
   .zoom-btn{
     background: transparent; border:1px solid var(--border); color: var(--muted);
     width:26px; height:26px; border-radius:4px; font-size:15px; line-height:1;
@@ -1551,15 +1541,13 @@
           // The actual override fields (distinct from the server*
           // fields above, which are the backend's read-only EFFECTIVE
           // mirrors) -- these are what this tab's own controls need to
-          // pre-fill themselves correctly, e.g. showing a risk-%
-          // stepper at the value actually on file rather than always
-          // resetting to some hardcoded default on reload. null/absent
-          // means "no override written yet, backend is using its own
-          // env-var default" -- see shwoop-server's src/settings.js.
+          // pre-fill themselves correctly rather than always resetting
+          // to some hardcoded default on reload. null/absent means "no
+          // override written yet, backend is using its own env-var
+          // default" -- see shwoop-server's src/settings.js.
           riskPercentOverride: typeof data.riskPercentOverride === 'number' ? data.riskPercentOverride : null,
           intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
-          intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
-          intradaySymbolOverrides: (data.intradaySymbolOverrides && typeof data.intradaySymbolOverrides === 'object') ? data.intradaySymbolOverrides : null
+          intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null
         });
       }, function(err){
         console.error('Screener sync error:', err);
@@ -1995,30 +1983,6 @@
           </div>
         </div>
         <button class="chart-tool-btn" id="screenerEnableToggle">Off</button>
-      </div>
-      <div class="settings-row" id="riskPercentRow" hidden>
-        <div>
-          <div class="settings-row-title">Risk per trade</div>
-          <div class="settings-row-desc">
-            Dollars risked per new position, as a % of account equity. This is the exact number the
-            server's own order sizing uses — not a local preview of a separate server setting.
-          </div>
-        </div>
-        <div class="layout-stepper">
-          <button class="zoom-btn" id="riskPercentDec" aria-label="Decrease risk per trade">−</button>
-          <span class="zoom-label mono" id="riskPercentLabel">1.0%</span>
-          <button class="zoom-btn" id="riskPercentInc" aria-label="Increase risk per trade">+</button>
-        </div>
-      </div>
-      <div class="settings-row settings-row-block" id="symbolOverridesRow" hidden>
-        <div style="margin-bottom:10px;">
-          <div class="settings-row-title">Symbols scanned</div>
-          <div class="settings-row-desc">
-            Turn off any symbol you don't want the server scanning, sizing, or sending orders for. Every
-            symbol is on by default.
-          </div>
-        </div>
-        <div class="symbol-toggle-grid" id="symbolOverridesGrid"></div>
       </div>
       <div class="settings-row" id="tradingPausedRow" hidden>
         <div>
@@ -3155,12 +3119,11 @@
   // is using its own env-var default) -- distinct from
   // backendScreenerEnabledOnServer/backendAutoTradeEnabledOnServer above,
   // which are the server's read-only EFFECTIVE mirrors. These drive what
-  // the Auto-Trading Controls toggles/stepper/grid actually show.
+  // the Auto-Trading Controls toggles actually show.
   var autoTradeOverrides = {
     riskPercentOverride: null,
     intradayScreenerEnabledOverride: null,
-    intradayAutoTradeEnabledOverride: null,
-    intradaySymbolOverrides: null
+    intradayAutoTradeEnabledOverride: null
   };
 
   function loadScreenerForUser(uid){
@@ -3186,8 +3149,10 @@
       autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
-      autoTradeOverrides.intradaySymbolOverrides = data.intradaySymbolOverrides;
-      if(typeof data.riskPercentOverride === 'number'){ riskPercent = data.riskPercentOverride; renderRiskPercentLabel(); }
+      // Still tracked (not user-adjustable from this tab anymore) so the
+      // local screener preview's sizeability filter stays in lockstep
+      // with whatever risk % the server is actually using to size orders.
+      if(typeof data.riskPercentOverride === 'number'){ riskPercent = data.riskPercentOverride; }
       renderAutoTradeOverrideControls();
       var statusPageEl = document.getElementById('page-trades');
       if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
@@ -3382,12 +3347,9 @@
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
     document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
     document.getElementById('screenerEnabledRow').removeAttribute('hidden');
-    document.getElementById('riskPercentRow').removeAttribute('hidden');
-    document.getElementById('symbolOverridesRow').removeAttribute('hidden');
     document.getElementById('flattenAllRow').removeAttribute('hidden');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.setAttribute('hidden', '');
-    renderSymbolOverridesGrid();
     updateTradeBubbles();
   }
 
@@ -3397,8 +3359,6 @@
     document.getElementById('alpacaDock').setAttribute('hidden', '');
     document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
     document.getElementById('screenerEnabledRow').setAttribute('hidden', '');
-    document.getElementById('riskPercentRow').setAttribute('hidden', '');
-    document.getElementById('symbolOverridesRow').setAttribute('hidden', '');
     document.getElementById('flattenAllRow').setAttribute('hidden', '');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.removeAttribute('hidden');
@@ -3507,13 +3467,13 @@
   var alpacaAutoTradeIntradayEnabled = false;
 
   // ---------- Risk-based position sizing ----------
-  // User-adjustable from the Risk per trade stepper in Auto-Trading
-  // Controls, which writes riskPercentOverride to Firestore -- the
-  // server reads that same field (see shwoop-server's src/settings.js)
-  // and falls back to its own RISK_PERCENT env var only when no
-  // override has ever been written, so this stays in lockstep with the
-  // server's real order sizing rather than just a local preview of a
-  // separate, disconnected server setting.
+  // Not user-adjustable from this tab -- kept in sync with whatever
+  // riskPercentOverride (if any) is on file in Firestore, which the
+  // server reads from that same field (see shwoop-server's
+  // src/settings.js) and falls back to its own RISK_PERCENT env var
+  // only when no override has ever been written. Mirroring it here
+  // keeps this tab's own screener preview in lockstep with the
+  // server's real order sizing rather than a disconnected local guess.
   var riskPercent = 1.0;
   // Total open risk across ALL positions is capped at a fixed % of
   // equity, independent of per-trade risk% -- there's no hard cap on how
@@ -3527,15 +3487,8 @@
   // position while risking very little per share.
   var MAX_POSITION_EQUITY_PERCENT = 20;
 
-  function renderRiskPercentLabel(){
-    var label = document.getElementById('riskPercentLabel');
-    if(label){ label.textContent = riskPercent.toFixed(1) + '%'; }
-  }
-
   // ---------- Auto-Trading Controls: writes overrides to the same
   // Firestore doc shwoop-server reads (see its src/settings.js) ----------
-  var RISK_PERCENT_MIN = 0.25, RISK_PERCENT_MAX = 5.0, RISK_PERCENT_STEP = 0.25;
-
   function saveAutoTradeOverride(partial){
     if(!window.__shwoopAPI || !currentUid) return;
     window.__shwoopAPI.saveAutoTradeOverrides(currentUid, partial).catch(function(err){
@@ -3580,8 +3533,6 @@
       screenerBtn.textContent = screenerOn ? 'On' : 'Off';
       screenerBtn.classList.toggle('active', screenerOn);
     }
-    renderRiskPercentLabel();
-    renderSymbolOverridesGrid();
   }
 
   document.getElementById('autoTradeEnableToggle').addEventListener('click', function(){
@@ -3623,43 +3574,6 @@
     saveAutoTradeOverride({ intradayScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
   });
-
-  function stepRiskPercent(dir){
-    var current = typeof autoTradeOverrides.riskPercentOverride === 'number' ? autoTradeOverrides.riskPercentOverride : riskPercent;
-    var next = Math.round((current + dir * RISK_PERCENT_STEP) * 100) / 100;
-    next = Math.min(RISK_PERCENT_MAX, Math.max(RISK_PERCENT_MIN, next));
-    riskPercent = next;
-    autoTradeOverrides.riskPercentOverride = next;
-    saveAutoTradeOverride({ riskPercentOverride: next });
-    renderRiskPercentLabel();
-  }
-  document.getElementById('riskPercentDec').addEventListener('click', function(){ stepRiskPercent(-1); });
-  document.getElementById('riskPercentInc').addEventListener('click', function(){ stepRiskPercent(1); });
-
-  // Per-symbol enable/disable -- a symbol maps to `false` to exclude it
-  // from the server's next scan; absent means enabled. Immediate (no
-  // arm-confirm) since the actual real-money gate is the auto-trade
-  // toggle above, not which symbols are in scope for it.
-  function renderSymbolOverridesGrid(){
-    var el = document.getElementById('symbolOverridesGrid');
-    if(!el || !alpacaConnected) return;
-    var overrides = autoTradeOverrides.intradaySymbolOverrides || {};
-    el.innerHTML = INTRADAY_UNIVERSE.map(function(sym){
-      var on = overrides[sym] !== false;
-      return '<button class="symbol-toggle-btn' + (on ? ' active' : '') + '" data-sym="' + sym + '">' + sym + '</button>';
-    }).join('');
-    el.querySelectorAll('.symbol-toggle-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.sym;
-        var current = autoTradeOverrides.intradaySymbolOverrides || {};
-        var next = {};
-        INTRADAY_UNIVERSE.forEach(function(s){ next[s] = (s === sym) ? (current[s] === false ? true : false) : (current[s] !== false); });
-        autoTradeOverrides.intradaySymbolOverrides = next;
-        saveAutoTradeOverride({ intradaySymbolOverrides: next });
-        renderSymbolOverridesGrid();
-      });
-    });
-  }
 
   // Pure function, deliberately simple and easy to test in isolation:
   // dollars risked divided by dollars risked per share, floored to a
@@ -8178,13 +8092,36 @@
       return;
     }
 
-    var openCount = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).length;
+    // The count comes from Alpaca's own live position list, not the local
+    // journal -- a journal entry can lag behind an actual close (a bracket
+    // leg filling server-side, the backend flattening at market close)
+    // for a while, and during that window the journal's "open" count is
+    // simply wrong. Alpaca's list is the one number that's always current.
+    // Fetched independently of the account-summary call below so a
+    // failure in one doesn't block the other from updating what it can.
+    getAlpacaPositionsCached().then(function(positions){
+      if(!alpacaConnected) return;
+      var openCount = Array.isArray(positions) ? positions.length : 0;
+      [dockBubble, sidebarBubble].forEach(function(el){
+        el.textContent = openCount;
+        el.removeAttribute('hidden');
+      });
+    }).catch(function(){
+      if(!alpacaConnected) return;
+      // Live count unavailable this cycle -- fall back to the journal's
+      // belief rather than showing nothing.
+      var openCount = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).length;
+      [dockBubble, sidebarBubble].forEach(function(el){
+        el.textContent = openCount;
+        el.removeAttribute('hidden');
+      });
+    });
 
     fetchAlpacaAccountSummary().then(function(acct){
       // Re-check rather than trust the closure's snapshot of
       // alpacaConnected -- this fetch can take a moment, and if the
       // connection was lost or explicitly reset while it was in
-      // flight, showing the bubble now would resurrect stale data
+      // flight, recoloring the bubble now would resurrect stale data
       // right after something else correctly hid it.
       if(!alpacaConnected) return;
       var equity = parseFloat(acct.equity || 0);
@@ -8195,18 +8132,10 @@
       var colorClass = Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
 
       [dockBubble, sidebarBubble].forEach(function(el){
-        el.textContent = openCount;
         el.className = el.className.replace(/\b(positive|negative|neutral)\b/g, '').trim() + ' ' + colorClass;
-        el.removeAttribute('hidden');
       });
     }).catch(function(){
-      if(!alpacaConnected) return;
-      // Account fetch failing shouldn't hide the bubble entirely --
-      // still show the position count, just without a color read yet.
-      [dockBubble, sidebarBubble].forEach(function(el){
-        el.textContent = openCount;
-        el.removeAttribute('hidden');
-      });
+      // Color just won't update this cycle -- the count above still did.
     });
   }
 
@@ -9187,7 +9116,6 @@
   updateClock();
   renderHistoryList();
   populateIntradayBacktestSymbolSelect();
-  renderRiskPercentLabel();
   loadIntradayPref();
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
