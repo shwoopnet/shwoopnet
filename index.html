@@ -9435,7 +9435,16 @@
   updateClock();
   renderHistoryList();
   populateIntradayBacktestSymbolSelect();
-  loadAlpacaAutoTradePref();
+  // loadAlpacaAutoTradePref() intentionally not called anymore -- the
+  // local daily auto-trade toggle (alpacaAutoTradeToggle) was removed
+  // from this page same as the intraday one below, but this call was
+  // missed when that happened. Without this fix, a "true" left over in
+  // an old browser's localStorage from back when the button existed
+  // would silently set alpacaAutoTradeEnabled = true on load, with no
+  // toggle anywhere in the UI to see or turn it back off -- and
+  // autoSendNewPicksIfEnabled() would keep sending real bracket orders
+  // off of it the moment a stored screener pick ever matched today's
+  // date.
   renderRiskPercentLabel();
   // loadAlpacaAutoTradeIntradayPref() intentionally not called anymore --
   // the local intraday auto-trade toggle was removed (see comment above
