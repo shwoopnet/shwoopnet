@@ -8178,13 +8178,36 @@
       return;
     }
 
-    var openCount = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).length;
+    // The count comes from Alpaca's own live position list, not the local
+    // journal -- a journal entry can lag behind an actual close (a bracket
+    // leg filling server-side, the backend flattening at market close)
+    // for a while, and during that window the journal's "open" count is
+    // simply wrong. Alpaca's list is the one number that's always current.
+    // Fetched independently of the account-summary call below so a
+    // failure in one doesn't block the other from updating what it can.
+    getAlpacaPositionsCached().then(function(positions){
+      if(!alpacaConnected) return;
+      var openCount = Array.isArray(positions) ? positions.length : 0;
+      [dockBubble, sidebarBubble].forEach(function(el){
+        el.textContent = openCount;
+        el.removeAttribute('hidden');
+      });
+    }).catch(function(){
+      if(!alpacaConnected) return;
+      // Live count unavailable this cycle -- fall back to the journal's
+      // belief rather than showing nothing.
+      var openCount = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).length;
+      [dockBubble, sidebarBubble].forEach(function(el){
+        el.textContent = openCount;
+        el.removeAttribute('hidden');
+      });
+    });
 
     fetchAlpacaAccountSummary().then(function(acct){
       // Re-check rather than trust the closure's snapshot of
       // alpacaConnected -- this fetch can take a moment, and if the
       // connection was lost or explicitly reset while it was in
-      // flight, showing the bubble now would resurrect stale data
+      // flight, recoloring the bubble now would resurrect stale data
       // right after something else correctly hid it.
       if(!alpacaConnected) return;
       var equity = parseFloat(acct.equity || 0);
@@ -8195,18 +8218,10 @@
       var colorClass = Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
 
       [dockBubble, sidebarBubble].forEach(function(el){
-        el.textContent = openCount;
         el.className = el.className.replace(/\b(positive|negative|neutral)\b/g, '').trim() + ' ' + colorClass;
-        el.removeAttribute('hidden');
       });
     }).catch(function(){
-      if(!alpacaConnected) return;
-      // Account fetch failing shouldn't hide the bubble entirely --
-      // still show the position count, just without a color read yet.
-      [dockBubble, sidebarBubble].forEach(function(el){
-        el.textContent = openCount;
-        el.removeAttribute('hidden');
-      });
+      // Color just won't update this cycle -- the count above still did.
     });
   }
 
