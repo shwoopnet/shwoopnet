@@ -333,6 +333,8 @@
      [hidden] override already present elsewhere in this file. */
   .settings-row[hidden]{ display:none; }
   .settings-row:last-of-type{ border-bottom:none; }
+  .settings-row-block{ display:block; }
+  .settings-row-block[hidden]{ display:none; }
   .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
   .settings-row-desc{ font-size:11.5px; color: var(--muted); }
   .quote-sync-status.ok{ color: var(--gain); }
@@ -788,6 +790,43 @@
   }
   .layout-reset-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .layout-toggle-group{ display:flex; gap:4px; }
+
+  /* ---------- Trade Overview: card show/hide + reorder ---------- */
+  .to-card{ margin-top:20px; }
+  .to-card:first-child{ margin-top:0; }
+  .to-card-hidden{ display:none !important; }
+  #cardCustomizeMenu{ min-width:280px; }
+  .card-customize-row{
+    justify-content:space-between; padding:6px 0;
+  }
+  .card-customize-row .step-name{ flex:1; text-transform:none; font-size:12.5px; letter-spacing:0; color:var(--paper); }
+  .card-customize-row.is-hidden .step-name{ color:var(--muted); }
+  .card-customize-row-actions{ display:flex; gap:4px; align-items:center; }
+  .card-visibility-btn{
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'Space Grotesk', sans-serif; font-size:10.5px; padding:5px 9px;
+    border-radius:5px; cursor:pointer; min-width:44px;
+  }
+  .card-visibility-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .card-visibility-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
+  .card-reorder-btn{
+    background:transparent; border:1px solid var(--border); color:var(--muted);
+    width:22px; height:22px; border-radius:4px; font-size:12px; line-height:1;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .card-reorder-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .card-reorder-btn:disabled{ opacity:.3; cursor:default; }
+  .card-reorder-btn:disabled:hover{ border-color: var(--border); color: var(--muted); }
+
+  /* ---------- Auto-Trading Controls: risk stepper + per-symbol grid ---------- */
+  .symbol-toggle-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap:8px; }
+  .symbol-toggle-btn{
+    background: var(--panel-raised); border:1px solid var(--border); color:var(--muted);
+    font-family:'IBM Plex Mono', monospace; font-size:12px; padding:8px 4px;
+    border-radius:5px; cursor:pointer; text-align:center;
+  }
+  .symbol-toggle-btn:hover{ border-color: var(--amber-dim); }
+  .symbol-toggle-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
 
   #tradeBlocks.two-col{ display:block; }
   #tradeBlocks.two-col .masonry-row{ display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; }
@@ -1528,11 +1567,31 @@
           intradayCycleCompletedAt: data.intradayCycleCompletedAt || null,
           intradayCycleError: data.intradayCycleError || null,
           intradayCycleErrorAt: data.intradayCycleErrorAt || null,
-          intradayLastCycleSummary: data.intradayLastCycleSummary || null
+          intradayLastCycleSummary: data.intradayLastCycleSummary || null,
+          // The actual override fields (distinct from the server*
+          // fields above, which are the backend's read-only EFFECTIVE
+          // mirrors) -- these are what this tab's own controls need to
+          // pre-fill themselves correctly, e.g. showing a risk-%
+          // stepper at the value actually on file rather than always
+          // resetting to some hardcoded default on reload. null/absent
+          // means "no override written yet, backend is using its own
+          // env-var default" -- see shwoop-server's src/settings.js.
+          riskPercentOverride: typeof data.riskPercentOverride === 'number' ? data.riskPercentOverride : null,
+          intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
+          intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
+          intradaySymbolOverrides: (data.intradaySymbolOverrides && typeof data.intradaySymbolOverrides === 'object') ? data.intradaySymbolOverrides : null
         });
       }, function(err){
         console.error('Screener sync error:', err);
       });
+    },
+    // Merges only the fields actually passed in -- callers pass a
+    // partial object with just the one or two settings that changed
+    // (e.g. { riskPercentOverride: 1.5 }), never the full settings
+    // shape, so toggling one control can't accidentally clobber another
+    // control's already-saved value.
+    saveAutoTradeOverrides: function(uid, partialOverrides){
+      return setDoc(doc(db, 'users', uid), partialOverrides, { merge: true });
     },
     saveAlpacaCredentials: function(uid, keyId, secretKey, environment){
       var field = environment === 'live' ? { alpacaLiveKeyId: keyId, alpacaLiveSecretKey: secretKey }
@@ -1909,6 +1968,17 @@
       </div>
       <div class="trades-header-right">
         <div class="layout-dropdown">
+          <button class="layout-toggle-btn" id="cardCustomizeToggle" aria-haspopup="true" aria-expanded="false">
+            <span>Customize page</span>
+            <span class="caret">▾</span>
+          </button>
+          <div class="layout-menu" id="cardCustomizeMenu" hidden>
+            <div id="cardCustomizeList"></div>
+            <div class="layout-divider"></div>
+            <button class="layout-reset-btn" id="cardCustomizeResetBtn">Reset page layout to defaults</button>
+          </div>
+        </div>
+        <div class="layout-dropdown">
           <button class="layout-toggle-btn" id="layoutToggle" aria-haspopup="true" aria-expanded="false">
             <span>Chart settings</span>
             <span class="caret">▾</span>
@@ -1948,32 +2018,75 @@
       </div>
     </div>
 
-    <div class="backtest-summary" id="statusAccountSummary"></div>
-
-    <div class="labs-backtest-card" id="backendPulseCard" style="margin-top:20px;" hidden>
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Pulse</div>
-      <div class="labs-backtest-note" style="margin-bottom:10px;">
-        Live proof the 24/7 server is actually up and running its scan → size → send cycle — not just a
-        timestamp of whatever it last found.
-      </div>
-      <div id="backendPulseBody"></div>
+    <div class="to-card" id="toCard-accountSummary">
+      <div class="backtest-summary" id="statusAccountSummary"></div>
     </div>
 
+    <div class="to-card" id="toCard-backendPulse">
+      <div class="labs-backtest-card" id="backendPulseCard" hidden>
+        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Pulse</div>
+        <div class="labs-backtest-note" style="margin-bottom:10px;">
+          Live proof the 24/7 server is actually up and running its scan → size → send cycle — not just a
+          timestamp of whatever it last found.
+        </div>
+        <div id="backendPulseBody"></div>
+      </div>
+    </div>
+
+    <!-- Pinned right after the header, always visible -- these are the
+         emergency/safety controls (resume trading, flatten all), not
+         something that should be hideable or reorderable away like the
+         cards below. -->
     <div class="labs-backtest-card" style="margin-top:20px;">
       <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Auto-Trading Controls</div>
       <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
         <div>
           <div class="settings-row-title">Auto-trading</div>
           <div class="settings-row-desc" id="autoTradeIntradayDesc">
-            Runs on the 24/7 backend now, not this browser tab — the server scans, sizes, and sends new picks
-            automatically whenever its own auto-trade setting is on, regardless of whether anyone has this page
-            open. This used to also be controllable from this tab, but running both at once risked the same
-            signal getting sized and sent twice — the local copy has been removed. Change the server's setting
-            via its Render environment variables. Failed orders retry 3 times, then auto-trading pauses and
-            alerts you — see status below.
+            Runs on the 24/7 backend, not this browser tab — flipping this writes directly to the same
+            Firestore setting the server reads every ~60 seconds, so it takes effect within about a minute
+            even if you close this tab right after, no redeploy needed. Failed orders retry 3 times, then
+            auto-trading pauses and alerts you — see status below.
           </div>
         </div>
-        <span class="quote-sync-status" id="serverAutoTradeStatusBadge">—</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="quote-sync-status" id="serverAutoTradeStatusBadge">—</span>
+          <button class="chart-tool-btn" id="autoTradeEnableToggle" data-armed="false">Off</button>
+        </div>
+      </div>
+      <div class="settings-row" id="screenerEnabledRow" hidden>
+        <div>
+          <div class="settings-row-title">Intraday screener (server)</div>
+          <div class="settings-row-desc">
+            Scans the 16-symbol universe every 15 minutes while the market's open. Auto-trading above has
+            nothing to size or send without this being on too.
+          </div>
+        </div>
+        <button class="chart-tool-btn" id="screenerEnableToggle">Off</button>
+      </div>
+      <div class="settings-row" id="riskPercentRow" hidden>
+        <div>
+          <div class="settings-row-title">Risk per trade</div>
+          <div class="settings-row-desc">
+            Dollars risked per new position, as a % of account equity. This is the exact number the
+            server's own order sizing uses — not a local preview of a separate server setting.
+          </div>
+        </div>
+        <div class="layout-stepper">
+          <button class="zoom-btn" id="riskPercentDec" aria-label="Decrease risk per trade">−</button>
+          <span class="zoom-label mono" id="riskPercentLabel">1.0%</span>
+          <button class="zoom-btn" id="riskPercentInc" aria-label="Increase risk per trade">+</button>
+        </div>
+      </div>
+      <div class="settings-row settings-row-block" id="symbolOverridesRow" hidden>
+        <div style="margin-bottom:10px;">
+          <div class="settings-row-title">Symbols scanned</div>
+          <div class="settings-row-desc">
+            Turn off any symbol you don't want the server scanning, sizing, or sending orders for. Every
+            symbol is on by default.
+          </div>
+        </div>
+        <div class="symbol-toggle-grid" id="symbolOverridesGrid"></div>
       </div>
       <div class="settings-row" id="tradingPausedRow" hidden>
         <div>
@@ -1996,32 +2109,42 @@
       <div class="labs-backtest-status" id="autoTradeControlsEmpty" hidden>Connect Alpaca in Settings to enable auto-trading.</div>
     </div>
 
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Open Positions</div>
-      <div id="statusPositionsBody"></div>
+    <div class="to-card" id="toCard-openPositions">
+      <div class="labs-backtest-card">
+        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Open Positions</div>
+        <div id="statusPositionsBody"></div>
+      </div>
     </div>
 
-    <div class="intraday-section" id="intradaySection" hidden style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Today's Setups</div>
-      <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
-      <div id="intradayBlocks"></div>
+    <div class="to-card" id="toCard-todaysSetups">
+      <div class="intraday-section" id="intradaySection" hidden>
+        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Today's Setups</div>
+        <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
+        <div id="intradayBlocks"></div>
+      </div>
     </div>
 
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">System Health</div>
-      <div id="statusHealthRows"></div>
+    <div class="to-card" id="toCard-systemHealth">
+      <div class="labs-backtest-card">
+        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">System Health</div>
+        <div id="statusHealthRows"></div>
+      </div>
     </div>
 
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Intraday Screener</div>
-      <div class="labs-backtest-note" style="margin-bottom:10px;">What the 24/7 server last saw — separate from this tab's own live view, and updates even when no browser is open.</div>
-      <div id="statusIntradayBody"></div>
+    <div class="to-card" id="toCard-backendScreener">
+      <div class="labs-backtest-card">
+        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Intraday Screener</div>
+        <div class="labs-backtest-note" style="margin-bottom:10px;">What the 24/7 server last saw — separate from this tab's own live view, and updates even when no browser is open.</div>
+        <div id="statusIntradayBody"></div>
+      </div>
     </div>
 
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log</div>
-      <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
-      <div id="statusActivityList"></div>
+    <div class="to-card" id="toCard-activityLog">
+      <div class="labs-backtest-card">
+        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log</div>
+        <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
+        <div id="statusActivityList"></div>
+      </div>
     </div>
   </main>
 
@@ -3452,6 +3575,17 @@
   var backendCycleError = null;
   var backendCycleErrorAt = null;
   var backendLastCycleSummary = null;
+  // The actual override values on file (null = no override written, server
+  // is using its own env-var default) -- distinct from
+  // backendScreenerEnabledOnServer/backendAutoTradeEnabledOnServer above,
+  // which are the server's read-only EFFECTIVE mirrors. These drive what
+  // the Auto-Trading Controls toggles/stepper/grid actually show.
+  var autoTradeOverrides = {
+    riskPercentOverride: null,
+    intradayScreenerEnabledOverride: null,
+    intradayAutoTradeEnabledOverride: null,
+    intradaySymbolOverrides: null
+  };
 
   function loadScreenerForUser(uid){
     if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
@@ -3480,6 +3614,12 @@
       backendCycleError = data.intradayCycleError;
       backendCycleErrorAt = data.intradayCycleErrorAt;
       backendLastCycleSummary = data.intradayLastCycleSummary;
+      autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
+      autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
+      autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
+      autoTradeOverrides.intradaySymbolOverrides = data.intradaySymbolOverrides;
+      if(typeof data.riskPercentOverride === 'number'){ riskPercent = data.riskPercentOverride; renderRiskPercentLabel(); }
+      renderAutoTradeOverrideControls();
       var statusPageEl = document.getElementById('page-trades');
       if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
@@ -3655,9 +3795,13 @@
     document.getElementById('alpacaDock').removeAttribute('hidden');
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
     document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
+    document.getElementById('screenerEnabledRow').removeAttribute('hidden');
+    document.getElementById('riskPercentRow').removeAttribute('hidden');
+    document.getElementById('symbolOverridesRow').removeAttribute('hidden');
     document.getElementById('flattenAllRow').removeAttribute('hidden');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.setAttribute('hidden', '');
+    renderSymbolOverridesGrid();
     updateTradeBubbles();
   }
 
@@ -3666,6 +3810,9 @@
     document.getElementById('alpacaInputsRow').removeAttribute('hidden');
     document.getElementById('alpacaDock').setAttribute('hidden', '');
     document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
+    document.getElementById('screenerEnabledRow').setAttribute('hidden', '');
+    document.getElementById('riskPercentRow').setAttribute('hidden', '');
+    document.getElementById('symbolOverridesRow').setAttribute('hidden', '');
     document.getElementById('flattenAllRow').setAttribute('hidden', '');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.removeAttribute('hidden');
@@ -3769,11 +3916,13 @@
   var alpacaAutoTradeIntradayEnabled = false;
 
   // ---------- Risk-based position sizing ----------
-  // Fixed by the strategy itself -- not user-adjustable. Manually
-  // changing this would skew the reliability numbers the strategy was
-  // actually calibrated and tested against (see the walk-forward
-  // validation this value came out of). Kept in exact lockstep with
-  // RISK_PERCENT on the server; if one changes, the other must too.
+  // User-adjustable from the Risk per trade stepper in Auto-Trading
+  // Controls, which writes riskPercentOverride to Firestore -- the
+  // server reads that same field (see shwoop-server's src/settings.js)
+  // and falls back to its own RISK_PERCENT env var only when no
+  // override has ever been written, so this stays in lockstep with the
+  // server's real order sizing rather than just a local preview of a
+  // separate, disconnected server setting.
   var riskPercent = 1.0;
   // Total open risk across ALL positions is capped at a fixed % of
   // equity, independent of per-trade risk% -- there's no hard cap on how
@@ -3790,6 +3939,117 @@
   function renderRiskPercentLabel(){
     var label = document.getElementById('riskPercentLabel');
     if(label){ label.textContent = riskPercent.toFixed(1) + '%'; }
+  }
+
+  // ---------- Auto-Trading Controls: writes overrides to the same
+  // Firestore doc shwoop-server reads (see its src/settings.js) ----------
+  var RISK_PERCENT_MIN = 0.25, RISK_PERCENT_MAX = 5.0, RISK_PERCENT_STEP = 0.25;
+
+  function saveAutoTradeOverride(partial){
+    if(!window.__shwoopAPI || !currentUid) return;
+    window.__shwoopAPI.saveAutoTradeOverrides(currentUid, partial).catch(function(err){
+      console.error('Failed to save auto-trade override:', partial, err);
+    });
+  }
+
+  // Renders the three top-level controls (auto-trade toggle, screener
+  // toggle, risk stepper) from the override state last synced from
+  // Firestore -- null means "no override written, using the server's
+  // env-var default," shown as an inactive/neutral toggle rather than
+  // guessing which way the untouched default actually goes.
+  function renderAutoTradeOverrideControls(){
+    var autoBtn = document.getElementById('autoTradeEnableToggle');
+    if(autoBtn && autoBtn.dataset.armed !== 'true'){
+      var autoOn = autoTradeOverrides.intradayAutoTradeEnabledOverride === true;
+      autoBtn.textContent = autoOn ? 'On' : 'Off';
+      autoBtn.classList.remove('confirming');
+      autoBtn.classList.toggle('active', autoOn);
+    }
+    var screenerBtn = document.getElementById('screenerEnableToggle');
+    if(screenerBtn){
+      var screenerOn = autoTradeOverrides.intradayScreenerEnabledOverride === true;
+      screenerBtn.textContent = screenerOn ? 'On' : 'Off';
+      screenerBtn.classList.toggle('active', screenerOn);
+    }
+    renderRiskPercentLabel();
+    renderSymbolOverridesGrid();
+  }
+
+  document.getElementById('autoTradeEnableToggle').addEventListener('click', function(){
+    var btn = this;
+    var currentlyOn = autoTradeOverrides.intradayAutoTradeEnabledOverride === true;
+    // Turning OFF is always immediate -- there's no safety reason to make
+    // stopping harder. Turning ON gets the same click-to-arm confirmation
+    // used elsewhere for real-money actions (see the live-account switch
+    // and Flatten All above), since this is the one toggle that actually
+    // lets the server start sending real orders.
+    if(currentlyOn){
+      autoTradeOverrides.intradayAutoTradeEnabledOverride = false;
+      saveAutoTradeOverride({ intradayAutoTradeEnabledOverride: false });
+      renderAutoTradeOverrideControls();
+      return;
+    }
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(btn._armTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      autoTradeOverrides.intradayAutoTradeEnabledOverride = true;
+      saveAutoTradeOverride({ intradayAutoTradeEnabledOverride: true });
+      renderAutoTradeOverrideControls();
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again — real orders';
+      btn._armTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        renderAutoTradeOverrideControls();
+      }, 4000);
+    }
+  });
+
+  document.getElementById('screenerEnableToggle').addEventListener('click', function(){
+    var next = !(autoTradeOverrides.intradayScreenerEnabledOverride === true);
+    autoTradeOverrides.intradayScreenerEnabledOverride = next;
+    saveAutoTradeOverride({ intradayScreenerEnabledOverride: next });
+    renderAutoTradeOverrideControls();
+  });
+
+  function stepRiskPercent(dir){
+    var current = typeof autoTradeOverrides.riskPercentOverride === 'number' ? autoTradeOverrides.riskPercentOverride : riskPercent;
+    var next = Math.round((current + dir * RISK_PERCENT_STEP) * 100) / 100;
+    next = Math.min(RISK_PERCENT_MAX, Math.max(RISK_PERCENT_MIN, next));
+    riskPercent = next;
+    autoTradeOverrides.riskPercentOverride = next;
+    saveAutoTradeOverride({ riskPercentOverride: next });
+    renderRiskPercentLabel();
+  }
+  document.getElementById('riskPercentDec').addEventListener('click', function(){ stepRiskPercent(-1); });
+  document.getElementById('riskPercentInc').addEventListener('click', function(){ stepRiskPercent(1); });
+
+  // Per-symbol enable/disable -- a symbol maps to `false` to exclude it
+  // from the server's next scan; absent means enabled. Immediate (no
+  // arm-confirm) since the actual real-money gate is the auto-trade
+  // toggle above, not which symbols are in scope for it.
+  function renderSymbolOverridesGrid(){
+    var el = document.getElementById('symbolOverridesGrid');
+    if(!el || !alpacaConnected) return;
+    var overrides = autoTradeOverrides.intradaySymbolOverrides || {};
+    el.innerHTML = INTRADAY_UNIVERSE.map(function(sym){
+      var on = overrides[sym] !== false;
+      return '<button class="symbol-toggle-btn' + (on ? ' active' : '') + '" data-sym="' + sym + '">' + sym + '</button>';
+    }).join('');
+    el.querySelectorAll('.symbol-toggle-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.sym;
+        var current = autoTradeOverrides.intradaySymbolOverrides || {};
+        var next = {};
+        INTRADAY_UNIVERSE.forEach(function(s){ next[s] = (s === sym) ? (current[s] === false ? true : false) : (current[s] !== false); });
+        autoTradeOverrides.intradaySymbolOverrides = next;
+        saveAutoTradeOverride({ intradaySymbolOverrides: next });
+        renderSymbolOverridesGrid();
+      });
+    });
   }
 
   // Pure function, deliberately simple and easy to test in isolation:
@@ -4023,7 +4283,7 @@
   function autoSendIntradayPicksIfEnabled(){
     if(!alpacaAutoTradeIntradayEnabled || !alpacaConnected || !window.__shwoopAPI || !currentUid) return;
     intradayTrades.forEach(function(t){
-      var hasOpenPosition = journalEntries.some(function(j){ return j.sym === t.sym && j.status === 'open'; });
+      var hasOpenPosition = journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
       if(hasOpenPosition) return;
       computeSizedOrder(t).then(function(sized){
         if(sized.qty < 1){
@@ -5049,7 +5309,7 @@
     var change = pct(q.price, q.prevClose);
     var up = change >= 0;
     var badge = computeBadgeInfo(t);
-    var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
+    var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
     var curScale = (chartStates[t.sym] && chartStates[t.sym].scale) || 'linear';
     var curTf = (chartStates[t.sym] && chartStates[t.sym].tf) || '1D';
     var action = buildActionHTML(t);
@@ -7257,6 +7517,135 @@
     }catch(e){}
     applyLayout();
   })();
+
+  // ---------- Trade Overview: card show/hide + reorder ----------
+  // Auto-Trading Controls and the paused/live banners are intentionally
+  // NOT in this list -- those are safety-critical (resume trading,
+  // flatten all) and stay pinned right after the header, always visible,
+  // never reorderable away. Only the informational/status cards below
+  // them are customizable.
+  var TO_CARD_DEFS = [
+    { key:'accountSummary', label:'Account Summary' },
+    { key:'backendPulse', label:'Backend Pulse' },
+    { key:'openPositions', label:'Open Positions' },
+    { key:'todaysSetups', label:"Today's Setups" },
+    { key:'systemHealth', label:'System Health' },
+    { key:'backendScreener', label:'Backend Intraday Screener' },
+    { key:'activityLog', label:'Activity Log' }
+  ];
+  var TO_CARD_LABELS = {};
+  TO_CARD_DEFS.forEach(function(c){ TO_CARD_LABELS[c.key] = c.label; });
+  var DEFAULT_TO_CARD_ORDER = TO_CARD_DEFS.map(function(c){ return c.key; });
+  var toCardPrefs = { order: DEFAULT_TO_CARD_ORDER.slice(), hidden: {} };
+
+  function loadToCardPrefs(){
+    try{
+      var saved = JSON.parse(window.localStorage.getItem('shwoopnet:toCards') || 'null');
+      if(saved && Array.isArray(saved.order)){
+        // Rebuilds from the CURRENT default list rather than trusting the
+        // saved array as-is -- a saved order from before a card was
+        // added/renamed would otherwise silently drop the new card
+        // forever (it'd never appear in the DOM reorder below) or keep a
+        // dangling key that no longer matches any element.
+        var order = saved.order.filter(function(k){ return DEFAULT_TO_CARD_ORDER.indexOf(k) > -1; });
+        DEFAULT_TO_CARD_ORDER.forEach(function(k){ if(order.indexOf(k) === -1) order.push(k); });
+        toCardPrefs.order = order;
+        toCardPrefs.hidden = (saved.hidden && typeof saved.hidden === 'object') ? saved.hidden : {};
+      }
+    }catch(e){}
+  }
+
+  function saveToCardPrefs(){
+    try{ window.localStorage.setItem('shwoopnet:toCards', JSON.stringify(toCardPrefs)); }catch(e){}
+  }
+
+  // Re-appends each wrapped card, in preference order, to the end of
+  // #page-trades -- the fixed elements before them in the markup
+  // (paused banner, header, Auto-Trading Controls) are never touched by
+  // this loop, so they stay exactly where they are regardless of how
+  // the cards below get reordered.
+  function applyToCardLayout(){
+    var container = document.getElementById('page-trades');
+    if(!container) return;
+    toCardPrefs.order.forEach(function(key){
+      var wrap = document.getElementById('toCard-' + key);
+      if(!wrap) return;
+      container.appendChild(wrap);
+      wrap.classList.toggle('to-card-hidden', Boolean(toCardPrefs.hidden[key]));
+    });
+  }
+
+  function renderCardCustomizeList(){
+    var el = document.getElementById('cardCustomizeList');
+    if(!el) return;
+    el.innerHTML = toCardPrefs.order.map(function(key, i){
+      var hidden = Boolean(toCardPrefs.hidden[key]);
+      return '' +
+        '<div class="layout-stepper card-customize-row' + (hidden ? ' is-hidden' : '') + '" data-card-key="' + key + '">' +
+          '<span class="step-name">' + TO_CARD_LABELS[key] + '</span>' +
+          '<div class="card-customize-row-actions">' +
+            '<button class="card-reorder-btn" data-action="up" ' + (i === 0 ? 'disabled' : '') + ' aria-label="Move up">↑</button>' +
+            '<button class="card-reorder-btn" data-action="down" ' + (i === toCardPrefs.order.length - 1 ? 'disabled' : '') + ' aria-label="Move down">↓</button>' +
+            '<button class="card-visibility-btn' + (hidden ? '' : ' active') + '" data-action="toggle">' + (hidden ? 'Hidden' : 'Shown') + '</button>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+
+    el.querySelectorAll('.card-customize-row').forEach(function(row){
+      var key = row.dataset.cardKey;
+      row.querySelector('[data-action="toggle"]').addEventListener('click', function(){
+        toCardPrefs.hidden[key] = !toCardPrefs.hidden[key];
+        saveToCardPrefs();
+        applyToCardLayout();
+        renderCardCustomizeList();
+      });
+      var upBtn = row.querySelector('[data-action="up"]');
+      var downBtn = row.querySelector('[data-action="down"]');
+      if(upBtn) upBtn.addEventListener('click', function(){ moveToCard(key, -1); });
+      if(downBtn) downBtn.addEventListener('click', function(){ moveToCard(key, 1); });
+    });
+  }
+
+  function moveToCard(key, dir){
+    var order = toCardPrefs.order;
+    var idx = order.indexOf(key);
+    var newIdx = idx + dir;
+    if(idx === -1 || newIdx < 0 || newIdx >= order.length) return;
+    order.splice(idx, 1);
+    order.splice(newIdx, 0, key);
+    saveToCardPrefs();
+    applyToCardLayout();
+    renderCardCustomizeList();
+  }
+
+  var cardCustomizeToggle = document.getElementById('cardCustomizeToggle');
+  var cardCustomizeMenu = document.getElementById('cardCustomizeMenu');
+  if(cardCustomizeToggle && cardCustomizeMenu){
+    cardCustomizeToggle.addEventListener('click', function(){
+      var open = !cardCustomizeMenu.hasAttribute('hidden');
+      if(open){ cardCustomizeMenu.setAttribute('hidden',''); cardCustomizeToggle.setAttribute('aria-expanded','false'); }
+      else{
+        cardCustomizeMenu.removeAttribute('hidden');
+        cardCustomizeToggle.setAttribute('aria-expanded','true');
+        renderCardCustomizeList();
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.layout-dropdown')){
+        cardCustomizeMenu.setAttribute('hidden','');
+        cardCustomizeToggle.setAttribute('aria-expanded','false');
+      }
+    });
+    document.getElementById('cardCustomizeResetBtn').addEventListener('click', function(){
+      toCardPrefs = { order: DEFAULT_TO_CARD_ORDER.slice(), hidden: {} };
+      saveToCardPrefs();
+      applyToCardLayout();
+      renderCardCustomizeList();
+    });
+  }
+
+  loadToCardPrefs();
+  applyToCardLayout();
 
   // ---------- Navigation ----------
   var navLabels = { brief: 'Market Brief', status: 'Status', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
