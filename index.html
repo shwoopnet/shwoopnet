@@ -615,6 +615,7 @@
     letter-spacing:.04em; border-bottom:1px solid var(--border); font-weight:600;
   }
   .backtest-trades-table td{ padding:8px 10px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono', monospace; }
+  .backtest-trades-table tbody tr:hover{ background: var(--panel-raised); }
   .backtest-trades-table th.sortable-col{ cursor:pointer; user-select:none; }
   .backtest-trades-table th.sortable-col:hover{ color: var(--paper); }
   .position-close-btn{
@@ -773,6 +774,18 @@
   .trades-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; }
   .trades-sub{ color:var(--muted); font-size:12.5px; margin-top:4px; }
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+  /* ---------- Trade Overview: shared card header ---------- */
+  .to-card-head{
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--border);
+  }
+  .to-card-head-left{ display:flex; align-items:center; gap:9px; }
+  .to-card-title{ font-family:'Space Grotesk', sans-serif; font-size:16px; font-weight:700; }
+  .to-card-dot{ width:7px; height:7px; border-radius:50%; background: var(--muted); flex-shrink:0; }
+  .to-card-dot.ok{ background: var(--gain); }
+  .to-card-dot.warn{ background: var(--loss); }
+  .to-card-meta{ font-size:11px; color: var(--muted); font-family:'IBM Plex Mono', monospace; }
 
   .layout-dropdown{ position:relative; }
   .layout-toggle-btn{
@@ -2034,7 +2047,13 @@
 
     <div class="to-card" id="toCard-backendPulse">
       <div class="labs-backtest-card" id="backendPulseCard" hidden>
-        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Pulse</div>
+        <div class="to-card-head">
+          <div class="to-card-head-left">
+            <span class="to-card-dot" id="backendPulseHeadDot"></span>
+            <span class="to-card-title">Backend Pulse</span>
+          </div>
+          <span class="to-card-meta" id="backendPulseHeadMeta"></span>
+        </div>
         <div class="labs-backtest-note" style="margin-bottom:10px;">
           Live proof the 24/7 server is actually up and running its scan → size → send cycle — not just a
           timestamp of whatever it last found.
@@ -2048,7 +2067,12 @@
          something that should be hideable or reorderable away like the
          cards below. -->
     <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Auto-Trading Controls</div>
+      <div class="to-card-head">
+        <div class="to-card-head-left">
+          <span class="to-card-dot" id="autoTradeHeadDot"></span>
+          <span class="to-card-title">Auto-Trading Controls</span>
+        </div>
+      </div>
       <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
         <div>
           <div class="settings-row-title">Auto-trading</div>
@@ -2121,14 +2145,20 @@
 
     <div class="to-card" id="toCard-openPositions">
       <div class="labs-backtest-card">
-        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Open Positions</div>
+        <div class="to-card-head">
+          <span class="to-card-title">Open Positions</span>
+          <span class="to-card-meta" id="openPositionsHeadMeta"></span>
+        </div>
         <div id="statusPositionsBody"></div>
       </div>
     </div>
 
     <div class="to-card" id="toCard-todaysSetups">
-      <div class="intraday-section" id="intradaySection" hidden>
-        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Today's Setups</div>
+      <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
+        <div class="to-card-head">
+          <span class="to-card-title">Today's Setups</span>
+          <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
+        </div>
         <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
         <div id="intradayBlocks"></div>
       </div>
@@ -2136,14 +2166,22 @@
 
     <div class="to-card" id="toCard-systemHealth">
       <div class="labs-backtest-card">
-        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">System Health</div>
+        <div class="to-card-head">
+          <div class="to-card-head-left">
+            <span class="to-card-dot" id="systemHealthHeadDot"></span>
+            <span class="to-card-title">System Health</span>
+          </div>
+        </div>
         <div id="statusHealthRows"></div>
       </div>
     </div>
 
     <div class="to-card" id="toCard-backendScreener">
       <div class="labs-backtest-card">
-        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Intraday Screener</div>
+        <div class="to-card-head">
+          <span class="to-card-title">Backend Intraday Screener</span>
+          <span class="to-card-meta" id="backendScreenerHeadMeta"></span>
+        </div>
         <div class="labs-backtest-note" style="margin-bottom:10px;">What the 24/7 server last saw — separate from this tab's own live view, and updates even when no browser is open.</div>
         <div id="statusIntradayBody"></div>
       </div>
@@ -2151,7 +2189,10 @@
 
     <div class="to-card" id="toCard-activityLog">
       <div class="labs-backtest-card">
-        <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log</div>
+        <div class="to-card-head">
+          <span class="to-card-title">Activity Log</span>
+          <span class="to-card-meta" id="activityLogHeadMeta"></span>
+        </div>
         <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
         <div id="statusActivityList"></div>
       </div>
@@ -3967,17 +4008,35 @@
   // Firestore -- null means "no override written, using the server's
   // env-var default," shown as an inactive/neutral toggle rather than
   // guessing which way the untouched default actually goes.
+  // What's actually happening right now, not just what override (if any)
+  // this browser has written -- falls back to the server's own mirrored
+  // effective value (backendAutoTradeEnabledOnServer/
+  // backendScreenerEnabledOnServer, kept live by loadScreenerForUser)
+  // whenever no override has been set yet, so these toggles never show
+  // "Off" while the badge right next to them says "On" because the
+  // server's untouched env-var default happens to be on.
+  function effectiveAutoTradeOn(){
+    return autoTradeOverrides.intradayAutoTradeEnabledOverride !== null
+      ? autoTradeOverrides.intradayAutoTradeEnabledOverride
+      : Boolean(backendAutoTradeEnabledOnServer);
+  }
+  function effectiveScreenerOn(){
+    return autoTradeOverrides.intradayScreenerEnabledOverride !== null
+      ? autoTradeOverrides.intradayScreenerEnabledOverride
+      : Boolean(backendScreenerEnabledOnServer);
+  }
+
   function renderAutoTradeOverrideControls(){
     var autoBtn = document.getElementById('autoTradeEnableToggle');
     if(autoBtn && autoBtn.dataset.armed !== 'true'){
-      var autoOn = autoTradeOverrides.intradayAutoTradeEnabledOverride === true;
+      var autoOn = effectiveAutoTradeOn();
       autoBtn.textContent = autoOn ? 'On' : 'Off';
       autoBtn.classList.remove('confirming');
       autoBtn.classList.toggle('active', autoOn);
     }
     var screenerBtn = document.getElementById('screenerEnableToggle');
     if(screenerBtn){
-      var screenerOn = autoTradeOverrides.intradayScreenerEnabledOverride === true;
+      var screenerOn = effectiveScreenerOn();
       screenerBtn.textContent = screenerOn ? 'On' : 'Off';
       screenerBtn.classList.toggle('active', screenerOn);
     }
@@ -3987,7 +4046,7 @@
 
   document.getElementById('autoTradeEnableToggle').addEventListener('click', function(){
     var btn = this;
-    var currentlyOn = autoTradeOverrides.intradayAutoTradeEnabledOverride === true;
+    var currentlyOn = effectiveAutoTradeOn();
     // Turning OFF is always immediate -- there's no safety reason to make
     // stopping harder. Turning ON gets the same click-to-arm confirmation
     // used elsewhere for real-money actions (see the live-account switch
@@ -4019,7 +4078,7 @@
   });
 
   document.getElementById('screenerEnableToggle').addEventListener('click', function(){
-    var next = !(autoTradeOverrides.intradayScreenerEnabledOverride === true);
+    var next = !effectiveScreenerOn();
     autoTradeOverrides.intradayScreenerEnabledOverride = next;
     saveAutoTradeOverride({ intradayScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
@@ -5397,6 +5456,8 @@
   function renderIntradayBlocks(){
     var el = document.getElementById('intradayBlocks');
     if(!el) return;
+    var headMeta = document.getElementById('todaysSetupsHeadMeta');
+    if(headMeta){ headMeta.textContent = intradayTrades.length ? (intradayTrades.length + ' setup' + (intradayTrades.length === 1 ? '' : 's')) : ''; }
     el.innerHTML = intradayTrades.map(function(t){
       var q = findQuote(t.sym) || { price: t.entry, prevClose: t.entry, name: t.sym };
       var change = pct(q.price, q.prevClose);
@@ -8823,9 +8884,13 @@
     card.hidden = false;
 
     var rows = [];
+    var headDot = document.getElementById('backendPulseHeadDot');
+    var headMeta = document.getElementById('backendPulseHeadMeta');
 
     // ---- Row 1: heartbeat ----
     if(!backendHeartbeatAt){
+      if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
+      if(headMeta){ headMeta.textContent = 'No heartbeat yet'; }
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
           '<div class="backend-pulse-label">No heartbeat received yet</div>' +
@@ -8837,6 +8902,8 @@
       var heartbeatStale = heartbeatAge > BACKEND_HEARTBEAT_STALE_MS;
       var marketNote = backendMarketOpenAtHeartbeat === true ? 'market open per the server'
         : backendMarketOpenAtHeartbeat === false ? 'market closed per the server' : '';
+      if(headDot){ headDot.classList.toggle('ok', !heartbeatStale); headDot.classList.toggle('warn', heartbeatStale); }
+      if(headMeta){ headMeta.textContent = 'checked in ' + formatAgo(heartbeatAge); }
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (heartbeatStale ? 'stale' : 'ok') + '"></div><div>' +
           '<div class="backend-pulse-label">' + (heartbeatStale ? 'Backend hasn\'t checked in recently' : 'Backend online') + '</div>' +
@@ -8928,6 +8995,10 @@
       badge.textContent = backendAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
       badge.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer));
     }
+    var autoTradeDot = document.getElementById('autoTradeHeadDot');
+    if(autoTradeDot){ autoTradeDot.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer)); }
+    var healthDot = document.getElementById('systemHealthHeadDot');
+    if(healthDot){ healthDot.classList.toggle('ok', alpacaConnected); healthDot.classList.toggle('warn', !alpacaConnected); }
   }
 
   // ---------- Trade notification bubbles (dock header + sidebar badge) ----------
@@ -9003,6 +9074,8 @@
     var el = document.getElementById('statusPositionsBody');
     if(!el) return;
     var openPositions = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
+    var headMeta = document.getElementById('openPositionsHeadMeta');
+    if(headMeta){ headMeta.textContent = openPositions.length ? (openPositions.length + ' open') : ''; }
     if(openPositions.length === 0){
       el.innerHTML = '<div class="labs-backtest-status">No open positions right now.</div>';
       return;
@@ -9121,16 +9194,19 @@
 
   function renderStatusIntraday(){
     var el = document.getElementById('statusIntradayBody');
+    var headMeta = document.getElementById('backendScreenerHeadMeta');
     if(!el) return;
     if(!backendIntradayPicks || backendIntradayPicks.length === 0){
+      if(headMeta){ headMeta.textContent = ''; }
       el.innerHTML = '<div class="labs-backtest-status">No picks yet — either the backend hasn\'t run an intraday cycle, or its intraday screener is currently disabled.</div>';
       return;
     }
-    var updatedText = backendIntradayUpdatedAt
-      ? 'Last updated ' + new Date(backendIntradayUpdatedAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })
-      : '';
+    if(headMeta){
+      headMeta.textContent = backendIntradayUpdatedAt
+        ? 'updated ' + new Date(backendIntradayUpdatedAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })
+        : '';
+    }
     el.innerHTML =
-      (updatedText ? '<div class="labs-backtest-status ok" style="margin-bottom:10px;">' + updatedText + '</div>' : '') +
       '<table class="backtest-trades-table">' +
         '<thead><tr><th>Symbol</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Status</th></tr></thead>' +
         '<tbody>' + backendIntradayPicks.map(function(p){
@@ -9158,12 +9234,15 @@
     var currentAccountLog = systemActivityLog.filter(function(entry){
       return entry.accountKeyId === activeAlpacaCreds().keyId;
     });
+    var headMeta = document.getElementById('activityLogHeadMeta');
     if(currentAccountLog.length === 0){
       el.innerHTML = '';
       if(emptyEl) emptyEl.removeAttribute('hidden');
+      if(headMeta){ headMeta.textContent = ''; }
       return;
     }
     if(emptyEl) emptyEl.setAttribute('hidden', '');
+    if(headMeta){ headMeta.textContent = currentAccountLog.length + ' entries'; }
     var typeLabels = {
       sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
       // cycle_summary is the once-per-15-minutes "did the scanner, sizing,
