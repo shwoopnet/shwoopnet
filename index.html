@@ -2956,6 +2956,7 @@
   var intradayTrades = [];
   var isRunningIntradayScreener = false;
   var intradayScreenerInterval = null;
+  var intradayMarketCloseInterval = null;
   var alpacaIntradayEnabled = false;
 
   // ---------- US market holidays ----------
@@ -3039,6 +3040,52 @@
     return minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60);
   }
 
+  // Alpaca supports genuine 24/5 trading now -- overnight (8pm-4am ET),
+  // pre-market (4am-9:30am), regular (9:30am-4pm), after-hours (4pm-8pm)
+  // -- running Sunday 8pm through Friday 8pm ET. "Market closed" is
+  // factually wrong outside that narrow gap, not just imprecise, so
+  // status displays use this instead of isUsMarketOpen(). The ORB
+  // screener itself still only runs during the 'regular' session (see
+  // isUsMarketOpen above) -- that's a deliberate scope, not an
+  // oversight: the opening-range concept it's built on only exists
+  // relative to the regular session's open, and the validated
+  // backtest never tested overnight/extended liquidity or volume
+  // patterns at all. Trading that regime with the same logic would be
+  // unvalidated extrapolation, not the tested strategy -- so this
+  // function is purely about telling the truth in the UI, not about
+  // deciding when the strategy runs.
+  function getUsMarketSession(){
+    var parts = {};
+    var now = new Date();
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', hour12: false, weekday: 'short',
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+    }).formatToParts(now).forEach(function(p){ parts[p.type] = p.value; });
+    var isHoliday = isUsMarketHoliday(parseInt(parts.year, 10), parseInt(parts.month, 10), parseInt(parts.day, 10));
+    var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
+    var weekday = parts.weekday;
+
+    // Weekend gap: Friday 8pm ET through Sunday 8pm ET has no session
+    // of any kind, overnight included.
+    if(weekday === 'Sat') return { session: 'closed', label: 'Weekend — closed' };
+    if(weekday === 'Sun' && minutesSinceMidnight < (20 * 60)) return { session: 'closed', label: 'Weekend — closed' };
+    if(weekday === 'Fri' && minutesSinceMidnight >= (20 * 60)) return { session: 'closed', label: 'Weekend — closed' };
+    if(isHoliday) return { session: 'closed', label: 'Market holiday — closed' };
+
+    if(minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60)){
+      return { session: 'regular', label: 'Regular session — open' };
+    }
+    if(minutesSinceMidnight >= (4 * 60) && minutesSinceMidnight < (9 * 60 + 30)){
+      return { session: 'premarket', label: 'Pre-market (extended hours)' };
+    }
+    if(minutesSinceMidnight >= (16 * 60) && minutesSinceMidnight < (20 * 60)){
+      return { session: 'afterhours', label: 'After-hours (extended hours)' };
+    }
+    // Remaining window: 8pm-4am ET, any weekday night (the overnight
+    // session, Sun 8pm - Fri 8pm span covers this every night in between).
+    return { session: 'overnight', label: 'Overnight session (extended hours)' };
+  }
+
   // Last 15 minutes before the 4:00pm ET close — the window where an
   // open intraday position needs a decision made about it before the
   // session ends, one way or the other.
@@ -3118,7 +3165,11 @@
   function runIntradayScreener(){
     if(isRunningIntradayScreener || isGuestMode || !alpacaIntradayEnabled) return;
     if(!isUsMarketOpen()){
-      updateIntradayStatus('Market closed — resumes screening when it opens', null);
+      var session = getUsMarketSession();
+      var msg = session.session === 'closed'
+        ? 'Market closed — resumes screening when it opens'
+        : session.label + ' — this strategy only screens during the regular 9:30am\u20134pm ET session, since that\'s what\'s actually been validated';
+      updateIntradayStatus(msg, null);
       return;
     }
     isRunningIntradayScreener = true;
@@ -3387,6 +3438,18 @@
   function activeAlpacaCreds(){
     return alpacaAccountType === 'live' ? alpacaCredsLive : alpacaCredsPaper;
   }
+  // A journal entry only counts as a real, currently-relevant open
+  // position if it belongs to the account that's actually connected
+  // right now -- entries from a previous account (or legacy entries
+  // from before this tracking existed, which have no accountKeyId at
+  // all) never match, so switching accounts can't accidentally show a
+  // brand new account's positions as if they included a different
+  // account's leftover trades. This is the one place this check lives;
+  // every other filter that used to repeat this logic now calls here
+  // instead, so it can't drift out of sync between call sites again.
+  function isOpenAlpacaPositionForCurrentAccount(j){
+    return j.status === 'open' && j.source === 'alpaca' && j.accountKeyId === activeAlpacaCreds().keyId;
+  }
   var alpacaConnected = false;
 
   function alpacaHeaders(){
@@ -3571,7 +3634,7 @@
         }
         qty = capQty;
       }
-      var openRisk = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; })
+      var openRisk = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount)
         .reduce(function(sum, j){ return sum + (j.qty * Math.abs(j.entry - j.stop)); }, 0);
       var thisRisk = qty * Math.abs(t.entry - t.stop);
       var riskCeiling = equity * (TOTAL_RISK_CEILING_PERCENT / 100);
@@ -3665,8 +3728,11 @@
       runIntradayScreener();
       if(intradayScreenerInterval) clearInterval(intradayScreenerInterval);
       intradayScreenerInterval = setInterval(runIntradayScreener, 15 * 60 * 1000);
+      if(intradayMarketCloseInterval) clearInterval(intradayMarketCloseInterval);
+      intradayMarketCloseInterval = setInterval(handleIntradayMarketClose, 60 * 1000);
     } else {
       if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
+      if(intradayMarketCloseInterval){ clearInterval(intradayMarketCloseInterval); intradayMarketCloseInterval = null; }
       intradayTrades = [];
       renderIntradayBlocks();
     }
@@ -4419,7 +4485,14 @@
       // fills at whatever the live price is, not the theoretical SMA20
       // level), and conflating them into one number would hide that.
       entry: fillPrice, plannedEntry: t.entry, qty: qty, stop: t.stop, t1: t.t1,
-      exit: null, status: 'open', source: 'alpaca', screenerType: screenerType || 'daily'
+      exit: null, status: 'open', source: 'alpaca', screenerType: screenerType || 'daily',
+      // Which specific Alpaca account this position actually lives in --
+      // without this, switching to a different account (even a brand
+      // new one) has no way to distinguish its positions from a
+      // previous account's leftover entries, since journalEntries are
+      // scoped to the signed-in user, not to any particular broker
+      // account connected at the time.
+      accountKeyId: activeAlpacaCreds().keyId
     });
     saveJournalEntries();
     renderCalendar();
@@ -4434,7 +4507,7 @@
   // marked "open" forever until the fill is actively checked for here.
   function syncAlpacaFilledExits(){
     if(!alpacaConnected || isGuestMode) return;
-    var openAlpacaEntries = journalEntries.filter(function(e){ return e.status === 'open' && e.source === 'alpaca'; });
+    var openAlpacaEntries = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
     if(openAlpacaEntries.length === 0) return;
     fetchWithTimeout(ALPACA_TRADING_BASE() + '/v2/orders?status=closed&limit=200', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
@@ -4544,7 +4617,7 @@
     if(!alpacaConnected || !window.__shwoopAPI || !currentUid){
       return Promise.resolve({ closed: [], failed: [] });
     }
-    var openEntries = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; });
+    var openEntries = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
     if(alpacaAutoTradeIntradayEnabled){
       setAlpacaAutoTradeIntradayEnabled(false);
     }
@@ -4568,7 +4641,7 @@
   function closeInvalidatedPositions(screenerType){
     if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
     var openEntries = journalEntries.filter(function(j){
-      return j.status === 'open' && j.source === 'alpaca' && (j.screenerType || 'daily') === screenerType;
+      return isOpenAlpacaPositionForCurrentAccount(j) && (j.screenerType || 'daily') === screenerType;
     });
     openEntries.forEach(function(entry){
       checkPositionStillValid(entry).then(function(stillValid){
@@ -4593,35 +4666,31 @@
   // no longer there. Guarded by date so this only fires once per
   // position per closing window, not every time the interval ticks
   // during those 15 minutes.
+  // Every open intraday position closes here, unconditionally -- no
+  // "still a valid setup, carry it forward" branch. That branch used to
+  // exist, but it's genuinely unsafe given what bracket orders actually
+  // do: Alpaca's bracket/OCO order type is structurally ineligible for
+  // extended-hours execution, so a position "carried forward" with a
+  // freshly-refreshed bracket right before the close would still be
+  // completely unprotected the moment the regular session ends -- its
+  // stop simply can't fire overnight no matter how recently it was
+  // set. Same-day close isn't just about matching the backtest; it's
+  // the only thing standing between a position and being left exposed
+  // with a stop that can't function.
   function handleIntradayMarketClose(){
     if(!alpacaConnected || !window.__shwoopAPI || !currentUid) return;
     if(!isMarketClosingSoon()) return;
     var today = new Date().toISOString().slice(0,10);
     var openIntradayEntries = journalEntries.filter(function(j){
-      return j.status === 'open' && j.source === 'alpaca' && j.screenerType === 'intraday' && j.marketCloseHandledDate !== today;
+      return isOpenAlpacaPositionForCurrentAccount(j) && j.screenerType === 'intraday' && j.marketCloseHandledDate !== today;
     });
     openIntradayEntries.forEach(function(entry){
-      fetchIntradayCandidate(entry.sym, 'high').then(function(candidate){
-        var stillValid = candidate && candidate.score >= 0 && candidate.analysis.direction === entry.direction;
-        if(stillValid){
-          refreshPositionBracket(entry, candidate.analysis).then(function(){
-            entry.marketCloseHandledDate = today;
-            entry.stop = candidate.analysis.stop;
-            entry.t1 = candidate.analysis.t1;
-            saveJournalEntries();
-            showPositionClosedToast(entry.sym, 'Still a valid setup at the close — carried into tomorrow with a refreshed stop and target.');
-          }).catch(function(err){
-            console.error('Failed to refresh bracket at close for', entry.sym, err);
-          });
-        } else {
-          closeAlpacaPosition(entry.sym).then(function(){
-            entry.marketCloseHandledDate = today;
-            saveJournalEntries();
-            showPositionClosedToast(entry.sym, 'No longer a valid setup at the close — closed rather than held overnight.');
-          }).catch(function(err){
-            console.error('Failed to close at market-close for', entry.sym, err);
-          });
-        }
+      closeAlpacaPosition(entry.sym).then(function(){
+        entry.marketCloseHandledDate = today;
+        saveJournalEntries();
+        showPositionClosedToast(entry.sym, 'Closed at end of day, as validated — intraday positions never carry overnight regardless of setup.');
+      }).catch(function(err){
+        console.error('Failed to close at market-close for', entry.sym, err);
       });
     });
   }
@@ -4714,6 +4783,95 @@
           (openEntry ? '<button class="open-position-badge" data-date="' + openEntry.date + '">● Open position — view in journal</button>' : '') +
         '</div>' +
       '</div>';
+  }
+
+  // The function these render calls always assumed existed, but never
+  // actually did -- calling it threw an uncaught ReferenceError every
+  // time the screener finished a pass, which aborted the rest of that
+  // callback before auto-trade's own order-sending logic ever ran.
+  // That's the real reason auto-trade could be "on" and still never
+  // send anything: it never got the chance to try.
+  //
+  // Deliberately doesn't include renderTradeRow's manual "log trade" /
+  // "send to Alpaca" buttons -- neither had a click handler wired up
+  // anywhere in the app, so they were exactly the same kind of
+  // silently-broken UI as the Layout menu's dead column toggle. Since
+  // auto-trade already handles sending orders automatically, adding
+  // more non-functional buttons here would repeat that mistake rather
+  // than fix it.
+  function renderIntradayBlocks(){
+    var el = document.getElementById('intradayBlocks');
+    if(!el) return;
+    el.innerHTML = intradayTrades.map(function(t){
+      var q = findQuote(t.sym) || { price: t.entry, prevClose: t.entry, name: t.sym };
+      var change = pct(q.price, q.prevClose);
+      var up = change >= 0;
+      var badge = computeBadgeInfo(t);
+      var rr = computeRiskReward(t);
+      var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && j.status === 'open'; })[0];
+      return '' +
+        '<div class="trade-block" data-symbol="' + t.sym + '">' +
+          '<div class="trade-columns trade-row">' +
+            '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
+            '<div class="t-sym-cell">' +
+              '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
+                '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
+              '<span class="t-name">' + (q.name || t.sym) + '</span>' +
+            '</div>' +
+            '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' + fmt(q.price) +
+              '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
+            '</div>' +
+            '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
+            '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
+            '<div class="t-t1 mono" data-label="Target">' + fmt(t.t1) + '</div>' +
+            '<div class="t-rr" data-label="Risk / Reward"><div class="rr-ratio mono">1 : ' + rr.ratio.toFixed(1) + '</div></div>' +
+          '</div>' +
+          (openEntry ? '<div class="trade-action-banner done"><span class="action-icon">✓</span><span class="action-text">Sent to Alpaca — open position, ' + openEntry.qty + ' shares</span></div>' : '') +
+          '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
+            '<div class="trade-chart-col">' +
+              '<div class="chart-canvas-wrap">' +
+                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>' +
+                '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="trade-notes-col">' +
+              '<h3>Why this trade</h3>' +
+              '<ul>' + t.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+
+    el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.toggle;
+        var detail = document.getElementById('chartwrap-' + sym);
+        if(!detail) return;
+        var nowHidden = detail.hasAttribute('hidden');
+        if(nowHidden){
+          detail.removeAttribute('hidden');
+          btn.setAttribute('aria-expanded', 'true');
+          btn.classList.add('expanded');
+          // Chart rendering deliberately deferred until the card is
+          // actually expanded, not rendered into every hidden card up
+          // front -- rendering into a zero-dimension hidden SVG
+          // produces a broken chart, and most cards are never opened.
+          var trade = intradayTrades.filter(function(x){ return x.sym === sym; })[0];
+          if(trade){
+            var svg = document.getElementById('chart-' + sym);
+            if(svg && !svg.dataset.rendered){
+              svg.dataset.rendered = '1';
+              renderChartInto(svg, sym, trade.entry, '1D');
+              setupChartInteractivity(sym);
+            }
+          }
+        } else {
+          detail.setAttribute('hidden', '');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.classList.remove('expanded');
+        }
+      });
+    });
   }
 
   // Entry/stop/targets stay fixed for the day once set — but status (and
@@ -7567,7 +7725,9 @@
         timeLabel: n.time || ''
       };
     });
-    var tradeItems = systemActivityLog.map(function(a){
+    var tradeItems = systemActivityLog.filter(function(a){
+      return a.accountKeyId === activeAlpacaCreds().keyId;
+    }).map(function(a){
       var tagInfo = tradeActivityTagInfo(a);
       return {
         kind: 'trade', sortKey: a.timestamp || 0, sym: a.sym, tagCls: tagInfo.cls, tag: tagInfo.label, text: a.text,
@@ -7788,7 +7948,8 @@
   function logSystemActivity(type, sym, text){
     var entry = {
       id: 'act' + Date.now() + Math.random().toString(36).slice(2, 6),
-      timestamp: Date.now(), type: type, sym: sym, text: text
+      timestamp: Date.now(), type: type, sym: sym, text: text,
+      accountKeyId: activeAlpacaCreds().keyId
     };
     systemActivityLog.unshift(entry);
     if(systemActivityLog.length > SYSTEM_ACTIVITY_LOG_MAX){ systemActivityLog = systemActivityLog.slice(0, SYSTEM_ACTIVITY_LOG_MAX); }
@@ -7887,7 +8048,7 @@
       return;
     }
 
-    var openCount = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; }).length;
+    var openCount = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).length;
 
     fetchAlpacaAccountSummary().then(function(acct){
       // Re-check rather than trust the closure's snapshot of
@@ -7922,7 +8083,7 @@
   function renderStatusPositions(){
     var el = document.getElementById('statusPositionsBody');
     if(!el) return;
-    var openPositions = journalEntries.filter(function(j){ return j.status === 'open' && j.source === 'alpaca'; });
+    var openPositions = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
     if(openPositions.length === 0){
       el.innerHTML = '<div class="labs-backtest-status">No open positions right now.</div>';
       return;
@@ -7982,14 +8143,22 @@
     var el = document.getElementById('statusActivityList');
     var emptyEl = document.getElementById('statusActivityEmpty');
     if(!el) return;
-    if(systemActivityLog.length === 0){
+    // Same account-scoping as journal entries -- an activity log entry
+    // from a previous account shouldn't appear as if it happened on
+    // whatever account is connected now. Legacy entries from before
+    // this tracking existed (no accountKeyId at all) are excluded the
+    // same way legacy journal entries are.
+    var currentAccountLog = systemActivityLog.filter(function(entry){
+      return entry.accountKeyId === activeAlpacaCreds().keyId;
+    });
+    if(currentAccountLog.length === 0){
       el.innerHTML = '';
       if(emptyEl) emptyEl.removeAttribute('hidden');
       return;
     }
     if(emptyEl) emptyEl.setAttribute('hidden', '');
     var typeLabels = { sent: 'Sent', skipped: 'Skipped', position_action: 'Position' };
-    el.innerHTML = systemActivityLog.map(function(entry){
+    el.innerHTML = currentAccountLog.map(function(entry){
       var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
       return '<div class="activity-log-row">' +
         '<div class="activity-log-meta"><span class="mono">' + entry.sym + '</span><span class="activity-log-tag">' + (typeLabels[entry.type] || entry.type) + '</span><span class="activity-log-time">' + time + '</span></div>' +
@@ -8582,6 +8751,7 @@
     var spy = reads.filter(function(r){ return r.sym === 'SPY'; })[0];
     var qqq = reads.filter(function(r){ return r.sym === 'QQQ'; })[0];
     var marketOpen = isUsMarketOpen();
+    var session = getUsMarketSession();
 
     var tone;
     if(Math.abs(avgChg) < 0.15) tone = 'markets are quiet so far';
@@ -8590,8 +8760,12 @@
     else if(avgChg <= -0.6) tone = 'markets are under real pressure';
     else tone = 'markets are drifting lower';
 
+    var sessionNote = '';
+    if(!marketOpen){
+      sessionNote = session.session === 'closed' ? ' (markets closed right now)' : ' (' + session.label.toLowerCase() + ')';
+    }
     headlineEl.textContent = greeting + '. ' + tone.charAt(0).toUpperCase() + tone.slice(1) +
-      (marketOpen ? '' : ' (markets closed right now)') + '.';
+      sessionNote + '.';
 
     var ledeParts = [];
     ledeParts.push('The S&P is ' + (spy.chg >= 0 ? 'up' : 'down') + ' ' + Math.abs(spy.chg).toFixed(2) +
