@@ -1433,6 +1433,9 @@
   import {
     getFirestore, doc, setDoc, getDoc, onSnapshot
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  import {
+    getFunctions, httpsCallable
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-functions.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAwzn8oibFBrMDT54eVp70LWaiJwaE0_zE",
@@ -1446,6 +1449,17 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const functions = getFunctions(app);
+  // Market-data calls (quote/news/earnings) go through these Cloud
+  // Functions instead of hitting Finnhub directly from the browser -- the
+  // Finnhub key lives only in the function's server-side secret now, never
+  // in this file, and each call requires a signed-in owner token (enforced
+  // server-side in functions/index.js), so the proxy can't be driven by
+  // anyone who just finds the function URL.
+  var finnhubQuoteFn = httpsCallable(functions, 'finnhubQuote');
+  var finnhubNewsFn = httpsCallable(functions, 'finnhubNews');
+  var finnhubEarningsCalendarFn = httpsCallable(functions, 'finnhubEarningsCalendar');
+  var finnhubCompanyNewsFn = httpsCallable(functions, 'finnhubCompanyNews');
 
   window.__shwoopReady({
     signUp: function(email, password){ return createUserWithEmailAndPassword(auth, email, password); },
@@ -1578,6 +1592,22 @@
         console.error('Pick history read failed:', err);
         return null;
       });
+    },
+    // Each wraps a Cloud Function callable -- .data is the raw Finnhub
+    // JSON response, unwrapped from the {data: ...} envelope callable
+    // functions return, so callers don't need to know a function is
+    // involved at all versus a direct fetch.
+    finnhubQuote: function(symbol){
+      return finnhubQuoteFn({ symbol: symbol }).then(function(res){ return res.data; });
+    },
+    finnhubNews: function(){
+      return finnhubNewsFn().then(function(res){ return res.data; });
+    },
+    finnhubEarningsCalendar: function(from, to){
+      return finnhubEarningsCalendarFn({ from: from, to: to }).then(function(res){ return res.data; });
+    },
+    finnhubCompanyNews: function(symbol, from, to){
+      return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
     }
   });
 </script>
@@ -6692,12 +6722,13 @@
   }
 
   // ---------- Live quotes (Finnhub, free tier) ----------
-  // Free-tier key: no billing attached, so it's acceptable to keep client-side
-  // for now. Move behind a proxy (Cloudflare Worker) before ever upgrading
-  // this key to a paid plan.
-  var FINNHUB_API_KEY = 'da3nb3pr01qual4qug80da3nb3pr01qual4qug8g';
-  var FINNHUB_QUOTE_URL = 'https://finnhub.io/api/v1/quote';
-
+  // Routed through the finnhubQuote Cloud Function (see
+  // functions/index.js) rather than calling Finnhub directly -- the key
+  // used to sit here in plaintext, shared by every browser that loaded
+  // this page and visible to anyone reading the repo. Moving it
+  // server-side also means Finnhub's free-tier rate limit is spent by
+  // this one function under one key, not raced by however many tabs
+  // happen to be open.
   var lastQuoteSyncOk = false;
 
   // ---------- Alpaca market data (primary when connected, Finnhub/Twelve
@@ -6760,12 +6791,7 @@
   }
 
   function fetchQuoteViaFinnhub(sym){
-    var url = FINNHUB_QUOTE_URL + '?symbol=' + encodeURIComponent(sym) + '&token=' + FINNHUB_API_KEY;
-    return fetch(url)
-      .then(function(res){
-        if(!res.ok) throw new Error('Finnhub HTTP ' + res.status);
-        return res.json();
-      })
+    return window.__shwoopAPI.finnhubQuote(sym)
       .then(function(data){
         // Guard against undefined/non-numeric bodies, not just an all-zero
         // quote (invalid symbol) — a raw !== 0 check lets `undefined` through.
@@ -8018,12 +8044,7 @@
     var lookback = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
     var toStr = today.toISOString().slice(0, 10);
     var fromStr = lookback.toISOString().slice(0, 10);
-    var url = 'https://finnhub.io/api/v1/company-news?symbol=' + encodeURIComponent(sym) +
-      '&from=' + fromStr + '&to=' + toStr + '&token=' + FINNHUB_API_KEY;
-    return fetch(url).then(function(res){
-      if(!res.ok) throw new Error('Finnhub company-news HTTP ' + res.status);
-      return res.json();
-    });
+    return window.__shwoopAPI.finnhubCompanyNews(sym, fromStr, toStr);
   }
 
   function buildAlertForTrade(t, today, stamp){
@@ -9334,9 +9355,6 @@
   }
 
   // ---------- Market News & Earnings Calendar (Finnhub, signed-in accounts only) ----------
-  var FINNHUB_NEWS_URL = 'https://finnhub.io/api/v1/news';
-  var FINNHUB_EARNINGS_URL = 'https://finnhub.io/api/v1/calendar/earnings';
-
   function renderMarketNews(articles){
     var el = document.getElementById('marketNewsList');
     if(!el) return;
@@ -9356,11 +9374,7 @@
   function loadMarketNewsIfSignedIn(){
     if(isGuestMode || !currentUid) return;
     var el = document.getElementById('marketNewsList');
-    var url = FINNHUB_NEWS_URL + '?category=general&token=' + FINNHUB_API_KEY;
-    fetch(url).then(function(res){
-      if(!res.ok) throw new Error('Finnhub news HTTP ' + res.status);
-      return res.json();
-    }).then(renderMarketNews).catch(function(err){
+    window.__shwoopAPI.finnhubNews().then(renderMarketNews).catch(function(err){
       console.error('Market news fetch failed:', err);
       if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load headlines right now.</div>'; }
     });
@@ -9396,11 +9410,7 @@
     var weekOut = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
     var fromStr = today.toISOString().slice(0, 10);
     var toStr = weekOut.toISOString().slice(0, 10);
-    var url = FINNHUB_EARNINGS_URL + '?from=' + fromStr + '&to=' + toStr + '&token=' + FINNHUB_API_KEY;
-    fetch(url).then(function(res){
-      if(!res.ok) throw new Error('Finnhub earnings HTTP ' + res.status);
-      return res.json();
-    }).then(renderEarningsCalendar).catch(function(err){
+    window.__shwoopAPI.finnhubEarningsCalendar(fromStr, toStr).then(renderEarningsCalendar).catch(function(err){
       console.error('Earnings calendar fetch failed:', err);
       if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load earnings calendar right now.</div>'; }
     });

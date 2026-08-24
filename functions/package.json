@@ -1,0 +1,12 @@
+{
+  "name": "shwoopnet-functions",
+  "description": "Cloud Functions proxy for Finnhub calls, keeping the API key server-side.",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.3.2"
+  },
+  "private": true
+}
