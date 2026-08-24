@@ -4729,6 +4729,25 @@
     });
   }
 
+  // A position with its bracket's stop-loss/take-profit legs still resting
+  // has those shares held against those orders -- Alpaca has no available
+  // (unheld) quantity left to sell, so closeAlpacaPosition() alone fails as
+  // forbidden/insufficient-qty every time. Same cancel-before-act
+  // sequencing as refreshPositionBracket above (defined further down, but
+  // fetchAlpacaOpenOrders/cancelAlpacaOrder are both already declared
+  // above this point), applied here so every close path -- the manual
+  // Close button, invalidated-position cleanup, exit-modal flatten --
+  // actually succeeds instead of silently failing on any position whose
+  // bracket is still live.
+  function closeAlpacaPositionSafely(sym){
+    return fetchAlpacaOpenOrders().then(function(orders){
+      var matches = (orders || []).filter(function(o){ return o.symbol === sym; });
+      return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
+    }).then(function(){
+      return closeAlpacaPosition(sym);
+    });
+  }
+
   // Without a timeout, a single hung request (network stall, a slow
   // endpoint, anything short of an outright error) leaves Promise.all
   // waiting forever — the exact "stuck on Loading…" symptom. This forces
@@ -4801,7 +4820,7 @@
           if(!confirm('Close the entire ' + sym + ' paper position at market?')) return;
           btn.disabled = true;
           btn.textContent = '…';
-          closeAlpacaPosition(sym).then(function(){
+          closeAlpacaPositionSafely(sym).then(function(){
             renderAlpacaDock();
           }).catch(function(err){
             alert('Failed to close ' + sym + ': ' + err.message);
@@ -5279,7 +5298,7 @@
     var closed = [];
     var failed = [];
     return Promise.all(openEntries.map(function(entry){
-      return closeAlpacaPosition(entry.sym).then(function(){
+      return closeAlpacaPositionSafely(entry.sym).then(function(){
         closed.push(entry.sym);
       }).catch(function(err){
         console.error('Flatten all: failed to close', entry.sym, err);
@@ -5313,7 +5332,7 @@
       invalidationCheckInFlight[entry.sym] = true;
       checkPositionStillValid(entry).then(function(stillValid){
         if(stillValid) return;
-        return closeAlpacaPosition(entry.sym).then(function(){
+        return closeAlpacaPositionSafely(entry.sym).then(function(){
           // The actual fill price/date gets picked up by the existing
           // exit-sync pass on its next cycle — not duplicating that here.
           showPositionClosedToast(entry.sym, 'No longer a valid setup — direction or trend alignment changed, so the position was closed.');
@@ -5354,10 +5373,10 @@
       return isOpenAlpacaPositionForCurrentAccount(j) && j.screenerType === 'intraday' && j.marketCloseHandledDate !== today;
     });
     openIntradayEntries.forEach(function(entry){
-      closeAlpacaPosition(entry.sym).then(function(){
+      closeAlpacaPositionSafely(entry.sym).then(function(){
         entry.marketCloseHandledDate = today;
         saveJournalEntries();
-        showPositionClosedToast(entry.sym, 'Closed at end of day, as validated — intraday positions never carry overnight regardless of setup.');
+        showPositionClosedToast(entry.sym, 'End-of-day flatten order submitted — intraday positions never carry overnight regardless of setup.');
       }).catch(function(err){
         console.error('Failed to close at market-close for', entry.sym, err);
       });
@@ -9146,7 +9165,7 @@
             btn.classList.remove('confirming');
             btn.disabled = true;
             btn.textContent = 'Closing…';
-            closeAlpacaPosition(sym).then(function(){
+            closeAlpacaPositionSafely(sym).then(function(){
               showPositionClosedToast(sym, 'Closed manually from Open Positions.');
               setTimeout(function(){ syncAlpacaFilledExits(); }, 2000);
               setTimeout(function(){ syncAlpacaFilledExits(); }, 6000);
