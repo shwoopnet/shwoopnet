@@ -4155,6 +4155,34 @@
     });
   }
 
+  // Three independent pollers all want the same live positions data --
+  // the 45s quote loop, the Alpaca dock's own 45s refresh, and every
+  // backend-heartbeat Firestore snapshot (which can land far more often
+  // than either). Left uncoordinated, that's frequent bursts of duplicate
+  // concurrent requests to the same Alpaca endpoint, which is exactly the
+  // kind of load that produces the intermittent "Could not load live
+  // position data" failures. A short shared cache -- and a single
+  // in-flight promise reused by anyone who asks while it's still pending
+  // -- collapses those bursts into one real request.
+  var alpacaPositionsCache = { data: null, at: 0, inflight: null };
+  var ALPACA_POSITIONS_CACHE_MS = 8000;
+  function getAlpacaPositionsCached(){
+    if(alpacaPositionsCache.inflight) return alpacaPositionsCache.inflight;
+    if(alpacaPositionsCache.data && (Date.now() - alpacaPositionsCache.at) < ALPACA_POSITIONS_CACHE_MS){
+      return Promise.resolve(alpacaPositionsCache.data);
+    }
+    alpacaPositionsCache.inflight = fetchAlpacaPositions().then(function(data){
+      alpacaPositionsCache.data = data;
+      alpacaPositionsCache.at = Date.now();
+      alpacaPositionsCache.inflight = null;
+      return data;
+    }).catch(function(err){
+      alpacaPositionsCache.inflight = null;
+      throw err;
+    });
+    return alpacaPositionsCache.inflight;
+  }
+
   // Once a bracket's entry order fills, the take-profit and stop-loss legs
   // become independently open orders — nested=true rolls the stop-loss
   // leg under the take-profit's own "legs" array, per Alpaca's own
@@ -4247,7 +4275,7 @@
       console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
       return [];
     });
-    Promise.all([fetchAlpacaAccountSummary(), fetchAlpacaPositions(), ordersPromise]).then(function(results){
+    Promise.all([fetchAlpacaAccountSummary(), getAlpacaPositionsCached(), ordersPromise]).then(function(results){
       // A newer render (from a later reopen, or the next 45s tick) has
       // already started — this response is stale, discard it rather than
       // overwriting more current data with an out-of-order result.
@@ -8203,6 +8231,8 @@
     { key:'stop', label:'Stop' }, { key:'t1', label:'Target' }, { key:'opened', label:'Opened' }
   ];
 
+  var statusPositionsRenderGen = 0;
+
   function renderStatusPositions(){
     var el = document.getElementById('statusPositionsBody');
     if(!el) return;
@@ -8217,7 +8247,19 @@
       el.innerHTML = '<div class="labs-backtest-status">Not connected — can\'t confirm live position data right now.</div>';
       return;
     }
-    fetchAlpacaPositions().then(function(positions){
+    var myGen = ++statusPositionsRenderGen;
+    loadStatusPositions(openPositions, el, myGen, false);
+  }
+
+  // A single flaky Alpaca response (timeout, transient 5xx) shouldn't leave
+  // this table stuck on a failure message until whichever of the several
+  // ~45s pollers happens to fire next -- one quick retry absorbs the common
+  // transient case immediately. myGen guards against a slow retry
+  // clobbering a newer render that already finished (e.g. positions
+  // changed, or the tab was left and reopened) while it was waiting.
+  function loadStatusPositions(openPositions, el, myGen, isRetry){
+    getAlpacaPositionsCached().then(function(positions){
+      if(myGen !== statusPositionsRenderGen) return;
       var bySym = {};
       (positions || []).forEach(function(p){ bySym[p.symbol] = p; });
       var rows = openPositions.map(function(j){
@@ -8320,6 +8362,11 @@
         });
       });
     }).catch(function(err){
+      if(myGen !== statusPositionsRenderGen) return;
+      if(!isRetry){
+        setTimeout(function(){ loadStatusPositions(openPositions, el, myGen, true); }, 2000);
+        return;
+      }
       console.error('Failed to fetch live positions:', err);
       el.innerHTML = '<div class="labs-backtest-status down">Could not load live position data — will retry on next refresh.</div>';
     });
