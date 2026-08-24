@@ -1321,18 +1321,6 @@
     margin-top:16px; text-decoration:underline;
   }
   .auth-forgot:hover{ color: var(--paper); }
-  .auth-divider{
-    display:flex; align-items:center; gap:10px; margin:16px 0 12px 0;
-    font-size:10.5px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em;
-  }
-  .auth-divider::before, .auth-divider::after{ content:""; flex:1; height:1px; background: var(--border); }
-  .auth-guest-btn{
-    width:100%; background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
-    padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:600; cursor:pointer;
-    font-family:'Space Grotesk', sans-serif;
-  }
-  .auth-guest-btn:hover{ border-color: var(--amber-dim); color: var(--amber); }
-  .auth-guest-note{ font-size:10.5px; color: var(--muted); margin-top:8px; line-height:1.5; }
 
   .exit-trade-btn{
     background:transparent; border:1px solid var(--border); color: var(--muted);
@@ -1739,8 +1727,6 @@
       <span id="authSwitchText">Don't have an account?</span>
       <button type="button" id="authSwitchBtn">Create one</button>
     </div>
-    <div class="auth-divider" hidden><span>or</span></div>
-    <div class="auth-guest-note" hidden>Simulated data only — nothing you do is saved, and it resets every visit.</div>
     <button type="button" id="authForgotBtn" class="auth-forgot">Forgot password?</button>
   </div>
 </div>
@@ -2847,9 +2833,8 @@
 
   // entry/stop/t1/t2 are computed from the live price (see calibrateTradeLevels),
   // not hardcoded — otherwise these drift completely out of sync with reality
-  // the moment the real stock price moves. This is also the simulated
-  // fallback: what guest mode shows, and what signed-in accounts fall back
-  // to before the screener has run for the day.
+  // the moment the real stock price moves. This is the simulated fallback
+  // shown before the screener has run for the day.
   var DEFAULT_TRADES = [
     { sym:'NVDA', direction:'Long', entryPct:-0.019, stopPctFromEntry:-0.0357, t1PctFromEntry:0.0357, status:'active',   statusLabel:'Active',
       notes: [
@@ -2891,8 +2876,8 @@
 
   var trades = DEFAULT_TRADES.map(cloneDefaultTrade);
 
-  // Snapshot of the original simulated direction/status/notes, so guest mode
-  // and post-sign-out always have a clean baseline to fall back to,
+  // Snapshot of the original simulated direction/status/notes, so
+  // post-sign-out always has a clean baseline to fall back to,
   // regardless of what the screener replaced `trades` with during the
   // session.
   var defaultTradeMeta = DEFAULT_TRADES.map(function(t){
@@ -2923,10 +2908,9 @@
     if(statusEl){ statusEl.textContent = '—'; statusEl.className = 'quote-sync-status'; }
   }
 
-  // ---------- Real technical analysis (signed-in accounts only) ----------
+  // ---------- Real technical analysis ----------
   // Computed from actual historical daily closes (Twelve Data), not
-  // fictional narrative. Guest mode intentionally keeps the simulated
-  // percentage-offset version above and never runs this.
+  // fictional narrative.
   function computeSMA(closes, period){
     if(closes.length < period) return null;
     var slice = closes.slice(closes.length - period);
@@ -3446,7 +3430,7 @@
   // candidate, capped only by the existing risk-based sizing checks
   // (total risk ceiling, per-position cap), not an arbitrary count.
   function runIntradayScreener(){
-    if(isRunningIntradayScreener || isGuestMode || !alpacaIntradayEnabled) return;
+    if(isRunningIntradayScreener || !alpacaIntradayEnabled) return;
     // Now that "What to Watch" (and everything else that displays
     // intraday picks) prefers the backend's own server-side scan --
     // computed every 15 minutes, 24/7, regardless of whether this tab is
@@ -3600,7 +3584,7 @@
     // loaded pick could show a fake "already at entry" price for up to
     // 45 seconds, which makes an otherwise-correct Watching status look
     // nonsensical (as if there's nothing left to wait for).
-    if(!isGuestMode){ fetchAllQuotes(); }
+    fetchAllQuotes();
     renderWhatToWatch();
     renderTicker();
     renderBriefHeadline();
@@ -5167,7 +5151,7 @@
   // Shwoop watches for that fill, which means the journal entry stays
   // marked "open" forever until the fill is actively checked for here.
   function syncAlpacaFilledExits(){
-    if(!alpacaConnected || isGuestMode) return;
+    if(!alpacaConnected) return;
     var openAlpacaEntries = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
     if(openAlpacaEntries.length === 0) return;
     fetchWithTimeout(ALPACA_TRADING_BASE() + '/v2/orders?status=closed&limit=200', { headers: alpacaHeaders() }).then(function(res){
@@ -5457,7 +5441,7 @@
         '</div>' +
         '<div class="trade-action-bar">' +
           '<button class="log-trade-btn" data-sym="' + t.sym + '">I took this trade →</button>' +
-          (!isGuestMode ? '<button class="alpaca-send-btn" id="alpaca-btn-' + t.sym + '" data-sym="' + t.sym + '"' + (alpacaConnected ? '' : ' disabled title="Connect Alpaca in Settings first"') + '>Send to Alpaca (Paper)</button>' : '') +
+          '<button class="alpaca-send-btn" id="alpaca-btn-' + t.sym + '" data-sym="' + t.sym + '"' + (alpacaConnected ? '' : ' disabled title="Connect Alpaca in Settings first"') + '>Send to Alpaca (Paper)</button>' +
           (openEntry ? '<button class="open-position-badge" data-date="' + openEntry.date + '">● Open position — view in journal</button>' : '') +
         '</div>' +
       '</div>';
@@ -5662,39 +5646,6 @@
   // currently closed) rather than months of daily candles under a "1D"
   // label.
   var INTRADAY_TFS = ['5m', '15m', '30m', '1D'];
-
-  // Real minutes-per-bar for each timeframe's actual interval, so guest
-  // mode's simulated candles are spaced correctly — matching the real
-  // Twelve Data intervals used for signed-in accounts (see
-  // historyIntervals below). Without this, every timeframe button looked
-  // the same in guest mode: "1W" and "1Y" would show only a few hours of
-  // 5-minute-spaced candles instead of actual weeks or years of data.
-  var tfSpacingMinutes = { '5m':5, '15m':15, '30m':30, '1D':5, '1W':1440, '1M':1440, '1Y':10080 };
-
-  function genOHLC(count, base, vol, spacingMinutes){
-    spacingMinutes = spacingMinutes || 5;
-    // Built backwards from the known live price, not forward with a
-    // patched-on override — guarantees every candle (including the last)
-    // is internally consistent, with no risk of a body outgrowing its own
-    // wick if the walk happens to drift far from `base`.
-    var closes = new Array(count);
-    closes[count - 1] = base;
-    for(var i = count - 2; i >= 0; i--){
-      var step = (Math.random() - 0.5) * vol;
-      closes[i] = closes[i + 1] - step;
-    }
-    var arr = [];
-    var now = new Date();
-    for(var j = 0; j < count; j++){
-      var open = j === 0 ? closes[0] - (Math.random() - 0.5) * vol * 0.6 : closes[j - 1];
-      var close = closes[j];
-      var high = Math.max(open, close) + Math.random() * vol * 0.4;
-      var low = Math.min(open, close) - Math.random() * vol * 0.4;
-      var t = new Date(now.getTime() - (count - 1 - j) * spacingMinutes * 60000);
-      arr.push({ o:open, h:high, l:low, c:close, t:t });
-    }
-    return arr;
-  }
 
   // ---------- Historical candles (Twelve Data, free tier) ----------
   // Same key-handling note as Finnhub: free tier, no billing, fine client-side
@@ -6237,7 +6188,6 @@
   }
 
   function runIntradayBacktestClicked(){
-    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
     var sym = document.getElementById('intradayBacktestSymbol').value;
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
     var statusEl = document.getElementById('intradayBacktestStatus');
@@ -6264,7 +6214,6 @@
   }
 
   function runIntradayUniverseBacktestClicked(){
-    if(isGuestMode){ alert('Sign in with a real account to run a backtest — it needs real historical data.'); return; }
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
     var statusEl = document.getElementById('intradayBacktestStatus');
     var btn = document.getElementById('runIntradayUniverseBacktestBtn');
@@ -6838,12 +6787,6 @@
   }
 
   function renderChartInto(svg, sym, base, tf){
-    if(isGuestMode){
-      var cfgGuest = tfConfig[tf];
-      initChartState(sym, tf, genOHLC(cfgGuest.fetchSize, base, base * cfgGuest.volFactor, tfSpacingMinutes[tf]));
-      renderChartView(sym);
-      return;
-    }
     fetchHistory(sym, tf, 'high').then(function(bars){
       // Keep the chart anchored to the live current price rather than
       // whatever Twelve Data's most recent close happened to be — but
@@ -7241,7 +7184,7 @@
     // Recalibrate entry/stop/targets against real pricing exactly once, the
     // first time live data actually lands — not on every refresh, or the
     // trade plan would visibly shift every 45 seconds.
-    if(!hasLiveCalibrated && !isGuestMode && anySuccess){
+    if(!hasLiveCalibrated && anySuccess){
       hasLiveCalibrated = true;
       calibrateTradeLevels();
       renderWhatToWatch();
@@ -7971,10 +7914,8 @@
   var journalEntries = [];
   var journalUnsubscribe = null;
   var currentUid = null;
-  var isGuestMode = false;
 
   function saveJournalEntries(){
-    if(isGuestMode) return; // guest edits are session-only, never persisted
     if(!window.__shwoopAPI || !currentUid) return;
     window.__shwoopAPI.saveJournal(currentUid, journalEntries).catch(function(err){
       console.error('Failed to save journal:', err);
@@ -8461,7 +8402,6 @@
   historyBackdrop.addEventListener('click', closeHistory);
 
   document.getElementById('alpacaSaveBtn').addEventListener('click', function(){
-    if(isGuestMode){ alert('Sign in with a real account to connect a broker.'); return; }
     var keyId = document.getElementById('alpacaKeyIdInput').value.trim();
     var secretKey = document.getElementById('alpacaSecretInput').value.trim();
     var creds = activeAlpacaCreds();
@@ -9738,13 +9678,6 @@
       if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
 
       if(user){
-        if(isGuestMode){
-          // Already committed to guest mode — this is a racing real-session
-          // restore (e.g. a persisted session confirming itself just after
-          // the guest button was clicked). Reject it and stay a guest.
-          if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
-          return;
-        }
         if(forceReauthPending){
           forceReauthPending = false;
           if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
@@ -9783,7 +9716,7 @@
             if(j.status !== 'open') return;
             ensureInWatchlist(j.sym, COMPANY_NAMES[j.sym] || j.sym, j.entry, j.entry);
           });
-          if(!isGuestMode){ fetchAllQuotes(); }
+          fetchAllQuotes();
           renderCalendar();
           renderJournalDetail();
           renderPLSummary();
@@ -9807,7 +9740,7 @@
           ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
         });
         startRealQuoteLoop();
-      } else if(!isGuestMode){
+      } else {
         currentUid = null;
         var exportSectionEl2 = document.getElementById('labsExportSection');
         if(exportSectionEl2) exportSectionEl2.setAttribute('hidden', '');
@@ -9958,18 +9891,14 @@
       ledeParts.push(qqq.chg > spy.chg ? 'Tech is outperforming the broader market today.' : 'Tech is lagging the broader market today.');
     }
 
-    if(isGuestMode){
-      ledeParts.push('Everything below is simulated — sign in for real, live-screened picks.');
+    var realTrades = intradayTrades.filter(function(t){ return t.analysisIsReal; });
+    if(realTrades.length === 0){
+      ledeParts.push("The intraday screener hasn't cleared any setups yet — check Trade Overview for the latest.");
     } else {
-      var realTrades = intradayTrades.filter(function(t){ return t.analysisIsReal; });
-      if(realTrades.length === 0){
-        ledeParts.push("The intraday screener hasn't cleared any setups yet — check Trade Overview for the latest.");
-      } else {
-        var longs = realTrades.filter(function(t){ return t.direction === 'Long'; }).length;
-        var shorts = realTrades.length - longs;
-        var splitDesc = longs === realTrades.length ? 'all long' : shorts === realTrades.length ? 'all short' : longs + ' long, ' + shorts + ' short';
-        ledeParts.push("Today's screener surfaced " + realTrades.length + (realTrades.length === 1 ? ' setup' : ' setups') + ' (' + splitDesc + ').');
-      }
+      var longs = realTrades.filter(function(t){ return t.direction === 'Long'; }).length;
+      var shorts = realTrades.length - longs;
+      var splitDesc = longs === realTrades.length ? 'all long' : shorts === realTrades.length ? 'all short' : longs + ' long, ' + shorts + ' short';
+      ledeParts.push("Today's screener surfaced " + realTrades.length + (realTrades.length === 1 ? ' setup' : ' setups') + ' (' + splitDesc + ').');
     }
 
     ledeEl.textContent = ledeParts.join(' ');
@@ -10022,7 +9951,7 @@
   }
 
   function loadMarketNewsIfSignedIn(){
-    if(isGuestMode || !currentUid) return;
+    if(!currentUid) return;
     var el = document.getElementById('marketNewsList');
     window.__shwoopAPI.finnhubNews().then(renderMarketNews).catch(function(err){
       console.error('Market news fetch failed:', err);
@@ -10054,7 +9983,7 @@
   }
 
   function loadEarningsIfSignedIn(){
-    if(isGuestMode || !currentUid) return;
+    if(!currentUid) return;
     var el = document.getElementById('earningsList');
     var today = new Date();
     var weekOut = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
