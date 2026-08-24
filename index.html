@@ -2238,12 +2238,12 @@
       </div>
       <div class="pl-card">
         <div class="pl-card-label">Best Trade</div>
-        <div class="pl-card-value mono up" id="statBest">—</div>
+        <div class="pl-card-value mono" id="statBest">—</div>
         <div class="pl-card-sub" id="statBestSub"></div>
       </div>
       <div class="pl-card">
         <div class="pl-card-label">Worst Trade</div>
-        <div class="pl-card-value mono down" id="statWorst">—</div>
+        <div class="pl-card-value mono" id="statWorst">—</div>
         <div class="pl-card-sub" id="statWorstSub"></div>
       </div>
     </div>
@@ -8204,21 +8204,32 @@
     if(!overall){
       winRateEl.textContent = '—'; winRateSubEl.textContent = '';
       avgWinEl.textContent = '—'; avgLossEl.textContent = '—';
-      bestEl.textContent = '—'; bestSubEl.textContent = '';
-      worstEl.textContent = '—'; worstSubEl.textContent = '';
+      bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = '';
+      worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = '';
     } else {
       winRateEl.textContent = overall.winRate.toFixed(0) + '%';
       winRateSubEl.textContent = overall.count + ' total trades';
       avgWinEl.textContent = '+$' + overall.avgWinDollar.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(overall.avgLossDollar).toFixed(0);
+      // Best/worst can each land on either side of zero regardless of
+      // label -- "best" among an all-losing stretch is still a loss
+      // (the smallest one), and "worst" among an all-winning stretch
+      // (or, as here, a single winning trade standing in as both best
+      // AND worst) is still a win. The up/down class on these two was
+      // previously hardcoded in the static HTML and never updated here,
+      // so "Worst Trade" always rendered in loss-red even when its own
+      // value was positive -- exactly backwards the one time it mattered
+      // most (a single win looking like a loss).
       if(overall.best){
         bestEl.textContent = (overall.best.dollar >= 0 ? '+$' : '−$') + Math.abs(overall.best.dollar).toFixed(0);
+        bestEl.className = 'pl-card-value mono ' + (overall.best.dollar >= 0 ? 'up' : 'down');
         bestSubEl.textContent = overall.best.sym;
-      } else { bestEl.textContent = '—'; bestSubEl.textContent = ''; }
+      } else { bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = ''; }
       if(overall.worst){
         worstEl.textContent = (overall.worst.dollar >= 0 ? '+$' : '−$') + Math.abs(overall.worst.dollar).toFixed(0);
+        worstEl.className = 'pl-card-value mono ' + (overall.worst.dollar >= 0 ? 'up' : 'down');
         worstSubEl.textContent = overall.worst.sym;
-      } else { worstEl.textContent = '—'; worstSubEl.textContent = ''; }
+      } else { worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = ''; }
     }
 
     var rangeValEl = document.getElementById('rangePLValue');
