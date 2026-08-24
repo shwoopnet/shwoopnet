@@ -2081,6 +2081,7 @@
             Firestore setting the server reads every ~60 seconds, so it takes effect within about a minute
             even if you close this tab right after, no redeploy needed. Failed orders retry 3 times, then
             auto-trading pauses and alerts you — see status below.
+            <span id="autoTradeIntradayMoneyClause"></span>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
@@ -3885,15 +3886,21 @@
     }
     var banner = document.getElementById('liveModeBanner');
     if(banner){ banner.hidden = (alpacaAccountType !== 'live'); }
-    var autoTradeDesc = document.getElementById('autoTradeIntradayDesc');
-    if(autoTradeDesc){
-      var moneyClause = alpacaAccountType === 'live'
+    var autoTradeMoneyClause = document.getElementById('autoTradeIntradayMoneyClause');
+    if(autoTradeMoneyClause){
+      // This used to overwrite the entire description with pre-migration
+      // copy every time this function ran (on load and on every paper/live
+      // switch) -- including the literally false claim "only runs while
+      // this tab is open" for a control that has run on the 24/7 backend
+      // for a while now. That's a real, currently-live bug: the correct
+      // description written into the static HTML below got silently
+      // clobbered back to the stale text within moments of the page
+      // finishing load. Scoped down to just the one thing that actually
+      // needs to change dynamically -- which environment's money is on
+      // the line.
+      autoTradeMoneyClause.innerHTML = alpacaAccountType === 'live'
         ? '<strong style="color:var(--loss);">Real money — every order placed here is a genuine trade in a live brokerage account.</strong>'
-        : 'Paper money only — nothing here is a real trade.';
-      autoTradeDesc.innerHTML = 'Sends a new pick the moment it\'s found, sized per the account\'s risk caps ' +
-        '(1% per trade, 20% max per position, 5.5% total risk ceiling). Allows re-entry on the same symbol ' +
-        'later the same day once a prior position closes. Failed orders retry 3 times, then auto-trading ' +
-        'pauses and alerts you — see status below. Only runs while this tab is open. ' + moneyClause;
+        : 'Paper money only — nothing here is a real trade in this environment.';
     }
   }
 
