@@ -339,6 +339,28 @@
   .quote-sync-status.fail{ color: var(--loss); }
   .alpaca-row-full{ width:100%; }
 
+  /* Backend Pulse card -- live proof that the 24/7 server's heartbeat,
+     screener, and auto-trade are actually running together, not just a
+     static "last updated" timestamp. The scanning dot pulses using the
+     same animation as the live-trading banner dot above, so a person
+     reopening the app at market open has a real shot at seeing it mid-
+     cycle rather than only ever a before/after snapshot. */
+  .backend-pulse-row{
+    display:flex; align-items:flex-start; gap:10px; padding:10px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .backend-pulse-row:last-child{ border-bottom:none; }
+  .backend-pulse-dot{
+    width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px;
+    background: var(--muted);
+  }
+  .backend-pulse-dot.scanning{ background: var(--amber); animation: liveDotPulse 1.1s ease-in-out infinite; }
+  .backend-pulse-dot.ok{ background: var(--gain); }
+  .backend-pulse-dot.error, .backend-pulse-dot.stale{ background: var(--loss); }
+  [data-reduce-motion="true"] .backend-pulse-dot{ animation:none; }
+  .backend-pulse-label{ font-size:13px; font-weight:600; }
+  .backend-pulse-sub{ font-size:11.5px; color: var(--muted); margin-top:3px; line-height:1.5; }
+
   /* Live trading mode -- deliberately loud. This is real money, so the
      visual language intentionally breaks from the rest of the app's
      calm, amber-accented style the moment it's active. */
@@ -1069,7 +1091,7 @@
     position:fixed; bottom:0; right:380px; z-index:441; width:440px; max-width:calc(100% - 40px);
     display:flex; justify-content:space-between; align-items:center;
     background: var(--panel); border:1px solid var(--border); border-bottom:none;
-    border-radius:8px 8px 0 0; padding:10px 16px; cursor:default;
+    border-radius:8px 8px 0 0; padding:10px 16px; cursor:pointer;
     font-family:'Space Grotesk', sans-serif; font-size:12.5px; font-weight:600; color: var(--paper);
     box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
   }
@@ -1451,7 +1473,28 @@
         var data = snap.exists() ? snap.data() : {};
         callback({
           screenerPicks: data.screenerPicks || null, screenerDate: data.screenerDate || null,
-          intradayScreenerPicks: data.intradayScreenerPicks || null, intradayScreenerUpdatedAt: data.intradayScreenerUpdatedAt || null
+          intradayScreenerPicks: data.intradayScreenerPicks || null, intradayScreenerUpdatedAt: data.intradayScreenerUpdatedAt || null,
+          // Backend liveness heartbeat -- written every minute by the
+          // server regardless of market hours (see scheduler.js/index.js
+          // in shwoop-server), so this is the one field that keeps moving
+          // even overnight when nothing else on this document changes.
+          // Absence of a value (never written yet, e.g. an old server
+          // build) is distinct from a stale value and is handled by the
+          // caller, not defaulted away here.
+          serverHeartbeatAt: data.serverHeartbeatAt || null,
+          serverMarketOpenAtHeartbeat: typeof data.serverMarketOpenAtHeartbeat === 'boolean' ? data.serverMarketOpenAtHeartbeat : null,
+          serverIntradayScreenerEnabled: typeof data.serverIntradayScreenerEnabled === 'boolean' ? data.serverIntradayScreenerEnabled : null,
+          serverIntradayAutoTradeEnabled: typeof data.serverIntradayAutoTradeEnabled === 'boolean' ? data.serverIntradayAutoTradeEnabled : null,
+          // Per-cycle status -- flips scanning -> idle/error every 15
+          // minutes while the market's open, so a person reopening the
+          // app has a real chance of catching "Scanning…" live, and
+          // always has a readable summary of what the last cycle did.
+          intradayCycleStatus: data.intradayCycleStatus || null,
+          intradayCycleStartedAt: data.intradayCycleStartedAt || null,
+          intradayCycleCompletedAt: data.intradayCycleCompletedAt || null,
+          intradayCycleError: data.intradayCycleError || null,
+          intradayCycleErrorAt: data.intradayCycleErrorAt || null,
+          intradayLastCycleSummary: data.intradayLastCycleSummary || null
         });
       }, function(err){
         console.error('Screener sync error:', err);
@@ -1852,6 +1895,15 @@
     </div>
 
     <div class="backtest-summary" id="statusAccountSummary"></div>
+
+    <div class="labs-backtest-card" id="backendPulseCard" style="margin-top:20px;" hidden>
+      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Backend Pulse</div>
+      <div class="labs-backtest-note" style="margin-bottom:10px;">
+        Live proof the 24/7 server is actually up and running its scan → size → send cycle — not just a
+        timestamp of whatever it last found.
+      </div>
+      <div id="backendPulseBody"></div>
+    </div>
 
     <div class="labs-backtest-card" style="margin-top:20px;">
       <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Auto-Trading Controls</div>
@@ -3313,6 +3365,21 @@
 
   var backendIntradayPicks = null;
   var backendIntradayUpdatedAt = null;
+  // Backend liveness + per-cycle status -- see watchScreenerPicks above
+  // for what each field means. These are what let the Status section
+  // show real, live evidence that the 24/7 backend's scanner, sizing,
+  // and auto-trade are actually running together, not just a snapshot
+  // of whatever it last found.
+  var backendHeartbeatAt = null;
+  var backendMarketOpenAtHeartbeat = null;
+  var backendScreenerEnabledOnServer = null;
+  var backendAutoTradeEnabledOnServer = null;
+  var backendCycleStatus = null;
+  var backendCycleStartedAt = null;
+  var backendCycleCompletedAt = null;
+  var backendCycleError = null;
+  var backendCycleErrorAt = null;
+  var backendLastCycleSummary = null;
 
   function loadScreenerForUser(uid){
     if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
@@ -3331,6 +3398,16 @@
       // this browser tab is the one doing any screening right now.
       backendIntradayPicks = data.intradayScreenerPicks;
       backendIntradayUpdatedAt = data.intradayScreenerUpdatedAt;
+      backendHeartbeatAt = data.serverHeartbeatAt;
+      backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
+      backendScreenerEnabledOnServer = data.serverIntradayScreenerEnabled;
+      backendAutoTradeEnabledOnServer = data.serverIntradayAutoTradeEnabled;
+      backendCycleStatus = data.intradayCycleStatus;
+      backendCycleStartedAt = data.intradayCycleStartedAt;
+      backendCycleCompletedAt = data.intradayCycleCompletedAt;
+      backendCycleError = data.intradayCycleError;
+      backendCycleErrorAt = data.intradayCycleErrorAt;
+      backendLastCycleSummary = data.intradayLastCycleSummary;
       var statusPageEl = document.getElementById('page-trades');
       if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
@@ -4216,9 +4293,13 @@
 
   // ---------- Alpaca dock: one unified header (title + lock + toggle), ----------
   // drag-left/right + resize. The header is always visible and is both the
-  // drag handle (when unlocked) and the home of the dedicated expand/
-  // collapse button — a separate button rather than making the whole
-  // header double as a click target avoids any click-vs-drag ambiguity.
+  // drag handle (when unlocked) and a click-anywhere target to expand or
+  // collapse the panel — the caret button still works too (and is what
+  // screen-reader / keyboard users get, via its aria-expanded state), but
+  // clicking anywhere else on the bar toggles it as well so there's no need
+  // to land a click on the small arrow specifically. The header-click
+  // handler below skips real button presses (the lock button, the caret
+  // button) and skips clicks that were actually the tail end of a drag.
   var alpacaDockOuter = document.getElementById('alpacaDock');
   var alpacaDockHeaderEl = document.getElementById('alpacaDockHeader');
   var alpacaDockBodyWrapEl = document.getElementById('alpacaDockBodyWrap');
@@ -4312,7 +4393,13 @@
   }
 
   var alpacaDockDragState = null;
+  // Set once a pointerdown-driven drag has moved past a tiny noise
+  // threshold -- lets the click handler below tell "you dragged the bar"
+  // apart from "you clicked the bar to open it", since a drag's pointerup
+  // still fires a click event on the same element afterward.
+  var alpacaDockDidDrag = false;
   alpacaDockHeaderEl.addEventListener('pointerdown', function(e){
+    alpacaDockDidDrag = false;
     if(alpacaDockLocked || e.target.closest('button')) return;
     var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
     alpacaDockDragState = { startX: e.clientX, startLeft: rect.left };
@@ -4321,6 +4408,7 @@
   alpacaDockHeaderEl.addEventListener('pointermove', function(e){
     if(!alpacaDockDragState) return;
     var dx = e.clientX - alpacaDockDragState.startX;
+    if(Math.abs(dx) > 4) alpacaDockDidDrag = true;
     var maxLeft = maxAlpacaDockLeft();
     var newLeft = Math.max(0, Math.min(maxLeft, alpacaDockDragState.startLeft + dx));
     setAlpacaDockLeft(newLeft);
@@ -4335,6 +4423,15 @@
   });
   alpacaDockHeaderEl.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
   alpacaDockHeaderEl.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
+
+  // Click-anywhere-on-the-bar to expand/collapse. Ignores clicks that
+  // landed on a real button (lock / caret -- each already has its own
+  // handler) and ignores clicks that were really the tail end of a drag.
+  alpacaDockHeaderEl.addEventListener('click', function(e){
+    if(e.target.closest('button')) return;
+    if(alpacaDockDidDrag){ alpacaDockDidDrag = false; return; }
+    toggleAlpacaDockOpen();
+  });
 
   (function initAlpacaDockGeometry(){
     var lockedSaved = 'true';
@@ -7980,6 +8077,7 @@
 
   // ---------- Status page: the one place to check in ----------
   function renderStatusPage(){
+    renderBackendPulse();
     renderStatusHealth();
     renderStatusPositions();
     renderStatusIntraday();
@@ -8013,6 +8111,128 @@
       console.error('Status page account fetch failed:', err);
     });
   }
+
+  // Heartbeat is written every ~60s by the server regardless of market
+  // hours (see scheduler.js/index.js in shwoop-server) -- if it's older
+  // than a couple missed ticks' worth, the honest read is "can't confirm
+  // this is alive" rather than silently trusting a stale timestamp.
+  var BACKEND_HEARTBEAT_STALE_MS = 150000; // 2.5 min -- allows for one missed 60s tick plus write latency
+  var INTRADAY_CYCLE_INTERVAL_MS = 15 * 60 * 1000;
+
+  function formatAgo(ms){
+    if(ms < 1000) return 'just now';
+    var s = Math.floor(ms / 1000);
+    if(s < 60) return s + 's ago';
+    var m = Math.floor(s / 60);
+    if(m < 60) return m + 'm ' + (s % 60) + 's ago';
+    var h = Math.floor(m / 60);
+    return h + 'h ' + (m % 60) + 'm ago';
+  }
+
+  function formatClock(ts){
+    return new Date(ts).toLocaleTimeString([], { hour:'numeric', minute:'2-digit', second:'2-digit' });
+  }
+
+  // The single card meant to answer the user's actual question on
+  // reopening the app: "is the scanner, sizing, and auto-trade actually
+  // all still running together, or did something quietly die overnight."
+  // Three independent signals, each capable of being wrong on its own --
+  // together they can't all lie at once:
+  //  1) Heartbeat -- proves the *process* is alive, even when there's
+  //     nothing to trade (market closed) and nothing else on the
+  //     document would otherwise change.
+  //  2) Cycle status -- proves the *15-minute intraday cycle itself* is
+  //     actually executing (scanning -> idle/error), not just that the
+  //     process happens to be up.
+  //  3) The last cycle's summary -- proves the scan, the sizing, and the
+  //     auto-send are genuinely wired together end to end, in plain
+  //     language, not just three components that each look fine alone.
+  function renderBackendPulse(){
+    var card = document.getElementById('backendPulseCard');
+    var body = document.getElementById('backendPulseBody');
+    if(!card || !body) return;
+    if(!alpacaConnected){ card.hidden = true; return; }
+    card.hidden = false;
+
+    var rows = [];
+
+    // ---- Row 1: heartbeat ----
+    if(!backendHeartbeatAt){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
+          '<div class="backend-pulse-label">No heartbeat received yet</div>' +
+          '<div class="backend-pulse-sub">Either the backend hasn\'t started up since this feature shipped, or it isn\'t running at all right now.</div>' +
+        '</div></div>'
+      );
+    } else {
+      var heartbeatAge = Date.now() - backendHeartbeatAt;
+      var heartbeatStale = heartbeatAge > BACKEND_HEARTBEAT_STALE_MS;
+      var marketNote = backendMarketOpenAtHeartbeat === true ? 'market open per the server'
+        : backendMarketOpenAtHeartbeat === false ? 'market closed per the server' : '';
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (heartbeatStale ? 'stale' : 'ok') + '"></div><div>' +
+          '<div class="backend-pulse-label">' + (heartbeatStale ? 'Backend hasn\'t checked in recently' : 'Backend online') + '</div>' +
+          '<div class="backend-pulse-sub">Checked in ' + formatAgo(heartbeatAge) + (marketNote ? ' · ' + marketNote : '') +
+            (heartbeatStale ? ' — it may have crashed or been stopped. Check the Render logs.' : '') +
+          '</div>' +
+        '</div></div>'
+      );
+    }
+
+    // ---- Row 2: this cycle's status ----
+    if(backendCycleStatus === 'scanning'){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
+          '<div class="backend-pulse-label">Scanning the market now…</div>' +
+          '<div class="backend-pulse-sub">Checking all 16 symbols for a qualifying ORB breakout, sizing anything that qualifies, and sending it to Alpaca if auto-trade is on. Started ' + (backendCycleStartedAt ? formatAgo(Date.now() - backendCycleStartedAt) : '') + '.</div>' +
+        '</div></div>'
+      );
+    } else if(backendCycleStatus === 'error'){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
+          '<div class="backend-pulse-label">Last cycle failed</div>' +
+          '<div class="backend-pulse-sub">' + (backendCycleError || 'Unknown error') + (backendCycleErrorAt ? ' · ' + formatClock(backendCycleErrorAt) + ' (' + formatAgo(Date.now() - backendCycleErrorAt) + ')' : '') + '</div>' +
+        '</div></div>'
+      );
+    } else if(backendCycleStatus === 'idle' && backendLastCycleSummary){
+      var nextEta = backendCycleCompletedAt ? backendCycleCompletedAt + INTRADAY_CYCLE_INTERVAL_MS : null;
+      var etaText = nextEta && nextEta > Date.now() ? ' · next scan ~' + formatClock(nextEta) : '';
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
+          '<div class="backend-pulse-label">Idle — last cycle finished ' + (backendCycleCompletedAt ? formatClock(backendCycleCompletedAt) : '') + '</div>' +
+          '<div class="backend-pulse-sub">' + backendLastCycleSummary.text + etaText + '</div>' +
+        '</div></div>'
+      );
+    } else {
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
+          '<div class="backend-pulse-label">No intraday cycle has run yet</div>' +
+          '<div class="backend-pulse-sub">Runs automatically every 15 minutes while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.</div>' +
+        '</div></div>'
+      );
+    }
+
+    // ---- Row 3: server-side settings truth (env vars, not this browser's toggle) ----
+    if(backendScreenerEnabledOnServer !== null){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
+          '<div class="backend-pulse-label">Server settings: screener ' + (backendScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
+          '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open.</div>' +
+        '</div></div>'
+      );
+    }
+
+    body.innerHTML = rows.join('');
+  }
+
+  // Keeps the "Xs ago" text moving and lets a stale heartbeat get caught
+  // even between Firestore snapshots -- purely a re-render of already-
+  // known data, no network call, so a short interval is cheap. Only
+  // bothers while the Trade Overview / Status page is actually visible.
+  setInterval(function(){
+    var statusPageEl = document.getElementById('page-trades');
+    if(statusPageEl && !statusPageEl.hidden){ renderBackendPulse(); }
+  }, 5000);
 
   function renderStatusHealth(){
     var el = document.getElementById('statusHealthRows');
@@ -8157,11 +8377,17 @@
       return;
     }
     if(emptyEl) emptyEl.setAttribute('hidden', '');
-    var typeLabels = { sent: 'Sent', skipped: 'Skipped', position_action: 'Position' };
+    var typeLabels = {
+      sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
+      // cycle_summary is the once-per-15-minutes "did the scanner, sizing,
+      // and auto-trade actually run together" line written by the
+      // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
+      cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error'
+    };
     el.innerHTML = currentAccountLog.map(function(entry){
       var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
       return '<div class="activity-log-row">' +
-        '<div class="activity-log-meta"><span class="mono">' + entry.sym + '</span><span class="activity-log-tag">' + (typeLabels[entry.type] || entry.type) + '</span><span class="activity-log-time">' + time + '</span></div>' +
+        '<div class="activity-log-meta">' + (entry.sym ? '<span class="mono">' + entry.sym + '</span>' : '') + '<span class="activity-log-tag">' + (typeLabels[entry.type] || entry.type) + '</span><span class="activity-log-time">' + time + '</span></div>' +
         '<div class="activity-log-text">' + entry.text + '</div>' +
       '</div>';
     }).join('');
