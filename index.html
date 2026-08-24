@@ -6857,61 +6857,21 @@
 
   var priceLoopInterval = null;
 
-  // If the same account is open in multiple tabs, each one independently
-  // running the quote loop and daily screener would multiply the
-  // rate-limited API traffic per real user for no benefit — only one tab
-  // needs to actually be live. A simple localStorage heartbeat elects one
-  // "leader" tab to do that work; others stay passive and just show
-  // whatever's already loaded/synced.
-  var TAB_ID = 'tab_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-  var LEADER_KEY = 'shwoop_leader_tab';
-  var LEADER_HEARTBEAT_MS = 4000;
-  var LEADER_STALE_MS = 10000;
-  var isLeaderTab = false;
-
-  function isAnotherTabLeading(){
-    try {
-      var raw = localStorage.getItem(LEADER_KEY);
-      if(!raw) return false;
-      var data = JSON.parse(raw);
-      return data.tabId !== TAB_ID && (Date.now() - data.ts) < LEADER_STALE_MS;
-    } catch(e){
-      return false;
-    }
-  }
-
-  function claimLeadership(){
-    try {
-      localStorage.setItem(LEADER_KEY, JSON.stringify({ tabId: TAB_ID, ts: Date.now() }));
-    } catch(e){}
-  }
-
-  function becomeLeaderIfAvailable(){
-    if(isAnotherTabLeading()){
-      isLeaderTab = false;
-      // Check again shortly in case the other tab closes.
-      setTimeout(becomeLeaderIfAvailable, LEADER_STALE_MS);
-      return;
-    }
-    isLeaderTab = true;
-    claimLeadership();
-    setInterval(claimLeadership, LEADER_HEARTBEAT_MS);
-    startRealQuoteLoop();
-  }
-
-  // Without this, a refresh leaves the OLD tab's claim sitting in
-  // localStorage with a recent heartbeat timestamp (the interval that was
-  // updating it just got destroyed by the reload, but the last write
-  // lingers) — the NEW page load then sees what looks like "another tab
-  // still active" and waits out the full stale-timeout before retrying,
-  // delaying real quotes and charts on every single refresh. Releasing the
-  // claim cleanly on unload means a normal refresh starts immediately.
-  window.addEventListener('pagehide', function(){
-    if(isLeaderTab){
-      try { localStorage.removeItem(LEADER_KEY); } catch(e){}
-    }
-  });
-
+  // Previously gated behind a localStorage-based "tab leader" election, so
+  // that only one open tab of the same account would poll for quotes. That
+  // added a real failure mode: a fresh page load would sometimes see a
+  // stale-but-not-yet-expired leadership claim (the writing tab's cleanup
+  // hadn't landed yet, or the tab had been closed some other way) and would
+  // then wait out the full 10-second stale-timeout before it tried again —
+  // during which nothing refreshed, and the index cards on Market Brief
+  // silently fell back to their hardcoded placeholder numbers with no
+  // indication they weren't live. Reload a few times in a row and each tab
+  // could land on a different outcome, which is exactly the "fails for data
+  // and syncing" / "jumbles the numbers" behavior reported. This is a
+  // single-owner tool where more than one tab open at once is rare, and
+  // Finnhub's free-tier rate limit has headroom for that rare case, so the
+  // simpler and more reliable fix is: every tab just starts its own quote
+  // loop immediately, no election, no waiting.
   function startRealQuoteLoop(){
     if(priceLoopInterval){ clearInterval(priceLoopInterval); }
     fetchAllQuotes();
@@ -9175,7 +9135,7 @@
           var fb = FALLBACK_INDEX_VALUES[ix.sym];
           ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
         });
-        becomeLeaderIfAvailable();
+        startRealQuoteLoop();
       } else if(!isGuestMode){
         currentUid = null;
         var exportSectionEl2 = document.getElementById('labsExportSection');
