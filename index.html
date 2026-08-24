@@ -378,6 +378,26 @@
   @keyframes liveDotPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
   [data-reduce-motion="true"] .live-mode-banner-dot{ animation:none; }
 
+  /* Trading-paused banner -- same "deliberately loud" language as the
+     live-money banner above, reused here because a paused auto-trader
+     is exactly the kind of thing that shouldn't be easy to miss on a
+     quick glance at Trade Overview. Sits at the very top of the page,
+     above the account summary. */
+  .trading-paused-banner{
+    background: var(--loss); color:#fff; font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:13px; letter-spacing:.02em;
+    padding:12px 16px; border-radius:6px; margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .trading-paused-banner[hidden]{ display:none; }
+  .trading-paused-banner-dot{
+    width:8px; height:8px; border-radius:50%; background:#fff; flex-shrink:0;
+    animation: liveDotPulse 1.4s ease-in-out infinite;
+  }
+  [data-reduce-motion="true"] .trading-paused-banner-dot{ animation:none; }
+  .trading-paused-banner-text{ font-weight:600; letter-spacing:0; }
+  .trading-paused-banner-text strong{ font-weight:800; }
+
   .alpaca-env-selector{ display:flex; gap:8px; margin:10px 0 12px 0; }
   .alpaca-env-btn{
     background: var(--panel); border:1px solid var(--border); color: var(--muted);
@@ -1848,6 +1868,10 @@
   <!-- ================= STATUS ================= -->
   <!-- ================= TRADE OVERVIEW (merged with Status) ================= -->
   <main class="page" id="page-trades" hidden>
+    <div class="trading-paused-banner" id="tradingPausedBanner" hidden>
+      <span class="trading-paused-banner-dot"></span>
+      <span class="trading-paused-banner-text" id="tradingPausedBannerText"><strong>Auto-trading paused</strong> — repeated order failures. Review the activity log below, then resume once resolved.</span>
+    </div>
     <div class="trades-header">
       <div>
         <div class="trades-title">Trade Overview</div>
@@ -3216,6 +3240,22 @@
   // (total risk ceiling, per-position cap), not an arbitrary count.
   function runIntradayScreener(){
     if(isRunningIntradayScreener || isGuestMode || !alpacaIntradayEnabled) return;
+    // Now that "What to Watch" (and everything else that displays
+    // intraday picks) prefers the backend's own server-side scan --
+    // computed every 15 minutes, 24/7, regardless of whether this tab is
+    // open -- this tab's own local re-scan is only still doing real work
+    // for one thing: sending real orders locally when "Auto-send new
+    // intraday picks" is on for THIS tab specifically. If that's off,
+    // running the full scan here just burns this browser's share of the
+    // *same* Twelve Data account-level quota the backend is already
+    // drawing from (confirmed: both use the same free-tier key), for a
+    // result nothing displays or acts on anymore. Skip it rather than
+    // let it collide with the backend's own requests -- this alone
+    // should roughly halve real-world Twelve Data usage.
+    if(!alpacaAutoTradeIntradayEnabled){
+      updateIntradayStatus('Screening handled by the 24/7 backend now — see Backend Pulse on Trade Overview', true);
+      return;
+    }
     if(!isUsMarketOpen()){
       var session = getUsMarketSession();
       var msg = session.session === 'closed'
@@ -4032,9 +4072,81 @@
     });
   }
 
+  // ---------- Trading-paused alert (sound + browser notification) ----------
+  // A paused auto-trader is a "someone should notice this soon" event --
+  // a quiet settings-row text change alone is easy to miss if nobody's
+  // looking at the app right at that moment. This fires once, on the
+  // actual false -> true transition, not on every snapshot the paused
+  // state happens to still be true on (the listener re-fires on every
+  // unrelated write to the same shared doc, same as everything else
+  // built on watchAlpacaCredentials/watchScreenerPicks).
+  var lastKnownTradingPaused = false;
+
+  function playTradingPausedAlertSound(){
+    try{
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if(!Ctx) return;
+      var ctx = new Ctx();
+      function beep(startTime){
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 740;
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.28, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.32);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + 0.35);
+      }
+      var now = ctx.currentTime;
+      beep(now);
+      beep(now + 0.4);
+      beep(now + 0.8);
+    } catch(err){
+      console.error('Trading-paused alert sound failed:', err);
+    }
+  }
+
+  function notifyTradingPausedViaBrowser(reasonText){
+    if(!('Notification' in window)) return;
+    var title = 'Shwoopnet — Auto-trading paused';
+    var body = 'Repeated failed order attempts. Reason: ' + reasonText + '. Review the activity log, then resume once resolved.';
+    if(Notification.permission === 'granted'){
+      try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
+    } else if(Notification.permission !== 'denied'){
+      Notification.requestPermission().then(function(perm){
+        if(perm === 'granted'){
+          try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
+        }
+      });
+    }
+  }
+
   function renderTradingPauseState(state){
     var row = document.getElementById('tradingPausedRow');
     var desc = document.getElementById('tradingPausedDesc');
+    var banner = document.getElementById('tradingPausedBanner');
+    var bannerText = document.getElementById('tradingPausedBannerText');
+    var reasonText = state.pausedReason || 'unknown';
+    var justPaused = state.paused && !lastKnownTradingPaused;
+    lastKnownTradingPaused = state.paused;
+    if(justPaused){
+      playTradingPausedAlertSound();
+      notifyTradingPausedViaBrowser(reasonText);
+    }
+    if(banner){
+      if(state.paused){
+        banner.removeAttribute('hidden');
+        if(bannerText){
+          bannerText.innerHTML = '<strong>Auto-trading paused</strong> — repeated order failures (' + reasonText +
+            '). Review the activity log below, then resume once resolved.';
+        }
+      } else {
+        banner.setAttribute('hidden', '');
+      }
+    }
     if(!row || !desc) return;
     if(!state.paused){
       row.setAttribute('hidden', '');
@@ -4043,7 +4155,7 @@
     row.removeAttribute('hidden');
     var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
     desc.textContent = 'Auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
-      (state.pausedReason || 'unknown') + '. Review the activity log, then resume once resolved.';
+      reasonText + '. Review the activity log, then resume once resolved.';
   }
 
   document.getElementById('resumeTradingBtn').addEventListener('click', function(){
@@ -8923,9 +9035,30 @@
         if(signOutBtn){ signOutBtn.textContent = 'Sign out'; }
         journalUnsubscribe = api.watchJournal(user.uid, function(entries){
           journalEntries = entries;
+          // Every OPEN position needs its symbol in the live-quote
+          // watchlist, or Open Positions' "current price" falls back to
+          // its entry price forever -- P&L stuck at exactly $0.00/0.00%
+          // even while the position is genuinely live. This matters most
+          // for positions the *backend* opened (auto-trade), since this
+          // tab's own local screener never ran a discovery pass on them
+          // and so never had a chance to add them to the watchlist itself
+          // -- previously only the daily/intraday screener picks did
+          // this, not journal entries in general.
+          entries.forEach(function(j){
+            if(j.status !== 'open') return;
+            ensureInWatchlist(j.sym, COMPANY_NAMES[j.sym] || j.sym, j.entry, j.entry);
+          });
+          if(!isGuestMode){ fetchAllQuotes(); }
           renderCalendar();
           renderJournalDetail();
           renderPLSummary();
+          // Journal changes (a new position opening, one closing, a
+          // trailing-stop update) previously only reached Trade
+          // Overview's Open Positions table indirectly, whenever the
+          // separate screener-picks listener happened to also fire --
+          // now a journal change refreshes it directly and immediately.
+          var statusPageEl = document.getElementById('page-trades');
+          if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
         });
         loadAlertsForUser(user.uid);
         loadActivityLogForUser(user.uid);
@@ -8965,9 +9098,22 @@
   });
 
   // ---------- What to Watch (Brief page recap of the actual trades) ----------
+  // Prefers the backend's own intraday picks (backendIntradayPicks) --
+  // computed server-side every 15 minutes, 24/7, regardless of whether
+  // this tab is open or has its own local "alpacaIntradayEnabled" toggle
+  // on. That fixed a real gap: this card used to source only from
+  // intradayTrades, this tab's own independent re-scan, which meant it
+  // sat empty/stale any time the local toggle was off or the tab hadn't
+  // run its own screener recently -- even while the server was actively
+  // tracking real setups the whole time. Falls back to the local
+  // intradayTrades only when the backend hasn't reported anything yet
+  // (e.g. server hasn't completed its first cycle since this tab opened).
   function renderWhatToWatch(){
     var el = document.getElementById('whatToWatchList');
-    el.innerHTML = intradayTrades.map(function(t){
+    var source = (backendIntradayPicks && backendIntradayPicks.length)
+      ? backendIntradayPicks.map(buildTradeFromPick)
+      : intradayTrades;
+    el.innerHTML = source.map(function(t){
       var badge = computeBadgeInfo(t);
       return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
         '<div class="watch-trade-head">' +
