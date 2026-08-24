@@ -211,6 +211,13 @@
       padding:8px 4px; overflow-x:auto; overflow-y:hidden;
       border-left:none; border-top:1px solid var(--border);
     }
+    /* More nav items than fit on a narrow phone -- this bar scrolls
+       horizontally, so fade both edges to hint there's more to swipe to. */
+    .side-nav::before, .side-nav::after{
+      content:""; position:absolute; top:0; bottom:0; width:24px; z-index:2; pointer-events:none;
+    }
+    .side-nav::before{ left:0; background: linear-gradient(90deg, var(--panel), transparent); }
+    .side-nav::after{ right:0; background: linear-gradient(270deg, var(--panel), transparent); }
     .side-nav-divider{ display:none; }
     .side-nav-item{ width:auto; min-width:50px; padding:6px 4px; }
     .side-nav-item:hover{ transform: translateY(-3px) scale(1.05); }
@@ -581,11 +588,12 @@
   }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
-  .labs-control-field{ display:flex; flex-direction:column; gap:6px; }
+  .labs-control-field{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1 1 160px; }
   .labs-control-field label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); }
   .labs-control-field select{
     background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
-    padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'IBM Plex Mono', monospace; min-width:160px;
+    padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'IBM Plex Mono', monospace;
+    min-width:0; width:100%; max-width:100%; box-sizing:border-box;
   }
   .labs-backtest-status{ font-size:12px; color: var(--muted); margin-bottom:16px; }
   .labs-export-section{ margin-top:8px; }
@@ -715,7 +723,8 @@
   .breadth-label.down{ border-color: rgba(232,92,81,0.35); color: var(--loss); }
 
   .movers-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  .movers-col{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; }
+  @media (max-width: 600px){ .movers-grid{ grid-template-columns:1fr; } }
+  .movers-col{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; min-width:0; }
   .movers-col-title{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color: var(--muted); margin-bottom:10px; }
   .mover-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; font-size:12px; }
   .mover-row + .mover-row{ border-top:1px solid var(--border); }
