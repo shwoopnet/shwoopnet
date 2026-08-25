@@ -1624,7 +1624,21 @@
           // default" -- see shwoop-server's src/settings.js.
           riskPercentOverride: typeof data.riskPercentOverride === 'number' ? data.riskPercentOverride : null,
           intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
-          intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null
+          intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
+          // Crypto's own mirrors of every field above -- entirely
+          // separate fields (see shwoop-server's runCryptoCycle), so the
+          // two strategies' statuses never overwrite each other here.
+          cryptoScreenerPicks: data.cryptoScreenerPicks || null, cryptoScreenerUpdatedAt: data.cryptoScreenerUpdatedAt || null,
+          serverCryptoScreenerEnabled: typeof data.serverCryptoScreenerEnabled === 'boolean' ? data.serverCryptoScreenerEnabled : null,
+          serverCryptoAutoTradeEnabled: typeof data.serverCryptoAutoTradeEnabled === 'boolean' ? data.serverCryptoAutoTradeEnabled : null,
+          cryptoCycleStatus: data.cryptoCycleStatus || null,
+          cryptoCycleStartedAt: data.cryptoCycleStartedAt || null,
+          cryptoCycleCompletedAt: data.cryptoCycleCompletedAt || null,
+          cryptoCycleError: data.cryptoCycleError || null,
+          cryptoCycleErrorAt: data.cryptoCycleErrorAt || null,
+          cryptoLastCycleSummary: data.cryptoLastCycleSummary || null,
+          cryptoScreenerEnabledOverride: typeof data.cryptoScreenerEnabledOverride === 'boolean' ? data.cryptoScreenerEnabledOverride : null,
+          cryptoAutoTradeEnabledOverride: typeof data.cryptoAutoTradeEnabledOverride === 'boolean' ? data.cryptoAutoTradeEnabledOverride : null
         });
       }, function(err){
         console.error('Screener sync error:', err);
@@ -1658,28 +1672,34 @@
         console.error('Alpaca credentials sync error:', err);
       });
     },
-    // The server sets intradayAutoTradePaused after exhausting its retry
-    // budget on a failed order (see autoTrade.js) — this just surfaces
-    // that same field to the Settings page in real time, and lets the
-    // person manually clear it once the underlying issue is resolved.
-    watchTradingPauseState: function(uid, callback){
+    // The server sets <screenerType>AutoTradePaused after exhausting its
+    // retry budget on a failed order (see autoTrade.js) — this just
+    // surfaces that same field to the Settings page in real time, and
+    // lets the person manually clear it once the underlying issue is
+    // resolved. screenerType defaults to 'intraday' for the original
+    // equities strategy; crypto's own pause state (a structural rejection
+    // on ONE strategy must never halt the other -- see autoTrade.js) is
+    // watched separately by passing 'crypto'.
+    watchTradingPauseState: function(uid, callback, screenerType){
+      var st = screenerType || 'intraday';
       return onSnapshot(doc(db, 'users', uid), function(snap){
         var data = snap.exists() ? snap.data() : {};
         callback({
-          paused: Boolean(data.intradayAutoTradePaused),
-          pausedAt: data.intradayAutoTradePausedAt || null,
-          pausedReason: data.intradayAutoTradePausedReason || null,
+          paused: Boolean(data[st + 'AutoTradePaused']),
+          pausedAt: data[st + 'AutoTradePausedAt'] || null,
+          pausedReason: data[st + 'AutoTradePausedReason'] || null,
         });
       }, function(err){
         console.error('Trading pause state sync error:', err);
       });
     },
-    resumeTrading: function(uid){
-      return setDoc(doc(db, 'users', uid), {
-        intradayAutoTradePaused: false,
-        intradayAutoTradePausedAt: null,
-        intradayAutoTradePausedReason: null,
-      }, { merge: true });
+    resumeTrading: function(uid, screenerType){
+      var st = screenerType || 'intraday';
+      var partial = {};
+      partial[st + 'AutoTradePaused'] = false;
+      partial[st + 'AutoTradePausedAt'] = null;
+      partial[st + 'AutoTradePausedReason'] = null;
+      return setDoc(doc(db, 'users', uid), partial, { merge: true });
     },
     // Each wraps a Cloud Function callable -- .data is the raw Finnhub
     // JSON response, unwrapped from the {data: ...} envelope callable
@@ -2087,6 +2107,39 @@
           <div class="settings-row-desc" id="tradingPausedDesc">—</div>
         </div>
         <button class="settings-reset-btn" id="resumeTradingBtn">Resume trading</button>
+      </div>
+      <div class="settings-row" id="alpacaAutoTradeCryptoRow" hidden>
+        <div>
+          <div class="settings-row-title">Crypto auto-trading</div>
+          <div class="settings-row-desc">
+            Same 24/7 backend, a separate strategy (rolling-range breakout, long-only) and its own independent
+            7% risk ceiling — doesn't compete with equities auto-trading above for risk budget. Runs around
+            the clock, not just market hours. Failed orders retry 3 times, then this strategy's auto-trading
+            pauses on its own, without affecting equities.
+            <span id="autoTradeCryptoMoneyClause"></span>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="quote-sync-status" id="serverCryptoAutoTradeStatusBadge">—</span>
+          <button class="chart-tool-btn" id="cryptoAutoTradeEnableToggle" data-armed="false">Off</button>
+        </div>
+      </div>
+      <div class="settings-row" id="cryptoScreenerEnabledRow" hidden>
+        <div>
+          <div class="settings-row-title">Crypto screener (server)</div>
+          <div class="settings-row-desc">
+            Scans a 12-symbol crypto universe every 5 minutes, continuously — no market-hours gate. Crypto
+            auto-trading above has nothing to size or send without this being on too.
+          </div>
+        </div>
+        <button class="chart-tool-btn" id="cryptoScreenerEnableToggle">Off</button>
+      </div>
+      <div class="settings-row" id="cryptoTradingPausedRow" hidden>
+        <div>
+          <div class="settings-row-title">Crypto auto-trading status</div>
+          <div class="settings-row-desc" id="cryptoTradingPausedDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="resumeCryptoTradingBtn">Resume crypto trading</button>
       </div>
       <div class="settings-row" id="flattenAllRow" hidden>
         <div>
@@ -3196,6 +3249,20 @@
   var backendCycleError = null;
   var backendCycleErrorAt = null;
   var backendLastCycleSummary = null;
+  // Crypto's own mirrors of every field above -- see runCryptoCycle in
+  // shwoop-server's orchestrator.js, which writes these as entirely
+  // separate Firestore fields so the two strategies never clobber each
+  // other's status.
+  var backendCryptoPicks = null;
+  var backendCryptoUpdatedAt = null;
+  var backendCryptoScreenerEnabledOnServer = null;
+  var backendCryptoAutoTradeEnabledOnServer = null;
+  var backendCryptoCycleStatus = null;
+  var backendCryptoCycleStartedAt = null;
+  var backendCryptoCycleCompletedAt = null;
+  var backendCryptoCycleError = null;
+  var backendCryptoCycleErrorAt = null;
+  var backendCryptoLastCycleSummary = null;
   // Journal/Alpaca drift findings (see shwoop-server's
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
@@ -3220,7 +3287,9 @@
   var autoTradeOverrides = {
     riskPercentOverride: null,
     intradayScreenerEnabledOverride: null,
-    intradayAutoTradeEnabledOverride: null
+    intradayAutoTradeEnabledOverride: null,
+    cryptoScreenerEnabledOverride: null,
+    cryptoAutoTradeEnabledOverride: null
   };
 
   function loadScreenerForUser(uid){
@@ -3251,6 +3320,18 @@
       autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
+      backendCryptoPicks = data.cryptoScreenerPicks;
+      backendCryptoUpdatedAt = data.cryptoScreenerUpdatedAt;
+      backendCryptoScreenerEnabledOnServer = data.serverCryptoScreenerEnabled;
+      backendCryptoAutoTradeEnabledOnServer = data.serverCryptoAutoTradeEnabled;
+      backendCryptoCycleStatus = data.cryptoCycleStatus;
+      backendCryptoCycleStartedAt = data.cryptoCycleStartedAt;
+      backendCryptoCycleCompletedAt = data.cryptoCycleCompletedAt;
+      backendCryptoCycleError = data.cryptoCycleError;
+      backendCryptoCycleErrorAt = data.cryptoCycleErrorAt;
+      backendCryptoLastCycleSummary = data.cryptoLastCycleSummary;
+      autoTradeOverrides.cryptoScreenerEnabledOverride = data.cryptoScreenerEnabledOverride;
+      autoTradeOverrides.cryptoAutoTradeEnabledOverride = data.cryptoAutoTradeEnabledOverride;
       // Still tracked (not user-adjustable from this tab anymore) so the
       // local screener preview's sizeability filter stays in lockstep
       // with whatever risk % the server is actually using to size orders.
@@ -3270,7 +3351,17 @@
     });
   }
 
-  function fmt(n){ return n.toFixed(2); }
+  // A flat .toFixed(2) is fine for every equities price (always well
+  // above $1), but would round a DOGE-class crypto price down toward
+  // $0.00 with no meaningful digits left -- scales decimals to the
+  // price's own magnitude instead, same convention as the backend's
+  // formatCryptoPrice (see shwoop-server's clients/alpaca.js), so a
+  // crypto position showing up in Open Positions displays honestly.
+  function fmt(n){
+    if(n >= 1) return n.toFixed(2);
+    if(n >= 0.01) return n.toFixed(4);
+    return n.toFixed(8);
+  }
   function pct(a,b){ return ((a-b)/b*100); }
   function findQuote(sym){ return watchlist.filter(function(w){ return w.sym === sym; })[0]; }
 
@@ -3477,6 +3568,8 @@
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
     document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
     document.getElementById('screenerEnabledRow').removeAttribute('hidden');
+    document.getElementById('alpacaAutoTradeCryptoRow').removeAttribute('hidden');
+    document.getElementById('cryptoScreenerEnabledRow').removeAttribute('hidden');
     document.getElementById('flattenAllRow').removeAttribute('hidden');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.setAttribute('hidden', '');
@@ -3489,6 +3582,8 @@
     document.getElementById('alpacaDock').setAttribute('hidden', '');
     document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
     document.getElementById('screenerEnabledRow').setAttribute('hidden', '');
+    document.getElementById('alpacaAutoTradeCryptoRow').setAttribute('hidden', '');
+    document.getElementById('cryptoScreenerEnabledRow').setAttribute('hidden', '');
     document.getElementById('flattenAllRow').setAttribute('hidden', '');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.removeAttribute('hidden');
@@ -3525,6 +3620,15 @@
       autoTradeMoneyClause.innerHTML = alpacaAccountType === 'live'
         ? '<strong style="color:var(--loss);">Real money — every order placed here is a genuine trade in a live brokerage account.</strong>'
         : 'Paper money only — nothing here is a real trade in this environment.';
+    }
+    // Crypto is deliberately, permanently paper-only on the backend right
+    // now (see shwoop-server's clients/alpaca.js) -- unlike equities
+    // above, this does NOT follow alpacaAccountType. Switching this tab
+    // to live only affects equities; crypto has no live capability at all
+    // yet, so saying otherwise here would be actively misleading.
+    var autoTradeCryptoMoneyClause = document.getElementById('autoTradeCryptoMoneyClause');
+    if(autoTradeCryptoMoneyClause){
+      autoTradeCryptoMoneyClause.textContent = ' Paper money only — the backend\'s crypto trading has no live-account capability yet, regardless of the equities environment selected above.';
     }
   }
 
@@ -3709,6 +3813,16 @@
       ? autoTradeOverrides.intradayScreenerEnabledOverride
       : Boolean(backendScreenerEnabledOnServer);
   }
+  function effectiveCryptoAutoTradeOn(){
+    return autoTradeOverrides.cryptoAutoTradeEnabledOverride !== null
+      ? autoTradeOverrides.cryptoAutoTradeEnabledOverride
+      : Boolean(backendCryptoAutoTradeEnabledOnServer);
+  }
+  function effectiveCryptoScreenerOn(){
+    return autoTradeOverrides.cryptoScreenerEnabledOverride !== null
+      ? autoTradeOverrides.cryptoScreenerEnabledOverride
+      : Boolean(backendCryptoScreenerEnabledOnServer);
+  }
 
   function renderAutoTradeOverrideControls(){
     var autoBtn = document.getElementById('autoTradeEnableToggle');
@@ -3723,6 +3837,19 @@
       var screenerOn = effectiveScreenerOn();
       screenerBtn.textContent = screenerOn ? 'On' : 'Off';
       screenerBtn.classList.toggle('active', screenerOn);
+    }
+    var cryptoAutoBtn = document.getElementById('cryptoAutoTradeEnableToggle');
+    if(cryptoAutoBtn && cryptoAutoBtn.dataset.armed !== 'true'){
+      var cryptoAutoOn = effectiveCryptoAutoTradeOn();
+      cryptoAutoBtn.textContent = cryptoAutoOn ? 'On' : 'Off';
+      cryptoAutoBtn.classList.remove('confirming');
+      cryptoAutoBtn.classList.toggle('active', cryptoAutoOn);
+    }
+    var cryptoScreenerBtn = document.getElementById('cryptoScreenerEnableToggle');
+    if(cryptoScreenerBtn){
+      var cryptoScreenerOn = effectiveCryptoScreenerOn();
+      cryptoScreenerBtn.textContent = cryptoScreenerOn ? 'On' : 'Off';
+      cryptoScreenerBtn.classList.toggle('active', cryptoScreenerOn);
     }
   }
 
@@ -3763,6 +3890,43 @@
     var next = !effectiveScreenerOn();
     autoTradeOverrides.intradayScreenerEnabledOverride = next;
     saveAutoTradeOverride({ intradayScreenerEnabledOverride: next });
+    renderAutoTradeOverrideControls();
+  });
+
+  document.getElementById('cryptoAutoTradeEnableToggle').addEventListener('click', function(){
+    var btn = this;
+    var currentlyOn = effectiveCryptoAutoTradeOn();
+    // Same click-to-arm confirmation as the equities toggle above --
+    // still real (paper) orders on a real Alpaca account.
+    if(currentlyOn){
+      autoTradeOverrides.cryptoAutoTradeEnabledOverride = false;
+      saveAutoTradeOverride({ cryptoAutoTradeEnabledOverride: false });
+      renderAutoTradeOverrideControls();
+      return;
+    }
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(btn._armTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      autoTradeOverrides.cryptoAutoTradeEnabledOverride = true;
+      saveAutoTradeOverride({ cryptoAutoTradeEnabledOverride: true });
+      renderAutoTradeOverrideControls();
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again — real orders';
+      btn._armTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        renderAutoTradeOverrideControls();
+      }, 4000);
+    }
+  });
+
+  document.getElementById('cryptoScreenerEnableToggle').addEventListener('click', function(){
+    var next = !effectiveCryptoScreenerOn();
+    autoTradeOverrides.cryptoScreenerEnabledOverride = next;
+    saveAutoTradeOverride({ cryptoScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
   });
 
@@ -4007,12 +4171,17 @@
   }
 
   var tradingPauseUnsubscribe = null;
+  var cryptoTradingPauseUnsubscribe = null;
   function loadTradingPauseStateForUser(uid){
     if(!window.__shwoopAPI) return;
     if(tradingPauseUnsubscribe){ tradingPauseUnsubscribe(); }
     tradingPauseUnsubscribe = window.__shwoopAPI.watchTradingPauseState(uid, function(state){
       renderTradingPauseState(state);
     });
+    if(cryptoTradingPauseUnsubscribe){ cryptoTradingPauseUnsubscribe(); }
+    cryptoTradingPauseUnsubscribe = window.__shwoopAPI.watchTradingPauseState(uid, function(state){
+      renderCryptoTradingPauseState(state);
+    }, 'crypto');
   }
 
   // ---------- Trading-paused alert (sound + browser notification) ----------
@@ -4100,6 +4269,48 @@
     desc.textContent = 'Auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
       reasonText + '. Review the activity log, then resume once resolved.';
   }
+
+  // Crypto's own copy of the same tracking/rendering -- kept separate
+  // rather than sharing lastKnownTradingPaused/the alert banner, since
+  // the two strategies' pause states are now genuinely independent (see
+  // autoTrade.js's per-screenerType pause scoping) and could in
+  // principle both be true at once; sharing state between them would
+  // let one strategy's pause silently mask or overwrite the other's.
+  var lastKnownCryptoTradingPaused = false;
+  function renderCryptoTradingPauseState(state){
+    var row = document.getElementById('cryptoTradingPausedRow');
+    var desc = document.getElementById('cryptoTradingPausedDesc');
+    var reasonText = state.pausedReason || 'unknown';
+    var justPaused = state.paused && !lastKnownCryptoTradingPaused;
+    lastKnownCryptoTradingPaused = state.paused;
+    if(justPaused){
+      playTradingPausedAlertSound();
+      notifyTradingPausedViaBrowser('Crypto — ' + reasonText);
+    }
+    if(!row || !desc) return;
+    if(!state.paused){
+      row.setAttribute('hidden', '');
+      return;
+    }
+    row.removeAttribute('hidden');
+    var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
+    desc.textContent = 'Crypto auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
+      reasonText + '. Review the activity log, then resume once resolved.';
+  }
+
+  document.getElementById('resumeCryptoTradingBtn').addEventListener('click', function(){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var btn = document.getElementById('resumeCryptoTradingBtn');
+    btn.disabled = true;
+    btn.textContent = 'Resuming…';
+    window.__shwoopAPI.resumeTrading(currentUid, 'crypto').catch(function(err){
+      console.error('Failed to resume crypto trading:', err);
+      alert('Could not resume crypto trading — please try again. (' + err.message + ')');
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Resume crypto trading';
+    });
+  });
 
   document.getElementById('resumeTradingBtn').addEventListener('click', function(){
     if(!window.__shwoopAPI || !currentUid) return;
@@ -5040,7 +5251,16 @@
   function withOpenPositionsMergedIn(source){
     var openPositionBySym = {};
     journalEntries.forEach(function(j){
-      if(isOpenAlpacaPositionForCurrentAccount(j)) openPositionBySym[j.sym] = j;
+      // Excludes crypto -- Today's Setups and What to Watch (the two
+      // callers of this function) are built around the equities ORB
+      // universe's own chart-rendering path (Twelve Data/Finnhub/Alpaca
+      // stocks endpoints), which doesn't understand crypto pairs like
+      // "BTC/USD" at all. A crypto position still shows up correctly in
+      // Open Positions (driven entirely by Alpaca's own asset-agnostic
+      // position data, no chart involved) and in the Backend Status
+      // card's own crypto rows -- it just doesn't belong on this
+      // specifically equities-shaped card.
+      if(isOpenAlpacaPositionForCurrentAccount(j) && j.screenerType !== 'crypto') openPositionBySym[j.sym] = j;
     });
     var sourceSyms = {};
     source.forEach(function(t){ sourceSyms[t.sym] = true; });
@@ -8504,12 +8724,57 @@
       );
     }
 
+    // ---- Row 3b: crypto's own cycle status -- separate from equities'
+    // Row 3 above since it's a genuinely separate cycle (see runCryptoCycle
+    // in shwoop-server's orchestrator.js), running continuously with no
+    // market-hours gate, so its own "idle/scanning/error/never run" states
+    // don't get muddled with equities' RTH-scoped ones. ----
+    if(backendCryptoCycleStatus === 'scanning'){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
+          '<div class="backend-pulse-label">Crypto: scanning now…</div>' +
+          '<div class="backend-pulse-sub">Checking all 12 symbols for a qualifying breakout, sizing anything that qualifies (fractional units), and sending it to Alpaca if crypto auto-trade is on. Started ' + (backendCryptoCycleStartedAt ? formatAgo(Date.now() - backendCryptoCycleStartedAt) : '') + '.</div>' +
+        '</div></div>'
+      );
+    } else if(backendCryptoCycleStatus === 'error'){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
+          '<div class="backend-pulse-label">Crypto: last cycle failed</div>' +
+          '<div class="backend-pulse-sub">' + (backendCryptoCycleError || 'Unknown error') + (backendCryptoCycleErrorAt ? ' · ' + formatClock(backendCryptoCycleErrorAt) + ' (' + formatAgo(Date.now() - backendCryptoCycleErrorAt) + ')' : '') + '</div>' +
+        '</div></div>'
+      );
+    } else if(backendCryptoCycleStatus === 'idle' && backendCryptoLastCycleSummary){
+      var cryptoNextEta = backendCryptoCycleCompletedAt ? backendCryptoCycleCompletedAt + INTRADAY_CYCLE_INTERVAL_MS : null;
+      var cryptoEtaText = cryptoNextEta && cryptoNextEta > Date.now() ? ' · next scan ~' + formatClock(cryptoNextEta) : '';
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
+          '<div class="backend-pulse-label">Crypto: idle — last cycle finished ' + (backendCryptoCycleCompletedAt ? formatClock(backendCryptoCycleCompletedAt) : '') + '</div>' +
+          '<div class="backend-pulse-sub">' + backendCryptoLastCycleSummary.text + cryptoEtaText + '</div>' +
+        '</div></div>'
+      );
+    } else if(backendCryptoScreenerEnabledOnServer){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
+          '<div class="backend-pulse-label">Crypto: no cycle has run yet</div>' +
+          '<div class="backend-pulse-sub">Runs automatically every 5 minutes, continuously — no market-hours gate, unlike equities above.</div>' +
+        '</div></div>'
+      );
+    }
+
     // ---- Row 4: server-side settings truth (env vars, not this browser's toggle) ----
     if(backendScreenerEnabledOnServer !== null){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
           '<div class="backend-pulse-label">Server settings: screener ' + (backendScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
           '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open.</div>' +
+        '</div></div>'
+      );
+    }
+    if(backendCryptoScreenerEnabledOnServer !== null){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendCryptoScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
+          '<div class="backend-pulse-label">Crypto server settings: screener ' + (backendCryptoScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendCryptoAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
+          '<div class="backend-pulse-sub">Set via Render environment variables (CRYPTO_SCREENER_ENABLED / CRYPTO_AUTO_TRADE_ENABLED) — a completely separate on/off from equities above.</div>' +
         '</div></div>'
       );
     }
@@ -8548,6 +8813,11 @@
     }
     var autoTradeDot = document.getElementById('autoTradeHeadDot');
     if(autoTradeDot){ autoTradeDot.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer)); }
+    var cryptoBadge = document.getElementById('serverCryptoAutoTradeStatusBadge');
+    if(cryptoBadge){
+      cryptoBadge.textContent = backendCryptoAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
+      cryptoBadge.classList.toggle('ok', Boolean(backendCryptoAutoTradeEnabledOnServer));
+    }
   }
 
   // Keeps the "Xs ago" text moving and lets a stale heartbeat get caught
