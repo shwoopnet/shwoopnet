@@ -1341,28 +1341,8 @@
   .calendar-head{ display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:16px; }
   .calendar-month{
     font-size:13px; color: var(--paper); min-width:150px; text-align:center;
-    background:none; border:1px solid transparent; cursor:pointer; font-family:'IBM Plex Mono',monospace;
-    padding:6px 10px; border-radius:4px;
+    font-family:'IBM Plex Mono',monospace; padding:6px 10px;
   }
-  .calendar-month:hover{ background: var(--panel-raised); border-color: var(--border); color: var(--amber); }
-  .range-dropdown{ position:relative; }
-  .range-menu{
-    position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%);
-    min-width:240px; background:var(--panel-raised); border:1px solid var(--border);
-    border-radius:6px; padding:16px; z-index:150; box-shadow:0 12px 28px rgba(0,0,0,0.45);
-  }
-  .range-menu[hidden]{ display:none; }
-  .range-field{ margin-bottom:10px; }
-  .range-field label{
-    display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em;
-    color: var(--muted); margin-bottom:4px;
-  }
-  .range-field input{
-    width:100%; background: var(--panel); border:1px solid var(--border); border-radius:5px;
-    padding:7px 8px; color: var(--paper); font-family:'IBM Plex Mono', monospace; font-size:12px;
-  }
-  .range-presets{ display:flex; gap:6px; margin:12px 0; flex-wrap:wrap; }
-  .range-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
 
   .pl-summary{ display:flex; gap:14px; flex-wrap:wrap; margin: 20px 0; }
   .pl-card{ flex:1; min-width:200px; background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:16px 18px; }
@@ -2154,11 +2134,6 @@
 
     <div class="pl-summary">
       <div class="pl-card">
-        <div class="pl-card-label">Range P&amp;L</div>
-        <div class="pl-card-value mono" id="rangePLValue">—</div>
-        <div class="pl-card-sub" id="rangePLSub">Select a date range below</div>
-      </div>
-      <div class="pl-card">
         <div class="pl-card-label">Overall P&amp;L</div>
         <div class="pl-card-value mono" id="overallPLValue">—</div>
         <div class="pl-card-sub" id="overallPLSub"></div>
@@ -2194,28 +2169,7 @@
     <div class="journal-calendar">
       <div class="calendar-head">
         <button class="zoom-btn" id="calPrev" aria-label="Previous month">‹</button>
-        <div class="range-dropdown">
-          <button class="calendar-month mono" id="calMonthLabel" aria-haspopup="true" aria-expanded="false">—</button>
-          <div class="range-menu" id="rangeMenu" hidden>
-            <div class="range-field">
-              <label for="rangeFrom">From</label>
-              <input type="date" id="rangeFrom">
-            </div>
-            <div class="range-field">
-              <label for="rangeTo">To</label>
-              <input type="date" id="rangeTo">
-            </div>
-            <div class="range-presets">
-              <button type="button" class="tf-btn" data-preset="week">This week</button>
-              <button type="button" class="tf-btn" data-preset="month">This month</button>
-              <button type="button" class="tf-btn" data-preset="all">All time</button>
-            </div>
-            <div class="range-actions">
-              <button type="button" class="modal-btn-cancel" id="rangeClear">Clear</button>
-              <button type="button" class="modal-btn-submit" id="rangeApply">Apply</button>
-            </div>
-          </div>
-        </div>
+        <div class="calendar-month mono" id="calMonthLabel">—</div>
         <button class="zoom-btn" id="calNext" aria-label="Next month">›</button>
       </div>
       <div class="calendar-dow-row">
@@ -7713,86 +7667,8 @@
         worstSubEl.textContent = overall.worst.sym;
       } else { worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = ''; }
     }
-
-    var rangeValEl = document.getElementById('rangePLValue');
-    var rangeSubEl = document.getElementById('rangePLSub');
-    var from = document.getElementById('rangeFrom').value;
-    var to = document.getElementById('rangeTo').value;
-    if(!from || !to){
-      rangeValEl.textContent = '—';
-      rangeValEl.className = 'pl-card-value mono';
-      rangeSubEl.textContent = 'Select a date range below';
-      return;
-    }
-    var inRange = journalEntries.filter(function(e){ return e.date >= from && e.date <= to; });
-    var range = computeAggregatePL(inRange);
-    if(!range){
-      rangeValEl.textContent = '—';
-      rangeValEl.className = 'pl-card-value mono';
-      rangeSubEl.textContent = 'No closed trades in this range';
-    } else {
-      var upR = range.totalDollar >= 0;
-      rangeValEl.textContent = (upR ? '+$' : '−$') + Math.abs(range.totalDollar).toFixed(0);
-      rangeValEl.className = 'pl-card-value mono ' + (upR ? 'up' : 'down');
-      rangeSubEl.textContent = range.count + ' closed · ' + range.wins + 'W / ' + range.losses + 'L · avg ' + (range.avgPct >= 0 ? '+' : '') + range.avgPct.toFixed(1) + '%';
-    }
   }
 
-  function toDateInputStr(d){
-    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-  }
-
-  var rangeToggle = document.getElementById('calMonthLabel');
-  var rangeMenu = document.getElementById('rangeMenu');
-  rangeToggle.addEventListener('click', function(){
-    var open = !rangeMenu.hasAttribute('hidden');
-    if(open){ rangeMenu.setAttribute('hidden',''); rangeToggle.setAttribute('aria-expanded','false'); }
-    else{ rangeMenu.removeAttribute('hidden'); rangeToggle.setAttribute('aria-expanded','true'); }
-  });
-  document.addEventListener('click', function(e){
-    if(!e.target.closest('.range-dropdown')){
-      rangeMenu.setAttribute('hidden','');
-      rangeToggle.setAttribute('aria-expanded','false');
-    }
-  });
-
-  document.querySelectorAll('.range-presets .tf-btn').forEach(function(b){
-    b.addEventListener('click', function(){
-      var preset = b.dataset.preset;
-      if(preset === 'all'){
-        document.getElementById('rangeFrom').value = '';
-        document.getElementById('rangeTo').value = '';
-      } else {
-        var today = new Date();
-        var from, to;
-        if(preset === 'week'){
-          var day = today.getDay();
-          from = new Date(today); from.setDate(today.getDate() - day);
-          to = new Date(from); to.setDate(from.getDate() + 6);
-        } else {
-          from = new Date(today.getFullYear(), today.getMonth(), 1);
-          to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        }
-        document.getElementById('rangeFrom').value = toDateInputStr(from);
-        document.getElementById('rangeTo').value = toDateInputStr(to);
-      }
-      renderPLSummary();
-      rangeMenu.setAttribute('hidden','');
-      rangeToggle.setAttribute('aria-expanded','false');
-    });
-  });
-  document.getElementById('rangeApply').addEventListener('click', function(){
-    renderPLSummary();
-    rangeMenu.setAttribute('hidden','');
-    rangeToggle.setAttribute('aria-expanded','false');
-  });
-  document.getElementById('rangeClear').addEventListener('click', function(){
-    document.getElementById('rangeFrom').value = '';
-    document.getElementById('rangeTo').value = '';
-    renderPLSummary();
-    rangeMenu.setAttribute('hidden','');
-    rangeToggle.setAttribute('aria-expanded','false');
-  });
   renderPLSummary();
 
 
