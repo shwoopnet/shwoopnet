@@ -2077,7 +2077,7 @@
       </div>
       <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
         <div>
-          <div class="settings-row-title">Auto-trading</div>
+          <div class="settings-row-title">Equities auto-trading</div>
           <div class="settings-row-desc" id="autoTradeIntradayDesc">
             Runs on the 24/7 backend, not this browser tab — flipping this writes directly to the same
             Firestore setting the server reads every ~60 seconds, so it takes effect within about a minute
@@ -2093,7 +2093,7 @@
       </div>
       <div class="settings-row" id="screenerEnabledRow" hidden>
         <div>
-          <div class="settings-row-title">Intraday screener (server)</div>
+          <div class="settings-row-title">Equities screener (server)</div>
           <div class="settings-row-desc">
             Scans the 16-symbol universe every 5 minutes while the market's open. Auto-trading above has
             nothing to size or send without this being on too.
@@ -2103,19 +2103,22 @@
       </div>
       <div class="settings-row" id="tradingPausedRow" hidden>
         <div>
-          <div class="settings-row-title">Auto-trading status</div>
+          <div class="settings-row-title">Equities auto-trading status</div>
           <div class="settings-row-desc" id="tradingPausedDesc">—</div>
         </div>
-        <button class="settings-reset-btn" id="resumeTradingBtn">Resume trading</button>
+        <button class="settings-reset-btn" id="resumeTradingBtn">Resume equities trading</button>
       </div>
       <div class="settings-row" id="alpacaAutoTradeCryptoRow" hidden>
         <div>
           <div class="settings-row-title">Crypto auto-trading</div>
           <div class="settings-row-desc">
-            Same 24/7 backend, a separate strategy (rolling-range breakout, long-only) and its own independent
-            7% risk ceiling — doesn't compete with equities auto-trading above for risk budget. Runs around
-            the clock, not just market hours. Failed orders retry 3 times, then this strategy's auto-trading
-            pauses on its own, without affecting equities.
+            Runs on the same 24/7 backend, not this browser tab — flipping this writes directly to the same
+            kind of Firestore setting the server reads every ~60 seconds, so it takes effect within about a
+            minute even if you close this tab right after, no redeploy needed. A separate strategy from
+            equities above (rolling-range breakout, long-only) with its own independent 7% risk ceiling, so it
+            never competes with equities for risk budget, and it runs around the clock, not just market hours.
+            Failed orders retry 3 times, then this strategy's auto-trading pauses on its own, without affecting
+            equities — see status below.
             <span id="autoTradeCryptoMoneyClause"></span>
           </div>
         </div>
@@ -2839,13 +2842,6 @@
   var ORB_VOLUME_CONFIRM_MULTIPLE = 2.0;
   var ORB_REWARD_MULTIPLE = 1.5;
 
-  // Persists the fired signal for each symbol for the rest of that same
-  // day, keyed by symbol -- the entry/stop/target are fixed at the exact
-  // moment the breakout happens, not recalculated on every 5-minute
-  // cycle the way the old rolling-SMA approach was. Naturally goes stale
-  // and gets replaced once a new day's date no longer matches.
-  var orbSignalsToday = {};
-
   function computeORBAnalysis(sym, bars, currentPrice, signalStore){
     if(!bars || bars.length === 0) return null;
     var lastBarDateKey = bars[bars.length-1].t.toISOString().slice(0,10);
@@ -2964,8 +2960,6 @@
                            'HOOD', 'RIOT', 'UPST', 'LCID', 'OPEN', 'SNAP', 'CHPT', 'ROKU'];
   var INTRADAY_TF = '15m';
   var intradayTrades = [];
-  var isRunningIntradayScreener = false;
-  var intradayScreenerInterval = null;
   var alpacaIntradayEnabled = false;
 
   // ---------- US market holidays ----------
@@ -3111,125 +3105,21 @@
   // every Twelve Data call in the app funnels through it, so this screener
   // can fire all 33 requests without worrying about pacing itself.
 
-  function fetchIntradayCandidate(sym, priority){
-    return Promise.all([fetchQuote(sym), fetchHistory(sym, INTRADAY_TF, priority || 'medium')]).then(function(results){
-      var quote = results[0], bars = results[1];
-      if(!quote || !bars || bars.length < 25) return null;
-      var analysis = computeORBAnalysis(sym, bars, quote.price, orbSignalsToday);
-      if(!analysis) return null; // no qualifying breakout for this symbol yet today
-      return { sym: sym, price: quote.price, prevClose: quote.prevClose, analysis: analysis };
-    }).catch(function(err){
-      console.error('Intraday screener fetch failed for', sym, err);
-      return null;
-    });
-  }
-
-  // Its own separate state (intradayTrades) purely for local display.
-  // Event-based, not ranked: an opening-range breakout either happened
-  // for a given symbol today (with volume confirmation) or it didn't --
-  // there's no "top 3 by score" the way the old momentum-ranking system
-  // worked, so every symbol with a qualifying signal today becomes a
-  // candidate, capped only by the existing risk-based sizing checks
-  // (total risk ceiling, per-position cap), not an arbitrary count.
-  function runIntradayScreener(){
-    if(isRunningIntradayScreener || !alpacaIntradayEnabled) return;
-    // Now that "What to Watch" (and everything else that displays
-    // intraday picks) prefers the backend's own server-side scan --
-    // computed every 5 minutes, 24/7, regardless of whether this tab is
-    // open -- this tab's own local re-scan is only still doing real work
-    // for one thing: sending real orders locally when "Auto-send new
-    // intraday picks" is on for THIS tab specifically. If that's off,
-    // running the full scan here just burns this browser's share of the
-    // *same* Twelve Data account-level quota the backend is already
-    // drawing from (confirmed: both use the same free-tier key), for a
-    // result nothing displays or acts on anymore. Skip it rather than
-    // let it collide with the backend's own requests -- this alone
-    // should roughly halve real-world Twelve Data usage.
-    if(!alpacaAutoTradeIntradayEnabled){
-      // This status line lives inside the Today's Setups card, which is
-      // already on Trade Overview -- the previous copy told the reader
-      // to go see "Backend Status on Trade Overview" from the page they
-      // were already looking at. Points at the actual other card by
-      // name instead of a page they haven't navigated away from.
-      updateIntradayStatus('Screening handled by the 24/7 backend now — see the Backend Status card for cycle details', true);
-      return;
-    }
-    if(!isUsMarketOpen()){
-      var session = getUsMarketSession();
-      var msg = session.session === 'closed'
-        ? 'Market closed — resumes screening when it opens'
-        : session.label + ' — this strategy only screens during the regular 9:30am\u20134pm ET session, since that\'s what\'s actually been validated';
-      updateIntradayStatus(msg, null);
-      return;
-    }
-    isRunningIntradayScreener = true;
-    updateIntradayStatus('Screening ' + INTRADAY_UNIVERSE.length + ' stocks…', null);
-    Promise.all(INTRADAY_UNIVERSE.map(function(sym){ return fetchIntradayCandidate(sym); })).then(function(results){
-      isRunningIntradayScreener = false;
-      var qualifying = results.filter(Boolean);
-
-      return fetchCurrentEquityForSizing().then(function(equity){
-      var candidates = filterCandidatesBySizeability(qualifying, equity);
-
-      if(candidates.length === 0){
-        intradayTrades = [];
-        renderIntradayBlocks();
-        statCta();
-        updateIntradayStatus('Screened ' + INTRADAY_UNIVERSE.length + ' stocks — no opening-range breakouts yet', true);
-        return;
-      }
-
-      candidates.forEach(function(c){
-        ensureInWatchlist(c.sym, COMPANY_NAMES[c.sym] || c.sym, c.price, c.prevClose);
-      });
-
-      intradayTrades = candidates.map(function(c){
-        return buildTradeFromPick({
-          sym: c.sym, direction: c.analysis.direction,
-          entry: c.analysis.entry, stop: c.analysis.stop, t1: c.analysis.t1,
-          status: c.analysis.status, statusLabel: c.analysis.statusLabel, notes: c.analysis.notes
-        });
-      });
-      renderIntradayBlocks();
-      statCta();
-      var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-      updateIntradayStatus('Updated ' + now + ' · next check in 5 min', true);
-      autoSendIntradayPicksIfEnabled();
-      });
-    });
-  }
-
+  // The local re-scan that used to run here is gone -- it was already
+  // fully retired in practice, gated behind alpacaAutoTradeIntradayEnabled,
+  // a flag nothing sets anymore (see setAlpacaAutoTradeIntradayEnabled's
+  // own comment below). Every 5 minutes it hit that guard immediately and
+  // wrote the same static status line, doing nothing else -- a no-op
+  // timer, not a real fallback. "What to Watch," Today's Setups, and
+  // everything else that shows intraday picks already read exclusively
+  // from the backend's own 24/7 scan (backendIntradayPicks); see Backend
+  // Status for the real scanned/fetched/qualified counts, which come
+  // from there, not from this tab.
   function updateIntradayStatus(text, ok){
     var el = document.getElementById('intradaySyncStatus');
     if(!el) return;
     el.textContent = text;
     el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
-  }
-
-  // Fetches current equity once per screener run (not once per
-  // candidate) so the viability filter below scales automatically as the
-  // account grows, without a separate setting to maintain. Returns null
-  // if no account is connected or the fetch fails — absence of sizing
-  // data isn't a reason to show zero picks, so callers should leave
-  // candidates unfiltered in that case rather than block on it.
-  function fetchCurrentEquityForSizing(){
-    if(!alpacaConnected) return Promise.resolve(null);
-    return getAlpacaAccountSummaryCached().then(function(acct){
-      var equity = parseFloat(acct.equity || 0);
-      return equity > 0 ? equity : null;
-    }).catch(function(){ return null; });
-  }
-
-  // Filters out candidates that would round to 0 shares at the account's
-  // actual current balance and risk setting — this is deliberately tied
-  // to the exact same math that decides real order size, not a separate
-  // price cutoff, since two stocks at the same price can have very
-  // different real dollar risk depending on their own stop distance.
-  function filterCandidatesBySizeability(candidates, equity){
-    if(equity === null) return candidates;
-    return candidates.filter(function(c){
-      return calculatePositionSize(equity, riskPercent, c.analysis.entry, c.analysis.stop) >= 1;
-    });
   }
 
   var backendIntradayPicks = null;
@@ -3405,10 +3295,11 @@
   }
 
   // ---------- Trade Overview rows ----------
-  // Was reading intradayTrades directly -- this tab's own local re-scan,
-  // which sits empty almost always now that the backend does the real
-  // screening (see runIntradayScreener's own early-return comment). That
-  // showed a permanent, wrong "0 stocks you're tracking today, 0 with
+  // Was reading intradayTrades directly -- this tab's own local re-scan
+  // slot, which stays permanently empty now that the local scan has been
+  // fully removed and the backend does the real screening (see
+  // updateIntradayStatus's own comment). That showed a permanent, wrong
+  // "0 stocks you're tracking today, 0 with
   // open positions" directly underneath What to Watch's own card list,
   // even while those cards were correctly populated from the backend's
   // picks. Defaults to recomputing the exact same merged source
@@ -4036,11 +3927,11 @@
     var section = document.getElementById('intradaySection');
     if(section){ section.hidden = !enabled; }
     if(enabled){
-      runIntradayScreener();
-      if(intradayScreenerInterval) clearInterval(intradayScreenerInterval);
-      intradayScreenerInterval = setInterval(runIntradayScreener, 5 * 60 * 1000);
+      // No local re-scan to kick off or keep re-running on a timer
+      // anymore -- see the comment above updateIntradayStatus for why.
+      // Just the one static status line, set once.
+      updateIntradayStatus('Screening handled by the 24/7 backend now — see the Backend Status card for cycle details', true);
     } else {
-      if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
       intradayTrades = [];
       renderIntradayBlocks();
     }
@@ -4095,9 +3986,9 @@
   // position that's still live, but allows real re-entry once a prior one
   // has actually closed.
   //
-  // The real safety backstop against runaway trading is the 5.5% total
-  // risk ceiling (in computeSizedOrder/filterCandidatesBySizeability) --
-  // it scales with actual exposure, unlike a flat count. A hard daily
+  // The real safety backstop against runaway trading is the 7% total
+  // risk ceiling (in computeSizedOrder) -- it scales with actual
+  // exposure, unlike a flat count. A hard daily
   // trade-count cap used to sit here too, but it was a leftover from the
   // old daily-screener era and silently throttled the validated
   // strategy well below what it's actually supposed to do (it averages
@@ -8695,14 +8586,14 @@
     if(backendCycleStatus === 'scanning'){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
-          '<div class="backend-pulse-label">Scanning the market now…</div>' +
+          '<div class="backend-pulse-label">Equities: scanning the market now…</div>' +
           '<div class="backend-pulse-sub">Checking all 16 symbols for a qualifying ORB breakout, sizing anything that qualifies, and sending it to Alpaca if auto-trade is on. Started ' + (backendCycleStartedAt ? formatAgo(Date.now() - backendCycleStartedAt) : '') + '.</div>' +
         '</div></div>'
       );
     } else if(backendCycleStatus === 'error'){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
-          '<div class="backend-pulse-label">Last cycle failed</div>' +
+          '<div class="backend-pulse-label">Equities: last cycle failed</div>' +
           '<div class="backend-pulse-sub">' + (backendCycleError || 'Unknown error') + (backendCycleErrorAt ? ' · ' + formatClock(backendCycleErrorAt) + ' (' + formatAgo(Date.now() - backendCycleErrorAt) + ')' : '') + '</div>' +
         '</div></div>'
       );
@@ -8711,14 +8602,14 @@
       var etaText = nextEta && nextEta > Date.now() ? ' · next scan ~' + formatClock(nextEta) : '';
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
-          '<div class="backend-pulse-label">Idle — last cycle finished ' + (backendCycleCompletedAt ? formatClock(backendCycleCompletedAt) : '') + '</div>' +
+          '<div class="backend-pulse-label">Equities: idle — last cycle finished ' + (backendCycleCompletedAt ? formatClock(backendCycleCompletedAt) : '') + '</div>' +
           '<div class="backend-pulse-sub">' + backendLastCycleSummary.text + etaText + '</div>' +
         '</div></div>'
       );
     } else {
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
-          '<div class="backend-pulse-label">No intraday cycle has run yet</div>' +
+          '<div class="backend-pulse-label">Equities: no cycle has run yet</div>' +
           '<div class="backend-pulse-sub">Runs automatically every 5 minutes while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.</div>' +
         '</div></div>'
       );
@@ -8765,7 +8656,7 @@
     if(backendScreenerEnabledOnServer !== null){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
-          '<div class="backend-pulse-label">Server settings: screener ' + (backendScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
+          '<div class="backend-pulse-label">Equities server settings: screener ' + (backendScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
           '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open.</div>' +
         '</div></div>'
       );
@@ -8774,7 +8665,7 @@
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendCryptoScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
           '<div class="backend-pulse-label">Crypto server settings: screener ' + (backendCryptoScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendCryptoAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">Set via Render environment variables (CRYPTO_SCREENER_ENABLED / CRYPTO_AUTO_TRADE_ENABLED) — a completely separate on/off from equities above.</div>' +
+          '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open, and a completely separate on/off from equities above.</div>' +
         '</div></div>'
       );
     }
@@ -9722,7 +9613,6 @@
         if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
         resetNewsAndEarnings();
     resetAlpacaConnection();
-        if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
         intradayTrades = [];
         renderIntradayBlocks();
         renderWhatToWatch();
