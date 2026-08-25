@@ -1440,7 +1440,7 @@
     signOut, onAuthStateChanged, sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, getDoc, onSnapshot
+    getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
   import {
     getFunctions, httpsCallable
@@ -1478,6 +1478,27 @@
     onAuthChange: function(callback){ return onAuthStateChanged(auth, callback); },
     saveJournal: function(uid, entries){
       return setDoc(doc(db, 'users', uid), { journalEntries: entries }, { merge: true });
+    },
+    // saveJournal above blindly overwrites the entire journalEntries
+    // array with whatever this tab last had in memory -- fine for a
+    // brand-new entry (nothing to collide with), but every other
+    // mutation (removing one, recording an exit, syncing a fill) risks
+    // silently erasing a concurrent write from the 24/7 backend that
+    // landed in Firestore after this tab's last onSnapshot update but
+    // before this save goes out. This reads the document fresh INSIDE
+    // the transaction and lets updateFn apply just its own specific
+    // change to that fresh copy, so a backend-created trade from
+    // moments ago can never be clobbered by a stale local snapshot.
+    runJournalTransaction: function(uid, updateFn){
+      var ref = doc(db, 'users', uid);
+      return runTransaction(db, function(t){
+        return t.get(ref).then(function(snap){
+          var fresh = snap.exists() ? (snap.data().journalEntries || []) : [];
+          var next = updateFn(fresh);
+          if(next) t.set(ref, { journalEntries: next }, { merge: true });
+          return next;
+        });
+      });
     },
     watchJournal: function(uid, callback){
       return onSnapshot(doc(db, 'users', uid), function(snap){
@@ -4557,7 +4578,7 @@
       return res.json();
     }).then(function(orders){
       var filled = orders.filter(function(o){ return o.status === 'filled' && o.filled_at && o.filled_avg_price; });
-      var changed = false;
+      var resolved = [];
       openAlpacaEntries.forEach(function(entry){
         var entryTime = new Date(entry.date).getTime();
         var exitSide = entry.direction === 'Long' ? 'sell' : 'buy';
@@ -4566,22 +4587,28 @@
         }).sort(function(a, b){ return new Date(a.filled_at) - new Date(b.filled_at); });
         var match = candidates[0];
         if(match){
-          var exitPrice = parseFloat(match.filled_avg_price);
-          entry.exit = exitPrice;
-          entry.exitDate = match.filled_at.slice(0, 10);
-          entry.status = 'closed';
-          changed = true;
-          showTradeResolvedToast(entry.sym, entry.direction, entry.entry, exitPrice);
+          resolved.push({
+            id: entry.id, sym: entry.sym, direction: entry.direction, entry: entry.entry,
+            exit: parseFloat(match.filled_avg_price), exitDate: match.filled_at.slice(0, 10),
+          });
         }
       });
-      if(changed){
-        saveJournalEntries();
+      if(resolved.length === 0 || !window.__shwoopAPI || !currentUid) return;
+      return window.__shwoopAPI.runJournalTransaction(currentUid, function(fresh){
+        resolved.forEach(function(r){
+          var entry = fresh.filter(function(j){ return j.id === r.id; })[0];
+          if(entry){ entry.exit = r.exit; entry.exitDate = r.exitDate; entry.status = 'closed'; }
+        });
+        return fresh;
+      }).then(function(next){
+        journalEntries = next;
+        resolved.forEach(function(r){ showTradeResolvedToast(r.sym, r.direction, r.entry, r.exit); });
         renderCalendar();
         renderJournalDetail();
         renderPLSummary();
         renderStatusPositions();
         updateTradeBubbles();
-      }
+      });
     }).catch(function(err){
       console.error('Alpaca exit sync failed:', err);
     });
@@ -7254,11 +7281,18 @@
     var entry = journalEntries.filter(function(j){ return j.id === id; })[0];
     if(!entry) return;
     if(!confirm('Remove this ' + entry.sym + ' trade from your journal? This can\'t be undone.')) return;
-    journalEntries = journalEntries.filter(function(j){ return j.id !== id; });
-    saveJournalEntries();
-    renderCalendar();
-    renderJournalDetail();
-    renderPLSummary();
+    if(!window.__shwoopAPI || !currentUid) return;
+    window.__shwoopAPI.runJournalTransaction(currentUid, function(fresh){
+      return fresh.filter(function(j){ return j.id !== id; });
+    }).then(function(next){
+      journalEntries = next;
+      renderCalendar();
+      renderJournalDetail();
+      renderPLSummary();
+    }).catch(function(err){
+      console.error('Failed to remove journal entry:', err);
+      alert('Failed to remove entry: ' + err.message);
+    });
   }
 
   document.getElementById('calPrev').addEventListener('click', function(){
@@ -7467,15 +7501,26 @@
     }
     errEl.classList.remove('show');
 
-    var entry = journalEntries.filter(function(j){ return j.id === exitModalEntryId; })[0];
-    entry.exit = exitPrice;
-    entry.exitDate = exitDate;
-    entry.status = 'closed';
-    saveJournalEntries();
-    closeExitModal();
-    renderCalendar();
-    renderJournalDetail();
-    renderPLSummary();
+    var entryId = exitModalEntryId;
+    if(!window.__shwoopAPI || !currentUid) return;
+    window.__shwoopAPI.runJournalTransaction(currentUid, function(fresh){
+      var entry = fresh.filter(function(j){ return j.id === entryId; })[0];
+      if(!entry) return null;
+      entry.exit = exitPrice;
+      entry.exitDate = exitDate;
+      entry.status = 'closed';
+      return fresh;
+    }).then(function(next){
+      if(next) journalEntries = next;
+      closeExitModal();
+      renderCalendar();
+      renderJournalDetail();
+      renderPLSummary();
+    }).catch(function(err){
+      console.error('Failed to save exit:', err);
+      errEl.textContent = 'Failed to save: ' + err.message;
+      errEl.classList.add('show');
+    });
   });
 
   document.addEventListener('keydown', function(e){
