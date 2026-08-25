@@ -6455,8 +6455,6 @@
       });
   }
 
-  var pendingAnalysisUid = null;
-
   var lastQuoteBatchSources = [];
 
   // Per-symbol fetch counter -- fetchAllQuotes() runs both on the 45s
@@ -6497,7 +6495,6 @@
 
   function onQuoteBatchDone(results){
     updateQuoteSyncStatus(results);
-    var anySuccess = results.some(function(r){ return r; });
 
     renderSentiment();
     renderMovers();
@@ -6506,14 +6503,6 @@
     var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
-
-    // A pending analysis request should fire on ANY successful batch,
-    // including a second sign-in later in the session.
-    if(pendingAnalysisUid && anySuccess){
-      var analysisUid = pendingAnalysisUid;
-      pendingAnalysisUid = null;
-      loadScreenerForUser(analysisUid);
-    }
   }
 
   function updateQuoteSyncStatus(results){
@@ -9165,7 +9154,7 @@
         });
         loadAlertsForUser(user.uid);
         loadActivityLogForUser(user.uid);
-        pendingAnalysisUid = user.uid;
+        loadScreenerForUser(user.uid);
         loadMarketNewsIfSignedIn();
         loadEarningsIfSignedIn();
         loadAlpacaCredentialsForUser(user.uid);
@@ -9183,7 +9172,6 @@
         clearAlerts();
         clearActivityLog();
         if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
-        pendingAnalysisUid = null;
         resetNewsAndEarnings();
     resetAlpacaConnection();
         if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
