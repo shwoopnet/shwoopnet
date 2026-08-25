@@ -4901,6 +4901,45 @@
     var source = (backendIntradayPicks && backendIntradayPicks.length)
       ? backendIntradayPicks.map(buildTradeFromPick)
       : intradayTrades;
+    // A symbol with a real, currently-open position stays visible here
+    // regardless of whether the backend's latest scan still lists it --
+    // actively holding a position is a stronger, more durable signal than
+    // this cycle's screener output, which can legitimately go to zero
+    // picks (a quiet cycle, or every symbol resolving out) even while
+    // real positions remain open. A setup with no real position just
+    // follows the backend's picks list normally -- it disappears the
+    // moment the backend itself stops listing it.
+    var openPositionBySym = {};
+    journalEntries.forEach(function(j){
+      if(isOpenAlpacaPositionForCurrentAccount(j)) openPositionBySym[j.sym] = j;
+    });
+    var sourceSyms = {};
+    source.forEach(function(t){ sourceSyms[t.sym] = true; });
+    Object.keys(openPositionBySym).forEach(function(sym){
+      if(sourceSyms[sym]) return;
+      var j = openPositionBySym[sym];
+      source = source.concat([{
+        sym: j.sym, direction: j.direction,
+        entryPct: 0, stopPctFromEntry: (j.stop - j.entry) / j.entry,
+        t1PctFromEntry: j.t1 != null ? (j.t1 - j.entry) / j.entry : 0,
+        entry: j.entry, stop: j.stop, t1: j.t1,
+        // Not 'watching'/'hit'/'trailing'/'stopped' -- computeBadgeInfo
+        // falls back to a plain direction-based Buying/Selling badge,
+        // which is honest here: this card has no fresh ORB analysis to
+        // say whether it's currently trailing, just the real position.
+        status: 'active', statusLabel: null,
+        notes: ['Position is currently open — this card stays visible regardless of what the current scan cycle finds.'],
+        analysisIsReal: true
+      }]);
+    });
+    // A symbol actually held should never be hidden behind the
+    // "Watching" filter either, even if the backend's own pick for it
+    // still carries status 'watching' (its own scan and the fact that a
+    // position is open aren't always in sync within the same minute).
+    source = source.map(function(t){
+      if(openPositionBySym[t.sym] && t.status === 'watching') return Object.assign({}, t, { status: 'active' });
+      return t;
+    });
     lastRenderedSetups = source;
     var hiddenCount = source.filter(function(t){ return t.status === 'watching'; }).length;
     var visible = todaysSetupsShowAll ? source : source.filter(function(t){ return t.status !== 'watching'; });
