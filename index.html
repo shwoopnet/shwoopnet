@@ -4984,7 +4984,8 @@
     }
 
     el.innerHTML = visible.map(function(t){
-      var q = findQuote(t.sym) || { price: t.entry, prevClose: t.entry, name: t.sym };
+      var liveQuote = findQuote(t.sym);
+      var q = liveQuote || { price: t.entry, prevClose: t.entry, name: t.sym };
       var change = pct(q.price, q.prevClose);
       var up = change >= 0;
       var badge = computeBadgeInfo(t);
@@ -4996,11 +4997,15 @@
       // theoretical risk:reward ratio that never changes once a trade's
       // actually live. A setup that hasn't been sent yet has no real
       // trade to have a P/L for -- shown as an honest "—", not a fake $0.
+      // Requires liveQuote specifically (not the entry-price fallback
+      // above) -- before the first quote fetch resolves, q.price === t.entry
+      // and this would otherwise render a real-looking "+$0.00 (+0.00%)"
+      // that then visibly flashes to the true number a moment later.
       var plCellHtml;
-      if(openEntry){
+      if(openEntry && liveQuote){
         var isLong = openEntry.direction === 'Long';
-        var pl = (q.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1);
-        var plPct = (q.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1);
+        var pl = (liveQuote.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1);
+        var plPct = (liveQuote.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1);
         var plClass = pl >= 0 ? 'up' : 'down';
         plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono ' + plClass + '">' +
           (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</div></div>';
