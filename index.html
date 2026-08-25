@@ -658,6 +658,10 @@
 
   .activity-log-row{ padding:12px 0; border-bottom:1px solid var(--border); }
   .activity-log-row:last-child{ border-bottom:none; }
+  /* A long-running 24/7 backend can pile up hundreds of entries --
+     without a cap this list just pushes the rest of Trade Overview
+     down the page indefinitely. Scrolls internally instead. */
+  #statusActivityList{ max-height:420px; overflow-y:auto; }
   .activity-log-meta{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
   .activity-log-tag{
     font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
@@ -1986,11 +1990,35 @@
       </div>
     </div>
 
-    <!-- Pinned right after the header, always visible -- these are the
-         emergency/safety controls (resume trading, flatten all), not
-         something that should be hideable or reorderable away like the
-         cards below. -->
-    <div class="labs-backtest-card" style="margin-top:20px;">
+    <div class="to-card" id="toCard-openPositions">
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Open Positions</span>
+          <span class="to-card-meta" id="openPositionsHeadMeta"></span>
+        </div>
+        <div id="statusPositionsBody"></div>
+      </div>
+    </div>
+
+    <div class="to-card" id="toCard-todaysSetups">
+      <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
+        <div class="to-card-head">
+          <span class="to-card-title">Today's Setups</span>
+          <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
+        </div>
+        <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
+        <button class="settings-reset-btn" id="todaysSetupsFilterBtn" style="margin-bottom:14px; display:none;"></button>
+        <div id="intradayBlocks"></div>
+      </div>
+    </div>
+
+    <!-- Emergency/safety controls (resume trading, flatten all) --
+         not hideable or reorderable away like the cards above, just
+         parked at the bottom right before the log instead of pinned
+         up top. applyToCardLayout() re-appends this to the very end
+         of the page after every reorderable card, so it stays put
+         however the cards above get shuffled. -->
+    <div class="labs-backtest-card" id="autoTradeControlsCard" style="margin-top:20px;">
       <div class="to-card-head">
         <div class="to-card-head-left">
           <span class="to-card-dot" id="autoTradeHeadDot"></span>
@@ -2044,33 +2072,14 @@
       <div class="labs-backtest-status" id="autoTradeControlsEmpty" hidden>Connect Alpaca in Settings to enable auto-trading.</div>
     </div>
 
-    <div class="to-card" id="toCard-openPositions">
-      <div class="labs-backtest-card">
-        <div class="to-card-head">
-          <span class="to-card-title">Open Positions</span>
-          <span class="to-card-meta" id="openPositionsHeadMeta"></span>
-        </div>
-        <div id="statusPositionsBody"></div>
-      </div>
-    </div>
-
-    <div class="to-card" id="toCard-todaysSetups">
-      <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
-        <div class="to-card-head">
-          <span class="to-card-title">Today's Setups</span>
-          <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
-        </div>
-        <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
-        <button class="settings-reset-btn" id="todaysSetupsFilterBtn" style="margin-bottom:14px; display:none;"></button>
-        <div id="intradayBlocks"></div>
-      </div>
-    </div>
-
     <div class="to-card" id="toCard-activityLog">
       <div class="labs-backtest-card">
         <div class="to-card-head">
           <span class="to-card-title">Activity Log</span>
-          <span class="to-card-meta" id="activityLogHeadMeta"></span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="to-card-meta" id="activityLogHeadMeta"></span>
+            <button class="settings-reset-btn" id="activityLogClearBtn" style="display:none;">Clear</button>
+          </div>
         </div>
         <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
         <div id="statusActivityList"></div>
@@ -6778,8 +6787,9 @@
   // ---------- Trade Overview: card show/hide + reorder ----------
   // Auto-Trading Controls and the paused/live banners are intentionally
   // NOT in this list -- those are safety-critical (resume trading,
-  // flatten all) and stay pinned right after the header, always visible,
-  // never reorderable away. Only the informational/status cards below
+  // flatten all) and stay fixed in place (bottom of the page, right
+  // above the Activity Log), always visible, never reorderable away.
+  // Only the informational/status cards below
   // them are customizable.
   var TO_CARD_DEFS = [
     { key:'accountSummary', label:'Account Summary' },
@@ -6828,6 +6838,14 @@
       container.appendChild(wrap);
       wrap.classList.toggle('to-card-hidden', Boolean(toCardPrefs.hidden[key]));
     });
+    // Auto-Trading Controls isn't one of the reorderable to-card
+    // elements above, so the forEach loop never touches it -- without
+    // this, every card it moved past on its way to the end of the
+    // container would leave Auto-Trading Controls stranded wherever it
+    // last sat, instead of pinned right above the log.
+    var autoTradeCard = document.getElementById('autoTradeControlsCard');
+    var activityLogCard = document.getElementById('toCard-activityLog');
+    if(autoTradeCard && activityLogCard){ container.insertBefore(autoTradeCard, activityLogCard); }
   }
 
   function renderCardCustomizeList(){
@@ -7961,6 +7979,23 @@
     renderHistoryList();
   }
 
+  // The "Clear" button on Trade Overview's Activity Log card -- unlike
+  // clearActivityLog() above (sign-out teardown only, never touches
+  // Firestore), this is a real user action: it has to persist the empty
+  // log back to Firestore, or the next backend write / page reload just
+  // brings every old entry right back.
+  document.getElementById('activityLogClearBtn').addEventListener('click', function(){
+    if(!confirm('Clear the entire activity log? This can\'t be undone.')) return;
+    systemActivityLog = [];
+    renderActivityLog();
+    renderHistoryList();
+    if(window.__shwoopAPI && currentUid){
+      window.__shwoopAPI.saveActivityLog(currentUid, []).catch(function(err){
+        console.error('Failed to clear activity log:', err);
+      });
+    }
+  });
+
   // ---------- Status page: the one place to check in ----------
   function renderStatusPage(){
     renderBackendStatus();
@@ -8399,14 +8434,17 @@
       return entry.accountKeyId === activeAlpacaCreds().keyId;
     });
     var headMeta = document.getElementById('activityLogHeadMeta');
+    var clearBtn = document.getElementById('activityLogClearBtn');
     if(currentAccountLog.length === 0){
       el.innerHTML = '';
       if(emptyEl) emptyEl.removeAttribute('hidden');
       if(headMeta){ headMeta.textContent = ''; }
+      if(clearBtn){ clearBtn.style.display = 'none'; }
       return;
     }
     if(emptyEl) emptyEl.setAttribute('hidden', '');
     if(headMeta){ headMeta.textContent = currentAccountLog.length + ' entries'; }
+    if(clearBtn){ clearBtn.style.display = ''; }
     var typeLabels = {
       sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
       // cycle_summary is the once-per-15-minutes "did the scanner, sizing,
