@@ -618,6 +618,32 @@
     0%{ background: var(--amber-glow); }
     100%{ background: transparent; }
   }
+  .demo-clock-row-crypto{ margin-top:-8px; }
+  .demo-clock-row-crypto .demo-clock{ font-size:13px; letter-spacing:.04em; }
+
+  /* A floating pointer-and-label, positioned via JS at whatever element
+     just changed (a new position row, a signal-fired card, a closed
+     position) -- the flash animations above are easy to miss if you're
+     not already looking right at that spot; this is the "tell me,
+     don't make me notice" fix, same idea as the toasts but anchored to
+     the exact box instead of a fixed corner. */
+  .demo-callout{
+    position:fixed; z-index:500; pointer-events:none;
+    padding:6px 13px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap;
+    background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    opacity:0; transform: translate(-50%, 6px) scale(.92);
+    transition: opacity .22s ease, transform .22s cubic-bezier(.2,.8,.3,1);
+  }
+  .demo-callout.show{ opacity:1; transform: translate(-50%, 0) scale(1); }
+  .demo-callout::after{
+    content:''; position:absolute; left:50%; bottom:-5px; width:9px; height:9px;
+    background: var(--panel-raised); border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+    transform: translateX(-50%) rotate(45deg);
+  }
+  .demo-callout.tone-new{ border-color: var(--amber); }
+  .demo-callout.tone-win{ color: var(--gain); border-color: var(--gain); }
+  .demo-callout.tone-loss{ color: var(--loss); border-color: var(--loss); }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
   .labs-control-field{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1 1 160px; }
@@ -2471,8 +2497,9 @@
       <div class="demo-intro-step" id="demoIntroStep1">
         <div class="demo-showcase">
           <div class="demo-showcase-title">What Shwoop actually does</div>
-          <p class="demo-showcase-text">It's a robot trader. It watches a list of 16 stocks, waits for one to make
-          a strong, real move early in the trading day, then buys or sells it automatically — picks how much to
+          <p class="demo-showcase-text">It's a robot trader — two of them, actually. One watches a list of 16
+          stocks and waits for one to make a strong, real move early in the trading day. The other watches a set
+          of crypto pairs around the clock, since crypto never closes. Either one fires, it picks how much to
           risk, places the order, and closes the trade out. You don't have to do anything.</p>
           <div class="demo-showcase-stats">
             <div class="demo-showcase-stat">
@@ -2511,10 +2538,15 @@
         position open at once. The real strategy is already live and running against your connected paper
         account 24/7; this is just a clean, simplified illustration of the mechanics, without waiting around for
         a real signal to show up.</p>
+        <p class="demo-intro-text">A second, independent line below the main clock runs a crypto position at the
+        same time — watch what happens when the stock market "closes" for the day: the equities positions
+        flatten, but crypto keeps running right through it and only closes on its own trailing stop, whenever
+        that happens to be. That's the actual difference between the two strategies, acted out instead of just
+        described.</p>
         <p class="demo-intro-text">Two wins and three losses each loop — matching real life, where it loses more
         often than it wins but still comes out ahead overall, since the wins run bigger. Every time a trade
-        happens, you'll hear a sound and see a pop-up, clearly marked "Demo" so it's never confused with a real
-        alert.</p>
+        happens, you'll hear a sound, see a pop-up, and see a small label point right at whatever just changed —
+        all clearly marked "Demo" so none of it is ever confused with a real alert.</p>
         <p class="demo-intro-text"><strong>None of this is real.</strong> It's not connected to your broker,
         your account, or any real prices — every number below is made up for this preview.</p>
         <div class="demo-intro-actions">
@@ -2528,7 +2560,7 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Demo</div>
-        <div class="trades-sub">A simulated trading day, start to finish — every number on this page is fake.</div>
+        <div class="trades-sub">A simulated trading day, plus a crypto position running on its own 24/7 clock — every number on this page is fake.</div>
       </div>
       <div class="demo-controls">
         <button class="settings-reset-btn" id="demoPlayPauseBtn">Pause</button>
@@ -2542,12 +2574,17 @@
       full simulated trading day, sped up: five setups form and break out over the course of the day, sometimes
       with more than one position open at once, same as the real account can hold. Two wins and three losses —
       the same roughly 40% win rate quoted above — with the wins sized bigger, so the day still nets positive
-      even with more losses than wins. Once the market "closes," it loops back to 9:30 and runs again.</p>
+      even with more losses than wins. Once the market "closes," it loops back to 9:30 and runs again — a crypto
+      position (bottom line) runs on its own separate clock the whole time and doesn't reset with it.</p>
     </div>
 
     <div class="demo-clock-row">
       <div class="demo-clock mono" id="demoClock">9:30 AM</div>
       <div class="demo-narration" id="demoNarration">Market opens. Watching PLTR's opening range form…</div>
+    </div>
+    <div class="demo-clock-row demo-clock-row-crypto">
+      <div class="demo-clock mono" id="demoCryptoClock">24/7</div>
+      <div class="demo-narration" id="demoCryptoNarration">Crypto scanner starting up…</div>
     </div>
 
     <div class="backtest-summary" style="margin-bottom:20px;">
@@ -7446,7 +7483,7 @@
     });
     if(name === 'trades'){ renderStatusPage(); }
     if(name === 'journal'){ renderCalendar(); }
-    if(name === 'demo'){ showDemoIntro(); } else { stopDemo(); }
+    if(name === 'demo'){ showDemoIntro(); } else { stopDemo(); stopDemoCrypto(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
@@ -9063,9 +9100,36 @@
   var demoTradeCount = 0;
   var demoAccountBalance = 10000;
   var demoCardState = null; // the one forming/watching candidate, pre-fill
-  var demoPositions = []; // filled positions, table can hold several at once
+  var demoPositions = []; // filled positions, table can hold several at once -- crypto's own position lives in here too, tagged only by its "SYM/USD" shape
 
-  function demoFmt(n){ return '$' + n.toFixed(2); }
+  // toLocaleString for the thousands separator -- matters now that BTC's
+  // $60k+ prices show up in the same table cells stock prices always fit
+  // in without one.
+  function demoFmt(n){ return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+  // A floating label pointing at whatever box on the page just changed --
+  // the flash animations elsewhere on this page are easy to miss if
+  // you're not already looking right at that exact spot; this makes sure
+  // you don't have to be. Takes a plain {left,top,width,height} rect
+  // rather than a live element, since the "closed" case needs to show a
+  // callout at a row's last-known position right as that row is removed
+  // from the DOM.
+  function showDemoCallout(rect, text, tone){
+    if(!rect) return;
+    var el = document.createElement('div');
+    el.className = 'demo-callout tone-' + tone;
+    el.textContent = text;
+    document.body.appendChild(el);
+    var left = rect.left + rect.width / 2;
+    var top = rect.top - el.offsetHeight - 14;
+    el.style.left = left + 'px';
+    el.style.top = Math.max(8, top) + 'px';
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+    setTimeout(function(){
+      el.classList.remove('show');
+      setTimeout(function(){ el.remove(); }, 250);
+    }, 1700);
+  }
 
   function renderDemoTradeCard(){
     var wrap = document.getElementById('demoTradeCardWrap');
@@ -9162,14 +9226,22 @@
     demoPositions.forEach(function(p){ p.flash = false; });
   }
 
+  // Crypto's own symbols ("BTC/USD") are the only ones with a slash --
+  // reusing that shape to pick the right unit word rather than adding a
+  // separate isCrypto flag everywhere.
+  function demoUnitLabel(sym){ return sym.indexOf('/') !== -1 ? 'units' : 'shares'; }
+
   function demoOpenPosition(cfg){
     demoPositions.push({ sym:cfg.sym, direction:cfg.direction, qty:cfg.qty, entry:cfg.entry, current:cfg.entry, stop:cfg.stop, target:cfg.target, flash:true });
     demoTradeCount++;
     renderDemoPositionsTable();
     demoUpdateSummary();
     document.getElementById('demoTradeCount').textContent = demoTradeCount + ' traded today';
-    demoAddActivity(cfg.sym + ' — ' + cfg.direction + ', ' + cfg.qty + ' shares.', 'Trade entered');
-    showDemoToast(cfg.sym, 'Trade entered', cfg.direction + ', ' + cfg.qty + ' shares.', 'sent');
+    var unit = demoUnitLabel(cfg.sym);
+    demoAddActivity(cfg.sym + ' — ' + cfg.direction + ', ' + cfg.qty + ' ' + unit + '.', 'Trade entered');
+    showDemoToast(cfg.sym, 'Trade entered', cfg.direction + ', ' + cfg.qty + ' ' + unit + '.', 'sent');
+    var rowEl = document.querySelector('#demoPositionsBody [data-symbol="' + cfg.sym + '"]');
+    if(rowEl){ showDemoCallout(rowEl.getBoundingClientRect(), 'Position created ↑', 'new'); }
   }
 
   // Equity has to move with the table, not just on a close -- otherwise
@@ -9189,6 +9261,11 @@
     var p = demoPositions[idx];
     var isLong = p.direction === 'Long';
     var pl = (exitPrice - p.entry) * p.qty * (isLong ? 1 : -1);
+    // Captured before the row disappears -- the callout still needs to
+    // point at where it WAS, even though the element itself is about to
+    // be removed by the re-render just below.
+    var rowEl = document.querySelector('#demoPositionsBody [data-symbol="' + sym + '"]');
+    var rowRect = rowEl ? rowEl.getBoundingClientRect() : null;
     demoPositions.splice(idx, 1);
     demoDayPL += pl;
     demoAccountBalance += pl;
@@ -9197,6 +9274,7 @@
     var plStr = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2);
     demoAddActivity(sym + ' — ' + plStr + (note ? ' (' + note + ')' : '') + '.', 'Trade exited');
     showDemoToast(sym, 'Trade exited', plStr + '.', pl >= 0 ? 'win' : 'loss');
+    showDemoCallout(rowRect, 'Closed ' + plStr, pl >= 0 ? 'win' : 'loss');
   }
 
   // A real floating toast, using the exact same visual system live
@@ -9264,6 +9342,7 @@
     el.classList.remove('demo-moment-flash');
     void el.offsetWidth; // force reflow so the animation can restart if it's already run once
     el.classList.add('demo-moment-flash');
+    showDemoCallout(el.getBoundingClientRect(), 'Signal fired', 'new');
   }
 
   // Each step: clock/narration text, how long to hold before advancing,
@@ -9345,7 +9424,7 @@
 
   function demoRunStep(){
     if(demoStepIndex >= demoDayScript.length){
-      resetDemoState();
+      rolloverDemoDay();
     }
     var step = demoDayScript[demoStepIndex];
     document.getElementById('demoClock').textContent = step.clock;
@@ -9364,10 +9443,29 @@
     demoPlaying = true;
     document.getElementById('demoPlayPauseBtn').textContent = 'Pause';
     demoRunStep();
+    startDemoCrypto();
   }
   function stopDemo(){
     if(demoTimer){ clearTimeout(demoTimer); demoTimer = null; }
   }
+  // Equities-only reset, fired automatically every time the scripted day
+  // reaches 4:00 PM and wraps back to 9:30 -- deliberately does NOT touch
+  // demoCryptoTimer or strip any crypto position out of demoPositions.
+  // That's the entire point being demonstrated: crypto runs on its own
+  // clock and genuinely doesn't care that the equities "day" just reset.
+  function rolloverDemoDay(){
+    demoStepIndex = 0; demoDayPL = 0; demoTradeCount = 0; demoAccountBalance = 10000; demoCardState = null;
+    demoPositions = demoPositions.filter(function(p){ return p.sym.indexOf('/') !== -1; });
+    document.getElementById('demoActivityList').innerHTML = '';
+    document.getElementById('demoActivityEmpty').removeAttribute('hidden');
+    document.getElementById('demoTradeCount').textContent = '0 traded today';
+    demoUpdateSummary();
+    renderDemoTradeCard();
+    renderDemoPositionsTable();
+  }
+  // Full reset -- Restart button and (re)opening the intro modal. Unlike
+  // rolloverDemoDay above, this is a deliberate "start completely over"
+  // action, so it takes crypto down and restarts its cycle fresh too.
   function resetDemoState(){
     stopDemo();
     demoStepIndex = 0; demoDayPL = 0; demoTradeCount = 0; demoAccountBalance = 10000; demoCardState = null; demoPositions = [];
@@ -9377,18 +9475,82 @@
     demoUpdateSummary();
     renderDemoTradeCard();
     renderDemoPositionsTable();
+    resetDemoCrypto();
   }
   document.getElementById('demoPlayPauseBtn').addEventListener('click', function(){
     demoPlaying = !demoPlaying;
+    demoCryptoPlaying = demoPlaying;
     this.textContent = demoPlaying ? 'Pause' : 'Play';
-    if(demoPlaying){ demoRunStep(); } else { stopDemo(); }
+    if(demoPlaying){ demoRunStep(); demoCryptoRunStep(); } else { stopDemo(); stopDemoCrypto(); }
   });
   document.getElementById('demoRestartBtn').addEventListener('click', function(){
     resetDemoState();
     demoPlaying = true;
     document.getElementById('demoPlayPauseBtn').textContent = 'Pause';
     demoRunStep();
+    startDemoCrypto();
   });
+
+  // ---------- Demo: crypto's own independent lifecycle ----------
+  // Deliberately NOT another entry in demoDayScript -- that script is a
+  // single 9:30-4:00 equities day on a loop, and the entire point of
+  // showing crypto here is that it does NOT run on that clock. This is
+  // its own small script, its own setTimeout chain, and its own
+  // narration line (#demoCryptoNarration), completely decoupled from
+  // demoStepIndex/demoRunStep. It shares demoPositions/demoOpenPosition/
+  // demoClosePosition/demoTickPosition with the equities side purely
+  // because those are already symbol-agnostic -- no changes needed there
+  // for a crypto row to sit in the same Open Positions table.
+  var demoCryptoTimer = null;
+  var demoCryptoPlaying = true;
+  var demoCryptoStep = 0;
+  var demoCryptoSym = 'BTC/USD';
+
+  function demoCryptoNarrate(text){
+    var el = document.getElementById('demoCryptoNarration');
+    if(!el) return;
+    el.style.opacity = '0';
+    setTimeout(function(){ el.textContent = text; el.style.opacity = '1'; }, 120);
+  }
+
+  var demoCryptoScript = [
+    { narration: "Watching BTC/USD's rolling range — this runs 24/7, completely separate from the stock market's hours.", duration: 3400 },
+    { narration: "Breaks out on strong volume. Signal fires.", duration: 2200 },
+    { narration: "0.0143 BTC sized to the same 1% account risk. Order sent.", duration: 2400, action: function(){
+        demoOpenPosition({ sym: demoCryptoSym, direction:'Long', qty:0.0143, entry:67250, stop:66180, target:68855 });
+      } },
+    { narration: "Ticking along: $67,610. Notice the equities day can flatten and reset around this — crypto just keeps running.", duration: 6000, action: function(){ demoTickPosition(demoCryptoSym, 67610); } },
+    { narration: "Still open, still watching: $68,050.", duration: 6000, action: function(){ demoTickPosition(demoCryptoSym, 68050); } },
+    { narration: "Trailing stop finally catches the reversal — closed automatically, no market close involved.", duration: 2800, action: function(){ demoClosePosition(demoCryptoSym, 68320, 'trailing stop'); } },
+    { narration: "Back to scanning. Crypto never really stops.", duration: 3200 },
+  ];
+
+  function demoCryptoRunStep(){
+    if(demoCryptoStep >= demoCryptoScript.length){ demoCryptoStep = 0; }
+    var step = demoCryptoScript[demoCryptoStep];
+    demoCryptoNarrate(step.narration);
+    if(step.action){ step.action(); }
+    demoCryptoStep++;
+    if(demoCryptoPlaying){
+      demoCryptoTimer = setTimeout(demoCryptoRunStep, step.duration);
+    }
+  }
+  function startDemoCrypto(){
+    if(demoCryptoTimer) return;
+    demoCryptoPlaying = true;
+    demoCryptoRunStep();
+  }
+  function stopDemoCrypto(){
+    if(demoCryptoTimer){ clearTimeout(demoCryptoTimer); demoCryptoTimer = null; }
+  }
+  function resetDemoCrypto(){
+    stopDemoCrypto();
+    demoCryptoStep = 0;
+    demoPositions = demoPositions.filter(function(p){ return p.sym.indexOf('/') === -1; });
+    renderDemoPositionsTable();
+    var el = document.getElementById('demoCryptoNarration');
+    if(el) el.textContent = 'Crypto scanner starting up…';
+  }
 
   // Shown every time the Demo page is freshly navigated to -- the demo
   // itself doesn't start (no timer, no sound) until "Start demo" is
