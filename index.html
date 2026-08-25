@@ -4944,7 +4944,14 @@
         // which is honest here: this card has no fresh ORB analysis to
         // say whether it's currently trailing, just the real position.
         status: 'active', statusLabel: null,
-        notes: ['Position is currently open — this card stays visible regardless of what the current scan cycle finds.'],
+        // Only ever actually shown in "Why this trade" when the real
+        // entryNotes pinned at entry (see notesForDisplay below) are
+        // missing -- i.e. this position was opened before that field
+        // existed. Said as much rather than the old copy, which just
+        // explained why the CARD is visible and, read under a "Why
+        // this trade" heading, looked like the reasoning had gone
+        // missing/broken rather than simply never having been recorded.
+        notes: ['No original entry reasoning was recorded for this position — it was opened before that started being pinned. (This card stays visible regardless of what the current scan cycle finds.)'],
         analysisIsReal: true
       }]);
     });
