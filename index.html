@@ -9,21 +9,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
+    /* Obsidian (default) -- true black instead of flat gray-black, with
+       a cool ice-white accent that carries a faint blue glow, so "no
+       color" still reads as a deliberate choice, not a placeholder. */
     --ink: #000000;
-    --panel: #0D0D0D;
-    --panel-raised: #161616;
-    --border: #2A2A2A;
-    --paper: #FFFFFF;
-    --muted: #8A8A8A;
-    --amber: #FFFFFF;
-    --amber-dim: #B5B5B5;
-    --amber-glow: rgba(255,255,255,0.12);
-    --amber-contrast: #0A0A0A;
-    --ticker-fg: #FFFFFF;
-    --ticker-fg-dim: #8A8A8A;
-    --grid-glow-1: rgba(255,255,255,0.06);
-    --grid-glow-2: rgba(255,255,255,0.045);
-    --grid-line: rgba(255,255,255,0.03);
+    --panel: #0A0B0D;
+    --panel-raised: #131519;
+    --border: #24272E;
+    --paper: #F5F7FB;
+    --muted: #767B87;
+    --amber: #DCE6FF;
+    --amber-dim: #8FA3D6;
+    --amber-glow: rgba(180,205,255,0.20);
+    --amber-contrast: #04060B;
+    --ticker-fg: #DCE6FF;
+    --ticker-fg-dim: #767B87;
+    --grid-glow-1: rgba(120,160,255,0.08);
+    --grid-glow-2: rgba(120,160,255,0.05);
+    --grid-line: rgba(120,160,255,0.035);
     /* Gain/loss and MA colors are deliberately NOT overridden by any
        theme below -- they stay fixed regardless of which pack is
        active. This matters more than it used to: --loss is now also
@@ -42,31 +45,46 @@
   /* Theme packs -- each overrides only the chrome/accent colors above.
      Candle, gain/loss, and MA colors intentionally stay out of every
      block below so they never vary by theme. */
-  :root[data-theme="synthwave"]{
-    --ink: #0A0612; --panel: #150D24; --panel-raised: #1D1230; --border: #332145;
-    --paper: #F0E6FF; --muted: #9080AD;
-    --amber: #F535AA; --amber-dim: #A82571; --amber-glow: rgba(245,53,170,0.16); --amber-contrast: #1A0512;
-    --ticker-fg: #F0E6FF; --ticker-fg-dim: #9080AD;
-    --grid-glow-1: rgba(245,53,170,0.07); --grid-glow-2: rgba(245,53,170,0.05); --grid-line: rgba(245,53,170,0.035);
+
+  /* Outrun -- leans all the way into the outrun-art palette instead of
+     a barely-tinted purple: violet-black ground, magenta primary paired
+     with a cyan secondary glow the way actual sunset-grid art does. */
+  :root[data-theme="outrun"]{
+    --ink: #0D0217; --panel: #170A28; --panel-raised: #20103A; --border: #3D1F5C;
+    --paper: #FBEBFF; --muted: #A88BC4;
+    --amber: #FF3EB5; --amber-dim: #B0287D; --amber-glow: rgba(255,62,181,0.20); --amber-contrast: #1A0512;
+    --ticker-fg: #FBEBFF; --ticker-fg-dim: #A88BC4;
+    --grid-glow-1: rgba(255,62,181,0.09); --grid-glow-2: rgba(46,224,255,0.08); --grid-line: rgba(255,62,181,0.04);
   }
+  /* Nebula -- deep-space indigo with a richer, more saturated electric
+     violet than before, and a stronger glow radius. */
   :root[data-theme="nebula"]{
-    --ink: #0A0818; --panel: #150F28; --panel-raised: #1D1536; --border: #332658;
-    --paper: #E8E0FF; --muted: #8C7FB0;
-    --amber: #9D6FFF; --amber-dim: #6B47B8; --amber-glow: rgba(157,111,255,0.16); --amber-contrast: #150A28;
-    --ticker-fg: #E8E0FF; --ticker-fg-dim: #8C7FB0;
-    --grid-glow-1: rgba(157,111,255,0.07); --grid-glow-2: rgba(157,111,255,0.05); --grid-line: rgba(157,111,255,0.035);
+    --ink: #0A0716; --panel: #130C24; --panel-raised: #1B1234; --border: #332158;
+    --paper: #EAE3FF; --muted: #9284B8;
+    --amber: #9D6FFF; --amber-dim: #6B47B8; --amber-glow: rgba(157,111,255,0.20); --amber-contrast: #0F0A1E;
+    --ticker-fg: #EAE3FF; --ticker-fg-dim: #9284B8;
+    --grid-glow-1: rgba(157,111,255,0.09); --grid-glow-2: rgba(90,60,200,0.07); --grid-line: rgba(157,111,255,0.04);
   }
-  /* The one light theme -- a light icy blue/white base rather than the
-     dark backgrounds every other pack uses, with a vivid "synth" blue
-     accent for the same energetic feel as Synthwave, just inverted.
-     --amber-contrast flips to white here since it's the text color that
-     sits ON TOP of the (now light) accent color, e.g. filled buttons. */
-  :root[data-theme="arctic"]{
-    --ink: #EAF4FB; --panel: #FFFFFF; --panel-raised: #F0F8FC; --border: #C4DCE8;
-    --paper: #0D2438; --muted: #5C7D91;
-    --amber: #1483FF; --amber-dim: #0A5FBD; --amber-glow: rgba(20,131,255,0.12); --amber-contrast: #FFFFFF;
-    --ticker-fg: #0D2438; --ticker-fg-dim: #5C7D91;
-    --grid-glow-1: rgba(20,131,255,0.05); --grid-glow-2: rgba(20,131,255,0.035); --grid-line: rgba(20,131,255,0.04);
+  /* Arcade -- the one light theme. A competitive-shooter scoreboard
+     read rather than a soft icy blue: crisp white panel, one saturated
+     "Player 1" blue as the accent. --amber-contrast flips to white
+     here since it's the text color sitting ON TOP of the (light)
+     accent, e.g. filled buttons. */
+  :root[data-theme="arcade"]{
+    --ink: #EEF1F6; --panel: #FFFFFF; --panel-raised: #F5F7FB; --border: #D6DCE6;
+    --paper: #12151C; --muted: #6B7280;
+    --amber: #2F5EFF; --amber-dim: #1E3FC4; --amber-glow: rgba(47,94,255,0.18); --amber-contrast: #FFFFFF;
+    --ticker-fg: #12151C; --ticker-fg-dim: #6B7280;
+    --grid-glow-1: rgba(47,94,255,0.08); --grid-glow-2: rgba(255,58,110,0.06); --grid-line: rgba(47,94,255,0.05);
+  }
+  /* Cyberdeck -- straight Tron/cyberpunk HUD: near-black with a stark
+     electric-cyan accent instead of another warm or violet variant. */
+  :root[data-theme="cyberdeck"]{
+    --ink: #040608; --panel: #0A0F14; --panel-raised: #0F171F; --border: #1C2B36;
+    --paper: #DFFBFF; --muted: #5C7A85;
+    --amber: #22E6FF; --amber-dim: #0FA6C2; --amber-glow: rgba(34,230,255,0.22); --amber-contrast: #02141A;
+    --ticker-fg: #DFFBFF; --ticker-fg-dim: #5C7A85;
+    --grid-glow-1: rgba(34,230,255,0.10); --grid-glow-2: rgba(34,230,255,0.05); --grid-line: rgba(34,230,255,0.05);
   }
 
   *{ box-sizing:border-box; }
@@ -586,6 +604,14 @@
     0%{ opacity:0; transform: translateX(-6px); }
     100%{ opacity:1; transform: translateX(0); }
   }
+  /* box-shadow on a <tr> doesn't render reliably with border-collapse,
+     unlike the .trade-block flash above -- a background flash works
+     regardless, for the Open Positions table rows entering/exiting. */
+  .demo-row-flash{ animation: demoRowFlash 1s ease; }
+  @keyframes demoRowFlash{
+    0%{ background: var(--amber-glow); }
+    100%{ background: transparent; }
+  }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
   .labs-control-field{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1 1 160px; }
@@ -640,6 +666,10 @@
 
   .activity-log-row{ padding:12px 0; border-bottom:1px solid var(--border); }
   .activity-log-row:last-child{ border-bottom:none; }
+  /* A long-running 24/7 backend can pile up hundreds of entries --
+     without a cap this list just pushes the rest of Trade Overview
+     down the page indefinitely. Scrolls internally instead. */
+  #statusActivityList{ max-height:420px; overflow-y:auto; }
   .activity-log-meta{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
   .activity-log-tag{
     font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
@@ -1968,11 +1998,35 @@
       </div>
     </div>
 
-    <!-- Pinned right after the header, always visible -- these are the
-         emergency/safety controls (resume trading, flatten all), not
-         something that should be hideable or reorderable away like the
-         cards below. -->
-    <div class="labs-backtest-card" style="margin-top:20px;">
+    <div class="to-card" id="toCard-openPositions">
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Open Positions</span>
+          <span class="to-card-meta" id="openPositionsHeadMeta"></span>
+        </div>
+        <div id="statusPositionsBody"></div>
+      </div>
+    </div>
+
+    <div class="to-card" id="toCard-todaysSetups">
+      <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
+        <div class="to-card-head">
+          <span class="to-card-title">Today's Setups</span>
+          <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
+        </div>
+        <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
+        <button class="settings-reset-btn" id="todaysSetupsFilterBtn" style="margin-bottom:14px; display:none;"></button>
+        <div id="intradayBlocks"></div>
+      </div>
+    </div>
+
+    <!-- Emergency/safety controls (resume trading, flatten all) --
+         not hideable or reorderable away like the cards above, just
+         parked at the bottom right before the log instead of pinned
+         up top. applyToCardLayout() re-appends this to the very end
+         of the page after every reorderable card, so it stays put
+         however the cards above get shuffled. -->
+    <div class="labs-backtest-card" id="autoTradeControlsCard" style="margin-top:20px;">
       <div class="to-card-head">
         <div class="to-card-head-left">
           <span class="to-card-dot" id="autoTradeHeadDot"></span>
@@ -2026,33 +2080,14 @@
       <div class="labs-backtest-status" id="autoTradeControlsEmpty" hidden>Connect Alpaca in Settings to enable auto-trading.</div>
     </div>
 
-    <div class="to-card" id="toCard-openPositions">
-      <div class="labs-backtest-card">
-        <div class="to-card-head">
-          <span class="to-card-title">Open Positions</span>
-          <span class="to-card-meta" id="openPositionsHeadMeta"></span>
-        </div>
-        <div id="statusPositionsBody"></div>
-      </div>
-    </div>
-
-    <div class="to-card" id="toCard-todaysSetups">
-      <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
-        <div class="to-card-head">
-          <span class="to-card-title">Today's Setups</span>
-          <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
-        </div>
-        <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
-        <button class="settings-reset-btn" id="todaysSetupsFilterBtn" style="margin-bottom:14px; display:none;"></button>
-        <div id="intradayBlocks"></div>
-      </div>
-    </div>
-
     <div class="to-card" id="toCard-activityLog">
       <div class="labs-backtest-card">
         <div class="to-card-head">
           <span class="to-card-title">Activity Log</span>
-          <span class="to-card-meta" id="activityLogHeadMeta"></span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="to-card-meta" id="activityLogHeadMeta"></span>
+            <button class="settings-reset-btn" id="activityLogClearBtn" style="display:none;">Clear</button>
+          </div>
         </div>
         <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
         <div id="statusActivityList"></div>
@@ -2199,21 +2234,25 @@
           <div class="settings-row-desc">Applies everywhere. Candle colors and the live-trading red stay fixed no matter which one's active.</div>
         </div>
         <div class="theme-pack-group" id="themePackGroup" role="group" aria-label="Theme">
-          <button class="theme-pack-btn active" data-theme="mono" aria-pressed="true">
-            <span class="theme-pack-swatch" style="background:#000; border:1px solid #444;"><span style="background:#FFF;"></span></span>
-            Mono
+          <button class="theme-pack-btn active" data-theme="obsidian" aria-pressed="true">
+            <span class="theme-pack-swatch" style="background:#000; border:1px solid #24272E;"><span style="background:#DCE6FF;"></span></span>
+            Obsidian
           </button>
-          <button class="theme-pack-btn" data-theme="synthwave" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#0A0612;"><span style="background:#F535AA;"></span></span>
-            Synthwave
+          <button class="theme-pack-btn" data-theme="outrun" aria-pressed="false">
+            <span class="theme-pack-swatch" style="background:#0D0217;"><span style="background:#FF3EB5;"></span></span>
+            Outrun
           </button>
           <button class="theme-pack-btn" data-theme="nebula" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#0A0818;"><span style="background:#9D6FFF;"></span></span>
+            <span class="theme-pack-swatch" style="background:#0A0716;"><span style="background:#9D6FFF;"></span></span>
             Nebula
           </button>
-          <button class="theme-pack-btn" data-theme="arctic" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#EAF4FB; border:1px solid #C4DCE8;"><span style="background:#1483FF;"></span></span>
-            Arctic
+          <button class="theme-pack-btn" data-theme="arcade" aria-pressed="false">
+            <span class="theme-pack-swatch" style="background:#EEF1F6; border:1px solid #D6DCE6;"><span style="background:#2F5EFF;"></span></span>
+            Arcade
+          </button>
+          <button class="theme-pack-btn" data-theme="cyberdeck" aria-pressed="false">
+            <span class="theme-pack-swatch" style="background:#040608; border:1px solid #1C2B36;"><span style="background:#22E6FF;"></span></span>
+            Cyberdeck
           </button>
         </div>
       </div>
@@ -2415,13 +2454,15 @@
 
       <div class="demo-intro-step" id="demoIntroStep2" hidden>
         <div class="demo-intro-title">Before this demo starts</div>
-        <p class="demo-intro-text">This plays a made-up trading day, on repeat — a stock sets its range, breaks
-        out, gets bought automatically, and the trade closes. The real strategy is already live and running
-        against your connected paper account 24/7; this is just a clean, simplified illustration of the
-        mechanics, without waiting around for a real signal to show up.</p>
-        <p class="demo-intro-text">One loop shows a win, the next shows a loss — matching real life, where it
-        loses more often than it wins but still comes out ahead overall. Every time a trade happens, you'll hear
-        a sound and see a pop-up, clearly marked "Demo" so it's never confused with a real alert.</p>
+        <p class="demo-intro-text">This plays a made-up full trading day, sped up and on repeat — several stocks
+        each set their range, break out, get bought automatically, and close out, sometimes with more than one
+        position open at once. The real strategy is already live and running against your connected paper
+        account 24/7; this is just a clean, simplified illustration of the mechanics, without waiting around for
+        a real signal to show up.</p>
+        <p class="demo-intro-text">Two wins and three losses each loop — matching real life, where it loses more
+        often than it wins but still comes out ahead overall, since the wins run bigger. Every time a trade
+        happens, you'll hear a sound and see a pop-up, clearly marked "Demo" so it's never confused with a real
+        alert.</p>
         <p class="demo-intro-text"><strong>None of this is real.</strong> It's not connected to your broker,
         your account, or any real prices — every number below is made up for this preview.</p>
         <div class="demo-intro-actions">
@@ -2445,10 +2486,11 @@
 
     <div class="labs-honesty-box" style="margin-bottom:24px;">
       <div class="labs-honesty-title">This is not real</div>
-      <p>This isn't connected to your real broker, account, or live prices — it's a made-up loop. It shows the
-      shape of how the strategy actually works: a stock sets its range, breaks out, gets bought, and the trade
-      closes out. It alternates a win, then a loss, on repeat, because in real life it loses more often than it
-      wins — just by smaller amounts each time.</p>
+      <p>This isn't connected to your real broker, account, or live prices — it's a made-up loop. It plays out a
+      full simulated trading day, sped up: five setups form and break out over the course of the day, sometimes
+      with more than one position open at once, same as the real account can hold. Two wins and three losses —
+      the same roughly 40% win rate quoted above — with the wins sized bigger, so the day still nets positive
+      even with more losses than wins. Once the market "closes," it loops back to 9:30 and runs again.</p>
     </div>
 
     <div class="demo-clock-row">
@@ -2457,16 +2499,34 @@
     </div>
 
     <div class="backtest-summary" style="margin-bottom:20px;">
-      <div class="backtest-stat"><div class="backtest-stat-label">Open positions</div><div class="backtest-stat-value" id="demoOpenCount">0</div></div>
-      <div class="backtest-stat"><div class="backtest-stat-label">Today's P&amp;L (simulated)</div><div class="backtest-stat-value" id="demoDayPL">+$0.00</div></div>
-      <div class="backtest-stat"><div class="backtest-stat-label">Trades today</div><div class="backtest-stat-value" id="demoTradeCount">0</div></div>
-      <div class="backtest-stat"><div class="backtest-stat-label">Account balance (simulated)</div><div class="backtest-stat-value" id="demoAccountBalance">$10,000.00</div></div>
+      <div class="backtest-stat"><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value" id="demoEquity">$10,000.00</div></div>
+      <div class="backtest-stat"><div class="backtest-stat-label">Today's P&amp;L</div><div class="backtest-stat-value" id="demoDayPL">+$0.00 (+0.00%)</div></div>
+      <div class="backtest-stat"><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value" id="demoCash">$10,000.00</div></div>
+      <div class="backtest-stat"><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value" id="demoBuyingPower">$40,000.00</div></div>
     </div>
 
-    <div id="demoTradeCardWrap"></div>
+    <div class="labs-backtest-card" style="margin-bottom:20px;">
+      <div class="to-card-head">
+        <span class="to-card-title">Today's Setups</span>
+        <span class="to-card-meta" id="demoTradeCount">0 traded today</span>
+      </div>
+      <div class="labs-backtest-status" id="demoSetupEmpty">Scanning the universe for the next setup…</div>
+      <div id="demoTradeCardWrap"></div>
+    </div>
 
-    <div class="labs-backtest-card" style="margin-top:20px;">
-      <div class="trades-title" style="font-size:16px; margin-bottom:14px;">Activity Log (simulated)</div>
+    <div class="labs-backtest-card" style="margin-bottom:20px;">
+      <div class="to-card-head">
+        <span class="to-card-title">Open Positions</span>
+        <span class="to-card-meta" id="demoPositionsHeadMeta"></span>
+      </div>
+      <div class="labs-backtest-status" id="demoPositionsEmpty">No open positions right now.</div>
+      <div id="demoPositionsBody"></div>
+    </div>
+
+    <div class="labs-backtest-card">
+      <div class="to-card-head">
+        <span class="to-card-title">Activity Log</span>
+      </div>
       <div class="labs-backtest-status" id="demoActivityEmpty">Nothing yet — the demo will populate this as it runs.</div>
       <div id="demoActivityList"></div>
     </div>
@@ -5928,7 +5988,7 @@
     // day, the chart should show what's actually being held (its real
     // entry/stop/target), not whatever levels today's re-run produced.
     var openPosition = journalEntries.filter(function(j){ return j.sym === sym && isOpenPositionForCurrentAccount(j); })[0];
-    var trade = trades.filter(function(t){ return t.sym === sym; })[0] || intradayTrades.filter(function(t){ return t.sym === sym; })[0];
+    var trade = intradayTrades.filter(function(t){ return t.sym === sym; })[0];
     var levels = null;
     if(openPosition){
       // Two genuinely different things: entry is the real, account
@@ -6588,10 +6648,10 @@
   })();
 
   // ---------- Settings: theme pack ----------
-  var THEME_PACKS = ['mono', 'synthwave', 'nebula', 'arctic'];
+  var THEME_PACKS = ['obsidian', 'outrun', 'nebula', 'arcade', 'cyberdeck'];
   function applyThemePack(name){
-    if(THEME_PACKS.indexOf(name) === -1) name = 'mono';
-    document.documentElement.setAttribute('data-theme', name === 'mono' ? '' : name);
+    if(THEME_PACKS.indexOf(name) === -1) name = 'obsidian';
+    document.documentElement.setAttribute('data-theme', name === 'obsidian' ? '' : name);
     document.querySelectorAll('.theme-pack-btn').forEach(function(btn){
       var isActive = btn.dataset.theme === name;
       btn.classList.toggle('active', isActive);
@@ -6603,8 +6663,16 @@
     btn.addEventListener('click', function(){ applyThemePack(btn.dataset.theme); });
   });
   (function initThemePref(){
-    var saved = 'mono';
-    try{ saved = window.localStorage.getItem('shwoopnet:theme') || 'mono'; }catch(e){}
+    var saved = 'obsidian';
+    try{
+      var stored = window.localStorage.getItem('shwoopnet:theme');
+      // Old theme names from before this pack's names changed (mono,
+      // synthwave, arctic) -- map them to their nearest replacement
+      // instead of silently falling back to the default and losing the
+      // user's actual preference (dark vs the one light pack, etc.).
+      var RENAMED = { mono: 'obsidian', synthwave: 'outrun', arctic: 'arcade' };
+      saved = (stored && RENAMED[stored]) || stored || 'obsidian';
+    }catch(e){}
     applyThemePack(saved);
   })();
 
@@ -6748,8 +6816,9 @@
   // ---------- Trade Overview: card show/hide + reorder ----------
   // Auto-Trading Controls and the paused/live banners are intentionally
   // NOT in this list -- those are safety-critical (resume trading,
-  // flatten all) and stay pinned right after the header, always visible,
-  // never reorderable away. Only the informational/status cards below
+  // flatten all) and stay fixed in place (bottom of the page, right
+  // above the Activity Log), always visible, never reorderable away.
+  // Only the informational/status cards below
   // them are customizable.
   var TO_CARD_DEFS = [
     { key:'accountSummary', label:'Account Summary' },
@@ -6798,6 +6867,14 @@
       container.appendChild(wrap);
       wrap.classList.toggle('to-card-hidden', Boolean(toCardPrefs.hidden[key]));
     });
+    // Auto-Trading Controls isn't one of the reorderable to-card
+    // elements above, so the forEach loop never touches it -- without
+    // this, every card it moved past on its way to the end of the
+    // container would leave Auto-Trading Controls stranded wherever it
+    // last sat, instead of pinned right above the log.
+    var autoTradeCard = document.getElementById('autoTradeControlsCard');
+    var activityLogCard = document.getElementById('toCard-activityLog');
+    if(autoTradeCard && activityLogCard){ container.insertBefore(autoTradeCard, activityLogCard); }
   }
 
   function renderCardCustomizeList(){
@@ -7931,6 +8008,23 @@
     renderHistoryList();
   }
 
+  // The "Clear" button on Trade Overview's Activity Log card -- unlike
+  // clearActivityLog() above (sign-out teardown only, never touches
+  // Firestore), this is a real user action: it has to persist the empty
+  // log back to Firestore, or the next backend write / page reload just
+  // brings every old entry right back.
+  document.getElementById('activityLogClearBtn').addEventListener('click', function(){
+    if(!confirm('Clear the entire activity log? This can\'t be undone.')) return;
+    systemActivityLog = [];
+    renderActivityLog();
+    renderHistoryList();
+    if(window.__shwoopAPI && currentUid){
+      window.__shwoopAPI.saveActivityLog(currentUid, []).catch(function(err){
+        console.error('Failed to clear activity log:', err);
+      });
+    }
+  });
+
   // ---------- Status page: the one place to check in ----------
   function renderStatusPage(){
     renderBackendStatus();
@@ -8369,14 +8463,17 @@
       return entry.accountKeyId === activeAlpacaCreds().keyId;
     });
     var headMeta = document.getElementById('activityLogHeadMeta');
+    var clearBtn = document.getElementById('activityLogClearBtn');
     if(currentAccountLog.length === 0){
       el.innerHTML = '';
       if(emptyEl) emptyEl.removeAttribute('hidden');
       if(headMeta){ headMeta.textContent = ''; }
+      if(clearBtn){ clearBtn.style.display = 'none'; }
       return;
     }
     if(emptyEl) emptyEl.setAttribute('hidden', '');
     if(headMeta){ headMeta.textContent = currentAccountLog.length + ' entries'; }
+    if(clearBtn){ clearBtn.style.display = ''; }
     var typeLabels = {
       sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
       // cycle_summary is the once-per-15-minutes "did the scanner, sizing,
@@ -8396,26 +8493,36 @@
 
   // ---------- Demo page: a scripted, simulated trading day ----------
   // Entirely self-contained -- no real data, no real API calls, no
-  // connection to journalEntries/Alpaca/Firestore. Alternates a winning
-  // and a losing scenario each loop, since a real ~40% win rate means
-  // losses happen more often than wins, even though each win outsizes
-  // a loss (1.5:1 reward:risk).
+  // connection to journalEntries/Alpaca/Firestore. One continuous
+  // 9:30-4:00 script (not two looping scenarios) mirrors how Trade
+  // Overview itself is laid out: a forming candidate shows in a
+  // Today's Setups-style card, then moves into a real Open Positions
+  // table once filled -- including holding more than one position at
+  // once, the way the real account actually does. 5 trades, 2 wins /
+  // 3 losses (the same ~40% win rate quoted elsewhere), with the wins
+  // sized bigger so the day still nets positive -- that's the whole
+  // profit-factor story in miniature, not just one trade's outcome.
   var demoTimer = null;
   var demoStepIndex = 0;
-  var demoScenarioIndex = 0; // 0 = win scenario, 1 = loss scenario, alternating
   var demoPlaying = true;
   var demoDayPL = 0;
-  var demoOpenCount = 0;
   var demoTradeCount = 0;
   var demoAccountBalance = 10000;
-  var demoCardState = null;
+  var demoCardState = null; // the one forming/watching candidate, pre-fill
+  var demoPositions = []; // filled positions, table can hold several at once
 
   function demoFmt(n){ return '$' + n.toFixed(2); }
 
   function renderDemoTradeCard(){
     var wrap = document.getElementById('demoTradeCardWrap');
+    var emptyEl = document.getElementById('demoSetupEmpty');
     if(!wrap) return;
-    if(!demoCardState){ wrap.innerHTML = ''; return; }
+    if(!demoCardState){
+      wrap.innerHTML = '';
+      if(emptyEl) emptyEl.removeAttribute('hidden');
+      return;
+    }
+    if(emptyEl) emptyEl.setAttribute('hidden', '');
     var s = demoCardState;
     var change = ((s.current - s.entry) / s.entry * 100) * (s.direction === 'Long' ? 1 : -1);
     var up = change >= 0;
@@ -8462,6 +8569,82 @@
     wrap.dataset.rendered = 'true';
   }
 
+  // ---------- Open Positions table (demo) -- the actual Trade Overview
+  // table markup/columns, just populated from demoPositions instead of
+  // real journalEntries. Can render more than one row at once, unlike
+  // the single forming-candidate card above. ----------
+  function renderDemoPositionsTable(){
+    var el = document.getElementById('demoPositionsBody');
+    var emptyEl = document.getElementById('demoPositionsEmpty');
+    var headMeta = document.getElementById('demoPositionsHeadMeta');
+    if(!el) return;
+    if(headMeta){ headMeta.textContent = demoPositions.length ? (demoPositions.length + ' open') : ''; }
+    if(demoPositions.length === 0){
+      el.innerHTML = '';
+      if(emptyEl) emptyEl.removeAttribute('hidden');
+      return;
+    }
+    if(emptyEl) emptyEl.setAttribute('hidden', '');
+    el.innerHTML =
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Symbol</th><th>Dir</th><th>Qty</th><th>Entry</th><th>Current</th><th>P&L</th><th>Stop</th><th>Target</th></tr></thead>' +
+        '<tbody>' + demoPositions.map(function(p){
+          var isLong = p.direction === 'Long';
+          var pl = (p.current - p.entry) * p.qty * (isLong ? 1 : -1);
+          var plPct = (p.current - p.entry) / p.entry * 100 * (isLong ? 1 : -1);
+          var plClass = pl >= 0 ? 'up' : 'down';
+          return '<tr class="' + (p.flash ? 'demo-row-flash' : '') + '" data-symbol="' + p.sym + '">' +
+            '<td class="mono">' + p.sym + '</td>' +
+            '<td>' + p.direction + '</td>' +
+            '<td>' + p.qty + '</td>' +
+            '<td>' + demoFmt(p.entry) + '</td>' +
+            '<td>' + demoFmt(p.current) + '</td>' +
+            '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</td>' +
+            '<td>' + demoFmt(p.stop) + '</td>' +
+            '<td>' + demoFmt(p.target) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody>' +
+      '</table>';
+    demoPositions.forEach(function(p){ p.flash = false; });
+  }
+
+  function demoOpenPosition(cfg){
+    demoPositions.push({ sym:cfg.sym, direction:cfg.direction, qty:cfg.qty, entry:cfg.entry, current:cfg.entry, stop:cfg.stop, target:cfg.target, flash:true });
+    demoTradeCount++;
+    renderDemoPositionsTable();
+    demoUpdateSummary();
+    document.getElementById('demoTradeCount').textContent = demoTradeCount + ' traded today';
+    demoAddActivity(cfg.sym + ' — ' + cfg.direction + ', ' + cfg.qty + ' shares.', 'Trade entered');
+    showDemoToast(cfg.sym, 'Trade entered', cfg.direction + ', ' + cfg.qty + ' shares.', 'sent');
+  }
+
+  // Equity has to move with the table, not just on a close -- otherwise
+  // the top row sits frozen at $10,000 while Open Positions visibly
+  // shows real unrealized gains/losses ticking, which reads as broken.
+  function demoTickPosition(sym, current){
+    var p = demoPositions.filter(function(x){ return x.sym === sym; })[0];
+    if(!p) return;
+    p.current = current;
+    renderDemoPositionsTable();
+    demoUpdateSummary();
+  }
+
+  function demoClosePosition(sym, exitPrice, note){
+    var idx = demoPositions.map(function(p){ return p.sym; }).indexOf(sym);
+    if(idx === -1) return;
+    var p = demoPositions[idx];
+    var isLong = p.direction === 'Long';
+    var pl = (exitPrice - p.entry) * p.qty * (isLong ? 1 : -1);
+    demoPositions.splice(idx, 1);
+    demoDayPL += pl;
+    demoAccountBalance += pl;
+    demoUpdateSummary();
+    renderDemoPositionsTable();
+    var plStr = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2);
+    demoAddActivity(sym + ' — ' + plStr + (note ? ' (' + note + ')' : '') + '.', 'Trade exited');
+    showDemoToast(sym, 'Trade exited', plStr + '.', pl >= 0 ? 'win' : 'loss');
+  }
+
   // A real floating toast, using the exact same visual system live
   // trades use -- this is the actual fix for "easy to miss": a row in a
   // page list only gets seen if you're looking right at it, but a
@@ -8500,13 +8683,25 @@
     while(list.children.length > 6){ list.removeChild(list.lastChild); }
   }
 
+  // Mirrors the real Account Summary card's own math: cash only moves on
+  // a REALIZED close (demoAccountBalance), while equity also reflects
+  // whatever unrealized P&L any still-open demoPositions are carrying
+  // right now -- same distinction the real Alpaca-backed version draws.
   function demoUpdateSummary(){
-    document.getElementById('demoOpenCount').textContent = demoOpenCount;
-    document.getElementById('demoTradeCount').textContent = demoTradeCount;
+    var unrealized = demoPositions.reduce(function(sum, p){
+      var isLong = p.direction === 'Long';
+      return sum + (p.current - p.entry) * p.qty * (isLong ? 1 : -1);
+    }, 0);
+    var equity = demoAccountBalance + unrealized;
+    var todayPL = equity - 10000;
+    var todayPLPct = todayPL / 10000 * 100;
+    var plClass = todayPL >= 0 ? 'up' : 'down';
+    document.getElementById('demoEquity').textContent = '$' + equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     var plEl = document.getElementById('demoDayPL');
-    plEl.textContent = (demoDayPL >= 0 ? '+' : '-') + '$' + Math.abs(demoDayPL).toFixed(2);
-    plEl.className = 'backtest-stat-value ' + (demoDayPL >= 0 ? 'up' : 'down');
-    document.getElementById('demoAccountBalance').textContent = '$' + demoAccountBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    plEl.textContent = (todayPL >= 0 ? '+' : '-') + '$' + Math.abs(todayPL).toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)';
+    plEl.className = 'backtest-stat-value ' + plClass;
+    document.getElementById('demoCash').textContent = '$' + demoAccountBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('demoBuyingPower').textContent = '$' + (demoAccountBalance * 4).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function flashDemoCard(){
@@ -8524,69 +8719,81 @@
   // resolution, a genuine payoff, and a final "zoom out" beat that ties
   // the one trade back to the validated, system-level story -- since
   // that's the actual point being made, not any single trade's outcome.
-  var demoWinScenario = [
-    { clock:'9:30 AM', narration:"Market opens. Shwoop is watching all 16 stocks for the first real move of the day.", duration:2600, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
-    { clock:'9:45 AM', narration:"PLTR's opening range is forming: $24.10 – $24.35. Nothing to do yet — just watching.", duration:2200 },
-    { clock:'10:15 AM', narration:'Price just broke above $24.35. Could be nothing… or it could be real.', duration:2200 },
-    { clock:'10:15 AM', narration:'Volume just spiked to 2.3x normal. That\'s the confirmation.', duration:1600 },
-    { clock:'10:15 AM', narration:'Signal fires. Shwoop pulls the trigger.', duration:1400, action:function(){
+  function wrapResetFlag(){ var wrap = document.getElementById('demoTradeCardWrap'); if(wrap){ wrap.dataset.rendered = ''; } }
+
+  // One continuous 9:30-4:00 script, not two alternating loops. Two
+  // overlap windows (PLTR+SOFI, then COIN+RIVN) are deliberate -- the
+  // real account can hold several positions at once, and a demo that
+  // only ever shows one row at a time undersells that. Final tally:
+  // 2 wins / 3 losses (the same ~40% quoted in the intro), with the
+  // wins sized bigger so the day still nets positive -- the
+  // profit-factor story acted out, not just asserted.
+  var demoDayScript = [
+    { clock:'9:30 AM', narration:"Market opens. Shwoop is watching all 16 stocks for the first real move of the day.", duration:2200, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
+    { clock:'9:45 AM', narration:"PLTR's opening range is forming: $24.10 – $24.35. Nothing to do yet — just watching.", duration:2000 },
+    { clock:'10:00 AM', narration:'Breaks above $24.35 on 2.3x normal volume — that\'s the confirmation. Signal fires.', duration:1800, action:function(){
       demoCardState = { sym:'PLTR', name:'Palantir Technologies', direction:'Long', entry:24.35, stop:24.10, target:24.72, current:24.35, badgeCls:'watching', badgeLabel:'Watching', bannerText:'Signal fired — sizing the order…', bannerDone:false };
       wrapResetFlag(); renderDemoTradeCard(); flashDemoCard();
     }},
-    { clock:'10:16 AM', narration:'42 shares, sized automatically to 1% account risk. Done — no clicking, no hesitating.', duration:2000, action:function(){
-      demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 42 shares (Long)'; renderDemoTradeCard();
-      demoOpenCount++; demoTradeCount++; demoUpdateSummary();
-      demoAddActivity('PLTR — Long, 42 shares.', 'Trade entered');
-      showDemoToast('PLTR', 'Trade entered', 'Long, 42 shares.', 'sent');
+    { clock:'10:01 AM', narration:'42 shares, sized automatically to 1% account risk. Order sent — no clicking, no hesitating.', duration:1900, action:function(){
+      demoCardState = null; renderDemoTradeCard();
+      demoOpenPosition({ sym:'PLTR', direction:'Long', qty:42, entry:24.35, stop:24.10, target:24.72 });
     }},
-    { clock:'10:32 AM', narration:'Climbing. $24.44.', duration:1500, action:function(){ demoCardState.current = 24.44; renderDemoTradeCard(); } },
-    { clock:'10:51 AM', narration:'Getting closer… $24.53.', duration:1500, action:function(){ demoCardState.current = 24.53; renderDemoTradeCard(); } },
-    { clock:'11:14 AM', narration:'Almost there. $24.63.', duration:1500, action:function(){ demoCardState.current = 24.63; renderDemoTradeCard(); } },
-    { clock:'11:40 AM', narration:'The stop trailed up as it climbed — closed automatically for +$15.54. No exit to manage, no second-guessing.', duration:2800, action:function(){
-      demoCardState.current = 24.72; demoCardState.badgeCls = 'trailing'; demoCardState.badgeLabel = 'Closed'; demoCardState.bannerText = 'Stop trailed up — closed at $24.72'; demoCardState.bannerDone = true; renderDemoTradeCard(); flashDemoCard();
-      demoOpenCount--; demoDayPL += 15.54; demoAccountBalance += 15.54; demoUpdateSummary();
-      demoAddActivity('PLTR — +$15.54.', 'Trade exited');
-      showDemoToast('PLTR', 'Trade exited', '+$15.54.', 'win');
-    }},
-    { clock:'11:40 AM', narration:'Only about 40% of trades look like this one — but the stop trails behind a real winner instead of capping it, so wins tend to run bigger than losses. That\'s the whole edge.', duration:3400 },
-  ];
-
-  var demoLossScenario = [
-    { clock:'9:30 AM', narration:"Market opens. Watching SOFI's opening range form.", duration:2400, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
-    { clock:'10:00 AM', narration:'Opening range set: $8.20 – $8.35.', duration:2200 },
-    { clock:'10:20 AM', narration:'Price breaks above $8.35. Checking the volume before taking it seriously…', duration:2200 },
-    { clock:'10:20 AM', narration:'Volume confirms: 2.1x normal.', duration:1600 },
-    { clock:'10:20 AM', narration:'Signal fires.', duration:1400, action:function(){
+    { clock:'10:15 AM', narration:"Meanwhile SOFI's own opening range sets: $8.20 – $8.35. PLTR keeps running in the background.", duration:2000 },
+    { clock:'10:20 AM', narration:'SOFI breaks above $8.35, volume confirms at 2.1x. Signal fires here too.', duration:1800, action:function(){
       demoCardState = { sym:'SOFI', name:'SoFi Technologies', direction:'Long', entry:8.35, stop:8.20, target:8.575, current:8.35, badgeCls:'watching', badgeLabel:'Watching', bannerText:'Signal fired — sizing the order…', bannerDone:false };
       wrapResetFlag(); renderDemoTradeCard(); flashDemoCard();
     }},
-    { clock:'10:21 AM', narration:'118 shares, sized automatically to 1% account risk.', duration:2000, action:function(){
-      demoCardState.badgeCls = 'active'; demoCardState.badgeLabel = 'Active'; demoCardState.bannerText = 'Order sent — 118 shares (Long)'; renderDemoTradeCard();
-      demoOpenCount++; demoTradeCount++; demoUpdateSummary();
-      demoAddActivity('SOFI — Long, 118 shares.', 'Trade entered');
-      showDemoToast('SOFI', 'Trade entered', 'Long, 118 shares.', 'sent');
+    { clock:'10:21 AM', narration:'118 shares sent. Two positions live at once now — PLTR and SOFI, each sized off the same account risk.', duration:2000, action:function(){
+      demoCardState = null; renderDemoTradeCard();
+      demoOpenPosition({ sym:'SOFI', direction:'Long', qty:118, entry:8.35, stop:8.20, target:8.575 });
     }},
-    { clock:'10:38 AM', narration:'Price giving back the move. $8.30.', duration:1600, action:function(){ demoCardState.current = 8.30; renderDemoTradeCard(); } },
-    { clock:'10:55 AM', narration:'Slipping further. $8.24.', duration:1600, action:function(){ demoCardState.current = 8.24; renderDemoTradeCard(); } },
-    { clock:'11:05 AM', narration:'Stopped out — automatically, exactly as planned. -$17.70, small and controlled.', duration:2800, action:function(){
-      demoCardState.current = 8.20; demoCardState.badgeCls = 'stopped'; demoCardState.badgeLabel = 'Stopped out'; demoCardState.bannerText = 'Closed at stop ($8.20)'; demoCardState.bannerDone = true; renderDemoTradeCard(); flashDemoCard();
-      demoOpenCount--; demoDayPL -= 17.70; demoAccountBalance -= 17.70; demoUpdateSummary();
-      demoAddActivity('SOFI — -$17.70.', 'Trade exited');
-      showDemoToast('SOFI', 'Trade exited', '-$17.70.', 'loss');
+    { clock:'10:35 AM', narration:'PLTR climbing: $24.44.', duration:1400, action:function(){ demoTickPosition('PLTR', 24.44); } },
+    { clock:'10:50 AM', narration:'SOFI giving the move back: $8.28.', duration:1400, action:function(){ demoTickPosition('SOFI', 8.28); } },
+    { clock:'11:05 AM', narration:'SOFI stops out — automatically, exactly as planned. Small and controlled.', duration:2200, action:function(){
+      demoClosePosition('SOFI', 8.20);
     }},
-    { clock:'11:05 AM', narration:'Every trade risks the same small amount, so a loss like this one never threatens the account — and the next win can still come out ahead.', duration:3400 },
+    { clock:'11:20 AM', narration:'PLTR keeps climbing: $24.58.', duration:1400, action:function(){ demoTickPosition('PLTR', 24.58); } },
+    { clock:'11:40 AM', narration:'PLTR\'s stop trailed up as it climbed — closed automatically for a real gain. No exit to manage, no second-guessing.', duration:2400, action:function(){
+      demoClosePosition('PLTR', 24.72);
+    }},
+    { clock:'11:41 AM', narration:'Two trades down: one stopped small, one ran with a trailing stop. That asymmetry is the whole edge.', duration:2600 },
+    { clock:'12:15 PM', narration:"Midday. COIN's range sets: $203.00 – $205.00.", duration:2000 },
+    { clock:'12:30 PM', narration:'COIN breaks above $205 on strong volume. Signal fires — 4 shares, sized for a $205 stock.', duration:2000, action:function(){
+      demoOpenPosition({ sym:'COIN', direction:'Long', qty:4, entry:205.00, stop:201.50, target:210.25 });
+    }},
+    { clock:'1:00 PM', narration:'COIN running: $208.50.', duration:1500, action:function(){ demoTickPosition('COIN', 208.50); } },
+    { clock:'1:15 PM', narration:'RIVN is doing the opposite — breaking down through $12.80 on heavy selling. This one\'s a short.', duration:2000, action:function(){
+      demoOpenPosition({ sym:'RIVN', direction:'Short', qty:48, entry:12.80, stop:13.05, target:12.425 });
+    }},
+    { clock:'1:35 PM', narration:'COIN\'s trailing stop locks in a solid gain, well past its original target — the whole point of trailing instead of a fixed cap.', duration:2400, action:function(){
+      demoClosePosition('COIN', 212.00, 'trailing stop');
+    }},
+    { clock:'1:50 PM', narration:'RIVN drifting against the short: $12.95.', duration:1500, action:function(){ demoTickPosition('RIVN', 12.95); } },
+    { clock:'2:05 PM', narration:'RIVN stops out at $13.05. A loss, but a small, planned one.', duration:2200, action:function(){
+      demoClosePosition('RIVN', 13.05);
+    }},
+    { clock:'2:30 PM', narration:"Late-day setup: MARA's range sets at $15.95 – $16.20.", duration:2000 },
+    { clock:'2:35 PM', narration:'MARA breaks out. Signal fires — 32 shares sent.', duration:1800, action:function(){
+      demoOpenPosition({ sym:'MARA', direction:'Long', qty:32, entry:16.20, stop:15.70, target:16.95 });
+    }},
+    { clock:'3:10 PM', narration:'MARA holding up: $16.35.', duration:1500, action:function(){ demoTickPosition('MARA', 16.35); } },
+    { clock:'3:45 PM', narration:'Market\'s closing soon. MARA is still open, so the end-of-day flatten kicks in automatically — intraday positions never carry overnight, no matter how the setup looks.', duration:2600, action:function(){
+      demoTickPosition('MARA', 16.00);
+    }},
+    { clock:'3:46 PM', narration:'Flattened at $16.00 — a small loss, but flattened before a real pullback could make it worse.', duration:2400, action:function(){
+      demoClosePosition('MARA', 16.00, 'end-of-day flatten');
+    }},
+    { clock:'4:00 PM', narration:'Market closes. 5 trades, 2 wins / 3 losses — same ~40% win rate as always — and the day still nets positive, because the wins ran further than the losses cost. That\'s a profit factor above 1 in miniature.', duration:3600, action:function(){
+      wrapResetFlag(); renderDemoTradeCard();
+    }},
   ];
 
-  function wrapResetFlag(){ var wrap = document.getElementById('demoTradeCardWrap'); if(wrap){ wrap.dataset.rendered = ''; } }
-
   function demoRunStep(){
-    var scenario = demoScenarioIndex === 0 ? demoWinScenario : demoLossScenario;
-    if(demoStepIndex >= scenario.length){
-      demoStepIndex = 0;
-      demoScenarioIndex = demoScenarioIndex === 0 ? 1 : 0;
-      scenario = demoScenarioIndex === 0 ? demoWinScenario : demoLossScenario;
+    if(demoStepIndex >= demoDayScript.length){
+      resetDemoState();
     }
-    var step = scenario[demoStepIndex];
+    var step = demoDayScript[demoStepIndex];
     document.getElementById('demoClock').textContent = step.clock;
     var narrEl = document.getElementById('demoNarration');
     narrEl.style.opacity = '0';
@@ -8609,11 +8816,13 @@
   }
   function resetDemoState(){
     stopDemo();
-    demoStepIndex = 0; demoScenarioIndex = 0; demoDayPL = 0; demoOpenCount = 0; demoTradeCount = 0; demoAccountBalance = 10000; demoCardState = null;
+    demoStepIndex = 0; demoDayPL = 0; demoTradeCount = 0; demoAccountBalance = 10000; demoCardState = null; demoPositions = [];
     document.getElementById('demoActivityList').innerHTML = '';
     document.getElementById('demoActivityEmpty').removeAttribute('hidden');
+    document.getElementById('demoTradeCount').textContent = '0 traded today';
     demoUpdateSummary();
     renderDemoTradeCard();
+    renderDemoPositionsTable();
   }
   document.getElementById('demoPlayPauseBtn').addEventListener('click', function(){
     demoPlaying = !demoPlaying;
@@ -8984,7 +9193,7 @@
 
   // ---------- Market Brief headline & lede (generated, not written) ----------
   // Built entirely from data already on this page — the same index
-  // proxies renderSentiment uses, and the same trades array Trade
+  // proxies renderSentiment uses, and the same intradayTrades Trade
   // Overview shows. No separate data source, no AI call: just describing,
   // in plain language, what the page already knows to be true right now.
   function renderBriefHeadline(){
