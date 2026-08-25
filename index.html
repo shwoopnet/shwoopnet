@@ -4991,6 +4991,17 @@
       } else {
         plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono">—</div></div>';
       }
+      // Once a position is actually open, "Why this trade" should keep
+      // showing the reasoning that was true AT ENTRY, not whatever the
+      // next scan's fresh re-analysis says about this same symbol now
+      // (price has moved, the ORB status may have already progressed
+      // Active -> Trailing -> Stopped) -- entryNotes is pinned by the
+      // backend at the moment the order was actually sent (see
+      // orchestrator.js/autoTrade.js). Entries opened before this field
+      // existed have none recorded, so this falls back to the live
+      // pick's current notes rather than showing an empty list.
+      var notesForDisplay = (openEntry && Array.isArray(openEntry.entryNotes) && openEntry.entryNotes.length)
+        ? openEntry.entryNotes : t.notes;
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
@@ -5018,7 +5029,7 @@
             '</div>' +
             '<div class="trade-notes-col">' +
               '<h3>Why this trade</h3>' +
-              '<ul>' + t.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
+              '<ul>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
             '</div>' +
           '</div>' +
         '</div>';
