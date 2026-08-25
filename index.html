@@ -5959,7 +5959,7 @@
     // day, the chart should show what's actually being held (its real
     // entry/stop/target), not whatever levels today's re-run produced.
     var openPosition = journalEntries.filter(function(j){ return j.sym === sym && isOpenPositionForCurrentAccount(j); })[0];
-    var trade = trades.filter(function(t){ return t.sym === sym; })[0] || intradayTrades.filter(function(t){ return t.sym === sym; })[0];
+    var trade = intradayTrades.filter(function(t){ return t.sym === sym; })[0];
     var levels = null;
     if(openPosition){
       // Two genuinely different things: entry is the real, account
@@ -9052,7 +9052,7 @@
 
   // ---------- Market Brief headline & lede (generated, not written) ----------
   // Built entirely from data already on this page — the same index
-  // proxies renderSentiment uses, and the same trades array Trade
+  // proxies renderSentiment uses, and the same intradayTrades Trade
   // Overview shows. No separate data source, no AI call: just describing,
   // in plain language, what the page already knows to be true right now.
   function renderBriefHeadline(){
