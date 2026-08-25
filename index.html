@@ -9,21 +9,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
+    /* Obsidian (default) -- true black instead of flat gray-black, with
+       a cool ice-white accent that carries a faint blue glow, so "no
+       color" still reads as a deliberate choice, not a placeholder. */
     --ink: #000000;
-    --panel: #0D0D0D;
-    --panel-raised: #161616;
-    --border: #2A2A2A;
-    --paper: #FFFFFF;
-    --muted: #8A8A8A;
-    --amber: #FFFFFF;
-    --amber-dim: #B5B5B5;
-    --amber-glow: rgba(255,255,255,0.12);
-    --amber-contrast: #0A0A0A;
-    --ticker-fg: #FFFFFF;
-    --ticker-fg-dim: #8A8A8A;
-    --grid-glow-1: rgba(255,255,255,0.06);
-    --grid-glow-2: rgba(255,255,255,0.045);
-    --grid-line: rgba(255,255,255,0.03);
+    --panel: #0A0B0D;
+    --panel-raised: #131519;
+    --border: #24272E;
+    --paper: #F5F7FB;
+    --muted: #767B87;
+    --amber: #DCE6FF;
+    --amber-dim: #8FA3D6;
+    --amber-glow: rgba(180,205,255,0.20);
+    --amber-contrast: #04060B;
+    --ticker-fg: #DCE6FF;
+    --ticker-fg-dim: #767B87;
+    --grid-glow-1: rgba(120,160,255,0.08);
+    --grid-glow-2: rgba(120,160,255,0.05);
+    --grid-line: rgba(120,160,255,0.035);
     /* Gain/loss and MA colors are deliberately NOT overridden by any
        theme below -- they stay fixed regardless of which pack is
        active. This matters more than it used to: --loss is now also
@@ -42,31 +45,46 @@
   /* Theme packs -- each overrides only the chrome/accent colors above.
      Candle, gain/loss, and MA colors intentionally stay out of every
      block below so they never vary by theme. */
-  :root[data-theme="synthwave"]{
-    --ink: #0A0612; --panel: #150D24; --panel-raised: #1D1230; --border: #332145;
-    --paper: #F0E6FF; --muted: #9080AD;
-    --amber: #F535AA; --amber-dim: #A82571; --amber-glow: rgba(245,53,170,0.16); --amber-contrast: #1A0512;
-    --ticker-fg: #F0E6FF; --ticker-fg-dim: #9080AD;
-    --grid-glow-1: rgba(245,53,170,0.07); --grid-glow-2: rgba(245,53,170,0.05); --grid-line: rgba(245,53,170,0.035);
+
+  /* Outrun -- leans all the way into the outrun-art palette instead of
+     a barely-tinted purple: violet-black ground, magenta primary paired
+     with a cyan secondary glow the way actual sunset-grid art does. */
+  :root[data-theme="outrun"]{
+    --ink: #0D0217; --panel: #170A28; --panel-raised: #20103A; --border: #3D1F5C;
+    --paper: #FBEBFF; --muted: #A88BC4;
+    --amber: #FF3EB5; --amber-dim: #B0287D; --amber-glow: rgba(255,62,181,0.20); --amber-contrast: #1A0512;
+    --ticker-fg: #FBEBFF; --ticker-fg-dim: #A88BC4;
+    --grid-glow-1: rgba(255,62,181,0.09); --grid-glow-2: rgba(46,224,255,0.08); --grid-line: rgba(255,62,181,0.04);
   }
+  /* Nebula -- deep-space indigo with a richer, more saturated electric
+     violet than before, and a stronger glow radius. */
   :root[data-theme="nebula"]{
-    --ink: #0A0818; --panel: #150F28; --panel-raised: #1D1536; --border: #332658;
-    --paper: #E8E0FF; --muted: #8C7FB0;
-    --amber: #9D6FFF; --amber-dim: #6B47B8; --amber-glow: rgba(157,111,255,0.16); --amber-contrast: #150A28;
-    --ticker-fg: #E8E0FF; --ticker-fg-dim: #8C7FB0;
-    --grid-glow-1: rgba(157,111,255,0.07); --grid-glow-2: rgba(157,111,255,0.05); --grid-line: rgba(157,111,255,0.035);
+    --ink: #0A0716; --panel: #130C24; --panel-raised: #1B1234; --border: #332158;
+    --paper: #EAE3FF; --muted: #9284B8;
+    --amber: #9D6FFF; --amber-dim: #6B47B8; --amber-glow: rgba(157,111,255,0.20); --amber-contrast: #0F0A1E;
+    --ticker-fg: #EAE3FF; --ticker-fg-dim: #9284B8;
+    --grid-glow-1: rgba(157,111,255,0.09); --grid-glow-2: rgba(90,60,200,0.07); --grid-line: rgba(157,111,255,0.04);
   }
-  /* The one light theme -- a light icy blue/white base rather than the
-     dark backgrounds every other pack uses, with a vivid "synth" blue
-     accent for the same energetic feel as Synthwave, just inverted.
-     --amber-contrast flips to white here since it's the text color that
-     sits ON TOP of the (now light) accent color, e.g. filled buttons. */
-  :root[data-theme="arctic"]{
-    --ink: #EAF4FB; --panel: #FFFFFF; --panel-raised: #F0F8FC; --border: #C4DCE8;
-    --paper: #0D2438; --muted: #5C7D91;
-    --amber: #1483FF; --amber-dim: #0A5FBD; --amber-glow: rgba(20,131,255,0.12); --amber-contrast: #FFFFFF;
-    --ticker-fg: #0D2438; --ticker-fg-dim: #5C7D91;
-    --grid-glow-1: rgba(20,131,255,0.05); --grid-glow-2: rgba(20,131,255,0.035); --grid-line: rgba(20,131,255,0.04);
+  /* Arcade -- the one light theme. A competitive-shooter scoreboard
+     read rather than a soft icy blue: crisp white panel, one saturated
+     "Player 1" blue as the accent. --amber-contrast flips to white
+     here since it's the text color sitting ON TOP of the (light)
+     accent, e.g. filled buttons. */
+  :root[data-theme="arcade"]{
+    --ink: #EEF1F6; --panel: #FFFFFF; --panel-raised: #F5F7FB; --border: #D6DCE6;
+    --paper: #12151C; --muted: #6B7280;
+    --amber: #2F5EFF; --amber-dim: #1E3FC4; --amber-glow: rgba(47,94,255,0.18); --amber-contrast: #FFFFFF;
+    --ticker-fg: #12151C; --ticker-fg-dim: #6B7280;
+    --grid-glow-1: rgba(47,94,255,0.08); --grid-glow-2: rgba(255,58,110,0.06); --grid-line: rgba(47,94,255,0.05);
+  }
+  /* Cyberdeck -- straight Tron/cyberpunk HUD: near-black with a stark
+     electric-cyan accent instead of another warm or violet variant. */
+  :root[data-theme="cyberdeck"]{
+    --ink: #040608; --panel: #0A0F14; --panel-raised: #0F171F; --border: #1C2B36;
+    --paper: #DFFBFF; --muted: #5C7A85;
+    --amber: #22E6FF; --amber-dim: #0FA6C2; --amber-glow: rgba(34,230,255,0.22); --amber-contrast: #02141A;
+    --ticker-fg: #DFFBFF; --ticker-fg-dim: #5C7A85;
+    --grid-glow-1: rgba(34,230,255,0.10); --grid-glow-2: rgba(34,230,255,0.05); --grid-line: rgba(34,230,255,0.05);
   }
 
   *{ box-sizing:border-box; }
@@ -2199,21 +2217,25 @@
           <div class="settings-row-desc">Applies everywhere. Candle colors and the live-trading red stay fixed no matter which one's active.</div>
         </div>
         <div class="theme-pack-group" id="themePackGroup" role="group" aria-label="Theme">
-          <button class="theme-pack-btn active" data-theme="mono" aria-pressed="true">
-            <span class="theme-pack-swatch" style="background:#000; border:1px solid #444;"><span style="background:#FFF;"></span></span>
-            Mono
+          <button class="theme-pack-btn active" data-theme="obsidian" aria-pressed="true">
+            <span class="theme-pack-swatch" style="background:#000; border:1px solid #24272E;"><span style="background:#DCE6FF;"></span></span>
+            Obsidian
           </button>
-          <button class="theme-pack-btn" data-theme="synthwave" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#0A0612;"><span style="background:#F535AA;"></span></span>
-            Synthwave
+          <button class="theme-pack-btn" data-theme="outrun" aria-pressed="false">
+            <span class="theme-pack-swatch" style="background:#0D0217;"><span style="background:#FF3EB5;"></span></span>
+            Outrun
           </button>
           <button class="theme-pack-btn" data-theme="nebula" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#0A0818;"><span style="background:#9D6FFF;"></span></span>
+            <span class="theme-pack-swatch" style="background:#0A0716;"><span style="background:#9D6FFF;"></span></span>
             Nebula
           </button>
-          <button class="theme-pack-btn" data-theme="arctic" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#EAF4FB; border:1px solid #C4DCE8;"><span style="background:#1483FF;"></span></span>
-            Arctic
+          <button class="theme-pack-btn" data-theme="arcade" aria-pressed="false">
+            <span class="theme-pack-swatch" style="background:#EEF1F6; border:1px solid #D6DCE6;"><span style="background:#2F5EFF;"></span></span>
+            Arcade
+          </button>
+          <button class="theme-pack-btn" data-theme="cyberdeck" aria-pressed="false">
+            <span class="theme-pack-swatch" style="background:#040608; border:1px solid #1C2B36;"><span style="background:#22E6FF;"></span></span>
+            Cyberdeck
           </button>
         </div>
       </div>
@@ -6588,10 +6610,10 @@
   })();
 
   // ---------- Settings: theme pack ----------
-  var THEME_PACKS = ['mono', 'synthwave', 'nebula', 'arctic'];
+  var THEME_PACKS = ['obsidian', 'outrun', 'nebula', 'arcade', 'cyberdeck'];
   function applyThemePack(name){
-    if(THEME_PACKS.indexOf(name) === -1) name = 'mono';
-    document.documentElement.setAttribute('data-theme', name === 'mono' ? '' : name);
+    if(THEME_PACKS.indexOf(name) === -1) name = 'obsidian';
+    document.documentElement.setAttribute('data-theme', name === 'obsidian' ? '' : name);
     document.querySelectorAll('.theme-pack-btn').forEach(function(btn){
       var isActive = btn.dataset.theme === name;
       btn.classList.toggle('active', isActive);
@@ -6603,8 +6625,16 @@
     btn.addEventListener('click', function(){ applyThemePack(btn.dataset.theme); });
   });
   (function initThemePref(){
-    var saved = 'mono';
-    try{ saved = window.localStorage.getItem('shwoopnet:theme') || 'mono'; }catch(e){}
+    var saved = 'obsidian';
+    try{
+      var stored = window.localStorage.getItem('shwoopnet:theme');
+      // Old theme names from before this pack's names changed (mono,
+      // synthwave, arctic) -- map them to their nearest replacement
+      // instead of silently falling back to the default and losing the
+      // user's actual preference (dark vs the one light pack, etc.).
+      var RENAMED = { mono: 'obsidian', synthwave: 'outrun', arctic: 'arcade' };
+      saved = (stored && RENAMED[stored]) || stored || 'obsidian';
+    }catch(e){}
     applyThemePack(saved);
   })();
 
