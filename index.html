@@ -650,6 +650,8 @@
   }
   .backtest-trades-table td{ padding:8px 10px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono', monospace; }
   .backtest-trades-table tbody tr:hover{ background: var(--panel-raised); }
+  .backtest-trades-table td.up{ color: var(--gain); }
+  .backtest-trades-table td.down{ color: var(--loss); }
   .backtest-trades-table th.sortable-col{ cursor:pointer; user-select:none; }
   .backtest-trades-table th.sortable-col:hover{ color: var(--paper); }
   .position-close-btn{
@@ -938,6 +940,8 @@
   .status-badge.stopped{ border-color: var(--loss); color: var(--loss); background: var(--loss-glow); }
 
   .t-rr .rr-ratio{ font-weight:600; font-size:13px; }
+  .t-rr .rr-ratio.up{ color: var(--gain); }
+  .t-rr .rr-ratio.down{ color: var(--loss); }
 
   .trade-action-banner{
     display:flex; align-items:flex-start; gap:10px;
@@ -4809,15 +4813,6 @@
   // only.
 
 
-  // the average of the distance to Target 1 and Target 2 (since the plan
-  // scales out half at each) — what you stand to gain if it plays out.
-  function computeRiskReward(t){
-    var riskPct = Math.abs((t.entry - t.stop) / t.entry * 100);
-    var rewardPct = Math.abs((t.t1 - t.entry) / t.entry * 100);
-    var ratio = riskPct > 0 ? (rewardPct / riskPct) : 0;
-    return { riskPct: riskPct, rewardPct: rewardPct, ratio: ratio };
-  }
-
   // Shared across the trade row, live price updates, and the Brief page's
   // "What to Watch" cards — one place decides the badge color/label so all
   // three stay consistent. Active is now direction-aware (green for a long
@@ -4889,8 +4884,25 @@
       var change = pct(q.price, q.prevClose);
       var up = change >= 0;
       var badge = computeBadgeInfo(t);
-      var rr = computeRiskReward(t);
       var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
+      // Running P/L for the real position, if one's actually been sent --
+      // same math as the Open Positions table's own fallback estimate
+      // (current quote vs. real fill price/qty), so this number tracks
+      // together with what that table shows rather than showing a
+      // theoretical risk:reward ratio that never changes once a trade's
+      // actually live. A setup that hasn't been sent yet has no real
+      // trade to have a P/L for -- shown as an honest "—", not a fake $0.
+      var plCellHtml;
+      if(openEntry){
+        var isLong = openEntry.direction === 'Long';
+        var pl = (q.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1);
+        var plPct = (q.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1);
+        var plClass = pl >= 0 ? 'up' : 'down';
+        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono ' + plClass + '">' +
+          (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</div></div>';
+      } else {
+        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono">—</div></div>';
+      }
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
@@ -4906,7 +4918,7 @@
             '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
             '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
             '<div class="t-t1 mono" data-label="Target">' + fmt(t.t1) + '</div>' +
-            '<div class="t-rr" data-label="Risk / Reward"><div class="rr-ratio mono">1 : ' + rr.ratio.toFixed(1) + '</div></div>' +
+            plCellHtml +
           '</div>' +
           (openEntry ? '<div class="trade-action-banner done"><span class="action-icon">✓</span><span class="action-text">Sent to Alpaca — open position, ' + openEntry.qty + ' shares</span></div>' : '') +
           '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
