@@ -623,32 +623,24 @@
      moment, a second line appears below the first instead of one
      silently overwriting the other. See pushDemoNarration/
      renderDemoNarration in the script below. */
-  .demo-narration-stack{ display:flex; flex-direction:column; gap:4px; transition: opacity .2s ease; }
-  .demo-narration-line{ font-size:13px; color: var(--paper); line-height:1.5; }
-
-  /* A floating pointer-and-label, positioned via JS at whatever element
-     just changed (a new position row, a signal-fired card, a closed
-     position) -- the flash animations above are easy to miss if you're
-     not already looking right at that spot; this is the "tell me,
-     don't make me notice" fix, same idea as the toasts but anchored to
-     the exact box instead of a fixed corner. */
-  .demo-callout{
-    position:fixed; z-index:500; pointer-events:none;
-    padding:6px 13px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap;
-    background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-    opacity:0; transform: translate(-50%, 6px) scale(.92);
-    transition: opacity .22s ease, transform .22s cubic-bezier(.2,.8,.3,1);
+  .demo-narration-stack{ display:flex; flex-direction:column; gap:6px; transition: opacity .2s ease; }
+  .demo-narration-line{
+    font-size:13px; color: var(--paper); line-height:1.5;
+    padding-left:10px; border-left:3px solid transparent; border-radius:2px;
   }
-  .demo-callout.show{ opacity:1; transform: translate(-50%, 0) scale(1); }
-  .demo-callout::after{
-    content:''; position:absolute; left:50%; bottom:-5px; width:9px; height:9px;
-    background: var(--panel-raised); border-right:1px solid var(--border); border-bottom:1px solid var(--border);
-    transform: translateX(-50%) rotate(45deg);
+  /* The "something just happened" signal now lives right on the
+     narration line itself -- a colored left edge (new/win/loss) plus a
+     brief flash-in -- instead of a separate floating callout pointing
+     elsewhere on the page. This is the one place text is already
+     constantly changing (scanning.. watching.. entering..), so it's the
+     one place that needs to carry the emphasis too. */
+  .demo-narration-line.tone-new{ border-left-color: var(--amber); animation: demoNarrationFlash .9s ease; }
+  .demo-narration-line.tone-win{ border-left-color: var(--gain); animation: demoNarrationFlash .9s ease; }
+  .demo-narration-line.tone-loss{ border-left-color: var(--loss); animation: demoNarrationFlash .9s ease; }
+  @keyframes demoNarrationFlash{
+    0%{ background: var(--amber-glow); }
+    100%{ background: transparent; }
   }
-  .demo-callout.tone-new{ border-color: var(--amber); }
-  .demo-callout.tone-win{ color: var(--gain); border-color: var(--gain); }
-  .demo-callout.tone-loss{ color: var(--loss); border-color: var(--loss); }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
   .labs-control-field{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1 1 160px; }
@@ -9131,23 +9123,33 @@
   var DEMO_NARRATION_COINCIDENCE_MS = 1200;
   var demoNarrationState = { equities: { text: '', at: 0 }, crypto: { text: '', at: 0 } };
 
+  // tone ('new'/'win'/'loss'/null) is what used to drive a separate
+  // floating callout pointing at whatever box on the page just changed --
+  // moved here instead, directly onto the narration line itself, since
+  // this is the one spot that's already constantly updating (scanning..
+  // watching.. entering..) and is the natural place to also carry the
+  // "something just happened" signal, rather than a second, disconnected
+  // location.
   function renderDemoNarration(){
     var el = document.getElementById('demoNarration');
     if(!el) return;
     var eq = demoNarrationState.equities, cr = demoNarrationState.crypto;
-    var lines;
+    var entries;
     if(eq.at && cr.at && Math.abs(eq.at - cr.at) < DEMO_NARRATION_COINCIDENCE_MS){
-      lines = eq.at <= cr.at ? [eq.text, cr.text] : [cr.text, eq.text];
+      entries = eq.at <= cr.at ? [eq, cr] : [cr, eq];
     } else if(eq.at >= cr.at){
-      lines = [eq.text];
+      entries = [eq];
     } else {
-      lines = [cr.text];
+      entries = [cr];
     }
-    el.innerHTML = lines.map(function(t){ return '<div class="demo-narration-line">' + t + '</div>'; }).join('');
+    el.innerHTML = entries.map(function(e){
+      var toneCls = e.tone ? ' tone-' + e.tone : '';
+      return '<div class="demo-narration-line' + toneCls + '">' + e.text + '</div>';
+    }).join('');
   }
 
-  function pushDemoNarration(source, text){
-    demoNarrationState[source] = { text: text, at: Date.now() };
+  function pushDemoNarration(source, text, tone){
+    demoNarrationState[source] = { text: text, at: Date.now(), tone: tone || null };
     var el = document.getElementById('demoNarration');
     if(el) el.style.opacity = '0';
     setTimeout(function(){
@@ -9160,30 +9162,6 @@
   // $60k+ prices show up in the same table cells stock prices always fit
   // in without one.
   function demoFmt(n){ return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-
-  // A floating label pointing at whatever box on the page just changed --
-  // the flash animations elsewhere on this page are easy to miss if
-  // you're not already looking right at that exact spot; this makes sure
-  // you don't have to be. Takes a plain {left,top,width,height} rect
-  // rather than a live element, since the "closed" case needs to show a
-  // callout at a row's last-known position right as that row is removed
-  // from the DOM.
-  function showDemoCallout(rect, text, tone){
-    if(!rect) return;
-    var el = document.createElement('div');
-    el.className = 'demo-callout tone-' + tone;
-    el.textContent = text;
-    document.body.appendChild(el);
-    var left = rect.left + rect.width / 2;
-    var top = rect.top - el.offsetHeight - 14;
-    el.style.left = left + 'px';
-    el.style.top = Math.max(8, top) + 'px';
-    requestAnimationFrame(function(){ el.classList.add('show'); });
-    setTimeout(function(){
-      el.classList.remove('show');
-      setTimeout(function(){ el.remove(); }, 250);
-    }, 1700);
-  }
 
   function renderDemoTradeCard(){
     var wrap = document.getElementById('demoTradeCardWrap');
@@ -9294,8 +9272,6 @@
     var unit = demoUnitLabel(cfg.sym);
     demoAddActivity(cfg.sym + ' — ' + cfg.direction + ', ' + cfg.qty + ' ' + unit + '.', 'Trade entered');
     showDemoToast(cfg.sym, 'Trade entered', cfg.direction + ', ' + cfg.qty + ' ' + unit + '.', 'sent');
-    var rowEl = document.querySelector('#demoPositionsBody [data-symbol="' + cfg.sym + '"]');
-    if(rowEl){ showDemoCallout(rowEl.getBoundingClientRect(), 'Position created ↑', 'new'); }
   }
 
   // Equity has to move with the table, not just on a close -- otherwise
@@ -9315,11 +9291,6 @@
     var p = demoPositions[idx];
     var isLong = p.direction === 'Long';
     var pl = (exitPrice - p.entry) * p.qty * (isLong ? 1 : -1);
-    // Captured before the row disappears -- the callout still needs to
-    // point at where it WAS, even though the element itself is about to
-    // be removed by the re-render just below.
-    var rowEl = document.querySelector('#demoPositionsBody [data-symbol="' + sym + '"]');
-    var rowRect = rowEl ? rowEl.getBoundingClientRect() : null;
     demoPositions.splice(idx, 1);
     demoDayPL += pl;
     demoAccountBalance += pl;
@@ -9328,7 +9299,6 @@
     var plStr = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2);
     demoAddActivity(sym + ' — ' + plStr + (note ? ' (' + note + ')' : '') + '.', 'Trade exited');
     showDemoToast(sym, 'Trade exited', plStr + '.', pl >= 0 ? 'win' : 'loss');
-    showDemoCallout(rowRect, 'Closed ' + plStr, pl >= 0 ? 'win' : 'loss');
   }
 
   // A real floating toast, using the exact same visual system live
@@ -9396,7 +9366,6 @@
     el.classList.remove('demo-moment-flash');
     void el.offsetWidth; // force reflow so the animation can restart if it's already run once
     el.classList.add('demo-moment-flash');
-    showDemoCallout(el.getBoundingClientRect(), 'Signal fired', 'new');
   }
 
   // Each step: clock/narration text, how long to hold before advancing,
@@ -9416,62 +9385,62 @@
   // wins sized bigger so the day still nets positive -- the
   // profit-factor story acted out, not just asserted.
   var demoDayScript = [
-    { clock:'9:30 AM', narration:"Market opens. Shwoop is watching all 16 stocks for the first real move of the day.", duration:2200, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
-    { clock:'9:45 AM', narration:"PLTR's opening range is forming: $24.10 – $24.35. Nothing to do yet — just watching.", duration:2000 },
-    { clock:'10:00 AM', narration:'Breaks above $24.35 on 2.3x normal volume — that\'s the confirmation. Signal fires.', duration:1800, action:function(){
+    { clock:'9:30 AM', narration:"Market opens. Shwoop is watching all 16 stocks for the first real move of the day.", duration:3200, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
+    { clock:'9:45 AM', narration:"PLTR's opening range is forming: $24.10 – $24.35. Nothing to do yet — just watching.", duration:2800 },
+    { clock:'10:00 AM', narration:'Breaks above $24.35 on 2.3x normal volume — that\'s the confirmation. Signal fires.', duration:2600, tone:'new', action:function(){
       demoCardState = { sym:'PLTR', name:'Palantir Technologies', direction:'Long', entry:24.35, stop:24.10, target:24.72, current:24.35, badgeCls:'watching', badgeLabel:'Watching', bannerText:'Signal fired — sizing the order…', bannerDone:false };
       wrapResetFlag(); renderDemoTradeCard(); flashDemoCard();
     }},
-    { clock:'10:01 AM', narration:'42 shares, sized automatically to 1% account risk. Order sent — no clicking, no hesitating.', duration:1900, action:function(){
+    { clock:'10:01 AM', narration:'42 shares, sized automatically to 1% account risk. Order sent — no clicking, no hesitating.', duration:2800, tone:'new', action:function(){
       demoCardState = null; renderDemoTradeCard();
       demoOpenPosition({ sym:'PLTR', direction:'Long', qty:42, entry:24.35, stop:24.10, target:24.72 });
     }},
-    { clock:'10:15 AM', narration:"Meanwhile SOFI's own opening range sets: $8.20 – $8.35. PLTR keeps running in the background.", duration:2000 },
-    { clock:'10:20 AM', narration:'SOFI breaks above $8.35, volume confirms at 2.1x. Signal fires here too.', duration:1800, action:function(){
+    { clock:'10:15 AM', narration:"Meanwhile SOFI's own opening range sets: $8.20 – $8.35. PLTR keeps running in the background.", duration:2800 },
+    { clock:'10:20 AM', narration:'SOFI breaks above $8.35, volume confirms at 2.1x. Signal fires here too.', duration:2600, tone:'new', action:function(){
       demoCardState = { sym:'SOFI', name:'SoFi Technologies', direction:'Long', entry:8.35, stop:8.20, target:8.575, current:8.35, badgeCls:'watching', badgeLabel:'Watching', bannerText:'Signal fired — sizing the order…', bannerDone:false };
       wrapResetFlag(); renderDemoTradeCard(); flashDemoCard();
     }},
-    { clock:'10:21 AM', narration:'118 shares sent. Two positions live at once now — PLTR and SOFI, each sized off the same account risk.', duration:2000, action:function(){
+    { clock:'10:21 AM', narration:'118 shares sent. Two positions live at once now — PLTR and SOFI, each sized off the same account risk.', duration:2800, tone:'new', action:function(){
       demoCardState = null; renderDemoTradeCard();
       demoOpenPosition({ sym:'SOFI', direction:'Long', qty:118, entry:8.35, stop:8.20, target:8.575 });
     }},
-    { clock:'10:35 AM', narration:'PLTR climbing: $24.44.', duration:1400, action:function(){ demoTickPosition('PLTR', 24.44); } },
-    { clock:'10:50 AM', narration:'SOFI giving the move back: $8.28.', duration:1400, action:function(){ demoTickPosition('SOFI', 8.28); } },
-    { clock:'11:05 AM', narration:'SOFI stops out — automatically, exactly as planned. Small and controlled.', duration:2200, action:function(){
+    { clock:'10:35 AM', narration:'PLTR climbing: $24.44.', duration:2000, action:function(){ demoTickPosition('PLTR', 24.44); } },
+    { clock:'10:50 AM', narration:'SOFI giving the move back: $8.28.', duration:2000, action:function(){ demoTickPosition('SOFI', 8.28); } },
+    { clock:'11:05 AM', narration:'SOFI stops out — automatically, exactly as planned. Small and controlled.', duration:3000, tone:'loss', action:function(){
       demoClosePosition('SOFI', 8.20);
     }},
-    { clock:'11:20 AM', narration:'PLTR keeps climbing: $24.58.', duration:1400, action:function(){ demoTickPosition('PLTR', 24.58); } },
-    { clock:'11:40 AM', narration:'PLTR\'s stop trailed up as it climbed — closed automatically for a real gain. No exit to manage, no second-guessing.', duration:2400, action:function(){
+    { clock:'11:20 AM', narration:'PLTR keeps climbing: $24.58.', duration:2000, action:function(){ demoTickPosition('PLTR', 24.58); } },
+    { clock:'11:40 AM', narration:'PLTR\'s stop trailed up as it climbed — closed automatically for a real gain. No exit to manage, no second-guessing.', duration:3200, tone:'win', action:function(){
       demoClosePosition('PLTR', 24.72);
     }},
-    { clock:'11:41 AM', narration:'Two trades down: one stopped small, one ran with a trailing stop. That asymmetry is the whole edge.', duration:2600 },
-    { clock:'12:15 PM', narration:"Midday. COIN's range sets: $203.00 – $205.00.", duration:2000 },
-    { clock:'12:30 PM', narration:'COIN breaks above $205 on strong volume. Signal fires — 4 shares, sized for a $205 stock.', duration:2000, action:function(){
+    { clock:'11:41 AM', narration:'Two trades down: one stopped small, one ran with a trailing stop. That asymmetry is the whole edge.', duration:3400 },
+    { clock:'12:15 PM', narration:"Midday. COIN's range sets: $203.00 – $205.00.", duration:2800 },
+    { clock:'12:30 PM', narration:'COIN breaks above $205 on strong volume. Signal fires — 4 shares, sized for a $205 stock.', duration:2800, tone:'new', action:function(){
       demoOpenPosition({ sym:'COIN', direction:'Long', qty:4, entry:205.00, stop:201.50, target:210.25 });
     }},
-    { clock:'1:00 PM', narration:'COIN running: $208.50.', duration:1500, action:function(){ demoTickPosition('COIN', 208.50); } },
-    { clock:'1:15 PM', narration:'RIVN is doing the opposite — breaking down through $12.80 on heavy selling. This one\'s a short.', duration:2000, action:function(){
+    { clock:'1:00 PM', narration:'COIN running: $208.50.', duration:2100, action:function(){ demoTickPosition('COIN', 208.50); } },
+    { clock:'1:15 PM', narration:'RIVN is doing the opposite — breaking down through $12.80 on heavy selling. This one\'s a short.', duration:2800, tone:'new', action:function(){
       demoOpenPosition({ sym:'RIVN', direction:'Short', qty:48, entry:12.80, stop:13.05, target:12.425 });
     }},
-    { clock:'1:35 PM', narration:'COIN\'s trailing stop locks in a solid gain, well past its original target — the whole point of trailing instead of a fixed cap.', duration:2400, action:function(){
+    { clock:'1:35 PM', narration:'COIN\'s trailing stop locks in a solid gain, well past its original target — the whole point of trailing instead of a fixed cap.', duration:3200, tone:'win', action:function(){
       demoClosePosition('COIN', 212.00, 'trailing stop');
     }},
-    { clock:'1:50 PM', narration:'RIVN drifting against the short: $12.95.', duration:1500, action:function(){ demoTickPosition('RIVN', 12.95); } },
-    { clock:'2:05 PM', narration:'RIVN stops out at $13.05. A loss, but a small, planned one.', duration:2200, action:function(){
+    { clock:'1:50 PM', narration:'RIVN drifting against the short: $12.95.', duration:2100, action:function(){ demoTickPosition('RIVN', 12.95); } },
+    { clock:'2:05 PM', narration:'RIVN stops out at $13.05. A loss, but a small, planned one.', duration:3000, tone:'loss', action:function(){
       demoClosePosition('RIVN', 13.05);
     }},
-    { clock:'2:30 PM', narration:"Late-day setup: MARA's range sets at $15.95 – $16.20.", duration:2000 },
-    { clock:'2:35 PM', narration:'MARA breaks out. Signal fires — 32 shares sent.', duration:1800, action:function(){
+    { clock:'2:30 PM', narration:"Late-day setup: MARA's range sets at $15.95 – $16.20.", duration:2800 },
+    { clock:'2:35 PM', narration:'MARA breaks out. Signal fires — 32 shares sent.', duration:2600, tone:'new', action:function(){
       demoOpenPosition({ sym:'MARA', direction:'Long', qty:32, entry:16.20, stop:15.70, target:16.95 });
     }},
-    { clock:'3:10 PM', narration:'MARA holding up: $16.35.', duration:1500, action:function(){ demoTickPosition('MARA', 16.35); } },
-    { clock:'3:45 PM', narration:'Market\'s closing soon. MARA is still open, so the end-of-day flatten kicks in automatically — intraday positions never carry overnight, no matter how the setup looks.', duration:2600, action:function(){
+    { clock:'3:10 PM', narration:'MARA holding up: $16.35.', duration:2100, action:function(){ demoTickPosition('MARA', 16.35); } },
+    { clock:'3:45 PM', narration:'Market\'s closing soon. MARA is still open, so the end-of-day flatten kicks in automatically — intraday positions never carry overnight, no matter how the setup looks.', duration:3400, action:function(){
       demoTickPosition('MARA', 16.00);
     }},
-    { clock:'3:46 PM', narration:'Flattened at $16.00 — a small loss, but flattened before a real pullback could make it worse.', duration:2400, action:function(){
+    { clock:'3:46 PM', narration:'Flattened at $16.00 — a small loss, but flattened before a real pullback could make it worse.', duration:3200, tone:'loss', action:function(){
       demoClosePosition('MARA', 16.00, 'end-of-day flatten');
     }},
-    { clock:'4:00 PM', narration:'Market closes. 5 trades, 2 wins / 3 losses — same ~40% win rate as always — and the day still nets positive, because the wins ran further than the losses cost. That\'s a profit factor above 1 in miniature.', duration:3600, action:function(){
+    { clock:'4:00 PM', narration:'Market closes. 5 trades, 2 wins / 3 losses — same ~40% win rate as always — and the day still nets positive, because the wins ran further than the losses cost. That\'s a profit factor above 1 in miniature.', duration:4400, action:function(){
       wrapResetFlag(); renderDemoTradeCard();
     }},
   ];
@@ -9482,7 +9451,7 @@
     }
     var step = demoDayScript[demoStepIndex];
     document.getElementById('demoClock').textContent = step.clock;
-    pushDemoNarration('equities', step.narration);
+    pushDemoNarration('equities', step.narration, step.tone);
     if(step.action){ step.action(); }
     demoStepIndex++;
     if(demoPlaying){
@@ -9561,26 +9530,26 @@
   var demoCryptoStep = 0;
   var demoCryptoSym = 'BTC/USD';
 
-  function demoCryptoNarrate(text){
-    pushDemoNarration('crypto', text);
+  function demoCryptoNarrate(text, tone){
+    pushDemoNarration('crypto', text, tone);
   }
 
   var demoCryptoScript = [
-    { narration: "Watching BTC/USD's rolling range — this runs 24/7, completely separate from the stock market's hours.", duration: 3400 },
-    { narration: "Breaks out on strong volume. Signal fires.", duration: 2200 },
-    { narration: "0.0143 BTC sized to the same 1% account risk. Order sent.", duration: 2400, action: function(){
+    { narration: "Watching BTC/USD's rolling range — this runs 24/7, completely separate from the stock market's hours.", duration: 4200 },
+    { narration: "Breaks out on strong volume. Signal fires.", duration: 2800, tone: 'new' },
+    { narration: "0.0143 BTC sized to the same 1% account risk. Order sent.", duration: 3000, tone: 'new', action: function(){
         demoOpenPosition({ sym: demoCryptoSym, direction:'Long', qty:0.0143, entry:67250, stop:66180, target:68855 });
       } },
-    { narration: "Ticking along: $67,610. Notice the equities day can flatten and reset around this — crypto just keeps running.", duration: 6000, action: function(){ demoTickPosition(demoCryptoSym, 67610); } },
-    { narration: "Still open, still watching: $68,050.", duration: 6000, action: function(){ demoTickPosition(demoCryptoSym, 68050); } },
-    { narration: "Trailing stop finally catches the reversal — closed automatically, no market close involved.", duration: 2800, action: function(){ demoClosePosition(demoCryptoSym, 68320, 'trailing stop'); } },
-    { narration: "Back to scanning. Crypto never really stops.", duration: 3200 },
+    { narration: "Ticking along: $67,610. Notice the equities day can flatten and reset around this — crypto just keeps running.", duration: 6500, action: function(){ demoTickPosition(demoCryptoSym, 67610); } },
+    { narration: "Still open, still watching: $68,050.", duration: 6500, action: function(){ demoTickPosition(demoCryptoSym, 68050); } },
+    { narration: "Trailing stop finally catches the reversal — closed automatically, no market close involved.", duration: 3400, tone: 'win', action: function(){ demoClosePosition(demoCryptoSym, 68320, 'trailing stop'); } },
+    { narration: "Back to scanning. Crypto never really stops.", duration: 3800 },
   ];
 
   function demoCryptoRunStep(){
     if(demoCryptoStep >= demoCryptoScript.length){ demoCryptoStep = 0; }
     var step = demoCryptoScript[demoCryptoStep];
-    demoCryptoNarrate(step.narration);
+    demoCryptoNarrate(step.narration, step.tone);
     if(step.action){ step.action(); }
     demoCryptoStep++;
     if(demoCryptoPlaying){
