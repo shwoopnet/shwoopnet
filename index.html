@@ -4979,11 +4979,25 @@
   // label.
   var INTRADAY_TFS = ['5m', '15m', '30m', '1D'];
 
-  // ---------- Historical candles (Twelve Data, free tier) ----------
-  // Same key-handling note as Finnhub: free tier, no billing, fine client-side
-  // for now, must move behind a proxy before ever upgrading to a paid plan.
-  var TWELVE_DATA_API_KEY = 'd71a3d8d70e04286b10e8cf67b4c710d';
-  var TWELVE_DATA_URL = 'https://api.twelvedata.com/time_series';
+  // ---------- Historical candles (via shwoop-server's Twelve Data proxy) ----------
+  // This used to hold a Twelve Data API key directly in this file's own
+  // shipped source -- a real problem, since this is a static file served
+  // from a public GitHub repo, permanently visible to anyone who looks.
+  // All history requests now go through shwoop-server's own proxy
+  // instead (see its src/server.js), which adds the real key server-side
+  // and never lets it leave that process. TWELVE_DATA_PROXY_SECRET below
+  // gates access to that proxy, but since this file is public source
+  // too, it's not a true secret against a determined reader -- same
+  // caveat the old key had. What it actually buys: the real Twelve Data
+  // key never leaves the backend, every request (however it arrives)
+  // shares the same rate-limited queue the screener itself uses (so this
+  // can never be hammered past what the account can afford), and the
+  // endpoint is a narrow, single-purpose history lookup, not a
+  // general-purpose credential usable anywhere else.
+  var TWELVE_DATA_PROXY_BASE = 'https://shwoop-server-s48r.onrender.com';
+  var TWELVE_DATA_URL = TWELVE_DATA_PROXY_BASE + '/twelvedata/time_series';
+  var TWELVE_DATA_PROXY_SECRET = '8e3220b1ca61df425aea8fe85f294ffbd312bbba85596de165e618be3806b48b';
+  function twelveDataProxyHeaders(){ return { Authorization: 'Bearer ' + TWELVE_DATA_PROXY_SECRET }; }
   var historyCache = {};
   var historyIntervals = { '5m':'5min', '15m':'15min', '30m':'30min', '1D':'5min', '1W':'1day', '1M':'1day', '1Y':'1week' };
 
@@ -5106,9 +5120,9 @@
     return scheduleTwelveDataCall(function(){
       var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
         '&interval=' + historyIntervals[tf] + '&outputsize=' + tfConfig[tf].fetchSize +
-        '&timezone=UTC&apikey=' + TWELVE_DATA_API_KEY;
+        '&timezone=UTC';
 
-      return fetch(url)
+      return fetch(url, { headers: twelveDataProxyHeaders() })
         .then(function(res){
           if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
           return res.json();
@@ -5268,8 +5282,8 @@
   function fetchIntradayBacktestHistory(sym, totalBars){
     return scheduleTwelveDataCall(function(){
       var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
-        '&interval=15min&outputsize=' + Math.min(totalBars, 5000) + '&timezone=UTC&apikey=' + TWELVE_DATA_API_KEY;
-      return fetch(url).then(function(res){
+        '&interval=15min&outputsize=' + Math.min(totalBars, 5000) + '&timezone=UTC';
+      return fetch(url, { headers: twelveDataProxyHeaders() }).then(function(res){
         if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
         return res.json();
       }).then(function(data){
@@ -5304,8 +5318,8 @@
       return scheduleTwelveDataCall(function(){
         var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
           '&interval=15min&outputsize=' + remainingBars + '&end_date=' + encodeURIComponent(endDateStr) +
-          '&timezone=UTC&apikey=' + TWELVE_DATA_API_KEY;
-        return fetch(url).then(function(res){
+          '&timezone=UTC';
+        return fetch(url, { headers: twelveDataProxyHeaders() }).then(function(res){
           if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
           return res.json();
         }).then(function(data){
