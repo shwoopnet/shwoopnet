@@ -3665,8 +3665,13 @@
   // equity, independent of per-trade risk% -- there's no hard cap on how
   // many positions can be open at once, just on how much can be at risk
   // in total. Kept in exact lockstep with src/lib/positionSizing.js on
-  // the server; if one changes, the other must too.
-  var TOTAL_RISK_CEILING_PERCENT = 5.5;
+  // the server; if one changes, the other must too. This is this
+  // (equities/intraday) strategy's own independent ceiling -- the server
+  // scopes its matching check to this strategy's own open positions only
+  // (see orchestrator.js's openAlpacaEntries(..., 'intraday')), so a
+  // future second strategy sharing the account gets its own separate
+  // budget instead of competing with this one.
+  var TOTAL_RISK_CEILING_PERCENT = 7;
   // No single symbol can eat more than this share of equity, regardless
   // of what the risk-based share count works out to -- a tight-stop,
   // low-volatility stock can otherwise size into a very large dollar
