@@ -4947,6 +4947,9 @@
   // collapse on the very next automatic refresh, sometimes within
   // seconds. Persisted across renders and re-applied after each rebuild.
   var expandedTradeSyms = {};
+  // Guards the async Alpaca-position patch below against a slow, stale
+  // response landing after a newer render already happened.
+  var intradayPLPatchGen = 0;
 
   // Shared by renderIntradayBlocks (Trade Overview) and renderWhatToWatch
   // (Market Brief) so both surfaces always agree on what's actually open --
@@ -4998,6 +5001,35 @@
     return source.map(function(t){
       if(openPositionBySym[t.sym] && t.status === 'watching') return Object.assign({}, t, { status: 'active' });
       return t;
+    });
+  }
+
+  // Patches every visible Today's Setups P/L cell to match Alpaca's own
+  // unrealized_pl/unrealized_plpc for that symbol -- the same source
+  // Open Positions reads via getAlpacaPositionsCached. The synchronous
+  // render above already painted a P/L figure from this tab's own
+  // locally-polled quote so the cell isn't blank while this resolves;
+  // this replaces that first-paint estimate with the authoritative
+  // number the moment it's available, the same two-phase pattern
+  // loadStatusPositions already uses for Open Positions itself.
+  function patchIntradayPLWithAlpacaPositions(){
+    var myGen = ++intradayPLPatchGen;
+    getAlpacaPositionsCached().then(function(positions){
+      if(myGen !== intradayPLPatchGen) return;
+      var bySym = {};
+      (positions || []).forEach(function(p){ bySym[p.symbol] = p; });
+      journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).forEach(function(j){
+        var live = bySym[j.sym];
+        var cell = document.getElementById('pl-' + j.sym);
+        if(!live || !cell) return;
+        var pl = parseFloat(live.unrealized_pl);
+        var plPct = parseFloat(live.unrealized_plpc) * 100;
+        var plClass = pl >= 0 ? 'up' : 'down';
+        cell.className = 'rr-ratio mono ' + plClass;
+        cell.textContent = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)';
+      });
+    }).catch(function(err){
+      console.error('Today\'s Setups P/L patch failed:', err);
     });
   }
 
@@ -5063,10 +5095,18 @@
         var pl = (liveQuote.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1);
         var plPct = (liveQuote.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1);
         var plClass = pl >= 0 ? 'up' : 'down';
-        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono ' + plClass + '">' +
+        // This local-quote figure is only the first-paint value -- it's
+        // immediately patched below (once getAlpacaPositionsCached
+        // resolves) to Alpaca's own unrealized_pl/unrealized_plpc, the
+        // exact same source Open Positions reads. Without that patch,
+        // the two tables disagree by however much our own quote poll
+        // happens to differ from Alpaca's real fill/position tracking --
+        // occasionally even opposite signs on a position sitting near
+        // breakeven.
+        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono ' + plClass + '" id="pl-' + t.sym + '">' +
           (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</div></div>';
       } else {
-        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono">—</div></div>';
+        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono" id="pl-' + t.sym + '">—</div></div>';
       }
       // Once a position is actually open, "Why this trade" should keep
       // showing the reasoning that was true AT ENTRY, not whatever the
@@ -5111,6 +5151,8 @@
           '</div>' +
         '</div>';
     }).join('');
+
+    patchIntradayPLWithAlpacaPositions();
 
     el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
       btn.addEventListener('click', function(){
