@@ -8054,11 +8054,23 @@
   }
   document.getElementById('historyClose').addEventListener('click', closeHistory);
   document.getElementById('historyClearBtn').addEventListener('click', function(){
+    // This panel renders BOTH market alerts (alertHistory) and trade
+    // activity (systemActivityLog) merged together in renderHistoryList —
+    // clearing only alertHistory left every trade-activity entry sitting
+    // right there, so the button looked like it did nothing.
+    if(!confirm('Clear all alerts and trade activity? This can\'t be undone.')) return;
     alertHistory = [];
+    systemActivityLog = [];
     renderHistoryList();
+    renderActivityLog();
     if(window.__shwoopAPI && alertsUid){
       window.__shwoopAPI.saveAlerts(alertsUid, [], new Date().toISOString().slice(0,10)).catch(function(err){
         console.error('Failed to clear alerts:', err);
+      });
+    }
+    if(window.__shwoopAPI && currentUid){
+      window.__shwoopAPI.saveActivityLog(currentUid, []).catch(function(err){
+        console.error('Failed to clear activity log:', err);
       });
     }
   });
