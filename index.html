@@ -38,8 +38,6 @@
     --gain-glow: rgba(51,193,126,0.16);
     --loss: #E85C51;
     --loss-glow: rgba(232,92,81,0.16);
-    --ma20-color: #E9A23B;
-    --ma50-color: #6FA8DC;
     --radius: 6px;
   }
 
@@ -1991,10 +1989,6 @@
             </div>
             <div class="layout-divider"></div>
             <div class="layout-stepper">
-              <span class="step-name">Moving averages</span>
-              <button class="chart-tool-btn active" id="maToggleBtn">On</button>
-            </div>
-            <div class="layout-stepper">
               <span class="step-name">OHLC readout</span>
               <button class="chart-tool-btn active" id="ohlcToggleBtn">On</button>
             </div>
@@ -2763,19 +2757,6 @@
     } else {
       watchlist.push({ sym: sym, name: name || sym, price: price, prevClose: prevClose });
     }
-  }
-
-  // Rolling SMA across a full bar series, for drawing as a line on the chart.
-  function computeSMASeries(bars, period){
-    var closes = bars.map(function(b){ return b.c; });
-    var series = new Array(closes.length).fill(null);
-    var runningSum = 0;
-    for(var i = 0; i < closes.length; i++){
-      runningSum += closes[i];
-      if(i >= period){ runningSum -= closes[i - period]; }
-      if(i >= period - 1){ series[i] = runningSum / period; }
-    }
-    return series;
   }
 
   // ---------- Opening-range breakout + volume confirmation ----------
@@ -5098,7 +5079,6 @@
     '1Y':  { volFactor:0.03,   fetchSize:154, maxVisible:104, defaultVisible:52 }
   };
   var chartStates = {}; // per-symbol: { data, viewStart, viewEnd, scale, tf }
-  var showMovingAverages = true;
   var showOHLCReadout = true;
   var MIN_VISIBLE_CANDLES = 8;
   // 1D is genuinely intraday — today's actual session, 5-minute bars —
@@ -6084,40 +6064,6 @@
       parts.push('<rect x="'+(x-cw/2)+'" y="'+bodyTop+'" width="'+cw+'" height="'+bodyH+'" fill="'+color+'"/>');
     });
 
-    // Moving averages — computed from the FULL dataset (not just the visible
-    // slice) so the line has correct lookback even when zoomed into a
-    // narrow recent window, then only the visible portion is drawn.
-    if(opts.showMA && opts.fullData && opts.fullData.length >= 2){
-      var viewStart = opts.viewStart || 0;
-      var cacheHost = opts.maCacheHost;
-      function getMASeries(period){
-        if(cacheHost){
-          if(!cacheHost._maCache){ cacheHost._maCache = {}; }
-          if(!cacheHost._maCache[period]){
-            cacheHost._maCache[period] = computeSMASeries(opts.fullData, period);
-          }
-          return cacheHost._maCache[period];
-        }
-        return computeSMASeries(opts.fullData, period);
-      }
-      function buildMALine(period, color){
-        var series = getMASeries(period);
-        var pts = [];
-        for(var i = 0; i < data.length; i++){
-          var seriesIdx = viewStart + i;
-          var val = series[seriesIdx];
-          if(val === null || val === undefined) continue;
-          var px = i * xStep + xStep / 2;
-          pts.push(px + ',' + y(val));
-        }
-        if(pts.length > 1){
-          parts.push('<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + color + '" stroke-width="1.5" opacity="0.9"/>');
-        }
-      }
-      buildMALine(20, 'var(--ma20-color)');
-      buildMALine(50, 'var(--ma50-color)');
-    }
-
     // Entry/stop/target reference lines — the same levels shown as text in
     // the row above, now visible directly against price action. Drawn only
     // when they actually fall within the visible price range, so a
@@ -6203,8 +6149,7 @@
       levels = { entry: trade.entry, stop: trade.stop, target: trade.t1 };
     }
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
-      showMA: showMovingAverages, fullData: state.data, viewStart: state.viewStart,
-      priceCenterOffset: state.priceCenterOffset, maCacheHost: state,
+      priceCenterOffset: state.priceCenterOffset,
       levels: levels
     });
   }
@@ -6923,7 +6868,7 @@
     }
   });
 
-  var layoutPrefs = { width:62, height:200, text:12.5, showMA:true, showOHLC:true };
+  var layoutPrefs = { width:62, height:200, text:12.5, showOHLC:true };
   var layoutLimits = {
     width:  [40, 85, 5],
     height: [120, 340, 20],
@@ -6946,12 +6891,8 @@
     document.getElementById('textDec').disabled = layoutPrefs.text <= layoutLimits.text[0];
     document.getElementById('textInc').disabled = layoutPrefs.text >= layoutLimits.text[1];
 
-    showMovingAverages = layoutPrefs.showMA;
     showOHLCReadout = layoutPrefs.showOHLC;
-    var maBtn = document.getElementById('maToggleBtn');
     var ohlcBtn = document.getElementById('ohlcToggleBtn');
-    maBtn.textContent = layoutPrefs.showMA ? 'On' : 'Off';
-    maBtn.classList.toggle('active', layoutPrefs.showMA);
     ohlcBtn.textContent = layoutPrefs.showOHLC ? 'On' : 'Off';
     ohlcBtn.classList.toggle('active', layoutPrefs.showOHLC);
 
@@ -6973,15 +6914,10 @@
   document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
 
   document.getElementById('layoutResetBtn').addEventListener('click', function(){
-    layoutPrefs = { width:62, height:200, text:12.5, showMA:true, showOHLC:true };
+    layoutPrefs = { width:62, height:200, text:12.5, showOHLC:true };
     applyLayout();
   });
 
-  document.getElementById('maToggleBtn').addEventListener('click', function(){
-    layoutPrefs.showMA = !layoutPrefs.showMA;
-    applyLayout();
-    renderAllTradeCharts();
-  });
   document.getElementById('ohlcToggleBtn').addEventListener('click', function(){
     layoutPrefs.showOHLC = !layoutPrefs.showOHLC;
     applyLayout();
@@ -6994,7 +6930,6 @@
         layoutPrefs.width = saved.width;
         layoutPrefs.height = saved.height;
         layoutPrefs.text = saved.text;
-        if(typeof saved.showMA === 'boolean'){ layoutPrefs.showMA = saved.showMA; }
         if(typeof saved.showOHLC === 'boolean'){ layoutPrefs.showOHLC = saved.showOHLC; }
       }
     }catch(e){}
