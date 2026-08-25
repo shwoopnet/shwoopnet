@@ -3314,9 +3314,29 @@
   }
 
   // ---------- Trade Overview rows ----------
-  function statCta(){
-    var active = intradayTrades.filter(function(t){ return t.status==='active'; }).length;
-    document.getElementById('ctaStat').textContent = intradayTrades.length + ' stocks you\'re tracking today, ' + active + ' with open positions';
+  // Was reading intradayTrades directly -- this tab's own local re-scan,
+  // which sits empty almost always now that the backend does the real
+  // screening (see runIntradayScreener's own early-return comment). That
+  // showed a permanent, wrong "0 stocks you're tracking today, 0 with
+  // open positions" directly underneath What to Watch's own card list,
+  // even while those cards were correctly populated from the backend's
+  // picks. Defaults to recomputing the exact same merged source
+  // renderWhatToWatch builds when no source is passed in, so every
+  // caller (including the couple of leftover local-scanner call sites)
+  // gets the real numbers rather than needing to be updated individually.
+  function statCta(source){
+    if(!source){
+      var base = (backendIntradayPicks && backendIntradayPicks.length) ? backendIntradayPicks.map(buildTradeFromPick) : intradayTrades;
+      source = withOpenPositionsMergedIn(base);
+    }
+    // "With open positions" means a real, current-account Alpaca
+    // position exists for that symbol -- not just an ORB status label
+    // like 'active'/'trailing', which can be true for a signal that was
+    // never actually sent to a broker at all.
+    var openCount = source.filter(function(t){
+      return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
+    }).length;
+    document.getElementById('ctaStat').textContent = source.length + ' stocks you\'re tracking today, ' + openCount + ' with open positions';
   }
 
   function buildActionHTML(t){
@@ -9371,6 +9391,7 @@
     // Overview but simply be missing here, the two pages disagreeing
     // about what's actually open.
     source = withOpenPositionsMergedIn(source);
+    statCta(source);
     el.innerHTML = source.map(function(t){
       var badge = computeBadgeInfo(t);
       return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
