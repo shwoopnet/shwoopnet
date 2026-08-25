@@ -1602,6 +1602,16 @@
           // positionDriftCheckedAt to tell those apart.
           positionDriftFindings: Array.isArray(data.positionDriftFindings) ? data.positionDriftFindings : [],
           positionDriftCheckedAt: data.positionDriftCheckedAt || null,
+          // Account summary + live positions the backend already fetches
+          // from Alpaca every minute (see shwoop-server's
+          // syncAccountSnapshot) -- delivered here over the same live
+          // listener instead of this tab making its own round-trip to
+          // Alpaca on every page load. Absence means the backend hasn't
+          // synced yet (e.g. a fresh deploy); the caller falls back to a
+          // direct fetch in that case, not a fake empty state.
+          serverAccountSummary: data.serverAccountSummary || null,
+          serverPositions: Array.isArray(data.serverPositions) ? data.serverPositions : null,
+          serverAccountSnapshotAt: data.serverAccountSnapshotAt || null,
           // The actual override fields (distinct from the server*
           // fields above, which are the backend's read-only EFFECTIVE
           // mirrors) -- these are what this tab's own controls need to
@@ -3214,6 +3224,17 @@
   // manual review, never auto-applied to journalEntries.
   var backendPositionDrift = [];
   var backendPositionDriftCheckedAt = null;
+  // Account summary + positions synced by the backend (see
+  // getAlpacaAccountSummaryCached/getAlpacaPositionsCached below for how
+  // these get preferred over a direct Alpaca fetch).
+  var backendAccountSummary = null;
+  var backendPositions = null;
+  var backendAccountSnapshotAt = null;
+  // Same reasoning as BACKEND_HEARTBEAT_STALE_MS below: the backend
+  // writes this every ~60s regardless of market hours, so allow one
+  // missed tick plus write latency before treating it as too stale to
+  // trust and falling back to a direct Alpaca fetch instead.
+  var SERVER_ACCOUNT_SNAPSHOT_STALE_MS = 150000;
   // The actual override values on file (null = no override written, server
   // is using its own env-var default) -- distinct from
   // backendScreenerEnabledOnServer/backendAutoTradeEnabledOnServer above,
@@ -3247,6 +3268,9 @@
       backendLastCycleSummary = data.intradayLastCycleSummary;
       backendPositionDrift = data.positionDriftFindings;
       backendPositionDriftCheckedAt = data.positionDriftCheckedAt;
+      backendAccountSummary = data.serverAccountSummary;
+      backendPositions = data.serverPositions;
+      backendAccountSnapshotAt = data.serverAccountSnapshotAt;
       autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
@@ -4184,7 +4208,26 @@
   // -- collapses those bursts into one real request.
   var alpacaPositionsCache = { data: null, at: 0, inflight: null };
   var ALPACA_POSITIONS_CACHE_MS = 8000;
+  // Reconstructs the shape every caller here already expects from a raw
+  // Alpaca /v2/positions response, from the backend's own synced
+  // snapshot instead -- delivered instantly over the live Firestore
+  // listener rather than this tab making its own round-trip to Alpaca.
+  // Only used while that snapshot is actually fresh (see
+  // SERVER_ACCOUNT_SNAPSHOT_STALE_MS); a stale or missing snapshot falls
+  // through to the direct-fetch path below exactly as before.
+  function backendPositionsAsAlpacaShape(){
+    return backendPositions.map(function(p){
+      return {
+        symbol: p.symbol, qty: p.qty, side: p.side,
+        avg_entry_price: p.avgEntryPrice, current_price: p.currentPrice,
+        unrealized_pl: p.unrealizedPl, unrealized_plpc: p.unrealizedPlpc / 100
+      };
+    });
+  }
   function getAlpacaPositionsCached(){
+    if(backendPositions && backendAccountSnapshotAt && (Date.now() - backendAccountSnapshotAt) < SERVER_ACCOUNT_SNAPSHOT_STALE_MS){
+      return Promise.resolve(backendPositionsAsAlpacaShape());
+    }
     if(alpacaPositionsCache.inflight) return alpacaPositionsCache.inflight;
     if(alpacaPositionsCache.data && (Date.now() - alpacaPositionsCache.at) < ALPACA_POSITIONS_CACHE_MS){
       return Promise.resolve(alpacaPositionsCache.data);
@@ -4212,6 +4255,12 @@
   var alpacaAccountSummaryCache = { data: null, at: 0, inflight: null };
   var ALPACA_ACCOUNT_CACHE_MS = 8000;
   function getAlpacaAccountSummaryCached(){
+    if(backendAccountSummary && backendAccountSnapshotAt && (Date.now() - backendAccountSnapshotAt) < SERVER_ACCOUNT_SNAPSHOT_STALE_MS){
+      return Promise.resolve({
+        equity: backendAccountSummary.equity, cash: backendAccountSummary.cash,
+        last_equity: backendAccountSummary.lastEquity, buying_power: backendAccountSummary.buyingPower
+      });
+    }
     if(alpacaAccountSummaryCache.inflight) return alpacaAccountSummaryCache.inflight;
     if(alpacaAccountSummaryCache.data && (Date.now() - alpacaAccountSummaryCache.at) < ALPACA_ACCOUNT_CACHE_MS){
       return Promise.resolve(alpacaAccountSummaryCache.data);
