@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// This app is single-owner: every real user document lives at
+// users/{uid}, one document per (currently: one) account, holding
+// journalEntries/activityLog/alertHistory/screenerPicks/alpacaKeyId/
+// alpacaSecretKey and everything else the frontend reads and writes
+// (see index.html's watch*/save* API methods -- there are no
+// subcollections anywhere in this app).
+//
+// Without this file, a fresh Firestore database defaults to denying
+// all client access -- so if the app has been working, some rule
+// already exists in the console; this file is meant to REPLACE
+// whatever that is with something that actually matches the app's own
+// client-side lockdown (SHWOOP_OWNER_EMAIL in index.html), rather than
+// relying on that client-side check alone. shwoop-server's backend
+// uses the Admin SDK, which bypasses these rules entirely -- this only
+// ever constrains requests from a browser using the client SDK.
+//
+// Deploy with: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == uid
+        && request.auth.token.email == 'heiszcam@gmail.com';
+    }
+
+    // Everything else is denied by default -- Firestore rules deny any
+    // request that doesn't match an explicit allow rule, so no further
+    // catch-all is needed, but this comment documents that this is
+    // intentional, not an oversight.
+  }
+}
