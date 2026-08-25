@@ -3533,7 +3533,13 @@
         var live = bySym[j.sym];
         if(!live) return;
         var liveSide = live.side === 'short' ? 'Short' : 'Long';
-        var qtyMatches = Math.abs(parseFloat(live.qty) - j.qty) < 0.5;
+        // Alpaca reports a short position's qty as negative (e.g. -118);
+        // the journal always stores qty as a positive share count
+        // regardless of direction, matching how it's displayed. Comparing
+        // the raw signed value against that always-positive number made
+        // every short position fail this check (abs(-118 - 118) = 236,
+        // nowhere near a match) while longs happened to work by accident.
+        var qtyMatches = Math.abs(Math.abs(parseFloat(live.qty)) - j.qty) < 0.5;
         if(liveSide === j.direction && qtyMatches){
           j.accountKeyId = currentKeyId;
           changed = true;
