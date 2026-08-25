@@ -4640,7 +4640,14 @@
       var filled = orders.filter(function(o){ return o.status === 'filled' && o.filled_at && o.filled_avg_price; });
       var resolved = [];
       openAlpacaEntries.forEach(function(entry){
-        var entryTime = new Date(entry.date).getTime();
+        // entryFilledAt (set by the backend once it reconciles the real
+        // fill) is precise to the second -- entry.date is a bare
+        // "YYYY-MM-DD". Intraday can legitimately re-enter the same
+        // symbol more than once in a day, and with date-only precision
+        // both same-day entries fall back to midnight, so whichever one
+        // runs here could match the same earliest closing order and
+        // attribute the wrong fill's price to the wrong entry.
+        var entryTime = entry.entryFilledAt ? new Date(entry.entryFilledAt).getTime() : new Date(entry.date).getTime();
         var exitSide = entry.direction === 'Long' ? 'sell' : 'buy';
         var candidates = filled.filter(function(o){
           return o.symbol === entry.sym && o.side === exitSide && new Date(o.filled_at).getTime() >= entryTime;
