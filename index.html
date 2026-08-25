@@ -8380,7 +8380,8 @@
   var statusPositionsSortDir = 1; // 1 = ascending, -1 = descending
   var STATUS_POSITIONS_COLUMNS = [
     { key:'sym', label:'Symbol' }, { key:'direction', label:'Dir' }, { key:'qty', label:'Qty' },
-    { key:'entry', label:'Entry' }, { key:'current', label:'Current' }, { key:'pl', label:'P&L' },
+    { key:'entry', label:'Entry' }, { key:'current', label:'Current' }, { key:'size', label:'Size' },
+    { key:'pl', label:'P&L' },
     { key:'stop', label:'Stop' }, { key:'t1', label:'Target' }, { key:'opened', label:'Opened' }
   ];
 
@@ -8433,14 +8434,18 @@
           pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
           plPct = (current - j.entry) / j.entry * 100 * (isLong ? 1 : -1);
         }
-        return { j: j, current: current, pl: pl, plPct: plPct };
+        // Current market value of the position -- qty at the live price,
+        // not the entry price, so this tracks the actual $ currently
+        // deployed rather than a fixed snapshot from whenever it opened.
+        var sizeDollar = j.qty * current;
+        return { j: j, current: current, pl: pl, plPct: plPct, sizeDollar: sizeDollar };
       });
 
       if(statusPositionsSortKey){
         var key = statusPositionsSortKey, dir = statusPositionsSortDir;
         rows.sort(function(a, b){
-          var av = key === 'current' ? a.current : key === 'pl' ? a.pl : key === 'opened' ? (a.j.date || '') : a.j[key];
-          var bv = key === 'current' ? b.current : key === 'pl' ? b.pl : key === 'opened' ? (b.j.date || '') : b.j[key];
+          var av = key === 'current' ? a.current : key === 'pl' ? a.pl : key === 'size' ? a.sizeDollar : key === 'opened' ? (a.j.date || '') : a.j[key];
+          var bv = key === 'current' ? b.current : key === 'pl' ? b.pl : key === 'size' ? b.sizeDollar : key === 'opened' ? (b.j.date || '') : b.j[key];
           if(av < bv) return -1 * dir;
           if(av > bv) return 1 * dir;
           return 0;
@@ -8462,6 +8467,7 @@
               '<td>' + j.qty + '</td>' +
               '<td>' + fmt(j.entry) + '</td>' +
               '<td>' + fmt(r.current) + '</td>' +
+              '<td class="mono">$' + r.sizeDollar.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>' +
               '<td class="' + plClass + '">' + (r.pl >= 0 ? '+' : '-') + '$' + Math.abs(r.pl).toFixed(2) + ' (' + (r.plPct >= 0 ? '+' : '') + r.plPct.toFixed(2) + '%)</td>' +
               '<td>' + fmt(j.stop) + '</td>' +
               '<td>' + fmt(j.t1) + '</td>' +
