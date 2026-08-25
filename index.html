@@ -3129,7 +3129,12 @@
     // let it collide with the backend's own requests -- this alone
     // should roughly halve real-world Twelve Data usage.
     if(!alpacaAutoTradeIntradayEnabled){
-      updateIntradayStatus('Screening handled by the 24/7 backend now — see Backend Status on Trade Overview', true);
+      // This status line lives inside the Today's Setups card, which is
+      // already on Trade Overview -- the previous copy told the reader
+      // to go see "Backend Status on Trade Overview" from the page they
+      // were already looking at. Points at the actual other card by
+      // name instead of a page they haven't navigated away from.
+      updateIntradayStatus('Screening handled by the 24/7 backend now — see the Backend Status card for cycle details', true);
       return;
     }
     if(!isUsMarketOpen()){
@@ -4907,24 +4912,19 @@
   // (backend or local) was actually shown, not always intradayTrades.
   var lastRenderedSetups = [];
 
-  function renderIntradayBlocks(){
-    var el = document.getElementById('intradayBlocks');
-    if(!el) return;
-    // Prefers the backend's own picks (computed 24/7, independent of
-    // whether this tab is open) over this tab's local re-scan -- same
-    // preference order renderWhatToWatch already uses, for the same
-    // reason: the backend is the authoritative, always-on source now.
-    var source = (backendIntradayPicks && backendIntradayPicks.length)
-      ? backendIntradayPicks.map(buildTradeFromPick)
-      : intradayTrades;
-    // A symbol with a real, currently-open position stays visible here
-    // regardless of whether the backend's latest scan still lists it --
-    // actively holding a position is a stronger, more durable signal than
-    // this cycle's screener output, which can legitimately go to zero
-    // picks (a quiet cycle, or every symbol resolving out) even while
-    // real positions remain open. A setup with no real position just
-    // follows the backend's picks list normally -- it disappears the
-    // moment the backend itself stops listing it.
+  // Shared by renderIntradayBlocks (Trade Overview) and renderWhatToWatch
+  // (Market Brief) so both surfaces always agree on what's actually open --
+  // a real, currently-open position stays visible regardless of whether
+  // the backend's latest scan cycle still lists it (a quiet cycle, or
+  // every symbol resolving out, can legitimately drop it from the picks
+  // list even while the position remains genuinely open), and is never
+  // left showing a stale 'watching' status from before it was entered.
+  // Previously only renderIntradayBlocks did this merge, so a symbol
+  // still open on Alpaca but no longer in backendIntradayPicks would
+  // show correctly on Trade Overview yet simply not appear at all on
+  // the Brief page's What to Watch -- the two pages disagreeing about
+  // what's actually open.
+  function withOpenPositionsMergedIn(source){
     var openPositionBySym = {};
     journalEntries.forEach(function(j){
       if(isOpenAlpacaPositionForCurrentAccount(j)) openPositionBySym[j.sym] = j;
@@ -4959,10 +4959,23 @@
     // "Watching" filter either, even if the backend's own pick for it
     // still carries status 'watching' (its own scan and the fact that a
     // position is open aren't always in sync within the same minute).
-    source = source.map(function(t){
+    return source.map(function(t){
       if(openPositionBySym[t.sym] && t.status === 'watching') return Object.assign({}, t, { status: 'active' });
       return t;
     });
+  }
+
+  function renderIntradayBlocks(){
+    var el = document.getElementById('intradayBlocks');
+    if(!el) return;
+    // Prefers the backend's own picks (computed 24/7, independent of
+    // whether this tab is open) over this tab's local re-scan -- same
+    // preference order renderWhatToWatch already uses, for the same
+    // reason: the backend is the authoritative, always-on source now.
+    var source = (backendIntradayPicks && backendIntradayPicks.length)
+      ? backendIntradayPicks.map(buildTradeFromPick)
+      : intradayTrades;
+    source = withOpenPositionsMergedIn(source);
     lastRenderedSetups = source;
     var hiddenCount = source.filter(function(t){ return t.status === 'watching'; }).length;
     var visible = todaysSetupsShowAll ? source : source.filter(function(t){ return t.status !== 'watching'; });
@@ -9342,6 +9355,13 @@
     var source = (backendIntradayPicks && backendIntradayPicks.length)
       ? backendIntradayPicks.map(buildTradeFromPick)
       : intradayTrades;
+    // Same merge Trade Overview's Today's Setups applies -- without it,
+    // a real open position that had already dropped out of the
+    // backend's current picks list (a quiet scan cycle, or the symbol
+    // resolving out of fresh candidates) would show correctly on Trade
+    // Overview but simply be missing here, the two pages disagreeing
+    // about what's actually open.
+    source = withOpenPositionsMergedIn(source);
     el.innerHTML = source.map(function(t){
       var badge = computeBadgeInfo(t);
       return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
