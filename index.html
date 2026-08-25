@@ -4927,6 +4927,14 @@
   // click handler below so it looks up chart data from whichever source
   // (backend or local) was actually shown, not always intradayTrades.
   var lastRenderedSetups = [];
+  // renderIntradayBlocks rebuilds el.innerHTML from scratch on every call
+  // (the quote loop, journal changes, and screener updates all trigger
+  // it, independent of anything the user is doing) -- every card's chart
+  // starts back at hidden in that fresh HTML, so without tracking which
+  // symbols were manually expanded, an open chart would silently
+  // collapse on the very next automatic refresh, sometimes within
+  // seconds. Persisted across renders and re-applied after each rebuild.
+  var expandedTradeSyms = {};
 
   // Shared by renderIntradayBlocks (Trade Overview) and renderWhatToWatch
   // (Market Brief) so both surfaces always agree on what's actually open --
@@ -5097,31 +5105,55 @@
         var sym = btn.dataset.toggle;
         var detail = document.getElementById('chartwrap-' + sym);
         if(!detail) return;
-        var nowHidden = detail.hasAttribute('hidden');
-        if(nowHidden){
-          detail.removeAttribute('hidden');
-          btn.setAttribute('aria-expanded', 'true');
-          btn.classList.add('expanded');
-          // Chart rendering deliberately deferred until the card is
-          // actually expanded, not rendered into every hidden card up
-          // front -- rendering into a zero-dimension hidden SVG
-          // produces a broken chart, and most cards are never opened.
-          var trade = lastRenderedSetups.filter(function(x){ return x.sym === sym; })[0];
-          if(trade){
-            var svg = document.getElementById('chart-' + sym);
-            if(svg && !svg.dataset.rendered){
-              svg.dataset.rendered = '1';
-              renderChartInto(svg, sym, trade.entry, '1D');
-              setupChartInteractivity(sym);
-            }
-          }
+        if(detail.hasAttribute('hidden')){
+          expandedTradeSyms[sym] = true;
+          expandTradeCard(sym, detail, btn);
         } else {
-          detail.setAttribute('hidden', '');
-          btn.setAttribute('aria-expanded', 'false');
-          btn.classList.remove('expanded');
+          delete expandedTradeSyms[sym];
+          collapseTradeCard(detail, btn);
         }
       });
     });
+
+    // Re-applies expanded state that survived from before this render --
+    // otherwise every periodic refresh (quote loop, journal change,
+    // screener update) silently closes whatever the user had open.
+    Object.keys(expandedTradeSyms).forEach(function(sym){
+      var detail = document.getElementById('chartwrap-' + sym);
+      var btn = el.querySelector('.chevron[data-toggle="' + sym + '"]');
+      if(!detail || !btn){
+        // No longer rendered this pass (setup dropped out entirely) --
+        // don't keep it marked expanded for a card that doesn't exist.
+        delete expandedTradeSyms[sym];
+        return;
+      }
+      expandTradeCard(sym, detail, btn);
+    });
+  }
+
+  function expandTradeCard(sym, detail, btn){
+    detail.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+    btn.classList.add('expanded');
+    // Chart rendering deliberately deferred until the card is actually
+    // expanded, not rendered into every hidden card up front --
+    // rendering into a zero-dimension hidden SVG produces a broken
+    // chart, and most cards are never opened.
+    var trade = lastRenderedSetups.filter(function(x){ return x.sym === sym; })[0];
+    if(trade){
+      var svg = document.getElementById('chart-' + sym);
+      if(svg && !svg.dataset.rendered){
+        svg.dataset.rendered = '1';
+        renderChartInto(svg, sym, trade.entry, '1D');
+        setupChartInteractivity(sym);
+      }
+    }
+  }
+
+  function collapseTradeCard(detail, btn){
+    detail.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.classList.remove('expanded');
   }
 
   // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
