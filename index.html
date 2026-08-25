@@ -1589,6 +1589,15 @@
           intradayCycleError: data.intradayCycleError || null,
           intradayCycleErrorAt: data.intradayCycleErrorAt || null,
           intradayLastCycleSummary: data.intradayLastCycleSummary || null,
+          // Position drift -- a mismatch between what the journal thinks
+          // is open and what Alpaca actually holds (see
+          // shwoop-server/src/safety/positionDrift.js). Deliberately
+          // surfaced for manual review only; nothing here auto-fixes a
+          // financial record. An empty/absent array means "no drift
+          // detected as of the last check", not "never checked" -- use
+          // positionDriftCheckedAt to tell those apart.
+          positionDriftFindings: Array.isArray(data.positionDriftFindings) ? data.positionDriftFindings : [],
+          positionDriftCheckedAt: data.positionDriftCheckedAt || null,
           // The actual override fields (distinct from the server*
           // fields above, which are the backend's read-only EFFECTIVE
           // mirrors) -- these are what this tab's own controls need to
@@ -3161,7 +3170,7 @@
   // candidates unfiltered in that case rather than block on it.
   function fetchCurrentEquityForSizing(){
     if(!alpacaConnected) return Promise.resolve(null);
-    return fetchAlpacaAccountSummary().then(function(acct){
+    return getAlpacaAccountSummaryCached().then(function(acct){
       var equity = parseFloat(acct.equity || 0);
       return equity > 0 ? equity : null;
     }).catch(function(){ return null; });
@@ -3196,6 +3205,11 @@
   var backendCycleError = null;
   var backendCycleErrorAt = null;
   var backendLastCycleSummary = null;
+  // Journal/Alpaca drift findings (see shwoop-server's
+  // src/safety/positionDrift.js) -- detection-only, surfaced here for
+  // manual review, never auto-applied to journalEntries.
+  var backendPositionDrift = [];
+  var backendPositionDriftCheckedAt = null;
   // The actual override values on file (null = no override written, server
   // is using its own env-var default) -- distinct from
   // backendScreenerEnabledOnServer/backendAutoTradeEnabledOnServer above,
@@ -3227,6 +3241,8 @@
       backendCycleError = data.intradayCycleError;
       backendCycleErrorAt = data.intradayCycleErrorAt;
       backendLastCycleSummary = data.intradayLastCycleSummary;
+      backendPositionDrift = data.positionDriftFindings;
+      backendPositionDriftCheckedAt = data.positionDriftCheckedAt;
       autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
@@ -3670,7 +3686,10 @@
   }
 
   // Fetches real, current account data — never assumes a cached or
-  // stale balance — and works out a safe order size for one trade: the
+  // stale balance (deliberately calls fetchAlpacaAccountSummary directly,
+  // not getAlpacaAccountSummaryCached — sizing a real order is the one
+  // caller that must never read a balance that could be seconds stale) —
+  // and works out a safe order size for one trade: the
   // risk-based share count, reduced further if it would exceed
   // available cash, and skipped entirely if it would push total risk
   // across all open positions past a hard ceiling. Returns
@@ -4178,6 +4197,33 @@
     return alpacaPositionsCache.inflight;
   }
 
+  // Same problem, same fix, for the account summary: the Alpaca dock
+  // refresh, the Status page, and the trade-count bubble color all fetch
+  // this independently, on their own overlapping timers/Firestore
+  // snapshots, purely to READ and display it -- not to size or submit a
+  // real order. computeSizedOrder deliberately does NOT use this cache
+  // (see its own comment) since sizing a real trade must always read the
+  // truly current balance, never one that could be up to
+  // ALPACA_ACCOUNT_CACHE_MS stale.
+  var alpacaAccountSummaryCache = { data: null, at: 0, inflight: null };
+  var ALPACA_ACCOUNT_CACHE_MS = 8000;
+  function getAlpacaAccountSummaryCached(){
+    if(alpacaAccountSummaryCache.inflight) return alpacaAccountSummaryCache.inflight;
+    if(alpacaAccountSummaryCache.data && (Date.now() - alpacaAccountSummaryCache.at) < ALPACA_ACCOUNT_CACHE_MS){
+      return Promise.resolve(alpacaAccountSummaryCache.data);
+    }
+    alpacaAccountSummaryCache.inflight = fetchAlpacaAccountSummary().then(function(data){
+      alpacaAccountSummaryCache.data = data;
+      alpacaAccountSummaryCache.at = Date.now();
+      alpacaAccountSummaryCache.inflight = null;
+      return data;
+    }).catch(function(err){
+      alpacaAccountSummaryCache.inflight = null;
+      throw err;
+    });
+    return alpacaAccountSummaryCache.inflight;
+  }
+
   // Once a bracket's entry order fills, the take-profit and stop-loss legs
   // become independently open orders — nested=true rolls the stop-loss
   // leg under the take-profit's own "legs" array, per Alpaca's own
@@ -4270,7 +4316,7 @@
       console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
       return [];
     });
-    Promise.all([fetchAlpacaAccountSummary(), getAlpacaPositionsCached(), ordersPromise]).then(function(results){
+    Promise.all([getAlpacaAccountSummaryCached(), getAlpacaPositionsCached(), ordersPromise]).then(function(results){
       // A newer render (from a later reopen, or the next 45s tick) has
       // already started — this response is stale, discard it rather than
       // overwriting more current data with an out-of-order result.
@@ -8045,7 +8091,7 @@
       summaryEl.innerHTML = '<div class="backtest-stat"><div class="backtest-stat-label">Account</div><div class="backtest-stat-value">Not connected</div></div>';
       return;
     }
-    fetchAlpacaAccountSummary().then(function(acct){
+    getAlpacaAccountSummaryCached().then(function(acct){
       var equity = parseFloat(acct.equity || 0);
       // last_equity is the account's equity as of the previous session's
       // close — comparing against it, not against a fixed baseline, is
@@ -8198,6 +8244,27 @@
       );
     }
 
+    // ---- Row 5: journal/Alpaca position drift -- detection-only, see
+    // shwoop-server's src/safety/positionDrift.js. Only shown when
+    // there's actually something to review, unlike the rows above which
+    // always render some status; nothing here mutates the journal --
+    // resolving a finding means going and looking at it by hand (Journal
+    // for an orphaned entry, Open Positions/Alpaca for an untracked one).
+    if(backendPositionDrift && backendPositionDrift.length > 0){
+      var driftLines = backendPositionDrift.map(function(f){
+        return f.type === 'orphaned_entry'
+          ? f.sym + ' — journal shows open, Alpaca shows no matching position (likely stale — review and remove it from Journal)'
+          : f.sym + ' — open on Alpaca (qty ' + f.qty + ') with no matching journal entry (no stop/target tracking from the backend)';
+      });
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
+          '<div class="backend-pulse-label">' + backendPositionDrift.length + ' position' + (backendPositionDrift.length === 1 ? '' : 's') + ' need manual review</div>' +
+          '<div class="backend-pulse-sub">' + driftLines.join(' · ') + '</div>' +
+        '</div></div>'
+      );
+      if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
+    }
+
     body.innerHTML = rows.join('');
 
     // Server's own auto-trade setting, not a local toggle -- this tab has
@@ -8263,7 +8330,7 @@
       });
     });
 
-    fetchAlpacaAccountSummary().then(function(acct){
+    getAlpacaAccountSummaryCached().then(function(acct){
       // Re-check rather than trust the closure's snapshot of
       // alpacaConnected -- this fetch can take a moment, and if the
       // connection was lost or explicitly reset while it was in
