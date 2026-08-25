@@ -24,6 +24,7 @@
     --amber-contrast: #04060B;
     --ticker-fg: #DCE6FF;
     --ticker-fg-dim: #767B87;
+    --ticker-bg: #000;
     --grid-glow-1: rgba(120,160,255,0.08);
     --grid-glow-2: rgba(120,160,255,0.05);
     --grid-line: rgba(120,160,255,0.035);
@@ -75,6 +76,13 @@
     --paper: #12151C; --muted: #6B7280;
     --amber: #2F5EFF; --amber-dim: #1E3FC4; --amber-glow: rgba(47,94,255,0.18); --amber-contrast: #FFFFFF;
     --ticker-fg: #12151C; --ticker-fg-dim: #6B7280;
+    /* Every other theme pack is dark enough that the ticker's hardcoded
+       black backing (see .ticker-tape below) just reads as "part of the
+       UI." Arcade is the one light theme, so that same black bar sat on
+       top of it looking like a stray unstyled leftover -- crisp white
+       instead matches the "competitive-shooter scoreboard" panel it's
+       supposed to be a strip of. */
+    --ticker-bg: #FFFFFF;
     --grid-glow-1: rgba(47,94,255,0.08); --grid-glow-2: rgba(255,58,110,0.06); --grid-line: rgba(47,94,255,0.05);
   }
   /* Cyberdeck -- straight Tron/cyberpunk HUD: near-black with a stark
@@ -126,7 +134,7 @@
 
   /* ---------- Ticker tape (signature element, global) ---------- */
   .ticker-tape{
-    background: #000;
+    background: var(--ticker-bg);
     border-bottom: 1px solid var(--border);
     overflow: hidden;
     white-space: nowrap;
@@ -136,8 +144,8 @@
   .ticker-tape::before, .ticker-tape::after{
     content:""; position:absolute; top:0; bottom:0; width:40px; z-index:2;
   }
-  .ticker-tape::before{ left:0; background: linear-gradient(90deg, #000, transparent); }
-  .ticker-tape::after{ right:0; background: linear-gradient(270deg, #000, transparent); }
+  .ticker-tape::before{ left:0; background: linear-gradient(90deg, var(--ticker-bg), transparent); }
+  .ticker-tape::after{ right:0; background: linear-gradient(270deg, var(--ticker-bg), transparent); }
   .ticker-track{
     display: inline-flex; align-items: center; height: 34px;
     animation: scroll-left 38s linear infinite;
