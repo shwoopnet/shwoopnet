@@ -3496,6 +3496,55 @@
     }
   }
 
+  // Repairs journal entries left stranded by a rotated Alpaca API key.
+  // isOpenAlpacaPositionForCurrentAccount (and isOpenPositionForCurrentAccount)
+  // only treat an 'open' alpaca entry as belonging to the current account
+  // when its stored accountKeyId matches the CURRENTLY connected key --
+  // exactly the right call for genuinely switching to a different broker
+  // account (a different account's stale entries shouldn't show up here
+  // just because a symbol happens to match), but it breaks the moment the
+  // SAME account's key is simply regenerated: every existing entry is
+  // still tagged with the now-retired key, so Open Positions, Today's
+  // Setups, and What to Watch all go blank -- even though the real
+  // positions are still open and still fully managed by the backend
+  // (openAlpacaEntries in shwoop-server's orchestrator.js never gates on
+  // accountKeyId at all, so trailing stops and market-close handling were
+  // never actually affected by this, only the frontend's display was).
+  // Whenever a connection check succeeds, cross-checks every 'open'
+  // alpaca entry whose accountKeyId doesn't match the current key against
+  // Alpaca's own live position list -- a live position on the SAME
+  // symbol, side, and a closely matching quantity is specific enough
+  // evidence this is the same account under a new key (not a genuinely
+  // different account that happens to hold the same ticker) that the
+  // stale tag gets corrected in place. Self-healing, so this only ever
+  // needs to run once per key rotation rather than needing a manual fix
+  // every time.
+  function reconcileAccountKeyIdAfterReconnect(){
+    var currentKeyId = activeAlpacaCreds().keyId;
+    var staleEntries = journalEntries.filter(function(j){
+      return j.status === 'open' && j.source === 'alpaca' && j.accountKeyId && j.accountKeyId !== currentKeyId;
+    });
+    if(staleEntries.length === 0) return;
+    fetchAlpacaPositions().then(function(positions){
+      var bySym = {};
+      (positions || []).forEach(function(p){ bySym[p.symbol] = p; });
+      var changed = false;
+      staleEntries.forEach(function(j){
+        var live = bySym[j.sym];
+        if(!live) return;
+        var liveSide = live.side === 'short' ? 'Short' : 'Long';
+        var qtyMatches = Math.abs(parseFloat(live.qty) - j.qty) < 0.5;
+        if(liveSide === j.direction && qtyMatches){
+          j.accountKeyId = currentKeyId;
+          changed = true;
+        }
+      });
+      if(changed) saveJournalEntries();
+    }).catch(function(err){
+      console.error('accountKeyId reconciliation failed:', err);
+    });
+  }
+
   function testAlpacaConnection(){
     if(alpacaReconnectTimer){ clearTimeout(alpacaReconnectTimer); alpacaReconnectTimer = null; }
     var creds = activeAlpacaCreds();
@@ -3523,6 +3572,7 @@
         setAlpacaStatus('Connected', true);
         showAlpacaConnectedView();
         updateTradeBubbles();
+        reconcileAccountKeyIdAfterReconnect();
       })
       .catch(function(err){
         console.error('Alpaca connection test failed:', err);
