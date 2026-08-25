@@ -1583,7 +1583,7 @@
           serverMarketOpenAtHeartbeat: typeof data.serverMarketOpenAtHeartbeat === 'boolean' ? data.serverMarketOpenAtHeartbeat : null,
           serverIntradayScreenerEnabled: typeof data.serverIntradayScreenerEnabled === 'boolean' ? data.serverIntradayScreenerEnabled : null,
           serverIntradayAutoTradeEnabled: typeof data.serverIntradayAutoTradeEnabled === 'boolean' ? data.serverIntradayAutoTradeEnabled : null,
-          // Per-cycle status -- flips scanning -> idle/error every 15
+          // Per-cycle status -- flips scanning -> idle/error every 5
           // minutes while the market's open, so a person reopening the
           // app has a real chance of catching "Scanning…" live, and
           // always has a readable summary of what the last cycle did.
@@ -2066,7 +2066,7 @@
         <div>
           <div class="settings-row-title">Intraday screener (server)</div>
           <div class="settings-row-desc">
-            Scans the 16-symbol universe every 15 minutes while the market's open. Auto-trading above has
+            Scans the 16-symbol universe every 5 minutes while the market's open. Auto-trading above has
             nothing to size or send without this being on too.
           </div>
         </div>
@@ -2695,7 +2695,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies referenced on this site. Stock ticker symbols and company names shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, and CVNA) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Shwoop calls itself "your pocket advisor" because that's the shape of what it does — it watches, decides, and acts on your behalf so you don't have to sit and stare at charts. It's not a licensed advisor and it isn't giving you advice: it screens a fixed list of 16 stocks — chosen for how they're priced, not their size — on 15-minute bars, re-checked every 15 minutes during market hours. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades can be sent to a connected Alpaca paper account — simulated money only, no real trades are ever placed. This is a single-owner personal tool, not a public product, and the underlying strategy is still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
+    <p>Shwoop calls itself "your pocket advisor" because that's the shape of what it does — it watches, decides, and acts on your behalf so you don't have to sit and stare at charts. It's not a licensed advisor and it isn't giving you advice: it screens a fixed list of 16 stocks — chosen for how they're priced, not their size — on 15-minute bars, re-checked every 5 minutes during market hours. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades can be sent to a connected Alpaca paper account — simulated money only, no real trades are ever placed. This is a single-owner personal tool, not a public product, and the underlying strategy is still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
     <p>Prices are live quotes from Finnhub. Chart history is real data from Twelve Data — if it can't be reached, you'll see an honest "couldn't load" message instead of fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
@@ -2806,7 +2806,7 @@
 
   // Persists the fired signal for each symbol for the rest of that same
   // day, keyed by symbol -- the entry/stop/target are fixed at the exact
-  // moment the breakout happens, not recalculated on every 15-minute
+  // moment the breakout happens, not recalculated on every 5-minute
   // cycle the way the old rolling-SMA approach was. Naturally goes stale
   // and gets replaced once a new day's date no longer matches.
   var orbSignalsToday = {};
@@ -3100,7 +3100,7 @@
     if(isRunningIntradayScreener || !alpacaIntradayEnabled) return;
     // Now that "What to Watch" (and everything else that displays
     // intraday picks) prefers the backend's own server-side scan --
-    // computed every 15 minutes, 24/7, regardless of whether this tab is
+    // computed every 5 minutes, 24/7, regardless of whether this tab is
     // open -- this tab's own local re-scan is only still doing real work
     // for one thing: sending real orders locally when "Auto-send new
     // intraday picks" is on for THIS tab specifically. If that's off,
@@ -3153,7 +3153,7 @@
       renderIntradayBlocks();
       statCta();
       var now = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
-      updateIntradayStatus('Updated ' + now + ' · next check in 15 min', true);
+      updateIntradayStatus('Updated ' + now + ' · next check in 5 min', true);
       autoSendIntradayPicksIfEnabled();
       });
     });
@@ -3784,7 +3784,7 @@
     if(enabled){
       runIntradayScreener();
       if(intradayScreenerInterval) clearInterval(intradayScreenerInterval);
-      intradayScreenerInterval = setInterval(runIntradayScreener, 15 * 60 * 1000);
+      intradayScreenerInterval = setInterval(runIntradayScreener, 5 * 60 * 1000);
     } else {
       if(intradayScreenerInterval){ clearInterval(intradayScreenerInterval); intradayScreenerInterval = null; }
       intradayTrades = [];
@@ -4802,7 +4802,7 @@
   // Both position-closing decisions that used to live here -- checking
   // whether a held setup is still valid, and flattening intraday
   // positions at end of day -- are now handled exclusively by the
-  // backend, which runs the same checks every 60 seconds/15 minutes
+  // backend, which runs the same checks every 60 seconds/5 minutes
   // regardless of whether this tab is even open. Having the frontend run
   // its own independent copy whenever a tab happened to be open meant two
   // uncoordinated systems could both decide to act on the same position
@@ -5032,7 +5032,7 @@
       // Three tiers, not two: a chart the user is actively looking at
       // ('high') always goes first. Below that, the intraday screener
       // ('medium') is a small, time-sensitive batch (10 symbols) that
-      // needs to actually finish inside its own 15-minute window — it
+      // needs to actually finish inside its own 5-minute window — it
       // must never sit stuck behind the daily screener's much larger
       // 41-symbol background scan ('low'), which isn't time-critical the
       // same way. Without this, the daily screener firing first (the
@@ -8134,7 +8134,7 @@
   // than a couple missed ticks' worth, the honest read is "can't confirm
   // this is alive" rather than silently trusting a stale timestamp.
   var BACKEND_HEARTBEAT_STALE_MS = 150000; // 2.5 min -- allows for one missed 60s tick plus write latency
-  var INTRADAY_CYCLE_INTERVAL_MS = 15 * 60 * 1000;
+  var INTRADAY_CYCLE_INTERVAL_MS = 5 * 60 * 1000;
 
   function formatAgo(ms){
     if(ms < 1000) return 'just now';
@@ -8160,7 +8160,7 @@
   //  2) Heartbeat -- proves the *process* is alive, even when there's
   //     nothing to trade (market closed) and nothing else on the
   //     document would otherwise change.
-  //  3) Cycle status -- proves the *15-minute intraday cycle itself* is
+  //  3) Cycle status -- proves the *5-minute intraday cycle itself* is
   //     actually executing (scanning -> idle/error), not just that the
   //     process happens to be up.
   //  4) Server settings truth -- proves the scan, the sizing, and the
@@ -8244,7 +8244,7 @@
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
           '<div class="backend-pulse-label">No intraday cycle has run yet</div>' +
-          '<div class="backend-pulse-sub">Runs automatically every 15 minutes while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.</div>' +
+          '<div class="backend-pulse-sub">Runs automatically every 5 minutes while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.</div>' +
         '</div></div>'
       );
     }
@@ -8565,7 +8565,7 @@
     if(clearBtn){ clearBtn.style.display = ''; }
     var typeLabels = {
       sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
-      // cycle_summary is the once-per-15-minutes "did the scanner, sizing,
+      // cycle_summary is the once-per-5-minutes "did the scanner, sizing,
       // and auto-trade actually run together" line written by the
       // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
       cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
@@ -9201,7 +9201,7 @@
 
   // ---------- What to Watch (Brief page recap of the actual trades) ----------
   // Prefers the backend's own intraday picks (backendIntradayPicks) --
-  // computed server-side every 15 minutes, 24/7, regardless of whether
+  // computed server-side every 5 minutes, 24/7, regardless of whether
   // this tab is open or has its own local "alpacaIntradayEnabled" toggle
   // on. That fixed a real gap: this card used to source only from
   // intradayTrades, this tab's own independent re-scan, which meant it
