@@ -4142,6 +4142,13 @@
   // selected next time this account signs in anywhere.
   function switchAlpacaEnvironment(newEnv){
     alpacaAccountType = newEnv;
+    // A different account means a completely different all-time P&L
+    // history -- without clearing this, the OLD account's lifetime
+    // number would keep showing for up to ALPACA_PORTFOLIO_HISTORY_CACHE_MS
+    // after switching, mislabeled as belonging to the account just
+    // connected.
+    alpacaPortfolioHistoryCache.data = null;
+    alpacaPortfolioHistoryCache.at = 0;
     applyAlpacaEnvironmentUI();
     updateAlpacaSectionCopy();
     document.getElementById('alpacaKeyIdInput').value = '';
@@ -4256,6 +4263,25 @@
     });
   }
 
+  // period=all pulls Alpaca's own equity curve for the ENTIRE life of
+  // whatever account is currently connected -- not just today -- which is
+  // what "Overall P&L" is actually supposed to mean (the account's real
+  // total return since it was connected, unrealized swings on still-open
+  // positions included), not a sum of only the trades this journal
+  // happens to have closed. Uses ALPACA_TRADING_BASE()/alpacaHeaders(),
+  // same as every other Alpaca call here, so it automatically follows
+  // whichever account is actually active -- switching from this paper
+  // account to a fresh one, or to a live account, needs no changes here;
+  // this always asks Alpaca fresh for THAT account's own history rather
+  // than assuming anything cached about a specific account.
+  function fetchAlpacaPortfolioHistory(){
+    var url = ALPACA_TRADING_BASE() + '/v2/account/portfolio/history?period=all&timeframe=1D';
+    return fetchWithTimeout(url, { headers: alpacaHeaders() }).then(function(res){
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
   function fetchAlpacaPositions(){
     return fetchWithTimeout(ALPACA_TRADING_BASE() + '/v2/positions', { headers: alpacaHeaders() }).then(function(res){
       if(!res.ok) throw new Error('HTTP ' + res.status);
@@ -4341,6 +4367,29 @@
       throw err;
     });
     return alpacaAccountSummaryCache.inflight;
+  }
+
+  // All-time P&L doesn't need to be nearly as fresh as the live account
+  // balance -- a longer cache window than the account-summary one above
+  // is plenty, and keeps a slow-changing lifetime figure from re-fetching
+  // on every quick re-render.
+  var alpacaPortfolioHistoryCache = { data: null, at: 0, inflight: null };
+  var ALPACA_PORTFOLIO_HISTORY_CACHE_MS = 60000;
+  function getAlpacaPortfolioHistoryCached(){
+    if(alpacaPortfolioHistoryCache.inflight) return alpacaPortfolioHistoryCache.inflight;
+    if(alpacaPortfolioHistoryCache.data && (Date.now() - alpacaPortfolioHistoryCache.at) < ALPACA_PORTFOLIO_HISTORY_CACHE_MS){
+      return Promise.resolve(alpacaPortfolioHistoryCache.data);
+    }
+    alpacaPortfolioHistoryCache.inflight = fetchAlpacaPortfolioHistory().then(function(data){
+      alpacaPortfolioHistoryCache.data = data;
+      alpacaPortfolioHistoryCache.at = Date.now();
+      alpacaPortfolioHistoryCache.inflight = null;
+      return data;
+    }).catch(function(err){
+      alpacaPortfolioHistoryCache.inflight = null;
+      throw err;
+    });
+    return alpacaPortfolioHistoryCache.inflight;
   }
 
   // Once a bracket's entry order fills, the take-profit and stop-loss legs
@@ -7716,6 +7765,42 @@
     };
   }
 
+  // Overwrites the Overall P&L card with Alpaca's own all-time figure for
+  // whichever account is currently connected, once it resolves -- this is
+  // the real fix for "Overall P&L says + while account balance is down":
+  // that card was only ever summing CLOSED journal trades, completely
+  // blind to unrealized P&L on anything still open. profit_loss/
+  // profit_loss_pct are cumulative-since-account-connected arrays; the
+  // last entry is the actual current all-time total. genCounter discards
+  // a stale response if a newer call (e.g. after switching accounts) has
+  // already superseded it, same pattern as intradayPLPatchGen.
+  var overallPLPatchGen = 0;
+  function patchOverallPLFromAlpaca(){
+    var myGen = ++overallPLPatchGen;
+    getAlpacaPortfolioHistoryCached().then(function(hist){
+      if(myGen !== overallPLPatchGen) return; // superseded by a newer call
+      var plSeries = hist && hist.profit_loss;
+      var pctSeries = hist && hist.profit_loss_pct;
+      if(!plSeries || !plSeries.length) return; // not connected, or no history yet -- leave the journal-based fallback showing
+      var pl = plSeries[plSeries.length - 1];
+      var plPct = pctSeries && pctSeries.length ? pctSeries[pctSeries.length - 1] * 100 : null;
+      if(typeof pl !== 'number' || !isFinite(pl)) return;
+      var overallValEl = document.getElementById('overallPLValue');
+      var overallSubEl = document.getElementById('overallPLSub');
+      if(!overallValEl || !overallSubEl) return;
+      var up = pl >= 0;
+      overallValEl.textContent = (up ? '+$' : '−$') + Math.abs(pl).toFixed(0);
+      overallValEl.className = 'pl-card-value mono ' + (up ? 'up' : 'down');
+      var pctText = (plPct !== null && isFinite(plPct)) ? ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(1) + '%)' : '';
+      overallSubEl.textContent = 'All-time · ' + alpacaAccountLabel() + pctText;
+    }).catch(function(err){
+      // Not connected, or a transient Alpaca hiccup -- the journal-based
+      // fallback rendered above stays showing rather than the card going
+      // blank or broken.
+      console.error('Failed to load all-time account P&L from Alpaca:', err);
+    });
+  }
+
   function renderPLSummary(){
     var overall = computeAggregatePL(journalEntries);
     var overallValEl = document.getElementById('overallPLValue');
@@ -7730,6 +7815,13 @@
       overallValEl.className = 'pl-card-value mono ' + (upO ? 'up' : 'down');
       overallSubEl.textContent = overall.count + ' closed · ' + overall.wins + 'W / ' + overall.losses + 'L · avg ' + (overall.avgPct >= 0 ? '+' : '') + overall.avgPct.toFixed(1) + '%';
     }
+    // The above is a same-tick fallback from closed journal trades only --
+    // it can't see unrealized P&L on anything still open, which is exactly
+    // why this card used to disagree with the actual account balance (a
+    // big open loss was simply invisible to it). Patches in Alpaca's own
+    // all-time P&L for the account actually connected right now, once it
+    // resolves -- see patchOverallPLFromAlpaca.
+    patchOverallPLFromAlpaca();
 
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
