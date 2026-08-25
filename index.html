@@ -1987,7 +1987,7 @@
   <main class="page" id="page-trades" hidden>
     <div class="trading-paused-banner" id="tradingPausedBanner" hidden>
       <span class="trading-paused-banner-dot"></span>
-      <span class="trading-paused-banner-text" id="tradingPausedBannerText"><strong>Auto-trading paused</strong> — repeated order failures. Review the activity log below, then resume once resolved.</span>
+      <span class="trading-paused-banner-text" id="tradingPausedBannerText"><strong>Equities auto-trading paused</strong> — repeated order failures. Review the activity log below, then resume once resolved.</span>
     </div>
     <div class="trades-header">
       <div>
@@ -2408,6 +2408,18 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
+        <div class="changelog-version">v2.2 — Crypto Trading &amp; Trade-Management Hardening</div>
+        <ul class="changelog-items">
+          <li>A second, fully independent strategy now trades crypto 24/7 — 12 pairs (BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, AAVE), its own screener, its own auto-trade toggle, and its own risk budget that never competes with equities for room</li>
+          <li>Total risk ceiling raised from 5.5% to 7% — each strategy gets its own independent 7% budget, not a shared one, so one maxing out has zero effect on the other's ability to trade</li>
+          <li>Trailing stop refined for both strategies: once a trade has genuinely moved into profit, its stop can no longer trail back below breakeven — closes a real gap where an already-winning trade could still round-trip into a loss</li>
+          <li>Flatten All now actually pauses both auto-traders immediately, as its own description always promised — previously closed positions but left auto-trading running, letting a new one open right back up</li>
+          <li>Fixed a real duplicate-order risk: order submissions are now idempotent (a lost response no longer resubmits a second, real order), and a slow cycle can no longer overlap with itself</li>
+          <li>Overall P&amp;L now reflects the account's true all-time total from Alpaca directly, not just a sum of closed journal trades — correctly includes unrealized P&amp;L on whatever's still open, and survives switching accounts</li>
+          <li>Labs Demo now runs a live crypto position alongside the equities day, on its own clock that keeps going even when the equities day resets</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
         <div class="changelog-version">v2.1 — Navigation Redesign &amp; Safety Overhaul</div>
         <ul class="changelog-items">
           <li>Navigation rebuilt as a single, persistent sidebar — no more separate popups to open and close, and every destination (including Notepad and History) now lives in one place</li>
@@ -2630,7 +2642,7 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        How the intraday screener actually works, in plain language.
+        How the equities screener actually works, in plain language.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
@@ -2680,9 +2692,12 @@
         of historical data. The exit was upgraded from a fixed 1.5x target to a trailing stop (activating at
         0.75x risk) after walk-forward testing showed it improves both the overall profit factor (2.15 → 2.32)
         and the worst-case result across 5 independent, non-overlapping time windows (2.03 → 2.15) together —
-        with realistic trading costs included throughout, not a frictionless best case. It's still genuinely
-        new, though — the activity log and the numbers building up there over time are what will show whether
-        real, ongoing performance holds up the way the backtest suggests it should.</p>
+        with realistic trading costs included throughout, not a frictionless best case. The trailing stop was
+        refined once more after that validation — once a trade genuinely moves into profit, its stop can no
+        longer trail back below breakeven — so the figures above reflect the trailing stop's prior shape, not a
+        fresh walk-forward pass against its exact current form; that re-validation hasn't been run yet. It's
+        still genuinely new, though — the activity log and the numbers building up there over time are what
+        will show whether real, ongoing performance holds up the way the backtest suggests it should.</p>
       </div>
     </div>
 
@@ -3353,7 +3368,18 @@
     var openCount = source.filter(function(t){
       return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
     }).length;
-    document.getElementById('ctaStat').textContent = source.length + ' stocks you\'re tracking today, ' + openCount + ' with open positions';
+    var text = source.length + ' stocks you\'re tracking today, ' + openCount + ' with open positions';
+    // source above is equities-only by construction (withOpenPositionsMergedIn
+    // deliberately excludes crypto), so a real open crypto position would
+    // otherwise go completely uncounted here -- reading as "0 with open
+    // positions" even with a real crypto trade live. Mentioned separately
+    // rather than folded into the equities count above, since "stocks
+    // you're tracking today" only ever refers to the 16-symbol universe.
+    var cryptoOpenCount = journalEntries.filter(function(j){ return j.screenerType === 'crypto' && isOpenAlpacaPositionForCurrentAccount(j); }).length;
+    if(cryptoOpenCount > 0){
+      text += ' (plus ' + cryptoOpenCount + ' crypto position' + (cryptoOpenCount === 1 ? '' : 's') + ' open)';
+    }
+    document.getElementById('ctaStat').textContent = text;
   }
 
   function buildActionHTML(t){
@@ -4149,7 +4175,7 @@
 
   function notifyTradingPausedViaBrowser(reasonText){
     if(!('Notification' in window)) return;
-    var title = 'Shwoopnet — Auto-trading paused';
+    var title = 'Shwoopnet — Equities auto-trading paused';
     var body = 'Repeated failed order attempts. Reason: ' + reasonText + '. Review the activity log, then resume once resolved.';
     if(Notification.permission === 'granted'){
       try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
@@ -4178,7 +4204,7 @@
       if(state.paused){
         banner.removeAttribute('hidden');
         if(bannerText){
-          bannerText.innerHTML = '<strong>Auto-trading paused</strong> — repeated order failures (' + reasonText +
+          bannerText.innerHTML = '<strong>Equities auto-trading paused</strong> — repeated order failures (' + reasonText +
             '). Review the activity log below, then resume once resolved.';
         }
       } else {
@@ -4192,7 +4218,7 @@
     }
     row.removeAttribute('hidden');
     var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
-    desc.textContent = 'Auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
+    desc.textContent = 'Equities auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
       reasonText + '. Review the activity log, then resume once resolved.';
   }
 
@@ -9988,7 +10014,7 @@
 
     var realTrades = intradayTrades.filter(function(t){ return t.analysisIsReal; });
     if(realTrades.length === 0){
-      ledeParts.push("The intraday screener hasn't cleared any setups yet — check Trade Overview for the latest.");
+      ledeParts.push("The equities screener hasn't cleared any setups yet — check Trade Overview for the latest.");
     } else {
       var longs = realTrades.filter(function(t){ return t.direction === 'Long'; }).length;
       var shorts = realTrades.length - longs;
