@@ -2750,11 +2750,23 @@
     return { sym: sym, name: COMPANY_NAMES[sym] || sym, price: price, prevClose: price / (1 + changePct) };
   });
 
+  // "Ensure" means exactly that -- make sure the symbol is tracked at
+  // all, seeding it with a reasonable placeholder if it's genuinely new.
+  // It does NOT mean "stamp this price onto it every time," and an
+  // existing entry is deliberately left untouched here now: fetchAllQuotes
+  // is the one place responsible for keeping a tracked symbol's price
+  // current, polling it continuously. The journal listener calls this on
+  // every open position on every journal write (which happens often --
+  // the backend's own heartbeat lands on the same shared document), always
+  // passing the position's static entry price. That used to overwrite an
+  // already-live, correctly-updating price/prevClose right back to the
+  // entry level each time, showing a suspicious, permanently frozen
+  // "0.00% change" on Today's Setups no matter how much the real price
+  // had actually moved -- the live update never got a chance to stick
+  // before the next journal write clobbered it again.
   function ensureInWatchlist(sym, name, price, prevClose){
     var existing = watchlist.filter(function(w){ return w.sym === sym; })[0];
-    if(existing){
-      existing.price = price; existing.prevClose = prevClose;
-    } else {
+    if(!existing){
       watchlist.push({ sym: sym, name: name || sym, price: price, prevClose: prevClose });
     }
   }
