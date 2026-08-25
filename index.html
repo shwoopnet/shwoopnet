@@ -582,7 +582,6 @@
     padding:14px 18px; background: var(--panel); border:1px solid var(--border); border-radius:8px;
   }
   .demo-clock{ font-size:20px; font-weight:700; color: var(--amber); flex-shrink:0; min-width:76px; }
-  .demo-narration{ font-size:13px; color: var(--paper); line-height:1.5; transition: opacity .2s ease; }
   .demo-trade-card-enter{ animation: demoCardIn .4s cubic-bezier(.2,.8,.3,1); }
   .demo-progress-wrap{ padding:0 16px 14px 16px; }
   .demo-progress-track{
@@ -618,8 +617,14 @@
     0%{ background: var(--amber-glow); }
     100%{ background: transparent; }
   }
-  .demo-clock-row-crypto{ margin-top:-8px; }
-  .demo-clock-row-crypto .demo-clock{ font-size:13px; letter-spacing:.04em; }
+  /* Equities and crypto share one clock and one narration slot -- most of
+     the time only one line is showing (whichever side most recently had
+     something to say), but if both happen to update within the same
+     moment, a second line appears below the first instead of one
+     silently overwriting the other. See pushDemoNarration/
+     renderDemoNarration in the script below. */
+  .demo-narration-stack{ display:flex; flex-direction:column; gap:4px; transition: opacity .2s ease; }
+  .demo-narration-line{ font-size:13px; color: var(--paper); line-height:1.5; }
 
   /* A floating pointer-and-label, positioned via JS at whatever element
      just changed (a new position row, a signal-fired card, a closed
@@ -2538,8 +2543,8 @@
         position open at once. The real strategy is already live and running against your connected paper
         account 24/7; this is just a clean, simplified illustration of the mechanics, without waiting around for
         a real signal to show up.</p>
-        <p class="demo-intro-text">A second, independent line below the main clock runs a crypto position at the
-        same time — watch what happens when the stock market "closes" for the day: the equities positions
+        <p class="demo-intro-text">A crypto position runs alongside the equities day, sharing the same clock and
+        narration line — watch what happens when the stock market "closes" for the day: the equities positions
         flatten, but crypto keeps running right through it and only closes on its own trailing stop, whenever
         that happens to be. That's the actual difference between the two strategies, acted out instead of just
         described.</p>
@@ -2575,16 +2580,16 @@
       with more than one position open at once, same as the real account can hold. Two wins and three losses —
       the same roughly 40% win rate quoted above — with the wins sized bigger, so the day still nets positive
       even with more losses than wins. Once the market "closes," it loops back to 9:30 and runs again — a crypto
-      position (bottom line) runs on its own separate clock the whole time and doesn't reset with it.</p>
+      position keeps running the whole time regardless and doesn't reset with it, even though it shares the same
+      narration line above (a second line appears briefly if an equities and a crypto update happen to land at
+      the same moment, so neither gets lost).</p>
     </div>
 
     <div class="demo-clock-row">
       <div class="demo-clock mono" id="demoClock">9:30 AM</div>
-      <div class="demo-narration" id="demoNarration">Market opens. Watching PLTR's opening range form…</div>
-    </div>
-    <div class="demo-clock-row demo-clock-row-crypto">
-      <div class="demo-clock mono" id="demoCryptoClock">24/7</div>
-      <div class="demo-narration" id="demoCryptoNarration">Crypto scanner starting up…</div>
+      <div class="demo-narration-stack" id="demoNarration">
+        <div class="demo-narration-line">Market opens. Watching PLTR's opening range form…</div>
+      </div>
     </div>
 
     <div class="backtest-summary" style="margin-bottom:20px;">
@@ -9115,6 +9120,42 @@
   var demoCardState = null; // the one forming/watching candidate, pre-fill
   var demoPositions = []; // filled positions, table can hold several at once -- crypto's own position lives in here too, tagged only by its "SYM/USD" shape
 
+  // Equities and crypto share one clock and one narration slot -- they
+  // really do just run off the same wall clock, so there's no reason for
+  // crypto to carry its own separate "24/7" marker and line. Normally
+  // only the more-recently-updated side is shown, as a single line; if
+  // both happen to update within DEMO_NARRATION_COINCIDENCE_MS of each
+  // other, a second line appears below the first instead of one
+  // silently overwriting the other (real trades genuinely can fill at
+  // close to the same moment).
+  var DEMO_NARRATION_COINCIDENCE_MS = 1200;
+  var demoNarrationState = { equities: { text: '', at: 0 }, crypto: { text: '', at: 0 } };
+
+  function renderDemoNarration(){
+    var el = document.getElementById('demoNarration');
+    if(!el) return;
+    var eq = demoNarrationState.equities, cr = demoNarrationState.crypto;
+    var lines;
+    if(eq.at && cr.at && Math.abs(eq.at - cr.at) < DEMO_NARRATION_COINCIDENCE_MS){
+      lines = eq.at <= cr.at ? [eq.text, cr.text] : [cr.text, eq.text];
+    } else if(eq.at >= cr.at){
+      lines = [eq.text];
+    } else {
+      lines = [cr.text];
+    }
+    el.innerHTML = lines.map(function(t){ return '<div class="demo-narration-line">' + t + '</div>'; }).join('');
+  }
+
+  function pushDemoNarration(source, text){
+    demoNarrationState[source] = { text: text, at: Date.now() };
+    var el = document.getElementById('demoNarration');
+    if(el) el.style.opacity = '0';
+    setTimeout(function(){
+      renderDemoNarration();
+      if(el) el.style.opacity = '1';
+    }, 120);
+  }
+
   // toLocaleString for the thousands separator -- matters now that BTC's
   // $60k+ prices show up in the same table cells stock prices always fit
   // in without one.
@@ -9441,9 +9482,7 @@
     }
     var step = demoDayScript[demoStepIndex];
     document.getElementById('demoClock').textContent = step.clock;
-    var narrEl = document.getElementById('demoNarration');
-    narrEl.style.opacity = '0';
-    setTimeout(function(){ narrEl.textContent = step.narration; narrEl.style.opacity = '1'; }, 120);
+    pushDemoNarration('equities', step.narration);
     if(step.action){ step.action(); }
     demoStepIndex++;
     if(demoPlaying){
@@ -9508,22 +9547,22 @@
   // Deliberately NOT another entry in demoDayScript -- that script is a
   // single 9:30-4:00 equities day on a loop, and the entire point of
   // showing crypto here is that it does NOT run on that clock. This is
-  // its own small script, its own setTimeout chain, and its own
-  // narration line (#demoCryptoNarration), completely decoupled from
-  // demoStepIndex/demoRunStep. It shares demoPositions/demoOpenPosition/
-  // demoClosePosition/demoTickPosition with the equities side purely
-  // because those are already symbol-agnostic -- no changes needed there
-  // for a crypto row to sit in the same Open Positions table.
+  // its own small script and its own setTimeout chain, completely
+  // decoupled from demoStepIndex/demoRunStep -- it shares the single
+  // narration slot with equities via pushDemoNarration('crypto', ...)
+  // rather than getting its own separate line/clock, since the two
+  // strategies genuinely run off the same wall clock. It shares
+  // demoPositions/demoOpenPosition/demoClosePosition/demoTickPosition
+  // with the equities side purely because those are already
+  // symbol-agnostic -- no changes needed there for a crypto row to sit
+  // in the same Open Positions table.
   var demoCryptoTimer = null;
   var demoCryptoPlaying = true;
   var demoCryptoStep = 0;
   var demoCryptoSym = 'BTC/USD';
 
   function demoCryptoNarrate(text){
-    var el = document.getElementById('demoCryptoNarration');
-    if(!el) return;
-    el.style.opacity = '0';
-    setTimeout(function(){ el.textContent = text; el.style.opacity = '1'; }, 120);
+    pushDemoNarration('crypto', text);
   }
 
   var demoCryptoScript = [
@@ -9561,8 +9600,8 @@
     demoCryptoStep = 0;
     demoPositions = demoPositions.filter(function(p){ return p.sym.indexOf('/') === -1; });
     renderDemoPositionsTable();
-    var el = document.getElementById('demoCryptoNarration');
-    if(el) el.textContent = 'Crypto scanner starting up…';
+    demoNarrationState.crypto = { text: '', at: 0 };
+    renderDemoNarration();
   }
 
   // Shown every time the Demo page is freshly navigated to -- the demo
