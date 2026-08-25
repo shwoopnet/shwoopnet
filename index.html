@@ -5120,8 +5120,21 @@
       return Promise.resolve({ closed: [], failed: [] });
     }
     var openEntries = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
-    if(alpacaAutoTradeIntradayEnabled){
-      setAlpacaAutoTradeIntradayEnabled(false);
+    // Pause BOTH auto-traders through the real, currently-live override
+    // mechanism -- the old alpacaAutoTradeIntradayEnabled check this
+    // replaced was dead code (see its own comment further down: that var
+    // is intentionally never set anywhere anymore), so this had quietly
+    // become a no-op that paused nothing, for either strategy, even
+    // though the row's own description promises "turns off auto-send so
+    // nothing re-enters immediately after." Crypto in particular has no
+    // market-hours gate to naturally hold it off the way equities does
+    // outside RTH -- without pausing it explicitly, its next 5-minute
+    // cycle could open a brand new position minutes after this ran.
+    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn()){
+      autoTradeOverrides.intradayAutoTradeEnabledOverride = false;
+      autoTradeOverrides.cryptoAutoTradeEnabledOverride = false;
+      renderAutoTradeOverrideControls();
+      saveAutoTradeOverride({ intradayAutoTradeEnabledOverride: false, cryptoAutoTradeEnabledOverride: false });
     }
     if(openEntries.length === 0){
       return Promise.resolve({ closed: [], failed: [] });
