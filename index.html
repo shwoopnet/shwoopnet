@@ -1417,7 +1417,18 @@
     font-size:12.5px; line-height:1.6; color: var(--muted); padding:2px 0 14px 14px;
     border-left:2px solid var(--amber-dim); margin-bottom:16px;
   }
-  .journal-entry{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:12.5px; flex-wrap:wrap; }
+  /* Fixed grid, not the old flex + justify-content:space-between --
+     every row (open or closed) now lands its pieces in the same column
+     regardless of how many elements that particular row has, which is
+     what actually lets journal-entry-header's labels mean anything. */
+  .journal-entry{
+    display:grid; grid-template-columns: 100px 110px 1fr 150px 190px;
+    align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:12.5px;
+  }
+  .journal-entry-header{
+    font-size:10px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted);
+    padding-bottom:8px;
+  }
   .journal-source-tag{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
     border:1px solid var(--amber-dim); border-radius:3px; padding:2px 6px;
@@ -1428,6 +1439,12 @@
   .journal-entry-prices{ color: var(--muted); }
   .journal-entry-result.up{ color: var(--gain); }
   .journal-entry-result.down{ color: var(--loss); }
+  .journal-entry-actions{ display:flex; gap:8px; justify-content:flex-end; }
+  @media (max-width:900px){
+    .journal-entry-header{ display:none; }
+    .journal-entry{ grid-template-columns: 1fr; gap:4px; }
+    .journal-entry-actions{ justify-content:flex-start; }
+  }
 
   .site-footer{
     text-align:center; color: var(--muted); font-size: 11px; line-height:1.6;
@@ -7525,16 +7542,33 @@
       recapParts.push(open.length + ' still open.');
     }
 
+    // Every row's pieces (symbol, source, price, result/status, actions)
+    // land in the same fixed grid column regardless of row type -- an
+    // open row's "Open" badge and a closed row's win/loss both sit in
+    // the Result column, and the Actions column always holds Remove
+    // (plus Exit trade when there's a position still open to exit).
+    // Without that fixed mapping, the header row below can't actually
+    // label anything: the old markup just flexed items out with
+    // justify-content:space-between, so which column a given piece of
+    // text landed under shifted row to row depending on how many
+    // elements that row happened to have.
+    var headerRow =
+      '<div class="journal-entry journal-entry-header">' +
+        '<span>Symbol</span><span>Source</span><span>Price</span><span>Result</span><span>Actions</span>' +
+      '</div>';
+
     var rows = entries.map(function(e){
       var sourceTag = e.source === 'alpaca' ? '<span class="journal-source-tag">via Alpaca</span>' : '';
       if(e.status === 'open'){
         return '<div class="journal-entry">' +
           '<span class="journal-entry-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span></span>' +
-          sourceTag +
+          '<span class="journal-entry-source">' + sourceTag + '</span>' +
           '<span class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' · ' + e.qty + ' sh</span>' +
           '<span class="status-badge active">Open</span>' +
-          '<button class="exit-trade-btn" data-id="' + e.id + '">Exit trade</button>' +
-          '<button class="journal-remove-btn" data-id="' + e.id + '" aria-label="Remove trade">Remove</button>' +
+          '<span class="journal-entry-actions">' +
+            '<button class="exit-trade-btn" data-id="' + e.id + '">Exit trade</button>' +
+            '<button class="journal-remove-btn" data-id="' + e.id + '" aria-label="Remove trade">Remove</button>' +
+          '</span>' +
         '</div>';
       }
       var pl = computePL(e);
@@ -7543,16 +7577,18 @@
       var dollarStr = (pl.dollar >= 0 ? '+$' : '−$') + Math.abs(pl.dollar).toFixed(0);
       return '<div class="journal-entry">' +
         '<span class="journal-entry-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span></span>' +
-        sourceTag +
+        '<span class="journal-entry-source">' + sourceTag + '</span>' +
         '<span class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' → ' + e.exit.toFixed(2) + '</span>' +
         '<span class="journal-entry-result mono ' + (up ? 'up' : 'down') + '">' + pctStr + ' · ' + dollarStr + '</span>' +
-        '<button class="journal-remove-btn" data-id="' + e.id + '" aria-label="Remove trade">Remove</button>' +
+        '<span class="journal-entry-actions">' +
+          '<button class="journal-remove-btn" data-id="' + e.id + '" aria-label="Remove trade">Remove</button>' +
+        '</span>' +
       '</div>';
     }).join('');
 
     el.innerHTML = '<div class="journal-detail-date">' + niceDate + '</div>' +
       (recapParts.length ? '<div class="journal-recap">' + recapParts.join(' ') + (closed.length ? ' <em>(simulated recap — not a live AI call)</em>' : '') + '</div>' : '') +
-      rows;
+      headerRow + rows;
 
     el.querySelectorAll('.exit-trade-btn').forEach(function(btn){
       btn.addEventListener('click', function(){ openExitModal(btn.dataset.id); });
