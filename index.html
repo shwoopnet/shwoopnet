@@ -4609,7 +4609,15 @@
     try{
       var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
       if(geo && geo.left){
-        setAlpacaDockLeft(parseFloat(geo.left));
+        // Unlike every drag move (which always clamps against
+        // maxAlpacaDockLeft()), a saved position was being applied here
+        // as-is -- so a left saved from a wider viewport, or before the
+        // sidebar's own width changed, could restore the dock fully
+        // off-screen. It'd still be present and updating in the DOM,
+        // just invisible, which is exactly what made this look like the
+        // dock had vanished rather than simply moved somewhere unseen.
+        var clampedLeft = Math.max(0, Math.min(maxAlpacaDockLeft(), parseFloat(geo.left)));
+        setAlpacaDockLeft(clampedLeft);
       }
     }catch(e){}
   })();
