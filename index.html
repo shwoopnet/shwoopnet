@@ -8612,16 +8612,21 @@
     demoPositions.push({ sym:cfg.sym, direction:cfg.direction, qty:cfg.qty, entry:cfg.entry, current:cfg.entry, stop:cfg.stop, target:cfg.target, flash:true });
     demoTradeCount++;
     renderDemoPositionsTable();
+    demoUpdateSummary();
     document.getElementById('demoTradeCount').textContent = demoTradeCount + ' traded today';
     demoAddActivity(cfg.sym + ' — ' + cfg.direction + ', ' + cfg.qty + ' shares.', 'Trade entered');
     showDemoToast(cfg.sym, 'Trade entered', cfg.direction + ', ' + cfg.qty + ' shares.', 'sent');
   }
 
+  // Equity has to move with the table, not just on a close -- otherwise
+  // the top row sits frozen at $10,000 while Open Positions visibly
+  // shows real unrealized gains/losses ticking, which reads as broken.
   function demoTickPosition(sym, current){
     var p = demoPositions.filter(function(x){ return x.sym === sym; })[0];
     if(!p) return;
     p.current = current;
     renderDemoPositionsTable();
+    demoUpdateSummary();
   }
 
   function demoClosePosition(sym, exitPrice, note){
