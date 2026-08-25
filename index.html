@@ -4354,7 +4354,6 @@
     showAlpacaInputsView();
     updateTradeBubbles();
     document.getElementById('alpacaDock').setAttribute('hidden', '');
-    if(alpacaDockRefreshInterval){ clearInterval(alpacaDockRefreshInterval); alpacaDockRefreshInterval = null; }
   }
 
   // ---------- Alpaca account/positions dock (Messenger-tab style) ----------
@@ -4506,6 +4505,32 @@
     });
   }
 
+  // Same short-cache treatment as positions/account summary above, for the
+  // same reason: the dock's Target/Stop columns are a pure read/display
+  // path, not an order-mutating one. closeAlpacaPositionSafely and
+  // refreshPositionBracket deliberately keep calling fetchAlpacaOpenOrders
+  // directly (uncached) instead — they cancel-then-replace real orders, so
+  // they always need the truly current open-order list, never one that
+  // could be a few seconds stale.
+  var alpacaOpenOrdersCache = { data: null, at: 0, inflight: null };
+  var ALPACA_OPEN_ORDERS_CACHE_MS = 8000;
+  function getAlpacaOpenOrdersCached(){
+    if(alpacaOpenOrdersCache.inflight) return alpacaOpenOrdersCache.inflight;
+    if(alpacaOpenOrdersCache.data && (Date.now() - alpacaOpenOrdersCache.at) < ALPACA_OPEN_ORDERS_CACHE_MS){
+      return Promise.resolve(alpacaOpenOrdersCache.data);
+    }
+    alpacaOpenOrdersCache.inflight = fetchAlpacaOpenOrders().then(function(data){
+      alpacaOpenOrdersCache.data = data;
+      alpacaOpenOrdersCache.at = Date.now();
+      alpacaOpenOrdersCache.inflight = null;
+      return data;
+    }).catch(function(err){
+      alpacaOpenOrdersCache.inflight = null;
+      throw err;
+    });
+    return alpacaOpenOrdersCache.inflight;
+  }
+
   function findBracketLevels(orders, sym){
     var order = (orders || []).filter(function(o){ return o.symbol === sym && o.limit_price; })[0];
     var stopLeg = order ? (order.legs || []).filter(function(l){ return l.stop_price; })[0] : null;
@@ -4582,7 +4607,7 @@
     // Open orders (for the Target/Stop columns) is treated as optional —
     // a failure there degrades gracefully to "—" rather than blocking the
     // account summary and positions themselves from ever showing up.
-    var ordersPromise = fetchAlpacaOpenOrders().catch(function(err){
+    var ordersPromise = getAlpacaOpenOrdersCached().catch(function(err){
       console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
       return [];
     });
@@ -4650,7 +4675,19 @@
     });
   }
 
-  var alpacaDockRefreshInterval = null;
+  // Whether the dock panel is actually open right now -- used to gate its
+  // repaint on the shared 45s quote-loop tick (see onQuoteBatchDone) rather
+  // than the dock running its own separate setInterval. It used to run its
+  // own independent 45s timer, started the moment you opened it -- unsynced
+  // with the quote loop's own 45s tick, so a session with the dock open
+  // made roughly TWICE the Alpaca account/positions calls for no extra
+  // freshness, purely because the two timers happened to land at different
+  // offsets. Piggybacking on the same tick everything else already uses
+  // (Trade Overview, trade bubbles) removes that duplication entirely.
+  function isAlpacaDockOpen(){
+    var bodyWrap = document.getElementById('alpacaDockBodyWrap');
+    return Boolean(bodyWrap && bodyWrap.classList.contains('open'));
+  }
 
   function toggleAlpacaDockOpen(){
     var bodyWrap = document.getElementById('alpacaDockBodyWrap');
@@ -4662,17 +4699,10 @@
       caret.textContent = '▼';
       toggleBtn.setAttribute('aria-expanded', 'true');
       renderAlpacaDock();
-      // Keeps balance/positions genuinely live while you're actually
-      // looking at the panel — same 45s cadence as the rest of the app's
-      // quotes, stopped the moment you collapse it so it's not silently
-      // burning API calls in the background for a panel nobody's watching.
-      if(alpacaDockRefreshInterval) clearInterval(alpacaDockRefreshInterval);
-      alpacaDockRefreshInterval = setInterval(renderAlpacaDock, 45000);
     } else {
       bodyWrap.classList.remove('open');
       caret.textContent = '▲';
       toggleBtn.setAttribute('aria-expanded', 'false');
-      if(alpacaDockRefreshInterval){ clearInterval(alpacaDockRefreshInterval); alpacaDockRefreshInterval = null; }
     }
   }
   document.getElementById('alpacaDockToggleBtn').addEventListener('click', toggleAlpacaDockOpen);
@@ -6906,6 +6936,7 @@
     renderWhatToWatch();
     var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
+    if(isAlpacaDockOpen()){ renderAlpacaDock(); }
       updateTradeBubbles();
   }
 
