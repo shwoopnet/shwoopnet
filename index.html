@@ -3309,6 +3309,14 @@
       // with whatever risk % the server is actually using to size orders.
       if(typeof data.riskPercentOverride === 'number'){ riskPercent = data.riskPercentOverride; }
       renderAutoTradeOverrideControls();
+      // Without this, What to Watch on the Brief page only ever showed
+      // whatever backendIntradayPicks happened to be at the single
+      // render call made when the script first loaded (before sign-in,
+      // before this listener had delivered anything) -- it never
+      // refreshed again as the backend's actual picks came in, showing
+      // "0 stocks you're tracking today" indefinitely regardless of
+      // what the server was really doing.
+      renderWhatToWatch();
       var statusPageEl = document.getElementById('page-trades');
       if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
@@ -6669,6 +6677,7 @@
     renderMovers();
     renderIndices();
     renderBriefHeadline();
+    renderWhatToWatch();
     var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
@@ -9339,6 +9348,11 @@
           // now a journal change refreshes it directly and immediately.
           var statusPageEl = document.getElementById('page-trades');
           if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
+          // What to Watch's open-position merge (withOpenPositionsMergedIn)
+          // reads journalEntries directly, so a position opening or
+          // closing needs to refresh it here too, not just wait for the
+          // next quote batch or screener-picks update.
+          renderWhatToWatch();
         });
         loadAlertsForUser(user.uid);
         loadActivityLogForUser(user.uid);
