@@ -36,6 +36,7 @@
     --loss: #D93025;
     --loss-glow: rgba(217,48,37,0.14);
     --radius: 10px;
+    --card-shadow: 0 1px 3px rgba(16,24,43,0.06);
   }
 
   *{ box-sizing:border-box; }
@@ -310,8 +311,12 @@
   .settings-row-block[hidden]{ display:none; }
   .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
   .settings-row-desc{ font-size:11.5px; color: var(--muted); }
-  .quote-sync-status.ok{ color: var(--gain); }
-  .quote-sync-status.fail{ color: var(--loss); }
+  .quote-sync-status{
+    display:inline-block; font-size:11px; font-weight:600; padding:3px 9px; border-radius:5px;
+    border:1px solid var(--border); color: var(--muted);
+  }
+  .quote-sync-status.ok{ color: var(--gain); border-color: rgba(15,157,88,0.35); background: var(--gain-glow); }
+  .quote-sync-status.fail{ color: var(--loss); border-color: rgba(217,48,37,0.35); background: var(--loss-glow); }
   .alpaca-row-full{ width:100%; }
 
   /* Backend Pulse card -- live proof that the 24/7 server's heartbeat,
@@ -431,15 +436,25 @@
   .settings-note{ font-size:11px; color: var(--muted); margin-top:20px; line-height:1.6; }
 
   .changelog-list{ margin-top:24px; }
-  .changelog-entry{ padding:22px 0; border-bottom:1px solid var(--border); }
-  .changelog-entry:last-child{ border-bottom:none; }
-  .changelog-version{ font-family:'Public Sans', sans-serif; font-size:15px; font-weight:700; color: var(--amber); margin-bottom:10px; }
+  .changelog-entry{
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    padding:24px 26px; margin-bottom:20px; box-shadow: var(--card-shadow);
+  }
+  .changelog-entry:last-child{ margin-bottom:0; }
+  .changelog-version{
+    font-family:'Public Sans', sans-serif; font-size:15px; font-weight:700; color: var(--paper);
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;
+  }
+  .changelog-version-badge{
+    font-size:11px; font-weight:700; color: var(--amber); background: var(--amber-glow);
+    padding:3px 9px; border-radius:5px; flex-shrink:0;
+  }
   .changelog-items{ margin:0; padding-left:18px; }
 
   .labs-method-card, .labs-backtest-card{
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     padding:24px 26px; margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(16,24,43,0.06);
+    box-shadow: var(--card-shadow);
   }
   .labs-method-intro, .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
   .labs-method-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px 28px; }
@@ -487,15 +502,22 @@
   .demo-showcase-text{ font-size:12.5px; line-height:1.55; color: var(--paper); margin:0 0 16px 0; }
   .demo-showcase-stats{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:12px; }
   .demo-showcase-stat{
-    background: var(--ink); border:1px solid var(--border); border-radius:6px;
-    padding:12px 8px; text-align:center;
+    /* Was var(--ink) -- a real black in the old dark palette, giving
+       this tile contrast against the showcase card's own lighter
+       gradient. Post-Ledger, --ink (#FAFAF8) is nearly the same shade
+       as that gradient, so the tile all but disappeared. --panel (pure
+       white) is the actual contrasting surface now. */
+    background: var(--panel); border:1px solid var(--border); border-radius:6px;
+    padding:12px 8px; text-align:center; box-shadow: var(--card-shadow);
   }
   .demo-showcase-stat-value{ font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight:600; font-size:20px; color: var(--paper); }
   .demo-showcase-stat-label{ font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--muted); margin-top:4px; }
   .demo-showcase-footnote{ font-size:10.5px; color: var(--muted); line-height:1.5; margin:0; }
   .demo-showcase-explainer{
+    /* Same var(--ink) -> var(--panel) fix as .demo-showcase-stat above. */
     font-size:12px; line-height:1.6; color: var(--paper); margin-bottom:14px;
-    padding:12px 14px; background: var(--ink); border:1px solid var(--border); border-radius:6px;
+    padding:12px 14px; background: var(--panel); border:1px solid var(--border); border-radius:6px;
+    box-shadow: var(--card-shadow);
   }
   .demo-showcase-calc{
     font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-size:11.5px; color: var(--muted);
@@ -509,6 +531,7 @@
   .demo-clock-row{
     display:flex; align-items:center; gap:16px; margin-bottom:20px;
     padding:14px 18px; background: var(--panel); border:1px solid var(--border); border-radius:8px;
+    box-shadow: var(--card-shadow);
   }
   .demo-clock{ font-size:20px; font-weight:700; color: var(--amber); flex-shrink:0; min-width:76px; }
   .demo-trade-card-enter{ animation: demoCardIn .4s cubic-bezier(.2,.8,.3,1); }
@@ -597,7 +620,7 @@
   .backtest-summary{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:22px; }
   .backtest-stat{
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px;
-    box-shadow: 0 1px 3px rgba(16,24,43,0.06);
+    box-shadow: var(--card-shadow);
   }
   /* Account balance figures (Equity/Day P&L/Buying power) read as ONE
      shared card with items just separated by gap -- not, like the
@@ -608,7 +631,7 @@
   .acct-strip{
     display:flex; gap:28px; flex-wrap:wrap; margin-bottom:22px;
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px;
-    box-shadow: 0 1px 3px rgba(16,24,43,0.06);
+    box-shadow: var(--card-shadow);
   }
   .backtest-stat-label{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); margin-bottom:6px; }
   .backtest-stat-value{ font-size:20px; font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight:600; }
@@ -665,7 +688,7 @@
   .brief-lede{ font-size:15px; line-height:1.75; color:var(--muted); margin:0 0 32px 0; }
 
   .brief-indices{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
-  .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+  .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
   .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
   .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
   .index-card .ix-val{ font-size:21px; display:block; }
@@ -682,6 +705,7 @@
   .trades-empty-state{
     padding: 32px 24px; text-align:center; color: var(--muted); font-size:13px; line-height:1.6;
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
   }
 
   .priority-label{
@@ -701,7 +725,7 @@
     display:flex; align-items:center; gap:8px; width:100%; text-align:left;
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     padding:14px 18px; font-size:12.5px; color: var(--muted); cursor:pointer;
-    font-family:'Public Sans', sans-serif;
+    font-family:'Public Sans', sans-serif; box-shadow: var(--card-shadow);
   }
   .finished-toggle:hover{ color: var(--paper); border-color: var(--amber-dim); }
   .finished-toggle .caret{ font-size:10px; color: var(--amber); }
@@ -712,7 +736,7 @@
   @media (max-width: 900px){ .brief-two-col{ grid-template-columns:1fr; gap:24px; } }
   .brief-col .brief-section-title{ margin-bottom:12px; }
 
-  .breadth-widget{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:18px 20px; }
+  .breadth-widget{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:18px 20px; box-shadow: var(--card-shadow); }
   .breadth-bar{ height:10px; border-radius:5px; background: var(--loss-glow); overflow:hidden; margin-bottom:14px; }
   .breadth-bar-up{ height:100%; background: var(--gain); }
   .sentiment-rows{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
@@ -728,7 +752,7 @@
 
   .movers-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   @media (max-width: 600px){ .movers-grid{ grid-template-columns:1fr; } }
-  .movers-col{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; min-width:0; }
+  .movers-col{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; min-width:0; box-shadow: var(--card-shadow); }
   .movers-col-title{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color: var(--muted); margin-bottom:10px; }
   .mover-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; font-size:12px; }
   .mover-row + .mover-row{ border-top:1px solid var(--border); }
@@ -738,7 +762,7 @@
   .mover-chg.up{ color: var(--gain); }
   .mover-chg.down{ color: var(--loss); }
 
-  .market-news-list, .earnings-list{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:6px 16px; min-height:60px; }
+  .market-news-list, .earnings-list{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:6px 16px; min-height:60px; box-shadow: var(--card-shadow); }
   .news-placeholder{ padding:14px 0; font-size:12px; color: var(--muted); }
   .news-item{ display:flex; flex-direction:column; gap:3px; padding:11px 0; text-decoration:none; color: var(--paper); }
   .news-item + .news-item{ border-top:1px solid var(--border); }
@@ -756,8 +780,8 @@
   }
   .watch-trade-card:hover{ border-color: var(--amber-dim); }
   .watch-trade-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
+  .watch-trade-sym-group{ display:flex; align-items:center; gap:8px; min-width:0; }
   .watch-trade-sym{ font-family:'Public Sans', sans-serif; font-weight:600; font-size:14px; }
-  .watch-trade-sym .t-dir{ font-size:10px; color: var(--muted); font-weight:400; margin-left:6px; }
   .watch-trade-reason{ font-size:12.5px; color: var(--muted); line-height:1.55; margin:0 0 12px 0; }
   .watch-trade-link{ font-size:11px; color: var(--amber); }
   .watch-trade-card:hover .watch-trade-link{ text-decoration:underline; }
@@ -888,7 +912,7 @@
   .trade-block{
     background:var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     margin-bottom:14px; overflow:hidden;
-    box-shadow: 0 1px 3px rgba(16,24,43,0.06);
+    box-shadow: var(--card-shadow);
   }
   .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; }
   .chevron:hover{ color: var(--amber); }
@@ -900,7 +924,7 @@
   }
   .t-sym-text{ display:flex; flex-direction:column; min-width:0; }
   .t-sym{ font-weight:600; letter-spacing:.02em; }
-  .t-sym .t-dir{
+  .t-sym .t-dir, .watch-trade-sym .t-dir, .journal-entry-sym .t-dir{
     font-size:10.5px; font-weight:600; color: var(--amber); background: var(--amber-glow);
     padding:2px 7px; border-radius:5px; margin-left:8px;
   }
@@ -1318,7 +1342,7 @@
     .notepad-panel{ left:16px; right:16px; width:auto; bottom:84px; }
   }
 
-  .journal-calendar{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; margin-bottom:20px; }
+  .journal-calendar{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; margin-bottom:20px; box-shadow: var(--card-shadow); }
   .calendar-head{ display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:16px; }
   .calendar-month{
     font-size:13px; color: var(--paper); min-width:150px; text-align:center;
@@ -1326,7 +1350,7 @@
   }
 
   .pl-summary{ display:flex; gap:14px; flex-wrap:wrap; margin: 20px 0; }
-  .pl-card{ flex:1; min-width:200px; background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:16px 18px; }
+  .pl-card{ flex:1; min-width:200px; background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
   .journal-stats-row{ margin-top:-6px; }
   .journal-stats-row .pl-card{ min-width:130px; padding:12px 14px; }
   .journal-stats-row .pl-card-value{ font-size:18px; }
@@ -1371,7 +1395,7 @@
     .calendar-week-cell{ grid-column: 1 / -1; flex-direction:row; align-items:center; gap:10px; min-height:auto; }
   }
 
-  .journal-detail{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; }
+  .journal-detail{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; box-shadow: var(--card-shadow); }
   .journal-detail-date{ font-family:'Public Sans', sans-serif; font-size:14px; margin-bottom:14px; }
   .journal-empty{ font-size:12.5px; color: var(--muted); }
   .journal-recap{
@@ -1392,11 +1416,10 @@
   }
   .journal-source-tag{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
-    border:1px solid var(--amber-dim); border-radius:3px; padding:2px 6px;
+    border:1px solid var(--amber-dim); border-radius:5px; padding:2px 6px; background: var(--amber-glow);
   }
   .journal-entry:last-child{ border-bottom:none; }
   .journal-entry-sym{ font-weight:600; }
-  .journal-entry-sym .t-dir{ font-size:10px; color: var(--muted); font-weight:400; margin-left:6px; }
   .journal-entry-prices{ color: var(--muted); }
   .journal-entry-result.up{ color: var(--gain); }
   .journal-entry-result.down{ color: var(--loss); }
@@ -2379,12 +2402,12 @@
       <div class="settings-row">
         <div>
           <div class="settings-row-title">Reset preferences</div>
-          <div class="settings-row-desc">Clears theme, layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
+          <div class="settings-row-desc">Clears layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
         </div>
         <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
       </div>
 
-      <div class="settings-note">Your Trade Journal syncs to your account and follows you across devices. Everything else on this page — theme, layout, notepad, and alert settings — stays local to this browser only.</div>
+      <div class="settings-note">Your Trade Journal syncs to your account and follows you across devices. Everything else on this page — layout, notepad, and alert settings — stays local to this browser only.</div>
     </div>
   </main>
 
@@ -2399,7 +2422,7 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
-        <div class="changelog-version">v2.2 — Crypto Trading &amp; Trade-Management Hardening</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v2.2</span>Crypto Trading &amp; Trade-Management Hardening</div>
         <ul class="changelog-items">
           <li>A second, fully independent strategy now trades crypto 24/7 — 12 pairs (BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, AAVE), its own screener, its own auto-trade toggle, and its own risk budget that never competes with equities for room</li>
           <li>Total risk ceiling raised from 5.5% to 7% — each strategy gets its own independent 7% budget, not a shared one, so one maxing out has zero effect on the other's ability to trade</li>
@@ -2411,7 +2434,7 @@
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v2.1 — Navigation Redesign &amp; Safety Overhaul</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v2.1</span>Navigation Redesign &amp; Safety Overhaul</div>
         <ul class="changelog-items">
           <li>Navigation rebuilt as a single, persistent sidebar — no more separate popups to open and close, and every destination (including Notepad and History) now lives in one place</li>
           <li>Position sizing tightened: 1% risk per trade, a 20% cap on any single position, and a 5.5% ceiling on total risk across every open position at once — not user-adjustable, since changing it manually would skew the numbers the strategy was actually tested against</li>
@@ -2422,7 +2445,7 @@
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v2.0 — Intraday-First &amp; Backend Server</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v2.0</span>Intraday-First &amp; Backend Server</div>
         <ul class="changelog-items">
           <li>Intraday is now the primary strategy — Trade Overview, the Market Brief, and backtesting are all built around short-term, real-time setups instead of once-a-day picks</li>
           <li>Position sizing is now risk-based, computed fresh from your real account balance every time — scales automatically as the account grows instead of a fixed share count</li>
@@ -2434,28 +2457,28 @@
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.7.3.0.0 — Account Panel &amp; Auto-Send</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.7.3.0.0</span>Account Panel &amp; Auto-Send</div>
         <ul class="changelog-items">
           <li>New account panel shows your real Alpaca balance and open positions at a glance</li>
           <li>Optional auto-send: new picks can go to Alpaca automatically, no manual click — off by default</li>
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.7.0.0.0 — Alpaca Paper Trading</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.7.0.0.0</span>Alpaca Paper Trading</div>
         <ul class="changelog-items">
           <li>Connect a free Alpaca paper account in Settings — "Send to Alpaca" places a real order and logs it to the journal in one click</li>
           <li>Started quietly tracking what actually happens to every pick, aiming toward real numbers on how well this works instead of a guess</li>
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.6.0.0.0 — Renamed to Shwoop, Labs Added</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.6.0.0.0</span>Renamed to Shwoop, Labs Added</div>
         <ul class="changelog-items">
           <li>Renamed from Shwoopnet to Shwoop</li>
           <li>New Labs page: a plain-language writeup of exactly how the screener works, plus a real backtest tool</li>
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.5.2.0.0 — Real Screener &amp; Analysis</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.5.2.0.0</span>Real Screener &amp; Analysis</div>
         <ul class="changelog-items">
           <li>Daily screener auto-picks trades from real technical analysis, replacing simulated data entirely</li>
           <li>Entry, stop, and targets calculated from real moving averages and price structure — no more fixed-ratio targets</li>
@@ -2463,21 +2486,21 @@
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.5 — Accounts &amp; Sync</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.5</span>Accounts &amp; Sync</div>
         <ul class="changelog-items">
           <li>Real sign-up and sign-in with email + password</li>
           <li>Trade Journal now syncs across devices in real time</li>
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.4 — Journal Upgrades</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.4</span>Journal Upgrades</div>
         <ul class="changelog-items">
           <li>Log real trades straight from Trade Overview, pre-filled from the setup</li>
           <li>Exit tracking with automatic P&amp;L, calendar-based journal with date-range filtering</li>
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version">v1.0 — Initial Launch</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.0</span>Initial Launch</div>
         <ul class="changelog-items">
           <li>Market Brief, Trade Overview, and live ticker tape</li>
           <li>Simulated pricing and candlestick charts</li>
@@ -10846,7 +10869,10 @@
         ? openEntry.entryNotes : t.notes;
       return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
         '<div class="watch-trade-head">' +
-          '<span class="watch-trade-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span></span>' +
+          '<span class="watch-trade-sym-group">' +
+            symbolBadgeHtml(t.sym) +
+            '<span class="watch-trade-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span></span>' +
+          '</span>' +
           '<span class="status-badge ' + badge.cls + '">' + badge.label + '</span>' +
         '</div>' +
         '<p class="watch-trade-reason">' + notesForDisplay[0] + '</p>' +
