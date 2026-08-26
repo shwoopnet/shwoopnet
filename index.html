@@ -989,23 +989,31 @@
   .trade-action-verb.done{ color: var(--muted); }
 
   .trade-detail{
-    display:flex; gap:22px; align-items:flex-start;
+    display:flex; flex-direction:column; gap:14px;
     padding: 16px 16px 18px 16px; border-top:1px solid var(--border);
   }
   .trade-detail[hidden]{ display:none; }
-  .trade-chart-col{ flex: 0 0 var(--chart-width, 68%); min-width:0; }
-  .trade-notes-col{ flex: 1 1 auto; min-width:200px; }
-  .trade-notes-col h3{
-    font-family:'Space Grotesk', sans-serif; font-size:11px; text-transform:uppercase;
-    letter-spacing:.06em; color:var(--muted); font-weight:600; margin:2px 0 12px 0;
+  .trade-chart-col{ width:100%; }
+  .trade-notes-col{ width:100%; }
+  .trade-notes-toggle{
+    display:flex; justify-content:space-between; align-items:center; width:100%;
+    background:none; border:none; padding:0; margin:2px 0 12px 0; cursor:pointer;
+    font-family:inherit; text-align:left;
   }
-  .trade-notes-col ul{ list-style:none; margin:0; padding:0; }
-  .trade-notes-col li{
+  .trade-notes-toggle h3{
+    font-family:'Space Grotesk', sans-serif; font-size:11px; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); font-weight:600; margin:0;
+  }
+  .trade-notes-chevron{ color:var(--muted); font-size:14px; transition: transform .15s ease; }
+  .trade-notes-toggle.collapsed .trade-notes-chevron{ transform: rotate(-90deg); }
+  .trade-notes-list{ list-style:none; margin:0; padding:0; }
+  .trade-notes-list[hidden]{ display:none; }
+  .trade-notes-list li{
     font-size: var(--notes-text-size, 12.5px); line-height:1.55; color:var(--muted);
     padding: 2px 0 12px 14px; border-left: 2px solid var(--amber-dim); margin-bottom:12px;
   }
-  .trade-notes-col li:last-child{ margin-bottom:0; }
-  .trade-chart{ width:100%; height: var(--chart-height, 260px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
+  .trade-notes-list li:last-child{ margin-bottom:0; }
+  .trade-chart{ width:100%; height: var(--chart-height, 310px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
   .grid-label{ fill: var(--muted); font-size: 11px; font-family:'IBM Plex Mono',monospace; }
   .chart-error-text{ fill: var(--paper); font-size:13px; font-family:'Space Grotesk', sans-serif; }
@@ -1052,9 +1060,6 @@
       content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
       text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;
     }
-    .trade-detail{ flex-direction: column; }
-    .trade-chart-col{ flex: 0 0 auto; width:100%; }
-    .trade-notes-col{ flex: 1 1 auto; width:100%; }
   }
 
   .news-stack-head{
@@ -2018,12 +2023,6 @@
             <span class="caret">▾</span>
           </button>
           <div class="layout-menu" id="layoutMenu" hidden>
-            <div class="layout-stepper">
-              <span class="step-name">Chart width</span>
-              <button class="zoom-btn" id="widthDec" aria-label="Decrease chart width">−</button>
-              <span class="zoom-label mono" id="widthLabel">62%</span>
-              <button class="zoom-btn" id="widthInc" aria-label="Increase chart width">+</button>
-            </div>
             <div class="layout-stepper">
               <span class="step-name">Chart height</span>
               <button class="zoom-btn" id="heightDec" aria-label="Decrease chart height">−</button>
@@ -5208,6 +5207,11 @@
   // symbols during its own "no longer rendered, stop tracking" cleanup.
   var lastRenderedCryptoSetups = [];
   var expandedCryptoTradeSyms = {};
+  // Whether a card's "Why this trade" notes are collapsed -- shared
+  // across both card types (unlike the expanded-chart maps above) since
+  // there's no per-type cleanup logic here to worry about evicting the
+  // wrong type's entries, and symbols are disjoint between them anyway.
+  var notesCollapsedSyms = {};
   // Guards the async Alpaca-position patch below against a slow, stale
   // response landing after a newer render already happened.
   var intradayPLPatchGen = 0;
@@ -5440,13 +5444,15 @@
           '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
             '<div class="trade-chart-col">' +
               '<div class="chart-canvas-wrap">' +
-                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>' +
+                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 240" preserveAspectRatio="none"></svg>' +
                 '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
               '</div>' +
             '</div>' +
             '<div class="trade-notes-col">' +
-              '<h3>Why this trade</h3>' +
-              '<ul>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
+              '<button class="trade-notes-toggle' + (notesCollapsedSyms[t.sym] ? ' collapsed' : '') + '" type="button" data-notes-toggle="' + t.sym + '" aria-expanded="' + (notesCollapsedSyms[t.sym] ? 'false' : 'true') + '">' +
+                '<h3>Why this trade</h3><span class="trade-notes-chevron">⌄</span>' +
+              '</button>' +
+              '<ul class="trade-notes-list" id="notes-' + t.sym + '"' + (notesCollapsedSyms[t.sym] ? ' hidden' : '') + '>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -5466,6 +5472,18 @@
           delete expandedTradeSyms[sym];
           collapseTradeCard(detail, btn);
         }
+      });
+    });
+
+    el.querySelectorAll('.trade-notes-toggle').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.notesToggle;
+        var collapsed = !notesCollapsedSyms[sym];
+        notesCollapsedSyms[sym] = collapsed;
+        var list = document.getElementById('notes-' + sym);
+        if(list) list.hidden = collapsed;
+        btn.classList.toggle('collapsed', collapsed);
+        btn.setAttribute('aria-expanded', String(!collapsed));
       });
     });
 
@@ -5555,13 +5573,15 @@
           '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
             '<div class="trade-chart-col">' +
               '<div class="chart-canvas-wrap">' +
-                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>' +
+                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 240" preserveAspectRatio="none"></svg>' +
                 '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
               '</div>' +
             '</div>' +
             '<div class="trade-notes-col">' +
-              '<h3>Why this trade</h3>' +
-              '<ul>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
+              '<button class="trade-notes-toggle' + (notesCollapsedSyms[t.sym] ? ' collapsed' : '') + '" type="button" data-notes-toggle="' + t.sym + '" aria-expanded="' + (notesCollapsedSyms[t.sym] ? 'false' : 'true') + '">' +
+                '<h3>Why this trade</h3><span class="trade-notes-chevron">⌄</span>' +
+              '</button>' +
+              '<ul class="trade-notes-list" id="notes-' + t.sym + '"' + (notesCollapsedSyms[t.sym] ? ' hidden' : '') + '>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -5581,6 +5601,18 @@
           delete expandedCryptoTradeSyms[sym];
           collapseTradeCard(detail, btn);
         }
+      });
+    });
+
+    el.querySelectorAll('.trade-notes-toggle').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.notesToggle;
+        var collapsed = !notesCollapsedSyms[sym];
+        notesCollapsedSyms[sym] = collapsed;
+        var list = document.getElementById('notes-' + sym);
+        if(list) list.hidden = collapsed;
+        btn.classList.toggle('collapsed', collapsed);
+        btn.setAttribute('aria-expanded', String(!collapsed));
       });
     });
 
@@ -6960,8 +6992,15 @@
 
   function drawCandles(svg, data, scale, priceScaleFactor, tf, opts){
     opts = opts || {};
-    var W = 760, H = 200, padTop=12, padBottom=30, padRight=54;
-    var plotW = W - padRight, plotH = H - padTop - padBottom;
+    // H grew from 200 to 240 to fit a volume strip below the price plot
+    // without shrinking it -- volGap+volH (4+36=40) is exactly the added
+    // height, so plotH still comes out to the same 158 it always was.
+    // padRight widened 54 -> 70 -- a 3-digit-dollar symbol's axis tag
+    // (e.g. "E 181.81" for COIN/PLTR, both real symbols here) was
+    // clipping at the old margin, which only ever got verified against
+    // 2-digit prices like MARA's "E 11.45".
+    var W = 760, H = 240, padTop=12, padBottom=30, padRight=70, volGap=4, volH=36;
+    var plotW = W - padRight, plotH = H - padTop - padBottom - volGap - volH;
     priceScaleFactor = priceScaleFactor || 1;
 
     var loRaw = Math.min.apply(null, data.map(function(d){return d.l;}));
@@ -7074,6 +7113,14 @@
       }
     }
 
+    // Volume strip beneath the price plot, one bar per candle at the same
+    // x/width so they line up exactly -- scaled to the loudest bar
+    // currently in view, not the whole symbol's history, so panning to a
+    // quieter stretch doesn't leave every bar looking like a whisper next
+    // to a spike from outside the visible window.
+    var volTop = padTop + plotH + volGap;
+    var maxVol = Math.max.apply(null, data.map(function(d){ return d.vol || 0; })) || 1;
+
     data.forEach(function(d, i){
       var x = i * xStep + xStep/2;
       var up = d.c >= d.o;
@@ -7083,6 +7130,8 @@
       var bodyH = Math.max(1, bodyBot - bodyTop);
       parts.push('<line x1="'+x+'" y1="'+y(d.h)+'" x2="'+x+'" y2="'+y(d.l)+'" stroke="'+color+'" stroke-width="1"/>');
       parts.push('<rect x="'+(x-cw/2)+'" y="'+bodyTop+'" width="'+cw+'" height="'+bodyH+'" fill="'+color+'"/>');
+      var barVolH = Math.max(1, (d.vol || 0) / maxVol * volH);
+      parts.push('<rect x="'+(x-cw/2)+'" y="'+(volTop + volH - barVolH)+'" width="'+cw+'" height="'+barVolH+'" fill="'+color+'" opacity="0.55"/>');
     });
 
     // Live price line — the signature "where are we right now" reference
@@ -7221,7 +7270,7 @@
   }
 
   function renderChartError(svg, sym){
-    var W = 760, H = 200;
+    var W = 760, H = 240;
     svg.innerHTML =
       '<text x="' + (W/2) + '" y="' + (H/2 - 8) + '" text-anchor="middle" class="chart-error-text">Couldn\'t load real chart data</text>' +
       '<text x="' + (W/2) + '" y="' + (H/2 + 14) + '" text-anchor="middle" class="chart-error-sub">Try a different timeframe, or check back shortly.</text>';
@@ -7379,7 +7428,7 @@
 
     svg.addEventListener('wheel', function(e){
       e.preventDefault();
-      var plotW = 760 - 54;
+      var plotW = 760 - 70;
       var localX = svgLocalX(svg, e.clientX);
       var fraction = Math.max(0, Math.min(1, localX / plotW));
       // A fixed zoom step per wheel event works fine for a mouse (one
@@ -7396,7 +7445,7 @@
     svg.addEventListener('pointerdown', function(e){
       var state = chartStates[sym];
       if(!state) return;
-      var plotW = 760 - 54;
+      var plotW = 760 - 70;
       var localX = svgLocalX(svg, e.clientX);
       var localY = svgLocalY(svg, e.clientY);
       var mode = 'pan';
@@ -7450,7 +7499,7 @@
         } else {
           var rect = svg.getBoundingClientRect();
           var count2 = state.viewEnd - state.viewStart;
-          var pixelsPerCandle = (rect.width * (706/760)) / count2;
+          var pixelsPerCandle = (rect.width * (690/760)) / count2;
           var dxPixels = e.clientX - dragState.startX;
           var deltaCandles = Math.round(dxPixels / pixelsPerCandle);
           var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, state.data.length - count2));
@@ -7468,7 +7517,7 @@
           hideCrosshair(sym);
         }
       } else {
-        var plotWHover = 760 - 54;
+        var plotWHover = 760 - 70;
         var localXHover = svgLocalX(svg, e.clientX);
         var localYHover = svgLocalY(svg, e.clientY);
         if(localXHover > plotWHover){ svg.style.cursor = 'ns-resize'; }
@@ -7968,24 +8017,26 @@
     }
   });
 
-  var layoutPrefs = { width:68, height:260, text:12.5, showOHLC:true };
+  // width dropped from here entirely -- the chart is always full width
+  // now (notes moved below it instead of beside it), so a "chart width %"
+  // control has nothing left to control. height's range is scaled up to
+  // match: the chart's internal viewBox grew from 200 to 240 units to fit
+  // the new volume strip, so the same *relative* stretch this slider
+  // always allowed (0.6x-1.7x of the viewBox height) now maps to
+  // different absolute px.
+  var layoutPrefs = { height:310, text:12.5, showOHLC:true };
   var layoutLimits = {
-    width:  [40, 85, 5],
-    height: [120, 340, 20],
+    height: [150, 410, 20],
     text:   [10, 16, 0.5]
   };
 
   function applyLayout(){
-    document.documentElement.style.setProperty('--chart-width', layoutPrefs.width + '%');
     document.documentElement.style.setProperty('--chart-height', layoutPrefs.height + 'px');
     document.documentElement.style.setProperty('--notes-text-size', layoutPrefs.text + 'px');
 
-    document.getElementById('widthLabel').textContent = layoutPrefs.width + '%';
     document.getElementById('heightLabel').textContent = layoutPrefs.height + 'px';
     document.getElementById('textLabel').textContent = layoutPrefs.text + 'px';
 
-    document.getElementById('widthDec').disabled = layoutPrefs.width <= layoutLimits.width[0];
-    document.getElementById('widthInc').disabled = layoutPrefs.width >= layoutLimits.width[1];
     document.getElementById('heightDec').disabled = layoutPrefs.height <= layoutLimits.height[0];
     document.getElementById('heightInc').disabled = layoutPrefs.height >= layoutLimits.height[1];
     document.getElementById('textDec').disabled = layoutPrefs.text <= layoutLimits.text[0];
@@ -8006,15 +8057,13 @@
     applyLayout();
   }
 
-  document.getElementById('widthDec').addEventListener('click', function(){ stepLayout('width', -1); });
-  document.getElementById('widthInc').addEventListener('click', function(){ stepLayout('width', 1); });
   document.getElementById('heightDec').addEventListener('click', function(){ stepLayout('height', -1); });
   document.getElementById('heightInc').addEventListener('click', function(){ stepLayout('height', 1); });
   document.getElementById('textDec').addEventListener('click', function(){ stepLayout('text', -1); });
   document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
 
   document.getElementById('layoutResetBtn').addEventListener('click', function(){
-    layoutPrefs = { width:68, height:260, text:12.5, showOHLC:true };
+    layoutPrefs = { height:310, text:12.5, showOHLC:true };
     applyLayout();
   });
 
@@ -8026,8 +8075,7 @@
   (function initLayout(){
     try{
       var saved = JSON.parse(window.localStorage.getItem('shwoopnet:layout') || 'null');
-      if(saved && typeof saved.width === 'number'){
-        layoutPrefs.width = saved.width;
+      if(saved && typeof saved.height === 'number'){
         layoutPrefs.height = saved.height;
         layoutPrefs.text = saved.text;
         if(typeof saved.showOHLC === 'boolean'){ layoutPrefs.showOHLC = saved.showOHLC; }
