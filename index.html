@@ -942,9 +942,6 @@
     color:var(--muted); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em;
     border-bottom:1px solid var(--border); padding-left:16px; padding-right:16px;
   }
-  /* Crypto Setups rows have no chevron/chart drill-down -- one fewer
-     column than the equities grid above, not a hidden placeholder cell. */
-  .trade-columns.no-chevron{ grid-template-columns: 1.5fr 1fr 1fr 1fr 1.1fr 1.1fr; }
   .trade-block{
     background:var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     margin-bottom:14px; overflow:hidden;
@@ -2107,8 +2104,9 @@
         </div>
         <div class="labs-backtest-note" style="margin-bottom:14px;">
           Runs 24/7, independent of market hours — its own rolling-range breakout screener across 12 crypto
-          pairs, long-only. No chart drill-down yet the way equities setups have — chart history here comes from
-          Twelve Data, which doesn't carry crypto bars.
+          pairs, long-only. Chart drill-down shows the most recent ~48 hours of 15-minute bars — crypto's own
+          native timeframe, since there's no single trading session for a "1D" view to anchor to the way equities
+          has one.
         </div>
         <div id="cryptoBlocks"></div>
       </div>
@@ -5375,6 +5373,14 @@
   // collapse on the very next automatic refresh, sometimes within
   // seconds. Persisted across renders and re-applied after each rebuild.
   var expandedTradeSyms = {};
+  // Same two roles as lastRenderedSetups/expandedTradeSyms above, kept as
+  // separate objects rather than shared with the equities ones -- Crypto
+  // Setups renders into its own #cryptoBlocks container on its own
+  // schedule, and reusing the same expandedTradeSyms would make each
+  // card type's render pass wrongly evict the OTHER type's expanded
+  // symbols during its own "no longer rendered, stop tracking" cleanup.
+  var lastRenderedCryptoSetups = [];
+  var expandedCryptoTradeSyms = {};
   // Guards the async Alpaca-position patch below against a slow, stale
   // response landing after a newer render already happened.
   var intradayPLPatchGen = 0;
@@ -5655,17 +5661,18 @@
   // Same overall shape as renderIntradayBlocks above, sourced from
   // backendCryptoPicks instead of backendIntradayPicks/intradayTrades --
   // crypto never had a local-tab fallback scan, so there's nothing to
-  // prefer over the backend's own picks here. No chevron/chart
-  // drill-down: the chart renderer below is built entirely around
-  // Twelve Data/equities symbols and doesn't understand a pair like
-  // "BTC/USD" -- an explicit v1 scope decision (see the card's own note
-  // in the markup), not a silent gap.
+  // prefer over the backend's own picks here. Chart drill-down reuses
+  // the exact same chevron/chart machinery as equities (see
+  // expandTradeCard) -- fetchHistoryFromNetwork branches on the symbol
+  // to route a crypto pair to Alpaca's own crypto bars instead of
+  // Twelve Data, which never carried crypto history at all.
   function renderCryptoBlocks(){
     var el = document.getElementById('cryptoBlocks');
     if(!el) return;
     var source = withCryptoOpenPositionsMergedIn(
       (backendCryptoPicks && backendCryptoPicks.length) ? backendCryptoPicks.map(buildTradeFromPick) : []
     );
+    lastRenderedCryptoSetups = source;
 
     var headMeta = document.getElementById('cryptoSetupsHeadMeta');
     if(headMeta){
@@ -5700,7 +5707,8 @@
         ? openEntry.entryNotes : t.notes;
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
-          '<div class="trade-columns trade-row no-chevron">' +
+          '<div class="trade-columns trade-row">' +
+            '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
             '<div class="t-sym-cell">' +
               '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
                 '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
@@ -5717,14 +5725,50 @@
             plCellHtml +
           '</div>' +
           (openEntry ? '<div class="trade-action-banner done"><span class="action-icon">✓</span><span class="action-text">Sent to Alpaca — open position, ' + openEntry.qty + ' units</span></div>' : '') +
-          '<div class="trade-notes-col" style="padding:14px 16px; border-top:1px solid var(--border);">' +
-            '<h3>Why this trade</h3>' +
-            '<ul>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
+          '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
+            '<div class="trade-chart-col">' +
+              '<div class="chart-canvas-wrap">' +
+                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>' +
+                '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="trade-notes-col">' +
+              '<h3>Why this trade</h3>' +
+              '<ul>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
+            '</div>' +
           '</div>' +
         '</div>';
     }).join('');
 
     patchIntradayPLWithAlpacaPositions();
+
+    el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sym = btn.dataset.toggle;
+        var detail = document.getElementById('chartwrap-' + sym);
+        if(!detail) return;
+        if(detail.hasAttribute('hidden')){
+          expandedCryptoTradeSyms[sym] = true;
+          expandTradeCard(sym, detail, btn);
+        } else {
+          delete expandedCryptoTradeSyms[sym];
+          collapseTradeCard(detail, btn);
+        }
+      });
+    });
+
+    // Same re-apply-expanded-state treatment as renderIntradayBlocks --
+    // this container's innerHTML is fully rebuilt every render, which
+    // would otherwise silently re-collapse a chart the user had open.
+    Object.keys(expandedCryptoTradeSyms).forEach(function(sym){
+      var detail = document.getElementById('chartwrap-' + sym);
+      var btn = el.querySelector('.chevron[data-toggle="' + sym + '"]');
+      if(!detail || !btn){
+        delete expandedCryptoTradeSyms[sym];
+        return;
+      }
+      expandTradeCard(sym, detail, btn);
+    });
   }
 
   function expandTradeCard(sym, detail, btn){
@@ -5735,12 +5779,20 @@
     // expanded, not rendered into every hidden card up front --
     // rendering into a zero-dimension hidden SVG produces a broken
     // chart, and most cards are never opened.
-    var trade = lastRenderedSetups.filter(function(x){ return x.sym === sym; })[0];
+    // Shared lookup across both card types -- symbols are disjoint
+    // between the two (a crypto pair always contains "/", an equities
+    // ticker never does), so concatenating is safe.
+    var trade = lastRenderedSetups.concat(lastRenderedCryptoSetups).filter(function(x){ return x.sym === sym; })[0];
     if(trade){
       var svg = document.getElementById('chart-' + sym);
       if(svg && !svg.dataset.rendered){
         svg.dataset.rendered = '1';
-        renderChartInto(svg, sym, trade.entry, '1D');
+        // Crypto has no single trading-day session for '1D' to anchor
+        // to -- charted at '15m' instead (its own strategy's native
+        // timeframe), which fetchHistoryFromNetwork routes to Alpaca's
+        // crypto bars rather than Twelve Data.
+        var tf = sym.indexOf('/') > -1 ? '15m' : '1D';
+        renderChartInto(svg, sym, trade.entry, tf);
         setupChartInteractivity(sym);
       }
     }
@@ -5911,7 +5963,35 @@
     return new Date(savedAt).toDateString() !== new Date().toDateString();
   }
 
+  // Crypto's own chart history -- Alpaca's crypto bars, not Twelve Data
+  // (which never carried crypto at all). Always requested at '15m', the
+  // crypto strategy's own native timeframe -- there's no per-card
+  // timeframe switcher for either asset class today (renderChartInto is
+  // only ever called with one fixed tf), and 15m sidesteps the '1D'
+  // same-session filtering below, which doesn't make sense for a market
+  // that never closes. No shared rate-limit queue the way Twelve Data
+  // calls have (scheduleTwelveDataCall) -- that queue exists specifically
+  // for Twelve Data's much tighter free-tier ceiling; Alpaca's crypto
+  // data endpoint is the same one fetchAllCryptoQuotes already calls
+  // directly with real headroom to spare.
+  function fetchCryptoHistoryFromNetwork(sym){
+    var limit = tfConfig['15m'].fetchSize;
+    return fetch(ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + encodeURIComponent(sym) + '&timeframe=15Min&limit=' + limit, { headers: alpacaHeaders() })
+      .then(function(res){
+        if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        var bars = (data.bars && data.bars[sym]) || [];
+        if(bars.length < 2) throw new Error('No usable crypto history for ' + sym);
+        return bars.map(function(b){
+          return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
+        });
+      });
+  }
+
   function fetchHistoryFromNetwork(sym, tf, priority){
+    if(sym.indexOf('/') > -1) return fetchCryptoHistoryFromNetwork(sym);
     return scheduleTwelveDataCall(function(){
       var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
         '&interval=' + historyIntervals[tf] + '&outputsize=' + tfConfig[tf].fetchSize +
