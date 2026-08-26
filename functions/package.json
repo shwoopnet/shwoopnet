@@ -3,7 +3,7 @@
   "description": "Cloud Functions proxy for Finnhub calls, keeping the API key server-side.",
   "main": "index.js",
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "dependencies": {
     "firebase-functions": "^6.3.2"
