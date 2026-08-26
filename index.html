@@ -4692,7 +4692,7 @@
         positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions.</div>';
         return;
       }
-      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th>Target</th><th>Current</th><th>Stop</th><th>P/L</th><th></th></tr></thead><tbody>' +
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th><th>Current</th><th>Stop</th><th>P/L</th><th></th></tr></thead><tbody>' +
         positions.map(function(p){
           var pl = parseFloat(p.unrealized_pl || 0);
           var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
@@ -9539,7 +9539,15 @@
     { key:'sym', label:'Symbol' }, { key:'direction', label:'Dir' }, { key:'qty', label:'Qty' },
     { key:'entry', label:'Entry' }, { key:'current', label:'Current' }, { key:'size', label:'Size' },
     { key:'pl', label:'P&L' },
-    { key:'stop', label:'Stop' }, { key:'t1', label:'Target' }, { key:'opened', label:'Opened' }
+    { key:'stop', label:'Stop' },
+    // This is the 1.5R reference target computed at entry, not the
+    // position's real take-profit -- the actual bracket order sends its
+    // take-profit 8x the risk away, and a trailing stop (which moves the
+    // Stop column above as price runs) is the real exit mechanism. Price
+    // can move past this number while the position stays open by design;
+    // the hover title explains that instead of it just looking stuck.
+    { key:'t1', label:'Target ⓘ', hint:'Reference only (1.5x the initial risk) -- not a hard cap. The real exit is the trailing stop shown in the Stop column, which is why price can move past this number while the position stays open.' },
+    { key:'opened', label:'Opened' }
   ];
 
   var statusPositionsRenderGen = 0;
@@ -9644,7 +9652,8 @@
         '<table class="backtest-trades-table">' +
           '<thead><tr>' + STATUS_POSITIONS_COLUMNS.map(function(col){
             var arrow = statusPositionsSortKey === col.key ? (statusPositionsSortDir === 1 ? ' ▲' : ' ▼') : '';
-            return '<th class="sortable-col" data-sort-key="' + col.key + '">' + col.label + arrow + '</th>';
+            var titleAttr = col.hint ? ' title="' + col.hint.replace(/"/g, '&quot;') + '"' : '';
+            return '<th class="sortable-col" data-sort-key="' + col.key + '"' + titleAttr + '>' + col.label + arrow + '</th>';
           }).join('') + '<th></th></tr></thead>' +
           '<tbody>' + rows.map(function(r){
             var j = r.j, plClass = r.pl >= 0 ? 'up' : 'down';
