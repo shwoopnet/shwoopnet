@@ -10552,12 +10552,22 @@
   function renderWatchTradeCards(el, source){
     el.innerHTML = source.map(function(t){
       var badge = computeBadgeInfo(t);
+      // Same reasoning as renderIntradayBlocks/renderCryptoBlocks: once a
+      // position is actually open, prefer the real entryNotes pinned by
+      // the backend at the moment the order was sent over t.notes, which
+      // for a position merged in via withOpenPositionsMergedIn (already
+      // dropped out of the backend's current scan picks) is always the
+      // generic "no notes" placeholder -- even when this position was
+      // opened minutes ago with real reasoning recorded.
+      var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
+      var notesForDisplay = (openEntry && Array.isArray(openEntry.entryNotes) && openEntry.entryNotes.length)
+        ? openEntry.entryNotes : t.notes;
       return '<div class="watch-trade-card" data-symbol="' + t.sym + '">' +
         '<div class="watch-trade-head">' +
           '<span class="watch-trade-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span></span>' +
           '<span class="status-badge ' + badge.cls + '">' + badge.label + '</span>' +
         '</div>' +
-        '<p class="watch-trade-reason">' + t.notes[0] + '</p>' +
+        '<p class="watch-trade-reason">' + notesForDisplay[0] + '</p>' +
         '<span class="watch-trade-link">View full setup →</span>' +
       '</div>';
     }).join('');
