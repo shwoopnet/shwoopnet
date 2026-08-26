@@ -5618,8 +5618,19 @@
         // to -- charted at '15m' instead (its own strategy's native
         // timeframe), which fetchHistoryFromNetwork routes to Alpaca's
         // crypto bars rather than Twelve Data.
-        var tf = sym.indexOf('/') > -1 ? '15m' : '1D';
-        renderChartInto(svg, sym, trade.entry, tf);
+        var isCrypto = sym.indexOf('/') > -1;
+        var tf = isCrypto ? '15m' : '1D';
+        // The live quote, not the entry price -- renderChartInto anchors
+        // the chart's last candle to whatever price this passes in (see
+        // its own comment), so passing trade.entry here made every open
+        // position's chart show its last candle sitting at the ENTRY
+        // price regardless of where the market actually is now, instead
+        // of tracking the real current price the way the row above the
+        // chart already does. Same fallback as that row uses: trade.entry
+        // only for the brief window before the first quote resolves.
+        var liveQuote = isCrypto ? findCryptoQuote(sym) : findQuote(sym);
+        var basePrice = (liveQuote && liveQuote.price != null) ? liveQuote.price : trade.entry;
+        renderChartInto(svg, sym, basePrice, tf);
         setupChartInteractivity(sym);
       }
     }
