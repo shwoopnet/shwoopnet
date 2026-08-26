@@ -9,88 +9,33 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* Obsidian (default) -- true black instead of flat gray-black, with
-       a cool ice-white accent that carries a faint blue glow, so "no
-       color" still reads as a deliberate choice, not a placeholder. */
-    --ink: #000000;
-    --panel: #0A0B0D;
-    --panel-raised: #131519;
-    --border: #24272E;
-    --paper: #F5F7FB;
-    --muted: #767B87;
-    --amber: #DCE6FF;
-    --amber-dim: #8FA3D6;
-    --amber-glow: rgba(180,205,255,0.20);
-    --amber-contrast: #04060B;
-    --ticker-fg: #DCE6FF;
-    --ticker-fg-dim: #767B87;
-    --ticker-bg: #000;
-    --grid-glow-1: rgba(120,160,255,0.08);
-    --grid-glow-2: rgba(120,160,255,0.05);
-    --grid-line: rgba(120,160,255,0.035);
-    /* Gain/loss and MA colors are deliberately NOT overridden by any
-       theme below -- they stay fixed regardless of which pack is
-       active. This matters more than it used to: --loss is now also
-       the live-trading safety color (the persistent red banner, the
-       dock border), and a theme silently recoloring it would undercut
-       the one visual signal that's supposed to be unmissable. */
-    --gain: #33C17E;
-    --gain-glow: rgba(51,193,126,0.16);
-    --loss: #E85C51;
-    --loss-glow: rgba(232,92,81,0.16);
-    --radius: 6px;
-  }
-
-  /* Theme packs -- each overrides only the chrome/accent colors above.
-     Candle, gain/loss, and MA colors intentionally stay out of every
-     block below so they never vary by theme. */
-
-  /* Outrun -- leans all the way into the outrun-art palette instead of
-     a barely-tinted purple: violet-black ground, magenta primary paired
-     with a cyan secondary glow the way actual sunset-grid art does. */
-  :root[data-theme="outrun"]{
-    --ink: #0D0217; --panel: #170A28; --panel-raised: #20103A; --border: #3D1F5C;
-    --paper: #FBEBFF; --muted: #A88BC4;
-    --amber: #FF3EB5; --amber-dim: #B0287D; --amber-glow: rgba(255,62,181,0.20); --amber-contrast: #1A0512;
-    --ticker-fg: #FBEBFF; --ticker-fg-dim: #A88BC4;
-    --grid-glow-1: rgba(255,62,181,0.09); --grid-glow-2: rgba(46,224,255,0.08); --grid-line: rgba(255,62,181,0.04);
-  }
-  /* Nebula -- deep-space indigo with a richer, more saturated electric
-     violet than before, and a stronger glow radius. */
-  :root[data-theme="nebula"]{
-    --ink: #0A0716; --panel: #130C24; --panel-raised: #1B1234; --border: #332158;
-    --paper: #EAE3FF; --muted: #9284B8;
-    --amber: #9D6FFF; --amber-dim: #6B47B8; --amber-glow: rgba(157,111,255,0.20); --amber-contrast: #0F0A1E;
-    --ticker-fg: #EAE3FF; --ticker-fg-dim: #9284B8;
-    --grid-glow-1: rgba(157,111,255,0.09); --grid-glow-2: rgba(90,60,200,0.07); --grid-line: rgba(157,111,255,0.04);
-  }
-  /* Arcade -- the one light theme. A competitive-shooter scoreboard
-     read rather than a soft icy blue: crisp white panel, one saturated
-     "Player 1" blue as the accent. --amber-contrast flips to white
-     here since it's the text color sitting ON TOP of the (light)
-     accent, e.g. filled buttons. */
-  :root[data-theme="arcade"]{
-    --ink: #EEF1F6; --panel: #FFFFFF; --panel-raised: #F5F7FB; --border: #D6DCE6;
-    --paper: #12151C; --muted: #6B7280;
-    --amber: #2F5EFF; --amber-dim: #1E3FC4; --amber-glow: rgba(47,94,255,0.18); --amber-contrast: #FFFFFF;
-    --ticker-fg: #12151C; --ticker-fg-dim: #6B7280;
-    /* Every other theme pack is dark enough that the ticker's hardcoded
-       black backing (see .ticker-tape below) just reads as "part of the
-       UI." Arcade is the one light theme, so that same black bar sat on
-       top of it looking like a stray unstyled leftover -- crisp white
-       instead matches the "competitive-shooter scoreboard" panel it's
-       supposed to be a strip of. */
+    /* Ledger -- one fixed palette, modeled on a consumer brokerage's own
+       actual design principles (warm off-white ground, a single blue
+       accent doing double duty as brand and "direction" chip, calm
+       card surfaces with real breathing room). No theme picker, no
+       novelty packs -- this is the one identity the app presents. */
+    --ink: #FAFAF8;
+    --panel: #FFFFFF;
+    --panel-raised: #F5F6F8;
+    --border: #E4E7EC;
+    --paper: #10182B;
+    --muted: #667085;
+    --amber: #0B5CD8;
+    --amber-dim: #0847AD;
+    --amber-glow: rgba(11,92,216,0.14);
+    --amber-contrast: #FFFFFF;
+    --ticker-fg: #10182B;
+    --ticker-fg-dim: #667085;
     --ticker-bg: #FFFFFF;
-    --grid-glow-1: rgba(47,94,255,0.08); --grid-glow-2: rgba(255,58,110,0.06); --grid-line: rgba(47,94,255,0.05);
-  }
-  /* Cyberdeck -- straight Tron/cyberpunk HUD: near-black with a stark
-     electric-cyan accent instead of another warm or violet variant. */
-  :root[data-theme="cyberdeck"]{
-    --ink: #040608; --panel: #0A0F14; --panel-raised: #0F171F; --border: #1C2B36;
-    --paper: #DFFBFF; --muted: #5C7A85;
-    --amber: #22E6FF; --amber-dim: #0FA6C2; --amber-glow: rgba(34,230,255,0.22); --amber-contrast: #02141A;
-    --ticker-fg: #DFFBFF; --ticker-fg-dim: #5C7A85;
-    --grid-glow-1: rgba(34,230,255,0.10); --grid-glow-2: rgba(34,230,255,0.05); --grid-line: rgba(34,230,255,0.05);
+    /* Gain/loss and MA colors stay fixed regardless of everything
+       else -- --loss also doubles as the live-trading safety color
+       (the persistent red banner, the dock border), so it never
+       varies with the rest of the palette. */
+    --gain: #0F9D58;
+    --gain-glow: rgba(15,157,88,0.14);
+    --loss: #D93025;
+    --loss-glow: rgba(217,48,37,0.14);
+    --radius: 10px;
   }
 
   *{ box-sizing:border-box; }
@@ -110,13 +55,9 @@
 
   html,body{
     margin:0; padding:0;
+    /* Flat, deliberately un-decorated ground -- a brokerage app's
+       background is furniture, not a mood board. */
     background-color: var(--ink);
-    background-image:
-      radial-gradient(ellipse 1000px 700px at 8% 4%, var(--grid-glow-1), transparent 60%),
-      radial-gradient(ellipse 900px 650px at 92% 98%, var(--grid-glow-2), transparent 60%),
-      repeating-linear-gradient(0deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 64px),
-      repeating-linear-gradient(90deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 64px);
-    background-attachment: fixed;
     color: var(--paper);
     font-family: 'IBM Plex Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -153,7 +94,7 @@
   .ticker-item{
     display:inline-flex; align-items:center; gap:8px;
     padding: 0 22px; font-size: 12px; letter-spacing: 0.02em;
-    border-right: 1px solid #1c1c1c;
+    border-right: 1px solid var(--border);
   }
   .ticker-item .t-sym{ color: var(--ticker-fg-dim); }
   .ticker-item .t-price{ color: var(--ticker-fg); }
@@ -186,20 +127,21 @@
     font-family:'Space Grotesk', sans-serif; text-align:center; flex-shrink:0;
     transition: background .25s ease, color .25s ease, transform .2s cubic-bezier(.2,.8,.3,1.3), box-shadow .25s ease;
   }
-  /* The animated hover "glow" -- a soft white radial highlight that fades
-     in behind the icon, combined with a slight lift/scale on the whole
-     button. Kept separate from the .current (active page) state below so
-     the page you're already on reads as calm/settled, not glowing. */
+  /* The animated hover "glow" -- a soft accent-tinted radial highlight
+     that fades in behind the icon, combined with a slight lift/scale on
+     the whole button. Kept separate from the .current (active page)
+     state below so the page you're already on reads as calm/settled,
+     not glowing. */
   .side-nav-item::before{
     content:""; position:absolute; inset:0; border-radius:10px;
-    background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.16), transparent 70%);
+    background: radial-gradient(circle at 50% 30%, var(--amber-glow), transparent 70%);
     opacity:0; transition: opacity .3s ease;
     pointer-events:none;
   }
   .side-nav-item:hover::before{ opacity:1; }
   .side-nav-item:hover{
-    color:#fff; transform: translateX(-3px) scale(1.05);
-    box-shadow: 0 0 18px rgba(255,255,255,0.12), inset 0 0 0 1px rgba(255,255,255,0.1);
+    color: var(--paper); transform: translateX(-3px) scale(1.05);
+    box-shadow: 0 4px 14px rgba(16,24,43,0.10), inset 0 0 0 1px var(--border);
   }
   .side-nav-item:active{ transform: translateX(-1px) scale(0.98); }
   .side-nav-item.current{ color: var(--amber); background: var(--panel-raised); }
@@ -216,7 +158,7 @@
      a different direction with no per-shard math needed beyond the angle. */
   .nav-shard{
     position:absolute; top:50%; left:50%; width:5px; height:5px;
-    background:#fff; opacity:0; pointer-events:none; z-index:1;
+    background: var(--amber); opacity:0; pointer-events:none; z-index:1;
     transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) rotate(45deg);
   }
   .side-nav-item:hover .nav-shard{
@@ -340,7 +282,7 @@
     line-height:1; vertical-align:middle; box-shadow:0 0 0 1.5px rgba(0,0,0,0.25);
   }
   .trade-bubble.positive{ background: var(--gain); color:#06210f; }
-  .trade-bubble.negative{ background: var(--loss); color:#2a0a06; }
+  .trade-bubble.negative{ background: var(--loss); color:#fff; }
   .trade-bubble.neutral{ background:#F2C94C; color:#2a2205; }
   .alpaca-dock-title-group{ display:flex; align-items:center; gap:6px; }
   #dockTradeBubble{ margin-left:0; }
@@ -462,20 +404,6 @@
   .alpaca-inputs input:focus{ outline:none; border-color: var(--amber-dim); }
   .settings-choice-group{ display:flex; gap:4px; }
 
-  .theme-pack-group{ display:flex; gap:8px; flex-wrap:wrap; }
-  .theme-pack-btn{
-    display:flex; align-items:center; gap:8px; background: var(--panel-raised);
-    border:1px solid var(--border); color: var(--muted); padding:7px 12px 7px 8px;
-    border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;
-    font-family:'Space Grotesk', sans-serif; transition: border-color .15s ease, color .15s ease;
-  }
-  .theme-pack-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
-  .theme-pack-btn.active{ border-color: var(--amber); color: var(--paper); box-shadow: 0 0 0 1px var(--amber); }
-  .theme-pack-swatch{
-    width:20px; height:20px; border-radius:5px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-  }
-  .theme-pack-swatch span{ width:9px; height:9px; border-radius:50%; }
   .settings-toggle-switch{
     width:38px; height:22px; border-radius:11px; border:1px solid var(--border);
     background: var(--panel-raised); position:relative; cursor:pointer; padding:0; flex-shrink:0;
@@ -2367,35 +2295,6 @@
             <button class="settings-reset-btn" id="alpacaChangeBtn">Change keys</button>
           </div>
           <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
-        </div>
-      </div>
-
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Theme</div>
-          <div class="settings-row-desc">Applies everywhere. Candle colors and the live-trading red stay fixed no matter which one's active.</div>
-        </div>
-        <div class="theme-pack-group" id="themePackGroup" role="group" aria-label="Theme">
-          <button class="theme-pack-btn active" data-theme="obsidian" aria-pressed="true">
-            <span class="theme-pack-swatch" style="background:#000; border:1px solid #24272E;"><span style="background:#DCE6FF;"></span></span>
-            Obsidian
-          </button>
-          <button class="theme-pack-btn" data-theme="outrun" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#0D0217;"><span style="background:#FF3EB5;"></span></span>
-            Outrun
-          </button>
-          <button class="theme-pack-btn" data-theme="nebula" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#0A0716;"><span style="background:#9D6FFF;"></span></span>
-            Nebula
-          </button>
-          <button class="theme-pack-btn" data-theme="arcade" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#EEF1F6; border:1px solid #D6DCE6;"><span style="background:#2F5EFF;"></span></span>
-            Arcade
-          </button>
-          <button class="theme-pack-btn" data-theme="cyberdeck" aria-pressed="false">
-            <span class="theme-pack-swatch" style="background:#040608; border:1px solid #1C2B36;"><span style="background:#22E6FF;"></span></span>
-            Cyberdeck
-          </button>
         </div>
       </div>
 
@@ -7927,35 +7826,6 @@
     var saved = 'true';
     try{ saved = window.localStorage.getItem('shwoopnet:soundAlerts') || 'true'; }catch(e){}
     applySoundAlertsPref(saved === 'true');
-  })();
-
-  // ---------- Settings: theme pack ----------
-  var THEME_PACKS = ['obsidian', 'outrun', 'nebula', 'arcade', 'cyberdeck'];
-  function applyThemePack(name){
-    if(THEME_PACKS.indexOf(name) === -1) name = 'obsidian';
-    document.documentElement.setAttribute('data-theme', name === 'obsidian' ? '' : name);
-    document.querySelectorAll('.theme-pack-btn').forEach(function(btn){
-      var isActive = btn.dataset.theme === name;
-      btn.classList.toggle('active', isActive);
-      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    });
-    try{ window.localStorage.setItem('shwoopnet:theme', name); }catch(e){}
-  }
-  document.querySelectorAll('.theme-pack-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){ applyThemePack(btn.dataset.theme); });
-  });
-  (function initThemePref(){
-    var saved = 'obsidian';
-    try{
-      var stored = window.localStorage.getItem('shwoopnet:theme');
-      // Old theme names from before this pack's names changed (mono,
-      // synthwave, arctic) -- map them to their nearest replacement
-      // instead of silently falling back to the default and losing the
-      // user's actual preference (dark vs the one light pack, etc.).
-      var RENAMED = { mono: 'obsidian', synthwave: 'outrun', arctic: 'arcade' };
-      saved = (stored && RENAMED[stored]) || stored || 'obsidian';
-    }catch(e){}
-    applyThemePack(saved);
   })();
 
   // ---------- Settings: reduce motion ----------
