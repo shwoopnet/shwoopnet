@@ -293,7 +293,15 @@
     position:absolute; top:-6px; right:-9px; min-width:13px; height:13px; font-size:8px; padding:0 2px;
   }
 
-  .settings-page{ display:flex; flex-direction:column; gap:0; margin-top:24px; }
+  .settings-page{ display:flex; flex-direction:column; gap:28px; margin-top:24px; }
+  .settings-section-title{
+    font-family:'Public Sans', sans-serif; font-size:12px; text-transform:uppercase;
+    letter-spacing:.08em; color:var(--muted); font-weight:600; margin: 0 0 12px 2px;
+  }
+  .settings-card{
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
+    padding:4px 20px; box-shadow: var(--card-shadow);
+  }
   .settings-row{
     display:flex; justify-content:space-between; align-items:center; gap:20px;
     padding:18px 4px; border-bottom:1px solid var(--border); flex-wrap:wrap;
@@ -2307,102 +2315,112 @@
     </div>
 
     <div class="settings-page">
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Account</div>
-          <div class="settings-row-desc" id="accountEmailDesc">—</div>
-        </div>
-        <button class="settings-reset-btn" id="signOutBtn">Sign out</button>
-      </div>
-
-      <div id="liveModeBanner" class="live-mode-banner" hidden>
-        <span class="live-mode-banner-dot"></span>
-        LIVE TRADING ACTIVE — every order placed right now uses real money in a real brokerage account.
-      </div>
-
-      <div class="settings-row alpaca-row">
-        <div class="alpaca-row-full">
-          <div class="settings-row-title" id="alpacaSectionTitle">Broker connection — Alpaca (Paper)</div>
-          <div class="alpaca-env-selector">
-            <button class="alpaca-env-btn active" id="alpacaEnvPaperBtn" data-env="paper">Paper (simulated)</button>
-            <button class="alpaca-env-btn" id="alpacaEnvLiveBtn" data-env="live">Live (real money)</button>
+      <div class="settings-section">
+        <div class="settings-section-title">Account</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Account</div>
+              <div class="settings-row-desc" id="accountEmailDesc">—</div>
+            </div>
+            <button class="settings-reset-btn" id="signOutBtn">Sign out</button>
           </div>
-          <div class="settings-row-desc" id="alpacaEnvDesc">
-            Simulated money only — no real trades are ever placed. Get free paper keys at
-            <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer">alpaca.markets</a>.
+
+          <div id="liveModeBanner" class="live-mode-banner" hidden>
+            <span class="live-mode-banner-dot"></span>
+            LIVE TRADING ACTIVE — every order placed right now uses real money in a real brokerage account.
           </div>
-          <div class="alpaca-inputs" id="alpacaInputsRow">
-            <input type="text" id="alpacaKeyIdInput" placeholder="API Key ID" autocomplete="off" spellcheck="false">
-            <input type="password" id="alpacaSecretInput" placeholder="Secret Key" autocomplete="off" spellcheck="false">
-            <button class="settings-reset-btn" id="alpacaSaveBtn">Connect</button>
+
+          <div class="settings-row alpaca-row">
+            <div class="alpaca-row-full">
+              <div class="settings-row-title" id="alpacaSectionTitle">Broker connection — Alpaca (Paper)</div>
+              <div class="alpaca-env-selector">
+                <button class="alpaca-env-btn active" id="alpacaEnvPaperBtn" data-env="paper">Paper (simulated)</button>
+                <button class="alpaca-env-btn" id="alpacaEnvLiveBtn" data-env="live">Live (real money)</button>
+              </div>
+              <div class="settings-row-desc" id="alpacaEnvDesc">
+                Simulated money only — no real trades are ever placed. Get free paper keys at
+                <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer">alpaca.markets</a>.
+              </div>
+              <div class="alpaca-inputs" id="alpacaInputsRow">
+                <input type="text" id="alpacaKeyIdInput" placeholder="API Key ID" autocomplete="off" spellcheck="false">
+                <input type="password" id="alpacaSecretInput" placeholder="Secret Key" autocomplete="off" spellcheck="false">
+                <button class="settings-reset-btn" id="alpacaSaveBtn">Connect</button>
+              </div>
+              <div class="alpaca-connected-row" id="alpacaConnectedRow" hidden>
+                <span class="alpaca-connected-keyid mono" id="alpacaConnectedKeyMasked"></span>
+                <button class="settings-reset-btn" id="alpacaChangeBtn">Change keys</button>
+              </div>
+              <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
+            </div>
           </div>
-          <div class="alpaca-connected-row" id="alpacaConnectedRow" hidden>
-            <span class="alpaca-connected-keyid mono" id="alpacaConnectedKeyMasked"></span>
-            <button class="settings-reset-btn" id="alpacaChangeBtn">Change keys</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Preferences</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Default landing page</div>
+              <div class="settings-row-desc">What opens when you return later today.</div>
+            </div>
+            <div class="settings-choice-group" id="landingChoice">
+              <button class="tf-btn" data-value="auto">Auto</button>
+              <button class="tf-btn" data-value="brief">Brief</button>
+              <button class="tf-btn" data-value="trades">Trades</button>
+            </div>
           </div>
-          <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
-        </div>
-      </div>
 
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Default landing page</div>
-          <div class="settings-row-desc">What opens when you return later today.</div>
-        </div>
-        <div class="settings-choice-group" id="landingChoice">
-          <button class="tf-btn" data-value="auto">Auto</button>
-          <button class="tf-btn" data-value="brief">Brief</button>
-          <button class="tf-btn" data-value="trades">Trades</button>
-        </div>
-      </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Clock format</div>
+              <div class="settings-row-desc">12-hour or 24-hour time in the header.</div>
+            </div>
+            <div class="settings-choice-group" id="clockFormatChoice">
+              <button class="tf-btn" data-value="24">24-hour</button>
+              <button class="tf-btn" data-value="12">12-hour</button>
+            </div>
+          </div>
 
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Clock format</div>
-          <div class="settings-row-desc">12-hour or 24-hour time in the header.</div>
-        </div>
-        <div class="settings-choice-group" id="clockFormatChoice">
-          <button class="tf-btn" data-value="24">24-hour</button>
-          <button class="tf-btn" data-value="12">12-hour</button>
-        </div>
-      </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Sound alerts</div>
+              <div class="settings-row-desc">A short tone plays alongside trade pop-ups — sent, closed in profit, or closed at a loss each sound different. Applies in the live app and the Demo page.</div>
+            </div>
+            <button class="settings-toggle-switch" id="soundAlertsToggle" role="switch" aria-checked="true" aria-label="Toggle sound alerts">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
 
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Sound alerts</div>
-          <div class="settings-row-desc">A short tone plays alongside trade pop-ups — sent, closed in profit, or closed at a loss each sound different. Applies in the live app and the Demo page.</div>
-        </div>
-        <button class="settings-toggle-switch" id="soundAlertsToggle" role="switch" aria-checked="true" aria-label="Toggle sound alerts">
-          <span class="toggle-knob"></span>
-        </button>
-      </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Reduce motion</div>
+              <div class="settings-row-desc">Turns off the ticker scroll, flash, and logo bounce animations.</div>
+            </div>
+            <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
 
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Reduce motion</div>
-          <div class="settings-row-desc">Turns off the ticker scroll, flash, and logo bounce animations.</div>
-        </div>
-        <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
-          <span class="toggle-knob"></span>
-        </button>
-      </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Ticker tape</div>
+              <div class="settings-row-desc">Show the scrolling price strip at the very top.</div>
+            </div>
+            <button class="settings-toggle-switch" id="tickerToggle" role="switch" aria-checked="true" aria-label="Toggle ticker tape">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
 
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Ticker tape</div>
-          <div class="settings-row-desc">Show the scrolling price strip at the very top.</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Reset preferences</div>
+              <div class="settings-row-desc">Clears layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
+            </div>
+            <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
+          </div>
         </div>
-        <button class="settings-toggle-switch" id="tickerToggle" role="switch" aria-checked="true" aria-label="Toggle ticker tape">
-          <span class="toggle-knob"></span>
-        </button>
-      </div>
-
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-title">Reset preferences</div>
-          <div class="settings-row-desc">Clears layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
-        </div>
-        <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
       </div>
 
       <div class="settings-note">Your Trade Journal syncs to your account and follows you across devices. Everything else on this page — layout, notepad, and alert settings — stays local to this browser only.</div>
