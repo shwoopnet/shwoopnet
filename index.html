@@ -1210,9 +1210,9 @@
     position:fixed; bottom:0; right:380px; z-index:441; width:440px; max-width:calc(100% - 40px);
     display:flex; justify-content:space-between; align-items:center;
     background: var(--panel); border:1px solid var(--border); border-bottom:none;
-    border-radius:8px 8px 0 0; padding:10px 16px; cursor:pointer;
+    border-radius: var(--radius) var(--radius) 0 0; padding:10px 16px; cursor:pointer;
     font-family:'Public Sans', sans-serif; font-size:12.5px; font-weight:600; color: var(--paper);
-    box-shadow: 0 -4px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 -2px 12px rgba(16,24,43,0.08);
   }
   .alpaca-dock.unlocked .alpaca-dock-header{ cursor:ew-resize; }
   .alpaca-dock-header-controls{ display:flex; align-items:center; gap:10px; }
@@ -1220,9 +1220,9 @@
   .alpaca-dock-caret{ color: var(--amber); font-size:10px; }
   .alpaca-dock-body-wrap{
     position:fixed; bottom:42px; right:380px; z-index:440; width:440px; max-width:calc(100% - 40px);
-    background: var(--panel); border:1px solid var(--border); border-radius:8px;
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     display:flex; flex-direction:column; height:40vh; max-height:min(480px, calc(100vh - 140px)); min-height:180px;
-    box-shadow:0 16px 36px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 32px rgba(16,24,43,0.14);
     opacity:0; transform: translateY(10px); pointer-events:none;
     transition: opacity .18s ease, transform .18s ease;
     /* max-height is capped relative to viewport height (not just a flat
@@ -1243,6 +1243,14 @@
   .alpaca-dock-daychange.down{ color: var(--loss); }
   .alpaca-dock-bp{ font-size:11.5px; color: var(--muted); margin-top:8px; padding-bottom:12px; border-bottom:1px solid var(--border); }
   .alpaca-dock-empty{ font-size:12px; color: var(--muted); padding-top:12px; }
+  .alpaca-dock-positions-controls{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+  .alpaca-dock-mini-btn{
+    background:none; border:1px solid var(--border); color: var(--muted);
+    font-family:'Public Sans', sans-serif; font-size:10.5px; padding:3px 9px;
+    border-radius:20px; cursor:pointer; white-space:nowrap;
+  }
+  .alpaca-dock-mini-btn:hover{ border-color: var(--amber-dim); color: var(--amber); }
+  .alpaca-dock-mini-btn.active{ border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
   .alpaca-dock-table{ width:100%; border-collapse:collapse; font-size:11.5px; margin-top:12px; }
   .alpaca-dock-table th{
     text-align:left; padding:6px 4px; color: var(--muted); font-size:9.5px; text-transform:uppercase;
@@ -1257,6 +1265,15 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .alpaca-dock-resize-handle{
+    position:absolute; left:-5px; top:0; bottom:0; width:10px; cursor:ew-resize; display:none; z-index:2;
+  }
+  .alpaca-dock.unlocked .alpaca-dock-resize-handle{ display:block; }
+  .alpaca-dock-resize-handle::before{
+    content:''; position:absolute; left:4px; top:50%; transform:translateY(-50%);
+    width:2px; height:28px; border-radius:2px; background: var(--border);
+  }
+  .alpaca-dock-resize-handle:hover::before{ background: var(--amber); }
   .notepad-resize-handle::before{
     content:""; position:absolute; right:3px; bottom:3px; width:9px; height:9px;
     border-right:2px solid var(--amber-dim); border-bottom:2px solid var(--amber-dim);
@@ -1887,8 +1904,13 @@
       </div>
     </div>
     <div class="alpaca-dock-body-wrap" id="alpacaDockBodyWrap">
+      <div class="alpaca-dock-resize-handle" id="alpacaDockResizeHandle" aria-hidden="true"></div>
       <div class="alpaca-dock-body">
         <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
+        <div class="alpaca-dock-positions-controls" id="alpacaDockPositionsControls" hidden>
+          <button class="alpaca-dock-mini-btn" id="alpacaDockCompactBtn" type="button">Compact view</button>
+          <button class="alpaca-dock-mini-btn" id="alpacaDockSortBtn" type="button">Sort: Default</button>
+        </div>
         <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
       </div>
     </div>
@@ -3680,6 +3702,15 @@
     document.getElementById('alpacaConnectedKeyMasked').textContent = maskAlpacaKeyId(activeAlpacaCreds().keyId);
     document.getElementById('alpacaDock').removeAttribute('hidden');
     document.getElementById('alpacaDockTitle').textContent = alpacaAccountLabel();
+    // Reopens exactly how it was left last time, instead of always
+    // starting collapsed -- idempotent against the dock's current state,
+    // so re-running this on every reconnect (env switch, etc.) never
+    // fights a toggle the user already made this same session.
+    try{
+      if(window.localStorage.getItem('shwoopnet:alpacaDockOpen') === 'true' && typeof setAlpacaDockOpen === 'function'){
+        setAlpacaDockOpen(true);
+      }
+    }catch(e){}
     document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
     document.getElementById('screenerEnabledRow').removeAttribute('hidden');
     document.getElementById('alpacaAutoTradeCryptoRow').removeAttribute('hidden');
@@ -4651,12 +4682,51 @@
 
   var alpacaDockRenderGen = 0;
 
+  // Two small QoL prefs, persisted the same way the dock's lock state and
+  // geometry already are -- 'compact' drops the Target/Stop columns (each
+  // needs the extra open-orders fetch and adds width, not always wanted
+  // just for a quick glance), 'sort' reorders rows by unrealized P/L
+  // (largest gain first) instead of whatever order Alpaca happens to
+  // return positions in.
+  var alpacaDockCompact = false;
+  var alpacaDockSort = 'default'; // 'default' | 'pl'
+  try{ alpacaDockCompact = window.localStorage.getItem('shwoopnet:alpacaDockCompact') === 'true'; }catch(e){}
+  try{ alpacaDockSort = window.localStorage.getItem('shwoopnet:alpacaDockSort') === 'pl' ? 'pl' : 'default'; }catch(e){}
+
+  function applyAlpacaDockControlsUI(){
+    var compactBtn = document.getElementById('alpacaDockCompactBtn');
+    var sortBtn = document.getElementById('alpacaDockSortBtn');
+    if(compactBtn){
+      compactBtn.classList.toggle('active', alpacaDockCompact);
+      compactBtn.textContent = alpacaDockCompact ? 'Compact view ✓' : 'Compact view';
+    }
+    if(sortBtn){
+      sortBtn.classList.toggle('active', alpacaDockSort === 'pl');
+      sortBtn.textContent = alpacaDockSort === 'pl' ? 'Sort: P/L' : 'Sort: Default';
+    }
+  }
+  document.getElementById('alpacaDockCompactBtn').addEventListener('click', function(){
+    alpacaDockCompact = !alpacaDockCompact;
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockCompact', alpacaDockCompact ? 'true' : 'false'); }catch(e){}
+    applyAlpacaDockControlsUI();
+    renderAlpacaDock();
+  });
+  document.getElementById('alpacaDockSortBtn').addEventListener('click', function(){
+    alpacaDockSort = alpacaDockSort === 'pl' ? 'default' : 'pl';
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockSort', alpacaDockSort); }catch(e){}
+    applyAlpacaDockControlsUI();
+    renderAlpacaDock();
+  });
+  applyAlpacaDockControlsUI();
+
   function renderAlpacaDock(){
     var myGen = ++alpacaDockRenderGen;
     var summaryEl = document.getElementById('alpacaDockSummary');
     var positionsEl = document.getElementById('alpacaDockPositions');
+    var controlsEl = document.getElementById('alpacaDockPositionsControls');
     summaryEl.textContent = 'Loading…';
     positionsEl.innerHTML = '';
+    if(controlsEl) controlsEl.setAttribute('hidden', '');
     // Open orders (for the Target/Stop columns) is treated as optional —
     // a failure there degrades gracefully to "—" rather than blocking the
     // account summary and positions themselves from ever showing up.
@@ -4682,23 +4752,35 @@
         '<div class="alpaca-dock-bp">Buying power: $' + parseFloat(acct.buying_power || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</div>';
 
       if(!Array.isArray(positions) || positions.length === 0){
-        positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions.</div>';
+        positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions right now.</div>';
         return;
       }
-      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Side</th><th>Entry</th><th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th><th>Current</th><th>Stop</th><th>P/L</th><th></th></tr></thead><tbody>' +
-        positions.map(function(p){
+      if(controlsEl) controlsEl.removeAttribute('hidden');
+
+      var rows = positions.slice();
+      if(alpacaDockSort === 'pl'){
+        rows.sort(function(a, b){ return parseFloat(b.unrealized_pl || 0) - parseFloat(a.unrealized_pl || 0); });
+      }
+
+      var targetStopHeaderHtml = alpacaDockCompact ? '' :
+        '<th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th><th>Stop</th>';
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Dir</th><th>Entry</th>' + targetStopHeaderHtml + '<th>Current</th><th>P/L</th><th></th></tr></thead><tbody>' +
+        rows.map(function(p){
           var pl = parseFloat(p.unrealized_pl || 0);
           var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
           var plClass = pl >= 0 ? 'up' : 'down';
-          var levels = findBracketLevels(openOrders, p.symbol);
+          var direction = p.side === 'short' ? 'Short' : 'Long';
+          var levels = alpacaDockCompact ? null : findBracketLevels(openOrders, p.symbol);
+          var targetStopCellsHtml = alpacaDockCompact ? '' :
+            '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>' +
+            '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>';
           return '<tr>' +
             '<td>' + p.symbol + '</td>' +
             '<td>' + p.qty + '</td>' +
-            '<td>' + p.side + '</td>' +
+            '<td>' + direction + '</td>' +
             '<td>' + fmt(parseFloat(p.avg_entry_price)) + '</td>' +
-            '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>' +
+            targetStopCellsHtml +
             '<td>' + fmt(parseFloat(p.current_price)) + '</td>' +
-            '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>' +
             '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
             '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
           '</tr>';
@@ -4722,8 +4804,9 @@
       });
     }).catch(function(err){
       if(myGen !== alpacaDockRenderGen) return;
-      summaryEl.textContent = 'Couldn\'t load account data.';
+      summaryEl.textContent = 'Sync failed — couldn\'t reach Alpaca.';
       positionsEl.innerHTML = '';
+      if(controlsEl) controlsEl.setAttribute('hidden', '');
       console.error('Alpaca dock fetch failed:', err);
     });
   }
@@ -4742,12 +4825,17 @@
     return Boolean(bodyWrap && bodyWrap.classList.contains('open'));
   }
 
-  function toggleAlpacaDockOpen(){
+  // Absolute setter (as opposed to toggleAlpacaDockOpen's flip) -- used
+  // both by the toggle itself and by the on-load restore below, so
+  // restoring last session's state never double-flips or re-saves a
+  // value that's already correct.
+  function setAlpacaDockOpen(open){
     var bodyWrap = document.getElementById('alpacaDockBodyWrap');
     var caret = document.getElementById('alpacaDockCaret');
     var toggleBtn = document.getElementById('alpacaDockToggleBtn');
     var isOpen = bodyWrap.classList.contains('open');
-    if(!isOpen){
+    if(open === isOpen) return;
+    if(open){
       bodyWrap.classList.add('open');
       caret.textContent = '▼';
       toggleBtn.setAttribute('aria-expanded', 'true');
@@ -4757,6 +4845,15 @@
       caret.textContent = '▲';
       toggleBtn.setAttribute('aria-expanded', 'false');
     }
+  }
+
+  function toggleAlpacaDockOpen(){
+    var isOpen = document.getElementById('alpacaDockBodyWrap').classList.contains('open');
+    setAlpacaDockOpen(!isOpen);
+    // Remembers open/collapsed across reloads, same as the lock state and
+    // geometry right below -- previously this always started collapsed on
+    // load regardless of how you left it last time.
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockOpen', (!isOpen) ? 'true' : 'false'); }catch(e){}
   }
   document.getElementById('alpacaDockToggleBtn').addEventListener('click', toggleAlpacaDockOpen);
 
@@ -4775,10 +4872,14 @@
   var alpacaDockLockBtn = document.getElementById('alpacaDockLockBtn');
   var alpacaDockLocked = true;
 
+  var ALPACA_DOCK_MIN_WIDTH = 320;
+  var ALPACA_DOCK_MAX_WIDTH = 720;
+
   function saveAlpacaDockGeometry(){
     try{
       window.localStorage.setItem('shwoopnet:alpacaDockGeo', JSON.stringify({
-        left: alpacaDockBodyWrapEl.style.left
+        left: alpacaDockBodyWrapEl.style.left,
+        width: alpacaDockBodyWrapEl.style.width
       }));
     }catch(e){}
   }
@@ -4787,7 +4888,7 @@
     alpacaDockLocked = locked;
     alpacaDockOuter.classList.toggle('unlocked', !locked);
     alpacaDockLockBtn.textContent = locked ? 'Unlock' : 'Lock';
-    alpacaDockLockBtn.setAttribute('aria-label', locked ? 'Unlock to drag left or right' : 'Lock in place');
+    alpacaDockLockBtn.setAttribute('aria-label', locked ? 'Unlock to drag or resize' : 'Lock in place');
     try{ window.localStorage.setItem('shwoopnet:alpacaDockLocked', locked ? 'true' : 'false'); }catch(e){}
   }
   alpacaDockLockBtn.addEventListener('click', function(){ applyAlpacaDockLock(!alpacaDockLocked); });
@@ -4799,6 +4900,16 @@
     alpacaDockHeaderEl.style.right = 'auto';
     alpacaDockBodyWrapEl.style.left = px + 'px';
     alpacaDockBodyWrapEl.style.right = 'auto';
+  }
+
+  // Same idea as setAlpacaDockLeft -- header and body are one visual unit
+  // and must resize in lockstep, or the header (fixed width) would drift
+  // out of alignment with the body underneath it.
+  function setAlpacaDockWidth(px){
+    var clamped = Math.max(ALPACA_DOCK_MIN_WIDTH, Math.min(ALPACA_DOCK_MAX_WIDTH, px));
+    alpacaDockHeaderEl.style.width = clamped + 'px';
+    alpacaDockBodyWrapEl.style.width = clamped + 'px';
+    return clamped;
   }
 
   // A hard stop so the dock can never be dragged underneath the persistent
@@ -4893,6 +5004,34 @@
   alpacaDockHeaderEl.addEventListener('pointerup', function(){ alpacaDockDragState = null; saveAlpacaDockGeometry(); });
   alpacaDockHeaderEl.addEventListener('pointercancel', function(){ alpacaDockDragState = null; });
 
+  // Width resize, via the grip on the body's left edge -- only live while
+  // unlocked, same gate as dragging (the "Lock" affordance exists so the
+  // dock doesn't shift around from an accidental grab; this just extends
+  // that same protection to resizing). Keeps the RIGHT edge fixed and
+  // grows/shrinks by moving the left edge, since the dock is anchored
+  // from the right (both by default CSS and by how dragging repositions
+  // it) -- widening should never push the panel further off toward the
+  // sidebar.
+  var alpacaDockResizeHandle = document.getElementById('alpacaDockResizeHandle');
+  var alpacaDockResizeState = null;
+  alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
+    if(alpacaDockLocked) return;
+    e.stopPropagation();
+    var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
+    alpacaDockResizeState = { startX: e.clientX, startWidth: rect.width, rightEdge: rect.left + rect.width };
+    alpacaDockResizeHandle.setPointerCapture(e.pointerId);
+  });
+  alpacaDockResizeHandle.addEventListener('pointermove', function(e){
+    if(!alpacaDockResizeState) return;
+    var dx = e.clientX - alpacaDockResizeState.startX;
+    var desiredWidth = Math.min(alpacaDockResizeState.startWidth - dx, alpacaDockResizeState.rightEdge);
+    var actualWidth = setAlpacaDockWidth(desiredWidth);
+    var newLeft = Math.max(0, alpacaDockResizeState.rightEdge - actualWidth);
+    setAlpacaDockLeft(newLeft);
+  });
+  alpacaDockResizeHandle.addEventListener('pointerup', function(){ alpacaDockResizeState = null; saveAlpacaDockGeometry(); });
+  alpacaDockResizeHandle.addEventListener('pointercancel', function(){ alpacaDockResizeState = null; });
+
   // Click-anywhere-on-the-bar to expand/collapse. Ignores clicks that
   // landed on a real button (lock / caret -- each already has its own
   // handler) and ignores clicks that were really the tail end of a drag.
@@ -4908,6 +5047,11 @@
     applyAlpacaDockLock(lockedSaved === 'true');
     try{
       var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
+      // Width restored before left -- maxAlpacaDockLeft() below reads the
+      // body wrap's current offsetWidth, so the left clamp needs to be
+      // computed against the width this session is actually restoring to,
+      // not the CSS default it briefly rendered at before this ran.
+      if(geo && geo.width){ setAlpacaDockWidth(parseFloat(geo.width)); }
       if(geo && geo.left){
         // Unlike every drag move (which always clamps against
         // maxAlpacaDockLeft()), a saved position was being applied here
