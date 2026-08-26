@@ -2292,6 +2292,36 @@
     </div>
 
     <div class="journal-detail" id="journalDetail"></div>
+
+    <div class="labs-export-section" style="margin-top:24px;">
+      <div class="labs-export-divider"></div>
+      <div class="labs-export-header">
+        <div>
+          <div class="labs-export-title">Full account history (from Alpaca, not this app's own journal)</div>
+          <div class="labs-export-desc">Pulls every closed order directly from your Alpaca account — the
+            authoritative record, independent of this app's own Firestore-tracked journal (which can drift,
+            e.g. the duplicate-order entries a scheduler race used to cause). Reconstructs entry/exit pairs
+            and reads each exit's real order type straight from Alpaca — stop-loss, target, or a plain market
+            order (a manual close or the end-of-day flatten) — so you can see exactly how trades really ended,
+            not just their final price.</div>
+        </div>
+        <button class="settings-reset-btn" id="pullAlpacaHistoryBtn">Pull full history from Alpaca</button>
+      </div>
+      <div class="labs-backtest-status" id="alpacaHistoryStatus"></div>
+      <div id="alpacaHistoryResultWrap" hidden>
+        <div class="pl-summary" id="alpacaHistoryStats" style="margin-bottom:16px; flex-wrap:wrap;"></div>
+        <div id="alpacaHistoryAnomalies"></div>
+        <div id="alpacaHistoryTableWrap" style="overflow-x:auto;"></div>
+        <div style="margin-top:14px;">
+          <button class="settings-reset-btn" id="alpacaHistoryShowRawBtn" style="font-size:11px; padding:6px 10px;">Show raw text (for export)</button>
+        </div>
+        <div id="alpacaHistoryRawWrap" hidden style="margin-top:10px;">
+          <textarea id="alpacaHistoryRawTextarea" class="labs-export-textarea" readonly rows="14"></textarea>
+          <button class="settings-reset-btn" id="alpacaHistoryCopyBtn" style="margin-top:10px;">Copy to clipboard</button>
+          <span id="alpacaHistoryCopyConfirm" class="labs-export-copy-confirm" hidden>Copied.</span>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- ================= SETTINGS ================= -->
@@ -8609,6 +8639,169 @@
       alert('Failed to remove entry: ' + err.message);
     });
   }
+
+  // ---------- Full account history, pulled directly from Alpaca ----------
+  // This app's own journal (Firestore) is written by this app's own code,
+  // which means it can drift from reality -- the duplicate-order-race bug
+  // (fixed 2026-08-25) left real duplicate entries behind, and any future
+  // gap in reconcileEntryFills/syncFilledExits would too. Alpaca's own
+  // order history is the ground truth: every fill, every order type, with
+  // no dependency on this app's own bookkeeping being correct. Paginates
+  // backward with `until` since a single request caps at 500 orders --
+  // an account with meaningful history needs more than one page.
+  function fetchAllAlpacaClosedOrders(){
+    var allOrders = [];
+    function fetchPage(untilParam){
+      var url = ALPACA_TRADING_BASE() + '/v2/orders?status=closed&limit=500&direction=desc' +
+        (untilParam ? '&until=' + encodeURIComponent(untilParam) : '');
+      return fetchWithTimeout(url, { headers: alpacaHeaders() }, 15000).then(function(res){
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      }).then(function(orders){
+        allOrders = allOrders.concat(orders);
+        if(orders.length === 500){
+          return fetchPage(orders[orders.length - 1].submitted_at);
+        }
+        return allOrders;
+      });
+    }
+    return fetchPage(null);
+  }
+
+  // Reconstructs entry/exit trade pairs from a flat list of filled orders
+  // -- Alpaca returns every leg of a bracket (the entry market order, plus
+  // whichever of stop-loss/take-profit actually filled) as its own
+  // top-level order, not nested, so pairing by side-alternation per
+  // symbol recovers the same trades this app's journal tracks, but from
+  // the account's own real fills rather than this app's bookkeeping.
+  // A same-side fill while a position is already open (no opposite-side
+  // fill in between) can only mean a real duplicate order went through --
+  // flagged as an anomaly rather than silently mispairing it with the
+  // wrong exit.
+  function reconstructTradesFromOrders(orders){
+    var filled = orders.filter(function(o){
+      return o.status === 'filled' && o.filled_at && o.filled_avg_price && o.asset_class !== 'crypto';
+    });
+    filled.sort(function(a,b){ return new Date(a.filled_at) - new Date(b.filled_at); });
+    var bySymbol = {};
+    filled.forEach(function(o){ (bySymbol[o.symbol] = bySymbol[o.symbol] || []).push(o); });
+
+    var trades = [];
+    var anomalies = [];
+    Object.keys(bySymbol).forEach(function(sym){
+      var open = null;
+      bySymbol[sym].forEach(function(o){
+        var qty = parseFloat(o.filled_qty || o.qty);
+        var price = parseFloat(o.filled_avg_price);
+        if(!open){
+          open = { sym: sym, entrySide: o.side, entryPrice: price, entryTime: o.filled_at, qty: qty };
+          return;
+        }
+        if(o.side === open.entrySide){
+          anomalies.push({
+            sym: sym, time: o.filled_at,
+            note: 'Another ' + o.side + ' fill while a ' + (open.entrySide === 'buy' ? 'Long' : 'Short') +
+              ' position was already open (entered ' + open.entryTime + ') -- almost certainly the ' +
+              'duplicate-order race (fixed 2026-08-25), not a real re-entry.',
+          });
+          return;
+        }
+        var direction = open.entrySide === 'buy' ? 'Long' : 'Short';
+        var pctReturn = direction === 'Long' ? (price - open.entryPrice) / open.entryPrice * 100 : (open.entryPrice - price) / open.entryPrice * 100;
+        var dollarPL = (price - open.entryPrice) * open.qty * (direction === 'Long' ? 1 : -1);
+        var exitType = o.type === 'stop' ? 'Stop-loss' : o.type === 'limit' ? 'Target' : 'Market (manual/EOD)';
+        trades.push({
+          sym: sym, direction: direction, qty: open.qty,
+          entryPrice: open.entryPrice, entryTime: open.entryTime,
+          exitPrice: price, exitTime: o.filled_at, exitType: exitType,
+          pctReturn: pctReturn, dollarPL: dollarPL,
+        });
+        open = null;
+      });
+    });
+    trades.sort(function(a,b){ return new Date(b.exitTime) - new Date(a.exitTime); });
+    return { trades: trades, anomalies: anomalies };
+  }
+
+  function renderAlpacaHistoryResults(trades, anomalies){
+    var wrap = document.getElementById('alpacaHistoryResultWrap');
+    wrap.removeAttribute('hidden');
+
+    var wins = trades.filter(function(t){ return t.dollarPL > 0; });
+    var losses = trades.filter(function(t){ return t.dollarPL <= 0; });
+    var grossWin = wins.reduce(function(s,t){ return s + t.dollarPL; }, 0);
+    var grossLoss = Math.abs(losses.reduce(function(s,t){ return s + t.dollarPL; }, 0));
+    var pf = grossLoss > 0 ? (grossWin / grossLoss) : (grossWin > 0 ? Infinity : 0);
+    var winRate = trades.length ? (wins.length / trades.length * 100) : 0;
+    var avgWin = wins.length ? grossWin / wins.length : 0;
+    var avgLoss = losses.length ? grossLoss / losses.length : 0;
+    var netPL = trades.reduce(function(s,t){ return s + t.dollarPL; }, 0);
+
+    var statsEl = document.getElementById('alpacaHistoryStats');
+    statsEl.innerHTML =
+      '<div class="pl-card"><div class="pl-card-label">Real trades</div><div class="pl-card-value mono">' + trades.length + '</div></div>' +
+      '<div class="pl-card"><div class="pl-card-label">Win rate</div><div class="pl-card-value mono">' + winRate.toFixed(0) + '%</div></div>' +
+      '<div class="pl-card"><div class="pl-card-label">Profit factor</div><div class="pl-card-value mono ' + (pf >= 1 ? 'up' : 'down') + '">' + (pf === Infinity ? '∞' : pf.toFixed(2)) + '</div></div>' +
+      '<div class="pl-card"><div class="pl-card-label">Avg win</div><div class="pl-card-value mono up">+$' + avgWin.toFixed(0) + '</div></div>' +
+      '<div class="pl-card"><div class="pl-card-label">Avg loss</div><div class="pl-card-value mono down">−$' + avgLoss.toFixed(0) + '</div></div>' +
+      '<div class="pl-card"><div class="pl-card-label">Net P&L</div><div class="pl-card-value mono ' + (netPL >= 0 ? 'up' : 'down') + '">' + (netPL >= 0 ? '+' : '−') + '$' + Math.abs(netPL).toFixed(0) + '</div></div>';
+
+    var anomaliesEl = document.getElementById('alpacaHistoryAnomalies');
+    anomaliesEl.innerHTML = anomalies.length
+      ? '<div class="labs-backtest-note" style="color:var(--loss); margin-bottom:14px;">' + anomalies.length + ' anomal' + (anomalies.length === 1 ? 'y' : 'ies') + ' detected (likely duplicate-order residue): ' +
+        anomalies.map(function(a){ return a.sym + ' at ' + a.time; }).join(', ') + '</div>'
+      : '';
+
+    var tableEl = document.getElementById('alpacaHistoryTableWrap');
+    tableEl.innerHTML = '<table class="backtest-trades-table">' +
+      '<thead><tr><th>Symbol</th><th>Dir</th><th>Entry</th><th>Entry time</th><th>Exit</th><th>Exit time</th><th>Exit type</th><th>Return</th><th>P&L</th></tr></thead>' +
+      '<tbody>' + trades.map(function(t){
+        var up = t.dollarPL >= 0;
+        return '<tr>' +
+          '<td class="mono">' + t.sym + '</td>' +
+          '<td>' + t.direction + '</td>' +
+          '<td class="mono">' + fmt(t.entryPrice) + '</td>' +
+          '<td class="mono" style="font-size:11px;">' + new Date(t.entryTime).toLocaleString() + '</td>' +
+          '<td class="mono">' + fmt(t.exitPrice) + '</td>' +
+          '<td class="mono" style="font-size:11px;">' + new Date(t.exitTime).toLocaleString() + '</td>' +
+          '<td>' + t.exitType + '</td>' +
+          '<td class="' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + t.pctReturn.toFixed(1) + '%</td>' +
+          '<td class="' + (up ? 'up' : 'down') + '">' + (up ? '+' : '−') + '$' + Math.abs(t.dollarPL).toFixed(0) + '</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table>';
+
+    document.getElementById('alpacaHistoryRawTextarea').value = JSON.stringify({ trades: trades, anomalies: anomalies }, null, 2);
+  }
+
+  document.getElementById('pullAlpacaHistoryBtn').addEventListener('click', function(){
+    var btn = document.getElementById('pullAlpacaHistoryBtn');
+    var statusEl = document.getElementById('alpacaHistoryStatus');
+    btn.disabled = true;
+    statusEl.textContent = 'Pulling full order history from Alpaca…';
+    fetchAllAlpacaClosedOrders().then(function(orders){
+      statusEl.textContent = 'Pulled ' + orders.length + ' order' + (orders.length === 1 ? '' : 's') + ' from Alpaca.';
+      var result = reconstructTradesFromOrders(orders);
+      renderAlpacaHistoryResults(result.trades, result.anomalies);
+    }).catch(function(err){
+      statusEl.textContent = 'Failed to pull history: ' + err.message;
+    }).finally(function(){
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('alpacaHistoryShowRawBtn').addEventListener('click', function(){
+    var wrap = document.getElementById('alpacaHistoryRawWrap');
+    wrap.hidden = !wrap.hidden;
+  });
+  document.getElementById('alpacaHistoryCopyBtn').addEventListener('click', function(){
+    var textarea = document.getElementById('alpacaHistoryRawTextarea');
+    textarea.select();
+    navigator.clipboard.writeText(textarea.value).then(function(){
+      var confirmEl = document.getElementById('alpacaHistoryCopyConfirm');
+      confirmEl.hidden = false;
+      setTimeout(function(){ confirmEl.hidden = true; }, 2000);
+    });
+  });
 
   document.getElementById('calPrev').addEventListener('click', function(){
     calendarViewDate.setMonth(calendarViewDate.getMonth() - 1);
