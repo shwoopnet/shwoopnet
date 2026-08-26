@@ -993,7 +993,7 @@
     padding: 16px 16px 18px 16px; border-top:1px solid var(--border);
   }
   .trade-detail[hidden]{ display:none; }
-  .trade-chart-col{ flex: 0 0 var(--chart-width, 62%); min-width:0; }
+  .trade-chart-col{ flex: 0 0 var(--chart-width, 68%); min-width:0; }
   .trade-notes-col{ flex: 1 1 auto; min-width:200px; }
   .trade-notes-col h3{
     font-family:'Space Grotesk', sans-serif; font-size:11px; text-transform:uppercase;
@@ -1005,9 +1005,9 @@
     padding: 2px 0 12px 14px; border-left: 2px solid var(--amber-dim); margin-bottom:12px;
   }
   .trade-notes-col li:last-child{ margin-bottom:0; }
-  .trade-chart{ width:100%; height: var(--chart-height, 200px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
+  .trade-chart{ width:100%; height: var(--chart-height, 260px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
-  .grid-label{ fill: var(--muted); font-size: 10px; font-family:'IBM Plex Mono',monospace; }
+  .grid-label{ fill: var(--muted); font-size: 11px; font-family:'IBM Plex Mono',monospace; }
   .chart-error-text{ fill: var(--paper); font-size:13px; font-family:'Space Grotesk', sans-serif; }
   .chart-error-sub{ fill: var(--muted); font-size:11px; font-family:'IBM Plex Mono', monospace; }
 
@@ -6953,7 +6953,9 @@
     }
 
     var xStep = plotW / data.length;
-    var cw = Math.max(2, xStep * 0.55);
+    // Chunkier, more solid-looking candles -- capped so a handful of
+    // visible bars doesn't blow up into oversized blocks.
+    var cw = Math.max(3, Math.min(xStep * 0.62, 16));
     var parts = [];
 
     if(useLog){
@@ -7004,6 +7006,14 @@
       parts.push('<rect x="'+(x-cw/2)+'" y="'+bodyTop+'" width="'+cw+'" height="'+bodyH+'" fill="'+color+'"/>');
     });
 
+    // Live price line — the signature "where are we right now" reference
+    // every real trading platform shows, dashed across the chart with a
+    // colored tag on the axis. Computed before the level lines below so
+    // a level tag landing almost on top of it can be suppressed instead
+    // of the two overlapping.
+    var lastBar = data[data.length - 1];
+    var liveY = lastBar ? y(lastBar.c) : null;
+
     // Entry/stop/target reference lines — the same levels shown as text in
     // the row above, now visible directly against price action. Drawn only
     // when they actually fall within the visible price range, so a
@@ -7011,27 +7021,37 @@
     // level that's currently way off the visible chart.
     if(opts.levels){
       var lv = opts.levels;
+      // Tag lives on the right axis, matching the live-price tag's own
+      // rect+text pattern, instead of bare colored text sitting inside
+      // the plot area -- that used to land directly on top of candles
+      // and wicks whenever a level happened to fall mid-chart. The
+      // reference line itself stays full-width and dashed at its
+      // original opacity; only the label moves.
       function levelLine(price, color, label, dashArray, opacity){
         if(price === null || price === undefined || !isFinite(price)) return;
         var ly2 = y(price);
         if(ly2 < padTop - 1 || ly2 > padTop + plotH + 1) return;
         parts.push('<line x1="0" y1="'+ly2+'" x2="'+plotW+'" y2="'+ly2+'" stroke="'+color+'" stroke-width="1" stroke-dasharray="'+dashArray+'" opacity="'+opacity+'"/>');
-        parts.push('<text class="grid-label" x="4" y="'+(ly2-3)+'" fill="'+color+'">'+label+' '+price.toFixed(2)+'</text>');
+        // A level sitting almost on top of the live price (e.g. a fresh
+        // entry that hasn't moved far yet) would otherwise draw its tag
+        // right on top of the live-price tag -- skip just the tag here,
+        // the dashed line at this price is still visible on its own.
+        if(liveY !== null && Math.abs(ly2 - liveY) < 16) return;
+        parts.push('<rect x="'+plotW+'" y="'+(ly2-8)+'" width="'+padRight+'" height="16" fill="'+color+'"/>');
+        parts.push('<text class="axis-tag-text" x="'+(plotW+8)+'" y="'+(ly2+4)+'" fill="var(--ink)">'+label+' '+price.toFixed(2)+'</text>');
       }
       levelLine(lv.target, 'var(--gain)', 'T', '2,4', 0.85);
       levelLine(lv.entry, 'var(--amber)', 'E', '2,4', 0.85);
       // Only ever present alongside a real, open position's own entry
       // line above — a separate, de-emphasized reference showing where
       // the original plan said to get in, distinct from where the
-      // account actually got filled.
-      levelLine(lv.planEntry, 'var(--muted)', 'Plan', '1,3', 0.6);
+      // account actually got filled. Single letter, same as E/S/T --
+      // the axis tag's fixed width only comfortably fits one letter
+      // plus the price.
+      levelLine(lv.planEntry, 'var(--muted)', 'P', '1,3', 0.6);
       levelLine(lv.stop, 'var(--loss)', 'S', '2,4', 0.85);
     }
 
-    // Live price line — the signature "where are we right now" reference
-    // every real trading platform shows, dashed across the chart with a
-    // colored tag on the axis.
-    var lastBar = data[data.length - 1];
     if(lastBar){
       var lastUp = lastBar.c >= lastBar.o;
       var priceColor = lastUp ? 'var(--gain)' : 'var(--loss)';
@@ -7869,7 +7889,7 @@
     }
   });
 
-  var layoutPrefs = { width:62, height:200, text:12.5, showOHLC:true };
+  var layoutPrefs = { width:68, height:260, text:12.5, showOHLC:true };
   var layoutLimits = {
     width:  [40, 85, 5],
     height: [120, 340, 20],
@@ -7915,7 +7935,7 @@
   document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
 
   document.getElementById('layoutResetBtn').addEventListener('click', function(){
-    layoutPrefs = { width:62, height:200, text:12.5, showOHLC:true };
+    layoutPrefs = { width:68, height:260, text:12.5, showOHLC:true };
     applyLayout();
   });
 
