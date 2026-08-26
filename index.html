@@ -2635,14 +2635,15 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Labs</div>
-        <div class="trades-sub">The method behind the screener, and a real backtest — not a demo.</div>
+        <div class="trades-sub">The method behind both strategies, and a real backtest — not a demo.</div>
       </div>
     </div>
 
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        How the equities screener actually works, in plain language.
+        How the equities screener actually works, in plain language — the crypto strategy, which runs as its own
+        independent screener rather than a variant of this one, is covered separately below.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
@@ -2706,6 +2707,68 @@
       </div>
     </div>
 
+    <div class="brief-section-title" style="margin-top:36px;">The Crypto Method</div>
+    <div class="labs-method-card">
+      <p class="labs-method-intro">
+        A second, independent strategy that trades alongside the equities screener — same overall shape, tuned
+        for a market that never closes rather than a version of the equities logic above.
+      </p>
+      <div class="labs-method-grid">
+        <div class="labs-method-item">
+          <div class="labs-method-step">1</div>
+          <div>
+            <div class="labs-method-title">12 crypto pairs, screened around the clock</div>
+            <div class="labs-method-body">BTC/USD, ETH/USD, SOL/USD, LTC/USD, LINK/USD, AVAX/USD, DOGE/USD, UNI/USD,
+            XRP/USD, DOT/USD, BCH/USD, AAVE/USD — checked continuously, since crypto has no open or close to wait
+            on. (ATOM/USD was dropped after returning no usable historical bars during validation; SHIB/USD was
+            dropped deliberately — it tested weakly across both independent historical windows.)</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">2</div>
+          <div>
+            <div class="labs-method-title">A rolling range instead of "today's" range</div>
+            <div class="labs-method-body">With no market open to anchor an opening range to, each check instead
+            looks at the last 4 bars (15-minute) as a rolling breakout range, re-evaluated fresh every cycle
+            against only the most recent bar — never re-firing on a breakout from hours or days ago.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">3</div>
+          <div>
+            <div class="labs-method-title">Volume and trend both have to agree</div>
+            <div class="labs-method-body">The breakout bar's volume must clear 2.5x its own preceding 20-bar
+            average (equities requires 2x), and price also has to clear its own 30-bar average by at least 1.5%
+            in the trade's direction — a trend filter equities doesn't need. Long only: Alpaca doesn't support
+            shorting crypto, so a Short signal is simply dropped rather than traded.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">4</div>
+          <div>
+            <div class="labs-method-title">Same trailing-stop shape as equities, with the same breakeven floor</div>
+            <div class="labs-method-body">Entry and initial stop come from the range edges. Once a trade moves
+            0.5x its own risk in its favor, the stop starts trailing a full 1x risk behind the best price reached
+            — and once trailing engages, the same breakeven floor used on the equities side keeps it from ever
+            sitting below entry again.</div>
+          </div>
+        </div>
+      </div>
+      <div class="labs-honesty-box">
+        <div class="labs-honesty-title">What's actually live right now</div>
+        <p>Validated the same way as the equities strategy: walk-forward across two independent historical
+        windows of real Alpaca crypto bars, both directions, profit factor 2.35 overall / 1.86 worst-case
+        window. Alpaca crypto trading has no short selling, so only the Long side actually trades live — checked
+        separately, restricting to Long-only doesn't cost anything relative to what was validated: 2.48 overall
+        / 1.94 worst-case window.</p>
+        <p>The same breakeven floor added to the equities exit was re-validated here too, on the same starting
+        stake used throughout this page: a hypothetical $7,000 grew to $18,852 with the floor (was $18,284
+        without it), profit factor 2.27 (was 2.02) — a real, measured improvement, same mechanism as equities.
+        This strategy is newer than the equities one and has less live history behind it — the activity log is
+        what will show whether real performance holds up the way this backtest suggests it should.</p>
+      </div>
+    </div>
+
     <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
@@ -2713,6 +2776,8 @@
         prices — only ever using data that would have existed at that point in time. Measures raw % return
         per trade, independent of account size, so sizing effects don't blur whether the underlying edge is
         real. If a longer lookback fails to load, try a shorter one — the free data tier's depth isn't fully known.
+        Covers the equities strategy only — the tool below pulls from Twelve Data, which doesn't carry crypto
+        history; the crypto numbers above come from a separate historical dataset pulled directly from Alpaca.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
