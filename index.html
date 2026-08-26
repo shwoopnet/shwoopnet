@@ -3319,6 +3319,7 @@
       t1PctFromEntry: (pick.t1 - pick.entry) / pick.entry,
       entry: pick.entry, stop: pick.stop, t1: pick.t1,
       status: pick.status, statusLabel: pick.statusLabel, notes: pick.notes.slice(),
+      entryBarTime: pick.entryBarTime,
       analysisIsReal: true
     };
   }
@@ -6995,6 +6996,43 @@
       prevLabelDate = barDate;
     }
 
+    // Shaded profit/loss zones between entry and target/stop -- the
+    // "position box" look real trading platforms (TradingView included)
+    // use to show risk/reward at a glance instead of just numbers.
+    // Drawn here, before the candles below, so the tint sits behind
+    // price action rather than washing it out. Anchored to the actual
+    // entry bar (when known) so the tint only covers price action since
+    // the position/plan actually started, not history from before it
+    // existed -- falls back to the full visible width when entryBarTime
+    // isn't available (older entries recorded before this field existed).
+    if(opts.levels && opts.levels.entry !== null && opts.levels.entry !== undefined && isFinite(opts.levels.entry)){
+      var lv0 = opts.levels;
+      var entryY0 = y(lv0.entry);
+      var zoneX0 = 0;
+      var zoneVisible = true;
+      if(lv0.entryBarTime){
+        var entryTime0 = new Date(lv0.entryBarTime).getTime();
+        zoneVisible = false;
+        for(var zi = 0; zi < data.length; zi++){
+          if(data[zi].t.getTime() >= entryTime0){ zoneX0 = zi * xStep; zoneVisible = true; break; }
+        }
+      }
+      if(zoneVisible){
+        (function(){
+          function zoneRect(otherPrice, color){
+            if(otherPrice === null || otherPrice === undefined || !isFinite(otherPrice)) return;
+            var otherY = y(otherPrice);
+            var top = Math.max(padTop, Math.min(entryY0, otherY));
+            var bottom = Math.min(padTop + plotH, Math.max(entryY0, otherY));
+            if(bottom <= top) return;
+            parts.push('<rect x="'+zoneX0+'" y="'+top+'" width="'+(plotW - zoneX0)+'" height="'+(bottom-top)+'" fill="'+color+'" opacity="0.10"/>');
+          }
+          zoneRect(lv0.target, 'var(--gain)');
+          zoneRect(lv0.stop, 'var(--loss)');
+        })();
+      }
+    }
+
     data.forEach(function(d, i){
       var x = i * xStep + xStep/2;
       var up = d.c >= d.o;
@@ -7102,11 +7140,11 @@
       // collapsed into one — a market-order fill can land meaningfully
       // away from the theoretical SMA20-based plan level, and that gap
       // is worth being able to see, not hide.
-      levels = { entry: openPosition.entry, planEntry: openPosition.plannedEntry, stop: openPosition.stop, target: openPosition.t1 };
+      levels = { entry: openPosition.entry, planEntry: openPosition.plannedEntry, stop: openPosition.stop, target: openPosition.t1, entryBarTime: openPosition.entryBarTime };
     } else if(trade){
       // Nothing's been traded yet — there's only one entry concept at
       // this stage (the plan itself), so no separate planEntry line.
-      levels = { entry: trade.entry, stop: trade.stop, target: trade.t1 };
+      levels = { entry: trade.entry, stop: trade.stop, target: trade.t1, entryBarTime: trade.entryBarTime };
     }
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
       priceCenterOffset: state.priceCenterOffset,
