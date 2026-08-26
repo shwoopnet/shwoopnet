@@ -599,6 +599,17 @@
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px;
     box-shadow: 0 1px 3px rgba(16,24,43,0.06);
   }
+  /* Account balance figures (Equity/Day P&L/Buying power) read as ONE
+     shared card with items just separated by gap -- not, like the
+     backtest-stat grid above, a wall of individually-boxed tiles. That
+     distinction matters here specifically: 3-4 balance figures are one
+     idea ("here's the account"), while a backtest's 8-9 metrics are a
+     dashboard of genuinely separate readouts. */
+  .acct-strip{
+    display:flex; gap:28px; flex-wrap:wrap; margin-bottom:22px;
+    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px;
+    box-shadow: 0 1px 3px rgba(16,24,43,0.06);
+  }
   .backtest-stat-label{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); margin-bottom:6px; }
   .backtest-stat-value{ font-size:20px; font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight:600; }
   .backtest-stat-value.up{ color: var(--gain); }
@@ -881,10 +892,19 @@
   }
   .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; }
   .chevron:hover{ color: var(--amber); }
-  .t-sym-cell{ display:flex; flex-direction:column; }
+  .t-sym-cell{ display:flex; align-items:center; gap:10px; }
+  .t-sym-badge{
+    width:32px; height:32px; border-radius:9px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:700; font-size:13px;
+  }
+  .t-sym-text{ display:flex; flex-direction:column; min-width:0; }
   .t-sym{ font-weight:600; letter-spacing:.02em; }
-  .t-sym .t-dir{ font-size:10px; color:var(--muted); font-weight:400; margin-left:6px; }
-  .t-sym .status-badge{ margin-left:10px; vertical-align:middle; }
+  .t-sym .t-dir{
+    font-size:10.5px; font-weight:600; color: var(--amber); background: var(--amber-glow);
+    padding:2px 7px; border-radius:5px; margin-left:8px;
+  }
+  .t-sym .status-badge{ margin-left:6px; vertical-align:middle; }
   .t-name{ font-size:10.5px; color:var(--muted); }
   .t-current .chg{ display:block; font-size:11px; margin-top:2px; }
   .t-current .chg.up{ color:var(--gain); }
@@ -1981,7 +2001,7 @@
     </div>
 
     <div class="to-card" id="toCard-accountSummary">
-      <div class="backtest-summary" id="statusAccountSummary"></div>
+      <div class="acct-strip" id="statusAccountSummary"></div>
     </div>
 
     <div class="to-card" id="toCard-backendStatus">
@@ -2568,11 +2588,11 @@
       </div>
     </div>
 
-    <div class="backtest-summary" style="margin-bottom:20px;">
-      <div class="backtest-stat"><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value" id="demoEquity">$10,000.00</div></div>
-      <div class="backtest-stat"><div class="backtest-stat-label">Today's P&amp;L</div><div class="backtest-stat-value" id="demoDayPL">+$0.00 (+0.00%)</div></div>
-      <div class="backtest-stat"><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value" id="demoCash">$10,000.00</div></div>
-      <div class="backtest-stat"><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value" id="demoBuyingPower">$40,000.00</div></div>
+    <div class="acct-strip">
+      <div><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value" id="demoEquity">$10,000.00</div></div>
+      <div><div class="backtest-stat-label">Today's P&amp;L</div><div class="backtest-stat-value" id="demoDayPL">+$0.00 (+0.00%)</div></div>
+      <div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value" id="demoCash">$10,000.00</div></div>
+      <div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value" id="demoBuyingPower">$40,000.00</div></div>
     </div>
 
     <div class="labs-backtest-card" style="margin-bottom:20px;">
@@ -5081,6 +5101,22 @@
     return isLong ? { cls: 'buying', label: 'Buying' } : { cls: 'selling', label: 'Selling' };
   }
 
+  // A small fixed palette a symbol's avatar badge picks from, deterministically
+  // (same symbol always lands on the same color across renders/sessions,
+  // the same way Slack/GitHub pick a stable avatar color per user) rather
+  // than a single repeated accent -- otherwise a page full of positions is
+  // a wall of identical blue circles with nothing to tell them apart at a
+  // glance besides the letter itself.
+  var SYMBOL_BADGE_COLORS = ['#0B5CD8', '#0F9D58', '#D97706', '#7C3AED', '#DB2777', '#0891B2'];
+  function symbolBadgeColor(sym){
+    var h = 0;
+    for(var i = 0; i < sym.length; i++){ h = (h * 31 + sym.charCodeAt(i)) | 0; }
+    return SYMBOL_BADGE_COLORS[Math.abs(h) % SYMBOL_BADGE_COLORS.length];
+  }
+  function symbolBadgeHtml(sym){
+    return '<span class="t-sym-badge" style="background:' + symbolBadgeColor(sym) + ';">' + sym.charAt(0) + '</span>';
+  }
+
   // Deliberately has no manual "log trade" / "send to Alpaca" buttons --
   // auto-trade already handles sending orders automatically, and a manual
   // override belongs in Open Positions (the Close button) and Settings
@@ -5332,9 +5368,12 @@
           '<div class="trade-columns trade-row">' +
             '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
             '<div class="t-sym-cell">' +
-              '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
-                '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
-              '<span class="t-name">' + (q.name || t.sym) + '</span>' +
+              symbolBadgeHtml(t.sym) +
+              '<span class="t-sym-text">' +
+                '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
+                  '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
+                '<span class="t-name">' + (q.name || t.sym) + '</span>' +
+              '</span>' +
             '</div>' +
             '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' + fmt(q.price) +
               '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
@@ -5459,8 +5498,11 @@
           '<div class="trade-columns trade-row">' +
             '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
             '<div class="t-sym-cell">' +
-              '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
-                '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
+              symbolBadgeHtml(t.sym) +
+              '<span class="t-sym-text">' +
+                '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
+                  '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
+              '</span>' +
             '</div>' +
             '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' +
               (liveQuote && liveQuote.price !== null ? fmt(q.price) : '—') +
@@ -9426,7 +9468,7 @@
     var summaryEl = document.getElementById('statusAccountSummary');
     if(!summaryEl) return;
     if(!alpacaConnected){
-      summaryEl.innerHTML = '<div class="backtest-stat"><div class="backtest-stat-label">Account</div><div class="backtest-stat-value">Not connected</div></div>';
+      summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value">Not connected</div></div>';
       return;
     }
     getAlpacaAccountSummaryCached().then(function(acct){
@@ -9442,12 +9484,12 @@
       var plClass = todayPL >= 0 ? 'up' : 'down';
 
       summaryEl.innerHTML =
-        '<div class="backtest-stat"><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value">$' + equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Today\'s P&L</div><div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value">$' + cash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value">$' + buyingPower.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>';
+        '<div><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value">$' + equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
+        '<div><div class="backtest-stat-label">Today\'s P&L</div><div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div></div>' +
+        '<div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value">$' + cash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
+        '<div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value">$' + buyingPower.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>';
     }).catch(function(err){
-      summaryEl.innerHTML = '<div class="backtest-stat"><div class="backtest-stat-label">Account</div><div class="backtest-stat-value down">Failed to load</div></div>';
+      summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value down">Failed to load</div></div>';
       console.error('Status page account fetch failed:', err);
     });
   }
@@ -10103,9 +10145,12 @@
         '<div class="trade-columns trade-row">' +
           '<button class="chevron" aria-label="Toggle" disabled>⌄</button>' +
           '<div class="t-sym-cell">' +
-            '<span class="t-sym">' + s.sym + '<span class="t-dir">' + s.direction + '</span>' +
-              '<span class="status-badge ' + s.badgeCls + '">' + s.badgeLabel + '</span></span>' +
-            '<span class="t-name">' + s.name + '</span>' +
+            symbolBadgeHtml(s.sym) +
+            '<span class="t-sym-text">' +
+              '<span class="t-sym">' + s.sym + '<span class="t-dir">' + s.direction + '</span>' +
+                '<span class="status-badge ' + s.badgeCls + '">' + s.badgeLabel + '</span></span>' +
+              '<span class="t-name">' + s.name + '</span>' +
+            '</span>' +
           '</div>' +
           '<div class="t-current mono" data-label="Current">' + demoFmt(s.current) +
             '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
