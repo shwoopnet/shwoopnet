@@ -2742,6 +2742,15 @@
         rather than a like-for-like continuation of the original series. It's still genuinely new, though — the
         activity log and the numbers building up there over time are what will show whether real, ongoing
         performance holds up the way the backtest suggests it should.</p>
+        <p>Same $7,000 starting stake as the crypto figure below, run the same honest way — real, chronologically-
+        ordered trades across all 16 symbols together, the shared 7% total-risk ceiling enforced exactly like the
+        live account — but sized differently: each trade risks a flat 1% of that original $7,000 rather than
+        compounding as the balance grows. That produced $7,000 → $59,427, profit factor 2.51. A compounding
+        version of this same run — sizing that scales up with the growing balance, the way a real account
+        naturally would — technically finishes above $10 million; shown here as fixed-risk instead because
+        equities fires far more often than crypto (thousands of trades over this window, not hundreds), and
+        letting that many trades compound off each other reaches a balance no real account could keep trading at
+        without running into its own liquidity and market-impact limits, which this simulation doesn't model.</p>
       </div>
     </div>
 
@@ -2884,6 +2893,37 @@
         <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'IBM Plex Mono', monospace; margin-top:8px;"></div>
       </div>
       </div>
+    </div>
+
+    <div class="brief-section-title" style="margin-top:36px;">Crypto Backtest</div>
+    <div class="labs-backtest-card">
+      <p class="labs-backtest-intro">
+        Same idea as the equities backtest above, scored against the crypto strategy's own rolling-range logic
+        instead — real historical 15-minute bars pulled straight from Alpaca (not Twelve Data, which doesn't carry
+        crypto history), since crypto never has a single trading day to bound a signal search to. A trade still
+        open when the data runs out is marked "Still open" and left out of the win-rate/profit-factor math below,
+        rather than force-closed against a session close that doesn't exist for this market.
+      </p>
+      <div class="labs-backtest-controls">
+        <div class="labs-control-field">
+          <label for="cryptoBacktestSymbol">Pair</label>
+          <select id="cryptoBacktestSymbol"></select>
+        </div>
+        <div class="labs-control-field">
+          <label for="cryptoBacktestLookback">Lookback</label>
+          <select id="cryptoBacktestLookback">
+            <option value="30">~30 days</option>
+            <option value="60" selected>~60 days</option>
+            <option value="90">~90 days</option>
+            <option value="180">~180 days</option>
+            <option value="365">~365 days (slower)</option>
+          </select>
+        </div>
+        <button class="settings-reset-btn" id="runCryptoBacktestBtn">Run backtest</button>
+        <button class="settings-reset-btn" id="runCryptoUniverseBacktestBtn">Run whole universe</button>
+      </div>
+      <div class="labs-backtest-status" id="cryptoBacktestStatus"></div>
+      <div id="cryptoBacktestResults"></div>
     </div>
   </main>
     </div>
@@ -3096,6 +3136,11 @@
       signal.trailingActive = true;
       var newStopShort = currentPrice + risk;
       if(newStopShort < signal.currentStop) signal.currentStop = newStopShort;
+    }
+    // Breakeven floor -- matches shwoop-server's live technicalAnalysis.js.
+    // Once trailing has activated, the stop can never sit worse than entry.
+    if(signal.trailingActive){
+      signal.currentStop = isLong ? Math.max(signal.currentStop, signal.entry) : Math.min(signal.currentStop, signal.entry);
     }
 
     var status = 'active', statusLabel = 'Active';
@@ -5843,6 +5888,14 @@
           if(newStopShort < currentStop) currentStop = newStopShort;
         }
       }
+      // Breakeven floor -- matches shwoop-server's live technicalAnalysis.js
+      // exactly. Once trailing has activated, the stop can never sit worse
+      // than entry again. This tool was missing it until now, meaning it
+      // was quietly simulating an older version of the strategy than the
+      // one actually trading.
+      if(trailingActive){
+        currentStop = isLong ? Math.max(currentStop, analysis.entry) : Math.min(currentStop, analysis.entry);
+      }
     }
     var lastBar = bars[lastBarOfDayIdx];
     return { result: 'eod_close', days: lastBarOfDayIdx - entryIdx, price: lastBar.c, date: lastBar.t };
@@ -5963,6 +6016,184 @@
       }, 'high').then(function(olderChunk){
         return olderChunk.concat(recentChunk);
       });
+    });
+  }
+
+  // ---------- Crypto backtest history (Alpaca crypto bars, not Twelve Data) ----------
+  // Alpaca's crypto bars endpoint takes a real start/end date range (not
+  // Twelve Data's outputsize-plus-end_date convention) and happily
+  // accepts every symbol in one request, paginating via next_page_token
+  // for anything longer than a single page -- so the "whole universe"
+  // backtest below fetches all 12 pairs in one paginated stream instead
+  // of 12 separate per-symbol calls the way the equities version needs.
+  function fetchCryptoBacktestHistory(symbols, lookbackDays){
+    var end = new Date();
+    var start = new Date(end.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
+    var symbolsParam = symbols.map(encodeURIComponent).join(',');
+
+    function fetchPage(pageToken){
+      var url = ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + symbolsParam +
+        '&timeframe=15Min&start=' + encodeURIComponent(start.toISOString()) +
+        '&end=' + encodeURIComponent(end.toISOString()) + '&limit=10000' +
+        (pageToken ? '&page_token=' + encodeURIComponent(pageToken) : '');
+      return fetch(url, { headers: alpacaHeaders() }).then(function(res){
+        if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
+        return res.json();
+      });
+    }
+
+    var barsBySymbol = {};
+    function loop(pageToken){
+      return fetchPage(pageToken).then(function(data){
+        var pageBars = data.bars || {};
+        Object.keys(pageBars).forEach(function(sym){
+          if(!barsBySymbol[sym]) barsBySymbol[sym] = [];
+          barsBySymbol[sym] = barsBySymbol[sym].concat(pageBars[sym]);
+        });
+        if(data.next_page_token) return loop(data.next_page_token);
+        return barsBySymbol;
+      });
+    }
+
+    return loop(null).then(function(raw){
+      // Deliberately doesn't throw on a thin/missing symbol here -- the
+      // whole-universe caller needs to skip just that one pair and keep
+      // testing the rest (same resilience the equities universe backtest
+      // already has); the single-symbol caller checks length itself and
+      // reports a real error for that one pair specifically.
+      var bars = {};
+      symbols.forEach(function(sym){
+        var symBars = raw[sym] || [];
+        bars[sym] = symBars.map(function(b){
+          return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
+        });
+      });
+      return bars;
+    });
+  }
+
+  // ---------- Crypto backtest signal engine (rolling range, not per-day) ----------
+  // Exact client-side port of shwoop-server's technicalAnalysisCrypto.js,
+  // scored against real history the same honest way the equities backtest
+  // is: only ever using bars that would have existed at that point in
+  // time. Unlike ORB, a crypto signal can fire on ANY bar (no "first
+  // breakout of the day" concept), so this scans every bar in sequence
+  // rather than resetting per calendar day.
+  var CRYPTO_BT_RANGE_LOOKBACK_BARS = 4;
+  var CRYPTO_BT_VOLUME_LOOKBACK = 20;
+  var CRYPTO_BT_VOLUME_CONFIRM_MULTIPLE = 2.5;
+  var CRYPTO_BT_TREND_LOOKBACK_BARS = 30;
+  var CRYPTO_BT_TREND_MARGIN_PCT = 0.015;
+  var CRYPTO_BT_TRAIL_TRIGGER_RR = 0.5;
+  var CRYPTO_BT_REWARD_MULTIPLE = 1.5; // reference only -- trailing stop is the real exit
+
+  function findCryptoBacktestBreakoutAt(bars, idx){
+    if(idx < CRYPTO_BT_RANGE_LOOKBACK_BARS || idx < CRYPTO_BT_VOLUME_LOOKBACK || idx < CRYPTO_BT_TREND_LOOKBACK_BARS) return null;
+    var bar = bars[idx];
+    var rangeBars = bars.slice(idx - CRYPTO_BT_RANGE_LOOKBACK_BARS, idx);
+    var rangeHigh = Math.max.apply(null, rangeBars.map(function(b){ return b.h; }));
+    var rangeLow = Math.min.apply(null, rangeBars.map(function(b){ return b.l; }));
+
+    var direction = null, entry, stop;
+    if(bar.h > rangeHigh){ direction = 'Long'; entry = rangeHigh; stop = rangeLow; }
+    else if(bar.l < rangeLow){ direction = 'Short'; entry = rangeLow; stop = rangeHigh; }
+    if(!direction) return null;
+    if(direction !== 'Long') return null; // Long-only, matches live -- Alpaca doesn't support shorting crypto
+
+    var volBars = bars.slice(idx - CRYPTO_BT_VOLUME_LOOKBACK, idx);
+    var avgVol = volBars.reduce(function(a,b){ return a + (b.vol || 0); }, 0) / volBars.length;
+    if(avgVol <= 0 || (bar.vol || 0) < avgVol * CRYPTO_BT_VOLUME_CONFIRM_MULTIPLE) return null;
+
+    var trendBars = bars.slice(idx - CRYPTO_BT_TREND_LOOKBACK_BARS, idx);
+    var trendSMA = trendBars.reduce(function(a,b){ return a + b.c; }, 0) / trendBars.length;
+    var margin = trendSMA * CRYPTO_BT_TREND_MARGIN_PCT;
+    if(bar.c <= trendSMA + margin) return null;
+
+    var risk = Math.abs(entry - stop);
+    if(risk <= 0) return null;
+    var target = entry + CRYPTO_BT_REWARD_MULTIPLE * risk;
+    return { direction: direction, entry: entry, stop: stop, t1: target };
+  }
+
+  // Walks forward from the signal bar with no session boundary to resolve
+  // against -- crypto never closes, so a position just keeps trailing
+  // until it's actually stopped out. A trade still open when the data
+  // runs out is marked 'unresolved' (mark-to-market at the last close)
+  // rather than force-resolved against a session close that doesn't
+  // exist for this market.
+  function simulateCryptoForward(bars, entryIdx, signal){
+    var risk = Math.abs(signal.entry - signal.stop);
+    var triggerPrice = signal.entry + CRYPTO_BT_TRAIL_TRIGGER_RR * risk;
+    var trailingActive = false;
+    var currentStop = signal.stop;
+    for(var j = entryIdx + 1; j < bars.length; j++){
+      var bar = bars[j];
+      if(bar.l <= currentStop){
+        return { result: trailingActive ? 'trailing_stopped' : 'stopped', bars: j - entryIdx, price: currentStop, date: bar.t };
+      }
+      if(bar.h >= triggerPrice){
+        trailingActive = true;
+        var newStop = bar.h - risk;
+        if(newStop > currentStop) currentStop = newStop;
+      }
+      // Breakeven floor -- matches technicalAnalysisCrypto.js exactly.
+      if(trailingActive) currentStop = Math.max(currentStop, signal.entry);
+    }
+    var lastBar = bars[bars.length - 1];
+    return { result: 'unresolved', bars: bars.length - 1 - entryIdx, price: lastBar.c, date: lastBar.t };
+  }
+
+  var CRYPTO_BT_MARKET_LEGS_BY_OUTCOME = { stopped: 2, trailing_stopped: 2, unresolved: 1 };
+  function applyCryptoBacktestSlippage(pctReturn, outcome){
+    var legs = CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
+    return pctReturn - legs * (ORB_SLIPPAGE_BPS / 100);
+  }
+
+  // "bars" here are 15-minute crypto bars, continuous (no session gaps)
+  // -- hours/days read directly off the bar count, no trading-day
+  // conversion the way equities' formatIntradayDuration needs.
+  function formatCryptoBacktestDuration(bars){
+    var totalMinutes = bars * 15;
+    if(totalMinutes < 60) return totalMinutes + ' min';
+    var hours = totalMinutes / 60;
+    if(hours < 48) return (Math.round(hours * 10) / 10) + ' hr' + (hours === 1 ? '' : 's');
+    var days = hours / 24;
+    return '~' + (Math.round(days * 10) / 10) + ' day' + (Math.round(days * 10) === 10 ? '' : 's');
+  }
+
+  function runCryptoBacktestSimulationAsync(bars, lookbackBars){
+    return new Promise(function(resolve){
+      var startIdx = Math.max(CRYPTO_BT_TREND_LOOKBACK_BARS, bars.length - lookbackBars);
+      var trades = [];
+      var i = startIdx;
+      var ITERATIONS_PER_CHUNK = 300;
+
+      function step(){
+        var processedThisChunk = 0;
+        while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
+          var signal = findCryptoBacktestBreakoutAt(bars, i);
+          if(signal){
+            var outcome = simulateCryptoForward(bars, i, signal);
+            var pctReturn = (outcome.price - signal.entry) / signal.entry * 100; // Long-only
+            pctReturn = applyCryptoBacktestSlippage(pctReturn, outcome.result);
+            trades.push({
+              date: bars[i].t, direction: signal.direction, entry: signal.entry,
+              stop: signal.stop, target: signal.t1, outcome: outcome.result === 'unresolved' ? 'unresolved' : outcome.result,
+              days: outcome.bars, exitPrice: outcome.price, pctReturn: pctReturn
+            });
+            i = i + outcome.bars + 1;
+          } else {
+            i++;
+          }
+          processedThisChunk++;
+        }
+        if(i < bars.length){
+          setTimeout(step, 0);
+        } else {
+          resolve(trades);
+        }
+      }
+      step();
     });
   }
 
@@ -6205,6 +6436,200 @@
     }
 
     processNext(0);
+  }
+
+  // ---------- Crypto backtest UI ----------
+  function renderCryptoBacktestResults(trades, summary, sym){
+    var statusEl = document.getElementById('cryptoBacktestStatus');
+    var resultsEl = document.getElementById('cryptoBacktestResults');
+    if(trades.length === 0){
+      statusEl.textContent = 'No qualifying crypto signals found for ' + sym + ' in this window.';
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = 'Found ' + trades.length + ' crypto signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym +
+      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.';
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatCryptoBacktestDuration(summary.avgDays) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatCryptoBacktestDuration(summary.avgDaysWin) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatCryptoBacktestDuration(summary.avgDaysLoss) + '</div></div>' +
+      '</div>' +
+      '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — expectancy and profit factor account for the size of wins and losses, not just how often each happened.</p>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Time</th></tr></thead>' +
+        '<tbody>' + trades.map(function(t){
+          var outcomeClass = t.outcome === 'unresolved' ? '' : (t.pctReturn > 0 ? 'backtest-outcome-hit' : 'backtest-outcome-stopped');
+          var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
+          var outcomeLabel = t.outcome === 'unresolved' ? 'Still open' : t.outcome === 'trailing_stopped' ? 'Trailing stop' : 'Stopped';
+          return '<tr>' +
+            '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
+            '<td>' + t.direction + '</td>' +
+            '<td>' + fmt(t.entry) + '</td>' +
+            '<td>' + fmt(t.stop) + '</td>' +
+            '<td>' + fmt(t.target) + '</td>' +
+            '<td class="' + outcomeClass + '">' + outcomeLabel + '</td>' +
+            '<td class="' + returnClass + '">' + (t.pctReturn >= 0 ? '+' : '') + t.pctReturn.toFixed(2) + '%</td>' +
+            '<td>' + formatCryptoBacktestDuration(t.days) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody>' +
+      '</table>';
+  }
+
+  function renderCryptoUniverseBacktestResults(perSymbolResults, summary){
+    var statusEl = document.getElementById('cryptoBacktestStatus');
+    var resultsEl = document.getElementById('cryptoBacktestResults');
+
+    if(summary.totalSignals === 0){
+      statusEl.textContent = 'No qualifying crypto signals found across the universe in this window.';
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' pairs, ' + summary.totalSignals + ' total crypto signals' +
+      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.';
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+
+    var perSymbolRows = perSymbolResults
+      .filter(function(r){ return r.summary.totalSignals > 0; })
+      .sort(function(a,b){ return b.summary.avgPctReturn - a.summary.avgPctReturn; })
+      .map(function(r){
+        var s = r.summary;
+        var rowClass = s.avgPctReturn >= 0 ? 'up' : 'down';
+        return '<tr>' +
+          '<td class="mono">' + r.sym + '</td>' +
+          '<td>' + s.totalSignals + '</td>' +
+          '<td>' + s.winRate.toFixed(0) + '%</td>' +
+          '<td class="' + rowClass + '">' + (s.avgPctReturn >= 0 ? '+' : '') + s.avgPctReturn.toFixed(2) + '%</td>' +
+        '</tr>';
+      }).join('');
+
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatCryptoBacktestDuration(summary.avgDays) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatCryptoBacktestDuration(summary.avgDaysWin) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatCryptoBacktestDuration(summary.avgDaysLoss) + '</div></div>' +
+      '</div>' +
+      '<p class="labs-backtest-note">Aggregated across every crypto pair that produced at least one signal in this window.</p>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Pair</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
+        '<tbody>' + perSymbolRows + '</tbody>' +
+      '</table>';
+  }
+
+  function populateCryptoBacktestSymbolSelect(){
+    var sel = document.getElementById('cryptoBacktestSymbol');
+    if(!sel) return;
+    sel.innerHTML = CRYPTO_UNIVERSE.map(function(sym){
+      return '<option value="' + sym + '">' + sym + '</option>';
+    }).join('');
+  }
+
+  function runCryptoBacktestClicked(){
+    var sym = document.getElementById('cryptoBacktestSymbol').value;
+    var lookbackDays = parseInt(document.getElementById('cryptoBacktestLookback').value, 10);
+    var statusEl = document.getElementById('cryptoBacktestStatus');
+    var btn = document.getElementById('runCryptoBacktestBtn');
+    var resultsEl = document.getElementById('cryptoBacktestResults');
+
+    btn.disabled = true;
+    statusEl.textContent = 'Fetching ' + sym + ' 15-min history and running the simulation…';
+    statusEl.className = 'labs-backtest-status';
+    resultsEl.innerHTML = '';
+
+    fetchCryptoBacktestHistory([sym], lookbackDays).then(function(barsBySymbol){
+      var bars = barsBySymbol[sym] || [];
+      if(bars.length < 60){
+        throw new Error('Not enough crypto history for ' + sym + ' in this window — try a longer lookback.');
+      }
+      var lookbackBars = Math.round(lookbackDays * 24 * 4); // 4 bars/hour at 15-min
+      return runCryptoBacktestSimulationAsync(bars, lookbackBars);
+    }).then(function(trades){
+      var summary = summarizeBacktestTrades(trades);
+      renderCryptoBacktestResults(trades, summary, sym);
+      btn.disabled = false;
+    }).catch(function(err){
+      statusEl.textContent = 'Crypto backtest failed: ' + err.message;
+      statusEl.className = 'labs-backtest-status fail';
+      btn.disabled = false;
+      console.error('Crypto backtest failed:', err);
+    });
+  }
+
+  function runCryptoUniverseBacktestClicked(){
+    var lookbackDays = parseInt(document.getElementById('cryptoBacktestLookback').value, 10);
+    var statusEl = document.getElementById('cryptoBacktestStatus');
+    var btn = document.getElementById('runCryptoUniverseBacktestBtn');
+    var singleBtn = document.getElementById('runCryptoBacktestBtn');
+    var resultsEl = document.getElementById('cryptoBacktestResults');
+
+    btn.disabled = true;
+    singleBtn.disabled = true;
+    resultsEl.innerHTML = '';
+    statusEl.textContent = 'Fetching ' + CRYPTO_UNIVERSE.length + ' pairs\' 15-min history…';
+    statusEl.className = 'labs-backtest-status';
+
+    fetchCryptoBacktestHistory(CRYPTO_UNIVERSE, lookbackDays).then(function(barsBySymbol){
+      var lookbackBars = Math.round(lookbackDays * 24 * 4);
+      var allTrades = [];
+      var perSymbolResults = [];
+
+      function processNext(index){
+        if(index >= CRYPTO_UNIVERSE.length){
+          btn.disabled = false;
+          singleBtn.disabled = false;
+          var summary = summarizeBacktestTrades(allTrades);
+          renderCryptoUniverseBacktestResults(perSymbolResults, summary);
+          return;
+        }
+        var sym = CRYPTO_UNIVERSE[index];
+        var bars = barsBySymbol[sym] || [];
+        statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + CRYPTO_UNIVERSE.length + ')';
+        if(bars.length < 60){
+          console.error('Crypto universe backtest: skipping', sym, '(not enough history)');
+          processNext(index + 1);
+          return;
+        }
+        runCryptoBacktestSimulationAsync(bars, lookbackBars).then(function(trades){
+          allTrades = allTrades.concat(trades);
+          perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
+          processNext(index + 1);
+        });
+      }
+
+      processNext(0);
+    }).catch(function(err){
+      statusEl.textContent = 'Crypto universe backtest failed: ' + err.message;
+      statusEl.className = 'labs-backtest-status fail';
+      btn.disabled = false;
+      singleBtn.disabled = false;
+      console.error('Crypto universe backtest failed:', err);
+    });
   }
 
   // Owner-only (gated via the currentUid/onAuthChange flow above, not a
@@ -10401,9 +10826,12 @@
   updateClock();
   renderHistoryList();
   populateIntradayBacktestSymbolSelect();
+  populateCryptoBacktestSymbolSelect();
   loadIntradayPref();
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
+  document.getElementById('runCryptoBacktestBtn').addEventListener('click', runCryptoBacktestClicked);
+  document.getElementById('runCryptoUniverseBacktestBtn').addEventListener('click', runCryptoUniverseBacktestClicked);
   document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
   document.getElementById('testAlpacaDataFeedBtn').addEventListener('click', testAlpacaDataFeedClicked);
   document.getElementById('exportCopyBtn').addEventListener('click', function(){
