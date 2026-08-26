@@ -857,6 +857,8 @@
   .to-card-dot.warn{ background: var(--loss); }
   .to-card-meta{ font-size:11px; color: var(--muted); font-family:'IBM Plex Mono', monospace; }
 
+  .positions-filter-row{ display:flex; gap:8px; margin-bottom:14px; }
+
   .layout-dropdown{ position:relative; }
   .layout-toggle-btn{
     background: var(--panel-raised); border:1px solid var(--border); color:var(--paper);
@@ -2068,6 +2070,11 @@
         <div class="to-card-head">
           <span class="to-card-title">Open Positions</span>
           <span class="to-card-meta" id="openPositionsHeadMeta"></span>
+        </div>
+        <div class="positions-filter-row" id="positionsFilterRow" hidden>
+          <button class="chart-tool-btn active" id="positionsFilterAll" data-filter="all">All</button>
+          <button class="chart-tool-btn" id="positionsFilterEquities" data-filter="equities">Equities</button>
+          <button class="chart-tool-btn" id="positionsFilterCrypto" data-filter="crypto">Crypto</button>
         </div>
         <div id="statusPositionsBody"></div>
       </div>
@@ -4470,6 +4477,13 @@
   document.getElementById('todaysSetupsFilterBtn').addEventListener('click', function(){
     todaysSetupsShowAll = !todaysSetupsShowAll;
     renderIntradayBlocks();
+  });
+
+  ['positionsFilterAll', 'positionsFilterEquities', 'positionsFilterCrypto'].forEach(function(id){
+    document.getElementById(id).addEventListener('click', function(){
+      statusPositionsFilter = this.dataset.filter;
+      renderStatusPositions();
+    });
   });
 
   function resetAlpacaConnection(){
@@ -8985,6 +8999,10 @@
   // of resetting back to journal-insertion order each time.
   var statusPositionsSortKey = null; // null = insertion order (no header clicked yet)
   var statusPositionsSortDir = 1; // 1 = ascending, -1 = descending
+  // Same persist-across-renders treatment as the sort state above --
+  // sticks with whatever the user last picked instead of bouncing back
+  // to "All" every ~45s refresh cycle.
+  var statusPositionsFilter = 'all'; // 'all' | 'equities' | 'crypto'
   var STATUS_POSITIONS_COLUMNS = [
     { key:'sym', label:'Symbol' }, { key:'direction', label:'Dir' }, { key:'qty', label:'Qty' },
     { key:'entry', label:'Entry' }, { key:'current', label:'Current' }, { key:'size', label:'Size' },
@@ -8994,14 +9012,45 @@
 
   var statusPositionsRenderGen = 0;
 
+  var POSITIONS_FILTER_LABELS = { all: '', equities: ' equities', crypto: ' crypto' };
+
   function renderStatusPositions(){
     var el = document.getElementById('statusPositionsBody');
     if(!el) return;
-    var openPositions = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
+    var allOpen = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
+    var equitiesOpen = allOpen.filter(function(j){ return j.screenerType !== 'crypto'; });
+    var cryptoOpen = allOpen.filter(function(j){ return j.screenerType === 'crypto'; });
+
+    // Only worth splitting into tabs once both strategies actually have
+    // something open right now -- a single-strategy list showing "All /
+    // Equities (0) / Crypto (4)" is just clutter, not a real choice.
+    var filterRow = document.getElementById('positionsFilterRow');
+    var showFilter = equitiesOpen.length > 0 && cryptoOpen.length > 0;
+    if(!showFilter) statusPositionsFilter = 'all';
+    if(filterRow){
+      filterRow.hidden = !showFilter;
+      if(showFilter){
+        document.getElementById('positionsFilterEquities').textContent = 'Equities (' + equitiesOpen.length + ')';
+        document.getElementById('positionsFilterCrypto').textContent = 'Crypto (' + cryptoOpen.length + ')';
+        ['All', 'Equities', 'Crypto'].forEach(function(label){
+          var btn = document.getElementById('positionsFilter' + label);
+          btn.classList.toggle('active', btn.dataset.filter === statusPositionsFilter);
+        });
+      }
+    }
+
+    var openPositions = statusPositionsFilter === 'equities' ? equitiesOpen
+      : statusPositionsFilter === 'crypto' ? cryptoOpen
+      : allOpen;
+
     var headMeta = document.getElementById('openPositionsHeadMeta');
-    if(headMeta){ headMeta.textContent = openPositions.length ? (openPositions.length + ' open') : ''; }
+    if(headMeta){
+      headMeta.textContent = !allOpen.length ? ''
+        : showFilter && statusPositionsFilter !== 'all' ? (openPositions.length + ' of ' + allOpen.length + ' open')
+        : (allOpen.length + ' open');
+    }
     if(openPositions.length === 0){
-      el.innerHTML = '<div class="labs-backtest-status">No open positions right now.</div>';
+      el.innerHTML = '<div class="labs-backtest-status">No open' + POSITIONS_FILTER_LABELS[statusPositionsFilter] + ' positions right now.</div>';
       return;
     }
     if(!alpacaConnected){
