@@ -857,7 +857,7 @@
   .to-card-dot.warn{ background: var(--loss); }
   .to-card-meta{ font-size:11px; color: var(--muted); font-family:'IBM Plex Mono', monospace; }
 
-  .positions-filter-row{ display:flex; gap:8px; margin-bottom:14px; }
+  .strategy-filter-row{ display:flex; gap:8px; margin-bottom:14px; }
 
   .layout-dropdown{ position:relative; }
   .layout-toggle-btn{
@@ -2071,7 +2071,7 @@
           <span class="to-card-title">Open Positions</span>
           <span class="to-card-meta" id="openPositionsHeadMeta"></span>
         </div>
-        <div class="positions-filter-row" id="positionsFilterRow" hidden>
+        <div class="strategy-filter-row" id="positionsFilterRow" hidden>
           <button class="chart-tool-btn active" id="positionsFilterAll" data-filter="all">All</button>
           <button class="chart-tool-btn" id="positionsFilterEquities" data-filter="equities">Equities</button>
           <button class="chart-tool-btn" id="positionsFilterCrypto" data-filter="crypto">Crypto</button>
@@ -2218,6 +2218,17 @@
         <div class="pl-card-value mono" id="overallPLValue">—</div>
         <div class="pl-card-sub" id="overallPLSub"></div>
       </div>
+    </div>
+
+    <!-- Overall P&L above is real Alpaca account equity -- a single
+         number the broker doesn't (and can't) break out by strategy, so
+         it's deliberately left outside this filter. Everything below is
+         derived from our own journal entries, which DO carry which
+         strategy each trade came from, so it's the honest place to split. -->
+    <div class="strategy-filter-row" id="journalFilterRow" hidden>
+      <button class="chart-tool-btn active" id="journalFilterAll" data-filter="all">All</button>
+      <button class="chart-tool-btn" id="journalFilterEquities" data-filter="equities">Equities</button>
+      <button class="chart-tool-btn" id="journalFilterCrypto" data-filter="crypto">Crypto</button>
     </div>
 
     <div class="pl-summary journal-stats-row">
@@ -4483,6 +4494,15 @@
     document.getElementById(id).addEventListener('click', function(){
       statusPositionsFilter = this.dataset.filter;
       renderStatusPositions();
+    });
+  });
+
+  ['journalFilterAll', 'journalFilterEquities', 'journalFilterCrypto'].forEach(function(id){
+    document.getElementById(id).addEventListener('click', function(){
+      journalFilter = this.dataset.filter;
+      renderCalendar();
+      renderJournalDetail();
+      renderPLSummary();
     });
   });
 
@@ -7834,6 +7854,16 @@
 
   var calendarViewDate = new Date();
   var selectedJournalDate = null;
+  // Same persist-across-renders treatment as Open Positions' filter --
+  // sticks with whatever the user last picked instead of resetting on
+  // every journal snapshot update.
+  var journalFilter = 'all'; // 'all' | 'equities' | 'crypto'
+
+  function filteredJournalEntries(){
+    if(journalFilter === 'equities') return journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
+    if(journalFilter === 'crypto') return journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
+    return journalEntries;
+  }
 
   function jumpToJournalDate(dateStr){
     showPage('journal');
@@ -7844,7 +7874,7 @@
   }
 
   function computeDayStats(dateStr){
-    var entries = journalEntries.filter(function(e){ return e.date === dateStr && e.status === 'closed'; });
+    var entries = filteredJournalEntries().filter(function(e){ return e.date === dateStr && e.status === 'closed'; });
     if(entries.length === 0) return null;
     var dollar = 0, wins = 0;
     entries.forEach(function(e){
@@ -7856,7 +7886,33 @@
     return { dollar: dollar, symbols: entries.length, pct: avgPct, winRate: (wins / entries.length) * 100 };
   }
 
+  // Same "only worth splitting once both strategies actually have
+  // something to show" rule as Open Positions' filter tabs -- scoped to
+  // ALL journal entries ever (open or closed), not just closed trades,
+  // since this also governs the day-detail view below the calendar.
+  function updateJournalFilterTabs(){
+    var equitiesEntries = journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
+    var cryptoEntries = journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
+    var showFilter = equitiesEntries.length > 0 && cryptoEntries.length > 0;
+    if(!showFilter) journalFilter = 'all';
+    var row = document.getElementById('journalFilterRow');
+    if(!row) return;
+    row.hidden = !showFilter;
+    if(!showFilter) return;
+    document.getElementById('journalFilterEquities').textContent = 'Equities (' + equitiesEntries.length + ')';
+    document.getElementById('journalFilterCrypto').textContent = 'Crypto (' + cryptoEntries.length + ')';
+    ['All', 'Equities', 'Crypto'].forEach(function(label){
+      var btn = document.getElementById('journalFilter' + label);
+      btn.classList.toggle('active', btn.dataset.filter === journalFilter);
+    });
+  }
+
   function renderCalendar(){
+    // Runs first so computeDayStats/dayCellHTML below (and the detail
+    // view + P&L stats rendered right after this) all see whichever
+    // filter is actually current, including an auto-reset to "All" if
+    // the mix of open/closed strategies just changed.
+    updateJournalFilterTabs();
     var y = calendarViewDate.getFullYear();
     var m = calendarViewDate.getMonth();
     document.getElementById('calMonthLabel').textContent =
@@ -7870,7 +7926,7 @@
     function dayCellHTML(dateStr, dayNum){
       if(!dateStr){ return '<div class="calendar-day empty"></div>'; }
       var stats = computeDayStats(dateStr);
-      var hasEntry = journalEntries.some(function(e){ return e.date === dateStr; });
+      var hasEntry = filteredJournalEntries().some(function(e){ return e.date === dateStr; });
       var cls = 'calendar-day' + (hasEntry ? ' has-entry' : '') + (dateStr === selectedJournalDate ? ' selected' : '');
       if(stats){ cls += stats.dollar >= 0 ? ' day-win' : ' day-loss'; }
       var inner = '<span class="cal-daynum">' + dayNum + '</span>';
@@ -7932,11 +7988,11 @@
       el.innerHTML = '<div class="journal-empty">Click a marked date to see that day\'s trades.</div>';
       return;
     }
-    var entries = journalEntries.filter(function(e){ return e.date === selectedJournalDate; });
+    var entries = filteredJournalEntries().filter(function(e){ return e.date === selectedJournalDate; });
     var niceDate = new Date(selectedJournalDate + 'T00:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
 
     if(entries.length === 0){
-      el.innerHTML = '<div class="journal-detail-date">' + niceDate + '</div><div class="journal-empty">No trades logged this day.</div>';
+      el.innerHTML = '<div class="journal-detail-date">' + niceDate + '</div><div class="journal-empty">No' + (journalFilter !== 'all' ? ' ' + journalFilter : '') + ' trades logged this day.</div>';
       return;
     }
 
@@ -8102,6 +8158,10 @@
   }
 
   function renderPLSummary(){
+    // Overall P&L is real Alpaca account equity (patched in below) --
+    // a single broker-reported number that can't be broken out by
+    // strategy, so it always reflects the FULL journal, never the
+    // filter tabs below it.
     var overall = computeAggregatePL(journalEntries);
     var overallValEl = document.getElementById('overallPLValue');
     var overallSubEl = document.getElementById('overallPLSub');
@@ -8123,6 +8183,11 @@
     // resolves -- see patchOverallPLFromAlpaca.
     patchOverallPLFromAlpaca();
 
+    // Everything below IS derived from our own journal entries, which do
+    // carry which strategy each trade came from -- the honest place to
+    // apply the Equities/Crypto filter tabs.
+    var filtered = computeAggregatePL(filteredJournalEntries());
+
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
     var avgWinEl = document.getElementById('statAvgWin');
@@ -8131,16 +8196,16 @@
     var bestSubEl = document.getElementById('statBestSub');
     var worstEl = document.getElementById('statWorst');
     var worstSubEl = document.getElementById('statWorstSub');
-    if(!overall){
+    if(!filtered){
       winRateEl.textContent = '—'; winRateSubEl.textContent = '';
       avgWinEl.textContent = '—'; avgLossEl.textContent = '—';
       bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = '';
       worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = '';
     } else {
-      winRateEl.textContent = overall.winRate.toFixed(0) + '%';
-      winRateSubEl.textContent = overall.count + ' total trades';
-      avgWinEl.textContent = '+$' + overall.avgWinDollar.toFixed(0);
-      avgLossEl.textContent = '−$' + Math.abs(overall.avgLossDollar).toFixed(0);
+      winRateEl.textContent = filtered.winRate.toFixed(0) + '%';
+      winRateSubEl.textContent = filtered.count + ' total trades';
+      avgWinEl.textContent = '+$' + filtered.avgWinDollar.toFixed(0);
+      avgLossEl.textContent = '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
       // Best/worst can each land on either side of zero regardless of
       // label -- "best" among an all-losing stretch is still a loss
       // (the smallest one), and "worst" among an all-winning stretch
@@ -8150,15 +8215,15 @@
       // so "Worst Trade" always rendered in loss-red even when its own
       // value was positive -- exactly backwards the one time it mattered
       // most (a single win looking like a loss).
-      if(overall.best){
-        bestEl.textContent = (overall.best.dollar >= 0 ? '+$' : '−$') + Math.abs(overall.best.dollar).toFixed(0);
-        bestEl.className = 'pl-card-value mono ' + (overall.best.dollar >= 0 ? 'up' : 'down');
-        bestSubEl.textContent = overall.best.sym;
+      if(filtered.best){
+        bestEl.textContent = (filtered.best.dollar >= 0 ? '+$' : '−$') + Math.abs(filtered.best.dollar).toFixed(0);
+        bestEl.className = 'pl-card-value mono ' + (filtered.best.dollar >= 0 ? 'up' : 'down');
+        bestSubEl.textContent = filtered.best.sym;
       } else { bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = ''; }
-      if(overall.worst){
-        worstEl.textContent = (overall.worst.dollar >= 0 ? '+$' : '−$') + Math.abs(overall.worst.dollar).toFixed(0);
-        worstEl.className = 'pl-card-value mono ' + (overall.worst.dollar >= 0 ? 'up' : 'down');
-        worstSubEl.textContent = overall.worst.sym;
+      if(filtered.worst){
+        worstEl.textContent = (filtered.worst.dollar >= 0 ? '+$' : '−$') + Math.abs(filtered.worst.dollar).toFixed(0);
+        worstEl.className = 'pl-card-value mono ' + (filtered.worst.dollar >= 0 ? 'up' : 'down');
+        worstSubEl.textContent = filtered.worst.sym;
       } else { worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = ''; }
     }
   }
