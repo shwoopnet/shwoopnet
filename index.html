@@ -6943,20 +6943,46 @@
     var cw = Math.max(3, Math.min(xStep * 0.62, 16));
     var parts = [];
 
+    // Computed up front (rather than down by the live-price/level-line
+    // code that used to be the only place that needed them) so the plain
+    // axis gridline numbers below can avoid printing right on top of a
+    // colored E/S/T/live-price tag sharing that same right-hand axis
+    // strip -- e.g. a gray "11.40" used to sit directly underneath a
+    // blue "E 11.45" tag, illegible where they overlapped. Real
+    // platforms never show both at once; this just skips the plain
+    // number wherever a tag already covers that y.
+    var lastBar = data[data.length - 1];
+    var liveY = lastBar ? y(lastBar.c) : null;
+    var activeTagYs = [];
+    if(liveY !== null) activeTagYs.push(liveY);
+    if(opts.levels){
+      [opts.levels.target, opts.levels.entry, opts.levels.planEntry, opts.levels.stop].forEach(function(price){
+        if(price === null || price === undefined || !isFinite(price)) return;
+        var tagY = y(price);
+        if(tagY < padTop - 1 || tagY > padTop + plotH + 1) return;
+        if(liveY !== null && Math.abs(tagY - liveY) < 16) return; // this tag itself gets suppressed below
+        activeTagYs.push(tagY);
+      });
+    }
+    function nearActiveTag(gy){
+      for(var i = 0; i < activeTagYs.length; i++){ if(Math.abs(gy - activeTagYs[i]) < 12) return true; }
+      return false;
+    }
+
     if(useLog){
       var glCount = 3;
       for(var g=0; g<=glCount; g++){
         var gv = Math.exp(loT + (range/glCount)*g);
         var gy = y(gv);
         parts.push('<line class="grid-line" x1="0" y1="'+gy+'" x2="'+plotW+'" y2="'+gy+'"/>');
-        parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(1)+'</text>');
+        if(!nearActiveTag(gy)) parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(1)+'</text>');
       }
     } else {
       niceTicks.forEach(function(gv){
         var gy = y(gv);
         if(gy < padTop - 1 || gy > padTop + plotH + 1) return;
         parts.push('<line class="grid-line" x1="0" y1="'+gy+'" x2="'+plotW+'" y2="'+gy+'"/>');
-        parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(2)+'</text>');
+        if(!nearActiveTag(gy)) parts.push('<text class="grid-label" x="'+(plotW+8)+'" y="'+(gy+3)+'">'+gv.toFixed(2)+'</text>');
       });
     }
 
@@ -7038,13 +7064,21 @@
       parts.push('<rect x="'+(x-cw/2)+'" y="'+(volTop + volH - barVolH)+'" width="'+cw+'" height="'+barVolH+'" fill="'+color+'" opacity="0.55"/>');
     });
 
-    // Live price line — the signature "where are we right now" reference
-    // every real trading platform shows, dashed across the chart with a
-    // colored tag on the axis. Computed before the level lines below so
-    // a level tag landing almost on top of it can be suppressed instead
-    // of the two overlapping.
-    var lastBar = data[data.length - 1];
-    var liveY = lastBar ? y(lastBar.c) : null;
+    // Axis tags render as a flag/pennant (a rectangle with a triangular
+    // nose pointing exactly at the line, TradingView/TopstepX-style)
+    // instead of a plain rectangle -- the point is what visually ties a
+    // tag back to its own line when several sit close together. --gain's
+    // midtone green is the one tag color too light for white text to
+    // clear AA contrast against, so it alone gets a dark label instead.
+    var flagNotch = 6, flagHalf = 8;
+    function axisFlagPath(ly2){
+      return 'M'+(plotW+flagNotch)+' '+(ly2-flagHalf)+
+        ' L'+(plotW+padRight)+' '+(ly2-flagHalf)+
+        ' L'+(plotW+padRight)+' '+(ly2+flagHalf)+
+        ' L'+(plotW+flagNotch)+' '+(ly2+flagHalf)+
+        ' L'+plotW+' '+ly2+' Z';
+    }
+    function tagTextFill(color){ return color === 'var(--gain)' ? 'var(--paper)' : '#fff'; }
 
     // Entry/stop/target reference lines — the same levels shown as text in
     // the row above, now visible directly against price action. Drawn only
@@ -7053,12 +7087,12 @@
     // level that's currently way off the visible chart.
     if(opts.levels){
       var lv = opts.levels;
-      // Tag lives on the right axis, matching the live-price tag's own
-      // rect+text pattern, instead of bare colored text sitting inside
-      // the plot area -- that used to land directly on top of candles
-      // and wicks whenever a level happened to fall mid-chart. The
-      // reference line itself stays full-width and dashed at its
-      // original opacity; only the label moves.
+      // Tag lives on the right axis as a flag pinned to the line, instead
+      // of bare colored text sitting inside the plot area -- that used to
+      // land directly on top of candles and wicks whenever a level
+      // happened to fall mid-chart. The reference line itself stays
+      // full-width and dashed at its original opacity; only the label
+      // moves.
       function levelLine(price, color, label, dashArray, opacity){
         if(price === null || price === undefined || !isFinite(price)) return;
         var ly2 = y(price);
@@ -7069,8 +7103,8 @@
         // right on top of the live-price tag -- skip just the tag here,
         // the dashed line at this price is still visible on its own.
         if(liveY !== null && Math.abs(ly2 - liveY) < 16) return;
-        parts.push('<rect x="'+plotW+'" y="'+(ly2-8)+'" width="'+padRight+'" height="16" fill="'+color+'"/>');
-        parts.push('<text class="axis-tag-text" x="'+(plotW+8)+'" y="'+(ly2+4)+'" fill="var(--ink)">'+label+' '+price.toFixed(2)+'</text>');
+        parts.push('<path d="'+axisFlagPath(ly2)+'" fill="'+color+'"/>');
+        parts.push('<text class="axis-tag-text" x="'+(plotW+flagNotch+4)+'" y="'+(ly2+4)+'" fill="'+tagTextFill(color)+'">'+label+' '+price.toFixed(2)+'</text>');
       }
       levelLine(lv.target, 'var(--gain)', 'T', '2,4', 0.85);
       levelLine(lv.entry, 'var(--amber)', 'E', '2,4', 0.85);
@@ -7089,8 +7123,8 @@
       var priceColor = lastUp ? 'var(--gain)' : 'var(--loss)';
       var ly = y(lastBar.c);
       parts.push('<line x1="0" y1="'+ly+'" x2="'+plotW+'" y2="'+ly+'" stroke="'+priceColor+'" stroke-width="1" stroke-dasharray="3,3"/>');
-      parts.push('<rect x="'+plotW+'" y="'+(ly-8)+'" width="'+padRight+'" height="16" fill="'+priceColor+'"/>');
-      parts.push('<text class="axis-tag-text" x="'+(plotW+8)+'" y="'+(ly+4)+'" fill="var(--ink)">'+lastBar.c.toFixed(2)+'</text>');
+      parts.push('<path d="'+axisFlagPath(ly)+'" fill="'+priceColor+'"/>');
+      parts.push('<text class="axis-tag-text" x="'+(plotW+flagNotch+4)+'" y="'+(ly+4)+'" fill="'+tagTextFill(priceColor)+'">'+lastBar.c.toFixed(2)+'</text>');
     }
 
     svg.innerHTML = parts.join('');
@@ -7307,9 +7341,14 @@
     var priceAtCursor = sc.useLog ? Math.exp(sc.loT + frac * sc.range) : (sc.loT + frac * sc.range);
     var priceTag = document.createElementNS(ns, 'g');
     priceTag.setAttribute('class', 'crosshair-tag');
+    var crosshairNotch = 6;
     priceTag.innerHTML =
-      '<rect x="' + sc.plotW + '" y="' + (localY - 8) + '" width="54" height="16" fill="var(--paper)"/>' +
-      '<text class="axis-tag-text" x="' + (sc.plotW + 8) + '" y="' + (localY + 4) + '" fill="var(--ink)">' + priceAtCursor.toFixed(2) + '</text>';
+      '<path d="M' + (sc.plotW + crosshairNotch) + ' ' + (localY - 8) +
+        ' L' + (sc.plotW + 54) + ' ' + (localY - 8) +
+        ' L' + (sc.plotW + 54) + ' ' + (localY + 8) +
+        ' L' + (sc.plotW + crosshairNotch) + ' ' + (localY + 8) +
+        ' L' + sc.plotW + ' ' + localY + ' Z" fill="var(--paper)"/>' +
+      '<text class="axis-tag-text" x="' + (sc.plotW + crosshairNotch + 4) + '" y="' + (localY + 4) + '" fill="var(--ink)">' + priceAtCursor.toFixed(2) + '</text>';
     svg.appendChild(priceTag);
 
     // Date tag on the bottom axis, under the hovered bar.
