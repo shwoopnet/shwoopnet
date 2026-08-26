@@ -3284,9 +3284,8 @@
   // can fire all 33 requests without worrying about pacing itself.
 
   // The local re-scan that used to run here is gone -- it was already
-  // fully retired in practice, gated behind alpacaAutoTradeIntradayEnabled,
-  // a flag nothing sets anymore (see setAlpacaAutoTradeIntradayEnabled's
-  // own comment below). Every 5 minutes it hit that guard immediately and
+  // fully retired in practice, gated behind a flag nothing ever set to
+  // true. Every 5 minutes it hit that guard immediately and
   // wrote the same static status line, doing nothing else -- a no-op
   // timer, not a real fallback. "What to Watch," Today's Setups, and
   // everything else that shows intraday picks already read exclusively
@@ -3400,10 +3399,6 @@
       backendCryptoLastCycleSummary = data.cryptoLastCycleSummary;
       autoTradeOverrides.cryptoScreenerEnabledOverride = data.cryptoScreenerEnabledOverride;
       autoTradeOverrides.cryptoAutoTradeEnabledOverride = data.cryptoAutoTradeEnabledOverride;
-      // Still tracked (not user-adjustable from this tab anymore) so the
-      // local screener preview's sizeability filter stays in lockstep
-      // with whatever risk % the server is actually using to size orders.
-      if(typeof data.riskPercentOverride === 'number'){ riskPercent = data.riskPercentOverride; }
       renderAutoTradeOverrideControls();
       // Without this, What to Watch on the Brief page only ever showed
       // whatever backendIntradayPicks happened to be at the single
@@ -3835,35 +3830,6 @@
       });
   }
 
-  // ---------- Auto-send new picks (opt-in, browser-tab-dependent) ----------
-  var alpacaAutoTradeIntradayEnabled = false;
-
-  // ---------- Risk-based position sizing ----------
-  // Not user-adjustable from this tab -- kept in sync with whatever
-  // riskPercentOverride (if any) is on file in Firestore, which the
-  // server reads from that same field (see shwoop-server's
-  // src/settings.js) and falls back to its own RISK_PERCENT env var
-  // only when no override has ever been written. Mirroring it here
-  // keeps this tab's own screener preview in lockstep with the
-  // server's real order sizing rather than a disconnected local guess.
-  var riskPercent = 1.0;
-  // Total open risk across ALL positions is capped at a fixed % of
-  // equity, independent of per-trade risk% -- there's no hard cap on how
-  // many positions can be open at once, just on how much can be at risk
-  // in total. Kept in exact lockstep with src/lib/positionSizing.js on
-  // the server; if one changes, the other must too. This is this
-  // (equities/intraday) strategy's own independent ceiling -- the server
-  // scopes its matching check to this strategy's own open positions only
-  // (see orchestrator.js's openAlpacaEntries(..., 'intraday')), so a
-  // future second strategy sharing the account gets its own separate
-  // budget instead of competing with this one.
-  var TOTAL_RISK_CEILING_PERCENT = 7;
-  // No single symbol can eat more than this share of equity, regardless
-  // of what the risk-based share count works out to -- a tight-stop,
-  // low-volatility stock can otherwise size into a very large dollar
-  // position while risking very little per share.
-  var MAX_POSITION_EQUITY_PERCENT = 20;
-
   // ---------- Auto-Trading Controls: writes overrides to the same
   // Firestore doc shwoop-server reads (see its src/settings.js) ----------
   function saveAutoTradeOverride(partial){
@@ -4012,99 +3978,6 @@
     renderAutoTradeOverrideControls();
   });
 
-  // Pure function, deliberately simple and easy to test in isolation:
-  // dollars risked divided by dollars risked per share, floored to a
-  // whole share — never fractional. Alpaca doesn't support fractional
-  // quantities on bracket or OCO orders, and fractional shares can't be
-  // sold short at all, so a fractional result here would silently break
-  // the exact stop-loss/target protection this app exists to provide.
-  function calculatePositionSize(equity, riskPct, entry, stop){
-    var riskDollars = equity * (riskPct / 100);
-    var perShareRisk = Math.abs(entry - stop);
-    if(perShareRisk <= 0) return 0;
-    return Math.floor(riskDollars / perShareRisk);
-  }
-
-  // Fetches real, current account data — never assumes a cached or
-  // stale balance (deliberately calls fetchAlpacaAccountSummary directly,
-  // not getAlpacaAccountSummaryCached — sizing a real order is the one
-  // caller that must never read a balance that could be seconds stale) —
-  // and works out a safe order size for one trade: the
-  // risk-based share count, reduced further if it would exceed
-  // available cash, and skipped entirely if it would push total risk
-  // across all open positions past a hard ceiling. Returns
-  // { qty, skipReason }: qty is 0 whenever skipReason is set, so callers
-  // only need to check one field either way.
-  function computeSizedOrder(t){
-    return fetchAlpacaAccountSummary().then(function(acct){
-      var equity = parseFloat(acct.equity || 0);
-      var cash = parseFloat(acct.cash || 0);
-      if(!equity || equity <= 0){
-        return { qty: 0, skipReason: 'Could not read a valid account balance.' };
-      }
-      var qty = calculatePositionSize(equity, riskPercent, t.entry, t.stop);
-      if(qty < 1){
-        return { qty: 0, skipReason: 'Position would round to 0 shares at the current risk setting (' +
-          riskPercent.toFixed(1) + '% of $' + equity.toFixed(2) + ') — too tight or too expensive a setup for this account balance.' };
-      }
-      var positionCost = qty * t.entry;
-      if(positionCost > cash){
-        // Take the largest whole-share size that actually fits in
-        // available cash rather than refusing outright — still capped
-        // at the risk-based qty above, never higher than it.
-        var affordableQty = Math.floor(cash / t.entry);
-        if(affordableQty < 1){
-          return { qty: 0, skipReason: 'Not enough available cash ($' + cash.toFixed(2) + ') to buy even 1 share at $' + t.entry.toFixed(2) + '.' };
-        }
-        qty = Math.min(qty, affordableQty);
-      }
-      // Max-per-position cap, checked independently of the risk-based
-      // qty — whichever constraint is tighter wins.
-      var maxPositionDollars = equity * (MAX_POSITION_EQUITY_PERCENT / 100);
-      if(qty * t.entry > maxPositionDollars){
-        var capQty = Math.floor(maxPositionDollars / t.entry);
-        if(capQty < 1){
-          return { qty: 0, skipReason: 'Entry price too high relative to the ' + MAX_POSITION_EQUITY_PERCENT + '% max-per-position cap on this account balance.' };
-        }
-        qty = capQty;
-      }
-      var openRisk = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount)
-        .reduce(function(sum, j){ return sum + (j.qty * Math.abs(j.entry - j.stop)); }, 0);
-      var thisRisk = qty * Math.abs(t.entry - t.stop);
-      var riskCeiling = equity * (TOTAL_RISK_CEILING_PERCENT / 100);
-      if(openRisk + thisRisk > riskCeiling){
-        return { qty: 0, skipReason: 'Skipped — total risk across open positions ($' + openRisk.toFixed(2) +
-          ') plus this trade would exceed the ' + TOTAL_RISK_CEILING_PERCENT.toFixed(1) + '% total-risk ceiling. This isn\'t a position-count limit — as many positions can stay open as the account can carry within this risk ceiling.' };
-      }
-      return { qty: qty, skipReason: null };
-    }).catch(function(err){
-      return { qty: 0, skipReason: 'Could not fetch account data to size this trade: ' + err.message };
-    });
-  }
-
-  function setAlpacaAutoTradeIntradayEnabled(enabled){
-    alpacaAutoTradeIntradayEnabled = enabled;
-    var btn = document.getElementById('alpacaAutoTradeIntradayToggle');
-    if(btn){
-      btn.textContent = enabled ? 'On' : 'Off';
-      btn.setAttribute('aria-checked', enabled ? 'true' : 'false');
-      btn.classList.toggle('active', enabled);
-    }
-    try { window.localStorage.setItem('shwoopnet:alpacaAutoTradeIntraday', enabled ? 'true' : 'false'); } catch(e){}
-  }
-
-
-  // The local "Auto-send new intraday picks" toggle and its click-to-arm
-  // live-mode confirmation used to live here. Removed: with the backend
-  // now running its own 24/7 auto-trade, having this tab ALSO able to
-  // independently size and send orders off the same signals was a real
-  // double-order risk (both check the shared journal for an existing
-  // open position before sending, but that guard only helps once one
-  // side's write has already landed -- two near-simultaneous cycles
-  // could both see "nothing open yet" and both fire). alpacaAutoTradeIntradayEnabled
-  // is intentionally never set anywhere anymore, so it stays permanently
-  // false and every check gated on it below stays permanently a no-op.
-
   // ---------- Intraday screener ----------
   function setIntradayEnabled(enabled){
     alpacaIntradayEnabled = enabled;
@@ -4134,77 +4007,6 @@
     // value from before this toggle was removed would otherwise silently
     // leave screening off with no way to turn it back on).
     setIntradayEnabled(true);
-  }
-
-  function showAutoSendToast(sym, direction, qty){
-    logSystemActivity('sent', sym, 'Sent ' + qty + ' shares (' + direction + ') to Alpaca automatically.');
-    playAlertSound('sent');
-    repositionToastContainer();
-    var container = document.getElementById('toastContainer');
-    if(!container) return;
-    var toastEl = document.createElement('div');
-    toastEl.className = 'alert-toast';
-    toastEl.innerHTML =
-      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">Auto-sent</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
-      '<p class="toast-text">Sent ' + qty + ' shares (' + direction + ') to Alpaca paper automatically.</p>';
-    container.appendChild(toastEl);
-    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
-    setTimeout(function(){ dismissToast(toastEl); }, 12000);
-  }
-
-  function showSizingSkippedToast(sym, reason){
-    logSystemActivity('skipped', sym, reason);
-    playAlertSound('neutral');
-    repositionToastContainer();
-    var container = document.getElementById('toastContainer');
-    if(!container) return;
-    var toastEl = document.createElement('div');
-    toastEl.className = 'alert-toast';
-    toastEl.innerHTML =
-      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">Skipped</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
-      '<p class="toast-text">' + reason + '</p>';
-    container.appendChild(toastEl);
-    toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
-    setTimeout(function(){ dismissToast(toastEl); }, 12000);
-  }
-
-  // Intraday auto-send is deliberately different from the daily version.
-  // Daily dedups by "already sent once today", which is correct for a
-  // once-a-day pick — but intraday can legitimately mean several genuine
-  // round-trips on the same symbol in one day (that's the whole point of
-  // "short-term, ever-updating"). So instead it dedups by "is there
-  // already an open position in this symbol" — blocks duplicates on a
-  // position that's still live, but allows real re-entry once a prior one
-  // has actually closed.
-  //
-  // The real safety backstop against runaway trading is the 7% total
-  // risk ceiling (in computeSizedOrder) -- it scales with actual
-  // exposure, unlike a flat count. A hard daily
-  // trade-count cap used to sit here too, but it was a leftover from the
-  // old daily-screener era and silently throttled the validated
-  // strategy well below what it's actually supposed to do (it averages
-  // ~9-10 trades/day across all 16 symbols when unrestricted). Removed
-  // in favor of the risk ceiling plus a manual "flatten all" override
-  // for the actual "something's gone wrong" scenario.
-  function autoSendIntradayPicksIfEnabled(){
-    if(!alpacaAutoTradeIntradayEnabled || !alpacaConnected || !window.__shwoopAPI || !currentUid) return;
-    intradayTrades.forEach(function(t){
-      var hasOpenPosition = journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
-      if(hasOpenPosition) return;
-      computeSizedOrder(t).then(function(sized){
-        if(sized.qty < 1){
-          showSizingSkippedToast(t.sym, sized.skipReason);
-          return;
-        }
-        var side = t.direction === 'Long' ? 'buy' : 'sell';
-        return submitAlpacaBracketOrder(t.sym, side, sized.qty, t.stop, t.t1).then(function(order){
-          logAlpacaTradeToJournal(t, sized.qty, order, 'intraday');
-          showAutoSendToast(t.sym, t.direction, sized.qty);
-        });
-      }).catch(function(err){
-        console.error('Intraday auto-send failed for', t.sym, err);
-      });
-    });
   }
 
   function loadAlpacaCredentialsForUser(uid){
@@ -4303,9 +4105,18 @@
     }
   }
 
-  function notifyTradingPausedViaBrowser(reasonText){
+  // strategyLabel identifies WHICH strategy actually paused ('Equities' or
+  // 'Crypto') -- this used to be hardcoded to "Equities auto-trading
+  // paused" in the title regardless of caller, so a crypto pause fired
+  // this exact same equities-labeled notification (with the crypto
+  // context awkwardly stuffed into the reason text instead: "Reason:
+  // Crypto — <actual reason>"). Since the two strategies pause
+  // independently (see renderCryptoTradingPauseState's own comment),
+  // the one visible OS-level notification has to say which one, or a
+  // real crypto pause reads as if equities paused instead.
+  function notifyTradingPausedViaBrowser(strategyLabel, reasonText){
     if(!('Notification' in window)) return;
-    var title = 'Shwoopnet — Equities auto-trading paused';
+    var title = 'Shwoopnet — ' + strategyLabel + ' auto-trading paused';
     var body = 'Repeated failed order attempts. Reason: ' + reasonText + '. Review the activity log, then resume once resolved.';
     if(Notification.permission === 'granted'){
       try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
@@ -4328,7 +4139,7 @@
     lastKnownTradingPaused = state.paused;
     if(justPaused){
       playTradingPausedAlertSound();
-      notifyTradingPausedViaBrowser(reasonText);
+      notifyTradingPausedViaBrowser('Equities', reasonText);
     }
     if(banner){
       if(state.paused){
@@ -4367,7 +4178,7 @@
     lastKnownCryptoTradingPaused = state.paused;
     if(justPaused){
       playTradingPausedAlertSound();
-      notifyTradingPausedViaBrowser('Crypto — ' + reasonText);
+      notifyTradingPausedViaBrowser('Crypto', reasonText);
     }
     if(!row || !desc) return;
     if(!state.paused){
@@ -4648,10 +4459,8 @@
   // refresh, the Status page, and the trade-count bubble color all fetch
   // this independently, on their own overlapping timers/Firestore
   // snapshots, purely to READ and display it -- not to size or submit a
-  // real order. computeSizedOrder deliberately does NOT use this cache
-  // (see its own comment) since sizing a real trade must always read the
-  // truly current balance, never one that could be up to
-  // ALPACA_ACCOUNT_CACHE_MS stale.
+  // real order (that happens server-side now, in shwoop-server, which
+  // always reads a truly current balance rather than anything cached).
   var alpacaAccountSummaryCache = { data: null, at: 0, inflight: null };
   var ALPACA_ACCOUNT_CACHE_MS = 8000;
   function getAlpacaAccountSummaryCached(){
@@ -4849,10 +4658,10 @@
             '<td>' + p.symbol + '</td>' +
             '<td>' + p.qty + '</td>' +
             '<td>' + p.side + '</td>' +
-            '<td>' + parseFloat(p.avg_entry_price).toFixed(2) + '</td>' +
-            '<td class="up">' + (levels.target !== null ? levels.target.toFixed(2) : '—') + '</td>' +
-            '<td>' + parseFloat(p.current_price).toFixed(2) + '</td>' +
-            '<td class="down">' + (levels.stop !== null ? levels.stop.toFixed(2) : '—') + '</td>' +
+            '<td>' + fmt(parseFloat(p.avg_entry_price)) + '</td>' +
+            '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>' +
+            '<td>' + fmt(parseFloat(p.current_price)) + '</td>' +
+            '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>' +
             '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
             '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
           '</tr>';
@@ -5076,33 +4885,6 @@
     }catch(e){}
   })();
 
-  // A bracket order: the entry itself, plus a stop-loss leg and a
-  // take-profit leg, submitted as one order — maps directly onto our
-  // Entry/Stop/Target structure, one-to-one.
-  // GTC, not day: a "day" bracket cancels its stop-loss leg at close along
-  // with everything else if neither the stop nor the target was hit yet —
-  // meaning a filled position could be left with zero automated downside
-  // protection overnight. GTC keeps the stop and target genuinely live
-  // until one of them actually triggers, however many sessions that takes.
-  function submitAlpacaBracketOrder(sym, side, qty, stopPrice, takeProfitPrice){
-    var body = {
-      symbol: sym, qty: String(qty), side: side, type: 'market', time_in_force: 'gtc',
-      order_class: 'bracket',
-      take_profit: { limit_price: takeProfitPrice.toFixed(2) },
-      stop_loss: { stop_price: stopPrice.toFixed(2) }
-    };
-    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
-      method: 'POST',
-      headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()),
-      body: JSON.stringify(body)
-    }).then(function(res){
-      return res.json().then(function(data){
-        if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); }
-        return data;
-      });
-    });
-  }
-
   function cancelAlpacaOrder(orderId){
     return fetch(ALPACA_TRADING_BASE() + '/v2/orders/' + orderId, {
       method: 'DELETE', headers: alpacaHeaders()
@@ -5153,35 +4935,6 @@
       var exitSide = entry.direction === 'Long' ? 'sell' : 'buy';
       return submitAlpacaOcoExit(entry.sym, exitSide, entry.qty, analysis.stop, analysis.t1);
     });
-  }
-
-  function logAlpacaTradeToJournal(t, qty, order, screenerType){
-    // Market orders don't always return a fill price immediately in the
-    // submission response — fall back to the planned entry level, which
-    // for a paper market order during market hours is a close proxy.
-    var fillPrice = (order && order.filled_avg_price) ? parseFloat(order.filled_avg_price) : t.entry;
-    journalEntries.push({
-      id: 'j' + Date.now(),
-      date: new Date().toISOString().slice(0,10), sym: t.sym, direction: t.direction,
-      // entry is the real, account-position price (the actual fill, once
-      // known) — plannedEntry is the original screener-computed "ideal"
-      // level at signal time, kept separately so it's never lost once a
-      // real position exists. These can genuinely differ (a market order
-      // fills at whatever the live price is, not the theoretical SMA20
-      // level), and conflating them into one number would hide that.
-      entry: fillPrice, plannedEntry: t.entry, qty: qty, stop: t.stop, t1: t.t1,
-      exit: null, status: 'open', source: 'alpaca', screenerType: screenerType || 'daily',
-      // Which specific Alpaca account this position actually lives in --
-      // without this, switching to a different account (even a brand
-      // new one) has no way to distinguish its positions from a
-      // previous account's leftover entries, since journalEntries are
-      // scoped to the signed-in user, not to any particular broker
-      // account connected at the time.
-      accountKeyId: activeAlpacaCreds().keyId
-    });
-    saveJournalEntries();
-    renderCalendar();
-    renderPLSummary();
   }
 
   // ---------- Syncing bracket-order exits back to the journal ----------
@@ -5291,12 +5044,11 @@
     }
     var openEntries = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
     // Pause BOTH auto-traders through the real, currently-live override
-    // mechanism -- the old alpacaAutoTradeIntradayEnabled check this
-    // replaced was dead code (see its own comment further down: that var
-    // is intentionally never set anywhere anymore), so this had quietly
-    // become a no-op that paused nothing, for either strategy, even
-    // though the row's own description promises "turns off auto-send so
-    // nothing re-enters immediately after." Crypto in particular has no
+    // mechanism -- the old check this replaced read a frontend flag that
+    // was never actually set anywhere, so this had quietly become a
+    // no-op that paused nothing, for either strategy, even though the
+    // row's own description promises "turns off auto-send so nothing
+    // re-enters immediately after." Crypto in particular has no
     // market-hours gate to naturally hold it off the way equities does
     // outside RTH -- without pausing it explicitly, its next 5-minute
     // cycle could open a brand new position minutes after this ran.
