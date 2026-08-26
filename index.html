@@ -2692,12 +2692,17 @@
         of historical data. The exit was upgraded from a fixed 1.5x target to a trailing stop (activating at
         0.75x risk) after walk-forward testing showed it improves both the overall profit factor (2.15 → 2.32)
         and the worst-case result across 5 independent, non-overlapping time windows (2.03 → 2.15) together —
-        with realistic trading costs included throughout, not a frictionless best case. The trailing stop was
-        refined once more after that validation — once a trade genuinely moves into profit, its stop can no
-        longer trail back below breakeven — so the figures above reflect the trailing stop's prior shape, not a
-        fresh walk-forward pass against its exact current form; that re-validation hasn't been run yet. It's
-        still genuinely new, though — the activity log and the numbers building up there over time are what
-        will show whether real, ongoing performance holds up the way the backtest suggests it should.</p>
+        with realistic trading costs included throughout, not a frictionless best case.</p>
+        <p>Re-validated since then against a longer historical window (through August 2026), with the trailing
+        stop's breakeven floor added on top (once a trade genuinely moves into profit, its stop can no longer
+        trail back below entry): every symbol still clears profit factor 1.5 individually (lowest: 2.16), overall
+        profit factor 2.71, worst case across the same 5-window split 2.46. Isolating the floor's own effect by
+        re-running this identical test with and without it: +0.05 on both figures — a small, real improvement,
+        not the source of the jump from the 2.15 → 2.32 numbers above. That jump is mostly the newer, longer
+        dataset this pass ran against, not a strategy change — so treat these as a fresh, honest data point
+        rather than a like-for-like continuation of the original series. It's still genuinely new, though — the
+        activity log and the numbers building up there over time are what will show whether real, ongoing
+        performance holds up the way the backtest suggests it should.</p>
       </div>
     </div>
 
