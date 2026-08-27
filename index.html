@@ -5557,7 +5557,15 @@
       var liveQuote = findQuote(t.sym);
       var q = liveQuote || { price: t.entry, prevClose: t.entry, name: t.sym };
       var change = pct(q.price, q.prevClose);
-      var up = change >= 0;
+      var up = change >= 0; // the arrow -- an honest, direction-agnostic fact: did the price itself rise or fall
+      // The color, unlike the arrow above, has to answer "is this GOOD
+      // for this specific trade" -- for a Short, price falling (up ===
+      // false) is the favorable direction, the opposite of what a plain
+      // watchlist's green-means-up convention would show. Previously
+      // colored by raw `up` the same as every other market-data widget
+      // in this file, which meant a Short position's price rising showed
+      // green (as if that were good news) while it was actually losing.
+      var favorable = t.direction === 'Short' ? !up : up;
       var badge = computeBadgeInfo(t);
       var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
       // Running P/L for the real position, if one's actually been sent --
@@ -5614,7 +5622,7 @@
               '</span>' +
             '</div>' +
             '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' + fmt(q.price) +
-              '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
+              '<span class="chg ' + (favorable?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
             '</div>' +
             '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
             '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
@@ -5709,7 +5717,13 @@
       var liveQuote = findCryptoQuote(t.sym);
       var q = (liveQuote && liveQuote.price !== null) ? liveQuote : { price: t.entry, prevClose: t.entry };
       var change = pct(q.price, q.prevClose);
-      var up = change >= 0;
+      var up = change >= 0; // the arrow -- an honest, direction-agnostic fact: did the price itself rise or fall
+      // Crypto is Long-only (Alpaca has no crypto shorting), so this is a
+      // no-op today (favorable === up always) -- kept in step with Today's
+      // Setups' identical fix anyway, so the color always answers "is
+      // this good for the trade," not just "did the stock move up," the
+      // moment either strategy ever needs it to differ.
+      var favorable = t.direction === 'Short' ? !up : up;
       var badge = computeBadgeInfo(t);
       var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
       // Same "honest dash until there's a real live quote to compare
@@ -5745,7 +5759,7 @@
             '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' +
               (liveQuote && liveQuote.price !== null ? fmt(q.price) : '—') +
               (liveQuote && liveQuote.price !== null
-                ? '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>'
+                ? '<span class="chg ' + (favorable?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>'
                 : '') +
             '</div>' +
             '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
