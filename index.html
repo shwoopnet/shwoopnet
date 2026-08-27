@@ -2826,6 +2826,35 @@
         <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
         <button class="settings-reset-btn" id="runIntradayUniverseBacktestBtn">Run whole universe</button>
       </div>
+      <div class="labs-backtest-controls" style="margin-top:10px;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:13.5px;">
+          <input type="checkbox" id="intradayBacktestTightenToggle" />
+          Tighten trail on big winners (experimental, backtest only)
+        </label>
+        <div class="labs-control-field">
+          <label for="intradayBacktestTightenTrigger">Tighten once past</label>
+          <select id="intradayBacktestTightenTrigger" disabled>
+            <option value="1.5">1.5R profit</option>
+            <option value="2" selected>2.0R profit</option>
+            <option value="2.5">2.5R profit</option>
+            <option value="3">3.0R profit</option>
+          </select>
+        </div>
+        <div class="labs-control-field">
+          <label for="intradayBacktestTightenDistance">Trail distance beyond that</label>
+          <select id="intradayBacktestTightenDistance" disabled>
+            <option value="0.25">0.25R</option>
+            <option value="0.5" selected>0.5R</option>
+            <option value="0.75">0.75R</option>
+          </select>
+        </div>
+      </div>
+      <p class="labs-backtest-note">
+        The live/default trail always trails 1R behind price once trailing activates. This experiment
+        shrinks that trail distance ONLY once a trade has already run deep enough in profit (the
+        threshold above), locking in more of a big move before it can give back a full R -- purely a
+        backtest comparison, nothing here changes live behavior unless you decide to ship it.
+      </p>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
 
@@ -6075,7 +6104,22 @@
   // average number alone isn't enough to trust. analysis.t1 is still
   // computed and shown as a reference point (still entry + 1.5x risk),
   // but it is no longer where the trade actually caps out.
-  function simulateORBForwardSameDay(bars, entryIdx, analysis){
+  // Reads the experimental profit-tightening controls -- purely a
+  // backtest comparison tool, never used by the live Setups card
+  // (finalizeORBAnalysis) or the backend's own trading logic. null when
+  // the toggle is off, so simulateORBForwardSameDay's default trail
+  // (a flat 1R behind price for the whole life of the trade once
+  // trailing activates) is completely unaffected.
+  function getIntradayTightenOpts(){
+    var toggle = document.getElementById('intradayBacktestTightenToggle');
+    if(!toggle || !toggle.checked) return null;
+    return {
+      triggerRR: parseFloat(document.getElementById('intradayBacktestTightenTrigger').value),
+      distanceRR: parseFloat(document.getElementById('intradayBacktestTightenDistance').value),
+    };
+  }
+
+  function simulateORBForwardSameDay(bars, entryIdx, analysis, tightenOpts){
     var isLong = analysis.direction === 'Long';
     var entryDateKey = bars[entryIdx].t.toISOString().slice(0,10);
     // If the entry bar is already the last bar of its own day, there's
@@ -6107,14 +6151,28 @@
         if(bar.l <= currentStop) return { result: trailingActive ? 'trailing_stopped' : 'stopped', days: j - entryIdx, price: currentStop, date: bar.t };
         if(bar.h >= triggerPrice){
           trailingActive = true;
-          var newStopLong = bar.h - risk;
+          // Experimental only (see getIntradayTightenOpts): once the peak
+          // has run deep enough in profit, trail at a tighter distance
+          // than the default full 1R behind price, locking in more of a
+          // big move before it can give back a full R.
+          var trailDistanceLong = risk;
+          if(tightenOpts){
+            var peakRRLong = (bar.h - analysis.entry) / risk;
+            if(peakRRLong >= tightenOpts.triggerRR) trailDistanceLong = tightenOpts.distanceRR * risk;
+          }
+          var newStopLong = bar.h - trailDistanceLong;
           if(newStopLong > currentStop) currentStop = newStopLong;
         }
       } else {
         if(bar.h >= currentStop) return { result: trailingActive ? 'trailing_stopped' : 'stopped', days: j - entryIdx, price: currentStop, date: bar.t };
         if(bar.l <= triggerPrice){
           trailingActive = true;
-          var newStopShort = bar.l + risk;
+          var trailDistanceShort = risk;
+          if(tightenOpts){
+            var peakRRShort = (analysis.entry - bar.l) / risk;
+            if(peakRRShort >= tightenOpts.triggerRR) trailDistanceShort = tightenOpts.distanceRR * risk;
+          }
+          var newStopShort = bar.l + trailDistanceShort;
           if(newStopShort < currentStop) currentStop = newStopShort;
         }
       }
@@ -6442,7 +6500,7 @@
   // iterations via setTimeout lets pending UI events (like a drag's
   // pointermove) get processed between chunks, without meaningfully
   // slowing down the backtest itself.
-  function runIntradayBacktestSimulationAsync(bars, lookbackBars){
+  function runIntradayBacktestSimulationAsync(bars, lookbackBars, tightenOpts){
     return new Promise(function(resolve){
       var startIdx = Math.max(50, bars.length - lookbackBars);
       var trades = [];
@@ -6460,7 +6518,7 @@
           var afterSignal = localSignalStore['SYM'];
           var isFreshSignal = analysis && afterSignal && afterSignal !== beforeSignal && afterSignal.dateFired === bars[i].t.toISOString().slice(0,10);
           if(isFreshSignal){
-            var outcome = simulateORBForwardSameDay(bars, i, analysis);
+            var outcome = simulateORBForwardSameDay(bars, i, analysis, tightenOpts);
             var isLong = analysis.direction === 'Long';
             var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
             pctReturn = applyORBSlippage(pctReturn, outcome.result);
@@ -6498,16 +6556,16 @@
     return '~' + tradingDays + ' trading day' + (tradingDays === 1 ? '' : 's');
   }
 
-  function renderIntradayBacktestResults(trades, summary, sym){
+  function renderIntradayBacktestResults(trades, summary, sym, note){
     var statusEl = document.getElementById('intradayBacktestStatus');
     var resultsEl = document.getElementById('intradayBacktestResults');
     if(trades.length === 0){
-      statusEl.textContent = 'No qualifying intraday signals found for ' + sym + ' in this window.';
+      statusEl.textContent = 'No qualifying intraday signals found for ' + sym + ' in this window.' + (note || '');
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = '';
       return;
     }
-    statusEl.textContent = 'Found ' + trades.length + ' intraday signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.';
+    statusEl.textContent = 'Found ' + trades.length + ' intraday signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.' + (note || '');
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -6546,18 +6604,18 @@
       '</table>';
   }
 
-  function renderIntradayUniverseBacktestResults(perSymbolResults, summary){
+  function renderIntradayUniverseBacktestResults(perSymbolResults, summary, note){
     var statusEl = document.getElementById('intradayBacktestStatus');
     var resultsEl = document.getElementById('intradayBacktestResults');
 
     if(summary.totalSignals === 0){
-      statusEl.textContent = 'No qualifying intraday signals found across the universe in this window.';
+      statusEl.textContent = 'No qualifying intraday signals found across the universe in this window.' + (note || '');
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = '';
       return;
     }
 
-    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total intraday signals.';
+    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total intraday signals.' + (note || '');
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -6608,12 +6666,18 @@
     if(symbolsInput && !symbolsInput.value){ symbolsInput.value = INTRADAY_UNIVERSE.join(', '); }
   }
 
+  function tightenOptsNote(tightenOpts){
+    if(!tightenOpts) return '';
+    return ' [Experimental: tighten trail to ' + tightenOpts.distanceRR + 'R once past ' + tightenOpts.triggerRR + 'R profit]';
+  }
+
   function runIntradayBacktestClicked(){
     var sym = document.getElementById('intradayBacktestSymbol').value;
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
     var statusEl = document.getElementById('intradayBacktestStatus');
     var btn = document.getElementById('runIntradayBacktestBtn');
     var resultsEl = document.getElementById('intradayBacktestResults');
+    var tightenOpts = getIntradayTightenOpts();
 
     btn.disabled = true;
     statusEl.textContent = 'Fetching ' + sym + ' 15-min history and running the simulation…';
@@ -6621,10 +6685,10 @@
     resultsEl.innerHTML = '';
 
     fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-      return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+      return runIntradayBacktestSimulationAsync(bars, lookbackBars, tightenOpts);
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
-      renderIntradayBacktestResults(trades, summary, sym);
+      renderIntradayBacktestResults(trades, summary, sym, tightenOptsNote(tightenOpts));
       btn.disabled = false;
     }).catch(function(err){
       statusEl.textContent = 'Intraday backtest failed: ' + err.message;
@@ -6640,6 +6704,7 @@
     var btn = document.getElementById('runIntradayUniverseBacktestBtn');
     var singleBtn = document.getElementById('runIntradayBacktestBtn');
     var resultsEl = document.getElementById('intradayBacktestResults');
+    var tightenOpts = getIntradayTightenOpts();
 
     btn.disabled = true;
     singleBtn.disabled = true;
@@ -6654,13 +6719,13 @@
         btn.disabled = false;
         singleBtn.disabled = false;
         var summary = summarizeBacktestTrades(allTrades);
-        renderIntradayUniverseBacktestResults(perSymbolResults, summary);
+        renderIntradayUniverseBacktestResults(perSymbolResults, summary, tightenOptsNote(tightenOpts));
         return;
       }
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
       fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, tightenOpts);
       }).then(function(trades){
         allTrades = allTrades.concat(trades);
         perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
@@ -11466,6 +11531,11 @@
   loadIntradayPref();
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
+  document.getElementById('intradayBacktestTightenToggle').addEventListener('change', function(){
+    var on = this.checked;
+    document.getElementById('intradayBacktestTightenTrigger').disabled = !on;
+    document.getElementById('intradayBacktestTightenDistance').disabled = !on;
+  });
   document.getElementById('runCryptoBacktestBtn').addEventListener('click', runCryptoBacktestClicked);
   document.getElementById('runCryptoUniverseBacktestBtn').addEventListener('click', runCryptoUniverseBacktestClicked);
   document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
