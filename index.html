@@ -326,6 +326,13 @@
   .quote-sync-status.ok{ color: var(--gain); border-color: rgba(15,157,88,0.35); background: var(--gain-glow); }
   .quote-sync-status.fail{ color: var(--loss); border-color: rgba(217,48,37,0.35); background: var(--loss-glow); }
   .alpaca-row-full{ width:100%; }
+  .settings-strategy-group{ display:flex; align-items:center; gap:10px; }
+  .settings-strategy-label{ font-size:13.5px; font-weight:600; }
+  .money-mode-badge{
+    display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:5px;
+    border:1px solid var(--border); color: var(--muted); text-transform:uppercase; letter-spacing:0.02em;
+  }
+  .money-mode-badge.live{ color: var(--loss); border-color: rgba(217,48,37,0.35); background: var(--loss-glow); }
 
   /* Backend Pulse card -- live proof that the 24/7 server's heartbeat,
      screener, and auto-trade are actually running together, not just a
@@ -1241,9 +1248,13 @@
   .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
   .alpaca-dock-daychange.up{ color: var(--gain); }
   .alpaca-dock-daychange.down{ color: var(--loss); }
-  .alpaca-dock-bp{ font-size:11.5px; color: var(--muted); margin-top:8px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .alpaca-dock-bp-row{
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-top:8px; padding-bottom:12px; border-bottom:1px solid var(--border);
+  }
+  .alpaca-dock-bp{ font-size:11.5px; color: var(--muted); }
   .alpaca-dock-empty{ font-size:12px; color: var(--muted); padding-top:12px; }
-  .alpaca-dock-positions-controls{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+  .alpaca-dock-positions-controls{ display:flex; gap:8px; }
   .alpaca-dock-mini-btn{
     background:none; border:1px solid var(--border); color: var(--muted);
     font-family:'Public Sans', sans-serif; font-size:10.5px; padding:3px 9px;
@@ -1907,9 +1918,12 @@
       <div class="alpaca-dock-resize-handle" id="alpacaDockResizeHandle" aria-hidden="true"></div>
       <div class="alpaca-dock-body">
         <div class="alpaca-dock-summary" id="alpacaDockSummary">Loading…</div>
-        <div class="alpaca-dock-positions-controls" id="alpacaDockPositionsControls" hidden>
-          <button class="alpaca-dock-mini-btn" id="alpacaDockCompactBtn" type="button">Compact view</button>
-          <button class="alpaca-dock-mini-btn" id="alpacaDockSortBtn" type="button">Sort: Default</button>
+        <div class="alpaca-dock-bp-row" id="alpacaDockBpRow" hidden>
+          <span class="alpaca-dock-bp" id="alpacaDockBpText"></span>
+          <div class="alpaca-dock-positions-controls" id="alpacaDockPositionsControls" hidden>
+            <button class="alpaca-dock-mini-btn" id="alpacaDockCompactBtn" type="button">Compact view</button>
+            <button class="alpaca-dock-mini-btn" id="alpacaDockSortBtn" type="button">Sort: Default</button>
+          </div>
         </div>
         <div class="alpaca-dock-positions" id="alpacaDockPositions"></div>
       </div>
@@ -2021,33 +2035,6 @@
             <button class="layout-reset-btn" id="cardCustomizeResetBtn">Reset page layout to defaults</button>
           </div>
         </div>
-        <div class="layout-dropdown">
-          <button class="layout-toggle-btn" id="layoutToggle" aria-haspopup="true" aria-expanded="false">
-            <span>Chart settings</span>
-            <span class="caret">▾</span>
-          </button>
-          <div class="layout-menu" id="layoutMenu" hidden>
-            <div class="layout-stepper">
-              <span class="step-name">Chart height</span>
-              <button class="zoom-btn" id="heightDec" aria-label="Decrease chart height">−</button>
-              <span class="zoom-label mono" id="heightLabel">200px</span>
-              <button class="zoom-btn" id="heightInc" aria-label="Increase chart height">+</button>
-            </div>
-            <div class="layout-stepper">
-              <span class="step-name">Notes text size</span>
-              <button class="zoom-btn" id="textDec" aria-label="Decrease notes text size">−</button>
-              <span class="zoom-label mono" id="textLabel">12.5px</span>
-              <button class="zoom-btn" id="textInc" aria-label="Increase notes text size">+</button>
-            </div>
-            <div class="layout-divider"></div>
-            <div class="layout-stepper">
-              <span class="step-name">OHLC readout</span>
-              <button class="chart-tool-btn active" id="ohlcToggleBtn">On</button>
-            </div>
-            <div class="layout-divider"></div>
-            <button class="layout-reset-btn" id="layoutResetBtn">Reset chart settings to defaults</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -2093,7 +2080,6 @@
           <span class="to-card-title">Equities Setups</span>
           <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
         </div>
-        <div class="quote-sync-status" id="intradaySyncStatus" style="margin-bottom:14px;"></div>
         <button class="settings-reset-btn" id="todaysSetupsFilterBtn" style="margin-bottom:14px; display:none;"></button>
         <div id="intradayBlocks"></div>
       </div>
@@ -2104,12 +2090,6 @@
         <div class="to-card-head">
           <span class="to-card-title">Crypto Setups</span>
           <span class="to-card-meta" id="cryptoSetupsHeadMeta"></span>
-        </div>
-        <div class="labs-backtest-note" style="margin-bottom:14px;">
-          Runs 24/7, independent of market hours — its own rolling-range breakout screener across 12 crypto
-          pairs, long-only. Chart drill-down shows the most recent ~48 hours of 15-minute bars — crypto's own
-          native timeframe, since there's no single trading session for a "1D" view to anchor to the way equities
-          has one.
         </div>
         <div id="cryptoBlocks"></div>
       </div>
@@ -2128,31 +2108,35 @@
           <span class="to-card-title">Auto-Trading Controls</span>
         </div>
       </div>
-      <div class="settings-row" id="alpacaAutoTradeIntradayRow" hidden>
-        <div>
-          <div class="settings-row-title">Equities auto-trading</div>
-          <div class="settings-row-desc" id="autoTradeIntradayDesc">
-            Runs on the 24/7 backend, not this browser tab — flipping this writes directly to the same
-            Firestore setting the server reads every ~60 seconds, so it takes effect within about a minute
-            even if you close this tab right after, no redeploy needed. Failed orders retry 3 times, then
-            auto-trading pauses and alerts you — see status below.
-            <span id="autoTradeIntradayMoneyClause"></span>
+      <div class="settings-row" id="autoTradeRow" hidden>
+        <div class="settings-row-title">Auto-trading</div>
+        <div style="display:flex; align-items:center; gap:28px; flex-wrap:wrap;">
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Equities</span>
+            <span class="money-mode-badge" id="autoTradeIntradayMoneyClause">Paper</span>
+            <span class="quote-sync-status" id="serverAutoTradeStatusBadge">—</span>
+            <button class="chart-tool-btn" id="autoTradeEnableToggle" data-armed="false">Off</button>
           </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span class="quote-sync-status" id="serverAutoTradeStatusBadge">—</span>
-          <button class="chart-tool-btn" id="autoTradeEnableToggle" data-armed="false">Off</button>
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Crypto</span>
+            <span class="money-mode-badge">Paper</span>
+            <span class="quote-sync-status" id="serverCryptoAutoTradeStatusBadge">—</span>
+            <button class="chart-tool-btn" id="cryptoAutoTradeEnableToggle" data-armed="false">Off</button>
+          </div>
         </div>
       </div>
-      <div class="settings-row" id="screenerEnabledRow" hidden>
-        <div>
-          <div class="settings-row-title">Equities screener (server)</div>
-          <div class="settings-row-desc">
-            Scans the 16-symbol universe every 5 minutes while the market's open. Auto-trading above has
-            nothing to size or send without this being on too.
+      <div class="settings-row" id="screenersRow" hidden>
+        <div class="settings-row-title">Screeners</div>
+        <div style="display:flex; align-items:center; gap:28px; flex-wrap:wrap;">
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Equities</span>
+            <button class="chart-tool-btn" id="screenerEnableToggle">Off</button>
+          </div>
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Crypto</span>
+            <button class="chart-tool-btn" id="cryptoScreenerEnableToggle">Off</button>
           </div>
         </div>
-        <button class="chart-tool-btn" id="screenerEnableToggle">Off</button>
       </div>
       <div class="settings-row" id="tradingPausedRow" hidden>
         <div>
@@ -2160,35 +2144,6 @@
           <div class="settings-row-desc" id="tradingPausedDesc">—</div>
         </div>
         <button class="settings-reset-btn" id="resumeTradingBtn">Resume equities trading</button>
-      </div>
-      <div class="settings-row" id="alpacaAutoTradeCryptoRow" hidden>
-        <div>
-          <div class="settings-row-title">Crypto auto-trading</div>
-          <div class="settings-row-desc">
-            Runs on the same 24/7 backend, not this browser tab — flipping this writes directly to the same
-            kind of Firestore setting the server reads every ~60 seconds, so it takes effect within about a
-            minute even if you close this tab right after, no redeploy needed. A separate strategy from
-            equities above (rolling-range breakout, long-only) with its own independent 7% risk ceiling, so it
-            never competes with equities for risk budget, and it runs around the clock, not just market hours.
-            Failed orders retry 3 times, then this strategy's auto-trading pauses on its own, without affecting
-            equities — see status below.
-            <span id="autoTradeCryptoMoneyClause"></span>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span class="quote-sync-status" id="serverCryptoAutoTradeStatusBadge">—</span>
-          <button class="chart-tool-btn" id="cryptoAutoTradeEnableToggle" data-armed="false">Off</button>
-        </div>
-      </div>
-      <div class="settings-row" id="cryptoScreenerEnabledRow" hidden>
-        <div>
-          <div class="settings-row-title">Crypto screener (server)</div>
-          <div class="settings-row-desc">
-            Scans a 12-symbol crypto universe every 5 minutes, continuously — no market-hours gate. Crypto
-            auto-trading above has nothing to size or send without this being on too.
-          </div>
-        </div>
-        <button class="chart-tool-btn" id="cryptoScreenerEnableToggle">Off</button>
       </div>
       <div class="settings-row" id="cryptoTradingPausedRow" hidden>
         <div>
@@ -3363,19 +3318,11 @@
 
   // The local re-scan that used to run here is gone -- it was already
   // fully retired in practice, gated behind a flag nothing ever set to
-  // true. Every 5 minutes it hit that guard immediately and
-  // wrote the same static status line, doing nothing else -- a no-op
-  // timer, not a real fallback. "What to Watch," Today's Setups, and
-  // everything else that shows intraday picks already read exclusively
-  // from the backend's own 24/7 scan (backendIntradayPicks); see Backend
-  // Status for the real scanned/fetched/qualified counts, which come
-  // from there, not from this tab.
-  function updateIntradayStatus(text, ok){
-    var el = document.getElementById('intradaySyncStatus');
-    if(!el) return;
-    el.textContent = text;
-    el.className = 'quote-sync-status' + (ok === true ? ' ok' : ok === false ? ' fail' : '');
-  }
+  // true. "What to Watch," Today's Setups, and everything else that
+  // shows intraday picks already read exclusively from the backend's own
+  // 24/7 scan (backendIntradayPicks); see Backend Status for the real
+  // scanned/fetched/qualified counts, which come from there, not from
+  // this tab.
 
   var backendIntradayPicks = null;
   var backendIntradayUpdatedAt = null;
@@ -3568,7 +3515,7 @@
   // Was reading intradayTrades directly -- this tab's own local re-scan
   // slot, which stays permanently empty now that the local scan has been
   // fully removed and the backend does the real screening (see
-  // updateIntradayStatus's own comment). That showed a permanent, wrong
+  // backendIntradayPicks's own comment). That showed a permanent, wrong
   // "0 stocks you're tracking today, 0 with
   // open positions" directly underneath What to Watch's own card list,
   // even while those cards were correctly populated from the backend's
@@ -3744,10 +3691,8 @@
         setAlpacaDockOpen(true);
       }
     }catch(e){}
-    document.getElementById('alpacaAutoTradeIntradayRow').removeAttribute('hidden');
-    document.getElementById('screenerEnabledRow').removeAttribute('hidden');
-    document.getElementById('alpacaAutoTradeCryptoRow').removeAttribute('hidden');
-    document.getElementById('cryptoScreenerEnabledRow').removeAttribute('hidden');
+    document.getElementById('autoTradeRow').removeAttribute('hidden');
+    document.getElementById('screenersRow').removeAttribute('hidden');
     document.getElementById('flattenAllRow').removeAttribute('hidden');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.setAttribute('hidden', '');
@@ -3758,10 +3703,8 @@
     document.getElementById('alpacaConnectedRow').setAttribute('hidden', '');
     document.getElementById('alpacaInputsRow').removeAttribute('hidden');
     document.getElementById('alpacaDock').setAttribute('hidden', '');
-    document.getElementById('alpacaAutoTradeIntradayRow').setAttribute('hidden', '');
-    document.getElementById('screenerEnabledRow').setAttribute('hidden', '');
-    document.getElementById('alpacaAutoTradeCryptoRow').setAttribute('hidden', '');
-    document.getElementById('cryptoScreenerEnabledRow').setAttribute('hidden', '');
+    document.getElementById('autoTradeRow').setAttribute('hidden', '');
+    document.getElementById('screenersRow').setAttribute('hidden', '');
     document.getElementById('flattenAllRow').setAttribute('hidden', '');
     var emptyEl = document.getElementById('autoTradeControlsEmpty');
     if(emptyEl) emptyEl.removeAttribute('hidden');
@@ -3783,30 +3726,15 @@
     }
     var banner = document.getElementById('liveModeBanner');
     if(banner){ banner.hidden = (alpacaAccountType !== 'live'); }
+    // Crypto's badge is static in the HTML (always "Paper" -- crypto has
+    // no live-account capability at all yet, regardless of the equities
+    // environment selected here, so it never needs to change). Equities'
+    // is the only one that actually varies with alpacaAccountType.
     var autoTradeMoneyClause = document.getElementById('autoTradeIntradayMoneyClause');
     if(autoTradeMoneyClause){
-      // This used to overwrite the entire description with pre-migration
-      // copy every time this function ran (on load and on every paper/live
-      // switch) -- including the literally false claim "only runs while
-      // this tab is open" for a control that has run on the 24/7 backend
-      // for a while now. That's a real, currently-live bug: the correct
-      // description written into the static HTML below got silently
-      // clobbered back to the stale text within moments of the page
-      // finishing load. Scoped down to just the one thing that actually
-      // needs to change dynamically -- which environment's money is on
-      // the line.
-      autoTradeMoneyClause.innerHTML = alpacaAccountType === 'live'
-        ? '<strong style="color:var(--loss);">Real money — every order placed here is a genuine trade in a live brokerage account.</strong>'
-        : 'Paper money only — nothing here is a real trade in this environment.';
-    }
-    // Crypto is deliberately, permanently paper-only on the backend right
-    // now (see shwoop-server's clients/alpaca.js) -- unlike equities
-    // above, this does NOT follow alpacaAccountType. Switching this tab
-    // to live only affects equities; crypto has no live capability at all
-    // yet, so saying otherwise here would be actively misleading.
-    var autoTradeCryptoMoneyClause = document.getElementById('autoTradeCryptoMoneyClause');
-    if(autoTradeCryptoMoneyClause){
-      autoTradeCryptoMoneyClause.textContent = ' Paper money only — the backend\'s crypto trading has no live-account capability yet, regardless of the equities environment selected above.';
+      var isLiveEnv = alpacaAccountType === 'live';
+      autoTradeMoneyClause.textContent = isLiveEnv ? 'Live' : 'Paper';
+      autoTradeMoneyClause.classList.toggle('live', isLiveEnv);
     }
   }
 
@@ -4092,9 +4020,7 @@
     if(section){ section.hidden = !enabled; }
     if(enabled){
       // No local re-scan to kick off or keep re-running on a timer
-      // anymore -- see the comment above updateIntradayStatus for why.
-      // Just the one static status line, set once.
-      updateIntradayStatus('Screening handled by the 24/7 backend now — see the Backend Status card for cycle details', true);
+      // anymore -- see the comment above backendIntradayPicks for why.
     } else {
       intradayTrades = [];
       renderIntradayBlocks();
@@ -4713,9 +4639,12 @@
     var myGen = ++alpacaDockRenderGen;
     var summaryEl = document.getElementById('alpacaDockSummary');
     var positionsEl = document.getElementById('alpacaDockPositions');
+    var bpRowEl = document.getElementById('alpacaDockBpRow');
+    var bpTextEl = document.getElementById('alpacaDockBpText');
     var controlsEl = document.getElementById('alpacaDockPositionsControls');
     summaryEl.textContent = 'Loading…';
     positionsEl.innerHTML = '';
+    if(bpRowEl) bpRowEl.setAttribute('hidden', '');
     if(controlsEl) controlsEl.setAttribute('hidden', '');
     // Open orders (for the Target/Stop columns) is treated as optional —
     // a failure there degrades gracefully to "—" rather than blocking the
@@ -4738,8 +4667,14 @@
       summaryEl.innerHTML =
         '<div class="alpaca-dock-equity">$' + equity.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</div>' +
         '<div class="alpaca-dock-daychange ' + changeClass + '">' + (dayChange >= 0 ? '+' : '−') + '$' + Math.abs(dayChange).toFixed(2) +
-          ' (' + (dayChangePct >= 0 ? '+' : '') + dayChangePct.toFixed(2) + '%) today</div>' +
-        '<div class="alpaca-dock-bp">Buying power: $' + parseFloat(acct.buying_power || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</div>';
+          ' (' + (dayChangePct >= 0 ? '+' : '') + dayChangePct.toFixed(2) + '%) today</div>';
+      // Buying power and the Compact view/Sort controls now share one row
+      // instead of the controls getting a whole extra row to themselves
+      // below it -- that extra row was real vertical space this fixed-
+      // height dock could otherwise spend on one more actual position
+      // before the list needs to scroll.
+      if(bpTextEl) bpTextEl.textContent = 'Buying power: $' + parseFloat(acct.buying_power || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
+      if(bpRowEl) bpRowEl.removeAttribute('hidden');
 
       if(!Array.isArray(positions) || positions.length === 0){
         positionsEl.innerHTML = '<div class="alpaca-dock-empty">No open positions right now.</div>';
@@ -4796,6 +4731,7 @@
       if(myGen !== alpacaDockRenderGen) return;
       summaryEl.textContent = 'Sync failed — couldn\'t reach Alpaca.';
       positionsEl.innerHTML = '';
+      if(bpRowEl) bpRowEl.setAttribute('hidden', '');
       if(controlsEl) controlsEl.setAttribute('hidden', '');
       console.error('Alpaca dock fetch failed:', err);
     });
@@ -8215,88 +8151,6 @@
     location.reload();
   });
 
-  // ---------- Layout controls (chart width, chart height, text size) ----------
-  var layoutToggle = document.getElementById('layoutToggle');
-  var layoutMenu = document.getElementById('layoutMenu');
-  layoutToggle.addEventListener('click', function(){
-    var open = !layoutMenu.hasAttribute('hidden');
-    if(open){ layoutMenu.setAttribute('hidden',''); layoutToggle.setAttribute('aria-expanded','false'); }
-    else{ layoutMenu.removeAttribute('hidden'); layoutToggle.setAttribute('aria-expanded','true'); }
-  });
-  document.addEventListener('click', function(e){
-    if(!e.target.closest('.layout-dropdown')){
-      layoutMenu.setAttribute('hidden','');
-      layoutToggle.setAttribute('aria-expanded','false');
-    }
-  });
-
-  // width dropped from here entirely -- the chart is always full width
-  // now (notes moved below it instead of beside it), so a "chart width %"
-  // control has nothing left to control. height's range is scaled up to
-  // match: the chart's internal viewBox grew from 200 to 240 units to fit
-  // the new volume strip, so the same *relative* stretch this slider
-  // always allowed (0.6x-1.7x of the viewBox height) now maps to
-  // different absolute px.
-  var layoutPrefs = { height:310, text:12.5, showOHLC:true };
-  var layoutLimits = {
-    height: [150, 410, 20],
-    text:   [10, 16, 0.5]
-  };
-
-  function applyLayout(){
-    document.documentElement.style.setProperty('--chart-height', layoutPrefs.height + 'px');
-    document.documentElement.style.setProperty('--notes-text-size', layoutPrefs.text + 'px');
-
-    document.getElementById('heightLabel').textContent = layoutPrefs.height + 'px';
-    document.getElementById('textLabel').textContent = layoutPrefs.text + 'px';
-
-    document.getElementById('heightDec').disabled = layoutPrefs.height <= layoutLimits.height[0];
-    document.getElementById('heightInc').disabled = layoutPrefs.height >= layoutLimits.height[1];
-    document.getElementById('textDec').disabled = layoutPrefs.text <= layoutLimits.text[0];
-    document.getElementById('textInc').disabled = layoutPrefs.text >= layoutLimits.text[1];
-
-    showOHLCReadout = layoutPrefs.showOHLC;
-    var ohlcBtn = document.getElementById('ohlcToggleBtn');
-    ohlcBtn.textContent = layoutPrefs.showOHLC ? 'On' : 'Off';
-    ohlcBtn.classList.toggle('active', layoutPrefs.showOHLC);
-
-    try{ window.localStorage.setItem('shwoopnet:layout', JSON.stringify(layoutPrefs)); }catch(e){}
-  }
-
-  function stepLayout(key, dir){
-    var lim = layoutLimits[key];
-    var next = layoutPrefs[key] + dir * lim[2];
-    layoutPrefs[key] = Math.min(lim[1], Math.max(lim[0], Math.round(next * 10) / 10));
-    applyLayout();
-  }
-
-  document.getElementById('heightDec').addEventListener('click', function(){ stepLayout('height', -1); });
-  document.getElementById('heightInc').addEventListener('click', function(){ stepLayout('height', 1); });
-  document.getElementById('textDec').addEventListener('click', function(){ stepLayout('text', -1); });
-  document.getElementById('textInc').addEventListener('click', function(){ stepLayout('text', 1); });
-
-  document.getElementById('layoutResetBtn').addEventListener('click', function(){
-    layoutPrefs = { height:310, text:12.5, showOHLC:true };
-    applyLayout();
-  });
-
-  document.getElementById('ohlcToggleBtn').addEventListener('click', function(){
-    layoutPrefs.showOHLC = !layoutPrefs.showOHLC;
-    applyLayout();
-  });
-
-  (function initLayout(){
-    try{
-      var saved = JSON.parse(window.localStorage.getItem('shwoopnet:layout') || 'null');
-      if(saved && typeof saved.height === 'number'){
-        layoutPrefs.height = saved.height;
-        layoutPrefs.text = saved.text;
-        if(typeof saved.showOHLC === 'boolean'){ layoutPrefs.showOHLC = saved.showOHLC; }
-      }
-    }catch(e){}
-    applyLayout();
-  })();
-
   // ---------- Trade Overview: card show/hide + reorder ----------
   // Auto-Trading Controls and the paused/live banners are intentionally
   // NOT in this list -- those are safety-critical (resume trading,
@@ -9164,6 +9018,65 @@
     });
   }
 
+  // Win Rate/Avg Win/Avg Loss/Best/Worst below are the same journal-
+  // derived numbers as Overall P&L's own same-tick fallback above, and
+  // for the same reason: this app's own Firestore journal can drift from
+  // what actually happened in the account, which is exactly what the
+  // user was comparing against "Pull full history from Alpaca" below and
+  // finding didn't line up. Patched here with the identical real-order
+  // reconstruction that panel uses -- but ONLY on the Equities tab.
+  // reconstructTradesFromOrders deliberately excludes crypto (its real
+  // order shape -- a plain market entry plus separately-submitted,
+  // manually-cancelled stop/target orders -- doesn't fit the same
+  // bracket-leg pairing equities orders do), so patching an "All" or
+  // "Crypto" view with an equities-only reconstruction would just swap
+  // one kind of wrong for another. Equities is the one tab where this is
+  // a complete, honest match.
+  var tradeStatsPatchGen = 0;
+  function patchTradeStatsFromAlpaca(){
+    var myGen = ++tradeStatsPatchGen;
+    if(journalFilter !== 'equities') return;
+    getAlpacaClosedOrdersCached().then(function(orders){
+      if(myGen !== tradeStatsPatchGen || journalFilter !== 'equities') return; // superseded, or the tab changed while this was in flight
+      var trades = reconstructTradesFromOrders(orders).trades;
+      if(!trades.length) return; // not connected, or no real equities trades yet -- leave the journal-based fallback showing
+      var wins = trades.filter(function(t){ return t.dollarPL > 0; });
+      var losses = trades.filter(function(t){ return t.dollarPL <= 0; });
+      var winRate = (wins.length / trades.length) * 100;
+      var avgWin = wins.length ? wins.reduce(function(s,t){ return s + t.dollarPL; }, 0) / wins.length : 0;
+      var avgLoss = losses.length ? losses.reduce(function(s,t){ return s + t.dollarPL; }, 0) / losses.length : 0;
+      var best = trades.reduce(function(b,t){ return (!b || t.dollarPL > b.dollarPL) ? t : b; }, null);
+      var worst = trades.reduce(function(w,t){ return (!w || t.dollarPL < w.dollarPL) ? t : w; }, null);
+
+      var winRateEl = document.getElementById('statWinRate');
+      var winRateSubEl = document.getElementById('statWinRateSub');
+      var avgWinEl = document.getElementById('statAvgWin');
+      var avgLossEl = document.getElementById('statAvgLoss');
+      var bestEl = document.getElementById('statBest');
+      var bestSubEl = document.getElementById('statBestSub');
+      var worstEl = document.getElementById('statWorst');
+      var worstSubEl = document.getElementById('statWorstSub');
+      if(!winRateEl) return;
+
+      winRateEl.textContent = winRate.toFixed(0) + '%';
+      winRateSubEl.textContent = trades.length + ' real trade' + (trades.length === 1 ? '' : 's');
+      avgWinEl.textContent = '+$' + avgWin.toFixed(0);
+      avgLossEl.textContent = '−$' + Math.abs(avgLoss).toFixed(0);
+      if(best){
+        bestEl.textContent = (best.dollarPL >= 0 ? '+$' : '−$') + Math.abs(best.dollarPL).toFixed(0);
+        bestEl.className = 'pl-card-value mono ' + (best.dollarPL >= 0 ? 'up' : 'down');
+        bestSubEl.textContent = best.sym;
+      }
+      if(worst){
+        worstEl.textContent = (worst.dollarPL >= 0 ? '+$' : '−$') + Math.abs(worst.dollarPL).toFixed(0);
+        worstEl.className = 'pl-card-value mono ' + (worst.dollarPL >= 0 ? 'up' : 'down');
+        worstSubEl.textContent = worst.sym;
+      }
+    }).catch(function(err){
+      console.error('Failed to load real equities trade stats from Alpaca:', err);
+    });
+  }
+
   function renderPLSummary(){
     // Overall P&L is real Alpaca account equity (patched in below) --
     // a single broker-reported number that can't be broken out by
@@ -9233,6 +9146,9 @@
         worstSubEl.textContent = filtered.worst.sym;
       } else { worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = ''; }
     }
+    // See patchTradeStatsFromAlpaca's own comment -- real numbers,
+    // Equities tab only.
+    patchTradeStatsFromAlpaca();
   }
 
   renderPLSummary();
