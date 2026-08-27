@@ -7300,9 +7300,16 @@
       prevLabelDate = barDate;
     }
 
-    // Shaded profit/loss zones between entry and target/stop -- the
-    // "position box" look real trading platforms (TradingView included)
-    // use to show risk/reward at a glance instead of just numbers.
+    // Shaded zone between entry and target/stop -- the "position box"
+    // look real trading platforms use to show the trade's footprint at a
+    // glance instead of just numbers. One neutral tint (the same accent
+    // as the entry line, not gain/loss green-or-red) on both sides --
+    // this used to shade toward-target green and toward-stop red, but
+    // that made "the position" itself read as if it were reporting
+    // real-time profit/loss, competing with (and getting confused for)
+    // the actual green/red T and S reference lines drawn on top of it.
+    // Now green/red on this chart means exactly one thing: the T and S
+    // lines, nothing else.
     // Drawn here, before the candles below, so the tint sits behind
     // price action rather than washing it out. Anchored to the actual
     // entry bar (when known) so the tint only covers price action since
@@ -7331,8 +7338,8 @@
             if(bottom <= top) return;
             parts.push('<rect x="'+zoneX0+'" y="'+top+'" width="'+(plotW - zoneX0)+'" height="'+(bottom-top)+'" fill="'+color+'" opacity="0.16"/>');
           }
-          zoneRect(lv0.target, 'var(--gain)');
-          zoneRect(lv0.stop, 'var(--loss)');
+          zoneRect(lv0.target, 'var(--amber)');
+          zoneRect(lv0.stop, 'var(--amber)');
         })();
       }
     }
@@ -7413,8 +7420,14 @@
     }
 
     if(lastBar){
-      var lastUp = lastBar.c >= lastBar.o;
-      var priceColor = lastUp ? 'var(--gain)' : 'var(--loss)';
+      // A fixed neutral color, not gain/loss keyed to the last candle's
+      // direction -- that used to make the live price line flip green or
+      // red on every other bar, for reasons that had nothing to do with
+      // the trade (a single up-tick colors it "gain" even for a Short
+      // that's underwater), and collided with the actual green/red T and
+      // S lines it sits next to. Green/red on this chart now means
+      // exactly one thing: the T and S reference lines.
+      var priceColor = 'var(--muted)';
       var ly = y(lastBar.c);
       parts.push('<line x1="0" y1="'+ly+'" x2="'+plotW+'" y2="'+ly+'" stroke="'+priceColor+'" stroke-width="1" stroke-dasharray="3,3"/>');
       parts.push('<path d="'+axisFlagPath(ly)+'" fill="'+priceColor+'"/>');
