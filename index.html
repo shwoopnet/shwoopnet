@@ -3060,6 +3060,23 @@
   });
   function findCryptoQuote(sym){ return cryptoWatchlist.filter(function(w){ return w.sym === sym; })[0]; }
 
+  // Alpaca's /v2/positions endpoint drops the "/" this app uses everywhere
+  // else for crypto pairs -- an order sent as "SOL/USD" comes back as a
+  // position symbol of "SOLUSD". Comparing raw strings against a journal
+  // entry's own "SOL/USD" silently failed to match every real crypto
+  // position in every place that looked one up by symbol (Open Positions,
+  // the Today's Setups/Crypto Setups P/L patch, and the account-key
+  // reconciliation after a key rotation), which is what made those crypto
+  // rows fall back to entry-price/zero-P&L estimates instead of Alpaca's
+  // real numbers. Equities symbols never contain "/", so this is a no-op
+  // for them and only changes how crypto positions get matched.
+  function canonicalSymbol(sym){ return (sym || '').replace(/\//g, ''); }
+  function alpacaPositionsBySymbol(positions){
+    var bySym = {};
+    (positions || []).forEach(function(p){ bySym[canonicalSymbol(p.symbol)] = p; });
+    return bySym;
+  }
+
   // ---------- Opening-range breakout + volume confirmation ----------
   // Replaces the old SMA-crossover intraday logic below (kept for
   // reference / potential comparison, but no longer called from the
@@ -3823,11 +3840,10 @@
     });
     if(staleEntries.length === 0) return;
     fetchAlpacaPositions().then(function(positions){
-      var bySym = {};
-      (positions || []).forEach(function(p){ bySym[p.symbol] = p; });
+      var bySym = alpacaPositionsBySymbol(positions);
       var changed = false;
       staleEntries.forEach(function(j){
-        var live = bySym[j.sym];
+        var live = bySym[canonicalSymbol(j.sym)];
         if(!live) return;
         var liveSide = live.side === 'short' ? 'Short' : 'Long';
         // Alpaca reports a short position's qty as negative (e.g. -118);
@@ -5458,10 +5474,9 @@
     var myGen = ++intradayPLPatchGen;
     getAlpacaPositionsCached().then(function(positions){
       if(myGen !== intradayPLPatchGen) return;
-      var bySym = {};
-      (positions || []).forEach(function(p){ bySym[p.symbol] = p; });
+      var bySym = alpacaPositionsBySymbol(positions);
       journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).forEach(function(j){
-        var live = bySym[j.sym];
+        var live = bySym[canonicalSymbol(j.sym)];
         var cell = document.getElementById('pl-' + j.sym);
         if(!live || !cell) return;
         var pl = parseFloat(live.unrealized_pl);
@@ -5675,8 +5690,15 @@
 
     el.innerHTML = source.map(function(t){
       var liveQuote = findCryptoQuote(t.sym);
-      var q = (liveQuote && liveQuote.price !== null) ? liveQuote : { price: t.entry, prevClose: t.entry };
-      var change = pct(q.price, q.prevClose);
+      var hasLiveQuote = !!(liveQuote && liveQuote.price !== null);
+      // prevClose resolves separately from price (a second endpoint,
+      // daily bars vs. the live quote) and can lag behind or fail to
+      // match at all -- gating the % change on it too, not just price,
+      // is what stops a real price divided by a still-null prevClose
+      // from rendering as "Infinity%".
+      var hasLiveChange = hasLiveQuote && liveQuote.prevClose !== null;
+      var q = hasLiveQuote ? liveQuote : { price: t.entry, prevClose: t.entry };
+      var change = hasLiveChange ? pct(q.price, q.prevClose) : 0;
       var up = change >= 0; // the arrow -- an honest, direction-agnostic fact: did the price itself rise or fall
       // Crypto is Long-only (Alpaca has no crypto shorting), so this is a
       // no-op today (favorable === up always) -- kept in step with Today's
@@ -5689,7 +5711,7 @@
       // Same "honest dash until there's a real live quote to compare
       // against" rule as Today's Setups' own P/L cell.
       var plCellHtml;
-      if(openEntry && liveQuote && liveQuote.price !== null){
+      if(openEntry && hasLiveQuote){
         var isLong = openEntry.direction === 'Long';
         var pl = (liveQuote.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1);
         var plPct = (liveQuote.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1);
@@ -5717,8 +5739,8 @@
               '</span>' +
             '</div>' +
             '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' +
-              (liveQuote && liveQuote.price !== null ? fmt(q.price) : '—') +
-              (liveQuote && liveQuote.price !== null
+              (hasLiveQuote ? fmt(q.price) : '—') +
+              (hasLiveChange
                 ? '<span class="chg ' + (favorable?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>'
                 : '') +
             '</div>' +
@@ -7836,7 +7858,17 @@
         if(q && typeof q.bp === 'number' && typeof q.ap === 'number'){
           item.price = (q.bp + q.ap) / 2;
         }
-        var symBars = bars[item.sym] || [];
+        // Falls back to a canonicalized (slash-stripped) key lookup --
+        // Alpaca's own endpoints are inconsistent about the "/" in a
+        // crypto symbol (this same data API's /v2/positions drops it
+        // entirely), so this guards against the bars response keying
+        // differently than /latest/quotes does even though both are
+        // requested with the same symbols param. Without this, a keyed-
+        // differently response reads as "zero bars for this symbol,
+        // forever" -- prevClose stays null permanently, which is exactly
+        // what turns the chg badge into "Infinity%" (a real price divided
+        // by a null/zero prevClose).
+        var symBars = bars[item.sym] || bars[canonicalSymbol(item.sym)] || [];
         if(symBars.length >= 1){
           var prevBar = symBars.length >= 2 ? symBars[symBars.length - 2] : symBars[symBars.length - 1];
           item.prevClose = prevBar.c;
@@ -10119,10 +10151,9 @@
   function loadStatusPositions(openPositions, el, myGen, isRetry){
     getAlpacaPositionsCached().then(function(positions){
       if(myGen !== statusPositionsRenderGen) return;
-      var bySym = {};
-      (positions || []).forEach(function(p){ bySym[p.symbol] = p; });
+      var bySym = alpacaPositionsBySymbol(positions);
       var rows = openPositions.map(function(j){
-        var live = bySym[j.sym];
+        var live = bySym[canonicalSymbol(j.sym)];
         var current, pl, plPct;
         if(live){
           current = parseFloat(live.current_price);
@@ -10132,8 +10163,13 @@
           // No matching live position from Alpaca yet (e.g. order
           // just filled and hasn't shown up in this fetch) -- fall
           // back to the same local-quote estimate as before rather
-          // than showing nothing.
-          var q = findQuote(j.sym);
+          // than showing nothing. Crypto pairs live in their own
+          // separate watchlist (findQuote only ever searches the
+          // equities one), so this used to silently fall through to
+          // j.entry for every crypto row here -- current === entry,
+          // P&L pinned at exactly $0.00, even on a real, moving position.
+          var isCrypto = j.sym.indexOf('/') > -1;
+          var q = isCrypto ? findCryptoQuote(j.sym) : findQuote(j.sym);
           current = (q && q.price) ? q.price : j.entry;
           var isLong = j.direction === 'Long';
           pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
