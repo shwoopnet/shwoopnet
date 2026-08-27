@@ -6639,18 +6639,37 @@
       '</table>';
   }
 
-  function renderIntradayUniverseBacktestResults(perSymbolResults, summary, note){
+  // failedSymbols is surfaced directly in the results, not just logged to
+  // the console -- a symbol whose history fetch fails (rate limit,
+  // network hiccup, anything) gets silently skipped so one bad symbol
+  // never takes down the whole run, but that used to mean the ONLY trace
+  // of it was a console.error, invisible on mobile (no dev tools) and
+  // easy to miss even on desktop. Without this, a lower total signal
+  // count between two runs of the supposedly same window looked like an
+  // unexplained inconsistency instead of what it actually was.
+  function renderIntradayUniverseBacktestResults(perSymbolResults, summary, note, failedSymbols){
     var statusEl = document.getElementById('intradayBacktestStatus');
     var resultsEl = document.getElementById('intradayBacktestResults');
+    var failedNote = (failedSymbols && failedSymbols.length)
+      ? ' (' + failedSymbols.length + ' symbol' + (failedSymbols.length === 1 ? '' : 's') + ' failed to fetch and ' +
+        (failedSymbols.length === 1 ? 'is' : 'are') + ' excluded from these results -- see below)'
+      : '';
+    var failedBlock = (failedSymbols && failedSymbols.length)
+      ? '<p class="labs-backtest-note" style="color:var(--loss);">' +
+        failedSymbols.length + ' symbol' + (failedSymbols.length === 1 ? '' : 's') + ' failed to fetch and ' +
+        (failedSymbols.length === 1 ? 'is' : 'are') + ' NOT included in the totals above -- a lower signal ' +
+        'count than a previous run of the same window can be explained by this alone: ' +
+        failedSymbols.map(function(f){ return f.sym + ' (' + f.message + ')'; }).join(', ') + '.</p>'
+      : '';
 
     if(summary.totalSignals === 0){
-      statusEl.textContent = 'No qualifying intraday signals found across the universe in this window.' + (note || '');
+      statusEl.textContent = 'No qualifying intraday signals found across the universe in this window.' + failedNote + (note || '');
       statusEl.className = 'labs-backtest-status';
-      resultsEl.innerHTML = '';
+      resultsEl.innerHTML = failedBlock;
       return;
     }
 
-    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total intraday signals.' + (note || '');
+    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total intraday signals.' + failedNote + (note || '');
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -6673,6 +6692,7 @@
       }).join('');
 
     resultsEl.innerHTML =
+      failedBlock +
       '<div class="backtest-summary">' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
@@ -6748,13 +6768,22 @@
 
     var allTrades = [];
     var perSymbolResults = [];
+    // A symbol whose history fetch fails (rate limit, network hiccup,
+    // anything) is silently skipped rather than failing the whole run --
+    // but "silently" used to mean console-only, which is invisible on
+    // mobile and made two runs of the supposedly same window look
+    // inconsistent with each other for no visible reason. Tracked here
+    // and surfaced directly in the results now, so a lower total signal
+    // count is never mistaken for a real difference in the underlying
+    // strategy/parameters when it was actually just missing data.
+    var failedSymbols = [];
 
     function processNext(index){
       if(index >= INTRADAY_UNIVERSE.length){
         btn.disabled = false;
         singleBtn.disabled = false;
         var summary = summarizeBacktestTrades(allTrades);
-        renderIntradayUniverseBacktestResults(perSymbolResults, summary, tightenOptsNote(tightenOpts));
+        renderIntradayUniverseBacktestResults(perSymbolResults, summary, tightenOptsNote(tightenOpts), failedSymbols);
         return;
       }
       var sym = INTRADAY_UNIVERSE[index];
@@ -6767,6 +6796,7 @@
         processNext(index + 1);
       }).catch(function(err){
         console.error('Intraday universe backtest: skipping', sym, err);
+        failedSymbols.push({ sym: sym, message: err.message });
         processNext(index + 1);
       });
     }
