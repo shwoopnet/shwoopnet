@@ -3491,22 +3491,21 @@
   function renderIndices(){
     var el = document.getElementById('indexSnapshot');
     el.innerHTML = '';
-    INDEX_PROXIES.forEach(function(ix){
-      var q = findQuote(ix.sym);
-      var val, chg;
-      if(q && q.price){
-        val = q.price; chg = pct(q.price, q.prevClose);
-      } else {
-        var fb = FALLBACK_INDEX_VALUES[ix.sym];
-        val = fb.val; chg = fb.chg;
-      }
-      var up = chg >= 0;
+    indexReads().forEach(function(r){
       var card = document.createElement('div');
       card.className = 'index-card';
-      card.innerHTML =
-        '<span class="ix-name">' + ix.name + ' <span class="ix-proxy">(' + ix.sym + ')</span></span>' +
-        '<span class="ix-val mono">' + val.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}) + '</span>' +
-        '<span class="ix-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(chg).toFixed(2) + '% today</span>';
+      if(!r.loaded){
+        card.innerHTML =
+          '<span class="ix-name">' + r.name + ' <span class="ix-proxy">(' + r.sym + ')</span></span>' +
+          '<span class="ix-val mono">—</span>' +
+          '<span class="ix-chg">Loading…</span>';
+      } else {
+        var up = r.chg >= 0;
+        card.innerHTML =
+          '<span class="ix-name">' + r.name + ' <span class="ix-proxy">(' + r.sym + ')</span></span>' +
+          '<span class="ix-val mono">' + r.val.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}) + '</span>' +
+          '<span class="ix-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(r.chg).toFixed(2) + '% today</span>';
+      }
       el.appendChild(card);
     });
   }
@@ -10958,9 +10957,13 @@
         loadEarningsIfSignedIn();
         loadAlpacaCredentialsForUser(user.uid);
         loadTradingPauseStateForUser(user.uid);
+        // Unpriced (null) until fetchAllQuotes actually resolves -- same
+        // "no fake data" rule the crypto watchlist already follows.
+        // Renders as an honest "Loading…" (see indexReads) rather than a
+        // hardcoded index level that only gets staler the longer it goes
+        // untouched.
         INDEX_PROXIES.forEach(function(ix){
-          var fb = FALLBACK_INDEX_VALUES[ix.sym];
-          ensureInWatchlist(ix.sym, ix.name, fb.val, fb.val);
+          ensureInWatchlist(ix.sym, ix.name, null, null);
         });
         startRealQuoteLoop();
       } else {
@@ -11080,20 +11083,35 @@
     { sym:'QQQ', name:'Nasdaq 100' },
     { sym:'DIA', name:'Dow Jones' }
   ];
-  var FALLBACK_INDEX_VALUES = {
-    SPY: { val: 592.01, chg: 0.42 },
-    QQQ: { val: 521.03, chg: 0.68 },
-    DIA: { val: 412.30, chg: -0.11 }
-  };
+  // No hardcoded fallback price/change here -- a stale hardcoded index
+  // level looks exactly like real, current data (unlike an honest "—" or
+  // "Loading…"), and goes wrong fast: markets move, a fixed number
+  // doesn't (this used to show a flat "0.00% today" whenever a real quote
+  // hadn't resolved yet, and worse, a SPY level that drifted further from
+  // reality every month it went untouched). Every reader below treats a
+  // still-unresolved read as legitimately not-loaded-yet, not a number to
+  // build a percentage or a sentence out of.
+  function indexReads(){
+    return INDEX_PROXIES.map(function(ix){
+      var q = findQuote(ix.sym);
+      var loaded = !!(q && q.price != null && q.prevClose != null);
+      return {
+        name: ix.name, sym: ix.sym,
+        val: loaded ? q.price : null,
+        chg: loaded ? pct(q.price, q.prevClose) : null,
+        loaded: loaded
+      };
+    });
+  }
 
   function renderSentiment(){
     var el = document.getElementById('breadthWidget');
     if(!el) return;
-    var reads = INDEX_PROXIES.map(function(ix){
-      var q = findQuote(ix.sym);
-      var chg = (q && q.price) ? pct(q.price, q.prevClose) : FALLBACK_INDEX_VALUES[ix.sym].chg;
-      return { name: ix.name, chg: chg };
-    });
+    var reads = indexReads();
+    if(reads.some(function(r){ return !r.loaded; })){
+      el.innerHTML = '<div class="labs-backtest-status">Loading market data…</div>';
+      return;
+    }
     var up = reads.filter(function(r){ return r.chg >= 0; }).length;
     var total = reads.length;
     var label = up === total ? 'Broadly positive' : up === 0 ? 'Broadly negative' :
@@ -11128,11 +11146,12 @@
     var hour = new Date().getHours();
     var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-    var reads = INDEX_PROXIES.map(function(ix){
-      var q = findQuote(ix.sym);
-      var chg = (q && q.price) ? pct(q.price, q.prevClose) : FALLBACK_INDEX_VALUES[ix.sym].chg;
-      return { name: ix.name, sym: ix.sym, chg: chg };
-    });
+    var reads = indexReads();
+    if(reads.some(function(r){ return !r.loaded; })){
+      headlineEl.textContent = greeting + '. Loading today\'s market data…';
+      ledeEl.textContent = '';
+      return;
+    }
     var avgChg = reads.reduce(function(sum, r){ return sum + r.chg; }, 0) / reads.length;
     var spy = reads.filter(function(r){ return r.sym === 'SPY'; })[0];
     var qqq = reads.filter(function(r){ return r.sym === 'QQQ'; })[0];
