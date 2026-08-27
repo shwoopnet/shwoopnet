@@ -2804,9 +2804,10 @@
         Runs the same scoring and stop/target logic used live, on 15-minute bars, against real historical
         prices — only ever using data that would have existed at that point in time. Measures raw % return
         per trade, independent of account size, so sizing effects don't blur whether the underlying edge is
-        real. If a longer lookback fails to load, try a shorter one — the free data tier's depth isn't fully known.
-        Covers the equities strategy only — the tool below pulls from Twelve Data, which doesn't carry crypto
-        history; the crypto numbers above come from a separate historical dataset pulled directly from Alpaca.
+        real. If a longer lookback fails to load, try a shorter one — Alpaca's free IEX feed's depth isn't
+        fully known. Covers the equities strategy only, pulled directly from Alpaca (same as the crypto
+        numbers above, which come from their own separate historical dataset) — no Twelve Data dependency
+        for either anymore.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -6247,69 +6248,103 @@
   }
 
 
-  // ---------- Intraday backtest ----------
+  // ---------- Intraday backtest history (Alpaca, not Twelve Data) ----------
   // Same simulation shape as the backtest engine above (no lookahead,
   // real history), pointed at the intraday universe and computeORBAnalysis
   // instead. summarizeBacktestTrades is timeframe-agnostic already (it
   // only ever checks trade outcomes, not bar size), so it's reused as-is
   // rather than duplicated.
-  function fetchIntradayBacktestHistory(sym, totalBars){
-    return scheduleTwelveDataCall(function(){
-      var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
-        '&interval=15min&outputsize=' + Math.min(totalBars, 5000) + '&timezone=UTC';
-      return fetch(url, { headers: twelveDataProxyHeaders() }).then(function(res){
-        if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
-        return res.json();
-      }).then(function(data){
-        if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 60){
-          throw new Error('Not enough intraday history for ' + sym + ' — the free data tier may not go back this far at 15-minute granularity. Try a shorter lookback.');
-        }
-        return data.values.map(function(v){
-          return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), vol:parseFloat(v.volume || 0), t:new Date(v.datetime.replace(' ', 'T') + 'Z') };
-        }).reverse();
-      });
-    }, 'high');
+  //
+  // Used to pull this from Twelve Data -- its free tier caps out at
+  // ~800 credits/day, and a whole-universe run (16 symbols) plus the
+  // usual handful of single-symbol re-runs across a session routinely
+  // ate the rest of whatever the live screener hadn't already spent
+  // (confirmed live: a run came back "0 signals across the universe"
+  // after several backtest passes the same day, once the account's
+  // daily budget was actually exhausted). Alpaca's own market data API
+  // has no comparable daily ceiling at this volume, and it's the same
+  // account credentials already used for trading -- no separate signup.
+  // Query shape (feed=iex&adjustment=raw) matches the Labs "fetch a real
+  // week from Alpaca" test and the backend's own equitiesMarketData.js,
+  // both already confirmed working against this exact API.
+  //
+  // Deliberately its own separate, conservative rate-limited queue below
+  // -- entirely browser-side, never shared with the backend process that
+  // actually places trades -- capped well under Alpaca's real per-minute
+  // ceiling so even a heavy whole-universe backtest run here can never
+  // meaningfully compete with live screening/trailing-stop calls the
+  // backend is making during market hours.
+  var ALPACA_BACKTEST_MAX_PER_MINUTE = 60;
+  var alpacaBacktestQueue = [];
+  var alpacaBacktestCallTimestamps = [];
+
+  function scheduleAlpacaBacktestCall(fn){
+    return new Promise(function(resolve, reject){
+      alpacaBacktestQueue.push({ fn: fn, resolve: resolve, reject: reject });
+      processAlpacaBacktestQueue();
+    });
   }
 
-  // Single-request cap -- both our own code and Twelve Data's own
-  // outputsize parameter max out at 5000, which is roughly 190 trading
-  // days at 26 bars/day. Anything longer needs a second request further
-  // back in time, stitched onto the first.
-  var TWELVE_DATA_SINGLE_REQUEST_BAR_CAP = 5000;
+  function processAlpacaBacktestQueue(){
+    var now = Date.now();
+    alpacaBacktestCallTimestamps = alpacaBacktestCallTimestamps.filter(function(t){ return now - t < 60000; });
+    if(alpacaBacktestQueue.length === 0) return;
+    if(alpacaBacktestCallTimestamps.length >= ALPACA_BACKTEST_MAX_PER_MINUTE){
+      var waitMs = 60000 - (now - alpacaBacktestCallTimestamps[0]) + 250;
+      setTimeout(processAlpacaBacktestQueue, waitMs);
+      return;
+    }
+    var next = alpacaBacktestQueue.shift();
+    alpacaBacktestCallTimestamps.push(now);
+    next.fn().then(next.resolve, next.reject);
+    if(alpacaBacktestQueue.length > 0){ processAlpacaBacktestQueue(); }
+  }
+
+  // Converts the lookback dropdown's bar-count value (e.g. 1610 for "~60
+  // trading days") into a calendar-day span for Alpaca's start/end query
+  // -- doesn't need to be exact, since runIntradayBacktestSimulationAsync's
+  // own startIdx already trims down to the requested bar count from
+  // whatever comes back; this only needs to comfortably OVER-fetch, never
+  // under. ~26 bars/regular session, with generous padding for weekends/
+  // holidays plus a flat buffer on top.
+  function backtestLookbackCalendarDays(totalBars){
+    var tradingDays = totalBars / 26;
+    return Math.ceil(tradingDays * 1.6) + 10;
+  }
 
   function fetchIntradayBacktestHistoryChunked(sym, totalBars){
-    if(totalBars <= TWELVE_DATA_SINGLE_REQUEST_BAR_CAP){
-      return fetchIntradayBacktestHistory(sym, totalBars);
-    }
-    // First chunk: the most recent ~190 days, exactly as a normal request
-    // already works today.
-    return fetchIntradayBacktestHistory(sym, TWELVE_DATA_SINGLE_REQUEST_BAR_CAP).then(function(recentChunk){
-      var earliestInRecentChunk = recentChunk[0].t;
-      var endDateForOlderChunk = new Date(earliestInRecentChunk.getTime() - 15 * 60 * 1000);
-      var endDateStr = endDateForOlderChunk.toISOString().slice(0, 19).replace('T', ' ');
-      var remainingBars = Math.min(totalBars - TWELVE_DATA_SINGLE_REQUEST_BAR_CAP, TWELVE_DATA_SINGLE_REQUEST_BAR_CAP);
+    var end = new Date();
+    var start = new Date(end.getTime() - backtestLookbackCalendarDays(totalBars) * 24 * 60 * 60 * 1000);
 
-      return scheduleTwelveDataCall(function(){
-        var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
-          '&interval=15min&outputsize=' + remainingBars + '&end_date=' + encodeURIComponent(endDateStr) +
-          '&timezone=UTC';
-        return fetch(url, { headers: twelveDataProxyHeaders() }).then(function(res){
-          if(!res.ok) throw new Error('Twelve Data HTTP ' + res.status);
+    function fetchPage(pageToken){
+      var url = ALPACA_DATA_BASE + '/v2/stocks/' + encodeURIComponent(sym) + '/bars?timeframe=15Min' +
+        '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()) +
+        '&limit=10000&feed=iex&adjustment=raw' +
+        (pageToken ? '&page_token=' + encodeURIComponent(pageToken) : '');
+      return scheduleAlpacaBacktestCall(function(){
+        return fetch(url, { headers: alpacaHeaders() }).then(function(res){
+          if(!res.ok) throw new Error('Alpaca stocks bars HTTP ' + res.status);
           return res.json();
-        }).then(function(data){
-          if(!data || data.status === 'error' || !Array.isArray(data.values)){
-            // The older chunk failing isn't fatal -- a shorter continuous
-            // history is still useful, just report what actually happened.
-            console.warn('Older chunk for ' + sym + ' unavailable -- returning the ~190-day chunk only.', data && data.message);
-            return [];
-          }
-          return data.values.map(function(v){
-            return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), vol:parseFloat(v.volume || 0), t:new Date(v.datetime.replace(' ', 'T') + 'Z') };
-          }).reverse();
         });
-      }, 'high').then(function(olderChunk){
-        return olderChunk.concat(recentChunk);
       });
+    }
+
+    var allRaw = [];
+    function loop(pageToken){
+      return fetchPage(pageToken).then(function(data){
+        allRaw = allRaw.concat(data.bars || []);
+        if(data.next_page_token) return loop(data.next_page_token);
+        return allRaw;
+      });
+    }
+
+    return loop(null).then(function(raw){
+      if(raw.length < 60){
+        throw new Error('Not enough intraday history for ' + sym + ' at 15-minute granularity in this window. Try a shorter lookback.');
+      }
+      return raw.map(function(b){
+        return { o:b.o, h:b.h, l:b.l, c:b.c, vol:b.v || 0, t:new Date(b.t) };
+      }).sort(function(a,b){ return a.t.getTime() - b.t.getTime(); });
     });
   }
 
@@ -6935,10 +6970,11 @@
 
   // Owner-only (gated via the currentUid/onAuthChange flow above, not a
   // separate check here). Exports the exact same raw bars the backtest
-  // above fetches -- reusing fetchIntradayBacktestHistory means this
-  // automatically respects the same rate-limited queue everything else
-  // already goes through, so this can't blow through Twelve Data's
-  // free-tier daily cap any differently than a normal backtest run would.
+  // above fetches -- reusing fetchIntradayBacktestHistoryChunked means
+  // this automatically goes through the same conservative Alpaca
+  // rate-limited queue everything else here does, so it can't compete
+  // with live trading calls any differently than a normal backtest run
+  // would.
   function exportHistoricalDataClicked(){
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
     var statusEl = document.getElementById('exportStatus');
