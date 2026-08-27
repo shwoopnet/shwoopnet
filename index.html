@@ -3116,6 +3116,14 @@
     var risk = Math.abs(signal.entry - signal.stop);
     var TRAIL_TRIGGER_RR = 0.75;
     var triggerPrice = isLong ? signal.entry + TRAIL_TRIGGER_RR * risk : signal.entry - TRAIL_TRIGGER_RR * risk;
+    // Lower, earlier threshold than the full trail trigger above -- a
+    // trade only got ANY breakeven protection once it crossed 0.75R,
+    // so one that ran to a real gain short of that (matches shwoop-
+    // server's technicalAnalysis.js -- see its own comment) could
+    // round-trip straight through entry into a genuine loss with
+    // nothing ever having engaged.
+    var EARLY_BREAKEVEN_RR = 0.3;
+    var earlyBreakevenPrice = isLong ? signal.entry + EARLY_BREAKEVEN_RR * risk : signal.entry - EARLY_BREAKEVEN_RR * risk;
 
     if(signal.currentStop === undefined){ signal.currentStop = signal.stop; }
     if(signal.trailingActive === undefined){ signal.trailingActive = false; }
@@ -3135,6 +3143,12 @@
     if(signal.trailingActive){
       signal.currentStop = isLong ? Math.max(signal.currentStop, signal.entry) : Math.min(signal.currentStop, signal.entry);
     }
+    // Independent of trailingActive -- see EARLY_BREAKEVEN_RR's own
+    // comment above for the gap this closes.
+    var reachedEarlyBreakeven = isLong ? currentPrice >= earlyBreakevenPrice : currentPrice <= earlyBreakevenPrice;
+    if(reachedEarlyBreakeven){
+      signal.currentStop = isLong ? Math.max(signal.currentStop, signal.entry) : Math.min(signal.currentStop, signal.entry);
+    }
 
     var status = 'active', statusLabel = 'Active';
     if(signal.trailingActive){ status = 'trailing'; statusLabel = 'Trailing'; }
@@ -3148,8 +3162,9 @@
       ' strategy specifically requires before taking a breakout seriously.');
     notes.push('Entry ' + (isLong ? 'above' : 'below') + ' the range at $' + signal.entry.toFixed(2) +
       ', initial stop at the opposite side of the range ($' + signal.stop.toFixed(2) + '). $' + signal.t1.toFixed(2) +
-      ' (1.5x that risk) is shown as a reference, not a hard cap — once price moves 0.75x the risk in its favor, ' +
-      'the stop trails behind it instead, so a real winner can run further than a fixed target would allow.');
+      ' (1.5x that risk) is shown as a reference, not a hard cap — once price moves 0.3x the risk in its favor the ' +
+      'stop locks to breakeven, and once it moves 0.75x the risk it starts trailing behind price instead, so a ' +
+      'real winner can run further than a fixed target would allow.');
     notes.push('This is intraday — expect it to resolve or need re-checking well before the close, not over days.');
 
     return {
@@ -6075,6 +6090,12 @@
     var risk = Math.abs(analysis.entry - analysis.stop);
     var TRAIL_TRIGGER_RR = 0.75;
     var triggerPrice = isLong ? analysis.entry + TRAIL_TRIGGER_RR * risk : analysis.entry - TRAIL_TRIGGER_RR * risk;
+    // Lower, earlier threshold than the full trail trigger above -- see
+    // shwoop-server's technicalAnalysis.js (EARLY_BREAKEVEN_RR) for the
+    // full reasoning. Checked against each bar's favorable extreme
+    // (high for Long, low for Short), same as the trigger check below.
+    var EARLY_BREAKEVEN_RR = 0.3;
+    var earlyBreakevenPrice = isLong ? analysis.entry + EARLY_BREAKEVEN_RR * risk : analysis.entry - EARLY_BREAKEVEN_RR * risk;
     var trailingActive = false;
     var currentStop = analysis.stop;
     var lastBarOfDayIdx = entryIdx;
@@ -6103,6 +6124,12 @@
       // was quietly simulating an older version of the strategy than the
       // one actually trading.
       if(trailingActive){
+        currentStop = isLong ? Math.max(currentStop, analysis.entry) : Math.min(currentStop, analysis.entry);
+      }
+      // Independent of trailingActive -- a smaller real favorable move
+      // locks breakeven on its own, even short of the full trigger.
+      var reachedEarlyBreakeven = isLong ? bar.h >= earlyBreakevenPrice : bar.l <= earlyBreakevenPrice;
+      if(reachedEarlyBreakeven){
         currentStop = isLong ? Math.max(currentStop, analysis.entry) : Math.min(currentStop, analysis.entry);
       }
     }
