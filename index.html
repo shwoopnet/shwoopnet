@@ -3427,6 +3427,20 @@
       // open). Shows what the 24/7 backend last saw, whether or not
       // this browser tab is the one doing any screening right now.
       backendIntradayPicks = data.intradayScreenerPicks;
+      // Seeds the live-quote watchlist for every symbol the backend is
+      // actually screening, not just the 8 curated in
+      // DEFAULT_WATCHLIST_SYMS -- without this, a pick for any of the
+      // other 8 real intraday-universe symbols (HOOD, RIOT, UPST, LCID,
+      // OPEN, SNAP, CHPT, ROKU) never gets a live quote polled at all,
+      // silently freezing its "Current" price and its expanded chart's
+      // last candle at the entry price forever (looks like real,
+      // moving price action but never actually updates) -- the exact
+      // same gap ensureInWatchlist already closed for real open journal
+      // entries, just never extended to cover setups that haven't
+      // necessarily been entered yet.
+      (backendIntradayPicks || []).forEach(function(p){
+        ensureInWatchlist(p.sym, COMPANY_NAMES[p.sym] || p.sym, p.entry, p.entry);
+      });
       backendIntradayUpdatedAt = data.intradayScreenerUpdatedAt;
       backendHeartbeatAt = data.serverHeartbeatAt;
       backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
@@ -5316,7 +5330,18 @@
     var posFromStop = isLong ? (current - stop) : (stop - current);
     var progressPct = validRange ? Math.max(0, Math.min(100, (posFromStop / range) * 100)) : 50;
     var entryPct = validRange ? Math.max(0, Math.min(100, ((isLong ? (entry - stop) : (stop - entry)) / range) * 100)) : 50;
-    return { progressPct: progressPct, entryPct: entryPct, barColor: progressPct >= entryPct ? 'var(--gain)' : 'var(--loss)' };
+    // Color is its own direct profit/loss check (current vs. entry),
+    // not derived from the clamped progressPct/entryPct comparison above.
+    // Those two get independently clamped to [0,100] for DISPLAY purposes
+    // (so the fill/marker never render off the visible track), and once
+    // a trailing stop moves past entry, that clamping collapses entryPct
+    // to 0 -- comparing the clamped values from that point on would only
+    // happen to stay accurate by coincidence (a trailed-past-breakeven
+    // trade genuinely can't lose anymore), not by any real guarantee, so
+    // color is computed the same honest way the P/L cell right next to
+    // this bar already is.
+    var inProfit = isLong ? current >= entry : current <= entry;
+    return { progressPct: progressPct, entryPct: entryPct, barColor: inProfit ? 'var(--gain)' : 'var(--loss)' };
   }
   function tradeProgressHtml(direction, current, entry, stop, target){
     var p = computeTradeProgress(direction, current, entry, stop, target);
