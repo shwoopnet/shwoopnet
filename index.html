@@ -2954,24 +2954,19 @@
   };
   var DEFAULT_WATCHLIST_SYMS = ['PLTR','SOFI','RIVN','COIN','MARA','AFRM','DKNG','CVNA'];
 
-  // Varied on purpose, not a uniform +0.50% for every symbol -- an
-  // identical placeholder change across the board meant "Top Losers"
-  // had nothing genuinely negative to show, so it displayed the
-  // relatively-lowest gainers with green up-arrows under a "Losers"
-  // label. Real quotes overwrite this within moments anyway; this is
-  // purely about what a brief flash of placeholder data looks like.
-  var DEFAULT_WATCHLIST_STARTING_PRICES = {
-    PLTR: 24.50, SOFI: 8.40, RIVN: 12.80, COIN: 205.00,
-    MARA: 16.20, AFRM: 62.00, DKNG: 42.50, CVNA: 245.00
-  };
-  var DEFAULT_WATCHLIST_STARTING_CHANGE_PCT = {
-    PLTR: 0.012, SOFI: 0.008, RIVN: -0.015, COIN: 0.021,
-    MARA: -0.009, AFRM: 0.004, DKNG: -0.006, CVNA: 0.017
-  };
+  // No hardcoded starting price/change here, same "no fake data" rule the
+  // crypto watchlist and the index cards already follow -- a hardcoded
+  // number (this used to seed DKNG at $42.50, a placeholder from whenever
+  // this was written) looks exactly like a real, current quote right up
+  // until "Sync failed -- last known prices" shows up and it's still
+  // sitting there, badly stale, with nothing to distinguish it from an
+  // actual last-known-good price. Every reader of this watchlist
+  // (Today's Setups, chart last-candle anchoring, the ticker, movers)
+  // already treats a still-null price/prevClose as legitimately not-
+  // resolved-yet -- real quotes replace this within moments once
+  // fetchAllQuotes' first batch completes.
   var watchlist = DEFAULT_WATCHLIST_SYMS.map(function(sym){
-    var price = DEFAULT_WATCHLIST_STARTING_PRICES[sym] || 100;
-    var changePct = DEFAULT_WATCHLIST_STARTING_CHANGE_PCT[sym] || 0;
-    return { sym: sym, name: COMPANY_NAMES[sym] || sym, price: price, prevClose: price / (1 + changePct) };
+    return { sym: sym, name: COMPANY_NAMES[sym] || sym, price: null, prevClose: null };
   });
 
   // "Ensure" means exactly that -- make sure the symbol is tracked at
@@ -3470,12 +3465,14 @@
   // ---------- Ticker tape ----------
   function renderTicker(){
     var track = document.getElementById('tickerTrack');
-    // Crypto items start at price:null and only ever get filled in by a
-    // real fetchAllCryptoQuotes resolution -- filtered out here rather
-    // than shown as a fake "$0.00" while that first fetch is still in
-    // flight (or never connected to Alpaca at all).
+    // Both watchlists start at price:null and only ever get filled in by
+    // a real fetchAllQuotes/fetchAllCryptoQuotes resolution -- filtered
+    // out here rather than shown as a fake "$0.00" (or, before this,
+    // equities' own hardcoded placeholder) while that first fetch is
+    // still in flight, or never connected at all.
+    var pricedEquities = watchlist.filter(function(item){ return item.price !== null && item.prevClose !== null; });
     var pricedCrypto = cryptoWatchlist.filter(function(item){ return item.price !== null && item.prevClose !== null; });
-    var itemsHtml = watchlist.concat(pricedCrypto).map(function(item){
+    var itemsHtml = pricedEquities.concat(pricedCrypto).map(function(item){
       var change = pct(item.price, item.prevClose);
       var up = change >= 0;
       return '<span class="ticker-item mono">' +
@@ -5465,8 +5462,18 @@
 
     el.innerHTML = visible.map(function(t){
       var liveQuote = findQuote(t.sym);
-      var q = liveQuote || { price: t.entry, prevClose: t.entry, name: t.sym };
-      var change = pct(q.price, q.prevClose);
+      // findQuote always returns SOME object here (every INTRADAY_UNIVERSE
+      // symbol is seeded into watchlist unpriced, before any real quote
+      // ever resolves -- see ensureInWatchlist) -- checking liveQuote
+      // itself for truthiness doesn't distinguish "a real quote came
+      // back" from "just the still-unpriced seed," which used to let a
+      // null price straight through to fmt()/pct() (previously it let a
+      // stale hardcoded placeholder number through instead, equally
+      // dishonest just less likely to crash).
+      var hasLiveQuote = !!(liveQuote && liveQuote.price != null);
+      var hasLiveChange = hasLiveQuote && liveQuote.prevClose != null;
+      var q = hasLiveQuote ? liveQuote : { price: t.entry, prevClose: t.entry, name: t.sym };
+      var change = hasLiveChange ? pct(q.price, q.prevClose) : 0;
       var up = change >= 0; // the arrow -- an honest, direction-agnostic fact: did the price itself rise or fall
       // The color, unlike the arrow above, has to answer "is this GOOD
       // for this specific trade" -- for a Short, price falling (up ===
@@ -5485,12 +5492,12 @@
       // theoretical risk:reward ratio that never changes once a trade's
       // actually live. A setup that hasn't been sent yet has no real
       // trade to have a P/L for -- shown as an honest "—", not a fake $0.
-      // Requires liveQuote specifically (not the entry-price fallback
+      // Requires hasLiveQuote specifically (not the entry-price fallback
       // above) -- before the first quote fetch resolves, q.price === t.entry
       // and this would otherwise render a real-looking "+$0.00 (+0.00%)"
       // that then visibly flashes to the true number a moment later.
       var plCellHtml;
-      if(openEntry && liveQuote){
+      if(openEntry && hasLiveQuote){
         var isLong = openEntry.direction === 'Long';
         var pl = (liveQuote.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1);
         var plPct = (liveQuote.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1);
@@ -5531,8 +5538,11 @@
                 '<span class="t-name">' + (q.name || t.sym) + '</span>' +
               '</span>' +
             '</div>' +
-            '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' + fmt(q.price) +
-              '<span class="chg ' + (favorable?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
+            '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' +
+              (hasLiveQuote ? fmt(q.price) : '—') +
+              (hasLiveChange
+                ? '<span class="chg ' + (favorable?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>'
+                : '') +
             '</div>' +
             '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
             '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
@@ -9385,7 +9395,7 @@
       };
     }).catch(function(){
       var q = findQuote(t.sym);
-      var price = q ? q.price : (t.entry || 0);
+      var price = (q && q.price != null) ? q.price : (t.entry || 0);
       var evald = evaluateTradeAlert(t, price);
       return {
         id: 'a' + Date.now() + '_' + t.sym, date: today, sym: t.sym, tag: evald.tag, text: evald.text,
@@ -11200,9 +11210,13 @@
     // S&P/Nasdaq/Dow benchmark ETFs for the index cards above, and mixing
     // those into gainers/losers meant an index sitting at a flat 0.00%
     // could out-"lose" real stocks just for having a smaller move,
-    // despite being a different category of thing entirely.
+    // despite being a different category of thing entirely. Also excludes
+    // anything not yet priced (still null, no fake placeholder anymore) --
+    // ranking against a still-unresolved quote would just be ranking
+    // against garbage (pct(null, null) is NaN, and Array.sort with NaN
+    // comparisons has no defined order).
     var withChange = watchlist.filter(function(w){
-      return INTRADAY_UNIVERSE.indexOf(w.sym) > -1;
+      return INTRADAY_UNIVERSE.indexOf(w.sym) > -1 && w.price != null && w.prevClose != null;
     }).map(function(w){
       return { sym: w.sym, price: w.price, change: pct(w.price, w.prevClose) };
     });
