@@ -9033,20 +9033,33 @@
   // what actually happened in the account, which is exactly what the
   // user was comparing against "Pull full history from Alpaca" below and
   // finding didn't line up. Patched here with the identical real-order
-  // reconstruction that panel uses -- but ONLY on the Equities tab.
-  // reconstructTradesFromOrders deliberately excludes crypto (its real
-  // order shape -- a plain market entry plus separately-submitted,
-  // manually-cancelled stop/target orders -- doesn't fit the same
-  // bracket-leg pairing equities orders do), so patching an "All" or
-  // "Crypto" view with an equities-only reconstruction would just swap
-  // one kind of wrong for another. Equities is the one tab where this is
-  // a complete, honest match.
+  // reconstruction that panel uses, on both All and Equities -- leaving
+  // All unreconciled used to mean this block and the headline Overall
+  // P&L card right above it (always Alpaca-patched regardless of tab)
+  // could show disagreeing numbers on the same screen with nothing
+  // explaining why. reconstructTradesFromOrders deliberately excludes
+  // crypto (its real order shape -- a plain market entry plus
+  // separately-submitted, manually-cancelled stop/target orders --
+  // doesn't fit the same bracket-leg pairing equities orders do), so the
+  // Crypto tab is the one left showing its own honest journal fallback,
+  // and All's own sub-label says "equities; crypto not yet reconciled"
+  // rather than implying crypto is included.
   var tradeStatsPatchGen = 0;
   function patchTradeStatsFromAlpaca(){
     var myGen = ++tradeStatsPatchGen;
-    if(journalFilter !== 'equities') return;
+    // Only the Crypto tab is skipped -- reconstructTradesFromOrders has no
+    // way to reconcile crypto's own order shape (see its own comment), so
+    // that tab is left showing the honest journal-based fallback. All and
+    // Equities both patch in the same real, reconciled equities trades:
+    // leaving All permanently unreconciled (the previous behavior here)
+    // meant the headline Overall P&L card above it (always Alpaca-patched,
+    // see patchOverallPLFromAlpaca) and these cards silently disagreed on
+    // the exact same screen with no indication why -- which is exactly
+    // the "disconnect" that kept getting reported. The sub-labels below
+    // make clear when crypto isn't included in what's shown.
+    if(journalFilter === 'crypto') return;
     getAlpacaClosedOrdersCached().then(function(orders){
-      if(myGen !== tradeStatsPatchGen || journalFilter !== 'equities') return; // superseded, or the tab changed while this was in flight
+      if(myGen !== tradeStatsPatchGen || journalFilter === 'crypto') return; // superseded, or the tab changed while this was in flight
       var trades = reconstructTradesFromOrders(orders).trades;
       if(!trades.length) return; // not connected, or no real equities trades yet -- leave the journal-based fallback showing
       var wins = trades.filter(function(t){ return t.dollarPL > 0; });
@@ -9068,7 +9081,12 @@
       if(!winRateEl) return;
 
       winRateEl.textContent = winRate.toFixed(0) + '%';
-      winRateSubEl.textContent = trades.length + ' real trade' + (trades.length === 1 ? '' : 's');
+      // On All, these cards now reflect real equities trades only --
+      // crypto isn't part of this reconstruction -- so the label says so
+      // rather than implying "all trades" the way the Equities tab's own
+      // unambiguous label can.
+      winRateSubEl.textContent = trades.length + ' real trade' + (trades.length === 1 ? '' : 's') +
+        (journalFilter === 'all' ? ' (equities; crypto not yet reconciled)' : '');
       avgWinEl.textContent = '+$' + avgWin.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(avgLoss).toFixed(0);
       if(best){
