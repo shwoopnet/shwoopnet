@@ -7172,7 +7172,14 @@
         }
         return res.json();
       }).then(function(data){
-        var bars = (data.bars && data.bars[sym]) || [];
+        // /v2/stocks/{sym}/bars (the single-symbol endpoint used here)
+        // returns bars as a plain array at the top level -- data.bars[sym]
+        // is the shape ONLY the crypto multi-symbol endpoint uses (see
+        // fetchCryptoHistoryFromNetwork), so that lookup was always
+        // undefined here regardless of what Alpaca actually returned,
+        // reporting "No bars returned" even for AAPL/MSFT/NVDA/TSLA on a
+        // real trading week.
+        var bars = data.bars || [];
         return { sym: sym, bars: bars, error: null };
       }).catch(function(err){
         return { sym: sym, bars: [], error: err.message };
