@@ -3149,19 +3149,17 @@
     return minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60);
   }
 
+  // bars must already be filtered to regular-session-only (see
+  // isRegularSessionBar) before being passed in here -- this function's
+  // only caller, the backtest simulation loop, filters once up front
+  // rather than this doing it on every call. It used to filter here
+  // instead, but this gets called once PER SIMULATED BAR with a slice
+  // that grows every iteration -- re-running an Intl.DateTimeFormat
+  // check across the whole growing slice on every single call turned a
+  // 30-day backtest into tens of thousands of redundant Intl calls,
+  // which is what was actually freezing the page, not a slow connection.
   function computeORBAnalysis(sym, bars, currentPrice, signalStore){
     if(!bars || bars.length === 0) return null;
-    // Filtered before anything else touches this array: without it, the
-    // "opening range" below could be built from a handful of near-zero-
-    // volume pre-market ticks instead of the real open, on most trading
-    // days -- not a rare edge case -- and the volume-lookback average a
-    // few lines down would also get diluted by those same thin
-    // extended-hours bars, making the 2x-volume confirmation trivially
-    // easy to pass against a deflated baseline. Shared by the live
-    // Setups card and the Labs backtest engine alike, since both call
-    // this same function.
-    bars = bars.filter(isRegularSessionBar);
-    if(bars.length === 0) return null;
     var lastBarDateKey = bars[bars.length-1].t.toISOString().slice(0,10);
     var todaysBars = bars.filter(function(b){ return b.t.toISOString().slice(0,10) === lastBarDateKey; });
     if(todaysBars.length <= ORB_RANGE_BARS) return null; // opening range not even established yet
@@ -6687,6 +6685,16 @@
   // slowing down the backtest itself.
   function runIntradayBacktestSimulationAsync(bars, lookbackBars, tightenOpts){
     return new Promise(function(resolve){
+      // Filtered once, here, rather than inside computeORBAnalysis (which
+      // used to do this on every call) -- this loop calls that function
+      // once per simulated bar, with a slice that grows every iteration,
+      // so filtering there meant re-running an Intl.DateTimeFormat check
+      // across the whole growing slice on every single call. Also fixes
+      // simulateORBForwardSameDay below for free, since it walks this
+      // same (now pre-filtered) bars array to resolve each trade -- a
+      // stray extended-hours bar's wick could otherwise spuriously
+      // trigger a stop-check outside real trading hours.
+      bars = bars.filter(isRegularSessionBar);
       var startIdx = Math.max(50, bars.length - lookbackBars);
       var trades = [];
       var localSignalStore = {};
