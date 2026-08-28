@@ -2755,6 +2755,16 @@
         and different data providers can genuinely disagree about what happened during the exact same historical
         window — a backtest run against one provider isn't a precise stand-in for what another would show for
         "the same" period, worth remembering before treating any single number here as more exact than it is.</p>
+        <p>A real bug was found and fixed after the validation numbers above were computed: Alpaca's IEX feed
+        carries real, if thin, extended-hours prints alongside the regular session — confirmed by directly
+        testing it, which found at least one pre-market bar before nearly every single trading day tested, across
+        every symbol tried. Without filtering those out, the opening range this whole strategy anchors to could
+        be built from a handful of near-zero-volume pre-market ticks instead of the real 9:30 ET open on most
+        days, and the 20-bar volume-lookback average used for the volume-confirmation check could get diluted by
+        those same thin bars too. Both the live screener and the backtest tool below now filter to genuine
+        regular-session bars before computing anything. The figures above predate that fix; a fresh walk-forward
+        run may land on different numbers now, and that's the correction working as intended, not the strategy
+        having changed.</p>
       </div>
     </div>
 
@@ -3123,8 +3133,35 @@
   var ORB_VOLUME_CONFIRM_MULTIPLE = 2.0;
   var ORB_REWARD_MULTIPLE = 1.5;
 
+  // Alpaca's IEX feed includes real (if thin) extended-hours prints
+  // alongside the regular session -- confirmed live via the "Test
+  // Alpaca data feed" diagnostic in Labs, which found at least one bar
+  // before the 9:30 ET open on nearly every day tested, across every
+  // symbol tried. Checked in real ET wall-clock time (not a fixed UTC
+  // offset) specifically so this stays correct across the DST boundary
+  // -- 9:30am-4:00pm ET is a different UTC window in EDT vs EST.
+  function isRegularSessionBar(bar){
+    var parts = {};
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit'
+    }).formatToParts(bar.t).forEach(function(p){ parts[p.type] = p.value; });
+    var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
+    return minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60);
+  }
+
   function computeORBAnalysis(sym, bars, currentPrice, signalStore){
     if(!bars || bars.length === 0) return null;
+    // Filtered before anything else touches this array: without it, the
+    // "opening range" below could be built from a handful of near-zero-
+    // volume pre-market ticks instead of the real open, on most trading
+    // days -- not a rare edge case -- and the volume-lookback average a
+    // few lines down would also get diluted by those same thin
+    // extended-hours bars, making the 2x-volume confirmation trivially
+    // easy to pass against a deflated baseline. Shared by the live
+    // Setups card and the Labs backtest engine alike, since both call
+    // this same function.
+    bars = bars.filter(isRegularSessionBar);
+    if(bars.length === 0) return null;
     var lastBarDateKey = bars[bars.length-1].t.toISOString().slice(0,10);
     var todaysBars = bars.filter(function(b){ return b.t.toISOString().slice(0,10) === lastBarDateKey; });
     if(todaysBars.length <= ORB_RANGE_BARS) return null; // opening range not even established yet
