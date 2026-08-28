@@ -5482,6 +5482,37 @@
         var plClass = pl >= 0 ? 'up' : 'down';
         cell.className = 'rr-ratio mono ' + plClass;
         cell.textContent = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)';
+
+        // The P/L cell above comes from Alpaca regardless of whether this
+        // tab's own quote poll (findQuote/findCryptoQuote) has resolved
+        // for this symbol yet -- crypto especially can have its own quote
+        // fetch lag or fail independently of the position endpoint. Without
+        // this, that gap showed a real dollar P/L sitting right next to an
+        // honest "--" Current price and a progress bar silently rendered
+        // at the entry price (see renderIntradayBlocks/renderCryptoBlocks'
+        // q.price fallback), which look contradictory even though neither
+        // number was actually wrong on its own. Alpaca's own current_price
+        // on this same position object is exactly the real price implied
+        // by the P/L just written above, so it's used here too.
+        var currentPrice = parseFloat(live.current_price);
+        if(!isNaN(currentPrice)){
+          var curCell = document.getElementById('cur-' + j.sym);
+          // Only fills in the still-unresolved placeholder -- a Current
+          // cell that already has a real quote also shows today's %
+          // change (see hasLiveChange in the render functions), which
+          // this position object has no equivalent field for; overwriting
+          // it here would silently delete that arrow.
+          if(curCell && curCell.textContent === '—'){
+            curCell.textContent = fmt(currentPrice);
+          }
+          var block = document.querySelector('.trade-block[data-symbol="' + j.sym + '"]');
+          var fill = block && block.querySelector('.trade-progress-fill');
+          if(fill){
+            var progress = computeTradeProgress(j.direction, currentPrice, j.entry, j.stop, j.t1);
+            fill.style.width = progress.progressPct + '%';
+            fill.style.background = progress.barColor;
+          }
+        }
       });
     }).catch(function(err){
       console.error('Today\'s Setups P/L patch failed:', err);
@@ -6403,9 +6434,22 @@
       var bars = {};
       symbols.forEach(function(sym){
         var symBars = raw[sym] || [];
+        // Sorted explicitly, same defensive choice the equities fetcher
+        // makes -- a single-page request (a short lookback) already
+        // comes back chronological, so this was never noticed there, but
+        // a long lookback needing several paginated requests concatenated
+        // in arrival order isn't guaranteed to still be in time order
+        // afterward. Every signal check here (the rolling range, the
+        // 20-bar volume average, the 30-bar trend) assumes "the last N
+        // bars" genuinely means the most recent N -- out-of-order bars
+        // silently corrupts those comparisons rather than erroring, which
+        // is exactly what a longer lookback producing FEWER total signals
+        // than a shorter one already contained within it looks like: real
+        // breakouts failing their volume/trend confirmation against a
+        // shuffled slice of history instead of the actual recent bars.
         bars[sym] = symBars.map(function(b){
           return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
-        });
+        }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
       });
       return bars;
     });
@@ -7128,7 +7172,14 @@
         }
         return res.json();
       }).then(function(data){
-        var bars = (data.bars && data.bars[sym]) || [];
+        // /v2/stocks/{sym}/bars (the single-symbol endpoint used here)
+        // returns bars as a plain array at the top level -- data.bars[sym]
+        // is the shape ONLY the crypto multi-symbol endpoint uses (see
+        // fetchCryptoHistoryFromNetwork), so that lookup was always
+        // undefined here regardless of what Alpaca actually returned,
+        // reporting "No bars returned" even for AAPL/MSFT/NVDA/TSLA on a
+        // real trading week.
+        var bars = data.bars || [];
         return { sym: sym, bars: bars, error: null };
       }).catch(function(err){
         return { sym: sym, bars: [], error: err.message };
