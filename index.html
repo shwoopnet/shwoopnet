@@ -4640,10 +4640,21 @@
   // bracket is still live.
   function closeAlpacaPositionSafely(sym){
     return fetchAlpacaOpenOrders().then(function(orders){
+      // Open ORDERS keep the symbol format they were actually submitted
+      // with -- for crypto, that's the slash-included form ("UNI/USD"),
+      // same as every journal entry -- so matching against the raw sym
+      // here is correct and must stay as-is.
       var matches = (orders || []).filter(function(o){ return o.symbol === sym; });
       return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
     }).then(function(){
-      return closeAlpacaPosition(sym);
+      // The POSITION-close endpoint is different: Alpaca's /v2/positions
+      // drops the "/" for crypto (see canonicalSymbol's own comment --
+      // an order sent as "UNI/USD" is held internally, and closable,
+      // only as "UNIUSD"). Passing the journal's slash-included sym
+      // straight through here 404'd on every manual Close click for a
+      // crypto position -- confirmed live on UNI/USD -- since Alpaca has
+      // no position on file under that literal identifier.
+      return closeAlpacaPosition(canonicalSymbol(sym));
     });
   }
 
