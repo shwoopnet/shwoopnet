@@ -1577,112 +1577,109 @@
         });
       });
     },
-    watchJournal: function(uid, callback){
+    // Single shared listener for the whole user document -- this used to
+    // be six separate onSnapshot subscriptions (journal, alerts, activity
+    // log, screener picks, Alpaca credentials, trading-pause state x2 for
+    // equities/crypto), all watching this exact same doc. Every one of
+    // them fired its own callback (and downstream re-render cascade) on
+    // EVERY single write to the doc -- including the backend's own
+    // once-a-minute heartbeat -- so a fresh sign-in had to wait on 7
+    // independent listener registrations before the app felt "connected,"
+    // and every subsequent sync repeated that sevenfold. One listener,
+    // fanned out to every consumer from the same snapshot (see
+    // onAuthChange below), is the same real-time behavior for a fraction
+    // of the overhead.
+    watchUserDoc: function(uid, callback){
       return onSnapshot(doc(db, 'users', uid), function(snap){
-        callback(snap.exists() ? (snap.data().journalEntries || []) : []);
+        callback(snap.exists() ? snap.data() : {});
       }, function(err){
-        console.error('Journal sync error:', err);
+        console.error('User doc sync error:', err);
       });
     },
     saveAlerts: function(uid, alertHistory, lastDate){
       return setDoc(doc(db, 'users', uid), { alertHistory: alertHistory, alertsLastDate: lastDate }, { merge: true });
     },
-    watchAlerts: function(uid, callback){
-      return onSnapshot(doc(db, 'users', uid), function(snap){
-        var data = snap.exists() ? snap.data() : {};
-        callback({ alertHistory: data.alertHistory || [], alertsLastDate: data.alertsLastDate || null });
-      }, function(err){
-        console.error('Alerts sync error:', err);
-      });
-    },
     saveActivityLog: function(uid, activityLog){
       return setDoc(doc(db, 'users', uid), { activityLog: activityLog }, { merge: true });
-    },
-    watchActivityLog: function(uid, callback){
-      return onSnapshot(doc(db, 'users', uid), function(snap){
-        var data = snap.exists() ? snap.data() : {};
-        callback(data.activityLog || []);
-      }, function(err){
-        console.error('Activity log sync error:', err);
-      });
     },
     saveScreenerPicks: function(uid, picks, forDate){
       return setDoc(doc(db, 'users', uid), { screenerPicks: picks, screenerDate: forDate }, { merge: true });
     },
-    watchScreenerPicks: function(uid, callback){
-      return onSnapshot(doc(db, 'users', uid), function(snap){
-        var data = snap.exists() ? snap.data() : {};
-        callback({
-          screenerPicks: data.screenerPicks || null, screenerDate: data.screenerDate || null,
-          intradayScreenerPicks: data.intradayScreenerPicks || null, intradayScreenerUpdatedAt: data.intradayScreenerUpdatedAt || null,
-          // Backend liveness heartbeat -- written every minute by the
-          // server regardless of market hours (see scheduler.js/index.js
-          // in shwoop-server), so this is the one field that keeps moving
-          // even overnight when nothing else on this document changes.
-          // Absence of a value (never written yet, e.g. an old server
-          // build) is distinct from a stale value and is handled by the
-          // caller, not defaulted away here.
-          serverHeartbeatAt: data.serverHeartbeatAt || null,
-          serverMarketOpenAtHeartbeat: typeof data.serverMarketOpenAtHeartbeat === 'boolean' ? data.serverMarketOpenAtHeartbeat : null,
-          serverIntradayScreenerEnabled: typeof data.serverIntradayScreenerEnabled === 'boolean' ? data.serverIntradayScreenerEnabled : null,
-          serverIntradayAutoTradeEnabled: typeof data.serverIntradayAutoTradeEnabled === 'boolean' ? data.serverIntradayAutoTradeEnabled : null,
-          // Per-cycle status -- flips scanning -> idle/error every 5
-          // minutes while the market's open, so a person reopening the
-          // app has a real chance of catching "Scanning…" live, and
-          // always has a readable summary of what the last cycle did.
-          intradayCycleStatus: data.intradayCycleStatus || null,
-          intradayCycleStartedAt: data.intradayCycleStartedAt || null,
-          intradayCycleCompletedAt: data.intradayCycleCompletedAt || null,
-          intradayCycleError: data.intradayCycleError || null,
-          intradayCycleErrorAt: data.intradayCycleErrorAt || null,
-          intradayLastCycleSummary: data.intradayLastCycleSummary || null,
-          // Position drift -- a mismatch between what the journal thinks
-          // is open and what Alpaca actually holds (see
-          // shwoop-server/src/safety/positionDrift.js). Deliberately
-          // surfaced for manual review only; nothing here auto-fixes a
-          // financial record. An empty/absent array means "no drift
-          // detected as of the last check", not "never checked" -- use
-          // positionDriftCheckedAt to tell those apart.
-          positionDriftFindings: Array.isArray(data.positionDriftFindings) ? data.positionDriftFindings : [],
-          positionDriftCheckedAt: data.positionDriftCheckedAt || null,
-          // Account summary + live positions the backend already fetches
-          // from Alpaca every minute (see shwoop-server's
-          // syncAccountSnapshot) -- delivered here over the same live
-          // listener instead of this tab making its own round-trip to
-          // Alpaca on every page load. Absence means the backend hasn't
-          // synced yet (e.g. a fresh deploy); the caller falls back to a
-          // direct fetch in that case, not a fake empty state.
-          serverAccountSummary: data.serverAccountSummary || null,
-          serverPositions: Array.isArray(data.serverPositions) ? data.serverPositions : null,
-          serverAccountSnapshotAt: data.serverAccountSnapshotAt || null,
-          // The actual override fields (distinct from the server*
-          // fields above, which are the backend's read-only EFFECTIVE
-          // mirrors) -- these are what this tab's own controls need to
-          // pre-fill themselves correctly rather than always resetting
-          // to some hardcoded default on reload. null/absent means "no
-          // override written yet, backend is using its own env-var
-          // default" -- see shwoop-server's src/settings.js.
-          riskPercentOverride: typeof data.riskPercentOverride === 'number' ? data.riskPercentOverride : null,
-          intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
-          intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
-          // Crypto's own mirrors of every field above -- entirely
-          // separate fields (see shwoop-server's runCryptoCycle), so the
-          // two strategies' statuses never overwrite each other here.
-          cryptoScreenerPicks: data.cryptoScreenerPicks || null, cryptoScreenerUpdatedAt: data.cryptoScreenerUpdatedAt || null,
-          serverCryptoScreenerEnabled: typeof data.serverCryptoScreenerEnabled === 'boolean' ? data.serverCryptoScreenerEnabled : null,
-          serverCryptoAutoTradeEnabled: typeof data.serverCryptoAutoTradeEnabled === 'boolean' ? data.serverCryptoAutoTradeEnabled : null,
-          cryptoCycleStatus: data.cryptoCycleStatus || null,
-          cryptoCycleStartedAt: data.cryptoCycleStartedAt || null,
-          cryptoCycleCompletedAt: data.cryptoCycleCompletedAt || null,
-          cryptoCycleError: data.cryptoCycleError || null,
-          cryptoCycleErrorAt: data.cryptoCycleErrorAt || null,
-          cryptoLastCycleSummary: data.cryptoLastCycleSummary || null,
-          cryptoScreenerEnabledOverride: typeof data.cryptoScreenerEnabledOverride === 'boolean' ? data.cryptoScreenerEnabledOverride : null,
-          cryptoAutoTradeEnabledOverride: typeof data.cryptoAutoTradeEnabledOverride === 'boolean' ? data.cryptoAutoTradeEnabledOverride : null
-        });
-      }, function(err){
-        console.error('Screener sync error:', err);
-      });
+    // Pure shaping helper -- takes the raw user-doc snapshot data (see
+    // watchUserDoc above) and applies the same defaults/typeof guards
+    // this used to apply inside its own onSnapshot callback. Kept as a
+    // plain function, not a listener, now that there's only one shared
+    // subscription; called directly from onAuthChange's dispatch.
+    shapeScreenerData: function(data){
+      data = data || {};
+      return {
+        screenerPicks: data.screenerPicks || null, screenerDate: data.screenerDate || null,
+        intradayScreenerPicks: data.intradayScreenerPicks || null, intradayScreenerUpdatedAt: data.intradayScreenerUpdatedAt || null,
+        // Backend liveness heartbeat -- written every minute by the
+        // server regardless of market hours (see scheduler.js/index.js
+        // in shwoop-server), so this is the one field that keeps moving
+        // even overnight when nothing else on this document changes.
+        // Absence of a value (never written yet, e.g. an old server
+        // build) is distinct from a stale value and is handled by the
+        // caller, not defaulted away here.
+        serverHeartbeatAt: data.serverHeartbeatAt || null,
+        serverMarketOpenAtHeartbeat: typeof data.serverMarketOpenAtHeartbeat === 'boolean' ? data.serverMarketOpenAtHeartbeat : null,
+        serverIntradayScreenerEnabled: typeof data.serverIntradayScreenerEnabled === 'boolean' ? data.serverIntradayScreenerEnabled : null,
+        serverIntradayAutoTradeEnabled: typeof data.serverIntradayAutoTradeEnabled === 'boolean' ? data.serverIntradayAutoTradeEnabled : null,
+        // Per-cycle status -- flips scanning -> idle/error every 5
+        // minutes while the market's open, so a person reopening the
+        // app has a real chance of catching "Scanning…" live, and
+        // always has a readable summary of what the last cycle did.
+        intradayCycleStatus: data.intradayCycleStatus || null,
+        intradayCycleStartedAt: data.intradayCycleStartedAt || null,
+        intradayCycleCompletedAt: data.intradayCycleCompletedAt || null,
+        intradayCycleError: data.intradayCycleError || null,
+        intradayCycleErrorAt: data.intradayCycleErrorAt || null,
+        intradayLastCycleSummary: data.intradayLastCycleSummary || null,
+        // Position drift -- a mismatch between what the journal thinks
+        // is open and what Alpaca actually holds (see
+        // shwoop-server/src/safety/positionDrift.js). Deliberately
+        // surfaced for manual review only; nothing here auto-fixes a
+        // financial record. An empty/absent array means "no drift
+        // detected as of the last check", not "never checked" -- use
+        // positionDriftCheckedAt to tell those apart.
+        positionDriftFindings: Array.isArray(data.positionDriftFindings) ? data.positionDriftFindings : [],
+        positionDriftCheckedAt: data.positionDriftCheckedAt || null,
+        // Account summary + live positions the backend already fetches
+        // from Alpaca every minute (see shwoop-server's
+        // syncAccountSnapshot) -- delivered here over the same live
+        // listener instead of this tab making its own round-trip to
+        // Alpaca on every page load. Absence means the backend hasn't
+        // synced yet (e.g. a fresh deploy); the caller falls back to a
+        // direct fetch in that case, not a fake empty state.
+        serverAccountSummary: data.serverAccountSummary || null,
+        serverPositions: Array.isArray(data.serverPositions) ? data.serverPositions : null,
+        serverAccountSnapshotAt: data.serverAccountSnapshotAt || null,
+        // The actual override fields (distinct from the server*
+        // fields above, which are the backend's read-only EFFECTIVE
+        // mirrors) -- these are what this tab's own controls need to
+        // pre-fill themselves correctly rather than always resetting
+        // to some hardcoded default on reload. null/absent means "no
+        // override written yet, backend is using its own env-var
+        // default" -- see shwoop-server's src/settings.js.
+        riskPercentOverride: typeof data.riskPercentOverride === 'number' ? data.riskPercentOverride : null,
+        intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
+        intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
+        // Crypto's own mirrors of every field above -- entirely
+        // separate fields (see shwoop-server's runCryptoCycle), so the
+        // two strategies' statuses never overwrite each other here.
+        cryptoScreenerPicks: data.cryptoScreenerPicks || null, cryptoScreenerUpdatedAt: data.cryptoScreenerUpdatedAt || null,
+        serverCryptoScreenerEnabled: typeof data.serverCryptoScreenerEnabled === 'boolean' ? data.serverCryptoScreenerEnabled : null,
+        serverCryptoAutoTradeEnabled: typeof data.serverCryptoAutoTradeEnabled === 'boolean' ? data.serverCryptoAutoTradeEnabled : null,
+        cryptoCycleStatus: data.cryptoCycleStatus || null,
+        cryptoCycleStartedAt: data.cryptoCycleStartedAt || null,
+        cryptoCycleCompletedAt: data.cryptoCycleCompletedAt || null,
+        cryptoCycleError: data.cryptoCycleError || null,
+        cryptoCycleErrorAt: data.cryptoCycleErrorAt || null,
+        cryptoLastCycleSummary: data.cryptoLastCycleSummary || null,
+        cryptoScreenerEnabledOverride: typeof data.cryptoScreenerEnabledOverride === 'boolean' ? data.cryptoScreenerEnabledOverride : null,
+        cryptoAutoTradeEnabledOverride: typeof data.cryptoAutoTradeEnabledOverride === 'boolean' ? data.cryptoAutoTradeEnabledOverride : null
+      };
     },
     // Merges only the fields actually passed in -- callers pass a
     // partial object with just the one or two settings that changed
@@ -1700,17 +1697,13 @@
     saveAlpacaEnvironmentPref: function(uid, environment){
       return setDoc(doc(db, 'users', uid), { alpacaEnvironment: environment }, { merge: true });
     },
-    watchAlpacaCredentials: function(uid, callback){
-      return onSnapshot(doc(db, 'users', uid), function(snap){
-        var data = snap.exists() ? snap.data() : {};
-        callback({
-          alpacaKeyId: data.alpacaKeyId || '', alpacaSecretKey: data.alpacaSecretKey || '',
-          alpacaLiveKeyId: data.alpacaLiveKeyId || '', alpacaLiveSecretKey: data.alpacaLiveSecretKey || '',
-          alpacaEnvironment: data.alpacaEnvironment || 'paper'
-        });
-      }, function(err){
-        console.error('Alpaca credentials sync error:', err);
-      });
+    shapeAlpacaCredentials: function(data){
+      data = data || {};
+      return {
+        alpacaKeyId: data.alpacaKeyId || '', alpacaSecretKey: data.alpacaSecretKey || '',
+        alpacaLiveKeyId: data.alpacaLiveKeyId || '', alpacaLiveSecretKey: data.alpacaLiveSecretKey || '',
+        alpacaEnvironment: data.alpacaEnvironment || 'paper'
+      };
     },
     // The server sets <screenerType>AutoTradePaused after exhausting its
     // retry budget on a failed order (see autoTrade.js) — this just
@@ -1720,18 +1713,14 @@
     // equities strategy; crypto's own pause state (a structural rejection
     // on ONE strategy must never halt the other -- see autoTrade.js) is
     // watched separately by passing 'crypto'.
-    watchTradingPauseState: function(uid, callback, screenerType){
+    shapeTradingPauseState: function(data, screenerType){
       var st = screenerType || 'intraday';
-      return onSnapshot(doc(db, 'users', uid), function(snap){
-        var data = snap.exists() ? snap.data() : {};
-        callback({
-          paused: Boolean(data[st + 'AutoTradePaused']),
-          pausedAt: data[st + 'AutoTradePausedAt'] || null,
-          pausedReason: data[st + 'AutoTradePausedReason'] || null,
-        });
-      }, function(err){
-        console.error('Trading pause state sync error:', err);
-      });
+      data = data || {};
+      return {
+        paused: Boolean(data[st + 'AutoTradePaused']),
+        pausedAt: data[st + 'AutoTradePausedAt'] || null,
+        pausedReason: data[st + 'AutoTradePausedReason'] || null,
+      };
     },
     resumeTrading: function(uid, screenerType){
       var st = screenerType || 'intraday';
@@ -2616,37 +2605,63 @@
       </div>
     </div>
 
-    <div class="acct-strip">
-      <div><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value" id="demoEquity">$10,000.00</div></div>
-      <div><div class="backtest-stat-label">Today's P&amp;L</div><div class="backtest-stat-value" id="demoDayPL">+$0.00 (+0.00%)</div></div>
-      <div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value" id="demoCash">$10,000.00</div></div>
-      <div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value" id="demoBuyingPower">$40,000.00</div></div>
+    <div class="to-card">
+      <div class="acct-strip">
+        <div><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value" id="demoEquity">$10,000.00</div></div>
+        <div><div class="backtest-stat-label">Today's P&amp;L</div><div class="backtest-stat-value" id="demoDayPL">+$0.00 (+0.00%)</div></div>
+        <div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value" id="demoCash">$10,000.00</div></div>
+        <div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value" id="demoBuyingPower">$40,000.00</div></div>
+      </div>
     </div>
 
-    <div class="labs-backtest-card" style="margin-bottom:20px;">
-      <div class="to-card-head">
-        <span class="to-card-title">Equities Setups</span>
-        <span class="to-card-meta" id="demoTradeCount">0 traded today</span>
+    <!-- Same card order as the real Trade Overview page: Account summary,
+         Open Positions, Equities Setups, Crypto Setups, Activity Log.
+         Backend Status and Auto-Trading Controls are deliberately left
+         out -- there's no real backend or real controls to show status
+         for in a scripted demo, and faking either would be the opposite
+         of the "clearly marked Demo, nothing confused with a real alert"
+         promise made in the intro modal. -->
+    <div class="to-card">
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Open Positions</span>
+          <span class="to-card-meta" id="demoPositionsHeadMeta"></span>
+        </div>
+        <div class="labs-backtest-status" id="demoPositionsEmpty">No open positions right now.</div>
+        <div id="demoPositionsBody"></div>
       </div>
-      <div class="labs-backtest-status" id="demoSetupEmpty">Scanning the universe for the next setup…</div>
-      <div id="demoTradeCardWrap"></div>
     </div>
 
-    <div class="labs-backtest-card" style="margin-bottom:20px;">
-      <div class="to-card-head">
-        <span class="to-card-title">Open Positions</span>
-        <span class="to-card-meta" id="demoPositionsHeadMeta"></span>
+    <div class="to-card">
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Equities Setups</span>
+          <span class="to-card-meta" id="demoTradeCount">0 traded today</span>
+        </div>
+        <div class="labs-backtest-status" id="demoSetupEmpty">Scanning the universe for the next setup…</div>
+        <div id="demoTradeCardWrap"></div>
       </div>
-      <div class="labs-backtest-status" id="demoPositionsEmpty">No open positions right now.</div>
-      <div id="demoPositionsBody"></div>
     </div>
 
-    <div class="labs-backtest-card">
-      <div class="to-card-head">
-        <span class="to-card-title">Activity Log</span>
+    <div class="to-card">
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Crypto Setups</span>
+          <span class="to-card-meta" id="demoCryptoSetupMeta"></span>
+        </div>
+        <div class="labs-backtest-status" id="demoCryptoSetupEmpty">Watching BTC/USD's rolling range…</div>
+        <div id="demoCryptoTradeCardWrap"></div>
       </div>
-      <div class="labs-backtest-status" id="demoActivityEmpty">Nothing yet — the demo will populate this as it runs.</div>
-      <div id="demoActivityList"></div>
+    </div>
+
+    <div class="to-card">
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Activity Log</span>
+        </div>
+        <div class="labs-backtest-status" id="demoActivityEmpty">Nothing yet — the demo will populate this as it runs.</div>
+        <div id="demoActivityList"></div>
+      </div>
     </div>
   </main>
 
@@ -2698,10 +2713,11 @@
           <div>
             <div class="labs-method-title">Entry and stop come straight from the range — the exit now trails</div>
             <div class="labs-method-body">Entry is the range boundary itself; the initial stop is the opposite
-            side of the range. Once a trade moves 0.75x its own risk in its favor, the stop starts trailing
-            behind the best price reached instead of staying fixed at a flat 1.5x target — a real winner can
-            run further than a hard cap would allow. One signal per stock per day — once a stock breaks out and
-            qualifies, it doesn't fire again until the next trading day.</div>
+            side of the range. A smaller favorable move — 0.3x risk — locks the stop to breakeven on its own;
+            once a trade moves 0.75x its own risk in its favor, the stop then starts trailing behind the best
+            price reached instead of staying fixed at a flat 1.5x target — a real winner can run further than a
+            hard cap would allow. One signal per stock per day — once a stock breaks out and qualifies, it
+            doesn't fire again until the next trading day.</div>
           </div>
         </div>
       </div>
@@ -2732,6 +2748,13 @@
         equities fires far more often than crypto (thousands of trades over this window, not hundreds), and
         letting that many trades compound off each other reaches a balance no real account could keep trading at
         without running into its own liquidity and market-impact limits, which this simulation doesn't model.</p>
+        <p>Every profit-factor and expectancy figure on this page — the walk-forward validation above and the
+        backtest tool below — bakes in a 5-basis-point cost per market-order leg (two legs for a stop-out or an
+        end-of-day close, one for a session that never got room to resolve at all), a real trading cost, not a
+        frictionless best case. Historical bars come from Alpaca's own market data (migrated off Twelve Data),
+        and different data providers can genuinely disagree about what happened during the exact same historical
+        window — a backtest run against one provider isn't a precise stand-in for what another would show for
+        "the same" period, worth remembering before treating any single number here as more exact than it is.</p>
       </div>
     </div>
 
@@ -2775,10 +2798,13 @@
           <div class="labs-method-step">4</div>
           <div>
             <div class="labs-method-title">Same trailing-stop shape as equities, with the same breakeven floor</div>
-            <div class="labs-method-body">Entry and initial stop come from the range edges. Once a trade moves
-            0.5x its own risk in its favor, the stop starts trailing a full 1x risk behind the best price reached
-            — and once trailing engages, the same breakeven floor used on the equities side keeps it from ever
-            sitting below entry again.</div>
+            <div class="labs-method-body">Entry and initial stop come from the range edges. A smaller favorable
+            move locks the stop to breakeven on its own, same as equities; once a trade moves 0.5x its own risk
+            in its favor, the stop then starts trailing a full 1x risk behind the best price reached, with the
+            same breakeven floor keeping it from ever sitting below entry again once trailing engages. Alpaca's
+            crypto API has no true stop-market order — only stop-limit — so a fast enough move can leave that
+            resting order unfilled below the market; a backstop now force-closes the position with a real market
+            order the moment that's detected, rather than leaving it unprotected.</div>
           </div>
         </div>
       </div>
@@ -2794,6 +2820,21 @@
         without it), profit factor 2.27 (was 2.02) — a real, measured improvement, same mechanism as equities.
         This strategy is newer than the equities one and has less live history behind it — the activity log is
         what will show whether real performance holds up the way this backtest suggests it should.</p>
+        <p>Alpaca's crypto API has no stop-market order type at all — only stop-limit, submitted as a real
+        resting order on Alpaca's own books. If price gaps down through both the trigger and its small execution
+        buffer in one move (crypto trades 24/7 with no circuit breakers smoothing a fast move the way equities
+        has), that resting order can be left open and unfilled below the market. A backstop added since this was
+        validated now checks every open position each cycle and force-closes it with a real market order the
+        moment price has already moved past its own stop, rather than leaving it to hope the limit price
+        eventually gets revisited.</p>
+        <p>A separate bug in how longer backtest lookbacks got assembled (multi-page history pulls weren't
+        guaranteed to land back in chronological order) was found and fixed after the figures above were
+        computed — it could silently make a longer lookback report FEWER signals than a shorter one already
+        contained within it, which is impossible if the underlying data is correct. The numbers above predate
+        that fix; a fresh long-lookback run in the tool below may look different now, and that's the correction
+        working as intended, not a change in the strategy itself. Every figure here also bakes in the same
+        5-basis-point per-leg trading cost described in the equities section above — a real cost, not a
+        frictionless best case.</p>
       </div>
     </div>
 
@@ -3202,7 +3243,6 @@
     };
   }
 
-  var screenerUnsubscribe = null;
   var isRunningScreener = false;
   var SCREENER_PICK_COUNT = 4;
 
@@ -3434,10 +3474,9 @@
     cryptoAutoTradeEnabledOverride: null
   };
 
-  function loadScreenerForUser(uid){
-    if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
-    screenerUnsubscribe = window.__shwoopAPI.watchScreenerPicks(uid, function(data){
-      // Purely for display — this is the backend server's own intraday
+  function handleScreenerDocUpdate(rawData){
+    var data = window.__shwoopAPI.shapeScreenerData(rawData);
+    // Purely for display — this is the backend server's own intraday
       // screener view, kept entirely separate from this tab's own
       // independent intradayTrades (which the tab computes itself when
       // open). Shows what the 24/7 backend last saw, whether or not
@@ -3500,7 +3539,6 @@
       var statusPageEl = document.getElementById('page-trades');
       if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
       updateTradeBubbles();
-    });
   }
 
   // A flat .toFixed(2) is fine for every equities price (always well
@@ -3937,7 +3975,7 @@
   // What's actually happening right now, not just what override (if any)
   // this browser has written -- falls back to the server's own mirrored
   // effective value (backendAutoTradeEnabledOnServer/
-  // backendScreenerEnabledOnServer, kept live by loadScreenerForUser)
+  // backendScreenerEnabledOnServer, kept live by handleScreenerDocUpdate)
   // whenever no override has been set yet, so these toggles never show
   // "Off" while the badge right next to them says "On" because the
   // server's untouched env-var default happens to be on.
@@ -4097,63 +4135,52 @@
     setIntradayEnabled(true);
   }
 
-  function loadAlpacaCredentialsForUser(uid){
+  function handleAlpacaCredentialsDocUpdate(rawData){
     if(!window.__shwoopAPI) return;
-    window.__shwoopAPI.watchAlpacaCredentials(uid, function(data){
-      var newEnv = data.alpacaEnvironment === 'live' ? 'live' : 'paper';
-      var newPaperKey = data.alpacaKeyId || '', newPaperSecret = data.alpacaSecretKey || '';
-      var newLiveKey = data.alpacaLiveKeyId || '', newLiveSecret = data.alpacaLiveSecretKey || '';
-      var credsUnchanged =
-        alpacaCredsPaper.keyId === newPaperKey && alpacaCredsPaper.secretKey === newPaperSecret &&
-        alpacaCredsLive.keyId === newLiveKey && alpacaCredsLive.secretKey === newLiveSecret &&
-        alpacaAccountType === newEnv;
+    var data = window.__shwoopAPI.shapeAlpacaCredentials(rawData);
+    var newEnv = data.alpacaEnvironment === 'live' ? 'live' : 'paper';
+    var newPaperKey = data.alpacaKeyId || '', newPaperSecret = data.alpacaSecretKey || '';
+    var newLiveKey = data.alpacaLiveKeyId || '', newLiveSecret = data.alpacaLiveSecretKey || '';
+    var credsUnchanged =
+      alpacaCredsPaper.keyId === newPaperKey && alpacaCredsPaper.secretKey === newPaperSecret &&
+      alpacaCredsLive.keyId === newLiveKey && alpacaCredsLive.secretKey === newLiveSecret &&
+      alpacaAccountType === newEnv;
 
-      alpacaCredsPaper.keyId = newPaperKey;
-      alpacaCredsPaper.secretKey = newPaperSecret;
-      alpacaCredsLive.keyId = newLiveKey;
-      alpacaCredsLive.secretKey = newLiveSecret;
-      alpacaAccountType = newEnv;
-      applyAlpacaEnvironmentUI();
-      // Deliberately not populating the visible input fields here — on a
-      // fresh page load there's no reason for the saved keys to ever sit
-      // in an open text box. Straight to testing the connection instead.
-      var creds = activeAlpacaCreds();
-      if(!creds.keyId || !creds.secretKey){
-        alpacaConnected = false;
-        showAlpacaInputsView();
-        return;
-      }
-      // This listener sits on the WHOLE shared account document — journal
-      // entries, activity log, screener picks, and (once deployed) the
-      // backend's once-a-minute heartbeat all live on that same doc — so
-      // it fires on every write to ANY of those, not just a credential
-      // change. Re-testing the live Alpaca connection on every one of
-      // those was harmless-but-wasteful before; once the heartbeat ships
-      // it would mean a real Alpaca API call every single minute, 24/7,
-      // for no reason. Skip the network round-trip when nothing about
-      // the credentials or environment actually changed and the last
-      // check already succeeded — testAlpacaConnection's own retry loop
-      // (see above) is what's responsible for recovering from a bad
-      // state, not this listener re-firing.
-      if(credsUnchanged && alpacaConnected){
-        return;
-      }
-      testAlpacaConnection();
-    });
+    alpacaCredsPaper.keyId = newPaperKey;
+    alpacaCredsPaper.secretKey = newPaperSecret;
+    alpacaCredsLive.keyId = newLiveKey;
+    alpacaCredsLive.secretKey = newLiveSecret;
+    alpacaAccountType = newEnv;
+    applyAlpacaEnvironmentUI();
+    // Deliberately not populating the visible input fields here — on a
+    // fresh page load there's no reason for the saved keys to ever sit
+    // in an open text box. Straight to testing the connection instead.
+    var creds = activeAlpacaCreds();
+    if(!creds.keyId || !creds.secretKey){
+      alpacaConnected = false;
+      showAlpacaInputsView();
+      return;
+    }
+    // This fires on every write to the shared account doc -- journal
+    // entries, activity log, screener picks, and the backend's own
+    // once-a-minute heartbeat all live on that same doc (see
+    // watchUserDoc) -- not just a credential change. Re-testing the live
+    // Alpaca connection on every one of those would mean a real Alpaca
+    // API call every single minute, 24/7, for no reason. Skip the
+    // network round-trip when nothing about the credentials or
+    // environment actually changed and the last check already succeeded
+    // — testAlpacaConnection's own retry loop (see above) is what's
+    // responsible for recovering from a bad state, not this re-firing.
+    if(credsUnchanged && alpacaConnected){
+      return;
+    }
+    testAlpacaConnection();
   }
 
-  var tradingPauseUnsubscribe = null;
-  var cryptoTradingPauseUnsubscribe = null;
-  function loadTradingPauseStateForUser(uid){
+  function handleTradingPauseDocUpdate(rawData){
     if(!window.__shwoopAPI) return;
-    if(tradingPauseUnsubscribe){ tradingPauseUnsubscribe(); }
-    tradingPauseUnsubscribe = window.__shwoopAPI.watchTradingPauseState(uid, function(state){
-      renderTradingPauseState(state);
-    });
-    if(cryptoTradingPauseUnsubscribe){ cryptoTradingPauseUnsubscribe(); }
-    cryptoTradingPauseUnsubscribe = window.__shwoopAPI.watchTradingPauseState(uid, function(state){
-      renderCryptoTradingPauseState(state);
-    }, 'crypto');
+    renderTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData));
+    renderCryptoTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'crypto'));
   }
 
   // ---------- Trading-paused alert (sound + browser notification) ----------
@@ -9548,7 +9575,6 @@
   // ---------- Market alerts: real, condition-based, persisted per day ----------
   var alertHistory = [];
   var alertsUid = null;
-  var alertsUnsubscribe = null;
 
   // Trade events get their own tag class/label derived from what
   // actually happened, not just the raw log type -- 'position_action'
@@ -9754,28 +9780,23 @@
     });
   }
 
-  function loadAlertsForUser(uid){
-    alertsUid = uid;
-    if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
-    alertsUnsubscribe = window.__shwoopAPI.watchAlerts(uid, function(data){
-      var today = new Date().toISOString().slice(0,10);
-      alertHistory = data.alertHistory || [];
-      if(!alertsEnabledPref){
-        renderHistoryList();
-        return;
-      }
-      if(data.alertsLastDate === today){
-        renderHistoryList();
-      } else {
-        generateAndSaveDailyAlerts(alertHistory);
-      }
-    });
+  function handleAlertsDocUpdate(rawData){
+    var today = new Date().toISOString().slice(0,10);
+    alertHistory = rawData.alertHistory || [];
+    if(!alertsEnabledPref){
+      renderHistoryList();
+      return;
+    }
+    if((rawData.alertsLastDate || null) === today){
+      renderHistoryList();
+    } else {
+      generateAndSaveDailyAlerts(alertHistory);
+    }
   }
 
   function clearAlerts(){
     alertHistory = [];
     alertsUid = null;
-    if(alertsUnsubscribe){ alertsUnsubscribe(); alertsUnsubscribe = null; }
     renderHistoryList();
   }
 
@@ -9786,7 +9807,6 @@
   // later." This is the same information, persisted, so it survives a
   // page reload and can actually be reviewed whenever you check in.
   var systemActivityLog = [];
-  var activityLogUnsubscribe = null;
   var SYSTEM_ACTIVITY_LOG_MAX = 200;
 
   function logSystemActivity(type, sym, text){
@@ -9880,21 +9900,16 @@
     });
   }
 
-  function loadActivityLogForUser(uid){
-    if(activityLogUnsubscribe){ activityLogUnsubscribe(); activityLogUnsubscribe = null; }
-    activityLogAlertBaselineId = undefined;
-    activityLogUnsubscribe = window.__shwoopAPI.watchActivityLog(uid, function(log){
-      var incoming = log || [];
-      checkForNewPositionCloseAlerts(incoming);
-      systemActivityLog = incoming;
-      renderActivityLog();
-      renderHistoryList();
-    });
+  function handleActivityLogDocUpdate(rawData){
+    var incoming = rawData.activityLog || [];
+    checkForNewPositionCloseAlerts(incoming);
+    systemActivityLog = incoming;
+    renderActivityLog();
+    renderHistoryList();
   }
 
   function clearActivityLog(){
     systemActivityLog = [];
-    if(activityLogUnsubscribe){ activityLogUnsubscribe(); activityLogUnsubscribe = null; }
     renderActivityLog();
     renderHistoryList();
   }
@@ -10708,6 +10723,63 @@
     wrap.dataset.rendered = 'true';
   }
 
+  // ---------- Crypto Setups card (demo) -- mirrors the real Trade
+  // Overview page having its own separate Crypto Setups card next to
+  // Equities Setups, not just a shared Open Positions row. Unlike the
+  // equities card above (driven by demoCardState, a pre-fill "forming"
+  // preview that goes away once the real position opens), crypto's own
+  // script has no separate forming stage -- it goes straight from
+  // "breaks out, signal fires" to sending the order -- so this reads
+  // directly off demoPositions instead of a parallel state variable,
+  // and simply keeps showing the position, updated, for as long as it
+  // stays open. trailing is inferred from current price vs. entry
+  // (favorable = trailing engaged) since the demo script doesn't
+  // simulate the real trailing-stop math bar by bar, only the narrated
+  // price points.
+  function renderDemoCryptoTradeCard(){
+    var wrap = document.getElementById('demoCryptoTradeCardWrap');
+    var emptyEl = document.getElementById('demoCryptoSetupEmpty');
+    var metaEl = document.getElementById('demoCryptoSetupMeta');
+    if(!wrap) return;
+    var s = demoPositions.filter(function(p){ return p.sym === demoCryptoSym; })[0];
+    if(!s){
+      wrap.innerHTML = '';
+      if(emptyEl) emptyEl.removeAttribute('hidden');
+      if(metaEl) metaEl.textContent = '';
+      return;
+    }
+    if(emptyEl) emptyEl.setAttribute('hidden', '');
+    if(metaEl) metaEl.textContent = '1 setup';
+    var change = ((s.current - s.entry) / s.entry * 100) * (s.direction === 'Long' ? 1 : -1);
+    var up = change >= 0;
+    var trailing = s.direction === 'Long' ? s.current > s.entry : s.current < s.entry;
+    var badgeCls = trailing ? 'trailing' : 'active';
+    var badgeLabel = trailing ? 'Trailing' : 'Active';
+    var pl = (s.current - s.entry) * s.qty * (s.direction === 'Long' ? 1 : -1);
+    wrap.innerHTML =
+      '<div class="trade-block' + (wrap.dataset.rendered ? '' : ' demo-trade-card-enter') + '" data-symbol="' + s.sym + '">' +
+        '<div class="trade-columns trade-row">' +
+          '<button class="chevron" aria-label="Toggle" disabled>⌄</button>' +
+          '<div class="t-sym-cell">' +
+            symbolBadgeHtml(s.sym) +
+            '<span class="t-sym-text">' +
+              '<span class="t-sym">' + s.sym + '<span class="t-dir">' + s.direction + '</span>' +
+                '<span class="status-badge ' + badgeCls + '">' + badgeLabel + '</span></span>' +
+            '</span>' +
+          '</div>' +
+          '<div class="t-current mono" data-label="Current">' + demoFmt(s.current) +
+            '<span class="chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>' +
+          '</div>' +
+          '<div class="t-entry mono" data-label="Entry">' + demoFmt(s.entry) + '</div>' +
+          '<div class="t-stop mono" data-label="Stop">' + demoFmt(s.stop) + '</div>' +
+          '<div class="t-t1 mono" data-label="Target">' + demoFmt(s.target) + '</div>' +
+          '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono ' + (pl>=0?'up':'down') + '">' + (pl>=0?'+':'-') + '$' + Math.abs(pl).toFixed(2) + '</div></div>' +
+        '</div>' +
+        tradeProgressHtml(s.direction, s.current, s.entry, s.stop, s.target) +
+      '</div>';
+    wrap.dataset.rendered = 'true';
+  }
+
   // ---------- Open Positions table (demo) -- the actual Trade Overview
   // table markup/columns, just populated from demoPositions instead of
   // real journalEntries. Can render more than one row at once, unlike
@@ -10756,6 +10828,7 @@
     demoPositions.push({ sym:cfg.sym, direction:cfg.direction, qty:cfg.qty, entry:cfg.entry, current:cfg.entry, stop:cfg.stop, target:cfg.target, flash:true });
     demoTradeCount++;
     renderDemoPositionsTable();
+    renderDemoCryptoTradeCard();
     demoUpdateSummary();
     document.getElementById('demoTradeCount').textContent = demoTradeCount + ' traded today';
     var unit = demoUnitLabel(cfg.sym);
@@ -10771,6 +10844,7 @@
     if(!p) return;
     p.current = current;
     renderDemoPositionsTable();
+    renderDemoCryptoTradeCard();
     demoUpdateSummary();
   }
 
@@ -10785,6 +10859,7 @@
     demoAccountBalance += pl;
     demoUpdateSummary();
     renderDemoPositionsTable();
+    renderDemoCryptoTradeCard();
     var plStr = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2);
     demoAddActivity(sym + ' — ' + plStr + (note ? ' (' + note + ')' : '') + '.', 'Trade exited');
     showDemoToast(sym, 'Trade exited', plStr + '.', pl >= 0 ? 'win' : 'loss');
@@ -10972,6 +11047,7 @@
     demoUpdateSummary();
     renderDemoTradeCard();
     renderDemoPositionsTable();
+    renderDemoCryptoTradeCard();
   }
   // Full reset -- Restart button and (re)opening the intro modal. Unlike
   // rolloverDemoDay above, this is a deliberate "start completely over"
@@ -10986,6 +11062,7 @@
     renderDemoTradeCard();
     renderDemoPositionsTable();
     resetDemoCrypto();
+    renderDemoCryptoTradeCard();
   }
   document.getElementById('demoPlayPauseBtn').addEventListener('click', function(){
     demoPlaying = !demoPlaying;
@@ -11274,7 +11351,15 @@
         if(exportSectionEl) exportSectionEl.removeAttribute('hidden');
         if(accountEmailDesc){ accountEmailDesc.textContent = 'Signed in as ' + user.email; }
         if(signOutBtn){ signOutBtn.textContent = 'Sign out'; }
-        journalUnsubscribe = api.watchJournal(user.uid, function(entries){
+        // Reset once per fresh sign-in -- loadAlertsForUser/
+        // loadActivityLogForUser used to do this themselves on every
+        // (re)subscribe; there's only one subscribe point now (see
+        // watchUserDoc below), so this is where that same setup belongs.
+        alertsUid = user.uid;
+        activityLogAlertBaselineId = undefined;
+        journalUnsubscribe = api.watchUserDoc(user.uid, function(data){
+          // ---- Journal ----
+          var entries = data.journalEntries || [];
           journalEntries = entries;
           // Every OPEN position needs its symbol in the live-quote
           // watchlist, or Open Positions' "current price" falls back to
@@ -11305,14 +11390,18 @@
           // closing needs to refresh it here too, not just wait for the
           // next quote batch or screener-picks update.
           renderWhatToWatch();
+
+          // ---- Everything else that used to keep its own separate
+          // listener on this exact same document -- all fanned out from
+          // this one snapshot instead (see watchUserDoc's own comment).
+          handleAlertsDocUpdate(data);
+          handleActivityLogDocUpdate(data);
+          handleScreenerDocUpdate(data);
+          handleAlpacaCredentialsDocUpdate(data);
+          handleTradingPauseDocUpdate(data);
         });
-        loadAlertsForUser(user.uid);
-        loadActivityLogForUser(user.uid);
-        loadScreenerForUser(user.uid);
         loadMarketNewsIfSignedIn();
         loadEarningsIfSignedIn();
-        loadAlpacaCredentialsForUser(user.uid);
-        loadTradingPauseStateForUser(user.uid);
         // Unpriced (null) until fetchAllQuotes actually resolves -- same
         // "no fake data" rule the crypto watchlist already follows.
         // Renders as an honest "Loading…" (see indexReads) rather than a
@@ -11329,7 +11418,6 @@
         journalEntries = [];
         clearAlerts();
         clearActivityLog();
-        if(screenerUnsubscribe){ screenerUnsubscribe(); screenerUnsubscribe = null; }
         resetNewsAndEarnings();
     resetAlpacaConnection();
         intradayTrades = [];
