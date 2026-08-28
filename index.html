@@ -2943,7 +2943,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies/projects referenced on this site. Stock ticker symbols, company names, and cryptocurrency symbols shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID, OPEN, SNAP, CHPT, and ROKU, plus BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, and AAVE) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Shwoop calls itself "your pocket advisor" because that's the shape of what it does — it watches, decides, and acts on your behalf so you don't have to sit and stare at charts. It's not a licensed advisor and it isn't giving you advice: it runs two strategies side by side, together screening 28 instruments — a fixed list of 16 stocks, chosen for how they're priced rather than their size, on 15-minute bars re-checked every 5 minutes during market hours; and a separate list of 12 crypto pairs, screened the same way but around the clock, since crypto never closes. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades are sent to a connected Alpaca account — paper (simulated money) or live, whichever environment is currently connected; a persistent banner and red accents make it unmistakable whenever live means real money is genuinely at risk. This is a single-owner personal tool, not a public product, and the underlying strategies are still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
+    <p>Shwoop calls itself "your pocket advisor" because that's the shape of what it does — it watches, decides, and acts on your behalf so you don't have to sit and stare at charts. It's not a licensed advisor and it isn't giving you advice: it runs two strategies side by side, together screening 28 instruments — a fixed list of 16 stocks, chosen for how they're priced rather than their size, on 15-minute bars re-checked every minute during market hours; and a separate list of 12 crypto pairs, screened the same way but every 5 minutes around the clock, since crypto never closes. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades are sent to a connected Alpaca account — paper (simulated money) or live, whichever environment is currently connected; a persistent banner and red accents make it unmistakable whenever live means real money is genuinely at risk. This is a single-owner personal tool, not a public product, and the underlying strategies are still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
     <p>Prices are live quotes from Alpaca's market data feed, falling back to Finnhub if that's unavailable. Chart history is real data from Twelve Data — if it can't be reached, you'll see an honest "couldn't load" message instead of fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
@@ -9886,7 +9886,15 @@
   // than a couple missed ticks' worth, the honest read is "can't confirm
   // this is alive" rather than silently trusting a stale timestamp.
   var BACKEND_HEARTBEAT_STALE_MS = 150000; // 2.5 min -- allows for one missed 60s tick plus write latency
-  var INTRADAY_CYCLE_INTERVAL_MS = 5 * 60 * 1000;
+  // Matches shwoop-server's scheduler.js INTRADAY_INTERVAL_MS -- dropped
+  // from 5 minutes to 1 once the equities screener moved off Twelve
+  // Data's rate limit onto Alpaca's, which could actually support the
+  // extra call volume (see equitiesMarketData.js on the backend).
+  var INTRADAY_CYCLE_INTERVAL_MS = 60 * 1000;
+  // Crypto keeps its own separate, unchanged cadence (shwoop-server's
+  // CRYPTO_INTERVAL_MS) -- this was never the bottleneck the equities
+  // change targets.
+  var CRYPTO_CYCLE_INTERVAL_MS = 5 * 60 * 1000;
 
   function formatAgo(ms){
     if(ms < 1000) return 'just now';
@@ -9912,9 +9920,9 @@
   //  2) Heartbeat -- proves the *process* is alive, even when there's
   //     nothing to trade (market closed) and nothing else on the
   //     document would otherwise change.
-  //  3) Cycle status -- proves the *5-minute intraday cycle itself* is
-  //     actually executing (scanning -> idle/error), not just that the
-  //     process happens to be up.
+  //  3) Cycle status -- proves the *intraday cycle itself* is actually
+  //     executing (scanning -> idle/error), not just that the process
+  //     happens to be up.
   //  4) Server settings truth -- proves the scan, the sizing, and the
   //     auto-send are genuinely wired together end to end, in plain
   //     language, not just three components that each look fine alone.
@@ -9996,7 +10004,7 @@
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
           '<div class="backend-pulse-label">Equities: no cycle has run yet</div>' +
-          '<div class="backend-pulse-sub">Runs automatically every 5 minutes while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.</div>' +
+          '<div class="backend-pulse-sub">Runs automatically every minute while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.</div>' +
         '</div></div>'
       );
     }
@@ -10021,7 +10029,7 @@
         '</div></div>'
       );
     } else if(backendCryptoCycleStatus === 'idle' && backendCryptoLastCycleSummary){
-      var cryptoNextEta = backendCryptoCycleCompletedAt ? backendCryptoCycleCompletedAt + INTRADAY_CYCLE_INTERVAL_MS : null;
+      var cryptoNextEta = backendCryptoCycleCompletedAt ? backendCryptoCycleCompletedAt + CRYPTO_CYCLE_INTERVAL_MS : null;
       var cryptoEtaText = cryptoNextEta && cryptoNextEta > Date.now() ? ' · next scan ~' + formatClock(cryptoNextEta) : '';
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
@@ -10500,7 +10508,7 @@
     if(clearBtn){ clearBtn.style.display = ''; }
     var typeLabels = {
       sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
-      // cycle_summary is the once-per-5-minutes "did the scanner, sizing,
+      // cycle_summary is the once-per-cycle "did the scanner, sizing,
       // and auto-trade actually run together" line written by the
       // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
       cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
@@ -11266,7 +11274,7 @@
 
   // ---------- What to Watch (Brief page recap of the actual trades) ----------
   // Prefers the backend's own intraday picks (backendIntradayPicks) --
-  // computed server-side every 5 minutes, 24/7, regardless of whether
+  // computed server-side every minute while the market's open, regardless of whether
   // this tab is open or has its own local "alpacaIntradayEnabled" toggle
   // on. That fixed a real gap: this card used to source only from
   // intradayTrades, this tab's own independent re-scan, which meant it
