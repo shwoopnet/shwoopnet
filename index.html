@@ -2687,10 +2687,11 @@
           <div>
             <div class="labs-method-title">Entry and stop come straight from the range — the exit now trails</div>
             <div class="labs-method-body">Entry is the range boundary itself; the initial stop is the opposite
-            side of the range. Once a trade moves 0.75x its own risk in its favor, the stop starts trailing
-            behind the best price reached instead of staying fixed at a flat 1.5x target — a real winner can
-            run further than a hard cap would allow. One signal per stock per day — once a stock breaks out and
-            qualifies, it doesn't fire again until the next trading day.</div>
+            side of the range. A smaller favorable move — 0.3x risk — locks the stop to breakeven on its own;
+            once a trade moves 0.75x its own risk in its favor, the stop then starts trailing behind the best
+            price reached instead of staying fixed at a flat 1.5x target — a real winner can run further than a
+            hard cap would allow. One signal per stock per day — once a stock breaks out and qualifies, it
+            doesn't fire again until the next trading day.</div>
           </div>
         </div>
       </div>
@@ -2721,6 +2722,13 @@
         equities fires far more often than crypto (thousands of trades over this window, not hundreds), and
         letting that many trades compound off each other reaches a balance no real account could keep trading at
         without running into its own liquidity and market-impact limits, which this simulation doesn't model.</p>
+        <p>Every profit-factor and expectancy figure on this page — the walk-forward validation above and the
+        backtest tool below — bakes in a 5-basis-point cost per market-order leg (two legs for a stop-out or an
+        end-of-day close, one for a session that never got room to resolve at all), a real trading cost, not a
+        frictionless best case. Historical bars come from Alpaca's own market data (migrated off Twelve Data),
+        and different data providers can genuinely disagree about what happened during the exact same historical
+        window — a backtest run against one provider isn't a precise stand-in for what another would show for
+        "the same" period, worth remembering before treating any single number here as more exact than it is.</p>
       </div>
     </div>
 
@@ -2764,10 +2772,13 @@
           <div class="labs-method-step">4</div>
           <div>
             <div class="labs-method-title">Same trailing-stop shape as equities, with the same breakeven floor</div>
-            <div class="labs-method-body">Entry and initial stop come from the range edges. Once a trade moves
-            0.5x its own risk in its favor, the stop starts trailing a full 1x risk behind the best price reached
-            — and once trailing engages, the same breakeven floor used on the equities side keeps it from ever
-            sitting below entry again.</div>
+            <div class="labs-method-body">Entry and initial stop come from the range edges. A smaller favorable
+            move locks the stop to breakeven on its own, same as equities; once a trade moves 0.5x its own risk
+            in its favor, the stop then starts trailing a full 1x risk behind the best price reached, with the
+            same breakeven floor keeping it from ever sitting below entry again once trailing engages. Alpaca's
+            crypto API has no true stop-market order — only stop-limit — so a fast enough move can leave that
+            resting order unfilled below the market; a backstop now force-closes the position with a real market
+            order the moment that's detected, rather than leaving it unprotected.</div>
           </div>
         </div>
       </div>
@@ -2783,6 +2794,21 @@
         without it), profit factor 2.27 (was 2.02) — a real, measured improvement, same mechanism as equities.
         This strategy is newer than the equities one and has less live history behind it — the activity log is
         what will show whether real performance holds up the way this backtest suggests it should.</p>
+        <p>Alpaca's crypto API has no stop-market order type at all — only stop-limit, submitted as a real
+        resting order on Alpaca's own books. If price gaps down through both the trigger and its small execution
+        buffer in one move (crypto trades 24/7 with no circuit breakers smoothing a fast move the way equities
+        has), that resting order can be left open and unfilled below the market. A backstop added since this was
+        validated now checks every open position each cycle and force-closes it with a real market order the
+        moment price has already moved past its own stop, rather than leaving it to hope the limit price
+        eventually gets revisited.</p>
+        <p>A separate bug in how longer backtest lookbacks got assembled (multi-page history pulls weren't
+        guaranteed to land back in chronological order) was found and fixed after the figures above were
+        computed — it could silently make a longer lookback report FEWER signals than a shorter one already
+        contained within it, which is impossible if the underlying data is correct. The numbers above predate
+        that fix; a fresh long-lookback run in the tool below may look different now, and that's the correction
+        working as intended, not a change in the strategy itself. Every figure here also bakes in the same
+        5-basis-point per-leg trading cost described in the equities section above — a real cost, not a
+        frictionless best case.</p>
       </div>
     </div>
 
