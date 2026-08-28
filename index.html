@@ -5482,6 +5482,37 @@
         var plClass = pl >= 0 ? 'up' : 'down';
         cell.className = 'rr-ratio mono ' + plClass;
         cell.textContent = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)';
+
+        // The P/L cell above comes from Alpaca regardless of whether this
+        // tab's own quote poll (findQuote/findCryptoQuote) has resolved
+        // for this symbol yet -- crypto especially can have its own quote
+        // fetch lag or fail independently of the position endpoint. Without
+        // this, that gap showed a real dollar P/L sitting right next to an
+        // honest "--" Current price and a progress bar silently rendered
+        // at the entry price (see renderIntradayBlocks/renderCryptoBlocks'
+        // q.price fallback), which look contradictory even though neither
+        // number was actually wrong on its own. Alpaca's own current_price
+        // on this same position object is exactly the real price implied
+        // by the P/L just written above, so it's used here too.
+        var currentPrice = parseFloat(live.current_price);
+        if(!isNaN(currentPrice)){
+          var curCell = document.getElementById('cur-' + j.sym);
+          // Only fills in the still-unresolved placeholder -- a Current
+          // cell that already has a real quote also shows today's %
+          // change (see hasLiveChange in the render functions), which
+          // this position object has no equivalent field for; overwriting
+          // it here would silently delete that arrow.
+          if(curCell && curCell.textContent === '—'){
+            curCell.textContent = fmt(currentPrice);
+          }
+          var block = document.querySelector('.trade-block[data-symbol="' + j.sym + '"]');
+          var fill = block && block.querySelector('.trade-progress-fill');
+          if(fill){
+            var progress = computeTradeProgress(j.direction, currentPrice, j.entry, j.stop, j.t1);
+            fill.style.width = progress.progressPct + '%';
+            fill.style.background = progress.barColor;
+          }
+        }
       });
     }).catch(function(err){
       console.error('Today\'s Setups P/L patch failed:', err);
