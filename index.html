@@ -6403,9 +6403,22 @@
       var bars = {};
       symbols.forEach(function(sym){
         var symBars = raw[sym] || [];
+        // Sorted explicitly, same defensive choice the equities fetcher
+        // makes -- a single-page request (a short lookback) already
+        // comes back chronological, so this was never noticed there, but
+        // a long lookback needing several paginated requests concatenated
+        // in arrival order isn't guaranteed to still be in time order
+        // afterward. Every signal check here (the rolling range, the
+        // 20-bar volume average, the 30-bar trend) assumes "the last N
+        // bars" genuinely means the most recent N -- out-of-order bars
+        // silently corrupts those comparisons rather than erroring, which
+        // is exactly what a longer lookback producing FEWER total signals
+        // than a shorter one already contained within it looks like: real
+        // breakouts failing their volume/trend confirmation against a
+        // shuffled slice of history instead of the actual recent bars.
         bars[sym] = symBars.map(function(b){
           return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
-        });
+        }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
       });
       return bars;
     });
