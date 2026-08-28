@@ -809,13 +809,7 @@
   }
   .brief-cta-copy{ flex: 1; min-width:220px; }
   .brief-cta-copy .cta-stat{ font-family:'Public Sans', sans-serif; font-size:15px; margin-bottom:4px; }
-  /* Bare selector (not scoped to .brief-cta-copy) -- also used standalone
-     for #cryptoWatchStat, the crypto "What to Watch" recap line, which
-     isn't nested inside .brief-cta-copy at all. That line used to match
-     no rule whatsoever and rendered as unstyled, full-size default text --
-     a jarring, oversized caption sitting directly above the properly-
-     styled equities card below it. */
-  .cta-sub{ font-size:12px; color:var(--muted); }
+  .brief-cta-copy .cta-sub{ font-size:12px; color:var(--muted); }
   .cta-btn{
     background: var(--amber-glow); border:1px solid var(--amber-dim); color:var(--amber);
     padding:12px 20px; border-radius:6px; font-size:13.5px; cursor:pointer;
@@ -2005,7 +1999,6 @@
 
     <div class="brief-section-title" style="margin-top:28px;">What to Watch — Crypto</div>
     <div class="watch-trades" id="whatToWatchCryptoList"></div>
-    <div class="cta-sub" id="cryptoWatchStat" style="margin-top:-8px; margin-bottom:20px;"></div>
 
     <div class="brief-cta-row">
       <div class="brief-cta-copy">
@@ -3581,10 +3574,24 @@
   // renderWhatToWatch builds when no source is passed in, so every
   // caller (including the couple of leftover local-scanner call sites)
   // gets the real numbers rather than needing to be updated individually.
-  function statCta(source){
+  // Combines both strategies into the one shared box/line below "What to
+  // Watch" -- equities and crypto used to each get their own separate
+  // stat display (this one, plus a standalone cryptoStatCta line above
+  // it), which visually split one "here's everything you're tracking"
+  // recap into two disconnected pieces pointing at the same underlying
+  // Trade Overview page. cryptoSource defaults the same way equities'
+  // source does when omitted, so the couple of leftover call sites that
+  // invoke this with no arguments at all still get real, current numbers
+  // for both.
+  function statCta(source, cryptoSource){
     if(!source){
       var base = (backendIntradayPicks && backendIntradayPicks.length) ? backendIntradayPicks.map(buildTradeFromPick) : intradayTrades;
       source = withOpenPositionsMergedIn(base);
+    }
+    if(!cryptoSource){
+      cryptoSource = withCryptoOpenPositionsMergedIn(
+        (backendCryptoPicks && backendCryptoPicks.length) ? backendCryptoPicks.map(buildTradeFromPick) : []
+      );
     }
     // "With open positions" means a real, current-account Alpaca
     // position exists for that symbol -- not just an ORB status label
@@ -3593,14 +3600,11 @@
     var openCount = source.filter(function(t){
       return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
     }).length;
-    var text = source.length + ' stocks you\'re tracking today, ' + openCount + ' with open positions';
-    // A real open crypto position used to need a parenthetical mention
-    // here, since this equities-only count (withOpenPositionsMergedIn
-    // deliberately excludes crypto) was the only place on the Brief page
-    // that acknowledged crypto at all. Now that the Brief has its own
-    // "What to Watch — Crypto" section with a real stat line of its own
-    // (see cryptoStatCta), that patch would just be a redundant second
-    // mention of the same thing right below it.
+    var cryptoOpenCount = cryptoSource.filter(function(t){
+      return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
+    }).length;
+    var text = (source.length + cryptoSource.length) + ' instruments you\'re tracking today (' +
+      source.length + ' stocks, ' + cryptoSource.length + ' crypto), ' + (openCount + cryptoOpenCount) + ' with open positions';
     document.getElementById('ctaStat').textContent = text;
   }
 
@@ -11332,7 +11336,6 @@
     // Overview but simply be missing here, the two pages disagreeing
     // about what's actually open.
     source = withOpenPositionsMergedIn(source);
-    statCta(source);
     renderWatchTradeCards(el, source);
 
     // Crypto's own parallel section -- same backendCryptoPicks that
@@ -11340,25 +11343,13 @@
     // had no UI reading it anywhere until now. No local-scan fallback
     // the way equities has intradayTrades -- crypto never had one.
     var cryptoEl = document.getElementById('whatToWatchCryptoList');
-    if(cryptoEl){
-      var cryptoSource = withCryptoOpenPositionsMergedIn(
-        (backendCryptoPicks && backendCryptoPicks.length) ? backendCryptoPicks.map(buildTradeFromPick) : []
-      );
-      cryptoStatCta(cryptoSource);
-      renderWatchTradeCards(cryptoEl, cryptoSource);
-    }
-  }
+    var cryptoSource = withCryptoOpenPositionsMergedIn(
+      (backendCryptoPicks && backendCryptoPicks.length) ? backendCryptoPicks.map(buildTradeFromPick) : []
+    );
+    if(cryptoEl){ renderWatchTradeCards(cryptoEl, cryptoSource); }
 
-  // Same shape/reasoning as statCta above, scoped to crypto -- kept as
-  // its own line rather than folded into statCta's sentence, since this
-  // section (unlike the equities one) has genuinely separate cards to
-  // point back to, not just a parenthetical mention.
-  function cryptoStatCta(source){
-    var openCount = source.filter(function(t){
-      return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
-    }).length;
-    var el = document.getElementById('cryptoWatchStat');
-    if(el) el.textContent = source.length + ' crypto pairs on the board right now, ' + openCount + ' with open positions';
+    // One combined recap for both strategies -- see statCta's own comment.
+    statCta(source, cryptoSource);
   }
 
   // ---------- Market Breadth & Today's Movers (computed, no extra API calls) ----------
