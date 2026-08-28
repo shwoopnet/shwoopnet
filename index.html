@@ -5631,6 +5631,17 @@
       el.innerHTML = '<div class="labs-backtest-status">No active setups right now — all ' + source.length + ' symbols are still watching. Click "Show all" above to see them.</div>';
       return;
     }
+    // source itself can genuinely be empty -- the backend only ever
+    // reports a symbol here once it actually has a qualifying breakout
+    // (no "Watching" placeholder for the rest of the universe comes from
+    // it at all), and this tab's own local re-scan hasn't necessarily run
+    // yet either. Without this, the card fell through to rendering
+    // completely blank -- no rows, no message, not even the Show-all
+    // button -- which reads as broken instead of "quiet right now."
+    if(source.length === 0){
+      el.innerHTML = '<div class="labs-backtest-status">No qualifying setups across the universe right now — the screener is still watching all 16 symbols for the next breakout.</div>';
+      return;
+    }
 
     el.innerHTML = visible.map(function(t){
       var liveQuote = findQuote(t.sym);
@@ -5803,6 +5814,16 @@
     var headMeta = document.getElementById('cryptoSetupsHeadMeta');
     if(headMeta){
       headMeta.textContent = source.length ? (source.length + ' setup' + (source.length === 1 ? '' : 's')) : '';
+    }
+
+    // Same gap as renderIntradayBlocks -- the backend only ever reports a
+    // pair here once it actually has a qualifying breakout, no "Watching"
+    // placeholder for the rest of the universe. Without this, the card
+    // fell through to rendering completely blank instead of saying
+    // anything, reading as broken rather than "quiet right now."
+    if(source.length === 0){
+      el.innerHTML = '<div class="labs-backtest-status">No qualifying setups right now — the screener is still watching all 12 crypto pairs for the next breakout.</div>';
+      return;
     }
 
     el.innerHTML = source.map(function(t){
