@@ -945,8 +945,13 @@
     margin-bottom:14px; overflow:hidden;
     box-shadow: var(--card-shadow);
   }
-  .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; }
+  .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; transition: transform .15s ease; }
   .chevron:hover{ color: var(--amber); }
+  /* expandTradeCard/collapseTradeCard already set aria-expanded and
+     add/remove this class correctly -- this rotation was the one
+     missing piece, so the arrow never visually reflected open/closed
+     state despite the underlying toggle working. */
+  .chevron.expanded{ transform: rotate(90deg); }
   .t-sym-cell{ display:flex; align-items:center; gap:10px; }
   .t-sym-badge{
     width:32px; height:32px; border-radius:9px; flex-shrink:0;
@@ -1919,12 +1924,6 @@
     <button class="side-nav-item nav-item" data-page="labs" title="Labs">
       <span class="side-nav-icon">◈</span><span class="side-nav-label">Labs</span>
     </button>
-    <button class="side-nav-item nav-item" data-page="changelog" title="Changelog">
-      <span class="side-nav-icon">≡</span><span class="side-nav-label">Log</span>
-    </button>
-    <button class="side-nav-item nav-item" data-page="demo" title="Demo">
-      <span class="side-nav-icon">▶</span><span class="side-nav-label">Demo</span>
-    </button>
     <div class="side-nav-divider"></div>
     <button class="side-nav-item nav-item" id="notepadToggle" data-action="notepad" title="Notepad">
       <span class="side-nav-icon">✎</span><span class="side-nav-label">Notes</span>
@@ -1933,8 +1932,14 @@
       <span class="side-nav-icon">↻</span><span class="side-nav-label">History</span>
     </button>
     <div class="side-nav-divider"></div>
+    <button class="side-nav-item nav-item" data-page="demo" title="Demo">
+      <span class="side-nav-icon">▶</span><span class="side-nav-label">Demo</span>
+    </button>
     <button class="side-nav-item nav-item" data-page="settings" title="Settings">
       <span class="side-nav-icon">⚙</span><span class="side-nav-label">Settings</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="changelog" title="Changelog">
+      <span class="side-nav-icon">≡</span><span class="side-nav-label">Log</span>
     </button>
   </nav>
 
