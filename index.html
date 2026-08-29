@@ -704,6 +704,14 @@
   .activity-log-row-cols .activity-log-sym{ font-size:12px; color: var(--paper); }
   .activity-log-row-cols .activity-log-text{ margin:0; }
   .activity-log-row-cols .activity-log-time{ margin-left:0; white-space:nowrap; }
+  /* A tag longer than its 72px column (an unmapped/long backend type
+     string, e.g. "position_drift_detected" before it had a short label)
+     must never spill into the symbol column next to it -- clip it
+     instead, so a future unmapped type degrades to a truncated tag
+     rather than garbled overlapping text. */
+  .activity-log-row-cols .activity-log-tag{
+    width:100%; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
 
 
   .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
@@ -10707,13 +10715,15 @@
     // and auto-trade actually run together" line written by the
     // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
     cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
-    position_closed: 'Closed'
+    position_closed: 'Closed', position_drift_detected: 'Drift', position_drift_resolved: 'Drift OK'
   };
-  // closed_at_close and position_closed both read as "Closed" -- grouped
-  // under one filter key so the chip row shows one toggle per label, not
-  // one per raw backend type.
+  // closed_at_close and position_closed both read as "Closed", and the two
+  // drift types both read as "Drift" -- grouped under one filter key each
+  // so the chip row shows one toggle per label, not one per raw backend type.
   function activityGroupKey(type){
-    return (type === 'closed_at_close' || type === 'position_closed') ? 'closed' : type;
+    if(type === 'closed_at_close' || type === 'position_closed') return 'closed';
+    if(type === 'position_drift_detected' || type === 'position_drift_resolved') return 'position_drift';
+    return type;
   }
   var ACTIVITY_FILTER_GROUPS = [
     { key:'cycle_summary', label:'Scan' },
@@ -10722,6 +10732,7 @@
     { key:'position_action', label:'Position' },
     { key:'trailing_stop_updated', label:'Trail' },
     { key:'closed', label:'Closed' },
+    { key:'position_drift', label:'Drift' },
     { key:'error', label:'Error' }
   ];
   var activityLogHiddenGroups = {};
