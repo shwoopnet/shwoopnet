@@ -705,14 +705,6 @@
   .activity-log-row-cols .activity-log-text{ margin:0; }
   .activity-log-row-cols .activity-log-time{ margin-left:0; white-space:nowrap; }
 
-  .activity-log-filters{ display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 14px 0; }
-  .activity-filter-chip{
-    background:none; border:1px solid var(--border); color:var(--muted);
-    font-family:'Public Sans', sans-serif; font-size:10.5px; padding:5px 10px;
-    border-radius:999px; cursor:pointer;
-  }
-  .activity-filter-chip:hover{ border-color: var(--amber-dim); color: var(--paper); }
-  .activity-filter-chip.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
 
   .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
 
@@ -1953,11 +1945,19 @@
     <div class="history-sidebar-head">
       <span>Alerts & trade history</span>
       <div class="history-head-actions">
+        <div class="layout-dropdown">
+          <button class="layout-toggle-btn" id="historyFiltersToggle" aria-haspopup="true" aria-expanded="false">
+            <span>Filters</span>
+            <span class="caret">▾</span>
+          </button>
+          <div class="layout-menu" id="historyFiltersMenu" hidden>
+            <div id="historyFilters"></div>
+          </div>
+        </div>
         <button class="history-clear-btn" id="historyClearBtn">Clear</button>
         <button class="notepad-close" id="historyClose" aria-label="Close history">×</button>
       </div>
     </div>
-    <div class="activity-log-filters" id="historyFilters" style="padding:8px 18px 0 18px; margin:0;"></div>
     <div class="history-list" id="historyList"></div>
   </div>
 
@@ -2249,10 +2249,18 @@
           <span class="to-card-title">Activity Log</span>
           <div style="display:flex; align-items:center; gap:10px;">
             <span class="to-card-meta" id="activityLogHeadMeta"></span>
+            <div class="layout-dropdown">
+              <button class="layout-toggle-btn" id="activityLogFiltersToggle" aria-haspopup="true" aria-expanded="false">
+                <span>Filters</span>
+                <span class="caret">▾</span>
+              </button>
+              <div class="layout-menu" id="activityLogFiltersMenu" hidden>
+                <div id="activityLogFilters"></div>
+              </div>
+            </div>
             <button class="settings-reset-btn" id="activityLogClearBtn" style="display:none;">Clear</button>
           </div>
         </div>
-        <div class="activity-log-filters" id="activityLogFilters"></div>
         <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
         <div id="statusActivityList"></div>
       </div>
@@ -10748,31 +10756,67 @@
     try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
   }
 
-  // Renders into every filter-chip container that exists on the page --
+  // Renders into every filter-list container that exists on the page --
   // Trade Overview's Activity Log card (#activityLogFilters) and the
   // Alerts & trade history modal (#historyFilters) both toggle the exact
-  // same activityLogHiddenGroups state, so a chip clicked in either place
+  // same activityLogHiddenGroups state, so a row toggled in either place
   // has to update both, not just whichever view happened to render it.
+  // Same row/toggle-button markup (.layout-stepper card-customize-row /
+  // .card-visibility-btn) as the Open Positions "Columns" dropdown, now
+  // that this lives inside its own dropdown menu the same way -- one
+  // consistent show/hide pattern instead of two different ones.
   var ACTIVITY_FILTER_CONTAINER_IDS = ['activityLogFilters', 'historyFilters'];
   function renderActivityLogFilters(){
     ACTIVITY_FILTER_CONTAINER_IDS.forEach(function(id){
       var el = document.getElementById(id);
       if(!el) return;
       el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
-        var shown = !activityLogHiddenGroups[g.key];
-        return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
+        var hidden = Boolean(activityLogHiddenGroups[g.key]);
+        return '<div class="layout-stepper card-customize-row" data-group="' + g.key + '">' +
+          '<span class="step-name">' + g.label + '</span>' +
+          '<div class="card-customize-row-actions">' +
+            '<button class="card-visibility-btn' + (hidden ? '' : ' active') + '" data-action="toggle">' + (hidden ? 'Hidden' : 'Shown') + '</button>' +
+          '</div>' +
+        '</div>';
       }).join('');
-      el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var key = btn.dataset.group;
+      el.querySelectorAll('.card-customize-row').forEach(function(row){
+        var key = row.dataset.group;
+        row.querySelector('[data-action="toggle"]').addEventListener('click', function(){
           activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
           saveActivityLogFilterPrefs();
+          renderActivityLogFilters();
           renderActivityLog();
           renderHistoryList();
         });
       });
     });
   }
+
+  // Same open/close/outside-click behavior as the Open Positions
+  // "Columns" dropdown (positionsColumnsToggle/Menu) -- one small helper
+  // instead of duplicating it for these two toggle/menu pairs.
+  function wireLayoutDropdown(toggleId, menuId, onOpen){
+    var toggle = document.getElementById(toggleId);
+    var menu = document.getElementById(menuId);
+    if(!toggle || !menu) return;
+    toggle.addEventListener('click', function(){
+      var open = !menu.hasAttribute('hidden');
+      if(open){ menu.setAttribute('hidden',''); toggle.setAttribute('aria-expanded','false'); }
+      else{
+        menu.removeAttribute('hidden');
+        toggle.setAttribute('aria-expanded','true');
+        if(onOpen) onOpen();
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('#' + toggleId) && !e.target.closest('#' + menuId)){
+        menu.setAttribute('hidden','');
+        toggle.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+  wireLayoutDropdown('activityLogFiltersToggle', 'activityLogFiltersMenu', renderActivityLogFilters);
+  wireLayoutDropdown('historyFiltersToggle', 'historyFiltersMenu', renderActivityLogFilters);
 
   // A cycle_summary ("Scan") entry gets written once per backend cycle
   // regardless of outcome -- with a 24/7 crypto cycle running every 5
