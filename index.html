@@ -1957,6 +1957,7 @@
         <button class="notepad-close" id="historyClose" aria-label="Close history">×</button>
       </div>
     </div>
+    <div class="activity-log-filters" id="historyFilters" style="padding:8px 18px 0 18px; margin:0;"></div>
     <div class="history-list" id="historyList"></div>
   </div>
 
@@ -9735,6 +9736,7 @@
 
   function renderHistoryList(){
     var el = document.getElementById('historyList');
+    renderActivityLogFilters();
     var marketItems = alertHistory.map(function(n){
       return {
         kind: 'market', sortKey: n.timestamp || 0, sym: n.sym, tag: n.tag, text: n.text,
@@ -9742,15 +9744,18 @@
         timeLabel: n.time || ''
       };
     });
-    var tradeItems = systemActivityLog.filter(function(a){
-      // Same two filters renderActivityLog itself applies -- a routine,
-      // fully-fetched scan is noise here too (this modal used to show
-      // every single one, unfiltered), and a type the Activity Log's own
-      // filter chips have hidden should stay hidden everywhere, not just
-      // on the Trade Overview card, since it's the same shared preference.
+    // Same currentAccountActivityLog + isRoutineScan + activityLogHiddenGroups
+    // as renderActivityLog itself applies (Trade Overview's own Activity
+    // Log card) -- a routine, fully-fetched scan is noise here too, and a
+    // type the filter chips have hidden should stay hidden everywhere,
+    // not just on the Trade Overview card, since it's the same shared
+    // preference. Sharing the exact same account-scoping helper (rather
+    // than each view keeping its own copy) is what guarantees these two
+    // views can never show a different set of trade-activity entries.
+    var tradeItems = currentAccountActivityLog().filter(function(a){
       if(isRoutineScan(a)) return false;
       if(activityLogHiddenGroups[activityGroupKey(a.type)]) return false;
-      return a.accountKeyId === activeAlpacaCreds().keyId;
+      return true;
     }).map(function(a){
       var tagInfo = tradeActivityTagInfo(a);
       return {
@@ -10823,19 +10828,28 @@
     try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
   }
 
+  // Renders into every filter-chip container that exists on the page --
+  // Trade Overview's Activity Log card (#activityLogFilters) and the
+  // Alerts & trade history modal (#historyFilters) both toggle the exact
+  // same activityLogHiddenGroups state, so a chip clicked in either place
+  // has to update both, not just whichever view happened to render it.
+  var ACTIVITY_FILTER_CONTAINER_IDS = ['activityLogFilters', 'historyFilters'];
   function renderActivityLogFilters(){
-    var el = document.getElementById('activityLogFilters');
-    if(!el) return;
-    el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
-      var shown = !activityLogHiddenGroups[g.key];
-      return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
-    }).join('');
-    el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var key = btn.dataset.group;
-        activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
-        saveActivityLogFilterPrefs();
-        renderActivityLog();
+    ACTIVITY_FILTER_CONTAINER_IDS.forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
+        var shown = !activityLogHiddenGroups[g.key];
+        return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
+      }).join('');
+      el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var key = btn.dataset.group;
+          activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
+          saveActivityLogFilterPrefs();
+          renderActivityLog();
+          renderHistoryList();
+        });
       });
     });
   }
@@ -10853,6 +10867,23 @@
     var m = text.match(/Scanned (\d+) symbols? \((\d+) fetched\)/i);
     if(m && m[1] !== m[2]) return false;
     return true;
+  }
+
+  // Which entries "belong" to the currently-connected account -- shared
+  // by renderActivityLog (Trade Overview's card) and renderHistoryList
+  // (the Alerts & trade history modal) so the two views can never show
+  // a different set of trade-activity entries for the same account.
+  // Before this was pulled out, renderHistoryList had its own copy that
+  // dropped legacy entries with no accountKeyId stamped at all (see
+  // orchestrator.js -- shwoop-server didn't start stamping this field
+  // until recently), while renderActivityLog correctly still counted
+  // those as the paper account's own -- so the modal silently showed
+  // fewer entries than the card for the exact same account.
+  function currentAccountActivityLog(){
+    return systemActivityLog.filter(function(entry){
+      if(!entry.accountKeyId) return alpacaAccountType === 'paper';
+      return entry.accountKeyId === activeAlpacaCreds().keyId;
+    });
   }
 
   // Best-effort win/loss read off the entry's own text -- backend and
@@ -10873,22 +10904,10 @@
     renderActivityLogFilters();
     // Same account-scoping as journal entries -- an activity log entry
     // from a previous account shouldn't appear as if it happened on
-    // whatever account is connected now.
-    //
-    // Same exception as isOpenAlpacaPositionForCurrentAccount, and for
-    // the same reason: shwoop-server never stamped accountKeyId on the
-    // activity entries it writes until just now (see its
-    // orchestrator.js), so EVERY entry the backend has ever created --
-    // which in practice is nearly all of them -- had accountKeyId
-    // undefined and was being silently excluded here, making the
-    // Activity Log look empty/broken regardless of how much the backend
-    // had actually done. The backend only ever operates on the single
-    // paper-account credentials, so a no-accountKeyId entry can only be
-    // one of its own -- never extended to the live environment.
-    var currentAccountLog = systemActivityLog.filter(function(entry){
-      if(!entry.accountKeyId) return alpacaAccountType === 'paper';
-      return entry.accountKeyId === activeAlpacaCreds().keyId;
-    });
+    // whatever account is connected now. See currentAccountActivityLog's
+    // own comment for why a missing accountKeyId still counts as the
+    // paper account's own.
+    var currentAccountLog = currentAccountActivityLog();
     var visibleLog = currentAccountLog.filter(function(entry){
       if(activityLogHiddenGroups[activityGroupKey(entry.type)]) return false;
       if(isRoutineScan(entry)) return false;
