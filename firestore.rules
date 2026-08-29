@@ -1,28 +1,109 @@
 rules_version = '2';
 
-// This app is single-owner: every real user document lives at
-// users/{uid}, one document per (currently: one) account, holding
-// journalEntries/activityLog/alertHistory/screenerPicks/alpacaKeyId/
-// alpacaSecretKey and everything else the frontend reads and writes
-// (see index.html's watch*/save* API methods -- there are no
-// subcollections anywhere in this app).
+// Multi-user, invite-gated model. Every real user document lives at
+// users/{uid}, one per account, holding journalEntries/activityLog/
+// alertHistory/screenerPicks/alpacaKeyId/alpacaSecretKey and everything
+// else the frontend reads and writes (see index.html's watch*/save*
+// API methods -- there are no subcollections under users/{uid}).
 //
-// Without this file, a fresh Firestore database defaults to denying
-// all client access -- so if the app has been working, some rule
-// already exists in the console; this file is meant to REPLACE
-// whatever that is with something that actually matches the app's own
-// client-side lockdown (SHWOOP_OWNER_EMAIL in index.html), rather than
-// relying on that client-side check alone. shwoop-server's backend
-// uses the Admin SDK, which bypasses these rules entirely -- this only
-// ever constrains requests from a browser using the client SDK.
+// This replaces the old single-owner rule (allow read, write: if
+// request.auth.token.email == 'heiszcam@gmail.com') with a standard
+// "you may only touch your own document" rule, plus an admin flag and
+// an invite-code system gating who can create a document at all.
 //
-// Deploy with: firebase deploy --only firestore:rules
+// shwoop-server's backend uses the Admin SDK, which bypasses these
+// rules entirely -- this only ever constrains requests from a browser
+// using the client SDK. Deploy with: firebase deploy --only firestore:rules
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // isAdmin is a plain field on the user's own document rather than a
+    // custom claim, specifically so promoting the one admin account
+    // needs no backend script or service-account access -- it's set
+    // once, by hand, in the Firebase console (a trusted, rules-bypassing
+    // path, same as the Admin SDK). The update rule below makes sure a
+    // signed-in user can never flip this field on themselves from the
+    // client SDK.
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Invited (non-admin) accounts are paper-trading only for now -- this
+    // is enforced in the UI too (the Live toggle is hidden for a non-admin
+    // account), but a real security boundary can't rely on the client
+    // choosing not to send a request, so the same rule holds here: a
+    // non-admin write can never result in a 'live' environment or a
+    // non-empty live credential, no matter how it's sent.
+    function wouldEnableLiveTrading(data) {
+      return data.get('alpacaEnvironment', 'paper') == 'live'
+        || data.get('alpacaLiveKeyId', '') != ''
+        || data.get('alpacaLiveSecretKey', '') != '';
+    }
+
     match /users/{uid} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == uid
-        && request.auth.token.email == 'heiszcam@gmail.com';
+      allow read: if signedIn() && request.auth.uid == uid;
+
+      // Creating your own account document requires, in the SAME
+      // transaction, redeeming a real invite code as yourself -- see
+      // the /invites rules below. getAfter() reads the invite doc as it
+      // will be once this transaction commits, so this can't be
+      // satisfied by an invite that isn't actually being consumed by
+      // this exact write. isAdmin can never be set true on creation --
+      // the one admin account is promoted by hand in the console after
+      // its document already exists.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.isAdmin != true
+        && request.resource.data.inviteCode is string
+        && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedBy == request.auth.uid;
+
+      // isAdmin is otherwise immutable from the client, and a non-admin
+      // account can never write itself into live trading -- every other
+      // field on your own document is yours to read and write freely,
+      // matching how the app has always treated per-user data.
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.isAdmin == resource.data.isAdmin
+        && (isAdmin() || !wouldEnableLiveTrading(request.resource.data));
+    }
+
+    // One document per invite code, keyed by the code itself. Minted by
+    // the admin (out of band -- shared with the invitee directly, not
+    // looked up publicly), redeemed exactly once by whoever creates the
+    // matching users/{uid} document above.
+    match /invites/{code} {
+      // Anyone signed in can look up a single code by id (needed to
+      // validate/redeem it), but only the admin can list the collection
+      // -- a plain get() never enumerates other codes.
+      allow get: if signedIn();
+      allow list: if isAdmin();
+
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['createdBy', 'createdAt', 'usedBy', 'usedAt', 'disabled'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.usedBy == null
+        && request.resource.data.usedAt == null
+        && request.resource.data.disabled == false;
+
+      // The admin can disable/edit a code at will. Anyone else may only
+      // redeem an unused, non-disabled code, and only by marking it
+      // used as themselves -- every other field on the invite is
+      // untouched by that write.
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && resource.data.usedBy == null
+          && resource.data.disabled == false
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy', 'usedAt'])
+          && request.resource.data.usedBy == request.auth.uid
+          && request.resource.data.usedAt == request.time
+        );
+
+      allow delete: if isAdmin();
     }
 
     // Everything else is denied by default -- Firestore rules deny any

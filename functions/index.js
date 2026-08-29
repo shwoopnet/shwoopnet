@@ -5,15 +5,14 @@ const { defineSecret } = require("firebase-functions/params");
 // Never committed -- this is the only place the real key lives now.
 const FINNHUB_API_KEY = defineSecret("FINNHUB_API_KEY");
 
-// Matches SHWOOP_OWNER_EMAIL in index.html -- this app is single-owner,
-// so every callable rejects anyone else's token the same way the
-// frontend's own auth gate does, rather than trusting the client to be
-// the only thing enforcing that.
-const OWNER_EMAIL = "heiszcam@gmail.com";
-
-function assertOwner(auth) {
-  if (!auth || auth.token.email !== OWNER_EMAIL) {
-    throw new HttpsError("permission-denied", "This app is private.");
+// Invite-gated, not single-owner: anyone with a real Firebase Auth
+// token may call these (matches firestore.rules, which lets any signed-in
+// account read/write only its own users/{uid} doc -- account creation
+// itself is what's gated, via the invite-code system, not access to
+// these functions once an account exists).
+function assertSignedIn(auth) {
+  if (!auth) {
+    throw new HttpsError("permission-denied", "Sign in required.");
   }
 }
 
@@ -29,7 +28,7 @@ async function finnhubGet(path, params) {
 }
 
 exports.finnhubQuote = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertOwner(request.auth);
+  assertSignedIn(request.auth);
   const symbol = request.data && request.data.symbol;
   if (!symbol || typeof symbol !== "string") {
     throw new HttpsError("invalid-argument", "symbol is required");
@@ -38,12 +37,12 @@ exports.finnhubQuote = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) =>
 });
 
 exports.finnhubNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertOwner(request.auth);
+  assertSignedIn(request.auth);
   return finnhubGet("news", { category: "general" });
 });
 
 exports.finnhubEarningsCalendar = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertOwner(request.auth);
+  assertSignedIn(request.auth);
   const { from, to } = request.data || {};
   if (!from || !to) {
     throw new HttpsError("invalid-argument", "from and to (YYYY-MM-DD) are required");
@@ -52,7 +51,7 @@ exports.finnhubEarningsCalendar = onCall({ secrets: [FINNHUB_API_KEY] }, async (
 });
 
 exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertOwner(request.auth);
+  assertSignedIn(request.auth);
   const { symbol, from, to } = request.data || {};
   if (!symbol || !from || !to) {
     throw new HttpsError("invalid-argument", "symbol, from, and to are required");

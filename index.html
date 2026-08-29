@@ -686,9 +686,33 @@
   .activity-log-tag{
     font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
     background: var(--amber-glow); border:1px solid var(--amber-dim); border-radius:4px; padding:2px 7px;
+    flex-shrink:0; width:fit-content;
   }
+  .activity-log-tag-loss{ color: var(--loss); background: var(--loss-glow); border-color: var(--loss); }
+  .activity-log-tag-gain{ color: var(--gain); background: var(--gain-glow); border-color: var(--gain); }
   .activity-log-time{ font-size:11px; color: var(--muted); margin-left:auto; }
   .activity-log-text{ font-size:12.5px; line-height:1.5; color: var(--muted); }
+
+  /* Real Activity Log rows (not the Demo page's simulated feed, which
+     keeps the original stacked layout above) -- one row, four columns,
+     so a page of entries reads as a scannable table instead of a stack
+     of two-line blocks. */
+  .activity-log-row-cols{
+    display:grid; grid-template-columns: 72px 58px 1fr auto;
+    align-items:center; gap:12px; padding:10px 0;
+  }
+  .activity-log-row-cols .activity-log-sym{ font-size:12px; color: var(--paper); }
+  .activity-log-row-cols .activity-log-text{ margin:0; }
+  .activity-log-row-cols .activity-log-time{ margin-left:0; white-space:nowrap; }
+
+  .activity-log-filters{ display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 14px 0; }
+  .activity-filter-chip{
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'Public Sans', sans-serif; font-size:10.5px; padding:5px 10px;
+    border-radius:999px; cursor:pointer;
+  }
+  .activity-filter-chip:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .activity-filter-chip.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
 
   .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
 
@@ -1514,10 +1538,11 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, onAuthStateChanged, sendPasswordResetEmail
+    signOut, onAuthStateChanged, sendPasswordResetEmail, deleteUser
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction
+    getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction,
+    writeBatch, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
   import {
     getFunctions, httpsCallable
@@ -1551,8 +1576,42 @@
     signUp: function(email, password){ return createUserWithEmailAndPassword(auth, email, password); },
     signIn: function(email, password){ return signInWithEmailAndPassword(auth, email, password); },
     signOutUser: function(){ return signOut(auth); },
+    // Rolls back a signup attempt that failed to redeem a real invite
+    // code -- the Auth account already exists at that point (Auth and
+    // Firestore are separate services; there's no way to create both
+    // atomically), so this deletes it rather than leaving a dangling
+    // account with no Firestore doc, no invite redeemed, and no way to
+    // ever sign in and complete the flow.
+    deleteCurrentUser: function(){ return auth.currentUser ? deleteUser(auth.currentUser) : Promise.resolve(); },
     resetPassword: function(email){ return sendPasswordResetEmail(auth, email); },
     onAuthChange: function(callback){ return onAuthStateChanged(auth, callback); },
+    // Redeems an invite code and creates the account's own users/{uid}
+    // doc in one atomic batch -- firestore.rules requires exactly this
+    // (the invite doc must show usedBy == this uid as a result of THIS
+    // SAME write) before the create is allowed at all, so a signup can
+    // never end up with a Firestore doc but no real, matching invite
+    // redemption. Rejects with a permission error if the code is
+    // invalid, already used, or disabled -- the caller's job is to roll
+    // back the just-created Auth account when that happens (see
+    // deleteCurrentUser above).
+    redeemInviteAndCreateAccount: function(uid, inviteCode){
+      var batch = writeBatch(db);
+      batch.update(doc(db, 'invites', inviteCode), { usedBy: uid, usedAt: serverTimestamp() });
+      batch.set(doc(db, 'users', uid), { isAdmin: false, inviteCode: inviteCode, createdAt: serverTimestamp() });
+      return batch.commit();
+    },
+    // Admin-only in practice (firestore.rules rejects the invite create
+    // otherwise) -- mints a fresh, unused, one-time code for the admin
+    // to share with whoever they're inviting, out of band (text, email,
+    // in person). Returns the code itself so the caller can display it.
+    createInviteCode: function(adminUid){
+      var code = Array.from({ length: 10 }, function(){
+        return 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)];
+      }).join('');
+      return setDoc(doc(db, 'invites', code), {
+        createdBy: adminUid, createdAt: serverTimestamp(), usedBy: null, usedAt: null, disabled: false
+      }).then(function(){ return code; });
+    },
     saveJournal: function(uid, entries){
       return setDoc(doc(db, 'users', uid), { journalEntries: entries }, { merge: true });
     },
@@ -1795,15 +1854,18 @@
           <button type="button" class="password-toggle" id="authConfirmPasswordToggle" aria-label="Show password"></button>
         </div>
       </div>
+      <div class="modal-field" id="authInviteField" hidden>
+        <label for="authInviteCode">Invite code</label>
+        <input type="text" id="authInviteCode" autocomplete="off" autocapitalize="characters" placeholder="Ask whoever invited you">
+      </div>
       <div class="modal-error" id="authError"></div>
       <button type="submit" class="modal-btn-submit auth-submit" id="authSubmitBtn">Sign in</button>
     </form>
-    <!-- Hidden, not removed: this is a locked-down single-owner tool right
-         now, so there's no path to create a second account. The signup
-         mode, form fields, and submit logic all still work underneath —
-         drop the "hidden" attribute below to bring this back if a future
-         account holder ever needs it. -->
-    <div class="auth-switch" hidden>
+    <!-- Signup is invite-only: creating your users/{uid} document requires
+         redeeming a real, unused invite code in the same atomic write (see
+         firestore.rules and redeemInviteAndCreateAccount). This toggle is
+         real and enabled -- it just leads nowhere useful without a code. -->
+    <div class="auth-switch">
       <span id="authSwitchText">Don't have an account?</span>
       <button type="button" id="authSwitchBtn">Create one</button>
     </div>
@@ -2185,6 +2247,7 @@
             <button class="settings-reset-btn" id="activityLogClearBtn" style="display:none;">Clear</button>
           </div>
         </div>
+        <div class="activity-log-filters" id="activityLogFilters"></div>
         <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
         <div id="statusActivityList"></div>
       </div>
@@ -2322,7 +2385,7 @@
               <div class="settings-row-title" id="alpacaSectionTitle">Broker connection — Alpaca (Paper)</div>
               <div class="alpaca-env-selector">
                 <button class="alpaca-env-btn active" id="alpacaEnvPaperBtn" data-env="paper">Paper (simulated)</button>
-                <button class="alpaca-env-btn" id="alpacaEnvLiveBtn" data-env="live">Live (real money)</button>
+                <button class="alpaca-env-btn" id="alpacaEnvLiveBtn" data-env="live" hidden>Live (real money)</button>
               </div>
               <div class="settings-row-desc" id="alpacaEnvDesc">
                 Simulated money only — no real trades are ever placed. Get free paper keys at
@@ -2339,6 +2402,23 @@
               </div>
               <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section" id="adminInviteSection" hidden>
+        <div class="settings-section-title">Invites</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Invite someone</div>
+              <div class="settings-row-desc">Generates a one-time code for a new account to sign up with. Share it directly, out of band — invited accounts are paper-trading only.</div>
+            </div>
+            <button class="settings-reset-btn" id="generateInviteBtn">Generate code</button>
+          </div>
+          <div class="settings-row-desc" id="generatedInviteCodeRow" hidden style="margin-top:4px; display:flex; align-items:center; gap:10px;">
+            <span>Code: <span class="mono" id="generatedInviteCodeText" style="font-weight:600; color:var(--paper);"></span></span>
+            <button type="button" class="settings-reset-btn" id="copyInviteCodeBtn">Copy</button>
           </div>
         </div>
       </div>
@@ -2849,48 +2929,6 @@
       </p>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
-
-      <div class="labs-export-section" id="labsExportSection" hidden>
-        <div class="labs-export-divider"></div>
-        <div class="labs-export-header">
-          <div>
-            <div class="labs-export-title">Export raw historical data</div>
-            <div class="labs-export-desc">Pulls 15-min bars for the symbols below at the current Lookback, saved
-              as a .json file. Defaults to the live universe, but you can swap in any symbols for research — this
-              never changes what actually trades. Owner-only; uses real API quota.</div>
-          </div>
-          <button class="settings-reset-btn" id="exportHistoricalDataBtn">Export historical data</button>
-        </div>
-        <div class="labs-control-field" style="margin-bottom:14px;">
-          <label for="exportSymbolsInput">Symbols to export (comma-separated)</label>
-          <input type="text" id="exportSymbolsInput" style="width:100%; max-width:520px; background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'Public Sans', sans-serif;">
-        </div>
-        <div class="labs-backtest-status" id="exportStatus"></div>
-        <div id="exportResultWrap" hidden>
-          <a id="exportDownloadLink" class="settings-reset-btn" download style="display:inline-block; text-decoration:none;">Download .json file</a>
-          <div style="margin-top:10px;">
-            <button class="settings-reset-btn" id="exportShowRawBtn" style="font-size:11px; padding:6px 10px;">Show raw text instead</button>
-          </div>
-          <div id="exportRawWrap" hidden style="margin-top:10px;">
-            <textarea id="exportResultTextarea" class="labs-export-textarea" readonly rows="10"></textarea>
-            <button class="settings-reset-btn" id="exportCopyBtn" style="margin-top:10px;">Copy to clipboard</button>
-            <span id="exportCopyConfirm" class="labs-export-copy-confirm" hidden>Copied.</span>
-          </div>
-        </div>
-
-        <div class="labs-export-divider"></div>
-        <div class="labs-export-header">
-          <div>
-            <div class="labs-export-title">Test Alpaca as a data feed</div>
-            <div class="labs-export-desc">Fetches a real past week of bars for 4 symbols and reports the hours
-              covered and the volume behind any extended-hours bars — thin volume there means sparse prints, not
-              real depth.</div>
-          </div>
-          <button class="settings-reset-btn" id="testAlpacaDataFeedBtn">Test Alpaca data feed</button>
-        </div>
-        <div class="labs-backtest-status" id="alpacaDataFeedTestStatus"></div>
-        <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
-      </div>
       </div>
 
     <div class="brief-section-title" style="margin-top:36px;">Crypto Backtest</div>
@@ -2920,6 +2958,53 @@
       </div>
       <div class="labs-backtest-status" id="cryptoBacktestStatus"></div>
       <div id="cryptoBacktestResults"></div>
+    </div>
+
+    <div id="labsExportSection" hidden>
+      <div class="brief-section-title" style="margin-top:36px;">Historical Data Export</div>
+      <div class="labs-backtest-card">
+        <div class="labs-export-header">
+          <div>
+            <div class="labs-export-title">Export raw historical data</div>
+            <div class="labs-export-desc">Pulls 15-min equities bars for the symbols below at the current equities
+              Lookback above, saved as a .json file. Defaults to the equities universe, but you can swap in any
+              equities symbols for research — this never changes what actually trades. Owner-only; uses real API
+              quota. (Equities only for now — crypto bars aren't wired into this export yet.)</div>
+          </div>
+          <button class="settings-reset-btn" id="exportHistoricalDataBtn">Export historical data</button>
+        </div>
+        <div class="labs-control-field" style="margin-bottom:14px;">
+          <label for="exportSymbolsInput">Symbols to export (comma-separated)</label>
+          <input type="text" id="exportSymbolsInput" style="width:100%; max-width:520px; background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); padding:8px 10px; border-radius:4px; font-size:12.5px; font-family:'Public Sans', sans-serif;">
+        </div>
+        <div class="labs-backtest-status" id="exportStatus"></div>
+        <div id="exportResultWrap" hidden>
+          <a id="exportDownloadLink" class="settings-reset-btn" download style="display:inline-block; text-decoration:none;">Download .json file</a>
+          <div style="margin-top:10px;">
+            <button class="settings-reset-btn" id="exportShowRawBtn" style="font-size:11px; padding:6px 10px;">Show raw text instead</button>
+          </div>
+          <div id="exportRawWrap" hidden style="margin-top:10px;">
+            <textarea id="exportResultTextarea" class="labs-export-textarea" readonly rows="10"></textarea>
+            <button class="settings-reset-btn" id="exportCopyBtn" style="margin-top:10px;">Copy to clipboard</button>
+            <span id="exportCopyConfirm" class="labs-export-copy-confirm" hidden>Copied.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brief-section-title" style="margin-top:36px;">Data Feed Diagnostics</div>
+      <div class="labs-backtest-card">
+        <div class="labs-export-header">
+          <div>
+            <div class="labs-export-title">Test Alpaca as a data feed</div>
+            <div class="labs-export-desc">Fetches a real past week of bars for 4 symbols and reports the hours
+              covered and the volume behind any extended-hours bars — thin volume there means sparse prints, not
+              real depth.</div>
+          </div>
+          <button class="settings-reset-btn" id="testAlpacaDataFeedBtn">Test Alpaca data feed</button>
+        </div>
+        <div class="labs-backtest-status" id="alpacaDataFeedTestStatus"></div>
+        <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
+      </div>
     </div>
   </main>
     </div>
@@ -4960,7 +5045,13 @@
     var neededRight = baseRight;
 
     var dockOuter = document.getElementById('alpacaDock');
-    if(dockOuter && !dockOuter.hasAttribute('hidden')){
+    // Same reasoning as avoidDockOverlap's own comment: a collapsed dock
+    // still reports its full expanded getBoundingClientRect() (opacity
+    // and a small transform don't remove it from that box), so this has
+    // to check .open too, not just whether the dock is connected at all
+    // -- otherwise toasts get pushed clear of empty space every time the
+    // dock happens to be collapsed.
+    if(dockOuter && !dockOuter.hasAttribute('hidden') && alpacaDockBodyWrapEl.classList.contains('open')){
       var dockRect = alpacaDockBodyWrapEl.getBoundingClientRect();
       neededRight = Math.max(neededRight, (window.innerWidth - dockRect.left) + 12);
     }
@@ -7998,6 +8089,11 @@
   // this one function under one key, not raced by however many tabs
   // happen to be open.
   var lastQuoteSyncOk = false;
+  // Crypto's own last-batch result -- tracked separately since it runs on
+  // its own independent fetch (fetchAllCryptoQuotes/onCryptoQuoteBatchDone
+  // below), not the equities/index one this file's watchlist loop drives.
+  // Both feed the SAME header status together (see renderHeaderLiveStatus).
+  var lastCryptoQuoteSyncOk = false;
 
   // ---------- Alpaca market data (primary when connected, Finnhub/Twelve
   // Data as automatic fallback) ----------
@@ -8180,17 +8276,32 @@
   }
 
   function updateQuoteSyncStatus(results){
-    var anyOk = results.some(function(r){ return r; });
-    lastQuoteSyncOk = anyOk;
+    lastQuoteSyncOk = results.some(function(r){ return r; });
+    renderHeaderLiveStatus();
+  }
+
+  // Shared by both the equities/index batch (updateQuoteSyncStatus above)
+  // and the crypto batch (startRealQuoteLoop below) -- crypto trades 24/7,
+  // independent of the equities market's calendar, so this reads "live"
+  // whenever EITHER side is actually syncing right now. Before this, the
+  // header only ever reflected the equities/index batch: a stretch of
+  // failed equities quotes (or simply the equities market being closed,
+  // which can leave its own quotes momentarily stale) showed "Sync
+  // failed" even while crypto was live and trading fine, and there was no
+  // way to tell from the header alone which side actually broke.
+  function renderHeaderLiveStatus(){
     var el = document.getElementById('headerLiveStatus');
     if(!el) return;
-    // Reflects what actually happened this cycle, not just whether Alpaca
-    // trading is connected — if every data call quietly fell back to
-    // Finnhub (e.g. a CORS block), this correctly still says Finnhub.
-    var usedAlpaca = lastQuoteBatchSources.length > 0 && lastQuoteBatchSources.every(function(s){ return s === 'alpaca'; });
-    var sourceLabel = usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub';
+    var anyOk = lastQuoteSyncOk || lastCryptoQuoteSyncOk;
     if(anyOk){
-      el.textContent = 'Live via ' + sourceLabel;
+      // Reflects what actually happened this cycle, not just whether
+      // Alpaca trading is connected — if every equities data call
+      // quietly fell back to Finnhub (e.g. a CORS block), this correctly
+      // still says Finnhub. Prefers naming whichever side is actually
+      // live when only one of the two is.
+      var usedAlpaca = lastQuoteBatchSources.length > 0 && lastQuoteBatchSources.every(function(s){ return s === 'alpaca'; });
+      var label = lastQuoteSyncOk ? (usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub') : 'Alpaca (crypto)';
+      el.textContent = 'Live via ' + label;
       el.className = 'header-live-status ok';
     } else {
       el.textContent = 'Sync failed — last known prices';
@@ -8218,7 +8329,9 @@
   // Separate from onQuoteBatchDone (equities) since a crypto-only quote
   // refresh shouldn't wait on or block the equities batch, or vice versa
   // -- the two run independently and just happen to share a poll cadence.
-  function onCryptoQuoteBatchDone(){
+  function onCryptoQuoteBatchDone(ok){
+    lastCryptoQuoteSyncOk = ok;
+    renderHeaderLiveStatus();
     renderTicker();
     renderWhatToWatch();
     var statusPageEl = document.getElementById('page-trades');
@@ -8571,6 +8684,7 @@
 
   loadToCardPrefs();
   applyToCardLayout();
+  loadActivityLogFilterPrefs();
 
   // ---------- Navigation ----------
   var navLabels = { brief: 'Market Brief', status: 'Status', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
@@ -8679,6 +8793,14 @@
   function avoidDockOverlap(left, top, width, height){
     var dockOuter = document.getElementById('alpacaDock');
     if(!dockOuter || dockOuter.hasAttribute('hidden')) return left;
+    // alpacaDockBodyWrapEl is position:fixed at its full expanded size
+    // ALL the time -- collapsing it (the compact "Paper Trading Account"
+    // bar) only sets opacity:0 and a tiny translateY, so its
+    // getBoundingClientRect() still reports the full open-sized box even
+    // while collapsed. Without this check, a collapsed dock still acted
+    // as a phantom wall the notepad could never be dragged into, even
+    // though that whole area was actually empty and clickable.
+    if(!alpacaDockBodyWrapEl.classList.contains('open')) return left;
     var dockRect = alpacaDockBodyWrapEl.getBoundingClientRect();
     var verticalOverlap = top < dockRect.bottom && (top + height) > dockRect.top;
     if(!verticalOverlap) return left;
@@ -9586,14 +9708,22 @@
   // Trade events get their own tag class/label derived from what
   // actually happened, not just the raw log type -- 'position_action'
   // covers both a profitable close and a loss, which need to look
-  // nothing alike at a glance.
+  // nothing alike at a glance. Covers every type renderActivityLog's own
+  // typeLabels does (cycle_summary/trailing_stop_updated/closed_at_close/
+  // position_closed/error too) -- this used to fall through to a generic
+  // "Activity" tag for all of those, which is exactly what showed up here
+  // for every single Scan entry.
   function tradeActivityTagInfo(entry){
     if(entry.type === 'sent') return { cls: 'sent', label: 'Sent' };
     if(entry.type === 'skipped') return { cls: 'neutral', label: 'Skipped' };
-    if(entry.type === 'position_action'){
-      if(/profit|\+\$/.test(entry.text)) return { cls: 'win', label: 'Closed +' };
-      if(/loss|-\$/.test(entry.text)) return { cls: 'loss', label: 'Closed −' };
-      return { cls: 'neutral', label: 'Position' };
+    if(entry.type === 'cycle_summary') return { cls: 'neutral', label: 'Scan' };
+    if(entry.type === 'trailing_stop_updated') return { cls: 'neutral', label: 'Trail' };
+    if(entry.type === 'error') return { cls: 'loss', label: 'Error' };
+    if(entry.type === 'position_action' || entry.type === 'closed_at_close' || entry.type === 'position_closed'){
+      var label = entry.type === 'position_action' ? 'Position' : 'Closed';
+      if(/profit|\+\$|\+\d/.test(entry.text)) return { cls: 'win', label: label === 'Position' ? 'Closed +' : label + ' +' };
+      if(/loss|-\$|-\d/.test(entry.text)) return { cls: 'loss', label: label === 'Position' ? 'Closed −' : label + ' −' };
+      return { cls: 'neutral', label: label };
     }
     return { cls: 'neutral', label: 'Activity' };
   }
@@ -9608,11 +9738,21 @@
       };
     });
     var tradeItems = systemActivityLog.filter(function(a){
+      // Same two filters renderActivityLog itself applies -- a routine,
+      // fully-fetched scan is noise here too (this modal used to show
+      // every single one, unfiltered), and a type the Activity Log's own
+      // filter chips have hidden should stay hidden everywhere, not just
+      // on the Trade Overview card, since it's the same shared preference.
+      if(isRoutineScan(a)) return false;
+      if(activityLogHiddenGroups[activityGroupKey(a.type)]) return false;
       return a.accountKeyId === activeAlpacaCreds().keyId;
     }).map(function(a){
       var tagInfo = tradeActivityTagInfo(a);
       return {
-        kind: 'trade', sortKey: a.timestamp || 0, sym: a.sym, tagCls: tagInfo.cls, tag: tagInfo.label, text: a.text,
+        // a.sym is null (not just absent) for a cycle-level entry like a
+        // scan -- concatenated directly into the template below, that
+        // rendered as the literal text "null" instead of an empty symbol.
+        kind: 'trade', sortKey: a.timestamp || 0, sym: a.sym || '', tagCls: tagInfo.cls, tag: tagInfo.label, text: a.text,
         timeLabel: new Date(a.timestamp).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })
       };
     });
@@ -9991,7 +10131,20 @@
       // falsy, so null/undefined from an old server build still falls
       // through to the normal calculation) shows the honest stale-delta
       // state instead of implying it just happened today.
-      var hasOpenCryptoPosition = (backendPositions || []).some(function(p){ return p.symbol && p.symbol.indexOf('/') !== -1; });
+      //
+      // Reads journalEntries (screenerType === 'crypto'), the exact same
+      // source and same isOpenAlpacaPositionForCurrentAccount check
+      // renderStatusPositions itself uses to split the Open Positions
+      // table into equities/crypto -- NOT backendPositions (Alpaca's raw
+      // /v2/positions response). That first attempt at this fix matched
+      // a symbol string like "SOL/USD" against a literal "/", but
+      // Alpaca's own position symbols come back WITHOUT one (e.g.
+      // "SOLUSD"), so hasOpenCryptoPosition silently stayed false for
+      // every real crypto position and "Market closed" kept showing
+      // exactly the bug this was meant to fix.
+      var hasOpenCryptoPosition = journalEntries.some(function(j){
+        return j.screenerType === 'crypto' && isOpenAlpacaPositionForCurrentAccount(j);
+      });
       var plValueHtml = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition)
         ? '<div class="backtest-stat-value">Market closed</div>'
         : '<div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
@@ -10299,8 +10452,13 @@
       // neutral rather than a real green/red read on a number that isn't
       // actually today's. An open crypto position overrides this: crypto
       // trades 24/7 regardless of the stock market's calendar, so the
-      // number is genuinely live and deserves a real color.
-      var hasOpenCryptoPosition = (backendPositions || []).some(function(p){ return p.symbol && p.symbol.indexOf('/') !== -1; });
+      // number is genuinely live and deserves a real color. Reads
+      // journalEntries the same way renderStatusPage/renderStatusPositions
+      // do -- not backendPositions, whose raw Alpaca symbol format doesn't
+      // actually contain a "/" and silently never matched.
+      var hasOpenCryptoPosition = journalEntries.some(function(j){
+        return j.screenerType === 'crypto' && isOpenAlpacaPositionForCurrentAccount(j);
+      });
       var colorClass = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition) ? 'neutral'
         : Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
 
@@ -10607,10 +10765,89 @@
     });
   }
 
+  var typeLabels = {
+    sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
+    // cycle_summary is the once-per-cycle "did the scanner, sizing,
+    // and auto-trade actually run together" line written by the
+    // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
+    cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
+    position_closed: 'Closed'
+  };
+  // closed_at_close and position_closed both read as "Closed" -- grouped
+  // under one filter key so the chip row shows one toggle per label, not
+  // one per raw backend type.
+  function activityGroupKey(type){
+    return (type === 'closed_at_close' || type === 'position_closed') ? 'closed' : type;
+  }
+  var ACTIVITY_FILTER_GROUPS = [
+    { key:'cycle_summary', label:'Scan' },
+    { key:'sent', label:'Sent' },
+    { key:'skipped', label:'Skipped' },
+    { key:'position_action', label:'Position' },
+    { key:'trailing_stop_updated', label:'Trail' },
+    { key:'closed', label:'Closed' },
+    { key:'error', label:'Error' }
+  ];
+  var activityLogHiddenGroups = {};
+
+  function loadActivityLogFilterPrefs(){
+    try{
+      var saved = JSON.parse(window.localStorage.getItem('shwoopnet:activityLogHiddenGroups') || 'null');
+      if(saved && typeof saved === 'object') activityLogHiddenGroups = saved;
+    }catch(e){}
+  }
+  function saveActivityLogFilterPrefs(){
+    try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
+  }
+
+  function renderActivityLogFilters(){
+    var el = document.getElementById('activityLogFilters');
+    if(!el) return;
+    el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
+      var shown = !activityLogHiddenGroups[g.key];
+      return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
+    }).join('');
+    el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var key = btn.dataset.group;
+        activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
+        saveActivityLogFilterPrefs();
+        renderActivityLog();
+      });
+    });
+  }
+
+  // A cycle_summary ("Scan") entry gets written once per backend cycle
+  // regardless of outcome -- with a 24/7 crypto cycle running every 5
+  // minutes, a stretch of ordinary "nothing to do" scans buries any real
+  // trade activity within hours. Only worth a row when the cycle itself
+  // was abnormal: it flags an error/failure in its own text, or it didn't
+  // fetch everything it meant to.
+  function isRoutineScan(entry){
+    if(entry.type !== 'cycle_summary') return false;
+    var text = entry.text || '';
+    if(/error|fail/i.test(text)) return false;
+    var m = text.match(/Scanned (\d+) symbols? \((\d+) fetched\)/i);
+    if(m && m[1] !== m[2]) return false;
+    return true;
+  }
+
+  // Best-effort win/loss read off the entry's own text -- backend and
+  // frontend close messages both phrase it as "in profit"/"+X%" for a
+  // win and "at a loss"/a bare "-X%" for a loss, so a real trade result
+  // still pops green or red without needing a structured field.
+  function activityOutcomeClass(text){
+    if(!text) return '';
+    if(/in profit|\+\$|\+\d/.test(text)) return 'activity-log-tag-gain';
+    if(/at a loss|-\$|-\d/.test(text)) return 'activity-log-tag-loss';
+    return '';
+  }
+
   function renderActivityLog(){
     var el = document.getElementById('statusActivityList');
     var emptyEl = document.getElementById('statusActivityEmpty');
     if(!el) return;
+    renderActivityLogFilters();
     // Same account-scoping as journal entries -- an activity log entry
     // from a previous account shouldn't appear as if it happened on
     // whatever account is connected now.
@@ -10629,31 +10866,36 @@
       if(!entry.accountKeyId) return alpacaAccountType === 'paper';
       return entry.accountKeyId === activeAlpacaCreds().keyId;
     });
+    var visibleLog = currentAccountLog.filter(function(entry){
+      if(activityLogHiddenGroups[activityGroupKey(entry.type)]) return false;
+      if(isRoutineScan(entry)) return false;
+      return true;
+    });
     var headMeta = document.getElementById('activityLogHeadMeta');
     var clearBtn = document.getElementById('activityLogClearBtn');
-    if(currentAccountLog.length === 0){
+    if(clearBtn){ clearBtn.style.display = currentAccountLog.length ? '' : 'none'; }
+    if(visibleLog.length === 0){
       el.innerHTML = '';
       if(emptyEl) emptyEl.removeAttribute('hidden');
-      if(headMeta){ headMeta.textContent = ''; }
-      if(clearBtn){ clearBtn.style.display = 'none'; }
+      if(headMeta){
+        var hiddenCount = currentAccountLog.length - visibleLog.length;
+        headMeta.textContent = hiddenCount ? hiddenCount + ' hidden' : '';
+      }
       return;
     }
     if(emptyEl) emptyEl.setAttribute('hidden', '');
-    if(headMeta){ headMeta.textContent = currentAccountLog.length + ' entries'; }
-    if(clearBtn){ clearBtn.style.display = ''; }
-    var typeLabels = {
-      sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
-      // cycle_summary is the once-per-cycle "did the scanner, sizing,
-      // and auto-trade actually run together" line written by the
-      // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
-      cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
-      position_closed: 'Closed'
-    };
-    el.innerHTML = currentAccountLog.map(function(entry){
+    if(headMeta){
+      var extra = currentAccountLog.length - visibleLog.length;
+      headMeta.textContent = visibleLog.length + ' entries' + (extra ? ' (' + extra + ' hidden)' : '');
+    }
+    el.innerHTML = visibleLog.map(function(entry){
       var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-      return '<div class="activity-log-row">' +
-        '<div class="activity-log-meta">' + (entry.sym ? '<span class="mono">' + entry.sym + '</span>' : '') + '<span class="activity-log-tag">' + (typeLabels[entry.type] || entry.type) + '</span><span class="activity-log-time">' + time + '</span></div>' +
-        '<div class="activity-log-text">' + entry.text + '</div>' +
+      var tagClass = 'activity-log-tag' + (entry.type === 'error' ? ' activity-log-tag-loss' : ' ' + activityOutcomeClass(entry.text));
+      return '<div class="activity-log-row activity-log-row-cols">' +
+        '<span class="' + tagClass.trim() + '">' + (typeLabels[entry.type] || entry.type) + '</span>' +
+        '<span class="activity-log-sym mono">' + (entry.sym || '') + '</span>' +
+        '<span class="activity-log-text">' + entry.text + '</span>' +
+        '<span class="activity-log-time">' + time + '</span>' +
       '</div>';
     }).join('');
   }
@@ -11240,6 +11482,8 @@
     authMode = mode;
     var confirmField = document.getElementById('authConfirmField');
     var confirmInput = document.getElementById('authConfirmPassword');
+    var inviteField = document.getElementById('authInviteField');
+    var inviteInput = document.getElementById('authInviteCode');
     if(mode === 'signup'){
       authTitleEl.textContent = 'Create your account';
       authSubmitBtn.textContent = 'Create account';
@@ -11247,6 +11491,8 @@
       authSwitchBtn.textContent = 'Sign in';
       confirmField.hidden = false;
       confirmInput.required = true;
+      inviteField.hidden = false;
+      inviteInput.required = true;
     } else {
       authTitleEl.textContent = 'Sign in';
       authSubmitBtn.textContent = 'Sign in';
@@ -11255,6 +11501,9 @@
       confirmField.hidden = true;
       confirmInput.required = false;
       confirmInput.value = '';
+      inviteField.hidden = true;
+      inviteInput.required = false;
+      inviteInput.value = '';
     }
     authErrorEl.classList.remove('show');
   }
@@ -11288,6 +11537,13 @@
     if(code.indexOf('unauthorized-domain') > -1) return 'This domain isn\'t authorized in Firebase yet.';
     if(code.indexOf('network-request-failed') > -1) return 'Network error — check your connection.';
     if(code.indexOf('operation-not-allowed') > -1) return "Email/Password sign-in isn't enabled yet in Firebase — check Authentication > Sign-in method.";
+    // Firestore's rejection of the invite-redemption batch (see
+    // redeemInviteAndCreateAccount / firestore.rules) surfaces as a plain
+    // 'permission-denied' Firestore error, not an auth/... code -- this is
+    // the one case worth a specific, honest message rather than the
+    // generic fallback below, since "permission denied" alone would read
+    // like a bug report, not "check your code."
+    if(code === 'permission-denied') return "That invite code isn't valid, has already been used, or has been disabled.";
     if(code) return 'Something went wrong (' + code + '). Please try again.';
     return 'Something went wrong. Please try again.';
   }
@@ -11343,15 +11599,34 @@
     }
 
     authSubmitBtn.disabled = true;
-    var action = authMode === 'signup'
-      ? window.__shwoopAPI.signUp(email, password)
-      : window.__shwoopAPI.signIn(email, password);
-    action.catch(function(err){
-      authErrorEl.textContent = friendlyAuthError(err);
-      authErrorEl.classList.add('show');
-    }).finally(function(){
-      authSubmitBtn.disabled = false;
-    });
+
+    if(authMode === 'signup'){
+      // Creating the Auth account and redeeming the invite code can't be
+      // one atomic operation -- Auth and Firestore are separate services
+      // -- so a failed redemption (bad/used/disabled code) rolls the Auth
+      // account back instead of leaving a signed-up-but-doc-less account
+      // that could never actually get in.
+      var inviteCode = document.getElementById('authInviteCode').value.trim().toUpperCase();
+      window.__shwoopAPI.signUp(email, password).then(function(cred){
+        return window.__shwoopAPI.redeemInviteAndCreateAccount(cred.user.uid, inviteCode).catch(function(redeemErr){
+          return window.__shwoopAPI.deleteCurrentUser().catch(function(){}).then(function(){
+            throw redeemErr;
+          });
+        });
+      }).catch(function(err){
+        authErrorEl.textContent = friendlyAuthError(err);
+        authErrorEl.classList.add('show');
+      }).finally(function(){
+        authSubmitBtn.disabled = false;
+      });
+    } else {
+      window.__shwoopAPI.signIn(email, password).catch(function(err){
+        authErrorEl.textContent = friendlyAuthError(err);
+        authErrorEl.classList.add('show');
+      }).finally(function(){
+        authSubmitBtn.disabled = false;
+      });
+    }
   });
 
   var accountEmailDesc = document.getElementById('accountEmailDesc');
@@ -11363,10 +11638,52 @@
   });
 
 
-  // Private for now — only this account is allowed to actually use the
-  // app once signed in. See the corresponding note where this is checked
-  // for what real (server-side) enforcement would additionally require.
-  var SHWOOP_OWNER_EMAIL = 'heiszcam@gmail.com';
+  // Invite-gated, not single-owner: any signed-in account with a real
+  // users/{uid} document gets in. Creating that document at all requires
+  // having redeemed a real invite code in the same atomic write (see
+  // firestore.rules and redeemInviteAndCreateAccount) -- there's no
+  // client-side email check to bypass because there isn't one anymore.
+  // isAdmin is read live off the same user-doc snapshot every sign-in
+  // (see watchUserDoc's callback below), never hardcoded here.
+  var currentUserIsAdmin = false;
+
+  // Live trading and inviting others are both admin-only -- a non-admin
+  // account never even sees the Live toggle or the invite generator, on
+  // top of firestore.rules' own real enforcement (wouldEnableLiveTrading,
+  // the invites collection's create rule) against bypassing the UI
+  // entirely. Called every time currentUserIsAdmin changes: on each
+  // sign-in's first snapshot, and back to hidden on sign-out.
+  function applyAdminUI(){
+    var liveBtn = document.getElementById('alpacaEnvLiveBtn');
+    if(liveBtn) liveBtn.hidden = !currentUserIsAdmin;
+    var inviteSection = document.getElementById('adminInviteSection');
+    if(inviteSection) inviteSection.hidden = !currentUserIsAdmin;
+  }
+
+  document.getElementById('generateInviteBtn').addEventListener('click', function(){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var btn = this;
+    btn.disabled = true;
+    window.__shwoopAPI.createInviteCode(currentUid).then(function(code){
+      document.getElementById('generatedInviteCodeText').textContent = code;
+      document.getElementById('generatedInviteCodeRow').hidden = false;
+    }).catch(function(err){
+      alert('Could not generate an invite code — please try again. (' + err.message + ')');
+    }).finally(function(){
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('copyInviteCodeBtn').addEventListener('click', function(){
+    var code = document.getElementById('generatedInviteCodeText').textContent;
+    if(!code) return;
+    var btn = this;
+    (navigator.clipboard ? navigator.clipboard.writeText(code) : Promise.reject()).catch(function(){}).finally(function(){
+      var original = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function(){ btn.textContent = original; }, 1500);
+    });
+  });
 
   window.__onShwoopReady(function(api){
     authStatusEl.textContent = '';
@@ -11382,17 +11699,6 @@
           authStatusEl.textContent = "We've shipped an update — please sign in again to continue.";
           return;
         }
-        // This app is private — rejects anyone other than the one owner
-        // account, whether it's a brand-new sign-up or a restored session
-        // from an old sign-in. Client-side only: real enforcement against
-        // someone bypassing the UI entirely needs a matching Firestore
-        // security rule, which has to be set in the Firebase console.
-        if(user.email !== SHWOOP_OWNER_EMAIL){
-          if(window.__shwoopAPI){ window.__shwoopAPI.signOutUser(); }
-          authGateEl.removeAttribute('hidden');
-          authStatusEl.textContent = 'This app is private right now and not accepting other accounts.';
-          return;
-        }
         currentUid = user.uid;
         authGateEl.setAttribute('hidden', '');
         var exportSectionEl = document.getElementById('labsExportSection');
@@ -11406,6 +11712,16 @@
         alertsUid = user.uid;
         activityLogAlertBaselineId = undefined;
         journalUnsubscribe = api.watchUserDoc(user.uid, function(data){
+          // ---- Admin status ----
+          // Read live off this same doc snapshot every time, never
+          // cached or assumed -- an admin flag flipped in the Firebase
+          // console mid-session takes effect on the very next snapshot,
+          // same as every other server-driven field this listener fans
+          // out. See firestore.rules: isAdmin can never be set by the
+          // client itself, only by hand in the console.
+          currentUserIsAdmin = Boolean(data.isAdmin);
+          applyAdminUI();
+
           // ---- Journal ----
           var entries = data.journalEntries || [];
           journalEntries = entries;
@@ -11461,6 +11777,8 @@
         startRealQuoteLoop();
       } else {
         currentUid = null;
+        currentUserIsAdmin = false;
+        applyAdminUI();
         var exportSectionEl2 = document.getElementById('labsExportSection');
         if(exportSectionEl2) exportSectionEl2.setAttribute('hidden', '');
         journalEntries = [];
