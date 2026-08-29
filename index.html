@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shwoop — Your Pocket Advisor</title>
+<title>Pocket Advisor — We trade. You live your life.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -205,7 +205,7 @@
   .brand:hover .brand-name{ color: var(--amber); }
   .brand-text{ position:relative; }
   .brand-name-row{ display:flex; align-items:center; gap:8px; }
-  /* Sits in normal flex flow now, beside SHWOOP specifically -- centered
+  /* Sits in normal flex flow now, beside POCKET ADVISOR specifically -- centered
      vertically against just that line (not the full two-line block),
      off to the right rather than floating above the text. */
   .brand-mark-scroller{
@@ -1769,10 +1769,10 @@
         <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
         <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
         <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-        <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
-        <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Public Sans', sans-serif">S</text>
+        <rect x="32" y="28" width="60" height="46" rx="10" fill="none" stroke="var(--amber)" stroke-width="6"/>
+        <circle cx="74" cy="51" r="7" fill="var(--amber)"/>
       </svg>
-      SHWOOP
+      POCKET ADVISOR
     </div>
     <div class="auth-title" id="authTitle">Sign in</div>
     <div class="auth-status" id="authStatus">Connecting…</div>
@@ -1821,22 +1821,22 @@
     <button class="brand" id="brandHomeBtn" aria-label="Go to home page">
       <div class="brand-text">
         <div class="brand-name-row">
-          <div class="brand-name">SHWOOP</div>
+          <div class="brand-name">POCKET ADVISOR</div>
           <span class="brand-mark-scroller">
             <span class="brand-mark-wrap">
               <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
                 <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
                 <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
                 <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-                <polygon points="60,18 92,50 60,82 28,50" fill="none" stroke="var(--amber)" stroke-width="6"/>
-                <text x="60" y="51" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="var(--amber)" font-family="'Public Sans', sans-serif">S</text>
+                <rect x="32" y="28" width="60" height="46" rx="10" fill="none" stroke="var(--amber)" stroke-width="6"/>
+                <circle cx="74" cy="51" r="7" fill="var(--amber)"/>
               </svg>
               <span class="brand-impact-ring"></span>
             </span>
             <span class="brand-ground"></span>
           </span>
         </div>
-        <div class="brand-sub">Your pocket advisor</div>
+        <div class="brand-sub">We trade. You live your life.</div>
       </div>
     </button>
 
@@ -2009,7 +2009,7 @@
       </div>
       <button class="cta-btn" id="ctaToTrades">View Trade Overview →</button>
     </div>
-    <div class="cta-caption">This brief opens automatically the first time you visit Shwoop each day. After that, you'll land on Trade Overview — use Brief in the sidebar to come back here anytime.</div>
+    <div class="cta-caption">This brief opens automatically the first time you visit Pocket Advisor each day. After that, you'll land on Trade Overview — use Brief in the sidebar to come back here anytime.</div>
   </main>
 
   <!-- ================= STATUS ================= -->
@@ -2418,11 +2418,17 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Changelog</div>
-        <div class="trades-sub">What's new in Shwoop.</div>
+        <div class="trades-sub">What's new in Pocket Advisor.</div>
       </div>
     </div>
 
     <div class="changelog-list">
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="changelog-version-badge">v2.3</span>Renamed to Pocket Advisor</div>
+        <ul class="changelog-items">
+          <li>Renamed from Shwoop to Pocket Advisor, with a new mark to match</li>
+        </ul>
+      </div>
       <div class="changelog-entry">
         <div class="changelog-version"><span class="changelog-version-badge">v2.2</span>Crypto Trading &amp; Trade-Management Hardening</div>
         <ul class="changelog-items">
@@ -2521,7 +2527,7 @@
 
       <div class="demo-intro-step" id="demoIntroStep1">
         <div class="demo-showcase">
-          <div class="demo-showcase-title">What Shwoop actually does</div>
+          <div class="demo-showcase-title">What Pocket Advisor actually does</div>
           <p class="demo-showcase-text">Two robot traders. One watches 16 stocks for a strong early-day breakout.
           The other watches 12 crypto pairs around the clock. Either fires, it sizes the risk, places the order,
           and closes it out. You don't touch anything.</p>
@@ -2920,9 +2926,9 @@
   </div>
 
   <footer class="site-footer">
-    <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
+    <div class="footer-copyright">© 2026 Pocket Advisor. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies/projects referenced on this site. Stock ticker symbols, company names, and cryptocurrency symbols shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID, OPEN, SNAP, CHPT, and ROKU, plus BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, and AAVE) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Shwoop watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account is connected — paper or live — with a persistent banner and red accents whenever live means real money. Single-owner personal tool, still under active testing — not a track record, not financial advice.</p>
+    <p>Pocket Advisor watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account is connected — paper or live — with a persistent banner and red accents whenever live means real money. Single-owner personal tool, still under active testing — not a track record, not financial advice.</p>
     <p>Prices are live quotes from Alpaca, falling back to Finnhub if needed. Chart history is real data from Twelve Data — if it can't load, you'll see an honest error, never fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
@@ -3643,7 +3649,7 @@
 
   // ---------- Alpaca trading: paper AND live, kept deliberately separate ----------
   // Bring-your-own-account: each user connects their own Alpaca keys.
-  // Shwoop never holds funds or credentials centrally — this is
+  // Pocket Advisor never holds funds or credentials centrally — this is
   // literally the same as if the person wrote this fetch call themselves.
   //
   // Paper and live are two genuinely separate accounts with separate
@@ -4201,7 +4207,7 @@
   // real crypto pause reads as if equities paused instead.
   function notifyTradingPausedViaBrowser(strategyLabel, reasonText){
     if(!('Notification' in window)) return;
-    var title = 'Shwoopnet — ' + strategyLabel + ' auto-trading paused';
+    var title = 'Pocket Advisor — ' + strategyLabel + ' auto-trading paused';
     var body = 'Repeated failed order attempts. Reason: ' + reasonText + '. Review the activity log, then resume once resolved.';
     if(Notification.permission === 'granted'){
       try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
@@ -4599,7 +4605,7 @@
     // Falls back to what was recorded in the journal at the moment this
     // trade was placed. The live-order lookup can come up empty for a
     // given symbol even when the position genuinely has real bracket
-    // protection sitting on Alpaca's side — this is data Shwoop already
+    // protection sitting on Alpaca's side — this is data Pocket Advisor already
     // has and trusts, since it wrote it there itself.
     if(target === null || stop === null){
       var journalMatch = journalEntries.filter(function(j){ return j.sym === sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
@@ -5118,7 +5124,7 @@
   // A bracket order's stop-loss/take-profit legs fill on Alpaca's own
   // servers, independent of whether this tab is open — so the position
   // itself genuinely closes correctly either way. But nothing else in
-  // Shwoop watches for that fill, which means the journal entry stays
+  // Pocket Advisor watches for that fill, which means the journal entry stays
   // marked "open" forever until the fill is actively checked for here.
   function syncAlpacaFilledExits(){
     if(!alpacaConnected) return;
@@ -9880,7 +9886,7 @@
 
   function notifyPositionClosedViaBrowser(entry){
     if(!('Notification' in window)) return;
-    var title = 'Shwoopnet — ' + (entry.sym || 'Position') + ' closed';
+    var title = 'Pocket Advisor — ' + (entry.sym || 'Position') + ' closed';
     var body = entry.text || 'A position closed.';
     if(Notification.permission === 'granted'){
       try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
@@ -9971,15 +9977,22 @@
       var todayPLPct = lastEquity > 0 ? (todayPL / lastEquity * 100) : 0;
       var plClass = todayPL >= 0 ? 'up' : 'down';
       // Alpaca only rolls last_equity forward at the START of the next
-      // real trading session -- on a weekend or holiday it's still
-      // sitting at the close from TWO sessions back, not one, so equity
-      // minus last_equity actually spans two days' worth of change,
-      // mislabeled as "Today's". backendIsTodayTradingDay === false (an
-      // explicit check, not just falsy, so null/undefined from an old
-      // server build still falls through to the normal calculation
-      // above rather than hiding P&L outright) shows that stale delta
-      // honestly instead of implying it just happened today.
-      var plValueHtml = backendIsTodayTradingDay === false
+      // real EQUITIES trading session -- on a weekend or holiday it's
+      // still sitting at the close from TWO sessions back, not one, so
+      // equity minus last_equity can span two days' worth of change,
+      // mislabeled as "Today's". But crypto trades 24/7 on this same
+      // account regardless of the stock market's calendar -- an open
+      // crypto position (or one that's simply still resting) means
+      // equity genuinely IS moving right now, so "Market closed" would
+      // be actively wrong, not just imprecise, hiding a real number the
+      // moment it's most worth checking. hasOpenCryptoPosition overrides
+      // the closed-market treatment whenever that's the case; otherwise
+      // backendIsTodayTradingDay === false (an explicit check, not just
+      // falsy, so null/undefined from an old server build still falls
+      // through to the normal calculation) shows the honest stale-delta
+      // state instead of implying it just happened today.
+      var hasOpenCryptoPosition = (backendPositions || []).some(function(p){ return p.symbol && p.symbol.indexOf('/') !== -1; });
+      var plValueHtml = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition)
         ? '<div class="backtest-stat-value">Market closed</div>'
         : '<div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
 
@@ -10280,11 +10293,15 @@
       var todayPLPct = lastEquity > 0 ? ((equity - lastEquity) / lastEquity * 100) : 0;
       // A small dead zone around exactly flat reads as neutral (yellow)
       // rather than flickering green/red on essentially no real move.
-      // On a non-trading day, last_equity hasn't rolled forward to
-      // yesterday's close yet (see renderStatusPage's own comment on
-      // this same staleness) -- neutral rather than a real green/red
-      // read on a number that isn't actually today's.
-      var colorClass = backendIsTodayTradingDay === false ? 'neutral'
+      // On a non-trading day with no open crypto position, last_equity
+      // hasn't rolled forward to yesterday's close yet (see
+      // renderStatusPage's own comment on this same staleness) --
+      // neutral rather than a real green/red read on a number that isn't
+      // actually today's. An open crypto position overrides this: crypto
+      // trades 24/7 regardless of the stock market's calendar, so the
+      // number is genuinely live and deserves a real color.
+      var hasOpenCryptoPosition = (backendPositions || []).some(function(p){ return p.symbol && p.symbol.indexOf('/') !== -1; });
+      var colorClass = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition) ? 'neutral'
         : Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
 
       [dockBubble, sidebarBubble].forEach(function(el){
@@ -10980,7 +10997,7 @@
   // wins sized bigger so the day still nets positive -- the
   // profit-factor story acted out, not just asserted.
   var demoDayScript = [
-    { clock:'9:30 AM', narration:"Market opens. Shwoop is watching all 16 stocks for the first real move of the day.", duration:3200, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
+    { clock:'9:30 AM', narration:"Market opens. Pocket Advisor is watching all 16 stocks for the first real move of the day.", duration:3200, action:function(){ demoCardState = null; renderDemoTradeCard(); } },
     { clock:'9:45 AM', narration:"PLTR's opening range is forming: $24.10 – $24.35. Nothing to do yet — just watching.", duration:2800 },
     { clock:'10:00 AM', narration:'Breaks above $24.35 on 2.3x normal volume — that\'s the confirmation. Signal fires.', duration:2600, tone:'new', action:function(){
       demoCardState = { sym:'PLTR', name:'Palantir Technologies', direction:'Long', entry:24.35, stop:24.10, target:24.72, current:24.35, badgeCls:'watching', badgeLabel:'Watching', bannerText:'Signal fired — sizing the order…', bannerDone:false };
@@ -11822,7 +11839,7 @@
 
   // A direct link (e.g. #trades) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise:
-  // default to the brief, unless we've already opened Shwoop today.
+  // default to the brief, unless we've already opened Pocket Advisor today.
   (function initLanding(){
     var hashPage = (location.hash || '').replace('#', '');
     if(hashPage === 'brief' || hashPage === 'trades' || hashPage === 'journal' || hashPage === 'settings' || hashPage === 'changelog'){
