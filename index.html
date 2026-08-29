@@ -1568,8 +1568,6 @@
   // server-side in functions/index.js), so the proxy can't be driven by
   // anyone who just finds the function URL.
   var finnhubQuoteFn = httpsCallable(functions, 'finnhubQuote');
-  var finnhubNewsFn = httpsCallable(functions, 'finnhubNews');
-  var finnhubEarningsCalendarFn = httpsCallable(functions, 'finnhubEarningsCalendar');
   var finnhubCompanyNewsFn = httpsCallable(functions, 'finnhubCompanyNews');
 
   window.__shwoopReady({
@@ -1653,6 +1651,18 @@
         callback(snap.exists() ? snap.data() : {});
       }, function(err){
         console.error('User doc sync error:', err);
+      });
+    },
+    // One document, computed once by shwoop-server and read by every
+    // signed-in account (see firestore.rules: shared/{doc} is
+    // read-only from the client SDK) -- general market data that's the
+    // same for everyone (index/watchlist quotes, headlines, earnings
+    // calendar) no longer needs a separate per-account Finnhub call.
+    watchSharedMarketSnapshot: function(callback){
+      return onSnapshot(doc(db, 'shared', 'marketSnapshot'), function(snap){
+        callback(snap.exists() ? snap.data() : null);
+      }, function(err){
+        console.error('Shared market snapshot sync error:', err);
       });
     },
     saveAlerts: function(uid, alertHistory, lastDate){
@@ -1809,12 +1819,6 @@
     finnhubQuote: function(symbol){
       return finnhubQuoteFn({ symbol: symbol }).then(function(res){ return res.data; });
     },
-    finnhubNews: function(){
-      return finnhubNewsFn().then(function(res){ return res.data; });
-    },
-    finnhubEarningsCalendar: function(from, to){
-      return finnhubEarningsCalendarFn({ from: from, to: to }).then(function(res){ return res.data; });
-    },
     finnhubCompanyNews: function(symbol, from, to){
       return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
     }
@@ -1953,6 +1957,7 @@
         <button class="notepad-close" id="historyClose" aria-label="Close history">×</button>
       </div>
     </div>
+    <div class="activity-log-filters" id="historyFilters" style="padding:8px 18px 0 18px; margin:0;"></div>
     <div class="history-list" id="historyList"></div>
   </div>
 
@@ -2504,9 +2509,23 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v2.3</span>Renamed to Pocket Advisor</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v2.4</span>Shared Market Data &amp; Polish</div>
+        <ul class="changelog-items">
+          <li>Index/watchlist quotes, market headlines, and the earnings calendar are now computed once by the backend and shared by every signed-in account, instead of each browser tab drawing on the same rate-limited data source independently</li>
+          <li>Fixed a scary false alarm: the Backend Status card no longer shows a red "no heartbeat" warning before you've even connected Alpaca — it now correctly waits until there's something to actually hear from</li>
+          <li>Alerts &amp; trade history now shares the exact same filters and entry list as the Activity Log card — it used to quietly drop some legacy entries the card still showed</li>
+          <li>What to Watch (equities and crypto) shows an honest "no setups right now" message instead of a blank gap when the screener has nothing to report</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="changelog-version-badge">v2.3</span>Pocket Advisor: Invite-Gated Multi-User Accounts</div>
         <ul class="changelog-items">
           <li>Renamed from Shwoop to Pocket Advisor, with a new mark to match</li>
+          <li>Real multi-user accounts: invited accounts sign up with a one-time code, trade on their own fully isolated paper account, and can't see or touch the owner's data — the owner account can still go live</li>
+          <li>The backend now runs its screener, sizing, and safety checks for every connected account on its own schedule, not just one</li>
+          <li>Activity Log cleanup: filterable by type, hides noisy routine scans by default, and reads as a real table instead of a wall of text</li>
+          <li>Fixed several real bugs: crypto positions hidden behind a false "Market closed" P&amp;L freeze, a Notepad drag that hit an invisible wall, and the header wrongly reporting "Sync failed" during crypto-only hours</li>
+          <li>Labs: "Test Alpaca as a data feed" and "Export raw historical data" are now their own sections instead of nested inside the equities backtest</li>
         </ul>
       </div>
       <div class="changelog-entry">
@@ -2545,53 +2564,12 @@
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.7.3.0.0</span>Account Panel &amp; Auto-Send</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.0 – v1.7</span>Early History</div>
         <ul class="changelog-items">
-          <li>New account panel shows your real Alpaca balance and open positions at a glance</li>
-          <li>Optional auto-send: new picks can go to Alpaca automatically, no manual click — off by default</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.7.0.0.0</span>Alpaca Paper Trading</div>
-        <ul class="changelog-items">
-          <li>Connect a free Alpaca paper account in Settings — "Send to Alpaca" places a real order and logs it to the journal in one click</li>
-          <li>Started quietly tracking what actually happens to every pick, aiming toward real numbers on how well this works instead of a guess</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.6.0.0.0</span>Renamed to Shwoop, Labs Added</div>
-        <ul class="changelog-items">
-          <li>Renamed from Shwoopnet to Shwoop</li>
-          <li>New Labs page: a plain-language writeup of exactly how the screener works, plus a real backtest tool</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.5.2.0.0</span>Real Screener &amp; Analysis</div>
-        <ul class="changelog-items">
-          <li>Daily screener auto-picks trades from real technical analysis, replacing simulated data entirely</li>
-          <li>Entry, stop, and targets calculated from real moving averages and price structure — no more fixed-ratio targets</li>
-          <li>Signed-in accounts never show simulated data again — an honest "couldn't load" state instead</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.5</span>Accounts &amp; Sync</div>
-        <ul class="changelog-items">
-          <li>Real sign-up and sign-in with email + password</li>
-          <li>Trade Journal now syncs across devices in real time</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.4</span>Journal Upgrades</div>
-        <ul class="changelog-items">
-          <li>Log real trades straight from Trade Overview, pre-filled from the setup</li>
-          <li>Exit tracking with automatic P&amp;L, calendar-based journal with date-range filtering</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.0</span>Initial Launch</div>
-        <ul class="changelog-items">
-          <li>Market Brief, Trade Overview, and live ticker tape</li>
-          <li>Simulated pricing and candlestick charts</li>
+          <li>Started as a simulated demo: Market Brief, Trade Overview, a live ticker tape, and fake pricing</li>
+          <li>Added a real trade journal (exit tracking, automatic P&amp;L, calendar view), then real accounts with cross-device sync</li>
+          <li>Replaced simulated picks with a real technical-analysis screener; renamed Shwoopnet → Shwoop; added the Labs page and its backtest tool</li>
+          <li>Connected real Alpaca paper trading — one-click order placement, an account panel, and optional auto-send</li>
         </ul>
       </div>
     </div>
@@ -3013,7 +2991,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Pocket Advisor. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies/projects referenced on this site. Stock ticker symbols, company names, and cryptocurrency symbols shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID, OPEN, SNAP, CHPT, and ROKU, plus BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, and AAVE) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Pocket Advisor watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account is connected — paper or live — with a persistent banner and red accents whenever live means real money. Single-owner personal tool, still under active testing — not a track record, not financial advice.</p>
+    <p>Pocket Advisor watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account you connect — invited accounts are paper-only; the admin account can also connect a live Alpaca account, with a persistent banner and red accents whenever live means real money. Invite-only, still under active testing — not a track record, not financial advice.</p>
     <p>Prices are live quotes from Alpaca, falling back to Finnhub if needed. Chart history is real data from Twelve Data — if it can't load, you'll see an honest error, never fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
@@ -8922,6 +8900,7 @@
   // ---------- Trade Journal (calendar + logged trades, synced via Firebase) ----------
   var journalEntries = [];
   var journalUnsubscribe = null;
+  var sharedSnapshotUnsubscribe = null;
   var currentUid = null;
 
   function saveJournalEntries(){
@@ -9730,6 +9709,7 @@
 
   function renderHistoryList(){
     var el = document.getElementById('historyList');
+    renderActivityLogFilters();
     var marketItems = alertHistory.map(function(n){
       return {
         kind: 'market', sortKey: n.timestamp || 0, sym: n.sym, tag: n.tag, text: n.text,
@@ -9737,15 +9717,18 @@
         timeLabel: n.time || ''
       };
     });
-    var tradeItems = systemActivityLog.filter(function(a){
-      // Same two filters renderActivityLog itself applies -- a routine,
-      // fully-fetched scan is noise here too (this modal used to show
-      // every single one, unfiltered), and a type the Activity Log's own
-      // filter chips have hidden should stay hidden everywhere, not just
-      // on the Trade Overview card, since it's the same shared preference.
+    // Same currentAccountActivityLog + isRoutineScan + activityLogHiddenGroups
+    // as renderActivityLog itself applies (Trade Overview's own Activity
+    // Log card) -- a routine, fully-fetched scan is noise here too, and a
+    // type the filter chips have hidden should stay hidden everywhere,
+    // not just on the Trade Overview card, since it's the same shared
+    // preference. Sharing the exact same account-scoping helper (rather
+    // than each view keeping its own copy) is what guarantees these two
+    // views can never show a different set of trade-activity entries.
+    var tradeItems = currentAccountActivityLog().filter(function(a){
       if(isRoutineScan(a)) return false;
       if(activityLogHiddenGroups[activityGroupKey(a.type)]) return false;
-      return a.accountKeyId === activeAlpacaCreds().keyId;
+      return true;
     }).map(function(a){
       var tagInfo = tradeActivityTagInfo(a);
       return {
@@ -10230,14 +10213,32 @@
 
     // ---- Row 2: heartbeat ----
     if(!backendHeartbeatAt){
-      if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
-      if(headMeta){ headMeta.textContent = alpacaConnected ? 'No heartbeat yet' : 'Not connected'; }
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
-          '<div class="backend-pulse-label">No heartbeat received yet</div>' +
-          '<div class="backend-pulse-sub">Either the backend hasn\'t started up since this feature shipped, or it isn\'t running at all right now.</div>' +
-        '</div></div>'
-      );
+      // The backend only ever runs (and writes a heartbeat) for an
+      // account once it has a real Alpaca connection on file -- see
+      // shwoop-server's listConnectedUserIds, which filters an
+      // unconnected account out of the scheduler entirely. So no
+      // heartbeat yet is the EXPECTED state here, not a sign anything is
+      // wrong, and shouldn't read as a warning the same way a missing
+      // heartbeat on an already-connected account genuinely would.
+      if(!alpacaConnected){
+        if(headDot){ headDot.classList.remove('ok'); headDot.classList.remove('warn'); }
+        if(headMeta){ headMeta.textContent = 'Not connected'; }
+        rows.push(
+          '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
+            '<div class="backend-pulse-label">Backend hasn\'t checked in yet</div>' +
+            '<div class="backend-pulse-sub">Expected — the backend only starts running for this account once you connect Alpaca in Settings.</div>' +
+          '</div></div>'
+        );
+      } else {
+        if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
+        if(headMeta){ headMeta.textContent = 'No heartbeat yet'; }
+        rows.push(
+          '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
+            '<div class="backend-pulse-label">No heartbeat received yet</div>' +
+            '<div class="backend-pulse-sub">Alpaca is connected, but the backend has never checked in for this account — either it hasn\'t redeployed since this account connected, or it isn\'t running right now.</div>' +
+          '</div></div>'
+        );
+      }
     } else {
       var heartbeatAge = Date.now() - backendHeartbeatAt;
       var heartbeatStale = heartbeatAge > BACKEND_HEARTBEAT_STALE_MS;
@@ -10800,19 +10801,28 @@
     try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
   }
 
+  // Renders into every filter-chip container that exists on the page --
+  // Trade Overview's Activity Log card (#activityLogFilters) and the
+  // Alerts & trade history modal (#historyFilters) both toggle the exact
+  // same activityLogHiddenGroups state, so a chip clicked in either place
+  // has to update both, not just whichever view happened to render it.
+  var ACTIVITY_FILTER_CONTAINER_IDS = ['activityLogFilters', 'historyFilters'];
   function renderActivityLogFilters(){
-    var el = document.getElementById('activityLogFilters');
-    if(!el) return;
-    el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
-      var shown = !activityLogHiddenGroups[g.key];
-      return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
-    }).join('');
-    el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var key = btn.dataset.group;
-        activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
-        saveActivityLogFilterPrefs();
-        renderActivityLog();
+    ACTIVITY_FILTER_CONTAINER_IDS.forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
+        var shown = !activityLogHiddenGroups[g.key];
+        return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
+      }).join('');
+      el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var key = btn.dataset.group;
+          activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
+          saveActivityLogFilterPrefs();
+          renderActivityLog();
+          renderHistoryList();
+        });
       });
     });
   }
@@ -10830,6 +10840,23 @@
     var m = text.match(/Scanned (\d+) symbols? \((\d+) fetched\)/i);
     if(m && m[1] !== m[2]) return false;
     return true;
+  }
+
+  // Which entries "belong" to the currently-connected account -- shared
+  // by renderActivityLog (Trade Overview's card) and renderHistoryList
+  // (the Alerts & trade history modal) so the two views can never show
+  // a different set of trade-activity entries for the same account.
+  // Before this was pulled out, renderHistoryList had its own copy that
+  // dropped legacy entries with no accountKeyId stamped at all (see
+  // orchestrator.js -- shwoop-server didn't start stamping this field
+  // until recently), while renderActivityLog correctly still counted
+  // those as the paper account's own -- so the modal silently showed
+  // fewer entries than the card for the exact same account.
+  function currentAccountActivityLog(){
+    return systemActivityLog.filter(function(entry){
+      if(!entry.accountKeyId) return alpacaAccountType === 'paper';
+      return entry.accountKeyId === activeAlpacaCreds().keyId;
+    });
   }
 
   // Best-effort win/loss read off the entry's own text -- backend and
@@ -10850,22 +10877,10 @@
     renderActivityLogFilters();
     // Same account-scoping as journal entries -- an activity log entry
     // from a previous account shouldn't appear as if it happened on
-    // whatever account is connected now.
-    //
-    // Same exception as isOpenAlpacaPositionForCurrentAccount, and for
-    // the same reason: shwoop-server never stamped accountKeyId on the
-    // activity entries it writes until just now (see its
-    // orchestrator.js), so EVERY entry the backend has ever created --
-    // which in practice is nearly all of them -- had accountKeyId
-    // undefined and was being silently excluded here, making the
-    // Activity Log look empty/broken regardless of how much the backend
-    // had actually done. The backend only ever operates on the single
-    // paper-account credentials, so a no-accountKeyId entry can only be
-    // one of its own -- never extended to the live environment.
-    var currentAccountLog = systemActivityLog.filter(function(entry){
-      if(!entry.accountKeyId) return alpacaAccountType === 'paper';
-      return entry.accountKeyId === activeAlpacaCreds().keyId;
-    });
+    // whatever account is connected now. See currentAccountActivityLog's
+    // own comment for why a missing accountKeyId still counts as the
+    // paper account's own.
+    var currentAccountLog = currentAccountActivityLog();
     var visibleLog = currentAccountLog.filter(function(entry){
       if(activityLogHiddenGroups[activityGroupKey(entry.type)]) return false;
       if(isRoutineScan(entry)) return false;
@@ -11691,6 +11706,7 @@
 
     api.onAuthChange(function(user){
       if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
+      if(sharedSnapshotUnsubscribe){ sharedSnapshotUnsubscribe(); sharedSnapshotUnsubscribe = null; }
 
       if(user){
         if(forceReauthPending){
@@ -11764,8 +11780,14 @@
           handleAlpacaCredentialsDocUpdate(data);
           handleTradingPauseDocUpdate(data);
         });
-        loadMarketNewsIfSignedIn();
-        loadEarningsIfSignedIn();
+        // News/earnings and index-and-watchlist quotes now come from the
+        // one shared/marketSnapshot document shwoop-server computes on
+        // its own 3-minute cycle (see marketSnapshot.js) instead of each
+        // signed-in tab making its own Finnhub calls for identical,
+        // non-personalized data. Falls back to nothing (last-known /
+        // "Sign in to see..." placeholders) if the backend hasn't
+        // written a snapshot yet, e.g. right after a fresh deploy.
+        sharedSnapshotUnsubscribe = api.watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate);
         // Unpriced (null) until fetchAllQuotes actually resolves -- same
         // "no fake data" rule the crypto watchlist already follows.
         // Renders as an honest "Loading…" (see indexReads) rather than a
@@ -11810,6 +11832,10 @@
   // intradayTrades only when the backend hasn't reported anything yet
   // (e.g. server hasn't completed its first cycle since this tab opened).
   function renderWatchTradeCards(el, source){
+    if(!source.length){
+      el.innerHTML = '<div class="news-placeholder">No setups right now — check back once the screener finds something.</div>';
+      return;
+    }
     el.innerHTML = source.map(function(t){
       var badge = computeBadgeInfo(t);
       // Same reasoning as renderIntradayBlocks/renderCryptoBlocks: once a
@@ -12024,6 +12050,39 @@
       '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(row).join('') + '</div>';
   }
 
+  // ---------- Shared market snapshot (indices/watchlist quotes, news, earnings -- one doc for every signed-in account) ----------
+  // shwoop-server writes shared/marketSnapshot once every 3 minutes from
+  // the admin account's own Alpaca credentials (quotes) and its own
+  // FINNHUB_API_KEY (news/earnings) -- see src/marketSnapshot.js. Merged
+  // into the same watchlist array/render functions a real per-account
+  // quote fetch already populates, so nothing downstream needs to know
+  // the difference. null (no snapshot written yet -- e.g. right after a
+  // fresh deploy, or FINNHUB_API_KEY isn't set on the backend) leaves
+  // whatever was already on screen alone rather than blanking it out.
+  function handleSharedMarketSnapshotUpdate(data){
+    if(!data) return;
+    var quotes = data.quotes || {};
+    Object.keys(quotes).forEach(function(sym){
+      var q = quotes[sym];
+      if(!q || q.price == null) return;
+      var existing = watchlist.filter(function(w){ return w.sym === sym; })[0];
+      if(existing){
+        existing.price = q.price;
+        existing.prevClose = q.prevClose;
+      } else {
+        watchlist.push({ sym: sym, name: COMPANY_NAMES[sym] || sym, price: q.price, prevClose: q.prevClose });
+      }
+    });
+    renderTicker();
+    renderIndices();
+    renderSentiment();
+    renderBriefHeadline();
+    renderMovers();
+    renderWhatToWatch();
+    renderMarketNews(data.news);
+    renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
+  }
+
   // ---------- Market News & Earnings Calendar (Finnhub, signed-in accounts only) ----------
   function renderMarketNews(articles){
     var el = document.getElementById('marketNewsList');
@@ -12039,15 +12098,6 @@
         '<span class="news-item-meta">' + (a.source || '') + (time ? ' · ' + time : '') + '</span>' +
       '</a>';
     }).join('');
-  }
-
-  function loadMarketNewsIfSignedIn(){
-    if(!currentUid) return;
-    var el = document.getElementById('marketNewsList');
-    window.__shwoopAPI.finnhubNews().then(renderMarketNews).catch(function(err){
-      console.error('Market news fetch failed:', err);
-      if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load headlines right now.</div>'; }
-    });
   }
 
   function renderEarningsCalendar(data){
@@ -12071,19 +12121,6 @@
         '<span class="earnings-hour">' + hourLabel + '</span>' +
       '</div>';
     }).join('');
-  }
-
-  function loadEarningsIfSignedIn(){
-    if(!currentUid) return;
-    var el = document.getElementById('earningsList');
-    var today = new Date();
-    var weekOut = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-    var fromStr = today.toISOString().slice(0, 10);
-    var toStr = weekOut.toISOString().slice(0, 10);
-    window.__shwoopAPI.finnhubEarningsCalendar(fromStr, toStr).then(renderEarningsCalendar).catch(function(err){
-      console.error('Earnings calendar fetch failed:', err);
-      if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load earnings calendar right now.</div>'; }
-    });
   }
 
   function resetNewsAndEarnings(){
