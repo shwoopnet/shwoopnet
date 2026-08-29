@@ -496,6 +496,12 @@
     box-shadow: var(--card-shadow);
   }
   .labs-method-intro, .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
+  .labs-live-compare{
+    font-size:12.5px; color: var(--muted); background: var(--panel-raised); border:1px solid var(--border);
+    border-radius:8px; padding:10px 14px; margin:-10px 0 22px 0;
+  }
+  .labs-live-compare strong.up{ color: var(--gain); }
+  .labs-live-compare strong.down{ color: var(--loss); }
   .labs-method-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px 28px; }
   @media (max-width:900px){ .labs-method-grid{ grid-template-columns:1fr; } }
   .labs-method-item{ display:flex; gap:14px; }
@@ -2358,6 +2364,11 @@
         <div class="pl-card-sub" id="statWinRateSub"></div>
       </div>
       <div class="pl-card">
+        <div class="pl-card-label">Profit Factor</div>
+        <div class="pl-card-value mono" id="statProfitFactor">—</div>
+        <div class="pl-card-sub" id="statProfitFactorSub">Gross gains ÷ gross losses — same math Labs' backtest uses.</div>
+      </div>
+      <div class="pl-card">
         <div class="pl-card-label">Avg Win</div>
         <div class="pl-card-value mono up" id="statAvgWin">—</div>
       </div>
@@ -2811,6 +2822,7 @@
         the activity log is the real read on how it's actually doing live. The crypto strategy is its own
         separate screener, covered below.
       </p>
+      <div class="labs-live-compare" id="labsEquitiesLiveStat">—</div>
       <div class="labs-method-grid">
         <div class="labs-method-item">
           <div class="labs-method-step">1</div>
@@ -2855,6 +2867,7 @@
         crypto has no shorting. Newer than equities and with less live history — the activity log is the real
         read on how it's holding up.
       </p>
+      <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
         <div class="labs-method-item">
           <div class="labs-method-step">1</div>
@@ -9361,21 +9374,30 @@
     if(closed.length === 0) return null;
     var totalDollar = 0, totalPctSum = 0, wins = 0;
     var winDollarSum = 0, lossDollarSum = 0, winCount = 0, lossCount = 0;
+    // Gross gains/losses in PERCENT terms (not dollars) -- profit factor
+    // computed this way is directly comparable to Labs' own backtest
+    // profit factor, which is also gross % gains over gross % losses
+    // (see summarizeBacktestTrades). A dollar-based version would be
+    // skewed by position sizing differences trade to trade in a way the
+    // backtest's number isn't, making the two numbers not apples-to-apples.
+    var winPctSum = 0, lossPctSum = 0;
     var best = null, worst = null;
     closed.forEach(function(e){
       var pl = computePL(e);
       totalDollar += pl.dollar;
       totalPctSum += pl.pct;
-      if(pl.pct >= 0){ wins++; winDollarSum += pl.dollar; winCount++; }
-      else { lossDollarSum += pl.dollar; lossCount++; }
+      if(pl.pct >= 0){ wins++; winDollarSum += pl.dollar; winCount++; winPctSum += pl.pct; }
+      else { lossDollarSum += pl.dollar; lossCount++; lossPctSum += pl.pct; }
       if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
     });
+    var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
     return {
       count: closed.length, wins: wins, losses: closed.length - wins, totalDollar: totalDollar, avgPct: totalPctSum / closed.length,
       winRate: (wins / closed.length) * 100,
       avgWinDollar: winCount ? winDollarSum / winCount : 0,
       avgLossDollar: lossCount ? lossDollarSum / lossCount : 0,
+      profitFactor: profitFactor,
       best: best, worst: worst
     };
   }
@@ -9458,11 +9480,19 @@
       var winRate = (wins.length / trades.length) * 100;
       var avgWin = wins.length ? wins.reduce(function(s,t){ return s + t.dollarPL; }, 0) / wins.length : 0;
       var avgLoss = losses.length ? losses.reduce(function(s,t){ return s + t.dollarPL; }, 0) / losses.length : 0;
+      // Same gross-%-gains-over-gross-%-losses math as computeAggregatePL
+      // and Labs' own backtest -- computed off pctReturn (not dollarPL) so
+      // it's directly comparable to the backtest's headline number even
+      // though these are the real, Alpaca-reconciled trades.
+      var winPctSum = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var lossPctSum = losses.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
       var best = trades.reduce(function(b,t){ return (!b || t.dollarPL > b.dollarPL) ? t : b; }, null);
       var worst = trades.reduce(function(w,t){ return (!w || t.dollarPL < w.dollarPL) ? t : w; }, null);
 
       var winRateEl = document.getElementById('statWinRate');
       var winRateSubEl = document.getElementById('statWinRateSub');
+      var profitFactorEl = document.getElementById('statProfitFactor');
       var avgWinEl = document.getElementById('statAvgWin');
       var avgLossEl = document.getElementById('statAvgLoss');
       var bestEl = document.getElementById('statBest');
@@ -9472,6 +9502,7 @@
       if(!winRateEl) return;
 
       winRateEl.textContent = winRate.toFixed(0) + '%';
+      if(profitFactorEl) profitFactorEl.textContent = isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞';
       // On All, these cards now reflect real equities trades only --
       // crypto isn't part of this reconstruction -- so the label says so
       // rather than implying "all trades" the way the Equities tab's own
@@ -9528,6 +9559,7 @@
 
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
+    var profitFactorEl = document.getElementById('statProfitFactor');
     var avgWinEl = document.getElementById('statAvgWin');
     var avgLossEl = document.getElementById('statAvgLoss');
     var bestEl = document.getElementById('statBest');
@@ -9536,12 +9568,14 @@
     var worstSubEl = document.getElementById('statWorstSub');
     if(!filtered){
       winRateEl.textContent = '—'; winRateSubEl.textContent = '';
+      profitFactorEl.textContent = '—';
       avgWinEl.textContent = '—'; avgLossEl.textContent = '—';
       bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = '';
       worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = '';
     } else {
       winRateEl.textContent = filtered.winRate.toFixed(0) + '%';
       winRateSubEl.textContent = filtered.count + ' total trades';
+      profitFactorEl.textContent = isFinite(filtered.profitFactor) ? filtered.profitFactor.toFixed(2) : '∞';
       avgWinEl.textContent = '+$' + filtered.avgWinDollar.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
       // Best/worst can each land on either side of zero regardless of
@@ -9567,6 +9601,43 @@
     // See patchTradeStatsFromAlpaca's own comment -- real numbers,
     // Equities tab only.
     patchTradeStatsFromAlpaca();
+    renderLabsLiveVsBacktest();
+  }
+
+  // The backtest's own headline profit-factor claims (see the Labs Method
+  // intro paragraphs) are a frozen, one-time historical validation -- they
+  // never re-check themselves against what this account has actually done
+  // since. This is that check: the same profit-factor math (gross % gains
+  // over gross % losses, see computeAggregatePL) applied to this account's
+  // own real closed trades, shown right next to the number it's supposed
+  // to be living up to. Kept independent of the journalFilter tab (which
+  // only affects the Journal page's own cards) since equities and crypto
+  // each need their own fixed comparison regardless of what tab is active.
+  // LABS_BACKTEST_PF must stay in sync with the hardcoded numbers quoted
+  // in the two labs-method-intro paragraphs above -- there's no single
+  // source of truth for those since the backtest itself isn't re-run live.
+  var LABS_BACKTEST_PF = { equities: 2.71, crypto: 2.35 };
+  var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
+  function renderLabsLiveVsBacktest(){
+    var eqEl = document.getElementById('labsEquitiesLiveStat');
+    var cryptoEl = document.getElementById('labsCryptoLiveStat');
+    if(!eqEl && !cryptoEl) return;
+    function renderInto(el, entries, backtestPF){
+      if(!el) return;
+      var agg = computeAggregatePL(entries);
+      if(!agg){
+        el.innerHTML = 'Live so far: <strong>no closed trades yet</strong> — nothing to compare against the backtest yet.';
+        return;
+      }
+      var pfText = isFinite(agg.profitFactor) ? agg.profitFactor.toFixed(2) : '∞';
+      var diffClass = agg.profitFactor >= backtestPF ? 'up' : 'down';
+      var confidenceNote = agg.count < LABS_MIN_TRADES_FOR_CONFIDENCE
+        ? ' — only ' + agg.count + ' closed trade' + (agg.count === 1 ? '' : 's') + ' so far, too few to trust yet.'
+        : ' across ' + agg.count + ' closed trades.';
+      el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
+    }
+    renderInto(eqEl, journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; }), LABS_BACKTEST_PF.equities);
+    renderInto(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
   }
 
   renderPLSummary();
