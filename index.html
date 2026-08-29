@@ -8932,7 +8932,11 @@
 
   function jumpToJournalDate(dateStr){
     showPage('journal');
-    calendarViewDate = new Date(dateStr + 'T00:00:00');
+    // UTC midnight, not local -- calendarViewDate is now always read via
+    // UTC getters (see renderCalendar), so it has to be constructed the
+    // same way or this would jump to the wrong month for anyone west of
+    // UTC (a local-midnight parse rolls back to the previous UTC day).
+    calendarViewDate = new Date(dateStr + 'T00:00:00Z');
     selectedJournalDate = dateStr;
     renderCalendar();
     renderJournalDetail();
@@ -8978,13 +8982,22 @@
     // filter is actually current, including an auto-reset to "All" if
     // the mix of open/closed strategies just changed.
     updateJournalFilterTabs();
-    var y = calendarViewDate.getFullYear();
-    var m = calendarViewDate.getMonth();
+    // UTC, not local getters -- every entry's own `date` field is stamped
+    // in UTC (both here and in shwoop-server's orchestrator.js, both
+    // `new Date().toISOString().slice(0,10)`), so building this grid from
+    // local getters silently drifted the two apart for anyone not on UTC
+    // itself. Equities never surfaced it (the whole 9:30-4pm ET session
+    // sits inside one UTC calendar day), but crypto trades right through
+    // the UTC day rollover 24/7 -- for a US timezone, that's evening
+    // local hours, exactly when a real fill would land on tomorrow's UTC
+    // date and vanish from today's LOCAL calendar cell entirely.
+    var y = calendarViewDate.getUTCFullYear();
+    var m = calendarViewDate.getUTCMonth();
     document.getElementById('calMonthLabel').textContent =
-      calendarViewDate.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+      calendarViewDate.toLocaleDateString('en-US', { month:'long', year:'numeric', timeZone:'UTC' });
 
-    var firstDow = new Date(y, m, 1).getDay();
-    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var firstDow = new Date(Date.UTC(y, m, 1)).getUTCDay();
+    var daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
     var grid = document.getElementById('calendarGrid');
     grid.innerHTML = '';
 
@@ -9054,7 +9067,12 @@
       return;
     }
     var entries = filteredJournalEntries().filter(function(e){ return e.date === selectedJournalDate; });
-    var niceDate = new Date(selectedJournalDate + 'T00:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    // UTC midnight + UTC-formatted display -- selectedJournalDate is a
+    // plain "YYYY-MM-DD" string matched against entries' UTC-stamped
+    // `date` field (see renderCalendar's own comment); parsing it as
+    // local midnight here would show the wrong weekday for part of the
+    // day in any timezone west of UTC.
+    var niceDate = new Date(selectedJournalDate + 'T00:00:00Z').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', timeZone:'UTC' });
 
     if(entries.length === 0){
       el.innerHTML = '<div class="journal-detail-date">' + niceDate + '</div><div class="journal-empty">No' + (journalFilter !== 'all' ? ' ' + journalFilter : '') + ' trades logged this day.</div>';
@@ -9331,11 +9349,11 @@
   });
 
   document.getElementById('calPrev').addEventListener('click', function(){
-    calendarViewDate.setMonth(calendarViewDate.getMonth() - 1);
+    calendarViewDate.setUTCMonth(calendarViewDate.getUTCMonth() - 1);
     renderCalendar();
   });
   document.getElementById('calNext').addEventListener('click', function(){
-    calendarViewDate.setMonth(calendarViewDate.getMonth() + 1);
+    calendarViewDate.setUTCMonth(calendarViewDate.getUTCMonth() + 1);
     renderCalendar();
   });
   renderJournalDetail();
