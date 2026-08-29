@@ -37,9 +37,12 @@ firebase deploy --only functions
 
 This deploys four callables: `finnhubQuote`, `finnhubNews`,
 `finnhubEarningsCalendar`, `finnhubCompanyNews`. Each one checks that the
-caller is signed in as `heiszcam@gmail.com` (matching the frontend's own
-owner-only gate) before it will spend the Finnhub key on a request — so the
+caller has a real signed-in Firebase Auth token (matching firestore.rules'
+own model: any account with a real `users/{uid}` document, not one specific
+owner email) before it will spend the Finnhub key on a request — so the
 function URLs being technically public doesn't open the key back up.
+Account creation itself is invite-gated (see firestore.rules), not these
+functions.
 
 ## After deploying
 
@@ -48,7 +51,7 @@ functions via the Firebase SDK (`window.__shwoopAPI.finnhubQuote(...)` etc. in
 the `<script type="module">` block). Reload the deployed page and the Brief
 page / quote loop should pull data through the proxy automatically. Check the
 Functions logs (`firebase functions:log`) if something doesn't load — a 403
-there means the signed-in email didn't match `OWNER_EMAIL`, not a Finnhub
+there means the request had no signed-in token at all, not a Finnhub
 problem.
 
 ## If you'd rather not deploy this yet
