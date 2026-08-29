@@ -106,6 +106,18 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // General market data (index levels, headlines, earnings calendar)
+    // computed ONCE by shwoop-server on its own schedule and shared by
+    // every signed-in account -- there is exactly one document here,
+    // regardless of how many accounts exist, so this never scales with
+    // the number of users the way each account independently calling
+    // Finnhub itself used to. Never client-writable: only the Admin SDK
+    // (which bypasses these rules) writes it.
+    match /shared/{doc} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
     // Everything else is denied by default -- Firestore rules deny any
     // request that doesn't match an explicit allow rule, so no further
     // catch-all is needed, but this comment documents that this is
