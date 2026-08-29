@@ -10230,14 +10230,32 @@
 
     // ---- Row 2: heartbeat ----
     if(!backendHeartbeatAt){
-      if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
-      if(headMeta){ headMeta.textContent = alpacaConnected ? 'No heartbeat yet' : 'Not connected'; }
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
-          '<div class="backend-pulse-label">No heartbeat received yet</div>' +
-          '<div class="backend-pulse-sub">Either the backend hasn\'t started up since this feature shipped, or it isn\'t running at all right now.</div>' +
-        '</div></div>'
-      );
+      // The backend only ever runs (and writes a heartbeat) for an
+      // account once it has a real Alpaca connection on file -- see
+      // shwoop-server's listConnectedUserIds, which filters an
+      // unconnected account out of the scheduler entirely. So no
+      // heartbeat yet is the EXPECTED state here, not a sign anything is
+      // wrong, and shouldn't read as a warning the same way a missing
+      // heartbeat on an already-connected account genuinely would.
+      if(!alpacaConnected){
+        if(headDot){ headDot.classList.remove('ok'); headDot.classList.remove('warn'); }
+        if(headMeta){ headMeta.textContent = 'Not connected'; }
+        rows.push(
+          '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
+            '<div class="backend-pulse-label">Backend hasn\'t checked in yet</div>' +
+            '<div class="backend-pulse-sub">Expected — the backend only starts running for this account once you connect Alpaca in Settings.</div>' +
+          '</div></div>'
+        );
+      } else {
+        if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
+        if(headMeta){ headMeta.textContent = 'No heartbeat yet'; }
+        rows.push(
+          '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
+            '<div class="backend-pulse-label">No heartbeat received yet</div>' +
+            '<div class="backend-pulse-sub">Alpaca is connected, but the backend has never checked in for this account — either it hasn\'t redeployed since this account connected, or it isn\'t running right now.</div>' +
+          '</div></div>'
+        );
+      }
     } else {
       var heartbeatAge = Date.now() - backendHeartbeatAt;
       var heartbeatStale = heartbeatAge > BACKEND_HEARTBEAT_STALE_MS;
