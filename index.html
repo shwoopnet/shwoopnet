@@ -13,7 +13,8 @@
        actual design principles (warm off-white ground, a single blue
        accent doing double duty as brand and "direction" chip, calm
        card surfaces with real breathing room). No theme picker, no
-       novelty packs -- this is the one identity the app presents. */
+       novelty packs -- light and dark are the only two states, and both
+       render this exact same identity, just inverted. */
     --ink: #FAFAF8;
     --panel: #FFFFFF;
     --panel-raised: #F5F6F8;
@@ -37,6 +38,29 @@
     --loss-glow: rgba(217,48,37,0.14);
     --radius: 10px;
     --card-shadow: 0 1px 3px rgba(16,24,43,0.06);
+  }
+
+  /* Dark mode -- same Ledger identity, inverted surfaces. Set on
+     <html> as early as possible (see the tiny inline script right
+     before </head>) so the very first paint already has the right
+     tokens -- toggled at runtime in Settings via applyDarkModePref.
+     Gain/loss intentionally NOT overridden here, same invariant as
+     the light palette above. */
+  html[data-theme="dark"]{
+    --ink: #11141B;
+    --panel: #181C25;
+    --panel-raised: #1F232E;
+    --border: #2A2F3B;
+    --paper: #EDEFF3;
+    --muted: #8891A3;
+    --amber: #5B9BFF;
+    --amber-dim: #3E76D6;
+    --amber-glow: rgba(91,155,255,0.18);
+    --amber-contrast: #0B1220;
+    --ticker-fg: #EDEFF3;
+    --ticker-fg-dim: #8891A3;
+    --ticker-bg: #181C25;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
 
   *{ box-sizing:border-box; }
@@ -472,6 +496,12 @@
     box-shadow: var(--card-shadow);
   }
   .labs-method-intro, .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
+  .labs-live-compare{
+    font-size:12.5px; color: var(--muted); background: var(--panel-raised); border:1px solid var(--border);
+    border-radius:8px; padding:10px 14px; margin:-10px 0 22px 0;
+  }
+  .labs-live-compare strong.up{ color: var(--gain); }
+  .labs-live-compare strong.down{ color: var(--loss); }
   .labs-method-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px 28px; }
   @media (max-width:900px){ .labs-method-grid{ grid-template-columns:1fr; } }
   .labs-method-item{ display:flex; gap:14px; }
@@ -684,12 +714,13 @@
   #statusActivityList{ max-height:420px; overflow-y:auto; }
   .activity-log-meta{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
   .activity-log-tag{
-    font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
-    background: var(--amber-glow); border:1px solid var(--amber-dim); border-radius:4px; padding:2px 7px;
+    font-size:10px; text-transform:uppercase; letter-spacing:.04em; font-weight:700; color: var(--amber);
+    background: var(--amber-glow); border:1px solid var(--amber-dim); border-radius:999px; padding:3px 10px 2px;
     flex-shrink:0; width:fit-content;
   }
   .activity-log-tag-loss{ color: var(--loss); background: var(--loss-glow); border-color: var(--loss); }
-  .activity-log-tag-gain{ color: var(--gain); background: var(--gain-glow); border-color: var(--gain); }
+  .activity-log-tag-win{ color: var(--gain); background: var(--gain-glow); border-color: var(--gain); }
+  .activity-log-tag-neutral{ color: var(--muted); background: var(--panel-raised); border-color: var(--border); }
   .activity-log-time{ font-size:11px; color: var(--muted); margin-left:auto; }
   .activity-log-text{ font-size:12.5px; line-height:1.5; color: var(--muted); }
 
@@ -704,15 +735,15 @@
   .activity-log-row-cols .activity-log-sym{ font-size:12px; color: var(--paper); }
   .activity-log-row-cols .activity-log-text{ margin:0; }
   .activity-log-row-cols .activity-log-time{ margin-left:0; white-space:nowrap; }
-
-  .activity-log-filters{ display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 14px 0; }
-  .activity-filter-chip{
-    background:none; border:1px solid var(--border); color:var(--muted);
-    font-family:'Public Sans', sans-serif; font-size:10.5px; padding:5px 10px;
-    border-radius:999px; cursor:pointer;
+  /* A tag longer than its 72px column (an unmapped/long backend type
+     string, e.g. "position_drift_detected" before it had a short label)
+     must never spill into the symbol column next to it -- clip it
+     instead, so a future unmapped type degrades to a truncated tag
+     rather than garbled overlapping text. */
+  .activity-log-row-cols .activity-log-tag{
+    width:100%; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .activity-filter-chip:hover{ border-color: var(--amber-dim); color: var(--paper); }
-  .activity-filter-chip.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
+
 
   .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
 
@@ -953,8 +984,13 @@
     margin-bottom:14px; overflow:hidden;
     box-shadow: var(--card-shadow);
   }
-  .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; }
+  .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; transition: transform .15s ease; }
   .chevron:hover{ color: var(--amber); }
+  /* expandTradeCard/collapseTradeCard already set aria-expanded and
+     add/remove this class correctly -- this rotation was the one
+     missing piece, so the arrow never visually reflected open/closed
+     state despite the underlying toggle working. */
+  .chevron.expanded{ transform: rotate(90deg); }
   .t-sym-cell{ display:flex; align-items:center; gap:10px; }
   .t-sym-badge{
     width:32px; height:32px; border-radius:9px; flex-shrink:0;
@@ -1097,21 +1133,23 @@
   .news-toast-tags{ display:flex; align-items:center; gap:8px; }
   .news-toast-sym{ font-weight:600; color: var(--amber); font-size:12px; }
   .news-toast-tag{
-    font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted);
-    border:1px solid var(--border); border-radius:3px; padding:1px 6px;
+    font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color: var(--muted);
+    border:1px solid var(--border); border-radius:999px; padding:2px 9px 1px; background: var(--panel-raised);
   }
-  /* Trade activity tags are deliberately a different visual language
-     from market-alert tags -- filled and colored rather than a neutral
-     outline, so a trade event never reads as just another news item at
-     a glance. */
+  .news-toast-tag-win{ color: var(--gain); background: var(--gain-glow); border-color: var(--gain); }
+  .news-toast-tag-loss{ color: var(--loss); background: var(--loss-glow); border-color: var(--loss); }
+  /* Trade activity and market-alert tags share one pill language now --
+     an outlined, colored badge (border + text same hue, a faint tint of
+     it behind) rather than a heavy fill, so it reads clearly on both the
+     light Ledger surface and (once dark mode ships) a dark one. */
   .history-tag-trade{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:700;
-    border-radius:3px; padding:1px 6px; border:none;
+    border-radius:999px; padding:2px 9px 1px; border:1px solid transparent;
   }
-  .history-tag-trade.sent{ background: var(--amber-glow); color: var(--amber); }
-  .history-tag-trade.win{ background: var(--gain-glow); color: var(--gain); }
-  .history-tag-trade.loss{ background: var(--loss-glow); color: var(--loss); }
-  .history-tag-trade.neutral{ background: var(--panel-raised); color: var(--muted); border:1px solid var(--border); }
+  .history-tag-trade.sent{ background: var(--amber-glow); color: var(--amber); border-color: var(--amber-dim); }
+  .history-tag-trade.win{ background: var(--gain-glow); color: var(--gain); border-color: var(--gain); }
+  .history-tag-trade.loss{ background: var(--loss-glow); color: var(--loss); border-color: var(--loss); }
+  .history-tag-trade.neutral{ background: var(--panel-raised); color: var(--muted); border-color: var(--border); }
   .history-item.history-item-trade{ border-left:2px solid var(--border); padding-left:10px; }
   .news-toast-close{
     background:none; border:none; color: var(--muted); cursor:pointer;
@@ -1515,6 +1553,20 @@
   @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
   @keyframes flashDown{ 0%{ background: var(--loss-glow); } 100%{ background: transparent; } }
 </style>
+<script>
+  // Runs synchronously before <body> paints anything, so dark mode is
+  // never a flash-of-light-then-dark -- a stored explicit choice wins,
+  // otherwise the OS preference decides (first visit only). Settings'
+  // applyDarkModePref re-runs this same resolution later just to wire
+  // up the toggle button itself; this copy exists purely for timing.
+  (function(){
+    try{
+      var saved = window.localStorage.getItem('shwoopnet:darkMode');
+      var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    }catch(e){}
+  })();
+</script>
 </head>
 <body>
 
@@ -1927,12 +1979,6 @@
     <button class="side-nav-item nav-item" data-page="labs" title="Labs">
       <span class="side-nav-icon">◈</span><span class="side-nav-label">Labs</span>
     </button>
-    <button class="side-nav-item nav-item" data-page="changelog" title="Changelog">
-      <span class="side-nav-icon">≡</span><span class="side-nav-label">Log</span>
-    </button>
-    <button class="side-nav-item nav-item" data-page="demo" title="Demo">
-      <span class="side-nav-icon">▶</span><span class="side-nav-label">Demo</span>
-    </button>
     <div class="side-nav-divider"></div>
     <button class="side-nav-item nav-item" id="notepadToggle" data-action="notepad" title="Notepad">
       <span class="side-nav-icon">✎</span><span class="side-nav-label">Notes</span>
@@ -1941,8 +1987,14 @@
       <span class="side-nav-icon">↻</span><span class="side-nav-label">History</span>
     </button>
     <div class="side-nav-divider"></div>
+    <button class="side-nav-item nav-item" data-page="demo" title="Demo">
+      <span class="side-nav-icon">▶</span><span class="side-nav-label">Demo</span>
+    </button>
     <button class="side-nav-item nav-item" data-page="settings" title="Settings">
       <span class="side-nav-icon">⚙</span><span class="side-nav-label">Settings</span>
+    </button>
+    <button class="side-nav-item nav-item" data-page="changelog" title="Changelog">
+      <span class="side-nav-icon">≡</span><span class="side-nav-label">Log</span>
     </button>
   </nav>
 
@@ -1953,11 +2005,19 @@
     <div class="history-sidebar-head">
       <span>Alerts & trade history</span>
       <div class="history-head-actions">
+        <div class="layout-dropdown">
+          <button class="layout-toggle-btn" id="historyFiltersToggle" aria-haspopup="true" aria-expanded="false">
+            <span>Filters</span>
+            <span class="caret">▾</span>
+          </button>
+          <div class="layout-menu" id="historyFiltersMenu" hidden>
+            <div id="historyFilters"></div>
+          </div>
+        </div>
         <button class="history-clear-btn" id="historyClearBtn">Clear</button>
         <button class="notepad-close" id="historyClose" aria-label="Close history">×</button>
       </div>
     </div>
-    <div class="activity-log-filters" id="historyFilters" style="padding:8px 18px 0 18px; margin:0;"></div>
     <div class="history-list" id="historyList"></div>
   </div>
 
@@ -2249,10 +2309,18 @@
           <span class="to-card-title">Activity Log</span>
           <div style="display:flex; align-items:center; gap:10px;">
             <span class="to-card-meta" id="activityLogHeadMeta"></span>
+            <div class="layout-dropdown">
+              <button class="layout-toggle-btn" id="activityLogFiltersToggle" aria-haspopup="true" aria-expanded="false">
+                <span>Filters</span>
+                <span class="caret">▾</span>
+              </button>
+              <div class="layout-menu" id="activityLogFiltersMenu" hidden>
+                <div id="activityLogFilters"></div>
+              </div>
+            </div>
             <button class="settings-reset-btn" id="activityLogClearBtn" style="display:none;">Clear</button>
           </div>
         </div>
-        <div class="activity-log-filters" id="activityLogFilters"></div>
         <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
         <div id="statusActivityList"></div>
       </div>
@@ -2294,6 +2362,11 @@
         <div class="pl-card-label">Win Rate</div>
         <div class="pl-card-value mono" id="statWinRate">—</div>
         <div class="pl-card-sub" id="statWinRateSub"></div>
+      </div>
+      <div class="pl-card">
+        <div class="pl-card-label">Profit Factor</div>
+        <div class="pl-card-value mono" id="statProfitFactor">—</div>
+        <div class="pl-card-sub" id="statProfitFactorSub">Gross gains ÷ gross losses — same math Labs' backtest uses.</div>
       </div>
       <div class="pl-card">
         <div class="pl-card-label">Avg Win</div>
@@ -2433,6 +2506,16 @@
         <div class="settings-card">
           <div class="settings-row">
             <div>
+              <div class="settings-row-title">Dark mode</div>
+              <div class="settings-row-desc">Switches the whole app to a dark palette. Follows your system setting the first time you visit.</div>
+            </div>
+            <button class="settings-toggle-switch" id="darkModeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+
+          <div class="settings-row">
+            <div>
               <div class="settings-row-title">Default landing page</div>
               <div class="settings-row-desc">What opens when you return later today.</div>
             </div>
@@ -2487,7 +2570,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Reset preferences</div>
-              <div class="settings-row-desc">Clears layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
+              <div class="settings-row-desc">Clears dark mode, layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
             </div>
             <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
           </div>
@@ -2734,8 +2817,12 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        How the equities screener works. The crypto strategy is its own separate screener, covered below.
+        How the equities screener works. Latest backtest: profit factor 2.71 (2.46 worst-case across 5
+        independent windows, real trading costs included) — but this strategy is newer than that number looks;
+        the activity log is the real read on how it's actually doing live. The crypto strategy is its own
+        separate screener, covered below.
       </p>
+      <div class="labs-live-compare" id="labsEquitiesLiveStat">—</div>
       <div class="labs-method-grid">
         <div class="labs-method-item">
           <div class="labs-method-step">1</div>
@@ -2770,29 +2857,17 @@
           </div>
         </div>
       </div>
-      <div class="labs-honesty-box">
-        <div class="labs-honesty-title">What's actually live right now</div>
-        <p>This replaced an older SMA-crossover approach. Every one of the 16 symbols individually clears a
-        profit factor above 1.5 over a year-plus of history. Latest walk-forward run: overall profit factor
-        2.71, worst case across 5 independent time windows 2.46 — real trading costs included, not a best case.</p>
-        <p>A $7,000 stake, sized the same way the live account is (flat 1% risk per trade, not compounding),
-        turned into $59,427 over this same run — profit factor 2.51. A compounding version finishes far higher on
-        paper, but equities fires thousands of times over this window, and compounding that many trades hits
-        liquidity limits no real account would actually get to trade through. Shown here as fixed-risk instead.</p>
-        <p>This strategy is newer than its track record looks — the activity log is what'll show whether real
-        results keep matching the backtest over time, not this page alone.</p>
-        <p>Bars come from Alpaca's own market data. A real bug was found and fixed since these numbers were run:
-        Alpaca's feed includes thin pre-market prints that could distort the opening range and volume check on
-        most days. Both the live screener and the backtest tool now filter those out — a fresh run may land on
-        different numbers, and that's the fix working, not the strategy changing.</p>
-      </div>
     </div>
 
     <div class="brief-section-title" style="margin-top:36px;">The Crypto Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        A second, independent strategy running alongside equities — same shape, tuned for a market that never closes.
+        A second, independent strategy running alongside equities — same shape, tuned for a market that never
+        closes. Latest backtest: profit factor 2.35 (1.86 worst-case across 2 windows), long-only since Alpaca
+        crypto has no shorting. Newer than equities and with less live history — the activity log is the real
+        read on how it's holding up.
       </p>
+      <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
         <div class="labs-method-item">
           <div class="labs-method-step">1</div>
@@ -2827,21 +2902,6 @@
             fast move leaves unprotected.</div>
           </div>
         </div>
-      </div>
-      <div class="labs-honesty-box">
-        <div class="labs-honesty-title">What's actually live right now</div>
-        <p>Validated the same way as equities: walk-forward across two independent historical windows, profit
-        factor 2.35 overall, 1.86 worst-case window. Alpaca crypto has no shorting, so only Long trades live —
-        checked separately, that costs nothing: 2.48 overall / 1.94 worst-case.</p>
-        <p>The same breakeven floor equities has was re-validated here: a $7,000 stake grew to $18,852 with it
-        (vs. $18,284 without), profit factor 2.27 (vs. 2.02) — a real improvement. This strategy is newer than
-        equities and has less live history — the activity log will show whether it holds up.</p>
-        <p>Alpaca's crypto API only has stop-limit orders, not stop-market. A fast enough move can leave one
-        unfilled below the market — a backstop checks every open position each cycle and force-closes it with a
-        market order the moment price has already passed its stop.</p>
-        <p>A backtest data bug (longer lookbacks weren't always assembled in chronological order) was found and
-        fixed after these figures were run — a fresh run may look different now, and that's the fix working, not
-        the strategy changing.</p>
       </div>
     </div>
 
@@ -5225,7 +5285,7 @@
     var toastEl = document.createElement('div');
     toastEl.className = 'alert-toast';
     toastEl.innerHTML =
-      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">' + (isWin ? 'Closed +' : 'Closed −') + '</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag ' + (isWin ? 'news-toast-tag-win' : 'news-toast-tag-loss') + '">' + (isWin ? 'Closed +' : 'Closed −') + '</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
       '<p class="toast-text">' + (isWin ? 'Closed in profit' : 'Closed at a loss') + ' — ' + (isWin ? '+' : '') + pnlPct.toFixed(2) + '% (exit $' + exitPrice.toFixed(2) + ').</p>';
     container.appendChild(toastEl);
     toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
@@ -8411,6 +8471,27 @@
     applySoundAlertsPref(saved === 'true');
   })();
 
+  // ---------- Settings: dark mode ----------
+  // Mirrors the tiny inline script right before </head>, which already
+  // set data-theme before first paint -- this re-derives the same value
+  // (rather than just reading the attribute back) purely to wire up the
+  // toggle button's own aria-checked state and click handler.
+  var darkModeToggleBtn = document.getElementById('darkModeToggle');
+  function applyDarkModePref(dark){
+    darkModeToggleBtn.setAttribute('aria-checked', dark ? 'true' : 'false');
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    try{ window.localStorage.setItem('shwoopnet:darkMode', dark ? 'true' : 'false'); }catch(e){}
+  }
+  darkModeToggleBtn.addEventListener('click', function(){
+    applyDarkModePref(darkModeToggleBtn.getAttribute('aria-checked') !== 'true');
+  });
+  (function initDarkModePref(){
+    var saved = null;
+    try{ saved = window.localStorage.getItem('shwoopnet:darkMode'); }catch(e){}
+    var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyDarkModePref(dark);
+  })();
+
   // ---------- Settings: reduce motion ----------
   var motionToggleBtn = document.getElementById('motionToggle');
   function applyMotionPref(reduced){
@@ -9293,21 +9374,30 @@
     if(closed.length === 0) return null;
     var totalDollar = 0, totalPctSum = 0, wins = 0;
     var winDollarSum = 0, lossDollarSum = 0, winCount = 0, lossCount = 0;
+    // Gross gains/losses in PERCENT terms (not dollars) -- profit factor
+    // computed this way is directly comparable to Labs' own backtest
+    // profit factor, which is also gross % gains over gross % losses
+    // (see summarizeBacktestTrades). A dollar-based version would be
+    // skewed by position sizing differences trade to trade in a way the
+    // backtest's number isn't, making the two numbers not apples-to-apples.
+    var winPctSum = 0, lossPctSum = 0;
     var best = null, worst = null;
     closed.forEach(function(e){
       var pl = computePL(e);
       totalDollar += pl.dollar;
       totalPctSum += pl.pct;
-      if(pl.pct >= 0){ wins++; winDollarSum += pl.dollar; winCount++; }
-      else { lossDollarSum += pl.dollar; lossCount++; }
+      if(pl.pct >= 0){ wins++; winDollarSum += pl.dollar; winCount++; winPctSum += pl.pct; }
+      else { lossDollarSum += pl.dollar; lossCount++; lossPctSum += pl.pct; }
       if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
     });
+    var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
     return {
       count: closed.length, wins: wins, losses: closed.length - wins, totalDollar: totalDollar, avgPct: totalPctSum / closed.length,
       winRate: (wins / closed.length) * 100,
       avgWinDollar: winCount ? winDollarSum / winCount : 0,
       avgLossDollar: lossCount ? lossDollarSum / lossCount : 0,
+      profitFactor: profitFactor,
       best: best, worst: worst
     };
   }
@@ -9390,11 +9480,19 @@
       var winRate = (wins.length / trades.length) * 100;
       var avgWin = wins.length ? wins.reduce(function(s,t){ return s + t.dollarPL; }, 0) / wins.length : 0;
       var avgLoss = losses.length ? losses.reduce(function(s,t){ return s + t.dollarPL; }, 0) / losses.length : 0;
+      // Same gross-%-gains-over-gross-%-losses math as computeAggregatePL
+      // and Labs' own backtest -- computed off pctReturn (not dollarPL) so
+      // it's directly comparable to the backtest's headline number even
+      // though these are the real, Alpaca-reconciled trades.
+      var winPctSum = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var lossPctSum = losses.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
       var best = trades.reduce(function(b,t){ return (!b || t.dollarPL > b.dollarPL) ? t : b; }, null);
       var worst = trades.reduce(function(w,t){ return (!w || t.dollarPL < w.dollarPL) ? t : w; }, null);
 
       var winRateEl = document.getElementById('statWinRate');
       var winRateSubEl = document.getElementById('statWinRateSub');
+      var profitFactorEl = document.getElementById('statProfitFactor');
       var avgWinEl = document.getElementById('statAvgWin');
       var avgLossEl = document.getElementById('statAvgLoss');
       var bestEl = document.getElementById('statBest');
@@ -9404,6 +9502,7 @@
       if(!winRateEl) return;
 
       winRateEl.textContent = winRate.toFixed(0) + '%';
+      if(profitFactorEl) profitFactorEl.textContent = isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞';
       // On All, these cards now reflect real equities trades only --
       // crypto isn't part of this reconstruction -- so the label says so
       // rather than implying "all trades" the way the Equities tab's own
@@ -9460,6 +9559,7 @@
 
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
+    var profitFactorEl = document.getElementById('statProfitFactor');
     var avgWinEl = document.getElementById('statAvgWin');
     var avgLossEl = document.getElementById('statAvgLoss');
     var bestEl = document.getElementById('statBest');
@@ -9468,12 +9568,14 @@
     var worstSubEl = document.getElementById('statWorstSub');
     if(!filtered){
       winRateEl.textContent = '—'; winRateSubEl.textContent = '';
+      profitFactorEl.textContent = '—';
       avgWinEl.textContent = '—'; avgLossEl.textContent = '—';
       bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = '';
       worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = '';
     } else {
       winRateEl.textContent = filtered.winRate.toFixed(0) + '%';
       winRateSubEl.textContent = filtered.count + ' total trades';
+      profitFactorEl.textContent = isFinite(filtered.profitFactor) ? filtered.profitFactor.toFixed(2) : '∞';
       avgWinEl.textContent = '+$' + filtered.avgWinDollar.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
       // Best/worst can each land on either side of zero regardless of
@@ -9499,6 +9601,43 @@
     // See patchTradeStatsFromAlpaca's own comment -- real numbers,
     // Equities tab only.
     patchTradeStatsFromAlpaca();
+    renderLabsLiveVsBacktest();
+  }
+
+  // The backtest's own headline profit-factor claims (see the Labs Method
+  // intro paragraphs) are a frozen, one-time historical validation -- they
+  // never re-check themselves against what this account has actually done
+  // since. This is that check: the same profit-factor math (gross % gains
+  // over gross % losses, see computeAggregatePL) applied to this account's
+  // own real closed trades, shown right next to the number it's supposed
+  // to be living up to. Kept independent of the journalFilter tab (which
+  // only affects the Journal page's own cards) since equities and crypto
+  // each need their own fixed comparison regardless of what tab is active.
+  // LABS_BACKTEST_PF must stay in sync with the hardcoded numbers quoted
+  // in the two labs-method-intro paragraphs above -- there's no single
+  // source of truth for those since the backtest itself isn't re-run live.
+  var LABS_BACKTEST_PF = { equities: 2.71, crypto: 2.35 };
+  var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
+  function renderLabsLiveVsBacktest(){
+    var eqEl = document.getElementById('labsEquitiesLiveStat');
+    var cryptoEl = document.getElementById('labsCryptoLiveStat');
+    if(!eqEl && !cryptoEl) return;
+    function renderInto(el, entries, backtestPF){
+      if(!el) return;
+      var agg = computeAggregatePL(entries);
+      if(!agg){
+        el.innerHTML = 'Live so far: <strong>no closed trades yet</strong> — nothing to compare against the backtest yet.';
+        return;
+      }
+      var pfText = isFinite(agg.profitFactor) ? agg.profitFactor.toFixed(2) : '∞';
+      var diffClass = agg.profitFactor >= backtestPF ? 'up' : 'down';
+      var confidenceNote = agg.count < LABS_MIN_TRADES_FOR_CONFIDENCE
+        ? ' — only ' + agg.count + ' closed trade' + (agg.count === 1 ? '' : 's') + ' so far, too few to trust yet.'
+        : ' across ' + agg.count + ' closed trades.';
+      el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
+    }
+    renderInto(eqEl, journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; }), LABS_BACKTEST_PF.equities);
+    renderInto(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
   }
 
   renderPLSummary();
@@ -9631,14 +9770,14 @@
   var alertHistory = [];
   var alertsUid = null;
 
-  // Trade events get their own tag class/label derived from what
-  // actually happened, not just the raw log type -- 'position_action'
-  // covers both a profitable close and a loss, which need to look
-  // nothing alike at a glance. Covers every type renderActivityLog's own
-  // typeLabels does (cycle_summary/trailing_stop_updated/closed_at_close/
-  // position_closed/error too) -- this used to fall through to a generic
-  // "Activity" tag for all of those, which is exactly what showed up here
-  // for every single Scan entry.
+  // Trade events get their own tag class/label derived from what actually
+  // happened, not just the raw log type -- 'position_action' covers both
+  // a profitable close and a loss, which need to look nothing alike at a
+  // glance. Shared by both renderHistoryList (this modal) and
+  // renderActivityLog (Trade Overview's own card), so the two views can
+  // never disagree on what a given entry's tag/label/color should be --
+  // before this was unified, position_drift_detected/resolved had no case
+  // here at all and silently fell through to a generic "Activity" tag.
   function tradeActivityTagInfo(entry){
     if(entry.type === 'sent') return { cls: 'sent', label: 'Sent' };
     if(entry.type === 'skipped') return { cls: 'neutral', label: 'Skipped' };
@@ -9651,7 +9790,20 @@
       if(/loss|-\$|-\d/.test(entry.text)) return { cls: 'loss', label: label === 'Position' ? 'Closed −' : label + ' −' };
       return { cls: 'neutral', label: label };
     }
+    if(entry.type === 'position_drift_detected') return { cls: 'neutral', label: 'Drift' };
+    if(entry.type === 'position_drift_resolved') return { cls: 'win', label: 'Drift OK' };
     return { cls: 'neutral', label: 'Activity' };
+  }
+
+  // Same win/loss/neutral color language as tradeActivityTagInfo, for the
+  // market-alert tags (Watching/Target hit/Stop hit) shown in real-time
+  // toasts and the History modal -- so an alert that already resolved in
+  // the trade's favor or against it reads as green/red at a glance instead
+  // of the same neutral outline as a still-forming "Watching" alert.
+  function newsAlertTagClass(tag){
+    if(tag === 'Target hit') return 'news-toast-tag-win';
+    if(tag === 'Stop hit') return 'news-toast-tag-loss';
+    return '';
   }
 
   function renderHistoryList(){
@@ -9706,7 +9858,7 @@
       return '<div class="history-item">' +
         '<div class="history-item-head">' +
           '<span class="history-item-sym mono">' + item.sym + '</span>' +
-          '<span class="news-toast-tag">' + item.tag + '</span>' +
+          '<span class="news-toast-tag ' + newsAlertTagClass(item.tag) + '">' + item.tag + '</span>' +
           '<span class="history-item-time mono">' + item.dateLabel + (item.dateLabel && item.timeLabel ? ' · ' : '') + item.timeLabel + '</span>' +
         '</div>' +
         '<p class="history-item-body">' + item.text + '</p>' +
@@ -9783,7 +9935,7 @@
     toastEl.innerHTML =
       '<div class="toast-head">' +
         '<span class="toast-sym mono">' + alert.sym + '</span>' +
-        '<span class="news-toast-tag">' + alert.tag + '</span>' +
+        '<span class="news-toast-tag ' + newsAlertTagClass(alert.tag) + '">' + alert.tag + '</span>' +
         '<button class="toast-close" aria-label="Dismiss">×</button>' +
       '</div>' +
       '<p class="toast-text">' + alert.text + '</p>' +
@@ -10713,19 +10865,13 @@
     });
   }
 
-  var typeLabels = {
-    sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
-    // cycle_summary is the once-per-cycle "did the scanner, sizing,
-    // and auto-trade actually run together" line written by the
-    // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
-    cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
-    position_closed: 'Closed'
-  };
-  // closed_at_close and position_closed both read as "Closed" -- grouped
-  // under one filter key so the chip row shows one toggle per label, not
-  // one per raw backend type.
+  // closed_at_close and position_closed both read as "Closed", and the two
+  // drift types both read as "Drift" -- grouped under one filter key each
+  // so the chip row shows one toggle per label, not one per raw backend type.
   function activityGroupKey(type){
-    return (type === 'closed_at_close' || type === 'position_closed') ? 'closed' : type;
+    if(type === 'closed_at_close' || type === 'position_closed') return 'closed';
+    if(type === 'position_drift_detected' || type === 'position_drift_resolved') return 'position_drift';
+    return type;
   }
   var ACTIVITY_FILTER_GROUPS = [
     { key:'cycle_summary', label:'Scan' },
@@ -10734,6 +10880,7 @@
     { key:'position_action', label:'Position' },
     { key:'trailing_stop_updated', label:'Trail' },
     { key:'closed', label:'Closed' },
+    { key:'position_drift', label:'Drift' },
     { key:'error', label:'Error' }
   ];
   var activityLogHiddenGroups = {};
@@ -10748,31 +10895,67 @@
     try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
   }
 
-  // Renders into every filter-chip container that exists on the page --
+  // Renders into every filter-list container that exists on the page --
   // Trade Overview's Activity Log card (#activityLogFilters) and the
   // Alerts & trade history modal (#historyFilters) both toggle the exact
-  // same activityLogHiddenGroups state, so a chip clicked in either place
+  // same activityLogHiddenGroups state, so a row toggled in either place
   // has to update both, not just whichever view happened to render it.
+  // Same row/toggle-button markup (.layout-stepper card-customize-row /
+  // .card-visibility-btn) as the Open Positions "Columns" dropdown, now
+  // that this lives inside its own dropdown menu the same way -- one
+  // consistent show/hide pattern instead of two different ones.
   var ACTIVITY_FILTER_CONTAINER_IDS = ['activityLogFilters', 'historyFilters'];
   function renderActivityLogFilters(){
     ACTIVITY_FILTER_CONTAINER_IDS.forEach(function(id){
       var el = document.getElementById(id);
       if(!el) return;
       el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
-        var shown = !activityLogHiddenGroups[g.key];
-        return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
+        var hidden = Boolean(activityLogHiddenGroups[g.key]);
+        return '<div class="layout-stepper card-customize-row" data-group="' + g.key + '">' +
+          '<span class="step-name">' + g.label + '</span>' +
+          '<div class="card-customize-row-actions">' +
+            '<button class="card-visibility-btn' + (hidden ? '' : ' active') + '" data-action="toggle">' + (hidden ? 'Hidden' : 'Shown') + '</button>' +
+          '</div>' +
+        '</div>';
       }).join('');
-      el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var key = btn.dataset.group;
+      el.querySelectorAll('.card-customize-row').forEach(function(row){
+        var key = row.dataset.group;
+        row.querySelector('[data-action="toggle"]').addEventListener('click', function(){
           activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
           saveActivityLogFilterPrefs();
+          renderActivityLogFilters();
           renderActivityLog();
           renderHistoryList();
         });
       });
     });
   }
+
+  // Same open/close/outside-click behavior as the Open Positions
+  // "Columns" dropdown (positionsColumnsToggle/Menu) -- one small helper
+  // instead of duplicating it for these two toggle/menu pairs.
+  function wireLayoutDropdown(toggleId, menuId, onOpen){
+    var toggle = document.getElementById(toggleId);
+    var menu = document.getElementById(menuId);
+    if(!toggle || !menu) return;
+    toggle.addEventListener('click', function(){
+      var open = !menu.hasAttribute('hidden');
+      if(open){ menu.setAttribute('hidden',''); toggle.setAttribute('aria-expanded','false'); }
+      else{
+        menu.removeAttribute('hidden');
+        toggle.setAttribute('aria-expanded','true');
+        if(onOpen) onOpen();
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('#' + toggleId) && !e.target.closest('#' + menuId)){
+        menu.setAttribute('hidden','');
+        toggle.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+  wireLayoutDropdown('activityLogFiltersToggle', 'activityLogFiltersMenu', renderActivityLogFilters);
+  wireLayoutDropdown('historyFiltersToggle', 'historyFiltersMenu', renderActivityLogFilters);
 
   // A cycle_summary ("Scan") entry gets written once per backend cycle
   // regardless of outcome -- with a 24/7 crypto cycle running every 5
@@ -10804,17 +10987,6 @@
       if(!entry.accountKeyId) return alpacaAccountType === 'paper';
       return entry.accountKeyId === activeAlpacaCreds().keyId;
     });
-  }
-
-  // Best-effort win/loss read off the entry's own text -- backend and
-  // frontend close messages both phrase it as "in profit"/"+X%" for a
-  // win and "at a loss"/a bare "-X%" for a loss, so a real trade result
-  // still pops green or red without needing a structured field.
-  function activityOutcomeClass(text){
-    if(!text) return '';
-    if(/in profit|\+\$|\+\d/.test(text)) return 'activity-log-tag-gain';
-    if(/at a loss|-\$|-\d/.test(text)) return 'activity-log-tag-loss';
-    return '';
   }
 
   function renderActivityLog(){
@@ -10852,9 +11024,14 @@
     }
     el.innerHTML = visibleLog.map(function(entry){
       var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-      var tagClass = 'activity-log-tag' + (entry.type === 'error' ? ' activity-log-tag-loss' : ' ' + activityOutcomeClass(entry.text));
+      // Same tradeActivityTagInfo the History modal uses, so the two views
+      // can never show a different label/color for the exact same entry --
+      // this is what let position_drift_detected fall through here with no
+      // short label at all until tradeActivityTagInfo grew a case for it.
+      var tagInfo = tradeActivityTagInfo(entry);
+      var tagClass = 'activity-log-tag' + (tagInfo.cls === 'sent' ? '' : ' activity-log-tag-' + tagInfo.cls);
       return '<div class="activity-log-row activity-log-row-cols">' +
-        '<span class="' + tagClass.trim() + '">' + (typeLabels[entry.type] || entry.type) + '</span>' +
+        '<span class="' + tagClass + '">' + tagInfo.label + '</span>' +
         '<span class="activity-log-sym mono">' + (entry.sym || '') + '</span>' +
         '<span class="activity-log-text">' + entry.text + '</span>' +
         '<span class="activity-log-time">' + time + '</span>' +
