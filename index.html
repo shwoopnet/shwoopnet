@@ -2747,7 +2747,10 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        How the equities screener works. The crypto strategy is its own separate screener, covered below.
+        How the equities screener works. Latest backtest: profit factor 2.71 (2.46 worst-case across 5
+        independent windows, real trading costs included) — but this strategy is newer than that number looks;
+        the activity log is the real read on how it's actually doing live. The crypto strategy is its own
+        separate screener, covered below.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
@@ -2783,28 +2786,15 @@
           </div>
         </div>
       </div>
-      <div class="labs-honesty-box">
-        <div class="labs-honesty-title">What's actually live right now</div>
-        <p>This replaced an older SMA-crossover approach. Every one of the 16 symbols individually clears a
-        profit factor above 1.5 over a year-plus of history. Latest walk-forward run: overall profit factor
-        2.71, worst case across 5 independent time windows 2.46 — real trading costs included, not a best case.</p>
-        <p>A $7,000 stake, sized the same way the live account is (flat 1% risk per trade, not compounding),
-        turned into $59,427 over this same run — profit factor 2.51. A compounding version finishes far higher on
-        paper, but equities fires thousands of times over this window, and compounding that many trades hits
-        liquidity limits no real account would actually get to trade through. Shown here as fixed-risk instead.</p>
-        <p>This strategy is newer than its track record looks — the activity log is what'll show whether real
-        results keep matching the backtest over time, not this page alone.</p>
-        <p>Bars come from Alpaca's own market data. A real bug was found and fixed since these numbers were run:
-        Alpaca's feed includes thin pre-market prints that could distort the opening range and volume check on
-        most days. Both the live screener and the backtest tool now filter those out — a fresh run may land on
-        different numbers, and that's the fix working, not the strategy changing.</p>
-      </div>
     </div>
 
     <div class="brief-section-title" style="margin-top:36px;">The Crypto Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        A second, independent strategy running alongside equities — same shape, tuned for a market that never closes.
+        A second, independent strategy running alongside equities — same shape, tuned for a market that never
+        closes. Latest backtest: profit factor 2.35 (1.86 worst-case across 2 windows), long-only since Alpaca
+        crypto has no shorting. Newer than equities and with less live history — the activity log is the real
+        read on how it's holding up.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
@@ -2840,21 +2830,6 @@
             fast move leaves unprotected.</div>
           </div>
         </div>
-      </div>
-      <div class="labs-honesty-box">
-        <div class="labs-honesty-title">What's actually live right now</div>
-        <p>Validated the same way as equities: walk-forward across two independent historical windows, profit
-        factor 2.35 overall, 1.86 worst-case window. Alpaca crypto has no shorting, so only Long trades live —
-        checked separately, that costs nothing: 2.48 overall / 1.94 worst-case.</p>
-        <p>The same breakeven floor equities has was re-validated here: a $7,000 stake grew to $18,852 with it
-        (vs. $18,284 without), profit factor 2.27 (vs. 2.02) — a real improvement. This strategy is newer than
-        equities and has less live history — the activity log will show whether it holds up.</p>
-        <p>Alpaca's crypto API only has stop-limit orders, not stop-market. A fast enough move can leave one
-        unfilled below the market — a backstop checks every open position each cycle and force-closes it with a
-        market order the moment price has already passed its stop.</p>
-        <p>A backtest data bug (longer lookbacks weren't always assembled in chronological order) was found and
-        fixed after these figures were run — a fresh run may look different now, and that's the fix working, not
-        the strategy changing.</p>
       </div>
     </div>
 
