@@ -9971,15 +9971,22 @@
       var todayPLPct = lastEquity > 0 ? (todayPL / lastEquity * 100) : 0;
       var plClass = todayPL >= 0 ? 'up' : 'down';
       // Alpaca only rolls last_equity forward at the START of the next
-      // real trading session -- on a weekend or holiday it's still
-      // sitting at the close from TWO sessions back, not one, so equity
-      // minus last_equity actually spans two days' worth of change,
-      // mislabeled as "Today's". backendIsTodayTradingDay === false (an
-      // explicit check, not just falsy, so null/undefined from an old
-      // server build still falls through to the normal calculation
-      // above rather than hiding P&L outright) shows that stale delta
-      // honestly instead of implying it just happened today.
-      var plValueHtml = backendIsTodayTradingDay === false
+      // real EQUITIES trading session -- on a weekend or holiday it's
+      // still sitting at the close from TWO sessions back, not one, so
+      // equity minus last_equity can span two days' worth of change,
+      // mislabeled as "Today's". But crypto trades 24/7 on this same
+      // account regardless of the stock market's calendar -- an open
+      // crypto position (or one that's simply still resting) means
+      // equity genuinely IS moving right now, so "Market closed" would
+      // be actively wrong, not just imprecise, hiding a real number the
+      // moment it's most worth checking. hasOpenCryptoPosition overrides
+      // the closed-market treatment whenever that's the case; otherwise
+      // backendIsTodayTradingDay === false (an explicit check, not just
+      // falsy, so null/undefined from an old server build still falls
+      // through to the normal calculation) shows the honest stale-delta
+      // state instead of implying it just happened today.
+      var hasOpenCryptoPosition = (backendPositions || []).some(function(p){ return p.symbol && p.symbol.indexOf('/') !== -1; });
+      var plValueHtml = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition)
         ? '<div class="backtest-stat-value">Market closed</div>'
         : '<div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
 
@@ -10280,11 +10287,15 @@
       var todayPLPct = lastEquity > 0 ? ((equity - lastEquity) / lastEquity * 100) : 0;
       // A small dead zone around exactly flat reads as neutral (yellow)
       // rather than flickering green/red on essentially no real move.
-      // On a non-trading day, last_equity hasn't rolled forward to
-      // yesterday's close yet (see renderStatusPage's own comment on
-      // this same staleness) -- neutral rather than a real green/red
-      // read on a number that isn't actually today's.
-      var colorClass = backendIsTodayTradingDay === false ? 'neutral'
+      // On a non-trading day with no open crypto position, last_equity
+      // hasn't rolled forward to yesterday's close yet (see
+      // renderStatusPage's own comment on this same staleness) --
+      // neutral rather than a real green/red read on a number that isn't
+      // actually today's. An open crypto position overrides this: crypto
+      // trades 24/7 regardless of the stock market's calendar, so the
+      // number is genuinely live and deserves a real color.
+      var hasOpenCryptoPosition = (backendPositions || []).some(function(p){ return p.symbol && p.symbol.indexOf('/') !== -1; });
+      var colorClass = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition) ? 'neutral'
         : Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
 
       [dockBubble, sidebarBubble].forEach(function(el){
