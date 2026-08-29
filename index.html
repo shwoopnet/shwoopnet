@@ -2509,9 +2509,23 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v2.3</span>Renamed to Pocket Advisor</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v2.4</span>Shared Market Data &amp; Polish</div>
+        <ul class="changelog-items">
+          <li>Index/watchlist quotes, market headlines, and the earnings calendar are now computed once by the backend and shared by every signed-in account, instead of each browser tab drawing on the same rate-limited data source independently</li>
+          <li>Fixed a scary false alarm: the Backend Status card no longer shows a red "no heartbeat" warning before you've even connected Alpaca — it now correctly waits until there's something to actually hear from</li>
+          <li>Alerts &amp; trade history now shares the exact same filters and entry list as the Activity Log card — it used to quietly drop some legacy entries the card still showed</li>
+          <li>What to Watch (equities and crypto) shows an honest "no setups right now" message instead of a blank gap when the screener has nothing to report</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-version"><span class="changelog-version-badge">v2.3</span>Pocket Advisor: Invite-Gated Multi-User Accounts</div>
         <ul class="changelog-items">
           <li>Renamed from Shwoop to Pocket Advisor, with a new mark to match</li>
+          <li>Real multi-user accounts: invited accounts sign up with a one-time code, trade on their own fully isolated paper account, and can't see or touch the owner's data — the owner account can still go live</li>
+          <li>The backend now runs its screener, sizing, and safety checks for every connected account on its own schedule, not just one</li>
+          <li>Activity Log cleanup: filterable by type, hides noisy routine scans by default, and reads as a real table instead of a wall of text</li>
+          <li>Fixed several real bugs: crypto positions hidden behind a false "Market closed" P&amp;L freeze, a Notepad drag that hit an invisible wall, and the header wrongly reporting "Sync failed" during crypto-only hours</li>
+          <li>Labs: "Test Alpaca as a data feed" and "Export raw historical data" are now their own sections instead of nested inside the equities backtest</li>
         </ul>
       </div>
       <div class="changelog-entry">
@@ -2550,53 +2564,12 @@
         </ul>
       </div>
       <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.7.3.0.0</span>Account Panel &amp; Auto-Send</div>
+        <div class="changelog-version"><span class="changelog-version-badge">v1.0 – v1.7</span>Early History</div>
         <ul class="changelog-items">
-          <li>New account panel shows your real Alpaca balance and open positions at a glance</li>
-          <li>Optional auto-send: new picks can go to Alpaca automatically, no manual click — off by default</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.7.0.0.0</span>Alpaca Paper Trading</div>
-        <ul class="changelog-items">
-          <li>Connect a free Alpaca paper account in Settings — "Send to Alpaca" places a real order and logs it to the journal in one click</li>
-          <li>Started quietly tracking what actually happens to every pick, aiming toward real numbers on how well this works instead of a guess</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.6.0.0.0</span>Renamed to Shwoop, Labs Added</div>
-        <ul class="changelog-items">
-          <li>Renamed from Shwoopnet to Shwoop</li>
-          <li>New Labs page: a plain-language writeup of exactly how the screener works, plus a real backtest tool</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.5.2.0.0</span>Real Screener &amp; Analysis</div>
-        <ul class="changelog-items">
-          <li>Daily screener auto-picks trades from real technical analysis, replacing simulated data entirely</li>
-          <li>Entry, stop, and targets calculated from real moving averages and price structure — no more fixed-ratio targets</li>
-          <li>Signed-in accounts never show simulated data again — an honest "couldn't load" state instead</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.5</span>Accounts &amp; Sync</div>
-        <ul class="changelog-items">
-          <li>Real sign-up and sign-in with email + password</li>
-          <li>Trade Journal now syncs across devices in real time</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.4</span>Journal Upgrades</div>
-        <ul class="changelog-items">
-          <li>Log real trades straight from Trade Overview, pre-filled from the setup</li>
-          <li>Exit tracking with automatic P&amp;L, calendar-based journal with date-range filtering</li>
-        </ul>
-      </div>
-      <div class="changelog-entry">
-        <div class="changelog-version"><span class="changelog-version-badge">v1.0</span>Initial Launch</div>
-        <ul class="changelog-items">
-          <li>Market Brief, Trade Overview, and live ticker tape</li>
-          <li>Simulated pricing and candlestick charts</li>
+          <li>Started as a simulated demo: Market Brief, Trade Overview, a live ticker tape, and fake pricing</li>
+          <li>Added a real trade journal (exit tracking, automatic P&amp;L, calendar view), then real accounts with cross-device sync</li>
+          <li>Replaced simulated picks with a real technical-analysis screener; renamed Shwoopnet → Shwoop; added the Labs page and its backtest tool</li>
+          <li>Connected real Alpaca paper trading — one-click order placement, an account panel, and optional auto-send</li>
         </ul>
       </div>
     </div>
