@@ -686,9 +686,33 @@
   .activity-log-tag{
     font-size:10px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
     background: var(--amber-glow); border:1px solid var(--amber-dim); border-radius:4px; padding:2px 7px;
+    flex-shrink:0; width:fit-content;
   }
+  .activity-log-tag-loss{ color: var(--loss); background: var(--loss-glow); border-color: var(--loss); }
+  .activity-log-tag-gain{ color: var(--gain); background: var(--gain-glow); border-color: var(--gain); }
   .activity-log-time{ font-size:11px; color: var(--muted); margin-left:auto; }
   .activity-log-text{ font-size:12.5px; line-height:1.5; color: var(--muted); }
+
+  /* Real Activity Log rows (not the Demo page's simulated feed, which
+     keeps the original stacked layout above) -- one row, four columns,
+     so a page of entries reads as a scannable table instead of a stack
+     of two-line blocks. */
+  .activity-log-row-cols{
+    display:grid; grid-template-columns: 72px 58px 1fr auto;
+    align-items:center; gap:12px; padding:10px 0;
+  }
+  .activity-log-row-cols .activity-log-sym{ font-size:12px; color: var(--paper); }
+  .activity-log-row-cols .activity-log-text{ margin:0; }
+  .activity-log-row-cols .activity-log-time{ margin-left:0; white-space:nowrap; }
+
+  .activity-log-filters{ display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 14px 0; }
+  .activity-filter-chip{
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'Public Sans', sans-serif; font-size:10.5px; padding:5px 10px;
+    border-radius:999px; cursor:pointer;
+  }
+  .activity-filter-chip:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .activity-filter-chip.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
 
   .changelog-items li{ font-size:13px; color: var(--muted); line-height:1.8; }
 
@@ -2185,6 +2209,7 @@
             <button class="settings-reset-btn" id="activityLogClearBtn" style="display:none;">Clear</button>
           </div>
         </div>
+        <div class="activity-log-filters" id="activityLogFilters"></div>
         <div class="labs-backtest-status" id="statusActivityEmpty" hidden>Nothing logged yet — automated actions (auto-sent trades, skips, safety closes) show up here as they happen.</div>
         <div id="statusActivityList"></div>
       </div>
@@ -8571,6 +8596,7 @@
 
   loadToCardPrefs();
   applyToCardLayout();
+  loadActivityLogFilterPrefs();
 
   // ---------- Navigation ----------
   var navLabels = { brief: 'Market Brief', status: 'Status', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
@@ -10607,10 +10633,89 @@
     });
   }
 
+  var typeLabels = {
+    sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
+    // cycle_summary is the once-per-cycle "did the scanner, sizing,
+    // and auto-trade actually run together" line written by the
+    // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
+    cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
+    position_closed: 'Closed'
+  };
+  // closed_at_close and position_closed both read as "Closed" -- grouped
+  // under one filter key so the chip row shows one toggle per label, not
+  // one per raw backend type.
+  function activityGroupKey(type){
+    return (type === 'closed_at_close' || type === 'position_closed') ? 'closed' : type;
+  }
+  var ACTIVITY_FILTER_GROUPS = [
+    { key:'cycle_summary', label:'Scan' },
+    { key:'sent', label:'Sent' },
+    { key:'skipped', label:'Skipped' },
+    { key:'position_action', label:'Position' },
+    { key:'trailing_stop_updated', label:'Trail' },
+    { key:'closed', label:'Closed' },
+    { key:'error', label:'Error' }
+  ];
+  var activityLogHiddenGroups = {};
+
+  function loadActivityLogFilterPrefs(){
+    try{
+      var saved = JSON.parse(window.localStorage.getItem('shwoopnet:activityLogHiddenGroups') || 'null');
+      if(saved && typeof saved === 'object') activityLogHiddenGroups = saved;
+    }catch(e){}
+  }
+  function saveActivityLogFilterPrefs(){
+    try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
+  }
+
+  function renderActivityLogFilters(){
+    var el = document.getElementById('activityLogFilters');
+    if(!el) return;
+    el.innerHTML = ACTIVITY_FILTER_GROUPS.map(function(g){
+      var shown = !activityLogHiddenGroups[g.key];
+      return '<button type="button" class="activity-filter-chip' + (shown ? ' active' : '') + '" data-group="' + g.key + '">' + g.label + '</button>';
+    }).join('');
+    el.querySelectorAll('.activity-filter-chip').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var key = btn.dataset.group;
+        activityLogHiddenGroups[key] = !activityLogHiddenGroups[key];
+        saveActivityLogFilterPrefs();
+        renderActivityLog();
+      });
+    });
+  }
+
+  // A cycle_summary ("Scan") entry gets written once per backend cycle
+  // regardless of outcome -- with a 24/7 crypto cycle running every 5
+  // minutes, a stretch of ordinary "nothing to do" scans buries any real
+  // trade activity within hours. Only worth a row when the cycle itself
+  // was abnormal: it flags an error/failure in its own text, or it didn't
+  // fetch everything it meant to.
+  function isRoutineScan(entry){
+    if(entry.type !== 'cycle_summary') return false;
+    var text = entry.text || '';
+    if(/error|fail/i.test(text)) return false;
+    var m = text.match(/Scanned (\d+) symbols? \((\d+) fetched\)/i);
+    if(m && m[1] !== m[2]) return false;
+    return true;
+  }
+
+  // Best-effort win/loss read off the entry's own text -- backend and
+  // frontend close messages both phrase it as "in profit"/"+X%" for a
+  // win and "at a loss"/a bare "-X%" for a loss, so a real trade result
+  // still pops green or red without needing a structured field.
+  function activityOutcomeClass(text){
+    if(!text) return '';
+    if(/in profit|\+\$|\+\d/.test(text)) return 'activity-log-tag-gain';
+    if(/at a loss|-\$|-\d/.test(text)) return 'activity-log-tag-loss';
+    return '';
+  }
+
   function renderActivityLog(){
     var el = document.getElementById('statusActivityList');
     var emptyEl = document.getElementById('statusActivityEmpty');
     if(!el) return;
+    renderActivityLogFilters();
     // Same account-scoping as journal entries -- an activity log entry
     // from a previous account shouldn't appear as if it happened on
     // whatever account is connected now.
@@ -10629,31 +10734,36 @@
       if(!entry.accountKeyId) return alpacaAccountType === 'paper';
       return entry.accountKeyId === activeAlpacaCreds().keyId;
     });
+    var visibleLog = currentAccountLog.filter(function(entry){
+      if(activityLogHiddenGroups[activityGroupKey(entry.type)]) return false;
+      if(isRoutineScan(entry)) return false;
+      return true;
+    });
     var headMeta = document.getElementById('activityLogHeadMeta');
     var clearBtn = document.getElementById('activityLogClearBtn');
-    if(currentAccountLog.length === 0){
+    if(clearBtn){ clearBtn.style.display = currentAccountLog.length ? '' : 'none'; }
+    if(visibleLog.length === 0){
       el.innerHTML = '';
       if(emptyEl) emptyEl.removeAttribute('hidden');
-      if(headMeta){ headMeta.textContent = ''; }
-      if(clearBtn){ clearBtn.style.display = 'none'; }
+      if(headMeta){
+        var hiddenCount = currentAccountLog.length - visibleLog.length;
+        headMeta.textContent = hiddenCount ? hiddenCount + ' hidden' : '';
+      }
       return;
     }
     if(emptyEl) emptyEl.setAttribute('hidden', '');
-    if(headMeta){ headMeta.textContent = currentAccountLog.length + ' entries'; }
-    if(clearBtn){ clearBtn.style.display = ''; }
-    var typeLabels = {
-      sent: 'Sent', skipped: 'Skipped', position_action: 'Position',
-      // cycle_summary is the once-per-cycle "did the scanner, sizing,
-      // and auto-trade actually run together" line written by the
-      // backend's runIntradayCycle -- see shwoop-server/src/orchestrator.js.
-      cycle_summary: 'Scan', trailing_stop_updated: 'Trail', closed_at_close: 'Closed', error: 'Error',
-      position_closed: 'Closed'
-    };
-    el.innerHTML = currentAccountLog.map(function(entry){
+    if(headMeta){
+      var extra = currentAccountLog.length - visibleLog.length;
+      headMeta.textContent = visibleLog.length + ' entries' + (extra ? ' (' + extra + ' hidden)' : '');
+    }
+    el.innerHTML = visibleLog.map(function(entry){
       var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-      return '<div class="activity-log-row">' +
-        '<div class="activity-log-meta">' + (entry.sym ? '<span class="mono">' + entry.sym + '</span>' : '') + '<span class="activity-log-tag">' + (typeLabels[entry.type] || entry.type) + '</span><span class="activity-log-time">' + time + '</span></div>' +
-        '<div class="activity-log-text">' + entry.text + '</div>' +
+      var tagClass = 'activity-log-tag' + (entry.type === 'error' ? ' activity-log-tag-loss' : ' ' + activityOutcomeClass(entry.text));
+      return '<div class="activity-log-row activity-log-row-cols">' +
+        '<span class="' + tagClass.trim() + '">' + (typeLabels[entry.type] || entry.type) + '</span>' +
+        '<span class="activity-log-sym mono">' + (entry.sym || '') + '</span>' +
+        '<span class="activity-log-text">' + entry.text + '</span>' +
+        '<span class="activity-log-time">' + time + '</span>' +
       '</div>';
     }).join('');
   }
