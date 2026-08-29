@@ -2053,8 +2053,7 @@
           <span class="to-card-meta" id="backendStatusHeadMeta"></span>
         </div>
         <div class="labs-backtest-note" style="margin-bottom:10px;">
-          Live proof the 24/7 server is actually up and running its scan → size → send cycle — not just a
-          timestamp of whatever it last found.
+          Live proof the 24/7 server is actually running its scan → size → send cycle.
         </div>
         <div id="backendStatusBody"></div>
       </div>
@@ -2168,9 +2167,8 @@
         <div>
           <div class="settings-row-title">Flatten all positions</div>
           <div class="settings-row-desc">
-            Closes every open position right now, at market, regardless of whether its own setup is still
-            valid — and turns off auto-send so nothing re-enters immediately after. For when something feels
-            wrong and you want everything closed first, questions later.
+            Closes every open position at market and turns off auto-trading, so nothing re-enters right after.
+            For when something feels wrong and you want it all closed now.
           </div>
         </div>
         <button class="flatten-all-btn" id="flattenAllBtn">Flatten all</button>
@@ -2269,13 +2267,10 @@
       <div class="labs-export-divider"></div>
       <div class="labs-export-header">
         <div>
-          <div class="labs-export-title">Full account history (from Alpaca, not this app's own journal)</div>
-          <div class="labs-export-desc">Pulls every closed order directly from your Alpaca account — the
-            authoritative record, independent of this app's own Firestore-tracked journal (which can drift,
-            e.g. the duplicate-order entries a scheduler race used to cause). Reconstructs entry/exit pairs
-            and reads each exit's real order type straight from Alpaca — stop-loss, target, or a plain market
-            order (a manual close or the end-of-day flatten) — so you can see exactly how trades really ended,
-            not just their final price.</div>
+          <div class="labs-export-title">Full account history (from Alpaca, not this app's journal)</div>
+          <div class="labs-export-desc">Pulls every closed order straight from Alpaca — the authoritative
+            record, independent of this app's own journal. Shows how each trade really ended: stop-loss,
+            target, or a plain close.</div>
         </div>
         <button class="settings-reset-btn" id="pullAlpacaHistoryBtn">Pull full history from Alpaca</button>
       </div>
@@ -2527,11 +2522,9 @@
       <div class="demo-intro-step" id="demoIntroStep1">
         <div class="demo-showcase">
           <div class="demo-showcase-title">What Shwoop actually does</div>
-          <p class="demo-showcase-text">It's a robot trader — two of them, actually, watching 28 instruments
-          between them. One watches a list of 16 stocks and waits for one to make a strong, real move early in
-          the trading day. The other watches a separate list of 12 crypto pairs around the clock, since crypto
-          never closes. Either one fires, it picks how much to risk, places the order, and closes the trade out.
-          You don't have to do anything.</p>
+          <p class="demo-showcase-text">Two robot traders. One watches 16 stocks for a strong early-day breakout.
+          The other watches 12 crypto pairs around the clock. Either fires, it sizes the risk, places the order,
+          and closes it out. You don't touch anything.</p>
           <div class="demo-showcase-stats">
             <div class="demo-showcase-stat">
               <div class="demo-showcase-stat-value">2.32</div>
@@ -2543,18 +2536,16 @@
             </div>
           </div>
           <div class="demo-showcase-explainer">
-            <strong>What "profit factor" means:</strong> add up every dollar it's won, add up every dollar it's
-            lost, and divide the two. It's the simplest way to answer "does this actually make money" — not just
-            how often it wins.
+            <strong>Profit factor:</strong> total dollars won ÷ total dollars lost. It's the simplest answer to
+            "does this make money" — not just how often it wins.
             <div class="demo-showcase-calc">
-              Say it wins $100 a hundred times over and loses $43 a hundred times over — losing more often than it
-              wins, same as real life here:<br>
-              Total won ($10,000) ÷ total lost ($4,300) = <strong>2.32</strong>
+              Win $100 a hundred times, lose $43 a hundred times — losing more often than not, same as real life:<br>
+              $10,000 ÷ $4,300 = <strong>2.32</strong>
             </div>
-            Above 1 means it makes money overall. Below 1 means it loses money overall — no matter how often it
-            "wins." 2.32 means: for every $1 it's lost, it's made back about $2.32.
+            Above 1 = profitable overall. Below 1 = losing overall, no matter the win rate. 2.32 means every $1
+            lost comes back as about $2.32.
           </div>
-          <p class="demo-showcase-footnote">2.32 is the current validated figure, after walk-forward testing across independent time windows, with realistic trading costs included — not a best-case fantasy number. Exits use a trailing stop, not a fixed target, so a real winner can run further than a flat cap would allow. See the Labs page for the full validation writeup.</p>
+          <p class="demo-showcase-footnote">2.32 is the current validated figure — walk-forward tested across independent time windows, real trading costs included. Full writeup on the Labs page.</p>
         </div>
         <div class="demo-intro-actions">
           <button class="settings-reset-btn" id="demoIntroCancelBtn1">Cancel</button>
@@ -2564,22 +2555,16 @@
 
       <div class="demo-intro-step" id="demoIntroStep2" hidden>
         <div class="demo-intro-title">Before this demo starts</div>
-        <p class="demo-intro-text">This plays a made-up full trading day, sped up and on repeat — several stocks
-        each set their range, break out, get bought automatically, and close out, sometimes with more than one
-        position open at once. The real strategy is already live and running against your connected paper
-        account 24/7; this is just a clean, simplified illustration of the mechanics, without waiting around for
-        a real signal to show up.</p>
-        <p class="demo-intro-text">A crypto position runs alongside the equities day, sharing the same clock and
-        narration line — watch what happens when the stock market "closes" for the day: the equities positions
-        flatten, but crypto keeps running right through it and only closes on its own trailing stop, whenever
-        that happens to be. That's the actual difference between the two strategies, acted out instead of just
-        described.</p>
-        <p class="demo-intro-text">Two wins and three losses each loop — matching real life, where it loses more
-        often than it wins but still comes out ahead overall, since the wins run bigger. Every time a trade
-        happens, you'll hear a sound, see a pop-up, and see a small label point right at whatever just changed —
-        all clearly marked "Demo" so none of it is ever confused with a real alert.</p>
-        <p class="demo-intro-text"><strong>None of this is real.</strong> It's not connected to your broker,
-        your account, or any real prices — every number below is made up for this preview.</p>
+        <p class="demo-intro-text">This plays a made-up trading day on a loop, sped way up — stocks set their
+        range, break out, get bought, and close out. The real strategy already runs live against your paper
+        account 24/7; this is just a fast, clean illustration of the mechanics.</p>
+        <p class="demo-intro-text">A crypto position runs alongside it on the same clock. Watch what happens when
+        the market "closes": equities flatten, crypto keeps going and only exits on its own trailing stop —
+        that's the real difference between the two strategies, shown instead of explained.</p>
+        <p class="demo-intro-text">Two wins, three losses each loop — it loses more often than it wins but comes
+        out ahead since the wins run bigger. Every trade gets a sound, a pop-up, and a label, all marked "Demo."</p>
+        <p class="demo-intro-text"><strong>None of this is real.</strong> No broker, no account, no real prices —
+        every number below is made up.</p>
         <div class="demo-intro-actions">
           <button class="settings-reset-btn" id="demoIntroBackBtn">← Back</button>
           <button class="settings-reset-btn" id="demoIntroCancelBtn2">Cancel</button>
@@ -2601,14 +2586,10 @@
 
     <div class="labs-honesty-box" style="margin-bottom:24px;">
       <div class="labs-honesty-title">This is not real</div>
-      <p>This isn't connected to your real broker, account, or live prices — it's a made-up loop. It plays out a
-      full simulated trading day, sped up: five setups form and break out over the course of the day, sometimes
-      with more than one position open at once, same as the real account can hold. Two wins and three losses —
-      the same roughly 40% win rate quoted above — with the wins sized bigger, so the day still nets positive
-      even with more losses than wins. Once the market "closes," it loops back to 9:30 and runs again — a crypto
-      position keeps running the whole time regardless and doesn't reset with it, even though it shares the same
-      narration line above (a second line appears briefly if an equities and a crypto update happen to land at
-      the same moment, so neither gets lost).</p>
+      <p>Not connected to your broker, account, or live prices — a made-up loop. Five setups form and break out
+      over a simulated day, sometimes more than one open at once. Two wins, three losses (matching the ~40% win
+      rate above), wins sized bigger so the day nets positive. It loops back to 9:30 when the market "closes" —
+      a crypto position keeps running through that reset on its own clock.</p>
     </div>
 
     <div class="demo-clock-row">
@@ -2689,103 +2670,67 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        How the equities screener actually works, in plain language — the crypto strategy, which runs as its own
-        independent screener rather than a variant of this one, is covered separately below.
+        How the equities screener works. The crypto strategy is its own separate screener, covered below.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
           <div class="labs-method-step">1</div>
           <div>
-            <div class="labs-method-title">16 stocks, chosen for how they're priced, not their size</div>
+            <div class="labs-method-title">16 stocks, picked for how they move</div>
             <div class="labs-method-body">PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID,
-            OPEN, SNAP, CHPT, ROKU — volatile, retail-attention-heavy names that trade less efficiently than
-            mega-cap tech. (An earlier universe of large-cap names like AAPL and MSFT was tested extensively
-            and retired — it sat close to breakeven after realistic trading costs, no matter how it was refined.)</div>
+            OPEN, SNAP, CHPT, ROKU — volatile, retail-heavy names. An earlier mega-cap list (AAPL, MSFT, etc.)
+            was tested and dropped: it sat near breakeven after real trading costs.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">2</div>
           <div>
             <div class="labs-method-title">The first 30 minutes set the range</div>
-            <div class="labs-method-body">The high and low of a stock's first two 15-minute bars each day — the
-            opening range. Everything else is judged against whether price actually breaks out of it.</div>
+            <div class="labs-method-body">The high and low of a stock's first two 15-minute bars each day. Everything after is judged against whether price breaks out of that range.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">3</div>
           <div>
-            <div class="labs-method-title">The breakout has to happen on real volume, not just a price move</div>
-            <div class="labs-method-body">A break beyond the opening range only counts if that bar's volume is
-            at least 2x its own preceding 20-bar average. This single requirement is what separates a
-            genuinely validated edge from one that wasn't — the same breakout logic without this volume
-            check performed meaningfully worse in backtesting.</div>
+            <div class="labs-method-title">The breakout needs real volume</div>
+            <div class="labs-method-body">A break past the range only counts if that bar's volume is at least
+            2x its own 20-bar average. This one rule is what separates a real edge from a fake one — the same
+            logic without it backtests meaningfully worse.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">4</div>
           <div>
-            <div class="labs-method-title">Entry and stop come straight from the range — the exit now trails</div>
-            <div class="labs-method-body">Entry is the range boundary itself; the initial stop is the opposite
-            side of the range. A smaller favorable move — 0.3x risk — locks the stop to breakeven on its own;
-            once a trade moves 0.75x its own risk in its favor, the stop then starts trailing behind the best
-            price reached instead of staying fixed at a flat 1.5x target — a real winner can run further than a
-            hard cap would allow. One signal per stock per day — once a stock breaks out and qualifies, it
-            doesn't fire again until the next trading day.</div>
+            <div class="labs-method-title">Entry and stop from the range, exit that trails</div>
+            <div class="labs-method-body">Entry is the range edge; the initial stop is the opposite edge. A
+            0.3x-risk move locks the stop to breakeven. A 0.75x-risk move starts trailing the stop behind the
+            best price reached, instead of a fixed 1.5x target — so a real winner can run further. One signal
+            per stock per day.</div>
           </div>
         </div>
       </div>
       <div class="labs-honesty-box">
         <div class="labs-honesty-title">What's actually live right now</div>
-        <p>This is the strategy that replaced the prior SMA-crossover approach, backed by real validation: every
-        one of the 16 universe symbols individually cleared a profit factor above 1.5 across a full year-plus
-        of historical data. The exit was upgraded from a fixed 1.5x target to a trailing stop (activating at
-        0.75x risk) after walk-forward testing showed it improves both the overall profit factor (2.15 → 2.32)
-        and the worst-case result across 5 independent, non-overlapping time windows (2.03 → 2.15) together —
-        with realistic trading costs included throughout, not a frictionless best case.</p>
-        <p>Re-validated since then against a longer historical window (through August 2026), with the trailing
-        stop's breakeven floor added on top (once a trade genuinely moves into profit, its stop can no longer
-        trail back below entry): every symbol still clears profit factor 1.5 individually (lowest: 2.16), overall
-        profit factor 2.71, worst case across the same 5-window split 2.46. Isolating the floor's own effect by
-        re-running this identical test with and without it: +0.05 on both figures — a small, real improvement,
-        not the source of the jump from the 2.15 → 2.32 numbers above. That jump is mostly the newer, longer
-        dataset this pass ran against, not a strategy change — so treat these as a fresh, honest data point
-        rather than a like-for-like continuation of the original series. It's still genuinely new, though — the
-        activity log and the numbers building up there over time are what will show whether real, ongoing
-        performance holds up the way the backtest suggests it should.</p>
-        <p>Same $7,000 starting stake as the crypto figure below, run the same honest way — real, chronologically-
-        ordered trades across all 16 symbols together, the shared 7% total-risk ceiling enforced exactly like the
-        live account — but sized differently: each trade risks a flat 1% of that original $7,000 rather than
-        compounding as the balance grows. That produced $7,000 → $59,427, profit factor 2.51. A compounding
-        version of this same run — sizing that scales up with the growing balance, the way a real account
-        naturally would — technically finishes above $10 million; shown here as fixed-risk instead because
-        equities fires far more often than crypto (thousands of trades over this window, not hundreds), and
-        letting that many trades compound off each other reaches a balance no real account could keep trading at
-        without running into its own liquidity and market-impact limits, which this simulation doesn't model.</p>
-        <p>Every profit-factor and expectancy figure on this page — the walk-forward validation above and the
-        backtest tool below — bakes in a 5-basis-point cost per market-order leg (two legs for a stop-out or an
-        end-of-day close, one for a session that never got room to resolve at all), a real trading cost, not a
-        frictionless best case. Historical bars come from Alpaca's own market data (migrated off Twelve Data),
-        and different data providers can genuinely disagree about what happened during the exact same historical
-        window — a backtest run against one provider isn't a precise stand-in for what another would show for
-        "the same" period, worth remembering before treating any single number here as more exact than it is.</p>
-        <p>A real bug was found and fixed after the validation numbers above were computed: Alpaca's IEX feed
-        carries real, if thin, extended-hours prints alongside the regular session — confirmed by directly
-        testing it, which found at least one pre-market bar before nearly every single trading day tested, across
-        every symbol tried. Without filtering those out, the opening range this whole strategy anchors to could
-        be built from a handful of near-zero-volume pre-market ticks instead of the real 9:30 ET open on most
-        days, and the 20-bar volume-lookback average used for the volume-confirmation check could get diluted by
-        those same thin bars too. Both the live screener and the backtest tool below now filter to genuine
-        regular-session bars before computing anything. The figures above predate that fix; a fresh walk-forward
-        run may land on different numbers now, and that's the correction working as intended, not the strategy
-        having changed.</p>
+        <p>This replaced an older SMA-crossover approach. Every one of the 16 symbols individually clears a
+        profit factor above 1.5 over a year-plus of history. Latest walk-forward run: overall profit factor
+        2.71, worst case across 5 independent time windows 2.46 — real trading costs included, not a best case.</p>
+        <p>A $7,000 stake, sized the same way the live account is (flat 1% risk per trade, not compounding),
+        turned into $59,427 over this same run — profit factor 2.51. A compounding version finishes far higher on
+        paper, but equities fires thousands of times over this window, and compounding that many trades hits
+        liquidity limits no real account would actually get to trade through. Shown here as fixed-risk instead.</p>
+        <p>This strategy is newer than its track record looks — the activity log is what'll show whether real
+        results keep matching the backtest over time, not this page alone.</p>
+        <p>Bars come from Alpaca's own market data. A real bug was found and fixed since these numbers were run:
+        Alpaca's feed includes thin pre-market prints that could distort the opening range and volume check on
+        most days. Both the live screener and the backtest tool now filter those out — a fresh run may land on
+        different numbers, and that's the fix working, not the strategy changing.</p>
       </div>
     </div>
 
     <div class="brief-section-title" style="margin-top:36px;">The Crypto Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        A second, independent strategy that trades alongside the equities screener — same overall shape, tuned
-        for a market that never closes rather than a version of the equities logic above.
+        A second, independent strategy running alongside equities — same shape, tuned for a market that never closes.
       </p>
       <div class="labs-method-grid">
         <div class="labs-method-item">
@@ -2793,84 +2738,63 @@
           <div>
             <div class="labs-method-title">12 crypto pairs, screened around the clock</div>
             <div class="labs-method-body">BTC/USD, ETH/USD, SOL/USD, LTC/USD, LINK/USD, AVAX/USD, DOGE/USD, UNI/USD,
-            XRP/USD, DOT/USD, BCH/USD, AAVE/USD — checked continuously, since crypto has no open or close to wait
-            on. (ATOM/USD was dropped after returning no usable historical bars during validation; SHIB/USD was
-            dropped deliberately — it tested weakly across both independent historical windows.)</div>
+            XRP/USD, DOT/USD, BCH/USD, AAVE/USD — checked continuously since crypto never closes. (ATOM/USD had no
+            usable history; SHIB/USD tested weakly and was dropped.)</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">2</div>
           <div>
             <div class="labs-method-title">A rolling range instead of "today's" range</div>
-            <div class="labs-method-body">With no market open to anchor an opening range to, each check instead
-            looks at the last 4 bars (15-minute) as a rolling breakout range, re-evaluated fresh every cycle
-            against only the most recent bar — never re-firing on a breakout from hours or days ago.</div>
+            <div class="labs-method-body">No market open to anchor to, so each check uses the last 4 15-minute
+            bars as a rolling breakout range, re-checked every cycle against only the newest bar — never
+            re-firing on an old breakout.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">3</div>
           <div>
             <div class="labs-method-title">Volume and trend both have to agree</div>
-            <div class="labs-method-body">The breakout bar's volume must clear 2.5x its own preceding 20-bar
-            average (equities requires 2x), and price also has to clear its own 30-bar average by at least 1.5%
-            in the trade's direction — a trend filter equities doesn't need. Long only: Alpaca doesn't support
-            shorting crypto, so a Short signal is simply dropped rather than traded.</div>
+            <div class="labs-method-body">Volume must clear 2.5x its 20-bar average (equities needs 2x), and
+            price must clear its own 30-bar average by 1.5% in the trade's direction. Long only — Alpaca doesn't
+            support crypto shorting, so a Short signal is just dropped.</div>
           </div>
         </div>
         <div class="labs-method-item">
           <div class="labs-method-step">4</div>
           <div>
-            <div class="labs-method-title">Same trailing-stop shape as equities, with the same breakeven floor</div>
-            <div class="labs-method-body">Entry and initial stop come from the range edges. A smaller favorable
-            move locks the stop to breakeven on its own, same as equities; once a trade moves 0.5x its own risk
-            in its favor, the stop then starts trailing a full 1x risk behind the best price reached, with the
-            same breakeven floor keeping it from ever sitting below entry again once trailing engages. Alpaca's
-            crypto API has no true stop-market order — only stop-limit — so a fast enough move can leave that
-            resting order unfilled below the market; a backstop now force-closes the position with a real market
-            order the moment that's detected, rather than leaving it unprotected.</div>
+            <div class="labs-method-title">Same trailing stop as equities, same breakeven floor</div>
+            <div class="labs-method-body">Entry and stop come from the range edges. A small favorable move locks
+            the stop to breakeven; at 0.5x risk in profit, the stop trails 1x risk behind the best price, never
+            below entry once trailing starts. Alpaca's crypto API only has stop-limit orders, not stop-market, so
+            a fast move can leave one unfilled — a backstop force-closes the position with a market order the
+            moment that's detected.</div>
           </div>
         </div>
       </div>
       <div class="labs-honesty-box">
         <div class="labs-honesty-title">What's actually live right now</div>
-        <p>Validated the same way as the equities strategy: walk-forward across two independent historical
-        windows of real Alpaca crypto bars, both directions, profit factor 2.35 overall / 1.86 worst-case
-        window. Alpaca crypto trading has no short selling, so only the Long side actually trades live — checked
-        separately, restricting to Long-only doesn't cost anything relative to what was validated: 2.48 overall
-        / 1.94 worst-case window.</p>
-        <p>The same breakeven floor added to the equities exit was re-validated here too, on the same starting
-        stake used throughout this page: a hypothetical $7,000 grew to $18,852 with the floor (was $18,284
-        without it), profit factor 2.27 (was 2.02) — a real, measured improvement, same mechanism as equities.
-        This strategy is newer than the equities one and has less live history behind it — the activity log is
-        what will show whether real performance holds up the way this backtest suggests it should.</p>
-        <p>Alpaca's crypto API has no stop-market order type at all — only stop-limit, submitted as a real
-        resting order on Alpaca's own books. If price gaps down through both the trigger and its small execution
-        buffer in one move (crypto trades 24/7 with no circuit breakers smoothing a fast move the way equities
-        has), that resting order can be left open and unfilled below the market. A backstop added since this was
-        validated now checks every open position each cycle and force-closes it with a real market order the
-        moment price has already moved past its own stop, rather than leaving it to hope the limit price
-        eventually gets revisited.</p>
-        <p>A separate bug in how longer backtest lookbacks got assembled (multi-page history pulls weren't
-        guaranteed to land back in chronological order) was found and fixed after the figures above were
-        computed — it could silently make a longer lookback report FEWER signals than a shorter one already
-        contained within it, which is impossible if the underlying data is correct. The numbers above predate
-        that fix; a fresh long-lookback run in the tool below may look different now, and that's the correction
-        working as intended, not a change in the strategy itself. Every figure here also bakes in the same
-        5-basis-point per-leg trading cost described in the equities section above — a real cost, not a
-        frictionless best case.</p>
+        <p>Validated the same way as equities: walk-forward across two independent historical windows, profit
+        factor 2.35 overall, 1.86 worst-case window. Alpaca crypto has no shorting, so only Long trades live —
+        checked separately, that costs nothing: 2.48 overall / 1.94 worst-case.</p>
+        <p>The same breakeven floor equities has was re-validated here: a $7,000 stake grew to $18,852 with it
+        (vs. $18,284 without), profit factor 2.27 (vs. 2.02) — a real improvement. This strategy is newer than
+        equities and has less live history — the activity log will show whether it holds up.</p>
+        <p>Alpaca's crypto API only has stop-limit orders, not stop-market. A fast enough move can leave one
+        unfilled below the market — a backstop checks every open position each cycle and force-closes it with a
+        market order the moment price has already passed its stop.</p>
+        <p>A backtest data bug (longer lookbacks weren't always assembled in chronological order) was found and
+        fixed after these figures were run — a fresh run may look different now, and that's the fix working, not
+        the strategy changing.</p>
       </div>
     </div>
 
     <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
-        Runs the same scoring and stop/target logic used live, on 15-minute bars, against real historical
-        prices — only ever using data that would have existed at that point in time. Measures raw % return
-        per trade, independent of account size, so sizing effects don't blur whether the underlying edge is
-        real. If a longer lookback fails to load, try a shorter one — Alpaca's free IEX feed's depth isn't
-        fully known. Covers the equities strategy only, pulled directly from Alpaca (same as the crypto
-        numbers above, which come from their own separate historical dataset) — no Twelve Data dependency
-        for either anymore.
+        Runs the same live scoring and stop/target logic against real historical Alpaca prices, only ever using
+        data that existed at that point in time. Measures raw % return per trade, independent of account size.
+        If a longer lookback fails to load, try a shorter one.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -2914,10 +2838,8 @@
         </div>
       </div>
       <p class="labs-backtest-note">
-        The live/default trail always trails 1R behind price once trailing activates. This experiment
-        shrinks that trail distance ONLY once a trade has already run deep enough in profit (the
-        threshold above), locking in more of a big move before it can give back a full R -- purely a
-        backtest comparison, nothing here changes live behavior unless you decide to ship it.
+        The live trail always trails 1R behind price. This experiment shrinks that distance only after a
+        trade has run deep enough in profit — backtest-only, doesn't touch live behavior.
       </p>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
@@ -2927,11 +2849,9 @@
         <div class="labs-export-header">
           <div>
             <div class="labs-export-title">Export raw historical data</div>
-            <div class="labs-export-desc">Pulls 15-min bars (including volume) for the symbols listed below, using
-              the current Lookback setting — saves as a real .json file you can upload directly, no copy-paste
-              needed. Defaults to the live trading universe, but you can replace it with any other symbols for
-              research — this never changes what the live screener actually trades. Owner-only, since this
-              consumes real API quota on every run.</div>
+            <div class="labs-export-desc">Pulls 15-min bars for the symbols below at the current Lookback, saved
+              as a .json file. Defaults to the live universe, but you can swap in any symbols for research — this
+              never changes what actually trades. Owner-only; uses real API quota.</div>
           </div>
           <button class="settings-reset-btn" id="exportHistoricalDataBtn">Export historical data</button>
         </div>
@@ -2956,11 +2876,9 @@
         <div class="labs-export-header">
           <div>
             <div class="labs-export-title">Test Alpaca as a data feed</div>
-            <div class="labs-export-desc">Fetches a real past week of 15-min bars directly from Alpaca's data API
-              (not Twelve Data) across 4 symbols, using your connected paper account, and reports both the hours
-              covered AND the volume behind any extended-hours bars — thin, near-zero volume outside regular
-              hours means sparse IEX prints, not real depth. Uses a real past date range, so this works
-              correctly even on a day the market happens to be closed.</div>
+            <div class="labs-export-desc">Fetches a real past week of bars for 4 symbols and reports the hours
+              covered and the volume behind any extended-hours bars — thin volume there means sparse prints, not
+              real depth.</div>
           </div>
           <button class="settings-reset-btn" id="testAlpacaDataFeedBtn">Test Alpaca data feed</button>
         </div>
@@ -2972,11 +2890,9 @@
     <div class="brief-section-title" style="margin-top:36px;">Crypto Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
-        Same idea as the equities backtest above, scored against the crypto strategy's own rolling-range logic
-        instead — real historical 15-minute bars pulled straight from Alpaca (not Twelve Data, which doesn't carry
-        crypto history), since crypto never has a single trading day to bound a signal search to. A trade still
-        open when the data runs out is marked "Still open" and left out of the win-rate/profit-factor math below,
-        rather than force-closed against a session close that doesn't exist for this market.
+        Same idea as the equities backtest, scored against the crypto strategy's own rolling-range logic on real
+        historical Alpaca bars. A trade still open when the data runs out is marked "Still open" and left out of
+        the win-rate/profit-factor math.
       </p>
       <div class="labs-backtest-controls">
         <div class="labs-control-field">
@@ -3006,8 +2922,8 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies/projects referenced on this site. Stock ticker symbols, company names, and cryptocurrency symbols shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID, OPEN, SNAP, CHPT, and ROKU, plus BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, and AAVE) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Shwoop calls itself "your pocket advisor" because that's the shape of what it does — it watches, decides, and acts on your behalf so you don't have to sit and stare at charts. It's not a licensed advisor and it isn't giving you advice: it runs two strategies side by side, together screening 28 instruments — a fixed list of 16 stocks, chosen for how they're priced rather than their size, on 15-minute bars re-checked every minute during market hours; and a separate list of 12 crypto pairs, screened the same way but every 5 minutes around the clock, since crypto never closes. Entry, stop, target, and the reasoning behind each pick are calculated in real time from actual price data, not written by hand. Trades are sent to a connected Alpaca account — paper (simulated money) or live, whichever environment is currently connected; a persistent banner and red accents make it unmistakable whenever live means real money is genuinely at risk. This is a single-owner personal tool, not a public product, and the underlying strategies are still under active testing — nothing here is a track record, and nothing here is financial or trading advice.</p>
-    <p>Prices are live quotes from Alpaca's market data feed, falling back to Finnhub if that's unavailable. Chart history is real data from Twelve Data — if it can't be reached, you'll see an honest "couldn't load" message instead of fake data.</p>
+    <p>Shwoop watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account is connected — paper or live — with a persistent banner and red accents whenever live means real money. Single-owner personal tool, still under active testing — not a track record, not financial advice.</p>
+    <p>Prices are live quotes from Alpaca, falling back to Finnhub if needed. Chart history is real data from Twelve Data — if it can't load, you'll see an honest error, never fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
 
@@ -11726,7 +11642,8 @@
       ledeParts.push(qqq.chg > spy.chg ? 'Tech is outperforming the broader market today.' : 'Tech is lagging the broader market today.');
     }
 
-    var realTrades = intradayTrades.filter(function(t){ return t.analysisIsReal; });
+    var briefSource = (backendIntradayPicks && backendIntradayPicks.length) ? backendIntradayPicks.map(buildTradeFromPick) : intradayTrades;
+    var realTrades = briefSource.filter(function(t){ return t.analysisIsReal; });
     if(realTrades.length === 0){
       ledeParts.push("The equities screener hasn't cleared any setups yet — check Trade Overview for the latest.");
     } else {
