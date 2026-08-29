@@ -640,6 +640,8 @@
   }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .labs-backtest-option{ display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--muted); margin:-4px 0 16px 0; }
+  .labs-backtest-option input{ margin:0; }
   .labs-control-field{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1 1 160px; }
   .labs-control-field label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); }
   .labs-control-field select{
@@ -2930,6 +2932,11 @@
         <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
         <button class="settings-reset-btn" id="runIntradayUniverseBacktestBtn">Run whole universe</button>
       </div>
+      <label class="labs-backtest-option">
+        <input type="checkbox" id="intradayBacktestRegimeFilter">
+        Apply the market-regime filter (real SPY history) — skips a fresh Long during a broad SPY selloff, a fresh
+        Short during a broad rally. Off by default so this stays a direct before/after comparison, not a new default.
+      </label>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
       </div>
@@ -6689,7 +6696,56 @@
   // iterations via setTimeout lets pending UI events (like a drag's
   // pointermove) get processed between chunks, without meaningfully
   // slowing down the backtest itself.
-  function runIntradayBacktestSimulationAsync(bars, lookbackBars){
+  // ---------- Optional market-regime filter for the backtest ----------
+  // Mirrors shwoop-server's src/lib/marketRegime.js thresholds/semantics
+  // exactly (SPY's own % change vs its prior close, skip fresh longs past
+  // a selloff threshold, fresh shorts past a rally threshold) -- but that
+  // module only ever checks one live snapshot. A backtest has to know
+  // what SPY's regime was at the EXACT moment each historical signal
+  // fired, so this builds a full time series from real SPY bars instead.
+  var BACKTEST_SELLOFF_THRESHOLD_PERCENT = -1.5;
+  var BACKTEST_RALLY_THRESHOLD_PERCENT = 1.5;
+
+  function buildSpyRegimeSeries(spyBars){
+    var regularBars = spyBars.filter(isRegularSessionBar).slice().sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
+    var series = [];
+    var prevDayClose = null, curDateKey = null, lastCloseSeen = null;
+    regularBars.forEach(function(b){
+      var dateKey = b.t.toISOString().slice(0, 10);
+      if(dateKey !== curDateKey){
+        if(curDateKey !== null) prevDayClose = lastCloseSeen; // yesterday's actual last bar, now that today has started
+        curDateKey = dateKey;
+      }
+      var changePercent = prevDayClose !== null ? (b.c - prevDayClose) / prevDayClose * 100 : 0;
+      series.push({ t: b.t.getTime(), changePercent: changePercent });
+      lastCloseSeen = b.c;
+    });
+    return series;
+  }
+
+  // Binary search for the most recent regime reading at or before a given
+  // signal's timestamp -- series is sorted ascending by t. No match (the
+  // signal predates SPY's own available history) fails open, same as the
+  // live checkMarketRegime does on a bad quote.
+  function regimeAt(series, timestamp){
+    var lo = 0, hi = series.length - 1, found = null;
+    while(lo <= hi){
+      var mid = (lo + hi) >> 1;
+      if(series[mid].t <= timestamp){ found = series[mid]; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    if(!found) return { skipLongs: false, skipShorts: false };
+    return {
+      skipLongs: found.changePercent <= BACKTEST_SELLOFF_THRESHOLD_PERCENT,
+      skipShorts: found.changePercent >= BACKTEST_RALLY_THRESHOLD_PERCENT
+    };
+  }
+
+  // regimeSeries is optional -- omitted entirely, this behaves exactly as
+  // it always has (no filtering), which is what every existing call site
+  // still does unless the new "Apply the market-regime filter" checkbox
+  // in Labs is checked.
+  function runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries){
     return new Promise(function(resolve){
       // Filtered once, here, rather than inside computeORBAnalysis (which
       // used to do this on every call) -- this loop calls that function
@@ -6716,7 +6772,15 @@
           var analysis = computeORBAnalysis('SYM', historySlice, currentPrice, localSignalStore);
           var afterSignal = localSignalStore['SYM'];
           var isFreshSignal = analysis && afterSignal && afterSignal !== beforeSignal && afterSignal.dateFired === bars[i].t.toISOString().slice(0,10);
-          if(isFreshSignal){
+          // Regime-skipped signals still count as "fired" in localSignalStore
+          // (computeORBAnalysis already set it) -- same as live, this is one
+          // signal per symbol per day either way, taken or not.
+          var regimeBlocked = false;
+          if(isFreshSignal && regimeSeries){
+            var regime = regimeAt(regimeSeries, bars[i].t.getTime());
+            regimeBlocked = (analysis.direction === 'Long' && regime.skipLongs) || (analysis.direction === 'Short' && regime.skipShorts);
+          }
+          if(isFreshSignal && !regimeBlocked){
             var outcome = simulateORBForwardSameDay(bars, i, analysis);
             var isLong = analysis.direction === 'Long';
             var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
@@ -6885,6 +6949,17 @@
     if(symbolsInput && !symbolsInput.value){ symbolsInput.value = INTRADAY_UNIVERSE.join(', '); }
   }
 
+  // The regime filter is opt-in (the "Apply the market-regime filter"
+  // checkbox) -- resolves to null (no filtering, identical to every
+  // existing run) unless it's checked, in which case it fetches SPY's own
+  // real history once and builds the time series runIntradayBacktestSimulationAsync
+  // needs to check each historical signal's moment against.
+  function fetchRegimeSeriesIfEnabled(lookbackBars){
+    var checkbox = document.getElementById('intradayBacktestRegimeFilter');
+    if(!checkbox || !checkbox.checked) return Promise.resolve(null);
+    return fetchIntradayBacktestHistoryChunked('SPY', lookbackBars).then(buildSpyRegimeSeries);
+  }
+
   function runIntradayBacktestClicked(){
     var sym = document.getElementById('intradayBacktestSymbol').value;
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
@@ -6897,8 +6972,10 @@
     statusEl.className = 'labs-backtest-status';
     resultsEl.innerHTML = '';
 
-    fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-      return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+    fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
+      return fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries);
+      });
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderIntradayBacktestResults(trades, summary, sym);
@@ -6935,7 +7012,7 @@
     // strategy/parameters when it was actually just missing data.
     var failedSymbols = [];
 
-    function processNext(index){
+    function processNext(index, regimeSeries){
       if(index >= INTRADAY_UNIVERSE.length){
         btn.disabled = false;
         singleBtn.disabled = false;
@@ -6946,19 +7023,27 @@
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
       fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries);
       }).then(function(trades){
         allTrades = allTrades.concat(trades);
         perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
-        processNext(index + 1);
+        processNext(index + 1, regimeSeries);
       }).catch(function(err){
         console.error('Intraday universe backtest: skipping', sym, err);
         failedSymbols.push({ sym: sym, message: err.message });
-        processNext(index + 1);
+        processNext(index + 1, regimeSeries);
       });
     }
 
-    processNext(0);
+    // Fetched once, shared across all 16 symbols -- not once per symbol.
+    fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
+      processNext(0, regimeSeries);
+    }).catch(function(err){
+      statusEl.textContent = 'Failed to fetch SPY history for the regime filter: ' + err.message;
+      statusEl.className = 'labs-backtest-status fail';
+      btn.disabled = false;
+      singleBtn.disabled = false;
+    });
   }
 
   // ---------- Crypto backtest UI ----------
