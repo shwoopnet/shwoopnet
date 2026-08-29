@@ -9822,7 +9822,20 @@
     var today = new Date().toISOString().slice(0,10);
     var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
 
-    if(intradayTrades.length === 0){
+    // Same source-of-truth preference every other consumer of today's
+    // picks already uses (renderIntradayBlocks, renderWhatToWatch, etc.)
+    // -- the local re-scan that used to populate intradayTrades was fully
+    // removed at some point, leaving it permanently empty. Checking it
+    // directly here (instead of falling back to the backend's own picks
+    // like everywhere else does) meant this silently generated zero
+    // alerts and wiped alertHistory every single day, regardless of how
+    // many real setups the backend actually found -- the "nothing real
+    // to alert on yet" comment below was masking dead data, not an
+    // honestly quiet day.
+    var tradesForAlerts = (backendIntradayPicks && backendIntradayPicks.length)
+      ? backendIntradayPicks.map(buildTradeFromPick) : intradayTrades;
+
+    if(tradesForAlerts.length === 0){
       // Nothing real to alert on yet (market closed, or no signals have
       // fired today) -- an empty, honest state beats falling back to
       // alerts about symbols that aren't even part of the current
@@ -9832,7 +9845,7 @@
       return;
     }
 
-    Promise.all(intradayTrades.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
+    Promise.all(tradesForAlerts.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
       // Only today's actual picks, not an ever-growing mix of old alerts
       // for symbols that may not even be on the board anymore.
       alertHistory = newAlerts;
