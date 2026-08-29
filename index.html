@@ -1568,8 +1568,6 @@
   // server-side in functions/index.js), so the proxy can't be driven by
   // anyone who just finds the function URL.
   var finnhubQuoteFn = httpsCallable(functions, 'finnhubQuote');
-  var finnhubNewsFn = httpsCallable(functions, 'finnhubNews');
-  var finnhubEarningsCalendarFn = httpsCallable(functions, 'finnhubEarningsCalendar');
   var finnhubCompanyNewsFn = httpsCallable(functions, 'finnhubCompanyNews');
 
   window.__shwoopReady({
@@ -1653,6 +1651,18 @@
         callback(snap.exists() ? snap.data() : {});
       }, function(err){
         console.error('User doc sync error:', err);
+      });
+    },
+    // One document, computed once by shwoop-server and read by every
+    // signed-in account (see firestore.rules: shared/{doc} is
+    // read-only from the client SDK) -- general market data that's the
+    // same for everyone (index/watchlist quotes, headlines, earnings
+    // calendar) no longer needs a separate per-account Finnhub call.
+    watchSharedMarketSnapshot: function(callback){
+      return onSnapshot(doc(db, 'shared', 'marketSnapshot'), function(snap){
+        callback(snap.exists() ? snap.data() : null);
+      }, function(err){
+        console.error('Shared market snapshot sync error:', err);
       });
     },
     saveAlerts: function(uid, alertHistory, lastDate){
@@ -1808,12 +1818,6 @@
     // involved at all versus a direct fetch.
     finnhubQuote: function(symbol){
       return finnhubQuoteFn({ symbol: symbol }).then(function(res){ return res.data; });
-    },
-    finnhubNews: function(){
-      return finnhubNewsFn().then(function(res){ return res.data; });
-    },
-    finnhubEarningsCalendar: function(from, to){
-      return finnhubEarningsCalendarFn({ from: from, to: to }).then(function(res){ return res.data; });
     },
     finnhubCompanyNews: function(symbol, from, to){
       return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
@@ -3013,7 +3017,7 @@
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Pocket Advisor. All rights reserved.</div>
     <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies/projects referenced on this site. Stock ticker symbols, company names, and cryptocurrency symbols shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID, OPEN, SNAP, CHPT, and ROKU, plus BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, and AAVE) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Pocket Advisor watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account is connected — paper or live — with a persistent banner and red accents whenever live means real money. Single-owner personal tool, still under active testing — not a track record, not financial advice.</p>
+    <p>Pocket Advisor watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account you connect — invited accounts are paper-only; the admin account can also connect a live Alpaca account, with a persistent banner and red accents whenever live means real money. Invite-only, still under active testing — not a track record, not financial advice.</p>
     <p>Prices are live quotes from Alpaca, falling back to Finnhub if needed. Chart history is real data from Twelve Data — if it can't load, you'll see an honest error, never fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
@@ -8922,6 +8926,7 @@
   // ---------- Trade Journal (calendar + logged trades, synced via Firebase) ----------
   var journalEntries = [];
   var journalUnsubscribe = null;
+  var sharedSnapshotUnsubscribe = null;
   var currentUid = null;
 
   function saveJournalEntries(){
@@ -11709,6 +11714,7 @@
 
     api.onAuthChange(function(user){
       if(journalUnsubscribe){ journalUnsubscribe(); journalUnsubscribe = null; }
+      if(sharedSnapshotUnsubscribe){ sharedSnapshotUnsubscribe(); sharedSnapshotUnsubscribe = null; }
 
       if(user){
         if(forceReauthPending){
@@ -11782,8 +11788,14 @@
           handleAlpacaCredentialsDocUpdate(data);
           handleTradingPauseDocUpdate(data);
         });
-        loadMarketNewsIfSignedIn();
-        loadEarningsIfSignedIn();
+        // News/earnings and index-and-watchlist quotes now come from the
+        // one shared/marketSnapshot document shwoop-server computes on
+        // its own 3-minute cycle (see marketSnapshot.js) instead of each
+        // signed-in tab making its own Finnhub calls for identical,
+        // non-personalized data. Falls back to nothing (last-known /
+        // "Sign in to see..." placeholders) if the backend hasn't
+        // written a snapshot yet, e.g. right after a fresh deploy.
+        sharedSnapshotUnsubscribe = api.watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate);
         // Unpriced (null) until fetchAllQuotes actually resolves -- same
         // "no fake data" rule the crypto watchlist already follows.
         // Renders as an honest "Loading…" (see indexReads) rather than a
@@ -11828,6 +11840,10 @@
   // intradayTrades only when the backend hasn't reported anything yet
   // (e.g. server hasn't completed its first cycle since this tab opened).
   function renderWatchTradeCards(el, source){
+    if(!source.length){
+      el.innerHTML = '<div class="news-placeholder">No setups right now — check back once the screener finds something.</div>';
+      return;
+    }
     el.innerHTML = source.map(function(t){
       var badge = computeBadgeInfo(t);
       // Same reasoning as renderIntradayBlocks/renderCryptoBlocks: once a
@@ -12042,6 +12058,39 @@
       '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(row).join('') + '</div>';
   }
 
+  // ---------- Shared market snapshot (indices/watchlist quotes, news, earnings -- one doc for every signed-in account) ----------
+  // shwoop-server writes shared/marketSnapshot once every 3 minutes from
+  // the admin account's own Alpaca credentials (quotes) and its own
+  // FINNHUB_API_KEY (news/earnings) -- see src/marketSnapshot.js. Merged
+  // into the same watchlist array/render functions a real per-account
+  // quote fetch already populates, so nothing downstream needs to know
+  // the difference. null (no snapshot written yet -- e.g. right after a
+  // fresh deploy, or FINNHUB_API_KEY isn't set on the backend) leaves
+  // whatever was already on screen alone rather than blanking it out.
+  function handleSharedMarketSnapshotUpdate(data){
+    if(!data) return;
+    var quotes = data.quotes || {};
+    Object.keys(quotes).forEach(function(sym){
+      var q = quotes[sym];
+      if(!q || q.price == null) return;
+      var existing = watchlist.filter(function(w){ return w.sym === sym; })[0];
+      if(existing){
+        existing.price = q.price;
+        existing.prevClose = q.prevClose;
+      } else {
+        watchlist.push({ sym: sym, name: COMPANY_NAMES[sym] || sym, price: q.price, prevClose: q.prevClose });
+      }
+    });
+    renderTicker();
+    renderIndices();
+    renderSentiment();
+    renderBriefHeadline();
+    renderMovers();
+    renderWhatToWatch();
+    renderMarketNews(data.news);
+    renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
+  }
+
   // ---------- Market News & Earnings Calendar (Finnhub, signed-in accounts only) ----------
   function renderMarketNews(articles){
     var el = document.getElementById('marketNewsList');
@@ -12057,15 +12106,6 @@
         '<span class="news-item-meta">' + (a.source || '') + (time ? ' · ' + time : '') + '</span>' +
       '</a>';
     }).join('');
-  }
-
-  function loadMarketNewsIfSignedIn(){
-    if(!currentUid) return;
-    var el = document.getElementById('marketNewsList');
-    window.__shwoopAPI.finnhubNews().then(renderMarketNews).catch(function(err){
-      console.error('Market news fetch failed:', err);
-      if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load headlines right now.</div>'; }
-    });
   }
 
   function renderEarningsCalendar(data){
@@ -12089,19 +12129,6 @@
         '<span class="earnings-hour">' + hourLabel + '</span>' +
       '</div>';
     }).join('');
-  }
-
-  function loadEarningsIfSignedIn(){
-    if(!currentUid) return;
-    var el = document.getElementById('earningsList');
-    var today = new Date();
-    var weekOut = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-    var fromStr = today.toISOString().slice(0, 10);
-    var toStr = weekOut.toISOString().slice(0, 10);
-    window.__shwoopAPI.finnhubEarningsCalendar(fromStr, toStr).then(renderEarningsCalendar).catch(function(err){
-      console.error('Earnings calendar fetch failed:', err);
-      if(el){ el.innerHTML = '<div class="news-placeholder">Couldn\'t load earnings calendar right now.</div>'; }
-    });
   }
 
   function resetNewsAndEarnings(){
