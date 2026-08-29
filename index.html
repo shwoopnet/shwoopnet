@@ -1655,6 +1655,19 @@
         serverAccountSummary: data.serverAccountSummary || null,
         serverPositions: Array.isArray(data.serverPositions) ? data.serverPositions : null,
         serverAccountSnapshotAt: data.serverAccountSnapshotAt || null,
+        // Whether the current Eastern-time calendar date is a real
+        // trading day at all (not just "is the market open right now") --
+        // see shwoop-server's syncAccountSnapshot. Needed because Alpaca's
+        // own last_equity field ("equity as of the previous trading
+        // day's close") only rolls forward at the START of the next real
+        // session -- on a weekend or holiday it's still sitting at the
+        // close from TWO sessions back, not one, making a naive equity
+        // minus last_equity span two days' worth of change under a
+        // "Today's P&L" label. null/absent (an old server build that
+        // hasn't deployed this yet) means "unknown" -- the caller treats
+        // that the same as "assume it's a trading day" rather than
+        // hiding P&L on every page load until the backend catches up.
+        serverIsTodayTradingDay: typeof data.serverIsTodayTradingDay === 'boolean' ? data.serverIsTodayTradingDay : null,
         // The actual override fields (distinct from the server*
         // fields above, which are the backend's read-only EFFECTIVE
         // mirrors) -- these are what this tab's own controls need to
@@ -3491,6 +3504,11 @@
   var backendAccountSummary = null;
   var backendPositions = null;
   var backendAccountSnapshotAt = null;
+  // null = unknown yet (no snapshot received, or an old server build
+  // that hasn't deployed serverIsTodayTradingDay) -- renderStatusPage
+  // treats that the same as "assume it's a trading day" rather than
+  // hiding P&L on every page load until the backend catches up.
+  var backendIsTodayTradingDay = null;
   // Same reasoning as BACKEND_HEARTBEAT_STALE_MS below: the backend
   // writes this every ~60s regardless of market hours, so allow one
   // missed tick plus write latency before treating it as too stale to
@@ -3547,6 +3565,7 @@
       backendAccountSummary = data.serverAccountSummary;
       backendPositions = data.serverPositions;
       backendAccountSnapshotAt = data.serverAccountSnapshotAt;
+      backendIsTodayTradingDay = data.serverIsTodayTradingDay;
       autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
@@ -9822,7 +9841,20 @@
     var today = new Date().toISOString().slice(0,10);
     var stamp = new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
 
-    if(intradayTrades.length === 0){
+    // Same source-of-truth preference every other consumer of today's
+    // picks already uses (renderIntradayBlocks, renderWhatToWatch, etc.)
+    // -- the local re-scan that used to populate intradayTrades was fully
+    // removed at some point, leaving it permanently empty. Checking it
+    // directly here (instead of falling back to the backend's own picks
+    // like everywhere else does) meant this silently generated zero
+    // alerts and wiped alertHistory every single day, regardless of how
+    // many real setups the backend actually found -- the "nothing real
+    // to alert on yet" comment below was masking dead data, not an
+    // honestly quiet day.
+    var tradesForAlerts = (backendIntradayPicks && backendIntradayPicks.length)
+      ? backendIntradayPicks.map(buildTradeFromPick) : intradayTrades;
+
+    if(tradesForAlerts.length === 0){
       // Nothing real to alert on yet (market closed, or no signals have
       // fired today) -- an empty, honest state beats falling back to
       // alerts about symbols that aren't even part of the current
@@ -9832,7 +9864,7 @@
       return;
     }
 
-    Promise.all(intradayTrades.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
+    Promise.all(tradesForAlerts.map(function(t){ return buildAlertForTrade(t, today, stamp); })).then(function(newAlerts){
       // Only today's actual picks, not an ever-growing mix of old alerts
       // for symbols that may not even be on the board anymore.
       alertHistory = newAlerts;
@@ -10022,10 +10054,22 @@
       var todayPL = equity - lastEquity;
       var todayPLPct = lastEquity > 0 ? (todayPL / lastEquity * 100) : 0;
       var plClass = todayPL >= 0 ? 'up' : 'down';
+      // Alpaca only rolls last_equity forward at the START of the next
+      // real trading session -- on a weekend or holiday it's still
+      // sitting at the close from TWO sessions back, not one, so equity
+      // minus last_equity actually spans two days' worth of change,
+      // mislabeled as "Today's". backendIsTodayTradingDay === false (an
+      // explicit check, not just falsy, so null/undefined from an old
+      // server build still falls through to the normal calculation
+      // above rather than hiding P&L outright) shows that stale delta
+      // honestly instead of implying it just happened today.
+      var plValueHtml = backendIsTodayTradingDay === false
+        ? '<div class="backtest-stat-value">Market closed</div>'
+        : '<div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
 
       summaryEl.innerHTML =
         '<div><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value">$' + equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
-        '<div><div class="backtest-stat-label">Today\'s P&L</div><div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div></div>' +
+        '<div><div class="backtest-stat-label">Today\'s P&L</div>' + plValueHtml + '</div>' +
         '<div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value">$' + cash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
         '<div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value">$' + buyingPower.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>';
     }).catch(function(err){
@@ -10320,7 +10364,12 @@
       var todayPLPct = lastEquity > 0 ? ((equity - lastEquity) / lastEquity * 100) : 0;
       // A small dead zone around exactly flat reads as neutral (yellow)
       // rather than flickering green/red on essentially no real move.
-      var colorClass = Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
+      // On a non-trading day, last_equity hasn't rolled forward to
+      // yesterday's close yet (see renderStatusPage's own comment on
+      // this same staleness) -- neutral rather than a real green/red
+      // read on a number that isn't actually today's.
+      var colorClass = backendIsTodayTradingDay === false ? 'neutral'
+        : Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
 
       [dockBubble, sidebarBubble].forEach(function(el){
         el.className = el.className.replace(/\b(positive|negative|neutral)\b/g, '').trim() + ' ' + colorClass;
