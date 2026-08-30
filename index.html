@@ -2900,6 +2900,17 @@
         close and no target, so it rides the trailing stop indefinitely — which is exactly where a stale
         thesis costs the most. Off by default.</span>
       </label>
+      <label class="labs-backtest-toggle">
+        <input type="checkbox" id="cryptoBacktestMaker">
+        <span>Maker-limit entries — rests a limit at the breakout level instead of sending a market order.
+        Measured median spread is 0.200%, so a market round trip costs 0.700% against a 0.62% gross edge:
+        negative. A resting limit crosses no spread and pays the lower maker fee on the entry leg, taking the
+        round trip to roughly 0.30%. <strong>Read the fill rate, not just the profit factor.</strong> The
+        breakouts that never trade back down to the limit are disproportionately the winners, so this is
+        expected to trade fill rate against profit factor — the same shape as the trend-exit above, which cut
+        average loss exactly as intended and still lost money. Missed signals are priced under the market-order
+        model and reported alongside. Off by default.</span>
+      </label>
       <div class="labs-backtest-status" id="cryptoBacktestStatus"></div>
       <div id="cryptoBacktestResults"></div>
     </div>
@@ -6920,6 +6931,64 @@
     return { direction: direction, entry: entry, stop: stop, t1: target };
   }
 
+  // Maker-limit entries -- the experiment pre-registered in CLAUDE.md.
+  //
+  // A market order CROSSES the spread going in and again going out, and
+  // pays Alpaca's taker fee both times: 0.50% fee + 0.200% measured
+  // median spread = 0.700% round trip, against a 0.62% gross edge. That
+  // is negative, which is what killed the market-order version.
+  //
+  // A resting limit at the breakout level provides liquidity instead of
+  // taking it. Only the ENTRY leg can rest, though -- the exit is a stop
+  // or a trend invalidation and has to take whatever is there -- so this
+  // is maker in, taker out: 0.40% of fees against the market version's
+  // 0.50%, and only the exit still crosses the spread.
+  //
+  // The predicted failure mode, recorded before this was run: breakouts
+  // that never trade back down to the limit are disproportionately the
+  // WINNERS, so fill rate and profit factor move in opposite directions.
+  // That is why runCryptoBacktestSimulationAsync also evaluates every
+  // MISSED signal under the taker model -- a profit factor that improves
+  // while fill rate collapses is the failed-breakout-exit trap wearing a
+  // new face, and reporting only the filled trades would hide it.
+  var CRYPTO_MAKER_FEE_BPS = 15;
+  var CRYPTO_MAKER_WAIT_BARS = 8; // 2 hours of 15-minute bars
+
+  function applyCryptoMakerSlippage(pctReturn, outcome){
+    // The EXIT is still a market order -- a stop or a trend-invalidation
+    // exit has to take whatever is there, so only the ENTRY leg earns the
+    // maker fee. Modelling both legs as maker would be assuming away the
+    // one leg that genuinely cannot rest.
+    var exitLegs = CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined
+      ? CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] - 1 : 1;
+    if(exitLegs < 0) exitLegs = 0;
+    return pctReturn - (CRYPTO_MAKER_FEE_BPS / 100) - exitLegs * (CRYPTO_SLIPPAGE_BPS / 100);
+  }
+
+  // Fills at the breakout level only if a later bar actually trades down
+  // to it, within the wait window. A limit order fills at its price or
+  // better; modelling the fill at exactly the limit is the conservative
+  // reading of a bar that opened through it.
+  function fillCryptoSignalAsMakerLimit(bars, signalIdx, signal, waitBars){
+    var limitPrice = signal.entry;
+    if(!(limitPrice > 0) || limitPrice <= signal.stop) return null;
+    var last = Math.min(bars.length - 1, signalIdx + waitBars);
+    for(var j = signalIdx + 1; j <= last; j++){
+      if(bars[j].l <= limitPrice){
+        var risk = limitPrice - signal.stop;
+        if(risk <= 0) return null;
+        return {
+          entryIdx: j,
+          direction: signal.direction,
+          entry: limitPrice,
+          stop: signal.stop,
+          t1: limitPrice + CRYPTO_BT_REWARD_MULTIPLE * risk
+        };
+      }
+    }
+    return null; // never came back -- the signal is missed, not filled
+  }
+
   // Books the fill at a price this system could actually have got.
   //
   // findCryptoBacktestBreakoutAt returns `entry` = rangeHigh, the level
@@ -7055,10 +7124,11 @@
     return '~' + (Math.round(days * 10) / 10) + ' day' + (Math.round(days * 10) === 10 ? '' : 's');
   }
 
-  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss){
+  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss, makerEntries){
     return new Promise(function(resolve){
       var startIdx = Math.max(CRYPTO_BT_TREND_LOOKBACK_BARS, bars.length - lookbackBars);
       var trades = [];
+      var missedTrades = [];
       var i = startIdx;
       var ITERATIONS_PER_CHUNK = 300;
 
@@ -7066,11 +7136,30 @@
         var processedThisChunk = 0;
         while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
           var signal = findCryptoBacktestBreakoutAt(bars, i);
-          var filled = signal ? fillCryptoSignalAtNextBar(bars, i, signal) : null;
+          var filled = signal
+            ? (makerEntries
+              ? fillCryptoSignalAsMakerLimit(bars, i, signal, CRYPTO_MAKER_WAIT_BARS)
+              : fillCryptoSignalAtNextBar(bars, i, signal))
+            : null;
+          // A signal the limit never caught is not simply absent. Price it
+          // under the TAKER model -- what the market-order version would
+          // have made on it -- so the fill-rate/profit-factor trade-off is
+          // measurable instead of invisible.
+          if(signal && makerEntries && !filled){
+            var takerFill = fillCryptoSignalAtNextBar(bars, i, signal);
+            if(takerFill){
+              var missedOutcome = simulateCryptoForward(bars, takerFill.entryIdx, takerFill, invalidateOnTrendLoss);
+              var missedReturn = applyCryptoBacktestSlippage(
+                (missedOutcome.price - takerFill.entry) / takerFill.entry * 100, missedOutcome.result);
+              missedTrades.push({ date: bars[i].t, pctReturn: missedReturn, outcome: missedOutcome.result });
+            }
+          }
           if(filled){
             var outcome = simulateCryptoForward(bars, filled.entryIdx, filled, invalidateOnTrendLoss);
             var pctReturn = (outcome.price - filled.entry) / filled.entry * 100; // Long-only
-            pctReturn = applyCryptoBacktestSlippage(pctReturn, outcome.result);
+            pctReturn = makerEntries
+              ? applyCryptoMakerSlippage(pctReturn, outcome.result)
+              : applyCryptoBacktestSlippage(pctReturn, outcome.result);
             trades.push({
               date: bars[filled.entryIdx].t, direction: filled.direction, entry: filled.entry,
               stop: filled.stop, target: filled.t1, outcome: outcome.result === 'unresolved' ? 'unresolved' : outcome.result,
@@ -7086,6 +7175,12 @@
         if(i < bars.length){
           setTimeout(step, 0);
         } else {
+          // Attached as a property rather than changing the resolve
+          // shape -- summarizeBacktestTrades and every existing caller
+          // iterate the ELEMENTS, so they are untouched, while the maker
+          // run can still report what its limit orders never caught.
+          trades.makerEntries = !!makerEntries;
+          trades.missedTrades = missedTrades;
           resolve(trades);
         }
       }
@@ -7536,13 +7631,21 @@
     var statusEl = document.getElementById('cryptoBacktestStatus');
     var resultsEl = document.getElementById('cryptoBacktestResults');
     if(trades.length === 0){
-      statusEl.textContent = 'No qualifying crypto signals found for ' + sym + ' in this window.';
+      // A maker run with zero fills is a RESULT, not an empty window --
+      // it means every breakout ran away and none came back to the limit.
+      // Saying "no signals found" there would be false.
+      var missedOnly = (trades.missedTrades || []).length;
+      statusEl.textContent = (trades.makerEntries && missedOnly)
+        ? 'No limit order filled for ' + sym + ' — all ' + missedOnly + ' signal' + (missedOnly !== 1 ? 's' : '') +
+          ' broke out and never traded back to the level. That is a 0% fill rate, not an absence of signals.'
+        : 'No qualifying crypto signals found for ' + sym + ' in this window.';
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = '';
       return;
     }
     statusEl.textContent = 'Found ' + trades.length + ' crypto signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym +
-      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.';
+      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.'
+      + describeMakerFills(trades);
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -7582,7 +7685,7 @@
       '</table>';
   }
 
-  function renderCryptoUniverseBacktestResults(perSymbolResults, summary, failedSymbols){
+  function renderCryptoUniverseBacktestResults(perSymbolResults, summary, failedSymbols, makerFills){
     var statusEl = document.getElementById('cryptoBacktestStatus');
     var resultsEl = document.getElementById('cryptoBacktestResults');
     // Same reporting the equities universe run already does, and for the
@@ -7601,15 +7704,32 @@
         failedSymbols.map(function(f){ return f.sym + ' (' + f.message + ')'; }).join(', ') + '.</p>'
       : '';
 
+    // See describeMakerFills -- a maker run's fill rate is the number that
+    // decides whether its profit factor means anything, so it goes in the
+    // headline rather than a footnote.
+    var makerNote = '';
+    if(makerFills){
+      var totalSignals = makerFills.filled + makerFills.missed;
+      makerNote = totalSignals
+        ? ' Limit orders filled ' + makerFills.filled + ' of ' + totalSignals + ' signals ('
+          + (makerFills.filled / totalSignals * 100).toFixed(0) + '%); the other ' + makerFills.missed +
+          ' broke out and never traded back to the level, so this profit factor covers a SUBSET of the signals '
+          + 'the market-order version takes.'
+        : '';
+    }
+
     if(summary.totalSignals === 0){
-      statusEl.textContent = 'No qualifying crypto signals found across the universe in this window.' + failedNote;
+      statusEl.textContent = (makerFills && makerFills.missed)
+        ? 'No limit order filled anywhere in the universe — all ' + makerFills.missed +
+          ' signals broke out and never traded back to the level. A 0% fill rate, not an absence of signals.' + failedNote
+        : 'No qualifying crypto signals found across the universe in this window.' + failedNote;
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = failedBlock;
       return;
     }
 
     statusEl.textContent = 'Tested ' + perSymbolResults.length + ' pairs, ' + summary.totalSignals + ' total crypto signals' +
-      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.' + failedNote;
+      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.' + failedNote + makerNote;
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -7664,6 +7784,32 @@
     return !!(el && el.checked);
   }
 
+  function cryptoMakerChecked(){
+    var el = document.getElementById('cryptoBacktestMaker');
+    return !!(el && el.checked);
+  }
+
+  // The one line that decides whether a maker run is a result or a trap.
+  // Reports fill rate alongside what the missed signals would have made,
+  // because a profit factor that improves while fill rate collapses is
+  // not an improvement -- it is selection.
+  function describeMakerFills(trades){
+    if(!trades || !trades.makerEntries) return '';
+    var missed = trades.missedTrades || [];
+    var total = trades.length + missed.length;
+    if(!total) return '';
+    var fillRate = trades.length / total * 100;
+    var missedAvg = missed.length
+      ? missed.reduce(function(a, t){ return a + t.pctReturn; }, 0) / missed.length
+      : 0;
+    return ' Filled ' + trades.length + ' of ' + total + ' signals (' + fillRate.toFixed(0) + '%). '
+      + (missed.length
+        ? 'The ' + missed.length + ' missed would have averaged ' + (missedAvg >= 0 ? '+' : '')
+          + missedAvg.toFixed(2) + '% each under the market-order model'
+          + (missedAvg > 0 ? ' — the limit skipped winners, which is the predicted failure mode.' : '.')
+        : '');
+  }
+
   function runCryptoBacktestClicked(){
     var sym = document.getElementById('cryptoBacktestSymbol').value;
     var lookbackDays = parseInt(document.getElementById('cryptoBacktestLookback').value, 10);
@@ -7682,7 +7828,7 @@
         throw new Error('Not enough crypto history for ' + sym + ' in this window — try a longer lookback.');
       }
       var lookbackBars = Math.round(lookbackDays * 24 * 4); // 4 bars/hour at 15-min
-      return runCryptoBacktestSimulationAsync(bars, lookbackBars, cryptoInvalidateChecked());
+      return runCryptoBacktestSimulationAsync(bars, lookbackBars, cryptoInvalidateChecked(), cryptoMakerChecked());
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderCryptoBacktestResults(trades, summary, sym);
@@ -7724,11 +7870,21 @@
     var perSymbolResults = [];
     var failedSymbols = [];
     var invalidate = cryptoInvalidateChecked();
+    var maker = cryptoMakerChecked();
+    var universeFilled = 0;
+    var universeMissed = 0;
 
     function finish(){
       btn.disabled = false;
       singleBtn.disabled = false;
-      renderCryptoUniverseBacktestResults(perSymbolResults, summarizeBacktestTrades(allTrades), failedSymbols);
+      // The universe run aggregates across pairs, so fill rate is carried
+      // on a synthetic array rather than recomputed -- same reporting,
+      // same trap avoided.
+      var aggregate = allTrades.slice();
+      aggregate.makerEntries = maker;
+      aggregate.missedTrades = new Array(universeMissed).fill({ pctReturn: 0, outcome: 'missed' });
+      renderCryptoUniverseBacktestResults(perSymbolResults, summarizeBacktestTrades(allTrades), failedSymbols,
+        maker ? { filled: universeFilled, missed: universeMissed } : null);
     }
 
     function processNext(index){
@@ -7747,7 +7903,9 @@
           return null;
         }
         statusEl.textContent = 'Simulating ' + progress + ' — ' + bars.length.toLocaleString() + ' bars…';
-        return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate).then(function(trades){
+        return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate, maker).then(function(trades){
+          universeFilled += trades.length;
+          universeMissed += (trades.missedTrades || []).length;
           allTrades = allTrades.concat(trades);
           perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
           processNext(index + 1);
