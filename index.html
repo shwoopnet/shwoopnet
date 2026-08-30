@@ -2988,6 +2988,13 @@
         Apply the market-regime filter (real SPY history) — skips a fresh Long during a broad SPY selloff, a fresh
         Short during a broad rally. Off by default so this stays a direct before/after comparison, not a new default.
       </label>
+      <label class="labs-backtest-option">
+        <input type="checkbox" id="intradayBacktestConfirmationBar">
+        Require a confirmation bar before entry — instead of entering the instant a bar first breaks the opening
+        range on volume, waits one more 15-minute bar and only takes the trade if price is still beyond the range at
+        that bar's close. Trades entry timing (and some of the "let winners run" edge from catching the move early)
+        for fewer immediate fakeouts. Off by default so this stays a direct before/after comparison, not a new default.
+      </label>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
       </div>
@@ -6824,11 +6831,32 @@
     };
   }
 
+  // requireConfirmationBar is optional -- omitted (or false), this behaves
+  // exactly as it always has (enters the instant the breakout bar itself
+  // qualifies). When true, a qualifying breakout bar doesn't enter
+  // immediately -- it waits one more bar and only takes the trade if
+  // price is still beyond the range at that NEXT bar's close (using the
+  // close, not just a wick, is the actual "confirmation" -- the original
+  // breakout trigger below only ever needed an intrabar high/low touch).
+  // If the next bar reverses back through the breakout level, or the day
+  // ends before a confirmation bar exists, no trade is taken at all --
+  // this doesn't look for a second, later breakout the same day, matching
+  // computeORBAnalysis's own one-signal-per-symbol-per-day mechanics
+  // (which already marked today's slot used the moment the ORIGINAL bar
+  // qualified, before this confirmation check ever runs).
+  function requiresConfirmation(bars, i, analysis){
+    var isLong = analysis.direction === 'Long';
+    var nextBar = bars[i + 1];
+    if(!nextBar) return false;
+    if(nextBar.t.toISOString().slice(0,10) !== bars[i].t.toISOString().slice(0,10)) return false; // next day already started
+    return isLong ? nextBar.c > analysis.entry : nextBar.c < analysis.entry;
+  }
+
   // regimeSeries is optional -- omitted entirely, this behaves exactly as
   // it always has (no filtering), which is what every existing call site
   // still does unless the new "Apply the market-regime filter" checkbox
   // in Labs is checked.
-  function runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries){
+  function runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar){
     return new Promise(function(resolve){
       // Filtered once, here, rather than inside computeORBAnalysis (which
       // used to do this on every call) -- this loop calls that function
@@ -6863,17 +6891,23 @@
             var regime = regimeAt(regimeSeries, bars[i].t.getTime());
             regimeBlocked = (analysis.direction === 'Long' && regime.skipLongs) || (analysis.direction === 'Short' && regime.skipShorts);
           }
-          if(isFreshSignal && !regimeBlocked){
-            var outcome = simulateORBForwardSameDay(bars, i, analysis);
+          var confirmationBlocked = false;
+          var entryIdx = i;
+          if(isFreshSignal && !regimeBlocked && requireConfirmationBar){
+            confirmationBlocked = !requiresConfirmation(bars, i, analysis);
+            if(!confirmationBlocked) entryIdx = i + 1;
+          }
+          if(isFreshSignal && !regimeBlocked && !confirmationBlocked){
+            var outcome = simulateORBForwardSameDay(bars, entryIdx, analysis);
             var isLong = analysis.direction === 'Long';
             var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
             pctReturn = applyORBSlippage(pctReturn, outcome.result);
             trades.push({
-              date: bars[i].t, direction: analysis.direction, entry: analysis.entry,
+              date: bars[entryIdx].t, direction: analysis.direction, entry: analysis.entry,
               stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
               exitPrice: outcome.price, pctReturn: pctReturn
             });
-            i = i + outcome.days + 1;
+            i = entryIdx + outcome.days + 1;
           } else {
             i++;
           }
@@ -7055,9 +7089,12 @@
     statusEl.className = 'labs-backtest-status';
     resultsEl.innerHTML = '';
 
+    var confirmationBarCheckbox = document.getElementById('intradayBacktestConfirmationBar');
+    var requireConfirmationBar = !!(confirmationBarCheckbox && confirmationBarCheckbox.checked);
+
     fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
       return fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar);
       });
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
@@ -7094,6 +7131,8 @@
     // count is never mistaken for a real difference in the underlying
     // strategy/parameters when it was actually just missing data.
     var failedSymbols = [];
+    var confirmationBarCheckbox = document.getElementById('intradayBacktestConfirmationBar');
+    var requireConfirmationBar = !!(confirmationBarCheckbox && confirmationBarCheckbox.checked);
 
     function processNext(index, regimeSeries){
       if(index >= INTRADAY_UNIVERSE.length){
@@ -7106,7 +7145,7 @@
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
       fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar);
       }).then(function(trades){
         allTrades = allTrades.concat(trades);
         perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
