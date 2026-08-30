@@ -84,8 +84,19 @@ trade against a 0.10% round-trip cost already subtracted from it. The edge
 is the same size as the uncertainty in the cost assumption.
 
 So **1.24 is the number to beat, not 2.71** — and clearing 1.24 is not the
-same as having an edge worth real money. Crypto's 2.35 has not been
-re-measured and should be treated as unverified until it is.
+same as having an edge worth real money.
+
+**Crypto measures better than equities, and that is worth acting on.**
+Under a corrected cost model (25bps a leg, not the 5bps it was wrongly
+inheriting from equities) crypto runs **1.93** with a 45% win rate and
++0.44% expectancy, against equities' 1.24 / 30% / +0.09%. Both replaced
+frozen numbers that did not reproduce. Judge each strategy against its own
+figure — 1.93 for crypto, 1.24 for equities — never against 2.71 or 2.35.
+
+Both remain upper bounds. The crypto 25bps is the taker fee and excludes
+spread, which is widest on the alts producing most of its signals, and it
+is one 60-day window on a long-only trend strategy — in crypto that
+measures the window at least as much as the strategy.
 
 Compare live against backtest explicitly. A large gap that persists past
 20 trades means the backtest is not describing reality, and the backtest
