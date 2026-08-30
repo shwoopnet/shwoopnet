@@ -8697,6 +8697,50 @@
   // resolve in two requests total, not twelve.
   var ALPACA_CRYPTO_DATA_BASE = 'https://data.alpaca.markets/v1beta3/crypto/us';
 
+  // How many days of daily bars to ask for. Two would be the minimum to
+  // get a previous close, but a pair whose most recent bar hasn't formed
+  // yet would then come back with one, so this asks for a few and takes
+  // the last two that actually arrived.
+  var CRYPTO_PREV_CLOSE_DAYS = 4;
+
+  // `limit` on Alpaca's MULTI-SYMBOL bars endpoint caps the whole
+  // response, not each symbol.
+  //
+  // This request used to be a flat `limit=2` for all 12 pairs, which is
+  // what "2 daily bars" would mean on the single-symbol equities
+  // endpoint. Here it returned two bars for the ENTIRE batch -- so one
+  // pair got its two bars, or two pairs got one each, and the other ten
+  // got nothing at all. That is the whole story behind a ticker tape
+  // cycling the same two symbols, "Broadly negative -- 0 of 2 pairs up
+  // over 24h" against a 12-pair universe, and a Top Gainers column
+  // listing the same names as Top Losers.
+  //
+  // It also explains the impossible-looking 0.00% moves: a pair that got
+  // exactly ONE bar fell into the old `length >= 2 ? [len-2] : [len-1]`
+  // fallback below, which used the current bar as its own previous
+  // close. Same close divided by itself is 0.00%, reported as a 24h
+  // change.
+  //
+  // Sized for the batch, and bounded with an explicit `start` so the
+  // window is pinned rather than left to the endpoint's default -- the
+  // same discipline the crypto CHART fetch already had to learn (see
+  // CLAUDE.md's bars-ascending-from-start incident).
+  function cryptoBarsUrl(base, symbols, days){
+    var since = new Date(Date.now() - (days + 1) * 24 * 60 * 60 * 1000);
+    return base + '/bars?symbols=' + symbols.map(encodeURIComponent).join(',')
+      + '&timeframe=1Day'
+      + '&start=' + since.toISOString().slice(0, 10)
+      + '&limit=' + (symbols.length * (days + 2));
+  }
+
+  // Returns null rather than inventing a previous close from the current
+  // bar. A missing change badge is honest; a 0.00% one is a claim that
+  // the price did not move.
+  function prevCloseFromBars(symBars){
+    if(!symBars || symBars.length < 2) return null;
+    return symBars[symBars.length - 2].c;
+  }
+
   function fetchAllCryptoQuotes(){
     if(!alpacaConnected) return Promise.resolve(false);
     var symbolsParam = CRYPTO_UNIVERSE.map(encodeURIComponent).join(',');
@@ -8705,7 +8749,7 @@
         if(!res.ok) throw new Error('Alpaca crypto quotes HTTP ' + res.status);
         return res.json();
       }),
-      fetch(ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + symbolsParam + '&timeframe=1Day&limit=2', { headers: alpacaHeaders() }).then(function(res){
+      fetch(cryptoBarsUrl(ALPACA_CRYPTO_DATA_BASE, CRYPTO_UNIVERSE, CRYPTO_PREV_CLOSE_DAYS), { headers: alpacaHeaders() }).then(function(res){
         if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
         return res.json();
       })
@@ -8732,10 +8776,8 @@
         // what turns the chg badge into "Infinity%" (a real price divided
         // by a null/zero prevClose).
         var symBars = bars[item.sym] || bars[canonicalSymbol(item.sym)] || [];
-        if(symBars.length >= 1){
-          var prevBar = symBars.length >= 2 ? symBars[symBars.length - 2] : symBars[symBars.length - 1];
-          item.prevClose = prevBar.c;
-        }
+        var prev = prevCloseFromBars(symBars);
+        if(prev !== null) item.prevClose = prev;
       });
       return true;
     }).catch(function(err){
@@ -11359,6 +11401,25 @@
   });
 
   // ---------- Status page: the one place to check in ----------
+  // "Market closed" exists to avoid presenting a STALE delta as today's,
+  // per the long comment inside the caller. But it was hiding an
+  // accurate zero: an account with nothing open has equity exactly equal
+  // to last_equity, so the delta is $0.00 and there is nothing stale
+  // about it. A fresh account on a Sunday read "Market closed" for a
+  // number that was simply, correctly, nothing -- while crypto traded
+  // 24/7 beside it.
+  //
+  // A zero delta cannot be a misleadingly-spanned two-session move, so it
+  // is always safe to show. Only a NON-zero weekend delta on an account
+  // with no open crypto position still gets the closed-market treatment.
+  function shouldHideTodayPL(backendIsTodayTradingDay, hasOpenCryptoPosition, todayPL) {
+    if (backendIsTodayTradingDay !== false) return false;
+    if (hasOpenCryptoPosition) return false;
+    // Below half a cent renders as $0.00 anyway, so treat it as zero
+    // rather than letting float dust re-trigger the hidden state.
+    return Math.abs(todayPL) >= 0.005;
+  }
+
   function renderStatusPage(){
     renderBackendStatus();
     renderStatusPositions();
@@ -11412,7 +11473,7 @@
       var hasOpenCryptoPosition = journalEntries.some(function(j){
         return j.screenerType === 'crypto' && isOpenAlpacaPositionForCurrentAccount(j);
       });
-      var plValueHtml = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition)
+      var plValueHtml = shouldHideTodayPL(backendIsTodayTradingDay, hasOpenCryptoPosition, todayPL)
         ? '<div class="backtest-stat-value">Market closed</div>'
         : '<div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
 

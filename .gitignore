@@ -4,3 +4,7 @@
 .unlazy/
 .unlazy-hook-state.json
 .claude/settings.local.json
+
+# unlazy's solo gate ledger is per-task scratch -- the evidence it
+# produces belongs in the commit and PR that cite it, not in the tree.
+GATES.md
