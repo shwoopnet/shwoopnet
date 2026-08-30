@@ -519,6 +519,24 @@
   .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
+  /* Duplicate-trade warning. Sits directly above the stats row because
+     these numbers are what a duplicate corrupts -- every one of them is
+     wrong, in the same direction, and none of them look wrong. */
+  .journal-dupe-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    margin:14px 0; padding:12px 16px; border-radius: var(--radius);
+    border:1px solid var(--loss); background: var(--panel-raised);
+  }
+  .journal-dupe-banner[hidden]{ display:none; }
+  .journal-dupe-text{ font-size:12.5px; color: var(--paper); line-height:1.5; }
+  .journal-dupe-btn{
+    background:none; border:1px solid var(--loss); color: var(--loss);
+    font-family:'Public Sans', sans-serif; font-size:12px; padding:7px 14px;
+    border-radius:5px; cursor:pointer; white-space:nowrap;
+  }
+  .journal-dupe-btn:hover{ background: var(--loss); color:#fff; }
+  .journal-dupe-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
   /* The Activity Log's "show me only what needs attention" switch. Sits
      unlit and quiet at zero so a healthy log doesn't nag, and goes loud
      the moment there is an error or an urgent instruction to see -- the
@@ -2360,6 +2378,11 @@
       <button class="chart-tool-btn active" id="journalFilterAll" data-filter="all">All</button>
       <button class="chart-tool-btn" id="journalFilterEquities" data-filter="equities">Equities</button>
       <button class="chart-tool-btn" id="journalFilterCrypto" data-filter="crypto">Crypto</button>
+    </div>
+
+    <div class="journal-dupe-banner" id="journalDupeBanner" hidden>
+      <div class="journal-dupe-text" id="journalDupeText"></div>
+      <button class="journal-dupe-btn" id="journalDupeBtn" type="button">Remove duplicates</button>
     </div>
 
     <div class="pl-summary journal-stats-row">
@@ -10486,7 +10509,91 @@
     });
   }
 
+  // ---------- Duplicate journal entries ----------
+  // The Journal reported 64 closed trades against a real 32. Every figure
+  // derived from the journal -- win rate, profit factor, net P&L, the
+  // growth curve, the exit-type mix the weekly health check leans on --
+  // is computed by counting entries, so a duplicated entry corrupts all
+  // of them at once, silently, and always in a direction that looks
+  // plausible. It is worth detecting loudly.
+  //
+  // Two entries are the same trade when they name the same Alpaca order.
+  // entryOrderId is exact and needs no judgement, so it is preferred
+  // wherever present. Entries predating that field fall back to a
+  // deliberately strict composite: a genuine re-entry on the same symbol
+  // the same day would have to match on direction, quantity AND both
+  // prices to the cent to be caught here, and if it did, it would be
+  // indistinguishable from a duplicate by any means available to this
+  // page anyway.
+  function journalEntryIdentity(e){
+    if(e.entryOrderId) return 'order:' + e.entryOrderId;
+    return ['fields', e.sym, e.date, e.direction, e.qty, e.entry, e.exit, e.exitDate].join('|');
+  }
+
+  // Returns the ids that would be REMOVED, keeping the first of each
+  // group. Order matters: journalEntries is append-ordered, so the first
+  // occurrence is the original and later ones are the copies.
+  function findDuplicateJournalEntryIds(entries){
+    var seen = {};
+    var dupeIds = [];
+    (entries || []).forEach(function(e){
+      var key = journalEntryIdentity(e);
+      if(seen[key]){ dupeIds.push(e.id); }
+      else { seen[key] = true; }
+    });
+    return dupeIds;
+  }
+
+  function renderJournalDupeBanner(){
+    var banner = document.getElementById('journalDupeBanner');
+    var textEl = document.getElementById('journalDupeText');
+    if(!banner || !textEl) return;
+    var dupeIds = findDuplicateJournalEntryIds(journalEntries);
+    if(dupeIds.length === 0){ banner.setAttribute('hidden', ''); return; }
+    banner.removeAttribute('hidden');
+    var kept = journalEntries.length - dupeIds.length;
+    textEl.textContent = dupeIds.length + ' of your ' + journalEntries.length +
+      ' journal entries are duplicates of another entry — the same trade recorded more than once. ' +
+      'Every number on this page is computed from these entries, so all of them are currently wrong. ' +
+      'Removing the copies leaves ' + kept + ' real ' + (kept === 1 ? 'entry' : 'entries') + '.';
+  }
+
+  document.getElementById('journalDupeBtn').addEventListener('click', function(){
+    var btn = this;
+    var dupeIds = findDuplicateJournalEntryIds(journalEntries);
+    if(dupeIds.length === 0) return;
+    if(!confirm('Remove ' + dupeIds.length + ' duplicate journal ' + (dupeIds.length === 1 ? 'entry' : 'entries') +
+      '?\n\nThe first recording of each trade is kept; only the later copies are removed. ' +
+      'This rewrites your journal and cannot be undone from here.')) return;
+    if(!window.__shwoopAPI || !currentUid) return;
+    btn.disabled = true;
+    btn.textContent = 'Removing…';
+    // Recomputed INSIDE the transaction against whatever the journal
+    // actually holds at commit time, not against the ids captured when
+    // the button was clicked -- the backend rewrites this same array
+    // every minute, and removing a stale id list could drop an entry
+    // written in between.
+    window.__shwoopAPI.runJournalTransaction(currentUid, function(fresh){
+      var freshDupeIds = {};
+      findDuplicateJournalEntryIds(fresh).forEach(function(id){ freshDupeIds[id] = true; });
+      return fresh.filter(function(e){ return !freshDupeIds[e.id]; });
+    }).then(function(next){
+      if(next) journalEntries = next;
+      btn.disabled = false;
+      btn.textContent = 'Remove duplicates';
+      renderCalendar();
+      renderJournalDetail();
+      renderPLSummary();
+    }).catch(function(err){
+      console.error('Failed to remove duplicate journal entries:', err);
+      alert('Could not remove duplicates: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Remove duplicates';
+    });
+  });
+
   function renderPLSummary(){
+    renderJournalDupeBanner();
     // Overall P&L is real Alpaca account equity (patched in below) --
     // a single broker-reported number that can't be broken out by
     // strategy, so it always reflects the FULL journal, never the
