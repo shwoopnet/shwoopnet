@@ -519,6 +519,24 @@
   .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
+  /* "Needs You" -- the priority lane. Deliberately the loudest thing on
+     the page when present, and completely absent otherwise. */
+  .priority-log-card{ border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber-glow); }
+  .priority-log-row{
+    display:flex; align-items:flex-start; gap:12px; padding:12px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .priority-log-row:last-child{ border-bottom:none; }
+  .priority-log-body{ flex:1; min-width:0; }
+  .priority-log-text{ font-size:13px; line-height:1.55; color: var(--paper); }
+  .priority-log-time{ font-size:10.5px; color: var(--muted); margin-top:4px; }
+  .priority-log-done-btn{
+    background:none; border:1px solid var(--amber); color: var(--amber);
+    font-family:'Public Sans', sans-serif; font-size:11px; padding:5px 12px;
+    border-radius:4px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+  }
+  .priority-log-done-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
+
   /* The stop-to-target bracket bar on every real setup/position row.
      These rules used to sit interleaved among the (now-removed) Demo
      page's styles, because the mechanism originated there before being
@@ -2247,6 +2265,22 @@
         <button class="flatten-all-btn" id="flattenAllBtn">Flatten all</button>
       </div>
       <div class="labs-backtest-status" id="autoTradeControlsEmpty" hidden>Connect Alpaca in Settings to enable auto-trading.</div>
+    </div>
+
+    <!-- Only rendered when something actually needs a human. Deliberately
+         its own card above the Activity Log rather than a filter inside
+         it: the whole point is that a "go buy $150 of holdings"
+         instruction must not scroll past unread among two hundred routine
+         cycle summaries. An empty priority list shows nothing at all,
+         so this costs no space on a normal day. -->
+    <div class="to-card" id="toCard-priorityLog" hidden>
+      <div class="labs-backtest-card priority-log-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Needs You</span>
+          <span class="to-card-meta" id="priorityLogHeadMeta"></span>
+        </div>
+        <div id="priorityLogList"></div>
+      </div>
     </div>
 
     <div class="to-card" id="toCard-activityLog">
@@ -9185,6 +9219,19 @@
     var autoTradeCard = document.getElementById('autoTradeControlsCard');
     var activityLogCard = document.getElementById('toCard-activityLog');
     if(autoTradeCard && activityLogCard){ container.insertBefore(autoTradeCard, activityLogCard); }
+
+    // "Needs You" is deliberately NOT reorderable or hideable, and is
+    // pinned to the very top rather than left to the loop above. It would
+    // otherwise be stranded exactly the way the comment above describes
+    // (every other card appends past it), and more importantly: a lane
+    // whose entire job is "this must not be missed" shouldn't be
+    // something you can accidentally drag to the bottom or switch off.
+    // It renders nothing at all when empty, so pinning it costs no space
+    // on a normal day.
+    var priorityCard = document.getElementById('toCard-priorityLog');
+    if(priorityCard && container.firstElementChild !== priorityCard){
+      container.insertBefore(priorityCard, container.firstElementChild);
+    }
   }
 
   function renderCardCustomizeList(){
@@ -11806,9 +11853,89 @@
     });
   }
 
+  // ---------- Priority lane ("Needs You") ----------
+  // A tiny minority of activity entries ask the human to actually DO
+  // something -- right now that's the profit sweep's "go buy $X of
+  // holdings" instruction (see shwoop-server's profitSweep.js), which the
+  // backend marks with priority:'urgent'. Everything else in that log is
+  // running commentary, and at 200 entries deep an instruction buried
+  // among cycle summaries is an instruction that never gets read.
+  //
+  // Acknowledgement is stored in localStorage rather than written back to
+  // Firestore, which is a deliberate tradeoff. It means clearing site
+  // data resurfaces an already-handled item -- annoying, but the SAFE
+  // direction to fail: you re-read an instruction you already acted on,
+  // rather than never seeing one you haven't. (The sweep's own text
+  // carries the lifetime earmarked total, so a resurfaced entry can't
+  // trick you into buying twice.) Writing back would mean the frontend
+  // mutating the same activityLog array the backend rewrites every
+  // minute, which is a real race for very little gain.
+  // The activity-log text these rows render is backend-generated, not user
+  // input, so this isn't guarding against a hostile string -- it's guarding
+  // against a dollar figure or symbol that happens to contain a character
+  // HTML would swallow, and against this code being reused later for
+  // something that IS user-supplied.
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  var acknowledgedPriorityIds = {};
+  try{
+    var savedAck = JSON.parse(window.localStorage.getItem('shwoopnet:acknowledgedPriorityIds') || 'null');
+    if(savedAck && typeof savedAck === 'object') acknowledgedPriorityIds = savedAck;
+  }catch(e){}
+  function saveAcknowledgedPriorityIds(){
+    try{ window.localStorage.setItem('shwoopnet:acknowledgedPriorityIds', JSON.stringify(acknowledgedPriorityIds)); }catch(e){}
+  }
+
+  function renderPriorityLog(){
+    var card = document.getElementById('toCard-priorityLog');
+    var listEl = document.getElementById('priorityLogList');
+    var metaEl = document.getElementById('priorityLogHeadMeta');
+    if(!card || !listEl) return;
+
+    // Same account-scoping as the main log below -- an instruction from a
+    // different account must not appear under whichever one is connected.
+    var urgent = currentAccountActivityLog().filter(function(entry){
+      return entry.priority === 'urgent' && !acknowledgedPriorityIds[entry.id];
+    });
+    if(urgent.length === 0){
+      card.setAttribute('hidden', '');
+      listEl.innerHTML = '';
+      return;
+    }
+    card.removeAttribute('hidden');
+    if(metaEl) metaEl.textContent = urgent.length + (urgent.length === 1 ? ' item' : ' items');
+
+    listEl.innerHTML = urgent.map(function(entry){
+      var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+      return '<div class="priority-log-row">' +
+        '<div class="priority-log-body">' +
+          '<div class="priority-log-text">' + escapeHtml(entry.text || '') + '</div>' +
+          '<div class="priority-log-time">' + time + '</div>' +
+        '</div>' +
+        '<button class="priority-log-done-btn" data-ack-id="' + escapeHtml(entry.id) + '">Mark done</button>' +
+      '</div>';
+    }).join('');
+
+    listEl.querySelectorAll('.priority-log-done-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        acknowledgedPriorityIds[btn.dataset.ackId] = true;
+        saveAcknowledgedPriorityIds();
+        // The entry stays in the Activity Log below as a permanent record
+        // -- acknowledging only removes it from the "still needs doing"
+        // lane, it never deletes history.
+        renderPriorityLog();
+      });
+    });
+  }
+
   function renderActivityLog(){
     var el = document.getElementById('statusActivityList');
     var emptyEl = document.getElementById('statusActivityEmpty');
+    renderPriorityLog();
     if(!el) return;
     renderActivityLogFilters();
     // Same account-scoping as journal entries -- an activity log entry
