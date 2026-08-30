@@ -2949,6 +2949,21 @@
         <div class="labs-backtest-status" id="alpacaDataFeedTestStatus"></div>
         <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
       </div>
+
+      <div class="labs-backtest-card" style="margin-top:16px;">
+        <div class="labs-export-header">
+          <div>
+            <div class="labs-export-title">How far back does options data go?</div>
+            <div class="labs-export-desc">Walks backwards through real expired SPY contracts and reports the
+              oldest date this account can actually fetch option bars for. Answers whether an options strategy
+              could be backtested at all before any of it gets built — the docs advertise history since
+              February 2024, but what matters is what your own key and data plan return.</div>
+          </div>
+          <button class="settings-reset-btn" id="testOptionsDepthBtn">Check options depth</button>
+        </div>
+        <div class="labs-backtest-status" id="optionsDepthStatus"></div>
+        <div id="optionsDepthResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
+      </div>
     </div>
   </main>
     </div>
@@ -12332,6 +12347,156 @@
       '</div>';
     }).join('');
   }
+
+  // ---------- Options data depth probe ----------
+  // Answers one question before any options work gets planned: how far back
+  // can THIS account actually fetch option bars?
+  //
+  // Worth probing rather than reading the docs, for two reasons. The docs
+  // advertise history since February 2024, but historical option TRADES are
+  // documented as only seven days deep -- and whether that limit also
+  // applies to bars is exactly the ambiguity that decides whether an
+  // options strategy is measurable. Second, data depth is a property of the
+  // plan attached to a key, not of the platform, so the only answer that
+  // means anything is the one your own credentials get back.
+  //
+  // Contracts are looked up rather than constructed. An OCC symbol encodes
+  // a strike that has to have actually existed (SPY240315C00500000 is a
+  // $500 call expiring 15 Mar 2024), and guessing one that never traded
+  // returns an empty result indistinguishable from "no history that far
+  // back" -- which would answer the question wrongly, in the discouraging
+  // direction.
+  var OPTIONS_DEPTH_PROBES = [
+    { label: '~2.5 years', year: 2024, month: 2 },
+    { label: '~2 years', year: 2024, month: 8 },
+    { label: '~18 months', year: 2025, month: 2 },
+    { label: '~1 year', year: 2025, month: 8 },
+    { label: '~6 months', year: 2026, month: 2 },
+    { label: '~1 month', year: 2026, month: 7 },
+  ];
+
+  // Reports rather than throws: a 403 is the most informative outcome here
+  // (it means the plan, not the date, is the limit) and an exception would
+  // discard exactly that. Still goes through the shared backtest queue so a
+  // probe cannot compete with live trading calls.
+  function probeAlpacaJSON(url){
+    return scheduleAlpacaBacktestCall(function(){
+      return fetch(url, { headers: alpacaHeaders() });
+    }).then(function(res){
+      return res.json().catch(function(){ return null; }).then(function(body){
+        return { ok: res.ok, status: res.status, body: body };
+      });
+    }).catch(function(err){
+      return { ok: false, status: 0, body: null, networkError: err.message };
+    });
+  }
+
+  function runOptionsDepthProbe(){
+    var btn = document.getElementById('testOptionsDepthBtn');
+    var statusEl = document.getElementById('optionsDepthStatus');
+    var resultEl = document.getElementById('optionsDepthResult');
+    if(!alpacaConnected){
+      statusEl.textContent = 'Connect an Alpaca account in Settings first — this probe uses your own key, since the answer depends on your data plan.';
+      statusEl.className = 'labs-backtest-status fail';
+      return;
+    }
+    btn.disabled = true;
+    resultEl.textContent = '';
+    statusEl.className = 'labs-backtest-status';
+
+    var lines = [];
+    var oldestWithBars = null;
+    var planBlocked = false;
+
+    function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+    function contractsUrl(from, to, status){
+      return ALPACA_TRADING_BASE() + '/v2/options/contracts?underlying_symbols=SPY' +
+        '&expiration_date_gte=' + from + '&expiration_date_lte=' + to + '&limit=1' +
+        (status ? '&status=' + status : '');
+    }
+    function findContract(from, to){
+      return probeAlpacaJSON(contractsUrl(from, to, null)).then(function(res){
+        var found = (res.body && res.body.option_contracts) || [];
+        if(found.length || res.status === 403 || res.status === 401) return res;
+        return probeAlpacaJSON(contractsUrl(from, to, 'inactive'));
+      });
+    }
+
+    function probeNext(i){
+      if(i >= OPTIONS_DEPTH_PROBES.length){ finish(); return; }
+      var probe = OPTIONS_DEPTH_PROBES[i];
+      var from = probe.year + '-' + pad(probe.month) + '-01';
+      var to = probe.year + '-' + pad(probe.month) + '-28';
+      statusEl.textContent = 'Checking ' + probe.label + ' back (' + from + ')…';
+
+      // Contracts live on the TRADING API, not the data API, so this has to
+      // use ALPACA_TRADING_BASE -- paper and live are different hosts and
+      // hardcoding either would probe the wrong account.
+      //
+      // Every probe window is in the past, so the contracts are expired.
+      // Alpaca's contracts endpoint defaults to listing ACTIVE ones, which
+      // would return nothing for all of them -- so the default query is
+      // tried first and then retried with status=inactive. Reporting "no
+      // contracts listed" when the real answer is "you didn't ask for
+      // expired ones" would answer the whole question wrongly, and in the
+      // discouraging direction.
+      findContract(from, to).then(function(contractsRes){
+        if(contractsRes.status === 403 || contractsRes.status === 401){
+          planBlocked = true;
+          lines.push(probe.label + ' (' + from + '): HTTP ' + contractsRes.status + ' — not permitted by this key/plan');
+          probeNext(i + 1);
+          return;
+        }
+        var contracts = (contractsRes.body && contractsRes.body.option_contracts) || [];
+        if(!contracts.length){
+          lines.push(probe.label + ' (' + from + '): no SPY contracts listed for that expiry window');
+          probeNext(i + 1);
+          return;
+        }
+        var sym = contracts[0].symbol;
+        return probeAlpacaJSON(ALPACA_DATA_BASE + '/v1beta1/options/bars?symbols=' + encodeURIComponent(sym) +
+          '&timeframe=1Day&start=' + from + '&end=' + to + '&limit=100'
+        ).then(function(barsRes){
+          if(barsRes.status === 403 || barsRes.status === 401){
+            planBlocked = true;
+            lines.push(probe.label + ' — ' + sym + ': HTTP ' + barsRes.status + ' — options data not included in this plan');
+          } else if(!barsRes.ok){
+            lines.push(probe.label + ' — ' + sym + ': HTTP ' + barsRes.status + (barsRes.networkError ? ' (' + barsRes.networkError + ')' : ''));
+          } else {
+            var bars = (barsRes.body && barsRes.body.bars && barsRes.body.bars[sym]) || [];
+            lines.push(probe.label + ' — ' + sym + ': ' + bars.length + ' daily bar' + (bars.length === 1 ? '' : 's'));
+            // Only the FIRST success counts. Probes run oldest-first, so
+            // reassigning on every hit would leave the NEWEST window here
+            // and report a month of history where there were years -- wrong
+            // in the discouraging direction, which is the one that would
+            // have quietly closed off options for no reason.
+            if(bars.length > 0 && !oldestWithBars) oldestWithBars = probe;
+          }
+          probeNext(i + 1);
+        });
+      });
+    }
+
+    function finish(){
+      btn.disabled = false;
+      resultEl.textContent = lines.join('\n');
+      if(planBlocked){
+        statusEl.textContent = 'Options data is not included in this key\'s plan — a paid options feed would be needed before any of this is measurable.';
+        statusEl.className = 'labs-backtest-status fail';
+      } else if(!oldestWithBars){
+        statusEl.textContent = 'No option bars returned at any depth. Options cannot be backtested on this account as it stands — which by the rule already set, puts them off the table rather than making them a gamble.';
+        statusEl.className = 'labs-backtest-status fail';
+      } else {
+        statusEl.textContent = 'Option bars available back to at least ' + oldestWithBars.label +
+          ' (' + oldestWithBars.year + '-' + pad(oldestWithBars.month) + '). That is enough history to backtest an options strategy — it says nothing about whether one would work.';
+        statusEl.className = 'labs-backtest-status ok';
+      }
+    }
+
+    probeNext(0);
+  }
+  document.getElementById('testOptionsDepthBtn').addEventListener('click', runOptionsDepthProbe);
 
   // ---------- Auth (sign in / sign up / sign out) ----------
   var authMode = 'signin';
