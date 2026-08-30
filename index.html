@@ -519,6 +519,39 @@
   .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
+  /* Duplicate-trade warning. Sits directly above the stats row because
+     these numbers are what a duplicate corrupts -- every one of them is
+     wrong, in the same direction, and none of them look wrong. */
+  .journal-dupe-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    margin:14px 0; padding:12px 16px; border-radius: var(--radius);
+    border:1px solid var(--loss); background: var(--panel-raised);
+  }
+  .journal-dupe-banner[hidden]{ display:none; }
+  .journal-dupe-text{ font-size:12.5px; color: var(--paper); line-height:1.5; }
+  .journal-dupe-btn{
+    background:none; border:1px solid var(--loss); color: var(--loss);
+    font-family:'Public Sans', sans-serif; font-size:12px; padding:7px 14px;
+    border-radius:5px; cursor:pointer; white-space:nowrap;
+  }
+  .journal-dupe-btn:hover{ background: var(--loss); color:#fff; }
+  .journal-dupe-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  /* The Activity Log's "show me only what needs attention" switch. Sits
+     unlit and quiet at zero so a healthy log doesn't nag, and goes loud
+     the moment there is an error or an urgent instruction to see -- the
+     count is the whole point of it, since 45 entries of routine scan
+     summaries is exactly where a real problem goes unnoticed. */
+  .activity-priority-btn{
+    background: var(--panel-raised); border:1px solid var(--border); color: var(--muted);
+    font-family:'Public Sans', sans-serif; font-size:12px; padding:8px 13px;
+    border-radius:5px; cursor:pointer; white-space:nowrap;
+  }
+  .activity-priority-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .activity-priority-btn.has-items{ border-color: var(--loss); color: var(--loss); }
+  .activity-priority-btn[aria-pressed="true"]{
+    border-color: var(--loss); background: var(--loss); color:#fff;
+  }
   /* "Needs You" -- the priority lane. Deliberately the loudest thing on
      the page when present, and completely absent otherwise. */
   .priority-log-card{ border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber-glow); }
@@ -1223,7 +1256,14 @@
   }
   .alpaca-dock-body-wrap.open{ opacity:1; transform: translateY(0); pointer-events:auto; }
   [data-reduce-motion="true"] .alpaca-dock-body-wrap{ transition:none; }
-  .alpaca-dock-body{ padding:14px 16px; overflow-y:auto; overflow-x:auto; flex:1; }
+  /* The scroll lives on the positions list, NOT on the body. An
+     overflow:auto ancestor clips its absolutely-positioned descendants,
+     which would cut the Columns dropdown off at the panel edge -- and
+     scrolling the list would drag the open menu along with it. Moving
+     the scroll one level down also keeps the equity figure and buying
+     power pinned while a long position list scrolls under them. */
+  .alpaca-dock-body{ padding:14px 16px; flex:1; min-height:0; display:flex; flex-direction:column; }
+  .alpaca-dock-positions{ flex:1; min-height:0; overflow:auto; }
   .alpaca-dock-equity{ font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-size:22px; font-weight:700; }
   .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
   .alpaca-dock-daychange.up{ color: var(--gain); }
@@ -1235,6 +1275,7 @@
   .alpaca-dock-bp{ font-size:11.5px; color: var(--muted); }
   .alpaca-dock-empty{ font-size:12px; color: var(--muted); padding-top:12px; }
   .alpaca-dock-positions-controls{ display:flex; gap:8px; }
+  #alpacaDockColumnsMenu{ min-width:200px; max-width:calc(100vw - 60px); max-height:min(340px, calc(100vh - 200px)); overflow-y:auto; }
   .alpaca-dock-mini-btn{
     background:none; border:1px solid var(--border); color: var(--muted);
     font-family:'Public Sans', sans-serif; font-size:10.5px; padding:3px 9px;
@@ -1256,24 +1297,6 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
-  .alpaca-dock-edit-input{
-    width:72px; background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
-    font-family:'Public Sans', sans-serif; font-size:11.5px; font-variant-numeric: tabular-nums;
-    padding:3px 5px; border-radius:4px;
-  }
-  .alpaca-dock-edit-input:focus{ outline:none; border-color: var(--amber); }
-  /* Number inputs render browser spinners that eat most of an already
-     narrow cell in this fixed-width dock -- the value is typed, not
-     stepped, so they're removed rather than styled around. */
-  .alpaca-dock-edit-input::-webkit-outer-spin-button,
-  .alpaca-dock-edit-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-  .alpaca-dock-edit-input[type=number]{ -moz-appearance:textfield; }
-  .alpaca-dock-save-pos-btn{
-    background:none; border:1px solid var(--amber); color: var(--amber); font-family:'Public Sans', sans-serif;
-    font-size:10.5px; padding:3px 8px; border-radius:4px; cursor:pointer;
-  }
-  .alpaca-dock-save-pos-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
-  .alpaca-dock-save-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
   .alpaca-dock-resize-handle{
     position:absolute; left:-5px; top:0; bottom:0; width:10px; cursor:ew-resize; display:none; z-index:2;
   }
@@ -2017,7 +2040,12 @@
         <div class="alpaca-dock-bp-row" id="alpacaDockBpRow" hidden>
           <span class="alpaca-dock-bp" id="alpacaDockBpText"></span>
           <div class="alpaca-dock-positions-controls" id="alpacaDockPositionsControls" hidden>
-            <button class="alpaca-dock-mini-btn" id="alpacaDockEditBtn" type="button">Edit</button>
+            <div class="layout-dropdown">
+              <button class="alpaca-dock-mini-btn" id="alpacaDockColumnsToggle" type="button" aria-haspopup="true" aria-expanded="false">Columns ▾</button>
+              <div class="layout-menu" id="alpacaDockColumnsMenu" hidden>
+                <div id="alpacaDockColumnsList"></div>
+              </div>
+            </div>
             <button class="alpaca-dock-mini-btn" id="alpacaDockSortBtn" type="button">Sort: Default</button>
           </div>
         </div>
@@ -2303,6 +2331,7 @@
           <span class="to-card-title">Activity Log</span>
           <div style="display:flex; align-items:center; gap:10px;">
             <span class="to-card-meta" id="activityLogHeadMeta"></span>
+            <button class="activity-priority-btn" id="activityLogPriorityBtn" type="button" aria-pressed="false">Priority</button>
             <div class="layout-dropdown">
               <button class="layout-toggle-btn" id="activityLogFiltersToggle" aria-haspopup="true" aria-expanded="false">
                 <span>Filters</span>
@@ -2349,6 +2378,11 @@
       <button class="chart-tool-btn active" id="journalFilterAll" data-filter="all">All</button>
       <button class="chart-tool-btn" id="journalFilterEquities" data-filter="equities">Equities</button>
       <button class="chart-tool-btn" id="journalFilterCrypto" data-filter="crypto">Crypto</button>
+    </div>
+
+    <div class="journal-dupe-banner" id="journalDupeBanner" hidden>
+      <div class="journal-dupe-text" id="journalDupeText"></div>
+      <button class="journal-dupe-btn" id="journalDupeBtn" type="button">Remove duplicates</button>
     </div>
 
     <div class="pl-summary journal-stats-row">
@@ -4749,39 +4783,80 @@
 
   var alpacaDockRenderGen = 0;
 
-  // Two small QoL controls. 'edit' turns the Target/Stop columns into
-  // real editable inputs with a Save button per row, so a resting
-  // stop-loss/take-profit can be adjusted straight from the dock instead
-  // of only ever being readable -- it replaced a "compact view" toggle
-  // that merely HID those two columns, which turned out to be the less
-  // useful of the two things that space could do. Deliberately NOT
-  // persisted across reloads (unlike sort below): edit mode puts real,
-  // money-moving controls on screen, and silently restoring it days later
-  // -- on a page that auto-refreshes every 45s -- is exactly how a stray
-  // click lands on the wrong position. It always starts off.
+  // Two small QoL controls, both mirroring what Open Positions on Trade
+  // Overview already does: 'columns' picks which columns are shown (the
+  // dock is a narrow floating panel, so which fields earn their space
+  // genuinely differs person to person and session to session), and
   // 'sort' reorders rows by unrealized P/L (largest gain first) instead
   // of whatever order Alpaca happens to return positions in.
-  var alpacaDockEditing = false;
+  //
+  // This replaced an inline Target/Stop EDITOR, which was both the wrong
+  // feature and a broken one: it rewrote the resting orders on Alpaca but
+  // never wrote the new levels back to the journal, so the backend's
+  // every-minute updateTrailingStops -- which reads entry.stop as its
+  // baseline and recomputes from bars -- would silently revert a manual
+  // edit, sometimes within the same minute. Editing a bot-managed stop
+  // from the UI needs the journal and the broker to move together; until
+  // that exists it is safer to have no editor at all than one that looks
+  // like it worked.
+  var ALPACA_DOCK_COLUMNS = [
+    { key:'sym', label:'Sym' }, { key:'qty', label:'Qty' }, { key:'direction', label:'Dir' },
+    { key:'entry', label:'Entry' }, { key:'target', label:'Target' }, { key:'stop', label:'Stop' },
+    { key:'current', label:'Current' }, { key:'pl', label:'P/L' },
+  ];
+  // Target/Stop start hidden: they're the two that need an extra
+  // open-orders fetch to populate, and the dock is narrow enough that the
+  // default should be the fields you glance at, not every field there is.
+  var ALPACA_DOCK_HIDDEN_COLS = { target: true, stop: true };
+  try{
+    var savedDockCols = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockHiddenCols') || 'null');
+    if(savedDockCols && typeof savedDockCols === 'object') ALPACA_DOCK_HIDDEN_COLS = savedDockCols;
+  }catch(e){}
+  function saveAlpacaDockHiddenCols(){
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockHiddenCols', JSON.stringify(ALPACA_DOCK_HIDDEN_COLS)); }catch(e){}
+  }
+  // Symbol is never hideable -- a row with no symbol identifies nothing.
+  function visibleAlpacaDockColumns(){
+    return ALPACA_DOCK_COLUMNS.filter(function(col){ return col.key === 'sym' || !ALPACA_DOCK_HIDDEN_COLS[col.key]; });
+  }
+
   var alpacaDockSort = 'default'; // 'default' | 'pl'
   try{ alpacaDockSort = window.localStorage.getItem('shwoopnet:alpacaDockSort') === 'pl' ? 'pl' : 'default'; }catch(e){}
 
   function applyAlpacaDockControlsUI(){
-    var editBtn = document.getElementById('alpacaDockEditBtn');
     var sortBtn = document.getElementById('alpacaDockSortBtn');
-    if(editBtn){
-      editBtn.classList.toggle('active', alpacaDockEditing);
-      editBtn.textContent = alpacaDockEditing ? 'Done' : 'Edit';
-    }
     if(sortBtn){
       sortBtn.classList.toggle('active', alpacaDockSort === 'pl');
       sortBtn.textContent = alpacaDockSort === 'pl' ? 'Sort: P/L' : 'Sort: Default';
     }
   }
-  document.getElementById('alpacaDockEditBtn').addEventListener('click', function(){
-    alpacaDockEditing = !alpacaDockEditing;
-    applyAlpacaDockControlsUI();
-    renderAlpacaDock();
-  });
+
+  // Same show/hide row pattern as renderPositionsColumnsList, so the two
+  // column pickers behave identically.
+  function renderAlpacaDockColumnsList(){
+    var el = document.getElementById('alpacaDockColumnsList');
+    if(!el) return;
+    el.innerHTML = ALPACA_DOCK_COLUMNS.filter(function(col){ return col.key !== 'sym'; }).map(function(col){
+      var hidden = Boolean(ALPACA_DOCK_HIDDEN_COLS[col.key]);
+      return '<div class="layout-stepper card-customize-row" data-col-key="' + col.key + '">' +
+          '<span class="step-name">' + col.label + '</span>' +
+          '<div class="card-customize-row-actions">' +
+            '<button class="card-visibility-btn' + (hidden ? '' : ' active') + '" data-action="toggle">' + (hidden ? 'Hidden' : 'Shown') + '</button>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+    el.querySelectorAll('.card-customize-row').forEach(function(row){
+      var key = row.dataset.colKey;
+      row.querySelector('[data-action="toggle"]').addEventListener('click', function(){
+        ALPACA_DOCK_HIDDEN_COLS[key] = !ALPACA_DOCK_HIDDEN_COLS[key];
+        saveAlpacaDockHiddenCols();
+        renderAlpacaDockColumnsList();
+        renderAlpacaDock();
+      });
+    });
+  }
+  wireLayoutDropdown('alpacaDockColumnsToggle', 'alpacaDockColumnsMenu', renderAlpacaDockColumnsList);
+
   document.getElementById('alpacaDockSortBtn').addEventListener('click', function(){
     alpacaDockSort = alpacaDockSort === 'pl' ? 'default' : 'pl';
     try{ window.localStorage.setItem('shwoopnet:alpacaDockSort', alpacaDockSort); }catch(e){}
@@ -4789,6 +4864,27 @@
     renderAlpacaDock();
   });
   applyAlpacaDockControlsUI();
+
+  // One cell per column key, same switch shape as the Open Positions
+  // table's statusPositionsCellHTML so the two stay easy to read against
+  // each other.
+  function alpacaDockCellHTML(colKey, p, levels){
+    switch(colKey){
+      case 'sym': return '<td>' + p.symbol + '</td>';
+      case 'qty': return '<td>' + p.qty + '</td>';
+      case 'direction': return '<td>' + (p.side === 'short' ? 'Short' : 'Long') + '</td>';
+      case 'entry': return '<td>' + fmt(parseFloat(p.avg_entry_price)) + '</td>';
+      case 'target': return '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>';
+      case 'stop': return '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>';
+      case 'current': return '<td>' + fmt(parseFloat(p.current_price)) + '</td>';
+      case 'pl':
+        var pl = parseFloat(p.unrealized_pl || 0);
+        var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
+        return '<td class="' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) +
+          ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>';
+      default: return '<td></td>';
+    }
+  }
 
   function renderAlpacaDock(){
     var myGen = ++alpacaDockRenderGen;
@@ -4801,13 +4897,26 @@
     positionsEl.innerHTML = '';
     if(bpRowEl) bpRowEl.setAttribute('hidden', '');
     if(controlsEl) controlsEl.setAttribute('hidden', '');
-    // Open orders (for the Target/Stop columns) is treated as optional —
-    // a failure there degrades gracefully to "—" rather than blocking the
-    // account summary and positions themselves from ever showing up.
-    var ordersPromise = getAlpacaOpenOrdersCached().catch(function(err){
-      console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
-      return [];
+    // Open orders is what populates the Target and Stop columns, and it
+    // is a whole extra Alpaca round-trip -- so with both of those columns
+    // hidden (the default) it is skipped rather than fetched and thrown
+    // away. When it IS needed it stays optional: a failure degrades to
+    // "—" rather than blocking the account summary and the positions
+    // themselves from ever showing up.
+    // Resolved once, up front, and reused for both the fetch decision and
+    // the header/cell rendering below -- deriving them separately would
+    // let a mid-flight column toggle render a header whose data source
+    // was never fetched.
+    var cols = visibleAlpacaDockColumns();
+    var needsBracketLevels = cols.some(function(col){
+      return col.key === 'target' || col.key === 'stop';
     });
+    var ordersPromise = needsBracketLevels
+      ? getAlpacaOpenOrdersCached().catch(function(err){
+          console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
+          return [];
+        })
+      : Promise.resolve([]);
     Promise.all([getAlpacaAccountSummaryCached(), getAlpacaPositionsCached(), ordersPromise]).then(function(results){
       // A newer render (from a later reopen, or the next 45s tick) has
       // already started — this response is stale, discard it rather than
@@ -4842,91 +4951,27 @@
         rows.sort(function(a, b){ return parseFloat(b.unrealized_pl || 0) - parseFloat(a.unrealized_pl || 0); });
       }
 
-      var targetStopHeaderHtml =
-        '<th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th><th>Stop</th>';
-      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Dir</th><th>Entry</th>' + targetStopHeaderHtml + '<th>Current</th><th>P/L</th><th></th></tr></thead><tbody>' +
+      // Header cells and body cells are both generated from the SAME
+      // visible-column list, so a column toggled off can never leave a
+      // header without its cells (or the reverse) -- the mismatch that
+      // would silently shift every column to the right of it.
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr>' +
+        cols.map(function(col){
+          if(col.key === 'target'){
+            return '<th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th>';
+          }
+          return '<th>' + col.label + '</th>';
+        }).join('') + '<th></th></tr></thead><tbody>' +
         rows.map(function(p){
-          var pl = parseFloat(p.unrealized_pl || 0);
-          var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
-          var plClass = pl >= 0 ? 'up' : 'down';
-          var direction = p.side === 'short' ? 'Short' : 'Long';
-          var levels = findBracketLevels(openOrders, p.symbol);
-          // In edit mode both levels become real inputs. A level with no
-          // live order behind it yet renders as an EMPTY input rather than
-          // a prefilled guess -- saving a number this app invented would
-          // put a real resting order on the books at a price nothing
-          // actually chose. Save is blocked until both have real values.
-          var targetStopCellsHtml = alpacaDockEditing
-            ? '<td><input class="alpaca-dock-edit-input" type="number" step="any" inputmode="decimal" data-field="target" data-sym="' + p.symbol + '" value="' + (levels.target !== null ? levels.target : '') + '" aria-label="Target price for ' + p.symbol + '"></td>' +
-              '<td><input class="alpaca-dock-edit-input" type="number" step="any" inputmode="decimal" data-field="stop" data-sym="' + p.symbol + '" value="' + (levels.stop !== null ? levels.stop : '') + '" aria-label="Stop price for ' + p.symbol + '"></td>'
-            : '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>' +
-              '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>';
-          var actionCellHtml = alpacaDockEditing
-            ? '<td><button class="alpaca-dock-save-pos-btn" data-sym="' + p.symbol + '">Save</button></td>'
-            : '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>';
+          // Only worth resolving when a column actually shows it -- with
+          // Target and Stop both hidden (the default) the open-orders
+          // fetch is skipped entirely and there is nothing to match.
+          var levels = needsBracketLevels ? findBracketLevels(openOrders, p.symbol) : { target: null, stop: null };
           return '<tr>' +
-            '<td>' + p.symbol + '</td>' +
-            '<td>' + p.qty + '</td>' +
-            '<td>' + direction + '</td>' +
-            '<td>' + fmt(parseFloat(p.avg_entry_price)) + '</td>' +
-            targetStopCellsHtml +
-            '<td>' + fmt(parseFloat(p.current_price)) + '</td>' +
-            '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
-            actionCellHtml +
+            cols.map(function(col){ return alpacaDockCellHTML(col.key, p, levels); }).join('') +
+            '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
           '</tr>';
         }).join('') + '</tbody></table>';
-
-      positionsEl.querySelectorAll('.alpaca-dock-save-pos-btn').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var sym = btn.dataset.sym;
-          var position = rows.filter(function(p){ return p.symbol === sym; })[0];
-          if(!position) return;
-          var targetInput = positionsEl.querySelector('.alpaca-dock-edit-input[data-field="target"][data-sym="' + sym + '"]');
-          var stopInput = positionsEl.querySelector('.alpaca-dock-edit-input[data-field="stop"][data-sym="' + sym + '"]');
-          var newTarget = parseFloat(targetInput && targetInput.value);
-          var newStop = parseFloat(stopInput && stopInput.value);
-          if(!isFinite(newTarget) || !isFinite(newStop) || newTarget <= 0 || newStop <= 0){
-            alert('Both a target and a stop price are required, and both must be greater than zero.');
-            return;
-          }
-          // A stop on the wrong side of the current price would trigger
-          // instantly on submission -- closing the position at market the
-          // moment it lands, which is the single most expensive way to get
-          // a typo wrong here. Alpaca would also reject it outright, but
-          // catching it before the request means a clear message instead
-          // of a raw API error.
-          var currentPrice = parseFloat(position.current_price);
-          var isLong = position.side !== 'short';
-          if(isLong && (newStop >= currentPrice || newTarget <= currentPrice)){
-            alert('For a Long position the stop must be BELOW the current price ($' + fmt(currentPrice) + ') and the target above it.');
-            return;
-          }
-          if(!isLong && (newStop <= currentPrice || newTarget >= currentPrice)){
-            alert('For a Short position the stop must be ABOVE the current price ($' + fmt(currentPrice) + ') and the target below it.');
-            return;
-          }
-          if(!confirm('Replace ' + sym + "'s resting exit orders with stop $" + fmt(newStop) + ' / target $' + fmt(newTarget) + '?\n\nThe existing orders are cancelled first, so the position is briefly unprotected while the new pair is submitted.')) return;
-          btn.disabled = true;
-          btn.textContent = '…';
-          saveDockPositionExits(position, newStop, newTarget).then(function(){
-            // The open-orders list the next render reads its Target/Stop
-            // levels from is cached -- without invalidating it, the
-            // re-render would show the OLD levels and look like the save
-            // silently failed. Only the cached payload is cleared, never
-            // the cache object itself, which getAlpacaOpenOrdersCached
-            // dereferences unconditionally.
-            alpacaOpenOrdersCache.data = null;
-            alpacaOpenOrdersCache.at = 0;
-            renderAlpacaDock();
-          }).catch(function(err){
-            alert('Failed to update ' + sym + "'s exit orders: " + err.message +
-              '\n\nIMPORTANT: the old orders may already have been cancelled. Check this position\'s protection on Alpaca before leaving it unattended.');
-            btn.disabled = false;
-            btn.textContent = 'Save';
-            console.error('Exit-order update failed:', err);
-          });
-        });
-      });
 
       positionsEl.querySelectorAll('.alpaca-close-pos-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
@@ -4987,14 +5032,6 @@
       bodyWrap.classList.remove('open');
       caret.textContent = '▲';
       toggleBtn.setAttribute('aria-expanded', 'false');
-      // Collapsing the dock discards whatever was being edited, so edit
-      // mode shouldn't survive it -- reopening to live inputs prefilled
-      // from an earlier session's state would be a real footgun on a
-      // panel that submits real orders.
-      if(alpacaDockEditing){
-        alpacaDockEditing = false;
-        applyAlpacaDockControlsUI();
-      }
     }
   }
 
@@ -5336,20 +5373,6 @@
         submitCryptoLimitOrderFrontend(sym, exitSide, qty, newTarget)
       ]);
     });
-  }
-
-  // Single entry point the dock's Save button uses for either asset
-  // class -- picks the right underlying call based on whether this
-  // symbol is a known crypto pair, so the row-rendering code doesn't need
-  // to know the difference.
-  function saveDockPositionExits(position, newStop, newTarget){
-    var direction = position.side === 'short' ? 'Short' : 'Long';
-    var qty = position.qty;
-    var cryptoSlashSym = findCryptoUniverseSymbol(position.symbol);
-    if(cryptoSlashSym){
-      return refreshCryptoExitOrders(cryptoSlashSym, direction, qty, newStop, newTarget);
-    }
-    return refreshPositionBracket({ sym: position.symbol, direction: direction, qty: qty }, { stop: newStop, t1: newTarget });
   }
 
   // ---------- Syncing bracket-order exits back to the journal ----------
@@ -6988,18 +7011,52 @@
           }
           var confirmationBlocked = false;
           var entryIdx = i;
+          // The analysis actually simulated. With the confirmation bar off
+          // this is the signal as computed; with it on, the entry price is
+          // REPLACED by the confirmation bar's close.
+          //
+          // That replacement is the whole correctness of this option. The
+          // confirmation rule only takes the trade when the next bar closes
+          // beyond the range -- i.e. it selects for a favorable move -- so
+          // booking the fill at the original breakout level hands the trade
+          // that move for free, before deciding whether to take it. That is
+          // lookahead, and it is enormous: it turned nearly every loss into
+          // a scratch and pushed the whole-universe profit factor to 13.26
+          // against a validated 2.71.
+          //
+          // Entering a bar later at a worse price with the same stop is a
+          // WIDER risk and a worse reward-to-risk ratio. That is the real
+          // trade-off this option is supposed to measure -- fewer fakeouts,
+          // paid for in entry price -- and it can only show up if the price
+          // paid is the price you would actually have got.
+          var effectiveAnalysis = analysis;
           if(isFreshSignal && !regimeBlocked && requireConfirmationBar){
             confirmationBlocked = !requiresConfirmation(bars, i, analysis);
-            if(!confirmationBlocked) entryIdx = i + 1;
+            if(!confirmationBlocked){
+              entryIdx = i + 1;
+              effectiveAnalysis = {
+                direction: analysis.direction, entry: bars[entryIdx].c,
+                stop: analysis.stop, t1: analysis.t1
+              };
+            }
           }
           if(isFreshSignal && !regimeBlocked && !confirmationBlocked){
-            var outcome = simulateORBForwardSameDay(bars, entryIdx, analysis);
-            var isLong = analysis.direction === 'Long';
-            var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
+            // A confirmation-bar close that lands on the wrong side of the
+            // stop is not a trade anyone could have taken -- the stop would
+            // already be breached at the moment of entry. Skipping it beats
+            // booking a guaranteed instant loss the live system would never
+            // have opened.
+            var stopAlreadyBreached = effectiveAnalysis.direction === 'Long'
+              ? effectiveAnalysis.entry <= effectiveAnalysis.stop
+              : effectiveAnalysis.entry >= effectiveAnalysis.stop;
+            if(stopAlreadyBreached){ i++; processedThisChunk++; continue; }
+            var outcome = simulateORBForwardSameDay(bars, entryIdx, effectiveAnalysis);
+            var isLong = effectiveAnalysis.direction === 'Long';
+            var pctReturn = (outcome.price - effectiveAnalysis.entry) / effectiveAnalysis.entry * (isLong ? 1 : -1) * 100;
             pctReturn = applyORBSlippage(pctReturn, outcome.result);
             trades.push({
-              date: bars[entryIdx].t, direction: analysis.direction, entry: analysis.entry,
-              stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
+              date: bars[entryIdx].t, direction: effectiveAnalysis.direction, entry: effectiveAnalysis.entry,
+              stop: effectiveAnalysis.stop, target: effectiveAnalysis.t1, outcome: outcome.result, days: outcome.days,
               exitPrice: outcome.price, pctReturn: pctReturn
             });
             i = entryIdx + outcome.days + 1;
@@ -7024,7 +7081,9 @@
   // the market isn't open continuously and "14 hours" would be misleading.
   function formatIntradayDuration(bars){
     var totalMinutes = bars * 15;
-    if(totalMinutes < 60) return totalMinutes + ' min';
+    // bars is an AVERAGE across trades, so it is routinely fractional --
+    // unrounded, this printed "57.51592356687898 min" on the Labs card.
+    if(totalMinutes < 60) return Math.round(totalMinutes) + ' min';
     var hours = totalMinutes / 60;
     if(hours <= 6.5) return (Math.round(hours * 10) / 10) + ' hr' + (hours === 1 ? '' : 's');
     var tradingDays = Math.max(1, Math.round(hours / 6.5));
@@ -8892,12 +8951,7 @@
     renderWhatToWatch();
     var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
-    // Deliberately skipped while the dock is in edit mode -- this runs on
-    // the periodic quote-sync tick, and re-rendering the table would blow
-    // away whatever half-typed stop/target the user is in the middle of
-    // entering. Prices go briefly stale during an edit, which is a far
-    // smaller problem than losing input mid-keystroke.
-    if(isAlpacaDockOpen() && !alpacaDockEditing){ renderAlpacaDock(); }
+    if(isAlpacaDockOpen()){ renderAlpacaDock(); }
       updateTradeBubbles();
   }
 
@@ -9638,20 +9692,28 @@
   }
 
   // Same "only worth splitting once both strategies actually have
-  // something to show" rule as Open Positions' filter tabs -- scoped to
-  // ALL journal entries ever (open or closed), not just closed trades,
-  // since this also governs the day-detail view below the calendar.
+  // something to show" rule as Open Positions' filter tabs. Whether to
+  // SHOW the tabs at all is decided on every journal entry (open or
+  // closed), since the tabs also govern the day-detail view below the
+  // calendar -- but the COUNT on each tab is closed trades only.
+  //
+  // Those two used to be the same number, and it read as a miscalculation:
+  // the tabs sat directly above a row of cards reading "64 total trades"
+  // while themselves totalling 66, because two positions were still open.
+  // Both numbers were right and neither said what it was counting. The
+  // count now matches the cards it sits next to.
   function updateJournalFilterTabs(){
     var equitiesEntries = journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
     var cryptoEntries = journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
+    var isClosed = function(j){ return j.status === 'closed'; };
     var showFilter = equitiesEntries.length > 0 && cryptoEntries.length > 0;
     if(!showFilter) journalFilter = 'all';
     var row = document.getElementById('journalFilterRow');
     if(!row) return;
     row.hidden = !showFilter;
     if(!showFilter) return;
-    document.getElementById('journalFilterEquities').textContent = 'Equities (' + equitiesEntries.length + ')';
-    document.getElementById('journalFilterCrypto').textContent = 'Crypto (' + cryptoEntries.length + ')';
+    document.getElementById('journalFilterEquities').textContent = 'Equities (' + equitiesEntries.filter(isClosed).length + ')';
+    document.getElementById('journalFilterCrypto').textContent = 'Crypto (' + cryptoEntries.filter(isClosed).length + ')';
     ['All', 'Equities', 'Crypto'].forEach(function(label){
       var btn = document.getElementById('journalFilter' + label);
       btn.classList.toggle('active', btn.dataset.filter === journalFilter);
@@ -10447,7 +10509,91 @@
     });
   }
 
+  // ---------- Duplicate journal entries ----------
+  // The Journal reported 64 closed trades against a real 32. Every figure
+  // derived from the journal -- win rate, profit factor, net P&L, the
+  // growth curve, the exit-type mix the weekly health check leans on --
+  // is computed by counting entries, so a duplicated entry corrupts all
+  // of them at once, silently, and always in a direction that looks
+  // plausible. It is worth detecting loudly.
+  //
+  // Two entries are the same trade when they name the same Alpaca order.
+  // entryOrderId is exact and needs no judgement, so it is preferred
+  // wherever present. Entries predating that field fall back to a
+  // deliberately strict composite: a genuine re-entry on the same symbol
+  // the same day would have to match on direction, quantity AND both
+  // prices to the cent to be caught here, and if it did, it would be
+  // indistinguishable from a duplicate by any means available to this
+  // page anyway.
+  function journalEntryIdentity(e){
+    if(e.entryOrderId) return 'order:' + e.entryOrderId;
+    return ['fields', e.sym, e.date, e.direction, e.qty, e.entry, e.exit, e.exitDate].join('|');
+  }
+
+  // Returns the ids that would be REMOVED, keeping the first of each
+  // group. Order matters: journalEntries is append-ordered, so the first
+  // occurrence is the original and later ones are the copies.
+  function findDuplicateJournalEntryIds(entries){
+    var seen = {};
+    var dupeIds = [];
+    (entries || []).forEach(function(e){
+      var key = journalEntryIdentity(e);
+      if(seen[key]){ dupeIds.push(e.id); }
+      else { seen[key] = true; }
+    });
+    return dupeIds;
+  }
+
+  function renderJournalDupeBanner(){
+    var banner = document.getElementById('journalDupeBanner');
+    var textEl = document.getElementById('journalDupeText');
+    if(!banner || !textEl) return;
+    var dupeIds = findDuplicateJournalEntryIds(journalEntries);
+    if(dupeIds.length === 0){ banner.setAttribute('hidden', ''); return; }
+    banner.removeAttribute('hidden');
+    var kept = journalEntries.length - dupeIds.length;
+    textEl.textContent = dupeIds.length + ' of your ' + journalEntries.length +
+      ' journal entries are duplicates of another entry — the same trade recorded more than once. ' +
+      'Every number on this page is computed from these entries, so all of them are currently wrong. ' +
+      'Removing the copies leaves ' + kept + ' real ' + (kept === 1 ? 'entry' : 'entries') + '.';
+  }
+
+  document.getElementById('journalDupeBtn').addEventListener('click', function(){
+    var btn = this;
+    var dupeIds = findDuplicateJournalEntryIds(journalEntries);
+    if(dupeIds.length === 0) return;
+    if(!confirm('Remove ' + dupeIds.length + ' duplicate journal ' + (dupeIds.length === 1 ? 'entry' : 'entries') +
+      '?\n\nThe first recording of each trade is kept; only the later copies are removed. ' +
+      'This rewrites your journal and cannot be undone from here.')) return;
+    if(!window.__shwoopAPI || !currentUid) return;
+    btn.disabled = true;
+    btn.textContent = 'Removing…';
+    // Recomputed INSIDE the transaction against whatever the journal
+    // actually holds at commit time, not against the ids captured when
+    // the button was clicked -- the backend rewrites this same array
+    // every minute, and removing a stale id list could drop an entry
+    // written in between.
+    window.__shwoopAPI.runJournalTransaction(currentUid, function(fresh){
+      var freshDupeIds = {};
+      findDuplicateJournalEntryIds(fresh).forEach(function(id){ freshDupeIds[id] = true; });
+      return fresh.filter(function(e){ return !freshDupeIds[e.id]; });
+    }).then(function(next){
+      if(next) journalEntries = next;
+      btn.disabled = false;
+      btn.textContent = 'Remove duplicates';
+      renderCalendar();
+      renderJournalDetail();
+      renderPLSummary();
+    }).catch(function(err){
+      console.error('Failed to remove duplicate journal entries:', err);
+      alert('Could not remove duplicates: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Remove duplicates';
+    });
+  });
+
   function renderPLSummary(){
+    renderJournalDupeBanner();
     // Overall P&L is real Alpaca account equity (patched in below) --
     // a single broker-reported number that can't be broken out by
     // strategy, so it always reflects the FULL journal, never the
@@ -11868,6 +12014,20 @@
   ];
   var activityLogHiddenGroups = {};
 
+  // "Priority" = the entries that are asking for a human, as opposed to
+  // the running commentary that makes up the rest of the log. Two things
+  // qualify: anything the backend explicitly marked priority:'urgent'
+  // (today that is the profit sweep's "go buy $X" instruction), and any
+  // error, because an error IS a request -- something failed and nobody
+  // finds out unless they go looking.
+  function isPriorityActivityEntry(entry){
+    return entry.priority === 'urgent' || activityGroupKey(entry.type) === 'error';
+  }
+  // Deliberately NOT persisted, unlike the group filters. This one hides
+  // almost the entire log, so a stale "on" from three sessions ago would
+  // read as "nothing has happened" rather than as a filter left on.
+  var activityLogPriorityOnly = false;
+
   function loadActivityLogFilterPrefs(){
     try{
       var saved = JSON.parse(window.localStorage.getItem('shwoopnet:activityLogHiddenGroups') || 'null');
@@ -11935,6 +12095,13 @@
         menu.setAttribute('hidden','');
         toggle.setAttribute('aria-expanded','false');
       }
+    });
+  }
+  var activityLogPriorityBtnEl = document.getElementById('activityLogPriorityBtn');
+  if(activityLogPriorityBtnEl){
+    activityLogPriorityBtnEl.addEventListener('click', function(){
+      activityLogPriorityOnly = !activityLogPriorityOnly;
+      renderActivityLog();
     });
   }
   wireLayoutDropdown('activityLogFiltersToggle', 'activityLogFiltersMenu', renderActivityLogFilters);
@@ -12063,7 +12230,12 @@
     // own comment for why a missing accountKeyId still counts as the
     // paper account's own.
     var currentAccountLog = currentAccountActivityLog();
-    var visibleLog = currentAccountLog.filter(function(entry){
+    var priorityLog = currentAccountLog.filter(isPriorityActivityEntry);
+    // In priority mode the group filters and the routine-scan collapse are
+    // both bypassed on purpose. Otherwise hiding the "Error" group -- or
+    // an error that happened to arrive as part of a scan -- would empty
+    // the one view whose entire job is to show you what went wrong.
+    var visibleLog = activityLogPriorityOnly ? priorityLog : currentAccountLog.filter(function(entry){
       if(activityLogHiddenGroups[activityGroupKey(entry.type)]) return false;
       if(isRoutineScan(entry)) return false;
       return true;
@@ -12071,9 +12243,25 @@
     var headMeta = document.getElementById('activityLogHeadMeta');
     var clearBtn = document.getElementById('activityLogClearBtn');
     if(clearBtn){ clearBtn.style.display = currentAccountLog.length ? '' : 'none'; }
+
+    var priorityBtn = document.getElementById('activityLogPriorityBtn');
+    if(priorityBtn){
+      priorityBtn.textContent = priorityLog.length ? 'Priority (' + priorityLog.length + ')' : 'Priority';
+      priorityBtn.classList.toggle('has-items', priorityLog.length > 0);
+      priorityBtn.setAttribute('aria-pressed', activityLogPriorityOnly ? 'true' : 'false');
+    }
     if(visibleLog.length === 0){
-      el.innerHTML = '';
-      if(emptyEl) emptyEl.removeAttribute('hidden');
+      if(activityLogPriorityOnly){
+        // A distinct message, not the generic empty state: "nothing here"
+        // under a filter is ambiguous, and the reassuring reading of it
+        // is the one that would be wrong if the filter were the cause.
+        el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' +
+          'Nothing needs you right now — no errors and no outstanding instructions.</span></div>';
+        if(emptyEl) emptyEl.setAttribute('hidden', '');
+      } else {
+        el.innerHTML = '';
+        if(emptyEl) emptyEl.removeAttribute('hidden');
+      }
       if(headMeta){
         var hiddenCount = currentAccountLog.length - visibleLog.length;
         headMeta.textContent = hiddenCount ? hiddenCount + ' hidden' : '';
@@ -12083,7 +12271,9 @@
     if(emptyEl) emptyEl.setAttribute('hidden', '');
     if(headMeta){
       var extra = currentAccountLog.length - visibleLog.length;
-      headMeta.textContent = visibleLog.length + ' entries' + (extra ? ' (' + extra + ' hidden)' : '');
+      headMeta.textContent = activityLogPriorityOnly
+        ? visibleLog.length + (visibleLog.length === 1 ? ' item needs you' : ' items need you')
+        : visibleLog.length + ' entries' + (extra ? ' (' + extra + ' hidden)' : '');
     }
     el.innerHTML = visibleLog.map(function(entry){
       var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
