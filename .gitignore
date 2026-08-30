@@ -1,0 +1,6 @@
+# unlazy writes its ledgers, dispatch state and hook state into the working
+# tree. They are per-session scratch, not project artifacts, and the hook
+# state embeds machine-specific absolute paths.
+.unlazy/
+.unlazy-hook-state.json
+.claude/settings.local.json
