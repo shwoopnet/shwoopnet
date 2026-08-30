@@ -6654,6 +6654,13 @@
   // The rate limit is a property of the account, not of any single request,
   // so the response has to be too.
   var alpacaBacktestCooldownUntil = 0;
+  // Set while the queue is deliberately paused, cleared when it resumes.
+  // A backtest that is waiting out a rate limit and a backtest that has
+  // hung look identical from the outside, and the first one can legitimately
+  // take minutes -- so the run's status line reads this and says which it
+  // is. Without it the only honest thing a user can conclude from a status
+  // that hasn't moved is that the page is broken.
+  var alpacaBacktestWaitNote = '';
 
   function scheduleAlpacaBacktestCall(fn){
     return new Promise(function(resolve, reject){
@@ -6699,12 +6706,19 @@
   // clears on its own in seconds. Retry-After is honoured when Alpaca
   // sends it, otherwise exponential backoff, capped so a genuinely stuck
   // limit still surfaces as an error instead of hanging forever.
-  // Six attempts with backoff capped at 60s, because an Alpaca rate-limit
-  // window can last a full minute -- four attempts inside 30s could exhaust
-  // themselves entirely within one window and give up while the limit was
-  // still in force, which is what dropped ten symbols from a real run.
-  var ALPACA_BACKTEST_MAX_RETRIES = 6;
-  function fetchAlpacaBacktestJSON(url, label){
+  // Five attempts, backoff capped at 30s: roughly a minute of waiting per
+  // symbol, worst case.
+  //
+  // The earlier version used six attempts capped at 60s, which is ~2 minutes
+  // per symbol and over half an hour across a 16-symbol universe -- long
+  // enough that a run doing exactly what it should looks indistinguishable
+  // from a hang. The shared cooldown is what actually prevents the cascade
+  // that dropped ten symbols; once a pause is shared, each symbol no longer
+  // needs a long private budget to survive someone else's rate limit, so the
+  // budget can come back down.
+  var ALPACA_BACKTEST_MAX_RETRIES = 5;
+  var ALPACA_BACKTEST_MAX_BACKOFF_MS = 30000;
+  function fetchAlpacaBacktestJSON(url, label, onWait){
     function attempt(tryNum){
       return scheduleAlpacaBacktestCall(function(){
         return fetch(url, { headers: alpacaHeaders() });
@@ -6712,8 +6726,8 @@
         if(res.status === 429){
           var retryAfter = parseFloat(res.headers && res.headers.get('Retry-After'));
           var waitMs = (isFinite(retryAfter) && retryAfter > 0)
-            ? Math.min(retryAfter * 1000, 60000)
-            : Math.min(2000 * Math.pow(2, tryNum), 60000);
+            ? Math.min(retryAfter * 1000, ALPACA_BACKTEST_MAX_BACKOFF_MS)
+            : Math.min(2000 * Math.pow(2, tryNum), ALPACA_BACKTEST_MAX_BACKOFF_MS);
           // Recorded on EVERY 429, including the last one -- before the
           // retry budget is consulted, not inside it.
           //
@@ -6727,9 +6741,17 @@
           // cascade this is here to stop.
           alpacaBacktestCooldownUntil = Math.max(alpacaBacktestCooldownUntil, Date.now() + waitMs);
           if(tryNum < ALPACA_BACKTEST_MAX_RETRIES){
-            console.warn('Alpaca rate-limited a backtest page (429) -- pausing all backtest fetches for ' + Math.round(waitMs / 1000) + 's');
-            return new Promise(function(r){ setTimeout(r, waitMs); }).then(function(){ return attempt(tryNum + 1); });
+            var secs = Math.round(waitMs / 1000);
+            alpacaBacktestWaitNote = 'rate-limited by Alpaca, waiting ' + secs + 's (attempt ' +
+              (tryNum + 2) + ' of ' + (ALPACA_BACKTEST_MAX_RETRIES + 1) + ')';
+            if(onWait) onWait(alpacaBacktestWaitNote);
+            console.warn('Alpaca rate-limited a backtest page (429) -- pausing all backtest fetches for ' + secs + 's');
+            return new Promise(function(r){ setTimeout(r, waitMs); }).then(function(){
+              alpacaBacktestWaitNote = '';
+              return attempt(tryNum + 1);
+            });
           }
+          alpacaBacktestWaitNote = '';
         }
         if(!res.ok) throw new Error(label + ' HTTP ' + res.status);
         return res.json();
@@ -6750,7 +6772,7 @@
     return Math.ceil(tradingDays * 1.6) + 10;
   }
 
-  function fetchIntradayBacktestHistoryChunked(sym, totalBars){
+  function fetchIntradayBacktestHistoryChunked(sym, totalBars, onWait){
     var end = new Date();
     var start = new Date(end.getTime() - backtestLookbackCalendarDays(totalBars) * 24 * 60 * 60 * 1000);
 
@@ -6759,7 +6781,7 @@
         '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()) +
         '&limit=10000&feed=iex&adjustment=raw' +
         (pageToken ? '&page_token=' + encodeURIComponent(pageToken) : '');
-      return fetchAlpacaBacktestJSON(url, 'Alpaca stocks bars');
+      return fetchAlpacaBacktestJSON(url, 'Alpaca stocks bars', onWait);
     }
 
     var allRaw = [];
@@ -6793,7 +6815,7 @@
   // per pair, so at the 10,000-bar page cap it is dozens of sequential
   // pages. Those go through the shared throttled/retrying fetch helper --
   // this used to call fetch() directly and had no pacing at all.
-  function fetchCryptoBacktestHistory(symbols, lookbackDays){
+  function fetchCryptoBacktestHistory(symbols, lookbackDays, onWait){
     var end = new Date();
     var start = new Date(end.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
     var symbolsParam = symbols.map(encodeURIComponent).join(',');
@@ -6803,7 +6825,7 @@
         '&timeframe=15Min&start=' + encodeURIComponent(start.toISOString()) +
         '&end=' + encodeURIComponent(end.toISOString()) + '&limit=10000' +
         (pageToken ? '&page_token=' + encodeURIComponent(pageToken) : '');
-      return fetchAlpacaBacktestJSON(url, 'Alpaca crypto bars');
+      return fetchAlpacaBacktestJSON(url, 'Alpaca crypto bars', onWait);
     }
 
     var barsBySymbol = {};
@@ -7397,8 +7419,14 @@
         return;
       }
       var sym = INTRADAY_UNIVERSE[index];
-      statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
-      fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
+      var progress = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
+      statusEl.textContent = progress;
+      // A rate-limit pause is the one thing here that can legitimately hold
+      // for tens of seconds with nothing else to show for it. Saying so
+      // beats letting an unchanged status line imply the page is broken.
+      fetchIntradayBacktestHistoryChunked(sym, lookbackBars, function(note){
+        statusEl.textContent = progress + ' — ' + note;
+      }).then(function(bars){
         return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar);
       }).then(function(trades){
         allTrades = allTrades.concat(trades);
