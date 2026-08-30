@@ -76,22 +76,31 @@ sample happened to land well.
 - **1.0–1.5** — marginally profitable; costs and slippage could erase it.
 - **> 1.5** — genuinely working.
 
-**The baseline moved, and this is the most important line in this file.**
-The equities backtest claimed 2.71 for months. It does not reproduce: run
-against the same 16-symbol universe over ~60 trading days with the same
-cost model, the tool measures **1.24**, with expectancy of +0.09% per
-trade against a 0.10% round-trip cost already subtracted from it. The edge
-is the same size as the uncertainty in the cost assumption.
+**There is no backtest baseline to compare against. That is the most
+important line in this file, and it is a deliberate absence.**
 
-So **1.24 is the number to beat, not 2.71** — and clearing 1.24 is not the
-same as having an edge worth real money.
+Every figure this section used to carry has been withdrawn:
 
-**Crypto measures better than equities, and that is worth acting on.**
-Under a corrected cost model (25bps a leg, not the 5bps it was wrongly
-inheriting from equities) crypto runs **1.93** with a 45% win rate and
-+0.44% expectancy, against equities' 1.24 / 30% / +0.09%. Both replaced
-frozen numbers that did not reproduce. Judge each strategy against its own
-figure — 1.93 for crypto, 1.24 for equities — never against 2.71 or 2.35.
+| Figure | Withdrawn because |
+|---|---|
+| equities 2.71 | frozen number that did not reproduce |
+| crypto 2.35 / 4.08 | crypto charged equities' trading costs |
+| equities 1.24 / 1.48 / 0.96 | never corrected for the `rangeHigh` entry lookahead; the strategy is withdrawn entirely |
+| crypto 1.93 → 1.94 → 1.20 | measured before the entry-pricing fix |
+| crypto 1.05 | measured before the engine-parity fix (no early breakeven, trailing from the intrabar high) |
+
+So do **not** judge live performance against a backtest number. There
+isn't one, and inventing a comparison is worse than having none — that
+substitution is the specific failure this skill exists to prevent, and it
+was sitting in this file's own instructions until Aug 2026.
+
+Judge on the thresholds above (< 1.0, 1.0–1.5, > 1.5) and on the
+absolute arithmetic: does the per-trade edge exceed the round-trip cost,
+measured rather than assumed? Crypto's measured spread is 0.200% median,
+so its real round trip is 0.700%, not the 0.50% the backtest deducts.
+
+If a corrected backtest figure is ever produced, it goes in
+`CLAUDE.md` first and here second — never only here.
 
 Both remain upper bounds. The crypto 25bps is the taker fee and excludes
 spread, which is widest on the alts producing most of its signals, and it
