@@ -2884,6 +2884,22 @@
         <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
       </div>
 
+      <div class="labs-backtest-card" style="margin-top:16px;">
+        <div class="labs-export-header">
+          <div>
+            <div class="labs-export-title">Can we get historical earnings with actuals?</div>
+            <div class="labs-export-desc"><strong>One-shot diagnostic — delete this card once it has an answer.</strong>
+              The last gate on the post-earnings-drift hypothesis. A forward-looking earnings calendar — all this
+              app has ever needed — is useless for a backtest: without <code>epsActual</code> there is no surprise
+              to compute, and without several quarters of prior surprises there is nothing to standardise it
+              against. Runs on the server, because the Finnhub key lives there and not in this browser.</div>
+          </div>
+          <button class="settings-reset-btn" id="testEarningsHistoryBtn">Check earnings history</button>
+        </div>
+        <div class="labs-backtest-status" id="earningsHistoryStatus"></div>
+        <div id="earningsHistoryResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
+      </div>
+
 
 
     </div>
@@ -12726,6 +12742,60 @@
       if(row && !row.hasAttribute('hidden')) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 60);
   });
+
+  // ---------- Earnings-history probe (one-shot; remove when answered) ----------
+  // Calls shwoop-server, which holds the Finnhub key. The response is
+  // counts and booleans only -- see that route's own comment.
+  function runEarningsHistoryProbe(){
+    var btn = document.getElementById('testEarningsHistoryBtn');
+    var statusEl = document.getElementById('earningsHistoryStatus');
+    var resultEl = document.getElementById('earningsHistoryResult');
+    btn.disabled = true;
+    resultEl.textContent = '';
+    statusEl.className = 'labs-backtest-status';
+    statusEl.textContent = 'Asking the server…';
+
+    fetch(TWELVE_DATA_PROXY_BASE + '/research/earnings-history', { headers: twelveDataProxyHeaders() })
+      .then(function(res){
+        if(!res.ok) throw new Error('HTTP ' + res.status + (res.status === 404 ? ' — the server has not redeployed with this route yet' : ''));
+        return res.json();
+      })
+      .then(function(out){
+        btn.disabled = false;
+        if(out.skipped){
+          statusEl.textContent = out.reason;
+          statusEl.className = 'labs-backtest-status fail';
+          return;
+        }
+        resultEl.textContent = (out.results || []).map(function(r){
+          return r.label + ': ' + (r.error ||
+            r.rows + ' row(s), ' + r.withActual + ' with epsActual, ' + r.complete +
+            ' with BOTH actual and estimate, ' + r.withHour + ' with a usable hour field');
+        }).join('\n');
+        if(!out.usable){
+          statusEl.textContent = 'No usable earnings history. Rows may come back, but without epsActual and ' +
+            'epsEstimate TOGETHER there is no surprise to compute and no SUE to rank on. Post-earnings drift ' +
+            'is not testable on this key — that needs a paid Finnhub tier, another vendor, or a different ' +
+            'hypothesis that does not depend on earnings actuals.';
+          statusEl.className = 'labs-backtest-status fail';
+          return;
+        }
+        statusEl.textContent = 'Usable earnings history back to at least ' + out.deepest + '. Enough to compute ' +
+          'surprises — which says nothing about whether the drift is real, only that the question can now be asked.'
+          + (out.hasHour ? ''
+            : ' NOTE: no `hour` field, so every announcement has to be treated as after-the-close. That is the ' +
+              'safe direction, but it costs a session on the ones reported before the open and slightly ' +
+              'understates the result.');
+        statusEl.className = 'labs-backtest-status ok';
+      })
+      .catch(function(err){
+        btn.disabled = false;
+        statusEl.textContent = 'Probe failed: ' + err.message;
+        statusEl.className = 'labs-backtest-status fail';
+      });
+  }
+
+  document.getElementById('testEarningsHistoryBtn').addEventListener('click', runEarningsHistoryProbe);
 
   document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
   document.getElementById('testAlpacaDataFeedBtn').addEventListener('click', testAlpacaDataFeedClicked);
