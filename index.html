@@ -2766,14 +2766,15 @@
     <div class="labs-method-card">
       <p class="labs-method-intro">
         A second, independent strategy running alongside equities — same shape, tuned for a market that never
-        closes. Long-only, since Alpaca crypto has no shorting. <strong>Measured profit factor: 1.93</strong>
-        — 282 signals across 12 pairs over ~60 days, at 25bps a leg. That replaces both the old 2.35 and the
-        4.08 a first run reported while still charging crypto the equities cost. This is the better of the two
-        strategies: 45% of trades win against 30% for equities, and expectancy is +0.44% a trade against
-        +0.09%. Two caveats it would be a mistake to skip. The 25bps is Alpaca's taker fee and
-        <em>excludes spread</em>, which is widest on exactly the pairs producing most of these signals. And
-        this is one 60-day window on a long-only trend strategy — in crypto that measures the window at least
-        as much as the strategy. Re-run it at 90 and 180 days before believing it.
+        closes. Long-only, since Alpaca crypto has no shorting. <strong>Profit factor 1.94 over 60 days, but
+        1.20 over 180.</strong> That fall is the finding, not the 1.94 — measured over 801 signals instead of
+        277, expectancy drops from +0.45% to +0.12% a trade against a 0.50% round-trip cost, so the edge
+        becomes a quarter of what it costs to trade. And that 0.50% is Alpaca's taker fee, which
+        <em>excludes spread</em> — widest on exactly the alts producing most of these signals. Equities
+        behaves identically (1.48 at 30 days, 1.24 at 60, 0.96 at 365): the shorter the window, the better
+        both strategies look, which is what an edge living in the recent market looks like rather than one
+        living in the strategy. Neither has cleared the 1.5-across-three-windows bar set before any of this
+        was measured. Re-run both below rather than trusting this paragraph.
       </p>
       <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
@@ -10644,8 +10645,19 @@
   // reproduce is worse than no number, because it is what the go-live
   // decision gets measured against.
   //
-  // crypto is 1.93, measured under the corrected cost model (see
-  // CRYPTO_SLIPPAGE_BPS) over ~60 days and 282 signals across 12 pairs.
+  // crypto is 1.20, from the 180-day window rather than the 60-day one.
+  //
+  // 60 days gave 1.94 and 180 gives 1.20 on the same pairs and the same
+  // cost model, over 801 signals instead of 277. The longer window is the
+  // better estimate -- more regimes, three times the sample -- and picking
+  // the flattering one is the exact habit that kept 2.71 on this page for
+  // months. Equities does the same thing (1.48 / 1.24 / 0.96 at 30 / 60 /
+  // 365 days), so this is a property of both strategies rather than a
+  // quirk of one.
+  //
+  // At 180 days crypto's expectancy is +0.12% against a 0.50% round-trip
+  // cost -- roughly a QUARTER of what it costs to trade, and that cost
+  // still excludes spread. Below 1.0 in any honest accounting.
   // It replaces two numbers that were never right: a frozen 2.35, and the
   // 4.08 a first run produced while still charging crypto the EQUITIES
   // cost per leg -- that run had all 12 pairs positive, the same
@@ -10658,12 +10670,13 @@
   // hardest on marginal wins, which is why profit factor fell so much
   // further (4.08 -> 1.93) than expectancy did.
   //
-  // 1.93 is still an upper bound, for two reasons kept in the Method copy
-  // rather than buried here: 25bps is the taker FEE and excludes spread,
-  // widest on the alts producing most of the signals; and one 60-day
-  // window on a long-only trend strategy in crypto measures the window as
-  // much as the strategy.
-  var LABS_BACKTEST_PF = { equities: 1.24, crypto: 1.93 };
+  // The 60-day 1.94 was an upper bound for two reasons named in the Method
+  // copy, and the 180-day run confirmed the second of them outright: 25bps
+  // is the taker FEE and excludes spread, widest on the alts producing most
+  // of the signals; and a single 60-day window on a long-only trend
+  // strategy in crypto measures the window at least as much as the
+  // strategy. It did.
+  var LABS_BACKTEST_PF = { equities: 1.24, crypto: 1.20 };
   var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
   // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
   // below -- all we have for crypto, and equities' own first paint before

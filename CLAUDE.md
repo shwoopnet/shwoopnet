@@ -67,10 +67,10 @@ The Labs page used to assert **profit factor 2.71 (equities) and 2.35
 produced them could not reproduce them. Current measured figures, from the
 same tool under corrected accounting:
 
-| | Measured | Basis |
-|---|---|---|
-| Equities | **1.24** | 406 signals, 16 symbols, ~60 days, 5bps/leg |
-| Crypto | **1.93** | 282 signals, 12 pairs, ~60 days, 25bps/leg |
+| | 30d | 60d | 180d | 365d |
+|---|---|---|---|---|
+| Equities | 1.48 | **1.24** | — | 0.96 (6 of 16 symbols) |
+| Crypto | — | 1.94 | **1.20** | not yet run |
 
 Both are **upper bounds**, and both are thin:
 
@@ -87,16 +87,19 @@ re-derived, never as a fact to be quoted.
 
 ### The window series is the finding
 
-Equities, same strategy, same universe, different lookbacks:
+**Both strategies decline monotonically with lookback length.** Equities
+1.48 / 1.24 / 0.96 at 30 / 60 / 365 days. Crypto 1.94 / 1.20 at 60 / 180.
+Same universes, same cost models, same code — only the window changes.
 
-| 30 days | 60 days | 365 days (6 of 16 symbols) |
-|---|---|---|
-| 1.48 | 1.24 | 0.96 |
+That is what an apparent edge living in the recent market looks like,
+rather than one living in the strategy. Any single-window figure quoted
+without its neighbours is close to meaningless here, and the flattering
+window is always the short one.
 
-Monotonic: **the shorter the window, the better it looks.** That is what an
-apparent edge living in the recent regime looks like, rather than one
-living in the strategy. Any single-window figure quoted without its
-neighbours is close to meaningless here.
+Crypto's 180-day expectancy is **+0.12% against a 0.50% round-trip cost** —
+roughly a quarter of what it costs to trade, before spread. Neither
+strategy has cleared the 1.5-across-three-windows bar that was set before
+any of this was measured.
 
 Note also that both strategies earn almost exactly **90% of their own cost
 assumption** per trade (equities +0.09% against 0.10%, crypto +0.45%
