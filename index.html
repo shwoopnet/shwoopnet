@@ -2853,10 +2853,12 @@
           <label class="labs-backtest-toggle">
             <input type="checkbox" id="intradayBacktestInvalidate">
             <span>Exit when the breakout fails — close the position as soon as a bar CLOSES back inside the
-            opening range, instead of waiting for the stop. The reason for the trade is gone at that point.
-            Off by default, and worth knowing before you run it: cutting a trend trade when it dips is a
-            well-known way to make a trend strategy worse, because the losers it saves you from are usually
-            outnumbered by the winners it ends early. This measures which happens here.</span>
+            opening range, instead of waiting for the stop. <strong>Measured, and it makes this strategy
+            worse: profit factor 1.24 → 1.12</strong> over the same 60-day window and the same 406 signals.
+            It did what it was supposed to — average loss fell 0.53% → 0.42% and average win rose 1.57% →
+            1.83% — and still lost, because it turned 37 winners into losers to get there. That is the
+            classic trend-following result: the losers it saves you from are outnumbered by the winners it
+            ends early. Left here as a measurement, not an option worth turning on.</span>
           </label>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
@@ -2889,7 +2891,9 @@
       </div>
       <label class="labs-backtest-toggle">
         <input type="checkbox" id="cryptoBacktestInvalidate">
-        <span>Exit when the trend is lost — close as soon as a bar CLOSES back below the 30-bar average.
+        <span>Exit when the trend is lost — <strong>not yet measured for crypto</strong>; the equities
+        equivalent above was measured and made that strategy worse, so expect the same until shown otherwise.
+        Closes as soon as a bar CLOSES back below the 30-bar average.
         Entry required price to sit 1.5% above that average, so the gap acts as hysteresis rather than
         churning on every touch. This matters more here than for equities: a crypto position has no session
         close and no target, so it rides the trailing stop indefinitely — which is exactly where a stale
