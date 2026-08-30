@@ -6328,10 +6328,31 @@
   function fetchCryptoHistoryFromNetwork(sym){
     var limit = tfConfig['15m'].fetchSize;
     var collected = [];
+    // An explicit start time is what actually makes `limit` mean anything.
+    // `limit` only CAPS a response -- it never guarantees one, and with no
+    // start the endpoint returns whatever short recent window it feels
+    // like, which in practice was under a dozen bars. Asking for a window
+    // wide enough to comfortably contain `limit` bars is what makes the
+    // request deterministic.
+    //
+    // Why that matters far more than it looks: with ~9 bars, chart zoom is
+    // mathematically frozen. The timescale handler clamps visible candles
+    // to [MIN_VISIBLE_CANDLES, min(maxVisible, data.length)] -- with 9 bars
+    // that's [8, 9], so dragging the x-axis does fire, it just has nowhere
+    // to go. It reads as "zoom is broken" when the real fault is upstream
+    // in the data.
+    //
+    // Sized so start->now spans roughly `limit` bars, with 1.5x slack for
+    // any gaps in what the venue actually published. This window is
+    // deliberately NOT huge: Alpaca returns bars ASCENDING FROM `start`,
+    // so asking for a week back and capping at `limit` would hand back the
+    // OLDEST 190 bars in that week and render a days-stale chart. The
+    // slice(-limit) below is the belt to this braces.
+    var startIso = new Date(Date.now() - limit * 15 * 60 * 1000 * 1.5).toISOString();
 
     function loadPage(pageToken){
       var url = ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + encodeURIComponent(sym) +
-        '&timeframe=15Min&limit=' + limit;
+        '&timeframe=15Min&limit=' + limit + '&start=' + encodeURIComponent(startIso);
       if(pageToken) url += '&page_token=' + encodeURIComponent(pageToken);
       return fetch(url, { headers: alpacaHeaders() })
         .then(function(res){
@@ -6341,12 +6362,12 @@
         .then(function(data){
           var page = (data.bars && data.bars[sym]) || [];
           collected = collected.concat(page);
-          // Stops once Alpaca runs out of pages OR we have what we asked
-          // for -- without the second condition a symbol with deep history
-          // would keep paging well past what the chart can display.
-          if(data.next_page_token && collected.length < limit){
-            return loadPage(data.next_page_token);
-          }
+          // Pages to the END of the window rather than stopping at `limit`
+          // bars: since results run oldest-first, stopping early would keep
+          // the oldest bars and discard the recent ones -- the opposite of
+          // what a live chart needs. The window above bounds how much this
+          // can ever pull.
+          if(data.next_page_token) return loadPage(data.next_page_token);
           return collected;
         });
     }
@@ -6358,7 +6379,10 @@
       // Sorted explicitly rather than assumed: pages arrive in order today,
       // but a lookahead bug from out-of-order bars would be silent and the
       // sort is cheap. Same reasoning as the backend's own client.
-      }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
+      }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); })
+      // Keep the most RECENT `limit` bars. If the window over-delivered,
+      // the excess must come off the old end, never the new one.
+        .slice(-limit);
     });
   }
 
