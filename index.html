@@ -640,6 +640,8 @@
   }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .labs-backtest-option{ display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--muted); margin:-4px 0 16px 0; }
+  .labs-backtest-option input{ margin:0; }
   .labs-control-field{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1 1 160px; }
   .labs-control-field label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); }
   .labs-control-field select{
@@ -2369,6 +2371,11 @@
         <div class="pl-card-sub" id="statProfitFactorSub">Gross gains ÷ gross losses — same math Labs' backtest uses.</div>
       </div>
       <div class="pl-card">
+        <div class="pl-card-label">Reached Trail/Breakeven</div>
+        <div class="pl-card-value mono" id="statEverProtected">—</div>
+        <div class="pl-card-sub" id="statEverProtectedSub">The health metric to watch — a low rate means the entry signal isn't producing real follow-through.</div>
+      </div>
+      <div class="pl-card">
         <div class="pl-card-label">Avg Win</div>
         <div class="pl-card-value mono up" id="statAvgWin">—</div>
       </div>
@@ -2905,6 +2912,52 @@
       </div>
     </div>
 
+    <div class="brief-section-title" style="margin-top:36px;">The Mean Reversion Method (research only)</div>
+    <div class="labs-method-card">
+      <p class="labs-method-intro">
+        A deliberate complement to ORB, not another momentum bot — the two tend to do well in opposite conditions
+        (ORB when the market is genuinely trending, this when it's chopping sideways), so running both is real
+        diversification. Backtest-only for now — not wired into auto-trade or the live screener anywhere yet.
+      </p>
+      <div class="labs-method-grid">
+        <div class="labs-method-item">
+          <div class="labs-method-step">1</div>
+          <div>
+            <div class="labs-method-title">22 liquid large caps and 2 broad ETFs</div>
+            <div class="labs-method-body">AAPL, MSFT, GOOGL, AMZN, META, NVDA, AMD, JPM, BAC, GS, UNH, JNJ, PFE, KO,
+            PG, WMT, HD, CAT, XOM, CVX, SPY, QQQ — the opposite profile from ORB's universe on purpose: heavily
+            arbitraged names are expected to snap back to their own recent average, not keep running.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">2</div>
+          <div>
+            <div class="labs-method-title">Stretched 1.5% from its own 20-bar average</div>
+            <div class="labs-method-body">A bar closing 1.5% below (or above) the rolling 20-bar mean counts as
+            over-extended in that direction.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">3</div>
+          <div>
+            <div class="labs-method-title">Needs real capitulation volume</div>
+            <div class="labs-method-body">The stretch only counts on 2x+ its 20-bar average volume — a climax move,
+            not a quiet drift. Also skipped if the reversion back to the mean wouldn't be worth at least half the
+            risk being taken.</div>
+          </div>
+        </div>
+        <div class="labs-method-item">
+          <div class="labs-method-step">4</div>
+          <div>
+            <div class="labs-method-title">A real target, not a trailing stop</div>
+            <div class="labs-method-body">Stop just past the stretched bar's own extreme, target at the rolling
+            mean itself (fixed at entry) — the actual thesis, unlike ORB's "let it run." Closes same day if
+            neither is hit.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
@@ -2930,6 +2983,11 @@
         <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
         <button class="settings-reset-btn" id="runIntradayUniverseBacktestBtn">Run whole universe</button>
       </div>
+      <label class="labs-backtest-option">
+        <input type="checkbox" id="intradayBacktestRegimeFilter">
+        Apply the market-regime filter (real SPY history) — skips a fresh Long during a broad SPY selloff, a fresh
+        Short during a broad rally. Off by default so this stays a direct before/after comparison, not a new default.
+      </label>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
       </div>
@@ -2961,6 +3019,35 @@
       </div>
       <div class="labs-backtest-status" id="cryptoBacktestStatus"></div>
       <div id="cryptoBacktestResults"></div>
+    </div>
+
+    <div class="brief-section-title" style="margin-top:36px;">Mean Reversion Backtest (research only)</div>
+    <div class="labs-backtest-card">
+      <p class="labs-backtest-intro">
+        Same rigor as the other two backtests -- real historical Alpaca prices, only ever using data that existed
+        at that point in time, real trading costs included. This strategy isn't live anywhere -- these are the
+        first real numbers on whether it's actually worth building further.
+      </p>
+      <div class="labs-backtest-controls">
+        <div class="labs-control-field">
+          <label for="meanReversionBacktestSymbol">Symbol</label>
+          <select id="meanReversionBacktestSymbol"></select>
+        </div>
+        <div class="labs-control-field">
+          <label for="meanReversionBacktestLookback">Lookback</label>
+          <select id="meanReversionBacktestLookback">
+            <option value="830" selected>~30 trading days</option>
+            <option value="1610">~60 trading days</option>
+            <option value="2390">~90 trading days</option>
+            <option value="4730">~180 trading days</option>
+            <option value="9540">~365 trading days (2 requests, slower)</option>
+          </select>
+        </div>
+        <button class="settings-reset-btn" id="runMeanReversionBacktestBtn">Run backtest</button>
+        <button class="settings-reset-btn" id="runMeanReversionUniverseBacktestBtn">Run whole universe</button>
+      </div>
+      <div class="labs-backtest-status" id="meanReversionBacktestStatus"></div>
+      <div id="meanReversionBacktestResults"></div>
     </div>
 
     <div id="labsExportSection" hidden>
@@ -3064,7 +3151,10 @@
     PLTR:'Palantir Technologies', SOFI:'SoFi Technologies', RIVN:'Rivian Automotive', COIN:'Coinbase Global',
     MARA:'Marathon Digital', AFRM:'Affirm Holdings', DKNG:'DraftKings Inc', CVNA:'Carvana Co',
     HOOD:'Robinhood Markets', RIOT:'Riot Platforms', UPST:'Upstart Holdings', LCID:'Lucid Group',
-    OPEN:'Opendoor Technologies', CHPT:'ChargePoint Holdings'
+    OPEN:'Opendoor Technologies', CHPT:'ChargePoint Holdings',
+    AMZN:'Amazon.com', META:'Meta Platforms', NVDA:'NVIDIA Corp', BAC:'Bank of America', GS:'Goldman Sachs',
+    PFE:'Pfizer Inc', KO:'Coca-Cola Co', PG:'Procter & Gamble', CVX:'Chevron Corp',
+    SPY:'SPDR S&P 500 ETF', QQQ:'Invesco QQQ Trust'
   };
   var DEFAULT_WATCHLIST_SYMS = ['PLTR','SOFI','RIVN','COIN','MARA','AFRM','DKNG','CVNA'];
 
@@ -6689,7 +6779,56 @@
   // iterations via setTimeout lets pending UI events (like a drag's
   // pointermove) get processed between chunks, without meaningfully
   // slowing down the backtest itself.
-  function runIntradayBacktestSimulationAsync(bars, lookbackBars){
+  // ---------- Optional market-regime filter for the backtest ----------
+  // Mirrors shwoop-server's src/lib/marketRegime.js thresholds/semantics
+  // exactly (SPY's own % change vs its prior close, skip fresh longs past
+  // a selloff threshold, fresh shorts past a rally threshold) -- but that
+  // module only ever checks one live snapshot. A backtest has to know
+  // what SPY's regime was at the EXACT moment each historical signal
+  // fired, so this builds a full time series from real SPY bars instead.
+  var BACKTEST_SELLOFF_THRESHOLD_PERCENT = -1.5;
+  var BACKTEST_RALLY_THRESHOLD_PERCENT = 1.5;
+
+  function buildSpyRegimeSeries(spyBars){
+    var regularBars = spyBars.filter(isRegularSessionBar).slice().sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
+    var series = [];
+    var prevDayClose = null, curDateKey = null, lastCloseSeen = null;
+    regularBars.forEach(function(b){
+      var dateKey = b.t.toISOString().slice(0, 10);
+      if(dateKey !== curDateKey){
+        if(curDateKey !== null) prevDayClose = lastCloseSeen; // yesterday's actual last bar, now that today has started
+        curDateKey = dateKey;
+      }
+      var changePercent = prevDayClose !== null ? (b.c - prevDayClose) / prevDayClose * 100 : 0;
+      series.push({ t: b.t.getTime(), changePercent: changePercent });
+      lastCloseSeen = b.c;
+    });
+    return series;
+  }
+
+  // Binary search for the most recent regime reading at or before a given
+  // signal's timestamp -- series is sorted ascending by t. No match (the
+  // signal predates SPY's own available history) fails open, same as the
+  // live checkMarketRegime does on a bad quote.
+  function regimeAt(series, timestamp){
+    var lo = 0, hi = series.length - 1, found = null;
+    while(lo <= hi){
+      var mid = (lo + hi) >> 1;
+      if(series[mid].t <= timestamp){ found = series[mid]; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    if(!found) return { skipLongs: false, skipShorts: false };
+    return {
+      skipLongs: found.changePercent <= BACKTEST_SELLOFF_THRESHOLD_PERCENT,
+      skipShorts: found.changePercent >= BACKTEST_RALLY_THRESHOLD_PERCENT
+    };
+  }
+
+  // regimeSeries is optional -- omitted entirely, this behaves exactly as
+  // it always has (no filtering), which is what every existing call site
+  // still does unless the new "Apply the market-regime filter" checkbox
+  // in Labs is checked.
+  function runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries){
     return new Promise(function(resolve){
       // Filtered once, here, rather than inside computeORBAnalysis (which
       // used to do this on every call) -- this loop calls that function
@@ -6716,7 +6855,15 @@
           var analysis = computeORBAnalysis('SYM', historySlice, currentPrice, localSignalStore);
           var afterSignal = localSignalStore['SYM'];
           var isFreshSignal = analysis && afterSignal && afterSignal !== beforeSignal && afterSignal.dateFired === bars[i].t.toISOString().slice(0,10);
-          if(isFreshSignal){
+          // Regime-skipped signals still count as "fired" in localSignalStore
+          // (computeORBAnalysis already set it) -- same as live, this is one
+          // signal per symbol per day either way, taken or not.
+          var regimeBlocked = false;
+          if(isFreshSignal && regimeSeries){
+            var regime = regimeAt(regimeSeries, bars[i].t.getTime());
+            regimeBlocked = (analysis.direction === 'Long' && regime.skipLongs) || (analysis.direction === 'Short' && regime.skipShorts);
+          }
+          if(isFreshSignal && !regimeBlocked){
             var outcome = simulateORBForwardSameDay(bars, i, analysis);
             var isLong = analysis.direction === 'Long';
             var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
@@ -6885,6 +7032,17 @@
     if(symbolsInput && !symbolsInput.value){ symbolsInput.value = INTRADAY_UNIVERSE.join(', '); }
   }
 
+  // The regime filter is opt-in (the "Apply the market-regime filter"
+  // checkbox) -- resolves to null (no filtering, identical to every
+  // existing run) unless it's checked, in which case it fetches SPY's own
+  // real history once and builds the time series runIntradayBacktestSimulationAsync
+  // needs to check each historical signal's moment against.
+  function fetchRegimeSeriesIfEnabled(lookbackBars){
+    var checkbox = document.getElementById('intradayBacktestRegimeFilter');
+    if(!checkbox || !checkbox.checked) return Promise.resolve(null);
+    return fetchIntradayBacktestHistoryChunked('SPY', lookbackBars).then(buildSpyRegimeSeries);
+  }
+
   function runIntradayBacktestClicked(){
     var sym = document.getElementById('intradayBacktestSymbol').value;
     var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
@@ -6897,8 +7055,10 @@
     statusEl.className = 'labs-backtest-status';
     resultsEl.innerHTML = '';
 
-    fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-      return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+    fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
+      return fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries);
+      });
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderIntradayBacktestResults(trades, summary, sym);
@@ -6935,7 +7095,7 @@
     // strategy/parameters when it was actually just missing data.
     var failedSymbols = [];
 
-    function processNext(index){
+    function processNext(index, regimeSeries){
       if(index >= INTRADAY_UNIVERSE.length){
         btn.disabled = false;
         singleBtn.disabled = false;
@@ -6946,19 +7106,27 @@
       var sym = INTRADAY_UNIVERSE[index];
       statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
       fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries);
       }).then(function(trades){
         allTrades = allTrades.concat(trades);
         perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
-        processNext(index + 1);
+        processNext(index + 1, regimeSeries);
       }).catch(function(err){
         console.error('Intraday universe backtest: skipping', sym, err);
         failedSymbols.push({ sym: sym, message: err.message });
-        processNext(index + 1);
+        processNext(index + 1, regimeSeries);
       });
     }
 
-    processNext(0);
+    // Fetched once, shared across all 16 symbols -- not once per symbol.
+    fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
+      processNext(0, regimeSeries);
+    }).catch(function(err){
+      statusEl.textContent = 'Failed to fetch SPY history for the regime filter: ' + err.message;
+      statusEl.className = 'labs-backtest-status fail';
+      btn.disabled = false;
+      singleBtn.disabled = false;
+    });
   }
 
   // ---------- Crypto backtest UI ----------
@@ -7153,6 +7321,320 @@
       singleBtn.disabled = false;
       console.error('Crypto universe backtest failed:', err);
     });
+  }
+
+  // ---------- Mean-reversion backtest engine (research only -- not wired
+  // into live/auto-trade anywhere yet) ----------
+  // A deliberate complement to ORB, not another momentum bot: ORB and
+  // mean-reversion tend to do well in OPPOSITE conditions (ORB wins when
+  // the market is genuinely trending, mean-reversion when it's chopping
+  // sideways), so running both is real diversification, not just doubled
+  // exposure to the same regime. Runs on its own universe -- liquid,
+  // widely-held large caps and two broad index ETFs, chosen for the
+  // OPPOSITE reason ORB's universe was chosen: ORB explicitly needed
+  // volatile, retail-heavy, LESS efficiently-priced names (see
+  // INTRADAY_UNIVERSE's own comment) because a mega-cap universe tested
+  // with no real edge under breakout logic (profit factor 0.4-0.97
+  // worst-case). Mean-reversion's whole thesis is the opposite: a liquid,
+  // heavily-arbitraged name is exactly what's expected to snap back to
+  // its own recent average rather than keep running.
+  var MEAN_REVERSION_UNIVERSE = [
+    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'AMD',
+    'JPM', 'BAC', 'GS', 'UNH', 'JNJ', 'PFE', 'KO', 'PG', 'WMT', 'HD',
+    'CAT', 'XOM', 'CVX', 'SPY', 'QQQ',
+  ];
+  var MR_BT_MA_LOOKBACK_BARS = 20;
+  var MR_BT_EXTENSION_PCT = 0.015; // 1.5% below/above the rolling mean to count as "stretched"
+  var MR_BT_VOLUME_LOOKBACK = 20;
+  var MR_BT_VOLUME_CONFIRM_MULTIPLE = 2.0; // capitulation/climax volume, not a breakout's -- same bar shape, opposite read
+  var MR_BT_STOP_BUFFER_PCT = 0.003; // a little room past the stretched bar's own extreme
+
+  // Unlike ORB (no fixed target -- trailing is the real exit) mean-
+  // reversion has a genuine, real target: the rolling mean itself,
+  // fixed at the moment the signal fires. That's the actual thesis
+  // ("this snaps back to its own recent average"), not a reference
+  // number a trailing stop immediately supersedes.
+  function findMeanReversionSignalAt(bars, idx){
+    if(idx < MR_BT_MA_LOOKBACK_BARS || idx < MR_BT_VOLUME_LOOKBACK) return null;
+    var bar = bars[idx];
+    var maBars = bars.slice(idx - MR_BT_MA_LOOKBACK_BARS, idx);
+    var maSMA = maBars.reduce(function(a,b){ return a + b.c; }, 0) / maBars.length;
+    var extensionLow = maSMA * (1 - MR_BT_EXTENSION_PCT);
+    var extensionHigh = maSMA * (1 + MR_BT_EXTENSION_PCT);
+
+    var direction = null;
+    if(bar.c <= extensionLow) direction = 'Long'; // stretched below its own recent average
+    else if(bar.c >= extensionHigh) direction = 'Short'; // stretched above it
+    if(!direction) return null;
+
+    var volBars = bars.slice(idx - MR_BT_VOLUME_LOOKBACK, idx);
+    var avgVol = volBars.reduce(function(a,b){ return a + (b.vol || 0); }, 0) / volBars.length;
+    if(avgVol <= 0 || (bar.vol || 0) < avgVol * MR_BT_VOLUME_CONFIRM_MULTIPLE) return null; // no capitulation volume behind the stretch
+
+    var entry = bar.c;
+    var stop = direction === 'Long' ? bar.l * (1 - MR_BT_STOP_BUFFER_PCT) : bar.h * (1 + MR_BT_STOP_BUFFER_PCT);
+    var risk = Math.abs(entry - stop);
+    if(risk <= 0) return null;
+    // The reward side isn't guaranteed to be worth the risk the way ORB's
+    // fixed 1.5x-of-range always is -- a mean that's barely below entry
+    // for a Long would size a real stop against almost no real reward.
+    // Skipping anything under 0.5R keeps this an actual trade, not a coin
+    // flip with real downside and negligible upside.
+    var reward = Math.abs(maSMA - entry);
+    if(reward < risk * 0.5) return null;
+
+    return { direction: direction, entry: entry, stop: stop, t1: maSMA };
+  }
+
+  // Same-day only, same reasoning as ORB's simulateORBForwardSameDay --
+  // avoids overnight gap risk, and reuses the exact same infrastructure
+  // (isRegularSessionBar-filtered bars, fetchIntradayBacktestHistoryChunked).
+  // Unlike ORB, there's a genuine fixed target here (the rolling mean at
+  // signal time) -- no trailing stop, since "let it run past the mean"
+  // isn't this strategy's thesis the way it is for a breakout.
+  function simulateMeanReversionForward(bars, entryIdx, signal){
+    var isLong = signal.direction === 'Long';
+    var entryDateKey = bars[entryIdx].t.toISOString().slice(0,10);
+    if(entryIdx + 1 >= bars.length || bars[entryIdx + 1].t.toISOString().slice(0,10) !== entryDateKey){
+      return { result: 'eod_flat', days: 1, price: signal.entry, date: bars[entryIdx].t };
+    }
+    var lastBarOfDayIdx = entryIdx;
+    for(var j = entryIdx + 1; j < bars.length; j++){
+      var bar = bars[j];
+      if(bar.t.toISOString().slice(0,10) !== entryDateKey) break;
+      lastBarOfDayIdx = j;
+      if(isLong){
+        if(bar.l <= signal.stop) return { result: 'stopped', days: j - entryIdx, price: signal.stop, date: bar.t };
+        if(bar.h >= signal.t1) return { result: 'hit', days: j - entryIdx, price: signal.t1, date: bar.t };
+      } else {
+        if(bar.h >= signal.stop) return { result: 'stopped', days: j - entryIdx, price: signal.stop, date: bar.t };
+        if(bar.l <= signal.t1) return { result: 'hit', days: j - entryIdx, price: signal.t1, date: bar.t };
+      }
+    }
+    var lastBar = bars[lastBarOfDayIdx];
+    return { result: 'eod_close', days: lastBarOfDayIdx - entryIdx, price: lastBar.c, date: lastBar.t };
+  }
+
+  var MR_BT_MARKET_LEGS_BY_OUTCOME = { hit: 2, stopped: 2, eod_close: 2, eod_flat: 1 };
+  function applyMeanReversionSlippage(pctReturn, outcome){
+    var legs = MR_BT_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? MR_BT_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
+    return pctReturn - legs * (ORB_SLIPPAGE_BPS / 100);
+  }
+
+  function runMeanReversionBacktestSimulationAsync(bars, lookbackBars){
+    return new Promise(function(resolve){
+      bars = bars.filter(isRegularSessionBar);
+      var startIdx = Math.max(50, bars.length - lookbackBars);
+      var trades = [];
+      var i = startIdx;
+      var ITERATIONS_PER_CHUNK = 300;
+
+      function step(){
+        var processedThisChunk = 0;
+        while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
+          var signal = findMeanReversionSignalAt(bars, i);
+          if(signal){
+            var outcome = simulateMeanReversionForward(bars, i, signal);
+            var isLong = signal.direction === 'Long';
+            var pctReturn = (outcome.price - signal.entry) / signal.entry * (isLong ? 1 : -1) * 100;
+            pctReturn = applyMeanReversionSlippage(pctReturn, outcome.result);
+            trades.push({
+              date: bars[i].t, direction: signal.direction, entry: signal.entry,
+              stop: signal.stop, target: signal.t1, outcome: outcome.result, days: outcome.days,
+              exitPrice: outcome.price, pctReturn: pctReturn
+            });
+            i = i + outcome.days + 1;
+          } else {
+            i++;
+          }
+          processedThisChunk++;
+        }
+        if(i < bars.length){
+          setTimeout(step, 0);
+        } else {
+          resolve(trades);
+        }
+      }
+      step();
+    });
+  }
+
+  function renderMeanReversionBacktestResults(trades, summary, sym){
+    var statusEl = document.getElementById('meanReversionBacktestStatus');
+    var resultsEl = document.getElementById('meanReversionBacktestResults');
+    if(trades.length === 0){
+      statusEl.textContent = 'No qualifying mean-reversion signals found for ' + sym + ' in this window.';
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+    statusEl.textContent = 'Found ' + trades.length + ' mean-reversion signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.';
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
+      '</div>' +
+      '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — expectancy and profit factor account for the size of wins and losses, not just how often each happened.</p>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Time</th></tr></thead>' +
+        '<tbody>' + trades.map(function(t){
+          var outcomeClass = t.outcome === 'hit' ? 'backtest-outcome-hit' : t.outcome === 'stopped' ? 'backtest-outcome-stopped' : 'backtest-outcome-unresolved';
+          var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
+          var outcomeLabel = t.outcome === 'hit' ? 'Target hit' : t.outcome === 'stopped' ? 'Stopped' : t.outcome === 'eod_close' ? 'Closed at EOD' : 'Flat (no room)';
+          return '<tr>' +
+            '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
+            '<td>' + t.direction + '</td>' +
+            '<td>' + fmt(t.entry) + '</td>' +
+            '<td>' + fmt(t.stop) + '</td>' +
+            '<td>' + fmt(t.target) + '</td>' +
+            '<td class="' + outcomeClass + '">' + outcomeLabel + '</td>' +
+            '<td class="' + returnClass + '">' + (t.pctReturn >= 0 ? '+' : '') + t.pctReturn.toFixed(2) + '%</td>' +
+            '<td>' + formatIntradayDuration(t.days) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody>' +
+      '</table>';
+  }
+
+  function renderMeanReversionUniverseBacktestResults(perSymbolResults, summary, failedSymbols){
+    var statusEl = document.getElementById('meanReversionBacktestStatus');
+    var resultsEl = document.getElementById('meanReversionBacktestResults');
+    var failedNote = failedSymbols.length ? (' (' + failedSymbols.length + ' symbol' + (failedSymbols.length === 1 ? '' : 's') + ' skipped — history fetch failed)') : '';
+
+    if(summary.totalSignals === 0){
+      statusEl.textContent = 'No qualifying mean-reversion signals found across the universe in this window.' + failedNote;
+      statusEl.className = 'labs-backtest-status';
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total mean-reversion signals.' + failedNote;
+    statusEl.className = 'labs-backtest-status ok';
+
+    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
+    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
+    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
+    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+
+    var perSymbolRows = perSymbolResults
+      .filter(function(r){ return r.summary.totalSignals > 0; })
+      .sort(function(a,b){ return b.summary.avgPctReturn - a.summary.avgPctReturn; })
+      .map(function(r){
+        var s = r.summary;
+        var rowClass = s.avgPctReturn >= 0 ? 'up' : 'down';
+        return '<tr>' +
+          '<td class="mono">' + r.sym + '</td>' +
+          '<td>' + s.totalSignals + '</td>' +
+          '<td>' + s.winRate.toFixed(0) + '%</td>' +
+          '<td class="' + rowClass + '">' + (s.avgPctReturn >= 0 ? '+' : '') + s.avgPctReturn.toFixed(2) + '%</td>' +
+        '</tr>';
+      }).join('');
+
+    resultsEl.innerHTML =
+      '<div class="backtest-summary">' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
+        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
+      '</div>' +
+      '<p class="labs-backtest-note">Aggregated across every symbol that produced at least one signal in this window.</p>' +
+      '<table class="backtest-trades-table">' +
+        '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
+        '<tbody>' + perSymbolRows + '</tbody>' +
+      '</table>';
+  }
+
+  function populateMeanReversionBacktestSymbolSelect(){
+    var sel = document.getElementById('meanReversionBacktestSymbol');
+    if(!sel) return;
+    sel.innerHTML = MEAN_REVERSION_UNIVERSE.map(function(sym){
+      return '<option value="' + sym + '">' + sym + ' — ' + (COMPANY_NAMES[sym] || sym) + '</option>';
+    }).join('');
+  }
+
+  function runMeanReversionBacktestClicked(){
+    var sym = document.getElementById('meanReversionBacktestSymbol').value;
+    var lookbackBars = parseInt(document.getElementById('meanReversionBacktestLookback').value, 10);
+    var statusEl = document.getElementById('meanReversionBacktestStatus');
+    var btn = document.getElementById('runMeanReversionBacktestBtn');
+    var resultsEl = document.getElementById('meanReversionBacktestResults');
+
+    btn.disabled = true;
+    statusEl.textContent = 'Fetching ' + sym + ' 15-min history and running the simulation…';
+    statusEl.className = 'labs-backtest-status';
+    resultsEl.innerHTML = '';
+
+    fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
+      return runMeanReversionBacktestSimulationAsync(bars, lookbackBars);
+    }).then(function(trades){
+      var summary = summarizeBacktestTrades(trades);
+      renderMeanReversionBacktestResults(trades, summary, sym);
+      btn.disabled = false;
+    }).catch(function(err){
+      statusEl.textContent = 'Mean-reversion backtest failed: ' + err.message;
+      statusEl.className = 'labs-backtest-status fail';
+      btn.disabled = false;
+      console.error('Mean-reversion backtest failed:', err);
+    });
+  }
+
+  function runMeanReversionUniverseBacktestClicked(){
+    var lookbackBars = parseInt(document.getElementById('meanReversionBacktestLookback').value, 10);
+    var statusEl = document.getElementById('meanReversionBacktestStatus');
+    var btn = document.getElementById('runMeanReversionUniverseBacktestBtn');
+    var singleBtn = document.getElementById('runMeanReversionBacktestBtn');
+    var resultsEl = document.getElementById('meanReversionBacktestResults');
+
+    btn.disabled = true;
+    singleBtn.disabled = true;
+    resultsEl.innerHTML = '';
+    statusEl.className = 'labs-backtest-status';
+
+    var allTrades = [];
+    var perSymbolResults = [];
+    var failedSymbols = [];
+
+    function processNext(index){
+      if(index >= MEAN_REVERSION_UNIVERSE.length){
+        btn.disabled = false;
+        singleBtn.disabled = false;
+        var summary = summarizeBacktestTrades(allTrades);
+        renderMeanReversionUniverseBacktestResults(perSymbolResults, summary, failedSymbols);
+        return;
+      }
+      var sym = MEAN_REVERSION_UNIVERSE[index];
+      statusEl.textContent = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + MEAN_REVERSION_UNIVERSE.length + ')';
+      fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
+        return runMeanReversionBacktestSimulationAsync(bars, lookbackBars);
+      }).then(function(trades){
+        allTrades = allTrades.concat(trades);
+        perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
+        processNext(index + 1);
+      }).catch(function(err){
+        console.error('Mean-reversion universe backtest: skipping', sym, err);
+        failedSymbols.push({ sym: sym, message: err.message });
+        processNext(index + 1);
+      });
+    }
+
+    processNext(0);
   }
 
   // Owner-only (gated via the currentUid/onAuthChange flow above, not a
@@ -9382,6 +9864,16 @@
     // backtest's number isn't, making the two numbers not apples-to-apples.
     var winPctSum = 0, lossPctSum = 0;
     var best = null, worst = null;
+    // Exit-type mix: what fraction of closed trades ever reached the
+    // trail/breakeven stage vs. only ever stopped out or closed flat at
+    // day's end. everProtected is a backend field (see shwoop-server's
+    // orchestrator.js/trailingStop.js) stamped on every entry the
+    // auto-trader creates from here forward -- entries from before that
+    // shipped simply don't have the field at all, so those are excluded
+    // from this count entirely rather than silently counted as "never
+    // protected" and skewing the rate with pre-fix data that predates
+    // this metric existing.
+    var everProtectedTracked = 0, everProtectedCount = 0;
     closed.forEach(function(e){
       var pl = computePL(e);
       totalDollar += pl.dollar;
@@ -9390,6 +9882,7 @@
       else { lossDollarSum += pl.dollar; lossCount++; lossPctSum += pl.pct; }
       if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
+      if(e.everProtected !== undefined){ everProtectedTracked++; if(e.everProtected) everProtectedCount++; }
     });
     var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
     return {
@@ -9398,7 +9891,9 @@
       avgWinDollar: winCount ? winDollarSum / winCount : 0,
       avgLossDollar: lossCount ? lossDollarSum / lossCount : 0,
       profitFactor: profitFactor,
-      best: best, worst: worst
+      best: best, worst: worst,
+      everProtectedTracked: everProtectedTracked, everProtectedCount: everProtectedCount,
+      everProtectedRate: everProtectedTracked ? (everProtectedCount / everProtectedTracked) * 100 : null
     };
   }
 
@@ -9560,6 +10055,8 @@
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
     var profitFactorEl = document.getElementById('statProfitFactor');
+    var everProtectedEl = document.getElementById('statEverProtected');
+    var everProtectedSubEl = document.getElementById('statEverProtectedSub');
     var avgWinEl = document.getElementById('statAvgWin');
     var avgLossEl = document.getElementById('statAvgLoss');
     var bestEl = document.getElementById('statBest');
@@ -9569,6 +10066,7 @@
     if(!filtered){
       winRateEl.textContent = '—'; winRateSubEl.textContent = '';
       profitFactorEl.textContent = '—';
+      everProtectedEl.textContent = '—';
       avgWinEl.textContent = '—'; avgLossEl.textContent = '—';
       bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = '';
       worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = '';
@@ -9576,6 +10074,13 @@
       winRateEl.textContent = filtered.winRate.toFixed(0) + '%';
       winRateSubEl.textContent = filtered.count + ' total trades';
       profitFactorEl.textContent = isFinite(filtered.profitFactor) ? filtered.profitFactor.toFixed(2) : '∞';
+      if(filtered.everProtectedRate === null){
+        everProtectedEl.textContent = '—';
+        everProtectedSubEl.textContent = 'No tracked trades yet';
+      } else {
+        everProtectedEl.textContent = filtered.everProtectedRate.toFixed(0) + '%';
+        everProtectedSubEl.textContent = filtered.everProtectedCount + ' of ' + filtered.everProtectedTracked + ' tracked trades';
+      }
       avgWinEl.textContent = '+$' + filtered.avgWinDollar.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
       // Best/worst can each land on either side of zero regardless of
@@ -9602,6 +10107,7 @@
     // Equities tab only.
     patchTradeStatsFromAlpaca();
     renderLabsLiveVsBacktest();
+    patchLabsEquitiesLiveStatFromAlpaca();
   }
 
   // The backtest's own headline profit-factor claims (see the Labs Method
@@ -9618,26 +10124,76 @@
   // source of truth for those since the backtest itself isn't re-run live.
   var LABS_BACKTEST_PF = { equities: 2.71, crypto: 2.35 };
   var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
+  // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
+  // below -- all we have for crypto, and equities' own first paint before
+  // the real numbers arrive) and patchLabsEquitiesLiveStatFromAlpaca's
+  // real, Alpaca-reconciled patch. Takes an already-computed count/
+  // profitFactor rather than raw entries so either source can drive it.
+  function renderLiveVsBacktestLine(el, count, profitFactor, backtestPF, real){
+    if(!el) return;
+    if(!count){
+      el.innerHTML = 'Live so far: <strong>no closed trades yet</strong> — nothing to compare against the backtest yet.';
+      return;
+    }
+    var pfText = isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞';
+    var diffClass = profitFactor >= backtestPF ? 'up' : 'down';
+    var tradeWord = real ? 'real trade' : 'closed trade';
+    var confidenceNote = count < LABS_MIN_TRADES_FOR_CONFIDENCE
+      ? ' — only ' + count + ' ' + tradeWord + (count === 1 ? '' : 's') + ' so far, too few to trust yet.'
+      : ' across ' + count + ' ' + tradeWord + (count === 1 ? '' : 's') + '.';
+    el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
+  }
   function renderLabsLiveVsBacktest(){
     var eqEl = document.getElementById('labsEquitiesLiveStat');
     var cryptoEl = document.getElementById('labsCryptoLiveStat');
     if(!eqEl && !cryptoEl) return;
-    function renderInto(el, entries, backtestPF){
+    function renderFromJournal(el, entries, backtestPF){
       if(!el) return;
       var agg = computeAggregatePL(entries);
-      if(!agg){
-        el.innerHTML = 'Live so far: <strong>no closed trades yet</strong> — nothing to compare against the backtest yet.';
-        return;
-      }
-      var pfText = isFinite(agg.profitFactor) ? agg.profitFactor.toFixed(2) : '∞';
-      var diffClass = agg.profitFactor >= backtestPF ? 'up' : 'down';
-      var confidenceNote = agg.count < LABS_MIN_TRADES_FOR_CONFIDENCE
-        ? ' — only ' + agg.count + ' closed trade' + (agg.count === 1 ? '' : 's') + ' so far, too few to trust yet.'
-        : ' across ' + agg.count + ' closed trades.';
-      el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
+      renderLiveVsBacktestLine(el, agg ? agg.count : 0, agg ? agg.profitFactor : 0, backtestPF, false);
     }
-    renderInto(eqEl, journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; }), LABS_BACKTEST_PF.equities);
-    renderInto(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
+    // Equities' own journal-derived count is a same-tick fallback only --
+    // it isn't scoped to the currently-connected account at all (unlike
+    // e.g. currentAccountActivityLog), and can include stale/duplicate
+    // entries a real Alpaca order was never actually placed for. Real
+    // numbers land moments later via patchLabsEquitiesLiveStatFromAlpaca,
+    // the same real-order reconciliation the Journal page's own cards use
+    // (see patchTradeStatsFromAlpaca) -- crypto has no such reconciliation
+    // available (reconstructTradesFromOrders can't parse its order shape)
+    // so it stays on this fallback permanently.
+    renderFromJournal(eqEl, journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; }), LABS_BACKTEST_PF.equities);
+    renderFromJournal(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
+  }
+
+  // Overwrites the equities Labs comparison with real, Alpaca-reconciled
+  // trades once they resolve -- the same reconstructTradesFromOrders this
+  // app already trusts as ground truth (Journal's own Profit Factor card,
+  // "Pull full history from Alpaca"). The journal-only fallback above
+  // isn't account-scoped and can double-count a symbol across accounts,
+  // or include an entry a real order was never actually confirmed for --
+  // exactly the "61 in the app vs. 32 in the brokerage" mismatch a real
+  // side-by-side check against Alpaca's own order history caught. Kept
+  // independent of patchTradeStatsFromAlpaca's own journalFilter-gated
+  // logic (that gate is a Journal-page-tab concern; this always needs to
+  // run regardless of which Journal tab happens to be selected).
+  var labsEquitiesPatchGen = 0;
+  function patchLabsEquitiesLiveStatFromAlpaca(){
+    var eqEl = document.getElementById('labsEquitiesLiveStat');
+    if(!eqEl) return;
+    var myGen = ++labsEquitiesPatchGen;
+    getAlpacaClosedOrdersCached().then(function(orders){
+      if(myGen !== labsEquitiesPatchGen) return; // superseded by a newer call
+      var trades = reconstructTradesFromOrders(orders).trades;
+      if(!trades.length) return; // not connected, or no real equities trades yet -- leave the journal-based fallback showing
+      var wins = trades.filter(function(t){ return t.pctReturn > 0; });
+      var losses = trades.filter(function(t){ return t.pctReturn <= 0; });
+      var winPctSum = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var lossPctSum = losses.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
+      renderLiveVsBacktestLine(eqEl, trades.length, profitFactor, LABS_BACKTEST_PF.equities, true);
+    }).catch(function(err){
+      console.error('Failed to load real equities trade stats for the Labs comparison:', err);
+    });
   }
 
   renderPLSummary();
@@ -12277,11 +12833,14 @@
   renderHistoryList();
   populateIntradayBacktestSymbolSelect();
   populateCryptoBacktestSymbolSelect();
+  populateMeanReversionBacktestSymbolSelect();
   loadIntradayPref();
   document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
   document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
   document.getElementById('runCryptoBacktestBtn').addEventListener('click', runCryptoBacktestClicked);
   document.getElementById('runCryptoUniverseBacktestBtn').addEventListener('click', runCryptoUniverseBacktestClicked);
+  document.getElementById('runMeanReversionBacktestBtn').addEventListener('click', runMeanReversionBacktestClicked);
+  document.getElementById('runMeanReversionUniverseBacktestBtn').addEventListener('click', runMeanReversionUniverseBacktestClicked);
   document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
   document.getElementById('testAlpacaDataFeedBtn').addEventListener('click', testAlpacaDataFeedClicked);
   document.getElementById('exportCopyBtn').addEventListener('click', function(){
