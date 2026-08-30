@@ -76,8 +76,16 @@ try {
 if (baseHtml) {
   const defined = (s) => new Set([...s.matchAll(/^\s*\.([a-zA-Z][\w-]*)[{ ,:]/gm)].map((m) => m[1]));
   const removed = [...defined(baseHtml)].filter((c) => !defined(html).has(c));
+  // \b is the WRONG boundary for a class name, because `-` is a non-word
+  // character: /\bnews-toast\b/ matches inside class="news-toast-tag".
+  // That made this check block the deletion of a genuinely dead class
+  // whose name happens to prefix a live hyphenated one -- and a check
+  // that cries wolf is a check people learn to override. The boundary
+  // has to exclude `-` on both sides as well as word characters.
+  const B = '(?<![-\\w])';
+  const A = '(?![-\\w])';
   const stillUsed = removed.filter((c) => new RegExp(
-    `class="[^"]*\\b${c}\\b|querySelector\\w*\\('\\.${c}\\b|classList\\.\\w+\\('${c}'`,
+    `class="[^"]*${B}${c}${A}|querySelector\\w*\\('\\.${c}${A}|classList\\.\\w+\\('${c}'`,
   ).test(html));
   if (stillUsed.length) {
     fail(`CSS deleted but still referenced: ${stillUsed.join(', ')}`);

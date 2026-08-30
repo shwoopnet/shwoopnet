@@ -534,12 +534,6 @@
   }
   .labs-method-title{ font-weight:600; font-size:13.5px; margin-bottom:6px; }
   .labs-method-body{ font-size:12.5px; line-height:1.6; color: var(--muted); }
-  .labs-honesty-box{
-    margin-top:24px; padding:16px 18px; border-left:3px solid var(--amber-dim);
-    background: var(--panel-raised); border-radius:4px;
-  }
-  .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
-  .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
   /* Duplicate-trade warning. Sits directly above the stats row because
      these numbers are what a duplicate corrupts -- every one of them is
@@ -677,7 +671,6 @@
   .position-close-btn:disabled{ opacity:.5; cursor:default; }
   .backtest-outcome-hit{ color: var(--gain); }
   .backtest-outcome-stopped{ color: var(--loss); }
-  .backtest-outcome-unresolved{ color: var(--muted); }
 
   .activity-log-row{ padding:12px 0; border-bottom:1px solid var(--border); }
   .activity-log-row:last-child{ border-bottom:none; }
@@ -685,7 +678,6 @@
      without a cap this list just pushes the rest of Trade Overview
      down the page indefinitely. Scrolls internally instead. */
   #statusActivityList{ max-height:420px; overflow-y:auto; }
-  .activity-log-meta{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
   .activity-log-tag{
     font-size:10px; text-transform:uppercase; letter-spacing:.04em; font-weight:700; color: var(--amber);
     background: var(--amber-glow); border:1px solid var(--amber-dim); border-radius:999px; padding:3px 10px 2px;
@@ -931,7 +923,6 @@
   .zoom-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .zoom-btn:disabled{ opacity:.35; cursor:default; }
   .zoom-btn:disabled:hover{ border-color: var(--border); color: var(--muted); }
-  .zoom-label{ font-size:12px; color: var(--muted); min-width:44px; text-align:center; }
   .tf-btn{
     background: transparent; border: 1px solid var(--border); color: var(--muted);
     padding: 6px 12px; font-size: 11.5px; border-radius: 4px; cursor:pointer; transition: all .15s ease;
@@ -999,20 +990,6 @@
   .t-rr .rr-ratio.up{ color: var(--gain); }
   .t-rr .rr-ratio.down{ color: var(--loss); }
 
-  .trade-action-banner{
-    display:flex; align-items:flex-start; gap:10px;
-    margin:0 16px 14px 16px; padding:11px 15px;
-    background: var(--panel-raised); border-left:3px solid var(--amber); border-radius:4px;
-    font-size:12.5px; line-height:1.6; color: var(--paper);
-  }
-  .trade-action-banner .action-icon{ color: var(--amber); font-weight:700; flex-shrink:0; line-height:1.6; }
-  .trade-action-banner.done{ border-left-color: var(--border); }
-  .trade-action-banner.done .action-icon{ color: var(--muted); }
-  .trade-action-verb{ font-weight:700; }
-  .trade-action-verb.buy{ color: var(--gain); }
-  .trade-action-verb.short{ color: var(--loss); }
-  .trade-action-verb.done{ color: var(--muted); }
-
   .trade-detail{
     display:flex; flex-direction:column; gap:14px;
     padding: 16px 16px 18px 16px; border-top:1px solid var(--border);
@@ -1043,14 +1020,6 @@
   .grid-label{ fill: var(--muted); font-size: 11px; font-family:'Public Sans',sans-serif; font-variant-numeric: tabular-nums; }
   .chart-error-text{ fill: var(--paper); font-size:13px; font-family:'Public Sans', sans-serif; }
   .chart-error-sub{ fill: var(--muted); font-size:11px; font-family:'Public Sans', sans-serif; }
-
-  .chart-toolbar{
-    display:flex; justify-content:space-between; align-items:center; gap:10px;
-    margin-bottom:8px; flex-wrap:wrap;
-  }
-  .chart-hint{ font-size:10.5px; color: var(--muted); }
-  .chart-tf-btns{ display:flex; gap:4px; }
-  .chart-toolbar-btns{ display:flex; gap:4px; }
   .chart-tool-btn{
     background: transparent; border:1px solid var(--border); color: var(--muted);
     padding:4px 10px; font-size:10.5px; border-radius:4px; cursor:pointer; transition: all .15s ease;
@@ -1066,7 +1035,6 @@
     display:flex; gap:10px; white-space:nowrap;
   }
   .chart-crosshair-readout[hidden]{ display:none; }
-  .chart-crosshair-readout .cr-date{ color: var(--paper); }
   .chart-crosshair-readout .cr-up{ color: var(--gain); }
   .chart-crosshair-readout .cr-down{ color: var(--loss); }
   .crosshair-line{ stroke: var(--muted); stroke-width:1; stroke-dasharray:3,3; pointer-events:none; }
@@ -1097,14 +1065,6 @@
     text-transform:none; letter-spacing:0; cursor:pointer; padding:0;
   }
   .news-dismiss-all:hover{ color: var(--amber); }
-  .news-toast{
-    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 16px; margin-bottom:12px;
-  }
-  .news-toast:last-child{ margin-bottom:0; }
-  .news-toast-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
-  .news-toast-tags{ display:flex; align-items:center; gap:8px; }
-  .news-toast-sym{ font-weight:600; color: var(--amber); font-size:12px; }
   .news-toast-tag{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color: var(--muted);
     border:1px solid var(--border); border-radius:999px; padding:2px 9px 1px; background: var(--panel-raised);
@@ -1124,12 +1084,6 @@
   .history-tag-trade.loss{ background: var(--loss-glow); color: var(--loss); border-color: var(--loss); }
   .history-tag-trade.neutral{ background: var(--panel-raised); color: var(--muted); border-color: var(--border); }
   .history-item.history-item-trade{ border-left:2px solid var(--border); padding-left:10px; }
-  .news-toast-close{
-    background:none; border:none; color: var(--muted); cursor:pointer;
-    font-size:15px; line-height:1; padding:0 2px;
-  }
-  .news-toast-close:hover{ color: var(--paper); }
-  .news-toast-body{ font-size:12.5px; line-height:1.5; color: var(--muted); margin:0; }
 
   .toast-container{
     position:fixed; bottom:20px; right:100px; z-index:900;
@@ -1170,10 +1124,6 @@
   .toast-link{ font-size:11px; color: var(--amber); text-decoration:none; }
   .toast-link:hover{ text-decoration:underline; }
   @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; bottom:84px; max-height:32vh; } }
-  .news-toast-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
-  .news-toast-link{ font-size:11.5px; color: var(--amber); text-decoration:none; }
-  .news-toast-link:hover{ text-decoration:underline; }
-  .news-toast-time{ font-size:10px; color: var(--muted); opacity:.7; }
 
   .history-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:240; }
   .history-backdrop[hidden]{ display:none; }
@@ -1551,22 +1501,16 @@
 
   @media (prefers-reduced-motion: reduce){
     .ticker-track{ animation: none; }
-    .flash-up, .flash-down{ animation: none; }
     .brand-mark{ animation: none; }
     .brand-ground{ animation: none; display:none; }
     .brand-impact-ring{ animation: none; display:none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   }
   [data-reduce-motion="true"] .ticker-track{ animation: none; }
-  [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
-  .flash-up{ animation: flashUp .6s ease; }
-  .flash-down{ animation: flashDown .6s ease; }
-  @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
-  @keyframes flashDown{ 0%{ background: var(--loss-glow); } 100%{ background: transparent; } }
 </style>
 <script>
   // Runs synchronously before <body> paints anything, so dark mode is
@@ -2926,27 +2870,6 @@
 (function(){
 
   // ---------- Shared quote data ----------
-  // Well-known, liquid large-cap symbols the screener picks from. Not a
-  // full-market scanner (that needs a dedicated screener API) — a curated
-  // pool of "high profile" names, screened daily with real technical
-  // analysis rather than picked by hand.
-  // A mix across market caps and sectors, not just the household mega-caps
-  // — a screener that only ever looks at the 10 biggest names in the
-  // market is more likely to be picking from stocks that are already
-  // heavily analyzed and efficiently priced, with less room for a clean
-  // technical edge to show up.
-  var SCREENER_UNIVERSE = [
-    'AAPL','MSFT','GOOGL','TSLA','AMD','CRM','ADBE',
-    'JPM','V',
-    'JNJ','UNH',
-    'WMT','HD','DIS',
-    'XOM',
-    'PYPL','ROKU','SNAP','ETSY','MU','QCOM','TXN','AMAT','LRCX',
-    'TGT','LULU','SBUX','CMG',
-    'SCHW','AXP','GILD','VRTX',
-    'CAT','DE','HON','GE','LMT','RTX',
-    'OXY','SLB','COP'
-  ];
   var COMPANY_NAMES = {
     AAPL:'Apple Inc', MSFT:'Microsoft', GOOGL:'Alphabet Cl A', TSLA:'Tesla Inc', AMD:'Adv Micro Devices',
     CRM:'Salesforce', ADBE:'Adobe Inc',
@@ -3066,157 +2989,9 @@
   var ORB_VOLUME_CONFIRM_MULTIPLE = 2.0;
   var ORB_REWARD_MULTIPLE = 1.5;
 
-  // Alpaca's IEX feed includes real (if thin) extended-hours prints
-  // alongside the regular session -- confirmed live via the "Test
-  // Alpaca data feed" diagnostic in Labs, which found at least one bar
-  // before the 9:30 ET open on nearly every day tested, across every
-  // symbol tried. Checked in real ET wall-clock time (not a fixed UTC
-  // offset) specifically so this stays correct across the DST boundary
-  // -- 9:30am-4:00pm ET is a different UTC window in EDT vs EST.
-  function isRegularSessionBar(bar){
-    var parts = {};
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit'
-    }).formatToParts(bar.t).forEach(function(p){ parts[p.type] = p.value; });
-    var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
-    return minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60);
-  }
 
-  // bars must already be filtered to regular-session-only (see
-  // isRegularSessionBar) before being passed in here -- this function's
-  // only caller, the backtest simulation loop, filters once up front
-  // rather than this doing it on every call. It used to filter here
-  // instead, but this gets called once PER SIMULATED BAR with a slice
-  // that grows every iteration -- re-running an Intl.DateTimeFormat
-  // check across the whole growing slice on every single call turned a
-  // 30-day backtest into tens of thousands of redundant Intl calls,
-  // which is what was actually freezing the page, not a slow connection.
-  function computeORBAnalysis(sym, bars, currentPrice, signalStore){
-    if(!bars || bars.length === 0) return null;
-    var lastBarDateKey = bars[bars.length-1].t.toISOString().slice(0,10);
-    var todaysBars = bars.filter(function(b){ return b.t.toISOString().slice(0,10) === lastBarDateKey; });
-    if(todaysBars.length <= ORB_RANGE_BARS) return null; // opening range not even established yet
 
-    var existing = signalStore[sym];
-    if(existing && existing.dateFired === lastBarDateKey){
-      // Already fired today -- reuse the fixed entry/stop/target, just
-      // recompute status against the current live price.
-      return finalizeORBAnalysis(existing, currentPrice);
-    }
 
-    var rangeBars = todaysBars.slice(0, ORB_RANGE_BARS);
-    var rangeHigh = Math.max.apply(null, rangeBars.map(function(b){ return b.h; }));
-    var rangeLow = Math.min.apply(null, rangeBars.map(function(b){ return b.l; }));
-
-    for(var idx = ORB_RANGE_BARS; idx < todaysBars.length; idx++){
-      var bar = todaysBars[idx];
-      var globalIdx = bars.indexOf(bar);
-      if(globalIdx < ORB_VOLUME_LOOKBACK) continue; // not enough history yet for a volume average
-
-      var direction = null, entry, stop;
-      if(bar.h > rangeHigh){ direction = 'Long'; entry = rangeHigh; stop = rangeLow; }
-      else if(bar.l < rangeLow){ direction = 'Short'; entry = rangeLow; stop = rangeHigh; }
-      if(!direction) continue;
-
-      var recentVols = bars.slice(globalIdx - ORB_VOLUME_LOOKBACK, globalIdx).map(function(b){ return b.vol || 0; });
-      var avgVol = recentVols.reduce(function(a,b){ return a+b; }, 0) / recentVols.length;
-      if(avgVol <= 0 || (bar.vol || 0) < avgVol * ORB_VOLUME_CONFIRM_MULTIPLE) continue; // no volume confirmation
-
-      var risk = Math.abs(entry - stop);
-      if(risk <= 0) continue;
-      var target = direction === 'Long' ? entry + ORB_REWARD_MULTIPLE * risk : entry - ORB_REWARD_MULTIPLE * risk;
-
-      var signal = {
-        direction: direction, entry: entry, stop: stop, t1: target,
-        dateFired: lastBarDateKey, rangeHigh: rangeHigh, rangeLow: rangeLow,
-        volumeMultipleActual: avgVol > 0 ? ((bar.vol || 0) / avgVol) : 0
-      };
-      signalStore[sym] = signal;
-      return finalizeORBAnalysis(signal, currentPrice);
-    }
-
-    return null; // no qualifying breakout yet today
-  }
-
-  // Mutates the persisted signal object with genuine trailing-stop state
-  // (currentStop, trailingActive) that ratchets forward across repeated
-  // calls on the same signal -- not just a stateless snapshot check
-  // against the original fixed levels. Once price crosses 0.75x the
-  // original risk in the trade's favor, the stop trails behind the best
-  // price seen since (at a distance of 1x risk) instead of staying
-  // fixed, matching the same mechanism validated in the backtest engine.
-  // signal.t1 remains a reference point only -- crossing it no longer
-  // means the trade is done, so it's shown as "Trailing" (still open,
-  // now protecting gains) rather than "Target hit" (which would wrongly
-  // imply the position already closed).
-  function finalizeORBAnalysis(signal, currentPrice){
-    var isLong = signal.direction === 'Long';
-    var risk = Math.abs(signal.entry - signal.stop);
-    var TRAIL_TRIGGER_RR = 0.75;
-    var triggerPrice = isLong ? signal.entry + TRAIL_TRIGGER_RR * risk : signal.entry - TRAIL_TRIGGER_RR * risk;
-    // Lower, earlier threshold than the full trail trigger above -- a
-    // trade only got ANY breakeven protection once it crossed 0.75R,
-    // so one that ran to a real gain short of that (matches shwoop-
-    // server's technicalAnalysis.js -- see its own comment) could
-    // round-trip straight through entry into a genuine loss with
-    // nothing ever having engaged.
-    var EARLY_BREAKEVEN_RR = 0.3;
-    var earlyBreakevenPrice = isLong ? signal.entry + EARLY_BREAKEVEN_RR * risk : signal.entry - EARLY_BREAKEVEN_RR * risk;
-
-    if(signal.currentStop === undefined){ signal.currentStop = signal.stop; }
-    if(signal.trailingActive === undefined){ signal.trailingActive = false; }
-
-    if(isLong && currentPrice >= triggerPrice){
-      signal.trailingActive = true;
-      var newStopLong = currentPrice - risk;
-      if(newStopLong > signal.currentStop) signal.currentStop = newStopLong;
-    }
-    if(!isLong && currentPrice <= triggerPrice){
-      signal.trailingActive = true;
-      var newStopShort = currentPrice + risk;
-      if(newStopShort < signal.currentStop) signal.currentStop = newStopShort;
-    }
-    // Breakeven floor -- matches shwoop-server's live technicalAnalysis.js.
-    // Once trailing has activated, the stop can never sit worse than entry.
-    if(signal.trailingActive){
-      signal.currentStop = isLong ? Math.max(signal.currentStop, signal.entry) : Math.min(signal.currentStop, signal.entry);
-    }
-    // Independent of trailingActive -- see EARLY_BREAKEVEN_RR's own
-    // comment above for the gap this closes.
-    var reachedEarlyBreakeven = isLong ? currentPrice >= earlyBreakevenPrice : currentPrice <= earlyBreakevenPrice;
-    if(reachedEarlyBreakeven){
-      signal.currentStop = isLong ? Math.max(signal.currentStop, signal.entry) : Math.min(signal.currentStop, signal.entry);
-    }
-
-    var status = 'active', statusLabel = 'Active';
-    if(signal.trailingActive){ status = 'trailing'; statusLabel = 'Trailing'; }
-    if(isLong && currentPrice <= signal.currentStop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-    if(!isLong && currentPrice >= signal.currentStop){ status = 'stopped'; statusLabel = 'Stopped out'; }
-
-    var notes = [];
-    notes.push('Opening range (first 30 minutes) ran from $' + signal.rangeLow.toFixed(2) + ' to $' + signal.rangeHigh.toFixed(2) + '.');
-    notes.push('Price broke ' + (isLong ? 'above' : 'below') + ' that range on volume ' +
-      signal.volumeMultipleActual.toFixed(1) + 'x the preceding 20-bar average — the volume confirmation this' +
-      ' strategy specifically requires before taking a breakout seriously.');
-    notes.push('Entry ' + (isLong ? 'above' : 'below') + ' the range at $' + signal.entry.toFixed(2) +
-      ', initial stop at the opposite side of the range ($' + signal.stop.toFixed(2) + '). $' + signal.t1.toFixed(2) +
-      ' (1.5x that risk) is shown as a reference, not a hard cap — once price moves 0.3x the risk in its favor the ' +
-      'stop locks to breakeven, and once it moves 0.75x the risk it starts trailing behind price instead, so a ' +
-      'real winner can run further than a fixed target would allow.');
-    notes.push('This is intraday — expect it to resolve or need re-checking well before the close, not over days.');
-
-    return {
-      direction: signal.direction, entry: signal.entry, stop: signal.currentStop, t1: signal.t1,
-      // Carried through because `stop` above is the TRAILED stop, so the
-      // original range boundaries can no longer be recovered from it -- and
-      // the backtest's failed-breakout exit needs the boundary, not the stop.
-      rangeHigh: signal.rangeHigh, rangeLow: signal.rangeLow,
-      status: status, statusLabel: statusLabel, notes: notes
-    };
-  }
-
-  var isRunningScreener = false;
-  var SCREENER_PICK_COUNT = 4;
 
   // 16 symbols, chosen deliberately for LESS efficient pricing than
   // mega-cap tech -- high retail attention and genuine volatility, but
@@ -3230,7 +3005,6 @@
   // mega-cap universe produced under the same rigor.
   var INTRADAY_UNIVERSE = ['PLTR', 'SOFI', 'RIVN', 'COIN', 'MARA', 'AFRM', 'DKNG', 'CVNA',
                            'HOOD', 'RIOT', 'UPST', 'LCID', 'OPEN', 'SNAP', 'CHPT', 'ROKU'];
-  var INTRADAY_TF = '15m';
   var intradayTrades = [];
   var alpacaIntradayEnabled = false;
 
@@ -3622,31 +3396,6 @@
     var text = (source.length + cryptoSource.length) + ' instruments you\'re tracking today (' +
       source.length + ' stocks, ' + cryptoSource.length + ' crypto), ' + (openCount + cryptoOpenCount) + ' with open positions';
     document.getElementById('ctaStat').textContent = text;
-  }
-
-  function buildActionHTML(t){
-    var isLong = t.direction !== 'Short';
-
-    if(t.status === 'hit'){
-      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already reached target at $' + fmt(t.t1) + '. This setup has played out, no action needed.' };
-    }
-    if(t.status === 'stopped'){
-      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already stopped out at $' + fmt(t.stop) + '. This setup is closed, no action needed.' };
-    }
-    if(t.status === 'watching'){
-      var enterVerb = isLong ? 'buying' : 'shorting';
-      var enterVerbClass = isLong ? 'buy' : 'short';
-      return { done: false, html:
-        'Wait for ' + t.sym + ' to reach <strong>$' + fmt(t.entry) + '</strong> before <span class="trade-action-verb ' + enterVerbClass + '">' + enterVerb + '</span>. Once triggered: ' +
-        'take profit at $' + fmt(t.t1) + '. Stop loss at $' + fmt(t.stop) + '.'
-      };
-    }
-    var verb = isLong ? 'Buy' : 'Short';
-    var verbClass = isLong ? 'buy' : 'short';
-    return { done: false, html:
-      '<span class="trade-action-verb ' + verbClass + '">' + verb + '</span> ' + t.sym + ' near <strong>$' + fmt(t.entry) + '</strong>. ' +
-      'Take profit at $' + fmt(t.t1) + '. Stop loss at $' + fmt(t.stop) + '.'
-    };
   }
 
   // ---------- Alpaca trading: paper AND live, kept deliberately separate ----------
@@ -4617,11 +4366,11 @@
 
   // Same short-cache treatment as positions/account summary above, for the
   // same reason: the dock's Target/Stop columns are a pure read/display
-  // path, not an order-mutating one. closeAlpacaPositionSafely and
-  // refreshPositionBracket deliberately keep calling fetchAlpacaOpenOrders
-  // directly (uncached) instead — they cancel-then-replace real orders, so
-  // they always need the truly current open-order list, never one that
-  // could be a few seconds stale.
+  // path, not an order-mutating one. closeAlpacaPositionSafely
+  // deliberately keeps calling fetchAlpacaOpenOrders directly (uncached)
+  // instead — it cancels-then-replaces real orders, so it always needs the
+  // truly current open-order list, never one that could be a few seconds
+  // stale. Any future order-mutating path must do the same.
   var alpacaOpenOrdersCache = { data: null, at: 0, inflight: null };
   var ALPACA_OPEN_ORDERS_CACHE_MS = 8000;
   function getAlpacaOpenOrdersCached(){
@@ -4701,10 +4450,10 @@
   // A position with its bracket's stop-loss/take-profit legs still resting
   // has those shares held against those orders -- Alpaca has no available
   // (unheld) quantity left to sell, so closeAlpacaPosition() alone fails as
-  // forbidden/insufficient-qty every time. Same cancel-before-act
-  // sequencing as refreshPositionBracket above (defined further down, but
-  // fetchAlpacaOpenOrders/cancelAlpacaOrder are both already declared
-  // above this point), applied here so every close path -- the manual
+  // forbidden/insufficient-qty every time. So: cancel the resting legs
+  // FIRST, then close. That ordering is not optional for any path that
+  // touches a bracketed position -- it is applied here so every close
+  // path -- the manual
   // Close button, invalidated-position cleanup, exit-modal flatten --
   // actually succeeds instead of silently failing on any position whose
   // bracket is still live.
@@ -5226,112 +4975,14 @@
     });
   }
 
-  // OCO — not bracket — is the correct order type here: bracket is for a
-  // new entry (market/limit order plus two exit legs), while OCO is
-  // specifically "a pair of exit orders for an existing position", which
-  // is exactly the case when refreshing protection on something already
-  // held. Deliberately not using Alpaca's order-replace endpoint for
-  // this — sources on whether replace is actually reliable for bracket/
-  // OCO legs conflict (Alpaca's own docs disagree with each other
-  // depending on the page, and there are real reports of it failing) —
-  // so this cancels the old exit orders outright and submits a fresh
-  // pair instead, which is unambiguously supported.
-  function submitAlpacaOcoExit(sym, exitSide, qty, stopPrice, takeProfitPrice){
-    var body = {
-      symbol: sym, qty: String(qty), side: exitSide, type: 'limit', time_in_force: 'gtc',
-      order_class: 'oco',
-      take_profit: { limit_price: takeProfitPrice.toFixed(2) },
-      stop_loss: { stop_price: stopPrice.toFixed(2) }
-    };
-    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
-      method: 'POST',
-      headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()),
-      body: JSON.stringify(body)
-    }).then(function(res){
-      return res.json().then(function(data){
-        if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); }
-        return data;
-      });
-    });
-  }
 
-  // Cancels every currently-open order for a symbol (the take-profit
-  // parent plus its nested stop-loss leg) before submitting the new OCO
-  // pair — never submits the replacement until the old one is
-  // confirmed gone, so a position is never left with two conflicting
-  // sets of exit orders live at once.
-  function refreshPositionBracket(entry, analysis){
-    return fetchAlpacaOpenOrders().then(function(orders){
-      var matches = (orders || []).filter(function(o){ return o.symbol === entry.sym; });
-      return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
-    }).then(function(){
-      var exitSide = entry.direction === 'Long' ? 'sell' : 'buy';
-      return submitAlpacaOcoExit(entry.sym, exitSide, entry.qty, analysis.stop, analysis.t1);
-    });
-  }
 
-  // ---------- Crypto exit-order editing (mirrors shwoop-server's own
-  // cryptoProtectiveOrders.js/cryptoTrailingStop.js, ported to the
-  // browser for a manual edit rather than an automated pass) ----------
-  // Alpaca has no bracket/OCO order class for crypto at all -- the stop
-  // and target are two independent, unlinked orders (a stop_limit and a
-  // plain limit), so there's no single "refresh the bracket" call the
-  // way equities has. Same price-precision rule as the backend's own
-  // formatCryptoPrice: whole-dollar-plus coins get cents, sub-dollar
-  // coins need more decimals to avoid rounding to a meaningless price.
-  function formatCryptoOrderPrice(price){
-    if(price >= 1) return price.toFixed(2);
-    if(price >= 0.01) return price.toFixed(4);
-    return price.toFixed(8);
-  }
   // A stop_limit order's limit leg needs to sit slightly past its own
   // trigger (in the direction that guarantees it can actually fill on a
   // fast move) -- same 0.5% buffer shwoop-server's own
   // STOP_LIMIT_BUFFER_PCT uses.
   var CRYPTO_STOP_LIMIT_BUFFER_PCT = 0.005;
 
-  function submitCryptoStopLimitOrderFrontend(sym, side, qty, stopPrice, limitPrice){
-    var body = {
-      symbol: sym, qty: String(qty), side: side, type: 'stop_limit', time_in_force: 'gtc',
-      stop_price: formatCryptoOrderPrice(stopPrice), limit_price: formatCryptoOrderPrice(limitPrice)
-    };
-    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
-      method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()), body: JSON.stringify(body)
-    }).then(function(res){
-      return res.json().then(function(data){ if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); } return data; });
-    });
-  }
-  function submitCryptoLimitOrderFrontend(sym, side, qty, limitPrice){
-    var body = {
-      symbol: sym, qty: String(qty), side: side, type: 'limit', time_in_force: 'gtc',
-      limit_price: formatCryptoOrderPrice(limitPrice)
-    };
-    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
-      method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()), body: JSON.stringify(body)
-    }).then(function(res){
-      return res.json().then(function(data){ if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); } return data; });
-    });
-  }
-  // Cancels whatever's currently resting for this symbol (the old
-  // stop_limit and/or limit order) before submitting the new pair —
-  // same cancel-before-submit sequencing as refreshPositionBracket, so a
-  // position is never left with two conflicting sets of exit orders live
-  // at once. sym here must be the slash-included form Alpaca's crypto
-  // trading endpoint expects for a NEW order (see findCryptoUniverseSymbol) —
-  // NOT the canonical no-slash form positions/orders are read back as.
-  function refreshCryptoExitOrders(sym, direction, qty, newStop, newTarget){
-    return fetchAlpacaOpenOrders().then(function(orders){
-      var matches = (orders || []).filter(function(o){ return o.symbol === sym; });
-      return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
-    }).then(function(){
-      var exitSide = direction === 'Long' ? 'sell' : 'buy';
-      var stopLimitPrice = exitSide === 'sell' ? newStop * (1 - CRYPTO_STOP_LIMIT_BUFFER_PCT) : newStop * (1 + CRYPTO_STOP_LIMIT_BUFFER_PCT);
-      return Promise.all([
-        submitCryptoStopLimitOrderFrontend(sym, exitSide, qty, newStop, stopLimitPrice),
-        submitCryptoLimitOrderFrontend(sym, exitSide, qty, newTarget)
-      ]);
-    });
-  }
 
   // ---------- Syncing bracket-order exits back to the journal ----------
   // A bracket order's stop-loss/take-profit legs fill on Alpaca's own
@@ -6428,12 +6079,6 @@
         });
     }, priority);
   }
-  var ORB_MARKET_LEGS_BY_OUTCOME = { hit: 1, stopped: 2, eod_close: 2, eod_flat: 1, trailing_stopped: 2, invalidated: 2 };
-  function applyORBSlippage(pctReturn, outcome){
-    var legs = ORB_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? ORB_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
-    var costPercentagePoints = legs * (ORB_SLIPPAGE_BPS / 100);
-    return pctReturn - costPercentagePoints;
-  }
 
   // Win rate alone can't answer whether a strategy is actually
   // profitable — a 55% win rate with small wins and large losses can
@@ -6472,11 +6117,10 @@
 
 
   // ---------- Intraday backtest history (Alpaca, not Twelve Data) ----------
-  // Same simulation shape as the backtest engine above (no lookahead,
-  // real history), pointed at the intraday universe and computeORBAnalysis
-  // instead. summarizeBacktestTrades is timeframe-agnostic already (it
-  // only ever checks trade outcomes, not bar size), so it's reused as-is
-  // rather than duplicated.
+  // Fetches real intraday history for a backtest to run over. The
+  // equities ORB engine this was originally built for has been removed;
+  // the crypto backtest still uses the fetcher, which was always
+  // timeframe- and strategy-agnostic.
   //
   // Used to pull this from Twelve Data -- its free tier caps out at
   // ~800 credits/day, and a whole-universe run (16 symbols) plus the
@@ -6919,9 +6563,10 @@
     return pctReturn - legs * (CRYPTO_SLIPPAGE_BPS / 100);
   }
 
-  // "bars" here are 15-minute crypto bars, continuous (no session gaps)
-  // -- hours/days read directly off the bar count, no trading-day
-  // conversion the way equities' formatIntradayDuration needs.
+  // "bars" here are 15-minute crypto bars, continuous (no session gaps),
+  // so hours/days read directly off the bar count. Equities would need a
+  // trading-day conversion instead -- the market is not open continuously,
+  // and "14 hours" across an overnight gap would be misleading.
   function formatCryptoBacktestDuration(bars){
     var totalMinutes = bars * 15;
     if(totalMinutes < 60) return totalMinutes + ' min';
@@ -6987,40 +6632,6 @@
   // fired, so this builds a full time series from real SPY bars instead.
   var BACKTEST_SELLOFF_THRESHOLD_PERCENT = -1.5;
   var BACKTEST_RALLY_THRESHOLD_PERCENT = 1.5;
-  // requireConfirmationBar is optional -- omitted (or false), this behaves
-  // exactly as it always has (enters the instant the breakout bar itself
-  // qualifies). When true, a qualifying breakout bar doesn't enter
-  // immediately -- it waits one more bar and only takes the trade if
-  // price is still beyond the range at that NEXT bar's close (using the
-  // close, not just a wick, is the actual "confirmation" -- the original
-  // breakout trigger below only ever needed an intrabar high/low touch).
-  // If the next bar reverses back through the breakout level, or the day
-  // ends before a confirmation bar exists, no trade is taken at all --
-  // this doesn't look for a second, later breakout the same day, matching
-  // computeORBAnalysis's own one-signal-per-symbol-per-day mechanics
-  // (which already marked today's slot used the moment the ORIGINAL bar
-  // qualified, before this confirmation check ever runs).
-  function requiresConfirmation(bars, i, analysis){
-    var isLong = analysis.direction === 'Long';
-    var nextBar = bars[i + 1];
-    if(!nextBar) return false;
-    if(nextBar.t.toISOString().slice(0,10) !== bars[i].t.toISOString().slice(0,10)) return false; // next day already started
-    return isLong ? nextBar.c > analysis.entry : nextBar.c < analysis.entry;
-  }
-  // "days" on these trade objects is actually a bar count here (15-min
-  // bars) — this turns that into something a human can read, snapping
-  // to trading-day units once it stretches past a single session, since
-  // the market isn't open continuously and "14 hours" would be misleading.
-  function formatIntradayDuration(bars){
-    var totalMinutes = bars * 15;
-    // bars is an AVERAGE across trades, so it is routinely fractional --
-    // unrounded, this printed "57.51592356687898 min" on the Labs card.
-    if(totalMinutes < 60) return Math.round(totalMinutes) + ' min';
-    var hours = totalMinutes / 60;
-    if(hours <= 6.5) return (Math.round(hours * 10) / 10) + ' hr' + (hours === 1 ? '' : 's');
-    var tradingDays = Math.max(1, Math.round(hours / 6.5));
-    return '~' + tradingDays + ' trading day' + (tradingDays === 1 ? '' : 's');
-  }
   // Seeds the export's symbol box. This used to also populate the
   // equities backtest's symbol select, which is gone.
   function populateIntradayBacktestSymbolSelect(){
@@ -7862,7 +7473,10 @@
   // already was. Only a genuine timeframe change starts fresh -- candle
   // counts aren't comparable across timeframes, so keeping a 1D view's
   // position when switching to 15m would land somewhere arbitrary.
-  // resetChartZoom (the reset control) is still the way back to default.
+  //
+  // NOTE: there is no reset control any more. resetChartZoom was removed
+  // as dead code -- nothing had called it since the chart toolbar went --
+  // so a timeframe switch is now the only way back to the default view.
   function initChartState(sym, tf, data){
     var cfg = tfConfig[tf];
     var defaultVisible = Math.min(cfg.defaultVisible, data.length);
@@ -7903,17 +7517,6 @@
     };
   }
 
-  function resetChartZoom(sym){
-    var state = chartStates[sym];
-    if(!state) return;
-    var cfg = tfConfig[state.tf];
-    var defaultVisible = Math.min(cfg.defaultVisible, state.data.length);
-    state.viewStart = state.data.length - defaultVisible;
-    state.viewEnd = state.data.length;
-    state.priceScaleFactor = 1;
-    state.priceCenterOffset = 0;
-    renderChartView(sym);
-  }
 
   function renderChartError(svg, sym){
     var W = 760, H = 240;
@@ -8577,16 +8180,6 @@
 
   // ---------- Market alerts: always on, no toggle UI anymore ----------
   var alertsEnabledPref = true;
-  function checkAlertsNow(){
-    if(!alertsUid) return;
-    var today = new Date().toISOString().slice(0,10);
-    var alreadyToday = alertHistory.some(function(a){ return a.date === today; });
-    if(!alreadyToday){
-      generateAndSaveDailyAlerts(alertHistory);
-    } else {
-      renderHistoryList();
-    }
-  }
 
   // ---------- Sound alerts ----------
   // Generated tones via the Web Audio API rather than audio files -- no
@@ -8872,9 +8465,8 @@
   applyToCardLayout();
   loadActivityLogFilterPrefs();
 
-  // ---------- Navigation ----------
-  var navLabels = { brief: 'Market Brief', status: 'Status', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
 
+  // ---------- Navigation ----------
   function showPage(name){
     // Labs is admin-only for now. Guarded here rather than only on the nav
     // button because this is the one function every route goes through --
@@ -9148,17 +8740,6 @@
     return journalEntries;
   }
 
-  function jumpToJournalDate(dateStr){
-    showPage('journal');
-    // UTC midnight, not local -- calendarViewDate is now always read via
-    // UTC getters (see renderCalendar), so it has to be constructed the
-    // same way or this would jump to the wrong month for anyone west of
-    // UTC (a local-midnight parse rolls back to the previous UTC day).
-    calendarViewDate = new Date(dateStr + 'T00:00:00Z');
-    selectedJournalDate = dateStr;
-    renderCalendar();
-    renderJournalDetail();
-  }
 
   function computeDayStats(dateStr){
     var entries = filteredJournalEntries().filter(function(e){ return e.date === dateStr && e.status === 'closed'; });
