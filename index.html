@@ -2130,6 +2130,17 @@
 
     <div class="brief-two-col">
       <div class="brief-col">
+        <div class="brief-section-title">Crypto Sentiment</div>
+        <div class="breadth-widget" id="cryptoBreadthWidget"></div>
+      </div>
+      <div class="brief-col">
+        <div class="brief-section-title">Crypto Movers (24h)</div>
+        <div class="movers-grid" id="cryptoMoversGrid"></div>
+      </div>
+    </div>
+
+    <div class="brief-two-col">
+      <div class="brief-col">
         <div class="brief-section-title">Market News</div>
         <div class="market-news-list" id="marketNewsList">
           <div class="news-placeholder">Sign in to see real market headlines.</div>
@@ -9025,6 +9036,8 @@
     lastCryptoQuoteSyncOk = ok;
     renderHeaderLiveStatus();
     renderTicker();
+    renderCryptoSentiment();
+    renderCryptoMovers();
     renderWhatToWatch();
     var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden) renderCryptoBlocks();
@@ -12879,6 +12892,53 @@
       '</div>';
   }
 
+  // Crypto's own breadth read, mirroring renderSentiment's shape. Unlike
+  // equities -- where three index ETFs (SPY/QQQ/DIA) genuinely stand in
+  // for "the market" -- crypto has no equivalent index proxy available
+  // here, so this measures breadth across the traded universe itself: how
+  // many of the 12 pairs are up over roughly the last 24h. That's a
+  // different kind of measure than the equities one above (constituent
+  // breadth vs. index direction), which is exactly why it's its own
+  // labelled section rather than extra rows in the same widget.
+  function renderCryptoSentiment(){
+    var el = document.getElementById('cryptoBreadthWidget');
+    if(!el) return;
+    var priced = cryptoWatchlist.filter(function(w){ return w.price != null && w.prevClose != null; });
+    if(priced.length === 0){
+      el.innerHTML = '<div class="labs-backtest-status">Loading crypto data…</div>';
+      return;
+    }
+    var reads = priced.map(function(w){ return { sym: w.sym, chg: pct(w.price, w.prevClose) }; });
+    var up = reads.filter(function(r){ return r.chg >= 0; }).length;
+    var total = reads.length;
+    var label = up === total ? 'Broadly positive' : up === 0 ? 'Broadly negative' :
+      up > total / 2 ? 'Mixed, leaning positive' : up < total / 2 ? 'Mixed, leaning negative' : 'Mixed';
+    var labelClass = up === total ? 'up' : up === 0 ? 'down' : '';
+    var upPct = (up / total) * 100;
+    // Only the biggest movers in each direction get their own row -- all
+    // 12 pairs listed out would dwarf the equities widget beside it and
+    // bury the one number that actually matters (the breadth split).
+    var sorted = reads.slice().sort(function(a,b){ return b.chg - a.chg; });
+    var shown = sorted.slice(0, 2).concat(sorted.slice(-2));
+    // A universe small enough that the top-2 and bottom-2 could overlap
+    // would otherwise render the same pair twice.
+    var seen = {};
+    shown = shown.filter(function(r){ if(seen[r.sym]) return false; seen[r.sym] = true; return true; });
+
+    el.innerHTML =
+      '<div class="breadth-bar"><div class="breadth-bar-up" style="width:' + upPct + '%"></div></div>' +
+      '<div class="sentiment-rows">' +
+        shown.map(function(r){
+          var isUp = r.chg >= 0;
+          return '<div class="sentiment-row"><span class="sentiment-name">' + r.sym + '</span>' +
+            '<span class="sentiment-chg ' + (isUp?'up':'down') + '">' + (isUp?'▲':'▼') + ' ' + Math.abs(r.chg).toFixed(2) + '%</span></div>';
+        }).join('') +
+      '</div>' +
+      '<div class="breadth-meta">' +
+        '<span class="breadth-label ' + labelClass + '">' + label + ' — ' + up + ' of ' + total + ' pairs up over 24h</span>' +
+      '</div>';
+  }
+
   // ---------- Market Brief headline & lede (generated, not written) ----------
   // Built entirely from data already on this page — the same index
   // proxies renderSentiment uses, and the same intradayTrades Trade
@@ -12937,6 +12997,22 @@
       ledeParts.push("Today's screener surfaced " + realTrades.length + (realTrades.length === 1 ? ' setup' : ' setups') + ' (' + splitDesc + ').');
     }
 
+    // Crypto gets a sentence of its own -- it trades 24/7, so on a
+    // weekend or overnight (when every equities figure above is frozen at
+    // the last session's close) this is the only part of the lede
+    // describing a market that's actually open right now.
+    var pricedCryptoNow = cryptoWatchlist.filter(function(w){ return w.price != null && w.prevClose != null; });
+    if(pricedCryptoNow.length){
+      var cryptoUp = pricedCryptoNow.filter(function(w){ return pct(w.price, w.prevClose) >= 0; }).length;
+      var btc = pricedCryptoNow.filter(function(w){ return w.sym === 'BTC/USD'; })[0];
+      var cryptoSentence = 'Crypto has ' + cryptoUp + ' of ' + pricedCryptoNow.length + ' tracked pairs up over the last 24 hours';
+      if(btc){
+        var btcChg = pct(btc.price, btc.prevClose);
+        cryptoSentence += ', with Bitcoin ' + (btcChg >= 0 ? 'up' : 'down') + ' ' + Math.abs(btcChg).toFixed(2) + '%';
+      }
+      ledeParts.push(cryptoSentence + '.');
+    }
+
     ledeEl.textContent = ledeParts.join(' ');
   }
 
@@ -12960,17 +13036,48 @@
     var sorted = withChange.slice().sort(function(a,b){ return b.change - a.change; });
     var gainers = sorted.slice(0, 3);
     var losers = sorted.slice(-3).reverse();
-    function row(m){
-      var up = m.change >= 0;
-      return '<div class="mover-row">' +
-        '<span class="mover-sym mono">' + m.sym + '</span>' +
-        '<span class="mover-price mono">' + fmt(m.price) + '</span>' +
-        '<span class="mover-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(m.change).toFixed(2) + '%</span>' +
-      '</div>';
-    }
     el.innerHTML =
-      '<div class="movers-col"><div class="movers-col-title">Top Gainers</div>' + gainers.map(row).join('') + '</div>' +
-      '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(row).join('') + '</div>';
+      '<div class="movers-col"><div class="movers-col-title">Top Gainers</div>' + gainers.map(moverRow).join('') + '</div>' +
+      '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(moverRow).join('') + '</div>';
+  }
+
+  // Shared by both the equities and crypto movers grids so the two can
+  // never drift apart visually.
+  function moverRow(m){
+    var up = m.change >= 0;
+    return '<div class="mover-row">' +
+      '<span class="mover-sym mono">' + m.sym + '</span>' +
+      '<span class="mover-price mono">' + fmt(m.price) + '</span>' +
+      '<span class="mover-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(m.change).toFixed(2) + '%</span>' +
+    '</div>';
+  }
+
+  // Crypto's own movers, mirroring renderMovers exactly. Kept a separate
+  // section rather than merged into one combined ranking: crypto trades
+  // 24/7 while equities don't, so a single list would routinely be all
+  // crypto on a weekend or overnight (when every equities change is
+  // frozen at Friday's close) and read as though the stocks had vanished.
+  // "Change" here is vs. roughly 24h ago rather than a previous session
+  // close, since crypto has no daily close to measure from -- see
+  // shwoop-server's cryptoMarketData.js fetchQuote.
+  function renderCryptoMovers(){
+    var el = document.getElementById('cryptoMoversGrid');
+    if(!el) return;
+    var withChange = cryptoWatchlist.filter(function(w){
+      return w.price != null && w.prevClose != null;
+    }).map(function(w){
+      return { sym: w.sym, price: w.price, change: pct(w.price, w.prevClose) };
+    });
+    if(withChange.length === 0){
+      el.innerHTML = '<div class="news-placeholder">Loading crypto prices…</div>';
+      return;
+    }
+    var sorted = withChange.slice().sort(function(a,b){ return b.change - a.change; });
+    var gainers = sorted.slice(0, 3);
+    var losers = sorted.slice(-3).reverse();
+    el.innerHTML =
+      '<div class="movers-col"><div class="movers-col-title">Top Gainers</div>' + gainers.map(moverRow).join('') + '</div>' +
+      '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(moverRow).join('') + '</div>';
   }
 
   // ---------- Shared market snapshot (indices/watchlist quotes, news, earnings -- one doc for every signed-in account) ----------
@@ -12996,11 +13103,30 @@
         watchlist.push({ sym: sym, name: COMPANY_NAMES[sym] || sym, price: q.price, prevClose: q.prevClose });
       }
     });
+    // Crypto's own quotes, merged into the SAME cryptoWatchlist that a
+    // per-account fetchAllCryptoQuotes populates -- so every crypto
+    // consumer downstream (the ticker tape, the Brief's movers/sentiment)
+    // works identically whether the price came from this shared snapshot
+    // or the account's own Alpaca connection. This is what makes crypto
+    // visible at all to a signed-in account that hasn't connected Alpaca
+    // yet, since that per-account fetch is gated on alpacaConnected.
+    var cryptoQuotes = data.cryptoQuotes || {};
+    Object.keys(cryptoQuotes).forEach(function(sym){
+      var q = cryptoQuotes[sym];
+      if(!q || q.price == null) return;
+      var existingCrypto = cryptoWatchlist.filter(function(w){ return w.sym === sym; })[0];
+      if(existingCrypto){
+        existingCrypto.price = q.price;
+        existingCrypto.prevClose = q.prevClose;
+      }
+    });
     renderTicker();
     renderIndices();
     renderSentiment();
+    renderCryptoSentiment();
     renderBriefHeadline();
     renderMovers();
+    renderCryptoMovers();
     renderWhatToWatch();
     renderMarketNews(data.news);
     renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
@@ -13069,7 +13195,9 @@
   renderIndices();
   renderWhatToWatch();
   renderSentiment();
+  renderCryptoSentiment();
   renderMovers();
+  renderCryptoMovers();
   renderBriefHeadline();
   statCta();
   updateClock();
