@@ -1969,7 +1969,7 @@
     <button class="side-nav-item nav-item" data-page="journal" title="Trade Journal">
       <span class="side-nav-icon">▦</span><span class="side-nav-label">Journal</span>
     </button>
-    <button class="side-nav-item nav-item" data-page="labs" title="Labs">
+    <button class="side-nav-item nav-item" id="navLabs" data-page="labs" title="Labs" hidden>
       <span class="side-nav-icon">◈</span><span class="side-nav-label">Labs</span>
     </button>
     <div class="side-nav-divider"></div>
@@ -9258,6 +9258,18 @@
   var navLabels = { brief: 'Market Brief', status: 'Status', trades: 'Trade Overview', journal: 'Trade Journal', settings: 'Settings', changelog: 'Changelog', labs: 'Labs' };
 
   function showPage(name){
+    // Labs is admin-only for now. Guarded here rather than only on the nav
+    // button because this is the one function every route goes through --
+    // the nav click, the landing restore, the CTA buttons -- so a page
+    // hidden in one place and reachable from another can't happen.
+    //
+    // This is a UI gate, not a security boundary: the whole app is one
+    // client-side file, so the markup is readable by anyone who opens dev
+    // tools. What it actually protects is nothing sensitive -- a backtest
+    // reads market data with the viewer's OWN Alpaca key and touches no
+    // other account -- so this is about not showing half-finished research
+    // to invited users, not about keeping a secret.
+    if(name === 'labs' && !currentUserIsAdmin){ name = 'brief'; }
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
@@ -12502,6 +12514,14 @@
     if(liveBtn) liveBtn.hidden = !currentUserIsAdmin;
     var inviteSection = document.getElementById('adminInviteSection');
     if(inviteSection) inviteSection.hidden = !currentUserIsAdmin;
+    var labsNav = document.getElementById('navLabs');
+    if(labsNav) labsNav.hidden = !currentUserIsAdmin;
+    // Admin status arrives with the Firestore snapshot, which is AFTER the
+    // landing page has already been chosen -- so someone sitting on Labs
+    // when it resolves has to be moved off, not just have the nav item
+    // vanish underneath them. Also covers sign-out, which resets the flag.
+    var labsPage = document.getElementById('page-labs');
+    if(!currentUserIsAdmin && labsPage && !labsPage.hidden){ showPage('brief'); }
   }
 
   document.getElementById('generateInviteBtn').addEventListener('click', function(){
