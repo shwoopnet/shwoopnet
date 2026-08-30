@@ -1380,6 +1380,20 @@
   .growth-chart-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
   .growth-chart-title{ font-size:14px; font-weight:600; color: var(--paper); }
   .growth-chart-sub{ font-size:11.5px; color: var(--muted); margin-top:3px; }
+  .growth-chart-head-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .growth-chart-ranges{ display:flex; gap:4px; }
+  .growth-chart-range-btn{
+    background:none; border:1px solid var(--border); color: var(--muted);
+    font-family:'Public Sans', sans-serif; font-size:11px; padding:3px 9px;
+    border-radius:4px; cursor:pointer; line-height:1.4;
+  }
+  .growth-chart-range-btn:hover{ color: var(--paper); border-color: var(--muted); }
+  .growth-chart-range-btn.active{ color: var(--amber); border-color: var(--amber); }
+  /* A window with fewer than two trades in it can't draw a curve. Shown
+     rather than hidden, so the set of ranges never shifts around under
+     the cursor as trades accumulate. */
+  .growth-chart-range-btn:disabled{ opacity:.35; cursor:default; }
+  .growth-chart-range-btn:disabled:hover{ color: var(--muted); border-color: var(--border); }
   .growth-chart-legend{ font-size:11.5px; color: var(--muted); font-variant-numeric: tabular-nums; text-align:right; }
   .growth-chart-legend .up{ color: var(--gain); }
   .growth-chart-legend .down{ color: var(--loss); }
@@ -2377,9 +2391,12 @@
       <div class="growth-chart-head">
         <div>
           <div class="growth-chart-title">Account Growth</div>
-          <div class="growth-chart-sub" id="growthChartSub">Realized P&amp;L, cumulative, in the order trades actually closed.</div>
+          <div class="growth-chart-sub" id="growthChartSub">Realized P&amp;L, cumulative.</div>
         </div>
-        <div class="growth-chart-legend" id="growthChartLegend"></div>
+        <div class="growth-chart-head-right">
+          <div class="growth-chart-ranges" id="growthChartRanges"></div>
+          <div class="growth-chart-legend" id="growthChartLegend"></div>
+        </div>
       </div>
       <div class="growth-chart-wrap">
         <svg class="growth-chart" id="growthChart" viewBox="0 0 760 220" preserveAspectRatio="none" role="img" aria-label="Cumulative realized profit and loss over time"></svg>
@@ -9862,6 +9879,20 @@
   var alpacaClosedOrdersCache = { data: null, at: 0, inflight: null };
   var ALPACA_CLOSED_ORDERS_CACHE_MS = 60000;
   function getAlpacaClosedOrdersCached(){
+    // Credentials live in the Firestore user doc, which arrives a moment
+    // AFTER auth resolves -- but the auth handler already kicks off the
+    // quote loop and renderPLSummary immediately. Without this guard,
+    // that gap fires a burst of requests with empty API keys, and all
+    // four callers below (Overall P&L, trade stats, growth chart, Labs
+    // comparison) each log a 401 on every single page load. They all
+    // already treat an empty result as "leave the journal fallback
+    // showing", so returning one here is both correct and silent; the
+    // real fetch happens on the very next render once the doc lands.
+    //
+    // Worth keeping: that console noise is not harmless. It buried a
+    // genuine crypto-chart data bug in a wall of red herrings and cost
+    // real debugging time before anyone realised the 401s were expected.
+    if(!alpacaConnected) return Promise.resolve([]);
     if(alpacaClosedOrdersCache.inflight) return alpacaClosedOrdersCache.inflight;
     if(alpacaClosedOrdersCache.data && (Date.now() - alpacaClosedOrdersCache.at) < ALPACA_CLOSED_ORDERS_CACHE_MS){
       return Promise.resolve(alpacaClosedOrdersCache.data);
@@ -10304,8 +10335,72 @@
         '<div>Max drawdown <span class="down">−$' + maxDrawdown.toFixed(0) + '</span></div>';
     }
     if(subEl){
-      subEl.textContent = 'Realized P&L, cumulative across ' + series.length + ' closed trades — plotted in the order they closed, not to scale by date.';
+      subEl.textContent = series.length + ' closed trade' + (series.length === 1 ? '' : 's')
+        + ' · ' + firstDate + ' – ' + lastDate;
     }
+  }
+
+  // ---------- Growth chart range filter ----------
+  // Spacing is by trade sequence, not calendar time (see buildGrowthSeries),
+  // so these windows select WHICH trades are plotted rather than rescaling
+  // an axis. days: null means everything.
+  var GROWTH_CHART_RANGES = [
+    { key: '7d', label: '7D', days: 7 },
+    { key: '30d', label: '30D', days: 30 },
+    { key: '90d', label: '90D', days: 90 },
+    { key: 'all', label: 'All', days: null },
+  ];
+  var growthChartRange = 'all';
+  try{
+    var savedRange = window.localStorage.getItem('shwoopnet:growthChartRange');
+    if(savedRange && GROWTH_CHART_RANGES.some(function(r){ return r.key === savedRange; })) growthChartRange = savedRange;
+  }catch(e){}
+
+  function tradesWithinRange(trades, rangeKey){
+    var range = GROWTH_CHART_RANGES.filter(function(r){ return r.key === rangeKey; })[0];
+    if(!range || range.days === null) return trades;
+    var cutoff = Date.now() - range.days * 24 * 60 * 60 * 1000;
+    return trades.filter(function(t){ return new Date(t.exitTime).getTime() >= cutoff; });
+  }
+
+  // Rendered from the FULL trade set, not the filtered one, so each button
+  // can say whether picking it would actually show anything -- a range with
+  // under two trades in it can't draw a curve, and silently rendering an
+  // empty card would look broken rather than empty.
+  function renderGrowthChartRanges(allTrades){
+    var el = document.getElementById('growthChartRanges');
+    if(!el) return;
+    el.innerHTML = GROWTH_CHART_RANGES.map(function(r){
+      var count = tradesWithinRange(allTrades, r.key).length;
+      var disabled = count < 2;
+      return '<button class="growth-chart-range-btn' + (r.key === growthChartRange ? ' active' : '') + '"'
+        + ' data-range="' + r.key + '"' + (disabled ? ' disabled' : '')
+        + ' title="' + count + ' closed trade' + (count === 1 ? '' : 's') + '">' + r.label + '</button>';
+    }).join('');
+    el.querySelectorAll('.growth-chart-range-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        growthChartRange = btn.dataset.range;
+        try{ window.localStorage.setItem('shwoopnet:growthChartRange', growthChartRange); }catch(e){}
+        renderGrowthChartRanges(allTrades);
+        renderGrowthChart(buildGrowthSeries(tradesWithinRange(allTrades, growthChartRange)));
+      });
+    });
+  }
+
+  // Draws the range buttons and the curve together, so the two can never
+  // disagree about which trade set is on screen.
+  function renderGrowthChartWithRanges(allTrades){
+    renderGrowthChartRanges(allTrades);
+    var scoped = tradesWithinRange(allTrades, growthChartRange);
+    // A saved range that no longer has enough trades in it (cleared
+    // history, or a long quiet stretch) falls back to All rather than
+    // rendering nothing at all.
+    if(scoped.length < 2 && allTrades.length >= 2){
+      growthChartRange = 'all';
+      renderGrowthChartRanges(allTrades);
+      scoped = allTrades;
+    }
+    renderGrowthChart(buildGrowthSeries(scoped));
   }
 
   // Real Alpaca orders first (the same ground truth the Profit Factor card
@@ -10323,7 +10418,7 @@
     // Crypto tab goes straight to the journal fallback rather than showing
     // an equities-only curve under a Crypto heading.
     if(journalFilter === 'crypto'){
-      renderGrowthChart(buildGrowthSeries(closedJournalTradesForGrowth()));
+      renderGrowthChartWithRanges(closedJournalTradesForGrowth());
       return;
     }
 
@@ -10331,14 +10426,14 @@
       if(myGen !== growthChartGen) return; // superseded by a newer render
       var trades = reconstructTradesFromOrders(orders).trades;
       if(trades.length >= 2){
-        renderGrowthChart(buildGrowthSeries(trades));
+        renderGrowthChartWithRanges(trades);
         return;
       }
-      renderGrowthChart(buildGrowthSeries(closedJournalTradesForGrowth()));
+      renderGrowthChartWithRanges(closedJournalTradesForGrowth());
     }).catch(function(err){
       if(myGen !== growthChartGen) return;
       console.error('Growth chart: Alpaca order history unavailable, falling back to the journal:', err);
-      renderGrowthChart(buildGrowthSeries(closedJournalTradesForGrowth()));
+      renderGrowthChartWithRanges(closedJournalTradesForGrowth());
     });
   }
 
