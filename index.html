@@ -2896,6 +2896,14 @@
         that bar's close. Trades entry timing (and some of the "let winners run" edge from catching the move early)
         for fewer immediate fakeouts. Off by default so this stays a direct before/after comparison, not a new default.
       </label>
+          <label class="labs-backtest-toggle">
+            <input type="checkbox" id="intradayBacktestInvalidate">
+            <span>Exit when the breakout fails — close the position as soon as a bar CLOSES back inside the
+            opening range, instead of waiting for the stop. The reason for the trade is gone at that point.
+            Off by default, and worth knowing before you run it: cutting a trend trade when it dips is a
+            well-known way to make a trend strategy worse, because the losers it saves you from are usually
+            outnumbered by the winners it ends early. This measures which happens here.</span>
+          </label>
       <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
       <div id="intradayBacktestResults"></div>
       </div>
@@ -2925,6 +2933,14 @@
         <button class="settings-reset-btn" id="runCryptoBacktestBtn">Run backtest</button>
         <button class="settings-reset-btn" id="runCryptoUniverseBacktestBtn">Run whole universe</button>
       </div>
+      <label class="labs-backtest-toggle">
+        <input type="checkbox" id="cryptoBacktestInvalidate">
+        <span>Exit when the trend is lost — close as soon as a bar CLOSES back below the 30-bar average.
+        Entry required price to sit 1.5% above that average, so the gap acts as hysteresis rather than
+        churning on every touch. This matters more here than for equities: a crypto position has no session
+        close and no target, so it rides the trailing stop indefinitely — which is exactly where a stale
+        thesis costs the most. Off by default.</span>
+      </label>
       <div class="labs-backtest-status" id="cryptoBacktestStatus"></div>
       <div id="cryptoBacktestResults"></div>
     </div>
@@ -3303,6 +3319,10 @@
 
     return {
       direction: signal.direction, entry: signal.entry, stop: signal.currentStop, t1: signal.t1,
+      // Carried through because `stop` above is the TRAILED stop, so the
+      // original range boundaries can no longer be recovered from it -- and
+      // the backtest's failed-breakout exit needs the boundary, not the stop.
+      rangeHigh: signal.rangeHigh, rangeLow: signal.rangeLow,
       status: status, statusLabel: statusLabel, notes: notes
     };
   }
@@ -6497,7 +6517,7 @@
   // average number alone isn't enough to trust. analysis.t1 is still
   // computed and shown as a reference point (still entry + 1.5x risk),
   // but it is no longer where the trade actually caps out.
-  function simulateORBForwardSameDay(bars, entryIdx, analysis){
+  function simulateORBForwardSameDay(bars, entryIdx, analysis, invalidateOnFailedBreakout){
     var isLong = analysis.direction === 'Long';
     var entryDateKey = bars[entryIdx].t.toISOString().slice(0,10);
     // If the entry bar is already the last bar of its own day, there's
@@ -6509,6 +6529,21 @@
     if(entryIdx + 1 >= bars.length || bars[entryIdx + 1].t.toISOString().slice(0,10) !== entryDateKey){
       return { result: 'eod_flat', days: 1, price: analysis.entry, date: bars[entryIdx].t };
     }
+    // The reason this trade exists is that price broke out of the opening
+    // range and held. If a bar CLOSES back inside that range, that reason is
+    // gone -- the breakout failed -- and the position is being held on
+    // nothing but the hope that the stop isn't hit.
+    //
+    // Deliberately measured on the CLOSE, not the low. Intrabar dips back
+    // through the level are exactly the noise a breakout trade is supposed
+    // to sit through; only a close says the move actually failed.
+    //
+    // Opt-in, and worth being blunt about why: cutting a trend trade when it
+    // dips is a well-known way to make a trend strategy WORSE, because the
+    // trades it saves you from are outnumbered by the winners it ends early.
+    // This exists to find out which happens here, not because it will help.
+    var invalidationLevel = invalidateOnFailedBreakout
+      ? (isLong ? analysis.rangeHigh : analysis.rangeLow) : null;
     var risk = Math.abs(analysis.entry - analysis.stop);
     var TRAIL_TRIGGER_RR = 0.75;
     var triggerPrice = isLong ? analysis.entry + TRAIL_TRIGGER_RR * risk : analysis.entry - TRAIL_TRIGGER_RR * risk;
@@ -6554,6 +6589,13 @@
       if(reachedEarlyBreakeven){
         currentStop = isLong ? Math.max(currentStop, analysis.entry) : Math.min(currentStop, analysis.entry);
       }
+      // Checked last, after the stop: a bar that hit the stop exited at the
+      // stop, and re-deciding that on the same bar's close would be reading
+      // the future to pick the better of two exits.
+      if(invalidationLevel !== null){
+        var failed = isLong ? bar.c < invalidationLevel : bar.c > invalidationLevel;
+        if(failed) return { result: 'invalidated', days: j - entryIdx, price: bar.c, date: bar.t };
+      }
     }
     var lastBar = bars[lastBarOfDayIdx];
     return { result: 'eod_close', days: lastBarOfDayIdx - entryIdx, price: lastBar.c, date: lastBar.t };
@@ -6568,7 +6610,7 @@
   // what this tool reported and what the strategy was actually
   // validated on (roughly double the true profit factor and win rate).
   var ORB_SLIPPAGE_BPS = 5;
-  var ORB_MARKET_LEGS_BY_OUTCOME = { hit: 1, stopped: 2, eod_close: 2, eod_flat: 1, trailing_stopped: 2 };
+  var ORB_MARKET_LEGS_BY_OUTCOME = { hit: 1, stopped: 2, eod_close: 2, eod_flat: 1, trailing_stopped: 2, invalidated: 2 };
   function applyORBSlippage(pctReturn, outcome){
     var legs = ORB_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? ORB_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
     var costPercentagePoints = legs * (ORB_SLIPPAGE_BPS / 100);
@@ -6920,7 +6962,16 @@
   // runs out is marked 'unresolved' (mark-to-market at the last close)
   // rather than force-resolved against a session close that doesn't
   // exist for this market.
-  function simulateCryptoForward(bars, entryIdx, signal){
+  // Crypto has no session close and no target -- a position rides the
+  // trailing stop indefinitely, which is exactly where a stale thesis costs
+  // the most. Entry required the close to sit 1.5% ABOVE the 30-bar trend
+  // average; this exits when it closes back BELOW that average.
+  //
+  // The gap between those two levels is deliberate. Exiting at the same line
+  // you entered on would churn in and out on every wobble around it; leaving
+  // the 1.5% as hysteresis means price has to genuinely give up the trend,
+  // not merely touch it.
+  function simulateCryptoForward(bars, entryIdx, signal, invalidateOnTrendLoss){
     var risk = Math.abs(signal.entry - signal.stop);
     var triggerPrice = signal.entry + CRYPTO_BT_TRAIL_TRIGGER_RR * risk;
     var trailingActive = false;
@@ -6937,12 +6988,21 @@
       }
       // Breakeven floor -- matches technicalAnalysisCrypto.js exactly.
       if(trailingActive) currentStop = Math.max(currentStop, signal.entry);
+      // Same ordering rule as the equities version: the stop is checked
+      // first, so a bar that stopped out exited at the stop.
+      if(invalidateOnTrendLoss && j >= CRYPTO_BT_TREND_LOOKBACK_BARS){
+        var trendBars = bars.slice(j - CRYPTO_BT_TREND_LOOKBACK_BARS, j);
+        var trendSMA = trendBars.reduce(function(a,b){ return a + b.c; }, 0) / trendBars.length;
+        if(bar.c < trendSMA){
+          return { result: 'invalidated', bars: j - entryIdx, price: bar.c, date: bar.t };
+        }
+      }
     }
     var lastBar = bars[bars.length - 1];
     return { result: 'unresolved', bars: bars.length - 1 - entryIdx, price: lastBar.c, date: lastBar.t };
   }
 
-  var CRYPTO_BT_MARKET_LEGS_BY_OUTCOME = { stopped: 2, trailing_stopped: 2, unresolved: 1 };
+  var CRYPTO_BT_MARKET_LEGS_BY_OUTCOME = { stopped: 2, trailing_stopped: 2, invalidated: 2, unresolved: 1 };
 
   // Crypto costs its OWN number, not the equities one.
   //
@@ -6981,7 +7041,7 @@
     return '~' + (Math.round(days * 10) / 10) + ' day' + (Math.round(days * 10) === 10 ? '' : 's');
   }
 
-  function runCryptoBacktestSimulationAsync(bars, lookbackBars){
+  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss){
     return new Promise(function(resolve){
       var startIdx = Math.max(CRYPTO_BT_TREND_LOOKBACK_BARS, bars.length - lookbackBars);
       var trades = [];
@@ -6993,7 +7053,7 @@
         while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
           var signal = findCryptoBacktestBreakoutAt(bars, i);
           if(signal){
-            var outcome = simulateCryptoForward(bars, i, signal);
+            var outcome = simulateCryptoForward(bars, i, signal, invalidateOnTrendLoss);
             var pctReturn = (outcome.price - signal.entry) / signal.entry * 100; // Long-only
             pctReturn = applyCryptoBacktestSlippage(pctReturn, outcome.result);
             trades.push({
@@ -7096,7 +7156,7 @@
   // it always has (no filtering), which is what every existing call site
   // still does unless the new "Apply the market-regime filter" checkbox
   // in Labs is checked.
-  function runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar){
+  function runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar, invalidateOnFailedBreakout){
     return new Promise(function(resolve){
       // Filtered once, here, rather than inside computeORBAnalysis (which
       // used to do this on every call) -- this loop calls that function
@@ -7158,7 +7218,8 @@
               entryIdx = i + 1;
               effectiveAnalysis = {
                 direction: analysis.direction, entry: bars[entryIdx].c,
-                stop: analysis.stop, t1: analysis.t1
+                stop: analysis.stop, t1: analysis.t1,
+                rangeHigh: analysis.rangeHigh, rangeLow: analysis.rangeLow
               };
             }
           }
@@ -7172,7 +7233,7 @@
               ? effectiveAnalysis.entry <= effectiveAnalysis.stop
               : effectiveAnalysis.entry >= effectiveAnalysis.stop;
             if(stopAlreadyBreached){ i++; processedThisChunk++; continue; }
-            var outcome = simulateORBForwardSameDay(bars, entryIdx, effectiveAnalysis);
+            var outcome = simulateORBForwardSameDay(bars, entryIdx, effectiveAnalysis, invalidateOnFailedBreakout);
             var isLong = effectiveAnalysis.direction === 'Long';
             var pctReturn = (outcome.price - effectiveAnalysis.entry) / effectiveAnalysis.entry * (isLong ? 1 : -1) * 100;
             pctReturn = applyORBSlippage(pctReturn, outcome.result);
@@ -7367,10 +7428,12 @@
 
     var confirmationBarCheckbox = document.getElementById('intradayBacktestConfirmationBar');
     var requireConfirmationBar = !!(confirmationBarCheckbox && confirmationBarCheckbox.checked);
+    var invalidateCheckbox = document.getElementById('intradayBacktestInvalidate');
+    var invalidateOnFailedBreakout = !!(invalidateCheckbox && invalidateCheckbox.checked);
 
     fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
       return fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar, invalidateOnFailedBreakout);
       });
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
@@ -7409,6 +7472,8 @@
     var failedSymbols = [];
     var confirmationBarCheckbox = document.getElementById('intradayBacktestConfirmationBar');
     var requireConfirmationBar = !!(confirmationBarCheckbox && confirmationBarCheckbox.checked);
+    var invalidateCheckbox = document.getElementById('intradayBacktestInvalidate');
+    var invalidateOnFailedBreakout = !!(invalidateCheckbox && invalidateCheckbox.checked);
 
     function processNext(index, regimeSeries){
       if(index >= INTRADAY_UNIVERSE.length){
@@ -7427,7 +7492,7 @@
       fetchIntradayBacktestHistoryChunked(sym, lookbackBars, function(note){
         statusEl.textContent = progress + ' — ' + note;
       }).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar);
+        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar, invalidateOnFailedBreakout);
       }).then(function(trades){
         allTrades = allTrades.concat(trades);
         perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
@@ -7486,7 +7551,7 @@
         '<tbody>' + trades.map(function(t){
           var outcomeClass = t.outcome === 'unresolved' ? '' : (t.pctReturn > 0 ? 'backtest-outcome-hit' : 'backtest-outcome-stopped');
           var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
-          var outcomeLabel = t.outcome === 'unresolved' ? 'Still open' : t.outcome === 'trailing_stopped' ? 'Trailing stop' : 'Stopped';
+          var outcomeLabel = t.outcome === 'unresolved' ? 'Still open' : t.outcome === 'invalidated' ? 'Thesis invalidated' : t.outcome === 'trailing_stopped' ? 'Trailing stop' : 'Stopped';
           return '<tr>' +
             '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
             '<td>' + t.direction + '</td>' +
@@ -7562,6 +7627,11 @@
     }).join('');
   }
 
+  function cryptoInvalidateChecked(){
+    var el = document.getElementById('cryptoBacktestInvalidate');
+    return !!(el && el.checked);
+  }
+
   function runCryptoBacktestClicked(){
     var sym = document.getElementById('cryptoBacktestSymbol').value;
     var lookbackDays = parseInt(document.getElementById('cryptoBacktestLookback').value, 10);
@@ -7580,7 +7650,7 @@
         throw new Error('Not enough crypto history for ' + sym + ' in this window — try a longer lookback.');
       }
       var lookbackBars = Math.round(lookbackDays * 24 * 4); // 4 bars/hour at 15-min
-      return runCryptoBacktestSimulationAsync(bars, lookbackBars);
+      return runCryptoBacktestSimulationAsync(bars, lookbackBars, cryptoInvalidateChecked());
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderCryptoBacktestResults(trades, summary, sym);
