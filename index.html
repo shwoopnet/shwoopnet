@@ -12788,6 +12788,33 @@
     });
   }
 
+  // Walks every page in a tight window around 20:00Z (16:00 ET). Tight
+  // because SPY trades tens of thousands of times a minute at the close,
+  // and paginated because "tight" is a guess and truncation is the exact
+  // failure this is correcting.
+  var SIP_TRADE_PAGE_LIMIT = 10000;
+  var SIP_MAX_PAGES = 12;
+  function fetchSipClosingTrades(day){
+    var all = [];
+    var pages = 0;
+    function page(token){
+      var url = ALPACA_DATA_BASE + '/v2/stocks/SPY/trades?start=' + day + 'T19:59:00Z&end=' + day +
+        'T20:05:00Z&feed=sip&limit=' + SIP_TRADE_PAGE_LIMIT + (token ? '&page_token=' + encodeURIComponent(token) : '');
+      return sipProbeFetch(url).then(function(res){
+        var problem = describeProbeResult(res);
+        if(problem) return { error: problem, list: all, pages: pages, truncated: false };
+        pages++;
+        all = all.concat((res.body && res.body.trades) || []);
+        var next = res.body && res.body.next_page_token;
+        if(next && pages < SIP_MAX_PAGES) return page(next);
+        // Ran out of page budget with more still to come: say so rather
+        // than reporting the absence as a finding.
+        return { list: all, pages: pages, truncated: Boolean(next) };
+      });
+    }
+    return page(null);
+  }
+
   function runSipAuctionProbe(){
     var btn = document.getElementById('testSipAuctionBtn');
     var statusEl = document.getElementById('sipAuctionStatus');
@@ -12806,6 +12833,7 @@
     var lines = [];
     var sipWorks = false;
     var auctionFound = false;
+    var scanTruncated = false;
 
     function barsUrl(feed, d){
       return ALPACA_DATA_BASE + '/v2/stocks/SPY/bars?timeframe=1Day&start=' + d + '&end=' + d +
@@ -12824,15 +12852,27 @@
       var b = (sip.body && sip.body.bars) || [];
       lines.push('SIP daily bars: ' + (p || b.length + ' bar(s)' + (b.length ? ', close ' + b[0].c : '')));
       if(!p && b.length) sipWorks = true;
-      return sipProbeFetch(ALPACA_DATA_BASE + '/v2/stocks/SPY/trades?start=' + day +
-        'T19:55:00Z&end=' + day + 'T20:10:00Z&feed=sip&limit=10000');
+      // A 15-minute window with limit=10000 came back with exactly 10,000
+      // trades and no auction print -- because Alpaca returns trades
+      // ASCENDING FROM start, so the cap truncated the response about a
+      // minute in and never reached 20:00 where the print actually is.
+      //
+      // That is the third time this exact trap has been hit here: the
+      // crypto charts froze their zoom clamp on it, the options probe
+      // needed two revisions for it, and CLAUDE.md records it in as many
+      // words. So this does not just narrow the window -- it PAGINATES to
+      // the end, and reports truncation explicitly if it ever runs out of
+      // pages, because a silent cap reads exactly like a real absence.
+      return fetchSipClosingTrades(day);
     }).then(function(trades){
-      var p = describeProbeResult(trades);
-      if(p){
-        lines.push('SIP trades around the close: ' + p);
+      if(trades.error){
+        lines.push('SIP trades around the close: ' + trades.error);
         return null;
       }
-      var list = (trades.body && trades.body.trades) || [];
+      var list = trades.list;
+      scanTruncated = Boolean(trades.truncated);
+      lines.push('SIP trades scanned around the close: ' + list.length +
+        ' across ' + trades.pages + ' page(s)' + (trades.truncated ? ' — TRUNCATED, the print may lie beyond' : ''));
       var auctions = list.filter(function(t){
         return (t.c || []).some(function(c){ return AUCTION_CONDITIONS[String(c)] !== undefined; });
       });
@@ -12871,10 +12911,15 @@
         statusEl.textContent = 'Auction data available. The auction and imbalance strategy families are testable ' +
           'on this account — which proves the print is RETRIEVABLE, not that a strategy using it works.';
         statusEl.className = 'labs-backtest-status ok';
+      } else if(sipWorks && scanTruncated){
+        statusEl.textContent = 'SIP works, but the trade scan hit its page budget before finishing — so this run ' +
+          'proves nothing about the auction print either way. Not an absence, a truncation.';
+        statusEl.className = 'labs-backtest-status';
       } else if(sipWorks){
-        statusEl.textContent = 'SIP works, but no auction print was identified. Either the condition codes differ ' +
-          'from those probed or the window missed it. An absence here is WEAK evidence, unlike a 403, which is ' +
-          'strong — widen the window before concluding it is unavailable.';
+        statusEl.textContent = 'SIP works and the full window was scanned, but no trade carried an auction ' +
+          'condition. That is real evidence now rather than a truncated scan, though still weaker than a 403 — ' +
+          'the condition codes could differ from those probed. Note the SIP and IEX daily closes above: if they ' +
+          'DIFFER, the SIP daily bar is already the consolidated close, which is all a daily-close strategy needs.';
         statusEl.className = 'labs-backtest-status';
       } else {
         statusEl.textContent = 'No SIP access. The auction and imbalance families are NOT testable on this account, ' +
