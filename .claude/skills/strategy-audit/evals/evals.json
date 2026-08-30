@@ -1,0 +1,29 @@
+{
+  "skill_name": "strategy-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "crypto backtest just came back at 1.93 profit factor over 60 days, 282 signals, 45% win rate, +0.44% expectancy. equities is 1.24. should i fund a real account and start with crypto?",
+      "expected_output": "Does not accept 1.93 at face value. Notes the edge is below 2x its own cost assumption, that 25bps excludes spread, and that one 60-day window on a long-only trend strategy in crypto measures the window. Verdict is 'not yet' with a named threshold and what to run next.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "ran the whole universe and every single symbol came back positive, PF 6.2, win rate 61%. this looks great right?",
+      "expected_output": "Treats the clean sweep as a symptom rather than a result. Runs the arithmetic to recover avg win/avg loss, then goes and reads the fill-price and cost-model paths in the backtest source before answering. Does not congratulate.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "i want to add a volume filter to the equities strategy so it only takes breakouts on 3x average volume instead of 2x. worth doing?",
+      "expected_output": "Recognises this as a proposed change, not a measured one. Insists on a decision rule written before the run (threshold + what happens either way), warns that tuning a parameter against one window is curve-fitting, and points at the 1.24 baseline it has to beat rather than 2.71.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "our live profit factor is 0.49 but the backtest says 1.24. is the strategy broken or is the backtest wrong?",
+      "expected_output": "Establishes provenance of both numbers first. Notes the live sample is small enough that 0.49 and 1.24 are not distinguishable, checks whether live exposure matched intended exposure (the duplicate-order incident), and does not assume either number is the wrong one without evidence.",
+      "files": []
+    }
+  ]
+}
