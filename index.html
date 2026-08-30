@@ -12229,12 +12229,32 @@
       el.innerHTML = '<div class="news-placeholder">No headlines available right now.</div>';
       return;
     }
+    // EVERY FIELD HERE IS THIRD-PARTY TEXT, and this is the only surface in
+    // the app fed by a document EVERY signed-in account reads
+    // (shared/marketSnapshot). Unescaped, one Finnhub headline containing
+    // "<" -- or a url containing a quote, which ends the href attribute --
+    // executes script in an origin that holds Alpaca API credentials
+    // (see alpacaAuthHeaders), in every open tab at once, including the
+    // admin's, which is the only account allowed to hold LIVE keys.
+    //
+    // escapeHtml has existed in this file the whole time; its own comment
+    // says it is there "against this code being reused later for something
+    // that IS user-supplied". This was exactly that case and never got it.
+    //
+    // The href is scheme-checked rather than merely escaped: escaping stops
+    // an attacker leaving the attribute, but javascript: inside it needs no
+    // metacharacters at all.
     el.innerHTML = articles.slice(0, 6).map(function(a){
       var time = a.datetime ? new Date(a.datetime * 1000).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) : '';
-      return '<a class="news-item" href="' + a.url + '" target="_blank" rel="noopener noreferrer">' +
-        '<span class="news-item-headline">' + a.headline + '</span>' +
-        '<span class="news-item-meta">' + (a.source || '') + (time ? ' · ' + time : '') + '</span>' +
-      '</a>';
+      var href = /^https?:\/\//i.test(a.url || '') ? escapeHtml(a.url) : '';
+      var meta = escapeHtml(a.source || '') + (time ? ' · ' + escapeHtml(time) : '');
+      var headline = '<span class="news-item-headline">' + escapeHtml(a.headline || '') + '</span>' +
+        '<span class="news-item-meta">' + meta + '</span>';
+      // No usable link: render the headline without an anchor rather than
+      // emitting href="" , which navigates to the current page on click.
+      return href
+        ? '<a class="news-item" href="' + href + '" target="_blank" rel="noopener noreferrer">' + headline + '</a>'
+        : '<div class="news-item">' + headline + '</div>';
     }).join('');
   }
 
@@ -12253,8 +12273,13 @@
     el.innerHTML = events.map(function(e){
       var dateLabel = new Date(e.date + 'T00:00:00').toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
       var hourLabel = e.hour === 'bmo' ? 'Before open' : e.hour === 'amc' ? 'After close' : 'Time TBD';
+      // e.symbol is currently whitelisted by the trackedSyms filter above --
+      // it has to equal one of our own watchlist strings to get here at all,
+      // so this is not reachable today. Escaped anyway: the filter is a
+      // display decision that could reasonably be relaxed later, and it
+      // would not be obvious that relaxing it opens an injection.
       return '<div class="earnings-row">' +
-        '<span class="earnings-sym mono">' + e.symbol + '</span>' +
+        '<span class="earnings-sym mono">' + escapeHtml(e.symbol) + '</span>' +
         '<span class="earnings-date">' + dateLabel + '</span>' +
         '<span class="earnings-hour">' + hourLabel + '</span>' +
       '</div>';

@@ -57,8 +57,26 @@ service cloud.firestore {
       // this exact write. isAdmin can never be set true on creation --
       // the one admin account is promoted by hand in the console after
       // its document already exists.
+      // wouldEnableLiveTrading is checked on CREATE as well as update, and
+      // its absence here was a real hole: `update` (below) refuses to let a
+      // non-admin turn live trading on, but nothing stopped an account
+      // being BORN with alpacaEnvironment 'live' and a live key pair
+      // already set. An invitee calling the SDK directly instead of using
+      // the signup form could include those fields in the same write that
+      // redeems their invite, and every other clause here would pass.
+      //
+      // The consequence is not credential theft -- they supply their own
+      // Alpaca keys and risk their own money. What is lost is the
+      // paper-only boundary: shwoop-server would place REAL orders on a
+      // stranger's brokerage account, on its schedule, under this
+      // project's automation. settings.js relies on this file for that
+      // guarantee and does no admin check of its own.
+      //
+      // data.get(k, default) evaluates correctly on a create where the
+      // fields are simply absent, so the real signup write is unaffected.
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.isAdmin != true
+        && !wouldEnableLiveTrading(request.resource.data)
         && request.resource.data.inviteCode is string
         && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedBy == request.auth.uid;
 
