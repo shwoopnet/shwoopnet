@@ -107,6 +107,19 @@ is the thing that's wrong.
   than ~20% of the account** means position sizing is too aggressive
   regardless of whether the strategy is net profitable.
 
+### Equities has failed its own gate
+The rule set in advance was **1.5 across three windows**. Equities has now
+been measured on four and cleared none:
+
+| 30d | 60d | 60d + failed-breakout exit | 365d (6 of 16) |
+|---|---|---|---|
+| 1.48 | 1.24 | 1.12 | 0.96 |
+
+The series is monotonic in window length — the shorter the lookback, the
+better it looks — which is what an edge living in the recent regime looks
+like rather than one living in the strategy. If this review is being run on
+equities, that is the finding, and no weekly figure changes it.
+
 ### Per-symbol expectancy — do not act on it
 The Labs per-symbol table looks like it identifies which names the
 strategy works on. It does not. Delaying entry by a single bar reverses

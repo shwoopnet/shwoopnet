@@ -85,6 +85,41 @@ Three separate backtest errors were found in one weekend, and **every one
 flattered the strategy**. Treat a backtest figure as a claim to be
 re-derived, never as a fact to be quoted.
 
+### The window series is the finding
+
+Equities, same strategy, same universe, different lookbacks:
+
+| 30 days | 60 days | 365 days (6 of 16 symbols) |
+|---|---|---|
+| 1.48 | 1.24 | 0.96 |
+
+Monotonic: **the shorter the window, the better it looks.** That is what an
+apparent edge living in the recent regime looks like, rather than one
+living in the strategy. Any single-window figure quoted without its
+neighbours is close to meaningless here.
+
+Note also that both strategies earn almost exactly **90% of their own cost
+assumption** per trade (equities +0.09% against 0.10%, crypto +0.45%
+against 0.50%). Crypto's profit factor looks nearly twice as good, but
+relative to what it costs to trade they are the same strategy, and neither
+survives being modestly wrong about fills.
+
+### Things that were measured and did NOT work
+
+Keep this list. Re-running a settled experiment is a real cost, and an
+option that sounds obviously good is exactly the one that gets retried.
+
+- **Exiting when the breakout fails** (close the position when a bar closes
+  back inside the opening range). Profit factor **1.24 → 1.12** on the same
+  60-day window and the same 406 signals. It did what it was meant to —
+  average loss 0.53% → 0.42%, average win 1.57% → 1.83% — and still lost,
+  because it converted 37 winners into losers. The classic trend-following
+  result: the losers it avoids are outnumbered by the winners it ends
+  early. The crypto equivalent is still unmeasured.
+- **The confirmation-bar delay** as originally written reported 13.26 by
+  booking the fill at the pre-confirmation price. Priced honestly it is
+  0.94.
+
 ## Incidents that shaped this code
 
 Do not undo these without understanding why they exist.
