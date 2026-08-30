@@ -534,12 +534,6 @@
   }
   .labs-method-title{ font-weight:600; font-size:13.5px; margin-bottom:6px; }
   .labs-method-body{ font-size:12.5px; line-height:1.6; color: var(--muted); }
-  .labs-honesty-box{
-    margin-top:24px; padding:16px 18px; border-left:3px solid var(--amber-dim);
-    background: var(--panel-raised); border-radius:4px;
-  }
-  .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
-  .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
   /* Duplicate-trade warning. Sits directly above the stats row because
      these numbers are what a duplicate corrupts -- every one of them is
@@ -677,7 +671,6 @@
   .position-close-btn:disabled{ opacity:.5; cursor:default; }
   .backtest-outcome-hit{ color: var(--gain); }
   .backtest-outcome-stopped{ color: var(--loss); }
-  .backtest-outcome-unresolved{ color: var(--muted); }
 
   .activity-log-row{ padding:12px 0; border-bottom:1px solid var(--border); }
   .activity-log-row:last-child{ border-bottom:none; }
@@ -685,7 +678,6 @@
      without a cap this list just pushes the rest of Trade Overview
      down the page indefinitely. Scrolls internally instead. */
   #statusActivityList{ max-height:420px; overflow-y:auto; }
-  .activity-log-meta{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
   .activity-log-tag{
     font-size:10px; text-transform:uppercase; letter-spacing:.04em; font-weight:700; color: var(--amber);
     background: var(--amber-glow); border:1px solid var(--amber-dim); border-radius:999px; padding:3px 10px 2px;
@@ -931,7 +923,6 @@
   .zoom-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .zoom-btn:disabled{ opacity:.35; cursor:default; }
   .zoom-btn:disabled:hover{ border-color: var(--border); color: var(--muted); }
-  .zoom-label{ font-size:12px; color: var(--muted); min-width:44px; text-align:center; }
   .tf-btn{
     background: transparent; border: 1px solid var(--border); color: var(--muted);
     padding: 6px 12px; font-size: 11.5px; border-radius: 4px; cursor:pointer; transition: all .15s ease;
@@ -999,20 +990,6 @@
   .t-rr .rr-ratio.up{ color: var(--gain); }
   .t-rr .rr-ratio.down{ color: var(--loss); }
 
-  .trade-action-banner{
-    display:flex; align-items:flex-start; gap:10px;
-    margin:0 16px 14px 16px; padding:11px 15px;
-    background: var(--panel-raised); border-left:3px solid var(--amber); border-radius:4px;
-    font-size:12.5px; line-height:1.6; color: var(--paper);
-  }
-  .trade-action-banner .action-icon{ color: var(--amber); font-weight:700; flex-shrink:0; line-height:1.6; }
-  .trade-action-banner.done{ border-left-color: var(--border); }
-  .trade-action-banner.done .action-icon{ color: var(--muted); }
-  .trade-action-verb{ font-weight:700; }
-  .trade-action-verb.buy{ color: var(--gain); }
-  .trade-action-verb.short{ color: var(--loss); }
-  .trade-action-verb.done{ color: var(--muted); }
-
   .trade-detail{
     display:flex; flex-direction:column; gap:14px;
     padding: 16px 16px 18px 16px; border-top:1px solid var(--border);
@@ -1043,14 +1020,6 @@
   .grid-label{ fill: var(--muted); font-size: 11px; font-family:'Public Sans',sans-serif; font-variant-numeric: tabular-nums; }
   .chart-error-text{ fill: var(--paper); font-size:13px; font-family:'Public Sans', sans-serif; }
   .chart-error-sub{ fill: var(--muted); font-size:11px; font-family:'Public Sans', sans-serif; }
-
-  .chart-toolbar{
-    display:flex; justify-content:space-between; align-items:center; gap:10px;
-    margin-bottom:8px; flex-wrap:wrap;
-  }
-  .chart-hint{ font-size:10.5px; color: var(--muted); }
-  .chart-tf-btns{ display:flex; gap:4px; }
-  .chart-toolbar-btns{ display:flex; gap:4px; }
   .chart-tool-btn{
     background: transparent; border:1px solid var(--border); color: var(--muted);
     padding:4px 10px; font-size:10.5px; border-radius:4px; cursor:pointer; transition: all .15s ease;
@@ -1066,7 +1035,6 @@
     display:flex; gap:10px; white-space:nowrap;
   }
   .chart-crosshair-readout[hidden]{ display:none; }
-  .chart-crosshair-readout .cr-date{ color: var(--paper); }
   .chart-crosshair-readout .cr-up{ color: var(--gain); }
   .chart-crosshair-readout .cr-down{ color: var(--loss); }
   .crosshair-line{ stroke: var(--muted); stroke-width:1; stroke-dasharray:3,3; pointer-events:none; }
@@ -1097,14 +1065,6 @@
     text-transform:none; letter-spacing:0; cursor:pointer; padding:0;
   }
   .news-dismiss-all:hover{ color: var(--amber); }
-  .news-toast{
-    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 16px; margin-bottom:12px;
-  }
-  .news-toast:last-child{ margin-bottom:0; }
-  .news-toast-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
-  .news-toast-tags{ display:flex; align-items:center; gap:8px; }
-  .news-toast-sym{ font-weight:600; color: var(--amber); font-size:12px; }
   .news-toast-tag{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color: var(--muted);
     border:1px solid var(--border); border-radius:999px; padding:2px 9px 1px; background: var(--panel-raised);
@@ -1124,12 +1084,6 @@
   .history-tag-trade.loss{ background: var(--loss-glow); color: var(--loss); border-color: var(--loss); }
   .history-tag-trade.neutral{ background: var(--panel-raised); color: var(--muted); border-color: var(--border); }
   .history-item.history-item-trade{ border-left:2px solid var(--border); padding-left:10px; }
-  .news-toast-close{
-    background:none; border:none; color: var(--muted); cursor:pointer;
-    font-size:15px; line-height:1; padding:0 2px;
-  }
-  .news-toast-close:hover{ color: var(--paper); }
-  .news-toast-body{ font-size:12.5px; line-height:1.5; color: var(--muted); margin:0; }
 
   .toast-container{
     position:fixed; bottom:20px; right:100px; z-index:900;
@@ -1170,10 +1124,6 @@
   .toast-link{ font-size:11px; color: var(--amber); text-decoration:none; }
   .toast-link:hover{ text-decoration:underline; }
   @media (max-width:600px){ .toast-container{ left:12px; right:12px; max-width:none; width:auto; bottom:84px; max-height:32vh; } }
-  .news-toast-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
-  .news-toast-link{ font-size:11.5px; color: var(--amber); text-decoration:none; }
-  .news-toast-link:hover{ text-decoration:underline; }
-  .news-toast-time{ font-size:10px; color: var(--muted); opacity:.7; }
 
   .history-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:240; }
   .history-backdrop[hidden]{ display:none; }
@@ -1551,22 +1501,16 @@
 
   @media (prefers-reduced-motion: reduce){
     .ticker-track{ animation: none; }
-    .flash-up, .flash-down{ animation: none; }
     .brand-mark{ animation: none; }
     .brand-ground{ animation: none; display:none; }
     .brand-impact-ring{ animation: none; display:none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   }
   [data-reduce-motion="true"] .ticker-track{ animation: none; }
-  [data-reduce-motion="true"] .flash-up, [data-reduce-motion="true"] .flash-down{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
-  .flash-up{ animation: flashUp .6s ease; }
-  .flash-down{ animation: flashDown .6s ease; }
-  @keyframes flashUp{ 0%{ background: var(--gain-glow); } 100%{ background: transparent; } }
-  @keyframes flashDown{ 0%{ background: var(--loss-glow); } 100%{ background: transparent; } }
 </style>
 <script>
   // Runs synchronously before <body> paints anything, so dark mode is
@@ -3622,31 +3566,6 @@
     var text = (source.length + cryptoSource.length) + ' instruments you\'re tracking today (' +
       source.length + ' stocks, ' + cryptoSource.length + ' crypto), ' + (openCount + cryptoOpenCount) + ' with open positions';
     document.getElementById('ctaStat').textContent = text;
-  }
-
-  function buildActionHTML(t){
-    var isLong = t.direction !== 'Short';
-
-    if(t.status === 'hit'){
-      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already reached target at $' + fmt(t.t1) + '. This setup has played out, no action needed.' };
-    }
-    if(t.status === 'stopped'){
-      return { done: true, html: '<span class="trade-action-verb done">Done —</span> already stopped out at $' + fmt(t.stop) + '. This setup is closed, no action needed.' };
-    }
-    if(t.status === 'watching'){
-      var enterVerb = isLong ? 'buying' : 'shorting';
-      var enterVerbClass = isLong ? 'buy' : 'short';
-      return { done: false, html:
-        'Wait for ' + t.sym + ' to reach <strong>$' + fmt(t.entry) + '</strong> before <span class="trade-action-verb ' + enterVerbClass + '">' + enterVerb + '</span>. Once triggered: ' +
-        'take profit at $' + fmt(t.t1) + '. Stop loss at $' + fmt(t.stop) + '.'
-      };
-    }
-    var verb = isLong ? 'Buy' : 'Short';
-    var verbClass = isLong ? 'buy' : 'short';
-    return { done: false, html:
-      '<span class="trade-action-verb ' + verbClass + '">' + verb + '</span> ' + t.sym + ' near <strong>$' + fmt(t.entry) + '</strong>. ' +
-      'Take profit at $' + fmt(t.t1) + '. Stop loss at $' + fmt(t.stop) + '.'
-    };
   }
 
   // ---------- Alpaca trading: paper AND live, kept deliberately separate ----------
