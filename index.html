@@ -10525,37 +10525,102 @@
   // prices to the cent to be caught here, and if it did, it would be
   // indistinguishable from a duplicate by any means available to this
   // page anyway.
-  function journalEntryIdentity(e){
-    if(e.entryOrderId) return 'order:' + e.entryOrderId;
-    return ['fields', e.sym, e.date, e.direction, e.qty, e.entry, e.exit, e.exitDate].join('|');
+  // The shape of a trade, independent of which order produced it. Market
+  // orders fill at whatever the tape gives them, so two genuinely separate
+  // fills matching on symbol, date, direction, quantity AND both prices to
+  // the cent is not something that happens by chance -- it means one trade
+  // got written down twice, or the same signal really was submitted twice.
+  // Which of those it is, is the entire question below.
+  function journalTradeShape(e){
+    return ['shape', e.sym, e.date, e.direction, e.qty, e.entry, e.exit, e.exitDate].join('|');
   }
 
-  // Returns the ids that would be REMOVED, keeping the first of each
-  // group. Order matters: journalEntries is append-ordered, so the first
-  // occurrence is the original and later ones are the copies.
-  function findDuplicateJournalEntryIds(entries){
-    var seen = {};
-    var dupeIds = [];
+  // Groups entries that describe the same trade, then classifies each group
+  // by what the Alpaca order ids say about it. This is the distinction the
+  // first version of this check missed entirely: it keyed on entryOrderId
+  // FIRST, so two entries naming different orders could never match, and
+  // the whole detector silently found nothing.
+  //
+  //   sameOrder       -- every entry names one Alpaca order. One trade,
+  //                      recorded more than once. Bookkeeping. Safe to fix.
+  //   separateOrders  -- the entries name DIFFERENT Alpaca orders. The
+  //                      order really was submitted more than once and the
+  //                      money really moved. Deleting these would hide a
+  //                      real loss, so this branch never offers to.
+  //   unknown         -- no order ids at all (entries predating the field).
+  //                      Treated as records, since the shape match is the
+  //                      only evidence available either way.
+  function journalDuplicateGroups(entries){
+    var byShape = {};
     (entries || []).forEach(function(e){
-      var key = journalEntryIdentity(e);
-      if(seen[key]){ dupeIds.push(e.id); }
-      else { seen[key] = true; }
+      var k = journalTradeShape(e);
+      if(!byShape[k]) byShape[k] = [];
+      byShape[k].push(e);
     });
-    return dupeIds;
+    return Object.keys(byShape).map(function(k){ return byShape[k]; })
+      .filter(function(group){ return group.length > 1; })
+      .map(function(group){
+        var orderIds = {}, anyMissing = false;
+        group.forEach(function(e){
+          if(e.entryOrderId) orderIds[e.entryOrderId] = true; else anyMissing = true;
+        });
+        var distinctOrders = Object.keys(orderIds).length;
+        return {
+          entries: group,
+          separateOrders: distinctOrders > 1,
+          sameOrder: distinctOrders === 1 && !anyMissing,
+          unknown: distinctOrders === 0,
+        };
+      });
+  }
+
+  // Only ever returns ids from groups that are a RECORDING problem. An
+  // entry backed by its own distinct Alpaca order is a real trade and is
+  // never offered for removal, however redundant it looks.
+  function findDuplicateJournalEntryIds(entries){
+    var ids = [];
+    journalDuplicateGroups(entries).forEach(function(group){
+      if(group.separateOrders) return;
+      // Append order is write order, so the first is the original.
+      group.entries.slice(1).forEach(function(e){ ids.push(e.id); });
+    });
+    return ids;
   }
 
   function renderJournalDupeBanner(){
     var banner = document.getElementById('journalDupeBanner');
     var textEl = document.getElementById('journalDupeText');
+    var btn = document.getElementById('journalDupeBtn');
     if(!banner || !textEl) return;
-    var dupeIds = findDuplicateJournalEntryIds(journalEntries);
-    if(dupeIds.length === 0){ banner.setAttribute('hidden', ''); return; }
+    var groups = journalDuplicateGroups(journalEntries);
+    var traded = groups.filter(function(g){ return g.separateOrders; });
+    var recorded = groups.filter(function(g){ return !g.separateOrders; });
+    if(groups.length === 0){ banner.setAttribute('hidden', ''); return; }
     banner.removeAttribute('hidden');
+
+    // The repeated-ORDERS case leads, because it is the one that cost real
+    // money and the one no button here can fix. Offering "Remove" beside
+    // it would be offering to delete the evidence of a live problem.
+    if(traded.length){
+      var tradedExtra = traded.reduce(function(n, g){ return n + g.entries.length - 1; }, 0);
+      textEl.textContent = tradedExtra + ' of your journal entries repeat an earlier trade ' +
+        'but name a DIFFERENT Alpaca order — so the same signal really was submitted more than once, ' +
+        'and that money really moved. These are not bookkeeping errors and removing them would only ' +
+        'hide a real loss. Check your Alpaca order history for ' +
+        traded.slice(0, 3).map(function(g){ return g.entries[0].sym; }).join(', ') +
+        (traded.length > 3 ? ' and ' + (traded.length - 3) + ' more' : '') + '.';
+      if(btn) btn.hidden = true;
+      return;
+    }
+
+    var dupeIds = findDuplicateJournalEntryIds(journalEntries);
     var kept = journalEntries.length - dupeIds.length;
+    if(btn) btn.hidden = false;
     textEl.textContent = dupeIds.length + ' of your ' + journalEntries.length +
-      ' journal entries are duplicates of another entry — the same trade recorded more than once. ' +
-      'Every number on this page is computed from these entries, so all of them are currently wrong. ' +
-      'Removing the copies leaves ' + kept + ' real ' + (kept === 1 ? 'entry' : 'entries') + '.';
+      ' journal entries record a trade that is already in the journal — the same Alpaca order written ' +
+      'down more than once. Every number on this page is computed from these entries, so all of them ' +
+      'are currently wrong. Removing the copies leaves ' + kept + ' real ' +
+      (kept === 1 ? 'entry' : 'entries') + '.';
   }
 
   document.getElementById('journalDupeBtn').addEventListener('click', function(){
