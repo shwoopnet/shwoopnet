@@ -12370,6 +12370,25 @@
   // session, so anything under this is a contract that barely traded rather
   // than an archive that barely goes back.
   var MIN_BARS_FOR_REAL_HISTORY = 5;
+  // Wide enough that a real archive returns dozens of bars, short enough
+  // that it stays inside the contract's listed life.
+  var OPTIONS_BAR_LOOKBACK_DAYS = 90;
+
+  // OCC symbols encode expiry as YYMMDD right after the underlying, e.g.
+  // SPY260701C00730000 -> 2026-07-01. Only used if the contracts endpoint
+  // ever stops returning expiration_date.
+  function expiryFromOccSymbol(sym){
+    var m = /^[A-Z]+(\d{2})(\d{2})(\d{2})[CP]\d+$/.exec(String(sym || ''));
+    if(!m) return null;
+    return '20' + m[1] + '-' + m[2] + '-' + m[3];
+  }
+
+  function shiftDays(isoDate, days){
+    var d = new Date(isoDate + 'T00:00:00Z');
+    if(isNaN(d.getTime())) return isoDate;
+    d.setUTCDate(d.getUTCDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
   var OPTIONS_DEPTH_PROBES = [
     { label: '~2.5 years', year: 2024, month: 2 },
     { label: '~2 years', year: 2024, month: 8 },
@@ -12497,8 +12516,20 @@
           return;
         }
         var sym = contracts[0].symbol;
+        // Bars have to be asked for over the contract's LIFE, which ends at
+        // expiry -- not over the window we searched for expiries in.
+        //
+        // The second version of this probe got that backwards. It searched
+        // for contracts expiring between the 1st and the 28th, got back the
+        // EARLIEST such expiry (the 1st or 2nd), and then asked for bars
+        // from the 1st to the 28th -- almost entirely after the contract
+        // had ceased to exist. Every window returned exactly one bar,
+        // expiry day itself, and that was read as "the archive is thin".
+        // It was not; it was 27 days of asking about a dead contract.
+        var expiry = contracts[0].expiration_date || expiryFromOccSymbol(sym) || to;
+        var barsFrom = shiftDays(expiry, -OPTIONS_BAR_LOOKBACK_DAYS);
         return probeAlpacaJSON(ALPACA_DATA_BASE + '/v1beta1/options/bars?symbols=' + encodeURIComponent(sym) +
-          '&timeframe=1Day&start=' + from + '&end=' + to + '&limit=100'
+          '&timeframe=1Day&start=' + barsFrom + '&end=' + expiry + '&limit=200'
         ).then(function(barsRes){
           if(barsRes.status === 403 || barsRes.status === 401){
             planBlocked = true;
