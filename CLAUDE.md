@@ -71,6 +71,50 @@ everything can still be verified headlessly, and should be:
 "It renders" and "it behaves" are different claims. Say which one you
 checked.
 
+## What this account's Alpaca plan can actually get (measured Aug 2026)
+
+Answered by the one-shot Labs probe, now removed. Do not re-derive this.
+
+- **SIP works.** Consolidated bars return at 2020-08-31, so there are
+  **6+ years** of daily history.
+- **The official closing auction print is retrievable.** SPY, 2026-08-27:
+  price **771.10**, size **1,096,888**, condition `[" ","M"]` — Market
+  Center Official Close.
+- **The SIP daily bar close IS the auction price.** SIP's daily close was
+  771.10 and the auction print was 771.10 — exact match on two
+  independent paths. So a daily-close strategy needs nothing beyond the
+  SIP daily bar; the trade-level print is only required for intraday
+  auction work.
+- **IEX is not the close.** IEX's daily close for the same day was
+  **771.18**, eight cents off. That gap is the whole reason this was
+  worth measuring: an IEX-based backtest of anything entering at "the
+  close" would price every entry at a number no index fund ever paid.
+
+**Nothing is eliminated by data availability.** All six strategy families
+the advisor board proposed are testable on this account.
+
+The 1,096,888-share print is worth holding on to as more than a data
+point. It is the price-insensitive forced flow the auction strategies aim
+to be paid for absorbing — over a million shares crossing at one price at
+one instant, because index funds, ETF baskets and MOC algos must trade at
+the close regardless of price. That is a measurement of the counterparty,
+not a story about one, which is exactly what the current strategies could
+never produce.
+
+### How this was nearly a false negative
+
+The first two runs reported "10,000 trades, no auction print". 10,000 was
+the requested `limit`, and Alpaca returns trades **ascending from
+`start`**, so a 15-minute window truncated about a minute in and never
+reached 20:00. The corrected run scanned 14,361 trades across 2 pages and
+found the print immediately.
+
+Third time this project has hit that trap — it froze the crypto charts'
+zoom clamp and cost the options probe two revisions. It is now asserted by
+a gate rather than recorded here and forgotten, and a truncated scan
+reports as a **distinct third verdict** from a genuine absence, because
+those mean opposite things.
+
 ## Strategy numbers — read this before quoting any of them
 
 The Labs page used to assert **profit factor 2.71 (equities) and 2.35
