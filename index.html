@@ -10615,35 +10615,77 @@
     return ids;
   }
 
+  // Repeated-ORDER groups are permanent history: the orders really filled,
+  // so unlike the bookkeeping case there is nothing to remove and nothing
+  // that will ever make this condition go away on its own. Left alone, the
+  // banner fires on every page load forever -- and a warning that can never
+  // be cleared stops being read, which would cost us the NEXT one.
+  //
+  // So it can be acknowledged, per entry. Keyed on entry id rather than a
+  // single "dismissed" flag on purpose: if the deterministic client_order_id
+  // fix (shwoop-server's signalOrderId) ever regresses, the new duplicates
+  // are unacknowledged ids and the banner comes back on its own. Failing
+  // that way round is the whole point.
+  //
+  // localStorage, like acknowledgedPriorityIds and for the same reason:
+  // clearing site data resurfaces something already handled, which is the
+  // safe direction to fail. Writing it back to Firestore would mean the
+  // frontend mutating the same journal array the backend rewrites every
+  // minute, for no real gain.
+  var acknowledgedDupeOrderIds = {};
+  try{
+    var savedDupeAck = JSON.parse(window.localStorage.getItem('shwoopnet:acknowledgedDupeOrderIds') || 'null');
+    if(savedDupeAck && typeof savedDupeAck === 'object') acknowledgedDupeOrderIds = savedDupeAck;
+  }catch(e){}
+  function saveAcknowledgedDupeOrderIds(){
+    try{ window.localStorage.setItem('shwoopnet:acknowledgedDupeOrderIds', JSON.stringify(acknowledgedDupeOrderIds)); }catch(e){}
+  }
+  // A group counts as acknowledged only when every entry in it is. A group
+  // that grows a new member later is unacknowledged again.
+  function unacknowledgedTradedGroups(groups){
+    return groups.filter(function(g){
+      return g.separateOrders && !g.entries.every(function(e){ return acknowledgedDupeOrderIds[e.id]; });
+    });
+  }
+
   function renderJournalDupeBanner(){
     var banner = document.getElementById('journalDupeBanner');
     var textEl = document.getElementById('journalDupeText');
     var btn = document.getElementById('journalDupeBtn');
     if(!banner || !textEl) return;
     var groups = journalDuplicateGroups(journalEntries);
-    var traded = groups.filter(function(g){ return g.separateOrders; });
+    var traded = unacknowledgedTradedGroups(groups);
     var recorded = groups.filter(function(g){ return !g.separateOrders; });
-    if(groups.length === 0){ banner.setAttribute('hidden', ''); return; }
+    var dupeIdsPreview = findDuplicateJournalEntryIds(journalEntries);
+    if(traded.length === 0 && dupeIdsPreview.length === 0){ banner.setAttribute('hidden', ''); return; }
     banner.removeAttribute('hidden');
 
     // The repeated-ORDERS case leads, because it is the one that cost real
-    // money and the one no button here can fix. Offering "Remove" beside
-    // it would be offering to delete the evidence of a live problem.
+    // money. There is no Remove here: those entries record orders that
+    // really filled, so deleting them would delete the record of a real
+    // loss while the loss stays on the account. Acknowledging changes no
+    // data -- it only records that this has been seen.
     if(traded.length){
       var tradedExtra = traded.reduce(function(n, g){ return n + g.entries.length - 1; }, 0);
-      textEl.textContent = tradedExtra + ' of your journal entries repeat an earlier trade ' +
-        'but name a DIFFERENT Alpaca order — so the same signal really was submitted more than once, ' +
-        'and that money really moved. These are not bookkeeping errors and removing them would only ' +
-        'hide a real loss. Check your Alpaca order history for ' +
-        traded.slice(0, 3).map(function(g){ return g.entries[0].sym; }).join(', ') +
-        (traded.length > 3 ? ' and ' + (traded.length - 3) + ' more' : '') + '.';
-      if(btn) btn.hidden = true;
+      // Every affected symbol and date, not a truncated sample: the whole
+      // point of this message is to be checked against Alpaca's own order
+      // history, and "and 7 more" is not something you can look up.
+      var affected = traded.map(function(g){
+        return g.entries[0].sym + (g.entries[0].date ? ' (' + g.entries[0].date + ')' : '');
+      }).join(', ');
+      textEl.textContent = tradedExtra + ' journal ' + (tradedExtra === 1 ? 'entry repeats' : 'entries repeat') +
+        ' an earlier trade under a DIFFERENT Alpaca order — the same signal was submitted more than once, ' +
+        'and that money really moved. These are not bookkeeping errors: the entries are correct and there ' +
+        'is nothing to remove. The cause is fixed going forward (orders are now keyed on the signal, so ' +
+        'Alpaca refuses a second submission), but past orders cannot be un-sent. Check your Alpaca order ' +
+        'history for ' + affected + ', then acknowledge to clear this.';
+      if(btn){ btn.hidden = false; btn.textContent = 'Acknowledge'; btn.dataset.mode = 'acknowledge'; }
       return;
     }
 
-    var dupeIds = findDuplicateJournalEntryIds(journalEntries);
+    var dupeIds = dupeIdsPreview;
     var kept = journalEntries.length - dupeIds.length;
-    if(btn) btn.hidden = false;
+    if(btn){ btn.hidden = false; btn.textContent = 'Remove duplicates'; btn.dataset.mode = 'remove'; }
     textEl.textContent = dupeIds.length + ' of your ' + journalEntries.length +
       ' journal entries record a trade that is already in the journal — the same Alpaca order written ' +
       'down more than once. Every number on this page is computed from these entries, so all of them ' +
@@ -10653,6 +10695,17 @@
 
   document.getElementById('journalDupeBtn').addEventListener('click', function(){
     var btn = this;
+    // Acknowledge mode touches no journal data at all -- it writes ids to
+    // localStorage and re-renders. The entries stay exactly as they are,
+    // because they are an accurate record of what happened.
+    if(btn.dataset.mode === 'acknowledge'){
+      unacknowledgedTradedGroups(journalDuplicateGroups(journalEntries)).forEach(function(g){
+        g.entries.forEach(function(e){ acknowledgedDupeOrderIds[e.id] = true; });
+      });
+      saveAcknowledgedDupeOrderIds();
+      renderJournalDupeBanner();
+      return;
+    }
     var dupeIds = findDuplicateJournalEntryIds(journalEntries);
     if(dupeIds.length === 0) return;
     if(!confirm('Remove ' + dupeIds.length + ' duplicate journal ' + (dupeIds.length === 1 ? 'entry' : 'entries') +
