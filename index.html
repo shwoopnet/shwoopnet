@@ -2828,26 +2828,6 @@
         <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
       </div>
 
-      <div class="labs-backtest-card" style="margin-top:16px;">
-        <div class="labs-export-header">
-          <div>
-            <div class="labs-export-title">Can SEC filings give us the earnings history Finnhub wouldn't?</div>
-            <div class="labs-export-desc"><strong>One-shot diagnostic — delete this card once it has an answer.</strong>
-              Replaces the Finnhub version of this card, which <em>was</em> answered: forward-only, 285 rows for the
-              next 14 days and 0 for every historical window. The conclusion drawn from that — &ldquo;post-earnings
-              drift needs a paid tier&rdquo; — was wrong, and the mistake is the interesting part. It assumed the
-              signal needs an <em>analyst consensus</em>. The consensus is the expensive half of an earnings feed;
-              the <em>actuals</em> are a public filing. Foster, Olsen &amp; Shevlin (1984), the paper the whole idea
-              comes from, defines the surprise against a <strong>seasonal random walk</strong> — this quarter versus
-              the same quarter last year — with no consensus in it anywhere. So this asks SEC EDGAR instead, which
-              is free and needs no key. It checks two things: enough consecutive quarterly EPS to form a surprise,
-              and a precise enough announcement time to know which close was the first one anyone could trade.</div>
-          </div>
-          <button class="settings-reset-btn" id="testEdgarEarningsBtn">Check SEC EDGAR</button>
-        </div>
-        <div class="labs-backtest-status" id="edgarEarningsStatus"></div>
-        <div id="edgarEarningsResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
-      </div>
 
 
 
@@ -12329,99 +12309,6 @@
     }, 60);
   });
 
-  // ---------- SEC EDGAR earnings probe (one-shot; remove when answered) ----------
-  // Runs on the server, not here: sec.gov needs a descriptive User-Agent,
-  // and a browser cannot set one. The response is counts and booleans
-  // only -- see that route's own comment.
-  function runEdgarEarningsProbe(){
-    var btn = document.getElementById('testEdgarEarningsBtn');
-    var statusEl = document.getElementById('edgarEarningsStatus');
-    var resultEl = document.getElementById('edgarEarningsResult');
-    btn.disabled = true;
-    resultEl.textContent = '';
-    statusEl.className = 'labs-backtest-status';
-    statusEl.textContent = 'Asking the server…';
-
-    fetch(TWELVE_DATA_PROXY_BASE + '/research/edgar-earnings', { headers: twelveDataProxyHeaders() })
-      .then(function(res){
-        if(!res.ok) throw new Error('HTTP ' + res.status + (res.status === 404 ? ' — the server has not redeployed with this route yet' : ''));
-        return res.json();
-      })
-      .then(function(out){
-        btn.disabled = false;
-        var controls = out.controls || {};
-
-        // A failure that never reached SEC says nothing about EDGAR. The
-        // probe's own first run reported "SEC refused the User-Agent" on a
-        // 403 that SEC never saw, which would have sent someone off to fix
-        // a User-Agent that was never broken.
-        if(!controls.reachable){
-          statusEl.textContent = controls.blockedByNetwork
-            ? 'The request never reached SEC — something between the server and sec.gov refused it (' +
-              controls.detail + '). This is NOT an answer about earnings history; do not read it as one.'
-            : 'Could not reach SEC: ' + controls.detail;
-          statusEl.className = 'labs-backtest-status fail';
-          return;
-        }
-
-        resultEl.textContent = (out.symbols || []).map(function(sym){
-          if(sym.error) return sym.ticker + ': ' + sym.error;
-          var line = sym.ticker + ': ' + sym.quarters + ' quarterly EPS (' + sym.earliestQuarter + ' → ' +
-            sym.latestQuarter + '), longest unbroken run ' + sym.longestRun + ', ' + sym.seasonalPairs +
-            ' seasonal pairs' + (sym.usedBasicEps ? ' [basic EPS]' : '');
-          if(sym.submissionsError) return line + '\n    8-K history: ' + sym.submissionsError;
-          var mix = Object.keys(sym.timingMix || {}).map(function(k){ return k + ' ' + sym.timingMix[k]; }).join(', ');
-          line += '\n    ' + sym.earningsReleases + ' earnings 8-Ks, ' + sym.withTimestamp +
-            ' with a usable timestamp' + (mix ? ' (' + mix + ')' : '');
-          if(sym.olderFilesUnread > 0){
-            line += '\n    …and ' + sym.olderFilesUnread + ' older filing page(s) not read — that count is a floor';
-          }
-          return line;
-        }).join('\n');
-
-        // The negative control decides whether anything above is readable.
-        // If a CIK that cannot exist came back successful, then a zero
-        // anywhere proves nothing, and the verdict has to be withheld even
-        // when the real symbols look perfect.
-        if(!controls.absenceIsDetectable){
-          statusEl.textContent = 'The negative control FAILED: a company number that cannot exist returned success, ' +
-            'so a zero anywhere above proves nothing. Fix the probe before reading any of it.';
-          statusEl.className = 'labs-backtest-status fail';
-          return;
-        }
-
-        if(out.usable){
-          statusEl.textContent = 'EDGAR serves both halves, free and without a key. Quarterly EPS goes back far ' +
-            'enough to form seasonal pairs, and every earnings 8-K carries an acceptance timestamp — which is ' +
-            'strictly more than Finnhub would have given, since a timestamp yields the before-open/after-close ' +
-            'bucket but not the reverse. Post-earnings drift was never blocked on a vendor; it was blocked on ' +
-            'asking for the consensus, which costs money, when the seasonal random walk it is specified against ' +
-            'never needed one. This says the question can now be asked — nothing about whether the drift is real.'
-            + (out.anyTruncated ? ' NOTE: the 8-K counts are floors. EDGAR pages older filings and the probe read ' +
-              'one page.' : '');
-          statusEl.className = 'labs-backtest-status ok';
-          return;
-        }
-
-        var why = [];
-        if(!out.epsOk) why.push('EPS history is too shallow on at least one name — fewer than 9 consecutive ' +
-          'quarters, which is the minimum that yields a seasonal surprise AND enough prior surprises to ' +
-          'standardise it. Note this is about the unbroken RUN, not the count: scattered quarters can clear the ' +
-          'count and still produce no pairs at all.');
-        if(!out.timingOk) why.push('No usable announcement timestamp on at least one name. Every announcement then ' +
-          'has to be treated as after-the-close, which is the safe direction but gives up a session on the ones ' +
-          'reported before the open.');
-        statusEl.textContent = why.join(' ');
-        statusEl.className = 'labs-backtest-status fail';
-      })
-      .catch(function(err){
-        btn.disabled = false;
-        statusEl.textContent = 'Probe failed: ' + err.message;
-        statusEl.className = 'labs-backtest-status fail';
-      });
-  }
-
-  document.getElementById('testEdgarEarningsBtn').addEventListener('click', runEdgarEarningsProbe);
 
   document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
   document.getElementById('testAlpacaDataFeedBtn').addEventListener('click', testAlpacaDataFeedClicked);
