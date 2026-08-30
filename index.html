@@ -2766,9 +2766,12 @@
     <div class="labs-method-card">
       <p class="labs-method-intro">
         A second, independent strategy running alongside equities — same shape, tuned for a market that never
-        closes. Long-only, since Alpaca crypto has no shorting. Its previously quoted profit factor of 2.35
-        has <strong>not been re-measured</strong> since the equities figure turned out not to reproduce, so
-        treat it as unverified until you run the whole-universe backtest below yourself.
+        closes. Long-only, since Alpaca crypto has no shorting. Its previously quoted profit factor of 2.35 is
+        <strong>withdrawn, not re-measured</strong>. A 60-day run reported 4.08 with all 12 pairs positive,
+        which was the tool charging crypto the same 5bps-per-leg cost as equities — but Alpaca crypto pays a
+        percentage taker fee on every side, and the pairs this trades most have far wider spreads than any
+        equity here. That is now corrected to 25bps a leg from the published fee schedule, and the honest
+        number is whatever you measure with it. Run the whole-universe backtest below.
       </p>
       <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
@@ -6844,9 +6847,30 @@
   }
 
   var CRYPTO_BT_MARKET_LEGS_BY_OUTCOME = { stopped: 2, trailing_stopped: 2, unresolved: 1 };
+
+  // Crypto costs its OWN number, not the equities one.
+  //
+  // This used to reuse ORB_SLIPPAGE_BPS (5bps), and that was simply wrong
+  // rather than approximate. Equities on Alpaca are commission-free and
+  // these are liquid large caps, so 5bps a leg is a fair estimate of pure
+  // slippage. Alpaca CRYPTO charges a percentage taker fee on every side
+  // -- a real fee, not slippage -- and market orders are always the taker
+  // side. On top of that, the spread on the pairs this strategy actually
+  // trades most is far wider than anything in the equities universe: UNI
+  // alone produced 58 of 282 signals in a 60-day run, with AAVE, AVAX,
+  // LINK and DOT close behind. The cost was being understated by several
+  // times, concentrated exactly where the volume is.
+  //
+  // 25bps a leg is Alpaca's lowest-tier taker rate, and it is an
+  // ASSUMPTION, not a measurement: it excludes spread, and a different
+  // volume tier moves it. It is deliberately set from the published fee
+  // schedule rather than tuned until the results look good -- if it is
+  // wrong it should be wrong against a real number, checked against your
+  // own Alpaca fee tier, not against a preferred profit factor.
+  var CRYPTO_SLIPPAGE_BPS = 25;
   function applyCryptoBacktestSlippage(pctReturn, outcome){
     var legs = CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
-    return pctReturn - legs * (ORB_SLIPPAGE_BPS / 100);
+    return pctReturn - legs * (CRYPTO_SLIPPAGE_BPS / 100);
   }
 
   // "bars" here are 15-minute crypto bars, continuous (no session gaps)
@@ -10780,9 +10804,13 @@
   // reproduce is worse than no number, because it is what the go-live
   // decision gets measured against.
   //
-  // crypto's 2.35 is left as-is and labelled unverified in the copy: the
-  // crypto backtest is a separate code path that was never touched by the
-  // bug above, so there is no measurement to replace it with yet.
+  // crypto's 2.35 is a placeholder and the copy says so. The crypto
+  // backtest was never touched by the equities lookahead bug, but it had
+  // its own understatement: it charged crypto the EQUITIES cost per leg
+  // (see CRYPTO_SLIPPAGE_BPS). A 60-day run under the old number reported
+  // 4.08 with all 12 pairs positive -- the same every-symbol-wins shape
+  // the broken equities run had, and the same reason to distrust it.
+  // Replace this once a run under the corrected cost gives a real figure.
   var LABS_BACKTEST_PF = { equities: 1.24, crypto: 2.35 };
   var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
   // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
