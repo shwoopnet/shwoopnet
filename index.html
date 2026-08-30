@@ -6663,6 +6663,45 @@
     if(alpacaBacktestQueue.length > 0){ processAlpacaBacktestQueue(); }
   }
 
+  // Every backtest page request goes through here: the queue above paces
+  // them, and a 429 is retried rather than killing the run.
+  //
+  // Both halves matter, and for different reasons. The crypto fetcher used
+  // to call fetch() directly, bypassing the queue entirely -- invisible at
+  // a 60-day lookback (one or two pages) and fatal at 365, where ~40 pages
+  // fire back-to-back as fast as the network allows and Alpaca answers
+  // with a 429. That is the actual cause of "Crypto universe backtest
+  // failed: Alpaca crypto bars HTTP 429".
+  //
+  // The retry matters even with the queue, because this browser does not
+  // own the rate limit: the live quote loop shares it, and so does the
+  // backend placing real trades. A whole-universe run at 365 days is
+  // minutes of work and dozens of pages -- throwing all of it away because
+  // one page came back 429 is the wrong response to a condition that
+  // clears on its own in seconds. Retry-After is honoured when Alpaca
+  // sends it, otherwise exponential backoff, capped so a genuinely stuck
+  // limit still surfaces as an error instead of hanging forever.
+  var ALPACA_BACKTEST_MAX_RETRIES = 4;
+  function fetchAlpacaBacktestJSON(url, label){
+    function attempt(tryNum){
+      return scheduleAlpacaBacktestCall(function(){
+        return fetch(url, { headers: alpacaHeaders() });
+      }).then(function(res){
+        if(res.status === 429 && tryNum < ALPACA_BACKTEST_MAX_RETRIES){
+          var retryAfter = parseFloat(res.headers && res.headers.get('Retry-After'));
+          var waitMs = (isFinite(retryAfter) && retryAfter > 0)
+            ? Math.min(retryAfter * 1000, 60000)
+            : Math.min(2000 * Math.pow(2, tryNum), 30000);
+          console.warn('Alpaca rate-limited a backtest page (429) -- retrying in ' + Math.round(waitMs / 1000) + 's');
+          return new Promise(function(r){ setTimeout(r, waitMs); }).then(function(){ return attempt(tryNum + 1); });
+        }
+        if(!res.ok) throw new Error(label + ' HTTP ' + res.status);
+        return res.json();
+      });
+    }
+    return attempt(0);
+  }
+
   // Converts the lookback dropdown's bar-count value (e.g. 1610 for "~60
   // trading days") into a calendar-day span for Alpaca's start/end query
   // -- doesn't need to be exact, since runIntradayBacktestSimulationAsync's
@@ -6684,12 +6723,7 @@
         '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()) +
         '&limit=10000&feed=iex&adjustment=raw' +
         (pageToken ? '&page_token=' + encodeURIComponent(pageToken) : '');
-      return scheduleAlpacaBacktestCall(function(){
-        return fetch(url, { headers: alpacaHeaders() }).then(function(res){
-          if(!res.ok) throw new Error('Alpaca stocks bars HTTP ' + res.status);
-          return res.json();
-        });
-      });
+      return fetchAlpacaBacktestJSON(url, 'Alpaca stocks bars');
     }
 
     var allRaw = [];
@@ -6718,6 +6752,11 @@
   // for anything longer than a single page -- so the "whole universe"
   // backtest below fetches all 12 pairs in one paginated stream instead
   // of 12 separate per-symbol calls the way the equities version needs.
+  //
+  // "One stream" is not "one request": a 365-day lookback is ~35,000 bars
+  // per pair, so at the 10,000-bar page cap it is dozens of sequential
+  // pages. Those go through the shared throttled/retrying fetch helper --
+  // this used to call fetch() directly and had no pacing at all.
   function fetchCryptoBacktestHistory(symbols, lookbackDays){
     var end = new Date();
     var start = new Date(end.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
@@ -6728,10 +6767,7 @@
         '&timeframe=15Min&start=' + encodeURIComponent(start.toISOString()) +
         '&end=' + encodeURIComponent(end.toISOString()) + '&limit=10000' +
         (pageToken ? '&page_token=' + encodeURIComponent(pageToken) : '');
-      return fetch(url, { headers: alpacaHeaders() }).then(function(res){
-        if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
-        return res.json();
-      });
+      return fetchAlpacaBacktestJSON(url, 'Alpaca crypto bars');
     }
 
     var barsBySymbol = {};
