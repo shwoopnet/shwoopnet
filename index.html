@@ -12772,11 +12772,22 @@
             r.rows + ' row(s), ' + r.withActual + ' with epsActual, ' + r.complete +
             ' with BOTH actual and estimate, ' + r.withHour + ' with a usable hour field');
         }).join('\n');
+        // Two failures that look identical and are not. The first run of
+        // this card could not tell them apart because the probe had no
+        // control -- every window it asked about was historical.
+        if(!out.endpointWorks){
+          statusEl.textContent = 'The earnings endpoint returns NOTHING AT ALL on this key — not even for the ' +
+            'next 14 days. That is not a statement about historical depth, it is the endpoint being unusable. ' +
+            'It also means the Brief page\'s "Earnings this week" has been silently empty, since it calls the ' +
+            'same endpoint. Check the key\'s plan before concluding anything about post-earnings drift.';
+          statusEl.className = 'labs-backtest-status fail';
+          return;
+        }
         if(!out.usable){
-          statusEl.textContent = 'No usable earnings history. Rows may come back, but without epsActual and ' +
-            'epsEstimate TOGETHER there is no surprise to compute and no SUE to rank on. Post-earnings drift ' +
-            'is not testable on this key — that needs a paid Finnhub tier, another vendor, or a different ' +
-            'hypothesis that does not depend on earnings actuals.';
+          statusEl.textContent = 'The endpoint WORKS — the forward control returned ' + out.forwardRows + ' row(s) — ' +
+            'but history does not. Finnhub serves the upcoming calendar on this plan and not past actuals, so ' +
+            'there is no surprise to compute and no SUE to rank on. Post-earnings drift is not testable on this ' +
+            'key: a paid tier, another vendor, or a hypothesis that does not depend on earnings actuals.';
           statusEl.className = 'labs-backtest-status fail';
           return;
         }
