@@ -166,6 +166,65 @@ gates.G6 = () => {
   console.log('G6 PASS universe run reports what the misses would have made');
 };
 
+gates.G7 = () => {
+  const hybrid = lift('fillCryptoSignalHybrid', {
+    CRYPTO_BT_REWARD_MULTIPLE: REWARD,
+    fillCryptoSignalAsMakerLimit: lift('fillCryptoSignalAsMakerLimit', { CRYPTO_BT_REWARD_MULTIPLE: REWARD }),
+  });
+  // A runaway: breaks out at bar 0 and never comes back within the window.
+  const bars = [bar(99, 104, 98, 103)];
+  for (let i = 0; i < WAIT + 4; i++) bars.push(bar(110 + i, 112 + i, 109 + i, 111 + i));
+  const out = hybrid(bars, 0, signal, WAIT);
+  assert.ok(out, 'a runaway must still be entered by the fallback');
+  assert.strictEqual(out.filledAs, 'taker');
+  assert.strictEqual(out.entryIdx, 1 + WAIT,
+    `the fallback must be priced at signalIdx + waitBars + 1 (${1 + WAIT}), got ${out.entryIdx}`);
+  assert.strictEqual(out.entry, bars[1 + WAIT].o, 'the fallback fills at that bar open');
+  // THE DEFECT THIS GATE EXISTS FOR: pricing it at the next bar would be
+  // lookahead, and on a runaway it is also a far better price -- which is
+  // exactly why it would flatter the result.
+  assert.notStrictEqual(out.entryIdx, 1, 'the fallback must NOT be priced at the bar after the signal');
+  assert.ok(out.entry > bars[1].o,
+    'control: on a runaway the honest fallback is WORSE than the next-bar price, which is the whole point');
+  // A limit that does fill still fills as maker, at the limit price.
+  const comesBack = [bar(99, 104, 98, 103), bar(103, 105, 99, 102)];
+  const m = hybrid(comesBack, 0, signal, WAIT);
+  assert.strictEqual(m.filledAs, 'maker');
+  assert.strictEqual(m.entry, 100, 'a resting fill is at the limit price');
+  // No bar left to fall back on -> dropped, not invented.
+  assert.strictEqual(hybrid([bar(99, 104, 98, 103), bar(110, 112, 109, 111)], 0, signal, WAIT), null,
+    'with no bar after the window the signal must be dropped');
+  console.log('G7 PASS hybrid fallback is priced after the window');
+};
+
+gates.G8 = () => {
+  const hybrid = lift('fillCryptoSignalHybrid', {
+    CRYPTO_BT_REWARD_MULTIPLE: REWARD,
+    fillCryptoSignalAsMakerLimit: lift('fillCryptoSignalAsMakerLimit', { CRYPTO_BT_REWARD_MULTIPLE: REWARD }),
+  });
+  const src2 = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  // Cost must follow the ACTUAL fill, not the run mode.
+  assert.ok(/filled\.filledAs === 'maker' \|\| entryMode === 'maker'/.test(src2),
+    'a chased fallback must be charged the taker cost, not the maker cost');
+  // The chase distance is measured against the setup's own risk width,
+  // and against LIVE's number -- 0.3, not a laxer one.
+  const chaseConst = new RegExp('CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION = ([\\d.]+);').exec(src2);
+  assert.ok(chaseConst, 'the chase gate constant must exist');
+  assert.strictEqual(Number(chaseConst[1]), 0.3,
+    'must mirror shwoop-server autoTrade.js CHASE_LIMIT_RISK_FRACTION exactly, or the backtest counts trades live refuses');
+  // A runaway fallback must actually record how far it chased.
+  const bars = [bar(99, 104, 98, 103)];
+  for (let i = 0; i < WAIT + 4; i++) bars.push(bar(110 + i, 112 + i, 109 + i, 111 + i));
+  const out = hybrid(bars, 0, signal, WAIT);
+  const expected = (out.entry - signal.entry) / Math.abs(signal.entry - signal.stop);
+  assert.ok(Math.abs(out.chaseRiskFraction - expected) < 1e-9, 'chase distance must be in risk-width units');
+  assert.ok(out.chaseRiskFraction > 0.3, 'control: this fixture must actually breach live\'s gate, or the check proves nothing');
+  // And the run must SAY so rather than quietly counting it.
+  assert.ok(/would have REFUSED them/.test(src2), 'chases live would refuse must be reported, not silently included');
+  assert.ok(/chased at market after the limit expired/.test(src2), 'the maker/chase split must be in the headline');
+  console.log('G8 PASS hybrid costs and split are honest');
+};
+
 function main() {
   const arg = process.argv[2];
   for (const n of (arg ? [arg] : Object.keys(gates))) {
