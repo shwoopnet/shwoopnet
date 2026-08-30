@@ -149,9 +149,21 @@ numbers surviving unexamined and then getting defended. A threshold
 committed to in advance is the only real defence, because after a result
 arrives there is always a reason to keep going.
 
-Current baselines to judge against, both measured under corrected
-accounting and both thin upper bounds: **equities 1.24, crypto 1.93.**
-2.71 and 2.35 are withdrawn — never quote them.
+**There are currently no baselines to judge against.** Every figure this
+line used to carry has been withdrawn: 2.71, 2.35 and 4.08 first, then
+1.24 / 1.48 / 0.96 for equities (never corrected for the `rangeHigh`
+entry lookahead, and the strategy is withdrawn entirely), then 1.93 /
+1.94 / 1.20 for crypto (measured before the entry-pricing fix), then 1.05
+(measured before the engine-parity fix).
+
+That is six withdrawals, and the honest state is an empty baseline rather
+than the most recent survivor. If you need a number to compare against,
+re-measure it — and put it in `CLAUDE.md` first, so this file cannot be
+the only place a stale figure lives.
+
+This line itself carried 1.24 and 1.93 as "current" for weeks after both
+were withdrawn. A skill that quotes a number is a skill that goes stale,
+which is why the rule is to point at the source rather than restate it.
 
 ## What this cannot tell you
 
