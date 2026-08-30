@@ -2766,15 +2766,15 @@
     <div class="labs-method-card">
       <p class="labs-method-intro">
         A second, independent strategy running alongside equities — same shape, tuned for a market that never
-        closes. Long-only, since Alpaca crypto has no shorting. <strong>Profit factor 1.94 over 60 days, but
-        1.20 over 180.</strong> That fall is the finding, not the 1.94 — measured over 801 signals instead of
-        277, expectancy drops from +0.45% to +0.12% a trade against a 0.50% round-trip cost, so the edge
-        becomes a quarter of what it costs to trade. And that 0.50% is Alpaca's taker fee, which
-        <em>excludes spread</em> — widest on exactly the alts producing most of these signals. Equities
-        behaves identically (1.48 at 30 days, 1.24 at 60, 0.96 at 365): the shorter the window, the better
-        both strategies look, which is what an edge living in the recent market looks like rather than one
-        living in the strategy. Neither has cleared the 1.5-across-three-windows bar set before any of this
-        was measured. Re-run both below rather than trusting this paragraph.
+        closes. Long-only, since Alpaca crypto has no shorting. <strong>Profit factor 1.94 over 60 days, then
+        1.20 over both 180 and 365.</strong> Those last two are identical across 1,843 signals, so the estimate
+        has settled rather than still falling — 1.94 was the recent window flattering it, and 1.20 is the
+        number. What that 1.20 actually describes is a <strong>gross edge of +0.62% a trade that trading costs
+        take 81% of</strong>, leaving +0.12% against a 0.50% round trip. The signal is real; it does not
+        survive paying the taker fee on both sides, and that 0.50% still excludes spread. Equities behaves
+        worse and does not settle at all (1.48 / 1.24 / 0.96 at 30 / 60 / 365 days). Neither has cleared the
+        1.5-across-three-windows bar set before any of this was measured. Re-run both below rather than
+        trusting this paragraph.
       </p>
       <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
@@ -10695,7 +10695,17 @@
   // reproduce is worse than no number, because it is what the go-live
   // decision gets measured against.
   //
-  // crypto is 1.20, from the 180-day window rather than the 60-day one.
+  // crypto is 1.20, measured at BOTH 180 and 365 days -- identical to two
+  // decimal places across 801 and 1,843 signals respectively, which is the
+  // strongest evidence available here that the estimate has converged
+  // rather than merely fallen. 60 days gave 1.94; that was the window, not
+  // the strategy.
+  //
+  // Worth stating in the terms that suggest what to do about it: 1.20 is a
+  // GROSS edge of +0.62% a trade with 81% of it eaten by cost. The signal
+  // is real and stable. It just does not survive paying a taker fee on both
+  // sides, which makes execution cost the binding constraint rather than
+  // the strategy logic.
   //
   // 60 days gave 1.94 and 180 gives 1.20 on the same pairs and the same
   // cost model, over 801 signals instead of 277. The longer window is the

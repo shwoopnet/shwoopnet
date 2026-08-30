@@ -114,15 +114,24 @@ cleared it, and both decline monotonically as the window lengthens:
 | | 30d | 60d | 180d | 365d |
 |---|---|---|---|---|
 | Equities | 1.48 | 1.24 | — | 0.96 (6 of 16) |
-| Crypto | — | 1.94 | **1.20** | not yet run |
+| Crypto | — | 1.94 | **1.20** | **1.20** (1,843 signals) |
 
 Equities was also measured with a failed-breakout exit at 60 days: 1.12,
 worse than without it.
 
-The shorter the lookback, the better both look — an edge living in the
-recent market rather than in the strategy. Crypto's 180-day expectancy is
-+0.12% against a 0.50% round-trip cost that excludes spread, so a quarter
-of what it costs to trade.
+Equities keeps degrading with window length. Crypto does not: 1.20 at both
+180 and 365 days, identical across 801 and 1,843 signals, so that estimate
+has converged. 1.94 was the recent window flattering it.
+
+**Crypto's failure is a cost failure, and that distinction matters for what
+to do next.** Its gross edge is +0.62% a trade and cost takes 81% of it,
+leaving +0.12% against a 0.50% round trip that still excludes spread. The
+signal is real and stable; it does not survive paying a taker fee on both
+sides. Equities is not the same case — gross +0.19% against a 0.10% cost,
+so cost takes half, and it degrades with window length regardless.
+
+If a future review is asked whether either is worth restarting, the honest
+answer for crypto turns on execution cost, not on signal quality.
 
 **This is the finding, and no weekly figure changes it.** A good week on
 twenty trades is not evidence against a 799-signal measurement. If a review
