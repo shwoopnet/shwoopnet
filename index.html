@@ -6640,6 +6640,20 @@
   var ALPACA_BACKTEST_MAX_PER_MINUTE = 60;
   var alpacaBacktestQueue = [];
   var alpacaBacktestCallTimestamps = [];
+  // When Alpaca rate-limits us, the whole queue stops -- not just the one
+  // request that got the 429.
+  //
+  // Per-request backoff alone is not enough, and a real run showed exactly
+  // why: a 365-day whole-universe run had 4 symbols succeed, then TEN fail
+  // in a row, then the last 2 succeed. The limit engaged and held for a few
+  // minutes, and each symbol independently spent its own ~30s retry budget
+  // rediscovering that, one after another, until the window happened to
+  // clear. Ten symbols were dropped from the results by a condition that
+  // one shared pause would have waited out.
+  //
+  // The rate limit is a property of the account, not of any single request,
+  // so the response has to be too.
+  var alpacaBacktestCooldownUntil = 0;
 
   function scheduleAlpacaBacktestCall(fn){
     return new Promise(function(resolve, reject){
@@ -6652,6 +6666,10 @@
     var now = Date.now();
     alpacaBacktestCallTimestamps = alpacaBacktestCallTimestamps.filter(function(t){ return now - t < 60000; });
     if(alpacaBacktestQueue.length === 0) return;
+    if(now < alpacaBacktestCooldownUntil){
+      setTimeout(processAlpacaBacktestQueue, alpacaBacktestCooldownUntil - now + 100);
+      return;
+    }
     if(alpacaBacktestCallTimestamps.length >= ALPACA_BACKTEST_MAX_PER_MINUTE){
       var waitMs = 60000 - (now - alpacaBacktestCallTimestamps[0]) + 250;
       setTimeout(processAlpacaBacktestQueue, waitMs);
@@ -6681,19 +6699,37 @@
   // clears on its own in seconds. Retry-After is honoured when Alpaca
   // sends it, otherwise exponential backoff, capped so a genuinely stuck
   // limit still surfaces as an error instead of hanging forever.
-  var ALPACA_BACKTEST_MAX_RETRIES = 4;
+  // Six attempts with backoff capped at 60s, because an Alpaca rate-limit
+  // window can last a full minute -- four attempts inside 30s could exhaust
+  // themselves entirely within one window and give up while the limit was
+  // still in force, which is what dropped ten symbols from a real run.
+  var ALPACA_BACKTEST_MAX_RETRIES = 6;
   function fetchAlpacaBacktestJSON(url, label){
     function attempt(tryNum){
       return scheduleAlpacaBacktestCall(function(){
         return fetch(url, { headers: alpacaHeaders() });
       }).then(function(res){
-        if(res.status === 429 && tryNum < ALPACA_BACKTEST_MAX_RETRIES){
+        if(res.status === 429){
           var retryAfter = parseFloat(res.headers && res.headers.get('Retry-After'));
           var waitMs = (isFinite(retryAfter) && retryAfter > 0)
             ? Math.min(retryAfter * 1000, 60000)
-            : Math.min(2000 * Math.pow(2, tryNum), 30000);
-          console.warn('Alpaca rate-limited a backtest page (429) -- retrying in ' + Math.round(waitMs / 1000) + 's');
-          return new Promise(function(r){ setTimeout(r, waitMs); }).then(function(){ return attempt(tryNum + 1); });
+            : Math.min(2000 * Math.pow(2, tryNum), 60000);
+          // Recorded on EVERY 429, including the last one -- before the
+          // retry budget is consulted, not inside it.
+          //
+          // Getting this wrong is subtle and was caught only by testing the
+          // gap between one caller giving up and the next starting. If the
+          // cooldown were set only when a retry follows, the FINAL 429 --
+          // the one that actually proves the limit is still in force --
+          // would be the single one that never records it. The next symbol
+          // would then start against an already-expired cooldown and burn
+          // its own budget rediscovering the same limit, which is the exact
+          // cascade this is here to stop.
+          alpacaBacktestCooldownUntil = Math.max(alpacaBacktestCooldownUntil, Date.now() + waitMs);
+          if(tryNum < ALPACA_BACKTEST_MAX_RETRIES){
+            console.warn('Alpaca rate-limited a backtest page (429) -- pausing all backtest fetches for ' + Math.round(waitMs / 1000) + 's');
+            return new Promise(function(r){ setTimeout(r, waitMs); }).then(function(){ return attempt(tryNum + 1); });
+          }
         }
         if(!res.ok) throw new Error(label + ' HTTP ' + res.status);
         return res.json();
