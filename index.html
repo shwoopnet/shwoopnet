@@ -8511,17 +8511,55 @@
     });
   }
 
+  // Called on every chart (re)render, which is far more often than it
+  // looks: the Trade Overview setup lists re-render on every quote poll
+  // (see renderCryptoBlocks/renderIntradayBlocks), which rebuilds each
+  // card's <svg> from scratch, and any expanded card then re-renders its
+  // chart. Resetting the view here on every one of those meant a zoom or
+  // pan silently snapped back to default within a poll cycle -- which
+  // reads, correctly, as "zoom and scroll don't work at all."
+  //
+  // So the user's own view is carried across a re-init, exactly as `scale`
+  // already was. Only a genuine timeframe change starts fresh -- candle
+  // counts aren't comparable across timeframes, so keeping a 1D view's
+  // position when switching to 15m would land somewhere arbitrary.
+  // resetChartZoom (the reset control) is still the way back to default.
   function initChartState(sym, tf, data){
     var cfg = tfConfig[tf];
     var defaultVisible = Math.min(cfg.defaultVisible, data.length);
-    var prevScale = (chartStates[sym] && chartStates[sym].scale) || 'linear';
+    var prev = chartStates[sym];
+    var prevScale = (prev && prev.scale) || 'linear';
+    var carryOver = prev && prev.tf === tf && prev.data && prev.viewEnd > prev.viewStart;
+
+    var viewStart = data.length - defaultVisible;
+    var viewEnd = data.length;
+    if(carryOver){
+      var prevCount = prev.viewEnd - prev.viewStart;
+      // Live charts gain bars as new ones close. Someone parked at the
+      // right edge is watching the latest price and should keep watching
+      // it as bars arrive -- anyone scrolled back into history is reading
+      // a specific stretch and should stay on it instead of being yanked
+      // forward. Matches how a real charting tool behaves.
+      var wasAtRightEdge = prev.viewEnd >= prev.data.length;
+      var count = Math.max(1, Math.min(prevCount, data.length));
+      if(wasAtRightEdge){
+        viewEnd = data.length;
+        viewStart = Math.max(0, data.length - count);
+      } else {
+        viewStart = Math.max(0, Math.min(prev.viewStart, data.length - count));
+        viewEnd = viewStart + count;
+      }
+    }
+
     chartStates[sym] = {
       data: data,
-      viewStart: data.length - defaultVisible,
-      viewEnd: data.length,
+      viewStart: viewStart,
+      viewEnd: viewEnd,
       scale: prevScale,
-      priceScaleFactor: 1,
-      priceCenterOffset: 0,
+      // Price-axis zoom/offset are pure view state with no dependence on
+      // bar count, so they carry over on any same-timeframe re-init.
+      priceScaleFactor: carryOver ? (prev.priceScaleFactor || 1) : 1,
+      priceCenterOffset: carryOver ? (prev.priceCenterOffset || 0) : 0,
       tf: tf
     };
   }
