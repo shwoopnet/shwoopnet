@@ -31,6 +31,11 @@ remote:
 - **`health-check`** — the weekly strategy review, with thresholds decided
   in advance so a losing week can't be argued into looking fine.
 - **`ask-the-advisors`** — six-perspective board for project decisions.
+- **`unlazy`** — vendored from upstream (see its `PROVENANCE.md`). Writes
+  acceptance gates before the work and re-measures them before reporting,
+  so a confident "done" has to survive a check. Its `CHECK:` lines are
+  shell commands — read `SECURITY.md` before running a ledger this repo
+  didn't write.
 
 ## Git workflow
 
