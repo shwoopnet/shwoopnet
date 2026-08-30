@@ -383,6 +383,28 @@
   /* Live trading mode -- deliberately loud. This is real money, so the
      visual language intentionally breaks from the rest of the app's
      calm, amber-accented style the moment it's active. */
+  /* Site-wide, sticky, on EVERY page. The per-page paused notices only
+     help someone already looking at the right page -- a halted strategy
+     has to be visible from wherever you happen to land, because the
+     failure mode is not noticing for days. */
+  .global-paused-banner{
+    position: sticky; top:0; z-index:200;
+    background: var(--loss); color:#fff; font-family:'Public Sans', sans-serif;
+    font-weight:700; font-size:12.5px; letter-spacing:.03em;
+    padding:10px 16px; display:flex; align-items:center; gap:10px;
+    flex-wrap:wrap; justify-content:center; text-align:center;
+  }
+  .global-paused-banner[hidden]{ display:none; }
+  .global-paused-banner-dot{
+    width:8px; height:8px; border-radius:50%; background:#fff; flex-shrink:0;
+    animation: liveDotPulse 1.4s ease-in-out infinite;
+  }
+  [data-reduce-motion="true"] .global-paused-banner-dot{ animation:none; }
+  .global-paused-banner-link{
+    color:#fff; text-decoration:underline; font-weight:700; cursor:pointer;
+    background:none; border:none; font:inherit; padding:0;
+  }
+  .global-paused-banner-link:hover{ opacity:.85; }
   .live-mode-banner{
     background: var(--loss); color:#fff; font-family:'Public Sans', sans-serif;
     font-weight:700; font-size:12.5px; letter-spacing:.03em;
@@ -1928,6 +1950,12 @@
     <div class="ticker-track" id="tickerTrack"></div>
   </div>
 
+  <div class="global-paused-banner" id="globalPausedBanner" role="alert" hidden>
+    <span class="global-paused-banner-dot"></span>
+    <span id="globalPausedBannerText"></span>
+    <button type="button" class="global-paused-banner-link" id="globalPausedBannerLink">Resolve this →</button>
+  </div>
+
   <div class="topbar">
     <button class="brand" id="brandHomeBtn" aria-label="Go to home page">
       <div class="brand-text">
@@ -2711,71 +2739,27 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Labs</div>
-        <div class="trades-sub">The method behind both strategies, and a real backtest — not a demo.</div>
-      </div>
-    </div>
-
-    <div class="brief-section-title">The Method</div>
-    <div class="labs-method-card">
-      <p class="labs-method-intro">
-        How the equities screener works. <strong>Measured profit factor: 1.24</strong> — 406 signals across the
-        full 16-symbol universe over ~60 trading days, real trading costs included. Expectancy is +0.09% per
-        trade, which is about the same size as the 0.10% round-trip cost already subtracted from it: assume
-        slightly worse fills than the model does and the edge is gone. This is a thin edge, not a proven one.
-        Re-run it yourself below rather than trusting this paragraph. The crypto strategy is its own separate
-        screener, covered below.
-      </p>
-      <div class="labs-live-compare" id="labsEquitiesLiveStat">—</div>
-      <div class="labs-method-grid">
-        <div class="labs-method-item">
-          <div class="labs-method-step">1</div>
-          <div>
-            <div class="labs-method-title">16 stocks, picked for how they move</div>
-            <div class="labs-method-body">PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID,
-            OPEN, SNAP, CHPT, ROKU — volatile, retail-heavy names chosen for real edge, not brand recognition.</div>
-          </div>
-        </div>
-        <div class="labs-method-item">
-          <div class="labs-method-step">2</div>
-          <div>
-            <div class="labs-method-title">The first 30 minutes set the range</div>
-            <div class="labs-method-body">The high/low of the first two 15-minute bars each day. Everything after is judged against a breakout of that range.</div>
-          </div>
-        </div>
-        <div class="labs-method-item">
-          <div class="labs-method-step">3</div>
-          <div>
-            <div class="labs-method-title">The breakout needs real volume</div>
-            <div class="labs-method-body">A break past the range only counts on 2x+ its 20-bar average volume —
-            without this filter, the same logic backtests meaningfully worse.</div>
-          </div>
-        </div>
-        <div class="labs-method-item">
-          <div class="labs-method-step">4</div>
-          <div>
-            <div class="labs-method-title">Entry and stop from the range, exit that trails</div>
-            <div class="labs-method-body">Entry and initial stop are the range's two edges. The stop locks to
-            breakeven at 0.3x risk in profit, then trails the best price past 0.75x — no fixed target, so
-            winners can run. One signal per stock per day.</div>
-          </div>
-        </div>
+        <div class="trades-sub">The crypto method, and a real backtest — not a demo. The equities strategy has been withdrawn; a replacement is being designed from scratch.</div>
       </div>
     </div>
 
     <div class="brief-section-title" style="margin-top:36px;">The Crypto Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        A second, independent strategy running alongside equities — same shape, tuned for a market that never
-        closes. Long-only, since Alpaca crypto has no shorting. <strong>Profit factor 1.94 over 60 days, then
-        1.20 over both 180 and 365.</strong> Those last two are identical across 1,843 signals, so the estimate
-        has settled rather than still falling — 1.94 was the recent window flattering it, and 1.20 is the
-        number. What that 1.20 actually describes is a <strong>gross edge of +0.62% a trade that trading costs
-        take 81% of</strong>, leaving +0.12% against a 0.50% round trip. The signal is real; it does not
-        survive paying the taker fee on both sides, and that 0.50% still excludes spread. Equities behaves
-        worse and does not settle at all (1.48 / 1.24 / 0.96 at 30 / 60 / 365 days). Neither has cleared the
-        1.5-across-three-windows bar set before any of this was measured. Re-run both below rather than
-        trusting this paragraph.
-      </p>
+        The only strategy currently running. Long-only, since Alpaca crypto has no shorting.
+        <strong>Profit factor 1.05 over 60 days — and negative after real trading costs.</strong>
+        That 1.05 replaces an earlier 1.94: the backtest had been booking each entry at the breakout
+        <em>level</em>, a price only knowable after the bar that broke through it had already closed. Priced at
+        a bar this system could actually have filled on, the edge is +0.04% a trade before spread.
+        Then the spread was measured for the first time — a 0.200% median across the 12 pairs, which the
+        0.50% cost assumption never included. The real round trip is 0.700% against a
+        <strong>gross edge of +0.54%</strong>, so the honest figure is <strong>−0.16% a trade</strong>.
+        Four of twelve pairs are cheap enough to trade (BTC, ETH, SOL, AVAX); the signals concentrate in the
+        expensive eight. Two execution alternatives were measured and neither survived: maker-limit entries
+        scored 1.29 by skipping the winners (the signals the limit missed averaged +1.47%), and a
+        limit-then-market hybrid scored 1.50 only by taking trades live's own chase gate refuses.
+        This is running because it is already built and paper-only, not because it has been shown to work.
+        Re-run it below rather than trusting this paragraph.</p>
       <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
         <div class="labs-method-item">
@@ -2805,65 +2789,15 @@
         <div class="labs-method-item">
           <div class="labs-method-step">4</div>
           <div>
-            <div class="labs-method-title">Same trailing stop as equities, same breakeven floor</div>
-            <div class="labs-method-body">Same shape as equities: breakeven lock, then trailing past 0.5x risk
-            in profit. Alpaca's crypto orders are stop-limit only, so a backstop force-closes any position a
-            fast move leaves unprotected.</div>
+            <div class="labs-method-title">Breakeven lock, then a trailing stop</div>
+            <div class="labs-method-body">The stop moves to breakeven early, then trails once the trade is
+            0.5x its risk in profit. There is no fixed target — a position rides the trail until it is stopped.
+            Alpaca's crypto orders are stop-limit only, so a backstop force-closes any position a fast move
+            leaves unprotected.</div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="brief-section-title" style="margin-top:36px;">Backtest</div>
-    <div class="labs-backtest-card">
-      <p class="labs-backtest-intro">
-        Runs the same live scoring and stop/target logic against real historical Alpaca prices, only ever using
-        data that existed at that point in time. Measures raw % return per trade, independent of account size.
-        If a longer lookback fails to load, try a shorter one.
-      </p>
-      <div class="labs-backtest-controls">
-        <div class="labs-control-field">
-          <label for="intradayBacktestSymbol">Symbol</label>
-          <select id="intradayBacktestSymbol"></select>
-        </div>
-        <div class="labs-control-field">
-          <label for="intradayBacktestLookback">Lookback</label>
-          <select id="intradayBacktestLookback">
-            <option value="830" selected>~30 trading days</option>
-            <option value="1610">~60 trading days</option>
-            <option value="2390">~90 trading days</option>
-            <option value="4730">~180 trading days</option>
-            <option value="9540">~365 trading days (2 requests, slower)</option>
-          </select>
-        </div>
-        <button class="settings-reset-btn" id="runIntradayBacktestBtn">Run backtest</button>
-        <button class="settings-reset-btn" id="runIntradayUniverseBacktestBtn">Run whole universe</button>
-      </div>
-      <label class="labs-backtest-option">
-        <input type="checkbox" id="intradayBacktestRegimeFilter">
-        Apply the market-regime filter (real SPY history) — skips a fresh Long during a broad SPY selloff, a fresh
-        Short during a broad rally. Off by default so this stays a direct before/after comparison, not a new default.
-      </label>
-      <label class="labs-backtest-option">
-        <input type="checkbox" id="intradayBacktestConfirmationBar">
-        Require a confirmation bar before entry — instead of entering the instant a bar first breaks the opening
-        range on volume, waits one more 15-minute bar and only takes the trade if price is still beyond the range at
-        that bar's close. Trades entry timing (and some of the "let winners run" edge from catching the move early)
-        for fewer immediate fakeouts. Off by default so this stays a direct before/after comparison, not a new default.
-      </label>
-          <label class="labs-backtest-toggle">
-            <input type="checkbox" id="intradayBacktestInvalidate">
-            <span>Exit when the breakout fails — close the position as soon as a bar CLOSES back inside the
-            opening range, instead of waiting for the stop. <strong>Measured, and it makes this strategy
-            worse: profit factor 1.24 → 1.12</strong> over the same 60-day window and the same 406 signals.
-            It did what it was supposed to — average loss fell 0.53% → 0.42% and average win rose 1.57% →
-            1.83% — and still lost, because it turned 37 winners into losers to get there. That is the
-            classic trend-following result: the losers it saves you from are outnumbered by the winners it
-            ends early. Left here as a measurement, not an option worth turning on.</span>
-          </label>
-      <div class="labs-backtest-status" id="intradayBacktestStatus"></div>
-      <div id="intradayBacktestResults"></div>
-      </div>
 
     <div class="brief-section-title" style="margin-top:36px;">Crypto Backtest</div>
     <div class="labs-backtest-card">
@@ -2890,37 +2824,6 @@
         <button class="settings-reset-btn" id="runCryptoBacktestBtn">Run backtest</button>
         <button class="settings-reset-btn" id="runCryptoUniverseBacktestBtn">Run whole universe</button>
       </div>
-      <label class="labs-backtest-toggle">
-        <input type="checkbox" id="cryptoBacktestInvalidate">
-        <span>Exit when the trend is lost — <strong>not yet measured for crypto</strong>; the equities
-        equivalent above was measured and made that strategy worse, so expect the same until shown otherwise.
-        Closes as soon as a bar CLOSES back below the 30-bar average.
-        Entry required price to sit 1.5% above that average, so the gap acts as hysteresis rather than
-        churning on every touch. This matters more here than for equities: a crypto position has no session
-        close and no target, so it rides the trailing stop indefinitely — which is exactly where a stale
-        thesis costs the most. Off by default.</span>
-      </label>
-      <label class="labs-backtest-toggle">
-        <input type="checkbox" id="cryptoBacktestMaker">
-        <span>Maker-limit entries — rests a limit at the breakout level instead of sending a market order.
-        Measured median spread is 0.200%, so a market round trip costs 0.700% against a 0.62% gross edge:
-        negative. A resting limit crosses no spread and pays the lower maker fee on the entry leg, taking the
-        round trip to roughly 0.30%. <strong>Read the fill rate, not just the profit factor.</strong> The
-        breakouts that never trade back down to the limit are disproportionately the winners, so this is
-        expected to trade fill rate against profit factor — the same shape as the trend-exit above, which cut
-        average loss exactly as intended and still lost money. Missed signals are priced under the market-order
-        model and reported alongside. Off by default.</span>
-      </label>
-      <label class="labs-backtest-toggle">
-        <input type="checkbox" id="cryptoBacktestHybrid">
-        <span>Hybrid entries — rests the limit, then takes the market order if it never fills. Supersedes the
-        checkbox above when both are ticked. <strong>The fallback is priced two hours late, not at the next
-        bar.</strong> A hybrid does not know the limit failed until the wait window expires, so booking the
-        fallback at the signal bar would use the future to justify a price from the past — the same lookahead
-        that reported 13.26. Which makes this honestly "maker fills on the breakouts that come back, and
-        chasing the runaways two hours late". Reports the split, and how many of those chases live's own chase
-        gate would have refused. Off by default.</span>
-      </label>
       <div class="labs-backtest-status" id="cryptoBacktestStatus"></div>
       <div id="cryptoBacktestResults"></div>
     </div>
@@ -2937,6 +2840,16 @@
               quota. (Equities only for now — crypto bars aren't wired into this export yet.)</div>
           </div>
           <button class="settings-reset-btn" id="exportHistoricalDataBtn">Export historical data</button>
+        </div>
+        <div class="labs-control-field" style="margin-bottom:14px;">
+          <label for="exportLookback">Lookback</label>
+          <select id="exportLookback">
+            <option value="830" selected>~30 trading days</option>
+            <option value="1610">~60 trading days</option>
+            <option value="2390">~90 trading days</option>
+            <option value="4730">~180 trading days</option>
+            <option value="9540">~365 trading days (2 requests, slower)</option>
+          </select>
         </div>
         <div class="labs-control-field" style="margin-bottom:14px;">
           <label for="exportSymbolsInput">Symbols to export (comma-separated)</label>
@@ -2971,36 +2884,7 @@
         <div id="alpacaDataFeedTestResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
       </div>
 
-      <div class="labs-backtest-card" style="margin-top:16px;">
-        <div class="labs-export-header">
-          <div>
-            <div class="labs-export-title">How far back does options data go?</div>
-            <div class="labs-export-desc">Walks backwards through real expired SPY contracts and reports the
-              oldest date this account can actually fetch option bars for. Answers whether an options strategy
-              could be backtested at all before any of it gets built — the docs advertise history since
-              February 2024, but what matters is what your own key and data plan return.</div>
-          </div>
-          <button class="settings-reset-btn" id="testOptionsDepthBtn">Check options depth</button>
-        </div>
-        <div class="labs-backtest-status" id="optionsDepthStatus"></div>
-        <div id="optionsDepthResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
-      </div>
 
-      <div class="labs-export-card">
-        <div class="labs-export-header">
-          <div>
-            <div class="labs-export-title">What spread does crypto actually pay?</div>
-            <div class="labs-export-desc">Samples live bid/ask on all 12 pairs and reports the round-trip cost
-              a market order really pays — the taker fee plus the spread it crosses. The backtest's 0.50%
-              assumption is fee-only and excludes spread entirely, and the measured edge only survives if the
-              true round trip stays under 0.62%. This is the number that decides whether the crypto strategy
-              is worth funding, and it costs nothing to measure.</div>
-          </div>
-          <button class="settings-reset-btn" id="testCryptoSpreadBtn">Measure spread</button>
-        </div>
-        <div class="labs-backtest-status" id="cryptoSpreadStatus"></div>
-        <div id="cryptoSpreadResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
-      </div>
     </div>
   </main>
     </div>
@@ -4263,6 +4147,41 @@
   // state happens to still be true on (the listener re-fires on every
   // unrelated write to the same shared doc, same as everything else
   // built on watchAlpacaCredentials/watchScreenerPicks).
+  // One banner, both strategies. Rendered from a single shared state so
+  // the two independent pause flags cannot fight over one element -- an
+  // earlier version of this kind of thing had each renderer setting and
+  // clearing the same node, so whichever ran last won and a real pause
+  // could be cleared off the screen by the other strategy being fine.
+  var globalPauseState = { intraday: null, crypto: null };
+
+  function renderGlobalPausedBanner(){
+    var banner = document.getElementById('globalPausedBanner');
+    var textEl = document.getElementById('globalPausedBannerText');
+    if(!banner || !textEl) return;
+    var paused = [];
+    if(globalPauseState.intraday && globalPauseState.intraday.paused) paused.push({ label: 'Equities', state: globalPauseState.intraday });
+    if(globalPauseState.crypto && globalPauseState.crypto.paused) paused.push({ label: 'Crypto', state: globalPauseState.crypto });
+    if(!paused.length){
+      banner.setAttribute('hidden', '');
+      return;
+    }
+    var names = paused.map(function(p){ return p.label; }).join(' and ');
+    var reasons = paused
+      .map(function(p){ return p.state.pausedReason; })
+      .filter(function(r){ return !!r; });
+    // The reason is the whole point -- "paused" alone tells you to go
+    // looking, which is the friction this banner exists to remove.
+    textEl.textContent = names + ' auto-trading ' + (paused.length > 1 ? 'are' : 'is') + ' PAUSED'
+      + (reasons.length ? ' — ' + reasons.join('; ') : '')
+      + '. No new orders will be sent until it is resumed.';
+    banner.removeAttribute('hidden');
+  }
+
+  function setGlobalPauseState(screenerType, state){
+    globalPauseState[screenerType] = state;
+    renderGlobalPausedBanner();
+  }
+
   var lastKnownTradingPaused = false;
 
   function playTradingPausedAlertSound(){
@@ -4324,6 +4243,7 @@
     var reasonText = state.pausedReason || 'unknown';
     var justPaused = state.paused && !lastKnownTradingPaused;
     lastKnownTradingPaused = state.paused;
+    setGlobalPauseState('intraday', state);
     if(justPaused){
       playTradingPausedAlertSound();
       notifyTradingPausedViaBrowser('Equities', reasonText);
@@ -4363,6 +4283,7 @@
     var reasonText = state.pausedReason || 'unknown';
     var justPaused = state.paused && !lastKnownCryptoTradingPaused;
     lastKnownCryptoTradingPaused = state.paused;
+    setGlobalPauseState('crypto', state);
     if(justPaused){
       playTradingPausedAlertSound();
       notifyTradingPausedViaBrowser('Crypto', reasonText);
@@ -6479,119 +6400,6 @@
         });
     }, priority);
   }
-
-  // ---------- Backtest engine (Labs page) ----------
-  // Re-runs the exact same scoring and stop/target logic the live ORB
-  // screener uses, day by day against real history, using only data that
-  // would have existed at the time — no lookahead. Not a demo: this is
-  // the actual signal, tested honestly.
-
-  // Same-day-close-aware resolver for ORB. Uses a trailing stop instead
-  // of a fixed target now -- once a trade moves 0.75x its own risk in
-  // its favor, the stop starts trailing behind the best price reached
-  // (held at a distance of 1x the original risk) instead of staying
-  // fixed, letting a real winner run further than a flat 1.5R cap would
-  // allow. This replaced the old fixed-target exit after walk-forward
-  // testing showed it improves BOTH the overall profit factor (2.15 ->
-  // 2.32) AND the worst-case window (2.03 -> 2.15) together -- the bar
-  // for treating a change like this as real rather than a lucky average,
-  // established after the eod_flat bug taught the hard way that a good
-  // average number alone isn't enough to trust. analysis.t1 is still
-  // computed and shown as a reference point (still entry + 1.5x risk),
-  // but it is no longer where the trade actually caps out.
-  function simulateORBForwardSameDay(bars, entryIdx, analysis, invalidateOnFailedBreakout){
-    var isLong = analysis.direction === 'Long';
-    var entryDateKey = bars[entryIdx].t.toISOString().slice(0,10);
-    // If the entry bar is already the last bar of its own day, there's
-    // no room left to simulate an exit at all -- Python's validated
-    // engine treats this as a flat, zero-return trade rather than
-    // resolving it against the entry bar's own close, which is almost
-    // always past the entry level (having just broken out through it)
-    // and would otherwise manufacture a fake win out of nothing.
-    if(entryIdx + 1 >= bars.length || bars[entryIdx + 1].t.toISOString().slice(0,10) !== entryDateKey){
-      return { result: 'eod_flat', days: 1, price: analysis.entry, date: bars[entryIdx].t };
-    }
-    // The reason this trade exists is that price broke out of the opening
-    // range and held. If a bar CLOSES back inside that range, that reason is
-    // gone -- the breakout failed -- and the position is being held on
-    // nothing but the hope that the stop isn't hit.
-    //
-    // Deliberately measured on the CLOSE, not the low. Intrabar dips back
-    // through the level are exactly the noise a breakout trade is supposed
-    // to sit through; only a close says the move actually failed.
-    //
-    // Opt-in, and worth being blunt about why: cutting a trend trade when it
-    // dips is a well-known way to make a trend strategy WORSE, because the
-    // trades it saves you from are outnumbered by the winners it ends early.
-    // This exists to find out which happens here, not because it will help.
-    var invalidationLevel = invalidateOnFailedBreakout
-      ? (isLong ? analysis.rangeHigh : analysis.rangeLow) : null;
-    var risk = Math.abs(analysis.entry - analysis.stop);
-    var TRAIL_TRIGGER_RR = 0.75;
-    var triggerPrice = isLong ? analysis.entry + TRAIL_TRIGGER_RR * risk : analysis.entry - TRAIL_TRIGGER_RR * risk;
-    // Lower, earlier threshold than the full trail trigger above -- see
-    // shwoop-server's technicalAnalysis.js (EARLY_BREAKEVEN_RR) for the
-    // full reasoning. Checked against each bar's favorable extreme
-    // (high for Long, low for Short), same as the trigger check below.
-    var EARLY_BREAKEVEN_RR = 0.3;
-    var earlyBreakevenPrice = isLong ? analysis.entry + EARLY_BREAKEVEN_RR * risk : analysis.entry - EARLY_BREAKEVEN_RR * risk;
-    var trailingActive = false;
-    var currentStop = analysis.stop;
-    var lastBarOfDayIdx = entryIdx;
-    for(var j = entryIdx + 1; j < bars.length; j++){
-      var bar = bars[j];
-      if(bar.t.toISOString().slice(0,10) !== entryDateKey) break; // next day started
-      lastBarOfDayIdx = j;
-      if(isLong){
-        if(bar.l <= currentStop) return { result: trailingActive ? 'trailing_stopped' : 'stopped', days: j - entryIdx, price: currentStop, date: bar.t };
-        if(bar.h >= triggerPrice){
-          trailingActive = true;
-          var newStopLong = bar.h - risk;
-          if(newStopLong > currentStop) currentStop = newStopLong;
-        }
-      } else {
-        if(bar.h >= currentStop) return { result: trailingActive ? 'trailing_stopped' : 'stopped', days: j - entryIdx, price: currentStop, date: bar.t };
-        if(bar.l <= triggerPrice){
-          trailingActive = true;
-          var newStopShort = bar.l + risk;
-          if(newStopShort < currentStop) currentStop = newStopShort;
-        }
-      }
-      // Breakeven floor -- matches shwoop-server's live technicalAnalysis.js
-      // exactly. Once trailing has activated, the stop can never sit worse
-      // than entry again. This tool was missing it until now, meaning it
-      // was quietly simulating an older version of the strategy than the
-      // one actually trading.
-      if(trailingActive){
-        currentStop = isLong ? Math.max(currentStop, analysis.entry) : Math.min(currentStop, analysis.entry);
-      }
-      // Independent of trailingActive -- a smaller real favorable move
-      // locks breakeven on its own, even short of the full trigger.
-      var reachedEarlyBreakeven = isLong ? bar.h >= earlyBreakevenPrice : bar.l <= earlyBreakevenPrice;
-      if(reachedEarlyBreakeven){
-        currentStop = isLong ? Math.max(currentStop, analysis.entry) : Math.min(currentStop, analysis.entry);
-      }
-      // Checked last, after the stop: a bar that hit the stop exited at the
-      // stop, and re-deciding that on the same bar's close would be reading
-      // the future to pick the better of two exits.
-      if(invalidationLevel !== null){
-        var failed = isLong ? bar.c < invalidationLevel : bar.c > invalidationLevel;
-        if(failed) return { result: 'invalidated', days: j - entryIdx, price: bar.c, date: bar.t };
-      }
-    }
-    var lastBar = bars[lastBarOfDayIdx];
-    return { result: 'eod_close', days: lastBarOfDayIdx - entryIdx, price: lastBar.c, date: lastBar.t };
-  }
-
-  // Basis points of adverse cost per market-order leg, deducted from
-  // every trade's return regardless of direction -- a real trading
-  // cost, not a directional price shift. Matches exactly what every
-  // Python validation run of this strategy used throughout -- the live
-  // backtest tool previously had no cost model at all, which turned out
-  // to be the actual explanation for a real, substantial gap between
-  // what this tool reported and what the strategy was actually
-  // validated on (roughly double the true profit factor and win rate).
-  var ORB_SLIPPAGE_BPS = 5;
   var ORB_MARKET_LEGS_BY_OUTCOME = { hit: 1, stopped: 2, eod_close: 2, eod_flat: 1, trailing_stopped: 2, invalidated: 2 };
   function applyORBSlippage(pctReturn, outcome){
     var legs = ORB_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined ? ORB_MARKET_LEGS_BY_OUTCOME[outcome] : 2;
@@ -6940,121 +6748,6 @@
     var target = entry + CRYPTO_BT_REWARD_MULTIPLE * risk;
     return { direction: direction, entry: entry, stop: stop, t1: target };
   }
-
-  // Maker-limit entries -- the experiment pre-registered in CLAUDE.md.
-  //
-  // A market order CROSSES the spread going in and again going out, and
-  // pays Alpaca's taker fee both times: 0.50% fee + 0.200% measured
-  // median spread = 0.700% round trip, against a 0.62% gross edge. That
-  // is negative, which is what killed the market-order version.
-  //
-  // A resting limit at the breakout level provides liquidity instead of
-  // taking it. Only the ENTRY leg can rest, though -- the exit is a stop
-  // or a trend invalidation and has to take whatever is there -- so this
-  // is maker in, taker out: 0.40% of fees against the market version's
-  // 0.50%, and only the exit still crosses the spread.
-  //
-  // The predicted failure mode, recorded before this was run: breakouts
-  // that never trade back down to the limit are disproportionately the
-  // WINNERS, so fill rate and profit factor move in opposite directions.
-  // That is why runCryptoBacktestSimulationAsync also evaluates every
-  // MISSED signal under the taker model -- a profit factor that improves
-  // while fill rate collapses is the failed-breakout-exit trap wearing a
-  // new face, and reporting only the filled trades would hide it.
-  var CRYPTO_MAKER_FEE_BPS = 15;
-  var CRYPTO_MAKER_WAIT_BARS = 8; // 2 hours of 15-minute bars
-  // Mirrors shwoop-server autoTrade.js's CHASE_LIMIT_RISK_FRACTION, which
-  // is 0.3 -- live refuses a market entry that has already run 30% of the
-  // setup's own risk width past the breakout level. Kept identical on
-  // purpose: a backtest reporting against a laxer gate than live enforces
-  // would count trades the live system would have refused.
-  var CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION = 0.3;
-
-  function applyCryptoMakerSlippage(pctReturn, outcome){
-    // The EXIT is still a market order -- a stop or a trend-invalidation
-    // exit has to take whatever is there, so only the ENTRY leg earns the
-    // maker fee. Modelling both legs as maker would be assuming away the
-    // one leg that genuinely cannot rest.
-    var exitLegs = CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] !== undefined
-      ? CRYPTO_BT_MARKET_LEGS_BY_OUTCOME[outcome] - 1 : 1;
-    if(exitLegs < 0) exitLegs = 0;
-    return pctReturn - (CRYPTO_MAKER_FEE_BPS / 100) - exitLegs * (CRYPTO_SLIPPAGE_BPS / 100);
-  }
-
-  // Fills at the breakout level only if a later bar actually trades down
-  // to it, within the wait window. A limit order fills at its price or
-  // better; modelling the fill at exactly the limit is the conservative
-  // reading of a bar that opened through it.
-  function fillCryptoSignalAsMakerLimit(bars, signalIdx, signal, waitBars){
-    var limitPrice = signal.entry;
-    if(!(limitPrice > 0) || limitPrice <= signal.stop) return null;
-    var last = Math.min(bars.length - 1, signalIdx + waitBars);
-    for(var j = signalIdx + 1; j <= last; j++){
-      if(bars[j].l <= limitPrice){
-        var risk = limitPrice - signal.stop;
-        if(risk <= 0) return null;
-        return {
-          entryIdx: j,
-          direction: signal.direction,
-          entry: limitPrice,
-          stop: signal.stop,
-          t1: limitPrice + CRYPTO_BT_REWARD_MULTIPLE * risk
-        };
-      }
-    }
-    return null; // never came back -- the signal is missed, not filled
-  }
-
-  // Hybrid entries: rest the limit, and take the market if it never fills.
-  //
-  // The tempting reading of the maker result is "the market strategy with
-  // a better entry on 70% of trades". That is WRONG, and acting on it
-  // would have been the sixth flattering error in this project.
-  //
-  // A hybrid cannot market-in at the bar after the signal, because at
-  // that moment it does not yet know the limit will fail. It only knows
-  // that once the wait window expires. So the fallback is priced
-  // waitBars later -- on an asset that, by definition, has been running
-  // away for those two hours. Booking the fallback at signalIdx + 1
-  // would be using the future (that price never came back) to justify a
-  // price from the past: the same lookahead as the 13.26, wearing a
-  // different hat.
-  //
-  // Which makes the honest description of this strategy: maker fills on
-  // the breakouts that come back, and chasing the runaways two hours
-  // late. Live's CHASE_LIMIT_RISK_FRACTION exists to refuse exactly that
-  // second trade, so how many fallbacks it would have blocked is
-  // reported rather than silently taken.
-  function fillCryptoSignalHybrid(bars, signalIdx, signal, waitBars){
-    var makerFill = fillCryptoSignalAsMakerLimit(bars, signalIdx, signal, waitBars);
-    if(makerFill){
-      makerFill.filledAs = 'maker';
-      return makerFill;
-    }
-    // The limit is cancelled at the end of the window; the market order
-    // goes in on the NEXT bar after that, which is the first bar whose
-    // open this strategy could actually have acted on.
-    var entryIdx = signalIdx + waitBars + 1;
-    if(entryIdx >= bars.length) return null;
-    var entry = bars[entryIdx].o;
-    if(!(entry > 0) || entry <= signal.stop) return null;
-    var risk = entry - signal.stop;
-    if(risk <= 0) return null;
-    return {
-      entryIdx: entryIdx,
-      direction: signal.direction,
-      entry: entry,
-      stop: signal.stop,
-      t1: entry + CRYPTO_BT_REWARD_MULTIPLE * risk,
-      filledAs: 'taker',
-      // How far past the breakout level this chased. Live refuses a
-      // market entry beyond CHASE_LIMIT_RISK_FRACTION of the setup's own
-      // risk width, so a fallback well past that is a trade the live
-      // system would never have taken.
-      chaseRiskFraction: (entry - signal.entry) / Math.abs(signal.entry - signal.stop)
-    };
-  }
-
   // Books the fill at a price this system could actually have got.
   //
   // findCryptoBacktestBreakoutAt returns `entry` = rangeHigh, the level
@@ -7190,14 +6883,10 @@
     return '~' + (Math.round(days * 10) / 10) + ' day' + (Math.round(days * 10) === 10 ? '' : 's');
   }
 
-  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss, entryMode){
+  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss){
     return new Promise(function(resolve){
       var startIdx = Math.max(CRYPTO_BT_TREND_LOOKBACK_BARS, bars.length - lookbackBars);
       var trades = [];
-      var missedTrades = [];
-      var hybridMakerFills = 0;
-      var hybridChaseFills = 0;
-      var hybridChaseBlocked = 0;
       var i = startIdx;
       var ITERATIONS_PER_CHUNK = 300;
 
@@ -7205,41 +6894,11 @@
         var processedThisChunk = 0;
         while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
           var signal = findCryptoBacktestBreakoutAt(bars, i);
-          var filled = signal
-            ? (entryMode === 'hybrid'
-              ? fillCryptoSignalHybrid(bars, i, signal, CRYPTO_MAKER_WAIT_BARS)
-              : entryMode === 'maker'
-                ? fillCryptoSignalAsMakerLimit(bars, i, signal, CRYPTO_MAKER_WAIT_BARS)
-                : fillCryptoSignalAtNextBar(bars, i, signal))
-            : null;
-          // A signal the limit never caught is not simply absent. Price it
-          // under the TAKER model -- what the market-order version would
-          // have made on it -- so the fill-rate/profit-factor trade-off is
-          // measurable instead of invisible.
-          if(signal && entryMode === 'maker' && !filled){
-            var takerFill = fillCryptoSignalAtNextBar(bars, i, signal);
-            if(takerFill){
-              var missedOutcome = simulateCryptoForward(bars, takerFill.entryIdx, takerFill, invalidateOnTrendLoss);
-              var missedReturn = applyCryptoBacktestSlippage(
-                (missedOutcome.price - takerFill.entry) / takerFill.entry * 100, missedOutcome.result);
-              missedTrades.push({ date: bars[i].t, pctReturn: missedReturn, outcome: missedOutcome.result });
-            }
-          }
+          var filled = signal ? fillCryptoSignalAtNextBar(bars, i, signal) : null;
           if(filled){
             var outcome = simulateCryptoForward(bars, filled.entryIdx, filled, invalidateOnTrendLoss);
             var pctReturn = (outcome.price - filled.entry) / filled.entry * 100; // Long-only
-            // A hybrid trade pays whichever cost its ACTUAL fill earned --
-            // maker on the ones that rested, taker on the ones it chased.
-            // Charging the whole run at the maker rate would quietly
-            // discount the chases, which are the expensive half.
-            pctReturn = (filled.filledAs === 'maker' || entryMode === 'maker')
-              ? applyCryptoMakerSlippage(pctReturn, outcome.result)
-              : applyCryptoBacktestSlippage(pctReturn, outcome.result);
-            if(filled.filledAs === 'maker') hybridMakerFills++;
-            else if(filled.filledAs === 'taker'){
-              hybridChaseFills++;
-              if(filled.chaseRiskFraction > CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION) hybridChaseBlocked++;
-            }
+            pctReturn = applyCryptoBacktestSlippage(pctReturn, outcome.result);
             trades.push({
               date: bars[filled.entryIdx].t, direction: filled.direction, entry: filled.entry,
               stop: filled.stop, target: filled.t1, outcome: outcome.result === 'unresolved' ? 'unresolved' : outcome.result,
@@ -7255,16 +6914,6 @@
         if(i < bars.length){
           setTimeout(step, 0);
         } else {
-          // Attached as a property rather than changing the resolve
-          // shape -- summarizeBacktestTrades and every existing caller
-          // iterate the ELEMENTS, so they are untouched, while the maker
-          // run can still report what its limit orders never caught.
-          trades.makerEntries = entryMode === 'maker';
-          trades.entryMode = entryMode;
-          trades.missedTrades = missedTrades;
-          trades.hybridMakerFills = hybridMakerFills;
-          trades.hybridChaseFills = hybridChaseFills;
-          trades.hybridChaseBlocked = hybridChaseBlocked;
           resolve(trades);
         }
       }
@@ -7290,42 +6939,6 @@
   // fired, so this builds a full time series from real SPY bars instead.
   var BACKTEST_SELLOFF_THRESHOLD_PERCENT = -1.5;
   var BACKTEST_RALLY_THRESHOLD_PERCENT = 1.5;
-
-  function buildSpyRegimeSeries(spyBars){
-    var regularBars = spyBars.filter(isRegularSessionBar).slice().sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
-    var series = [];
-    var prevDayClose = null, curDateKey = null, lastCloseSeen = null;
-    regularBars.forEach(function(b){
-      var dateKey = b.t.toISOString().slice(0, 10);
-      if(dateKey !== curDateKey){
-        if(curDateKey !== null) prevDayClose = lastCloseSeen; // yesterday's actual last bar, now that today has started
-        curDateKey = dateKey;
-      }
-      var changePercent = prevDayClose !== null ? (b.c - prevDayClose) / prevDayClose * 100 : 0;
-      series.push({ t: b.t.getTime(), changePercent: changePercent });
-      lastCloseSeen = b.c;
-    });
-    return series;
-  }
-
-  // Binary search for the most recent regime reading at or before a given
-  // signal's timestamp -- series is sorted ascending by t. No match (the
-  // signal predates SPY's own available history) fails open, same as the
-  // live checkMarketRegime does on a bad quote.
-  function regimeAt(series, timestamp){
-    var lo = 0, hi = series.length - 1, found = null;
-    while(lo <= hi){
-      var mid = (lo + hi) >> 1;
-      if(series[mid].t <= timestamp){ found = series[mid]; lo = mid + 1; }
-      else { hi = mid - 1; }
-    }
-    if(!found) return { skipLongs: false, skipShorts: false };
-    return {
-      skipLongs: found.changePercent <= BACKTEST_SELLOFF_THRESHOLD_PERCENT,
-      skipShorts: found.changePercent >= BACKTEST_RALLY_THRESHOLD_PERCENT
-    };
-  }
-
   // requireConfirmationBar is optional -- omitted (or false), this behaves
   // exactly as it always has (enters the instant the breakout bar itself
   // qualifies). When true, a qualifying breakout bar doesn't enter
@@ -7346,113 +6959,6 @@
     if(nextBar.t.toISOString().slice(0,10) !== bars[i].t.toISOString().slice(0,10)) return false; // next day already started
     return isLong ? nextBar.c > analysis.entry : nextBar.c < analysis.entry;
   }
-
-  // regimeSeries is optional -- omitted entirely, this behaves exactly as
-  // it always has (no filtering), which is what every existing call site
-  // still does unless the new "Apply the market-regime filter" checkbox
-  // in Labs is checked.
-  function runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar, invalidateOnFailedBreakout){
-    return new Promise(function(resolve){
-      // Filtered once, here, rather than inside computeORBAnalysis (which
-      // used to do this on every call) -- this loop calls that function
-      // once per simulated bar, with a slice that grows every iteration,
-      // so filtering there meant re-running an Intl.DateTimeFormat check
-      // across the whole growing slice on every single call. Also fixes
-      // simulateORBForwardSameDay below for free, since it walks this
-      // same (now pre-filtered) bars array to resolve each trade -- a
-      // stray extended-hours bar's wick could otherwise spuriously
-      // trigger a stop-check outside real trading hours.
-      bars = bars.filter(isRegularSessionBar);
-      var startIdx = Math.max(50, bars.length - lookbackBars);
-      var trades = [];
-      var localSignalStore = {};
-      var i = startIdx;
-      var ITERATIONS_PER_CHUNK = 300;
-
-      function step(){
-        var processedThisChunk = 0;
-        while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
-          var historySlice = bars.slice(0, i + 1);
-          var currentPrice = bars[i].c;
-          var beforeSignal = localSignalStore['SYM'];
-          var analysis = computeORBAnalysis('SYM', historySlice, currentPrice, localSignalStore);
-          var afterSignal = localSignalStore['SYM'];
-          var isFreshSignal = analysis && afterSignal && afterSignal !== beforeSignal && afterSignal.dateFired === bars[i].t.toISOString().slice(0,10);
-          // Regime-skipped signals still count as "fired" in localSignalStore
-          // (computeORBAnalysis already set it) -- same as live, this is one
-          // signal per symbol per day either way, taken or not.
-          var regimeBlocked = false;
-          if(isFreshSignal && regimeSeries){
-            var regime = regimeAt(regimeSeries, bars[i].t.getTime());
-            regimeBlocked = (analysis.direction === 'Long' && regime.skipLongs) || (analysis.direction === 'Short' && regime.skipShorts);
-          }
-          var confirmationBlocked = false;
-          var entryIdx = i;
-          // The analysis actually simulated. With the confirmation bar off
-          // this is the signal as computed; with it on, the entry price is
-          // REPLACED by the confirmation bar's close.
-          //
-          // That replacement is the whole correctness of this option. The
-          // confirmation rule only takes the trade when the next bar closes
-          // beyond the range -- i.e. it selects for a favorable move -- so
-          // booking the fill at the original breakout level hands the trade
-          // that move for free, before deciding whether to take it. That is
-          // lookahead, and it is enormous: it turned nearly every loss into
-          // a scratch and pushed the whole-universe profit factor to 13.26
-          // against a claimed 2.71 that does not reproduce (see LABS_BACKTEST_PF).
-          //
-          // Entering a bar later at a worse price with the same stop is a
-          // WIDER risk and a worse reward-to-risk ratio. That is the real
-          // trade-off this option is supposed to measure -- fewer fakeouts,
-          // paid for in entry price -- and it can only show up if the price
-          // paid is the price you would actually have got.
-          var effectiveAnalysis = analysis;
-          if(isFreshSignal && !regimeBlocked && requireConfirmationBar){
-            confirmationBlocked = !requiresConfirmation(bars, i, analysis);
-            if(!confirmationBlocked){
-              entryIdx = i + 1;
-              effectiveAnalysis = {
-                direction: analysis.direction, entry: bars[entryIdx].c,
-                stop: analysis.stop, t1: analysis.t1,
-                rangeHigh: analysis.rangeHigh, rangeLow: analysis.rangeLow
-              };
-            }
-          }
-          if(isFreshSignal && !regimeBlocked && !confirmationBlocked){
-            // A confirmation-bar close that lands on the wrong side of the
-            // stop is not a trade anyone could have taken -- the stop would
-            // already be breached at the moment of entry. Skipping it beats
-            // booking a guaranteed instant loss the live system would never
-            // have opened.
-            var stopAlreadyBreached = effectiveAnalysis.direction === 'Long'
-              ? effectiveAnalysis.entry <= effectiveAnalysis.stop
-              : effectiveAnalysis.entry >= effectiveAnalysis.stop;
-            if(stopAlreadyBreached){ i++; processedThisChunk++; continue; }
-            var outcome = simulateORBForwardSameDay(bars, entryIdx, effectiveAnalysis, invalidateOnFailedBreakout);
-            var isLong = effectiveAnalysis.direction === 'Long';
-            var pctReturn = (outcome.price - effectiveAnalysis.entry) / effectiveAnalysis.entry * (isLong ? 1 : -1) * 100;
-            pctReturn = applyORBSlippage(pctReturn, outcome.result);
-            trades.push({
-              date: bars[entryIdx].t, direction: effectiveAnalysis.direction, entry: effectiveAnalysis.entry,
-              stop: effectiveAnalysis.stop, target: effectiveAnalysis.t1, outcome: outcome.result, days: outcome.days,
-              exitPrice: outcome.price, pctReturn: pctReturn
-            });
-            i = entryIdx + outcome.days + 1;
-          } else {
-            i++;
-          }
-          processedThisChunk++;
-        }
-        if(i < bars.length){
-          setTimeout(step, 0);
-        } else {
-          resolve(trades);
-        }
-      }
-      step();
-    });
-  }
-
   // "days" on these trade objects is actually a bar count here (15-min
   // bars) — this turns that into something a human can read, snapping
   // to trading-day units once it stretches past a single session, since
@@ -7467,269 +6973,24 @@
     var tradingDays = Math.max(1, Math.round(hours / 6.5));
     return '~' + tradingDays + ' trading day' + (tradingDays === 1 ? '' : 's');
   }
-
-  function renderIntradayBacktestResults(trades, summary, sym){
-    var statusEl = document.getElementById('intradayBacktestStatus');
-    var resultsEl = document.getElementById('intradayBacktestResults');
-    if(trades.length === 0){
-      statusEl.textContent = 'No qualifying intraday signals found for ' + sym + ' in this window.';
-      statusEl.className = 'labs-backtest-status';
-      resultsEl.innerHTML = '';
-      return;
-    }
-    statusEl.textContent = 'Found ' + trades.length + ' intraday signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym + '.';
-    statusEl.className = 'labs-backtest-status ok';
-
-    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
-    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
-    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
-    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
-    resultsEl.innerHTML =
-      '<div class="backtest-summary">' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
-      '</div>' +
-      '<p class="labs-backtest-note">Win rate alone doesn\'t show whether this made money — expectancy and profit factor account for the size of wins and losses, not just how often each happened.</p>' +
-      '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th><th>Target</th><th>Outcome</th><th>Return</th><th>Time</th></tr></thead>' +
-        '<tbody>' + trades.map(function(t){
-          var outcomeClass = t.pctReturn > 0 ? 'backtest-outcome-hit' : 'backtest-outcome-stopped';
-          var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
-          return '<tr>' +
-            '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
-            '<td>' + t.direction + '</td>' +
-            '<td>' + fmt(t.entry) + '</td>' +
-            '<td>' + fmt(t.stop) + '</td>' +
-            '<td>' + fmt(t.target) + '</td>' +
-            '<td class="' + outcomeClass + '">' + t.outcome + '</td>' +
-            '<td class="' + returnClass + '">' + (t.pctReturn >= 0 ? '+' : '') + t.pctReturn.toFixed(2) + '%</td>' +
-            '<td>' + formatIntradayDuration(t.days) + '</td>' +
-          '</tr>';
-        }).join('') + '</tbody>' +
-      '</table>';
-  }
-
-  // failedSymbols is surfaced directly in the results, not just logged to
-  // the console -- a symbol whose history fetch fails (rate limit,
-  // network hiccup, anything) gets silently skipped so one bad symbol
-  // never takes down the whole run, but that used to mean the ONLY trace
-  // of it was a console.error, invisible on mobile (no dev tools) and
-  // easy to miss even on desktop. Without this, a lower total signal
-  // count between two runs of the supposedly same window looked like an
-  // unexplained inconsistency instead of what it actually was.
-  function renderIntradayUniverseBacktestResults(perSymbolResults, summary, failedSymbols){
-    var statusEl = document.getElementById('intradayBacktestStatus');
-    var resultsEl = document.getElementById('intradayBacktestResults');
-    var failedNote = (failedSymbols && failedSymbols.length)
-      ? ' (' + failedSymbols.length + ' symbol' + (failedSymbols.length === 1 ? '' : 's') + ' failed to fetch and ' +
-        (failedSymbols.length === 1 ? 'is' : 'are') + ' excluded from these results -- see below)'
-      : '';
-    var failedBlock = (failedSymbols && failedSymbols.length)
-      ? '<p class="labs-backtest-note" style="color:var(--loss);">' +
-        failedSymbols.length + ' symbol' + (failedSymbols.length === 1 ? '' : 's') + ' failed to fetch and ' +
-        (failedSymbols.length === 1 ? 'is' : 'are') + ' NOT included in the totals above -- a lower signal ' +
-        'count than a previous run of the same window can be explained by this alone: ' +
-        failedSymbols.map(function(f){ return f.sym + ' (' + f.message + ')'; }).join(', ') + '.</p>'
-      : '';
-
-    if(summary.totalSignals === 0){
-      statusEl.textContent = 'No qualifying intraday signals found across the universe in this window.' + failedNote;
-      statusEl.className = 'labs-backtest-status';
-      resultsEl.innerHTML = failedBlock;
-      return;
-    }
-
-    statusEl.textContent = 'Tested ' + perSymbolResults.length + ' symbols, ' + summary.totalSignals + ' total intraday signals.' + failedNote;
-    statusEl.className = 'labs-backtest-status ok';
-
-    var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
-    var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
-    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
-    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
-
-    var perSymbolRows = perSymbolResults
-      .filter(function(r){ return r.summary.totalSignals > 0; })
-      .sort(function(a,b){ return b.summary.avgPctReturn - a.summary.avgPctReturn; })
-      .map(function(r){
-        var s = r.summary;
-        var rowClass = s.avgPctReturn >= 0 ? 'up' : 'down';
-        return '<tr>' +
-          '<td class="mono">' + r.sym + '</td>' +
-          '<td>' + s.totalSignals + '</td>' +
-          '<td>' + s.winRate.toFixed(0) + '%</td>' +
-          '<td class="' + rowClass + '">' + (s.avgPctReturn >= 0 ? '+' : '') + s.avgPctReturn.toFixed(2) + '%</td>' +
-        '</tr>';
-      }).join('');
-
-    resultsEl.innerHTML =
-      failedBlock +
-      '<div class="backtest-summary">' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Losses</div><div class="backtest-stat-value down">' + summary.stoppedCount + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time to resolve</div><div class="backtest-stat-value">' + formatIntradayDuration(summary.avgDays) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — wins</div><div class="backtest-stat-value up">' + formatIntradayDuration(summary.avgDaysWin) + '</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Avg time — losses</div><div class="backtest-stat-value down">' + formatIntradayDuration(summary.avgDaysLoss) + '</div></div>' +
-      '</div>' +
-      '<p class="labs-backtest-note">Aggregated across every symbol in the intraday universe that produced at least one signal in this window.</p>' +
-      '<table class="backtest-trades-table">' +
-        '<thead><tr><th>Symbol</th><th>Signals</th><th>Win rate</th><th>Expectancy</th></tr></thead>' +
-        '<tbody>' + perSymbolRows + '</tbody>' +
-      '</table>';
-  }
-
+  // Seeds the export's symbol box. This used to also populate the
+  // equities backtest's symbol select, which is gone.
   function populateIntradayBacktestSymbolSelect(){
-    var sel = document.getElementById('intradayBacktestSymbol');
-    if(!sel) return;
-    sel.innerHTML = INTRADAY_UNIVERSE.map(function(sym){
-      return '<option value="' + sym + '">' + sym + ' — ' + (COMPANY_NAMES[sym] || sym) + '</option>';
-    }).join('');
     var symbolsInput = document.getElementById('exportSymbolsInput');
     if(symbolsInput && !symbolsInput.value){ symbolsInput.value = INTRADAY_UNIVERSE.join(', '); }
   }
-
-  // The regime filter is opt-in (the "Apply the market-regime filter"
-  // checkbox) -- resolves to null (no filtering, identical to every
-  // existing run) unless it's checked, in which case it fetches SPY's own
-  // real history once and builds the time series runIntradayBacktestSimulationAsync
-  // needs to check each historical signal's moment against.
-  function fetchRegimeSeriesIfEnabled(lookbackBars){
-    var checkbox = document.getElementById('intradayBacktestRegimeFilter');
-    if(!checkbox || !checkbox.checked) return Promise.resolve(null);
-    return fetchIntradayBacktestHistoryChunked('SPY', lookbackBars).then(buildSpyRegimeSeries);
-  }
-
-  function runIntradayBacktestClicked(){
-    var sym = document.getElementById('intradayBacktestSymbol').value;
-    var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
-    var statusEl = document.getElementById('intradayBacktestStatus');
-    var btn = document.getElementById('runIntradayBacktestBtn');
-    var resultsEl = document.getElementById('intradayBacktestResults');
-
-    btn.disabled = true;
-    statusEl.textContent = 'Fetching ' + sym + ' 15-min history and running the simulation…';
-    statusEl.className = 'labs-backtest-status';
-    resultsEl.innerHTML = '';
-
-    var confirmationBarCheckbox = document.getElementById('intradayBacktestConfirmationBar');
-    var requireConfirmationBar = !!(confirmationBarCheckbox && confirmationBarCheckbox.checked);
-    var invalidateCheckbox = document.getElementById('intradayBacktestInvalidate');
-    var invalidateOnFailedBreakout = !!(invalidateCheckbox && invalidateCheckbox.checked);
-
-    fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
-      return fetchIntradayBacktestHistoryChunked(sym, lookbackBars).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar, invalidateOnFailedBreakout);
-      });
-    }).then(function(trades){
-      var summary = summarizeBacktestTrades(trades);
-      renderIntradayBacktestResults(trades, summary, sym);
-      btn.disabled = false;
-    }).catch(function(err){
-      statusEl.textContent = 'Intraday backtest failed: ' + err.message;
-      statusEl.className = 'labs-backtest-status fail';
-      btn.disabled = false;
-      console.error('Intraday backtest failed:', err);
-    });
-  }
-
-  function runIntradayUniverseBacktestClicked(){
-    var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
-    var statusEl = document.getElementById('intradayBacktestStatus');
-    var btn = document.getElementById('runIntradayUniverseBacktestBtn');
-    var singleBtn = document.getElementById('runIntradayBacktestBtn');
-    var resultsEl = document.getElementById('intradayBacktestResults');
-
-    btn.disabled = true;
-    singleBtn.disabled = true;
-    resultsEl.innerHTML = '';
-    statusEl.className = 'labs-backtest-status';
-
-    var allTrades = [];
-    var perSymbolResults = [];
-    // A symbol whose history fetch fails (rate limit, network hiccup,
-    // anything) is silently skipped rather than failing the whole run --
-    // but "silently" used to mean console-only, which is invisible on
-    // mobile and made two runs of the supposedly same window look
-    // inconsistent with each other for no visible reason. Tracked here
-    // and surfaced directly in the results now, so a lower total signal
-    // count is never mistaken for a real difference in the underlying
-    // strategy/parameters when it was actually just missing data.
-    var failedSymbols = [];
-    var confirmationBarCheckbox = document.getElementById('intradayBacktestConfirmationBar');
-    var requireConfirmationBar = !!(confirmationBarCheckbox && confirmationBarCheckbox.checked);
-    var invalidateCheckbox = document.getElementById('intradayBacktestInvalidate');
-    var invalidateOnFailedBreakout = !!(invalidateCheckbox && invalidateCheckbox.checked);
-
-    function processNext(index, regimeSeries){
-      if(index >= INTRADAY_UNIVERSE.length){
-        btn.disabled = false;
-        singleBtn.disabled = false;
-        var summary = summarizeBacktestTrades(allTrades);
-        renderIntradayUniverseBacktestResults(perSymbolResults, summary, failedSymbols);
-        return;
-      }
-      var sym = INTRADAY_UNIVERSE[index];
-      var progress = 'Testing ' + sym + '… (' + (index + 1) + ' of ' + INTRADAY_UNIVERSE.length + ')';
-      statusEl.textContent = progress;
-      // A rate-limit pause is the one thing here that can legitimately hold
-      // for tens of seconds with nothing else to show for it. Saying so
-      // beats letting an unchanged status line imply the page is broken.
-      fetchIntradayBacktestHistoryChunked(sym, lookbackBars, function(note){
-        statusEl.textContent = progress + ' — ' + note;
-      }).then(function(bars){
-        return runIntradayBacktestSimulationAsync(bars, lookbackBars, regimeSeries, requireConfirmationBar, invalidateOnFailedBreakout);
-      }).then(function(trades){
-        allTrades = allTrades.concat(trades);
-        perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
-        processNext(index + 1, regimeSeries);
-      }).catch(function(err){
-        console.error('Intraday universe backtest: skipping', sym, err);
-        failedSymbols.push({ sym: sym, message: err.message });
-        processNext(index + 1, regimeSeries);
-      });
-    }
-
-    // Fetched once, shared across all 16 symbols -- not once per symbol.
-    fetchRegimeSeriesIfEnabled(lookbackBars).then(function(regimeSeries){
-      processNext(0, regimeSeries);
-    }).catch(function(err){
-      statusEl.textContent = 'Failed to fetch SPY history for the regime filter: ' + err.message;
-      statusEl.className = 'labs-backtest-status fail';
-      btn.disabled = false;
-      singleBtn.disabled = false;
-    });
-  }
-
   // ---------- Crypto backtest UI ----------
   function renderCryptoBacktestResults(trades, summary, sym){
     var statusEl = document.getElementById('cryptoBacktestStatus');
     var resultsEl = document.getElementById('cryptoBacktestResults');
     if(trades.length === 0){
-      // A maker run with zero fills is a RESULT, not an empty window --
-      // it means every breakout ran away and none came back to the limit.
-      // Saying "no signals found" there would be false.
-      var missedOnly = (trades.missedTrades || []).length;
-      statusEl.textContent = (trades.makerEntries && missedOnly)
-        ? 'No limit order filled for ' + sym + ' — all ' + missedOnly + ' signal' + (missedOnly !== 1 ? 's' : '') +
-          ' broke out and never traded back to the level. That is a 0% fill rate, not an absence of signals.'
-        : 'No qualifying crypto signals found for ' + sym + ' in this window.';
+      statusEl.textContent = 'No qualifying crypto signals found for ' + sym + ' in this window.';
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = '';
       return;
     }
     statusEl.textContent = 'Found ' + trades.length + ' crypto signal' + (trades.length !== 1 ? 's' : '') + ' for ' + sym +
-      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.'
-      + describeMakerFills(trades);
+      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.';
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -7769,7 +7030,7 @@
       '</table>';
   }
 
-  function renderCryptoUniverseBacktestResults(perSymbolResults, summary, failedSymbols, makerFills, hybridFills){
+  function renderCryptoUniverseBacktestResults(perSymbolResults, summary, failedSymbols){
     var statusEl = document.getElementById('cryptoBacktestStatus');
     var resultsEl = document.getElementById('cryptoBacktestResults');
     // Same reporting the equities universe run already does, and for the
@@ -7788,66 +7049,15 @@
         failedSymbols.map(function(f){ return f.sym + ' (' + f.message + ')'; }).join(', ') + '.</p>'
       : '';
 
-    // See describeMakerFills -- a maker run's fill rate is the number that
-    // decides whether its profit factor means anything, so it goes in the
-    // headline rather than a footnote.
-    var makerNote = '';
-    if(makerFills){
-      var missedList = makerFills.missedTrades || [];
-      var totalSignals = makerFills.filled + missedList.length;
-      if(totalSignals){
-        var missedAvg = missedList.length
-          ? missedList.reduce(function(a, t){ return a + t.pctReturn; }, 0) / missedList.length
-          : 0;
-        // The whole point. A profit factor computed on a subset means
-        // nothing until you know whether the subset was the easy trades.
-        var missedWins = missedList.filter(function(t){ return t.pctReturn > 0; }).length;
-        makerNote = ' Limit orders filled ' + makerFills.filled + ' of ' + totalSignals + ' signals ('
-          + (makerFills.filled / totalSignals * 100).toFixed(0) + '%).'
-          + (missedList.length
-            ? ' The ' + missedList.length + ' missed would have averaged ' + (missedAvg >= 0 ? '+' : '')
-              + missedAvg.toFixed(2) + '% each under the market-order model (' + missedWins + ' of them winners). '
-              + (missedAvg > 0
-                ? 'That is POSITIVE — the limit skipped trades worth taking, so part of this profit factor is '
-                  + 'selection rather than better execution. Compare it against the market-order run\'s '
-                  + 'expectancy before treating this as an improvement.'
-                : 'That is negative — the limit skipped trades worth avoiding, so the improvement is not '
-                  + 'explained by cherry-picking.')
-            : '');
-      }
-    }
-
-    // A hybrid run's headline is the SPLIT. Maker fills and chased
-    // fallbacks are different trades with different costs, and an
-    // aggregate that hides the mix hides the whole experiment.
-    var hybridNote = '';
-    if(hybridFills){
-      var hybridTotal = hybridFills.maker + hybridFills.chase;
-      if(hybridTotal){
-        hybridNote = ' Entries: ' + hybridFills.maker + ' filled at the limit ('
-          + (hybridFills.maker / hybridTotal * 100).toFixed(0) + '%), ' + hybridFills.chase
-          + ' chased at market after the limit expired.'
-          + (hybridFills.blocked
-            ? ' Of those chases, ' + hybridFills.blocked + ' had already run more than '
-              + (CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION * 100).toFixed(0) + '% of the setup\'s risk width past the '
-              + 'breakout — live\'s chase gate would have REFUSED them, so this result counts trades the '
-              + 'real system would never have taken.'
-            : '');
-      }
-    }
-
     if(summary.totalSignals === 0){
-      statusEl.textContent = (makerFills && (makerFills.missedTrades || []).length)
-        ? 'No limit order filled anywhere in the universe — all ' + makerFills.missedTrades.length +
-          ' signals broke out and never traded back to the level. A 0% fill rate, not an absence of signals.' + failedNote
-        : 'No qualifying crypto signals found across the universe in this window.' + failedNote;
+      statusEl.textContent = 'No qualifying crypto signals found across the universe in this window.' + failedNote;
       statusEl.className = 'labs-backtest-status';
       resultsEl.innerHTML = failedBlock;
       return;
     }
 
     statusEl.textContent = 'Tested ' + perSymbolResults.length + ' pairs, ' + summary.totalSignals + ' total crypto signals' +
-      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.' + failedNote + makerNote + hybridNote;
+      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.' + failedNote;
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -7896,52 +7106,6 @@
       return '<option value="' + sym + '">' + sym + '</option>';
     }).join('');
   }
-
-  function cryptoInvalidateChecked(){
-    var el = document.getElementById('cryptoBacktestInvalidate');
-    return !!(el && el.checked);
-  }
-
-  function cryptoMakerChecked(){
-    var el = document.getElementById('cryptoBacktestMaker');
-    return !!(el && el.checked);
-  }
-
-  function cryptoHybridChecked(){
-    var el = document.getElementById('cryptoBacktestHybrid');
-    return !!(el && el.checked);
-  }
-
-  // Hybrid wins if both are ticked -- it is a superset of maker, so
-  // silently running maker-only there would report one thing and label
-  // it another.
-  function cryptoEntryMode(){
-    if(cryptoHybridChecked()) return 'hybrid';
-    if(cryptoMakerChecked()) return 'maker';
-    return 'market';
-  }
-
-  // The one line that decides whether a maker run is a result or a trap.
-  // Reports fill rate alongside what the missed signals would have made,
-  // because a profit factor that improves while fill rate collapses is
-  // not an improvement -- it is selection.
-  function describeMakerFills(trades){
-    if(!trades || !trades.makerEntries) return '';
-    var missed = trades.missedTrades || [];
-    var total = trades.length + missed.length;
-    if(!total) return '';
-    var fillRate = trades.length / total * 100;
-    var missedAvg = missed.length
-      ? missed.reduce(function(a, t){ return a + t.pctReturn; }, 0) / missed.length
-      : 0;
-    return ' Filled ' + trades.length + ' of ' + total + ' signals (' + fillRate.toFixed(0) + '%). '
-      + (missed.length
-        ? 'The ' + missed.length + ' missed would have averaged ' + (missedAvg >= 0 ? '+' : '')
-          + missedAvg.toFixed(2) + '% each under the market-order model'
-          + (missedAvg > 0 ? ' — the limit skipped winners, which is the predicted failure mode.' : '.')
-        : '');
-  }
-
   function runCryptoBacktestClicked(){
     var sym = document.getElementById('cryptoBacktestSymbol').value;
     var lookbackDays = parseInt(document.getElementById('cryptoBacktestLookback').value, 10);
@@ -7960,7 +7124,7 @@
         throw new Error('Not enough crypto history for ' + sym + ' in this window — try a longer lookback.');
       }
       var lookbackBars = Math.round(lookbackDays * 24 * 4); // 4 bars/hour at 15-min
-      return runCryptoBacktestSimulationAsync(bars, lookbackBars, cryptoInvalidateChecked(), cryptoEntryMode());
+      return runCryptoBacktestSimulationAsync(bars, lookbackBars, false);
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderCryptoBacktestResults(trades, summary, sym);
@@ -8001,25 +7165,12 @@
     var allTrades = [];
     var perSymbolResults = [];
     var failedSymbols = [];
-    var invalidate = cryptoInvalidateChecked();
-    var entryMode = cryptoEntryMode();
-    var universeFilled = 0;
-    var universeMissedTrades = [];
-    var universeHybridMaker = 0;
-    var universeHybridChase = 0;
-    var universeHybridBlocked = 0;
+    var invalidate = false;
 
     function finish(){
       btn.disabled = false;
       singleBtn.disabled = false;
-      // The universe run aggregates across pairs, so fill rate is carried
-      // on a synthetic array rather than recomputed -- same reporting,
-      // same trap avoided.
-      renderCryptoUniverseBacktestResults(perSymbolResults, summarizeBacktestTrades(allTrades), failedSymbols,
-        entryMode === 'maker' ? { filled: universeFilled, missedTrades: universeMissedTrades } : null,
-        entryMode === 'hybrid'
-          ? { maker: universeHybridMaker, chase: universeHybridChase, blocked: universeHybridBlocked }
-          : null);
+      renderCryptoUniverseBacktestResults(perSymbolResults, summarizeBacktestTrades(allTrades), failedSymbols);
     }
 
     function processNext(index){
@@ -8038,17 +7189,7 @@
           return null;
         }
         statusEl.textContent = 'Simulating ' + progress + ' — ' + bars.length.toLocaleString() + ' bars…';
-        return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate, entryMode).then(function(trades){
-          universeFilled += trades.length;
-          universeHybridMaker += trades.hybridMakerFills || 0;
-          universeHybridChase += trades.hybridChaseFills || 0;
-          universeHybridBlocked += trades.hybridChaseBlocked || 0;
-          // The RETURNS, not just the count. Whether a maker run is skill
-          // or selection is decided by what the misses would have made,
-          // and the first version of this carried only a tally -- which
-          // made exactly the question the experiment exists to answer
-          // unanswerable from the universe run.
-          universeMissedTrades = universeMissedTrades.concat(trades.missedTrades || []);
+        return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate).then(function(trades){
           allTrades = allTrades.concat(trades);
           perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
           processNext(index + 1);
@@ -8074,7 +7215,10 @@
   // with live trading calls any differently than a normal backtest run
   // would.
   function exportHistoricalDataClicked(){
-    var lookbackBars = parseInt(document.getElementById('intradayBacktestLookback').value, 10);
+    // Its own control now. This used to read the equities backtest's
+    // Lookback select, which was removed with that backtest -- leaving
+    // the export to dereference null on click.
+    var lookbackBars = parseInt(document.getElementById('exportLookback').value, 10);
     var statusEl = document.getElementById('exportStatus');
     var btn = document.getElementById('exportHistoricalDataBtn');
     var resultWrap = document.getElementById('exportResultWrap');
@@ -11088,7 +10232,6 @@
     patchTradeStatsFromAlpaca();
     renderGrowthChartFromBestSource();
     renderLabsLiveVsBacktest();
-    patchLabsEquitiesLiveStatFromAlpaca();
   }
 
   // The backtest's own headline profit-factor claims (see the Labs Method
@@ -11162,7 +10305,7 @@
   // of the signals; and a single 60-day window on a long-only trend
   // strategy in crypto measures the window at least as much as the
   // strategy. It did.
-  var LABS_BACKTEST_PF = { equities: 1.24, crypto: 1.20 };
+  var LABS_BACKTEST_PF = { crypto: 1.20 };
   var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
   // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
   // below -- all we have for crypto, and equities' own first paint before
@@ -11184,24 +10327,13 @@
     el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
   }
   function renderLabsLiveVsBacktest(){
-    var eqEl = document.getElementById('labsEquitiesLiveStat');
     var cryptoEl = document.getElementById('labsCryptoLiveStat');
-    if(!eqEl && !cryptoEl) return;
+    if(!cryptoEl) return;
     function renderFromJournal(el, entries, backtestPF){
       if(!el) return;
       var agg = computeAggregatePL(entries);
       renderLiveVsBacktestLine(el, agg ? agg.count : 0, agg ? agg.profitFactor : 0, backtestPF, false);
     }
-    // Equities' own journal-derived count is a same-tick fallback only --
-    // it isn't scoped to the currently-connected account at all (unlike
-    // e.g. currentAccountActivityLog), and can include stale/duplicate
-    // entries a real Alpaca order was never actually placed for. Real
-    // numbers land moments later via patchLabsEquitiesLiveStatFromAlpaca,
-    // the same real-order reconciliation the Journal page's own cards use
-    // (see patchTradeStatsFromAlpaca) -- crypto has no such reconciliation
-    // available (reconstructTradesFromOrders can't parse its order shape)
-    // so it stays on this fallback permanently.
-    renderFromJournal(eqEl, journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; }), LABS_BACKTEST_PF.equities);
     renderFromJournal(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
   }
 
@@ -11216,26 +10348,6 @@
   // independent of patchTradeStatsFromAlpaca's own journalFilter-gated
   // logic (that gate is a Journal-page-tab concern; this always needs to
   // run regardless of which Journal tab happens to be selected).
-  var labsEquitiesPatchGen = 0;
-  function patchLabsEquitiesLiveStatFromAlpaca(){
-    var eqEl = document.getElementById('labsEquitiesLiveStat');
-    if(!eqEl) return;
-    var myGen = ++labsEquitiesPatchGen;
-    getAlpacaClosedOrdersCached().then(function(orders){
-      if(myGen !== labsEquitiesPatchGen) return; // superseded by a newer call
-      var trades = reconstructTradesFromOrders(orders).trades;
-      if(!trades.length) return; // not connected, or no real equities trades yet -- leave the journal-based fallback showing
-      var wins = trades.filter(function(t){ return t.pctReturn > 0; });
-      var losses = trades.filter(function(t){ return t.pctReturn <= 0; });
-      var winPctSum = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
-      var lossPctSum = losses.reduce(function(s,t){ return s + t.pctReturn; }, 0);
-      var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
-      renderLiveVsBacktestLine(eqEl, trades.length, profitFactor, LABS_BACKTEST_PF.equities, true);
-    }).catch(function(err){
-      console.error('Failed to load real equities trade stats for the Labs comparison:', err);
-    });
-  }
-
   renderPLSummary();
 
 
@@ -12778,359 +11890,6 @@
     }).join('');
   }
 
-  // ---------- Options data depth probe ----------
-  // Answers one question before any options work gets planned: how far back
-  // can THIS account actually fetch option bars?
-  //
-  // Worth probing rather than reading the docs, for two reasons. The docs
-  // advertise history since February 2024, but historical option TRADES are
-  // documented as only seven days deep -- and whether that limit also
-  // applies to bars is exactly the ambiguity that decides whether an
-  // options strategy is measurable. Second, data depth is a property of the
-  // plan attached to a key, not of the platform, so the only answer that
-  // means anything is the one your own credentials get back.
-  //
-  // Contracts are looked up rather than constructed. An OCC symbol encodes
-  // a strike that has to have actually existed (SPY240315C00500000 is a
-  // $500 call expiring 15 Mar 2024), and guessing one that never traded
-  // returns an empty result indistinguishable from "no history that far
-  // back" -- which would answer the question wrongly, in the discouraging
-  // direction.
-  // Roughly a trading week. A near-the-money SPY contract trades every
-  // session, so anything under this is a contract that barely traded rather
-  // than an archive that barely goes back.
-  var MIN_BARS_FOR_REAL_HISTORY = 5;
-  // Wide enough that a real archive returns dozens of bars, short enough
-  // that it stays inside the contract's listed life.
-  var OPTIONS_BAR_LOOKBACK_DAYS = 90;
-
-  // OCC symbols encode expiry as YYMMDD right after the underlying, e.g.
-  // SPY260701C00730000 -> 2026-07-01. Only used if the contracts endpoint
-  // ever stops returning expiration_date.
-  function expiryFromOccSymbol(sym){
-    var m = /^[A-Z]+(\d{2})(\d{2})(\d{2})[CP]\d+$/.exec(String(sym || ''));
-    if(!m) return null;
-    return '20' + m[1] + '-' + m[2] + '-' + m[3];
-  }
-
-  function shiftDays(isoDate, days){
-    var d = new Date(isoDate + 'T00:00:00Z');
-    if(isNaN(d.getTime())) return isoDate;
-    d.setUTCDate(d.getUTCDate() + days);
-    return d.toISOString().slice(0, 10);
-  }
-  var OPTIONS_DEPTH_PROBES = [
-    { label: '~2.5 years', year: 2024, month: 2 },
-    { label: '~2 years', year: 2024, month: 8 },
-    { label: '~18 months', year: 2025, month: 2 },
-    { label: '~1 year', year: 2025, month: 8 },
-    { label: '~6 months', year: 2026, month: 2 },
-    { label: '~1 month', year: 2026, month: 7 },
-  ];
-
-  // Reports rather than throws: a 403 is the most informative outcome here
-  // (it means the plan, not the date, is the limit) and an exception would
-  // discard exactly that. Still goes through the shared backtest queue so a
-  // probe cannot compete with live trading calls.
-  function probeAlpacaJSON(url){
-    return scheduleAlpacaBacktestCall(function(){
-      return fetch(url, { headers: alpacaHeaders() });
-    }).then(function(res){
-      return res.json().catch(function(){ return null; }).then(function(body){
-        return { ok: res.ok, status: res.status, body: body };
-      });
-    }).catch(function(err){
-      return { ok: false, status: 0, body: null, networkError: err.message };
-    });
-  }
-
-  function runOptionsDepthProbe(){
-    var btn = document.getElementById('testOptionsDepthBtn');
-    var statusEl = document.getElementById('optionsDepthStatus');
-    var resultEl = document.getElementById('optionsDepthResult');
-    if(!alpacaConnected){
-      statusEl.textContent = 'Connect an Alpaca account in Settings first — this probe uses your own key, since the answer depends on your data plan.';
-      statusEl.className = 'labs-backtest-status fail';
-      return;
-    }
-    btn.disabled = true;
-    resultEl.textContent = '';
-    statusEl.className = 'labs-backtest-status';
-
-    var lines = [];
-    var oldestWithBars = null;
-    var planBlocked = false;
-
-    function pad(n){ return (n < 10 ? '0' : '') + n; }
-
-    // The contract has to be NEAR THE MONEY, and getting this wrong is what
-    // made the first version of this probe useless.
-    //
-    // Taking whatever the contracts endpoint returned first handed back
-    // arbitrary strikes -- a deep-in-the-money $406 call, a far-out-of-the
-    // money $500 one. Those barely trade, so they have almost no daily bars
-    // no matter how much history Alpaca holds, and the probe reported "1
-    // bar" and "0 bars" as if that were a statement about data depth. It was
-    // a statement about liquidity.
-    //
-    // So: look up where SPY actually closed in that window first, then ask
-    // only for strikes within 2% of it. A near-the-money SPY contract trades
-    // every session, which makes the bar count meaningful -- roughly one per
-    // trading day if the history is really there.
-    function spyCloseNear(from, to){
-      return probeAlpacaJSON(ALPACA_DATA_BASE + '/v2/stocks/SPY/bars?timeframe=1Day' +
-        '&start=' + from + '&end=' + to + '&limit=5&feed=iex&adjustment=raw'
-      ).then(function(res){
-        var bars = (res.body && res.body.bars) || [];
-        return bars.length ? bars[bars.length - 1].c : null;
-      });
-    }
-    function contractsUrl(from, to, status, ref){
-      var url = ALPACA_TRADING_BASE() + '/v2/options/contracts?underlying_symbols=SPY' +
-        '&expiration_date_gte=' + from + '&expiration_date_lte=' + to + '&limit=20' +
-        (status ? '&status=' + status : '');
-      if(ref){
-        url += '&strike_price_gte=' + Math.floor(ref * 0.98) + '&strike_price_lte=' + Math.ceil(ref * 1.02);
-      }
-      return url;
-    }
-    function findContract(from, to){
-      return spyCloseNear(from, to).then(function(ref){
-        function attempt(status){
-          return probeAlpacaJSON(contractsUrl(from, to, status, ref)).then(function(res){
-            var found = (res.body && res.body.option_contracts) || [];
-            if(found.length || res.status === 403 || res.status === 401) return { res: res, ref: ref };
-            if(status === null) return attempt('inactive');
-            // Nothing near the money -- fall back to any strike rather than
-            // reporting nothing, but the caller flags it, because a bar
-            // count from an arbitrary strike means nothing.
-            return probeAlpacaJSON(contractsUrl(from, to, 'inactive', null)).then(function(wide){
-              return { res: wide, ref: ref, offMoney: true };
-            });
-          });
-        }
-        return attempt(null);
-      });
-    }
-
-    function probeNext(i){
-      if(i >= OPTIONS_DEPTH_PROBES.length){ finish(); return; }
-      var probe = OPTIONS_DEPTH_PROBES[i];
-      var from = probe.year + '-' + pad(probe.month) + '-01';
-      var to = probe.year + '-' + pad(probe.month) + '-28';
-      statusEl.textContent = 'Checking ' + probe.label + ' back (' + from + ')…';
-
-      // Contracts live on the TRADING API, not the data API, so this has to
-      // use ALPACA_TRADING_BASE -- paper and live are different hosts and
-      // hardcoding either would probe the wrong account.
-      //
-      // Every probe window is in the past, so the contracts are expired.
-      // Alpaca's contracts endpoint defaults to listing ACTIVE ones, which
-      // would return nothing for all of them -- so the default query is
-      // tried first and then retried with status=inactive. Reporting "no
-      // contracts listed" when the real answer is "you didn't ask for
-      // expired ones" would answer the whole question wrongly, and in the
-      // discouraging direction.
-      findContract(from, to).then(function(found){
-        var contractsRes = found.res;
-        if(contractsRes.status === 403 || contractsRes.status === 401){
-          planBlocked = true;
-          lines.push(probe.label + ' (' + from + '): HTTP ' + contractsRes.status + ' — not permitted by this key/plan');
-          probeNext(i + 1);
-          return;
-        }
-        var contracts = (contractsRes.body && contractsRes.body.option_contracts) || [];
-        if(!contracts.length){
-          lines.push(probe.label + ' (' + from + '): no SPY contracts listed for that expiry window');
-          probeNext(i + 1);
-          return;
-        }
-        var sym = contracts[0].symbol;
-        // Bars have to be asked for over the contract's LIFE, which ends at
-        // expiry -- not over the window we searched for expiries in.
-        //
-        // The second version of this probe got that backwards. It searched
-        // for contracts expiring between the 1st and the 28th, got back the
-        // EARLIEST such expiry (the 1st or 2nd), and then asked for bars
-        // from the 1st to the 28th -- almost entirely after the contract
-        // had ceased to exist. Every window returned exactly one bar,
-        // expiry day itself, and that was read as "the archive is thin".
-        // It was not; it was 27 days of asking about a dead contract.
-        var expiry = contracts[0].expiration_date || expiryFromOccSymbol(sym) || to;
-        var barsFrom = shiftDays(expiry, -OPTIONS_BAR_LOOKBACK_DAYS);
-        return probeAlpacaJSON(ALPACA_DATA_BASE + '/v1beta1/options/bars?symbols=' + encodeURIComponent(sym) +
-          '&timeframe=1Day&start=' + barsFrom + '&end=' + expiry + '&limit=200'
-        ).then(function(barsRes){
-          if(barsRes.status === 403 || barsRes.status === 401){
-            planBlocked = true;
-            lines.push(probe.label + ' — ' + sym + ': HTTP ' + barsRes.status + ' — options data not included in this plan');
-          } else if(!barsRes.ok){
-            lines.push(probe.label + ' — ' + sym + ': HTTP ' + barsRes.status + (barsRes.networkError ? ' (' + barsRes.networkError + ')' : ''));
-          } else {
-            var bars = (barsRes.body && barsRes.body.bars && barsRes.body.bars[sym]) || [];
-            // A handful of bars is not history. A near-the-money SPY
-            // contract trades every session, so a real archive returns
-            // roughly one bar per trading day across the window -- one or
-            // two means the contract barely traded, which says nothing
-            // about what Alpaca stores. Reporting that as "history back to
-            // 2024" is exactly the kind of plausible-looking wrong number
-            // this whole project keeps producing.
-            var meaningful = bars.length >= MIN_BARS_FOR_REAL_HISTORY;
-            lines.push(probe.label + ' — ' + sym + (found.ref ? ' (SPY ~' + found.ref.toFixed(0) + ')' : '') +
-              (found.offMoney ? ' [no near-the-money strike found — count not meaningful]' : '') +
-              ': ' + bars.length + ' daily bar' + (bars.length === 1 ? '' : 's') +
-              (meaningful ? '' : ' — too few to be real history'));
-            // Only the FIRST qualifying window counts. Probes run
-            // oldest-first, so reassigning on every hit would leave the
-            // NEWEST window here and report a month of history where there
-            // were years -- wrong in the discouraging direction.
-            if(meaningful && !found.offMoney && !oldestWithBars) oldestWithBars = probe;
-          }
-          probeNext(i + 1);
-        });
-      });
-    }
-
-    function finish(){
-      btn.disabled = false;
-      resultEl.textContent = lines.join('\n');
-      if(planBlocked){
-        statusEl.textContent = 'Options data is not included in this key\'s plan — a paid options feed would be needed before any of this is measurable.';
-        statusEl.className = 'labs-backtest-status fail';
-      } else if(!oldestWithBars){
-        statusEl.textContent = 'No window returned enough bars to count as real history (' + MIN_BARS_FOR_REAL_HISTORY +
-          '+ daily bars on a near-the-money contract). Either the archive is thinner than advertised or these contracts barely traded — ' +
-          'the counts below say which. Until this comes back clean, options are not measurable here, which by the rule already set puts them off the table rather than making them a gamble.';
-        statusEl.className = 'labs-backtest-status fail';
-      } else {
-        statusEl.textContent = 'Option bars available back to at least ' + oldestWithBars.label +
-          ' (' + oldestWithBars.year + '-' + pad(oldestWithBars.month) + '). That is enough history to backtest an options strategy — it says nothing about whether one would work.';
-        statusEl.className = 'labs-backtest-status ok';
-      }
-    }
-
-    probeNext(0);
-  }
-  // ---------- Crypto spread probe ----------
-  // The one cost the backtest has never modelled.
-  //
-  // CRYPTO_SLIPPAGE_BPS (25) is Alpaca's taker FEE per side. It is not
-  // the spread, and a market order crosses the spread on the way in and
-  // again on the way out. So the real round trip is the modelled 0.50%
-  // PLUS the full spread -- half of it on each leg, twice.
-  //
-  // That matters because the measured edge is gross +0.62% a trade. At a
-  // 0.50% round trip the net is +0.12%; at anything above 0.62% the
-  // strategy is arithmetically negative. The entire margin of safety is
-  // ~12bps of spread, and the pairs producing most of the signals are
-  // alts, not BTC.
-  var CRYPTO_GROSS_EDGE_PCT = 0.62;
-  var CRYPTO_MODELLED_FEE_ROUND_TRIP_PCT = 0.50;
-  var CRYPTO_SPREAD_SAMPLES = 12;
-  var CRYPTO_SPREAD_SAMPLE_GAP_MS = 5000;
-
-  // A market order pays roughly half the spread against the midpoint on
-  // each leg, so a full round trip crosses one whole spread on top of
-  // both taker fees.
-  function cryptoRoundTripCostPct(spreadPct){
-    return CRYPTO_MODELLED_FEE_ROUND_TRIP_PCT + spreadPct;
-  }
-
-  function spreadPctFromQuote(q){
-    if(!q || typeof q.bp !== 'number' || typeof q.ap !== 'number') return null;
-    if(!(q.bp > 0) || !(q.ap > 0) || q.ap < q.bp) return null;
-    var mid = (q.bp + q.ap) / 2;
-    if(!(mid > 0)) return null;
-    return (q.ap - q.bp) / mid * 100;
-  }
-
-  // Median, not mean -- one stale or crossed quote in a 12-sample run
-  // would drag a mean somewhere the pair never actually traded.
-  function medianOf(values){
-    if(!values || !values.length) return null;
-    var sorted = values.slice().sort(function(a,b){ return a - b; });
-    var mid = Math.floor(sorted.length / 2);
-    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-  }
-
-  function runCryptoSpreadProbe(){
-    var btn = document.getElementById('testCryptoSpreadBtn');
-    var statusEl = document.getElementById('cryptoSpreadStatus');
-    var resultEl = document.getElementById('cryptoSpreadResult');
-    if(!alpacaConnected){
-      statusEl.textContent = 'Connect an Alpaca account in Settings first — this reads live quotes with your own key.';
-      statusEl.className = 'labs-backtest-status fail';
-      return;
-    }
-    btn.disabled = true;
-    resultEl.textContent = '';
-    statusEl.className = 'labs-backtest-status';
-
-    var samplesBySym = {};
-    CRYPTO_UNIVERSE.forEach(function(sym){ samplesBySym[sym] = []; });
-    var symbolsParam = CRYPTO_UNIVERSE.map(encodeURIComponent).join(',');
-
-    function takeSample(n){
-      if(n >= CRYPTO_SPREAD_SAMPLES){ finish(); return; }
-      statusEl.textContent = 'Sampling live quotes… (' + (n + 1) + ' of ' + CRYPTO_SPREAD_SAMPLES + ')';
-      fetch(ALPACA_CRYPTO_DATA_BASE + '/latest/quotes?symbols=' + symbolsParam, { headers: alpacaHeaders() })
-        .then(function(res){
-          if(!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function(body){
-          var quotes = (body && body.quotes) || {};
-          CRYPTO_UNIVERSE.forEach(function(sym){
-            var spread = spreadPctFromQuote(quotes[sym] || quotes[canonicalSymbol(sym)]);
-            if(spread !== null) samplesBySym[sym].push(spread);
-          });
-          setTimeout(function(){ takeSample(n + 1); }, CRYPTO_SPREAD_SAMPLE_GAP_MS);
-        })
-        .catch(function(err){
-          btn.disabled = false;
-          statusEl.textContent = 'Quote fetch failed: ' + err.message;
-          statusEl.className = 'labs-backtest-status fail';
-        });
-    }
-
-    function finish(){
-      btn.disabled = false;
-      var rows = [];
-      var medians = [];
-      CRYPTO_UNIVERSE.forEach(function(sym){
-        var med = medianOf(samplesBySym[sym]);
-        if(med === null){
-          rows.push(sym + ': no usable quote');
-          return;
-        }
-        medians.push(med);
-        rows.push(sym + ': ' + med.toFixed(3) + '% spread → ' + cryptoRoundTripCostPct(med).toFixed(3) + '% round trip'
-          + (cryptoRoundTripCostPct(med) > CRYPTO_GROSS_EDGE_PCT ? '  — above break-even' : ''));
-      });
-      var universeMedian = medianOf(medians);
-      resultEl.textContent = rows.join('\n');
-      if(universeMedian === null){
-        statusEl.textContent = 'No usable quotes came back — nothing measured.';
-        statusEl.className = 'labs-backtest-status fail';
-        return;
-      }
-      var roundTrip = cryptoRoundTripCostPct(universeMedian);
-      var net = CRYPTO_GROSS_EDGE_PCT - roundTrip;
-      statusEl.textContent = 'Median spread ' + universeMedian.toFixed(3) + '% → round trip '
-        + roundTrip.toFixed(3) + '% against a gross edge of ' + CRYPTO_GROSS_EDGE_PCT.toFixed(2) + '%, '
-        + 'leaving ' + (net >= 0 ? '+' : '') + net.toFixed(3) + '% a trade. '
-        + (net > 0
-          ? 'Still positive — but this is a snapshot of current conditions, not the spread that applied during the backtest window.'
-          : 'Negative. At this spread the strategy pays more to trade than the signal is worth.');
-      statusEl.className = 'labs-backtest-status ' + (net > 0 ? 'ok' : 'fail');
-    }
-
-    takeSample(0);
-  }
-
-  document.getElementById('testCryptoSpreadBtn').addEventListener('click', runCryptoSpreadProbe);
-  document.getElementById('testOptionsDepthBtn').addEventListener('click', runOptionsDepthProbe);
-
   // ---------- Auth (sign in / sign up / sign out) ----------
   var authMode = 'signin';
   var authTitleEl = document.getElementById('authTitle');
@@ -13926,10 +12685,21 @@
   populateIntradayBacktestSymbolSelect();
   populateCryptoBacktestSymbolSelect();
   loadIntradayPref();
-  document.getElementById('runIntradayBacktestBtn').addEventListener('click', runIntradayBacktestClicked);
-  document.getElementById('runIntradayUniverseBacktestBtn').addEventListener('click', runIntradayUniverseBacktestClicked);
   document.getElementById('runCryptoBacktestBtn').addEventListener('click', runCryptoBacktestClicked);
   document.getElementById('runCryptoUniverseBacktestBtn').addEventListener('click', runCryptoUniverseBacktestClicked);
+  // Both resume buttons live on Trade Overview (#tradingPausedRow /
+  // #cryptoTradingPausedRow), so the link goes there and scrolls to the
+  // first one that is actually showing -- a link that merely changes the
+  // page still leaves someone hunting for the control.
+  document.getElementById('globalPausedBannerLink').addEventListener('click', function(){
+    showPage('trades');
+    setTimeout(function(){
+      var row = document.getElementById('tradingPausedRow');
+      if(!row || row.hasAttribute('hidden')) row = document.getElementById('cryptoTradingPausedRow');
+      if(row && !row.hasAttribute('hidden')) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 60);
+  });
+
   document.getElementById('exportHistoricalDataBtn').addEventListener('click', exportHistoricalDataClicked);
   document.getElementById('testAlpacaDataFeedBtn').addEventListener('click', testAlpacaDataFeedClicked);
   document.getElementById('exportCopyBtn').addEventListener('click', function(){

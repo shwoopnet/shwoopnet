@@ -90,6 +90,32 @@ Three separate backtest errors were found in one weekend, and **every one
 flattered the strategy**. Treat a backtest figure as a claim to be
 re-derived, never as a fact to be quoted.
 
+### The equities strategy was withdrawn (Aug 2026)
+
+Removed from Labs entirely -- the Method card, the backtest, and the
+live-vs-backtest comparison -- and `LABS_BACKTEST_PF` now carries crypto
+only. 1.48 / 1.24 / 0.96 are **withdrawn figures**; do not quote them.
+
+The reason is not that they were weak. It is that `computeORBAnalysis`
+books the entry at `rangeHigh`, the level the signal bar broke through --
+the identical lookahead found in the crypto backtest, which took its
+60-day figure from 1.94 to 1.05 when priced honestly. The equities numbers
+were never corrected for it, so their true values are unknown and lower.
+
+The strategy is being replaced from scratch rather than repaired. Both
+strategies were the same shape (opening-range breakout, volume filter,
+trailing stop) and both decay with window length, which is what an edge
+living in the recent market looks like rather than one living in the
+strategy. The replacement should have an economic reason someone is on the
+other side losing money, not a chart shape.
+
+**A process note worth keeping.** A whole day went into four execution
+variants of one crypto strategy -- market, maker, hybrid, hybrid with the
+chase gate -- when the same effort could have tested four different
+strategy families and reported which had anything in it. Optimising the
+idea in front of you is not the same as searching. When a strategy fails
+its pre-set bar, widen the search before deepening it.
+
 ### The window series is the finding
 
 **Both strategies decline as the lookback lengthens.** Equities 1.48 /
@@ -235,6 +261,20 @@ refuse in live trading.
 and probably below market-only, because the fallback bucket buys the
 strongest moves at their worst prices. If it comes out above both, suspect
 the fallback timing before believing it.
+
+### Removed from Labs, and what went with them
+
+- **Equities backtest and Method** -- see above.
+- **Crypto backtest checkboxes** (trend-exit, maker-limit, hybrid). All
+  three were experiments, all three are measured and recorded here, and
+  none changed what runs live. The backtest now models exactly one entry:
+  the market order the live system actually sends.
+- **Options data-depth probe.** Answered its question: ~2.5 years of daily
+  option bars, back to Feb 2024. Recorded, tool removed.
+- **Crypto spread probe.** Answered its question: 0.200% median, per-pair
+  figures above. What is now unmeasured is the WEEKDAY spread -- the one
+  reading taken was a Sunday afternoon, likely the worst case. If crypto
+  execution is ever revisited, that measurement has to be rebuilt first.
 
 ### Things that were measured and did NOT work
 
