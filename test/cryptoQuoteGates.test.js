@@ -109,11 +109,10 @@ gates.G4 = () => {
   );
   assert.ok(/FRONTEND: clean/.test(out), 'pre-ship did not report clean:\n' + out);
   // The known, long-standing note is allowed; a SECOND orphan is not.
+  // Zero orphans, not "only the known one". intradayToggle was cleared,
+  // so this is now a strictly stronger assertion than it was.
   const orphans = /no matching element: (.+)/.exec(out);
-  if (orphans) {
-    const names = orphans[1].split(',').map((s) => s.trim()).filter(Boolean);
-    assert.deepStrictEqual(names, ['intradayToggle'], `new orphaned lookup(s): ${names.join(', ')}`);
-  }
+  assert.strictEqual(orphans, null, orphans ? `orphaned lookup(s): ${orphans[1]}` : '');
   console.log('G4 PASS pre-ship clean');
 };
 
