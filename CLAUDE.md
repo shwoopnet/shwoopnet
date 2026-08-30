@@ -262,6 +262,40 @@ and probably below market-only, because the fallback bucket buys the
 strongest moves at their worst prices. If it comes out above both, suspect
 the fallback timing before believing it.
 
+### The backtest was simulating a different strategy than the one running
+
+Found by comparing `simulateCryptoForward` against
+`shwoop-server/src/lib/technicalAnalysisCrypto.js` directly, which is now
+a standing test (`test/engineParityGates.test.js`) rather than a review
+habit. **Two divergences, both flattering:**
+
+1. **No early breakeven.** Live carries `EARLY_BREAKEVEN_RR: 0.2` -- the
+   stop locks to breakeven at 0.2R, well before the 0.5R trail trigger.
+   The simulation had no such concept, while its own comment claimed
+   "matches technicalAnalysisCrypto.js exactly". Between 0.2R and 0.5R
+   live protected the trade and the backtest let it fall to the range low.
+2. **Trailing followed the intrabar HIGH.** Live runs on completed bars
+   and sees closes; it cannot react to a peak the bar never closed at.
+   Trailing from `bar.h` set a better stop than live could ever set.
+
+Both are fixed to match live. The stop-HIT check still uses `bar.l`, and
+that is correct rather than inconsistent: the stop is a resting order at
+the broker, so it really does fill intrabar. **Updates happen on closes;
+fills happen intrabar.** Both are true and they are not the same rule.
+
+**So 1.05 is withdrawn too.** Every crypto figure ever produced here
+described a strategy that has not traded since `EARLY_BREAKEVEN_RR`
+landed. The sign of the correction is genuinely unknown -- early breakeven
+avoids full losses but also cuts trades that would have recovered, the
+same trade-off as the failed-breakout exit that improved every component
+metric and still lost money. Re-run 60/180/365 before quoting anything.
+
+That is the sixth wrong number, and the fifth in the flattering
+direction. The lesson is not "check harder". It is that a comment
+asserting two things match is worth nothing, and a test asserting it is
+worth everything -- G1 now fails if live gains a parameter the backtest
+does not have.
+
 ### Removed from Labs, and what went with them
 
 - **Equities backtest and Method** -- see above.

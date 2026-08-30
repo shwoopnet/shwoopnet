@@ -6719,6 +6719,13 @@
   var CRYPTO_BT_TREND_LOOKBACK_BARS = 30;
   var CRYPTO_BT_TREND_MARGIN_PCT = 0.015;
   var CRYPTO_BT_TRAIL_TRIGGER_RR = 0.5;
+  // Mirrors technicalAnalysisCrypto.js's EARLY_BREAKEVEN_RR. Live locks
+  // the stop to breakeven at 0.2R, well before the 0.5R trail trigger.
+  // This simulation had NO early-breakeven concept at all while its own
+  // comment claimed it matched live exactly -- so every crypto figure on
+  // the books, including the corrected 1.05, described a strategy that
+  // has not traded since that constant landed.
+  var CRYPTO_BT_EARLY_BREAKEVEN_RR = 0.2;
   var CRYPTO_BT_REWARD_MULTIPLE = 1.5; // reference only -- trailing stop is the real exit
 
   function findCryptoBacktestBreakoutAt(bars, idx){
@@ -6823,13 +6830,26 @@
       if(bar.l <= currentStop){
         return { result: trailingActive ? 'trailing_stopped' : 'stopped', bars: j - entryIdx, price: currentStop, date: bar.t };
       }
-      if(bar.h >= triggerPrice){
+      // bar.c, NOT bar.h. The live cycle runs on COMPLETED bars and sees
+      // closes -- it cannot react to an intrabar peak. Trailing from the
+      // high set a better stop than live would ever set, which is a
+      // second way this simulation flattered itself.
+      //
+      // The stop-hit check above deliberately keeps using bar.l: the stop
+      // is a resting order at the broker, so it really does trigger
+      // intrabar. Updates happen on closes; fills happen intrabar. Both
+      // are true and they are not the same rule.
+      if(bar.c >= triggerPrice){
         trailingActive = true;
-        var newStop = bar.h - risk;
+        var newStop = bar.c - risk;
         if(newStop > currentStop) currentStop = newStop;
       }
-      // Breakeven floor -- matches technicalAnalysisCrypto.js exactly.
+      // Same order live applies them in: the trailing floor first, then
+      // the early breakeven that engages long before trailing does.
       if(trailingActive) currentStop = Math.max(currentStop, signal.entry);
+      if(bar.c >= signal.entry + CRYPTO_BT_EARLY_BREAKEVEN_RR * risk){
+        currentStop = Math.max(currentStop, signal.entry);
+      }
       // Same ordering rule as the equities version: the stop is checked
       // first, so a bar that stopped out exited at the stop.
       if(invalidateOnTrendLoss && j >= CRYPTO_BT_TREND_LOOKBACK_BARS){
