@@ -12366,6 +12366,10 @@
   // returns an empty result indistinguishable from "no history that far
   // back" -- which would answer the question wrongly, in the discouraging
   // direction.
+  // Roughly a trading week. A near-the-money SPY contract trades every
+  // session, so anything under this is a contract that barely traded rather
+  // than an archive that barely goes back.
+  var MIN_BARS_FOR_REAL_HISTORY = 5;
   var OPTIONS_DEPTH_PROBES = [
     { label: '~2.5 years', year: 2024, month: 2 },
     { label: '~2 years', year: 2024, month: 8 },
@@ -12410,16 +12414,53 @@
 
     function pad(n){ return (n < 10 ? '0' : '') + n; }
 
-    function contractsUrl(from, to, status){
-      return ALPACA_TRADING_BASE() + '/v2/options/contracts?underlying_symbols=SPY' +
-        '&expiration_date_gte=' + from + '&expiration_date_lte=' + to + '&limit=1' +
+    // The contract has to be NEAR THE MONEY, and getting this wrong is what
+    // made the first version of this probe useless.
+    //
+    // Taking whatever the contracts endpoint returned first handed back
+    // arbitrary strikes -- a deep-in-the-money $406 call, a far-out-of-the
+    // money $500 one. Those barely trade, so they have almost no daily bars
+    // no matter how much history Alpaca holds, and the probe reported "1
+    // bar" and "0 bars" as if that were a statement about data depth. It was
+    // a statement about liquidity.
+    //
+    // So: look up where SPY actually closed in that window first, then ask
+    // only for strikes within 2% of it. A near-the-money SPY contract trades
+    // every session, which makes the bar count meaningful -- roughly one per
+    // trading day if the history is really there.
+    function spyCloseNear(from, to){
+      return probeAlpacaJSON(ALPACA_DATA_BASE + '/v2/stocks/SPY/bars?timeframe=1Day' +
+        '&start=' + from + '&end=' + to + '&limit=5&feed=iex&adjustment=raw'
+      ).then(function(res){
+        var bars = (res.body && res.body.bars) || [];
+        return bars.length ? bars[bars.length - 1].c : null;
+      });
+    }
+    function contractsUrl(from, to, status, ref){
+      var url = ALPACA_TRADING_BASE() + '/v2/options/contracts?underlying_symbols=SPY' +
+        '&expiration_date_gte=' + from + '&expiration_date_lte=' + to + '&limit=20' +
         (status ? '&status=' + status : '');
+      if(ref){
+        url += '&strike_price_gte=' + Math.floor(ref * 0.98) + '&strike_price_lte=' + Math.ceil(ref * 1.02);
+      }
+      return url;
     }
     function findContract(from, to){
-      return probeAlpacaJSON(contractsUrl(from, to, null)).then(function(res){
-        var found = (res.body && res.body.option_contracts) || [];
-        if(found.length || res.status === 403 || res.status === 401) return res;
-        return probeAlpacaJSON(contractsUrl(from, to, 'inactive'));
+      return spyCloseNear(from, to).then(function(ref){
+        function attempt(status){
+          return probeAlpacaJSON(contractsUrl(from, to, status, ref)).then(function(res){
+            var found = (res.body && res.body.option_contracts) || [];
+            if(found.length || res.status === 403 || res.status === 401) return { res: res, ref: ref };
+            if(status === null) return attempt('inactive');
+            // Nothing near the money -- fall back to any strike rather than
+            // reporting nothing, but the caller flags it, because a bar
+            // count from an arbitrary strike means nothing.
+            return probeAlpacaJSON(contractsUrl(from, to, 'inactive', null)).then(function(wide){
+              return { res: wide, ref: ref, offMoney: true };
+            });
+          });
+        }
+        return attempt(null);
       });
     }
 
@@ -12441,7 +12482,8 @@
       // contracts listed" when the real answer is "you didn't ask for
       // expired ones" would answer the whole question wrongly, and in the
       // discouraging direction.
-      findContract(from, to).then(function(contractsRes){
+      findContract(from, to).then(function(found){
+        var contractsRes = found.res;
         if(contractsRes.status === 403 || contractsRes.status === 401){
           planBlocked = true;
           lines.push(probe.label + ' (' + from + '): HTTP ' + contractsRes.status + ' — not permitted by this key/plan');
@@ -12465,13 +12507,23 @@
             lines.push(probe.label + ' — ' + sym + ': HTTP ' + barsRes.status + (barsRes.networkError ? ' (' + barsRes.networkError + ')' : ''));
           } else {
             var bars = (barsRes.body && barsRes.body.bars && barsRes.body.bars[sym]) || [];
-            lines.push(probe.label + ' — ' + sym + ': ' + bars.length + ' daily bar' + (bars.length === 1 ? '' : 's'));
-            // Only the FIRST success counts. Probes run oldest-first, so
-            // reassigning on every hit would leave the NEWEST window here
-            // and report a month of history where there were years -- wrong
-            // in the discouraging direction, which is the one that would
-            // have quietly closed off options for no reason.
-            if(bars.length > 0 && !oldestWithBars) oldestWithBars = probe;
+            // A handful of bars is not history. A near-the-money SPY
+            // contract trades every session, so a real archive returns
+            // roughly one bar per trading day across the window -- one or
+            // two means the contract barely traded, which says nothing
+            // about what Alpaca stores. Reporting that as "history back to
+            // 2024" is exactly the kind of plausible-looking wrong number
+            // this whole project keeps producing.
+            var meaningful = bars.length >= MIN_BARS_FOR_REAL_HISTORY;
+            lines.push(probe.label + ' — ' + sym + (found.ref ? ' (SPY ~' + found.ref.toFixed(0) + ')' : '') +
+              (found.offMoney ? ' [no near-the-money strike found — count not meaningful]' : '') +
+              ': ' + bars.length + ' daily bar' + (bars.length === 1 ? '' : 's') +
+              (meaningful ? '' : ' — too few to be real history'));
+            // Only the FIRST qualifying window counts. Probes run
+            // oldest-first, so reassigning on every hit would leave the
+            // NEWEST window here and report a month of history where there
+            // were years -- wrong in the discouraging direction.
+            if(meaningful && !found.offMoney && !oldestWithBars) oldestWithBars = probe;
           }
           probeNext(i + 1);
         });
@@ -12485,7 +12537,9 @@
         statusEl.textContent = 'Options data is not included in this key\'s plan — a paid options feed would be needed before any of this is measurable.';
         statusEl.className = 'labs-backtest-status fail';
       } else if(!oldestWithBars){
-        statusEl.textContent = 'No option bars returned at any depth. Options cannot be backtested on this account as it stands — which by the rule already set, puts them off the table rather than making them a gamble.';
+        statusEl.textContent = 'No window returned enough bars to count as real history (' + MIN_BARS_FOR_REAL_HISTORY +
+          '+ daily bars on a near-the-money contract). Either the archive is thinner than advertised or these contracts barely traded — ' +
+          'the counts below say which. Until this comes back clean, options are not measurable here, which by the rule already set puts them off the table rather than making them a gamble.';
         statusEl.className = 'labs-backtest-status fail';
       } else {
         statusEl.textContent = 'Option bars available back to at least ' + oldestWithBars.label +
