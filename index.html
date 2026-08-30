@@ -519,6 +519,21 @@
   .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
+  /* The Activity Log's "show me only what needs attention" switch. Sits
+     unlit and quiet at zero so a healthy log doesn't nag, and goes loud
+     the moment there is an error or an urgent instruction to see -- the
+     count is the whole point of it, since 45 entries of routine scan
+     summaries is exactly where a real problem goes unnoticed. */
+  .activity-priority-btn{
+    background: var(--panel-raised); border:1px solid var(--border); color: var(--muted);
+    font-family:'Public Sans', sans-serif; font-size:12px; padding:8px 13px;
+    border-radius:5px; cursor:pointer; white-space:nowrap;
+  }
+  .activity-priority-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .activity-priority-btn.has-items{ border-color: var(--loss); color: var(--loss); }
+  .activity-priority-btn[aria-pressed="true"]{
+    border-color: var(--loss); background: var(--loss); color:#fff;
+  }
   /* "Needs You" -- the priority lane. Deliberately the loudest thing on
      the page when present, and completely absent otherwise. */
   .priority-log-card{ border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber-glow); }
@@ -2298,6 +2313,7 @@
           <span class="to-card-title">Activity Log</span>
           <div style="display:flex; align-items:center; gap:10px;">
             <span class="to-card-meta" id="activityLogHeadMeta"></span>
+            <button class="activity-priority-btn" id="activityLogPriorityBtn" type="button" aria-pressed="false">Priority</button>
             <div class="layout-dropdown">
               <button class="layout-toggle-btn" id="activityLogFiltersToggle" aria-haspopup="true" aria-expanded="false">
                 <span>Filters</span>
@@ -6972,18 +6988,52 @@
           }
           var confirmationBlocked = false;
           var entryIdx = i;
+          // The analysis actually simulated. With the confirmation bar off
+          // this is the signal as computed; with it on, the entry price is
+          // REPLACED by the confirmation bar's close.
+          //
+          // That replacement is the whole correctness of this option. The
+          // confirmation rule only takes the trade when the next bar closes
+          // beyond the range -- i.e. it selects for a favorable move -- so
+          // booking the fill at the original breakout level hands the trade
+          // that move for free, before deciding whether to take it. That is
+          // lookahead, and it is enormous: it turned nearly every loss into
+          // a scratch and pushed the whole-universe profit factor to 13.26
+          // against a validated 2.71.
+          //
+          // Entering a bar later at a worse price with the same stop is a
+          // WIDER risk and a worse reward-to-risk ratio. That is the real
+          // trade-off this option is supposed to measure -- fewer fakeouts,
+          // paid for in entry price -- and it can only show up if the price
+          // paid is the price you would actually have got.
+          var effectiveAnalysis = analysis;
           if(isFreshSignal && !regimeBlocked && requireConfirmationBar){
             confirmationBlocked = !requiresConfirmation(bars, i, analysis);
-            if(!confirmationBlocked) entryIdx = i + 1;
+            if(!confirmationBlocked){
+              entryIdx = i + 1;
+              effectiveAnalysis = {
+                direction: analysis.direction, entry: bars[entryIdx].c,
+                stop: analysis.stop, t1: analysis.t1
+              };
+            }
           }
           if(isFreshSignal && !regimeBlocked && !confirmationBlocked){
-            var outcome = simulateORBForwardSameDay(bars, entryIdx, analysis);
-            var isLong = analysis.direction === 'Long';
-            var pctReturn = (outcome.price - analysis.entry) / analysis.entry * (isLong ? 1 : -1) * 100;
+            // A confirmation-bar close that lands on the wrong side of the
+            // stop is not a trade anyone could have taken -- the stop would
+            // already be breached at the moment of entry. Skipping it beats
+            // booking a guaranteed instant loss the live system would never
+            // have opened.
+            var stopAlreadyBreached = effectiveAnalysis.direction === 'Long'
+              ? effectiveAnalysis.entry <= effectiveAnalysis.stop
+              : effectiveAnalysis.entry >= effectiveAnalysis.stop;
+            if(stopAlreadyBreached){ i++; processedThisChunk++; continue; }
+            var outcome = simulateORBForwardSameDay(bars, entryIdx, effectiveAnalysis);
+            var isLong = effectiveAnalysis.direction === 'Long';
+            var pctReturn = (outcome.price - effectiveAnalysis.entry) / effectiveAnalysis.entry * (isLong ? 1 : -1) * 100;
             pctReturn = applyORBSlippage(pctReturn, outcome.result);
             trades.push({
-              date: bars[entryIdx].t, direction: analysis.direction, entry: analysis.entry,
-              stop: analysis.stop, target: analysis.t1, outcome: outcome.result, days: outcome.days,
+              date: bars[entryIdx].t, direction: effectiveAnalysis.direction, entry: effectiveAnalysis.entry,
+              stop: effectiveAnalysis.stop, target: effectiveAnalysis.t1, outcome: outcome.result, days: outcome.days,
               exitPrice: outcome.price, pctReturn: pctReturn
             });
             i = entryIdx + outcome.days + 1;
@@ -7008,7 +7058,9 @@
   // the market isn't open continuously and "14 hours" would be misleading.
   function formatIntradayDuration(bars){
     var totalMinutes = bars * 15;
-    if(totalMinutes < 60) return totalMinutes + ' min';
+    // bars is an AVERAGE across trades, so it is routinely fractional --
+    // unrounded, this printed "57.51592356687898 min" on the Labs card.
+    if(totalMinutes < 60) return Math.round(totalMinutes) + ' min';
     var hours = totalMinutes / 60;
     if(hours <= 6.5) return (Math.round(hours * 10) / 10) + ' hr' + (hours === 1 ? '' : 's');
     var tradingDays = Math.max(1, Math.round(hours / 6.5));
@@ -9617,20 +9669,28 @@
   }
 
   // Same "only worth splitting once both strategies actually have
-  // something to show" rule as Open Positions' filter tabs -- scoped to
-  // ALL journal entries ever (open or closed), not just closed trades,
-  // since this also governs the day-detail view below the calendar.
+  // something to show" rule as Open Positions' filter tabs. Whether to
+  // SHOW the tabs at all is decided on every journal entry (open or
+  // closed), since the tabs also govern the day-detail view below the
+  // calendar -- but the COUNT on each tab is closed trades only.
+  //
+  // Those two used to be the same number, and it read as a miscalculation:
+  // the tabs sat directly above a row of cards reading "64 total trades"
+  // while themselves totalling 66, because two positions were still open.
+  // Both numbers were right and neither said what it was counting. The
+  // count now matches the cards it sits next to.
   function updateJournalFilterTabs(){
     var equitiesEntries = journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
     var cryptoEntries = journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
+    var isClosed = function(j){ return j.status === 'closed'; };
     var showFilter = equitiesEntries.length > 0 && cryptoEntries.length > 0;
     if(!showFilter) journalFilter = 'all';
     var row = document.getElementById('journalFilterRow');
     if(!row) return;
     row.hidden = !showFilter;
     if(!showFilter) return;
-    document.getElementById('journalFilterEquities').textContent = 'Equities (' + equitiesEntries.length + ')';
-    document.getElementById('journalFilterCrypto').textContent = 'Crypto (' + cryptoEntries.length + ')';
+    document.getElementById('journalFilterEquities').textContent = 'Equities (' + equitiesEntries.filter(isClosed).length + ')';
+    document.getElementById('journalFilterCrypto').textContent = 'Crypto (' + cryptoEntries.filter(isClosed).length + ')';
     ['All', 'Equities', 'Crypto'].forEach(function(label){
       var btn = document.getElementById('journalFilter' + label);
       btn.classList.toggle('active', btn.dataset.filter === journalFilter);
@@ -11847,6 +11907,20 @@
   ];
   var activityLogHiddenGroups = {};
 
+  // "Priority" = the entries that are asking for a human, as opposed to
+  // the running commentary that makes up the rest of the log. Two things
+  // qualify: anything the backend explicitly marked priority:'urgent'
+  // (today that is the profit sweep's "go buy $X" instruction), and any
+  // error, because an error IS a request -- something failed and nobody
+  // finds out unless they go looking.
+  function isPriorityActivityEntry(entry){
+    return entry.priority === 'urgent' || activityGroupKey(entry.type) === 'error';
+  }
+  // Deliberately NOT persisted, unlike the group filters. This one hides
+  // almost the entire log, so a stale "on" from three sessions ago would
+  // read as "nothing has happened" rather than as a filter left on.
+  var activityLogPriorityOnly = false;
+
   function loadActivityLogFilterPrefs(){
     try{
       var saved = JSON.parse(window.localStorage.getItem('shwoopnet:activityLogHiddenGroups') || 'null');
@@ -11914,6 +11988,13 @@
         menu.setAttribute('hidden','');
         toggle.setAttribute('aria-expanded','false');
       }
+    });
+  }
+  var activityLogPriorityBtnEl = document.getElementById('activityLogPriorityBtn');
+  if(activityLogPriorityBtnEl){
+    activityLogPriorityBtnEl.addEventListener('click', function(){
+      activityLogPriorityOnly = !activityLogPriorityOnly;
+      renderActivityLog();
     });
   }
   wireLayoutDropdown('activityLogFiltersToggle', 'activityLogFiltersMenu', renderActivityLogFilters);
@@ -12042,7 +12123,12 @@
     // own comment for why a missing accountKeyId still counts as the
     // paper account's own.
     var currentAccountLog = currentAccountActivityLog();
-    var visibleLog = currentAccountLog.filter(function(entry){
+    var priorityLog = currentAccountLog.filter(isPriorityActivityEntry);
+    // In priority mode the group filters and the routine-scan collapse are
+    // both bypassed on purpose. Otherwise hiding the "Error" group -- or
+    // an error that happened to arrive as part of a scan -- would empty
+    // the one view whose entire job is to show you what went wrong.
+    var visibleLog = activityLogPriorityOnly ? priorityLog : currentAccountLog.filter(function(entry){
       if(activityLogHiddenGroups[activityGroupKey(entry.type)]) return false;
       if(isRoutineScan(entry)) return false;
       return true;
@@ -12050,9 +12136,25 @@
     var headMeta = document.getElementById('activityLogHeadMeta');
     var clearBtn = document.getElementById('activityLogClearBtn');
     if(clearBtn){ clearBtn.style.display = currentAccountLog.length ? '' : 'none'; }
+
+    var priorityBtn = document.getElementById('activityLogPriorityBtn');
+    if(priorityBtn){
+      priorityBtn.textContent = priorityLog.length ? 'Priority (' + priorityLog.length + ')' : 'Priority';
+      priorityBtn.classList.toggle('has-items', priorityLog.length > 0);
+      priorityBtn.setAttribute('aria-pressed', activityLogPriorityOnly ? 'true' : 'false');
+    }
     if(visibleLog.length === 0){
-      el.innerHTML = '';
-      if(emptyEl) emptyEl.removeAttribute('hidden');
+      if(activityLogPriorityOnly){
+        // A distinct message, not the generic empty state: "nothing here"
+        // under a filter is ambiguous, and the reassuring reading of it
+        // is the one that would be wrong if the filter were the cause.
+        el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' +
+          'Nothing needs you right now — no errors and no outstanding instructions.</span></div>';
+        if(emptyEl) emptyEl.setAttribute('hidden', '');
+      } else {
+        el.innerHTML = '';
+        if(emptyEl) emptyEl.removeAttribute('hidden');
+      }
       if(headMeta){
         var hiddenCount = currentAccountLog.length - visibleLog.length;
         headMeta.textContent = hiddenCount ? hiddenCount + ' hidden' : '';
@@ -12062,7 +12164,9 @@
     if(emptyEl) emptyEl.setAttribute('hidden', '');
     if(headMeta){
       var extra = currentAccountLog.length - visibleLog.length;
-      headMeta.textContent = visibleLog.length + ' entries' + (extra ? ' (' + extra + ' hidden)' : '');
+      headMeta.textContent = activityLogPriorityOnly
+        ? visibleLog.length + (visibleLog.length === 1 ? ' item needs you' : ' items need you')
+        : visibleLog.length + ' entries' + (extra ? ' (' + extra + ' hidden)' : '');
     }
     el.innerHTML = visibleLog.map(function(entry){
       var time = new Date(entry.timestamp).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
