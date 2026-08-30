@@ -7709,18 +7709,33 @@
     // headline rather than a footnote.
     var makerNote = '';
     if(makerFills){
-      var totalSignals = makerFills.filled + makerFills.missed;
-      makerNote = totalSignals
-        ? ' Limit orders filled ' + makerFills.filled + ' of ' + totalSignals + ' signals ('
-          + (makerFills.filled / totalSignals * 100).toFixed(0) + '%); the other ' + makerFills.missed +
-          ' broke out and never traded back to the level, so this profit factor covers a SUBSET of the signals '
-          + 'the market-order version takes.'
-        : '';
+      var missedList = makerFills.missedTrades || [];
+      var totalSignals = makerFills.filled + missedList.length;
+      if(totalSignals){
+        var missedAvg = missedList.length
+          ? missedList.reduce(function(a, t){ return a + t.pctReturn; }, 0) / missedList.length
+          : 0;
+        // The whole point. A profit factor computed on a subset means
+        // nothing until you know whether the subset was the easy trades.
+        var missedWins = missedList.filter(function(t){ return t.pctReturn > 0; }).length;
+        makerNote = ' Limit orders filled ' + makerFills.filled + ' of ' + totalSignals + ' signals ('
+          + (makerFills.filled / totalSignals * 100).toFixed(0) + '%).'
+          + (missedList.length
+            ? ' The ' + missedList.length + ' missed would have averaged ' + (missedAvg >= 0 ? '+' : '')
+              + missedAvg.toFixed(2) + '% each under the market-order model (' + missedWins + ' of them winners). '
+              + (missedAvg > 0
+                ? 'That is POSITIVE — the limit skipped trades worth taking, so part of this profit factor is '
+                  + 'selection rather than better execution. Compare it against the market-order run\'s '
+                  + 'expectancy before treating this as an improvement.'
+                : 'That is negative — the limit skipped trades worth avoiding, so the improvement is not '
+                  + 'explained by cherry-picking.')
+            : '');
+      }
     }
 
     if(summary.totalSignals === 0){
-      statusEl.textContent = (makerFills && makerFills.missed)
-        ? 'No limit order filled anywhere in the universe — all ' + makerFills.missed +
+      statusEl.textContent = (makerFills && (makerFills.missedTrades || []).length)
+        ? 'No limit order filled anywhere in the universe — all ' + makerFills.missedTrades.length +
           ' signals broke out and never traded back to the level. A 0% fill rate, not an absence of signals.' + failedNote
         : 'No qualifying crypto signals found across the universe in this window.' + failedNote;
       statusEl.className = 'labs-backtest-status';
@@ -7872,7 +7887,7 @@
     var invalidate = cryptoInvalidateChecked();
     var maker = cryptoMakerChecked();
     var universeFilled = 0;
-    var universeMissed = 0;
+    var universeMissedTrades = [];
 
     function finish(){
       btn.disabled = false;
@@ -7880,11 +7895,8 @@
       // The universe run aggregates across pairs, so fill rate is carried
       // on a synthetic array rather than recomputed -- same reporting,
       // same trap avoided.
-      var aggregate = allTrades.slice();
-      aggregate.makerEntries = maker;
-      aggregate.missedTrades = new Array(universeMissed).fill({ pctReturn: 0, outcome: 'missed' });
       renderCryptoUniverseBacktestResults(perSymbolResults, summarizeBacktestTrades(allTrades), failedSymbols,
-        maker ? { filled: universeFilled, missed: universeMissed } : null);
+        maker ? { filled: universeFilled, missedTrades: universeMissedTrades } : null);
     }
 
     function processNext(index){
@@ -7905,7 +7917,12 @@
         statusEl.textContent = 'Simulating ' + progress + ' — ' + bars.length.toLocaleString() + ' bars…';
         return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate, maker).then(function(trades){
           universeFilled += trades.length;
-          universeMissed += (trades.missedTrades || []).length;
+          // The RETURNS, not just the count. Whether a maker run is skill
+          // or selection is decided by what the misses would have made,
+          // and the first version of this carried only a tally -- which
+          // made exactly the question the experiment exists to answer
+          // unanswerable from the universe run.
+          universeMissedTrades = universeMissedTrades.concat(trades.missedTrades || []);
           allTrades = allTrades.concat(trades);
           perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
           processNext(index + 1);
