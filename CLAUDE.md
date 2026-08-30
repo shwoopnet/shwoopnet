@@ -169,9 +169,22 @@ Recorded here **before** the experiment, so the result counts either way.
 
 A resting limit at the breakout level *earns* the spread instead of
 crossing it, and Alpaca's crypto maker fee (15bps) is below its taker fee
-(25bps). Round trip goes from 0.700% (0.50% taker + 0.200% spread) to
-**0.30%**, which turns −0.08% a trade into roughly +0.32% — if the fills
-happen.
+(25bps).
+
+Only the **entry** leg can rest. The exit is a stop or a trend
+invalidation — it takes whatever is there — so the honest model is maker
+on the way in, taker on the way out:
+
+| | Fees | Spread crossed | Round trip |
+|---|---|---|---|
+| Market (today) | 0.50% | 0.200% (both legs) | **0.700%** |
+| Maker entry | 0.40% | ~0.100% (exit only) | **~0.50%** |
+
+Against a 0.62% gross edge that is **+0.12% a trade, not +0.32%** — an
+earlier draft of this note assumed maker fees on both legs and was wrong
+in the flattering direction, which is the fifth time that has happened
+here. It is a real improvement over −0.08%, and it is thin, and the gross
+edge itself still has to be re-measured after the #140 entry-pricing fix.
 
 **Predicted failure mode, stated in advance:** the breakouts that never
 trade back down to the limit are disproportionately the *winners*, so fill
