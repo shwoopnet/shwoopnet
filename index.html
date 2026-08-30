@@ -1460,6 +1460,26 @@
     .notepad-panel{ left:16px; right:16px; width:auto; bottom:84px; }
   }
 
+  .growth-chart-card{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; margin-bottom:20px; box-shadow: var(--card-shadow); }
+  .growth-chart-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .growth-chart-title{ font-size:14px; font-weight:600; color: var(--paper); }
+  .growth-chart-sub{ font-size:11.5px; color: var(--muted); margin-top:3px; }
+  .growth-chart-legend{ font-size:11.5px; color: var(--muted); font-variant-numeric: tabular-nums; text-align:right; }
+  .growth-chart-legend .up{ color: var(--gain); }
+  .growth-chart-legend .down{ color: var(--loss); }
+  /* Height is fixed rather than aspect-ratio'd: the viewBox uses
+     preserveAspectRatio="none" (same as the trade charts), so the SVG
+     stretches to whatever box it's given, and a fixed height keeps the
+     curve readable at any window width instead of collapsing to a sliver
+     on a narrow screen. */
+  .growth-chart-wrap{ position:relative; width:100%; height:220px; }
+  .growth-chart{ width:100%; height:100%; display:block; overflow:visible; }
+  .growth-chart-grid{ stroke: var(--border); stroke-width:1; }
+  .growth-chart-zero{ stroke: var(--muted); stroke-width:1; stroke-dasharray:3 3; opacity:.6; }
+  .growth-chart-line{ fill:none; stroke: var(--amber); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+  .growth-chart-area{ fill: var(--amber-glow); stroke:none; }
+  .growth-chart-label{ fill: var(--muted); font-size:10px; font-family:'Public Sans', sans-serif; }
+  .growth-chart-empty{ fill: var(--muted); font-size:12px; font-family:'Public Sans', sans-serif; }
   .journal-calendar{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; margin-bottom:20px; box-shadow: var(--card-shadow); }
   .calendar-head{ display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:16px; }
   .calendar-month{
@@ -2421,6 +2441,19 @@
         <div class="pl-card-label">Worst Trade</div>
         <div class="pl-card-value mono" id="statWorst">—</div>
         <div class="pl-card-sub" id="statWorstSub"></div>
+      </div>
+    </div>
+
+    <div class="growth-chart-card" id="growthChartCard" hidden>
+      <div class="growth-chart-head">
+        <div>
+          <div class="growth-chart-title">Account Growth</div>
+          <div class="growth-chart-sub" id="growthChartSub">Realized P&amp;L, cumulative, in the order trades actually closed.</div>
+        </div>
+        <div class="growth-chart-legend" id="growthChartLegend"></div>
+      </div>
+      <div class="growth-chart-wrap">
+        <svg class="growth-chart" id="growthChart" viewBox="0 0 760 220" preserveAspectRatio="none" role="img" aria-label="Cumulative realized profit and loss over time"></svg>
       </div>
     </div>
 
@@ -10277,6 +10310,164 @@
     });
   }
 
+  // ---------- Account growth chart (cumulative realized P&L) ----------
+  // Deliberately a REALIZED-P&L curve, not a mark-to-market equity curve:
+  // this app's ground truth for "what actually happened" is Alpaca's own
+  // closed-order history (see reconstructTradesFromOrders, the same source
+  // the Profit Factor card and the full-history export both use), and that
+  // record only knows about trades once they've closed. Plotting a true
+  // equity curve would need portfolio_history, which measures a genuinely
+  // different thing (account value including open positions and any
+  // deposits/withdrawals) and could disagree with every other number on
+  // this page -- exactly the mismatch the Overall P&L card was already
+  // fixed once to avoid.
+  //
+  // The x-axis is trade SEQUENCE, not calendar time. Trades cluster into
+  // bursts (several fire in the same few minutes, then nothing for days),
+  // so a time-proportional axis would compress every real move into a few
+  // vertical cliffs separated by long flat stretches. Sequence gives each
+  // trade equal width, which is what makes the shape of the curve
+  // readable; the date range is labelled underneath so the real timespan
+  // is never hidden.
+  function buildGrowthSeries(trades){
+    // Oldest first -- reconstructTradesFromOrders returns newest-first for
+    // its table, which would draw the curve backwards.
+    var chronological = trades.slice().sort(function(a, b){
+      return new Date(a.exitTime) - new Date(b.exitTime);
+    });
+    var running = 0;
+    return chronological.map(function(t){
+      running += t.dollarPL;
+      return { cumulative: running, exitTime: t.exitTime, sym: t.sym, dollarPL: t.dollarPL };
+    });
+  }
+
+  function renderGrowthChart(series){
+    var card = document.getElementById('growthChartCard');
+    var svg = document.getElementById('growthChart');
+    var legendEl = document.getElementById('growthChartLegend');
+    var subEl = document.getElementById('growthChartSub');
+    if(!card || !svg) return;
+
+    // A single point is a dot, not a curve -- honest to say so rather than
+    // drawing a flat line that implies a trend from one data point.
+    if(!series || series.length < 2){
+      card.setAttribute('hidden', '');
+      return;
+    }
+    card.removeAttribute('hidden');
+
+    var W = 760, H = 220;
+    var padL = 8, padR = 8, padTop = 14, padBottom = 26;
+    var plotW = W - padL - padR;
+    var plotH = H - padTop - padBottom;
+
+    var values = series.map(function(p){ return p.cumulative; });
+    var maxV = Math.max.apply(null, values);
+    var minV = Math.min.apply(null, values);
+    // Zero always sits inside the range: a curve that never went negative
+    // would otherwise be drawn against a floor of its own first trade,
+    // visually exaggerating a small gain into a dramatic climb.
+    maxV = Math.max(maxV, 0);
+    minV = Math.min(minV, 0);
+    // A completely flat series (every trade netting to exactly zero) would
+    // divide by zero below -- give it an arbitrary but sane range so it
+    // renders as a flat line rather than NaN coordinates.
+    var range = maxV - minV;
+    if(range === 0){ maxV = 1; minV = -1; range = 2; }
+    // Breathing room so the peak/trough don't touch the frame edge.
+    var headroom = range * 0.08;
+    maxV += headroom; minV -= headroom; range = maxV - minV;
+
+    function x(i){ return padL + (series.length === 1 ? plotW / 2 : (i / (series.length - 1)) * plotW); }
+    function y(v){ return padTop + (1 - (v - minV) / range) * plotH; }
+
+    var linePoints = series.map(function(p, i){ return x(i).toFixed(2) + ',' + y(p.cumulative).toFixed(2); }).join(' ');
+    // The filled area closes down to the zero line rather than the bottom
+    // of the frame, so a losing stretch reads as area BELOW zero rather
+    // than as a smaller version of a winning one.
+    var zeroY = y(0);
+    var areaPoints = x(0).toFixed(2) + ',' + zeroY.toFixed(2) + ' ' + linePoints + ' ' + x(series.length - 1).toFixed(2) + ',' + zeroY.toFixed(2);
+
+    var first = series[0], last = series[series.length - 1];
+    var firstDate = new Date(first.exitTime).toLocaleDateString();
+    var lastDate = new Date(last.exitTime).toLocaleDateString();
+
+    svg.innerHTML =
+      '<polygon class="growth-chart-area" points="' + areaPoints + '"></polygon>' +
+      '<line class="growth-chart-zero" x1="' + padL + '" y1="' + zeroY.toFixed(2) + '" x2="' + (W - padR) + '" y2="' + zeroY.toFixed(2) + '"></line>' +
+      '<polyline class="growth-chart-line" points="' + linePoints + '"></polyline>' +
+      '<text class="growth-chart-label" x="' + padL + '" y="' + (H - 8) + '">' + firstDate + '</text>' +
+      '<text class="growth-chart-label" x="' + (W - padR) + '" y="' + (H - 8) + '" text-anchor="end">' + lastDate + '</text>';
+
+    var net = last.cumulative;
+    var peak = Math.max.apply(null, values);
+    // Max drawdown -- the largest peak-to-trough fall along the way. The
+    // single most useful number a growth curve can carry that a headline
+    // P&L figure hides entirely: two accounts can end at the same profit
+    // having taken wildly different amounts of pain to get there.
+    var runningPeak = -Infinity, maxDrawdown = 0;
+    values.forEach(function(v){
+      if(v > runningPeak) runningPeak = v;
+      var dd = runningPeak - v;
+      if(dd > maxDrawdown) maxDrawdown = dd;
+    });
+
+    if(legendEl){
+      legendEl.innerHTML =
+        '<div>Net <span class="' + (net >= 0 ? 'up' : 'down') + '">' + (net >= 0 ? '+' : '−') + '$' + Math.abs(net).toFixed(0) + '</span></div>' +
+        '<div>Peak <span class="' + (peak >= 0 ? 'up' : 'down') + '">' + (peak >= 0 ? '+' : '−') + '$' + Math.abs(peak).toFixed(0) + '</span></div>' +
+        '<div>Max drawdown <span class="down">−$' + maxDrawdown.toFixed(0) + '</span></div>';
+    }
+    if(subEl){
+      subEl.textContent = 'Realized P&L, cumulative across ' + series.length + ' closed trades — plotted in the order they closed, not to scale by date.';
+    }
+  }
+
+  // Real Alpaca orders first (the same ground truth the Profit Factor card
+  // uses), falling back to this app's own journal only if that isn't
+  // available -- and hiding the card entirely rather than drawing a curve
+  // from data the app itself doesn't trust.
+  var growthChartGen = 0;
+  function renderGrowthChartFromBestSource(){
+    var myGen = ++growthChartGen;
+    var card = document.getElementById('growthChartCard');
+    if(!card) return;
+
+    // reconstructTradesFromOrders is equities-only (crypto's order shape
+    // doesn't fit its bracket-leg pairing -- see its own comment), so the
+    // Crypto tab goes straight to the journal fallback rather than showing
+    // an equities-only curve under a Crypto heading.
+    if(journalFilter === 'crypto'){
+      renderGrowthChart(buildGrowthSeries(closedJournalTradesForGrowth()));
+      return;
+    }
+
+    getAlpacaClosedOrdersCached().then(function(orders){
+      if(myGen !== growthChartGen) return; // superseded by a newer render
+      var trades = reconstructTradesFromOrders(orders).trades;
+      if(trades.length >= 2){
+        renderGrowthChart(buildGrowthSeries(trades));
+        return;
+      }
+      renderGrowthChart(buildGrowthSeries(closedJournalTradesForGrowth()));
+    }).catch(function(err){
+      if(myGen !== growthChartGen) return;
+      console.error('Growth chart: Alpaca order history unavailable, falling back to the journal:', err);
+      renderGrowthChart(buildGrowthSeries(closedJournalTradesForGrowth()));
+    });
+  }
+
+  // Journal-derived stand-in, shaped like reconstructTradesFromOrders'
+  // output so buildGrowthSeries doesn't need to know which source it got.
+  function closedJournalTradesForGrowth(){
+    return filteredJournalEntries().filter(function(e){
+      return e.status === 'closed' && e.exitDate;
+    }).map(function(e){
+      return { sym: e.sym, exitTime: e.exitDate, dollarPL: computePL(e).dollar };
+    });
+  }
+
   function renderPLSummary(){
     // Overall P&L is real Alpaca account equity (patched in below) --
     // a single broker-reported number that can't be broken out by
@@ -10362,6 +10553,7 @@
     // See patchTradeStatsFromAlpaca's own comment -- real numbers,
     // Equities tab only.
     patchTradeStatsFromAlpaca();
+    renderGrowthChartFromBestSource();
     renderLabsLiveVsBacktest();
     patchLabsEquitiesLiveStatFromAlpaca();
   }
