@@ -1223,7 +1223,14 @@
   }
   .alpaca-dock-body-wrap.open{ opacity:1; transform: translateY(0); pointer-events:auto; }
   [data-reduce-motion="true"] .alpaca-dock-body-wrap{ transition:none; }
-  .alpaca-dock-body{ padding:14px 16px; overflow-y:auto; overflow-x:auto; flex:1; }
+  /* The scroll lives on the positions list, NOT on the body. An
+     overflow:auto ancestor clips its absolutely-positioned descendants,
+     which would cut the Columns dropdown off at the panel edge -- and
+     scrolling the list would drag the open menu along with it. Moving
+     the scroll one level down also keeps the equity figure and buying
+     power pinned while a long position list scrolls under them. */
+  .alpaca-dock-body{ padding:14px 16px; flex:1; min-height:0; display:flex; flex-direction:column; }
+  .alpaca-dock-positions{ flex:1; min-height:0; overflow:auto; }
   .alpaca-dock-equity{ font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-size:22px; font-weight:700; }
   .alpaca-dock-daychange{ font-size:12px; margin-top:2px; }
   .alpaca-dock-daychange.up{ color: var(--gain); }
@@ -1235,6 +1242,7 @@
   .alpaca-dock-bp{ font-size:11.5px; color: var(--muted); }
   .alpaca-dock-empty{ font-size:12px; color: var(--muted); padding-top:12px; }
   .alpaca-dock-positions-controls{ display:flex; gap:8px; }
+  #alpacaDockColumnsMenu{ min-width:200px; max-width:calc(100vw - 60px); max-height:min(340px, calc(100vh - 200px)); overflow-y:auto; }
   .alpaca-dock-mini-btn{
     background:none; border:1px solid var(--border); color: var(--muted);
     font-family:'Public Sans', sans-serif; font-size:10.5px; padding:3px 9px;
@@ -1256,24 +1264,6 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
-  .alpaca-dock-edit-input{
-    width:72px; background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
-    font-family:'Public Sans', sans-serif; font-size:11.5px; font-variant-numeric: tabular-nums;
-    padding:3px 5px; border-radius:4px;
-  }
-  .alpaca-dock-edit-input:focus{ outline:none; border-color: var(--amber); }
-  /* Number inputs render browser spinners that eat most of an already
-     narrow cell in this fixed-width dock -- the value is typed, not
-     stepped, so they're removed rather than styled around. */
-  .alpaca-dock-edit-input::-webkit-outer-spin-button,
-  .alpaca-dock-edit-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-  .alpaca-dock-edit-input[type=number]{ -moz-appearance:textfield; }
-  .alpaca-dock-save-pos-btn{
-    background:none; border:1px solid var(--amber); color: var(--amber); font-family:'Public Sans', sans-serif;
-    font-size:10.5px; padding:3px 8px; border-radius:4px; cursor:pointer;
-  }
-  .alpaca-dock-save-pos-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
-  .alpaca-dock-save-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
   .alpaca-dock-resize-handle{
     position:absolute; left:-5px; top:0; bottom:0; width:10px; cursor:ew-resize; display:none; z-index:2;
   }
@@ -2017,7 +2007,12 @@
         <div class="alpaca-dock-bp-row" id="alpacaDockBpRow" hidden>
           <span class="alpaca-dock-bp" id="alpacaDockBpText"></span>
           <div class="alpaca-dock-positions-controls" id="alpacaDockPositionsControls" hidden>
-            <button class="alpaca-dock-mini-btn" id="alpacaDockEditBtn" type="button">Edit</button>
+            <div class="layout-dropdown">
+              <button class="alpaca-dock-mini-btn" id="alpacaDockColumnsToggle" type="button" aria-haspopup="true" aria-expanded="false">Columns ▾</button>
+              <div class="layout-menu" id="alpacaDockColumnsMenu" hidden>
+                <div id="alpacaDockColumnsList"></div>
+              </div>
+            </div>
             <button class="alpaca-dock-mini-btn" id="alpacaDockSortBtn" type="button">Sort: Default</button>
           </div>
         </div>
@@ -4749,39 +4744,80 @@
 
   var alpacaDockRenderGen = 0;
 
-  // Two small QoL controls. 'edit' turns the Target/Stop columns into
-  // real editable inputs with a Save button per row, so a resting
-  // stop-loss/take-profit can be adjusted straight from the dock instead
-  // of only ever being readable -- it replaced a "compact view" toggle
-  // that merely HID those two columns, which turned out to be the less
-  // useful of the two things that space could do. Deliberately NOT
-  // persisted across reloads (unlike sort below): edit mode puts real,
-  // money-moving controls on screen, and silently restoring it days later
-  // -- on a page that auto-refreshes every 45s -- is exactly how a stray
-  // click lands on the wrong position. It always starts off.
+  // Two small QoL controls, both mirroring what Open Positions on Trade
+  // Overview already does: 'columns' picks which columns are shown (the
+  // dock is a narrow floating panel, so which fields earn their space
+  // genuinely differs person to person and session to session), and
   // 'sort' reorders rows by unrealized P/L (largest gain first) instead
   // of whatever order Alpaca happens to return positions in.
-  var alpacaDockEditing = false;
+  //
+  // This replaced an inline Target/Stop EDITOR, which was both the wrong
+  // feature and a broken one: it rewrote the resting orders on Alpaca but
+  // never wrote the new levels back to the journal, so the backend's
+  // every-minute updateTrailingStops -- which reads entry.stop as its
+  // baseline and recomputes from bars -- would silently revert a manual
+  // edit, sometimes within the same minute. Editing a bot-managed stop
+  // from the UI needs the journal and the broker to move together; until
+  // that exists it is safer to have no editor at all than one that looks
+  // like it worked.
+  var ALPACA_DOCK_COLUMNS = [
+    { key:'sym', label:'Sym' }, { key:'qty', label:'Qty' }, { key:'direction', label:'Dir' },
+    { key:'entry', label:'Entry' }, { key:'target', label:'Target' }, { key:'stop', label:'Stop' },
+    { key:'current', label:'Current' }, { key:'pl', label:'P/L' },
+  ];
+  // Target/Stop start hidden: they're the two that need an extra
+  // open-orders fetch to populate, and the dock is narrow enough that the
+  // default should be the fields you glance at, not every field there is.
+  var ALPACA_DOCK_HIDDEN_COLS = { target: true, stop: true };
+  try{
+    var savedDockCols = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockHiddenCols') || 'null');
+    if(savedDockCols && typeof savedDockCols === 'object') ALPACA_DOCK_HIDDEN_COLS = savedDockCols;
+  }catch(e){}
+  function saveAlpacaDockHiddenCols(){
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockHiddenCols', JSON.stringify(ALPACA_DOCK_HIDDEN_COLS)); }catch(e){}
+  }
+  // Symbol is never hideable -- a row with no symbol identifies nothing.
+  function visibleAlpacaDockColumns(){
+    return ALPACA_DOCK_COLUMNS.filter(function(col){ return col.key === 'sym' || !ALPACA_DOCK_HIDDEN_COLS[col.key]; });
+  }
+
   var alpacaDockSort = 'default'; // 'default' | 'pl'
   try{ alpacaDockSort = window.localStorage.getItem('shwoopnet:alpacaDockSort') === 'pl' ? 'pl' : 'default'; }catch(e){}
 
   function applyAlpacaDockControlsUI(){
-    var editBtn = document.getElementById('alpacaDockEditBtn');
     var sortBtn = document.getElementById('alpacaDockSortBtn');
-    if(editBtn){
-      editBtn.classList.toggle('active', alpacaDockEditing);
-      editBtn.textContent = alpacaDockEditing ? 'Done' : 'Edit';
-    }
     if(sortBtn){
       sortBtn.classList.toggle('active', alpacaDockSort === 'pl');
       sortBtn.textContent = alpacaDockSort === 'pl' ? 'Sort: P/L' : 'Sort: Default';
     }
   }
-  document.getElementById('alpacaDockEditBtn').addEventListener('click', function(){
-    alpacaDockEditing = !alpacaDockEditing;
-    applyAlpacaDockControlsUI();
-    renderAlpacaDock();
-  });
+
+  // Same show/hide row pattern as renderPositionsColumnsList, so the two
+  // column pickers behave identically.
+  function renderAlpacaDockColumnsList(){
+    var el = document.getElementById('alpacaDockColumnsList');
+    if(!el) return;
+    el.innerHTML = ALPACA_DOCK_COLUMNS.filter(function(col){ return col.key !== 'sym'; }).map(function(col){
+      var hidden = Boolean(ALPACA_DOCK_HIDDEN_COLS[col.key]);
+      return '<div class="layout-stepper card-customize-row" data-col-key="' + col.key + '">' +
+          '<span class="step-name">' + col.label + '</span>' +
+          '<div class="card-customize-row-actions">' +
+            '<button class="card-visibility-btn' + (hidden ? '' : ' active') + '" data-action="toggle">' + (hidden ? 'Hidden' : 'Shown') + '</button>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+    el.querySelectorAll('.card-customize-row').forEach(function(row){
+      var key = row.dataset.colKey;
+      row.querySelector('[data-action="toggle"]').addEventListener('click', function(){
+        ALPACA_DOCK_HIDDEN_COLS[key] = !ALPACA_DOCK_HIDDEN_COLS[key];
+        saveAlpacaDockHiddenCols();
+        renderAlpacaDockColumnsList();
+        renderAlpacaDock();
+      });
+    });
+  }
+  wireLayoutDropdown('alpacaDockColumnsToggle', 'alpacaDockColumnsMenu', renderAlpacaDockColumnsList);
+
   document.getElementById('alpacaDockSortBtn').addEventListener('click', function(){
     alpacaDockSort = alpacaDockSort === 'pl' ? 'default' : 'pl';
     try{ window.localStorage.setItem('shwoopnet:alpacaDockSort', alpacaDockSort); }catch(e){}
@@ -4789,6 +4825,27 @@
     renderAlpacaDock();
   });
   applyAlpacaDockControlsUI();
+
+  // One cell per column key, same switch shape as the Open Positions
+  // table's statusPositionsCellHTML so the two stay easy to read against
+  // each other.
+  function alpacaDockCellHTML(colKey, p, levels){
+    switch(colKey){
+      case 'sym': return '<td>' + p.symbol + '</td>';
+      case 'qty': return '<td>' + p.qty + '</td>';
+      case 'direction': return '<td>' + (p.side === 'short' ? 'Short' : 'Long') + '</td>';
+      case 'entry': return '<td>' + fmt(parseFloat(p.avg_entry_price)) + '</td>';
+      case 'target': return '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>';
+      case 'stop': return '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>';
+      case 'current': return '<td>' + fmt(parseFloat(p.current_price)) + '</td>';
+      case 'pl':
+        var pl = parseFloat(p.unrealized_pl || 0);
+        var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
+        return '<td class="' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) +
+          ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>';
+      default: return '<td></td>';
+    }
+  }
 
   function renderAlpacaDock(){
     var myGen = ++alpacaDockRenderGen;
@@ -4801,13 +4858,26 @@
     positionsEl.innerHTML = '';
     if(bpRowEl) bpRowEl.setAttribute('hidden', '');
     if(controlsEl) controlsEl.setAttribute('hidden', '');
-    // Open orders (for the Target/Stop columns) is treated as optional —
-    // a failure there degrades gracefully to "—" rather than blocking the
-    // account summary and positions themselves from ever showing up.
-    var ordersPromise = getAlpacaOpenOrdersCached().catch(function(err){
-      console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
-      return [];
+    // Open orders is what populates the Target and Stop columns, and it
+    // is a whole extra Alpaca round-trip -- so with both of those columns
+    // hidden (the default) it is skipped rather than fetched and thrown
+    // away. When it IS needed it stays optional: a failure degrades to
+    // "—" rather than blocking the account summary and the positions
+    // themselves from ever showing up.
+    // Resolved once, up front, and reused for both the fetch decision and
+    // the header/cell rendering below -- deriving them separately would
+    // let a mid-flight column toggle render a header whose data source
+    // was never fetched.
+    var cols = visibleAlpacaDockColumns();
+    var needsBracketLevels = cols.some(function(col){
+      return col.key === 'target' || col.key === 'stop';
     });
+    var ordersPromise = needsBracketLevels
+      ? getAlpacaOpenOrdersCached().catch(function(err){
+          console.error('Open orders fetch failed (target/stop will show as unavailable):', err);
+          return [];
+        })
+      : Promise.resolve([]);
     Promise.all([getAlpacaAccountSummaryCached(), getAlpacaPositionsCached(), ordersPromise]).then(function(results){
       // A newer render (from a later reopen, or the next 45s tick) has
       // already started — this response is stale, discard it rather than
@@ -4842,91 +4912,27 @@
         rows.sort(function(a, b){ return parseFloat(b.unrealized_pl || 0) - parseFloat(a.unrealized_pl || 0); });
       }
 
-      var targetStopHeaderHtml =
-        '<th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th><th>Stop</th>';
-      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Dir</th><th>Entry</th>' + targetStopHeaderHtml + '<th>Current</th><th>P/L</th><th></th></tr></thead><tbody>' +
+      // Header cells and body cells are both generated from the SAME
+      // visible-column list, so a column toggled off can never leave a
+      // header without its cells (or the reverse) -- the mismatch that
+      // would silently shift every column to the right of it.
+      positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr>' +
+        cols.map(function(col){
+          if(col.key === 'target'){
+            return '<th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th>';
+          }
+          return '<th>' + col.label + '</th>';
+        }).join('') + '<th></th></tr></thead><tbody>' +
         rows.map(function(p){
-          var pl = parseFloat(p.unrealized_pl || 0);
-          var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
-          var plClass = pl >= 0 ? 'up' : 'down';
-          var direction = p.side === 'short' ? 'Short' : 'Long';
-          var levels = findBracketLevels(openOrders, p.symbol);
-          // In edit mode both levels become real inputs. A level with no
-          // live order behind it yet renders as an EMPTY input rather than
-          // a prefilled guess -- saving a number this app invented would
-          // put a real resting order on the books at a price nothing
-          // actually chose. Save is blocked until both have real values.
-          var targetStopCellsHtml = alpacaDockEditing
-            ? '<td><input class="alpaca-dock-edit-input" type="number" step="any" inputmode="decimal" data-field="target" data-sym="' + p.symbol + '" value="' + (levels.target !== null ? levels.target : '') + '" aria-label="Target price for ' + p.symbol + '"></td>' +
-              '<td><input class="alpaca-dock-edit-input" type="number" step="any" inputmode="decimal" data-field="stop" data-sym="' + p.symbol + '" value="' + (levels.stop !== null ? levels.stop : '') + '" aria-label="Stop price for ' + p.symbol + '"></td>'
-            : '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>' +
-              '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>';
-          var actionCellHtml = alpacaDockEditing
-            ? '<td><button class="alpaca-dock-save-pos-btn" data-sym="' + p.symbol + '">Save</button></td>'
-            : '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>';
+          // Only worth resolving when a column actually shows it -- with
+          // Target and Stop both hidden (the default) the open-orders
+          // fetch is skipped entirely and there is nothing to match.
+          var levels = needsBracketLevels ? findBracketLevels(openOrders, p.symbol) : { target: null, stop: null };
           return '<tr>' +
-            '<td>' + p.symbol + '</td>' +
-            '<td>' + p.qty + '</td>' +
-            '<td>' + direction + '</td>' +
-            '<td>' + fmt(parseFloat(p.avg_entry_price)) + '</td>' +
-            targetStopCellsHtml +
-            '<td>' + fmt(parseFloat(p.current_price)) + '</td>' +
-            '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
-            actionCellHtml +
+            cols.map(function(col){ return alpacaDockCellHTML(col.key, p, levels); }).join('') +
+            '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
           '</tr>';
         }).join('') + '</tbody></table>';
-
-      positionsEl.querySelectorAll('.alpaca-dock-save-pos-btn').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var sym = btn.dataset.sym;
-          var position = rows.filter(function(p){ return p.symbol === sym; })[0];
-          if(!position) return;
-          var targetInput = positionsEl.querySelector('.alpaca-dock-edit-input[data-field="target"][data-sym="' + sym + '"]');
-          var stopInput = positionsEl.querySelector('.alpaca-dock-edit-input[data-field="stop"][data-sym="' + sym + '"]');
-          var newTarget = parseFloat(targetInput && targetInput.value);
-          var newStop = parseFloat(stopInput && stopInput.value);
-          if(!isFinite(newTarget) || !isFinite(newStop) || newTarget <= 0 || newStop <= 0){
-            alert('Both a target and a stop price are required, and both must be greater than zero.');
-            return;
-          }
-          // A stop on the wrong side of the current price would trigger
-          // instantly on submission -- closing the position at market the
-          // moment it lands, which is the single most expensive way to get
-          // a typo wrong here. Alpaca would also reject it outright, but
-          // catching it before the request means a clear message instead
-          // of a raw API error.
-          var currentPrice = parseFloat(position.current_price);
-          var isLong = position.side !== 'short';
-          if(isLong && (newStop >= currentPrice || newTarget <= currentPrice)){
-            alert('For a Long position the stop must be BELOW the current price ($' + fmt(currentPrice) + ') and the target above it.');
-            return;
-          }
-          if(!isLong && (newStop <= currentPrice || newTarget >= currentPrice)){
-            alert('For a Short position the stop must be ABOVE the current price ($' + fmt(currentPrice) + ') and the target below it.');
-            return;
-          }
-          if(!confirm('Replace ' + sym + "'s resting exit orders with stop $" + fmt(newStop) + ' / target $' + fmt(newTarget) + '?\n\nThe existing orders are cancelled first, so the position is briefly unprotected while the new pair is submitted.')) return;
-          btn.disabled = true;
-          btn.textContent = '…';
-          saveDockPositionExits(position, newStop, newTarget).then(function(){
-            // The open-orders list the next render reads its Target/Stop
-            // levels from is cached -- without invalidating it, the
-            // re-render would show the OLD levels and look like the save
-            // silently failed. Only the cached payload is cleared, never
-            // the cache object itself, which getAlpacaOpenOrdersCached
-            // dereferences unconditionally.
-            alpacaOpenOrdersCache.data = null;
-            alpacaOpenOrdersCache.at = 0;
-            renderAlpacaDock();
-          }).catch(function(err){
-            alert('Failed to update ' + sym + "'s exit orders: " + err.message +
-              '\n\nIMPORTANT: the old orders may already have been cancelled. Check this position\'s protection on Alpaca before leaving it unattended.');
-            btn.disabled = false;
-            btn.textContent = 'Save';
-            console.error('Exit-order update failed:', err);
-          });
-        });
-      });
 
       positionsEl.querySelectorAll('.alpaca-close-pos-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
@@ -4987,14 +4993,6 @@
       bodyWrap.classList.remove('open');
       caret.textContent = '▲';
       toggleBtn.setAttribute('aria-expanded', 'false');
-      // Collapsing the dock discards whatever was being edited, so edit
-      // mode shouldn't survive it -- reopening to live inputs prefilled
-      // from an earlier session's state would be a real footgun on a
-      // panel that submits real orders.
-      if(alpacaDockEditing){
-        alpacaDockEditing = false;
-        applyAlpacaDockControlsUI();
-      }
     }
   }
 
@@ -5336,20 +5334,6 @@
         submitCryptoLimitOrderFrontend(sym, exitSide, qty, newTarget)
       ]);
     });
-  }
-
-  // Single entry point the dock's Save button uses for either asset
-  // class -- picks the right underlying call based on whether this
-  // symbol is a known crypto pair, so the row-rendering code doesn't need
-  // to know the difference.
-  function saveDockPositionExits(position, newStop, newTarget){
-    var direction = position.side === 'short' ? 'Short' : 'Long';
-    var qty = position.qty;
-    var cryptoSlashSym = findCryptoUniverseSymbol(position.symbol);
-    if(cryptoSlashSym){
-      return refreshCryptoExitOrders(cryptoSlashSym, direction, qty, newStop, newTarget);
-    }
-    return refreshPositionBracket({ sym: position.symbol, direction: direction, qty: qty }, { stop: newStop, t1: newTarget });
   }
 
   // ---------- Syncing bracket-order exits back to the journal ----------
@@ -8892,12 +8876,7 @@
     renderWhatToWatch();
     var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
-    // Deliberately skipped while the dock is in edit mode -- this runs on
-    // the periodic quote-sync tick, and re-rendering the table would blow
-    // away whatever half-typed stop/target the user is in the middle of
-    // entering. Prices go briefly stale during an edit, which is a far
-    // smaller problem than losing input mid-keystroke.
-    if(isAlpacaDockOpen() && !alpacaDockEditing){ renderAlpacaDock(); }
+    if(isAlpacaDockOpen()){ renderAlpacaDock(); }
       updateTradeBubbles();
   }
 
