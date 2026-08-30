@@ -140,6 +140,32 @@ gates.G5 = () => {
   console.log('G5 PASS pre-ship clean');
 };
 
+gates.G6 = () => {
+  // The universe run is where the real experiment is actually run, and
+  // its first version carried only a COUNT of missed signals -- which
+  // made the one question this experiment exists to answer unanswerable
+  // from the run that matters. This gate exists so that cannot recur.
+  const src2 = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const start = src2.indexOf('function renderCryptoUniverseBacktestResults(');
+  assert.ok(start > 0, 'universe renderer not found');
+  let d = 0, end = -1;
+  for (let i = src2.indexOf('{', start); i < src2.length; i++) {
+    if (src2[i] === '{') d++;
+    else if (src2[i] === '}') { d--; if (!d) { end = i + 1; break; } }
+  }
+  const body = src2.slice(start, end);
+  assert.ok(/missedTrades/.test(body), 'the universe run must receive the missed RETURNS, not just a count');
+  assert.ok(/missedAvg/.test(body), 'the universe run must compute what the missed signals would have made');
+  assert.ok(/selection rather than better execution/.test(body),
+    'a positive missed average must be named as selection, not left for the reader to notice');
+  // And the aggregation must actually carry them through.
+  assert.ok(/universeMissedTrades = universeMissedTrades\.concat/.test(src2),
+    'missed trades must be accumulated across pairs, not tallied');
+  assert.ok(!/new Array\(universeMissed\)/.test(src2),
+    'the synthetic zero-return placeholder must be gone -- it made every missed average read as 0.00%');
+  console.log('G6 PASS universe run reports what the misses would have made');
+};
+
 function main() {
   const arg = process.argv[2];
   for (const n of (arg ? [arg] : Object.keys(gates))) {
