@@ -107,18 +107,27 @@ is the thing that's wrong.
   than ~20% of the account** means position sizing is too aggressive
   regardless of whether the strategy is net profitable.
 
-### Equities has failed its own gate
-The rule set in advance was **1.5 across three windows**. Equities has now
-been measured on four and cleared none:
+### Both strategies have failed the gate
+The rule set in advance was **1.5 across three windows**. Neither has
+cleared it, and both decline monotonically as the window lengthens:
 
-| 30d | 60d | 60d + failed-breakout exit | 365d (6 of 16) |
-|---|---|---|---|
-| 1.48 | 1.24 | 1.12 | 0.96 |
+| | 30d | 60d | 180d | 365d |
+|---|---|---|---|---|
+| Equities | 1.48 | 1.24 | — | 0.96 (6 of 16) |
+| Crypto | — | 1.94 | **1.20** | not yet run |
 
-The series is monotonic in window length — the shorter the lookback, the
-better it looks — which is what an edge living in the recent regime looks
-like rather than one living in the strategy. If this review is being run on
-equities, that is the finding, and no weekly figure changes it.
+Equities was also measured with a failed-breakout exit at 60 days: 1.12,
+worse than without it.
+
+The shorter the lookback, the better both look — an edge living in the
+recent market rather than in the strategy. Crypto's 180-day expectancy is
++0.12% against a 0.50% round-trip cost that excludes spread, so a quarter
+of what it costs to trade.
+
+**This is the finding, and no weekly figure changes it.** A good week on
+twenty trades is not evidence against a 799-signal measurement. If a review
+is being run in the hope that live results overturn this, say so plainly
+instead.
 
 ### Per-symbol expectancy — do not act on it
 The Labs per-symbol table looks like it identifies which names the
