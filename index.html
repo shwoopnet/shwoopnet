@@ -7040,6 +7040,22 @@
     if(!(entry > 0) || entry <= signal.stop) return null;
     var risk = entry - signal.stop;
     if(risk <= 0) return null;
+    // Live REFUSES this trade if price has already run past the breakout
+    // by more than CHASE_LIMIT_RISK_FRACTION of the setup's risk width,
+    // so the backtest refuses it too. Reporting it as "would have been
+    // blocked" while still counting its return produced a profit factor
+    // of 1.50 on a 60-day window in which 66 of 69 chases were blocked --
+    // a number describing a strategy that cannot be run.
+    //
+    // Refused signals are handed back rather than dropped silently, so
+    // what the gate costs is measurable instead of invisible. That is the
+    // same reason the maker run reports its missed signals.
+    var chaseRiskFraction = (entry - signal.entry) / Math.abs(signal.entry - signal.stop);
+    if(chaseRiskFraction > CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION){
+      return { refusedByChaseGate: true, entryIdx: entryIdx, entry: entry, stop: signal.stop,
+               direction: signal.direction, t1: entry + CRYPTO_BT_REWARD_MULTIPLE * risk,
+               chaseRiskFraction: chaseRiskFraction };
+    }
     return {
       entryIdx: entryIdx,
       direction: signal.direction,
@@ -7198,6 +7214,7 @@
       var hybridMakerFills = 0;
       var hybridChaseFills = 0;
       var hybridChaseBlocked = 0;
+      var chaseRefusedTrades = [];
       var i = startIdx;
       var ITERATIONS_PER_CHUNK = 300;
 
@@ -7216,6 +7233,19 @@
           // under the TAKER model -- what the market-order version would
           // have made on it -- so the fill-rate/profit-factor trade-off is
           // measurable instead of invisible.
+          if(filled && filled.refusedByChaseGate){
+            // Priced honestly at the fallback bar, exactly as if it had
+            // been taken -- the point is to know the cost of the gate,
+            // and a guess would defeat that.
+            var refusedOutcome = simulateCryptoForward(bars, filled.entryIdx, filled, invalidateOnTrendLoss);
+            chaseRefusedTrades.push({
+              date: bars[filled.entryIdx].t,
+              pctReturn: applyCryptoBacktestSlippage(
+                (refusedOutcome.price - filled.entry) / filled.entry * 100, refusedOutcome.result),
+              outcome: refusedOutcome.result
+            });
+            filled = null;
+          }
           if(signal && entryMode === 'maker' && !filled){
             var takerFill = fillCryptoSignalAtNextBar(bars, i, signal);
             if(takerFill){
@@ -7238,7 +7268,9 @@
             if(filled.filledAs === 'maker') hybridMakerFills++;
             else if(filled.filledAs === 'taker'){
               hybridChaseFills++;
-              if(filled.chaseRiskFraction > CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION) hybridChaseBlocked++;
+              // Anything reaching here already passed the gate inside
+            // fillCryptoSignalHybrid, so this counter is now only the
+            // legal chases; the refused ones live in chaseRefusedTrades.
             }
             trades.push({
               date: bars[filled.entryIdx].t, direction: filled.direction, entry: filled.entry,
@@ -7265,6 +7297,7 @@
           trades.hybridMakerFills = hybridMakerFills;
           trades.hybridChaseFills = hybridChaseFills;
           trades.hybridChaseBlocked = hybridChaseBlocked;
+          trades.chaseRefusedTrades = chaseRefusedTrades;
           resolve(trades);
         }
       }
@@ -7823,16 +7856,27 @@
     var hybridNote = '';
     if(hybridFills){
       var hybridTotal = hybridFills.maker + hybridFills.chase;
-      if(hybridTotal){
-        hybridNote = ' Entries: ' + hybridFills.maker + ' filled at the limit ('
-          + (hybridFills.maker / hybridTotal * 100).toFixed(0) + '%), ' + hybridFills.chase
-          + ' chased at market after the limit expired.'
-          + (hybridFills.blocked
-            ? ' Of those chases, ' + hybridFills.blocked + ' had already run more than '
-              + (CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION * 100).toFixed(0) + '% of the setup\'s risk width past the '
-              + 'breakout — live\'s chase gate would have REFUSED them, so this result counts trades the '
-              + 'real system would never have taken.'
-            : '');
+      var refusedList = hybridFills.refused || [];
+      if(hybridTotal || refusedList.length){
+        hybridNote = ' Entries: ' + hybridFills.maker + ' filled at the limit'
+          + (hybridTotal ? ' (' + (hybridFills.maker / hybridTotal * 100).toFixed(0) + '%)' : '')
+          + ', ' + hybridFills.chase + ' chased at market after the limit expired.';
+        if(refusedList.length){
+          var refusedAvg = refusedList.reduce(function(a, t){ return a + t.pctReturn; }, 0) / refusedList.length;
+          var refusedWins = refusedList.filter(function(t){ return t.pctReturn > 0; }).length;
+          // The gate's cost, stated. Refusing trades is only free if the
+          // refused trades were bad, and a previous version of this run
+          // counted them in the headline instead of measuring them.
+          hybridNote += ' A further ' + refusedList.length + ' were REFUSED by the same chase gate live '
+            + 'enforces (already ' + (CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION * 100).toFixed(0)
+            + '%+ of the setup\'s risk width past the breakout) and are NOT in the numbers above. '
+            + 'They would have averaged ' + (refusedAvg >= 0 ? '+' : '') + refusedAvg.toFixed(2) + '% each ('
+            + refusedWins + ' winners). '
+            + (refusedAvg > 0
+              ? 'That is positive, so the gate is costing this strategy money — worth testing as its own '
+                + 'registered hypothesis, NOT worth loosening because it would improve this number.'
+              : 'That is negative, so the gate is doing its job.');
+        }
       }
     }
 
@@ -8008,6 +8052,7 @@
     var universeHybridMaker = 0;
     var universeHybridChase = 0;
     var universeHybridBlocked = 0;
+    var universeChaseRefused = [];
 
     function finish(){
       btn.disabled = false;
@@ -8018,7 +8063,7 @@
       renderCryptoUniverseBacktestResults(perSymbolResults, summarizeBacktestTrades(allTrades), failedSymbols,
         entryMode === 'maker' ? { filled: universeFilled, missedTrades: universeMissedTrades } : null,
         entryMode === 'hybrid'
-          ? { maker: universeHybridMaker, chase: universeHybridChase, blocked: universeHybridBlocked }
+          ? { maker: universeHybridMaker, chase: universeHybridChase, refused: universeChaseRefused }
           : null);
     }
 
@@ -8043,6 +8088,7 @@
           universeHybridMaker += trades.hybridMakerFills || 0;
           universeHybridChase += trades.hybridChaseFills || 0;
           universeHybridBlocked += trades.hybridChaseBlocked || 0;
+          universeChaseRefused = universeChaseRefused.concat(trades.chaseRefusedTrades || []);
           // The RETURNS, not just the count. Whether a maker run is skill
           // or selection is decided by what the misses would have made,
           // and the first version of this carried only a tally -- which

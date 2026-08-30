@@ -169,14 +169,18 @@ gates.G6 = () => {
 gates.G7 = () => {
   const hybrid = lift('fillCryptoSignalHybrid', {
     CRYPTO_BT_REWARD_MULTIPLE: REWARD,
+    CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION: num('CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION'),
     fillCryptoSignalAsMakerLimit: lift('fillCryptoSignalAsMakerLimit', { CRYPTO_BT_REWARD_MULTIPLE: REWARD }),
   });
   // A runaway: breaks out at bar 0 and never comes back within the window.
   const bars = [bar(99, 104, 98, 103)];
   for (let i = 0; i < WAIT + 4; i++) bars.push(bar(110 + i, 112 + i, 109 + i, 111 + i));
   const out = hybrid(bars, 0, signal, WAIT);
-  assert.ok(out, 'a runaway must still be entered by the fallback');
-  assert.strictEqual(out.filledAs, 'taker');
+  assert.ok(out, 'a runaway must still be priced, whether or not it is taken');
+  // This particular runaway is now REFUSED by live's chase gate (see G9).
+  // The claim THIS gate makes is about WHEN the fallback is priced, which
+  // holds either way -- a refused signal still carries the honest entry
+  // so the gate's cost can be measured.
   assert.strictEqual(out.entryIdx, 1 + WAIT,
     `the fallback must be priced at signalIdx + waitBars + 1 (${1 + WAIT}), got ${out.entryIdx}`);
   assert.strictEqual(out.entry, bars[1 + WAIT].o, 'the fallback fills at that bar open');
@@ -186,6 +190,15 @@ gates.G7 = () => {
   assert.notStrictEqual(out.entryIdx, 1, 'the fallback must NOT be priced at the bar after the signal');
   assert.ok(out.entry > bars[1].o,
     'control: on a runaway the honest fallback is WORSE than the next-bar price, which is the whole point');
+  // A chase INSIDE live's gate is taken, and is still priced after the
+  // window -- so the pricing rule is not an artifact of refusal.
+  const near = [bar(99, 104, 98, 103)];
+  for (let i = 0; i < WAIT; i++) near.push(bar(101, 101.4, 100.6, 101.2));
+  near.push(bar(101, 102, 100.5, 101.5));
+  const legal = hybrid(near, 0, signal, WAIT);
+  assert.strictEqual(legal.filledAs, 'taker', 'a legal chase fills as a taker');
+  assert.strictEqual(legal.entryIdx, 1 + WAIT, 'and is still priced after the window');
+
   // A limit that does fill still fills as maker, at the limit price.
   const comesBack = [bar(99, 104, 98, 103), bar(103, 105, 99, 102)];
   const m = hybrid(comesBack, 0, signal, WAIT);
@@ -200,6 +213,7 @@ gates.G7 = () => {
 gates.G8 = () => {
   const hybrid = lift('fillCryptoSignalHybrid', {
     CRYPTO_BT_REWARD_MULTIPLE: REWARD,
+    CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION: num('CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION'),
     fillCryptoSignalAsMakerLimit: lift('fillCryptoSignalAsMakerLimit', { CRYPTO_BT_REWARD_MULTIPLE: REWARD }),
   });
   const src2 = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -220,9 +234,50 @@ gates.G8 = () => {
   assert.ok(Math.abs(out.chaseRiskFraction - expected) < 1e-9, 'chase distance must be in risk-width units');
   assert.ok(out.chaseRiskFraction > 0.3, 'control: this fixture must actually breach live\'s gate, or the check proves nothing');
   // And the run must SAY so rather than quietly counting it.
-  assert.ok(/would have REFUSED them/.test(src2), 'chases live would refuse must be reported, not silently included');
+  assert.ok(/were REFUSED by the same chase gate live/.test(src2),
+    'chases live would refuse must be reported, not silently included');
   assert.ok(/chased at market after the limit expired/.test(src2), 'the maker/chase split must be in the headline');
   console.log('G8 PASS hybrid costs and split are honest');
+};
+
+gates.G9 = () => {
+  const hybrid = lift('fillCryptoSignalHybrid', {
+    CRYPTO_BT_REWARD_MULTIPLE: REWARD,
+    CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION: num('CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION'),
+    fillCryptoSignalAsMakerLimit: lift('fillCryptoSignalAsMakerLimit', { CRYPTO_BT_REWARD_MULTIPLE: REWARD }),
+  });
+  // A runaway that blows past live's gate: entry 100, stop 95 (risk 5),
+  // so 30% of risk width is 1.5 -- anything filling above 101.5 is refused.
+  const far = [bar(99, 104, 98, 103)];
+  for (let i = 0; i < WAIT + 4; i++) far.push(bar(110 + i, 112 + i, 109 + i, 111 + i));
+  const refused = hybrid(far, 0, signal, WAIT);
+  assert.ok(refused, 'a refused signal must be RETURNED, not dropped -- the gate cost has to be measurable');
+  assert.strictEqual(refused.refusedByChaseGate, true, 'a chase past live\'s gate must be marked refused');
+  assert.ok(refused.chaseRiskFraction > 0.3);
+  // It must still carry a priceable entry so the counterfactual is honest.
+  assert.strictEqual(refused.entry, far[1 + WAIT].o);
+  assert.ok(refused.stop === signal.stop && refused.t1 > refused.entry, 'a refused signal must still be simulable');
+
+  // POSITIVE CONTROL: a chase INSIDE the gate must still be taken, or the
+  // gate would simply be refusing every fallback and this proves nothing.
+  const near = [bar(99, 104, 98, 103)];
+  for (let i = 0; i < WAIT; i++) near.push(bar(101, 101.4, 100.6, 101.2));
+  near.push(bar(101, 102, 100.5, 101.5)); // fallback bar opens at 101 -> 0.2 of risk width
+  const taken = hybrid(near, 0, signal, WAIT);
+  assert.ok(taken, 'a legal chase must fill');
+  assert.ok(!taken.refusedByChaseGate, 'a chase inside the gate must NOT be refused');
+  assert.strictEqual(taken.filledAs, 'taker');
+
+  // The runner must exclude refused trades from the results and report
+  // what they would have made.
+  const src2 = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.ok(/filled\.refusedByChaseGate/.test(src2), 'the runner must act on the refusal flag');
+  assert.ok(/chaseRefusedTrades\.push/.test(src2), 'refused trades must be recorded, not discarded');
+  assert.ok(/filled = null;/.test(src2), 'a refused trade must not enter the results');
+  assert.ok(/NOT in the numbers above/.test(src2), 'the report must say refused trades are excluded');
+  assert.ok(/NOT worth loosening because it would improve this number/.test(src2),
+    'a positive refused average must warn against loosening the gate to chase the number');
+  console.log('G9 PASS the chase gate is enforced and its cost measured');
 };
 
 function main() {
