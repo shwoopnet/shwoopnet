@@ -519,6 +519,24 @@
   .labs-honesty-title{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--amber); margin-bottom:8px; font-weight:600; }
   .labs-honesty-box p{ font-size:12.5px; line-height:1.6; color: var(--paper); margin:0; }
 
+  /* The stop-to-target bracket bar on every real setup/position row.
+     These rules used to sit interleaved among the (now-removed) Demo
+     page's styles, because the mechanism originated there before being
+     generalised -- deleting that block took these with it and left the
+     bar as bare "StopTarget" text with no track. Kept here, next to
+     nothing demo-related, so the association can't be made again. */
+  .trade-progress-wrap{ padding:0 16px 14px 16px; }
+  .trade-progress-track{
+    position:relative; height:6px; border-radius:3px; background: var(--panel-raised);
+    border:1px solid var(--border); overflow:visible;
+  }
+  .trade-progress-fill{ height:100%; border-radius:3px; transition: width 1.1s cubic-bezier(.3,.7,.3,1), background .3s ease; }
+  .trade-progress-entry-marker{
+    position:absolute; top:-3px; width:2px; height:12px; background: var(--paper); opacity:.6;
+    transform: translateX(-50%);
+  }
+  .trade-progress-labels{ display:flex; justify-content:space-between; font-size:10px; color: var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:.04em; }
+
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
   .labs-backtest-option{ display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--muted); margin:-4px 0 16px 0; }
   .labs-backtest-option input{ margin:0; }
@@ -6262,20 +6280,52 @@
   // for Twelve Data's much tighter free-tier ceiling; Alpaca's crypto
   // data endpoint is the same one fetchAllCryptoQuotes already calls
   // directly with real headroom to spare.
+  // Alpaca's crypto bars endpoint does NOT reliably return `limit` bars in
+  // one response -- it returns what fits in a page plus a next_page_token,
+  // and drops the rest silently, with no error. shwoop-server hit exactly
+  // this and fixed it there (see cryptoMarketData.js: "requesting 12
+  // symbols at 300 bars each came back with only 4 symbols' worth of data
+  // and a next_page_token, the rest silently missing"); this call never
+  // got the same treatment, so crypto charts were rendering from whatever
+  // single page came back -- often under a dozen bars instead of the ~190
+  // requested. That's invisible as a data bug and instead shows up as
+  // "the chart won't zoom or pan", because there's almost nothing there
+  // to move through.
   function fetchCryptoHistoryFromNetwork(sym){
     var limit = tfConfig['15m'].fetchSize;
-    return fetch(ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + encodeURIComponent(sym) + '&timeframe=15Min&limit=' + limit, { headers: alpacaHeaders() })
-      .then(function(res){
-        if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function(data){
-        var bars = (data.bars && data.bars[sym]) || [];
-        if(bars.length < 2) throw new Error('No usable crypto history for ' + sym);
-        return bars.map(function(b){
-          return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
+    var collected = [];
+
+    function loadPage(pageToken){
+      var url = ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + encodeURIComponent(sym) +
+        '&timeframe=15Min&limit=' + limit;
+      if(pageToken) url += '&page_token=' + encodeURIComponent(pageToken);
+      return fetch(url, { headers: alpacaHeaders() })
+        .then(function(res){
+          if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function(data){
+          var page = (data.bars && data.bars[sym]) || [];
+          collected = collected.concat(page);
+          // Stops once Alpaca runs out of pages OR we have what we asked
+          // for -- without the second condition a symbol with deep history
+          // would keep paging well past what the chart can display.
+          if(data.next_page_token && collected.length < limit){
+            return loadPage(data.next_page_token);
+          }
+          return collected;
         });
-      });
+    }
+
+    return loadPage(null).then(function(bars){
+      if(bars.length < 2) throw new Error('No usable crypto history for ' + sym);
+      return bars.map(function(b){
+        return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
+      // Sorted explicitly rather than assumed: pages arrive in order today,
+      // but a lookahead bug from out-of-order bars would be silent and the
+      // sort is cheap. Same reasoning as the backend's own client.
+      }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
+    });
   }
 
   function fetchHistoryFromNetwork(sym, tf, priority){
