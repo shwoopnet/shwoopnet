@@ -74,8 +74,18 @@ sample happened to land well.
 ### Profit factor
 - **< 1.0** — losing money. Nothing else matters this week.
 - **1.0–1.5** — marginally profitable; costs and slippage could erase it.
-- **> 1.5** — genuinely working. For context the backtest claimed 2.71
-  (equities) / 2.35 (crypto), and live ran 0.55 pre-fix.
+- **> 1.5** — genuinely working.
+
+**The baseline moved, and this is the most important line in this file.**
+The equities backtest claimed 2.71 for months. It does not reproduce: run
+against the same 16-symbol universe over ~60 trading days with the same
+cost model, the tool measures **1.24**, with expectancy of +0.09% per
+trade against a 0.10% round-trip cost already subtracted from it. The edge
+is the same size as the uncertainty in the cost assumption.
+
+So **1.24 is the number to beat, not 2.71** — and clearing 1.24 is not the
+same as having an edge worth real money. Crypto's 2.35 has not been
+re-measured and should be treated as unverified until it is.
 
 Compare live against backtest explicitly. A large gap that persists past
 20 trades means the backtest is not describing reality, and the backtest
@@ -85,6 +95,14 @@ is the thing that's wrong.
 - Judge against the account size, not in isolation. **A drawdown greater
   than ~20% of the account** means position sizing is too aggressive
   regardless of whether the strategy is net profitable.
+
+### Per-symbol expectancy — do not act on it
+The Labs per-symbol table looks like it identifies which names the
+strategy works on. It does not. Delaying entry by a single bar reverses
+the sign on roughly half the universe (MARA −0.30% → +0.54%, COIN −0.24% →
++0.24%, LCID +0.03% → −0.39%, DKNG +0.15% → −0.20%). A ranking that
+unstable under a one-bar change is sampling noise, and trimming the
+universe to its top rows is fitting that noise.
 
 ### Regression check
 Compare against last week's numbers if the user has them. **A metric
@@ -121,4 +139,8 @@ worse than no verdict.
   with a real sample, that's the trigger — reconsider the split
   deliberately, with data.
 - **Going live with real money** was gated on watching the first 5–10 real
-  signals post-fix. This review is how that gate gets judged.
+  signals post-fix. That gate is no longer sufficient on its own: 5–10
+  trades cannot distinguish a 1.24 profit factor from a 1.0, and 1.24 is
+  what the corrected backtest actually measures. The gate should be a
+  demonstrated edge larger than the cost model's own uncertainty, which
+  needs a real sample, not a handful of signals.

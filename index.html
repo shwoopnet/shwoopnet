@@ -2718,10 +2718,12 @@
     <div class="brief-section-title">The Method</div>
     <div class="labs-method-card">
       <p class="labs-method-intro">
-        How the equities screener works. Latest backtest: profit factor 2.71 (2.46 worst-case across 5
-        independent windows, real trading costs included) — but this strategy is newer than that number looks;
-        the activity log is the real read on how it's actually doing live. The crypto strategy is its own
-        separate screener, covered below.
+        How the equities screener works. <strong>Measured profit factor: 1.24</strong> — 406 signals across the
+        full 16-symbol universe over ~60 trading days, real trading costs included. Expectancy is +0.09% per
+        trade, which is about the same size as the 0.10% round-trip cost already subtracted from it: assume
+        slightly worse fills than the model does and the edge is gone. This is a thin edge, not a proven one.
+        Re-run it yourself below rather than trusting this paragraph. The crypto strategy is its own separate
+        screener, covered below.
       </p>
       <div class="labs-live-compare" id="labsEquitiesLiveStat">—</div>
       <div class="labs-method-grid">
@@ -2764,9 +2766,9 @@
     <div class="labs-method-card">
       <p class="labs-method-intro">
         A second, independent strategy running alongside equities — same shape, tuned for a market that never
-        closes. Latest backtest: profit factor 2.35 (1.86 worst-case across 2 windows), long-only since Alpaca
-        crypto has no shorting. Newer than equities and with less live history — the activity log is the real
-        read on how it's holding up.
+        closes. Long-only, since Alpaca crypto has no shorting. Its previously quoted profit factor of 2.35
+        has <strong>not been re-measured</strong> since the equities figure turned out not to reproduce, so
+        treat it as unverified until you run the whole-universe backtest below yourself.
       </p>
       <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
@@ -7022,7 +7024,7 @@
           // that move for free, before deciding whether to take it. That is
           // lookahead, and it is enormous: it turned nearly every loss into
           // a scratch and pushed the whole-universe profit factor to 13.26
-          // against a validated 2.71.
+          // against a claimed 2.71 that does not reproduce (see LABS_BACKTEST_PF).
           //
           // Entering a bar later at a worse price with the same stop is a
           // WIDER risk and a worse reward-to-risk ratio. That is the real
@@ -10757,10 +10759,31 @@
   // to be living up to. Kept independent of the journalFilter tab (which
   // only affects the Journal page's own cards) since equities and crypto
   // each need their own fixed comparison regardless of what tab is active.
-  // LABS_BACKTEST_PF must stay in sync with the hardcoded numbers quoted
-  // in the two labs-method-intro paragraphs above -- there's no single
-  // source of truth for those since the backtest itself isn't re-run live.
-  var LABS_BACKTEST_PF = { equities: 2.71, crypto: 2.35 };
+  // LABS_BACKTEST_PF must stay in sync with the numbers quoted in the two
+  // labs-method-intro paragraphs above -- there's no single source of
+  // truth for those since the backtest isn't re-run live.
+  //
+  // equities was 2.71 for months, described in the copy as "2.46
+  // worst-case across 5 independent windows". It does not reproduce. Run
+  // today against the SAME 16-symbol universe (unchanged since that
+  // number was set), over ~60 trading days, with the same slippage model
+  // already applied, this tool measures 1.24 -- below the claimed worst
+  // case, on the strategy's own default settings.
+  //
+  // The gap is not the universe and not the cost model; both were checked
+  // and neither changed. The most likely explanation is that 2.71 was
+  // measured before the backtest simulated the breakeven floor and early
+  // breakeven the live strategy actually uses (see
+  // simulateORBForwardSameDay, which was "quietly simulating an older
+  // version of the strategy than the one actually trading" until that was
+  // fixed). Whatever the cause, a frozen number that the tool cannot
+  // reproduce is worse than no number, because it is what the go-live
+  // decision gets measured against.
+  //
+  // crypto's 2.35 is left as-is and labelled unverified in the copy: the
+  // crypto backtest is a separate code path that was never touched by the
+  // bug above, so there is no measurement to replace it with yet.
+  var LABS_BACKTEST_PF = { equities: 1.24, crypto: 2.35 };
   var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
   // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
   // below -- all we have for crypto, and equities' own first paint before
