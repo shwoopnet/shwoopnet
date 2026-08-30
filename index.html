@@ -1340,6 +1340,24 @@
   }
   .alpaca-close-pos-btn:hover{ background: var(--loss); color:#fff; }
   .alpaca-close-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .alpaca-dock-edit-input{
+    width:72px; background: var(--panel-raised); border:1px solid var(--border); color: var(--paper);
+    font-family:'Public Sans', sans-serif; font-size:11.5px; font-variant-numeric: tabular-nums;
+    padding:3px 5px; border-radius:4px;
+  }
+  .alpaca-dock-edit-input:focus{ outline:none; border-color: var(--amber); }
+  /* Number inputs render browser spinners that eat most of an already
+     narrow cell in this fixed-width dock -- the value is typed, not
+     stepped, so they're removed rather than styled around. */
+  .alpaca-dock-edit-input::-webkit-outer-spin-button,
+  .alpaca-dock-edit-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .alpaca-dock-edit-input[type=number]{ -moz-appearance:textfield; }
+  .alpaca-dock-save-pos-btn{
+    background:none; border:1px solid var(--amber); color: var(--amber); font-family:'Public Sans', sans-serif;
+    font-size:10.5px; padding:3px 8px; border-radius:4px; cursor:pointer;
+  }
+  .alpaca-dock-save-pos-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
+  .alpaca-dock-save-pos-btn:disabled{ opacity:.5; cursor:not-allowed; }
   .alpaca-dock-resize-handle{
     position:absolute; left:-5px; top:0; bottom:0; width:10px; cursor:ew-resize; display:none; z-index:2;
   }
@@ -2052,7 +2070,7 @@
         <div class="alpaca-dock-bp-row" id="alpacaDockBpRow" hidden>
           <span class="alpaca-dock-bp" id="alpacaDockBpText"></span>
           <div class="alpaca-dock-positions-controls" id="alpacaDockPositionsControls" hidden>
-            <button class="alpaca-dock-mini-btn" id="alpacaDockCompactBtn" type="button">Compact view</button>
+            <button class="alpaca-dock-mini-btn" id="alpacaDockEditBtn" type="button">Edit</button>
             <button class="alpaca-dock-mini-btn" id="alpacaDockSortBtn" type="button">Sort: Default</button>
           </div>
         </div>
@@ -3232,6 +3250,14 @@
   // real numbers. Equities symbols never contain "/", so this is a no-op
   // for them and only changes how crypto positions get matched.
   function canonicalSymbol(sym){ return (sym || '').replace(/\//g, ''); }
+  // Alpaca's /v2/positions (and open orders) return crypto symbols in the
+  // canonical no-slash form ("AAVEUSD"), but submitting a NEW crypto order
+  // requires the slash-included form ("AAVE/USD") -- the reverse direction
+  // canonicalSymbol doesn't provide. Returns null for an equities symbol
+  // (never in CRYPTO_UNIVERSE), which callers use as "this isn't crypto."
+  function findCryptoUniverseSymbol(rawSym){
+    return CRYPTO_UNIVERSE.filter(function(s){ return canonicalSymbol(s) === rawSym; })[0] || null;
+  }
   function alpacaPositionsBySymbol(positions){
     var bySym = {};
     (positions || []).forEach(function(p){ bySym[canonicalSymbol(p.symbol)] = p; });
@@ -4782,10 +4808,24 @@
   }
 
   function findBracketLevels(orders, sym){
-    var order = (orders || []).filter(function(o){ return o.symbol === sym && o.limit_price; })[0];
+    var order = (orders || []).filter(function(o){ return o.symbol === sym && o.limit_price && (o.legs || []).length; })[0];
     var stopLeg = order ? (order.legs || []).filter(function(l){ return l.stop_price; })[0] : null;
     var target = order && order.limit_price ? parseFloat(order.limit_price) : null;
     var stop = stopLeg ? parseFloat(stopLeg.stop_price) : null;
+
+    // Crypto's exit orders are two independent, unlinked orders rather
+    // than one bracket/OCO parent+legs -- Alpaca has no order_class at
+    // all for crypto (see shwoop-server's cryptoProtectiveOrders.js). The
+    // target is a plain limit order; the stop is a stop_limit order with
+    // its trigger at the top level, not nested under .legs the way a
+    // bracket's stop leg is.
+    if(target === null || stop === null){
+      var symOrders = (orders || []).filter(function(o){ return o.symbol === sym; });
+      var targetOrder = symOrders.filter(function(o){ return o.type === 'limit' && o.limit_price; })[0];
+      var stopOrder = symOrders.filter(function(o){ return o.type === 'stop_limit' && o.stop_price; })[0];
+      if(target === null && targetOrder) target = parseFloat(targetOrder.limit_price);
+      if(stop === null && stopOrder) stop = parseFloat(stopOrder.stop_price);
+    }
 
     // Falls back to what was recorded in the journal at the moment this
     // trade was placed. The live-order lookup can come up empty for a
@@ -4793,7 +4833,15 @@
     // protection sitting on Alpaca's side — this is data Pocket Advisor already
     // has and trusts, since it wrote it there itself.
     if(target === null || stop === null){
-      var journalMatch = journalEntries.filter(function(j){ return j.sym === sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
+      // Alpaca's own positions/orders endpoints return crypto symbols in
+      // the canonical no-slash form ("AAVEUSD"), but journalEntries were
+      // always written with the slash-included form ("AAVE/USD") -- matching
+      // sym directly against j.sym here silently never matched a single
+      // crypto entry, so this fallback (and everything downstream of it,
+      // including the dock's own Target/Stop columns) was always blank
+      // for crypto specifically, without ever surfacing as an error.
+      var journalSym = findCryptoUniverseSymbol(sym) || sym;
+      var journalMatch = journalEntries.filter(function(j){ return j.sym === journalSym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
       if(journalMatch){
         if(target === null && journalMatch.t1 !== undefined && journalMatch.t1 !== null) target = journalMatch.t1;
         if(stop === null && journalMatch.stop !== undefined && journalMatch.stop !== null) stop = journalMatch.stop;
@@ -4859,32 +4907,36 @@
 
   var alpacaDockRenderGen = 0;
 
-  // Two small QoL prefs, persisted the same way the dock's lock state and
-  // geometry already are -- 'compact' drops the Target/Stop columns (each
-  // needs the extra open-orders fetch and adds width, not always wanted
-  // just for a quick glance), 'sort' reorders rows by unrealized P/L
-  // (largest gain first) instead of whatever order Alpaca happens to
-  // return positions in.
-  var alpacaDockCompact = false;
+  // Two small QoL controls. 'edit' turns the Target/Stop columns into
+  // real editable inputs with a Save button per row, so a resting
+  // stop-loss/take-profit can be adjusted straight from the dock instead
+  // of only ever being readable -- it replaced a "compact view" toggle
+  // that merely HID those two columns, which turned out to be the less
+  // useful of the two things that space could do. Deliberately NOT
+  // persisted across reloads (unlike sort below): edit mode puts real,
+  // money-moving controls on screen, and silently restoring it days later
+  // -- on a page that auto-refreshes every 45s -- is exactly how a stray
+  // click lands on the wrong position. It always starts off.
+  // 'sort' reorders rows by unrealized P/L (largest gain first) instead
+  // of whatever order Alpaca happens to return positions in.
+  var alpacaDockEditing = false;
   var alpacaDockSort = 'default'; // 'default' | 'pl'
-  try{ alpacaDockCompact = window.localStorage.getItem('shwoopnet:alpacaDockCompact') === 'true'; }catch(e){}
   try{ alpacaDockSort = window.localStorage.getItem('shwoopnet:alpacaDockSort') === 'pl' ? 'pl' : 'default'; }catch(e){}
 
   function applyAlpacaDockControlsUI(){
-    var compactBtn = document.getElementById('alpacaDockCompactBtn');
+    var editBtn = document.getElementById('alpacaDockEditBtn');
     var sortBtn = document.getElementById('alpacaDockSortBtn');
-    if(compactBtn){
-      compactBtn.classList.toggle('active', alpacaDockCompact);
-      compactBtn.textContent = alpacaDockCompact ? 'Compact view ✓' : 'Compact view';
+    if(editBtn){
+      editBtn.classList.toggle('active', alpacaDockEditing);
+      editBtn.textContent = alpacaDockEditing ? 'Done' : 'Edit';
     }
     if(sortBtn){
       sortBtn.classList.toggle('active', alpacaDockSort === 'pl');
       sortBtn.textContent = alpacaDockSort === 'pl' ? 'Sort: P/L' : 'Sort: Default';
     }
   }
-  document.getElementById('alpacaDockCompactBtn').addEventListener('click', function(){
-    alpacaDockCompact = !alpacaDockCompact;
-    try{ window.localStorage.setItem('shwoopnet:alpacaDockCompact', alpacaDockCompact ? 'true' : 'false'); }catch(e){}
+  document.getElementById('alpacaDockEditBtn').addEventListener('click', function(){
+    alpacaDockEditing = !alpacaDockEditing;
     applyAlpacaDockControlsUI();
     renderAlpacaDock();
   });
@@ -4948,7 +5000,7 @@
         rows.sort(function(a, b){ return parseFloat(b.unrealized_pl || 0) - parseFloat(a.unrealized_pl || 0); });
       }
 
-      var targetStopHeaderHtml = alpacaDockCompact ? '' :
+      var targetStopHeaderHtml =
         '<th title="The real live take-profit order on Alpaca, far from entry -- a trailing stop (see Stop) manages the actual exit, not this price. Falls back to the 1.5x-risk reference figure only if no live order is found yet.">Target ⓘ</th><th>Stop</th>';
       positionsEl.innerHTML = '<table class="alpaca-dock-table"><thead><tr><th>Sym</th><th>Qty</th><th>Dir</th><th>Entry</th>' + targetStopHeaderHtml + '<th>Current</th><th>P/L</th><th></th></tr></thead><tbody>' +
         rows.map(function(p){
@@ -4956,10 +5008,20 @@
           var plpc = parseFloat(p.unrealized_plpc || 0) * 100;
           var plClass = pl >= 0 ? 'up' : 'down';
           var direction = p.side === 'short' ? 'Short' : 'Long';
-          var levels = alpacaDockCompact ? null : findBracketLevels(openOrders, p.symbol);
-          var targetStopCellsHtml = alpacaDockCompact ? '' :
-            '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>' +
-            '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>';
+          var levels = findBracketLevels(openOrders, p.symbol);
+          // In edit mode both levels become real inputs. A level with no
+          // live order behind it yet renders as an EMPTY input rather than
+          // a prefilled guess -- saving a number this app invented would
+          // put a real resting order on the books at a price nothing
+          // actually chose. Save is blocked until both have real values.
+          var targetStopCellsHtml = alpacaDockEditing
+            ? '<td><input class="alpaca-dock-edit-input" type="number" step="any" inputmode="decimal" data-field="target" data-sym="' + p.symbol + '" value="' + (levels.target !== null ? levels.target : '') + '" aria-label="Target price for ' + p.symbol + '"></td>' +
+              '<td><input class="alpaca-dock-edit-input" type="number" step="any" inputmode="decimal" data-field="stop" data-sym="' + p.symbol + '" value="' + (levels.stop !== null ? levels.stop : '') + '" aria-label="Stop price for ' + p.symbol + '"></td>'
+            : '<td class="up">' + (levels.target !== null ? fmt(levels.target) : '—') + '</td>' +
+              '<td class="down">' + (levels.stop !== null ? fmt(levels.stop) : '—') + '</td>';
+          var actionCellHtml = alpacaDockEditing
+            ? '<td><button class="alpaca-dock-save-pos-btn" data-sym="' + p.symbol + '">Save</button></td>'
+            : '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>';
           return '<tr>' +
             '<td>' + p.symbol + '</td>' +
             '<td>' + p.qty + '</td>' +
@@ -4968,9 +5030,61 @@
             targetStopCellsHtml +
             '<td>' + fmt(parseFloat(p.current_price)) + '</td>' +
             '<td class="' + plClass + '">' + (pl >= 0 ? '+' : '−') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plpc >= 0 ? '+' : '') + plpc.toFixed(1) + '%)</td>' +
-            '<td><button class="alpaca-close-pos-btn" data-sym="' + p.symbol + '">Close</button></td>' +
+            actionCellHtml +
           '</tr>';
         }).join('') + '</tbody></table>';
+
+      positionsEl.querySelectorAll('.alpaca-dock-save-pos-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var sym = btn.dataset.sym;
+          var position = rows.filter(function(p){ return p.symbol === sym; })[0];
+          if(!position) return;
+          var targetInput = positionsEl.querySelector('.alpaca-dock-edit-input[data-field="target"][data-sym="' + sym + '"]');
+          var stopInput = positionsEl.querySelector('.alpaca-dock-edit-input[data-field="stop"][data-sym="' + sym + '"]');
+          var newTarget = parseFloat(targetInput && targetInput.value);
+          var newStop = parseFloat(stopInput && stopInput.value);
+          if(!isFinite(newTarget) || !isFinite(newStop) || newTarget <= 0 || newStop <= 0){
+            alert('Both a target and a stop price are required, and both must be greater than zero.');
+            return;
+          }
+          // A stop on the wrong side of the current price would trigger
+          // instantly on submission -- closing the position at market the
+          // moment it lands, which is the single most expensive way to get
+          // a typo wrong here. Alpaca would also reject it outright, but
+          // catching it before the request means a clear message instead
+          // of a raw API error.
+          var currentPrice = parseFloat(position.current_price);
+          var isLong = position.side !== 'short';
+          if(isLong && (newStop >= currentPrice || newTarget <= currentPrice)){
+            alert('For a Long position the stop must be BELOW the current price ($' + fmt(currentPrice) + ') and the target above it.');
+            return;
+          }
+          if(!isLong && (newStop <= currentPrice || newTarget >= currentPrice)){
+            alert('For a Short position the stop must be ABOVE the current price ($' + fmt(currentPrice) + ') and the target below it.');
+            return;
+          }
+          if(!confirm('Replace ' + sym + "'s resting exit orders with stop $" + fmt(newStop) + ' / target $' + fmt(newTarget) + '?\n\nThe existing orders are cancelled first, so the position is briefly unprotected while the new pair is submitted.')) return;
+          btn.disabled = true;
+          btn.textContent = '…';
+          saveDockPositionExits(position, newStop, newTarget).then(function(){
+            // The open-orders list the next render reads its Target/Stop
+            // levels from is cached -- without invalidating it, the
+            // re-render would show the OLD levels and look like the save
+            // silently failed. Only the cached payload is cleared, never
+            // the cache object itself, which getAlpacaOpenOrdersCached
+            // dereferences unconditionally.
+            alpacaOpenOrdersCache.data = null;
+            alpacaOpenOrdersCache.at = 0;
+            renderAlpacaDock();
+          }).catch(function(err){
+            alert('Failed to update ' + sym + "'s exit orders: " + err.message +
+              '\n\nIMPORTANT: the old orders may already have been cancelled. Check this position\'s protection on Alpaca before leaving it unattended.');
+            btn.disabled = false;
+            btn.textContent = 'Save';
+            console.error('Exit-order update failed:', err);
+          });
+        });
+      });
 
       positionsEl.querySelectorAll('.alpaca-close-pos-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
@@ -5031,6 +5145,14 @@
       bodyWrap.classList.remove('open');
       caret.textContent = '▲';
       toggleBtn.setAttribute('aria-expanded', 'false');
+      // Collapsing the dock discards whatever was being edited, so edit
+      // mode shouldn't survive it -- reopening to live inputs prefilled
+      // from an earlier session's state would be a real footgun on a
+      // panel that submits real orders.
+      if(alpacaDockEditing){
+        alpacaDockEditing = false;
+        applyAlpacaDockControlsUI();
+      }
     }
   }
 
@@ -5309,6 +5431,83 @@
       var exitSide = entry.direction === 'Long' ? 'sell' : 'buy';
       return submitAlpacaOcoExit(entry.sym, exitSide, entry.qty, analysis.stop, analysis.t1);
     });
+  }
+
+  // ---------- Crypto exit-order editing (mirrors shwoop-server's own
+  // cryptoProtectiveOrders.js/cryptoTrailingStop.js, ported to the
+  // browser for a manual edit rather than an automated pass) ----------
+  // Alpaca has no bracket/OCO order class for crypto at all -- the stop
+  // and target are two independent, unlinked orders (a stop_limit and a
+  // plain limit), so there's no single "refresh the bracket" call the
+  // way equities has. Same price-precision rule as the backend's own
+  // formatCryptoPrice: whole-dollar-plus coins get cents, sub-dollar
+  // coins need more decimals to avoid rounding to a meaningless price.
+  function formatCryptoOrderPrice(price){
+    if(price >= 1) return price.toFixed(2);
+    if(price >= 0.01) return price.toFixed(4);
+    return price.toFixed(8);
+  }
+  // A stop_limit order's limit leg needs to sit slightly past its own
+  // trigger (in the direction that guarantees it can actually fill on a
+  // fast move) -- same 0.5% buffer shwoop-server's own
+  // STOP_LIMIT_BUFFER_PCT uses.
+  var CRYPTO_STOP_LIMIT_BUFFER_PCT = 0.005;
+
+  function submitCryptoStopLimitOrderFrontend(sym, side, qty, stopPrice, limitPrice){
+    var body = {
+      symbol: sym, qty: String(qty), side: side, type: 'stop_limit', time_in_force: 'gtc',
+      stop_price: formatCryptoOrderPrice(stopPrice), limit_price: formatCryptoOrderPrice(limitPrice)
+    };
+    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
+      method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()), body: JSON.stringify(body)
+    }).then(function(res){
+      return res.json().then(function(data){ if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); } return data; });
+    });
+  }
+  function submitCryptoLimitOrderFrontend(sym, side, qty, limitPrice){
+    var body = {
+      symbol: sym, qty: String(qty), side: side, type: 'limit', time_in_force: 'gtc',
+      limit_price: formatCryptoOrderPrice(limitPrice)
+    };
+    return fetch(ALPACA_TRADING_BASE() + '/v2/orders', {
+      method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, alpacaHeaders()), body: JSON.stringify(body)
+    }).then(function(res){
+      return res.json().then(function(data){ if(!res.ok){ throw new Error(data.message || ('HTTP ' + res.status)); } return data; });
+    });
+  }
+  // Cancels whatever's currently resting for this symbol (the old
+  // stop_limit and/or limit order) before submitting the new pair —
+  // same cancel-before-submit sequencing as refreshPositionBracket, so a
+  // position is never left with two conflicting sets of exit orders live
+  // at once. sym here must be the slash-included form Alpaca's crypto
+  // trading endpoint expects for a NEW order (see findCryptoUniverseSymbol) —
+  // NOT the canonical no-slash form positions/orders are read back as.
+  function refreshCryptoExitOrders(sym, direction, qty, newStop, newTarget){
+    return fetchAlpacaOpenOrders().then(function(orders){
+      var matches = (orders || []).filter(function(o){ return o.symbol === sym; });
+      return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
+    }).then(function(){
+      var exitSide = direction === 'Long' ? 'sell' : 'buy';
+      var stopLimitPrice = exitSide === 'sell' ? newStop * (1 - CRYPTO_STOP_LIMIT_BUFFER_PCT) : newStop * (1 + CRYPTO_STOP_LIMIT_BUFFER_PCT);
+      return Promise.all([
+        submitCryptoStopLimitOrderFrontend(sym, exitSide, qty, newStop, stopLimitPrice),
+        submitCryptoLimitOrderFrontend(sym, exitSide, qty, newTarget)
+      ]);
+    });
+  }
+
+  // Single entry point the dock's Save button uses for either asset
+  // class -- picks the right underlying call based on whether this
+  // symbol is a known crypto pair, so the row-rendering code doesn't need
+  // to know the difference.
+  function saveDockPositionExits(position, newStop, newTarget){
+    var direction = position.side === 'short' ? 'Short' : 'Long';
+    var qty = position.qty;
+    var cryptoSlashSym = findCryptoUniverseSymbol(position.symbol);
+    if(cryptoSlashSym){
+      return refreshCryptoExitOrders(cryptoSlashSym, direction, qty, newStop, newTarget);
+    }
+    return refreshPositionBracket({ sym: position.symbol, direction: direction, qty: qty }, { stop: newStop, t1: newTarget });
   }
 
   // ---------- Syncing bracket-order exits back to the journal ----------
@@ -8759,7 +8958,12 @@
     renderWhatToWatch();
     var statusPageEl = document.getElementById('page-trades');
     if(statusPageEl && !statusPageEl.hidden){ renderStatusPage(); }
-    if(isAlpacaDockOpen()){ renderAlpacaDock(); }
+    // Deliberately skipped while the dock is in edit mode -- this runs on
+    // the periodic quote-sync tick, and re-rendering the table would blow
+    // away whatever half-typed stop/target the user is in the middle of
+    // entering. Prices go briefly stale during an edit, which is a far
+    // smaller problem than losing input mid-keystroke.
+    if(isAlpacaDockOpen() && !alpacaDockEditing){ renderAlpacaDock(); }
       updateTradeBubbles();
   }
 
