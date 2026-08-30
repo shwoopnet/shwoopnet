@@ -131,11 +131,10 @@ gates.G5 = () => {
     [path.join(root, '.claude/skills/pre-ship/scripts/check-frontend.js'), path.join(root, 'index.html')],
     { encoding: 'utf8' });
   assert.ok(/FRONTEND: clean/.test(out), 'pre-ship not clean:\n' + out);
+  // Zero orphans, not "only the known one". intradayToggle was cleared,
+  // so this is now a strictly stronger assertion than it was.
   const m = /no matching element: (.+)/.exec(out);
-  if (m) {
-    const names = m[1].split(',').map((x) => x.trim()).filter(Boolean);
-    assert.deepStrictEqual(names, ['intradayToggle'], `new orphaned lookup(s): ${names.join(', ')}`);
-  }
+  assert.strictEqual(m, null, m ? `orphaned lookup(s): ${m[1]}` : '');
   console.log('G5 PASS pre-ship clean');
 };
 

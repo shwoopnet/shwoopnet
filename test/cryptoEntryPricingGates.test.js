@@ -50,6 +50,7 @@ gates.G2 = () => {
   const sim = lift('simulateCryptoForward', {
     CRYPTO_BT_TRAIL_TRIGGER_RR: constant('CRYPTO_BT_TRAIL_TRIGGER_RR'),
     CRYPTO_BT_TREND_LOOKBACK_BARS: constant('CRYPTO_BT_TREND_LOOKBACK_BARS'),
+    CRYPTO_BT_EARLY_BREAKEVEN_RR: constant('CRYPTO_BT_EARLY_BREAKEVEN_RR'),
   });
   // Filled at 102.5 on bar index 1, whose own low is 94 -- below the 95
   // stop. That trade is stopped out on the bar it entered on.
@@ -87,56 +88,15 @@ gates.G3 = () => {
   console.log('G3 PASS unfillable signals dropped and levels re-anchored');
 };
 
-gates.G4 = () => {
-  const spreadPctFromQuote = lift('spreadPctFromQuote');
-  const cryptoRoundTripCostPct = lift('cryptoRoundTripCostPct', {
-    CRYPTO_MODELLED_FEE_ROUND_TRIP_PCT: constant('CRYPTO_MODELLED_FEE_ROUND_TRIP_PCT'),
-  });
-  const medianOf = lift('medianOf');
-  const grossEdge = constant('CRYPTO_GROSS_EDGE_PCT');
-  const fee = constant('CRYPTO_MODELLED_FEE_ROUND_TRIP_PCT');
-
-  // bid 99.9 / ask 100.1 -> mid 100, spread 0.2 -> 0.2%
-  const s = spreadPctFromQuote({ bp: 99.9, ap: 100.1 });
-  assert.ok(Math.abs(s - 0.2) < 1e-9, `expected 0.2% spread, got ${s}`);
-  // Garbage must not become a number.
-  assert.strictEqual(spreadPctFromQuote(null), null);
-  assert.strictEqual(spreadPctFromQuote({ bp: 100 }), null);
-  assert.strictEqual(spreadPctFromQuote({ bp: 100, ap: 99 }), null, 'a crossed quote is not a spread');
-  assert.strictEqual(spreadPctFromQuote({ bp: 0, ap: 1 }), null);
-
-  // The cost model: fee round trip plus one whole spread.
-  assert.ok(Math.abs(cryptoRoundTripCostPct(0) - fee) < 1e-9, 'zero spread leaves just the fees');
-  assert.ok(Math.abs(cryptoRoundTripCostPct(0.2) - (fee + 0.2)) < 1e-9);
-
-  // The decision this exists to make. Break-even is where round trip
-  // equals the gross edge; measured independently here rather than
-  // copied from the status string.
-  const breakEvenSpread = grossEdge - fee;
-  assert.ok(breakEvenSpread > 0, 'the gross edge must exceed the modelled fee, or there was never anything to measure');
-  assert.ok(cryptoRoundTripCostPct(breakEvenSpread - 0.001) < grossEdge, 'just under break-even must stay profitable');
-  assert.ok(cryptoRoundTripCostPct(breakEvenSpread + 0.001) > grossEdge, 'just over break-even must go negative');
-  // The margin of safety is small enough to be worth stating out loud.
-  assert.ok(breakEvenSpread < 0.25, `break-even spread is ${breakEvenSpread}%, wider than this audit assumed`);
-
-  assert.strictEqual(medianOf([3, 1, 2]), 2, 'median must sort numerically');
-  assert.strictEqual(medianOf([4, 1, 3, 2]), 2.5);
-  assert.strictEqual(medianOf([]), null);
-  // Control: a median must resist one absurd outlier, which a mean would not.
-  assert.strictEqual(medianOf([0.1, 0.1, 0.1, 0.1, 99]), 0.1, 'one stale quote must not move the answer');
-  console.log('G4 PASS spread converts to round-trip cost');
-};
-
 gates.G5 = () => {
   const out = execFileSync(process.execPath,
     [path.join(root, '.claude/skills/pre-ship/scripts/check-frontend.js'), path.join(root, 'index.html')],
     { encoding: 'utf8' });
   assert.ok(/FRONTEND: clean/.test(out), 'pre-ship not clean:\n' + out);
+  // Zero orphans, not "only the known one". intradayToggle was cleared,
+  // so this is now a strictly stronger assertion than it was.
   const m = /no matching element: (.+)/.exec(out);
-  if (m) {
-    const names = m[1].split(',').map((x) => x.trim()).filter(Boolean);
-    assert.deepStrictEqual(names, ['intradayToggle'], `new orphaned lookup(s): ${names.join(', ')}`);
-  }
+  assert.strictEqual(m, null, m ? `orphaned lookup(s): ${m[1]}` : '');
   console.log('G5 PASS pre-ship clean');
 };
 

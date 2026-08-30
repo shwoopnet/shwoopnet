@@ -19,8 +19,14 @@ node .claude/skills/pre-ship/scripts/check-frontend.js index.html
 
 Every check in it traces to a bug that **actually shipped here**. Run it
 before every merge. A `note` is a judgement call — the question is never
-"are there notes" but "is any note *new* in this change". `intradayToggle`
-is a known, long-standing one.
+"are there notes" but "is any note *new* in this change".
+
+As of Aug 2026 it reports **`FRONTEND: clean.`** with no notes at all, and
+that is worth defending. It carried one permanent orphan (`intradayToggle`,
+a guarded lookup for a button removed long ago) for months, and a check
+that always prints one known failure teaches everyone to skim past the
+line failures appear on. The Labs removals in the same session produced
+*nineteen* orphans on that exact line.
 
 ## Skills in this repo
 

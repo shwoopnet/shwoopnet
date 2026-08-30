@@ -50,7 +50,7 @@ because those are exactly the places the two drift apart silently.
 - **`FAIL`** — do not ship. Fix it first.
 - **`note`** — informational, and the judgement call. The frontend
   carries some long-standing null-guarded references (e.g.
-  `intradayToggle`). The question is never "are there notes" but **"is any
+  The question is never "are there notes" but **"is any
   note new in this change?"** A newly-appearing note is a real bug wearing
   a soft label.
 

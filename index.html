@@ -4065,12 +4065,18 @@
   // ---------- Intraday screener ----------
   function setIntradayEnabled(enabled){
     alpacaIntradayEnabled = enabled;
-    var btn = document.getElementById('intradayToggle');
-    if(btn){
-      btn.textContent = enabled ? 'On' : 'Off';
-      btn.setAttribute('aria-checked', enabled ? 'true' : 'false');
-      btn.classList.toggle('active', enabled);
-    }
+    // The #intradayToggle button was removed long ago (see loadIntradayPref,
+    // which now always passes true). Its getElementById survived as a
+    // guarded no-op, and pre-ship has reported it as an orphan on every
+    // single run since.
+    //
+    // That is worse than untidy. A check that always prints one known
+    // failure teaches everyone to skim past the line the failures appear
+    // on -- and this run's real removals produced NINETEEN orphans on
+    // that same line. Clearing it makes the count meaningful again.
+    //
+    // The localStorage write stays: an old stored 'false' would otherwise
+    // outlive this and there is no UI left to turn screening back on.
     try { window.localStorage.setItem('shwoopnet:intradayEnabled', enabled ? 'true' : 'false'); } catch(e){}
     var section = document.getElementById('intradaySection');
     if(section){ section.hidden = !enabled; }
