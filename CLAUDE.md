@@ -197,6 +197,45 @@ factor of filled trades **and** what the missed signals would have made.
 A profit factor that improves while fill rate collapses is not a result,
 it is the same trap with a new face.
 
+### Registered before running: hybrid entries (limit first, market fallback)
+
+Measured 60-day results on the same window, all three under corrected
+accounting:
+
+| | Reported PF | True net/trade |
+|---|---|---|
+| Market orders | 1.05 | **−0.16%** |
+| Maker only | 1.29 | +0.10%, on a set that excludes the winners |
+
+Maker-only is **selection, not execution**. The 94 skipped signals would
+have averaged **+1.47%** with 51% winners, against the filled trades' 30%.
+The limit catches the breakouts that come back — which is another way of
+saying the ones that failed.
+
+**The correction that matters, and it was nearly missed.** The obvious
+hybrid reading is "the market strategy, with a better entry on 70% of
+trades". That is wrong, and believing it would have been the sixth
+flattering error here.
+
+A hybrid cannot market-in at the bar after the signal, because it does not
+yet KNOW the limit will fail — that is only known after the wait window
+expires. So the fallback entry is priced at `signalIdx + waitBars + 1`,
+roughly two hours later, on an asset that by definition has been running
+away for those two hours. The +1.47% figure is an honest measure of what
+the MARKET-ONLY strategy earns on that subset (it enters at the next bar
+regardless); it is **not** what a hybrid earns, and using it as such is
+lookahead wearing a different hat.
+
+So the hybrid is not "maker plus free upside". It is **maker on the ones
+that come back, and chase-the-runaway two hours late on the ones that
+don't** — which is exactly what `CHASE_LIMIT_RISK_FRACTION` exists to
+refuse in live trading.
+
+**Prediction, recorded before the run:** the hybrid lands *below* maker-only
+and probably below market-only, because the fallback bucket buys the
+strongest moves at their worst prices. If it comes out above both, suspect
+the fallback timing before believing it.
+
 ### Things that were measured and did NOT work
 
 Keep this list. Re-running a settled experiment is a real cost, and an

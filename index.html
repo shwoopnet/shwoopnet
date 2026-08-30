@@ -2911,6 +2911,16 @@
         average loss exactly as intended and still lost money. Missed signals are priced under the market-order
         model and reported alongside. Off by default.</span>
       </label>
+      <label class="labs-backtest-toggle">
+        <input type="checkbox" id="cryptoBacktestHybrid">
+        <span>Hybrid entries — rests the limit, then takes the market order if it never fills. Supersedes the
+        checkbox above when both are ticked. <strong>The fallback is priced two hours late, not at the next
+        bar.</strong> A hybrid does not know the limit failed until the wait window expires, so booking the
+        fallback at the signal bar would use the future to justify a price from the past — the same lookahead
+        that reported 13.26. Which makes this honestly "maker fills on the breakouts that come back, and
+        chasing the runaways two hours late". Reports the split, and how many of those chases live's own chase
+        gate would have refused. Off by default.</span>
+      </label>
       <div class="labs-backtest-status" id="cryptoBacktestStatus"></div>
       <div id="cryptoBacktestResults"></div>
     </div>
@@ -6953,6 +6963,12 @@
   // new face, and reporting only the filled trades would hide it.
   var CRYPTO_MAKER_FEE_BPS = 15;
   var CRYPTO_MAKER_WAIT_BARS = 8; // 2 hours of 15-minute bars
+  // Mirrors shwoop-server autoTrade.js's CHASE_LIMIT_RISK_FRACTION, which
+  // is 0.3 -- live refuses a market entry that has already run 30% of the
+  // setup's own risk width past the breakout level. Kept identical on
+  // purpose: a backtest reporting against a laxer gate than live enforces
+  // would count trades the live system would have refused.
+  var CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION = 0.3;
 
   function applyCryptoMakerSlippage(pctReturn, outcome){
     // The EXIT is still a market order -- a stop or a trend-invalidation
@@ -6987,6 +7003,56 @@
       }
     }
     return null; // never came back -- the signal is missed, not filled
+  }
+
+  // Hybrid entries: rest the limit, and take the market if it never fills.
+  //
+  // The tempting reading of the maker result is "the market strategy with
+  // a better entry on 70% of trades". That is WRONG, and acting on it
+  // would have been the sixth flattering error in this project.
+  //
+  // A hybrid cannot market-in at the bar after the signal, because at
+  // that moment it does not yet know the limit will fail. It only knows
+  // that once the wait window expires. So the fallback is priced
+  // waitBars later -- on an asset that, by definition, has been running
+  // away for those two hours. Booking the fallback at signalIdx + 1
+  // would be using the future (that price never came back) to justify a
+  // price from the past: the same lookahead as the 13.26, wearing a
+  // different hat.
+  //
+  // Which makes the honest description of this strategy: maker fills on
+  // the breakouts that come back, and chasing the runaways two hours
+  // late. Live's CHASE_LIMIT_RISK_FRACTION exists to refuse exactly that
+  // second trade, so how many fallbacks it would have blocked is
+  // reported rather than silently taken.
+  function fillCryptoSignalHybrid(bars, signalIdx, signal, waitBars){
+    var makerFill = fillCryptoSignalAsMakerLimit(bars, signalIdx, signal, waitBars);
+    if(makerFill){
+      makerFill.filledAs = 'maker';
+      return makerFill;
+    }
+    // The limit is cancelled at the end of the window; the market order
+    // goes in on the NEXT bar after that, which is the first bar whose
+    // open this strategy could actually have acted on.
+    var entryIdx = signalIdx + waitBars + 1;
+    if(entryIdx >= bars.length) return null;
+    var entry = bars[entryIdx].o;
+    if(!(entry > 0) || entry <= signal.stop) return null;
+    var risk = entry - signal.stop;
+    if(risk <= 0) return null;
+    return {
+      entryIdx: entryIdx,
+      direction: signal.direction,
+      entry: entry,
+      stop: signal.stop,
+      t1: entry + CRYPTO_BT_REWARD_MULTIPLE * risk,
+      filledAs: 'taker',
+      // How far past the breakout level this chased. Live refuses a
+      // market entry beyond CHASE_LIMIT_RISK_FRACTION of the setup's own
+      // risk width, so a fallback well past that is a trade the live
+      // system would never have taken.
+      chaseRiskFraction: (entry - signal.entry) / Math.abs(signal.entry - signal.stop)
+    };
   }
 
   // Books the fill at a price this system could actually have got.
@@ -7124,11 +7190,14 @@
     return '~' + (Math.round(days * 10) / 10) + ' day' + (Math.round(days * 10) === 10 ? '' : 's');
   }
 
-  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss, makerEntries){
+  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss, entryMode){
     return new Promise(function(resolve){
       var startIdx = Math.max(CRYPTO_BT_TREND_LOOKBACK_BARS, bars.length - lookbackBars);
       var trades = [];
       var missedTrades = [];
+      var hybridMakerFills = 0;
+      var hybridChaseFills = 0;
+      var hybridChaseBlocked = 0;
       var i = startIdx;
       var ITERATIONS_PER_CHUNK = 300;
 
@@ -7137,15 +7206,17 @@
         while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
           var signal = findCryptoBacktestBreakoutAt(bars, i);
           var filled = signal
-            ? (makerEntries
-              ? fillCryptoSignalAsMakerLimit(bars, i, signal, CRYPTO_MAKER_WAIT_BARS)
-              : fillCryptoSignalAtNextBar(bars, i, signal))
+            ? (entryMode === 'hybrid'
+              ? fillCryptoSignalHybrid(bars, i, signal, CRYPTO_MAKER_WAIT_BARS)
+              : entryMode === 'maker'
+                ? fillCryptoSignalAsMakerLimit(bars, i, signal, CRYPTO_MAKER_WAIT_BARS)
+                : fillCryptoSignalAtNextBar(bars, i, signal))
             : null;
           // A signal the limit never caught is not simply absent. Price it
           // under the TAKER model -- what the market-order version would
           // have made on it -- so the fill-rate/profit-factor trade-off is
           // measurable instead of invisible.
-          if(signal && makerEntries && !filled){
+          if(signal && entryMode === 'maker' && !filled){
             var takerFill = fillCryptoSignalAtNextBar(bars, i, signal);
             if(takerFill){
               var missedOutcome = simulateCryptoForward(bars, takerFill.entryIdx, takerFill, invalidateOnTrendLoss);
@@ -7157,9 +7228,18 @@
           if(filled){
             var outcome = simulateCryptoForward(bars, filled.entryIdx, filled, invalidateOnTrendLoss);
             var pctReturn = (outcome.price - filled.entry) / filled.entry * 100; // Long-only
-            pctReturn = makerEntries
+            // A hybrid trade pays whichever cost its ACTUAL fill earned --
+            // maker on the ones that rested, taker on the ones it chased.
+            // Charging the whole run at the maker rate would quietly
+            // discount the chases, which are the expensive half.
+            pctReturn = (filled.filledAs === 'maker' || entryMode === 'maker')
               ? applyCryptoMakerSlippage(pctReturn, outcome.result)
               : applyCryptoBacktestSlippage(pctReturn, outcome.result);
+            if(filled.filledAs === 'maker') hybridMakerFills++;
+            else if(filled.filledAs === 'taker'){
+              hybridChaseFills++;
+              if(filled.chaseRiskFraction > CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION) hybridChaseBlocked++;
+            }
             trades.push({
               date: bars[filled.entryIdx].t, direction: filled.direction, entry: filled.entry,
               stop: filled.stop, target: filled.t1, outcome: outcome.result === 'unresolved' ? 'unresolved' : outcome.result,
@@ -7179,8 +7259,12 @@
           // shape -- summarizeBacktestTrades and every existing caller
           // iterate the ELEMENTS, so they are untouched, while the maker
           // run can still report what its limit orders never caught.
-          trades.makerEntries = !!makerEntries;
+          trades.makerEntries = entryMode === 'maker';
+          trades.entryMode = entryMode;
           trades.missedTrades = missedTrades;
+          trades.hybridMakerFills = hybridMakerFills;
+          trades.hybridChaseFills = hybridChaseFills;
+          trades.hybridChaseBlocked = hybridChaseBlocked;
           resolve(trades);
         }
       }
@@ -7685,7 +7769,7 @@
       '</table>';
   }
 
-  function renderCryptoUniverseBacktestResults(perSymbolResults, summary, failedSymbols, makerFills){
+  function renderCryptoUniverseBacktestResults(perSymbolResults, summary, failedSymbols, makerFills, hybridFills){
     var statusEl = document.getElementById('cryptoBacktestStatus');
     var resultsEl = document.getElementById('cryptoBacktestResults');
     // Same reporting the equities universe run already does, and for the
@@ -7733,6 +7817,25 @@
       }
     }
 
+    // A hybrid run's headline is the SPLIT. Maker fills and chased
+    // fallbacks are different trades with different costs, and an
+    // aggregate that hides the mix hides the whole experiment.
+    var hybridNote = '';
+    if(hybridFills){
+      var hybridTotal = hybridFills.maker + hybridFills.chase;
+      if(hybridTotal){
+        hybridNote = ' Entries: ' + hybridFills.maker + ' filled at the limit ('
+          + (hybridFills.maker / hybridTotal * 100).toFixed(0) + '%), ' + hybridFills.chase
+          + ' chased at market after the limit expired.'
+          + (hybridFills.blocked
+            ? ' Of those chases, ' + hybridFills.blocked + ' had already run more than '
+              + (CRYPTO_BT_CHASE_LIMIT_RISK_FRACTION * 100).toFixed(0) + '% of the setup\'s risk width past the '
+              + 'breakout — live\'s chase gate would have REFUSED them, so this result counts trades the '
+              + 'real system would never have taken.'
+            : '');
+      }
+    }
+
     if(summary.totalSignals === 0){
       statusEl.textContent = (makerFills && (makerFills.missedTrades || []).length)
         ? 'No limit order filled anywhere in the universe — all ' + makerFills.missedTrades.length +
@@ -7744,7 +7847,7 @@
     }
 
     statusEl.textContent = 'Tested ' + perSymbolResults.length + ' pairs, ' + summary.totalSignals + ' total crypto signals' +
-      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.' + failedNote + makerNote;
+      (summary.unresolvedCount ? ' (' + summary.unresolvedCount + ' still open at the end of this window)' : '') + '.' + failedNote + makerNote + hybridNote;
     statusEl.className = 'labs-backtest-status ok';
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
@@ -7804,6 +7907,20 @@
     return !!(el && el.checked);
   }
 
+  function cryptoHybridChecked(){
+    var el = document.getElementById('cryptoBacktestHybrid');
+    return !!(el && el.checked);
+  }
+
+  // Hybrid wins if both are ticked -- it is a superset of maker, so
+  // silently running maker-only there would report one thing and label
+  // it another.
+  function cryptoEntryMode(){
+    if(cryptoHybridChecked()) return 'hybrid';
+    if(cryptoMakerChecked()) return 'maker';
+    return 'market';
+  }
+
   // The one line that decides whether a maker run is a result or a trap.
   // Reports fill rate alongside what the missed signals would have made,
   // because a profit factor that improves while fill rate collapses is
@@ -7843,7 +7960,7 @@
         throw new Error('Not enough crypto history for ' + sym + ' in this window — try a longer lookback.');
       }
       var lookbackBars = Math.round(lookbackDays * 24 * 4); // 4 bars/hour at 15-min
-      return runCryptoBacktestSimulationAsync(bars, lookbackBars, cryptoInvalidateChecked(), cryptoMakerChecked());
+      return runCryptoBacktestSimulationAsync(bars, lookbackBars, cryptoInvalidateChecked(), cryptoEntryMode());
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderCryptoBacktestResults(trades, summary, sym);
@@ -7885,9 +8002,12 @@
     var perSymbolResults = [];
     var failedSymbols = [];
     var invalidate = cryptoInvalidateChecked();
-    var maker = cryptoMakerChecked();
+    var entryMode = cryptoEntryMode();
     var universeFilled = 0;
     var universeMissedTrades = [];
+    var universeHybridMaker = 0;
+    var universeHybridChase = 0;
+    var universeHybridBlocked = 0;
 
     function finish(){
       btn.disabled = false;
@@ -7896,7 +8016,10 @@
       // on a synthetic array rather than recomputed -- same reporting,
       // same trap avoided.
       renderCryptoUniverseBacktestResults(perSymbolResults, summarizeBacktestTrades(allTrades), failedSymbols,
-        maker ? { filled: universeFilled, missedTrades: universeMissedTrades } : null);
+        entryMode === 'maker' ? { filled: universeFilled, missedTrades: universeMissedTrades } : null,
+        entryMode === 'hybrid'
+          ? { maker: universeHybridMaker, chase: universeHybridChase, blocked: universeHybridBlocked }
+          : null);
     }
 
     function processNext(index){
@@ -7915,8 +8038,11 @@
           return null;
         }
         statusEl.textContent = 'Simulating ' + progress + ' — ' + bars.length.toLocaleString() + ' bars…';
-        return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate, maker).then(function(trades){
+        return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate, entryMode).then(function(trades){
           universeFilled += trades.length;
+          universeHybridMaker += trades.hybridMakerFills || 0;
+          universeHybridChase += trades.hybridChaseFills || 0;
+          universeHybridBlocked += trades.hybridChaseBlocked || 0;
           // The RETURNS, not just the count. Whether a maker run is skill
           // or selection is decided by what the misses would have made,
           // and the first version of this carried only a tally -- which
