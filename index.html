@@ -2964,6 +2964,22 @@
         <div class="labs-backtest-status" id="optionsDepthStatus"></div>
         <div id="optionsDepthResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
       </div>
+
+      <div class="labs-export-card">
+        <div class="labs-export-header">
+          <div>
+            <div class="labs-export-title">What spread does crypto actually pay?</div>
+            <div class="labs-export-desc">Samples live bid/ask on all 12 pairs and reports the round-trip cost
+              a market order really pays — the taker fee plus the spread it crosses. The backtest's 0.50%
+              assumption is fee-only and excludes spread entirely, and the measured edge only survives if the
+              true round trip stays under 0.62%. This is the number that decides whether the crypto strategy
+              is worth funding, and it costs nothing to measure.</div>
+          </div>
+          <button class="settings-reset-btn" id="testCryptoSpreadBtn">Measure spread</button>
+        </div>
+        <div class="labs-backtest-status" id="cryptoSpreadStatus"></div>
+        <div id="cryptoSpreadResult" style="font-size:12px; color: var(--muted); white-space:pre-wrap; font-family:'Public Sans', sans-serif; margin-top:8px;"></div>
+      </div>
     </div>
   </main>
     </div>
@@ -6904,6 +6920,50 @@
     return { direction: direction, entry: entry, stop: stop, t1: target };
   }
 
+  // Books the fill at a price this system could actually have got.
+  //
+  // findCryptoBacktestBreakoutAt returns `entry` = rangeHigh, the level
+  // the bar broke through. But the signal only EXISTS once that bar is
+  // complete -- it needs bar.h to clear the range AND bar.c to sit above
+  // the trend SMA -- so rangeHigh is a price from partway through a bar
+  // that had already finished by the time anything could act. Booking
+  // there hands every trade the intra-bar run for free, and the volume
+  // and trend filters select precisely for bars that ran hard.
+  //
+  // This is the same defect that reported profit factor 13.26 on
+  // equities before it was priced honestly at 0.94. The equities
+  // simulation was fixed; the crypto one was never given the same
+  // treatment.
+  //
+  // Live, shwoop-server scans completed bars and sends a plain MARKET
+  // order -- see autoTrade.js, whose own CHASE_LIMIT_RISK_FRACTION gate
+  // exists because "price has already run well past the breakout level
+  // by the time this cycle gets around to acting on it". The next bar's
+  // open is the earliest price that order could realistically touch.
+  //
+  // The stop stays where the signal put it (rangeLow), and risk/target
+  // are recomputed from the REAL fill -- matching live, where the
+  // protective orders re-anchor to the actual fill price rather than to
+  // the theoretical entry (see autoTrade.js's plannedEntry/initialStop).
+  function fillCryptoSignalAtNextBar(bars, signalIdx, signal){
+    var entryIdx = signalIdx + 1;
+    // No next bar means no price to fill at. Dropping the signal is the
+    // only honest option; pricing it at the signal bar is the bug.
+    if(entryIdx >= bars.length) return null;
+    var entry = bars[entryIdx].o;
+    if(!(entry > 0)) return null;
+    var risk = Math.abs(entry - signal.stop);
+    // A gap straight through the stop leaves no trade to model.
+    if(risk <= 0 || entry <= signal.stop) return null;
+    return {
+      entryIdx: entryIdx,
+      direction: signal.direction,
+      entry: entry,
+      stop: signal.stop,
+      t1: entry + CRYPTO_BT_REWARD_MULTIPLE * risk
+    };
+  }
+
   // Walks forward from the signal bar with no session boundary to resolve
   // against -- crypto never closes, so a position just keeps trailing
   // until it's actually stopped out. A trade still open when the data
@@ -6919,12 +6979,18 @@
   // you entered on would churn in and out on every wobble around it; leaving
   // the 1.5% as hysteresis means price has to genuinely give up the trend,
   // not merely touch it.
+  // entryIdx is the bar the position is FILLED on, and the walk starts on
+  // that same bar rather than the one after it. A market order filled at
+  // this bar's open is exposed to the rest of this bar, so a trade that
+  // fills and stops out inside a single 15-minute bar is a real outcome.
+  // Starting at entryIdx + 1 would silently discard exactly the fastest
+  // losers -- flattering, in the usual direction.
   function simulateCryptoForward(bars, entryIdx, signal, invalidateOnTrendLoss){
     var risk = Math.abs(signal.entry - signal.stop);
     var triggerPrice = signal.entry + CRYPTO_BT_TRAIL_TRIGGER_RR * risk;
     var trailingActive = false;
     var currentStop = signal.stop;
-    for(var j = entryIdx + 1; j < bars.length; j++){
+    for(var j = entryIdx; j < bars.length; j++){
       var bar = bars[j];
       if(bar.l <= currentStop){
         return { result: trailingActive ? 'trailing_stopped' : 'stopped', bars: j - entryIdx, price: currentStop, date: bar.t };
@@ -7000,16 +7066,18 @@
         var processedThisChunk = 0;
         while(i < bars.length && processedThisChunk < ITERATIONS_PER_CHUNK){
           var signal = findCryptoBacktestBreakoutAt(bars, i);
-          if(signal){
-            var outcome = simulateCryptoForward(bars, i, signal, invalidateOnTrendLoss);
-            var pctReturn = (outcome.price - signal.entry) / signal.entry * 100; // Long-only
+          var filled = signal ? fillCryptoSignalAtNextBar(bars, i, signal) : null;
+          if(filled){
+            var outcome = simulateCryptoForward(bars, filled.entryIdx, filled, invalidateOnTrendLoss);
+            var pctReturn = (outcome.price - filled.entry) / filled.entry * 100; // Long-only
             pctReturn = applyCryptoBacktestSlippage(pctReturn, outcome.result);
             trades.push({
-              date: bars[i].t, direction: signal.direction, entry: signal.entry,
-              stop: signal.stop, target: signal.t1, outcome: outcome.result === 'unresolved' ? 'unresolved' : outcome.result,
-              days: outcome.bars, exitPrice: outcome.price, pctReturn: pctReturn
+              date: bars[filled.entryIdx].t, direction: filled.direction, entry: filled.entry,
+              stop: filled.stop, target: filled.t1, outcome: outcome.result === 'unresolved' ? 'unresolved' : outcome.result,
+              days: outcome.bars, exitPrice: outcome.price, pctReturn: pctReturn,
+              breakoutLevel: signal.entry, chasePct: (filled.entry - signal.entry) / signal.entry * 100
             });
-            i = i + outcome.bars + 1;
+            i = filled.entryIdx + outcome.bars + 1;
           } else {
             i++;
           }
@@ -12642,6 +12710,124 @@
 
     probeNext(0);
   }
+  // ---------- Crypto spread probe ----------
+  // The one cost the backtest has never modelled.
+  //
+  // CRYPTO_SLIPPAGE_BPS (25) is Alpaca's taker FEE per side. It is not
+  // the spread, and a market order crosses the spread on the way in and
+  // again on the way out. So the real round trip is the modelled 0.50%
+  // PLUS the full spread -- half of it on each leg, twice.
+  //
+  // That matters because the measured edge is gross +0.62% a trade. At a
+  // 0.50% round trip the net is +0.12%; at anything above 0.62% the
+  // strategy is arithmetically negative. The entire margin of safety is
+  // ~12bps of spread, and the pairs producing most of the signals are
+  // alts, not BTC.
+  var CRYPTO_GROSS_EDGE_PCT = 0.62;
+  var CRYPTO_MODELLED_FEE_ROUND_TRIP_PCT = 0.50;
+  var CRYPTO_SPREAD_SAMPLES = 12;
+  var CRYPTO_SPREAD_SAMPLE_GAP_MS = 5000;
+
+  // A market order pays roughly half the spread against the midpoint on
+  // each leg, so a full round trip crosses one whole spread on top of
+  // both taker fees.
+  function cryptoRoundTripCostPct(spreadPct){
+    return CRYPTO_MODELLED_FEE_ROUND_TRIP_PCT + spreadPct;
+  }
+
+  function spreadPctFromQuote(q){
+    if(!q || typeof q.bp !== 'number' || typeof q.ap !== 'number') return null;
+    if(!(q.bp > 0) || !(q.ap > 0) || q.ap < q.bp) return null;
+    var mid = (q.bp + q.ap) / 2;
+    if(!(mid > 0)) return null;
+    return (q.ap - q.bp) / mid * 100;
+  }
+
+  // Median, not mean -- one stale or crossed quote in a 12-sample run
+  // would drag a mean somewhere the pair never actually traded.
+  function medianOf(values){
+    if(!values || !values.length) return null;
+    var sorted = values.slice().sort(function(a,b){ return a - b; });
+    var mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  function runCryptoSpreadProbe(){
+    var btn = document.getElementById('testCryptoSpreadBtn');
+    var statusEl = document.getElementById('cryptoSpreadStatus');
+    var resultEl = document.getElementById('cryptoSpreadResult');
+    if(!alpacaConnected){
+      statusEl.textContent = 'Connect an Alpaca account in Settings first — this reads live quotes with your own key.';
+      statusEl.className = 'labs-backtest-status fail';
+      return;
+    }
+    btn.disabled = true;
+    resultEl.textContent = '';
+    statusEl.className = 'labs-backtest-status';
+
+    var samplesBySym = {};
+    CRYPTO_UNIVERSE.forEach(function(sym){ samplesBySym[sym] = []; });
+    var symbolsParam = CRYPTO_UNIVERSE.map(encodeURIComponent).join(',');
+
+    function takeSample(n){
+      if(n >= CRYPTO_SPREAD_SAMPLES){ finish(); return; }
+      statusEl.textContent = 'Sampling live quotes… (' + (n + 1) + ' of ' + CRYPTO_SPREAD_SAMPLES + ')';
+      fetch(ALPACA_CRYPTO_DATA_BASE + '/latest/quotes?symbols=' + symbolsParam, { headers: alpacaHeaders() })
+        .then(function(res){
+          if(!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function(body){
+          var quotes = (body && body.quotes) || {};
+          CRYPTO_UNIVERSE.forEach(function(sym){
+            var spread = spreadPctFromQuote(quotes[sym] || quotes[canonicalSymbol(sym)]);
+            if(spread !== null) samplesBySym[sym].push(spread);
+          });
+          setTimeout(function(){ takeSample(n + 1); }, CRYPTO_SPREAD_SAMPLE_GAP_MS);
+        })
+        .catch(function(err){
+          btn.disabled = false;
+          statusEl.textContent = 'Quote fetch failed: ' + err.message;
+          statusEl.className = 'labs-backtest-status fail';
+        });
+    }
+
+    function finish(){
+      btn.disabled = false;
+      var rows = [];
+      var medians = [];
+      CRYPTO_UNIVERSE.forEach(function(sym){
+        var med = medianOf(samplesBySym[sym]);
+        if(med === null){
+          rows.push(sym + ': no usable quote');
+          return;
+        }
+        medians.push(med);
+        rows.push(sym + ': ' + med.toFixed(3) + '% spread → ' + cryptoRoundTripCostPct(med).toFixed(3) + '% round trip'
+          + (cryptoRoundTripCostPct(med) > CRYPTO_GROSS_EDGE_PCT ? '  — above break-even' : ''));
+      });
+      var universeMedian = medianOf(medians);
+      resultEl.textContent = rows.join('\n');
+      if(universeMedian === null){
+        statusEl.textContent = 'No usable quotes came back — nothing measured.';
+        statusEl.className = 'labs-backtest-status fail';
+        return;
+      }
+      var roundTrip = cryptoRoundTripCostPct(universeMedian);
+      var net = CRYPTO_GROSS_EDGE_PCT - roundTrip;
+      statusEl.textContent = 'Median spread ' + universeMedian.toFixed(3) + '% → round trip '
+        + roundTrip.toFixed(3) + '% against a gross edge of ' + CRYPTO_GROSS_EDGE_PCT.toFixed(2) + '%, '
+        + 'leaving ' + (net >= 0 ? '+' : '') + net.toFixed(3) + '% a trade. '
+        + (net > 0
+          ? 'Still positive — but this is a snapshot of current conditions, not the spread that applied during the backtest window.'
+          : 'Negative. At this spread the strategy pays more to trade than the signal is worth.');
+      statusEl.className = 'labs-backtest-status ' + (net > 0 ? 'ok' : 'fail');
+    }
+
+    takeSample(0);
+  }
+
+  document.getElementById('testCryptoSpreadBtn').addEventListener('click', runCryptoSpreadProbe);
   document.getElementById('testOptionsDepthBtn').addEventListener('click', runOptionsDepthProbe);
 
   // ---------- Auth (sign in / sign up / sign out) ----------
