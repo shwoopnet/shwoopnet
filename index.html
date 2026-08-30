@@ -9687,6 +9687,7 @@
     // Equities tab only.
     patchTradeStatsFromAlpaca();
     renderLabsLiveVsBacktest();
+    patchLabsEquitiesLiveStatFromAlpaca();
   }
 
   // The backtest's own headline profit-factor claims (see the Labs Method
@@ -9703,26 +9704,76 @@
   // source of truth for those since the backtest itself isn't re-run live.
   var LABS_BACKTEST_PF = { equities: 2.71, crypto: 2.35 };
   var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
+  // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
+  // below -- all we have for crypto, and equities' own first paint before
+  // the real numbers arrive) and patchLabsEquitiesLiveStatFromAlpaca's
+  // real, Alpaca-reconciled patch. Takes an already-computed count/
+  // profitFactor rather than raw entries so either source can drive it.
+  function renderLiveVsBacktestLine(el, count, profitFactor, backtestPF, real){
+    if(!el) return;
+    if(!count){
+      el.innerHTML = 'Live so far: <strong>no closed trades yet</strong> — nothing to compare against the backtest yet.';
+      return;
+    }
+    var pfText = isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞';
+    var diffClass = profitFactor >= backtestPF ? 'up' : 'down';
+    var tradeWord = real ? 'real trade' : 'closed trade';
+    var confidenceNote = count < LABS_MIN_TRADES_FOR_CONFIDENCE
+      ? ' — only ' + count + ' ' + tradeWord + (count === 1 ? '' : 's') + ' so far, too few to trust yet.'
+      : ' across ' + count + ' ' + tradeWord + (count === 1 ? '' : 's') + '.';
+    el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
+  }
   function renderLabsLiveVsBacktest(){
     var eqEl = document.getElementById('labsEquitiesLiveStat');
     var cryptoEl = document.getElementById('labsCryptoLiveStat');
     if(!eqEl && !cryptoEl) return;
-    function renderInto(el, entries, backtestPF){
+    function renderFromJournal(el, entries, backtestPF){
       if(!el) return;
       var agg = computeAggregatePL(entries);
-      if(!agg){
-        el.innerHTML = 'Live so far: <strong>no closed trades yet</strong> — nothing to compare against the backtest yet.';
-        return;
-      }
-      var pfText = isFinite(agg.profitFactor) ? agg.profitFactor.toFixed(2) : '∞';
-      var diffClass = agg.profitFactor >= backtestPF ? 'up' : 'down';
-      var confidenceNote = agg.count < LABS_MIN_TRADES_FOR_CONFIDENCE
-        ? ' — only ' + agg.count + ' closed trade' + (agg.count === 1 ? '' : 's') + ' so far, too few to trust yet.'
-        : ' across ' + agg.count + ' closed trades.';
-      el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
+      renderLiveVsBacktestLine(el, agg ? agg.count : 0, agg ? agg.profitFactor : 0, backtestPF, false);
     }
-    renderInto(eqEl, journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; }), LABS_BACKTEST_PF.equities);
-    renderInto(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
+    // Equities' own journal-derived count is a same-tick fallback only --
+    // it isn't scoped to the currently-connected account at all (unlike
+    // e.g. currentAccountActivityLog), and can include stale/duplicate
+    // entries a real Alpaca order was never actually placed for. Real
+    // numbers land moments later via patchLabsEquitiesLiveStatFromAlpaca,
+    // the same real-order reconciliation the Journal page's own cards use
+    // (see patchTradeStatsFromAlpaca) -- crypto has no such reconciliation
+    // available (reconstructTradesFromOrders can't parse its order shape)
+    // so it stays on this fallback permanently.
+    renderFromJournal(eqEl, journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; }), LABS_BACKTEST_PF.equities);
+    renderFromJournal(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
+  }
+
+  // Overwrites the equities Labs comparison with real, Alpaca-reconciled
+  // trades once they resolve -- the same reconstructTradesFromOrders this
+  // app already trusts as ground truth (Journal's own Profit Factor card,
+  // "Pull full history from Alpaca"). The journal-only fallback above
+  // isn't account-scoped and can double-count a symbol across accounts,
+  // or include an entry a real order was never actually confirmed for --
+  // exactly the "61 in the app vs. 32 in the brokerage" mismatch a real
+  // side-by-side check against Alpaca's own order history caught. Kept
+  // independent of patchTradeStatsFromAlpaca's own journalFilter-gated
+  // logic (that gate is a Journal-page-tab concern; this always needs to
+  // run regardless of which Journal tab happens to be selected).
+  var labsEquitiesPatchGen = 0;
+  function patchLabsEquitiesLiveStatFromAlpaca(){
+    var eqEl = document.getElementById('labsEquitiesLiveStat');
+    if(!eqEl) return;
+    var myGen = ++labsEquitiesPatchGen;
+    getAlpacaClosedOrdersCached().then(function(orders){
+      if(myGen !== labsEquitiesPatchGen) return; // superseded by a newer call
+      var trades = reconstructTradesFromOrders(orders).trades;
+      if(!trades.length) return; // not connected, or no real equities trades yet -- leave the journal-based fallback showing
+      var wins = trades.filter(function(t){ return t.pctReturn > 0; });
+      var losses = trades.filter(function(t){ return t.pctReturn <= 0; });
+      var winPctSum = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var lossPctSum = losses.reduce(function(s,t){ return s + t.pctReturn; }, 0);
+      var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
+      renderLiveVsBacktestLine(eqEl, trades.length, profitFactor, LABS_BACKTEST_PF.equities, true);
+    }).catch(function(err){
+      console.error('Failed to load real equities trade stats for the Labs comparison:', err);
+    });
   }
 
   renderPLSummary();
