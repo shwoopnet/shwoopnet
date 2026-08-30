@@ -2371,6 +2371,11 @@
         <div class="pl-card-sub" id="statProfitFactorSub">Gross gains ÷ gross losses — same math Labs' backtest uses.</div>
       </div>
       <div class="pl-card">
+        <div class="pl-card-label">Reached Trail/Breakeven</div>
+        <div class="pl-card-value mono" id="statEverProtected">—</div>
+        <div class="pl-card-sub" id="statEverProtectedSub">The health metric to watch — a low rate means the entry signal isn't producing real follow-through.</div>
+      </div>
+      <div class="pl-card">
         <div class="pl-card-label">Avg Win</div>
         <div class="pl-card-value mono up" id="statAvgWin">—</div>
       </div>
@@ -9859,6 +9864,16 @@
     // backtest's number isn't, making the two numbers not apples-to-apples.
     var winPctSum = 0, lossPctSum = 0;
     var best = null, worst = null;
+    // Exit-type mix: what fraction of closed trades ever reached the
+    // trail/breakeven stage vs. only ever stopped out or closed flat at
+    // day's end. everProtected is a backend field (see shwoop-server's
+    // orchestrator.js/trailingStop.js) stamped on every entry the
+    // auto-trader creates from here forward -- entries from before that
+    // shipped simply don't have the field at all, so those are excluded
+    // from this count entirely rather than silently counted as "never
+    // protected" and skewing the rate with pre-fix data that predates
+    // this metric existing.
+    var everProtectedTracked = 0, everProtectedCount = 0;
     closed.forEach(function(e){
       var pl = computePL(e);
       totalDollar += pl.dollar;
@@ -9867,6 +9882,7 @@
       else { lossDollarSum += pl.dollar; lossCount++; lossPctSum += pl.pct; }
       if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
+      if(e.everProtected !== undefined){ everProtectedTracked++; if(e.everProtected) everProtectedCount++; }
     });
     var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
     return {
@@ -9875,7 +9891,9 @@
       avgWinDollar: winCount ? winDollarSum / winCount : 0,
       avgLossDollar: lossCount ? lossDollarSum / lossCount : 0,
       profitFactor: profitFactor,
-      best: best, worst: worst
+      best: best, worst: worst,
+      everProtectedTracked: everProtectedTracked, everProtectedCount: everProtectedCount,
+      everProtectedRate: everProtectedTracked ? (everProtectedCount / everProtectedTracked) * 100 : null
     };
   }
 
@@ -10037,6 +10055,8 @@
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
     var profitFactorEl = document.getElementById('statProfitFactor');
+    var everProtectedEl = document.getElementById('statEverProtected');
+    var everProtectedSubEl = document.getElementById('statEverProtectedSub');
     var avgWinEl = document.getElementById('statAvgWin');
     var avgLossEl = document.getElementById('statAvgLoss');
     var bestEl = document.getElementById('statBest');
@@ -10046,6 +10066,7 @@
     if(!filtered){
       winRateEl.textContent = '—'; winRateSubEl.textContent = '';
       profitFactorEl.textContent = '—';
+      everProtectedEl.textContent = '—';
       avgWinEl.textContent = '—'; avgLossEl.textContent = '—';
       bestEl.textContent = '—'; bestEl.className = 'pl-card-value mono'; bestSubEl.textContent = '';
       worstEl.textContent = '—'; worstEl.className = 'pl-card-value mono'; worstSubEl.textContent = '';
@@ -10053,6 +10074,13 @@
       winRateEl.textContent = filtered.winRate.toFixed(0) + '%';
       winRateSubEl.textContent = filtered.count + ' total trades';
       profitFactorEl.textContent = isFinite(filtered.profitFactor) ? filtered.profitFactor.toFixed(2) : '∞';
+      if(filtered.everProtectedRate === null){
+        everProtectedEl.textContent = '—';
+        everProtectedSubEl.textContent = 'No tracked trades yet';
+      } else {
+        everProtectedEl.textContent = filtered.everProtectedRate.toFixed(0) + '%';
+        everProtectedSubEl.textContent = filtered.everProtectedCount + ' of ' + filtered.everProtectedTracked + ' tracked trades';
+      }
       avgWinEl.textContent = '+$' + filtered.avgWinDollar.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
       // Best/worst can each land on either side of zero regardless of
