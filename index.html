@@ -2766,12 +2766,14 @@
     <div class="labs-method-card">
       <p class="labs-method-intro">
         A second, independent strategy running alongside equities — same shape, tuned for a market that never
-        closes. Long-only, since Alpaca crypto has no shorting. Its previously quoted profit factor of 2.35 is
-        <strong>withdrawn, not re-measured</strong>. A 60-day run reported 4.08 with all 12 pairs positive,
-        which was the tool charging crypto the same 5bps-per-leg cost as equities — but Alpaca crypto pays a
-        percentage taker fee on every side, and the pairs this trades most have far wider spreads than any
-        equity here. That is now corrected to 25bps a leg from the published fee schedule, and the honest
-        number is whatever you measure with it. Run the whole-universe backtest below.
+        closes. Long-only, since Alpaca crypto has no shorting. <strong>Measured profit factor: 1.93</strong>
+        — 282 signals across 12 pairs over ~60 days, at 25bps a leg. That replaces both the old 2.35 and the
+        4.08 a first run reported while still charging crypto the equities cost. This is the better of the two
+        strategies: 45% of trades win against 30% for equities, and expectancy is +0.44% a trade against
+        +0.09%. Two caveats it would be a mistake to skip. The 25bps is Alpaca's taker fee and
+        <em>excludes spread</em>, which is widest on exactly the pairs producing most of these signals. And
+        this is one 60-day window on a long-only trend strategy — in crypto that measures the window at least
+        as much as the strategy. Re-run it at 90 and 180 days before believing it.
       </p>
       <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
       <div class="labs-method-grid">
@@ -10804,14 +10806,26 @@
   // reproduce is worse than no number, because it is what the go-live
   // decision gets measured against.
   //
-  // crypto's 2.35 is a placeholder and the copy says so. The crypto
-  // backtest was never touched by the equities lookahead bug, but it had
-  // its own understatement: it charged crypto the EQUITIES cost per leg
-  // (see CRYPTO_SLIPPAGE_BPS). A 60-day run under the old number reported
-  // 4.08 with all 12 pairs positive -- the same every-symbol-wins shape
-  // the broken equities run had, and the same reason to distrust it.
-  // Replace this once a run under the corrected cost gives a real figure.
-  var LABS_BACKTEST_PF = { equities: 1.24, crypto: 2.35 };
+  // crypto is 1.93, measured under the corrected cost model (see
+  // CRYPTO_SLIPPAGE_BPS) over ~60 days and 282 signals across 12 pairs.
+  // It replaces two numbers that were never right: a frozen 2.35, and the
+  // 4.08 a first run produced while still charging crypto the EQUITIES
+  // cost per leg -- that run had all 12 pairs positive, the same
+  // every-symbol-wins shape the broken equities backtest had.
+  //
+  // The correction behaved exactly as the arithmetic said it would, which
+  // is the reason to trust that it changed one thing and only that thing:
+  // expectancy fell by 0.40pp, precisely 2 legs x the 20bps increase, and
+  // 28 trades flipped from small winners to losers -- the cost landing
+  // hardest on marginal wins, which is why profit factor fell so much
+  // further (4.08 -> 1.93) than expectancy did.
+  //
+  // 1.93 is still an upper bound, for two reasons kept in the Method copy
+  // rather than buried here: 25bps is the taker FEE and excludes spread,
+  // widest on the alts producing most of the signals; and one 60-day
+  // window on a long-only trend strategy in crypto measures the window as
+  // much as the strategy.
+  var LABS_BACKTEST_PF = { equities: 1.24, crypto: 1.93 };
   var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
   // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
   // below -- all we have for crypto, and equities' own first paint before
