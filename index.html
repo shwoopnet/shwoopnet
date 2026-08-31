@@ -1758,6 +1758,7 @@
         riskPercentOverride: typeof data.riskPercentOverride === 'number' ? data.riskPercentOverride : null,
         intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
         intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
+        fadeScreenerEnabledOverride: typeof data.fadeScreenerEnabledOverride === 'boolean' ? data.fadeScreenerEnabledOverride : null,
         // Crypto's own mirrors of every field above -- entirely
         // separate fields (see shwoop-server's runCryptoCycle), so the
         // two strategies' statuses never overwrite each other here.
@@ -2247,6 +2248,10 @@
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Equities</span>
             <button class="chart-tool-btn" id="screenerEnableToggle">Off</button>
+          </div>
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Equities fade</span>
+            <button class="chart-tool-btn" id="fadeScreenerEnableToggle">Off</button>
           </div>
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Crypto</span>
@@ -3150,6 +3155,10 @@
   var backendHeartbeatAt = null;
   var backendMarketOpenAtHeartbeat = null;
   var backendScreenerEnabledOnServer = null;
+  // The server's own effective value for the fade screener, mirrored the
+  // same way as the two above -- so the toggle never reads "Off" while
+  // the backend is in fact scanning because its env-var default is on.
+  var backendFadeScreenerEnabledOnServer = null;
   var backendAutoTradeEnabledOnServer = null;
   var backendCycleStatus = null;
   var backendCycleStartedAt = null;
@@ -3201,6 +3210,7 @@
     riskPercentOverride: null,
     intradayScreenerEnabledOverride: null,
     intradayAutoTradeEnabledOverride: null,
+    fadeScreenerEnabledOverride: null,
     cryptoScreenerEnabledOverride: null,
     cryptoAutoTradeEnabledOverride: null
   };
@@ -3231,6 +3241,7 @@
       backendHeartbeatAt = data.serverHeartbeatAt;
       backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
       backendScreenerEnabledOnServer = data.serverIntradayScreenerEnabled;
+      backendFadeScreenerEnabledOnServer = data.serverFadeScreenerEnabled;
       backendAutoTradeEnabledOnServer = data.serverIntradayAutoTradeEnabled;
       backendCycleStatus = data.intradayCycleStatus;
       backendCycleStartedAt = data.intradayCycleStartedAt;
@@ -3247,6 +3258,7 @@
       autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
+      autoTradeOverrides.fadeScreenerEnabledOverride = data.fadeScreenerEnabledOverride;
       backendCryptoPicks = data.cryptoScreenerPicks;
       backendCryptoUpdatedAt = data.cryptoScreenerUpdatedAt;
       backendCryptoScreenerEnabledOnServer = data.serverCryptoScreenerEnabled;
@@ -3696,6 +3708,20 @@
       ? autoTradeOverrides.intradayScreenerEnabledOverride
       : Boolean(backendScreenerEnabledOnServer);
   }
+  // The exhaustion fade -- the second equities strategy, scanning the
+  // same universe on the opposite side. Deliberately its own toggle
+  // rather than folded into the equities screener switch: the two are
+  // separate experiments running side by side, and being able to stop one
+  // without stopping the other is the whole point of running them that
+  // way. It has no auto-trade switch of its own -- its picks only ever
+  // become orders when the equities auto-trade toggle above is already
+  // on, so there is no path here to real orders that that switch doesn't
+  // already govern.
+  function effectiveFadeScreenerOn(){
+    return autoTradeOverrides.fadeScreenerEnabledOverride !== null
+      ? autoTradeOverrides.fadeScreenerEnabledOverride
+      : Boolean(backendFadeScreenerEnabledOnServer);
+  }
   function effectiveCryptoAutoTradeOn(){
     return autoTradeOverrides.cryptoAutoTradeEnabledOverride !== null
       ? autoTradeOverrides.cryptoAutoTradeEnabledOverride
@@ -3720,6 +3746,12 @@
       var screenerOn = effectiveScreenerOn();
       screenerBtn.textContent = screenerOn ? 'On' : 'Off';
       screenerBtn.classList.toggle('active', screenerOn);
+    }
+    var fadeBtn = document.getElementById('fadeScreenerEnableToggle');
+    if(fadeBtn){
+      var fadeOn = effectiveFadeScreenerOn();
+      fadeBtn.textContent = fadeOn ? 'On' : 'Off';
+      fadeBtn.classList.toggle('active', fadeOn);
     }
     var cryptoAutoBtn = document.getElementById('cryptoAutoTradeEnableToggle');
     if(cryptoAutoBtn && cryptoAutoBtn.dataset.armed !== 'true'){
@@ -3773,6 +3805,13 @@
     var next = !effectiveScreenerOn();
     autoTradeOverrides.intradayScreenerEnabledOverride = next;
     saveAutoTradeOverride({ intradayScreenerEnabledOverride: next });
+    renderAutoTradeOverrideControls();
+  });
+
+  document.getElementById('fadeScreenerEnableToggle').addEventListener('click', function(){
+    var next = !effectiveFadeScreenerOn();
+    autoTradeOverrides.fadeScreenerEnabledOverride = next;
+    saveAutoTradeOverride({ fadeScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
   });
 
