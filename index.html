@@ -5429,6 +5429,14 @@
         // which is honest here: this card has no fresh ORB analysis to
         // say whether it's currently trailing, just the real position.
         status: 'active', statusLabel: null,
+        // Carried from the journal entry the backend stamped at entry, so
+        // an OPEN position keeps saying which strategy opened it -- not
+        // just the setup row that preceded it. Without this, the moment a
+        // fade fills it becomes indistinguishable from a breakout, which
+        // is the point at which knowing actually matters: two strategies
+        // trading the same universe on opposite sides cannot be told
+        // apart by direction, symbol or price.
+        strategy: j.strategy || 'orb',
         // Only ever actually shown in "Why this trade" when the real
         // entryNotes pinned at entry (see notesForDisplay below) are
         // missing -- i.e. this position was opened before that field
@@ -5445,7 +5453,15 @@
     // still carries status 'watching' (its own scan and the fact that a
     // position is open aren't always in sync within the same minute).
     return source.map(function(t){
-      if(openPositionBySym[t.sym] && t.status === 'watching') return Object.assign({}, t, { status: 'active' });
+      // The journal entry is authoritative for attribution: it records
+      // which strategy actually OPENED the position, whereas the live row
+      // only says which one is signalling on that symbol right now -- and
+      // on a symbol both strategies watch, those genuinely differ.
+      if(openPositionBySym[t.sym]){
+        var owned = { strategy: openPositionBySym[t.sym].strategy || t.strategy || 'orb' };
+        if(t.status === 'watching') owned.status = 'active';
+        return Object.assign({}, t, owned);
+      }
       return t;
     });
   }
@@ -9064,9 +9080,20 @@
 
     var rows = entries.map(function(e){
       var sourceTag = e.source === 'alpaca' ? '<span class="journal-source-tag">via Alpaca</span>' : '';
+      // Which equities strategy opened this, on every journal row --
+      // including CLOSED ones, which is where it earns its keep:
+      // attributing realised P&L between the breakout and the fade is the
+      // entire reason the two run side by side, and neither symbol nor
+      // direction nor price can separate them. Reuses the source tag's own
+      // class rather than introducing a second one.
+      // Only equities: crypto has one strategy, so a tag there would be
+      // noise, and entries predating this carry no field at all.
+      var strategyTag = (e.screenerType === 'intraday' && e.strategy)
+        ? '<span class="journal-source-tag">' + (e.strategy === 'fade' ? 'fade' : 'breakout') + '</span>'
+        : '';
       var symCell = '<div class="t-sym-cell">' +
         symbolBadgeHtml(e.sym) +
-        '<span class="t-sym-text"><span class="t-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span>' + sourceTag + '</span></span>' +
+        '<span class="t-sym-text"><span class="t-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span>' + sourceTag + strategyTag + '</span></span>' +
       '</div>';
       if(e.status === 'open'){
         return '<div class="journal-entry-card">' +
