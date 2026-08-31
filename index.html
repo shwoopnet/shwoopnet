@@ -4370,8 +4370,26 @@
     return alpacaOpenOrdersCache.inflight;
   }
 
+  // WHICH SYMBOL FORM DO OPEN ORDERS USE? This file used to answer that
+  // twice, in opposite directions -- one comment said Alpaca's orders
+  // endpoint returns the no-slash form, another said orders keep the
+  // slash-included form they were submitted with and matching raw "must
+  // stay as-is". They cannot both be right.
+  //
+  // Rather than pick a winner, every comparison now normalises BOTH
+  // sides. That is correct under either answer: if orders really are
+  // no-slash, canonicalSymbol is a no-op and nothing changes; if they
+  // carry the slash, it fixes a match that could never have succeeded.
+  // Equities symbols contain no "/" at all, so this cannot affect them.
+  //
+  // The reason not to guess: `sym` arriving here comes from Alpaca's
+  // POSITIONS list (p.symbol at the dock's row map), which is documented
+  // no-slash -- so a raw comparison is only right if orders happen to
+  // agree with positions, and the whole point is that nobody could say
+  // whether they do.
   function findBracketLevels(orders, sym){
-    var order = (orders || []).filter(function(o){ return o.symbol === sym && o.limit_price && (o.legs || []).length; })[0];
+    var want = canonicalSymbol(sym);
+    var order = (orders || []).filter(function(o){ return canonicalSymbol(o.symbol) === want && o.limit_price && (o.legs || []).length; })[0];
     var stopLeg = order ? (order.legs || []).filter(function(l){ return l.stop_price; })[0] : null;
     var target = order && order.limit_price ? parseFloat(order.limit_price) : null;
     var stop = stopLeg ? parseFloat(stopLeg.stop_price) : null;
@@ -4383,7 +4401,7 @@
     // its trigger at the top level, not nested under .legs the way a
     // bracket's stop leg is.
     if(target === null || stop === null){
-      var symOrders = (orders || []).filter(function(o){ return o.symbol === sym; });
+      var symOrders = (orders || []).filter(function(o){ return canonicalSymbol(o.symbol) === want; });
       var targetOrder = symOrders.filter(function(o){ return o.type === 'limit' && o.limit_price; })[0];
       var stopOrder = symOrders.filter(function(o){ return o.type === 'stop_limit' && o.stop_price; })[0];
       if(target === null && targetOrder) target = parseFloat(targetOrder.limit_price);
@@ -4396,8 +4414,11 @@
     // protection sitting on Alpaca's side — this is data Pocket Advisor already
     // has and trusts, since it wrote it there itself.
     if(target === null || stop === null){
-      // Alpaca's own positions/orders endpoints return crypto symbols in
-      // the canonical no-slash form ("AAVEUSD"), but journalEntries were
+      // Alpaca's POSITIONS endpoint returns crypto symbols in the
+      // canonical no-slash form ("AAVEUSD") -- what the orders endpoint
+      // returns is deliberately no longer asserted here, since the two
+      // comments in this file that claimed to know disagreed with each
+      // other. Every comparison normalises instead. journalEntries were
       // always written with the slash-included form ("AAVE/USD") -- matching
       // sym directly against j.sym here silently never matched a single
       // crypto entry, so this fallback (and everything downstream of it,
@@ -4439,11 +4460,21 @@
   // bracket is still live.
   function closeAlpacaPositionSafely(sym){
     return fetchAlpacaOpenOrders().then(function(orders){
-      // Open ORDERS keep the symbol format they were actually submitted
-      // with -- for crypto, that's the slash-included form ("UNI/USD"),
-      // same as every journal entry -- so matching against the raw sym
-      // here is correct and must stay as-is.
-      var matches = (orders || []).filter(function(o){ return o.symbol === sym; });
+      // THIS FUNCTION IS CALLED WITH BOTH SYMBOL FORMS, which is why a
+      // raw comparison cannot be right here whatever Alpaca returns:
+      //   - the dock's Close button passes p.symbol, straight off the
+      //     POSITIONS list, so no-slash ("UNIUSD");
+      //   - the journal paths (exit modal, invalidated-position cleanup)
+      //     pass entry.sym, which is always slash-included ("UNI/USD").
+      // One `===` against a fixed order format must therefore fail for
+      // one of those two callers, silently. When it fails, the cancel
+      // loop matches nothing and the position is closed with its
+      // protective stop and limit ORDERS STILL RESTING -- which is the
+      // orphaned-order state cryptoProtectiveOrders.js exists to avoid.
+      // Normalising both sides is a no-op for equities and for whichever
+      // crypto caller was already matching.
+      var wantSym = canonicalSymbol(sym);
+      var matches = (orders || []).filter(function(o){ return canonicalSymbol(o.symbol) === wantSym; });
       return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
     }).then(function(){
       // The POSITION-close endpoint is different: Alpaca's /v2/positions
