@@ -5281,7 +5281,8 @@
     // to the existing label rather than given its own badge and CSS
     // class, so nothing new can be orphaned and the status itself
     // (Trailing, Stopped out) is never displaced by the attribution.
-    if(t.strategy === 'fade'){ return { cls: info.cls, label: info.label + ' \u00b7 Fade' }; }
+    if(t.strategy === 'fade') return { cls: info.cls, label: info.label + ' \u00b7 Fade' };
+    if(t.strategy === 'orb') return { cls: info.cls, label: info.label + ' \u00b7 Breakout' };
     return info;
   }
 
@@ -9089,7 +9090,7 @@
       // Only equities: crypto has one strategy, so a tag there would be
       // noise, and entries predating this carry no field at all.
       var strategyTag = (e.screenerType === 'intraday' && e.strategy)
-        ? '<span class="journal-source-tag">' + (e.strategy === 'fade' ? 'fade' : 'breakout') + '</span>'
+        ? '<span class="journal-source-tag">' + strategyLabel(e).toLowerCase() + '</span>'
         : '';
       var symCell = '<div class="t-sym-cell">' +
         symbolBadgeHtml(e.sym) +
@@ -11144,7 +11145,12 @@
     // can move past this number while the position stays open by design;
     // the hover title explains that instead of it just looking stuck.
     { key:'t1', label:'Target ⓘ', hint:'Reference only (1.5x the initial risk) -- not a hard cap. The real exit is the trailing stop shown in the Stop column, which is why price can move past this number while the position stays open.' },
-    { key:'opened', label:'Opened' }
+    { key:'opened', label:'Opened' },
+    // WHICH STRATEGY OPENED IT. Two equities strategies now trade the same
+    // 16 symbols on OPPOSITE sides, so symbol, direction and price cannot
+    // separate them -- and this table is where a position is actually
+    // looked at once it is filled.
+    { key:'strategy', label:'Strategy' }
   ];
 
   // Which columns the user has chosen to hide, persisted across sessions.
@@ -11259,8 +11265,8 @@
       if(statusPositionsSortKey){
         var key = statusPositionsSortKey, dir = statusPositionsSortDir;
         rows.sort(function(a, b){
-          var av = key === 'current' ? a.current : key === 'pl' ? a.pl : key === 'size' ? a.sizeDollar : key === 'opened' ? (a.j.date || '') : a.j[key];
-          var bv = key === 'current' ? b.current : key === 'pl' ? b.pl : key === 'size' ? b.sizeDollar : key === 'opened' ? (b.j.date || '') : b.j[key];
+          var av = key === 'current' ? a.current : key === 'pl' ? a.pl : key === 'size' ? a.sizeDollar : key === 'opened' ? (a.j.date || '') : key === 'strategy' ? strategyLabel(a.j) : a.j[key];
+          var bv = key === 'current' ? b.current : key === 'pl' ? b.pl : key === 'size' ? b.sizeDollar : key === 'opened' ? (b.j.date || '') : key === 'strategy' ? strategyLabel(b.j) : b.j[key];
           if(av < bv) return -1 * dir;
           if(av > bv) return 1 * dir;
           return 0;
@@ -11341,6 +11347,22 @@
   // list the header renders from -- keeping header and row cells built
   // from a single source of truth is what lets a hidden column disappear
   // from both at once instead of drifting out of alignment.
+  // The one place that turns a journal entry's strategy field into words,
+  // so the positions table, the journal and the setup badges cannot end up
+  // calling the same thing by three different names.
+  //
+  // BOTH strategies are named, not just the fade. Marking only fades made
+  // "no label" carry two incompatible meanings -- "this is a breakout" and
+  // "this entry predates attribution entirely" -- which is no answer at
+  // all to "which strategy took this trade". A dash means genuinely
+  // unknown, and nothing else does.
+  function strategyLabel(j){
+    if(!j || j.screenerType === 'crypto') return 'Crypto';
+    if(j.strategy === 'fade') return 'Fade';
+    if(j.strategy === 'orb') return 'Breakout';
+    return '—';
+  }
+
   function statusPositionsCellHTML(colKey, r){
     var j = r.j;
     switch(colKey){
@@ -11356,6 +11378,7 @@
       case 'opened':
         var openedLabel = j.date ? new Date(j.date + 'T00:00:00').toLocaleDateString([], { month:'short', day:'numeric' }) : '—';
         return '<td>' + openedLabel + '</td>';
+      case 'strategy': return '<td>' + strategyLabel(j) + '</td>';
       default: return '<td></td>';
     }
   }
