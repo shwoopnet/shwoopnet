@@ -1759,6 +1759,8 @@
         intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
         intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
         fadeScreenerEnabledOverride: typeof data.fadeScreenerEnabledOverride === 'boolean' ? data.fadeScreenerEnabledOverride : null,
+        fadeAutoTradeEnabledOverride: typeof data.fadeAutoTradeEnabledOverride === 'boolean' ? data.fadeAutoTradeEnabledOverride : null,
+        fadeScreenerPicks: data.fadeScreenerPicks || null,
         // Crypto's own mirrors of every field above -- entirely
         // separate fields (see shwoop-server's runCryptoCycle), so the
         // two strategies' statuses never overwrite each other here.
@@ -2233,6 +2235,11 @@
             <span class="money-mode-badge" id="autoTradeIntradayMoneyClause">Paper</span>
             <span class="quote-sync-status" id="serverAutoTradeStatusBadge">—</span>
             <button class="chart-tool-btn" id="autoTradeEnableToggle" data-armed="false">Off</button>
+          </div>
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Equities fade</span>
+            <span class="money-mode-badge">Paper</span>
+            <button class="chart-tool-btn" id="fadeAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Crypto</span>
@@ -3129,6 +3136,12 @@
       entry: pick.entry, stop: pick.stop, t1: pick.t1,
       status: pick.status, statusLabel: pick.statusLabel, notes: pick.notes.slice(),
       entryBarTime: pick.entryBarTime,
+      // Which of the two equities strategies produced this. The breakout
+      // and the fade scan the same universe on OPPOSITE sides, so an
+      // unlabelled list of both reads as the screener contradicting
+      // itself -- and acting on a fade short while believing it a
+      // breakout long is a real way to lose money by hand.
+      strategy: pick.strategy || 'orb',
       analysisIsReal: true
     };
   }
@@ -3146,6 +3159,11 @@
   // this tab.
 
   var backendIntradayPicks = null;
+  // The exhaustion fade's own picks, kept separate from the breakout's
+  // all the way from Firestore (fadeScreenerPicks) so the two can never
+  // be silently conflated -- they are merged only at render time, each
+  // row carrying its own label.
+  var backendFadePicks = null;
   var backendIntradayUpdatedAt = null;
   // Backend liveness + per-cycle status -- see watchScreenerPicks above
   // for what each field means. These are what let the Status section
@@ -3159,6 +3177,7 @@
   // same way as the two above -- so the toggle never reads "Off" while
   // the backend is in fact scanning because its env-var default is on.
   var backendFadeScreenerEnabledOnServer = null;
+  var backendFadeAutoTradeEnabledOnServer = null;
   var backendAutoTradeEnabledOnServer = null;
   var backendCycleStatus = null;
   var backendCycleStartedAt = null;
@@ -3211,6 +3230,7 @@
     intradayScreenerEnabledOverride: null,
     intradayAutoTradeEnabledOverride: null,
     fadeScreenerEnabledOverride: null,
+    fadeAutoTradeEnabledOverride: null,
     cryptoScreenerEnabledOverride: null,
     cryptoAutoTradeEnabledOverride: null
   };
@@ -3237,11 +3257,20 @@
       (backendIntradayPicks || []).forEach(function(p){
         ensureInWatchlist(p.sym, COMPANY_NAMES[p.sym] || p.sym, p.entry, p.entry);
       });
+      // Same watchlist seeding the breakout's picks get above, and needed
+      // for the same reason: without a live quote polled for the symbol,
+      // a fade setup's "Current" price freezes at its entry forever and
+      // looks like real but motionless price action.
+      backendFadePicks = data.fadeScreenerPicks;
+      (backendFadePicks || []).forEach(function(p){
+        ensureInWatchlist(p.sym, COMPANY_NAMES[p.sym] || p.sym, p.entry, p.entry);
+      });
       backendIntradayUpdatedAt = data.intradayScreenerUpdatedAt;
       backendHeartbeatAt = data.serverHeartbeatAt;
       backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
       backendScreenerEnabledOnServer = data.serverIntradayScreenerEnabled;
       backendFadeScreenerEnabledOnServer = data.serverFadeScreenerEnabled;
+      backendFadeAutoTradeEnabledOnServer = data.serverFadeAutoTradeEnabled;
       backendAutoTradeEnabledOnServer = data.serverIntradayAutoTradeEnabled;
       backendCycleStatus = data.intradayCycleStatus;
       backendCycleStartedAt = data.intradayCycleStartedAt;
@@ -3259,6 +3288,7 @@
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
       autoTradeOverrides.fadeScreenerEnabledOverride = data.fadeScreenerEnabledOverride;
+      autoTradeOverrides.fadeAutoTradeEnabledOverride = data.fadeAutoTradeEnabledOverride;
       backendCryptoPicks = data.cryptoScreenerPicks;
       backendCryptoUpdatedAt = data.cryptoScreenerUpdatedAt;
       backendCryptoScreenerEnabledOnServer = data.serverCryptoScreenerEnabled;
@@ -3367,7 +3397,8 @@
   // for both.
   function statCta(source, cryptoSource){
     if(!source){
-      var base = (backendIntradayPicks && backendIntradayPicks.length) ? backendIntradayPicks.map(buildTradeFromPick) : intradayTrades;
+      var mergedForWatch = mergedEquitiesPicks();
+      var base = mergedForWatch.length ? mergedForWatch : intradayTrades;
       source = withOpenPositionsMergedIn(base);
     }
     if(!cryptoSource){
@@ -3722,6 +3753,19 @@
       ? autoTradeOverrides.fadeScreenerEnabledOverride
       : Boolean(backendFadeScreenerEnabledOnServer);
   }
+  // Independent of the equities auto-trade switch above, deliberately.
+  // Turning the fade SCREENER on to watch it must never start trading it
+  // for someone already auto-trading the breakout -- and since the fade
+  // has never been backtested, watching it is the only evidence there is.
+  //
+  // Both this AND equities auto-trade have to be on before a fade pick
+  // becomes an order (the backend enforces that in orchestrator.js; this
+  // just has to not imply otherwise).
+  function effectiveFadeAutoTradeOn(){
+    return autoTradeOverrides.fadeAutoTradeEnabledOverride !== null
+      ? autoTradeOverrides.fadeAutoTradeEnabledOverride
+      : Boolean(backendFadeAutoTradeEnabledOnServer);
+  }
   function effectiveCryptoAutoTradeOn(){
     return autoTradeOverrides.cryptoAutoTradeEnabledOverride !== null
       ? autoTradeOverrides.cryptoAutoTradeEnabledOverride
@@ -3752,6 +3796,13 @@
       var fadeOn = effectiveFadeScreenerOn();
       fadeBtn.textContent = fadeOn ? 'On' : 'Off';
       fadeBtn.classList.toggle('active', fadeOn);
+    }
+    var fadeAutoBtn = document.getElementById('fadeAutoTradeEnableToggle');
+    if(fadeAutoBtn && fadeAutoBtn.dataset.armed !== 'true'){
+      var fadeAutoOn = effectiveFadeAutoTradeOn();
+      fadeAutoBtn.textContent = fadeAutoOn ? 'On' : 'Off';
+      fadeAutoBtn.classList.remove('confirming');
+      fadeAutoBtn.classList.toggle('active', fadeAutoOn);
     }
     var cryptoAutoBtn = document.getElementById('cryptoAutoTradeEnableToggle');
     if(cryptoAutoBtn && cryptoAutoBtn.dataset.armed !== 'true'){
@@ -3813,6 +3864,37 @@
     autoTradeOverrides.fadeScreenerEnabledOverride = next;
     saveAutoTradeOverride({ fadeScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
+  });
+
+  document.getElementById('fadeAutoTradeEnableToggle').addEventListener('click', function(){
+    var btn = this;
+    // Same click-to-arm confirmation the other two auto-trade switches
+    // use, for the same reason: this is a switch that lets the server
+    // start sending orders. Turning it OFF stays immediate -- there is
+    // never a safety reason to make stopping harder.
+    if(effectiveFadeAutoTradeOn()){
+      autoTradeOverrides.fadeAutoTradeEnabledOverride = false;
+      saveAutoTradeOverride({ fadeAutoTradeEnabledOverride: false });
+      renderAutoTradeOverrideControls();
+      return;
+    }
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(btn._armTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      autoTradeOverrides.fadeAutoTradeEnabledOverride = true;
+      saveAutoTradeOverride({ fadeAutoTradeEnabledOverride: true });
+      renderAutoTradeOverrideControls();
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again — real orders';
+      btn._armTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        renderAutoTradeOverrideControls();
+      }, 4000);
+    }
   });
 
   document.getElementById('cryptoAutoTradeEnableToggle').addEventListener('click', function(){
@@ -5192,6 +5274,18 @@
   // you'd be buying, red for a short you'd be selling) instead of a neutral
   // amber that didn't tell you which way you're positioned.
   function computeBadgeInfo(t){
+    var info = computeStatusBadgeInfo(t);
+    // The fade is the breakout's opposite side on the same universe, so
+    // an unlabelled row is genuinely ambiguous -- "Selling PLTR" means
+    // something different depending on which strategy said it. Appended
+    // to the existing label rather than given its own badge and CSS
+    // class, so nothing new can be orphaned and the status itself
+    // (Trailing, Stopped out) is never displaced by the attribution.
+    if(t.strategy === 'fade'){ return { cls: info.cls, label: info.label + ' \u00b7 Fade' }; }
+    return info;
+  }
+
+  function computeStatusBadgeInfo(t){
     if(t.status === 'hit'){ return { cls: 'hit', label: 'Target hit' }; }
     if(t.status === 'trailing'){ return { cls: 'trailing', label: 'Trailing' }; }
     if(t.status === 'stopped'){ return { cls: 'stopped', label: 'Stopped out' }; }
@@ -5445,6 +5539,23 @@
     });
   }
 
+  // The breakout's picks and the fade's, as one list. Merged only here
+  // and in renderWhatToWatch, both through this function, so the two
+  // views can never disagree about what fired today.
+  //
+  // Breakout first, matching the backend's own batch order -- on a symbol
+  // both strategies fire on, that is the one that would have traded, so
+  // it is the one shown first.
+  function mergedEquitiesPicks(){
+    var orb = (backendIntradayPicks || []).map(function(p){
+      return buildTradeFromPick(Object.assign({}, p, { strategy: 'orb' }));
+    });
+    var fade = (backendFadePicks || []).map(function(p){
+      return buildTradeFromPick(Object.assign({}, p, { strategy: 'fade' }));
+    });
+    return orb.concat(fade);
+  }
+
   function renderIntradayBlocks(){
     var el = document.getElementById('intradayBlocks');
     if(!el) return;
@@ -5452,9 +5563,8 @@
     // whether this tab is open) over this tab's local re-scan -- same
     // preference order renderWhatToWatch already uses, for the same
     // reason: the backend is the authoritative, always-on source now.
-    var source = (backendIntradayPicks && backendIntradayPicks.length)
-      ? backendIntradayPicks.map(buildTradeFromPick)
-      : intradayTrades;
+    var merged = mergedEquitiesPicks();
+    var source = merged.length ? merged : intradayTrades;
     source = withOpenPositionsMergedIn(source);
     lastRenderedSetups = source;
     var hiddenCount = source.filter(function(t){ return t.status === 'watching'; }).length;
