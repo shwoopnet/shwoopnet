@@ -9096,6 +9096,24 @@
         symbolBadgeHtml(e.sym) +
         '<span class="t-sym-text"><span class="t-sym mono">' + e.sym + '<span class="t-dir">' + e.direction + '</span>' + sourceTag + strategyTag + '</span></span>' +
       '</div>';
+      // A VOIDED ENTRY IS NOT A TRADE. Alpaca rejected or cancelled the
+      // order after it was sent, so nothing filled: no entry price, no
+      // exit price, no P&L. Falling through to the closed-trade branch
+      // would call computePL, which returns {pct: null, dollar: null} for
+      // a missing exit -- and that branch then calls pl.pct.toFixed(1),
+      // which THROWS on null and takes the whole journal render down with
+      // it. Verified in the browser rather than assumed. It would also
+      // pull a non-event into the day's win/loss record.
+      if(e.status === 'void'){
+        return '<div class="journal-entry-card">' +
+          symCell +
+          '<div class="journal-entry-prices mono">—</div>' +
+          '<div class="journal-entry-result-cell"><span class="status-badge watching" title="' + escapeHtml(e.voidReason || 'The entry order never filled.') + '">Never filled</span></div>' +
+          '<div class="journal-entry-actions">' +
+            '<button class="journal-remove-btn" data-id="' + e.id + '" aria-label="Remove trade">Remove</button>' +
+          '</div>' +
+        '</div>';
+      }
       if(e.status === 'open'){
         return '<div class="journal-entry-card">' +
           symCell +
@@ -11209,7 +11227,7 @@
       // "4 open" for four entries the broker does not hold is the same
       // lie the P&L column was telling, in a smaller font. Counted
       // separately: what is actually open, and what needs clearing.
-      var staleCount = allOpen.filter(function(j){ return isStaleIntradayJournalEntry(j); }).length;
+      var staleCount = allOpen.filter(function(j){ return isUnreconciledEntry(j); }).length;
       var realOpen = allOpen.length - staleCount;
       var needsReview = staleCount ? (staleCount + ' need review') : '';
       headMeta.textContent = !allOpen.length ? ''
@@ -11271,7 +11289,7 @@
           // Nulled rather than zeroed. "$0.00" reads as a real, flat
           // position; a dash reads as what it is -- no number, because
           // there is nothing to measure.
-          if(isStaleIntradayJournalEntry(j)){
+          if(isUnreconciledEntry(j)){
             current = null; pl = null; plPct = null;
           }
         }
@@ -11317,7 +11335,7 @@
               // error. The useful action on a stale entry is removing the
               // journal record, which is the Journal page's job -- so this
               // says so instead of offering a button that cannot work.
-              (isStaleIntradayJournalEntry(r.j)
+              (isUnreconciledEntry(r.j)
                 ? '<td><span class="labs-backtest-status" title="There is no position at Alpaca to close. Remove this entry on the Journal page.">clear in Journal</span></td>'
                 : '<td><button class="position-close-btn" data-sym="' + r.j.sym + '" data-armed="false">Close</button></td>') +
             '</tr>';
@@ -11419,6 +11437,29 @@
     return session < easternDateKeyOf(now || new Date());
   }
 
+  // THE BROADER, AUTHORITATIVE TEST.
+  //
+  // isStaleIntradayJournalEntry infers from a date. This asks the broker.
+  // The backend's position-drift check compares open journal entries
+  // against Alpaca's real positions each cycle and flags any entry with
+  // no matching position as an orphaned_entry -- so a same-day entry for
+  // a position that closed hours ago is caught here even though its date
+  // is today, which the date test alone misses. Three such rows showed
+  // live-looking P&L of +$10.84, -$1.56 and -$6.78 against an account
+  // whose cash equalled its equity and whose buying power was exactly 4x
+  // equity, i.e. holding nothing.
+  //
+  // Matched on entryId first, falling back to symbol for findings written
+  // before entryId was carried.
+  function isUnreconciledEntry(j){
+    if(isStaleIntradayJournalEntry(j)) return true;
+    if(!j || !Array.isArray(backendPositionDrift)) return false;
+    return backendPositionDrift.some(function(f){
+      if(!f || f.type !== 'orphaned_entry') return false;
+      return f.entryId ? f.entryId === j.id : f.sym === j.sym;
+    });
+  }
+
   function strategyLabel(j){
     if(!j || j.screenerType === 'crypto') return 'Crypto';
     if(j.strategy === 'fade') return 'Fade';
@@ -11434,7 +11475,7 @@
     var j = r.j;
     switch(colKey){
       case 'sym': return '<td class="mono">' + j.sym
-        + (isStaleIntradayJournalEntry(j) ? ' <span class="journal-source-tag" title="Opened in a previous session and Alpaca holds no matching position. The server is already ignoring it. Remove it from the Journal.">needs review</span>' : '')
+        + (isUnreconciledEntry(j) ? ' <span class="journal-source-tag" title="Alpaca holds no matching position for this entry, so there is nothing live to price. Remove it from the Journal.">needs review</span>' : '')
         + '</td>';
       case 'direction': return '<td>' + j.direction + '</td>';
       case 'qty': return '<td>' + j.qty + '</td>';
