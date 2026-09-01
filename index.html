@@ -112,7 +112,13 @@
   .ticker-tape::after{ right:0; background: linear-gradient(270deg, var(--ticker-bg), transparent); }
   .ticker-track{
     display: inline-flex; align-items: center; height: 34px;
-    animation: scroll-left 38s linear infinite;
+    /* 38s is 100% speed -- the duration this tape scrolled at before it
+       was adjustable, kept as the default so an account that never opens
+       the setting sees no change. The speed preference divides into it
+       (25% -> 152s), and it lives on :root rather than on this rule so
+       the JS sets one variable instead of rewriting the animation
+       shorthand, which would drop the reduce-motion overrides below. */
+    animation: scroll-left var(--ticker-duration, 38s) linear infinite;
     will-change: transform;
   }
   @keyframes scroll-left{ from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
@@ -512,28 +518,12 @@
   }
   .changelog-items{ margin:0; padding-left:18px; }
 
-  .labs-method-card, .labs-backtest-card{
+  .labs-backtest-card{
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     padding:24px 26px; margin-bottom: 20px;
     box-shadow: var(--card-shadow);
   }
-  .labs-method-intro, .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
-  .labs-live-compare{
-    font-size:12.5px; color: var(--muted); background: var(--panel-raised); border:1px solid var(--border);
-    border-radius:8px; padding:10px 14px; margin:-10px 0 22px 0;
-  }
-  .labs-live-compare strong.up{ color: var(--gain); }
-  .labs-live-compare strong.down{ color: var(--loss); }
-  .labs-method-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px 28px; }
-  @media (max-width:900px){ .labs-method-grid{ grid-template-columns:1fr; } }
-  .labs-method-item{ display:flex; gap:14px; }
-  .labs-method-step{
-    flex-shrink:0; width:26px; height:26px; border-radius:50%; border:1px solid var(--amber-dim);
-    color: var(--amber); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;
-    font-family:'Public Sans', sans-serif;
-  }
-  .labs-method-title{ font-weight:600; font-size:13.5px; margin-bottom:6px; }
-  .labs-method-body{ font-size:12.5px; line-height:1.6; color: var(--muted); }
+  .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
 
   /* Duplicate-trade warning. Sits directly above the stats row because
      these numbers are what a duplicate corrupts -- every one of them is
@@ -2617,6 +2607,19 @@
 
           <div class="settings-row">
             <div>
+              <div class="settings-row-title">Ticker speed</div>
+              <div class="settings-row-desc">How fast the price strip scrolls. Lower is slower and easier to read. Ignored while Reduce motion is on, which stops the scroll entirely.</div>
+            </div>
+            <div class="settings-choice-group" id="tickerSpeedChoice">
+              <button class="tf-btn" data-value="25">25%</button>
+              <button class="tf-btn" data-value="50">50%</button>
+              <button class="tf-btn" data-value="75">75%</button>
+              <button class="tf-btn" data-value="100">100%</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
               <div class="settings-row-title">Reset preferences</div>
               <div class="settings-row-desc">Clears dark mode, layout, notepad, and alert settings. Your logged trades in the Journal are not affected.</div>
             </div>
@@ -2710,63 +2713,7 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Labs</div>
-        <div class="trades-sub">The crypto method, and a real backtest — not a demo. The equities strategy has been withdrawn; a replacement is being designed from scratch.</div>
-      </div>
-    </div>
-
-    <div class="brief-section-title" style="margin-top:36px;">The Crypto Method</div>
-    <div class="labs-method-card">
-      <p class="labs-method-intro">
-        The only strategy currently running. Long-only, since Alpaca crypto has no shorting.
-        <strong>Profit factor 1.05 over 60 days — and negative after real trading costs.</strong>
-        That 1.05 replaces an earlier 1.94: the backtest had been booking each entry at the breakout
-        <em>level</em>, a price only knowable after the bar that broke through it had already closed. Priced at
-        a bar this system could actually have filled on, the edge is +0.04% a trade before spread.
-        Then the spread was measured for the first time — a 0.200% median across the 12 pairs, which the
-        0.50% cost assumption never included. The real round trip is 0.700% against a
-        <strong>gross edge of +0.54%</strong>, so the honest figure is <strong>−0.16% a trade</strong>.
-        Four of twelve pairs are cheap enough to trade (BTC, ETH, SOL, AVAX); the signals concentrate in the
-        expensive eight. Two execution alternatives were measured and neither survived: maker-limit entries
-        scored 1.29 by skipping the winners (the signals the limit missed averaged +1.47%), and a
-        limit-then-market hybrid scored 1.50 only by taking trades live's own chase gate refuses.
-        This is running because it is already built and paper-only, not because it has been shown to work.
-        Re-run it below rather than trusting this paragraph.</p>
-      <div class="labs-live-compare" id="labsCryptoLiveStat">—</div>
-      <div class="labs-method-grid">
-        <div class="labs-method-item">
-          <div class="labs-method-step">1</div>
-          <div>
-            <div class="labs-method-title">12 crypto pairs, screened around the clock</div>
-            <div class="labs-method-body">BTC/USD, ETH/USD, SOL/USD, LTC/USD, LINK/USD, AVAX/USD, DOGE/USD, UNI/USD,
-            XRP/USD, DOT/USD, BCH/USD, AAVE/USD — checked continuously, 24/7.</div>
-          </div>
-        </div>
-        <div class="labs-method-item">
-          <div class="labs-method-step">2</div>
-          <div>
-            <div class="labs-method-title">A rolling range instead of "today's" range</div>
-            <div class="labs-method-body">No market open to anchor to, so the last 4 15-minute bars form a
-            rolling range, re-checked each cycle against only the newest bar.</div>
-          </div>
-        </div>
-        <div class="labs-method-item">
-          <div class="labs-method-step">3</div>
-          <div>
-            <div class="labs-method-title">Volume and trend both have to agree</div>
-            <div class="labs-method-body">Volume must clear 2.5x its 20-bar average, and price must clear its
-            30-bar average by 1.5% in the trade's direction. Long only — Alpaca crypto has no shorting.</div>
-          </div>
-        </div>
-        <div class="labs-method-item">
-          <div class="labs-method-step">4</div>
-          <div>
-            <div class="labs-method-title">Breakeven lock, then a trailing stop</div>
-            <div class="labs-method-body">The stop moves to breakeven early, then trails once the trade is
-            0.5x its risk in profit. There is no fixed target — a position rides the trail until it is stopped.
-            Alpaca's crypto orders are stop-limit only, so a backstop force-closes any position a fast move
-            leaves unprotected.</div>
-          </div>
-        </div>
+        <div class="trades-sub">A real backtest — not a demo. Re-run the crypto strategy against real Alpaca bars rather than trusting a number written down somewhere. The equities strategy has been withdrawn; a replacement is being designed from scratch.</div>
       </div>
     </div>
 
@@ -8494,6 +8441,34 @@
     applyTickerPref(saved === 'true');
   })();
 
+  // ---------- Settings: ticker speed ----------
+  // A percentage of the original 38s scroll, not a duration, because the
+  // duration is the inverse of what the user is choosing: 25% speed is a
+  // LONGER animation (152s). Written as speed so the control reads the way
+  // the setting is named.
+  var TICKER_BASE_SECONDS = 38;
+  var TICKER_SPEEDS = ['25', '50', '75', '100'];
+  var tickerSpeedEl = document.getElementById('tickerSpeedChoice');
+  function applyTickerSpeedPref(val){
+    // An unrecognised stored value (an older build, a hand-edited
+    // localStorage) falls back to full speed rather than dividing by NaN
+    // and leaving the tape frozen with no visible cause.
+    if(TICKER_SPEEDS.indexOf(String(val)) === -1) val = '100';
+    tickerSpeedEl.querySelectorAll('.tf-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.value === val);
+    });
+    document.documentElement.style.setProperty('--ticker-duration', (TICKER_BASE_SECONDS / (parseInt(val, 10) / 100)).toFixed(2) + 's');
+    try{ window.localStorage.setItem('shwoopnet:tickerSpeed', val); }catch(e){}
+  }
+  tickerSpeedEl.querySelectorAll('.tf-btn').forEach(function(b){
+    b.addEventListener('click', function(){ applyTickerSpeedPref(b.dataset.value); });
+  });
+  (function initTickerSpeedPref(){
+    var saved = '100';
+    try{ saved = window.localStorage.getItem('shwoopnet:tickerSpeed') || '100'; }catch(e){}
+    applyTickerSpeedPref(saved);
+  })();
+
   // ---------- Settings: reset all preferences ----------
   document.getElementById('resetPrefsBtn').addEventListener('click', function(){
     try{
@@ -10081,123 +10056,8 @@
     // Equities tab only.
     patchTradeStatsFromAlpaca();
     renderGrowthChartFromBestSource();
-    renderLabsLiveVsBacktest();
   }
 
-  // The backtest's own headline profit-factor claims (see the Labs Method
-  // intro paragraphs) are a frozen, one-time historical validation -- they
-  // never re-check themselves against what this account has actually done
-  // since. This is that check: the same profit-factor math (gross % gains
-  // over gross % losses, see computeAggregatePL) applied to this account's
-  // own real closed trades, shown right next to the number it's supposed
-  // to be living up to. Kept independent of the journalFilter tab (which
-  // only affects the Journal page's own cards) since equities and crypto
-  // each need their own fixed comparison regardless of what tab is active.
-  // LABS_BACKTEST_PF must stay in sync with the numbers quoted in the two
-  // labs-method-intro paragraphs above -- there's no single source of
-  // truth for those since the backtest isn't re-run live.
-  //
-  // equities was 2.71 for months, described in the copy as "2.46
-  // worst-case across 5 independent windows". It does not reproduce. Run
-  // today against the SAME 16-symbol universe (unchanged since that
-  // number was set), over ~60 trading days, with the same slippage model
-  // already applied, this tool measures 1.24 -- below the claimed worst
-  // case, on the strategy's own default settings.
-  //
-  // The gap is not the universe and not the cost model; both were checked
-  // and neither changed. The most likely explanation is that 2.71 was
-  // measured before the backtest simulated the breakeven floor and early
-  // breakeven the live strategy actually uses (see
-  // simulateORBForwardSameDay, which was "quietly simulating an older
-  // version of the strategy than the one actually trading" until that was
-  // fixed). Whatever the cause, a frozen number that the tool cannot
-  // reproduce is worse than no number, because it is what the go-live
-  // decision gets measured against.
-  //
-  // crypto is 1.20, measured at BOTH 180 and 365 days -- identical to two
-  // decimal places across 801 and 1,843 signals respectively, which is the
-  // strongest evidence available here that the estimate has converged
-  // rather than merely fallen. 60 days gave 1.94; that was the window, not
-  // the strategy.
-  //
-  // Worth stating in the terms that suggest what to do about it: 1.20 is a
-  // GROSS edge of +0.62% a trade with 81% of it eaten by cost. The signal
-  // is real and stable. It just does not survive paying a taker fee on both
-  // sides, which makes execution cost the binding constraint rather than
-  // the strategy logic.
-  //
-  // 60 days gave 1.94 and 180 gives 1.20 on the same pairs and the same
-  // cost model, over 801 signals instead of 277. The longer window is the
-  // better estimate -- more regimes, three times the sample -- and picking
-  // the flattering one is the exact habit that kept 2.71 on this page for
-  // months. Equities does the same thing (1.48 / 1.24 / 0.96 at 30 / 60 /
-  // 365 days), so this is a property of both strategies rather than a
-  // quirk of one.
-  //
-  // At 180 days crypto's expectancy is +0.12% against a 0.50% round-trip
-  // cost -- roughly a QUARTER of what it costs to trade, and that cost
-  // still excludes spread. Below 1.0 in any honest accounting.
-  // It replaces two numbers that were never right: a frozen 2.35, and the
-  // 4.08 a first run produced while still charging crypto the EQUITIES
-  // cost per leg -- that run had all 12 pairs positive, the same
-  // every-symbol-wins shape the broken equities backtest had.
-  //
-  // The correction behaved exactly as the arithmetic said it would, which
-  // is the reason to trust that it changed one thing and only that thing:
-  // expectancy fell by 0.40pp, precisely 2 legs x the 20bps increase, and
-  // 28 trades flipped from small winners to losers -- the cost landing
-  // hardest on marginal wins, which is why profit factor fell so much
-  // further (4.08 -> 1.93) than expectancy did.
-  //
-  // The 60-day 1.94 was an upper bound for two reasons named in the Method
-  // copy, and the 180-day run confirmed the second of them outright: 25bps
-  // is the taker FEE and excludes spread, widest on the alts producing most
-  // of the signals; and a single 60-day window on a long-only trend
-  // strategy in crypto measures the window at least as much as the
-  // strategy. It did.
-  var LABS_BACKTEST_PF = { crypto: 1.20 };
-  var LABS_MIN_TRADES_FOR_CONFIDENCE = 20;
-  // Shared by both the journal-derived fallback (renderLabsLiveVsBacktest,
-  // below -- all we have for crypto, and equities' own first paint before
-  // the real numbers arrive) and patchLabsEquitiesLiveStatFromAlpaca's
-  // real, Alpaca-reconciled patch. Takes an already-computed count/
-  // profitFactor rather than raw entries so either source can drive it.
-  function renderLiveVsBacktestLine(el, count, profitFactor, backtestPF, real){
-    if(!el) return;
-    if(!count){
-      el.innerHTML = 'Live so far: <strong>no closed trades yet</strong> — nothing to compare against the backtest yet.';
-      return;
-    }
-    var pfText = isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞';
-    var diffClass = profitFactor >= backtestPF ? 'up' : 'down';
-    var tradeWord = real ? 'real trade' : 'closed trade';
-    var confidenceNote = count < LABS_MIN_TRADES_FOR_CONFIDENCE
-      ? ' — only ' + count + ' ' + tradeWord + (count === 1 ? '' : 's') + ' so far, too few to trust yet.'
-      : ' across ' + count + ' ' + tradeWord + (count === 1 ? '' : 's') + '.';
-    el.innerHTML = 'Live so far: profit factor <strong class="' + diffClass + '">' + pfText + '</strong>' + confidenceNote;
-  }
-  function renderLabsLiveVsBacktest(){
-    var cryptoEl = document.getElementById('labsCryptoLiveStat');
-    if(!cryptoEl) return;
-    function renderFromJournal(el, entries, backtestPF){
-      if(!el) return;
-      var agg = computeAggregatePL(entries);
-      renderLiveVsBacktestLine(el, agg ? agg.count : 0, agg ? agg.profitFactor : 0, backtestPF, false);
-    }
-    renderFromJournal(cryptoEl, journalEntries.filter(function(j){ return j.screenerType === 'crypto'; }), LABS_BACKTEST_PF.crypto);
-  }
-
-  // Overwrites the equities Labs comparison with real, Alpaca-reconciled
-  // trades once they resolve -- the same reconstructTradesFromOrders this
-  // app already trusts as ground truth (Journal's own Profit Factor card,
-  // "Pull full history from Alpaca"). The journal-only fallback above
-  // isn't account-scoped and can double-count a symbol across accounts,
-  // or include an entry a real order was never actually confirmed for --
-  // exactly the "61 in the app vs. 32 in the brokerage" mismatch a real
-  // side-by-side check against Alpaca's own order history caught. Kept
-  // independent of patchTradeStatsFromAlpaca's own journalFilter-gated
-  // logic (that gate is a Journal-page-tab concern; this always needs to
-  // run regardless of which Journal tab happens to be selected).
   renderPLSummary();
 
 
