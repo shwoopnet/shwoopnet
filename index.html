@@ -1506,14 +1506,22 @@
   .site-footer p{ margin:0 0 6px 0; max-width:680px; margin-left:auto; margin-right:auto; }
   .site-footer p:last-child{ margin-bottom:0; }
 
+  /* THE TICKER IS DELIBERATELY NOT LISTED HERE.
+     Stopping it is `animation: none`, which parks the track at
+     translateX(0). The track holds two copies of the tape and the
+     keyframe runs to -50%, so frozen at 0 the only items you can read are
+     the handful that happen to fit the viewport -- everything past the
+     right edge is overflow-hidden and unreachable, with no way to scroll
+     to it. So "reduce motion" was not making the ticker calmer, it was
+     making most of it permanently unreadable, which is a worse outcome
+     for the same user than letting it move. Every other animation here
+     is decorative and genuinely loses nothing by stopping. */
   @media (prefers-reduced-motion: reduce){
-    .ticker-track{ animation: none; }
     .brand-mark{ animation: none; }
     .brand-ground{ animation: none; display:none; }
     .brand-impact-ring{ animation: none; display:none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   }
-  [data-reduce-motion="true"] .ticker-track{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
