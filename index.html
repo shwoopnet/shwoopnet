@@ -5281,7 +5281,8 @@
     // to the existing label rather than given its own badge and CSS
     // class, so nothing new can be orphaned and the status itself
     // (Trailing, Stopped out) is never displaced by the attribution.
-    if(t.strategy === 'fade'){ return { cls: info.cls, label: info.label + ' \u00b7 Fade' }; }
+    if(t.strategy === 'fade') return { cls: info.cls, label: info.label + ' \u00b7 Fade' };
+    if(t.strategy === 'orb') return { cls: info.cls, label: info.label + ' \u00b7 Breakout' };
     return info;
   }
 
@@ -9089,7 +9090,7 @@
       // Only equities: crypto has one strategy, so a tag there would be
       // noise, and entries predating this carry no field at all.
       var strategyTag = (e.screenerType === 'intraday' && e.strategy)
-        ? '<span class="journal-source-tag">' + (e.strategy === 'fade' ? 'fade' : 'breakout') + '</span>'
+        ? '<span class="journal-source-tag">' + strategyLabel(e).toLowerCase() + '</span>'
         : '';
       var symCell = '<div class="t-sym-cell">' +
         symbolBadgeHtml(e.sym) +
@@ -11144,7 +11145,12 @@
     // can move past this number while the position stays open by design;
     // the hover title explains that instead of it just looking stuck.
     { key:'t1', label:'Target ⓘ', hint:'Reference only (1.5x the initial risk) -- not a hard cap. The real exit is the trailing stop shown in the Stop column, which is why price can move past this number while the position stays open.' },
-    { key:'opened', label:'Opened' }
+    { key:'opened', label:'Opened' },
+    // WHICH STRATEGY OPENED IT. Two equities strategies now trade the same
+    // 16 symbols on OPPOSITE sides, so symbol, direction and price cannot
+    // separate them -- and this table is where a position is actually
+    // looked at once it is filled.
+    { key:'strategy', label:'Strategy' }
   ];
 
   // Which columns the user has chosen to hide, persisted across sessions.
@@ -11248,19 +11254,42 @@
           var isLong = j.direction === 'Long';
           pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
           plPct = (current - j.entry) / j.entry * 100 * (isLong ? 1 : -1);
+          // ...UNLESS the entry is from a previous session. The fallback
+          // above exists for the few seconds between a fill and it
+          // appearing in the positions fetch. For an entry Alpaca will
+          // NEVER have, that estimate is permanent and fabricated: four
+          // stale rows showed live-looking P&L of +$49.72, -$41.22,
+          // +$6.17 and -$57.60 against an account holding nothing, each
+          // figure moving on every quote poll.
+          //
+          // Nulled rather than zeroed. "$0.00" reads as a real, flat
+          // position; a dash reads as what it is -- no number, because
+          // there is nothing to measure.
+          if(isStaleIntradayJournalEntry(j)){
+            current = null; pl = null; plPct = null;
+          }
         }
         // Current market value of the position -- qty at the live price,
         // not the entry price, so this tracks the actual $ currently
         // deployed rather than a fixed snapshot from whenever it opened.
-        var sizeDollar = j.qty * current;
+        var sizeDollar = current === null ? null : j.qty * current;
         return { j: j, current: current, pl: pl, plPct: plPct, sizeDollar: sizeDollar };
       });
 
       if(statusPositionsSortKey){
         var key = statusPositionsSortKey, dir = statusPositionsSortDir;
         rows.sort(function(a, b){
-          var av = key === 'current' ? a.current : key === 'pl' ? a.pl : key === 'size' ? a.sizeDollar : key === 'opened' ? (a.j.date || '') : a.j[key];
-          var bv = key === 'current' ? b.current : key === 'pl' ? b.pl : key === 'size' ? b.sizeDollar : key === 'opened' ? (b.j.date || '') : b.j[key];
+          // A stale row's figures are null. Sorted to the bottom rather
+          // than compared, since null < any number would rank a position
+          // that does not exist as the day's biggest loser.
+          var pick = function(x){
+            return key === 'current' ? x.current : key === 'pl' ? x.pl : key === 'size' ? x.sizeDollar
+              : key === 'opened' ? (x.j.date || '') : key === 'strategy' ? strategyLabel(x.j) : x.j[key];
+          };
+          var av = pick(a), bv = pick(b);
+          if(av === null && bv === null) return 0;
+          if(av === null) return 1;
+          if(bv === null) return -1;
           if(av < bv) return -1 * dir;
           if(av > bv) return 1 * dir;
           return 0;
@@ -11341,6 +11370,54 @@
   // list the header renders from -- keeping header and row cells built
   // from a single source of truth is what lets a hidden column disappear
   // from both at once instead of drifting out of alignment.
+  // The one place that turns a journal entry's strategy field into words,
+  // so the positions table, the journal and the setup badges cannot end up
+  // calling the same thing by three different names.
+  //
+  // BOTH strategies are named, not just the fade. Marking only fades made
+  // "no label" carry two incompatible meanings -- "this is a breakout" and
+  // "this entry predates attribution entirely" -- which is no answer at
+  // all to "which strategy took this trade". A dash means genuinely
+  // unknown, and nothing else does.
+  // Mirrors shwoop-server's safety/staleEntries.js. An intraday position
+  // cannot survive its own session, so a journal entry still marked open
+  // from a previous session is not a position -- it is an unreconciled
+  // record, and the backend already refuses to act on it.
+  //
+  // Crypto is never stale: it runs 24/7 and holding across midnight is
+  // the design. An entry with no usable date is not stale either -- that
+  // is a different problem, and treating a possibly-real position as
+  // fictional is the worse error.
+  function easternDateKeyOf(when){
+    var p = {};
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(when).forEach(function(x){ p[x.type] = x.value; });
+    return p.year + '-' + p.month + '-' + p.day;
+  }
+  function isStaleIntradayJournalEntry(j, now){
+    if(!j || j.screenerType !== 'intraday' || j.status !== 'open') return false;
+    var session = null;
+    if(j.entryBarTime){
+      var t = new Date(j.entryBarTime);
+      if(!isNaN(t.getTime())) session = easternDateKeyOf(t);
+    }
+    if(!session && typeof j.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(j.date)) session = j.date;
+    if(!session) return false;
+    return session < easternDateKeyOf(now || new Date());
+  }
+
+  function strategyLabel(j){
+    if(!j || j.screenerType === 'crypto') return 'Crypto';
+    if(j.strategy === 'fade') return 'Fade';
+    if(j.strategy === 'orb') return 'Breakout';
+    return '—';
+  }
+
+  function staleCell(){
+    return '<td title="This entry is from a previous session and Alpaca holds no matching position, so there is no live figure to show. The server is already ignoring it. Remove it from the Journal.">&mdash;</td>';
+  }
+
   function statusPositionsCellHTML(colKey, r){
     var j = r.j;
     switch(colKey){
@@ -11348,14 +11425,18 @@
       case 'direction': return '<td>' + j.direction + '</td>';
       case 'qty': return '<td>' + j.qty + '</td>';
       case 'entry': return '<td>' + fmt(j.entry) + '</td>';
-      case 'current': return '<td>' + fmt(r.current) + '</td>';
-      case 'size': return '<td class="mono">$' + r.sizeDollar.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>';
-      case 'pl': return '<td class="' + (r.pl >= 0 ? 'up' : 'down') + '">' + (r.pl >= 0 ? '+' : '-') + '$' + Math.abs(r.pl).toFixed(2) + ' (' + (r.plPct >= 0 ? '+' : '') + r.plPct.toFixed(2) + '%)</td>';
+      // A dash, with the reason on hover, wherever there is genuinely no
+      // number -- rather than a plausible-looking one derived from an
+      // entry price for a position the broker does not hold.
+      case 'current': return r.current === null ? staleCell() : '<td>' + fmt(r.current) + '</td>';
+      case 'size': return r.sizeDollar === null ? staleCell() : '<td class="mono">$' + r.sizeDollar.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>';
+      case 'pl': return r.pl === null ? staleCell() : '<td class="' + (r.pl >= 0 ? 'up' : 'down') + '">' + (r.pl >= 0 ? '+' : '-') + '$' + Math.abs(r.pl).toFixed(2) + ' (' + (r.plPct >= 0 ? '+' : '') + r.plPct.toFixed(2) + '%)</td>';
       case 'stop': return '<td>' + fmt(j.stop) + '</td>';
       case 't1': return '<td>' + fmt(j.t1) + '</td>';
       case 'opened':
         var openedLabel = j.date ? new Date(j.date + 'T00:00:00').toLocaleDateString([], { month:'short', day:'numeric' }) : '—';
         return '<td>' + openedLabel + '</td>';
+      case 'strategy': return '<td>' + strategyLabel(j) + '</td>';
       default: return '<td></td>';
     }
   }
