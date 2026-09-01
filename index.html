@@ -11206,9 +11206,15 @@
 
     var headMeta = document.getElementById('openPositionsHeadMeta');
     if(headMeta){
+      // "4 open" for four entries the broker does not hold is the same
+      // lie the P&L column was telling, in a smaller font. Counted
+      // separately: what is actually open, and what needs clearing.
+      var staleCount = allOpen.filter(function(j){ return isStaleIntradayJournalEntry(j); }).length;
+      var realOpen = allOpen.length - staleCount;
+      var needsReview = staleCount ? (staleCount + ' need review') : '';
       headMeta.textContent = !allOpen.length ? ''
         : showFilter && statusPositionsFilter !== 'all' ? (openPositions.length + ' of ' + allOpen.length + ' open')
-        : (allOpen.length + ' open');
+        : [realOpen + ' open', needsReview].filter(Boolean).join(' · ');
     }
     if(openPositions.length === 0){
       el.innerHTML = '<div class="labs-backtest-status">No open' + POSITIONS_FILTER_LABELS[statusPositionsFilter] + ' positions right now.</div>';
@@ -11307,7 +11313,13 @@
           }).join('') + '<th></th></tr></thead>' +
           '<tbody>' + rows.map(function(r){
             return '<tr>' + visibleCols.map(function(col){ return statusPositionsCellHTML(col.key, r); }).join('') +
-              '<td><button class="position-close-btn" data-sym="' + r.j.sym + '" data-armed="false">Close</button></td>' +
+              // Closing a position the broker does not hold just returns an
+              // error. The useful action on a stale entry is removing the
+              // journal record, which is the Journal page's job -- so this
+              // says so instead of offering a button that cannot work.
+              (isStaleIntradayJournalEntry(r.j)
+                ? '<td><span class="labs-backtest-status" title="There is no position at Alpaca to close. Remove this entry on the Journal page.">clear in Journal</span></td>'
+                : '<td><button class="position-close-btn" data-sym="' + r.j.sym + '" data-armed="false">Close</button></td>') +
             '</tr>';
           }).join('') + '</tbody>' +
         '</table>';
@@ -11421,7 +11433,9 @@
   function statusPositionsCellHTML(colKey, r){
     var j = r.j;
     switch(colKey){
-      case 'sym': return '<td class="mono">' + j.sym + '</td>';
+      case 'sym': return '<td class="mono">' + j.sym
+        + (isStaleIntradayJournalEntry(j) ? ' <span class="journal-source-tag" title="Opened in a previous session and Alpaca holds no matching position. The server is already ignoring it. Remove it from the Journal.">needs review</span>' : '')
+        + '</td>';
       case 'direction': return '<td>' + j.direction + '</td>';
       case 'qty': return '<td>' + j.qty + '</td>';
       case 'entry': return '<td>' + fmt(j.entry) + '</td>';
