@@ -143,27 +143,6 @@ gates.G5 = () => {
   console.log('G5 PASS permission state is re-read per send and re-rendered');
 };
 
-// The backend's SMS channel is the only one that reaches the owner with the
-// app closed. Unset TWILIO_* vars turn it into a no-op logger, which is a
-// deliberate choice -- but an undeclared one is a person believing they are
-// covered when they are not.
-gates.G6 = () => {
-  const body = src.slice(src.indexOf('function renderBackendStatus()'));
-  const end = body.indexOf("// ---- Row 3: this cycle's status ----");
-  const head = body.slice(0, end);
-  assert.ok(/backendSmsAlertsConfigured === false/.test(head),
-    'the card must render an SMS-off row, and must key it on an explicit false');
-  assert.ok(/SMS alerts are switched off/.test(head),
-    'an off alert channel must say so in the words a person reads');
-  assert.ok(/TWILIO_/.test(head), 'the row must name what the owner has to set to fix it');
-  // Strictly false, never falsy: an older server build that never wrote the
-  // field is UNKNOWN, and accusing it of being off is a warning nobody can
-  // act on and everybody learns to ignore.
-  assert.ok(/typeof data\.serverSmsAlertsConfigured === 'boolean' \? data\.serverSmsAlertsConfigured : null/.test(src),
-    'an absent field must shape to null (unknown), not to false (accused)');
-  console.log('G6 PASS a switched-off SMS channel is surfaced, and an unknown one is not accused');
-};
-
 // The priority lane's acknowledgement lives in localStorage forever, so an
 // over-broad key would suppress the "Needs You" lane permanently and look
 // exactly like the reported symptom. It must be keyed per entry id and

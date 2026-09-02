@@ -124,7 +124,7 @@ assert.strictEqual(
   api.state({ lastSuccess: NOW - 12 * MIN, failingSince: NOW - 12 * MIN }, NOW).level,
   'failing', 'a failure run past the server alert threshold is failing');
 // Matches shwoop-server FAILURE_ALERT_AFTER_MS: the app must not say
-// "fine" while the owner is holding the SMS that says otherwise.
+// "fine" while the server's own log says otherwise.
 assert.strictEqual(api.state({ failingSince: NOW - 10 * MIN }, NOW).level, 'failing');
 assert.strictEqual(api.state({ failingSince: NOW - 9 * MIN }, NOW).level, 'degraded');
 
