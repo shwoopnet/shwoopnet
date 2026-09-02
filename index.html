@@ -908,6 +908,10 @@
   .to-card-dot.ok{ background: var(--gain); }
   .to-card-dot.warn{ background: var(--loss); }
   .to-card-meta{ font-size:11px; color: var(--muted); font-family:'Public Sans', sans-serif; }
+  /* A scan the screener should already have refreshed and did not -- the
+     count next to it is a count of stale rows, so it must not read like an
+     ordinary one. */
+  .to-card-meta.is-stale{ color: var(--amber); }
 
   .strategy-filter-row{ display:flex; gap:8px; margin-bottom:14px; }
 
@@ -3355,6 +3359,20 @@
   // this tab.
 
   var backendIntradayPicks = null;
+  // WHEN THE SETUPS ON SCREEN WERE COMPUTED.
+  //
+  // The backend has published intradayScreenerUpdatedAt/
+  // cryptoScreenerUpdatedAt since these fields shipped, both arrive on the
+  // same user-doc snapshot everything else here reads, and nothing in this
+  // app ever looked at either one. So a setups card showed a pick computed
+  // four minutes ago and one computed at yesterday's close in exactly the
+  // same type, with the same live-looking status badge and the same entry/
+  // stop/target -- and the reader has no way to tell which they are looking
+  // at. Prices on this page move on their own; picks do not, so a dead
+  // screener looks identical to a quiet one.
+  //
+  // Costs nothing: same document, same listener, no extra read.
+  var backendIntradayPicksUpdatedAt = null;
   // The exhaustion fade's own picks, kept separate from the breakout's
   // all the way from Firestore (fadeScreenerPicks) so the two can never
   // be silently conflated -- they are merged only at render time, each
@@ -3400,6 +3418,9 @@
   // separate Firestore fields so the two strategies never clobber each
   // other's status.
   var backendCryptoPicks = null;
+  // See backendIntradayPicksUpdatedAt -- crypto's own, on its own 5-minute
+  // cycle rather than the equities one.
+  var backendCryptoPicksUpdatedAt = null;
   var backendCryptoScreenerEnabledOnServer = null;
   var backendCryptoAutoTradeEnabledOnServer = null;
   var backendCryptoCycleStatus = null;
@@ -3455,6 +3476,7 @@
       // open). Shows what the 24/7 backend last saw, whether or not
       // this browser tab is the one doing any screening right now.
       backendIntradayPicks = data.intradayScreenerPicks;
+      backendIntradayPicksUpdatedAt = data.intradayScreenerUpdatedAt;
       // Seeds the live-quote watchlist for every symbol the backend is
       // actually screening, not just the 8 curated in
       // DEFAULT_WATCHLIST_SYMS -- without this, a pick for any of the
@@ -3505,6 +3527,7 @@
       autoTradeOverrides.fadeScreenerEnabledOverride = data.fadeScreenerEnabledOverride;
       autoTradeOverrides.fadeAutoTradeEnabledOverride = data.fadeAutoTradeEnabledOverride;
       backendCryptoPicks = data.cryptoScreenerPicks;
+      backendCryptoPicksUpdatedAt = data.cryptoScreenerUpdatedAt;
       backendCryptoScreenerEnabledOnServer = data.serverCryptoScreenerEnabled;
       backendCryptoAutoTradeEnabledOnServer = data.serverCryptoAutoTradeEnabled;
       backendCryptoCycleStatus = data.cryptoCycleStatus;
@@ -3535,10 +3558,66 @@
   // price's own magnitude instead, same convention as the backend's
   // formatCryptoPrice (see shwoop-server's clients/alpaca.js), so a
   // crypto position showing up in Open Positions displays honestly.
+  // A NON-NUMBER IS A GAP, NOT A PRICE.
+  //
+  // Every caller here feeds this something that came from outside: a
+  // parseFloat of an Alpaca field, a journal entry written by hand, a pick
+  // whose analysis never produced a level. Without this guard the two
+  // outcomes were both lies. `fmt(NaN)` printed the string "NaN" into a
+  // price cell -- parseFloat('') on an Alpaca response is all it takes --
+  // and `fmt(undefined)` threw TypeError from inside a .map() building the
+  // table's innerHTML, which blanks the whole card the way the undefined
+  // -function bug blanked the Backend Status card. A dash says what is
+  // actually true: there is no number for this.
   function fmt(n){
+    if(typeof n !== 'number' || !isFinite(n)) return '—';
     if(n >= 1) return n.toFixed(2);
     if(n >= 0.01) return n.toFixed(4);
     return n.toFixed(8);
+  }
+
+  // PROFIT FACTOR WITH NO LOSING TRADE HAS NO DENOMINATOR.
+  //
+  // gross gains / gross losses is undefined when gross losses is zero, and
+  // every one of these call sites used to render that as "∞" -- a symbol
+  // that reads as "infinitely profitable" on a card whose whole job is to
+  // say how the strategy is doing. It is the most flattering possible
+  // reading of "we have not measured a loss yet", and on a three-trade
+  // sample that is exactly what it means. A dash, with the reason on
+  // hover, is the honest form: not a number, because there is nothing to
+  // divide by.
+  //
+  // Zero gains AND zero losses is the same gap for the same reason, and
+  // the computation above hands that back as a literal 0 -- which reads as
+  // a measured, terrible result rather than as no measurement at all.
+  function profitFactorText(pf, lossCount){
+    if(typeof pf !== 'number' || !isFinite(pf)) return '—';
+    if(lossCount === 0) return '—';
+    return pf.toFixed(2);
+  }
+  var PROFIT_FACTOR_NO_LOSSES_HINT = 'No losing trade yet, so there is nothing to divide by — a profit factor cannot be computed from wins alone.';
+
+  // HOW OLD THE SETUPS ON SCREEN ARE.
+  //
+  // Kept pure and separate from the DOM so it can be tested against real
+  // ages rather than inferred from a rendered string, same as
+  // quoteFeedStatus. Three answers, because two of them are not the same
+  // thing: 'unknown' is a backend that never wrote the timestamp (an old
+  // build) and must not read as stale, 'stale' is a scan that should have
+  // happened and did not.
+  //
+  // Two cycle intervals before it is called stale: one missed cycle is
+  // routine (a slow Alpaca call, a deploy swapping instances) and calling
+  // that stale would train the reader to ignore the marker, which is how a
+  // real outage gets missed.
+  function picksFreshness(updatedAt, now, intervalMs){
+    var ms = firestoreMillis(updatedAt);
+    if(isNaN(ms)) return { level: 'unknown', ageMs: null };
+    var age = now - ms;
+    // A backend clock a little ahead of this browser's must not render as
+    // a negative age; it is not evidence of anything except clock skew.
+    if(age < 0) age = 0;
+    return { level: age > intervalMs * 2 ? 'stale' : 'fresh', ageMs: age };
   }
   function pct(a,b){ return ((a-b)/b*100); }
   function findQuote(sym){ return watchlist.filter(function(w){ return w.sym === sym; })[0]; }
@@ -5950,11 +6029,19 @@
     var hiddenCount = source.filter(function(t){ return t.status === 'watching'; }).length;
     var visible = todaysSetupsShowAll ? source : source.filter(function(t){ return t.status !== 'watching'; });
 
+    // The scan's own age, shown next to the count. Without it the card
+    // presents a list computed at yesterday's close exactly as it presents
+    // one computed forty seconds ago.
+    var eqFresh = picksFreshness(backendIntradayPicksUpdatedAt, Date.now(), INTRADAY_CYCLE_INTERVAL_MS);
+    var eqAgeNote = eqFresh.level === 'fresh' ? ' · scanned ' + formatAgo(eqFresh.ageMs)
+      : eqFresh.level === 'stale' ? ' · last scan ' + formatAgo(eqFresh.ageMs) + ' — may be out of date'
+      : '';
     var headMeta = document.getElementById('todaysSetupsHeadMeta');
     if(headMeta){
       headMeta.textContent = source.length
-        ? (visible.length + ' of ' + source.length + ' setup' + (source.length === 1 ? '' : 's'))
-        : '';
+        ? (visible.length + ' of ' + source.length + ' setup' + (source.length === 1 ? '' : 's') + eqAgeNote)
+        : (eqFresh.level === 'stale' ? eqAgeNote.replace(/^ · /, '') : '');
+      headMeta.classList.toggle('is-stale', eqFresh.level === 'stale');
     }
     var filterBtn = document.getElementById('todaysSetupsFilterBtn');
     if(filterBtn){
@@ -5980,7 +6067,13 @@
     // completely blank -- no rows, no message, not even the Show-all
     // button -- which reads as broken instead of "quiet right now."
     if(source.length === 0){
-      el.innerHTML = '<div class="labs-backtest-status">No qualifying setups across the universe right now — the screener is still watching all 16 symbols for the next breakout.</div>';
+      // "Right now" is a claim about the present, and an empty list from a
+      // screener that stopped running hours ago does not support it. When
+      // the scan is stale the card says which of the two it is instead of
+      // reporting a quiet market on the strength of a dead cycle.
+      el.innerHTML = eqFresh.level === 'stale'
+        ? '<div class="labs-backtest-status down">No setups have been published since the last scan ' + formatAgo(eqFresh.ageMs) + ' — that is older than the screener\'s own cycle, so this list may simply not have been refreshed. Check Backend Status.</div>'
+        : '<div class="labs-backtest-status">No qualifying setups across the universe right now — the screener is still watching all 16 symbols for the next breakout.</div>';
       return;
     }
 
@@ -6152,9 +6245,18 @@
     );
     lastRenderedCryptoSetups = source;
 
+    // Same scan-age disclosure as the equities card, on crypto's own
+    // separate 5-minute cycle -- see picksFreshness.
+    var cxFresh = picksFreshness(backendCryptoPicksUpdatedAt, Date.now(), CRYPTO_CYCLE_INTERVAL_MS);
+    var cxAgeNote = cxFresh.level === 'fresh' ? ' · scanned ' + formatAgo(cxFresh.ageMs)
+      : cxFresh.level === 'stale' ? ' · last scan ' + formatAgo(cxFresh.ageMs) + ' — may be out of date'
+      : '';
     var headMeta = document.getElementById('cryptoSetupsHeadMeta');
     if(headMeta){
-      headMeta.textContent = source.length ? (source.length + ' setup' + (source.length === 1 ? '' : 's')) : '';
+      headMeta.textContent = source.length
+        ? (source.length + ' setup' + (source.length === 1 ? '' : 's') + cxAgeNote)
+        : (cxFresh.level === 'stale' ? cxAgeNote.replace(/^ · /, '') : '');
+      headMeta.classList.toggle('is-stale', cxFresh.level === 'stale');
     }
 
     // Same gap as renderIntradayBlocks -- the backend only ever reports a
@@ -6163,7 +6265,9 @@
     // fell through to rendering completely blank instead of saying
     // anything, reading as broken rather than "quiet right now."
     if(source.length === 0){
-      el.innerHTML = '<div class="labs-backtest-status">No qualifying setups right now — the screener is still watching all 12 crypto pairs for the next breakout.</div>';
+      el.innerHTML = cxFresh.level === 'stale'
+        ? '<div class="labs-backtest-status down">No setups have been published since the last scan ' + formatAgo(cxFresh.ageMs) + ' — that is older than the crypto screener\'s own cycle, so this list may simply not have been refreshed. Check Backend Status.</div>'
+        : '<div class="labs-backtest-status">No qualifying setups right now — the screener is still watching all 12 crypto pairs for the next breakout.</div>';
       return;
     }
 
@@ -7220,12 +7324,18 @@
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
     var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
-    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
-    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+    // stoppedCount is the losing-trade count this profit factor's
+    // denominator is built from. Zero of them means the figure was never
+    // computed, so it gets neither a number nor a colour -- "∞" in green
+    // read as the best result the engine had ever produced when it in fact
+    // meant the sample had not produced a loss yet.
+    var pfDisplay = profitFactorText(summary.profitFactor, summary.stoppedCount);
+    var pfClass = summary.stoppedCount === 0 ? '' : (summary.profitFactor >= 1 ? 'up' : 'down');
+    var pfTitle = summary.stoppedCount === 0 ? ' title="' + PROFIT_FACTOR_NO_LOSSES_HINT + '"' : '';
     resultsEl.innerHTML =
       '<div class="backtest-summary">' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"' + pfTitle + '><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
@@ -7287,8 +7397,14 @@
 
     var winRateClass = summary.winRate >= 50 ? 'up' : 'down';
     var expectancyClass = summary.avgPctReturn >= 0 ? 'up' : 'down';
-    var pfDisplay = summary.profitFactor === Infinity ? '∞ (no losses yet)' : summary.profitFactor.toFixed(2);
-    var pfClass = summary.profitFactor >= 1 ? 'up' : 'down';
+    // stoppedCount is the losing-trade count this profit factor's
+    // denominator is built from. Zero of them means the figure was never
+    // computed, so it gets neither a number nor a colour -- "∞" in green
+    // read as the best result the engine had ever produced when it in fact
+    // meant the sample had not produced a loss yet.
+    var pfDisplay = profitFactorText(summary.profitFactor, summary.stoppedCount);
+    var pfClass = summary.stoppedCount === 0 ? '' : (summary.profitFactor >= 1 ? 'up' : 'down');
+    var pfTitle = summary.stoppedCount === 0 ? ' title="' + PROFIT_FACTOR_NO_LOSSES_HINT + '"' : '';
 
     var perSymbolRows = perSymbolResults
       .filter(function(r){ return r.summary.totalSignals > 0; })
@@ -7308,7 +7424,7 @@
       failedBlock +
       '<div class="backtest-summary">' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Expectancy (avg % per trade)</div><div class="backtest-stat-value ' + expectancyClass + '">' + (summary.avgPctReturn >= 0 ? '+' : '') + summary.avgPctReturn.toFixed(2) + '%</div></div>' +
-        '<div class="backtest-stat"><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
+        '<div class="backtest-stat"' + pfTitle + '><div class="backtest-stat-label">Profit factor</div><div class="backtest-stat-value ' + pfClass + '">' + pfDisplay + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Win rate (resolved)</div><div class="backtest-stat-value ' + winRateClass + '">' + summary.winRate.toFixed(0) + '%</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Total signals</div><div class="backtest-stat-value">' + summary.totalSignals + '</div></div>' +
         '<div class="backtest-stat"><div class="backtest-stat-label">Wins</div><div class="backtest-stat-value up">' + summary.hitCount + '</div></div>' +
@@ -10122,7 +10238,7 @@
     statsEl.innerHTML =
       '<div class="pl-card"><div class="pl-card-label">Real trades</div><div class="pl-card-value mono">' + trades.length + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Win rate</div><div class="pl-card-value mono">' + winRate.toFixed(0) + '%</div></div>' +
-      '<div class="pl-card"><div class="pl-card-label">Profit factor</div><div class="pl-card-value mono ' + (pf >= 1 ? 'up' : 'down') + '">' + (pf === Infinity ? '∞' : pf.toFixed(2)) + '</div></div>' +
+      '<div class="pl-card"' + (losses.length ? '' : ' title="' + PROFIT_FACTOR_NO_LOSSES_HINT + '"') + '><div class="pl-card-label">Profit factor</div><div class="pl-card-value mono ' + (losses.length && pf >= 1 ? 'up' : losses.length ? 'down' : '') + '">' + profitFactorText(pf, losses.length) + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Avg win</div><div class="pl-card-value mono up">+$' + avgWin.toFixed(0) + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Avg loss</div><div class="pl-card-value mono down">−$' + avgLoss.toFixed(0) + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Net P&L</div><div class="pl-card-value mono ' + (netPL >= 0 ? 'up' : 'down') + '">' + (netPL >= 0 ? '+' : '−') + '$' + Math.abs(netPL).toFixed(0) + '</div></div>' +
@@ -10414,7 +10530,10 @@
       if(!winRateEl) return;
 
       winRateEl.textContent = winRate.toFixed(0) + '%';
-      if(profitFactorEl) profitFactorEl.textContent = isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞';
+      if(profitFactorEl){
+        profitFactorEl.textContent = profitFactorText(profitFactor, losses.length);
+        profitFactorEl.title = losses.length ? '' : PROFIT_FACTOR_NO_LOSSES_HINT;
+      }
       // All really does mean all now -- both asset classes, every dollar
       // from Alpaca's own fills -- so the label no longer has to carve out
       // crypto. It says "broker-reconciled" because the number these cards
@@ -10916,7 +11035,8 @@
     } else {
       winRateEl.textContent = filtered.winRate.toFixed(0) + '%';
       winRateSubEl.textContent = filtered.count + ' total trades';
-      profitFactorEl.textContent = isFinite(filtered.profitFactor) ? filtered.profitFactor.toFixed(2) : '∞';
+      profitFactorEl.textContent = profitFactorText(filtered.profitFactor, filtered.losses);
+      profitFactorEl.title = filtered.losses ? '' : PROFIT_FACTOR_NO_LOSSES_HINT;
       // A trade the backend could not evaluate is reported as its own
       // number, never folded into the denominator. Folding it in presents
       // "we could not check" as "we checked and the signal failed", which
@@ -12342,10 +12462,26 @@
           // P&L pinned at exactly $0.00, even on a real, moving position.
           var isCrypto = j.sym.indexOf('/') > -1;
           var q = isCrypto ? findCryptoQuote(j.sym) : findQuote(j.sym);
-          current = (q && q.price) ? q.price : j.entry;
-          var isLong = j.direction === 'Long';
-          pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
-          plPct = (current - j.entry) / j.entry * 100 * (isLong ? 1 : -1);
+          var quotedPrice = (q && typeof q.price === 'number' && isFinite(q.price)) ? q.price : null;
+          if(quotedPrice === null){
+            // NO QUOTE IS NOT A FLAT POSITION.
+            //
+            // This fell back to j.entry, which makes current === entry and
+            // therefore P&L of exactly $0.00 (+0.00%) -- rendered in the
+            // same green as a real flat position, on a position that is
+            // moving and simply has not been priced. It is the identical
+            // lie the crypto-quote gap above already produced once, left
+            // standing for the case where the quote feed itself is down;
+            // the header even says "Sync failed" at that moment while
+            // these rows keep reporting a confident zero. Nulled, so the
+            // row shows the same honest dash a stale entry does.
+            current = null; pl = null; plPct = null;
+          } else {
+            current = quotedPrice;
+            var isLong = j.direction === 'Long';
+            pl = (current - j.entry) * j.qty * (isLong ? 1 : -1);
+            plPct = (current - j.entry) / j.entry * 100 * (isLong ? 1 : -1);
+          }
           // ...UNLESS the entry is from a previous session. The fallback
           // above exists for the few seconds between a fill and it
           // appearing in the positions fetch. For an entry Alpaca will
@@ -12694,7 +12830,23 @@
     { key:'position_drift', label:'Drift' },
     { key:'error', label:'Error' }
   ];
-  var activityLogHiddenGroups = {};
+  // ORDER-INDEPENDENT ON PURPOSE, in both directions.
+  //
+  // loadActivityLogFilterPrefs() is called from the init sequence roughly
+  // 3,400 lines ABOVE this line, so at that moment `var` hoisting has
+  // declared this name but not assigned it -- and reading
+  // `activityLogHiddenGroups.cycle_summary` off undefined threw a
+  // TypeError on every single page load, aborting the rest of that
+  // top-level init block silently. Nothing looked broken, which is why it
+  // survived: the saved group filters were simply discarded on every load
+  // and the log rendered unfiltered, the same class of fault as the
+  // undefined function that blanked Backend Status.
+  //
+  // `|| {}` rather than `{}` because the loader now populates it first:
+  // a bare re-initialisation here would throw the loaded preferences away
+  // a few milliseconds after reading them, trading a crash for a quieter
+  // wrong answer.
+  var activityLogHiddenGroups = activityLogHiddenGroups || {};
 
   // "Priority" = the entries that are asking for a human, as opposed to
   // the running commentary that makes up the rest of the log. Two things
@@ -12724,6 +12876,8 @@
   var activityLogPriorityOnly = false;
 
   function loadActivityLogFilterPrefs(){
+    // See the declaration's own comment -- this runs before it.
+    if(!activityLogHiddenGroups || typeof activityLogHiddenGroups !== 'object') activityLogHiddenGroups = {};
     try{
       var saved = JSON.parse(window.localStorage.getItem('shwoopnet:activityLogHiddenGroups') || 'null');
       if(saved && typeof saved === 'object') activityLogHiddenGroups = saved;
@@ -13604,7 +13758,16 @@
           '</span>' +
           '<span class="status-badge ' + badge.cls + '">' + badge.label + '</span>' +
         '</div>' +
-        '<p class="watch-trade-reason">' + notesForDisplay[0] + '</p>' +
+        // A pick the backend wrote without a notes array reaches here as
+        // an empty list (see buildTradeFromPick, which stopped that same
+        // shape from throwing), and `notes[0]` on an empty list is
+        // undefined -- which string concatenation renders as the literal
+        // word "undefined" where the card's one sentence of reasoning
+        // belongs. This is the card someone reads to decide whether a
+        // setup makes sense, so a missing reason has to read as missing.
+        '<p class="watch-trade-reason">' + (notesForDisplay && notesForDisplay.length
+          ? notesForDisplay[0]
+          : '<span class="labs-backtest-status">No reason recorded for this setup — open it to see the levels.</span>') + '</p>' +
         '<span class="watch-trade-link">View full setup →</span>' +
       '</div>';
     }).join('');
@@ -13616,9 +13779,19 @@
 
   function renderWhatToWatch(){
     var el = document.getElementById('whatToWatchList');
-    var source = (backendIntradayPicks && backendIntradayPicks.length)
-      ? backendIntradayPicks.map(buildTradeFromPick)
-      : intradayTrades;
+    // BOTH equities strategies, via the same merge Today's Setups uses.
+    //
+    // This read backendIntradayPicks alone, so every exhaustion-fade setup
+    // the backend published was silently absent from the card whose title
+    // is what to watch -- and the recap line below it counted the same
+    // short list. Two cards sourced from two different subsets of the same
+    // scan is how the app ends up quietly disagreeing with itself about
+    // what the server actually found. mergedEquitiesPicks also tags each
+    // row's strategy, which buildTradeFromPick otherwise defaults to 'orb':
+    // a fade short labelled as a breakout is the one mislabel here that
+    // could be acted on by hand.
+    var merged = mergedEquitiesPicks();
+    var source = merged.length ? merged : intradayTrades;
     // Same merge Trade Overview's Today's Setups applies -- without it,
     // a real open position that had already dropped out of the
     // backend's current picks list (a quiet scan cycle, or the symbol
@@ -13716,8 +13889,24 @@
     var el = document.getElementById('cryptoBreadthWidget');
     if(!el) return;
     var priced = cryptoWatchlist.filter(function(w){ return w.price != null && w.prevClose != null; });
+    // BREADTH IS A CLAIM ABOUT THE WHOLE UNIVERSE.
+    //
+    // Equities' own widget above refuses to draw until all three of its
+    // index proxies have resolved, for exactly this reason. This one drew
+    // from whatever had arrived: two pairs priced out of twelve, both up,
+    // rendered a full green bar and the sentence "Broadly positive" -- a
+    // statement about the crypto market made from a sixth of it, and
+    // indistinguishable from the same sentence backed by all twelve. The
+    // headline is only claimed once most of the universe has actually
+    // priced; below that the card says how much of it it can see.
+    var universeSize = cryptoWatchlist.length || priced.length;
     if(priced.length === 0){
       el.innerHTML = '<div class="labs-backtest-status">Loading crypto data…</div>';
+      return;
+    }
+    if(priced.length * 2 <= universeSize){
+      el.innerHTML = '<div class="labs-backtest-status">Only ' + priced.length + ' of ' + universeSize +
+        ' pairs have priced — not enough to say which way crypto is leaning yet.</div>';
       return;
     }
     var reads = priced.map(function(w){ return { sym: w.sym, chg: pct(w.price, w.prevClose) }; });
@@ -13747,7 +13936,8 @@
         }).join('') +
       '</div>' +
       '<div class="breadth-meta">' +
-        '<span class="breadth-label ' + labelClass + '">' + label + ' — ' + up + ' of ' + total + ' pairs up over 24h</span>' +
+        '<span class="breadth-label ' + labelClass + '">' + label + ' — ' + up + ' of ' + total + ' pairs up over 24h' +
+          (total < universeSize ? ' (' + (universeSize - total) + ' of ' + universeSize + ' not priced yet)' : '') + '</span>' +
       '</div>';
   }
 
