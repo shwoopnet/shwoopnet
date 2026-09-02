@@ -77,6 +77,15 @@ gates.G3 = () => {
   // A gap straight through the stop leaves no trade to model.
   assert.strictEqual(fill([bar(99, 103, 98, 103), bar(94, 95, 90, 91)], 0, signal), null, 'a fill at or below the stop must be dropped');
   assert.strictEqual(fill([bar(99, 103, 98, 103), bar(0, 1, 0, 1)], 0, signal), null, 'a nonsense open must be dropped');
+  // A bar whose open is missing or unparseable is the case the entry > 0
+  // guard is actually load-bearing for: the two comparisons below it are
+  // both false against NaN, so without it the signal becomes a trade with
+  // a NaN entry, a NaN target and a NaN return that silently poisons every
+  // aggregate it is averaged into.
+  assert.strictEqual(fill([bar(99, 103, 98, 103), bar(NaN, 1, 0, 1)], 0, signal), null,
+    'a bar with no usable open must be dropped, not filled at NaN');
+  assert.strictEqual(fill([bar(99, 103, 98, 103), bar(undefined, 1, 0, 1)], 0, signal), null,
+    'a bar with a missing open must be dropped, not filled at NaN');
   // Levels must be re-anchored to the REAL fill, not left at the signal's.
   const out = fill([bar(99, 103, 98, 103), bar(102.5, 104, 102, 103.5)], 0, signal);
   assert.strictEqual(out.stop, 95, 'the stop stays where the signal put it');

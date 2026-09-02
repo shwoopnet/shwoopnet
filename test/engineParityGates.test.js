@@ -138,6 +138,41 @@ gates.G5 = () => {
   console.log('G5 PASS pre-ship clean');
 };
 
+gates.G6 = () => {
+  // THE BOUNDARIES THEMSELVES. G2-G4 each clear their threshold by a
+  // comfortable margin, so every comparison in the walk could be shifted
+  // by one tick -- >= to >, <= to < -- and no gate noticed. A backtest
+  // that resolves the exact-touch case differently from live is producing
+  // a number for a strategy nobody runs, which is how the last figure in
+  // CLAUDE.md was withdrawn.
+  const f = sim();
+  const signal = { direction: 'Long', entry: 100, stop: 95, t1: 115 }; // risk 5
+  const risk = 5;
+
+  // (1) A low that touches the stop EXACTLY is a fill. A resting order at
+  // 95 fills at 95; treating it as a miss keeps losers alive for free.
+  const touch = f([bar(100, 100.5, 95, 99), bar(99, 99.5, 98, 98.5)], 0, signal);
+  assert.strictEqual(touch.result, 'stopped', 'a low exactly at the stop must fill, not survive');
+  assert.strictEqual(touch.price, 95);
+
+  // (2) A close exactly AT the trail trigger arms trailing. One tick short
+  // and the trade rides the original stop, reporting a bigger loss than
+  // the live engine would have taken.
+  const trig = 100 + num('CRYPTO_BT_TRAIL_TRIGGER_RR') * risk;
+  const armed = f([bar(100, trig, 99.9, trig), bar(trig, trig, trig - risk, trig - risk)], 0, signal);
+  assert.strictEqual(armed.result, 'trailing_stopped',
+    'a close exactly at the trail trigger must arm trailing, not merely reach it');
+
+  // (3) A close exactly AT the early-breakeven level moves the stop to
+  // entry. One tick short and the same trade exits at 95 instead of 100 --
+  // a full R of invented loss on every trade that just touches the level.
+  const eb = 100 + num('CRYPTO_BT_EARLY_BREAKEVEN_RR') * risk;
+  const be = f([bar(100, eb + 0.2, 99.8, eb), bar(eb, eb, 90, 91)], 0, signal);
+  assert.strictEqual(be.price, 100,
+    `a close exactly at the ${num('CRYPTO_BT_EARLY_BREAKEVEN_RR')}R level must move the stop to entry, got ${be.price}`);
+  console.log('G6 PASS the exact-touch case resolves the way live resolves it');
+};
+
 function main() {
   const arg = process.argv[2];
   for (const n of (arg ? [arg] : Object.keys(gates))) {

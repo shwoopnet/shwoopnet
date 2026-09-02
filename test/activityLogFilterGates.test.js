@@ -87,9 +87,27 @@ gates.G3 = () => {
 
 // "Nothing logged yet" over N filtered entries is the reassuring reading of
 // an ambiguous state, and it is the wrong one.
+// Comments are prose, not behaviour. This gate asserts against SOURCE
+// TEXT, and until the strip below existed a comment naming the branch
+// satisfied it: `} else if(false){ // currentAccountLog.length > 0` passed
+// every assertion here while the filtered-empty branch was unreachable.
+// The window was also a flat 4000 characters from the function's start,
+// which is a promise about the length of a function nobody is keeping.
+function codeOf(name) {
+  const start = src.indexOf('function ' + name + '(');
+  if (start < 0) throw new Error('not found in index.html: ' + name);
+  let d = 0, end = -1;
+  for (let i = src.indexOf('{', start); i < src.length; i++) {
+    if (src[i] === '{') d++;
+    else if (src[i] === '}') { d--; if (!d) { end = i + 1; break; } }
+  }
+  return src.slice(start, end)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '');
+}
+
 gates.G4 = () => {
-  const body = src.slice(src.indexOf('function renderActivityLog()'),
-    src.indexOf('function renderActivityLog()') + 4000);
+  const body = codeOf('renderActivityLog');
   assert.ok(/currentAccountLog\.length > 0/.test(body),
     'the empty branch must distinguish an empty log from a filtered one');
   assert.ok(/are hidden by the filters above/.test(body),
@@ -97,6 +115,16 @@ gates.G4 = () => {
   // The genuinely-empty case must still reach the original message.
   assert.ok(/emptyEl\.removeAttribute\('hidden'\)/.test(body),
     'a genuinely empty log must still show the "nothing logged yet" state');
+  // And the filter those messages describe must actually be applied. Both
+  // of these lines could be deleted outright without failing anything:
+  // every entry then shows regardless of the group toggles, and the Scan
+  // collapse -- which G1 and G2 verify the PREDICATE of -- is not wired to
+  // anything. The consequence is the one this card was rebuilt for: the
+  // routine commentary buries the entries a human has to act on.
+  assert.ok(/activityLogHiddenGroups\[activityGroupKey\(entry\.type\)\][\s\S]{0,40}return false/.test(body),
+    'a hidden group must actually be filtered out, or the toggles do nothing');
+  assert.ok(/isRoutineScan\(entry\)[\s\S]{0,40}return false/.test(body),
+    'isRoutineScan must be applied, not merely defined');
   console.log('G4 PASS a filtered-empty log is not reported as an empty one');
 };
 
