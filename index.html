@@ -2869,6 +2869,53 @@
   function findCryptoUniverseSymbol(rawSym){
     return CRYPTO_UNIVERSE.filter(function(s){ return canonicalSymbol(s) === rawSym; })[0] || null;
   }
+  // ONE way to read an entry's bar time, because `new Date(entryBarTime)`
+  // is Invalid Date on the value this app actually stores.
+  //
+  // The backend writes entryBarTime as a JS Date; the Admin SDK stores that
+  // as a Firestore Timestamp; this tab reads it back through the web SDK as
+  // a Timestamp object ({seconds, nanoseconds}, or an instance with
+  // toDate()), never as a Date or a string. Signals computed in this tab DO
+  // hand over a real Date, so both shapes are live at once and a raw
+  // `new Date()` is right exactly half the time.
+  //
+  // The cost was the chart's entry zone. It anchored the tint with
+  // `new Date(lv0.entryBarTime).getTime()`, got NaN, and then every
+  // `bar.t.getTime() >= NaN` compared false -- so zoneVisible stayed false
+  // and the zone was never drawn for any position loaded from Firestore.
+  // Not an error, not a blank chart: just a feature that silently did not
+  // exist. This mirrors shwoop-server's src/lib/entryBarTime.js, which was
+  // written for the same bug on the trailing stop, where it meant no
+  // position on either asset class had ever trailed.
+  //
+  // Returns NaN when the value cannot be dated -- never a substituted "now"
+  // or "first bar", which would anchor the tint to a place the position was
+  // never opened at. Callers decide what to do with NaN, out loud.
+  function entryBarMillis(value){
+    if(value === null || value === undefined) return NaN;
+    if(value instanceof Date) return value.getTime();
+    if(typeof value === 'string' || typeof value === 'number') return new Date(value).getTime();
+    if(typeof value === 'object'){
+      if(typeof value.toMillis === 'function'){
+        var ms = value.toMillis();
+        return isFinite(ms) ? ms : NaN;
+      }
+      if(typeof value.toDate === 'function'){
+        var d = value.toDate();
+        return (d instanceof Date) ? d.getTime() : NaN;
+      }
+      // Admin SDK underscores these; the web SDK does not. Accept both --
+      // the same document can reach this tab either way.
+      var secs = value._seconds !== undefined ? value._seconds : value.seconds;
+      var nanos = value._nanoseconds !== undefined ? value._nanoseconds : value.nanoseconds;
+      if(typeof secs === 'number' && isFinite(secs)){
+        var ns = (typeof nanos === 'number' && isFinite(nanos)) ? nanos : 0;
+        return secs * 1000 + Math.floor(ns / 1e6);
+      }
+    }
+    return NaN;
+  }
+
   function alpacaPositionsBySymbol(positions){
     var bySym = {};
     (positions || []).forEach(function(p){ bySym[canonicalSymbol(p.symbol)] = p; });
@@ -7467,8 +7514,13 @@
       var entryY0 = y(lv0.entry);
       var zoneX0 = 0;
       var zoneVisible = true;
-      if(lv0.entryBarTime){
-        var entryTime0 = new Date(lv0.entryBarTime).getTime();
+      // An entryBarTime that cannot be dated is treated exactly like one
+      // that was never recorded: fall back to the full visible width, which
+      // is what the comment above already promises for older entries. The
+      // bug this replaces did the opposite -- it entered this branch, got
+      // NaN, and then failed every comparison, so it drew nothing at all.
+      var entryTime0 = lv0.entryBarTime ? entryBarMillis(lv0.entryBarTime) : NaN;
+      if(!isNaN(entryTime0)){
         zoneVisible = false;
         for(var zi = 0; zi < data.length; zi++){
           if(data[zi].t.getTime() >= entryTime0){ zoneX0 = zi * xStep; zoneVisible = true; break; }
@@ -11478,9 +11530,16 @@
   function isStaleIntradayJournalEntry(j, now){
     if(!j || j.screenerType !== 'intraday' || j.status !== 'open') return false;
     var session = null;
+    // Same coercion as the chart: a Firestore Timestamp read straight into
+    // new Date() is Invalid Date, which quietly dropped this to the j.date
+    // fallback below for every entry loaded from Firestore. That fallback
+    // happens to agree most of the time, which is why it went unnoticed --
+    // but j.date is the day the row was WRITTEN and entryBarTime is the bar
+    // the position was opened on, and they disagree across a midnight or a
+    // backfill.
     if(j.entryBarTime){
-      var t = new Date(j.entryBarTime);
-      if(!isNaN(t.getTime())) session = easternDateKeyOf(t);
+      var ms = entryBarMillis(j.entryBarTime);
+      if(!isNaN(ms)) session = easternDateKeyOf(new Date(ms));
     }
     if(!session && typeof j.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(j.date)) session = j.date;
     if(!session) return false;
