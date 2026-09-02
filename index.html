@@ -12374,8 +12374,20 @@
     if(type === 'position_drift_detected' || type === 'position_drift_resolved') return 'position_drift';
     return type;
   }
+  // NO "Scan" ROW HERE, DELIBERATELY.
+  //
+  // It used to be listed, and it read "Shown" while scans were in fact
+  // hidden -- because isRoutineScan (below) drops an ordinary scan
+  // independently of this filter, and only an ABNORMAL one (it names an
+  // error, or it fetched fewer symbols than it meant to) ever reaches the
+  // log at all. So the toggle claimed to control something it did not, and
+  // its "Shown" state was contradicted by the empty card underneath it.
+  //
+  // The behaviour was right and the control was the lie, so the control is
+  // gone rather than the collapse. The scans that survive isRoutineScan are
+  // the ones worth reading -- a cycle that failed or came back short -- and
+  // there is no longer a way to hide those, which is the point.
   var ACTIVITY_FILTER_GROUPS = [
-    { key:'cycle_summary', label:'Scan' },
     { key:'sent', label:'Sent' },
     { key:'skipped', label:'Skipped' },
     { key:'position_action', label:'Position' },
@@ -12418,6 +12430,16 @@
       var saved = JSON.parse(window.localStorage.getItem('shwoopnet:activityLogHiddenGroups') || 'null');
       if(saved && typeof saved === 'object') activityLogHiddenGroups = saved;
     }catch(e){}
+    // Anyone who hid "Scan" before the row was removed has that choice
+    // stored in their browser forever. The filter is still applied by
+    // group key whether or not a row exists to toggle it, so leaving it
+    // would permanently suppress exactly the abnormal scans -- failed
+    // cycles, short fetches -- that are the only ones that reach the log,
+    // with no control left to undo it. Dropped on load, once.
+    if(activityLogHiddenGroups.cycle_summary){
+      delete activityLogHiddenGroups.cycle_summary;
+      saveActivityLogFilterPrefs();
+    }
   }
   function saveActivityLogFilterPrefs(){
     try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
@@ -12643,6 +12665,16 @@
         // is the one that would be wrong if the filter were the cause.
         el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' +
           'Nothing needs you right now — no errors and no outstanding instructions.</span></div>';
+        if(emptyEl) emptyEl.setAttribute('hidden', '');
+      } else if(currentAccountLog.length > 0){
+        // "Nothing logged yet" over 130 filtered-out entries is the same
+        // ambiguity the priority branch above already argues against, and
+        // it fails the same way: the reassuring reading ("the system is
+        // quiet") is the wrong one, and the log looks broken rather than
+        // filtered. Say which it is, and how to get them back.
+        el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' +
+          'All ' + currentAccountLog.length + ' entries are hidden by the filters above — ' +
+          'nothing is wrong, this view is just narrowed. Use Filters to show them.</span></div>';
         if(emptyEl) emptyEl.setAttribute('hidden', '');
       } else {
         el.innerHTML = '';
