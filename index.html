@@ -11616,6 +11616,35 @@
   // evidence is not evidence of failure, and getting that wrong would
   // train the owner to ignore this row -- which is the same outcome as
   // not having built it.
+  // WHERE A STRATEGY'S ON/OFF SETTING ACTUALLY COMES FROM.
+  //
+  // shwoop-server's settings.js resolves each of these the same way: a
+  // per-account override stored on the user doc wins whenever it is a real
+  // boolean, and the Render env var is only the fallback for when it is
+  // absent. That precedence runs in BOTH directions -- once an override
+  // exists, changing Render does nothing.
+  //
+  // That is not a nitpick. The env vars were set to true in Render and the
+  // strategy stayed off, because a stored `false` override was winning and
+  // nothing on screen said so.
+  //
+  // Written in one place so the three rows that use it cannot drift into
+  // saying three different things about one rule.
+  //
+  // This function was the whole point of the change that introduced it, and
+  // it was never actually added -- three calls shipped against a name that
+  // did not exist, so renderBackendStatus threw a ReferenceError on every
+  // single render and the card has been dead since. It took the cards below
+  // it down with it until renderStatusCard started isolating them, which is
+  // why this surfaced as "most of the page is blank" rather than as one
+  // broken card.
+  function serverSettingSource(hasServerValue){
+    if(!hasServerValue){
+      return 'The server has not reported this setting yet, so nothing here reflects a live value.';
+    }
+    return 'Set on the server, unless this account stores its own override — an override always wins, and changing Render will not move it.';
+  }
+
   function reconcileHealthState(nowMs){
     var successMs = firestoreMillis(backendReconcileLastSuccessAt);
     var failingMs = firestoreMillis(backendReconcileFailingSince);
