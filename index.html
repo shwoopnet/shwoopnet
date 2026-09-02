@@ -1656,6 +1656,20 @@
         // build) is distinct from a stale value and is handled by the
         // caller, not defaulted away here.
         serverHeartbeatAt: data.serverHeartbeatAt || null,
+        // Reconcile health (shwoop-server/src/safety/reconcileHealth.js).
+        // Passed through RAW rather than coerced here: the value can be a
+        // number, a Date or a Firestore Timestamp depending on how the
+        // backend wrote it, and firestoreMillis() is the one place that
+        // knows all of those shapes. `|| null` is safe for both because
+        // 0 is not a meaningful epoch for either field.
+        //
+        // reconcileLastSuccessAt: last SUCCESSFUL reconcile pass.
+        // reconcileFailingSince: first failure of the current run of
+        // failures, cleared on the next success. Absent (null) on both
+        // means an older server build -- "unknown", never "failing".
+        reconcileLastSuccessAt: data.reconcileLastSuccessAt || null,
+        reconcileFailingSince: data.reconcileFailingSince || null,
+        reconcileLastError: data.reconcileLastError || null,
         serverMarketOpenAtHeartbeat: typeof data.serverMarketOpenAtHeartbeat === 'boolean' ? data.serverMarketOpenAtHeartbeat : null,
         serverIntradayScreenerEnabled: typeof data.serverIntradayScreenerEnabled === 'boolean' ? data.serverIntradayScreenerEnabled : null,
         serverIntradayAutoTradeEnabled: typeof data.serverIntradayAutoTradeEnabled === 'boolean' ? data.serverIntradayAutoTradeEnabled : null,
@@ -3086,6 +3100,21 @@
   // and auto-trade are actually running together, not just a snapshot
   // of whatever it last found.
   var backendHeartbeatAt = null;
+  // Reconcile health -- see shwoop-server/src/safety/reconcileHealth.js.
+  // These answer a DIFFERENT question from the heartbeat, and that
+  // distinction is the entire reason they exist: serverHeartbeatAt says
+  // the process is ALIVE, these say it is DOING ITS JOB.
+  // reconcileFilledExits is the only caller of the protective-order
+  // verification, the protective-order submission and the end-of-day
+  // flatten, and it used to fail into a bare console.error while the
+  // heartbeat kept ticking -- so a backend that had left every position
+  // unprotected for six hours rendered here as "Backend online".
+  // null means the field is ABSENT, which for these two means "this
+  // account's backend hasn't deployed the code that writes them yet".
+  // That must not render as failing -- see renderReconcileHealthRow.
+  var backendReconcileLastSuccessAt = null;
+  var backendReconcileFailingSince = null;
+  var backendReconcileLastError = null;
   var backendMarketOpenAtHeartbeat = null;
   var backendScreenerEnabledOnServer = null;
   // The server's own effective value for the fade screener, mirrored the
@@ -3179,6 +3208,9 @@
         ensureInWatchlist(p.sym, COMPANY_NAMES[p.sym] || p.sym, p.entry, p.entry);
       });
       backendHeartbeatAt = data.serverHeartbeatAt;
+      backendReconcileLastSuccessAt = data.reconcileLastSuccessAt;
+      backendReconcileFailingSince = data.reconcileFailingSince;
+      backendReconcileLastError = data.reconcileLastError;
       backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
       backendScreenerEnabledOnServer = data.serverIntradayScreenerEnabled;
       backendFadeScreenerEnabledOnServer = data.serverFadeScreenerEnabled;
@@ -10742,6 +10774,111 @@
   // than a couple missed ticks' worth, the honest read is "can't confirm
   // this is alive" rather than silently trusting a stale timestamp.
   var BACKEND_HEARTBEAT_STALE_MS = 150000; // 2.5 min -- allows for one missed 60s tick plus write latency
+  // ---- Reconcile-health thresholds ----
+  //
+  // reconcileFilledExits runs on the same once-a-minute tick as the
+  // heartbeat, so a "reconcile age" is a count of missed minutes. The
+  // thresholds are chosen against what a miss COSTS, not against the
+  // cadence alone: while this pass is down, filled entries get no
+  // protective order, exits already filled at the broker are never
+  // booked, and the end-of-day flatten does not run.
+  //
+  // Healthy up to 5 minutes. A single slow minute is not degraded, and
+  // it is routinely not even a failure -- an Alpaca 500, a socket reset
+  // or a Firestore contention retry costs one tick and the next one
+  // recovers. 5 minutes tolerates four consecutive misses plus snapshot
+  // latency and client/server clock skew (this compares a server-written
+  // timestamp against Date.now() in a browser, which is why the band has
+  // to be minutes rather than seconds). It is deliberately NOT 2.5 min
+  // like the heartbeat: the heartbeat is written before anything is
+  // attempted, so it is a cheap write, while a reconcile pass has to
+  // talk to Alpaca first and legitimately takes longer to land.
+  var RECONCILE_DEGRADED_AFTER_MS = 5 * 60 * 1000;
+  // Failing at 15 minutes, which is the end-of-day flatten window --
+  // the tightest real deadline this pass owns. Past that point an outage
+  // has been long enough to have missed it entirely, so it is no longer
+  // "probably a blip", it is a thing the owner has to go look at.
+  //
+  // Note the equities cycle is a separate, slower clock (see
+  // INTRADAY_CYCLE_INTERVAL_MS): reconcile is once a minute and must not
+  // be judged on the cycle's cadence, or a genuinely dead reconcile pass
+  // would read as healthy for as long as one cycle interval.
+  var RECONCILE_FAILING_AFTER_MS = 15 * 60 * 1000;
+  // When reconcileFailingSince is set the backend is telling us it is
+  // failing RIGHT NOW -- that is a stronger signal than an aging success
+  // stamp, so it gets its own, shorter escalation. 10 minutes matches
+  // shwoop-server's FAILURE_ALERT_AFTER_MS exactly: the app should say
+  // "failing" at the same moment the server decides to text the owner,
+  // rather than disagreeing with the SMS they are holding.
+  var RECONCILE_FAILING_STREAK_MS = 10 * 60 * 1000;
+
+  // Returns { level, label, sub } for the reconcile row, where level is
+  // 'unknown' | 'ok' | 'degraded' | 'failing'.
+  //
+  // 'unknown' exists so an account whose backend has not deployed the
+  // reconcile-health code yet does not render as failing. Absence of
+  // evidence is not evidence of failure, and getting that wrong would
+  // train the owner to ignore this row -- which is the same outcome as
+  // not having built it.
+  function reconcileHealthState(nowMs){
+    var successMs = firestoreMillis(backendReconcileLastSuccessAt);
+    var failingMs = firestoreMillis(backendReconcileFailingSince);
+    var haveSuccess = !isNaN(successMs);
+    var haveFailing = !isNaN(failingMs);
+
+    if(!haveSuccess && !haveFailing){
+      return {
+        level: 'unknown',
+        label: 'Reconciliation: not reported',
+        sub: 'This account\'s backend hasn\'t reported reconcile health yet — it is running an older build, or it has never completed a pass since deploying. Protective-order checks may still be running; there is just no evidence either way here.'
+      };
+    }
+
+    // The backend's own "I am currently failing" flag takes precedence
+    // over the success stamp, because it is the fresher fact: the
+    // success stamp only tells you when things last worked, this tells
+    // you that they are not working now.
+    if(haveFailing){
+      var failingFor = nowMs - failingMs;
+      var lastOk = haveSuccess ? ' Last successful pass ' + formatAgo(nowMs - successMs) + '.' : ' No successful pass has ever been recorded.';
+      var errText = backendReconcileLastError ? ' Last error: ' + escapeHtml(String(backendReconcileLastError)) : '';
+      if(failingFor >= RECONCILE_FAILING_STREAK_MS){
+        return {
+          level: 'failing',
+          label: 'Reconciliation has been failing for ' + Math.round(failingFor / 60000) + ' min',
+          sub: 'Protective orders are not being verified or submitted and the end-of-day flatten is not running. Check your open positions now.' + lastOk + errText
+        };
+      }
+      return {
+        level: 'degraded',
+        label: 'Reconciliation is failing (started ' + formatAgo(failingFor) + ')',
+        sub: 'The backend is up but its once-a-minute reconcile pass is erroring. Short runs of this recover on their own; if it keeps going, protective orders stop being submitted.' + lastOk + errText
+      };
+    }
+
+    var age = nowMs - successMs;
+    if(age >= RECONCILE_FAILING_AFTER_MS){
+      return {
+        level: 'failing',
+        // The honest sentence this whole card was missing: running, but
+        // not reconciling, with the number attached.
+        label: 'Running, but hasn\'t reconciled in ' + Math.round(age / 60000) + ' minutes',
+        sub: 'The process is alive but its reconcile pass has not completed for longer than the end-of-day flatten window. Positions may be unprotected. Check the Render logs and your open positions.'
+      };
+    }
+    if(age >= RECONCILE_DEGRADED_AFTER_MS){
+      return {
+        level: 'degraded',
+        label: 'Reconciliation is behind — last success ' + formatAgo(age),
+        sub: 'It runs every minute, so this is several missed passes. Not yet long enough to have missed the end-of-day flatten, but worth watching.'
+      };
+    }
+    return {
+      level: 'ok',
+      label: 'Reconciliation healthy',
+      sub: 'Protective orders verified and the end-of-day flatten checked ' + formatAgo(age) + '.'
+    };
+  }
   // Matches shwoop-server's scheduler.js INTRADAY_INTERVAL_MS -- dropped
   // from 5 minutes to 1 once the equities screener moved off Twelve
   // Data's rate limit onto Alpaca's, which could actually support the
@@ -10751,6 +10888,54 @@
   // CRYPTO_INTERVAL_MS) -- this was never the bottleneck the equities
   // change targets.
   var CRYPTO_CYCLE_INTERVAL_MS = 5 * 60 * 1000;
+
+  // ONE way to read a timestamp that came out of Firestore, because the
+  // shape it actually arrives in is not the shape every call site here
+  // assumes. shwoop-server writes some of these as Date.now() (a plain
+  // number) and others as a JS Date, and the Admin SDK stores a Date as
+  // a Firestore Timestamp. Read back through the web SDK that is a
+  // Timestamp instance (toMillis()/toDate(), .seconds/.nanoseconds), and
+  // through anything JSON it is a bare { _seconds, _nanoseconds }.
+  // `new Date(thatObject)` is Invalid Date in both cases.
+  //
+  // That exact mistake is not hypothetical here: it is the bug that
+  // silently disabled the trailing stop on every position this account
+  // has ever held (shwoop-server/src/lib/entryBarTime.js documents the
+  // whole chain). Every comparison against NaN is false, so the code
+  // walked zero bars, kept the initial stop, and logged nothing. This is
+  // the frontend's equivalent of that helper, and it accepts the same
+  // four shapes for the same reason.
+  //
+  // Returns NaN when the value cannot be dated -- deliberately, not
+  // Date.now() and not 0. A substituted fallback would make a broken
+  // field render as a confident healthy or a confident failing, and both
+  // of those are worse than "unknown", which callers can say out loud.
+  function firestoreMillis(value){
+    if(value === null || value === undefined) return NaN;
+    if(value instanceof Date) return value.getTime();
+    if(typeof value === 'number' || typeof value === 'string') return new Date(value).getTime();
+    if(typeof value === 'object'){
+      // Real web-SDK Timestamp instances.
+      if(typeof value.toMillis === 'function'){
+        var ms = value.toMillis();
+        return typeof ms === 'number' && isFinite(ms) ? ms : NaN;
+      }
+      if(typeof value.toDate === 'function'){
+        var d = value.toDate();
+        return d instanceof Date ? d.getTime() : NaN;
+      }
+      // A Timestamp that has been through JSON. The Admin SDK underscores
+      // the keys, the web SDK does not; accept both, because a value can
+      // reach this page either way.
+      var secs = value._seconds !== undefined ? value._seconds : value.seconds;
+      var nanos = value._nanoseconds !== undefined ? value._nanoseconds : value.nanoseconds;
+      if(typeof secs === 'number' && isFinite(secs)){
+        var ns = typeof nanos === 'number' && isFinite(nanos) ? nanos : 0;
+        return secs * 1000 + Math.floor(ns / 1e6);
+      }
+    }
+    return NaN;
+  }
 
   function formatAgo(ms){
     if(ms < 1000) return 'just now';
@@ -10848,6 +11033,30 @@
           '</div>' +
         '</div></div>'
       );
+    }
+
+    // ---- Row 2b: is it actually RECONCILING, not just alive? ----
+    // Deliberately its own row rather than folded into the heartbeat
+    // row: a fresh heartbeat and a dead reconcile pass is precisely the
+    // state that used to be invisible, and merging them back into one
+    // sentence would hide it again.
+    if(alpacaConnected || backendHeartbeatAt){
+      var rec = reconcileHealthState(Date.now());
+      var recDot = rec.level === 'ok' ? 'ok' : rec.level === 'degraded' ? 'stale' : rec.level === 'failing' ? 'error' : '';
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + recDot + '"></div><div>' +
+          '<div class="backend-pulse-label">' + rec.label + '</div>' +
+          '<div class="backend-pulse-sub">' + rec.sub + '</div>' +
+        '</div></div>'
+      );
+      // A failing reconcile pass must beat a fresh heartbeat in the card
+      // HEADER too. The header is what someone sees without expanding
+      // the card, so leaving it green while the body says positions are
+      // unprotected would reproduce the original lie one level up.
+      if(rec.level === 'failing' || rec.level === 'degraded'){
+        if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
+        if(headMeta){ headMeta.textContent = rec.level === 'failing' ? 'Not reconciling' : 'Reconcile behind'; }
+      }
     }
 
     // ---- Row 3: this cycle's status ----
