@@ -10946,9 +10946,24 @@
     // for an orphaned entry, Open Positions/Alpaca for an untracked one).
     if(backendPositionDrift && backendPositionDrift.length > 0){
       var driftLines = backendPositionDrift.map(function(f){
-        return f.type === 'orphaned_entry'
-          ? f.sym + ' — journal shows open, Alpaca shows no matching position (likely stale — review and remove it from Journal)'
-          : f.sym + ' — open on Alpaca (qty ' + f.qty + ') with no matching journal entry (no stop/target tracking from the backend)';
+        if(f.type === 'orphaned_entry'){
+          return f.sym + ' — journal shows open, Alpaca shows no matching position (likely stale — review and remove it from Journal)';
+        }
+        // quantity_mismatch carries alpacaQty/journalQty/overExposed, NOT
+        // the single `qty` the untracked_position finding carries (see
+        // shwoop-server's safety/positionDrift.js). Falling through to the
+        // untracked branch printed "qty undefined" for the one finding whose
+        // whole point is a number: it is the only drift type that says the
+        // account holds a different SIZE than the journal believes, the case
+        // that let 15 duplicate orders sit unnoticed because both
+        // set-membership checks saw the symbol on both sides and said
+        // nothing. Which way it is wrong is part of the reading -- holding
+        // MORE than the journal tracks means the extra size carries no stop.
+        if(f.type === 'quantity_mismatch'){
+          return f.sym + ' — Alpaca holds ' + f.alpacaQty + ', journal totals ' + f.journalQty
+            + (f.overExposed ? ' (holding MORE than tracked — the extra size has no stop of its own)' : ' (holding LESS than tracked — journal-sized exits would try to close more than the account holds)');
+        }
+        return f.sym + ' — open on Alpaca (qty ' + f.qty + ') with no matching journal entry (no stop/target tracking from the backend)';
       });
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
@@ -11360,6 +11375,16 @@
   }
   function isStaleIntradayJournalEntry(j, now){
     if(!j || j.screenerType !== 'intraday' || j.status !== 'open') return false;
+    // A position that is SUPPOSED to outlive its session is not stale, it is
+    // working. shwoop-server's safety/staleEntries.js gates on exactly this
+    // (holdsAcrossSessions, lib/holdingHorizon.js) before any date compare,
+    // and a multi-day strategy sets holdAcrossSessions on purpose. Without
+    // this the row reads "needs review — remove it from the Journal", which
+    // would strand a real, funded, still-open position with no record of it
+    // anywhere: the worst of the three states position drift reports.
+    // Anything other than an explicit true stays intraday, matching the
+    // backend's own fail-closed reading of the field.
+    if(j.holdAcrossSessions === true) return false;
     var session = null;
     if(j.entryBarTime){
       var t = new Date(j.entryBarTime);
