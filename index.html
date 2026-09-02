@@ -2324,13 +2324,12 @@
 
     <!-- Overall P&L above is real Alpaca order history, reconstructed the
          same way the "Pull full history from Alpaca" export does. That
-         reconstruction covers EQUITIES ONLY -- crypto's order shape can't
-         be paired the same way (see reconstructTradesFromOrders) -- so the
-         card names its own scope in its sub-label and reports crypto's
-         journal figure alongside rather than folding broker-reconciled and
-         journal-only dollars into one number. It is left outside this
-         filter because it is a broker-derived figure, not a per-strategy
-         one. Everything below is
+         reconstruction covers BOTH asset classes now (it was equities-only
+         until crypto's fee-in-kind and partial exits were handled -- see
+         reconstructTradesFromOrders), so every dollar in the card is the
+         broker's own, and none of it is journal bookkeeping. It is left
+         outside this filter because it is a broker-derived figure, not a
+         per-strategy one. Everything below is
          derived from our own journal entries, which DO carry which
          strategy each trade came from, so it's the honest place to split. -->
     <div class="strategy-filter-row" id="journalFilterRow" hidden>
@@ -9587,23 +9586,95 @@
   // fill in between) can only mean a real duplicate order went through --
   // flagged as an anomaly rather than silently mispairing it with the
   // wrong exit.
+  //
+  // CRYPTO IS RECONSTRUCTED HERE TOO, and used to be excluded. The stated
+  // reason for excluding it was that crypto "does not pair by bracket
+  // legs" -- crypto has no order_class at Alpaca at all, so the stop is a
+  // separately-submitted stop_limit order that the backend cancels by hand
+  // (shwoop-server's cryptoProtectiveOrders.js). But this function never
+  // paired by bracket legs in the first place: it pairs by side
+  // alternation over `status === 'filled'` orders only, and a cancelled
+  // protective order never reaches `filled`. The unfilled leg simply is
+  // not in the list. That objection was about a mechanism this code does
+  // not use, and excluding crypto made the app's headline P&L silently
+  // equities-only.
+  //
+  // What genuinely IS different about crypto, and what the crypto branch
+  // below exists for:
+  //
+  //   FEES ARE TAKEN IN KIND. Alpaca charges the crypto commission in the
+  //   asset, so a buy of 250 SOL leaves ~249.6 SOL actually held, and the
+  //   closing sell can only ever fill the smaller number (protectiveQty in
+  //   cryptoProtectiveOrders.js clamps to the held quantity for exactly
+  //   this reason). Assuming buy qty == sell qty would leave dust open on
+  //   every single trade and mis-pair everything after it. So the crypto
+  //   branch tracks a REMAINING quantity, and P&L is real cash flow --
+  //   (sell qty x sell price) - (matched buy qty x buy price) -- with the
+  //   coin that never came back charged at cost as `feeCost` rather than
+  //   quietly dropped. The fee is surfaced, not absorbed: it is a column
+  //   in the history table and it is inside the net figure, because it is
+  //   money the account really paid.
+  //
+  //   Only the BUY-side in-kind fee is visible this way. A sell's fee is
+  //   deducted from the USD proceeds, and Alpaca does not report it in the
+  //   order record, so these dollars are net of the buy-side fee only and
+  //   are, if anything, a touch optimistic. Said out loud rather than
+  //   implied.
+  //
+  //   PARTIAL EXITS are real: a position can be closed by more than one
+  //   sell. Each sell closes a slice against the same entry basis and the
+  //   remainder stays open for the next one, so the trade after it still
+  //   pairs correctly.
+  //
+  //   SYMBOL FORM. /v2/positions returns "UNIUSD" and /v2/orders returns
+  //   "UNI/USD" (see canonicalSymbol). Grouping on the raw string would
+  //   split one symbol into two books and orphan both halves, so grouping
+  //   is on the canonical form. Equities symbols contain no "/", so this
+  //   is a no-op for them.
+  //
+  // ANYTHING THAT CANNOT BE RECONSTRUCTED IS REPORTED, NEVER DROPPED. A
+  // sell with no open position, or a sell larger than what is open (coin
+  // acquired outside this app, a transfer in), cannot be assigned a cost
+  // basis from order history alone. Silently skipping it would make the
+  // headline total quietly wrong, which is the exact failure this card was
+  // rebuilt around Alpaca's own fills to escape. It goes in
+  // `unreconstructable` and is shown on screen and beside the headline.
+  var CRYPTO_DUST_FRACTION = 0.02; // see below
   function reconstructTradesFromOrders(orders){
     var filled = orders.filter(function(o){
-      return o.status === 'filled' && o.filled_at && o.filled_avg_price && o.asset_class !== 'crypto';
+      return o.status === 'filled' && o.filled_at && o.filled_avg_price;
     });
     filled.sort(function(a,b){ return new Date(a.filled_at) - new Date(b.filled_at); });
     var bySymbol = {};
-    filled.forEach(function(o){ (bySymbol[o.symbol] = bySymbol[o.symbol] || []).push(o); });
+    filled.forEach(function(o){ (bySymbol[canonicalSymbol(o.symbol)] = bySymbol[canonicalSymbol(o.symbol)] || []).push(o); });
 
     var trades = [];
     var anomalies = [];
+    var unreconstructable = [];
     Object.keys(bySymbol).forEach(function(sym){
+      // Crypto-ness is decided per SYMBOL, not per order: the two forms of
+      // one pair are already merged into this group, and an order missing
+      // asset_class still belongs to the same book as its siblings.
+      var isCrypto = bySymbol[sym].some(function(o){
+        return o.asset_class === 'crypto' || (o.symbol || '').indexOf('/') >= 0;
+      });
       var open = null;
       bySymbol[sym].forEach(function(o){
         var qty = parseFloat(o.filled_qty || o.qty);
         var price = parseFloat(o.filled_avg_price);
         if(!open){
-          open = { sym: sym, entrySide: o.side, entryPrice: price, entryTime: o.filled_at, qty: qty };
+          if(isCrypto && o.side === 'sell'){
+            // Alpaca does not permit crypto shorts, so a sell with nothing
+            // open is coin this order history cannot price -- no basis, no
+            // trade. Reported, not swallowed.
+            unreconstructable.push({
+              sym: sym, time: o.filled_at, qty: qty,
+              note: 'Sell of ' + qty + ' ' + sym + ' with no open position in the order history -- ' +
+                'no cost basis is recoverable (coin transferred in, or bought before this history begins).',
+            });
+            return;
+          }
+          open = { sym: sym, entrySide: o.side, entryPrice: price, entryTime: o.filled_at, qty: qty, remaining: qty };
           return;
         }
         if(o.side === open.entrySide){
@@ -9616,23 +9687,67 @@
           return;
         }
         var direction = open.entrySide === 'buy' ? 'Long' : 'Short';
-        var pctReturn = direction === 'Long' ? (price - open.entryPrice) / open.entryPrice * 100 : (open.entryPrice - price) / open.entryPrice * 100;
-        var dollarPL = (price - open.entryPrice) * open.qty * (direction === 'Long' ? 1 : -1);
         var exitType = o.type === 'stop' ? 'Stop-loss' : o.type === 'limit' ? 'Target' : 'Market (manual/EOD)';
+        if(!isCrypto){
+          // EQUITIES PATH -- byte-for-byte the arithmetic it has always
+          // been. Equities fees are not taken in kind and a whole-share
+          // exit matches the entry, so there is nothing here to fix and
+          // nothing to risk changing.
+          var pctReturn = direction === 'Long' ? (price - open.entryPrice) / open.entryPrice * 100 : (open.entryPrice - price) / open.entryPrice * 100;
+          var dollarPL = (price - open.entryPrice) * open.qty * (direction === 'Long' ? 1 : -1);
+          trades.push({
+            sym: sym, direction: direction, qty: open.qty,
+            entryPrice: open.entryPrice, entryTime: open.entryTime,
+            exitPrice: price, exitTime: o.filled_at, exitType: exitType,
+            pctReturn: pctReturn, dollarPL: dollarPL, assetClass: 'us_equity',
+          });
+          open = null;
+          return;
+        }
+
+        // CRYPTO PATH.
+        // Crypto's stop is a stop_limit order (Alpaca has no plain stop for
+        // crypto), which the equities labelling above would have called a
+        // manual exit. Relabelled here only, so the equities path keeps the
+        // exact exit-type mapping it has always had.
+        if(o.type === 'stop_limit') exitType = 'Stop-loss';
+        var closeQty = Math.min(qty, open.remaining);
+        if(qty > open.remaining * (1 + 1e-9)){
+          unreconstructable.push({
+            sym: sym, time: o.filled_at, qty: qty - open.remaining,
+            note: 'Sell of ' + qty + ' ' + sym + ' exceeded the ' + open.remaining + ' still open from the ' +
+              'entry at ' + open.entryTime + ' -- the excess has no cost basis in this order history and is ' +
+              'excluded from P&L rather than priced off the wrong entry.',
+          });
+        }
+        open.remaining -= closeQty;
+        // DUST vs A REAL PARTIAL EXIT. The in-kind fee is a fraction of a
+        // percent of the position; a deliberate partial exit is a
+        // meaningful slice of it. Anything left under 2% of the original
+        // quantity is the fee, so the trade is closed and that coin is
+        // charged at cost. Anything above it is still a live position and
+        // the book stays open for the next sell.
+        var isFinalExit = open.remaining <= open.qty * CRYPTO_DUST_FRACTION;
+        var feeQty = isFinalExit ? open.remaining : 0;
+        var feeCost = feeQty * open.entryPrice;
+        var grossPL = (price - open.entryPrice) * closeQty * (direction === 'Long' ? 1 : -1);
+        var netPLc = grossPL - feeCost;
+        var basis = open.entryPrice * (closeQty + feeQty);
         trades.push({
-          sym: sym, direction: direction, qty: open.qty,
+          sym: sym, direction: direction, qty: closeQty,
           entryPrice: open.entryPrice, entryTime: open.entryTime,
           exitPrice: price, exitTime: o.filled_at, exitType: exitType,
-          pctReturn: pctReturn, dollarPL: dollarPL,
+          pctReturn: basis > 0 ? netPLc / basis * 100 : 0,
+          dollarPL: netPLc, feeCost: feeCost, assetClass: 'crypto',
         });
-        open = null;
+        if(isFinalExit) open = null;
       });
     });
     trades.sort(function(a,b){ return new Date(b.exitTime) - new Date(a.exitTime); });
-    return { trades: trades, anomalies: anomalies };
+    return { trades: trades, anomalies: anomalies, unreconstructable: unreconstructable };
   }
 
-  function renderAlpacaHistoryResults(trades, anomalies){
+  function renderAlpacaHistoryResults(trades, anomalies, unreconstructable){
     var wrap = document.getElementById('alpacaHistoryResultWrap');
     wrap.removeAttribute('hidden');
 
@@ -9645,6 +9760,11 @@
     var avgWin = wins.length ? grossWin / wins.length : 0;
     var avgLoss = losses.length ? grossLoss / losses.length : 0;
     var netPL = trades.reduce(function(s,t){ return s + t.dollarPL; }, 0);
+    // The crypto commission is taken in the asset, so it never appears as a
+    // line item anywhere -- it is simply coin that did not come back. It is
+    // already inside netPL (see reconstructTradesFromOrders); shown on its
+    // own as well so the cost is visible rather than merely felt.
+    var feeTotal = trades.reduce(function(s,t){ return s + (t.feeCost || 0); }, 0);
 
     var statsEl = document.getElementById('alpacaHistoryStats');
     statsEl.innerHTML =
@@ -9653,13 +9773,25 @@
       '<div class="pl-card"><div class="pl-card-label">Profit factor</div><div class="pl-card-value mono ' + (pf >= 1 ? 'up' : 'down') + '">' + (pf === Infinity ? '∞' : pf.toFixed(2)) + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Avg win</div><div class="pl-card-value mono up">+$' + avgWin.toFixed(0) + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Avg loss</div><div class="pl-card-value mono down">−$' + avgLoss.toFixed(0) + '</div></div>' +
-      '<div class="pl-card"><div class="pl-card-label">Net P&L</div><div class="pl-card-value mono ' + (netPL >= 0 ? 'up' : 'down') + '">' + (netPL >= 0 ? '+' : '−') + '$' + Math.abs(netPL).toFixed(0) + '</div></div>';
+      '<div class="pl-card"><div class="pl-card-label">Net P&L</div><div class="pl-card-value mono ' + (netPL >= 0 ? 'up' : 'down') + '">' + (netPL >= 0 ? '+' : '−') + '$' + Math.abs(netPL).toFixed(0) + '</div></div>' +
+      (feeTotal > 0 ? '<div class="pl-card"><div class="pl-card-label">Crypto fees (in kind)</div><div class="pl-card-value mono down">−$' + feeTotal.toFixed(2) + '</div></div>' : '');
 
     var anomaliesEl = document.getElementById('alpacaHistoryAnomalies');
     anomaliesEl.innerHTML = anomalies.length
       ? '<div class="labs-backtest-note" style="color:var(--loss); margin-bottom:14px;">' + anomalies.length + ' anomal' + (anomalies.length === 1 ? 'y' : 'ies') + ' detected (likely duplicate-order residue): ' +
         anomalies.map(function(a){ return a.sym + ' at ' + a.time; }).join(', ') + '</div>'
       : '';
+
+    // Never hidden, never rolled into the total: a fill that cannot be
+    // priced is stated as such, because a total that quietly omits it is
+    // wrong in the one direction nobody would notice.
+    var unrec = unreconstructable || [];
+    if(unrec.length){
+      anomaliesEl.innerHTML += '<div class="labs-backtest-note" style="color:var(--loss); margin-bottom:14px;">' +
+        unrec.length + ' fill' + (unrec.length === 1 ? '' : 's') + ' could not be reconstructed and ' +
+        (unrec.length === 1 ? 'is' : 'are') + ' excluded from the figures above: ' +
+        unrec.map(function(u){ return u.sym + ' at ' + u.time + ' -- ' + u.note; }).join(' · ') + '</div>';
+    }
 
     var tableEl = document.getElementById('alpacaHistoryTableWrap');
     tableEl.innerHTML = '<table class="backtest-trades-table">' +
@@ -9679,7 +9811,7 @@
         '</tr>';
       }).join('') + '</tbody></table>';
 
-    document.getElementById('alpacaHistoryRawTextarea').value = JSON.stringify({ trades: trades, anomalies: anomalies }, null, 2);
+    document.getElementById('alpacaHistoryRawTextarea').value = JSON.stringify({ trades: trades, anomalies: anomalies, unreconstructable: unrec }, null, 2);
   }
 
   document.getElementById('pullAlpacaHistoryBtn').addEventListener('click', function(){
@@ -9690,7 +9822,7 @@
     fetchAllAlpacaClosedOrders().then(function(orders){
       statusEl.textContent = 'Pulled ' + orders.length + ' order' + (orders.length === 1 ? '' : 's') + ' from Alpaca.';
       var result = reconstructTradesFromOrders(orders);
-      renderAlpacaHistoryResults(result.trades, result.anomalies);
+      renderAlpacaHistoryResults(result.trades, result.anomalies, result.unreconstructable);
     }).catch(function(err){
       statusEl.textContent = 'Failed to pull history: ' + err.message;
     }).finally(function(){
@@ -9824,36 +9956,36 @@
       var up = netPL >= 0;
       overallValEl.textContent = (up ? '+$' : '−$') + Math.abs(netPL).toFixed(0);
       overallValEl.className = 'pl-card-value mono ' + (up ? 'up' : 'down');
-      // THE NUMBER IS EQUITIES-ONLY, SO THE LABEL SAYS EQUITIES-ONLY.
+      // THE NUMBER IS NOW ALL-TIME, ACROSS BOTH ASSET CLASSES, AND EVERY
+      // DOLLAR IN IT IS THE BROKER'S.
       //
-      // reconstructTradesFromOrders filters out `asset_class === 'crypto'`
-      // deliberately, and for a real reason (crypto's order shape -- a
-      // plain market entry plus separately-submitted, manually-cancelled
-      // stop/target orders -- does not pair by bracket legs the way
-      // equities orders do). The arithmetic is not the bug. The label was:
-      // this card said "Overall P&L / All-time" and the journal fallback
-      // rendered a moment earlier genuinely DOES include crypto, so the
-      // headline silently changed scope -- and usually value -- the instant
-      // Alpaca resolved, with nothing on screen saying why. The sibling
-      // patchTradeStatsFromAlpaca already labels its own equities-only
-      // numbers; this one did not.
+      // This card used to say "All-time equities", honestly, because
+      // reconstructTradesFromOrders filtered out `asset_class === 'crypto'`
+      // and the crypto half was reported beside it from this app's own
+      // journal, explicitly marked journal-only. That was the right label
+      // for the number it had. The number is what changed: crypto is
+      // reconstructed from Alpaca's order history too now (see that
+      // function's own comment for what fee-in-kind, partial exits and the
+      // two symbol forms each required), so both halves come from the same
+      // place and the headline can say all-time without lying.
       //
-      // Do not "fix" this by adding the journal's crypto P&L into netPL.
-      // That would mix broker-reconciled dollars with dollars this app's
-      // own bookkeeping produced, in a single figure, with no way to tell
-      // afterwards which half is which -- the exact drift this card was
-      // rebuilt around Alpaca's order history to escape. Crypto is reported
-      // beside it, from the journal, and named as journal-only.
-      var cryptoClosed = journalEntries.filter(function(e){
-        return e.status === 'closed' && e.screenerType === 'crypto';
-      });
-      var cryptoNote = '';
-      if(cryptoClosed.length){
-        var cryptoPL = cryptoClosed.reduce(function(s, e){ return s + computePL(e).dollar; }, 0);
-        cryptoNote = ' · crypto not included: ' + (cryptoPL >= 0 ? '+$' : '−$') + Math.abs(cryptoPL).toFixed(0) +
-          ' over ' + cryptoClosed.length + ' journal trade' + (cryptoClosed.length === 1 ? '' : 's') + ' (journal-only, not broker-reconciled)';
-      }
-      overallSubEl.textContent = 'All-time equities · ' + alpacaAccountLabel() + ' · ' + trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + ', ' + wins + 'W/' + (trades.length - wins) + 'L' + cryptoNote;
+      // The rule that produced the old label still stands and must not be
+      // undone: never add the journal's crypto P&L into netPL. That would
+      // mix broker-reconciled dollars with dollars this app's own
+      // bookkeeping produced, in one figure, with no way to tell afterwards
+      // which half is which. The fix was to reconcile crypto, not to blend
+      // it. netPL below is 100% Alpaca fills and nothing else.
+      //
+      // Anything the order history genuinely could not price is named in
+      // the sub-label rather than dropped -- a total that silently omits a
+      // fill is wrong in the one direction nobody checks.
+      var unrecNote = result.unreconstructable.length
+        ? ' · ' + result.unreconstructable.length + ' fill' + (result.unreconstructable.length === 1 ? '' : 's') +
+          ' not reconstructable (excluded -- see Pull full history)'
+        : '';
+      var cryptoCount = trades.filter(function(t){ return t.assetClass === 'crypto'; }).length;
+      var mixNote = cryptoCount ? ' (' + (trades.length - cryptoCount) + ' equities, ' + cryptoCount + ' crypto)' : '';
+      overallSubEl.textContent = 'All-time · broker-reconciled · ' + alpacaAccountLabel() + ' · ' + trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + mixNote + ', ' + wins + 'W/' + (trades.length - wins) + 'L' + unrecNote;
     }).catch(function(err){
       // Not connected, or a transient Alpaca hiccup -- the journal-based
       // fallback rendered above stays showing rather than the card going
@@ -9872,31 +10004,32 @@
   // All unreconciled used to mean this block and the headline Overall
   // P&L card right above it (always Alpaca-patched regardless of tab)
   // could show disagreeing numbers on the same screen with nothing
-  // explaining why. reconstructTradesFromOrders deliberately excludes
-  // crypto (its real order shape -- a plain market entry plus
-  // separately-submitted, manually-cancelled stop/target orders --
-  // doesn't fit the same bracket-leg pairing equities orders do), so the
-  // Crypto tab is the one left showing its own honest journal fallback,
-  // and All's own sub-label says "equities; crypto not yet reconciled"
-  // rather than implying crypto is included.
+  // explaining why. reconstructTradesFromOrders now reconstructs crypto
+  // from the same order history (see its own comment), so all three tabs
+  // -- All, Equities and Crypto -- show broker-reconciled trades, each
+  // filtered to what its own tab claims to be about. The Crypto tab used
+  // to be left on its journal fallback because crypto was excluded from
+  // the reconstruction; it no longer is, and leaving it on the journal
+  // would recreate exactly the disagreement described above, one tab
+  // over.
   var tradeStatsPatchGen = 0;
   function patchTradeStatsFromAlpaca(){
     var myGen = ++tradeStatsPatchGen;
-    // Only the Crypto tab is skipped -- reconstructTradesFromOrders has no
-    // way to reconcile crypto's own order shape (see its own comment), so
-    // that tab is left showing the honest journal-based fallback. All and
-    // Equities both patch in the same real, reconciled equities trades:
-    // leaving All permanently unreconciled (the previous behavior here)
-    // meant the headline Overall P&L card above it (always Alpaca-patched,
-    // see patchOverallPLFromAlpaca) and these cards silently disagreed on
-    // the exact same screen with no indication why -- which is exactly
-    // the "disconnect" that kept getting reported. The sub-labels below
-    // make clear when crypto isn't included in what's shown.
-    if(journalFilter === 'crypto') return;
+    // Every tab patches now. Which trades a tab gets is decided by the
+    // tab, not by what the reconstruction happens to be able to do:
+    // Equities gets the equities fills, Crypto gets the crypto fills, All
+    // gets both. Before crypto was reconcilable, All silently meant
+    // equities; that is what the sub-label had to apologise for below, and
+    // it no longer does.
+    var tabAtCall = journalFilter;
     getAlpacaClosedOrdersCached().then(function(orders){
-      if(myGen !== tradeStatsPatchGen || journalFilter === 'crypto') return; // superseded, or the tab changed while this was in flight
-      var trades = reconstructTradesFromOrders(orders).trades;
-      if(!trades.length) return; // not connected, or no real equities trades yet -- leave the journal-based fallback showing
+      if(myGen !== tradeStatsPatchGen || journalFilter !== tabAtCall) return; // superseded, or the tab changed while this was in flight
+      var trades = reconstructTradesFromOrders(orders).trades.filter(function(t){
+        if(tabAtCall === 'crypto') return t.assetClass === 'crypto';
+        if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
+        return true;
+      });
+      if(!trades.length) return; // not connected, or no real trades on this tab yet -- leave the journal-based fallback showing
       var wins = trades.filter(function(t){ return isWinningReturn(t.dollarPL); });
       var losses = trades.filter(function(t){ return !isWinningReturn(t.dollarPL); });
       var winRate = (wins.length / trades.length) * 100;
@@ -9930,12 +10063,12 @@
 
       winRateEl.textContent = winRate.toFixed(0) + '%';
       if(profitFactorEl) profitFactorEl.textContent = isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞';
-      // On All, these cards now reflect real equities trades only --
-      // crypto isn't part of this reconstruction -- so the label says so
-      // rather than implying "all trades" the way the Equities tab's own
-      // unambiguous label can.
-      winRateSubEl.textContent = trades.length + ' real trade' + (trades.length === 1 ? '' : 's') +
-        (journalFilter === 'all' ? ' (equities; crypto not yet reconciled)' : '');
+      // All really does mean all now -- both asset classes, every dollar
+      // from Alpaca's own fills -- so the label no longer has to carve out
+      // crypto. It says "broker-reconciled" because the number these cards
+      // replaced was the journal's, and the distinction is the whole point
+      // of patching them.
+      winRateSubEl.textContent = trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + ' (broker-reconciled)';
       avgWinEl.textContent = '+$' + avgWin.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(avgLoss).toFixed(0);
       if(best){
@@ -10141,18 +10274,20 @@
     var card = document.getElementById('growthChartCard');
     if(!card) return;
 
-    // reconstructTradesFromOrders is equities-only (crypto's order shape
-    // doesn't fit its bracket-leg pairing -- see its own comment), so the
-    // Crypto tab goes straight to the journal fallback rather than showing
-    // an equities-only curve under a Crypto heading.
-    if(journalFilter === 'crypto'){
-      renderGrowthChartWithRanges(closedJournalTradesForGrowth());
-      return;
-    }
-
+    // The Crypto tab used to go straight to the journal fallback, because
+    // reconstructTradesFromOrders excluded crypto and an equities-only
+    // curve under a Crypto heading would have been a lie. Crypto is
+    // reconstructed now, so every tab draws the broker's own fills,
+    // filtered to what the tab is about -- a curve whose source silently
+    // differs per tab is the same class of bug one level down.
+    var tabAtCall = journalFilter;
     getAlpacaClosedOrdersCached().then(function(orders){
-      if(myGen !== growthChartGen) return; // superseded by a newer render
-      var trades = reconstructTradesFromOrders(orders).trades;
+      if(myGen !== growthChartGen || journalFilter !== tabAtCall) return; // superseded by a newer render
+      var trades = reconstructTradesFromOrders(orders).trades.filter(function(t){
+        if(tabAtCall === 'crypto') return t.assetClass === 'crypto';
+        if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
+        return true;
+      });
       if(trades.length >= 2){
         renderGrowthChartWithRanges(trades);
         return;
