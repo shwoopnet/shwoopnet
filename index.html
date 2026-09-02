@@ -6186,6 +6186,17 @@
   // of profit factor, and a trade that returned nothing contributed to
   // neither -- counting it as a win inflates the win rate for free.
   function isWinningReturn(x){ return x > 0; }
+  // SEVEN call sites, not three. The first pass at this unified the three that
+  // were obviously the same computation; four more were found later, each in a
+  // different corner: the calendar cell's own WR badge, the Journal day recap
+  // directly beneath it, the Alpaca history page's win/loss split (which also
+  // feeds its profit factor), and the overall P&L card's win count. A day
+  // could therefore report one win count on the calendar cell and a different
+  // one in the recap under it.
+  //
+  // If you are adding a win rate or a profit factor, route it through here.
+  // The rule is not "> 0 is nicer" -- it is that a scratch trade must not be a
+  // win in one place and a loss in another on the same screen.
 
   function summarizeBacktestTrades(trades){
     var resolved = trades.filter(function(t){ return t.outcome !== 'unresolved'; });
@@ -8927,7 +8938,7 @@
     entries.forEach(function(e){
       var pl = computePL(e);
       dollar += pl.dollar;
-      if(pl.pct >= 0) wins++;
+      if(isWinningReturn(pl.pct)) wins++;
     });
     var avgPct = entries.reduce(function(s,e){ return s + computePL(e).pct; }, 0) / entries.length;
     return { dollar: dollar, symbols: entries.length, pct: avgPct, winRate: (wins / entries.length) * 100 };
@@ -9058,7 +9069,30 @@
       el.innerHTML = '<div class="journal-empty">Click a marked date to see that day\'s trades.</div>';
       return;
     }
-    var entries = filteredJournalEntries().filter(function(e){ return e.date === selectedJournalDate; });
+    // THE LIST MUST DESCRIBE THE SAME DAY THE CALENDAR CELL DOES.
+    //
+    // The cell's P&L was moved onto the EXIT date (a closed trade belongs to
+    // the day it was realized, not the day it opened) and this list was left
+    // filtering on `e.date`, the ENTRY date. Half a fix, and the two then
+    // contradicted each other on screen: the cell read "+$151 · 5 sym · 20%
+    // WR" while the recap under it read "Closed 4 positions — 0 wins, 4
+    // losses" over four negative rows. One trade had closed on a different
+    // day than it opened, so the cell counted it and the list did not -- and
+    // that trade was the day's only winner.
+    //
+    // Both halves of the day, each on the right date:
+    //   - a CLOSED trade appears on the day it was realized, which is exactly
+    //     what the cell's figure is the sum of;
+    //   - an OPEN trade has no realized date yet, so it appears on the day it
+    //     was entered.
+    //
+    // Written as one predicate rather than two filters so the cell and the
+    // list cannot drift apart again.
+    var entries = filteredJournalEntries().filter(function(e){
+      return e.status === 'closed'
+        ? realizedOnDate(e) === selectedJournalDate
+        : e.date === selectedJournalDate;
+    });
     // UTC midnight + UTC-formatted display -- selectedJournalDate is a
     // plain "YYYY-MM-DD" string matched against entries' UTC-stamped
     // `date` field (see renderCalendar's own comment); parsing it as
@@ -9073,7 +9107,7 @@
 
     var closed = entries.filter(function(e){ return e.status === 'closed'; });
     var open = entries.filter(function(e){ return e.status === 'open'; });
-    var wins = closed.filter(function(e){ return computePL(e).pct >= 0; }).length;
+    var wins = closed.filter(function(e){ return isWinningReturn(computePL(e).pct); }).length;
     var losses = closed.length - wins;
     var netPct = closed.reduce(function(sum, e){ return sum + computePL(e).pct; }, 0);
 
@@ -9307,8 +9341,8 @@
     var wrap = document.getElementById('alpacaHistoryResultWrap');
     wrap.removeAttribute('hidden');
 
-    var wins = trades.filter(function(t){ return t.dollarPL > 0; });
-    var losses = trades.filter(function(t){ return t.dollarPL <= 0; });
+    var wins = trades.filter(function(t){ return isWinningReturn(t.dollarPL); });
+    var losses = trades.filter(function(t){ return !isWinningReturn(t.dollarPL); });
     var grossWin = wins.reduce(function(s,t){ return s + t.dollarPL; }, 0);
     var grossLoss = Math.abs(losses.reduce(function(s,t){ return s + t.dollarPL; }, 0));
     var pf = grossLoss > 0 ? (grossWin / grossLoss) : (grossWin > 0 ? Infinity : 0);
@@ -9488,7 +9522,7 @@
       var trades = result.trades;
       if(!trades.length) return; // not connected, or no real trades yet -- leave the journal-based fallback showing
       var netPL = trades.reduce(function(s,t){ return s + t.dollarPL; }, 0);
-      var wins = trades.filter(function(t){ return t.dollarPL > 0; }).length;
+      var wins = trades.filter(function(t){ return isWinningReturn(t.dollarPL); }).length;
       var overallValEl = document.getElementById('overallPLValue');
       var overallSubEl = document.getElementById('overallPLSub');
       if(!overallValEl || !overallSubEl) return;
