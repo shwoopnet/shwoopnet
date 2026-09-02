@@ -300,6 +300,10 @@
   .header-live-status{ font-size:11.5px; font-weight:600; margin-bottom:2px; }
   .header-live-status.ok{ color: var(--gain); }
   .header-live-status.fail{ color: var(--loss); }
+  /* Degraded, not down: the last batch failed but the prices on screen
+     are still recent. Neither green nor red, because claiming either
+     would be wrong -- see quoteFeedStatus. */
+  .header-live-status.warn{ color: var(--muted); }
 
   /* Trade notification bubble -- Messenger-style: a small colored circle
      with the open-position count inside, color reflecting today's
@@ -8089,6 +8093,35 @@
   // Both feed the SAME header status together (see renderHeaderLiveStatus).
   var lastCryptoQuoteSyncOk = false;
 
+  // A single all-failed batch is not a dead feed, and the header used to
+  // claim it was: lastQuoteSyncOk was overwritten by every batch, so one
+  // rate-limited burst flipped it red and the next batch flipped it back
+  // green -- flapping every few seconds while the app worked fine. That
+  // trains the owner to ignore the indicator entirely, which is the same
+  // argument this codebase already makes about log floods: a warning
+  // nobody reads is its own kind of silence. So "failed" is now a
+  // SUSTAINED state -- consecutive all-failed batches AND no good data
+  // for long enough that the poll loop should have recovered by now.
+  var QUOTE_FAIL_STREAK_LIMIT = 3;
+  // Comfortably longer than three 45s poll ticks, so a feed that ever
+  // recovers within the loop's own cadence never trips this.
+  var QUOTE_STALE_MS = 150000;
+  // Named rather than left as a literal at the setInterval below, because
+  // three other numbers here are only defensible RELATIVE to it: the
+  // staleness window has to outlast several ticks of it, and the dedupe
+  // floor has to be shorter than it or it would throttle the very loop it
+  // exists to leave alone. A test asserts those relationships hold.
+  var QUOTE_POLL_INTERVAL_MS = 45000;
+  var quoteFailStreak = 0;
+  var lastGoodQuoteAt = null;
+
+  // Both the equities batch and the crypto batch report here: either one
+  // succeeding proves the feed is alive, so either one resets the streak.
+  function noteQuoteBatchResult(ok){
+    if(ok){ quoteFailStreak = 0; lastGoodQuoteAt = Date.now(); }
+    else { quoteFailStreak++; }
+  }
+
   // ---------- Alpaca market data (primary when connected, Finnhub/Twelve
   // Data as automatic fallback) ----------
   // Alpaca's data endpoint (data.alpaca.markets) is a DIFFERENT subdomain
@@ -8270,29 +8303,88 @@
   // wrote a fresher price would silently overwrite it with a stale one.
   var quoteFetchGen = {};
 
+  // The equities batch fires one Alpaca request per watchlist symbol, all
+  // at the same instant, and it is triggered from TWO places: the 45s
+  // poll loop, and the journal listener -- which fires on every write to
+  // the shared account document, including the backend's own ~60s
+  // heartbeat and each write a trading cycle makes. Each trigger used to
+  // start its own full, unpaced burst, so bursts overlapped and the real
+  // per-minute request count was set by how chatty the backend happened
+  // to be that minute rather than by anything here.
+  //
+  // That is the whole flapping story. When a burst is rate-limited,
+  // EVERY symbol in it fails together -- they were all in flight at the
+  // same moment -- and then every one of them falls back to Finnhub at
+  // the same moment too, through one shared key with its own limit, so
+  // the fallback fails as well. results.some(...) is then false for the
+  // entire batch and the header went red, with a perfectly healthy feed
+  // and last-known prices still on screen.
+  //
+  // Same shape as getAlpacaPositionsCached above: reuse the in-flight
+  // batch instead of starting a second one, and refuse to start a fresh
+  // one inside a minimum interval. This can only ever REDUCE request
+  // volume -- the 45s loop is longer than the floor, so its own cadence
+  // is untouched; what is dropped is the duplicate journal-driven bursts.
+  var QUOTE_BATCH_MIN_INTERVAL_MS = 20000;
+  var quoteBatchInflight = null;
+  var lastQuoteBatchStartedAt = 0;
+
   function fetchAllQuotes(){
-    var results = [];
-    var sources = [];
-    var pending = watchlist.length;
-    watchlist.forEach(function(item){
-      quoteFetchGen[item.sym] = (quoteFetchGen[item.sym] || 0) + 1;
-      var myGen = quoteFetchGen[item.sym];
-      fetchQuote(item.sym).then(function(q){
-        if(quoteFetchGen[item.sym] === myGen){
-          item.price = q.price;
-          item.prevClose = q.prevClose;
+    if(quoteBatchInflight) return quoteBatchInflight;
+    if(lastQuoteBatchStartedAt && (Date.now() - lastQuoteBatchStartedAt) < QUOTE_BATCH_MIN_INTERVAL_MS){
+      // Deliberately not queued for later: the 45s loop is already going
+      // to run one, and a queued burst is just the same duplicate burst
+      // arriving slightly later.
+      return Promise.resolve(null);
+    }
+    lastQuoteBatchStartedAt = Date.now();
+    quoteBatchInflight = runQuoteBatch().then(function(r){
+      quoteBatchInflight = null;
+      return r;
+    }, function(err){
+      quoteBatchInflight = null;
+      throw err;
+    });
+    return quoteBatchInflight;
+  }
+
+  function runQuoteBatch(){
+    return new Promise(function(resolve){
+      var results = [];
+      var sources = [];
+      // Snapshotted, not read live: the journal listener can add symbols
+      // mid-batch, and a growing watchlist would mean `pending` never
+      // reaches the count it was sized for.
+      var items = watchlist.slice();
+      var pending = items.length;
+      if(pending === 0){ resolve(results); return; }
+      function settle(){
+        if(pending === 0){
+          lastQuoteBatchSources = sources;
+          onQuoteBatchDone(results);
+          resolve(results);
         }
-        sources.push(q.source);
-        renderTicker();
-        pending--;
-        results.push(true);
-        if(pending === 0){ lastQuoteBatchSources = sources; onQuoteBatchDone(results); }
-      }).catch(function(err){
-        // Leave the last known price in place rather than breaking the UI.
-        console.error('Quote fetch failed for', item.sym, err);
-        pending--;
-        results.push(false);
-        if(pending === 0){ lastQuoteBatchSources = sources; onQuoteBatchDone(results); }
+      }
+      items.forEach(function(item){
+        quoteFetchGen[item.sym] = (quoteFetchGen[item.sym] || 0) + 1;
+        var myGen = quoteFetchGen[item.sym];
+        fetchQuote(item.sym).then(function(q){
+          if(quoteFetchGen[item.sym] === myGen){
+            item.price = q.price;
+            item.prevClose = q.prevClose;
+          }
+          sources.push(q.source);
+          renderTicker();
+          pending--;
+          results.push(true);
+          settle();
+        }).catch(function(err){
+          // Leave the last known price in place rather than breaking the UI.
+          console.error('Quote fetch failed for', item.sym, err);
+          pending--;
+          results.push(false);
+          settle();
+        });
       });
     });
   }
@@ -8313,6 +8405,7 @@
 
   function updateQuoteSyncStatus(results){
     lastQuoteSyncOk = results.some(function(r){ return r; });
+    noteQuoteBatchResult(lastQuoteSyncOk);
     renderHeaderLiveStatus();
   }
 
@@ -8325,24 +8418,49 @@
   // which can leave its own quotes momentarily stale) showed "Sync
   // failed" even while crypto was live and trading fine, and there was no
   // way to tell from the header alone which side actually broke.
+
+  // Pure, and separated from the DOM, so the hysteresis above can be
+  // tested against real sequences of batch results rather than inferred
+  // from the rendered string (see test/quoteFeedStatusGates.test.js).
+  //
+  // What this measures, stated plainly: not "did the last batch
+  // succeed", but "is the feed sustainedly down" -- every recent batch
+  // failed AND the prices on screen have gone stale with it. Anything
+  // short of that is a retry, not a failure, and says so.
+  function quoteFeedStatus(s){
+    var anyOk = !!(s.equitiesOk || s.cryptoOk);
+    var age = (s.lastGoodAt === null || s.lastGoodAt === undefined) ? Infinity : (s.now - s.lastGoodAt);
+    if(!anyOk && s.failStreak >= s.streakLimit && age >= s.staleMs){
+      return { cls: 'fail', text: 'Sync failed — last known prices' };
+    }
+    if(anyOk){
+      var usedAlpaca = s.sources && s.sources.length > 0 && s.sources.every(function(x){ return x === 'alpaca'; });
+      var label = s.equitiesOk ? (usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub') : 'Alpaca (crypto)';
+      return { cls: 'ok', text: 'Live via ' + label };
+    }
+    return {
+      cls: 'warn',
+      text: isFinite(age)
+        ? 'Retrying — prices from ' + Math.max(1, Math.round(age / 1000)) + 's ago'
+        : 'Connecting…'
+    };
+  }
+
   function renderHeaderLiveStatus(){
     var el = document.getElementById('headerLiveStatus');
     if(!el) return;
-    var anyOk = lastQuoteSyncOk || lastCryptoQuoteSyncOk;
-    if(anyOk){
-      // Reflects what actually happened this cycle, not just whether
-      // Alpaca trading is connected — if every equities data call
-      // quietly fell back to Finnhub (e.g. a CORS block), this correctly
-      // still says Finnhub. Prefers naming whichever side is actually
-      // live when only one of the two is.
-      var usedAlpaca = lastQuoteBatchSources.length > 0 && lastQuoteBatchSources.every(function(s){ return s === 'alpaca'; });
-      var label = lastQuoteSyncOk ? (usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub') : 'Alpaca (crypto)';
-      el.textContent = 'Live via ' + label;
-      el.className = 'header-live-status ok';
-    } else {
-      el.textContent = 'Sync failed — last known prices';
-      el.className = 'header-live-status fail';
-    }
+    var status = quoteFeedStatus({
+      equitiesOk: lastQuoteSyncOk,
+      cryptoOk: lastCryptoQuoteSyncOk,
+      failStreak: quoteFailStreak,
+      lastGoodAt: lastGoodQuoteAt,
+      now: Date.now(),
+      streakLimit: QUOTE_FAIL_STREAK_LIMIT,
+      staleMs: QUOTE_STALE_MS,
+      sources: lastQuoteBatchSources
+    });
+    el.textContent = status.text;
+    el.className = 'header-live-status ' + status.cls;
   }
 
   var priceLoopInterval = null;
@@ -8367,6 +8485,7 @@
   // -- the two run independently and just happen to share a poll cadence.
   function onCryptoQuoteBatchDone(ok){
     lastCryptoQuoteSyncOk = ok;
+    noteQuoteBatchResult(ok);
     renderHeaderLiveStatus();
     renderTicker();
     renderCryptoSentiment();
@@ -8383,7 +8502,7 @@
     priceLoopInterval = setInterval(function(){
       fetchAllQuotes();
       fetchAllCryptoQuotes().then(onCryptoQuoteBatchDone);
-    }, 45000);
+    }, QUOTE_POLL_INTERVAL_MS);
   }
 
   // ---------- Clock ----------
