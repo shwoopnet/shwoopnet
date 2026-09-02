@@ -2388,7 +2388,7 @@
       <div class="pl-card">
         <div class="pl-card-label">Reached Trail/Breakeven</div>
         <div class="pl-card-value mono" id="statEverProtected">—</div>
-        <div class="pl-card-sub" id="statEverProtectedSub">The health metric to watch — a low rate means the entry signal isn't producing real follow-through.</div>
+        <div class="pl-card-sub" id="statEverProtectedSub">The health metric to watch — a low rate means the entry signal isn't producing real follow-through. Trades the backend couldn't evaluate are counted separately, not as failures.</div>
       </div>
       <div class="pl-card">
         <div class="pl-card-label">Avg Win</div>
@@ -9398,7 +9398,7 @@
     // from this count entirely rather than silently counted as "never
     // protected" and skewing the rate with pre-fix data that predates
     // this metric existing.
-    var everProtectedTracked = 0, everProtectedCount = 0;
+    var everProtectedTracked = 0, everProtectedCount = 0, everProtectedUnmeasurable = 0;
     closed.forEach(function(e){
       var pl = computePL(e);
       totalDollar += pl.dollar;
@@ -9407,7 +9407,32 @@
       else { lossDollarSum += pl.dollar; lossCount++; lossPctSum += pl.pct; }
       if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
-      if(e.everProtected !== undefined){ everProtectedTracked++; if(e.everProtected) everProtectedCount++; }
+      // THREE STATES, because two of them used to look identical.
+      //
+      // everProtected only ever flips true once a stop replacement
+      // SUCCEEDS at the broker, so it fuses "the signal followed through"
+      // with "the API call worked". A trade whose stop could not be rested,
+      // or whose bracket refresh failed, read exactly like one whose signal
+      // never moved -- and this card claims to measure the first of those.
+      //
+      // reachedEarlyBreakeven (shwoop-server orchestrator.js
+      // applyEarlyBreakevenUpdates) records the signal's own follow-through
+      // independently of the broker. Prefer it wherever it exists.
+      //
+      // For older entries that predate it, everProtected === true still
+      // PROVES follow-through -- it is a conjunction, so the true branch
+      // implies both halves. Only everProtected === false is ambiguous, and
+      // that is the state counted as not-measurable rather than as a
+      // failure of the entry signal.
+      if(e.reachedEarlyBreakeven !== undefined){
+        everProtectedTracked++;
+        if(e.reachedEarlyBreakeven) everProtectedCount++;
+      } else if(e.everProtected === true){
+        everProtectedTracked++;
+        everProtectedCount++;
+      } else if(e.everProtected === false){
+        everProtectedUnmeasurable++;
+      }
     });
     var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
     return {
@@ -9418,6 +9443,7 @@
       profitFactor: profitFactor,
       best: best, worst: worst,
       everProtectedTracked: everProtectedTracked, everProtectedCount: everProtectedCount,
+      everProtectedUnmeasurable: everProtectedUnmeasurable,
       everProtectedRate: everProtectedTracked ? (everProtectedCount / everProtectedTracked) * 100 : null
     };
   }
@@ -10023,12 +10049,21 @@
       winRateEl.textContent = filtered.winRate.toFixed(0) + '%';
       winRateSubEl.textContent = filtered.count + ' total trades';
       profitFactorEl.textContent = isFinite(filtered.profitFactor) ? filtered.profitFactor.toFixed(2) : '∞';
+      // A trade the backend could not evaluate is reported as its own
+      // number, never folded into the denominator. Folding it in presents
+      // "we could not check" as "we checked and the signal failed", which
+      // is the single most misleading thing this card could do.
+      var unmeasurableNote = filtered.everProtectedUnmeasurable
+        ? ' · ' + filtered.everProtectedUnmeasurable + ' not measurable'
+        : '';
       if(filtered.everProtectedRate === null){
         everProtectedEl.textContent = '—';
-        everProtectedSubEl.textContent = 'No tracked trades yet';
+        everProtectedSubEl.textContent = filtered.everProtectedUnmeasurable
+          ? filtered.everProtectedUnmeasurable + ' trade' + (filtered.everProtectedUnmeasurable === 1 ? '' : 's') + ' recorded before this could be measured'
+          : 'No measured trades yet';
       } else {
         everProtectedEl.textContent = filtered.everProtectedRate.toFixed(0) + '%';
-        everProtectedSubEl.textContent = filtered.everProtectedCount + ' of ' + filtered.everProtectedTracked + ' tracked trades';
+        everProtectedSubEl.textContent = filtered.everProtectedCount + ' of ' + filtered.everProtectedTracked + ' measured' + unmeasurableNote;
       }
       avgWinEl.textContent = '+$' + filtered.avgWinDollar.toFixed(0);
       avgLossEl.textContent = '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
