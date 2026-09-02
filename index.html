@@ -1760,10 +1760,6 @@
         reconcileFailingSince: data.reconcileFailingSince || null,
         reconcileLastError: data.reconcileLastError || null,
         serverMarketOpenAtHeartbeat: typeof data.serverMarketOpenAtHeartbeat === 'boolean' ? data.serverMarketOpenAtHeartbeat : null,
-        // null (absent) means an older server build that never wrote it --
-        // "unknown", which the card says nothing about, rather than "off",
-        // which would be an accusation we cannot support.
-        serverSmsAlertsConfigured: typeof data.serverSmsAlertsConfigured === 'boolean' ? data.serverSmsAlertsConfigured : null,
         serverIntradayScreenerEnabled: typeof data.serverIntradayScreenerEnabled === 'boolean' ? data.serverIntradayScreenerEnabled : null,
         serverIntradayAutoTradeEnabled: typeof data.serverIntradayAutoTradeEnabled === 'boolean' ? data.serverIntradayAutoTradeEnabled : null,
         // Per-cycle status -- flips scanning -> idle/error every 5
@@ -2757,7 +2753,7 @@
           <li>Intraday is now the primary strategy — Trade Overview, the Market Brief, and backtesting are all built around short-term, real-time setups instead of once-a-day picks</li>
           <li>Position sizing is now risk-based, computed fresh from your real account balance every time — scales automatically as the account grows instead of a fixed share count</li>
           <li>Full automated safety layer: positions close automatically if their original thesis breaks, get refreshed or closed at market close, and stay in sync with what Alpaca actually filled</li>
-          <li>New backend server: the screener, sizing, and safety checks now run on a real 24/7 schedule, independent of a browser tab being open, with SMS alerts on crashes</li>
+          <li>New backend server: the screener, sizing, and safety checks now run on a real 24/7 schedule, independent of a browser tab being open, with crash reporting in its own log</li>
           <li>New Status page: real account equity, today's P&amp;L, open positions with live P&amp;L, and a persistent log of everything the automated systems have done</li>
           <li>Backtest results now show expectancy and profit factor, not just win rate — and a real entry-price bug that was inflating returns has been found and fixed</li>
           <li>Guest mode and the onboarding tour removed — this is a single-owner tool now, not a public demo</li>
@@ -3290,7 +3286,6 @@
   var backendReconcileFailingSince = null;
   var backendReconcileLastError = null;
   var backendMarketOpenAtHeartbeat = null;
-  var backendSmsAlertsConfigured = null;
   var backendScreenerEnabledOnServer = null;
   // The server's own effective value for the fade screener, mirrored the
   // same way as the two above -- so the toggle never reads "Off" while
@@ -3387,7 +3382,6 @@
       backendReconcileFailingSince = data.reconcileFailingSince;
       backendReconcileLastError = data.reconcileLastError;
       backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
-      backendSmsAlertsConfigured = data.serverSmsAlertsConfigured;
       backendScreenerEnabledOnServer = data.serverIntradayScreenerEnabled;
       backendFadeScreenerEnabledOnServer = data.serverFadeScreenerEnabled;
       backendFadeAutoTradeEnabledOnServer = data.serverFadeAutoTradeEnabled;
@@ -11604,8 +11598,8 @@
   // failing RIGHT NOW -- that is a stronger signal than an aging success
   // stamp, so it gets its own, shorter escalation. 10 minutes matches
   // shwoop-server's FAILURE_ALERT_AFTER_MS exactly: the app should say
-  // "failing" at the same moment the server decides to text the owner,
-  // rather than disagreeing with the SMS they are holding.
+  // "failing" at the same moment the server decides to log an alert about
+  // it, rather than disagreeing with what the server's own log says.
   var RECONCILE_FAILING_STREAK_MS = 10 * 60 * 1000;
 
   // Returns { level, label, sub } for the reconcile row, where level is
@@ -11834,23 +11828,6 @@
         if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
         if(headMeta){ headMeta.textContent = rec.level === 'failing' ? 'Not reconciling' : 'Reconcile behind'; }
       }
-    }
-
-    // ---- Row 2c: is the out-of-app alerting channel even switched on? ----
-    // Only ever rendered when the server has actually TOLD us it is off.
-    // The backend's SMS alerts are the only thing that can reach the owner
-    // when the app is closed -- every other surface in this file needs a
-    // tab open to be seen -- and createNotifier turning itself into a no-op
-    // logger with no TWILIO_* env vars set is exactly the kind of switched
-    // off that looks identical to quiet. A channel that is off says it is
-    // off; that is this project's position on silent failure.
-    if(backendSmsAlertsConfigured === false){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
-          '<div class="backend-pulse-label">SMS alerts are switched off on the server</div>' +
-          '<div class="backend-pulse-sub">The backend has no Twilio credentials configured, so crash and reconciliation-failure alerts are only written to its own log — nothing will reach you while this app is closed. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER and TWILIO_TO_NUMBER in the Render environment to turn them on.</div>' +
-        '</div></div>'
-      );
     }
 
     // ---- Row 3: this cycle's status ----
