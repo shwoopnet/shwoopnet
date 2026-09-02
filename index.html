@@ -535,6 +535,80 @@
   }
   .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
 
+  /* ---- Forward-test record (Labs) ----------------------------------
+     The visual job of this block is to make three things impossible to
+     skim past, because each of them is how a paper number turned into a
+     quoted baseline before: that these are LIVE PAPER figures on
+     mechanisms research already crossed off, that a sample below the
+     confidence gate has no verdict, and that gross/cost/net are three
+     numbers rather than one. So the warning is a full-width band at the
+     top of the card rather than a tooltip, the refused state recolours
+     the whole strategy block instead of blanking a field, and the cost
+     column is always drawn even when it is small. */
+  .ft-warning{
+    border:1px solid var(--loss); border-left-width:4px; border-radius: var(--radius);
+    background: var(--panel-raised); padding:14px 16px; margin-bottom:18px;
+  }
+  .ft-warning-kind{
+    font-family:'Public Sans', sans-serif; font-weight:700; font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; color: var(--loss); margin-bottom:6px;
+  }
+  .ft-warning-text{ font-size:12.5px; color: var(--paper); line-height:1.6; }
+  .ft-since{ font-size:12px; color: var(--muted); line-height:1.6; margin-bottom:20px; }
+  .ft-since strong{ color: var(--paper); }
+  .ft-empty{ font-size:12.5px; color: var(--muted); line-height:1.6; }
+
+  .ft-strategy{
+    border:1px solid var(--border); border-radius: var(--radius);
+    padding:18px 20px; margin-bottom:18px; background: var(--panel-raised);
+  }
+  /* A refused verdict is a STATE of the whole block, not a missing
+     field: an amber-edged card that says so at the top reads as
+     "no verdict yet", where a blank number reads as zero. */
+  .ft-strategy.refused{ border-color: var(--amber); }
+  .ft-strategy-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:10px; }
+  .ft-strategy-name{ font-family:'Public Sans', sans-serif; font-weight:600; font-size:14px; }
+  .ft-verdict{
+    font-family:'Public Sans', sans-serif; font-weight:700; font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; padding:4px 10px; border-radius:5px; white-space:nowrap;
+  }
+  .ft-verdict.refused{ color: var(--amber); background: var(--amber-glow); border:1px solid var(--amber); }
+  .ft-verdict.sufficient{ color: var(--gain); border:1px solid var(--gain); }
+  .ft-refused-reason{
+    font-size:12px; color: var(--paper); line-height:1.6;
+    border-left:3px solid var(--amber); padding:8px 12px; margin-bottom:14px; background: var(--panel);
+  }
+  .ft-mechanism{
+    font-size:12px; color: var(--muted); line-height:1.6; margin-bottom:14px;
+    border-left:3px solid var(--border); padding:8px 12px; background: var(--panel);
+  }
+  .ft-metrics{ display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px; margin-bottom:14px; }
+  .ft-metric{ background: var(--panel); border:1px solid var(--border); border-radius:6px; padding:10px 12px; }
+  .ft-metric-label{ font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color: var(--muted); margin-bottom:4px; }
+  .ft-metric-value{ font-family:'IBM Plex Mono', monospace; font-size:14px; color: var(--paper); }
+  /* Provisional: the figure is real and recorded, but the sample behind
+     it is below the gate. Dimmed and annotated so it cannot be lifted
+     out of here and read as a result. */
+  .ft-metric.provisional .ft-metric-value{ color: var(--muted); font-style:italic; }
+  .ft-metric-note{ font-size:10.5px; color: var(--amber); margin-top:4px; }
+  .ft-metric-value.gain{ color: var(--gain); }
+  .ft-metric-value.loss{ color: var(--loss); }
+  .ft-exitmix{ font-size:12px; color: var(--muted); line-height:1.6; margin-bottom:14px; }
+  .ft-series-title{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color: var(--muted); margin:16px 0 8px 0; }
+  .ft-series{ width:100%; border-collapse:collapse; font-size:12px; }
+  .ft-series th{
+    text-align:right; font-family:'Public Sans', sans-serif; font-weight:600; font-size:10.5px;
+    letter-spacing:.05em; text-transform:uppercase; color: var(--muted);
+    padding:6px 8px; border-bottom:1px solid var(--border);
+  }
+  .ft-series th:first-child, .ft-series td:first-child{ text-align:left; }
+  .ft-series td{ text-align:right; padding:6px 8px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono', monospace; color: var(--paper); }
+  /* A superseded week is never deleted -- the correction is a new row and
+     the old one stays visible, struck through, saying what replaced it.
+     A record that can quietly drop a bad week is not evidence. */
+  .ft-series tr.superseded td{ color: var(--muted); text-decoration: line-through; }
+  .ft-series-note{ font-size:11px; color: var(--muted); margin-top:8px; line-height:1.6; }
+
   /* Duplicate-trade warning. Sits directly above the stats row because
      these numbers are what a duplicate corrupts -- every one of them is
      wrong, in the same direction, and none of them look wrong. */
@@ -1781,6 +1855,13 @@
         // positionDriftCheckedAt to tell those apart.
         positionDriftFindings: Array.isArray(data.positionDriftFindings) ? data.positionDriftFindings : [],
         positionDriftCheckedAt: data.positionDriftCheckedAt || null,
+        // The append-only forward-test record (shwoop-server/src/forwardTest.js).
+        // Passed through raw: every field in a snapshot is written once by
+        // the backend and never rewritten, so there is nothing to coerce
+        // here, and coercing would risk inventing a value the backend never
+        // emitted. Absent means "no completed week has been snapshotted
+        // yet", which the renderer says out loud rather than drawing zeros.
+        forwardTestSnapshots: Array.isArray(data.forwardTestSnapshots) ? data.forwardTestSnapshots : [],
         // Account summary + live positions the backend already fetches
         // from Alpaca every minute (see shwoop-server's
         // syncAccountSnapshot) -- delivered here over the same live
@@ -2779,6 +2860,21 @@
       </div>
     </div>
 
+    <!-- The forward-test record sits ABOVE the backtest deliberately.
+         A backtest is a claim; this is the measurement, and the measurement
+         is what the owner should read first. Rendered entirely from the
+         snapshots on the user doc (see renderForwardTestRecord) -- never
+         from GET /forward-test, which is behind a server-side shared secret
+         the browser must never hold. -->
+    <div class="brief-section-title" style="margin-top:36px;">Forward-Test Record</div>
+    <div class="labs-backtest-card">
+      <p class="labs-backtest-intro">
+        What the paper account actually did, appended once per completed week by the backend and never rewritten.
+        Each strategy is shown on its own; they are different mechanisms and a combined figure would be a number about nothing.
+      </p>
+      <div id="forwardTestRecord"></div>
+    </div>
+
     <div class="brief-section-title" style="margin-top:36px;">Crypto Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
@@ -3316,6 +3412,10 @@
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
   var backendPositionDrift = [];
+  // The dated, immutable weekly forward-test record. Read off the SAME
+  // live listener as everything above; the server's GET /forward-test is
+  // behind a shared secret the browser must never hold.
+  var forwardTestSnapshots = [];
   // Account summary + positions synced by the backend (see
   // getAlpacaAccountSummaryCached/getAlpacaPositionsCached below for how
   // these get preferred over a direct Alpaca fetch).
@@ -3393,6 +3493,8 @@
       backendCycleErrorAt = data.intradayCycleErrorAt;
       backendLastCycleSummary = data.intradayLastCycleSummary;
       backendPositionDrift = data.positionDriftFindings;
+      forwardTestSnapshots = data.forwardTestSnapshots;
+      renderForwardTestRecord();
       backendAccountSummary = data.serverAccountSummary;
       backendPositions = data.serverPositions;
       backendAccountSnapshotAt = data.serverAccountSnapshotAt;
@@ -9202,6 +9304,7 @@
     if(name === 'trades'){ renderStatusPage(); }
     runCardEntrance(name);
     if(name === 'journal'){ renderCalendar(); }
+    if(name === 'labs'){ renderForwardTestRecord(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
@@ -12764,6 +12867,219 @@
   // against a dollar figure or symbol that happens to contain a character
   // HTML would swallow, and against this code being reused later for
   // something that IS user-supplied.
+  // ---------- Forward-test record (Labs) ----------
+  //
+  // The backend appends one immutable snapshot per completed week to the
+  // user document (shwoop-server/src/forwardTest.js). This reads it off the
+  // same live listener every other backend* field arrives on. It must NOT
+  // call GET /forward-test: that route is behind PROXY_SHARED_SECRET, and a
+  // secret in a static page is a secret published.
+  //
+  // Every rule below is a rendering rule because the underlying failure was
+  // a READING failure: seven profit factors were quoted here as baselines
+  // and all seven were withdrawn. The record only helps if the page makes
+  // it hard to lift a number out of context.
+  var FORWARD_TEST_STRATEGY_LABELS = {
+    'intraday-orb': 'Intraday ORB (equities)',
+    'equities-fade': 'Equities fade',
+    'crypto': 'Crypto'
+  };
+  // Order fixed here, and iterated one block at a time, so there is no code
+  // path that can sum across them. Three mechanisms with different
+  // counterparties, universes and cost models; one blended figure would be
+  // a number about nothing, and it would be the flattering one.
+  var FORWARD_TEST_STRATEGY_ORDER = ['intraday-orb', 'equities-fade', 'crypto'];
+
+  function ftMoney(n){
+    if(n === null || n === undefined || isNaN(n)) return '—';
+    var sign = n < 0 ? '-' : '';
+    return sign + '$' + Math.abs(n).toFixed(2);
+  }
+  function ftPercent(n){
+    if(n === null || n === undefined || isNaN(n)) return '—';
+    return (n * 100).toFixed(1) + '%';
+  }
+  function ftNumber(n){
+    if(n === null || n === undefined || isNaN(n)) return '—';
+    return Number(n).toFixed(2);
+  }
+
+  // The snapshot that STANDS for a period: the last correction in its
+  // chain. Mirrors effectiveSnapshots in shwoop-server/src/forwardTest.js.
+  // The superseded entries are still rendered -- struck through, in place --
+  // because a record that can quietly drop a week it did not like is not
+  // evidence.
+  function forwardTestSupersededIds(record){
+    var out = {};
+    (record || []).forEach(function(s){
+      if(s && s.supersedes){ out[s.supersedes] = s.id; }
+    });
+    return out;
+  }
+
+  function forwardTestSortedSnapshots(){
+    return (forwardTestSnapshots || []).filter(function(s){ return s && s.strategies; }).slice().sort(function(a, b){
+      var byPeriod = String(a.periodKey).localeCompare(String(b.periodKey));
+      if(byPeriod !== 0) return byPeriod;
+      return (a.correctionSeq || 0) - (b.correctionSeq || 0);
+    });
+  }
+
+  // One metric tile. `provisional` is the whole point of this helper: below
+  // the confidence gate the figure is still SHOWN (it was measured, and
+  // hiding it would invite re-deriving it by hand) but it is dimmed and
+  // carries the sample size next to it, so it cannot be read as a result.
+  function ftMetric(label, value, opts){
+    opts = opts || {};
+    var cls = 'ft-metric' + (opts.provisional ? ' provisional' : '');
+    var valueCls = 'ft-metric-value' + (opts.tone ? ' ' + opts.tone : '');
+    return '<div class="' + cls + '">' +
+      '<div class="ft-metric-label">' + escapeHtml(label) + '</div>' +
+      '<div class="' + valueCls + '">' + escapeHtml(value) + '</div>' +
+      (opts.note ? '<div class="ft-metric-note">' + escapeHtml(opts.note) + '</div>' : '') +
+    '</div>';
+  }
+
+  function ftExitMixLine(mix){
+    if(!mix) return 'Exit mix: not recorded.';
+    var parts = [];
+    ['stop', 'target', 'trail', 'time_stop', 'flatten', 'unclassified'].forEach(function(k){
+      if(mix[k]) parts.push(k.replace('_', ' ') + ' ' + mix[k]);
+    });
+    return 'Exit mix: ' + (parts.length ? parts.join(' · ') : 'no closed trades yet');
+  }
+
+  // The accumulating series is the actual value of this record -- the latest
+  // week on its own is one small sample, and a trend is the thing no
+  // hand-transcribed number ever gave. Oldest first, so the direction reads
+  // left-to-right down the page.
+  function ftSeriesTable(strategy, snaps, superseded){
+    var rows = snaps.map(function(s){
+      var block = s.strategies[strategy];
+      if(!block) return '';
+      var m = block.period || {};
+      var isSuperseded = Boolean(superseded[s.id]);
+      var label = escapeHtml(s.periodKey) + (s.supersedes ? ' (correction)' : '');
+      return '<tr class="' + (isSuperseded ? 'superseded' : '') + '">' +
+        '<td>' + label + (isSuperseded ? ' — superseded by ' + escapeHtml(superseded[s.id]) : '') + '</td>' +
+        '<td>' + (m.trades == null ? '—' : m.trades) + '</td>' +
+        '<td>' + escapeHtml(ftMoney(m.grossPnl)) + '</td>' +
+        '<td>' + escapeHtml(ftMoney(m.modeledCost)) + '</td>' +
+        '<td>' + escapeHtml(ftMoney(m.netPnl)) + '</td>' +
+      '</tr>';
+    }).join('');
+    return '<div class="ft-series-title">Weekly series — ' + escapeHtml(FORWARD_TEST_STRATEGY_LABELS[strategy] || strategy) + '</div>' +
+      '<table class="ft-series"><thead><tr>' +
+        '<th>Week</th><th>Trades</th><th>Gross</th><th>Modeled cost</th><th>Net</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      // Gross, cost and net stay three columns here for the same reason the
+      // research invariants keep them three fields: one blended number hides
+      // whether an edge died to cost or was never there.
+      '<div class="ft-series-note">Gross, modeled cost and net are shown separately, never blended. Cost is a model (round-trip rate), not broker billing.</div>';
+  }
+
+  function ftStrategyBlock(strategy, latest, snaps, superseded){
+    var block = latest.strategies[strategy];
+    if(!block){
+      return '<div class="ft-strategy"><div class="ft-strategy-name">' +
+        escapeHtml(FORWARD_TEST_STRATEGY_LABELS[strategy] || strategy) +
+        '</div><div class="ft-mechanism">This strategy is not present in the latest snapshot.</div></div>';
+    }
+    var refused = Boolean(block.verdictRefused);
+    var cum = block.cumulative || {};
+    var minTrades = block.minTradesForConfidence;
+    // The sample-size note travels with EVERY figure in a refused block. A
+    // single banner at the top is skimmed past; the annotation next to the
+    // number is not.
+    var gateNote = refused ? (cum.trades == null ? 'sample below the gate' : cum.trades + ' of ' + minTrades + ' trades') : null;
+    var opt = function(extra){
+      var o = { provisional: refused, note: gateNote };
+      if(extra && extra.tone && !refused) o.tone = extra.tone;
+      if(extra && extra.note) o.note = refused ? gateNote : extra.note;
+      return o;
+    };
+
+    var metrics = [
+      ftMetric('Closed trades (cumulative)', cum.trades == null ? '—' : String(cum.trades), {
+        note: 'since ' + ((latest.since && latest.since.date) || 'the marker') + (refused ? ' — below the ' + minTrades + '-trade gate' : '')
+      }),
+      ftMetric('Win rate', ftPercent(cum.winRate), opt()),
+      ftMetric('Expectancy (net/trade)', ftMoney(cum.expectancyNet), opt({ tone: cum.expectancyNet > 0 ? 'gain' : (cum.expectancyNet < 0 ? 'loss' : '') })),
+      // null is a MISSING DENOMINATOR, not an infinite result, and it says
+      // so rather than printing a dash that reads as zero.
+      ftMetric('Profit factor', cum.profitFactor == null ? 'n/a' : ftNumber(cum.profitFactor), cum.profitFactor == null
+        ? { provisional: true, note: 'no losing trade in the sample — no denominator' }
+        : opt()),
+      ftMetric('Max drawdown', ftMoney(cum.maxDrawdown), opt()),
+      ftMetric('Gross P&L', ftMoney(cum.grossPnl), opt()),
+      ftMetric('Modeled cost', ftMoney(cum.modeledCost), opt()),
+      ftMetric('Net P&L', ftMoney(cum.netPnl), opt({ tone: cum.netPnl > 0 ? 'gain' : (cum.netPnl < 0 ? 'loss' : '') }))
+    ].join('');
+
+    return '<div class="ft-strategy' + (refused ? ' refused' : '') + '">' +
+      '<div class="ft-strategy-head">' +
+        '<div class="ft-strategy-name">' + escapeHtml(FORWARD_TEST_STRATEGY_LABELS[strategy] || strategy) + '</div>' +
+        // The verdict slot is words, never a figure. A refused verdict
+        // rendered as a blank or as a neutral-looking number is read as a
+        // result anyway -- which is the exact failure this whole record
+        // exists to stop.
+        '<div class="ft-verdict ' + (refused ? 'refused' : 'sufficient') + '">' +
+          (refused ? 'Verdict refused — insufficient data' : 'Sample sufficient — apply the written thresholds') +
+        '</div>' +
+      '</div>' +
+      (refused
+        ? '<div class="ft-refused-reason">' + escapeHtml(block.verdictRefusedReason || ('Below MIN_TRADES_FOR_CONFIDENCE (' + minTrades + '). No verdict is possible from this sample.')) + '</div>'
+        : '') +
+      // Research already crossed these mechanisms off. Printed next to the
+      // P&L, not behind an expander, because a doc is not read at the moment
+      // somebody is quoting a number.
+      '<div class="ft-mechanism">' + escapeHtml(block.mechanismStatus || 'No mechanism status recorded for this strategy.') + '</div>' +
+      '<div class="ft-metrics">' + metrics + '</div>' +
+      '<div class="ft-exitmix">' + escapeHtml(ftExitMixLine(cum.exitMix)) + '</div>' +
+      ftSeriesTable(strategy, snaps, superseded) +
+    '</div>';
+  }
+
+  function renderForwardTestRecord(){
+    var el = document.getElementById('forwardTestRecord');
+    if(!el) return;
+    var snaps = forwardTestSortedSnapshots();
+    if(!snaps.length){
+      el.innerHTML = '<div class="ft-empty">No forward-test snapshot has been written yet. The backend appends one per completed week (Monday 00:00 UTC); until the first full week closes there is nothing to show — which is not the same as a flat week.</div>';
+      return;
+    }
+    var superseded = forwardTestSupersededIds(snaps);
+    var live = snaps.filter(function(s){ return !superseded[s.id]; });
+    var latest = live[live.length - 1] || snaps[snaps.length - 1];
+
+    // The warning is a band across the top of the card, at full contrast,
+    // above every figure. It is not fine print: every number below it is
+    // live paper traffic on mechanisms that failed their own research
+    // measurement.
+    var head = '<div class="ft-warning">' +
+      '<div class="ft-warning-kind">' + escapeHtml(latest.kind || 'live-paper-forward-test') +
+        ' · not a backtest' + (latest.notQuotableAs ? ' · not quotable as ' + escapeHtml(latest.notQuotableAs) : '') + '</div>' +
+      '<div class="ft-warning-text">' + escapeHtml(latest.warning || 'These are live paper forward-test figures and are never a backtest result.') + '</div>' +
+    '</div>';
+
+    // The sample always states its own "since", so a reader knows what they
+    // are looking at without asking anyone.
+    var since = latest.since || {};
+    head += '<div class="ft-since">' +
+      '<strong>Sample since ' + escapeHtml(since.date || 'unknown') + '.</strong> ' + escapeHtml(since.reason || '') +
+      '<br>Latest snapshot: <strong>' + escapeHtml(latest.periodKey || '') + '</strong> covering ' +
+      escapeHtml(latest.periodStart || '?') + ' to ' + escapeHtml(latest.periodEnd || '?') + ' (exclusive), ' +
+      escapeHtml(latest.environment || 'paper') + ' account, recorded ' + escapeHtml(String(latest.recordedAt || '')) + '. ' +
+      snaps.length + ' snapshot' + (snaps.length === 1 ? '' : 's') + ' on file, ' + live.length + ' standing.' +
+    '</div>';
+
+    var body = FORWARD_TEST_STRATEGY_ORDER.map(function(s){
+      return ftStrategyBlock(s, latest, snaps, superseded);
+    }).join('');
+
+    el.innerHTML = head + body;
+  }
+
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, function(c){
       return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
