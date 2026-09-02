@@ -3128,7 +3128,17 @@
       entryPct: 0, stopPctFromEntry: (pick.stop - pick.entry) / pick.entry,
       t1PctFromEntry: (pick.t1 - pick.entry) / pick.entry,
       entry: pick.entry, stop: pick.stop, t1: pick.t1,
-      status: pick.status, statusLabel: pick.statusLabel, notes: pick.notes.slice(),
+      status: pick.status, statusLabel: pick.statusLabel,
+      // Defensive on purpose. `pick.notes.slice()` threw TypeError for any
+      // pick written without a notes array, and this function runs at the
+      // very TOP of renderIntradayBlocks (via mergedEquitiesPicks) -- before
+      // a single byte of the card is written. So one malformed pick from the
+      // backend left Equities Setups as a bare header with nothing under it,
+      // and, because renderStatusPage called its cards in a bare sequence,
+      // took the cards after it and the account strip down with it. A
+      // missing reason to explain a trade is a missing sentence; it is not a
+      // reason to blank the page.
+      notes: Array.isArray(pick.notes) ? pick.notes.slice() : [],
       entryBarTime: pick.entryBarTime,
       // Which of the two equities strategies produced this. The breakout
       // and the fade scan the same universe on OPPOSITE sides, so an
@@ -10898,18 +10908,54 @@
     return Math.abs(todayPL) >= 0.005;
   }
 
+  // Each Trade Overview card renders independently, because they used to
+  // not. renderStatusPage called these five in a bare sequence, so a throw
+  // inside ANY of them silently skipped every card below it AND the account
+  // strip at the bottom of this function.
+  //
+  // The only reason that ever looked like a three-card bug rather than a
+  // whole-page one is that two of the five have a SECOND painter: Backend
+  // Status re-renders on its own 5s timer, and Crypto Setups re-renders in
+  // onCryptoQuoteBatchDone. Those two repainted themselves moments later and
+  // looked healthy; the cards with no second painter just stayed empty.
+  //
+  // A card that cannot render says so, in its own body, rather than showing
+  // an empty rounded rectangle -- blank reads as "the whole app is broken",
+  // which is both less true and less useful than naming the one card that
+  // failed.
+  function renderStatusCard(label, bodyId, fn){
+    try{
+      fn();
+    }catch(err){
+      console.error('Trade Overview card failed to render: ' + label, err);
+      var body = document.getElementById(bodyId);
+      if(body){
+        body.innerHTML = '<div class="labs-backtest-status">' + label + ' couldn\'t be drawn from the data the server last sent. Your positions are unaffected — this is a display fault, and it retries on the next refresh.</div>';
+      }
+    }
+  }
+
   function renderStatusPage(){
-    renderBackendStatus();
-    renderStatusPositions();
-    renderIntradayBlocks();
-    renderCryptoBlocks();
-    renderActivityLog();
+    renderStatusCard('Backend Status', 'backendStatusBody', renderBackendStatus);
+    renderStatusCard('Open Positions', 'statusPositionsBody', renderStatusPositions);
+    renderStatusCard('Equities Setups', 'intradayBlocks', renderIntradayBlocks);
+    renderStatusCard('Crypto Setups', 'cryptoBlocks', renderCryptoBlocks);
+    renderStatusCard('Activity Log', 'statusActivityList', renderActivityLog);
 
     var summaryEl = document.getElementById('statusAccountSummary');
     if(!summaryEl) return;
     if(!alpacaConnected){
       summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value">Not connected</div></div>';
       return;
+    }
+    // Painted synchronously so this strip is never an unexplained blank
+    // rounded rectangle while the request is in flight -- and, since the
+    // .then() below has no way to fire if the request fails, so a failure
+    // leaves a sentence rather than nothing. It is the one card on this page
+    // with no title of its own, so an empty one cannot even tell you WHICH
+    // card is missing; it just reads as furniture the app forgot to fill in.
+    if(!summaryEl.innerHTML){
+      summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value">Checking with Alpaca…</div></div>';
     }
     getAlpacaAccountSummaryCached().then(function(acct){
       var equity = parseFloat(acct.equity || 0);
@@ -11564,7 +11610,11 @@
         : [realOpen + ' open', needsReview, partialNote].filter(Boolean).join(' · ');
     }
     if(openPositions.length === 0){
-      el.innerHTML = '<div class="labs-backtest-status">No open' + POSITIONS_FILTER_LABELS[statusPositionsFilter] + ' positions right now.</div>';
+      // Says what is being watched, not only what is absent -- the voice
+      // the Crypto Setups card already uses. A quiet account should read as
+      // quiet, and "No open positions." alone is barely distinguishable from
+      // the blank card this page used to show instead.
+      el.innerHTML = '<div class="labs-backtest-status">No open' + POSITIONS_FILTER_LABELS[statusPositionsFilter] + ' positions right now — nothing is at risk. The backend keeps scanning and a position will appear here as soon as a setup qualifies and fills.</div>';
       return;
     }
     if(!alpacaConnected){
@@ -11572,6 +11622,16 @@
       return;
     }
     var myGen = ++statusPositionsRenderGen;
+    // The rows below arrive asynchronously from Alpaca, and nothing was
+    // written here in the meantime: the card showed its header, its Columns
+    // button and then nothing at all for as long as that took. The failure
+    // path is worse than one request -- loadStatusPositions' catch retries
+    // once silently two seconds later before it will write a message, so a
+    // flaky response held the card blank for the whole round trip plus that
+    // delay. Real open positions rendering as a blank card is the most
+    // dangerous empty state on this page, because it reads as "nothing is
+    // open" rather than "not loaded yet."
+    el.innerHTML = '<div class="labs-backtest-status">Checking ' + openPositions.length + ' open position' + (openPositions.length === 1 ? '' : 's') + ' against Alpaca…</div>';
     loadStatusPositions(openPositions, el, myGen, false);
   }
 
