@@ -36,19 +36,18 @@ exports.finnhubQuote = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) =>
   return finnhubGet("quote", { symbol });
 });
 
-exports.finnhubNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertSignedIn(request.auth);
-  return finnhubGet("news", { category: "general" });
-});
-
-exports.finnhubEarningsCalendar = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertSignedIn(request.auth);
-  const { from, to } = request.data || {};
-  if (!from || !to) {
-    throw new HttpsError("invalid-argument", "from and to (YYYY-MM-DD) are required");
-  }
-  return finnhubGet("calendar/earnings", { from, to });
-});
+// finnhubNews and finnhubEarningsCalendar used to sit here. Nothing called
+// them: index.html wires exactly two callables (finnhubQuote,
+// finnhubCompanyNews), and general news and the earnings calendar now arrive
+// through the backend's shared market snapshot instead.
+//
+// They were deployed functions holding a binding on the Finnhub API key, so
+// removing them narrows what can spend that key -- which is why this is worth
+// doing rather than leaving two harmless dead exports.
+//
+// NOTE: deleting them here does not undeploy them. `firebase deploy --only
+// functions` does not remove functions absent from source either; they have
+// to go with `firebase functions:delete finnhubNews finnhubEarningsCalendar`.
 
 exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
   assertSignedIn(request.auth);

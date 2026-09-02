@@ -345,8 +345,6 @@
      [hidden] override already present elsewhere in this file. */
   .settings-row[hidden]{ display:none; }
   .settings-row:last-of-type{ border-bottom:none; }
-  .settings-row-block{ display:block; }
-  .settings-row-block[hidden]{ display:none; }
   .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
   .settings-row-desc{ font-size:11.5px; color: var(--muted); }
   .quote-sync-status{
@@ -595,8 +593,6 @@
   .trade-progress-labels{ display:flex; justify-content:space-between; font-size:10px; color: var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:.04em; }
 
   .labs-backtest-controls{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
-  .labs-backtest-option{ display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--muted); margin:-4px 0 16px 0; }
-  .labs-backtest-option input{ margin:0; }
   .labs-control-field{ display:flex; flex-direction:column; gap:6px; min-width:0; flex:1 1 160px; }
   .labs-control-field label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); }
   .labs-control-field select{
@@ -727,35 +723,6 @@
   }
 
   .watch-trades{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom: 40px; }
-  .trades-empty-state{
-    padding: 32px 24px; text-align:center; color: var(--muted); font-size:13px; line-height:1.6;
-    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
-    box-shadow: var(--card-shadow);
-  }
-
-  .priority-label{
-    display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; text-transform:uppercase;
-    letter-spacing:.06em; margin: 24px 2px 10px 2px;
-  }
-  .priority-label:first-child{ margin-top:0; }
-  .priority-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-  .in-position-label{ color: var(--muted); }
-  .in-position-label .priority-dot{ background: var(--muted); }
-  .needs-entry-label{ color: var(--amber); }
-  .needs-entry-label .priority-dot{ background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); }
-  [data-reduce-motion="true"] .priority-dot{ animation:none; }
-  .trade-block-needs-entry{ border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber), 0 8px 24px rgba(0,0,0,.3); }
-  .finished-trades-section{ margin-top: 28px; }
-  .finished-toggle{
-    display:flex; align-items:center; gap:8px; width:100%; text-align:left;
-    background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
-    padding:14px 18px; font-size:12.5px; color: var(--muted); cursor:pointer;
-    font-family:'Public Sans', sans-serif; box-shadow: var(--card-shadow);
-  }
-  .finished-toggle:hover{ color: var(--paper); border-color: var(--amber-dim); }
-  .finished-toggle .caret{ font-size:10px; color: var(--amber); }
-  .finished-trades-list{ margin-top:14px; display:flex; flex-direction:column; gap:14px; opacity:.85; }
-  .finished-trades-list .trade-block{ border-color: var(--border); }
 
   .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
   @media (max-width: 900px){ .brief-two-col{ grid-template-columns:1fr; gap:24px; } }
@@ -883,7 +850,6 @@
     font-size:11.5px; padding:8px; border-radius:6px; cursor:pointer; width:100%;
   }
   .layout-reset-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
-  .layout-toggle-group{ display:flex; gap:4px; }
 
   /* ---------- Trade Overview: card show/hide + reorder ---------- */
   .to-card{ margin-top:20px; }
@@ -1052,16 +1018,6 @@
     }
   }
 
-  .news-stack-head{
-    display:flex; justify-content:flex-end; align-items:center;
-    font-size:11px; color: var(--muted); text-transform:uppercase; letter-spacing:.05em;
-    padding: 0 2px 8px 2px;
-  }
-  .news-dismiss-all{
-    background:none; border:none; color: var(--amber-dim); font-size:11px;
-    text-transform:none; letter-spacing:0; cursor:pointer; padding:0;
-  }
-  .news-dismiss-all:hover{ color: var(--amber); }
   .news-toast-tag{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color: var(--muted);
     border:1px solid var(--border); border-radius:999px; padding:2px 9px 1px; background: var(--panel-raised);
@@ -1152,12 +1108,6 @@
   .history-item-link:hover{ text-decoration:underline; }
   .history-empty{ font-size:12px; color: var(--muted); padding-top:10px; }
 
-  .settings-view-btn{
-    background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
-    padding:8px 16px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer;
-    font-family:'Public Sans', sans-serif;
-  }
-  .settings-view-btn:hover{ background: var(--amber); color: var(--amber-contrast); }
 
 
   .notepad-panel{
@@ -1312,7 +1262,6 @@
   .password-toggle:hover{ color: var(--paper); }
   .modal-error{ font-size:11px; color: var(--loss); margin-top:2px; display:none; }
   .modal-error.show{ display:block; }
-  .modal-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
   .modal-btn-cancel{
     background:transparent; border:1px solid var(--border); color: var(--muted);
@@ -1396,12 +1345,10 @@
      on a narrow screen. */
   .growth-chart-wrap{ position:relative; width:100%; height:220px; }
   .growth-chart{ width:100%; height:100%; display:block; overflow:visible; }
-  .growth-chart-grid{ stroke: var(--border); stroke-width:1; }
   .growth-chart-zero{ stroke: var(--muted); stroke-width:1; stroke-dasharray:3 3; opacity:.6; }
   .growth-chart-line{ fill:none; stroke: var(--amber); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
   .growth-chart-area{ fill: var(--amber-glow); stroke:none; }
   .growth-chart-label{ fill: var(--muted); font-size:10px; font-family:'Public Sans', sans-serif; }
-  .growth-chart-empty{ fill: var(--muted); font-size:12px; font-family:'Public Sans', sans-serif; }
   .journal-calendar{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:20px; margin-bottom:20px; box-shadow: var(--card-shadow); }
   .calendar-head{ display:flex; justify-content:center; align-items:center; gap:18px; margin-bottom:16px; }
   .calendar-month{
@@ -1687,9 +1634,6 @@
     saveActivityLog: function(uid, activityLog){
       return setDoc(doc(db, 'users', uid), { activityLog: activityLog }, { merge: true });
     },
-    saveScreenerPicks: function(uid, picks, forDate){
-      return setDoc(doc(db, 'users', uid), { screenerPicks: picks, screenerDate: forDate }, { merge: true });
-    },
     // Pure shaping helper -- takes the raw user-doc snapshot data (see
     // watchUserDoc above) and applies the same defaults/typeof guards
     // this used to apply inside its own onSnapshot callback. Kept as a
@@ -1698,7 +1642,11 @@
     shapeScreenerData: function(data){
       data = data || {};
       return {
-        screenerPicks: data.screenerPicks || null, screenerDate: data.screenerDate || null,
+        // screenerPicks/screenerDate are gone. They were the retired
+        // daily/swing screener's fields: nothing in shwoop-server has
+        // written them since that strategy was removed, saveScreenerPicks
+        // had zero callers, and nothing here read them back off this
+        // object. Three dead ends meeting in one place.
         intradayScreenerPicks: data.intradayScreenerPicks || null, intradayScreenerUpdatedAt: data.intradayScreenerUpdatedAt || null,
         // Backend liveness heartbeat -- written every minute by the
         // server regardless of market hours (see scheduler.js/index.js
@@ -1956,7 +1904,7 @@
     <button class="side-nav-item nav-item" id="notepadToggle" data-action="notepad" title="Notepad">
       <span class="side-nav-icon">✎</span><span class="side-nav-label">Notes</span>
     </button>
-    <button class="side-nav-item nav-item" id="historyNavItem" data-action="history" title="History">
+    <button class="side-nav-item nav-item" data-action="history" title="History">
       <span class="side-nav-icon">↻</span><span class="side-nav-label">History</span>
     </button>
     <div class="side-nav-divider"></div>
@@ -2135,7 +2083,7 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Trade Overview</div>
-        <div class="trades-sub" id="tradesSubtitle">Everything in one place — account health, open positions, controls, and today's setups.</div>
+        <div class="trades-sub">Everything in one place — account health, open positions, controls, and today's setups.</div>
       </div>
       <div class="trades-header-right">
         <div class="layout-dropdown">
@@ -2383,7 +2331,7 @@
       <div class="pl-card">
         <div class="pl-card-label">Profit Factor</div>
         <div class="pl-card-value mono" id="statProfitFactor">—</div>
-        <div class="pl-card-sub" id="statProfitFactorSub">Gross gains ÷ gross losses — same math Labs' backtest uses.</div>
+        <div class="pl-card-sub">Gross gains ÷ gross losses across every closed trade in this journal. A trade that returned exactly zero counts as neither.</div>
       </div>
       <div class="pl-card">
         <div class="pl-card-label">Reached Trail/Breakeven</div>
@@ -3132,7 +3080,6 @@
   // be silently conflated -- they are merged only at render time, each
   // row carrying its own label.
   var backendFadePicks = null;
-  var backendIntradayUpdatedAt = null;
   // Backend liveness + per-cycle status -- see watchScreenerPicks above
   // for what each field means. These are what let the Status section
   // show real, live evidence that the 24/7 backend's scanner, sizing,
@@ -3158,7 +3105,6 @@
   // separate Firestore fields so the two strategies never clobber each
   // other's status.
   var backendCryptoPicks = null;
-  var backendCryptoUpdatedAt = null;
   var backendCryptoScreenerEnabledOnServer = null;
   var backendCryptoAutoTradeEnabledOnServer = null;
   var backendCryptoCycleStatus = null;
@@ -3171,7 +3117,6 @@
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
   var backendPositionDrift = [];
-  var backendPositionDriftCheckedAt = null;
   // Account summary + positions synced by the backend (see
   // getAlpacaAccountSummaryCached/getAlpacaPositionsCached below for how
   // these get preferred over a direct Alpaca fetch).
@@ -3233,7 +3178,6 @@
       (backendFadePicks || []).forEach(function(p){
         ensureInWatchlist(p.sym, COMPANY_NAMES[p.sym] || p.sym, p.entry, p.entry);
       });
-      backendIntradayUpdatedAt = data.intradayScreenerUpdatedAt;
       backendHeartbeatAt = data.serverHeartbeatAt;
       backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
       backendScreenerEnabledOnServer = data.serverIntradayScreenerEnabled;
@@ -3247,7 +3191,6 @@
       backendCycleErrorAt = data.intradayCycleErrorAt;
       backendLastCycleSummary = data.intradayLastCycleSummary;
       backendPositionDrift = data.positionDriftFindings;
-      backendPositionDriftCheckedAt = data.positionDriftCheckedAt;
       backendAccountSummary = data.serverAccountSummary;
       backendPositions = data.serverPositions;
       backendAccountSnapshotAt = data.serverAccountSnapshotAt;
@@ -3258,7 +3201,6 @@
       autoTradeOverrides.fadeScreenerEnabledOverride = data.fadeScreenerEnabledOverride;
       autoTradeOverrides.fadeAutoTradeEnabledOverride = data.fadeAutoTradeEnabledOverride;
       backendCryptoPicks = data.cryptoScreenerPicks;
-      backendCryptoUpdatedAt = data.cryptoScreenerUpdatedAt;
       backendCryptoScreenerEnabledOnServer = data.serverCryptoScreenerEnabled;
       backendCryptoAutoTradeEnabledOnServer = data.serverCryptoAutoTradeEnabled;
       backendCryptoCycleStatus = data.cryptoCycleStatus;
@@ -5077,11 +5019,6 @@
 
 
 
-  // A stop_limit order's limit leg needs to sit slightly past its own
-  // trigger (in the direction that guarantees it can actually fill on a
-  // fast move) -- same 0.5% buffer shwoop-server's own
-  // STOP_LIMIT_BUFFER_PCT uses.
-  var CRYPTO_STOP_LIMIT_BUFFER_PCT = 0.005;
 
 
   // ---------- Syncing bracket-order exits back to the journal ----------
@@ -6231,6 +6168,25 @@
   // losses can still make money. Expectancy (average % return per trade,
   // wins and losses both counted) and profit factor (gross gains divided
   // by gross losses) are what actually answer that question.
+  // ONE definition of "is this trade a win", used by every win-rate and
+  // profit-factor figure on the page.
+  //
+  // It was implemented three times and they did not agree. summarizeBacktest-
+  // Trades and patchTradeStatsFromAlpaca used `> 0`; computeAggregatePL used
+  // `>= 0`, so a trade that returned exactly zero was a WIN in one and a LOSS
+  // in the other two.
+  //
+  // That is not academic, because the two disagreeing functions write the
+  // SAME two cards: computeAggregatePL fills Win Rate and Profit Factor on
+  // load, and patchTradeStatsFromAlpaca overwrites them in place once the
+  // Alpaca order history resolves. A scratch trade in the journal made those
+  // cards change value mid-load, on screen, with no visible cause.
+  //
+  // A scratch is not a win. Gross profit over gross losses is the definition
+  // of profit factor, and a trade that returned nothing contributed to
+  // neither -- counting it as a win inflates the win rate for free.
+  function isWinningReturn(x){ return x > 0; }
+
   function summarizeBacktestTrades(trades){
     var resolved = trades.filter(function(t){ return t.outcome !== 'unresolved'; });
     // Win/loss is classified by the actual post-slippage return, not the
@@ -6239,8 +6195,8 @@
     // eod_close trade's sign can only be known from its real return,
     // and after slippage a small handful of eod_close trades that
     // looked marginally favorable can flip negative.
-    var wins = resolved.filter(function(t){ return t.pctReturn > 0; });
-    var losses = resolved.filter(function(t){ return t.pctReturn <= 0; });
+    var wins = resolved.filter(function(t){ return isWinningReturn(t.pctReturn); });
+    var losses = resolved.filter(function(t){ return !isWinningReturn(t.pctReturn); });
     var winRate = resolved.length > 0 ? (wins.length / resolved.length * 100) : 0;
     var avgDays = resolved.length > 0 ? (resolved.reduce(function(s,t){ return s + t.days; }, 0) / resolved.length) : 0;
     // A single blended average can hide something important — a strategy
@@ -6637,7 +6593,19 @@
   // fills and stops out inside a single 15-minute bar is a real outcome.
   // Starting at entryIdx + 1 would silently discard exactly the fastest
   // losers -- flattering, in the usual direction.
-  function simulateCryptoForward(bars, entryIdx, signal, invalidateOnTrendLoss){
+  // A trend-EXIT rule used to live in here behind an invalidateOnTrendLoss
+  // flag: close the trade when price fell back under the 30-bar SMA. It went
+  // with the trend-exit checkbox, and both remaining call sites passed a
+  // hard-coded false, so it had been unreachable ever since.
+  //
+  // NOT to be confused with the trend rule this backtest DOES run, in
+  // findCryptoBacktestSignal above: that one is an ENTRY FILTER
+  // (bar.c <= trendSMA + margin -> no signal) and it matches
+  // technicalAnalysisCrypto.js's live rule line for line. Deleting the dead
+  // exit rule leaves that untouched -- and the two sharing the word "trend"
+  // is exactly why the dead one was worth removing rather than leaving to
+  // suggest this backtest models an exit it does not.
+  function simulateCryptoForward(bars, entryIdx, signal){
     var risk = Math.abs(signal.entry - signal.stop);
     var triggerPrice = signal.entry + CRYPTO_BT_TRAIL_TRIGGER_RR * risk;
     var trailingActive = false;
@@ -6669,19 +6637,12 @@
       }
       // Same ordering rule as the equities version: the stop is checked
       // first, so a bar that stopped out exited at the stop.
-      if(invalidateOnTrendLoss && j >= CRYPTO_BT_TREND_LOOKBACK_BARS){
-        var trendBars = bars.slice(j - CRYPTO_BT_TREND_LOOKBACK_BARS, j);
-        var trendSMA = trendBars.reduce(function(a,b){ return a + b.c; }, 0) / trendBars.length;
-        if(bar.c < trendSMA){
-          return { result: 'invalidated', bars: j - entryIdx, price: bar.c, date: bar.t };
-        }
-      }
     }
     var lastBar = bars[bars.length - 1];
     return { result: 'unresolved', bars: bars.length - 1 - entryIdx, price: lastBar.c, date: lastBar.t };
   }
 
-  var CRYPTO_BT_MARKET_LEGS_BY_OUTCOME = { stopped: 2, trailing_stopped: 2, invalidated: 2, unresolved: 1 };
+  var CRYPTO_BT_MARKET_LEGS_BY_OUTCOME = { stopped: 2, trailing_stopped: 2, unresolved: 1 };
 
   // Crypto costs its OWN number, not the equities one.
   //
@@ -6721,7 +6682,7 @@
     return '~' + (Math.round(days * 10) / 10) + ' day' + (Math.round(days * 10) === 10 ? '' : 's');
   }
 
-  function runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidateOnTrendLoss){
+  function runCryptoBacktestSimulationAsync(bars, lookbackBars){
     return new Promise(function(resolve){
       var startIdx = Math.max(CRYPTO_BT_TREND_LOOKBACK_BARS, bars.length - lookbackBars);
       var trades = [];
@@ -6734,7 +6695,7 @@
           var signal = findCryptoBacktestBreakoutAt(bars, i);
           var filled = signal ? fillCryptoSignalAtNextBar(bars, i, signal) : null;
           if(filled){
-            var outcome = simulateCryptoForward(bars, filled.entryIdx, filled, invalidateOnTrendLoss);
+            var outcome = simulateCryptoForward(bars, filled.entryIdx, filled);
             var pctReturn = (outcome.price - filled.entry) / filled.entry * 100; // Long-only
             pctReturn = applyCryptoBacktestSlippage(pctReturn, outcome.result);
             trades.push({
@@ -6768,15 +6729,6 @@
   // iterations via setTimeout lets pending UI events (like a drag's
   // pointermove) get processed between chunks, without meaningfully
   // slowing down the backtest itself.
-  // ---------- Optional market-regime filter for the backtest ----------
-  // Mirrors shwoop-server's src/lib/marketRegime.js thresholds/semantics
-  // exactly (SPY's own % change vs its prior close, skip fresh longs past
-  // a selloff threshold, fresh shorts past a rally threshold) -- but that
-  // module only ever checks one live snapshot. A backtest has to know
-  // what SPY's regime was at the EXACT moment each historical signal
-  // fired, so this builds a full time series from real SPY bars instead.
-  var BACKTEST_SELLOFF_THRESHOLD_PERCENT = -1.5;
-  var BACKTEST_RALLY_THRESHOLD_PERCENT = 1.5;
   // Seeds the export's symbol box. This used to also populate the
   // equities backtest's symbol select, which is gone.
   function populateIntradayBacktestSymbolSelect(){
@@ -6819,7 +6771,7 @@
         '<tbody>' + trades.map(function(t){
           var outcomeClass = t.outcome === 'unresolved' ? '' : (t.pctReturn > 0 ? 'backtest-outcome-hit' : 'backtest-outcome-stopped');
           var returnClass = t.pctReturn >= 0 ? 'up' : 'down';
-          var outcomeLabel = t.outcome === 'unresolved' ? 'Still open' : t.outcome === 'invalidated' ? 'Thesis invalidated' : t.outcome === 'trailing_stopped' ? 'Trailing stop' : 'Stopped';
+          var outcomeLabel = t.outcome === 'unresolved' ? 'Still open' : t.outcome === 'trailing_stopped' ? 'Trailing stop' : 'Stopped';
           return '<tr>' +
             '<td class="mono">' + t.date.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) + '</td>' +
             '<td>' + t.direction + '</td>' +
@@ -6928,7 +6880,7 @@
         throw new Error('Not enough crypto history for ' + sym + ' in this window — try a longer lookback.');
       }
       var lookbackBars = Math.round(lookbackDays * 24 * 4); // 4 bars/hour at 15-min
-      return runCryptoBacktestSimulationAsync(bars, lookbackBars, false);
+      return runCryptoBacktestSimulationAsync(bars, lookbackBars);
     }).then(function(trades){
       var summary = summarizeBacktestTrades(trades);
       renderCryptoBacktestResults(trades, summary, sym);
@@ -6969,7 +6921,6 @@
     var allTrades = [];
     var perSymbolResults = [];
     var failedSymbols = [];
-    var invalidate = false;
 
     function finish(){
       btn.disabled = false;
@@ -6993,7 +6944,7 @@
           return null;
         }
         statusEl.textContent = 'Simulating ' + progress + ' — ' + bars.length.toLocaleString() + ' bars…';
-        return runCryptoBacktestSimulationAsync(bars, lookbackBars, invalidate).then(function(trades){
+        return runCryptoBacktestSimulationAsync(bars, lookbackBars).then(function(trades){
           allTrades = allTrades.concat(trades);
           perSymbolResults.push({ sym: sym, summary: summarizeBacktestTrades(trades) });
           processNext(index + 1);
@@ -9470,7 +9421,7 @@
       var pl = computePL(e);
       totalDollar += pl.dollar;
       totalPctSum += pl.pct;
-      if(pl.pct >= 0){ wins++; winDollarSum += pl.dollar; winCount++; winPctSum += pl.pct; }
+      if(isWinningReturn(pl.pct)){ wins++; winDollarSum += pl.dollar; winCount++; winPctSum += pl.pct; }
       else { lossDollarSum += pl.dollar; lossCount++; lossPctSum += pl.pct; }
       if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
@@ -9588,15 +9539,20 @@
       if(myGen !== tradeStatsPatchGen || journalFilter === 'crypto') return; // superseded, or the tab changed while this was in flight
       var trades = reconstructTradesFromOrders(orders).trades;
       if(!trades.length) return; // not connected, or no real equities trades yet -- leave the journal-based fallback showing
-      var wins = trades.filter(function(t){ return t.dollarPL > 0; });
-      var losses = trades.filter(function(t){ return t.dollarPL <= 0; });
+      var wins = trades.filter(function(t){ return isWinningReturn(t.dollarPL); });
+      var losses = trades.filter(function(t){ return !isWinningReturn(t.dollarPL); });
       var winRate = (wins.length / trades.length) * 100;
       var avgWin = wins.length ? wins.reduce(function(s,t){ return s + t.dollarPL; }, 0) / wins.length : 0;
       var avgLoss = losses.length ? losses.reduce(function(s,t){ return s + t.dollarPL; }, 0) / losses.length : 0;
       // Same gross-%-gains-over-gross-%-losses math as computeAggregatePL
-      // and Labs' own backtest -- computed off pctReturn (not dollarPL) so
-      // it's directly comparable to the backtest's headline number even
-      // though these are the real, Alpaca-reconciled trades.
+      // and Labs' own backtest -- and it now really is the same, because all
+      // three route their win/loss split through isWinningReturn. This
+      // comment claimed they matched while computeAggregatePL used >= 0 and
+      // these two used > 0.
+      //
+      // Computed off pctReturn (not dollarPL) so it stays directly comparable
+      // to the backtest's headline number even though these are the real,
+      // Alpaca-reconciled trades.
       var winPctSum = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
       var lossPctSum = losses.reduce(function(s,t){ return s + t.pctReturn; }, 0);
       var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);

@@ -35,8 +35,7 @@ From the repo root:
 firebase deploy --only functions
 ```
 
-This deploys four callables: `finnhubQuote`, `finnhubNews`,
-`finnhubEarningsCalendar`, `finnhubCompanyNews`. Each one checks that the
+This deploys two callables: `finnhubQuote` and `finnhubCompanyNews`. Each one checks that the
 caller has a real signed-in Firebase Auth token (matching firestore.rules'
 own model: any account with a real `users/{uid}` document, not one specific
 owner email) before it will spend the Finnhub key on a request — so the
