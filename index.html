@@ -2205,12 +2205,12 @@
           </div>
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Equities fade</span>
-            <span class="money-mode-badge">Paper</span>
+            <span class="money-mode-badge" id="fadeAutoTradeMoneyClause">Paper</span>
             <button class="chart-tool-btn" id="fadeAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Crypto</span>
-            <span class="money-mode-badge">Paper</span>
+            <span class="money-mode-badge" id="cryptoAutoTradeMoneyClause">Paper</span>
             <span class="quote-sync-status" id="serverCryptoAutoTradeStatusBadge">—</span>
             <button class="chart-tool-btn" id="cryptoAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
@@ -3518,16 +3518,29 @@
     }
     var banner = document.getElementById('liveModeBanner');
     if(banner){ banner.hidden = (alpacaAccountType !== 'live'); }
-    // Crypto's badge is static in the HTML (always "Paper" -- crypto has
-    // no live-account capability at all yet, regardless of the equities
-    // environment selected here, so it never needs to change). Equities'
-    // is the only one that actually varies with alpacaAccountType.
-    var autoTradeMoneyClause = document.getElementById('autoTradeIntradayMoneyClause');
-    if(autoTradeMoneyClause){
-      var isLiveEnv = alpacaAccountType === 'live';
-      autoTradeMoneyClause.textContent = isLiveEnv ? 'Live' : 'Paper';
-      autoTradeMoneyClause.classList.toggle('live', isLiveEnv);
-    }
+    // ALL THREE strategy badges track the same flag, because the backend
+    // gives an account exactly ONE environment and every cycle resolves it
+    // the same way. runCryptoCycle (shwoop-server orchestrator.js) calls the
+    // same resolveActiveAlpacaCredentials(userDoc) the equities cycles do,
+    // and settings.js decides it once per account:
+    //   alpacaEnvironment === 'live' ? 'live' : 'paper'.
+    // There is no per-strategy environment anywhere in that path.
+    //
+    // The crypto and fade badges used to be hardcoded "Paper" in the HTML,
+    // under a comment claiming crypto had no live capability. It did: on a
+    // live account crypto placed REAL orders while this badge read Paper --
+    // the one screen the owner checks before arming a strategy, lying about
+    // whose money it was about to spend. Never hardcode these again; if a
+    // strategy is ever genuinely paper-only, drive that off a real signal
+    // from the backend, not off a literal in the markup.
+    var isLiveEnv = alpacaAccountType === 'live';
+    ['autoTradeIntradayMoneyClause', 'fadeAutoTradeMoneyClause', 'cryptoAutoTradeMoneyClause']
+      .forEach(function(id){
+        var badge = document.getElementById(id);
+        if(!badge) return;
+        badge.textContent = isLiveEnv ? 'Live' : 'Paper';
+        badge.classList.toggle('live', isLiveEnv);
+      });
   }
 
   // Repairs journal entries left stranded by a rotated Alpaca API key.
@@ -4230,12 +4243,19 @@
       btn.disabled = true;
       btn.textContent = 'Flattening…';
       flattenAllPositions().then(function(result){
+        // The unavailable case has to be said out loud in BOTH branches.
+        // "No open positions to close" after a failed positions fetch is
+        // the same lie the journal-only version told, just phrased as
+        // reassurance instead of a list.
+        var unreadable = result.positionsUnavailable
+          ? ' Could not read the broker position list, so this may not have covered everything — check the dock.'
+          : '';
         if(result.closed.length === 0 && result.failed.length === 0){
-          showPositionClosedToast('—', 'Flatten all: no open positions to close.');
+          showPositionClosedToast('—', 'Flatten all: no open positions to close.' + unreadable);
         } else {
           var msg = result.closed.length > 0 ? ('Closed: ' + result.closed.join(', ') + '.') : '';
           if(result.failed.length > 0){ msg += (msg ? ' ' : '') + 'Failed to close: ' + result.failed.join(', ') + ' — check the dock and retry manually.'; }
-          showPositionClosedToast('Flatten all', msg);
+          showPositionClosedToast('Flatten all', msg + unreadable);
         }
         if(result.closed.length > 0){
           // closeAlpacaPosition submits a market order to close -- it
@@ -5156,7 +5176,7 @@
   // doesn't block the rest -- each is tracked independently.
   function flattenAllPositions(){
     if(!alpacaConnected || !window.__shwoopAPI || !currentUid){
-      return Promise.resolve({ closed: [], failed: [] });
+      return Promise.resolve({ closed: [], failed: [], positionsUnavailable: false });
     }
     var openEntries = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
     // Pause BOTH auto-traders through the real, currently-live override
@@ -5174,20 +5194,65 @@
       renderAutoTradeOverrideControls();
       saveAutoTradeOverride({ intradayAutoTradeEnabledOverride: false, cryptoAutoTradeEnabledOverride: false });
     }
-    if(openEntries.length === 0){
-      return Promise.resolve({ closed: [], failed: [] });
-    }
-    var closed = [];
-    var failed = [];
-    return Promise.all(openEntries.map(function(entry){
-      return closeAlpacaPositionSafely(entry.sym).then(function(){
-        closed.push(entry.sym);
-      }).catch(function(err){
-        console.error('Flatten all: failed to close', entry.sym, err);
-        failed.push(entry.sym);
+    // WHAT GETS CLOSED IS THE BROKER'S LIST, NOT THE JOURNAL'S.
+    //
+    // This used to iterate journalEntries alone. Every position the
+    // journal did not know about therefore survived a flatten that
+    // reported success: a trade placed by hand in Alpaca's own UI, a
+    // position whose journal write failed after the order landed, an
+    // entry stamped with a rotated accountKeyId (which is exactly what
+    // isOpenAlpacaPositionForCurrentAccount filters OUT), or anything
+    // opened by the other process during a deploy. The row promises
+    // "Closes every open position at market" and the toast then said
+    // "Closed: ..." -- so the one control meant for "something feels
+    // wrong, close it all now" would leave real exposure open while
+    // telling the owner they were flat. That is the worst possible
+    // direction for this particular button to be wrong in.
+    //
+    // So: take the union of the journal's open entries and the broker's
+    // actual positions, keyed by canonicalSymbol because /v2/positions
+    // strips the slash off crypto pairs and the journal keeps it. The
+    // journal's own sym is preferred when both sides have the symbol,
+    // since closeAlpacaPositionSafely accepts either form and the
+    // slash-included one is what the activity log reads better as.
+    return getAlpacaPositionsCached().then(function(positions){
+      return { positions: positions || [], positionsUnavailable: false };
+    }).catch(function(err){
+      // Never let a failed positions fetch quietly shrink the blast
+      // radius back to the journal. Close what we can, and tell the
+      // caller the list was incomplete so the toast cannot claim flat.
+      console.error('Flatten all: could not read broker positions', err);
+      return { positions: [], positionsUnavailable: true };
+    }).then(function(ctx){
+      var symsToClose = [];
+      var seen = {};
+      openEntries.forEach(function(e){
+        var key = canonicalSymbol(e.sym);
+        if(seen[key]) return;
+        seen[key] = true;
+        symsToClose.push(e.sym);
       });
-    })).then(function(){
-      return { closed: closed, failed: failed };
+      ctx.positions.forEach(function(p){
+        var key = canonicalSymbol(p.symbol);
+        if(seen[key]) return;
+        seen[key] = true;
+        symsToClose.push(p.symbol);
+      });
+      if(symsToClose.length === 0){
+        return { closed: [], failed: [], positionsUnavailable: ctx.positionsUnavailable };
+      }
+      var closed = [];
+      var failed = [];
+      return Promise.all(symsToClose.map(function(sym){
+        return closeAlpacaPositionSafely(sym).then(function(){
+          closed.push(sym);
+        }).catch(function(err){
+          console.error('Flatten all: failed to close', sym, err);
+          failed.push(sym);
+        });
+      })).then(function(){
+        return { closed: closed, failed: failed, positionsUnavailable: ctx.positionsUnavailable };
+      });
     });
   }
 
@@ -6218,6 +6283,17 @@
   // of profit factor, and a trade that returned nothing contributed to
   // neither -- counting it as a win inflates the win rate for free.
   function isWinningReturn(x){ return x > 0; }
+  // SEVEN call sites, not three. The first pass at this unified the three that
+  // were obviously the same computation; four more were found later, each in a
+  // different corner: the calendar cell's own WR badge, the Journal day recap
+  // directly beneath it, the Alpaca history page's win/loss split (which also
+  // feeds its profit factor), and the overall P&L card's win count. A day
+  // could therefore report one win count on the calendar cell and a different
+  // one in the recap under it.
+  //
+  // If you are adding a win rate or a profit factor, route it through here.
+  // The rule is not "> 0 is nicer" -- it is that a scratch trade must not be a
+  // win in one place and a loss in another on the same screen.
 
   function summarizeBacktestTrades(trades){
     var resolved = trades.filter(function(t){ return t.outcome !== 'unresolved'; });
@@ -8959,7 +9035,7 @@
     entries.forEach(function(e){
       var pl = computePL(e);
       dollar += pl.dollar;
-      if(pl.pct >= 0) wins++;
+      if(isWinningReturn(pl.pct)) wins++;
     });
     var avgPct = entries.reduce(function(s,e){ return s + computePL(e).pct; }, 0) / entries.length;
     return { dollar: dollar, symbols: entries.length, pct: avgPct, winRate: (wins / entries.length) * 100 };
@@ -9090,7 +9166,30 @@
       el.innerHTML = '<div class="journal-empty">Click a marked date to see that day\'s trades.</div>';
       return;
     }
-    var entries = filteredJournalEntries().filter(function(e){ return e.date === selectedJournalDate; });
+    // THE LIST MUST DESCRIBE THE SAME DAY THE CALENDAR CELL DOES.
+    //
+    // The cell's P&L was moved onto the EXIT date (a closed trade belongs to
+    // the day it was realized, not the day it opened) and this list was left
+    // filtering on `e.date`, the ENTRY date. Half a fix, and the two then
+    // contradicted each other on screen: the cell read "+$151 · 5 sym · 20%
+    // WR" while the recap under it read "Closed 4 positions — 0 wins, 4
+    // losses" over four negative rows. One trade had closed on a different
+    // day than it opened, so the cell counted it and the list did not -- and
+    // that trade was the day's only winner.
+    //
+    // Both halves of the day, each on the right date:
+    //   - a CLOSED trade appears on the day it was realized, which is exactly
+    //     what the cell's figure is the sum of;
+    //   - an OPEN trade has no realized date yet, so it appears on the day it
+    //     was entered.
+    //
+    // Written as one predicate rather than two filters so the cell and the
+    // list cannot drift apart again.
+    var entries = filteredJournalEntries().filter(function(e){
+      return e.status === 'closed'
+        ? realizedOnDate(e) === selectedJournalDate
+        : e.date === selectedJournalDate;
+    });
     // UTC midnight + UTC-formatted display -- selectedJournalDate is a
     // plain "YYYY-MM-DD" string matched against entries' UTC-stamped
     // `date` field (see renderCalendar's own comment); parsing it as
@@ -9105,7 +9204,7 @@
 
     var closed = entries.filter(function(e){ return e.status === 'closed'; });
     var open = entries.filter(function(e){ return e.status === 'open'; });
-    var wins = closed.filter(function(e){ return computePL(e).pct >= 0; }).length;
+    var wins = closed.filter(function(e){ return isWinningReturn(computePL(e).pct); }).length;
     var losses = closed.length - wins;
     var netPct = closed.reduce(function(sum, e){ return sum + computePL(e).pct; }, 0);
 
@@ -9339,8 +9438,8 @@
     var wrap = document.getElementById('alpacaHistoryResultWrap');
     wrap.removeAttribute('hidden');
 
-    var wins = trades.filter(function(t){ return t.dollarPL > 0; });
-    var losses = trades.filter(function(t){ return t.dollarPL <= 0; });
+    var wins = trades.filter(function(t){ return isWinningReturn(t.dollarPL); });
+    var losses = trades.filter(function(t){ return !isWinningReturn(t.dollarPL); });
     var grossWin = wins.reduce(function(s,t){ return s + t.dollarPL; }, 0);
     var grossLoss = Math.abs(losses.reduce(function(s,t){ return s + t.dollarPL; }, 0));
     var pf = grossLoss > 0 ? (grossWin / grossLoss) : (grossWin > 0 ? Infinity : 0);
@@ -9520,7 +9619,7 @@
       var trades = result.trades;
       if(!trades.length) return; // not connected, or no real trades yet -- leave the journal-based fallback showing
       var netPL = trades.reduce(function(s,t){ return s + t.dollarPL; }, 0);
-      var wins = trades.filter(function(t){ return t.dollarPL > 0; }).length;
+      var wins = trades.filter(function(t){ return isWinningReturn(t.dollarPL); }).length;
       var overallValEl = document.getElementById('overallPLValue');
       var overallSubEl = document.getElementById('overallPLSub');
       if(!overallValEl || !overallSubEl) return;
@@ -11134,15 +11233,33 @@
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
           '<div class="backend-pulse-label">Equities server settings: screener ' + (backendScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open.</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(backendScreenerEnabledOnServer !== null) + '</div>' +
         '</div></div>'
       );
     }
+    // THE FADE HAD NO ROW AT ALL. It is a third strategy with its own two
+    // flags, the backend has published serverFadeScreenerEnabled since it
+    // shipped, and this card -- the one whose whole job is "live proof the
+    // server is running its cycle" -- simply never showed it. There was no
+    // way to tell from the app whether the fade was on.
+    //
+    // Rendered next to equities rather than after crypto because ORB and the
+    // fade are both equities strategies sharing one risk budget: seeing them
+    // apart invites reading either one's state as "the equities state".
+    if(backendFadeScreenerEnabledOnServer !== null){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendFadeScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
+          '<div class="backend-pulse-label">Equities fade settings: screener ' + (backendFadeScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendFadeAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' The fade shares the equities risk budget with the ORB above, so both compete for the same 7% ceiling.</div>' +
+        '</div></div>'
+      );
+    }
+
     if(backendCryptoScreenerEnabledOnServer !== null){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendCryptoScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
           '<div class="backend-pulse-label">Crypto server settings: screener ' + (backendCryptoScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendCryptoAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open, and a completely separate on/off from equities above.</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' A completely separate on/off from equities above.</div>' +
         '</div></div>'
       );
     }
