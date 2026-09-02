@@ -179,5 +179,84 @@ gates.G6_equitiesUnchanged = () => {
   console.log('G6 PASS equities results are identical, alone and alongside crypto');
 };
 
+// G7-G9 added by the vacuous-test sweep (Sep 2026). Each replaces an
+// assertion that was true by construction: every fixture above hands
+// reconstructTradesFromOrders a perfectly-formed FILLED crypto order that
+// carries BOTH crypto markers and exits well clear of the dust boundary,
+// so the three predicates that decide whether an order counts at all, and
+// which arithmetic prices it, could each be broken without failing a gate.
+
+// Only FILLED orders with a real fill price are cash that moved. A resting
+// or cancelled order has no filled_avg_price; booking one as a trade
+// prices it at NaN and poisons the headline total for every symbol.
+gates.G7_unfilledOrdersAreNotTrades = () => {
+  t = 0;
+  const out = reconstruct([
+    crypto({ symbol: 'SOL/USD', side: 'buy', filled_qty: '250', filled_avg_price: '100' }),
+    crypto({ symbol: 'SOL/USD', side: 'sell', status: 'canceled', filled_qty: '0', filled_avg_price: null }),
+    crypto({ symbol: 'SOL/USD', side: 'sell', status: 'new', filled_at: null, filled_avg_price: null, qty: '250' }),
+    // Still working: part of it has printed, but the order is not done and
+    // the position is not closed. Each of the three conditions is tested
+    // alone here, so none of them can be dropped or loosened unnoticed.
+    crypto({ symbol: 'SOL/USD', side: 'sell', status: 'partially_filled', filled_qty: '100', filled_avg_price: '109' }),
+    crypto({ symbol: 'SOL/USD', side: 'sell', type: 'stop_limit', filled_qty: '249.5', filled_avg_price: '110' }),
+  ]);
+  assert.strictEqual(out.trades.length, 1, 'the cancelled and resting sells are not exits: one trade, not three');
+  assert.strictEqual(out.anomalies.length, 0, 'and they are not mistaken for same-side re-entries either');
+  near(out.trades[0].dollarPL, 2445, 'P&L is still the real cash flow of the two legs that actually filled');
+  out.trades.forEach((x) => assert.ok(isFinite(x.dollarPL), 'no trade may carry a NaN P&L'));
+  console.log('G7 PASS unfilled and cancelled orders never become trades');
+};
+
+// Crypto-ness decides which arithmetic runs. An order that reaches this
+// function with the slashed symbol but no asset_class (an older cached
+// pull, a field Alpaca omits) must still take the crypto path -- down the
+// equities path the in-kind fee is invisible and the trade reports the
+// $55-of-invented-profit answer G1 exists to reject.
+gates.G8_slashAloneIsEnoughToBeCrypto = () => {
+  t = 0;
+  const out = reconstruct([
+    ord({ symbol: 'SOL/USD', side: 'buy', asset_class: undefined, filled_qty: '250', filled_avg_price: '100' }),
+    ord({ symbol: 'SOL/USD', side: 'sell', asset_class: undefined, type: 'stop_limit', filled_qty: '249.5', filled_avg_price: '110' }),
+  ]);
+  assert.strictEqual(out.trades.length, 1, 'the slashed pair is one crypto book');
+  assert.strictEqual(out.trades[0].assetClass, 'crypto', 'a slashed symbol is crypto even with asset_class missing');
+  near(out.trades[0].feeCost, 50, 'the in-kind fee must still be charged');
+  near(out.trades[0].dollarPL, 2445, 'P&L must be the real cash flow, not the qty-matched $2500');
+  assert.strictEqual(out.trades[0].exitType, 'Stop-loss', 'and stop_limit still reads as a stop, not a manual exit');
+  console.log('G8 PASS a slashed symbol alone is enough to price as crypto');
+};
+
+// The dust boundary decides whether a position is CLOSED or still open. At
+// exactly the fraction, the leftover is fee, the trade closes and the next
+// entry pairs against itself. One tick the wrong side of that comparison
+// leaves the book open forever and every later trade on the symbol is
+// priced off a stale basis.
+gates.G9_dustBoundaryClosesTheTrade = () => {
+  t = 0;
+  const exact = 100 * (1 - CRYPTO_DUST_FRACTION); // leftover is EXACTLY the dust fraction
+  const out = reconstruct([
+    crypto({ symbol: 'ETH/USD', side: 'buy', filled_qty: '100', filled_avg_price: '100' }),
+    crypto({ symbol: 'ETH/USD', side: 'sell', filled_qty: String(exact), filled_avg_price: '110' }),
+    crypto({ symbol: 'ETH/USD', side: 'buy', filled_qty: '10', filled_avg_price: '200' }),
+    crypto({ symbol: 'ETH/USD', side: 'sell', filled_qty: '9.98', filled_avg_price: '210' }),
+  ]);
+  assert.strictEqual(out.trades.length, 2, 'a leftover exactly at the dust fraction closes the trade');
+  const chrono = out.trades.slice().reverse();
+  near(chrono[0].feeCost, 100 * CRYPTO_DUST_FRACTION * 100, 'the leftover is charged as fee, at cost');
+  near(chrono[1].entryPrice, 200, 'the next trade must pair against its own entry, not the never-closed one');
+  // Control: one unit MORE left over is a real partial exit and the book
+  // must stay open, or this gate would pass by closing everything.
+  t = 0;
+  const partial = reconstruct([
+    crypto({ symbol: 'ETH/USD', side: 'buy', filled_qty: '100', filled_avg_price: '100' }),
+    crypto({ symbol: 'ETH/USD', side: 'sell', filled_qty: String(exact - 1), filled_avg_price: '110' }),
+    crypto({ symbol: 'ETH/USD', side: 'buy', filled_qty: '10', filled_avg_price: '200' }),
+  ]);
+  assert.strictEqual(partial.anomalies.length, 1,
+    'control: above the dust fraction the position is still open, so the next buy is a same-side fill');
+  console.log('G9 PASS the dust boundary closes the trade at exactly the fraction');
+};
+
 Object.keys(gates).forEach((k) => gates[k]());
 console.log('\nAll crypto broker-reconciliation gates passed.');
