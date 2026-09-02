@@ -2305,10 +2305,14 @@
     </div>
 
     <!-- Overall P&L above is real Alpaca order history, reconstructed the
-         same way the "Pull full history from Alpaca" export does -- a
-         single all-strategy number the broker's own record doesn't break
-         out by strategy, so it's deliberately left outside this filter.
-         Everything below is
+         same way the "Pull full history from Alpaca" export does. That
+         reconstruction covers EQUITIES ONLY -- crypto's order shape can't
+         be paired the same way (see reconstructTradesFromOrders) -- so the
+         card names its own scope in its sub-label and reports crypto's
+         journal figure alongside rather than folding broker-reconciled and
+         journal-only dollars into one number. It is left outside this
+         filter because it is a broker-derived figure, not a per-strategy
+         one. Everything below is
          derived from our own journal entries, which DO carry which
          strategy each trade came from, so it's the honest place to split. -->
     <div class="strategy-filter-row" id="journalFilterRow" hidden>
@@ -9495,7 +9499,36 @@
       var up = netPL >= 0;
       overallValEl.textContent = (up ? '+$' : '−$') + Math.abs(netPL).toFixed(0);
       overallValEl.className = 'pl-card-value mono ' + (up ? 'up' : 'down');
-      overallSubEl.textContent = 'All-time · ' + alpacaAccountLabel() + ' · ' + trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + ', ' + wins + 'W/' + (trades.length - wins) + 'L';
+      // THE NUMBER IS EQUITIES-ONLY, SO THE LABEL SAYS EQUITIES-ONLY.
+      //
+      // reconstructTradesFromOrders filters out `asset_class === 'crypto'`
+      // deliberately, and for a real reason (crypto's order shape -- a
+      // plain market entry plus separately-submitted, manually-cancelled
+      // stop/target orders -- does not pair by bracket legs the way
+      // equities orders do). The arithmetic is not the bug. The label was:
+      // this card said "Overall P&L / All-time" and the journal fallback
+      // rendered a moment earlier genuinely DOES include crypto, so the
+      // headline silently changed scope -- and usually value -- the instant
+      // Alpaca resolved, with nothing on screen saying why. The sibling
+      // patchTradeStatsFromAlpaca already labels its own equities-only
+      // numbers; this one did not.
+      //
+      // Do not "fix" this by adding the journal's crypto P&L into netPL.
+      // That would mix broker-reconciled dollars with dollars this app's
+      // own bookkeeping produced, in a single figure, with no way to tell
+      // afterwards which half is which -- the exact drift this card was
+      // rebuilt around Alpaca's order history to escape. Crypto is reported
+      // beside it, from the journal, and named as journal-only.
+      var cryptoClosed = journalEntries.filter(function(e){
+        return e.status === 'closed' && e.screenerType === 'crypto';
+      });
+      var cryptoNote = '';
+      if(cryptoClosed.length){
+        var cryptoPL = cryptoClosed.reduce(function(s, e){ return s + computePL(e).dollar; }, 0);
+        cryptoNote = ' · crypto not included: ' + (cryptoPL >= 0 ? '+$' : '−$') + Math.abs(cryptoPL).toFixed(0) +
+          ' over ' + cryptoClosed.length + ' journal trade' + (cryptoClosed.length === 1 ? '' : 's') + ' (journal-only, not broker-reconciled)';
+      }
+      overallSubEl.textContent = 'All-time equities · ' + alpacaAccountLabel() + ' · ' + trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + ', ' + wins + 'W/' + (trades.length - wins) + 'L' + cryptoNote;
     }).catch(function(err){
       // Not connected, or a transient Alpaca hiccup -- the journal-based
       // fallback rendered above stays showing rather than the card going
@@ -11163,9 +11196,14 @@
       var staleCount = allOpen.filter(function(j){ return isUnreconciledEntry(j); }).length;
       var realOpen = allOpen.length - staleCount;
       var needsReview = staleCount ? (staleCount + ' need review') : '';
+      // Counted here too, not only tagged on the row: a partially filled
+      // position is held at a size nobody chose, and the header is what is
+      // read at a glance before anyone scrolls the table.
+      var partialCount = allOpen.filter(function(j){ return !!j.partialFill; }).length;
+      var partialNote = partialCount ? (partialCount + ' partially filled') : '';
       headMeta.textContent = !allOpen.length ? ''
         : showFilter && statusPositionsFilter !== 'all' ? (openPositions.length + ' of ' + allOpen.length + ' open')
-        : [realOpen + ' open', needsReview].filter(Boolean).join(' · ');
+        : [realOpen + ' open', needsReview, partialNote].filter(Boolean).join(' · ');
     }
     if(openPositions.length === 0){
       el.innerHTML = '<div class="labs-backtest-status">No open' + POSITIONS_FILTER_LABELS[statusPositionsFilter] + ' positions right now.</div>';
@@ -11409,9 +11447,31 @@
     switch(colKey){
       case 'sym': return '<td class="mono">' + j.sym
         + (isUnreconciledEntry(j) ? ' <span class="journal-source-tag" title="Alpaca holds no matching position for this entry, so there is nothing live to price. Remove it from the Journal.">needs review</span>' : '')
+        // A PARTIAL FILL IS A POSITION WHOSE SIZE NOBODY CHOSE.
+        //
+        // shwoop-server's exitSync.js stamps partialFill/partialFillReason
+        // when Alpaca terminates an entry order after only part of it
+        // filled. The backend does the safe thing -- it rewrites the
+        // journal's qty to the quantity that ACTUALLY filled and protects
+        // that size -- but the position is still smaller than the strategy
+        // sized it, so every number derived from it (P&L, protective-order
+        // size, how much of the risk budget this trade is really using)
+        // describes a trade nobody chose to place. This was written to
+        // Firestore and then rendered nowhere, so the one signal that the
+        // account and the plan disagree about size was silently dropped.
+        // Same amber tag as "needs review" because it is the same kind of
+        // fact: a row the owner has to look at, not merely read.
+        + (j.partialFill ? ' <span class="journal-source-tag" title="' +
+            escapeHtml(j.partialFillReason || 'This entry order only partially filled. The position is real, but smaller than the strategy sized it.') +
+            '">partial fill</span>' : '')
         + '</td>';
       case 'direction': return '<td>' + j.direction + '</td>';
-      case 'qty': return '<td>' + j.qty + '</td>';
+      // On a partially filled entry this is the FILLED quantity, not the
+      // intended one -- marked so the size is never read as the one the
+      // strategy asked for.
+      case 'qty': return j.partialFill
+        ? '<td title="Partially filled — this is the quantity that actually filled, not the size the strategy asked for.">' + j.qty + ' <span style="color:var(--amber);">*</span></td>'
+        : '<td>' + j.qty + '</td>';
       case 'entry': return '<td>' + fmt(j.entry) + '</td>';
       // A dash, with the reason on hover, wherever there is genuinely no
       // number -- rather than a plausible-looking one derived from an
