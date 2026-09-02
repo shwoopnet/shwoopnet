@@ -1447,6 +1447,68 @@
   .site-footer p{ margin:0 0 6px 0; max-width:680px; margin-left:auto; margin-right:auto; }
   .site-footer p:last-child{ margin-bottom:0; }
 
+  /* ---------- Motion ----------
+     Everything below is driven by data the page already holds: no new
+     request, no new timer, no poll. Each rule animates transform,
+     opacity or a background tint only, so none of it can force layout
+     on a table that redraws every poll cycle. */
+
+  /* A figure that CHANGED tints its own cell for a moment and decays.
+     Background only -- the digits never move, never fade in, and are
+     legible on the first frame. The point of the flash is to pull the
+     eye TO a number, so a flash that made it briefly unreadable would
+     defeat itself. */
+  .value-flash-up{ animation: valueFlashUp .7s ease-out 1; }
+  .value-flash-down{ animation: valueFlashDown .7s ease-out 1; }
+  @keyframes valueFlashUp{ from{ background-color: var(--gain-glow); } to{ background-color: transparent; } }
+  @keyframes valueFlashDown{ from{ background-color: var(--loss-glow); } to{ background-color: transparent; } }
+
+  /* The header's liveness dot. The pulse lives ONLY on .ok, and .ok is
+     set from quoteFeedStatus's verdict on real batch results -- so a
+     degraded or failed feed cannot render a pulsing dot, because it
+     never receives the class the animation is attached to. warn/fail get
+     the same dot, still, in their own color. This header already shipped
+     once flapping between "Live" and "Sync failed"; a dot that kept
+     beating through a dead feed would be that same lie told in motion,
+     and harder to notice because nobody reads a dot twice. */
+  .header-live-status{ transition: color .2s ease; }
+  .header-live-status::before{
+    content:''; display:inline-block; width:6px; height:6px; border-radius:50%;
+    margin-right:5px; vertical-align:middle; background: currentColor;
+  }
+  .header-live-status.ok::before{ animation: liveDotPulse 1.6s ease-in-out infinite; }
+
+  /* Same rule for the Backend Status head dot: it is set .ok only when
+     the heartbeat is fresh AND Alpaca is connected, and the pulse is
+     bound to that class, so unknown/degraded/failing stay still. */
+  .to-card-dot.ok{ animation: liveDotPulse 2s ease-in-out infinite; }
+
+  /* "Checking with Alpaca..." reads as stuck rather than working. One
+     sweep across the line says the request is genuinely in flight. It is
+     a single transform-animated pseudo-element, and it is applied only
+     to the in-flight placeholder -- never to a message reporting a
+     failure, which must not look like it is still trying. */
+  .is-loading-shimmer{ position:relative; overflow:hidden; }
+  .is-loading-shimmer::after{
+    content:''; position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none;
+    background: linear-gradient(90deg, transparent, var(--amber-glow), transparent);
+    transform: translateX(-100%);
+    animation: loadingSweep 1.25s ease-in-out infinite;
+  }
+  @keyframes loadingSweep{ from{ transform: translateX(-100%); } to{ transform: translateX(100%); } }
+
+  /* Card entrance, once per page view (see runCardEntrance). These cards
+     re-render on every poll; an entrance that replayed every ~45s would
+     be maddening, so the animation is applied by JS exactly once per
+     page rather than living on the card class. */
+  .card-enter{ animation: cardEnter .22s ease-out both; }
+  @keyframes cardEnter{ from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform:none; } }
+
+  /* Press feedback on the one button that spends real money, so a click
+     that armed it is visibly a click. Transform only. */
+  .position-close-btn{ transition: transform .12s ease; }
+  .position-close-btn:active{ transform: scale(.96); }
+
   /* THE TICKER IS DELIBERATELY NOT LISTED HERE.
      Stopping it is `animation: none`, which parks the track at
      translateX(0). The track holds two copies of the tape and the
@@ -1462,11 +1524,26 @@
     .brand-ground{ animation: none; display:none; }
     .brand-impact-ring{ animation: none; display:none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
+      .value-flash-up, .value-flash-down{ animation: none; }
+    .header-live-status.ok::before{ animation: none; }
+    .to-card-dot.ok{ animation: none; }
+    .is-loading-shimmer::after{ animation: none; display:none; }
+    .card-enter{ animation: none; }
+    .position-close-btn{ transition: none; }
+    .position-close-btn:active{ transform: none; }
   }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
+  [data-reduce-motion="true"] .value-flash-up,
+  [data-reduce-motion="true"] .value-flash-down{ animation: none; }
+  [data-reduce-motion="true"] .header-live-status.ok::before{ animation: none; }
+  [data-reduce-motion="true"] .to-card-dot.ok{ animation: none; }
+  [data-reduce-motion="true"] .is-loading-shimmer::after{ animation: none; display:none; }
+  [data-reduce-motion="true"] .card-enter{ animation: none; }
+  [data-reduce-motion="true"] .position-close-btn{ transition: none; }
+  [data-reduce-motion="true"] .position-close-btn:active{ transform: none; }
 </style>
 <script>
   // Runs synchronously before <body> paints anything, so dark mode is
@@ -8952,6 +9029,7 @@
       item.classList.toggle('current', item.dataset.page === name);
     });
     if(name === 'trades'){ renderStatusPage(); }
+    runCardEntrance(name);
     if(name === 'journal'){ renderCalendar(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
@@ -11177,6 +11255,51 @@
   // an empty rounded rectangle -- blank reads as "the whole app is broken",
   // which is both less true and less useful than naming the one card that
   // failed.
+  // ---------- Value change flash ----------
+  // Flashing a number that CHANGED is information. Flashing one that was
+  // merely re-rendered is noise, and every card on this page redraws in
+  // full on each ~45s poll, so "it was written to the DOM" says nothing
+  // about whether it moved. The previous value is therefore remembered
+  // per key and the tint is applied only when the number actually moved.
+  //
+  // Never on first sight: with no previous value there is no direction to
+  // claim, and green-on-arrival would read as a gain that never happened.
+  // A cell with no number (an unreconciled row shows a dash) is recorded
+  // as null for the same reason -- when it prices again there is nothing
+  // honest to compare against, so it arrives quietly.
+  var lastFlashedValues = {};
+  function applyValueFlashes(root){
+    if(!root || !root.querySelectorAll) return;
+    root.querySelectorAll('[data-flash-key]').forEach(function(el){
+      var key = el.getAttribute('data-flash-key');
+      var raw = el.getAttribute('data-flash-value');
+      var val = (raw === null || raw === '') ? null : Number(raw);
+      if(val !== null && !isFinite(val)) val = null;
+      var had = Object.prototype.hasOwnProperty.call(lastFlashedValues, key);
+      var prev = had ? lastFlashedValues[key] : null;
+      lastFlashedValues[key] = val;
+      if(!had || prev === null || val === null || val === prev) return;
+      el.classList.add(val > prev ? 'value-flash-up' : 'value-flash-down');
+    });
+  }
+
+  // Entrance runs once per page, not once per render. renderStatusPage
+  // fires on every poll and on every tab switch back; an entrance bound
+  // to the card class would replay a rise on all seven cards every 45s,
+  // under the eyes of someone trying to read a P&L figure.
+  var cardsEnteredPages = {};
+  function runCardEntrance(pageName){
+    if(cardsEnteredPages[pageName]) return;
+    cardsEnteredPages[pageName] = true;
+    var page = document.getElementById('page-' + pageName);
+    if(!page) return;
+    var cards = page.querySelectorAll('.to-card');
+    for(var i = 0; i < cards.length; i++){
+      cards[i].style.animationDelay = (i * 40) + 'ms';
+      cards[i].classList.add('card-enter');
+    }
+  }
+
   function renderStatusCard(label, bodyId, fn){
     try{
       fn();
@@ -11209,7 +11332,7 @@
     // with no title of its own, so an empty one cannot even tell you WHICH
     // card is missing; it just reads as furniture the app forgot to fill in.
     if(!summaryEl.innerHTML){
-      summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value">Checking with Alpaca…</div></div>';
+      summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value is-loading-shimmer">Checking with Alpaca…</div></div>';
     }
     getAlpacaAccountSummaryCached().then(function(acct){
       var equity = parseFloat(acct.equity || 0);
@@ -11251,15 +11374,19 @@
       var hasOpenCryptoPosition = journalEntries.some(function(j){
         return j.screenerType === 'crypto' && isOpenAlpacaPositionForCurrentAccount(j);
       });
+      // "Market closed" carries no flash key at all: it is not a number,
+      // and recording it would let the next real figure flash against a
+      // value from before the market shut.
       var plValueHtml = shouldHideTodayPL(backendIsTodayTradingDay, hasOpenCryptoPosition, todayPL)
         ? '<div class="backtest-stat-value">Market closed</div>'
-        : '<div class="backtest-stat-value ' + plClass + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
+        : '<div class="backtest-stat-value ' + plClass + '" data-flash-key="acct:todayPL" data-flash-value="' + todayPL + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
 
       summaryEl.innerHTML =
-        '<div><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value">$' + equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
+        '<div><div class="backtest-stat-label">Equity</div><div class="backtest-stat-value" data-flash-key="acct:equity" data-flash-value="' + equity + '">$' + equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
         '<div><div class="backtest-stat-label">Today\'s P&L</div>' + plValueHtml + '</div>' +
-        '<div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value">$' + cash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
-        '<div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value">$' + buyingPower.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>';
+        '<div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value" data-flash-key="acct:cash" data-flash-value="' + cash + '">$' + cash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
+        '<div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value" data-flash-key="acct:buyingPower" data-flash-value="' + buyingPower + '">$' + buyingPower.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>';
+      applyValueFlashes(summaryEl);
     }).catch(function(err){
       summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value down">Failed to load</div></div>';
       console.error('Status page account fetch failed:', err);
@@ -11885,7 +12012,7 @@
     // delay. Real open positions rendering as a blank card is the most
     // dangerous empty state on this page, because it reads as "nothing is
     // open" rather than "not loaded yet."
-    el.innerHTML = '<div class="labs-backtest-status">Checking ' + openPositions.length + ' open position' + (openPositions.length === 1 ? '' : 's') + ' against Alpaca…</div>';
+    el.innerHTML = '<div class="labs-backtest-status is-loading-shimmer">Checking ' + openPositions.length + ' open position' + (openPositions.length === 1 ? '' : 's') + ' against Alpaca…</div>';
     loadStatusPositions(openPositions, el, myGen, false);
   }
 
@@ -11984,6 +12111,8 @@
             '</tr>';
           }).join('') + '</tbody>' +
         '</table>';
+
+      applyValueFlashes(el);
 
       el.querySelectorAll('.sortable-col').forEach(function(th){
         th.addEventListener('click', function(){
@@ -12127,8 +12256,13 @@
     return '—';
   }
 
-  function staleCell(){
-    return '<td title="This entry is from a previous session and Alpaca holds no matching position, so there is no live figure to show. The server is already ignoring it. Remove it from the Journal.">&mdash;</td>';
+  // Carries the flash key with an EMPTY value on purpose: a dash is a
+  // recorded absence of a number, so if this row ever prices again it
+  // starts fresh instead of flashing a direction measured against
+  // whatever it last showed before it went stale.
+  function staleCell(flashKey){
+    return '<td' + (flashKey ? ' data-flash-key="' + flashKey + '" data-flash-value=""' : '') +
+      ' title="This entry is from a previous session and Alpaca holds no matching position, so there is no live figure to show. The server is already ignoring it. Remove it from the Journal.">&mdash;</td>';
   }
 
   function statusPositionsCellHTML(colKey, r){
@@ -12165,9 +12299,15 @@
       // A dash, with the reason on hover, wherever there is genuinely no
       // number -- rather than a plausible-looking one derived from an
       // entry price for a position the broker does not hold.
-      case 'current': return r.current === null ? staleCell() : '<td>' + fmt(r.current) + '</td>';
-      case 'size': return r.sizeDollar === null ? staleCell() : '<td class="mono">$' + r.sizeDollar.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>';
-      case 'pl': return r.pl === null ? staleCell() : '<td class="' + (r.pl >= 0 ? 'up' : 'down') + '">' + (r.pl >= 0 ? '+' : '-') + '$' + Math.abs(r.pl).toFixed(2) + ' (' + (r.plPct >= 0 ? '+' : '') + r.plPct.toFixed(2) + '%)</td>';
+      // Keyed by symbol, not by row position, so a re-sort or a filter
+      // change compares each figure against the same position's previous
+      // figure rather than against whatever now sits in that row.
+      case 'current': return r.current === null ? staleCell('pos:' + j.sym + ':current')
+        : '<td data-flash-key="pos:' + j.sym + ':current" data-flash-value="' + r.current + '">' + fmt(r.current) + '</td>';
+      case 'size': return r.sizeDollar === null ? staleCell('pos:' + j.sym + ':size')
+        : '<td class="mono" data-flash-key="pos:' + j.sym + ':size" data-flash-value="' + r.sizeDollar + '">$' + r.sizeDollar.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>';
+      case 'pl': return r.pl === null ? staleCell('pos:' + j.sym + ':pl')
+        : '<td class="' + (r.pl >= 0 ? 'up' : 'down') + '" data-flash-key="pos:' + j.sym + ':pl" data-flash-value="' + r.pl + '">' + (r.pl >= 0 ? '+' : '-') + '$' + Math.abs(r.pl).toFixed(2) + ' (' + (r.plPct >= 0 ? '+' : '') + r.plPct.toFixed(2) + '%)</td>';
       case 'stop': return '<td>' + fmt(j.stop) + '</td>';
       case 't1': return '<td>' + fmt(j.t1) + '</td>';
       case 'opened':
