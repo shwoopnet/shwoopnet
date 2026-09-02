@@ -8457,7 +8457,40 @@
     tickerSpeedEl.querySelectorAll('.tf-btn').forEach(function(b){
       b.classList.toggle('active', b.dataset.value === val);
     });
-    document.documentElement.style.setProperty('--ticker-duration', (TICKER_BASE_SECONDS / (parseInt(val, 10) / 100)).toFixed(2) + 's');
+
+    // CHANGING animation-duration MID-FLIGHT TELEPORTS THE TAPE.
+    //
+    // A CSS animation's position is elapsed-time-divided-by-duration, and
+    // the browser keeps the ELAPSED time when the duration changes. So
+    // halving the duration doubles the proportion instantly: the strip
+    // jumps to a completely different place in the loop. Changing speed
+    // should change the RATE, not the position.
+    //
+    // Fixed by reading how far through the loop the tape currently is and
+    // re-seeding an equivalent offset against the new duration, via a
+    // negative animation-delay. Position is preserved exactly and only the
+    // rate changes, which is what the control claims to do.
+    var track = document.getElementById('tickerTrack');
+    var progress = 0;
+    // getAnimations is the only way to read a running CSS animation's real
+    // position. Guarded rather than assumed: it is absent in older
+    // browsers, and it throws in a few contexts. Falling through with
+    // progress 0 restarts the loop from its beginning -- still a jump, but
+    // the honest fallback, and no worse than the behaviour being fixed.
+    try{
+      if(track && track.getAnimations){
+        var running = track.getAnimations()[0];
+        if(running && running.currentTime != null && running.effect){
+          var priorMs = running.effect.getTiming().duration;
+          if(priorMs > 0) progress = (running.currentTime % priorMs) / priorMs;
+        }
+      }
+    }catch(e){}
+
+    var seconds = TICKER_BASE_SECONDS / (parseInt(val, 10) / 100);
+    document.documentElement.style.setProperty('--ticker-duration', seconds.toFixed(2) + 's');
+    if(track) track.style.animationDelay = (-progress * seconds).toFixed(2) + 's';
+
     try{ window.localStorage.setItem('shwoopnet:tickerSpeed', val); }catch(e){}
   }
   tickerSpeedEl.querySelectorAll('.tf-btn').forEach(function(b){
