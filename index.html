@@ -10925,15 +10925,33 @@
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
           '<div class="backend-pulse-label">Equities server settings: screener ' + (backendScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open.</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(backendScreenerEnabledOnServer !== null) + '</div>' +
         '</div></div>'
       );
     }
+    // THE FADE HAD NO ROW AT ALL. It is a third strategy with its own two
+    // flags, the backend has published serverFadeScreenerEnabled since it
+    // shipped, and this card -- the one whose whole job is "live proof the
+    // server is running its cycle" -- simply never showed it. There was no
+    // way to tell from the app whether the fade was on.
+    //
+    // Rendered next to equities rather than after crypto because ORB and the
+    // fade are both equities strategies sharing one risk budget: seeing them
+    // apart invites reading either one's state as "the equities state".
+    if(backendFadeScreenerEnabledOnServer !== null){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendFadeScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
+          '<div class="backend-pulse-label">Equities fade settings: screener ' + (backendFadeScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendFadeAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' The fade shares the equities risk budget with the ORB above, so both compete for the same 7% ceiling.</div>' +
+        '</div></div>'
+      );
+    }
+
     if(backendCryptoScreenerEnabledOnServer !== null){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendCryptoScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
           '<div class="backend-pulse-label">Crypto server settings: screener ' + (backendCryptoScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendCryptoAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">Set via Render environment variables — independent of this browser\'s own toggle below, which only affects this tab while it\'s open, and a completely separate on/off from equities above.</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' A completely separate on/off from equities above.</div>' +
         '</div></div>'
       );
     }
