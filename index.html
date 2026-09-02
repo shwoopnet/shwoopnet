@@ -2720,8 +2720,7 @@
     <div class="brief-section-title" style="margin-top:36px;">Crypto Backtest</div>
     <div class="labs-backtest-card">
       <p class="labs-backtest-intro">
-        Same idea as the equities backtest, scored against the crypto strategy's own rolling-range logic on real
-        historical Alpaca bars. A trade still open when the data runs out is marked "Still open" and left out of
+        Scored against the crypto strategy's own rolling-range logic on real historical Alpaca bars. A trade still open when the data runs out is marked "Still open" and left out of
         the win-rate/profit-factor math.
       </p>
       <div class="labs-backtest-controls">
@@ -2928,35 +2927,42 @@
     return bySym;
   }
 
-  // ---------- Opening-range breakout + volume confirmation ----------
-  // Replaces the old SMA-crossover intraday logic below (kept for
-  // reference / potential comparison, but no longer called from the
-  // live screener path). Parameters match exactly what was validated via
-  // 5-window walk-forward backtesting against ~369 trading days of real
-  // data, with realistic slippage included: a 30-minute opening range
-  // (first 2 bars), a breakout beyond that range, confirmed by volume
-  // at least 2x the preceding 20-bar average. Every one of the 16
-  // universe symbols individually cleared a profit factor above 1.5
-  // under this exact configuration.
-  var ORB_RANGE_BARS = 2;
-  var ORB_VOLUME_LOOKBACK = 20;
-  var ORB_VOLUME_CONFIRM_MULTIPLE = 2.0;
-  var ORB_REWARD_MULTIPLE = 1.5;
+  // The four ORB_* constants that used to sit here are gone. Nothing read
+  // them -- computeORBAnalysis lives in the backend and has no occurrence in
+  // this repo at all -- and the comment above them quoted a profit factor
+  // above 1.5 for every one of the 16 symbols, from a 5-window walk-forward
+  // that has since been withdrawn.
+  //
+  // The number was withdrawn because the backtest booked entries at
+  // rangeHigh, which is a lookahead: it is the price that triggered the
+  // signal, not a price anyone could have been filled at. shwoop-server's
+  // CLAUDE.md carries the full list -- 2.71, 2.35, 4.08, 1.24, 1.93, 1.20,
+  // 1.05, each quoted and each withdrawn, every withdrawal moving the number
+  // DOWN -- and states there is no current baseline.
+  //
+  // A dead constant is harmless. A quotable-looking profit factor next to it
+  // is not: it is exactly the thing a future session picks up and compares
+  // against.
 
 
 
 
 
-  // 16 symbols, chosen deliberately for LESS efficient pricing than
-  // mega-cap tech -- high retail attention and genuine volatility, but
-  // less heavily arbitraged by institutional algorithms than names like
-  // AAPL or MSFT. Validated via walk-forward backtesting (5 independent
-  // windows across ~369 trading days, realistic slippage included) with
-  // an opening-range-breakout + volume-confirmation strategy: every
-  // single symbol individually cleared a profit factor above 1.5, and
-  // the combined worst-case window across all 16 came in at 2.03 --
-  // meaningfully different from the near-breakeven results the prior
-  // mega-cap universe produced under the same rigor.
+  // 16 symbols, chosen deliberately for LESS efficient pricing than mega-cap
+  // tech -- high retail attention and genuine volatility, but less heavily
+  // arbitraged by institutional algorithms than names like AAPL or MSFT.
+  //
+  // The "every symbol cleared a profit factor above 1.5, worst-case window
+  // 2.03" claim that used to be here is withdrawn, for the lookahead reason
+  // given above. What IS known about this universe now is worse and better
+  // documented: research/MECHANISMS.md has seven single-name directional
+  // mechanisms measured on exactly these symbols, all failed, with
+  // vwap-displacement confidently NEGATIVE across 10,000+ trades. The
+  // reading there is not "no edge found" but "this universe's own spread and
+  // impact cost more than any single-name-direction bet on it earns back".
+  //
+  // Which is the opposite of what the sentence removed from here said, and
+  // is the reason it could not be left in place.
   var INTRADAY_UNIVERSE = ['PLTR', 'SOFI', 'RIVN', 'COIN', 'MARA', 'AFRM', 'DKNG', 'CVNA',
                            'HOOD', 'RIOT', 'UPST', 'LCID', 'OPEN', 'SNAP', 'CHPT', 'ROKU'];
   var intradayTrades = [];
@@ -8941,8 +8947,30 @@
   }
 
 
+  // WHICH DAY A CLOSED TRADE'S P&L BELONGS TO.
+  //
+  // The day it was REALIZED, which is the exit, not the entry. This filtered
+  // on e.date -- the entry date -- and was correct for exactly as long as
+  // every position opened and closed in the same session, because then the
+  // two dates were the same date.
+  //
+  // They are not any more. The backend now supports holding a position across
+  // sessions (holdAcrossSessions, a 40-session horizon), so a trade entered
+  // 2 Sep and closed 29 Oct put its ENTIRE result on the 2 Sep calendar cell
+  // -- a day on which nothing was realized -- while 29 Oct read $0. Nothing
+  // errors and nothing looks broken; the month simply adds up against the
+  // wrong days.
+  //
+  // exitDate is already written by the backend (safety/exitSync.js) and this
+  // file already relies on it for the growth chart. Falling back to e.date
+  // leaves every pre-existing entry exactly where it is, since for an
+  // intraday trade the two fields hold the same value anyway.
+  function realizedOnDate(e){
+    return (e.exitDate || e.date);
+  }
+
   function computeDayStats(dateStr){
-    var entries = filteredJournalEntries().filter(function(e){ return e.date === dateStr && e.status === 'closed'; });
+    var entries = filteredJournalEntries().filter(function(e){ return e.status === 'closed' && realizedOnDate(e) === dateStr; });
     if(entries.length === 0) return null;
     var dollar = 0, wins = 0;
     entries.forEach(function(e){
@@ -9011,7 +9039,13 @@
     function dayCellHTML(dateStr, dayNum){
       if(!dateStr){ return '<div class="calendar-day empty"></div>'; }
       var stats = computeDayStats(dateStr);
-      var hasEntry = filteredJournalEntries().some(function(e){ return e.date === dateStr; });
+      // "Something happened on this day" -- an entry OR an exit. A trade held
+      // for two months genuinely touches both ends of its span and neither
+      // day should look empty. Same reasoning as realizedOnDate above; the
+      // dot and the P&L figure have to agree about which days matter.
+      var hasEntry = filteredJournalEntries().some(function(e){
+        return e.date === dateStr || (e.status === 'closed' && realizedOnDate(e) === dateStr);
+      });
       var cls = 'calendar-day' + (hasEntry ? ' has-entry' : '') + (dateStr === selectedJournalDate ? ' selected' : '');
       if(stats){ cls += stats.dollar >= 0 ? ' day-win' : ' day-loss'; }
       var inner = '<span class="cal-daynum">' + dayNum + '</span>';
@@ -11509,10 +11543,23 @@
 
   // "Priority" = the entries that are asking for a human, as opposed to
   // the running commentary that makes up the rest of the log. Two things
-  // qualify: anything the backend explicitly marked priority:'urgent'
-  // (today that is the profit sweep's "go buy $X" instruction), and any
-  // error, because an error IS a request -- something failed and nobody
+  // qualify: anything the backend explicitly marked priority:'urgent', and
+  // any error, because an error IS a request -- something failed and nobody
   // finds out unless they go looking.
+  //
+  // THREE things emit urgent today, and the newest is the most consequential
+  // -- this comment named only the profit sweep, which is the oldest and the
+  // least urgent of them:
+  //   - quantity_mismatch drift: the account holds a different size than the
+  //     journal thinks. shwoop-server's CLAUDE.md describes this as the
+  //     reason the lane exists in its current form -- the two set-membership
+  //     drift checks ask WHICH symbols appear and never HOW MUCH, so an
+  //     account holding double its intended size produced no finding at all.
+  //   - protective_orders_failed: a real position with no working stop.
+  //   - the profit sweep's "go buy $X" instruction.
+  // The filter below is generic and was always correct; only this comment
+  // was behind, and it is the one a future session reads to decide what the
+  // lane is for.
   function isPriorityActivityEntry(entry){
     return entry.priority === 'urgent' || activityGroupKey(entry.type) === 'error';
   }
@@ -11634,7 +11681,8 @@
 
   // ---------- Priority lane ("Needs You") ----------
   // A tiny minority of activity entries ask the human to actually DO
-  // something -- right now that's the profit sweep's "go buy $X of
+  // something -- a quantity mismatch between the account and the journal, a
+  // protective order the broker refused, or the profit sweep's "go buy $X of
   // holdings" instruction (see shwoop-server's profitSweep.js), which the
   // backend marks with priority:'urgent'. Everything else in that log is
   // running commentary, and at 200 entries deep an instruction buried
