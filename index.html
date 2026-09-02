@@ -493,6 +493,14 @@
     background: transparent; border:1px solid var(--loss); color: var(--loss);
     padding:8px 16px; border-radius:5px; font-size:12px; cursor:pointer;
   }
+  /* Same shape as the reset button, without the destructive red -- enabling
+     notifications is an ordinary action, not a dangerous one. */
+  .settings-action-btn{
+    background: transparent; border:1px solid var(--amber-dim); color: var(--amber);
+    padding:8px 16px; border-radius:5px; font-size:12px; cursor:pointer; flex-shrink:0;
+  }
+  .settings-action-btn:hover{ background: var(--amber-glow); }
+  .settings-action-btn[disabled]{ border-color: var(--border); color: var(--muted); cursor:default; background:transparent; }
   .settings-reset-btn:hover{ background: var(--loss-glow); }
   .flatten-all-btn{
     background: var(--loss); border:1px solid var(--loss); color:#fff;
@@ -1752,6 +1760,10 @@
         reconcileFailingSince: data.reconcileFailingSince || null,
         reconcileLastError: data.reconcileLastError || null,
         serverMarketOpenAtHeartbeat: typeof data.serverMarketOpenAtHeartbeat === 'boolean' ? data.serverMarketOpenAtHeartbeat : null,
+        // null (absent) means an older server build that never wrote it --
+        // "unknown", which the card says nothing about, rather than "off",
+        // which would be an accusation we cannot support.
+        serverSmsAlertsConfigured: typeof data.serverSmsAlertsConfigured === 'boolean' ? data.serverSmsAlertsConfigured : null,
         serverIntradayScreenerEnabled: typeof data.serverIntradayScreenerEnabled === 'boolean' ? data.serverIntradayScreenerEnabled : null,
         serverIntradayAutoTradeEnabled: typeof data.serverIntradayAutoTradeEnabled === 'boolean' ? data.serverIntradayAutoTradeEnabled : null,
         // Per-cycle status -- flips scanning -> idle/error every 5
@@ -2633,6 +2645,14 @@
 
           <div class="settings-row">
             <div>
+              <div class="settings-row-title">Desktop notifications</div>
+              <div class="settings-row-desc" id="browserNotifyDesc">—</div>
+            </div>
+            <button class="settings-action-btn" id="browserNotifyBtn">Enable</button>
+          </div>
+
+          <div class="settings-row">
+            <div>
               <div class="settings-row-title">Reduce motion</div>
               <div class="settings-row-desc">Turns off the ticker scroll, flash, and logo bounce animations.</div>
             </div>
@@ -3270,6 +3290,7 @@
   var backendReconcileFailingSince = null;
   var backendReconcileLastError = null;
   var backendMarketOpenAtHeartbeat = null;
+  var backendSmsAlertsConfigured = null;
   var backendScreenerEnabledOnServer = null;
   // The server's own effective value for the fade screener, mirrored the
   // same way as the two above -- so the toggle never reads "Off" while
@@ -3366,6 +3387,7 @@
       backendReconcileFailingSince = data.reconcileFailingSince;
       backendReconcileLastError = data.reconcileLastError;
       backendMarketOpenAtHeartbeat = data.serverMarketOpenAtHeartbeat;
+      backendSmsAlertsConfigured = data.serverSmsAlertsConfigured;
       backendScreenerEnabledOnServer = data.serverIntradayScreenerEnabled;
       backendFadeScreenerEnabledOnServer = data.serverFadeScreenerEnabled;
       backendFadeAutoTradeEnabledOnServer = data.serverFadeAutoTradeEnabled;
@@ -4198,6 +4220,61 @@
     }
   }
 
+  // ---------- Browser notifications: ONE implementation, every caller ----------
+  // There were two of these -- this one and notifyPositionClosedViaBrowser --
+  // identical apart from the title and body they built, and they had already
+  // drifted: this one grew the strategyLabel fix described below and the
+  // other never got anything like it. Two copies of the same logic is how
+  // that happens, so there is now one.
+  //
+  // Both copies also did the same two things wrong, which is why "it does not
+  // appear that notifications are populating" was the reported symptom:
+  //
+  //  - Permission was requested LAZILY, at the moment an alert fired, from
+  //    inside a Firestore snapshot callback. That is not a user gesture.
+  //    Safari refuses requestPermission outright without transient
+  //    activation, and a prompt raised out of nowhere while nobody is
+  //    looking at the tab is dismissed rather than granted -- so permission
+  //    sat at 'default' forever and no notification was ever shown. The
+  //    request now happens on a real click in Settings, and nowhere else.
+  //  - When permission was not granted, both copies simply `return`ed.
+  //    Nothing anywhere in the app said notifications were switched off, so
+  //    "the browser is blocking these" and "nothing has happened worth
+  //    telling you about" looked exactly the same from the outside. That is
+  //    the silent failure this codebase refuses everywhere else, and it is
+  //    the more dangerous of the two: a paused auto-trader that nobody is
+  //    told about stays paused.
+  //
+  // browserNotifyState is the last thing the browser actually told us, read
+  // fresh at every send (permission can be revoked from the address bar at
+  // any time, with no event fired) so the Settings row states the CURRENT
+  // truth rather than whatever was true at page load.
+  var browserNotifyState = 'unsupported'; // 'unsupported' | 'default' | 'granted' | 'denied'
+
+  function readBrowserNotifyPermission(){
+    if(!('Notification' in window)) return 'unsupported';
+    // A browser that reports something unexpected here is treated as
+    // not-granted, never as granted -- failing closed on a notification is
+    // a missed pop-up; failing open would be a claim we cannot keep.
+    var p = Notification.permission;
+    return (p === 'granted' || p === 'denied' || p === 'default') ? p : 'default';
+  }
+
+  function refreshBrowserNotifyState(){
+    browserNotifyState = readBrowserNotifyPermission();
+    if(typeof renderBrowserNotifySetting === 'function') renderBrowserNotifySetting();
+    return browserNotifyState;
+  }
+
+  // Returns whether an OS-level notification was actually shown, so a caller
+  // can tell "delivered" from "silently dropped". Never throws: an alert
+  // failing to display must not take down the render that triggered it.
+  function showBrowserNotification(title, body){
+    if(refreshBrowserNotifyState() !== 'granted') return false;
+    try{ new Notification(title, { body: body }); return true; }
+    catch(err){ console.error('Notification failed:', err); return false; }
+  }
+
   // strategyLabel identifies WHICH strategy actually paused ('Equities' or
   // 'Crypto') -- this used to be hardcoded to "Equities auto-trading
   // paused" in the title regardless of caller, so a crypto pause fired
@@ -4208,18 +4285,10 @@
   // the one visible OS-level notification has to say which one, or a
   // real crypto pause reads as if equities paused instead.
   function notifyTradingPausedViaBrowser(strategyLabel, reasonText){
-    if(!('Notification' in window)) return;
-    var title = 'Pocket Advisor — ' + strategyLabel + ' auto-trading paused';
-    var body = 'Repeated failed order attempts. Reason: ' + reasonText + '. Review the activity log, then resume once resolved.';
-    if(Notification.permission === 'granted'){
-      try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
-    } else if(Notification.permission !== 'denied'){
-      Notification.requestPermission().then(function(perm){
-        if(perm === 'granted'){
-          try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
-        }
-      });
-    }
+    return showBrowserNotification(
+      'Pocket Advisor — ' + strategyLabel + ' auto-trading paused',
+      'Repeated failed order attempts. Reason: ' + reasonText + '. Review the activity log, then resume once resolved.'
+    );
   }
 
   function renderTradingPauseState(state){
@@ -8727,6 +8796,62 @@
     applySoundAlertsPref(saved === 'true');
   })();
 
+  // ---------- Settings: desktop notifications ----------
+  // The only place in the app that asks the browser for notification
+  // permission, and it does so from a real click -- see
+  // showBrowserNotification's comment for why asking from a Firestore
+  // snapshot callback never worked.
+  //
+  // This row's whole job is to make an OFF state VISIBLE. "Blocked" is
+  // stated as blocked, with what to do about it, because a blocked
+  // permission cannot be re-prompted from script at all: the button would
+  // do nothing and the user would conclude the app was broken rather than
+  // their site settings.
+  var browserNotifyBtn = document.getElementById('browserNotifyBtn');
+  var browserNotifyDesc = document.getElementById('browserNotifyDesc');
+  var BROWSER_NOTIFY_TEXT = {
+    unsupported: {
+      desc: 'This browser does not support desktop notifications, so pause and position-closed alerts will only ever appear inside the app.',
+      label: 'Unavailable', disabled: true
+    },
+    granted: {
+      desc: 'On — your browser will pop up an alert when auto-trading pauses or a position closes, even when this tab is in the background.',
+      label: 'On', disabled: true
+    },
+    denied: {
+      desc: 'Off — your browser is blocking notifications for this site, so pause and position-closed alerts can only appear inside the app. Re-allow them in your browser\u2019s site settings (the icon beside the address bar); this page cannot ask again once blocked.',
+      label: 'Blocked', disabled: true
+    },
+    'default': {
+      desc: 'Off — not enabled yet. Turn these on to be told when auto-trading pauses or a position closes while you are looking at something else.',
+      label: 'Enable', disabled: false
+    }
+  };
+  function renderBrowserNotifySetting(){
+    if(!browserNotifyBtn || !browserNotifyDesc) return;
+    var t = BROWSER_NOTIFY_TEXT[browserNotifyState] || BROWSER_NOTIFY_TEXT['default'];
+    browserNotifyDesc.textContent = t.desc;
+    browserNotifyBtn.textContent = t.label;
+    browserNotifyBtn.disabled = t.disabled;
+  }
+  if(browserNotifyBtn){
+    browserNotifyBtn.addEventListener('click', function(){
+      if(browserNotifyState !== 'default') return;
+      // Chrome returns a promise; older Safari only takes a callback. Both
+      // shapes end in the same refresh, so neither can leave the row
+      // claiming a state the browser is no longer in.
+      var done = function(){ refreshBrowserNotifyState(); };
+      try{
+        var r = Notification.requestPermission(done);
+        if(r && typeof r.then === 'function') r.then(done, done);
+      }catch(err){
+        console.error('Notification permission request failed:', err);
+        done();
+      }
+    });
+  }
+  refreshBrowserNotifyState();
+
   // ---------- Settings: dark mode ----------
   // Mirrors the tiny inline script right before </head>, which already
   // set data-theme before first paint -- this re-derives the same value
@@ -11153,19 +11278,14 @@
     }
   }
 
+  // Was a byte-for-byte copy of the paused alert's own permission dance.
+  // Shares showBrowserNotification now, so a fix to one is a fix to both --
+  // the last time these were separate, only one of them got fixed.
   function notifyPositionClosedViaBrowser(entry){
-    if(!('Notification' in window)) return;
-    var title = 'Pocket Advisor — ' + (entry.sym || 'Position') + ' closed';
-    var body = entry.text || 'A position closed.';
-    if(Notification.permission === 'granted'){
-      try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
-    } else if(Notification.permission !== 'denied'){
-      Notification.requestPermission().then(function(perm){
-        if(perm === 'granted'){
-          try{ new Notification(title, { body: body }); } catch(err){ console.error('Notification failed:', err); }
-        }
-      });
-    }
+    return showBrowserNotification(
+      'Pocket Advisor — ' + (entry.sym || 'Position') + ' closed',
+      entry.text || 'A position closed.'
+    );
   }
 
   function checkForNewPositionCloseAlerts(entries){
@@ -11633,6 +11753,23 @@
         if(headDot){ headDot.classList.remove('ok'); headDot.classList.add('warn'); }
         if(headMeta){ headMeta.textContent = rec.level === 'failing' ? 'Not reconciling' : 'Reconcile behind'; }
       }
+    }
+
+    // ---- Row 2c: is the out-of-app alerting channel even switched on? ----
+    // Only ever rendered when the server has actually TOLD us it is off.
+    // The backend's SMS alerts are the only thing that can reach the owner
+    // when the app is closed -- every other surface in this file needs a
+    // tab open to be seen -- and createNotifier turning itself into a no-op
+    // logger with no TWILIO_* env vars set is exactly the kind of switched
+    // off that looks identical to quiet. A channel that is off says it is
+    // off; that is this project's position on silent failure.
+    if(backendSmsAlertsConfigured === false){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot stale"></div><div>' +
+          '<div class="backend-pulse-label">SMS alerts are switched off on the server</div>' +
+          '<div class="backend-pulse-sub">The backend has no Twilio credentials configured, so crash and reconciliation-failure alerts are only written to its own log — nothing will reach you while this app is closed. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER and TWILIO_TO_NUMBER in the Render environment to turn them on.</div>' +
+        '</div></div>'
+      );
     }
 
     // ---- Row 3: this cycle's status ----
