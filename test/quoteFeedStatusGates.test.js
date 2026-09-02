@@ -143,16 +143,60 @@ gates.G5 = () => {
   // an unbounded number of bursts per minute.
   const floor = liftNum('QUOTE_BATCH_MIN_INTERVAL_MS');
   assert.ok(floor > 0, 'there must be a floor between batches');
-  const loop = /}, (\d+)\);/.exec(src.slice(src.indexOf('function startRealQuoteLoop()')));
-  assert.ok(loop, 'poll interval not found');
+  // The loop's interval is now a named constant rather than a literal, so
+  // read it by name and assert the loop really uses it -- a regex that
+  // silently matched nothing would make this gate vacuous.
+  const loopMs = liftNum('QUOTE_POLL_INTERVAL_MS');
+  const loopSrc = src.slice(src.indexOf('function startRealQuoteLoop()'));
+  assert.ok(/}, QUOTE_POLL_INTERVAL_MS\);/.test(loopSrc.slice(0, 2000)),
+    'the quote loop must use the named poll interval, not a bare literal');
   assert.ok(
-    floor <= Number(loop[1]),
-    `the floor (${floor}ms) must not throttle the poll loop itself (${loop[1]}ms)`,
+    floor <= loopMs,
+    `the floor (${floor}ms) must not throttle the poll loop itself (${loopMs}ms)`,
   );
   const body = src.slice(src.indexOf('function fetchAllQuotes()'), src.indexOf('function runQuoteBatch()'));
   assert.ok(/quoteBatchInflight/.test(body), 'concurrent callers must reuse the in-flight batch');
   assert.ok(/lastQuoteBatchStartedAt/.test(body), 'a second batch inside the floor must be refused');
   console.log('G5 PASS duplicate quote bursts are collapsed, poll cadence unchanged');
+};
+
+// The SHIPPED constants, not just the parameters.
+//
+// G3 proves the hysteresis is load-bearing when quoteFeedStatus is CALLED
+// with a weak threshold. It cannot see the values renderHeaderLiveStatus
+// actually passes, because it supplies its own. So the shipped configuration
+// -- the only one a user ever sees -- was unprotected: setting
+// QUOTE_FAIL_STREAK_LIMIT back to 1 broke nothing and no test noticed.
+//
+// This pins the shipped numbers to the reasoning behind them. The streak must
+// span more than one poll, and the staleness window must outlast several poll
+// ticks, or a single unlucky burst is once again enough to call a live feed
+// dead. Change these deliberately, with the argument updated -- not by
+// accident.
+gates.G6 = () => {
+  const constant = (name) => {
+    const m = new RegExp('var ' + name + ' = (\\d+);').exec(src);
+    if (!m) throw new Error('shipped constant not found: ' + name);
+    return Number(m[1]);
+  };
+  const quoteFeedStatus = lift('quoteFeedStatus');
+  const streak = constant('QUOTE_FAIL_STREAK_LIMIT');
+  const stale = constant('QUOTE_STALE_MS');
+  const poll = constant('QUOTE_POLL_INTERVAL_MS');
+  const floor = constant('QUOTE_BATCH_MIN_INTERVAL_MS');
+
+  assert.ok(streak >= 2, 'a single failed batch must never be enough to call the feed down (got ' + streak + ')');
+  assert.ok(stale > poll * 2, 'the staleness window must outlast more than two poll ticks, or fresh prices get called stale (stale ' + stale + ' vs poll ' + poll + ')');
+  assert.ok(floor < poll, 'the dedupe floor must be shorter than the poll interval, or it would slow the loop it is meant to leave alone');
+  assert.ok(floor > 0, 'a zero floor collapses no duplicate bursts at all');
+
+  // And the shipped values, fed through the real function, must actually
+  // survive a flap. This is the consequence, not the constants themselves.
+  const flap = [false, true, false, true, false, false, true, false];
+  const out = replay(quoteFeedStatus, flap, { streakLimit: streak, staleMs: stale });
+  assert.notStrictEqual(out.cls, 'fail',
+    'with the SHIPPED thresholds, an alternating flap must never report the feed down');
+  console.log('G6 PASS the shipped thresholds, not just the parameters, survive a flap');
 };
 
 function main() {

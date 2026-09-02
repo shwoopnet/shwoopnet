@@ -8106,6 +8106,12 @@
   // Comfortably longer than three 45s poll ticks, so a feed that ever
   // recovers within the loop's own cadence never trips this.
   var QUOTE_STALE_MS = 150000;
+  // Named rather than left as a literal at the setInterval below, because
+  // three other numbers here are only defensible RELATIVE to it: the
+  // staleness window has to outlast several ticks of it, and the dedupe
+  // floor has to be shorter than it or it would throttle the very loop it
+  // exists to leave alone. A test asserts those relationships hold.
+  var QUOTE_POLL_INTERVAL_MS = 45000;
   var quoteFailStreak = 0;
   var lastGoodQuoteAt = null;
 
@@ -8496,7 +8502,7 @@
     priceLoopInterval = setInterval(function(){
       fetchAllQuotes();
       fetchAllCryptoQuotes().then(onCryptoQuoteBatchDone);
-    }, 45000);
+    }, QUOTE_POLL_INTERVAL_MS);
   }
 
   // ---------- Clock ----------
