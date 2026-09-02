@@ -237,6 +237,21 @@ function main() {
     console.log('An absent backend value never renders as a fabricated one: PASS');
   }
 
+  // ---- 8. THE GATES MUST ACTUALLY READ THE SHIPPED FILE.
+  // Added after a mutation check: deleting the refused wording from
+  // index.html left every gate above still passing. A gate that cannot see
+  // the file it is guarding is decoration, and this suite's whole subject is
+  // a record that must not be able to mislead.
+  {
+    const out = build([week1]);
+    assert.ok(out.indexOf('Verdict refused') !== -1,
+      'the rendered output must contain the refused wording from index.html itself');
+    assert.ok(html.indexOf('Verdict refused') !== -1,
+      'index.html must still carry the refused wording -- if this passes while the '
+      + 'file does not contain it, build() is not reading the shipped file');
+    console.log('The gates read the shipped file, not a stale copy: PASS');
+  }
+
   console.log('\nAll forward-test record gates passed.');
 }
 
