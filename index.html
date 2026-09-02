@@ -2887,8 +2887,13 @@
   function findCryptoUniverseSymbol(rawSym){
     return CRYPTO_UNIVERSE.filter(function(s){ return canonicalSymbol(s) === rawSym; })[0] || null;
   }
-  // ONE way to read an entry's bar time, because `new Date(entryBarTime)`
-  // is Invalid Date on the value this app actually stores.
+  // ONE way to read ANY Firestore timestamp this app stores, because
+  // `new Date(theStoredValue)` is Invalid Date on the shape it actually
+  // arrives in -- and because there were briefly two copies of this
+  // function, added days apart for two different fields that had the
+  // identical bug. Two helpers for one problem is how the backend ended
+  // up with four disagreeing readers of entryBarTime, two of which
+  // guarded the wrong way. There is one here, deliberately.
   //
   // The backend writes entryBarTime as a JS Date; the Admin SDK stores that
   // as a Firestore Timestamp; this tab reads it back through the web SDK as
@@ -2906,10 +2911,18 @@
   // written for the same bug on the trailing stop, where it meant no
   // position on either asset class had ever trailed.
   //
-  // Returns NaN when the value cannot be dated -- never a substituted "now"
-  // or "first bar", which would anchor the tint to a place the position was
-  // never opened at. Callers decide what to do with NaN, out loud.
-  function entryBarMillis(value){
+  // The shapes are not uniform even within one backend: shwoop-server
+  // writes some of these as Date.now() (a plain number) and others as a JS
+  // Date, which the Admin SDK then stores as a Timestamp. So a call site
+  // that happens to work on the field it was written for tells you nothing
+  // about the next field.
+  //
+  // Returns NaN when the value cannot be dated -- never a substituted "now",
+  // "first bar" or 0. On the chart that would anchor the tint to a bar the
+  // position was never opened at; on the health card it would make a broken
+  // field render as a confident healthy or a confident failing. Both are
+  // worse than "unknown", which a caller can say out loud.
+  function firestoreMillis(value){
     if(value === null || value === undefined) return NaN;
     if(value instanceof Date) return value.getTime();
     if(typeof value === 'string' || typeof value === 'number') return new Date(value).getTime();
@@ -7555,7 +7568,7 @@
       // is what the comment above already promises for older entries. The
       // bug this replaces did the opposite -- it entered this branch, got
       // NaN, and then failed every comparison, so it drew nothing at all.
-      var entryTime0 = lv0.entryBarTime ? entryBarMillis(lv0.entryBarTime) : NaN;
+      var entryTime0 = lv0.entryBarTime ? firestoreMillis(lv0.entryBarTime) : NaN;
       if(!isNaN(entryTime0)){
         zoneVisible = false;
         for(var zi = 0; zi < data.length; zi++){
@@ -11073,54 +11086,6 @@
   // change targets.
   var CRYPTO_CYCLE_INTERVAL_MS = 5 * 60 * 1000;
 
-  // ONE way to read a timestamp that came out of Firestore, because the
-  // shape it actually arrives in is not the shape every call site here
-  // assumes. shwoop-server writes some of these as Date.now() (a plain
-  // number) and others as a JS Date, and the Admin SDK stores a Date as
-  // a Firestore Timestamp. Read back through the web SDK that is a
-  // Timestamp instance (toMillis()/toDate(), .seconds/.nanoseconds), and
-  // through anything JSON it is a bare { _seconds, _nanoseconds }.
-  // `new Date(thatObject)` is Invalid Date in both cases.
-  //
-  // That exact mistake is not hypothetical here: it is the bug that
-  // silently disabled the trailing stop on every position this account
-  // has ever held (shwoop-server/src/lib/entryBarTime.js documents the
-  // whole chain). Every comparison against NaN is false, so the code
-  // walked zero bars, kept the initial stop, and logged nothing. This is
-  // the frontend's equivalent of that helper, and it accepts the same
-  // four shapes for the same reason.
-  //
-  // Returns NaN when the value cannot be dated -- deliberately, not
-  // Date.now() and not 0. A substituted fallback would make a broken
-  // field render as a confident healthy or a confident failing, and both
-  // of those are worse than "unknown", which callers can say out loud.
-  function firestoreMillis(value){
-    if(value === null || value === undefined) return NaN;
-    if(value instanceof Date) return value.getTime();
-    if(typeof value === 'number' || typeof value === 'string') return new Date(value).getTime();
-    if(typeof value === 'object'){
-      // Real web-SDK Timestamp instances.
-      if(typeof value.toMillis === 'function'){
-        var ms = value.toMillis();
-        return typeof ms === 'number' && isFinite(ms) ? ms : NaN;
-      }
-      if(typeof value.toDate === 'function'){
-        var d = value.toDate();
-        return d instanceof Date ? d.getTime() : NaN;
-      }
-      // A Timestamp that has been through JSON. The Admin SDK underscores
-      // the keys, the web SDK does not; accept both, because a value can
-      // reach this page either way.
-      var secs = value._seconds !== undefined ? value._seconds : value.seconds;
-      var nanos = value._nanoseconds !== undefined ? value._nanoseconds : value.nanoseconds;
-      if(typeof secs === 'number' && isFinite(secs)){
-        var ns = typeof nanos === 'number' && isFinite(nanos) ? nanos : 0;
-        return secs * 1000 + Math.floor(ns / 1e6);
-      }
-    }
-    return NaN;
-  }
-
   function formatAgo(ms){
     if(ms < 1000) return 'just now';
     var s = Math.floor(ms / 1000);
@@ -11810,7 +11775,7 @@
     // the position was opened on, and they disagree across a midnight or a
     // backfill.
     if(j.entryBarTime){
-      var ms = entryBarMillis(j.entryBarTime);
+      var ms = firestoreMillis(j.entryBarTime);
       if(!isNaN(ms)) session = easternDateKeyOf(new Date(ms));
     }
     if(!session && typeof j.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(j.date)) session = j.date;

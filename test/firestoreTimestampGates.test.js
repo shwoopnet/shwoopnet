@@ -31,7 +31,7 @@ function lift(name, deps) {
   return new Function(...names, 'return (' + src.slice(start, end) + ')')(...names.map((n) => deps[n]));
 }
 
-const entryBarMillis = lift('entryBarMillis');
+const entryBarMillis = lift('firestoreMillis');
 
 // 2026-09-02T13:45:00Z
 const MS = 1788356700000;
@@ -82,8 +82,8 @@ gates.G3 = () => {
   // without noticing, and a check that reads comments would flag that
   // documentation as the bug it prevents.
   const code = src.replace(/\/\/[^\n]*/g, '');
-  assert.ok(/var entryTime0 = lv0\.entryBarTime \? entryBarMillis\(lv0\.entryBarTime\) : NaN;/.test(src),
-    'the chart entry-zone anchor must go through entryBarMillis');
+  assert.ok(/var entryTime0 = lv0\.entryBarTime \? firestoreMillis\(lv0\.entryBarTime\) : NaN;/.test(src),
+    'the chart entry-zone anchor must go through firestoreMillis');
   assert.ok(!/new Date\(lv0\.entryBarTime\)/.test(code),
     'the chart must never build the anchor with a raw new Date(entryBarTime)');
   assert.ok(!/new Date\(j\.entryBarTime\)/.test(code),
