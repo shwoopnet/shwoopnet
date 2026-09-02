@@ -5684,8 +5684,50 @@
       // only says which one is signalling on that symbol right now -- and
       // on a symbol both strategies watch, those genuinely differ.
       if(openPositionBySym[t.sym]){
-        var owned = { strategy: openPositionBySym[t.sym].strategy || t.strategy || 'orb' };
+        var pos = openPositionBySym[t.sym];
+        var owned = { strategy: pos.strategy || t.strategy || 'orb' };
         if(t.status === 'watching') owned.status = 'active';
+        // ONCE A POSITION IS OPEN, ITS OWN NUMBERS WIN.
+        //
+        // This merge already let the journal entry override strategy and
+        // status, on the reasoning that the entry records what actually
+        // happened while the live row only says what is signalling now. The
+        // prices were left behind, and they are the ones that matter:
+        //
+        //   - entry: the row showed the signal's theoretical level while the
+        //     account filled somewhere else, so "ENTRY" on this card and
+        //     "ENTRY" in Open Positions were two different numbers for the
+        //     same position with nothing saying which was which.
+        //   - stop: worse, because THE STOP MOVES. safety/trailingStop.js
+        //     ratchets it as the trade goes the right way, so a row showing
+        //     the signal's original stop is showing protection that is no
+        //     longer where it says -- reading a stop as further away than it
+        //     really is, on the one card people check to see where they
+        //     stand.
+        //   - t1: re-anchored to the real fill by
+        //     equitiesProtectiveOrders.js for the same reason.
+        //
+        // The percentage fields are recomputed from the real prices so the
+        // stop/target bar underneath cannot disagree with the numbers above
+        // it. Only ever applied to values the entry actually carries.
+        // Number(null) is 0, which is finite -- so a bare
+        // Number.isFinite(Number(x)) guard ADMITS null and would overwrite a
+        // perfectly good signal price with it. Reject the empty values
+        // first, then check the number.
+        var realPrice = function(v){
+          return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v));
+        };
+        if(realPrice(pos.entry)){
+          owned.entry = pos.entry;
+          if(realPrice(pos.stop)){
+            owned.stop = pos.stop;
+            owned.stopPctFromEntry = (pos.stop - pos.entry) / pos.entry;
+          }
+          if(realPrice(pos.t1)){
+            owned.t1 = pos.t1;
+            owned.t1PctFromEntry = (pos.t1 - pos.entry) / pos.entry;
+          }
+        }
         return Object.assign({}, t, owned);
       }
       return t;
@@ -7651,7 +7693,7 @@
     var activeTagYs = [];
     if(liveY !== null) activeTagYs.push(liveY);
     if(opts.levels){
-      [opts.levels.target, opts.levels.entry, opts.levels.planEntry, opts.levels.stop].forEach(function(price){
+      [opts.levels.target, opts.levels.entry, opts.levels.stop].forEach(function(price){
         if(price === null || price === undefined || !isFinite(price)) return;
         var tagY = y(price);
         if(tagY < padTop - 1 || tagY > padTop + plotH + 1) return;
@@ -7813,15 +7855,28 @@
         parts.push('<path d="'+axisFlagPath(ly2)+'" fill="'+color+'"/>');
         parts.push('<text class="axis-tag-text" x="'+(plotW+flagNotch+4)+'" y="'+(ly2+4)+'" fill="'+tagTextFill(color)+'">'+label+' '+price.toFixed(2)+'</text>');
       }
+      // THREE LINES, NOT FOUR: where you got in, where you get out losing,
+      // where you get out winning. Everything else on this chart is price.
+      //
+      // There used to be a fourth, "P", showing the level the original
+      // signal said to enter at, drawn beside the actual fill so the gap
+      // between them was visible. That gap was worth watching when it was
+      // unbounded -- chasing an extended breakout by market order while the
+      // stop and target stayed pinned to the pre-chase theoretical price is
+      // what sent live results far below the backtest.
+      //
+      // It is bounded now, at both ends: autoTrade.js's chase gate refuses
+      // a signal price has already run past (CHASE_LIMIT_RISK_FRACTION), and
+      // equitiesProtectiveOrders.js re-anchors the real stop and target to
+      // the actual fill rather than the plan. So the line reported a
+      // quantity that is now controlled, and at a cent apart on a $3 stock
+      // its axis tag simply sat on top of the fill's -- making the one
+      // number it existed to show the one you could not read.
+      //
+      // plannedEntry is still stored on the journal entry. This is a
+      // decluttered chart, not a discarded field.
       levelLine(lv.target, 'var(--gain)', 'T', '2,4', 0.85);
       levelLine(lv.entry, 'var(--amber)', 'E', '2,4', 0.85);
-      // Only ever present alongside a real, open position's own entry
-      // line above — a separate, de-emphasized reference showing where
-      // the original plan said to get in, distinct from where the
-      // account actually got filled. Single letter, same as E/S/T --
-      // the axis tag's fixed width only comfortably fits one letter
-      // plus the price.
-      levelLine(lv.planEntry, 'var(--muted)', 'P', '1,3', 0.6);
       levelLine(lv.stop, 'var(--loss)', 'S', '2,4', 0.85);
     }
 
@@ -7874,17 +7929,14 @@
     var trade = intradayTrades.filter(function(t){ return t.sym === sym; })[0];
     var levels = null;
     if(openPosition){
-      // Two genuinely different things: entry is the real, account
-      // position price (what actually happened); planEntry is the
-      // original ideal level the screener computed at signal time
-      // (what the plan said). Kept as separate lines rather than
-      // collapsed into one — a market-order fill can land meaningfully
-      // away from the theoretical SMA20-based plan level, and that gap
-      // is worth being able to see, not hide.
-      levels = { entry: openPosition.entry, planEntry: openPosition.plannedEntry, stop: openPosition.stop, target: openPosition.t1, entryBarTime: openPosition.entryBarTime };
+      // The REAL position's own prices -- what the account actually filled
+      // at, and where its stop and target actually are right now, stop
+      // included after any trailing. Not the theoretical levels today's
+      // re-run produced for the same symbol.
+      levels = { entry: openPosition.entry, stop: openPosition.stop, target: openPosition.t1, entryBarTime: openPosition.entryBarTime };
     } else if(trade){
-      // Nothing's been traded yet — there's only one entry concept at
-      // this stage (the plan itself), so no separate planEntry line.
+      // Nothing has been traded yet, so the plan IS the entry -- there is
+      // no second, realised price for it to differ from.
       levels = { entry: trade.entry, stop: trade.stop, target: trade.t1, entryBarTime: trade.entryBarTime };
     }
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
