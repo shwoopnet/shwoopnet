@@ -10385,8 +10385,14 @@
     return {
       count: closed.length, wins: wins, losses: closed.length - wins, totalDollar: totalDollar, avgPct: totalPctSum / closed.length,
       winRate: (wins / closed.length) * 100,
-      avgWinDollar: winCount ? winDollarSum / winCount : 0,
-      avgLossDollar: lossCount ? lossDollarSum / lossCount : 0,
+      // null, not 0, when the count is zero -- "$0" reads as a MEASURED
+      // average win of zero dollars, which cannot happen (a winning trade
+      // is by definition > $0). It is really "there is nothing to
+      // average", the same distinction profitFactorText already draws for
+      // a profit factor with no losing trade. Rendered as an em dash below.
+      avgWinDollar: winCount ? winDollarSum / winCount : null,
+      avgLossDollar: lossCount ? lossDollarSum / lossCount : null,
+      winCount: winCount, lossCount: lossCount,
       profitFactor: profitFactor,
       best: best, worst: worst,
       everProtectedTracked: everProtectedTracked, everProtectedCount: everProtectedCount,
@@ -11053,8 +11059,15 @@
         everProtectedEl.textContent = filtered.everProtectedRate.toFixed(0) + '%';
         everProtectedSubEl.textContent = filtered.everProtectedCount + ' of ' + filtered.everProtectedTracked + ' measured' + unmeasurableNote;
       }
-      avgWinEl.textContent = '+$' + filtered.avgWinDollar.toFixed(0);
-      avgLossEl.textContent = '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
+      // A losing (or winning) streak legitimately empties one side --
+      // 0 winners in 13 crypto trades is a real, uncomfortable result,
+      // and "+$0" hid it behind a number that looked measured. "—" says
+      // plainly that there is nothing on that side to average, same as
+      // the win-rate and profit-factor cards already do.
+      avgWinEl.textContent = filtered.avgWinDollar === null ? '—' : '+$' + filtered.avgWinDollar.toFixed(0);
+      avgWinEl.title = filtered.avgWinDollar === null ? 'No winning trade yet in this selection.' : '';
+      avgLossEl.textContent = filtered.avgLossDollar === null ? '—' : '−$' + Math.abs(filtered.avgLossDollar).toFixed(0);
+      avgLossEl.title = filtered.avgLossDollar === null ? 'No losing trade yet in this selection.' : '';
       // Best/worst can each land on either side of zero regardless of
       // label -- "best" among an all-losing stretch is still a loss
       // (the smallest one), and "worst" among an all-winning stretch
