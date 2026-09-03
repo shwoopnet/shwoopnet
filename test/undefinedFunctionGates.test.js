@@ -99,9 +99,12 @@ gates.G1 = () => {
 // refactor that legitimately removed it.
 gates.G2 = () => {
   assert.ok(/function\s+serverSettingSource\s*\(/.test(code),
-    'serverSettingSource must exist: three Backend Status rows call it');
+    'serverSettingSource must exist: the Backend Status rows call it');
   const calls = (code.match(/serverSettingSource\s*\(/g) || []).length;
-  assert.ok(calls >= 4, 'expected the definition plus its three call sites, found ' + calls);
+  // Definition plus one call site per Backend Status settings row --
+  // equities and crypto, since the fade row was removed along with the
+  // rest of the fade strategy's frontend surfaces.
+  assert.ok(calls >= 3, 'expected the definition plus its call sites, found ' + calls);
   console.log('G2 PASS serverSettingSource is defined, and its callers still call it');
 };
 
