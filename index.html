@@ -3576,6 +3576,26 @@
     return n.toFixed(8);
   }
 
+  // A crypto position's qty is a dollar risk budget divided by a live
+  // price, so it carries however many decimals that division happens to
+  // produce -- "172.79659", not a number anyone chose. Shortens what is
+  // READ, never what is stored or traded: this only touches the table
+  // cell string, and every P&L/sizing calculation elsewhere still reads
+  // the real j.qty untouched.
+  //
+  // Magnitude-aware, mirroring fmt()'s own price tiers just above, rather
+  // than a flat "one decimal place" -- a fixed decimal count would print
+  // "0.0" for a BTC-sized holding, which reads as nothing is held when
+  // real size is. Trims trailing zeros so a round number reads as one.
+  function fmtCryptoQty(n){
+    if(typeof n !== 'number' || !isFinite(n)) return String(n);
+    var abs = Math.abs(n);
+    var decimals = abs >= 1000 ? 0 : abs >= 1 ? 1 : abs >= 0.001 ? 4 : 8;
+    var out = n.toFixed(decimals);
+    if(out.indexOf('.') !== -1) out = out.replace(/0+$/, '').replace(/\.$/, '');
+    return out;
+  }
+
   // PROFIT FACTOR WITH NO LOSING TRADE HAS NO DENOMINATOR.
   //
   // gross gains / gross losses is undefined when gross losses is zero, and
@@ -12739,9 +12759,16 @@
       // On a partially filled entry this is the FILLED quantity, not the
       // intended one -- marked so the size is never read as the one the
       // strategy asked for.
-      case 'qty': return j.partialFill
-        ? '<td title="Partially filled — this is the quantity that actually filled, not the size the strategy asked for.">' + j.qty + ' <span style="color:var(--amber);">*</span></td>'
-        : '<td>' + j.qty + '</td>';
+      case 'qty': {
+        // Equities is always whole shares -- fmtCryptoQty is a no-op there
+        // in practice, but gated on screenerType explicitly rather than
+        // relied on implicitly, so a future equities value with a stray
+        // decimal is never silently rounded.
+        var qtyText = j.screenerType === 'crypto' ? fmtCryptoQty(j.qty) : j.qty;
+        return j.partialFill
+          ? '<td title="Partially filled — this is the quantity that actually filled, not the size the strategy asked for.">' + qtyText + ' <span style="color:var(--amber);">*</span></td>'
+          : '<td>' + qtyText + '</td>';
+      }
       case 'entry': return '<td>' + fmt(j.entry) + '</td>';
       // A dash, with the reason on hover, wherever there is genuinely no
       // number -- rather than a plausible-looking one derived from an
