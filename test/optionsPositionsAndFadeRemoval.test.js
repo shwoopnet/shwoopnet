@@ -94,6 +94,30 @@ gates.G7 = () => {
   console.log('G7 PASS mergedEquitiesPicks still exists, now ORB-only');
 };
 
+// ---- Options auto-trade control (added after the Backend Status row
+// shipped showing options auto-trade ON with no way to switch it off from
+// this card, and Flatten All not pausing it either) ----
+
+gates.G8 = () => {
+  const code = src.replace(/\/\/[^\n]*/g, '');
+  assert.ok(/id="optionsAutoTradeEnableToggle"/.test(code), 'Auto-Trading Controls must have a real options auto-trade switch');
+  assert.ok(/id="optionsScreenerEnableToggle"/.test(code), 'Screeners must have a real options screener switch');
+  assert.ok(/function effectiveOptionsAutoTradeOn\(\)/.test(code));
+  assert.ok(/function effectiveOptionsScreenerOn\(\)/.test(code));
+  console.log('G8 PASS options has real Settings toggles, not just a read-only Backend Status row');
+};
+
+gates.G9 = () => {
+  const code = src.replace(/\/\/[^\n]*/g, '');
+  const flattenBody = code.match(/function flattenAllPositions\(\)\{[\s\S]*?\n  \}/)?.[0] || '';
+  assert.ok(flattenBody, 'flattenAllPositions must exist');
+  assert.ok(/effectiveOptionsAutoTradeOn\(\)/.test(flattenBody),
+    'Flatten All must check options auto-trade before deciding whether to pause anything');
+  assert.ok(/optionsAutoTradeEnabledOverride: false/.test(flattenBody),
+    'Flatten All must actually pause options auto-trade, or its own "nothing re-enters right after" promise is false for this strategy');
+  console.log('G9 PASS Flatten All pauses options auto-trade along with equities and crypto');
+};
+
 function main() {
   const arg = process.argv[2];
   for (const n of (arg ? [arg] : Object.keys(gates))) {
