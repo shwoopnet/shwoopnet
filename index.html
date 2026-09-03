@@ -3271,6 +3271,67 @@
     return minutesSinceMidnight >= (9 * 60 + 30) && minutesSinceMidnight < (16 * 60);
   }
 
+  // ---------- What the price feed can actually see ----------
+  // WHEN AN EQUITIES PRICE ON THIS PAGE CAN CHANGE AT ALL.
+  //
+  // NOT a trading gate, and never to be used as one: the strategy runs on
+  // isUsMarketOpen (9:30-16:00 ET) above, and this window is deliberately
+  // WIDER than that. It describes IEX's own operating day -- the feed this
+  // account is on -- not the exchange's session, which is why it is named
+  // for IEX.
+  //
+  // MEASURED live on this account, 2026-09-02, not assumed:
+  //   - /v2/stocks/{sym}/trades/latest?feed=iex answered 200 after the
+  //     16:00 close: PLTR's last trade was 16:41 ET, while AAPL's and
+  //     SNAP's were still 15:59 at the same instant. IEX does publish
+  //     post-market prints -- thinly, and UNEVENLY BY SYMBOL, which is
+  //     why price age is tracked per symbol below and never page-wide.
+  //   - A 30-hour window of 15Min IEX bars came back including 08:45 and
+  //     09:00 ET bars, so pre-market prints exist too.
+  //   - SIP is NOT available for recent data on this subscription (403
+  //     under ~15 minutes old), so IEX is the whole of what can be seen.
+  // Those two edges put IEX's day at roughly 08:00-17:00 ET. Outside it
+  // there are genuinely no new prints on any feed reachable here, so
+  // polling harder cannot produce a newer number -- the honest thing is
+  // to poll less and say when the last price was.
+  var IEX_DATA_WINDOW_OPEN_MIN = 8 * 60;   // 08:00 ET
+  var IEX_DATA_WINDOW_CLOSE_MIN = 17 * 60; // 17:00 ET
+
+  function isWithinIexDataWindow(now){
+    var parts = {};
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', hour12: false, weekday: 'short',
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+    }).formatToParts(now || new Date()).forEach(function(p){ parts[p.type] = p.value; });
+    if(parts.weekday === 'Sat' || parts.weekday === 'Sun') return false;
+    if(isUsMarketHoliday(parseInt(parts.year, 10), parseInt(parts.month, 10), parseInt(parts.day, 10))) return false;
+    var minutesSinceMidnight = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
+    return minutesSinceMidnight >= IEX_DATA_WINDOW_OPEN_MIN && minutesSinceMidnight < IEX_DATA_WINDOW_CLOSE_MIN;
+  }
+
+  // HOW OLD ONE SYMBOL'S PRICE IS.
+  //
+  // Pure and per-symbol on purpose. Two positions held at the same instant
+  // can legitimately have marks minutes apart (PLTR 16:41, AAPL 15:59),
+  // and presenting the older one as though it were as current as the
+  // newer is the same lie as a hardcoded placeholder price.
+  //
+  // 'unknown' is a price with no print timestamp behind it (a Finnhub
+  // fallback quote, or an older backend build) -- it must not be dressed
+  // up as current, and it must not read as stale either; it reads as not
+  // known. Threshold is generous inside the window because a thin symbol
+  // can genuinely go minutes between prints while the feed is perfectly
+  // healthy; outside the window EVERY price is aged by definition, no
+  // matter how recently it printed, because nothing can refresh it.
+  var PRICE_AGE_CURRENT_MS = 5 * 60 * 1000;
+  function priceAgeStatus(asOf, now, dataWindowOpen){
+    if(asOf === null || asOf === undefined || !isFinite(asOf)) return { level:'unknown', ageMs:null };
+    var age = now - asOf;
+    if(age < 0) age = 0; // clock skew is not evidence of anything
+    if(dataWindowOpen && age <= PRICE_AGE_CURRENT_MS) return { level:'current', ageMs:age };
+    return { level:'aged', ageMs:age };
+  }
+
   // Alpaca supports genuine 24/5 trading now -- overnight (8pm-4am ET),
   // pre-market (4am-9:30am), regular (9:30am-4pm), after-hours (4pm-8pm)
   // -- running Sunday 8pm through Friday 8pm ET. "Market closed" is
@@ -3630,14 +3691,25 @@
   // routine (a slow Alpaca call, a deploy swapping instances) and calling
   // that stale would train the reader to ignore the marker, which is how a
   // real outage gets missed.
-  function picksFreshness(updatedAt, now, intervalMs){
+  //
+  // A FOURTH ANSWER: 'closed'. The equities screener only ever runs while
+  // the market is open, by design (see isUsMarketOpen -- the opening-range
+  // concept it trades does not exist outside the session). So from 16:00
+  // every evening the scan is, correctly, hours old, and 'stale' pointed
+  // the reader at Backend Status for a cycle that is not supposed to be
+  // running. That is the same "reads as a fault when nothing is wrong"
+  // problem the header had overnight. Crypto passes nothing here and keeps
+  // exactly three answers -- it runs 24/7, so an old crypto scan really is
+  // a problem.
+  function picksFreshness(updatedAt, now, intervalMs, sessionOpen){
     var ms = firestoreMillis(updatedAt);
     if(isNaN(ms)) return { level: 'unknown', ageMs: null };
     var age = now - ms;
     // A backend clock a little ahead of this browser's must not render as
     // a negative age; it is not evidence of anything except clock skew.
     if(age < 0) age = 0;
-    return { level: age > intervalMs * 2 ? 'stale' : 'fresh', ageMs: age };
+    if(age > intervalMs * 2) return { level: sessionOpen === false ? 'closed' : 'stale', ageMs: age };
+    return { level: 'fresh', ageMs: age };
   }
   function pct(a,b){ return ((a-b)/b*100); }
   function findQuote(sym){ return watchlist.filter(function(w){ return w.sym === sym; })[0]; }
@@ -6052,15 +6124,16 @@
     // The scan's own age, shown next to the count. Without it the card
     // presents a list computed at yesterday's close exactly as it presents
     // one computed forty seconds ago.
-    var eqFresh = picksFreshness(backendIntradayPicksUpdatedAt, Date.now(), INTRADAY_CYCLE_INTERVAL_MS);
+    var eqFresh = picksFreshness(backendIntradayPicksUpdatedAt, Date.now(), INTRADAY_CYCLE_INTERVAL_MS, isUsMarketOpen());
     var eqAgeNote = eqFresh.level === 'fresh' ? ' · scanned ' + formatAgo(eqFresh.ageMs)
       : eqFresh.level === 'stale' ? ' · last scan ' + formatAgo(eqFresh.ageMs) + ' — may be out of date'
+      : eqFresh.level === 'closed' ? ' · market closed · last scan ' + formatAgo(eqFresh.ageMs)
       : '';
     var headMeta = document.getElementById('todaysSetupsHeadMeta');
     if(headMeta){
       headMeta.textContent = source.length
         ? (visible.length + ' of ' + source.length + ' setup' + (source.length === 1 ? '' : 's') + eqAgeNote)
-        : (eqFresh.level === 'stale' ? eqAgeNote.replace(/^ · /, '') : '');
+        : (eqFresh.level === 'stale' || eqFresh.level === 'closed' ? eqAgeNote.replace(/^ · /, '') : '');
       headMeta.classList.toggle('is-stale', eqFresh.level === 'stale');
     }
     var filterBtn = document.getElementById('todaysSetupsFilterBtn');
@@ -6091,7 +6164,9 @@
       // screener that stopped running hours ago does not support it. When
       // the scan is stale the card says which of the two it is instead of
       // reporting a quiet market on the strength of a dead cycle.
-      el.innerHTML = eqFresh.level === 'stale'
+      el.innerHTML = eqFresh.level === 'closed'
+        ? '<div class="labs-backtest-status">The equities market is closed. The screener only runs during the regular session (9:30–16:00 ET); the last scan was ' + formatAgo(eqFresh.ageMs) + '.</div>'
+        : eqFresh.level === 'stale'
         ? '<div class="labs-backtest-status down">No setups have been published since the last scan ' + formatAgo(eqFresh.ageMs) + ' — that is older than the screener\'s own cycle, so this list may simply not have been refreshed. Check Backend Status.</div>'
         : '<div class="labs-backtest-status">No qualifying setups across the universe right now — the screener is still watching all 16 symbols for the next breakout.</div>';
       return;
@@ -8541,6 +8616,10 @@
   // floor has to be shorter than it or it would throttle the very loop it
   // exists to leave alone. A test asserts those relationships hold.
   var QUOTE_POLL_INTERVAL_MS = 45000;
+  // The equities cadence outside IEX's day (see equitiesPollIntervalMs and
+  // scheduleEquitiesPoll). Declared here, next to the interval it replaces,
+  // because the dedupe floor below reads it too.
+  var QUOTE_POLL_INTERVAL_CLOSED_MS = 15 * 60 * 1000;
   var quoteFailStreak = 0;
   var lastGoodQuoteAt = null;
 
@@ -8571,7 +8650,11 @@
       })
       .then(function(data){
         if(!data.trade || typeof data.trade.p !== 'number') throw new Error('No trade data for ' + sym);
-        return data.trade.p;
+        // The print's OWN timestamp, kept rather than thrown away. This
+        // endpoint answers 200 at any hour with whatever it last saw, so
+        // the price alone cannot say whether it is seconds or hours old.
+        var asOf = data.trade.t ? Date.parse(data.trade.t) : NaN;
+        return { price: data.trade.p, asOf: isFinite(asOf) ? asOf : null };
       });
   }
 
@@ -8593,7 +8676,7 @@
 
   function fetchQuoteViaAlpaca(sym){
     return Promise.all([fetchAlpacaLatestTrade(sym), fetchAlpacaPrevClose(sym)]).then(function(results){
-      return { price: results[0], prevClose: results[1] };
+      return { price: results[0].price, priceAsOf: results[0].asOf, prevClose: results[1] };
     });
   }
 
@@ -8717,7 +8800,10 @@
           throw new Error('Unexpected Finnhub response for ' + sym + ': ' + JSON.stringify(data));
         }
         if(data.c === 0 && data.pc === 0) throw new Error('No data for ' + sym);
-        return { price: data.c, prevClose: data.pc };
+        // No print timestamp in this response, so priceAsOf is null and
+        // the age renders as unknown -- Date.now() here would have
+        // manufactured a "just now" for a quote of unknown vintage.
+        return { price: data.c, priceAsOf: null, prevClose: data.pc };
       });
   }
 
@@ -8758,9 +8844,22 @@
   var quoteBatchInflight = null;
   var lastQuoteBatchStartedAt = 0;
 
+  // OUTSIDE IEX'S DAY THE FLOOR IS THE CADENCE.
+  //
+  // The 45s loop is not the only trigger: the journal listener fires on
+  // every write to the shared account document, including the backend's
+  // own ~60s heartbeat. With a flat 20s floor that heartbeat alone would
+  // have kept the equities batch running once a minute all night, so
+  // slowing the loop down overnight would have saved nothing at all.
+  // Outside the window the floor rises to the closed-window cadence, and
+  // the heartbeat-driven bursts are dropped with it.
+  function quoteBatchMinIntervalMs(now){
+    return isWithinIexDataWindow(now) ? QUOTE_BATCH_MIN_INTERVAL_MS : QUOTE_POLL_INTERVAL_CLOSED_MS;
+  }
+
   function fetchAllQuotes(){
     if(quoteBatchInflight) return quoteBatchInflight;
-    if(lastQuoteBatchStartedAt && (Date.now() - lastQuoteBatchStartedAt) < QUOTE_BATCH_MIN_INTERVAL_MS){
+    if(lastQuoteBatchStartedAt && (Date.now() - lastQuoteBatchStartedAt) < quoteBatchMinIntervalMs(new Date())){
       // Deliberately not queued for later: the 45s loop is already going
       // to run one, and a queued burst is just the same duplicate burst
       // arriving slightly later.
@@ -8801,6 +8900,10 @@
           if(quoteFetchGen[item.sym] === myGen){
             item.price = q.price;
             item.prevClose = q.prevClose;
+            // Carried per symbol, alongside the price it belongs to. A
+            // page-wide "last updated" cannot describe a feed where one
+            // symbol printed at 16:41 and another stopped at 15:59.
+            item.priceAsOf = (q.priceAsOf === undefined) ? null : q.priceAsOf;
           }
           sources.push(q.source);
           renderTicker();
@@ -8859,6 +8962,26 @@
   function quoteFeedStatus(s){
     var anyOk = !!(s.equitiesOk || s.cryptoOk);
     var age = (s.lastGoodAt === null || s.lastGoodAt === undefined) ? Infinity : (s.now - s.lastGoodAt);
+    // A SHUT DATA WINDOW IS NOT A FAULT, AND IT IS NOT LIVE EITHER.
+    //
+    // Both wrong answers were reachable here at 3am. "Sync failed" reads
+    // as something broken and sends the owner looking for a problem that
+    // does not exist; and the opposite failure is subtler and worse --
+    // /trades/latest answers 200 at any hour with yesterday afternoon's
+    // print, so a successful batch outside IEX's day used to render as
+    // "Live via Alpaca (IEX)" over a price hours old. Crypto genuinely
+    // trades 24/7 and still reports live on its own merits; the equities
+    // half says what it is: closed, and when the last price was.
+    var windowOpen = s.dataWindowOpen !== false;
+    if(!windowOpen){
+      if(s.cryptoOk) return { cls: 'ok', text: 'Live via Alpaca (crypto) — equities market closed' };
+      return {
+        cls: 'warn',
+        text: isFinite(s.lastEquitiesPriceAgeMs)
+          ? 'Equities market closed — last price ' + formatAgo(s.lastEquitiesPriceAgeMs)
+          : 'Equities market closed — no price yet'
+      };
+    }
     if(!anyOk && s.failStreak >= s.streakLimit && age >= s.staleMs){
       return { cls: 'fail', text: 'Sync failed — last known prices' };
     }
@@ -8875,6 +8998,18 @@
     };
   }
 
+  // The most recent print ANY tracked equity has, which is the only
+  // honest thing a single page-wide header can say about a feed whose
+  // symbols are uneven: "the newest thing we have is this old". Per-row
+  // ages live on the rows themselves.
+  function freshestEquitiesPriceAgeMs(){
+    var newest = null;
+    watchlist.forEach(function(item){
+      if(item.priceAsOf != null && isFinite(item.priceAsOf) && (newest === null || item.priceAsOf > newest)) newest = item.priceAsOf;
+    });
+    return newest === null ? Infinity : Math.max(0, Date.now() - newest);
+  }
+
   function renderHeaderLiveStatus(){
     var el = document.getElementById('headerLiveStatus');
     if(!el) return;
@@ -8886,7 +9021,9 @@
       now: Date.now(),
       streakLimit: QUOTE_FAIL_STREAK_LIMIT,
       staleMs: QUOTE_STALE_MS,
-      sources: lastQuoteBatchSources
+      sources: lastQuoteBatchSources,
+      dataWindowOpen: isWithinIexDataWindow(),
+      lastEquitiesPriceAgeMs: freshestEquitiesPriceAgeMs()
     });
     el.textContent = status.text;
     el.className = 'header-live-status ' + status.cls;
@@ -8924,12 +9061,38 @@
     if(statusPageEl && !statusPageEl.hidden) renderCryptoBlocks();
   }
 
+  // EXTENDING THE HOURS MUST NOT MEAN MORE REQUESTS PER HOUR.
+  //
+  // The equities loop now covers IEX's whole day (08:00-17:00 ET) at the
+  // same 45s cadence it always used, and outside that window it drops to
+  // this instead of continuing at 45s -- polling for prints that cannot
+  // exist is pure volume for a number that cannot change. The occasional
+  // closed-window poll is not wasted: it is what notices the window
+  // reopening (and the first pre-market print) without a page reload.
+  //
+  // Crypto is deliberately NOT part of this decision -- it trades 24/7,
+  // so its own loop keeps the 45s cadence around the clock, unchanged.
+  function equitiesPollIntervalMs(now){
+    return isWithinIexDataWindow(now) ? QUOTE_POLL_INTERVAL_MS : QUOTE_POLL_INTERVAL_CLOSED_MS;
+  }
+
+  var equitiesPollTimeout = null;
+  function scheduleEquitiesPoll(){
+    if(equitiesPollTimeout){ clearTimeout(equitiesPollTimeout); }
+    // Re-decided on every tick rather than once at startup, so a tab left
+    // open overnight speeds back up by itself when the window reopens.
+    equitiesPollTimeout = setTimeout(function(){
+      fetchAllQuotes();
+      scheduleEquitiesPoll();
+    }, equitiesPollIntervalMs(new Date()));
+  }
+
   function startRealQuoteLoop(){
     if(priceLoopInterval){ clearInterval(priceLoopInterval); }
     fetchAllQuotes();
     fetchAllCryptoQuotes().then(onCryptoQuoteBatchDone);
+    scheduleEquitiesPoll();
     priceLoopInterval = setInterval(function(){
-      fetchAllQuotes();
       fetchAllCryptoQuotes().then(onCryptoQuoteBatchDone);
     }, QUOTE_POLL_INTERVAL_MS);
   }
@@ -12365,6 +12528,12 @@
     // can move past this number while the position stays open by design;
     // the hover title explains that instead of it just looking stuck.
     { key:'t1', label:'Target ⓘ', hint:'Reference only (1.5x the initial risk) -- not a hard cap. The real exit is the trailing stop shown in the Stop column, which is why price can move past this number while the position stays open.' },
+    // HOW OLD THIS ROW'S MARK IS, PER ROW.
+    // Measured 2026-09-02: at the same instant PLTR's last print was 16:41
+    // ET and AAPL's was 15:59. One position can legitimately be priced
+    // fresher than another, and the P&L above is only as current as this
+    // column says it is.
+    { key:'priceAge', label:'Price age ⓘ', hint:'How long ago this symbol last printed a trade on IEX. Post-market prints are thin and uneven by symbol, so two positions held at the same moment can have marks minutes apart. Outside IEX\'s day (08:00-17:00 ET) nothing can refresh, so every mark ages.' },
     { key:'opened', label:'Opened' },
     // WHICH STRATEGY OPENED IT. Two equities strategies now trade the same
     // 16 symbols on OPPOSITE sides, so symbol, direction and price cannot
@@ -12534,7 +12703,16 @@
         // not the entry price, so this tracks the actual $ currently
         // deployed rather than a fixed snapshot from whenever it opened.
         var sizeDollar = current === null ? null : j.qty * current;
-        return { j: j, current: current, pl: pl, plPct: plPct, sizeDollar: sizeDollar };
+        // The age of THIS symbol's own mark. Crypto keeps its own 24/7
+        // feed and is not subject to the equities data window at all.
+        var isCryptoRow = j.sym.indexOf('/') > -1;
+        var ageQuote = isCryptoRow ? null : findQuote(j.sym);
+        var priceAsOf = (ageQuote && ageQuote.priceAsOf != null) ? ageQuote.priceAsOf : null;
+        return {
+          j: j, current: current, pl: pl, plPct: plPct, sizeDollar: sizeDollar,
+          priceAge: (current === null || isCryptoRow) ? { level:'unknown', ageMs:null }
+            : priceAgeStatus(priceAsOf, Date.now(), isWithinIexDataWindow())
+        };
       });
 
       if(statusPositionsSortKey){
@@ -12784,6 +12962,13 @@
         : '<td class="' + (r.pl >= 0 ? 'up' : 'down') + '" data-flash-key="pos:' + j.sym + ':pl" data-flash-value="' + r.pl + '">' + (r.pl >= 0 ? '+' : '-') + '$' + Math.abs(r.pl).toFixed(2) + ' (' + (r.plPct >= 0 ? '+' : '') + r.plPct.toFixed(2) + '%)</td>';
       case 'stop': return '<td>' + fmt(j.stop) + '</td>';
       case 't1': return '<td>' + fmt(j.t1) + '</td>';
+      // An aged mark is amber and says its age; a current one says so
+      // plainly. Never a blank, which would read as "no opinion" on a
+      // number the row is already showing.
+      case 'priceAge':
+        if(!r.priceAge || r.priceAge.level === 'unknown') return '<td title="No trade timestamp for this mark.">—</td>';
+        if(r.priceAge.level === 'current') return '<td>current</td>';
+        return '<td class="to-card-meta is-stale" title="This price is the last trade IEX printed for this symbol. Nothing newer exists on this account\'s feed.">' + formatAgo(r.priceAge.ageMs) + '</td>';
       case 'opened':
         var openedLabel = j.date ? new Date(j.date + 'T00:00:00').toLocaleDateString([], { month:'short', day:'numeric' }) : '—';
         return '<td>' + openedLabel + '</td>';
