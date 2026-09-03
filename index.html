@@ -1913,6 +1913,8 @@
         cryptoLastCycleSummary: data.cryptoLastCycleSummary || null,
         cryptoScreenerEnabledOverride: typeof data.cryptoScreenerEnabledOverride === 'boolean' ? data.cryptoScreenerEnabledOverride : null,
         cryptoAutoTradeEnabledOverride: typeof data.cryptoAutoTradeEnabledOverride === 'boolean' ? data.cryptoAutoTradeEnabledOverride : null,
+        optionsScreenerEnabledOverride: typeof data.optionsScreenerEnabledOverride === 'boolean' ? data.optionsScreenerEnabledOverride : null,
+        optionsAutoTradeEnabledOverride: typeof data.optionsAutoTradeEnabledOverride === 'boolean' ? data.optionsAutoTradeEnabledOverride : null,
         // Cash-secured-put income forward test (shwoop-server's
         // optionsIncomeCycle.js). A DIFFERENT SHAPE from every equities/
         // crypto position -- premium collected against a strike and an
@@ -2414,6 +2416,15 @@
             <span class="quote-sync-status" id="serverCryptoAutoTradeStatusBadge">—</span>
             <button class="chart-tool-btn" id="cryptoAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
+          <!-- Cash-secured-put income forward test (optionsIncomeCycle.js).
+               No paused-status badge -- unlike equities/crypto, options has
+               no auto-pause-on-repeated-failure mechanism built yet, and a
+               badge here would claim a health signal that doesn't exist. -->
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Options (CSP)</span>
+            <span class="money-mode-badge" id="optionsAutoTradeMoneyClause">Paper</span>
+            <button class="chart-tool-btn" id="optionsAutoTradeEnableToggle" data-armed="false">Off</button>
+          </div>
         </div>
       </div>
       <div class="settings-row" id="screenersRow" hidden>
@@ -2426,6 +2437,10 @@
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Crypto</span>
             <button class="chart-tool-btn" id="cryptoScreenerEnableToggle">Off</button>
+          </div>
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Options (CSP)</span>
+            <button class="chart-tool-btn" id="optionsScreenerEnableToggle">Off</button>
           </div>
         </div>
       </div>
@@ -3545,7 +3560,9 @@
     intradayScreenerEnabledOverride: null,
     intradayAutoTradeEnabledOverride: null,
     cryptoScreenerEnabledOverride: null,
-    cryptoAutoTradeEnabledOverride: null
+    cryptoAutoTradeEnabledOverride: null,
+    optionsScreenerEnabledOverride: null,
+    optionsAutoTradeEnabledOverride: null
   };
 
   function handleScreenerDocUpdate(rawData){
@@ -3611,6 +3628,8 @@
       backendCryptoLastCycleSummary = data.cryptoLastCycleSummary;
       autoTradeOverrides.cryptoScreenerEnabledOverride = data.cryptoScreenerEnabledOverride;
       autoTradeOverrides.cryptoAutoTradeEnabledOverride = data.cryptoAutoTradeEnabledOverride;
+      autoTradeOverrides.optionsScreenerEnabledOverride = data.optionsScreenerEnabledOverride;
+      autoTradeOverrides.optionsAutoTradeEnabledOverride = data.optionsAutoTradeEnabledOverride;
       renderAutoTradeOverrideControls();
       // Without this, What to Watch on the Brief page only ever showed
       // whatever backendIntradayPicks happened to be at the single
@@ -3989,7 +4008,7 @@
     // strategy is ever genuinely paper-only, drive that off a real signal
     // from the backend, not off a literal in the markup.
     var isLiveEnv = alpacaAccountType === 'live';
-    ['autoTradeIntradayMoneyClause', 'cryptoAutoTradeMoneyClause']
+    ['autoTradeIntradayMoneyClause', 'cryptoAutoTradeMoneyClause', 'optionsAutoTradeMoneyClause']
       .forEach(function(id){
         var badge = document.getElementById(id);
         if(!badge) return;
@@ -4154,6 +4173,16 @@
       ? autoTradeOverrides.cryptoAutoTradeEnabledOverride
       : Boolean(backendCryptoAutoTradeEnabledOnServer);
   }
+  function effectiveOptionsAutoTradeOn(){
+    return autoTradeOverrides.optionsAutoTradeEnabledOverride !== null
+      ? autoTradeOverrides.optionsAutoTradeEnabledOverride
+      : Boolean(backendOptionsAutoTradeEnabledOnServer);
+  }
+  function effectiveOptionsScreenerOn(){
+    return autoTradeOverrides.optionsScreenerEnabledOverride !== null
+      ? autoTradeOverrides.optionsScreenerEnabledOverride
+      : Boolean(backendOptionsScreenerEnabledOnServer);
+  }
   function effectiveCryptoScreenerOn(){
     return autoTradeOverrides.cryptoScreenerEnabledOverride !== null
       ? autoTradeOverrides.cryptoScreenerEnabledOverride
@@ -4186,6 +4215,19 @@
       var cryptoScreenerOn = effectiveCryptoScreenerOn();
       cryptoScreenerBtn.textContent = cryptoScreenerOn ? 'On' : 'Off';
       cryptoScreenerBtn.classList.toggle('active', cryptoScreenerOn);
+    }
+    var optionsAutoBtn = document.getElementById('optionsAutoTradeEnableToggle');
+    if(optionsAutoBtn && optionsAutoBtn.dataset.armed !== 'true'){
+      var optionsAutoOn = effectiveOptionsAutoTradeOn();
+      optionsAutoBtn.textContent = optionsAutoOn ? 'On' : 'Off';
+      optionsAutoBtn.classList.remove('confirming');
+      optionsAutoBtn.classList.toggle('active', optionsAutoOn);
+    }
+    var optionsScreenerBtn = document.getElementById('optionsScreenerEnableToggle');
+    if(optionsScreenerBtn){
+      var optionsScreenerOn = effectiveOptionsScreenerOn();
+      optionsScreenerBtn.textContent = optionsScreenerOn ? 'On' : 'Off';
+      optionsScreenerBtn.classList.toggle('active', optionsScreenerOn);
     }
   }
 
@@ -4263,6 +4305,44 @@
     var next = !effectiveCryptoScreenerOn();
     autoTradeOverrides.cryptoScreenerEnabledOverride = next;
     saveAutoTradeOverride({ cryptoScreenerEnabledOverride: next });
+    renderAutoTradeOverrideControls();
+  });
+
+  document.getElementById('optionsAutoTradeEnableToggle').addEventListener('click', function(){
+    var btn = this;
+    var currentlyOn = effectiveOptionsAutoTradeOn();
+    // Same click-to-arm confirmation as equities/crypto -- still real
+    // (paper) orders on a real Alpaca account, and this one commits real
+    // cash per cash-secured-put contract.
+    if(currentlyOn){
+      autoTradeOverrides.optionsAutoTradeEnabledOverride = false;
+      saveAutoTradeOverride({ optionsAutoTradeEnabledOverride: false });
+      renderAutoTradeOverrideControls();
+      return;
+    }
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(btn._armTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      autoTradeOverrides.optionsAutoTradeEnabledOverride = true;
+      saveAutoTradeOverride({ optionsAutoTradeEnabledOverride: true });
+      renderAutoTradeOverrideControls();
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again — real orders';
+      btn._armTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        renderAutoTradeOverrideControls();
+      }, 4000);
+    }
+  });
+
+  document.getElementById('optionsScreenerEnableToggle').addEventListener('click', function(){
+    var next = !effectiveOptionsScreenerOn();
+    autoTradeOverrides.optionsScreenerEnabledOverride = next;
+    saveAutoTradeOverride({ optionsScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
   });
 
@@ -5612,11 +5692,21 @@
     // market-hours gate to naturally hold it off the way equities does
     // outside RTH -- without pausing it explicitly, its next 5-minute
     // cycle could open a brand new position minutes after this ran.
-    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn()){
+    // Options included -- added after the row's promise turned out not to
+    // hold for it either: this account's options auto-trade can be ON
+    // (Backend Status shows it live) with no Settings toggle in this card
+    // to stop it, and its next scan (up to 4 hours out, but no
+    // market-hours gate stopping a cycle already in flight) could open a
+    // brand new short put minutes after "everything" was supposedly flat.
+    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn() || effectiveOptionsAutoTradeOn()){
       autoTradeOverrides.intradayAutoTradeEnabledOverride = false;
       autoTradeOverrides.cryptoAutoTradeEnabledOverride = false;
+      autoTradeOverrides.optionsAutoTradeEnabledOverride = false;
       renderAutoTradeOverrideControls();
-      saveAutoTradeOverride({ intradayAutoTradeEnabledOverride: false, cryptoAutoTradeEnabledOverride: false });
+      saveAutoTradeOverride({
+        intradayAutoTradeEnabledOverride: false, cryptoAutoTradeEnabledOverride: false,
+        optionsAutoTradeEnabledOverride: false,
+      });
     }
     // WHAT GETS CLOSED IS THE BROKER'S LIST, NOT THE JOURNAL'S.
     //
