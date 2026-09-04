@@ -929,6 +929,11 @@
     background: var(--panel-raised); border:1px solid var(--border); border-radius:6px;
     padding:14px; z-index:150; box-shadow:0 12px 28px rgba(0,0,0,0.45);
     display:flex; flex-direction:column; gap:12px;
+    /* Unbounded before this -- a menu with more rows than fit the
+       viewport (e.g. Open Positions' Columns list, one row per column)
+       just got clipped at the window edge with no way to reach the rest.
+       Same cap-and-scroll fix as #alpacaDockColumnsMenu's own rule. */
+    max-height:min(420px, calc(100vh - 160px)); overflow-y:auto;
   }
   .layout-menu[hidden]{ display:none; }
   .layout-menu .layout-stepper{ justify-content:space-between; }
