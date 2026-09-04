@@ -339,7 +339,9 @@
   .settings-row{
     display:flex; justify-content:space-between; align-items:center; gap:20px;
     padding:18px 4px; border-bottom:1px solid var(--border); flex-wrap:wrap;
+    transition: background-color .15s ease; border-radius:6px;
   }
+  .settings-row:hover{ background: var(--panel-raised); }
   /* Without this, the hidden attribute alone has no visual effect: the
      flex display set above has the same specificity as the browser's
      built-in [hidden]{display:none} rule, and author styles win ties
@@ -532,6 +534,7 @@
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
     padding:24px 26px; margin-bottom: 20px;
     box-shadow: var(--card-shadow);
+    transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
   }
   .labs-backtest-intro{ color: var(--muted); font-size:13px; line-height:1.6; margin:0 0 22px 0; }
 
@@ -728,6 +731,7 @@
     letter-spacing:.04em; border-bottom:1px solid var(--border); font-weight:600;
   }
   .backtest-trades-table td{ padding:8px 10px; border-bottom:1px solid var(--border); font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; }
+  .backtest-trades-table tbody tr{ transition: background-color .15s ease; }
   .backtest-trades-table tbody tr:hover{ background: var(--panel-raised); }
   .backtest-trades-table td.up{ color: var(--gain); }
   .backtest-trades-table td.down{ color: var(--loss); }
@@ -744,7 +748,8 @@
   .backtest-outcome-hit{ color: var(--gain); }
   .backtest-outcome-stopped{ color: var(--loss); }
 
-  .activity-log-row{ padding:12px 0; border-bottom:1px solid var(--border); }
+  .activity-log-row{ padding:12px 0; border-bottom:1px solid var(--border); transition: background-color .15s ease; margin:0 -10px; padding-left:10px; padding-right:10px; border-radius:6px; }
+  .activity-log-row:hover{ background: var(--panel-raised); }
   .activity-log-row:last-child{ border-bottom:none; }
   /* A long-running 24/7 backend can pile up hundreds of entries --
      without a cap this list just pushes the rest of Trade Overview
@@ -1943,22 +1948,22 @@
         optionsCycleError: data.optionsCycleError || null,
         optionsCycleErrorAt: data.optionsCycleErrorAt || null,
         optionsLastCycleSummary: data.optionsLastCycleSummary || null,
-        // The earnings IV-crush credit spread mechanism (shwoop-server's
-        // optionsEarningsCycle.js) -- a second, separate options strategy
-        // from the CSP above, its own fields throughout so neither ever
-        // clobbers the other's status or positions.
-        earningsSpreadPositions: Array.isArray(data.earningsSpreadPositions) ? data.earningsSpreadPositions : [],
-        earningsSpreadClosedTrades: Array.isArray(data.earningsSpreadClosedTrades) ? data.earningsSpreadClosedTrades : [],
-        serverEarningsSpreadScreenerEnabled: typeof data.serverEarningsSpreadScreenerEnabled === 'boolean' ? data.serverEarningsSpreadScreenerEnabled : null,
-        serverEarningsSpreadAutoTradeEnabled: typeof data.serverEarningsSpreadAutoTradeEnabled === 'boolean' ? data.serverEarningsSpreadAutoTradeEnabled : null,
-        earningsSpreadCycleStatus: data.earningsSpreadCycleStatus || null,
-        earningsSpreadCycleStartedAt: data.earningsSpreadCycleStartedAt || null,
-        earningsSpreadCycleCompletedAt: data.earningsSpreadCycleCompletedAt || null,
-        earningsSpreadCycleError: data.earningsSpreadCycleError || null,
-        earningsSpreadCycleErrorAt: data.earningsSpreadCycleErrorAt || null,
-        earningsSpreadLastCycleSummary: data.earningsSpreadLastCycleSummary || null,
-        earningsSpreadScreenerEnabledOverride: typeof data.earningsSpreadScreenerEnabledOverride === 'boolean' ? data.earningsSpreadScreenerEnabledOverride : null,
-        earningsSpreadAutoTradeEnabledOverride: typeof data.earningsSpreadAutoTradeEnabledOverride === 'boolean' ? data.earningsSpreadAutoTradeEnabledOverride : null
+        // The weekly defined-risk credit spread mechanism (shwoop-server's
+        // optionsWeeklySpreadCycle.js) -- a second, separate options
+        // strategy from the CSP above, its own fields throughout so
+        // neither ever clobbers the other's status or positions.
+        weeklySpreadPositions: Array.isArray(data.weeklySpreadPositions) ? data.weeklySpreadPositions : [],
+        weeklySpreadClosedTrades: Array.isArray(data.weeklySpreadClosedTrades) ? data.weeklySpreadClosedTrades : [],
+        serverWeeklySpreadScreenerEnabled: typeof data.serverWeeklySpreadScreenerEnabled === 'boolean' ? data.serverWeeklySpreadScreenerEnabled : null,
+        serverWeeklySpreadAutoTradeEnabled: typeof data.serverWeeklySpreadAutoTradeEnabled === 'boolean' ? data.serverWeeklySpreadAutoTradeEnabled : null,
+        weeklySpreadCycleStatus: data.weeklySpreadCycleStatus || null,
+        weeklySpreadCycleStartedAt: data.weeklySpreadCycleStartedAt || null,
+        weeklySpreadCycleCompletedAt: data.weeklySpreadCycleCompletedAt || null,
+        weeklySpreadCycleError: data.weeklySpreadCycleError || null,
+        weeklySpreadCycleErrorAt: data.weeklySpreadCycleErrorAt || null,
+        weeklySpreadLastCycleSummary: data.weeklySpreadLastCycleSummary || null,
+        weeklySpreadScreenerEnabledOverride: typeof data.weeklySpreadScreenerEnabledOverride === 'boolean' ? data.weeklySpreadScreenerEnabledOverride : null,
+        weeklySpreadAutoTradeEnabledOverride: typeof data.weeklySpreadAutoTradeEnabledOverride === 'boolean' ? data.weeklySpreadAutoTradeEnabledOverride : null
       };
     },
     // Merges only the fields actually passed in -- callers pass a
@@ -2389,34 +2394,25 @@
           <span class="to-card-meta" id="optionsPositionsHeadMeta"></span>
         </div>
         <div class="labs-backtest-note" style="margin-bottom:10px;">
-          Forward test, not a backtest -- there is no historical options data
-          this account can measure against. Selling cash-secured puts on a
-          liquidity-picked universe (F, INTC, T, BAC, XLF, NOK, SIRI, PFE, HPQ). See the note on each
-          position for why: research/MECHANISMS.md has no verdict on this
-          mechanism, and none of these numbers should be read as one.
+          Cash-secured puts. Forward test only -- not a validated strategy.
         </div>
         <div id="optionsPositionsBody"></div>
       </div>
     </div>
 
-    <!-- Earnings IV-crush credit spread (optionsEarningsCycle.js) -- a
-         second, separate options mechanism from the CSP above. Same
+    <!-- Weekly defined-risk credit spread (optionsWeeklySpreadCycle.js) --
+         a second, separate options mechanism from the CSP above. Same
          hidden-until-real-data pattern. -->
-    <div class="to-card" id="toCard-earningsSpreadPositions" hidden>
+    <div class="to-card" id="toCard-weeklySpreadPositions" hidden>
       <div class="labs-backtest-card">
         <div class="to-card-head">
-          <span class="to-card-title">Earnings Credit Spread</span>
-          <span class="to-card-meta" id="earningsSpreadPositionsHeadMeta"></span>
+          <span class="to-card-title">Weekly Credit Spread</span>
+          <span class="to-card-meta" id="weeklySpreadPositionsHeadMeta"></span>
         </div>
         <div class="labs-backtest-note" style="margin-bottom:10px;">
-          Forward test, not a backtest. Selling a defined-risk put credit
-          spread the session before a scheduled earnings release, closed
-          the session after -- the edge is the post-earnings IV crush, not
-          direction. Same liquidity-picked universe minus XLF (an ETF has
-          no earnings). research/MECHANISMS.md has no verdict on this
-          mechanism, and none of these numbers should be read as one.
+          Defined-risk weekly credit spreads. Forward test only.
         </div>
-        <div id="earningsSpreadPositionsBody"></div>
+        <div id="weeklySpreadPositionsBody"></div>
       </div>
     </div>
 
@@ -2478,14 +2474,14 @@
             <span class="money-mode-badge" id="optionsAutoTradeMoneyClause">Paper</span>
             <button class="chart-tool-btn" id="optionsAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
-          <!-- Earnings IV-crush credit spread (optionsEarningsCycle.js), a
-               separate mechanism from the CSP above -- see
-               lib/optionsEarningsSpread.js. Same "no paused-status badge
-               yet" reasoning as the CSP group. -->
+          <!-- Weekly defined-risk credit spread
+               (optionsWeeklySpreadCycle.js), a separate mechanism from
+               the CSP above -- see lib/optionsWeeklySpread.js. Same "no
+               paused-status badge yet" reasoning as the CSP group. -->
           <div class="settings-strategy-group">
-            <span class="settings-strategy-label">Earnings spread</span>
-            <span class="money-mode-badge" id="earningsSpreadAutoTradeMoneyClause">Paper</span>
-            <button class="chart-tool-btn" id="earningsSpreadAutoTradeEnableToggle" data-armed="false">Off</button>
+            <span class="settings-strategy-label">Weekly spread</span>
+            <span class="money-mode-badge" id="weeklySpreadAutoTradeMoneyClause">Paper</span>
+            <button class="chart-tool-btn" id="weeklySpreadAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
         </div>
       </div>
@@ -2505,8 +2501,8 @@
             <button class="chart-tool-btn" id="optionsScreenerEnableToggle">Off</button>
           </div>
           <div class="settings-strategy-group">
-            <span class="settings-strategy-label">Earnings spread</span>
-            <button class="chart-tool-btn" id="earningsSpreadScreenerEnableToggle">Off</button>
+            <span class="settings-strategy-label">Weekly spread</span>
+            <button class="chart-tool-btn" id="weeklySpreadScreenerEnableToggle">Off</button>
           </div>
         </div>
       </div>
@@ -3594,20 +3590,20 @@
   var backendOptionsCycleError = null;
   var backendOptionsCycleErrorAt = null;
   var backendOptionsLastCycleSummary = null;
-  // The earnings credit-spread mechanism -- a second, separate options
-  // strategy (shwoop-server's optionsEarningsCycle.js), own fields
+  // The weekly credit-spread mechanism -- a second, separate options
+  // strategy (shwoop-server's optionsWeeklySpreadCycle.js), own fields
   // throughout, same reasoning as backendCryptoPicks having its own set
   // rather than sharing the equities ones.
-  var backendEarningsSpreadPositions = [];
-  var backendEarningsSpreadClosedTrades = [];
-  var backendEarningsSpreadScreenerEnabledOnServer = null;
-  var backendEarningsSpreadAutoTradeEnabledOnServer = null;
-  var backendEarningsSpreadCycleStatus = null;
-  var backendEarningsSpreadCycleStartedAt = null;
-  var backendEarningsSpreadCycleCompletedAt = null;
-  var backendEarningsSpreadCycleError = null;
-  var backendEarningsSpreadCycleErrorAt = null;
-  var backendEarningsSpreadLastCycleSummary = null;
+  var backendWeeklySpreadPositions = [];
+  var backendWeeklySpreadClosedTrades = [];
+  var backendWeeklySpreadScreenerEnabledOnServer = null;
+  var backendWeeklySpreadAutoTradeEnabledOnServer = null;
+  var backendWeeklySpreadCycleStatus = null;
+  var backendWeeklySpreadCycleStartedAt = null;
+  var backendWeeklySpreadCycleCompletedAt = null;
+  var backendWeeklySpreadCycleError = null;
+  var backendWeeklySpreadCycleErrorAt = null;
+  var backendWeeklySpreadLastCycleSummary = null;
   // Journal/Alpaca drift findings (see shwoop-server's
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
@@ -3645,8 +3641,8 @@
     cryptoAutoTradeEnabledOverride: null,
     optionsScreenerEnabledOverride: null,
     optionsAutoTradeEnabledOverride: null,
-    earningsSpreadScreenerEnabledOverride: null,
-    earningsSpreadAutoTradeEnabledOverride: null
+    weeklySpreadScreenerEnabledOverride: null,
+    weeklySpreadAutoTradeEnabledOverride: null
   };
 
   function handleScreenerDocUpdate(rawData){
@@ -3709,19 +3705,19 @@
       backendOptionsCycleError = data.optionsCycleError;
       backendOptionsCycleErrorAt = data.optionsCycleErrorAt;
       backendOptionsLastCycleSummary = data.optionsLastCycleSummary;
-      backendEarningsSpreadPositions = data.earningsSpreadPositions;
-      backendEarningsSpreadClosedTrades = data.earningsSpreadClosedTrades;
-      backendEarningsSpreadScreenerEnabledOnServer = data.serverEarningsSpreadScreenerEnabled;
-      backendEarningsSpreadAutoTradeEnabledOnServer = data.serverEarningsSpreadAutoTradeEnabled;
-      backendEarningsSpreadCycleStatus = data.earningsSpreadCycleStatus;
-      backendEarningsSpreadCycleStartedAt = data.earningsSpreadCycleStartedAt;
-      backendEarningsSpreadCycleCompletedAt = data.earningsSpreadCycleCompletedAt;
-      backendEarningsSpreadCycleError = data.earningsSpreadCycleError;
-      backendEarningsSpreadCycleErrorAt = data.earningsSpreadCycleErrorAt;
-      backendEarningsSpreadLastCycleSummary = data.earningsSpreadLastCycleSummary;
-      autoTradeOverrides.earningsSpreadScreenerEnabledOverride = data.earningsSpreadScreenerEnabledOverride;
-      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = data.earningsSpreadAutoTradeEnabledOverride;
-      renderEarningsSpreadPositions();
+      backendWeeklySpreadPositions = data.weeklySpreadPositions;
+      backendWeeklySpreadClosedTrades = data.weeklySpreadClosedTrades;
+      backendWeeklySpreadScreenerEnabledOnServer = data.serverWeeklySpreadScreenerEnabled;
+      backendWeeklySpreadAutoTradeEnabledOnServer = data.serverWeeklySpreadAutoTradeEnabled;
+      backendWeeklySpreadCycleStatus = data.weeklySpreadCycleStatus;
+      backendWeeklySpreadCycleStartedAt = data.weeklySpreadCycleStartedAt;
+      backendWeeklySpreadCycleCompletedAt = data.weeklySpreadCycleCompletedAt;
+      backendWeeklySpreadCycleError = data.weeklySpreadCycleError;
+      backendWeeklySpreadCycleErrorAt = data.weeklySpreadCycleErrorAt;
+      backendWeeklySpreadLastCycleSummary = data.weeklySpreadLastCycleSummary;
+      autoTradeOverrides.weeklySpreadScreenerEnabledOverride = data.weeklySpreadScreenerEnabledOverride;
+      autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = data.weeklySpreadAutoTradeEnabledOverride;
+      renderWeeklySpreadPositions();
       renderOptionsPositions();
       backendCryptoCycleStatus = data.cryptoCycleStatus;
       backendCryptoCycleStartedAt = data.cryptoCycleStartedAt;
@@ -4111,7 +4107,7 @@
     // strategy is ever genuinely paper-only, drive that off a real signal
     // from the backend, not off a literal in the markup.
     var isLiveEnv = alpacaAccountType === 'live';
-    ['autoTradeIntradayMoneyClause', 'cryptoAutoTradeMoneyClause', 'optionsAutoTradeMoneyClause', 'earningsSpreadAutoTradeMoneyClause']
+    ['autoTradeIntradayMoneyClause', 'cryptoAutoTradeMoneyClause', 'optionsAutoTradeMoneyClause', 'weeklySpreadAutoTradeMoneyClause']
       .forEach(function(id){
         var badge = document.getElementById(id);
         if(!badge) return;
@@ -4291,15 +4287,15 @@
       ? autoTradeOverrides.cryptoScreenerEnabledOverride
       : Boolean(backendCryptoScreenerEnabledOnServer);
   }
-  function effectiveEarningsSpreadAutoTradeOn(){
-    return autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride !== null
-      ? autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride
-      : Boolean(backendEarningsSpreadAutoTradeEnabledOnServer);
+  function effectiveWeeklySpreadAutoTradeOn(){
+    return autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride !== null
+      ? autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride
+      : Boolean(backendWeeklySpreadAutoTradeEnabledOnServer);
   }
-  function effectiveEarningsSpreadScreenerOn(){
-    return autoTradeOverrides.earningsSpreadScreenerEnabledOverride !== null
-      ? autoTradeOverrides.earningsSpreadScreenerEnabledOverride
-      : Boolean(backendEarningsSpreadScreenerEnabledOnServer);
+  function effectiveWeeklySpreadScreenerOn(){
+    return autoTradeOverrides.weeklySpreadScreenerEnabledOverride !== null
+      ? autoTradeOverrides.weeklySpreadScreenerEnabledOverride
+      : Boolean(backendWeeklySpreadScreenerEnabledOnServer);
   }
 
   function renderAutoTradeOverrideControls(){
@@ -4342,18 +4338,18 @@
       optionsScreenerBtn.textContent = optionsScreenerOn ? 'On' : 'Off';
       optionsScreenerBtn.classList.toggle('active', optionsScreenerOn);
     }
-    var earningsSpreadAutoBtn = document.getElementById('earningsSpreadAutoTradeEnableToggle');
-    if(earningsSpreadAutoBtn && earningsSpreadAutoBtn.dataset.armed !== 'true'){
-      var earningsSpreadAutoOn = effectiveEarningsSpreadAutoTradeOn();
-      earningsSpreadAutoBtn.textContent = earningsSpreadAutoOn ? 'On' : 'Off';
-      earningsSpreadAutoBtn.classList.remove('confirming');
-      earningsSpreadAutoBtn.classList.toggle('active', earningsSpreadAutoOn);
+    var weeklySpreadAutoBtn = document.getElementById('weeklySpreadAutoTradeEnableToggle');
+    if(weeklySpreadAutoBtn && weeklySpreadAutoBtn.dataset.armed !== 'true'){
+      var weeklySpreadAutoOn = effectiveWeeklySpreadAutoTradeOn();
+      weeklySpreadAutoBtn.textContent = weeklySpreadAutoOn ? 'On' : 'Off';
+      weeklySpreadAutoBtn.classList.remove('confirming');
+      weeklySpreadAutoBtn.classList.toggle('active', weeklySpreadAutoOn);
     }
-    var earningsSpreadScreenerBtn = document.getElementById('earningsSpreadScreenerEnableToggle');
-    if(earningsSpreadScreenerBtn){
-      var earningsSpreadScreenerOn = effectiveEarningsSpreadScreenerOn();
-      earningsSpreadScreenerBtn.textContent = earningsSpreadScreenerOn ? 'On' : 'Off';
-      earningsSpreadScreenerBtn.classList.toggle('active', earningsSpreadScreenerOn);
+    var weeklySpreadScreenerBtn = document.getElementById('weeklySpreadScreenerEnableToggle');
+    if(weeklySpreadScreenerBtn){
+      var weeklySpreadScreenerOn = effectiveWeeklySpreadScreenerOn();
+      weeklySpreadScreenerBtn.textContent = weeklySpreadScreenerOn ? 'On' : 'Off';
+      weeklySpreadScreenerBtn.classList.toggle('active', weeklySpreadScreenerOn);
     }
   }
 
@@ -4472,14 +4468,14 @@
     renderAutoTradeOverrideControls();
   });
 
-  document.getElementById('earningsSpreadAutoTradeEnableToggle').addEventListener('click', function(){
+  document.getElementById('weeklySpreadAutoTradeEnableToggle').addEventListener('click', function(){
     var btn = this;
-    var currentlyOn = effectiveEarningsSpreadAutoTradeOn();
+    var currentlyOn = effectiveWeeklySpreadAutoTradeOn();
     // Same click-to-arm confirmation as the CSP above -- real (paper)
     // orders, two legs per spread.
     if(currentlyOn){
-      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = false;
-      saveAutoTradeOverride({ earningsSpreadAutoTradeEnabledOverride: false });
+      autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = false;
+      saveAutoTradeOverride({ weeklySpreadAutoTradeEnabledOverride: false });
       renderAutoTradeOverrideControls();
       return;
     }
@@ -4487,8 +4483,8 @@
       clearTimeout(btn._armTimer);
       btn.dataset.armed = 'false';
       btn.classList.remove('confirming');
-      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = true;
-      saveAutoTradeOverride({ earningsSpreadAutoTradeEnabledOverride: true });
+      autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = true;
+      saveAutoTradeOverride({ weeklySpreadAutoTradeEnabledOverride: true });
       renderAutoTradeOverrideControls();
     } else {
       btn.dataset.armed = 'true';
@@ -4502,10 +4498,10 @@
     }
   });
 
-  document.getElementById('earningsSpreadScreenerEnableToggle').addEventListener('click', function(){
-    var next = !effectiveEarningsSpreadScreenerOn();
-    autoTradeOverrides.earningsSpreadScreenerEnabledOverride = next;
-    saveAutoTradeOverride({ earningsSpreadScreenerEnabledOverride: next });
+  document.getElementById('weeklySpreadScreenerEnableToggle').addEventListener('click', function(){
+    var next = !effectiveWeeklySpreadScreenerOn();
+    autoTradeOverrides.weeklySpreadScreenerEnabledOverride = next;
+    saveAutoTradeOverride({ weeklySpreadScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
   });
 
@@ -5788,15 +5784,15 @@
     // to stop it, and its next scan (up to 4 hours out, but no
     // market-hours gate stopping a cycle already in flight) could open a
     // brand new short put minutes after "everything" was supposedly flat.
-    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn() || effectiveOptionsAutoTradeOn() || effectiveEarningsSpreadAutoTradeOn()){
+    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn() || effectiveOptionsAutoTradeOn() || effectiveWeeklySpreadAutoTradeOn()){
       autoTradeOverrides.intradayAutoTradeEnabledOverride = false;
       autoTradeOverrides.cryptoAutoTradeEnabledOverride = false;
       autoTradeOverrides.optionsAutoTradeEnabledOverride = false;
-      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = false;
+      autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = false;
       renderAutoTradeOverrideControls();
       saveAutoTradeOverride({
         intradayAutoTradeEnabledOverride: false, cryptoAutoTradeEnabledOverride: false,
-        optionsAutoTradeEnabledOverride: false, earningsSpreadAutoTradeEnabledOverride: false,
+        optionsAutoTradeEnabledOverride: false, weeklySpreadAutoTradeEnabledOverride: false,
       });
     }
     // WHAT GETS CLOSED IS THE BROKER'S LIST, NOT THE JOURNAL'S.
@@ -9490,6 +9486,8 @@
     { key:'openPositions', label:'Open Positions' },
     { key:'todaysSetups', label:'Equities Setups' },
     { key:'cryptoSetups', label:'Crypto Setups' },
+    { key:'optionsPositions', label:'Options Income (CSP)' },
+    { key:'weeklySpreadPositions', label:'Weekly Credit Spread' },
     { key:'activityLog', label:'Activity Log' }
   ];
   var TO_CARD_LABELS = {};
@@ -12171,8 +12169,8 @@
   // here are held 30-45 days at entry, so a 4-hour scan cadence during
   // market hours has no cost the way a slower equities scan would.
   var OPTIONS_CYCLE_INTERVAL_MS = 4 * 60 * 60 * 1000;
-  // Matches shwoop-server's EARNINGS_SPREAD_INTERVAL_MS (scheduler.js).
-  var EARNINGS_SPREAD_CYCLE_INTERVAL_MS = 2 * 60 * 60 * 1000;
+  // Matches shwoop-server's WEEKLY_SPREAD_INTERVAL_MS (scheduler.js).
+  var WEEKLY_SPREAD_CYCLE_INTERVAL_MS = 2 * 60 * 60 * 1000;
 
   function formatAgo(ms){
     if(ms < 1000) return 'just now';
@@ -12404,38 +12402,38 @@
       );
     }
 
-    // ---- Row 3d: earnings credit-spread cycle status -- see
-    // runOptionsEarningsCycle in shwoop-server's optionsEarningsCycle.js.
-    // A second, separate options mechanism from the CSP above, own status
-    // fields throughout. ----
-    if(backendEarningsSpreadCycleStatus === 'scanning'){
+    // ---- Row 3d: weekly credit-spread cycle status -- see
+    // runOptionsWeeklySpreadCycle in shwoop-server's
+    // optionsWeeklySpreadCycle.js. A second, separate options mechanism
+    // from the CSP above, own status fields throughout. ----
+    if(backendWeeklySpreadCycleStatus === 'scanning'){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
-          '<div class="backend-pulse-label">Earnings spread: scanning now…</div>' +
-          '<div class="backend-pulse-sub">Checking the earnings calendar for a qualifying credit spread entry, managing anything already open. Started ' + (backendEarningsSpreadCycleStartedAt ? formatAgo(Date.now() - backendEarningsSpreadCycleStartedAt) : '') + '.</div>' +
+          '<div class="backend-pulse-label">Weekly spread: scanning now…</div>' +
+          '<div class="backend-pulse-sub">Checking for a qualifying weekly credit spread entry, managing anything already open. Started ' + (backendWeeklySpreadCycleStartedAt ? formatAgo(Date.now() - backendWeeklySpreadCycleStartedAt) : '') + '.</div>' +
         '</div></div>'
       );
-    } else if(backendEarningsSpreadCycleStatus === 'error'){
+    } else if(backendWeeklySpreadCycleStatus === 'error'){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
-          '<div class="backend-pulse-label">Earnings spread: last cycle failed</div>' +
-          '<div class="backend-pulse-sub">' + (backendEarningsSpreadCycleError || 'Unknown error') + (backendEarningsSpreadCycleErrorAt ? ' · ' + formatClock(backendEarningsSpreadCycleErrorAt) + ' (' + formatAgo(Date.now() - backendEarningsSpreadCycleErrorAt) + ')' : '') + '</div>' +
+          '<div class="backend-pulse-label">Weekly spread: last cycle failed</div>' +
+          '<div class="backend-pulse-sub">' + (backendWeeklySpreadCycleError || 'Unknown error') + (backendWeeklySpreadCycleErrorAt ? ' · ' + formatClock(backendWeeklySpreadCycleErrorAt) + ' (' + formatAgo(Date.now() - backendWeeklySpreadCycleErrorAt) + ')' : '') + '</div>' +
         '</div></div>'
       );
-    } else if(backendEarningsSpreadCycleStatus === 'idle' && backendEarningsSpreadLastCycleSummary){
-      var earningsSpreadNextEta = backendEarningsSpreadCycleCompletedAt ? backendEarningsSpreadCycleCompletedAt + EARNINGS_SPREAD_CYCLE_INTERVAL_MS : null;
-      var earningsSpreadEtaText = earningsSpreadNextEta && earningsSpreadNextEta > Date.now() ? ' · next scan ~' + formatClock(earningsSpreadNextEta) : '';
+    } else if(backendWeeklySpreadCycleStatus === 'idle' && backendWeeklySpreadLastCycleSummary){
+      var weeklySpreadNextEta = backendWeeklySpreadCycleCompletedAt ? backendWeeklySpreadCycleCompletedAt + WEEKLY_SPREAD_CYCLE_INTERVAL_MS : null;
+      var weeklySpreadEtaText = weeklySpreadNextEta && weeklySpreadNextEta > Date.now() ? ' · next scan ~' + formatClock(weeklySpreadNextEta) : '';
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
-          '<div class="backend-pulse-label">Earnings spread: idle — last cycle finished ' + (backendEarningsSpreadCycleCompletedAt ? formatClock(backendEarningsSpreadCycleCompletedAt) : '') + '</div>' +
-          '<div class="backend-pulse-sub">' + backendEarningsSpreadLastCycleSummary.text + earningsSpreadEtaText + '</div>' +
+          '<div class="backend-pulse-label">Weekly spread: idle — last cycle finished ' + (backendWeeklySpreadCycleCompletedAt ? formatClock(backendWeeklySpreadCycleCompletedAt) : '') + '</div>' +
+          '<div class="backend-pulse-sub">' + backendWeeklySpreadLastCycleSummary.text + weeklySpreadEtaText + '</div>' +
         '</div></div>'
       );
-    } else if(backendEarningsSpreadScreenerEnabledOnServer){
+    } else if(backendWeeklySpreadScreenerEnabledOnServer){
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
-          '<div class="backend-pulse-label">Earnings spread: no cycle has run yet</div>' +
-          '<div class="backend-pulse-sub">Runs automatically every 2 hours while the market is open — a trade only ever exists for 1-2 days around a scheduled release, so it checks more often than the CSP above.</div>' +
+          '<div class="backend-pulse-label">Weekly spread: no cycle has run yet</div>' +
+          '<div class="backend-pulse-sub">Runs automatically every 2 hours while the market is open — positions here run 5-10 days at entry, closed by 2 DTE, so it checks more often than the CSP above.</div>' +
         '</div></div>'
       );
     }
@@ -12468,11 +12466,11 @@
         '</div></div>'
       );
     }
-    if(backendEarningsSpreadScreenerEnabledOnServer !== null){
+    if(backendWeeklySpreadScreenerEnabledOnServer !== null){
       rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendEarningsSpreadScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
-          '<div class="backend-pulse-label">Earnings spread server settings: screener ' + (backendEarningsSpreadScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendEarningsSpreadAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' Forward test, not a backtest -- a completely separate mechanism from the CSP above, see the Earnings Credit Spread card.</div>' +
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendWeeklySpreadScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
+          '<div class="backend-pulse-label">Weekly spread server settings: screener ' + (backendWeeklySpreadScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendWeeklySpreadAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' Forward test, not a backtest -- a completely separate mechanism from the CSP above, see the Weekly Credit Spread card.</div>' +
         '</div></div>'
       );
     }
@@ -13663,41 +13661,44 @@
     el.innerHTML = rows;
   }
 
-  // Earnings credit-spread positions. Same "no live current-price column"
+  // Weekly credit-spread positions. Same "no live current-price column"
   // reasoning as renderOptionsPositions above -- each row is a 2-leg
   // spread (short/long strikes), and status reflects the multi-order
-  // lifecycle in optionsEarningsCycle.js's state machine, not a single
-  // fill.
-  var EARNINGS_SPREAD_STATUS_LABELS = {
+  // lifecycle in optionsWeeklySpreadCycle.js's state machine, not a
+  // single fill. DTE (not an earnings date -- this mechanism has none)
+  // reuses optionsDaysToExpiration, same as the CSP card.
+  var WEEKLY_SPREAD_STATUS_LABELS = {
     pending_long: 'Opening (long leg)', pending_short: 'Opening (short leg)', open: 'Open',
     pending_close_short: 'Closing (short leg)', pending_close_long: 'Closing (long leg)', closed: 'Closed',
   };
-  function renderEarningsSpreadPositions(){
-    var card = document.getElementById('toCard-earningsSpreadPositions');
-    var el = document.getElementById('earningsSpreadPositionsBody');
-    var meta = document.getElementById('earningsSpreadPositionsHeadMeta');
+  function renderWeeklySpreadPositions(){
+    var card = document.getElementById('toCard-weeklySpreadPositions');
+    var el = document.getElementById('weeklySpreadPositionsBody');
+    var meta = document.getElementById('weeklySpreadPositionsHeadMeta');
     if(!card || !el) return;
-    var open = backendEarningsSpreadPositions || [];
-    var closed = backendEarningsSpreadClosedTrades || [];
+    var open = backendWeeklySpreadPositions || [];
+    var closed = backendWeeklySpreadClosedTrades || [];
     if(!open.length && !closed.length){ card.hidden = true; return; }
     card.hidden = false;
     if(meta) meta.textContent = open.length + ' open · ' + closed.length + ' closed';
 
+    var now = new Date();
     var rows = '';
     if(open.length){
       rows += '<table class="backtest-trades-table"><thead><tr>' +
-        '<th>Underlying</th><th>Short/Long</th><th>Expiration</th><th>Earnings</th>' +
+        '<th>Underlying</th><th>Short/Long</th><th>Expiration</th><th>DTE</th>' +
         '<th>Qty</th><th>Credit</th><th>Status</th>' +
         '</tr></thead><tbody>' +
         open.map(function(p){
+          var dte = optionsDaysToExpiration(p.expirationDate, now);
           return '<tr>' +
             '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
             '<td>' + ftMoney(p.shortStrike) + ' / ' + ftMoney(p.longStrike) + '</td>' +
             '<td>' + escapeHtml(p.expirationDate || '') + '</td>' +
-            '<td>' + escapeHtml(p.earningsDate || '') + (p.earningsHour ? ' (' + escapeHtml(p.earningsHour) + ')' : '') + '</td>' +
+            '<td>' + (isFinite(dte) ? Math.max(0, Math.round(dte)) : '—') + '</td>' +
             '<td>' + (p.qty != null ? p.qty : '—') + '</td>' +
             '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
-            '<td>' + (EARNINGS_SPREAD_STATUS_LABELS[p.status] || escapeHtml(p.status || '—')) + '</td>' +
+            '<td>' + (WEEKLY_SPREAD_STATUS_LABELS[p.status] || escapeHtml(p.status || '—')) + '</td>' +
           '</tr>';
         }).join('') + '</tbody></table>';
     }
