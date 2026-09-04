@@ -1942,7 +1942,23 @@
         optionsCycleCompletedAt: data.optionsCycleCompletedAt || null,
         optionsCycleError: data.optionsCycleError || null,
         optionsCycleErrorAt: data.optionsCycleErrorAt || null,
-        optionsLastCycleSummary: data.optionsLastCycleSummary || null
+        optionsLastCycleSummary: data.optionsLastCycleSummary || null,
+        // The earnings IV-crush credit spread mechanism (shwoop-server's
+        // optionsEarningsCycle.js) -- a second, separate options strategy
+        // from the CSP above, its own fields throughout so neither ever
+        // clobbers the other's status or positions.
+        earningsSpreadPositions: Array.isArray(data.earningsSpreadPositions) ? data.earningsSpreadPositions : [],
+        earningsSpreadClosedTrades: Array.isArray(data.earningsSpreadClosedTrades) ? data.earningsSpreadClosedTrades : [],
+        serverEarningsSpreadScreenerEnabled: typeof data.serverEarningsSpreadScreenerEnabled === 'boolean' ? data.serverEarningsSpreadScreenerEnabled : null,
+        serverEarningsSpreadAutoTradeEnabled: typeof data.serverEarningsSpreadAutoTradeEnabled === 'boolean' ? data.serverEarningsSpreadAutoTradeEnabled : null,
+        earningsSpreadCycleStatus: data.earningsSpreadCycleStatus || null,
+        earningsSpreadCycleStartedAt: data.earningsSpreadCycleStartedAt || null,
+        earningsSpreadCycleCompletedAt: data.earningsSpreadCycleCompletedAt || null,
+        earningsSpreadCycleError: data.earningsSpreadCycleError || null,
+        earningsSpreadCycleErrorAt: data.earningsSpreadCycleErrorAt || null,
+        earningsSpreadLastCycleSummary: data.earningsSpreadLastCycleSummary || null,
+        earningsSpreadScreenerEnabledOverride: typeof data.earningsSpreadScreenerEnabledOverride === 'boolean' ? data.earningsSpreadScreenerEnabledOverride : null,
+        earningsSpreadAutoTradeEnabledOverride: typeof data.earningsSpreadAutoTradeEnabledOverride === 'boolean' ? data.earningsSpreadAutoTradeEnabledOverride : null
       };
     },
     // Merges only the fields actually passed in -- callers pass a
@@ -2375,11 +2391,32 @@
         <div class="labs-backtest-note" style="margin-bottom:10px;">
           Forward test, not a backtest -- there is no historical options data
           this account can measure against. Selling cash-secured puts on a
-          liquidity-picked universe (F, INTC, T, BAC). See the note on each
+          liquidity-picked universe (F, INTC, T, BAC, XLF, NOK, SIRI, PFE, HPQ). See the note on each
           position for why: research/MECHANISMS.md has no verdict on this
           mechanism, and none of these numbers should be read as one.
         </div>
         <div id="optionsPositionsBody"></div>
+      </div>
+    </div>
+
+    <!-- Earnings IV-crush credit spread (optionsEarningsCycle.js) -- a
+         second, separate options mechanism from the CSP above. Same
+         hidden-until-real-data pattern. -->
+    <div class="to-card" id="toCard-earningsSpreadPositions" hidden>
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Earnings Credit Spread</span>
+          <span class="to-card-meta" id="earningsSpreadPositionsHeadMeta"></span>
+        </div>
+        <div class="labs-backtest-note" style="margin-bottom:10px;">
+          Forward test, not a backtest. Selling a defined-risk put credit
+          spread the session before a scheduled earnings release, closed
+          the session after -- the edge is the post-earnings IV crush, not
+          direction. Same liquidity-picked universe minus XLF (an ETF has
+          no earnings). research/MECHANISMS.md has no verdict on this
+          mechanism, and none of these numbers should be read as one.
+        </div>
+        <div id="earningsSpreadPositionsBody"></div>
       </div>
     </div>
 
@@ -2441,6 +2478,15 @@
             <span class="money-mode-badge" id="optionsAutoTradeMoneyClause">Paper</span>
             <button class="chart-tool-btn" id="optionsAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
+          <!-- Earnings IV-crush credit spread (optionsEarningsCycle.js), a
+               separate mechanism from the CSP above -- see
+               lib/optionsEarningsSpread.js. Same "no paused-status badge
+               yet" reasoning as the CSP group. -->
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Earnings spread</span>
+            <span class="money-mode-badge" id="earningsSpreadAutoTradeMoneyClause">Paper</span>
+            <button class="chart-tool-btn" id="earningsSpreadAutoTradeEnableToggle" data-armed="false">Off</button>
+          </div>
         </div>
       </div>
       <div class="settings-row" id="screenersRow" hidden>
@@ -2457,6 +2503,10 @@
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Options (CSP)</span>
             <button class="chart-tool-btn" id="optionsScreenerEnableToggle">Off</button>
+          </div>
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Earnings spread</span>
+            <button class="chart-tool-btn" id="earningsSpreadScreenerEnableToggle">Off</button>
           </div>
         </div>
       </div>
@@ -3544,6 +3594,20 @@
   var backendOptionsCycleError = null;
   var backendOptionsCycleErrorAt = null;
   var backendOptionsLastCycleSummary = null;
+  // The earnings credit-spread mechanism -- a second, separate options
+  // strategy (shwoop-server's optionsEarningsCycle.js), own fields
+  // throughout, same reasoning as backendCryptoPicks having its own set
+  // rather than sharing the equities ones.
+  var backendEarningsSpreadPositions = [];
+  var backendEarningsSpreadClosedTrades = [];
+  var backendEarningsSpreadScreenerEnabledOnServer = null;
+  var backendEarningsSpreadAutoTradeEnabledOnServer = null;
+  var backendEarningsSpreadCycleStatus = null;
+  var backendEarningsSpreadCycleStartedAt = null;
+  var backendEarningsSpreadCycleCompletedAt = null;
+  var backendEarningsSpreadCycleError = null;
+  var backendEarningsSpreadCycleErrorAt = null;
+  var backendEarningsSpreadLastCycleSummary = null;
   // Journal/Alpaca drift findings (see shwoop-server's
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
@@ -3580,7 +3644,9 @@
     cryptoScreenerEnabledOverride: null,
     cryptoAutoTradeEnabledOverride: null,
     optionsScreenerEnabledOverride: null,
-    optionsAutoTradeEnabledOverride: null
+    optionsAutoTradeEnabledOverride: null,
+    earningsSpreadScreenerEnabledOverride: null,
+    earningsSpreadAutoTradeEnabledOverride: null
   };
 
   function handleScreenerDocUpdate(rawData){
@@ -3643,6 +3709,19 @@
       backendOptionsCycleError = data.optionsCycleError;
       backendOptionsCycleErrorAt = data.optionsCycleErrorAt;
       backendOptionsLastCycleSummary = data.optionsLastCycleSummary;
+      backendEarningsSpreadPositions = data.earningsSpreadPositions;
+      backendEarningsSpreadClosedTrades = data.earningsSpreadClosedTrades;
+      backendEarningsSpreadScreenerEnabledOnServer = data.serverEarningsSpreadScreenerEnabled;
+      backendEarningsSpreadAutoTradeEnabledOnServer = data.serverEarningsSpreadAutoTradeEnabled;
+      backendEarningsSpreadCycleStatus = data.earningsSpreadCycleStatus;
+      backendEarningsSpreadCycleStartedAt = data.earningsSpreadCycleStartedAt;
+      backendEarningsSpreadCycleCompletedAt = data.earningsSpreadCycleCompletedAt;
+      backendEarningsSpreadCycleError = data.earningsSpreadCycleError;
+      backendEarningsSpreadCycleErrorAt = data.earningsSpreadCycleErrorAt;
+      backendEarningsSpreadLastCycleSummary = data.earningsSpreadLastCycleSummary;
+      autoTradeOverrides.earningsSpreadScreenerEnabledOverride = data.earningsSpreadScreenerEnabledOverride;
+      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = data.earningsSpreadAutoTradeEnabledOverride;
+      renderEarningsSpreadPositions();
       renderOptionsPositions();
       backendCryptoCycleStatus = data.cryptoCycleStatus;
       backendCryptoCycleStartedAt = data.cryptoCycleStartedAt;
@@ -4032,7 +4111,7 @@
     // strategy is ever genuinely paper-only, drive that off a real signal
     // from the backend, not off a literal in the markup.
     var isLiveEnv = alpacaAccountType === 'live';
-    ['autoTradeIntradayMoneyClause', 'cryptoAutoTradeMoneyClause', 'optionsAutoTradeMoneyClause']
+    ['autoTradeIntradayMoneyClause', 'cryptoAutoTradeMoneyClause', 'optionsAutoTradeMoneyClause', 'earningsSpreadAutoTradeMoneyClause']
       .forEach(function(id){
         var badge = document.getElementById(id);
         if(!badge) return;
@@ -4212,6 +4291,16 @@
       ? autoTradeOverrides.cryptoScreenerEnabledOverride
       : Boolean(backendCryptoScreenerEnabledOnServer);
   }
+  function effectiveEarningsSpreadAutoTradeOn(){
+    return autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride !== null
+      ? autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride
+      : Boolean(backendEarningsSpreadAutoTradeEnabledOnServer);
+  }
+  function effectiveEarningsSpreadScreenerOn(){
+    return autoTradeOverrides.earningsSpreadScreenerEnabledOverride !== null
+      ? autoTradeOverrides.earningsSpreadScreenerEnabledOverride
+      : Boolean(backendEarningsSpreadScreenerEnabledOnServer);
+  }
 
   function renderAutoTradeOverrideControls(){
     var autoBtn = document.getElementById('autoTradeEnableToggle');
@@ -4252,6 +4341,19 @@
       var optionsScreenerOn = effectiveOptionsScreenerOn();
       optionsScreenerBtn.textContent = optionsScreenerOn ? 'On' : 'Off';
       optionsScreenerBtn.classList.toggle('active', optionsScreenerOn);
+    }
+    var earningsSpreadAutoBtn = document.getElementById('earningsSpreadAutoTradeEnableToggle');
+    if(earningsSpreadAutoBtn && earningsSpreadAutoBtn.dataset.armed !== 'true'){
+      var earningsSpreadAutoOn = effectiveEarningsSpreadAutoTradeOn();
+      earningsSpreadAutoBtn.textContent = earningsSpreadAutoOn ? 'On' : 'Off';
+      earningsSpreadAutoBtn.classList.remove('confirming');
+      earningsSpreadAutoBtn.classList.toggle('active', earningsSpreadAutoOn);
+    }
+    var earningsSpreadScreenerBtn = document.getElementById('earningsSpreadScreenerEnableToggle');
+    if(earningsSpreadScreenerBtn){
+      var earningsSpreadScreenerOn = effectiveEarningsSpreadScreenerOn();
+      earningsSpreadScreenerBtn.textContent = earningsSpreadScreenerOn ? 'On' : 'Off';
+      earningsSpreadScreenerBtn.classList.toggle('active', earningsSpreadScreenerOn);
     }
   }
 
@@ -4367,6 +4469,43 @@
     var next = !effectiveOptionsScreenerOn();
     autoTradeOverrides.optionsScreenerEnabledOverride = next;
     saveAutoTradeOverride({ optionsScreenerEnabledOverride: next });
+    renderAutoTradeOverrideControls();
+  });
+
+  document.getElementById('earningsSpreadAutoTradeEnableToggle').addEventListener('click', function(){
+    var btn = this;
+    var currentlyOn = effectiveEarningsSpreadAutoTradeOn();
+    // Same click-to-arm confirmation as the CSP above -- real (paper)
+    // orders, two legs per spread.
+    if(currentlyOn){
+      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = false;
+      saveAutoTradeOverride({ earningsSpreadAutoTradeEnabledOverride: false });
+      renderAutoTradeOverrideControls();
+      return;
+    }
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(btn._armTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = true;
+      saveAutoTradeOverride({ earningsSpreadAutoTradeEnabledOverride: true });
+      renderAutoTradeOverrideControls();
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again — real orders';
+      btn._armTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        renderAutoTradeOverrideControls();
+      }, 4000);
+    }
+  });
+
+  document.getElementById('earningsSpreadScreenerEnableToggle').addEventListener('click', function(){
+    var next = !effectiveEarningsSpreadScreenerOn();
+    autoTradeOverrides.earningsSpreadScreenerEnabledOverride = next;
+    saveAutoTradeOverride({ earningsSpreadScreenerEnabledOverride: next });
     renderAutoTradeOverrideControls();
   });
 
@@ -5649,14 +5788,15 @@
     // to stop it, and its next scan (up to 4 hours out, but no
     // market-hours gate stopping a cycle already in flight) could open a
     // brand new short put minutes after "everything" was supposedly flat.
-    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn() || effectiveOptionsAutoTradeOn()){
+    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn() || effectiveOptionsAutoTradeOn() || effectiveEarningsSpreadAutoTradeOn()){
       autoTradeOverrides.intradayAutoTradeEnabledOverride = false;
       autoTradeOverrides.cryptoAutoTradeEnabledOverride = false;
       autoTradeOverrides.optionsAutoTradeEnabledOverride = false;
+      autoTradeOverrides.earningsSpreadAutoTradeEnabledOverride = false;
       renderAutoTradeOverrideControls();
       saveAutoTradeOverride({
         intradayAutoTradeEnabledOverride: false, cryptoAutoTradeEnabledOverride: false,
-        optionsAutoTradeEnabledOverride: false,
+        optionsAutoTradeEnabledOverride: false, earningsSpreadAutoTradeEnabledOverride: false,
       });
     }
     // WHAT GETS CLOSED IS THE BROKER'S LIST, NOT THE JOURNAL'S.
@@ -12031,6 +12171,8 @@
   // here are held 30-45 days at entry, so a 4-hour scan cadence during
   // market hours has no cost the way a slower equities scan would.
   var OPTIONS_CYCLE_INTERVAL_MS = 4 * 60 * 60 * 1000;
+  // Matches shwoop-server's EARNINGS_SPREAD_INTERVAL_MS (scheduler.js).
+  var EARNINGS_SPREAD_CYCLE_INTERVAL_MS = 2 * 60 * 60 * 1000;
 
   function formatAgo(ms){
     if(ms < 1000) return 'just now';
@@ -12234,7 +12376,7 @@
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
           '<div class="backend-pulse-label">Options income (CSP): scanning now…</div>' +
-          '<div class="backend-pulse-sub">Checking F/INTC/T/BAC for a qualifying cash-secured put, managing anything already open. Started ' + (backendOptionsCycleStartedAt ? formatAgo(Date.now() - backendOptionsCycleStartedAt) : '') + '.</div>' +
+          '<div class="backend-pulse-sub">Checking a 9-name liquidity-picked universe for a qualifying cash-secured put, managing anything already open. Started ' + (backendOptionsCycleStartedAt ? formatAgo(Date.now() - backendOptionsCycleStartedAt) : '') + '.</div>' +
         '</div></div>'
       );
     } else if(backendOptionsCycleStatus === 'error'){
@@ -12258,6 +12400,42 @@
         '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
           '<div class="backend-pulse-label">Options income (CSP): no cycle has run yet</div>' +
           '<div class="backend-pulse-sub">Runs automatically every 4 hours while the market is open — positions here are held 9-24 days, so it never needed equities’ minute-by-minute cadence.</div>' +
+        '</div></div>'
+      );
+    }
+
+    // ---- Row 3d: earnings credit-spread cycle status -- see
+    // runOptionsEarningsCycle in shwoop-server's optionsEarningsCycle.js.
+    // A second, separate options mechanism from the CSP above, own status
+    // fields throughout. ----
+    if(backendEarningsSpreadCycleStatus === 'scanning'){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
+          '<div class="backend-pulse-label">Earnings spread: scanning now…</div>' +
+          '<div class="backend-pulse-sub">Checking the earnings calendar for a qualifying credit spread entry, managing anything already open. Started ' + (backendEarningsSpreadCycleStartedAt ? formatAgo(Date.now() - backendEarningsSpreadCycleStartedAt) : '') + '.</div>' +
+        '</div></div>'
+      );
+    } else if(backendEarningsSpreadCycleStatus === 'error'){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
+          '<div class="backend-pulse-label">Earnings spread: last cycle failed</div>' +
+          '<div class="backend-pulse-sub">' + (backendEarningsSpreadCycleError || 'Unknown error') + (backendEarningsSpreadCycleErrorAt ? ' · ' + formatClock(backendEarningsSpreadCycleErrorAt) + ' (' + formatAgo(Date.now() - backendEarningsSpreadCycleErrorAt) + ')' : '') + '</div>' +
+        '</div></div>'
+      );
+    } else if(backendEarningsSpreadCycleStatus === 'idle' && backendEarningsSpreadLastCycleSummary){
+      var earningsSpreadNextEta = backendEarningsSpreadCycleCompletedAt ? backendEarningsSpreadCycleCompletedAt + EARNINGS_SPREAD_CYCLE_INTERVAL_MS : null;
+      var earningsSpreadEtaText = earningsSpreadNextEta && earningsSpreadNextEta > Date.now() ? ' · next scan ~' + formatClock(earningsSpreadNextEta) : '';
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
+          '<div class="backend-pulse-label">Earnings spread: idle — last cycle finished ' + (backendEarningsSpreadCycleCompletedAt ? formatClock(backendEarningsSpreadCycleCompletedAt) : '') + '</div>' +
+          '<div class="backend-pulse-sub">' + backendEarningsSpreadLastCycleSummary.text + earningsSpreadEtaText + '</div>' +
+        '</div></div>'
+      );
+    } else if(backendEarningsSpreadScreenerEnabledOnServer){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
+          '<div class="backend-pulse-label">Earnings spread: no cycle has run yet</div>' +
+          '<div class="backend-pulse-sub">Runs automatically every 2 hours while the market is open — a trade only ever exists for 1-2 days around a scheduled release, so it checks more often than the CSP above.</div>' +
         '</div></div>'
       );
     }
@@ -12287,6 +12465,14 @@
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendOptionsScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
           '<div class="backend-pulse-label">Options income (CSP) server settings: screener ' + (backendOptionsScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendOptionsAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
           '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' Forward test, not a backtest -- see the Options Income card.</div>' +
+        '</div></div>'
+      );
+    }
+    if(backendEarningsSpreadScreenerEnabledOnServer !== null){
+      rows.push(
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendEarningsSpreadScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
+          '<div class="backend-pulse-label">Earnings spread server settings: screener ' + (backendEarningsSpreadScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendEarningsSpreadAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' Forward test, not a backtest -- a completely separate mechanism from the CSP above, see the Earnings Credit Spread card.</div>' +
         '</div></div>'
       );
     }
@@ -13470,6 +13656,66 @@
             '<td>' + ftMoney(p.entryCredit) + '</td>' +
             '<td>' + ftMoney(p.exitCredit) + '</td>' +
             '<td>' + reasonLabel + '</td>' +
+            '<td>' + (p.closedAt ? escapeHtml(String(p.closedAt).slice(0, 10)) : '—') + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody></table>';
+    }
+    el.innerHTML = rows;
+  }
+
+  // Earnings credit-spread positions. Same "no live current-price column"
+  // reasoning as renderOptionsPositions above -- each row is a 2-leg
+  // spread (short/long strikes), and status reflects the multi-order
+  // lifecycle in optionsEarningsCycle.js's state machine, not a single
+  // fill.
+  var EARNINGS_SPREAD_STATUS_LABELS = {
+    pending_long: 'Opening (long leg)', pending_short: 'Opening (short leg)', open: 'Open',
+    pending_close_short: 'Closing (short leg)', pending_close_long: 'Closing (long leg)', closed: 'Closed',
+  };
+  function renderEarningsSpreadPositions(){
+    var card = document.getElementById('toCard-earningsSpreadPositions');
+    var el = document.getElementById('earningsSpreadPositionsBody');
+    var meta = document.getElementById('earningsSpreadPositionsHeadMeta');
+    if(!card || !el) return;
+    var open = backendEarningsSpreadPositions || [];
+    var closed = backendEarningsSpreadClosedTrades || [];
+    if(!open.length && !closed.length){ card.hidden = true; return; }
+    card.hidden = false;
+    if(meta) meta.textContent = open.length + ' open · ' + closed.length + ' closed';
+
+    var rows = '';
+    if(open.length){
+      rows += '<table class="backtest-trades-table"><thead><tr>' +
+        '<th>Underlying</th><th>Short/Long</th><th>Expiration</th><th>Earnings</th>' +
+        '<th>Qty</th><th>Credit</th><th>Status</th>' +
+        '</tr></thead><tbody>' +
+        open.map(function(p){
+          return '<tr>' +
+            '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
+            '<td>' + ftMoney(p.shortStrike) + ' / ' + ftMoney(p.longStrike) + '</td>' +
+            '<td>' + escapeHtml(p.expirationDate || '') + '</td>' +
+            '<td>' + escapeHtml(p.earningsDate || '') + (p.earningsHour ? ' (' + escapeHtml(p.earningsHour) + ')' : '') + '</td>' +
+            '<td>' + (p.qty != null ? p.qty : '—') + '</td>' +
+            '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
+            '<td>' + (EARNINGS_SPREAD_STATUS_LABELS[p.status] || escapeHtml(p.status || '—')) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody></table>';
+    }
+    if(closed.length){
+      var closedSorted = closed.slice().sort(function(a, b){
+        return String(b.closedAt || '').localeCompare(String(a.closedAt || ''));
+      });
+      rows += '<div class="ft-since" style="margin-top:14px;">Closed</div>' +
+        '<table class="backtest-trades-table"><thead><tr>' +
+        '<th>Underlying</th><th>Short/Long</th><th>Credit in</th><th>Credit out</th><th>Reason</th><th>Closed</th>' +
+        '</tr></thead><tbody>' +
+        closedSorted.map(function(p){
+          return '<tr>' +
+            '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
+            '<td>' + ftMoney(p.shortStrike) + ' / ' + ftMoney(p.longStrike) + '</td>' +
+            '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
+            '<td>' + (p.exitCredit != null ? ftMoney(p.exitCredit) : '—') + '</td>' +
+            '<td>' + escapeHtml(p.exitReason || '—') + '</td>' +
             '<td>' + (p.closedAt ? escapeHtml(String(p.closedAt).slice(0, 10)) : '—') + '</td>' +
           '</tr>';
         }).join('') + '</tbody></table>';
