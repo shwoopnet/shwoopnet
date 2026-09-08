@@ -2416,6 +2416,27 @@
       </div>
     </div>
 
+    <!-- research/OPTIONS_PREREGISTRATION.md's own kill criteria, checked
+         against real closed trades in the browser -- the backend's
+         /options/preregistration-status route computes the same thing,
+         but that route sits behind PROXY_SHARED_SECRET and this page
+         must never ship that secret (see the forward-test record's own
+         comment on why). Duplicated math, not shared code -- there is no
+         bundler here to share it through -- so both sides are covered by
+         their own tests and any drift is a bug to find, not paper over. -->
+    <div class="to-card" id="toCard-optionsPreregistration" hidden>
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Options Research Status</span>
+          <span class="to-card-meta" id="optionsPreregistrationHeadMeta"></span>
+        </div>
+        <div class="labs-backtest-note" style="margin-bottom:10px;">
+          Progress against research/OPTIONS_PREREGISTRATION.md's own written kill criteria. NOT_YET_FALSIFIED is not an endorsement.
+        </div>
+        <div id="optionsPreregistrationBody"></div>
+      </div>
+    </div>
+
     <div class="to-card" id="toCard-todaysSetups">
       <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
         <div class="to-card-head">
@@ -2466,21 +2487,26 @@
             <button class="chart-tool-btn" id="cryptoAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
           <!-- Cash-secured-put income forward test (optionsIncomeCycle.js).
-               No paused-status badge -- unlike equities/crypto, options has
-               no auto-pause-on-repeated-failure mechanism built yet, and a
-               badge here would claim a health signal that doesn't exist. -->
+               Now carries the same auto-pause-on-repeated-failure
+               mechanism as equities/crypto (see optionsIncomeCycle.js's
+               MAX_CONSECUTIVE_ORDER_FAILURES), so the badge reflects a
+               real health signal rather than claiming one that doesn't
+               exist. -->
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Options (CSP)</span>
             <span class="money-mode-badge" id="optionsAutoTradeMoneyClause">Paper</span>
+            <span class="quote-sync-status" id="serverOptionsAutoTradeStatusBadge">—</span>
             <button class="chart-tool-btn" id="optionsAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
           <!-- Weekly defined-risk credit spread
                (optionsWeeklySpreadCycle.js), a separate mechanism from
-               the CSP above -- see lib/optionsWeeklySpread.js. Same "no
-               paused-status badge yet" reasoning as the CSP group. -->
+               the CSP above -- see lib/optionsWeeklySpread.js. Same
+               real auto-pause badge as the CSP group now, its own
+               'weeklySpread' screenerType. -->
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Weekly spread</span>
             <span class="money-mode-badge" id="weeklySpreadAutoTradeMoneyClause">Paper</span>
+            <span class="quote-sync-status" id="serverWeeklySpreadAutoTradeStatusBadge">—</span>
             <button class="chart-tool-btn" id="weeklySpreadAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
         </div>
@@ -2519,6 +2545,20 @@
           <div class="settings-row-desc" id="cryptoTradingPausedDesc">—</div>
         </div>
         <button class="settings-reset-btn" id="resumeCryptoTradingBtn">Resume crypto trading</button>
+      </div>
+      <div class="settings-row" id="optionsTradingPausedRow" hidden>
+        <div>
+          <div class="settings-row-title">Options (CSP) auto-trading status</div>
+          <div class="settings-row-desc" id="optionsTradingPausedDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="resumeOptionsTradingBtn">Resume options trading</button>
+      </div>
+      <div class="settings-row" id="weeklySpreadTradingPausedRow" hidden>
+        <div>
+          <div class="settings-row-title">Weekly spread auto-trading status</div>
+          <div class="settings-row-desc" id="weeklySpreadTradingPausedDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="resumeWeeklySpreadTradingBtn">Resume weekly spread trading</button>
       </div>
       <div class="settings-row" id="flattenAllRow" hidden>
         <div>
@@ -2705,6 +2745,25 @@
           <span id="alpacaHistoryCopyConfirm" class="labs-export-copy-confirm" hidden>Copied.</span>
         </div>
       </div>
+    </div>
+
+    <!-- Options closed trades (CSP + Weekly Credit Spread) -- deliberately
+         NOT folded into the Overall P&L/Win Rate/Profit Factor/growth
+         chart above: those are all built around journalEntries' qty*price
+         shape (entry/stop/target/trail), and a credit-collected options
+         position has none of that. A separate, simpler tally instead of
+         forcing it through math that doesn't describe it. Hidden entirely
+         until there's at least one real closed trade, same pattern as the
+         Trade Overview options cards themselves. -->
+    <div class="labs-export-section" id="journalOptionsSection" style="margin-top:24px;" hidden>
+      <div class="labs-export-divider"></div>
+      <div class="labs-export-header">
+        <div>
+          <div class="labs-export-title">Options closed trades</div>
+          <div class="labs-export-desc">Cash-secured puts and weekly credit spreads. Forward tests only -- see the Trade Overview cards for open positions and each mechanism's own note.</div>
+        </div>
+      </div>
+      <div id="journalOptionsBody"></div>
     </div>
   </main>
 
@@ -2951,7 +3010,7 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Labs</div>
-        <div class="trades-sub">A real backtest — not a demo. Re-run the crypto strategy against real Alpaca bars rather than trusting a number written down somewhere. The equities strategy has been withdrawn; a replacement is being designed from scratch.</div>
+        <div class="trades-sub">A real backtest — not a demo. Re-run the crypto strategy against real Alpaca bars rather than trusting a number written down somewhere. The equities strategy (ORB) was crossed off by this same measurement and still runs live only as deliberate test traffic. The options mechanisms (CSP, Weekly Credit Spread) have no backtest at all — Alpaca carries no historical options data — so they are forward-tested only; see their own cards on Trade Overview.</div>
       </div>
     </div>
 
@@ -3580,6 +3639,7 @@
   var backendOptionsClosedTrades = [];
   var backendOptionsScreenerEnabledOnServer = null;
   var backendOptionsAutoTradeEnabledOnServer = null;
+  var backendOptionsAutoTradePausedOnServer = null;
   // Same "is it actually running" fields as backendCryptoCycleStatus
   // below -- see runOptionsIncomeCycle in shwoop-server. Without these
   // there was no way to tell a dead cycle apart from one that correctly
@@ -3590,6 +3650,11 @@
   var backendOptionsCycleError = null;
   var backendOptionsCycleErrorAt = null;
   var backendOptionsLastCycleSummary = null;
+  // Cumulative since research/OPTIONS_PREREGISTRATION.md's own commit --
+  // see shwoop-server's optionsIncomeCycle.js. Feeds
+  // renderOptionsPreregistrationStatus() below; never reset, so this is a
+  // handful of int counters, not a growing log.
+  var backendOptionsActionCounts = null;
   // The weekly credit-spread mechanism -- a second, separate options
   // strategy (shwoop-server's optionsWeeklySpreadCycle.js), own fields
   // throughout, same reasoning as backendCryptoPicks having its own set
@@ -3598,12 +3663,14 @@
   var backendWeeklySpreadClosedTrades = [];
   var backendWeeklySpreadScreenerEnabledOnServer = null;
   var backendWeeklySpreadAutoTradeEnabledOnServer = null;
+  var backendWeeklySpreadAutoTradePausedOnServer = null;
   var backendWeeklySpreadCycleStatus = null;
   var backendWeeklySpreadCycleStartedAt = null;
   var backendWeeklySpreadCycleCompletedAt = null;
   var backendWeeklySpreadCycleError = null;
   var backendWeeklySpreadCycleErrorAt = null;
   var backendWeeklySpreadLastCycleSummary = null;
+  var backendWeeklySpreadActionCounts = null;
   // Journal/Alpaca drift findings (see shwoop-server's
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
@@ -3699,25 +3766,31 @@
       backendOptionsClosedTrades = data.optionsClosedTrades;
       backendOptionsScreenerEnabledOnServer = data.serverOptionsScreenerEnabled;
       backendOptionsAutoTradeEnabledOnServer = data.serverOptionsAutoTradeEnabled;
+      backendOptionsAutoTradePausedOnServer = data.serverOptionsAutoTradePaused;
       backendOptionsCycleStatus = data.optionsCycleStatus;
       backendOptionsCycleStartedAt = data.optionsCycleStartedAt;
       backendOptionsCycleCompletedAt = data.optionsCycleCompletedAt;
       backendOptionsCycleError = data.optionsCycleError;
       backendOptionsCycleErrorAt = data.optionsCycleErrorAt;
       backendOptionsLastCycleSummary = data.optionsLastCycleSummary;
+      backendOptionsActionCounts = data.optionsActionCountsSincePreregistration;
       backendWeeklySpreadPositions = data.weeklySpreadPositions;
       backendWeeklySpreadClosedTrades = data.weeklySpreadClosedTrades;
       backendWeeklySpreadScreenerEnabledOnServer = data.serverWeeklySpreadScreenerEnabled;
       backendWeeklySpreadAutoTradeEnabledOnServer = data.serverWeeklySpreadAutoTradeEnabled;
+      backendWeeklySpreadAutoTradePausedOnServer = data.serverWeeklySpreadAutoTradePaused;
       backendWeeklySpreadCycleStatus = data.weeklySpreadCycleStatus;
       backendWeeklySpreadCycleStartedAt = data.weeklySpreadCycleStartedAt;
       backendWeeklySpreadCycleCompletedAt = data.weeklySpreadCycleCompletedAt;
       backendWeeklySpreadCycleError = data.weeklySpreadCycleError;
       backendWeeklySpreadCycleErrorAt = data.weeklySpreadCycleErrorAt;
       backendWeeklySpreadLastCycleSummary = data.weeklySpreadLastCycleSummary;
+      backendWeeklySpreadActionCounts = data.weeklySpreadActionCountsSincePreregistration;
       autoTradeOverrides.weeklySpreadScreenerEnabledOverride = data.weeklySpreadScreenerEnabledOverride;
       autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = data.weeklySpreadAutoTradeEnabledOverride;
       renderWeeklySpreadPositions();
+      renderJournalOptionsClosedTrades();
+      renderOptionsPreregistrationStatus();
       renderOptionsPositions();
       backendCryptoCycleStatus = data.cryptoCycleStatus;
       backendCryptoCycleStartedAt = data.cryptoCycleStartedAt;
@@ -4586,6 +4659,8 @@
     if(!window.__shwoopAPI) return;
     renderTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData));
     renderCryptoTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'crypto'));
+    renderOptionsTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'options'));
+    renderWeeklySpreadTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'weeklySpread'));
   }
 
   // ---------- Trading-paused alert (sound + browser notification) ----------
@@ -4601,7 +4676,7 @@
   // earlier version of this kind of thing had each renderer setting and
   // clearing the same node, so whichever ran last won and a real pause
   // could be cleared off the screen by the other strategy being fine.
-  var globalPauseState = { intraday: null, crypto: null };
+  var globalPauseState = { intraday: null, crypto: null, options: null, weeklySpread: null };
 
   function renderGlobalPausedBanner(){
     var banner = document.getElementById('globalPausedBanner');
@@ -4610,6 +4685,8 @@
     var paused = [];
     if(globalPauseState.intraday && globalPauseState.intraday.paused) paused.push({ label: 'Equities', state: globalPauseState.intraday });
     if(globalPauseState.crypto && globalPauseState.crypto.paused) paused.push({ label: 'Crypto', state: globalPauseState.crypto });
+    if(globalPauseState.options && globalPauseState.options.paused) paused.push({ label: 'Options (CSP)', state: globalPauseState.options });
+    if(globalPauseState.weeklySpread && globalPauseState.weeklySpread.paused) paused.push({ label: 'Weekly spread', state: globalPauseState.weeklySpread });
     if(!paused.length){
       banner.setAttribute('hidden', '');
       return;
@@ -4721,6 +4798,73 @@
     desc.textContent = 'Crypto auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
       reasonText + '. Review the activity log, then resume once resolved.';
   }
+
+  // Same independent-tracking reasoning as renderCryptoTradingPauseState --
+  // options and weekly spread now carry their own auto-pause (see
+  // optionsIncomeCycle.js / optionsWeeklySpreadCycle.js's
+  // MAX_CONSECUTIVE_ORDER_FAILURES), and each strategy's pause must stay
+  // visible on its own rather than being able to mask another's.
+  var lastKnownOptionsTradingPaused = false;
+  function renderOptionsTradingPauseState(state){
+    var row = document.getElementById('optionsTradingPausedRow');
+    var desc = document.getElementById('optionsTradingPausedDesc');
+    var reasonText = state.pausedReason || 'unknown';
+    var justPaused = state.paused && !lastKnownOptionsTradingPaused;
+    lastKnownOptionsTradingPaused = state.paused;
+    setGlobalPauseState('options', state);
+    if(justPaused) playTradingPausedAlertSound();
+    if(!row || !desc) return;
+    if(!state.paused){ row.setAttribute('hidden', ''); return; }
+    row.removeAttribute('hidden');
+    var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
+    desc.textContent = 'Options (CSP) auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
+      reasonText + '. Review the activity log, then resume once resolved.';
+  }
+
+  var lastKnownWeeklySpreadTradingPaused = false;
+  function renderWeeklySpreadTradingPauseState(state){
+    var row = document.getElementById('weeklySpreadTradingPausedRow');
+    var desc = document.getElementById('weeklySpreadTradingPausedDesc');
+    var reasonText = state.pausedReason || 'unknown';
+    var justPaused = state.paused && !lastKnownWeeklySpreadTradingPaused;
+    lastKnownWeeklySpreadTradingPaused = state.paused;
+    setGlobalPauseState('weeklySpread', state);
+    if(justPaused) playTradingPausedAlertSound();
+    if(!row || !desc) return;
+    if(!state.paused){ row.setAttribute('hidden', ''); return; }
+    row.removeAttribute('hidden');
+    var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
+    desc.textContent = 'Weekly spread auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
+      reasonText + '. Review the activity log, then resume once resolved.';
+  }
+
+  document.getElementById('resumeOptionsTradingBtn').addEventListener('click', function(){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var btn = document.getElementById('resumeOptionsTradingBtn');
+    btn.disabled = true;
+    btn.textContent = 'Resuming…';
+    window.__shwoopAPI.resumeTrading(currentUid, 'options').catch(function(err){
+      console.error('Failed to resume options trading:', err);
+      alert('Could not resume options trading — please try again. (' + err.message + ')');
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Resume options trading';
+    });
+  });
+
+  document.getElementById('resumeWeeklySpreadTradingBtn').addEventListener('click', function(){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var btn = document.getElementById('resumeWeeklySpreadTradingBtn');
+    btn.disabled = true;
+    btn.textContent = 'Resuming…';
+    window.__shwoopAPI.resumeTrading(currentUid, 'weeklySpread').catch(function(err){
+      console.error('Failed to resume weekly spread trading:', err);
+      alert('Could not resume weekly spread trading — please try again. (' + err.message + ')');
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Resume weekly spread trading';
+    });
+  });
 
   document.getElementById('resumeCryptoTradingBtn').addEventListener('click', function(){
     if(!window.__shwoopAPI || !currentUid) return;
@@ -7933,33 +8077,52 @@
 
   function fetchHistory(sym, tf, priority){
     var cacheKey = sym + '_' + tf;
-    if(historyCache[cacheKey]){ return Promise.resolve(historyCache[cacheKey]); }
+
+    // The in-memory cache has no TTL of its own -- this dashboard is
+    // typically left open for hours or days, so a naive "return it if
+    // present" here would keep showing whatever bars were fetched at tab
+    // load forever, for the rest of the session. That was a real bug: a
+    // symbol's mini chart could sit days stale (wrong price range, wrong
+    // date on the axis) while the header above it kept updating from live
+    // quotes, because the header doesn't go through this cache at all.
+    // Route every hit -- memory or storage -- through the same
+    // stale-first-then-refresh-in-background path so both age out the
+    // same way.
+    var refreshInBackground = function(staleBars){
+      var staleBarsRef = staleBars;
+      fetchHistoryFromNetwork(sym, tf, priority).then(function(freshBars){
+        historyCache[cacheKey] = { bars: freshBars, savedAt: Date.now() };
+        saveHistoryToStorage(cacheKey, freshBars);
+        var state = chartStates[sym];
+        if(state && state.tf === tf && state.data === staleBarsRef){
+          initChartState(sym, tf, freshBars);
+          renderChartView(sym);
+        }
+      }).catch(function(err){
+        console.error('Background history refresh failed for', sym, tf, err);
+      });
+    };
+
+    var cached = historyCache[cacheKey];
+    if(cached && cached.bars && cached.bars.length > 1){
+      if(isHistoryStale(tf, cached.savedAt)) refreshInBackground(cached.bars);
+      return Promise.resolve(cached.bars);
+    }
 
     var stored = loadHistoryFromStorage(cacheKey);
     if(stored && stored.bars && stored.bars.length > 1){
-      historyCache[cacheKey] = stored.bars;
+      historyCache[cacheKey] = { bars: stored.bars, savedAt: stored.savedAt };
       if(isHistoryStale(tf, stored.savedAt)){
         // Show what we have immediately; refresh quietly in the background
         // so next time (and this chart, if it's still open) has fresh data
         // without ever blocking on the network first.
-        var staleBarsRef = stored.bars;
-        fetchHistoryFromNetwork(sym, tf, priority).then(function(freshBars){
-          historyCache[cacheKey] = freshBars;
-          saveHistoryToStorage(cacheKey, freshBars);
-          var state = chartStates[sym];
-          if(state && state.tf === tf && state.data === staleBarsRef){
-            initChartState(sym, tf, freshBars);
-            renderChartView(sym);
-          }
-        }).catch(function(err){
-          console.error('Background history refresh failed for', sym, tf, err);
-        });
+        refreshInBackground(stored.bars);
       }
       return Promise.resolve(stored.bars);
     }
 
     return fetchHistoryFromNetwork(sym, tf, priority).then(function(bars){
-      historyCache[cacheKey] = bars;
+      historyCache[cacheKey] = { bars: bars, savedAt: Date.now() };
       saveHistoryToStorage(cacheKey, bars);
       return bars;
     });
@@ -9488,6 +9651,7 @@
     { key:'cryptoSetups', label:'Crypto Setups' },
     { key:'optionsPositions', label:'Options Income (CSP)' },
     { key:'weeklySpreadPositions', label:'Weekly Credit Spread' },
+    { key:'optionsPreregistration', label:'Options Research Status' },
     { key:'activityLog', label:'Activity Log' }
   ];
   var TO_CARD_LABELS = {};
@@ -9652,7 +9816,7 @@
     });
     if(name === 'trades'){ renderStatusPage(); }
     runCardEntrance(name);
-    if(name === 'journal'){ renderCalendar(); }
+    if(name === 'journal'){ renderCalendar(); renderJournalOptionsClosedTrades(); }
     if(name === 'labs'){ renderForwardTestRecord(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
@@ -11479,6 +11643,15 @@
     }
     if(entry.type === 'position_drift_detected') return { cls: 'neutral', label: 'Drift' };
     if(entry.type === 'position_drift_resolved') return { cls: 'win', label: 'Drift OK' };
+    // Real stop-loss lifecycle events (safety/equitiesProtectiveOrders.js,
+    // orchestrator.js) -- these fell all the way through to the generic
+    // "Activity" tag with no case here at all, the exact bug this
+    // function's own comment already names as fixed for position_drift.
+    // _failed/_missing are the ones that matter most: a stop that did not
+    // actually make it to the broker is not routine activity.
+    if(entry.type === 'protective_orders_submitted') return { cls: 'neutral', label: 'Protective Stop' };
+    if(entry.type === 'protective_orders_resubmitted') return { cls: 'neutral', label: 'Protective Stop' };
+    if(entry.type === 'protective_orders_failed' || entry.type === 'protective_orders_missing') return { cls: 'loss', label: 'Protective Stop' };
     return { cls: 'neutral', label: 'Activity' };
   }
 
@@ -12529,6 +12702,24 @@
       cryptoBadge.textContent = backendCryptoAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
       cryptoBadge.classList.toggle('ok', Boolean(backendCryptoAutoTradeEnabledOnServer));
     }
+    // Now a real health signal, not a claimed one -- see
+    // optionsIncomeCycle.js / optionsWeeklySpreadCycle.js's own
+    // MAX_CONSECUTIVE_ORDER_FAILURES auto-pause, mirrored onto these two
+    // badges the same way equities/crypto's paused state already is.
+    var optionsBadge = document.getElementById('serverOptionsAutoTradeStatusBadge');
+    if(optionsBadge){
+      optionsBadge.textContent = backendOptionsAutoTradePausedOnServer ? 'Paused — see below'
+        : backendOptionsAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
+      optionsBadge.classList.toggle('ok', Boolean(backendOptionsAutoTradeEnabledOnServer) && !backendOptionsAutoTradePausedOnServer);
+      optionsBadge.classList.toggle('fail', Boolean(backendOptionsAutoTradePausedOnServer));
+    }
+    var weeklySpreadBadge = document.getElementById('serverWeeklySpreadAutoTradeStatusBadge');
+    if(weeklySpreadBadge){
+      weeklySpreadBadge.textContent = backendWeeklySpreadAutoTradePausedOnServer ? 'Paused — see below'
+        : backendWeeklySpreadAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
+      weeklySpreadBadge.classList.toggle('ok', Boolean(backendWeeklySpreadAutoTradeEnabledOnServer) && !backendWeeklySpreadAutoTradePausedOnServer);
+      weeklySpreadBadge.classList.toggle('fail', Boolean(backendWeeklySpreadAutoTradePausedOnServer));
+    }
   }
 
   // Keeps the "Xs ago" text moving and lets a stale heartbeat get caught
@@ -13151,6 +13342,8 @@
   function activityGroupKey(type){
     if(type === 'closed_at_close' || type === 'position_closed') return 'closed';
     if(type === 'position_drift_detected' || type === 'position_drift_resolved') return 'position_drift';
+    if(type === 'protective_orders_submitted' || type === 'protective_orders_resubmitted'
+      || type === 'protective_orders_failed' || type === 'protective_orders_missing') return 'protective_orders';
     return type;
   }
   // NO "Scan" ROW HERE, DELIBERATELY.
@@ -13173,6 +13366,7 @@
     { key:'trailing_stop_updated', label:'Trail' },
     { key:'closed', label:'Closed' },
     { key:'position_drift', label:'Drift' },
+    { key:'protective_orders', label:'Protective' },
     { key:'error', label:'Error' }
   ];
   // ORDER-INDEPENDENT ON PURPOSE, in both directions.
@@ -13722,6 +13916,116 @@
         }).join('') + '</tbody></table>';
     }
     el.innerHTML = rows;
+  }
+
+  // research/OPTIONS_PREREGISTRATION.md's own kill criteria, reimplemented
+  // here in the browser -- see optionsPreregistrationEvaluator.js
+  // (shwoop-server) for the source of truth this mirrors. PREREGISTRATION_DATE
+  // and TARGET_SAMPLE_SIZE are copied as literals, not fetched, since this
+  // page has no way to import that module and no bundler to share it
+  // through -- a drift between the two is a real risk, flagged here
+  // rather than assumed away, and caught by each side's own tests
+  // independently rather than a shared one.
+  var OPTIONS_PREREGISTRATION_DATE = '2026-09-08';
+  var OPTIONS_PREREGISTRATION_TARGET_SAMPLE = 40;
+
+  function optionsRealizedPnl(t){
+    if(t.entryCredit == null || t.exitCredit == null || !(t.qty > 0)) return null;
+    return (t.entryCredit - t.exitCredit) * t.qty * 100;
+  }
+  function optionsAfterCutoff(t){
+    if(!t.closedAt) return false;
+    return new Date(t.closedAt).getTime() >= new Date(OPTIONS_PREREGISTRATION_DATE).getTime();
+  }
+  function optionsIvBlockRate(counts, enteredKey){
+    counts = counts || {};
+    var blocked = counts.iv_not_rich_enough || 0;
+    var entered = counts[enteredKey] || 0;
+    var total = blocked + entered;
+    if(total === 0) return null;
+    return { blocked: blocked, entered: entered, total: total, rate: blocked / total };
+  }
+
+  function renderOptionsPreregistrationStatus(){
+    var card = document.getElementById('toCard-optionsPreregistration');
+    var el = document.getElementById('optionsPreregistrationBody');
+    var meta = document.getElementById('optionsPreregistrationHeadMeta');
+    if(!card || !el) return;
+
+    var cspAll = backendOptionsClosedTrades || [];
+    var spreadAll = backendWeeklySpreadClosedTrades || [];
+    // Only shows once there is SOMETHING to show -- an empty card here
+    // reads as broken, not as "nothing has closed yet," the same
+    // hidden-until-real-data pattern every other Trade Overview card uses.
+    if(!cspAll.length && !spreadAll.length){ card.hidden = true; return; }
+    card.hidden = false;
+
+    var cspTrades = cspAll.filter(optionsAfterCutoff);
+    var spreadTrades = spreadAll.filter(optionsAfterCutoff);
+    var cspPnl = cspTrades.reduce(function(sum, t){ var p = optionsRealizedPnl(t); return p == null ? sum : sum + p; }, 0);
+    var spreadPnl = spreadTrades.reduce(function(sum, t){ var p = optionsRealizedPnl(t); return p == null ? sum : sum + p; }, 0);
+
+    if(meta) meta.textContent = cspTrades.length + '/' + OPTIONS_PREREGISTRATION_TARGET_SAMPLE + ' CSP · ' + spreadTrades.length + '/' + OPTIONS_PREREGISTRATION_TARGET_SAMPLE + ' spread';
+
+    function block(name, trades, pnl, ivCounts, ivEnteredKey){
+      var sampleMet = trades.length >= OPTIONS_PREREGISTRATION_TARGET_SAMPLE;
+      var pnlNegative = sampleMet && pnl < 0;
+      var ivBlocks = optionsIvBlockRate(ivCounts, ivEnteredKey);
+      var ivTriggered = ivBlocks && ivBlocks.total >= OPTIONS_PREREGISTRATION_TARGET_SAMPLE && ivBlocks.rate > 0.5;
+      var anyTriggered = pnlNegative || ivTriggered;
+      var verdict = anyTriggered ? 'FALSIFIED' : 'NOT_YET_FALSIFIED';
+      var verdictClass = anyTriggered ? 'fail' : '';
+      return '<div class="settings-row" style="align-items:flex-start;">' +
+        '<div>' +
+          '<div class="settings-row-title">' + escapeHtml(name) + '</div>' +
+          '<div class="settings-row-desc">' +
+            trades.length + '/' + OPTIONS_PREREGISTRATION_TARGET_SAMPLE + ' closed trades since the pre-registration date · realized P&amp;L ' + ftMoney(pnl) +
+            (ivBlocks ? ' · IV filter blocked ' + ivBlocks.blocked + '/' + ivBlocks.total + ' (' + (ivBlocks.rate * 100).toFixed(0) + '%)' : '') +
+          '</div>' +
+        '</div>' +
+        '<span class="labs-backtest-status ' + verdictClass + '">' + verdict + '</span>' +
+      '</div>';
+    }
+
+    el.innerHTML =
+      block('Cash-secured put', cspTrades, cspPnl, backendOptionsActionCounts, 'entry_submitted') +
+      block('Weekly credit spread', spreadTrades, spreadPnl, backendWeeklySpreadActionCounts, 'long_leg_submitted') +
+      '<div class="labs-backtest-note" style="margin-top:10px;">NOT_YET_FALSIFIED is not an endorsement, and is not final until the 40-trade sample is met. Full criteria (including ones only the backend evaluator checks) live in research/OPTIONS_PREREGISTRATION.md.</div>';
+  }
+
+  // Journal's own view of options closed trades -- combines the CSP and
+  // Weekly Credit Spread closed lists (each already tagged with
+  // `mechanism` when the backend writes it) into one table, newest first.
+  // Deliberately just a list, no win-rate/profit-factor math: those
+  // figures above are built for journalEntries' qty*price shape and a
+  // credit-collected position doesn't fit it any better here than it did
+  // on the Trade Overview cards.
+  function renderJournalOptionsClosedTrades(){
+    var section = document.getElementById('journalOptionsSection');
+    var el = document.getElementById('journalOptionsBody');
+    if(!section || !el) return;
+    var combined = []
+      .concat((backendOptionsClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'CSP' }, t); }))
+      .concat((backendWeeklySpreadClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'Weekly Spread' }, t); }));
+    if(!combined.length){ section.hidden = true; return; }
+    section.hidden = false;
+    combined.sort(function(a, b){ return String(b.closedAt || '').localeCompare(String(a.closedAt || '')); });
+    el.innerHTML = '<table class="backtest-trades-table"><thead><tr>' +
+      '<th>Mechanism</th><th>Underlying</th><th>Credit in</th><th>Credit out</th><th>Reason</th><th>Closed</th>' +
+      '</tr></thead><tbody>' +
+      combined.map(function(t){
+        var reasonLabel = t.needsReconciliation
+          ? '<span class="labs-backtest-status" title="Disappeared from the broker with no matching close order on file. Verify manually.">unreconciled</span>'
+          : escapeHtml(t.exitReason || '—');
+        return '<tr>' +
+          '<td>' + escapeHtml(t.mechanismLabel) + '</td>' +
+          '<td>' + escapeHtml(t.underlyingSymbol || '') + '</td>' +
+          '<td>' + (t.entryCredit != null ? ftMoney(t.entryCredit) : '—') + '</td>' +
+          '<td>' + (t.exitCredit != null ? ftMoney(t.exitCredit) : '—') + '</td>' +
+          '<td>' + reasonLabel + '</td>' +
+          '<td>' + (t.closedAt ? escapeHtml(String(t.closedAt).slice(0, 10)) : '—') + '</td>' +
+        '</tr>';
+      }).join('') + '</tbody></table>';
   }
 
   function escapeHtml(s){
