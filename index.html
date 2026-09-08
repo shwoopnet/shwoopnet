@@ -2416,6 +2416,27 @@
       </div>
     </div>
 
+    <!-- research/OPTIONS_PREREGISTRATION.md's own kill criteria, checked
+         against real closed trades in the browser -- the backend's
+         /options/preregistration-status route computes the same thing,
+         but that route sits behind PROXY_SHARED_SECRET and this page
+         must never ship that secret (see the forward-test record's own
+         comment on why). Duplicated math, not shared code -- there is no
+         bundler here to share it through -- so both sides are covered by
+         their own tests and any drift is a bug to find, not paper over. -->
+    <div class="to-card" id="toCard-optionsPreregistration" hidden>
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Options Research Status</span>
+          <span class="to-card-meta" id="optionsPreregistrationHeadMeta"></span>
+        </div>
+        <div class="labs-backtest-note" style="margin-bottom:10px;">
+          Progress against research/OPTIONS_PREREGISTRATION.md's own written kill criteria. NOT_YET_FALSIFIED is not an endorsement.
+        </div>
+        <div id="optionsPreregistrationBody"></div>
+      </div>
+    </div>
+
     <div class="to-card" id="toCard-todaysSetups">
       <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
         <div class="to-card-head">
@@ -3629,6 +3650,11 @@
   var backendOptionsCycleError = null;
   var backendOptionsCycleErrorAt = null;
   var backendOptionsLastCycleSummary = null;
+  // Cumulative since research/OPTIONS_PREREGISTRATION.md's own commit --
+  // see shwoop-server's optionsIncomeCycle.js. Feeds
+  // renderOptionsPreregistrationStatus() below; never reset, so this is a
+  // handful of int counters, not a growing log.
+  var backendOptionsActionCounts = null;
   // The weekly credit-spread mechanism -- a second, separate options
   // strategy (shwoop-server's optionsWeeklySpreadCycle.js), own fields
   // throughout, same reasoning as backendCryptoPicks having its own set
@@ -3644,6 +3670,7 @@
   var backendWeeklySpreadCycleError = null;
   var backendWeeklySpreadCycleErrorAt = null;
   var backendWeeklySpreadLastCycleSummary = null;
+  var backendWeeklySpreadActionCounts = null;
   // Journal/Alpaca drift findings (see shwoop-server's
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
@@ -3746,6 +3773,7 @@
       backendOptionsCycleError = data.optionsCycleError;
       backendOptionsCycleErrorAt = data.optionsCycleErrorAt;
       backendOptionsLastCycleSummary = data.optionsLastCycleSummary;
+      backendOptionsActionCounts = data.optionsActionCountsSincePreregistration;
       backendWeeklySpreadPositions = data.weeklySpreadPositions;
       backendWeeklySpreadClosedTrades = data.weeklySpreadClosedTrades;
       backendWeeklySpreadScreenerEnabledOnServer = data.serverWeeklySpreadScreenerEnabled;
@@ -3757,10 +3785,12 @@
       backendWeeklySpreadCycleError = data.weeklySpreadCycleError;
       backendWeeklySpreadCycleErrorAt = data.weeklySpreadCycleErrorAt;
       backendWeeklySpreadLastCycleSummary = data.weeklySpreadLastCycleSummary;
+      backendWeeklySpreadActionCounts = data.weeklySpreadActionCountsSincePreregistration;
       autoTradeOverrides.weeklySpreadScreenerEnabledOverride = data.weeklySpreadScreenerEnabledOverride;
       autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = data.weeklySpreadAutoTradeEnabledOverride;
       renderWeeklySpreadPositions();
       renderJournalOptionsClosedTrades();
+      renderOptionsPreregistrationStatus();
       renderOptionsPositions();
       backendCryptoCycleStatus = data.cryptoCycleStatus;
       backendCryptoCycleStartedAt = data.cryptoCycleStartedAt;
@@ -9621,6 +9651,7 @@
     { key:'cryptoSetups', label:'Crypto Setups' },
     { key:'optionsPositions', label:'Options Income (CSP)' },
     { key:'weeklySpreadPositions', label:'Weekly Credit Spread' },
+    { key:'optionsPreregistration', label:'Options Research Status' },
     { key:'activityLog', label:'Activity Log' }
   ];
   var TO_CARD_LABELS = {};
@@ -13885,6 +13916,81 @@
         }).join('') + '</tbody></table>';
     }
     el.innerHTML = rows;
+  }
+
+  // research/OPTIONS_PREREGISTRATION.md's own kill criteria, reimplemented
+  // here in the browser -- see optionsPreregistrationEvaluator.js
+  // (shwoop-server) for the source of truth this mirrors. PREREGISTRATION_DATE
+  // and TARGET_SAMPLE_SIZE are copied as literals, not fetched, since this
+  // page has no way to import that module and no bundler to share it
+  // through -- a drift between the two is a real risk, flagged here
+  // rather than assumed away, and caught by each side's own tests
+  // independently rather than a shared one.
+  var OPTIONS_PREREGISTRATION_DATE = '2026-09-08';
+  var OPTIONS_PREREGISTRATION_TARGET_SAMPLE = 40;
+
+  function optionsRealizedPnl(t){
+    if(t.entryCredit == null || t.exitCredit == null || !(t.qty > 0)) return null;
+    return (t.entryCredit - t.exitCredit) * t.qty * 100;
+  }
+  function optionsAfterCutoff(t){
+    if(!t.closedAt) return false;
+    return new Date(t.closedAt).getTime() >= new Date(OPTIONS_PREREGISTRATION_DATE).getTime();
+  }
+  function optionsIvBlockRate(counts, enteredKey){
+    counts = counts || {};
+    var blocked = counts.iv_not_rich_enough || 0;
+    var entered = counts[enteredKey] || 0;
+    var total = blocked + entered;
+    if(total === 0) return null;
+    return { blocked: blocked, entered: entered, total: total, rate: blocked / total };
+  }
+
+  function renderOptionsPreregistrationStatus(){
+    var card = document.getElementById('toCard-optionsPreregistration');
+    var el = document.getElementById('optionsPreregistrationBody');
+    var meta = document.getElementById('optionsPreregistrationHeadMeta');
+    if(!card || !el) return;
+
+    var cspAll = backendOptionsClosedTrades || [];
+    var spreadAll = backendWeeklySpreadClosedTrades || [];
+    // Only shows once there is SOMETHING to show -- an empty card here
+    // reads as broken, not as "nothing has closed yet," the same
+    // hidden-until-real-data pattern every other Trade Overview card uses.
+    if(!cspAll.length && !spreadAll.length){ card.hidden = true; return; }
+    card.hidden = false;
+
+    var cspTrades = cspAll.filter(optionsAfterCutoff);
+    var spreadTrades = spreadAll.filter(optionsAfterCutoff);
+    var cspPnl = cspTrades.reduce(function(sum, t){ var p = optionsRealizedPnl(t); return p == null ? sum : sum + p; }, 0);
+    var spreadPnl = spreadTrades.reduce(function(sum, t){ var p = optionsRealizedPnl(t); return p == null ? sum : sum + p; }, 0);
+
+    if(meta) meta.textContent = cspTrades.length + '/' + OPTIONS_PREREGISTRATION_TARGET_SAMPLE + ' CSP · ' + spreadTrades.length + '/' + OPTIONS_PREREGISTRATION_TARGET_SAMPLE + ' spread';
+
+    function block(name, trades, pnl, ivCounts, ivEnteredKey){
+      var sampleMet = trades.length >= OPTIONS_PREREGISTRATION_TARGET_SAMPLE;
+      var pnlNegative = sampleMet && pnl < 0;
+      var ivBlocks = optionsIvBlockRate(ivCounts, ivEnteredKey);
+      var ivTriggered = ivBlocks && ivBlocks.total >= OPTIONS_PREREGISTRATION_TARGET_SAMPLE && ivBlocks.rate > 0.5;
+      var anyTriggered = pnlNegative || ivTriggered;
+      var verdict = anyTriggered ? 'FALSIFIED' : 'NOT_YET_FALSIFIED';
+      var verdictClass = anyTriggered ? 'fail' : '';
+      return '<div class="settings-row" style="align-items:flex-start;">' +
+        '<div>' +
+          '<div class="settings-row-title">' + escapeHtml(name) + '</div>' +
+          '<div class="settings-row-desc">' +
+            trades.length + '/' + OPTIONS_PREREGISTRATION_TARGET_SAMPLE + ' closed trades since the pre-registration date · realized P&amp;L ' + ftMoney(pnl) +
+            (ivBlocks ? ' · IV filter blocked ' + ivBlocks.blocked + '/' + ivBlocks.total + ' (' + (ivBlocks.rate * 100).toFixed(0) + '%)' : '') +
+          '</div>' +
+        '</div>' +
+        '<span class="labs-backtest-status ' + verdictClass + '">' + verdict + '</span>' +
+      '</div>';
+    }
+
+    el.innerHTML =
+      block('Cash-secured put', cspTrades, cspPnl, backendOptionsActionCounts, 'entry_submitted') +
+      block('Weekly credit spread', spreadTrades, spreadPnl, backendWeeklySpreadActionCounts, 'long_leg_submitted') +
+      '<div class="labs-backtest-note" style="margin-top:10px;">NOT_YET_FALSIFIED is not an endorsement, and is not final until the 40-trade sample is met. Full criteria (including ones only the backend evaluator checks) live in research/OPTIONS_PREREGISTRATION.md.</div>';
   }
 
   // Journal's own view of options closed trades -- combines the CSP and
