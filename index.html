@@ -6759,7 +6759,29 @@
         // timeframe), which fetchHistoryFromNetwork routes to Alpaca's
         // crypto bars rather than Twelve Data.
         var isCrypto = sym.indexOf('/') > -1;
-        var tf = isCrypto ? '15m' : '1D';
+        // '1D' fetches a buffer of days but keeps only whichever ONE date
+        // is most recent in that buffer (see fetchHistoryFromNetwork) --
+        // fine for a position opened and (if it's going to close) closed
+        // within the same session, but this strategy explicitly allows
+        // holding across sessions (holdAcrossSessions), and a chart stuck
+        // on one calendar day cannot show a multi-day hold's actual price
+        // action since entry. Confirmed live: a position opened Sep 3
+        // still showing a chart dated Sep 4 days later, because '1D'
+        // never looks further back than "the most recent day it has."
+        // The real journal entry (not the possibly-live-rescanned `trade`
+        // row above, whose entryBarTime can reflect today's fresh signal
+        // rather than this position's actual original entry) is what
+        // decides: if it was opened on an earlier calendar day, chart at
+        // '30m' instead, which spans multiple days and whose date labels
+        // (formatAxisLabel) already handle day boundaries correctly.
+        var openEntryForChart = !isCrypto && journalEntries.filter(function(j){
+          return j.sym === sym && isOpenPositionForCurrentAccount(j);
+        })[0];
+        var entryDay = openEntryForChart && openEntryForChart.entryBarTime
+          ? new Date(firestoreMillis(openEntryForChart.entryBarTime)) : null;
+        var heldAcrossSessions = entryDay && !isNaN(entryDay.getTime())
+          && entryDay.toDateString() !== new Date().toDateString();
+        var tf = isCrypto ? '15m' : (heldAcrossSessions ? '30m' : '1D');
         // The live quote, not the entry price -- renderChartInto anchors
         // the chart's last candle to whatever price this passes in (see
         // its own comment), so passing trade.entry here made every open
