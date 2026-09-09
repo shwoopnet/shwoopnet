@@ -2338,6 +2338,7 @@
 
     <div class="to-card" id="toCard-accountSummary">
       <div class="acct-strip" id="statusAccountSummary"></div>
+      <div class="acct-strip" id="statusTodaySplit" hidden></div>
     </div>
 
     <div class="to-card" id="toCard-backendStatus">
@@ -5094,7 +5095,8 @@
       return {
         symbol: p.symbol, qty: p.qty, side: p.side,
         avg_entry_price: p.avgEntryPrice, current_price: p.currentPrice,
-        unrealized_pl: p.unrealizedPl, unrealized_plpc: p.unrealizedPlpc / 100
+        unrealized_pl: p.unrealizedPl, unrealized_plpc: p.unrealizedPlpc / 100,
+        unrealized_intraday_pl: p.unrealizedIntradayPl
       };
     });
   }
@@ -6757,7 +6759,29 @@
         // timeframe), which fetchHistoryFromNetwork routes to Alpaca's
         // crypto bars rather than Twelve Data.
         var isCrypto = sym.indexOf('/') > -1;
-        var tf = isCrypto ? '15m' : '1D';
+        // '1D' fetches a buffer of days but keeps only whichever ONE date
+        // is most recent in that buffer (see fetchHistoryFromNetwork) --
+        // fine for a position opened and (if it's going to close) closed
+        // within the same session, but this strategy explicitly allows
+        // holding across sessions (holdAcrossSessions), and a chart stuck
+        // on one calendar day cannot show a multi-day hold's actual price
+        // action since entry. Confirmed live: a position opened Sep 3
+        // still showing a chart dated Sep 4 days later, because '1D'
+        // never looks further back than "the most recent day it has."
+        // The real journal entry (not the possibly-live-rescanned `trade`
+        // row above, whose entryBarTime can reflect today's fresh signal
+        // rather than this position's actual original entry) is what
+        // decides: if it was opened on an earlier calendar day, chart at
+        // '30m' instead, which spans multiple days and whose date labels
+        // (formatAxisLabel) already handle day boundaries correctly.
+        var openEntryForChart = !isCrypto && journalEntries.filter(function(j){
+          return j.sym === sym && isOpenPositionForCurrentAccount(j);
+        })[0];
+        var entryDay = openEntryForChart && openEntryForChart.entryBarTime
+          ? new Date(firestoreMillis(openEntryForChart.entryBarTime)) : null;
+        var heldAcrossSessions = entryDay && !isNaN(entryDay.getTime())
+          && entryDay.toDateString() !== new Date().toDateString();
+        var tf = isCrypto ? '15m' : (heldAcrossSessions ? '30m' : '1D');
         // The live quote, not the entry price -- renderChartInto anchors
         // the chart's last candle to whatever price this passes in (see
         // its own comment), so passing trade.entry here made every open
@@ -12174,7 +12198,8 @@
       // "Market closed" carries no flash key at all: it is not a number,
       // and recording it would let the next real figure flash against a
       // value from before the market shut.
-      var plValueHtml = shouldHideTodayPL(backendIsTodayTradingDay, hasOpenCryptoPosition, todayPL)
+      var hideTodayPL = shouldHideTodayPL(backendIsTodayTradingDay, hasOpenCryptoPosition, todayPL);
+      var plValueHtml = hideTodayPL
         ? '<div class="backtest-stat-value">Market closed</div>'
         : '<div class="backtest-stat-value ' + plClass + '" data-flash-key="acct:todayPL" data-flash-value="' + todayPL + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
 
@@ -12184,10 +12209,74 @@
         '<div><div class="backtest-stat-label">Cash</div><div class="backtest-stat-value" data-flash-key="acct:cash" data-flash-value="' + cash + '">$' + cash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>' +
         '<div><div class="backtest-stat-label">Buying power</div><div class="backtest-stat-value" data-flash-key="acct:buyingPower" data-flash-value="' + buyingPower + '">$' + buyingPower.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div></div>';
       applyValueFlashes(summaryEl);
+
+      // The realized/unrealized split, because "Today's P&L" above is a
+      // single whole-account equity delta that quietly mixes two very
+      // different things: mark-to-market movement on positions still
+      // open (money you don't have yet and could lose back) and money
+      // that actually changed hands via a closed trade today. A big
+      // green "Today's P&L" driven entirely by the first is a materially
+      // different situation from one driven by the second, and this app
+      // had no way to tell them apart without pulling raw Alpaca data by
+      // hand -- confirmed live: an account showing +$900 "today" with
+      // zero winning round-trips that day, because it was 100% unrealized
+      // carry from positions opened on prior sessions, already fading as
+      // the current session's prices moved.
+      if(hideTodayPL){
+        renderTodaySplit(null);
+        return;
+      }
+      getAlpacaPositionsCached().then(function(positions){
+        // unrealized_intraday_pl is Alpaca's own today-only mark, scoped
+        // to positions still open right now -- NOT unrealized_pl, which
+        // is cumulative since entry and would double-count gains from
+        // days before today. A position missing the field entirely
+        // (server hasn't synced it yet, or Alpaca omitted it) makes the
+        // whole split "unknown" rather than silently treating that
+        // position's contribution as zero, which would misattribute its
+        // real share of today's move to the realized bucket instead.
+        var anyMissing = positions.some(function(p){ return p.unrealized_intraday_pl == null; });
+        if(anyMissing){
+          renderTodaySplit(null);
+          return;
+        }
+        var unrealizedToday = positions.reduce(function(sum, p){ return sum + parseFloat(p.unrealized_intraday_pl || 0); }, 0);
+        // Derived, not independently fetched: today's whole-account
+        // equity delta minus the mark-to-market portion still sitting in
+        // open positions leaves the portion that came from cash actually
+        // moving -- a closed trade, a dividend, a fee. Alpaca has no
+        // single "realized P&L today" field to fetch instead.
+        var realizedToday = todayPL - unrealizedToday;
+        renderTodaySplit({ unrealizedToday: unrealizedToday, realizedToday: realizedToday });
+      }).catch(function(err){
+        renderTodaySplit(null);
+        console.error('Today P&L split failed (positions fetch):', err);
+      });
     }).catch(function(err){
       summaryEl.innerHTML = '<div><div class="backtest-stat-label">Account</div><div class="backtest-stat-value down">Failed to load</div></div>';
       console.error('Status page account fetch failed:', err);
     });
+  }
+
+  // Renders the realized/unrealized split as a second row under the main
+  // account summary strip. null means "can't be computed right now" (market
+  // closed, a missing unrealized_intraday_pl, or a fetch failure) -- shown
+  // as an explicit unavailable state, never silently omitted or zeroed.
+  function renderTodaySplit(split){
+    var el = document.getElementById('statusTodaySplit');
+    if(!el) return;
+    if(!split){
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    el.hidden = false;
+    var uClass = split.unrealizedToday >= 0 ? 'up' : 'down';
+    var rClass = split.realizedToday >= 0 ? 'up' : 'down';
+    el.innerHTML =
+      '<div><div class="backtest-stat-label">Unrealized (today)</div><div class="backtest-stat-value ' + uClass + '" data-flash-key="acct:unrealizedToday" data-flash-value="' + split.unrealizedToday + '">' + (split.unrealizedToday >= 0 ? '+' : '') + '$' + split.unrealizedToday.toFixed(2) + '</div></div>' +
+      '<div><div class="backtest-stat-label">Realized (today)</div><div class="backtest-stat-value ' + rClass + '" data-flash-key="acct:realizedToday" data-flash-value="' + split.realizedToday + '">' + (split.realizedToday >= 0 ? '+' : '') + '$' + split.realizedToday.toFixed(2) + '</div></div>';
+    applyValueFlashes(el);
   }
 
   // Heartbeat is written every ~60s by the server regardless of market
