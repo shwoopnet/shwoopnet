@@ -11033,6 +11033,17 @@
         if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
         return true;
       });
+      // Closed options trades join this same broker-reconciled set, only
+      // in the unified "all" view (see optionsClosedJournalRows' own
+      // comment) -- win/loss decided by dollarPL sign exactly like every
+      // other trade here, since a dollar is the one unit that's actually
+      // comparable between a qty*price stock move and a credit collected/
+      // paid on an options contract.
+      if(tabAtCall === 'all'){
+        trades = trades.concat(optionsClosedJournalRows().map(function(e){
+          return { sym: e.sym, dollarPL: e._pl.dollar, pctReturn: e._pl.pct, assetClass: 'options' };
+        }));
+      }
       if(!trades.length) return; // not connected, or no real trades on this tab yet -- leave the journal-based fallback showing
       var wins = trades.filter(function(t){ return isWinningReturn(t.dollarPL); });
       var losses = trades.filter(function(t){ return !isWinningReturn(t.dollarPL); });
@@ -11542,7 +11553,11 @@
     // a single broker-reported number that can't be broken out by
     // strategy, so it always reflects the FULL journal, never the
     // filter tabs below it.
-    var overall = computeAggregatePL(journalEntries);
+    // Overall always includes closed options trades regardless of the
+    // Equities/Crypto tabs below -- same reasoning as "always reflects
+    // the FULL journal" above; options aren't a tab, but they are real
+    // closed P&L that belongs in the account's actual overall total.
+    var overall = computeAggregatePL(journalEntries.concat(optionsClosedJournalRows()));
     var overallValEl = document.getElementById('overallPLValue');
     var overallSubEl = document.getElementById('overallPLSub');
     if(!overall){
@@ -11566,7 +11581,13 @@
     // Everything below IS derived from our own journal entries, which do
     // carry which strategy each trade came from -- the honest place to
     // apply the Equities/Crypto filter tabs.
-    var filtered = computeAggregatePL(filteredJournalEntries());
+    // Options fold into these stat tiles too now (win/loss decided by
+    // dollar sign -- equity out vs. equity in -- same rule as every
+    // other trade here goes through computePL/isWinningReturn), but only
+    // in the unified "all" view: they aren't Equities or Crypto, so
+    // neither of those tabs should silently gain or lose trades when
+    // toggled.
+    var filtered = computeAggregatePL(filteredJournalEntries().concat(journalFilter === 'all' ? optionsClosedJournalRows() : []));
 
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
