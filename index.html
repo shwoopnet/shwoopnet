@@ -8232,8 +8232,30 @@
       var paddedLo = loRaw - padAmt, paddedHi = hiRaw + padAmt;
       var mid2 = (paddedLo + paddedHi) / 2 + priceCenterOffset;
       var half2 = (paddedHi - paddedLo) / 2 / priceScaleFactor;
-      var nice = computeNiceScale(mid2 - half2, mid2 + half2, 5);
-      loT = nice.lo; hiT = nice.hi; niceTicks = nice.ticks;
+      // HYSTERESIS: reuse the PREVIOUS render's exact gridline bounds
+      // whenever this render's real price range still fits comfortably
+      // inside them, instead of recomputing fresh nice numbers every
+      // single time. A live position's chart redraws on every quote poll
+      // (every few seconds); recomputing from scratch each time snapped
+      // the gridlines (76.00/74.00 -> 78.00/76.00/70.00/66.00) and jolted
+      // the whole plot on nearly every poll, even when the actual price
+      // action barely moved -- confirmed live, the axis and the S/E/T
+      // tags visibly jumping second to second while just watching a
+      // trade. Only applies to the default, not-manually-zoomed view
+      // (priceScaleFactor 1, no priceCenterOffset) -- a deliberate pan or
+      // pinch-zoom should still respond immediately, never lag behind the
+      // gesture that just made it.
+      var prevScale = opts.prevScale;
+      var reusedScale = false;
+      if(prevScale && !prevScale.useLog && priceScaleFactor === 1 && !priceCenterOffset
+        && paddedLo >= prevScale.loT && paddedHi <= prevScale.hiT){
+        loT = prevScale.loT; hiT = prevScale.hiT; niceTicks = prevScale.niceTicks;
+        reusedScale = true;
+      }
+      if(!reusedScale){
+        var nice = computeNiceScale(mid2 - half2, mid2 + half2, 5);
+        loT = nice.lo; hiT = nice.hi; niceTicks = nice.ticks;
+      }
     }
     var range = (hiT - loT) || 1;
 
@@ -8410,18 +8432,37 @@
       // happened to fall mid-chart. The reference line itself stays
       // full-width and dashed at its original opacity; only the label
       // moves.
+      // A level sitting near the live price (e.g. a trade approaching its
+      // target, or a fresh entry that hasn't moved far yet) used to just
+      // DROP its tag entirely once within 16px of the live-price tag --
+      // meaning the one moment a target is worth watching closest (price
+      // actually closing in on it) was exactly when its label vanished.
+      // Every tag now gets a slot: each new one is nudged away from
+      // whatever's already claimed nearby instead of being hidden, so
+      // "T 69.76" stays on screen right up against the live price tag
+      // rather than disappearing the instant they'd overlap. The dashed
+      // reference LINE always stays at the true price either way --
+      // only the tag's vertical position ever moves.
+      var placedTagYs = liveY !== null ? [liveY] : [];
+      function reserveTagY(desiredY){
+        var ty = desiredY;
+        for(var guard = 0; guard < 12; guard++){
+          var collision = placedTagYs.some(function(py){ return Math.abs(ty - py) < 16; });
+          if(!collision) break;
+          ty += 16;
+        }
+        ty = Math.max(padTop + 6, Math.min(padTop + plotH - 6, ty));
+        placedTagYs.push(ty);
+        return ty;
+      }
       function levelLine(price, color, label, dashArray, opacity){
         if(price === null || price === undefined || !isFinite(price)) return;
         var ly2 = y(price);
         if(ly2 < padTop - 1 || ly2 > padTop + plotH + 1) return;
         parts.push('<line x1="0" y1="'+ly2+'" x2="'+plotW+'" y2="'+ly2+'" stroke="'+color+'" stroke-width="1" stroke-dasharray="'+dashArray+'" opacity="'+opacity+'"/>');
-        // A level sitting almost on top of the live price (e.g. a fresh
-        // entry that hasn't moved far yet) would otherwise draw its tag
-        // right on top of the live-price tag -- skip just the tag here,
-        // the dashed line at this price is still visible on its own.
-        if(liveY !== null && Math.abs(ly2 - liveY) < 16) return;
-        parts.push('<path d="'+axisFlagPath(ly2)+'" fill="'+color+'"/>');
-        parts.push('<text class="axis-tag-text" x="'+(plotW+flagNotch+4)+'" y="'+(ly2+4)+'" fill="'+tagTextFill(color)+'">'+label+' '+price.toFixed(2)+'</text>');
+        var tagY = reserveTagY(ly2);
+        parts.push('<path d="'+axisFlagPath(tagY)+'" fill="'+color+'"/>');
+        parts.push('<text class="axis-tag-text" x="'+(plotW+flagNotch+4)+'" y="'+(tagY+4)+'" fill="'+tagTextFill(color)+'">'+label+' '+price.toFixed(2)+'</text>');
       }
       // THREE LINES, NOT FOUR: where you got in, where you get out losing,
       // where you get out winning. Everything else on this chart is price.
@@ -8464,7 +8505,7 @@
     }
 
     svg.innerHTML = parts.join('');
-    return { loT: loT, hiT: hiT, range: range, useLog: useLog, padTop: padTop, plotH: plotH, plotW: plotW };
+    return { loT: loT, hiT: hiT, range: range, useLog: useLog, padTop: padTop, plotH: plotH, plotW: plotW, niceTicks: niceTicks };
   }
 
   // Dragging fires pointermove far more often than the screen can even
@@ -8509,7 +8550,12 @@
     }
     state.lastScale = drawCandles(svg, visible, state.scale, state.priceScaleFactor, state.tf, {
       priceCenterOffset: state.priceCenterOffset,
-      levels: levels
+      levels: levels,
+      // Lets drawCandles reuse the previous render's exact gridline
+      // bounds when the new price data still fits inside them, instead
+      // of recomputing (and visibly jumping) on every single poll -- see
+      // that hysteresis block's own comment.
+      prevScale: state.lastScale
     });
   }
 
@@ -12669,41 +12715,42 @@
       );
     }
 
-    // ---- Row 4: server-side settings truth (env vars, not this browser's toggle) ----
-    if(backendScreenerEnabledOnServer !== null){
+    // ---- Row 4: server-side settings truth (env vars, not this browser's
+    // toggle) -- CONSOLIDATED. Four mechanisms means four rows here, and
+    // when every one of them is simply ON (screener + auto-trade both),
+    // as they are the overwhelming majority of the time, those four rows
+    // say the identical thing four times with nothing to actually read.
+    // The exceptional case -- one mechanism switched off while the others
+    // aren't -- is exactly what this card exists to surface, so it still
+    // gets its own full row the moment that's true; only the all-healthy
+    // case collapses to one line. ----
+    var serverSettingMechanisms = [
+      { label: 'Equities', screenerOn: backendScreenerEnabledOnServer, autoTradeOn: backendAutoTradeEnabledOnServer, note: '' },
+      { label: 'Crypto', screenerOn: backendCryptoScreenerEnabledOnServer, autoTradeOn: backendCryptoAutoTradeEnabledOnServer, note: '' },
+      // Off by default (see shwoop-server's config.js) -- an account that
+      // has never touched this still gets a row, same as before, so "off"
+      // is visible confirmation rather than the row simply not existing.
+      { label: 'Options income (CSP)', screenerOn: backendOptionsScreenerEnabledOnServer, autoTradeOn: backendOptionsAutoTradeEnabledOnServer, note: 'Forward test, not a backtest -- see the Options Income card.' },
+      { label: 'Weekly spread', screenerOn: backendWeeklySpreadScreenerEnabledOnServer, autoTradeOn: backendWeeklySpreadAutoTradeEnabledOnServer, note: 'Forward test, not a backtest -- a completely separate mechanism from the CSP, see the Weekly Credit Spread card.' }
+    ].filter(function(m){ return m.screenerOn !== null; });
+    var allSettingsHealthy = serverSettingMechanisms.length > 0
+      && serverSettingMechanisms.every(function(m){ return m.screenerOn && m.autoTradeOn; });
+    if(allSettingsHealthy){
       rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
-          '<div class="backend-pulse-label">Equities server settings: screener ' + (backendScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">' + serverSettingSource(backendScreenerEnabledOnServer !== null) + '</div>' +
+        '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
+          '<div class="backend-pulse-label">Server settings: all ' + serverSettingMechanisms.length + ' mechanisms ON (screener + auto-trade)</div>' +
+          '<div class="backend-pulse-sub">' + serverSettingMechanisms.map(function(m){ return m.label; }).join(', ') + '. ' + serverSettingSource(true) + '</div>' +
         '</div></div>'
       );
-    }
-    if(backendCryptoScreenerEnabledOnServer !== null){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendCryptoScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
-          '<div class="backend-pulse-label">Crypto server settings: screener ' + (backendCryptoScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendCryptoAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' A completely separate on/off from equities above.</div>' +
-        '</div></div>'
-      );
-    }
-    // Off by default (see shwoop-server's config.js) -- an account that has
-    // never touched this shows the row anyway, same as the rows above, so
-    // "off" is visible confirmation rather than the row simply not existing.
-    if(backendOptionsScreenerEnabledOnServer !== null){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendOptionsScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
-          '<div class="backend-pulse-label">Options income (CSP) server settings: screener ' + (backendOptionsScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendOptionsAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' Forward test, not a backtest -- see the Options Income card.</div>' +
-        '</div></div>'
-      );
-    }
-    if(backendWeeklySpreadScreenerEnabledOnServer !== null){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (backendWeeklySpreadScreenerEnabledOnServer ? 'ok' : '') + '"></div><div>' +
-          '<div class="backend-pulse-label">Weekly spread server settings: screener ' + (backendWeeklySpreadScreenerEnabledOnServer ? 'ON' : 'off') + ', auto-trade ' + (backendWeeklySpreadAutoTradeEnabledOnServer ? 'ON' : 'off') + '</div>' +
-          '<div class="backend-pulse-sub">' + serverSettingSource(true) + ' Forward test, not a backtest -- a completely separate mechanism from the CSP above, see the Weekly Credit Spread card.</div>' +
-        '</div></div>'
-      );
+    } else {
+      serverSettingMechanisms.forEach(function(m){
+        rows.push(
+          '<div class="backend-pulse-row"><div class="backend-pulse-dot ' + (m.screenerOn ? 'ok' : '') + '"></div><div>' +
+            '<div class="backend-pulse-label">' + m.label + ' server settings: screener ' + (m.screenerOn ? 'ON' : 'off') + ', auto-trade ' + (m.autoTradeOn ? 'ON' : 'off') + '</div>' +
+            '<div class="backend-pulse-sub">' + serverSettingSource(true) + (m.note ? ' ' + m.note : '') + '</div>' +
+          '</div></div>'
+        );
+      });
     }
 
     // ---- Row 5: journal/Alpaca position drift -- detection-only, see
