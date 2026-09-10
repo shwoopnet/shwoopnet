@@ -10858,13 +10858,19 @@
     if(closed.length === 0) return null;
     var totalDollar = 0, totalPctSum = 0, wins = 0;
     var winDollarSum = 0, lossDollarSum = 0, winCount = 0, lossCount = 0;
-    // Gross gains/losses in PERCENT terms (not dollars) -- profit factor
-    // computed this way is directly comparable to Labs' own backtest
-    // profit factor, which is also gross % gains over gross % losses
-    // (see summarizeBacktestTrades). A dollar-based version would be
-    // skewed by position sizing differences trade to trade in a way the
-    // backtest's number isn't, making the two numbers not apples-to-apples.
-    var winPctSum = 0, lossPctSum = 0;
+    // Gross gains/losses in DOLLAR terms, not percent. This used to be
+    // percent-based specifically to stay comparable to Labs' own backtest
+    // profit factor (gross % gains over gross % losses) -- but a percent
+    // is meaningless as a shared unit the moment options trades are in the
+    // mix (see optionsClosedJournalRows: an options trade's "%" is return
+    // on credit collected, a different scale than a stock's return on
+    // share price entirely). Dollars are the one unit every trade here
+    // actually has in common. The real, accepted tradeoff: this number no
+    // longer matches Labs' backtest profit factor, and IS skewed by
+    // position-sizing differences trade to trade in a way a %-based
+    // number wouldn't be -- a $500 winner on a large position and a $50
+    // winner on a small one count very differently here, correctly,
+    // because that is what actually happened to the account.
     var best = null, worst = null;
     // Exit-type mix: what fraction of closed trades ever reached the
     // trail/breakeven stage vs. only ever stopped out or closed flat at
@@ -10880,8 +10886,8 @@
       var pl = computePL(e);
       totalDollar += pl.dollar;
       totalPctSum += pl.pct;
-      if(isWinningReturn(pl.pct)){ wins++; winDollarSum += pl.dollar; winCount++; winPctSum += pl.pct; }
-      else { lossDollarSum += pl.dollar; lossCount++; lossPctSum += pl.pct; }
+      if(isWinningReturn(pl.pct)){ wins++; winDollarSum += pl.dollar; winCount++; }
+      else { lossDollarSum += pl.dollar; lossCount++; }
       if(best === null || pl.dollar > best.dollar) best = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       if(worst === null || pl.dollar < worst.dollar) worst = { sym: e.sym, dollar: pl.dollar, pct: pl.pct };
       // THREE STATES, because two of them used to look identical.
@@ -10911,7 +10917,7 @@
         everProtectedUnmeasurable++;
       }
     });
-    var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
+    var profitFactor = lossDollarSum < 0 ? (winDollarSum / Math.abs(lossDollarSum)) : (winDollarSum > 0 ? Infinity : 0);
     return {
       count: closed.length, wins: wins, losses: closed.length - wins, totalDollar: totalDollar, avgPct: totalPctSum / closed.length,
       winRate: (wins / closed.length) * 100,
@@ -11050,18 +11056,16 @@
       var winRate = (wins.length / trades.length) * 100;
       var avgWin = wins.length ? wins.reduce(function(s,t){ return s + t.dollarPL; }, 0) / wins.length : 0;
       var avgLoss = losses.length ? losses.reduce(function(s,t){ return s + t.dollarPL; }, 0) / losses.length : 0;
-      // Same gross-%-gains-over-gross-%-losses math as computeAggregatePL
-      // and Labs' own backtest -- and it now really is the same, because all
-      // three route their win/loss split through isWinningReturn. This
-      // comment claimed they matched while computeAggregatePL used >= 0 and
-      // these two used > 0.
-      //
-      // Computed off pctReturn (not dollarPL) so it stays directly comparable
-      // to the backtest's headline number even though these are the real,
-      // Alpaca-reconciled trades.
-      var winPctSum = wins.reduce(function(s,t){ return s + t.pctReturn; }, 0);
-      var lossPctSum = losses.reduce(function(s,t){ return s + t.pctReturn; }, 0);
-      var profitFactor = lossPctSum < 0 ? (winPctSum / Math.abs(lossPctSum)) : (winPctSum > 0 ? Infinity : 0);
+      // Dollar-based now, matching computeAggregatePL's own switch -- see
+      // that function's comment for why: a percent stopped being a shared
+      // unit the moment options trades (return on credit collected, not
+      // on share price) joined the same pool. No longer directly
+      // comparable to Labs' backtest profit factor (gross % gains over
+      // gross % losses) on purpose; this is the real, position-sized
+      // dollar outcome, not a scale-normalized one.
+      var winDollarSum = wins.reduce(function(s,t){ return s + t.dollarPL; }, 0);
+      var lossDollarSum = losses.reduce(function(s,t){ return s + t.dollarPL; }, 0);
+      var profitFactor = lossDollarSum < 0 ? (winDollarSum / Math.abs(lossDollarSum)) : (winDollarSum > 0 ? Infinity : 0);
       var best = trades.reduce(function(b,t){ return (!b || t.dollarPL > b.dollarPL) ? t : b; }, null);
       var worst = trades.reduce(function(w,t){ return (!w || t.dollarPL < w.dollarPL) ? t : w; }, null);
 
