@@ -12844,18 +12844,42 @@
     // failure in one doesn't block the other from updating what it can.
     getAlpacaPositionsCached().then(function(positions){
       if(!alpacaConnected) return;
-      var openCount = Array.isArray(positions) ? positions.length : 0;
+      var posArray = Array.isArray(positions) ? positions : [];
+      var openCount = posArray.length;
+      // This total is EVERY real Alpaca position, options included --
+      // deliberately, per this function's own reasoning above (Alpaca's
+      // list is the one number that's always current). Options never
+      // appear in journalEntries at all (see shwoop-server's
+      // optionsIncomeCycle.js/optionsWeeklySpreadCycle.js headers), so
+      // this can genuinely run higher than Brief's "N with open
+      // positions" or the Open Positions table -- both of which are
+      // deliberately equities/crypto-only, options tracked separately in
+      // their own cards. Confirmed live: 7 here against 4 there, on an
+      // account correctly holding 4 equities positions plus 3 real
+      // options legs, read as a bug rather than two numbers answering
+      // different questions. A tooltip is the cheapest honest fix: don't
+      // change either count (both are individually correct for what they
+      // represent), just say so where the mismatch would otherwise look
+      // silent and unexplained.
+      var optionsCount = posArray.filter(function(p){ return p.asset_class === 'us_option'; }).length;
+      var bubbleTitle = optionsCount > 0
+        ? openCount + ' open positions at Alpaca (' + (openCount - optionsCount) + ' equities/crypto + ' + optionsCount + ' options -- options are tracked separately from the equities/crypto count shown elsewhere)'
+        : '';
       [dockBubble, sidebarBubble].forEach(function(el){
         el.textContent = openCount;
+        el.title = bubbleTitle;
         el.removeAttribute('hidden');
       });
     }).catch(function(){
       if(!alpacaConnected) return;
       // Live count unavailable this cycle -- fall back to the journal's
-      // belief rather than showing nothing.
+      // belief rather than showing nothing. Equities/crypto only (same
+      // as journalEntries itself), so no options-count tooltip applies
+      // to this fallback -- clear whatever the last successful fetch set.
       var openCount = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).length;
       [dockBubble, sidebarBubble].forEach(function(el){
         el.textContent = openCount;
+        el.title = '';
         el.removeAttribute('hidden');
       });
     });
