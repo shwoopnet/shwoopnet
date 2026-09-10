@@ -2832,6 +2832,19 @@
 
     <div class="changelog-list">
       <div class="changelog-entry">
+        <div class="changelog-version"><span class="changelog-version-badge">v2.6</span>Options in the Journal, Dollar-Based Profit Factor &amp; Labs Removed</div>
+        <ul class="changelog-items">
+          <li>Closed options trades (cash-secured puts and weekly credit spreads) now appear alongside equities/crypto in the Journal calendar, day detail list, day win/loss recap, and Account Growth chart — no separate options view to check</li>
+          <li>Win Rate, Profit Factor, Avg Win, and Avg Loss now factor in closed options trades too, using the same equity-in-vs-equity-out rule as every other trade</li>
+          <li>Profit Factor is now dollar-based (gross $ gains over gross $ losses) instead of percent-based, since options trades return on credit collected rather than share price — the two aren't the same unit</li>
+          <li>Removed the Labs page (Historical Data Export, Data Feed Diagnostics, Crypto Backtest, Forward-Test Record) — internal research tooling that had no place in the main app</li>
+          <li>Option symbols in the Alpaca account dock now read as "INTC $94P 9/18" instead of the raw OCC ticker</li>
+          <li>The account dock's position-count bubble now explains itself with a tooltip when it includes options positions that Brief/Open Positions don't count</li>
+          <li>Consolidated the Backend Status card's four per-strategy cycle/settings rows into one line when everything is healthy</li>
+          <li>Chart fixes: target/entry/stop tags no longer disappear when price gets close to them, and the price axis no longer jumps on every live update</li>
+        </ul>
+      </div>
+      <div class="changelog-entry">
         <div class="changelog-version"><span class="changelog-version-badge">v2.5</span>Renamed back to Shwoop</div>
         <ul class="changelog-items">
           <li>Renamed from Pocket Advisor back to Shwoop</li>
