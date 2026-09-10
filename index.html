@@ -724,6 +724,14 @@
   .backtest-stat-value{ font-size:20px; font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight:600; }
   .backtest-stat-value.up{ color: var(--gain); }
   .backtest-stat-value.down{ color: var(--loss); }
+  /* A disclaimer/caption line ("Forward test only", "Win rate alone
+     doesn't show...") had no rule of its own anywhere in this sheet, so
+     it rendered at the exact same size and contrast as real content --
+     the boilerplate line under a card title competed visually with the
+     title itself instead of reading as the secondary note it is. Real
+     color overrides (var(--loss) for a warning) pass through untouched;
+     this only sets the DEFAULT weight. */
+  .labs-backtest-note{ font-size:12px; color: var(--muted); line-height:1.4; }
 
   .backtest-trades-table{ width:100%; border-collapse:collapse; font-size:12px; }
   .backtest-trades-table th{
@@ -5372,12 +5380,28 @@
   });
   applyAlpacaDockControlsUI();
 
+  // A raw OCC option symbol (e.g. "INTC260918P00094000") packs root,
+  // expiration, type and strike into one unbroken string with no
+  // separators -- unreadable at a glance next to a plain equities symbol
+  // like "SNAP" in the same column. Parsed apart here into "INTC $94P
+  // 9/18" for display only; every other code path (Close button, order
+  // submission, position lookups) still uses p.symbol untouched, so
+  // nothing about what gets sent to Alpaca changes.
+  var OCC_OPTION_SYMBOL_RE = /^([A-Z]{1,6})(\d{2})(\d{2})(\d{2})([CP])(\d{8})$/;
+  function formatPositionSymbol(sym){
+    var m = OCC_OPTION_SYMBOL_RE.exec(sym);
+    if(!m) return sym;
+    var root = m[1], month = m[3], day = m[4], type = m[5];
+    var strike = parseInt(m[6], 10) / 1000;
+    return root + ' $' + (strike % 1 === 0 ? strike.toFixed(0) : strike.toFixed(2)) + type + ' ' + parseInt(month, 10) + '/' + parseInt(day, 10);
+  }
+
   // One cell per column key, same switch shape as the Open Positions
   // table's statusPositionsCellHTML so the two stay easy to read against
   // each other.
   function alpacaDockCellHTML(colKey, p, levels){
     switch(colKey){
-      case 'sym': return '<td>' + p.symbol + '</td>';
+      case 'sym': return '<td>' + formatPositionSymbol(p.symbol) + '</td>';
       case 'qty': return '<td>' + p.qty + '</td>';
       case 'direction': return '<td>' + (p.side === 'short' ? 'Short' : 'Long') + '</td>';
       case 'entry': return '<td>' + fmt(parseFloat(p.avg_entry_price)) + '</td>';
@@ -12571,148 +12595,107 @@
       }
     }
 
-    // ---- Row 3: this cycle's status ----
-    if(backendCycleStatus === 'scanning'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
-          '<div class="backend-pulse-label">Equities: scanning the market now…</div>' +
-          '<div class="backend-pulse-sub">Checking all 16 symbols for a qualifying ORB breakout, sizing anything that qualifies, and sending it to Alpaca if auto-trade is on. Started ' + (backendCycleStartedAt ? formatAgo(Date.now() - backendCycleStartedAt) : '') + '.</div>' +
-        '</div></div>'
-      );
-    } else if(backendCycleStatus === 'error'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
-          '<div class="backend-pulse-label">Equities: last cycle failed</div>' +
-          '<div class="backend-pulse-sub">' + (backendCycleError || 'Unknown error') + (backendCycleErrorAt ? ' · ' + formatClock(backendCycleErrorAt) + ' (' + formatAgo(Date.now() - backendCycleErrorAt) + ')' : '') + '</div>' +
-        '</div></div>'
-      );
-    } else if(backendCycleStatus === 'idle' && backendLastCycleSummary){
-      var nextEta = backendCycleCompletedAt ? backendCycleCompletedAt + INTRADAY_CYCLE_INTERVAL_MS : null;
-      var etaText = nextEta && nextEta > Date.now() ? ' · next scan ~' + formatClock(nextEta) : '';
+    // ---- Rows 3/3b/3c/3d, CONSOLIDATED: each mechanism's own cycle
+    // status (equities, crypto, options income, weekly spread). These
+    // used to always render as four separate two-line rows. The common
+    // case -- every mechanism idle with a real last-cycle summary, i.e.
+    // everything working exactly as expected -- now collapses to ONE
+    // row naming all four with their last-finished times, since that's
+    // the same "yes, it's fine" fact stated four times otherwise. The
+    // moment any ONE of them is scanning, has failed, or has never run,
+    // ALL FOUR fall back to full individual rows -- never just the
+    // exceptional one -- so a reader never has to remember "was crypto
+    // also idle, or did I only see equities broken out because it
+    // failed?" from a mixed collapsed/expanded display.
+    var cycleMechanisms = [
+      {
+        label: 'Equities', status: backendCycleStatus, startedAt: backendCycleStartedAt,
+        error: backendCycleError, errorAt: backendCycleErrorAt, completedAt: backendCycleCompletedAt,
+        summary: backendLastCycleSummary, intervalMs: INTRADAY_CYCLE_INTERVAL_MS,
+        alwaysShowNeverRun: true,
+        scanningText: 'Checking all 16 symbols for a qualifying ORB breakout, sizing anything that qualifies, and sending it to Alpaca if auto-trade is on.',
+        neverRunText: 'Runs automatically every minute while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.'
+      },
+      {
+        label: 'Crypto', status: backendCryptoCycleStatus, startedAt: backendCryptoCycleStartedAt,
+        error: backendCryptoCycleError, errorAt: backendCryptoCycleErrorAt, completedAt: backendCryptoCycleCompletedAt,
+        summary: backendCryptoLastCycleSummary, intervalMs: CRYPTO_CYCLE_INTERVAL_MS,
+        alwaysShowNeverRun: !!backendCryptoScreenerEnabledOnServer,
+        scanningText: 'Checking all 12 symbols for a qualifying breakout, sizing anything that qualifies (fractional units), and sending it to Alpaca if crypto auto-trade is on.',
+        neverRunText: 'Runs automatically every 5 minutes, continuously — no market-hours gate, unlike equities.'
+      },
+      {
+        label: 'Options income (CSP)', status: backendOptionsCycleStatus, startedAt: backendOptionsCycleStartedAt,
+        error: backendOptionsCycleError, errorAt: backendOptionsCycleErrorAt, completedAt: backendOptionsCycleCompletedAt,
+        summary: backendOptionsLastCycleSummary, intervalMs: OPTIONS_CYCLE_INTERVAL_MS,
+        alwaysShowNeverRun: !!backendOptionsScreenerEnabledOnServer,
+        scanningText: 'Checking a 9-name liquidity-picked universe for a qualifying cash-secured put, managing anything already open.',
+        neverRunText: 'Runs automatically every 4 hours while the market is open — positions here are held 9-24 days, so it never needed equities’ minute-by-minute cadence.'
+      },
+      {
+        label: 'Weekly spread', status: backendWeeklySpreadCycleStatus, startedAt: backendWeeklySpreadCycleStartedAt,
+        error: backendWeeklySpreadCycleError, errorAt: backendWeeklySpreadCycleErrorAt, completedAt: backendWeeklySpreadCycleCompletedAt,
+        summary: backendWeeklySpreadLastCycleSummary, intervalMs: WEEKLY_SPREAD_CYCLE_INTERVAL_MS,
+        alwaysShowNeverRun: !!backendWeeklySpreadScreenerEnabledOnServer,
+        scanningText: 'Checking for a qualifying weekly credit spread entry, managing anything already open.',
+        neverRunText: 'Runs automatically every 2 hours while the market is open — positions here run 5-10 days at entry, closed by 2 DTE, so it checks more often than the CSP.'
+      }
+    ];
+    function mechanismState(m){
+      if(m.status === 'scanning') return 'scanning';
+      if(m.status === 'error') return 'error';
+      if(m.status === 'idle' && m.summary) return 'idle';
+      if(m.alwaysShowNeverRun) return 'never-run';
+      return 'hidden'; // matches the old code's silent no-row for a disabled, never-run mechanism
+    }
+    var visibleMechanisms = cycleMechanisms.filter(function(m){ return mechanismState(m) !== 'hidden'; });
+    var allIdle = visibleMechanisms.length > 0 && visibleMechanisms.every(function(m){ return mechanismState(m) === 'idle'; });
+    if(allIdle){
+      var idleSummaryText = visibleMechanisms.map(function(m){
+        return m.label + ' ' + (m.completedAt ? formatClock(m.completedAt) : '');
+      }).join(' · ');
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
-          '<div class="backend-pulse-label">Equities: idle — last cycle finished ' + (backendCycleCompletedAt ? formatClock(backendCycleCompletedAt) : '') + '</div>' +
-          '<div class="backend-pulse-sub">' + backendLastCycleSummary.text + etaText + '</div>' +
+          '<div class="backend-pulse-label">All 4 cycles idle — last finished within the last cycle interval</div>' +
+          '<div class="backend-pulse-sub">' + idleSummaryText + '</div>' +
         '</div></div>'
       );
     } else {
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
-          '<div class="backend-pulse-label">Equities: no cycle has run yet</div>' +
-          '<div class="backend-pulse-sub">Runs automatically every minute while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.</div>' +
-        '</div></div>'
-      );
-    }
-
-    // ---- Row 3b: crypto's own cycle status -- separate from equities'
-    // Row 3 above since it's a genuinely separate cycle (see runCryptoCycle
-    // in shwoop-server's orchestrator.js), running continuously with no
-    // market-hours gate, so its own "idle/scanning/error/never run" states
-    // don't get muddled with equities' RTH-scoped ones. ----
-    if(backendCryptoCycleStatus === 'scanning'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
-          '<div class="backend-pulse-label">Crypto: scanning now…</div>' +
-          '<div class="backend-pulse-sub">Checking all 12 symbols for a qualifying breakout, sizing anything that qualifies (fractional units), and sending it to Alpaca if crypto auto-trade is on. Started ' + (backendCryptoCycleStartedAt ? formatAgo(Date.now() - backendCryptoCycleStartedAt) : '') + '.</div>' +
-        '</div></div>'
-      );
-    } else if(backendCryptoCycleStatus === 'error'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
-          '<div class="backend-pulse-label">Crypto: last cycle failed</div>' +
-          '<div class="backend-pulse-sub">' + (backendCryptoCycleError || 'Unknown error') + (backendCryptoCycleErrorAt ? ' · ' + formatClock(backendCryptoCycleErrorAt) + ' (' + formatAgo(Date.now() - backendCryptoCycleErrorAt) + ')' : '') + '</div>' +
-        '</div></div>'
-      );
-    } else if(backendCryptoCycleStatus === 'idle' && backendCryptoLastCycleSummary){
-      var cryptoNextEta = backendCryptoCycleCompletedAt ? backendCryptoCycleCompletedAt + CRYPTO_CYCLE_INTERVAL_MS : null;
-      var cryptoEtaText = cryptoNextEta && cryptoNextEta > Date.now() ? ' · next scan ~' + formatClock(cryptoNextEta) : '';
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
-          '<div class="backend-pulse-label">Crypto: idle — last cycle finished ' + (backendCryptoCycleCompletedAt ? formatClock(backendCryptoCycleCompletedAt) : '') + '</div>' +
-          '<div class="backend-pulse-sub">' + backendCryptoLastCycleSummary.text + cryptoEtaText + '</div>' +
-        '</div></div>'
-      );
-    } else if(backendCryptoScreenerEnabledOnServer){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
-          '<div class="backend-pulse-label">Crypto: no cycle has run yet</div>' +
-          '<div class="backend-pulse-sub">Runs automatically every 5 minutes, continuously — no market-hours gate, unlike equities above.</div>' +
-        '</div></div>'
-      );
-    }
-
-    // ---- Row 3c: options income (CSP) cycle status -- see
-    // runOptionsIncomeCycle in shwoop-server's optionsIncomeCycle.js.
-    // Same "is it actually running" evidence as equities/crypto above --
-    // without this, a working screener and a dead one (or one an Alpaca
-    // account setting is silently blocking, e.g. options trading level
-    // too low) looked identical: nothing ever appeared here either way. ----
-    if(backendOptionsCycleStatus === 'scanning'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
-          '<div class="backend-pulse-label">Options income (CSP): scanning now…</div>' +
-          '<div class="backend-pulse-sub">Checking a 9-name liquidity-picked universe for a qualifying cash-secured put, managing anything already open. Started ' + (backendOptionsCycleStartedAt ? formatAgo(Date.now() - backendOptionsCycleStartedAt) : '') + '.</div>' +
-        '</div></div>'
-      );
-    } else if(backendOptionsCycleStatus === 'error'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
-          '<div class="backend-pulse-label">Options income (CSP): last cycle failed</div>' +
-          '<div class="backend-pulse-sub">' + (backendOptionsCycleError || 'Unknown error') + (backendOptionsCycleErrorAt ? ' · ' + formatClock(backendOptionsCycleErrorAt) + ' (' + formatAgo(Date.now() - backendOptionsCycleErrorAt) + ')' : '') + '</div>' +
-        '</div></div>'
-      );
-    } else if(backendOptionsCycleStatus === 'idle' && backendOptionsLastCycleSummary){
-      var optionsNextEta = backendOptionsCycleCompletedAt ? backendOptionsCycleCompletedAt + OPTIONS_CYCLE_INTERVAL_MS : null;
-      var optionsEtaText = optionsNextEta && optionsNextEta > Date.now() ? ' · next scan ~' + formatClock(optionsNextEta) : '';
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
-          '<div class="backend-pulse-label">Options income (CSP): idle — last cycle finished ' + (backendOptionsCycleCompletedAt ? formatClock(backendOptionsCycleCompletedAt) : '') + '</div>' +
-          '<div class="backend-pulse-sub">' + backendOptionsLastCycleSummary.text + optionsEtaText + '</div>' +
-        '</div></div>'
-      );
-    } else if(backendOptionsScreenerEnabledOnServer){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
-          '<div class="backend-pulse-label">Options income (CSP): no cycle has run yet</div>' +
-          '<div class="backend-pulse-sub">Runs automatically every 4 hours while the market is open — positions here are held 9-24 days, so it never needed equities’ minute-by-minute cadence.</div>' +
-        '</div></div>'
-      );
-    }
-
-    // ---- Row 3d: weekly credit-spread cycle status -- see
-    // runOptionsWeeklySpreadCycle in shwoop-server's
-    // optionsWeeklySpreadCycle.js. A second, separate options mechanism
-    // from the CSP above, own status fields throughout. ----
-    if(backendWeeklySpreadCycleStatus === 'scanning'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
-          '<div class="backend-pulse-label">Weekly spread: scanning now…</div>' +
-          '<div class="backend-pulse-sub">Checking for a qualifying weekly credit spread entry, managing anything already open. Started ' + (backendWeeklySpreadCycleStartedAt ? formatAgo(Date.now() - backendWeeklySpreadCycleStartedAt) : '') + '.</div>' +
-        '</div></div>'
-      );
-    } else if(backendWeeklySpreadCycleStatus === 'error'){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
-          '<div class="backend-pulse-label">Weekly spread: last cycle failed</div>' +
-          '<div class="backend-pulse-sub">' + (backendWeeklySpreadCycleError || 'Unknown error') + (backendWeeklySpreadCycleErrorAt ? ' · ' + formatClock(backendWeeklySpreadCycleErrorAt) + ' (' + formatAgo(Date.now() - backendWeeklySpreadCycleErrorAt) + ')' : '') + '</div>' +
-        '</div></div>'
-      );
-    } else if(backendWeeklySpreadCycleStatus === 'idle' && backendWeeklySpreadLastCycleSummary){
-      var weeklySpreadNextEta = backendWeeklySpreadCycleCompletedAt ? backendWeeklySpreadCycleCompletedAt + WEEKLY_SPREAD_CYCLE_INTERVAL_MS : null;
-      var weeklySpreadEtaText = weeklySpreadNextEta && weeklySpreadNextEta > Date.now() ? ' · next scan ~' + formatClock(weeklySpreadNextEta) : '';
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
-          '<div class="backend-pulse-label">Weekly spread: idle — last cycle finished ' + (backendWeeklySpreadCycleCompletedAt ? formatClock(backendWeeklySpreadCycleCompletedAt) : '') + '</div>' +
-          '<div class="backend-pulse-sub">' + backendWeeklySpreadLastCycleSummary.text + weeklySpreadEtaText + '</div>' +
-        '</div></div>'
-      );
-    } else if(backendWeeklySpreadScreenerEnabledOnServer){
-      rows.push(
-        '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
-          '<div class="backend-pulse-label">Weekly spread: no cycle has run yet</div>' +
-          '<div class="backend-pulse-sub">Runs automatically every 2 hours while the market is open — positions here run 5-10 days at entry, closed by 2 DTE, so it checks more often than the CSP above.</div>' +
-        '</div></div>'
-      );
+      cycleMechanisms.forEach(function(m){
+        var state = mechanismState(m);
+        if(state === 'hidden') return;
+        if(state === 'scanning'){
+          rows.push(
+            '<div class="backend-pulse-row"><div class="backend-pulse-dot scanning"></div><div>' +
+              '<div class="backend-pulse-label">' + m.label + ': scanning now…</div>' +
+              '<div class="backend-pulse-sub">' + m.scanningText + ' Started ' + (m.startedAt ? formatAgo(Date.now() - m.startedAt) : '') + '.</div>' +
+            '</div></div>'
+          );
+        } else if(state === 'error'){
+          rows.push(
+            '<div class="backend-pulse-row"><div class="backend-pulse-dot error"></div><div>' +
+              '<div class="backend-pulse-label">' + m.label + ': last cycle failed</div>' +
+              '<div class="backend-pulse-sub">' + (m.error || 'Unknown error') + (m.errorAt ? ' · ' + formatClock(m.errorAt) + ' (' + formatAgo(Date.now() - m.errorAt) + ')' : '') + '</div>' +
+            '</div></div>'
+          );
+        } else if(state === 'idle'){
+          var mNextEta = m.completedAt ? m.completedAt + m.intervalMs : null;
+          var mEtaText = mNextEta && mNextEta > Date.now() ? ' · next scan ~' + formatClock(mNextEta) : '';
+          rows.push(
+            '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
+              '<div class="backend-pulse-label">' + m.label + ': idle — last cycle finished ' + (m.completedAt ? formatClock(m.completedAt) : '') + '</div>' +
+              '<div class="backend-pulse-sub">' + m.summary.text + mEtaText + '</div>' +
+            '</div></div>'
+          );
+        } else {
+          rows.push(
+            '<div class="backend-pulse-row"><div class="backend-pulse-dot"></div><div>' +
+              '<div class="backend-pulse-label">' + m.label + ': no cycle has run yet</div>' +
+              '<div class="backend-pulse-sub">' + m.neverRunText + '</div>' +
+            '</div></div>'
+          );
+        }
+      });
     }
 
     // ---- Row 4: server-side settings truth (env vars, not this browser's
