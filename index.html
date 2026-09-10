@@ -10117,10 +10117,41 @@
   }
 
   function computePL(e){
+    // A precomputed shortcut for entries that don't have the qty*price
+    // shape this function otherwise assumes -- see optionsClosedJournalRows
+    // below, whose whole reason for existing is a credit-collected P&L
+    // that this formula cannot derive from e.entry/e.exit at all.
+    if(e._pl) return e._pl;
     var sign = e.direction === 'Short' ? -1 : 1;
     var pctVal = (e.exit - e.entry) / e.entry * 100 * sign;
     var dollarVal = (e.exit - e.entry) * (e.qty || 0) * sign;
     return { pct: pctVal, dollar: dollarVal };
+  }
+
+  // Closed options trades (CSP + weekly spread), reshaped to sit alongside
+  // real journalEntries in the calendar and the day-by-day Journal list --
+  // NOT in the Win Rate/Profit Factor/Avg Win/Avg Loss stat tiles above the
+  // calendar (computeAggregatePL), which stay scoped to journalEntries'
+  // qty*price shape on purpose (see renderJournalOptionsClosedTrades' own
+  // comment on why that math doesn't fit a credit-collected position).
+  // %pl here is return on the credit COLLECTED (premium kept vs. premium
+  // paid back), not return on share price -- a different scale than an
+  // equities/crypto trade's %, stated here rather than left implicit,
+  // since it now feeds the same "Net: X%" day recap sentence.
+  function optionsClosedJournalRows(){
+    return allClosedOptionsTrades().filter(function(t){
+      return t.closedAt && optionsClosedTradeDollarPL(t) != null;
+    }).map(function(t){
+      var dollarVal = optionsClosedTradeDollarPL(t);
+      var pctVal = t.entryCredit ? (t.entryCredit - t.exitCredit) / t.entryCredit * 100 : 0;
+      var dateStr = String(t.closedAt).slice(0, 10);
+      return {
+        isOption: true, sym: t.underlyingSymbol, direction: t.mechanismLabel,
+        status: 'closed', date: dateStr, exitDate: dateStr,
+        entryCredit: t.entryCredit, exitCredit: t.exitCredit,
+        _pl: { pct: pctVal, dollar: dollarVal }
+      };
+    });
   }
 
   var calendarViewDate = new Date();
@@ -10160,7 +10191,10 @@
   }
 
   function computeDayStats(dateStr){
-    var entries = filteredJournalEntries().filter(function(e){ return e.status === 'closed' && realizedOnDate(e) === dateStr; });
+    // Options only join the unified "all" view -- see closedOptionsTradesForGrowth's
+    // own comment on why they're left out of the Equities/Crypto-scoped tabs.
+    var optionsRows = journalFilter === 'all' ? optionsClosedJournalRows().filter(function(e){ return realizedOnDate(e) === dateStr; }) : [];
+    var entries = filteredJournalEntries().filter(function(e){ return e.status === 'closed' && realizedOnDate(e) === dateStr; }).concat(optionsRows);
     if(entries.length === 0) return null;
     var dollar = 0, wins = 0;
     entries.forEach(function(e){
@@ -10235,7 +10269,7 @@
       // dot and the P&L figure have to agree about which days matter.
       var hasEntry = filteredJournalEntries().some(function(e){
         return e.date === dateStr || (e.status === 'closed' && realizedOnDate(e) === dateStr);
-      });
+      }) || !!stats; // stats already folds in any closed options trade realized this day
       var cls = 'calendar-day' + (hasEntry ? ' has-entry' : '') + (dateStr === selectedJournalDate ? ' selected' : '');
       if(stats){ cls += stats.dollar >= 0 ? ' day-win' : ' day-loss'; }
       var inner = '<span class="cal-daynum">' + dayNum + '</span>';
@@ -10316,11 +10350,19 @@
     //
     // Written as one predicate rather than two filters so the cell and the
     // list cannot drift apart again.
+    // Closed options trades join this same day-by-day list (not a fourth
+    // filter tab -- see optionsClosedJournalRows' own comment), only in
+    // the unified "all" view, only on the day they actually closed since
+    // there's no "open" state to show here at all (open options positions
+    // already have their own dedicated cards).
+    var optionsEntries = journalFilter === 'all'
+      ? optionsClosedJournalRows().filter(function(e){ return realizedOnDate(e) === selectedJournalDate; })
+      : [];
     var entries = filteredJournalEntries().filter(function(e){
       return e.status === 'closed'
         ? realizedOnDate(e) === selectedJournalDate
         : e.date === selectedJournalDate;
-    });
+    }).concat(optionsEntries);
     // UTC midnight + UTC-formatted display -- selectedJournalDate is a
     // plain "YYYY-MM-DD" string matched against entries' UTC-stamped
     // `date` field (see renderCalendar's own comment); parsing it as
@@ -10350,6 +10392,28 @@
     }
 
     var rows = entries.map(function(e){
+      // A closed options trade has no e.entry/e.exit share price and no
+      // journalEntries document id -- reusing the stock-shaped row below
+      // for it would call e.entry.toFixed(2) on undefined (a hard throw,
+      // the exact failure voidedEntry rows were fixed to avoid) and wire
+      // a Remove button to an id that deletes nothing. Its own small
+      // branch instead: credit in -> credit out, no Remove button since
+      // there is no journal document to remove -- see the Options Income
+      // (CSP) / Weekly Credit Spread cards for that trade's own record.
+      if(e.isOption){
+        var oPl = e._pl;
+        var oUp = oPl.dollar >= 0;
+        var oDollarStr = (oPl.dollar >= 0 ? '+$' : '−$') + Math.abs(oPl.dollar).toFixed(0);
+        return '<div class="journal-entry-card">' +
+          '<div class="t-sym-cell">' + symbolBadgeHtml(e.sym) +
+            '<span class="t-sym-text"><span class="t-sym mono">' + e.sym + '<span class="t-dir">' + escapeHtml(e.direction) + '</span>' +
+              '<span class="journal-source-tag">options</span></span></span>' +
+          '</div>' +
+          '<div class="journal-entry-prices mono">' + (e.entryCredit != null ? ftMoney(e.entryCredit) : '—') + ' → ' + (e.exitCredit != null ? ftMoney(e.exitCredit) : '—') + '</div>' +
+          '<div class="journal-entry-result-cell"><span class="journal-entry-result mono ' + (oUp ? 'up' : 'down') + '">' + oDollarStr + '</span></div>' +
+          '<div class="journal-entry-actions"></div>' +
+        '</div>';
+      }
       var sourceTag = e.source === 'alpaca' ? '<span class="journal-source-tag">via Alpaca</span>' : '';
       // Which equities strategy opened this, on every journal row --
       // including CLOSED ones, which is where it earns its keep:
@@ -11231,15 +11295,17 @@
         if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
         return true;
       });
+      var optionsTrades = tabAtCall === 'all' ? closedOptionsTradesForGrowth() : [];
       if(trades.length >= 2){
-        renderGrowthChartWithRanges(trades);
+        renderGrowthChartWithRanges(trades.concat(optionsTrades));
         return;
       }
-      renderGrowthChartWithRanges(closedJournalTradesForGrowth());
+      renderGrowthChartWithRanges(closedJournalTradesForGrowth().concat(optionsTrades));
     }).catch(function(err){
       if(myGen !== growthChartGen) return;
       console.error('Growth chart: Alpaca order history unavailable, falling back to the journal:', err);
-      renderGrowthChartWithRanges(closedJournalTradesForGrowth());
+      var optionsTrades = tabAtCall === 'all' ? closedOptionsTradesForGrowth() : [];
+      renderGrowthChartWithRanges(closedJournalTradesForGrowth().concat(optionsTrades));
     });
   }
 
@@ -11250,6 +11316,22 @@
       return e.status === 'closed' && e.exitDate;
     }).map(function(e){
       return { sym: e.sym, exitTime: e.exitDate, dollarPL: computePL(e).dollar };
+    });
+  }
+
+  // Same stand-in shape, for closed options trades -- a real $ P&L is a
+  // real $ P&L regardless of whether it came from a qty*price stock move
+  // or a credit collected/paid on an options contract, so it can be
+  // summed into the SAME cumulative curve honestly. Only in the unified
+  // "all" view, not under the Equities or Crypto tabs -- options are
+  // neither, and injecting their P&L into a curve labeled "Equities"
+  // would be exactly the kind of silent mislabeling this file's other
+  // comments keep calling out.
+  function closedOptionsTradesForGrowth(){
+    return allClosedOptionsTrades().filter(function(t){
+      return t.closedAt && optionsClosedTradeDollarPL(t) != null;
+    }).map(function(t){
+      return { sym: t.underlyingSymbol, exitTime: t.closedAt, dollarPL: optionsClosedTradeDollarPL(t) };
     });
   }
 
@@ -14043,13 +14125,32 @@
   // figures above are built for journalEntries' qty*price shape and a
   // credit-collected position doesn't fit it any better here than it did
   // on the Trade Overview cards.
+  // Single source of truth for "every closed options trade, tagged with
+  // which mechanism closed it" -- shared by the options-only table below
+  // AND by the calendar/Journal-day/Account-Growth integration further
+  // down, so the two can never list a different set of trades.
+  function allClosedOptionsTrades(){
+    return []
+      .concat((backendOptionsClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'CSP' }, t); }))
+      .concat((backendWeeklySpreadClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'Weekly Spread' }, t); }));
+  }
+
+  // Realized $ P&L for one closed options trade -- entry credit collected
+  // minus exit credit paid to close, times contracts times 100 (one
+  // options contract controls 100 shares' worth of premium). Returns null
+  // when either credit is missing (e.g. short-leg-never-filled closures
+  // never collected or paid a real credit at all), the same "don't invent
+  // a number" rule the now-removed Options Research Status card used.
+  function optionsClosedTradeDollarPL(t){
+    if(t.entryCredit == null || t.exitCredit == null || !(t.qty > 0)) return null;
+    return (t.entryCredit - t.exitCredit) * t.qty * 100;
+  }
+
   function renderJournalOptionsClosedTrades(){
     var section = document.getElementById('journalOptionsSection');
     var el = document.getElementById('journalOptionsBody');
     if(!section || !el) return;
-    var combined = []
-      .concat((backendOptionsClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'CSP' }, t); }))
-      .concat((backendWeeklySpreadClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'Weekly Spread' }, t); }));
+    var combined = allClosedOptionsTrades();
     if(!combined.length){ section.hidden = true; return; }
     section.hidden = false;
     combined.sort(function(a, b){ return String(b.closedAt || '').localeCompare(String(a.closedAt || '')); });
