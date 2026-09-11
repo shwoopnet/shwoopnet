@@ -225,8 +225,8 @@
   .app{ padding-right: 92px; }
   @media (max-width: 900px){ .app{ padding-right:0; padding-bottom:76px; } }
   @media (max-width: 900px){
-    .alpaca-dock-header{ bottom:76px; }
-    .alpaca-dock-body-wrap{ bottom:118px; }
+    .alpaca-dock-header{ bottom:76px; left:16px; right:16px; width:auto; }
+    .alpaca-dock-body-wrap{ bottom:118px; left:16px; right:16px; width:auto; }
   }
   .brand{
     display:flex; align-items:center; gap:12px;
@@ -1271,15 +1271,15 @@
   }
   .modal-field input{
     width:100%; background: var(--panel-raised); border:1px solid var(--border); border-radius:5px;
-    padding:9px 10px; color: var(--paper); font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-size:13px;
+    padding:12px 10px; color: var(--paper); font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-size:13px;
   }
   .modal-field input:focus{ outline:2px solid var(--amber); outline-offset:1px; border-color: var(--amber-dim); }
   .password-field{ position:relative; }
-  .password-field input{ padding-right:38px; }
+  .password-field input{ padding-right:44px; }
   .password-toggle{
-    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    position:absolute; right:2px; top:50%; transform:translateY(-50%);
     background:none; border:none; color: var(--muted); cursor:pointer;
-    width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+    width:40px; height:40px; display:flex; align-items:center; justify-content:center;
     padding:0; border-radius:4px;
   }
   .password-toggle:hover{ color: var(--paper); }
@@ -1288,12 +1288,12 @@
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
   .modal-btn-cancel{
     background:transparent; border:1px solid var(--border); color: var(--muted);
-    padding:9px 16px; border-radius:5px; font-size:12.5px; cursor:pointer;
+    padding:12px 16px; border-radius:5px; font-size:12.5px; cursor:pointer;
   }
   .modal-btn-cancel:hover{ color: var(--paper); border-color: var(--amber-dim); }
   .modal-btn-submit{
     background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
-    padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:600; cursor:pointer;
+    padding:12px 18px; border-radius:5px; font-size:12.5px; font-weight:600; cursor:pointer;
     font-family:'Public Sans', sans-serif;
   }
   .modal-btn-submit:hover{ background: var(--amber); color: var(--amber-contrast); }
@@ -1318,11 +1318,17 @@
   .auth-switch{ margin-top:16px; font-size:12px; color: var(--muted); }
   .auth-switch button{
     background:none; border:none; color: var(--amber); cursor:pointer; font-size:12px;
-    text-decoration:underline; padding:0; margin-left:4px;
+    text-decoration:underline;
+    /* padding grows the real tap target to ~44px without visually
+       shifting the text -- the matching negative margin cancels the
+       padding's own layout footprint, same "hitslop" technique used on
+       touch UIs generally. */
+    padding:14px 4px; margin:-14px -4px -14px 0;
   }
   .auth-forgot{
     background:none; border:none; color: var(--muted); font-size:11px; cursor:pointer;
-    margin-top:16px; text-decoration:underline;
+    text-decoration:underline;
+    margin-top:2px; padding:14px 4px; margin-left:-4px; margin-right:-4px;
   }
   .auth-forgot:hover{ color: var(--paper); }
 
