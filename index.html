@@ -1740,6 +1740,20 @@
     saveActivityLog: function(uid, activityLog){
       return setDoc(doc(db, 'users', uid), { activityLog: activityLog }, { merge: true });
     },
+    // Account-synced preferences (layout, notepad, alert toggles -- see
+    // shapeUserSettings for the full list and defaults). `settings` is
+    // merged as ONE map field rather than 14 top-level fields, so a
+    // partial update (one toggle) only needs to send the keys that
+    // changed, merge:true leaves the rest of the doc (and the rest of
+    // `settings` itself, since Firestore merges nested maps field-by-
+    // field) untouched.
+    saveUserSettings: function(uid, partialSettings){
+      var patch = {};
+      Object.keys(partialSettings).forEach(function(k){
+        patch['settings.' + k] = partialSettings[k];
+      });
+      return setDoc(doc(db, 'users', uid), patch, { merge: true });
+    },
     // Pure shaping helper -- takes the raw user-doc snapshot data (see
     // watchUserDoc above) and applies the same defaults/typeof guards
     // this used to apply inside its own onSnapshot callback. Kept as a
@@ -1885,6 +1899,32 @@
         weeklySpreadLastCycleSummary: data.weeklySpreadLastCycleSummary || null,
         weeklySpreadScreenerEnabledOverride: typeof data.weeklySpreadScreenerEnabledOverride === 'boolean' ? data.weeklySpreadScreenerEnabledOverride : null,
         weeklySpreadAutoTradeEnabledOverride: typeof data.weeklySpreadAutoTradeEnabledOverride === 'boolean' ? data.weeklySpreadAutoTradeEnabledOverride : null
+      };
+    },
+    // Same defensive shaping as shapeScreenerData, for the account-synced
+    // preferences under `settings` (see saveUserSettings). Defaults here
+    // match each control's own localStorage-era default exactly, so a
+    // brand new account (or a pre-existing browser-only user's very first
+    // sync, before adoption writes anything) renders identically to how
+    // the page already behaved with nothing in localStorage.
+    shapeUserSettings: function(data){
+      var s = (data && typeof data.settings === 'object' && data.settings) ? data.settings : null;
+      if(!s) return null; // null, not defaults -- lets the caller tell "never synced" from "synced, all defaults"
+      return {
+        darkMode: typeof s.darkMode === 'boolean' ? s.darkMode : null, // null here means "no explicit choice", same as an absent localStorage key -- OS preference decides
+        reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : false,
+        tickerEnabled: typeof s.tickerEnabled === 'boolean' ? s.tickerEnabled : true,
+        tickerSpeed: typeof s.tickerSpeed === 'string' ? s.tickerSpeed : '100',
+        clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
+        soundAlerts: typeof s.soundAlerts === 'boolean' ? s.soundAlerts : true,
+        landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto',
+        growthChartRange: typeof s.growthChartRange === 'string' ? s.growthChartRange : 'all',
+        alpacaDockHiddenCols: (s.alpacaDockHiddenCols && typeof s.alpacaDockHiddenCols === 'object') ? s.alpacaDockHiddenCols : { target: true, stop: true },
+        alpacaDockSort: s.alpacaDockSort === 'pl' ? 'pl' : 'default',
+        statusPositionsHiddenCols: (s.statusPositionsHiddenCols && typeof s.statusPositionsHiddenCols === 'object') ? s.statusPositionsHiddenCols : {},
+        activityLogHiddenGroups: (s.activityLogHiddenGroups && typeof s.activityLogHiddenGroups === 'object') ? s.activityLogHiddenGroups : {},
+        toCards: (s.toCards && typeof s.toCards === 'object') ? s.toCards : null, // null -- applyToCardPrefs below already knows how to fall back to the default order itself
+        notepad: typeof s.notepad === 'string' ? s.notepad : ''
       };
     },
     // Merges only the fields actually passed in -- callers pass a
@@ -2823,7 +2863,7 @@
         </div>
       </div>
 
-      <div class="settings-note">Your Trade Journal syncs to your account and follows you across devices. Everything else on this page — layout, notepad, and alert settings — stays local to this browser only.</div>
+      <div class="settings-note">Your Trade Journal, layout, notepad, and alert settings all sync to your account and follow you across devices. Panel positions/sizes and a few minor UI toggles (locked/open state) stay local to this browser, since a spot that makes sense on one screen rarely makes sense on another.</div>
     </div>
   </main>
 
@@ -5138,8 +5178,9 @@
     var savedDockCols = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockHiddenCols') || 'null');
     if(savedDockCols && typeof savedDockCols === 'object') ALPACA_DOCK_HIDDEN_COLS = savedDockCols;
   }catch(e){}
-  function saveAlpacaDockHiddenCols(){
+  function saveAlpacaDockHiddenCols(skipSync){
     try{ window.localStorage.setItem('shwoopnet:alpacaDockHiddenCols', JSON.stringify(ALPACA_DOCK_HIDDEN_COLS)); }catch(e){}
+    if(!skipSync) syncUserSetting('alpacaDockHiddenCols', ALPACA_DOCK_HIDDEN_COLS, 300);
   }
   // Symbol is never hideable -- a row with no symbol identifies nothing.
   function visibleAlpacaDockColumns(){
@@ -5186,6 +5227,7 @@
   document.getElementById('alpacaDockSortBtn').addEventListener('click', function(){
     alpacaDockSort = alpacaDockSort === 'pl' ? 'default' : 'pl';
     try{ window.localStorage.setItem('shwoopnet:alpacaDockSort', alpacaDockSort); }catch(e){}
+    syncUserSetting('alpacaDockSort', alpacaDockSort, 300);
     applyAlpacaDockControlsUI();
     renderAlpacaDock();
   });
@@ -8306,13 +8348,49 @@
   // out of date regardless of what else is or isn't happening on the page.
   setInterval(renderBriefHeadline, 60000);
 
+  // ---------- Account-synced settings: write-through helper ----------
+  // Every applyXPref below already writes its own localStorage key on
+  // every call, from three different call sites: (1) the user actually
+  // changing the control, (2) page-load init reading the fast local
+  // cache before sign-in resolves, (3) the Firestore snapshot handler
+  // applying a value that just arrived FROM the account doc. Only (1)
+  // should turn around and write back to Firestore -- (2) has no uid yet
+  // and (3) would just be echoing the exact value the doc already holds,
+  // paying for a write on every snapshot forever (in the worst case,
+  // ping-ponging between browser tabs each just confirming what the
+  // other already wrote). So the localStorage write stays inside each
+  // applyXPref (cheap, and needed for (2)'s instant first paint), while
+  // the Firestore write is a separate call each (1)-site makes explicitly
+  // -- see syncUserSetting below -- and (3) never calls it at all.
+  var userSettingsSyncTimers = {};
+  function syncUserSetting(key, value, debounceMs){
+    if(!window.__shwoopAPI || !currentUid) return; // signed out, or not yet resolved -- localStorage is already the source of truth until sign-in
+    if(debounceMs){
+      clearTimeout(userSettingsSyncTimers[key]);
+      userSettingsSyncTimers[key] = setTimeout(function(){
+        var partial = {};
+        partial[key] = value;
+        window.__shwoopAPI.saveUserSettings(currentUid, partial).catch(function(err){
+          console.error('Failed to sync setting ' + key + ':', err);
+        });
+      }, debounceMs);
+    } else {
+      var partial = {};
+      partial[key] = value;
+      window.__shwoopAPI.saveUserSettings(currentUid, partial).catch(function(err){
+        console.error('Failed to sync setting ' + key + ':', err);
+      });
+    }
+  }
+
   // ---------- Settings: default landing page ----------
   var landingChoiceEl = document.getElementById('landingChoice');
-  function applyLandingPref(val){
+  function applyLandingPref(val, skipSync){
     landingChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
       b.classList.toggle('active', b.dataset.value === val);
     });
     try{ window.localStorage.setItem('shwoopnet:landingPref', val); }catch(e){}
+    if(!skipSync) syncUserSetting('landingPref', val);
   }
   landingChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
     b.addEventListener('click', function(){ applyLandingPref(b.dataset.value); });
@@ -8325,12 +8403,13 @@
 
   // ---------- Settings: clock format ----------
   var clockFormatEl = document.getElementById('clockFormatChoice');
-  function applyClockFormat(val){
+  function applyClockFormat(val, skipSync){
     clockFormatPref = val;
     clockFormatEl.querySelectorAll('.tf-btn').forEach(function(b){
       b.classList.toggle('active', b.dataset.value === val);
     });
     try{ window.localStorage.setItem('shwoopnet:clockFormat', val); }catch(e){}
+    if(!skipSync) syncUserSetting('clockFormat', val);
     updateClock();
   }
   clockFormatEl.querySelectorAll('.tf-btn').forEach(function(b){
@@ -8397,10 +8476,11 @@
 
   // ---------- Settings: sound alerts ----------
   var soundAlertsToggleBtn = document.getElementById('soundAlertsToggle');
-  function applySoundAlertsPref(enabled){
+  function applySoundAlertsPref(enabled, skipSync){
     soundAlertsEnabled = enabled;
     soundAlertsToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
     try{ window.localStorage.setItem('shwoopnet:soundAlerts', enabled ? 'true' : 'false'); }catch(e){}
+    if(!skipSync) syncUserSetting('soundAlerts', enabled);
   }
   soundAlertsToggleBtn.addEventListener('click', function(){
     var enabling = soundAlertsToggleBtn.getAttribute('aria-checked') !== 'true';
@@ -8419,10 +8499,11 @@
   // (rather than just reading the attribute back) purely to wire up the
   // toggle button's own aria-checked state and click handler.
   var darkModeToggleBtn = document.getElementById('darkModeToggle');
-  function applyDarkModePref(dark){
+  function applyDarkModePref(dark, skipSync){
     darkModeToggleBtn.setAttribute('aria-checked', dark ? 'true' : 'false');
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     try{ window.localStorage.setItem('shwoopnet:darkMode', dark ? 'true' : 'false'); }catch(e){}
+    if(!skipSync) syncUserSetting('darkMode', dark);
   }
   darkModeToggleBtn.addEventListener('click', function(){
     applyDarkModePref(darkModeToggleBtn.getAttribute('aria-checked') !== 'true');
@@ -8436,10 +8517,11 @@
 
   // ---------- Settings: reduce motion ----------
   var motionToggleBtn = document.getElementById('motionToggle');
-  function applyMotionPref(reduced){
+  function applyMotionPref(reduced, skipSync){
     motionToggleBtn.setAttribute('aria-checked', reduced ? 'true' : 'false');
     document.documentElement.setAttribute('data-reduce-motion', reduced ? 'true' : 'false');
     try{ window.localStorage.setItem('shwoopnet:reduceMotion', reduced ? 'true' : 'false'); }catch(e){}
+    if(!skipSync) syncUserSetting('reduceMotion', reduced);
   }
   motionToggleBtn.addEventListener('click', function(){
     applyMotionPref(motionToggleBtn.getAttribute('aria-checked') !== 'true');
@@ -8452,10 +8534,11 @@
 
   // ---------- Settings: ticker tape on/off ----------
   var tickerToggleBtn = document.getElementById('tickerToggle');
-  function applyTickerPref(enabled){
+  function applyTickerPref(enabled, skipSync){
     tickerToggleBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
     document.getElementById('tickerTape').style.display = enabled ? '' : 'none';
     try{ window.localStorage.setItem('shwoopnet:tickerEnabled', enabled ? 'true' : 'false'); }catch(e){}
+    if(!skipSync) syncUserSetting('tickerEnabled', enabled);
   }
   tickerToggleBtn.addEventListener('click', function(){
     applyTickerPref(tickerToggleBtn.getAttribute('aria-checked') !== 'true');
@@ -8474,7 +8557,7 @@
   var TICKER_BASE_SECONDS = 38;
   var TICKER_SPEEDS = ['25', '50', '75', '100'];
   var tickerSpeedEl = document.getElementById('tickerSpeedChoice');
-  function applyTickerSpeedPref(val){
+  function applyTickerSpeedPref(val, skipSync){
     // An unrecognised stored value (an older build, a hand-edited
     // localStorage) falls back to full speed rather than dividing by NaN
     // and leaving the tape frozen with no visible cause.
@@ -8517,6 +8600,7 @@
     if(track) track.style.animationDelay = (-progress * seconds).toFixed(2) + 's';
 
     try{ window.localStorage.setItem('shwoopnet:tickerSpeed', val); }catch(e){}
+    if(!skipSync) syncUserSetting('tickerSpeed', val);
   }
   tickerSpeedEl.querySelectorAll('.tf-btn').forEach(function(b){
     b.addEventListener('click', function(){ applyTickerSpeedPref(b.dataset.value); });
@@ -8578,8 +8662,9 @@
     }catch(e){}
   }
 
-  function saveToCardPrefs(){
+  function saveToCardPrefs(skipSync){
     try{ window.localStorage.setItem('shwoopnet:toCards', JSON.stringify(toCardPrefs)); }catch(e){}
+    if(!skipSync) syncUserSetting('toCards', toCardPrefs, 300);
   }
 
   // Re-appends each wrapped card, in preference order, to the end of
@@ -8760,6 +8845,7 @@
     try{ area.value = window.localStorage.getItem('shwoopnet:notepad') || ''; }catch(e){}
     area.addEventListener('input', function(){
       try{ window.localStorage.setItem('shwoopnet:notepad', area.value); }catch(e){}
+      syncUserSetting('notepad', area.value, 500);
     });
   })();
 
@@ -8921,6 +9007,116 @@
   window.addEventListener('resize', function(){
     if(!notepadPanel.hasAttribute('hidden')){ clampNotepadPosition(); }
   });
+
+  // ---------- Account-synced settings: remote apply + first-sync adoption ----------
+  // Tracks which uid an adoption write is currently in flight for, so a
+  // second snapshot arriving before that write round-trips back (the doc
+  // still shows no `settings` field yet) doesn't fire a second, redundant
+  // adopt. Reset to null once a real settings object comes back, and on
+  // sign-out below.
+  var userSettingsAdoptionInFlight = null;
+
+  // First time this account's doc has no `settings` field at all -- a
+  // pre-existing browser-only user's very first sign-in after this
+  // shipped, or a brand new account -- adopt whatever this browser
+  // already has (already applied to the UI by the localStorage-driven
+  // init calls above) into the account doc, rather than the account
+  // silently resetting every preference to default the moment sync
+  // exists. Reads the live, already-applied in-memory state rather than
+  // localStorage directly, since that's exactly what the page is
+  // currently showing.
+  function adoptLocalSettingsIntoAccount(){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var notepadVal = '';
+    try{ notepadVal = document.getElementById('notepadArea').value || ''; }catch(e){}
+    var storedTickerSpeed = '100';
+    try{ storedTickerSpeed = window.localStorage.getItem('shwoopnet:tickerSpeed') || '100'; }catch(e){}
+    var storedLandingPref = 'auto';
+    try{ storedLandingPref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
+    var snapshot = {
+      darkMode: document.documentElement.getAttribute('data-theme') === 'dark',
+      reduceMotion: motionToggleBtn.getAttribute('aria-checked') === 'true',
+      tickerEnabled: tickerToggleBtn.getAttribute('aria-checked') === 'true',
+      tickerSpeed: storedTickerSpeed,
+      clockFormat: clockFormatPref || '24',
+      soundAlerts: soundAlertsEnabled,
+      landingPref: storedLandingPref,
+      growthChartRange: growthChartRange,
+      alpacaDockHiddenCols: ALPACA_DOCK_HIDDEN_COLS,
+      alpacaDockSort: alpacaDockSort,
+      statusPositionsHiddenCols: STATUS_POSITIONS_HIDDEN_COLS,
+      activityLogHiddenGroups: activityLogHiddenGroups,
+      toCards: toCardPrefs,
+      notepad: notepadVal
+    };
+    window.__shwoopAPI.saveUserSettings(currentUid, snapshot).catch(function(err){
+      console.error('Failed to adopt local settings into account:', err);
+      userSettingsAdoptionInFlight = null; // allow a retry on the next snapshot
+    });
+  }
+
+  // Called from the same shared watchUserDoc snapshot as journalEntries
+  // etc. (see onAuthChange below). Every applyXPref call here passes
+  // skipSync=true -- these values just arrived FROM the account doc, so
+  // writing them straight back would be a pointless round trip (and, if
+  // it happened before the debounce on the write path settled, a real
+  // race).
+  function handleUserSettingsDocUpdate(data){
+    var shaped = window.__shwoopAPI ? window.__shwoopAPI.shapeUserSettings(data) : null;
+    if(!shaped){
+      if(userSettingsAdoptionInFlight !== currentUid){
+        userSettingsAdoptionInFlight = currentUid;
+        adoptLocalSettingsIntoAccount();
+      }
+      return;
+    }
+    userSettingsAdoptionInFlight = null;
+
+    applyLandingPref(shaped.landingPref, true);
+    applyClockFormat(shaped.clockFormat, true);
+    applySoundAlertsPref(shaped.soundAlerts, true);
+    var dark = shaped.darkMode !== null ? shaped.darkMode
+      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyDarkModePref(dark, true);
+    applyMotionPref(shaped.reduceMotion, true);
+    applyTickerPref(shaped.tickerEnabled, true);
+    applyTickerSpeedPref(shaped.tickerSpeed, true);
+
+    growthChartRange = shaped.growthChartRange;
+    try{ window.localStorage.setItem('shwoopnet:growthChartRange', growthChartRange); }catch(e){}
+
+    ALPACA_DOCK_HIDDEN_COLS = shaped.alpacaDockHiddenCols;
+    saveAlpacaDockHiddenCols(true);
+    alpacaDockSort = shaped.alpacaDockSort;
+    try{ window.localStorage.setItem('shwoopnet:alpacaDockSort', alpacaDockSort); }catch(e){}
+    applyAlpacaDockControlsUI();
+    renderAlpacaDock();
+
+    STATUS_POSITIONS_HIDDEN_COLS = shaped.statusPositionsHiddenCols;
+    saveStatusPositionsHiddenCols(true);
+
+    activityLogHiddenGroups = shaped.activityLogHiddenGroups;
+    saveActivityLogFilterPrefs(true);
+
+    if(shaped.toCards && Array.isArray(shaped.toCards.order)){
+      // Same rebuild-from-current-defaults guard as loadToCardPrefs, so a
+      // synced order from before a card was added/renamed can't drop the
+      // new card or leave a dangling key.
+      var order = shaped.toCards.order.filter(function(k){ return DEFAULT_TO_CARD_ORDER.indexOf(k) > -1; });
+      DEFAULT_TO_CARD_ORDER.forEach(function(k){ if(order.indexOf(k) === -1) order.push(k); });
+      toCardPrefs.order = order;
+      toCardPrefs.hidden = (shaped.toCards.hidden && typeof shaped.toCards.hidden === 'object') ? shaped.toCards.hidden : {};
+      saveToCardPrefs(true);
+      applyToCardLayout();
+      renderCardCustomizeList();
+    }
+
+    var notepadArea = document.getElementById('notepadArea');
+    if(notepadArea && notepadArea.value !== shaped.notepad){
+      notepadArea.value = shaped.notepad;
+      try{ window.localStorage.setItem('shwoopnet:notepad', shaped.notepad); }catch(e){}
+    }
+  }
 
   // ---------- Trade Journal (calendar + logged trades, synced via Firebase) ----------
   var journalEntries = [];
@@ -10083,6 +10279,7 @@
       btn.addEventListener('click', function(){
         growthChartRange = btn.dataset.range;
         try{ window.localStorage.setItem('shwoopnet:growthChartRange', growthChartRange); }catch(e){}
+        syncUserSetting('growthChartRange', growthChartRange);
         renderGrowthChartRanges(allTrades);
         renderGrowthChart(buildGrowthSeries(tradesWithinRange(allTrades, growthChartRange)));
       });
@@ -11908,8 +12105,9 @@
       if(saved && typeof saved === 'object') STATUS_POSITIONS_HIDDEN_COLS = saved;
     }catch(e){}
   })();
-  function saveStatusPositionsHiddenCols(){
+  function saveStatusPositionsHiddenCols(skipSync){
     try{ window.localStorage.setItem('shwoopnet:statusPositionsHiddenCols', JSON.stringify(STATUS_POSITIONS_HIDDEN_COLS)); }catch(e){}
+    if(!skipSync) syncUserSetting('statusPositionsHiddenCols', STATUS_POSITIONS_HIDDEN_COLS);
   }
   function visibleStatusPositionsColumns(){
     return STATUS_POSITIONS_COLUMNS.filter(function(col){ return col.key === 'sym' || !STATUS_POSITIONS_HIDDEN_COLS[col.key]; });
@@ -12476,8 +12674,9 @@
       saveActivityLogFilterPrefs();
     }
   }
-  function saveActivityLogFilterPrefs(){
+  function saveActivityLogFilterPrefs(skipSync){
     try{ window.localStorage.setItem('shwoopnet:activityLogHiddenGroups', JSON.stringify(activityLogHiddenGroups)); }catch(e){}
+    if(!skipSync) syncUserSetting('activityLogHiddenGroups', activityLogHiddenGroups);
   }
 
   // Renders into every filter-list container that exists on the page --
@@ -13246,6 +13445,7 @@
           handleScreenerDocUpdate(data);
           handleAlpacaCredentialsDocUpdate(data);
           handleTradingPauseDocUpdate(data);
+          handleUserSettingsDocUpdate(data);
         });
         // News/earnings and index-and-watchlist quotes now come from the
         // one shared/marketSnapshot document shwoop-server computes on
@@ -13266,6 +13466,7 @@
         startRealQuoteLoop();
       } else {
         currentUid = null;
+        userSettingsAdoptionInFlight = null;
         currentUserIsAdmin = false;
         applyAdminUI();
         journalEntries = [];
