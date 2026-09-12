@@ -1020,11 +1020,6 @@
   }
   .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; transition: transform .15s ease; }
   .chevron:hover{ color: var(--amber); }
-  /* expandTradeCard/collapseTradeCard already set aria-expanded and
-     add/remove this class correctly -- this rotation was the one
-     missing piece, so the arrow never visually reflected open/closed
-     state despite the underlying toggle working. */
-  .chevron.expanded{ transform: rotate(90deg); }
   .t-sym-cell{ display:flex; align-items:center; gap:10px; }
   .t-sym-badge{
     width:32px; height:32px; border-radius:9px; flex-shrink:0;
@@ -1065,6 +1060,52 @@
     padding: 16px 16px 18px 16px; border-top:1px solid var(--border);
   }
   .trade-detail[hidden]{ display:none; }
+
+  /* ---------- Trade detail modal ---------- */
+  .trade-modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:260;
+    animation: tradeModalFadeIn .15s ease-out both;
+  }
+  .trade-modal-backdrop[hidden]{ display:none; }
+  .trade-modal{
+    position:fixed; z-index:261; top:50%; left:50%;
+    transform: translate(-50%, -50%);
+    width:min(920px, calc(100vw - 32px)); max-height: calc(100vh - 64px);
+    overflow-y:auto; background: var(--panel); border:1px solid var(--border);
+    border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    padding:20px 22px 22px; animation: tradeModalIn .18s cubic-bezier(.2,.9,.3,1.1) both;
+  }
+  .trade-modal[hidden]{ display:none; }
+  @keyframes tradeModalFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes tradeModalIn{
+    from{ opacity:0; transform: translate(-50%, -50%) scale(.96) translateY(8px); }
+    to{ opacity:1; transform: translate(-50%, -50%) scale(1) translateY(0); }
+  }
+  /* The reduce-motion overrides for .trade-modal live in the single
+     consolidated @media (prefers-reduced-motion: reduce) block further
+     down (see motionHonestyGates.test.js's G3) and the matching
+     [data-reduce-motion="true"] rules next to it, not a second block
+     here -- see the ambient-background CSS above for why a second block
+     with the same query silently breaks that test's regex-based check. */
+  .trade-modal-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:14px; }
+  .trade-modal-close{
+    background:none; border:1px solid var(--border); color: var(--muted);
+    width:30px; height:30px; border-radius:6px; font-size:18px; line-height:1;
+    cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  }
+  .trade-modal-close:hover{ border-color: var(--amber-dim); color: var(--paper); }
+  .trade-modal-prices{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap:12px;
+    padding:14px 16px; margin-bottom:16px; background: var(--panel-raised); border-radius: var(--radius);
+  }
+  .trade-modal-price-cell .backtest-stat-label{ margin-bottom:3px; }
+  .trade-modal-body{ display:flex; gap:22px; flex-wrap:wrap; }
+  .trade-modal-chart-col{ flex: 2 1 480px; min-width:0; }
+  .trade-modal-body .trade-notes-col{ flex: 1 1 260px; min-width:0; }
+  @media (max-width: 700px){
+    .trade-modal{ padding:16px; }
+    .trade-modal-body{ flex-direction:column; }
+  }
   .trade-chart-col{ width:100%; }
   .trade-notes-col{ width:100%; }
   .trade-notes-toggle{
@@ -1533,6 +1574,8 @@
     padding:14px 18px; margin-bottom:12px; box-shadow: var(--card-shadow); font-size:12.5px;
   }
   .journal-entry-card:last-child{ margin-bottom:0; }
+  .journal-entry-card-clickable{ cursor:pointer; transition: border-color .15s ease; }
+  .journal-entry-card-clickable:hover{ border-color: var(--amber-dim); }
   .journal-entry-card .t-sym-cell{ flex:1 1 200px; }
   .journal-source-tag{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.04em; color: var(--amber);
@@ -1641,9 +1684,12 @@
     .position-close-btn{ transition: none; }
     .position-close-btn:active{ transform: none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
+    .trade-modal-backdrop, .trade-modal{ animation: none; }
   }
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
+  [data-reduce-motion="true"] .trade-modal-backdrop,
+  [data-reduce-motion="true"] .trade-modal{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
@@ -2201,6 +2247,36 @@
 
   <div class="history-backdrop" id="historyBackdrop" hidden></div>
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Trade detail modal -- REPLACES the old inline chevron-expand (a
+       .trade-detail div that grew below the row) for every trade card
+       app-wide (Equities/Crypto Setups, Journal day-detail rows), rather
+       than each surface keeping its own copy. One instance, reused: only
+       ever one trade's detail is worth looking at at a time, and a single
+       shared modal is what makes Journal rows (which never had a
+       chart/notes view before) free to wire up the exact same way Setups
+       already did, instead of duplicating the whole apparatus a second
+       time for a second surface. -->
+  <div class="trade-modal-backdrop" id="tradeModalBackdrop" hidden></div>
+  <div class="trade-modal" id="tradeModal" hidden role="dialog" aria-modal="true" aria-labelledby="tradeModalSym">
+    <div class="trade-modal-head">
+      <div class="t-sym-cell" id="tradeModalSymCell"></div>
+      <button class="trade-modal-close" id="tradeModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="trade-modal-prices" id="tradeModalPrices"></div>
+    <div class="trade-modal-body">
+      <div class="trade-modal-chart-col" id="tradeModalChartCol">
+        <div class="chart-canvas-wrap">
+          <svg class="trade-chart" id="tradeModalChart" viewBox="0 0 760 240" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="labs-backtest-status" id="tradeModalChartStatus" hidden></div>
+      </div>
+      <div class="trade-notes-col">
+        <h3>Why this trade</h3>
+        <ul class="trade-notes-list" id="tradeModalNotes"></ul>
+      </div>
+    </div>
+  </div>
 
   <div class="history-sidebar" id="historySidebar" hidden>
     <div class="history-sidebar-head">
@@ -6026,31 +6102,14 @@
   // actually qualified. Shows only non-Watching setups (Active, Trailing,
   // Stopped, Target hit) until toggled open to the full universe.
   var todaysSetupsShowAll = false;
-  // The array actually rendered this pass -- referenced by the chevron
-  // click handler below so it looks up chart data from whichever source
-  // (backend or local) was actually shown, not always intradayTrades.
+  // The array actually rendered this pass -- referenced by openSetupTradeModal
+  // below so it looks up chart data from whichever source (backend or
+  // local) was actually shown, not always intradayTrades. No more per-symbol
+  // expanded/collapsed bookkeeping here -- the trade detail modal (see
+  // openTradeModal) is a single shared instance opened fresh on each click,
+  // not per-row state that a render rebuild could silently collapse.
   var lastRenderedSetups = [];
-  // renderIntradayBlocks rebuilds el.innerHTML from scratch on every call
-  // (the quote loop, journal changes, and screener updates all trigger
-  // it, independent of anything the user is doing) -- every card's chart
-  // starts back at hidden in that fresh HTML, so without tracking which
-  // symbols were manually expanded, an open chart would silently
-  // collapse on the very next automatic refresh, sometimes within
-  // seconds. Persisted across renders and re-applied after each rebuild.
-  var expandedTradeSyms = {};
-  // Same two roles as lastRenderedSetups/expandedTradeSyms above, kept as
-  // separate objects rather than shared with the equities ones -- Crypto
-  // Setups renders into its own #cryptoBlocks container on its own
-  // schedule, and reusing the same expandedTradeSyms would make each
-  // card type's render pass wrongly evict the OTHER type's expanded
-  // symbols during its own "no longer rendered, stop tracking" cleanup.
   var lastRenderedCryptoSetups = [];
-  var expandedCryptoTradeSyms = {};
-  // Whether a card's "Why this trade" notes are collapsed -- shared
-  // across both card types (unlike the expanded-chart maps above) since
-  // there's no per-type cleanup logic here to worry about evicting the
-  // wrong type's entries, and symbols are disjoint between them anyway.
-  var notesCollapsedSyms = {};
   // Guards the async Alpaca-position patch below against a slow, stale
   // response landing after a newer render already happened.
   var intradayPLPatchGen = 0;
@@ -6408,7 +6467,7 @@
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
-            '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
+            '<button class="chevron" data-toggle="' + t.sym + '" aria-label="View trade details">›</button>' +
             '<div class="t-sym-cell">' +
               symbolBadgeHtml(t.sym) +
               '<span class="t-sym-text">' +
@@ -6429,65 +6488,13 @@
             plCellHtml +
           '</div>' +
           tradeProgressHtml(t.direction, q.price, t.entry, t.stop, t.t1) +
-          '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
-            '<div class="trade-chart-col">' +
-              '<div class="chart-canvas-wrap">' +
-                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 240" preserveAspectRatio="none"></svg>' +
-                '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="trade-notes-col">' +
-              '<button class="trade-notes-toggle' + (notesCollapsedSyms[t.sym] ? ' collapsed' : '') + '" type="button" data-notes-toggle="' + t.sym + '" aria-expanded="' + (notesCollapsedSyms[t.sym] ? 'false' : 'true') + '">' +
-                '<h3>Why this trade</h3><span class="trade-notes-chevron">⌄</span>' +
-              '</button>' +
-              '<ul class="trade-notes-list" id="notes-' + t.sym + '"' + (notesCollapsedSyms[t.sym] ? ' hidden' : '') + '>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
-            '</div>' +
-          '</div>' +
         '</div>';
     }).join('');
 
     patchIntradayPLWithAlpacaPositions();
 
     el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.toggle;
-        var detail = document.getElementById('chartwrap-' + sym);
-        if(!detail) return;
-        if(detail.hasAttribute('hidden')){
-          expandedTradeSyms[sym] = true;
-          expandTradeCard(sym, detail, btn);
-        } else {
-          delete expandedTradeSyms[sym];
-          collapseTradeCard(detail, btn);
-        }
-      });
-    });
-
-    el.querySelectorAll('.trade-notes-toggle').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.notesToggle;
-        var collapsed = !notesCollapsedSyms[sym];
-        notesCollapsedSyms[sym] = collapsed;
-        var list = document.getElementById('notes-' + sym);
-        if(list) list.hidden = collapsed;
-        btn.classList.toggle('collapsed', collapsed);
-        btn.setAttribute('aria-expanded', String(!collapsed));
-      });
-    });
-
-    // Re-applies expanded state that survived from before this render --
-    // otherwise every periodic refresh (quote loop, journal change,
-    // screener update) silently closes whatever the user had open.
-    Object.keys(expandedTradeSyms).forEach(function(sym){
-      var detail = document.getElementById('chartwrap-' + sym);
-      var btn = el.querySelector('.chevron[data-toggle="' + sym + '"]');
-      if(!detail || !btn){
-        // No longer rendered this pass (setup dropped out entirely) --
-        // don't keep it marked expanded for a card that doesn't exist.
-        delete expandedTradeSyms[sym];
-        return;
-      }
-      expandTradeCard(sym, detail, btn);
+      btn.addEventListener('click', function(){ openSetupTradeModal(btn.dataset.toggle); });
     });
   }
 
@@ -6575,7 +6582,7 @@
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
-            '<button class="chevron" data-toggle="' + t.sym + '" aria-expanded="false" aria-label="Toggle chart">›</button>' +
+            '<button class="chevron" data-toggle="' + t.sym + '" aria-label="View trade details">›</button>' +
             '<div class="t-sym-cell">' +
               symbolBadgeHtml(t.sym) +
               '<span class="t-sym-text">' +
@@ -6595,130 +6602,200 @@
             plCellHtml +
           '</div>' +
           tradeProgressHtml(t.direction, q.price, t.entry, t.stop, t.t1) +
-          '<div class="trade-detail" id="chartwrap-' + t.sym + '" hidden>' +
-            '<div class="trade-chart-col">' +
-              '<div class="chart-canvas-wrap">' +
-                '<svg class="trade-chart" id="chart-' + t.sym + '" viewBox="0 0 760 240" preserveAspectRatio="none"></svg>' +
-                '<div class="chart-crosshair-readout" id="crosshair-' + t.sym + '" hidden></div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="trade-notes-col">' +
-              '<button class="trade-notes-toggle' + (notesCollapsedSyms[t.sym] ? ' collapsed' : '') + '" type="button" data-notes-toggle="' + t.sym + '" aria-expanded="' + (notesCollapsedSyms[t.sym] ? 'false' : 'true') + '">' +
-                '<h3>Why this trade</h3><span class="trade-notes-chevron">⌄</span>' +
-              '</button>' +
-              '<ul class="trade-notes-list" id="notes-' + t.sym + '"' + (notesCollapsedSyms[t.sym] ? ' hidden' : '') + '>' + notesForDisplay.map(function(n){ return '<li>' + n + '</li>'; }).join('') + '</ul>' +
-            '</div>' +
-          '</div>' +
         '</div>';
     }).join('');
 
     patchIntradayPLWithAlpacaPositions();
 
     el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.toggle;
-        var detail = document.getElementById('chartwrap-' + sym);
-        if(!detail) return;
-        if(detail.hasAttribute('hidden')){
-          expandedCryptoTradeSyms[sym] = true;
-          expandTradeCard(sym, detail, btn);
-        } else {
-          delete expandedCryptoTradeSyms[sym];
-          collapseTradeCard(detail, btn);
-        }
-      });
-    });
-
-    el.querySelectorAll('.trade-notes-toggle').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var sym = btn.dataset.notesToggle;
-        var collapsed = !notesCollapsedSyms[sym];
-        notesCollapsedSyms[sym] = collapsed;
-        var list = document.getElementById('notes-' + sym);
-        if(list) list.hidden = collapsed;
-        btn.classList.toggle('collapsed', collapsed);
-        btn.setAttribute('aria-expanded', String(!collapsed));
-      });
-    });
-
-    // Same re-apply-expanded-state treatment as renderIntradayBlocks --
-    // this container's innerHTML is fully rebuilt every render, which
-    // would otherwise silently re-collapse a chart the user had open.
-    Object.keys(expandedCryptoTradeSyms).forEach(function(sym){
-      var detail = document.getElementById('chartwrap-' + sym);
-      var btn = el.querySelector('.chevron[data-toggle="' + sym + '"]');
-      if(!detail || !btn){
-        delete expandedCryptoTradeSyms[sym];
-        return;
-      }
-      expandTradeCard(sym, detail, btn);
+      btn.addEventListener('click', function(){ openSetupTradeModal(btn.dataset.toggle); });
     });
   }
 
-  function expandTradeCard(sym, detail, btn){
-    detail.removeAttribute('hidden');
-    btn.setAttribute('aria-expanded', 'true');
-    btn.classList.add('expanded');
-    // Chart rendering deliberately deferred until the card is actually
-    // expanded, not rendered into every hidden card up front --
-    // rendering into a zero-dimension hidden SVG produces a broken
-    // chart, and most cards are never opened.
-    // Shared lookup across both card types -- symbols are disjoint
-    // between the two (a crypto pair always contains "/", an equities
-    // ticker never does), so concatenating is safe.
-    var trade = lastRenderedSetups.concat(lastRenderedCryptoSetups).filter(function(x){ return x.sym === sym; })[0];
-    if(trade){
-      var svg = document.getElementById('chart-' + sym);
-      if(svg && !svg.dataset.rendered){
-        svg.dataset.rendered = '1';
-        // Crypto has no single trading-day session for '1D' to anchor
-        // to -- charted at '15m' instead (its own strategy's native
-        // timeframe), which fetchHistoryFromNetwork routes to Alpaca's
-        // crypto bars rather than Twelve Data.
-        var isCrypto = sym.indexOf('/') > -1;
-        // '1D' fetches a buffer of days but keeps only whichever ONE date
-        // is most recent in that buffer (see fetchHistoryFromNetwork) --
-        // fine for a position opened and (if it's going to close) closed
-        // within the same session, but this strategy explicitly allows
-        // holding across sessions (holdAcrossSessions), and a chart stuck
-        // on one calendar day cannot show a multi-day hold's actual price
-        // action since entry. Confirmed live: a position opened Sep 3
-        // still showing a chart dated Sep 4 days later, because '1D'
-        // never looks further back than "the most recent day it has."
-        // The real journal entry (not the possibly-live-rescanned `trade`
-        // row above, whose entryBarTime can reflect today's fresh signal
-        // rather than this position's actual original entry) is what
-        // decides: if it was opened on an earlier calendar day, chart at
-        // '30m' instead, which spans multiple days and whose date labels
-        // (formatAxisLabel) already handle day boundaries correctly.
-        var openEntryForChart = !isCrypto && journalEntries.filter(function(j){
-          return j.sym === sym && isOpenPositionForCurrentAccount(j);
-        })[0];
-        var entryDay = openEntryForChart && openEntryForChart.entryBarTime
-          ? new Date(firestoreMillis(openEntryForChart.entryBarTime)) : null;
-        var heldAcrossSessions = entryDay && !isNaN(entryDay.getTime())
-          && entryDay.toDateString() !== new Date().toDateString();
-        var tf = isCrypto ? '15m' : (heldAcrossSessions ? '30m' : '1D');
-        // The live quote, not the entry price -- renderChartInto anchors
-        // the chart's last candle to whatever price this passes in (see
-        // its own comment), so passing trade.entry here made every open
-        // position's chart show its last candle sitting at the ENTRY
-        // price regardless of where the market actually is now, instead
-        // of tracking the real current price the way the row above the
-        // chart already does. Same fallback as that row uses: trade.entry
-        // only for the brief window before the first quote resolves.
-        var liveQuote = isCrypto ? findCryptoQuote(sym) : findQuote(sym);
-        var basePrice = (liveQuote && liveQuote.price != null) ? liveQuote.price : trade.entry;
-        renderChartInto(svg, sym, basePrice, tf);
-        setupChartInteractivity(sym);
-      }
+  // ---------- Trade detail modal ----------
+  // Replaces the old per-row inline chevron-expand (expandTradeCard/
+  // collapseTradeCard, one .trade-detail div grown below each row) with a
+  // single shared modal, opened from Setups (Equities/Crypto) AND from
+  // Journal's day-detail rows -- the latter never had a chart/notes view
+  // at all before this. One chart target (#tradeModalChart), one notes
+  // list, populated fresh on each open; nothing about it is per-symbol
+  // state that needs tracking across renders the way the old per-row
+  // expanded/collapsed bookkeeping did.
+  var tradeModalBackdrop = document.getElementById('tradeModalBackdrop');
+  var tradeModalEl = document.getElementById('tradeModal');
+  // Bumped on every open/close so an in-flight historical-bars fetch that
+  // resolves after the modal has already moved on to a different trade
+  // (or closed) can tell it's stale and drop itself instead of painting a
+  // chart into a chart element that now belongs to someone else.
+  var tradeModalOpenToken = 0;
+
+  function tradeModalPriceCell(label, value, cls){
+    return '<div class="trade-modal-price-cell"><div class="backtest-stat-label">' + label + '</div>' +
+      '<div class="backtest-stat-value mono' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+  }
+
+  // descriptor shape (see the two call sites -- Setups rows and Journal
+  // day-detail rows -- for how each fills this in from what they already
+  // have on hand):
+  //   sym, direction, status (badge label), notes (array of strings)
+  //   entry, stop, target -- null is fine, rendered as "--"
+  //   pl: { dollar, pct } | null -- null renders "--", never a fake $0
+  //   chart: { kind:'live', isCrypto, tf, basePrice }
+  //        | { kind:'historical', isCrypto, entryTime, exitTime }
+  //        | { kind:'none', reason } -- e.g. options: no share price to chart
+  function openTradeModal(d){
+    tradeModalOpenToken++;
+    var myToken = tradeModalOpenToken;
+    document.getElementById('tradeModalSymCell').innerHTML =
+      symbolBadgeHtml(d.sym) +
+      '<span class="t-sym-text"><span class="t-sym mono">' + escapeHtml(d.sym) +
+        (d.direction ? '<span class="t-dir">' + escapeHtml(d.direction) + '</span>' : '') +
+        (d.status ? '<span class="status-badge ' + (d.statusCls || 'watching') + '">' + escapeHtml(d.status) + '</span>' : '') +
+      '</span></span>';
+    var plCls = d.pl == null ? '' : (d.pl.dollar >= 0 ? 'up' : 'down');
+    var plText = d.pl == null ? '—' : (d.pl.dollar >= 0 ? '+' : '−') + '$' + Math.abs(d.pl.dollar).toFixed(2) +
+      (d.pl.pct != null ? ' (' + (d.pl.pct >= 0 ? '+' : '') + d.pl.pct.toFixed(1) + '%)' : '');
+    document.getElementById('tradeModalPrices').innerHTML =
+      tradeModalPriceCell('Entry', d.entry != null ? fmt(d.entry) : '—') +
+      (d.stop != null ? tradeModalPriceCell('Stop', fmt(d.stop), 'down') : '') +
+      (d.target != null ? tradeModalPriceCell('Target', fmt(d.target), 'up') : '') +
+      tradeModalPriceCell('P/L', plText, plCls);
+    var notesEl = document.getElementById('tradeModalNotes');
+    notesEl.innerHTML = (d.notes && d.notes.length)
+      ? d.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('')
+      : '<li>No recorded reasoning for this trade.</li>';
+
+    var chartCol = document.getElementById('tradeModalChartCol');
+    var statusEl = document.getElementById('tradeModalChartStatus');
+    statusEl.setAttribute('hidden', '');
+    // Always a fresh <svg> node, not the same one reused across opens.
+    // The live path below needs the element's id to literally be
+    // 'chart-<sym>' -- renderChartView/zoomChart/setupChartInteractivity
+    // all look it up that way, unchanged from how each Setups row's own
+    // inline chart used to work -- and setupChartInteractivity guards
+    // against double-wiring by checking svg.dataset.wired on the DOM
+    // node itself, not by symbol. Reusing one physical node across two
+    // DIFFERENT symbols would leave the FIRST symbol's drag/zoom
+    // listeners attached (closures bound to that sym) and skip wiring
+    // the second entirely, since the node already reads "wired". A fresh
+    // clone (no dataset, no listeners) each open avoids that outright.
+    var oldSvg = document.getElementById('tradeModalChart');
+    var svg = oldSvg.cloneNode(false);
+    oldSvg.parentNode.replaceChild(svg, oldSvg);
+    // Historical (closed-trade) renders are static -- no live polling, no
+    // drag/zoom state to carry across re-renders the way an OPEN
+    // position's chart needs (see chartStates) -- so a fresh, unkeyed
+    // draw is correct here and simpler than routing a one-shot render
+    // through the same interactive per-symbol state store.
+    if(d.chart.kind === 'none'){
+      svg.id = 'tradeModalChart';
+      chartCol.hidden = true;
+    } else if(d.chart.kind === 'live'){
+      svg.id = 'chart-' + d.sym;
+      chartCol.hidden = false;
+      // No levels/opts param here on purpose -- renderChartView derives
+      // entry/stop/target itself from journalEntries/intradayTrades by
+      // symbol, exactly as it already does for every Setups row's own
+      // inline chart. Passing them again here would just be a second,
+      // possibly-stale copy of the same numbers.
+      renderChartInto(svg, d.sym, d.chart.basePrice, d.chart.tf);
+      setupChartInteractivity(d.sym);
+    } else if(d.chart.kind === 'historical'){
+      svg.id = 'tradeModalChart';
+      chartCol.hidden = false;
+      statusEl.removeAttribute('hidden');
+      statusEl.classList.add('is-loading-shimmer');
+      statusEl.textContent = 'Loading historical price data…';
+      fetchHistoricalRangeBars(d.sym, d.chart.isCrypto, d.chart.entryTime, d.chart.exitTime)
+        .then(function(bars){
+          if(myToken !== tradeModalOpenToken) return; // modal moved on -- drop this
+          statusEl.setAttribute('hidden', '');
+          statusEl.classList.remove('is-loading-shimmer');
+          drawCandles(svg, bars.data, 'linear', 1, bars.tf, {
+            levels: { entry: d.entry, stop: d.stop, target: d.target, entryBarTime: d.chart.entryTime },
+          });
+        })
+        .catch(function(err){
+          if(myToken !== tradeModalOpenToken) return;
+          console.error('Historical chart fetch failed for', d.sym, err);
+          statusEl.removeAttribute('hidden');
+          statusEl.classList.remove('is-loading-shimmer');
+          statusEl.textContent = 'Couldn\'t load historical price data for this trade.';
+        });
     }
+
+    tradeModalBackdrop.removeAttribute('hidden');
+    tradeModalEl.removeAttribute('hidden');
   }
 
-  function collapseTradeCard(detail, btn){
-    detail.setAttribute('hidden', '');
-    btn.setAttribute('aria-expanded', 'false');
-    btn.classList.remove('expanded');
+  function closeTradeModal(){
+    tradeModalOpenToken++; // invalidate any in-flight historical fetch
+    tradeModalBackdrop.setAttribute('hidden', '');
+    tradeModalEl.setAttribute('hidden', '');
+  }
+  document.getElementById('tradeModalClose').addEventListener('click', closeTradeModal);
+  tradeModalBackdrop.addEventListener('click', closeTradeModal);
+
+  // Builds the SAME live-chart descriptor expandTradeCard used to compute
+  // (timeframe choice, live-quote-anchored base price) -- unchanged logic,
+  // just handed to the shared modal instead of an inline expand.
+  function liveChartDescriptorFor(sym, entryForFallback){
+    var isCrypto = sym.indexOf('/') > -1;
+    // '1D' fetches a buffer of days but keeps only whichever ONE date is
+    // most recent in that buffer (see fetchHistoryFromNetwork) -- fine for
+    // a position opened and (if it's going to close) closed within the
+    // same session, but this strategy explicitly allows holding across
+    // sessions (holdAcrossSessions), and a chart stuck on one calendar day
+    // cannot show a multi-day hold's actual price action since entry.
+    var openEntryForChart = !isCrypto && journalEntries.filter(function(j){
+      return j.sym === sym && isOpenPositionForCurrentAccount(j);
+    })[0];
+    var entryDay = openEntryForChart && openEntryForChart.entryBarTime
+      ? new Date(firestoreMillis(openEntryForChart.entryBarTime)) : null;
+    var heldAcrossSessions = entryDay && !isNaN(entryDay.getTime())
+      && entryDay.toDateString() !== new Date().toDateString();
+    var tf = isCrypto ? '15m' : (heldAcrossSessions ? '30m' : '1D');
+    // The live quote, not the entry price -- renderChartInto anchors the
+    // chart's last candle to whatever price this passes in. trade.entry
+    // is only the fallback for the brief window before the first quote
+    // resolves.
+    var liveQuote = isCrypto ? findCryptoQuote(sym) : findQuote(sym);
+    var basePrice = (liveQuote && liveQuote.price != null) ? liveQuote.price : entryForFallback;
+    return { kind: 'live', isCrypto: isCrypto, tf: tf, basePrice: basePrice };
+  }
+
+  // Opens the shared trade detail modal for a Setups row (Equities or
+  // Crypto -- symbols are disjoint between the two, same as the old
+  // expandTradeCard's lookup). Recomputes from live state rather than
+  // reading anything cached from the row's own render pass, same
+  // principle expandTradeCard already followed: this can be clicked long
+  // after the row that triggered it was rebuilt by the next poll.
+  function openSetupTradeModal(sym){
+    var t = lastRenderedSetups.concat(lastRenderedCryptoSetups).filter(function(x){ return x.sym === sym; })[0];
+    if(!t) return;
+    var isCrypto = sym.indexOf('/') > -1;
+    var liveQuote = isCrypto ? findCryptoQuote(sym) : findQuote(sym);
+    var hasLiveQuote = !!(liveQuote && liveQuote.price != null);
+    var badge = computeBadgeInfo(t);
+    var openEntry = journalEntries.filter(function(j){ return j.sym === sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
+    var pl = null;
+    if(openEntry && hasLiveQuote){
+      var isLong = openEntry.direction === 'Long';
+      pl = {
+        dollar: (liveQuote.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1),
+        pct: (liveQuote.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1),
+      };
+    }
+    // Same entry-notes-pinned-at-entry rule as the row itself uses (see
+    // its own comment): once a position is open, "Why this trade" shows
+    // what was true AT ENTRY, not the live pick's current re-analysis.
+    var notes = (openEntry && Array.isArray(openEntry.entryNotes) && openEntry.entryNotes.length)
+      ? openEntry.entryNotes : t.notes;
+    openTradeModal({
+      sym: sym, direction: t.direction, status: badge.label, statusCls: badge.cls,
+      entry: t.entry, stop: t.stop, target: t.t1, pl: pl, notes: notes,
+      chart: liveChartDescriptorFor(sym, t.entry),
+    });
   }
 
   // ---------- Candlestick rendering (zoomable/pannable, TV-style) ----------
@@ -7094,6 +7171,84 @@
       historyCache[cacheKey] = { bars: bars, savedAt: Date.now() };
       saveHistoryToStorage(cacheKey, bars);
       return bars;
+    });
+  }
+
+  // Fetches bars covering an arbitrary PAST date range -- entry to exit of
+  // one already-closed trade -- for the trade detail modal's historical
+  // chart. Deliberately separate from fetchHistory/fetchHistoryFromNetwork
+  // above: those always fetch "the most recent N bars", anchored to now,
+  // which is exactly wrong for a trade that closed weeks ago. Not cached
+  // (fetchHistory's cache key is sym+tf with no date range in it, and
+  // every closed trade needs its own window) and not routed through
+  // fetchHistory's stale-refresh machinery, which only makes sense for a
+  // live, currently-open chart.
+  //
+  // Equities: the Twelve Data proxy already supports `end_date` (added for
+  // the since-removed Labs historical export, see test/server.test.js) --
+  // requesting enough bars to end shortly after the exit, at an interval
+  // sized to the trade's own span, reaches back far enough to include the
+  // entry too without needing a start_date param the proxy has never
+  // supported.
+  // Crypto: fetched directly against Alpaca's own crypto bars endpoint
+  // (same as fetchCryptoHistoryFromNetwork), which DOES take an explicit
+  // `end` alongside `start` -- no proxy involved for crypto at all, same
+  // as the live chart path.
+  function twelveDataDateParam(d){
+    // 'YYYY-MM-DD HH:MM:SS', UTC -- the exact shape the proxy's own test
+    // asserts (test/server.test.js) and Twelve Data's end_date expects.
+    return d.toISOString().slice(0, 19).replace('T', ' ');
+  }
+  function fetchHistoricalRangeBars(sym, isCrypto, entryTime, exitTime){
+    var spanMs = Math.max(0, exitTime.getTime() - entryTime.getTime());
+    var spanDays = spanMs / (24 * 60 * 60 * 1000);
+
+    if(isCrypto){
+      // Alpaca crypto bars: '15Min' for anything up to a few days (this
+      // strategy's actual holds are same-day), '1Day' for anything longer
+      // -- padding the window on both sides so the chart shows a little
+      // price action before the entry and after the exit, not a candle
+      // series that starts and ends exactly at the trade's own edges.
+      var cryptoIntraday = spanDays <= 4;
+      var timeframe = cryptoIntraday ? '15Min' : '1Day';
+      var padMs = cryptoIntraday ? 2 * 60 * 60 * 1000 : 2 * 24 * 60 * 60 * 1000;
+      var startIso = new Date(entryTime.getTime() - padMs).toISOString();
+      var endIso = new Date(Math.min(Date.now(), exitTime.getTime() + padMs)).toISOString();
+      var url = ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + encodeURIComponent(sym) +
+        '&timeframe=' + timeframe + '&start=' + encodeURIComponent(startIso) + '&end=' + encodeURIComponent(endIso) + '&limit=1000';
+      return fetch(url, { headers: alpacaHeaders() }).then(function(res){
+        if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
+        return res.json();
+      }).then(function(data){
+        var page = (data.bars && data.bars[sym]) || [];
+        if(page.length < 2) throw new Error('No usable historical crypto data for ' + sym);
+        var bars = page.map(function(b){
+          return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
+        }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
+        return { data: bars, tf: cryptoIntraday ? '15m' : '1M' };
+      });
+    }
+
+    var intraday = spanDays < 1.5;
+    var mid = !intraday && spanDays < 10;
+    var interval = intraday ? '5min' : mid ? '30min' : '1day';
+    var tfLabel = intraday ? '5m' : mid ? '30m' : '1M'; // '1M' (not intraday): daily bars get date-only axis labels, not time-of-day
+    var outputsize = interval === '1day' ? 260 : 300;
+    var padMs = interval === '1day' ? 2 * 24 * 60 * 60 * 1000 : 2 * 60 * 60 * 1000;
+    var endDate = twelveDataDateParam(new Date(Math.min(Date.now(), exitTime.getTime() + padMs)));
+    var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
+      '&interval=' + interval + '&outputsize=' + outputsize + '&timezone=UTC&end_date=' + encodeURIComponent(endDate);
+    return fetch(url, { headers: twelveDataProxyHeaders() }).then(function(res){
+      if(!res.ok) throw new Error('Twelve Data proxy HTTP ' + res.status);
+      return res.json();
+    }).then(function(data){
+      if(!data || data.status === 'error' || !Array.isArray(data.values) || data.values.length < 2){
+        throw new Error('No usable historical data for ' + sym);
+      }
+      var bars = data.values.map(function(v){
+        return { o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close), vol:parseFloat(v.volume || 0), t:new Date(v.datetime.replace(' ', 'T') + 'Z') };
+      }).reverse();
+      return { data: bars, tf: tfLabel };
     });
   }
 
@@ -9263,6 +9418,7 @@
 
   var calendarViewDate = new Date();
   var selectedJournalDate = null;
+  var lastRenderedJournalDetailEntries = [];
   // Same persist-across-renders treatment as Open Positions' filter --
   // sticks with whatever the user last picked instead of resetting on
   // every journal snapshot update.
@@ -9498,7 +9654,12 @@
       recapParts.push(open.length + ' still open.');
     }
 
-    var rows = entries.map(function(e){
+    // Referenced by the click handler below (event delegation, by index)
+    // so it can open the trade detail modal for whichever row was
+    // actually clicked -- same "look up from the last render, not from
+    // anything baked into the DOM" principle as lastRenderedSetups.
+    lastRenderedJournalDetailEntries = entries;
+    var rows = entries.map(function(e, idx){
       // A closed options trade has no e.entry/e.exit share price and no
       // journalEntries document id -- reusing the stock-shaped row below
       // for it would call e.entry.toFixed(2) on undefined (a hard throw,
@@ -9507,6 +9668,9 @@
       // branch instead: credit in -> credit out, no Remove button since
       // there is no journal document to remove -- see the Options Income
       // (CSP) / Weekly Credit Spread cards for that trade's own record.
+      // Not click-to-detail either (see the click handler below): a
+      // credit-collected position has no share-price chart to show, and
+      // its own two Trade Overview cards already carry its exit reason.
       if(e.isOption){
         var oPl = e._pl;
         var oUp = oPl.dollar >= 0;
@@ -9556,7 +9720,7 @@
         '</div>';
       }
       if(e.status === 'open'){
-        return '<div class="journal-entry-card">' +
+        return '<div class="journal-entry-card journal-entry-card-clickable" data-row-index="' + idx + '">' +
           symCell +
           '<div class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' · ' + e.qty + ' sh</div>' +
           '<div class="journal-entry-result-cell"><span class="status-badge active">Open</span></div>' +
@@ -9570,7 +9734,7 @@
       var up = pl.pct >= 0;
       var pctStr = (up ? '+' : '') + pl.pct.toFixed(1) + '%';
       var dollarStr = (pl.dollar >= 0 ? '+$' : '−$') + Math.abs(pl.dollar).toFixed(0);
-      return '<div class="journal-entry-card">' +
+      return '<div class="journal-entry-card journal-entry-card-clickable" data-row-index="' + idx + '">' +
         symCell +
         '<div class="journal-entry-prices mono">' + e.entry.toFixed(2) + ' → ' + e.exit.toFixed(2) + '</div>' +
         '<div class="journal-entry-result-cell"><span class="journal-entry-result mono ' + (up ? 'up' : 'down') + '">' + pctStr + ' · ' + dollarStr + '</span></div>' +
@@ -9589,6 +9753,53 @@
     });
     el.querySelectorAll('.journal-remove-btn').forEach(function(btn){
       btn.addEventListener('click', function(){ removeJournalEntry(btn.dataset.id); });
+    });
+    // Clicking a row opens the same shared trade detail modal Setups
+    // rows use -- Journal never had a chart/notes view of its own before
+    // this. Excludes clicks on the row's own buttons (Exit trade,
+    // Remove), which must keep doing their own thing, not also open the
+    // modal underneath whatever they just did.
+    el.querySelectorAll('.journal-entry-card-clickable').forEach(function(card){
+      card.addEventListener('click', function(e){
+        if(e.target.closest('button')) return;
+        var entry = lastRenderedJournalDetailEntries[parseInt(card.dataset.rowIndex, 10)];
+        if(entry) openJournalEntryTradeModal(entry);
+      });
+    });
+  }
+
+  // Opens the trade detail modal for one Journal day-detail row -- a real
+  // equities/crypto journalEntries trade, open or closed (options rows
+  // never reach here, see the row-building comment above). An OPEN entry
+  // gets the same live, currently-updating chart Setups rows show; a
+  // CLOSED one gets a static historical chart fetched for its own
+  // entry-to-exit window (fetchHistoricalRangeBars), since "how did this
+  // trade play out" for a trade that closed weeks ago cannot mean "here
+  // is today's price" the way an open position's chart can.
+  function openJournalEntryTradeModal(e){
+    var isCrypto = e.screenerType === 'crypto';
+    var chart;
+    if(e.status === 'open'){
+      chart = liveChartDescriptorFor(e.sym, e.entry);
+    } else {
+      var entryMs = e.entryBarTime ? firestoreMillis(e.entryBarTime) : NaN;
+      var entryTime = !isNaN(entryMs) ? new Date(entryMs) : new Date(e.date + 'T14:30:00Z');
+      // No real "close" timestamp is stored on a journal entry, only the
+      // exit DATE -- approximated to market-close (equities) / end of day
+      // (crypto trades 24/7, so this is just "some time that day", and
+      // fetchHistoricalRangeBars pads the fetch window either way.
+      var exitTime = new Date((e.exitDate || e.date) + (isCrypto ? 'T23:59:00Z' : 'T21:00:00Z'));
+      chart = { kind: 'historical', isCrypto: isCrypto, entryTime: entryTime, exitTime: exitTime };
+    }
+    var pl = e.status === 'closed' ? computePL(e) : null;
+    openTradeModal({
+      sym: e.sym, direction: e.direction,
+      status: e.status === 'open' ? 'Open' : 'Closed', statusCls: e.status === 'open' ? 'active' : 'watching',
+      // Stop/target are the ORIGINAL plan, kept on the entry regardless of
+      // status -- still worth showing on a closed trade's chart as
+      // reference lines for how price actually moved relative to them.
+      entry: e.entry, stop: e.stop, target: e.t1,
+      pl: pl, notes: e.entryNotes || [], chart: chart,
     });
   }
 
@@ -10843,6 +11054,7 @@
     if(e.key === 'Escape'){
       closeExitModal();
       closeHistory();
+      closeTradeModal();
     }
   });
 
