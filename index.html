@@ -1166,6 +1166,62 @@
     }
   }
 
+  /* ---------- Trade card columns (Setups + Journal day-detail) ----------
+     Multiple trade cards side by side instead of one full-width column,
+     per the "Trade card columns" Settings preference. Reuses the SAME
+     compact row layout the 900px mobile breakpoint above already has
+     (stacked fields with their own data-label caption) rather than
+     inventing a second compact style -- a card that's 1/3 or 1/4 of the
+     page width needs the same treatment a narrow phone screen does, for
+     the same reason: .trade-columns' normal 7-column grid has nowhere
+     near enough room. */
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns.head{ display:none; }
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns > *{ flex:1 1 40%; }
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns .chevron{ flex: 0 0 auto; }
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns .t-sym-cell{ flex: 1 1 100%; }
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) [data-label]::before{
+    content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;
+  }
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks,
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks,
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail{
+    display:grid; gap:14px; align-items:start;
+  }
+  html[data-trade-columns="2"] #intradayBlocks, html[data-trade-columns="2"] #cryptoBlocks, html[data-trade-columns="2"] #journalDetail{ grid-template-columns:repeat(2,1fr); }
+  html[data-trade-columns="3"] #intradayBlocks, html[data-trade-columns="3"] #cryptoBlocks, html[data-trade-columns="3"] #journalDetail{ grid-template-columns:repeat(3,1fr); }
+  html[data-trade-columns="4"] #intradayBlocks, html[data-trade-columns="4"] #cryptoBlocks, html[data-trade-columns="4"] #journalDetail{ grid-template-columns:repeat(4,1fr); }
+  /* Non-card content (the "no active setups" placeholder, Journal's own
+     date heading and recap sentence) must always span every column --
+     without this, that text drops into the FIRST grid cell only, next to
+     whatever card happens to be its grid sibling. */
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks > :not(.trade-block),
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks > :not(.trade-block),
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail > :not(.journal-entry-card){
+    grid-column: 1 / -1;
+  }
+  /* The grid's own `gap` already spaces cards out -- each card's normal
+     margin-bottom (for the default single-column stack) would otherwise
+     ADD to that gap unevenly, since only cards followed by another card
+     in the SAME row keep their bottom neighbor close while a card at the
+     end of a grid row sits next to nothing below it at all. */
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks .trade-block,
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks .trade-block,
+  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail .journal-entry-card{
+    margin-bottom: 0;
+  }
+  /* Below ~640px, even a 2-up grid runs out of room for the compact
+     stacked row above -- same collapse-to-one-column reasoning phones
+     already get via the 900px breakpoint. */
+  @media (max-width: 640px){
+    html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks,
+    html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks,
+    html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail{
+      grid-template-columns: 1fr;
+    }
+  }
+
   .news-toast-tag{
     font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color: var(--muted);
     border:1px solid var(--border); border-radius:999px; padding:2px 9px 1px; background: var(--panel-raised);
@@ -2050,6 +2106,7 @@
         reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : false,
         tickerEnabled: typeof s.tickerEnabled === 'boolean' ? s.tickerEnabled : true,
         tickerSpeed: typeof s.tickerSpeed === 'string' ? s.tickerSpeed : '100',
+        tradeColumns: typeof s.tradeColumns === 'string' ? s.tradeColumns : '1',
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
         soundAlerts: typeof s.soundAlerts === 'boolean' ? s.soundAlerts : true,
         landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto',
@@ -2997,6 +3054,19 @@
               <button class="tf-btn" data-value="50">50%</button>
               <button class="tf-btn" data-value="75">75%</button>
               <button class="tf-btn" data-value="100">100%</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Trade card columns</div>
+              <div class="settings-row-desc">How many trade cards sit side by side in Equities/Crypto Setups and Journal's day-detail list. More columns means smaller, more compact cards -- click any card to open its full detail in the trade detail modal either way.</div>
+            </div>
+            <div class="settings-choice-group" id="tradeColumnsChoice">
+              <button class="tf-btn" data-value="1">1</button>
+              <button class="tf-btn" data-value="2">2</button>
+              <button class="tf-btn" data-value="3">3</button>
+              <button class="tf-btn" data-value="4">4</button>
             </div>
           </div>
 
@@ -8850,6 +8920,36 @@
     applyTickerSpeedPref(saved);
   })();
 
+  // ---------- Trade card columns (Equities/Crypto Setups, Journal day-detail) ----------
+  // One global preference rather than a separate dial per list -- the
+  // three lists (#intradayBlocks, #cryptoBlocks, #journalDetail) are the
+  // same kind of thing (a stack of trade cards) and a reader who picks
+  // "3 columns" almost certainly means it everywhere, not just the one
+  // section they happened to be looking at when they changed it.
+  // Applied via a single [data-trade-columns] attribute on <html> and a
+  // CSS grid keyed off it (see .trade-columns-grid), rather than each
+  // render function computing its own inline grid-template-columns --
+  // one one style recalculation on toggle, not three separate re-renders.
+  var TRADE_COLUMN_COUNTS = ['1', '2', '3', '4'];
+  var tradeColumnsEl = document.getElementById('tradeColumnsChoice');
+  function applyTradeColumnsPref(val, skipSync){
+    if(TRADE_COLUMN_COUNTS.indexOf(String(val)) === -1) val = '1';
+    tradeColumnsEl.querySelectorAll('.tf-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.value === val);
+    });
+    document.documentElement.setAttribute('data-trade-columns', val);
+    try{ window.localStorage.setItem('shwoopnet:tradeColumns', val); }catch(e){}
+    if(!skipSync) syncUserSetting('tradeColumns', val);
+  }
+  tradeColumnsEl.querySelectorAll('.tf-btn').forEach(function(b){
+    b.addEventListener('click', function(){ applyTradeColumnsPref(b.dataset.value); });
+  });
+  (function initTradeColumnsPref(){
+    var saved = '1';
+    try{ saved = window.localStorage.getItem('shwoopnet:tradeColumns') || '1'; }catch(e){}
+    applyTradeColumnsPref(saved, true);
+  })();
+
   // ---------- Settings: reset all preferences ----------
   document.getElementById('resetPrefsBtn').addEventListener('click', function(){
     try{
@@ -9270,6 +9370,8 @@
     try{ notepadVal = document.getElementById('notepadArea').value || ''; }catch(e){}
     var storedTickerSpeed = '100';
     try{ storedTickerSpeed = window.localStorage.getItem('shwoopnet:tickerSpeed') || '100'; }catch(e){}
+    var storedTradeColumns = '1';
+    try{ storedTradeColumns = window.localStorage.getItem('shwoopnet:tradeColumns') || '1'; }catch(e){}
     var storedLandingPref = 'auto';
     try{ storedLandingPref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     var snapshot = {
@@ -9277,6 +9379,7 @@
       reduceMotion: motionToggleBtn.getAttribute('aria-checked') === 'true',
       tickerEnabled: tickerToggleBtn.getAttribute('aria-checked') === 'true',
       tickerSpeed: storedTickerSpeed,
+      tradeColumns: storedTradeColumns,
       clockFormat: clockFormatPref || '24',
       soundAlerts: soundAlertsEnabled,
       landingPref: storedLandingPref,
@@ -9320,6 +9423,7 @@
     applyMotionPref(shaped.reduceMotion, true);
     applyTickerPref(shaped.tickerEnabled, true);
     applyTickerSpeedPref(shaped.tickerSpeed, true);
+    applyTradeColumnsPref(shaped.tradeColumns, true);
 
     growthChartRange = shaped.growthChartRange;
     try{ window.localStorage.setItem('shwoopnet:growthChartRange', growthChartRange); }catch(e){}
