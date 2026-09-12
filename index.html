@@ -2774,24 +2774,6 @@
       </div>
     </div>
 
-    <!-- Options closed trades (CSP + Weekly Credit Spread) -- deliberately
-         NOT folded into the Overall P&L/Win Rate/Profit Factor/growth
-         chart above: those are all built around journalEntries' qty*price
-         shape (entry/stop/target/trail), and a credit-collected options
-         position has none of that. A separate, simpler tally instead of
-         forcing it through math that doesn't describe it. Hidden entirely
-         until there's at least one real closed trade, same pattern as the
-         Trade Overview options cards themselves. -->
-    <div class="labs-export-section" id="journalOptionsSection" style="margin-top:24px;" hidden>
-      <div class="labs-export-divider"></div>
-      <div class="labs-export-header">
-        <div>
-          <div class="labs-export-title">Options closed trades</div>
-          <div class="labs-export-desc">Cash-secured puts and weekly credit spreads. Forward tests only -- see the Trade Overview cards for open positions and each mechanism's own note.</div>
-        </div>
-      </div>
-      <div id="journalOptionsBody"></div>
-    </div>
   </main>
 
   <!-- ================= SETTINGS ================= -->
@@ -3709,7 +3691,6 @@
       autoTradeOverrides.weeklySpreadScreenerEnabledOverride = data.weeklySpreadScreenerEnabledOverride;
       autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = data.weeklySpreadAutoTradeEnabledOverride;
       renderWeeklySpreadPositions();
-      renderJournalOptionsClosedTrades();
       renderOptionsPositions();
       backendCryptoCycleStatus = data.cryptoCycleStatus;
       backendCryptoCycleStartedAt = data.cryptoCycleStartedAt;
@@ -8893,7 +8874,7 @@
     });
     if(name === 'trades'){ renderStatusPage(); }
     runCardEntrance(name);
-    if(name === 'journal'){ renderCalendar(); renderJournalOptionsClosedTrades(); }
+    if(name === 'journal'){ renderCalendar(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
@@ -9250,8 +9231,16 @@
   // real journalEntries in the calendar and the day-by-day Journal list --
   // NOT in the Win Rate/Profit Factor/Avg Win/Avg Loss stat tiles above the
   // calendar (computeAggregatePL), which stay scoped to journalEntries'
-  // qty*price shape on purpose (see renderJournalOptionsClosedTrades' own
-  // comment on why that math doesn't fit a credit-collected position).
+  // qty*price shape on purpose: a credit-collected options position has no
+  // entry/exit share price for that math to run on. The Journal page used
+  // to also carry a separate, standalone "Options closed trades" table
+  // below the calendar for exactly this reason -- removed as truly
+  // redundant, not just duplicated: this folding already puts every closed
+  // options trade's $ into the right day/week cell and the day-detail
+  // list, and the extra columns that table had (exit reason, the
+  // "unreconciled" flag) already live on Trade Overview's own Options
+  // Income (CSP) and Weekly Credit Spread cards, across all time, so
+  // nothing the standalone table showed is gone from the app.
   // %pl here is return on the credit COLLECTED (premium kept vs. premium
   // paid back), not return on share price -- a different scale than an
   // equities/crypto trade's %, stated here rather than left implicit,
@@ -13061,17 +13050,13 @@
     el.innerHTML = rows;
   }
 
-  // Journal's own view of options closed trades -- combines the CSP and
-  // Weekly Credit Spread closed lists (each already tagged with
-  // `mechanism` when the backend writes it) into one table, newest first.
-  // Deliberately just a list, no win-rate/profit-factor math: those
-  // figures above are built for journalEntries' qty*price shape and a
-  // credit-collected position doesn't fit it any better here than it did
-  // on the Trade Overview cards.
   // Single source of truth for "every closed options trade, tagged with
-  // which mechanism closed it" -- shared by the options-only table below
-  // AND by the calendar/Journal-day/Account-Growth integration further
-  // down, so the two can never list a different set of trades.
+  // which mechanism closed it" -- combines the CSP and Weekly Credit
+  // Spread closed lists. Shared by Trade Overview's own per-mechanism
+  // cards (renderOptionsPositions/renderWeeklySpreadPositions) AND by the
+  // Journal calendar/day-detail/Account-Growth integration
+  // (optionsClosedJournalRows below), so none of them can ever list a
+  // different set of trades.
   function allClosedOptionsTrades(){
     return []
       .concat((backendOptionsClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'CSP' }, t); }))
@@ -13087,32 +13072,6 @@
   function optionsClosedTradeDollarPL(t){
     if(t.entryCredit == null || t.exitCredit == null || !(t.qty > 0)) return null;
     return (t.entryCredit - t.exitCredit) * t.qty * 100;
-  }
-
-  function renderJournalOptionsClosedTrades(){
-    var section = document.getElementById('journalOptionsSection');
-    var el = document.getElementById('journalOptionsBody');
-    if(!section || !el) return;
-    var combined = allClosedOptionsTrades();
-    if(!combined.length){ section.hidden = true; return; }
-    section.hidden = false;
-    combined.sort(function(a, b){ return String(b.closedAt || '').localeCompare(String(a.closedAt || '')); });
-    el.innerHTML = '<table class="backtest-trades-table"><thead><tr>' +
-      '<th>Mechanism</th><th>Underlying</th><th>Credit in</th><th>Credit out</th><th>Reason</th><th>Closed</th>' +
-      '</tr></thead><tbody>' +
-      combined.map(function(t){
-        var reasonLabel = t.needsReconciliation
-          ? '<span class="labs-backtest-status" title="Disappeared from the broker with no matching close order on file. Verify manually.">unreconciled</span>'
-          : escapeHtml(t.exitReason || '—');
-        return '<tr>' +
-          '<td>' + escapeHtml(t.mechanismLabel) + '</td>' +
-          '<td>' + escapeHtml(t.underlyingSymbol || '') + '</td>' +
-          '<td>' + (t.entryCredit != null ? ftMoney(t.entryCredit) : '—') + '</td>' +
-          '<td>' + (t.exitCredit != null ? ftMoney(t.exitCredit) : '—') + '</td>' +
-          '<td>' + reasonLabel + '</td>' +
-          '<td>' + (t.closedAt ? escapeHtml(String(t.closedAt).slice(0, 10)) : '—') + '</td>' +
-        '</tr>';
-      }).join('') + '</tbody></table>';
   }
 
   function escapeHtml(s){
