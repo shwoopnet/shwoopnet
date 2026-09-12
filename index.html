@@ -7155,8 +7155,22 @@
       // gesture that just made it.
       var prevScale = opts.prevScale;
       var reusedScale = false;
+      // Containment alone isn't enough: once ANY render ever widened
+      // loT/hiT (a single volatile bar, a bad print), every later render
+      // whose real range still fits inside that old window kept reusing
+      // it forever, even long after price had settled into a much
+      // narrower band -- the bounds never got a chance to tighten back
+      // up, so the real candles ended up compressed into a sliver in the
+      // middle of a plot sized for a move that was no longer happening.
+      // Requiring the real (padded) range to still fill at least half of
+      // the previous window keeps the jitter-smoothing this exists for
+      // (tiny polling moves stay put) while forcing a fresh, tighter
+      // recompute once the true range has shrunk enough that the old
+      // bounds are no longer describing the current price action.
+      var prevRange = prevScale ? (prevScale.hiT - prevScale.loT) : 0;
+      var fillsEnoughOfPrevRange = prevRange > 0 && (paddedHi - paddedLo) >= prevRange * 0.5;
       if(prevScale && !prevScale.useLog && priceScaleFactor === 1 && !priceCenterOffset
-        && paddedLo >= prevScale.loT && paddedHi <= prevScale.hiT){
+        && paddedLo >= prevScale.loT && paddedHi <= prevScale.hiT && fillsEnoughOfPrevRange){
         loT = prevScale.loT; hiT = prevScale.hiT; niceTicks = prevScale.niceTicks;
         reusedScale = true;
       }
