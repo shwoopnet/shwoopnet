@@ -9829,7 +9829,11 @@
       '<tbody>' + trades.map(function(t){
         var up = t.dollarPL >= 0;
         return '<tr>' +
-          '<td class="mono">' + t.sym + '</td>' +
+          // Same OCC-symbol parsing the Alpaca dock's Open Positions table
+          // uses (formatPositionSymbol) -- t.sym here is Alpaca's own raw
+          // order symbol, and an options fill renders as the unbroken
+          // "INTC260918P00094000" instead of "INTC $94P 9/18" otherwise.
+          '<td class="mono">' + formatPositionSymbol(t.sym) + '</td>' +
           '<td>' + t.direction + '</td>' +
           '<td class="mono">' + fmt(t.entryPrice) + '</td>' +
           '<td class="mono" style="font-size:11px;">' + new Date(t.entryTime).toLocaleString() + '</td>' +
