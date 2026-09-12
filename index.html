@@ -78,15 +78,96 @@
      with what was on screen. */
   [hidden]{ display:none !important; }
 
-  html,body{
+  /* Only html carries the background-color, not body -- the canvas (the
+     area behind everything, including past the end of a short page)
+     already takes it from html per the standard propagation rule, and
+     leaving body's own box transparent is what lets .bg-ambient's
+     z-index:-1 layer actually show: a negative z-index escapes into the
+     ROOT element's stacking context, which paints below any in-flow
+     box's own background -- body painting the SAME color as its own
+     background would have silently covered it completely, exactly the
+     bug this comment is warning off. */
+  html{ background-color: var(--ink); }
+  body{
     margin:0; padding:0;
-    /* Flat, deliberately un-decorated ground -- a brokerage app's
-       background is furniture, not a mood board. */
-    background-color: var(--ink);
+    /* The ground is still furniture, not a mood board -- no per-page
+       imagery, nothing that competes with a number someone is trying to
+       read. What sits ON TOP of this flat color is .bg-ambient below: a
+       fixed, all-page layer so quiet it reads as "the screen just isn't
+       perfectly flat" rather than as decoration, requested specifically
+       so neither theme's blank ground felt quite this inert. */
     color: var(--paper);
     font-family: 'Public Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+
+  /* ---------- Ambient background: texture + a slow drift, nothing else ----------
+     Two soft, blurred accent-color blobs drifting on a multi-minute loop,
+     plus a static film-grain layer for texture at rest. Both are capped low
+     enough (title-bar-glance test: does it read as "a colored patch" at any
+     point in the loop? if yes, it's too strong) that they never compete
+     with a P&L figure or a candle -- if this is ever pulled up in review and
+     it's noticeable at a glance, that's a bug in this rule, not a reason to
+     rip the whole thing out.
+     Fixed + z-index:-1, which only works because body itself carries NO
+     background-color (see the html/body split above) -- a negative
+     z-index escapes into the ROOT element's own stacking context, which
+     paints any IN-FLOW box's own background (body's own, if it painted
+     one) ABOVE a negative-z-index descendant. With body transparent,
+     there is nothing at that level to cover it, and everything real
+     (all genuinely in-flow content, plus every positioned overlay in
+     this app, which all carry their own z-index >= 0) still paints
+     above it as normal. Confirmed by inspecting computed styles before
+     this split existed: the layer had a real background and opacity and
+     still sampled as the plain page color at every single pixel --
+     z-index:-1 alone, against an opaque body, is a silent no-op, not a
+     visible-but-behind-content layer.
+     Not a pseudo-element on body for the same underlying reason bodies
+     historically get this wrong: had body kept its own background, a
+     body::before would have hit the identical bug.
+     aria-hidden and pointer-events:none: this is not content, and must
+     never intercept a click meant for whatever's actually on the page. */
+  .bg-ambient{
+    position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
+  }
+  .bg-ambient::before, .bg-ambient::after{
+    content:''; position:absolute; width:60vmax; height:60vmax; border-radius:50%;
+    background: var(--amber); opacity:0.07; filter: blur(60px);
+    will-change: transform;
+  }
+  .bg-ambient::before{ top:-18vmax; left:-14vmax; animation: bgDriftA 100s ease-in-out infinite; }
+  .bg-ambient::after{ bottom:-22vmax; right:-18vmax; animation: bgDriftB 130s ease-in-out infinite; background: var(--gain); opacity:0.06; }
+  /* Same nominal alpha reads as noticeably fainter against dark theme's
+     near-black ground than against light theme's off-white one (blurred
+     low-alpha color has less to contrast against on a dark base) -- bumped
+     here rather than raising the light-mode values and overshooting the
+     "furniture, not decoration" bar there. */
+  html[data-theme="dark"] .bg-ambient::before{ opacity:0.09; }
+  html[data-theme="dark"] .bg-ambient::after{ opacity:0.07; }
+  @keyframes bgDriftA{
+    0%, 100%{ transform: translate(0, 0); }
+    50%{ transform: translate(8vmax, 10vmax); }
+  }
+  @keyframes bgDriftB{
+    0%, 100%{ transform: translate(0, 0); }
+    50%{ transform: translate(-10vmax, -6vmax); }
+  }
+  /* Grain: a tiny inline SVG turbulence filter as a tiled data-URI, not a
+     network asset -- there is nothing to fail to load and nothing added to
+     the page's request count. Opacity low enough that it reads as texture
+     ("this isn't a flat vector fill") rather than as visible noise. */
+  .bg-grain{
+    position:absolute; inset:-10%; opacity:0.025; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* The reduce-motion overrides for .bg-ambient live in the single
+     consolidated @media (prefers-reduced-motion: reduce) block and the
+     matching [data-reduce-motion="true"] rules further down (see
+     motionHonestyGates.test.js's G3), not a second block here -- a
+     second @media block with the same query is legal CSS and the
+     browser merges it fine, but this repo's own test asserts against
+     the FIRST such block by regex, so a second one earlier in the file
+     silently stops that gate from ever checking the real one. */
 
   .mono{ font-family: 'Public Sans', sans-serif; font-variant-numeric: tabular-nums; }
   .display{ font-family: 'Public Sans', sans-serif; }
@@ -1559,7 +1640,10 @@
     .card-enter{ animation: none; }
     .position-close-btn{ transition: none; }
     .position-close-btn:active{ transform: none; }
+    .bg-ambient::before, .bg-ambient::after{ animation: none; }
   }
+  [data-reduce-motion="true"] .bg-ambient::before,
+  [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
@@ -1589,6 +1673,8 @@
 </script>
 </head>
 <body>
+
+<div class="bg-ambient" aria-hidden="true"><div class="bg-grain"></div></div>
 
 <script>
   // Decouples the deferred Firebase module from the rest of the app so
