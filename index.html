@@ -694,17 +694,20 @@
      so a page of entries reads as a scannable table instead of a stack
      of two-line blocks. */
   .activity-log-row-cols{
-    display:grid; grid-template-columns: 72px 58px 1fr auto;
+    display:grid; grid-template-columns: 128px 58px 1fr auto;
     align-items:center; gap:12px; padding:10px 0;
   }
   .activity-log-row-cols .activity-log-sym{ font-size:12px; color: var(--paper); }
   .activity-log-row-cols .activity-log-text{ margin:0; }
   .activity-log-row-cols .activity-log-time{ margin-left:0; white-space:nowrap; }
-  /* A tag longer than its 72px column (an unmapped/long backend type
-     string, e.g. "position_drift_detected" before it had a short label)
-     must never spill into the symbol column next to it -- clip it
-     instead, so a future unmapped type degrades to a truncated tag
-     rather than garbled overlapping text. */
+  /* 128px fits the longest real label ("Protective Stop", ~122px
+     measured) without truncation -- the column used to be 72px, which
+     clipped every label past "Trail" or "Drift OK" and made "Protective
+     Stop" (the label a failed/missing stop-loss submission gets, i.e.
+     the one that most needs to be readable) unreadable. The ellipsis
+     below stays only as a fallback for an unmapped/long backend type
+     string (e.g. "position_drift_detected" before it had a short label)
+     that would otherwise spill into the symbol column next to it. */
   .activity-log-row-cols .activity-log-tag{
     width:100%; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
