@@ -9309,6 +9309,13 @@
 
   // ---------- Navigation ----------
   function showPage(name){
+    // Switching pages via nav used to leave the scroll position exactly
+    // where it was on the PREVIOUS page -- landing on Journal already
+    // scrolled halfway down Trade Overview's own page length read as the
+    // new page failing to load, not as a scroll position carried over.
+    // Instant (no smooth-scroll animation) regardless of the reduce-motion
+    // setting -- this is a position reset, not a decorative transition.
+    try{ window.scrollTo(0, 0); }catch(e){}
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
