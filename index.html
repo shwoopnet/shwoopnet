@@ -308,6 +308,11 @@
   @media (max-width: 900px){
     .alpaca-dock-header{ bottom:76px; left:16px; right:16px; width:auto; }
     .alpaca-dock-body-wrap{ bottom:118px; left:16px; right:16px; width:auto; }
+    /* Drag-to-reposition/resize is a desktop concept (see
+       isMobileDockLayout's comment) -- the handle and the ew-resize cursor
+       both imply an interaction that no longer does anything here. */
+    .alpaca-dock.unlocked .alpaca-dock-resize-handle{ display:none; }
+    .alpaca-dock.unlocked .alpaca-dock-header{ cursor:pointer; }
   }
   .brand{
     display:flex; align-items:center; gap:12px;
@@ -5746,6 +5751,24 @@
     return maxLeftClearingSidebar(alpacaDockBodyWrapEl.offsetWidth);
   }
 
+  // Same "is the sidebar currently a vertical rail or a bottom bar" check
+  // maxLeftClearingSidebar already does, exposed on its own: a saved
+  // drag/resize geometry is a desktop-only concept (the dock is full-width
+  // on mobile, right:16px/left:16px/width:auto via the @media rule below),
+  // but initAlpacaDockGeometry used to apply a saved left/width as an
+  // INLINE style regardless of viewport -- which always wins over that
+  // media-query rule by specificity. A geometry saved from any wider
+  // session (a desktop visit, a tablet in landscape, a browser window
+  // later resized down) then permanently overrode the mobile layout on
+  // every load afterward, positioning the dock wherever it happened to be
+  // dragged to on a completely different screen size -- overlapping or
+  // running past the bottom nav bar, reported as "awkward on mobile."
+  function isMobileDockLayout(){
+    var sideNav = document.getElementById('sideNav');
+    if(!sideNav) return false;
+    return sideNav.getBoundingClientRect().height <= window.innerHeight * 0.5;
+  }
+
   // Same bump logic every other floating panel already has, applied to
   // the toast container -- it isn't user-draggable, but it defaults to
   // the same general bottom-right area as the Notepad and the Alpaca
@@ -5791,7 +5814,7 @@
   var alpacaDockDidDrag = false;
   alpacaDockHeaderEl.addEventListener('pointerdown', function(e){
     alpacaDockDidDrag = false;
-    if(alpacaDockLocked || e.target.closest('button')) return;
+    if(alpacaDockLocked || e.target.closest('button') || isMobileDockLayout()) return;
     var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
     alpacaDockDragState = { startX: e.clientX, startLeft: rect.left };
     alpacaDockHeaderEl.setPointerCapture(e.pointerId);
@@ -5826,7 +5849,7 @@
   var alpacaDockResizeHandle = document.getElementById('alpacaDockResizeHandle');
   var alpacaDockResizeState = null;
   alpacaDockResizeHandle.addEventListener('pointerdown', function(e){
-    if(alpacaDockLocked) return;
+    if(alpacaDockLocked || isMobileDockLayout()) return;
     e.stopPropagation();
     var rect = alpacaDockBodyWrapEl.getBoundingClientRect();
     alpacaDockResizeState = { startX: e.clientX, startWidth: rect.width, rightEdge: rect.left + rect.width };
@@ -5856,6 +5879,10 @@
     var lockedSaved = 'true';
     try{ lockedSaved = window.localStorage.getItem('shwoopnet:alpacaDockLocked') || 'true'; }catch(e){}
     applyAlpacaDockLock(lockedSaved === 'true');
+    // A saved drag/resize geometry is desktop-only (see isMobileDockLayout's
+    // own comment) -- skip restoring it entirely on the mobile layout and
+    // let the @media rule's left:16px/right:16px/width:auto govern instead.
+    if(isMobileDockLayout()) return;
     try{
       var geo = JSON.parse(window.localStorage.getItem('shwoopnet:alpacaDockGeo') || 'null');
       // Width restored before left -- maxAlpacaDockLeft() below reads the
