@@ -1499,6 +1499,15 @@
   .auth-box{
     width:100%; max-width:340px; background: var(--panel); border:1px solid var(--border);
     border-radius: var(--radius); padding:32px 28px; text-align:center;
+    /* Same elevation the trade detail modal/layout menus already use --
+       this box sat visually flat against the page behind it (which is
+       always solid var(--ink), so there was nothing for its own border
+       to contrast against) where every other floating panel in the app
+       has real depth. */
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  @media (max-width: 400px){
+    .auth-box{ padding:24px 18px; }
   }
   .auth-brand{
     display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:26px;
@@ -1524,6 +1533,18 @@
     margin-top:2px; padding:14px 4px; margin-left:-4px; margin-right:-4px;
   }
   .auth-forgot:hover{ color: var(--paper); }
+  .auth-remember-row{
+    display:flex; align-items:center; gap:9px; margin:2px 0 12px 0;
+    font-size:12.5px; color: var(--muted); cursor:pointer;
+    /* Same hitslop technique .auth-switch button already uses -- the row
+       reads visually compact, but the real clickable/tappable area is
+       taller than the text alone, comfortable on a touchscreen. */
+    padding:8px 4px; margin-left:-4px; margin-right:-4px;
+  }
+  .auth-remember-row:hover{ color: var(--paper); }
+  .auth-remember-row input[type="checkbox"]{
+    width:16px; height:16px; accent-color: var(--amber); cursor:pointer; flex-shrink:0;
+  }
 
   .exit-trade-btn{
     background:transparent; border:1px solid var(--border); color: var(--muted);
@@ -1810,7 +1831,8 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, onAuthStateChanged, sendPasswordResetEmail, deleteUser
+    signOut, onAuthStateChanged, sendPasswordResetEmail, deleteUser,
+    setPersistence, browserLocalPersistence, browserSessionPersistence
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction,
@@ -1842,9 +1864,26 @@
   var finnhubQuoteFn = httpsCallable(functions, 'finnhubQuote');
   var finnhubCompanyNewsFn = httpsCallable(functions, 'finnhubCompanyNews');
 
+  // rememberMe controls whether Firebase's own session survives closing the
+  // browser (browserLocalPersistence, the SDK's own default) or ends with
+  // it (browserSessionPersistence). setPersistence has to resolve BEFORE
+  // the actual sign-in/sign-up call -- it configures how the credential
+  // that call is about to produce gets stored, not something applied
+  // retroactively to a session that already exists.
+  function withPersistence(rememberMe){
+    return setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+  }
   window.__shwoopReady({
-    signUp: function(email, password){ return createUserWithEmailAndPassword(auth, email, password); },
-    signIn: function(email, password){ return signInWithEmailAndPassword(auth, email, password); },
+    signUp: function(email, password, rememberMe){
+      return withPersistence(rememberMe).then(function(){
+        return createUserWithEmailAndPassword(auth, email, password);
+      });
+    },
+    signIn: function(email, password, rememberMe){
+      return withPersistence(rememberMe).then(function(){
+        return signInWithEmailAndPassword(auth, email, password);
+      });
+    },
     signOutUser: function(){ return signOut(auth); },
     // Rolls back a signup attempt that failed to redeem a real invite
     // code -- the Auth account already exists at that point (Auth and
@@ -2230,6 +2269,10 @@
         <label for="authInviteCode">Invite code</label>
         <input type="text" id="authInviteCode" autocomplete="off" autocapitalize="characters" placeholder="Ask whoever invited you">
       </div>
+      <label class="auth-remember-row">
+        <input type="checkbox" id="authRememberMe" checked>
+        <span>Remember me on this device</span>
+      </label>
       <div class="modal-error" id="authError"></div>
       <button type="submit" class="modal-btn-submit auth-submit" id="authSubmitBtn">Sign in</button>
     </form>
@@ -13755,6 +13798,17 @@
   var authErrorEl = document.getElementById('authError');
   var authSwitchTextEl = document.getElementById('authSwitchText');
   var authSwitchBtn = document.getElementById('authSwitchBtn');
+  // Defaults to checked (matching Firebase's own default persistence --
+  // see withPersistence's comment) for a first-time visitor; remembers the
+  // owner's last choice afterward, same "remember the preference itself"
+  // pattern every other checkbox-shaped setting in this app already uses.
+  (function initAuthRememberMe(){
+    var rememberEl = document.getElementById('authRememberMe');
+    if(!rememberEl) return;
+    var saved = 'true';
+    try{ saved = window.localStorage.getItem('shwoopnet:authRememberMe') || 'true'; }catch(e){}
+    rememberEl.checked = saved !== 'false';
+  })();
   var authSubmitBtn = document.getElementById('authSubmitBtn');
   var authGateEl = document.getElementById('authGate');
 
@@ -13867,6 +13921,8 @@
     if(!window.__shwoopAPI) return;
     var email = document.getElementById('authEmail').value;
     var password = document.getElementById('authPassword').value;
+    var rememberMe = document.getElementById('authRememberMe').checked;
+    try{ window.localStorage.setItem('shwoopnet:authRememberMe', rememberMe ? 'true' : 'false'); }catch(e){}
     authErrorEl.classList.remove('show');
 
     if(authMode === 'signup'){
@@ -13887,7 +13943,7 @@
       // account back instead of leaving a signed-up-but-doc-less account
       // that could never actually get in.
       var inviteCode = document.getElementById('authInviteCode').value.trim().toUpperCase();
-      window.__shwoopAPI.signUp(email, password).then(function(cred){
+      window.__shwoopAPI.signUp(email, password, rememberMe).then(function(cred){
         return window.__shwoopAPI.redeemInviteAndCreateAccount(cred.user.uid, inviteCode).catch(function(redeemErr){
           return window.__shwoopAPI.deleteCurrentUser().catch(function(){}).then(function(){
             throw redeemErr;
@@ -13900,7 +13956,7 @@
         authSubmitBtn.disabled = false;
       });
     } else {
-      window.__shwoopAPI.signIn(email, password).catch(function(err){
+      window.__shwoopAPI.signIn(email, password, rememberMe).catch(function(err){
         authErrorEl.textContent = friendlyAuthError(err);
         authErrorEl.classList.add('show');
       }).finally(function(){
