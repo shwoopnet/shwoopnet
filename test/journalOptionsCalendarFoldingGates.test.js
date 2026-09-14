@@ -123,6 +123,29 @@ function main() {
     console.log('G5 PASS a closed options trade is dated by its own close, not by when the page happens to render');
   }
 
+  // The "Options" filter tab (added alongside All/Equities/Crypto): the
+  // reverse of G4 -- under journalFilter 'options', a closed options
+  // trade must show, and a real equities/crypto journal entry must NOT
+  // leak in (filteredJournalEntries returns [] for 'options').
+  {
+    const { computeDayStats } = build({
+      journalFilter: 'options',
+      journalEntries: [{
+        id: 'j1', sym: 'SOFI', status: 'closed', direction: 'Long',
+        entry: 10, exit: 10.5, qty: 100, date: '2026-09-13', exitDate: '2026-09-13',
+        screenerType: 'intraday',
+      }],
+      backendOptionsClosedTrades: [{
+        underlyingSymbol: 'SPY', entryCredit: 1.00, exitCredit: 0.50, qty: 1,
+        closedAt: '2026-09-13T20:05:00Z', exitReason: 'expired',
+      }],
+    });
+    const optionsDollar = (1.00 - 0.50) * 1 * 100;
+    assert.strictEqual(computeDayStats('2026-09-13').dollar, optionsDollar,
+      'the Options tab must show only the closed options trade\'s $, not the equities trade on the same day');
+    console.log('G6 PASS the Options filter tab shows closed options trades and excludes equities/crypto journal entries');
+  }
+
   console.log('\nAll Journal calendar options-folding gates passed.');
 }
 

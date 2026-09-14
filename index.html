@@ -2912,6 +2912,7 @@
       <button class="chart-tool-btn active" id="journalFilterAll" data-filter="all">All</button>
       <button class="chart-tool-btn" id="journalFilterEquities" data-filter="equities">Equities</button>
       <button class="chart-tool-btn" id="journalFilterCrypto" data-filter="crypto">Crypto</button>
+      <button class="chart-tool-btn" id="journalFilterOptions" data-filter="options" hidden>Options</button>
     </div>
 
     <div class="journal-dupe-banner" id="journalDupeBanner" hidden>
@@ -5198,7 +5199,7 @@
     });
   });
 
-  ['journalFilterAll', 'journalFilterEquities', 'journalFilterCrypto'].forEach(function(id){
+  ['journalFilterAll', 'journalFilterEquities', 'journalFilterCrypto', 'journalFilterOptions'].forEach(function(id){
     document.getElementById(id).addEventListener('click', function(){
       journalFilter = this.dataset.filter;
       renderCalendar();
@@ -9983,19 +9984,21 @@
   }
 
   // Closed options trades (CSP + weekly spread), reshaped to sit alongside
-  // real journalEntries in the calendar and the day-by-day Journal list --
-  // NOT in the Win Rate/Profit Factor/Avg Win/Avg Loss stat tiles above the
-  // calendar (computeAggregatePL), which stay scoped to journalEntries'
-  // qty*price shape on purpose: a credit-collected options position has no
-  // entry/exit share price for that math to run on. The Journal page used
-  // to also carry a separate, standalone "Options closed trades" table
-  // below the calendar for exactly this reason -- removed as truly
-  // redundant, not just duplicated: this folding already puts every closed
-  // options trade's $ into the right day/week cell and the day-detail
-  // list, and the extra columns that table had (exit reason, the
-  // "unreconciled" flag) already live on Trade Overview's own Options
-  // Income (CSP) and Weekly Credit Spread cards, across all time, so
-  // nothing the standalone table showed is gone from the app.
+  // real journalEntries in the calendar, the day-by-day Journal list, AND
+  // (via computeAggregatePL, now dollar-based for exactly this reason) the
+  // Win Rate/Profit Factor/Avg Win/Avg Loss stat tiles above the calendar,
+  // in the unified "all" view and their own "Options" filter tab -- a
+  // dollar is the one unit every trade here actually has in common, even
+  // though an options trade's own "%" (return on credit collected) is a
+  // different scale from a stock's return on share price. The Journal
+  // page used to also carry a separate, standalone "Options closed
+  // trades" table below the calendar -- removed as truly redundant, not
+  // just duplicated: this folding already puts every closed options
+  // trade's $ into the right day/week cell and the day-detail list, and
+  // the extra columns that table had (exit reason, the "unreconciled"
+  // flag) already live on Trade Overview's own Options Income (CSP) and
+  // Weekly Credit Spread cards, across all time, so nothing the
+  // standalone table showed is gone from the app.
   // %pl here is return on the credit COLLECTED (premium kept vs. premium
   // paid back), not return on share price -- a different scale than an
   // equities/crypto trade's %, stated here rather than left implicit,
@@ -10022,11 +10025,17 @@
   // Same persist-across-renders treatment as Open Positions' filter --
   // sticks with whatever the user last picked instead of resetting on
   // every journal snapshot update.
-  var journalFilter = 'all'; // 'all' | 'equities' | 'crypto'
+  var journalFilter = 'all'; // 'all' | 'equities' | 'crypto' | 'options'
 
   function filteredJournalEntries(){
     if(journalFilter === 'equities') return journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
     if(journalFilter === 'crypto') return journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
+    // Options never live in journalEntries at all (see allClosedOptionsTrades'
+    // own comment) -- optionsClosedJournalRows is the entire Options tab's
+    // real source, added in separately wherever this function's callers
+    // need it (see computeDayStats/journal detail's own optionsRows/
+    // optionsEntries, already gated the same "all or options" way).
+    if(journalFilter === 'options') return [];
     return journalEntries;
   }
 
@@ -10054,9 +10063,10 @@
   }
 
   function computeDayStats(dateStr){
-    // Options only join the unified "all" view -- see closedOptionsTradesForGrowth's
-    // own comment on why they're left out of the Equities/Crypto-scoped tabs.
-    var optionsRows = journalFilter === 'all' ? optionsClosedJournalRows().filter(function(e){ return realizedOnDate(e) === dateStr; }) : [];
+    // Options join the unified "all" view and their own "options" tab --
+    // never the Equities/Crypto-scoped ones, since they're neither.
+    var optionsRows = (journalFilter === 'all' || journalFilter === 'options')
+      ? optionsClosedJournalRows().filter(function(e){ return realizedOnDate(e) === dateStr; }) : [];
     var entries = filteredJournalEntries().filter(function(e){ return e.status === 'closed' && realizedOnDate(e) === dateStr; }).concat(optionsRows);
     if(entries.length === 0) return null;
     var dollar = 0, wins = 0;
@@ -10084,7 +10094,13 @@
     var equitiesEntries = journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
     var cryptoEntries = journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
     var isClosed = function(j){ return j.status === 'closed'; };
-    var showFilter = equitiesEntries.length > 0 && cryptoEntries.length > 0;
+    var optionsCount = optionsClosedJournalRows().length;
+    // Whichever two-or-more categories actually have trades -- a lone
+    // category showing "All" and its own single tab was never useful, and
+    // options specifically (off by default, CSP/weekly spread) shouldn't
+    // force a tab strip onto every account that's never touched it.
+    var categoriesPresent = [equitiesEntries.length > 0, cryptoEntries.length > 0, optionsCount > 0].filter(Boolean).length;
+    var showFilter = categoriesPresent > 1;
     if(!showFilter) journalFilter = 'all';
     var row = document.getElementById('journalFilterRow');
     if(!row) return;
@@ -10092,7 +10108,10 @@
     if(!showFilter) return;
     document.getElementById('journalFilterEquities').textContent = 'Equities (' + equitiesEntries.filter(isClosed).length + ')';
     document.getElementById('journalFilterCrypto').textContent = 'Crypto (' + cryptoEntries.filter(isClosed).length + ')';
-    ['All', 'Equities', 'Crypto'].forEach(function(label){
+    var optionsBtn = document.getElementById('journalFilterOptions');
+    optionsBtn.hidden = optionsCount === 0;
+    optionsBtn.textContent = 'Options (' + optionsCount + ')';
+    ['All', 'Equities', 'Crypto', 'Options'].forEach(function(label){
       var btn = document.getElementById('journalFilter' + label);
       btn.classList.toggle('active', btn.dataset.filter === journalFilter);
     });
@@ -10213,12 +10232,13 @@
     //
     // Written as one predicate rather than two filters so the cell and the
     // list cannot drift apart again.
-    // Closed options trades join this same day-by-day list (not a fourth
-    // filter tab -- see optionsClosedJournalRows' own comment), only in
-    // the unified "all" view, only on the day they actually closed since
-    // there's no "open" state to show here at all (open options positions
-    // already have their own dedicated cards).
-    var optionsEntries = journalFilter === 'all'
+    // Closed options trades join this same day-by-day list -- in the
+    // unified "all" view and their own "options" tab -- only on the day
+    // they actually closed since there's no "open" state to show here at
+    // all (open options positions already have their own dedicated cards
+    // on Trade Overview; the Options tab, unlike Equities/Crypto, will
+    // therefore never show an open row).
+    var optionsEntries = (journalFilter === 'all' || journalFilter === 'options')
       ? optionsClosedJournalRows().filter(function(e){ return realizedOnDate(e) === selectedJournalDate; })
       : [];
     var entries = filteredJournalEntries().filter(function(e){
@@ -10956,18 +10976,23 @@
     var tabAtCall = journalFilter;
     getAlpacaClosedOrdersCached().then(function(orders){
       if(myGen !== tradeStatsPatchGen || journalFilter !== tabAtCall) return; // superseded, or the tab changed while this was in flight
-      var trades = reconstructTradesFromOrders(orders).trades.filter(function(t){
+      // The options tab has no broker-reconstructable trades at all --
+      // reconstructTradesFromOrders only ever produces 'us_equity'/'crypto'
+      // (Alpaca's REST order history has no options reconstruction path
+      // here) -- so it skips the reconstruction entirely rather than
+      // filtering it down to an always-empty set.
+      var trades = tabAtCall === 'options' ? [] : reconstructTradesFromOrders(orders).trades.filter(function(t){
         if(tabAtCall === 'crypto') return t.assetClass === 'crypto';
         if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
         return true;
       });
-      // Closed options trades join this same broker-reconciled set, only
-      // in the unified "all" view (see optionsClosedJournalRows' own
-      // comment) -- win/loss decided by dollarPL sign exactly like every
-      // other trade here, since a dollar is the one unit that's actually
-      // comparable between a qty*price stock move and a credit collected/
-      // paid on an options contract.
-      if(tabAtCall === 'all'){
+      // Closed options trades join this same broker-reconciled set, in the
+      // unified "all" view and their own "options" tab -- win/loss decided
+      // by dollarPL sign exactly like every other trade here, since a
+      // dollar is the one unit that's actually comparable between a
+      // qty*price stock move and a credit collected/paid on an options
+      // contract.
+      if(tabAtCall === 'all' || tabAtCall === 'options'){
         trades = trades.concat(optionsClosedJournalRows().map(function(e){
           return { sym: e.sym, dollarPL: e._pl.dollar, pctReturn: e._pl.pct, assetClass: 'options' };
         }));
@@ -11228,12 +11253,14 @@
     var tabAtCall = journalFilter;
     getAlpacaClosedOrdersCached().then(function(orders){
       if(myGen !== growthChartGen || journalFilter !== tabAtCall) return; // superseded by a newer render
-      var trades = reconstructTradesFromOrders(orders).trades.filter(function(t){
+      // Options has no broker-reconstructable trades -- same reasoning as
+      // patchTradeStatsFromAlpaca's own comment.
+      var trades = tabAtCall === 'options' ? [] : reconstructTradesFromOrders(orders).trades.filter(function(t){
         if(tabAtCall === 'crypto') return t.assetClass === 'crypto';
         if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
         return true;
       });
-      var optionsTrades = tabAtCall === 'all' ? closedOptionsTradesForGrowth() : [];
+      var optionsTrades = (tabAtCall === 'all' || tabAtCall === 'options') ? closedOptionsTradesForGrowth() : [];
       if(trades.length >= 2){
         renderGrowthChartWithRanges(trades.concat(optionsTrades));
         return;
@@ -11242,7 +11269,7 @@
     }).catch(function(err){
       if(myGen !== growthChartGen) return;
       console.error('Growth chart: Alpaca order history unavailable, falling back to the journal:', err);
-      var optionsTrades = tabAtCall === 'all' ? closedOptionsTradesForGrowth() : [];
+      var optionsTrades = (tabAtCall === 'all' || tabAtCall === 'options') ? closedOptionsTradesForGrowth() : [];
       renderGrowthChartWithRanges(closedJournalTradesForGrowth().concat(optionsTrades));
     });
   }
@@ -11260,11 +11287,11 @@
   // Same stand-in shape, for closed options trades -- a real $ P&L is a
   // real $ P&L regardless of whether it came from a qty*price stock move
   // or a credit collected/paid on an options contract, so it can be
-  // summed into the SAME cumulative curve honestly. Only in the unified
-  // "all" view, not under the Equities or Crypto tabs -- options are
-  // neither, and injecting their P&L into a curve labeled "Equities"
-  // would be exactly the kind of silent mislabeling this file's other
-  // comments keep calling out.
+  // summed into the SAME cumulative curve honestly. In the unified "all"
+  // view and their own "Options" tab, never under Equities or Crypto --
+  // options are neither, and injecting their P&L into a curve labeled
+  // "Equities" would be exactly the kind of silent mislabeling this
+  // file's other comments keep calling out.
   function closedOptionsTradesForGrowth(){
     return allClosedOptionsTrades().filter(function(t){
       return t.closedAt && optionsClosedTradeDollarPL(t) != null;
@@ -11510,11 +11537,11 @@
     // apply the Equities/Crypto filter tabs.
     // Options fold into these stat tiles too now (win/loss decided by
     // dollar sign -- equity out vs. equity in -- same rule as every
-    // other trade here goes through computePL/isWinningReturn), but only
-    // in the unified "all" view: they aren't Equities or Crypto, so
-    // neither of those tabs should silently gain or lose trades when
-    // toggled.
-    var filtered = computeAggregatePL(filteredJournalEntries().concat(journalFilter === 'all' ? optionsClosedJournalRows() : []));
+    // other trade here goes through computePL/isWinningReturn), in the
+    // unified "all" view and their own "options" tab: they aren't
+    // Equities or Crypto, so neither of those tabs should silently gain
+    // or lose trades when toggled.
+    var filtered = computeAggregatePL(filteredJournalEntries().concat((journalFilter === 'all' || journalFilter === 'options') ? optionsClosedJournalRows() : []));
 
     var winRateEl = document.getElementById('statWinRate');
     var winRateSubEl = document.getElementById('statWinRateSub');
