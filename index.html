@@ -2510,6 +2510,16 @@
           <div class="layout-menu" id="cardCustomizeMenu" hidden>
             <div id="cardCustomizeList"></div>
             <div class="layout-divider"></div>
+            <div class="layout-stepper" style="justify-content:space-between;">
+              <span class="step-name">Trade card columns</span>
+              <div class="settings-choice-group" data-trade-columns-group>
+                <button class="tf-btn" data-value="1">1</button>
+                <button class="tf-btn" data-value="2">2</button>
+                <button class="tf-btn" data-value="3">3</button>
+                <button class="tf-btn" data-value="4">4</button>
+              </div>
+            </div>
+            <div class="layout-divider"></div>
             <button class="layout-reset-btn" id="cardCustomizeResetBtn">Reset page layout to defaults</button>
           </div>
         </div>
@@ -3062,7 +3072,7 @@
               <div class="settings-row-title">Trade card columns</div>
               <div class="settings-row-desc">How many trade cards sit side by side in Equities/Crypto Setups and Journal's day-detail list. More columns means smaller, more compact cards -- click any card to open its full detail in the trade detail modal either way.</div>
             </div>
-            <div class="settings-choice-group" id="tradeColumnsChoice">
+            <div class="settings-choice-group" id="tradeColumnsChoice" data-trade-columns-group>
               <button class="tf-btn" data-value="1">1</button>
               <button class="tf-btn" data-value="2">2</button>
               <button class="tf-btn" data-value="3">3</button>
@@ -8958,18 +8968,31 @@
   // render function computing its own inline grid-template-columns --
   // one one style recalculation on toggle, not three separate re-renders.
   var TRADE_COLUMN_COUNTS = ['1', '2', '3', '4'];
-  var tradeColumnsEl = document.getElementById('tradeColumnsChoice');
+  // TWO instances of this control exist -- the original in Settings, and a
+  // second inside Trade Overview's own "Customize page" menu, added because
+  // the Settings-only control meant nobody browsing the cards it actually
+  // affects ever found it. Queried fresh via a single delegated document
+  // click listener (below) rather than binding to each button once at
+  // load: the two instances are static, but a shared selector plus one
+  // listener is simpler to keep correct than caching and wiring two
+  // separate element lookups by hand, and costs nothing extra since both
+  // instances are always in the DOM (the Customize-page one just sits
+  // inside a normally-hidden menu).
+  function tradeColumnsGroups(){ return document.querySelectorAll('[data-trade-columns-group]'); }
   function applyTradeColumnsPref(val, skipSync){
     if(TRADE_COLUMN_COUNTS.indexOf(String(val)) === -1) val = '1';
-    tradeColumnsEl.querySelectorAll('.tf-btn').forEach(function(b){
-      b.classList.toggle('active', b.dataset.value === val);
+    tradeColumnsGroups().forEach(function(group){
+      group.querySelectorAll('.tf-btn').forEach(function(b){
+        b.classList.toggle('active', b.dataset.value === val);
+      });
     });
     document.documentElement.setAttribute('data-trade-columns', val);
     try{ window.localStorage.setItem('shwoopnet:tradeColumns', val); }catch(e){}
     if(!skipSync) syncUserSetting('tradeColumns', val);
   }
-  tradeColumnsEl.querySelectorAll('.tf-btn').forEach(function(b){
-    b.addEventListener('click', function(){ applyTradeColumnsPref(b.dataset.value); });
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-trade-columns-group] .tf-btn');
+    if(btn) applyTradeColumnsPref(btn.dataset.value);
   });
   (function initTradeColumnsPref(){
     var saved = '1';
