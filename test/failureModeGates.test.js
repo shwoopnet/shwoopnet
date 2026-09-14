@@ -124,24 +124,30 @@ gates.G4_a_dead_screener_does_not_look_like_a_quiet_market = () => {
     'a timestamp slightly in the future must not render as a negative age');
 };
 
-// The stale state has to actually reach the cards, including the empty one:
-// "No qualifying setups right now" is a claim about the present that a dead
-// screener cannot support.
-gates.G5_empty_setups_card_distinguishes_quiet_from_stale = () => {
+// A genuinely empty Setups card (no open position, no scan pick of any
+// status) is hidden entirely now, not shown with a "quiet market" message
+// that a dead screener could just as easily produce -- see task #27. The
+// stale/fresh distinction still has to reach the card whenever it IS
+// showing something (the head-meta age note next to a real count), just
+// not via a standalone empty-state sentence anymore.
+gates.G5_empty_setups_card_is_hidden_not_a_misleading_message = () => {
   const eq = src.indexOf('function renderIntradayBlocks(');
   const eqBody = src.slice(eq, src.indexOf('function renderCryptoBlocks(', eq));
+  assert.ok(/toCard-todaysSetups['"]\)[\s\S]{0,40}card\.hidden = source\.length === 0/.test(eqBody),
+    'the equities Setups card must hide itself when source is genuinely empty');
+  assert.ok(!eqBody.includes('No qualifying setups'),
+    'the old "quiet market" empty-state message must be gone now that the card hides instead');
   assert.ok(/eqFresh\.level === 'stale'/.test(eqBody),
-    'the equities setups card must consult the scan age');
-  assert.ok(eqBody.indexOf("eqFresh.level === 'stale'\n        ? '<div class=\"labs-backtest-status down\">No setups have been published") > -1
-    || /level === 'stale'[\s\S]{0,200}No setups have been published/.test(eqBody),
-    'its empty state must say "stale scan", not "quiet market", when the scan is stale');
+    'the equities setups card must still consult the scan age for its non-empty head-meta');
 
   const cx = src.indexOf('function renderCryptoBlocks(');
   const cxBody = src.slice(cx, cx + 12000);
+  assert.ok(/toCard-cryptoSetups['"]\)[\s\S]{0,40}card\.hidden = source\.length === 0/.test(cxBody),
+    'the crypto Setups card must hide itself when source is genuinely empty');
+  assert.ok(!cxBody.includes('No qualifying setups'),
+    'the old crypto "quiet market" empty-state message must be gone too');
   assert.ok(/cxFresh\.level === 'stale'/.test(cxBody),
-    'the crypto setups card must consult its own scan age');
-  assert.ok(/level === 'stale'[\s\S]{0,200}No setups have been published/.test(cxBody),
-    'the crypto empty state must distinguish stale from quiet too');
+    'the crypto setups card must still consult its own scan age for its non-empty head-meta');
 
   // Costs nothing extra: both timestamps ride the user-doc snapshot the
   // app already subscribes to. A gate, because adding a fetch for them
