@@ -2614,7 +2614,7 @@
       </div>
     </div>
 
-    <div class="to-card" id="toCard-todaysSetups">
+    <div class="to-card" id="toCard-todaysSetups" hidden>
       <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
         <div class="to-card-head">
           <span class="to-card-title">Equities Setups</span>
@@ -2625,7 +2625,7 @@
       </div>
     </div>
 
-    <div class="to-card" id="toCard-cryptoSetups">
+    <div class="to-card" id="toCard-cryptoSetups" hidden>
       <div class="intraday-section labs-backtest-card">
         <div class="to-card-head">
           <span class="to-card-title">Crypto Setups</span>
@@ -6450,6 +6450,21 @@
     var source = merged.length ? merged : intradayTrades;
     source = withOpenPositionsMergedIn(source);
     lastRenderedSetups = source;
+
+    // Hidden entirely when there's nothing at all to show -- no open
+    // position AND no live scan pick of any status. Same "hidden-until-
+    // real-data" pattern renderOptionsPositions/renderWeeklySpreadPositions
+    // already use, extended for this card specifically: unlike those two
+    // (real broker records only), this one can ALSO have "watching"
+    // candidates with no position behind them yet, which is still live
+    // scan activity worth showing -- only a genuinely empty source (no
+    // picks of any status, no open position; withOpenPositionsMergedIn
+    // above guarantees a real open position always appears here even if
+    // the screener itself is currently disabled) hides the card.
+    var card = document.getElementById('toCard-todaysSetups');
+    if(card) card.hidden = source.length === 0;
+    if(source.length === 0) return;
+
     var hiddenCount = source.filter(function(t){ return t.status === 'watching'; }).length;
     var visible = todaysSetupsShowAll ? source : source.filter(function(t){ return t.status !== 'watching'; });
 
@@ -6463,9 +6478,10 @@
       : '';
     var headMeta = document.getElementById('todaysSetupsHeadMeta');
     if(headMeta){
-      headMeta.textContent = source.length
-        ? (visible.length + ' of ' + source.length + ' setup' + (source.length === 1 ? '' : 's') + eqAgeNote)
-        : (eqFresh.level === 'stale' || eqFresh.level === 'closed' ? eqAgeNote.replace(/^ · /, '') : '');
+      // source.length is always > 0 here -- the card returned early above
+      // when it wasn't, so there's no longer an empty-source case to
+      // report a bare age note for.
+      headMeta.textContent = visible.length + ' of ' + source.length + ' setup' + (source.length === 1 ? '' : 's') + eqAgeNote;
       headMeta.classList.toggle('is-stale', eqFresh.level === 'stale');
     }
     var filterBtn = document.getElementById('todaysSetupsFilterBtn');
@@ -6484,26 +6500,6 @@
       el.innerHTML = '<div class="labs-backtest-status">No active setups right now — all ' + source.length + ' symbols are still watching. Click "Show all" above to see them.</div>';
       return;
     }
-    // source itself can genuinely be empty -- the backend only ever
-    // reports a symbol here once it actually has a qualifying breakout
-    // (no "Watching" placeholder for the rest of the universe comes from
-    // it at all), and this tab's own local re-scan hasn't necessarily run
-    // yet either. Without this, the card fell through to rendering
-    // completely blank -- no rows, no message, not even the Show-all
-    // button -- which reads as broken instead of "quiet right now."
-    if(source.length === 0){
-      // "Right now" is a claim about the present, and an empty list from a
-      // screener that stopped running hours ago does not support it. When
-      // the scan is stale the card says which of the two it is instead of
-      // reporting a quiet market on the strength of a dead cycle.
-      el.innerHTML = eqFresh.level === 'closed'
-        ? '<div class="labs-backtest-status">The equities market is closed. The screener only runs during the regular session (9:30–16:00 ET); the last scan was ' + formatAgo(eqFresh.ageMs) + '.</div>'
-        : eqFresh.level === 'stale'
-        ? '<div class="labs-backtest-status down">No setups have been published since the last scan ' + formatAgo(eqFresh.ageMs) + ' — that is older than the screener\'s own cycle, so this list may simply not have been refreshed. Check Backend Status.</div>'
-        : '<div class="labs-backtest-status">No qualifying setups across the universe right now — the screener is still watching all 16 symbols for the next breakout.</div>';
-      return;
-    }
-
     el.innerHTML = visible.map(function(t){
       var liveQuote = findQuote(t.sym);
       // findQuote always returns SOME object here (every INTRADAY_UNIVERSE
@@ -6620,6 +6616,14 @@
     );
     lastRenderedCryptoSetups = source;
 
+    // Same "hidden-until-real-data" rule as renderIntradayBlocks' own
+    // card -- see its comment. withCryptoOpenPositionsMergedIn above
+    // guarantees a real open crypto position always appears in source
+    // even if the crypto screener itself is currently disabled.
+    var card = document.getElementById('toCard-cryptoSetups');
+    if(card) card.hidden = source.length === 0;
+    if(source.length === 0) return;
+
     // Same scan-age disclosure as the equities card, on crypto's own
     // separate 5-minute cycle -- see picksFreshness.
     var cxFresh = picksFreshness(backendCryptoPicksUpdatedAt, Date.now(), CRYPTO_CYCLE_INTERVAL_MS);
@@ -6628,22 +6632,10 @@
       : '';
     var headMeta = document.getElementById('cryptoSetupsHeadMeta');
     if(headMeta){
-      headMeta.textContent = source.length
-        ? (source.length + ' setup' + (source.length === 1 ? '' : 's') + cxAgeNote)
-        : (cxFresh.level === 'stale' ? cxAgeNote.replace(/^ · /, '') : '');
+      // source.length is always > 0 here -- the card returned early above
+      // when it wasn't.
+      headMeta.textContent = source.length + ' setup' + (source.length === 1 ? '' : 's') + cxAgeNote;
       headMeta.classList.toggle('is-stale', cxFresh.level === 'stale');
-    }
-
-    // Same gap as renderIntradayBlocks -- the backend only ever reports a
-    // pair here once it actually has a qualifying breakout, no "Watching"
-    // placeholder for the rest of the universe. Without this, the card
-    // fell through to rendering completely blank instead of saying
-    // anything, reading as broken rather than "quiet right now."
-    if(source.length === 0){
-      el.innerHTML = cxFresh.level === 'stale'
-        ? '<div class="labs-backtest-status down">No setups have been published since the last scan ' + formatAgo(cxFresh.ageMs) + ' — that is older than the crypto screener\'s own cycle, so this list may simply not have been refreshed. Check Backend Status.</div>'
-        : '<div class="labs-backtest-status">No qualifying setups right now — the screener is still watching all 12 crypto pairs for the next breakout.</div>';
-      return;
     }
 
     el.innerHTML = source.map(function(t){
