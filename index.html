@@ -6182,7 +6182,7 @@
   var lastRenderedCryptoSetups = [];
   // Guards the async Alpaca-position patch below against a slow, stale
   // response landing after a newer render already happened.
-  var intradayPLPatchGen = 0;
+  var intradayPLPatchGen = { equities: 0, crypto: 0 };
 
   // Shared by renderIntradayBlocks (Trade Overview) and renderWhatToWatch
   // (Market Brief) so both surfaces always agree on what's actually open --
@@ -6342,10 +6342,29 @@
   // this replaces that first-paint estimate with the authoritative
   // number the moment it's available, the same two-phase pattern
   // loadStatusPositions already uses for Open Positions itself.
-  function patchIntradayPLWithAlpacaPositions(){
-    var myGen = ++intradayPLPatchGen;
+  // domain ('equities' or 'crypto') keys its OWN generation counter --
+  // renderIntradayBlocks and renderCryptoBlocks each call this
+  // independently, on their own quote-poll cadence, and a single shared
+  // counter meant either one's call could supersede the other's before
+  // its getAlpacaPositionsCached() fetch resolved, silently dropping a
+  // write for positions that render didn't even touch. Concretely: an
+  // equities render firing between a crypto call's fetch starting and
+  // resolving would bump a shared counter, the crypto call's own
+  // myGen-check would then fail and it would return having patched
+  // nothing -- and because renderCryptoBlocks had already repainted its
+  // cards back to the synchronous "—" first-paint moments earlier, that
+  // card was left stuck on "—" until pure luck lined up a later call
+  // that both fired after and resolved before any other call bumped the
+  // counter again. Same failure the other direction for crypto
+  // superseding equities. Per-domain counters remove the cross-domain
+  // half of that race; same-domain re-renders still correctly supersede
+  // each other, which is this counter's actual purpose (see
+  // overallPLPatchGen's identical pattern below for account switches).
+  function patchIntradayPLWithAlpacaPositions(domain){
+    var key = domain === 'crypto' ? 'crypto' : 'equities';
+    var myGen = ++intradayPLPatchGen[key];
     getAlpacaPositionsCached().then(function(positions){
-      if(myGen !== intradayPLPatchGen) return;
+      if(myGen !== intradayPLPatchGen[key]) return;
       var bySym = alpacaPositionsBySymbol(positions);
       journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).forEach(function(j){
         var live = bySym[canonicalSymbol(j.sym)];
@@ -6561,7 +6580,7 @@
         '</div>';
     }).join('');
 
-    patchIntradayPLWithAlpacaPositions();
+    patchIntradayPLWithAlpacaPositions('equities');
 
     el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
       btn.addEventListener('click', function(){ openSetupTradeModal(btn.dataset.toggle); });
@@ -6675,7 +6694,7 @@
         '</div>';
     }).join('');
 
-    patchIntradayPLWithAlpacaPositions();
+    patchIntradayPLWithAlpacaPositions('crypto');
 
     el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
       btn.addEventListener('click', function(){ openSetupTradeModal(btn.dataset.toggle); });
