@@ -6749,7 +6749,15 @@
     // listeners attached (closures bound to that sym) and skip wiring
     // the second entirely, since the node already reads "wired". A fresh
     // clone (no dataset, no listeners) each open avoids that outright.
-    var oldSvg = document.getElementById('tradeModalChart');
+    // Queried by its PARENT, not by id: the live branch below reassigns
+    // this node's id to 'chart-<sym>' and never restores it (closeTradeModal
+    // only hides the modal, it doesn't reset the id either), so after the
+    // first open of any live position document.getElementById('tradeModalChart')
+    // permanently returns null and every subsequent open throws trying to
+    // clone it -- the modal silently fails to reopen. chartCol's own id is
+    // stable across opens/closes, so finding the <svg> through it can't
+    // break the same way.
+    var oldSvg = chartCol.querySelector('svg');
     var svg = oldSvg.cloneNode(false);
     oldSvg.parentNode.replaceChild(svg, oldSvg);
     // Historical (closed-trade) renders are static -- no live polling, no
