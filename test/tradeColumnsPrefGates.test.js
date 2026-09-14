@@ -35,32 +35,43 @@ function fakeBtn(value) {
 }
 
 function main() {
-  const btn1 = fakeBtn('1'), btn2 = fakeBtn('2'), btn3 = fakeBtn('3'), btn4 = fakeBtn('4');
-  const buttons = [btn1, btn2, btn3, btn4];
+  // TWO instances of the control -- Settings, and the one added to Trade
+  // Overview's own "Customize page" menu so the control is discoverable
+  // from the page it actually affects. Both must stay in sync.
+  const settingsButtons = ['1', '2', '3', '4'].map(fakeBtn);
+  const inlineButtons = ['1', '2', '3', '4'].map(fakeBtn);
+  const groups = [
+    { querySelectorAll: function(){ return settingsButtons; } },
+    { querySelectorAll: function(){ return inlineButtons; } },
+  ];
   const storage = {};
-  let htmlAttr = null;
   let syncedCalls = [];
 
   const src = `
     ${liftVar('TRADE_COLUMN_COUNTS')}
-    var tradeColumnsEl = { querySelectorAll: function(){ return BUTTONS; } };
-    var document = { documentElement: { setAttribute: function(name, v){ if(name === 'data-trade-columns') HTML_ATTR.value = v; } } };
+    var document = {
+      documentElement: { setAttribute: function(name, v){ if(name === 'data-trade-columns') HTML_ATTR.value = v; } },
+      querySelectorAll: function(sel){ return sel === '[data-trade-columns-group]' ? GROUPS : []; },
+      addEventListener: function(){}, // click-delegation wiring, not under test here
+    };
     var window = { localStorage: { setItem: function(k, v){ STORAGE[k] = v; } } };
     function syncUserSetting(k, v){ SYNCED.push([k, v]); }
+    ${lift('tradeColumnsGroups')}
     ${lift('applyTradeColumnsPref')}
     return applyTradeColumnsPref;
   `;
   const htmlAttrHolder = { value: null };
   const applyTradeColumnsPref = new Function(
-    'BUTTONS', 'STORAGE', 'HTML_ATTR', 'SYNCED', src
-  )(buttons, storage, htmlAttrHolder, syncedCalls);
+    'GROUPS', 'STORAGE', 'HTML_ATTR', 'SYNCED', src
+  )(groups, storage, htmlAttrHolder, syncedCalls);
 
   applyTradeColumnsPref('3');
   assert.strictEqual(htmlAttrHolder.value, '3', 'the html[data-trade-columns] attribute must be set to the chosen value');
   assert.strictEqual(storage['shwoopnet:tradeColumns'], '3', 'the choice must persist to localStorage');
-  assert.deepStrictEqual(buttons.map((b) => b.classList.active), [false, false, true, false], 'only the chosen column-count button must read as active');
-  assert.deepStrictEqual(syncedCalls, [['tradeColumns', '3']], 'a normal call must sync to the account');
-  console.log('G1 PASS choosing 3 columns sets the attribute, persists, and syncs');
+  assert.deepStrictEqual(settingsButtons.map((b) => b.classList.active), [false, false, true, false], 'only the chosen column-count button must read as active in Settings');
+  assert.deepStrictEqual(inlineButtons.map((b) => b.classList.active), [false, false, true, false], 'the Trade Overview "Customize page" instance must stay in sync with Settings');
+  assert.deepStrictEqual(syncedCalls, [['tradeColumns', '3']], 'a normal call must sync to the account exactly once, not once per control instance');
+  console.log('G1 PASS choosing 3 columns sets the attribute, persists, syncs once, and stays in sync across both control instances');
 
   syncedCalls = [];
   applyTradeColumnsPref('7', true);
