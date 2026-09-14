@@ -96,16 +96,22 @@ function build(overrides) {
     function renderChartInto(svg, sym, base, tf){ CALLS.renderChartInto.push({sym: sym, base: base, tf: tf}); }
     function setupChartInteractivity(sym){ CALLS.setupChartInteractivity.push(sym); }
     function drawCandles(svg, data, scale, factor, tf, opts){ CALLS.drawCandles.push({data: data, tf: tf, opts: opts}); }
+    function svgLocalX(){ return 0; }
+    function svgLocalY(){ return 0; }
+    var CHART_PLOT_BOTTOM_Y = 170;
     function fetchHistoricalRangeBars(sym, isCrypto, entryTime, exitTime){
       CALLS.fetchHistoricalRangeBars.push({sym: sym, isCrypto: isCrypto, entryTime: entryTime, exitTime: exitTime});
       return FETCH_IMPL(sym, isCrypto, entryTime, exitTime);
     }
     ${liftVar('SYMBOL_BADGE_COLORS')}
+    ${liftVar('tfConfig')}
+    ${liftVar('MIN_VISIBLE_CANDLES')}
     ${lift('symbolBadgeColor')}
     ${lift('symbolBadgeHtml')}
     ${lift('escapeHtml')}
     ${lift('fmt')}
     ${lift('tradeModalPriceCell')}
+    ${lift('setupHistoricalChartInteractivity')}
     ${lift('openTradeModal')}
     ${lift('closeTradeModal')}
     return { openTradeModal: openTradeModal, closeTradeModal: closeTradeModal };

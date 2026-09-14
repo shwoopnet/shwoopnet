@@ -1100,7 +1100,14 @@
   }
   .trade-modal-price-cell .backtest-stat-label{ margin-bottom:3px; }
   .trade-modal-body{ display:flex; gap:22px; flex-wrap:wrap; }
-  .trade-modal-chart-col{ flex: 2 1 480px; min-width:0; }
+  /* Taller than the app-wide default (310px, set on .trade-chart below) --
+     the modal has real vertical room a compact Setups card doesn't, and a
+     chart stretched to the same fixed height regardless of how much space
+     was actually available read as cramped/condensed here specifically. */
+  .trade-modal-chart-col{ flex: 2 1 480px; min-width:0; --chart-height: 420px; }
+  @media (max-width: 700px){
+    .trade-modal-chart-col{ --chart-height: 280px; }
+  }
   .trade-modal-body .trade-notes-col{ flex: 1 1 260px; min-width:0; }
   @media (max-width: 700px){
     .trade-modal{ padding:16px; }
@@ -6789,11 +6796,12 @@
     var oldSvg = chartCol.querySelector('svg');
     var svg = oldSvg.cloneNode(false);
     oldSvg.parentNode.replaceChild(svg, oldSvg);
-    // Historical (closed-trade) renders are static -- no live polling, no
-    // drag/zoom state to carry across re-renders the way an OPEN
-    // position's chart needs (see chartStates) -- so a fresh, unkeyed
-    // draw is correct here and simpler than routing a one-shot render
-    // through the same interactive per-symbol state store.
+    // Historical (closed-trade) renders are static -- no live polling, so
+    // there's no reason to route them through the same sym-keyed
+    // chartStates an OPEN position's chart needs to survive repeated
+    // re-renders across quote polls. They still get real zoom/pan/price-
+    // scale interactivity, just via setupHistoricalChartInteractivity's
+    // own self-contained view state instead (see its comment).
     if(d.chart.kind === 'none'){
       svg.id = 'tradeModalChart';
       chartCol.hidden = true;
@@ -6818,9 +6826,8 @@
           if(myToken !== tradeModalOpenToken) return; // modal moved on -- drop this
           statusEl.setAttribute('hidden', '');
           statusEl.classList.remove('is-loading-shimmer');
-          drawCandles(svg, bars.data, 'linear', 1, bars.tf, {
-            levels: { entry: d.entry, stop: d.stop, target: d.target, entryBarTime: d.chart.entryTime },
-          });
+          setupHistoricalChartInteractivity(svg, bars.data, bars.tf,
+            { entry: d.entry, stop: d.stop, target: d.target, entryBarTime: d.chart.entryTime });
         })
         .catch(function(err){
           if(myToken !== tradeModalOpenToken) return;
@@ -8137,6 +8144,139 @@
       dragState = null;
       svg.style.cursor = 'crosshair';
       hideCrosshair(sym);
+    });
+  }
+
+  // ---------- Historical chart interactivity (closed-trade modal charts) ----------
+  // Same wheel-zoom/drag-pan/drag-price-scale interaction as the live
+  // per-symbol charts above, but self-contained rather than routed through
+  // chartStates/sym: a closed trade's historical bars are a one-shot,
+  // non-live fetch (see fetchHistoricalRangeBars), so there's no live poll
+  // to carry view state across renders, and reusing the sym-keyed system
+  // risks colliding with (or clobbering) a live Setups card open for that
+  // same symbol. All view state lives in the closure captured by this one
+  // call. openTradeModal always hands this a freshly cloned <svg> (see its
+  // own comment), so there's no stale-listener teardown to worry about --
+  // a new call on every open just means new listeners on a new node.
+  function setupHistoricalChartInteractivity(svg, data, tf, levels){
+    var cfg = tfConfig[tf] || tfConfig['1D'];
+    var view = {
+      data: data,
+      viewStart: Math.max(0, data.length - cfg.defaultVisible),
+      viewEnd: data.length,
+      scale: 'linear',
+      priceScaleFactor: 1,
+      priceCenterOffset: 0,
+      lastScale: null
+    };
+    var renderScheduled = false;
+    function render(){
+      var visible = view.data.slice(view.viewStart, view.viewEnd);
+      view.lastScale = drawCandles(svg, visible, view.scale, view.priceScaleFactor, tf, {
+        priceCenterOffset: view.priceCenterOffset,
+        levels: levels,
+        prevScale: view.lastScale
+      });
+    }
+    function scheduleRender(){
+      if(renderScheduled) return;
+      renderScheduled = true;
+      requestAnimationFrame(function(){ renderScheduled = false; render(); });
+    }
+    render();
+
+    function zoom(cursorFraction, factor){
+      var currentCount = view.viewEnd - view.viewStart;
+      var cursorIndex = view.viewStart + cursorFraction * currentCount;
+      var newCount = Math.round(currentCount * factor);
+      var maxCount = Math.min(cfg.maxVisible, view.data.length);
+      newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, maxCount));
+      var newStart = Math.round(cursorIndex - cursorFraction * newCount);
+      var newEnd = newStart + newCount;
+      if(newStart < 0){ newEnd -= newStart; newStart = 0; }
+      if(newEnd > view.data.length){ newStart -= (newEnd - view.data.length); newEnd = view.data.length; }
+      newStart = Math.max(0, newStart);
+      view.viewStart = newStart;
+      view.viewEnd = newEnd;
+      scheduleRender();
+    }
+
+    svg.addEventListener('wheel', function(e){
+      e.preventDefault();
+      var plotW = 760 - 70;
+      var localX = svgLocalX(svg, e.clientX);
+      var fraction = Math.max(0, Math.min(1, localX / plotW));
+      var clampedDelta = Math.max(-200, Math.min(200, e.deltaY));
+      var factor = Math.exp(clampedDelta * 0.0026);
+      zoom(fraction, factor);
+    }, { passive: false });
+
+    var dragState = null;
+    svg.addEventListener('pointerdown', function(e){
+      var plotW = 760 - 70;
+      var localX = svgLocalX(svg, e.clientX);
+      var localY = svgLocalY(svg, e.clientY);
+      var mode = 'pan';
+      if(localX > plotW){ mode = 'scale'; }
+      else if(localY > CHART_PLOT_BOTTOM_Y){ mode = 'timescale'; }
+      var count = view.viewEnd - view.viewStart;
+      var sc = view.lastScale;
+      dragState = {
+        mode: mode, startX: e.clientX, startY: e.clientY,
+        startViewStart: view.viewStart, startCount: count,
+        startFraction: Math.max(0, Math.min(1, localX / plotW)),
+        startFactor: view.priceScaleFactor || 1,
+        startPriceOffset: view.priceCenterOffset || 0,
+        startRange: sc ? sc.range : 1,
+        startPlotH: sc ? sc.plotH : 158
+      };
+      svg.setPointerCapture(e.pointerId);
+      svg.style.cursor = (mode === 'scale') ? 'ns-resize' : (mode === 'timescale') ? 'ew-resize' : 'grabbing';
+    });
+    svg.addEventListener('pointermove', function(e){
+      if(!dragState) return;
+      if(dragState.mode === 'scale'){
+        var dyPixels = e.clientY - dragState.startY;
+        var factor = dragState.startFactor * Math.exp(-dyPixels / 150);
+        view.priceScaleFactor = Math.max(0.2, Math.min(5, factor));
+        scheduleRender();
+      } else if(dragState.mode === 'timescale'){
+        var dxScale = e.clientX - dragState.startX;
+        var scaleFactor = Math.exp(-dxScale / 200);
+        var newCount = Math.round(dragState.startCount * scaleFactor);
+        var maxCountTs = Math.min(cfg.maxVisible, view.data.length);
+        newCount = Math.max(MIN_VISIBLE_CANDLES, Math.min(newCount, maxCountTs));
+        var anchorIdx = dragState.startViewStart + dragState.startFraction * dragState.startCount;
+        var newStart = Math.round(anchorIdx - dragState.startFraction * newCount);
+        var newEnd = newStart + newCount;
+        if(newStart < 0){ newEnd -= newStart; newStart = 0; }
+        if(newEnd > view.data.length){ newStart -= (newEnd - view.data.length); newEnd = view.data.length; }
+        newStart = Math.max(0, newStart);
+        view.viewStart = newStart;
+        view.viewEnd = newEnd;
+        scheduleRender();
+      } else {
+        var rect = svg.getBoundingClientRect();
+        var count2 = view.viewEnd - view.viewStart;
+        var pixelsPerCandle = (rect.width * (690/760)) / count2;
+        var dxPixels = e.clientX - dragState.startX;
+        var deltaCandles = Math.round(dxPixels / pixelsPerCandle);
+        var newStart = Math.max(0, Math.min(dragState.startViewStart - deltaCandles, view.data.length - count2));
+        view.viewStart = newStart;
+        view.viewEnd = newStart + count2;
+        var dyPixels2 = e.clientY - dragState.startY;
+        var pricePerPixel = dragState.startRange / dragState.startPlotH;
+        view.priceCenterOffset = dragState.startPriceOffset + dyPixels2 * pricePerPixel;
+        scheduleRender();
+      }
+    });
+    svg.addEventListener('pointerup', function(e){
+      if(dragState){ try{ svg.releasePointerCapture(e.pointerId); }catch(err){} }
+      dragState = null;
+      svg.style.cursor = '';
+    });
+    svg.addEventListener('pointerleave', function(){
+      if(!dragState) svg.style.cursor = '';
     });
   }
 
