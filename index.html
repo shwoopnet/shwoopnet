@@ -2919,6 +2919,16 @@
       <button class="journal-dupe-btn" id="journalDupeBtn" type="button">Remove duplicates</button>
     </div>
 
+    <!-- Real numbers from real (paper) trades, not fabricated -- but this
+         account's own strategies were formally backtested and falsified
+         (see shwoop-server's research/MECHANISMS.md), so a healthy-looking
+         Win Rate or Profit Factor here describes test traffic on an
+         unvalidated mechanism, not evidence of a working edge. Said once,
+         plainly, rather than left implicit the way it was before the seven
+         profit-factor figures quoted and withdrawn over this project's
+         history got quoted in the first place. -->
+    <div class="labs-backtest-note" style="margin-bottom:10px;">These are real trade results, not evidence of a validated edge — the strategies producing them were backtested and falsified. See the Journal as a record, not a track record.</div>
+
     <div class="pl-summary journal-stats-row">
       <div class="pl-card">
         <div class="pl-card-label">Win Rate</div>
@@ -3000,6 +3010,9 @@
       </div>
       <div class="labs-backtest-status" id="alpacaHistoryStatus"></div>
       <div id="alpacaHistoryResultWrap" hidden>
+        <!-- Same "real numbers, not evidence of an edge" caveat the Journal
+             page's own stats row carries -- see its comment for why. -->
+        <div class="labs-backtest-note" style="margin-bottom:10px;">These are real trade results, not evidence of a validated edge — the strategies producing them were backtested and falsified.</div>
         <div class="pl-summary" id="alpacaHistoryStats" style="margin-bottom:16px; flex-wrap:wrap;"></div>
         <div id="alpacaHistoryAnomalies"></div>
         <div id="alpacaHistoryTableWrap" style="overflow-x:auto;"></div>
