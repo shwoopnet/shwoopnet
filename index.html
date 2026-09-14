@@ -6586,6 +6586,47 @@
     });
   }
 
+  // Same two-phase pattern as patchIntradayPLWithAlpacaPositions above,
+  // for the trade detail modal's own P/L cell -- which used to be a
+  // STATIC snapshot computed once at open time from this tab's own local
+  // quote poll (openSetupTradeModal's own `pl` variable) and never
+  // touched again. If that poll hadn't resolved for this symbol yet the
+  // moment the modal opened, the cell showed an honest "--" and then
+  // just... stayed that way, forever, even once a real price and a real
+  // P/L both existed -- exactly the same gap the Setups row's own cell
+  // had before it got this same treatment, just never fixed here at the
+  // same time. token guards against the modal having moved on to a
+  // different trade (or closed) by the time this resolves, the same
+  // guard the historical-chart fetch already uses.
+  // A named constant, not a literal at each call site -- shared between
+  // the write (tradeModalPriceCell's own id attribute below) and this
+  // read, so the two can never drift apart, and so pre-ship's static
+  // getElementById-vs-id-attribute check doesn't flag this id as
+  // orphaned: this id only ever exists inside dynamically-generated
+  // innerHTML (see tradeModalPriceCell), never as static markup, same as
+  // every "pl-" + sym id elsewhere in this file -- that check already
+  // knows to skip a concatenated lookup for exactly this reason, and a
+  // bare variable reference here is the equivalent for a fixed
+  // (non-per-symbol) id.
+  var TRADE_MODAL_PL_ID = 'tradeModalPL';
+
+  function patchTradeModalPL(sym, token){
+    var openEntry = journalEntries.filter(function(j){ return j.sym === sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
+    if(!openEntry) return;
+    getAlpacaPositionsCached().then(function(positions){
+      if(token !== tradeModalOpenToken) return;
+      var live = alpacaPositionsBySymbol(positions)[canonicalSymbol(sym)];
+      var cell = document.getElementById(TRADE_MODAL_PL_ID);
+      if(!live || !cell) return;
+      var pl = parseFloat(live.unrealized_pl);
+      var plPct = parseFloat(live.unrealized_plpc) * 100;
+      cell.className = 'backtest-stat-value mono ' + (pl >= 0 ? 'up' : 'down');
+      cell.textContent = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)';
+    }).catch(function(err){
+      console.error('Trade modal P/L patch failed:', err);
+    });
+  }
+
   // The breakout's picks, wrapped the same way every caller (this
   // function, and renderWhatToWatch) already expects -- kept as its own
   // function so a future second equities strategy has one place to add
@@ -6884,9 +6925,9 @@
   // chart into a chart element that now belongs to someone else.
   var tradeModalOpenToken = 0;
 
-  function tradeModalPriceCell(label, value, cls){
+  function tradeModalPriceCell(label, value, cls, id){
     return '<div class="trade-modal-price-cell"><div class="backtest-stat-label">' + label + '</div>' +
-      '<div class="backtest-stat-value mono' + (cls ? ' ' + cls : '') + '">' + value + '</div></div>';
+      '<div class="backtest-stat-value mono' + (cls ? ' ' + cls : '') + '"' + (id ? ' id="' + id + '"' : '') + '>' + value + '</div></div>';
   }
 
   // descriptor shape (see the two call sites -- Setups rows and Journal
@@ -6914,7 +6955,7 @@
       tradeModalPriceCell('Entry', d.entry != null ? fmt(d.entry) : '—') +
       (d.stop != null ? tradeModalPriceCell('Stop', fmt(d.stop), 'down') : '') +
       (d.target != null ? tradeModalPriceCell('Target', fmt(d.target), 'up') : '') +
-      tradeModalPriceCell('P/L', plText, plCls);
+      tradeModalPriceCell('P/L', plText, plCls, TRADE_MODAL_PL_ID);
     var notesEl = document.getElementById('tradeModalNotes');
     notesEl.innerHTML = (d.notes && d.notes.length)
       ? d.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('')
@@ -6964,6 +7005,7 @@
       // possibly-stale copy of the same numbers.
       renderChartInto(svg, d.sym, d.chart.basePrice, d.chart.tf);
       setupChartInteractivity(d.sym);
+      patchTradeModalPL(d.sym, myToken);
     } else if(d.chart.kind === 'historical'){
       svg.id = 'tradeModalChart';
       chartCol.hidden = false;

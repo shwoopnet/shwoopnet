@@ -85,7 +85,7 @@ function build(overrides) {
     return sel === 'svg' ? els.tradeModalChartCol._child : null;
   };
 
-  const calls = { renderChartInto: [], setupChartInteractivity: [], drawCandles: [], fetchHistoricalRangeBars: [] };
+  const calls = { renderChartInto: [], setupChartInteractivity: [], drawCandles: [], fetchHistoricalRangeBars: [], patchTradeModalPL: [] };
   const fetchImpl = overrides.fetchHistoricalRangeBars || (() => Promise.resolve({ data: [{ o:1,h:1,l:1,c:1,vol:1,t:new Date() }], tf: '5m' }));
 
   const src = `
@@ -95,6 +95,7 @@ function build(overrides) {
     var document = { getElementById: function(id){ return REGISTRY[id] || null; } };
     function renderChartInto(svg, sym, base, tf){ CALLS.renderChartInto.push({sym: sym, base: base, tf: tf}); }
     function setupChartInteractivity(sym){ CALLS.setupChartInteractivity.push(sym); }
+    function patchTradeModalPL(sym, token){ CALLS.patchTradeModalPL.push({sym: sym, token: token}); }
     function drawCandles(svg, data, scale, factor, tf, opts){ CALLS.drawCandles.push({data: data, tf: tf, opts: opts}); }
     function svgLocalX(){ return 0; }
     function svgLocalY(){ return 0; }
@@ -104,6 +105,7 @@ function build(overrides) {
       return FETCH_IMPL(sym, isCrypto, entryTime, exitTime);
     }
     ${liftVar('SYMBOL_BADGE_COLORS')}
+    ${liftVar('TRADE_MODAL_PL_ID')}
     ${liftVar('tfConfig')}
     ${liftVar('MIN_VISIBLE_CANDLES')}
     ${lift('symbolBadgeColor')}
