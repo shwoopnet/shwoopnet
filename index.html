@@ -14327,6 +14327,18 @@
       ledeParts.push("Today's screener surfaced " + realTrades.length + (realTrades.length === 1 ? ' setup' : ' setups') + ' (' + splitDesc + ').');
     }
 
+    // Options gets a sentence too, when there's anything real to report --
+    // both mechanisms (CSP income, weekly credit spreads) are off by
+    // default (see renderOptionsPositions/renderWeeklySpreadPositions'
+    // own "hidden entirely for an account that's never run this" logic),
+    // so an account that has never enabled either gets no sentence at all
+    // rather than a hollow "0 options positions" line every single day.
+    var optionsOpenCount = (backendOptionsPositions || []).length + (backendWeeklySpreadPositions || []).length;
+    if(optionsOpenCount > 0){
+      ledeParts.push('Options income has ' + optionsOpenCount +
+        (optionsOpenCount === 1 ? ' position' : ' positions') + ' open.');
+    }
+
     // Crypto gets a sentence of its own -- it trades 24/7, so on a
     // weekend or overnight (when every equities figure above is frozen at
     // the last session's close) this is the only part of the lede
