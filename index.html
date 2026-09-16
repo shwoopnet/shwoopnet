@@ -1183,7 +1183,12 @@
   .trade-notes-list li:last-child{ margin-bottom:0; }
   .trade-chart{ width:100%; height: var(--chart-height, 310px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
-  .grid-label{ fill: var(--muted); font-size: 11px; font-family:'Public Sans',sans-serif; font-variant-numeric: tabular-nums; }
+  /* Bumped from 11px/400 -- the smallest, lowest-contrast text on the
+     whole chart was its own axis, the one part meant to be read at a
+     glance while your eyes are actually on the candles. 600 weight reads
+     noticeably clearer than upping size alone would have without
+     crowding the y-axis's tightly-packed price labels. */
+  .grid-label{ fill: var(--muted); font-size: 12px; font-weight:600; font-family:'Public Sans',sans-serif; font-variant-numeric: tabular-nums; }
   .chart-error-text{ fill: var(--paper); font-size:13px; font-family:'Public Sans', sans-serif; }
   .chart-error-sub{ fill: var(--muted); font-size:11px; font-family:'Public Sans', sans-serif; }
   .chart-tool-btn{
@@ -8362,6 +8367,22 @@
       var clampedDelta = Math.max(-200, Math.min(200, e.deltaY));
       var factor = Math.exp(clampedDelta * 0.0026);
       zoomChart(sym, fraction, factor);
+      // zoomChart's own re-render is deferred to the next frame (see
+      // scheduleChartRender), and drawCandles wipes and rebuilds the
+      // whole <svg> on every render -- which clears the crosshair LINE/
+      // TAG elements it drew (they live inside the svg) but never
+      // touches the separate #crosshair-<sym> readout div sitting next
+      // to it. Reported live as "data issues" on the trade modal: scroll
+      // to zoom without moving the mouse and the OHLC box kept showing
+      // whatever bar used to be under the cursor, now pointing at a
+      // price/candle that isn't there any more post-zoom. A second,
+      // nested rAF (registered after zoomChart's own, so it runs in the
+      // same frame right after the fresh render) recomputes the
+      // crosshair against the NEW view/scale at the cursor's unchanged
+      // screen position, instead of leaving it stale or just blanking it.
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ updateCrosshair(sym, e.clientX, e.clientY); });
+      });
     }, { passive: false });
 
     var dragState = null;
