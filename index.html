@@ -810,7 +810,15 @@
      of two-line blocks. */
   .activity-log-row-cols{
     display:grid; grid-template-columns: 128px 58px 1fr auto;
-    align-items:center; gap:12px; padding:10px 0;
+    align-items:center; gap:12px;
+    /* Longhand on purpose -- a `padding:10px 0` shorthand here would also
+       reset padding-left/right to 0, silently overriding .activity-log-row's
+       own padding-left:10px (both classes land on the same element, same
+       specificity, this rule declared later wins). That padding-left exists
+       specifically to offset this row's margin:0 -10px; losing it left the
+       whole row, tag pill included, shifted 10px into the card's own edge
+       -- the "leftmost column clipped" bug, back again after looking fixed. */
+    padding-top:10px; padding-bottom:10px;
   }
   .activity-log-row-cols .activity-log-sym{ font-size:12px; color: var(--paper); }
   .activity-log-row-cols .activity-log-text{ margin:0; }
