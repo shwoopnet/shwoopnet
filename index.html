@@ -8331,10 +8331,24 @@
     }
   }
 
+  // No dataset.wired self-guard here (unlike an earlier version) -- its
+  // only caller (openTradeModal) ALWAYS hands this a freshly
+  // svg.cloneNode(false)'d element specifically so this never double-
+  // wires (see that call site's own comment), and cloneNode(false)
+  // copies EVERY ATTRIBUTE of the source node, data-* included -- so a
+  // dataset.wired='1' set here on one symbol's chart was still sitting
+  // on the very next clone for a DIFFERENT symbol's chart, and this
+  // function's own guard then refused to attach any listeners to it at
+  // all. Reported live and reproduced exactly as described: the first
+  // trade opened after a page load scrolled/zoomed fine, and every
+  // subsequent one -- a different symbol, a fresh close-then-reopen --
+  // did nothing, because "wired" had already migrated onto the node
+  // before this ever ran on it. setupHistoricalChartInteractivity next
+  // to this function has never had a self-guard at all, for the same
+  // reason: the fresh-clone-per-open contract already IS the guard.
   function setupChartInteractivity(sym){
     var svg = document.getElementById('chart-' + sym);
-    if(!svg || svg.dataset.wired) return;
-    svg.dataset.wired = '1';
+    if(!svg) return;
 
     svg.addEventListener('wheel', function(e){
       e.preventDefault();

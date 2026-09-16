@@ -103,7 +103,8 @@ function main() {
     const { mod, svg, listeners } = build();
     mod.initChartState('SYM', '5m', makeBars(50));
     mod.setupChartInteractivity('SYM');
-    assert.strictEqual(svg.dataset.wired, '1', 'the svg must be marked wired after setup');
+    // No dataset.wired assertion here on purpose -- see G4's own comment
+    // for why that attribute is no longer used as a self-guard at all.
     assert.strictEqual(typeof listeners.wheel, 'function', 'a wheel listener must actually be attached');
     assert.strictEqual(typeof listeners.pointerdown, 'function', 'a pointerdown listener must actually be attached');
     console.log('G1 PASS setupChartInteractivity wires real wheel/pointerdown listeners on the live chart svg');
@@ -149,19 +150,27 @@ function main() {
     console.log('G3 PASS dragging pans the live chart\'s view');
   }
 
-  // ---- setupChartInteractivity called a SECOND time on the SAME node must not throw / must still be wired ----
-  // (Reproduces exactly what openTradeModal does: renderChartInto -> setupChartInteractivity,
-  // on a node that -- across a poll re-render inside the SAME open modal session -- could
-  // already carry dataset.wired from a prior call.)
+  // ---- A fresh clone that inherited a "wired" attribute must still get wired ----
+  // Reported live: the first trade opened after a page load scrolled/zoomed
+  // fine, and the SECOND one -- a different symbol, a fresh close-then-
+  // reopen -- did nothing at all. openTradeModal always hands this a
+  // freshly svg.cloneNode(false)'d element specifically so a prior open's
+  // listeners can never carry over -- but cloneNode(false) copies every
+  // ATTRIBUTE of the source node, data-* included, so a dataset.wired='1'
+  // set on the FIRST symbol's node was still sitting on the clone made for
+  // the SECOND symbol's node, even though that clone had never actually
+  // been wired itself. A self-guard keyed on that attribute would see
+  // "already wired" and skip attaching any listeners at all -- this
+  // simulates exactly that inherited-attribute clone and confirms
+  // setupChartInteractivity wires it anyway.
   {
     const { mod, svg, listeners } = build();
+    svg.dataset.wired = '1'; // what a cloneNode(false) of an already-wired node carries over
     mod.initChartState('SYM', '5m', makeBars(50));
     mod.setupChartInteractivity('SYM');
-    const firstWheel = listeners.wheel;
-    mod.setupChartInteractivity('SYM'); // called again, same node
-    assert.strictEqual(listeners.wheel, firstWheel,
-      'a second setup call on an already-wired node must be a no-op (guarded by svg.dataset.wired), not double-attach');
-    console.log('G4 PASS a second setupChartInteractivity call on the same node is a safe no-op');
+    assert.strictEqual(typeof listeners.wheel, 'function',
+      'a node that inherited dataset.wired from cloneNode(false) must still get real listeners attached, not be skipped as "already wired"');
+    console.log('G4 PASS a clone that inherited a stale "wired" attribute still gets wired for real');
   }
 
   console.log('\nAll live chart interactivity gates passed.');
