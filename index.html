@@ -1181,6 +1181,11 @@
     padding: 2px 0 12px 14px; border-left: 2px solid var(--amber-dim); margin-bottom:12px;
   }
   .trade-notes-list li:last-child{ margin-bottom:0; }
+  /* Second block in the same column, closed trades only -- a visible
+     divider (not just top margin) so "how it actually happened" reads as
+     a separate, later-in-time list from "why it was taken", not a
+     continuation of the same one. */
+  #tradeModalPlayedOutCol{ margin-top:20px; padding-top:18px; border-top:1px solid var(--border); }
   .trade-chart{ width:100%; height: var(--chart-height, 310px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
   /* Bumped from 11px/400 -- the smallest, lowest-contrast text on the
@@ -2489,6 +2494,13 @@
       <div class="trade-notes-col">
         <h3>Why this trade</h3>
         <ul class="trade-notes-list" id="tradeModalNotes"></ul>
+        <!-- Closed trades only -- see buildPlayedOutNotes' own comment for
+             what this can and can't say. Hidden entirely (not just empty)
+             for an open trade, where "how it played out" has no answer yet. -->
+        <div id="tradeModalPlayedOutCol" hidden>
+          <h3>How it played out</h3>
+          <ul class="trade-notes-list" id="tradeModalPlayedOut"></ul>
+        </div>
       </div>
     </div>
   </div>
@@ -7040,6 +7052,15 @@
       ? d.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('')
       : '<li>No recorded reasoning for this trade.</li>';
 
+    var playedOutCol = document.getElementById('tradeModalPlayedOutCol');
+    if(d.playedOut && d.playedOut.length){
+      document.getElementById('tradeModalPlayedOut').innerHTML =
+        d.playedOut.map(function(n){ return '<li>' + n + '</li>'; }).join('');
+      playedOutCol.removeAttribute('hidden');
+    } else {
+      playedOutCol.setAttribute('hidden', '');
+    }
+
     var chartCol = document.getElementById('tradeModalChartCol');
     var statusEl = document.getElementById('tradeModalChartStatus');
     statusEl.setAttribute('hidden', '');
@@ -10199,6 +10220,94 @@
     return { pct: pctVal, dollar: dollarVal };
   }
 
+  // "How it played out" -- a closed-trade-only companion to "Why this
+  // trade": that list is pinned at ENTRY and never changes; this is built
+  // fresh from how the trade actually ended, entry to exit. Deliberately
+  // narrower than it could be: this repo's own discipline is never
+  // inventing a number (see optionsClosedTradeDollarPL, CLAUDE.md's whole
+  // "no fabricated result" thread), and a journal entry does not record
+  // WHICH order actually filled the exit -- only its price and date. So
+  // "stop-loss" / "target" below is stated as what the exit price is
+  // CONSISTENT WITH (a proximity check), not asserted as fact the way a
+  // real order-type-tagged exitReason field would let it be. A future
+  // version that has that field can drop the hedging language outright.
+  function buildPlayedOutNotes(e){
+    if(e.status !== 'closed' || e.entry == null || e.exit == null) return [];
+    var notes = [];
+    var isLong = e.direction !== 'Short';
+    var sameDay = e.date === (e.exitDate || e.date);
+    var entryDateStr = niceDateShort(e.date);
+    var exitDateStr = niceDateShort(e.exitDate || e.date);
+    notes.push(
+      'Entered ' + (isLong ? 'long' : 'short') + ' at ' + fmt(e.entry) + ' on ' + entryDateStr +
+      (sameDay
+        ? ', closed the same session at ' + fmt(e.exit) + '.'
+        : ', closed at ' + fmt(e.exit) + ' on ' + exitDateStr + ' -- ' + calendarDaySpan(e.date, e.exitDate) + '.')
+    );
+
+    var pl = computePL(e);
+    if(pl.dollar != null && !isNaN(pl.dollar)){
+      var plLine = (pl.dollar >= 0 ? 'Closed up ' : 'Closed down ') + '$' + Math.abs(pl.dollar).toFixed(2) +
+        ' (' + (pl.pct >= 0 ? '+' : '') + pl.pct.toFixed(1) + '%).';
+      if(e.stop != null && e.entry !== e.stop){
+        var plannedRisk = Math.abs(e.entry - e.stop);
+        var realizedR = ((e.exit - e.entry) * (isLong ? 1 : -1)) / plannedRisk;
+        plLine += ' That is about ' + (realizedR >= 0 ? '+' : '') + realizedR.toFixed(2) + 'R against the ' +
+          fmt(plannedRisk) + ' of planned risk this trade opened with.';
+      }
+      notes.push(plLine);
+    }
+
+    // Proximity check, not a real fill classification -- see this
+    // function's own header comment on why. A tolerance of 1% of price
+    // (floor 1 cent) treats "basically at the level" as "at the level"
+    // without needing exact-cent agreement, which a real fill essentially
+    // never has (slippage, a trailing stop that had already moved).
+    if(e.stop != null || e.t1 != null){
+      var tol = Math.max(e.exit * 0.01, 0.01);
+      var nearStop = e.stop != null && Math.abs(e.exit - e.stop) <= tol;
+      var nearTarget = e.t1 != null && Math.abs(e.exit - e.t1) <= tol;
+      if(nearStop && !nearTarget){
+        notes.push('Exit price landed at ' + fmt(e.exit) + ', right at the ' + fmt(e.stop) +
+          ' stop -- consistent with a stop-loss exit (the stop may have trailed since entry, so this isn\'t necessarily the ORIGINAL stop).');
+      } else if(nearTarget && !nearStop){
+        notes.push('Exit price landed at ' + fmt(e.exit) + ', right at the ' + fmt(e.t1) + ' target.');
+      } else if(!nearStop && !nearTarget){
+        notes.push('Exit price ' + fmt(e.exit) + ' isn\'t close to either the stop (' + (e.stop != null ? fmt(e.stop) : '—') +
+          ') or the target (' + (e.t1 != null ? fmt(e.t1) : '—') + ') -- likely a trailing-stop, time-stop, or session-close exit rather than either fixed level.');
+      }
+    }
+
+    if(e.reachedEarlyBreakeven !== undefined){
+      notes.push(e.reachedEarlyBreakeven
+        ? 'Price moved far enough in its favor at some point to lock the stop at breakeven, before the trade eventually closed.'
+        : 'The stop never reached breakeven -- this trade closed still carrying its full original risk.');
+    }
+
+    return notes;
+  }
+
+  // Short "Sep 11" style date, reused here rather than pulled from one of
+  // the several slightly-different date formatters already in this file
+  // (toLocaleDateString options differ by call site) -- this one only
+  // ever needs to read well inline in a sentence.
+  function niceDateShort(dateStr){
+    if(!dateStr) return '—';
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString([], { month:'short', day:'numeric' });
+  }
+
+  // Calendar days, explicitly NOT trading days -- this file has no market
+  // calendar to consult client-side (see usMarketHolidays.js, server-only),
+  // and a wrong "N trading days" claim is worse than an honest "N calendar
+  // days" one. Phrasing says so outright rather than implying precision
+  // this doesn't have.
+  function calendarDaySpan(startStr, endStr){
+    var start = new Date(startStr + 'T00:00:00');
+    var end = new Date((endStr || startStr) + 'T00:00:00');
+    var days = Math.round((end - start) / 86400000);
+    return days + ' calendar day' + (days === 1 ? '' : 's') + ' later';
+  }
+
   // Closed options trades (CSP + weekly spread), reshaped to sit alongside
   // real journalEntries in the calendar, the day-by-day Journal list, AND
   // (via computeAggregatePL, now dollar-based for exactly this reason) the
@@ -10636,6 +10745,9 @@
       // reference lines for how price actually moved relative to them.
       entry: e.entry, stop: e.stop, target: e.t1,
       pl: pl, notes: e.entryNotes || [], chart: chart,
+      // buildPlayedOutNotes itself returns [] for anything still open, so
+      // this is safe to always compute rather than branching here too.
+      playedOut: buildPlayedOutNotes(e),
     });
   }
 

@@ -74,7 +74,8 @@ function fakeNode(id, registry) {
 function build(overrides) {
   const registry = {};
   const els = {};
-  ['tradeModalSymCell', 'tradeModalPrices', 'tradeModalNotes', 'tradeModalChartCol', 'tradeModalChart', 'tradeModalChartStatus']
+  ['tradeModalSymCell', 'tradeModalPrices', 'tradeModalNotes', 'tradeModalChartCol', 'tradeModalChart', 'tradeModalChartStatus',
+    'tradeModalPlayedOutCol', 'tradeModalPlayedOut']
     .forEach((id) => { els[id] = fakeNode(id, registry); });
   // Wire the chart <svg> as chartCol's real DOM child, and give chartCol a
   // querySelector so openTradeModal's chartCol.querySelector('svg') lookup
