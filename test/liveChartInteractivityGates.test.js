@@ -77,7 +77,7 @@ function build() {
     ${liftVar('chartStates')}
     var chartRenderScheduled = {};
     ${liftVar('MIN_VISIBLE_CANDLES')}
-    ${liftVar('CHART_PLOT_BOTTOM_Y')}
+    ${lift('chartPlotBottomY')}
     ${lift('svgLocalX')}
     ${lift('svgLocalY')}
     ${lift('scheduleChartRender')}

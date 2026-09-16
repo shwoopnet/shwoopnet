@@ -62,7 +62,7 @@ function build() {
     }
     function svgLocalX(svgArg, clientX){ return clientX; } // tests drive clientX directly as a plotW-relative coordinate
     function svgLocalY(svgArg, clientY){ return clientY; }
-    var CHART_PLOT_BOTTOM_Y = 170;
+    function chartPlotBottomY(svgArg){ return 170; } // matches the fake svg's own 240-tall viewBox below (240-70=170)
     // Real browsers batch redraws via requestAnimationFrame; Node has no
     // such global, so runs the callback immediately -- fine here since
     // these tests only care about the end state, not frame timing.

@@ -1049,8 +1049,17 @@
   }
   .trade-block{
     background:var(--panel); border:1px solid var(--border); border-radius: var(--radius);
-    margin-bottom:14px; overflow:hidden;
+    margin-bottom:14px; overflow:hidden; cursor:pointer;
     box-shadow: var(--card-shadow);
+    transition: border-color .12s ease, box-shadow .12s ease;
+  }
+  /* The whole card is the click target that opens the trade detail modal
+     (see renderIntradayBlocks/renderCryptoBlocks' own comment) -- this is
+     the hover cue that tells you so, not just the small chevron's own
+     :hover rule below. */
+  .trade-block:hover{
+    border-color: var(--amber-dim);
+    box-shadow: var(--card-shadow), 0 0 0 1px var(--amber-dim);
   }
   .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; transition: transform .15s ease; }
   .chevron:hover{ color: var(--amber); }
@@ -2451,7 +2460,21 @@
     <div class="trade-modal-body">
       <div class="trade-modal-chart-col" id="tradeModalChartCol">
         <div class="chart-canvas-wrap">
-          <svg class="trade-chart" id="tradeModalChart" viewBox="0 0 760 240" preserveAspectRatio="none"></svg>
+          <!-- Taller viewBox than every other chart on the page (which
+               all share "0 0 760 240") -- this chart ALSO renders at a
+               taller CSS height (.trade-modal-chart-col's own
+               --chart-height, see its comment), and a viewBox mismatched
+               against that height gets non-uniformly stretched by
+               preserveAspectRatio="none" below, distorting every candle,
+               gridline and character of axis/price-tag text drawn into
+               it (see drawCandles' own comment). 580 is chosen to
+               roughly match this column's typical rendered aspect ratio
+               at both the desktop (~550x420) and mobile (~380x280)
+               --chart-height values, not an exact fit for every possible
+               width -- there is no static number that is, short of
+               recomputing this on every resize, which is more than a
+               font-legibility fix needs. -->
+          <svg class="trade-chart" id="tradeModalChart" viewBox="0 0 760 580" preserveAspectRatio="none"></svg>
         </div>
         <div class="labs-backtest-status" id="tradeModalChartStatus" hidden></div>
       </div>
@@ -2739,7 +2762,29 @@
       <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
         <div class="to-card-head">
           <span class="to-card-title">Equities Setups</span>
-          <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="to-card-meta" id="todaysSetupsHeadMeta"></span>
+            <div class="layout-dropdown">
+              <button class="layout-toggle-btn" id="todaysSetupsColumnsToggle" aria-haspopup="true" aria-expanded="false">
+                <span>Columns</span>
+                <span class="caret">▾</span>
+              </button>
+              <!-- Same shared [data-trade-columns-group] control as Settings
+                   and the "Customize page" menu -- one preference, three
+                   places to reach it, always in sync (see
+                   applyTradeColumnsPref's own comment). Card-level placement
+                   added because neither of the other two read as
+                   discoverable next to the cards it actually affects. -->
+              <div class="layout-menu" id="todaysSetupsColumnsMenu" hidden>
+                <div class="settings-choice-group" data-trade-columns-group>
+                  <button class="tf-btn" data-value="1">1</button>
+                  <button class="tf-btn" data-value="2">2</button>
+                  <button class="tf-btn" data-value="3">3</button>
+                  <button class="tf-btn" data-value="4">4</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <button class="settings-reset-btn" id="todaysSetupsFilterBtn" style="margin-bottom:14px; display:none;"></button>
         <div id="intradayBlocks"></div>
@@ -2750,7 +2795,23 @@
       <div class="intraday-section labs-backtest-card">
         <div class="to-card-head">
           <span class="to-card-title">Crypto Setups</span>
-          <span class="to-card-meta" id="cryptoSetupsHeadMeta"></span>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="to-card-meta" id="cryptoSetupsHeadMeta"></span>
+            <div class="layout-dropdown">
+              <button class="layout-toggle-btn" id="cryptoSetupsColumnsToggle" aria-haspopup="true" aria-expanded="false">
+                <span>Columns</span>
+                <span class="caret">▾</span>
+              </button>
+              <div class="layout-menu" id="cryptoSetupsColumnsMenu" hidden>
+                <div class="settings-choice-group" data-trade-columns-group>
+                  <button class="tf-btn" data-value="1">1</button>
+                  <button class="tf-btn" data-value="2">2</button>
+                  <button class="tf-btn" data-value="3">3</button>
+                  <button class="tf-btn" data-value="4">4</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div id="cryptoBlocks"></div>
       </div>
@@ -6793,8 +6854,15 @@
 
     patchIntradayPLWithAlpacaPositions('equities');
 
-    el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
-      btn.addEventListener('click', function(){ openSetupTradeModal(btn.dataset.toggle); });
+    // The whole card is the click target now, not just the chevron --
+    // requested directly: a target the width of one small arrow was easy
+    // to miss on a row that's otherwise entirely non-interactive-looking.
+    // The chevron stays as a visual affordance (it still LOOKS like
+    // there's more here to open) but no longer needs its own listener --
+    // a click on it bubbles up to this same handler like any other click
+    // inside the card, so it still works exactly as before.
+    el.querySelectorAll('.trade-block[data-symbol]').forEach(function(card){
+      card.addEventListener('click', function(){ openSetupTradeModal(card.dataset.symbol); });
     });
   }
 
@@ -6903,8 +6971,15 @@
 
     patchIntradayPLWithAlpacaPositions('crypto');
 
-    el.querySelectorAll('.chevron[data-toggle]').forEach(function(btn){
-      btn.addEventListener('click', function(){ openSetupTradeModal(btn.dataset.toggle); });
+    // The whole card is the click target now, not just the chevron --
+    // requested directly: a target the width of one small arrow was easy
+    // to miss on a row that's otherwise entirely non-interactive-looking.
+    // The chevron stays as a visual affordance (it still LOOKS like
+    // there's more here to open) but no longer needs its own listener --
+    // a click on it bubbles up to this same handler like any other click
+    // inside the card, so it still works exactly as before.
+    el.querySelectorAll('.trade-block[data-symbol]').forEach(function(card){
+      card.addEventListener('click', function(){ openSetupTradeModal(card.dataset.symbol); });
     });
   }
 
@@ -7643,7 +7718,24 @@
     // (e.g. "E 181.81" for COIN/PLTR, both real symbols here) was
     // clipping at the old margin, which only ever got verified against
     // 2-digit prices like MARA's "E 11.45".
-    var W = 760, H = 240, padTop=12, padBottom=30, padRight=70, volGap=4, volH=36;
+    //
+    // W/H read from the SVG'S OWN viewBox, not hardcoded -- every chart on
+    // the page used to share this exact 760x240 box regardless of how
+    // tall its CSS actually rendered it, and preserveAspectRatio="none"
+    // (see the markup) stretches a mismatched box non-uniformly: taller
+    // CSS height than the viewBox's own aspect ratio supports means
+    // everything drawn here -- candlesticks, gridlines, and every
+    // character of axis/price-tag text -- gets vertically stretched by
+    // however much the two ratios disagree. That's what made the trade
+    // modal's chart (given more CSS height specifically so it reads less
+    // condensed) look like its font was wrong: the font was never wrong,
+    // it was being stretched along with the candles sitting right next to
+    // it. A chart that wants real extra room declares a taller viewBox to
+    // match (see the modal's own markup) so the stretch factor stays 1:1
+    // in both directions -- taller AND undistorted, not just taller.
+    var vb = svg.viewBox && svg.viewBox.baseVal;
+    var W = (vb && vb.width) || 760, H = (vb && vb.height) || 240;
+    var padTop=12, padBottom=30, padRight=70, volGap=4, volH=36;
     var plotW = W - padRight, plotH = H - padTop - padBottom - volGap - volH;
     priceScaleFactor = priceScaleFactor || 1;
 
@@ -8113,8 +8205,25 @@
     return vb.y + fraction * vb.height;
   }
 
-  // Bottom margin where date labels live — matches padTop(12)+plotH(158) in drawCandles.
-  var CHART_PLOT_BOTTOM_Y = 170;
+  // Bottom margin where date labels live — matches padTop(12)+plotH in
+  // drawCandles, i.e. viewBox height minus the fixed padBottom+volGap+volH
+  // (30+4+36=70) drawCandles itself uses. A function of the SVG's own
+  // viewBox, not a flat constant: the trade modal's chart declares a
+  // TALLER viewBox than every other chart on the page (see its own markup
+  // comment) specifically so a bigger CSS height renders it genuinely
+  // bigger -- more real plot area -- rather than non-uniformly STRETCHING
+  // a viewBox sized for a shorter box, which is what distorted every
+  // candle, gridline and character of text on it before this (reported
+  // live as "fix font on chart, both numbers and letters" -- the glyphs
+  // were never wrong, they were being vertically stretched along with
+  // everything else). A flat 170 was only ever correct for a 240-tall
+  // viewBox; using it against a taller one would put the plot/time-axis
+  // boundary in the wrong place for exactly the chart most likely to hit
+  // this code, since dragging is the one interaction that reads it.
+  function chartPlotBottomY(svg){
+    var vb = svg.viewBox && svg.viewBox.baseVal;
+    return ((vb && vb.height) || 240) - 70;
+  }
 
   function zoomChart(sym, cursorFraction, zoomFactor){
     var state = chartStates[sym];
@@ -8251,7 +8360,7 @@
       var localY = svgLocalY(svg, e.clientY);
       var mode = 'pan';
       if(localX > plotW){ mode = 'scale'; }
-      else if(localY > CHART_PLOT_BOTTOM_Y){ mode = 'timescale'; }
+      else if(localY > chartPlotBottomY(svg)){ mode = 'timescale'; }
       var count = state.viewEnd - state.viewStart;
       var sc = state.lastScale;
       dragState = {
@@ -8322,7 +8431,7 @@
         var localXHover = svgLocalX(svg, e.clientX);
         var localYHover = svgLocalY(svg, e.clientY);
         if(localXHover > plotWHover){ svg.style.cursor = 'ns-resize'; }
-        else if(localYHover > CHART_PLOT_BOTTOM_Y){ svg.style.cursor = 'ew-resize'; }
+        else if(localYHover > chartPlotBottomY(svg)){ svg.style.cursor = 'ew-resize'; }
         else { svg.style.cursor = 'crosshair'; }
         updateCrosshair(sym, e.clientX, e.clientY);
       }
@@ -8409,7 +8518,7 @@
       var localY = svgLocalY(svg, e.clientY);
       var mode = 'pan';
       if(localX > plotW){ mode = 'scale'; }
-      else if(localY > CHART_PLOT_BOTTOM_Y){ mode = 'timescale'; }
+      else if(localY > chartPlotBottomY(svg)){ mode = 'timescale'; }
       var count = view.viewEnd - view.viewStart;
       var sc = view.lastScale;
       dragState = {
@@ -13755,6 +13864,8 @@
   }
   wireLayoutDropdown('activityLogFiltersToggle', 'activityLogFiltersMenu', renderActivityLogFilters);
   wireLayoutDropdown('historyFiltersToggle', 'historyFiltersMenu', renderActivityLogFilters);
+  wireLayoutDropdown('todaysSetupsColumnsToggle', 'todaysSetupsColumnsMenu');
+  wireLayoutDropdown('cryptoSetupsColumnsToggle', 'cryptoSetupsColumnsMenu');
 
   // A cycle_summary ("Scan") entry gets written once per backend cycle
   // regardless of outcome -- with a 24/7 crypto cycle running every 5

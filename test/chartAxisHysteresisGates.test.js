@@ -51,7 +51,7 @@ function tightBars() {
   return out;
 }
 
-function fakeSvg() { return { innerHTML: '' }; }
+function fakeSvg() { return { innerHTML: '', viewBox: { baseVal: { width: 760, height: 240 } } }; }
 
 function main() {
   // ---- Baseline: with no prevScale, the axis is computed fresh and
