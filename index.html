@@ -1044,7 +1044,7 @@
 
   .trade-columns{
     display:grid;
-    grid-template-columns: 28px 1.5fr 1fr 1fr 1fr 1.1fr 1.1fr;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1.1fr 1.1fr;
     gap: 10px; align-items:center; padding: 10px 16px;
   }
   .trade-row [data-label]::before{
@@ -1063,14 +1063,11 @@
   }
   /* The whole card is the click target that opens the trade detail modal
      (see renderIntradayBlocks/renderCryptoBlocks' own comment) -- this is
-     the hover cue that tells you so, not just the small chevron's own
-     :hover rule below. */
+     the hover cue that tells you so. */
   .trade-block:hover{
     border-color: var(--amber-dim);
     box-shadow: var(--card-shadow), 0 0 0 1px var(--amber-dim);
   }
-  .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; transition: transform .15s ease; }
-  .chevron:hover{ color: var(--amber); }
   .t-sym-cell{ display:flex; align-items:center; gap:10px; }
   .t-sym-badge{
     width:32px; height:32px; border-radius:9px; flex-shrink:0;
@@ -1216,7 +1213,6 @@
     .trade-columns.head{ display:none; }
     .trade-columns{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
     .trade-columns > *{ flex:1 1 40%; }
-    .trade-columns .chevron{ flex: 0 0 auto; }
     .trade-columns .t-sym-cell{ flex: 1 1 100%; }
     [data-label]::before{
       content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
@@ -1236,7 +1232,6 @@
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns.head{ display:none; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns > *{ flex:1 1 40%; }
-  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns .chevron{ flex: 0 0 auto; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns .t-sym-cell{ flex: 1 1 100%; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) [data-label]::before{
     content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
@@ -6836,7 +6831,6 @@
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
-            '<button class="chevron" data-toggle="' + t.sym + '" aria-label="View trade details">›</button>' +
             '<div class="t-sym-cell">' +
               symbolBadgeHtml(t.sym) +
               '<span class="t-sym-text">' +
@@ -6862,13 +6856,12 @@
 
     patchIntradayPLWithAlpacaPositions('equities');
 
-    // The whole card is the click target now, not just the chevron --
-    // requested directly: a target the width of one small arrow was easy
-    // to miss on a row that's otherwise entirely non-interactive-looking.
-    // The chevron stays as a visual affordance (it still LOOKS like
-    // there's more here to open) but no longer needs its own listener --
-    // a click on it bubbles up to this same handler like any other click
-    // inside the card, so it still works exactly as before.
+    // The whole card is the click target -- requested directly: a target
+    // the width of one small arrow was easy to miss on a row that's
+    // otherwise entirely non-interactive-looking. The chevron itself has
+    // since been removed (also requested): once every card is a button,
+    // a separate arrow icon no longer tells you anything the card's own
+    // hover cue (.trade-block:hover) doesn't already.
     el.querySelectorAll('.trade-block[data-symbol]').forEach(function(card){
       card.addEventListener('click', function(){ openSetupTradeModal(card.dataset.symbol); });
     });
@@ -6954,7 +6947,6 @@
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
-            '<button class="chevron" data-toggle="' + t.sym + '" aria-label="View trade details">›</button>' +
             '<div class="t-sym-cell">' +
               symbolBadgeHtml(t.sym) +
               '<span class="t-sym-text">' +
@@ -6979,13 +6971,12 @@
 
     patchIntradayPLWithAlpacaPositions('crypto');
 
-    // The whole card is the click target now, not just the chevron --
-    // requested directly: a target the width of one small arrow was easy
-    // to miss on a row that's otherwise entirely non-interactive-looking.
-    // The chevron stays as a visual affordance (it still LOOKS like
-    // there's more here to open) but no longer needs its own listener --
-    // a click on it bubbles up to this same handler like any other click
-    // inside the card, so it still works exactly as before.
+    // The whole card is the click target -- requested directly: a target
+    // the width of one small arrow was easy to miss on a row that's
+    // otherwise entirely non-interactive-looking. The chevron itself has
+    // since been removed (also requested): once every card is a button,
+    // a separate arrow icon no longer tells you anything the card's own
+    // hover cue (.trade-block:hover) doesn't already.
     el.querySelectorAll('.trade-block[data-symbol]').forEach(function(card){
       card.addEventListener('click', function(){ openSetupTradeModal(card.dataset.symbol); });
     });
