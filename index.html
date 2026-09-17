@@ -4283,8 +4283,16 @@
     var cryptoOpenCount = cryptoSource.filter(function(t){
       return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
     }).length;
-    var text = (source.length + cryptoSource.length) + ' instruments you\'re tracking today (' +
-      source.length + ' stocks, ' + cryptoSource.length + ' crypto), ' + (openCount + cryptoOpenCount) + ' with open positions';
+    // Options positions are always open positions (the mechanisms hold
+    // no "watching, not yet in" state the way equities/crypto do) -- same
+    // count used by the lede paragraph's own "Options income has N
+    // positions open" sentence nearby, so the two stats can't drift
+    // apart on what "open" means for options.
+    var optionsCount = (backendOptionsPositions || []).length + (backendWeeklySpreadPositions || []).length;
+    var text = (source.length + cryptoSource.length + optionsCount) + ' instruments you\'re tracking today (' +
+      source.length + ' stocks, ' + cryptoSource.length + ' crypto' +
+      (optionsCount ? ', ' + optionsCount + ' options' : '') + '), ' +
+      (openCount + cryptoOpenCount + optionsCount) + ' with open positions';
     document.getElementById('ctaStat').textContent = text;
   }
 
