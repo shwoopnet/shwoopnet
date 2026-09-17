@@ -8193,15 +8193,27 @@
   function renderChartInto(svg, sym, base, tf){
     fetchHistory(sym, tf, 'high').then(function(bars){
       // Keep the chart anchored to the live current price rather than
-      // whatever Twelve Data's most recent close happened to be — but
-      // only the close, not the high/low. Twelve Data's free tier can lag
-      // real-time by a meaningful amount, so stretching the wick to
-      // always reach the live quote was bridging two data sources that
-      // sometimes genuinely disagree, producing a wick shooting far past
-      // where the rest of the candle series actually sits.
+      // whatever Twelve Data's most recent close happened to be. h/l stay
+      // Twelve Data's own real range EXCEPT when the live quote falls
+      // outside it -- clamped with Math.max/min, not just copied, because
+      // a candle whose close sits beyond its own high/low is not a
+      // rendering choice, it's an invalid OHLC bar: drawCandles draws the
+      // wick from h to l and the body from open to close as two separate
+      // shapes, so a close outside [l, h] draws a body sticking out past
+      // the end of its own wick -- confirmed live, "maybe chart bug here
+      // with the candle", a solid block appearing to plunge straight
+      // through the bottom of the plot with no wick visible past it. The
+      // axis range (drawCandles' own loRaw/hiRaw) reads only h/l per bar
+      // too, so an unclamped close also wasn't even guaranteed to be
+      // inside the visible plot at all. Twelve Data's free-tier lag is
+      // still real and still means this h/l and the live quote can
+      // disagree -- but the fix for that disagreement can never be an
+      // internally-inconsistent candle; when they genuinely diverge this
+      // much, the candle's own wick extending to show it is the honest
+      // picture, not a bug to paper over.
       var lastBar = bars[bars.length - 1];
       var adjusted = bars.slice(0, -1).concat([{
-        o: lastBar.o, h: lastBar.h, l: lastBar.l, c: base, t: lastBar.t
+        o: lastBar.o, h: Math.max(lastBar.h, base), l: Math.min(lastBar.l, base), c: base, t: lastBar.t
       }]);
       initChartState(sym, tf, adjusted);
       renderChartView(sym);
