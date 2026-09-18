@@ -2746,9 +2746,10 @@
 
     <!-- Cash-secured-put income forward test (shwoop-server's
          optionsIncomeCycle.js). Hidden entirely (see renderOptionsPositions)
-         until there is at least one real open or closed position, so an
-         account that has never turned this on sees nothing -- no empty
-         card advertising a mechanism most accounts aren't running. -->
+         unless there is at least one real OPEN position -- closed history
+         lives on the Journal page instead, so an account with nothing live
+         right now sees nothing here rather than an empty or history-only
+         card. -->
     <div class="to-card" id="toCard-optionsPositions" hidden>
       <div class="labs-backtest-card">
         <div class="to-card-head">
@@ -14114,14 +14115,14 @@
     var meta = document.getElementById('optionsPositionsHeadMeta');
     if(!card || !el) return;
     var open = backendOptionsPositions || [];
-    var closed = backendOptionsClosedTrades || [];
-    // Hidden entirely for an account that has never run this -- an empty
-    // card advertising an off-by-default mechanism is exactly the kind of
-    // "reads as broken when nothing is wrong" case this app's other empty
-    // states already guard against.
-    if(!open.length && !closed.length){ card.hidden = true; return; }
+    // Hidden entirely for an account that has never run this, or that has
+    // nothing open right now -- Trade Overview is "what's live," and
+    // closed history already lives on the Journal page (see
+    // optionsClosedJournalRows), so an empty card here would just
+    // duplicate a table shown better elsewhere.
+    if(!open.length){ card.hidden = true; return; }
     card.hidden = false;
-    if(meta) meta.textContent = open.length + ' open · ' + closed.length + ' closed';
+    if(meta) meta.textContent = open.length + ' open';
 
     var now = new Date();
     var rows = '';
@@ -14147,32 +14148,6 @@
           '</tr>';
         }).join('') + '</tbody></table>';
     }
-    if(closed.length){
-      // Newest first -- a trader checking in wants to know what just
-      // happened, not what happened first when this mechanism was turned on.
-      var closedSorted = closed.slice().sort(function(a, b){
-        return String(b.closedAt || '').localeCompare(String(a.closedAt || ''));
-      });
-      rows += '<div class="ft-since" style="margin-top:14px;">Closed</div>' +
-        '<table class="backtest-trades-table"><thead><tr>' +
-        '<th>Underlying</th><th>Strike</th><th>Expiration</th>' +
-        '<th>Credit in</th><th>Credit out</th><th>Reason</th><th>Closed</th>' +
-        '</tr></thead><tbody>' +
-        closedSorted.map(function(p){
-          var reasonLabel = p.needsReconciliation
-            ? '<span class="labs-backtest-status" title="Disappeared from the broker with no matching close order on file. Verify manually.">unreconciled</span>'
-            : escapeHtml(p.exitReason || '—');
-          return '<tr>' +
-            '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
-            '<td>' + ftMoney(p.strike) + '</td>' +
-            '<td>' + escapeHtml(p.expirationDate || '') + '</td>' +
-            '<td>' + ftMoney(p.entryCredit) + '</td>' +
-            '<td>' + ftMoney(p.exitCredit) + '</td>' +
-            '<td>' + reasonLabel + '</td>' +
-            '<td>' + (p.closedAt ? escapeHtml(String(p.closedAt).slice(0, 10)) : '—') + '</td>' +
-          '</tr>';
-        }).join('') + '</tbody></table>';
-    }
     el.innerHTML = rows;
   }
 
@@ -14192,10 +14167,12 @@
     var meta = document.getElementById('weeklySpreadPositionsHeadMeta');
     if(!card || !el) return;
     var open = backendWeeklySpreadPositions || [];
-    var closed = backendWeeklySpreadClosedTrades || [];
-    if(!open.length && !closed.length){ card.hidden = true; return; }
+    // Same "what's live, not what's history" reasoning as
+    // renderOptionsPositions -- closed spreads already live on the
+    // Journal page via optionsClosedJournalRows.
+    if(!open.length){ card.hidden = true; return; }
     card.hidden = false;
-    if(meta) meta.textContent = open.length + ' open · ' + closed.length + ' closed';
+    if(meta) meta.textContent = open.length + ' open';
 
     var now = new Date();
     var rows = '';
@@ -14214,25 +14191,6 @@
             '<td>' + (p.qty != null ? p.qty : '—') + '</td>' +
             '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
             '<td>' + (WEEKLY_SPREAD_STATUS_LABELS[p.status] || escapeHtml(p.status || '—')) + '</td>' +
-          '</tr>';
-        }).join('') + '</tbody></table>';
-    }
-    if(closed.length){
-      var closedSorted = closed.slice().sort(function(a, b){
-        return String(b.closedAt || '').localeCompare(String(a.closedAt || ''));
-      });
-      rows += '<div class="ft-since" style="margin-top:14px;">Closed</div>' +
-        '<table class="backtest-trades-table"><thead><tr>' +
-        '<th>Underlying</th><th>Short/Long</th><th>Credit in</th><th>Credit out</th><th>Reason</th><th>Closed</th>' +
-        '</tr></thead><tbody>' +
-        closedSorted.map(function(p){
-          return '<tr>' +
-            '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
-            '<td>' + ftMoney(p.shortStrike) + ' / ' + ftMoney(p.longStrike) + '</td>' +
-            '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
-            '<td>' + (p.exitCredit != null ? ftMoney(p.exitCredit) : '—') + '</td>' +
-            '<td>' + escapeHtml(p.exitReason || '—') + '</td>' +
-            '<td>' + (p.closedAt ? escapeHtml(String(p.closedAt).slice(0, 10)) : '—') + '</td>' +
           '</tr>';
         }).join('') + '</tbody></table>';
     }
