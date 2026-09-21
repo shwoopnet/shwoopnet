@@ -1,5 +1,5 @@
 'use strict';
-// The Journal page's filter row (All/Equities/Crypto/Options) only shows
+// The Journal page's filter row (All/Equities/Options) only shows
 // itself when there's actually more than one category to switch between --
 // and the Options tab specifically stays hidden for an account that's
 // never closed one, since CSP/weekly spread are off by default and an
@@ -33,7 +33,6 @@ function build(state) {
     journalFilterRow: { hidden: false },
     journalFilterAll: Object.assign(fakeBtn(), { dataset: { filter: 'all' } }),
     journalFilterEquities: Object.assign(fakeBtn(), { dataset: { filter: 'equities' } }),
-    journalFilterCrypto: Object.assign(fakeBtn(), { dataset: { filter: 'crypto' } }),
     journalFilterOptions: Object.assign(fakeBtn(), { dataset: { filter: 'options' } }),
   };
   const src = `
@@ -68,21 +67,7 @@ function main() {
     console.log('G1 PASS a single-category journal hides the whole filter row');
   }
 
-  // ---- Equities + crypto, no options: row shows, Options tab stays hidden ----
-  {
-    const { mod, els } = build({
-      journalEntries: [
-        { sym: 'PLTR', status: 'closed', screenerType: 'intraday' },
-        { sym: 'BTC/USD', status: 'closed', screenerType: 'crypto' },
-      ],
-    });
-    mod.updateJournalFilterTabs();
-    assert.strictEqual(els.journalFilterRow.hidden, false, 'two categories must show the filter row');
-    assert.strictEqual(els.journalFilterOptions.hidden, true, 'an account with no closed options trades must not show the Options tab');
-    console.log('G2 PASS equities+crypto shows the row but keeps the empty Options tab hidden');
-  }
-
-  // ---- Equities + options (no crypto): row shows, Options tab shows with a real count ----
+  // ---- Equities + options: row shows, Options tab shows with a real count ----
   {
     const { mod, els } = build({
       journalEntries: [{ sym: 'PLTR', status: 'closed', screenerType: 'intraday' }],
@@ -92,10 +77,10 @@ function main() {
       }],
     });
     mod.updateJournalFilterTabs();
-    assert.strictEqual(els.journalFilterRow.hidden, false, 'equities + options (even with zero crypto) must show the filter row');
+    assert.strictEqual(els.journalFilterRow.hidden, false, 'equities + options must show the filter row');
     assert.strictEqual(els.journalFilterOptions.hidden, false, 'a real closed options trade must show the Options tab');
     assert.strictEqual(els.journalFilterOptions.textContent, 'Options (1)', 'the tab must show the real closed-options count');
-    console.log('G3 PASS a real closed options trade shows its own tab with an accurate count, even with no crypto trades');
+    console.log('G3 PASS a real closed options trade shows its own tab with an accurate count');
   }
 
   console.log('\nAll Journal filter-tabs gates passed.');

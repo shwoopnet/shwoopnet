@@ -1065,7 +1065,7 @@
     transition: border-color .12s ease, box-shadow .12s ease;
   }
   /* The whole card is the click target that opens the trade detail modal
-     (see renderIntradayBlocks/renderCryptoBlocks' own comment) -- this is
+     (see renderIntradayBlocks' own comment) -- this is
      the hover cue that tells you so. */
   .trade-block:hover{
     border-color: var(--amber-dim);
@@ -1251,19 +1251,17 @@
     text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;
   }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks,
-  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks,
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail{
     display:grid; gap:14px; align-items:start;
   }
-  html[data-trade-columns="2"] #intradayBlocks, html[data-trade-columns="2"] #cryptoBlocks, html[data-trade-columns="2"] #journalDetail{ grid-template-columns:repeat(2,1fr); }
-  html[data-trade-columns="3"] #intradayBlocks, html[data-trade-columns="3"] #cryptoBlocks, html[data-trade-columns="3"] #journalDetail{ grid-template-columns:repeat(3,1fr); }
-  html[data-trade-columns="4"] #intradayBlocks, html[data-trade-columns="4"] #cryptoBlocks, html[data-trade-columns="4"] #journalDetail{ grid-template-columns:repeat(4,1fr); }
+  html[data-trade-columns="2"] #intradayBlocks, html[data-trade-columns="2"] #journalDetail{ grid-template-columns:repeat(2,1fr); }
+  html[data-trade-columns="3"] #intradayBlocks, html[data-trade-columns="3"] #journalDetail{ grid-template-columns:repeat(3,1fr); }
+  html[data-trade-columns="4"] #intradayBlocks, html[data-trade-columns="4"] #journalDetail{ grid-template-columns:repeat(4,1fr); }
   /* Non-card content (the "no active setups" placeholder, Journal's own
      date heading and recap sentence) must always span every column --
      without this, that text drops into the FIRST grid cell only, next to
      whatever card happens to be its grid sibling. */
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks > :not(.trade-block),
-  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks > :not(.trade-block),
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail > :not(.journal-entry-card){
     grid-column: 1 / -1;
   }
@@ -1273,7 +1271,6 @@
      in the SAME row keep their bottom neighbor close while a card at the
      end of a grid row sits next to nothing below it at all. */
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks .trade-block,
-  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks .trade-block,
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail .journal-entry-card{
     margin-bottom: 0;
   }
@@ -1282,8 +1279,7 @@
      already get via the 900px breakpoint. */
   @media (max-width: 640px){
     html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #intradayBlocks,
-    html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #cryptoBlocks,
-    html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail{
+      html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) #journalDetail{
       grid-template-columns: 1fr;
     }
   }
@@ -2085,8 +2081,8 @@
     },
     // Single shared listener for the whole user document -- this used to
     // be six separate onSnapshot subscriptions (journal, alerts, activity
-    // log, screener picks, Alpaca credentials, trading-pause state x2 for
-    // equities/crypto), all watching this exact same doc. Every one of
+    // log, screener picks, Alpaca credentials, trading-pause state for
+    // equities), all watching this exact same doc. Every one of
     // them fired its own callback (and downstream re-render cascade) on
     // EVERY single write to the doc -- including the backend's own
     // once-a-minute heartbeat -- so a fresh sign-in had to wait on 7
@@ -2225,25 +2221,11 @@
         riskPercentOverride: typeof data.riskPercentOverride === 'number' ? data.riskPercentOverride : null,
         intradayScreenerEnabledOverride: typeof data.intradayScreenerEnabledOverride === 'boolean' ? data.intradayScreenerEnabledOverride : null,
         intradayAutoTradeEnabledOverride: typeof data.intradayAutoTradeEnabledOverride === 'boolean' ? data.intradayAutoTradeEnabledOverride : null,
-        // Crypto's own mirrors of every field above -- entirely
-        // separate fields (see shwoop-server's runCryptoCycle), so the
-        // two strategies' statuses never overwrite each other here.
-        cryptoScreenerPicks: data.cryptoScreenerPicks || null, cryptoScreenerUpdatedAt: data.cryptoScreenerUpdatedAt || null,
-        serverCryptoScreenerEnabled: typeof data.serverCryptoScreenerEnabled === 'boolean' ? data.serverCryptoScreenerEnabled : null,
-        serverCryptoAutoTradeEnabled: typeof data.serverCryptoAutoTradeEnabled === 'boolean' ? data.serverCryptoAutoTradeEnabled : null,
-        cryptoCycleStatus: data.cryptoCycleStatus || null,
-        cryptoCycleStartedAt: data.cryptoCycleStartedAt || null,
-        cryptoCycleCompletedAt: data.cryptoCycleCompletedAt || null,
-        cryptoCycleError: data.cryptoCycleError || null,
-        cryptoCycleErrorAt: data.cryptoCycleErrorAt || null,
-        cryptoLastCycleSummary: data.cryptoLastCycleSummary || null,
-        cryptoScreenerEnabledOverride: typeof data.cryptoScreenerEnabledOverride === 'boolean' ? data.cryptoScreenerEnabledOverride : null,
-        cryptoAutoTradeEnabledOverride: typeof data.cryptoAutoTradeEnabledOverride === 'boolean' ? data.cryptoAutoTradeEnabledOverride : null,
         optionsScreenerEnabledOverride: typeof data.optionsScreenerEnabledOverride === 'boolean' ? data.optionsScreenerEnabledOverride : null,
         optionsAutoTradeEnabledOverride: typeof data.optionsAutoTradeEnabledOverride === 'boolean' ? data.optionsAutoTradeEnabledOverride : null,
         // Cash-secured-put income forward test (shwoop-server's
-        // optionsIncomeCycle.js). A DIFFERENT SHAPE from every equities/
-        // crypto position -- premium collected against a strike and an
+        // optionsIncomeCycle.js). A DIFFERENT SHAPE from every equities
+        // position -- premium collected against a strike and an
         // expiration, not a qty*price directional trade -- so it lives in
         // its own fields rather than being folded into journalEntries.
         // Passed through raw: every field here is written once by the
@@ -2252,7 +2234,7 @@
         optionsClosedTrades: Array.isArray(data.optionsClosedTrades) ? data.optionsClosedTrades : [],
         serverOptionsScreenerEnabled: typeof data.serverOptionsScreenerEnabled === 'boolean' ? data.serverOptionsScreenerEnabled : null,
         serverOptionsAutoTradeEnabled: typeof data.serverOptionsAutoTradeEnabled === 'boolean' ? data.serverOptionsAutoTradeEnabled : null,
-        // Same "is it actually running" evidence as cryptoCycleStatus
+        // Same "is it actually running" evidence as intradayCycleStatus
         // above -- see runOptionsIncomeCycle in shwoop-server's
         // optionsIncomeCycle.js, which writes these on every pass
         // (including a skip, e.g. options trading level too low) so a
@@ -2347,9 +2329,9 @@
     // surfaces that same field to the Settings page in real time, and
     // lets the person manually clear it once the underlying issue is
     // resolved. screenerType defaults to 'intraday' for the original
-    // equities strategy; crypto's own pause state (a structural rejection
-    // on ONE strategy must never halt the other -- see autoTrade.js) is
-    // watched separately by passing 'crypto'.
+    // equities strategy; other strategies' own pause state (a structural
+    // rejection on ONE strategy must never halt the other -- see
+    // autoTrade.js) is watched separately by passing their screenerType.
     shapeTradingPauseState: function(data, screenerType){
       var st = screenerType || 'intraday';
       data = data || {};
@@ -2510,7 +2492,7 @@
 
   <!-- Trade detail modal -- REPLACES the old inline chevron-expand (a
        .trade-detail div that grew below the row) for every trade card
-       app-wide (Equities/Crypto Setups, Journal day-detail rows), rather
+       app-wide (Equities Setups, Journal day-detail rows), rather
        than each surface keeping its own copy. One instance, reused: only
        ever one trade's detail is worth looking at at a time, and a single
        shared modal is what makes Journal rows (which never had a
@@ -2674,17 +2656,6 @@
 
     <div class="brief-two-col">
       <div class="brief-col">
-        <div class="brief-section-title">Crypto Sentiment</div>
-        <div class="breadth-widget" id="cryptoBreadthWidget"></div>
-      </div>
-      <div class="brief-col">
-        <div class="brief-section-title">Crypto Movers (24h)</div>
-        <div class="movers-grid" id="cryptoMoversGrid"></div>
-      </div>
-    </div>
-
-    <div class="brief-two-col">
-      <div class="brief-col">
         <div class="brief-section-title">Market News</div>
         <div class="market-news-list" id="marketNewsList">
           <div class="news-placeholder">Sign in to see real market headlines.</div>
@@ -2700,9 +2671,6 @@
 
     <div class="brief-section-title">What to Watch — Today</div>
     <div class="watch-trades" id="whatToWatchList"></div>
-
-    <div class="brief-section-title" style="margin-top:28px;">What to Watch — Crypto</div>
-    <div class="watch-trades" id="whatToWatchCryptoList"></div>
 
     <div class="brief-cta-row">
       <div class="brief-cta-copy">
@@ -2792,7 +2760,6 @@
         <div class="strategy-filter-row" id="positionsFilterRow" hidden>
           <button class="chart-tool-btn active" id="positionsFilterAll" data-filter="all">All</button>
           <button class="chart-tool-btn" id="positionsFilterEquities" data-filter="equities">Equities</button>
-          <button class="chart-tool-btn" id="positionsFilterCrypto" data-filter="crypto">Crypto</button>
         </div>
         <div id="statusPositionsBody"></div>
       </div>
@@ -2866,32 +2833,6 @@
       </div>
     </div>
 
-    <div class="to-card" id="toCard-cryptoSetups" hidden>
-      <div class="intraday-section labs-backtest-card">
-        <div class="to-card-head">
-          <span class="to-card-title">Crypto Setups</span>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <span class="to-card-meta" id="cryptoSetupsHeadMeta"></span>
-            <div class="layout-dropdown">
-              <button class="layout-toggle-btn" id="cryptoSetupsColumnsToggle" aria-haspopup="true" aria-expanded="false">
-                <span>Columns</span>
-                <span class="caret">▾</span>
-              </button>
-              <div class="layout-menu" id="cryptoSetupsColumnsMenu" hidden>
-                <div class="settings-choice-group" data-trade-columns-group>
-                  <button class="tf-btn" data-value="1">1</button>
-                  <button class="tf-btn" data-value="2">2</button>
-                  <button class="tf-btn" data-value="3">3</button>
-                  <button class="tf-btn" data-value="4">4</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="cryptoBlocks"></div>
-      </div>
-    </div>
-
     <!-- Emergency/safety controls (resume trading, flatten all) --
          not hideable or reorderable away like the cards above, just
          parked at the bottom right before the log instead of pinned
@@ -2914,15 +2855,9 @@
             <span class="quote-sync-status" id="serverAutoTradeStatusBadge">—</span>
             <button class="chart-tool-btn" id="autoTradeEnableToggle" data-armed="false">Off</button>
           </div>
-          <div class="settings-strategy-group">
-            <span class="settings-strategy-label">Crypto</span>
-            <span class="money-mode-badge" id="cryptoAutoTradeMoneyClause">Paper</span>
-            <span class="quote-sync-status" id="serverCryptoAutoTradeStatusBadge">—</span>
-            <button class="chart-tool-btn" id="cryptoAutoTradeEnableToggle" data-armed="false">Off</button>
-          </div>
           <!-- Cash-secured-put income forward test (optionsIncomeCycle.js).
                Now carries the same auto-pause-on-repeated-failure
-               mechanism as equities/crypto (see optionsIncomeCycle.js's
+               mechanism as equities (see optionsIncomeCycle.js's
                MAX_CONSECUTIVE_ORDER_FAILURES), so the badge reflects a
                real health signal rather than claiming one that doesn't
                exist. -->
@@ -2953,10 +2888,6 @@
             <button class="chart-tool-btn" id="screenerEnableToggle">Off</button>
           </div>
           <div class="settings-strategy-group">
-            <span class="settings-strategy-label">Crypto</span>
-            <button class="chart-tool-btn" id="cryptoScreenerEnableToggle">Off</button>
-          </div>
-          <div class="settings-strategy-group">
             <span class="settings-strategy-label">Options (CSP)</span>
             <button class="chart-tool-btn" id="optionsScreenerEnableToggle">Off</button>
           </div>
@@ -2972,13 +2903,6 @@
           <div class="settings-row-desc" id="tradingPausedDesc">—</div>
         </div>
         <button class="settings-reset-btn" id="resumeTradingBtn">Resume equities trading</button>
-      </div>
-      <div class="settings-row" id="cryptoTradingPausedRow" hidden>
-        <div>
-          <div class="settings-row-title">Crypto auto-trading status</div>
-          <div class="settings-row-desc" id="cryptoTradingPausedDesc">—</div>
-        </div>
-        <button class="settings-reset-btn" id="resumeCryptoTradingBtn">Resume crypto trading</button>
       </div>
       <div class="settings-row" id="optionsTradingPausedRow" hidden>
         <div>
@@ -3066,9 +2990,7 @@
     </div>
 
     <!-- Overall P&L above is real Alpaca order history, reconstructed the
-         same way the "Pull full history from Alpaca" export does. That
-         reconstruction covers BOTH asset classes now (it was equities-only
-         until crypto's fee-in-kind and partial exits were handled -- see
+         same way the "Pull full history from Alpaca" export does (see
          reconstructTradesFromOrders), so every dollar in the card is the
          broker's own, and none of it is journal bookkeeping. It is left
          outside this filter because it is a broker-derived figure, not a
@@ -3078,7 +3000,6 @@
     <div class="strategy-filter-row" id="journalFilterRow" hidden>
       <button class="chart-tool-btn active" id="journalFilterAll" data-filter="all">All</button>
       <button class="chart-tool-btn" id="journalFilterEquities" data-filter="equities">Equities</button>
-      <button class="chart-tool-btn" id="journalFilterCrypto" data-filter="crypto">Crypto</button>
       <button class="chart-tool-btn" id="journalFilterOptions" data-filter="options" hidden>Options</button>
     </div>
 
@@ -3256,7 +3177,7 @@
                 are connected right now, so key rotation never loses it. Use
                 this only when you've started against a genuinely different
                 broker account (e.g. a brand-new paper account) and want a
-                clean slate. Removes every CLOSED equities/crypto/options
+                clean slate. Removes every CLOSED equities/options
                 trade. Anything still open is left untouched.
               </div>
             </div>
@@ -3364,7 +3285,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Trade card columns</div>
-              <div class="settings-row-desc">How many trade cards sit side by side in Equities/Crypto Setups and Journal's day-detail list. More columns means smaller, more compact cards -- click any card to open its full detail in the trade detail modal either way.</div>
+              <div class="settings-row-desc">How many trade cards sit side by side in Equities Setups and Journal's day-detail list. More columns means smaller, more compact cards -- click any card to open its full detail in the trade detail modal either way.</div>
             </div>
             <div class="settings-choice-group" id="tradeColumnsChoice" data-trade-columns-group>
               <button class="tf-btn" data-value="1">1</button>
@@ -3489,8 +3410,8 @@
 
   <footer class="site-footer">
     <div class="footer-copyright">© 2026 Shwoop. All rights reserved.</div>
-    <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies/projects referenced on this site. Stock ticker symbols, company names, and cryptocurrency symbols shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID, OPEN, SNAP, CHPT, and ROKU, plus BTC, ETH, SOL, LTC, LINK, AVAX, DOGE, UNI, XRP, DOT, BCH, and AAVE) are trademarks of their respective owners and are used here solely for identification purposes.</p>
-    <p>Shwoop watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs two strategies: 16 stocks on 15-minute bars, checked every minute during market hours, and 12 crypto pairs checked every 5 minutes around the clock. Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account you connect — invited accounts are paper-only; the admin account can also connect a live Alpaca account, with a persistent banner and red accents whenever live means real money. Invite-only, still under active testing — not a track record, not financial advice.</p>
+    <p>This is an independent personal project and is not affiliated with, endorsed by, or sponsored by any exchange, broker, or the companies/projects referenced on this site. Stock ticker symbols and company names shown (including PLTR, SOFI, RIVN, COIN, MARA, AFRM, DKNG, CVNA, HOOD, RIOT, UPST, LCID, OPEN, SNAP, CHPT, and ROKU) are trademarks of their respective owners and are used here solely for identification purposes.</p>
+    <p>Shwoop watches, decides, and trades on your behalf so you don't have to stare at charts. It's not a licensed advisor. It runs an equities strategy on 16 stocks on 15-minute bars, checked every minute during market hours, plus options income mechanisms (cash-secured puts and weekly credit spreads). Entry, stop, and target are all calculated live from real price data, not written by hand. Trades go to whichever Alpaca account you connect — invited accounts are paper-only; the admin account can also connect a live Alpaca account, with a persistent banner and red accents whenever live means real money. Invite-only, still under active testing — not a track record, not financial advice.</p>
     <p>Prices are live quotes from Alpaca, falling back to Finnhub if needed. Chart history is real data from Twelve Data — if it can't load, you'll see an honest error, never fake data.</p>
     <p>Data provided by <a href="https://finnhub.io" target="_blank" rel="noopener noreferrer" style="color:inherit;">Finnhub.io</a>, <a href="https://twelvedata.com" target="_blank" rel="noopener noreferrer" style="color:inherit;">Twelve Data</a>, and <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" style="color:inherit;">Alpaca</a>.</p>
   </footer>
@@ -3525,7 +3446,7 @@
   var DEFAULT_WATCHLIST_SYMS = ['PLTR','SOFI','RIVN','COIN','MARA','AFRM','DKNG','CVNA'];
 
   // No hardcoded starting price/change here, same "no fake data" rule the
-  // crypto watchlist and the index cards already follow -- a hardcoded
+  // index cards already follow -- a hardcoded
   // number (this used to seed DKNG at $42.50, a placeholder from whenever
   // this was written) looks exactly like a real, current quote right up
   // until "Sync failed -- last known prices" shows up and it's still
@@ -3560,45 +3481,13 @@
     }
   }
 
-  // Must stay in sync with shwoop-server's own CRYPTO_UNIVERSE
-  // (cryptoScreener.js) -- this is display/quote-tracking only, not a
-  // second source of truth for what actually trades.
-  var CRYPTO_UNIVERSE = [
-    'BTC/USD', 'ETH/USD', 'SOL/USD', 'LTC/USD', 'LINK/USD', 'AVAX/USD',
-    'DOGE/USD', 'UNI/USD', 'XRP/USD', 'DOT/USD', 'BCH/USD', 'AAVE/USD'
-  ];
-
-  // No hardcoded starting price/change here the way the equities
-  // watchlist above has -- crypto prices move too much for a stale
-  // placeholder to look anything but wrong (a hardcoded BTC figure from
-  // whenever this was written vs. whatever it's actually worth by the
-  // time someone loads the page). Starts unpriced (null) and stays that
-  // way honestly until fetchAllCryptoQuotes actually resolves -- same
-  // "no fake data" rule the footer already promises for chart history.
-  var cryptoWatchlist = CRYPTO_UNIVERSE.map(function(sym){
-    return { sym: sym, name: sym, price: null, prevClose: null };
-  });
-  function findCryptoQuote(sym){ return cryptoWatchlist.filter(function(w){ return w.sym === sym; })[0]; }
-
-  // Alpaca's /v2/positions endpoint drops the "/" this app uses everywhere
-  // else for crypto pairs -- an order sent as "SOL/USD" comes back as a
-  // position symbol of "SOLUSD". Comparing raw strings against a journal
-  // entry's own "SOL/USD" silently failed to match every real crypto
-  // position in every place that looked one up by symbol (Open Positions,
-  // the Today's Setups/Crypto Setups P/L patch, and the account-key
-  // reconciliation after a key rotation), which is what made those crypto
-  // rows fall back to entry-price/zero-P&L estimates instead of Alpaca's
-  // real numbers. Equities symbols never contain "/", so this is a no-op
-  // for them and only changes how crypto positions get matched.
+  // Alpaca's /v2/positions endpoint can drop separators some symbol
+  // formats use elsewhere in this app. Comparing raw strings against a
+  // journal entry's own symbol form has silently failed to match a real
+  // position in the past (Open Positions, the Today's Setups P/L patch,
+  // and the account-key reconciliation after a key rotation). Equities
+  // symbols never contain "/", so this is a no-op for them.
   function canonicalSymbol(sym){ return (sym || '').replace(/\//g, ''); }
-  // Alpaca's /v2/positions (and open orders) return crypto symbols in the
-  // canonical no-slash form ("AAVEUSD"), but submitting a NEW crypto order
-  // requires the slash-included form ("AAVE/USD") -- the reverse direction
-  // canonicalSymbol doesn't provide. Returns null for an equities symbol
-  // (never in CRYPTO_UNIVERSE), which callers use as "this isn't crypto."
-  function findCryptoUniverseSymbol(rawSym){
-    return CRYPTO_UNIVERSE.filter(function(s){ return canonicalSymbol(s) === rawSym; })[0] || null;
-  }
   // ONE way to read ANY Firestore timestamp this app stores, because
   // `new Date(theStoredValue)` is Invalid Date on the shape it actually
   // arrives in -- and because there were briefly two copies of this
@@ -3938,9 +3827,9 @@
   var backendIntradayPicks = null;
   // WHEN THE SETUPS ON SCREEN WERE COMPUTED.
   //
-  // The backend has published intradayScreenerUpdatedAt/
-  // cryptoScreenerUpdatedAt since these fields shipped, both arrive on the
-  // same user-doc snapshot everything else here reads, and nothing in this
+  // The backend has published intradayScreenerUpdatedAt since this field
+  // shipped, arriving on the same user-doc snapshot everything else here
+  // reads, and nothing in this
   // app ever looked at either one. So a setups card showed a pick computed
   // four minutes ago and one computed at yesterday's close in exactly the
   // same type, with the same live-looking status badge and the same entry/
@@ -3980,22 +3869,6 @@
   var backendCycleError = null;
   var backendCycleErrorAt = null;
   var backendLastCycleSummary = null;
-  // Crypto's own mirrors of every field above -- see runCryptoCycle in
-  // shwoop-server's orchestrator.js, which writes these as entirely
-  // separate Firestore fields so the two strategies never clobber each
-  // other's status.
-  var backendCryptoPicks = null;
-  // See backendIntradayPicksUpdatedAt -- crypto's own, on its own 5-minute
-  // cycle rather than the equities one.
-  var backendCryptoPicksUpdatedAt = null;
-  var backendCryptoScreenerEnabledOnServer = null;
-  var backendCryptoAutoTradeEnabledOnServer = null;
-  var backendCryptoCycleStatus = null;
-  var backendCryptoCycleStartedAt = null;
-  var backendCryptoCycleCompletedAt = null;
-  var backendCryptoCycleError = null;
-  var backendCryptoCycleErrorAt = null;
-  var backendCryptoLastCycleSummary = null;
   // Cash-secured-put income forward test (shwoop-server's
   // optionsIncomeCycle.js) -- entirely separate fields from journalEntries,
   // since a premium-collected options position isn't a qty*price
@@ -4006,8 +3879,8 @@
   var backendOptionsScreenerEnabledOnServer = null;
   var backendOptionsAutoTradeEnabledOnServer = null;
   var backendOptionsAutoTradePausedOnServer = null;
-  // Same "is it actually running" fields as backendCryptoCycleStatus
-  // below -- see runOptionsIncomeCycle in shwoop-server. Without these
+  // Same "is it actually running" fields as backendCycleStatus
+  // above -- see runOptionsIncomeCycle in shwoop-server. Without these
   // there was no way to tell a dead cycle apart from one that correctly
   // found nothing to do.
   var backendOptionsCycleStatus = null;
@@ -4018,8 +3891,8 @@
   var backendOptionsLastCycleSummary = null;
   // The weekly credit-spread mechanism -- a second, separate options
   // strategy (shwoop-server's optionsWeeklySpreadCycle.js), own fields
-  // throughout, same reasoning as backendCryptoPicks having its own set
-  // rather than sharing the equities ones.
+  // throughout, same reasoning as backendOptionsPositions having its own
+  // set rather than sharing the equities ones.
   var backendWeeklySpreadPositions = [];
   var backendWeeklySpreadClosedTrades = [];
   var backendWeeklySpreadScreenerEnabledOnServer = null;
@@ -4060,8 +3933,6 @@
     riskPercentOverride: null,
     intradayScreenerEnabledOverride: null,
     intradayAutoTradeEnabledOverride: null,
-    cryptoScreenerEnabledOverride: null,
-    cryptoAutoTradeEnabledOverride: null,
     optionsScreenerEnabledOverride: null,
     optionsAutoTradeEnabledOverride: null,
     weeklySpreadScreenerEnabledOverride: null,
@@ -4112,10 +3983,6 @@
       autoTradeOverrides.riskPercentOverride = data.riskPercentOverride;
       autoTradeOverrides.intradayScreenerEnabledOverride = data.intradayScreenerEnabledOverride;
       autoTradeOverrides.intradayAutoTradeEnabledOverride = data.intradayAutoTradeEnabledOverride;
-      backendCryptoPicks = data.cryptoScreenerPicks;
-      backendCryptoPicksUpdatedAt = data.cryptoScreenerUpdatedAt;
-      backendCryptoScreenerEnabledOnServer = data.serverCryptoScreenerEnabled;
-      backendCryptoAutoTradeEnabledOnServer = data.serverCryptoAutoTradeEnabled;
       backendOptionsPositions = data.optionsPositions;
       backendOptionsClosedTrades = data.optionsClosedTrades;
       backendOptionsScreenerEnabledOnServer = data.serverOptionsScreenerEnabled;
@@ -4142,14 +4009,6 @@
       autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = data.weeklySpreadAutoTradeEnabledOverride;
       renderWeeklySpreadPositions();
       renderOptionsPositions();
-      backendCryptoCycleStatus = data.cryptoCycleStatus;
-      backendCryptoCycleStartedAt = data.cryptoCycleStartedAt;
-      backendCryptoCycleCompletedAt = data.cryptoCycleCompletedAt;
-      backendCryptoCycleError = data.cryptoCycleError;
-      backendCryptoCycleErrorAt = data.cryptoCycleErrorAt;
-      backendCryptoLastCycleSummary = data.cryptoLastCycleSummary;
-      autoTradeOverrides.cryptoScreenerEnabledOverride = data.cryptoScreenerEnabledOverride;
-      autoTradeOverrides.cryptoAutoTradeEnabledOverride = data.cryptoAutoTradeEnabledOverride;
       autoTradeOverrides.optionsScreenerEnabledOverride = data.optionsScreenerEnabledOverride;
       autoTradeOverrides.optionsAutoTradeEnabledOverride = data.optionsAutoTradeEnabledOverride;
       renderAutoTradeOverrideControls();
@@ -4166,12 +4025,10 @@
       updateTradeBubbles();
   }
 
-  // A flat .toFixed(2) is fine for every equities price (always well
-  // above $1), but would round a DOGE-class crypto price down toward
-  // $0.00 with no meaningful digits left -- scales decimals to the
-  // price's own magnitude instead, same convention as the backend's
-  // formatCryptoPrice (see shwoop-server's clients/alpaca.js), so a
-  // crypto position showing up in Open Positions displays honestly.
+  // A flat .toFixed(2) is fine for every ordinary equities price (always
+  // well above $1), but would round a sub-cent price down toward $0.00
+  // with no meaningful digits left -- scales decimals to the price's own
+  // magnitude instead, so a low-priced position displays honestly.
   // A NON-NUMBER IS A GAP, NOT A PRICE.
   //
   // Every caller here feeds this something that came from outside: a
@@ -4188,26 +4045,6 @@
     if(n >= 1) return n.toFixed(2);
     if(n >= 0.01) return n.toFixed(4);
     return n.toFixed(8);
-  }
-
-  // A crypto position's qty is a dollar risk budget divided by a live
-  // price, so it carries however many decimals that division happens to
-  // produce -- "172.79659", not a number anyone chose. Shortens what is
-  // READ, never what is stored or traded: this only touches the table
-  // cell string, and every P&L/sizing calculation elsewhere still reads
-  // the real j.qty untouched.
-  //
-  // Magnitude-aware, mirroring fmt()'s own price tiers just above, rather
-  // than a flat "one decimal place" -- a fixed decimal count would print
-  // "0.0" for a BTC-sized holding, which reads as nothing is held when
-  // real size is. Trims trailing zeros so a round number reads as one.
-  function fmtCryptoQty(n){
-    if(typeof n !== 'number' || !isFinite(n)) return String(n);
-    var abs = Math.abs(n);
-    var decimals = abs >= 1000 ? 0 : abs >= 1 ? 1 : abs >= 0.001 ? 4 : 8;
-    var out = n.toFixed(decimals);
-    if(out.indexOf('.') !== -1) out = out.replace(/0+$/, '').replace(/\.$/, '');
-    return out;
   }
 
   // PROFIT FACTOR WITH NO LOSING TRADE HAS NO DENOMINATOR.
@@ -4251,9 +4088,7 @@
   // every evening the scan is, correctly, hours old, and 'stale' pointed
   // the reader at Backend Status for a cycle that is not supposed to be
   // running. That is the same "reads as a fault when nothing is wrong"
-  // problem the header had overnight. Crypto passes nothing here and keeps
-  // exactly three answers -- it runs 24/7, so an old crypto scan really is
-  // a problem.
+  // problem the header had overnight.
   function picksFreshness(updatedAt, now, intervalMs, sessionOpen){
     var ms = firestoreMillis(updatedAt);
     if(isNaN(ms)) return { level: 'unknown', ageMs: null };
@@ -4270,14 +4105,13 @@
   // ---------- Ticker tape ----------
   function renderTicker(){
     var track = document.getElementById('tickerTrack');
-    // Both watchlists start at price:null and only ever get filled in by
-    // a real fetchAllQuotes/fetchAllCryptoQuotes resolution -- filtered
-    // out here rather than shown as a fake "$0.00" (or, before this,
-    // equities' own hardcoded placeholder) while that first fetch is
-    // still in flight, or never connected at all.
+    // The watchlist starts at price:null and only ever gets filled in by
+    // a real fetchAllQuotes resolution -- filtered out here rather than
+    // shown as a fake "$0.00" (or, before this, equities' own hardcoded
+    // placeholder) while that first fetch is still in flight, or never
+    // connected at all.
     var pricedEquities = watchlist.filter(function(item){ return item.price !== null && item.prevClose !== null; });
-    var pricedCrypto = cryptoWatchlist.filter(function(item){ return item.price !== null && item.prevClose !== null; });
-    var itemsHtml = pricedEquities.concat(pricedCrypto).map(function(item){
+    var itemsHtml = pricedEquities.map(function(item){
       var change = pct(item.price, item.prevClose);
       var up = change >= 0;
       return '<span class="ticker-item mono">' +
@@ -4324,25 +4158,16 @@
   // renderWhatToWatch builds when no source is passed in, so every
   // caller (including the couple of leftover local-scanner call sites)
   // gets the real numbers rather than needing to be updated individually.
-  // Combines both strategies into the one shared box/line below "What to
-  // Watch" -- equities and crypto used to each get their own separate
-  // stat display (this one, plus a standalone cryptoStatCta line above
-  // it), which visually split one "here's everything you're tracking"
-  // recap into two disconnected pieces pointing at the same underlying
-  // Trade Overview page. cryptoSource defaults the same way equities'
-  // source does when omitted, so the couple of leftover call sites that
-  // invoke this with no arguments at all still get real, current numbers
-  // for both.
-  function statCta(source, cryptoSource){
+  // The shared box/line below "What to Watch" -- combines equities and
+  // options into one "here's everything you're tracking" recap for the
+  // Trade Overview page. source defaults to the equities merge when
+  // omitted, so the couple of leftover call sites that invoke this with
+  // no arguments at all still get real, current numbers.
+  function statCta(source){
     if(!source){
       var mergedForWatch = mergedEquitiesPicks();
       var base = mergedForWatch.length ? mergedForWatch : intradayTrades;
       source = withOpenPositionsMergedIn(base);
-    }
-    if(!cryptoSource){
-      cryptoSource = withCryptoOpenPositionsMergedIn(
-        (backendCryptoPicks && backendCryptoPicks.length) ? backendCryptoPicks.map(buildTradeFromPick) : []
-      );
     }
     // "With open positions" means a real, current-account Alpaca
     // position exists for that symbol -- not just an ORB status label
@@ -4351,19 +4176,16 @@
     var openCount = source.filter(function(t){
       return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
     }).length;
-    var cryptoOpenCount = cryptoSource.filter(function(t){
-      return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
-    }).length;
     // Options positions are always open positions (the mechanisms hold
-    // no "watching, not yet in" state the way equities/crypto do) -- same
+    // no "watching, not yet in" state the way equities does) -- same
     // count used by the lede paragraph's own "Options income has N
     // positions open" sentence nearby, so the two stats can't drift
     // apart on what "open" means for options.
     var optionsCount = (backendOptionsPositions || []).length + (backendWeeklySpreadPositions || []).length;
-    var text = (source.length + cryptoSource.length + optionsCount) + ' instruments you\'re tracking today (' +
-      source.length + ' stocks, ' + cryptoSource.length + ' crypto' +
+    var text = (source.length + optionsCount) + ' instruments you\'re tracking today (' +
+      source.length + ' stocks' +
       (optionsCount ? ', ' + optionsCount + ' options' : '') + '), ' +
-      (openCount + cryptoOpenCount + optionsCount) + ' with open positions';
+      (openCount + optionsCount) + ' with open positions';
     document.getElementById('ctaStat').textContent = text;
   }
 
@@ -4522,23 +4344,17 @@
     }
     var banner = document.getElementById('liveModeBanner');
     if(banner){ banner.hidden = (alpacaAccountType !== 'live'); }
-    // ALL THREE strategy badges track the same flag, because the backend
+    // ALL strategy badges track the same flag, because the backend
     // gives an account exactly ONE environment and every cycle resolves it
-    // the same way. runCryptoCycle (shwoop-server orchestrator.js) calls the
-    // same resolveActiveAlpacaCredentials(userDoc) the equities cycles do,
-    // and settings.js decides it once per account:
+    // the same way, and settings.js decides it once per account:
     //   alpacaEnvironment === 'live' ? 'live' : 'paper'.
     // There is no per-strategy environment anywhere in that path.
     //
-    // The crypto badge used to be hardcoded "Paper" in the HTML, under a
-    // comment claiming crypto had no live capability. It did: on a live
-    // account crypto placed REAL orders while this badge read Paper --
-    // the one screen the owner checks before arming a strategy, lying about
-    // whose money it was about to spend. Never hardcode these again; if a
-    // strategy is ever genuinely paper-only, drive that off a real signal
-    // from the backend, not off a literal in the markup.
+    // Never hardcode these; if a strategy is ever genuinely paper-only,
+    // drive that off a real signal from the backend, not off a literal
+    // in the markup.
     var isLiveEnv = alpacaAccountType === 'live';
-    ['autoTradeIntradayMoneyClause', 'cryptoAutoTradeMoneyClause', 'optionsAutoTradeMoneyClause', 'weeklySpreadAutoTradeMoneyClause']
+    ['autoTradeIntradayMoneyClause', 'optionsAutoTradeMoneyClause', 'weeklySpreadAutoTradeMoneyClause']
       .forEach(function(id){
         var badge = document.getElementById(id);
         if(!badge) return;
@@ -4698,11 +4514,6 @@
       ? autoTradeOverrides.intradayScreenerEnabledOverride
       : Boolean(backendScreenerEnabledOnServer);
   }
-  function effectiveCryptoAutoTradeOn(){
-    return autoTradeOverrides.cryptoAutoTradeEnabledOverride !== null
-      ? autoTradeOverrides.cryptoAutoTradeEnabledOverride
-      : Boolean(backendCryptoAutoTradeEnabledOnServer);
-  }
   function effectiveOptionsAutoTradeOn(){
     return autoTradeOverrides.optionsAutoTradeEnabledOverride !== null
       ? autoTradeOverrides.optionsAutoTradeEnabledOverride
@@ -4712,11 +4523,6 @@
     return autoTradeOverrides.optionsScreenerEnabledOverride !== null
       ? autoTradeOverrides.optionsScreenerEnabledOverride
       : Boolean(backendOptionsScreenerEnabledOnServer);
-  }
-  function effectiveCryptoScreenerOn(){
-    return autoTradeOverrides.cryptoScreenerEnabledOverride !== null
-      ? autoTradeOverrides.cryptoScreenerEnabledOverride
-      : Boolean(backendCryptoScreenerEnabledOnServer);
   }
   function effectiveWeeklySpreadAutoTradeOn(){
     return autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride !== null
@@ -4742,19 +4548,6 @@
       var screenerOn = effectiveScreenerOn();
       screenerBtn.textContent = screenerOn ? 'On' : 'Off';
       screenerBtn.classList.toggle('active', screenerOn);
-    }
-    var cryptoAutoBtn = document.getElementById('cryptoAutoTradeEnableToggle');
-    if(cryptoAutoBtn && cryptoAutoBtn.dataset.armed !== 'true'){
-      var cryptoAutoOn = effectiveCryptoAutoTradeOn();
-      cryptoAutoBtn.textContent = cryptoAutoOn ? 'On' : 'Off';
-      cryptoAutoBtn.classList.remove('confirming');
-      cryptoAutoBtn.classList.toggle('active', cryptoAutoOn);
-    }
-    var cryptoScreenerBtn = document.getElementById('cryptoScreenerEnableToggle');
-    if(cryptoScreenerBtn){
-      var cryptoScreenerOn = effectiveCryptoScreenerOn();
-      cryptoScreenerBtn.textContent = cryptoScreenerOn ? 'On' : 'Off';
-      cryptoScreenerBtn.classList.toggle('active', cryptoScreenerOn);
     }
     var optionsAutoBtn = document.getElementById('optionsAutoTradeEnableToggle');
     if(optionsAutoBtn && optionsAutoBtn.dataset.armed !== 'true'){
@@ -4824,47 +4617,10 @@
     renderAutoTradeOverrideControls();
   });
 
-  document.getElementById('cryptoAutoTradeEnableToggle').addEventListener('click', function(){
-    var btn = this;
-    var currentlyOn = effectiveCryptoAutoTradeOn();
-    // Same click-to-arm confirmation as the equities toggle above --
-    // still real (paper) orders on a real Alpaca account.
-    if(currentlyOn){
-      autoTradeOverrides.cryptoAutoTradeEnabledOverride = false;
-      saveAutoTradeOverride({ cryptoAutoTradeEnabledOverride: false });
-      renderAutoTradeOverrideControls();
-      return;
-    }
-    if(btn.dataset.armed === 'true'){
-      clearTimeout(btn._armTimer);
-      btn.dataset.armed = 'false';
-      btn.classList.remove('confirming');
-      autoTradeOverrides.cryptoAutoTradeEnabledOverride = true;
-      saveAutoTradeOverride({ cryptoAutoTradeEnabledOverride: true });
-      renderAutoTradeOverrideControls();
-    } else {
-      btn.dataset.armed = 'true';
-      btn.classList.add('confirming');
-      btn.textContent = 'Click again — real orders';
-      btn._armTimer = setTimeout(function(){
-        btn.dataset.armed = 'false';
-        btn.classList.remove('confirming');
-        renderAutoTradeOverrideControls();
-      }, 4000);
-    }
-  });
-
-  document.getElementById('cryptoScreenerEnableToggle').addEventListener('click', function(){
-    var next = !effectiveCryptoScreenerOn();
-    autoTradeOverrides.cryptoScreenerEnabledOverride = next;
-    saveAutoTradeOverride({ cryptoScreenerEnabledOverride: next });
-    renderAutoTradeOverrideControls();
-  });
-
   document.getElementById('optionsAutoTradeEnableToggle').addEventListener('click', function(){
     var btn = this;
     var currentlyOn = effectiveOptionsAutoTradeOn();
-    // Same click-to-arm confirmation as equities/crypto -- still real
+    // Same click-to-arm confirmation as the equities toggle above -- still real
     // (paper) orders on a real Alpaca account, and this one commits real
     // cash per cash-secured-put contract.
     if(currentlyOn){
@@ -5016,7 +4772,6 @@
   function handleTradingPauseDocUpdate(rawData){
     if(!window.__shwoopAPI) return;
     renderTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData));
-    renderCryptoTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'crypto'));
     renderOptionsTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'options'));
     renderWeeklySpreadTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'weeklySpread'));
   }
@@ -5034,7 +4789,7 @@
   // earlier version of this kind of thing had each renderer setting and
   // clearing the same node, so whichever ran last won and a real pause
   // could be cleared off the screen by the other strategy being fine.
-  var globalPauseState = { intraday: null, crypto: null, options: null, weeklySpread: null };
+  var globalPauseState = { intraday: null, options: null, weeklySpread: null };
 
   function renderGlobalPausedBanner(){
     var banner = document.getElementById('globalPausedBanner');
@@ -5042,7 +4797,6 @@
     if(!banner || !textEl) return;
     var paused = [];
     if(globalPauseState.intraday && globalPauseState.intraday.paused) paused.push({ label: 'Equities', state: globalPauseState.intraday });
-    if(globalPauseState.crypto && globalPauseState.crypto.paused) paused.push({ label: 'Crypto', state: globalPauseState.crypto });
     if(globalPauseState.options && globalPauseState.options.paused) paused.push({ label: 'Options (CSP)', state: globalPauseState.options });
     if(globalPauseState.weeklySpread && globalPauseState.weeklySpread.paused) paused.push({ label: 'Weekly spread', state: globalPauseState.weeklySpread });
     if(!paused.length){
@@ -5129,35 +4883,7 @@
       reasonText + '. Review the activity log, then resume once resolved.';
   }
 
-  // Crypto's own copy of the same tracking/rendering -- kept separate
-  // rather than sharing lastKnownTradingPaused/the alert banner, since
-  // the two strategies' pause states are now genuinely independent (see
-  // autoTrade.js's per-screenerType pause scoping) and could in
-  // principle both be true at once; sharing state between them would
-  // let one strategy's pause silently mask or overwrite the other's.
-  var lastKnownCryptoTradingPaused = false;
-  function renderCryptoTradingPauseState(state){
-    var row = document.getElementById('cryptoTradingPausedRow');
-    var desc = document.getElementById('cryptoTradingPausedDesc');
-    var reasonText = state.pausedReason || 'unknown';
-    var justPaused = state.paused && !lastKnownCryptoTradingPaused;
-    lastKnownCryptoTradingPaused = state.paused;
-    setGlobalPauseState('crypto', state);
-    if(justPaused){
-      playTradingPausedAlertSound();
-    }
-    if(!row || !desc) return;
-    if(!state.paused){
-      row.setAttribute('hidden', '');
-      return;
-    }
-    row.removeAttribute('hidden');
-    var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
-    desc.textContent = 'Crypto auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
-      reasonText + '. Review the activity log, then resume once resolved.';
-  }
-
-  // Same independent-tracking reasoning as renderCryptoTradingPauseState --
+  // Same independent-tracking reasoning as renderTradingPauseState --
   // options and weekly spread now carry their own auto-pause (see
   // optionsIncomeCycle.js / optionsWeeklySpreadCycle.js's
   // MAX_CONSECUTIVE_ORDER_FAILURES), and each strategy's pause must stay
@@ -5221,20 +4947,6 @@
     }).finally(function(){
       btn.disabled = false;
       btn.textContent = 'Resume weekly spread trading';
-    });
-  });
-
-  document.getElementById('resumeCryptoTradingBtn').addEventListener('click', function(){
-    if(!window.__shwoopAPI || !currentUid) return;
-    var btn = document.getElementById('resumeCryptoTradingBtn');
-    btn.disabled = true;
-    btn.textContent = 'Resuming…';
-    window.__shwoopAPI.resumeTrading(currentUid, 'crypto').catch(function(err){
-      console.error('Failed to resume crypto trading:', err);
-      alert('Could not resume crypto trading — please try again. (' + err.message + ')');
-    }).finally(function(){
-      btn.disabled = false;
-      btn.textContent = 'Resume crypto trading';
     });
   });
 
@@ -5383,14 +5095,14 @@
     renderIntradayBlocks();
   });
 
-  ['positionsFilterAll', 'positionsFilterEquities', 'positionsFilterCrypto'].forEach(function(id){
+  ['positionsFilterAll', 'positionsFilterEquities'].forEach(function(id){
     document.getElementById(id).addEventListener('click', function(){
       statusPositionsFilter = this.dataset.filter;
       renderStatusPositions();
     });
   });
 
-  ['journalFilterAll', 'journalFilterEquities', 'journalFilterCrypto', 'journalFilterOptions'].forEach(function(id){
+  ['journalFilterAll', 'journalFilterEquities', 'journalFilterOptions'].forEach(function(id){
     document.getElementById(id).addEventListener('click', function(){
       journalFilter = this.dataset.filter;
       renderCalendar();
@@ -5570,12 +5282,10 @@
     var target = order && order.limit_price ? parseFloat(order.limit_price) : null;
     var stop = stopLeg ? parseFloat(stopLeg.stop_price) : null;
 
-    // Crypto's exit orders are two independent, unlinked orders rather
-    // than one bracket/OCO parent+legs -- Alpaca has no order_class at
-    // all for crypto (see shwoop-server's cryptoProtectiveOrders.js). The
-    // target is a plain limit order; the stop is a stop_limit order with
-    // its trigger at the top level, not nested under .legs the way a
-    // bracket's stop leg is.
+    // Fallback for exit orders sent as two independent, unlinked orders
+    // rather than one bracket/OCO parent+legs: a plain limit order for
+    // the target, and a stop_limit order (trigger at the top level, not
+    // nested under .legs the way a bracket's stop leg is) for the stop.
     if(target === null || stop === null){
       var symOrders = (orders || []).filter(function(o){ return canonicalSymbol(o.symbol) === want; });
       var targetOrder = symOrders.filter(function(o){ return o.type === 'limit' && o.limit_price; })[0];
@@ -5590,18 +5300,7 @@
     // protection sitting on Alpaca's side — this is data Shwoop already
     // has and trusts, since it wrote it there itself.
     if(target === null || stop === null){
-      // Alpaca's POSITIONS endpoint returns crypto symbols in the
-      // canonical no-slash form ("AAVEUSD") -- what the orders endpoint
-      // returns is deliberately no longer asserted here, since the two
-      // comments in this file that claimed to know disagreed with each
-      // other. Every comparison normalises instead. journalEntries were
-      // always written with the slash-included form ("AAVE/USD") -- matching
-      // sym directly against j.sym here silently never matched a single
-      // crypto entry, so this fallback (and everything downstream of it,
-      // including the dock's own Target/Stop columns) was always blank
-      // for crypto specifically, without ever surfacing as an error.
-      var journalSym = findCryptoUniverseSymbol(sym) || sym;
-      var journalMatch = journalEntries.filter(function(j){ return j.sym === journalSym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
+      var journalMatch = journalEntries.filter(function(j){ return j.sym === sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
       if(journalMatch){
         if(target === null && journalMatch.t1 !== undefined && journalMatch.t1 !== null) target = journalMatch.t1;
         if(stop === null && journalMatch.stop !== undefined && journalMatch.stop !== null) stop = journalMatch.stop;
@@ -5636,30 +5335,14 @@
   // bracket is still live.
   function closeAlpacaPositionSafely(sym){
     return fetchAlpacaOpenOrders().then(function(orders){
-      // THIS FUNCTION IS CALLED WITH BOTH SYMBOL FORMS, which is why a
-      // raw comparison cannot be right here whatever Alpaca returns:
-      //   - the dock's Close button passes p.symbol, straight off the
-      //     POSITIONS list, so no-slash ("UNIUSD");
-      //   - the journal paths (exit modal, invalidated-position cleanup)
-      //     pass entry.sym, which is always slash-included ("UNI/USD").
-      // One `===` against a fixed order format must therefore fail for
-      // one of those two callers, silently. When it fails, the cancel
-      // loop matches nothing and the position is closed with its
-      // protective stop and limit ORDERS STILL RESTING -- which is the
-      // orphaned-order state cryptoProtectiveOrders.js exists to avoid.
-      // Normalising both sides is a no-op for equities and for whichever
-      // crypto caller was already matching.
+      // Normalized on both sides via canonicalSymbol before comparing, so
+      // this stays correct regardless of which symbol form a given
+      // caller happens to pass in.
       var wantSym = canonicalSymbol(sym);
       var matches = (orders || []).filter(function(o){ return canonicalSymbol(o.symbol) === wantSym; });
       return Promise.all(matches.map(function(o){ return cancelAlpacaOrder(o.id); }));
     }).then(function(){
-      // The POSITION-close endpoint is different: Alpaca's /v2/positions
-      // drops the "/" for crypto (see canonicalSymbol's own comment --
-      // an order sent as "UNI/USD" is held internally, and closable,
-      // only as "UNIUSD"). Passing the journal's slash-included sym
-      // straight through here 404'd on every manual Close click for a
-      // crypto position -- confirmed live on UNI/USD -- since Alpaca has
-      // no position on file under that literal identifier.
+      // Normalized via canonicalSymbol for the same reason as above.
       return closeAlpacaPosition(canonicalSymbol(sym));
     });
   }
@@ -6317,24 +6000,20 @@
     // was never actually set anywhere, so this had quietly become a
     // no-op that paused nothing, for either strategy, even though the
     // row's own description promises "turns off auto-send so nothing
-    // re-enters immediately after." Crypto in particular has no
-    // market-hours gate to naturally hold it off the way equities does
-    // outside RTH -- without pausing it explicitly, its next 5-minute
-    // cycle could open a brand new position minutes after this ran.
+    // re-enters immediately after."
     // Options included -- added after the row's promise turned out not to
     // hold for it either: this account's options auto-trade can be ON
     // (Backend Status shows it live) with no Settings toggle in this card
     // to stop it, and its next scan (up to 4 hours out, but no
     // market-hours gate stopping a cycle already in flight) could open a
     // brand new short put minutes after "everything" was supposedly flat.
-    if(effectiveAutoTradeOn() || effectiveCryptoAutoTradeOn() || effectiveOptionsAutoTradeOn() || effectiveWeeklySpreadAutoTradeOn()){
+    if(effectiveAutoTradeOn() || effectiveOptionsAutoTradeOn() || effectiveWeeklySpreadAutoTradeOn()){
       autoTradeOverrides.intradayAutoTradeEnabledOverride = false;
-      autoTradeOverrides.cryptoAutoTradeEnabledOverride = false;
       autoTradeOverrides.optionsAutoTradeEnabledOverride = false;
       autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = false;
       renderAutoTradeOverrideControls();
       saveAutoTradeOverride({
-        intradayAutoTradeEnabledOverride: false, cryptoAutoTradeEnabledOverride: false,
+        intradayAutoTradeEnabledOverride: false,
         optionsAutoTradeEnabledOverride: false, weeklySpreadAutoTradeEnabledOverride: false,
       });
     }
@@ -6513,10 +6192,9 @@
   // openTradeModal) is a single shared instance opened fresh on each click,
   // not per-row state that a render rebuild could silently collapse.
   var lastRenderedSetups = [];
-  var lastRenderedCryptoSetups = [];
   // Guards the async Alpaca-position patch below against a slow, stale
   // response landing after a newer render already happened.
-  var intradayPLPatchGen = { equities: 0, crypto: 0 };
+  var intradayPLPatchGen = { equities: 0 };
 
   // Shared by renderIntradayBlocks (Trade Overview) and renderWhatToWatch
   // (Market Brief) so both surfaces always agree on what's actually open --
@@ -6533,16 +6211,7 @@
   function withOpenPositionsMergedIn(source){
     var openPositionBySym = {};
     journalEntries.forEach(function(j){
-      // Excludes crypto -- Today's Setups and What to Watch (the two
-      // callers of this function) are built around the equities ORB
-      // universe's own chart-rendering path (Twelve Data/Finnhub/Alpaca
-      // stocks endpoints), which doesn't understand crypto pairs like
-      // "BTC/USD" at all. A crypto position still shows up correctly in
-      // Open Positions (driven entirely by Alpaca's own asset-agnostic
-      // position data, no chart involved) and in the Backend Status
-      // card's own crypto rows -- it just doesn't belong on this
-      // specifically equities-shaped card.
-      if(isOpenAlpacaPositionForCurrentAccount(j) && j.screenerType !== 'crypto') openPositionBySym[j.sym] = j;
+      if(isOpenAlpacaPositionForCurrentAccount(j)) openPositionBySym[j.sym] = j;
     });
     var sourceSyms = {};
     source.forEach(function(t){ sourceSyms[t.sym] = true; });
@@ -6638,36 +6307,6 @@
     });
   }
 
-  // Same merge as withOpenPositionsMergedIn above, flipped to crypto-only
-  // -- a real open crypto position should never be missing from the
-  // crypto watch/setups cards just because the current scan cycle
-  // doesn't currently list it.
-  function withCryptoOpenPositionsMergedIn(source){
-    var openPositionBySym = {};
-    journalEntries.forEach(function(j){
-      if(isOpenAlpacaPositionForCurrentAccount(j) && j.screenerType === 'crypto') openPositionBySym[j.sym] = j;
-    });
-    var sourceSyms = {};
-    source.forEach(function(t){ sourceSyms[t.sym] = true; });
-    Object.keys(openPositionBySym).forEach(function(sym){
-      if(sourceSyms[sym]) return;
-      var j = openPositionBySym[sym];
-      source = source.concat([{
-        sym: j.sym, direction: j.direction,
-        entryPct: 0, stopPctFromEntry: (j.stop - j.entry) / j.entry,
-        t1PctFromEntry: j.t1 != null ? (j.t1 - j.entry) / j.entry : 0,
-        entry: j.entry, stop: j.stop, t1: j.t1,
-        status: 'active', statusLabel: null,
-        notes: ['No original entry reasoning was recorded for this position — it was opened before that started being pinned. (This card stays visible regardless of what the current scan cycle finds.)'],
-        analysisIsReal: true
-      }]);
-    });
-    return source.map(function(t){
-      if(openPositionBySym[t.sym] && t.status === 'watching') return Object.assign({}, t, { status: 'active' });
-      return t;
-    });
-  }
-
   // Patches every visible Today's Setups P/L cell to match Alpaca's own
   // unrealized_pl/unrealized_plpc for that symbol -- the same source
   // Open Positions reads via getAlpacaPositionsCached. The synchronous
@@ -6676,26 +6315,13 @@
   // this replaces that first-paint estimate with the authoritative
   // number the moment it's available, the same two-phase pattern
   // loadStatusPositions already uses for Open Positions itself.
-  // domain ('equities' or 'crypto') keys its OWN generation counter --
-  // renderIntradayBlocks and renderCryptoBlocks each call this
-  // independently, on their own quote-poll cadence, and a single shared
-  // counter meant either one's call could supersede the other's before
-  // its getAlpacaPositionsCached() fetch resolved, silently dropping a
-  // write for positions that render didn't even touch. Concretely: an
-  // equities render firing between a crypto call's fetch starting and
-  // resolving would bump a shared counter, the crypto call's own
-  // myGen-check would then fail and it would return having patched
-  // nothing -- and because renderCryptoBlocks had already repainted its
-  // cards back to the synchronous "—" first-paint moments earlier, that
-  // card was left stuck on "—" until pure luck lined up a later call
-  // that both fired after and resolved before any other call bumped the
-  // counter again. Same failure the other direction for crypto
-  // superseding equities. Per-domain counters remove the cross-domain
-  // half of that race; same-domain re-renders still correctly supersede
-  // each other, which is this counter's actual purpose (see
-  // overallPLPatchGen's identical pattern below for account switches).
+  // Keys its own generation counter per domain (currently just
+  // 'equities') -- a stale, slow getAlpacaPositionsCached() response
+  // landing after a newer render already happened must not clobber that
+  // newer render's own patch. Same purpose as overallPLPatchGen's
+  // identical pattern below for account switches.
   function patchIntradayPLWithAlpacaPositions(domain){
-    var key = domain === 'crypto' ? 'crypto' : 'equities';
+    var key = 'equities';
     var myGen = ++intradayPLPatchGen[key];
     getAlpacaPositionsCached().then(function(positions){
       if(myGen !== intradayPLPatchGen[key]) return;
@@ -6711,12 +6337,10 @@
         cell.textContent = (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)';
 
         // The P/L cell above comes from Alpaca regardless of whether this
-        // tab's own quote poll (findQuote/findCryptoQuote) has resolved
-        // for this symbol yet -- crypto especially can have its own quote
-        // fetch lag or fail independently of the position endpoint. Without
-        // this, that gap showed a real dollar P/L sitting right next to an
-        // honest "--" Current price and a progress bar silently rendered
-        // at the entry price (see renderIntradayBlocks/renderCryptoBlocks'
+        // tab's own quote poll (findQuote) has resolved for this symbol
+        // yet. Without this, that gap showed a real dollar P/L sitting
+        // right next to an honest "--" Current price and a progress bar
+        // silently rendered at the entry price (see renderIntradayBlocks'
         // q.price fallback), which look contradictory even though neither
         // number was actually wrong on its own. Alpaca's own current_price
         // on this same position object is exactly the real price implied
@@ -6963,125 +6587,10 @@
     });
   }
 
-  // Same overall shape as renderIntradayBlocks above, sourced from
-  // backendCryptoPicks instead of backendIntradayPicks/intradayTrades --
-  // crypto never had a local-tab fallback scan, so there's nothing to
-  // prefer over the backend's own picks here. Chart drill-down reuses
-  // the exact same chevron/chart machinery as equities (see
-  // expandTradeCard) -- fetchHistoryFromNetwork branches on the symbol
-  // to route a crypto pair to Alpaca's own crypto bars instead of
-  // Twelve Data, which never carried crypto history at all.
-  function renderCryptoBlocks(){
-    var el = document.getElementById('cryptoBlocks');
-    if(!el) return;
-    var source = withCryptoOpenPositionsMergedIn(
-      (backendCryptoPicks && backendCryptoPicks.length) ? backendCryptoPicks.map(buildTradeFromPick) : []
-    );
-    lastRenderedCryptoSetups = source;
-
-    // Same "hidden-until-real-data" rule as renderIntradayBlocks' own
-    // card -- see its comment. withCryptoOpenPositionsMergedIn above
-    // guarantees a real open crypto position always appears in source
-    // even if the crypto screener itself is currently disabled.
-    var card = document.getElementById('toCard-cryptoSetups');
-    if(card) card.hidden = source.length === 0;
-    if(source.length === 0) return;
-
-    // Same scan-age disclosure as the equities card, on crypto's own
-    // separate 5-minute cycle -- see picksFreshness.
-    var cxFresh = picksFreshness(backendCryptoPicksUpdatedAt, Date.now(), CRYPTO_CYCLE_INTERVAL_MS);
-    var cxAgeNote = cxFresh.level === 'fresh' ? ' · scanned ' + formatAgo(cxFresh.ageMs)
-      : cxFresh.level === 'stale' ? ' · last scan ' + formatAgo(cxFresh.ageMs) + ' — may be out of date'
-      : '';
-    var headMeta = document.getElementById('cryptoSetupsHeadMeta');
-    if(headMeta){
-      // source.length is always > 0 here -- the card returned early above
-      // when it wasn't.
-      headMeta.textContent = source.length + ' setup' + (source.length === 1 ? '' : 's') + cxAgeNote;
-      headMeta.classList.toggle('is-stale', cxFresh.level === 'stale');
-    }
-
-    el.innerHTML = source.map(function(t){
-      var liveQuote = findCryptoQuote(t.sym);
-      var hasLiveQuote = !!(liveQuote && liveQuote.price !== null);
-      // prevClose resolves separately from price (a second endpoint,
-      // daily bars vs. the live quote) and can lag behind or fail to
-      // match at all -- gating the % change on it too, not just price,
-      // is what stops a real price divided by a still-null prevClose
-      // from rendering as "Infinity%".
-      var hasLiveChange = hasLiveQuote && liveQuote.prevClose !== null;
-      var q = hasLiveQuote ? liveQuote : { price: t.entry, prevClose: t.entry };
-      var change = hasLiveChange ? pct(q.price, q.prevClose) : 0;
-      var up = change >= 0; // the arrow -- an honest, direction-agnostic fact: did the price itself rise or fall
-      // Crypto is Long-only (Alpaca has no crypto shorting), so this is a
-      // no-op today (favorable === up always) -- kept in step with Today's
-      // Setups' identical fix anyway, so the color always answers "is
-      // this good for the trade," not just "did the stock move up," the
-      // moment either strategy ever needs it to differ.
-      var favorable = t.direction === 'Short' ? !up : up;
-      var badge = computeBadgeInfo(t);
-      var openEntry = journalEntries.filter(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
-      // Same "honest dash until there's a real live quote to compare
-      // against" rule as Today's Setups' own P/L cell.
-      var plCellHtml;
-      if(openEntry && hasLiveQuote){
-        var isLong = openEntry.direction === 'Long';
-        var pl = (liveQuote.price - openEntry.entry) * openEntry.qty * (isLong ? 1 : -1);
-        var plPct = (liveQuote.price - openEntry.entry) / openEntry.entry * 100 * (isLong ? 1 : -1);
-        var plClass = pl >= 0 ? 'up' : 'down';
-        // Patched below (patchIntradayPLWithAlpacaPositions already
-        // covers every open position regardless of strategy, matching
-        // by symbol -- not just equities) to Alpaca's own real
-        // unrealized_pl/unrealized_plpc once that resolves.
-        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono ' + plClass + '" id="pl-' + t.sym + '">' +
-          (pl >= 0 ? '+' : '-') + '$' + Math.abs(pl).toFixed(2) + ' (' + (plPct >= 0 ? '+' : '') + plPct.toFixed(2) + '%)</div></div>';
-      } else {
-        plCellHtml = '<div class="t-rr" data-label="P/L"><div class="rr-ratio mono" id="pl-' + t.sym + '">—</div></div>';
-      }
-      var notesForDisplay = (openEntry && Array.isArray(openEntry.entryNotes) && openEntry.entryNotes.length)
-        ? openEntry.entryNotes : t.notes;
-      return '' +
-        '<div class="trade-block" data-symbol="' + t.sym + '">' +
-          '<div class="trade-columns trade-row">' +
-            '<div class="t-sym-cell">' +
-              symbolBadgeHtml(t.sym) +
-              '<span class="t-sym-text">' +
-                '<span class="t-sym">' + t.sym + '<span class="t-dir">' + t.direction + '</span>' +
-                  '<span class="status-badge ' + badge.cls + '" id="status-badge-' + t.sym + '">' + badge.label + '</span></span>' +
-              '</span>' +
-            '</div>' +
-            '<div class="t-current mono" data-label="Current" id="cur-' + t.sym + '">' +
-              (hasLiveQuote ? fmt(q.price) : '—') +
-              (hasLiveChange
-                ? '<span class="chg ' + (favorable?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(change).toFixed(2) + '%</span>'
-                : '') +
-            '</div>' +
-            '<div class="t-entry mono" data-label="Entry">' + fmt(t.entry) + '</div>' +
-            '<div class="t-stop mono" data-label="Stop">' + fmt(t.stop) + '</div>' +
-            '<div class="t-t1 mono" data-label="Target">' + fmt(t.t1) + '</div>' +
-            plCellHtml +
-          '</div>' +
-          tradeProgressHtml(t.direction, q.price, t.entry, t.stop, t.t1) +
-        '</div>';
-    }).join('');
-
-    patchIntradayPLWithAlpacaPositions('crypto');
-
-    // The whole card is the click target -- requested directly: a target
-    // the width of one small arrow was easy to miss on a row that's
-    // otherwise entirely non-interactive-looking. The chevron itself has
-    // since been removed (also requested): once every card is a button,
-    // a separate arrow icon no longer tells you anything the card's own
-    // hover cue (.trade-block:hover) doesn't already.
-    el.querySelectorAll('.trade-block[data-symbol]').forEach(function(card){
-      card.addEventListener('click', function(){ openSetupTradeModal(card.dataset.symbol); });
-    });
-  }
-
   // ---------- Trade detail modal ----------
   // Replaces the old per-row inline chevron-expand (expandTradeCard/
   // collapseTradeCard, one .trade-detail div grown below each row) with a
-  // single shared modal, opened from Setups (Equities/Crypto) AND from
+  // single shared modal, opened from Setups (Equities) AND from
   // Journal's day-detail rows -- the latter never had a chart/notes view
   // at all before this. One chart target (#tradeModalChart), one notes
   // list, populated fresh on each open; nothing about it is per-symbol
@@ -7106,8 +6615,8 @@
   //   sym, direction, status (badge label), notes (array of strings)
   //   entry, stop, target -- null is fine, rendered as "--"
   //   pl: { dollar, pct } | null -- null renders "--", never a fake $0
-  //   chart: { kind:'live', isCrypto, tf, basePrice }
-  //        | { kind:'historical', isCrypto, entryTime, exitTime }
+  //   chart: { kind:'live', tf, basePrice }
+  //        | { kind:'historical', entryTime, exitTime }
   //        | { kind:'none', reason } -- e.g. options: no share price to chart
   function openTradeModal(d){
     tradeModalOpenToken++;
@@ -7191,7 +6700,7 @@
       statusEl.removeAttribute('hidden');
       statusEl.classList.add('is-loading-shimmer');
       statusEl.textContent = 'Loading historical price data…';
-      fetchHistoricalRangeBars(d.sym, d.chart.isCrypto, d.chart.entryTime, d.chart.exitTime)
+      fetchHistoricalRangeBars(d.sym, d.chart.entryTime, d.chart.exitTime)
         .then(function(bars){
           if(myToken !== tradeModalOpenToken) return; // modal moved on -- drop this
           statusEl.setAttribute('hidden', '');
@@ -7224,41 +6733,38 @@
   // (timeframe choice, live-quote-anchored base price) -- unchanged logic,
   // just handed to the shared modal instead of an inline expand.
   function liveChartDescriptorFor(sym, entryForFallback){
-    var isCrypto = sym.indexOf('/') > -1;
     // '1D' fetches a buffer of days but keeps only whichever ONE date is
     // most recent in that buffer (see fetchHistoryFromNetwork) -- fine for
     // a position opened and (if it's going to close) closed within the
     // same session, but this strategy explicitly allows holding across
     // sessions (holdAcrossSessions), and a chart stuck on one calendar day
     // cannot show a multi-day hold's actual price action since entry.
-    var openEntryForChart = !isCrypto && journalEntries.filter(function(j){
+    var openEntryForChart = journalEntries.filter(function(j){
       return j.sym === sym && isOpenPositionForCurrentAccount(j);
     })[0];
     var entryDay = openEntryForChart && openEntryForChart.entryBarTime
       ? new Date(firestoreMillis(openEntryForChart.entryBarTime)) : null;
     var heldAcrossSessions = entryDay && !isNaN(entryDay.getTime())
       && entryDay.toDateString() !== new Date().toDateString();
-    var tf = isCrypto ? '15m' : (heldAcrossSessions ? '30m' : '1D');
+    var tf = heldAcrossSessions ? '30m' : '1D';
     // The live quote, not the entry price -- renderChartInto anchors the
     // chart's last candle to whatever price this passes in. trade.entry
     // is only the fallback for the brief window before the first quote
     // resolves.
-    var liveQuote = isCrypto ? findCryptoQuote(sym) : findQuote(sym);
+    var liveQuote = findQuote(sym);
     var basePrice = (liveQuote && liveQuote.price != null) ? liveQuote.price : entryForFallback;
-    return { kind: 'live', isCrypto: isCrypto, tf: tf, basePrice: basePrice };
+    return { kind: 'live', tf: tf, basePrice: basePrice };
   }
 
-  // Opens the shared trade detail modal for a Setups row (Equities or
-  // Crypto -- symbols are disjoint between the two, same as the old
-  // expandTradeCard's lookup). Recomputes from live state rather than
-  // reading anything cached from the row's own render pass, same
-  // principle expandTradeCard already followed: this can be clicked long
-  // after the row that triggered it was rebuilt by the next poll.
+  // Opens the shared trade detail modal for a Setups row. Recomputes from
+  // live state rather than reading anything cached from the row's own
+  // render pass, same principle expandTradeCard already followed: this
+  // can be clicked long after the row that triggered it was rebuilt by
+  // the next poll.
   function openSetupTradeModal(sym){
-    var t = lastRenderedSetups.concat(lastRenderedCryptoSetups).filter(function(x){ return x.sym === sym; })[0];
+    var t = lastRenderedSetups.filter(function(x){ return x.sym === sym; })[0];
     if(!t) return;
-    var isCrypto = sym.indexOf('/') > -1;
-    var liveQuote = isCrypto ? findCryptoQuote(sym) : findQuote(sym);
+    var liveQuote = findQuote(sym);
     var hasLiveQuote = !!(liveQuote && liveQuote.price != null);
     var badge = computeBadgeInfo(t);
     var openEntry = journalEntries.filter(function(j){ return j.sym === sym && isOpenAlpacaPositionForCurrentAccount(j); })[0];
@@ -7441,91 +6947,7 @@
     return new Date(savedAt).toDateString() !== new Date().toDateString();
   }
 
-  // Crypto's own chart history -- Alpaca's crypto bars, not Twelve Data
-  // (which never carried crypto at all). Always requested at '15m', the
-  // crypto strategy's own native timeframe -- there's no per-card
-  // timeframe switcher for either asset class today (renderChartInto is
-  // only ever called with one fixed tf), and 15m sidesteps the '1D'
-  // same-session filtering below, which doesn't make sense for a market
-  // that never closes. No shared rate-limit queue the way Twelve Data
-  // calls have (scheduleTwelveDataCall) -- that queue exists specifically
-  // for Twelve Data's much tighter free-tier ceiling; Alpaca's crypto
-  // data endpoint is the same one fetchAllCryptoQuotes already calls
-  // directly with real headroom to spare.
-  // Alpaca's crypto bars endpoint does NOT reliably return `limit` bars in
-  // one response -- it returns what fits in a page plus a next_page_token,
-  // and drops the rest silently, with no error. shwoop-server hit exactly
-  // this and fixed it there (see cryptoMarketData.js: "requesting 12
-  // symbols at 300 bars each came back with only 4 symbols' worth of data
-  // and a next_page_token, the rest silently missing"); this call never
-  // got the same treatment, so crypto charts were rendering from whatever
-  // single page came back -- often under a dozen bars instead of the ~190
-  // requested. That's invisible as a data bug and instead shows up as
-  // "the chart won't zoom or pan", because there's almost nothing there
-  // to move through.
-  function fetchCryptoHistoryFromNetwork(sym){
-    var limit = tfConfig['15m'].fetchSize;
-    var collected = [];
-    // An explicit start time is what actually makes `limit` mean anything.
-    // `limit` only CAPS a response -- it never guarantees one, and with no
-    // start the endpoint returns whatever short recent window it feels
-    // like, which in practice was under a dozen bars. Asking for a window
-    // wide enough to comfortably contain `limit` bars is what makes the
-    // request deterministic.
-    //
-    // Why that matters far more than it looks: with ~9 bars, chart zoom is
-    // mathematically frozen. The timescale handler clamps visible candles
-    // to [MIN_VISIBLE_CANDLES, min(maxVisible, data.length)] -- with 9 bars
-    // that's [8, 9], so dragging the x-axis does fire, it just has nowhere
-    // to go. It reads as "zoom is broken" when the real fault is upstream
-    // in the data.
-    //
-    // Sized so start->now spans roughly `limit` bars, with 1.5x slack for
-    // any gaps in what the venue actually published. This window is
-    // deliberately NOT huge: Alpaca returns bars ASCENDING FROM `start`,
-    // so asking for a week back and capping at `limit` would hand back the
-    // OLDEST 190 bars in that week and render a days-stale chart. The
-    // slice(-limit) below is the belt to this braces.
-    var startIso = new Date(Date.now() - limit * 15 * 60 * 1000 * 1.5).toISOString();
-
-    function loadPage(pageToken){
-      var url = ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + encodeURIComponent(sym) +
-        '&timeframe=15Min&limit=' + limit + '&start=' + encodeURIComponent(startIso);
-      if(pageToken) url += '&page_token=' + encodeURIComponent(pageToken);
-      return fetch(url, { headers: alpacaHeaders() })
-        .then(function(res){
-          if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function(data){
-          var page = (data.bars && data.bars[sym]) || [];
-          collected = collected.concat(page);
-          // Pages to the END of the window rather than stopping at `limit`
-          // bars: since results run oldest-first, stopping early would keep
-          // the oldest bars and discard the recent ones -- the opposite of
-          // what a live chart needs. The window above bounds how much this
-          // can ever pull.
-          if(data.next_page_token) return loadPage(data.next_page_token);
-          return collected;
-        });
-    }
-
-    return loadPage(null).then(function(bars){
-      if(bars.length < 2) throw new Error('No usable crypto history for ' + sym);
-      return bars.map(function(b){
-        return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
-      // Sorted explicitly rather than assumed: pages arrive in order today,
-      // but a lookahead bug from out-of-order bars would be silent and the
-      // sort is cheap. Same reasoning as the backend's own client.
-      }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); })
-      // Keep the most RECENT `limit` bars. If the window over-delivered,
-      // the excess must come off the old end, never the new one.
-        .slice(-limit);
-    });
-  }
-
   function fetchHistoryFromNetwork(sym, tf, priority){
-    if(sym.indexOf('/') > -1) return fetchCryptoHistoryFromNetwork(sym);
     return scheduleTwelveDataCall(function(){
       var url = TWELVE_DATA_URL + '?symbol=' + encodeURIComponent(sym) +
         '&interval=' + historyIntervals[tf] + '&outputsize=' + tfConfig[tf].fetchSize +
@@ -7668,50 +7090,20 @@
   // fetchHistory's stale-refresh machinery, which only makes sense for a
   // live, currently-open chart.
   //
-  // Equities: the Twelve Data proxy already supports `end_date` (added for
+  // The Twelve Data proxy already supports `end_date` (added for
   // the since-removed Labs historical export, see test/server.test.js) --
   // requesting enough bars to end shortly after the exit, at an interval
   // sized to the trade's own span, reaches back far enough to include the
   // entry too without needing a start_date param the proxy has never
   // supported.
-  // Crypto: fetched directly against Alpaca's own crypto bars endpoint
-  // (same as fetchCryptoHistoryFromNetwork), which DOES take an explicit
-  // `end` alongside `start` -- no proxy involved for crypto at all, same
-  // as the live chart path.
   function twelveDataDateParam(d){
     // 'YYYY-MM-DD HH:MM:SS', UTC -- the exact shape the proxy's own test
     // asserts (test/server.test.js) and Twelve Data's end_date expects.
     return d.toISOString().slice(0, 19).replace('T', ' ');
   }
-  function fetchHistoricalRangeBars(sym, isCrypto, entryTime, exitTime){
+  function fetchHistoricalRangeBars(sym, entryTime, exitTime){
     var spanMs = Math.max(0, exitTime.getTime() - entryTime.getTime());
     var spanDays = spanMs / (24 * 60 * 60 * 1000);
-
-    if(isCrypto){
-      // Alpaca crypto bars: '15Min' for anything up to a few days (this
-      // strategy's actual holds are same-day), '1Day' for anything longer
-      // -- padding the window on both sides so the chart shows a little
-      // price action before the entry and after the exit, not a candle
-      // series that starts and ends exactly at the trade's own edges.
-      var cryptoIntraday = spanDays <= 4;
-      var timeframe = cryptoIntraday ? '15Min' : '1Day';
-      var padMs = cryptoIntraday ? 2 * 60 * 60 * 1000 : 2 * 24 * 60 * 60 * 1000;
-      var startIso = new Date(entryTime.getTime() - padMs).toISOString();
-      var endIso = new Date(Math.min(Date.now(), exitTime.getTime() + padMs)).toISOString();
-      var url = ALPACA_CRYPTO_DATA_BASE + '/bars?symbols=' + encodeURIComponent(sym) +
-        '&timeframe=' + timeframe + '&start=' + encodeURIComponent(startIso) + '&end=' + encodeURIComponent(endIso) + '&limit=1000';
-      return fetch(url, { headers: alpacaHeaders() }).then(function(res){
-        if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
-        return res.json();
-      }).then(function(data){
-        var page = (data.bars && data.bars[sym]) || [];
-        if(page.length < 2) throw new Error('No usable historical crypto data for ' + sym);
-        var bars = page.map(function(b){
-          return { o: b.o, h: b.h, l: b.l, c: b.c, vol: b.v || 0, t: new Date(b.t) };
-        }).sort(function(a, b){ return a.t.getTime() - b.t.getTime(); });
-        return { data: bars, tf: cryptoIntraday ? '15m' : '1M' };
-      });
-    }
 
     var intraday = spanDays < 1.5;
     var mid = !intraday && spanDays < 10;
@@ -8206,7 +7598,7 @@
 
   // Called on every chart (re)render, which is far more often than it
   // looks: the Trade Overview setup lists re-render on every quote poll
-  // (see renderCryptoBlocks/renderIntradayBlocks), which rebuilds each
+  // (see renderIntradayBlocks), which rebuilds each
   // card's <svg> from scratch, and any expanded card then re-renders its
   // chart. Resetting the view here on every one of those meant a zoom or
   // pan silently snapped back to default within a poll cycle -- which
@@ -8735,11 +8127,6 @@
   // this one function under one key, not raced by however many tabs
   // happen to be open.
   var lastQuoteSyncOk = false;
-  // Crypto's own last-batch result -- tracked separately since it runs on
-  // its own independent fetch (fetchAllCryptoQuotes/onCryptoQuoteBatchDone
-  // below), not the equities/index one this file's watchlist loop drives.
-  // Both feed the SAME header status together (see renderHeaderLiveStatus).
-  var lastCryptoQuoteSyncOk = false;
 
   // A single all-failed batch is not a dead feed, and the header used to
   // claim it was: lastQuoteSyncOk was overwritten by every batch, so one
@@ -8767,8 +8154,8 @@
   var quoteFailStreak = 0;
   var lastGoodQuoteAt = null;
 
-  // Both the equities batch and the crypto batch report here: either one
-  // succeeding proves the feed is alive, so either one resets the streak.
+  // The equities batch reports here: a success proves the feed is alive
+  // and resets the streak.
   function noteQuoteBatchResult(ok){
     if(ok){ quoteFailStreak = 0; lastGoodQuoteAt = Date.now(); }
     else { quoteFailStreak++; }
@@ -8821,104 +8208,6 @@
   function fetchQuoteViaAlpaca(sym){
     return Promise.all([fetchAlpacaLatestTrade(sym), fetchAlpacaPrevClose(sym)]).then(function(results){
       return { price: results[0].price, priceAsOf: results[0].asOf, prevClose: results[1] };
-    });
-  }
-
-  // ---------- Crypto quotes (Alpaca crypto data, no Finnhub fallback) ----------
-  // Finnhub's callable proxy is stocks-only (see functions/index.js) --
-  // there's no crypto fallback path the way equities has one, so this is
-  // Alpaca-or-nothing. Unlike the equities loop above (one request per
-  // symbol, since /v2/stocks/{sym}/... is single-symbol), Alpaca's crypto
-  // data endpoints accept a batched symbols= list, so all 12 pairs
-  // resolve in two requests total, not twelve.
-  var ALPACA_CRYPTO_DATA_BASE = 'https://data.alpaca.markets/v1beta3/crypto/us';
-
-  // How many days of daily bars to ask for. Two would be the minimum to
-  // get a previous close, but a pair whose most recent bar hasn't formed
-  // yet would then come back with one, so this asks for a few and takes
-  // the last two that actually arrived.
-  var CRYPTO_PREV_CLOSE_DAYS = 4;
-
-  // `limit` on Alpaca's MULTI-SYMBOL bars endpoint caps the whole
-  // response, not each symbol.
-  //
-  // This request used to be a flat `limit=2` for all 12 pairs, which is
-  // what "2 daily bars" would mean on the single-symbol equities
-  // endpoint. Here it returned two bars for the ENTIRE batch -- so one
-  // pair got its two bars, or two pairs got one each, and the other ten
-  // got nothing at all. That is the whole story behind a ticker tape
-  // cycling the same two symbols, "Broadly negative -- 0 of 2 pairs up
-  // over 24h" against a 12-pair universe, and a Top Gainers column
-  // listing the same names as Top Losers.
-  //
-  // It also explains the impossible-looking 0.00% moves: a pair that got
-  // exactly ONE bar fell into the old `length >= 2 ? [len-2] : [len-1]`
-  // fallback below, which used the current bar as its own previous
-  // close. Same close divided by itself is 0.00%, reported as a 24h
-  // change.
-  //
-  // Sized for the batch, and bounded with an explicit `start` so the
-  // window is pinned rather than left to the endpoint's default -- the
-  // same discipline the crypto CHART fetch already had to learn (see
-  // CLAUDE.md's bars-ascending-from-start incident).
-  function cryptoBarsUrl(base, symbols, days){
-    var since = new Date(Date.now() - (days + 1) * 24 * 60 * 60 * 1000);
-    return base + '/bars?symbols=' + symbols.map(encodeURIComponent).join(',')
-      + '&timeframe=1Day'
-      + '&start=' + since.toISOString().slice(0, 10)
-      + '&limit=' + (symbols.length * (days + 2));
-  }
-
-  // Returns null rather than inventing a previous close from the current
-  // bar. A missing change badge is honest; a 0.00% one is a claim that
-  // the price did not move.
-  function prevCloseFromBars(symBars){
-    if(!symBars || symBars.length < 2) return null;
-    return symBars[symBars.length - 2].c;
-  }
-
-  function fetchAllCryptoQuotes(){
-    if(!alpacaConnected) return Promise.resolve(false);
-    var symbolsParam = CRYPTO_UNIVERSE.map(encodeURIComponent).join(',');
-    return Promise.all([
-      fetch(ALPACA_CRYPTO_DATA_BASE + '/latest/quotes?symbols=' + symbolsParam, { headers: alpacaHeaders() }).then(function(res){
-        if(!res.ok) throw new Error('Alpaca crypto quotes HTTP ' + res.status);
-        return res.json();
-      }),
-      fetch(cryptoBarsUrl(ALPACA_CRYPTO_DATA_BASE, CRYPTO_UNIVERSE, CRYPTO_PREV_CLOSE_DAYS), { headers: alpacaHeaders() }).then(function(res){
-        if(!res.ok) throw new Error('Alpaca crypto bars HTTP ' + res.status);
-        return res.json();
-      })
-    ]).then(function(results){
-      var quotes = (results[0] && results[0].quotes) || {};
-      var bars = (results[1] && results[1].bars) || {};
-      cryptoWatchlist.forEach(function(item){
-        var q = quotes[item.sym];
-        // A quote carries a bid (bp) and ask (ap), not a single trade
-        // price the way equities' latest-trade endpoint does -- midpoint
-        // is the conventional "current price" reference for a crypto
-        // ticker, same convention most retail crypto trackers use.
-        if(q && typeof q.bp === 'number' && typeof q.ap === 'number'){
-          item.price = (q.bp + q.ap) / 2;
-        }
-        // Falls back to a canonicalized (slash-stripped) key lookup --
-        // Alpaca's own endpoints are inconsistent about the "/" in a
-        // crypto symbol (this same data API's /v2/positions drops it
-        // entirely), so this guards against the bars response keying
-        // differently than /latest/quotes does even though both are
-        // requested with the same symbols param. Without this, a keyed-
-        // differently response reads as "zero bars for this symbol,
-        // forever" -- prevClose stays null permanently, which is exactly
-        // what turns the chg badge into "Infinity%" (a real price divided
-        // by a null/zero prevClose).
-        var symBars = bars[item.sym] || bars[canonicalSymbol(item.sym)] || [];
-        var prev = prevCloseFromBars(symBars);
-        if(prev !== null) item.prevClose = prev;
-      });
-      return true;
-    }).catch(function(err){
-      console.error('Crypto quote fetch failed:', err);
-      return false;
     });
   }
 
@@ -9085,16 +8374,6 @@
     renderHeaderLiveStatus();
   }
 
-  // Shared by both the equities/index batch (updateQuoteSyncStatus above)
-  // and the crypto batch (startRealQuoteLoop below) -- crypto trades 24/7,
-  // independent of the equities market's calendar, so this reads "live"
-  // whenever EITHER side is actually syncing right now. Before this, the
-  // header only ever reflected the equities/index batch: a stretch of
-  // failed equities quotes (or simply the equities market being closed,
-  // which can leave its own quotes momentarily stale) showed "Sync
-  // failed" even while crypto was live and trading fine, and there was no
-  // way to tell from the header alone which side actually broke.
-
   // Pure, and separated from the DOM, so the hysteresis above can be
   // tested against real sequences of batch results rather than inferred
   // from the rendered string (see test/quoteFeedStatusGates.test.js).
@@ -9104,21 +8383,19 @@
   // failed AND the prices on screen have gone stale with it. Anything
   // short of that is a retry, not a failure, and says so.
   function quoteFeedStatus(s){
-    var anyOk = !!(s.equitiesOk || s.cryptoOk);
+    var anyOk = !!s.equitiesOk;
     var age = (s.lastGoodAt === null || s.lastGoodAt === undefined) ? Infinity : (s.now - s.lastGoodAt);
     // A SHUT DATA WINDOW IS NOT A FAULT, AND IT IS NOT LIVE EITHER.
     //
-    // Both wrong answers were reachable here at 3am. "Sync failed" reads
-    // as something broken and sends the owner looking for a problem that
-    // does not exist; and the opposite failure is subtler and worse --
-    // /trades/latest answers 200 at any hour with yesterday afternoon's
-    // print, so a successful batch outside IEX's day used to render as
-    // "Live via Alpaca (IEX)" over a price hours old. Crypto genuinely
-    // trades 24/7 and still reports live on its own merits; the equities
-    // half says what it is: closed, and when the last price was.
+    // "Sync failed" reads as something broken and sends the owner looking
+    // for a problem that does not exist; and the opposite failure is
+    // subtler and worse -- /trades/latest answers 200 at any hour with
+    // yesterday afternoon's print, so a successful batch outside IEX's
+    // day used to render as "Live via Alpaca (IEX)" over a price hours
+    // old. The equities half says what it is: closed, and when the last
+    // price was.
     var windowOpen = s.dataWindowOpen !== false;
     if(!windowOpen){
-      if(s.cryptoOk) return { cls: 'ok', text: 'Live via Alpaca (crypto) — equities market closed' };
       return {
         cls: 'warn',
         text: isFinite(s.lastEquitiesPriceAgeMs)
@@ -9131,7 +8408,7 @@
     }
     if(anyOk){
       var usedAlpaca = s.sources && s.sources.length > 0 && s.sources.every(function(x){ return x === 'alpaca'; });
-      var label = s.equitiesOk ? (usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub') : 'Alpaca (crypto)';
+      var label = usedAlpaca ? 'Alpaca (IEX)' : 'Finnhub';
       return { cls: 'ok', text: 'Live via ' + label };
     }
     return {
@@ -9159,7 +8436,6 @@
     if(!el) return;
     var status = quoteFeedStatus({
       equitiesOk: lastQuoteSyncOk,
-      cryptoOk: lastCryptoQuoteSyncOk,
       failStreak: quoteFailStreak,
       lastGoodAt: lastGoodQuoteAt,
       now: Date.now(),
@@ -9190,21 +8466,6 @@
   // Finnhub's free-tier rate limit has headroom for that rare case, so the
   // simpler and more reliable fix is: every tab just starts its own quote
   // loop immediately, no election, no waiting.
-  // Separate from onQuoteBatchDone (equities) since a crypto-only quote
-  // refresh shouldn't wait on or block the equities batch, or vice versa
-  // -- the two run independently and just happen to share a poll cadence.
-  function onCryptoQuoteBatchDone(ok){
-    lastCryptoQuoteSyncOk = ok;
-    noteQuoteBatchResult(ok);
-    renderHeaderLiveStatus();
-    renderTicker();
-    renderCryptoSentiment();
-    renderCryptoMovers();
-    renderWhatToWatch();
-    var statusPageEl = document.getElementById('page-trades');
-    if(statusPageEl && !statusPageEl.hidden) renderCryptoBlocks();
-  }
-
   // EXTENDING THE HOURS MUST NOT MEAN MORE REQUESTS PER HOUR.
   //
   // The equities loop now covers IEX's whole day (08:00-17:00 ET) at the
@@ -9214,8 +8475,6 @@
   // closed-window poll is not wasted: it is what notices the window
   // reopening (and the first pre-market print) without a page reload.
   //
-  // Crypto is deliberately NOT part of this decision -- it trades 24/7,
-  // so its own loop keeps the 45s cadence around the clock, unchanged.
   function equitiesPollIntervalMs(now){
     return isWithinIexDataWindow(now) ? QUOTE_POLL_INTERVAL_MS : QUOTE_POLL_INTERVAL_CLOSED_MS;
   }
@@ -9234,11 +8493,7 @@
   function startRealQuoteLoop(){
     if(priceLoopInterval){ clearInterval(priceLoopInterval); }
     fetchAllQuotes();
-    fetchAllCryptoQuotes().then(onCryptoQuoteBatchDone);
     scheduleEquitiesPoll();
-    priceLoopInterval = setInterval(function(){
-      fetchAllCryptoQuotes().then(onCryptoQuoteBatchDone);
-    }, QUOTE_POLL_INTERVAL_MS);
   }
 
   // ---------- Clock ----------
@@ -9543,9 +8798,9 @@
     applyTickerSpeedPref(saved);
   })();
 
-  // ---------- Trade card columns (Equities/Crypto Setups, Journal day-detail) ----------
+  // ---------- Trade card columns (Equities Setups, Journal day-detail) ----------
   // One global preference rather than a separate dial per list -- the
-  // three lists (#intradayBlocks, #cryptoBlocks, #journalDetail) are the
+  // three lists (#intradayBlocks, #journalDetail) are the
   // same kind of thing (a stack of trade cards) and a reader who picks
   // "3 columns" almost certainly means it everywhere, not just the one
   // section they happened to be looking at when they changed it.
@@ -9610,7 +8865,6 @@
     { key:'backendStatus', label:'Backend Status' },
     { key:'openPositions', label:'Open Positions' },
     { key:'todaysSetups', label:'Equities Setups' },
-    { key:'cryptoSetups', label:'Crypto Setups' },
     { key:'optionsPositions', label:'Options Income (CSP)' },
     { key:'weeklySpreadPositions', label:'Weekly Credit Spread' },
     { key:'activityLog', label:'Activity Log' }
@@ -10417,7 +9671,7 @@
   // standalone table showed is gone from the app.
   // %pl here is return on the credit COLLECTED (premium kept vs. premium
   // paid back), not return on share price -- a different scale than an
-  // equities/crypto trade's %, stated here rather than left implicit,
+  // equities trade's %, stated here rather than left implicit,
   // since it now feeds the same "Net: X%" day recap sentence.
   function optionsClosedJournalRows(){
     return allClosedOptionsTrades().filter(function(t){
@@ -10441,11 +9695,10 @@
   // Same persist-across-renders treatment as Open Positions' filter --
   // sticks with whatever the user last picked instead of resetting on
   // every journal snapshot update.
-  var journalFilter = 'all'; // 'all' | 'equities' | 'crypto' | 'options'
+  var journalFilter = 'all'; // 'all' | 'equities' | 'options'
 
   function filteredJournalEntries(){
-    if(journalFilter === 'equities') return journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
-    if(journalFilter === 'crypto') return journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
+    if(journalFilter === 'equities') return journalEntries;
     // Options never live in journalEntries at all (see allClosedOptionsTrades'
     // own comment) -- optionsClosedJournalRows is the entire Options tab's
     // real source, added in separately wherever this function's callers
@@ -10480,7 +9733,7 @@
 
   function computeDayStats(dateStr){
     // Options join the unified "all" view and their own "options" tab --
-    // never the Equities/Crypto-scoped ones, since they're neither.
+    // never the Equities-scoped one, since they're neither.
     var optionsRows = (journalFilter === 'all' || journalFilter === 'options')
       ? optionsClosedJournalRows().filter(function(e){ return realizedOnDate(e) === dateStr; }) : [];
     var entries = filteredJournalEntries().filter(function(e){ return e.status === 'closed' && realizedOnDate(e) === dateStr; }).concat(optionsRows);
@@ -10507,15 +9760,14 @@
   // Both numbers were right and neither said what it was counting. The
   // count now matches the cards it sits next to.
   function updateJournalFilterTabs(){
-    var equitiesEntries = journalEntries.filter(function(j){ return j.screenerType !== 'crypto'; });
-    var cryptoEntries = journalEntries.filter(function(j){ return j.screenerType === 'crypto'; });
+    var equitiesEntries = journalEntries;
     var isClosed = function(j){ return j.status === 'closed'; };
     var optionsCount = optionsClosedJournalRows().length;
     // Whichever two-or-more categories actually have trades -- a lone
     // category showing "All" and its own single tab was never useful, and
     // options specifically (off by default, CSP/weekly spread) shouldn't
     // force a tab strip onto every account that's never touched it.
-    var categoriesPresent = [equitiesEntries.length > 0, cryptoEntries.length > 0, optionsCount > 0].filter(Boolean).length;
+    var categoriesPresent = [equitiesEntries.length > 0, optionsCount > 0].filter(Boolean).length;
     var showFilter = categoriesPresent > 1;
     if(!showFilter) journalFilter = 'all';
     var row = document.getElementById('journalFilterRow');
@@ -10523,11 +9775,10 @@
     row.hidden = !showFilter;
     if(!showFilter) return;
     document.getElementById('journalFilterEquities').textContent = 'Equities (' + equitiesEntries.filter(isClosed).length + ')';
-    document.getElementById('journalFilterCrypto').textContent = 'Crypto (' + cryptoEntries.filter(isClosed).length + ')';
     var optionsBtn = document.getElementById('journalFilterOptions');
     optionsBtn.hidden = optionsCount === 0;
     optionsBtn.textContent = 'Options (' + optionsCount + ')';
-    ['All', 'Equities', 'Crypto', 'Options'].forEach(function(label){
+    ['All', 'Equities', 'Options'].forEach(function(label){
       var btn = document.getElementById('journalFilter' + label);
       btn.classList.toggle('active', btn.dataset.filter === journalFilter);
     });
@@ -10544,7 +9795,7 @@
     // `new Date().toISOString().slice(0,10)`), so building this grid from
     // local getters silently drifted the two apart for anyone not on UTC
     // itself. Equities never surfaced it (the whole 9:30-4pm ET session
-    // sits inside one UTC calendar day), but crypto trades right through
+    // sits inside one UTC calendar day).
     // the UTC day rollover 24/7 -- for a US timezone, that's evening
     // local hours, exactly when a real fill would land on tomorrow's UTC
     // date and vanish from today's LOCAL calendar cell entirely.
@@ -10652,7 +9903,7 @@
     // unified "all" view and their own "options" tab -- only on the day
     // they actually closed since there's no "open" state to show here at
     // all (open options positions already have their own dedicated cards
-    // on Trade Overview; the Options tab, unlike Equities/Crypto, will
+    // on Trade Overview; the Options tab, unlike Equities, will
     // therefore never show an open row).
     var optionsEntries = (journalFilter === 'all' || journalFilter === 'options')
       ? optionsClosedJournalRows().filter(function(e){ return realizedOnDate(e) === selectedJournalDate; })
@@ -10728,7 +9979,7 @@
       // entire reason the two run side by side, and neither symbol nor
       // direction nor price can separate them. Reuses the source tag's own
       // class rather than introducing a second one.
-      // Only equities: crypto has one strategy, so a tag there would be
+      // Only equities has more than one strategy, so a tag there would be
       // noise, and entries predating this carry no field at all.
       var strategyTag = (e.screenerType === 'intraday' && e.strategy)
         ? '<span class="journal-source-tag">' + strategyLabel(e).toLowerCase() + '</span>'
@@ -10805,15 +10056,14 @@
   }
 
   // Opens the trade detail modal for one Journal day-detail row -- a real
-  // equities/crypto journalEntries trade, open or closed (options rows
-  // never reach here, see the row-building comment above). An OPEN entry
+  // equities journalEntries trade, open or closed (options rows never
+  // reach here, see the row-building comment above). An OPEN entry
   // gets the same live, currently-updating chart Setups rows show; a
   // CLOSED one gets a static historical chart fetched for its own
   // entry-to-exit window (fetchHistoricalRangeBars), since "how did this
   // trade play out" for a trade that closed weeks ago cannot mean "here
   // is today's price" the way an open position's chart can.
   function openJournalEntryTradeModal(e){
-    var isCrypto = e.screenerType === 'crypto';
     var chart;
     if(e.status === 'open'){
       chart = liveChartDescriptorFor(e.sym, e.entry);
@@ -10821,11 +10071,9 @@
       var entryMs = e.entryBarTime ? firestoreMillis(e.entryBarTime) : NaN;
       var entryTime = !isNaN(entryMs) ? new Date(entryMs) : new Date(e.date + 'T14:30:00Z');
       // No real "close" timestamp is stored on a journal entry, only the
-      // exit DATE -- approximated to market-close (equities) / end of day
-      // (crypto trades 24/7, so this is just "some time that day", and
-      // fetchHistoricalRangeBars pads the fetch window either way.
-      var exitTime = new Date((e.exitDate || e.date) + (isCrypto ? 'T23:59:00Z' : 'T21:00:00Z'));
-      chart = { kind: 'historical', isCrypto: isCrypto, entryTime: entryTime, exitTime: exitTime };
+      // exit DATE -- approximated to market-close.
+      var exitTime = new Date((e.exitDate || e.date) + 'T21:00:00Z');
+      chart = { kind: 'historical', entryTime: entryTime, exitTime: exitTime };
     }
     var pl = e.status === 'closed' ? computePL(e) : null;
     openTradeModal({
@@ -10912,7 +10160,7 @@
     // real fetch happens on the very next render once the doc lands.
     //
     // Worth keeping: that console noise is not harmless. It buried a
-    // genuine crypto-chart data bug in a wall of red herrings and cost
+    // genuine chart data bug in a wall of red herrings and cost
     // real debugging time before anyone realised the 401s were expected.
     if(!alpacaConnected) return Promise.resolve([]);
     if(alpacaClosedOrdersCache.inflight) return alpacaClosedOrdersCache.inflight;
@@ -10942,59 +10190,17 @@
   // flagged as an anomaly rather than silently mispairing it with the
   // wrong exit.
   //
-  // CRYPTO IS RECONSTRUCTED HERE TOO, and used to be excluded. The stated
-  // reason for excluding it was that crypto "does not pair by bracket
-  // legs" -- crypto has no order_class at Alpaca at all, so the stop is a
-  // separately-submitted stop_limit order that the backend cancels by hand
-  // (shwoop-server's cryptoProtectiveOrders.js). But this function never
-  // paired by bracket legs in the first place: it pairs by side
-  // alternation over `status === 'filled'` orders only, and a cancelled
-  // protective order never reaches `filled`. The unfilled leg simply is
-  // not in the list. That objection was about a mechanism this code does
-  // not use, and excluding crypto made the app's headline P&L silently
-  // equities-only.
-  //
-  // What genuinely IS different about crypto, and what the crypto branch
-  // below exists for:
-  //
-  //   FEES ARE TAKEN IN KIND. Alpaca charges the crypto commission in the
-  //   asset, so a buy of 250 SOL leaves ~249.6 SOL actually held, and the
-  //   closing sell can only ever fill the smaller number (protectiveQty in
-  //   cryptoProtectiveOrders.js clamps to the held quantity for exactly
-  //   this reason). Assuming buy qty == sell qty would leave dust open on
-  //   every single trade and mis-pair everything after it. So the crypto
-  //   branch tracks a REMAINING quantity, and P&L is real cash flow --
-  //   (sell qty x sell price) - (matched buy qty x buy price) -- with the
-  //   coin that never came back charged at cost as `feeCost` rather than
-  //   quietly dropped. The fee is surfaced, not absorbed: it is a column
-  //   in the history table and it is inside the net figure, because it is
-  //   money the account really paid.
-  //
-  //   Only the BUY-side in-kind fee is visible this way. A sell's fee is
-  //   deducted from the USD proceeds, and Alpaca does not report it in the
-  //   order record, so these dollars are net of the buy-side fee only and
-  //   are, if anything, a touch optimistic. Said out loud rather than
-  //   implied.
-  //
-  //   PARTIAL EXITS are real: a position can be closed by more than one
-  //   sell. Each sell closes a slice against the same entry basis and the
-  //   remainder stays open for the next one, so the trade after it still
-  //   pairs correctly.
-  //
-  //   SYMBOL FORM. /v2/positions returns "UNIUSD" and /v2/orders returns
-  //   "UNI/USD" (see canonicalSymbol). Grouping on the raw string would
-  //   split one symbol into two books and orphan both halves, so grouping
-  //   is on the canonical form. Equities symbols contain no "/", so this
-  //   is a no-op for them.
-  //
   // ANYTHING THAT CANNOT BE RECONSTRUCTED IS REPORTED, NEVER DROPPED. A
-  // sell with no open position, or a sell larger than what is open (coin
-  // acquired outside this app, a transfer in), cannot be assigned a cost
-  // basis from order history alone. Silently skipping it would make the
-  // headline total quietly wrong, which is the exact failure this card was
-  // rebuilt around Alpaca's own fills to escape. It goes in
-  // `unreconstructable` and is shown on screen and beside the headline.
-  var CRYPTO_DUST_FRACTION = 0.02; // see below
+  // sell with no open position, or a sell larger than what is open,
+  // cannot be assigned a cost basis from order history alone. Silently
+  // skipping it would make the headline total quietly wrong, which is the
+  // exact failure this card was rebuilt around Alpaca's own fills to
+  // escape. It goes in `unreconstructable` and is shown on screen and
+  // beside the headline.
+  //
+  // SYMBOL FORM is normalized via canonicalSymbol before grouping, so a
+  // symbol never splits into two books over an incidental character
+  // difference between two records of the same fill.
   function reconstructTradesFromOrders(orders){
     var filled = orders.filter(function(o){
       return o.status === 'filled' && o.filled_at && o.filled_avg_price;
@@ -11007,28 +10213,11 @@
     var anomalies = [];
     var unreconstructable = [];
     Object.keys(bySymbol).forEach(function(sym){
-      // Crypto-ness is decided per SYMBOL, not per order: the two forms of
-      // one pair are already merged into this group, and an order missing
-      // asset_class still belongs to the same book as its siblings.
-      var isCrypto = bySymbol[sym].some(function(o){
-        return o.asset_class === 'crypto' || (o.symbol || '').indexOf('/') >= 0;
-      });
       var open = null;
       bySymbol[sym].forEach(function(o){
         var qty = parseFloat(o.filled_qty || o.qty);
         var price = parseFloat(o.filled_avg_price);
         if(!open){
-          if(isCrypto && o.side === 'sell'){
-            // Alpaca does not permit crypto shorts, so a sell with nothing
-            // open is coin this order history cannot price -- no basis, no
-            // trade. Reported, not swallowed.
-            unreconstructable.push({
-              sym: sym, time: o.filled_at, qty: qty,
-              note: 'Sell of ' + qty + ' ' + sym + ' with no open position in the order history -- ' +
-                'no cost basis is recoverable (coin transferred in, or bought before this history begins).',
-            });
-            return;
-          }
           open = { sym: sym, entrySide: o.side, entryPrice: price, entryTime: o.filled_at, qty: qty, remaining: qty };
           return;
         }
@@ -11043,59 +10232,15 @@
         }
         var direction = open.entrySide === 'buy' ? 'Long' : 'Short';
         var exitType = o.type === 'stop' ? 'Stop-loss' : o.type === 'limit' ? 'Target' : 'Market (manual/EOD)';
-        if(!isCrypto){
-          // EQUITIES PATH -- byte-for-byte the arithmetic it has always
-          // been. Equities fees are not taken in kind and a whole-share
-          // exit matches the entry, so there is nothing here to fix and
-          // nothing to risk changing.
-          var pctReturn = direction === 'Long' ? (price - open.entryPrice) / open.entryPrice * 100 : (open.entryPrice - price) / open.entryPrice * 100;
-          var dollarPL = (price - open.entryPrice) * open.qty * (direction === 'Long' ? 1 : -1);
-          trades.push({
-            sym: sym, direction: direction, qty: open.qty,
-            entryPrice: open.entryPrice, entryTime: open.entryTime,
-            exitPrice: price, exitTime: o.filled_at, exitType: exitType,
-            pctReturn: pctReturn, dollarPL: dollarPL, assetClass: 'us_equity',
-          });
-          open = null;
-          return;
-        }
-
-        // CRYPTO PATH.
-        // Crypto's stop is a stop_limit order (Alpaca has no plain stop for
-        // crypto), which the equities labelling above would have called a
-        // manual exit. Relabelled here only, so the equities path keeps the
-        // exact exit-type mapping it has always had.
-        if(o.type === 'stop_limit') exitType = 'Stop-loss';
-        var closeQty = Math.min(qty, open.remaining);
-        if(qty > open.remaining * (1 + 1e-9)){
-          unreconstructable.push({
-            sym: sym, time: o.filled_at, qty: qty - open.remaining,
-            note: 'Sell of ' + qty + ' ' + sym + ' exceeded the ' + open.remaining + ' still open from the ' +
-              'entry at ' + open.entryTime + ' -- the excess has no cost basis in this order history and is ' +
-              'excluded from P&L rather than priced off the wrong entry.',
-          });
-        }
-        open.remaining -= closeQty;
-        // DUST vs A REAL PARTIAL EXIT. The in-kind fee is a fraction of a
-        // percent of the position; a deliberate partial exit is a
-        // meaningful slice of it. Anything left under 2% of the original
-        // quantity is the fee, so the trade is closed and that coin is
-        // charged at cost. Anything above it is still a live position and
-        // the book stays open for the next sell.
-        var isFinalExit = open.remaining <= open.qty * CRYPTO_DUST_FRACTION;
-        var feeQty = isFinalExit ? open.remaining : 0;
-        var feeCost = feeQty * open.entryPrice;
-        var grossPL = (price - open.entryPrice) * closeQty * (direction === 'Long' ? 1 : -1);
-        var netPLc = grossPL - feeCost;
-        var basis = open.entryPrice * (closeQty + feeQty);
+        var pctReturn = direction === 'Long' ? (price - open.entryPrice) / open.entryPrice * 100 : (open.entryPrice - price) / open.entryPrice * 100;
+        var dollarPL = (price - open.entryPrice) * open.qty * (direction === 'Long' ? 1 : -1);
         trades.push({
-          sym: sym, direction: direction, qty: closeQty,
+          sym: sym, direction: direction, qty: open.qty,
           entryPrice: open.entryPrice, entryTime: open.entryTime,
           exitPrice: price, exitTime: o.filled_at, exitType: exitType,
-          pctReturn: basis > 0 ? netPLc / basis * 100 : 0,
-          dollarPL: netPLc, feeCost: feeCost, assetClass: 'crypto',
+          pctReturn: pctReturn, dollarPL: dollarPL, assetClass: 'us_equity',
         });
-        if(isFinalExit) open = null;
+        open = null;
       });
     });
     trades.sort(function(a,b){ return new Date(b.exitTime) - new Date(a.exitTime); });
@@ -11115,11 +10260,6 @@
     var avgWin = wins.length ? grossWin / wins.length : 0;
     var avgLoss = losses.length ? grossLoss / losses.length : 0;
     var netPL = trades.reduce(function(s,t){ return s + t.dollarPL; }, 0);
-    // The crypto commission is taken in the asset, so it never appears as a
-    // line item anywhere -- it is simply coin that did not come back. It is
-    // already inside netPL (see reconstructTradesFromOrders); shown on its
-    // own as well so the cost is visible rather than merely felt.
-    var feeTotal = trades.reduce(function(s,t){ return s + (t.feeCost || 0); }, 0);
 
     var statsEl = document.getElementById('alpacaHistoryStats');
     statsEl.innerHTML =
@@ -11128,8 +10268,7 @@
       '<div class="pl-card"' + (losses.length ? '' : ' title="' + PROFIT_FACTOR_NO_LOSSES_HINT + '"') + '><div class="pl-card-label">Profit factor</div><div class="pl-card-value mono ' + (losses.length && pf >= 1 ? 'up' : losses.length ? 'down' : '') + '">' + profitFactorText(pf, losses.length) + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Avg win</div><div class="pl-card-value mono up">+$' + avgWin.toFixed(0) + '</div></div>' +
       '<div class="pl-card"><div class="pl-card-label">Avg loss</div><div class="pl-card-value mono down">−$' + avgLoss.toFixed(0) + '</div></div>' +
-      '<div class="pl-card"><div class="pl-card-label">Net P&L</div><div class="pl-card-value mono ' + (netPL >= 0 ? 'up' : 'down') + '">' + (netPL >= 0 ? '+' : '−') + '$' + Math.abs(netPL).toFixed(0) + '</div></div>' +
-      (feeTotal > 0 ? '<div class="pl-card"><div class="pl-card-label">Crypto fees (in kind)</div><div class="pl-card-value mono down">−$' + feeTotal.toFixed(2) + '</div></div>' : '');
+      '<div class="pl-card"><div class="pl-card-label">Net P&L</div><div class="pl-card-value mono ' + (netPL >= 0 ? 'up' : 'down') + '">' + (netPL >= 0 ? '+' : '−') + '$' + Math.abs(netPL).toFixed(0) + '</div></div>';
 
     var anomaliesEl = document.getElementById('alpacaHistoryAnomalies');
     anomaliesEl.innerHTML = anomalies.length
@@ -11327,25 +10466,7 @@
       var up = netPL >= 0;
       overallValEl.textContent = (up ? '+$' : '−$') + Math.abs(netPL).toFixed(0);
       overallValEl.className = 'pl-card-value mono ' + (up ? 'up' : 'down');
-      // THE NUMBER IS NOW ALL-TIME, ACROSS BOTH ASSET CLASSES, AND EVERY
-      // DOLLAR IN IT IS THE BROKER'S.
-      //
-      // This card used to say "All-time equities", honestly, because
-      // reconstructTradesFromOrders filtered out `asset_class === 'crypto'`
-      // and the crypto half was reported beside it from this app's own
-      // journal, explicitly marked journal-only. That was the right label
-      // for the number it had. The number is what changed: crypto is
-      // reconstructed from Alpaca's order history too now (see that
-      // function's own comment for what fee-in-kind, partial exits and the
-      // two symbol forms each required), so both halves come from the same
-      // place and the headline can say all-time without lying.
-      //
-      // The rule that produced the old label still stands and must not be
-      // undone: never add the journal's crypto P&L into netPL. That would
-      // mix broker-reconciled dollars with dollars this app's own
-      // bookkeeping produced, in one figure, with no way to tell afterwards
-      // which half is which. The fix was to reconcile crypto, not to blend
-      // it. netPL below is 100% Alpaca fills and nothing else.
+      // THE NUMBER IS ALL-TIME, AND EVERY DOLLAR IN IT IS THE BROKER'S.
       //
       // Anything the order history genuinely could not price is named in
       // the sub-label rather than dropped -- a total that silently omits a
@@ -11354,9 +10475,7 @@
         ? ' · ' + result.unreconstructable.length + ' fill' + (result.unreconstructable.length === 1 ? '' : 's') +
           ' not reconstructable (excluded -- see Pull full history)'
         : '';
-      var cryptoCount = trades.filter(function(t){ return t.assetClass === 'crypto'; }).length;
-      var mixNote = cryptoCount ? ' (' + (trades.length - cryptoCount) + ' equities, ' + cryptoCount + ' crypto)' : '';
-      overallSubEl.textContent = 'All-time · broker-reconciled · ' + alpacaAccountLabel() + ' · ' + trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + mixNote + ', ' + wins + 'W/' + (trades.length - wins) + 'L' + unrecNote;
+      overallSubEl.textContent = 'All-time · broker-reconciled · ' + alpacaAccountLabel() + ' · ' + trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + ', ' + wins + 'W/' + (trades.length - wins) + 'L' + unrecNote;
     }).catch(function(err){
       // Not connected, or a transient Alpaca hiccup -- the journal-based
       // fallback rendered above stays showing rather than the card going
@@ -11375,36 +10494,28 @@
   // All unreconciled used to mean this block and the headline Overall
   // P&L card right above it (always Alpaca-patched regardless of tab)
   // could show disagreeing numbers on the same screen with nothing
-  // explaining why. reconstructTradesFromOrders now reconstructs crypto
-  // from the same order history (see its own comment), so all three tabs
-  // -- All, Equities and Crypto -- show broker-reconciled trades, each
-  // filtered to what its own tab claims to be about. The Crypto tab used
-  // to be left on its journal fallback because crypto was excluded from
-  // the reconstruction; it no longer is, and leaving it on the journal
-  // would recreate exactly the disagreement described above, one tab
-  // over.
+  // explaining why. reconstructTradesFromOrders reconstructs real fills
+  // from Alpaca's own order history (see its own comment), so both tabs
+  // -- All and Equities -- show broker-reconciled trades, each filtered
+  // to what its own tab claims to be about.
   var tradeStatsPatchGen = 0;
   function patchTradeStatsFromAlpaca(){
     var myGen = ++tradeStatsPatchGen;
     // Every tab patches now. Which trades a tab gets is decided by the
     // tab, not by what the reconstruction happens to be able to do:
-    // Equities gets the equities fills, Crypto gets the crypto fills, All
-    // gets both. Before crypto was reconcilable, All silently meant
+    // Equities gets the equities fills, All
+    // gets everything. All silently meant
     // equities; that is what the sub-label had to apologise for below, and
     // it no longer does.
     var tabAtCall = journalFilter;
     getAlpacaClosedOrdersCached().then(function(orders){
       if(myGen !== tradeStatsPatchGen || journalFilter !== tabAtCall) return; // superseded, or the tab changed while this was in flight
       // The options tab has no broker-reconstructable trades at all --
-      // reconstructTradesFromOrders only ever produces 'us_equity'/'crypto'
+      // reconstructTradesFromOrders only ever produces 'us_equity'
       // (Alpaca's REST order history has no options reconstruction path
       // here) -- so it skips the reconstruction entirely rather than
       // filtering it down to an always-empty set.
-      var trades = tabAtCall === 'options' ? [] : reconstructTradesFromOrders(orders).trades.filter(function(t){
-        if(tabAtCall === 'crypto') return t.assetClass === 'crypto';
-        if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
-        return true;
-      });
+      var trades = tabAtCall === 'options' ? [] : reconstructTradesFromOrders(orders).trades;
       // Closed options trades join this same broker-reconciled set, in the
       // unified "all" view and their own "options" tab -- win/loss decided
       // by dollarPL sign exactly like every other trade here, since a
@@ -11453,7 +10564,7 @@
       }
       // All really does mean all now -- both asset classes, every dollar
       // from Alpaca's own fills -- so the label no longer has to carve out
-      // crypto. It says "broker-reconciled" because the number these cards
+      // these fills. It says "broker-reconciled" because the number these cards
       // replaced was the journal's, and the distinction is the whole point
       // of patching them.
       winRateSubEl.textContent = trades.length + ' real trade' + (trades.length === 1 ? '' : 's') + ' (broker-reconciled)';
@@ -11663,22 +10774,14 @@
     var card = document.getElementById('growthChartCard');
     if(!card) return;
 
-    // The Crypto tab used to go straight to the journal fallback, because
-    // reconstructTradesFromOrders excluded crypto and an equities-only
-    // curve under a Crypto heading would have been a lie. Crypto is
-    // reconstructed now, so every tab draws the broker's own fills,
-    // filtered to what the tab is about -- a curve whose source silently
-    // differs per tab is the same class of bug one level down.
+    // Every tab draws the broker's own fills -- a curve whose source
+    // silently differs per tab is the same class of bug one level down.
     var tabAtCall = journalFilter;
     getAlpacaClosedOrdersCached().then(function(orders){
       if(myGen !== growthChartGen || journalFilter !== tabAtCall) return; // superseded by a newer render
       // Options has no broker-reconstructable trades -- same reasoning as
       // patchTradeStatsFromAlpaca's own comment.
-      var trades = tabAtCall === 'options' ? [] : reconstructTradesFromOrders(orders).trades.filter(function(t){
-        if(tabAtCall === 'crypto') return t.assetClass === 'crypto';
-        if(tabAtCall === 'equities') return t.assetClass !== 'crypto';
-        return true;
-      });
+      var trades = tabAtCall === 'options' ? [] : reconstructTradesFromOrders(orders).trades;
       var optionsTrades = (tabAtCall === 'all' || tabAtCall === 'options') ? closedOptionsTradesForGrowth() : [];
       if(trades.length >= 2){
         renderGrowthChartWithRanges(trades.concat(optionsTrades));
@@ -11707,7 +10810,7 @@
   // real $ P&L regardless of whether it came from a qty*price stock move
   // or a credit collected/paid on an options contract, so it can be
   // summed into the SAME cumulative curve honestly. In the unified "all"
-  // view and their own "Options" tab, never under Equities or Crypto --
+  // view and their own "Options" tab, never under Equities --
   // options are neither, and injecting their P&L into a curve labeled
   // "Equities" would be exactly the kind of silent mislabeling this
   // file's other comments keep calling out.
@@ -11927,7 +11030,7 @@
     // strategy, so it always reflects the FULL journal, never the
     // filter tabs below it.
     // Overall always includes closed options trades regardless of the
-    // Equities/Crypto tabs below -- same reasoning as "always reflects
+    // Equities tab below -- same reasoning as "always reflects
     // the FULL journal" above; options aren't a tab, but they are real
     // closed P&L that belongs in the account's actual overall total.
     var overall = computeAggregatePL(journalEntries.concat(optionsClosedJournalRows()));
@@ -11953,12 +11056,12 @@
 
     // Everything below IS derived from our own journal entries, which do
     // carry which strategy each trade came from -- the honest place to
-    // apply the Equities/Crypto filter tabs.
+    // apply the Equities filter tab.
     // Options fold into these stat tiles too now (win/loss decided by
     // dollar sign -- equity out vs. equity in -- same rule as every
     // other trade here goes through computePL/isWinningReturn), in the
     // unified "all" view and their own "options" tab: they aren't
-    // Equities or Crypto, so neither of those tabs should silently gain
+    // Equities, so that tab should never silently gain
     // or lose trades when toggled.
     var filtered = computeAggregatePL(filteredJournalEntries().concat((journalFilter === 'all' || journalFilter === 'options') ? optionsClosedJournalRows() : []));
 
@@ -12002,7 +11105,7 @@
         everProtectedSubEl.textContent = filtered.everProtectedCount + ' of ' + filtered.everProtectedTracked + ' measured' + unmeasurableNote;
       }
       // A losing (or winning) streak legitimately empties one side --
-      // 0 winners in 13 crypto trades is a real, uncomfortable result,
+      // 0 winners in 13 trades is a real, uncomfortable result,
       // and "+$0" hid it behind a number that looked measured. "—" says
       // plainly that there is nothing on that side to average, same as
       // the win-rate and profit-factor cards already do.
@@ -12606,15 +11709,13 @@
   // accurate zero: an account with nothing open has equity exactly equal
   // to last_equity, so the delta is $0.00 and there is nothing stale
   // about it. A fresh account on a Sunday read "Market closed" for a
-  // number that was simply, correctly, nothing -- while crypto traded
-  // 24/7 beside it.
+  // number that was simply, correctly, nothing.
   //
   // A zero delta cannot be a misleadingly-spanned two-session move, so it
-  // is always safe to show. Only a NON-zero weekend delta on an account
-  // with no open crypto position still gets the closed-market treatment.
-  function shouldHideTodayPL(backendIsTodayTradingDay, hasOpenCryptoPosition, todayPL) {
+  // is always safe to show. Only a NON-zero weekend delta still gets the
+  // closed-market treatment.
+  function shouldHideTodayPL(backendIsTodayTradingDay, todayPL) {
     if (backendIsTodayTradingDay !== false) return false;
-    if (hasOpenCryptoPosition) return false;
     // Below half a cent renders as $0.00 anyway, so treat it as zero
     // rather than letting float dust re-trigger the hidden state.
     return Math.abs(todayPL) >= 0.005;
@@ -12627,8 +11728,7 @@
   //
   // The only reason that ever looked like a three-card bug rather than a
   // whole-page one is that two of the five have a SECOND painter: Backend
-  // Status re-renders on its own 5s timer, and Crypto Setups re-renders in
-  // onCryptoQuoteBatchDone. Those two repainted themselves moments later and
+  // Status re-renders on its own 5s timer. That card repainted itself moments later and
   // looked healthy; the cards with no second painter just stayed empty.
   //
   // A card that cannot render says so, in its own body, rather than showing
@@ -12696,7 +11796,6 @@
     renderStatusCard('Backend Status', 'backendStatusBody', renderBackendStatus);
     renderStatusCard('Open Positions', 'statusPositionsBody', renderStatusPositions);
     renderStatusCard('Equities Setups', 'intradayBlocks', renderIntradayBlocks);
-    renderStatusCard('Crypto Setups', 'cryptoBlocks', renderCryptoBlocks);
     renderStatusCard('Activity Log', 'statusActivityList', renderActivityLog);
 
     var summaryEl = document.getElementById('statusAccountSummary');
@@ -12726,38 +11825,19 @@
       var todayPLPct = lastEquity > 0 ? (todayPL / lastEquity * 100) : 0;
       var plClass = todayPL >= 0 ? 'up' : 'down';
       // Alpaca only rolls last_equity forward at the START of the next
-      // real EQUITIES trading session -- on a weekend or holiday it's
-      // still sitting at the close from TWO sessions back, not one, so
-      // equity minus last_equity can span two days' worth of change,
-      // mislabeled as "Today's". But crypto trades 24/7 on this same
-      // account regardless of the stock market's calendar -- an open
-      // crypto position (or one that's simply still resting) means
-      // equity genuinely IS moving right now, so "Market closed" would
-      // be actively wrong, not just imprecise, hiding a real number the
-      // moment it's most worth checking. hasOpenCryptoPosition overrides
-      // the closed-market treatment whenever that's the case; otherwise
-      // backendIsTodayTradingDay === false (an explicit check, not just
-      // falsy, so null/undefined from an old server build still falls
-      // through to the normal calculation) shows the honest stale-delta
-      // state instead of implying it just happened today.
+      // real trading session -- on a weekend or holiday it's still
+      // sitting at the close from TWO sessions back, not one, so equity
+      // minus last_equity can span two days' worth of change, mislabeled
+      // as "Today's". backendIsTodayTradingDay === false (an explicit
+      // check, not just falsy, so null/undefined from an old server
+      // build still falls through to the normal calculation) shows the
+      // honest stale-delta state instead of implying it just happened
+      // today.
       //
-      // Reads journalEntries (screenerType === 'crypto'), the exact same
-      // source and same isOpenAlpacaPositionForCurrentAccount check
-      // renderStatusPositions itself uses to split the Open Positions
-      // table into equities/crypto -- NOT backendPositions (Alpaca's raw
-      // /v2/positions response). That first attempt at this fix matched
-      // a symbol string like "SOL/USD" against a literal "/", but
-      // Alpaca's own position symbols come back WITHOUT one (e.g.
-      // "SOLUSD"), so hasOpenCryptoPosition silently stayed false for
-      // every real crypto position and "Market closed" kept showing
-      // exactly the bug this was meant to fix.
-      var hasOpenCryptoPosition = journalEntries.some(function(j){
-        return j.screenerType === 'crypto' && isOpenAlpacaPositionForCurrentAccount(j);
-      });
       // "Market closed" carries no flash key at all: it is not a number,
       // and recording it would let the next real figure flash against a
       // value from before the market shut.
-      var hideTodayPL = shouldHideTodayPL(backendIsTodayTradingDay, hasOpenCryptoPosition, todayPL);
+      var hideTodayPL = shouldHideTodayPL(backendIsTodayTradingDay, todayPL);
       var plValueHtml = hideTodayPL
         ? '<div class="backtest-stat-value">Market closed</div>'
         : '<div class="backtest-stat-value ' + plClass + '" data-flash-key="acct:todayPL" data-flash-value="' + todayPL + '">' + (todayPL >= 0 ? '+' : '') + '$' + todayPL.toFixed(2) + ' (' + (todayPLPct >= 0 ? '+' : '') + todayPLPct.toFixed(2) + '%)</div>';
@@ -12982,10 +12062,6 @@
   // Data's rate limit onto Alpaca's, which could actually support the
   // extra call volume (see equitiesMarketData.js on the backend).
   var INTRADAY_CYCLE_INTERVAL_MS = 60 * 1000;
-  // Crypto keeps its own separate, unchanged cadence (shwoop-server's
-  // CRYPTO_INTERVAL_MS) -- this was never the bottleneck the equities
-  // change targets.
-  var CRYPTO_CYCLE_INTERVAL_MS = 5 * 60 * 1000;
   // Matches shwoop-server's OPTIONS_INTERVAL_MS (scheduler.js) -- positions
   // here are held 30-45 days at entry, so a 4-hour scan cadence during
   // market hours has no cost the way a slower equities scan would.
@@ -13115,18 +12191,18 @@
       }
     }
 
-    // ---- Rows 3/3b/3c/3d, CONSOLIDATED: each mechanism's own cycle
-    // status (equities, crypto, options income, weekly spread). These
-    // used to always render as four separate two-line rows. The common
-    // case -- every mechanism idle with a real last-cycle summary, i.e.
-    // everything working exactly as expected -- now collapses to ONE
-    // row naming all four with their last-finished times, since that's
-    // the same "yes, it's fine" fact stated four times otherwise. The
-    // moment any ONE of them is scanning, has failed, or has never run,
-    // ALL FOUR fall back to full individual rows -- never just the
-    // exceptional one -- so a reader never has to remember "was crypto
-    // also idle, or did I only see equities broken out because it
-    // failed?" from a mixed collapsed/expanded display.
+    // ---- Rows 3/3b/3c, CONSOLIDATED: each mechanism's own cycle
+    // status (equities, options income, weekly spread). These used to
+    // always render as separate two-line rows. The common case -- every
+    // mechanism idle with a real last-cycle summary, i.e. everything
+    // working exactly as expected -- now collapses to ONE row naming all
+    // of them with their last-finished times, since that's the same
+    // "yes, it's fine" fact stated repeatedly otherwise. The moment any
+    // ONE of them is scanning, has failed, or has never run, ALL fall
+    // back to full individual rows -- never just the exceptional one --
+    // so a reader never has to remember "was one also idle, or did I
+    // only see equities broken out because it failed?" from a mixed
+    // collapsed/expanded display.
     var cycleMechanisms = [
       {
         label: 'Equities', status: backendCycleStatus, startedAt: backendCycleStartedAt,
@@ -13135,14 +12211,6 @@
         alwaysShowNeverRun: true,
         scanningText: 'Checking all 16 symbols for a qualifying ORB breakout, sizing anything that qualifies, and sending it to Alpaca if auto-trade is on.',
         neverRunText: 'Runs automatically every minute while the market is open (9:30am–4pm ET) — nothing to do here overnight or on weekends.'
-      },
-      {
-        label: 'Crypto', status: backendCryptoCycleStatus, startedAt: backendCryptoCycleStartedAt,
-        error: backendCryptoCycleError, errorAt: backendCryptoCycleErrorAt, completedAt: backendCryptoCycleCompletedAt,
-        summary: backendCryptoLastCycleSummary, intervalMs: CRYPTO_CYCLE_INTERVAL_MS,
-        alwaysShowNeverRun: !!backendCryptoScreenerEnabledOnServer,
-        scanningText: 'Checking all 12 symbols for a qualifying breakout, sizing anything that qualifies (fractional units), and sending it to Alpaca if crypto auto-trade is on.',
-        neverRunText: 'Runs automatically every 5 minutes, continuously — no market-hours gate, unlike equities.'
       },
       {
         label: 'Options income (CSP)', status: backendOptionsCycleStatus, startedAt: backendOptionsCycleStartedAt,
@@ -13176,7 +12244,7 @@
       }).join(' · ');
       rows.push(
         '<div class="backend-pulse-row"><div class="backend-pulse-dot ok"></div><div>' +
-          '<div class="backend-pulse-label">All 4 cycles idle — last finished within the last cycle interval</div>' +
+          '<div class="backend-pulse-label">All cycles idle — last finished within the last cycle interval</div>' +
           '<div class="backend-pulse-sub">' + idleSummaryText + '</div>' +
         '</div></div>'
       );
@@ -13219,17 +12287,16 @@
     }
 
     // ---- Row 4: server-side settings truth (env vars, not this browser's
-    // toggle) -- CONSOLIDATED. Four mechanisms means four rows here, and
-    // when every one of them is simply ON (screener + auto-trade both),
-    // as they are the overwhelming majority of the time, those four rows
-    // say the identical thing four times with nothing to actually read.
-    // The exceptional case -- one mechanism switched off while the others
-    // aren't -- is exactly what this card exists to surface, so it still
-    // gets its own full row the moment that's true; only the all-healthy
-    // case collapses to one line. ----
+    // toggle) -- CONSOLIDATED. Several mechanisms means several rows here,
+    // and when every one of them is simply ON (screener + auto-trade
+    // both), as they are the overwhelming majority of the time, those
+    // rows say the identical thing repeatedly with nothing to actually
+    // read. The exceptional case -- one mechanism switched off while the
+    // others aren't -- is exactly what this card exists to surface, so it
+    // still gets its own full row the moment that's true; only the
+    // all-healthy case collapses to one line. ----
     var serverSettingMechanisms = [
       { label: 'Equities', screenerOn: backendScreenerEnabledOnServer, autoTradeOn: backendAutoTradeEnabledOnServer, note: '' },
-      { label: 'Crypto', screenerOn: backendCryptoScreenerEnabledOnServer, autoTradeOn: backendCryptoAutoTradeEnabledOnServer, note: '' },
       // Off by default (see shwoop-server's config.js) -- an account that
       // has never touched this still gets a row, same as before, so "off"
       // is visible confirmation rather than the row simply not existing.
@@ -13305,15 +12372,10 @@
     }
     var autoTradeDot = document.getElementById('autoTradeHeadDot');
     if(autoTradeDot){ autoTradeDot.classList.toggle('ok', Boolean(backendAutoTradeEnabledOnServer)); }
-    var cryptoBadge = document.getElementById('serverCryptoAutoTradeStatusBadge');
-    if(cryptoBadge){
-      cryptoBadge.textContent = backendCryptoAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
-      cryptoBadge.classList.toggle('ok', Boolean(backendCryptoAutoTradeEnabledOnServer));
-    }
     // Now a real health signal, not a claimed one -- see
     // optionsIncomeCycle.js / optionsWeeklySpreadCycle.js's own
     // MAX_CONSECUTIVE_ORDER_FAILURES auto-pause, mirrored onto these two
-    // badges the same way equities/crypto's paused state already is.
+    // badges the same way equities' paused state already is.
     var optionsBadge = document.getElementById('serverOptionsAutoTradeStatusBadge');
     if(optionsBadge){
       optionsBadge.textContent = backendOptionsAutoTradePausedOnServer ? 'Paused — see below'
@@ -13373,7 +12435,7 @@
       // optionsIncomeCycle.js/optionsWeeklySpreadCycle.js headers), so
       // this can genuinely run higher than Brief's "N with open
       // positions" or the Open Positions table -- both of which are
-      // deliberately equities/crypto-only, options tracked separately in
+      // deliberately equities-only, options tracked separately in
       // their own cards. Confirmed live: 7 here against 4 there, on an
       // account correctly holding 4 equities positions plus 3 real
       // options legs, read as a bug rather than two numbers answering
@@ -13383,7 +12445,7 @@
       // silent and unexplained.
       var optionsCount = posArray.filter(function(p){ return p.asset_class === 'us_option'; }).length;
       var bubbleTitle = optionsCount > 0
-        ? openCount + ' open positions at Alpaca (' + (openCount - optionsCount) + ' equities/crypto + ' + optionsCount + ' options -- options are tracked separately from the equities/crypto count shown elsewhere)'
+        ? openCount + ' open positions at Alpaca (' + (openCount - optionsCount) + ' equities + ' + optionsCount + ' options -- options are tracked separately from the equities count shown elsewhere)'
         : '';
       [dockBubble, sidebarBubble].forEach(function(el){
         el.textContent = openCount;
@@ -13393,7 +12455,7 @@
     }).catch(function(){
       if(!alpacaConnected) return;
       // Live count unavailable this cycle -- fall back to the journal's
-      // belief rather than showing nothing. Equities/crypto only (same
+      // belief rather than showing nothing. Equities only (same
       // as journalEntries itself), so no options-count tooltip applies
       // to this fallback -- clear whatever the last successful fetch set.
       var openCount = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount).length;
@@ -13416,20 +12478,11 @@
       var todayPLPct = lastEquity > 0 ? ((equity - lastEquity) / lastEquity * 100) : 0;
       // A small dead zone around exactly flat reads as neutral (yellow)
       // rather than flickering green/red on essentially no real move.
-      // On a non-trading day with no open crypto position, last_equity
-      // hasn't rolled forward to yesterday's close yet (see
-      // renderStatusPage's own comment on this same staleness) --
-      // neutral rather than a real green/red read on a number that isn't
-      // actually today's. An open crypto position overrides this: crypto
-      // trades 24/7 regardless of the stock market's calendar, so the
-      // number is genuinely live and deserves a real color. Reads
-      // journalEntries the same way renderStatusPage/renderStatusPositions
-      // do -- not backendPositions, whose raw Alpaca symbol format doesn't
-      // actually contain a "/" and silently never matched.
-      var hasOpenCryptoPosition = journalEntries.some(function(j){
-        return j.screenerType === 'crypto' && isOpenAlpacaPositionForCurrentAccount(j);
-      });
-      var colorClass = (backendIsTodayTradingDay === false && !hasOpenCryptoPosition) ? 'neutral'
+      // On a non-trading day, last_equity hasn't rolled forward to
+      // yesterday's close yet (see renderStatusPage's own comment on this
+      // same staleness) -- neutral rather than a real green/red read on a
+      // number that isn't actually today's.
+      var colorClass = (backendIsTodayTradingDay === false) ? 'neutral'
         : Math.abs(todayPLPct) < 0.02 ? 'neutral' : (todayPLPct > 0 ? 'positive' : 'negative');
 
       [dockBubble, sidebarBubble].forEach(function(el){
@@ -13458,7 +12511,7 @@
   // Same persist-across-renders treatment as the sort state above --
   // sticks with whatever the user last picked instead of bouncing back
   // to "All" every ~45s refresh cycle.
-  var statusPositionsFilter = 'all'; // 'all' | 'equities' | 'crypto'
+  var statusPositionsFilter = 'all'; // 'all' | 'equities'
   var STATUS_POSITIONS_COLUMNS = [
     { key:'sym', label:'Symbol' }, { key:'direction', label:'Dir' }, { key:'qty', label:'Qty' },
     { key:'entry', label:'Entry' }, { key:'current', label:'Current' }, { key:'size', label:'Size' },
@@ -13506,27 +12559,27 @@
 
   var statusPositionsRenderGen = 0;
 
-  var POSITIONS_FILTER_LABELS = { all: '', equities: ' equities', crypto: ' crypto' };
+  var POSITIONS_FILTER_LABELS = { all: '', equities: ' equities' };
 
   function renderStatusPositions(){
     var el = document.getElementById('statusPositionsBody');
     if(!el) return;
     var allOpen = journalEntries.filter(isOpenAlpacaPositionForCurrentAccount);
-    var equitiesOpen = allOpen.filter(function(j){ return j.screenerType !== 'crypto'; });
-    var cryptoOpen = allOpen.filter(function(j){ return j.screenerType === 'crypto'; });
+    var equitiesOpen = allOpen;
 
-    // Only worth splitting into tabs once both strategies actually have
-    // something open right now -- a single-strategy list showing "All /
-    // Equities (0) / Crypto (4)" is just clutter, not a real choice.
+    // Only worth splitting into tabs once more than one strategy actually
+    // has something open right now -- a single-strategy list showing
+    // "All / Equities (4)" is just clutter, not a real choice. With only
+    // one strategy left, this is permanently false; kept as the hook for
+    // a future second strategy to plug back into.
     var filterRow = document.getElementById('positionsFilterRow');
-    var showFilter = equitiesOpen.length > 0 && cryptoOpen.length > 0;
+    var showFilter = false;
     if(!showFilter) statusPositionsFilter = 'all';
     if(filterRow){
       filterRow.hidden = !showFilter;
       if(showFilter){
         document.getElementById('positionsFilterEquities').textContent = 'Equities (' + equitiesOpen.length + ')';
-        document.getElementById('positionsFilterCrypto').textContent = 'Crypto (' + cryptoOpen.length + ')';
-        ['All', 'Equities', 'Crypto'].forEach(function(label){
+        ['All', 'Equities'].forEach(function(label){
           var btn = document.getElementById('positionsFilter' + label);
           btn.classList.toggle('active', btn.dataset.filter === statusPositionsFilter);
         });
@@ -13534,7 +12587,6 @@
     }
 
     var openPositions = statusPositionsFilter === 'equities' ? equitiesOpen
-      : statusPositionsFilter === 'crypto' ? cryptoOpen
       : allOpen;
 
     var headMeta = document.getElementById('openPositionsHeadMeta');
@@ -13556,7 +12608,7 @@
     }
     if(openPositions.length === 0){
       // Says what is being watched, not only what is absent -- the voice
-      // the Crypto Setups card already uses. A quiet account should read as
+      // the Backend Status card already uses. A quiet account should read as
       // quiet, and "No open positions." alone is barely distinguishable from
       // the blank card this page used to show instead.
       el.innerHTML = '<div class="labs-backtest-status">No open' + POSITIONS_FILTER_LABELS[statusPositionsFilter] + ' positions right now — nothing is at risk. The backend keeps scanning and a position will appear here as soon as a setup qualifies and fills.</div>';
@@ -13601,13 +12653,8 @@
           // No matching live position from Alpaca yet (e.g. order
           // just filled and hasn't shown up in this fetch) -- fall
           // back to the same local-quote estimate as before rather
-          // than showing nothing. Crypto pairs live in their own
-          // separate watchlist (findQuote only ever searches the
-          // equities one), so this used to silently fall through to
-          // j.entry for every crypto row here -- current === entry,
-          // P&L pinned at exactly $0.00, even on a real, moving position.
-          var isCrypto = j.sym.indexOf('/') > -1;
-          var q = isCrypto ? findCryptoQuote(j.sym) : findQuote(j.sym);
+          // than showing nothing.
+          var q = findQuote(j.sym);
           var quotedPrice = (q && typeof q.price === 'number' && isFinite(q.price)) ? q.price : null;
           if(quotedPrice === null){
             // NO QUOTE IS NOT A FLAT POSITION.
@@ -13616,11 +12663,11 @@
             // therefore P&L of exactly $0.00 (+0.00%) -- rendered in the
             // same green as a real flat position, on a position that is
             // moving and simply has not been priced. It is the identical
-            // lie the crypto-quote gap above already produced once, left
-            // standing for the case where the quote feed itself is down;
-            // the header even says "Sync failed" at that moment while
-            // these rows keep reporting a confident zero. Nulled, so the
-            // row shows the same honest dash a stale entry does.
+            // lie a quote gap can produce, left standing for the case
+            // where the quote feed itself is down; the header even says
+            // "Sync failed" at that moment while these rows keep
+            // reporting a confident zero. Nulled, so the row shows the
+            // same honest dash a stale entry does.
             current = null; pl = null; plPct = null;
           } else {
             current = quotedPrice;
@@ -13647,14 +12694,12 @@
         // not the entry price, so this tracks the actual $ currently
         // deployed rather than a fixed snapshot from whenever it opened.
         var sizeDollar = current === null ? null : j.qty * current;
-        // The age of THIS symbol's own mark. Crypto keeps its own 24/7
-        // feed and is not subject to the equities data window at all.
-        var isCryptoRow = j.sym.indexOf('/') > -1;
-        var ageQuote = isCryptoRow ? null : findQuote(j.sym);
+        // The age of THIS symbol's own mark.
+        var ageQuote = findQuote(j.sym);
         var priceAsOf = (ageQuote && ageQuote.priceAsOf != null) ? ageQuote.priceAsOf : null;
         return {
           j: j, current: current, pl: pl, plPct: plPct, sizeDollar: sizeDollar,
-          priceAge: (current === null || isCryptoRow) ? { level:'unknown', ageMs:null }
+          priceAge: current === null ? { level:'unknown', ageMs:null }
             : priceAgeStatus(priceAsOf, Date.now(), isWithinIexDataWindow())
         };
       });
@@ -13775,7 +12820,6 @@
   // from a previous session is not a position -- it is an unreconciled
   // record, and the backend already refuses to act on it.
   //
-  // Crypto is never stale: it runs 24/7 and holding across midnight is
   // the design. An entry with no usable date is not stale either -- that
   // is a different problem, and treating a possibly-real position as
   // fictional is the worse error.
@@ -13839,7 +12883,7 @@
   }
 
   function strategyLabel(j){
-    if(!j || j.screenerType === 'crypto') return 'Crypto';
+    if(!j) return '—';
     if(j.strategy === 'fade') return 'Fade';
     if(j.strategy === 'orb') return 'Breakout';
     return '—';
@@ -13882,11 +12926,7 @@
       // intended one -- marked so the size is never read as the one the
       // strategy asked for.
       case 'qty': {
-        // Equities is always whole shares -- fmtCryptoQty is a no-op there
-        // in practice, but gated on screenerType explicitly rather than
-        // relied on implicitly, so a future equities value with a stray
-        // decimal is never silently rounded.
-        var qtyText = j.screenerType === 'crypto' ? fmtCryptoQty(j.qty) : j.qty;
+        var qtyText = j.qty;
         return j.partialFill
           ? '<td title="Partially filled — this is the quantity that actually filled, not the size the strategy asked for.">' + qtyText + ' <span style="color:var(--amber);">*</span></td>'
           : '<td>' + qtyText + '</td>';
@@ -14139,10 +13179,8 @@
   wireLayoutDropdown('activityLogFiltersToggle', 'activityLogFiltersMenu', renderActivityLogFilters);
   wireLayoutDropdown('historyFiltersToggle', 'historyFiltersMenu', renderActivityLogFilters);
   wireLayoutDropdown('todaysSetupsColumnsToggle', 'todaysSetupsColumnsMenu');
-  wireLayoutDropdown('cryptoSetupsColumnsToggle', 'cryptoSetupsColumnsMenu');
 
   // A cycle_summary ("Scan") entry gets written once per backend cycle
-  // regardless of outcome -- with a 24/7 crypto cycle running every 5
   // minutes, a stretch of ordinary "nothing to do" scans buries any real
   // trade activity within hours. Only worth a row when the cycle itself
   // was abnormal: it flags an error/failure in its own text, or it didn't
@@ -14208,7 +13246,7 @@
   // fetches a fresh quote only to DECIDE whether to manage a position, and
   // does not persist it back. Showing a stale or fabricated "current"
   // value here would be the same lie fmt()'s own header comment already
-  // rejects for equities/crypto prices.
+  // rejects for equities prices.
   function optionsDaysToExpiration(expirationDate, now){
     var exp = new Date(expirationDate + 'T21:00:00Z');
     return (exp.getTime() - now.getTime()) / (24 * 60 * 60 * 1000);
@@ -14808,7 +13846,7 @@
         // written a snapshot yet, e.g. right after a fresh deploy.
         sharedSnapshotUnsubscribe = api.watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate);
         // Unpriced (null) until fetchAllQuotes actually resolves -- same
-        // "no fake data" rule the crypto watchlist already follows.
+        // "no fake data" rule this file follows elsewhere.
         // Renders as an honest "Loading…" (see indexReads) rather than a
         // hardcoded index level that only gets staler the longer it goes
         // untouched.
@@ -14856,7 +13894,7 @@
     }
     el.innerHTML = source.map(function(t){
       var badge = computeBadgeInfo(t);
-      // Same reasoning as renderIntradayBlocks/renderCryptoBlocks: once a
+      // Same reasoning as renderIntradayBlocks: once a
       // position is actually open, prefer the real entryNotes pinned by
       // the backend at the moment the order was sent over t.notes, which
       // for a position merged in via withOpenPositionsMergedIn (already
@@ -14910,18 +13948,8 @@
     source = withOpenPositionsMergedIn(source);
     renderWatchTradeCards(el, source);
 
-    // Crypto's own parallel section -- same backendCryptoPicks that
-    // already existed (subscribed to for the Backend Status card) but
-    // had no UI reading it anywhere until now. No local-scan fallback
-    // the way equities has intradayTrades -- crypto never had one.
-    var cryptoEl = document.getElementById('whatToWatchCryptoList');
-    var cryptoSource = withCryptoOpenPositionsMergedIn(
-      (backendCryptoPicks && backendCryptoPicks.length) ? backendCryptoPicks.map(buildTradeFromPick) : []
-    );
-    if(cryptoEl){ renderWatchTradeCards(cryptoEl, cryptoSource); }
-
-    // One combined recap for both strategies -- see statCta's own comment.
-    statCta(source, cryptoSource);
+    // See statCta's own comment.
+    statCta(source);
   }
 
   // ---------- Market Breadth & Today's Movers (computed, no extra API calls) ----------
@@ -14983,70 +14011,6 @@
       '</div>' +
       '<div class="breadth-meta">' +
         '<span class="breadth-label ' + labelClass + '">' + label + ' — that\'s the bias going into today</span>' +
-      '</div>';
-  }
-
-  // Crypto's own breadth read, mirroring renderSentiment's shape. Unlike
-  // equities -- where three index ETFs (SPY/QQQ/DIA) genuinely stand in
-  // for "the market" -- crypto has no equivalent index proxy available
-  // here, so this measures breadth across the traded universe itself: how
-  // many of the 12 pairs are up over roughly the last 24h. That's a
-  // different kind of measure than the equities one above (constituent
-  // breadth vs. index direction), which is exactly why it's its own
-  // labelled section rather than extra rows in the same widget.
-  function renderCryptoSentiment(){
-    var el = document.getElementById('cryptoBreadthWidget');
-    if(!el) return;
-    var priced = cryptoWatchlist.filter(function(w){ return w.price != null && w.prevClose != null; });
-    // BREADTH IS A CLAIM ABOUT THE WHOLE UNIVERSE.
-    //
-    // Equities' own widget above refuses to draw until all three of its
-    // index proxies have resolved, for exactly this reason. This one drew
-    // from whatever had arrived: two pairs priced out of twelve, both up,
-    // rendered a full green bar and the sentence "Broadly positive" -- a
-    // statement about the crypto market made from a sixth of it, and
-    // indistinguishable from the same sentence backed by all twelve. The
-    // headline is only claimed once most of the universe has actually
-    // priced; below that the card says how much of it it can see.
-    var universeSize = cryptoWatchlist.length || priced.length;
-    if(priced.length === 0){
-      el.innerHTML = '<div class="labs-backtest-status">Loading crypto data…</div>';
-      return;
-    }
-    if(priced.length * 2 <= universeSize){
-      el.innerHTML = '<div class="labs-backtest-status">Only ' + priced.length + ' of ' + universeSize +
-        ' pairs have priced — not enough to say which way crypto is leaning yet.</div>';
-      return;
-    }
-    var reads = priced.map(function(w){ return { sym: w.sym, chg: pct(w.price, w.prevClose) }; });
-    var up = reads.filter(function(r){ return r.chg >= 0; }).length;
-    var total = reads.length;
-    var label = up === total ? 'Broadly positive' : up === 0 ? 'Broadly negative' :
-      up > total / 2 ? 'Mixed, leaning positive' : up < total / 2 ? 'Mixed, leaning negative' : 'Mixed';
-    var labelClass = up === total ? 'up' : up === 0 ? 'down' : '';
-    var upPct = (up / total) * 100;
-    // Only the biggest movers in each direction get their own row -- all
-    // 12 pairs listed out would dwarf the equities widget beside it and
-    // bury the one number that actually matters (the breadth split).
-    var sorted = reads.slice().sort(function(a,b){ return b.chg - a.chg; });
-    var shown = sorted.slice(0, 2).concat(sorted.slice(-2));
-    // A universe small enough that the top-2 and bottom-2 could overlap
-    // would otherwise render the same pair twice.
-    var seen = {};
-    shown = shown.filter(function(r){ if(seen[r.sym]) return false; seen[r.sym] = true; return true; });
-
-    el.innerHTML =
-      '<div class="breadth-bar"><div class="breadth-bar-up" style="width:' + upPct + '%"></div></div>' +
-      '<div class="sentiment-rows">' +
-        shown.map(function(r){
-          var isUp = r.chg >= 0;
-          return '<div class="sentiment-row"><span class="sentiment-name">' + r.sym + '</span>' +
-            '<span class="sentiment-chg ' + (isUp?'up':'down') + '">' + (isUp?'▲':'▼') + ' ' + Math.abs(r.chg).toFixed(2) + '%</span></div>';
-        }).join('') +
-      '</div>' +
-      '<div class="breadth-meta">' +
-        '<span class="breadth-label ' + labelClass + '">' + label + ' — ' + up + ' of ' + total + ' pairs up over 24h' +
-          (total < universeSize ? ' (' + (universeSize - total) + ' of ' + universeSize + ' not priced yet)' : '') + '</span>' +
       '</div>';
   }
 
@@ -15120,22 +14084,6 @@
         (optionsOpenCount === 1 ? ' position' : ' positions') + ' open.');
     }
 
-    // Crypto gets a sentence of its own -- it trades 24/7, so on a
-    // weekend or overnight (when every equities figure above is frozen at
-    // the last session's close) this is the only part of the lede
-    // describing a market that's actually open right now.
-    var pricedCryptoNow = cryptoWatchlist.filter(function(w){ return w.price != null && w.prevClose != null; });
-    if(pricedCryptoNow.length){
-      var cryptoUp = pricedCryptoNow.filter(function(w){ return pct(w.price, w.prevClose) >= 0; }).length;
-      var btc = pricedCryptoNow.filter(function(w){ return w.sym === 'BTC/USD'; })[0];
-      var cryptoSentence = 'Crypto has ' + cryptoUp + ' of ' + pricedCryptoNow.length + ' tracked pairs up over the last 24 hours';
-      if(btc){
-        var btcChg = pct(btc.price, btc.prevClose);
-        cryptoSentence += ', with Bitcoin ' + (btcChg >= 0 ? 'up' : 'down') + ' ' + Math.abs(btcChg).toFixed(2) + '%';
-      }
-      ledeParts.push(cryptoSentence + '.');
-    }
-
     ledeEl.textContent = ledeParts.join(' ');
   }
 
@@ -15164,8 +14112,7 @@
       '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(moverRow).join('') + '</div>';
   }
 
-  // Shared by both the equities and crypto movers grids so the two can
-  // never drift apart visually.
+  // Used by the movers grid renderer.
   function moverRow(m){
     var up = m.change >= 0;
     return '<div class="mover-row">' +
@@ -15173,34 +14120,6 @@
       '<span class="mover-price mono">' + fmt(m.price) + '</span>' +
       '<span class="mover-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(m.change).toFixed(2) + '%</span>' +
     '</div>';
-  }
-
-  // Crypto's own movers, mirroring renderMovers exactly. Kept a separate
-  // section rather than merged into one combined ranking: crypto trades
-  // 24/7 while equities don't, so a single list would routinely be all
-  // crypto on a weekend or overnight (when every equities change is
-  // frozen at Friday's close) and read as though the stocks had vanished.
-  // "Change" here is vs. roughly 24h ago rather than a previous session
-  // close, since crypto has no daily close to measure from -- see
-  // shwoop-server's cryptoMarketData.js fetchQuote.
-  function renderCryptoMovers(){
-    var el = document.getElementById('cryptoMoversGrid');
-    if(!el) return;
-    var withChange = cryptoWatchlist.filter(function(w){
-      return w.price != null && w.prevClose != null;
-    }).map(function(w){
-      return { sym: w.sym, price: w.price, change: pct(w.price, w.prevClose) };
-    });
-    if(withChange.length === 0){
-      el.innerHTML = '<div class="news-placeholder">Loading crypto prices…</div>';
-      return;
-    }
-    var sorted = withChange.slice().sort(function(a,b){ return b.change - a.change; });
-    var gainers = sorted.slice(0, 3);
-    var losers = sorted.slice(-3).reverse();
-    el.innerHTML =
-      '<div class="movers-col"><div class="movers-col-title">Top Gainers</div>' + gainers.map(moverRow).join('') + '</div>' +
-      '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(moverRow).join('') + '</div>';
   }
 
   // ---------- Shared market snapshot (indices/watchlist quotes, news, earnings -- one doc for every signed-in account) ----------
@@ -15226,30 +14145,11 @@
         watchlist.push({ sym: sym, name: COMPANY_NAMES[sym] || sym, price: q.price, prevClose: q.prevClose });
       }
     });
-    // Crypto's own quotes, merged into the SAME cryptoWatchlist that a
-    // per-account fetchAllCryptoQuotes populates -- so every crypto
-    // consumer downstream (the ticker tape, the Brief's movers/sentiment)
-    // works identically whether the price came from this shared snapshot
-    // or the account's own Alpaca connection. This is what makes crypto
-    // visible at all to a signed-in account that hasn't connected Alpaca
-    // yet, since that per-account fetch is gated on alpacaConnected.
-    var cryptoQuotes = data.cryptoQuotes || {};
-    Object.keys(cryptoQuotes).forEach(function(sym){
-      var q = cryptoQuotes[sym];
-      if(!q || q.price == null) return;
-      var existingCrypto = cryptoWatchlist.filter(function(w){ return w.sym === sym; })[0];
-      if(existingCrypto){
-        existingCrypto.price = q.price;
-        existingCrypto.prevClose = q.prevClose;
-      }
-    });
     renderTicker();
     renderIndices();
     renderSentiment();
-    renderCryptoSentiment();
     renderBriefHeadline();
     renderMovers();
-    renderCryptoMovers();
     renderWhatToWatch();
     renderMarketNews(data.news);
     renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
@@ -15361,23 +14261,20 @@
   renderIndices();
   renderWhatToWatch();
   renderSentiment();
-  renderCryptoSentiment();
   renderMovers();
-  renderCryptoMovers();
   renderBriefHeadline();
   statCta();
   updateClock();
   renderHistoryList();
   loadIntradayPref();
-  // Both resume buttons live on Trade Overview (#tradingPausedRow /
-  // #cryptoTradingPausedRow), so the link goes there and scrolls to the
-  // first one that is actually showing -- a link that merely changes the
-  // page still leaves someone hunting for the control.
+  // The resume button lives on Trade Overview (#tradingPausedRow), so the
+  // link goes there and scrolls to it if it's actually showing -- a link
+  // that merely changes the page still leaves someone hunting for the
+  // control.
   document.getElementById('globalPausedBannerLink').addEventListener('click', function(){
     showPage('trades');
     setTimeout(function(){
       var row = document.getElementById('tradingPausedRow');
-      if(!row || row.hasAttribute('hidden')) row = document.getElementById('cryptoTradingPausedRow');
       if(row && !row.hasAttribute('hidden')) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 60);
   });

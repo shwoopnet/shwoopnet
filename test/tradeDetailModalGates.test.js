@@ -101,9 +101,9 @@ function build(overrides) {
     function svgLocalX(){ return 0; }
     function svgLocalY(){ return 0; }
     var CHART_PLOT_BOTTOM_Y = 170;
-    function fetchHistoricalRangeBars(sym, isCrypto, entryTime, exitTime){
-      CALLS.fetchHistoricalRangeBars.push({sym: sym, isCrypto: isCrypto, entryTime: entryTime, exitTime: exitTime});
-      return FETCH_IMPL(sym, isCrypto, entryTime, exitTime);
+    function fetchHistoricalRangeBars(sym, entryTime, exitTime){
+      CALLS.fetchHistoricalRangeBars.push({sym: sym, entryTime: entryTime, exitTime: exitTime});
+      return FETCH_IMPL(sym, entryTime, exitTime);
     }
     ${liftVar('SYMBOL_BADGE_COLORS')}
     ${liftVar('TRADE_MODAL_PL_ID')}
@@ -134,7 +134,7 @@ function main() {
       sym: 'SOFI', direction: 'Long', status: 'Active', statusCls: 'active',
       entry: 10, stop: 9.5, target: 11, pl: { dollar: 42.5, pct: 4.25 },
       notes: ['Opening range broke above $10.'],
-      chart: { kind: 'live', isCrypto: false, tf: '1D', basePrice: 10.4 },
+      chart: { kind: 'live', tf: '1D', basePrice: 10.4 },
     });
     assert.ok(els.tradeModalSymCell.innerHTML.includes('SOFI'), 'symbol must appear in the modal header');
     assert.ok(els.tradeModalPrices.innerHTML.includes('9.50'), 'stop must appear in the price row');
@@ -160,13 +160,13 @@ function main() {
     mod.openTradeModal({
       sym: 'PLTR', direction: 'Long', status: 'Active', statusCls: 'active',
       entry: 20, stop: 19, target: 22, pl: { dollar: 10, pct: 2 }, notes: [],
-      chart: { kind: 'live', isCrypto: false, tf: '1D', basePrice: 20.5 },
+      chart: { kind: 'live', tf: '1D', basePrice: 20.5 },
     });
     assert.doesNotThrow(() => {
       mod.openTradeModal({
         sym: 'SOFI', direction: 'Long', status: 'Active', statusCls: 'active',
         entry: 10, stop: 9.5, target: 11, pl: { dollar: 5, pct: 1 }, notes: [],
-        chart: { kind: 'live', isCrypto: false, tf: '1D', basePrice: 10.2 },
+        chart: { kind: 'live', tf: '1D', basePrice: 10.2 },
       });
     }, 'opening a second live trade after a first must not throw');
     assert.ok(els.tradeModalSymCell.innerHTML.includes('SOFI'), 'the second open must actually render, not abort mid-function');
@@ -201,7 +201,7 @@ function main() {
     mod.openTradeModal({
       sym: 'MARA', direction: 'Long', status: 'Closed', statusCls: 'watching',
       entry: 18.40, stop: 17.80, target: 19.30, pl: { dollar: -30, pct: -1.6 }, notes: [],
-      chart: { kind: 'historical', isCrypto: false, entryTime: entryTime, exitTime: exitTime },
+      chart: { kind: 'historical', entryTime: entryTime, exitTime: exitTime },
     });
     assert.strictEqual(calls.fetchHistoricalRangeBars.length, 1, 'a closed trade must fetch its own historical window');
     assert.strictEqual(calls.fetchHistoricalRangeBars[0].entryTime.getTime(), entryTime.getTime());
@@ -221,13 +221,13 @@ function main() {
       mod3Build.mod.openTradeModal({
         sym: 'RIOT', direction: 'Long', status: 'Closed', statusCls: 'watching',
         entry: 10, stop: 9, target: 12, pl: null, notes: [],
-        chart: { kind: 'historical', isCrypto: false, entryTime: new Date('2026-09-01T14:00:00Z'), exitTime: new Date('2026-09-01T18:00:00Z') },
+        chart: { kind: 'historical', entryTime: new Date('2026-09-01T14:00:00Z'), exitTime: new Date('2026-09-01T18:00:00Z') },
       });
       // A second trade opens before the first's fetch resolves.
       mod3Build.mod.openTradeModal({
         sym: 'COIN', direction: 'Long', status: 'Active', statusCls: 'active',
         entry: 200, stop: 190, target: 220, pl: null, notes: [],
-        chart: { kind: 'live', isCrypto: false, tf: '1D', basePrice: 205 },
+        chart: { kind: 'live', tf: '1D', basePrice: 205 },
       });
       resolveFirst({ data: [{ o:1,h:1,l:1,c:1,vol:1,t:new Date() }], tf: '5m' });
       return firstPending.then(() => new Promise((r) => setImmediate(r))).then(() => {

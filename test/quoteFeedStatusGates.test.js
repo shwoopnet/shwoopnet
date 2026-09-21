@@ -44,7 +44,7 @@ function replay(quoteFeedStatus, outcomes, opts) {
     last = ok;
   }
   return quoteFeedStatus({
-    equitiesOk: last, cryptoOk: false,
+    equitiesOk: last,
     failStreak: streak, lastGoodAt, now,
     streakLimit: o.streakLimit === undefined ? STREAK : o.streakLimit,
     staleMs: o.staleMs === undefined ? STALE : o.staleMs,
@@ -120,15 +120,7 @@ gates.G4 = () => {
   assert.strictEqual(mid.cls, 'warn');
   assert.ok(!/^Live via/.test(mid.text), 'a failed batch must not claim to be live: ' + mid.text);
   assert.ok(/Retrying/.test(mid.text), 'the degraded state must say it is retrying: ' + mid.text);
-  // Crypto alone being up is still live, since crypto trades 24/7 --
-  // the pre-existing behaviour this change must not regress.
-  const cryptoOnly = quoteFeedStatus({
-    equitiesOk: false, cryptoOk: true, failStreak: 9, lastGoodAt: null,
-    now: 1e9, streakLimit: STREAK, staleMs: STALE, sources: [],
-  });
-  assert.strictEqual(cryptoOnly.cls, 'ok');
-  assert.ok(/crypto/.test(cryptoOnly.text), 'must name the side that is live: ' + cryptoOnly.text);
-  // And the source label must still distinguish Alpaca from a silent
+  // The source label must still distinguish Alpaca from a silent
   // Finnhub fallback.
   assert.ok(/Alpaca \(IEX\)/.test(replay(quoteFeedStatus, [true]).text));
   assert.ok(/Finnhub/.test(replay(quoteFeedStatus, [true], { sources: ['alpaca', 'finnhub'] }).text));
@@ -147,8 +139,8 @@ gates.G5 = () => {
   // read it by name and assert the loop really uses it -- a regex that
   // silently matched nothing would make this gate vacuous.
   const loopMs = liftNum('QUOTE_POLL_INTERVAL_MS');
-  const loopSrc = src.slice(src.indexOf('function startRealQuoteLoop()'));
-  assert.ok(/}, QUOTE_POLL_INTERVAL_MS\);/.test(loopSrc.slice(0, 2000)),
+  const loopSrc = src.slice(src.indexOf('function equitiesPollIntervalMs('));
+  assert.ok(/QUOTE_POLL_INTERVAL_MS/.test(loopSrc.slice(0, 400)),
     'the quote loop must use the named poll interval, not a bare literal');
   assert.ok(
     floor <= loopMs,

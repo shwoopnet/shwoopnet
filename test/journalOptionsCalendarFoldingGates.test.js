@@ -93,7 +93,7 @@ function main() {
   }
 
   // Options only join the unified "All" view (see the source's own
-  // comment) -- filtered to Equities or Crypto only, a closed options
+  // comment) -- filtered to Equities only, a closed options
   // trade must not leak in and inflate a tab it doesn't belong to.
   {
     const { computeDayStats } = build({
@@ -104,8 +104,8 @@ function main() {
       }],
     });
     assert.strictEqual(computeDayStats('2026-09-12'), null,
-      'a closed options trade must not appear under the Equities-only or Crypto-only filter tabs');
-    console.log('G4 PASS a closed options trade stays out of the Equities/Crypto-only filtered view');
+      'a closed options trade must not appear under the Equities-only filter tab');
+    console.log('G4 PASS a closed options trade stays out of the Equities-only filtered view');
   }
 
   // realizedOnDate uses closedAt's date, not today -- an options trade
@@ -123,9 +123,9 @@ function main() {
     console.log('G5 PASS a closed options trade is dated by its own close, not by when the page happens to render');
   }
 
-  // The "Options" filter tab (added alongside All/Equities/Crypto): the
+  // The "Options" filter tab (added alongside All/Equities): the
   // reverse of G4 -- under journalFilter 'options', a closed options
-  // trade must show, and a real equities/crypto journal entry must NOT
+  // trade must show, and a real equities journal entry must NOT
   // leak in (filteredJournalEntries returns [] for 'options').
   {
     const { computeDayStats } = build({
@@ -143,7 +143,7 @@ function main() {
     const optionsDollar = (1.00 - 0.50) * 1 * 100;
     assert.strictEqual(computeDayStats('2026-09-13').dollar, optionsDollar,
       'the Options tab must show only the closed options trade\'s $, not the equities trade on the same day');
-    console.log('G6 PASS the Options filter tab shows closed options trades and excludes equities/crypto journal entries');
+    console.log('G6 PASS the Options filter tab shows closed options trades and excludes equities journal entries');
   }
 
   console.log('\nAll Journal calendar options-folding gates passed.');

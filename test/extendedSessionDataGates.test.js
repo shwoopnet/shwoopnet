@@ -92,7 +92,7 @@ gates.G2 = () => {
   // The header, with the equities batch "succeeding" -- which it does at
   // 3am, on a price hours old.
   const status = quoteFeedStatus({
-    equitiesOk: true, cryptoOk: false, failStreak: 0, lastGoodAt: now - 1000, now,
+    equitiesOk: true, failStreak: 0, lastGoodAt: now - 1000, now,
     streakLimit: 3, staleMs: 150000, sources: ['alpaca'],
     dataWindowOpen: false, lastEquitiesPriceAgeMs: now - printedAt,
   });
@@ -105,7 +105,7 @@ gates.G2 = () => {
   // Even with the feed genuinely all-failing overnight, it is still not
   // reported as a fault -- there is nothing to fetch.
   const dead = quoteFeedStatus({
-    equitiesOk: false, cryptoOk: false, failStreak: 99, lastGoodAt: now - 10 * 60 * MIN, now,
+    equitiesOk: false, failStreak: 99, lastGoodAt: now - 10 * 60 * MIN, now,
     streakLimit: 3, staleMs: 150000, sources: [],
     dataWindowOpen: false, lastEquitiesPriceAgeMs: now - printedAt,
   });
@@ -117,7 +117,7 @@ gates.G3 = () => {
   const { quoteFeedStatus } = windowFns;
   const now = at('18:00').getTime();
   const status = quoteFeedStatus({
-    equitiesOk: false, cryptoOk: false, failStreak: 5, lastGoodAt: now - 10 * MIN, now,
+    equitiesOk: false, failStreak: 5, lastGoodAt: now - 10 * MIN, now,
     streakLimit: 3, staleMs: 150000, sources: [],
     dataWindowOpen: true, lastEquitiesPriceAgeMs: 10 * MIN,
   });
@@ -217,9 +217,6 @@ gates.G8 = () => {
   const open = picksFreshness(scannedAt, now, interval, true);
   assert.strictEqual(open.level, 'stale',
     'The same five-hour-old scan DURING the session is a genuine problem and must still say so');
-  // Crypto passes no session flag at all and keeps the old three answers.
-  assert.strictEqual(picksFreshness(scannedAt, now, interval).level, 'stale',
-    'Crypto runs 24/7 -- an old crypto scan is stale whatever the equities clock says');
   assert.strictEqual(picksFreshness(now - 1000, now, interval, false).level, 'fresh',
     'A scan from a second ago is fresh regardless of the session flag');
   // The distinction is worthless if the equities card does not actually
@@ -227,8 +224,6 @@ gates.G8 = () => {
   // catch that wiring being dropped.
   assert.ok(/picksFreshness\(backendIntradayPicksUpdatedAt,[\s\S]{0,80}?isUsMarketOpen\(\)\)/.test(src),
     'The equities setups card must pass the session state into picksFreshness');
-  assert.ok(/picksFreshness\(backendCryptoPicksUpdatedAt,\s*Date\.now\(\),\s*CRYPTO_CYCLE_INTERVAL_MS\)/.test(src),
-    'The crypto card must NOT pass one -- crypto has no closed session');
 };
 
 let failed = 0;

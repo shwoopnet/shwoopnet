@@ -3,8 +3,8 @@
 // require landing a click on the small chevron specifically -- a target
 // the width of one arrow icon on a row that otherwise looked entirely
 // non-interactive. The whole card is the click target now, with a hover
-// highlight as the visual cue (see .trade-block:hover), in both the
-// equities and crypto Setups lists.
+// highlight as the visual cue (see .trade-block:hover), in the equities
+// Setups list.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -26,7 +26,7 @@ function functionBody(name) {
 }
 
 function main() {
-  ['renderIntradayBlocks', 'renderCryptoBlocks'].forEach(function(fnName) {
+  ['renderIntradayBlocks'].forEach(function(fnName) {
     const body = functionBody(fnName);
     assert.ok(/\.trade-block\[data-symbol\]/.test(body),
       fnName + ' must wire a click listener on the whole .trade-block card, not just the chevron');
