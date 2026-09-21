@@ -2040,14 +2040,21 @@
     // ROTATION on the same account must never lose history). This is
     // the explicit, opt-in action for the other case.
     //
-    // Deliberately narrow: only CLOSED journal entries are removed --
-    // anything still 'open' is left exactly alone, whether it's a real
-    // live position or a stale one, because a stale open entry already
-    // has its own "needs review" flag and individual Remove button
-    // (removeJournalEntry) on the Journal/Trade Overview pages. Clearing
-    // an open entry here could desync this app's own tracking of a
-    // position the backend still believes is open, which is a real-money
-    // risk this action has no business taking blindly.
+    // CLOSED journal entries are always removed. An 'open' entry is
+    // removed too, but ONLY when the backend's own reconciliation
+    // (positionDriftFindings, computed server-side against real Alpaca
+    // positions -- see safety/positionDrift.js) has ALREADY flagged it
+    // orphaned_entry: journal says open, the broker holds nothing under
+    // that symbol. That is a server-confirmed fact, not a guess -- the
+    // exact same signal isUnreconciledEntry's own drift branch uses to
+    // show the "needs review" tag. A different, weaker signal
+    // (isStaleIntradayJournalEntry's time-since-session heuristic) is
+    // deliberately NOT used here: a real position sitting quiet over a
+    // weekend or holiday can look stale by that clock alone, and this
+    // action has no business guessing at real, still-open exposure.
+    // Any OTHER open entry -- not flagged by the backend at all -- is
+    // left exactly alone, since it may be a real live position under
+    // the newly-connected account.
     // optionsClosedTrades/weeklySpreadClosedTrades hold ONLY closed
     // trades by construction (open ones live in optionsPositions/
     // weeklySpreadPositions, untouched here) so those two are cleared
@@ -2057,7 +2064,17 @@
       return runTransaction(db, function(t){
         return t.get(ref).then(function(snap){
           var fresh = snap.exists() ? snap.data() : {};
-          var nextJournal = (fresh.journalEntries || []).filter(function(j){ return j.status !== 'closed'; });
+          var drift = Array.isArray(fresh.positionDriftFindings) ? fresh.positionDriftFindings : [];
+          var isOrphaned = function(j){
+            return drift.some(function(f){
+              if(!f || f.type !== 'orphaned_entry') return false;
+              return f.entryId ? f.entryId === j.id : f.sym === j.sym;
+            });
+          };
+          var nextJournal = (fresh.journalEntries || []).filter(function(j){
+            if(j.status !== 'open') return false; // drop every closed entry
+            return !isOrphaned(j); // keep an open entry unless the backend already confirmed it's orphaned
+          });
           t.set(ref, {
             journalEntries: nextJournal, optionsClosedTrades: [], weeklySpreadClosedTrades: [],
           }, { merge: true });
