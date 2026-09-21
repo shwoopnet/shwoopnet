@@ -11995,7 +11995,7 @@
     if(!hasServerValue){
       return 'The server has not reported this setting yet, so nothing here reflects a live value.';
     }
-    return 'Set on the server, unless this account stores its own override — an override always wins, and changing Render will not move it.';
+    return 'Set on the server; a per-account override always wins over Render.';
   }
 
   function reconcileHealthState(nowMs){
@@ -12300,8 +12300,8 @@
       // Off by default (see shwoop-server's config.js) -- an account that
       // has never touched this still gets a row, same as before, so "off"
       // is visible confirmation rather than the row simply not existing.
-      { label: 'Options income (CSP)', screenerOn: backendOptionsScreenerEnabledOnServer, autoTradeOn: backendOptionsAutoTradeEnabledOnServer, note: 'Forward test, not a backtest -- see the Options Income card.' },
-      { label: 'Weekly spread', screenerOn: backendWeeklySpreadScreenerEnabledOnServer, autoTradeOn: backendWeeklySpreadAutoTradeEnabledOnServer, note: 'Forward test, not a backtest -- a completely separate mechanism from the CSP, see the Weekly Credit Spread card.' }
+      { label: 'Options income (CSP)', screenerOn: backendOptionsScreenerEnabledOnServer, autoTradeOn: backendOptionsAutoTradeEnabledOnServer, note: 'Forward test, not a backtest.' },
+      { label: 'Weekly spread', screenerOn: backendWeeklySpreadScreenerEnabledOnServer, autoTradeOn: backendWeeklySpreadAutoTradeEnabledOnServer, note: 'Forward test, separate from the CSP.' }
     ].filter(function(m){ return m.screenerOn !== null; });
     var allSettingsHealthy = serverSettingMechanisms.length > 0
       && serverSettingMechanisms.every(function(m){ return m.screenerOn && m.autoTradeOn; });
