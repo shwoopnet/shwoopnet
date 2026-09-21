@@ -1,10 +1,15 @@
 'use strict';
 // resetClosedTradeHistory (window.__shwoopAPI, index.html) -- the
-// deliberately narrow "start fresh against a different broker account"
-// action. It must remove every CLOSED journal entry and both options
-// closed-trade arrays outright, while leaving anything still 'open'
-// completely untouched (a stale open entry has its own "needs review" +
-// individual Remove flow; this action has no business guessing at it).
+// "start fresh against a different broker account" action. It must remove
+// every CLOSED journal entry and both options closed-trade arrays outright.
+// An 'open' entry is left alone UNLESS the backend's own reconciliation
+// (positionDriftFindings, computed server-side against real Alpaca
+// positions) has already flagged it orphaned_entry -- journal says open,
+// the broker holds nothing under that symbol. That is the same
+// server-confirmed signal the "needs review" tag itself is built from, not
+// a time-based guess: an open entry the backend hasn't flagged is left
+// completely untouched, since it may be a real position under the newly
+// connected account.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -61,8 +66,10 @@ function build(initialDoc) {
 }
 
 function main() {
-  // ---- Closed journal entries are removed, open ones are untouched ----
-  {
+  let chain = Promise.resolve();
+
+  // ---- Closed journal entries are removed; an unflagged open entry survives ----
+  chain = chain.then(() => {
     const { resetClosedTradeHistory, getStored } = build({
       journalEntries: [
         { id: 'a', sym: 'PLTR', status: 'closed' },
@@ -71,16 +78,45 @@ function main() {
       ],
       optionsClosedTrades: [{ underlyingSymbol: 'NOK' }],
       weeklySpreadClosedTrades: [{ underlyingSymbol: 'INTC' }],
+      positionDriftFindings: [],
     });
     return resetClosedTradeHistory('uid').then(function(){
       const stored = getStored();
       assert.deepStrictEqual(stored.journalEntries.map((j) => j.id), ['b'],
-        'only the open entry must survive: got ' + JSON.stringify(stored.journalEntries));
+        'only the open, unflagged entry must survive: got ' + JSON.stringify(stored.journalEntries));
       assert.deepStrictEqual(stored.optionsClosedTrades, [], 'optionsClosedTrades must be cleared outright');
       assert.deepStrictEqual(stored.weeklySpreadClosedTrades, [], 'weeklySpreadClosedTrades must be cleared outright');
-      console.log('G1 PASS closed journal entries and both options closed-trade arrays are cleared; open entries survive untouched');
+      console.log('G1 PASS closed journal entries and both options closed-trade arrays are cleared; an unflagged open entry survives untouched');
     });
-  }
+  });
+
+  // ---- An open entry the backend has already confirmed orphaned is removed too ----
+  // Simulates a genuinely different broker account: the journal still lists
+  // an 'open' position the backend's own reconciliation (positionDrift.js)
+  // has already found no matching Alpaca position for. A DIFFERENT open
+  // entry with no matching finding at all must still survive, since it may
+  // be a real position under the newly connected account.
+  chain = chain.then(() => {
+    const { resetClosedTradeHistory, getStored } = build({
+      journalEntries: [
+        { id: 'd', sym: 'CHPT', status: 'open' },
+        { id: 'e', sym: 'RIOT', status: 'open' },
+      ],
+      optionsClosedTrades: [],
+      weeklySpreadClosedTrades: [],
+      positionDriftFindings: [
+        { type: 'orphaned_entry', entryId: 'd', sym: 'CHPT' },
+      ],
+    });
+    return resetClosedTradeHistory('uid').then(function(){
+      const stored = getStored();
+      assert.deepStrictEqual(stored.journalEntries.map((j) => j.id), ['e'],
+        'the entry flagged orphaned_entry by the backend must be removed, the unflagged one must survive: got ' + JSON.stringify(stored.journalEntries));
+      console.log('G2 PASS an open entry the backend already confirmed orphaned is removed; an unflagged open entry survives');
+    });
+  });
+
+  return chain;
 }
 
 Promise.resolve(main()).then(() => {
