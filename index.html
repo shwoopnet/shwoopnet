@@ -619,6 +619,8 @@
   .settings-action-btn:hover{ background: var(--amber-glow); }
   .settings-action-btn[disabled]{ border-color: var(--border); color: var(--muted); cursor:default; background:transparent; }
   .settings-reset-btn:hover{ background: var(--loss-glow); }
+  .settings-reset-btn.confirming{ background: var(--loss); color:#fff; animation: flattenPulse 1s ease-in-out infinite; }
+  .settings-reset-btn[disabled]{ opacity:.6; cursor:default; }
   .flatten-all-btn{
     background: var(--loss); border:1px solid var(--loss); color:#fff;
     padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:700; cursor:pointer;
@@ -2029,6 +2031,40 @@
         });
       });
     },
+    // For starting fresh against a genuinely different broker account
+    // under the same login (a new paper account, a new live account) --
+    // journalEntries/optionsClosedTrades/weeklySpreadClosedTrades are
+    // this app's own historical record, not tied to whichever Alpaca
+    // keys happen to be connected right now, so swapping keys alone
+    // never touches them (see saveAlpacaCredentials -- on purpose, key
+    // ROTATION on the same account must never lose history). This is
+    // the explicit, opt-in action for the other case.
+    //
+    // Deliberately narrow: only CLOSED journal entries are removed --
+    // anything still 'open' is left exactly alone, whether it's a real
+    // live position or a stale one, because a stale open entry already
+    // has its own "needs review" flag and individual Remove button
+    // (removeJournalEntry) on the Journal/Trade Overview pages. Clearing
+    // an open entry here could desync this app's own tracking of a
+    // position the backend still believes is open, which is a real-money
+    // risk this action has no business taking blindly.
+    // optionsClosedTrades/weeklySpreadClosedTrades hold ONLY closed
+    // trades by construction (open ones live in optionsPositions/
+    // weeklySpreadPositions, untouched here) so those two are cleared
+    // outright.
+    resetClosedTradeHistory: function(uid){
+      var ref = doc(db, 'users', uid);
+      return runTransaction(db, function(t){
+        return t.get(ref).then(function(snap){
+          var fresh = snap.exists() ? snap.data() : {};
+          var nextJournal = (fresh.journalEntries || []).filter(function(j){ return j.status !== 'closed'; });
+          t.set(ref, {
+            journalEntries: nextJournal, optionsClosedTrades: [], weeklySpreadClosedTrades: [],
+          }, { merge: true });
+          return nextJournal;
+        });
+      });
+    },
     // Single shared listener for the whole user document -- this used to
     // be six separate onSnapshot subscriptions (journal, alerts, activity
     // log, screener picks, Alpaca credentials, trading-pause state x2 for
@@ -3191,6 +3227,22 @@
               </div>
               <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
             </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Closed-trade history</div>
+              <div class="settings-row-desc">
+                Changing keys above does NOT reset this — journal and options
+                history belong to this account, not to whichever broker keys
+                are connected right now, so key rotation never loses it. Use
+                this only when you've started against a genuinely different
+                broker account (e.g. a brand-new paper account) and want a
+                clean slate. Removes every CLOSED equities/crypto/options
+                trade. Anything still open is left untouched.
+              </div>
+            </div>
+            <button class="settings-reset-btn" id="resetClosedTradeHistoryBtn" data-armed="false">Reset</button>
           </div>
         </div>
       </div>
@@ -12093,6 +12145,43 @@
     setAlpacaStatus('Enter new keys to reconnect', null);
   });
 
+  // Same click-to-arm confirmation as the dock's per-position Close
+  // button -- this permanently deletes real trade history, so a single
+  // accidental click can't do it.
+  (function(){
+    var btn = document.getElementById('resetClosedTradeHistoryBtn');
+    if(!btn) return;
+    var armTimer = null;
+    btn.addEventListener('click', function(){
+      if(btn.dataset.armed === 'true'){
+        clearTimeout(armTimer);
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        if(!window.__shwoopAPI || !currentUid) return;
+        btn.disabled = true;
+        btn.textContent = 'Resetting…';
+        window.__shwoopAPI.resetClosedTradeHistory(currentUid).then(function(){
+          btn.disabled = false;
+          btn.textContent = 'Reset';
+        }).catch(function(err){
+          console.error('Failed to reset closed-trade history:', err);
+          btn.disabled = false;
+          btn.textContent = 'Reset';
+          alert('Failed to reset: ' + err.message);
+        });
+      } else {
+        btn.dataset.armed = 'true';
+        btn.classList.add('confirming');
+        btn.textContent = 'Confirm? Deletes all closed trades';
+        armTimer = setTimeout(function(){
+          btn.dataset.armed = 'false';
+          btn.classList.remove('confirming');
+          btn.textContent = 'Reset';
+        }, 4000);
+      }
+    });
+  })();
+
   // ---------- Market alerts: real, condition-based, persisted per day ----------
   var alertHistory = [];
   var alertsUid = null;
@@ -14328,9 +14417,24 @@
         // it fails the same way: the reassuring reading ("the system is
         // quiet") is the wrong one, and the log looks broken rather than
         // filtered. Say which it is, and how to get them back.
-        el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' +
-          'All ' + currentAccountLog.length + ' entries are hidden by the filters above — ' +
-          'nothing is wrong, this view is just narrowed. Use Filters to show them.</span></div>';
+        //
+        // "Use Filters to show them" is only true when a category toggle
+        // is actually the reason -- isRoutineScan's own collapse (quiet,
+        // no-error cycle_summary entries) has no toggle in that panel at
+        // all, so telling someone to open Filters when every category
+        // already reads "Shown" sends them somewhere that cannot help.
+        // Distinguish the two causes instead of always blaming "the
+        // filters above."
+        var anyCategoryHidden = currentAccountLog.some(function(entry){
+          return activityLogHiddenGroups[activityGroupKey(entry.type)];
+        });
+        var text = anyCategoryHidden
+          ? 'All ' + currentAccountLog.length + ' entries are hidden by the filters above — ' +
+            'nothing is wrong, this view is just narrowed. Use Filters to show them.'
+          : 'All ' + currentAccountLog.length + ' entries right now are routine, no-error scan summaries, ' +
+            'which this log collapses on purpose so real activity doesn’t get buried — nothing is wrong, ' +
+            'and there’s nothing to change in Filters to bring them back. A real trade, skip, or error will show up here.';
+        el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' + text + '</span></div>';
         if(emptyEl) emptyEl.setAttribute('hidden', '');
       } else {
         el.innerHTML = '';
