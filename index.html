@@ -14160,6 +14160,10 @@
   var WEEKLY_SPREAD_STATUS_LABELS = {
     pending_long: 'Opening (long leg)', pending_short: 'Opening (short leg)', open: 'Open',
     pending_close_short: 'Closing (short leg)', pending_close_long: 'Closing (long leg)', closed: 'Closed',
+    // The short leg never filled (or was canceled stale) and the long
+    // leg is being sold off as uncompensated, naked exposure -- see
+    // cleanUpStrayLongLeg's own comment in optionsWeeklySpreadCycle.js.
+    pending_cleanup_long: 'Closing (stray long leg)',
   };
   function renderWeeklySpreadPositions(){
     var card = document.getElementById('toCard-weeklySpreadPositions');
