@@ -35,8 +35,8 @@ gates.G1 = () => {
 gates.G2 = () => {
   const code = src.replace(/\/\/[^\n]*/g, '');
   assert.ok(/function renderOptionsPositions\(\)/.test(code), 'renderOptionsPositions must exist');
-  assert.ok(/if\(!open\.length && !closed\.length\)\{ card\.hidden = true; return; \}/.test(code),
-    'an account with no options positions at all must have the card hidden, not showing an empty table');
+  assert.ok(/if\(!open\.length\)\{ card\.hidden = true; return; \}/.test(code),
+    'an account with no open options positions must have the card hidden, not showing an empty table');
   console.log('G2 PASS the Options Income card hides itself entirely when there is nothing to show');
 };
 

@@ -619,6 +619,8 @@
   .settings-action-btn:hover{ background: var(--amber-glow); }
   .settings-action-btn[disabled]{ border-color: var(--border); color: var(--muted); cursor:default; background:transparent; }
   .settings-reset-btn:hover{ background: var(--loss-glow); }
+  .settings-reset-btn.confirming{ background: var(--loss); color:#fff; animation: flattenPulse 1s ease-in-out infinite; }
+  .settings-reset-btn[disabled]{ opacity:.6; cursor:default; }
   .flatten-all-btn{
     background: var(--loss); border:1px solid var(--loss); color:#fff;
     padding:9px 18px; border-radius:5px; font-size:12.5px; font-weight:700; cursor:pointer;
@@ -810,7 +812,15 @@
      of two-line blocks. */
   .activity-log-row-cols{
     display:grid; grid-template-columns: 128px 58px 1fr auto;
-    align-items:center; gap:12px; padding:10px 0;
+    align-items:center; gap:12px;
+    /* Longhand on purpose -- a `padding:10px 0` shorthand here would also
+       reset padding-left/right to 0, silently overriding .activity-log-row's
+       own padding-left:10px (both classes land on the same element, same
+       specificity, this rule declared later wins). That padding-left exists
+       specifically to offset this row's margin:0 -10px; losing it left the
+       whole row, tag pill included, shifted 10px into the card's own edge
+       -- the "leftmost column clipped" bug, back again after looking fixed. */
+    padding-top:10px; padding-bottom:10px;
   }
   .activity-log-row-cols .activity-log-sym{ font-size:12px; color: var(--paper); }
   .activity-log-row-cols .activity-log-text{ margin:0; }
@@ -1036,7 +1046,7 @@
 
   .trade-columns{
     display:grid;
-    grid-template-columns: 28px 1.5fr 1fr 1fr 1fr 1.1fr 1.1fr;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1.1fr 1.1fr;
     gap: 10px; align-items:center; padding: 10px 16px;
   }
   .trade-row [data-label]::before{
@@ -1055,14 +1065,11 @@
   }
   /* The whole card is the click target that opens the trade detail modal
      (see renderIntradayBlocks/renderCryptoBlocks' own comment) -- this is
-     the hover cue that tells you so, not just the small chevron's own
-     :hover rule below. */
+     the hover cue that tells you so. */
   .trade-block:hover{
     border-color: var(--amber-dim);
     box-shadow: var(--card-shadow), 0 0 0 1px var(--amber-dim);
   }
-  .chevron{ border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px; transition: transform .15s ease; }
-  .chevron:hover{ color: var(--amber); }
   .t-sym-cell{ display:flex; align-items:center; gap:10px; }
   .t-sym-badge{
     width:32px; height:32px; border-radius:9px; flex-shrink:0;
@@ -1176,9 +1183,19 @@
     padding: 2px 0 12px 14px; border-left: 2px solid var(--amber-dim); margin-bottom:12px;
   }
   .trade-notes-list li:last-child{ margin-bottom:0; }
+  /* Second block in the same column, closed trades only -- a visible
+     divider (not just top margin) so "how it actually happened" reads as
+     a separate, later-in-time list from "why it was taken", not a
+     continuation of the same one. */
+  #tradeModalPlayedOutCol{ margin-top:20px; padding-top:18px; border-top:1px solid var(--border); }
   .trade-chart{ width:100%; height: var(--chart-height, 310px); display:block; cursor: crosshair; touch-action: none; user-select: none; }
   .grid-line{ stroke: var(--border); stroke-width:1; }
-  .grid-label{ fill: var(--muted); font-size: 11px; font-family:'Public Sans',sans-serif; font-variant-numeric: tabular-nums; }
+  /* Bumped from 11px/400 -- the smallest, lowest-contrast text on the
+     whole chart was its own axis, the one part meant to be read at a
+     glance while your eyes are actually on the candles. 600 weight reads
+     noticeably clearer than upping size alone would have without
+     crowding the y-axis's tightly-packed price labels. */
+  .grid-label{ fill: var(--muted); font-size: 12px; font-weight:600; font-family:'Public Sans',sans-serif; font-variant-numeric: tabular-nums; }
   .chart-error-text{ fill: var(--paper); font-size:13px; font-family:'Public Sans', sans-serif; }
   .chart-error-sub{ fill: var(--muted); font-size:11px; font-family:'Public Sans', sans-serif; }
   .chart-tool-btn{
@@ -1208,7 +1225,6 @@
     .trade-columns.head{ display:none; }
     .trade-columns{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
     .trade-columns > *{ flex:1 1 40%; }
-    .trade-columns .chevron{ flex: 0 0 auto; }
     .trade-columns .t-sym-cell{ flex: 1 1 100%; }
     [data-label]::before{
       content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
@@ -1228,7 +1244,6 @@
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns.head{ display:none; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns{ display:flex; flex-wrap:wrap; gap:10px 18px; padding:14px 16px; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns > *{ flex:1 1 40%; }
-  html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns .chevron{ flex: 0 0 auto; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) .trade-columns .t-sym-cell{ flex: 1 1 100%; }
   html:is([data-trade-columns="2"],[data-trade-columns="3"],[data-trade-columns="4"]) [data-label]::before{
     content: attr(data-label); display:block; font-size:9.5px; color:var(--muted);
@@ -2016,6 +2031,40 @@
         });
       });
     },
+    // For starting fresh against a genuinely different broker account
+    // under the same login (a new paper account, a new live account) --
+    // journalEntries/optionsClosedTrades/weeklySpreadClosedTrades are
+    // this app's own historical record, not tied to whichever Alpaca
+    // keys happen to be connected right now, so swapping keys alone
+    // never touches them (see saveAlpacaCredentials -- on purpose, key
+    // ROTATION on the same account must never lose history). This is
+    // the explicit, opt-in action for the other case.
+    //
+    // Deliberately narrow: only CLOSED journal entries are removed --
+    // anything still 'open' is left exactly alone, whether it's a real
+    // live position or a stale one, because a stale open entry already
+    // has its own "needs review" flag and individual Remove button
+    // (removeJournalEntry) on the Journal/Trade Overview pages. Clearing
+    // an open entry here could desync this app's own tracking of a
+    // position the backend still believes is open, which is a real-money
+    // risk this action has no business taking blindly.
+    // optionsClosedTrades/weeklySpreadClosedTrades hold ONLY closed
+    // trades by construction (open ones live in optionsPositions/
+    // weeklySpreadPositions, untouched here) so those two are cleared
+    // outright.
+    resetClosedTradeHistory: function(uid){
+      var ref = doc(db, 'users', uid);
+      return runTransaction(db, function(t){
+        return t.get(ref).then(function(snap){
+          var fresh = snap.exists() ? snap.data() : {};
+          var nextJournal = (fresh.journalEntries || []).filter(function(j){ return j.status !== 'closed'; });
+          t.set(ref, {
+            journalEntries: nextJournal, optionsClosedTrades: [], weeklySpreadClosedTrades: [],
+          }, { merge: true });
+          return nextJournal;
+        });
+      });
+    },
     // Single shared listener for the whole user document -- this used to
     // be six separate onSnapshot subscriptions (journal, alerts, activity
     // log, screener picks, Alpaca credentials, trading-pause state x2 for
@@ -2481,6 +2530,13 @@
       <div class="trade-notes-col">
         <h3>Why this trade</h3>
         <ul class="trade-notes-list" id="tradeModalNotes"></ul>
+        <!-- Closed trades only -- see buildPlayedOutNotes' own comment for
+             what this can and can't say. Hidden entirely (not just empty)
+             for an open trade, where "how it played out" has no answer yet. -->
+        <div id="tradeModalPlayedOutCol" hidden>
+          <h3>How it played out</h3>
+          <ul class="trade-notes-list" id="tradeModalPlayedOut"></ul>
+        </div>
       </div>
     </div>
   </div>
@@ -2726,9 +2782,10 @@
 
     <!-- Cash-secured-put income forward test (shwoop-server's
          optionsIncomeCycle.js). Hidden entirely (see renderOptionsPositions)
-         until there is at least one real open or closed position, so an
-         account that has never turned this on sees nothing -- no empty
-         card advertising a mechanism most accounts aren't running. -->
+         unless there is at least one real OPEN position -- closed history
+         lives on the Journal page instead, so an account with nothing live
+         right now sees nothing here rather than an empty or history-only
+         card. -->
     <div class="to-card" id="toCard-optionsPositions" hidden>
       <div class="labs-backtest-card">
         <div class="to-card-head">
@@ -3170,6 +3227,22 @@
               </div>
               <div class="quote-sync-status" id="alpacaStatus">Not connected</div>
             </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Closed-trade history</div>
+              <div class="settings-row-desc">
+                Changing keys above does NOT reset this — journal and options
+                history belong to this account, not to whichever broker keys
+                are connected right now, so key rotation never loses it. Use
+                this only when you've started against a genuinely different
+                broker account (e.g. a brand-new paper account) and want a
+                clean slate. Removes every CLOSED equities/crypto/options
+                trade. Anything still open is left untouched.
+              </div>
+            </div>
+            <button class="settings-reset-btn" id="resetClosedTradeHistoryBtn" data-armed="false">Reset</button>
           </div>
         </div>
       </div>
@@ -4263,8 +4336,16 @@
     var cryptoOpenCount = cryptoSource.filter(function(t){
       return journalEntries.some(function(j){ return j.sym === t.sym && isOpenAlpacaPositionForCurrentAccount(j); });
     }).length;
-    var text = (source.length + cryptoSource.length) + ' instruments you\'re tracking today (' +
-      source.length + ' stocks, ' + cryptoSource.length + ' crypto), ' + (openCount + cryptoOpenCount) + ' with open positions';
+    // Options positions are always open positions (the mechanisms hold
+    // no "watching, not yet in" state the way equities/crypto do) -- same
+    // count used by the lede paragraph's own "Options income has N
+    // positions open" sentence nearby, so the two stats can't drift
+    // apart on what "open" means for options.
+    var optionsCount = (backendOptionsPositions || []).length + (backendWeeklySpreadPositions || []).length;
+    var text = (source.length + cryptoSource.length + optionsCount) + ' instruments you\'re tracking today (' +
+      source.length + ' stocks, ' + cryptoSource.length + ' crypto' +
+      (optionsCount ? ', ' + optionsCount + ' options' : '') + '), ' +
+      (openCount + cryptoOpenCount + optionsCount) + ' with open positions';
     document.getElementById('ctaStat').textContent = text;
   }
 
@@ -6828,7 +6909,6 @@
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
-            '<button class="chevron" data-toggle="' + t.sym + '" aria-label="View trade details">›</button>' +
             '<div class="t-sym-cell">' +
               symbolBadgeHtml(t.sym) +
               '<span class="t-sym-text">' +
@@ -6854,13 +6934,12 @@
 
     patchIntradayPLWithAlpacaPositions('equities');
 
-    // The whole card is the click target now, not just the chevron --
-    // requested directly: a target the width of one small arrow was easy
-    // to miss on a row that's otherwise entirely non-interactive-looking.
-    // The chevron stays as a visual affordance (it still LOOKS like
-    // there's more here to open) but no longer needs its own listener --
-    // a click on it bubbles up to this same handler like any other click
-    // inside the card, so it still works exactly as before.
+    // The whole card is the click target -- requested directly: a target
+    // the width of one small arrow was easy to miss on a row that's
+    // otherwise entirely non-interactive-looking. The chevron itself has
+    // since been removed (also requested): once every card is a button,
+    // a separate arrow icon no longer tells you anything the card's own
+    // hover cue (.trade-block:hover) doesn't already.
     el.querySelectorAll('.trade-block[data-symbol]').forEach(function(card){
       card.addEventListener('click', function(){ openSetupTradeModal(card.dataset.symbol); });
     });
@@ -6946,7 +7025,6 @@
       return '' +
         '<div class="trade-block" data-symbol="' + t.sym + '">' +
           '<div class="trade-columns trade-row">' +
-            '<button class="chevron" data-toggle="' + t.sym + '" aria-label="View trade details">›</button>' +
             '<div class="t-sym-cell">' +
               symbolBadgeHtml(t.sym) +
               '<span class="t-sym-text">' +
@@ -6971,13 +7049,12 @@
 
     patchIntradayPLWithAlpacaPositions('crypto');
 
-    // The whole card is the click target now, not just the chevron --
-    // requested directly: a target the width of one small arrow was easy
-    // to miss on a row that's otherwise entirely non-interactive-looking.
-    // The chevron stays as a visual affordance (it still LOOKS like
-    // there's more here to open) but no longer needs its own listener --
-    // a click on it bubbles up to this same handler like any other click
-    // inside the card, so it still works exactly as before.
+    // The whole card is the click target -- requested directly: a target
+    // the width of one small arrow was easy to miss on a row that's
+    // otherwise entirely non-interactive-looking. The chevron itself has
+    // since been removed (also requested): once every card is a button,
+    // a separate arrow icon no longer tells you anything the card's own
+    // hover cue (.trade-block:hover) doesn't already.
     el.querySelectorAll('.trade-block[data-symbol]').forEach(function(card){
       card.addEventListener('click', function(){ openSetupTradeModal(card.dataset.symbol); });
     });
@@ -7035,6 +7112,15 @@
     notesEl.innerHTML = (d.notes && d.notes.length)
       ? d.notes.map(function(n){ return '<li>' + n + '</li>'; }).join('')
       : '<li>No recorded reasoning for this trade.</li>';
+
+    var playedOutCol = document.getElementById('tradeModalPlayedOutCol');
+    if(d.playedOut && d.playedOut.length){
+      document.getElementById('tradeModalPlayedOut').innerHTML =
+        d.playedOut.map(function(n){ return '<li>' + n + '</li>'; }).join('');
+      playedOutCol.removeAttribute('hidden');
+    } else {
+      playedOutCol.setAttribute('hidden', '');
+    }
 
     var chartCol = document.getElementById('tradeModalChartCol');
     var statusEl = document.getElementById('tradeModalChartStatus');
@@ -8168,15 +8254,27 @@
   function renderChartInto(svg, sym, base, tf){
     fetchHistory(sym, tf, 'high').then(function(bars){
       // Keep the chart anchored to the live current price rather than
-      // whatever Twelve Data's most recent close happened to be — but
-      // only the close, not the high/low. Twelve Data's free tier can lag
-      // real-time by a meaningful amount, so stretching the wick to
-      // always reach the live quote was bridging two data sources that
-      // sometimes genuinely disagree, producing a wick shooting far past
-      // where the rest of the candle series actually sits.
+      // whatever Twelve Data's most recent close happened to be. h/l stay
+      // Twelve Data's own real range EXCEPT when the live quote falls
+      // outside it -- clamped with Math.max/min, not just copied, because
+      // a candle whose close sits beyond its own high/low is not a
+      // rendering choice, it's an invalid OHLC bar: drawCandles draws the
+      // wick from h to l and the body from open to close as two separate
+      // shapes, so a close outside [l, h] draws a body sticking out past
+      // the end of its own wick -- confirmed live, "maybe chart bug here
+      // with the candle", a solid block appearing to plunge straight
+      // through the bottom of the plot with no wick visible past it. The
+      // axis range (drawCandles' own loRaw/hiRaw) reads only h/l per bar
+      // too, so an unclamped close also wasn't even guaranteed to be
+      // inside the visible plot at all. Twelve Data's free-tier lag is
+      // still real and still means this h/l and the live quote can
+      // disagree -- but the fix for that disagreement can never be an
+      // internally-inconsistent candle; when they genuinely diverge this
+      // much, the candle's own wick extending to show it is the honest
+      // picture, not a bug to paper over.
       var lastBar = bars[bars.length - 1];
       var adjusted = bars.slice(0, -1).concat([{
-        o: lastBar.o, h: lastBar.h, l: lastBar.l, c: base, t: lastBar.t
+        o: lastBar.o, h: Math.max(lastBar.h, base), l: Math.min(lastBar.l, base), c: base, t: lastBar.t
       }]);
       initChartState(sym, tf, adjusted);
       renderChartView(sym);
@@ -8363,6 +8461,22 @@
       var clampedDelta = Math.max(-200, Math.min(200, e.deltaY));
       var factor = Math.exp(clampedDelta * 0.0026);
       zoomChart(sym, fraction, factor);
+      // zoomChart's own re-render is deferred to the next frame (see
+      // scheduleChartRender), and drawCandles wipes and rebuilds the
+      // whole <svg> on every render -- which clears the crosshair LINE/
+      // TAG elements it drew (they live inside the svg) but never
+      // touches the separate #crosshair-<sym> readout div sitting next
+      // to it. Reported live as "data issues" on the trade modal: scroll
+      // to zoom without moving the mouse and the OHLC box kept showing
+      // whatever bar used to be under the cursor, now pointing at a
+      // price/candle that isn't there any more post-zoom. A second,
+      // nested rAF (registered after zoomChart's own, so it runs in the
+      // same frame right after the fresh render) recomputes the
+      // crosshair against the NEW view/scale at the cursor's unchanged
+      // screen position, instead of leaving it stale or just blanking it.
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ updateCrosshair(sym, e.clientX, e.clientY); });
+      });
     }, { passive: false });
 
     var dragState = null;
@@ -10179,6 +10293,94 @@
     return { pct: pctVal, dollar: dollarVal };
   }
 
+  // "How it played out" -- a closed-trade-only companion to "Why this
+  // trade": that list is pinned at ENTRY and never changes; this is built
+  // fresh from how the trade actually ended, entry to exit. Deliberately
+  // narrower than it could be: this repo's own discipline is never
+  // inventing a number (see optionsClosedTradeDollarPL, CLAUDE.md's whole
+  // "no fabricated result" thread), and a journal entry does not record
+  // WHICH order actually filled the exit -- only its price and date. So
+  // "stop-loss" / "target" below is stated as what the exit price is
+  // CONSISTENT WITH (a proximity check), not asserted as fact the way a
+  // real order-type-tagged exitReason field would let it be. A future
+  // version that has that field can drop the hedging language outright.
+  function buildPlayedOutNotes(e){
+    if(e.status !== 'closed' || e.entry == null || e.exit == null) return [];
+    var notes = [];
+    var isLong = e.direction !== 'Short';
+    var sameDay = e.date === (e.exitDate || e.date);
+    var entryDateStr = niceDateShort(e.date);
+    var exitDateStr = niceDateShort(e.exitDate || e.date);
+    notes.push(
+      'Entered ' + (isLong ? 'long' : 'short') + ' at ' + fmt(e.entry) + ' on ' + entryDateStr +
+      (sameDay
+        ? ', closed the same session at ' + fmt(e.exit) + '.'
+        : ', closed at ' + fmt(e.exit) + ' on ' + exitDateStr + ' -- ' + calendarDaySpan(e.date, e.exitDate) + '.')
+    );
+
+    var pl = computePL(e);
+    if(pl.dollar != null && !isNaN(pl.dollar)){
+      var plLine = (pl.dollar >= 0 ? 'Closed up ' : 'Closed down ') + '$' + Math.abs(pl.dollar).toFixed(2) +
+        ' (' + (pl.pct >= 0 ? '+' : '') + pl.pct.toFixed(1) + '%).';
+      if(e.stop != null && e.entry !== e.stop){
+        var plannedRisk = Math.abs(e.entry - e.stop);
+        var realizedR = ((e.exit - e.entry) * (isLong ? 1 : -1)) / plannedRisk;
+        plLine += ' That is about ' + (realizedR >= 0 ? '+' : '') + realizedR.toFixed(2) + 'R against the ' +
+          fmt(plannedRisk) + ' of planned risk this trade opened with.';
+      }
+      notes.push(plLine);
+    }
+
+    // Proximity check, not a real fill classification -- see this
+    // function's own header comment on why. A tolerance of 1% of price
+    // (floor 1 cent) treats "basically at the level" as "at the level"
+    // without needing exact-cent agreement, which a real fill essentially
+    // never has (slippage, a trailing stop that had already moved).
+    if(e.stop != null || e.t1 != null){
+      var tol = Math.max(e.exit * 0.01, 0.01);
+      var nearStop = e.stop != null && Math.abs(e.exit - e.stop) <= tol;
+      var nearTarget = e.t1 != null && Math.abs(e.exit - e.t1) <= tol;
+      if(nearStop && !nearTarget){
+        notes.push('Exit price landed at ' + fmt(e.exit) + ', right at the ' + fmt(e.stop) +
+          ' stop -- consistent with a stop-loss exit (the stop may have trailed since entry, so this isn\'t necessarily the ORIGINAL stop).');
+      } else if(nearTarget && !nearStop){
+        notes.push('Exit price landed at ' + fmt(e.exit) + ', right at the ' + fmt(e.t1) + ' target.');
+      } else if(!nearStop && !nearTarget){
+        notes.push('Exit price ' + fmt(e.exit) + ' isn\'t close to either the stop (' + (e.stop != null ? fmt(e.stop) : '—') +
+          ') or the target (' + (e.t1 != null ? fmt(e.t1) : '—') + ') -- likely a trailing-stop, time-stop, or session-close exit rather than either fixed level.');
+      }
+    }
+
+    if(e.reachedEarlyBreakeven !== undefined){
+      notes.push(e.reachedEarlyBreakeven
+        ? 'Price moved far enough in its favor at some point to lock the stop at breakeven, before the trade eventually closed.'
+        : 'The stop never reached breakeven -- this trade closed still carrying its full original risk.');
+    }
+
+    return notes;
+  }
+
+  // Short "Sep 11" style date, reused here rather than pulled from one of
+  // the several slightly-different date formatters already in this file
+  // (toLocaleDateString options differ by call site) -- this one only
+  // ever needs to read well inline in a sentence.
+  function niceDateShort(dateStr){
+    if(!dateStr) return '—';
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString([], { month:'short', day:'numeric' });
+  }
+
+  // Calendar days, explicitly NOT trading days -- this file has no market
+  // calendar to consult client-side (see usMarketHolidays.js, server-only),
+  // and a wrong "N trading days" claim is worse than an honest "N calendar
+  // days" one. Phrasing says so outright rather than implying precision
+  // this doesn't have.
+  function calendarDaySpan(startStr, endStr){
+    var start = new Date(startStr + 'T00:00:00');
+    var end = new Date((endStr || startStr) + 'T00:00:00');
+    var days = Math.round((end - start) / 86400000);
+    return days + ' calendar day' + (days === 1 ? '' : 's') + ' later';
+  }
+
   // Closed options trades (CSP + weekly spread), reshaped to sit alongside
   // real journalEntries in the calendar, the day-by-day Journal list, AND
   // (via computeAggregatePL, now dollar-based for exactly this reason) the
@@ -10616,6 +10818,9 @@
       // reference lines for how price actually moved relative to them.
       entry: e.entry, stop: e.stop, target: e.t1,
       pl: pl, notes: e.entryNotes || [], chart: chart,
+      // buildPlayedOutNotes itself returns [] for anything still open, so
+      // this is safe to always compute rather than branching here too.
+      playedOut: buildPlayedOutNotes(e),
     });
   }
 
@@ -11939,6 +12144,43 @@
     showAlpacaInputsView();
     setAlpacaStatus('Enter new keys to reconnect', null);
   });
+
+  // Same click-to-arm confirmation as the dock's per-position Close
+  // button -- this permanently deletes real trade history, so a single
+  // accidental click can't do it.
+  (function(){
+    var btn = document.getElementById('resetClosedTradeHistoryBtn');
+    if(!btn) return;
+    var armTimer = null;
+    btn.addEventListener('click', function(){
+      if(btn.dataset.armed === 'true'){
+        clearTimeout(armTimer);
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        if(!window.__shwoopAPI || !currentUid) return;
+        btn.disabled = true;
+        btn.textContent = 'Resetting…';
+        window.__shwoopAPI.resetClosedTradeHistory(currentUid).then(function(){
+          btn.disabled = false;
+          btn.textContent = 'Reset';
+        }).catch(function(err){
+          console.error('Failed to reset closed-trade history:', err);
+          btn.disabled = false;
+          btn.textContent = 'Reset';
+          alert('Failed to reset: ' + err.message);
+        });
+      } else {
+        btn.dataset.armed = 'true';
+        btn.classList.add('confirming');
+        btn.textContent = 'Confirm? Deletes all closed trades';
+        armTimer = setTimeout(function(){
+          btn.dataset.armed = 'false';
+          btn.classList.remove('confirming');
+          btn.textContent = 'Reset';
+        }, 4000);
+      }
+    });
+  })();
 
   // ---------- Market alerts: real, condition-based, persisted per day ----------
   var alertHistory = [];
@@ -13962,14 +14204,14 @@
     var meta = document.getElementById('optionsPositionsHeadMeta');
     if(!card || !el) return;
     var open = backendOptionsPositions || [];
-    var closed = backendOptionsClosedTrades || [];
-    // Hidden entirely for an account that has never run this -- an empty
-    // card advertising an off-by-default mechanism is exactly the kind of
-    // "reads as broken when nothing is wrong" case this app's other empty
-    // states already guard against.
-    if(!open.length && !closed.length){ card.hidden = true; return; }
+    // Hidden entirely for an account that has never run this, or that has
+    // nothing open right now -- Trade Overview is "what's live," and
+    // closed history already lives on the Journal page (see
+    // optionsClosedJournalRows), so an empty card here would just
+    // duplicate a table shown better elsewhere.
+    if(!open.length){ card.hidden = true; return; }
     card.hidden = false;
-    if(meta) meta.textContent = open.length + ' open · ' + closed.length + ' closed';
+    if(meta) meta.textContent = open.length + ' open';
 
     var now = new Date();
     var rows = '';
@@ -13995,32 +14237,6 @@
           '</tr>';
         }).join('') + '</tbody></table>';
     }
-    if(closed.length){
-      // Newest first -- a trader checking in wants to know what just
-      // happened, not what happened first when this mechanism was turned on.
-      var closedSorted = closed.slice().sort(function(a, b){
-        return String(b.closedAt || '').localeCompare(String(a.closedAt || ''));
-      });
-      rows += '<div class="ft-since" style="margin-top:14px;">Closed</div>' +
-        '<table class="backtest-trades-table"><thead><tr>' +
-        '<th>Underlying</th><th>Strike</th><th>Expiration</th>' +
-        '<th>Credit in</th><th>Credit out</th><th>Reason</th><th>Closed</th>' +
-        '</tr></thead><tbody>' +
-        closedSorted.map(function(p){
-          var reasonLabel = p.needsReconciliation
-            ? '<span class="labs-backtest-status" title="Disappeared from the broker with no matching close order on file. Verify manually.">unreconciled</span>'
-            : escapeHtml(p.exitReason || '—');
-          return '<tr>' +
-            '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
-            '<td>' + ftMoney(p.strike) + '</td>' +
-            '<td>' + escapeHtml(p.expirationDate || '') + '</td>' +
-            '<td>' + ftMoney(p.entryCredit) + '</td>' +
-            '<td>' + ftMoney(p.exitCredit) + '</td>' +
-            '<td>' + reasonLabel + '</td>' +
-            '<td>' + (p.closedAt ? escapeHtml(String(p.closedAt).slice(0, 10)) : '—') + '</td>' +
-          '</tr>';
-        }).join('') + '</tbody></table>';
-    }
     el.innerHTML = rows;
   }
 
@@ -14033,6 +14249,10 @@
   var WEEKLY_SPREAD_STATUS_LABELS = {
     pending_long: 'Opening (long leg)', pending_short: 'Opening (short leg)', open: 'Open',
     pending_close_short: 'Closing (short leg)', pending_close_long: 'Closing (long leg)', closed: 'Closed',
+    // The short leg never filled (or was canceled stale) and the long
+    // leg is being sold off as uncompensated, naked exposure -- see
+    // cleanUpStrayLongLeg's own comment in optionsWeeklySpreadCycle.js.
+    pending_cleanup_long: 'Closing (stray long leg)',
   };
   function renderWeeklySpreadPositions(){
     var card = document.getElementById('toCard-weeklySpreadPositions');
@@ -14040,10 +14260,12 @@
     var meta = document.getElementById('weeklySpreadPositionsHeadMeta');
     if(!card || !el) return;
     var open = backendWeeklySpreadPositions || [];
-    var closed = backendWeeklySpreadClosedTrades || [];
-    if(!open.length && !closed.length){ card.hidden = true; return; }
+    // Same "what's live, not what's history" reasoning as
+    // renderOptionsPositions -- closed spreads already live on the
+    // Journal page via optionsClosedJournalRows.
+    if(!open.length){ card.hidden = true; return; }
     card.hidden = false;
-    if(meta) meta.textContent = open.length + ' open · ' + closed.length + ' closed';
+    if(meta) meta.textContent = open.length + ' open';
 
     var now = new Date();
     var rows = '';
@@ -14062,25 +14284,6 @@
             '<td>' + (p.qty != null ? p.qty : '—') + '</td>' +
             '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
             '<td>' + (WEEKLY_SPREAD_STATUS_LABELS[p.status] || escapeHtml(p.status || '—')) + '</td>' +
-          '</tr>';
-        }).join('') + '</tbody></table>';
-    }
-    if(closed.length){
-      var closedSorted = closed.slice().sort(function(a, b){
-        return String(b.closedAt || '').localeCompare(String(a.closedAt || ''));
-      });
-      rows += '<div class="ft-since" style="margin-top:14px;">Closed</div>' +
-        '<table class="backtest-trades-table"><thead><tr>' +
-        '<th>Underlying</th><th>Short/Long</th><th>Credit in</th><th>Credit out</th><th>Reason</th><th>Closed</th>' +
-        '</tr></thead><tbody>' +
-        closedSorted.map(function(p){
-          return '<tr>' +
-            '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
-            '<td>' + ftMoney(p.shortStrike) + ' / ' + ftMoney(p.longStrike) + '</td>' +
-            '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
-            '<td>' + (p.exitCredit != null ? ftMoney(p.exitCredit) : '—') + '</td>' +
-            '<td>' + escapeHtml(p.exitReason || '—') + '</td>' +
-            '<td>' + (p.closedAt ? escapeHtml(String(p.closedAt).slice(0, 10)) : '—') + '</td>' +
           '</tr>';
         }).join('') + '</tbody></table>';
     }
@@ -14214,9 +14417,24 @@
         // it fails the same way: the reassuring reading ("the system is
         // quiet") is the wrong one, and the log looks broken rather than
         // filtered. Say which it is, and how to get them back.
-        el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' +
-          'All ' + currentAccountLog.length + ' entries are hidden by the filters above — ' +
-          'nothing is wrong, this view is just narrowed. Use Filters to show them.</span></div>';
+        //
+        // "Use Filters to show them" is only true when a category toggle
+        // is actually the reason -- isRoutineScan's own collapse (quiet,
+        // no-error cycle_summary entries) has no toggle in that panel at
+        // all, so telling someone to open Filters when every category
+        // already reads "Shown" sends them somewhere that cannot help.
+        // Distinguish the two causes instead of always blaming "the
+        // filters above."
+        var anyCategoryHidden = currentAccountLog.some(function(entry){
+          return activityLogHiddenGroups[activityGroupKey(entry.type)];
+        });
+        var text = anyCategoryHidden
+          ? 'All ' + currentAccountLog.length + ' entries are hidden by the filters above — ' +
+            'nothing is wrong, this view is just narrowed. Use Filters to show them.'
+          : 'All ' + currentAccountLog.length + ' entries right now are routine, no-error scan summaries, ' +
+            'which this log collapses on purpose so real activity doesn’t get buried — nothing is wrong, ' +
+            'and there’s nothing to change in Filters to bring them back. A real trade, skip, or error will show up here.';
+        el.innerHTML = '<div class="activity-log-row"><span class="activity-log-text">' + text + '</span></div>';
         if(emptyEl) emptyEl.setAttribute('hidden', '');
       } else {
         el.innerHTML = '';
