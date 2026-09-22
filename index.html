@@ -2073,7 +2073,7 @@
             return !isOrphaned(j); // keep an open entry unless the backend already confirmed it's orphaned
           });
           t.set(ref, {
-            journalEntries: nextJournal, optionsClosedTrades: [], weeklySpreadClosedTrades: [],
+            journalEntries: nextJournal, optionsClosedTrades: [], weeklySpreadClosedTrades: [], ironCondorClosedTrades: [],
           }, { merge: true });
           return nextJournal;
         });
@@ -2260,7 +2260,22 @@
         weeklySpreadCycleErrorAt: data.weeklySpreadCycleErrorAt || null,
         weeklySpreadLastCycleSummary: data.weeklySpreadLastCycleSummary || null,
         weeklySpreadScreenerEnabledOverride: typeof data.weeklySpreadScreenerEnabledOverride === 'boolean' ? data.weeklySpreadScreenerEnabledOverride : null,
-        weeklySpreadAutoTradeEnabledOverride: typeof data.weeklySpreadAutoTradeEnabledOverride === 'boolean' ? data.weeklySpreadAutoTradeEnabledOverride : null
+        weeklySpreadAutoTradeEnabledOverride: typeof data.weeklySpreadAutoTradeEnabledOverride === 'boolean' ? data.weeklySpreadAutoTradeEnabledOverride : null,
+        // The iron condor mechanism (shwoop-server's optionsIronCondorCycle.js)
+        // -- a third, separate options strategy, own fields throughout so it
+        // never clobbers the CSP or weekly-spread status or positions.
+        ironCondorPositions: Array.isArray(data.ironCondorPositions) ? data.ironCondorPositions : [],
+        ironCondorClosedTrades: Array.isArray(data.ironCondorClosedTrades) ? data.ironCondorClosedTrades : [],
+        serverIronCondorScreenerEnabled: typeof data.serverIronCondorScreenerEnabled === 'boolean' ? data.serverIronCondorScreenerEnabled : null,
+        serverIronCondorAutoTradeEnabled: typeof data.serverIronCondorAutoTradeEnabled === 'boolean' ? data.serverIronCondorAutoTradeEnabled : null,
+        ironCondorCycleStatus: data.ironCondorCycleStatus || null,
+        ironCondorCycleStartedAt: data.ironCondorCycleStartedAt || null,
+        ironCondorCycleCompletedAt: data.ironCondorCycleCompletedAt || null,
+        ironCondorCycleError: data.ironCondorCycleError || null,
+        ironCondorCycleErrorAt: data.ironCondorCycleErrorAt || null,
+        ironCondorLastCycleSummary: data.ironCondorLastCycleSummary || null,
+        ironCondorScreenerEnabledOverride: typeof data.ironCondorScreenerEnabledOverride === 'boolean' ? data.ironCondorScreenerEnabledOverride : null,
+        ironCondorAutoTradeEnabledOverride: typeof data.ironCondorAutoTradeEnabledOverride === 'boolean' ? data.ironCondorAutoTradeEnabledOverride : null
       };
     },
     // Same defensive shaping as shapeScreenerData, for the account-synced
@@ -2800,6 +2815,22 @@
       </div>
     </div>
 
+    <!-- Iron condor (optionsIronCondorCycle.js) -- a third, separate
+         options mechanism from the CSP and weekly spread above. Same
+         hidden-until-real-data pattern. -->
+    <div class="to-card" id="toCard-ironCondorPositions" hidden>
+      <div class="labs-backtest-card">
+        <div class="to-card-head">
+          <span class="to-card-title">Iron Condor</span>
+          <span class="to-card-meta" id="ironCondorPositionsHeadMeta"></span>
+        </div>
+        <div class="labs-backtest-note" style="margin-bottom:10px;">
+          Defined-risk iron condors. Forward test only.
+        </div>
+        <div id="ironCondorPositionsBody"></div>
+      </div>
+    </div>
+
     <div class="to-card" id="toCard-todaysSetups" hidden>
       <div class="intraday-section labs-backtest-card" id="intradaySection" hidden>
         <div class="to-card-head">
@@ -2878,6 +2909,16 @@
             <span class="quote-sync-status" id="serverWeeklySpreadAutoTradeStatusBadge">—</span>
             <button class="chart-tool-btn" id="weeklySpreadAutoTradeEnableToggle" data-armed="false">Off</button>
           </div>
+          <!-- Iron condor (optionsIronCondorCycle.js), a third, separate
+               mechanism from the CSP and weekly spread above. Same real
+               auto-pause badge as the others, its own 'ironCondor'
+               screenerType. -->
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Iron condor</span>
+            <span class="money-mode-badge" id="ironCondorAutoTradeMoneyClause">Paper</span>
+            <span class="quote-sync-status" id="serverIronCondorAutoTradeStatusBadge">—</span>
+            <button class="chart-tool-btn" id="ironCondorAutoTradeEnableToggle" data-armed="false">Off</button>
+          </div>
         </div>
       </div>
       <div class="settings-row" id="screenersRow" hidden>
@@ -2894,6 +2935,10 @@
           <div class="settings-strategy-group">
             <span class="settings-strategy-label">Weekly spread</span>
             <button class="chart-tool-btn" id="weeklySpreadScreenerEnableToggle">Off</button>
+          </div>
+          <div class="settings-strategy-group">
+            <span class="settings-strategy-label">Iron condor</span>
+            <button class="chart-tool-btn" id="ironCondorScreenerEnableToggle">Off</button>
           </div>
         </div>
       </div>
@@ -2917,6 +2962,13 @@
           <div class="settings-row-desc" id="weeklySpreadTradingPausedDesc">—</div>
         </div>
         <button class="settings-reset-btn" id="resumeWeeklySpreadTradingBtn">Resume weekly spread trading</button>
+      </div>
+      <div class="settings-row" id="ironCondorTradingPausedRow" hidden>
+        <div>
+          <div class="settings-row-title">Iron condor auto-trading status</div>
+          <div class="settings-row-desc" id="ironCondorTradingPausedDesc">—</div>
+        </div>
+        <button class="settings-reset-btn" id="resumeIronCondorTradingBtn">Resume iron condor trading</button>
       </div>
       <div class="settings-row" id="flattenAllRow" hidden>
         <div>
@@ -3904,6 +3956,20 @@
   var backendWeeklySpreadCycleError = null;
   var backendWeeklySpreadCycleErrorAt = null;
   var backendWeeklySpreadLastCycleSummary = null;
+  // The iron condor mechanism -- a third, separate options strategy
+  // (shwoop-server's optionsIronCondorCycle.js), own fields throughout,
+  // same reasoning as backendWeeklySpreadPositions above.
+  var backendIronCondorPositions = [];
+  var backendIronCondorClosedTrades = [];
+  var backendIronCondorScreenerEnabledOnServer = null;
+  var backendIronCondorAutoTradeEnabledOnServer = null;
+  var backendIronCondorAutoTradePausedOnServer = null;
+  var backendIronCondorCycleStatus = null;
+  var backendIronCondorCycleStartedAt = null;
+  var backendIronCondorCycleCompletedAt = null;
+  var backendIronCondorCycleError = null;
+  var backendIronCondorCycleErrorAt = null;
+  var backendIronCondorLastCycleSummary = null;
   // Journal/Alpaca drift findings (see shwoop-server's
   // src/safety/positionDrift.js) -- detection-only, surfaced here for
   // manual review, never auto-applied to journalEntries.
@@ -3936,7 +4002,9 @@
     optionsScreenerEnabledOverride: null,
     optionsAutoTradeEnabledOverride: null,
     weeklySpreadScreenerEnabledOverride: null,
-    weeklySpreadAutoTradeEnabledOverride: null
+    weeklySpreadAutoTradeEnabledOverride: null,
+    ironCondorScreenerEnabledOverride: null,
+    ironCondorAutoTradeEnabledOverride: null
   };
 
   function handleScreenerDocUpdate(rawData){
@@ -4007,7 +4075,21 @@
       backendWeeklySpreadLastCycleSummary = data.weeklySpreadLastCycleSummary;
       autoTradeOverrides.weeklySpreadScreenerEnabledOverride = data.weeklySpreadScreenerEnabledOverride;
       autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = data.weeklySpreadAutoTradeEnabledOverride;
+      backendIronCondorPositions = data.ironCondorPositions;
+      backendIronCondorClosedTrades = data.ironCondorClosedTrades;
+      backendIronCondorScreenerEnabledOnServer = data.serverIronCondorScreenerEnabled;
+      backendIronCondorAutoTradeEnabledOnServer = data.serverIronCondorAutoTradeEnabled;
+      backendIronCondorAutoTradePausedOnServer = data.serverIronCondorAutoTradePaused;
+      backendIronCondorCycleStatus = data.ironCondorCycleStatus;
+      backendIronCondorCycleStartedAt = data.ironCondorCycleStartedAt;
+      backendIronCondorCycleCompletedAt = data.ironCondorCycleCompletedAt;
+      backendIronCondorCycleError = data.ironCondorCycleError;
+      backendIronCondorCycleErrorAt = data.ironCondorCycleErrorAt;
+      backendIronCondorLastCycleSummary = data.ironCondorLastCycleSummary;
+      autoTradeOverrides.ironCondorScreenerEnabledOverride = data.ironCondorScreenerEnabledOverride;
+      autoTradeOverrides.ironCondorAutoTradeEnabledOverride = data.ironCondorAutoTradeEnabledOverride;
       renderWeeklySpreadPositions();
+      renderIronCondorPositions();
       renderOptionsPositions();
       autoTradeOverrides.optionsScreenerEnabledOverride = data.optionsScreenerEnabledOverride;
       autoTradeOverrides.optionsAutoTradeEnabledOverride = data.optionsAutoTradeEnabledOverride;
@@ -4354,7 +4436,7 @@
     // drive that off a real signal from the backend, not off a literal
     // in the markup.
     var isLiveEnv = alpacaAccountType === 'live';
-    ['autoTradeIntradayMoneyClause', 'optionsAutoTradeMoneyClause', 'weeklySpreadAutoTradeMoneyClause']
+    ['autoTradeIntradayMoneyClause', 'optionsAutoTradeMoneyClause', 'weeklySpreadAutoTradeMoneyClause', 'ironCondorAutoTradeMoneyClause']
       .forEach(function(id){
         var badge = document.getElementById(id);
         if(!badge) return;
@@ -4534,6 +4616,16 @@
       ? autoTradeOverrides.weeklySpreadScreenerEnabledOverride
       : Boolean(backendWeeklySpreadScreenerEnabledOnServer);
   }
+  function effectiveIronCondorAutoTradeOn(){
+    return autoTradeOverrides.ironCondorAutoTradeEnabledOverride !== null
+      ? autoTradeOverrides.ironCondorAutoTradeEnabledOverride
+      : Boolean(backendIronCondorAutoTradeEnabledOnServer);
+  }
+  function effectiveIronCondorScreenerOn(){
+    return autoTradeOverrides.ironCondorScreenerEnabledOverride !== null
+      ? autoTradeOverrides.ironCondorScreenerEnabledOverride
+      : Boolean(backendIronCondorScreenerEnabledOnServer);
+  }
 
   function renderAutoTradeOverrideControls(){
     var autoBtn = document.getElementById('autoTradeEnableToggle');
@@ -4574,6 +4666,19 @@
       var weeklySpreadScreenerOn = effectiveWeeklySpreadScreenerOn();
       weeklySpreadScreenerBtn.textContent = weeklySpreadScreenerOn ? 'On' : 'Off';
       weeklySpreadScreenerBtn.classList.toggle('active', weeklySpreadScreenerOn);
+    }
+    var ironCondorAutoBtn = document.getElementById('ironCondorAutoTradeEnableToggle');
+    if(ironCondorAutoBtn && ironCondorAutoBtn.dataset.armed !== 'true'){
+      var ironCondorAutoOn = effectiveIronCondorAutoTradeOn();
+      ironCondorAutoBtn.textContent = ironCondorAutoOn ? 'On' : 'Off';
+      ironCondorAutoBtn.classList.remove('confirming');
+      ironCondorAutoBtn.classList.toggle('active', ironCondorAutoOn);
+    }
+    var ironCondorScreenerBtn = document.getElementById('ironCondorScreenerEnableToggle');
+    if(ironCondorScreenerBtn){
+      var ironCondorScreenerOn = effectiveIronCondorScreenerOn();
+      ironCondorScreenerBtn.textContent = ironCondorScreenerOn ? 'On' : 'Off';
+      ironCondorScreenerBtn.classList.toggle('active', ironCondorScreenerOn);
     }
   }
 
@@ -4692,6 +4797,43 @@
     renderAutoTradeOverrideControls();
   });
 
+  document.getElementById('ironCondorAutoTradeEnableToggle').addEventListener('click', function(){
+    var btn = this;
+    var currentlyOn = effectiveIronCondorAutoTradeOn();
+    // Same click-to-arm confirmation as the CSP/weekly spread above --
+    // real (paper) orders, four legs per condor.
+    if(currentlyOn){
+      autoTradeOverrides.ironCondorAutoTradeEnabledOverride = false;
+      saveAutoTradeOverride({ ironCondorAutoTradeEnabledOverride: false });
+      renderAutoTradeOverrideControls();
+      return;
+    }
+    if(btn.dataset.armed === 'true'){
+      clearTimeout(btn._armTimer);
+      btn.dataset.armed = 'false';
+      btn.classList.remove('confirming');
+      autoTradeOverrides.ironCondorAutoTradeEnabledOverride = true;
+      saveAutoTradeOverride({ ironCondorAutoTradeEnabledOverride: true });
+      renderAutoTradeOverrideControls();
+    } else {
+      btn.dataset.armed = 'true';
+      btn.classList.add('confirming');
+      btn.textContent = 'Click again — real orders';
+      btn._armTimer = setTimeout(function(){
+        btn.dataset.armed = 'false';
+        btn.classList.remove('confirming');
+        renderAutoTradeOverrideControls();
+      }, 4000);
+    }
+  });
+
+  document.getElementById('ironCondorScreenerEnableToggle').addEventListener('click', function(){
+    var next = !effectiveIronCondorScreenerOn();
+    autoTradeOverrides.ironCondorScreenerEnabledOverride = next;
+    saveAutoTradeOverride({ ironCondorScreenerEnabledOverride: next });
+    renderAutoTradeOverrideControls();
+  });
+
   // ---------- Intraday screener ----------
   function setIntradayEnabled(enabled){
     alpacaIntradayEnabled = enabled;
@@ -4774,6 +4916,7 @@
     renderTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData));
     renderOptionsTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'options'));
     renderWeeklySpreadTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'weeklySpread'));
+    renderIronCondorTradingPauseState(window.__shwoopAPI.shapeTradingPauseState(rawData, 'ironCondor'));
   }
 
   // ---------- Trading-paused alert (sound + browser notification) ----------
@@ -4789,7 +4932,7 @@
   // earlier version of this kind of thing had each renderer setting and
   // clearing the same node, so whichever ran last won and a real pause
   // could be cleared off the screen by the other strategy being fine.
-  var globalPauseState = { intraday: null, options: null, weeklySpread: null };
+  var globalPauseState = { intraday: null, options: null, weeklySpread: null, ironCondor: null };
 
   function renderGlobalPausedBanner(){
     var banner = document.getElementById('globalPausedBanner');
@@ -4799,6 +4942,7 @@
     if(globalPauseState.intraday && globalPauseState.intraday.paused) paused.push({ label: 'Equities', state: globalPauseState.intraday });
     if(globalPauseState.options && globalPauseState.options.paused) paused.push({ label: 'Options (CSP)', state: globalPauseState.options });
     if(globalPauseState.weeklySpread && globalPauseState.weeklySpread.paused) paused.push({ label: 'Weekly spread', state: globalPauseState.weeklySpread });
+    if(globalPauseState.ironCondor && globalPauseState.ironCondor.paused) paused.push({ label: 'Iron condor', state: globalPauseState.ironCondor });
     if(!paused.length){
       banner.setAttribute('hidden', '');
       return;
@@ -4922,6 +5066,23 @@
       reasonText + '. Review the activity log, then resume once resolved.';
   }
 
+  var lastKnownIronCondorTradingPaused = false;
+  function renderIronCondorTradingPauseState(state){
+    var row = document.getElementById('ironCondorTradingPausedRow');
+    var desc = document.getElementById('ironCondorTradingPausedDesc');
+    var reasonText = state.pausedReason || 'unknown';
+    var justPaused = state.paused && !lastKnownIronCondorTradingPaused;
+    lastKnownIronCondorTradingPaused = state.paused;
+    setGlobalPauseState('ironCondor', state);
+    if(justPaused) playTradingPausedAlertSound();
+    if(!row || !desc) return;
+    if(!state.paused){ row.setAttribute('hidden', ''); return; }
+    row.removeAttribute('hidden');
+    var when = state.pausedAt ? new Date(state.pausedAt).toLocaleString() : 'an unknown time';
+    desc.textContent = 'Iron condor auto-trading paused ' + when + ' after repeated failed order attempts. Reason: ' +
+      reasonText + '. Review the activity log, then resume once resolved.';
+  }
+
   document.getElementById('resumeOptionsTradingBtn').addEventListener('click', function(){
     if(!window.__shwoopAPI || !currentUid) return;
     var btn = document.getElementById('resumeOptionsTradingBtn');
@@ -4947,6 +5108,20 @@
     }).finally(function(){
       btn.disabled = false;
       btn.textContent = 'Resume weekly spread trading';
+    });
+  });
+
+  document.getElementById('resumeIronCondorTradingBtn').addEventListener('click', function(){
+    if(!window.__shwoopAPI || !currentUid) return;
+    var btn = document.getElementById('resumeIronCondorTradingBtn');
+    btn.disabled = true;
+    btn.textContent = 'Resuming…';
+    window.__shwoopAPI.resumeTrading(currentUid, 'ironCondor').catch(function(err){
+      console.error('Failed to resume iron condor trading:', err);
+      alert('Could not resume iron condor trading — please try again. (' + err.message + ')');
+    }).finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Resume iron condor trading';
     });
   });
 
@@ -6007,14 +6182,16 @@
     // to stop it, and its next scan (up to 4 hours out, but no
     // market-hours gate stopping a cycle already in flight) could open a
     // brand new short put minutes after "everything" was supposedly flat.
-    if(effectiveAutoTradeOn() || effectiveOptionsAutoTradeOn() || effectiveWeeklySpreadAutoTradeOn()){
+    if(effectiveAutoTradeOn() || effectiveOptionsAutoTradeOn() || effectiveWeeklySpreadAutoTradeOn() || effectiveIronCondorAutoTradeOn()){
       autoTradeOverrides.intradayAutoTradeEnabledOverride = false;
       autoTradeOverrides.optionsAutoTradeEnabledOverride = false;
       autoTradeOverrides.weeklySpreadAutoTradeEnabledOverride = false;
+      autoTradeOverrides.ironCondorAutoTradeEnabledOverride = false;
       renderAutoTradeOverrideControls();
       saveAutoTradeOverride({
         intradayAutoTradeEnabledOverride: false,
         optionsAutoTradeEnabledOverride: false, weeklySpreadAutoTradeEnabledOverride: false,
+        ironCondorAutoTradeEnabledOverride: false,
       });
     }
     // WHAT GETS CLOSED IS THE BROKER'S LIST, NOT THE JOURNAL'S.
@@ -8867,6 +9044,7 @@
     { key:'todaysSetups', label:'Equities Setups' },
     { key:'optionsPositions', label:'Options Income (CSP)' },
     { key:'weeklySpreadPositions', label:'Weekly Credit Spread' },
+    { key:'ironCondorPositions', label:'Iron Condor' },
     { key:'activityLog', label:'Activity Log' }
   ];
   var TO_CARD_LABELS = {};
@@ -12068,6 +12246,7 @@
   var OPTIONS_CYCLE_INTERVAL_MS = 4 * 60 * 60 * 1000;
   // Matches shwoop-server's WEEKLY_SPREAD_INTERVAL_MS (scheduler.js).
   var WEEKLY_SPREAD_CYCLE_INTERVAL_MS = 2 * 60 * 60 * 1000;
+  var IRON_CONDOR_CYCLE_INTERVAL_MS = 4 * 60 * 60 * 1000;
 
   function formatAgo(ms){
     if(ms < 1000) return 'just now';
@@ -12227,6 +12406,14 @@
         alwaysShowNeverRun: !!backendWeeklySpreadScreenerEnabledOnServer,
         scanningText: 'Checking for a qualifying weekly credit spread entry, managing anything already open.',
         neverRunText: 'Runs automatically every 2 hours while the market is open — positions here run 5-10 days at entry, closed by 2 DTE, so it checks more often than the CSP.'
+      },
+      {
+        label: 'Iron condor', status: backendIronCondorCycleStatus, startedAt: backendIronCondorCycleStartedAt,
+        error: backendIronCondorCycleError, errorAt: backendIronCondorCycleErrorAt, completedAt: backendIronCondorCycleCompletedAt,
+        summary: backendIronCondorLastCycleSummary, intervalMs: IRON_CONDOR_CYCLE_INTERVAL_MS,
+        alwaysShowNeverRun: !!backendIronCondorScreenerEnabledOnServer,
+        scanningText: 'Checking for a qualifying defined-risk iron condor entry, managing anything already open.',
+        neverRunText: 'Runs automatically every 4 hours while the market is open — same cadence as the CSP.'
       }
     ];
     function mechanismState(m){
@@ -12301,7 +12488,8 @@
       // has never touched this still gets a row, same as before, so "off"
       // is visible confirmation rather than the row simply not existing.
       { label: 'Options income (CSP)', screenerOn: backendOptionsScreenerEnabledOnServer, autoTradeOn: backendOptionsAutoTradeEnabledOnServer, note: 'Forward test, not a backtest.' },
-      { label: 'Weekly spread', screenerOn: backendWeeklySpreadScreenerEnabledOnServer, autoTradeOn: backendWeeklySpreadAutoTradeEnabledOnServer, note: 'Forward test, separate from the CSP.' }
+      { label: 'Weekly spread', screenerOn: backendWeeklySpreadScreenerEnabledOnServer, autoTradeOn: backendWeeklySpreadAutoTradeEnabledOnServer, note: 'Forward test, separate from the CSP.' },
+      { label: 'Iron condor', screenerOn: backendIronCondorScreenerEnabledOnServer, autoTradeOn: backendIronCondorAutoTradeEnabledOnServer, note: 'Forward test, separate from the CSP.' }
     ].filter(function(m){ return m.screenerOn !== null; });
     var allSettingsHealthy = serverSettingMechanisms.length > 0
       && serverSettingMechanisms.every(function(m){ return m.screenerOn && m.autoTradeOn; });
@@ -12389,6 +12577,13 @@
         : backendWeeklySpreadAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
       weeklySpreadBadge.classList.toggle('ok', Boolean(backendWeeklySpreadAutoTradeEnabledOnServer) && !backendWeeklySpreadAutoTradePausedOnServer);
       weeklySpreadBadge.classList.toggle('fail', Boolean(backendWeeklySpreadAutoTradePausedOnServer));
+    }
+    var ironCondorBadge = document.getElementById('serverIronCondorAutoTradeStatusBadge');
+    if(ironCondorBadge){
+      ironCondorBadge.textContent = backendIronCondorAutoTradePausedOnServer ? 'Paused — see below'
+        : backendIronCondorAutoTradeEnabledOnServer ? 'On — 24/7 backend' : 'Off';
+      ironCondorBadge.classList.toggle('ok', Boolean(backendIronCondorAutoTradeEnabledOnServer) && !backendIronCondorAutoTradePausedOnServer);
+      ironCondorBadge.classList.toggle('fail', Boolean(backendIronCondorAutoTradePausedOnServer));
     }
   }
 
@@ -13346,17 +13541,75 @@
     el.innerHTML = rows;
   }
 
+  // Iron condor positions. Four legs (put short/long, call short/long)
+  // rather than a single spread's two, so the table shows both wings'
+  // strikes; status reflects the multi-order lifecycle in
+  // optionsIronCondorCycle.js's state machine, not a single fill. No
+  // live P&L column, same reasoning as renderWeeklySpreadPositions above
+  // -- this card never fetches live option-chain pricing for open
+  // positions, so a P&L number here would be fabricated rather than
+  // honestly unavailable.
+  var IRON_CONDOR_STATUS_LABELS = {
+    pending_put_long: 'Opening (put long leg)', pending_put_short: 'Opening (put short leg)',
+    pending_call_long: 'Opening (call long leg)', pending_call_short: 'Opening (call short leg)',
+    open: 'Open',
+    pending_close_put_short: 'Closing (put short leg)', pending_close_put_long: 'Closing (put long leg)',
+    pending_close_call_short: 'Closing (call short leg)', pending_close_call_long: 'Closing (call long leg)',
+    // The build aborted mid-way (a leg never filled) and every leg
+    // actually held is being unwound at market -- see
+    // optionsIronCondorCycle.js's own comment on the abort-mid-build path.
+    pending_unwind: 'Closing (unwinding)',
+    closed: 'Closed',
+  };
+  function renderIronCondorPositions(){
+    var card = document.getElementById('toCard-ironCondorPositions');
+    var el = document.getElementById('ironCondorPositionsBody');
+    var meta = document.getElementById('ironCondorPositionsHeadMeta');
+    if(!card || !el) return;
+    var open = backendIronCondorPositions || [];
+    // Same "what's live, not what's history" reasoning as
+    // renderWeeklySpreadPositions -- closed condors already live on the
+    // Journal page via optionsClosedJournalRows.
+    if(!open.length){ card.hidden = true; return; }
+    card.hidden = false;
+    if(meta) meta.textContent = open.length + ' open';
+
+    var now = new Date();
+    var rows = '';
+    if(open.length){
+      rows += '<table class="backtest-trades-table"><thead><tr>' +
+        '<th>Underlying</th><th>Put short/long</th><th>Call short/long</th><th>Expiration</th><th>DTE</th>' +
+        '<th>Qty</th><th>Credit</th><th>Status</th>' +
+        '</tr></thead><tbody>' +
+        open.map(function(p){
+          var dte = optionsDaysToExpiration(p.expirationDate, now);
+          return '<tr>' +
+            '<td>' + escapeHtml(p.underlyingSymbol || '') + '</td>' +
+            '<td>' + ftMoney(p.putShortStrike) + ' / ' + ftMoney(p.putLongStrike) + '</td>' +
+            '<td>' + ftMoney(p.callShortStrike) + ' / ' + ftMoney(p.callLongStrike) + '</td>' +
+            '<td>' + escapeHtml(p.expirationDate || '') + '</td>' +
+            '<td>' + (isFinite(dte) ? Math.max(0, Math.round(dte)) : '—') + '</td>' +
+            '<td>' + (p.qty != null ? p.qty : '—') + '</td>' +
+            '<td>' + (p.entryCredit != null ? ftMoney(p.entryCredit) : '—') + '</td>' +
+            '<td>' + (IRON_CONDOR_STATUS_LABELS[p.status] || escapeHtml(p.status || '—')) + '</td>' +
+          '</tr>';
+        }).join('') + '</tbody></table>';
+    }
+    el.innerHTML = rows;
+  }
+
   // Single source of truth for "every closed options trade, tagged with
-  // which mechanism closed it" -- combines the CSP and Weekly Credit
-  // Spread closed lists. Shared by Trade Overview's own per-mechanism
-  // cards (renderOptionsPositions/renderWeeklySpreadPositions) AND by the
-  // Journal calendar/day-detail/Account-Growth integration
-  // (optionsClosedJournalRows below), so none of them can ever list a
-  // different set of trades.
+  // which mechanism closed it" -- combines the CSP, Weekly Credit Spread
+  // and Iron Condor closed lists. Shared by Trade Overview's own
+  // per-mechanism cards (renderOptionsPositions/renderWeeklySpreadPositions/
+  // renderIronCondorPositions) AND by the Journal calendar/day-detail/
+  // Account-Growth integration (optionsClosedJournalRows below), so none
+  // of them can ever list a different set of trades.
   function allClosedOptionsTrades(){
     return []
       .concat((backendOptionsClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'CSP' }, t); }))
-      .concat((backendWeeklySpreadClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'Weekly Spread' }, t); }));
+      .concat((backendWeeklySpreadClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'Weekly Spread' }, t); }))
+      .concat((backendIronCondorClosedTrades || []).map(function(t){ return Object.assign({ mechanismLabel: 'Iron Condor' }, t); }));
   }
 
   // Realized $ P&L for one closed options trade -- entry credit collected

@@ -40,6 +40,7 @@ function build(state) {
     var journalFilter = JOURNAL_FILTER;
     var backendOptionsClosedTrades = OPTIONS_CLOSED;
     var backendWeeklySpreadClosedTrades = SPREAD_CLOSED;
+    var backendIronCondorClosedTrades = [];
     var document = { getElementById: function(id){ return ELS[id] || null; } };
     ${lift('isWinningReturn')}
     ${lift('computePL')}
