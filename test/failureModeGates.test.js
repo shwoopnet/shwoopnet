@@ -48,7 +48,7 @@ gates.G1_fmt_never_prints_a_fake_price = () => {
   // table's innerHTML takes the whole card down, which is how the
   // undefined-function bug blanked Backend Status.
   assert.doesNotThrow(() => fmt(undefined), 'a missing level must not blank the card it appears in');
-  // Real prices are untouched, including the sub-dollar crypto scaling
+  // Real prices are untouched, including the sub-dollar scaling
   // this function exists for.
   assert.strictEqual(fmt(12.345), '12.35');
   assert.strictEqual(fmt(0.12345678), '0.1235');
@@ -132,7 +132,12 @@ gates.G4_a_dead_screener_does_not_look_like_a_quiet_market = () => {
 // not via a standalone empty-state sentence anymore.
 gates.G5_empty_setups_card_is_hidden_not_a_misleading_message = () => {
   const eq = src.indexOf('function renderIntradayBlocks(');
-  const eqBody = src.slice(eq, src.indexOf('function renderCryptoBlocks(', eq));
+  let d = 0, eqEnd = -1;
+  for (let i = src.indexOf('{', eq); i < src.length; i++) {
+    if (src[i] === '{') d++;
+    else if (src[i] === '}') { d--; if (!d) { eqEnd = i + 1; break; } }
+  }
+  const eqBody = src.slice(eq, eqEnd);
   assert.ok(/toCard-todaysSetups['"]\)[\s\S]{0,40}card\.hidden = source\.length === 0/.test(eqBody),
     'the equities Setups card must hide itself when source is genuinely empty');
   assert.ok(!eqBody.includes('No qualifying setups'),
@@ -140,21 +145,11 @@ gates.G5_empty_setups_card_is_hidden_not_a_misleading_message = () => {
   assert.ok(/eqFresh\.level === 'stale'/.test(eqBody),
     'the equities setups card must still consult the scan age for its non-empty head-meta');
 
-  const cx = src.indexOf('function renderCryptoBlocks(');
-  const cxBody = src.slice(cx, cx + 12000);
-  assert.ok(/toCard-cryptoSetups['"]\)[\s\S]{0,40}card\.hidden = source\.length === 0/.test(cxBody),
-    'the crypto Setups card must hide itself when source is genuinely empty');
-  assert.ok(!cxBody.includes('No qualifying setups'),
-    'the old crypto "quiet market" empty-state message must be gone too');
-  assert.ok(/cxFresh\.level === 'stale'/.test(cxBody),
-    'the crypto setups card must still consult its own scan age for its non-empty head-meta');
-
-  // Costs nothing extra: both timestamps ride the user-doc snapshot the
-  // app already subscribes to. A gate, because adding a fetch for them
+  // Costs nothing extra: the timestamp rides the user-doc snapshot the
+  // app already subscribes to. A gate, because adding a fetch for it
   // would be the wrong fix.
   assert.ok(src.includes('backendIntradayPicksUpdatedAt = data.intradayScreenerUpdatedAt'),
     'the scan age must come from the existing snapshot, not a new request');
-  assert.ok(src.includes('backendCryptoPicksUpdatedAt = data.cryptoScreenerUpdatedAt'));
 };
 
 // ---------------------------------------------------------------------
@@ -172,7 +167,6 @@ gates.G6_unpriced_position_shows_a_dash_not_zero = () => {
     alpacaPositionsBySymbol: () => ({}),
     canonicalSymbol: (x) => String(x).replace(/\//g, ''),
     findQuote: () => undefined,        // equities quote feed down
-    findCryptoQuote: () => undefined,  // crypto quote feed down
     isUnreconciledEntry: () => false,  // a REAL, current entry
     statusPositionsSortKey: null,
     statusPositionsSortDir: 1,
@@ -187,7 +181,7 @@ gates.G6_unpriced_position_shows_a_dash_not_zero = () => {
     syncAlpacaFilledExits: () => {},
   });
 
-  const entry = { id: 'e1', sym: 'BTC/USD', direction: 'Long', entry: 60000, qty: 0.5 };
+  const entry = { id: 'e1', sym: 'PLTR', direction: 'Long', entry: 60, qty: 5 };
   load([entry], el, 7, false);
   // The render happens in the resolved .then() inside; one macrotask is
   // enough for it to have run.
@@ -246,47 +240,6 @@ gates.G8_what_to_watch_shows_both_equities_strategies = () => {
     'What to Watch must read the same merged ORB+fade list Today\'s Setups does');
   assert.ok(!/backendIntradayPicks\.map\(buildTradeFromPick\)/.test(body),
     'reading only the breakout picks silently drops every fade setup from the card named "what to watch"');
-};
-
-// ---------------------------------------------------------------------
-// Breadth is a claim about the whole universe.
-// ---------------------------------------------------------------------
-gates.G9_crypto_breadth_not_claimed_from_a_fraction = () => {
-  const results = [];
-  const el = { set innerHTML(v) { results.push(v); }, get innerHTML() { return results[results.length - 1] || ''; } };
-  const priced = (n, dir) => Array.from({ length: 12 }, (_, i) => (
-    i < n ? { sym: 'C' + i, price: dir > 0 ? 110 : 90, prevClose: 100 } : { sym: 'C' + i, price: null, prevClose: null }
-  ));
-
-  const run = (watchlist) => {
-    const render = lift('renderCryptoSentiment', {
-      document: { getElementById: () => el },
-      cryptoWatchlist: watchlist,
-      pct: (a, b) => ((a - b) / b) * 100,
-    });
-    render();
-    return el.innerHTML;
-  };
-
-  // Two pairs out of twelve, both up, used to draw a full green bar and
-  // the sentence "Broadly positive" -- a statement about the crypto
-  // market made from a sixth of it.
-  const thin = run(priced(2, 1));
-  assert.ok(!/Broadly positive/.test(thin),
-    'a headline about crypto must not be claimed from a sixth of the universe');
-  assert.ok(/2 of 12/.test(thin), 'it must say how much of the universe it can actually see');
-
-  // With most of it priced the headline is legitimate again -- and still
-  // discloses what is missing, so the reader is not told about twelve
-  // pairs when ten were measured.
-  const most = run(priced(10, 1));
-  assert.ok(/Broadly positive/.test(most), 'a real quorum must still produce a real read');
-  assert.ok(/not priced yet/.test(most), 'the pairs that did not price must still be disclosed');
-
-  // The full universe says nothing extra -- no defensive noise on the
-  // path that was already correct.
-  const all = run(priced(12, 1));
-  assert.ok(!/not priced yet/.test(all), 'a complete read must not carry a caveat it does not need');
 };
 
 // ---------------------------------------------------------------------

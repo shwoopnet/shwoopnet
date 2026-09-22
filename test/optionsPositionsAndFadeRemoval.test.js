@@ -55,7 +55,7 @@ gates.G4 = () => {
   // No live "current price" column -- the position record the backend
   // writes doesn't carry one (see optionsIncomeCycle.js), and fabricating
   // one here would be exactly the "made-up P&L" failure fmt()'s own header
-  // comment already rejects for equities/crypto.
+  // comment already rejects for equities.
   assert.ok(!/Current<\/th>/.test(code.match(/optionsPositionsBody[\s\S]{0,2000}/)?.[0] || ''),
     'the options table must not claim a live current-price column it cannot honestly fill');
   console.log('G4 PASS no fabricated current-price column on the options table');
@@ -115,7 +115,7 @@ gates.G9 = () => {
     'Flatten All must check options auto-trade before deciding whether to pause anything');
   assert.ok(/optionsAutoTradeEnabledOverride: false/.test(flattenBody),
     'Flatten All must actually pause options auto-trade, or its own "nothing re-enters right after" promise is false for this strategy');
-  console.log('G9 PASS Flatten All pauses options auto-trade along with equities and crypto');
+  console.log('G9 PASS Flatten All pauses options auto-trade along with equities');
 };
 
 function main() {

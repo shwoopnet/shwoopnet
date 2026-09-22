@@ -1,9 +1,9 @@
 'use strict';
-// The Brief page's headline/lede told you about equities and crypto every
-// day, but never mentioned options income (CSP/weekly credit spread)
-// positions even when real ones were open -- an account running options
-// alongside the other two strategies had no way to learn that from the
-// Brief page at all. renderBriefHeadline now adds an options sentence to
+// The Brief page's headline/lede told you about equities every day, but
+// never mentioned options income (CSP/weekly credit spread) positions
+// even when real ones were open -- an account running options alongside
+// equities had no way to learn that from the Brief page at all.
+// renderBriefHeadline now adds an options sentence to
 // the lede whenever there's a real open options position, and stays
 // silent (no "0 positions" filler) for an account that's never enabled
 // either mechanism.
@@ -56,7 +56,6 @@ function build({ optionsOpen, weeklySpreadOpen }) {
     function buildTradeFromPick(p){ return p; }
     var backendIntradayPicks = [];
     var intradayTrades = [{ sym: 'PLTR', direction: 'Long', analysisIsReal: true }];
-    var cryptoWatchlist = [];
     var backendOptionsPositions = OPTIONS_OPEN;
     var backendWeeklySpreadPositions = WEEKLY_SPREAD_OPEN;
     var HEADLINE_EL_REF = HEADLINE_EL, LEDE_EL_REF = LEDE_EL;

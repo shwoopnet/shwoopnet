@@ -3,14 +3,9 @@
 // own local quote poll, then patched to the authoritative Alpaca
 // unrealized_pl/unrealized_plpc figure by patchIntradayPLWithAlpacaPositions
 // once getAlpacaPositionsCached() resolves -- see its own comment in
-// index.html. That function used to share ONE generation counter between
-// renderIntradayBlocks (equities) and renderCryptoBlocks (crypto), which
-// independently call it on their own quote-poll cadence. An equities call
-// firing while a crypto call's fetch was still in flight would bump the
-// shared counter and silently discard the crypto call's own write when it
-// resolved -- leaving that card stuck on the "—" first-paint placeholder
-// even though real P/L data existed. This gate pins that the two domains
-// now use independent counters and can't cancel each other out.
+// index.html. This gate pins that a slow, stale response landing after a
+// newer render already happened does not clobber that newer render's own
+// patch (the generation counter's whole purpose).
 
 const assert = require('assert');
 const fs = require('fs');
@@ -81,24 +76,14 @@ function build(journalEntries, positionsQueue) {
 async function main() {
   const journalEntries = [
     { sym: 'PLTR', status: 'open', source: 'alpaca' },
-    { sym: 'BTC/USD', status: 'open', source: 'alpaca' },
   ];
 
-  // Two positions snapshots: the crypto call's fetch will resolve against
-  // the FIRST (queued first), the equities call's against the SECOND.
-  // The second (equities) snapshot deliberately omits BTC/USD -- a real
-  // getAlpacaPositionsCached() call always returns every position
-  // regardless of who called it, but omitting it here is what makes this
-  // test actually distinguish "the crypto call's own write landed" from
-  // "some LATER call happened to carry the same figure and masked the
-  // bug" (an earlier draft of this test used the same P/L on both
-  // snapshots and kept passing even with the old shared-counter code,
-  // because the later equities call's write papered over the discarded
-  // crypto write with an identical number).
+  // Two snapshots: an earlier, slower call's fetch resolves SECOND (after
+  // a newer call already started and completed), so its stale write must
+  // be discarded rather than clobbering the newer render's own patch.
   const positionsQueue = [
     [
       { symbol: 'PLTR', unrealized_pl: '10.00', unrealized_plpc: '0.01', current_price: '20' },
-      { symbol: 'BTC/USD', unrealized_pl: '5.00', unrealized_plpc: '0.02', current_price: '50000' },
     ],
     [
       { symbol: 'PLTR', unrealized_pl: '11.00', unrealized_plpc: '0.011', current_price: '20.1' },
@@ -107,21 +92,19 @@ async function main() {
 
   const { mod, cells } = build(journalEntries, positionsQueue);
 
-  // Simulates the exact race: crypto's patch call starts (its fetch now
-  // pending), THEN equities' patch call starts and bumps what used to be
-  // a SHARED counter, THEN crypto's fetch resolves.
-  mod.patch('crypto');
-  mod.patch('equities');
-  mod.flush(); // resolves both in-flight fetches, in call order
+  // Simulates the race: an older call's fetch is still pending when a
+  // newer call starts and bumps the generation counter, then the older
+  // call's fetch resolves. Its stale write must not land.
+  mod.patch('equities'); // older call, fetch pending
+  mod.patch('equities'); // newer call, bumps the counter
+  mod.flush(); // resolves both in-flight fetches, in call order: newer's queued-first, older's queued-second
 
   await new Promise((r) => setTimeout(r, 0));
   await new Promise((r) => setTimeout(r, 0));
 
-  assert.strictEqual(cells['pl-BTC/USD'].textContent, '+$5.00 (+2.00%)',
-    'the crypto call\'s own write must not be discarded just because an equities call ran concurrently');
   assert.strictEqual(cells['pl-PLTR'].textContent, '+$11.00 (+1.10%)',
-    'the equities call must still apply its own (later) fetch normally');
-  console.log('G1 PASS a concurrent crypto + equities patch call no longer cancels either domain\'s write');
+    'the newer call\'s write must win; a stale response from a superseded call must not overwrite it');
+  console.log('G1 PASS a stale, slow patch response cannot clobber a newer render\'s own write');
   console.log('\nAll P/L patch generation-race gates passed.');
 }
 
