@@ -48,10 +48,10 @@ function main() {
     return { computeDayStats, optionsClosedJournalRows };
   `;
   const build = (state) => new Function(
-    'journalEntries', 'journalFilter', 'backendOptionsClosedTrades', 'backendWeeklySpreadClosedTrades',
+    'journalEntries', 'journalFilter', 'backendOptionsClosedTrades', 'backendWeeklySpreadClosedTrades', 'backendIronCondorClosedTrades',
     src
   )(state.journalEntries || [], state.journalFilter || 'all',
-    state.backendOptionsClosedTrades || [], state.backendWeeklySpreadClosedTrades || []);
+    state.backendOptionsClosedTrades || [], state.backendWeeklySpreadClosedTrades || [], state.backendIronCondorClosedTrades || []);
 
   // A day with ONLY a closed CSP trade (no journalEntries at all) must
   // still show up in the calendar's day $ figure -- this is exactly what
