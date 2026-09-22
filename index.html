@@ -10396,6 +10396,22 @@
         var qty = parseFloat(o.filled_qty || o.qty);
         var price = parseFloat(o.filled_avg_price);
         if(!open){
+          // A sell with nothing open cannot be given a cost basis -- the
+          // position it closed was opened before this account history
+          // window, or by an order not visible here. This app has never
+          // placed a short entry (every strategy only ever buys first),
+          // so treating a stray sell as the start of a fresh "Short"
+          // position would fabricate a trade nobody made -- exactly what
+          // this function's own header promises never to do.
+          if(o.side === 'sell'){
+            unreconstructable.push({
+              sym: sym, time: o.filled_at, side: o.side, qty: qty,
+              note: 'A sell with no tracked open position -- the position it closed was opened before ' +
+                'this account history window, or by an order not visible here. No cost basis can be ' +
+                'assigned from order history alone.',
+            });
+            return;
+          }
           open = { sym: sym, entrySide: o.side, entryPrice: price, entryTime: o.filled_at, qty: qty, remaining: qty };
           return;
         }
@@ -10410,15 +10426,37 @@
         }
         var direction = open.entrySide === 'buy' ? 'Long' : 'Short';
         var exitType = o.type === 'stop' ? 'Stop-loss' : o.type === 'limit' ? 'Target' : 'Market (manual/EOD)';
+        // A closing fill's quantity is matched against what is actually
+        // still open, never blindly assumed to close the whole original
+        // entry. This used to price EVERY closing fill using open.qty (the
+        // full entry size), so a stop that only partially filled -- or a
+        // manual partial sale -- got dollarPL computed as if the WHOLE
+        // position closed at that one fill's price. A second fill closing
+        // the remainder then found `open` already cleared and started a
+        // brand-new phantom position from its own side, at its own price.
+        // The fill's own quantity is now matched against what remains
+        // open; anything past that cannot be assigned a cost basis and is
+        // reported in `unreconstructable`, same as a sell with no open
+        // position at all above.
+        var closedQty = Math.min(qty, open.remaining);
         var pctReturn = direction === 'Long' ? (price - open.entryPrice) / open.entryPrice * 100 : (open.entryPrice - price) / open.entryPrice * 100;
-        var dollarPL = (price - open.entryPrice) * open.qty * (direction === 'Long' ? 1 : -1);
+        var dollarPL = (price - open.entryPrice) * closedQty * (direction === 'Long' ? 1 : -1);
         trades.push({
-          sym: sym, direction: direction, qty: open.qty,
+          sym: sym, direction: direction, qty: closedQty,
           entryPrice: open.entryPrice, entryTime: open.entryTime,
           exitPrice: price, exitTime: o.filled_at, exitType: exitType,
           pctReturn: pctReturn, dollarPL: dollarPL, assetClass: 'us_equity',
         });
-        open = null;
+        open.remaining -= closedQty;
+        if(qty > closedQty){
+          unreconstructable.push({
+            sym: sym, time: o.filled_at, side: o.side, qty: qty - closedQty,
+            note: 'This fill closed more than the tracked open quantity (' + closedQty + ' of ' + qty +
+              ' shares matched to the open position). The remaining ' + (qty - closedQty) +
+              ' shares cannot be assigned a cost basis from order history alone.',
+          });
+        }
+        if(open.remaining <= 0) open = null;
       });
     });
     trades.sort(function(a,b){ return new Date(b.exitTime) - new Date(a.exitTime); });
