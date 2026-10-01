@@ -2539,6 +2539,7 @@
                recomputing this on every resize, which is more than a
                font-legibility fix needs. -->
           <svg class="trade-chart" id="tradeModalChart" viewBox="0 0 760 580" preserveAspectRatio="none"></svg>
+          <div class="chart-crosshair-readout" id="tradeModalChartCrosshair" hidden></div>
         </div>
         <div class="labs-backtest-status" id="tradeModalChartStatus" hidden></div>
       </div>
@@ -6780,6 +6781,20 @@
   // (or closed) can tell it's stale and drop itself instead of painting a
   // chart into a chart element that now belongs to someone else.
   var tradeModalOpenToken = 0;
+  // Which symbol's LIVE chart (if any) is currently sitting in
+  // chartStates because of the modal -- used by openTradeModal/
+  // closeTradeModal to clean that entry up on a genuine symbol change or
+  // modal close, without touching it on a same-symbol re-render (e.g. a
+  // quote poll re-opening the same trade), which is the whole reason
+  // chartStates exists: to survive those re-renders with zoom/pan intact.
+  var tradeModalChartSym = null;
+  // Set by setupHistoricalChartInteractivity to that one call's own
+  // `render` closure, so a window resize (see the resize handler near
+  // renderGrowthChart) can redraw the current historical chart from its
+  // existing data without refetching or losing zoom/pan. Cleared on modal
+  // close or a switch away from a historical chart so a stale closure
+  // over a detached <svg> never gets invoked.
+  var historicalChartRerender = null;
 
   function tradeModalPriceCell(label, value, cls, id){
     return '<div class="trade-modal-price-cell"><div class="backtest-stat-label">' + label + '</div>' +
@@ -6851,6 +6866,22 @@
     var oldSvg = chartCol.querySelector('svg');
     var svg = oldSvg.cloneNode(false);
     oldSvg.parentNode.replaceChild(svg, oldSvg);
+    // A genuine symbol change (not a same-symbol re-render, e.g. a quote
+    // poll re-opening the same trade) -- drop whatever chartStates entry
+    // the PREVIOUS symbol's live chart left behind. Left alone, that
+    // entry just sits there keyed by a symbol the modal no longer shows,
+    // forever, since renderChartError's delete is the only other place
+    // that ever cleared one and only fires on a fetch failure. Checked
+    // before the kind branches below so it also fires when switching from
+    // a live chart to a 'historical' or 'none' one for a different trade.
+    if(tradeModalChartSym && tradeModalChartSym !== d.sym){
+      delete chartStates[tradeModalChartSym];
+    }
+    // Every open invalidates whatever historical-chart redraw closure was
+    // sitting here -- it closes over the PREVIOUS open's (now-replaced)
+    // <svg> node. The 'historical' branch below sets a fresh one once its
+    // fetch resolves; until then, a resize has nothing to redraw.
+    historicalChartRerender = null;
     // Historical (closed-trade) renders are static -- no live polling, so
     // there's no reason to route them through the same sym-keyed
     // chartStates an OPEN position's chart needs to survive repeated
@@ -6860,9 +6891,11 @@
     if(d.chart.kind === 'none'){
       svg.id = 'tradeModalChart';
       chartCol.hidden = true;
+      tradeModalChartSym = null;
     } else if(d.chart.kind === 'live'){
       svg.id = 'chart-' + d.sym;
       chartCol.hidden = false;
+      tradeModalChartSym = d.sym;
       // No levels/opts param here on purpose -- renderChartView derives
       // entry/stop/target itself from journalEntries/intradayTrades by
       // symbol, exactly as it already does for every Setups row's own
@@ -6872,6 +6905,7 @@
       setupChartInteractivity(d.sym);
       patchTradeModalPL(d.sym, myToken);
     } else if(d.chart.kind === 'historical'){
+      tradeModalChartSym = null;
       svg.id = 'tradeModalChart';
       chartCol.hidden = false;
       statusEl.removeAttribute('hidden');
@@ -6900,6 +6934,16 @@
 
   function closeTradeModal(){
     tradeModalOpenToken++; // invalidate any in-flight historical fetch
+    // The modal is gone, so whatever live chart's view state it was
+    // holding onto in chartStates has nowhere left to be shown -- drop it
+    // rather than leaving it to sit there until some OTHER trade for the
+    // same symbol happens to reopen (possibly much later, with stale
+    // zoom/pan carried over from this unrelated session).
+    if(tradeModalChartSym){
+      delete chartStates[tradeModalChartSym];
+      tradeModalChartSym = null;
+    }
+    historicalChartRerender = null;
     tradeModalBackdrop.setAttribute('hidden', '');
     tradeModalEl.setAttribute('hidden', '');
   }
@@ -7928,8 +7972,18 @@
     scheduleChartRender(sym);
   }
 
+  // The readout is the SAME shared, static div the historical chart also
+  // uses (#tradeModalChartCrosshair) -- the modal is a single shared
+  // instance (see chartStates cleanup, which assumes exactly one tracked
+  // symbol at a time), so there is never more than one live chart on
+  // screen needing its own readout. This used to look up 'crosshair-' +
+  // sym, an id NOTHING in this file ever created (static or dynamic) --
+  // confirmed by grep across the whole markup -- so updateCrosshair's own
+  // `!readout` guard always failed and the live chart's hover crosshair
+  // and OHLC readout have never actually rendered on the real page, only
+  // in test harnesses that fabricated the missing element.
   function hideCrosshair(sym){
-    var readout = document.getElementById('crosshair-' + sym);
+    var readout = document.getElementById('tradeModalChartCrosshair');
     if(readout) readout.setAttribute('hidden', '');
     var svg = document.getElementById('chart-' + sym);
     if(svg){
@@ -7940,7 +7994,7 @@
   function updateCrosshair(sym, clientX, clientY){
     var state = chartStates[sym];
     var svg = document.getElementById('chart-' + sym);
-    var readout = document.getElementById('crosshair-' + sym);
+    var readout = document.getElementById('tradeModalChartCrosshair');
     var sc = state && state.lastScale;
     if(!state || !svg || !readout || !sc) return;
 
@@ -8174,6 +8228,102 @@
   // own comment), so there's no stale-listener teardown to worry about --
   // a new call on every open just means new listeners on a new node.
   function setupHistoricalChartInteractivity(svg, data, tf, levels){
+    // Fixed id, not sym-keyed like the live chart's `crosshair-<sym>` --
+    // this chart is self-contained (see this function's own comment), so
+    // there's exactly one historical-chart readout node in the modal
+    // markup and no symbol to key it by. Looked up once here rather than
+    // on every hover; a real browser svg's getElementById would work
+    // either way, but lifted tests drive this through a plain-object
+    // document stub that may not implement live lookups.
+    var readout = (typeof document !== 'undefined' && document.getElementById)
+      ? document.getElementById('tradeModalChartCrosshair') : null;
+
+    function hideHistoricalCrosshair(){
+      if(readout) readout.setAttribute('hidden', '');
+      if(svg.querySelectorAll){
+        svg.querySelectorAll('.crosshair-line, .crosshair-hline, .crosshair-tag').forEach(function(el){ el.remove(); });
+      }
+    }
+
+    // Same pattern as the live chart's updateCrosshair (vertical/
+    // horizontal lines + axis-anchored price/date tags + an OHLC readout
+    // div), just reading the closure's own `view` instead of a sym-keyed
+    // chartStates entry.
+    function updateHistoricalCrosshair(clientX, clientY){
+      var sc = view.lastScale;
+      if(!svg || !sc) return;
+
+      var localX = svgLocalX(svg, clientX);
+      var localY = svgLocalY(svg, clientY);
+      if(localX < 0 || localX > sc.plotW || localY < sc.padTop || localY > sc.padTop + sc.plotH){
+        hideHistoricalCrosshair();
+        return;
+      }
+
+      var count = view.viewEnd - view.viewStart;
+      var xStep = sc.plotW / count;
+      var idx = Math.max(0, Math.min(Math.floor(localX / xStep), count - 1));
+      var bar = view.data[view.viewStart + idx];
+      if(!bar) return;
+      var up = bar.c >= bar.o;
+      var cls = up ? 'cr-up' : 'cr-down';
+
+      if(readout){
+        readout.innerHTML =
+          '<span>O <span class="' + cls + '">' + bar.o.toFixed(2) + '</span></span>' +
+          '<span>H <span class="' + cls + '">' + bar.h.toFixed(2) + '</span></span>' +
+          '<span>L <span class="' + cls + '">' + bar.l.toFixed(2) + '</span></span>' +
+          '<span>C <span class="' + cls + '">' + bar.c.toFixed(2) + '</span></span>';
+        readout.removeAttribute('hidden');
+      }
+
+      if(svg.querySelectorAll){
+        svg.querySelectorAll('.crosshair-line, .crosshair-hline, .crosshair-tag').forEach(function(el){ el.remove(); });
+      }
+
+      var ns = 'http://www.w3.org/2000/svg';
+      var lineX = idx * xStep + xStep / 2;
+
+      var vLine = document.createElementNS(ns, 'line');
+      vLine.setAttribute('class', 'crosshair-line');
+      vLine.setAttribute('x1', lineX); vLine.setAttribute('x2', lineX);
+      vLine.setAttribute('y1', sc.padTop); vLine.setAttribute('y2', sc.padTop + sc.plotH);
+      svg.appendChild(vLine);
+
+      var hLine = document.createElementNS(ns, 'line');
+      hLine.setAttribute('class', 'crosshair-hline');
+      hLine.setAttribute('x1', 0); hLine.setAttribute('x2', sc.plotW);
+      hLine.setAttribute('y1', localY); hLine.setAttribute('y2', localY);
+      svg.appendChild(hLine);
+
+      // Price tag on the right axis, at the exact cursor position.
+      var frac = 1 - (localY - sc.padTop) / sc.plotH;
+      var priceAtCursor = sc.useLog ? Math.exp(sc.loT + frac * sc.range) : (sc.loT + frac * sc.range);
+      var priceTag = document.createElementNS(ns, 'g');
+      priceTag.setAttribute('class', 'crosshair-tag');
+      var crosshairNotch = 6;
+      priceTag.innerHTML =
+        '<path d="M' + (sc.plotW + crosshairNotch) + ' ' + (localY - 8) +
+          ' L' + (sc.plotW + 54) + ' ' + (localY - 8) +
+          ' L' + (sc.plotW + 54) + ' ' + (localY + 8) +
+          ' L' + (sc.plotW + crosshairNotch) + ' ' + (localY + 8) +
+          ' L' + sc.plotW + ' ' + localY + ' Z" fill="var(--paper)"/>' +
+        '<text class="axis-tag-text" x="' + (sc.plotW + crosshairNotch + 4) + '" y="' + (localY + 4) + '" fill="var(--ink)">' + priceAtCursor.toFixed(2) + '</text>';
+      svg.appendChild(priceTag);
+
+      // Date tag on the bottom axis, under the hovered bar.
+      var dateLabel = formatCrosshairDate(bar.t, tf);
+      if(dateLabel){
+        var dateTag = document.createElementNS(ns, 'g');
+        dateTag.setAttribute('class', 'crosshair-tag');
+        var tagW = Math.max(46, dateLabel.length * 6.2);
+        dateTag.innerHTML =
+          '<rect x="' + (lineX - tagW/2) + '" y="' + (sc.padTop + sc.plotH + 2) + '" width="' + tagW + '" height="16" fill="var(--paper)"/>' +
+          '<text class="axis-tag-text" x="' + lineX + '" y="' + (sc.padTop + sc.plotH + 14) + '" text-anchor="middle" fill="var(--ink)">' + dateLabel + '</text>';
+        svg.appendChild(dateTag);
+      }
+    }
+
     var cfg = tfConfig[tf] || tfConfig['1D'];
     var view = {
       data: data,
@@ -8199,6 +8349,12 @@
       requestAnimationFrame(function(){ renderScheduled = false; render(); });
     }
     render();
+    // Exposed so a window resize can re-run THIS render (same data, same
+    // zoom/pan) without re-fetching or rebuilding the view -- there's only
+    // ever one historical chart on screen at a time (the trade modal's),
+    // so the module-level slot is overwritten on every open and cleared
+    // on close/switch (see openTradeModal/closeTradeModal).
+    historicalChartRerender = render;
 
     function zoom(cursorFraction, factor){
       var currentCount = view.viewEnd - view.viewStart;
@@ -8249,7 +8405,10 @@
       svg.style.cursor = (mode === 'scale') ? 'ns-resize' : (mode === 'timescale') ? 'ew-resize' : 'grabbing';
     });
     svg.addEventListener('pointermove', function(e){
-      if(!dragState) return;
+      if(!dragState){
+        updateHistoricalCrosshair(e.clientX, e.clientY);
+        return;
+      }
       if(dragState.mode === 'scale'){
         var dyPixels = e.clientY - dragState.startY;
         var factor = dragState.startFactor * Math.exp(-dyPixels / 150);
@@ -8292,6 +8451,7 @@
     });
     svg.addEventListener('pointerleave', function(){
       if(!dragState) svg.style.cursor = '';
+      hideHistoricalCrosshair();
     });
   }
 
@@ -10820,6 +10980,12 @@
   // trade equal width, which is what makes the shape of the curve
   // readable; the date range is labelled underneath so the real timespan
   // is never hidden.
+  // The most recently drawn growth-chart series, so a window resize can
+  // redraw the same curve (see the resize handler below renderGrowthChart)
+  // without recomputing it from trades. null whenever no curve is on
+  // screen (fewer than 2 trades), kept in sync by renderGrowthChart itself.
+  var lastGrowthSeries = null;
+
   function buildGrowthSeries(trades){
     // Oldest first -- reconstructTradesFromOrders returns newest-first for
     // its table, which would draw the curve backwards.
@@ -10844,9 +11010,14 @@
     // drawing a flat line that implies a trend from one data point.
     if(!series || series.length < 2){
       card.setAttribute('hidden', '');
+      lastGrowthSeries = null;
       return;
     }
     card.removeAttribute('hidden');
+    // Remembered so a window resize can redraw this exact curve again
+    // (see the resize handler below) without recomputing it from trades
+    // or re-fetching anything.
+    lastGrowthSeries = series;
 
     var W = 760, H = 220;
     var padL = 8, padR = 8, padTop = 14, padBottom = 26;
@@ -10915,6 +11086,40 @@
         + ' · ' + firstDate + ' – ' + lastDate;
     }
   }
+
+  // ---------- Chart redraw on window resize ----------
+  // None of the chart systems above re-render on a viewport/breakpoint
+  // change -- fine for the candle charts' own SVGs, which scale via
+  // preserveAspectRatio, but the growth chart recomputes its pixel-space
+  // layout (padL/padR/plotW etc, all off a fixed W/H) in JS, and a resize
+  // is exactly when that layout can go stale. Debounced (resize fires
+  // continuously while dragging a window edge) and deliberately cheap --
+  // it re-runs each chart's existing render against data already on hand
+  // (chartStates, the closed-over historical `view`, or the last growth
+  // series), never a re-fetch.
+  var chartResizeDebounceTimer = null;
+  window.addEventListener('resize', function(){
+    if(chartResizeDebounceTimer) clearTimeout(chartResizeDebounceTimer);
+    chartResizeDebounceTimer = setTimeout(function(){
+      chartResizeDebounceTimer = null;
+      // The trade modal's chart, if it's open -- at most one of these two
+      // is ever non-null/visible at a time (see openTradeModal).
+      if(tradeModalEl && !tradeModalEl.hasAttribute('hidden')){
+        if(tradeModalChartSym){
+          renderChartView(tradeModalChartSym);
+        } else if(historicalChartRerender){
+          historicalChartRerender();
+        }
+      }
+      // The growth chart, if it's currently showing a curve. Re-rendering
+      // only when it's actually visible avoids un-hiding it with stale
+      // data left over from a different Journal tab's last render.
+      var growthCard = document.getElementById('growthChartCard');
+      if(lastGrowthSeries && growthCard && !growthCard.hasAttribute('hidden')){
+        renderGrowthChart(lastGrowthSeries);
+      }
+    }, 200);
+  });
 
   // ---------- Growth chart range filter ----------
   // Spacing is by trade sequence, not calendar time (see buildGrowthSeries),

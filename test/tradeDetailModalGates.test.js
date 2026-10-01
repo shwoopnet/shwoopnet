@@ -91,6 +91,8 @@ function build(overrides) {
 
   const src = `
     var tradeModalOpenToken = 0;
+    var tradeModalChartSym = null;
+    var chartStates = {};
     var tradeModalBackdrop = FAKE_BACKDROP;
     var tradeModalEl = FAKE_MODAL_EL;
     var document = { getElementById: function(id){ return REGISTRY[id] || null; } };
