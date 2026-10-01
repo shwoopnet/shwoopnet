@@ -6788,6 +6788,13 @@
   // quote poll re-opening the same trade), which is the whole reason
   // chartStates exists: to survive those re-renders with zoom/pan intact.
   var tradeModalChartSym = null;
+  // Set by setupHistoricalChartInteractivity to that one call's own
+  // `render` closure, so a window resize (see the resize handler near
+  // renderGrowthChart) can redraw the current historical chart from its
+  // existing data without refetching or losing zoom/pan. Cleared on modal
+  // close or a switch away from a historical chart so a stale closure
+  // over a detached <svg> never gets invoked.
+  var historicalChartRerender = null;
 
   function tradeModalPriceCell(label, value, cls, id){
     return '<div class="trade-modal-price-cell"><div class="backtest-stat-label">' + label + '</div>' +
@@ -6870,6 +6877,11 @@
     if(tradeModalChartSym && tradeModalChartSym !== d.sym){
       delete chartStates[tradeModalChartSym];
     }
+    // Every open invalidates whatever historical-chart redraw closure was
+    // sitting here -- it closes over the PREVIOUS open's (now-replaced)
+    // <svg> node. The 'historical' branch below sets a fresh one once its
+    // fetch resolves; until then, a resize has nothing to redraw.
+    historicalChartRerender = null;
     // Historical (closed-trade) renders are static -- no live polling, so
     // there's no reason to route them through the same sym-keyed
     // chartStates an OPEN position's chart needs to survive repeated
@@ -6931,6 +6943,7 @@
       delete chartStates[tradeModalChartSym];
       tradeModalChartSym = null;
     }
+    historicalChartRerender = null;
     tradeModalBackdrop.setAttribute('hidden', '');
     tradeModalEl.setAttribute('hidden', '');
   }
@@ -8326,6 +8339,12 @@
       requestAnimationFrame(function(){ renderScheduled = false; render(); });
     }
     render();
+    // Exposed so a window resize can re-run THIS render (same data, same
+    // zoom/pan) without re-fetching or rebuilding the view -- there's only
+    // ever one historical chart on screen at a time (the trade modal's),
+    // so the module-level slot is overwritten on every open and cleared
+    // on close/switch (see openTradeModal/closeTradeModal).
+    historicalChartRerender = render;
 
     function zoom(cursorFraction, factor){
       var currentCount = view.viewEnd - view.viewStart;
@@ -10951,6 +10970,12 @@
   // trade equal width, which is what makes the shape of the curve
   // readable; the date range is labelled underneath so the real timespan
   // is never hidden.
+  // The most recently drawn growth-chart series, so a window resize can
+  // redraw the same curve (see the resize handler below renderGrowthChart)
+  // without recomputing it from trades. null whenever no curve is on
+  // screen (fewer than 2 trades), kept in sync by renderGrowthChart itself.
+  var lastGrowthSeries = null;
+
   function buildGrowthSeries(trades){
     // Oldest first -- reconstructTradesFromOrders returns newest-first for
     // its table, which would draw the curve backwards.
@@ -10975,9 +11000,14 @@
     // drawing a flat line that implies a trend from one data point.
     if(!series || series.length < 2){
       card.setAttribute('hidden', '');
+      lastGrowthSeries = null;
       return;
     }
     card.removeAttribute('hidden');
+    // Remembered so a window resize can redraw this exact curve again
+    // (see the resize handler below) without recomputing it from trades
+    // or re-fetching anything.
+    lastGrowthSeries = series;
 
     var W = 760, H = 220;
     var padL = 8, padR = 8, padTop = 14, padBottom = 26;
@@ -11046,6 +11076,40 @@
         + ' · ' + firstDate + ' – ' + lastDate;
     }
   }
+
+  // ---------- Chart redraw on window resize ----------
+  // None of the chart systems above re-render on a viewport/breakpoint
+  // change -- fine for the candle charts' own SVGs, which scale via
+  // preserveAspectRatio, but the growth chart recomputes its pixel-space
+  // layout (padL/padR/plotW etc, all off a fixed W/H) in JS, and a resize
+  // is exactly when that layout can go stale. Debounced (resize fires
+  // continuously while dragging a window edge) and deliberately cheap --
+  // it re-runs each chart's existing render against data already on hand
+  // (chartStates, the closed-over historical `view`, or the last growth
+  // series), never a re-fetch.
+  var chartResizeDebounceTimer = null;
+  window.addEventListener('resize', function(){
+    if(chartResizeDebounceTimer) clearTimeout(chartResizeDebounceTimer);
+    chartResizeDebounceTimer = setTimeout(function(){
+      chartResizeDebounceTimer = null;
+      // The trade modal's chart, if it's open -- at most one of these two
+      // is ever non-null/visible at a time (see openTradeModal).
+      if(tradeModalEl && !tradeModalEl.hasAttribute('hidden')){
+        if(tradeModalChartSym){
+          renderChartView(tradeModalChartSym);
+        } else if(historicalChartRerender){
+          historicalChartRerender();
+        }
+      }
+      // The growth chart, if it's currently showing a curve. Re-rendering
+      // only when it's actually visible avoids un-hiding it with stale
+      // data left over from a different Journal tab's last render.
+      var growthCard = document.getElementById('growthChartCard');
+      if(lastGrowthSeries && growthCard && !growthCard.hasAttribute('hidden')){
+        renderGrowthChart(lastGrowthSeries);
+      }
+    }, 200);
+  });
 
   // ---------- Growth chart range filter ----------
   // Spacing is by trade sequence, not calendar time (see buildGrowthSeries),
