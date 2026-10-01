@@ -6781,6 +6781,13 @@
   // (or closed) can tell it's stale and drop itself instead of painting a
   // chart into a chart element that now belongs to someone else.
   var tradeModalOpenToken = 0;
+  // Which symbol's LIVE chart (if any) is currently sitting in
+  // chartStates because of the modal -- used by openTradeModal/
+  // closeTradeModal to clean that entry up on a genuine symbol change or
+  // modal close, without touching it on a same-symbol re-render (e.g. a
+  // quote poll re-opening the same trade), which is the whole reason
+  // chartStates exists: to survive those re-renders with zoom/pan intact.
+  var tradeModalChartSym = null;
 
   function tradeModalPriceCell(label, value, cls, id){
     return '<div class="trade-modal-price-cell"><div class="backtest-stat-label">' + label + '</div>' +
@@ -6852,6 +6859,17 @@
     var oldSvg = chartCol.querySelector('svg');
     var svg = oldSvg.cloneNode(false);
     oldSvg.parentNode.replaceChild(svg, oldSvg);
+    // A genuine symbol change (not a same-symbol re-render, e.g. a quote
+    // poll re-opening the same trade) -- drop whatever chartStates entry
+    // the PREVIOUS symbol's live chart left behind. Left alone, that
+    // entry just sits there keyed by a symbol the modal no longer shows,
+    // forever, since renderChartError's delete is the only other place
+    // that ever cleared one and only fires on a fetch failure. Checked
+    // before the kind branches below so it also fires when switching from
+    // a live chart to a 'historical' or 'none' one for a different trade.
+    if(tradeModalChartSym && tradeModalChartSym !== d.sym){
+      delete chartStates[tradeModalChartSym];
+    }
     // Historical (closed-trade) renders are static -- no live polling, so
     // there's no reason to route them through the same sym-keyed
     // chartStates an OPEN position's chart needs to survive repeated
@@ -6861,9 +6879,11 @@
     if(d.chart.kind === 'none'){
       svg.id = 'tradeModalChart';
       chartCol.hidden = true;
+      tradeModalChartSym = null;
     } else if(d.chart.kind === 'live'){
       svg.id = 'chart-' + d.sym;
       chartCol.hidden = false;
+      tradeModalChartSym = d.sym;
       // No levels/opts param here on purpose -- renderChartView derives
       // entry/stop/target itself from journalEntries/intradayTrades by
       // symbol, exactly as it already does for every Setups row's own
@@ -6873,6 +6893,7 @@
       setupChartInteractivity(d.sym);
       patchTradeModalPL(d.sym, myToken);
     } else if(d.chart.kind === 'historical'){
+      tradeModalChartSym = null;
       svg.id = 'tradeModalChart';
       chartCol.hidden = false;
       statusEl.removeAttribute('hidden');
@@ -6901,6 +6922,15 @@
 
   function closeTradeModal(){
     tradeModalOpenToken++; // invalidate any in-flight historical fetch
+    // The modal is gone, so whatever live chart's view state it was
+    // holding onto in chartStates has nowhere left to be shown -- drop it
+    // rather than leaving it to sit there until some OTHER trade for the
+    // same symbol happens to reopen (possibly much later, with stale
+    // zoom/pan carried over from this unrelated session).
+    if(tradeModalChartSym){
+      delete chartStates[tradeModalChartSym];
+      tradeModalChartSym = null;
+    }
     tradeModalBackdrop.setAttribute('hidden', '');
     tradeModalEl.setAttribute('hidden', '');
   }
