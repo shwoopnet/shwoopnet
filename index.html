@@ -7972,8 +7972,18 @@
     scheduleChartRender(sym);
   }
 
+  // The readout is the SAME shared, static div the historical chart also
+  // uses (#tradeModalChartCrosshair) -- the modal is a single shared
+  // instance (see chartStates cleanup, which assumes exactly one tracked
+  // symbol at a time), so there is never more than one live chart on
+  // screen needing its own readout. This used to look up 'crosshair-' +
+  // sym, an id NOTHING in this file ever created (static or dynamic) --
+  // confirmed by grep across the whole markup -- so updateCrosshair's own
+  // `!readout` guard always failed and the live chart's hover crosshair
+  // and OHLC readout have never actually rendered on the real page, only
+  // in test harnesses that fabricated the missing element.
   function hideCrosshair(sym){
-    var readout = document.getElementById('crosshair-' + sym);
+    var readout = document.getElementById('tradeModalChartCrosshair');
     if(readout) readout.setAttribute('hidden', '');
     var svg = document.getElementById('chart-' + sym);
     if(svg){
@@ -7984,7 +7994,7 @@
   function updateCrosshair(sym, clientX, clientY){
     var state = chartStates[sym];
     var svg = document.getElementById('chart-' + sym);
-    var readout = document.getElementById('crosshair-' + sym);
+    var readout = document.getElementById('tradeModalChartCrosshair');
     var sc = state && state.lastScale;
     if(!state || !svg || !readout || !sc) return;
 

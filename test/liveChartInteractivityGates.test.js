@@ -69,7 +69,11 @@ function build(opts) {
     var document = {
       getElementById: function(id){
         if(id === 'chart-SYM') return SVG;
-        if(id === 'crosshair-SYM') return CROSSHAIR;
+        // The real readout is a single shared, static element
+        // (#tradeModalChartCrosshair), not a per-symbol id -- see
+        // updateCrosshair's own comment on why ('crosshair-' + sym was
+        // never actually created anywhere in the real page).
+        if(id === 'tradeModalChartCrosshair') return CROSSHAIR;
         return null;
       },
       querySelector: function(){ return null; },
@@ -108,6 +112,33 @@ function build(opts) {
 }
 
 function main() {
+  // ---- The crosshair readout id this code looks up actually exists in the real page ----
+  // CONFIRMED-LIVE INCIDENT: updateCrosshair looked up 'crosshair-' + sym,
+  // an id nothing in index.html's real markup ever created (static or
+  // dynamic) -- so its own `!readout` guard silently no-op'd forever, and
+  // the live chart's hover crosshair/OHLC readout never actually rendered
+  // on the real page. It read as "working" here because this test file's
+  // own DOM mock fabricated an element at that exact id, which is the same
+  // false-positive-harness risk this session already hit once elsewhere.
+  // This gate reads the REAL document markup (not a mock) and asserts the
+  // id updateCrosshair/hideCrosshair actually query for is present there,
+  // so a future rename on either side (the lookup or the markup) fails
+  // loudly instead of silently reintroducing a dead crosshair.
+  {
+    const crosshairLookupId = (() => {
+      const fn = lift('updateCrosshair');
+      const m = fn.match(/getElementById\('([^']+)'\)/g) || [];
+      const readoutCall = m.find((c) => !c.includes("'chart-'"));
+      return readoutCall && readoutCall.match(/getElementById\('([^']+)'\)/)[1];
+    })();
+    assert.ok(crosshairLookupId, 'could not determine which id updateCrosshair looks up for its readout');
+    const hasStaticMatch = html.includes(`id="${crosshairLookupId}"`);
+    const isDynamicPattern = crosshairLookupId.endsWith('-') || crosshairLookupId.includes('+');
+    assert.ok(hasStaticMatch || isDynamicPattern,
+      `updateCrosshair looks up id "${crosshairLookupId}" for its readout, but no element with that id exists anywhere in index.html's real markup -- the live chart's crosshair/OHLC readout would silently never render.`);
+    console.log('G0 PASS the crosshair readout id updateCrosshair looks up actually exists in the real page markup, not just in a test mock');
+  }
+
   // ---- setupChartInteractivity actually wires the listeners it claims to ----
   {
     const { mod, svg, listeners } = build();
