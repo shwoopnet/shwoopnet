@@ -2539,6 +2539,7 @@
                recomputing this on every resize, which is more than a
                font-legibility fix needs. -->
           <svg class="trade-chart" id="tradeModalChart" viewBox="0 0 760 580" preserveAspectRatio="none"></svg>
+          <div class="chart-crosshair-readout" id="tradeModalChartCrosshair" hidden></div>
         </div>
         <div class="labs-backtest-status" id="tradeModalChartStatus" hidden></div>
       </div>
@@ -8174,6 +8175,102 @@
   // own comment), so there's no stale-listener teardown to worry about --
   // a new call on every open just means new listeners on a new node.
   function setupHistoricalChartInteractivity(svg, data, tf, levels){
+    // Fixed id, not sym-keyed like the live chart's `crosshair-<sym>` --
+    // this chart is self-contained (see this function's own comment), so
+    // there's exactly one historical-chart readout node in the modal
+    // markup and no symbol to key it by. Looked up once here rather than
+    // on every hover; a real browser svg's getElementById would work
+    // either way, but lifted tests drive this through a plain-object
+    // document stub that may not implement live lookups.
+    var readout = (typeof document !== 'undefined' && document.getElementById)
+      ? document.getElementById('tradeModalChartCrosshair') : null;
+
+    function hideHistoricalCrosshair(){
+      if(readout) readout.setAttribute('hidden', '');
+      if(svg.querySelectorAll){
+        svg.querySelectorAll('.crosshair-line, .crosshair-hline, .crosshair-tag').forEach(function(el){ el.remove(); });
+      }
+    }
+
+    // Same pattern as the live chart's updateCrosshair (vertical/
+    // horizontal lines + axis-anchored price/date tags + an OHLC readout
+    // div), just reading the closure's own `view` instead of a sym-keyed
+    // chartStates entry.
+    function updateHistoricalCrosshair(clientX, clientY){
+      var sc = view.lastScale;
+      if(!svg || !sc) return;
+
+      var localX = svgLocalX(svg, clientX);
+      var localY = svgLocalY(svg, clientY);
+      if(localX < 0 || localX > sc.plotW || localY < sc.padTop || localY > sc.padTop + sc.plotH){
+        hideHistoricalCrosshair();
+        return;
+      }
+
+      var count = view.viewEnd - view.viewStart;
+      var xStep = sc.plotW / count;
+      var idx = Math.max(0, Math.min(Math.floor(localX / xStep), count - 1));
+      var bar = view.data[view.viewStart + idx];
+      if(!bar) return;
+      var up = bar.c >= bar.o;
+      var cls = up ? 'cr-up' : 'cr-down';
+
+      if(readout){
+        readout.innerHTML =
+          '<span>O <span class="' + cls + '">' + bar.o.toFixed(2) + '</span></span>' +
+          '<span>H <span class="' + cls + '">' + bar.h.toFixed(2) + '</span></span>' +
+          '<span>L <span class="' + cls + '">' + bar.l.toFixed(2) + '</span></span>' +
+          '<span>C <span class="' + cls + '">' + bar.c.toFixed(2) + '</span></span>';
+        readout.removeAttribute('hidden');
+      }
+
+      if(svg.querySelectorAll){
+        svg.querySelectorAll('.crosshair-line, .crosshair-hline, .crosshair-tag').forEach(function(el){ el.remove(); });
+      }
+
+      var ns = 'http://www.w3.org/2000/svg';
+      var lineX = idx * xStep + xStep / 2;
+
+      var vLine = document.createElementNS(ns, 'line');
+      vLine.setAttribute('class', 'crosshair-line');
+      vLine.setAttribute('x1', lineX); vLine.setAttribute('x2', lineX);
+      vLine.setAttribute('y1', sc.padTop); vLine.setAttribute('y2', sc.padTop + sc.plotH);
+      svg.appendChild(vLine);
+
+      var hLine = document.createElementNS(ns, 'line');
+      hLine.setAttribute('class', 'crosshair-hline');
+      hLine.setAttribute('x1', 0); hLine.setAttribute('x2', sc.plotW);
+      hLine.setAttribute('y1', localY); hLine.setAttribute('y2', localY);
+      svg.appendChild(hLine);
+
+      // Price tag on the right axis, at the exact cursor position.
+      var frac = 1 - (localY - sc.padTop) / sc.plotH;
+      var priceAtCursor = sc.useLog ? Math.exp(sc.loT + frac * sc.range) : (sc.loT + frac * sc.range);
+      var priceTag = document.createElementNS(ns, 'g');
+      priceTag.setAttribute('class', 'crosshair-tag');
+      var crosshairNotch = 6;
+      priceTag.innerHTML =
+        '<path d="M' + (sc.plotW + crosshairNotch) + ' ' + (localY - 8) +
+          ' L' + (sc.plotW + 54) + ' ' + (localY - 8) +
+          ' L' + (sc.plotW + 54) + ' ' + (localY + 8) +
+          ' L' + (sc.plotW + crosshairNotch) + ' ' + (localY + 8) +
+          ' L' + sc.plotW + ' ' + localY + ' Z" fill="var(--paper)"/>' +
+        '<text class="axis-tag-text" x="' + (sc.plotW + crosshairNotch + 4) + '" y="' + (localY + 4) + '" fill="var(--ink)">' + priceAtCursor.toFixed(2) + '</text>';
+      svg.appendChild(priceTag);
+
+      // Date tag on the bottom axis, under the hovered bar.
+      var dateLabel = formatCrosshairDate(bar.t, tf);
+      if(dateLabel){
+        var dateTag = document.createElementNS(ns, 'g');
+        dateTag.setAttribute('class', 'crosshair-tag');
+        var tagW = Math.max(46, dateLabel.length * 6.2);
+        dateTag.innerHTML =
+          '<rect x="' + (lineX - tagW/2) + '" y="' + (sc.padTop + sc.plotH + 2) + '" width="' + tagW + '" height="16" fill="var(--paper)"/>' +
+          '<text class="axis-tag-text" x="' + lineX + '" y="' + (sc.padTop + sc.plotH + 14) + '" text-anchor="middle" fill="var(--ink)">' + dateLabel + '</text>';
+        svg.appendChild(dateTag);
+      }
+    }
+
     var cfg = tfConfig[tf] || tfConfig['1D'];
     var view = {
       data: data,
@@ -8249,7 +8346,10 @@
       svg.style.cursor = (mode === 'scale') ? 'ns-resize' : (mode === 'timescale') ? 'ew-resize' : 'grabbing';
     });
     svg.addEventListener('pointermove', function(e){
-      if(!dragState) return;
+      if(!dragState){
+        updateHistoricalCrosshair(e.clientX, e.clientY);
+        return;
+      }
       if(dragState.mode === 'scale'){
         var dyPixels = e.clientY - dragState.startY;
         var factor = dragState.startFactor * Math.exp(-dyPixels / 150);
@@ -8292,6 +8392,7 @@
     });
     svg.addEventListener('pointerleave', function(){
       if(!dragState) svg.style.cursor = '';
+      hideHistoricalCrosshair();
     });
   }
 
