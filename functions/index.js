@@ -57,3 +57,54 @@ exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (reque
   }
   return finnhubGet("company-news", { symbol, from, to });
 });
+
+// ---- Kalshi read-only relay ------------------------------------------------
+// Kalshi's API answers 403 to any request carrying a browser Origin header and
+// sends no CORS headers, so the page cannot call it directly. This relays the
+// public order-book fields the Kalshi page needs.
+//
+// Deliberately narrow: two fixed series, GET only, no caller-supplied path or
+// query, and no Kalshi credentials anywhere. It cannot place or cancel an order
+// and must not be widened into something that can without a separate review.
+const KALSHI_BASE = "https://api.elections.kalshi.com/trade-api/v2";
+const KALSHI_SERIES = ["KXBTC15M", "KXGOLD15M"];
+const KALSHI_CACHE_MS = 2000;
+let kalshiCache = { at: 0, body: null };
+
+function kalshiNum(x) {
+  const n = parseFloat(x);
+  return Number.isFinite(n) ? n : null;
+}
+
+exports.kalshiBooks = onCall(async (request) => {
+  assertSignedIn(request.auth);
+  // Many tabs polling at once must not multiply into Kalshi rate limits.
+  if (kalshiCache.body && Date.now() - kalshiCache.at < KALSHI_CACHE_MS) {
+    return kalshiCache.body;
+  }
+  const markets = [];
+  for (const series of KALSHI_SERIES) {
+    const url = KALSHI_BASE + "/markets?series_ticker=" + series + "&status=open&limit=5";
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) {
+      throw new HttpsError("unavailable", "Kalshi " + series + " HTTP " + res.status);
+    }
+    const data = await res.json();
+    (data.markets || []).forEach((m) => {
+      markets.push({
+        series,
+        ticker: m.ticker,
+        closeTime: m.close_time,
+        strike: m.floor_strike == null ? null : m.floor_strike,
+        yesBid: kalshiNum(m.yes_bid_dollars),
+        yesBidSz: kalshiNum(m.yes_bid_size_fp),
+        yesAsk: kalshiNum(m.yes_ask_dollars),
+        yesAskSz: kalshiNum(m.yes_ask_size_fp),
+        last: kalshiNum(m.last_price_dollars),
+      });
+    });
+  }
+  const body = { fetchedAt: Date.now(), markets };
+  kalshiCache = { at: Date.now(), body };
+  return body;
+});
