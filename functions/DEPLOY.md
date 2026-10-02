@@ -59,3 +59,22 @@ The old direct-to-Finnhub code path has been fully removed from `index.html`,
 so until this is deployed, the Brief page's quotes/news/earnings and the
 per-trade news alerts will fail closed (console errors, "Couldn't load..."
 placeholders) rather than silently falling back to the old exposed key.
+
+## Kalshi relay and recorder
+
+`kalshiBooks` (callable) and `kalshiRecorder` (scheduled, every minute) are
+deployed with the same `firebase deploy --only functions`. Both are read-only
+against Kalshi's public API and need no secret.
+
+The recorder writes `kalshiSnapshots` and `kalshiResults`. `firestore.rules`
+has no rule for either, so clients cannot read or write them; only the Admin
+SDK can.
+
+**One-time, after the first deploy:** enable a TTL policy so snapshots expire
+after 30 days instead of growing forever:
+```
+gcloud firestore fields ttls update expireAt --collection-group=kalshiSnapshots --enable-ttl
+```
+Until that runs nothing is deleted. Check Firebase usage and set a budget alert
+the first week; the figures in the cost estimate are projections, not
+measurements.
