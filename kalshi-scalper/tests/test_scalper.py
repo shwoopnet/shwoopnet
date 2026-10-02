@@ -127,3 +127,13 @@ import scalper.analyze as _a, re as _re
 _code = _re.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_a.__file__).read())
 assert not _re.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _code)
 print("verdict tests passed")
+
+# ---- market hours are per series ----
+from scalper.analyze import market_hours
+# Two series recorded over the same 15 minute window are 0.25h EACH, not 0.5h.
+# Summing them is what made "72 hours" fire after about 36 hours of recording.
+by = {("BTC", "m1"): [(0.0,), (900.0,)], ("GOLD", "m1"): [(0.0,), (900.0,)]}
+h = market_hours(by)
+assert h == {"BTC": 0.25, "GOLD": 0.25}, h
+assert min(h.values()) == 0.25
+print("market hours tests passed")

@@ -36,7 +36,7 @@ HORIZONS = (10, 30, 60, 120)  # seconds
 CUT_HORIZON = 60
 
 # ---- Decision rule, fixed on 2026-10-02 before further data was seen ----
-RULE_MIN_HOURS = 72     # recorded market time before any verdict other than NOT_ENOUGH_DATA
+RULE_MIN_HOURS = 72     # market time PER SERIES (about 3 days of recording) before any other verdict
 RULE_MIN_N = 500        # samples a bucket needs overall
 RULE_MIN_HALF_N = 250   # and in each half of the recording period
 RULE_BAR = 0.60         # break-even hit rate a bucket must beat, in BOTH halves
@@ -76,6 +76,17 @@ def _summ(rows: list[tuple]) -> tuple:
     return n, cost, move, beat, needed_accuracy(cost, move)
 
 
+def market_hours(by: dict) -> dict[str, float]:
+    """Hours of recorded market time PER SERIES. Each market covers about 15
+    minutes, so one series records about one market-hour per wall-clock hour,
+    and summing across series would double the figure. The rule needs the
+    thinner series to have enough, because both are being judged."""
+    out: dict[str, float] = defaultdict(float)
+    for (series, _), pts in by.items():
+        out[series] += (pts[-1][0] - pts[0][0]) / 3600
+    return dict(out)
+
+
 def collect() -> tuple[list[tuple], dict]:
     db = sqlite3.connect(DB)
     q = ("SELECT series,ticker,ts,yes_bid,yes_ask,close_time FROM snap "
@@ -93,8 +104,9 @@ def collect() -> tuple[list[tuple], dict]:
                 _, b2, a2, _ = pts[j]
                 recs.append((s, h, (a + b) / 2, _secs_left(c, ts),
                              round_trip_cost(a, b), abs((b2 + a2) / 2 - (b + a) / 2), ts))
-    hours = sum((p[-1][0] - p[0][0]) for p in by.values()) / 3600
-    return recs, {"markets": len(by), "hours": hours}
+    per = market_hours(by)
+    return recs, {"markets": len(by), "hours_by_series": per,
+                  "hours": min(per.values()) if per else 0.0}
 
 
 def _buckets() -> list[tuple[str, object]]:
@@ -111,7 +123,7 @@ def verdict(recs: list[tuple], hours: float) -> tuple[str, list[str]]:
     means "trade this": the best outcome is NOT_YET_FALSIFIED, which only
     permits writing down a hypothesis and testing it on data not yet recorded.
 
-    NOT_ENOUGH_DATA     under RULE_MIN_HOURS of market time, or no usable rows
+    NOT_ENOUGH_DATA     under RULE_MIN_HOURS of market time in the thinner series, or no usable rows
     NOT_YET_FALSIFIED   some bucket needs under RULE_BAR in BOTH halves of the period
     FALSIFIED           no bucket does: a directional scalp has no room here
     """
@@ -138,7 +150,8 @@ def main() -> None:
     if not recs:
         print("Not enough recorded data yet.")
         return
-    print(f"{info['markets']} markets, {info['hours']:.1f} hours of market time recorded\n")
+    per = ", ".join(f"{k} {v:.1f}h" for k, v in sorted(info["hours_by_series"].items()))
+    print(f"{info['markets']} markets. Market time recorded per series: {per} (rule needs {RULE_MIN_HOURS}h in each)\n")
 
     print(f"{'series':10} {'hold':>5} {'n':>7} {'avg cost':>9} {'avg |move|':>11} {'move>cost':>10} {'needs':>7}")
     for s in sorted({r[0] for r in recs}):

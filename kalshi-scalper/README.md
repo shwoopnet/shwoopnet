@@ -55,7 +55,7 @@ horizon is fixed at 60s. Other horizons are not used to rescue a result.
 
 | Verdict | Condition | What follows |
 |---|---|---|
-| `NOT_ENOUGH_DATA` | under 72 hours of recorded market time | Keep recording. No conclusion either way. |
+| `NOT_ENOUGH_DATA` | under 72 hours of recorded market time in EACH series (about 3 days of continuous recording; gold takes longer if its market is not open around the clock) | Keep recording. No conclusion either way. |
 | `FALSIFIED` | no bucket beats the bar (below) | Stop. Do not build a directional scalping strategy. |
 | `NOT_YET_FALSIFIED` | some bucket beats the bar | Permission to WRITE DOWN a hypothesis only: who loses money and why, a numeric prediction, a kill criterion. Then test it on data recorded after this verdict. Not evidence of an edge. |
 
