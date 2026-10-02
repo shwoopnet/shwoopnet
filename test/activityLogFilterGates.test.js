@@ -75,7 +75,7 @@ gates.G3 = () => {
   const fn = new Function('window', 'saveActivityLogFilterPrefs',
     'var activityLogHiddenGroups = {};' +
     src.slice(src.indexOf('function loadActivityLogFilterPrefs()'),
-      src.indexOf('function saveActivityLogFilterPrefs()')) +
+      src.indexOf('function saveActivityLogFilterPrefs(')) +
     'loadActivityLogFilterPrefs(); return activityLogHiddenGroups;');
   const out = fn({ localStorage: store }, () => {});
   assert.strictEqual(out.cycle_summary, undefined,

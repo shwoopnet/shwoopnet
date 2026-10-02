@@ -80,9 +80,9 @@ gates.G6 = () => {
   // Journal or Trade Overview still needs to say what it was, or realised
   // P&L attribution between two equities strategies becomes unreadable.
   assert.ok(/strategy === 'fade'/.test(src), 'past fade trades must still be labelled correctly in the Journal/badges');
-  assert.ok(/'equities-fade': 'Equities fade'/.test(src),
-    'the forward-test record must still be able to show a historical fade snapshot if one was ever recorded -- an append-only record is never hidden after the fact');
-  console.log('G6 PASS historical fade trade labels and forward-test snapshots are preserved, only the active controls are gone');
+  // The forward-test record that used to show a historical fade snapshot was
+  // removed with the Labs page (#208), so that assertion went with it.
+  console.log('G6 PASS historical fade trade labels are preserved, only the active controls are gone');
 };
 
 gates.G7 = () => {
