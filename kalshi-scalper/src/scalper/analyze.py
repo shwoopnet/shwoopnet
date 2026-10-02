@@ -16,6 +16,11 @@ Two cuts expose what the headline averages hide:
 Samples overlap (a 10s window starts every 2s), so n is not a count of
 independent trades. The header reports distinct markets and hours instead.
 
+The last thing it prints is a VERDICT from a rule written down before the data
+existed (see README, "Decision rule"). The thresholds below are part of that
+rule. Changing one after seeing a result voids that result: the earlier verdict
+stands and the new rule counts as a new trial.
+
 Usage: python -m scalper.analyze
 """
 from __future__ import annotations
@@ -29,6 +34,12 @@ from .recorder import DB
 
 HORIZONS = (10, 30, 60, 120)  # seconds
 CUT_HORIZON = 60
+
+# ---- Decision rule, fixed on 2026-10-02 before further data was seen ----
+RULE_MIN_HOURS = 72     # recorded market time before any verdict other than NOT_ENOUGH_DATA
+RULE_MIN_N = 500        # samples a bucket needs overall
+RULE_MIN_HALF_N = 250   # and in each half of the recording period
+RULE_BAR = 0.60         # break-even hit rate a bucket must beat, in BOTH halves
 PRICE_BANDS = [(0.0, 0.10), (0.10, 0.30), (0.30, 0.70), (0.70, 0.90), (0.90, 1.0001)]
 TIME_BANDS = [(600, 1e9, "over 10 min left"), (300, 600, "5 to 10 min"),
               (120, 300, "2 to 5 min"), (0, 120, "under 2 min")]
@@ -72,7 +83,7 @@ def collect() -> tuple[list[tuple], dict]:
     by = defaultdict(list)
     for s, t, ts, b, a, c in db.execute(q):
         by[(s, t)].append((ts, b, a, c))
-    recs = []  # (series, horizon, mid, secs_left, cost, move)
+    recs = []  # (series, horizon, mid, secs_left, cost, move, ts)
     for (s, _), pts in by.items():
         for i, (ts, b, a, c) in enumerate(pts):
             for h in HORIZONS:
@@ -81,9 +92,45 @@ def collect() -> tuple[list[tuple], dict]:
                     break
                 _, b2, a2, _ = pts[j]
                 recs.append((s, h, (a + b) / 2, _secs_left(c, ts),
-                             round_trip_cost(a, b), abs((b2 + a2) / 2 - (b + a) / 2)))
+                             round_trip_cost(a, b), abs((b2 + a2) / 2 - (b + a) / 2), ts))
     hours = sum((p[-1][0] - p[0][0]) for p in by.values()) / 3600
     return recs, {"markets": len(by), "hours": hours}
+
+
+def _buckets() -> list[tuple[str, object]]:
+    """The 9 cuts per series the rule looks at. Fixed: adding one is a new trial."""
+    out = [(f"price {lo*100:.0f}-{min(hi,1)*100:.0f}c", lambda r, lo=lo, hi=hi: lo <= r[2] < hi)
+           for lo, hi in PRICE_BANDS]
+    out += [(f"time left {label}", lambda r, lo=lo, hi=hi: r[3] is not None and lo <= r[3] < hi)
+            for lo, hi, label in TIME_BANDS]
+    return out
+
+
+def verdict(recs: list[tuple], hours: float) -> tuple[str, list[str]]:
+    """Apply the pre-registered rule. There is deliberately no verdict that
+    means "trade this": the best outcome is NOT_YET_FALSIFIED, which only
+    permits writing down a hypothesis and testing it on data not yet recorded.
+
+    NOT_ENOUGH_DATA     under RULE_MIN_HOURS of market time, or no usable rows
+    NOT_YET_FALSIFIED   some bucket needs under RULE_BAR in BOTH halves of the period
+    FALSIFIED           no bucket does: a directional scalp has no room here
+    """
+    rows60 = [r for r in recs if r[1] == CUT_HORIZON]
+    if hours < RULE_MIN_HOURS or not rows60:
+        return "NOT_ENOUGH_DATA", [f"{hours:.1f} of {RULE_MIN_HOURS} hours recorded"]
+    mid_t = (min(r[6] for r in rows60) + max(r[6] for r in rows60)) / 2
+    found: list[str] = []
+    for series in sorted({r[0] for r in rows60}):
+        mine = [r for r in rows60 if r[0] == series]
+        for label, pred in _buckets():
+            rows = [r for r in mine if pred(r)]
+            halves = [[r for r in rows if r[6] < mid_t], [r for r in rows if r[6] >= mid_t]]
+            if len(rows) < RULE_MIN_N or any(len(h) < RULE_MIN_HALF_N for h in halves):
+                continue
+            needs = [needed_accuracy(sum(r[4] for r in h) / len(h), sum(r[5] for r in h) / len(h)) for h in halves]
+            if all(n is not None and n < RULE_BAR for n in needs):
+                found.append(f"{series} {label}: needs {needs[0]:.0%} then {needs[1]:.0%}")
+    return ("NOT_YET_FALSIFIED", found) if found else ("FALSIFIED", [])
 
 
 def main() -> None:
@@ -122,6 +169,15 @@ def main() -> None:
                 n, c, m, _, need = _summ(rows)
                 print(f"{s:10} {label:>17} {n:>7} {c:>9.4f} {m:>11.4f} {_acc(need):>7}")
     print("\nA bucket with few markets behind it is noise. Judge on days of data, not rows.")
+
+    v, why = verdict(recs, info["hours"])
+    print(f"\nVERDICT (pre-registered rule, 60s hold, bar {RULE_BAR:.0%} in both halves): {v}")
+    for line in why:
+        print("  " + line)
+    if v == "NOT_YET_FALSIFIED":
+        print("  This is permission to write a hypothesis down, not evidence of an edge.")
+    if v == "FALSIFIED":
+        print("  No bucket clears the bar. Do not build a directional scalping strategy.")
 
 
 if __name__ == "__main__":

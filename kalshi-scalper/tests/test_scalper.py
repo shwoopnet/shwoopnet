@@ -99,3 +99,31 @@ assert abs(needed_accuracy(0.0440, 0.0934) - 0.7355) < 0.001
 # When the cost exceeds twice the move, no predictor can break even.
 assert needed_accuracy(0.0423, 0.0207) > 1.0
 print("analyze tests passed")
+
+# ---- pre-registered verdict ----
+from scalper.analyze import verdict, RULE_MIN_HOURS
+
+def rec(series, mid, cost, move, ts, secs=400.0):
+    return (series, 60, mid, secs, cost, move, ts)
+
+def block(n, cost, move, t0, t1, mid=0.5):
+    return [rec("S", mid, cost, move, t0 + (t1 - t0) * i / n) for i in range(n)]
+
+H = RULE_MIN_HOURS + 1
+# Too little data never produces a conclusion either way.
+assert verdict(block(2000, 0.05, 0.10, 0, 1000), 5.0)[0] == "NOT_ENOUGH_DATA"
+# Costly, small-move data is a clean negative: a directional scalp has no room.
+assert verdict(block(2000, 0.05, 0.10, 0, 1000), H)[0] == "FALSIFIED"
+# A bucket that beats the bar in BOTH halves earns only "not yet falsified".
+good = block(1000, 0.02, 0.20, 0, 1000)            # needs 55% throughout
+assert verdict(good, H)[0] == "NOT_YET_FALSIFIED"
+# One lucky half must not qualify: 18 buckets will always throw up a fluke.
+lucky = block(500, 0.02, 0.20, 0, 499) + block(500, 0.05, 0.10, 500, 1000)
+assert verdict(lucky, H)[0] == "FALSIFIED"
+# A promising bucket with too few samples must not qualify.
+assert verdict(block(300, 0.02, 0.20, 0, 1000), H)[0] == "FALSIFIED"
+# No verdict may ever read as a go-ahead to trade.
+import scalper.analyze as _a, re as _re
+_code = _re.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_a.__file__).read())
+assert not _re.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _code)
+print("verdict tests passed")
