@@ -56,6 +56,16 @@ gates.G5 = () => {
   assert.ok(!/\/orders|Authorization|KALSHI_(API_)?KEY|method\s*:/i.test(m));
 };
 
+// When Kalshi refuses a request the error must say what it said, and requests
+// must identify themselves. A bare "HTTP 403" cannot tell a bug in our code
+// from a network path Kalshi's CDN refuses, and the two have different fixes.
+gates.G6 = () => {
+  const m = /async function kalshiFetchSeries\(([\s\S]*?)\n\}/.exec(fnSrc);
+  assert.ok(m, 'kalshiFetchSeries not found');
+  assert.ok(/"User-Agent"/.test(m[1]), 'requests must send a User-Agent');
+  assert.ok(/res\.text\(\)/.test(m[1]) && /console\.error\(/.test(m[1]), 'a refusal must log and surface what Kalshi said');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); }

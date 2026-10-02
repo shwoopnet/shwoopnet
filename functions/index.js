@@ -77,9 +77,20 @@ let kalshiCache = { at: 0, body: null };
 
 async function kalshiFetchSeries(series, status, limit) {
   const url = KALSHI_BASE + "/markets?series_ticker=" + series + "&status=" + status + "&limit=" + limit;
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(8000),
+    headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" },
+  });
   if (!res.ok) {
-    throw new HttpsError("unavailable", "Kalshi " + series + " HTTP " + res.status);
+    // A refusal from Kalshi's CDN says very little, so keep what it does say.
+    // Without this a 403 reads as a bug in our code when it may be the network
+    // path (some CDNs refuse cloud-provider address ranges), and the two need
+    // different fixes.
+    const body = (await res.text().catch(() => "")).slice(0, 200);
+    const cdn = res.headers.get("x-cache") || res.headers.get("server") || "";
+    console.error("Kalshi " + series + " HTTP " + res.status + " cdn=" + cdn + " body=" + body);
+    throw new HttpsError("unavailable", "Kalshi " + series + " HTTP " + res.status +
+      (cdn ? " (" + cdn + ")" : "") + (body ? ": " + body : ""));
   }
   const data = await res.json();
   return data.markets || [];
