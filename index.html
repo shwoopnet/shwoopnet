@@ -10648,19 +10648,28 @@
 
     var anomaliesEl = document.getElementById('alpacaHistoryAnomalies');
     anomaliesEl.innerHTML = anomalies.length
-      ? '<div class="labs-backtest-note" style="color:var(--loss); margin-bottom:14px;">' + anomalies.length + ' anomal' + (anomalies.length === 1 ? 'y' : 'ies') + ' detected (likely duplicate-order residue): ' +
-        anomalies.map(function(a){ return a.sym + ' at ' + a.time; }).join(', ') + '</div>'
+      ? '<details class="labs-backtest-note" style="color:var(--loss); margin-bottom:14px;">' +
+        '<summary style="cursor:pointer;">' + anomalies.length + ' anomal' + (anomalies.length === 1 ? 'y' : 'ies') + ' detected (likely duplicate-order residue)</summary>' +
+        '<div style="margin-top:8px;">' + anomalies.map(function(a){ return escapeHtml(a.sym) + ' at ' + escapeHtml(a.time); }).join('<br>') + '</div>' +
+        '</details>'
       : '';
 
     // Never hidden, never rolled into the total: a fill that cannot be
     // priced is stated as such, because a total that quietly omits it is
-    // wrong in the one direction nobody would notice.
+    // wrong in the one direction nobody would notice. Collapsed behind a
+    // <details> toggle rather than dumped inline -- a real account's order
+    // history can easily produce a few dozen of these (every sell that
+    // predates this account's visible window counts as one), and a wall of
+    // red text that long reads as the page being broken, not as the honest
+    // disclosure it actually is.
     var unrec = unreconstructable || [];
     if(unrec.length){
-      anomaliesEl.innerHTML += '<div class="labs-backtest-note" style="color:var(--loss); margin-bottom:14px;">' +
-        unrec.length + ' fill' + (unrec.length === 1 ? '' : 's') + ' could not be reconstructed and ' +
-        (unrec.length === 1 ? 'is' : 'are') + ' excluded from the figures above: ' +
-        unrec.map(function(u){ return u.sym + ' at ' + u.time + ' -- ' + u.note; }).join(' · ') + '</div>';
+      anomaliesEl.innerHTML += '<details class="labs-backtest-note" style="color:var(--loss); margin-bottom:14px;">' +
+        '<summary style="cursor:pointer;">' + unrec.length + ' fill' + (unrec.length === 1 ? '' : 's') + ' could not be reconstructed and ' +
+        (unrec.length === 1 ? 'is' : 'are') + ' excluded from the figures above</summary>' +
+        '<div style="margin-top:8px;">' +
+        unrec.map(function(u){ return escapeHtml(u.sym) + ' at ' + escapeHtml(u.time) + ' — ' + escapeHtml(u.note); }).join('<br><br>') +
+        '</div></details>';
     }
 
     var tableEl = document.getElementById('alpacaHistoryTableWrap');
