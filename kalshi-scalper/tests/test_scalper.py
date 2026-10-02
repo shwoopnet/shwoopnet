@@ -86,3 +86,16 @@ pl = build_plist()
 assert pl["Label"] == LABEL and pl["KeepAlive"] is True and pl["RunAtLoad"] is True
 assert pl["ProgramArguments"][-2:] == ["scalper.recorder", "2"]
 print("status and service tests passed")
+
+# ---- analyze ----
+from scalper.analyze import needed_accuracy
+# A coin flip must never look profitable: with any cost at all, break-even
+# needs better than 50% of calls right.
+assert needed_accuracy(0.04, 0.10) > 0.5
+# Free trading would break even at 50%.
+assert abs(needed_accuracy(0.0, 0.10) - 0.5) < 1e-12
+# Hand check: 4.4c cost against a 9.34c average move needs about 73.6% right.
+assert abs(needed_accuracy(0.0440, 0.0934) - 0.7355) < 0.001
+# When the cost exceeds twice the move, no predictor can break even.
+assert needed_accuracy(0.0423, 0.0207) > 1.0
+print("analyze tests passed")
