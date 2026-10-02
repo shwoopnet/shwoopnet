@@ -86,7 +86,10 @@ const attrRules = src.split('\n').filter(l => l.includes('[data-reduce-motion="t
 // preconnects and the one Google Fonts stylesheet that predate this work.
 // ---------------------------------------------------------------
 const resourceRefs = []
-  .concat(src.match(/<link\b[^>]*>/g) || [])
+  // An inline data: icon makes no network request, so it is not an external
+  // resource. Its SVG contains '>' characters, so the tag match is cut short;
+  // the filter keys on the href prefix instead.
+  .concat((src.match(/<link\b[^>]*>/g) || []).filter(tag => !/\bhref="data:/.test(tag)))
   .concat(src.match(/<script\b[^>]*\bsrc=[^>]*>/g) || [])
   .concat(src.match(/<img\b[^>]*\bsrc=[^>]*>/g) || [])
   .concat(src.match(/url\((["']?)https?:[^)]*\)/g) || []);

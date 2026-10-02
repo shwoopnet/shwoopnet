@@ -31,7 +31,7 @@ function fakePage() {
 function main() {
   const pages = {
     'page-brief': fakePage(), 'page-trades': fakePage(), 'page-journal': fakePage(),
-    'page-settings': fakePage(), 'page-changelog': fakePage(),
+    'page-settings': fakePage(), 'page-changelog': fakePage(), 'page-kalshi': fakePage(),
   };
   const scrollCalls = [];
   const src = `
@@ -44,6 +44,8 @@ function main() {
     function renderStatusPage(){}
     function runCardEntrance(){}
     function renderCalendar(){}
+    function startKalshiPoll(){}
+    function stopKalshiPoll(){}
     ${lift('showPage')}
     return showPage;
   `;
@@ -53,6 +55,7 @@ function main() {
   assert.deepStrictEqual(scrollCalls, [[0, 0]], 'switching pages must scroll to the top');
   assert.strictEqual(pages['page-journal'].hidden, false, 'the target page must actually show');
   assert.strictEqual(pages['page-trades'].hidden, true, 'other pages must hide');
+  assert.strictEqual(pages['page-kalshi'].hidden, true, 'the Kalshi page must hide when another page is shown');
   console.log('G1 PASS switching to a page scrolls to the top');
 
   showPage('trades');
