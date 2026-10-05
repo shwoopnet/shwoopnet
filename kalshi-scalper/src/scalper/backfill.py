@@ -25,7 +25,7 @@ from .recorder import DB
 
 SERIES = ("KXBTC15M", "KXGOLD15M")
 MAX_DAYS = 40
-PAUSE_S = 0.12  # stay well inside Kalshi's public read limits
+PAUSE_S = 0.25  # stay inside Kalshi's public read limits; _get also waits out any 429
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS market(

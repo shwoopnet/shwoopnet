@@ -196,3 +196,35 @@ junk = [(60, 0.001, 1.0)] + cs[1:]
 r3, d3 = candle_windows("S", 900, junk)
 assert d3 >= 1 and all(r[6] != 60 for r in r3)
 print("candle backfill tests passed")
+
+# ---- rate limits are waited out, not fatal ----
+import io, json as _json, urllib.error as _ue
+import scalper.api as _api
+_waits = []
+_orig_sleep, _orig_open = _api.time.sleep, _api.urllib.request.urlopen
+_calls = {"n": 0}
+class _Resp(io.BytesIO):
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+def _fake_open(url, timeout=0):
+    _calls["n"] += 1
+    if _calls["n"] <= 3:   # three 429s in a row, as a long pull can see
+        raise _ue.HTTPError(url, 429, "Too Many Requests", {"Retry-After": "2"}, None)
+    return _Resp(_json.dumps({"ok": True}).encode())
+_api.time.sleep = lambda x: _waits.append(x)
+_api.urllib.request.urlopen = _fake_open
+try:
+    # A 30 minute job must survive a burst of 429s and carry on...
+    assert _api._get("/x") == {"ok": True}
+    # ...waiting longer each time, never hammering.
+    assert len(_waits) == 3 and _waits == sorted(_waits) and _waits[0] >= 5.0, _waits
+    # A permanent failure still ends in an error, not an endless loop.
+    _calls["n"] = -100
+    _api.urllib.request.urlopen = lambda url, timeout=0: (_ for _ in ()).throw(_ue.HTTPError(url, 500, "x", {}, None))
+    try:
+        _api._get("/y", retries=2); raise SystemExit("should have failed")
+    except RuntimeError:
+        pass
+finally:
+    _api.time.sleep, _api.urllib.request.urlopen = _orig_sleep, _orig_open
+print("rate limit tests passed")

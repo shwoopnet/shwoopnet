@@ -8,13 +8,28 @@ from __future__ import annotations
 
 import json
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
 
 
-def _get(path: str, params: dict | None = None, retries: int = 3) -> dict:
+def _wait_for(i: int, err: Exception) -> float:
+    """Seconds to wait before attempt i+1. Kalshi's 429 (rate limited) is not a
+    failure of the request, it is a request to slow down: honour Retry-After and
+    otherwise back off hard, so a long job waits out a limit instead of dying."""
+    wait = 1.5 * (i + 1)
+    if isinstance(err, urllib.error.HTTPError) and err.code == 429:
+        try:
+            wait = max(wait, float(err.headers.get("Retry-After", 0)))
+        except (TypeError, ValueError):
+            pass
+        wait = max(wait, 5.0 * (i + 1))
+    return min(wait, 60.0)
+
+
+def _get(path: str, params: dict | None = None, retries: int = 8) -> dict:
     url = BASE + path
     if params:
         url += "?" + urllib.parse.urlencode(params)
@@ -25,7 +40,7 @@ def _get(path: str, params: dict | None = None, retries: int = 3) -> dict:
                 return json.load(r)
         except Exception as e:  # network blips and 429s: back off and retry
             last = e
-            time.sleep(1.5 * (i + 1))
+            time.sleep(_wait_for(i, e))
     raise RuntimeError(f"GET {path} failed: {last}")
 
 
