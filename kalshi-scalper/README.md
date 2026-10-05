@@ -244,6 +244,28 @@ nothing in it licenses a trade.**
   which this has not seen, before anyone trades it. Reading it off this table and
   acting on it is the thing this process exists to prevent.
 
+**Exploratory result, 2026-10-05 (30 days, 4,871 markets; no verdict).** A side
+reaching 70%:
+
+| Window | Events | Same direction | Flipped | Priced at trigger | Gap | Buy at ask, hold, net |
+|---|---|---|---|---|---|---|
+| First 2 min | 1,123 | 74.8% | 25.2% | 75.4% | -0.6 pts (95% interval for same: 72.2% to 77.3%) | -2.41c a contract |
+| Last 2 min | 4,580 | 91.9% | 8.1% | 92.9% | -1.1 pts | -1.73c a contract |
+
+- **First 2 minutes:** it kept going about three times in four, which is what the
+  price said. The gap is inside the noise. Buying either side costs about the
+  spread and fees and nothing else.
+- **Last 2 minutes:** flips are rare (about 8%) and but sides won slightly LESS often than the
+  price said, 1.8 points less
+  for Bitcoin and about 0 for gold. This is the same effect the H1 run found at its
+  2 minute entry (the two overlap heavily in the same markets), so it is the same
+  evidence counted twice, not a second confirmation.
+- **Thresholds of 60% and 80% show the same shapes**, so it is not an accident of 70%.
+- **What this does not show.** It uses only Kalshi's own prices. Any edge would need
+  information the price does not already contain, for example the live spot price
+  against the strike with the 60 second averaging rule. That is a different
+  hypothesis and needs data this study does not have.
+
 ## Run it on your Mac (background, survives reboots)
 
 Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your
