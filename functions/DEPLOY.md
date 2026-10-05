@@ -62,22 +62,52 @@ placeholders) rather than silently falling back to the old exposed key.
 
 ## Kalshi page (admin only)
 
-`kalshiBooks` is a read-only callable that feeds the Live books tab. It requires
-the owner's email AND `isAdmin: true` on the user document. The journal needs no
-function at all: it is a field on the admin's own user document, and
-`firestore.rules` refuses a non-admin write to it. So the journal works only
-once the rules are deployed:
+- **Live books** (`kalshiBooks`, a read-only callable) requires the owner's email AND
+  `isAdmin: true` on the user document. It tries `external-api.kalshi.com`, the host Kalshi's
+  docs give, and falls back to `api.elections.kalshi.com`. The first works from Google Cloud
+  (confirmed 2026-10-05); the second sits behind a CDN that refuses Google Cloud addresses
+  (HTTP 403). If a refusal ever returns, the status line names each host and what it said.
+- **Journal.** A field (`kalshiJournal`) on the admin's own user document. It needs no function:
+  `firestore.rules` refuses a non-admin write to it, so it is protected only once the rules
+  are deployed.
+- **History for research** is fetched with `kalshi-scalper` (`python -m scalper.backfill`)
+  and analysed there. Nothing on Firebase records it.
+
+Deploy functions and rules together:
 ```
 firebase deploy --only functions,firestore:rules
 ```
 
-Kalshi's CDN returns 403 to requests from Google Cloud, so Live books will show
-a plain message instead of prices. That is expected and the journal does not
-depend on it. There is deliberately no scheduled recorder on Firebase: it could
-only fail every minute. History is fetched with `kalshi-scalper`
-(`python -m scalper.backfill`) from a connection Kalshi accepts.
+## The Kalshi paper bot (server side)
 
-The first deploy after this change asks whether to delete `kalshiRecorder` and
-the old `kalshiSnapshots` data function. Answer `y`: nothing calls it.
-Any `kalshiSnapshots` or `kalshiResults` documents it already wrote can be
-deleted in the Firebase console; nothing reads them.
+`kalshiBot` is a scheduled function that runs once a minute, makes SIMULATED trades
+from Kalshi's public prices with $100 of paper capital, and writes its state to
+Firestore. It cannot place a real order: nothing in it signs a request or calls an order
+endpoint, and a test asserts that. Deploy it together with the rules, because the rules
+are what keep its records readable by the admin only:
+```
+firebase deploy --only functions,firestore:rules
+```
+The first deploy of a scheduled function enables Cloud Scheduler and may ask a question
+or two about APIs; answer yes. After about a minute the **Bot** tab on the Kalshi page
+shows `Bot: OK`. If it still says "Not running yet" after three minutes, read the log:
+```
+firebase functions:log --only kalshiBot
+```
+
+- **State** lives in `kalshiBotPositions`, `kalshiBotEvents` and `kalshiBotMeta`. Only the
+  function writes them (the Admin SDK bypasses the rules). The one thing the page may
+  write is `kalshiBotMeta/control`, the halt switch.
+- **A double fire cannot enter a market twice.** A position is created with `create()` under
+  an id derived from the market, which fails if it exists; a close happens inside a
+  transaction that re-checks the position is still open.
+- **Cost** (a projection, not a measurement): about 43,000 invocations a month against 2
+  million free, roughly 1,500 Firestore writes and 10,000 reads a day against a daily free
+  allowance of 20,000 and 50,000 that the rest of the app shares. Set a budget alert and
+  look at usage after a week.
+- **Alerts.** The page shows the bot as OK, STALE (2.5 minutes of silence) or DOWN (5). A
+  phone alert when it stops is not built yet; it needs an outside watchdog and is the next
+  piece.
+- **Real orders are not part of this.** They come only after a strategy passes its
+  pre-registered test and 300 paper trades, and they need the API key stored as a Firebase
+  secret, never in the repo. See `kalshi-scalper/README.md`.

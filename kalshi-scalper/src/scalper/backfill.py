@@ -1,12 +1,13 @@
 """Pull Kalshi's own 1 minute history for settled 15 minute markets.
 
-Why this exists: the live recorder only sees what happens while a laptop is
-awake, and it had gaps for most of its first three days. Kalshi serves 1 minute
-candles (with the bid and ask) for past markets, no login needed, so history can
-be fetched on demand and a sleeping computer costs nothing. Checked to reach at
-least 45 days back and not 120; this defaults to 30.
+Why this exists: Kalshi serves 1 minute candles (with the bid and ask) for past
+markets, no login needed, so history can be fetched on demand and nothing has to
+be left recording. (A live snapshot recorder was tried first and retired: it only
+saw what happened while a laptop was awake, and had gaps for most of its first
+three days.) Checked to reach at least 45 days back and not 120; this defaults
+to 30.
 
-Stores into the same SQLite file as the recorder:
+Stores into one SQLite file (see paths.py):
   market(ticker, series, open_ts, close_ts, result, strike, n_candles)
   candle(ticker, series, end_ts, bid_c, ask_c, ..., volume)
 Resumable and idempotent: a market already stored is skipped.
@@ -21,11 +22,11 @@ import time
 from datetime import datetime
 
 from . import api
-from .recorder import DB
+from .paths import DB
 
 SERIES = ("KXBTC15M", "KXGOLD15M")
 MAX_DAYS = 40
-PAUSE_S = 0.12  # stay well inside Kalshi's public read limits
+PAUSE_S = 0.25  # stay inside Kalshi's public read limits; _get also waits out any 429
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS market(

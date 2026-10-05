@@ -5,15 +5,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from scalper.fees import taker_fee, round_trip_cost
-from scalper.risk import Limits, State, Order, check_order, KILL_FILE
-
-LIM = Limits(bankroll=1000.0)
 
 
-def good(**kw):
-    base = dict(underlying="BTC", price=0.50, contracts=10, my_prob=0.60, spread=0.01)
-    base.update(kw)
-    return Order(**base)
 
 
 # A scalp exiting early pays fees twice, so it must cost more than the same
@@ -23,69 +16,7 @@ assert round_trip_cost(0.50, 0.50) >= 2 * taker_fee(0.50) - 1e-9
 assert taker_fee(0.95, 100) < taker_fee(0.50, 100)
 # Crossing a 2c spread at 50c can never be break-even on a flat market.
 assert round_trip_cost(0.51, 0.49) > 0.02
-
-# A normal, edged, small order is allowed.
-ok, why = check_order(good(contracts=10), LIM, State())
-assert ok, why
-# One trade must never risk more than the per-trade cap (1% of $1000 = $10).
-ok, why = check_order(good(contracts=40), LIM, State())
-assert not ok and any("per-trade" in w for w in why)
-# Many BTC strikes are one bet: a second BTC order is refused when BTC exposure is full.
-ok, why = check_order(good(contracts=10), LIM, State(open_risk_by_underlying={"BTC": 28.0}))
-assert not ok and any("correlated" in w for w in why)
-# After the daily loss limit, no new risk is taken, even on a great-looking trade.
-ok, why = check_order(good(), LIM, State(realized_pnl_today=-25.0))
-assert not ok and any("daily loss" in w for w in why)
-# No edge after fees means no trade. Buying at your own probability loses to the fee.
-ok, why = check_order(good(price=0.50, my_prob=0.51), LIM, State())
-assert not ok and any("edge" in w for w in why)
-# Garbage input fails closed rather than slipping through.
-ok, _ = check_order(good(price=1.5), LIM, State())
-assert not ok
-# The kill switch overrides everything.
-KILL_FILE.write_text("stop")
-try:
-    ok, why = check_order(good(), LIM, State())
-    assert not ok and "kill" in why[0]
-finally:
-    KILL_FILE.unlink()
-print("all tests passed")
-
-# ---- paper engine ----
-from scalper.paper import run
-
-# snapshot: (ts, yes_bid, bid_sz, yes_ask, ask_sz)
-flat = {"M": [(t, 0.49, 100, 0.51, 100) for t in range(0, 200, 2)]}
-always = lambda h: ("yes", 0.6)
-tr = run(flat, always, hold_s=10)
-# A flat market must LOSE money to spread and fees. If a flat book ever shows a
-# profit, fills are being priced at the mid and every result is fiction.
-assert tr and all(t.net < 0 for t in tr)
-# The fill must come from a later snapshot than the signal (no lookahead).
-seen = []
-def spy(h):
-    seen.append(len(h)); return ("yes", 0.6) if len(h) == 1 else None
-tr = run({"M": [(0, .49, 9, .51, 9), (2, .60, 9, .62, 9), (20, .60, 9, .62, 9)]}, spy, hold_s=5)
-assert tr and tr[0].entry == 0.62      # filled at the NEXT snapshot's ask, not 0.51
-# Size is capped by what is displayed at the touch.
-tr = run({"M": [(0, .49, 3, .51, 3), (2, .49, 3, .51, 3), (30, .49, 3, .51, 3)]}, spy, hold_s=5, contracts=50)
-assert tr and tr[0].contracts == 3
-print("paper engine tests passed")
-
-# ---- status and service ----
-from scalper.status import find_gaps
-from scalper.service import build_plist, LABEL
-
-# A laptop that sleeps for 40 minutes must show up as a gap. Silence that looks
-# like "nothing happened" would let a 60 second move be computed across a hole.
-ts = [0, 2, 4, 6, 2406, 2408]
-assert find_gaps(ts) == [(6, 2406)]
-assert find_gaps([0, 2, 4, 6, 8]) == []
-# The background job must restart itself and run the recorder, not something else.
-pl = build_plist()
-assert pl["Label"] == LABEL and pl["KeepAlive"] is True and pl["RunAtLoad"] is True
-assert pl["ProgramArguments"][-2:] == ["scalper.recorder", "2"]
-print("status and service tests passed")
+print("fee tests passed")
 
 # ---- analyze ----
 from scalper.analyze import needed_accuracy
@@ -128,33 +59,6 @@ _code = _re.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_a.__file__).read())
 assert not _re.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _code)
 print("verdict tests passed")
 
-# ---- market hours are per series ----
-from scalper.analyze import market_hours
-# Two series recorded over the same 15 minute window are 0.25h EACH, not 0.5h.
-# Summing them is what made "72 hours" fire after about 36 hours of recording.
-dense = [(float(t),) for t in range(0, 901, 2)]
-by = {("BTC", "m1"): dense, ("GOLD", "m1"): dense}
-h = market_hours(by)
-assert set(h) == {"BTC", "GOLD"} and all(abs(v - 0.25) < 1e-9 for v in h.values()), h
-# A market recorded for 4 minutes, then nothing for 10, then 1 minute more, is
-# 5 minutes of data, not the 15 that first-to-last would credit.
-holey = [(float(t),) for t in range(0, 241, 2)] + [(float(t),) for t in range(840, 901, 2)]
-assert abs(market_hours({("BTC", "m"): holey})["BTC"] - 300 / 3600) < 1e-9
-print("market hours tests passed")
-
-# ---- windows must not span recording gaps ----
-from scalper.analyze import find_exit
-ts_ = [float(t) for t in range(0, 61, 2)] + [1000.0, 1002.0]
-# Normal: a 60s hold from t=0 exits at the snapshot at t=60.
-assert ts_[find_exit(ts_, 0, 60)] == 60.0
-# Entry at t=20: the next snapshot 60s later would be t=80, but the recorder
-# was off until t=1000. That is not a 60 second hold and must be dropped,
-# or a 16 minute move gets scored as a 60 second one and flatters the result.
-assert find_exit(ts_, 10, 60) is None
-# The end of the data is also a drop, never a guess.
-assert find_exit(ts_, len(ts_) - 1, 10) is None
-print("gap window tests passed")
-
 # ---- candle backfill ----
 from scalper.analyze import valid_quote, candle_windows
 from scalper.backfill import parse_candle
@@ -196,3 +100,198 @@ junk = [(60, 0.001, 1.0)] + cs[1:]
 r3, d3 = candle_windows("S", 900, junk)
 assert d3 >= 1 and all(r[6] != 60 for r in r3)
 print("candle backfill tests passed")
+
+# ---- rate limits are waited out, not fatal ----
+import io, json as _json, urllib.error as _ue
+import scalper.api as _api
+_waits = []
+_orig_sleep, _orig_open = _api.time.sleep, _api.urllib.request.urlopen
+_calls = {"n": 0}
+class _Resp(io.BytesIO):
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+def _fake_open(url, timeout=0):
+    _calls["n"] += 1
+    if _calls["n"] <= 3:   # three 429s in a row, as a long pull can see
+        raise _ue.HTTPError(url, 429, "Too Many Requests", {"Retry-After": "2"}, None)
+    return _Resp(_json.dumps({"ok": True}).encode())
+_api.time.sleep = lambda x: _waits.append(x)
+_api.urllib.request.urlopen = _fake_open
+try:
+    # A 30 minute job must survive a burst of 429s and carry on...
+    assert _api._get("/x") == {"ok": True}
+    # ...waiting longer each time, never hammering.
+    assert len(_waits) == 3 and _waits == sorted(_waits) and _waits[0] >= 5.0, _waits
+    # A permanent failure still ends in an error, not an endless loop.
+    _calls["n"] = -100
+    _api.urllib.request.urlopen = lambda url, timeout=0: (_ for _ in ()).throw(_ue.HTTPError(url, 500, "x", {}, None))
+    try:
+        _api._get("/y", retries=2); raise SystemExit("should have failed")
+    except RuntimeError:
+        pass
+finally:
+    _api.time.sleep, _api.urllib.request.urlopen = _orig_sleep, _orig_open
+print("rate limit tests passed")
+
+# ---- calibration (hold to settlement) ----
+from scalper.calibration import favourite, net_pnl, cluster_mean_z, judge, MIN_N, Z_BAR
+
+# The favourite is bought at its ask. NO is bought at 1 minus the YES bid.
+assert favourite(0.89, 0.90) == ("yes", 0.90)
+b = favourite(0.08, 0.09)
+assert b[0] == "no" and abs(b[1] - 0.92) < 1e-9
+assert favourite(0.49, 0.51) is None             # a coin flip is not a favourite
+assert favourite(0.97, 0.99) is None             # ask above the band: too little left to win
+assert favourite(0.001, 1.0) is None             # an empty book is not a quote
+# Profit per contract: a win pays $1 less the price and fee, a loss loses both.
+fee = 0.07 * 0.90 * 0.10
+assert abs(net_pnl("yes", 0.90, "yes") - (1 - 0.90 - fee)) < 1e-12
+assert abs(net_pnl("yes", 0.90, "no") - (-0.90 - fee)) < 1e-12
+assert net_pnl("no", 0.92, "no") > 0 > net_pnl("no", 0.92, "yes")
+# A market that did not resolve yes or no is not scored at all.
+assert net_pnl("yes", 0.90, "") is None and net_pnl("yes", 0.90, "void") is None
+# Higher fees only ever lower profit.
+assert net_pnl("yes", 0.90, "yes", 1.2) < net_pnl("yes", 0.90, "yes")
+
+# Twenty outcomes from one day are closer to one observation than to twenty:
+# the clustered error must be larger than the naive one when days differ.
+obs = [("d1", 1.0)] * 20 + [("d2", -1.0)] * 20
+mean, se, z = cluster_mean_z(obs)
+naive = (sum((x - mean) ** 2 for _, x in obs) / (len(obs) - 1)) ** 0.5 / len(obs) ** 0.5
+assert abs(mean) < 1e-12 and se > naive * 3, (se, naive)
+
+def synth(n, edge, hi_edge=None, days=30, half_split=True):
+    """n markets with a fixed net edge, spread over days; optionally a different
+    edge in the second half. Alternates so the sample is not degenerate."""
+    rows = []
+    for i in range(n):
+        day = i % days
+        late = i >= n // 2
+        e = (hi_edge if (late and hi_edge is not None) else edge)
+        x = e + (0.05 if i % 2 else -0.05)
+        rows.append((f"d{day}", float(i), x, x - 0.002))
+    return rows
+
+MID = 600.0
+# A clean, consistent edge across both halves passes every criterion.
+v, s = judge({10: synth(1200, 0.03)}, MID)
+assert v == "NOT_YET_FALSIFIED" and s[0]["ok"], s
+# No edge: falsified.
+assert judge({10: synth(1200, 0.0)}, MID)[0] == "FALSIFIED"
+# An edge in only one half must not qualify: with several entry times and
+# several cells, one lucky half is exactly what chance produces.
+assert judge({10: synth(1200, 0.03, hi_edge=-0.01)}, MID)[0] == "FALSIFIED"
+# Too few markets never qualifies, however good they look.
+assert judge({10: synth(MIN_N - 1, 0.20)}, MID)[0] == "FALSIFIED"
+# An edge that disappears with 20% higher fees must not qualify.
+rows = [(a, b, c, c - 0.05) for a, b, c, d in synth(1200, 0.03)]
+assert judge({10: rows}, MID)[0] == "FALSIFIED"
+# No verdict word may ever read as a go-ahead to trade.
+import scalper.calibration as _c, re as _re2
+_src = _re2.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_c.__file__).read())
+assert not _re2.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _src)
+print("calibration tests passed")
+
+# ---- path situations (exploratory) ----
+from scalper.situations import first_trigger, wilson, summarise
+
+# A side hits T on its MID. YES at 72/74c is a 73% YES; NO is the mirror.
+t = first_trigger([(0.72, 0.74)], 0.70)
+assert t[0] == "yes" and abs(t[1] - 0.73) < 1e-9 and t[2] == 0.74
+t = first_trigger([(0.26, 0.28)], 0.70)              # YES mid 27c, so NO is 73%
+assert t[0] == "no" and abs(t[1] - 0.73) < 1e-9 and abs(t[2] - 0.74) < 1e-9   # NO is bought at 1 - yes_bid
+assert first_trigger([(0.49, 0.51)], 0.70) is None
+# The FIRST checkpoint that qualifies is the event, even if a later one flips side.
+assert first_trigger([(0.49, 0.51), (0.72, 0.74), (0.20, 0.22)], 0.70)[0] == "yes"
+# An unusable quote (empty opening book, no candle) is skipped, never read as a trigger.
+assert first_trigger([(0.001, 1.0), None, (0.72, 0.74)], 0.70)[0] == "yes"
+assert first_trigger([(0.001, 1.0), None], 0.70) is None
+# Exactly at the threshold counts; just under it does not.
+assert first_trigger([(0.695, 0.705)], 0.70) is not None and first_trigger([(0.69, 0.70)], 0.70) is None
+
+# The consequence that matters: a side priced at 70% that wins 70% of the time is
+# CALIBRATED, not an edge. The gap must be zero there, however the flip rate looks.
+ev = [("yes", 0.70, 0.71, i < 70, 0.0, "d%d" % (i % 10), float(i)) for i in range(100)]
+s = summarise(ev)
+assert abs(s["flip"] - 0.30) < 1e-9 and abs(s["gap"]) < 1e-9, s
+# A flip rate of 30% against a price of 80% is a real shortfall of 10 points.
+ev = [("yes", 0.80, 0.81, i < 70, 0.0, "d%d" % (i % 10), float(i)) for i in range(100)]
+assert abs(summarise(ev)["gap"] + 0.10) < 1e-9
+# The interval must widen when there are few events.
+assert (lambda a, b: (a[1] - a[0]) > (b[1] - b[0]))(wilson(7, 10), wilson(700, 1000))
+assert wilson(0, 0) == (0.0, 1.0)
+lo, hi = wilson(98, 100)
+assert 0.9 < lo < 0.98 < hi <= 1.0   # near 100% the interval stays inside [0,1]
+print("situations tests passed")
+
+# ---- 40c/50c to 80c scalps (hypothesis H2) ----
+import random as _random
+from scalper.scalps import simulate, judge as scalp_judge, fee as sfee, BANDS, MIN_N as SMIN
+
+def cd(end, bid, ask, bh=None, al=None):
+    """(end, bid_c, ask_c, bid_h, ask_l)"""
+    return (end, bid, ask, bid if bh is None else bh, ask if al is None else al)
+
+CLOSE = 900
+B40 = BANDS["40c"]
+# Entry at the ask of 40c, exit when the bid closes at 80c: the 80c is received,
+# and the fee is paid on BOTH legs.
+t = simulate([cd(60, 0.39, 0.40), cd(120, 0.80, 0.81)], CLOSE, "no", B40)
+assert t["outcome"] == "target" and t["side"] == "yes"
+assert abs(t["net"] - (0.80 - sfee(0.80) - 0.40 - sfee(0.40))) < 1e-12
+# Never reaches 80c: held to settlement, a win pays $1 and a loss pays nothing.
+nope = [cd(60, 0.39, 0.40), cd(120, 0.50, 0.51), cd(180, 0.45, 0.46)]
+assert abs(simulate(nope, CLOSE, "yes", B40)["net"] - (1 - 0.40 - sfee(0.40))) < 1e-12
+assert abs(simulate(nope, CLOSE, "no", B40)["net"] - (-0.40 - sfee(0.40))) < 1e-12
+# The NO side is bought at 1 minus the YES bid and sold when the YES ask falls to 20c.
+n = simulate([cd(60, 0.59, 0.61), cd(120, 0.18, 0.20)], CLOSE, "yes", B40)
+assert n["side"] == "no" and abs(n["ask"] - 0.41) < 1e-9 and n["outcome"] == "target"
+# No entry: outside the band, under 5 minutes left, or an unusable quote.
+assert simulate([cd(60, 0.55, 0.57)], CLOSE, "yes", B40) is None
+assert simulate([cd(CLOSE - 240, 0.39, 0.40)], CLOSE, "yes", B40) is None
+assert simulate([cd(60, 0.001, 1.0)], CLOSE, "yes", B40) is None
+# A market that did not resolve yes or no is not scored.
+assert simulate(nope, CLOSE, "", B40) is None
+# No lookahead: the entry minute's own high must never trigger the exit.
+spike = [cd(60, 0.39, 0.40, bh=0.90), cd(120, 0.30, 0.31)]
+assert simulate(spike, CLOSE, "no", B40, touch="high")["outcome"] == "loss"
+# A stop exits at the closing bid, slippage included, never at the stop price.
+st = simulate([cd(60, 0.39, 0.40), cd(120, 0.12, 0.13)], CLOSE, "no", B40, stop=0.20)
+assert st["outcome"] == "stop" and abs(st["net"] - (0.12 - sfee(0.12) - 0.40 - sfee(0.40))) < 1e-12
+# Fees only ever lower profit.
+assert simulate([cd(60, 0.39, 0.40), cd(120, 0.80, 0.81)], CLOSE, "no", B40, fee_mult=1.2)["net"] < t["net"]
+
+# THE test that matters. In a FAIR game (a martingale price, the result drawn with
+# probability equal to the price) this strategy has zero expected profit before
+# costs, so after a 2c spread and fees it must LOSE about the costs. A profit here
+# would mean the simulator invents an edge (an optimistic fill, a lookahead).
+rng = _random.Random(7)
+def fair_market():
+    p, cs = 0.5, []
+    for k in range(1, 15):
+        if 0.02 < p < 0.98:
+            p = min(0.98, max(0.02, p + rng.choice((-0.06, 0.06))))
+        cs.append(cd(60 * k, round(p - 0.01, 4), round(p + 0.01, 4)))
+    return cs, ("yes" if rng.random() < p else "no")
+nets = {"40c": [], "50c": []}
+for _ in range(20000):
+    cs, res = fair_market()
+    for b in nets:
+        r = simulate(cs, CLOSE, res, BANDS[b])
+        if r:
+            nets[b].append(r["net"])
+for b, v in nets.items():
+    m = sum(v) / len(v)
+    assert -0.10 < m < -0.01, (b, m, len(v))   # loses roughly the costs, never wins
+# Verdict logic, as for H1: a clean edge passes, one lucky half or too few markets does not.
+def rows(n, edge, edge2=None):
+    return {"40c": [("d%d" % (i % 30), float(i), (edge2 if (edge2 is not None and i >= n // 2) else edge) + (0.1 if i % 2 else -0.1),
+                     (edge2 if (edge2 is not None and i >= n // 2) else edge) - 0.003 + (0.1 if i % 2 else -0.1)) for i in range(n)]}
+assert scalp_judge(rows(1200, 0.04), 600.0)[0] == "NOT_YET_FALSIFIED"
+assert scalp_judge(rows(1200, 0.0), 600.0)[0] == "FALSIFIED"
+assert scalp_judge(rows(1200, 0.04, edge2=-0.02), 600.0)[0] == "FALSIFIED"
+assert scalp_judge(rows(SMIN - 1, 0.30), 600.0)[0] == "FALSIFIED"
+import scalper.scalps as _sc, re as _re3
+_s = _re3.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_sc.__file__).read())
+assert not _re3.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _s)
+print("scalp tests passed")

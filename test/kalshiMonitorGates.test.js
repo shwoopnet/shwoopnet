@@ -1,7 +1,7 @@
 // The Kalshi page tells someone how much a scalp costs and whether a trade
 // fits their risk limits. A wrong number here is not cosmetic: it is the
 // number someone sizes real money from. These gates state the consequences.
-// The same math lives in kalshi-scalper (fees.py, risk.py); keep them equal.
+// The same math lives in kalshi-scalper (fees.py); keep them equal.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -233,6 +233,16 @@ gates.G21 = () => {
   assert.ok(/losing to the price|Not distinguishable/.test(c.verdict), c.verdict);
   const lucky = Array.from({ length: 200 }, (_, i) => mk(i % 3 !== 0, i));
   assert.ok(/beating the price/.test(calib(lucky).verdict));
+};
+
+// Kalshi's refusal is a whole HTML error page. The status line must never show
+// markup, and a permanent refusal must stop the 5 second polling.
+gates.G22 = () => {
+  const m = /function refreshKalshi\(\)\{([\s\S]*?)\n  \}\n  function startKalshiPoll/.exec(src);
+  assert.ok(m, 'refreshKalshi not found');
+  assert.ok(/refused \? 'Kalshi refused the request \(HTTP 403\)'/.test(m[1]), 'a 403 must show a short line');
+  assert.ok(/replace\(\/<\[\^>\]\*>\/g/.test(m[1]), 'any other error must have markup stripped');
+  assert.ok(/if\(refused\)\{ stopKalshiPoll\(\); \}/.test(m[1]), 'a 403 must stop the polling');
 };
 
 let failed = 0;

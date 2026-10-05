@@ -68,9 +68,17 @@ exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (reque
 // and must not be widened into something that can without a separate review.
 const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const botRun = require("./kalshiBotRun");
 const kalshi = require("./kalshiLib");
 
-const KALSHI_BASE = "https://api.elections.kalshi.com/trade-api/v2";
+// The first host is the one Kalshi's API documentation gives. api.elections sits
+// behind a CDN that refuses Google Cloud addresses (HTTP 403), so it is only the
+// fallback. Both serve the same read-only public data.
+const KALSHI_HOSTS = [
+  "https://external-api.kalshi.com/trade-api/v2",
+  "https://api.elections.kalshi.com/trade-api/v2",
+];
 const KALSHI_CACHE_MS = 2000;
 let kalshiCache = { at: 0, body: null };
 
@@ -81,37 +89,70 @@ let kalshiCache = { at: 0, body: null };
 // let a second admin in by accident. The page hides itself for anyone else, but
 // hiding is not the control, this is.
 const KALSHI_OWNER_EMAIL = "heiszcam@gmail.com";
+
+// getFirestore() needs the DEFAULT app. "Is any app initialised?" is the wrong
+// question: the functions runtime can already hold another app, so a check on
+// getApps().length skips initialisation and getFirestore() then throws
+// "The default Firebase app does not exist". That is exactly what the first
+// deploy did. Ask for the default app by name, and never initialise it twice
+// (a second initializeApp() with the same name throws too).
+function ensureDefaultAdminApp() {
+  if (!getApps().some((a) => a.name === "[DEFAULT]")) initializeApp();
+}
 async function assertKalshiAdmin(auth) {
   assertSignedIn(auth);
   if (!auth.token || auth.token.email !== KALSHI_OWNER_EMAIL) {
     throw new HttpsError("permission-denied", "Not available for this account.");
   }
-  if (!getApps().length) initializeApp();
-  const snap = await getFirestore().collection("users").doc(auth.uid).get();
+  // The email already matched, so only the owner can reach this line. A failure
+  // to read the user document must still deny (fail closed), but it must say why:
+  // an unnamed error here reaches the page as "INTERNAL" and hides the cause.
+  let snap;
+  try {
+    ensureDefaultAdminApp();
+    snap = await getFirestore().collection("users").doc(auth.uid).get();
+  } catch (e) {
+    console.error("kalshi admin check could not read the user document:", e);
+    throw new HttpsError("unavailable", "Admin check failed: " + String((e && e.message) || e).slice(0, 120));
+  }
   if (!snap.exists || snap.data().isAdmin !== true) {
     throw new HttpsError("permission-denied", "Not available for this account.");
   }
 }
 
 async function kalshiFetchSeries(series, status, limit) {
-  const url = KALSHI_BASE + "/markets?series_ticker=" + series + "&status=" + status + "&limit=" + limit;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(8000),
-    headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" },
-  });
-  if (!res.ok) {
-    // A refusal from Kalshi's CDN says very little, so keep what it does say.
-    // Without this a 403 reads as a bug in our code when it may be the network
-    // path (some CDNs refuse cloud-provider address ranges), and the two need
-    // different fixes.
-    const body = (await res.text().catch(() => "")).slice(0, 200);
-    const cdn = res.headers.get("x-cache") || res.headers.get("server") || "";
-    console.error("Kalshi " + series + " HTTP " + res.status + " cdn=" + cdn + " body=" + body);
-    throw new HttpsError("unavailable", "Kalshi " + series + " HTTP " + res.status +
-      (cdn ? " (" + cdn + ")" : "") + (body ? ": " + body : ""));
+  const failures = [];
+  for (const base of KALSHI_HOSTS) {
+    const host = base.replace("https://", "").split("/")[0];
+    const url = base + "/markets?series_ticker=" + series + "&status=" + status + "&limit=" + limit;
+    // One host failing, for any reason (a refusal, a timeout, a dropped
+    // connection, a body that is not JSON), is a reason to try the next one,
+    // never a crash. An error that escapes here reaches the page as the useless
+    // "INTERNAL", which is what hid the real cause the first time.
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(8000),
+        headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.markets || [];
+      }
+      // A refusal from Kalshi's CDN says very little, so keep what it does say
+      // in the logs. Without this a 403 reads as a bug in our code when it may
+      // be the network path (some CDNs refuse cloud-provider address ranges),
+      // and the two need different fixes. The thrown message names the host and
+      // status only, never the response body, which is a whole HTML page.
+      const body = (await res.text().catch(() => "")).slice(0, 200);
+      const cdn = res.headers.get("x-cache") || res.headers.get("server") || "";
+      console.error("Kalshi " + host + " " + series + " HTTP " + res.status + " cdn=" + cdn + " body=" + body);
+      failures.push(host + " HTTP " + res.status + (cdn ? " (" + cdn + ")" : ""));
+    } catch (e) {
+      console.error("Kalshi " + host + " " + series + " failed:", e);
+      failures.push(host + " " + ((e && e.name) || "error") + ": " + String((e && e.message) || e).slice(0, 80));
+    }
   }
-  const data = await res.json();
-  return data.markets || [];
+  throw new HttpsError("unavailable", "Kalshi " + series + ": " + failures.join(" | "));
 }
 
 exports.kalshiBooks = onCall(async (request) => {
@@ -120,12 +161,99 @@ exports.kalshiBooks = onCall(async (request) => {
   if (kalshiCache.body && Date.now() - kalshiCache.at < KALSHI_CACHE_MS) {
     return kalshiCache.body;
   }
-  const markets = [];
-  for (const series of kalshi.KALSHI_SERIES) {
-    const raw = await kalshiFetchSeries(series, "open", 5);
-    raw.forEach((m) => markets.push(kalshi.trimMarket(series, m)));
+  try {
+    const markets = [];
+    for (const series of kalshi.KALSHI_SERIES) {
+      const raw = await kalshiFetchSeries(series, "open", 5);
+      raw.forEach((m) => markets.push(kalshi.trimMarket(series, m)));
+    }
+    const body = { fetchedAt: Date.now(), markets };
+    kalshiCache = { at: Date.now(), body };
+    return body;
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    console.error("kalshiBooks failed:", e);
+    throw new HttpsError("unavailable", "Relay error: " + String((e && e.message) || e).slice(0, 120));
   }
-  const body = { fetchedAt: Date.now(), markets };
-  kalshiCache = { at: Date.now(), body };
-  return body;
 });
+
+// ---- Kalshi PAPER bot, on the server ----------------------------------------
+// Runs once a minute on Google's servers, so nothing depends on a computer being
+// awake. PAPER ONLY: it simulates trades from Kalshi's public prices and cannot place
+// an order (the api object below has no order method, and a test asserts this file's
+// bot section contains no order code). The logic lives in kalshiBotLib.js and the tick
+// in kalshiBotRun.js, both tested without Firebase; this file only supplies Firestore
+// and Kalshi to them.
+//
+// State is in Firestore, not on a disk. A position is created by a key derived from its
+// market (h2-<ticker>) with create(), which fails if the document exists, so two runs at
+// the same moment cannot enter one market twice. The collections have no client write
+// rule except the admin's halt switch (see firestore.rules).
+async function kalshiGetJson(pathAndQuery) {
+  const failures = [];
+  for (const base of KALSHI_HOSTS) {
+    const host = base.replace("https://", "").split("/")[0];
+    try {
+      const res = await fetch(base + pathAndQuery, {
+        signal: AbortSignal.timeout(8000),
+        headers: { "User-Agent": "shwoopnet-bot/1.0 (paper)", "Accept": "application/json" },
+      });
+      if (res.ok) return await res.json();
+      failures.push(host + " HTTP " + res.status);
+    } catch (e) {
+      failures.push(host + " " + String((e && e.message) || e).slice(0, 60));
+    }
+  }
+  throw new Error(pathAndQuery.split("?")[0] + ": " + failures.join(" | "));
+}
+
+function kalshiBotApi() {
+  return {
+    exchangeStatus: () => kalshiGetJson("/exchange/status"),
+    markets: (series) => kalshiFetchSeries(series, "open", 5),
+    market: async (ticker) => (await kalshiGetJson("/markets/" + encodeURIComponent(ticker))).market || {},
+  };
+}
+
+function firestoreBotStore(db) {
+  const positions = db.collection("kalshiBotPositions");
+  const events = db.collection("kalshiBotEvents");
+  const meta = db.collection("kalshiBotMeta");
+  const fromDocs = (snap) => snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+  return {
+    async getStatus() { const s = await meta.doc("status").get(); return s.exists ? s.data() : null; },
+    async getControl() { const s = await meta.doc("control").get(); return s.exists ? s.data() : {}; },
+    async listOpen() { return fromDocs(await positions.where("status", "==", "open").get()); },
+    // One range filter on one field, so no composite index is needed.
+    async listClosedSince(ms) { return fromDocs(await positions.where("settledAt", ">=", ms).get()).filter((p) => p.status === "closed"); },
+    async createPosition(id, data) {
+      try {
+        await positions.doc(id).create(data);
+        return true;
+      } catch (e) {
+        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
+        throw e;
+      }
+    },
+    async closePosition(id, patch) {
+      return db.runTransaction(async (t) => {
+        const ref = positions.doc(id);
+        const snap = await t.get(ref);
+        if (!snap.exists || snap.data().status !== "open") return false;
+        t.update(ref, Object.assign({}, patch, { status: "closed" }));
+        return true;
+      });
+    },
+    async addEvent(e) { await events.add(e); },
+    async setStatus(st) { await meta.doc("status").set(st); },
+  };
+}
+
+exports.kalshiBot = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const r = await botRun.runTick({ store: firestoreBotStore(getFirestore()), api: kalshiBotApi(), now: Date.now() });
+    console.log("kalshiBot tick: entered=" + r.entered + " tier=" + r.tier + (r.block ? " blocked=" + r.block : ""));
+  }
+);

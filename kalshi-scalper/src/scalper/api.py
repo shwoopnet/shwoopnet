@@ -1,41 +1,52 @@
 """Minimal Kalshi REST client. Public market data only for now.
 
 No order placement lives here on purpose. Orders go through the risk gate
-(risk.py) and are added only after paper results clear the pre-registered bar.
+(the server bot) and are added only after paper results clear the pre-registered bar.
 Quotes are dollar strings ("0.0950"), not cents.
 """
 from __future__ import annotations
 
 import json
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
-BASE = "https://api.elections.kalshi.com/trade-api/v2"
+# Kalshi's docs give external-api.kalshi.com as the production host. The older
+# api.elections host keeps working today and stays as a fallback.
+BASES = ("https://external-api.kalshi.com/trade-api/v2", "https://api.elections.kalshi.com/trade-api/v2")
 
 
-def _get(path: str, params: dict | None = None, retries: int = 3) -> dict:
-    url = BASE + path
-    if params:
-        url += "?" + urllib.parse.urlencode(params)
+def _wait_for(i: int, err: Exception) -> float:
+    """Seconds to wait before attempt i+1. Kalshi's 429 (rate limited) is not a
+    failure of the request, it is a request to slow down: honour Retry-After and
+    otherwise back off hard, so a long job waits out a limit instead of dying."""
+    wait = 1.5 * (i + 1)
+    if isinstance(err, urllib.error.HTTPError) and err.code == 429:
+        try:
+            wait = max(wait, float(err.headers.get("Retry-After", 0)))
+        except (TypeError, ValueError):
+            pass
+        wait = max(wait, 5.0 * (i + 1))
+    return min(wait, 60.0)
+
+
+def _get(path: str, params: dict | None = None, retries: int = 8) -> dict:
+    query = ("?" + urllib.parse.urlencode(params)) if params else ""
     last = None
     for i in range(retries):
-        try:
-            with urllib.request.urlopen(url, timeout=15) as r:
-                return json.load(r)
-        except Exception as e:  # network blips and 429s: back off and retry
-            last = e
-            time.sleep(1.5 * (i + 1))
+        for base in BASES:
+            try:
+                with urllib.request.urlopen(base + path + query, timeout=15) as r:
+                    return json.load(r)
+            except urllib.error.HTTPError as e:
+                last = e
+                if e.code == 429:
+                    break          # the limit is on the account, so another host will not help: back off
+            except Exception as e:  # a dropped connection or a refusal: try the other host
+                last = e
+        time.sleep(_wait_for(i, last))
     raise RuntimeError(f"GET {path} failed: {last}")
-
-
-def markets(series_ticker: str, status: str = "open", limit: int = 20) -> list[dict]:
-    return _get("/markets", {"series_ticker": series_ticker, "status": status,
-                             "limit": limit}).get("markets", [])
-
-
-def orderbook(ticker: str) -> dict:
-    return _get(f"/markets/{ticker}/orderbook")["orderbook_fp"]
 
 
 def f(x) -> float | None:
