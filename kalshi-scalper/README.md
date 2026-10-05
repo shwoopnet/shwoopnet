@@ -27,7 +27,7 @@ added only after the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 1 (see Verdicts). Cuts examined by the decision rule: 18.
+Strategy variants tried so far: 2 (see Verdicts). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -153,7 +153,34 @@ different cost structure), selecting only some moments, or anything faster than
 one minute. Those are new hypotheses and each must declare its counterparty, a
 numeric prediction and a kill criterion before it is run.
 
-Strategy variants tried so far: 1 (this one). Cuts examined: 18.
+Cuts examined: 18.
+
+**2026-10-05: H1, favourites underpriced when held to settlement: `FALSIFIED`.**
+One run of `python -m scalper.calibration` under the rule fixed before it (commit
+e4f4d87). 4,871 markets, 30 days, no threshold or band changed after seeing it.
+
+| Entry | n | Mean net per contract | z (day clustered) | 1st half | 2nd half | Fees x1.2 | Detectable |
+|---|---|---|---|---|---|---|---|
+| 10 min before close | 764 | +1.13c | 1.34 | +0.88c | +1.33c | +1.00c | 2.35c |
+| 5 min | 1,857 | +0.53c | 0.90 | +0.30c | +0.79c | +0.42c | 1.65c |
+| 2 min | 1,320 | -2.73c | -4.20 | -3.37c | -2.03c | -2.83c | 1.82c |
+
+- No entry time clears the bar (z of 2.2 or more, both halves, positive after
+  stressed fees). The sign changes with the entry time (+1.1c, +0.5c, -2.7c), the
+  pattern of noise around zero.
+- The test could see an edge of about 1.7c to 2.4c, better than the 2.5c predicted.
+  So: no favourite edge that large, at any of the three entry times.
+- The 2 minute result is significantly NEGATIVE (z of -4.2, negative in both
+  halves): favourites bought two minutes before close lost 2.7c a contract. That is
+  the opposite of H1. It is a pattern found in the data it was measured on, so
+  acting on it needs a new hypothesis stated first and tested on data this run has
+  not seen (the history reaches at least 45 days, so days 31 to 45 back are unseen).
+- The descriptive calibration table is not evidence for anything. It is 15 cells
+  with no verdict attached, and some cells look dramatic at small n (for example
+  90c to 100c at 10 minutes: priced 93.0%, won 98.1%, n of 160).
+
+Strategy variants tried so far: 2 (the 60s scalp and H1). Cuts examined: 18, plus
+3 entry times for H1.
 
 ## Hypothesis H1: favourites are underpriced, held to settlement (fixed 2026-10-05, before any calibration data was looked at)
 
