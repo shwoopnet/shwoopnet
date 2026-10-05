@@ -255,7 +255,7 @@ reaching 70%:
 - **First 2 minutes:** it kept going about three times in four, which is what the
   price said. The gap is inside the noise. Buying either side costs about the
   spread and fees and nothing else.
-- **Last 2 minutes:** flips are rare (about 8%) and but sides won slightly LESS often than the
+- **Last 2 minutes:** flips are rare (about 8%), but sides won slightly LESS often than the
   price said, 1.8 points less
   for Bitcoin and about 0 for gold. This is the same effect the H1 run found at its
   2 minute entry (the two overlap heavily in the same markets), so it is the same
