@@ -132,8 +132,25 @@ print("verdict tests passed")
 from scalper.analyze import market_hours
 # Two series recorded over the same 15 minute window are 0.25h EACH, not 0.5h.
 # Summing them is what made "72 hours" fire after about 36 hours of recording.
-by = {("BTC", "m1"): [(0.0,), (900.0,)], ("GOLD", "m1"): [(0.0,), (900.0,)]}
+dense = [(float(t),) for t in range(0, 901, 2)]
+by = {("BTC", "m1"): dense, ("GOLD", "m1"): dense}
 h = market_hours(by)
-assert h == {"BTC": 0.25, "GOLD": 0.25}, h
-assert min(h.values()) == 0.25
+assert set(h) == {"BTC", "GOLD"} and all(abs(v - 0.25) < 1e-9 for v in h.values()), h
+# A market recorded for 4 minutes, then nothing for 10, then 1 minute more, is
+# 5 minutes of data, not the 15 that first-to-last would credit.
+holey = [(float(t),) for t in range(0, 241, 2)] + [(float(t),) for t in range(840, 901, 2)]
+assert abs(market_hours({("BTC", "m"): holey})["BTC"] - 300 / 3600) < 1e-9
 print("market hours tests passed")
+
+# ---- windows must not span recording gaps ----
+from scalper.analyze import find_exit
+ts_ = [float(t) for t in range(0, 61, 2)] + [1000.0, 1002.0]
+# Normal: a 60s hold from t=0 exits at the snapshot at t=60.
+assert ts_[find_exit(ts_, 0, 60)] == 60.0
+# Entry at t=20: the next snapshot 60s later would be t=80, but the recorder
+# was off until t=1000. That is not a 60 second hold and must be dropped,
+# or a 16 minute move gets scored as a 60 second one and flatters the result.
+assert find_exit(ts_, 10, 60) is None
+# The end of the data is also a drop, never a guess.
+assert find_exit(ts_, len(ts_) - 1, 10) is None
+print("gap window tests passed")

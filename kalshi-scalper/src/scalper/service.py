@@ -27,9 +27,10 @@ DATA = SRC.parent / "data"
 def build_plist() -> dict:
     return {
         "Label": LABEL,
-        # caffeinate -i stops IDLE sleep while the recorder runs. It cannot stop
-        # a closed lid or a manual sleep; status.py reports those as gaps.
-        "ProgramArguments": ["/usr/bin/caffeinate", "-i", sys.executable, "-m", "scalper.recorder", "2"],
+        # -i stops idle sleep; -s stops system sleep while on AC power. Neither
+        # stops a closed lid (without an external display) or a manual sleep;
+        # status.py reports those as gaps.
+        "ProgramArguments": ["/usr/bin/caffeinate", "-i", "-s", sys.executable, "-m", "scalper.recorder", "2"],
         "WorkingDirectory": str(SRC),
         "EnvironmentVariables": {"PYTHONPATH": str(SRC)},
         "RunAtLoad": True,

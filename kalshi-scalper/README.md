@@ -81,6 +81,21 @@ every 2s), so row counts overstate independent trades. Part of the late-market
 move is the price resolving toward 0 or 100, which is not a signal anyone can
 call in advance. A single week also may not cover weekends or news days.
 
+## Measurement fixes (logged because the rule above was already in force)
+
+No verdict other than `NOT_ENOUGH_DATA` had been issued under either of these.
+Both make the measurement stricter, and the numbers quoted before them are
+superseded.
+
+- **2026-10-05, windows across gaps.** A "60 second hold" was scored as the
+  first snapshot at least 60s later, however late. After a recorder outage that
+  paired an entry with a snapshot many minutes on, so the move was larger than
+  a 60s move and the "needs" figure looked better than it was. Windows whose
+  exit lands more than 6s late are now dropped, and the count is printed.
+- **2026-10-05, hours of market time.** First-to-last snapshot credited a market
+  for time the recorder was off in the middle of it. Only the intervals actually
+  recorded now count. Earlier, hours were also summed across both series.
+
 ## Run it on your Mac (background, survives reboots)
 
 Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your

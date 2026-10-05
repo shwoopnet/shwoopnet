@@ -26,14 +26,21 @@ Usage: python -m scalper.analyze
 from __future__ import annotations
 
 import sqlite3
+from bisect import bisect_left
 from collections import defaultdict
 from datetime import datetime
 
 from .fees import round_trip_cost
 from .recorder import DB
+from .status import GAP_SECONDS
 
 HORIZONS = (10, 30, 60, 120)  # seconds
 CUT_HORIZON = 60
+# An exit snapshot more than this far past the target time means the recorder
+# was not running in between. That is not an N second hold, it is whatever
+# happened across the hole, and the move over a hole is larger than the move
+# over the window it claims to be. Such windows are dropped, never stretched.
+MAX_SLIP_S = 6.0
 
 # ---- Decision rule, fixed on 2026-10-02 before further data was seen ----
 RULE_MIN_HOURS = 72     # market time PER SERIES (about 3 days of recording) before any other verdict
@@ -76,14 +83,29 @@ def _summ(rows: list[tuple]) -> tuple:
     return n, cost, move, beat, needed_accuracy(cost, move)
 
 
+def find_exit(ts: list[float], i: int, hold: float) -> int | None:
+    """Index of the snapshot to exit at for an entry at ts[i], or None. None
+    when the data ends first, or when the first snapshot at least `hold`
+    seconds on is more than MAX_SLIP_S late (the recorder was off)."""
+    j = bisect_left(ts, ts[i] + hold, i + 1)
+    if j >= len(ts) or ts[j] - ts[i] - hold > MAX_SLIP_S:
+        return None
+    return j
+
+
 def market_hours(by: dict) -> dict[str, float]:
-    """Hours of recorded market time PER SERIES. Each market covers about 15
-    minutes, so one series records about one market-hour per wall-clock hour,
-    and summing across series would double the figure. The rule needs the
-    thinner series to have enough, because both are being judged."""
+    """Hours of market time actually RECORDED, per series. Only the intervals
+    between consecutive snapshots count, and only when they are no longer than
+    GAP_SECONDS, so a sleeping laptop adds nothing. (Measuring first-to-last
+    snapshot of each market would credit a market for time the recorder was
+    off in the middle of it.) Each market is about 15 minutes, so one series
+    records about one market-hour per wall-clock hour; summing across series
+    would double it. The rule needs the thinner series to have enough."""
     out: dict[str, float] = defaultdict(float)
     for (series, _), pts in by.items():
-        out[series] += (pts[-1][0] - pts[0][0]) / 3600
+        for a, b in zip(pts, pts[1:]):
+            if b[0] - a[0] <= GAP_SECONDS:
+                out[series] += (b[0] - a[0]) / 3600
     return dict(out)
 
 
@@ -95,17 +117,20 @@ def collect() -> tuple[list[tuple], dict]:
     for s, t, ts, b, a, c in db.execute(q):
         by[(s, t)].append((ts, b, a, c))
     recs = []  # (series, horizon, mid, secs_left, cost, move, ts)
+    dropped = 0
     for (s, _), pts in by.items():
+        tss = [p[0] for p in pts]
         for i, (ts, b, a, c) in enumerate(pts):
             for h in HORIZONS:
-                j = next((k for k in range(i + 1, len(pts)) if pts[k][0] - ts >= h), None)
+                j = find_exit(tss, i, h)
                 if j is None:
-                    break
+                    dropped += 1
+                    continue
                 _, b2, a2, _ = pts[j]
                 recs.append((s, h, (a + b) / 2, _secs_left(c, ts),
                              round_trip_cost(a, b), abs((b2 + a2) / 2 - (b + a) / 2), ts))
     per = market_hours(by)
-    return recs, {"markets": len(by), "hours_by_series": per,
+    return recs, {"markets": len(by), "hours_by_series": per, "dropped": dropped,
                   "hours": min(per.values()) if per else 0.0}
 
 
@@ -151,7 +176,8 @@ def main() -> None:
         print("Not enough recorded data yet.")
         return
     per = ", ".join(f"{k} {v:.1f}h" for k, v in sorted(info["hours_by_series"].items()))
-    print(f"{info['markets']} markets. Market time recorded per series: {per} (rule needs {RULE_MIN_HOURS}h in each)\n")
+    print(f"{info['markets']} markets. Market time recorded per series: {per} (rule needs {RULE_MIN_HOURS}h in each)")
+    print(f"{info['dropped']:,} windows dropped for spanning a recording gap or the end of a market\n")
 
     print(f"{'series':10} {'hold':>5} {'n':>7} {'avg cost':>9} {'avg |move|':>11} {'move>cost':>10} {'needs':>7}")
     for s in sorted({r[0] for r in recs}):
