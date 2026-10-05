@@ -44,7 +44,21 @@ gates.G4 = () => {
 
 // The relay stays read-only and keyless: GET only, nothing to place an order with.
 gates.G5 = () => {
-  assert.ok(!/\/orders|Authorization|KALSHI_(API_)?KEY|method\s*:/i.test(fnSrc.slice(fnSrc.indexOf('KALSHI_BASE'))));
+  assert.ok(!/\/orders|Authorization|KALSHI_(API_)?KEY|method\s*:/i.test(fnSrc.slice(fnSrc.indexOf('KALSHI_HOSTS'))));
+};
+
+// The documented host comes first and the old one stays as a fallback. A single
+// refused host must not take the page down, and an error must name which host
+// said no and never carry a whole HTML page.
+gates.G6 = () => {
+  const hosts = /const KALSHI_HOSTS = \[([\s\S]*?)\];/.exec(fnSrc);
+  assert.ok(hosts, 'KALSHI_HOSTS not found');
+  const list = [...hosts[1].matchAll(/"https:\/\/([^/"]+)/g)].map((x) => x[1]);
+  assert.deepStrictEqual(list, ['external-api.kalshi.com', 'api.elections.kalshi.com']);
+  const m = /async function kalshiFetchSeries\(([\s\S]*?)\n\}\n/.exec(fnSrc)[1];
+  assert.ok(/for \(const base of KALSHI_HOSTS\)/.test(m) && /continue;/.test(m), 'must try each host in turn');
+  const thrown = /throw new HttpsError\("unavailable", "Kalshi " \+ series[^;]*;/.exec(m);
+  assert.ok(thrown && !/body/.test(thrown[0]), 'the thrown message must not include the response body');
 };
 
 let failed = 0;

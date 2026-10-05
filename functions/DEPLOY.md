@@ -71,7 +71,14 @@ once the rules are deployed:
 firebase deploy --only functions,firestore:rules
 ```
 
-Kalshi's CDN returns 403 to requests from Google Cloud, so Live books will show
+
+`kalshiBooks` tries `external-api.kalshi.com` (the host Kalshi's docs give) first
+and `api.elections.kalshi.com` second. The second sits behind a CDN that refuses
+Google Cloud addresses, so Live books working at all depends on the first not
+doing the same. If the status line still says refused, both hosts said no and
+the error names each.
+
+Kalshi's CDN returns 403 to requests from Google Cloud on the second host, so if both refuse, Live books will show
 a plain message instead of prices. That is expected and the journal does not
 depend on it. There is deliberately no scheduled recorder on Firebase: it could
 only fail every minute. History is fetched with `kalshi-scalper`

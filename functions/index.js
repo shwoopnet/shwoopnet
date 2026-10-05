@@ -70,7 +70,13 @@ const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const kalshi = require("./kalshiLib");
 
-const KALSHI_BASE = "https://api.elections.kalshi.com/trade-api/v2";
+// The first host is the one Kalshi's API documentation gives. api.elections sits
+// behind a CDN that refuses Google Cloud addresses (HTTP 403), so it is only the
+// fallback. Both serve the same read-only public data.
+const KALSHI_HOSTS = [
+  "https://external-api.kalshi.com/trade-api/v2",
+  "https://api.elections.kalshi.com/trade-api/v2",
+];
 const KALSHI_CACHE_MS = 2000;
 let kalshiCache = { at: 0, body: null };
 
@@ -94,24 +100,35 @@ async function assertKalshiAdmin(auth) {
 }
 
 async function kalshiFetchSeries(series, status, limit) {
-  const url = KALSHI_BASE + "/markets?series_ticker=" + series + "&status=" + status + "&limit=" + limit;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(8000),
-    headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" },
-  });
-  if (!res.ok) {
-    // A refusal from Kalshi's CDN says very little, so keep what it does say.
-    // Without this a 403 reads as a bug in our code when it may be the network
-    // path (some CDNs refuse cloud-provider address ranges), and the two need
-    // different fixes.
+  const failures = [];
+  for (const base of KALSHI_HOSTS) {
+    const host = base.replace("https://", "").split("/")[0];
+    const url = base + "/markets?series_ticker=" + series + "&status=" + status + "&limit=" + limit;
+    let res;
+    try {
+      res = await fetch(url, {
+        signal: AbortSignal.timeout(8000),
+        headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" },
+      });
+    } catch (e) {
+      failures.push(host + " " + e.message);
+      continue;
+    }
+    if (res.ok) {
+      const data = await res.json();
+      return data.markets || [];
+    }
+    // A refusal from Kalshi's CDN says very little, so keep what it does say in
+    // the logs. Without this a 403 reads as a bug in our code when it may be the
+    // network path (some CDNs refuse cloud-provider address ranges), and the two
+    // need different fixes. The thrown message names the host and status only,
+    // never the response body, which is a whole HTML page.
     const body = (await res.text().catch(() => "")).slice(0, 200);
     const cdn = res.headers.get("x-cache") || res.headers.get("server") || "";
-    console.error("Kalshi " + series + " HTTP " + res.status + " cdn=" + cdn + " body=" + body);
-    throw new HttpsError("unavailable", "Kalshi " + series + " HTTP " + res.status +
-      (cdn ? " (" + cdn + ")" : "") + (body ? ": " + body : ""));
+    console.error("Kalshi " + host + " " + series + " HTTP " + res.status + " cdn=" + cdn + " body=" + body);
+    failures.push(host + " HTTP " + res.status + (cdn ? " (" + cdn + ")" : ""));
   }
-  const data = await res.json();
-  return data.markets || [];
+  throw new HttpsError("unavailable", "Kalshi " + series + ": " + failures.join(" | "));
 }
 
 exports.kalshiBooks = onCall(async (request) => {
