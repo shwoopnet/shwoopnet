@@ -75,6 +75,25 @@ const KALSHI_BASE = "https://api.elections.kalshi.com/trade-api/v2";
 const KALSHI_CACHE_MS = 2000;
 let kalshiCache = { at: 0, body: null };
 
+// The Kalshi page is for the owner only. Two independent checks, both required:
+// the token's email, and the isAdmin flag on the user document that
+// firestore.rules already treats as the single source of truth for admin. The
+// email alone would not follow a change of admin account; the flag alone would
+// let a second admin in by accident. The page hides itself for anyone else, but
+// hiding is not the control, this is.
+const KALSHI_OWNER_EMAIL = "heiszcam@gmail.com";
+async function assertKalshiAdmin(auth) {
+  assertSignedIn(auth);
+  if (!auth.token || auth.token.email !== KALSHI_OWNER_EMAIL) {
+    throw new HttpsError("permission-denied", "Not available for this account.");
+  }
+  if (!getApps().length) initializeApp();
+  const snap = await getFirestore().collection("users").doc(auth.uid).get();
+  if (!snap.exists || snap.data().isAdmin !== true) {
+    throw new HttpsError("permission-denied", "Not available for this account.");
+  }
+}
+
 async function kalshiFetchSeries(series, status, limit) {
   const url = KALSHI_BASE + "/markets?series_ticker=" + series + "&status=" + status + "&limit=" + limit;
   const res = await fetch(url, {
@@ -97,7 +116,7 @@ async function kalshiFetchSeries(series, status, limit) {
 }
 
 exports.kalshiBooks = onCall(async (request) => {
-  assertSignedIn(request.auth);
+  await assertKalshiAdmin(request.auth);
   // Many tabs polling at once must not multiply into Kalshi rate limits.
   if (kalshiCache.body && Date.now() - kalshiCache.at < KALSHI_CACHE_MS) {
     return kalshiCache.body;

@@ -44,8 +44,9 @@ function main() {
     function renderStatusPage(){}
     function runCardEntrance(){}
     function renderCalendar(){}
-    function startKalshiPoll(){}
-    function stopKalshiPoll(){}
+    function kalshiOnShow(){}
+    function kalshiOnHide(){}
+    var currentUserIsAdmin = true;
     ${lift('showPage')}
     return showPage;
   `;

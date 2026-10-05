@@ -78,3 +78,17 @@ gcloud firestore fields ttls update expireAt --collection-group=kalshiSnapshots 
 Until that runs nothing is deleted. Check Firebase usage and set a budget alert
 the first week; the figures in the cost estimate are projections, not
 measurements.
+
+## Kalshi page is admin only
+
+`kalshiBooks` now requires the owner's email AND `isAdmin: true` on the user
+document, and `firestore.rules` refuses a non-admin write to the `kalshiJournal`
+field. The rules are a separate deploy:
+```
+firebase deploy --only functions,firestore:rules
+```
+
+Kalshi's CDN returns 403 to requests from Google Cloud, so `kalshiBooks` and
+`kalshiRecorder` cannot read Kalshi from Firebase. The journal does not need
+them. The recorder function only fails every minute; remove it with
+`firebase functions:delete kalshiRecorder --region us-central1`.

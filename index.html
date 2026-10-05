@@ -969,6 +969,26 @@
   .kal-check{ font-size:13.5px; line-height:1.6; }
   .kal-check .kal-ok{ font-weight:700; }
   @media (max-width:640px){ .kal-row{ grid-template-columns:1fr 1fr; } }
+  .kal-tabs{ display:flex; gap:8px; margin-bottom:16px; }
+  .kal-tab{ background:var(--panel); color:var(--muted); border:1px solid var(--border); border-radius:999px; padding:7px 16px; font:inherit; font-size:13px; cursor:pointer; }
+  .kal-tab.current{ color:var(--paper); border-color:var(--paper); }
+  .kal-wide{ width:260px; }
+  select.kal-input{ appearance:auto; }
+  .kal-actions{ display:flex; align-items:center; gap:12px; margin:12px 0 4px; flex-wrap:wrap; }
+  .kal-btn{ background:var(--paper); color:var(--ink); border:0; border-radius:8px; padding:9px 16px; font:inherit; font-weight:600; cursor:pointer; }
+  .kal-mini{ background:transparent; color:var(--paper); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font:inherit; font-size:12px; cursor:pointer; margin-right:6px; }
+  .kal-limits{ font-size:14px; line-height:1.7; }
+  .kal-big{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; }
+  .kal-trade{ display:grid; grid-template-columns:minmax(110px,1.2fr) repeat(4,minmax(80px,1fr)) auto; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--border); font-size:13px; }
+  .kal-trade:first-child{ border-top:0; }
+  .kal-trade .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
+  .kal-tnote{ grid-column:1 / -1; color:var(--muted); font-size:12px; }
+  .kal-flag{ color:var(--muted); font-size:11px; border:1px solid var(--border); border-radius:999px; padding:1px 7px; margin-left:4px; }
+  .kal-pos{ color:#1f9d55; }
+  .kal-neg{ color:#d64545; }
+  .kal-stat-row{ display:flex; gap:28px; flex-wrap:wrap; margin-bottom:10px; }
+  .kal-stat-row .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
+  @media (max-width:640px){ .kal-trade{ grid-template-columns:1fr 1fr; } }
 
   /* ---------- Trade Overview: shared card header ---------- */
   .to-card-head{
@@ -2391,6 +2411,11 @@
     finnhubCompanyNews: function(symbol, from, to){
       return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
     },
+    // Admin-only journal of Kalshi trades, stored on the user's own doc.
+    // firestore.rules refuses this field from any non-admin account.
+    saveKalshiJournal: function(uid, entries){
+      return setDoc(doc(db, 'users', uid), { kalshiJournal: entries }, { merge: true });
+    },
     // Read-only relay: Kalshi rejects browser-origin requests, so the page
     // cannot call it directly. Nothing reachable through this places an order.
     kalshiBooks: function(){
@@ -2508,7 +2533,7 @@
     <button class="side-nav-item nav-item" data-page="journal" title="Trade Journal">
       <span class="side-nav-icon">▦</span><span class="side-nav-label">Journal</span>
     </button>
-    <button class="side-nav-item nav-item" data-page="kalshi" title="Kalshi Scalp Monitor">
+    <button class="side-nav-item nav-item" data-page="kalshi" title="Kalshi" hidden>
       <span class="side-nav-icon">◐</span><span class="side-nav-label">Kalshi</span>
     </button>
     <div class="side-nav-divider"></div>
@@ -3200,29 +3225,60 @@
   <main class="page" id="page-kalshi" hidden>
     <div class="trades-header">
       <div>
-        <div class="trades-title">Kalshi Monitor</div>
-        <div class="trades-sub">15 minute Bitcoin and gold markets. Read only: nothing on this page places an order.</div>
+        <div class="trades-title">Kalshi</div>
+        <div class="trades-sub">Trade journal and risk limits for the 15 minute Bitcoin and gold markets. Admin only. Nothing on this page places an order.</div>
       </div>
-      <div class="trades-header-right"><span class="kal-status" id="kalStatus">Not loaded</span></div>
+      <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span></div>
     </div>
 
-    <div class="kal-card">
-      <div class="kal-card-title">Live books</div>
-      <div id="kalBooks" class="kal-books"><div class="kal-empty">Loading...</div></div>
-      <div class="kal-note">Round trip = crossing the spread (buy the ask, sell the bid) plus fees on both legs. The market must move at least this far in your favour just to break even. Fees round up to a cent per order, so the 1 lot figure is the worst case. Fee rate is an unverified estimate.</div>
+    <div class="kal-tabs" role="tablist">
+      <button class="kal-tab current" data-kal-tab="journal" role="tab">Journal</button>
+      <button class="kal-tab" data-kal-tab="live" role="tab">Live books</button>
     </div>
 
-    <div class="kal-card">
-      <div class="kal-card-title">Pre-trade check</div>
-      <div class="kal-form">
-        <label>Price paid ($)<input class="kal-input" id="kalPrice" type="number" step="0.01" min="0.01" max="0.99" value="0.50"></label>
-        <label>Contracts<input class="kal-input" id="kalContracts" type="number" step="1" min="1" value="10"></label>
-        <label>Your win chance (%)<input class="kal-input" id="kalProb" type="number" step="1" min="0" max="100" value="55"></label>
-        <label>Spread ($)<input class="kal-input" id="kalSpread" type="number" step="0.01" min="0" value="0.01"></label>
-        <label>Bankroll ($)<input class="kal-input" id="kalBankroll" type="number" step="50" min="0" value="1000"></label>
+    <div id="kalTabJournal">
+      <div class="kal-card">
+        <div class="kal-card-title">Today's limits</div>
+        <div id="kalLimits" class="kal-limits"></div>
+        <div class="kal-note">Per trade: risk at most 1% of bankroll. Down 3% on the day: a 2 hour break, then half size. Down 5%: done for the day. Counted from trades you mark settled, in your local day.</div>
       </div>
-      <div id="kalCheckOut" class="kal-check"></div>
-      <div class="kal-note">Limits: risk at most 1% of bankroll per trade, at least 3 points of edge after fees, spread under 4c. These mirror the scalper's risk gate.</div>
+
+      <div class="kal-card">
+        <div class="kal-card-title">Check a trade, then log it</div>
+        <div class="kal-form">
+          <label>Market<select class="kal-input" id="kalMarket"><option value="GOLD">Gold 15m</option><option value="BTC">Bitcoin 15m</option></select></label>
+          <label>Side<select class="kal-input" id="kalSide"><option value="up">Up</option><option value="down">Down</option></select></label>
+          <label>Price paid (cents)<input class="kal-input" id="kalPrice" type="number" step="1" min="1" max="99" value="40"></label>
+          <label>Contracts<input class="kal-input" id="kalContracts" type="number" step="1" min="1" value="7"></label>
+          <label>Your win chance (%)<input class="kal-input" id="kalProb" type="number" step="1" min="0" max="100" value="45"></label>
+          <label>Spread (cents)<input class="kal-input" id="kalSpread" type="number" step="1" min="0" value="1"></label>
+          <label>Bankroll ($)<input class="kal-input" id="kalBankroll" type="number" step="10" min="0" value="300"></label>
+          <label>Fee paid ($, blank = estimate)<input class="kal-input" id="kalFee" type="number" step="0.01" min="0" placeholder="estimate"></label>
+          <label>Note<input class="kal-input kal-wide" id="kalNote" type="text" maxlength="140" placeholder="why this trade"></label>
+        </div>
+        <div id="kalCheckOut" class="kal-check"></div>
+        <div class="kal-actions"><button class="kal-btn" id="kalLogBtn" type="button">Log this trade as bought</button><span class="kal-note" id="kalLogMsg"></span></div>
+        <div class="kal-note">The journal records what you actually did, even when a rule said no. Trades that broke a rule are flagged, not refused. Fee rate (0.07) is an estimate: enter the real fee from your receipt to check it.</div>
+      </div>
+
+      <div class="kal-card">
+        <div class="kal-card-title">Your trades</div>
+        <div id="kalEntries"></div>
+      </div>
+
+      <div class="kal-card">
+        <div class="kal-card-title">Do your calls beat the price?</div>
+        <div id="kalStats"></div>
+        <div class="kal-note">Win rate counts only trades held to settlement. Early sells count in profit and loss but not here, because they are not a yes or no call. About 100 held trades are needed before a result means much.</div>
+      </div>
+    </div>
+
+    <div id="kalTabLive" hidden>
+      <div class="kal-card">
+        <div class="kal-card-title">Live books</div>
+        <div id="kalBooks" class="kal-books"><div class="kal-empty">Loading...</div></div>
+        <div class="kal-note">Round trip = crossing the spread (buy the ask, sell the bid) plus fees on both legs. Fees round up to a cent per order, so the 1 lot figure is the worst case. Fee rate is an unverified estimate.</div>
+      </div>
     </div>
   </main>
 
@@ -9399,12 +9455,20 @@
   loadActivityLogFilterPrefs();
 
 
-  // ---------- Kalshi (read only) ----------
+  // ---------- Kalshi (admin only) ----------
   // Fee and limit math mirrors kalshi-scalper's fees.py and risk.py. The 0.07
-  // taker rate is an unverified estimate: confirm it against real fills before
-  // trusting any figure on this page. Nothing here places an order.
+  // taker rate matched one real fill (50 contracts at 39c) but is still an
+  // estimate: enter the real fee on each journal entry to keep checking it.
+  // Nothing here places an order.
   var KALSHI_TAKER_RATE = 0.07;
-  var KALSHI_LIMITS = { perTradePct: 0.01, minEdge: 0.03, maxSpread: 0.04 };
+  var KALSHI_LIMITS = {
+    perTradePct: 0.01,          // $3 on a $300 bankroll
+    minEdge: 0.03,
+    maxSpread: 0.04,
+    softStopPct: 0.03,          // down 3% on the day: take a break
+    hardStopPct: 0.05,          // down 5% on the day: done
+    breakMs: 2 * 60 * 60 * 1000 // length of that break; half size after it
+  };
 
   // Quadratic: dearest at 50c, cheap near the extremes, rounded UP to a cent
   // per order. An early exit pays it on both legs, which is why a scalp costs
@@ -9422,7 +9486,8 @@
     return (ask - bid) * contracts + kalshiTakerFee(ask, contracts) + kalshiTakerFee(bid, contracts);
   }
 
-  // Fails closed: any bad input rejects instead of passing.
+  // Fails closed: any bad input rejects instead of passing. `o.tier` is the
+  // result of kalshiTierState; without it only the per-trade rules apply.
   function kalshiCheckTrade(o){
     var why = [];
     var price = Number(o.price), n = Number(o.contracts), prob = Number(o.prob);
@@ -9433,7 +9498,17 @@
     var risk = price * n;
     var fee = kalshiTakerFee(price, n);
     var edge = prob - price - fee / n;
-    if(risk > bank * KALSHI_LIMITS.perTradePct){ why.push('Risks $' + risk.toFixed(2) + ', over the 1% cap of $' + (bank * KALSHI_LIMITS.perTradePct).toFixed(2)); }
+    var cap = bank * KALSHI_LIMITS.perTradePct;
+    if(o.tier){
+      if(o.tier.mode === 'done'){
+        why.push('Done for today: the 5% daily stop was reached');
+      } else if(o.tier.mode === 'break'){
+        why.push('On a break until ' + new Date(o.tier.breakUntil).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }));
+      } else if(o.tier.mode === 'half'){
+        cap = cap / 2;
+      }
+    }
+    if(risk > cap){ why.push('Risks $' + risk.toFixed(2) + ', over the cap of $' + cap.toFixed(2)); }
     if(spread > KALSHI_LIMITS.maxSpread){ why.push('Spread is wider than 4c'); }
     if(edge < KALSHI_LIMITS.minEdge){ why.push('Edge after fees is ' + (edge * 100).toFixed(1) + ' points, under the 3 point minimum'); }
     return { ok: why.length === 0, reasons: why, risk: risk, edge: edge, fee: fee };
@@ -9449,6 +9524,275 @@
     if(secs == null){ return '-'; }
     return Math.floor(secs / 60) + ':' + ('0' + (secs % 60)).slice(-2);
   }
+
+  // ---- journal logic (pure) ----
+
+  function kalshiEntryCost(e){
+    return e.price * e.contracts + e.fee;
+  }
+
+  // Returns a settled copy of the entry, or null when the input is unusable.
+  // Settlement pays $1 a contract with no fee; an early sale pays the taker fee.
+  function kalshiSettle(e, outcome, exitPrice, nowMs){
+    var out = {};
+    Object.keys(e).forEach(function(k){ out[k] = e[k]; });
+    var cost = kalshiEntryCost(e);
+    if(outcome === 'won'){
+      out.pnl = e.contracts - cost;
+      out.exitPrice = 1;
+    } else if(outcome === 'lost'){
+      out.pnl = -cost;
+      out.exitPrice = 0;
+    } else if(outcome === 'sold'){
+      var x = Number(exitPrice);
+      if(!(x > 0 && x < 1)){ return null; }
+      out.pnl = x * e.contracts - kalshiTakerFee(x, e.contracts) - cost;
+      out.exitPrice = x;
+    } else {
+      return null;
+    }
+    out.pnl = Math.round(out.pnl * 100) / 100;
+    out.status = outcome;
+    out.settledAt = nowMs;
+    return out;
+  }
+
+  function kalshiDayStart(nowMs){
+    var d = new Date(nowMs);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }
+
+  // Where today's loss limits stand. Realised P&L only, in the local day, in
+  // the order trades settled. The break starts when the trade that crossed the
+  // soft line settled and is not shortened by later wins; the hard stop is
+  // sticky for the rest of the day. No bankroll means no trading: fail closed.
+  //   mode: ok | break | half | done     cap: dollars you may risk on one trade now
+  function kalshiTierState(entries, bankroll, nowMs){
+    var bank = Number(bankroll);
+    var out = { mode:'ok', cap:0, perTradeCap:0, softLimit:0, hardLimit:0, pnlToday:0, softAt:null, breakUntil:null };
+    if(!(bank > 0)){ out.mode = 'done'; return out; }
+    out.perTradeCap = bank * KALSHI_LIMITS.perTradePct;
+    out.softLimit = bank * KALSHI_LIMITS.softStopPct;
+    out.hardLimit = bank * KALSHI_LIMITS.hardStopPct;
+    var start = kalshiDayStart(nowMs);
+    var today = (entries || []).filter(function(e){
+      return e && typeof e.pnl === 'number' && e.settledAt >= start && e.settledAt <= nowMs;
+    }).sort(function(a, b){ return a.settledAt - b.settledAt; });
+    var cum = 0, hard = false;
+    today.forEach(function(e){
+      cum += e.pnl;
+      if(out.softAt === null && cum <= -out.softLimit){ out.softAt = e.settledAt; }
+      if(cum <= -out.hardLimit){ hard = true; }
+    });
+    out.pnlToday = Math.round(cum * 100) / 100;
+    if(hard){
+      out.mode = 'done';
+    } else if(out.softAt !== null){
+      out.breakUntil = out.softAt + KALSHI_LIMITS.breakMs;
+      if(nowMs < out.breakUntil){ out.mode = 'break'; }
+      else { out.mode = 'half'; out.cap = out.perTradeCap / 2; }
+    } else {
+      out.cap = out.perTradeCap;
+    }
+    return out;
+  }
+
+  // Do the stated odds beat the price? Only trades held to settlement are a
+  // yes or no call. The bar is what each contract cost including fee.
+  function kalshiCalibration(entries){
+    var all = (entries || []).filter(function(e){ return e && typeof e.pnl === 'number'; });
+    var held = all.filter(function(e){ return e.status === 'won' || e.status === 'lost'; });
+    var out = { settled: all.length, held: held.length, net: 0, expectancy: null,
+                winRate: null, avgStated: null, avgBreakEven: null, verdict: 'No settled trades yet' };
+    all.forEach(function(e){ out.net += e.pnl; });
+    out.net = Math.round(out.net * 100) / 100;
+    if(all.length){ out.expectancy = out.net / all.length; }
+    if(!held.length){ return out; }
+    var mean = function(f){ return held.reduce(function(a, e){ return a + f(e); }, 0) / held.length; };
+    out.winRate = held.filter(function(e){ return e.status === 'won'; }).length / held.length;
+    out.avgStated = mean(function(e){ return e.myProb; });
+    out.avgBreakEven = mean(function(e){ return kalshiEntryCost(e) / e.contracts; });
+    if(held.length < 30){
+      out.verdict = 'Too early: ' + held.length + ' held to settlement, about 100 needed';
+    } else {
+      var se = Math.sqrt(out.avgBreakEven * (1 - out.avgBreakEven) / held.length);
+      var z = (out.winRate - out.avgBreakEven) / se;
+      out.verdict = z > 2 ? 'Your calls are beating the price'
+        : (z < -2 ? 'Your calls are losing to the price' : 'Not distinguishable from the price yet');
+    }
+    return out;
+  }
+
+  // ---- journal state and page ----
+
+  var kalshiJournal = [];
+
+  function kalshiMoney(x){
+    return (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
+  }
+
+  function kalshiBankroll(){
+    return Number(document.getElementById('kalBankroll').value);
+  }
+
+  // Keep only well-formed entries: a malformed record in the user's doc must
+  // not break the page or poison the limits.
+  function kalshiLoadJournal(raw){
+    var list = Array.isArray(raw) ? raw : [];
+    kalshiJournal = currentUserIsAdmin ? list.filter(function(e){
+      return e && typeof e.id === 'string' && e.price > 0 && e.price < 1 && e.contracts >= 1
+        && typeof e.fee === 'number' && e.myProb >= 0 && e.myProb <= 1;
+    }) : [];
+    renderKalshiJournal();
+  }
+
+  function kalshiSaveJournal(){
+    var api = window.__shwoopAPI;
+    if(!api || !api.saveKalshiJournal || !currentUid || !currentUserIsAdmin){ return Promise.resolve(); }
+    return api.saveKalshiJournal(currentUid, kalshiJournal).catch(function(err){
+      document.getElementById('kalLogMsg').textContent = 'Could not save: ' + ((err && err.message) || 'unknown');
+    });
+  }
+
+  function renderKalshiLimits(){
+    var el = document.getElementById('kalLimits');
+    var t = kalshiTierState(kalshiJournal, kalshiBankroll(), Date.now());
+    if(!(kalshiBankroll() > 0)){ el.textContent = 'Enter your bankroll to see today\'s limits.'; return t; }
+    var head;
+    if(t.mode === 'done'){ head = 'Done for today'; }
+    else if(t.mode === 'break'){ head = 'On a break until ' + new Date(t.breakUntil).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }); }
+    else if(t.mode === 'half'){ head = 'Half size: risk at most ' + kalshiMoney(t.cap) + ' a trade'; }
+    else { head = 'Within limits: risk at most ' + kalshiMoney(t.cap) + ' a trade'; }
+    el.innerHTML = '<div class="kal-big">' + escapeHtml(head) + '</div>' +
+      '<div>Today ' + kalshiMoney(t.pnlToday) + ' &middot; break at -' + kalshiMoney(t.softLimit) +
+      ' &middot; done at -' + kalshiMoney(t.hardLimit) + '</div>';
+    return t;
+  }
+
+  function renderKalshiEntries(){
+    var el = document.getElementById('kalEntries');
+    var list = kalshiJournal.slice().sort(function(a, b){ return b.openedAt - a.openedAt; });
+    if(!list.length){
+      el.innerHTML = '<div class="kal-empty">No trades logged yet. Log one after you buy it.</div>';
+      return;
+    }
+    el.innerHTML = list.map(function(e){
+      var open = e.status === 'open';
+      var when = new Date(e.openedAt).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+      var res = open ? 'Open' : (kalshiMoney(e.pnl) + ' (' + e.status + ')');
+      var cls = open ? '' : (e.pnl >= 0 ? 'kal-pos' : 'kal-neg');
+      var id = escapeHtml(e.id);
+      var flags = (e.flags && e.flags.length)
+        ? ' <span class="kal-flag" title="' + escapeHtml(e.flags.join('; ')) + '">broke a rule</span>' : '';
+      var acts = (open
+        ? '<button class="kal-mini" data-kal-act="won" data-id="' + id + '">Won</button>' +
+          '<button class="kal-mini" data-kal-act="lost" data-id="' + id + '">Lost</button>' +
+          '<button class="kal-mini" data-kal-act="sold" data-id="' + id + '">Sold</button>'
+        : '') + '<button class="kal-mini" data-kal-act="del" data-id="' + id + '">Delete</button>';
+      return '<div class="kal-trade">' +
+        '<div><div class="kal-name">' + (e.market === 'BTC' ? 'Bitcoin' : 'Gold') + ' ' + (e.side === 'up' ? 'Up' : 'Down') + '</div><span class="kal-lbl">' + escapeHtml(when) + '</span></div>' +
+        '<div><span class="kal-lbl">Bought</span>' + e.contracts + ' at ' + (e.price * 100).toFixed(1) + 'c</div>' +
+        '<div><span class="kal-lbl">Cost with fee' + (e.feeEstimated ? ' (est.)' : '') + '</span>' + kalshiMoney(kalshiEntryCost(e)) + flags + '</div>' +
+        '<div><span class="kal-lbl">You said</span>' + Math.round(e.myProb * 100) + '%</div>' +
+        '<div class="' + cls + '"><span class="kal-lbl">Result</span>' + escapeHtml(res) + '</div>' +
+        '<div>' + acts + '</div>' +
+        (e.note ? '<div class="kal-tnote">' + escapeHtml(e.note) + '</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  function renderKalshiStats(){
+    var c = kalshiCalibration(kalshiJournal);
+    var el = document.getElementById('kalStats');
+    var pct = function(x){ return x == null ? '-' : (x * 100).toFixed(0) + '%'; };
+    el.innerHTML =
+      '<div class="kal-stat-row">' +
+        '<div><span class="kal-lbl">Net profit and loss</span><span class="kal-big ' + (c.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + kalshiMoney(c.net) + '</span></div>' +
+        '<div><span class="kal-lbl">Settled trades</span><span class="kal-big">' + c.settled + '</span></div>' +
+        '<div><span class="kal-lbl">Per trade</span><span class="kal-big">' + (c.expectancy == null ? '-' : kalshiMoney(c.expectancy)) + '</span></div>' +
+      '</div>' +
+      '<div class="kal-stat-row">' +
+        '<div><span class="kal-lbl">You won (held to settlement)</span>' + pct(c.winRate) + ' of ' + c.held + '</div>' +
+        '<div><span class="kal-lbl">You said on average</span>' + pct(c.avgStated) + '</div>' +
+        '<div><span class="kal-lbl">Break-even was</span>' + pct(c.avgBreakEven) + '</div>' +
+      '</div>' +
+      '<div>' + escapeHtml(c.verdict) + '</div>';
+  }
+
+  function renderKalshiCheck(){
+    var v = function(id){ return document.getElementById(id).value; };
+    var tier = kalshiTierState(kalshiJournal, kalshiBankroll(), Date.now());
+    var r = kalshiCheckTrade({ price: Number(v('kalPrice')) / 100, contracts: v('kalContracts'),
+                               prob: Number(v('kalProb')) / 100, spread: Number(v('kalSpread')) / 100,
+                               bankroll: v('kalBankroll'), tier: tier });
+    var out = document.getElementById('kalCheckOut');
+    if(r.risk == null){ out.textContent = r.reasons[0]; return r; }
+    out.innerHTML = '<div class="kal-big">' + (r.ok ? 'Within limits' : 'Blocked') + '</div>' +
+      '<div>Max loss ' + kalshiMoney(r.risk) + ' &middot; estimated fee ' + kalshiMoney(r.fee) + ' &middot; edge after fees ' + (r.edge * 100).toFixed(1) + ' points</div>' +
+      r.reasons.map(function(x){ return '<div>' + escapeHtml(x) + '</div>'; }).join('');
+    try{ localStorage.setItem('kalBankroll', v('kalBankroll')); }catch(e){}
+    return r;
+  }
+
+  function renderKalshiJournal(){
+    if(!document.getElementById('kalLimits')){ return; }
+    renderKalshiLimits();
+    renderKalshiCheck();
+    renderKalshiEntries();
+    renderKalshiStats();
+  }
+
+  function kalshiLogTrade(){
+    var v = function(id){ return document.getElementById(id).value; };
+    var msg = document.getElementById('kalLogMsg');
+    if(!currentUserIsAdmin){ return; }
+    var price = Number(v('kalPrice')) / 100, n = Math.floor(Number(v('kalContracts')));
+    var prob = Number(v('kalProb')) / 100;
+    if(!(price > 0 && price < 1) || !(n >= 1) || !(prob >= 0 && prob <= 1)){
+      msg.textContent = 'Check the price, contracts and win chance.';
+      return;
+    }
+    var feeRaw = v('kalFee');
+    var feeEstimated = (feeRaw === '' || !(Number(feeRaw) >= 0));
+    var fee = feeEstimated ? kalshiTakerFee(price, n) : Math.round(Number(feeRaw) * 100) / 100;
+    var r = renderKalshiCheck();
+    kalshiJournal.push({
+      id: 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      openedAt: Date.now(), market: v('kalMarket') === 'BTC' ? 'BTC' : 'GOLD', side: v('kalSide') === 'down' ? 'down' : 'up',
+      price: price, contracts: n, fee: fee, feeEstimated: feeEstimated, myProb: prob,
+      note: v('kalNote').slice(0, 140), status: 'open', pnl: null, exitPrice: null, settledAt: null,
+      flags: (r && r.reasons) ? r.reasons.slice() : []
+    });
+    document.getElementById('kalNote').value = '';
+    msg.textContent = 'Logged.';
+    renderKalshiJournal();
+    kalshiSaveJournal();
+  }
+
+  function kalshiEntryAction(act, id){
+    var i = kalshiJournal.findIndex(function(e){ return e.id === id; });
+    if(i < 0){ return; }
+    var e = kalshiJournal[i];
+    if(act === 'del'){
+      if(!window.confirm('Delete this entry? It will no longer count toward your limits or results.')){ return; }
+      kalshiJournal.splice(i, 1);
+    } else {
+      var exit = null;
+      if(act === 'sold'){
+        var raw = window.prompt('Sold at what price, in cents (1 to 99)?');
+        if(raw == null){ return; }
+        exit = Number(raw) / 100;
+      }
+      var settled = kalshiSettle(e, act, exit, Date.now());
+      if(!settled){ document.getElementById('kalLogMsg').textContent = 'That price is not valid.'; return; }
+      kalshiJournal[i] = settled;
+    }
+    renderKalshiJournal();
+    kalshiSaveJournal();
+  }
+
+  // ---- live books tab (the relay is read-only; see functions/index.js) ----
 
   function renderKalshiBooks(data){
     var el = document.getElementById('kalBooks');
@@ -9484,35 +9828,49 @@
     if(!api || !api.kalshiBooks){ st.textContent = 'Not connected'; return; }
     api.kalshiBooks().then(renderKalshiBooks).catch(function(err){
       // Say so rather than leaving stale numbers on screen looking live.
-      document.getElementById('kalBooks').innerHTML = '<div class="kal-empty">Could not load Kalshi data. The relay function may not be deployed yet.</div>';
-      st.textContent = 'Error: ' + ((err && err.message) || 'unknown');
+      var m = (err && err.message) || 'unknown';
+      document.getElementById('kalBooks').innerHTML = '<div class="kal-empty">' +
+        (m.indexOf('403') >= 0
+          ? 'Kalshi refuses requests from Google Cloud, which the live relay runs on, so live books are not available here. The journal does not need them.'
+          : 'Could not load Kalshi data. The relay function may not be deployed yet.') + '</div>';
+      st.textContent = 'Error: ' + m;
     });
   }
   function startKalshiPoll(){
     stopKalshiPoll();
     refreshKalshi();
     kalshiPollTimer = setInterval(function(){ if(!document.hidden){ refreshKalshi(); } }, 5000);
-    renderKalshiCheck();
   }
   function stopKalshiPoll(){
     if(kalshiPollTimer){ clearInterval(kalshiPollTimer); kalshiPollTimer = null; }
   }
 
-  function renderKalshiCheck(){
-    var v = function(id){ return document.getElementById(id).value; };
-    var r = kalshiCheckTrade({ price: v('kalPrice'), contracts: v('kalContracts'), prob: Number(v('kalProb')) / 100,
-                               spread: v('kalSpread'), bankroll: v('kalBankroll') });
-    var out = document.getElementById('kalCheckOut');
-    if(r.risk == null){ out.textContent = r.reasons[0]; return; }
-    out.innerHTML = '<div class="kal-ok">' + (r.ok ? 'Within limits' : 'Blocked') + '</div>' +
-      '<div>Max loss $' + r.risk.toFixed(2) + ' · fee $' + r.fee.toFixed(2) + ' · edge after fees ' + (r.edge * 100).toFixed(1) + ' points</div>' +
-      r.reasons.map(function(x){ return '<div>' + escapeHtml(x) + '</div>'; }).join('');
-    try{ localStorage.setItem('kalBankroll', v('kalBankroll')); }catch(e){}
+  var kalshiTab = 'journal';
+  function showKalshiTab(name){
+    kalshiTab = (name === 'live') ? 'live' : 'journal';
+    document.getElementById('kalTabJournal').hidden = (kalshiTab !== 'journal');
+    document.getElementById('kalTabLive').hidden = (kalshiTab !== 'live');
+    document.querySelectorAll('.kal-tab').forEach(function(b){
+      b.classList.toggle('current', b.dataset.kalTab === kalshiTab);
+    });
+    if(kalshiTab === 'live'){ startKalshiPoll(); } else { stopKalshiPoll(); }
   }
+  function kalshiOnShow(){ showKalshiTab(kalshiTab); renderKalshiJournal(); }
+  function kalshiOnHide(){ stopKalshiPoll(); }
+
   ['kalPrice','kalContracts','kalProb','kalSpread','kalBankroll'].forEach(function(id){
-    document.getElementById(id).addEventListener('input', renderKalshiCheck);
+    document.getElementById(id).addEventListener('input', renderKalshiJournal);
+  });
+  document.getElementById('kalLogBtn').addEventListener('click', kalshiLogTrade);
+  document.getElementById('kalEntries').addEventListener('click', function(ev){
+    var b = ev.target.closest('[data-kal-act]');
+    if(b){ kalshiEntryAction(b.dataset.kalAct, b.dataset.id); }
+  });
+  document.querySelectorAll('.kal-tab').forEach(function(b){
+    b.addEventListener('click', function(){ showKalshiTab(b.dataset.kalTab); });
   });
   try{ var kb = localStorage.getItem('kalBankroll'); if(kb){ document.getElementById('kalBankroll').value = kb; } }catch(e){}
+  renderKalshiJournal();
 
   // ---------- Navigation ----------
   function showPage(name){
@@ -9523,6 +9881,7 @@
     // Instant (no smooth-scroll animation) regardless of the reduce-motion
     // setting -- this is a position reset, not a decorative transition.
     try{ window.scrollTo(0, 0); }catch(e){}
+    if(name === 'kalshi' && !currentUserIsAdmin){ name = 'brief'; }
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
@@ -9533,7 +9892,7 @@
       item.classList.toggle('current', item.dataset.page === name);
     });
     if(name === 'trades'){ renderStatusPage(); }
-    if(name === 'kalshi'){ startKalshiPoll(); } else { stopKalshiPoll(); }
+    if(name === 'kalshi'){ kalshiOnShow(); } else { kalshiOnHide(); }
     runCardEntrance(name);
     if(name === 'journal'){ renderCalendar(); }
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
@@ -14406,6 +14765,13 @@
     if(liveBtn) liveBtn.hidden = !currentUserIsAdmin;
     var inviteSection = document.getElementById('adminInviteSection');
     if(inviteSection) inviteSection.hidden = !currentUserIsAdmin;
+    // The Kalshi page and its journal are admin-only. Hiding is only the UI:
+    // the relay checks the admin flag and email, and firestore.rules refuses
+    // the journal field from anyone else.
+    var kalNav = document.querySelector('.nav-item[data-page="kalshi"]');
+    if(kalNav) kalNav.hidden = !currentUserIsAdmin;
+    var kalPage = document.getElementById('page-kalshi');
+    if(!currentUserIsAdmin && kalPage && !kalPage.hidden){ showPage('brief'); }
   }
 
   document.getElementById('generateInviteBtn').addEventListener('click', function(){
@@ -14468,6 +14834,7 @@
           // client itself, only by hand in the console.
           currentUserIsAdmin = Boolean(data.isAdmin);
           applyAdminUI();
+          kalshiLoadJournal(data.kalshiJournal);
           setNewsAndEarningsPending();
 
           // ---- Journal ----
@@ -14535,6 +14902,7 @@
         userSettingsAdoptionInFlight = null;
         currentUserIsAdmin = false;
         applyAdminUI();
+        kalshiLoadJournal(null);
         journalEntries = [];
         clearAlerts();
         clearActivityLog();
