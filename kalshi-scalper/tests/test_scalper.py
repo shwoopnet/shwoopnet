@@ -228,3 +228,62 @@ try:
 finally:
     _api.time.sleep, _api.urllib.request.urlopen = _orig_sleep, _orig_open
 print("rate limit tests passed")
+
+# ---- calibration (hold to settlement) ----
+from scalper.calibration import favourite, net_pnl, cluster_mean_z, judge, MIN_N, Z_BAR
+
+# The favourite is bought at its ask. NO is bought at 1 minus the YES bid.
+assert favourite(0.89, 0.90) == ("yes", 0.90)
+b = favourite(0.08, 0.09)
+assert b[0] == "no" and abs(b[1] - 0.92) < 1e-9
+assert favourite(0.49, 0.51) is None             # a coin flip is not a favourite
+assert favourite(0.97, 0.99) is None             # ask above the band: too little left to win
+assert favourite(0.001, 1.0) is None             # an empty book is not a quote
+# Profit per contract: a win pays $1 less the price and fee, a loss loses both.
+fee = 0.07 * 0.90 * 0.10
+assert abs(net_pnl("yes", 0.90, "yes") - (1 - 0.90 - fee)) < 1e-12
+assert abs(net_pnl("yes", 0.90, "no") - (-0.90 - fee)) < 1e-12
+assert net_pnl("no", 0.92, "no") > 0 > net_pnl("no", 0.92, "yes")
+# A market that did not resolve yes or no is not scored at all.
+assert net_pnl("yes", 0.90, "") is None and net_pnl("yes", 0.90, "void") is None
+# Higher fees only ever lower profit.
+assert net_pnl("yes", 0.90, "yes", 1.2) < net_pnl("yes", 0.90, "yes")
+
+# Twenty outcomes from one day are closer to one observation than to twenty:
+# the clustered error must be larger than the naive one when days differ.
+obs = [("d1", 1.0)] * 20 + [("d2", -1.0)] * 20
+mean, se, z = cluster_mean_z(obs)
+naive = (sum((x - mean) ** 2 for _, x in obs) / (len(obs) - 1)) ** 0.5 / len(obs) ** 0.5
+assert abs(mean) < 1e-12 and se > naive * 3, (se, naive)
+
+def synth(n, edge, hi_edge=None, days=30, half_split=True):
+    """n markets with a fixed net edge, spread over days; optionally a different
+    edge in the second half. Alternates so the sample is not degenerate."""
+    rows = []
+    for i in range(n):
+        day = i % days
+        late = i >= n // 2
+        e = (hi_edge if (late and hi_edge is not None) else edge)
+        x = e + (0.05 if i % 2 else -0.05)
+        rows.append((f"d{day}", float(i), x, x - 0.002))
+    return rows
+
+MID = 600.0
+# A clean, consistent edge across both halves passes every criterion.
+v, s = judge({10: synth(1200, 0.03)}, MID)
+assert v == "NOT_YET_FALSIFIED" and s[0]["ok"], s
+# No edge: falsified.
+assert judge({10: synth(1200, 0.0)}, MID)[0] == "FALSIFIED"
+# An edge in only one half must not qualify: with several entry times and
+# several cells, one lucky half is exactly what chance produces.
+assert judge({10: synth(1200, 0.03, hi_edge=-0.01)}, MID)[0] == "FALSIFIED"
+# Too few markets never qualifies, however good they look.
+assert judge({10: synth(MIN_N - 1, 0.20)}, MID)[0] == "FALSIFIED"
+# An edge that disappears with 20% higher fees must not qualify.
+rows = [(a, b, c, c - 0.05) for a, b, c, d in synth(1200, 0.03)]
+assert judge({10: rows}, MID)[0] == "FALSIFIED"
+# No verdict word may ever read as a go-ahead to trade.
+import scalper.calibration as _c, re as _re2
+_src = _re2.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_c.__file__).read())
+assert not _re2.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _src)
+print("calibration tests passed")

@@ -155,6 +155,44 @@ numeric prediction and a kill criterion before it is run.
 
 Strategy variants tried so far: 1 (this one). Cuts examined: 18.
 
+## Hypothesis H1: favourites are underpriced, held to settlement (fixed 2026-10-05, before any calibration data was looked at)
+
+The scalping verdict above says nothing about holding to settlement, which costs
+one fee and half the spread instead of two fees and a full spread. H1 is the
+simplest hypothesis with an economic reason behind it. Code and thresholds are in
+`src/scalper/calibration.py`; run `python -m scalper.calibration`.
+
+- **Claim.** Buying the favourite side at 85c to 97c (YES at its ask, or NO at 1
+  minus the YES bid) and holding it to settlement earns more than it costs.
+- **Counterparty.** Whoever sells us the favourite is buying the cheap longshot
+  (3c to 15c) as a lottery ticket. If longshots are overpaid for, favourites are
+  underpriced by the same amount.
+- **Prediction.** Mean net profit of at least +1.0c per contract at one or more of
+  three entry times (10, 5 and 2 minutes before close), after entering at the ask
+  and paying fees (7% rate, unrounded, per contract).
+- **Unit.** One entry per market per entry time. A minute-by-minute version would
+  count one outcome dozens of times.
+- **Kill criteria.** FALSIFIED unless, for at least one entry time, ALL hold:
+  n of at least 300 markets; mean net profit positive with a day-clustered z of
+  at least 2.2 (Bonferroni for three entry times; clustered by UTC day because
+  adjacent markets share a regime); positive in BOTH halves of the 30 days; and
+  still positive with fees 20% higher.
+- **Best outcome is `NOT_YET_FALSIFIED`.** That is permission to test on data
+  recorded after the verdict, never evidence of an edge. No verdict means "trade".
+- **Prior: low.** These are liquid markets priced off live indices by
+  professional makers. I expect FALSIFIED.
+- **Power.** With about a thousand markets per entry time only an edge of roughly
+  2.5c or more is visible (the run prints the figure as "detectable"). FALSIFIED
+  here means "no edge that large", not "priced perfectly". A smaller edge is also
+  barely worth the risk.
+- **Descriptive table.** The calibration table printed after the verdict (did YES
+  win as often as its price said, by price band and entry time) affects nothing.
+  Anything interesting in it is a new hypothesis and needs data it was not fitted
+  on. It must not be used to pick a cell after the fact.
+- **No change after seeing it.** Any change to a band, entry time, threshold or
+  fee after the first run voids that run, the earlier verdict stands, and the
+  change is a new trial.
+
 ## Run it on your Mac (background, survives reboots)
 
 Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your
