@@ -66,9 +66,8 @@ exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (reque
 // Deliberately narrow: two fixed series, GET only, no caller-supplied path or
 // query, and no Kalshi credentials anywhere. It cannot place or cancel an order
 // and must not be widened into something that can without a separate review.
-const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { initializeApp, getApps } = require("firebase-admin/app");
-const { getFirestore, Timestamp } = require("firebase-admin/firestore");
+const { getFirestore } = require("firebase-admin/firestore");
 const kalshi = require("./kalshiLib");
 
 const KALSHI_BASE = "https://api.elections.kalshi.com/trade-api/v2";
@@ -130,64 +129,3 @@ exports.kalshiBooks = onCall(async (request) => {
   kalshiCache = { at: Date.now(), body };
   return body;
 });
-
-// Background recorder: one top-of-book snapshot per open market per minute,
-// plus settled results, into Firestore. The collections have no rule that
-// allows a client, so only the Admin SDK (this function) can touch them.
-// Cloud Scheduler's floor is one minute, so this is market-level data, not the
-// second-by-second book a real scalp study needs.
-//
-// Retention: docs carry expireAt; enable a TTL policy on it once, see DEPLOY.md.
-exports.kalshiRecorder = onSchedule(
-  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0 },
-  async () => {
-    if (!getApps().length) initializeApp();
-    const db = getFirestore();
-    const now = Date.now();
-    const failures = [];
-    const batch = db.batch();
-    let writes = 0;
-
-    for (const series of kalshi.KALSHI_SERIES) {
-      try {
-        const raw = await kalshiFetchSeries(series, "open", 5);
-        raw.forEach((m) => {
-          const doc = kalshi.snapshotDoc(kalshi.trimMarket(series, m), now);
-          const ref = db.collection("kalshiSnapshots").doc(kalshi.snapshotId(doc.ticker, now));
-          // set() on a deterministic id, never add(): a second invocation for
-          // the same minute overwrites the same document instead of doubling it.
-          batch.set(ref, Object.assign({}, doc, { expireAt: Timestamp.fromMillis(doc.expireAtMs) }));
-          writes++;
-        });
-      } catch (e) {
-        failures.push(series + ": " + e.message);
-      }
-    }
-
-    // Settled results are checked every 5th minute and written only when new,
-    // which keeps the write count (and the free-tier headroom) down.
-    if (new Date(now).getUTCMinutes() % 5 === 0) {
-      for (const series of kalshi.KALSHI_SERIES) {
-        try {
-          const settled = (await kalshiFetchSeries(series, "settled", 3)).filter((m) => m.result);
-          if (!settled.length) continue;
-          const refs = settled.map((m) => db.collection("kalshiResults").doc(m.ticker));
-          const have = await db.getAll(...refs);
-          settled.forEach((m, i) => {
-            if (have[i].exists) return;
-            batch.set(refs[i], { series, ticker: m.ticker, result: m.result, closeTime: m.close_time, strike: m.floor_strike == null ? null : m.floor_strike, recordedAt: now });
-            writes++;
-          });
-        } catch (e) {
-          failures.push(series + " results: " + e.message);
-        }
-      }
-    }
-
-    if (writes) await batch.commit();
-    console.log("kalshiRecorder wrote " + writes + " docs" + (failures.length ? "; failures: " + failures.join(" | ") : ""));
-    // A partial failure still committed what it could; throw so the run is
-    // visible as failed rather than silently thinner than it should be.
-    if (failures.length) throw new Error(failures.join(" | "));
-  }
-);

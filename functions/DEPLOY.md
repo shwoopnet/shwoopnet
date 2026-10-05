@@ -60,35 +60,24 @@ so until this is deployed, the Brief page's quotes/news/earnings and the
 per-trade news alerts will fail closed (console errors, "Couldn't load..."
 placeholders) rather than silently falling back to the old exposed key.
 
-## Kalshi relay and recorder
+## Kalshi page (admin only)
 
-`kalshiBooks` (callable) and `kalshiRecorder` (scheduled, every minute) are
-deployed with the same `firebase deploy --only functions`. Both are read-only
-against Kalshi's public API and need no secret.
-
-The recorder writes `kalshiSnapshots` and `kalshiResults`. `firestore.rules`
-has no rule for either, so clients cannot read or write them; only the Admin
-SDK can.
-
-**One-time, after the first deploy:** enable a TTL policy so snapshots expire
-after 30 days instead of growing forever:
-```
-gcloud firestore fields ttls update expireAt --collection-group=kalshiSnapshots --enable-ttl
-```
-Until that runs nothing is deleted. Check Firebase usage and set a budget alert
-the first week; the figures in the cost estimate are projections, not
-measurements.
-
-## Kalshi page is admin only
-
-`kalshiBooks` now requires the owner's email AND `isAdmin: true` on the user
-document, and `firestore.rules` refuses a non-admin write to the `kalshiJournal`
-field. The rules are a separate deploy:
+`kalshiBooks` is a read-only callable that feeds the Live books tab. It requires
+the owner's email AND `isAdmin: true` on the user document. The journal needs no
+function at all: it is a field on the admin's own user document, and
+`firestore.rules` refuses a non-admin write to it. So the journal works only
+once the rules are deployed:
 ```
 firebase deploy --only functions,firestore:rules
 ```
 
-Kalshi's CDN returns 403 to requests from Google Cloud, so `kalshiBooks` and
-`kalshiRecorder` cannot read Kalshi from Firebase. The journal does not need
-them. The recorder function only fails every minute; remove it with
-`firebase functions:delete kalshiRecorder --region us-central1`.
+Kalshi's CDN returns 403 to requests from Google Cloud, so Live books will show
+a plain message instead of prices. That is expected and the journal does not
+depend on it. There is deliberately no scheduled recorder on Firebase: it could
+only fail every minute. History is fetched with `kalshi-scalper`
+(`python -m scalper.backfill`) from a connection Kalshi accepts.
+
+The first deploy after this change asks whether to delete `kalshiRecorder` and
+the old `kalshiSnapshots` data function. Answer `y`: nothing calls it.
+Any `kalshiSnapshots` or `kalshiResults` documents it already wrote can be
+deleted in the Firebase console; nothing reads them.
