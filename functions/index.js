@@ -87,6 +87,16 @@ let kalshiCache = { at: 0, body: null };
 // let a second admin in by accident. The page hides itself for anyone else, but
 // hiding is not the control, this is.
 const KALSHI_OWNER_EMAIL = "heiszcam@gmail.com";
+
+// getFirestore() needs the DEFAULT app. "Is any app initialised?" is the wrong
+// question: the functions runtime can already hold another app, so a check on
+// getApps().length skips initialisation and getFirestore() then throws
+// "The default Firebase app does not exist". That is exactly what the first
+// deploy did. Ask for the default app by name, and never initialise it twice
+// (a second initializeApp() with the same name throws too).
+function ensureDefaultAdminApp() {
+  if (!getApps().some((a) => a.name === "[DEFAULT]")) initializeApp();
+}
 async function assertKalshiAdmin(auth) {
   assertSignedIn(auth);
   if (!auth.token || auth.token.email !== KALSHI_OWNER_EMAIL) {
@@ -97,7 +107,7 @@ async function assertKalshiAdmin(auth) {
   // an unnamed error here reaches the page as "INTERNAL" and hides the cause.
   let snap;
   try {
-    if (!getApps().length) initializeApp();
+    ensureDefaultAdminApp();
     snap = await getFirestore().collection("users").doc(auth.uid).get();
   } catch (e) {
     console.error("kalshi admin check could not read the user document:", e);

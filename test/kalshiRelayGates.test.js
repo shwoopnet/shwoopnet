@@ -126,9 +126,23 @@ function liftAdminCheck(firestore, calls) {
     else if (fnSrc[i] === '}') { d--; if (!d) { end = i + 1; break; } }
   }
   const assertSignedIn = (a) => { if (!a) throw new FakeHttpsError('permission-denied', 'Sign in required.'); };
-  return new Function('assertSignedIn', 'HttpsError', 'KALSHI_OWNER_EMAIL', 'getApps', 'initializeApp', 'getFirestore', 'console',
-    'return (' + fnSrc.slice(start, end) + ')')(assertSignedIn, FakeHttpsError, 'heiszcam@gmail.com', () => [1], () => {},
+  // The default app already exists, so a correct check initialises nothing.
+  return new Function('assertSignedIn', 'HttpsError', 'KALSHI_OWNER_EMAIL', 'ensureDefaultAdminApp', 'getFirestore', 'console',
+    'return (' + fnSrc.slice(start, end) + ')')(assertSignedIn, FakeHttpsError, 'heiszcam@gmail.com', () => {},
     () => { calls.push('firestore'); return firestore; }, { error: () => {} });
+}
+
+// The function that decides whether the default admin app must be created, run for
+// real against a scripted app list.
+function liftEnsureApp(apps, inits) {
+  const start = fnSrc.indexOf('function ensureDefaultAdminApp(');
+  let d = 0, end = -1;
+  for (let i = fnSrc.indexOf('{', start); i < fnSrc.length; i++) {
+    if (fnSrc[i] === '{') d++;
+    else if (fnSrc[i] === '}') { d--; if (!d) { end = i + 1; break; } }
+  }
+  return new Function('getApps', 'initializeApp', 'return (' + fnSrc.slice(start, end) + ')')(
+    () => apps, () => { inits.push('init'); apps.push({ name: '[DEFAULT]' }); });
 }
 const userDoc = (exists, data) => ({ collection: () => ({ doc: () => ({ get: async () => ({ exists, data: () => data }) }) }) });
 const owner = { uid: 'u1', token: { email: 'heiszcam@gmail.com' } };
@@ -154,6 +168,24 @@ gates.G12 = async () => {
   assert.ok(/Admin check failed: .*PERMISSION_DENIED/.test(r.e.message), r.e.message);
   const boom = await attempt(owner, { collection: () => { throw new TypeError('getFirestore is not a function'); } });
   assert.ok(boom.e instanceof FakeHttpsError, 'even a synchronous failure must be named');
+};
+
+// The production failure, reproduced. The functions runtime already holds ANOTHER
+// app, so "is any app initialised?" said yes, nothing was initialised, and
+// getFirestore() threw "The default Firebase app does not exist". The default app
+// must be created whenever it is missing, whatever else exists, and never twice.
+gates.G13 = () => {
+  const inits = [];
+  const apps = [{ name: 'firebase-functions-internal' }];
+  liftEnsureApp(apps, inits)();
+  assert.strictEqual(inits.length, 1, 'with only a non-default app present, the default app must be created');
+  liftEnsureApp(apps, inits)();
+  assert.strictEqual(inits.length, 1, 'once the default app exists it must not be initialised again');
+  const none = [];
+  liftEnsureApp([], none)();
+  assert.strictEqual(none.length, 1, 'with no apps at all it must be created');
+  assert.ok(/getApps\(\)\.some\(\(a\) => a\.name === "\[DEFAULT\]"\)/.test(fnSrc), 'the check must be by app name');
+  assert.ok(!/if \(!getApps\(\)\.length\)/.test(fnSrc), 'the "any app" check that caused this must not come back');
 };
 
 (async () => {
