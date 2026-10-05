@@ -235,6 +235,16 @@ gates.G21 = () => {
   assert.ok(/beating the price/.test(calib(lucky).verdict));
 };
 
+// Kalshi's refusal is a whole HTML error page. The status line must never show
+// markup, and a permanent refusal must stop the 5 second polling.
+gates.G22 = () => {
+  const m = /function refreshKalshi\(\)\{([\s\S]*?)\n  \}\n  function startKalshiPoll/.exec(src);
+  assert.ok(m, 'refreshKalshi not found');
+  assert.ok(/refused \? 'Kalshi refused the request \(HTTP 403\)'/.test(m[1]), 'a 403 must show a short line');
+  assert.ok(/replace\(\/<\[\^>\]\*>\/g/.test(m[1]), 'any other error must have markup stripped');
+  assert.ok(/if\(refused\)\{ stopKalshiPoll\(\); \}/.test(m[1]), 'a 403 must stop the polling');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); }

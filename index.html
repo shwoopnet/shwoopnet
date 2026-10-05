@@ -9829,11 +9829,17 @@
     api.kalshiBooks().then(renderKalshiBooks).catch(function(err){
       // Say so rather than leaving stale numbers on screen looking live.
       var m = (err && err.message) || 'unknown';
+      // A refusal from Kalshi's CDN comes back as a whole HTML error page. Show a
+      // short line, never the markup, and stop polling: the refusal is permanent
+      // (it is about where the relay runs), so asking again every 5s only repeats it.
+      var refused = m.indexOf('403') >= 0;
       document.getElementById('kalBooks').innerHTML = '<div class="kal-empty">' +
-        (m.indexOf('403') >= 0
+        (refused
           ? 'Kalshi refuses requests from Google Cloud, which the live relay runs on, so live books are not available here. The journal does not need them.'
           : 'Could not load Kalshi data. The relay function may not be deployed yet.') + '</div>';
-      st.textContent = 'Error: ' + m;
+      st.textContent = refused ? 'Kalshi refused the request (HTTP 403)'
+        : 'Error: ' + m.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
+      if(refused){ stopKalshiPoll(); }
     });
   }
   function startKalshiPoll(){
