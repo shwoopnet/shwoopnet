@@ -39,7 +39,9 @@ gates.G3 = () => {
 // CDN, so it must not come back. Recording is done by the local recorder and by
 // scalper.backfill, which read Kalshi from a connection it accepts.
 gates.G4 = () => {
-  assert.ok(!/kalshiRecorder|onSchedule/.test(fnSrc), 'the Firebase recorder must stay removed');
+  assert.ok(!/kalshiRecorder/.test(fnSrc), 'the Firebase recorder must stay removed');
+  const scheduled = [...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]);
+  assert.deepStrictEqual(scheduled, ['kalshiBot'], 'the only scheduled function is the paper bot');
 };
 
 // The relay stays read-only and keyless: GET only, nothing to place an order with.

@@ -88,3 +88,37 @@ The first deploy after this change asks whether to delete `kalshiRecorder` and
 the old `kalshiSnapshots` data function. Answer `y`: nothing calls it.
 Any `kalshiSnapshots` or `kalshiResults` documents it already wrote can be
 deleted in the Firebase console; nothing reads them.
+
+## The Kalshi paper bot (server side)
+
+`kalshiBot` is a scheduled function that runs once a minute, makes SIMULATED trades
+from Kalshi's public prices with $100 of paper capital, and writes its state to
+Firestore. It cannot place a real order: nothing in it signs a request or calls an order
+endpoint, and a test asserts that. Deploy it together with the rules, because the rules
+are what keep its records readable by the admin only:
+```
+firebase deploy --only functions,firestore:rules
+```
+The first deploy of a scheduled function enables Cloud Scheduler and may ask a question
+or two about APIs; answer yes. After about a minute the **Bot** tab on the Kalshi page
+shows `Bot: OK`. If it still says "Not running yet" after three minutes, read the log:
+```
+firebase functions:log --only kalshiBot
+```
+
+- **State** lives in `kalshiBotPositions`, `kalshiBotEvents` and `kalshiBotMeta`. Only the
+  function writes them (the Admin SDK bypasses the rules). The one thing the page may
+  write is `kalshiBotMeta/control`, the halt switch.
+- **A double fire cannot enter a market twice.** A position is created with `create()` under
+  an id derived from the market, which fails if it exists; a close happens inside a
+  transaction that re-checks the position is still open.
+- **Cost** (a projection, not a measurement): about 43,000 invocations a month against 2
+  million free, roughly 1,500 Firestore writes and 10,000 reads a day against a daily free
+  allowance of 20,000 and 50,000 that the rest of the app shares. Set a budget alert and
+  look at usage after a week.
+- **Alerts.** The page shows the bot as OK, STALE (2.5 minutes of silence) or DOWN (5). A
+  phone alert when it stops is not built yet; it needs an outside watchdog and is the next
+  piece.
+- **Real orders are not part of this.** They come only after a strategy passes its
+  pre-registered test and 300 paper trades, and they need the API key stored as a Firebase
+  secret, never in the repo. See `kalshi-scalper/README.md`.

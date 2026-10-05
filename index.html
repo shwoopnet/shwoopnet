@@ -985,6 +985,7 @@
   .kal-tnote{ grid-column:1 / -1; color:var(--muted); font-size:12px; }
   .kal-flag{ color:var(--muted); font-size:11px; border:1px solid var(--border); border-radius:999px; padding:1px 7px; margin-left:4px; }
   .kal-pos{ color:#1f9d55; }
+  .kal-warn{ color:#c58a00; }
   .kal-neg{ color:#d64545; }
   .kal-stat-row{ display:flex; gap:28px; flex-wrap:wrap; margin-bottom:10px; }
   .kal-stat-row .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
@@ -1955,7 +1956,7 @@
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction,
-    writeBatch, serverTimestamp
+    writeBatch, serverTimestamp, collection, query, orderBy, limit
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
   import {
     getFunctions, httpsCallable
@@ -2410,6 +2411,25 @@
     },
     finnhubCompanyNews: function(symbol, from, to){
       return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
+    },
+    // The server-side Kalshi PAPER bot (functions/kalshiBot*). The page can only watch it
+    // and flip a halt switch; firestore.rules lets nobody else write a position or an event.
+    // `h` is { status, control, positions, events }, each a function called on every change.
+    watchKalshiBot: function(h){
+      var un = [];
+      var onErr = function(err){ console.error('Kalshi bot sync error:', err); };
+      un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'status'), function(s){ h.status(s.exists() ? s.data() : null); }, onErr));
+      un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'control'), function(s){ h.control(s.exists() ? s.data() : {}); }, onErr));
+      un.push(onSnapshot(query(collection(db, 'kalshiBotPositions'), orderBy('entryAt', 'desc'), limit(40)), function(q){
+        h.positions(q.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); }));
+      }, onErr));
+      un.push(onSnapshot(query(collection(db, 'kalshiBotEvents'), orderBy('ts', 'desc'), limit(12)), function(q){
+        h.events(q.docs.map(function(d){ return d.data(); }));
+      }, onErr));
+      return function(){ un.forEach(function(f){ f(); }); };
+    },
+    setKalshiHalt: function(halt){
+      return setDoc(doc(db, 'kalshiBotMeta', 'control'), { halt: Boolean(halt), at: serverTimestamp() });
     },
     // Admin-only journal of Kalshi trades, stored on the user's own doc.
     // firestore.rules refuses this field from any non-admin account.
@@ -3232,11 +3252,33 @@
     </div>
 
     <div class="kal-tabs" role="tablist">
-      <button class="kal-tab current" data-kal-tab="journal" role="tab">Journal</button>
+      <button class="kal-tab current" data-kal-tab="bot" role="tab">Bot</button>
+      <button class="kal-tab" data-kal-tab="journal" role="tab">Journal</button>
       <button class="kal-tab" data-kal-tab="live" role="tab">Live books</button>
     </div>
 
-    <div id="kalTabJournal">
+    <div id="kalTabBot">
+      <div class="kal-card">
+        <div class="kal-card-title">Server bot</div>
+        <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Waiting for the bot's first report.</div></div>
+        <div class="kal-actions"><button class="kal-btn" id="kalBotHalt" type="button" hidden></button><span class="kal-note" id="kalBotHaltMsg"></span></div>
+        <div class="kal-note">PAPER only: it makes simulated trades from Kalshi's live prices once a minute on Google's servers, and cannot place a real order. Halt stops new entries; positions already open are still managed.</div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">Open positions</div>
+        <div id="kalBotOpen"></div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">Recent closed trades</div>
+        <div id="kalBotClosed"></div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">What it did</div>
+        <div id="kalBotEvents"></div>
+      </div>
+    </div>
+
+    <div id="kalTabJournal" hidden>
       <div class="kal-card">
         <div class="kal-card-title">Today's limits</div>
         <div id="kalLimits" class="kal-limits"></div>
@@ -9851,18 +9893,105 @@
     if(kalshiPollTimer){ clearInterval(kalshiPollTimer); kalshiPollTimer = null; }
   }
 
-  var kalshiTab = 'journal';
+  // ---- server bot tab (read only, plus one halt switch) ----
+
+  // The bot runs once a minute, so the heartbeat is judged against that: two and a
+  // half minutes of silence is stale, five is down. The same three words as the
+  // Python status command and an outside watchdog would use.
+  function kalshiBotHealth(ageMs){
+    if(ageMs == null || !Number.isFinite(ageMs)){ return 'NEVER RAN'; }
+    return ageMs < 150000 ? 'OK' : (ageMs < 300000 ? 'STALE' : 'DOWN');
+  }
+
+  var kalshiBotState = { status: null, control: {}, positions: [], events: [] };
+  var kalshiBotUnsub = null;
+
+  function renderKalshiBot(){
+    var s = kalshiBotState.status;
+    var el = document.getElementById('kalBotStatus');
+    var halted = kalshiBotState.control && kalshiBotState.control.halt === true;
+    if(!s){
+      el.innerHTML = '<div class="kal-big">Not running yet</div><div>The bot has not reported. After the next deploy it reports within a minute.</div>';
+    } else {
+      var age = Date.now() - s.lastTickMs;
+      var h = kalshiBotHealth(age);
+      var cls = h === 'OK' ? 'kal-pos' : (h === 'STALE' ? 'kal-warn' : 'kal-neg');
+      var secs = Math.max(0, Math.round(age / 1000));
+      var tier = { ok: 'Within limits', half: 'Half size after a break', break: 'On a break', done: 'Done for today' }[s.tierMode] || s.tierMode;
+      el.innerHTML = '<div class="kal-big ' + cls + '">Bot: ' + h + '</div>' +
+        '<div>Last run ' + (secs < 120 ? secs + 's' : Math.round(secs / 60) + ' min') + ' ago &middot; PAPER, no real orders &middot; bankroll ' + kalshiMoney(s.bankroll) + '</div>' +
+        '<div>' + escapeHtml(tier) + ' &middot; today ' + kalshiMoney(s.pnlToday) + ' &middot; ' + kalshiMoney(s.perTradeCap) + ' a trade &middot; break at -' + kalshiMoney(s.softLimit) + ' &middot; done at -' + kalshiMoney(s.hardLimit) + '</div>' +
+        '<div>' + (s.exchangeActive ? 'Exchange trading' : 'Exchange not trading') + (s.ok ? '' : ' &middot; <span class="kal-neg">prices unreadable: ' + escapeHtml(s.error || '') + '</span>') +
+        (s.lastBlock ? ' &middot; entries blocked: ' + escapeHtml(s.lastBlock) : '') + '</div>';
+    }
+    // Shown the moment the switch is flipped, not only after the bot's next run reports it.
+    if(halted){ el.innerHTML += '<div class="kal-warn kal-big">Halted from this page: no new entries</div>'; }
+    var btn = document.getElementById('kalBotHalt');
+    btn.hidden = !currentUserIsAdmin;
+    btn.textContent = halted ? 'Resume new entries' : 'Halt new entries';
+    var pos = kalshiBotState.positions;
+    var open = pos.filter(function(p){ return p.status === 'open'; });
+    var closed = pos.filter(function(p){ return p.status === 'closed'; })
+      .sort(function(a, b){ return b.settledAt - a.settledAt; }).slice(0, 15);
+    var name = function(p){ return (p.series === 'KXBTC15M' ? 'Bitcoin' : 'Gold') + ' ' + (p.side === 'yes' ? 'Up' : 'Down'); };
+    document.getElementById('kalBotOpen').innerHTML = open.length ? open.map(function(p){
+      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(name(p)) + '</div><span class="kal-lbl">' + escapeHtml(p.ticker) + '</span></div>' +
+        '<div><span class="kal-lbl">Bought</span>' + p.contracts + ' at ' + (p.entry * 100).toFixed(1) + 'c</div>' +
+        '<div><span class="kal-lbl">Band</span>' + escapeHtml(p.band) + '</div>' +
+        '<div><span class="kal-lbl">Opened</span>' + new Date(p.entryAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) + '</div></div>';
+    }).join('') : '<div class="kal-empty">No open positions.</div>';
+    document.getElementById('kalBotClosed').innerHTML = closed.length ? closed.map(function(p){
+      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(name(p)) + '</div><span class="kal-lbl">' + escapeHtml(p.ticker) + '</span></div>' +
+        '<div><span class="kal-lbl">Bought</span>' + p.contracts + ' at ' + (p.entry * 100).toFixed(1) + 'c</div>' +
+        '<div><span class="kal-lbl">Ended</span>' + (p.exit === 0.8 ? 'sold at 80c' : (p.exit === 1 ? 'won' : 'lost')) + '</div>' +
+        '<div class="' + (p.pnl >= 0 ? 'kal-pos' : 'kal-neg') + '"><span class="kal-lbl">Net</span>' + kalshiMoney(p.pnl) + '</div></div>';
+    }).join('') : '<div class="kal-empty">No closed trades yet.</div>';
+    document.getElementById('kalBotEvents').innerHTML = kalshiBotState.events.length ? kalshiBotState.events.map(function(e){
+      return '<div class="kal-tnote">' + new Date(e.ts).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) + ' &middot; ' + escapeHtml(e.kind) + ' &middot; ' + escapeHtml(e.detail) + '</div>';
+    }).join('') : '<div class="kal-empty">Nothing yet.</div>';
+  }
+
+  function startKalshiBot(){
+    stopKalshiBot();
+    var api = window.__shwoopAPI;
+    if(!api || !api.watchKalshiBot || !currentUserIsAdmin){ return; }
+    kalshiBotUnsub = api.watchKalshiBot({
+      status: function(s){ kalshiBotState.status = s; renderKalshiBot(); },
+      control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); },
+      positions: function(p){ kalshiBotState.positions = p; renderKalshiBot(); },
+      events: function(e){ kalshiBotState.events = e; renderKalshiBot(); }
+    });
+  }
+  function stopKalshiBot(){
+    if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }
+  }
+  // A heartbeat only goes stale on screen if the page keeps re-judging its age.
+  setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
+
+  document.getElementById('kalBotHalt').addEventListener('click', function(){
+    var api = window.__shwoopAPI;
+    if(!api || !api.setKalshiHalt || !currentUserIsAdmin){ return; }
+    var halted = kalshiBotState.control && kalshiBotState.control.halt === true;
+    if(halted && !window.confirm('Let the bot take new entries again?')){ return; }
+    api.setKalshiHalt(!halted).catch(function(err){
+      document.getElementById('kalBotHaltMsg').textContent = 'Could not change it: ' + ((err && err.message) || 'unknown');
+    });
+  });
+
+  var kalshiTab = 'bot';
   function showKalshiTab(name){
-    kalshiTab = (name === 'live') ? 'live' : 'journal';
+    kalshiTab = (name === 'live' || name === 'journal') ? name : 'bot';
+    document.getElementById('kalTabBot').hidden = (kalshiTab !== 'bot');
     document.getElementById('kalTabJournal').hidden = (kalshiTab !== 'journal');
     document.getElementById('kalTabLive').hidden = (kalshiTab !== 'live');
     document.querySelectorAll('.kal-tab').forEach(function(b){
       b.classList.toggle('current', b.dataset.kalTab === kalshiTab);
     });
     if(kalshiTab === 'live'){ startKalshiPoll(); } else { stopKalshiPoll(); }
+    if(kalshiTab === 'bot'){ startKalshiBot(); } else { stopKalshiBot(); }
   }
   function kalshiOnShow(){ showKalshiTab(kalshiTab); renderKalshiJournal(); }
-  function kalshiOnHide(){ stopKalshiPoll(); }
+  function kalshiOnHide(){ stopKalshiPoll(); stopKalshiBot(); }
 
   ['kalPrice','kalContracts','kalProb','kalSpread','kalBankroll'].forEach(function(id){
     document.getElementById(id).addEventListener('input', renderKalshiJournal);

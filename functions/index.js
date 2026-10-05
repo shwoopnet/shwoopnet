@@ -68,6 +68,8 @@ exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (reque
 // and must not be widened into something that can without a separate review.
 const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const botRun = require("./kalshiBotRun");
 const kalshi = require("./kalshiLib");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
@@ -174,3 +176,84 @@ exports.kalshiBooks = onCall(async (request) => {
     throw new HttpsError("unavailable", "Relay error: " + String((e && e.message) || e).slice(0, 120));
   }
 });
+
+// ---- Kalshi PAPER bot, on the server ----------------------------------------
+// Runs once a minute on Google's servers, so nothing depends on a computer being
+// awake. PAPER ONLY: it simulates trades from Kalshi's public prices and cannot place
+// an order (the api object below has no order method, and a test asserts this file's
+// bot section contains no order code). The logic lives in kalshiBotLib.js and the tick
+// in kalshiBotRun.js, both tested without Firebase; this file only supplies Firestore
+// and Kalshi to them.
+//
+// State is in Firestore, not on a disk. A position is created by a key derived from its
+// market (h2-<ticker>) with create(), which fails if the document exists, so two runs at
+// the same moment cannot enter one market twice. The collections have no client write
+// rule except the admin's halt switch (see firestore.rules).
+async function kalshiGetJson(pathAndQuery) {
+  const failures = [];
+  for (const base of KALSHI_HOSTS) {
+    const host = base.replace("https://", "").split("/")[0];
+    try {
+      const res = await fetch(base + pathAndQuery, {
+        signal: AbortSignal.timeout(8000),
+        headers: { "User-Agent": "shwoopnet-bot/1.0 (paper)", "Accept": "application/json" },
+      });
+      if (res.ok) return await res.json();
+      failures.push(host + " HTTP " + res.status);
+    } catch (e) {
+      failures.push(host + " " + String((e && e.message) || e).slice(0, 60));
+    }
+  }
+  throw new Error(pathAndQuery.split("?")[0] + ": " + failures.join(" | "));
+}
+
+function kalshiBotApi() {
+  return {
+    exchangeStatus: () => kalshiGetJson("/exchange/status"),
+    markets: (series) => kalshiFetchSeries(series, "open", 5),
+    market: async (ticker) => (await kalshiGetJson("/markets/" + encodeURIComponent(ticker))).market || {},
+  };
+}
+
+function firestoreBotStore(db) {
+  const positions = db.collection("kalshiBotPositions");
+  const events = db.collection("kalshiBotEvents");
+  const meta = db.collection("kalshiBotMeta");
+  const fromDocs = (snap) => snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+  return {
+    async getStatus() { const s = await meta.doc("status").get(); return s.exists ? s.data() : null; },
+    async getControl() { const s = await meta.doc("control").get(); return s.exists ? s.data() : {}; },
+    async listOpen() { return fromDocs(await positions.where("status", "==", "open").get()); },
+    // One range filter on one field, so no composite index is needed.
+    async listClosedSince(ms) { return fromDocs(await positions.where("settledAt", ">=", ms).get()).filter((p) => p.status === "closed"); },
+    async createPosition(id, data) {
+      try {
+        await positions.doc(id).create(data);
+        return true;
+      } catch (e) {
+        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
+        throw e;
+      }
+    },
+    async closePosition(id, patch) {
+      return db.runTransaction(async (t) => {
+        const ref = positions.doc(id);
+        const snap = await t.get(ref);
+        if (!snap.exists || snap.data().status !== "open") return false;
+        t.update(ref, Object.assign({}, patch, { status: "closed" }));
+        return true;
+      });
+    },
+    async addEvent(e) { await events.add(e); },
+    async setStatus(st) { await meta.doc("status").set(st); },
+  };
+}
+
+exports.kalshiBot = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const r = await botRun.runTick({ store: firestoreBotStore(getFirestore()), api: kalshiBotApi(), now: Date.now() });
+    console.log("kalshiBot tick: entered=" + r.entered + " tier=" + r.tier + (r.block ? " blocked=" + r.block : ""));
+  }
+);

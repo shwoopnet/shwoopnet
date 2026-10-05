@@ -326,6 +326,13 @@ The owner's own idea, stated as a rule. `python -m scalper.scalps`.
 
 ## The paper bot (starts with $100, cannot place a real order)
 
+**Which bot runs where.** The bot that matters runs on the SERVER: a Firebase
+scheduled function (`functions/kalshiBot*`), once a minute, with its state in
+Firestore, watched and halted from the Bot tab of the Kalshi page. It depends on no
+computer being awake, which is what the owner asked for. The Python bot described
+below is the same logic for local development and research. It is not meant to be
+left running on a laptop.
+
 `python -m scalper.bot` watches live Kalshi prices for the two markets, makes
 SIMULATED trades, applies the loss limits in code, and keeps its own records. There
 is no order code in it, and the constructor refuses any mode but "paper".
