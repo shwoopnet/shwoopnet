@@ -12,15 +12,12 @@ const MIN_LEFT_S = 300;
 const FEE_RATE = 0.07;
 const SETTLE_GRACE_MS = 15000;
 const BANKROLL = 100; // the owner starts at $100
-const SERIES = ["KXBTC15M", "KXGOLD15M"];
+// One copy of the series list and the dollar-string parsing, shared with the relay.
+const { KALSHI_SERIES: SERIES, kalshiNum: num } = require("./kalshiLib");
 const LIMITS = { perTradePct: 0.01, softPct: 0.03, hardPct: 0.05, breakMs: 2 * 60 * 60 * 1000 };
 const TZ = "America/Chicago"; // the owner's day; the server clock is UTC
 
 const round2 = (x) => Math.round(x * 100) / 100;
-const num = (x) => {
-  const n = parseFloat(x);
-  return Number.isFinite(n) ? n : null;
-};
 
 // Rounded UP to a cent per order, as Kalshi does.
 function takerFee(price, contracts) {
@@ -131,7 +128,7 @@ const exitPnl = (pos) => round2(TARGET * pos.contracts - takerFee(TARGET, pos.co
 const settlePnl = (pos, result) => round2((result === pos.side ? pos.contracts : 0) - pos.entry * pos.contracts - pos.entryFee);
 
 module.exports = {
-  BANDS, TARGET, MIN_LEFT_S, SETTLE_GRACE_MS, BANKROLL, SERIES, LIMITS, TZ,
-  takerFee, validQuote, localDayStart, tierState, sizeFor, positionId, parseMarket,
+  TARGET, SETTLE_GRACE_MS, BANKROLL, SERIES,
+  takerFee, validQuote, localDayStart, tierState, sizeFor, positionId,
   planEntries, exitDue, exitPnl, settlePnl, round2,
 };

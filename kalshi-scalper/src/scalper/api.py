@@ -15,7 +15,6 @@ import urllib.request
 # Kalshi's docs give external-api.kalshi.com as the production host. The older
 # api.elections host keeps working today and stays as a fallback.
 BASES = ("https://external-api.kalshi.com/trade-api/v2", "https://api.elections.kalshi.com/trade-api/v2")
-BASE = BASES[0]
 
 
 def _wait_for(i: int, err: Exception) -> float:
@@ -53,10 +52,6 @@ def _get(path: str, params: dict | None = None, retries: int = 8) -> dict:
 def markets(series_ticker: str, status: str = "open", limit: int = 20) -> list[dict]:
     return _get("/markets", {"series_ticker": series_ticker, "status": status,
                              "limit": limit}).get("markets", [])
-
-
-def orderbook(ticker: str) -> dict:
-    return _get(f"/markets/{ticker}/orderbook")["orderbook_fp"]
 
 
 def f(x) -> float | None:

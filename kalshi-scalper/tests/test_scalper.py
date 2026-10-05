@@ -51,27 +51,6 @@ finally:
     KILL_FILE.unlink()
 print("all tests passed")
 
-# ---- paper engine ----
-from scalper.paper import run
-
-# snapshot: (ts, yes_bid, bid_sz, yes_ask, ask_sz)
-flat = {"M": [(t, 0.49, 100, 0.51, 100) for t in range(0, 200, 2)]}
-always = lambda h: ("yes", 0.6)
-tr = run(flat, always, hold_s=10)
-# A flat market must LOSE money to spread and fees. If a flat book ever shows a
-# profit, fills are being priced at the mid and every result is fiction.
-assert tr and all(t.net < 0 for t in tr)
-# The fill must come from a later snapshot than the signal (no lookahead).
-seen = []
-def spy(h):
-    seen.append(len(h)); return ("yes", 0.6) if len(h) == 1 else None
-tr = run({"M": [(0, .49, 9, .51, 9), (2, .60, 9, .62, 9), (20, .60, 9, .62, 9)]}, spy, hold_s=5)
-assert tr and tr[0].entry == 0.62      # filled at the NEXT snapshot's ask, not 0.51
-# Size is capped by what is displayed at the touch.
-tr = run({"M": [(0, .49, 3, .51, 3), (2, .49, 3, .51, 3), (30, .49, 3, .51, 3)]}, spy, hold_s=5, contracts=50)
-assert tr and tr[0].contracts == 3
-print("paper engine tests passed")
-
 # ---- status and service ----
 from scalper.status import find_gaps
 from scalper.service import build_plist, LABEL

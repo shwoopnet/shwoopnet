@@ -62,32 +62,21 @@ placeholders) rather than silently falling back to the old exposed key.
 
 ## Kalshi page (admin only)
 
-`kalshiBooks` is a read-only callable that feeds the Live books tab. It requires
-the owner's email AND `isAdmin: true` on the user document. The journal needs no
-function at all: it is a field on the admin's own user document, and
-`firestore.rules` refuses a non-admin write to it. So the journal works only
-once the rules are deployed:
+- **Live books** (`kalshiBooks`, a read-only callable) requires the owner's email AND
+  `isAdmin: true` on the user document. It tries `external-api.kalshi.com`, the host Kalshi's
+  docs give, and falls back to `api.elections.kalshi.com`. The first works from Google Cloud
+  (confirmed 2026-10-05); the second sits behind a CDN that refuses Google Cloud addresses
+  (HTTP 403). If a refusal ever returns, the status line names each host and what it said.
+- **Journal.** A field (`kalshiJournal`) on the admin's own user document. It needs no function:
+  `firestore.rules` refuses a non-admin write to it, so it is protected only once the rules
+  are deployed.
+- **History for research** is fetched with `kalshi-scalper` (`python -m scalper.backfill`)
+  and analysed there. Nothing on Firebase records it.
+
+Deploy functions and rules together:
 ```
 firebase deploy --only functions,firestore:rules
 ```
-
-
-`kalshiBooks` tries `external-api.kalshi.com` (the host Kalshi's docs give) first
-and `api.elections.kalshi.com` second. The second sits behind a CDN that refuses
-Google Cloud addresses, so Live books working at all depends on the first not
-doing the same. If the status line still says refused, both hosts said no and
-the error names each.
-
-Kalshi's CDN returns 403 to requests from Google Cloud on the second host, so if both refuse, Live books will show
-a plain message instead of prices. That is expected and the journal does not
-depend on it. There is deliberately no scheduled recorder on Firebase: it could
-only fail every minute. History is fetched with `kalshi-scalper`
-(`python -m scalper.backfill`) from a connection Kalshi accepts.
-
-The first deploy after this change asks whether to delete `kalshiRecorder` and
-the old `kalshiSnapshots` data function. Answer `y`: nothing calls it.
-Any `kalshiSnapshots` or `kalshiResults` documents it already wrote can be
-deleted in the Firebase console; nothing reads them.
 
 ## The Kalshi paper bot (server side)
 
