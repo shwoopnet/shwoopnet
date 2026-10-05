@@ -1,7 +1,7 @@
 "use strict";
 // Pure logic for the server-side Kalshi paper bot. No Firebase, no network, so the
 // repo's plain-node tests can run it. A port of kalshi-scalper/src/scalper/
-// (limits.py, bot.py, scalps.py); the tests use the same cases as the Python ones.
+// (limits.py, bot.py, scalps.py, since retired); the tests use the same cases.
 //
 // PAPER ONLY. There is no order code anywhere in the bot. Real orders will be
 // written only after a strategy passes its pre-registered test in paper trading.
@@ -38,7 +38,7 @@ function localDayStart(nowMs, tz) {
   return nowMs - ((g("hour") * 60 + g("minute")) * 60 + g("second")) * 1000 - (nowMs % 1000);
 }
 
-// Daily loss tiers: the same rules as the web page and limits.py. closed: [{settledAt, pnl}].
+// Daily loss tiers: the same rules as the web page. closed: [{settledAt, pnl}].
 //   per trade 1% of bankroll; down 3%: a 2 hour break then half size; down 5%: done.
 // Realised only, in the owner's local day, in settlement order. The break is measured
 // from the trade that crossed the soft line and later wins do not shorten it. The hard

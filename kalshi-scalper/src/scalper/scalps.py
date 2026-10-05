@@ -49,7 +49,7 @@ from datetime import datetime, timezone
 
 from .analyze import valid_quote
 from .calibration import cluster_mean_z
-from .recorder import DB
+from .paths import DB
 
 # ---- fixed before the first run ----
 BANDS = {"40c": (0.38, 0.42), "50c": (0.48, 0.52)}

@@ -2,7 +2,7 @@
 // A bug here is not a cosmetic bug: the same loop will later sit in front of real
 // orders, so every rule that protects money is stated as a consequence and exercised
 // by running the real code against a scripted Kalshi and an in-memory store.
-// The cases mirror kalshi-scalper's Python tests (limits.py, bot.py).
+// The cases mirror kalshi-scalper's Python tests.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -69,7 +69,7 @@ gates.G2 = () => {
   assert.strictEqual(t.mode, 'ok', 'yesterday evening must not count today');
 };
 
-// Same cases as limits.py and the web page.
+// Same cases as the web page (and the retired Python bot).
 gates.G3 = () => {
   const t = lib.tierState([], 300, at(12));
   assert.deepStrictEqual([t.mode, t.cap, t.softLimit, t.hardLimit], ['ok', 3, 9, 15]);

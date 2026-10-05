@@ -1,7 +1,7 @@
 // The Kalshi page tells someone how much a scalp costs and whether a trade
 // fits their risk limits. A wrong number here is not cosmetic: it is the
 // number someone sizes real money from. These gates state the consequences.
-// The same math lives in kalshi-scalper (fees.py, risk.py); keep them equal.
+// The same math lives in kalshi-scalper (fees.py); keep them equal.
 
 const assert = require('assert');
 const fs = require('fs');

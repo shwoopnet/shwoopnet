@@ -39,7 +39,7 @@ from datetime import datetime, timezone
 
 from .analyze import valid_quote
 from .calibration import cluster_mean_z, net_pnl
-from .recorder import DB
+from .paths import DB
 
 THRESHOLDS = (0.70, 0.60, 0.80)
 HEADLINE = 0.70

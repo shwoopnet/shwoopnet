@@ -6,16 +6,18 @@ Research and risk tooling for Kalshi 15 minute BTC (`KXBTC15M`) and gold
 
 ## Status
 
-Nothing here places an order. Order placement does not exist yet and is
-added only after the bar below is cleared in paper trading.
+Nothing here places an order, and nothing here has to stay running: this folder
+is offline research over downloaded history. The bot that watches the markets
+runs on the server. Order placement does not exist yet and is added only after
+the bar below is cleared in paper trading.
 
 ## Build order
 
-1. `recorder.py`  record books for days (run it, see below).
-2. `analyze.py`   is there any move bigger than spread plus fees (done).
-3. Paper engine   simulate fills from recorded books, never from mids.
-4. Strategy       only if step 2 shows room. Declares counterparty first.
-5. Live, tiny     demo env, then smallest real size, behind `risk.py`.
+1. `backfill.py`  fetch Kalshi's own 1 minute history for settled markets.
+2. `analyze.py`, `calibration.py`, `scalps.py`, `situations.py`  measure it.
+3. Strategy       only if the measurement shows room. Declares counterparty first.
+4. Paper bot      runs on the server (see below), not from this folder.
+5. Live, tiny     demo env, then smallest real size, behind hard limits.
 
 ## Bar to clear before any real money (written before any result exists)
 
@@ -326,42 +328,27 @@ The owner's own idea, stated as a rule. `python -m scalper.scalps`.
 
 ## The paper bot (starts with $100, cannot place a real order)
 
-**Which bot runs where.** The bot that matters runs on the SERVER: a Firebase
-scheduled function (`functions/kalshiBot*`), once a minute, with its state in
-Firestore, watched and halted from the Bot tab of the Kalshi page. It depends on no
-computer being awake, which is what the owner asked for. The Python bot described
-below is the same logic for local development and research. It is not meant to be
-left running on a laptop.
-
-`python -m scalper.bot` watches live Kalshi prices for the two markets, makes
-SIMULATED trades, applies the loss limits in code, and keeps its own records. There
-is no order code in it, and the constructor refuses any mode but "paper".
+It runs on the SERVER: a Firebase scheduled function (`functions/kalshiBot*` in
+this repo), once a minute, with its state in Firestore, watched and halted from
+the Bot tab of the Kalshi page. It depends on no computer being awake. Deploy
+and monitoring steps are in `functions/DEPLOY.md`. There is no copy of it in this
+folder: the Python version was retired so there is one implementation, not two
+that can drift.
 
 - **Strategy: H2, as plumbing.** H2 (buy near 40c or 50c, sell at 80c) was
-  falsified on 30 days of history and expects to lose roughly its costs. It is here
-  because it is simple and fully specified, so it exercises the whole loop (quotes,
-  limits, fills, settlement, records) and gives a forward check of the verdict. A
-  paper result far worse than the history says the plumbing is wrong.
-- **$100 capital.** Limits come from `limits.py`, identical to the web page: 1% a
-  trade ($1.00), a 2 hour break at -3% (-$3), done for the day at -5% (-$5). At this
-  size that is one or two contracts a trade, and Kalshi rounds each order's fee up
-  to a cent, so the fee is a larger share of a small trade (2 contracts at 40c pay
-  4c, about 19% more than the unrounded 3.4c). The paper P&L includes that rounding.
-- **Start it and keep it running:** `python3 -m scalper.service install bot` (starts
-  at login, restarts if it dies, stops idle sleep on power). `uninstall bot` stops it.
-- **Monitor it:** `python3 -m scalper.botstatus` shows OK, STALE or DOWN, today's
-  limits, open positions, closed trades and recent events.
-- **Alert when it stops:** set `HEALTHCHECK_URL` to a free watchdog address (for
-  example from healthchecks.io). The bot pings it once a minute while healthy, and
-  stays silent when it cannot read prices, so the service alerts a phone.
-- **Kill switch:** create an empty file named `KILL` in this folder. It stops new
-  entries. It does NOT freeze positions already open, which keep being managed.
-- **Safety rules, each with a test that fails if the rule is broken:** one position
-  per market from an id every process computes identically (a restart or a second
-  copy cannot enter twice); no new entry on an unreadable or partly unreadable
-  feed, an inactive exchange, no bankroll, under 5 minutes left, a wide book or
-  after the hard stop; never more contracts than the touch shows; never an exit on
-  the entry tick.
+  falsified on 30 days of history and expects to lose roughly its costs. It is
+  there because it is simple and fully specified, so it exercises the whole loop
+  and gives a forward check of the verdict.
+- **$100 capital.** 1% a trade ($1.00), a 2 hour break at -3% (-$3), done for the
+  day at -5% (-$5). Kalshi rounds each order's fee up to a cent, so the fee is a
+  larger share of a small trade.
+- **Kill switch:** the Halt button on the Bot tab stops new entries. It does NOT
+  freeze positions already open, which keep being managed.
+- **Safety rules, each with a test in `test/kalshiBotGates.test.js`:** one position
+  per market from an id every process computes identically; no new entry on an
+  unreadable or partly unreadable feed, an inactive exchange, no bankroll, under 5
+  minutes left, a wide book or after the hard stop; never more contracts than the
+  touch shows; never an exit on the entry tick.
 
 ## How real orders work on Kalshi (read from docs.kalshi.com on 2026-10-05)
 
@@ -407,33 +394,12 @@ Nothing below is implemented. It is what the live version will have to do.
    trades (see "Bar to clear before any real money"), starting at the $1 a trade the
    limits allow, with a hard-coded maximum order size and the kill switch in front.
 
-## Run it on your Mac (background, survives reboots)
-
-Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your
-own computer instead of Firebase. It only reads Kalshi's public prices: no
-account, key or password.
-
-    cd kalshi-scalper/src
-    python3 -m scalper.service install      # start now, and at every login
-    python3 -m scalper.status               # how much is saved, and any gaps
-    python3 -m scalper.service uninstall    # stop it (saved data is kept)
-
-Data lands in `kalshi-scalper/data/book.sqlite` (about 10 MB a day). Back that
-file up if it matters to you; it is not in git.
-
-**Sleep is the thing to watch.** The service stops the Mac idling to sleep, but
-a closed lid or a manual sleep still stops it. `status` reports those as gaps,
-so a hole shows up as a fact and not as silence. Anything computed over the data
-must not span a gap.
-
-If you see `CERTIFICATE_VERIFY_FAILED`, you are on a python.org install: run
-"Install Certificates.command" from `/Applications/Python 3.x/`.
-
-On other systems: `cd src && python3 -m scalper.recorder 2`.
-
 ## Analyse
 
-    cd src && python3 -m scalper.analyze    # needs a few days of data first
     ./run_tests.sh
+    cd src
+    python3 -m scalper.backfill      # download settled markets' minute history
+    python3 -m scalper.analyze       # then calibration, scalps, situations
 
-Create an empty file named `KILL` in this directory to halt all ordering.
+Data lands in `kalshi-scalper/data/` (not in git). It only reads Kalshi's public
+prices: no account, key or password.

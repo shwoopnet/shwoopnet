@@ -1,7 +1,7 @@
 """Minimal Kalshi REST client. Public market data only for now.
 
 No order placement lives here on purpose. Orders go through the risk gate
-(risk.py) and are added only after paper results clear the pre-registered bar.
+(the server bot) and are added only after paper results clear the pre-registered bar.
 Quotes are dollar strings ("0.0950"), not cents.
 """
 from __future__ import annotations
@@ -49,11 +49,6 @@ def _get(path: str, params: dict | None = None, retries: int = 8) -> dict:
     raise RuntimeError(f"GET {path} failed: {last}")
 
 
-def markets(series_ticker: str, status: str = "open", limit: int = 20) -> list[dict]:
-    return _get("/markets", {"series_ticker": series_ticker, "status": status,
-                             "limit": limit}).get("markets", [])
-
-
 def f(x) -> float | None:
     """Dollar string to float, tolerating missing or empty values."""
     try:
@@ -83,14 +78,3 @@ def candlesticks(series: str, ticker: str, start_ts: int, end_ts: int) -> list[d
     d = _get(f"/series/{series}/markets/{ticker}/candlesticks",
              {"start_ts": start_ts, "end_ts": end_ts, "period_interval": 1})
     return d.get("candlesticks", [])
-
-
-def market(ticker: str) -> dict:
-    """One market, including its status and, once settled, its result."""
-    return _get(f"/markets/{ticker}").get("market", {})
-
-
-def exchange_status() -> dict:
-    """Whether Kalshi itself is open. trading_active is false outside exchange
-    hours and during maintenance; nothing should be entered then."""
-    return _get("/exchange/status")

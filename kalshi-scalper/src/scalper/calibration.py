@@ -44,7 +44,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from .analyze import valid_quote
-from .recorder import DB
+from .paths import DB
 
 # ---- fixed before the first run ----
 TAU_MIN = (10, 5, 2)          # minutes before close at which the quote is taken
