@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import time
+import urllib.parse
 import urllib.request
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
@@ -16,7 +17,7 @@ BASE = "https://api.elections.kalshi.com/trade-api/v2"
 def _get(path: str, params: dict | None = None, retries: int = 3) -> dict:
     url = BASE + path
     if params:
-        url += "?" + "&".join(f"{k}={v}" for k, v in params.items())
+        url += "?" + urllib.parse.urlencode(params)
     last = None
     for i in range(retries):
         try:
@@ -43,3 +44,26 @@ def f(x) -> float | None:
         return float(x) if x not in (None, "") else None
     except ValueError:
         return None
+
+
+def settled_markets(series: str, min_close_ts: int, max_close_ts: int):
+    """Every settled market of a series that closed in [min, max], following the
+    cursor until the listing is exhausted."""
+    cursor = None
+    while True:
+        params = {"series_ticker": series, "status": "settled", "min_close_ts": min_close_ts,
+                  "max_close_ts": max_close_ts, "limit": 1000}
+        if cursor:
+            params["cursor"] = cursor
+        d = _get("/markets", params)
+        yield from d.get("markets", [])
+        cursor = d.get("cursor")
+        if not cursor:
+            return
+
+
+def candlesticks(series: str, ticker: str, start_ts: int, end_ts: int) -> list[dict]:
+    """One minute candles for a market, each with yes_bid and yes_ask OHLC."""
+    d = _get(f"/series/{series}/markets/{ticker}/candlesticks",
+             {"start_ts": start_ts, "end_ts": end_ts, "period_interval": 1})
+    return d.get("candlesticks", [])

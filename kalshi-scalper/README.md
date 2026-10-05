@@ -96,6 +96,33 @@ superseded.
   for time the recorder was off in the middle of it. Only the intervals actually
   recorded now count. Earlier, hours were also summed across both series.
 
+## Candle backfill: what is fixed before the first run (2026-10-05)
+
+Kalshi serves its own 1 minute history, with the bid and ask, for settled
+markets (checked to reach 45 days back, not 120). `python -m scalper.backfill`
+pulls it and `python -m scalper.analyze --candles` applies the decision rule to
+it. Written before any candle result was seen:
+
+- **Window:** the last 30 days, both series. First half and second half of the
+  window (by time) are the two halves the rule requires.
+- **Quote:** each minute's closing bid and ask. A hold is entry at one close and
+  exit at the close exactly 60s later. The rule uses the 60s hold only. 120s is
+  printed for information and plays no part in the verdict.
+- **Usable quote:** bid at least 0.1c, ask at most 99.9c, ask not below bid, and
+  a spread of at most 10c, at BOTH ends of the hold. A freshly opened market
+  shows an empty book (bid 0.1c, ask $1.00) that nothing can be traded against.
+  Dropped windows are counted and printed, never repaired.
+- **Everything else is unchanged:** the 18 buckets, the 60% bar, both halves,
+  500 samples overall and 250 per half, 72 hours of market time per series.
+- **This run counts.** Whatever verdict it gives is the verdict. Changing the
+  window, the quote filter or any threshold after seeing it voids it, the
+  earlier one stands, and the change is a new trial.
+
+**What this can and cannot see.** One quote per minute, so 10s and 30s holds do
+not exist here (they were already impossible: the move was below the cost). A
+closing quote can be stale in a thin minute. The data is whatever Kalshi serves
+now and could be revised. It cannot see a strategy that trades selected moments.
+
 ## Run it on your Mac (background, survives reboots)
 
 Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your

@@ -21,11 +21,18 @@ existed (see README, "Decision rule"). The thresholds below are part of that
 rule. Changing one after seeing a result voids that result: the earlier verdict
 stands and the new rule counts as a new trial.
 
-Usage: python -m scalper.analyze
+Two data sources. The default is the live recorder's 2 second snapshots. With
+--candles it reads Kalshi's own 1 minute history fetched by `scalper.backfill`,
+which has no sleep gaps. The rule, thresholds and cuts are identical; only the
+quotes come from a different place. Candles carry one quote per minute (the
+closing bid and ask), so only 60s and 120s holds exist there.
+
+Usage: python -m scalper.analyze [--candles]
 """
 from __future__ import annotations
 
 import sqlite3
+import sys
 from bisect import bisect_left
 from collections import defaultdict
 from datetime import datetime
@@ -47,6 +54,10 @@ RULE_MIN_HOURS = 72     # market time PER SERIES (about 3 days of recording) bef
 RULE_MIN_N = 500        # samples a bucket needs overall
 RULE_MIN_HALF_N = 250   # and in each half of the recording period
 RULE_BAR = 0.60         # break-even hit rate a bucket must beat, in BOTH halves
+
+# ---- Candle source, fixed on 2026-10-05 before the first candle run ----
+CANDLE_HORIZONS = (60, 120)
+CANDLE_MAX_SPREAD = 0.10  # a book wider than this at either end is not a market: dropped, counted
 PRICE_BANDS = [(0.0, 0.10), (0.10, 0.30), (0.30, 0.70), (0.70, 0.90), (0.90, 1.0001)]
 TIME_BANDS = [(600, 1e9, "over 10 min left"), (300, 600, "5 to 10 min"),
               (120, 300, "2 to 5 min"), (0, 120, "under 2 min")]
@@ -107,6 +118,56 @@ def market_hours(by: dict) -> dict[str, float]:
             if b[0] - a[0] <= GAP_SECONDS:
                 out[series] += (b[0] - a[0]) / 3600
     return dict(out)
+
+
+def valid_quote(bid: float | None, ask: float | None) -> bool:
+    """A usable two sided quote. A market that has just opened shows a bid of
+    0.1c and an ask of $1.00 (an empty book), and nothing can be traded there."""
+    return (bid is not None and ask is not None and bid >= 0.001 and ask <= 0.999
+            and ask >= bid and ask - bid <= CANDLE_MAX_SPREAD)
+
+
+def candle_windows(series: str, close_ts: int, candles: list[tuple]) -> tuple[list[tuple], int]:
+    """Holds built from one market's candles: (end_ts, bid_close, ask_close) each.
+    Entry at one candle's closing quote, exit at the closing quote exactly N
+    seconds later. A missing minute or an unusable quote drops the window; it is
+    never bridged. Returns (records, dropped)."""
+    by_t = {c[0]: c for c in candles}
+    recs, dropped = [], 0
+    for end, bid, ask in sorted(candles):
+        for h in CANDLE_HORIZONS:
+            nxt = by_t.get(end + h)
+            if nxt is None:
+                continue  # end of the market or a missing minute
+            if not (valid_quote(bid, ask) and valid_quote(nxt[1], nxt[2])):
+                dropped += 1
+                continue
+            recs.append((series, h, (ask + bid) / 2, close_ts - end, round_trip_cost(ask, bid),
+                         abs((nxt[2] + nxt[1]) / 2 - (ask + bid) / 2), float(end)))
+    return recs, dropped
+
+
+def collect_candles() -> tuple[list[tuple], dict]:
+    db = sqlite3.connect(DB)
+    q = ("SELECT c.series, c.ticker, c.end_ts, c.bid_c, c.ask_c, m.close_ts FROM candle c "
+         "JOIN market m ON m.ticker = c.ticker ORDER BY c.ticker, c.end_ts")
+    by: dict = defaultdict(list)
+    close: dict = {}
+    for series, ticker, end, b, a, close_ts in db.execute(q):
+        by[(series, ticker)].append((end, b, a))
+        close[ticker] = close_ts
+    recs: list[tuple] = []
+    dropped = 0
+    hours: dict[str, float] = defaultdict(float)
+    for (series, ticker), cs in by.items():
+        r, d = candle_windows(series, close[ticker], cs)
+        recs += r
+        dropped += d
+        hours[series] += len(cs) / 60  # one candle is one recorded minute
+    per = dict(hours)
+    return recs, {"markets": len(by), "hours_by_series": per, "dropped": dropped,
+                  "hours": min(per.values()) if per else 0.0,
+                  "dropped_label": "windows dropped for an unusable quote (empty or wider than 10c)"}
 
 
 def collect() -> tuple[list[tuple], dict]:
@@ -171,13 +232,17 @@ def verdict(recs: list[tuple], hours: float) -> tuple[str, list[str]]:
 
 
 def main() -> None:
-    recs, info = collect()
+    candles = "--candles" in sys.argv
+    recs, info = collect_candles() if candles else collect()
     if not recs:
-        print("Not enough recorded data yet.")
+        print("Not enough data yet." + (" Run: python -m scalper.backfill" if candles else ""))
         return
+    if candles:
+        print("Source: Kalshi 1 minute history (closing bid and ask), holds of 60s and 120s only")
     per = ", ".join(f"{k} {v:.1f}h" for k, v in sorted(info["hours_by_series"].items()))
     print(f"{info['markets']} markets. Market time recorded per series: {per} (rule needs {RULE_MIN_HOURS}h in each)")
-    print(f"{info['dropped']:,} windows dropped for spanning a recording gap or the end of a market\n")
+    label = info.get("dropped_label", "windows dropped for spanning a recording gap or the end of a market")
+    print(f"{info['dropped']:,} {label}\n")
 
     print(f"{'series':10} {'hold':>5} {'n':>7} {'avg cost':>9} {'avg |move|':>11} {'move>cost':>10} {'needs':>7}")
     for s in sorted({r[0] for r in recs}):

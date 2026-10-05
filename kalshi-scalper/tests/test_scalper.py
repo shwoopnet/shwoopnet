@@ -154,3 +154,45 @@ assert find_exit(ts_, 10, 60) is None
 # The end of the data is also a drop, never a guess.
 assert find_exit(ts_, len(ts_) - 1, 10) is None
 print("gap window tests passed")
+
+# ---- candle backfill ----
+from scalper.analyze import valid_quote, candle_windows
+from scalper.backfill import parse_candle
+
+# A real API candle, as served (dollar strings, nested yes_bid and yes_ask).
+api_candle = {"end_period_ts": 1791209820, "open_interest_fp": "145952.68", "volume_fp": "135875.16",
+              "price": {"close_dollars": "0.5100"},
+              "yes_ask": {"open_dollars": "0.3600", "high_dollars": "0.6000", "low_dollars": "0.3000", "close_dollars": "0.5200"},
+              "yes_bid": {"open_dollars": "0.3500", "high_dollars": "0.5900", "low_dollars": "0.2900", "close_dollars": "0.5100"}}
+row = parse_candle(api_candle, "T", "S")
+assert row[2] == 1791209820 and row[6] == 0.51 and row[10] == 0.52 and row[11] == 0.51
+# A candle with no book fields parses to None values, never to zero (a fake free quote).
+bare = parse_candle({"end_period_ts": 60, "price": {}}, "T", "S")
+assert bare[6] is None and bare[10] is None
+assert parse_candle({"price": {}}, "T", "S") is None
+
+# An empty book at market open (bid 0.1c, ask $1) is not a tradable quote.
+assert not valid_quote(0.001, 1.0)
+assert not valid_quote(None, 0.5) and not valid_quote(0.5, None)
+assert not valid_quote(0.40, 0.60)          # 20c wide: not a market
+assert valid_quote(0.47, 0.49) and valid_quote(0.001, 0.01)  # a real far-from-50 book is fine
+
+# Windows: entry at one close, exit exactly 60s later, never bridged.
+cs = [(60 * k, 0.40 + 0.01 * k, 0.42 + 0.01 * k) for k in range(1, 6)]
+recs, dropped = candle_windows("S", 900, cs)
+assert len([r for r in recs if r[1] == 60]) == 4 and len([r for r in recs if r[1] == 120]) == 3
+first = [r for r in recs if r[1] == 60][0]
+assert abs(first[5] - 0.01) < 1e-9 and first[3] == 900 - 60 and first[4] > 0.02
+# A missing minute must not be bridged: removing k=3 kills every window across it.
+holey = [c for c in cs if c[0] != 180]
+r2, _ = candle_windows("S", 900, holey)
+assert all(not (r[6] < 180 < r[6] + r[1]) for r in r2 if r[1] == 60), "a 60s hold spans the missing minute"
+assert len([r for r in r2 if r[1] == 60]) == 2
+# Every hold ends exactly N seconds after it starts, on a candle that exists.
+ends = {c[0] for c in holey}
+assert all(int(r[6]) + r[1] in ends for r in r2)
+# An unusable placeholder quote drops its windows and is counted, not scored.
+junk = [(60, 0.001, 1.0)] + cs[1:]
+r3, d3 = candle_windows("S", 900, junk)
+assert d3 >= 1 and all(r[6] != 60 for r in r3)
+print("candle backfill tests passed")
