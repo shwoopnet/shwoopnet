@@ -27,7 +27,7 @@ added only after the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 0. Cuts examined by the decision rule: 18.
+Strategy variants tried so far: 1 (see Verdicts). Cuts examined by the decision rule: 18.
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -122,6 +122,38 @@ it. Written before any candle result was seen:
 not exist here (they were already impossible: the move was below the cost). A
 closing quote can be stale in a thin minute. The data is whatever Kalshi serves
 now and could be revised. It cannot see a strategy that trades selected moments.
+
+## Verdicts
+
+**2026-10-05: 60 second directional scalping on Kalshi 15 minute Bitcoin and gold: `FALSIFIED`.**
+First and only run of the candle source, under the rule and filters fixed before
+it (see above). No threshold, window or filter was changed after seeing it.
+
+- 4,871 markets, 30 days, 712.5 market hours (Bitcoin) and 505.2 (gold), against
+  the 72 hours the rule needs. 11,631 windows dropped for an unusable quote.
+- Share of direction calls that must be right just to break even, 60s hold:
+  **76% Bitcoin, 78% gold**. 120s hold (information only): 68% and 69%.
+- Cheapest buckets with enough samples: Bitcoin 2 to 5 minutes left at 67%, gold
+  2 to 5 minutes left at 71%. The bar was 60%. By price level nothing was below
+  75% except the extremes, which were worse (84% to "never"): fees are lowest
+  there but the price barely moves.
+- The late-market bucket that looked best in the live recorder's snapshots (under
+  2 minutes left, about 64%) cannot be measured here: the exit quote is usually a
+  resolved book with nothing to trade against, so those windows are dropped by the
+  quote filter (Bitcoin has too few left to report, gold has 73). It is not an
+  opportunity this data supports.
+- The two sources agree: the snapshot data (about 12 market hours per series, with
+  recording gaps) also put the 60s break-even at 75% to 76%.
+
+**What this does and does not say.** It says a trade that buys at the ask and
+sells at the bid 60 seconds later needs about three direction calls in four to
+break even, which is out of reach, so no directional scalping strategy gets built
+on it. It does not test holding to settlement (one fee and half the spread, a
+different cost structure), selecting only some moments, or anything faster than
+one minute. Those are new hypotheses and each must declare its counterparty, a
+numeric prediction and a kill criterion before it is run.
+
+Strategy variants tried so far: 1 (this one). Cuts examined: 18.
 
 ## Run it on your Mac (background, survives reboots)
 
