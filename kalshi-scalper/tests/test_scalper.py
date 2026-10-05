@@ -287,3 +287,35 @@ import scalper.calibration as _c, re as _re2
 _src = _re2.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_c.__file__).read())
 assert not _re2.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _src)
 print("calibration tests passed")
+
+# ---- path situations (exploratory) ----
+from scalper.situations import first_trigger, wilson, summarise
+
+# A side hits T on its MID. YES at 72/74c is a 73% YES; NO is the mirror.
+t = first_trigger([(0.72, 0.74)], 0.70)
+assert t[0] == "yes" and abs(t[1] - 0.73) < 1e-9 and t[2] == 0.74
+t = first_trigger([(0.26, 0.28)], 0.70)              # YES mid 27c, so NO is 73%
+assert t[0] == "no" and abs(t[1] - 0.73) < 1e-9 and abs(t[2] - 0.74) < 1e-9   # NO is bought at 1 - yes_bid
+assert first_trigger([(0.49, 0.51)], 0.70) is None
+# The FIRST checkpoint that qualifies is the event, even if a later one flips side.
+assert first_trigger([(0.49, 0.51), (0.72, 0.74), (0.20, 0.22)], 0.70)[0] == "yes"
+# An unusable quote (empty opening book, no candle) is skipped, never read as a trigger.
+assert first_trigger([(0.001, 1.0), None, (0.72, 0.74)], 0.70)[0] == "yes"
+assert first_trigger([(0.001, 1.0), None], 0.70) is None
+# Exactly at the threshold counts; just under it does not.
+assert first_trigger([(0.695, 0.705)], 0.70) is not None and first_trigger([(0.69, 0.70)], 0.70) is None
+
+# The consequence that matters: a side priced at 70% that wins 70% of the time is
+# CALIBRATED, not an edge. The gap must be zero there, however the flip rate looks.
+ev = [("yes", 0.70, 0.71, i < 70, 0.0, "d%d" % (i % 10), float(i)) for i in range(100)]
+s = summarise(ev)
+assert abs(s["flip"] - 0.30) < 1e-9 and abs(s["gap"]) < 1e-9, s
+# A flip rate of 30% against a price of 80% is a real shortfall of 10 points.
+ev = [("yes", 0.80, 0.81, i < 70, 0.0, "d%d" % (i % 10), float(i)) for i in range(100)]
+assert abs(summarise(ev)["gap"] + 0.10) < 1e-9
+# The interval must widen when there are few events.
+assert (lambda a, b: (a[1] - a[0]) > (b[1] - b[0]))(wilson(7, 10), wilson(700, 1000))
+assert wilson(0, 0) == (0.0, 1.0)
+lo, hi = wilson(98, 100)
+assert 0.9 < lo < 0.98 < hi <= 1.0   # near 100% the interval stays inside [0,1]
+print("situations tests passed")

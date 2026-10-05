@@ -220,6 +220,30 @@ simplest hypothesis with an economic reason behind it. Code and thresholds are i
   fee after the first run voids that run, the earlier verdict stands, and the
   change is a new trial.
 
+## Exploratory: path situations (definitions fixed 2026-10-05, before the first run)
+
+Question asked: when a side reaches 70% in the first 2 or the last 2 minutes of a
+market, how often does it flip, and how often does it close the same way?
+`python -m scalper.situations`. **Exploratory: no verdict, no kill criterion, and
+nothing in it licenses a trade.**
+
+- **The baseline is the price, not 50%.** A side priced at 70% flips about 30% of
+  the time if the market is fair. Each row prints the same-direction rate next to
+  the price that side traded at when it triggered, and the gap between them.
+- **Definitions.** Probability is the mid of a minute's closing bid and ask. A side
+  hits T when its mid is at least T (NO when the YES mid is at most 1 - T). First
+  window: the closes 1 and 2 minutes after open. Last window: the closes 2 and 1
+  minutes before close. One event per market per window, at the first checkpoint
+  that qualifies. Usable quotes only (real two sided book, spread 10c or less).
+  Tradable reading: buy that side at its ask at the trigger, hold to settlement,
+  7% fee unrounded.
+- **Thresholds.** 70% is the question. 60% and 80% are printed as sensitivity.
+  Cuts examined: 3 thresholds x 2 windows x 3 groupings.
+- **What follows a gap.** A gap that looks real is a hypothesis. It is written down
+  first (counterparty, number, kill criterion) and tested on days 31 to 45 back,
+  which this has not seen, before anyone trades it. Reading it off this table and
+  acting on it is the thing this process exists to prevent.
+
 ## Run it on your Mac (background, survives reboots)
 
 Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your
