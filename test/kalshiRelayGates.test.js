@@ -114,6 +114,48 @@ gates.G10 = () => {
   assert.ok(m.indexOf('assertKalshiAdmin') < m.indexOf('try {'), 'the admin check must stay outside the catch so it can never be swallowed');
 };
 
+// Run the real admin check against a scripted Firestore. It must let in only the
+// owner whose user document says isAdmin, deny everyone else with the SAME generic
+// message, and when Firestore itself fails it must deny AND say why, because an
+// unnamed error here is what the page showed as "INTERNAL".
+function liftAdminCheck(firestore, calls) {
+  const start = fnSrc.indexOf('async function assertKalshiAdmin(');
+  let d = 0, end = -1;
+  for (let i = fnSrc.indexOf('{', start); i < fnSrc.length; i++) {
+    if (fnSrc[i] === '{') d++;
+    else if (fnSrc[i] === '}') { d--; if (!d) { end = i + 1; break; } }
+  }
+  const assertSignedIn = (a) => { if (!a) throw new FakeHttpsError('permission-denied', 'Sign in required.'); };
+  return new Function('assertSignedIn', 'HttpsError', 'KALSHI_OWNER_EMAIL', 'getApps', 'initializeApp', 'getFirestore', 'console',
+    'return (' + fnSrc.slice(start, end) + ')')(assertSignedIn, FakeHttpsError, 'heiszcam@gmail.com', () => [1], () => {},
+    () => { calls.push('firestore'); return firestore; }, { error: () => {} });
+}
+const userDoc = (exists, data) => ({ collection: () => ({ doc: () => ({ get: async () => ({ exists, data: () => data }) }) }) });
+const owner = { uid: 'u1', token: { email: 'heiszcam@gmail.com' } };
+const attempt = async (auth, fs) => { const calls = []; try { await liftAdminCheck(fs, calls)(auth); return { ok: true, calls }; } catch (e) { return { e, calls }; } };
+
+gates.G11 = async () => {
+  assert.ok((await attempt(owner, userDoc(true, { isAdmin: true }))).ok, 'the owner with isAdmin must pass');
+  // Wrong email: denied before Firestore is even asked.
+  const other = await attempt({ uid: 'u2', token: { email: 'someone@else.com' } }, userDoc(true, { isAdmin: true }));
+  assert.ok(other.e && other.e.code === 'permission-denied' && other.calls.length === 0);
+  // Right email, flag false or missing document: denied with the same generic message.
+  for (const fs of [userDoc(true, { isAdmin: false }), userDoc(true, {}), userDoc(false, undefined)]) {
+    const r = await attempt(owner, fs);
+    assert.ok(r.e && r.e.code === 'permission-denied' && r.e.message === other.e.message, 'denial must not reveal which check failed');
+  }
+  assert.ok((await attempt(null, userDoc(true, { isAdmin: true }))).e, 'no sign-in must be denied');
+};
+
+gates.G12 = async () => {
+  const broken = { collection: () => ({ doc: () => ({ get: async () => { throw new Error('7 PERMISSION_DENIED: Missing or insufficient permissions'); } }) }) };
+  const r = await attempt(owner, broken);
+  assert.ok(r.e instanceof FakeHttpsError && r.e.code === 'unavailable', 'a Firestore failure must be a named error, never INTERNAL');
+  assert.ok(/Admin check failed: .*PERMISSION_DENIED/.test(r.e.message), r.e.message);
+  const boom = await attempt(owner, { collection: () => { throw new TypeError('getFirestore is not a function'); } });
+  assert.ok(boom.e instanceof FakeHttpsError, 'even a synchronous failure must be named');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

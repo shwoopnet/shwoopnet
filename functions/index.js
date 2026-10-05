@@ -92,8 +92,17 @@ async function assertKalshiAdmin(auth) {
   if (!auth.token || auth.token.email !== KALSHI_OWNER_EMAIL) {
     throw new HttpsError("permission-denied", "Not available for this account.");
   }
-  if (!getApps().length) initializeApp();
-  const snap = await getFirestore().collection("users").doc(auth.uid).get();
+  // The email already matched, so only the owner can reach this line. A failure
+  // to read the user document must still deny (fail closed), but it must say why:
+  // an unnamed error here reaches the page as "INTERNAL" and hides the cause.
+  let snap;
+  try {
+    if (!getApps().length) initializeApp();
+    snap = await getFirestore().collection("users").doc(auth.uid).get();
+  } catch (e) {
+    console.error("kalshi admin check could not read the user document:", e);
+    throw new HttpsError("unavailable", "Admin check failed: " + String((e && e.message) || e).slice(0, 120));
+  }
   if (!snap.exists || snap.data().isAdmin !== true) {
     throw new HttpsError("permission-denied", "Not available for this account.");
   }
