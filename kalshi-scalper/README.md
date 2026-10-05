@@ -266,6 +266,34 @@ reaching 70%:
   against the strike with the 60 second averaging rule. That is a different
   hypothesis and needs data this study does not have.
 
+**2026-10-05: H2, buy at 40c or 50c and sell at 80c: `FALSIFIED`.** One run of
+`python -m scalper.scalps` under the rule fixed before it (commit ed8e869). 4,871
+markets, 30 days. No threshold, band or fee was changed after seeing it.
+
+| Band | Entries | Mean net per contract | z | 1st half | 2nd half | Fees x1.2 |
+|---|---|---|---|---|---|---|
+| 40c to 80c | 3,162 | -7.96c | -13.1 | -7.71c | -8.22c | -8.39c |
+| 50c to 80c | 2,593 | -7.94c | -11.3 | -7.68c | -8.21c | -8.41c |
+
+- **The "50/50" question.** At 40c to 80c the target was reached 42.4% of the time,
+  and 52.6% was needed to break even (average win +37.4c, average loss -41.4c). At
+  50c to 80c it was reached 55.1% against 65.2% needed (+27.4c against -51.4c). A
+  fair market gives 50% and 62.5% as touch rates, and the payoff is lopsided to
+  match, so the expected profit is zero before costs at any target.
+- **It lost about twice its costs, in both halves and in both bands.** Costs are
+  about 4c a round trip; the primary result is about -8c. Letting a touch count
+  only on a minute's CLOSE misses intra-minute touches, and selling at 80c when the
+  price has jumped past it leaves the overshoot behind. I have not separated those
+  two effects. The optimistic fill (touch by the minute's high) is -4.9c and -4.4c,
+  which is about the costs and still negative.
+- **Neither a maker exit (-7.5c, -7.3c) nor a stop 20c below entry (-6.9c, -6.7c)
+  rescues it.** A stop does not change the expected profit of a fair game.
+- **What it does not test.** Other targets, other entry prices, entries chosen by
+  any signal, or anything faster than one minute. Each is a new hypothesis.
+
+Strategy variants tried so far: 3 (the 60s scalp, H1, H2), plus one exploratory
+study with no verdict.
+
 ## Hypothesis H2: buy at 40c or 50c, sell at 80c (fixed 2026-10-05, before it was run on any data)
 
 The owner's own idea, stated as a rule. `python -m scalper.scalps`.
