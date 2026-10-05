@@ -47,23 +47,78 @@ gates.G5 = () => {
   assert.ok(!/\/orders|Authorization|KALSHI_(API_)?KEY|method\s*:/i.test(fnSrc.slice(fnSrc.indexOf('KALSHI_HOSTS'))));
 };
 
-// The documented host comes first and the old one stays as a fallback. A single
-// refused host must not take the page down, and an error must name which host
-// said no and never carry a whole HTML page.
-gates.G6 = () => {
+// Run the real kalshiFetchSeries against a scripted fetch. This is the code that
+// answered "INTERNAL" in production, so it is exercised, not just read.
+class FakeHttpsError extends Error { constructor(code, msg) { super(msg); this.code = code; } }
+function liftFetchSeries(scripted, log) {
+  const start = fnSrc.indexOf('async function kalshiFetchSeries(');
+  let d = 0, end = -1;
+  for (let i = fnSrc.indexOf('{', start); i < fnSrc.length; i++) {
+    if (fnSrc[i] === '{') d++;
+    else if (fnSrc[i] === '}') { d--; if (!d) { end = i + 1; break; } }
+  }
+  const hosts = ['https://external-api.kalshi.com/trade-api/v2', 'https://api.elections.kalshi.com/trade-api/v2'];
+  const fetch = async (url) => { log.push(url.split('/')[2]); return scripted.shift()(); };
+  return new Function('KALSHI_HOSTS', 'HttpsError', 'fetch', 'AbortSignal', 'console',
+    'return (' + fnSrc.slice(start, end) + ')')(hosts, FakeHttpsError, fetch, { timeout: () => undefined }, { error: () => {} });
+}
+const okJson = (markets) => () => ({ ok: true, json: async () => ({ markets }), headers: { get: () => '' } });
+const refused = () => ({ ok: false, status: 403, text: async () => '<!DOCTYPE HTML>', headers: { get: (k) => (k === 'x-cache' ? 'Error from cloudfront' : '') } });
+const run = (scripted) => { const log = []; return liftFetchSeries(scripted.slice(), log)('KXBTC15M', 'open', 5).then((r) => ({ r, log }), (e) => ({ e, log })); };
+
+// The documented host comes first and the old one stays as a fallback.
+gates.G6 = async () => {
   const hosts = /const KALSHI_HOSTS = \[([\s\S]*?)\];/.exec(fnSrc);
-  assert.ok(hosts, 'KALSHI_HOSTS not found');
   const list = [...hosts[1].matchAll(/"https:\/\/([^/"]+)/g)].map((x) => x[1]);
   assert.deepStrictEqual(list, ['external-api.kalshi.com', 'api.elections.kalshi.com']);
-  const m = /async function kalshiFetchSeries\(([\s\S]*?)\n\}\n/.exec(fnSrc)[1];
-  assert.ok(/for \(const base of KALSHI_HOSTS\)/.test(m) && /continue;/.test(m), 'must try each host in turn');
-  const thrown = /throw new HttpsError\("unavailable", "Kalshi " \+ series[^;]*;/.exec(m);
-  assert.ok(thrown && !/body/.test(thrown[0]), 'the thrown message must not include the response body');
+  const a = await run([okJson([{ ticker: 'A' }])]);
+  assert.deepStrictEqual(a.log, ['external-api.kalshi.com'], 'a working first host must be the only one asked');
+  assert.strictEqual(a.r.length, 1);
 };
 
-let failed = 0;
-for (const [name, fn] of Object.entries(gates)) {
-  try { fn(); console.log('ok   ' + name); }
-  catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
-}
-process.exit(failed ? 1 : 0);
+// One refused host must not take the page down: fall back and succeed.
+gates.G7 = async () => {
+  const a = await run([refused, okJson([{ ticker: 'B' }])]);
+  assert.deepStrictEqual(a.log, ['external-api.kalshi.com', 'api.elections.kalshi.com']);
+  assert.strictEqual(a.r[0].ticker, 'B');
+};
+
+// Any other way a host can fail (timeout, dropped connection, a 200 whose body
+// is not JSON) is also just that host failing. Escaping as a raw error is what
+// produced "INTERNAL" on the page.
+gates.G8 = async () => {
+  const timeout = () => { const e = new Error('The operation was aborted'); e.name = 'TimeoutError'; throw e; };
+  const notJson = () => ({ ok: true, json: async () => { throw new SyntaxError('Unexpected token <'); }, headers: { get: () => '' } });
+  const dropped = () => { throw new TypeError('fetch failed'); };
+  for (const bad of [timeout, notJson, dropped]) {
+    const a = await run([bad, okJson([{ ticker: 'C' }])]);
+    assert.ok(!a.e && a.r[0].ticker === 'C', 'a failing first host must fall back, not crash');
+  }
+};
+
+// When every host fails the error is a clean HttpsError naming each host and
+// status, and never carries the response body (a whole HTML page).
+gates.G9 = async () => {
+  const a = await run([refused, refused]);
+  assert.ok(a.e instanceof FakeHttpsError && a.e.code === 'unavailable');
+  assert.ok(/external-api\.kalshi\.com HTTP 403/.test(a.e.message) && /api\.elections\.kalshi\.com HTTP 403/.test(a.e.message), a.e.message);
+  assert.ok(!/DOCTYPE|<HTML/i.test(a.e.message), 'the message must not include the response body');
+  const b = await run([() => { throw new TypeError('fetch failed'); }, () => { throw new TypeError('fetch failed'); }]);
+  assert.ok(b.e instanceof FakeHttpsError, 'two dropped connections must still be an HttpsError');
+};
+
+// The handler never lets an unexpected error reach the page as "INTERNAL".
+gates.G10 = () => {
+  const m = /exports\.kalshiBooks = onCall\(async \(request\) => \{([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
+  assert.ok(/catch \(e\)/.test(m) && /instanceof HttpsError/.test(m) && /Relay error: /.test(m), 'unexpected errors must become a named HttpsError');
+  assert.ok(m.indexOf('assertKalshiAdmin') < m.indexOf('try {'), 'the admin check must stay outside the catch so it can never be swallowed');
+};
+
+(async () => {
+  let failed = 0;
+  for (const [name, fn] of Object.entries(gates)) {
+    try { await fn(); console.log('ok   ' + name); }
+    catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
+  }
+  process.exit(failed ? 1 : 0);
+})();

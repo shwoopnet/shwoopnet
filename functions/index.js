@@ -104,29 +104,32 @@ async function kalshiFetchSeries(series, status, limit) {
   for (const base of KALSHI_HOSTS) {
     const host = base.replace("https://", "").split("/")[0];
     const url = base + "/markets?series_ticker=" + series + "&status=" + status + "&limit=" + limit;
-    let res;
+    // One host failing, for any reason (a refusal, a timeout, a dropped
+    // connection, a body that is not JSON), is a reason to try the next one,
+    // never a crash. An error that escapes here reaches the page as the useless
+    // "INTERNAL", which is what hid the real cause the first time.
     try {
-      res = await fetch(url, {
+      const res = await fetch(url, {
         signal: AbortSignal.timeout(8000),
         headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" },
       });
+      if (res.ok) {
+        const data = await res.json();
+        return data.markets || [];
+      }
+      // A refusal from Kalshi's CDN says very little, so keep what it does say
+      // in the logs. Without this a 403 reads as a bug in our code when it may
+      // be the network path (some CDNs refuse cloud-provider address ranges),
+      // and the two need different fixes. The thrown message names the host and
+      // status only, never the response body, which is a whole HTML page.
+      const body = (await res.text().catch(() => "")).slice(0, 200);
+      const cdn = res.headers.get("x-cache") || res.headers.get("server") || "";
+      console.error("Kalshi " + host + " " + series + " HTTP " + res.status + " cdn=" + cdn + " body=" + body);
+      failures.push(host + " HTTP " + res.status + (cdn ? " (" + cdn + ")" : ""));
     } catch (e) {
-      failures.push(host + " " + e.message);
-      continue;
+      console.error("Kalshi " + host + " " + series + " failed:", e);
+      failures.push(host + " " + ((e && e.name) || "error") + ": " + String((e && e.message) || e).slice(0, 80));
     }
-    if (res.ok) {
-      const data = await res.json();
-      return data.markets || [];
-    }
-    // A refusal from Kalshi's CDN says very little, so keep what it does say in
-    // the logs. Without this a 403 reads as a bug in our code when it may be the
-    // network path (some CDNs refuse cloud-provider address ranges), and the two
-    // need different fixes. The thrown message names the host and status only,
-    // never the response body, which is a whole HTML page.
-    const body = (await res.text().catch(() => "")).slice(0, 200);
-    const cdn = res.headers.get("x-cache") || res.headers.get("server") || "";
-    console.error("Kalshi " + host + " " + series + " HTTP " + res.status + " cdn=" + cdn + " body=" + body);
-    failures.push(host + " HTTP " + res.status + (cdn ? " (" + cdn + ")" : ""));
   }
   throw new HttpsError("unavailable", "Kalshi " + series + ": " + failures.join(" | "));
 }
@@ -137,12 +140,18 @@ exports.kalshiBooks = onCall(async (request) => {
   if (kalshiCache.body && Date.now() - kalshiCache.at < KALSHI_CACHE_MS) {
     return kalshiCache.body;
   }
-  const markets = [];
-  for (const series of kalshi.KALSHI_SERIES) {
-    const raw = await kalshiFetchSeries(series, "open", 5);
-    raw.forEach((m) => markets.push(kalshi.trimMarket(series, m)));
+  try {
+    const markets = [];
+    for (const series of kalshi.KALSHI_SERIES) {
+      const raw = await kalshiFetchSeries(series, "open", 5);
+      raw.forEach((m) => markets.push(kalshi.trimMarket(series, m)));
+    }
+    const body = { fetchedAt: Date.now(), markets };
+    kalshiCache = { at: Date.now(), body };
+    return body;
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    console.error("kalshiBooks failed:", e);
+    throw new HttpsError("unavailable", "Relay error: " + String((e && e.message) || e).slice(0, 120));
   }
-  const body = { fetchedAt: Date.now(), markets };
-  kalshiCache = { at: Date.now(), body };
-  return body;
 });
