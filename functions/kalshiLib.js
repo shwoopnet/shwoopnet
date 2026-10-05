@@ -1,9 +1,7 @@
-// Pure helpers for the Kalshi relay and recorder. No Firebase imports, so the
+// Pure helpers for the Kalshi relay. No Firebase imports, so the
 // repo's plain-node tests can load this without installing anything.
 
 const KALSHI_SERIES = ["KXBTC15M", "KXGOLD15M"];
-const SNAPSHOT_BUCKET_MS = 60 * 1000;
-const SNAPSHOT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 function kalshiNum(x) {
   const n = parseFloat(x);
@@ -25,25 +23,4 @@ function trimMarket(series, m) {
   };
 }
 
-function bucketStart(tsMs) {
-  return Math.floor(tsMs / SNAPSHOT_BUCKET_MS) * SNAPSHOT_BUCKET_MS;
-}
-
-// More than one invocation can run for the same minute (Cloud Scheduler can
-// deliver twice, and a redeploy briefly overlaps instances). Anything that
-// must happen once per market per minute has to key on something every
-// invocation computes identically. Using the bucket start, not "now", is what
-// makes two runs a few hundred ms apart land on the same document.
-function snapshotId(ticker, tsMs) {
-  return ticker + "_" + bucketStart(tsMs);
-}
-
-function snapshotDoc(market, tsMs) {
-  const b = bucketStart(tsMs);
-  return Object.assign({}, market, { bucket: b, recordedAt: tsMs, expireAtMs: b + SNAPSHOT_TTL_MS });
-}
-
-module.exports = {
-  KALSHI_SERIES, SNAPSHOT_BUCKET_MS, SNAPSHOT_TTL_MS,
-  kalshiNum, trimMarket, bucketStart, snapshotId, snapshotDoc,
-};
+module.exports = { KALSHI_SERIES, kalshiNum, trimMarket };

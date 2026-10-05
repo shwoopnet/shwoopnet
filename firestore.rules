@@ -84,9 +84,13 @@ service cloud.firestore {
       // account can never write itself into live trading -- every other
       // field on your own document is yours to read and write freely,
       // matching how the app has always treated per-user data.
+      //
+      // kalshiJournal is the admin's Kalshi trade log. It is readable like the
+      // rest of the owner's own document, but only an admin may change it.
       allow update: if signedIn() && request.auth.uid == uid
         && request.resource.data.isAdmin == resource.data.isAdmin
-        && (isAdmin() || !wouldEnableLiveTrading(request.resource.data));
+        && (isAdmin() || !wouldEnableLiveTrading(request.resource.data))
+        && (isAdmin() || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['kalshiJournal']));
     }
 
     // One document per invite code, keyed by the code itself. Minted by
