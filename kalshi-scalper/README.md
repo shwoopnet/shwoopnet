@@ -324,6 +324,82 @@ The owner's own idea, stated as a rule. `python -m scalper.scalps`.
 - **Cost of this idea so far.** It is the third hypothesis tested. Strategy variants
   tried before it: 2.
 
+## The paper bot (starts with $100, cannot place a real order)
+
+`python -m scalper.bot` watches live Kalshi prices for the two markets, makes
+SIMULATED trades, applies the loss limits in code, and keeps its own records. There
+is no order code in it, and the constructor refuses any mode but "paper".
+
+- **Strategy: H2, as plumbing.** H2 (buy near 40c or 50c, sell at 80c) was
+  falsified on 30 days of history and expects to lose roughly its costs. It is here
+  because it is simple and fully specified, so it exercises the whole loop (quotes,
+  limits, fills, settlement, records) and gives a forward check of the verdict. A
+  paper result far worse than the history says the plumbing is wrong.
+- **$100 capital.** Limits come from `limits.py`, identical to the web page: 1% a
+  trade ($1.00), a 2 hour break at -3% (-$3), done for the day at -5% (-$5). At this
+  size that is one or two contracts a trade, and Kalshi rounds each order's fee up
+  to a cent, so the fee is a larger share of a small trade (2 contracts at 40c pay
+  4c, about 19% more than the unrounded 3.4c). The paper P&L includes that rounding.
+- **Start it and keep it running:** `python3 -m scalper.service install bot` (starts
+  at login, restarts if it dies, stops idle sleep on power). `uninstall bot` stops it.
+- **Monitor it:** `python3 -m scalper.botstatus` shows OK, STALE or DOWN, today's
+  limits, open positions, closed trades and recent events.
+- **Alert when it stops:** set `HEALTHCHECK_URL` to a free watchdog address (for
+  example from healthchecks.io). The bot pings it once a minute while healthy, and
+  stays silent when it cannot read prices, so the service alerts a phone.
+- **Kill switch:** create an empty file named `KILL` in this folder. It stops new
+  entries. It does NOT freeze positions already open, which keep being managed.
+- **Safety rules, each with a test that fails if the rule is broken:** one position
+  per market from an id every process computes identically (a restart or a second
+  copy cannot enter twice); no new entry on an unreadable or partly unreadable
+  feed, an inactive exchange, no bankroll, under 5 minutes left, a wide book or
+  after the hard stop; never more contracts than the touch shows; never an exit on
+  the entry tick.
+
+## How real orders work on Kalshi (read from docs.kalshi.com on 2026-10-05)
+
+Nothing below is implemented. It is what the live version will have to do.
+
+- **Hosts.** Production `https://external-api.kalshi.com/trade-api/v2`, demo
+  `https://external-api.demo.kalshi.co/trade-api/v2` ([demo environment](https://docs.kalshi.com/getting_started/demo_env)).
+  Demo has separate accounts and separate API keys, mock funds, and prices that
+  "may not be reflective of those in real markets". It tests the plumbing, not the strategy.
+- **Authentication** ([signing guide](https://docs.kalshi.com/getting_started/quick_start_authenticated_requests)).
+  Three headers: `KALSHI-ACCESS-KEY` (the key id), `KALSHI-ACCESS-TIMESTAMP`
+  (milliseconds) and `KALSHI-ACCESS-SIGNATURE`: the base64 of a signature over the
+  timestamp, then the HTTP method, then the path without its query string. RSA keys
+  use RSA-PSS with SHA-256 and a salt length equal to the digest length. This needs
+  the `cryptography` package, the first dependency outside the standard library. The
+  private key lives only on the bot's machine (never in git, never pasted into chat).
+- **Placing an order** ([Create Order V2](https://docs.kalshi.com/api-reference/orders/create-order-v2)).
+  `POST /portfolio/events/orders` with `ticker`, `side` (`bid` buys YES, `ask` sells
+  YES, which is economically buying NO at 1 minus the price), `count` and `price` as
+  strings (fixed-point dollars), a required `time_in_force`
+  (`fill_or_kill`, `good_till_canceled`, `immediate_or_cancel`) and a required
+  `self_trade_prevention_type`. `client_order_id` is optional. The response gives
+  `fill_count`, `remaining_count`, `average_fill_price` and `average_fee_paid`,
+  which lets the bot check its own fee model against every real fill.
+- **Rate limits** ([tiers](https://docs.kalshi.com/getting_started/rate_limits)). A new
+  account gets 200 read and 100 write tokens a second, far above what the bot needs.
+  A 429 carries no `Retry-After`, so the bot backs off exponentially, as the backfill does.
+- **The one thing the docs do not say, and the incident lesson depends on it.** The
+  Create Order page does not say what happens when the same `client_order_id` is sent
+  twice. The 15 duplicate orders in shwoop-server were stopped from happening again by
+  the broker refusing a repeated id. Whether Kalshi does is unknown. It must be
+  tested in demo, with the same id sent twice, and the answer written here, before
+  any real order is placed. Until then the bot's own one-position-per-market id is
+  the only guard.
+
+**Order of work to real orders (each step gated on the one before):**
+
+1. Create a Kalshi demo account and a demo API key. Read the demo balance (read-only).
+2. Implement signing; check it by reading the demo balance and positions.
+3. Place and cancel a one-contract demo order. Probe the duplicate `client_order_id` behaviour.
+4. Reconcile: every minute compare the bot's own positions with Kalshi's, and halt on a mismatch.
+5. Real money only after a strategy has passed its pre-registered test AND 300 paper
+   trades (see "Bar to clear before any real money"), starting at the $1 a trade the
+   limits allow, with a hard-coded maximum order size and the kill switch in front.
+
 ## Run it on your Mac (background, survives reboots)
 
 Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your

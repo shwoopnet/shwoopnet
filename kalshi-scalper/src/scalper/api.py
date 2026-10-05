@@ -12,7 +12,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-BASE = "https://api.elections.kalshi.com/trade-api/v2"
+# Kalshi's docs give external-api.kalshi.com as the production host. The older
+# api.elections host keeps working today and stays as a fallback.
+BASES = ("https://external-api.kalshi.com/trade-api/v2", "https://api.elections.kalshi.com/trade-api/v2")
+BASE = BASES[0]
 
 
 def _wait_for(i: int, err: Exception) -> float:
@@ -30,17 +33,20 @@ def _wait_for(i: int, err: Exception) -> float:
 
 
 def _get(path: str, params: dict | None = None, retries: int = 8) -> dict:
-    url = BASE + path
-    if params:
-        url += "?" + urllib.parse.urlencode(params)
+    query = ("?" + urllib.parse.urlencode(params)) if params else ""
     last = None
     for i in range(retries):
-        try:
-            with urllib.request.urlopen(url, timeout=15) as r:
-                return json.load(r)
-        except Exception as e:  # network blips and 429s: back off and retry
-            last = e
-            time.sleep(_wait_for(i, e))
+        for base in BASES:
+            try:
+                with urllib.request.urlopen(base + path + query, timeout=15) as r:
+                    return json.load(r)
+            except urllib.error.HTTPError as e:
+                last = e
+                if e.code == 429:
+                    break          # the limit is on the account, so another host will not help: back off
+            except Exception as e:  # a dropped connection or a refusal: try the other host
+                last = e
+        time.sleep(_wait_for(i, last))
     raise RuntimeError(f"GET {path} failed: {last}")
 
 
@@ -82,3 +88,14 @@ def candlesticks(series: str, ticker: str, start_ts: int, end_ts: int) -> list[d
     d = _get(f"/series/{series}/markets/{ticker}/candlesticks",
              {"start_ts": start_ts, "end_ts": end_ts, "period_interval": 1})
     return d.get("candlesticks", [])
+
+
+def market(ticker: str) -> dict:
+    """One market, including its status and, once settled, its result."""
+    return _get(f"/markets/{ticker}").get("market", {})
+
+
+def exchange_status() -> dict:
+    """Whether Kalshi itself is open. trading_active is false outside exchange
+    hours and during maintenance; nothing should be entered then."""
+    return _get("/exchange/status")

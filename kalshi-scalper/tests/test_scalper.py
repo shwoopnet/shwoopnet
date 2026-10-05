@@ -391,3 +391,220 @@ import scalper.scalps as _sc, re as _re3
 _s = _re3.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_sc.__file__).read())
 assert not _re3.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _s)
 print("scalp tests passed")
+
+# ---- the paper bot ----
+import tempfile as _tf
+from datetime import datetime as _dt, timezone as _tz
+from pathlib import Path as _P
+from scalper.limits import tier_state
+from scalper.bot import PaperBot, size_for, position_id
+
+NOON = _dt(2026, 10, 5, 12, 0, 0).timestamp()      # local noon, so a local-day boundary never interferes
+def at(h, m=0): return _dt(2026, 10, 5, h, m, 0).timestamp()
+def iso(ts): return _dt.fromtimestamp(ts, _tz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+# --- limits: the SAME cases as the web page's tests (kalshiMonitorGates G13 to G17) ---
+cl = lambda pnl, t: (t, pnl)
+t = tier_state([], 300, at(12))
+assert t["mode"] == "ok" and t["cap"] == 3 and t["soft_limit"] == 9 and t["hard_limit"] == 15
+two = [cl(-5, at(9)), cl(-5, at(10))]
+assert tier_state(two, 300, at(11, 59))["mode"] == "break" and tier_state(two, 300, at(11, 59))["cap"] == 0
+after = tier_state(two, 300, at(12, 1))
+assert after["mode"] == "half" and after["cap"] == 1.5
+# a later win does not end the break early
+assert tier_state(two + [cl(8, at(10, 30))], 300, at(11)) ["mode"] == "break"
+# the hard stop is sticky, even after a recovery
+assert tier_state([cl(-16, at(9)), cl(20, at(9, 30))], 300, at(14))["mode"] == "done"
+# yesterday's loss does not carry over
+assert tier_state([cl(-20, at(12) - 86400)], 300, at(12))["mode"] == "ok"
+# no bankroll means no trading, never an unlimited cap
+assert tier_state([], 0, at(12))["mode"] == "done" and tier_state([], "", at(12))["mode"] == "done"
+
+# --- sizing: cost INCLUDING the fee must fit the cap ---
+assert size_for(0.40, 3.0, None) == 7              # 7 x 40c = $2.80 + 12c fee = $2.92; 8 would be $3.35
+assert size_for(0.42, 3.0, None) == 6             # 7 x 42c = $2.94 fits, but the 12c fee makes $3.06: the fee counts
+assert size_for(0.40, 3.0, 3) == 3                 # never more than the touch can fill
+assert size_for(0.40, 0.30, None) == 0             # a cap too small for one contract means no trade
+assert size_for(1.2, 3.0, None) == 0 and size_for(0.4, 0, None) == 0
+
+# --- a scripted Kalshi ---
+class FakeApi:
+    def __init__(self): self.mk, self.result, self.active, self.fail, self.fail_series = {}, {}, True, False, set()
+    def exchange_status(self):
+        if self.fail: raise RuntimeError("exchange down")
+        return {"trading_active": self.active}
+    def markets(self, series, status="open", limit=20):
+        if self.fail or series in self.fail_series: raise RuntimeError("markets down")
+        return [m for m in self.mk.get(series, [])]
+    def market(self, ticker):
+        self.market_calls = getattr(self, "market_calls", 0) + 1
+        return {"result": self.result.get(ticker, "")}
+    def put(self, ticker, bid, ask, close_ts, series="KXBTC15M", ask_sz=100, bid_sz=100, status="active"):
+        self.mk[series] = [m for m in self.mk.get(series, []) if m["ticker"] != ticker] + [{
+            "ticker": ticker, "status": status, "close_time": iso(close_ts),
+            "yes_bid_dollars": f"{bid:.4f}", "yes_ask_dollars": f"{ask:.4f}",
+            "yes_ask_size_fp": str(ask_sz), "yes_bid_size_fp": str(bid_sz)}]
+
+def make(bankroll=300.0, start=NOON):
+    d = _P(_tf.mkdtemp())
+    clock = {"t": start}
+    api = FakeApi()
+    bot = PaperBot(api, d / "bot.sqlite", bankroll, lambda: clock["t"], d / "KILL")
+    return bot, api, clock, d
+
+CLOSE = NOON + 900                                   # a market 15 minutes from now
+# It refuses to be anything but a paper bot.
+try:
+    PaperBot(FakeApi(), _P(_tf.mkdtemp()) / "x.sqlite", mode="live"); raise SystemExit("live mode must be refused")
+except ValueError:
+    pass
+
+# Entry at the ask in the 40c band, sized from the $3 cap, then the 80c exit on a LATER tick.
+bot, api, clock, d = make()
+api.put("M1", 0.39, 0.40, CLOSE)
+bot.tick()
+p = bot.db.execute("SELECT side,band,contracts,entry,status FROM position").fetchall()
+assert p == [("yes", "40c", 7, 0.40, "open")], p
+clock["t"] += 5; api.put("M1", 0.81, 0.82, CLOSE); bot.tick()
+r = bot.db.execute("SELECT status,exit,pnl FROM position").fetchone()
+want = round(0.80 * 7 - taker_fee(0.80, 7) - 0.40 * 7 - taker_fee(0.40, 7), 2)
+assert r == ("closed", 0.8, want), (r, want)
+# After a closed trade the same market is never re-entered (the id is taken).
+clock["t"] += 5; api.put("M1", 0.39, 0.40, CLOSE); bot.tick()
+assert bot.db.execute("SELECT COUNT(*) FROM position").fetchone()[0] == 1
+# ...and the closed trade must be untouched, not quietly reopened by a replace.
+assert bot.db.execute("SELECT status,pnl FROM position").fetchone() == ("closed", want)
+assert bot.db.execute("SELECT COUNT(*) FROM event WHERE kind='entry'").fetchone()[0] == 1
+
+# THE incident, in miniature: two copies of the bot, or a restart, must not enter
+# the same market twice. The key is derived from the market, not generated per call.
+bot, api, clock, d = make()
+api.put("M2", 0.39, 0.40, CLOSE)
+bot.tick(); bot.tick()
+bot2 = PaperBot(api, d / "bot.sqlite", 300.0, lambda: clock["t"], d / "KILL")   # a second process, same database
+bot2.tick()
+assert bot.db.execute("SELECT COUNT(*) FROM position").fetchone()[0] == 1
+assert bot.db.execute("SELECT COUNT(*) FROM event WHERE kind='entry'").fetchone()[0] == 1, "a second process must not log a second entry"
+assert position_id("M2") == "h2-M2"
+
+# Never exit at the very timestamp of the entry, even if the quote then jumps
+# (a restart at the same instant must not turn into a free instant profit).
+bot, api, clock, d = make()
+api.put("M7", 0.39, 0.40, CLOSE); bot.tick()
+api.put("M7", 0.85, 0.86, CLOSE); bot.tick()                 # same clock value
+assert bot.db.execute("SELECT status FROM position").fetchone()[0] == "open"
+clock["t"] += 5; bot.tick()
+assert bot.db.execute("SELECT status FROM position").fetchone()[0] == "closed"
+
+# The NO side is bought at 1 minus the YES bid.
+bot, api, clock, d = make()
+api.put("M3", 0.59, 0.61, CLOSE)
+bot.tick()
+s = bot.db.execute("SELECT side,entry FROM position").fetchone()
+assert s[0] == "no" and abs(s[1] - 0.41) < 1e-9
+# ...and is sold when the YES ask falls to 20c (NO bid 80c).
+clock["t"] += 5; api.put("M3", 0.18, 0.20, CLOSE); bot.tick()
+assert bot.db.execute("SELECT status FROM position").fetchone()[0] == "closed"
+
+# Held to settlement: a loss costs the entry plus the fee, a win pays $1 a contract.
+bot, api, clock, d = make()
+api.put("M4", 0.39, 0.40, CLOSE); bot.tick()
+clock["t"] = CLOSE + 60; api.mk = {}; api.result["M4"] = "no"; bot.tick()
+assert bot.db.execute("SELECT status,pnl FROM position").fetchone() == ("closed", round(-0.40 * 7 - taker_fee(0.40, 7), 2))
+bot, api, clock, d = make()
+api.put("M5", 0.39, 0.40, CLOSE); bot.tick()
+clock["t"] = CLOSE + 60; api.mk = {}; api.result["M5"] = "yes"; bot.tick()
+assert bot.db.execute("SELECT pnl FROM position").fetchone()[0] == round(7 - 0.40 * 7 - taker_fee(0.40, 7), 2)
+# Before the market closes the bot must not even ask for a result: a position is
+# not settled early, and asking for every open position on every tick wastes the
+# request budget.
+bot, api, clock, d = make()
+api.put("M8", 0.39, 0.40, CLOSE); bot.tick()
+clock["t"] += 5; bot.tick(); clock["t"] += 5; bot.tick()
+assert getattr(api, "market_calls", 0) == 0, "no result lookups before the close"
+# A result that is not final yet leaves the position open, to be asked again.
+bot, api, clock, d = make()
+api.put("M6", 0.39, 0.40, CLOSE); bot.tick()
+clock["t"] = CLOSE + 60; api.mk = {}; bot.tick()
+assert bot.db.execute("SELECT status FROM position").fetchone()[0] == "open"
+
+# --- the safety rules ---
+def entered(bot): return bot.db.execute("SELECT COUNT(*) FROM position").fetchone()[0]
+bot, api, clock, d = make(); (d / "KILL").write_text("stop"); api.put("A", 0.39, 0.40, CLOSE); bot.tick()
+assert entered(bot) == 0, "the kill switch must stop new entries"
+# ...but it must NOT freeze a position that is already open: that is the dangerous act.
+bot, api, clock, d = make(); api.put("B", 0.39, 0.40, CLOSE); bot.tick()
+(d / "KILL").write_text("stop"); clock["t"] += 5; api.put("B", 0.81, 0.82, CLOSE); bot.tick()
+assert bot.db.execute("SELECT status FROM position").fetchone()[0] == "closed", "exits must carry on under the kill switch"
+bot, api, clock, d = make(); api.active = False; api.put("A", 0.39, 0.40, CLOSE); bot.tick()
+assert entered(bot) == 0, "an inactive exchange means no entry"
+bot, api, clock, d = make(); api.fail = True; bot.tick()          # prices unreadable: no crash, no entry
+assert entered(bot) == 0 and bot.db.execute("SELECT COUNT(*) FROM event WHERE kind='error'").fetchone()[0] == 1
+bot, api, clock, d = make(); api.fail_series = {"KXGOLD15M"}; api.put("A", 0.39, 0.40, CLOSE); bot.tick()
+assert entered(bot) == 0, "a partly unreadable feed must fail closed, even for the part that was readable"
+bot, api, clock, d = make(bankroll=0); api.put("A", 0.39, 0.40, CLOSE); bot.tick()
+assert entered(bot) == 0, "no bankroll must fail closed"
+bot, api, clock, d = make(); api.put("A", 0.39, 0.40, NOON + 240); bot.tick()
+assert entered(bot) == 0, "under 5 minutes left is no entry"
+bot, api, clock, d = make(); api.put("A", 0.30, 0.55, CLOSE); api.put("B", 0.45, 0.46, CLOSE, status="finalized"); bot.tick()
+assert entered(bot) == 0, "a wide book and a closed market are not entries"
+bot, api, clock, d = make(); api.put("A", 0.39, 0.40, CLOSE, ask_sz=2); bot.tick()
+assert bot.db.execute("SELECT contracts FROM position").fetchone()[0] == 2, "never more than the touch shows"
+# A hard stop: after enough losses today the bot takes no new entry, and reports why once.
+bot, api, clock, d = make()
+for i in range(3):
+    bot.db.execute("INSERT INTO position VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (f"x{i}", f"X{i}", "S", "yes", "40c", 7, .4, .12, at(9), at(9, 15), "closed", 0, None, at(9, 15), -6.0, at(9, 15) + i, "paper"))
+bot.db.commit()
+api.put("A", 0.39, 0.40, CLOSE); bot.tick(); bot.tick()
+assert entered(bot) == 3 and bot.db.execute("SELECT COUNT(*) FROM event WHERE kind='block'").fetchone()[0] == 1
+assert bot.summary()["limits"]["mode"] == "done"
+# The outside watchdog: pinged at most once a minute, only on a healthy tick, and a
+# failing ping must never stop or change a tick.
+pings = []
+bot, api, clock, d = make(); bot.pinger = lambda: pings.append(clock["t"])
+api.put("P", 0.39, 0.40, CLOSE)
+for _ in range(5):
+    bot.tick(); clock["t"] += 5
+assert len(pings) == 1, "one ping a minute, not one per tick"
+clock["t"] += 60; bot.tick()
+assert len(pings) == 2
+api.fail = True; clock["t"] += 120; bot.tick()
+assert len(pings) == 2, "silence on an unhealthy tick is what makes the watchdog alarm"
+api.fail = False; bot.pinger = lambda: (_ for _ in ()).throw(RuntimeError("watchdog down")); clock["t"] += 120
+bot.tick()                                         # must not raise
+assert entered(bot) >= 1
+# The owner's starting capital is $100: $1 a trade, a break at -$3, done at -$5.
+from scalper.bot import DEFAULT_BANKROLL
+assert DEFAULT_BANKROLL == 100.0
+t100 = tier_state([], DEFAULT_BANKROLL, at(12))
+assert (t100["cap"], t100["soft_limit"], t100["hard_limit"]) == (1.0, 3.0, 5.0)
+# No verdict or order code: this file must contain no way to place an order.
+import scalper.bot as _b, re as _re4
+_code = _re4.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_b.__file__).read())
+assert not _re4.search(r"/orders|create_order|place_order|private_key|api_key", _code, _re4.I)
+print("paper bot tests passed")
+
+# ---- bot status ----
+from scalper.botstatus import report, health
+assert health(None) == "NEVER RAN" and health(5) == "OK" and health(60) == "STALE" and health(500) == "DOWN"
+bot, api, clock, d = make(bankroll=100.0)
+api.put("S1", 0.39, 0.40, CLOSE); bot.tick()
+rep = report(d / "bot.sqlite", now=clock["t"] + 3)
+assert "Bot: OK" in rep and "PAPER" in rep and "Bankroll $100.00" in rep and "$1.00 a trade" in rep
+assert "Open positions: 1" in rep and "S1" in rep, rep
+# A bot that has stopped must read as DOWN, not as a stale "everything fine".
+assert "Bot: DOWN" in report(d / "bot.sqlite", now=clock["t"] + 600)
+assert "No bot database" in report(d / "missing.sqlite")
+print("bot status tests passed")
+
+# ---- the bot as a background job ----
+from scalper.service import build_plist as _bp, JOBS
+pb = _bp("bot")
+assert pb["Label"] == "com.shwoop.kalshi-bot" and pb["KeepAlive"] is True and pb["RunAtLoad"] is True
+assert pb["ProgramArguments"][-3:] == ["scalper.bot", "--bankroll", "100"], pb["ProgramArguments"]
+# The two jobs must never share a label, or installing one would replace the other.
+assert JOBS["bot"][0] != JOBS["recorder"][0] and _bp()["Label"] == "com.shwoop.kalshi-recorder"
+# Nothing the service runs may be anything but the paper bot: no live flag exists.
+assert not any("live" in a.lower() for a in pb["ProgramArguments"])
+print("bot service tests passed")
