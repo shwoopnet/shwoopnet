@@ -319,3 +319,75 @@ assert wilson(0, 0) == (0.0, 1.0)
 lo, hi = wilson(98, 100)
 assert 0.9 < lo < 0.98 < hi <= 1.0   # near 100% the interval stays inside [0,1]
 print("situations tests passed")
+
+# ---- 40c/50c to 80c scalps (hypothesis H2) ----
+import random as _random
+from scalper.scalps import simulate, judge as scalp_judge, fee as sfee, BANDS, MIN_N as SMIN
+
+def cd(end, bid, ask, bh=None, al=None):
+    """(end, bid_c, ask_c, bid_h, ask_l)"""
+    return (end, bid, ask, bid if bh is None else bh, ask if al is None else al)
+
+CLOSE = 900
+B40 = BANDS["40c"]
+# Entry at the ask of 40c, exit when the bid closes at 80c: the 80c is received,
+# and the fee is paid on BOTH legs.
+t = simulate([cd(60, 0.39, 0.40), cd(120, 0.80, 0.81)], CLOSE, "no", B40)
+assert t["outcome"] == "target" and t["side"] == "yes"
+assert abs(t["net"] - (0.80 - sfee(0.80) - 0.40 - sfee(0.40))) < 1e-12
+# Never reaches 80c: held to settlement, a win pays $1 and a loss pays nothing.
+nope = [cd(60, 0.39, 0.40), cd(120, 0.50, 0.51), cd(180, 0.45, 0.46)]
+assert abs(simulate(nope, CLOSE, "yes", B40)["net"] - (1 - 0.40 - sfee(0.40))) < 1e-12
+assert abs(simulate(nope, CLOSE, "no", B40)["net"] - (-0.40 - sfee(0.40))) < 1e-12
+# The NO side is bought at 1 minus the YES bid and sold when the YES ask falls to 20c.
+n = simulate([cd(60, 0.59, 0.61), cd(120, 0.18, 0.20)], CLOSE, "yes", B40)
+assert n["side"] == "no" and abs(n["ask"] - 0.41) < 1e-9 and n["outcome"] == "target"
+# No entry: outside the band, under 5 minutes left, or an unusable quote.
+assert simulate([cd(60, 0.55, 0.57)], CLOSE, "yes", B40) is None
+assert simulate([cd(CLOSE - 240, 0.39, 0.40)], CLOSE, "yes", B40) is None
+assert simulate([cd(60, 0.001, 1.0)], CLOSE, "yes", B40) is None
+# A market that did not resolve yes or no is not scored.
+assert simulate(nope, CLOSE, "", B40) is None
+# No lookahead: the entry minute's own high must never trigger the exit.
+spike = [cd(60, 0.39, 0.40, bh=0.90), cd(120, 0.30, 0.31)]
+assert simulate(spike, CLOSE, "no", B40, touch="high")["outcome"] == "loss"
+# A stop exits at the closing bid, slippage included, never at the stop price.
+st = simulate([cd(60, 0.39, 0.40), cd(120, 0.12, 0.13)], CLOSE, "no", B40, stop=0.20)
+assert st["outcome"] == "stop" and abs(st["net"] - (0.12 - sfee(0.12) - 0.40 - sfee(0.40))) < 1e-12
+# Fees only ever lower profit.
+assert simulate([cd(60, 0.39, 0.40), cd(120, 0.80, 0.81)], CLOSE, "no", B40, fee_mult=1.2)["net"] < t["net"]
+
+# THE test that matters. In a FAIR game (a martingale price, the result drawn with
+# probability equal to the price) this strategy has zero expected profit before
+# costs, so after a 2c spread and fees it must LOSE about the costs. A profit here
+# would mean the simulator invents an edge (an optimistic fill, a lookahead).
+rng = _random.Random(7)
+def fair_market():
+    p, cs = 0.5, []
+    for k in range(1, 15):
+        if 0.02 < p < 0.98:
+            p = min(0.98, max(0.02, p + rng.choice((-0.06, 0.06))))
+        cs.append(cd(60 * k, round(p - 0.01, 4), round(p + 0.01, 4)))
+    return cs, ("yes" if rng.random() < p else "no")
+nets = {"40c": [], "50c": []}
+for _ in range(20000):
+    cs, res = fair_market()
+    for b in nets:
+        r = simulate(cs, CLOSE, res, BANDS[b])
+        if r:
+            nets[b].append(r["net"])
+for b, v in nets.items():
+    m = sum(v) / len(v)
+    assert -0.10 < m < -0.01, (b, m, len(v))   # loses roughly the costs, never wins
+# Verdict logic, as for H1: a clean edge passes, one lucky half or too few markets does not.
+def rows(n, edge, edge2=None):
+    return {"40c": [("d%d" % (i % 30), float(i), (edge2 if (edge2 is not None and i >= n // 2) else edge) + (0.1 if i % 2 else -0.1),
+                     (edge2 if (edge2 is not None and i >= n // 2) else edge) - 0.003 + (0.1 if i % 2 else -0.1)) for i in range(n)]}
+assert scalp_judge(rows(1200, 0.04), 600.0)[0] == "NOT_YET_FALSIFIED"
+assert scalp_judge(rows(1200, 0.0), 600.0)[0] == "FALSIFIED"
+assert scalp_judge(rows(1200, 0.04, edge2=-0.02), 600.0)[0] == "FALSIFIED"
+assert scalp_judge(rows(SMIN - 1, 0.30), 600.0)[0] == "FALSIFIED"
+import scalper.scalps as _sc, re as _re3
+_s = _re3.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_sc.__file__).read())
+assert not _re3.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _s)
+print("scalp tests passed")

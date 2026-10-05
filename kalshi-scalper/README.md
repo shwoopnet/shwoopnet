@@ -266,6 +266,36 @@ reaching 70%:
   against the strike with the 60 second averaging rule. That is a different
   hypothesis and needs data this study does not have.
 
+## Hypothesis H2: buy at 40c or 50c, sell at 80c (fixed 2026-10-05, before it was run on any data)
+
+The owner's own idea, stated as a rule. `python -m scalper.scalps`.
+
+- **Rule.** Buy a side at about 40c (ask 38c to 42c) or about 50c (48c to 52c), at the
+  first minute close with at least 5 minutes left and a usable quote (YES tried
+  first, then NO). Sell at 80c when that side's bid first closes at 80c or more on a
+  LATER minute. Otherwise hold to settlement. Fee on the way in and out, 7%
+  unrounded per contract. No stop. One entry per market per band.
+- **Why it feels like 50/50 and why the prior is zero.** In a fair market a price at
+  40c reaches 80c before 0c half the time (40 over 80), and 50c does so 62.5% of the
+  time. The payoff is lopsided to match, so the expected profit is zero before costs
+  at ANY target. Costs are about 4c a round trip. It can only work if prices
+  continue more than a fair game. The earlier path study found no continuation.
+- **Counterparty.** Whoever sells at 40c to 50c, or buys at 80c, on a view that
+  prices lag a move.
+- **Prediction.** Mean net profit of at least +1c a contract in at least one band.
+- **Kill criteria.** FALSIFIED unless, for at least one band: n of at least 300
+  markets; mean net profit positive with a day clustered z of at least 2.1
+  (Bonferroni for two bands); positive in BOTH halves of the 30 days; positive with
+  fees 20% higher. Best outcome `NOT_YET_FALSIFIED`, meaning permission to test on
+  data not yet seen, never evidence of an edge. No verdict means "trade".
+- **Simulator guard.** A test runs the exact code on a simulated FAIR game and
+  requires it to lose roughly the costs. A profit there would mean the simulator
+  invents an edge.
+- **Printed for information only.** Touching by the minute's high, a maker exit with
+  no exit fee, a stop 20c below entry, and the hit rate needed to break even.
+- **Cost of this idea so far.** It is the third hypothesis tested. Strategy variants
+  tried before it: 2.
+
 ## Run it on your Mac (background, survives reboots)
 
 Kalshi's CDN refuses requests from Google Cloud addresses, so this runs on your
