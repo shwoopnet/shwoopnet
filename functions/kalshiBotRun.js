@@ -115,7 +115,8 @@ async function runTick({ store, api, now }) {
     // with the trades listed, the limits are not seeing what the owner sees.
     closedCounted: tier.counted, dayStart: lib.localDayStart(now),
   });
-  return { entered, block, tier: tier.mode };
+  // ok and prevTier feed the outside watchdog (kalshiAlertLib), which lives outside this process.
+  return { entered, block, tier: tier.mode, ok: quotesOk, prevTier: prev.tierMode || null };
 }
 
 module.exports = { runTick };

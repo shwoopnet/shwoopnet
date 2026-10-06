@@ -105,9 +105,20 @@ firebase functions:log --only kalshiBot
   million free, roughly 1,500 Firestore writes and 10,000 reads a day against a daily free
   allowance of 20,000 and 50,000 that the rest of the app shares. Set a budget alert and
   look at usage after a week.
-- **Alerts.** The page shows the bot as OK, STALE (2.5 minutes of silence) or DOWN (5). A
-  phone alert when it stops is not built yet; it needs an outside watchdog and is the next
-  piece.
+- **Alerts.** The page shows the bot as OK, STALE (2.5 minutes of silence) or DOWN (5), but
+  only while the page is open. For an alert that reaches a phone, the bot pings an outside
+  dead-man's switch every healthy minute, and that service alerts when the pings stop.
+  Setup (about five minutes):
+  1. Make a free account at healthchecks.io and add a check with period 1 minute and grace
+     time 5 minutes. Add a notification channel (email, or their phone app, SMS or Telegram).
+  2. Copy the check's ping URL (it looks like `https://hc-ping.com/<uuid>`).
+  3. Create `functions/.env` (it is gitignored) containing one line:
+     `KALSHI_WATCHDOG_URL=https://hc-ping.com/<uuid>`
+  4. `firebase deploy --only functions`.
+  The bot sends no ping when it cannot read Kalshi's prices, so a stuck feed alerts too. It
+  also sends one failure ping when the day's -5% stop is hit (expect a "back up" notice a
+  minute later). Leave the URL unset and nothing is sent. A failed ping never affects the
+  bot. The URL lets anyone ping your check, so keep it out of git and chat.
 - **Real orders are not part of this.** They come only after a strategy passes its
   pre-registered test and 300 paper trades, and they need the API key stored as a Firebase
   secret, never in the repo. See `kalshi-scalper/README.md`.
