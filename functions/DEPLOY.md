@@ -143,3 +143,13 @@ pasted into a chat, and never commit it):
 
 Demo markets sit on exchange shards and a balance belongs to a shard. If the signal's market is on a
 shard with no demo funds the button says so and sends nothing.
+
+**If the demo is down or flaky.** Kalshi's demo exchange has gone down for stretches (HTTP 503, and
+`/exchange/status` reporting `trading_active: false`). The trader checks that first and says "the demo
+exchange is down" without writing a record. A transient failure (503, 429, a timeout) is retried twice
+inside the call. If it never clears, the record says "unavailable" and the next press tries again with the
+same order id: that is safe because Kalshi refuses a repeated `client_order_id` (HTTP 409, measured on the
+demo) and, if an earlier attempt had in fact landed, the 409 makes the trader look that order up and report
+it. A refusal that is the caller's fault (HTTP 4xx) is recorded and blocks that market, and a record stuck at
+"sending" (the function was killed mid-flight) blocks it too, so nothing is ever sent twice. The duplicate
+protection was measured on the demo; confirm it on production before any real order.
