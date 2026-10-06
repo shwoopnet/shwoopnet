@@ -294,6 +294,42 @@ assert scalp_judge(rows(SMIN - 1, 0.30), 600.0)[0] == "FALSIFIED"
 import scalper.scalps as _sc, re as _re3
 _s = _re3.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_sc.__file__).read())
 assert not _re3.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _s)
+# ---- H4: the same rule from a 30c entry ----
+from scalper.bandscan import H4_BAND, INFO_BANDS, rows_for as _h4_rows
+# The band is exactly what the README fixed, and H2's own bands (and so the paper bot's) are untouched.
+assert H4_BAND == ("30c", (0.28, 0.32)) and set(BANDS) == {"40c", "50c"} and BANDS["40c"] == (0.38, 0.42)
+assert INFO_BANDS["40c"] == BANDS["40c"] and INFO_BANDS["50c"] == BANDS["50c"]
+# From 30c the NO side is bought at 1 minus the YES bid: a YES bid of 0.69 is a NO ask of 0.31.
+t30 = simulate([cd(60, 0.28, 0.30), cd(120, 0.80, 0.81)], CLOSE, "no", H4_BAND[1])
+assert t30["side"] == "yes" and t30["outcome"] == "target" and abs(t30["net"] - (0.80 - sfee(0.80) - 0.30 - sfee(0.30))) < 1e-12
+n30 = simulate([cd(60, 0.69, 0.71), cd(120, 0.18, 0.20)], CLOSE, "yes", H4_BAND[1])
+assert n30["side"] == "no" and abs(n30["ask"] - 0.31) < 1e-9
+# Outside 28c to 32c there is no entry, so a 40c market is not a 30c trade.
+assert simulate([cd(60, 0.39, 0.40)], CLOSE, "yes", H4_BAND[1]) is None
+# THE test that matters, for this band: in a FAIR game it must lose about the costs, never win.
+rng30 = _random.Random(11)
+def fair_market30():
+    p, cs = 0.5, []
+    for k in range(1, 15):
+        p = min(0.98, max(0.02, p + rng30.choice((-0.05, 0.05))))   # 5c steps land exactly on 30c
+        cs.append(cd(60 * k, round(p - 0.01, 4), round(p + 0.01, 4)))
+    return cs, ("yes" if rng30.random() < p else "no")
+v30 = []
+for _ in range(30000):
+    cs, res = fair_market30()
+    r = simulate(cs, CLOSE, res, H4_BAND[1])
+    if r:
+        v30.append(r["net"])
+m30 = sum(v30) / len(v30)
+assert len(v30) > 3000 and -0.10 < m30 < -0.01, (m30, len(v30))
+# A rigged market that really does continue from 30c (it reaches 80c more often than a fair game) must show a profit,
+# so a pass is possible and the test is not one that always says no.
+def trend_market():
+    return [cd(60, 0.29, 0.30), cd(120, 0.80, 0.81)], "yes"
+r = [simulate(*((lambda cs, res: (cs, CLOSE, res, H4_BAND[1]))(*trend_market()))) for _ in range(5)]
+assert all(x and x["net"] > 0.4 for x in r)
+import scalper.bandscan as _bs, re as _re8
+assert not _re8.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _re8.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_bs.__file__).read()))
 print("scalp tests passed")
 
 # ---- spot lag study (exploratory) ----
