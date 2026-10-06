@@ -153,3 +153,8 @@ demo) and, if an earlier attempt had in fact landed, the 409 makes the trader lo
 it. A refusal that is the caller's fault (HTTP 4xx) is recorded and blocks that market, and a record stuck at
 "sending" (the function was killed mid-flight) blocks it too, so nothing is ever sent twice. The duplicate
 protection was measured on the demo; confirm it on production before any real order.
+
+**Two demo hosts.** Kalshi documents two demo front doors, `external-api.demo.kalshi.co` (recommended) and
+`demo-api.kalshi.co`. On 2026-10-06 the first returned HTTP 503 for over an hour while the second kept
+trading, so a transient failure on the first is retried on the second, both on the allow list. If the
+button says the demo is down, both were failing.

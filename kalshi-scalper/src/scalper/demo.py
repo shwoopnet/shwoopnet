@@ -34,6 +34,10 @@ import uuid
 from datetime import datetime
 
 DEMO_BASE = "https://external-api.demo.kalshi.co/trade-api/v2"
+# Kalshi documents two demo front doors, both on the allow list. The recommended one returned HTTP 503 while
+# the other kept answering with every shard trading (2026-10-06), so a transient failure on the first goes to
+# the second. They front one exchange and a repeated client_order_id is refused with 409, so this is safe.
+DEMO_ALT_BASE = "https://demo-api.kalshi.co/trade-api/v2"
 DEMO_HOSTS = ("external-api.demo.kalshi.co", "demo-api.kalshi.co")
 API_ROOT = "/trade-api/v2"
 MAX_COUNT = 5
@@ -90,22 +94,30 @@ def request(method: str, path: str, *, key_id: str | None = None, key=None, para
             body: dict | None = None, opener=None):
     """One request to the demo API. path is relative to the API root ('/portfolio/balance').
     Signed when a key is given. Returns (status, parsed json or text). Never raises on an HTTP
-    error status: the caller prints what the exchange said."""
+    error status: the caller prints what the exchange said. A 5xx, 429 or a connection failure on the
+    first demo front door is retried on the second."""
     query = ("?" + urllib.parse.urlencode(params)) if params else ""
-    url = DEMO_BASE + path + query
-    assert_demo(url)
-    headers = auth_headers(key_id, key, method, API_ROOT + path) if key is not None else {"Accept": "application/json", "User-Agent": "shwoopnet-demo/1.0"}
     data = json.dumps(body).encode("utf-8") if body is not None else None
-    req = urllib.request.Request(url, data=data, method=method, headers=headers)
-    try:
-        with (opener or urllib.request.urlopen)(req, timeout=20) as r:
-            raw, status = r.read().decode("utf-8"), r.status
-    except urllib.error.HTTPError as e:
-        raw, status = e.read().decode("utf-8", "replace"), e.code
-    try:
-        return status, json.loads(raw)
-    except ValueError:
-        return status, raw
+    status, parsed = 0, "no answer"
+    for base in (DEMO_BASE, DEMO_ALT_BASE):
+        url = base + path + query
+        assert_demo(url)
+        headers = auth_headers(key_id, key, method, API_ROOT + path) if key is not None else {"Accept": "application/json", "User-Agent": "shwoopnet-demo/1.0"}
+        req = urllib.request.Request(url, data=data, method=method, headers=headers)
+        try:
+            with (opener or urllib.request.urlopen)(req, timeout=20) as r:
+                raw, status = r.read().decode("utf-8"), r.status
+        except urllib.error.HTTPError as e:
+            raw, status = e.read().decode("utf-8", "replace"), e.code
+        except (urllib.error.URLError, OSError) as e:
+            raw, status = str(e)[:100], 0
+        try:
+            parsed = json.loads(raw)
+        except ValueError:
+            parsed = raw
+        if not (status == 0 or status == 429 or status >= 500):
+            return status, parsed
+    return status, parsed
 
 
 def order_body(ticker: str, count: int, price: float, client_order_id: str, exchange_index: int | None = None) -> dict:

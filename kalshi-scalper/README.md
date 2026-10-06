@@ -600,6 +600,15 @@ Nothing below is implemented. It is what the live version will have to do.
   $0.50 and 495000 moved $49.50, so the field is 1/10,000 of a dollar. Never reuse that unit on
   production without a tiny test first. Result: $150 on shard 0 and $50 on shard 2, and a Bitcoin demo
   order on shard 2 was created and cancelled (`python3 -m scalper.demo order`).
+- **The demo has two front doors, and one can fail alone (measured 2026-10-06 20:30 to 20:53 UTC).**
+  `external-api.demo.kalshi.co` (the recommended host) answered HTTP 503 with `trading_active: false` on
+  every call, while `demo-api.kalshi.co` answered 200 with all four shards trading, and a signed order
+  placed through it was accepted and cancelled. Kalshi's published schedule showed the demo open at the
+  time (its only daily closure is a 15 minute gap) and production was fine. So "the demo is down" can mean
+  one hostname is down. Both the website's test trader and `python3 -m scalper.demo` now try the second
+  host when the first fails transiently (5xx, 429 or no answer), with the same order id. That is safe
+  because they front one exchange and a repeated `client_order_id` is refused with 409, which the trader
+  reads as "an earlier attempt landed".
 - **Other demo facts measured the same day.** A create returns **HTTP 201**, not 200, with
   `order_id`, `client_order_id`, `fill_count`, `remaining_count` and `ts_ms`. A cancel needs the market
   ticker and shard (`DELETE /portfolio/events/orders/{id}?market_ticker=...&exchange_index=...`).

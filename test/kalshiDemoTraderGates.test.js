@@ -83,6 +83,7 @@ function world(opts = {}) {
   const fetchFn = async (url, o) => {
     calls.push({ url, method: o.method, headers: o.headers, body: o.body ? JSON.parse(o.body) : null });
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
+    if (opts.primaryDown && url.startsWith('https://external-api.demo.kalshi.co/')) return reply(503, { exchange_active: false, trading_active: false });
     if (url.endsWith('/exchange/status')) return opts.demoDown ? reply(503, { exchange_active: false, trading_active: false }) : reply(200, { exchange_active: true, trading_active: true });
     if (url.endsWith('/portfolio/balance')) return reply(200, { balance_breakdown: opts.breakdown || [{ balance: '200.0000', exchange_index: 0 }, { balance: '0.0000', exchange_index: 2 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: [...orders.values()] });
@@ -191,10 +192,10 @@ gates.D12 = async () => {
 // A transient failure is retried within the call; if it never clears, the record says "unavailable" and the next
 // press tries again, sending the same order id. It can leave only one order.
 gates.D13 = async () => {
-  const w = world({ postSeq: [{ status: 503, body: { error: { code: 'service_unavailable' } } }, { status: 503, body: {} }, { status: 503, body: {} }] });
+  const w = world({ postSeq: Array.from({ length: 6 }, () => ({ status: 503, body: { error: { code: 'service_unavailable' } } })) });
   const r = await run(w);
   assert.ok(!r.ok && /not answering \(HTTP 503\)/.test(r.reason), r.reason);
-  assert.strictEqual(w.posts.length, 3, 'tried three times in the one call');
+  assert.strictEqual(w.posts.length, 6, 'three attempts in the one call, each tried on both demo front doors');
   assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'unavailable');
   assert.strictEqual(w.orders.size, 0, 'nothing was placed');
   const retry = await run(w, { now: NOW + 5 * 60000 });
@@ -216,7 +217,24 @@ gates.D14 = async () => {
   assert.ok(r.filled && r.fillCount === '2.00');
   const w2 = world({ netDown: true });
   const down = await run(w2);
-  assert.ok(!down.ok && w2.docs.get('t-KXGOLD15M-26OCT061400-00').status === 'unavailable' && w2.posts.length === 3, 'a network failure is retried, then marked unavailable');
+  assert.ok(!down.ok && w2.docs.get('t-KXGOLD15M-26OCT061400-00').status === 'unavailable' && w2.posts.length === 6, 'a network failure is retried on both front doors, then marked unavailable');
+};
+
+// Kalshi's recommended demo host returned 503 while the other demo host kept trading (2026-10-06). The order must go
+// through the second one, once, with the same id, and only ever to the two documented demo hosts.
+gates.D15 = async () => {
+  const w = world({ primaryDown: true });
+  const r = await run(w);
+  assert.ok(r.ok && r.filled, 'the order goes through when only the recommended host is down: ' + JSON.stringify(r));
+  assert.strictEqual(w.orders.size, 1, 'exactly one order exists');
+  const post = w.calls.filter((c) => c.method === 'POST');
+  assert.ok(post.length === 2 && post[0].url.startsWith('https://external-api.demo.kalshi.co/') && post[1].url.startsWith('https://demo-api.kalshi.co/'), 'tried the recommended host, then the alternate');
+  assert.strictEqual(post[0].body.client_order_id, post[1].body.client_order_id, 'the same order id on both');
+  const hosts = new Set(w.calls.map((c) => new URL(c.url).hostname));
+  assert.ok([...hosts].every((h) => ['external-api.demo.kalshi.co', 'demo-api.kalshi.co'].includes(h)), 'only demo hosts: ' + [...hosts]);
+  // The exchange check also fails over: one front door reporting the exchange down is not "down".
+  const w2 = world({ primaryDown: true });
+  assert.ok((await run(w2)).ok && !w2.calls.some((c) => c.url.startsWith('https://demo-api.kalshi.co/') && c.method === 'DELETE'));
 };
 
 // ---- wiring: where the order code may live ----
