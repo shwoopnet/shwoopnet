@@ -207,6 +207,25 @@ no free gold spot series here.
 - **What it does not say.** Not tested: gold, anything faster than one minute, or
   whether resting orders earn the spread (candles cannot show fills).
 
+**2026-10-06: H5, quoting both sides as a market maker: `FALSIFIED`.**
+One run, on the sample and rules fixed before any code (see H5 above). Nothing was changed after seeing it.
+
+- 1,219 markets (every 4th per series by close time), z of -36.9, mean **-41.3c a market**, -40.6c and
+  -42.0c in the two halves, -45.6c with fees 20% higher. The bar was +1c and z of 2.1.
+- Decomposition: round trips **-16.6c**, leftover inventory **-3.4c**, fees **-21.3c**. About 8 fills a
+  side per market, 24% of markets ended flat.
+- **The prediction (adverse selection bigger than the spread) was right, but not where I expected it.**
+  The leftover was a small part. The loss is in the paired buys and sells: the quote follows the price, so
+  in a trending minute it buys at the old level and sells at the new, lower one. Fills are not independent
+  of direction, which is the same adverse selection arriving as a loss on completed pairs.
+- Information only: with no fee at all it is still -20.0c, with fills also on a print AT our price -22.2c,
+  inventory cap 1 -35.3c, cap 4 -44.1c. So the fee is about half of it, and removing it does not rescue it.
+  It does not depend on the cap.
+- **What it does not say.** The fee was charged at the taker formula on every fill, which a resting order
+  may not pay (unconfirmed). Quotes were refreshed once a minute and one contract each side; a quoter that
+  re-prices within the minute or skips quoting after a move is a different strategy and was not tested.
+  Fills are the conservative strictly-through model.
+
 ## Hypothesis H1: favourites are underpriced, held to settlement (fixed 2026-10-05, before any calibration data was looked at)
 
 The scalping verdict above says nothing about holding to settlement, which costs
