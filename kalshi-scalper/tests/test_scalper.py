@@ -375,3 +375,118 @@ import scalper.leadlag as _ll, re as _re5
 _c = _re5.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_ll.__file__).read())
 assert not _re5.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c)
 print("spot lag tests passed")
+
+# ---- H3: resting orders ----
+import random as _rd2
+from scalper.makers import plan, filled, net as _net, orders_for, verdict as _mverdict, mean as _mmean, BANDS as _MB
+from scalper.tape import parse_ts, parse_trade
+
+# The order is the FIRST usable minute with 5+ minutes left, YES bid before NO bid, one per band.
+_cs = [(100, 0.001, 0.999), (160, 0.30, 0.34), (220, 0.40, 0.42), (280, 0.39, 0.41)]
+assert plan(_cs, 100 + 900, (0.38, 0.42)) == (220, "yes", 0.40, 0.42), "an unusable quote and an out of band minute are skipped"
+assert plan(_cs, 220 + 200, (0.38, 0.42)) is None, "under 5 minutes left: no order"
+_no = [(100, 0.56, 0.58)]   # YES bid 0.56 is out of band, NO bid is 1 - 0.58 = 0.42
+assert plan(_no, 100 + 900, (0.38, 0.42)) == (100, "no", 0.42, 0.44)
+
+# A resting bid is filled only when the tape prints strictly THROUGH it, on our side, after it, inside the window.
+_o = (1000, "yes", 0.40, 0.42)
+assert filled(_o, [(1030, "no", 0.39, 0.61)])
+assert not filled(_o, [(1030, "no", 0.40, 0.60)]), "a print AT our price does not count: our queue place is unknown"
+assert filled(_o, [(1030, "no", 0.40, 0.60)], strict=False), "but it does in the optimistic count"
+assert not filled(_o, [(1030, "yes", 0.39, 0.61)]), "a taker buying YES hits the asks, not our bid"
+assert not filled(_o, [(1000, "no", 0.30, 0.70)]), "a print at the order minute is not after the order"
+assert not filled(_o, [(1121, "no", 0.30, 0.70)]) and filled(_o, [(1121, "no", 0.30, 0.70)], window=300)
+_on = (1000, "no", 0.42, 0.44)
+assert filled(_on, [(1030, "yes", 0.60, 0.41)]) and not filled(_on, [(1030, "no", 0.60, 0.41)])
+
+# Tape timestamps carry any number of fraction digits.
+assert abs(parse_ts("2026-10-05T09:59:59.95576Z") - parse_ts("2026-10-05T09:59:59Z") - 0.95576) < 1e-6
+assert parse_trade({"trade_id": "x", "ticker": "T", "created_time": "2026-10-05T09:59:59.5Z", "taker_side": "no",
+                    "yes_price_dollars": "0.9990", "no_price_dollars": "0.0010", "count_fp": "75.00"})[3:] == ("no", 0.999, 0.001, 75.0)
+assert parse_trade({"ticker": "T"}) is None
+
+def _h3_world(p_win, fill_when, n=1200, seed=3, days=20, edge_first_half_only=False):
+    """Synthetic markets: a 40c bid, ask 42c, one order each. fill_when(won) says whether the tape
+    prints through our bid. p_win is the true chance the side wins."""
+    rng = _rd2.Random(seed)
+    markets, results = [], {}
+    base = 1_790_000_000 - 1_790_000_000 % 86400
+    for i in range(n):
+        d = i * days // n
+        close_ts = base + d * 86400 + (i % 90) * 900 + 900
+        end = close_ts - 780
+        pw = p_win(d) if callable(p_win) else p_win
+        won = rng.random() < pw
+        t = f"T{i}"
+        markets.append((t, "KXBTC15M", [(end, 0.40, 0.42)], close_ts, "yes" if won else "no"))
+        tape = [(end + 30, "no", 0.39, 0.61)] if fill_when(won, rng) else []
+        o = plan([(end, 0.40, 0.42)], close_ts, _MB["40c"])
+        # exactly what tape.py stores for the order: flags computed from the window's trades
+        results[(t, end)] = (filled(o, tape), filled(o, tape, strict=False), filled(o, tape, 300), o[1], o[2])
+    return markets, results
+
+# A FAIR game (the side wins as often as its price says, fills unrelated to the outcome) must lose about the
+# fee less the half spread it earns, never make money: the simulator invents no edge.
+_m, _r = _h3_world(0.41, lambda won, r: r.random() < 0.4, n=6000)
+_rows = orders_for(_m, _r)["40c"]
+_fm = _mmean([r["net"] for r in _rows if r["fill"]])
+assert _fm < 0 and abs(_fm - (0.41 - 0.40 - 0.07 * 0.4 * 0.6)) < 0.02, _fm
+assert abs(sum(r["fill"] for r in _rows) / len(_rows) - 0.4) < 0.03
+
+# ADVERSE SELECTION: fills happen when the side is about to lose. Filled orders lose, the missed ones would
+# have won: that gap is the selection check the verdict is printed beside.
+_m, _r = _h3_world(0.41, lambda won, r: (not won) and r.random() < 0.8, n=4000)
+_rows = orders_for(_m, _r)["40c"]
+_filled = _mmean([r["net"] for r in _rows if r["fill"]]); _missed = _mmean([r["net"] for r in _rows if not r["fill"]])
+assert _filled < -0.4 and _missed > _filled + 0.3, (_filled, _missed)
+
+# An order whose tape window was never fetched is not an order with no fills: it is left out.
+_m, _r = _h3_world(0.41, lambda won, r: True, n=100)
+assert len(orders_for(_m, {})["40c"]) == 0 and len(orders_for(_m, _r)["40c"]) == 100
+# A window recorded for a different side or price than today's plan is not this order's window.
+_k = next(iter(_r)); _bad = dict(_r); _bad[_k] = _r[_k][:3] + ("no", _r[_k][4])
+assert len(orders_for(_m, _bad)["40c"]) == 99
+
+# The kill criteria: too few fills is NOT_ENOUGH_DATA, a real edge in both halves passes, one lucky half does not.
+_m, _r = _h3_world(0.41, lambda won, r: r.random() < 0.4, n=500)
+assert _mverdict(orders_for(_m, _r), 1_790_000_000 + 10 * 86400)[0] == "NOT_ENOUGH_DATA"
+_mid = 1_790_000_000 - 1_790_000_000 % 86400 + 10 * 86400
+_m, _r = _h3_world(0.62, lambda won, r: r.random() < 0.5, n=3000)
+assert _mverdict(orders_for(_m, _r), _mid)[0] == "NOT_YET_FALSIFIED"
+_m, _r = _h3_world(lambda d: 0.65 if d < 10 else 0.30, lambda won, r: r.random() < 0.5, n=3000)
+assert _mverdict(orders_for(_m, _r), _mid)[0] == "FALSIFIED", "an edge in only one half of the period must not pass"
+
+# The fetcher stores the right flags, one row per order, and a rerun fetches nothing already done.
+import sqlite3 as _sq, tempfile as _tf2, os as _os
+import scalper.tape as _tp
+_tmp = _os.path.join(_tf2.mkdtemp(), "t.sqlite")
+_d = _sq.connect(_tmp)
+_d.executescript("CREATE TABLE market(ticker TEXT PRIMARY KEY, series TEXT, open_ts INTEGER, close_ts INTEGER, result TEXT, strike REAL, n_candles INTEGER);"
+                 "CREATE TABLE candle(ticker TEXT, series TEXT, end_ts INTEGER, bid_o REAL, bid_h REAL, bid_l REAL, bid_c REAL, ask_o REAL, ask_h REAL, ask_l REAL, ask_c REAL, price_c REAL, volume REAL, oi REAL, PRIMARY KEY (ticker, end_ts));")
+for _i, _t in enumerate(("A", "B")):
+    _d.execute("INSERT INTO market VALUES(?,?,?,?,?,?,?)", (_t, "KXBTC15M", 0, 5000 + _i * 10000, "yes", None, 1))
+    _d.execute("INSERT INTO candle(ticker, series, end_ts, bid_c, ask_c) VALUES(?,?,?,?,?)", (_t, "KXBTC15M", 4000 + _i * 10000 - 3000, 0.40, 0.42))
+_d.commit(); _d.close()
+_calls = []
+def _fake(ticker, end_ts):
+    _calls.append(ticker)
+    # A fills through a YES bid of 0.40 at 30s; B prints only AT 0.40 (not through) at 30s and through at 200s
+    return [("1", ticker, end_ts + 30, "no", 0.39 if ticker == "A" else 0.40, 0.6, 5.0)] + ([("2", ticker, end_ts + 200, "no", 0.35, 0.65, 5.0)] if ticker == "B" else [])
+_orig_db, _orig_fetch = _tp.DB, _tp.fetch_window
+_tp.DB, _tp.fetch_window = _tmp, _fake
+try:
+    _tp.run(None)
+    _got = {r[0]: r[1:] for r in _sq.connect(_tmp).execute("SELECT ticker, fill, fill_opt, fill5, side, price, n_trades FROM fills")}
+    assert _got["A"] == (1, 1, 1, "yes", 0.40, 1), _got
+    assert _got["B"] == (0, 1, 1, "yes", 0.40, 2), _got      # not through in 2 min, an AT-price print counts only optimistically, through by 5 min
+    _n = len(_calls)
+    _tp.run(None)
+    assert len(_calls) == _n == 2, "a rerun must not fetch an order that is already stored"
+finally:
+    _tp.DB, _tp.fetch_window = _orig_db, _orig_fetch
+
+# No output of the study may read as a go-ahead to trade.
+import scalper.makers as _mk, re as _re6
+_c2 = _re6.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_mk.__file__).read())
+assert not _re6.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c2)
+print("resting order tests passed")

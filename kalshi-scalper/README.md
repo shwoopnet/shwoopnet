@@ -385,6 +385,50 @@ in it licenses a trade.** It is not a strategy variant and does not count toward
 - **Prior: low.** I expect the one minute lag to be about zero: these prices are set by
   professional makers off the live index.
 
+## Hypothesis H3: resting buy orders earn the spread that H2 pays (fixed 2026-10-06, before any trade tape was fetched)
+
+H2 lost about twice its costs, and most of the cost is crossing the spread and paying a
+fee on both legs. A resting order does not cross. This asks whether posting the bid
+instead of lifting the ask turns H2's entry from a cost into an earning. Kalshi's public
+trade tape (every trade with price, size, taker side and time) lets fills be simulated,
+which candles could not. `python -m scalper.makers` (to be written after this commit).
+
+- **Rule.** At the first minute close with at least 5 minutes left and a usable quote,
+  if a side's BID is in the 40c band (38c to 42c) or the 50c band (48c to 52c), rest a buy
+  of one contract at that bid (YES tried first, then NO), for 2 minutes, then cancel.
+  If it fills, hold to settlement. No exit order, no stop. One order per market per band.
+- **Fill model, conservative.** Our bid fills only when the tape prints strictly THROUGH
+  our price on our side inside the window: for a YES bid at p, a trade with taker side
+  "no" at a YES price below p (everything ahead of us was eaten); for a NO bid at q,
+  taker side "yes" at a NO price below q. A print AT our price does not count, because
+  our place in the queue is unknown. This understates fills and is stated as such.
+- **Counterparty.** Whoever sells into our bid is an impatient seller paying the spread
+  to leave. We collect it. The usual reason that does not simply work is adverse
+  selection: a bid is filled when the price is about to fall.
+- **Prediction.** Mean net profit of at least +0.5c per filled contract in at least one
+  band, against H2's primary entry at the ask. The honest prior is low. I expect the
+  spread earned to be about the size of the adverse selection, so a net near zero.
+- **Costs.** Entry fee at Kalshi's taker formula (7% of p times 1 minus p, per contract,
+  rounded up per order), even though a resting order may pay less: the schedule for these
+  markets is not confirmed, and assuming a discount would flatter the result. A run with
+  no entry fee is printed for information only.
+- **Kill criteria.** FALSIFIED unless, for at least one band: at least 300 FILLED
+  orders; mean net profit positive with a day clustered z of at least 2.1 (Bonferroni for
+  two bands); positive in BOTH halves of the 30 days; positive with fees 20% higher. Fewer
+  than 300 fills is NOT_ENOUGH_DATA and crosses nothing off. Best outcome is
+  `NOT_YET_FALSIFIED`, meaning permission to test on days 31 to 45 back, never a trade.
+- **The selection check that decides what a result means.** Always printed beside the
+  verdict: the fill rate, and what the orders that did NOT fill would have earned if held
+  to settlement from the same price. Crypto's maker test looked better and was selection,
+  not execution, because the unfilled signals were the winners. A profit on the filled
+  orders next to a strongly positive result on the missed ones is that same trap and is
+  reported as such, whatever the headline says.
+- **Printed for information only.** Fills counted when the tape prints AT our price
+  (optimistic), a 5 minute window, and the same rule entering at the ask (H2's entry
+  taken to settlement) as the comparison.
+- **Cost of this idea so far.** It will be the fourth strategy variant tried. Cuts
+  examined: 2 bands. The lag study was exploratory and is not counted.
+
 ## The paper bot (starts with $100, cannot place a real order)
 
 It runs on the SERVER: a Firebase scheduled function (`functions/kalshiBot*` in
