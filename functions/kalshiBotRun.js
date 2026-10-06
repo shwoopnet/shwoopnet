@@ -111,6 +111,9 @@ async function runTick({ store, api, now }) {
     halted, tierMode: tier.mode, pnlToday: tier.pnlToday, perTradeCap: tier.perTradeCap,
     softLimit: tier.softLimit, hardLimit: tier.hardLimit, breakUntil: tier.breakUntil,
     openCount: stillOpen, lastBlock: block || "", lastError: error || "",
+    // What the limits were computed from, so the page can show it. If this ever disagrees
+    // with the trades listed, the limits are not seeing what the owner sees.
+    closedCounted: tier.counted, dayStart: lib.localDayStart(now),
   });
   return { entered, block, tier: tier.mode };
 }

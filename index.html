@@ -9921,6 +9921,7 @@
       el.innerHTML = '<div class="kal-big ' + cls + '">Bot: ' + h + '</div>' +
         '<div>Last run ' + (secs < 120 ? secs + 's' : Math.round(secs / 60) + ' min') + ' ago &middot; PAPER, no real orders &middot; bankroll ' + kalshiMoney(s.bankroll) + '</div>' +
         '<div>' + escapeHtml(tier) + ' &middot; today ' + kalshiMoney(s.pnlToday) + ' &middot; ' + kalshiMoney(s.perTradeCap) + ' a trade &middot; break at -' + kalshiMoney(s.softLimit) + ' &middot; done at -' + kalshiMoney(s.hardLimit) + '</div>' +
+        (s.closedCounted === undefined ? '' : '<div class="kal-status">Limits counted ' + s.closedCounted + ' closed trade' + (s.closedCounted === 1 ? '' : 's') + ' since ' + new Date(s.dayStart).toLocaleString() + '</div>') +
         '<div>' + (s.exchangeActive ? 'Exchange trading' : 'Exchange not trading') + (s.ok ? '' : ' &middot; <span class="kal-neg">prices unreadable: ' + escapeHtml(s.error || '') + '</span>') +
         (s.lastBlock ? ' &middot; entries blocked: ' + escapeHtml(s.lastBlock) : '') + '</div>';
     }
