@@ -626,6 +626,31 @@ if _HAVE_CRYPTO:
     except RuntimeError as _e:
         assert "unfunded" in str(_e)
 
+    # Moving demo funds between shards: whole cents, capped, never to the same shard, signed, and demo only.
+    assert _dm.transfer_body(50, 2) == {"source": "event_contract", "destination": "event_contract", "amount": 500000,   # $50 at the measured 10,000 units a dollar
+                                        "source_exchange_shard": 0, "destination_exchange_shard": 2}
+    assert _dm.transfer_body(0.01, 2)["amount"] == 100 and _dm.transfer_body(49.5, 2)["amount"] == 495000
+    for _args in ((0, 2), (-5, 2), (101, 2), (50, 0), (50.005, 2)):
+        try:
+            _dm.transfer_body(*_args); raise AssertionError("must refuse a transfer of %s" % (_args,))
+        except ValueError:
+            pass
+    _sent = []
+    def _opener(req, timeout=None):
+        _sent.append((req.get_method(), req.full_url, _json.loads(req.data) if req.data else None, dict(req.header_items())))
+        if req.get_method() == "POST":
+            return _Resp(200, {"transfer_id": "tr-1"})
+        if "/portfolio/balance" in req.full_url:
+            return _Resp(200, {"balance_breakdown": [{"balance": "150.0000", "exchange_index": 0}, {"balance": "50.0000", "exchange_index": 2}]})
+        return _Resp(200, {"markets": [{"ticker": "T", "exchange_index": 2}]})
+    _out = _run(lambda: _dm.cmd_move(["50", "2"]), _opener)
+    _post = [x for x in _sent if x[0] == "POST"][0]
+    assert _post[1] == "https://external-api.demo.kalshi.co/trade-api/v2/portfolio/intra_exchange_instance_transfer" and _post[2]["amount"] == 500000
+    _ph = {k.lower(): v for k, v in _post[3].items()}
+    _rk.public_key().verify(_b64.b64decode(_ph["kalshi-access-signature"]),
+                            (_ph["kalshi-access-timestamp"] + "POST/trade-api/v2/portfolio/intra_exchange_instance_transfer").encode(), _pss, _h.SHA256())
+    assert "tr-1" in _out and "shard 2" in _out and _pem_body not in _out
+
     # One order: placed tiny, then cancelled.
     _op, _seen, _cr = _server()
     _run(_dm.cmd_order, _op)

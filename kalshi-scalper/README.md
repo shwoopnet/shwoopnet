@@ -488,13 +488,29 @@ Nothing below is implemented. It is what the live version will have to do.
   (derived from the signal, never random). The recovery path must treat a 409 as "already sent",
   look the original order up, and carry on. Not yet confirmed on production, and a production
   check is part of any first real order.
+- **Shards, explained and fixed (docs read and demo tested, 2026-10-06).** Kalshi runs several matching
+  engines, called exchange shards. A market is assigned to a shard for life by its category: index 0 is
+  the default catch-all, 1 exotics and combos, 2 crypto and commodities, 3 sports. On the demo the
+  Bitcoin series trades on shard 2 and gold on shard 0. **Each shard holds its own funds**: collateral is
+  checked inside the matching engine, so "programmatic traders must preallocate collateral on a given
+  exchange shard before order placement" (the Kalshi app and website move it for you; the API does not).
+  An order needs the shard (`exchange_index`, or auto-routing with `market_ticker`), and a cancel needs
+  the same, because an order id alone cannot identify the shard. This account started with $200 on shard
+  0 and $0 on shard 2, so a Bitcoin order had nothing to draw on. Two ways to fix it:
+  `POST /portfolio/intra_exchange_instance_transfer` moves funds once, and
+  `POST /portfolio/target_balance_allocation` (percentages that total 100) makes Kalshi rebalance
+  automatically every 10 seconds, which is the right tool once trading is automated. A transfer is not
+  atomic across shards (up to three steps, and a later step failing can leave funds in the primary
+  account), and a transfer returned a transient `503 service_unavailable` once, then succeeded on retry.
+  **Measured unit surprise:** the docs say the transfer `amount` is in cents, but on the demo 5000 moved
+  $0.50 and 495000 moved $49.50, so the field is 1/10,000 of a dollar. Never reuse that unit on
+  production without a tiny test first. Result: $150 on shard 0 and $50 on shard 2, and a Bitcoin demo
+  order on shard 2 was created and cancelled (`python3 -m scalper.demo order`).
 - **Other demo facts measured the same day.** A create returns **HTTP 201**, not 200, with
-  `order_id`, `client_order_id`, `fill_count`, `remaining_count` and `ts_ms`. Demo markets are
-  split across exchange shards (Bitcoin on shard 2, gold on shard 0) and a balance belongs to a
-  shard (this account had $200 on shard 0 and $0 on shard 2), so an order on an unfunded shard has
-  nowhere to draw from. A cancel needs the market ticker and shard (`DELETE
-  /portfolio/events/orders/{id}?market_ticker=...&exchange_index=...`). Markets are listed ahead of
-  time as "initialized" and open on the quarter hour.
+  `order_id`, `client_order_id`, `fill_count`, `remaining_count` and `ts_ms`. A cancel needs the market
+  ticker and shard (`DELETE /portfolio/events/orders/{id}?market_ticker=...&exchange_index=...`).
+  Markets are listed ahead of time as "initialized" and open on the quarter hour, so a call in the last
+  seconds before the next quarter hour finds no open market.
 
 **Order of work to real orders (each step gated on the one before):**
 

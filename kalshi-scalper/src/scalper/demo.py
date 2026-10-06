@@ -15,6 +15,8 @@ Run it on the machine that holds the demo key (see the README, "Demo trading"):
     python3 -m scalper.demo balance
     python3 -m scalper.demo order            # one contract at 1c, rests, cancelled for you
     python3 -m scalper.demo dup              # the same client_order_id twice, then cancels
+    python3 -m scalper.demo shards           # demo funds per exchange shard, and which series sit on which shard
+    python3 -m scalper.demo move 50 2        # move $50 of demo funds from shard 0 to shard 2
 
 Needs the `cryptography` package (`pip3 install cryptography`).
 """
@@ -38,6 +40,11 @@ MAX_COUNT = 5
 MAX_PRICE = 0.05
 SERIES = ("KXBTC15M", "KXGOLD15M")
 MIN_LEFT_S = 120   # long enough to place and cancel a test order
+MAX_MOVE_DOLLARS = 100   # the most one demo transfer between shards may move
+# The transfer endpoint's docs say `amount` is in cents. MEASURED on the demo (2026-10-06): 5000 moved
+# $0.50 and 495000 moved $49.50, so the field is 1/10,000 of a dollar. Do not assume the same on
+# production: test with a tiny amount first. This tool is demo only.
+TRANSFER_UNITS_PER_DOLLAR = 10000
 
 
 class NotDemo(Exception):
@@ -217,10 +224,48 @@ def cmd_dup() -> None:
         show(f"cancel {oid[:8]}", *cancel(m["ticker"], oid, key_id, key, m.get("exchange_index")))
 
 
+def transfer_body(dollars: float, to_shard: int, from_shard: int = 0) -> dict:
+    """An intra-account transfer between event-contract shards, of a whole number of cents of dollars. Demo funds only,
+    capped, and never a transfer from a shard to itself."""
+    if from_shard == to_shard:
+        raise ValueError("the source and destination shard are the same")
+    if not (0 < dollars <= MAX_MOVE_DOLLARS):
+        raise ValueError(f"a demo transfer is more than $0 and at most ${MAX_MOVE_DOLLARS}, got {dollars}")
+    cents = round(dollars * 100)
+    if abs(cents - dollars * 100) > 1e-6:
+        raise ValueError("an amount is whole cents")
+    return {"source": "event_contract", "destination": "event_contract", "amount": cents * (TRANSFER_UNITS_PER_DOLLAR // 100),
+            "source_exchange_shard": from_shard, "destination_exchange_shard": to_shard}
+
+
+def cmd_shards() -> None:
+    """Which shard holds the demo money, and which shard each series trades on. A balance belongs to a
+    shard: an order needs collateral on the shard its market lives on."""
+    key_id, key = credentials()
+    st, d = request("GET", "/portfolio/balance", key_id=key_id, key=key)
+    show("balance by shard", st, d.get("balance_breakdown") if isinstance(d, dict) else d)
+    for series in SERIES:
+        st, m = request("GET", "/markets", params={"series_ticker": series, "limit": 1})
+        shard = m["markets"][0].get("exchange_index") if st == 200 and isinstance(m, dict) and m.get("markets") else None
+        print(f"{series} trades on shard {shard}")
+
+
+def cmd_move(args: list[str]) -> None:
+    key_id, key = credentials()
+    try:
+        body = transfer_body(float(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else 0)
+    except (IndexError, ValueError) as e:
+        sys.exit(f"usage: python3 -m scalper.demo move <dollars> <to shard> [from shard, default 0]   ({e})")
+    show("transfer", *request("POST", "/portfolio/intra_exchange_instance_transfer", key_id=key_id, key=key, body=body))
+    cmd_shards()
+
+
 def main() -> None:
-    cmds = {"balance": cmd_balance, "order": cmd_order, "dup": cmd_dup}
+    cmds = {"balance": cmd_balance, "order": cmd_order, "dup": cmd_dup, "shards": cmd_shards}
+    if len(sys.argv) >= 2 and sys.argv[1] == "move":
+        return cmd_move(sys.argv[2:])
     if len(sys.argv) != 2 or sys.argv[1] not in cmds:
-        sys.exit("usage: python3 -m scalper.demo balance | order | dup   (DEMO ONLY)")
+        sys.exit("usage: python3 -m scalper.demo balance | order | dup | shards | move <dollars> <to shard>   (DEMO ONLY)")
     cmds[sys.argv[1]]()
 
 
