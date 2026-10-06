@@ -429,6 +429,41 @@ which candles could not. `python -m scalper.makers` (to be written after this co
 - **Cost of this idea so far.** It will be the fourth strategy variant tried. Cuts
   examined: 2 bands. The lag study was exploratory and is not counted.
 
+## Hypothesis H4: buy at 30c and sell at 80c (fixed 2026-10-06, before it was run on any data)
+
+Raised by the owner: the bot and H2 buy only near 40c or 50c, so the whole 30c range is never
+traded. This asks whether H2's rule works from a cheaper entry. Same machinery as H2, one new
+band. `python -m scalper.bandscan` (to be written after this commit).
+
+- **Rule, identical to H2 except the band.** Buy a side whose ask is in [0.28, 0.32] ("30c"), at
+  the FIRST minute close with at least 5 minutes left and a usable quote (YES then NO). Sell at 80c
+  when that side's bid first closes at 80c or more on a LATER minute; otherwise hold to settlement.
+  Entry at the ask, a taker fee on both legs (7% unrounded per contract), no stop, one entry per
+  market. Unit: a market. Statistic: net profit per contract.
+- **Why the prior is the same as H2's.** In a fair market a price at 30c reaches 80c before 0c
+  with probability 30/80 = 37.5%, a win of +50c against a loss of -30c, so the expected profit is
+  zero before costs at any entry or target. Costs are a little lower than at 40c to 50c (the fee
+  is 7% of p times 1 minus p, so 1.47c at 30c against 1.75c at 50c), about 3.5c to 4c a round
+  trip. So H4 can only work if prices CONTINUE more than a fair game from low prices, and the
+  earlier path study found no continuation.
+- **Counterparty.** Whoever sells at 30c, or buys at 80c, on a view that a market moving up from a
+  low price keeps going.
+- **Prediction.** Mean net profit of at least +1c a contract. My honest expectation is the opposite:
+  about -4c to -8c, as H2 lost at 40c and 50c.
+- **Kill criteria.** FALSIFIED unless ALL hold: n of at least 300 markets; mean net profit positive
+  with a day clustered z of at least 2.1 (the bar H2 used, kept so the three bands are held to the
+  same standard); positive in BOTH halves of the 30 days; positive with fees 20% higher. Best
+  outcome `NOT_YET_FALSIFIED`, meaning permission to test on days 31 to 45 back, which neither H2
+  nor this has seen. It is never evidence of an edge, and no verdict means "trade".
+- **Same data as H2, so the bar is not lowered for it.** The 30 days H2 used are reused. 30c was
+  chosen because it is the gap in what H2 and the bot cover, not from a result, but a pass here
+  would still have to survive the unseen days before anything is built on it.
+- **Descriptive only, affects nothing above.** The same rule at 20c, 40c, 50c and 60c, to show how
+  the result moves with the entry price. It is printed as information and is NOT used to pick a
+  band: choosing the best-looking cell afterwards is the thing this process forbids.
+- **Cost of this idea so far.** It is the fifth strategy variant tried (the 60s scalp, H1, H2, H3,
+  H4); the spot lag study was exploratory and is not counted. Cuts examined for the verdict: 1 band.
+
 ## The paper bot (starts with $100, cannot place a real order)
 
 It runs on the SERVER: a Firebase scheduled function (`functions/kalshiBot*` in
