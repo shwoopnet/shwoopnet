@@ -457,10 +457,19 @@ that can drift.
 
 Nothing below is implemented. It is what the live version will have to do.
 
-- **Hosts.** Production `https://external-api.kalshi.com/trade-api/v2`, demo
-  `https://external-api.demo.kalshi.co/trade-api/v2` ([demo environment](https://docs.kalshi.com/getting_started/demo_env)).
-  Demo has separate accounts and separate API keys, mock funds, and prices that
-  "may not be reflective of those in real markets". It tests the plumbing, not the strategy.
+- **Hosts.** Production `https://external-api.kalshi.com/trade-api/v2`. Demo has separate
+  accounts and separate API keys, mock funds, and prices that "may not be reflective of
+  those in real markets" ([demo environment](https://docs.kalshi.com/getting_started/demo_env)).
+  It tests the plumbing, not the strategy. Demo endpoints (confirmed by the owner 2026-10-06):
+
+  | Surface | Recommended demo endpoint | Also supported |
+  |---|---|---|
+  | REST Trade API | `https://external-api.demo.kalshi.co/trade-api/v2` | `https://demo-api.kalshi.co/trade-api/v2` |
+  | WebSocket API | `wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2` | `wss://demo-api.kalshi.co/trade-api/ws/v2` |
+
+  Checked from the research container on 2026-10-06: both REST hosts answer unauthenticated
+  reads, and the demo lists open `KXBTC15M` and `KXGOLD15M` markets, the two series the bot
+  uses. Orders, balance and positions need a demo API key (separate from any real key).
 - **Authentication** ([signing guide](https://docs.kalshi.com/getting_started/quick_start_authenticated_requests)).
   Three headers: `KALSHI-ACCESS-KEY` (the key id), `KALSHI-ACCESS-TIMESTAMP`
   (milliseconds) and `KALSHI-ACCESS-SIGNATURE`: the base64 of a signature over the
