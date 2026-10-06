@@ -184,6 +184,29 @@ e4f4d87). 4,871 markets, 30 days, no threshold or band changed after seeing it.
 Strategy variants tried so far: 2 (the 60s scalp and H1). Cuts examined: 18, plus
 3 entry times for H1.
 
+**2026-10-06: does Kalshi lag spot Bitcoin? No lag visible at one minute (exploratory, no verdict).**
+One run of `python -m scalper.leadlag` under the definitions fixed before it (commit
+b44a19a). 30 days, 15,101 Bitcoin market minutes with a mid between 30c and 70c and at
+least 5 minutes left. Nothing was changed after seeing it. Gold is not covered: there is
+no free gold spot series here.
+
+- **The clocks line up.** The market strike and Coinbase's price at the open differ by
+  0.012% on the median market (the bar was 0.1%), over 2,850 markets.
+- **Kalshi tracks spot inside the same minute.** The contemporaneous coefficient is
+  large and stable (z of 23.9; 15.2 and 18.1 in the two halves). A 0.1% Bitcoin move in
+  a minute moves the mid by about 22c, which is what a 50c binary 15 minutes from
+  settlement should do.
+- **There is no lag to trade.** One minute of lag is -2.6% of the contemporaneous effect
+  (z of -2.7, small, and the wrong sign for a lag: it looks like a little bid and ask
+  bounce). The lead term, the clock check, is 1.2 z, noise. After a top-decile spot
+  move, Kalshi's next-minute move in that direction is +0.09c, against a 4c round trip.
+- **What it says.** The professional quoters on these markets price the live index
+  within a minute, so a bot that looks at prices once a minute has no information
+  advantage over them. Beating them needs sub-second data and execution, which is a
+  different business from this one.
+- **What it does not say.** Not tested: gold, anything faster than one minute, or
+  whether resting orders earn the spread (candles cannot show fills).
+
 ## Hypothesis H1: favourites are underpriced, held to settlement (fixed 2026-10-05, before any calibration data was looked at)
 
 The scalping verdict above says nothing about holding to settlement, which costs

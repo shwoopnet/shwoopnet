@@ -42,7 +42,8 @@ def fetch(start: int, end: int, retries: int = 6) -> list[tuple[int, float]]:
     last = None
     for i in range(retries):
         try:
-            with urllib.request.urlopen(URL % (iso(start), iso(end)), timeout=15) as r:
+            req = urllib.request.Request(URL % (iso(start), iso(end)), headers={"User-Agent": "shwoopnet-research/1.0", "Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=15) as r:
                 return parse_rows(json.load(r))
         except urllib.error.HTTPError as e:
             last = e
