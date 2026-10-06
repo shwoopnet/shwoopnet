@@ -980,6 +980,7 @@
   .kal-limits{ font-size:14px; line-height:1.7; }
   .kal-big{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; }
   .kal-trade{ display:grid; grid-template-columns:minmax(110px,1.2fr) repeat(4,minmax(80px,1fr)) auto; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--border); font-size:13px; }
+  .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); }
   .kal-trade:first-child{ border-top:0; }
   .kal-trade .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
   .kal-tnote{ grid-column:1 / -1; color:var(--muted); font-size:12px; }
@@ -3263,6 +3264,10 @@
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Waiting for the bot's first report.</div></div>
         <div class="kal-actions"><button class="kal-btn" id="kalBotHalt" type="button" hidden></button><span class="kal-note" id="kalBotHaltMsg"></span></div>
         <div class="kal-note">PAPER only: it makes simulated trades from Kalshi's live prices once a minute on Google's servers, and cannot place a real order. Halt stops new entries; positions already open are still managed.</div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">Totals since the bot started</div>
+        <div id="kalBotTotals"><div class="kal-empty">No closed trades yet.</div></div>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">Open positions</div>
@@ -9909,6 +9914,34 @@
   var kalshiBotShow = { closed: 15, events: 12 };
   var kalshiBotUnsub = null;
 
+  // Everything the bot has closed, added up. Pure, so a test can run it on a fixture. Only
+  // closed trades with a numeric pnl count; days are the viewer's local calendar days.
+  function kalshiBotTotals(positions, dayOf){
+    var closed = (positions || []).filter(function(p){ return p && p.status === 'closed' && typeof p.pnl === 'number'; });
+    var out = { n: closed.length, wins: 0, losses: 0, net: 0, grossWin: 0, grossLoss: 0, best: null, worst: null, days: [], first: null };
+    var byDay = {};
+    closed.forEach(function(p){
+      out.net += p.pnl;
+      if(p.pnl > 0){ out.wins++; out.grossWin += p.pnl; } else if(p.pnl < 0){ out.losses++; out.grossLoss += p.pnl; }
+      if(out.best === null || p.pnl > out.best) out.best = p.pnl;
+      if(out.worst === null || p.pnl < out.worst) out.worst = p.pnl;
+      if(out.first === null || p.settledAt < out.first) out.first = p.settledAt;
+      var d = dayOf(p.settledAt);
+      if(!byDay[d]){ byDay[d] = { day: d, trades: 0, net: 0, at: p.settledAt }; }
+      byDay[d].trades++; byDay[d].net += p.pnl;
+      if(p.settledAt > byDay[d].at){ byDay[d].at = p.settledAt; }
+    });
+    out.days = Object.keys(byDay).map(function(k){ return byDay[k]; }).sort(function(a, b){ return b.at - a.at; });
+    out.net = Math.round(out.net * 100) / 100;
+    out.winRate = out.n ? out.wins / out.n : null;
+    out.perTrade = out.n ? out.net / out.n : null;
+    out.avgWin = out.wins ? out.grossWin / out.wins : null;
+    out.avgLoss = out.losses ? out.grossLoss / out.losses : null;
+    // The share of trades that must win for these average sizes to break even.
+    out.breakEven = (out.avgWin !== null && out.avgLoss !== null) ? -out.avgLoss / (out.avgWin - out.avgLoss) : null;
+    return out;
+  }
+
   function renderKalshiBot(){
     var s = kalshiBotState.status;
     var el = document.getElementById('kalBotStatus');
@@ -9934,6 +9967,38 @@
     btn.hidden = !currentUserIsAdmin;
     btn.textContent = halted ? 'Resume new entries' : 'Halt new entries';
     var pos = kalshiBotState.positions;
+    var tot = kalshiBotTotals(pos, function(ms){ return new Date(ms).toLocaleDateString(); });
+    var totEl = document.getElementById('kalBotTotals');
+    if(!tot.n){
+      totEl.innerHTML = '<div class="kal-empty">No closed trades yet.</div>';
+    } else {
+      var pct = function(x){ return x === null ? 'n/a' : (x * 100).toFixed(0) + '%'; };
+      var cell = function(label, value, cls){ return '<div><span class="kal-lbl">' + label + '</span><span class="' + (cls || '') + '">' + value + '</span></div>'; };
+      totEl.innerHTML =
+        '<div class="kal-trade kal-sum">' +
+          cell('Net P&amp;L', kalshiMoney(tot.net), tot.net >= 0 ? 'kal-pos kal-big' : 'kal-neg kal-big') +
+          cell('Closed trades', String(tot.n)) +
+          cell('Won / lost', tot.wins + ' / ' + tot.losses) +
+          cell('Win rate', pct(tot.winRate)) +
+          cell('Net per trade', kalshiMoney(tot.perTrade), tot.perTrade >= 0 ? 'kal-pos' : 'kal-neg') +
+        '</div>' +
+        '<div class="kal-trade kal-sum">' +
+          cell('Average win', tot.avgWin === null ? 'n/a' : kalshiMoney(tot.avgWin)) +
+          cell('Average loss', tot.avgLoss === null ? 'n/a' : kalshiMoney(tot.avgLoss)) +
+          cell('Needs to win', pct(tot.breakEven)) +
+          cell('Best / worst', kalshiMoney(tot.best) + ' / ' + kalshiMoney(tot.worst)) +
+          cell('Days traded', String(tot.days.length)) +
+        '</div>' +
+        '<div class="kal-note">Bar before any real money: 300 paper trades over at least 5 days (' + tot.n + ' trades over ' + tot.days.length + ' day' + (tot.days.length === 1 ? '' : 's') + ' so far), positive after fees. ' +
+        'Since ' + new Date(tot.first).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) + '.' +
+        (pos.length >= 500 ? ' Counted from the newest 500 trades only.' : '') + '</div>' +
+        '<div class="kal-note">By day (your local time)</div>' +
+        tot.days.map(function(d){
+          return '<div class="kal-trade kal-sum"><div class="kal-name">' + escapeHtml(d.day) + '</div>' +
+            '<div><span class="kal-lbl">Trades</span>' + d.trades + '</div>' +
+            '<div class="' + (d.net >= 0 ? 'kal-pos' : 'kal-neg') + '"><span class="kal-lbl">Net</span>' + kalshiMoney(d.net) + '</div></div>';
+        }).join('');
+    }
     var open = pos.filter(function(p){ return p.status === 'open'; });
     var closed = pos.filter(function(p){ return p.status === 'closed'; })
       .sort(function(a, b){ return b.settledAt - a.settledAt; });
