@@ -44,7 +44,7 @@ function localDayStart(nowMs, tz) {
 // from the trade that crossed the soft line and later wins do not shorten it. The hard
 // stop is sticky. No bankroll means no trading (fail closed).
 function tierState(closed, bankroll, nowMs) {
-  const out = { mode: "ok", cap: 0, perTradeCap: 0, softLimit: 0, hardLimit: 0, pnlToday: 0, softAt: null, breakUntil: null };
+  const out = { mode: "ok", cap: 0, perTradeCap: 0, softLimit: 0, hardLimit: 0, pnlToday: 0, counted: 0, softAt: null, breakUntil: null };
   const bank = Number(bankroll);
   if (!(bank > 0)) { out.mode = "done"; return out; }
   out.perTradeCap = bank * LIMITS.perTradePct;
@@ -60,6 +60,7 @@ function tierState(closed, bankroll, nowMs) {
     if (cum <= -out.hardLimit) hard = true;
   });
   out.pnlToday = round2(cum);
+  out.counted = today.length;
   if (hard) {
     out.mode = "done";
   } else if (out.softAt !== null) {

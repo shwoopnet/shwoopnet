@@ -265,6 +265,9 @@ gates.G15 = async () => {
   assert.strictEqual(r.entered, 1);
   const s = c.store.status;
   assert.ok(s.ok && s.mode === 'paper' && s.bankroll === 100 && s.openCount === 1 && s.lastTickMs === NOON, JSON.stringify(s));
+  // The page shows what the limits counted, so a mismatch with the trade list is visible.
+  assert.strictEqual(s.closedCounted, 0);
+  assert.strictEqual(s.dayStart, require('../functions/kalshiBotLib').localDayStart(NOON));
 };
 
 // During the 2 hour break no new entry is taken, and the reason is logged; open
