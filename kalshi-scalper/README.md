@@ -184,6 +184,29 @@ e4f4d87). 4,871 markets, 30 days, no threshold or band changed after seeing it.
 Strategy variants tried so far: 2 (the 60s scalp and H1). Cuts examined: 18, plus
 3 entry times for H1.
 
+**2026-10-06: does Kalshi lag spot Bitcoin? No lag visible at one minute (exploratory, no verdict).**
+One run of `python -m scalper.leadlag` under the definitions fixed before it (commit
+b44a19a). 30 days, 15,101 Bitcoin market minutes with a mid between 30c and 70c and at
+least 5 minutes left. Nothing was changed after seeing it. Gold is not covered: there is
+no free gold spot series here.
+
+- **The clocks line up.** The market strike and Coinbase's price at the open differ by
+  0.012% on the median market (the bar was 0.1%), over 2,850 markets.
+- **Kalshi tracks spot inside the same minute.** The contemporaneous coefficient is
+  large and stable (z of 23.9; 15.2 and 18.1 in the two halves). A 0.1% Bitcoin move in
+  a minute moves the mid by about 22c, which is what a 50c binary 15 minutes from
+  settlement should do.
+- **There is no lag to trade.** One minute of lag is -2.6% of the contemporaneous effect
+  (z of -2.7, small, and the wrong sign for a lag: it looks like a little bid and ask
+  bounce). The lead term, the clock check, is 1.2 z, noise. After a top-decile spot
+  move, Kalshi's next-minute move in that direction is +0.09c, against a 4c round trip.
+- **What it says.** The professional quoters on these markets price the live index
+  within a minute, so a bot that looks at prices once a minute has no information
+  advantage over them. Beating them needs sub-second data and execution, which is a
+  different business from this one.
+- **What it does not say.** Not tested: gold, anything faster than one minute, or
+  whether resting orders earn the spread (candles cannot show fills).
+
 ## Hypothesis H1: favourites are underpriced, held to settlement (fixed 2026-10-05, before any calibration data was looked at)
 
 The scalping verdict above says nothing about holding to settlement, which costs
@@ -325,6 +348,42 @@ The owner's own idea, stated as a rule. `python -m scalper.scalps`.
   no exit fee, a stop 20c below entry, and the hit rate needed to break even.
 - **Cost of this idea so far.** It is the third hypothesis tested. Strategy variants
   tried before it: 2.
+
+## Exploratory: does Kalshi lag spot Bitcoin? (definitions fixed 2026-10-06, before the first run)
+
+Why this question. Every test so far used only Kalshi's own prices, and the path study
+said so: "any edge would need information the price does not already contain, for
+example the live spot price against the strike". This asks the cheapest version of that
+question, and it decides whether any information strategy is reachable for a bot that
+looks at prices once a minute. **Exploratory: no verdict, no kill criterion, and nothing
+in it licenses a trade.** It is not a strategy variant and does not count toward the 3.
+
+- **Data.** Bitcoin only (`KXBTC15M`). Spot is Coinbase's public 1 minute BTC-USD
+  candles. Gold has no free spot series here, so it is out of this study. Kalshi's index
+  is not Coinbase's price, so spot is a proxy: a gap between them is noise this study
+  cannot remove.
+- **Alignment check first.** A Kalshi candle's `end_ts` is matched to the Coinbase candle
+  that CLOSES at that instant. The check is the market's strike against Coinbase's price
+  at the market's open: it must agree to within 0.1% on the median market. If it does
+  not, the clocks are off and nothing below is read.
+- **Unit and filters.** One row per market per minute. Mid = (bid + ask) / 2 of the
+  minute's closing quote. Keep rows where both this and the next minute have a usable
+  quote (real two sided book, spread 10c or less), the mid is between 30c and 70c (so
+  the price's sensitivity to spot is roughly constant), and at least 5 minutes remain.
+- **Measurement.** Regress the change in Kalshi's mid over minute t+1 on Bitcoin's
+  log return in minute t+1 (contemporaneous), minute t (one minute of lag, the
+  coefficient that matters), minute t-1 (two), and minute t+2 (a lead, a clock check).
+  Day clustered standard errors. Fixed: no other lags, filters or splits.
+- **What would justify a formal hypothesis.** Only if ALL hold: the one minute lag
+  coefficient is at least 15% of the contemporaneous one, with z of at least 3, in BOTH
+  halves of the 30 days; AND the expected next-minute Kalshi move after a top-decile
+  spot move is larger than the 4c round trip cost. Anything less is reported as "no
+  lag visible at one minute" and information strategies are crossed off for this bot,
+  since beating professional quoters needs sub-minute data.
+- **If it passes.** A hypothesis is written down first (counterparty, number, kill
+  criterion) and tested on days 31 to 45 back, which this has not seen.
+- **Prior: low.** I expect the one minute lag to be about zero: these prices are set by
+  professional makers off the live index.
 
 ## The paper bot (starts with $100, cannot place a real order)
 

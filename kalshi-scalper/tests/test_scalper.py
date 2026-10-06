@@ -295,3 +295,83 @@ import scalper.scalps as _sc, re as _re3
 _s = _re3.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_sc.__file__).read())
 assert not _re3.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _s)
 print("scalp tests passed")
+
+# ---- spot lag study (exploratory) ----
+import math as _m
+import random as _rd
+from scalper.leadlag import ols_clustered, build_rows, report, verdict, decile_move, usable as _usable
+from scalper.spot import parse_rows
+
+# Coinbase lists newest first with the close in column 4; we keep (start, close), oldest first.
+assert parse_rows([[120, 1, 2, 3, 40.5, 9], [60, 1, 2, 3, 30.0, 9], ["bad"]]) == [(60, 30.0), (120, 40.5)]
+
+# The estimator must recover a known relationship, or every number below is noise.
+_rd.seed(7)
+_rows = []
+for _d in range(20):
+    for _ in range(30):
+        _x = [1.0, _rd.gauss(0, 1), _rd.gauss(0, 1)]
+        _rows.append((str(_d), _x, 2.0 + 3.0 * _x[1] - 1.0 * _x[2] + _rd.gauss(0, 0.1)))
+_b, _s = ols_clustered(_rows)
+assert abs(_b[0] - 2) < 0.05 and abs(_b[1] - 3) < 0.05 and abs(_b[2] + 1) < 0.05, _b
+assert all(0 < s < 0.1 for s in _s), _s
+
+GAIN = 30.0   # dollars of Kalshi mid per unit log return: a 0.06% move is 1.8c, well inside the 35c to 65c clamp
+
+def _world(lag_share, n_markets=240, seed=11):
+    """Synthetic Bitcoin and Kalshi where Kalshi's minute move is a known blend of this
+    minute's spot move and last minute's. lag_share = 0 is a market with no lag."""
+    rng = _rd.Random(seed)
+    spot, markets = {}, {}
+    t0, price = 1_700_000_000 - 1_700_000_000 % 60, 60000.0
+    rets = {}
+    for i in range(n_markets * 15 + 40):
+        r = rng.gauss(0, 0.0006)
+        price *= _m.exp(r)
+        spot[t0 + i * 60] = price          # candle STARTING at t0+i*60, closes a minute later
+        rets[t0 + (i + 1) * 60] = r        # the return that ENDS at that instant
+    for m in range(n_markets):
+        open_ts = t0 + (m * 15 + 20) * 60
+        close_ts = open_ts + 900
+        mid, cs = 0.5, []
+        for k in range(1, 16):
+            end = open_ts + k * 60
+            cs.append((end, mid - 0.01, mid + 0.01))
+            mid += GAIN * ((1 - lag_share) * rets[end + 60] + lag_share * rets[end]) + rng.gauss(0, 0.002)
+            mid = min(max(mid, 0.35), 0.65)
+        markets[f"M{m}"] = (open_ts, close_ts, cs)
+    return markets, spot
+
+# No lag in the world: the lag coefficient must come out near zero and the bar must say no.
+_mk, _sp = _world(0.0)
+_rows2, _drop = build_rows(_mk, _sp)
+_rep = report(_rows2)
+assert _rep["beta"][1] > 0 and abs(_rep["beta"][2]) < 0.15 * _rep["beta"][1], _rep["beta"]
+assert verdict(_rep, 0.0)[0] is False
+# A full minute of lag in the world: it must be found, in the right slot, in both halves.
+_mk, _sp = _world(1.0)
+_rows3, _ = build_rows(_mk, _sp)
+_rep3 = report(_rows3)
+assert _rep3["beta"][2] > 0.6 * GAIN and abs(_rep3["beta"][1]) < 0.1 * GAIN, _rep3["beta"]
+assert all(hb[2] / hs[2] > 3 for hb, hs in _rep3["halves"])
+# A quarter blend is found as a third of the contemporaneous effect (0.25 / 0.75): the ratio is what the bar reads.
+_mk, _sp = _world(0.25)
+_rep4 = report(build_rows(_mk, _sp)[0])
+assert 0.27 < _rep4["beta"][2] / _rep4["beta"][1] < 0.40, _rep4["beta"]
+# A minute with no spot price is dropped, never bridged across.
+_mk, _sp = _world(0.0, n_markets=20)
+_full, _ = build_rows(_mk, _sp)
+for _k in list(_sp)[40:60]:
+    del _sp[_k]
+_cut, _dropped = build_rows(_mk, _sp)
+assert _dropped > 0 and len(_cut) < len(_full)
+# The signal must be known at the time: a spot move only AFTER the quote cannot be the lag term.
+assert _usable(0.49, 0.51) and not _usable(0.001, 0.999) and not _usable(0.40, 0.55)
+# The decile read is in dollars per contract in the direction of the spot move.
+_mv, _n = decile_move([("d", 0, [], 0.05, 0.01), ("d", 0, [], -0.05, -0.01)] * 20)
+assert abs(_mv - 0.05) < 1e-12 and _n >= 1
+# No output of the study may read as a go-ahead to trade.
+import scalper.leadlag as _ll, re as _re5
+_c = _re5.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_ll.__file__).read())
+assert not _re5.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c)
+print("spot lag tests passed")
