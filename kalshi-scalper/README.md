@@ -319,6 +319,31 @@ markets, 30 days. No threshold, band or fee was changed after seeing it.
 Strategy variants tried so far: 3 (the 60s scalp, H1, H2), plus one exploratory
 study with no verdict.
 
+**2026-10-06: H3, resting buy orders earn the spread H2 pays: `FALSIFIED`.** One run of
+`python -m scalper.makers` under the rules fixed before it (commit 4e9f3ec, README section "Hypothesis
+H3"), on the trade tape for every simulated order: 5,907 orders over the same 4,871 markets and 30
+days. No rule, band, window or fee was changed after seeing it.
+
+| Band | Orders | Filled | Fill rate | Net on filled | z | 1st half | 2nd half | Fees x1.2 | Missed would have earned |
+|---|---|---|---|---|---|---|---|---|---|
+| 40c | 3,317 | 3,024 | 91.2% | -4.34c | -5.20 | -3.97c | -4.70c | -4.68c | +17.90c |
+| 50c | 2,590 | 2,349 | 90.7% | -3.83c | -3.39 | -5.21c | -2.35c | -4.18c | +16.67c |
+
+- **The selection check, as pre-registered, tells the story.** Resting at the bid did save the spread:
+  taking the ask on the same signals earns -3.5c and -3.0c, against -2.4c and -1.9c for resting
+  (all orders, filled or not). But the orders that FILLED lost -4.3c and -3.8c, while the roughly 9% that
+  did not fill would have earned +17.9c and +16.7c. A bid fills when the price falls through it and
+  is left behind when the price rises, which is adverse selection: the fills are the losers and the
+  winners get away. It is the same trap crypto's maker test fell into, now measured here.
+- **Not rescued by any generous reading.** Counting a print AT our price as a fill gives -2.6c and
+  -2.3c; a 5 minute window -4.2c and -3.8c; no entry fee at all -2.7c and -2.1c. Every variant loses.
+  The fill model understates fills by design, but the optimistic count is still negative.
+- **What it says.** The spread is real money but smaller than the damage from being filled only when
+  the price is about to fall. Cost is not the only barrier: the entry itself carries no edge.
+- **What it does not say.** One contract orders on a 2 minute window at the first qualifying minute.
+  Placing a resting ASK (selling into strength) or quoting both sides as a market maker is a different
+  strategy with its own inventory risk and was not tested.
+
 **2026-10-06: H4, buy at 30c and sell at 80c: `FALSIFIED`.** One run of `python -m scalper.bandscan`
 under the rule fixed before it (commit 68192ec). The same 4,871 markets and 30 days as H2. No
 threshold, band or fee was changed after seeing it.
@@ -341,8 +366,8 @@ threshold, band or fee was changed after seeing it.
   minute are still untested, as for H2. This stays inside the cost problem: a 4c round trip against
   prices set by professional quoters.
 
-Strategy variants tried so far: 5 (the 60s scalp, H1, H2, H3 pre-registered and not yet run, H4),
-plus one exploratory study with no verdict.
+Strategy variants tried so far: 5 (the 60s scalp, H1, H2, H3, H4), all FALSIFIED, plus one exploratory
+study with no verdict.
 
 ## Hypothesis H2: buy at 40c or 50c, sell at 80c (fixed 2026-10-05, before it was run on any data)
 
