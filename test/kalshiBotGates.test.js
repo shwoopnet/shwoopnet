@@ -372,6 +372,37 @@ gates.G22 = () => {
   assert.ok(/Showing ' \+ closed\.length \+ ' of ' \+ closedTotal/.test(html), 'the page must say how many it is not showing');
 };
 
+// The owner added the Net column up by hand to learn how the bot was doing. The page now
+// does it, so the sum must match what a person gets: this is the real Oct 5 list, which
+// the bot's own status line reported as +$2.07 over 43 trades (27 wins, 16 losses).
+gates.G23 = () => {
+  const src = block(/(function kalshiBotTotals\(positions, dayOf\)\{[\s\S]*?\n  \})\n/, html);
+  const totals = new Function(src + '; return kalshiBotTotals;')();
+  const nets = [0.71, 0.75, 0.25, 0.24, -0.80, -0.84, -1, -1, -0.52, 0.57, 0.24, 0.57, -0.84, -0.53, -0.82, -0.82, -1,
+    0.57, 0.73, 0.75, 0.57, 0.24, -0.82, 0.26, -0.82, 0.24, -0.54, 0.75, 1.18, -1, 0.77, 0.75, 0.69, 0.57, 0.24, -0.80,
+    0.69, 0.71, 0.24, 0.26, 0.75, -0.84, 0.77];
+  const day = (ms) => new Date(ms).toISOString().slice(0, 10);
+  const D1 = Date.parse('2026-10-05T18:00:00Z'), D2 = D1 + 86400000;
+  const closed = nets.map((pnl, i) => ({ status: 'closed', pnl, settledAt: (i < 40 ? D1 : D2) + i * 60000 }));
+  const noise = [{ status: 'open', pnl: null, settledAt: null }, { status: 'closed', pnl: null, settledAt: D1 }, null];
+  const t = totals(closed.concat(noise), day);
+  assert.strictEqual(t.n, 43, 'open and unpriced positions are not trades');
+  assert.strictEqual(t.net, 2.07, 'must equal what the bot reported');
+  assert.strictEqual(t.wins, 27); assert.strictEqual(t.losses, 16);
+  assert.ok(Math.abs(t.winRate - 27 / 43) < 1e-12 && Math.abs(t.perTrade - 2.07 / 43) < 1e-12);
+  assert.ok(t.best === 1.18 && t.worst === -1);
+  assert.ok(t.breakEven > 0.58 && t.breakEven < 0.61, 'about 59% needed at these average sizes: ' + t.breakEven);
+  assert.deepStrictEqual(t.days.map((d) => [d.trades]), [[3], [40]], 'newest day first, grouped by the viewer\'s day');
+  assert.strictEqual(Math.round(t.days.reduce((a, d) => a + d.net, 0) * 100) / 100, 2.07, 'the days add up to the total');
+  const flat = totals([{ status: 'closed', pnl: 0, settledAt: D1 }, { status: 'closed', pnl: 1, settledAt: D1 }], day);
+  assert.ok(flat.n === 2 && flat.wins === 1 && flat.losses === 0, 'a break-even trade is neither a win nor a loss');
+  const none = totals([], day);
+  assert.ok(none.n === 0 && none.winRate === null && none.breakEven === null, 'no trades must not divide by zero');
+  // Wired into the page: a card, the render, and an honest note when the history is cut off.
+  assert.ok(/id="kalBotTotals"/.test(html) && /kalshiBotTotals\(pos,/.test(html));
+  assert.ok(/pos\.length >= 500/.test(html), 'say so if only the newest 500 trades were counted');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
