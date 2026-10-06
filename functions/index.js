@@ -283,6 +283,10 @@ function firestoreDemoStore(db) {
         throw e;
       }
     },
+    async getTest(id) {
+      const s = await col.doc(id).get();
+      return s.exists ? s.data() : null;
+    },
     async updateTest(id, patch) { await col.doc(id).update(patch); },
   };
 }

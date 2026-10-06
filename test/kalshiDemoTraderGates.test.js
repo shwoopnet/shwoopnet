@@ -72,28 +72,39 @@ const quote = (over = {}) => ({ series: 'KXGOLD15M', m: Object.assign({
   yes_bid_dollars: '0.38', yes_ask_dollars: '0.40', yes_bid_size_fp: '50', yes_ask_size_fp: '50' }, over) });
 
 function world(opts = {}) {
-  const calls = [], posts = [], docs = new Map();
+  const calls = [], posts = [], docs = new Map(), orders = new Map();
   const store = {
     async lastTestAt() { const t = [...docs.values()].map((d) => d.ts); return t.length ? Math.max(...t) : null; },
     async createTest(id, data) { if (docs.has(id)) return false; docs.set(id, { ...data }); return true; },
+    async getTest(id) { return docs.has(id) ? { ...docs.get(id) } : null; },
     async updateTest(id, patch) { Object.assign(docs.get(id), patch); },
   };
+  const seq = (opts.postSeq || []).slice();
   const fetchFn = async (url, o) => {
     calls.push({ url, method: o.method, headers: o.headers, body: o.body ? JSON.parse(o.body) : null });
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
+    if (url.endsWith('/exchange/status')) return opts.demoDown ? reply(503, { exchange_active: false, trading_active: false }) : reply(200, { exchange_active: true, trading_active: true });
     if (url.endsWith('/portfolio/balance')) return reply(200, { balance_breakdown: opts.breakdown || [{ balance: '200.0000', exchange_index: 0 }, { balance: '0.0000', exchange_index: 2 }] });
+    if (url.includes('/portfolio/orders')) return reply(200, { orders: [...orders.values()] });
     if (url.includes('/markets/')) return reply(200, { market: { status: 'active', close_time: iso(NOW + 13 * 60000), exchange_index: opts.shard === undefined ? 0 : opts.shard } });
     if (o.method === 'POST') {
-      posts.push(JSON.parse(o.body));
-      if (opts.netDown) throw new Error('network down');
+      const b = JSON.parse(o.body);
+      posts.push(b);
+      const step = seq.length ? seq.shift() : null;
+      if (opts.netDown || step === 'throw') throw new Error('network down');
+      const create = () => { const ord = { order_id: 'ord-' + (orders.size + 1), client_order_id: b.client_order_id, status: 'canceled', fill_count_fp: '2.00', initial_count_fp: b.count }; orders.set(b.client_order_id, ord); return ord; };
+      if (step === 'land-then-throw') { create(); throw new Error('response lost'); }
+      if (step && typeof step === 'object') return reply(step.status, step.body);
       if (opts.post) return reply(opts.post.status, opts.post.body);
-      return reply(201, { order_id: 'ord-' + posts.length, client_order_id: JSON.parse(o.body).client_order_id, fill_count: '2.00', remaining_count: '0.00', average_fill_price: '0.4000' });
+      if (orders.has(b.client_order_id)) return reply(409, { error: { code: 'order_already_exists', message: 'order already exists' } });
+      const ord = create();
+      return reply(201, { order_id: ord.order_id, client_order_id: b.client_order_id, fill_count: '2.00', remaining_count: '0.00', average_fill_price: '0.4000' });
     }
     throw new Error('unexpected ' + o.method + ' ' + url);
   };
-  return { calls, posts, docs, store, fetchFn };
+  return { calls, posts, docs, orders, store, fetchFn };
 }
-const run = (w, over = {}) => demo.runDemoTest({ quotes: [quote()], active: true, store: w.store, now: NOW, keyId: 'key-id-123', pem: pemOf(ed), fetchFn: w.fetchFn, ...over });
+const run = (w, over = {}) => demo.runDemoTest({ quotes: [quote()], active: true, store: w.store, now: NOW, keyId: 'key-id-123', pem: pemOf(ed), fetchFn: w.fetchFn, sleepFn: async () => {}, ...over });
 
 // The happy path: one capped order from the live signal, signed, recorded, with no secret anywhere.
 gates.D5 = async () => {
@@ -125,12 +136,16 @@ gates.D6 = async () => {
   assert.strictEqual(both.filter((x) => x.ok).length, 1);
 };
 
-// Kalshi's own refusal of a repeated id (HTTP 409) is handled, not crashed on.
+// Kalshi's own refusal of a repeated id (HTTP 409) is handled, not crashed on: the order that already exists is looked up.
 gates.D7 = async () => {
   const w = world({ post: { status: 409, body: { error: { code: 'order_already_exists', message: 'order already exists' } } } });
   const r = await run(w);
-  assert.ok(!r.ok && /already has an order/.test(r.reason));
+  assert.ok(!r.ok && /already has an order/.test(r.reason), 'a 409 whose order cannot be found is reported, not crashed on');
   assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'duplicate refused');
+  const w2 = world({ post: { status: 409, body: { error: { code: 'order_already_exists' } } } });
+  w2.orders.set('t-KXGOLD15M-26OCT061400-00', { order_id: 'ord-9', client_order_id: 't-KXGOLD15M-26OCT061400-00', status: 'canceled', fill_count_fp: '0.00' });
+  const r2 = await run(w2);
+  assert.ok(r2.ok && r2.recovered && r2.orderId === 'ord-9' && !r2.filled, 'the existing order is reported as it stands: ' + JSON.stringify(r2));
 };
 
 // Things that must stop BEFORE any order: no signal, exchange closed, cooldown, unfunded shard.
@@ -150,17 +165,58 @@ gates.D8 = async () => {
   assert.strictEqual(w.docs.size, 0, 'and no record');
 };
 
-// Failure stops, it does not repeat: a server error is recorded, and a network failure after the record leaves
-// it behind so a retry cannot send a second order.
+// A refusal that is the caller's fault (HTTP 400) is recorded and blocks that market; it is not retried.
 gates.D9 = async () => {
-  let w = world({ post: { status: 500, body: { error: 'boom' } } });
+  const w = world({ post: { status: 400, body: { error: { code: 'invalid_order' } } } });
   const r = await run(w);
-  assert.ok(!r.ok && /HTTP 500/.test(r.reason) && w.docs.get('t-KXGOLD15M-26OCT061400-00').status === 'error');
-  w = world({ netDown: true });
-  await assert.rejects(() => run(w), /network down/);
-  assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'sending', 'the record stays, marking an order of unknown outcome');
+  assert.ok(!r.ok && /HTTP 400/.test(r.reason) && w.docs.get('t-KXGOLD15M-26OCT061400-00').status === 'error' && w.posts.length === 1, 'a 400 is not retried');
+  const again = await run(w, { now: NOW + 5 * 60000 });
+  assert.ok(!again.ok && /already sent/.test(again.reason) && w.posts.length === 1, 'and it blocks the market');
+  // A crash after the record and before any answer leaves "sending", which blocks: nothing is sent twice.
+  const w2 = world();
+  await w2.store.createTest('t-KXGOLD15M-26OCT061400-00', { ts: NOW - 120000, status: 'sending' });
+  const stuck = await run(w2);
+  assert.ok(!stuck.ok && /already sent/.test(stuck.reason) && w2.posts.length === 0);
+};
+
+// The demo exchange went down in real use (HTTP 503, trading_active false). It must say so before anything is recorded.
+gates.D12 = async () => {
+  const w = world({ demoDown: true });
+  const r = await run(w);
+  assert.ok(!r.ok && /demo exchange is down/.test(r.reason) && w.posts.length === 0, r.reason);
+  assert.strictEqual(w.docs.size, 0, 'no record is written for an order that was never sent');
+  assert.ok(w.calls.every((c) => c.method === 'GET'), 'and nothing is placed');
+};
+
+// A transient failure is retried within the call; if it never clears, the record says "unavailable" and the next
+// press tries again, sending the same order id. It can leave only one order.
+gates.D13 = async () => {
+  const w = world({ postSeq: [{ status: 503, body: { error: { code: 'service_unavailable' } } }, { status: 503, body: {} }, { status: 503, body: {} }] });
+  const r = await run(w);
+  assert.ok(!r.ok && /not answering \(HTTP 503\)/.test(r.reason), r.reason);
+  assert.strictEqual(w.posts.length, 3, 'tried three times in the one call');
+  assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'unavailable');
+  assert.strictEqual(w.orders.size, 0, 'nothing was placed');
   const retry = await run(w, { now: NOW + 5 * 60000 });
-  assert.ok(!retry.ok && /already sent/.test(retry.reason) && w.posts.length === 1, 'a retry must not send a second order');
+  assert.ok(retry.ok && w.orders.size === 1, 'the next press goes through once the exchange is back: ' + JSON.stringify(retry));
+  assert.ok(new Set(w.posts.map((p) => p.client_order_id)).size === 1, 'every attempt carried the same order id');
+  assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'filled');
+  // One retry inside the call is enough when the exchange recovers at once.
+  const w2 = world({ postSeq: [{ status: 503, body: {} }] });
+  const r2 = await run(w2);
+  assert.ok(r2.ok && w2.posts.length === 2 && w2.orders.size === 1);
+};
+
+// The answer to an order can be lost AFTER Kalshi accepted it. The retry is refused as a duplicate (409), and the
+// existing order is reported: exactly one order exists and the user sees the truth.
+gates.D14 = async () => {
+  const w = world({ postSeq: ['land-then-throw'] });
+  const r = await run(w);
+  assert.ok(r.ok && r.recovered && w.orders.size === 1 && w.posts.length === 2, JSON.stringify(r));
+  assert.ok(r.filled && r.fillCount === '2.00');
+  const w2 = world({ netDown: true });
+  const down = await run(w2);
+  assert.ok(!down.ok && w2.docs.get('t-KXGOLD15M-26OCT061400-00').status === 'unavailable' && w2.posts.length === 3, 'a network failure is retried, then marked unavailable');
 };
 
 // ---- wiring: where the order code may live ----

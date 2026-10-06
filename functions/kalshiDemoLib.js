@@ -27,6 +27,7 @@ const API_ROOT = "/trade-api/v2";
 const TEST_CAP = 1.0;            // dollars, fee included
 const MIN_LEFT_MS = 120000;      // a market must have at least this long to run
 const COOLDOWN_MS = 60000;       // a second test within a minute of the last is refused
+const RETRY_DELAYS_MS = [500, 1500];   // a transient failure is retried twice before giving up
 
 class NotDemo extends Error {}
 
@@ -111,17 +112,55 @@ async function loadQuotes(api) {
   return { active, quotes };
 }
 
+const realSleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// 0 is "no answer at all" (a network error or timeout). 429 and 5xx are the exchange asking us to try again.
+const isTransient = (status) => status === 0 || status === 429 || status >= 500;
+
+// The same order is safe to send again after a transient failure: the id is derived from the market and Kalshi
+// refuses a repeated client_order_id with HTTP 409 (measured on the demo). So a request whose answer was lost
+// can only ever leave ONE order, and a retry that gets 409 means the earlier attempt landed.
+async function postWithRetry(args, sleepFn) {
+  let res;
+  for (let i = 0; i <= RETRY_DELAYS_MS.length; i++) {
+    try {
+      res = await demoRequest(args);
+    } catch (e) {
+      if (e instanceof NotDemo) throw e;
+      res = { status: 0, body: String((e && e.message) || e).slice(0, 100) };
+    }
+    if (!isTransient(res.status) || i === RETRY_DELAYS_MS.length) break;
+    await sleepFn(RETRY_DELAYS_MS[i]);
+  }
+  return res;
+}
+
+// What Kalshi holds for this client_order_id, for the case where a repeat was refused (the order already exists).
+async function findOrder({ fetchFn, keyId, pem, ticker, clientOrderId, nowMs }) {
+  const r = await demoRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/orders", params: { ticker, limit: "50" }, nowMs });
+  const list = r.status === 200 && r.body && Array.isArray(r.body.orders) ? r.body.orders : [];
+  return list.find((o) => o.client_order_id === clientOrderId) || null;
+}
+
 const short = (b) => (typeof b === "string" ? b : JSON.stringify(b)).slice(0, 200);
 const no = (reason) => ({ ok: false, reason });
 
 // store: { lastTestAt() -> ms|null, createTest(id, data) -> bool, updateTest(id, patch) }
-async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn }) {
+async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn, sleepFn }) {
+  const sleep = sleepFn || realSleep;
   if (!active) return no("The exchange is not trading right now.");
   const last = await store.lastTestAt();
   if (last && now - last < COOLDOWN_MS) return no("A test was sent less than a minute ago. Wait a moment.");
 
   const signals = bot.planEntries(quotes, now, TEST_CAP);
   if (!signals.length) return no("No signal right now: no market is at a 40c or 50c price with a tradable book. Try again in a few minutes.");
+
+  // Say so plainly if the demo exchange is down, before anything is recorded. Kalshi's demo has gone down for
+  // stretches (HTTP 503 with trading_active false), and a record written for an order that was never sent would
+  // only get in the way of trying again.
+  const ex = await demoRequest({ fetchFn, method: "GET", path: "/exchange/status" });
+  if (ex.status !== 200 || !ex.body || ex.body.trading_active === false) {
+    return no("Kalshi's demo exchange is down right now (HTTP " + ex.status + "). Nothing was sent. Try again in a few minutes.");
+  }
 
   const bal = await demoRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/balance", nowMs: now });
   if (bal.status !== 200) return no("The demo account balance could not be read (HTTP " + bal.status + ").");
@@ -147,7 +186,13 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn }) 
     price: chosen.price, exchangeIndex: market.exchange_index, clientOrderId: cid, status: "sending", ts: now, mode: "demo",
   };
   // Record first. If it already exists, an order for this market was already attempted: do not send another.
-  if (!(await store.createTest(cid, record))) return no("A test order for " + chosen.ticker + " was already sent. Wait for the next market.");
+  if (!(await store.createTest(cid, record))) {
+    // A record marked unavailable means the exchange was down when we tried: sending the same order again is
+    // safe (see postWithRetry). Anything else (sending, placed, filled, error) means this market was already tried.
+    const prev = typeof store.getTest === "function" ? await store.getTest(cid) : null;
+    if (!(prev && prev.status === "unavailable")) return no("A test order for " + chosen.ticker + " was already sent. Wait for the next market.");
+    await store.updateTest(cid, { status: "sending", retriedAt: now });
+  }
 
   let body;
   try {
@@ -156,7 +201,7 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn }) 
     await store.updateTest(cid, { status: "refused", error: String(e.message) });
     return no(String(e.message));
   }
-  const res = await demoRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
+  const res = await postWithRetry({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() }, sleep);
   const d = res.body && typeof res.body === "object" ? res.body : {};
   if (res.status >= 200 && res.status < 300 && d.order_id) {
     const filledCount = Number(d.fill_count || 0);
@@ -172,8 +217,25 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn }) 
     };
   }
   if (res.status === 409) {
+    // The order already exists: an earlier attempt landed even though its answer was lost. Report what Kalshi holds.
+    const found = await findOrder({ fetchFn, keyId, pem, ticker: chosen.ticker, clientOrderId: cid, nowMs: Date.now() });
+    if (found) {
+      const fillCount = String(found.fill_count_fp || "0");
+      const wasFilled = Number(fillCount) > 0;
+      await store.updateTest(cid, {
+        status: wasFilled ? "filled" : "no fill", orderId: found.order_id, fillCount, recovered: true, sentSide: body.side, sentPrice: body.price,
+      });
+      return {
+        ok: true, recovered: true, ticker: chosen.ticker, side: chosen.side, count: chosen.contracts, price: chosen.price,
+        sentSide: body.side, sentPrice: body.price, orderId: found.order_id, fillCount, averageFillPrice: null, filled: wasFilled,
+      };
+    }
     await store.updateTest(cid, { status: "duplicate refused", error: short(res.body) });
     return no("Kalshi already has an order with this id, so nothing new was sent.");
+  }
+  if (isTransient(res.status)) {
+    await store.updateTest(cid, { status: "unavailable", error: "HTTP " + res.status + " " + short(res.body) });
+    return no("Kalshi's demo is not answering (HTTP " + res.status + "). The order may not have been accepted. Pressing the button again is safe: the order id is the same, and Kalshi refuses a duplicate.");
   }
   await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
   return no("Kalshi refused the order: HTTP " + res.status + " " + short(res.body));
