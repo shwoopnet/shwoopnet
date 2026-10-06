@@ -479,37 +479,22 @@ Nothing below is implemented. It is what the live version will have to do.
 - **Rate limits** ([tiers](https://docs.kalshi.com/getting_started/rate_limits)). A new
   account gets 200 read and 100 write tokens a second, far above what the bot needs.
   A 429 carries no `Retry-After`, so the bot backs off exponentially, as the backfill does.
-- **The one thing the docs do not say, and the incident lesson depends on it.** The
-  Create Order page does not say what happens when the same `client_order_id` is sent
-  twice. The 15 duplicate orders in shwoop-server were stopped from happening again by
-  the broker refusing a repeated id. Whether Kalshi does is unknown. It must be
-  tested in demo, with the same id sent twice, and the answer written here, before
-  any real order is placed. Until then the bot's own one-position-per-market id is
-  the only guard.
-
-## Demo trading (fake money, run on your own machine)
-
-`python3 -m scalper.demo` signs requests with the demo API key, reads the demo balance, places
-one tiny resting order and cancels it, and runs the duplicate `client_order_id` test the
-docs leave open. It can only talk to the demo hosts (the host list is a constant checked
-before every request) and an order is at most 5 contracts at 5c or less, so a test order
-rests far below the market. The private key is read from a file on the machine you run it
-on and is never printed or sent anywhere but into the signature.
-
-1. On the demo site (https://demo.kalshi.co) create an API key. The private key is shown
-   once: save it as `~/.kalshi/demo_private.pem` and run `chmod 600` on it. It must never be
-   pasted into chat or committed (`*.pem` is gitignored). Note the key id too.
-2. `pip3 install cryptography`
-3. From `kalshi-scalper/src`:
-
-        export KALSHI_DEMO_KEY_ID=<the key id>
-        export KALSHI_DEMO_KEY_FILE=~/.kalshi/demo_private.pem
-        python3 -m scalper.demo balance     # proves signing works
-        python3 -m scalper.demo order       # one contract at 1c, rests, cancelled for you
-        python3 -m scalper.demo dup         # the same client_order_id twice, then cancels
-
-The output holds no secret (no key, no signature), so it is safe to paste back. The `dup`
-result is the answer to write into "The one thing the docs do not say" above.
+- **The one thing the docs do not say, now measured (demo, 2026-10-06).** The Create Order
+  page does not say what happens when the same `client_order_id` is sent twice. The 15 duplicate
+  orders in shwoop-server were stopped from happening again by the broker refusing a repeated id,
+  so this had to be tested. On the demo exchange the second identical create returned
+  **HTTP 409 `order_already_exists`** and only one order existed (`python3 -m scalper.demo dup`).
+  So Kalshi protects against a duplicate the way Alpaca does, provided the id is deterministic
+  (derived from the signal, never random). The recovery path must treat a 409 as "already sent",
+  look the original order up, and carry on. Not yet confirmed on production, and a production
+  check is part of any first real order.
+- **Other demo facts measured the same day.** A create returns **HTTP 201**, not 200, with
+  `order_id`, `client_order_id`, `fill_count`, `remaining_count` and `ts_ms`. Demo markets are
+  split across exchange shards (Bitcoin on shard 2, gold on shard 0) and a balance belongs to a
+  shard (this account had $200 on shard 0 and $0 on shard 2), so an order on an unfunded shard has
+  nowhere to draw from. A cancel needs the market ticker and shard (`DELETE
+  /portfolio/events/orders/{id}?market_ticker=...&exchange_index=...`). Markets are listed ahead of
+  time as "initialized" and open on the quarter hour.
 
 **Order of work to real orders (each step gated on the one before):**
 

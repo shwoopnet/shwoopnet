@@ -36,7 +36,8 @@ DEMO_HOSTS = ("external-api.demo.kalshi.co", "demo-api.kalshi.co")
 API_ROOT = "/trade-api/v2"
 MAX_COUNT = 5
 MAX_PRICE = 0.05
-SERIES = "KXBTC15M"
+SERIES = ("KXBTC15M", "KXGOLD15M")
+MIN_LEFT_S = 120   # long enough to place and cancel a test order
 
 
 class NotDemo(Exception):
@@ -114,17 +115,39 @@ def order_body(ticker: str, count: int, price: float, client_order_id: str, exch
     return body
 
 
-def pick_market(opener=None) -> dict:
-    """An open Bitcoin demo market with at least 5 minutes left (public read, no key)."""
-    status, d = request("GET", "/markets", params={"series_ticker": SERIES, "status": "open", "limit": 10}, opener=opener)
+def funded_shards(key_id: str, key, opener=None) -> set | None:
+    """Exchange shards with a positive demo balance, or None if the balance could not be read."""
+    status, d = request("GET", "/portfolio/balance", key_id=key_id, key=key, opener=opener)
     if status != 200 or not isinstance(d, dict):
-        raise RuntimeError(f"could not list demo markets: HTTP {status}")
-    now = time.time()
-    for m in d.get("markets", []):
-        close = datetime.fromisoformat(m["close_time"].replace("Z", "+00:00")).timestamp()
-        if close - now > 300:
+        return None
+    out = set()
+    for b in d.get("balance_breakdown", []):
+        try:
+            if float(b.get("balance", 0)) > 0:
+                out.add(b.get("exchange_index"))
+        except (TypeError, ValueError):
+            pass
+    return out
+
+
+def pick_market(funded: set | None = None, opener=None) -> dict:
+    """An open Bitcoin or gold demo market with at least MIN_LEFT_S left, on a shard that has
+    demo funds (a market on an unfunded shard would refuse the order). Public read, no key."""
+    now, seen = time.time(), []
+    for series in SERIES:
+        status, d = request("GET", "/markets", params={"series_ticker": series, "status": "open", "limit": 10}, opener=opener)
+        if status != 200 or not isinstance(d, dict):
+            continue
+        for m in d.get("markets", []):
+            close = datetime.fromisoformat(m["close_time"].replace("Z", "+00:00")).timestamp()
+            if close - now <= MIN_LEFT_S:
+                continue
+            if funded is not None and m.get("exchange_index") not in funded:
+                seen.append((m["ticker"], m.get("exchange_index")))
+                continue
             return m
-    raise RuntimeError("no demo market with 5+ minutes left; try again in a minute")
+    raise RuntimeError("no open demo market with %ds left on a funded shard (funded shards: %s; unfunded markets seen: %s). "
+                       "Try again in a minute, or move demo funds to that shard." % (MIN_LEFT_S, sorted(funded or []), seen[:3]))
 
 
 def credentials():
@@ -153,13 +176,13 @@ def cmd_balance() -> None:
 
 def cmd_order() -> None:
     key_id, key = credentials()
-    m = pick_market()
+    m = pick_market(funded_shards(key_id, key))
     print(f"market {m['ticker']} (exchange_index {m.get('exchange_index')}), closes {m['close_time']}")
     cid = "demo-" + uuid.uuid4().hex[:12]
     st, d = request("POST", "/portfolio/events/orders", key_id=key_id, key=key,
                     body=order_body(m["ticker"], 1, 0.01, cid, m.get("exchange_index")))
     show("create order", st, d)
-    if st == 200 and isinstance(d, dict) and d.get("order_id"):
+    if 200 <= st < 300 and isinstance(d, dict) and d.get("order_id"):   # the exchange answers 201 to a create
         show("cancel order", *cancel(m["ticker"], d["order_id"], key_id, key, m.get("exchange_index")))
 
 
@@ -178,7 +201,7 @@ def classify_dup(order_ids: list[str]) -> str:
 def cmd_dup() -> None:
     """The same client_order_id twice. The docs do not say what happens; this finds out."""
     key_id, key = credentials()
-    m = pick_market()
+    m = pick_market(funded_shards(key_id, key))
     cid = "dup-" + uuid.uuid4().hex[:12]
     body = order_body(m["ticker"], 1, 0.01, cid, m.get("exchange_index"))
     print(f"market {m['ticker']}, client_order_id {cid}, sending the identical order twice")

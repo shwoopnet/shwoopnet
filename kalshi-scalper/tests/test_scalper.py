@@ -568,13 +568,14 @@ if _HAVE_CRYPTO:
             if m == "GET" and "/markets" in u:
                 return _Resp(200, {"markets": [{"ticker": "KXBTC15M-TEST", "close_time": "2099-01-01T00:00:00Z", "exchange_index": 2}]})
             if m == "GET" and u.endswith("/portfolio/balance"):
-                return _Resp(200, {"balance": 10000000, "balance_dollars": "100000.00"})
+                return _Resp(200, {"balance": 10000000, "balance_dollars": "100000.00",
+                                   "balance_breakdown": [{"balance": "0.0000", "exchange_index": 0}, {"balance": "200.0000", "exchange_index": 2}]})
             if m == "POST":
                 creates.append(body)
                 if len(creates) == 2 and dup_second == "refuse":
                     raise _ue.HTTPError(u, 409, "conflict", {}, _io.BytesIO(b'{"error":"duplicate client_order_id"}'))
                 oid = "ord-1" if (len(creates) == 1 or dup_second == "same") else "ord-2"
-                return _Resp(200, {"order_id": oid, "client_order_id": body["client_order_id"], "fill_count": "0.00", "remaining_count": "1.00"})
+                return _Resp(201, {"order_id": oid, "client_order_id": body["client_order_id"], "fill_count": "0.00", "remaining_count": "1.00"})
             if m == "DELETE":
                 return _Resp(200, {"order_id": u.rsplit("/", 1)[1].split("?")[0], "reduced_by": "1.00"})
             raise AssertionError("unexpected request " + m + " " + u)
@@ -617,6 +618,13 @@ if _HAVE_CRYPTO:
         assert len(_dels) == (2 if _mode == "two" else 1)
         assert all("market_ticker=KXBTC15M-TEST" in d[1] and "exchange_index=2" in d[1] for d in _dels), "cancels name the market and shard"
     assert "neither" in _dm.classify_dup([])
+    # The picker takes a market on a funded shard and refuses one on an unfunded shard, and needs 2+ minutes left.
+    _op, _seen, _ = _server()
+    assert _dm.pick_market({2}, opener=_op)["ticker"] == "KXBTC15M-TEST"
+    try:
+        _dm.pick_market({0}, opener=_op); raise AssertionError("a market on an unfunded shard must not be picked")
+    except RuntimeError as _e:
+        assert "unfunded" in str(_e)
 
     # One order: placed tiny, then cancelled.
     _op, _seen, _cr = _server()
