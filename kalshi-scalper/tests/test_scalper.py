@@ -687,6 +687,28 @@ if _HAVE_CRYPTO:
                             (_ph["kalshi-access-timestamp"] + "POST/trade-api/v2/portfolio/intra_exchange_instance_transfer").encode(), _pss, _h.SHA256())
     assert "tr-1" in _out and "shard 2" in _out and _pem_body not in _out
 
+    # The recommended demo host returned 503 while the other kept trading: a transient failure fails over to the second
+    # host, with the same signed body; a real answer (even a 4xx) is returned from the first and never repeated.
+    def _two_hosts(first, second):
+        seen = []
+        def op(req, timeout=None):
+            seen.append((req.full_url.split("/")[2], req.get_method(), req.data))
+            kind = first if len(seen) == 1 else second
+            if kind == "ok":
+                return _Resp(200, {"ok": True})
+            raise _ue.HTTPError(req.full_url, kind, "x", {}, _io.BytesIO(b'{"error":"x"}'))
+        return op, seen
+    _op, _s = _two_hosts(503, "ok")
+    _st, _d = _dm.request("POST", "/portfolio/events/orders", key_id="k", key=_rk, body={"client_order_id": "c1"}, opener=_op)
+    assert _st == 200 and [h for h, _, _ in _s] == ["external-api.demo.kalshi.co", "demo-api.kalshi.co"], _s
+    assert _s[0][2] == _s[1][2] and b"c1" in _s[0][2], "the same body goes to both"
+    _op, _s = _two_hosts(400, "ok")
+    assert _dm.request("GET", "/x", opener=_op)[0] == 400 and len(_s) == 1, "a 4xx is an answer, not a reason to try another host"
+    _op, _s = _two_hosts(503, 503)
+    assert _dm.request("GET", "/x", opener=_op)[0] == 503 and len(_s) == 2, "both down: the last answer is reported"
+    assert all(h in _dm.DEMO_HOSTS for h in ("external-api.demo.kalshi.co", "demo-api.kalshi.co"))
+    assert _dm.DEMO_ALT_BASE.split("/")[2] in _dm.DEMO_HOSTS
+
     # One order: placed tiny, then cancelled.
     _op, _seen, _cr = _server()
     _run(_dm.cmd_order, _op)

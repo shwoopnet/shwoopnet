@@ -22,6 +22,10 @@ const crypto = require("crypto");
 const bot = require("./kalshiBotLib");
 
 const DEMO_BASE = "https://external-api.demo.kalshi.co/trade-api/v2";
+// Kalshi documents two demo front doors, both on the allow list below. The recommended one has returned
+// HTTP 503 while the other kept answering with every shard trading (2026-10-06), so a request that fails
+// transiently on the first goes to the second.
+const DEMO_BASES = [DEMO_BASE, "https://demo-api.kalshi.co/trade-api/v2"];
 const DEMO_HOSTS = ["external-api.demo.kalshi.co", "demo-api.kalshi.co"];
 const API_ROOT = "/trade-api/v2";
 const TEST_CAP = 1.0;            // dollars, fee included
@@ -53,11 +57,11 @@ function signRequest(pem, timestamp, method, path) {
   throw new Error("unsupported key type: " + type);
 }
 
-// One request to the demo API. path is relative to the API root. Signed when keyId and pem are
-// given. Never throws on an HTTP error status: the caller reports what the exchange said.
-async function demoRequest({ fetchFn, keyId, pem, method, path, params, body, nowMs }) {
+// One request to the demo API at one base. path is relative to the API root. Signed when keyId and pem are given.
+// Never throws on an HTTP error status: the caller reports what the exchange said.
+async function demoRequestAt(base, { fetchFn, keyId, pem, method, path, params, body, nowMs }) {
   const query = params ? "?" + new URLSearchParams(params).toString() : "";
-  const url = DEMO_BASE + path + query;
+  const url = base + path + query;
   assertDemo(url);
   const headers = { Accept: "application/json", "User-Agent": "shwoopnet-demo/1.0" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
@@ -73,7 +77,27 @@ async function demoRequest({ fetchFn, keyId, pem, method, path, params, body, no
   const text = await res.text();
   let parsed;
   try { parsed = JSON.parse(text); } catch (e) { parsed = text.slice(0, 300); }
-  return { status: res.status, body: parsed };
+  return { status: res.status, body: parsed, base };
+}
+
+// Tries each demo front door in turn and stops at the first answer that is not a transient failure. The same
+// order id goes to both, which is safe: they front one exchange, and Kalshi refuses a repeated client_order_id
+// (HTTP 409), which the caller treats as "an earlier attempt landed".
+async function demoRequest(args) {
+  let last, thrown = null;
+  for (const base of DEMO_BASES) {
+    try {
+      last = await demoRequestAt(base, args);
+      thrown = null;
+    } catch (e) {
+      if (e instanceof NotDemo) throw e;
+      thrown = e;
+      last = { status: 0, body: String((e && e.message) || e).slice(0, 100), base };
+    }
+    if (!isTransient(last.status)) return last;
+  }
+  if (thrown) throw thrown;
+  return last;
 }
 
 // Prices on the YES book. Buying YES is a bid at the ask; buying NO at q is selling YES at 1 - q.
