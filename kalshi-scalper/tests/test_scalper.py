@@ -490,3 +490,145 @@ import scalper.makers as _mk, re as _re6
 _c2 = _re6.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_mk.__file__).read())
 assert not _re6.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c2)
 print("resting order tests passed")
+
+# ---- Kalshi demo trading ----
+try:
+    import cryptography  # noqa: F401
+    _HAVE_CRYPTO = True
+except ImportError:
+    _HAVE_CRYPTO = False
+    print("demo trading tests skipped: pip3 install cryptography to run them")
+
+if _HAVE_CRYPTO:
+    import base64 as _b64, io as _io, json as _json, os as _os2, tempfile as _tf3, urllib.request as _ur, urllib.error as _ue, contextlib as _cl
+    from cryptography.hazmat.primitives import hashes as _h, serialization as _ser
+    from cryptography.hazmat.primitives.asymmetric import padding as _pad, rsa as _rsa
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as _Ed
+    from cryptography.exceptions import InvalidSignature as _Bad
+    import scalper.demo as _dm
+
+    _rk = _rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    _pss = _pad.PSS(mgf=_pad.MGF1(_h.SHA256()), salt_length=_pad.PSS.DIGEST_LENGTH)
+
+    # The signature must verify against the public key over timestamp + METHOD + path, query stripped.
+    _sig = _b64.b64decode(_dm.sign_request(_rk, "1703123456789", "GET", "/trade-api/v2/portfolio/balance?limit=5"))
+    _rk.public_key().verify(_sig, b"1703123456789GET/trade-api/v2/portfolio/balance", _pss, _h.SHA256())
+    for _wrong in (b"1703123456789POST/trade-api/v2/portfolio/balance", b"1703123456790GET/trade-api/v2/portfolio/balance",
+                   b"1703123456789GET/portfolio/balance", b"1703123456789GET/trade-api/v2/portfolio/balance?limit=5"):
+        try:
+            _rk.public_key().verify(_sig, _wrong, _pss, _h.SHA256())
+            raise AssertionError("a signature over a different message must not verify: %r" % _wrong)
+        except _Bad:
+            pass
+    _ek = _Ed.generate()
+    _ek.public_key().verify(_b64.b64decode(_dm.sign_request(_ek, "1", "GET", "/x")), b"1GET/x")
+
+    # Demo only: no other host is ever contacted, whatever the base is set to.
+    for _bad in ("https://external-api.kalshi.com/trade-api/v2/x", "https://api.elections.kalshi.com/trade-api/v2/x",
+                 "http://external-api.demo.kalshi.co/trade-api/v2/x", "https://external-api.demo.kalshi.co.evil.com/x",
+                 "https://evil.com/external-api.demo.kalshi.co"):
+        try:
+            _dm.assert_demo(_bad); raise AssertionError("must refuse " + _bad)
+        except _dm.NotDemo:
+            pass
+    _dm.assert_demo("https://demo-api.kalshi.co/trade-api/v2/x")
+    _real, _hit = _dm.DEMO_BASE, []
+    _dm.DEMO_BASE = "https://external-api.kalshi.com/trade-api/v2"
+    try:
+        _dm.request("GET", "/portfolio/balance", opener=lambda *a, **k: _hit.append(1))
+        raise AssertionError("a request to the real exchange must never be sent")
+    except _dm.NotDemo:
+        assert not _hit, "refused before anything was sent"
+    finally:
+        _dm.DEMO_BASE = _real
+
+    # An order is tiny and shaped as the docs say: strings for count and price, a resting bid.
+    _b = _dm.order_body("KXBTC15M-X", 1, 0.01, "cid1", 2)
+    assert _b == {"ticker": "KXBTC15M-X", "side": "bid", "count": "1", "price": "0.01", "time_in_force": "good_till_canceled",
+                  "self_trade_prevention_type": "taker_at_cross", "client_order_id": "cid1", "exchange_index": 2}, _b
+    assert "exchange_index" not in _dm.order_body("T", 1, 0.01, "c")
+    for _c, _p in ((0, 0.01), (6, 0.01), (1, 0.0), (1, 0.06), (1, 0.5)):
+        try:
+            _dm.order_body("T", _c, _p, "c"); raise AssertionError("must refuse count %s price %s" % (_c, _p))
+        except ValueError:
+            pass
+
+    class _Resp:
+        def __init__(self, status, body): self.status, self._b = status, _json.dumps(body).encode()
+        def read(self): return self._b
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+
+    def _server(dup_second=None):
+        """A fake demo exchange. Records every request. dup_second: what the second identical create does."""
+        seen, creates = [], []
+        def opener(req, timeout=None):
+            u = req.full_url; m = req.get_method(); body = _json.loads(req.data) if req.data else None
+            seen.append((m, u, dict(req.header_items()), body))
+            if m == "GET" and "/markets" in u:
+                return _Resp(200, {"markets": [{"ticker": "KXBTC15M-TEST", "close_time": "2099-01-01T00:00:00Z", "exchange_index": 2}]})
+            if m == "GET" and u.endswith("/portfolio/balance"):
+                return _Resp(200, {"balance": 10000000, "balance_dollars": "100000.00"})
+            if m == "POST":
+                creates.append(body)
+                if len(creates) == 2 and dup_second == "refuse":
+                    raise _ue.HTTPError(u, 409, "conflict", {}, _io.BytesIO(b'{"error":"duplicate client_order_id"}'))
+                oid = "ord-1" if (len(creates) == 1 or dup_second == "same") else "ord-2"
+                return _Resp(200, {"order_id": oid, "client_order_id": body["client_order_id"], "fill_count": "0.00", "remaining_count": "1.00"})
+            if m == "DELETE":
+                return _Resp(200, {"order_id": u.rsplit("/", 1)[1].split("?")[0], "reduced_by": "1.00"})
+            raise AssertionError("unexpected request " + m + " " + u)
+        return opener, seen, creates
+
+    _d = _tf3.mkdtemp(); _pem = _os2.path.join(_d, "k.pem")
+    open(_pem, "wb").write(_rk.private_bytes(_ser.Encoding.PEM, _ser.PrivateFormat.PKCS8, _ser.NoEncryption()))
+    _os2.environ["KALSHI_DEMO_KEY_ID"] = "key-id-123"; _os2.environ["KALSHI_DEMO_KEY_FILE"] = _pem
+    _pem_body = open(_pem).read().split("\n")[1]
+    _orig_open = _ur.urlopen
+
+    def _run(cmd, opener):
+        _ur.urlopen = opener
+        out = _io.StringIO()
+        try:
+            with _cl.redirect_stdout(out):
+                cmd()
+        finally:
+            _ur.urlopen = _orig_open
+        return out.getvalue()
+
+    # A signed read signs the FULL path from the API root, with the query left out, and prints no secret.
+    _op, _seen, _ = _server()
+    _out = _run(_dm.cmd_balance, _op)
+    _m, _u, _hd, _ = _seen[0]
+    _hd = {k.lower(): v for k, v in _hd.items()}
+    assert _m == "GET" and _u == "https://external-api.demo.kalshi.co/trade-api/v2/portfolio/balance" and _hd["kalshi-access-key"] == "key-id-123"
+    _rk.public_key().verify(_b64.b64decode(_hd["kalshi-access-signature"]),
+                            (_hd["kalshi-access-timestamp"] + "GET/trade-api/v2/portfolio/balance").encode(), _pss, _h.SHA256())
+    assert "100000.00" in _out and _pem_body not in _out and _hd["kalshi-access-signature"] not in _out and "BEGIN" not in _out
+
+    # The duplicate test sends the identical order twice, cancels what exists by ticker and shard, and says which of
+    # the three things happened. Each outcome must be told apart.
+    for _mode, _expect in (("same", "SAME order"), ("refuse", "REFUSED"), ("two", "does NOT protect")):
+        _op, _seen, _cr = _server(_mode)
+        _out = _run(_dm.cmd_dup, _op)
+        assert len(_cr) == 2 and _cr[0] == _cr[1] and _cr[0]["client_order_id"].startswith("dup-"), "the same body twice"
+        assert _expect in _out, (_mode, _out)
+        _dels = [s for s in _seen if s[0] == "DELETE"]
+        assert len(_dels) == (2 if _mode == "two" else 1)
+        assert all("market_ticker=KXBTC15M-TEST" in d[1] and "exchange_index=2" in d[1] for d in _dels), "cancels name the market and shard"
+    assert "neither" in _dm.classify_dup([])
+
+    # One order: placed tiny, then cancelled.
+    _op, _seen, _cr = _server()
+    _run(_dm.cmd_order, _op)
+    assert len(_cr) == 1 and _cr[0]["count"] == "1" and float(_cr[0]["price"]) <= 0.05
+    assert [s[0] for s in _seen].count("DELETE") == 1
+    # The key never leaves the machine: nothing in the module writes it anywhere but into the signature.
+    import re as _re7
+    _src = _re7.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_dm.__file__).read())
+    assert not _re7.search(r"print\([^)]*(private|pem|key\b)", _src), "no print of key material"
+    assert not _re7.search(r"kalshi\.com/trade-api", _src.replace("demo.kalshi.co", "")), "no production host in the code"
+    # A private key dropped into the repo must not be committable by accident.
+    _gi = open(_os2.path.join(_os2.path.dirname(__file__), "..", "..", ".gitignore")).read()
+    assert "*.pem" in _gi and "*.key" in _gi, "private keys are gitignored"
+    print("demo trading tests passed")

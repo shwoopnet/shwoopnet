@@ -8,3 +8,8 @@
 # unlazy's solo gate ledger is per-task scratch -- the evidence it
 # produces belongs in the commit and PR that cite it, not in the tree.
 GATES.md
+
+# Kalshi demo or real API private keys must never be committed
+*.pem
+*.key
+.kalshi/
