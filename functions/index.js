@@ -1,5 +1,9 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { defineSecret } = require("firebase-functions/params");
+const { defineSecret, defineString } = require("firebase-functions/params");
+
+// Optional outside watchdog for the Kalshi bot. Put KALSHI_WATCHDOG_URL=<ping url> in
+// functions/.env (gitignored) before deploying. Empty means no alerts, nothing else changes.
+const KALSHI_WATCHDOG_URL = defineString("KALSHI_WATCHDOG_URL", { default: "" });
 
 // Set once via: firebase functions:secrets:set FINNHUB_API_KEY
 // Never committed -- this is the only place the real key lives now.
@@ -70,6 +74,7 @@ const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const botRun = require("./kalshiBotRun");
+const alerts = require("./kalshiAlertLib");
 const kalshi = require("./kalshiLib");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
@@ -254,6 +259,7 @@ exports.kalshiBot = onSchedule(
   async () => {
     ensureDefaultAdminApp();
     const r = await botRun.runTick({ store: firestoreBotStore(getFirestore()), api: kalshiBotApi(), now: Date.now() });
+    await alerts.sendAll(fetch, alerts.pingsFor({ base: KALSHI_WATCHDOG_URL.value(), ok: r.ok, tierMode: r.tier, prevTier: r.prevTier }));
     console.log("kalshiBot tick: entered=" + r.entered + " tier=" + r.tier + (r.block ? " blocked=" + r.block : ""));
   }
 );
