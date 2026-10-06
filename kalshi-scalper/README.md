@@ -319,6 +319,31 @@ markets, 30 days. No threshold, band or fee was changed after seeing it.
 Strategy variants tried so far: 3 (the 60s scalp, H1, H2), plus one exploratory
 study with no verdict.
 
+**2026-10-06: H4, buy at 30c and sell at 80c: `FALSIFIED`.** One run of `python -m scalper.bandscan`
+under the rule fixed before it (commit 68192ec). The same 4,871 markets and 30 days as H2. No
+threshold, band or fee was changed after seeing it.
+
+| Band | Entries | Mean net per contract | z | 1st half | 2nd half | Fees x1.2 |
+|---|---|---|---|---|---|---|
+| 30c to 80c | 3,112 | -6.36c | -10.15 | -6.31c | -6.42c | -6.73c |
+
+- **It lost about 6.4c a contract, in both halves.** The test could see an edge of about 1.8c, so
+  there is no 30c edge anywhere near that size. 31.9% of trades reached 80c (a fair game gives 37.5%
+  from 30c; as in H2, a touch counted only on a minute's CLOSE misses intra-minute touches), 68.0%
+  settled as losses. Average win +47.3c, average loss -31.6c, so break-even needed 40.0% winners and
+  got 32.0%.
+- **Cheaper entry helps a little and not enough.** The information table (not used to choose
+  anything) shows the same rule by entry price: 20c -6.2c, 30c -6.4c, 40c -8.0c, 50c -7.9c, 60c
+  -7.2c per contract. 40c and 50c reproduce H2's printed result exactly, a check that H4 ran H2's
+  simulator unchanged. The fee is lower away from 50c (1.47c at 30c against 1.75c), which is about the
+  1.5c difference seen, but every entry price loses in both halves. Entry price is not the lever.
+- **What it does not say.** Other targets, entries chosen by a signal, or anything faster than a
+  minute are still untested, as for H2. This stays inside the cost problem: a 4c round trip against
+  prices set by professional quoters.
+
+Strategy variants tried so far: 5 (the 60s scalp, H1, H2, H3 pre-registered and not yet run, H4),
+plus one exploratory study with no verdict.
+
 ## Hypothesis H2: buy at 40c or 50c, sell at 80c (fixed 2026-10-05, before it was run on any data)
 
 The owner's own idea, stated as a rule. `python -m scalper.scalps`.
