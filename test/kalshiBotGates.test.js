@@ -363,6 +363,15 @@ gates.G21 = () => {
   assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(block(/function startKalshiBot\(\)\{([\s\S]*?)\n  \}\n  function stopKalshiBot/, html) + ')'), 'only an admin may subscribe');
 };
 
+// The Bot tab once showed only the newest 15 closed trades and 12 events with no way to see
+// more, which hid most of the day and made the limits look wrong when they were not.
+gates.G22 = () => {
+  assert.ok(!/limit\((12|40)\)/.test(html), 'the bot queries must not cap the history at a dozen rows');
+  assert.ok(!/\.slice\(0, 15\)/.test(html), 'closed trades must not be hard cut at 15');
+  assert.ok(/data-more="closed"/.test(html) && /data-more="events"/.test(html), 'both lists need a way to show more');
+  assert.ok(/Showing ' \+ closed\.length \+ ' of ' \+ closedTotal/.test(html), 'the page must say how many it is not showing');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

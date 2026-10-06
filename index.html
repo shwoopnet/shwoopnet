@@ -2420,10 +2420,10 @@
       var onErr = function(err){ console.error('Kalshi bot sync error:', err); };
       un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'status'), function(s){ h.status(s.exists() ? s.data() : null); }, onErr));
       un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'control'), function(s){ h.control(s.exists() ? s.data() : {}); }, onErr));
-      un.push(onSnapshot(query(collection(db, 'kalshiBotPositions'), orderBy('entryAt', 'desc'), limit(40)), function(q){
+      un.push(onSnapshot(query(collection(db, 'kalshiBotPositions'), orderBy('entryAt', 'desc'), limit(500)), function(q){
         h.positions(q.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); }));
       }, onErr));
-      un.push(onSnapshot(query(collection(db, 'kalshiBotEvents'), orderBy('ts', 'desc'), limit(12)), function(q){
+      un.push(onSnapshot(query(collection(db, 'kalshiBotEvents'), orderBy('ts', 'desc'), limit(500)), function(q){
         h.events(q.docs.map(function(d){ return d.data(); }));
       }, onErr));
       return function(){ un.forEach(function(f){ f(); }); };
@@ -9904,6 +9904,9 @@
   }
 
   var kalshiBotState = { status: null, control: {}, positions: [], events: [] };
+  // How many rows each list shows. The data is all there; these only size the view, and the
+  // 'Show more' buttons raise them, so a long history is never silently cut off.
+  var kalshiBotShow = { closed: 15, events: 12 };
   var kalshiBotUnsub = null;
 
   function renderKalshiBot(){
@@ -9933,7 +9936,9 @@
     var pos = kalshiBotState.positions;
     var open = pos.filter(function(p){ return p.status === 'open'; });
     var closed = pos.filter(function(p){ return p.status === 'closed'; })
-      .sort(function(a, b){ return b.settledAt - a.settledAt; }).slice(0, 15);
+      .sort(function(a, b){ return b.settledAt - a.settledAt; });
+    var closedTotal = closed.length;
+    closed = closed.slice(0, kalshiBotShow.closed);
     var name = function(p){ return (p.series === 'KXBTC15M' ? 'Bitcoin' : 'Gold') + ' ' + (p.side === 'yes' ? 'Up' : 'Down'); };
     document.getElementById('kalBotOpen').innerHTML = open.length ? open.map(function(p){
       return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(name(p)) + '</div><span class="kal-lbl">' + escapeHtml(p.ticker) + '</span></div>' +
@@ -9946,11 +9951,23 @@
         '<div><span class="kal-lbl">Bought</span>' + p.contracts + ' at ' + (p.entry * 100).toFixed(1) + 'c</div>' +
         '<div><span class="kal-lbl">Ended</span>' + (p.exit === 0.8 ? 'sold at 80c' : (p.exit === 1 ? 'won' : 'lost')) + '</div>' +
         '<div class="' + (p.pnl >= 0 ? 'kal-pos' : 'kal-neg') + '"><span class="kal-lbl">Net</span>' + kalshiMoney(p.pnl) + '</div></div>';
-    }).join('') : '<div class="kal-empty">No closed trades yet.</div>';
-    document.getElementById('kalBotEvents').innerHTML = kalshiBotState.events.length ? kalshiBotState.events.map(function(e){
+    }).join('') + (closedTotal > closed.length
+      ? '<div class="kal-note">Showing ' + closed.length + ' of ' + closedTotal + ' closed trades. <button type="button" class="kal-btn" data-more="closed">Show more</button></div>'
+      : (closedTotal > 15 ? '<div class="kal-note">All ' + closedTotal + ' closed trades shown.</div>' : '')) : '<div class="kal-empty">No closed trades yet.</div>';
+    var evAll = kalshiBotState.events, evShown = evAll.slice(0, kalshiBotShow.events);
+    document.getElementById('kalBotEvents').innerHTML = evAll.length ? evShown.map(function(e){
       return '<div class="kal-tnote">' + new Date(e.ts).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) + ' &middot; ' + escapeHtml(e.kind) + ' &middot; ' + escapeHtml(e.detail) + '</div>';
-    }).join('') : '<div class="kal-empty">Nothing yet.</div>';
+    }).join('') + (evAll.length > evShown.length
+      ? '<div class="kal-note">Showing ' + evShown.length + ' of ' + evAll.length + ' events. <button type="button" class="kal-btn" data-more="events">Show more</button></div>'
+      : '') : '<div class="kal-empty">Nothing yet.</div>';
   }
+  // One listener for both 'Show more' buttons; they are re-created on every render.
+  document.getElementById('kalBotClosed').addEventListener('click', function(e){
+    if(e.target && e.target.getAttribute('data-more') === 'closed'){ kalshiBotShow.closed += 50; renderKalshiBot(); }
+  });
+  document.getElementById('kalBotEvents').addEventListener('click', function(e){
+    if(e.target && e.target.getAttribute('data-more') === 'events'){ kalshiBotShow.events += 50; renderKalshiBot(); }
+  });
 
   function startKalshiBot(){
     stopKalshiBot();
