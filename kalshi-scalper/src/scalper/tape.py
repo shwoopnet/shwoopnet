@@ -2,31 +2,35 @@
 
 Kalshi's public tape lists every trade (time, side, price, size), but a market has 26,000 to
 41,000 of them, so only the window after each simulated order is fetched: (order minute, +5
-minutes]. Windows are fetched newest first, several at a time, and the run is resumable: a
-window recorded in tape_done is skipped. A window with no trades is still recorded, because
-"fetched and empty" and "never fetched" mean opposite things to the fill model.
+minutes]. The raw trades are not kept (about 28 million rows); the order's side and price are
+known before the fetch, so the fill flags are computed here and only they are stored, one
+row per order, in `fills`. Windows are fetched newest first, several at a time, and the run is
+resumable: an order already in `fills` is skipped. A window with no trades is still recorded,
+because "fetched and empty" and "never fetched" mean opposite things to the fill model.
 
 Usage: python -m scalper.tape [max_windows]
 """
 from __future__ import annotations
 
 import calendar
+import os
 import sqlite3
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from . import api
-from .makers import BANDS, FETCH_S, plan
+from .makers import BANDS, FETCH_S, INFO_WINDOW_S, WINDOW_S, filled, plan
 from .paths import DB
 
-WORKERS = 4
+WORKERS = int(os.environ.get("SCALPER_WORKERS", "4"))
 
 SCHEMA = """
-CREATE TABLE IF NOT EXISTS tape(
-  trade_id TEXT PRIMARY KEY, ticker TEXT, ts REAL, taker TEXT, yes REAL, no REAL, n REAL);
-CREATE INDEX IF NOT EXISTS tape_ticker ON tape(ticker);
-CREATE TABLE IF NOT EXISTS tape_done(ticker TEXT, end_ts INTEGER, PRIMARY KEY (ticker, end_ts));
+DROP TABLE IF EXISTS tape;
+DROP TABLE IF EXISTS tape_done;
+CREATE TABLE IF NOT EXISTS fills(
+  ticker TEXT, end_ts INTEGER, side TEXT, price REAL, fill INTEGER, fill_opt INTEGER, fill5 INTEGER, n_trades INTEGER,
+  PRIMARY KEY (ticker, end_ts));
 """
 
 
@@ -58,9 +62,10 @@ def fetch_window(ticker: str, end_ts: int) -> list[tuple]:
             return out
 
 
-def needed(db) -> list[tuple[str, int, int]]:
-    """(ticker, order minute, close) for every H3 order not yet fetched, newest market first."""
-    done = {(t, e) for t, e in db.execute("SELECT ticker, end_ts FROM tape_done")}
+def needed(db) -> list[tuple]:
+    """(ticker, order) for every H3 order not yet in `fills`, newest market first. order is
+    makers.plan's (minute, side, bid, ask)."""
+    done = {(t, e) for t, e in db.execute("SELECT ticker, end_ts FROM fills")}
     by: dict = {}
     for t, close_ts, end, b, a in db.execute(
             "SELECT m.ticker, m.close_ts, c.end_ts, c.bid_c, c.ask_c FROM candle c JOIN market m ON m.ticker = c.ticker "
@@ -73,7 +78,7 @@ def needed(db) -> list[tuple[str, int, int]]:
             o = plan(cs, close_ts, band)
             if o and (t, o[0]) not in done and (t, o[0]) not in seen:
                 seen.add((t, o[0]))
-                out.append((t, o[0], close_ts))
+                out.append((t, o))
     return out
 
 
@@ -86,16 +91,18 @@ def run(limit: int | None) -> None:
     print(f"{len(todo)} windows to fetch", flush=True)
     t0, n = time.time(), 0
     with ThreadPoolExecutor(WORKERS) as ex:
-        futs = {ex.submit(fetch_window, t, e): (t, e) for t, e, _ in todo}
+        futs = {ex.submit(fetch_window, t, o[0]): (t, o) for t, o in todo}
         for f in as_completed(futs):
-            t, e = futs[f]
+            t, o = futs[f]
             try:
                 rows = f.result()
-            except Exception as err:      # leave the window unrecorded so a rerun retries it
+            except Exception as err:      # leave the order unrecorded so a rerun retries it
                 print(f"  {t}: {err}", flush=True)
                 continue
-            db.executemany("INSERT OR IGNORE INTO tape VALUES(?,?,?,?,?,?,?)", rows)
-            db.execute("INSERT OR REPLACE INTO tape_done VALUES(?,?)", (t, e))
+            tr = [(r[2], r[3], r[4], r[5]) for r in rows]
+            db.execute("INSERT OR REPLACE INTO fills VALUES(?,?,?,?,?,?,?,?)",
+                       (t, o[0], o[1], o[2], int(filled(o, tr, WINDOW_S)), int(filled(o, tr, WINDOW_S, strict=False)),
+                        int(filled(o, tr, INFO_WINDOW_S)), len(tr)))
             n += 1
             if n % 25 == 0:
                 db.commit()

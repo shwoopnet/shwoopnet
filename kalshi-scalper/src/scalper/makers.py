@@ -72,9 +72,11 @@ def net(side: str, result: str, price: float, mult: float = 1.0) -> float:
     return (1.0 if result == side else 0.0) - price - fee(price, mult)
 
 
-def orders_for(markets: list[tuple], tape: dict[str, list[tuple]], covered: set) -> dict[str, list[dict]]:
-    """markets: (ticker, series, candles, close_ts, result). Only orders whose tape window was
-    fetched are included: a window that was never fetched is not a window with no trades."""
+def orders_for(markets: list[tuple], results: dict) -> dict[str, list[dict]]:
+    """markets: (ticker, series, candles, close_ts, result). results[(ticker, order minute)] =
+    (fill, fill_opt, fill5, side, price), recorded when the tape window was fetched. An order
+    whose window was never fetched, or was fetched for a different side or price, is left out:
+    a window that was never fetched is not a window with no trades."""
     rows: dict[str, list[dict]] = {b: [] for b in BANDS}
     for ticker, _, candles, close_ts, result in markets:
         if result not in ("yes", "no"):
@@ -82,13 +84,14 @@ def orders_for(markets: list[tuple], tape: dict[str, list[tuple]], covered: set)
         day = datetime.fromtimestamp(close_ts, timezone.utc).strftime("%Y-%m-%d")
         for b, band in BANDS.items():
             o = plan(candles, close_ts, band)
-            if o is None or (ticker, o[0]) not in covered:
+            if o is None:
                 continue
-            tr = tape.get(ticker, [])
             _, side, bid, ask = o
+            got = results.get((ticker, o[0]))
+            if got is None or got[3] != side or abs(got[4] - bid) > 1e-9:
+                continue
             rows[b].append({
-                "day": day, "close_ts": close_ts,
-                "fill": filled(o, tr), "fill_opt": filled(o, tr, strict=False), "fill5": filled(o, tr, INFO_WINDOW_S),
+                "day": day, "close_ts": close_ts, "fill": got[0], "fill_opt": got[1], "fill5": got[2],
                 "net": net(side, result, bid), "net_stress": net(side, result, bid, STRESS),
                 "net_nofee": net(side, result, bid) + fee(bid), "net_ask": net(side, result, ask),
             })
@@ -108,7 +111,7 @@ def mean(xs: list[float]) -> float | None:
     return sum(xs) / len(xs) if xs else None
 
 
-def load() -> tuple[list[tuple], float, dict, set]:
+def load() -> tuple[list[tuple], float, dict]:
     db = sqlite3.connect(DB)
     by: dict = defaultdict(lambda: {"c": [], "close": 0, "res": "", "s": ""})
     q = ("SELECT c.series, c.ticker, c.end_ts, c.bid_c, c.ask_c, m.close_ts, m.result "
@@ -119,18 +122,16 @@ def load() -> tuple[list[tuple], float, dict, set]:
     markets = [(t, m["s"], m["c"], m["close"], m["res"]) for t, m in by.items()]
     closes = [m[3] for m in markets]
     mid = (min(closes) + max(closes)) / 2 if closes else 0.0
-    tape: dict = defaultdict(list)
-    covered: set = set()
-    if db.execute("SELECT name FROM sqlite_master WHERE name='tape'").fetchone():
-        for t, ts, taker, yes, no in db.execute("SELECT ticker, ts, taker, yes, no FROM tape"):
-            tape[t].append((ts, taker, yes, no))
-        covered = {(t, e) for t, e in db.execute("SELECT ticker, end_ts FROM tape_done")}
-    return markets, mid, tape, covered
+    results: dict = {}
+    if db.execute("SELECT name FROM sqlite_master WHERE name='fills'").fetchone():
+        for t, e, side, price, f1, f2, f5 in db.execute("SELECT ticker, end_ts, side, price, fill, fill_opt, fill5 FROM fills"):
+            results[(t, e)] = (bool(f1), bool(f2), bool(f5), side, price)
+    return markets, mid, results
 
 
 def main() -> None:
-    markets, mid, tape, covered = load()
-    rows = orders_for(markets, tape, covered)
+    markets, mid, results = load()
+    rows = orders_for(markets, results)
     total = sum(len(v) for v in rows.values())
     if not total:
         print("No orders with fetched tape. Run: python -m scalper.tape")
