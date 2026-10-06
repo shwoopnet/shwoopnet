@@ -164,6 +164,12 @@ service cloud.firestore {
         && request.resource.data.halt is bool;
     }
 
+    // The DEMO test trader's records (mock funds). Written only by the server, readable only by the admin.
+    match /kalshiDemoOrders/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Everything else is denied by default -- Firestore rules deny any
     // request that doesn't match an explicit allow rule, so no further
     // catch-all is needed, but this comment documents that this is

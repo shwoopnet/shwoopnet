@@ -122,3 +122,24 @@ firebase functions:log --only kalshiBot
 - **Real orders are not part of this.** They come only after a strategy passes its
   pre-registered test and 300 paper trades, and they need the API key stored as a Firebase
   secret, never in the repo. See `kalshi-scalper/README.md`.
+
+
+## Kalshi demo test trader (one order, mock funds)
+
+A button on the Kalshi page's Bot tab ("Send one test trade") that sends ONE tiny order to Kalshi's
+DEMO exchange from the bot's current signal, so the whole path is proved before anything is automated.
+It is admin only, takes nothing from the page (no ticker, price or size), and can only reach the demo
+hosts. It is capped at $1 including the fee, immediate-or-cancel, and the order id is derived from the
+market, so a double click, a retry or a second instance cannot place it twice (Kalshi also refuses a
+repeated `client_order_id` with HTTP 409, measured on the demo). Each attempt is recorded in
+`kalshiDemoOrders` (admin read, no client write).
+
+Set the two secrets BEFORE deploying, or the deploy fails (use a fresh demo key, not one that has been
+pasted into a chat, and never commit it):
+
+    firebase functions:secrets:set KALSHI_DEMO_KEY_ID          # the key id from the demo site
+    firebase functions:secrets:set KALSHI_DEMO_PRIVATE_KEY     # paste the whole PEM, including the BEGIN and END lines
+    firebase deploy --only functions,firestore:rules
+
+Demo markets sit on exchange shards and a balance belongs to a shard. If the signal's market is on a
+shard with no demo funds the button says so and sends nothing.

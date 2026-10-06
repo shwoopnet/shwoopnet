@@ -1985,6 +1985,7 @@
   var finnhubQuoteFn = httpsCallable(functions, 'finnhubQuote');
   var finnhubCompanyNewsFn = httpsCallable(functions, 'finnhubCompanyNews');
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
+  var kalshiDemoTradeFn = httpsCallable(functions, 'kalshiDemoTrade');
 
   // rememberMe controls whether Firebase's own session survives closing the
   // browser (browserLocalPersistence, the SDK's own default) or ends with
@@ -2439,6 +2440,16 @@
     },
     // Read-only relay: Kalshi rejects browser-origin requests, so the page
     // cannot call it directly. Nothing reachable through this places an order.
+    // One order to Kalshi's DEMO exchange (mock funds), from the bot's current signal. The server
+    // takes nothing from the page: no ticker, price or size can be sent from here.
+    kalshiDemoTrade: function(){
+      return kalshiDemoTradeFn({}).then(function(res){ return res.data; });
+    },
+    watchKalshiDemo: function(cb){
+      return onSnapshot(query(collection(db, 'kalshiDemoOrders'), orderBy('ts', 'desc'), limit(20)), function(q){
+        cb(q.docs.map(function(d){ return d.data(); }));
+      }, function(err){ console.error('Kalshi demo sync error:', err); });
+    },
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     }
@@ -3276,6 +3287,16 @@
       <div class="kal-card">
         <div class="kal-card-title">Recent closed trades</div>
         <div id="kalBotClosed"></div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">Demo test trade</div>
+        <div class="kal-note">Sends ONE order to Kalshi's DEMO exchange (mock funds, nothing real) from the bot's current signal, at most $1. It proves the whole path, signal to order to record, before anything is automated.</div>
+        <div class="kal-actions">
+          <button class="kal-btn" id="kalDemoSend" type="button">Send one test trade</button>
+          <span id="kalDemoConfirm" hidden><span class="kal-note">Place one demo order now?</span> <button class="kal-btn" id="kalDemoYes" type="button">Yes, send it</button> <button class="kal-btn" id="kalDemoNo" type="button">Cancel</button></span>
+        </div>
+        <div class="kal-note" id="kalDemoMsg"></div>
+        <div id="kalDemoList"><div class="kal-empty">No demo test trades yet.</div></div>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">What it did</div>
@@ -10034,6 +10055,16 @@
     if(e.target && e.target.getAttribute('data-more') === 'events'){ kalshiBotShow.events += 50; renderKalshiBot(); }
   });
 
+  var kalshiDemoOrders = [];
+  var kalshiDemoUnsub = null;
+  function renderKalshiDemo(){
+    document.getElementById('kalDemoList').innerHTML = kalshiDemoOrders.length ? kalshiDemoOrders.map(function(o){
+      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(o.ticker) + '</div><span class="kal-lbl">' + escapeHtml(new Date(o.ts).toLocaleString()) + '</span></div>' +
+        '<div><span class="kal-lbl">Signal</span>' + escapeHtml(o.side) + ' ' + escapeHtml(String(o.count)) + ' at ' + (o.price * 100).toFixed(0) + 'c</div>' +
+        '<div><span class="kal-lbl">Result</span>' + escapeHtml(o.status || '') + '</div>' +
+        '<div><span class="kal-lbl">Filled</span>' + escapeHtml(o.fillCount !== undefined ? String(o.fillCount) : '-') + '</div></div>';
+    }).join('') : '<div class="kal-empty">No demo test trades yet.</div>';
+  }
   function startKalshiBot(){
     stopKalshiBot();
     var api = window.__shwoopAPI;
@@ -10044,9 +10075,11 @@
       positions: function(p){ kalshiBotState.positions = p; renderKalshiBot(); },
       events: function(e){ kalshiBotState.events = e; renderKalshiBot(); }
     });
+    if(api.watchKalshiDemo){ kalshiDemoUnsub = api.watchKalshiDemo(function(o){ kalshiDemoOrders = o; renderKalshiDemo(); }); }
   }
   function stopKalshiBot(){
     if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }
+    if(kalshiDemoUnsub){ kalshiDemoUnsub(); kalshiDemoUnsub = null; }
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
   setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
@@ -10060,6 +10093,28 @@
       document.getElementById('kalBotHaltMsg').textContent = 'Could not change it: ' + ((err && err.message) || 'unknown');
     });
   });
+
+  // The demo test trade asks twice, and only the second click sends anything.
+  (function(){
+    var send = document.getElementById('kalDemoSend'), box = document.getElementById('kalDemoConfirm'), msg = document.getElementById('kalDemoMsg');
+    var yes = document.getElementById('kalDemoYes'), no = document.getElementById('kalDemoNo');
+    function ask(on){ box.hidden = !on; send.hidden = on; }
+    send.addEventListener('click', function(){ msg.textContent = ''; ask(true); });
+    no.addEventListener('click', function(){ ask(false); });
+    yes.addEventListener('click', function(){
+      var api = window.__shwoopAPI;
+      if(!api || !api.kalshiDemoTrade || !currentUserIsAdmin){ return; }
+      yes.disabled = no.disabled = true;
+      msg.textContent = 'Sending one demo order...';
+      api.kalshiDemoTrade().then(function(r){
+        msg.textContent = r.ok
+          ? 'Sent to the demo exchange: ' + r.side + ' ' + r.count + ' of ' + r.ticker + ' at ' + (r.price * 100).toFixed(0) + 'c. ' + (r.filled ? 'Filled ' + r.fillCount + '.' : 'No fill: the demo book had nothing at that price.')
+          : 'Not sent: ' + r.reason;
+      }).catch(function(err){
+        msg.textContent = 'Failed: ' + ((err && err.message) || 'unknown');
+      }).then(function(){ yes.disabled = no.disabled = false; ask(false); });
+    });
+  })();
 
   var kalshiTab = 'bot';
   function showKalshiTab(name){

@@ -9,6 +9,13 @@ const KALSHI_WATCHDOG_URL = defineString("KALSHI_WATCHDOG_URL", { default: "" })
 // Never committed -- this is the only place the real key lives now.
 const FINNHUB_API_KEY = defineSecret("FINNHUB_API_KEY");
 
+// The Kalshi DEMO test trader's credentials (a demo key, mock funds). Set once with
+//   firebase functions:secrets:set KALSHI_DEMO_KEY_ID
+//   firebase functions:secrets:set KALSHI_DEMO_PRIVATE_KEY   (paste the whole PEM)
+// They are used only to sign requests to the demo exchange and are never logged or returned.
+const KALSHI_DEMO_KEY_ID = defineSecret("KALSHI_DEMO_KEY_ID");
+const KALSHI_DEMO_PRIVATE_KEY = defineSecret("KALSHI_DEMO_PRIVATE_KEY");
+
 // Invite-gated, not single-owner: anyone with a real Firebase Auth
 // token may call these (matches firestore.rules, which lets any signed-in
 // account read/write only its own users/{uid} doc -- account creation
@@ -75,6 +82,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const botRun = require("./kalshiBotRun");
 const alerts = require("./kalshiAlertLib");
+const demo = require("./kalshiDemoLib");
 const kalshi = require("./kalshiLib");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
@@ -253,6 +261,49 @@ function firestoreBotStore(db) {
     async setStatus(st) { await meta.doc("status").set(st); },
   };
 }
+
+// ---- Kalshi DEMO test trader (one order, mock funds, admin only) ------------------
+// A button on the Bot tab. It takes the bot's current signal from the live prices and sends one
+// tiny order to Kalshi's DEMO exchange, so the whole path is proved before anything is automated.
+// All the logic, and all the order code, is in kalshiDemoLib.js (demo hosts only, capped, one
+// order per market, the record written first). The scheduled bot below has none of it.
+function firestoreDemoStore(db) {
+  const col = db.collection("kalshiDemoOrders");
+  return {
+    async lastTestAt() {
+      const s = await col.orderBy("ts", "desc").limit(1).get();
+      return s.empty ? null : s.docs[0].data().ts;
+    },
+    async createTest(id, data) {
+      try {
+        await col.doc(id).create(data);
+        return true;
+      } catch (e) {
+        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
+        throw e;
+      }
+    },
+    async updateTest(id, patch) { await col.doc(id).update(patch); },
+  };
+}
+
+exports.kalshiDemoTrade = onCall(
+  { secrets: [KALSHI_DEMO_KEY_ID, KALSHI_DEMO_PRIVATE_KEY], timeoutSeconds: 60 },
+  async (request) => {
+    await assertKalshiAdmin(request.auth);
+    ensureDefaultAdminApp();
+    try {
+      const { active, quotes } = await demo.loadQuotes(kalshiBotApi());
+      return await demo.runDemoTest({
+        quotes, active, store: firestoreDemoStore(getFirestore()), now: Date.now(),
+        keyId: KALSHI_DEMO_KEY_ID.value(), pem: KALSHI_DEMO_PRIVATE_KEY.value(), fetchFn: fetch,
+      });
+    } catch (e) {
+      if (e instanceof HttpsError) throw e;
+      throw new HttpsError("internal", "Demo test failed: " + String((e && e.message) || e).slice(0, 120));
+    }
+  }
+);
 
 exports.kalshiBot = onSchedule(
   { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
