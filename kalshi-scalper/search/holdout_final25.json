@@ -1,0 +1,227 @@
+[
+ {
+  "rule": "3m left, side either priced 0.20-0.30, only BTC, spread<=4c",
+  "search_n": 167,
+  "search_mean_cents": 9.629,
+  "search_z": 2.989,
+  "holdout_n": 170,
+  "holdout_mean_cents": -0.896,
+  "holdout_z": -0.405
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30",
+  "search_n": 278,
+  "search_mean_cents": 7.142,
+  "search_z": 2.411,
+  "holdout_n": 300,
+  "holdout_mean_cents": -0.28,
+  "holdout_z": -0.173
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, only BTC",
+  "search_n": 114,
+  "search_mean_cents": 9.101,
+  "search_z": 2.327,
+  "holdout_n": 117,
+  "holdout_mean_cents": -2.047,
+  "holdout_z": -0.583
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, spread<=4c",
+  "search_n": 186,
+  "search_mean_cents": 8.721,
+  "search_z": 2.315,
+  "holdout_n": 204,
+  "holdout_mean_cents": -2.274,
+  "holdout_z": -0.864
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.50, price moved away the side by 5c over 3m, spread<=1c",
+  "search_n": 430,
+  "search_mean_cents": 2.587,
+  "search_z": 2.311,
+  "holdout_n": 430,
+  "holdout_mean_cents": -1.096,
+  "holdout_z": -0.613
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.40, spread<=1c",
+  "search_n": 567,
+  "search_mean_cents": 2.228,
+  "search_z": 2.103,
+  "holdout_n": 551,
+  "holdout_mean_cents": -0.495,
+  "holdout_z": -0.299
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.40, spread<=4c",
+  "search_n": 611,
+  "search_mean_cents": 1.827,
+  "search_z": 1.998,
+  "holdout_n": 589,
+  "holdout_mean_cents": 0.066,
+  "holdout_z": 0.05
+ },
+ {
+  "rule": "2m left, side either priced 0.03-0.20, only BTC, spread<=1c",
+  "search_n": 418,
+  "search_mean_cents": 3.202,
+  "search_z": 1.916,
+  "holdout_n": 402,
+  "holdout_mean_cents": 2.093,
+  "holdout_z": 1.616
+ },
+ {
+  "rule": "5m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL, spread<=4c",
+  "search_n": 151,
+  "search_mean_cents": 3.436,
+  "search_z": 1.496,
+  "holdout_n": 153,
+  "holdout_mean_cents": -3.197,
+  "holdout_z": -0.933
+ },
+ {
+  "rule": "3m left, side yes priced 0.10-0.40, price moved away the side by 2c over 1m",
+  "search_n": 265,
+  "search_mean_cents": 2.807,
+  "search_z": 1.202,
+  "holdout_n": 277,
+  "holdout_mean_cents": -0.871,
+  "holdout_z": -0.333
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.90, price moved toward the side by 5c over 5m, only BTC, spread<=1c",
+  "search_n": 112,
+  "search_mean_cents": 4.651,
+  "search_z": 1.116,
+  "holdout_n": 110,
+  "holdout_mean_cents": -2.266,
+  "holdout_z": -0.532
+ },
+ {
+  "rule": "6m left, side yes priced 0.70-0.97, price moved toward the side by 2c over 3m",
+  "search_n": 629,
+  "search_mean_cents": 1.164,
+  "search_z": 0.94,
+  "holdout_n": 648,
+  "holdout_mean_cents": 0.701,
+  "holdout_z": 0.567
+ },
+ {
+  "rule": "6m left, side either priced 0.40-0.70, price moved toward the side by 5c over 1m",
+  "search_n": 285,
+  "search_mean_cents": 1.986,
+  "search_z": 0.877,
+  "holdout_n": 283,
+  "holdout_mean_cents": 2.678,
+  "holdout_z": 0.892
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90, only GOL",
+  "search_n": 304,
+  "search_mean_cents": 1.728,
+  "search_z": 0.787,
+  "holdout_n": 344,
+  "holdout_mean_cents": -2.502,
+  "holdout_z": -1.669
+ },
+ {
+  "rule": "1m left, side either priced 0.20-0.60, only BTC, spread<=2c",
+  "search_n": 195,
+  "search_mean_cents": 1.678,
+  "search_z": 0.697,
+  "holdout_n": 158,
+  "holdout_mean_cents": -7.356,
+  "holdout_z": -3.333
+ },
+ {
+  "rule": "6m left, side yes priced 0.70-0.97, price moved toward the side by 2c over 1m",
+  "search_n": 483,
+  "search_mean_cents": 1.004,
+  "search_z": 0.602,
+  "holdout_n": 490,
+  "holdout_mean_cents": 2.457,
+  "holdout_z": 1.498
+ },
+ {
+  "rule": "8m left, side yes priced 0.03-0.40, only GOL",
+  "search_n": 383,
+  "search_mean_cents": 0.779,
+  "search_z": 0.524,
+  "holdout_n": 432,
+  "holdout_mean_cents": -0.607,
+  "holdout_z": -0.465
+ },
+ {
+  "rule": "10m left, side no priced 0.50-0.80",
+  "search_n": 948,
+  "search_mean_cents": 1.031,
+  "search_z": 0.481,
+  "holdout_n": 981,
+  "holdout_mean_cents": -0.203,
+  "holdout_z": -0.24
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.70, only BTC",
+  "search_n": 350,
+  "search_mean_cents": 1.317,
+  "search_z": 0.469,
+  "holdout_n": 299,
+  "holdout_mean_cents": -3.594,
+  "holdout_z": -1.75
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.70, spread<=4c",
+  "search_n": 589,
+  "search_mean_cents": 0.618,
+  "search_z": 0.374,
+  "holdout_n": 560,
+  "holdout_mean_cents": -1.827,
+  "holdout_z": -1.364
+ },
+ {
+  "rule": "1m left, side yes priced 0.10-0.40, spread<=2c",
+  "search_n": 193,
+  "search_mean_cents": 0.8,
+  "search_z": 0.332,
+  "holdout_n": 194,
+  "holdout_mean_cents": -3.976,
+  "holdout_z": -2.359
+ },
+ {
+  "rule": "1m left, side either priced 0.20-0.60",
+  "search_n": 377,
+  "search_mean_cents": 0.513,
+  "search_z": 0.325,
+  "holdout_n": 326,
+  "holdout_mean_cents": -3.407,
+  "holdout_z": -1.597
+ },
+ {
+  "rule": "6m left, side no priced 0.40-0.80, price moved toward the side by 2c over 1m, only BTC, spread<=1c",
+  "search_n": 228,
+  "search_mean_cents": 0.734,
+  "search_z": 0.237,
+  "holdout_n": 242,
+  "holdout_mean_cents": 0.182,
+  "holdout_z": 0.07
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.90, only BTC",
+  "search_n": 236,
+  "search_mean_cents": 0.225,
+  "search_z": 0.075,
+  "holdout_n": 195,
+  "holdout_mean_cents": -8.376,
+  "holdout_z": -2.976
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL, spread<=1c",
+  "search_n": 145,
+  "search_mean_cents": 0.085,
+  "search_z": 0.026,
+  "holdout_n": 179,
+  "holdout_mean_cents": -9.15,
+  "holdout_z": -3.857
+ }
+]

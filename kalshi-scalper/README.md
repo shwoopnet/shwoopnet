@@ -678,6 +678,15 @@ study was exploratory and does not count). Every idea that gets a verdict raises
 | L5 | Quote staleness: list price lags the single-market read by about 2c | Stale resting orders | A stale-side fill beats its fee | Recorded order books at under 10 seconds | NOT_RUNNABLE until the recorder has data |
 | L6 | Bitcoin and gold on the same window, or related ladders, priced inconsistently | Slow quoters | Gap beats two fees | Recorded books, both series | NOT_RUNNABLE until the recorder has data |
 | L7 | Volatility regime gate on the best variant, regimes set by spread and liquidity, never by profit | Whoever misprices fat tails | Touch rate shifts by at least 5 points | Candles (have) | OPEN |
+| L8 | Averaged strike at the open (Bitcoin). The market compares the average of the last 60 seconds of BRTI before the close with the average of the last 60 seconds before the open, so the strike is a LAGGING average and spot minus strike at the open is recent drift | Makers who open near 50c without pricing the gap | At the open, in the top decile of gap size, price is off the model by at least 3c | Strike, spot minute closes, first minute quotes (have) | PRE-REGISTERED 2026-10-07 |
+| L9 | Final minute averaging (Bitcoin). With a 60 second average at the close, the settlement value is less uncertain than a single end price (one third of the variance), so prices should be more extreme near the end than a point-to-point model says | Holders pricing the last minute as a terminal price | With 1 minute left the favorite wins at least 2 points more often than its price after the averaging adjustment | Spot minute closes (have); sub-minute spot would sharpen it | PRE-REGISTERED 2026-10-07 |
+| L10 | Scheduled release windows (gold and Bitcoin): dates fixed in advance by calendar (CPI, jobs, FOMC), never by past returns | Quoters slow to widen around a release | Price error or spread in release windows is at least twice the normal level | A dated release calendar (not in the repo), candles | OPEN, calendar needed |
+| L11 | Taker flow momentum: net buying by takers in the last few minutes predicts the outcome | Slow quoters facing informed takers | Taker imbalance in the top decile shifts the outcome rate by at least 3 points beyond the price | The trade tape from H3 (check what it stores first) | OPEN, tape check needed |
+| L12 | Book depth imbalance: the share of size on one side of the top levels predicts the next price move | Quoters that do not read their own depth | Imbalance in the top decile predicts a move of at least 1c within a minute | Recorded order books | NOT_RUNNABLE until the recorder has data |
+| L13 | Volatility surprise: after a jump in short term realized volatility, makers' volatility estimates lag. This is H7's calibration cut by volatility regime, so it is H7 conditioned, not a new mechanism | Makers using stale volatility | Calibration error doubles in the top volatility decile | Spot minute closes (have) | OPEN, overlaps H7, likely duplicate |
+| L14 | Locked or crossed books: buy both sides when the two asks sum to less than 1 minus both fees. An arithmetic arbitrage, not a directional bet | Stale quoters on one side | At least one occurrence a day with net of at least 0.5c after both fees | Recorded order books at under 10 seconds | NOT_RUNNABLE until the recorder has data |
+
+**Settlement rules, verified from the live markets on 2026-10-07.** Bitcoin: the simple average of the 60 seconds of CF Benchmarks' BRTI before the close, against the same average before the open. Gold: the close of the 1 minute Pyth GOLD candle at the close, against the one at the open. Gold has no averaging and no free spot series here, so L8 and L9 are Bitcoin only.
 
 Standing exclusions, so they are not re-proposed:
 
@@ -755,7 +764,7 @@ Nothing changed after seeing the numbers.
 - **L2 is H7's signal wearing H2's exit and it lost 7c.** The exit swaps a chance of a larger settlement win for a sure 80c,
   and pays a second fee. It was registered as a duplicate of H7's information and the result agrees.
 
-Strategy variants tried so far: 11 (the 60s scalp, H1 to H7, L1, L2, L3), all `FALSIFIED`. The lag study was exploratory and does not count.
+Strategy variants tried so far: 11 hypotheses (the 60s scalp, H1 to H7, L1, L2, L3), all `FALSIFIED`, plus one parameter search of 437 rules, which counts against every bar as 437 more tries. The lag study was exploratory and does not count.
 
 ## Live waiver: L1 for 24 hours in the live account (terms fixed 2026-10-07, before any code for it)
 
@@ -780,6 +789,150 @@ test is the plumbing at volume: fills, fees, rejections, shards, timing.
 - **How the result is read, written now.** Net result after fees, and the count of fills, no fills and rejections. It is recorded
   as one forward observation of L1 with n of about 55. It does not re-run the verdict, and no band or minute changes afterwards.
   A positive day proves nothing; a negative day is within the expected noise unless it hits the stop.
+
+## Pre-registration: L8 and L9 (fixed 2026-10-07, before any code or any price was looked at for these rules)
+
+Both use the settlement rule verified on 2026-10-07: Bitcoin settles on the simple average of the 60 seconds of BRTI before the
+close, against the same average before the open (the stored strike). Bitcoin only, since gold has no spot series here. The same
+30 days that H2, H4, H7 and L1 to L3 already used, so a pass is permission to test forward and nothing more. Two more variants:
+11 tried before, 13 after.
+
+**Model, fully fixed, nothing fitted.** At the decision minute, S is Bitcoin spot (the close of the 1 minute candle that STARTED a
+minute earlier, as in H7), K the stored strike, and sigma the sample standard deviation of the 60 one minute log returns ending
+there (H7's volatility). The settlement value is an average over the last minute, so with tau minutes before that minute begins,
+its variance is sigma squared times (tau + 1/3), not tau + 1 as for a single end price. The model probability of YES is
+Phi(ln(S/K) / (sigma x sqrt(tau + 1/3))).
+- **Entry rule, same as H7's, margin fixed now at 2c.** Buy YES at the ask if p minus the ask minus the fee exceeds 0.02. Buy NO at
+  1 minus the YES bid if (1 - p) minus that price minus its fee exceeds 0.02. Real two sided book only. One observation per
+  market, held to settlement, taker fee 7% x p x (1-p) on entry.
+- **Judged by the common bar:** n of at least 300 markets, day clustered z of at least 2.1, positive in both halves (split by close
+  time at the median), positive with fees 20% higher. Verdicts only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`.
+- **Simulator guard:** on a simulated fair game the exact code must lose about its costs.
+- **Information only, decides nothing:** how well the model's own p matches outcomes in deciles, gross profit, and the split of
+  entries into favorites (price 80c or more) and the rest.
+
+**L9. Final minute averaging.** Decision at the candle that ends 1 minute before the close, so tau = 0 and the variance factor is
+1/3. Counterparty: holders who price the last minute as a single end price, who leave the far side too cheap and the near side
+too dear. Prediction: mean net at least +0.5c per contract. Prior, stated honestly: low to moderate. L3 (favorites at 2 minutes,
+no distance) lost 1.7c, but this conditions on the actual distance, and the averaging effect is real arithmetic: at 0.6 sigma
+a single end price gives 73% and the averaged value gives 85%. Whether any trader leaves that on the table is the question.
+
+**L8. The averaged strike at the open.** Decision at the candle that ends 14 minutes before the close (one minute after the open),
+so tau = 13 and the variance factor is 13 and 1/3. The strike is a lagging average of the last minute, so spot minus strike at the
+open is recent drift, and the model prices it. Counterparty: whoever opens the market near 50c without pricing the gap.
+Prediction: mean net at least +0.5c. Prior, stated honestly: very low. H7 found the price well calibrated to distance at 6 minutes,
+the same quoters set the open, and spreads are widest right after an open, which is the cost this rule pays.
+
+Verdicts are recorded below when the one run each has happened. No margin, decision minute, variance factor or fee changes after seeing them.
+
+## Pre-registration: the automated rule search (fixed 2026-10-07, before any code or any result)
+
+The owner asked for a loop: make 50 rules and test them, keep the top 25; make 50 more, keep the top 25; take those top 50, add or
+remove ONE rule from each, rerun, keep the top 25; then repeat. This is a parameter search, not a set of hypotheses, and it is the
+exact "automated loop" the deflation notes say a bar of 1.5 means nothing against: the best of N noise strategies always looks good.
+So the search is run with these protections, fixed now:
+- **Locked holdout.** The loop only ever sees the first 15 days. The last 15 days are read ONCE, at the end, for the saved survivors,
+  and a result printed there is the only out-of-sample number. Anything tuned after reading it is contaminated and says so.
+- **A shuffled-outcome control.** The identical pipeline, same seed and rules, is run with each market's result shuffled among the
+  markets of its own day. The best z it finds on pure noise is printed beside the real best, so the selection effect is visible.
+- **Every configuration counts.** The total number of rules evaluated is recorded and the null expectation for the best of N,
+  about sqrt(2 ln N) in z, is the floor a search-window z must beat to mean anything at all. Beating it is still only permission to
+  look at the holdout and, after that, to test forward on days not yet seen.
+- **Fixed grammar.** A rule is a decision minute (1, 2, 3, 4, 5, 6, 8, 10, 12 or 14 minutes left), a price band for the side bought
+  (taker at the ask, fee 7% x p x (1-p), held to settlement), a side selector (either, YES only, NO only), and up to three optional
+  filters: spread at most 1c, 2c or 4c; one series only; the market's own price having moved toward or away from the side by 2c or
+  5c over the last 1, 3 or 5 minutes. No filter reads a result. No hour of the day is a filter, because hours chosen by profit fit
+  noise. Add or remove one rule means adding or removing one filter, or changing nothing else.
+- **Ranking.** By the day clustered z of net profit per contract in the search window, with at least 100 entries; a rule with fewer is
+  not ranked. Both series are in the pool, since the owner chose these two markets and nothing else.
+- **What is saved.** Each round's top 25 with its search-window statistics, in `search/`, and nothing from the holdout until the
+  final step. Verdict words stay `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`; this search can never produce a "trade".
+
+**2026-10-07: the first run of the search (`python -m scalper.search`, seed 7, 3 cycles, commit d9746a5): nothing survives.**
+437 distinct rules evaluated on the first 15 days (2,346 markets); 2,525 markets locked as the holdout. The saved top 25 of every
+round are in `search/`.
+
+| | Search window, best z | Holdout of the final 25 |
+|---|---|---|
+| Real data | +2.99 (3 minutes left, either side priced 20c to 30c, Bitcoin, spread 4c or less: +9.63c on 167 entries) | 6 of 25 positive, mean net -1.85c, best z +1.62. That best rule fell from +9.63c to -0.90c |
+| Fair market control (same prices and costs, outcomes drawn from each price) | +2.44 | 7 of 25 positive, mean net -1.44c, best z +1.85 |
+
+- **The survivors look exactly like the survivors of a fair market.** Real and fair-market results are the same size, in both the
+  search window and the holdout. The best real rule's +9.63c was selection: the same pipeline finds z of about 2.4 to 3 in a market
+  where no edge can exist, and a z of 2.99 is under the 3.49 that the best of 437 is expected to reach by luck alone.
+- **The first control was invalid and is replaced.** Shuffling results among markets of one day broke the link between price and
+  outcome, so buying a 5c longshot won half the time and the control showed z of 25 and +27c. That is a flaw in the control, not
+  a finding, and it is why the control now draws outcomes from each market's own price. The real-data numbers did not change
+  between the two runs; the holdout was printed twice (the second time only to fix the control) and no rule was changed in between.
+- **Cost still decides it.** The 6 holdout winners are within what 25 fair-market rules produce (7), and none has a search-window z
+  that a real edge would explain.
+- **What the search can and cannot do.** It found nothing beyond noise on 30 days, which is a statement about this universe and these
+  rule shapes, not a proof that nothing exists. Running it again with more cycles would not help: the holdout is now read, and any
+  rule tuned after seeing it is contaminated. The only clean next data is forward data (the live session and the recorder).
+
+## Pre-registration: the overnight run on older data (fixed 2026-10-07, before the older history was downloaded or looked at)
+
+The first search spent its holdout (see the 437 rule result above). The owner gave permission to pull more history and asked for
+five solid rule-sets. Kalshi keeps candles about 66 days back, so the markets of roughly Aug 2 to Sep 5 are NEW data, older than
+anything used so far. Only that, and nothing newer, can serve as a clean test. The rules for using it, fixed now:
+
+- **Windows, by date.** W0 = the older history (Aug 2 to Sep 5). W0s is its first two thirds of days (search), W0h its last third
+  (locked until the very end). W1 = Sep 5 to Sep 20 and W2 = Sep 20 to Oct 5 are the windows of the first search; they were used to
+  pick the first search's rules, so they are out of sample ONLY for rules found on W0s.
+- **Stage A. Do the first search's winners generalize?** Every rule saved in `search/` (all nine top-25 lists, deduplicated) is
+  scored once on W0s. Nothing is tuned.
+- **Stage B. A new search of at least 200 rules,** the same grammar and the same loop (50 and 50 and 50 mutants, 25 kept, repeated),
+  run on W0s only, beside a fair-market control run on the same window (outcomes drawn from each market's own price).
+- **Survivor test, fixed now.** A saved rule is a survivor only if ALL hold on windows it was NOT selected on: mean net after fees is
+  positive in each of them, each with at least 50 entries, and the pooled day-clustered z is at least 2.5. For a Stage B rule the
+  windows are W0h, W1 and W2. For a Stage A rule they are W0s, W0h and W2 (W1 was its search window). W0h is read once, for the saved
+  rules of both stages together. A null rule passes this with probability about 0.1%, so with 50 saved rules the chance that
+  luck alone produces one survivor is about 5%. The same test is run on the fair-market control's saved rules, so the false
+  survivor rate is measured, not assumed.
+- **No second pass.** After the one read of the out-of-sample windows, a rule that is changed and retested is contaminated and is
+  labelled so. More searching on W0s alone is allowed and counts in N; it does not make the windows clean again.
+- **What a survivor means.** Permission to test it forward (the live session and the recorder), never "trade this". Fewer than five
+  survivors, including none, is a complete and valid result and is reported as such.
+
+**2026-10-07: the overnight run on older data (`python -m scalper.overnight`, seed 11, 2 cycles; commit 4be67f3).** The history now runs
+Aug 1 to Oct 7 (11,092 markets: 6,432 Bitcoin, 4,660 gold; 97,624 minutes of Bitcoin spot). Windows: W0s 3,826 markets, W0h 1,988, W1 2,346,
+W2 2,525, W3 (Oct 5 to 7) 402.
+
+- **L1 replicated on data it never saw.** L1 is one fixed pre-registered rule with no selection. On the older W0 (1,810 entries) it made
+  **+1.10c net, z +2.68**, positive in both halves of that window (+0.92c and +1.46c), after losing its own bar on W1 and W2 at z 1.45.
+  Over all 68 days: 3,382 entries, +0.98c, z +2.76, about 50 trades a day. W3 (125 entries) is -0.47c, z -0.20, which is noise at that size.
+  A win rate of 94.1%, average win +6.8c, average loss -92.0c. Per contract: +$0.49 a day, standard deviation $1.47, 25 of 68 days losing,
+  worst day -$3.11, maximum drawdown $4.84. Bootstrapped from the days: over 30 days at one contract it ends positive 96% of the time.
+- **L3 (favorites at 2 minutes) lost on every window**, -1.22c on W0 (z -2.42): the reverse of L1, consistent with the profile below.
+- **L8 and L9 (averaged settlement) were run once and are `FALSIFIED`:** L9 -1.79c (z -2.31), L8 -2.38c (z -2.31), both halves negative.
+  The market's own price tracks the YES rate decile by decile far better than the averaged-variance model does.
+- **Exploratory profile (no verdict).** Favorites priced 80c to 97c: +0.1c to +1.2c at 5 to 8 minutes left in BOTH periods, -2.6c to -3.2c at 2
+  minutes left in both (z -3.4 and -4.2). Longshots priced 3c to 20c: -1.5c to -3.1c at 4 to 10 minutes in both periods (z -3 to -6), +1.0c at
+  2 minutes in both. A real favorite-longshot pattern that changes sign over the last minutes; L1 harvests its small positive side.
+- **The search.** Stage A: of the first search's 179 saved rules, 2 survive the fixed test on W0s, W0h and W2. Stage B: of 132 new rules found
+  on W0s, 2 survive on W0h, W1 and W2. The four: (1) 2 minutes left, either side priced 3c to 20c, Bitcoin only, spread 1c or less
+  (+2.1c, +5.3c, +2.1c out of sample, pooled z +3.46, and +4.35c on the newest 67 entries); (2) 2 minutes left, NO side, Bitcoin, the market moved
+  away from the side by 2c over 5 minutes, spread 4c or less (pooled z +2.87); (3) 8 minutes left, YES side priced 80c to 97c (pooled z +2.88);
+  (4) the same with spread 2c or less.
+- **The first control was invalid, twice.** The shuffle control broke the price-outcome link. The fair-market control that drew outcomes from
+  the last-minute price kept the real price dynamics, so it behaved like a resample of the real data (survivors in about half its runs) and
+  proves nothing; it is withdrawn. The valid null gives every rule zero edge at its OWN decision price: each entry wins with probability equal to
+  the side's mid, independent draws per rule, paying the ask and the fee, with the fixed survivor test applied to all 311 rules.
+  Over 500 repeats the best pooled z in that null has median +1.79, 95th percentile +2.75, maximum +4.25. **The real best, +3.46, beats it:
+  P(null best >= real best) = 0.008, and P(null survivors >= 4) = 0.000 (mean 0.11).** Independent draws across rules is the strict direction.
+  So at least one of the four is unlikely to be luck. That is a statement about the family, not about which one.
+- **A warning on the strongest.** The first rule earns +3.04c (z +4.11, n=1,822) only at exactly 2 minutes left on Bitcoin; at 1 minute it is
+  -0.85c, at 3 minutes -0.15c, and on gold -0.81c. A sharp spike at one minute on one series is what an artifact looks like, and also what a
+  quote refresh cadence would look like. Its wins exceed its price by 2 to 9 points in every price band (6.1% against 4.2%, 9.8% against 7.8%,
+  21.3% against 12.3%, 21.6% against 17.2%). Treat it as a hypothesis for the forward test, not a result.
+- **Combining.** Daily profit correlations are low between the favorites rules and the 2 minute rules (+0.08 and +0.01). Per contract of each:
+  L1 alone +$0.49/day; L1 with the 2 minute longshot rule +$1.30/day, sd $2.32, max drawdown $6.11; those two plus the 8 minute YES favorites
+  +$1.59/day, max drawdown $8.48; all four +$2.22/day, max drawdown $7.79. The 2 minute rules and the 8 minute rule were selected on the same
+  data, so those figures are optimistic. Fills are assumed at the ask on the decision minute; a live fill can be worse.
+- **What this does and does not support.** The pre-registered L1 is a small, replicated, out-of-sample positive of about +1c a contract (about
+  1.1% a trade): worth running forward at small size, which the 24 hour session is doing. The 2 minute rules are the most interesting and the
+  least trustworthy. Nothing here is a reason to size up. The overall power is low: with about 500 entries per window, an edge under about 5c is
+  hard to see, which is why every candidate here shows up as "survives" at z of 2.5 to 3.5 and not 6.
 
 ## The order-book recorder (`recorder.py`, read only)
 

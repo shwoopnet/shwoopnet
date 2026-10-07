@@ -13,6 +13,7 @@ Stores into one SQLite file (see paths.py):
 Resumable and idempotent: a market already stored is skipped.
 
 Usage: python -m scalper.backfill [days]
+       python -m scalper.backfill range OLDER_DAYS NEWER_DAYS    (for example: range 68 29)
 """
 from __future__ import annotations
 
@@ -26,7 +27,7 @@ from .paths import DB
 
 SERIES = ("KXBTC15M", "KXGOLD15M")
 MAX_DAYS = 40
-PAUSE_S = 0.25  # stay inside Kalshi's public read limits; _get also waits out any 429
+PAUSE_S = 0.6  # stay inside Kalshi public read limits; _get also waits out any 429
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS market(
@@ -65,41 +66,78 @@ def parse_candle(c: dict, ticker: str, series: str) -> tuple | None:
             _d(p, "close_dollars"), api.f(c.get("volume_fp")), api.f(c.get("open_interest_fp")))
 
 
+BATCH = 20   # markets per candles request. The endpoint counts (window in minutes x tickers) against a 10,000 limit and answers 400 above it; 20 markets span about 300 minutes, so 6,000
+
+
+def _fetch(db: sqlite3.Connection, lo: int, hi: int, label: str, skip_empty: bool = False) -> tuple[int, int, int]:
+    """Store every settled market of both series closing in [lo, hi] that is not stored yet, fetching candles for BATCH markets per request
+    (one call per market took hours). skip_empty: a market with no candles (older than Kalshi keeps them) is not stored at all, so it
+    cannot look like a market that traded with no quotes."""
+    have = {r[0] for r in db.execute("SELECT ticker FROM market")}
+    stored = skipped = empty = 0
+    for series in SERIES:
+        listed = list(api.settled_markets(series, lo, hi))
+        print(f"{series}: {len(listed)} settled markets {label}", flush=True)
+        todo = []
+        for m in listed:
+            if m["ticker"] in have:
+                skipped += 1
+                continue
+            o, c = iso_ts(m.get("open_time")), iso_ts(m.get("close_time"))
+            if o is not None and c is not None:
+                todo.append((m, o, c))
+        todo.sort(key=lambda x: x[2])      # consecutive markets together, so a batch's window stays short
+        for i in range(0, len(todo), BATCH):
+            chunk = todo[i:i + BATCH]
+            try:
+                got = api.batch_candlesticks([m["ticker"] for m, _, _ in chunk], min(o for _, o, _ in chunk), max(c for _, _, c in chunk))
+            except RuntimeError as e:         # e.g. a window too wide for the endpoint: fall back to one request per market
+                print(f"  batch failed ({str(e)[-60:]}), fetching this chunk one by one", flush=True)
+                got = {m["ticker"]: api.candlesticks(series, m["ticker"], o, c) for m, o, c in chunk}
+            for m, o, c in chunk:
+                t = m["ticker"]
+                rows = [r for r in (parse_candle(x, t, series) for x in got.get(t, [])) if r]
+                if skip_empty and not rows:
+                    empty += 1
+                    continue
+                db.executemany("INSERT OR REPLACE INTO candle VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+                db.execute("INSERT OR REPLACE INTO market VALUES(?,?,?,?,?,?,?)",
+                           (t, series, o, c, m.get("result"), m.get("floor_strike"), len(rows)))
+                stored += 1
+            db.commit()
+            print(f"  {stored} markets stored", flush=True)
+            time.sleep(PAUSE_S)
+    return stored, skipped, empty
+
+
 def run(days: int) -> None:
     days = max(1, min(days, MAX_DAYS))
     DB.parent.mkdir(exist_ok=True)
     db = sqlite3.connect(DB)
     db.executescript(SCHEMA)
-    have = {r[0] for r in db.execute("SELECT ticker FROM market")}
     now = int(time.time())
-    lo = now - days * 86400
-    stored = skipped = 0
-    for series in SERIES:
-        listed = list(api.settled_markets(series, lo, now))
-        print(f"{series}: {len(listed)} settled markets in the last {days} days", flush=True)
-        for m in listed:
-            t = m["ticker"]
-            if t in have:
-                skipped += 1
-                continue
-            o, c = iso_ts(m.get("open_time")), iso_ts(m.get("close_time"))
-            if o is None or c is None:
-                continue
-            rows = [r for r in (parse_candle(x, t, series) for x in api.candlesticks(series, t, o, c)) if r]
-            db.executemany("INSERT OR REPLACE INTO candle VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
-            db.execute("INSERT OR REPLACE INTO market VALUES(?,?,?,?,?,?,?)",
-                       (t, series, o, c, m.get("result"), m.get("floor_strike"), len(rows)))
-            stored += 1
-            if stored % 50 == 0:
-                db.commit()
-                print(f"  {stored} markets stored", flush=True)
-            time.sleep(PAUSE_S)
-        db.commit()
+    stored, skipped, _ = _fetch(db, now - days * 86400, now, f"in the last {days} days")
     print(f"done: {stored} new markets, {skipped} already stored", flush=True)
 
 
+def run_range(older_days: int, newer_days: int) -> None:
+    """Markets that closed between older_days and newer_days ago (older_days > newer_days). Kalshi kept candles about 66 days back on
+    2026-10-07, so older markets come back empty and are not stored."""
+    if not older_days > newer_days >= 0:
+        raise ValueError("older_days must be greater than newer_days")
+    DB.parent.mkdir(exist_ok=True)
+    db = sqlite3.connect(DB)
+    db.executescript(SCHEMA)
+    now = int(time.time())
+    stored, skipped, empty = _fetch(db, now - older_days * 86400, now - newer_days * 86400, f"from {older_days} to {newer_days} days ago", skip_empty=True)
+    print(f"done: {stored} new markets, {skipped} already stored, {empty} with no candles (not stored)", flush=True)
+
+
 def main() -> None:
-    run(int(sys.argv[1]) if len(sys.argv) > 1 else 30)
+    if len(sys.argv) > 3 and sys.argv[1] == "range":
+        run_range(int(sys.argv[2]), int(sys.argv[3]))
+    else:
+        run(int(sys.argv[1]) if len(sys.argv) > 1 else 30)
 
 
 if __name__ == "__main__":

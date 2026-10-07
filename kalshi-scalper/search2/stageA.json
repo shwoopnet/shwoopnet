@@ -1,0 +1,5660 @@
+[
+ {
+  "rule": "2m left, side either priced 0.03-0.20, only BTC, spread<=1c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.2,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": true,
+  "pooled_z": 3.46,
+  "per_window": [
+   {
+    "n": 597,
+    "mean_cents": 2.125
+   },
+   {
+    "n": 338,
+    "mean_cents": 5.339
+   },
+   {
+    "n": 402,
+    "mean_cents": 2.093
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.03-0.97, price moved away the side by 2c over 5m, only BTC, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     5
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": true,
+  "pooled_z": 2.872,
+  "per_window": [
+   {
+    "n": 472,
+    "mean_cents": 3.486
+   },
+   {
+    "n": 237,
+    "mean_cents": 4.057
+   },
+   {
+    "n": 316,
+    "mean_cents": 2.657
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side either priced 0.03-0.20, spread<=1c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.2,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.862,
+  "per_window": [
+   {
+    "n": 1045,
+    "mean_cents": 0.815
+   },
+   {
+    "n": 607,
+    "mean_cents": 2.907
+   },
+   {
+    "n": 731,
+    "mean_cents": 0.243
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.03-0.80, price moved away the side by 2c over 3m, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.774,
+  "per_window": [
+   {
+    "n": 436,
+    "mean_cents": 1.992
+   },
+   {
+    "n": 214,
+    "mean_cents": 1.889
+   },
+   {
+    "n": 298,
+    "mean_cents": 3.048
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side no priced 0.10-0.30, only BTC",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.3,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.575,
+  "per_window": [
+   {
+    "n": 252,
+    "mean_cents": 2.926
+   },
+   {
+    "n": 117,
+    "mean_cents": 5.687
+   },
+   {
+    "n": 169,
+    "mean_cents": 1.162
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.70-0.97, price moved toward the side by 2c over 1m",
+  "spec": {
+   "left": 6,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.306,
+  "per_window": [
+   {
+    "n": 789,
+    "mean_cents": 1.496
+   },
+   {
+    "n": 389,
+    "mean_cents": -1.168
+   },
+   {
+    "n": 490,
+    "mean_cents": 2.457
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90, price moved away the side by 5c over 1m",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.247,
+  "per_window": [
+   {
+    "n": 180,
+    "mean_cents": 1.003
+   },
+   {
+    "n": 108,
+    "mean_cents": 9.853
+   },
+   {
+    "n": 137,
+    "mean_cents": -1.623
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, only BTC, spread<=2c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.236,
+  "per_window": [
+   {
+    "n": 148,
+    "mean_cents": 4.323
+   },
+   {
+    "n": 78,
+    "mean_cents": 6.318
+   },
+   {
+    "n": 117,
+    "mean_cents": -2.047
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, only BTC",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.196,
+  "per_window": [
+   {
+    "n": 149,
+    "mean_cents": 4.111
+   },
+   {
+    "n": 78,
+    "mean_cents": 6.318
+   },
+   {
+    "n": 117,
+    "mean_cents": -2.047
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, only BTC, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.196,
+  "per_window": [
+   {
+    "n": 149,
+    "mean_cents": 4.111
+   },
+   {
+    "n": 78,
+    "mean_cents": 6.318
+   },
+   {
+    "n": 117,
+    "mean_cents": -2.047
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side either priced 0.50-0.90, only BTC",
+  "spec": {
+   "left": 12,
+   "lo": 0.5,
+   "hi": 0.9,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.159,
+  "per_window": [
+   {
+    "n": 2251,
+    "mean_cents": 0.71
+   },
+   {
+    "n": 1096,
+    "mean_cents": 0.852
+   },
+   {
+    "n": 1468,
+    "mean_cents": 0.766
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side no priced 0.10-0.30",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.3,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": 1.101,
+  "per_window": [
+   {
+    "n": 469,
+    "mean_cents": 1.939
+   },
+   {
+    "n": 246,
+    "mean_cents": 5.384
+   },
+   {
+    "n": 320,
+    "mean_cents": -2.236
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.065,
+  "per_window": [
+   {
+    "n": 253,
+    "mean_cents": 1.892
+   },
+   {
+    "n": 144,
+    "mean_cents": 8.521
+   },
+   {
+    "n": 204,
+    "mean_cents": -2.274
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.023,
+  "per_window": [
+   {
+    "n": 254,
+    "mean_cents": 1.793
+   },
+   {
+    "n": 144,
+    "mean_cents": 8.521
+   },
+   {
+    "n": 205,
+    "mean_cents": -2.406
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.10-0.60, price moved toward the side by 2c over 1m",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.6,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 1.005,
+  "per_window": [
+   {
+    "n": 240,
+    "mean_cents": -0.174
+   },
+   {
+    "n": 120,
+    "mean_cents": 8.765
+   },
+   {
+    "n": 168,
+    "mean_cents": 1.136
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side no priced 0.03-0.80, price moved away the side by 2c over 1m, only BTC",
+  "spec": {
+   "left": 3,
+   "lo": 0.03,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.987,
+  "per_window": [
+   {
+    "n": 557,
+    "mean_cents": 0.41
+   },
+   {
+    "n": 266,
+    "mean_cents": 2.366
+   },
+   {
+    "n": 334,
+    "mean_cents": 1.751
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": 0.883,
+  "per_window": [
+   {
+    "n": 367,
+    "mean_cents": 1.163
+   },
+   {
+    "n": 210,
+    "mean_cents": 3.983
+   },
+   {
+    "n": 300,
+    "mean_cents": -0.28
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side yes priced 0.70-0.97, only BTC",
+  "spec": {
+   "left": 12,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.809,
+  "per_window": [
+   {
+    "n": 394,
+    "mean_cents": 0.78
+   },
+   {
+    "n": 191,
+    "mean_cents": 0.74
+   },
+   {
+    "n": 306,
+    "mean_cents": 1.638
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.03-0.97, price moved away the side by 2c over 5m, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     5
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.764,
+  "per_window": [
+   {
+    "n": 947,
+    "mean_cents": 0.849
+   },
+   {
+    "n": 462,
+    "mean_cents": 2.402
+   },
+   {
+    "n": 580,
+    "mean_cents": -1.007
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side no priced 0.80-0.90, price moved toward the side by 5c over 1m",
+  "spec": {
+   "left": 8,
+   "lo": 0.8,
+   "hi": 0.9,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.722,
+  "per_window": [
+   {
+    "n": 232,
+    "mean_cents": 1.458
+   },
+   {
+    "n": 142,
+    "mean_cents": 0.633
+   },
+   {
+    "n": 142,
+    "mean_cents": 0.6
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.30-0.80, price moved toward the side by 2c over 1m, only GOL, spread<=1c",
+  "spec": {
+   "left": 6,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.701,
+  "per_window": [
+   {
+    "n": 168,
+    "mean_cents": -4.676
+   },
+   {
+    "n": 149,
+    "mean_cents": 2.498
+   },
+   {
+    "n": 151,
+    "mean_cents": 7.371
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.70-0.80, spread<=4c",
+  "spec": {
+   "left": 8,
+   "lo": 0.7,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.676,
+  "per_window": [
+   {
+    "n": 430,
+    "mean_cents": 0.933
+   },
+   {
+    "n": 249,
+    "mean_cents": 2.004
+   },
+   {
+    "n": 304,
+    "mean_cents": -0.214
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.70-0.97",
+  "spec": {
+   "left": 6,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": 0.651,
+  "per_window": [
+   {
+    "n": 1252,
+    "mean_cents": 0.654
+   },
+   {
+    "n": 632,
+    "mean_cents": -0.516
+   },
+   {
+    "n": 797,
+    "mean_cents": 0.687
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side no priced 0.03-0.20",
+  "spec": {
+   "left": 3,
+   "lo": 0.03,
+   "hi": 0.2,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": 0.62,
+  "per_window": [
+   {
+    "n": 871,
+    "mean_cents": -0.123
+   },
+   {
+    "n": 418,
+    "mean_cents": 2.674
+   },
+   {
+    "n": 478,
+    "mean_cents": -0.565
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.70-0.97, price moved toward the side by 2c over 3m",
+  "spec": {
+   "left": 6,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.3,
+  "per_window": [
+   {
+    "n": 1021,
+    "mean_cents": 0.65
+   },
+   {
+    "n": 510,
+    "mean_cents": -1.304
+   },
+   {
+    "n": 648,
+    "mean_cents": 0.701
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.10-0.20, spread<=2c",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.2,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.253,
+  "per_window": [
+   {
+    "n": 519,
+    "mean_cents": 0.066
+   },
+   {
+    "n": 347,
+    "mean_cents": 1.895
+   },
+   {
+    "n": 388,
+    "mean_cents": -1.106
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.20-0.30, only BTC, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.21,
+  "per_window": [
+   {
+    "n": 202,
+    "mean_cents": 1.06
+   },
+   {
+    "n": 109,
+    "mean_cents": 0.927
+   },
+   {
+    "n": 170,
+    "mean_cents": -0.896
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.10-0.20",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.2,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": 0.186,
+  "per_window": [
+   {
+    "n": 588,
+    "mean_cents": 0.007
+   },
+   {
+    "n": 352,
+    "mean_cents": 2.249
+   },
+   {
+    "n": 399,
+    "mean_cents": -1.495
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side either priced 0.50-0.90",
+  "spec": {
+   "left": 8,
+   "lo": 0.5,
+   "hi": 0.9,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": 0.124,
+  "per_window": [
+   {
+    "n": 3117,
+    "mean_cents": 0.988
+   },
+   {
+    "n": 1711,
+    "mean_cents": 0.488
+   },
+   {
+    "n": 2090,
+    "mean_cents": -1.653
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.30-0.80, only GOL, spread<=2c",
+  "spec": {
+   "left": 2,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.124,
+  "per_window": [
+   {
+    "n": 214,
+    "mean_cents": 1.81
+   },
+   {
+    "n": 157,
+    "mean_cents": -0.108
+   },
+   {
+    "n": 193,
+    "mean_cents": -1.182
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side no priced 0.40-0.80, price moved toward the side by 2c over 1m, only BTC",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.101,
+  "per_window": [
+   {
+    "n": 328,
+    "mean_cents": 2.027
+   },
+   {
+    "n": 171,
+    "mean_cents": -3.372
+   },
+   {
+    "n": 242,
+    "mean_cents": 0.182
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side either priced 0.60-0.80, price moved toward the side by 2c over 3m, only GOL, spread<=1c",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.8,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": 0.075,
+  "per_window": [
+   {
+    "n": 173,
+    "mean_cents": -0.266
+   },
+   {
+    "n": 153,
+    "mean_cents": -0.813
+   },
+   {
+    "n": 185,
+    "mean_cents": 1.285
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side no priced 0.40-0.80, price moved toward the side by 2c over 1m, spread<=1c",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.04,
+  "per_window": [
+   {
+    "n": 471,
+    "mean_cents": 2.683
+   },
+   {
+    "n": 301,
+    "mean_cents": -5.056
+   },
+   {
+    "n": 407,
+    "mean_cents": 0.489
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.03-0.50, price moved toward the side by 2c over 5m, spread<=1c",
+  "spec": {
+   "left": 5,
+   "lo": 0.03,
+   "hi": 0.5,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     5
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.042,
+  "per_window": [
+   {
+    "n": 153,
+    "mean_cents": 2.061
+   },
+   {
+    "n": 86,
+    "mean_cents": 0.551
+   },
+   {
+    "n": 152,
+    "mean_cents": -2.658
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.03-0.50, price moved toward the side by 2c over 5m",
+  "spec": {
+   "left": 5,
+   "lo": 0.03,
+   "hi": 0.5,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     5
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.043,
+  "per_window": [
+   {
+    "n": 192,
+    "mean_cents": 1.569
+   },
+   {
+    "n": 90,
+    "mean_cents": 2.374
+   },
+   {
+    "n": 159,
+    "mean_cents": -3.527
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side no priced 0.40-0.80, price moved toward the side by 2c over 1m, only BTC, spread<=1c",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.044,
+  "per_window": [
+   {
+    "n": 324,
+    "mean_cents": 1.675
+   },
+   {
+    "n": 169,
+    "mean_cents": -3.813
+   },
+   {
+    "n": 242,
+    "mean_cents": 0.182
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side no priced 0.70-0.97, spread<=4c",
+  "spec": {
+   "left": 1,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.105,
+  "per_window": [
+   {
+    "n": 400,
+    "mean_cents": 1.109
+   },
+   {
+    "n": 251,
+    "mean_cents": 0.737
+   },
+   {
+    "n": 289,
+    "mean_cents": -2.513
+   }
+  ]
+ },
+ {
+  "rule": "10m left, side no priced 0.50-0.80, only BTC",
+  "spec": {
+   "left": 10,
+   "lo": 0.5,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.125,
+  "per_window": [
+   {
+    "n": 930,
+    "mean_cents": 0.131
+   },
+   {
+    "n": 477,
+    "mean_cents": -1.766
+   },
+   {
+    "n": 565,
+    "mean_cents": 0.783
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.70-0.97, only BTC",
+  "spec": {
+   "left": 1,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.193,
+  "per_window": [
+   {
+    "n": 192,
+    "mean_cents": -1.187
+   },
+   {
+    "n": 103,
+    "mean_cents": 1.064
+   },
+   {
+    "n": 140,
+    "mean_cents": -0.069
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.03-0.80, price moved away the side by 2c over 3m",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.262,
+  "per_window": [
+   {
+    "n": 888,
+    "mean_cents": -0.205
+   },
+   {
+    "n": 435,
+    "mean_cents": 1.033
+   },
+   {
+    "n": 560,
+    "mean_cents": -1.328
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.50, price moved away the side by 5c over 3m, only GOL, spread<=1c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.5,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     3
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.266,
+  "per_window": [
+   {
+    "n": 210,
+    "mean_cents": -1.756
+   },
+   {
+    "n": 153,
+    "mean_cents": 0.516
+   },
+   {
+    "n": 209,
+    "mean_cents": 0.439
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.70, spread<=2c",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.283,
+  "per_window": [
+   {
+    "n": 401,
+    "mean_cents": 1.495
+   },
+   {
+    "n": 209,
+    "mean_cents": 1.479
+   },
+   {
+    "n": 271,
+    "mean_cents": -4.911
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.293,
+  "per_window": [
+   {
+    "n": 1258,
+    "mean_cents": 0.173
+   },
+   {
+    "n": 661,
+    "mean_cents": 0.607
+   },
+   {
+    "n": 835,
+    "mean_cents": -1.442
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side either priced 0.10-0.60, price moved toward the side by 2c over 5m",
+  "spec": {
+   "left": 5,
+   "lo": 0.1,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     5
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.347,
+  "per_window": [
+   {
+    "n": 442,
+    "mean_cents": -0.266
+   },
+   {
+    "n": 225,
+    "mean_cents": -0.77
+   },
+   {
+    "n": 331,
+    "mean_cents": -0.788
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side either priced 0.50-0.90, spread<=1c",
+  "spec": {
+   "left": 12,
+   "lo": 0.5,
+   "hi": 0.9,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.35,
+  "per_window": [
+   {
+    "n": 3125,
+    "mean_cents": -0.342
+   },
+   {
+    "n": 1866,
+    "mean_cents": -0.756
+   },
+   {
+    "n": 2372,
+    "mean_cents": 0.416
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.70-0.97, only BTC, spread<=4c",
+  "spec": {
+   "left": 1,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.351,
+  "per_window": [
+   {
+    "n": 189,
+    "mean_cents": -1.48
+   },
+   {
+    "n": 101,
+    "mean_cents": 0.803
+   },
+   {
+    "n": 139,
+    "mean_cents": -0.233
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side no priced 0.40-0.97",
+  "spec": {
+   "left": 8,
+   "lo": 0.4,
+   "hi": 0.97,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.358,
+  "per_window": [
+   {
+    "n": 2215,
+    "mean_cents": -0.096
+   },
+   {
+    "n": 1211,
+    "mean_cents": 0.477
+   },
+   {
+    "n": 1488,
+    "mean_cents": -1.038
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side no priced 0.03-0.97, price moved toward the side by 5c over 1m, spread<=1c",
+  "spec": {
+   "left": 12,
+   "lo": 0.03,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     1
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.382,
+  "per_window": [
+   {
+    "n": 935,
+    "mean_cents": -1.471
+   },
+   {
+    "n": 577,
+    "mean_cents": 1.724
+   },
+   {
+    "n": 757,
+    "mean_cents": -0.743
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90, spread<=4c",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.391,
+  "per_window": [
+   {
+    "n": 1239,
+    "mean_cents": 0.059
+   },
+   {
+    "n": 660,
+    "mean_cents": 0.553
+   },
+   {
+    "n": 829,
+    "mean_cents": -1.481
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.03-0.50, price moved toward the side by 2c over 3m, spread<=4c",
+  "spec": {
+   "left": 1,
+   "lo": 0.03,
+   "hi": 0.5,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     3
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.392,
+  "per_window": [
+   {
+    "n": 171,
+    "mean_cents": -2.261
+   },
+   {
+    "n": 115,
+    "mean_cents": -0.501
+   },
+   {
+    "n": 137,
+    "mean_cents": 0.513
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.10-0.40",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.453,
+  "per_window": [
+   {
+    "n": 595,
+    "mean_cents": -2.261
+   },
+   {
+    "n": 376,
+    "mean_cents": 1.672
+   },
+   {
+    "n": 457,
+    "mean_cents": 0.208
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.10-0.60, only GOL, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.6,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.465,
+  "per_window": [
+   {
+    "n": 375,
+    "mean_cents": -0.174
+   },
+   {
+    "n": 244,
+    "mean_cents": -0.701
+   },
+   {
+    "n": 313,
+    "mean_cents": -1.289
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side no priced 0.50-0.90, spread<=4c",
+  "spec": {
+   "left": 12,
+   "lo": 0.5,
+   "hi": 0.9,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.516,
+  "per_window": [
+   {
+    "n": 1866,
+    "mean_cents": -1.128
+   },
+   {
+    "n": 1021,
+    "mean_cents": 0.325
+   },
+   {
+    "n": 1286,
+    "mean_cents": 0.062
+   }
+  ]
+ },
+ {
+  "rule": "10m left, side no priced 0.50-0.80",
+  "spec": {
+   "left": 10,
+   "lo": 0.5,
+   "hi": 0.8,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.584,
+  "per_window": [
+   {
+    "n": 1507,
+    "mean_cents": -0.557
+   },
+   {
+    "n": 825,
+    "mean_cents": -0.826
+   },
+   {
+    "n": 981,
+    "mean_cents": -0.203
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.50-0.70",
+  "spec": {
+   "left": 2,
+   "lo": 0.5,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.607,
+  "per_window": [
+   {
+    "n": 235,
+    "mean_cents": -4.157
+   },
+   {
+    "n": 122,
+    "mean_cents": -0.25
+   },
+   {
+    "n": 174,
+    "mean_cents": 1.991
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side no priced 0.50-0.90",
+  "spec": {
+   "left": 12,
+   "lo": 0.5,
+   "hi": 0.9,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.608,
+  "per_window": [
+   {
+    "n": 1892,
+    "mean_cents": -1.293
+   },
+   {
+    "n": 1022,
+    "mean_cents": 0.263
+   },
+   {
+    "n": 1288,
+    "mean_cents": 0.105
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.30-0.60",
+  "spec": {
+   "left": 1,
+   "lo": 0.3,
+   "hi": 0.6,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.631,
+  "per_window": [
+   {
+    "n": 190,
+    "mean_cents": -1.86
+   },
+   {
+    "n": 120,
+    "mean_cents": 2.911
+   },
+   {
+    "n": 155,
+    "mean_cents": -4.813
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side no priced 0.30-0.97, only BTC",
+  "spec": {
+   "left": 5,
+   "lo": 0.3,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.644,
+  "per_window": [
+   {
+    "n": 1246,
+    "mean_cents": -1.487
+   },
+   {
+    "n": 644,
+    "mean_cents": -0.232
+   },
+   {
+    "n": 793,
+    "mean_cents": 1.009
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.40, spread<=1c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.645,
+  "per_window": [
+   {
+    "n": 701,
+    "mean_cents": -1.553
+   },
+   {
+    "n": 457,
+    "mean_cents": 0.896
+   },
+   {
+    "n": 551,
+    "mean_cents": -0.495
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.60-0.90, only GOL",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.654,
+  "per_window": [
+   {
+    "n": 386,
+    "mean_cents": -3.182
+   },
+   {
+    "n": 240,
+    "mean_cents": 1.89
+   },
+   {
+    "n": 258,
+    "mean_cents": -0.114
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side either priced 0.40-0.70, price moved toward the side by 5c over 1m",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.7,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.729,
+  "per_window": [
+   {
+    "n": 403,
+    "mean_cents": -1.879
+   },
+   {
+    "n": 210,
+    "mean_cents": -5.858
+   },
+   {
+    "n": 283,
+    "mean_cents": 2.678
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side no priced 0.03-0.40, price moved away the side by 2c over 1m, only BTC, spread<=4c",
+  "spec": {
+   "left": 5,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.739,
+  "per_window": [
+   {
+    "n": 517,
+    "mean_cents": -2.324
+   },
+   {
+    "n": 269,
+    "mean_cents": -0.462
+   },
+   {
+    "n": 365,
+    "mean_cents": 1.217
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side no priced 0.40-0.80, price moved toward the side by 2c over 1m",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.739,
+  "per_window": [
+   {
+    "n": 567,
+    "mean_cents": -0.015
+   },
+   {
+    "n": 320,
+    "mean_cents": -3.932
+   },
+   {
+    "n": 439,
+    "mean_cents": 0.075
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.90, price moved toward the side by 5c over 5m, only BTC, spread<=1c",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     5
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.741,
+  "per_window": [
+   {
+    "n": 120,
+    "mean_cents": -1.04
+   },
+   {
+    "n": 57,
+    "mean_cents": -2.197
+   },
+   {
+    "n": 110,
+    "mean_cents": -2.266
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side either priced 0.50-0.97, spread<=2c",
+  "spec": {
+   "left": 12,
+   "lo": 0.5,
+   "hi": 0.97,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.748,
+  "per_window": [
+   {
+    "n": 3547,
+    "mean_cents": -0.694
+   },
+   {
+    "n": 1979,
+    "mean_cents": -0.574
+   },
+   {
+    "n": 2497,
+    "mean_cents": 0.205
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.766,
+  "per_window": [
+   {
+    "n": 218,
+    "mean_cents": -2.382
+   },
+   {
+    "n": 148,
+    "mean_cents": 1.33
+   },
+   {
+    "n": 154,
+    "mean_cents": -3.072
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side either priced 0.50-0.97",
+  "spec": {
+   "left": 12,
+   "lo": 0.5,
+   "hi": 0.97,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.812,
+  "per_window": [
+   {
+    "n": 3755,
+    "mean_cents": -0.741
+   },
+   {
+    "n": 1986,
+    "mean_cents": -0.56
+   },
+   {
+    "n": 2522,
+    "mean_cents": 0.214
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.40",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.814,
+  "per_window": [
+   {
+    "n": 881,
+    "mean_cents": -2.159
+   },
+   {
+    "n": 503,
+    "mean_cents": 1.301
+   },
+   {
+    "n": 593,
+    "mean_cents": 0.017
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side either priced 0.50-0.90",
+  "spec": {
+   "left": 12,
+   "lo": 0.5,
+   "hi": 0.9,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.86,
+  "per_window": [
+   {
+    "n": 3707,
+    "mean_cents": -0.79
+   },
+   {
+    "n": 1973,
+    "mean_cents": -0.611
+   },
+   {
+    "n": 2484,
+    "mean_cents": 0.24
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL, spread<=4c",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.869,
+  "per_window": [
+   {
+    "n": 209,
+    "mean_cents": -3.166
+   },
+   {
+    "n": 146,
+    "mean_cents": 1.761
+   },
+   {
+    "n": 153,
+    "mean_cents": -3.197
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.03-0.20, spread<=1c",
+  "spec": {
+   "left": 1,
+   "lo": 0.03,
+   "hi": 0.2,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.87,
+  "per_window": [
+   {
+    "n": 285,
+    "mean_cents": -1.408
+   },
+   {
+    "n": 172,
+    "mean_cents": -4.027
+   },
+   {
+    "n": 223,
+    "mean_cents": 1.993
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.40, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.879,
+  "per_window": [
+   {
+    "n": 871,
+    "mean_cents": -2.295
+   },
+   {
+    "n": 499,
+    "mean_cents": 1.259
+   },
+   {
+    "n": 589,
+    "mean_cents": 0.066
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.10-0.40, price moved away the side by 2c over 1m",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -0.884,
+  "per_window": [
+   {
+    "n": 365,
+    "mean_cents": -2.974
+   },
+   {
+    "n": 222,
+    "mean_cents": 1.426
+   },
+   {
+    "n": 277,
+    "mean_cents": -0.871
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.70-0.80",
+  "spec": {
+   "left": 2,
+   "lo": 0.7,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -0.92,
+  "per_window": [
+   {
+    "n": 155,
+    "mean_cents": 3.583
+   },
+   {
+    "n": 81,
+    "mean_cents": -10.079
+   },
+   {
+    "n": 104,
+    "mean_cents": -4.692
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side yes priced 0.60-0.70, spread<=1c",
+  "spec": {
+   "left": 12,
+   "lo": 0.6,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.004,
+  "per_window": [
+   {
+    "n": 563,
+    "mean_cents": 0.065
+   },
+   {
+    "n": 351,
+    "mean_cents": -4.812
+   },
+   {
+    "n": 402,
+    "mean_cents": -0.219
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side no priced 0.03-0.10",
+  "spec": {
+   "left": 3,
+   "lo": 0.03,
+   "hi": 0.1,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.012,
+  "per_window": [
+   {
+    "n": 591,
+    "mean_cents": -1.676
+   },
+   {
+    "n": 262,
+    "mean_cents": 0.204
+   },
+   {
+    "n": 291,
+    "mean_cents": 0.791
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.50, price moved away the side by 5c over 3m, spread<=1c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.5,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     3
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.033,
+  "per_window": [
+   {
+    "n": 537,
+    "mean_cents": -2.387
+   },
+   {
+    "n": 342,
+    "mean_cents": 1.311
+   },
+   {
+    "n": 430,
+    "mean_cents": -1.096
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.03-0.40, only GOL",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.038,
+  "per_window": [
+   {
+    "n": 453,
+    "mean_cents": -2.697
+   },
+   {
+    "n": 246,
+    "mean_cents": -0.104
+   },
+   {
+    "n": 293,
+    "mean_cents": 1.026
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.10-0.40, price moved away the side by 5c over 1m",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.061,
+  "per_window": [
+   {
+    "n": 307,
+    "mean_cents": -3.261
+   },
+   {
+    "n": 182,
+    "mean_cents": 1.87
+   },
+   {
+    "n": 231,
+    "mean_cents": -1.734
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side no priced 0.60-0.80, price moved toward the side by 2c over 3m",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.069,
+  "per_window": [
+   {
+    "n": 370,
+    "mean_cents": -2.544
+   },
+   {
+    "n": 190,
+    "mean_cents": -4.471
+   },
+   {
+    "n": 247,
+    "mean_cents": 1.044
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.30-0.70, price moved away the side by 2c over 5m",
+  "spec": {
+   "left": 1,
+   "lo": 0.3,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     5
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.104,
+  "per_window": [
+   {
+    "n": 116,
+    "mean_cents": -0.515
+   },
+   {
+    "n": 81,
+    "mean_cents": 1.244
+   },
+   {
+    "n": 76,
+    "mean_cents": -11.438
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.90-0.97, price moved toward the side by 5c over 5m, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.9,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     5
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.106,
+  "per_window": [
+   {
+    "n": 193,
+    "mean_cents": -0.003
+   },
+   {
+    "n": 126,
+    "mean_cents": -5.007
+   },
+   {
+    "n": 118,
+    "mean_cents": 0.292
+   }
+  ]
+ },
+ {
+  "rule": "10m left, side yes priced 0.50-0.90, spread<=2c",
+  "spec": {
+   "left": 10,
+   "lo": 0.5,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.116,
+  "per_window": [
+   {
+    "n": 1673,
+    "mean_cents": 0.825
+   },
+   {
+    "n": 976,
+    "mean_cents": -2.597
+   },
+   {
+    "n": 1201,
+    "mean_cents": -1.558
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side either priced 0.60-0.80",
+  "spec": {
+   "left": 6,
+   "lo": 0.6,
+   "hi": 0.8,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.136,
+  "per_window": [
+   {
+    "n": 1287,
+    "mean_cents": -1.349
+   },
+   {
+    "n": 694,
+    "mean_cents": -2.45
+   },
+   {
+    "n": 875,
+    "mean_cents": 0.901
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.30-0.50",
+  "spec": {
+   "left": 3,
+   "lo": 0.3,
+   "hi": 0.5,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.149,
+  "per_window": [
+   {
+    "n": 302,
+    "mean_cents": -2.148
+   },
+   {
+    "n": 166,
+    "mean_cents": 0.76
+   },
+   {
+    "n": 241,
+    "mean_cents": -4.88
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side no priced 0.50-0.60",
+  "spec": {
+   "left": 6,
+   "lo": 0.5,
+   "hi": 0.6,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.16,
+  "per_window": [
+   {
+    "n": 270,
+    "mean_cents": -3.183
+   },
+   {
+    "n": 152,
+    "mean_cents": -0.405
+   },
+   {
+    "n": 215,
+    "mean_cents": -3.047
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.70-0.97, spread<=4c",
+  "spec": {
+   "left": 1,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.183,
+  "per_window": [
+   {
+    "n": 415,
+    "mean_cents": -2.672
+   },
+   {
+    "n": 211,
+    "mean_cents": -1.884
+   },
+   {
+    "n": 283,
+    "mean_cents": 0.399
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.70, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.211,
+  "per_window": [
+   {
+    "n": 398,
+    "mean_cents": -2.158
+   },
+   {
+    "n": 215,
+    "mean_cents": 0.733
+   },
+   {
+    "n": 299,
+    "mean_cents": -3.594
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.70, only BTC, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.211,
+  "per_window": [
+   {
+    "n": 398,
+    "mean_cents": -2.158
+   },
+   {
+    "n": 215,
+    "mean_cents": 0.733
+   },
+   {
+    "n": 299,
+    "mean_cents": -3.594
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.70, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.218,
+  "per_window": [
+   {
+    "n": 742,
+    "mean_cents": -2.612
+   },
+   {
+    "n": 443,
+    "mean_cents": 1.192
+   },
+   {
+    "n": 560,
+    "mean_cents": -1.827
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.03-0.97",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.97,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.224,
+  "per_window": [
+   {
+    "n": 1896,
+    "mean_cents": -0.326
+   },
+   {
+    "n": 1037,
+    "mean_cents": -0.825
+   },
+   {
+    "n": 1291,
+    "mean_cents": -1.229
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.20-0.60",
+  "spec": {
+   "left": 2,
+   "lo": 0.2,
+   "hi": 0.6,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.24,
+  "per_window": [
+   {
+    "n": 433,
+    "mean_cents": -3.547
+   },
+   {
+    "n": 254,
+    "mean_cents": 1.386
+   },
+   {
+    "n": 338,
+    "mean_cents": -2.737
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side no priced 0.20-0.50",
+  "spec": {
+   "left": 5,
+   "lo": 0.2,
+   "hi": 0.5,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.253,
+  "per_window": [
+   {
+    "n": 759,
+    "mean_cents": -2.79
+   },
+   {
+    "n": 456,
+    "mean_cents": 1.579
+   },
+   {
+    "n": 537,
+    "mean_cents": -0.817
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90, only GOL",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.292,
+  "per_window": [
+   {
+    "n": 499,
+    "mean_cents": -1.396
+   },
+   {
+    "n": 306,
+    "mean_cents": -0.213
+   },
+   {
+    "n": 344,
+    "mean_cents": -2.502
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side no priced 0.20-0.80, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.344,
+  "per_window": [
+   {
+    "n": 907,
+    "mean_cents": -0.606
+   },
+   {
+    "n": 519,
+    "mean_cents": -2.749
+   },
+   {
+    "n": 699,
+    "mean_cents": -1.291
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.20-0.50, only GOL",
+  "spec": {
+   "left": 2,
+   "lo": 0.2,
+   "hi": 0.5,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.384,
+  "per_window": [
+   {
+    "n": 181,
+    "mean_cents": -2.993
+   },
+   {
+    "n": 92,
+    "mean_cents": -1.624
+   },
+   {
+    "n": 132,
+    "mean_cents": -4.93
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side either priced 0.50-0.70",
+  "spec": {
+   "left": 2,
+   "lo": 0.5,
+   "hi": 0.7,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.42,
+  "per_window": [
+   {
+    "n": 400,
+    "mean_cents": -5.419
+   },
+   {
+    "n": 237,
+    "mean_cents": -3.493
+   },
+   {
+    "n": 311,
+    "mean_cents": 2.429
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side no priced 0.80-0.90, only BTC, spread<=2c",
+  "spec": {
+   "left": 6,
+   "lo": 0.8,
+   "hi": 0.9,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.427,
+  "per_window": [
+   {
+    "n": 284,
+    "mean_cents": -2.214
+   },
+   {
+    "n": 169,
+    "mean_cents": -3.84
+   },
+   {
+    "n": 159,
+    "mean_cents": 0.189
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side either priced 0.60-0.80, only GOL, spread<=1c",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.8,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.445,
+  "per_window": [
+   {
+    "n": 249,
+    "mean_cents": -2.21
+   },
+   {
+    "n": 235,
+    "mean_cents": 0.081
+   },
+   {
+    "n": 306,
+    "mean_cents": -4.186
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side yes priced 0.20-0.50, only GOL",
+  "spec": {
+   "left": 4,
+   "lo": 0.2,
+   "hi": 0.5,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.456,
+  "per_window": [
+   {
+    "n": 239,
+    "mean_cents": -5.836
+   },
+   {
+    "n": 164,
+    "mean_cents": 3.762
+   },
+   {
+    "n": 220,
+    "mean_cents": -3.291
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.90-0.97, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.9,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.464,
+  "per_window": [
+   {
+    "n": 219,
+    "mean_cents": -0.258
+   },
+   {
+    "n": 137,
+    "mean_cents": -4.161
+   },
+   {
+    "n": 133,
+    "mean_cents": -1.288
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.20-0.50, spread<=1c",
+  "spec": {
+   "left": 2,
+   "lo": 0.2,
+   "hi": 0.5,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.504,
+  "per_window": [
+   {
+    "n": 287,
+    "mean_cents": -4.733
+   },
+   {
+    "n": 185,
+    "mean_cents": 0.335
+   },
+   {
+    "n": 243,
+    "mean_cents": -2.054
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.80, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.505,
+  "per_window": [
+   {
+    "n": 470,
+    "mean_cents": -1.649
+   },
+   {
+    "n": 253,
+    "mean_cents": -0.752
+   },
+   {
+    "n": 348,
+    "mean_cents": -4.438
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side yes priced 0.10-0.40, only GOL",
+  "spec": {
+   "left": 12,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.54,
+  "per_window": [
+   {
+    "n": 429,
+    "mean_cents": -0.712
+   },
+   {
+    "n": 280,
+    "mean_cents": -4.735
+   },
+   {
+    "n": 328,
+    "mean_cents": -2.827
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL, spread<=1c",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.54,
+  "per_window": [
+   {
+    "n": 175,
+    "mean_cents": 0.463
+   },
+   {
+    "n": 155,
+    "mean_cents": 0.875
+   },
+   {
+    "n": 179,
+    "mean_cents": -9.15
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side either priced 0.60-0.90, price moved toward the side by 5c over 1m, only GOL",
+  "spec": {
+   "left": 12,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.542,
+  "per_window": [
+   {
+    "n": 532,
+    "mean_cents": -1.913
+   },
+   {
+    "n": 310,
+    "mean_cents": -2.52
+   },
+   {
+    "n": 344,
+    "mean_cents": -1.431
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.30-0.40, spread<=4c",
+  "spec": {
+   "left": 8,
+   "lo": 0.3,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.553,
+  "per_window": [
+   {
+    "n": 405,
+    "mean_cents": -1.97
+   },
+   {
+    "n": 224,
+    "mean_cents": -3.714
+   },
+   {
+    "n": 297,
+    "mean_cents": -3.248
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side either priced 0.20-0.60, price moved away the side by 5c over 1m, only GOL",
+  "spec": {
+   "left": 8,
+   "lo": 0.2,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.564,
+  "per_window": [
+   {
+    "n": 367,
+    "mean_cents": -5.573
+   },
+   {
+    "n": 236,
+    "mean_cents": -4.933
+   },
+   {
+    "n": 263,
+    "mean_cents": 3.541
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side either priced 0.10-0.40",
+  "spec": {
+   "left": 4,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.57,
+  "per_window": [
+   {
+    "n": 1562,
+    "mean_cents": -1.426
+   },
+   {
+    "n": 866,
+    "mean_cents": 0.587
+   },
+   {
+    "n": 1077,
+    "mean_cents": -2.084
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.80",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.584,
+  "per_window": [
+   {
+    "n": 898,
+    "mean_cents": -1.637
+   },
+   {
+    "n": 519,
+    "mean_cents": -0.632
+   },
+   {
+    "n": 662,
+    "mean_cents": -2.585
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.10-0.80, price moved away the side by 5c over 3m, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.597,
+  "per_window": [
+   {
+    "n": 219,
+    "mean_cents": -0.639
+   },
+   {
+    "n": 122,
+    "mean_cents": -3.541
+   },
+   {
+    "n": 167,
+    "mean_cents": -6.1
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side either priced 0.30-0.80, price moved away the side by 2c over 1m",
+  "spec": {
+   "left": 8,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.609,
+  "per_window": [
+   {
+    "n": 867,
+    "mean_cents": -0.706
+   },
+   {
+    "n": 471,
+    "mean_cents": -2.508
+   },
+   {
+    "n": 568,
+    "mean_cents": -2.617
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.03-0.60, price moved away the side by 5c over 1m",
+  "spec": {
+   "left": 3,
+   "lo": 0.03,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.63,
+  "per_window": [
+   {
+    "n": 1140,
+    "mean_cents": -1.336
+   },
+   {
+    "n": 633,
+    "mean_cents": 0.886
+   },
+   {
+    "n": 766,
+    "mean_cents": -2.282
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.60-0.90",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.638,
+  "per_window": [
+   {
+    "n": 889,
+    "mean_cents": -0.877
+   },
+   {
+    "n": 526,
+    "mean_cents": -0.634
+   },
+   {
+    "n": 610,
+    "mean_cents": -2.578
+   }
+  ]
+ },
+ {
+  "rule": "10m left, side no priced 0.30-0.90, only GOL, spread<=2c",
+  "spec": {
+   "left": 10,
+   "lo": 0.3,
+   "hi": 0.9,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.656,
+  "per_window": [
+   {
+    "n": 904,
+    "mean_cents": -2.48
+   },
+   {
+    "n": 649,
+    "mean_cents": 0.018
+   },
+   {
+    "n": 763,
+    "mean_cents": -1.538
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side either priced 0.50-0.80, only GOL",
+  "spec": {
+   "left": 5,
+   "lo": 0.5,
+   "hi": 0.8,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.662,
+  "per_window": [
+   {
+    "n": 569,
+    "mean_cents": -1.903
+   },
+   {
+    "n": 378,
+    "mean_cents": -2.786
+   },
+   {
+    "n": 469,
+    "mean_cents": -2.275
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.20-0.50, only GOL, spread<=2c",
+  "spec": {
+   "left": 2,
+   "lo": 0.2,
+   "hi": 0.5,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.675,
+  "per_window": [
+   {
+    "n": 143,
+    "mean_cents": -4.926
+   },
+   {
+    "n": 89,
+    "mean_cents": -1.685
+   },
+   {
+    "n": 127,
+    "mean_cents": -3.895
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.30-0.80",
+  "spec": {
+   "left": 2,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.706,
+  "per_window": [
+   {
+    "n": 556,
+    "mean_cents": -0.822
+   },
+   {
+    "n": 320,
+    "mean_cents": -4.985
+   },
+   {
+    "n": 418,
+    "mean_cents": -2.46
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.30-0.80, only GOL",
+  "spec": {
+   "left": 2,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.725,
+  "per_window": [
+   {
+    "n": 258,
+    "mean_cents": -1.717
+   },
+   {
+    "n": 163,
+    "mean_cents": -5.628
+   },
+   {
+    "n": 188,
+    "mean_cents": -5.115
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side yes priced 0.40-0.80",
+  "spec": {
+   "left": 2,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.74,
+  "per_window": [
+   {
+    "n": 477,
+    "mean_cents": -1.405
+   },
+   {
+    "n": 247,
+    "mean_cents": -3.186
+   },
+   {
+    "n": 347,
+    "mean_cents": -3.697
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side either priced 0.30-0.40",
+  "spec": {
+   "left": 4,
+   "lo": 0.3,
+   "hi": 0.4,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.791,
+  "per_window": [
+   {
+    "n": 431,
+    "mean_cents": -4.018
+   },
+   {
+    "n": 219,
+    "mean_cents": 1.543
+   },
+   {
+    "n": 331,
+    "mean_cents": -3.871
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.30-0.80, price moved toward the side by 2c over 3m, only GOL, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.791,
+  "per_window": [
+   {
+    "n": 153,
+    "mean_cents": -1.769
+   },
+   {
+    "n": 120,
+    "mean_cents": -6.093
+   },
+   {
+    "n": 135,
+    "mean_cents": -5.104
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.30-0.80, price moved away the side by 5c over 3m",
+  "spec": {
+   "left": 1,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     3
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.792,
+  "per_window": [
+   {
+    "n": 151,
+    "mean_cents": -0.826
+   },
+   {
+    "n": 97,
+    "mean_cents": -5.083
+   },
+   {
+    "n": 113,
+    "mean_cents": -10.486
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.90, spread<=1c",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.801,
+  "per_window": [
+   {
+    "n": 364,
+    "mean_cents": -1.994
+   },
+   {
+    "n": 257,
+    "mean_cents": -0.69
+   },
+   {
+    "n": 330,
+    "mean_cents": -3.578
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.90",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.826,
+  "per_window": [
+   {
+    "n": 534,
+    "mean_cents": -3.291
+   },
+   {
+    "n": 322,
+    "mean_cents": -0.768
+   },
+   {
+    "n": 387,
+    "mean_cents": -2.822
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side either priced 0.30-0.40, spread<=1c",
+  "spec": {
+   "left": 4,
+   "lo": 0.3,
+   "hi": 0.4,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.833,
+  "per_window": [
+   {
+    "n": 367,
+    "mean_cents": -3.899
+   },
+   {
+    "n": 201,
+    "mean_cents": 0.89
+   },
+   {
+    "n": 301,
+    "mean_cents": -3.919
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side yes priced 0.10-0.60, only GOL, spread<=2c",
+  "spec": {
+   "left": 4,
+   "lo": 0.1,
+   "hi": 0.6,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.841,
+  "per_window": [
+   {
+    "n": 392,
+    "mean_cents": -2.475
+   },
+   {
+    "n": 281,
+    "mean_cents": -1.26
+   },
+   {
+    "n": 355,
+    "mean_cents": -2.346
+   }
+  ]
+ },
+ {
+  "rule": "14m left, side yes priced 0.70-0.97",
+  "spec": {
+   "left": 14,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.843,
+  "per_window": [
+   {
+    "n": 235,
+    "mean_cents": -2.747
+   },
+   {
+    "n": 110,
+    "mean_cents": -1.372
+   },
+   {
+    "n": 164,
+    "mean_cents": -6.065
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side yes priced 0.20-0.40",
+  "spec": {
+   "left": 4,
+   "lo": 0.2,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.872,
+  "per_window": [
+   {
+    "n": 412,
+    "mean_cents": -5.054
+   },
+   {
+    "n": 243,
+    "mean_cents": 0.613
+   },
+   {
+    "n": 350,
+    "mean_cents": -1.499
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side yes priced 0.20-0.40, only BTC",
+  "spec": {
+   "left": 4,
+   "lo": 0.2,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.874,
+  "per_window": [
+   {
+    "n": 248,
+    "mean_cents": -4.211
+   },
+   {
+    "n": 125,
+    "mean_cents": -3.654
+   },
+   {
+    "n": 187,
+    "mean_cents": -2.427
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.10-0.70, price moved toward the side by 5c over 3m, spread<=4c",
+  "spec": {
+   "left": 6,
+   "lo": 0.1,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     3
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.886,
+  "per_window": [
+   {
+    "n": 459,
+    "mean_cents": -5.011
+   },
+   {
+    "n": 241,
+    "mean_cents": -1.357
+   },
+   {
+    "n": 343,
+    "mean_cents": -1.021
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.40-0.80, only GOL",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.897,
+  "per_window": [
+   {
+    "n": 463,
+    "mean_cents": -4.788
+   },
+   {
+    "n": 287,
+    "mean_cents": -1.294
+   },
+   {
+    "n": 330,
+    "mean_cents": -0.062
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.10-0.60, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.6,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.897,
+  "per_window": [
+   {
+    "n": 864,
+    "mean_cents": -1.937
+   },
+   {
+    "n": 528,
+    "mean_cents": 0.9
+   },
+   {
+    "n": 663,
+    "mean_cents": -2.987
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side either priced 0.50-0.97, price moved toward the side by 2c over 5m, only GOL",
+  "spec": {
+   "left": 2,
+   "lo": 0.5,
+   "hi": 0.97,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     5
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.909,
+  "per_window": [
+   {
+    "n": 661,
+    "mean_cents": -0.481
+   },
+   {
+    "n": 388,
+    "mean_cents": -3.763
+   },
+   {
+    "n": 461,
+    "mean_cents": -0.424
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.90, only BTC, spread<=1c",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.909,
+  "per_window": [
+   {
+    "n": 210,
+    "mean_cents": 0.569
+   },
+   {
+    "n": 119,
+    "mean_cents": -4.253
+   },
+   {
+    "n": 184,
+    "mean_cents": -7.895
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.90, only BTC",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.95,
+  "per_window": [
+   {
+    "n": 267,
+    "mean_cents": -0.041
+   },
+   {
+    "n": 143,
+    "mean_cents": -3.231
+   },
+   {
+    "n": 195,
+    "mean_cents": -8.376
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side either priced 0.30-0.60, price moved away the side by 5c over 1m",
+  "spec": {
+   "left": 3,
+   "lo": 0.3,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.965,
+  "per_window": [
+   {
+    "n": 244,
+    "mean_cents": -2.794
+   },
+   {
+    "n": 155,
+    "mean_cents": -5.706
+   },
+   {
+    "n": 195,
+    "mean_cents": -3.488
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side no priced 0.40-0.50",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.5,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -1.97,
+  "per_window": [
+   {
+    "n": 275,
+    "mean_cents": -4.914
+   },
+   {
+    "n": 167,
+    "mean_cents": 0.671
+   },
+   {
+    "n": 212,
+    "mean_cents": -4.791
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side no priced 0.20-0.50, price moved toward the side by 5c over 1m",
+  "spec": {
+   "left": 5,
+   "lo": 0.2,
+   "hi": 0.5,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -1.986,
+  "per_window": [
+   {
+    "n": 187,
+    "mean_cents": -7.776
+   },
+   {
+    "n": 118,
+    "mean_cents": 3.498
+   },
+   {
+    "n": 153,
+    "mean_cents": -5.754
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side either priced 0.20-0.90, only GOL",
+  "spec": {
+   "left": 4,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.0,
+  "per_window": [
+   {
+    "n": 769,
+    "mean_cents": -3.64
+   },
+   {
+    "n": 483,
+    "mean_cents": -0.468
+   },
+   {
+    "n": 574,
+    "mean_cents": -1.154
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.40-0.90",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.001,
+  "per_window": [
+   {
+    "n": 1550,
+    "mean_cents": -1.642
+   },
+   {
+    "n": 839,
+    "mean_cents": -2.111
+   },
+   {
+    "n": 1053,
+    "mean_cents": -0.849
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.97",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.03,
+  "per_window": [
+   {
+    "n": 768,
+    "mean_cents": -3.17
+   },
+   {
+    "n": 428,
+    "mean_cents": -1.154
+   },
+   {
+    "n": 537,
+    "mean_cents": -1.467
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.30-0.90, only GOL, spread<=2c",
+  "spec": {
+   "left": 6,
+   "lo": 0.3,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.057,
+  "per_window": [
+   {
+    "n": 632,
+    "mean_cents": -4.377
+   },
+   {
+    "n": 460,
+    "mean_cents": -1.259
+   },
+   {
+    "n": 515,
+    "mean_cents": -0.693
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.20-0.97, spread<=4c",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.067,
+  "per_window": [
+   {
+    "n": 737,
+    "mean_cents": -3.197
+   },
+   {
+    "n": 414,
+    "mean_cents": -1.024
+   },
+   {
+    "n": 527,
+    "mean_cents": -1.535
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.03-0.40, price moved away the side by 2c over 5m, only GOL, spread<=1c",
+  "spec": {
+   "left": 8,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     5
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.072,
+  "per_window": [
+   {
+    "n": 302,
+    "mean_cents": -3.406
+   },
+   {
+    "n": 279,
+    "mean_cents": -5.66
+   },
+   {
+    "n": 353,
+    "mean_cents": 0.807
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side either priced 0.40-0.70",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.7,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.094,
+  "per_window": [
+   {
+    "n": 1066,
+    "mean_cents": -2.643
+   },
+   {
+    "n": 588,
+    "mean_cents": -3.52
+   },
+   {
+    "n": 746,
+    "mean_cents": 0.185
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.20-0.60",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.6,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.109,
+  "per_window": [
+   {
+    "n": 431,
+    "mean_cents": -3.786
+   },
+   {
+    "n": 260,
+    "mean_cents": -1.415
+   },
+   {
+    "n": 326,
+    "mean_cents": -3.407
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side no priced 0.80-0.97, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.8,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.115,
+  "per_window": [
+   {
+    "n": 311,
+    "mean_cents": -2.168
+   },
+   {
+    "n": 193,
+    "mean_cents": -4.114
+   },
+   {
+    "n": 203,
+    "mean_cents": -1.025
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.20-0.60, only BTC, spread<=2c",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.12,
+  "per_window": [
+   {
+    "n": 198,
+    "mean_cents": -3.333
+   },
+   {
+    "n": 111,
+    "mean_cents": -1.022
+   },
+   {
+    "n": 158,
+    "mean_cents": -7.356
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.40-0.80, only GOL, spread<=4c",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.171,
+  "per_window": [
+   {
+    "n": 451,
+    "mean_cents": -5.467
+   },
+   {
+    "n": 286,
+    "mean_cents": -1.381
+   },
+   {
+    "n": 325,
+    "mean_cents": -0.253
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.20-0.40, only GOL, spread<=1c",
+  "spec": {
+   "left": 6,
+   "lo": 0.2,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.173,
+  "per_window": [
+   {
+    "n": 145,
+    "mean_cents": -7.036
+   },
+   {
+    "n": 138,
+    "mean_cents": -0.179
+   },
+   {
+    "n": 183,
+    "mean_cents": -7.012
+   }
+  ]
+ },
+ {
+  "rule": "2m left, side either priced 0.30-0.90, price moved toward the side by 5c over 1m, only BTC, spread<=2c",
+  "spec": {
+   "left": 2,
+   "lo": 0.3,
+   "hi": 0.9,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     1
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.238,
+  "per_window": [
+   {
+    "n": 295,
+    "mean_cents": -3.622
+   },
+   {
+    "n": 147,
+    "mean_cents": -3.903
+   },
+   {
+    "n": 211,
+    "mean_cents": -4.498
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side yes priced 0.50-0.97, spread<=4c",
+  "spec": {
+   "left": 4,
+   "lo": 0.5,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.27,
+  "per_window": [
+   {
+    "n": 1448,
+    "mean_cents": -1.087
+   },
+   {
+    "n": 804,
+    "mean_cents": -2.924
+   },
+   {
+    "n": 963,
+    "mean_cents": -0.737
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.274,
+  "per_window": [
+   {
+    "n": 289,
+    "mean_cents": -1.144
+   },
+   {
+    "n": 177,
+    "mean_cents": -1.098
+   },
+   {
+    "n": 199,
+    "mean_cents": -8.58
+   }
+  ]
+ },
+ {
+  "rule": "6m left, side yes priced 0.20-0.40, only GOL",
+  "spec": {
+   "left": 6,
+   "lo": 0.2,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.281,
+  "per_window": [
+   {
+    "n": 253,
+    "mean_cents": -3.263
+   },
+   {
+    "n": 165,
+    "mean_cents": -3.228
+   },
+   {
+    "n": 214,
+    "mean_cents": -7.087
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.10-0.90, price moved away the side by 2c over 3m",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.299,
+  "per_window": [
+   {
+    "n": 669,
+    "mean_cents": -3.158
+   },
+   {
+    "n": 405,
+    "mean_cents": -0.49
+   },
+   {
+    "n": 528,
+    "mean_cents": -2.098
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side yes priced 0.80-0.97",
+  "spec": {
+   "left": 4,
+   "lo": 0.8,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.339,
+  "per_window": [
+   {
+    "n": 899,
+    "mean_cents": -1.155
+   },
+   {
+    "n": 462,
+    "mean_cents": -1.448
+   },
+   {
+    "n": 558,
+    "mean_cents": -1.423
+   }
+  ]
+ },
+ {
+  "rule": "14m left, side yes priced 0.70-0.97, spread<=1c",
+  "spec": {
+   "left": 14,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.345,
+  "per_window": [
+   {
+    "n": 192,
+    "mean_cents": -4.578
+   },
+   {
+    "n": 105,
+    "mean_cents": -2.374
+   },
+   {
+    "n": 147,
+    "mean_cents": -6.182
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.10-0.30, spread<=1c",
+  "spec": {
+   "left": 1,
+   "lo": 0.1,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.387,
+  "per_window": [
+   {
+    "n": 289,
+    "mean_cents": -3.121
+   },
+   {
+    "n": 203,
+    "mean_cents": -2.577
+   },
+   {
+    "n": 250,
+    "mean_cents": -3.024
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.20-0.60, only BTC",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.468,
+  "per_window": [
+   {
+    "n": 217,
+    "mean_cents": -4.2
+   },
+   {
+    "n": 119,
+    "mean_cents": -1.321
+   },
+   {
+    "n": 159,
+    "mean_cents": -7.502
+   }
+  ]
+ },
+ {
+  "rule": "14m left, side no priced 0.30-0.60, only GOL",
+  "spec": {
+   "left": 14,
+   "lo": 0.3,
+   "hi": 0.6,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.503,
+  "per_window": [
+   {
+    "n": 1111,
+    "mean_cents": -3.825
+   },
+   {
+    "n": 682,
+    "mean_cents": 0.002
+   },
+   {
+    "n": 764,
+    "mean_cents": -2.786
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.03-0.40, only GOL, spread<=1c",
+  "spec": {
+   "left": 8,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.591,
+  "per_window": [
+   {
+    "n": 333,
+    "mean_cents": -3.247
+   },
+   {
+    "n": 308,
+    "mean_cents": -5.211
+   },
+   {
+    "n": 397,
+    "mean_cents": -0.421
+   }
+  ]
+ },
+ {
+  "rule": "3m left, side yes priced 0.03-0.10",
+  "spec": {
+   "left": 3,
+   "lo": 0.03,
+   "hi": 0.1,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.598,
+  "per_window": [
+   {
+    "n": 564,
+    "mean_cents": -1.243
+   },
+   {
+    "n": 229,
+    "mean_cents": -2.35
+   },
+   {
+    "n": 302,
+    "mean_cents": -1.952
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.03-0.80",
+  "spec": {
+   "left": 1,
+   "lo": 0.03,
+   "hi": 0.8,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.634,
+  "per_window": [
+   {
+    "n": 1256,
+    "mean_cents": -1.88
+   },
+   {
+    "n": 636,
+    "mean_cents": -1.253
+   },
+   {
+    "n": 804,
+    "mean_cents": -1.939
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side no priced 0.10-0.40, spread<=2c",
+  "spec": {
+   "left": 5,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.683,
+  "per_window": [
+   {
+    "n": 815,
+    "mean_cents": -3.077
+   },
+   {
+    "n": 524,
+    "mean_cents": -3.415
+   },
+   {
+    "n": 599,
+    "mean_cents": -0.167
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side no priced 0.03-0.70, only BTC",
+  "spec": {
+   "left": 12,
+   "lo": 0.03,
+   "hi": 0.7,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.693,
+  "per_window": [
+   {
+    "n": 1927,
+    "mean_cents": -2.096
+   },
+   {
+    "n": 931,
+    "mean_cents": -1.821
+   },
+   {
+    "n": 1258,
+    "mean_cents": -1.487
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side either priced 0.10-0.30",
+  "spec": {
+   "left": 1,
+   "lo": 0.1,
+   "hi": 0.3,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.79,
+  "per_window": [
+   {
+    "n": 422,
+    "mean_cents": -4.341
+   },
+   {
+    "n": 243,
+    "mean_cents": -2.514
+   },
+   {
+    "n": 297,
+    "mean_cents": -2.46
+   }
+  ]
+ },
+ {
+  "rule": "8m left, side yes priced 0.03-0.40, only GOL",
+  "spec": {
+   "left": 8,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -2.926,
+  "per_window": [
+   {
+    "n": 536,
+    "mean_cents": -3.949
+   },
+   {
+    "n": 348,
+    "mean_cents": -5.389
+   },
+   {
+    "n": 432,
+    "mean_cents": -0.607
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side either priced 0.80-0.90",
+  "spec": {
+   "left": 4,
+   "lo": 0.8,
+   "hi": 0.9,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -2.945,
+  "per_window": [
+   {
+    "n": 726,
+    "mean_cents": -2.777
+   },
+   {
+    "n": 418,
+    "mean_cents": -2.509
+   },
+   {
+    "n": 453,
+    "mean_cents": -1.91
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.20-0.90",
+  "spec": {
+   "left": 5,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -3.29,
+  "per_window": [
+   {
+    "n": 1835,
+    "mean_cents": -1.869
+   },
+   {
+    "n": 1029,
+    "mean_cents": -2.514
+   },
+   {
+    "n": 1300,
+    "mean_cents": -1.991
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side no priced 0.10-0.60, only BTC",
+  "spec": {
+   "left": 12,
+   "lo": 0.1,
+   "hi": 0.6,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -3.348,
+  "per_window": [
+   {
+    "n": 1553,
+    "mean_cents": -3.143
+   },
+   {
+    "n": 753,
+    "mean_cents": -2.866
+   },
+   {
+    "n": 1009,
+    "mean_cents": -2.431
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.10-0.40, spread<=2c",
+  "spec": {
+   "left": 1,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -3.393,
+  "per_window": [
+   {
+    "n": 243,
+    "mean_cents": -5.445
+   },
+   {
+    "n": 169,
+    "mean_cents": -3.732
+   },
+   {
+    "n": 194,
+    "mean_cents": -3.976
+   }
+  ]
+ },
+ {
+  "rule": "10m left, side no priced 0.10-0.80",
+  "spec": {
+   "left": 10,
+   "lo": 0.1,
+   "hi": 0.8,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -3.42,
+  "per_window": [
+   {
+    "n": 3215,
+    "mean_cents": -2.707
+   },
+   {
+    "n": 1751,
+    "mean_cents": -0.765
+   },
+   {
+    "n": 2126,
+    "mean_cents": -1.491
+   }
+  ]
+ },
+ {
+  "rule": "1m left, side yes priced 0.10-0.40",
+  "spec": {
+   "left": 1,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -3.609,
+  "per_window": [
+   {
+    "n": 285,
+    "mean_cents": -6.596
+   },
+   {
+    "n": 176,
+    "mean_cents": -3.451
+   },
+   {
+    "n": 201,
+    "mean_cents": -3.66
+   }
+  ]
+ },
+ {
+  "rule": "5m left, side yes priced 0.03-0.30",
+  "spec": {
+   "left": 5,
+   "lo": 0.03,
+   "hi": 0.3,
+   "side": "yes",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -4.061,
+  "per_window": [
+   {
+    "n": 1206,
+    "mean_cents": -2.241
+   },
+   {
+    "n": 668,
+    "mean_cents": -1.444
+   },
+   {
+    "n": 745,
+    "mean_cents": -3.834
+   }
+  ]
+ },
+ {
+  "rule": "14m left, side no priced 0.20-0.97",
+  "spec": {
+   "left": 14,
+   "lo": 0.2,
+   "hi": 0.97,
+   "side": "no",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -4.088,
+  "per_window": [
+   {
+    "n": 3707,
+    "mean_cents": -3.191
+   },
+   {
+    "n": 1977,
+    "mean_cents": -1.16
+   },
+   {
+    "n": 2492,
+    "mean_cents": -2.055
+   }
+  ]
+ },
+ {
+  "rule": "12m left, side either priced 0.03-0.20",
+  "spec": {
+   "left": 12,
+   "lo": 0.03,
+   "hi": 0.2,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -4.53,
+  "per_window": [
+   {
+    "n": 413,
+    "mean_cents": -2.836
+   },
+   {
+    "n": 172,
+    "mean_cents": -7.912
+   },
+   {
+    "n": 287,
+    "mean_cents": -4.204
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side either priced 0.20-0.90",
+  "spec": {
+   "left": 4,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "either",
+   "filters": []
+  },
+  "survivor": false,
+  "pooled_z": -4.589,
+  "per_window": [
+   {
+    "n": 1819,
+    "mean_cents": -3.539
+   },
+   {
+    "n": 1049,
+    "mean_cents": -2.101
+   },
+   {
+    "n": 1293,
+    "mean_cents": -2.228
+   }
+  ]
+ },
+ {
+  "rule": "4m left, side either priced 0.03-0.10, spread<=4c",
+  "spec": {
+   "left": 4,
+   "lo": 0.03,
+   "hi": 0.1,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "survivor": false,
+  "pooled_z": -5.502,
+  "per_window": [
+   {
+    "n": 1198,
+    "mean_cents": -2.081
+   },
+   {
+    "n": 552,
+    "mean_cents": -2.311
+   },
+   {
+    "n": 662,
+    "mean_cents": -1.321
+   }
+  ]
+ }
+]

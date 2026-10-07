@@ -1058,3 +1058,234 @@ import re as _re11
 _c11 = _re11.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_ls.__file__).read())
 assert not _re11.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c11)
 assert not _re11.search(r"place_order|/portfolio/", _c11), "research code never touches an order endpoint"
+
+# ---- automated rule search ----
+import random as _rs
+from scalper import search as _se
+from scalper import lstrats as _l2s
+
+def _sm(ticker, close, bid, ask, res, series="KXBTC15M", extra=()):
+    cs = [(close - 360, bid, ask, bid, ask)] + list(extra)
+    return (ticker, series, cs, close, res)
+
+_C0 = 1_790_000_000 - (1_790_000_000 % 900)
+_rule = lambda **k: {"left": 6, "lo": 0.88, "hi": 0.97, "side": "either", "filters": [], **k}
+
+# A search rule that is L1 must give exactly L1's numbers: the generic evaluator cannot disagree with the audited one.
+_mk = [_sm("A", _C0, 0.89, 0.90, "yes"), _sm("B", _C0 + 900, 0.03, 0.04, "no"), _sm("C", _C0 + 1800, 0.50, 0.52, "yes"),
+       _sm("D", _C0 + 2700, 0.89, 0.90, "")]
+_p = _se.prep(_mk)
+_got = sorted(_se.observe(m, _rule()) [1] for m in _p if _se.observe(m, _rule()))
+_ref = sorted(o["net"] for o in _l2s.hold_rule(_mk, **_l2s.L1))
+assert len(_got) == 2 and all(abs(a - b) < 1e-12 for a, b in zip(_got, _ref)), (_got, _ref)
+
+# The decision candle must be exactly the one asked for, a side selector must restrict the side, and band edges are inclusive.
+assert _se.observe(_p[0], _rule(left=5)) is None, "no candle at 5 minutes: nothing is substituted"
+assert _se.observe(_p[0], _rule(side="no")) is None and _se.observe(_p[0], _rule(side="yes")) is not None
+assert _se.observe(_p[0], _rule(lo=0.90, hi=0.97)) is not None and _se.observe(_p[0], _rule(lo=0.91, hi=0.97)) is None
+
+# Filters: spread, series and the market's own move toward or away from the side.
+assert _se.observe(_p[0], _rule(filters=[("spread", 0.01)])) is not None
+assert _se.observe(_p[0], _rule(filters=[("spread", 0.01)])) is not None and _se.observe(_se.prep([_sm("W", _C0, 0.86, 0.90, "yes")])[0], _rule(filters=[("spread", 0.02)])) is None
+assert _se.observe(_p[0], _rule(filters=[("series", "KXGOLD15M")])) is None
+_mv = _se.prep([_sm("M", _C0, 0.89, 0.90, "yes", extra=[(_C0 - 360 - 180, 0.84, 0.85, 0.84, 0.85)])])[0]       # YES mid rose 5c over the last 3 minutes
+assert _se.observe(_mv, _rule(filters=[("move", "toward", 0.05, 3)])) is not None, "a YES buy after a 5c rise moved toward the side"
+assert _se.observe(_mv, _rule(filters=[("move", "away", 0.05, 3)])) is None
+assert _se.observe(_mv, _rule(filters=[("move", "toward", 0.05, 5)])) is None, "no candle 5 minutes back: the filter cannot be evaluated, so no entry"
+_mv2 = _se.prep([_sm("N", _C0, 0.89, 0.90, "yes", extra=[(_C0 - 360 - 180, 0.001, 1.0, 0.001, 1.0)])])[0]      # an empty book 3 minutes back is not a price
+assert _se.observe(_mv2, _rule(filters=[("move", "toward", 0.05, 3)])) is None, "an unusable earlier quote cannot define a move"
+
+# Add or remove ONE filter, and nothing else changes.
+_g = _rs.Random(3)
+for _ in range(300):
+    _r0 = _se.normalize(_se.random_rule(_g)); _r1 = _se.normalize(_se.mutate(_r0, _g))
+    _a, _b = {tuple(f) for f in _r0["filters"]}, {tuple(f) for f in _r1["filters"]}
+    assert abs(len(_a) - len(_b)) == 1 and (_a <= _b or _b <= _a), (_r0, _r1)     # exactly one filter added or removed
+    assert {k: v for k, v in _r0.items() if k != "filters"} == {k: v for k, v in _r1.items() if k != "filters"}
+    assert len({f[0] for f in _r1["filters"]}) == len(_r1["filters"]) <= 3
+
+# The holdout is the later half of the DAYS and never overlaps the search window.
+_days = [_sm(f"X{i}", _C0 + 86400 * (i // 4) + 900 * (i % 4), 0.89, 0.90, "yes") for i in range(40)]
+_s, _h = _se.split_days(_se.prep(_days))
+assert _s and _h and max(m["day"] for m in _s) < min(m["day"] for m in _h)
+assert (len({m["day"] for m in _s}), len({m["day"] for m in _h})) == (5, 5), "half the days each"
+assert "holdout" not in _se.run_search.__code__.co_varnames and "hold" not in _se.run_search.__code__.co_varnames
+
+# THE selection guard. On a FAIR game, the best of 150 rules found in the search window looks good, and the same rules lose on fresh data.
+_gf = _rs.Random(11)
+def _fair(n, base):
+    out = []
+    for i in range(n):
+        p = _gf.choice([0.15, 0.35, 0.5, 0.65, 0.85, 0.93])
+        res = "yes" if _gf.random() < p else "no"
+        close = base + 900 * i
+        cs = [(close - 60 * L, round(p - 0.01, 4), round(p + 0.01, 4), round(p - 0.01, 4), round(p + 0.01, 4)) for L in _se.LEFTS]
+        out.append(("F%d_%d" % (base, i), "KXBTC15M" if i % 2 else "KXGOLD15M", cs, close, res))
+    return out
+_fs = _se.prep(_fair(1600, _C0)); _fh = _se.prep(_fair(1600, _C0 + 86400 * 20))
+_res = _se.run_search(_fs, seed=5, cycles=1)
+_best = _res["rounds"][-1]["top"][0]
+_hold = [_se.score(_fh, r["rule"]) for r in _res["rounds"][-1]["top"]]
+_hm = sum(h["mean"] for h in _hold) / len(_hold)
+assert _res["evaluated"] > 100 and _best["z"] >= _res["rounds"][-1]["top"][-1]["z"], "ranked best first"
+assert _best["z"] < 2.5, ("a fair game with costs must not produce a significant winner", _best["z"])
+assert _hm < 0.005, ("and it does not survive fresh data", _hm)
+
+# The control is a FAIR market: outcomes are drawn from each market's own last price, so a rule's win rate matches its price.
+_cm = _se.prep([_sm("Q%d" % i, _C0 + 900 * i, 0.79, 0.81, "yes", extra=[(_C0 + 900 * i - 60, 0.79, 0.81, 0.79, 0.81)]) for i in range(4000)])
+_cn = _se.fair_market(_cm, 3)
+_yr = sum(1 for m in _cn if m["res"] == "yes") / len(_cn)
+assert len(_cn) == 4000 and abs(_yr - 0.80) < 0.02, ("outcomes follow the price", _yr)
+assert [m["ticker"] for m in _cn] == [m["ticker"] for m in _cm], "same markets, same order"
+# Buying the 5c longshot in the control does NOT win half the time (the failure of the shuffle control).
+_lg = _se.prep([_sm("L%d" % i, _C0 + 900 * i, 0.04, 0.06, "no", extra=[(_C0 + 900 * i - 60, 0.04, 0.06, 0.04, 0.06)]) for i in range(4000)])
+_ln = _se.fair_market(_lg, 4)
+assert sum(1 for m in _ln if m["res"] == "yes") / len(_ln) < 0.09, "a 5c contract wins about 5% of the time in a fair market"
+print("search tests passed")
+
+import re as _re12
+_c12 = _re12.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_se.__file__).read())
+assert not _re12.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c12)
+assert not _re12.search(r"place_order|/portfolio/", _c12)
+
+# ---- overnight run: windows, the survivor test, and a pipeline that can say yes and can say no ----
+import tempfile as _tf3, random as _rn3
+from pathlib import Path as _P3
+from scalper import overnight as _ov
+
+def _world(edge, seed, old_days=24, orig_days=30, new_days=2, per_day=60):
+    g = _rn3.Random(seed); out = []
+    def day(base_ts, di):
+        for k in range(per_day):
+            p = g.choice([0.2, 0.4, 0.6, 0.8])
+            win = p + (edge if abs(p - 0.4) < 1e-9 else 0.0)
+            res = "yes" if g.random() < win else "no"
+            close = base_ts + di * 86400 + 3600 + k * 900
+            cs = [(close - 60 * L, round(p - 0.01, 4), round(p + 0.01, 4), round(p - 0.01, 4), round(p + 0.01, 4)) for L in _se.LEFTS]
+            out.append(("W%d_%d_%d" % (base_ts % 1000, di, k), "KXBTC15M" if k % 2 else "KXGOLD15M", cs, close, res))
+    for d in range(old_days): day(_ov.ORIG_START - old_days * 86400 - 3600 + 0, d)
+    for d in range(orig_days): day(_ov.ORIG_START + 3600, d)
+    for d in range(new_days): day(_ov.ORIG_END + 3600, d)
+    return _se.prep(out)
+
+_ms = _world(0.0, 1)
+_w = _ov.windows(_ms)
+assert set(_w) == {"W0s", "W0h", "W1", "W2", "W3"} and all(_w.values())
+assert all(m["close"] < _ov.ORIG_START for m in _w["W0s"] + _w["W0h"]), "W0 is the older data"
+assert all(_ov.ORIG_START <= m["close"] <= _ov.ORIG_END for m in _w["W1"] + _w["W2"]) and all(m["close"] > _ov.ORIG_END for m in _w["W3"])
+assert max(m["day"] for m in _w["W0s"]) < min(m["day"] for m in _w["W0h"]), "the locked third is the latest"
+_nd = len({m["day"] for m in _w["W0s"] + _w["W0h"]})
+assert (len({m["day"] for m in _w["W0s"]}), len({m["day"] for m in _w["W0h"]})) == (round(_nd * 2 / 3), _nd - round(_nd * 2 / 3)), "two thirds search, one third locked"
+assert max(m["day"] for m in _w["W1"]) < min(m["day"] for m in _w["W2"])
+assert not ({m["ticker"] for m in _w["W0s"]} & {m["ticker"] for m in _w["W0h"]})
+
+# The survivor test: a real edge passes, a fair game does not, and each way of failing fails.
+_edge = _world(0.15, 2); _ew = _ov.windows(_edge); _fw = _ov.windows(_world(0.0, 3))
+_r = {"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []}
+_yes = _ov.survivor(_r, [_ew["W0h"], _ew["W1"], _ew["W2"]])
+assert _yes["survivor"] and _yes["pooled_z"] >= 2.5 and all(p["mean"] > 0 for p in _yes["per_window"]), _yes
+_no = _ov.survivor(_r, [_fw["W0h"], _fw["W1"], _fw["W2"]])
+assert not _no["survivor"], _no
+assert not _ov.survivor(_r, [_ew["W0h"], _ew["W1"], _fw["W2"]])["survivor"], "one window with no edge fails the rule"
+assert not _ov.survivor(_r, [_ew["W0h"][:30], _ew["W1"], _ew["W2"]])["survivor"], "a window with fewer than 50 entries fails, however good its mean"
+assert _ov.survivor(_r, [_ew["W0h"], _ew["W1"], _ew["W2"]])["survivor"], "while the full window passes"
+
+# THE pipeline guard: with a real edge planted the search finds survivors; on a fair market it finds none, and neither does its control.
+import json as _js3
+with _tf3.TemporaryDirectory() as _empty, _tf3.TemporaryDirectory() as _saved:
+    (_P3(_saved) / "cycle1_A_top25.json").write_text(_js3.dumps([{"spec": {**_r, "filters": []}}]))
+    _res_a = _ov.run(_edge, seed=4, cycles=1, first_dir=_P3(_saved))
+    assert len(_res_a["stageA"]) == 1 and len(_res_a["stageA"][0]["per_window"]) == 3, "a stage A rule is judged on the three windows it did not search"
+    assert _res_a["stageA"][0]["per_window"][0]["n"] == len(_ov.observations(_ov.windows(_edge)["W0s"], _res_a["stageA"][0]["rule"])), "the first is W0s"
+    _res_e = _ov.run(_edge, seed=4, cycles=2, first_dir=_P3(_empty))
+    _res_f = _ov.run(_world(0.0, 5), seed=4, cycles=2, first_dir=_P3(_empty))
+assert any(r["survivor"] for r in _res_e["stageB"]), "a planted edge must be found out of sample"
+assert all(len(r["per_window"]) == 3 for r in _res_e["stageB"]), "a stage B rule is judged on W0h, W1 and W2"
+assert not any(r["survivor"] for r in _res_f["stageB"]) and not any(r["survivor"] for r in _res_f["control"]), "a fair market must produce no survivor"
+assert not any(r["survivor"] for r in _res_e["control"]), "the control of an edge world is a fair market too"
+assert _res_f["evaluated_B"] >= 200
+print("overnight tests passed")
+
+# ---- L8 and L9 (averaged settlement) ----
+from scalper import avgsettle as _av
+# The arithmetic in the README: at 0.6 sigma (one minute) a single end price gives 73% and the averaged value gives 85%.
+_z6 = 0.6 / _mt.sqrt(6)                      # ln(S/K)/sigma = 0.6 one-minute sigmas
+assert abs(_av.model_p(_z6, 0.0) - 0.85) < 0.005, _av.model_p(_z6, 0.0)
+assert abs(_av.phi(0.6) - 0.726) < 0.002
+assert 0.5 < _av.model_p(_z6, 13.0) < 0.60, "far from the close the gap is small against the remaining variance"
+assert abs(_av.model_p(-_z6, 0.0) - (1 - _av.model_p(_z6, 0.0))) < 1e-12, "symmetric"
+# Entries: the decision candle ends exactly left_s before the close; a market priced at the model gives no entry; a market priced
+# far below the model is bought, and settles with the usual fee.
+_close = _C0 + 900
+_sp = {(_close - 60) - 60 * k - 60: 110.0 * (1 + 0.0005 * _mt.sin(k)) for k in range(0, 70)}
+_mk9 = [("M", _close, 100.0, "yes", {_close - 60: (0.60, 0.62)})]
+_e9 = _av.entries(_mk9, _sp, 60, 0.0)
+assert len(_e9) == 1 and _e9[0]["side"] == "yes" and abs(_e9[0]["price"] - 0.62) < 1e-9, "model near 100% against a 62c ask is bought"
+assert abs(_e9[0]["net"] - (1.0 - 0.62 - _di.fee(0.62))) < 1e-12
+assert _av.entries([("M", _close, 100.0, "yes", {_close - 120: (0.60, 0.62)})], _sp, 60, 0.0) == [], "no candle at exactly 1 minute left: nothing"
+assert _av.entries([("M", _close, 100.0, "yes", {_close - 60: (0.99, 1.0)})], _sp, 60, 0.0) == [], "an empty book is not a quote"
+assert _av.entries([("M", _close, 100.0, "yes", {_close - 60: (0.994, 0.996)})], _sp, 60, 0.0) == [], "priced at the model: no entry"
+assert _av.entries([("M", _close, None, "yes", {_close - 60: (0.6, 0.62)})], _sp, 60, 0.0) == [], "no strike, no model"
+print("L8 L9 tests passed")
+
+# ---- batched backfill ----
+import sqlite3 as _sq13
+from scalper import backfill as _bf, api as _api13
+_calls13 = []
+def _fake_settled(series, lo, hi):
+    return [{"ticker": f"{series}-T{i}", "open_time": "2026-08-01T00:00:00Z", "close_time": "2026-08-01T00:15:00Z", "result": "yes", "floor_strike": 100.0} for i in range(120)]
+def _fake_batch(tickers, a, b):
+    _calls13.append(len(tickers))
+    return {t: ([] if t.endswith("T7") else [{"end_period_ts": 1000, "yes_bid": {"close_dollars": "0.40"}, "yes_ask": {"close_dollars": "0.42"}}]) for t in tickers}
+_o13 = (_api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES)
+_api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES = _fake_settled, _fake_batch, 0, ("KXBTC15M",)
+try:
+    _db13 = _sq13.connect(":memory:"); _db13.executescript(_bf.SCHEMA)
+    _st, _sk, _em = _bf._fetch(_db13, 0, 1, "test", skip_empty=True)
+    assert max(_calls13) <= _bf.BATCH == 20 and len(_calls13) == 6, ("120 markets go in batches of at most 20", _calls13)
+    assert (_st, _sk, _em) == (119, 0, 1), "a market with no candles is not stored when skip_empty is on"
+    assert _db13.execute("SELECT COUNT(*) FROM market").fetchone()[0] == 119 and _db13.execute("SELECT COUNT(*) FROM candle").fetchone()[0] == 119
+    _calls13.clear()
+    _st2, _sk2, _ = _bf._fetch(_db13, 0, 1, "again", skip_empty=True)
+    assert _st2 == 0 and _sk2 == 119 and len(_calls13) == 1, "stored markets are never fetched again (only the one empty market is retried)"
+finally:
+    _api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES = _o13
+# A batch the endpoint refuses falls back to one request per market instead of losing the chunk.
+def _bad_batch(tickers, a, b):
+    raise RuntimeError("GET /markets/candlesticks failed: HTTP Error 400: Bad Request")
+def _one(series, ticker, a, b):
+    return [{"end_period_ts": 1000, "yes_bid": {"close_dollars": "0.40"}, "yes_ask": {"close_dollars": "0.42"}}]
+_o14 = (_api13.settled_markets, _api13.batch_candlesticks, _api13.candlesticks, _bf.PAUSE_S, _bf.SERIES)
+_api13.settled_markets, _api13.batch_candlesticks, _api13.candlesticks, _bf.PAUSE_S, _bf.SERIES = _fake_settled, _bad_batch, _one, 0, ("KXBTC15M",)
+try:
+    _db14 = _sq13.connect(":memory:"); _db14.executescript(_bf.SCHEMA)
+    _st3, _, _ = _bf._fetch(_db14, 0, 1, "fallback")
+    assert _st3 == 120 and _db14.execute("SELECT COUNT(*) FROM candle").fetchone()[0] == 120, "every market stored via the fallback"
+finally:
+    _api13.settled_markets, _api13.batch_candlesticks, _api13.candlesticks, _bf.PAUSE_S, _bf.SERIES = _o14
+print("batched backfill tests passed")
+
+# The fair null: each rule has zero edge at its OWN decision price, so it loses its costs, never produces survivors by luck at the fixed bar
+# more than rarely, and ignores the real outcomes entirely (a planted edge changes nothing in it).
+_nrules = [{"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []}, {"left": 4, "lo": 0.10, "hi": 0.30, "side": "either", "filters": []}]
+_nw = _ov.windows(_world(0.0, 9)); _nw_edge = _ov.windows(_world(0.15, 9))
+_oos = [[_nw["W0h"], _nw["W1"], _nw["W2"]]] * 2
+_a1 = _ov.fair_null(_nrules, _oos, 60, seed=2)
+_a2 = _ov.fair_null(_nrules, [[_nw_edge["W0h"], _nw_edge["W1"], _nw_edge["W2"]]] * 2, 60, seed=2)
+assert _a1["best"] == _a2["best"], "the null never reads outcomes, so a planted edge cannot change it"
+assert sum(_a1["survivors"]) <= 3 and max(_a1["best"]) < 3.5, ("luck at the fixed bar is rare for two fair rules", _a1["survivors"], max(_a1["best"]))
+_en = _ov.entries_of(_nw["W1"], _nrules[0])
+assert _en and all(abs(c - (m + 0.0)) < 1.0 for _, c, m in _en) and sum(m - c for _, c, m in _en) < 0, "a fair rule loses its costs in expectation"
+# The criteria in one place, each condition on its own.
+assert _ov.passes([60, 60, 60], [0.01, 0.01, 0.01], 2.5) and not _ov.passes([60, 60, 60], [0.01, 0.01, 0.01], 2.49)
+assert not _ov.passes([60, 49, 60], [0.01, 0.01, 0.01], 3.0), "49 entries in a window fails"
+assert not _ov.passes([60, 60, 60], [0.01, 0.0, 0.01], 3.0) and not _ov.passes([60, 60, 60], [0.01, -0.01, 0.01], 3.0), "a non-positive window fails"
+# In the null, a window below 50 entries can never make a survivor, however lucky its draws (30 near-certain winners are positive almost every time).
+_tiny = _se.prep([_sm("Z%d" % i, _C0 + 86400 * (i // 10) + 900 * (i % 10), round(0.96 + 0.01 * (i % 3), 4), round(0.97 + 0.01 * (i % 3), 4), "yes") for i in range(30)])
+_tn = _ov.fair_null([{"left": 6, "lo": 0.90, "hi": 0.999, "side": "yes", "filters": []}], [[_tiny, _tiny, _tiny]], 40, seed=3)
+assert sum(_tn["survivors"]) == 0 and max(_tn["best"]) > 2.5, ("a lucky tiny window is positive with a high z yet cannot survive", _tn["best"][:3])
+# The entries a rule pays include the fee, not only the ask.
+_em = _se.prep([_sm("E1", _C0, 0.39, 0.41, "yes")])
+_ee = _ov.entries_of(_em, {"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []})
+assert len(_ee) == 1 and abs(_ee[0][1] - (0.41 + _se.fee(0.41))) < 1e-12 and abs(_ee[0][2] - 0.40) < 1e-12, _ee
+print("fair null tests passed")
