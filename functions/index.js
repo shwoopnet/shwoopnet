@@ -344,6 +344,10 @@ exports.kalshiLiveArm = onCall(async (request) => {
   if (sess.exists && sess.data().active === true && sess.data().until > Date.now()) {
     throw new HttpsError("failed-precondition", "The 24 hour L1 session is running. Stop it before arming a single test order.");
   }
+  const sessD = await getFirestore().collection("kalshiLiveControl").doc("sessionD").get();
+  if (sessD.exists && sessD.data().active === true && sessD.data().until > Date.now()) {
+    throw new HttpsError("failed-precondition", "The rule D session is running. Stop it before arming a single test order.");
+  }
   const now = Date.now();
   await ref.set({ armed: true, since: now, until: now + live.ARM_MS, endedAt: null, endedBecause: null });
   await events.add({ ts: now, kind: "armed", detail: "scanning every minute for up to 3 hours, one order at most" });
@@ -377,6 +381,33 @@ exports.kalshiL1Session = onCall(async (request) => {
   return { active: true, until: now + live.L1_SESSION_MS };
 });
 
+// The rule D forward test (README: "Live waiver: rule D forward test"). Like the L1 session: this only switches its session document on or off with a
+// server-set expiry; the scheduled function below does the work, and every limit is in kalshiLiveLib.js. It runs beside the L1 session.
+exports.kalshiDSession = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  ensureDefaultAdminApp();
+  const on = request.data && request.data.on === true;
+  const db = getFirestore();
+  const ref = db.collection("kalshiLiveControl").doc("sessionD");
+  const events = db.collection("kalshiLiveEvents");
+  if (!on) {
+    await ref.set({ active: false, endedAt: Date.now(), endedBecause: "switched off by the owner" }, { merge: true });
+    await events.add({ ts: Date.now(), kind: "rule D ended", detail: "switched off by you" });
+    return { active: false };
+  }
+  if (KALSHI_LIVE_ENABLED.value() !== "on") {
+    throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to start.");
+  }
+  const arm = await db.collection("kalshiLiveControl").doc("arm").get();
+  if (arm.exists && arm.data().armed === true && arm.data().until > Date.now()) {
+    throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting rule D.");
+  }
+  const now = Date.now();
+  await ref.set({ active: true, since: now, until: now + live.D_SESSION_MS, ordersSent: 0, startCash: null, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a Bitcoin market about 2 minutes from its close." });
+  await events.add({ ts: now, kind: "rule D started", detail: "rule D for 24 hours: one contract on a 3c to 20c side of Bitcoin about 2 minutes before the close, spread 1c or less, at most " + live.D_MAX_ORDERS + " orders, stops at $" + live.D_LOSS_STOP.toFixed(2) + " below the starting cash" });
+  return { active: true, until: now + live.D_SESSION_MS };
+});
+
 exports.kalshiLiveArmed = onSchedule(
   { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
   async () => {
@@ -400,8 +431,12 @@ exports.kalshiLiveArmed = onSchedule(
       const sessSnap = await sessRef.get();
       const session = sessSnap.exists ? sessSnap.data() : null;
       const sessionOn = Boolean(session && session.active === true);
+      const sessDRef = db.collection("kalshiLiveControl").doc("sessionD");
+      const sessDSnap = await sessDRef.get();
+      const sessionD = sessDSnap.exists ? sessDSnap.data() : null;
+      const sessionDOn = Boolean(sessionD && sessionD.active === true);
       let market = null;
-      if (armedOn || sessionOn) market = await live.loadQuotes(kalshiMarketApi());
+      if (armedOn || sessionOn || sessionDOn) market = await live.loadQuotes(kalshiMarketApi());
       if (armedOn) {
         Object.assign(args, {
           quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
@@ -414,6 +449,14 @@ exports.kalshiLiveArmed = onSchedule(
       if (sessionOn && !armedOn) {
         await live.runL1Tick({
           session, now, setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent,
+          quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
+          keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
+        });
+      }
+      // Rule D runs beside the L1 session in the same minute, with its own document and limits, and never beside a single armed test.
+      if (sessionDOn && !armedOn) {
+        await live.runDTick({
+          session: sessionD, now, setSession: (patch) => sessDRef.set(patch, { merge: true }), logEvent: args.logEvent,
           quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
         });

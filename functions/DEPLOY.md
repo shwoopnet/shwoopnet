@@ -224,3 +224,26 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
   one-contract test's limit of 5 ever; after a session the single test button will say the limit is reached.
 - **Reading it.** Net result after fees plus the counts of fills, no fills and refusals. About 55 trades a day, so a day is noise (plus or
   minus about $2); it tests fills, fees and timing.
+
+## Rule D forward test (Oct 7, 2026)
+
+A second 24 hour session beside the L1 session. Terms: `kalshi-scalper/README.md`, "Live waiver: rule D forward test", written before the code.
+D came out of a search, so this is its first clean test. It is off until you start it from the Bot tab ("Rule D forward test", two clicks).
+
+- **What it does.** About 2 minutes before each BITCOIN close (95 to 155 seconds left), it re-reads the market and, if a side's fresh price is 3c to 20c,
+  the book is real and the spread is 1c or less, buys ONE contract at the touch, immediate-or-cancel, held to settlement. One order per market
+  (id `D-<ticker>`, record created first), production host only, never retried. Gold is never traded by D.
+- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 60 orders, 24 hours, ends when cash falls $4.00 below its level at the first tick, on the
+  first order whose answer is lost or refused, and while any earlier order (L1's too) is unresolved. The server switch, the halt switch and the shard
+  balance (cost plus $0.50, on shard 2) apply. The loss stops count total cash, so D's and L1's losses share one risk budget.
+- **Deploy:** `firebase deploy --only functions:kalshiDSession,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`, then reload the site.
+  Start it from the Bot tab; stop it from the same card.
+- **Reading it.** Net after fees, fills and no-fills, and the win rate against the price paid. About 27 trades a day; a day proves nothing, 30 days
+  is what it takes. Expect no edge in US trading hours.
+
+## Deploy checklist for everything merged since the paper bot removal
+
+1. `git checkout main && git pull origin main`
+2. `firebase deploy --only functions,firestore:rules` (the recorder `kalshiBookRecorder`, the D session, the L1 session changes and the paper removal)
+3. `firebase functions:delete kalshiBot --region us-central1` (the old paper bot, now gone from the code)
+4. Check `KALSHI_LIVE_ENABLED=on` is still in `functions/.env` if you want orders to go out. Both sessions refuse to start when it is off.
