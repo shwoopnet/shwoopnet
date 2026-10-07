@@ -3,7 +3,7 @@
 // (recorded in kalshi-scalper/README.md). It proves the real-money plumbing (production signing, a real fill, the
 // real fee, the real duplicate-order behaviour) with ONE contract. It is not the bot and cannot become it:
 //
-// - One contract, a hard $2.00 cap including the fee, Bitcoin only, immediate-or-cancel so nothing rests.
+// - One contract, a hard $2.00 cap including the fee, Bitcoin or gold, immediate-or-cancel so nothing rests.
 // - Fails closed. It does nothing unless the switch KALSHI_LIVE_ENABLED is "on" (default off), the bot is not
 //   halted, the exchange is trading and the account balance is readable and enough.
 // - Hard totals: at most 2 a day and 5 ever. Past that this module refuses until a person edits it.
@@ -25,7 +25,7 @@ const LIVE_BASE = "https://external-api.kalshi.com/trade-api/v2";
 const LIVE_HOSTS = ["external-api.kalshi.com"];
 const API_ROOT = "/trade-api/v2";
 const LIVE_CAP = 2.0;               // dollars, fee included. Not a parameter: change it here, in review.
-const LIVE_SERIES = ["KXBTC15M"];
+const LIVE_SERIES = ["KXBTC15M", "KXGOLD15M"];   // gold has real volume on production; only the DEMO's gold book is empty
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -131,7 +131,12 @@ async function runLiveTest({ quotes, active, enabled, store, now, keyId, pem, fe
 
   const all = bot.planEntries(quotes, now, LIVE_CAP);
   const signals = all.filter((s) => LIVE_SERIES.includes(s.series));
-  if (!signals.length) return no("No Bitcoin signal right now: no market is at a 40c or 50c price with a tradable book. Try again in a few minutes.");
+  if (!signals.length) return no("No Bitcoin or gold signal right now: no market is at a 40c or 50c price with a tradable book. Try again in a few minutes.");
+
+  // Read the balance once. Each market lives on its own shard and each shard holds its own funds, so a signal on a
+  // market whose shard is empty is skipped for the next one, instead of the whole test failing on it.
+  const bal = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/balance", nowMs: now });
+  if (bal.status !== 200) return no("The account balance could not be read (HTTP " + bal.status + "), so nothing was sent.");
 
   // Refresh the price from the exchange itself, right before sending, and keep only a market that is still open.
   let chosen = null, market = null, plan = null;
@@ -144,18 +149,16 @@ async function runLiveTest({ quotes, active, enabled, store, now, keyId, pem, fe
     if (Date.parse(m.close_time) - now <= MIN_LEFT_MS) { skipped.push(s.ticker + ": closing too soon"); continue; }
     const p = livePlan(s, m);
     if (!p.ok) { skipped.push(s.ticker + ": " + p.why); continue; }
+    const avail = availableFor(bal.body, m.exchange_index);
+    if (!Number.isFinite(avail)) { skipped.push(s.ticker + ": the balance came back in a shape this code does not recognise"); continue; }
+    if (avail < p.cost + BALANCE_MARGIN) {
+      skipped.push(s.ticker + ": the account has $" + avail.toFixed(2) + " available" + (m.exchange_index !== undefined ? " on shard " + m.exchange_index : "") + " and this order needs $" + (p.cost + BALANCE_MARGIN).toFixed(2) + ", and funds on another shard do not count, so move money to that shard in the Kalshi app first");
+      continue;
+    }
     chosen = s; market = m; plan = p;
     break;
   }
   if (!chosen) return no("There is a signal, but nothing safe to send (" + skipped.join("; ") + "). Nothing was sent.");
-
-  const bal = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/balance", nowMs: now });
-  if (bal.status !== 200) return no("The account balance could not be read (HTTP " + bal.status + "), so nothing was sent.");
-  const avail = availableFor(bal.body, market.exchange_index);
-  if (!Number.isFinite(avail)) return no("The balance came back in a shape this code does not recognise, so nothing was sent.");
-  if (avail < plan.cost + BALANCE_MARGIN) {
-    return no("The account has $" + avail.toFixed(2) + " available for this market" + (market.exchange_index !== undefined ? " (shard " + market.exchange_index + ")" : "") + ", and this order needs $" + (plan.cost + BALANCE_MARGIN).toFixed(2) + ". Funds on another shard do not count: move money to that shard in the Kalshi app first. Nothing was sent.");
-  }
 
   const cid = "L-" + chosen.ticker;
   const record = {

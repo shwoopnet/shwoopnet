@@ -2451,7 +2451,7 @@
         cb(q.docs.map(function(d){ return d.data(); }));
       }, function(err){ console.error('Kalshi demo sync error:', err); });
     },
-    // ONE contract of REAL money, Bitcoin only, from the bot's current signal. The server decides everything
+    // ONE contract of REAL money, Bitcoin or gold, from the bot's current signal. The server decides everything
     // (and refuses unless its own switch is on): no ticker, price or size can be sent from here.
     kalshiLiveTrade: function(){
       return kalshiLiveTradeFn({}).then(function(res){ return res.data; });
@@ -3311,7 +3311,7 @@
       </div>
       <div class="kal-card">
         <div class="kal-card-title">Live test trade (real money)</div>
-        <div class="kal-note">Sends ONE contract of REAL money to Kalshi from the bot's current Bitcoin signal, at most $2.00 including the fee. It proves the live path: the real fill, the real fee and the real duplicate-order behaviour. It does nothing unless the server switch is on, and it is limited to 2 a day and 5 ever. If Kalshi's answer is ever lost it says so, does not retry, and blocks the next test until you have looked at your Kalshi account.</div>
+        <div class="kal-note">Sends ONE contract of REAL money to Kalshi from the bot's current Bitcoin or gold signal, at most $2.00 including the fee. It proves the live path: the real fill, the real fee and the real duplicate-order behaviour. It does nothing unless the server switch is on, and it is limited to 2 a day and 5 ever. If Kalshi's answer is ever lost it says so, does not retry, and blocks the next test until you have looked at your Kalshi account.</div>
         <div class="kal-actions">
           <button class="kal-btn" id="kalLiveSend" type="button">Send one live test trade</button>
           <span id="kalLiveConfirm" hidden><span class="kal-note">This places a REAL order with real money (up to $2.00). Send it?</span> <button class="kal-btn" id="kalLiveYes" type="button">Yes, send real order</button> <button class="kal-btn" id="kalLiveNo" type="button">Cancel</button></span>
