@@ -977,6 +977,19 @@
   .kal-actions{ display:flex; align-items:center; gap:12px; margin:12px 0 4px; flex-wrap:wrap; }
   .kal-btn{ background:var(--paper); color:var(--ink); border:0; border-radius:8px; padding:9px 16px; font:inherit; font-weight:600; cursor:pointer; }
   .kal-mini{ background:transparent; color:var(--paper); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font:inherit; font-size:12px; cursor:pointer; margin-right:6px; }
+  /* The Bot tab lays its cards side by side like the equities setup cards, and wraps to fewer columns on a narrow screen. */
+  .kal-bot-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:20px; align-items:start; }
+  .kal-layout-bar{ display:flex; justify-content:flex-end; }
+  .kal-layout{ position:relative; }
+  .kal-layout > summary{ list-style:none; cursor:pointer; }
+  .kal-layout > summary::-webkit-details-marker{ display:none; }
+  .kal-layout-body{ position:absolute; right:0; top:34px; z-index:5; min-width:240px; display:grid; gap:10px; padding:14px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 8px 24px rgba(0,0,0,.18); }
+  .kal-layout-body label{ display:flex; align-items:center; gap:8px; font-size:13px; }
+  .kal-layout-body select{ width:auto; }
+  .kal-bot-grid > .kal-card{ margin-bottom:0; min-width:0; }
+  .kal-bot-grid > .kal-span{ grid-column:1 / -1; }
+  .kal-bot-grid .kal-trade{ grid-template-columns:1fr 1fr; }
+  .kal-bot-grid .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); }
   .kal-more{ margin-top:10px; }
   .kal-more > summary{ cursor:pointer; color:var(--muted); font-size:12.5px; }
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
@@ -3294,14 +3307,23 @@
       <button class="kal-tab" data-kal-tab="live" role="tab">Live books</button>
     </div>
 
-    <div id="kalTabBot">
-      <div class="kal-card">
+    <div id="kalTabBot" class="kal-bot-grid">
+      <div class="kal-span kal-layout-bar">
+        <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
+          <div class="kal-layout-body">
+            <label for="kalLayoutCols">Columns <select class="kal-input" id="kalLayoutCols"><option value="auto">Auto</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
+            <div id="kalLayoutCards"></div>
+            <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
+          </div>
+        </details>
+      </div>
+      <div class="kal-card" data-card="account">
         <div class="kal-card-title">Live account (real money)</div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-actions"><button class="kal-btn" id="kalBotHalt" type="button" hidden></button><span class="kal-note" id="kalBotHaltMsg"></span></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
       </div>
-      <div class="kal-card">
+      <div class="kal-card" data-card="session">
         <div class="kal-card-title">24 hour L1 session</div>
         <div class="kal-actions">
           <button class="kal-btn" id="kalL1Start" type="button">Start 24 hour session</button>
@@ -3314,13 +3336,15 @@
           <div class="kal-note">One contract about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement. At most 80 orders and $2.00 each. Stops after 24 hours, at $7.00 below the starting cash, or on any order that goes wrong. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
         </details>
       </div>
-      <div class="kal-card">
+      <div class="kal-card" data-card="positions">
         <div class="kal-card-title">Open positions</div>
         <div id="kalBotOpen"></div>
-        <div class="kal-sub">Recent trades</div>
+      </div>
+      <div class="kal-card" data-card="trades">
+        <div class="kal-card-title">Recent trades</div>
         <div id="kalBotClosed"></div>
       </div>
-      <div class="kal-card">
+      <div class="kal-card kal-span" data-card="detail">
         <details class="kal-fold"><summary class="kal-card-title">Account detail and starting line</summary>
           <div class="kal-note kal-first">Reads your real Kalshi account with the live key; it cannot place or change anything. Funds are held per shard, and an order uses only its market's shard (Bitcoin and gold were both on shard 2).</div>
           <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
@@ -3333,7 +3357,7 @@
           <div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div>
         </details>
       </div>
-      <div class="kal-card">
+      <div class="kal-card kal-span" data-card="log">
         <details class="kal-fold"><summary class="kal-card-title">What it did</summary>
           <div id="kalBotEvents"></div>
         </details>
@@ -10135,6 +10159,43 @@
       document.getElementById('kalBotHaltMsg').textContent = 'Could not change it: ' + ((err && err.message) || 'unknown');
     });
   });
+
+  // Layout of the Bot tab: how many columns, and which of the optional cards show. Remembered in this browser only. The live
+  // account and the session card cannot be hidden, so the halt and stop buttons are always on screen.
+  (function(){
+    var OPTIONAL = [['positions', 'Open positions'], ['trades', 'Recent trades'], ['detail', 'Account detail'], ['log', 'What it did']];
+    var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {} };
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if(saved && typeof saved === 'object'){
+        if(['auto', '1', '2', '3', '4'].indexOf(String(saved.cols)) > -1){ layout.cols = String(saved.cols); }
+        OPTIONAL.forEach(function(o){ if(saved.hidden && saved.hidden[o[0]] === true){ layout.hidden[o[0]] = true; } });
+      }
+    } catch(e){ /* storage can be blocked: the layout just resets each visit */ }
+    var grid = document.getElementById('kalTabBot'), colsSel = document.getElementById('kalLayoutCols'), list = document.getElementById('kalLayoutCards');
+    list.innerHTML = OPTIONAL.map(function(o){
+      return '<label><input type="checkbox" data-card-toggle="' + o[0] + '"> ' + o[1] + '</label>';
+    }).join('');
+    function apply(){
+      grid.style.gridTemplateColumns = layout.cols === 'auto' ? '' : 'repeat(' + layout.cols + ', minmax(0, 1fr))';
+      colsSel.value = layout.cols;
+      OPTIONAL.forEach(function(o){
+        var card = grid.querySelector('[data-card="' + o[0] + '"]');
+        if(card){ card.hidden = layout.hidden[o[0]] === true; }
+        list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true;
+      });
+    }
+    function save(){ try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch(e){ /* optional */ } }
+    colsSel.addEventListener('change', function(){ layout.cols = colsSel.value; apply(); save(); });
+    list.addEventListener('change', function(e){
+      var k = e.target && e.target.getAttribute('data-card-toggle');
+      if(!k){ return; }
+      if(e.target.checked){ delete layout.hidden[k]; } else { layout.hidden[k] = true; }
+      apply(); save();
+    });
+    document.getElementById('kalLayoutReset').addEventListener('click', function(){ layout = { cols: 'auto', hidden: {} }; apply(); save(); });
+    apply();
+  })();
 
   // Starting the 24 hour session asks twice: the first click only asks, the confirm click is the only one that starts it.
   (function(){
