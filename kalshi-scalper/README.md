@@ -207,6 +207,26 @@ no free gold spot series here.
 - **What it does not say.** Not tested: gold, anything faster than one minute, or
   whether resting orders earn the spread (candles cannot show fills).
 
+**2026-10-07: H6, a market maker that stops quoting into a move: `FALSIFIED`.**
+One run, on the disjoint sample and rules fixed before any code (see H6 above). Nothing was changed after seeing it.
+
+- 1,217 markets, z of -13.3, mean **-22.0c a market**, -24.1c and -19.8c in the two halves, -24.4c with fees 20%
+  higher. The bar was +1c.
+- **The gate worked and it was not enough.** The H5 always-quote control on the SAME markets lost 40.6c (H5 on
+  its own sample: 41.3c, so the loss is not a feature of one sample). The gate cut it by 18.6c. My prediction was
+  -25c to -35c, so it did better than I expected, and it is still 23c short of the bar.
+- Decomposition: round trips **-17.3c**, leftover inventory **+7.4c**, fees **-12.1c**. The leftover turned
+  positive (the gate no longer buys a falling market and holds it to zero), and fees fell by about 9c because
+  fills per market halved (4.4 buys, 4.5 sells). The gate skipped 41.7% of quote sides, and the fills it
+  refused would have made -19.5c a market, so it refused mostly losers, as intended.
+- **The loss that remains is in the round trips (-17.3c), and the gate did not touch it.** Completed pairs
+  still lose money before fees, which says a pair is formed at a worse price than its first leg even after a
+  move filter. With no fee at all it is still -9.9c, and with fills counted at our price -10.9c.
+- **What it does not say.** The 1c threshold and the once-a-minute quote are the only version tested. Quoting
+  is still one contract each side, the fee is the taker formula (a resting order may pay less), and a quoter
+  that re-prices inside the minute needs a sub-minute book history that does not exist yet (the collector
+  noted in H6). Fills are the conservative strictly-through model.
+
 **2026-10-06: H5, quoting both sides as a market maker: `FALSIFIED`.**
 One run, on the sample and rules fixed before any code (see H5 above). Nothing was changed after seeing it.
 
