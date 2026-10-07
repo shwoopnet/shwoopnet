@@ -1058,3 +1058,88 @@ import re as _re11
 _c11 = _re11.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_ls.__file__).read())
 assert not _re11.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c11)
 assert not _re11.search(r"place_order|/portfolio/", _c11), "research code never touches an order endpoint"
+
+# ---- automated rule search ----
+import random as _rs
+from scalper import search as _se
+from scalper import lstrats as _l2s
+
+def _sm(ticker, close, bid, ask, res, series="KXBTC15M", extra=()):
+    cs = [(close - 360, bid, ask, bid, ask)] + list(extra)
+    return (ticker, series, cs, close, res)
+
+_C0 = 1_790_000_000 - (1_790_000_000 % 900)
+_rule = lambda **k: {"left": 6, "lo": 0.88, "hi": 0.97, "side": "either", "filters": [], **k}
+
+# A search rule that is L1 must give exactly L1's numbers: the generic evaluator cannot disagree with the audited one.
+_mk = [_sm("A", _C0, 0.89, 0.90, "yes"), _sm("B", _C0 + 900, 0.03, 0.04, "no"), _sm("C", _C0 + 1800, 0.50, 0.52, "yes"),
+       _sm("D", _C0 + 2700, 0.89, 0.90, "")]
+_p = _se.prep(_mk)
+_got = sorted(_se.observe(m, _rule()) [1] for m in _p if _se.observe(m, _rule()))
+_ref = sorted(o["net"] for o in _l2s.hold_rule(_mk, **_l2s.L1))
+assert len(_got) == 2 and all(abs(a - b) < 1e-12 for a, b in zip(_got, _ref)), (_got, _ref)
+
+# The decision candle must be exactly the one asked for, a side selector must restrict the side, and band edges are inclusive.
+assert _se.observe(_p[0], _rule(left=5)) is None, "no candle at 5 minutes: nothing is substituted"
+assert _se.observe(_p[0], _rule(side="no")) is None and _se.observe(_p[0], _rule(side="yes")) is not None
+assert _se.observe(_p[0], _rule(lo=0.90, hi=0.97)) is not None and _se.observe(_p[0], _rule(lo=0.91, hi=0.97)) is None
+
+# Filters: spread, series and the market's own move toward or away from the side.
+assert _se.observe(_p[0], _rule(filters=[("spread", 0.01)])) is not None
+assert _se.observe(_p[0], _rule(filters=[("spread", 0.01)])) is not None and _se.observe(_se.prep([_sm("W", _C0, 0.86, 0.90, "yes")])[0], _rule(filters=[("spread", 0.02)])) is None
+assert _se.observe(_p[0], _rule(filters=[("series", "KXGOLD15M")])) is None
+_mv = _se.prep([_sm("M", _C0, 0.89, 0.90, "yes", extra=[(_C0 - 360 - 180, 0.84, 0.85, 0.84, 0.85)])])[0]       # YES mid rose 5c over the last 3 minutes
+assert _se.observe(_mv, _rule(filters=[("move", "toward", 0.05, 3)])) is not None, "a YES buy after a 5c rise moved toward the side"
+assert _se.observe(_mv, _rule(filters=[("move", "away", 0.05, 3)])) is None
+assert _se.observe(_mv, _rule(filters=[("move", "toward", 0.05, 5)])) is None, "no candle 5 minutes back: the filter cannot be evaluated, so no entry"
+_mv2 = _se.prep([_sm("N", _C0, 0.89, 0.90, "yes", extra=[(_C0 - 360 - 180, 0.001, 1.0, 0.001, 1.0)])])[0]      # an empty book 3 minutes back is not a price
+assert _se.observe(_mv2, _rule(filters=[("move", "toward", 0.05, 3)])) is None, "an unusable earlier quote cannot define a move"
+
+# Add or remove ONE filter, and nothing else changes.
+_g = _rs.Random(3)
+for _ in range(300):
+    _r0 = _se.normalize(_se.random_rule(_g)); _r1 = _se.normalize(_se.mutate(_r0, _g))
+    _a, _b = {tuple(f) for f in _r0["filters"]}, {tuple(f) for f in _r1["filters"]}
+    assert abs(len(_a) - len(_b)) == 1 and (_a <= _b or _b <= _a), (_r0, _r1)     # exactly one filter added or removed
+    assert {k: v for k, v in _r0.items() if k != "filters"} == {k: v for k, v in _r1.items() if k != "filters"}
+    assert len({f[0] for f in _r1["filters"]}) == len(_r1["filters"]) <= 3
+
+# The holdout is the later half of the DAYS and never overlaps the search window.
+_days = [_sm(f"X{i}", _C0 + 86400 * (i // 4) + 900 * (i % 4), 0.89, 0.90, "yes") for i in range(40)]
+_s, _h = _se.split_days(_se.prep(_days))
+assert _s and _h and max(m["day"] for m in _s) < min(m["day"] for m in _h)
+assert (len({m["day"] for m in _s}), len({m["day"] for m in _h})) == (5, 5), "half the days each"
+assert "holdout" not in _se.run_search.__code__.co_varnames and "hold" not in _se.run_search.__code__.co_varnames
+
+# THE selection guard. On a FAIR game, the best of 150 rules found in the search window looks good, and the same rules lose on fresh data.
+_gf = _rs.Random(11)
+def _fair(n, base):
+    out = []
+    for i in range(n):
+        p = _gf.choice([0.15, 0.35, 0.5, 0.65, 0.85, 0.93])
+        res = "yes" if _gf.random() < p else "no"
+        close = base + 900 * i
+        cs = [(close - 60 * L, round(p - 0.01, 4), round(p + 0.01, 4), round(p - 0.01, 4), round(p + 0.01, 4)) for L in _se.LEFTS]
+        out.append(("F%d_%d" % (base, i), "KXBTC15M" if i % 2 else "KXGOLD15M", cs, close, res))
+    return out
+_fs = _se.prep(_fair(1600, _C0)); _fh = _se.prep(_fair(1600, _C0 + 86400 * 20))
+_res = _se.run_search(_fs, seed=5, cycles=1)
+_best = _res["rounds"][-1]["top"][0]
+_hold = [_se.score(_fh, r["rule"]) for r in _res["rounds"][-1]["top"]]
+_hm = sum(h["mean"] for h in _hold) / len(_hold)
+assert _res["evaluated"] > 100 and _best["z"] >= _res["rounds"][-1]["top"][-1]["z"], "ranked best first"
+assert _best["z"] < 2.5, ("a fair game with costs must not produce a significant winner", _best["z"])
+assert _hm < 0.005, ("and it does not survive fresh data", _hm)
+
+# The shuffle keeps the markets and days, and only moves results within a day.
+_sh = _se.shuffle_within_day(_fs, 1)
+assert len(_sh) == len(_fs) and sorted(m["ticker"] for m in _sh) == sorted(m["ticker"] for m in _fs)
+assert sorted(m["res"] for m in _sh) == sorted(m["res"] for m in _fs)
+from collections import Counter as _Cn
+assert all(_Cn(m["res"] for m in _sh if m["day"] == d) == _Cn(m["res"] for m in _fs if m["day"] == d) for d in {m["day"] for m in _fs}), "results move only within their own day"
+print("search tests passed")
+
+import re as _re12
+_c12 = _re12.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_se.__file__).read())
+assert not _re12.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c12)
+assert not _re12.search(r"place_order|/portfolio/", _c12)
