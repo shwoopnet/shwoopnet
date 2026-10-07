@@ -207,6 +207,40 @@ no free gold spot series here.
 - **What it does not say.** Not tested: gold, anything faster than one minute, or
   whether resting orders earn the spread (candles cannot show fills).
 
+**2026-10-07: H7, how far spot sits from the target vs the market's price: `FALSIFIED`.**
+One run of the rule fixed in H7 above, on the half of the data that had not been looked at. Nothing changed after seeing it.
+
+- 2,843 Bitcoin markets with a usable quote at 6 minutes left. Estimation half 1,421, test half 1,422. The rule entered
+  **879** test markets and lost **2.69c** each (z of -2.06, so it is reliably negative, not just flat): -4.23c in the
+  first half of the test half, -1.14c in the second, -2.89c with fees 20% higher. The bar was +0 with z of 2.1.
+- Decomposition: gross -1.64c, fees -1.04c. YES entries won 36.7% at a mean price of 38.3% (548 of them), NO entries won
+  34.1% at 35.9% (331). In-sample, on the half that set the buckets, the same rule lost 1.79c, so there was nothing there
+  to lose out of sample either. My prediction was -1c to -3c, and it landed at -2.69c.
+- **The owner's question, answered from the estimation half (how often the market finished above its target, by how far
+  spot sat above it at 6 minutes left, in units of typical Bitcoin movement over those 6 minutes):**
+
+  | z bucket | markets | finished YES | YES ask charged |
+  |---|---|---|---|
+  | below -2 | 81 | 4.9% | 4.5% |
+  | -2 to -1 | 232 | 10.3% | 11.7% |
+  | -1 to -0.5 | 219 | 26.5% | 24.9% |
+  | -0.5 to 0 | 218 | 38.5% | 43.4% |
+  | 0 to 0.5 | 228 | 61.4% | 65.7% |
+  | 0.5 to 1 | 189 | 82.0% | 82.2% |
+  | 1 to 2 | 190 | 95.3% | 91.2% |
+  | above 2 | 64 | 98.4% | 96.5% |
+
+  So spot at 1 to 2 typical moves above the target finished above it 95% of the time, and Kalshi was already charging
+  about 91c for it. Across every bucket the price sits within about 4c of how often the outcome happened. The market
+  prices the distance to the target about as well as these buckets can.
+- **What it says.** Distance to the target is information the market already uses. The cheap-looking side the rule
+  bought lost its price plus fee more often than the bucket rate suggested, which is what picking the cheapest asks inside
+  a bucket does: it selects the quotes that are cheap because something else in the market (a recent move, a wide
+  spread) justified them.
+- **What it does not say.** One decision per market, at 6 minutes left, with one fixed margin and fixed buckets. Other
+  decision times, a finer distance measure or the settlement source itself (CF Benchmarks' 60 second average, not the
+  Coinbase closes used here) were not tested. Gold has no spot series here and was not tested.
+
 **2026-10-06: H5, quoting both sides as a market maker: `FALSIFIED`.**
 One run, on the sample and rules fixed before any code (see H5 above). Nothing was changed after seeing it.
 
@@ -579,6 +613,55 @@ after this commit).
   of 1 and of 4.
 - **Cost of this idea so far.** It is the sixth strategy variant tried (the 60s scalp, H1, H2, H3, H4, H5).
   Cuts examined for the verdict: 1 configuration.
+
+## Hypothesis H7: how far spot sits from the target predicts the outcome better than the market's price does (fixed 2026-10-07, before any code or data was looked at)
+
+Asked by the owner: Kalshi stores each market's target (the strike, "to beat"). Every test so far used the market's
+price and result, and none conditioned on how far Bitcoin spot sits from the target. The owner's question: of the
+times spot is X above (or below) the target with T minutes left, how often does the market finish above it, and does
+the price Kalshi charges match that? Bitcoin only: there is no free gold spot series here. Gold is not tested.
+
+- **Mechanism and counterparty.** If the market charges, say, 65c for YES when spot is far enough above the target that
+  YES wins 75% of the time, the sellers of that 65c are people pricing the distance badly (stale quotes, slow
+  repricing as spot moves, a flat price near 50c that ignores a large lead). The usual reason it fails: the
+  professional quoters on these markets already price the live index, and the lag study found no lag.
+- **Observation, one per market.** At the minute close `t = close_ts - 360` (6 minutes left), a market counts if it
+  has a usable two sided quote (spread 10c or less), spot closes exist for `t` and the 60 minutes before it, and the
+  strike is stored. One decision per market means the observations do not overlap, and there is no choosing of the
+  minute afterwards. Spot at `t` is the close of the 1 minute Coinbase candle that ends at `t` (the same alignment the
+  lag study used).
+- **Distance, in units of how far Bitcoin typically moves.** `z = ln(spot / strike) / (sigma * sqrt(6))` where `sigma`
+  is the standard deviation of the 1 minute log returns of spot over the 60 minutes before `t`, and 6 is the minutes
+  left. Fixed z buckets: below -2, -2 to -1, -1 to -0.5, -0.5 to 0, 0 to 0.5, 0.5 to 1, 1 to 2, above 2.
+- **Split.** The markets are ordered by close time. The first half is the ESTIMATION half and the second is the TEST
+  half. `p(bucket)` is the share of estimation-half markets in that bucket that resolved YES (buckets with fewer than
+  20 markets are not traded). The test half is not looked at until the verdict run.
+- **Descriptive output, labelled as such (no verdict, affects nothing).** For the estimation half only: for each z
+  bucket, the number of markets, how often they resolved YES, and the mean YES ask Kalshi was charging then. This
+  answers the owner's "how many times out of X" question in plain numbers.
+- **Rule (the only configuration run).** On the test half, at `t`, with `ask` the YES ask and `bid` the YES bid:
+  buy YES at `ask` if `p(bucket) - ask - fee(ask) > 0.02`; buy NO at `1 - bid` if `(1 - p(bucket)) - (1 - bid) -
+  fee(1 - bid) > 0.02`; otherwise do nothing. One contract, held to settlement, fee `0.07 * p * (1 - p)` per
+  contract (unrounded, because the measured real fee on 2026-10-07 was 1.67c for a 40c contract, which is exactly
+  that formula; a run with fees times 1.2 is the stress). The 2c margin, the buckets and the 6 minutes are fixed here
+  and are not tuned.
+- **Prediction, recorded before the run.** Negative: the market already prices distance within the minute, so I
+  expect a mean net of about -1c to -3c per entered market and a z below 2. If it comes out positive, suspect the
+  alignment first: Kalshi settles on the CF Benchmarks RTI average of the last 60 seconds, and this uses Coinbase 1
+  minute closes, so a spot figure that already contains information the strike does not is a lookahead to rule out.
+- **Unit and kill criteria.** One entered market, net cents. FALSIFIED unless ALL hold: at least 300 entered markets
+  in the test half; mean net positive with a day clustered z of at least 2.1; positive in BOTH halves of the test half;
+  positive with fees times 1.2. Fewer than 300 entered markets is NOT_ENOUGH_DATA and crosses nothing off. Best outcome
+  is `NOT_YET_FALSIFIED`, meaning permission to test on unseen days, never a trade.
+- **Decomposition, always printed.** Entries by side, win rate against the average price paid, mean gross and fees, and
+  the same table for the estimation half run through the rule, labelled in-sample so the gap between the halves is
+  visible.
+- **Known limits, stated up front.** Spot is not Kalshi's settlement source. One observation per market throws away
+  most minutes on purpose. Thirty days is one market regime. The estimation half decides the buckets' probabilities,
+  so the test is out of sample but the whole sample is one month.
+- **Cost of this idea so far.** The eighth variant tried. Cuts examined for the verdict: 1 configuration.
+
+## The paper bot (starts with $100, cannot place a real order)
 
 ## Idea ledger (written 2026-10-07, before any idea below was run)
 
