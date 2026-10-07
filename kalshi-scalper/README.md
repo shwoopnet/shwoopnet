@@ -681,6 +681,15 @@ Nothing below is implemented. It is what the live version will have to do.
   Markets are listed ahead of time as "initialized" and open on the quarter hour, so a call in the last
   seconds before the next quarter hour finds no open market.
 
+**Owner's decision, 2026-10-07: real money as a test phase.** The bar below (a strategy that passed its
+pre-registered test plus 300 paper trades) has NOT been met: no strategy has passed (the 60s scalp, H1 to H6
+were all `FALSIFIED`) and the paper bot has not reached 300 trades over 5 days. The owner chose to put $100
+to $150 behind it anyway, with the risk per trade kept small. That is recorded here as a decision, not as
+evidence of an edge. Step 1 is the one-contract live test (`kalshiLiveLib.js`): production signing, a real
+fill, the real fee, and the real duplicate `client_order_id` behaviour. Step 2, a live bot, is not built and
+needs its terms written first: 1% per trade, the existing 3% and 5% daily limits, a total loss stop the owner
+names in advance, an arming switch that is off by default, and the halt button in front of it.
+
 **Order of work to real orders (each step gated on the one before):**
 
 1. Create a Kalshi demo account and a demo API key. Read the demo balance (read-only).
