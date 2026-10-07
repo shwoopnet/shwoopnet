@@ -161,6 +161,18 @@ gates.KalshiNoEdge = () => {
   }
 };
 
+// The Bot tab layout is customizable, but the live account card (halt) and the session card (stop) can never be hidden, and
+// the saved layout survives blocked storage.
+gates.G24 = () => {
+  const optional = /var OPTIONAL = \[([^\]]*\][^\]]*\][^\]]*\][^\]]*\])\]/.exec(html);
+  assert.ok(optional, 'optional card list not found');
+  assert.ok(!/'account'|'session'/.test(optional[1]), 'the account and session cards are not in the hideable list');
+  assert.ok(/data-card="account"/.test(html) && /data-card="session"/.test(html));
+  const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
+  assert.ok(/try \{\s*var saved = JSON\.parse\(localStorage\.getItem\(KEY\)/.test(iife) && /try \{ localStorage\.setItem\(KEY/.test(iife), 'storage reads and writes are guarded');
+  assert.ok(/\['auto', '1', '2', '3', '4'\]\.indexOf\(String\(saved\.cols\)\)/.test(iife), 'a corrupt saved value cannot set a bad column count');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
