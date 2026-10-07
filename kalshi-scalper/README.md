@@ -207,6 +207,40 @@ no free gold spot series here.
 - **What it does not say.** Not tested: gold, anything faster than one minute, or
   whether resting orders earn the spread (candles cannot show fills).
 
+**2026-10-07: H7, how far spot sits from the target vs the market's price: `FALSIFIED`.**
+One run of the rule fixed in H7 above, on the half of the data that had not been looked at. Nothing changed after seeing it.
+
+- 2,843 Bitcoin markets with a usable quote at 6 minutes left. Estimation half 1,421, test half 1,422. The rule entered
+  **879** test markets and lost **2.69c** each (z of -2.06, so it is reliably negative, not just flat): -4.23c in the
+  first half of the test half, -1.14c in the second, -2.89c with fees 20% higher. The bar was +0 with z of 2.1.
+- Decomposition: gross -1.64c, fees -1.04c. YES entries won 36.7% at a mean price of 38.3% (548 of them), NO entries won
+  34.1% at 35.9% (331). In-sample, on the half that set the buckets, the same rule lost 1.79c, so there was nothing there
+  to lose out of sample either. My prediction was -1c to -3c, and it landed at -2.69c.
+- **The owner's question, answered from the estimation half (how often the market finished above its target, by how far
+  spot sat above it at 6 minutes left, in units of typical Bitcoin movement over those 6 minutes):**
+
+  | z bucket | markets | finished YES | YES ask charged |
+  |---|---|---|---|
+  | below -2 | 81 | 4.9% | 4.5% |
+  | -2 to -1 | 232 | 10.3% | 11.7% |
+  | -1 to -0.5 | 219 | 26.5% | 24.9% |
+  | -0.5 to 0 | 218 | 38.5% | 43.4% |
+  | 0 to 0.5 | 228 | 61.4% | 65.7% |
+  | 0.5 to 1 | 189 | 82.0% | 82.2% |
+  | 1 to 2 | 190 | 95.3% | 91.2% |
+  | above 2 | 64 | 98.4% | 96.5% |
+
+  So spot at 1 to 2 typical moves above the target finished above it 95% of the time, and Kalshi was already charging
+  about 91c for it. Across every bucket the price sits within about 4c of how often the outcome happened. The market
+  prices the distance to the target about as well as these buckets can.
+- **What it says.** Distance to the target is information the market already uses. The cheap-looking side the rule
+  bought lost its price plus fee more often than the bucket rate suggested, which is what picking the cheapest asks inside
+  a bucket does: it selects the quotes that are cheap because something else in the market (a recent move, a wide
+  spread) justified them.
+- **What it does not say.** One decision per market, at 6 minutes left, with one fixed margin and fixed buckets. Other
+  decision times, a finer distance measure or the settlement source itself (CF Benchmarks' 60 second average, not the
+  Coinbase closes used here) were not tested. Gold has no spot series here and was not tested.
+
 **2026-10-06: H5, quoting both sides as a market maker: `FALSIFIED`.**
 One run, on the sample and rules fixed before any code (see H5 above). Nothing was changed after seeing it.
 
