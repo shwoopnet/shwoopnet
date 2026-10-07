@@ -31,7 +31,8 @@ function world(opts = {}) {
   const fetchFn = async (url, o) => {
     calls.push({ url, method: o.method, headers: o.headers, body: o.body ? JSON.parse(o.body) : null });
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
-    if (url.includes('/markets/')) return reply(200, { market: { status: 'active', close_time: iso(NOW + 13 * 60000), exchange_index: 2, yes_bid_dollars: '0.38', yes_ask_dollars: '0.40', ...(opts.book || {}) } });
+    // As on the demo: Bitcoin trades on shard 2, gold on shard 0.
+    if (url.includes('/markets/')) return reply(200, { market: { status: 'active', close_time: iso(NOW + 13 * 60000), exchange_index: url.includes('KXGOLD') ? 0 : 2, yes_bid_dollars: '0.38', yes_ask_dollars: '0.40', ...(opts.book || {}) } });
     if (url.endsWith('/portfolio/balance')) return reply(opts.balStatus || 200, opts.balance || { balance_breakdown: [{ balance: '120.0000', exchange_index: 2 }, { balance: '30.0000', exchange_index: 0 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: opts.existing || [] });
     if (o.method === 'POST') {
@@ -97,10 +98,14 @@ gates.L4 = async () => {
 };
 
 gates.L5 = async () => {
-  // Bitcoin only, and a price that moved since the signal is not chased.
+  // Bitcoin and gold only (nothing else is ever sent), and a price that moved since the signal is not chased.
   const gold = { series: 'KXGOLD15M', m: { ...quote().m, ticker: 'KXGOLD15M-26OCT071415-00' } };
   const wg = world(); const g = await run(wg, { quotes: [gold] });
-  assert.ok(!g.ok && /No Bitcoin signal/.test(g.reason) && wg.posts.length === 0);
+  assert.ok(g.ok && g.ticker.startsWith('KXGOLD15M') && wg.posts[0].exchange_index === 0, 'a gold signal is sent, on gold\'s own shard: ' + JSON.stringify(g));
+  const other = { series: 'KXETH15M', m: { ...quote().m, ticker: 'KXETH15M-26OCT071415-00' } };
+  const wo = world(); const o = await run(wo, { quotes: [other] });
+  assert.ok(!o.ok && /No Bitcoin or gold signal/.test(o.reason) && wo.posts.length === 0, 'any other series is ignored');
+  assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M']);
   const wm = world({ book: { yes_ask_dollars: '0.44' } }); const m = await run(wm);
   assert.ok(!m.ok && /moved from 0\.40 to 0\.44/.test(m.reason) && wm.posts.length === 0 && wm.docs.size === 0, JSON.stringify(m));
   const we = world({ book: { yes_ask_dollars: '0.00' } }); const e = await run(we);
@@ -108,6 +113,25 @@ gates.L5 = async () => {
   // The exchange's own close time is re-checked: a market it says closes in 3 minutes is skipped even if the quote looked fine.
   const wc = world({ book: { close_time: iso(NOW + 3 * 60000) } }); const c = await run(wc);
   assert.ok(!c.ok && /closing too soon/.test(c.reason) && wc.posts.length === 0 && wc.docs.size === 0, JSON.stringify(c));
+};
+
+gates.L15 = async () => {
+  // Funds sit on one shard each. A signal on a market whose shard is empty is skipped for the next signal; when
+  // every shard is empty nothing is sent and the reason names each one.
+  const btc = quote();
+  const gold = { series: 'KXGOLD15M', m: { ...quote().m, ticker: 'KXGOLD15M-26OCT071415-00' } };
+  const onlyGold = { balance: { balance_breakdown: [{ balance: '0.0000', exchange_index: 2 }, { balance: '30.0000', exchange_index: 0 }] } };
+  const w = world(onlyGold); const r = await run(w, { quotes: [btc, gold] });
+  assert.ok(r.ok && r.ticker.startsWith('KXGOLD15M') && w.posts.length === 1, 'Bitcoin is unfunded, so gold is sent: ' + JSON.stringify(r));
+  const onlyBtc = { balance: { balance_breakdown: [{ balance: '30.0000', exchange_index: 2 }, { balance: '0.0000', exchange_index: 0 }] } };
+  const w2 = world(onlyBtc); const r2 = await run(w2, { quotes: [gold, btc] });
+  assert.ok(r2.ok && r2.ticker.startsWith('KXBTC15M') && w2.posts.length === 1, 'gold is unfunded, so Bitcoin is sent (the order of the signals does not matter)');
+  const w3 = world({ balance: { balance_breakdown: [{ balance: '0.0000', exchange_index: 2 }, { balance: '0.0000', exchange_index: 0 }] } });
+  const r3 = await run(w3, { quotes: [btc, gold] });
+  assert.ok(!r3.ok && /KXBTC15M[^;]*shard 2/.test(r3.reason) && /KXGOLD15M[^;]*shard 0/.test(r3.reason) && w3.posts.length === 0 && w3.docs.size === 0, JSON.stringify(r3));
+  // At most ONE order per press, however many markets qualify.
+  const w4 = world(); await run(w4, { quotes: [btc, gold] });
+  assert.strictEqual(w4.posts.length, 1);
 };
 
 gates.L6 = async () => {

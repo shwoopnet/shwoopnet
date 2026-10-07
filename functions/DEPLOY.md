@@ -172,13 +172,14 @@ button says the demo is down, both were failing.
 ## Kalshi LIVE test order (ONE contract, REAL money)
 
 Step 1 of the owner's decision (2026-10-07) to put $100 to $150 of real money behind this. It proves the
-live path with one contract, and it is not the bot: `kalshiLiveTrade` sends at most ONE Bitcoin contract,
+live path with one contract, and it is not the bot: `kalshiLiveTrade` sends at most ONE Bitcoin or gold contract,
 $2.00 cap including the fee, immediate-or-cancel, to the PRODUCTION host only. It is admin only, takes nothing
 from the page, and refuses unless ALL of these hold: the switch is on, the exchange is trading, the bot is not
 halted (the control document must say `halt: false` explicitly, so press Halt then release it once if the
 document has never been written), no earlier live test is unresolved, fewer than 2 today and 5 ever, the
 live price has not moved more than 2c since the signal, and the balance on THIS market's shard covers it
-(money on another shard does not count: move it in the Kalshi app first).
+(money on another shard does not count: move it in the Kalshi app first; a signal whose shard is empty is skipped
+for the next signal, and gold and Bitcoin usually sit on different shards, so fund both if you want both).
 
 It is never retried. If Kalshi's answer is lost the record is marked `unknown`, the page says the order may or
 may not exist, and further live tests are blocked until you look at the account (Portfolio, Orders) and set that
