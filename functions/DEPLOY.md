@@ -232,3 +232,12 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
 settled results) in `kalshiLiveControl/account` at minutes 1 and 10 of each quarter hour (just after a market settles and just after the entry window), or when none exists or it is 20 minutes old, after the order logic has run. The Bot tab shows it
 the moment it opens, so the panel is current even if the page was closed. A failed snapshot is logged and never fails
 the run, the session or the watchdog ping. Cost: one small Firestore read a minute, and about 3 Kalshi reads plus up to 20 public market reads twice per quarter hour. Deploy: `firebase deploy --only functions`. No rules change (the document is admin read, server write).
+
+## Size scaling for the L1 session (off by default, Oct 7, 2026)
+
+A box on the start confirmation ("Scale size with the account") turns it on for that session only; it starts unticked and
+cannot be changed mid-run. On: each order buys `floor(1% of cash / cost of one contract)` contracts, never fewer than one or
+more than three, judged on the cash left after earlier orders in the same minute, and the loss stop becomes 7% of the starting
+cash (still counting the bot's own trades only, every contract, open ones as lost). Off: exactly as before, one contract and
+a $7.00 stop. On a $100 account it still buys one contract; it first buys two at about $180 and three at about $270.
+Deploy: `firebase deploy --only functions`.

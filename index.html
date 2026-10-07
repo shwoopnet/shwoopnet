@@ -2465,8 +2465,8 @@
       return kalshiLiveBaselineFn({}).then(function(res){ return res.data; });
     },
     // Arm or disarm the automatic scan. The server sets the 3 hour expiry itself; the page sends only on or off.
-    kalshiL1Session: function(on){
-      return kalshiL1SessionFn({ on: on === true }).then(function(res){ return res.data; });
+    kalshiL1Session: function(on, sizing){
+      return kalshiL1SessionFn({ on: on === true, sizing: sizing === true }).then(function(res){ return res.data; });
     },
     watchKalshiLiveControl: function(cb){
       var st = { arm: null, last: null, session: null, account: null };
@@ -3317,7 +3317,7 @@
         <div class="kal-card-title">24 hour L1 session</div>
         <div class="kal-actions">
           <button class="kal-btn" id="kalL1Start" type="button">Start 24 hour session</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, one contract at a time (up to $2.00 each), for 24 hours.</span> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself for 24 hours, one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (about 1% of cash per order, up to 3 contracts, stop at 7% of starting cash)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
           <button class="kal-btn" id="kalL1Stop" type="button" hidden>Stop now</button>
         </div>
         <div id="kalL1Status" class="kal-note">Not running.</div>
@@ -9801,8 +9801,8 @@
     var running = !!(s && s.active === true && s.until > now);
     var t;
     if(running){
-      t = 'RUNNING until ' + new Date(s.until).toLocaleString() + '. Orders sent ' + (s.ordersSent || 0) + '.' +
-        ' Stops if the bot trades are down $7.00 (open ones counted as lost)' + (Number.isFinite(s.botNet) ? '; so far ' + (s.botNet >= 0 ? '+' : '-') + '$' + Math.abs(s.botNet).toFixed(2) + ' settled, $' + (s.botOpen || 0).toFixed(2) + ' open' : '') + '.' +
+      t = 'RUNNING until ' + new Date(s.until).toLocaleString() + '. Orders sent ' + (s.ordersSent || 0) + '.' + (s.sizing === true ? ' Size scales with the account (up to 3).' : ' One contract each.') +
+        ' Stops if the bot trades are down ' + (s.sizing === true && Number.isFinite(s.startCash) ? '$' + (0.07 * s.startCash).toFixed(2) : '$7.00') + ' (open ones counted as lost)' + (Number.isFinite(s.botNet) ? '; so far ' + (s.botNet >= 0 ? '+' : '-') + '$' + Math.abs(s.botNet).toFixed(2) + ' settled, $' + (s.botOpen || 0).toFixed(2) + ' open' : '') + '.' +
         (s.lastNote ? ' ' + s.lastNote : '');
     } else {
       t = 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '');
@@ -9897,7 +9897,7 @@
       if(!api || !api.kalshiL1Session || !currentUserIsAdmin){ return; }
       yes.disabled = no.disabled = true;
       msg.textContent = 'Starting...';
-      api.kalshiL1Session(true).then(function(){
+      api.kalshiL1Session(true, document.getElementById('kalL1Sizing').checked).then(function(){
         msg.textContent = 'Started. You can close this page: the server does the trading.';
       }).catch(function(err){
         msg.textContent = 'Not started: ' + ((err && err.message) || 'unknown');
