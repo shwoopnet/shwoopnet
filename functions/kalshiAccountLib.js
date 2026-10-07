@@ -51,14 +51,31 @@ function shapeFills(r) {
   return { ok: true, status: 200, fills, keys: keysOf(r.body), sampleKeys: list.length ? keysOf(list[0]) : [] };
 }
 
-async function readAccount({ fetchFn, keyId, pem, now }) {
+async function readAccount({ fetchFn, keyId, pem, now, baseline }) {
   const get = (path, params) => live.liveRequest({ fetchFn, keyId, pem, method: "GET", path, params, nowMs: now });
   const [bal, pos, fills] = await Promise.all([
     get("/portfolio/balance"),
     get("/portfolio/positions", { limit: "50" }),
     get("/portfolio/fills", { limit: "20" }),
   ]);
-  return { at: now, balance: shapeBalance(bal), positions: shapePositions(pos), fills: shapeFills(fills) };
+  return applyBaseline({ at: now, balance: shapeBalance(bal), positions: shapePositions(pos), fills: shapeFills(fills) }, baseline);
 }
 
-module.exports = { readAccount, shapeBalance, shapePositions, shapeFills };
+// The account is shared with the owner's own earlier trades, which Kalshi cannot separate from the bot's. A baseline
+// ({since, startingDollars}, written once by the owner) draws the line: fills before `since` are hidden, and the
+// balance is shown as a change from the starting balance. Nothing on Kalshi is touched or erased, and without a
+// baseline everything is shown unchanged and flagged. The change includes any deposit or withdrawal after the line.
+function applyBaseline(d, baseline) {
+  if (!baseline || !Number.isFinite(baseline.since)) return { ...d, baseline: null };
+  let fills = d.fills;
+  if (fills.ok) {
+    // An undated fill is hidden too (Date.parse of nothing is NaN, which is never >= the line).
+    const kept = fills.fills.filter((f) => f.time && Date.parse(f.time) >= baseline.since);
+    fills = { ...fills, fills: kept, hiddenBeforeBaseline: fills.fills.length - kept.length };
+  }
+  const total = d.balance.ok ? d.balance.totalDollars : null;
+  const changeSinceStart = total !== null && Number.isFinite(baseline.startingDollars) ? Math.round((total - baseline.startingDollars) * 100) / 100 : null;
+  return { ...d, fills, baseline: { since: baseline.since, startingDollars: baseline.startingDollars }, changeSinceStart };
+}
+
+module.exports = { readAccount, applyBaseline, shapeBalance, shapePositions, shapeFills };

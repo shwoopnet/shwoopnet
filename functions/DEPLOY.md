@@ -188,3 +188,14 @@ shape it does not recognise is listed by field name. Deploy with
 `firebase deploy --only functions:kalshiLiveAccount`. It is the quickest way to see whether your funds sit on the same
 shard as the market (Bitcoin and gold were both on shard 2 when last checked) without waiting for a scan to refuse.
 
+#### Start fresh from now (the account is shared with your own trades)
+
+Kalshi cannot separate the owner's personal trades from the bot's on one account, and nothing on Kalshi can be erased.
+"Start fresh from now (one time)" on the account card draws a permanent line instead: it records the time and the
+current total balance in `kalshiLiveControl/baseline`, written once with `create()` so it can never be overwritten
+(a second press just shows the existing line). From then on the account view hides fills before the line and shows
+the balance as a change from the starting balance (it includes any deposit or withdrawal after the line). Press it
+only after your last personal trade. To move the line, delete that one document in the Firebase console.
+Deploy with `firebase deploy --only functions:kalshiLiveAccount,functions:kalshiLiveBaseline`. The bot's own journal and
+the live test records were never mixed with personal trades, so only this view needed the line.
+
