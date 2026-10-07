@@ -158,7 +158,9 @@ gates.R6 = () => {
   assert.ok(!/request\.data/.test(body), 'takes nothing from the caller');
   assert.ok(/secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(body), 'the live secrets');
   // Reading never depends on the order switch: the only mention allowed is REPORTING it, and nothing branches on it.
-  assert.ok(/return \{ \.\.\.d, liveSwitch: KALSHI_LIVE_ENABLED\.value\(\) === "on" \};/.test(body), 'the switch is only reported back');
+  assert.ok(/return \{ \.\.\.d, results, liveSwitch: KALSHI_LIVE_ENABLED\.value\(\) === "on" \};/.test(body), 'the switch is only reported back');
+  // The settled results are public market reads only: one GET per ticker through the keyless helper, never an order.
+  assert.ok(/kalshiGetJson\("\/markets\/" \+ encodeURIComponent\(t\)\)/.test(body) && !/POST|method\s*:|portfolio\/events/.test(body), 'results come from public market reads');
   assert.ok(!/KALSHI_LIVE_ENABLED/.test(body.replace('liveSwitch: KALSHI_LIVE_ENABLED.value() === "on"', '')), 'no other use of the order switch');
   assert.ok(!/runLiveTest|runArmedTick/.test(body), 'never goes near order code');
   assert.ok(fnSrc.indexOf('exports.kalshiLiveAccount') < fnSrc.indexOf('exports.kalshiBookRecorder ='), 'defined before the book recorder');

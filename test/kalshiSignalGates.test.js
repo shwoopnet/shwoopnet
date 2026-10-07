@@ -181,6 +181,36 @@ gates.G25 = () => {
   assert.ok(/\.kal-layout-body label\{[^}]*min-height:34px/.test(html) && /\.kal-layout-body input\[type=checkbox\]\{ width:18px; height:18px; \}/.test(html), 'layout controls are tappable');
 };
 
+// Profit or loss on a bot trade line: right sign, right side, right fee, and nothing guessed while a market is open or for a fill that is not the bot's.
+gates.G26 = () => {
+  const pnl = new Function(block(/(function kalshiTradePnl\(fill, order, result\)\{[\s\S]*?\n  \})\n/, html) + '; return kalshiTradePnl;')();
+  const fee = 0.0057;
+  // YES bought at 93.9c, fee 0.57c: a win pays $1.
+  let r = pnl({ count: 1, price: '0.9390' }, { side: 'yes', averageFeePaid: String(fee) }, 'yes');
+  assert.ok(Math.abs(r.pnl - (1 - 0.939 - fee)) < 1e-9 && r.won === true, JSON.stringify(r));
+  r = pnl({ count: 1, price: '0.9390' }, { side: 'yes', averageFeePaid: String(fee) }, 'no');
+  assert.ok(Math.abs(r.pnl - (-0.939 - fee)) < 1e-9 && r.won === false, 'a loss costs the price and the fee');
+  // NO: the fill carries the YES price (5.8c), so the bot paid 94.2c. NO wins when the result is no.
+  r = pnl({ count: 1, price: '0.0580' }, { side: 'no', averageFeePaid: String(fee) }, 'no');
+  assert.ok(Math.abs(r.pnl - (1 - 0.942 - fee)) < 1e-9 && Math.abs(r.paid - 0.942) < 1e-9, 'a NO at a 5.8c YES price cost 94.2c: ' + JSON.stringify(r));
+  r = pnl({ count: 1, price: '0.0580' }, { side: 'no' }, 'yes');
+  assert.ok(Math.abs(r.pnl - (-0.942 - 0.07 * 0.942 * 0.058)) < 1e-4, 'with no saved fee it uses 7% x p x (1 - p): ' + JSON.stringify(r));
+  r = pnl({ count: 3, price: '0.9000' }, { side: 'yes', averageFeePaid: '0.01' }, 'yes');
+  assert.ok(Math.abs(r.pnl - (3 - 2.7 - 0.03)) < 1e-9, 'a count above one scales the payout, the cost and the fee');
+  // Nothing is invented.
+  assert.strictEqual(pnl({ count: 1, price: '0.9' }, { side: 'yes' }, null), null, 'open market');
+  assert.strictEqual(pnl({ count: 1, price: '0.9' }, { side: 'yes' }, undefined), null, 'unknown result');
+  assert.strictEqual(pnl({ count: 1, price: '0.9' }, null, 'yes'), null, 'a manual fill has no bot order');
+  assert.strictEqual(pnl({ count: 0, price: '0.9' }, { side: 'yes' }, 'yes'), null);
+  assert.strictEqual(pnl({ count: 1, price: 'abc' }, { side: 'yes' }, 'yes'), null);
+  assert.strictEqual(pnl({ count: 1, price: '1.4' }, { side: 'yes' }, 'yes'), null, 'a price outside 0 to 1 is refused');
+  assert.strictEqual(pnl({ count: 1, price: '0.9' }, { side: 'maybe' }, 'yes'), null);
+  // Wired into the trade line: a P/L cell, the plain "bought NO at 94.2c" wording for the bot's own fills, and the settled results from the server.
+  const row = html.slice(html.indexOf("var trEl = document.getElementById('kalBotClosed');"), html.indexOf('var evAll'));
+  assert.ok(/kalshiTradePnl\(x, ord, a\.results \? a\.results\[x\.ticker\] : null\)/.test(row) && /<span class="kal-lbl">P\/L<\/span>/.test(row), 'each trade line shows its P/L');
+  assert.ok(/'bought ' \+ ord\.side\.toUpperCase\(\)/.test(row), 'the bot\'s own fills read "bought NO at 94.2c"');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
