@@ -87,7 +87,7 @@ function world(opts = {}) {
     if (url.endsWith('/exchange/status')) return opts.demoDown ? reply(503, { exchange_active: false, trading_active: false }) : reply(200, { exchange_active: true, trading_active: true });
     if (url.endsWith('/portfolio/balance')) return reply(200, { balance_breakdown: opts.breakdown || [{ balance: '200.0000', exchange_index: 0 }, { balance: '0.0000', exchange_index: 2 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: [...orders.values()] });
-    if (url.includes('/markets/')) return reply(200, { market: { status: 'active', close_time: iso(NOW + 13 * 60000), exchange_index: opts.shard === undefined ? 0 : opts.shard } });
+    if (url.includes('/markets/')) return reply(200, { market: { status: 'active', close_time: iso(NOW + 13 * 60000), exchange_index: opts.shard === undefined ? 0 : opts.shard, yes_bid_dollars: '0.38', yes_ask_dollars: '0.40', yes_bid_size_fp: '20', yes_ask_size_fp: '20', ...(opts.demoBook || {}) } });
     if (o.method === 'POST') {
       const b = JSON.parse(o.body);
       posts.push(b);
@@ -235,6 +235,48 @@ gates.D15 = async () => {
   // The exchange check also fails over: one front door reporting the exchange down is not "down".
   const w2 = world({ primaryDown: true });
   assert.ok((await run(w2)).ok && !w2.calls.some((c) => c.url.startsWith('https://demo-api.kalshi.co/') && c.method === 'DELETE'));
+};
+
+// The first demo tests came back "no fill" because they were priced at the LIVE signal price, which the thin demo book
+// did not hold. The order is now priced to meet the demo's own touch, within a tolerance of the live price.
+gates.D16 = async () => {
+  // A YES buy takes the demo's YES ask, even when it is a few cents from the live signal price.
+  const w = world({ demoBook: { yes_ask_dollars: '0.43' } });
+  const r = await run(w);
+  assert.ok(r.ok && r.filled && r.sentSide === 'bid' && r.sentPrice === '0.43', JSON.stringify(r));
+  assert.strictEqual(w.posts[0].price, '0.43', 'crosses the demo ask, not the live price');
+  assert.strictEqual(w.docs.get('t-' + w.posts[0].ticker).livePrice, 0.4, 'the live signal price is kept on the record');
+  // A NO buy is a YES sell: it takes the demo's YES bid.
+  const q = quote({ yes_bid_dollars: '0.59', yes_ask_dollars: '0.61' });
+  const w2 = world({ demoBook: { yes_bid_dollars: '0.57', yes_ask_dollars: '0.61' } });
+  const r2 = await run(w2, { quotes: [q] });
+  assert.ok(r2.ok && r2.sentSide === 'ask' && r2.sentPrice === '0.57', JSON.stringify(r2));
+};
+gates.D17 = async () => {
+  // Too far from the live price: nothing is sent and nothing is recorded, so trying again is not blocked.
+  const far = world({ demoBook: { yes_ask_dollars: '0.50' } });
+  const r = await run(far);
+  assert.ok(!r.ok && /0\.50 against the live 0\.40/.test(r.reason), JSON.stringify(r));
+  assert.strictEqual(far.posts.length, 0); assert.strictEqual(far.docs.size, 0);
+  // An empty side of the demo book is said plainly, not reported as "no fill".
+  for (const book of [{ yes_ask_dollars: '0.00' }, { yes_ask_dollars: '1.00' }, { yes_ask_dollars: undefined }, { yes_ask_size_fp: '0' }]) {
+    const w = world({ demoBook: book });
+    const e = await run(w);
+    assert.ok(!e.ok && /nothing on the side/.test(e.reason) && w.posts.length === 0 && w.docs.size === 0, JSON.stringify([book, e]));
+  }
+};
+gates.D18 = () => {
+  // The cap holds at the crossing price: contracts shrink to fit, and one that still does not fit is refused.
+  const sig = { ticker: 'T', series: 'KXBTC15M', side: 'yes', band: '40c', price: 0.40, contracts: 2 };
+  const p = demo.crossPlan(sig, { yes_ask_dollars: '0.44', yes_ask_size_fp: '10' });
+  assert.ok(p.ok && p.signal.price === 0.44);
+  const cost = p.signal.price * p.signal.contracts + require('../functions/kalshiBotLib').takerFee(p.signal.price, p.signal.contracts);
+  assert.ok(cost <= demo.TEST_CAP + 1e-9, 'cost ' + cost);
+  assert.strictEqual(demo.crossPlan({ ...sig, price: 0.99 }, { yes_ask_dollars: '0.995' }).ok, false, 'a price whose single contract plus fee breaks the cap');
+  const shrunk = demo.crossPlan({ ...sig, price: 0.45, contracts: 2 }, { yes_ask_dollars: '0.49' });
+  assert.ok(shrunk.ok && shrunk.signal.contracts === 1, 'two contracts at 49c break the cap, so one is sent: ' + JSON.stringify(shrunk));
+  assert.strictEqual(demo.CROSS_TOLERANCE, 0.05);
+  assert.ok(demo.crossPlan(sig, { yes_ask_dollars: '0.45' }).ok && !demo.crossPlan(sig, { yes_ask_dollars: '0.46' }).ok, 'the tolerance is 5c, no more');
 };
 
 // ---- wiring: where the order code may live ----
