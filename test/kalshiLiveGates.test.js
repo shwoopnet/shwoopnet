@@ -336,7 +336,7 @@ gates.L19 = () => {
   const s = sm[1];
   assert.ok(/schedule: "every 1 minutes"/.test(s) && /secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(s) && !/KALSHI_DEMO/.test(s), 'its own live secrets only');
   assert.ok(/retryCount: 0/.test(s) && !/retryCount: [1-9]/.test(s), 'a failed run is never retried by the platform');
-  const load = s.indexOf('demo.loadQuotes'), guard = s.indexOf('arm.armed === true && arm.until > now');
+  const load = s.indexOf('live.loadQuotes'), guard = s.indexOf('arm.armed === true && arm.until > now');
   assert.ok(guard > -1 && load > guard, 'prices are loaded only inside the armed branch');
   assert.ok(/live\.runArmedTick\(args\)/.test(s) && !/live\.runLiveTest/.test(s), 'it only ever goes through runArmedTick');
   assert.ok(fnSrc.indexOf('exports.kalshiLiveArmed') < fnSrc.indexOf('exports.kalshiBot ='), 'defined before the paper bot, so the no-order-code slice still covers the paper bot');
@@ -352,10 +352,34 @@ gates.L19 = () => {
   assert.ok(/kalshiLiveArmFn\(\{ on: on === true \}\)/.test(html), 'the page sends only on or off');
 };
 
+gates.L20 = () => {
+  // The signature must verify against the public key over timestamp + METHOD + path, query left out (kept from the
+  // retired demo trader's gates: the live module now owns signing).
+  const sig = live.signRequest(pem, '1703123456789', 'GET', '/trade-api/v2/portfolio/balance?limit=5');
+  const msg = Buffer.from('1703123456789GET/trade-api/v2/portfolio/balance');
+  assert.ok(crypto.verify(null, msg, ed.publicKey, Buffer.from(sig, 'base64')), 'Ed25519 signature verifies');
+  assert.ok(!crypto.verify(null, Buffer.from('1703123456789POST/trade-api/v2/portfolio/balance'), ed.publicKey, Buffer.from(sig, 'base64')), 'a different method must not verify');
+  assert.ok(!crypto.verify(null, Buffer.from('1703123456790GET/trade-api/v2/portfolio/balance'), ed.publicKey, Buffer.from(sig, 'base64')), 'a different timestamp must not verify');
+  const rsa = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const rs = live.signRequest(rsa.privateKey.export({ type: 'pkcs8', format: 'pem' }), '1', 'POST', '/trade-api/v2/portfolio/events/orders');
+  const pss = { key: rsa.publicKey, padding: crypto.constants.RSA_PKCS1_PSS_PADDING, saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST };
+  assert.ok(crypto.verify('sha256', Buffer.from('1POST/trade-api/v2/portfolio/events/orders'), pss, Buffer.from(rs, 'base64')), 'RSA-PSS signature verifies');
+  const flat = pem.replace(/\n/g, '\\n');   // a secret pasted with literal \n still loads
+  assert.ok(crypto.verify(null, msg, ed.publicKey, Buffer.from(live.signRequest(flat, '1703123456789', 'GET', '/trade-api/v2/portfolio/balance'), 'base64')));
+  assert.throws(() => live.signRequest(crypto.generateKeyPairSync('ec', { namedCurve: 'P-256' }).privateKey.export({ type: 'pkcs8', format: 'pem' }), '1', 'GET', '/x'), /unsupported key type/);
+};
+
+gates.L21 = () => {
+  // Order code lives in exactly one module, and nothing of the retired demo trader remains.
+  const fnDir = path.join(root, 'functions');
+  const offenders = fs.readdirSync(fnDir).filter((f) => f.endsWith('.js') && /portfolio\/events\/orders/.test(fs.readFileSync(path.join(fnDir, f), 'utf8')));
+  assert.deepStrictEqual(offenders, ['kalshiLiveLib.js'], 'order code lives in exactly one module');
+  assert.ok(!fs.existsSync(path.join(fnDir, 'kalshiDemoLib.js')), 'the demo module is gone');
+  assert.ok(!/kalshiDemo|KALSHI_DEMO/i.test(fnSrc + html + rules), 'no demo function, secret, collection or page card is left');
+};
+
 gates.L11 = () => {
-  // The scheduled bot and the demo module stay separate from the live one.
-  const demoSrc = fs.readFileSync(path.join(root, 'functions', 'kalshiDemoLib.js'), 'utf8').replace(/\/\/[^\n]*/g, '');
-  assert.ok(!/external-api\.kalshi\.com/.test(demoSrc), 'the demo module never names the production host');
+  // The scheduled paper bot stays separate from the live order code.
   for (const f of ['kalshiBotLib.js', 'kalshiBotRun.js']) {
     const code = fs.readFileSync(path.join(root, 'functions', f), 'utf8').replace(/\/\/[^\n]*/g, '');
     assert.ok(!/kalshiLiveLib|portfolio\/events\/orders/.test(code), f + ' must not touch live order code');
