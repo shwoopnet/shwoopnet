@@ -436,6 +436,9 @@
   .trade-bubble.negative{ background: var(--loss); color:#fff; }
   .trade-bubble.neutral{ background:#F2C94C; color:#2a2205; }
   .alpaca-dock-title-group{ display:flex; align-items:center; gap:6px; }
+  /* The account pop-up can be turned off per user in Settings (data-hide-account-dock is set from the account's own settings). It stays connected and
+     keeps updating underneath, so turning it back on shows current numbers immediately. */
+  [data-hide-account-dock="true"] #alpacaDock{ display:none !important; }
   #dockTradeBubble{ margin-left:0; }
 
   .side-nav-icon-wrap{ position:relative; display:inline-block; }
@@ -2352,6 +2355,7 @@
         darkMode: typeof s.darkMode === 'boolean' ? s.darkMode : null, // null here means "no explicit choice", same as an absent localStorage key -- OS preference decides
         reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : false,
         tickerEnabled: typeof s.tickerEnabled === 'boolean' ? s.tickerEnabled : true,
+        hideAccountDock: s.hideAccountDock === true,
         tickerSpeed: typeof s.tickerSpeed === 'string' ? s.tickerSpeed : '100',
         tradeColumns: typeof s.tradeColumns === 'string' ? s.tradeColumns : '1',
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
@@ -3508,6 +3512,16 @@
               <div class="settings-row-desc">Show the scrolling price strip at the very top.</div>
             </div>
             <button class="settings-toggle-switch" id="tickerToggle" role="switch" aria-checked="true" aria-label="Toggle ticker tape">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Hide account pop-up</div>
+              <div class="settings-row-desc">Hide the paper or live trading account panel at the bottom right. Saved to your account, so it follows you to other devices.</div>
+            </div>
+            <button class="settings-toggle-switch" id="hideDockToggle" role="switch" aria-checked="false" aria-label="Hide the trading account pop-up">
               <span class="toggle-knob"></span>
             </button>
           </div>
@@ -9246,6 +9260,23 @@
     applyMotionPref(saved === 'true');
   })();
 
+  // ---------- Settings: hide the account pop-up (per user, synced to the account like the toggles around it) ----------
+  var hideDockToggleBtn = document.getElementById('hideDockToggle');
+  function applyHideDockPref(hidden, skipSync){
+    hideDockToggleBtn.setAttribute('aria-checked', hidden ? 'true' : 'false');
+    document.documentElement.setAttribute('data-hide-account-dock', hidden ? 'true' : 'false');
+    try{ window.localStorage.setItem('shwoopnet:hideAccountDock', hidden ? 'true' : 'false'); }catch(e){}
+    if(!skipSync) syncUserSetting('hideAccountDock', hidden);
+  }
+  hideDockToggleBtn.addEventListener('click', function(){
+    applyHideDockPref(hideDockToggleBtn.getAttribute('aria-checked') !== 'true');
+  });
+  (function initHideDockPref(){
+    var saved = 'false';
+    try{ saved = window.localStorage.getItem('shwoopnet:hideAccountDock') || 'false'; }catch(e){}
+    applyHideDockPref(saved === 'true', true);
+  })();
+
   // ---------- Settings: ticker tape on/off ----------
   var tickerToggleBtn = document.getElementById('tickerToggle');
   function applyTickerPref(enabled, skipSync){
@@ -10436,6 +10467,7 @@
       darkMode: document.documentElement.getAttribute('data-theme') === 'dark',
       reduceMotion: motionToggleBtn.getAttribute('aria-checked') === 'true',
       tickerEnabled: tickerToggleBtn.getAttribute('aria-checked') === 'true',
+      hideAccountDock: hideDockToggleBtn.getAttribute('aria-checked') === 'true',
       tickerSpeed: storedTickerSpeed,
       tradeColumns: storedTradeColumns,
       clockFormat: clockFormatPref || '24',
@@ -10485,6 +10517,7 @@
     applyDarkModePref(dark, true);
     applyMotionPref(shaped.reduceMotion, true);
     applyTickerPref(shaped.tickerEnabled, true);
+    applyHideDockPref(shaped.hideAccountDock, true);
     applyTickerSpeedPref(shaped.tickerSpeed, true);
     applyTradeColumnsPref(shaped.tradeColumns, true);
 
