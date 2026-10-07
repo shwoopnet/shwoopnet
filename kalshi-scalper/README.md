@@ -678,8 +678,8 @@ study was exploratory and does not count). Every idea that gets a verdict raises
 | L5 | Quote staleness: list price lags the single-market read by about 2c | Stale resting orders | A stale-side fill beats its fee | Recorded order books at under 10 seconds | NOT_RUNNABLE until the recorder has data |
 | L6 | Bitcoin and gold on the same window, or related ladders, priced inconsistently | Slow quoters | Gap beats two fees | Recorded books, both series | NOT_RUNNABLE until the recorder has data |
 | L7 | Volatility regime gate on the best variant, regimes set by spread and liquidity, never by profit | Whoever misprices fat tails | Touch rate shifts by at least 5 points | Candles (have) | OPEN |
-| L8 | Averaged strike at the open (Bitcoin). The market compares the average of the last 60 seconds of BRTI before the close with the average of the last 60 seconds before the open, so the strike is a LAGGING average and spot minus strike at the open is recent drift | Makers who open near 50c without pricing the gap | At the open, in the top decile of gap size, price is off the model by at least 3c | Strike, spot minute closes, first minute quotes (have) | OPEN, not pre-registered |
-| L9 | Final minute averaging (Bitcoin). With a 60 second average at the close, the settlement value is less uncertain than a single end price (one third of the variance), so prices should be more extreme near the end than a point-to-point model says | Holders pricing the last minute as a terminal price | With 1 minute left the favorite wins at least 2 points more often than its price after the averaging adjustment | Spot minute closes (have); sub-minute spot would sharpen it | OPEN, not pre-registered |
+| L8 | Averaged strike at the open (Bitcoin). The market compares the average of the last 60 seconds of BRTI before the close with the average of the last 60 seconds before the open, so the strike is a LAGGING average and spot minus strike at the open is recent drift | Makers who open near 50c without pricing the gap | At the open, in the top decile of gap size, price is off the model by at least 3c | Strike, spot minute closes, first minute quotes (have) | PRE-REGISTERED 2026-10-07 |
+| L9 | Final minute averaging (Bitcoin). With a 60 second average at the close, the settlement value is less uncertain than a single end price (one third of the variance), so prices should be more extreme near the end than a point-to-point model says | Holders pricing the last minute as a terminal price | With 1 minute left the favorite wins at least 2 points more often than its price after the averaging adjustment | Spot minute closes (have); sub-minute spot would sharpen it | PRE-REGISTERED 2026-10-07 |
 | L10 | Scheduled release windows (gold and Bitcoin): dates fixed in advance by calendar (CPI, jobs, FOMC), never by past returns | Quoters slow to widen around a release | Price error or spread in release windows is at least twice the normal level | A dated release calendar (not in the repo), candles | OPEN, calendar needed |
 | L11 | Taker flow momentum: net buying by takers in the last few minutes predicts the outcome | Slow quoters facing informed takers | Taker imbalance in the top decile shifts the outcome rate by at least 3 points beyond the price | The trade tape from H3 (check what it stores first) | OPEN, tape check needed |
 | L12 | Book depth imbalance: the share of size on one side of the top levels predicts the next price move | Quoters that do not read their own depth | Imbalance in the top decile predicts a move of at least 1c within a minute | Recorded order books | NOT_RUNNABLE until the recorder has data |
@@ -789,6 +789,41 @@ test is the plumbing at volume: fills, fees, rejections, shards, timing.
 - **How the result is read, written now.** Net result after fees, and the count of fills, no fills and rejections. It is recorded
   as one forward observation of L1 with n of about 55. It does not re-run the verdict, and no band or minute changes afterwards.
   A positive day proves nothing; a negative day is within the expected noise unless it hits the stop.
+
+## Pre-registration: L8 and L9 (fixed 2026-10-07, before any code or any price was looked at for these rules)
+
+Both use the settlement rule verified on 2026-10-07: Bitcoin settles on the simple average of the 60 seconds of BRTI before the
+close, against the same average before the open (the stored strike). Bitcoin only, since gold has no spot series here. The same
+30 days that H2, H4, H7 and L1 to L3 already used, so a pass is permission to test forward and nothing more. Two more variants:
+11 tried before, 13 after.
+
+**Model, fully fixed, nothing fitted.** At the decision minute, S is Bitcoin spot (the close of the 1 minute candle that STARTED a
+minute earlier, as in H7), K the stored strike, and sigma the sample standard deviation of the 60 one minute log returns ending
+there (H7's volatility). The settlement value is an average over the last minute, so with tau minutes before that minute begins,
+its variance is sigma squared times (tau + 1/3), not tau + 1 as for a single end price. The model probability of YES is
+Phi(ln(S/K) / (sigma x sqrt(tau + 1/3))).
+- **Entry rule, same as H7's, margin fixed now at 2c.** Buy YES at the ask if p minus the ask minus the fee exceeds 0.02. Buy NO at
+  1 minus the YES bid if (1 - p) minus that price minus its fee exceeds 0.02. Real two sided book only. One observation per
+  market, held to settlement, taker fee 7% x p x (1-p) on entry.
+- **Judged by the common bar:** n of at least 300 markets, day clustered z of at least 2.1, positive in both halves (split by close
+  time at the median), positive with fees 20% higher. Verdicts only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`.
+- **Simulator guard:** on a simulated fair game the exact code must lose about its costs.
+- **Information only, decides nothing:** how well the model's own p matches outcomes in deciles, gross profit, and the split of
+  entries into favorites (price 80c or more) and the rest.
+
+**L9. Final minute averaging.** Decision at the candle that ends 1 minute before the close, so tau = 0 and the variance factor is
+1/3. Counterparty: holders who price the last minute as a single end price, who leave the far side too cheap and the near side
+too dear. Prediction: mean net at least +0.5c per contract. Prior, stated honestly: low to moderate. L3 (favorites at 2 minutes,
+no distance) lost 1.7c, but this conditions on the actual distance, and the averaging effect is real arithmetic: at 0.6 sigma
+a single end price gives 73% and the averaged value gives 85%. Whether any trader leaves that on the table is the question.
+
+**L8. The averaged strike at the open.** Decision at the candle that ends 14 minutes before the close (one minute after the open),
+so tau = 13 and the variance factor is 13 and 1/3. The strike is a lagging average of the last minute, so spot minus strike at the
+open is recent drift, and the model prices it. Counterparty: whoever opens the market near 50c without pricing the gap.
+Prediction: mean net at least +0.5c. Prior, stated honestly: very low. H7 found the price well calibrated to distance at 6 minutes,
+the same quoters set the open, and spreads are widest right after an open, which is the cost this rule pays.
+
+Verdicts are recorded below when the one run each has happened. No margin, decision minute, variance factor or fee changes after seeing them.
 
 ## The order-book recorder (`recorder.py`, read only)
 
