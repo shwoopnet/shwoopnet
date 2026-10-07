@@ -1,0 +1,442 @@
+[
+ {
+  "rank": 1,
+  "rule": "6m left, side yes priced 0.70-0.97",
+  "spec": {
+   "left": 6,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 748,
+  "mean_cents": 1.47,
+  "z": 1.276
+ },
+ {
+  "rank": 2,
+  "rule": "8m left, side yes priced 0.60-0.90, price moved away the side by 5c over 1m",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "n": 129,
+  "mean_cents": 0.915,
+  "z": 0.262
+ },
+ {
+  "rank": 3,
+  "rule": "1m left, side yes priced 0.10-0.40",
+  "spec": {
+   "left": 1,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 197,
+  "mean_cents": 0.361,
+  "z": 0.152
+ },
+ {
+  "rank": 4,
+  "rule": "8m left, side either priced 0.30-0.80, price moved away the side by 2c over 1m",
+  "spec": {
+   "left": 8,
+   "lo": 0.3,
+   "hi": 0.8,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     1
+    ]
+   ]
+  },
+  "n": 575,
+  "mean_cents": -0.366,
+  "z": -0.169
+ },
+ {
+  "rank": 5,
+  "rule": "3m left, side either priced 0.03-0.60, price moved away the side by 5c over 1m",
+  "spec": {
+   "left": 3,
+   "lo": 0.03,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     1
+    ]
+   ]
+  },
+  "n": 772,
+  "mean_cents": -0.67,
+  "z": -0.479
+ },
+ {
+  "rank": 6,
+  "rule": "5m left, side no priced 0.60-0.80, price moved toward the side by 2c over 3m",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "n": 248,
+  "mean_cents": -1.529,
+  "z": -0.551
+ },
+ {
+  "rank": 7,
+  "rule": "10m left, side no priced 0.30-0.90, only GOL, spread<=2c",
+  "spec": {
+   "left": 10,
+   "lo": 0.3,
+   "hi": 0.9,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "n": 711,
+  "mean_cents": -0.562,
+  "z": -0.56
+ },
+ {
+  "rank": 8,
+  "rule": "3m left, side no priced 0.20-0.80, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "n": 693,
+  "mean_cents": -0.881,
+  "z": -0.562
+ },
+ {
+  "rank": 9,
+  "rule": "12m left, side yes priced 0.60-0.70, spread<=1c",
+  "spec": {
+   "left": 12,
+   "lo": 0.6,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "n": 393,
+  "mean_cents": -1.825,
+  "z": -0.689
+ },
+ {
+  "rank": 10,
+  "rule": "6m left, side no priced 0.50-0.60",
+  "spec": {
+   "left": 6,
+   "lo": 0.5,
+   "hi": 0.6,
+   "side": "no",
+   "filters": []
+  },
+  "n": 187,
+  "mean_cents": -2.906,
+  "z": -0.726
+ },
+ {
+  "rank": 11,
+  "rule": "10m left, side no priced 0.10-0.80",
+  "spec": {
+   "left": 10,
+   "lo": 0.1,
+   "hi": 0.8,
+   "side": "no",
+   "filters": []
+  },
+  "n": 2056,
+  "mean_cents": -0.865,
+  "z": -0.747
+ },
+ {
+  "rank": 12,
+  "rule": "12m left, side no priced 0.10-0.60, only BTC",
+  "spec": {
+   "left": 12,
+   "lo": 0.1,
+   "hi": 0.6,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "n": 960,
+  "mean_cents": -1.779,
+  "z": -0.996
+ },
+ {
+  "rank": 13,
+  "rule": "3m left, side yes priced 0.10-0.90, price moved away the side by 2c over 3m",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "n": 482,
+  "mean_cents": -1.748,
+  "z": -1.008
+ },
+ {
+  "rank": 14,
+  "rule": "3m left, side no priced 0.03-0.10",
+  "spec": {
+   "left": 3,
+   "lo": 0.03,
+   "hi": 0.1,
+   "side": "no",
+   "filters": []
+  },
+  "n": 334,
+  "mean_cents": -1.556,
+  "z": -1.244
+ },
+ {
+  "rank": 15,
+  "rule": "12m left, side either priced 0.60-0.90, price moved toward the side by 5c over 1m, only GOL",
+  "spec": {
+   "left": 12,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.05,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "n": 363,
+  "mean_cents": -2.194,
+  "z": -1.246
+ },
+ {
+  "rank": 16,
+  "rule": "5m left, side yes priced 0.20-0.90",
+  "spec": {
+   "left": 5,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 1242,
+  "mean_cents": -1.621,
+  "z": -1.307
+ },
+ {
+  "rank": 17,
+  "rule": "2m left, side yes priced 0.40-0.80",
+  "spec": {
+   "left": 2,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 330,
+  "mean_cents": -4.296,
+  "z": -1.369
+ },
+ {
+  "rank": 18,
+  "rule": "5m left, side either priced 0.50-0.80, only GOL",
+  "spec": {
+   "left": 5,
+   "lo": 0.5,
+   "hi": 0.8,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "n": 402,
+  "mean_cents": -2.263,
+  "z": -1.421
+ },
+ {
+  "rank": 19,
+  "rule": "14m left, side no priced 0.30-0.60, only GOL",
+  "spec": {
+   "left": 14,
+   "lo": 0.3,
+   "hi": 0.6,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "n": 767,
+  "mean_cents": -1.608,
+  "z": -1.464
+ },
+ {
+  "rank": 20,
+  "rule": "5m left, side no priced 0.10-0.40, spread<=2c",
+  "spec": {
+   "left": 5,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "n": 577,
+  "mean_cents": -2.213,
+  "z": -1.489
+ },
+ {
+  "rank": 21,
+  "rule": "2m left, side no priced 0.03-0.97",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.97,
+   "side": "no",
+   "filters": []
+  },
+  "n": 1289,
+  "mean_cents": -1.791,
+  "z": -1.547
+ },
+ {
+  "rank": 22,
+  "rule": "1m left, side no priced 0.70-0.97, spread<=4c",
+  "spec": {
+   "left": 1,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "n": 295,
+  "mean_cents": -2.515,
+  "z": -1.599
+ },
+ {
+  "rank": 23,
+  "rule": "5m left, side yes priced 0.03-0.30",
+  "spec": {
+   "left": 5,
+   "lo": 0.03,
+   "hi": 0.3,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 736,
+  "mean_cents": -1.697,
+  "z": -1.605
+ },
+ {
+  "rank": 24,
+  "rule": "14m left, side no priced 0.20-0.97",
+  "spec": {
+   "left": 14,
+   "lo": 0.2,
+   "hi": 0.97,
+   "side": "no",
+   "filters": []
+  },
+  "n": 2326,
+  "mean_cents": -1.723,
+  "z": -1.665
+ },
+ {
+  "rank": 25,
+  "rule": "6m left, side either priced 0.40-0.70",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.7,
+   "side": "either",
+   "filters": []
+  },
+  "n": 715,
+  "mean_cents": -3.135,
+  "z": -1.7
+ }
+]

@@ -2,7 +2,7 @@
 
 make 50 rules and test them, keep the top 25; make 50 more, keep the top 25; take those top 50, add or remove ONE filter from
 each, rerun, keep the top 25; repeat. The search sees ONLY the first half of the days. The second half is the holdout and is read
-once, at the end, for the saved survivors. A shuffled-outcome copy of the data runs through the same pipeline as a control, so
+once, at the end, for the saved survivors. A fair-market copy of the data (outcomes drawn from each market's own price) runs through the same pipeline as a control, so
 the selection effect is visible: the best of N rules on pure noise looks real.
 
 This is a parameter search. It cannot produce a verdict that means "trade", and it never reads the holdout while it searches.
@@ -198,18 +198,21 @@ def run_search(search_markets: list[dict], seed: int = 7, cycles: int = 3) -> di
     return {"rounds": rounds, "evaluated": len(seen), "seen": seen}
 
 
-def shuffle_within_day(ms: list[dict], seed: int) -> list[dict]:
-    """Same markets, same prices, but each market's result swapped with another market's from the SAME day. A pure noise world."""
+def fair_market(ms: list[dict], seed: int) -> list[dict]:
+    """The control: same markets, same prices, same costs, but each result is DRAWN from the market's own last price, so the market is
+    exactly fair and no rule can have an edge. (Shuffling results among markets was tried first and is invalid: it breaks the link
+    between price and outcome, so buying a 5c longshot wins half the time and looks like a fortune.) Prices are close to a martingale,
+    so drawing from the price at 1 minute left is also calibrated at every earlier minute."""
     rng = random.Random(seed)
-    by = defaultdict(list)
-    for m in ms:
-        by[m["day"]].append(m)
     out = []
-    for day, items in by.items():
-        res = [m["res"] for m in items]
-        rng.shuffle(res)
-        out += [dict(m, res=r) for m, r in zip(items, res)]
-    return sorted(out, key=lambda m: m["close"])
+    for m in ms:
+        ends = sorted(e for e, q in m["book"].items() if valid_quote(q[0], q[1]) and e <= m["close"] - 60)
+        if not ends:
+            continue
+        bid, ask = m["book"][ends[-1]]
+        p = min(max((bid + ask) / 2, 0.001), 0.999)
+        out.append(dict(m, res="yes" if rng.random() < p else "no"))
+    return out
 
 
 def holdout_report(final: list[dict], holdout: list[dict]) -> list[dict]:
@@ -231,11 +234,11 @@ def main(seed: int = 7, cycles: int = 3) -> None:
     search, hold = split_days(ms)
     print(f"{len(ms)} markets; search window {len(search)} (first {len({m['day'] for m in search})} days), holdout {len(hold)} locked until the end.\n")
     real = run_search(search, seed, cycles)
-    null_world = shuffle_within_day(search, seed + 1)
+    null_world = fair_market(search, seed + 1)
     null = run_search(null_world, seed, cycles)
     for r in real["rounds"]:
         save(f"cycle{r['cycle']}_{r['phase']}_top25", r["top"])
-    print("round        best z (real)  25th z (real)   best z (shuffled)  25th z (shuffled)")
+    print("round        best z (real)  25th z (real)   best z (fair mkt)  25th z (fair mkt)")
     for a, b in zip(real["rounds"], null["rounds"]):
         ta, tb = a["top"], b["top"]
         print(f"c{a['cycle']} {a['phase']}   {ta[0]['z']:>13.2f} {ta[-1]['z']:>14.2f} {tb[0]['z']:>17.2f} {tb[-1]['z']:>18.2f}")
@@ -243,13 +246,13 @@ def main(seed: int = 7, cycles: int = 3) -> None:
     print(f"\ndistinct rules evaluated: {n}. Best of N on pure noise is expected near z = {math.sqrt(2 * math.log(n)):.2f}.")
     final = real["rounds"][-1]["top"]
     nfinal = null["rounds"][-1]["top"]
-    print("\nHOLDOUT (read once, for the final 25 only; the shuffled column is the same rules on a shuffled holdout):")
+    print("\nHOLDOUT (read once, for the final 25 only; the fair-market column is the same rules on a fair-market holdout):")
     rep = holdout_report(final, hold)
-    nrep = holdout_report(nfinal, shuffle_within_day(hold, seed + 2))
+    nrep = holdout_report(nfinal, fair_market(hold, seed + 2))
     pos = sum(1 for r in rep if r["hold"]["mean"] > 0)
     print(f"  real: {pos} of {len(rep)} positive on the holdout; mean net {sum(r['hold']['mean'] for r in rep) / len(rep) * 100:+.2f}c; best z {max(r['hold']['z'] for r in rep):+.2f}")
     npos = sum(1 for r in nrep if r["hold"]["mean"] > 0)
-    print(f"  noise: {npos} of {len(nrep)} positive; mean net {sum(r['hold']['mean'] for r in nrep) / len(nrep) * 100:+.2f}c; best z {max(r['hold']['z'] for r in nrep):+.2f}")
+    print(f"  fair market: {npos} of {len(nrep)} positive; mean net {sum(r['hold']['mean'] for r in nrep) / len(nrep) * 100:+.2f}c; best z {max(r['hold']['z'] for r in nrep):+.2f}")
     OUT.mkdir(exist_ok=True)
     (OUT / "holdout_final25.json").write_text(json.dumps([{"rule": describe(r["rule"]), "search_n": r["n"], "search_mean_cents": round(r["mean"] * 100, 3),
         "search_z": round(r["z"], 3), "holdout_n": r["hold"]["n"], "holdout_mean_cents": round(r["hold"]["mean"] * 100, 3),

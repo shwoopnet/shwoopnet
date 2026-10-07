@@ -1131,12 +1131,16 @@ assert _res["evaluated"] > 100 and _best["z"] >= _res["rounds"][-1]["top"][-1]["
 assert _best["z"] < 2.5, ("a fair game with costs must not produce a significant winner", _best["z"])
 assert _hm < 0.005, ("and it does not survive fresh data", _hm)
 
-# The shuffle keeps the markets and days, and only moves results within a day.
-_sh = _se.shuffle_within_day(_fs, 1)
-assert len(_sh) == len(_fs) and sorted(m["ticker"] for m in _sh) == sorted(m["ticker"] for m in _fs)
-assert sorted(m["res"] for m in _sh) == sorted(m["res"] for m in _fs)
-from collections import Counter as _Cn
-assert all(_Cn(m["res"] for m in _sh if m["day"] == d) == _Cn(m["res"] for m in _fs if m["day"] == d) for d in {m["day"] for m in _fs}), "results move only within their own day"
+# The control is a FAIR market: outcomes are drawn from each market's own last price, so a rule's win rate matches its price.
+_cm = _se.prep([_sm("Q%d" % i, _C0 + 900 * i, 0.79, 0.81, "yes", extra=[(_C0 + 900 * i - 60, 0.79, 0.81, 0.79, 0.81)]) for i in range(4000)])
+_cn = _se.fair_market(_cm, 3)
+_yr = sum(1 for m in _cn if m["res"] == "yes") / len(_cn)
+assert len(_cn) == 4000 and abs(_yr - 0.80) < 0.02, ("outcomes follow the price", _yr)
+assert [m["ticker"] for m in _cn] == [m["ticker"] for m in _cm], "same markets, same order"
+# Buying the 5c longshot in the control does NOT win half the time (the failure of the shuffle control).
+_lg = _se.prep([_sm("L%d" % i, _C0 + 900 * i, 0.04, 0.06, "no", extra=[(_C0 + 900 * i - 60, 0.04, 0.06, 0.04, 0.06)]) for i in range(4000)])
+_ln = _se.fair_market(_lg, 4)
+assert sum(1 for m in _ln if m["res"] == "yes") / len(_ln) < 0.09, "a 5c contract wins about 5% of the time in a fair market"
 print("search tests passed")
 
 import re as _re12

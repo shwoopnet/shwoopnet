@@ -1,0 +1,547 @@
+[
+ {
+  "rank": 1,
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, only BTC, spread<=2c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "n": 114,
+  "mean_cents": 9.101,
+  "z": 2.327
+ },
+ {
+  "rank": 2,
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m, only BTC, spread<=4c",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "n": 114,
+  "mean_cents": 9.101,
+  "z": 2.327
+ },
+ {
+  "rank": 3,
+  "rule": "3m left, side either priced 0.20-0.30, price moved away the side by 2c over 3m",
+  "spec": {
+   "left": 3,
+   "lo": 0.2,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ]
+   ]
+  },
+  "n": 186,
+  "mean_cents": 8.721,
+  "z": 2.315
+ },
+ {
+  "rank": 4,
+  "rule": "3m left, side yes priced 0.10-0.40",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 432,
+  "mean_cents": 3.254,
+  "z": 2.029
+ },
+ {
+  "rank": 5,
+  "rule": "2m left, side yes priced 0.03-0.40",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 615,
+  "mean_cents": 1.736,
+  "z": 1.914
+ },
+ {
+  "rank": 6,
+  "rule": "5m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL",
+  "spec": {
+   "left": 5,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "n": 151,
+  "mean_cents": 3.436,
+  "z": 1.496
+ },
+ {
+  "rank": 7,
+  "rule": "2m left, side no priced 0.03-0.97, price moved away the side by 2c over 5m, only BTC, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     5
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "n": 319,
+  "mean_cents": 3.304,
+  "z": 0.998
+ },
+ {
+  "rank": 8,
+  "rule": "8m left, side yes priced 0.03-0.40, only GOL, spread<=1c",
+  "spec": {
+   "left": 8,
+   "lo": 0.03,
+   "hi": 0.4,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "n": 344,
+  "mean_cents": 1.552,
+  "z": 0.983
+ },
+ {
+  "rank": 9,
+  "rule": "5m left, side yes priced 0.03-0.50, price moved toward the side by 2c over 5m, spread<=1c",
+  "spec": {
+   "left": 5,
+   "lo": 0.03,
+   "hi": 0.5,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     5
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "n": 116,
+  "mean_cents": 3.58,
+  "z": 0.951
+ },
+ {
+  "rank": 10,
+  "rule": "1m left, side either priced 0.20-0.60, only BTC",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.6,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "n": 199,
+  "mean_cents": 1.843,
+  "z": 0.83
+ },
+ {
+  "rank": 11,
+  "rule": "2m left, side yes priced 0.10-0.80, price moved away the side by 5c over 3m, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.05,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "n": 203,
+  "mean_cents": 2.487,
+  "z": 0.797
+ },
+ {
+  "rank": 12,
+  "rule": "6m left, side no priced 0.40-0.80, price moved toward the side by 2c over 1m, spread<=1c",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "n": 387,
+  "mean_cents": 1.121,
+  "z": 0.537
+ },
+ {
+  "rank": 13,
+  "rule": "2m left, side yes priced 0.10-0.70, only BTC, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.1,
+   "hi": 0.7,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "n": 350,
+  "mean_cents": 1.317,
+  "z": 0.469
+ },
+ {
+  "rank": 14,
+  "rule": "1m left, side yes priced 0.20-0.90, only BTC, spread<=1c",
+  "spec": {
+   "left": 1,
+   "lo": 0.2,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "n": 212,
+  "mean_cents": 1.205,
+  "z": 0.453
+ },
+ {
+  "rank": 15,
+  "rule": "10m left, side no priced 0.50-0.80, only BTC",
+  "spec": {
+   "left": 10,
+   "lo": 0.5,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "n": 565,
+  "mean_cents": 1.234,
+  "z": 0.423
+ },
+ {
+  "rank": 16,
+  "rule": "8m left, side yes priced 0.60-0.90, price moved toward the side by 2c over 1m, only GOL",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXGOLD15M"
+    ]
+   ]
+  },
+  "n": 167,
+  "mean_cents": 1.243,
+  "z": 0.395
+ },
+ {
+  "rank": 17,
+  "rule": "4m left, side either priced 0.30-0.40",
+  "spec": {
+   "left": 4,
+   "lo": 0.3,
+   "hi": 0.4,
+   "side": "either",
+   "filters": []
+  },
+  "n": 303,
+  "mean_cents": 1.274,
+  "z": 0.374
+ },
+ {
+  "rank": 18,
+  "rule": "14m left, side yes priced 0.70-0.97, spread<=1c",
+  "spec": {
+   "left": 14,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "n": 122,
+  "mean_cents": 1.228,
+  "z": 0.278
+ },
+ {
+  "rank": 19,
+  "rule": "8m left, side yes priced 0.60-0.90",
+  "spec": {
+   "left": 8,
+   "lo": 0.6,
+   "hi": 0.9,
+   "side": "yes",
+   "filters": []
+  },
+  "n": 786,
+  "mean_cents": 0.325,
+  "z": 0.187
+ },
+ {
+  "rank": 20,
+  "rule": "6m left, side yes priced 0.40-0.80, only GOL, spread<=4c",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXGOLD15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "n": 317,
+  "mean_cents": 0.469,
+  "z": 0.185
+ },
+ {
+  "rank": 21,
+  "rule": "6m left, side no priced 0.40-0.80, price moved toward the side by 2c over 1m, only BTC",
+  "spec": {
+   "left": 6,
+   "lo": 0.4,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "toward",
+     0.02,
+     1
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "n": 229,
+  "mean_cents": 0.531,
+  "z": 0.17
+ },
+ {
+  "rank": 22,
+  "rule": "2m left, side no priced 0.03-0.80, price moved away the side by 2c over 3m, only BTC",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.8,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     3
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "n": 307,
+  "mean_cents": 0.324,
+  "z": 0.1
+ },
+ {
+  "rank": 23,
+  "rule": "3m left, side either priced 0.10-0.20, spread<=2c",
+  "spec": {
+   "left": 3,
+   "lo": 0.1,
+   "hi": 0.2,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "n": 379,
+  "mean_cents": 0.112,
+  "z": 0.074
+ },
+ {
+  "rank": 24,
+  "rule": "1m left, side either priced 0.10-0.30, spread<=1c",
+  "spec": {
+   "left": 1,
+   "lo": 0.1,
+   "hi": 0.3,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "n": 256,
+  "mean_cents": -0.2,
+  "z": -0.1
+ },
+ {
+  "rank": 25,
+  "rule": "1m left, side yes priced 0.70-0.97, only BTC",
+  "spec": {
+   "left": 1,
+   "lo": 0.7,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ]
+   ]
+  },
+  "n": 137,
+  "mean_cents": -0.635,
+  "z": -0.171
+ }
+]

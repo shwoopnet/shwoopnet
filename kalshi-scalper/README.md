@@ -764,7 +764,7 @@ Nothing changed after seeing the numbers.
 - **L2 is H7's signal wearing H2's exit and it lost 7c.** The exit swaps a chance of a larger settlement win for a sure 80c,
   and pays a second fee. It was registered as a duplicate of H7's information and the result agrees.
 
-Strategy variants tried so far: 11 (the 60s scalp, H1 to H7, L1, L2, L3), all `FALSIFIED`. The lag study was exploratory and does not count.
+Strategy variants tried so far: 11 hypotheses (the 60s scalp, H1 to H7, L1, L2, L3), all `FALSIFIED`, plus one parameter search of 437 rules, which counts against every bar as 437 more tries. The lag study was exploratory and does not count.
 
 ## Live waiver: L1 for 24 hours in the live account (terms fixed 2026-10-07, before any code for it)
 
@@ -847,6 +847,28 @@ So the search is run with these protections, fixed now:
   not ranked. Both series are in the pool, since the owner chose these two markets and nothing else.
 - **What is saved.** Each round's top 25 with its search-window statistics, in `search/`, and nothing from the holdout until the
   final step. Verdict words stay `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`; this search can never produce a "trade".
+
+**2026-10-07: the first run of the search (`python -m scalper.search`, seed 7, 3 cycles, commit d9746a5): nothing survives.**
+437 distinct rules evaluated on the first 15 days (2,346 markets); 2,525 markets locked as the holdout. The saved top 25 of every
+round are in `search/`.
+
+| | Search window, best z | Holdout of the final 25 |
+|---|---|---|
+| Real data | +2.99 (3 minutes left, either side priced 20c to 30c, Bitcoin, spread 4c or less: +9.63c on 167 entries) | 6 of 25 positive, mean net -1.85c, best z +1.62. That best rule fell from +9.63c to -0.90c |
+| Fair market control (same prices and costs, outcomes drawn from each price) | +2.44 | 7 of 25 positive, mean net -1.44c, best z +1.85 |
+
+- **The survivors look exactly like the survivors of a fair market.** Real and fair-market results are the same size, in both the
+  search window and the holdout. The best real rule's +9.63c was selection: the same pipeline finds z of about 2.4 to 3 in a market
+  where no edge can exist, and a z of 2.99 is under the 3.49 that the best of 437 is expected to reach by luck alone.
+- **The first control was invalid and is replaced.** Shuffling results among markets of one day broke the link between price and
+  outcome, so buying a 5c longshot won half the time and the control showed z of 25 and +27c. That is a flaw in the control, not
+  a finding, and it is why the control now draws outcomes from each market's own price. The real-data numbers did not change
+  between the two runs; the holdout was printed twice (the second time only to fix the control) and no rule was changed in between.
+- **Cost still decides it.** The 6 holdout winners are within what 25 fair-market rules produce (7), and none has a search-window z
+  that a real edge would explain.
+- **What the search can and cannot do.** It found nothing beyond noise on 30 days, which is a statement about this universe and these
+  rule shapes, not a proof that nothing exists. Running it again with more cycles would not help: the holdout is now read, and any
+  rule tuned after seeing it is contaminated. The only clean next data is forward data (the live session and the recorder).
 
 ## The order-book recorder (`recorder.py`, read only)
 
