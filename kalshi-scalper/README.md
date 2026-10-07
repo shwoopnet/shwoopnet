@@ -825,6 +825,29 @@ the same quoters set the open, and spreads are widest right after an open, which
 
 Verdicts are recorded below when the one run each has happened. No margin, decision minute, variance factor or fee changes after seeing them.
 
+## Pre-registration: the automated rule search (fixed 2026-10-07, before any code or any result)
+
+The owner asked for a loop: make 50 rules and test them, keep the top 25; make 50 more, keep the top 25; take those top 50, add or
+remove ONE rule from each, rerun, keep the top 25; then repeat. This is a parameter search, not a set of hypotheses, and it is the
+exact "automated loop" the deflation notes say a bar of 1.5 means nothing against: the best of N noise strategies always looks good.
+So the search is run with these protections, fixed now:
+- **Locked holdout.** The loop only ever sees the first 15 days. The last 15 days are read ONCE, at the end, for the saved survivors,
+  and a result printed there is the only out-of-sample number. Anything tuned after reading it is contaminated and says so.
+- **A shuffled-outcome control.** The identical pipeline, same seed and rules, is run with each market's result shuffled among the
+  markets of its own day. The best z it finds on pure noise is printed beside the real best, so the selection effect is visible.
+- **Every configuration counts.** The total number of rules evaluated is recorded and the null expectation for the best of N,
+  about sqrt(2 ln N) in z, is the floor a search-window z must beat to mean anything at all. Beating it is still only permission to
+  look at the holdout and, after that, to test forward on days not yet seen.
+- **Fixed grammar.** A rule is a decision minute (1, 2, 3, 4, 5, 6, 8, 10, 12 or 14 minutes left), a price band for the side bought
+  (taker at the ask, fee 7% x p x (1-p), held to settlement), a side selector (either, YES only, NO only), and up to three optional
+  filters: spread at most 1c, 2c or 4c; one series only; the market's own price having moved toward or away from the side by 2c or
+  5c over the last 1, 3 or 5 minutes. No filter reads a result. No hour of the day is a filter, because hours chosen by profit fit
+  noise. Add or remove one rule means adding or removing one filter, or changing nothing else.
+- **Ranking.** By the day clustered z of net profit per contract in the search window, with at least 100 entries; a rule with fewer is
+  not ranked. Both series are in the pool, since the owner chose these two markets and nothing else.
+- **What is saved.** Each round's top 25 with its search-window statistics, in `search/`, and nothing from the holdout until the
+  final step. Verdict words stay `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`; this search can never produce a "trade".
+
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few
