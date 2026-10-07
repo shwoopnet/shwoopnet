@@ -92,6 +92,7 @@ const botRun = require("./kalshiBotRun");
 const alerts = require("./kalshiAlertLib");
 const demo = require("./kalshiDemoLib");
 const live = require("./kalshiLiveLib");
+const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
@@ -366,6 +367,22 @@ exports.kalshiLiveTrade = onCall(
     } catch (e) {
       if (e instanceof HttpsError) throw e;
       throw new HttpsError("internal", "Live test failed: " + String((e && e.message) || e).slice(0, 120));
+    }
+  }
+);
+
+// ---- Kalshi account view (read only, admin only) -----------------------------------------------------------------
+// Balance per shard, open positions and recent fills, read with the live key. GET requests only and no order code
+// (kalshiAccountLib.js); it works whether or not the live test switch is on, and takes nothing from the page.
+exports.kalshiLiveAccount = onCall(
+  { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30 },
+  async (request) => {
+    await assertKalshiAdmin(request.auth);
+    try {
+      return await account.readAccount({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now() });
+    } catch (e) {
+      if (e instanceof HttpsError) throw e;
+      throw new HttpsError("internal", "Account read failed: " + String((e && e.message) || e).slice(0, 120));
     }
   }
 );

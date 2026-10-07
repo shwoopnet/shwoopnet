@@ -1988,6 +1988,7 @@
   var kalshiDemoTradeFn = httpsCallable(functions, 'kalshiDemoTrade');
   var kalshiLiveTradeFn = httpsCallable(functions, 'kalshiLiveTrade');
   var kalshiLiveArmFn = httpsCallable(functions, 'kalshiLiveArm');
+  var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
 
   // rememberMe controls whether Firebase's own session survives closing the
   // browser (browserLocalPersistence, the SDK's own default) or ends with
@@ -2456,6 +2457,10 @@
     // (and refuses unless its own switch is on): no ticker, price or size can be sent from here.
     kalshiLiveTrade: function(){
       return kalshiLiveTradeFn({}).then(function(res){ return res.data; });
+    },
+    // Read-only: balance per shard, open positions and recent fills from the live Kalshi account. Sends nothing.
+    kalshiLiveAccount: function(){
+      return kalshiLiveAccountFn({}).then(function(res){ return res.data; });
     },
     // Arm or disarm the automatic scan. The server sets the 3 hour expiry itself; the page sends only on or off.
     kalshiLiveArm: function(on){
@@ -3340,6 +3345,13 @@
         <div class="kal-note" id="kalLiveArmStatus">Not armed.</div>
         <div class="kal-note" id="kalLiveArmMsg"></div>
         <div id="kalLiveList"><div class="kal-empty">No live test trades yet.</div></div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">Kalshi account (live, read only)</div>
+        <div class="kal-note">Reads your real Kalshi account with the live key: what each shard holds, open positions and recent fills. It cannot place or change anything. Funds are held per shard, and an order can only use the shard its market lives on (Bitcoin and gold were both on shard 2 when last checked).</div>
+        <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
+        <div class="kal-note" id="kalAcctMsg"></div>
+        <div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">What it did</div>
@@ -10234,6 +10246,43 @@
       api.kalshiLiveArm(false).then(function(){ msg.textContent = 'Disarmed.'; }).catch(function(err){
         msg.textContent = 'Could not disarm: ' + ((err && err.message) || 'unknown');
       });
+    });
+  })();
+
+  // The account panel only reads. One call per press; each part shows its own error so one failing read hides nothing else.
+  (function(){
+    var btn = document.getElementById('kalAcctRefresh'), msg = document.getElementById('kalAcctMsg'), body = document.getElementById('kalAcctBody');
+    function money(n){ return '$' + Number(n).toFixed(2); }
+    function part(title, rows, err){
+      return '<div style="margin-top:10px"><span class="kal-lbl">' + escapeHtml(title) + '</span>' +
+        (err ? '<div class="kal-note">Could not read: ' + escapeHtml(err) + '</div>' : (rows.length ? rows.join('') : '<div class="kal-empty">None.</div>')) + '</div>';
+    }
+    function render(d){
+      var b = d.balance, p = d.positions, f = d.fills;
+      var shardRows = (b.ok ? b.shards : []).map(function(s){
+        return '<div class="kal-note">Shard ' + escapeHtml(String(s.shard)) + ': <b>' + money(s.dollars) + '</b></div>';
+      });
+      if(b.ok && !b.shards.length){ shardRows.push('<div class="kal-note">Kalshi gave no per-shard breakdown, so there is nothing to compare. Fields it returned: ' + escapeHtml(b.keys.join(', ')) + '.</div>'); }
+      if(b.ok && b.totalDollars !== null){ shardRows.push('<div class="kal-note">Total <b>' + money(b.totalDollars) + '</b> (' + escapeHtml(b.totalFrom) + ')' + (b.portfolioValue ? ', portfolio value ' + escapeHtml(b.portfolioValue) : '') + '</div>'); }
+      var posRows = (p.ok ? p.positions : []).map(function(x){
+        return '<div class="kal-note">' + escapeHtml(x.ticker) + ': ' + escapeHtml(String(x.position)) + ' contracts' + (x.realizedPnl !== null ? ', realized ' + escapeHtml(x.realizedPnl) : '') + (x.feesPaid !== null ? ', fees ' + escapeHtml(x.feesPaid) : '') + '</div>';
+      });
+      var fillRows = (f.ok ? f.fills : []).map(function(x){
+        return '<div class="kal-note">' + escapeHtml(x.time ? new Date(x.time).toLocaleString() : '') + ' ' + escapeHtml(String(x.ticker)) + ' ' + escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '') + (x.taker === null ? '' : (x.taker ? ' (taker)' : ' (maker)')) + '</div>';
+      });
+      body.innerHTML = part('Balance by shard', shardRows, b.ok ? null : 'HTTP ' + b.status + ' ' + b.error) +
+        part('Open positions', posRows, p.ok ? null : 'HTTP ' + p.status + ' ' + p.error) +
+        part('Recent fills', fillRows, f.ok ? null : 'HTTP ' + f.status + ' ' + f.error);
+      msg.textContent = 'Read ' + new Date(d.at).toLocaleTimeString() + '.';
+    }
+    btn.addEventListener('click', function(){
+      var api = window.__shwoopAPI;
+      if(!api || !api.kalshiLiveAccount || !currentUserIsAdmin){ return; }
+      btn.disabled = true;
+      msg.textContent = 'Reading the account...';
+      api.kalshiLiveAccount().then(render).catch(function(err){
+        msg.textContent = 'Could not read the account: ' + ((err && err.message) || 'unknown');
+      }).then(function(){ btn.disabled = false; });
     });
   })();
 
