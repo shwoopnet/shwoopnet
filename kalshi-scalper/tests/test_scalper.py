@@ -1205,3 +1205,49 @@ assert not any(r["survivor"] for r in _res_f["stageB"]) and not any(r["survivor"
 assert not any(r["survivor"] for r in _res_e["control"]), "the control of an edge world is a fair market too"
 assert _res_f["evaluated_B"] >= 200
 print("overnight tests passed")
+
+# ---- L8 and L9 (averaged settlement) ----
+from scalper import avgsettle as _av
+# The arithmetic in the README: at 0.6 sigma (one minute) a single end price gives 73% and the averaged value gives 85%.
+_z6 = 0.6 / _mt.sqrt(6)                      # ln(S/K)/sigma = 0.6 one-minute sigmas
+assert abs(_av.model_p(_z6, 0.0) - 0.85) < 0.005, _av.model_p(_z6, 0.0)
+assert abs(_av.phi(0.6) - 0.726) < 0.002
+assert 0.5 < _av.model_p(_z6, 13.0) < 0.60, "far from the close the gap is small against the remaining variance"
+assert abs(_av.model_p(-_z6, 0.0) - (1 - _av.model_p(_z6, 0.0))) < 1e-12, "symmetric"
+# Entries: the decision candle ends exactly left_s before the close; a market priced at the model gives no entry; a market priced
+# far below the model is bought, and settles with the usual fee.
+_close = _C0 + 900
+_sp = {(_close - 60) - 60 * k - 60: 110.0 * (1 + 0.0005 * _mt.sin(k)) for k in range(0, 70)}
+_mk9 = [("M", _close, 100.0, "yes", {_close - 60: (0.60, 0.62)})]
+_e9 = _av.entries(_mk9, _sp, 60, 0.0)
+assert len(_e9) == 1 and _e9[0]["side"] == "yes" and abs(_e9[0]["price"] - 0.62) < 1e-9, "model near 100% against a 62c ask is bought"
+assert abs(_e9[0]["net"] - (1.0 - 0.62 - _di.fee(0.62))) < 1e-12
+assert _av.entries([("M", _close, 100.0, "yes", {_close - 120: (0.60, 0.62)})], _sp, 60, 0.0) == [], "no candle at exactly 1 minute left: nothing"
+assert _av.entries([("M", _close, 100.0, "yes", {_close - 60: (0.99, 1.0)})], _sp, 60, 0.0) == [], "an empty book is not a quote"
+assert _av.entries([("M", _close, 100.0, "yes", {_close - 60: (0.994, 0.996)})], _sp, 60, 0.0) == [], "priced at the model: no entry"
+assert _av.entries([("M", _close, None, "yes", {_close - 60: (0.6, 0.62)})], _sp, 60, 0.0) == [], "no strike, no model"
+print("L8 L9 tests passed")
+
+# ---- batched backfill ----
+import sqlite3 as _sq13
+from scalper import backfill as _bf, api as _api13
+_calls13 = []
+def _fake_settled(series, lo, hi):
+    return [{"ticker": f"{series}-T{i}", "open_time": "2026-08-01T00:00:00Z", "close_time": "2026-08-01T00:15:00Z", "result": "yes", "floor_strike": 100.0} for i in range(120)]
+def _fake_batch(tickers, a, b):
+    _calls13.append(len(tickers))
+    return {t: ([] if t.endswith("T7") else [{"end_period_ts": 1000, "yes_bid": {"close_dollars": "0.40"}, "yes_ask": {"close_dollars": "0.42"}}]) for t in tickers}
+_o13 = (_api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES)
+_api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES = _fake_settled, _fake_batch, 0, ("KXBTC15M",)
+try:
+    _db13 = _sq13.connect(":memory:"); _db13.executescript(_bf.SCHEMA)
+    _st, _sk, _em = _bf._fetch(_db13, 0, 1, "test", skip_empty=True)
+    assert max(_calls13) <= _bf.BATCH and len(_calls13) == 3, ("120 markets go in batches of at most 50", _calls13)
+    assert (_st, _sk, _em) == (119, 0, 1), "a market with no candles is not stored when skip_empty is on"
+    assert _db13.execute("SELECT COUNT(*) FROM market").fetchone()[0] == 119 and _db13.execute("SELECT COUNT(*) FROM candle").fetchone()[0] == 119
+    _calls13.clear()
+    _st2, _sk2, _ = _bf._fetch(_db13, 0, 1, "again", skip_empty=True)
+    assert _st2 == 0 and _sk2 == 119 and len(_calls13) == 1, "stored markets are never fetched again"
+finally:
+    _api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES = _o13
+print("batched backfill tests passed")

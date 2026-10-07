@@ -66,35 +66,42 @@ def parse_candle(c: dict, ticker: str, series: str) -> tuple | None:
             _d(p, "close_dollars"), api.f(c.get("volume_fp")), api.f(c.get("open_interest_fp")))
 
 
+BATCH = 50   # markets per candles request: 50 x about 16 candles is far under the endpoint's 10,000 candle limit
+
+
 def _fetch(db: sqlite3.Connection, lo: int, hi: int, label: str, skip_empty: bool = False) -> tuple[int, int, int]:
-    """Store every settled market of both series closing in [lo, hi] that is not stored yet. skip_empty: a market with no
-    candles (older than Kalshi keeps them) is not stored at all, so it cannot look like a market that traded with no quotes."""
+    """Store every settled market of both series closing in [lo, hi] that is not stored yet, fetching candles for BATCH markets per request
+    (one call per market took hours). skip_empty: a market with no candles (older than Kalshi keeps them) is not stored at all, so it
+    cannot look like a market that traded with no quotes."""
     have = {r[0] for r in db.execute("SELECT ticker FROM market")}
     stored = skipped = empty = 0
     for series in SERIES:
         listed = list(api.settled_markets(series, lo, hi))
         print(f"{series}: {len(listed)} settled markets {label}", flush=True)
+        todo = []
         for m in listed:
-            t = m["ticker"]
-            if t in have:
+            if m["ticker"] in have:
                 skipped += 1
                 continue
             o, c = iso_ts(m.get("open_time")), iso_ts(m.get("close_time"))
-            if o is None or c is None:
-                continue
-            rows = [r for r in (parse_candle(x, t, series) for x in api.candlesticks(series, t, o, c)) if r]
-            if skip_empty and not rows:
-                empty += 1
-                continue
-            db.executemany("INSERT OR REPLACE INTO candle VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
-            db.execute("INSERT OR REPLACE INTO market VALUES(?,?,?,?,?,?,?)",
-                       (t, series, o, c, m.get("result"), m.get("floor_strike"), len(rows)))
-            stored += 1
-            if stored % 50 == 0:
-                db.commit()
-                print(f"  {stored} markets stored", flush=True)
+            if o is not None and c is not None:
+                todo.append((m, o, c))
+        for i in range(0, len(todo), BATCH):
+            chunk = todo[i:i + BATCH]
+            got = api.batch_candlesticks([m["ticker"] for m, _, _ in chunk], min(o for _, o, _ in chunk), max(c for _, _, c in chunk))
+            for m, o, c in chunk:
+                t = m["ticker"]
+                rows = [r for r in (parse_candle(x, t, series) for x in got.get(t, [])) if r]
+                if skip_empty and not rows:
+                    empty += 1
+                    continue
+                db.executemany("INSERT OR REPLACE INTO candle VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+                db.execute("INSERT OR REPLACE INTO market VALUES(?,?,?,?,?,?,?)",
+                           (t, series, o, c, m.get("result"), m.get("floor_strike"), len(rows)))
+                stored += 1
+            db.commit()
+            print(f"  {stored} markets stored", flush=True)
             time.sleep(PAUSE_S)
-        db.commit()
     return stored, skipped, empty
 
 

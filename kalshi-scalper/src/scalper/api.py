@@ -78,3 +78,10 @@ def candlesticks(series: str, ticker: str, start_ts: int, end_ts: int) -> list[d
     d = _get(f"/series/{series}/markets/{ticker}/candlesticks",
              {"start_ts": start_ts, "end_ts": end_ts, "period_interval": 1})
     return d.get("candlesticks", [])
+
+
+def batch_candlesticks(tickers: list[str], start_ts: int, end_ts: int) -> dict[str, list[dict]]:
+    """One minute candles for many markets in ONE request (up to 100 tickers). Returns ticker -> candles; a ticker Kalshi has no candles
+    for comes back with an empty list or is absent."""
+    d = _get("/markets/candlesticks", {"market_tickers": ",".join(tickers), "start_ts": start_ts, "end_ts": end_ts, "period_interval": 1})
+    return {m.get("market_ticker"): m.get("candlesticks", []) for m in d.get("markets", [])}
