@@ -977,6 +977,12 @@
   .kal-actions{ display:flex; align-items:center; gap:12px; margin:12px 0 4px; flex-wrap:wrap; }
   .kal-btn{ background:var(--paper); color:var(--ink); border:0; border-radius:8px; padding:9px 16px; font:inherit; font-weight:600; cursor:pointer; }
   .kal-mini{ background:transparent; color:var(--paper); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font:inherit; font-size:12px; cursor:pointer; margin-right:6px; }
+  .kal-more{ margin-top:10px; }
+  .kal-more > summary{ cursor:pointer; color:var(--muted); font-size:12.5px; }
+  .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
+  .kal-fold[open] > summary{ margin-bottom:14px; }
+  .kal-first{ margin-top:0; }
+  .kal-sub{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; margin:16px 0 6px; }
   .kal-limits{ font-size:14px; line-height:1.7; }
   .kal-big{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; }
   .kal-trade{ display:grid; grid-template-columns:minmax(110px,1.2fr) repeat(4,minmax(80px,1fr)) auto; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--border); font-size:13px; }
@@ -2417,13 +2423,11 @@
     finnhubCompanyNews: function(symbol, from, to){
       return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
     },
-    // The halt switch and the quiet server-side PAPER bot's heartbeat (functions/kalshiBot*). The page only watches
-    // them, and flips the halt switch below; firestore.rules lets nobody else write a position or an event. The
-    // paper bot's trades are no longer shown here. `h` is { status, control }, each called on every change.
+    // The halt switch (kalshiBotMeta/control). The page only watches it and flips it below; firestore.rules lets nobody
+    // else write it. `h` is { control }, called on every change.
     watchKalshiBot: function(h){
       var un = [];
       var onErr = function(err){ console.error('Kalshi bot sync error:', err); };
-      un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'status'), function(s){ h.status(s.exists() ? s.data() : null); }, onErr));
       un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'control'), function(s){ h.control(s.exists() ? s.data() : {}); }, onErr));
       return function(){ un.forEach(function(f){ f(); }); };
     },
@@ -3299,11 +3303,36 @@
         <div class="kal-card-title">Live bot (real money)</div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-actions"><button class="kal-btn" id="kalBotHalt" type="button" hidden></button><span class="kal-note" id="kalBotHaltMsg"></span></div>
-        <div class="kal-note">This is your real Kalshi account, read every minute while this tab is open. Halt blocks any new live order, including the automatic scan. The old $100 paper bot still runs quietly on the server, and its trades are no longer shown here.</div>
+        <details class="kal-more"><summary>About this card</summary>
+          <div class="kal-note">Your real Kalshi account, read every minute while this tab is open. Halt blocks any new live order, including the automatic scan.</div>
+        </details>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">Totals since you started fresh</div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">Place a live trade (real money)</div>
+        <div class="kal-note kal-first">One contract, at most $2.00 including the fee, Bitcoin or gold. Limits: 2 a day, 5 ever.</div>
+        <div class="kal-actions">
+          <button class="kal-btn" id="kalLiveArm" type="button">Arm automatic scan (3 hours)</button>
+          <span id="kalLiveArmConfirm" hidden><span class="kal-note">Arm it? When a signal qualifies it will place ONE REAL order (up to $2.00) with no further click.</span> <button class="kal-btn" id="kalLiveArmYes" type="button">Yes, arm it</button> <button class="kal-btn" id="kalLiveArmNo" type="button">Cancel</button></span>
+          <button class="kal-btn" id="kalLiveDisarm" type="button" hidden>Disarm now</button>
+        </div>
+        <div class="kal-note" id="kalLiveArmStatus">Not armed.</div>
+        <div class="kal-note" id="kalLiveArmMsg"></div>
+        <details class="kal-more"><summary>Send one now instead</summary>
+          <div class="kal-actions">
+            <button class="kal-btn" id="kalLiveSend" type="button">Send one live test trade</button>
+            <span id="kalLiveConfirm" hidden><span class="kal-note">This places a REAL order with real money (up to $2.00). Send it?</span> <button class="kal-btn" id="kalLiveYes" type="button">Yes, send real order</button> <button class="kal-btn" id="kalLiveNo" type="button">Cancel</button></span>
+          </div>
+          <div class="kal-note" id="kalLiveMsg"></div>
+        </details>
+        <details class="kal-more"><summary>How it works</summary>
+          <div class="kal-note">Arm it once and the server checks every minute until a signal qualifies, sends ONE real contract, and switches itself off. It also switches off after 3 hours with no signal, and on any error. The position closes by settlement at the end of its 15 minute market. Nothing is sent unless the server switch is on. If Kalshi's answer is ever lost it says so, does not retry, and blocks the next order until you have looked at your Kalshi account.</div>
+        </details>
+        <div class="kal-sub">Orders sent</div>
+        <div id="kalLiveList"><div class="kal-empty">No live test trades yet.</div></div>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">Open positions</div>
@@ -3314,38 +3343,22 @@
         <div id="kalBotClosed"></div>
       </div>
       <div class="kal-card">
-        <div class="kal-card-title">Live test trade (real money)</div>
-        <div class="kal-note">Sends ONE contract of REAL money to Kalshi from the bot's current Bitcoin or gold signal, at most $2.00 including the fee. It proves the live path: the real fill, the real fee and the real duplicate-order behaviour. It does nothing unless the server switch is on, and it is limited to 2 a day and 5 ever. If Kalshi's answer is ever lost it says so, does not retry, and blocks the next test until you have looked at your Kalshi account.</div>
-        <div class="kal-actions">
-          <button class="kal-btn" id="kalLiveSend" type="button">Send one live test trade</button>
-          <span id="kalLiveConfirm" hidden><span class="kal-note">This places a REAL order with real money (up to $2.00). Send it?</span> <button class="kal-btn" id="kalLiveYes" type="button">Yes, send real order</button> <button class="kal-btn" id="kalLiveNo" type="button">Cancel</button></span>
-        </div>
-        <div class="kal-note" id="kalLiveMsg"></div>
-        <div class="kal-note"><b>Automatic scan.</b> Arm it once and the server checks every minute until a Bitcoin or gold signal qualifies, sends ONE real contract, and switches itself off. It also switches off after 3 hours if nothing qualified, and on any error. The position closes by settlement at the end of its 15 minute market. All the limits above still apply.</div>
-        <div class="kal-actions">
-          <button class="kal-btn" id="kalLiveArm" type="button">Arm automatic scan (3 hours)</button>
-          <span id="kalLiveArmConfirm" hidden><span class="kal-note">Arm it? When a signal qualifies it will place ONE REAL order (up to $2.00) with no further click.</span> <button class="kal-btn" id="kalLiveArmYes" type="button">Yes, arm it</button> <button class="kal-btn" id="kalLiveArmNo" type="button">Cancel</button></span>
-          <button class="kal-btn" id="kalLiveDisarm" type="button" hidden>Disarm now</button>
-        </div>
-        <div class="kal-note" id="kalLiveArmStatus">Not armed.</div>
-        <div class="kal-note" id="kalLiveArmMsg"></div>
-        <div id="kalLiveList"><div class="kal-empty">No live test trades yet.</div></div>
+        <details class="kal-fold"><summary class="kal-card-title">Kalshi account detail (read only)</summary>
+          <div class="kal-note kal-first">Reads your real Kalshi account with the live key. It cannot place or change anything. Funds are held per shard, and an order can only use the shard its market lives on (Bitcoin and gold were both on shard 2 when last checked).</div>
+          <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
+          <div class="kal-note" id="kalAcctMsg"></div>
+          <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
+          <div class="kal-actions">
+            <button class="kal-btn" id="kalAcctStart" type="button">Start fresh from now (one time)</button>
+            <span id="kalAcctStartConfirm" hidden><span class="kal-note">Everything before this moment is ignored from now on, and the balance shown becomes the starting balance. Nothing on Kalshi is changed. Do this only after your last personal trade. Go ahead?</span> <button class="kal-btn" id="kalAcctStartYes" type="button">Yes, start fresh</button> <button class="kal-btn" id="kalAcctStartNo" type="button">Cancel</button></span>
+          </div>
+          <div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div>
+        </details>
       </div>
       <div class="kal-card">
-        <div class="kal-card-title">Kalshi account (live, read only)</div>
-        <div class="kal-note">Reads your real Kalshi account with the live key: what each shard holds, open positions and recent fills. It cannot place or change anything. Funds are held per shard, and an order can only use the shard its market lives on (Bitcoin and gold were both on shard 2 when last checked).</div>
-        <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
-        <div class="kal-note" id="kalAcctMsg"></div>
-        <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
-        <div class="kal-actions">
-          <button class="kal-btn" id="kalAcctStart" type="button">Start fresh from now (one time)</button>
-          <span id="kalAcctStartConfirm" hidden><span class="kal-note">Everything before this moment is ignored from now on, and the balance shown becomes the starting balance. Nothing on Kalshi is changed. Do this only after your last personal trade. Go ahead?</span> <button class="kal-btn" id="kalAcctStartYes" type="button">Yes, start fresh</button> <button class="kal-btn" id="kalAcctStartNo" type="button">Cancel</button></span>
-        </div>
-        <div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div>
-      </div>
-      <div class="kal-card">
-        <div class="kal-card-title">What it did</div>
-        <div id="kalBotEvents"></div>
+        <details class="kal-fold"><summary class="kal-card-title">What it did</summary>
+          <div id="kalBotEvents"></div>
+        </details>
       </div>
     </div>
 
@@ -9966,18 +9979,7 @@
 
   // ---- server bot tab (read only, plus one halt switch) ----
 
-  // The bot runs once a minute, so the heartbeat is judged against that: two and a
-  // half minutes of silence is stale, five is down. The same three words as the
-  // Python status command and an outside watchdog would use.
-  function kalshiBotHealth(ageMs){
-    if(ageMs == null || !Number.isFinite(ageMs)){ return 'NEVER RAN'; }
-    return ageMs < 150000 ? 'OK' : (ageMs < 300000 ? 'STALE' : 'DOWN');
-  }
-
-  // What this tab shows is the live account: status, totals since the owner's "start fresh" line, open positions,
-  // recent trades and a log of what the live bot did. The old paper bot keeps running quietly on the server; only
-  // its heartbeat and the halt switch are read here.
-  var kalshiBotState = { status: null, control: {} };
+  var kalshiBotState = { control: {} };
   var kalshiLiveAcct = null;     // the latest read of the account (the account block below owns the read)
   var kalshiLiveEvents = [];
   var kalshiLiveShow = { events: 12 };
@@ -10033,8 +10035,6 @@
       h += '<div class="kal-status">Last scan ' + new Date(c.last.ts).toLocaleTimeString() + ': ' +
         escapeHtml(c.last.ok ? 'order sent' + (c.last.filled ? ' and filled' : ', no fill') : String(c.last.reason || 'nothing sent').slice(0, 220)) + '</div>';
     }
-    var ps = kalshiBotState.status;
-    if(ps && Number.isFinite(ps.lastTickMs)){ h += '<div class="kal-status">Paper bot (running quietly, not shown): ' + kalshiBotHealth(now - ps.lastTickMs) + '</div>'; }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
     if(halted){ el.innerHTML += '<div class="kal-warn kal-big">Halted from this page: no new entries</div>'; }
@@ -10134,7 +10134,6 @@
     var api = window.__shwoopAPI;
     if(!api || !api.watchKalshiBot || !currentUserIsAdmin){ return; }
     kalshiBotUnsub = api.watchKalshiBot({
-      status: function(s){ kalshiBotState.status = s; renderKalshiBot(); },
       control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); }
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiLive(); renderKalshiBot(); }); }

@@ -227,7 +227,7 @@ gates.L12 = () => {
   assert.ok(!/KALSHI_DEMO/.test(body), 'the demo key is never used for a live order');
   assert.ok(/enabled: KALSHI_LIVE_ENABLED\.value\(\) === "on"/.test(body), 'only the literal "on" enables it');
   assert.ok(/defineString\("KALSHI_LIVE_ENABLED", \{ default: "off" \}\)/.test(fnSrc), 'off by default: deploying alone cannot place an order');
-  assert.ok(!/KALSHI_LIVE/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBot ='))), 'the scheduled bot never sees the live key or switch');
+  assert.ok(!/KALSHI_LIVE/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBookRecorder ='))), 'nothing after the live arm sees the live key or switch');
 };
 
 gates.L13 = () => {
@@ -378,7 +378,7 @@ gates.L19 = () => {
   const load = s.indexOf('live.loadQuotes'), guard = s.indexOf('arm.armed === true && arm.until > now');
   assert.ok(guard > -1 && load > guard, 'prices are loaded only inside the armed branch');
   assert.ok(/live\.runArmedTick\(args\)/.test(s) && !/live\.runLiveTest/.test(s), 'it only ever goes through runArmedTick');
-  assert.ok(fnSrc.indexOf('exports.kalshiLiveArmed') < fnSrc.indexOf('exports.kalshiBot ='), 'defined before the paper bot, so the no-order-code slice still covers the paper bot');
+  assert.ok(fnSrc.indexOf('exports.kalshiLiveArmed') < fnSrc.indexOf('exports.kalshiBookRecorder ='), 'defined before the recorder, so the no-order-code slice still covers it');
   const m = /match \/kalshiLiveControl\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
   assert.ok(m && /allow read: if isAdmin\(\);/.test(m[1]) && /allow write: if false;/.test(m[1]), 'admin read, no client write');
   // The page: the arm click only asks, the confirm click is the only one that arms, and it is admin only.
@@ -418,8 +418,8 @@ gates.L21 = () => {
 };
 
 gates.L11 = () => {
-  // The scheduled paper bot stays separate from the live order code.
-  for (const f of ['kalshiBotLib.js', 'kalshiBotRun.js']) {
+  // The signal library, the recorder and the watchdog stay separate from the live order code.
+  for (const f of ['kalshiSignalLib.js', 'kalshiBookLib.js', 'kalshiWatchdogLib.js']) {
     const code = fs.readFileSync(path.join(root, 'functions', f), 'utf8').replace(/\/\/[^\n]*/g, '');
     assert.ok(!/kalshiLiveLib|portfolio\/events\/orders/.test(code), f + ' must not touch live order code');
   }

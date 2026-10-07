@@ -16,10 +16,10 @@
 // - Production host only: every request is checked against the production host before it is sent. The key
 //   lives in Firebase secrets, signs and is never logged, recorded or returned.
 //
-// The scheduled bot (kalshiBotLib.js, kalshiBotRun.js, exports.kalshiBot) still has no order code.
+// The signal library, the book recorder and the watchdog have no order code.
 
 const crypto = require("crypto");
-const bot = require("./kalshiBotLib");
+const bot = require("./kalshiSignalLib");
 
 // Kalshi's scheme: sign timestamp + METHOD + the full path from the API root, query left out.
 // RSA keys use PSS with SHA-256 and a salt as long as the digest; Ed25519 signs the message.

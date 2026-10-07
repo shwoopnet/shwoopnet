@@ -78,51 +78,27 @@ Deploy functions and rules together:
 firebase deploy --only functions,firestore:rules
 ```
 
-## The Kalshi paper bot (server side)
+## Retired: the Kalshi paper bot (removed Oct 7, 2026)
 
-`kalshiBot` is a scheduled function that runs once a minute, makes SIMULATED trades
-from Kalshi's public prices with $100 of paper capital, and writes its state to
-Firestore. It cannot place a real order: nothing in it signs a request or calls an order
-endpoint, and a test asserts that. Deploy it together with the rules, because the rules
-are what keep its records readable by the admin only:
+The simulated bot (`kalshiBot`, `kalshiBotRun.js`, the alert module and their collections) is gone from the code. It made
+SIMULATED trades from Kalshi's public prices and proved nothing about the strategy. What remains from it is the entry
+signal the live test uses (`kalshiSignalLib.js`) and the halt switch (`kalshiBotMeta/control`, whose path is kept so your
+saved setting survives). Cleanup on your side, once the new code is deployed:
 ```
 firebase deploy --only functions,firestore:rules
+firebase functions:delete kalshiBot --region us-central1
 ```
-The first deploy of a scheduled function enables Cloud Scheduler and may ask a question
-or two about APIs; answer yes. After about a minute the **Bot** tab on the Kalshi page
-shows `Bot: OK`. If it still says "Not running yet" after three minutes, read the log:
-```
-firebase functions:log --only kalshiBot
-```
+The old records (`kalshiBotPositions`, `kalshiBotEvents`, `kalshiBotMeta/status`) are no longer readable from the page. Delete
+the collections in the Firebase console if you want them gone; nothing reads them.
 
-- **State** lives in `kalshiBotPositions`, `kalshiBotEvents` and `kalshiBotMeta`. Only the
-  function writes them (the Admin SDK bypasses the rules). The one thing the page may
-  write is `kalshiBotMeta/control`, the halt switch.
-- **A double fire cannot enter a market twice.** A position is created with `create()` under
-  an id derived from the market, which fails if it exists; a close happens inside a
-  transaction that re-checks the position is still open.
-- **Cost** (a projection, not a measurement): about 43,000 invocations a month against 2
-  million free, roughly 1,500 Firestore writes and 10,000 reads a day against a daily free
-  allowance of 20,000 and 50,000 that the rest of the app shares. Set a budget alert and
-  look at usage after a week.
-- **Alerts.** The page shows the bot as OK, STALE (2.5 minutes of silence) or DOWN (5), but
-  only while the page is open. For an alert that reaches a phone, the bot pings an outside
-  dead-man's switch every healthy minute, and that service alerts when the pings stop.
-  Setup (about five minutes):
-  1. Make a free account at healthchecks.io and add a check with period 1 minute and grace
-     time 5 minutes. Add a notification channel (email, or their phone app, SMS or Telegram).
-  2. Copy the check's ping URL (it looks like `https://hc-ping.com/<uuid>`).
-  3. Create `functions/.env` (it is gitignored) containing one line:
-     `KALSHI_WATCHDOG_URL=https://hc-ping.com/<uuid>`
-  4. `firebase deploy --only functions`.
-  The bot sends no ping when it cannot read Kalshi's prices, so a stuck feed alerts too. It
-  also sends one failure ping when the day's -5% stop is hit (expect a "back up" notice a
-  minute later). Leave the URL unset and nothing is sent. A failed ping never affects the
-  bot. The URL lets anyone ping your check, so keep it out of git and chat.
-- **Real orders are not part of this.** They come only after a strategy passes its
-  pre-registered test and 300 paper trades, and they need the API key stored as a Firebase
-  secret, never in the repo. See `kalshi-scalper/README.md`.
+### The outside watchdog now watches the live arm
 
+`kalshiLiveArmed` runs every minute whether or not it is armed, and pings an outside dead-man's switch after every completed
+run. A run that throws sends the failure ping instead, and still fails. The service alerts when the pings stop. Setup is the
+same as before: a healthchecks.io check with period 1 minute and grace time 5 minutes, then one line in the gitignored
+`functions/.env`: `KALSHI_WATCHDOG_URL=https://hc-ping.com/<uuid>`, then `firebase deploy --only functions`. Leave it unset and
+nothing is sent. A failed ping never affects the arm check. The URL lets anyone ping your check, so keep it out of git and chat.
+Real orders are covered in the live test sections below and in `kalshi-scalper/README.md`.
 
 ## Retired: the Kalshi demo test trader (removed Oct 7, 2026)
 
@@ -176,7 +152,7 @@ settlement at the end of its 15 minute market; no exit order is placed.
 The signal price comes from Kalshi's market list, which lags the single-market read by about 2c, so the live test
 re-reads the market and requires the price it would actually pay to be inside the 40c or 50c band (and within 5c
 of the signal). Deploy with `firebase deploy --only functions:kalshiLiveTrade,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`.
-`kalshiLiveArmed` is the second scheduled function (the paper bot is the first); the tests name exactly those two.
+`kalshiLiveArmed` and `kalshiBookRecorder` are the only scheduled functions; the tests name exactly those two.
 
 ### Kalshi account panel (read only)
 
@@ -201,16 +177,13 @@ the live test records were never mixed with personal trades, so only this view n
 
 ### The Bot tab now shows the live account (Oct 7, 2026)
 
-The Bot tab used to show the paper bot (status, totals, positions, trades, event log). It now shows the live account:
+The Bot tab used to show a simulated bot (status, totals, positions, trades, event log). It now shows the live account:
 a status card (balance by shard, whether the server's order switch is on, armed or not, the last scan's result, the
 halt state with its button), totals since your "start fresh" line (starting balance, now, change, how many orders the
 bot sent and how many filled), open positions, recent fills labelled bot or manual (matched by the order id the bot
 saved), and a log of what the live bot did. The account is read when the tab opens and once a minute while it stays
 visible: three GET requests, read only. Without a starting line the totals say so instead of guessing.
 
-- The old paper bot still runs on the server every minute, writes its records and keeps the outside alert and the halt
-  gate working. The page reads only its heartbeat (one line on the status card) and the halt switch. Its trades are in
-  the database and are no longer shown anywhere on the page. To stop it for good, delete or disable `kalshiBot`.
 - The halt button is the live kill switch: the live test and the armed scan refuse while halted. If the halt setting
   was never saved, the scan treats that as halted and the card says so: press Halt, then Resume, once.
 - New collection `kalshiLiveEvents` (armed, disarmed, scan ended), written only by the server; admin read in the rules.
@@ -218,3 +191,17 @@ visible: three GET requests, read only. Without a starting line the totals say s
 - Deploy: `firebase deploy --only functions:kalshiLiveAccount,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`.
   Do it when the scan is not armed: redeploying `kalshiLiveArmed` restarts it for a moment.
 
+
+## Order-book recorder (`kalshiBookRecorder`, read only)
+
+Scheduled once a minute; inside each run it takes about 5 snapshots, 10 seconds apart, of the real
+order book of the open Bitcoin and gold 15 minute markets. No key, no order code, no secrets.
+One Firestore document per minute (`kalshiBookSnaps/bk-<minute>`, admin read only), 10 days kept,
+and a heartbeat at `kalshiBookMeta/status` (`lastTickMs`, `snaps`, `errs`). About 1,440 writes a day.
+
+    firebase deploy --only functions:kalshiBookRecorder,firestore:rules
+
+This replaces the old Firebase recorder removed on 2026-10-05, which only reached the host Kalshi's
+CDN refuses from Google Cloud. `external-api.kalshi.com` works from there (the bots use it), and the
+status doc shows errors per minute if that ever changes. Stop it with
+`firebase functions:delete kalshiBookRecorder --region us-central1`.
