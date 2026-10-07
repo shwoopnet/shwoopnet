@@ -870,6 +870,30 @@ round are in `search/`.
   rule shapes, not a proof that nothing exists. Running it again with more cycles would not help: the holdout is now read, and any
   rule tuned after seeing it is contaminated. The only clean next data is forward data (the live session and the recorder).
 
+## Pre-registration: the overnight run on older data (fixed 2026-10-07, before the older history was downloaded or looked at)
+
+The first search spent its holdout (see the 437 rule result above). The owner gave permission to pull more history and asked for
+five solid rule-sets. Kalshi keeps candles about 66 days back, so the markets of roughly Aug 2 to Sep 5 are NEW data, older than
+anything used so far. Only that, and nothing newer, can serve as a clean test. The rules for using it, fixed now:
+
+- **Windows, by date.** W0 = the older history (Aug 2 to Sep 5). W0s is its first two thirds of days (search), W0h its last third
+  (locked until the very end). W1 = Sep 5 to Sep 20 and W2 = Sep 20 to Oct 5 are the windows of the first search; they were used to
+  pick the first search's rules, so they are out of sample ONLY for rules found on W0s.
+- **Stage A. Do the first search's winners generalize?** Every rule saved in `search/` (all nine top-25 lists, deduplicated) is
+  scored once on W0s. Nothing is tuned.
+- **Stage B. A new search of at least 200 rules,** the same grammar and the same loop (50 and 50 and 50 mutants, 25 kept, repeated),
+  run on W0s only, beside a fair-market control run on the same window (outcomes drawn from each market's own price).
+- **Survivor test, fixed now.** A saved rule is a survivor only if ALL hold on windows it was NOT selected on: mean net after fees is
+  positive in each of them, each with at least 50 entries, and the pooled day-clustered z is at least 2.5. For a Stage B rule the
+  windows are W0h, W1 and W2. For a Stage A rule they are W0s, W0h and W2 (W1 was its search window). W0h is read once, for the saved
+  rules of both stages together. A null rule passes this with probability about 0.1%, so with 50 saved rules the chance that
+  luck alone produces one survivor is about 5%. The same test is run on the fair-market control's saved rules, so the false
+  survivor rate is measured, not assumed.
+- **No second pass.** After the one read of the out-of-sample windows, a rule that is changed and retested is contaminated and is
+  labelled so. More searching on W0s alone is allowed and counts in N; it does not make the windows clean again.
+- **What a survivor means.** Permission to test it forward (the live session and the recorder), never "trade this". Fewer than five
+  survivors, including none, is a complete and valid result and is reported as such.
+
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few

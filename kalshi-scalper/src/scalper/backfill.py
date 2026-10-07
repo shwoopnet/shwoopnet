@@ -13,6 +13,7 @@ Stores into one SQLite file (see paths.py):
 Resumable and idempotent: a market already stored is skipped.
 
 Usage: python -m scalper.backfill [days]
+       python -m scalper.backfill range OLDER_DAYS NEWER_DAYS    (for example: range 68 29)
 """
 from __future__ import annotations
 
@@ -65,18 +66,14 @@ def parse_candle(c: dict, ticker: str, series: str) -> tuple | None:
             _d(p, "close_dollars"), api.f(c.get("volume_fp")), api.f(c.get("open_interest_fp")))
 
 
-def run(days: int) -> None:
-    days = max(1, min(days, MAX_DAYS))
-    DB.parent.mkdir(exist_ok=True)
-    db = sqlite3.connect(DB)
-    db.executescript(SCHEMA)
+def _fetch(db: sqlite3.Connection, lo: int, hi: int, label: str, skip_empty: bool = False) -> tuple[int, int, int]:
+    """Store every settled market of both series closing in [lo, hi] that is not stored yet. skip_empty: a market with no
+    candles (older than Kalshi keeps them) is not stored at all, so it cannot look like a market that traded with no quotes."""
     have = {r[0] for r in db.execute("SELECT ticker FROM market")}
-    now = int(time.time())
-    lo = now - days * 86400
-    stored = skipped = 0
+    stored = skipped = empty = 0
     for series in SERIES:
-        listed = list(api.settled_markets(series, lo, now))
-        print(f"{series}: {len(listed)} settled markets in the last {days} days", flush=True)
+        listed = list(api.settled_markets(series, lo, hi))
+        print(f"{series}: {len(listed)} settled markets {label}", flush=True)
         for m in listed:
             t = m["ticker"]
             if t in have:
@@ -86,6 +83,9 @@ def run(days: int) -> None:
             if o is None or c is None:
                 continue
             rows = [r for r in (parse_candle(x, t, series) for x in api.candlesticks(series, t, o, c)) if r]
+            if skip_empty and not rows:
+                empty += 1
+                continue
             db.executemany("INSERT OR REPLACE INTO candle VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
             db.execute("INSERT OR REPLACE INTO market VALUES(?,?,?,?,?,?,?)",
                        (t, series, o, c, m.get("result"), m.get("floor_strike"), len(rows)))
@@ -95,11 +95,37 @@ def run(days: int) -> None:
                 print(f"  {stored} markets stored", flush=True)
             time.sleep(PAUSE_S)
         db.commit()
+    return stored, skipped, empty
+
+
+def run(days: int) -> None:
+    days = max(1, min(days, MAX_DAYS))
+    DB.parent.mkdir(exist_ok=True)
+    db = sqlite3.connect(DB)
+    db.executescript(SCHEMA)
+    now = int(time.time())
+    stored, skipped, _ = _fetch(db, now - days * 86400, now, f"in the last {days} days")
     print(f"done: {stored} new markets, {skipped} already stored", flush=True)
 
 
+def run_range(older_days: int, newer_days: int) -> None:
+    """Markets that closed between older_days and newer_days ago (older_days > newer_days). Kalshi kept candles about 66 days back on
+    2026-10-07, so older markets come back empty and are not stored."""
+    if not older_days > newer_days >= 0:
+        raise ValueError("older_days must be greater than newer_days")
+    DB.parent.mkdir(exist_ok=True)
+    db = sqlite3.connect(DB)
+    db.executescript(SCHEMA)
+    now = int(time.time())
+    stored, skipped, empty = _fetch(db, now - older_days * 86400, now - newer_days * 86400, f"from {older_days} to {newer_days} days ago", skip_empty=True)
+    print(f"done: {stored} new markets, {skipped} already stored, {empty} with no candles (not stored)", flush=True)
+
+
 def main() -> None:
-    run(int(sys.argv[1]) if len(sys.argv) > 1 else 30)
+    if len(sys.argv) > 3 and sys.argv[1] == "range":
+        run_range(int(sys.argv[2]), int(sys.argv[3]))
+    else:
+        run(int(sys.argv[1]) if len(sys.argv) > 1 else 30)
 
 
 if __name__ == "__main__":
