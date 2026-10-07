@@ -671,9 +671,9 @@ study was exploratory and does not count). Every idea that gets a verdict raises
 
 | # | Idea | Counterparty (who loses) | Prediction | Needs | Status |
 |---|---|---|---|---|---|
-| L1 | Favorite-longshot bias in the two markets we trade (Bitcoin and gold 15 minute only; the owner chose to keep the universe to these two) | Retail buyers overpaying for longshots | Cheap side loses more than its price implies by more than the fee | Settled history we hold (30 days, both series) | PRE-REGISTERED 2026-10-07 |
-| L2 | H2 entered only when the first 30 seconds put spot within reach of the strike | Sellers who price the move as luck | Hit rate in the chosen bucket beats the price by at least 3c | Spot and candles (have; Bitcoin only, no gold spot) | PRE-REGISTERED 2026-10-07 |
-| L3 | Settlement edge: buy the side already far from the strike at 90c or more, last 2 to 3 minutes | Holders who sell near-certainties early | Win rate above price plus fee (fee is smallest at extremes) | Candles (have) | PRE-REGISTERED 2026-10-07 |
+| L1 | Favorite-longshot bias in the two markets we trade (Bitcoin and gold 15 minute only; the owner chose to keep the universe to these two) | Retail buyers overpaying for longshots | Cheap side loses more than its price implies by more than the fee | Settled history we hold (30 days, both series) | FALSIFIED 2026-10-07 |
+| L2 | H2 entered only when the first 30 seconds put spot within reach of the strike | Sellers who price the move as luck | Hit rate in the chosen bucket beats the price by at least 3c | Spot and candles (have; Bitcoin only, no gold spot) | FALSIFIED 2026-10-07 |
+| L3 | Settlement edge: buy the side already far from the strike at 90c or more, last 2 to 3 minutes | Holders who sell near-certainties early | Win rate above price plus fee (fee is smallest at extremes) | Candles (have) | FALSIFIED 2026-10-07 |
 | L4 | Maker entry that rests only when distance says the price is cheap | Takers crossing the spread | Net after maker fee above zero | Recorded order books | NOT_RUNNABLE until the recorder has data |
 | L5 | Quote staleness: list price lags the single-market read by about 2c | Stale resting orders | A stale-side fill beats its fee | Recorded order books at under 10 seconds | NOT_RUNNABLE until the recorder has data |
 | L6 | Bitcoin and gold on the same window, or related ladders, priced inconsistently | Slow quoters | Gap beats two fees | Recorded books, both series | NOT_RUNNABLE until the recorder has data |
@@ -733,6 +733,29 @@ code on a simulated FAIR game and requires it to lose about its costs; a profit 
   registered because the timing differs, and it counts as its own variant.
 
 Verdicts are recorded below when the one run each has happened. No threshold, band, decision minute or fee changes after seeing them.
+
+**2026-10-07: L1, L2 and L3 each ran once (`python -m scalper.lstrats`, commit 962459f), all `FALSIFIED`.** 4,871 markets, 30 days.
+Nothing changed after seeing the numbers.
+
+| Rule | n | Gross | Mean net | z | 1st half | 2nd half | Fees x1.2 |
+|---|---|---|---|---|---|---|---|
+| L1 favorite 88c to 97c, 6 min left | 1,447 | +1.44c | +0.97c | +1.45 | +0.71c | +1.22c | +0.87c |
+| L3 favorite 90c to 98c, 2 min left | 1,374 | -1.38c | -1.71c | -2.94 | -1.91c | -1.50c | -1.77c |
+| L2 H7 entries, sell at 80c (Bitcoin) | 879 | -5.51c | -7.00c | -8.30 | -8.24c | -5.76c | -7.30c |
+
+- **L1 is the first rule here with a positive mean in both halves and under higher fees, and it still fails.** Its z is 1.45
+  against a bar of 2.1, so the data cannot tell +1c from zero. Bitcoin (+1.04c, 854) and gold (+0.85c, 593) agree in sign, which
+  is printed for information and decided nothing. Passing the pre-registered bar was the rule, and it was not met. At this
+  noise level a z of 2.1 would need about twice the sample (roughly 60 days), and the days we hold have already been
+  used by H2, H4 and H7. Any follow-up has to be a forward test on days not yet seen, with the band fixed as it is here.
+- **L3 lost 1.71c while L1 won 0.97c, from the same favorites bias measured at 2 minutes instead of 6 minutes.** The two are
+  the same trade at different times, so the sign flip says the favorites premium is not stable across the market's life:
+  early favorites were underpriced a little, late ones overpriced a little, and neither survives the bar. I registered them as two
+  variants and they count as two.
+- **L2 is H7's signal wearing H2's exit and it lost 7c.** The exit swaps a chance of a larger settlement win for a sure 80c,
+  and pays a second fee. It was registered as a duplicate of H7's information and the result agrees.
+
+Strategy variants tried so far: 11 (the 60s scalp, H1 to H7, L1, L2, L3), all `FALSIFIED`. The lag study was exploratory and does not count.
 
 ## The order-book recorder (`recorder.py`, read only)
 
