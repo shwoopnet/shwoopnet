@@ -214,8 +214,9 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
 - **What it does.** About 6 minutes before each Bitcoin or gold 15 minute close (330 to 400 seconds left), it re-reads the market and,
   if a side's fresh price is 88c to 97c, buys ONE contract at the touch, immediate-or-cancel, and holds it to settlement. One order per
   market (id `L1-<ticker>`, record created first), production host only, never retried.
-- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 24 hours, a 200 order backstop that a 24 hour session cannot reach (192 markets a day), and the session ends when cash falls $7.00 below its
-  level at the first tick (a $5 loss allowance plus up to $2 in open positions). It also ends on the first order whose answer is lost or
+- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 24 hours, a 200 order backstop that a 24 hour session cannot reach (192 markets a day), and the session ends when the BOT's own filled trades are down $7.00
+  (settled results plus every unsettled trade counted as lost, at the order's worst-case cost). Your manual trades on the same account
+  neither trip it nor hide a bot loss. If the bot's trades cannot be read, nothing is sent that minute. It also ends on the first order whose answer is lost or
   refused, and while an earlier order is unresolved. The server switch, the halt switch and the shard balance all still apply.
 - **Start and stop** from the Bot tab ("24 hour L1 session", two clicks to start). It cannot run beside a single armed test order, and
   each refuses to start while the other is on. The scheduled `kalshiLiveArmed` function runs it every minute and pings the watchdog.
@@ -231,3 +232,12 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
 settled results) in `kalshiLiveControl/account` at minutes 1 and 10 of each quarter hour (just after a market settles and just after the entry window), or when none exists or it is 20 minutes old, after the order logic has run. The Bot tab shows it
 the moment it opens, so the panel is current even if the page was closed. A failed snapshot is logged and never fails
 the run, the session or the watchdog ping. Cost: one small Firestore read a minute, and about 3 Kalshi reads plus up to 20 public market reads twice per quarter hour. Deploy: `firebase deploy --only functions`. No rules change (the document is admin read, server write).
+
+## Size scaling for the L1 session (off by default, Oct 7, 2026)
+
+A box on the start confirmation ("Scale size with the account") turns it on for that session only; it starts unticked and
+cannot be changed mid-run. On: each order buys `floor(1% of cash / cost of one contract)` contracts, never fewer than one or
+more than three, judged on the cash left after earlier orders in the same minute, and the loss stop becomes 7% of the starting
+cash (still counting the bot's own trades only, every contract, open ones as lost). Off: exactly as before, one contract and
+a $7.00 stop. On a $100 account it still buys one contract; it first buys two at about $180 and three at about $270.
+Deploy: `firebase deploy --only functions`.

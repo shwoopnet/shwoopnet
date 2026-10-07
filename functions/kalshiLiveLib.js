@@ -122,10 +122,12 @@ function livePlan(signal, market) {
   return { ok: true, touch, sidePrice, cost };
 }
 
-// The order body is built from fixed fields only. count is the literal 1.
-function liveOrderBody(ticker, touch, side, clientOrderId, exchangeIndex) {
+// The order body is built from fixed fields only. count is 1 unless the owner turned on size scaling, and then a whole number
+// from 1 to L1_SIZE_MAX; anything else is refused here rather than sent.
+function liveOrderBody(ticker, touch, side, clientOrderId, exchangeIndex, count = 1) {
+  if (!Number.isInteger(count) || count < 1 || count > L1_SIZE_MAX) throw new Error("refusing to build an order for " + count + " contracts");
   const body = {
-    ticker, side: side === "yes" ? "bid" : "ask", count: "1", price: touch.toFixed(2),
+    ticker, side: side === "yes" ? "bid" : "ask", count: String(count), price: touch.toFixed(2),
     time_in_force: "immediate_or_cancel", self_trade_prevention_type: "taker_at_cross", client_order_id: clientOrderId,
   };
   if (exchangeIndex !== undefined && exchangeIndex !== null) body.exchange_index = exchangeIndex;
@@ -280,6 +282,15 @@ const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eli
 // 200 can never end a 24 hour session; it only stops a runaway loop from sending orders without end. The loss stop is the real limit.
 const L1_MAX_ORDERS = 200;
 const L1_SESSION_MS = 24 * 3600 * 1000;
+// Size scaling (off unless the owner ticks it when starting a session). Each order risks about 1% of the account's cash, at
+// least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 7% of the starting cash instead of $7.
+const L1_SIZE_MAX = 3;
+const L1_SIZE_FRACTION = 0.01;
+const L1_SIZED_STOP_FRACTION = 0.07;
+function l1Count(cash, costPerContract) {
+  if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
+  return Math.max(1, Math.min(L1_SIZE_MAX, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
+}
 const L1_LOSS_STOP = 7.0;                  // dollars of cash below the starting level: $5 of loss plus up to $2 sitting in open positions
 
 // The side whose FRESH price is inside the band, or null. YES is bought at its ask; NO at 1 minus the YES bid. Kalshi
@@ -320,6 +331,32 @@ const totalCash = (balanceBody) => {
   return Number.isFinite(cents) ? cents / 100 : NaN;
 };
 
+// What the bot's own filled trades in this session have done. A settled trade is read once from the public market and
+// kept on its record; a trade not yet settled is counted at its full cost, as if it lost. Costs are the order's worst-case
+// price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
+async function botRisk({ store, since, fetchFn, nowMs }) {
+  const trades = (await store.sessionTrades(Number.isFinite(since) ? since : 0)).filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
+  let net = 0, openCost = 0;
+  for (const t of trades) {
+    const cost = Number(t.maxCost);
+    let result = t.settled === true ? t.result : null;
+    if (t.settled !== true) {
+      const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
+      const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
+      if (r === "yes" || r === "no") {
+        result = r;
+        const want0 = Number(t.count) > 0 ? Number(t.count) : 1, got0 = Math.min(Number(t.fillCount), want0);
+        await store.updateTest(t.id, { settled: true, result, settledPnl: Number(((r === t.side ? got0 : 0) - cost * (got0 / want0)).toFixed(4)) });
+      }
+    }
+    // A partial fill costs and pays in proportion; orders from before size scaling have count 1.
+    const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want), paid = cost * (got / want);
+    if (result === "yes" || result === "no") net += (result === t.side ? got : 0) - paid;
+    else openCost += paid;
+  }
+  return { net, openCost, worst: net - openCost, trades: trades.length };
+}
+
 // One minute of the session. session = {active, until, startCash, ordersSent}; setSession merges fields into it.
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on expiry, the order limit, the loss stop, an unresolved order, and any order whose answer was lost or refused.
@@ -343,7 +380,14 @@ async function runL1Tick(args) {
   if (!Number.isFinite(cash)) { await note("The balance came back in a shape this code does not recognise, so nothing was sent."); return { skipped: "balance unrecognised" }; }
   let startCash = session.startCash;
   if (!Number.isFinite(startCash)) { startCash = cash; await setSession({ startCash }); }
-  if (cash < startCash - L1_LOSS_STOP + 1e-9) return end("loss stop", "cash is $" + cash.toFixed(2) + ", more than $" + L1_LOSS_STOP.toFixed(2) + " below the $" + startCash.toFixed(2) + " it started at");
+  // The stop follows the BOT's trades, not the account: the owner trades the same account by hand, and a manual trade must
+  // neither trip the stop nor hide a bot loss. Fails closed: if the bot's trades cannot be read, nothing is sent this minute.
+  let risk;
+  try { risk = await botRisk({ store, since: session.since, fetchFn, nowMs: now }); }
+  catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
+  const sizing = session.sizing === true;
+  const stopAt = sizing ? L1_SIZED_STOP_FRACTION * startCash : L1_LOSS_STOP;
+  if (risk.worst <= -stopAt + 1e-9) return end("loss stop", "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + stopAt.toFixed(2) + " stop");
 
   const candidates = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status)
     && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1]);
@@ -364,8 +408,11 @@ async function runL1Tick(args) {
     if (!["active", "open"].includes(m.status) || left < L1_WINDOW_MS[0] || left > L1_WINDOW_MS[1]) { results.push(ticker + ": not open in the 6 minute window"); continue; }
     const pick = l1Pick(m);
     if (!pick) { results.push(ticker + ": no side is priced 88c to 97c"); continue; }
-    const cost = pick.worst + bot.takerFee(pick.worst, 1);
-    if (cost > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost.toFixed(2) + ", above the cap"); continue; }
+    const cost1 = pick.worst + bot.takerFee(pick.worst, 1);
+    if (cost1 > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
+    // The cash the size is judged on is what is left after this tick's earlier orders, so two markets cannot both take the full share.
+    const count = sizing ? l1Count(cash - Object.values(committed).reduce((a, x) => a + x, 0), cost1) : 1;
+    const cost = pick.worst * count + bot.takerFee(pick.worst, count);
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
     if (!Number.isFinite(avail)) { results.push(ticker + ": the balance came back in a shape this code does not recognise"); continue; }
@@ -373,7 +420,7 @@ async function runL1Tick(args) {
 
     const cid = "L1-" + ticker;
     const record = {
-      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count: 1, price: pick.price, limit: pick.limit,
+      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count, price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
       // What the book showed when the order was decided (null where Kalshi did not send a field), so a "no fill" can be
@@ -383,7 +430,7 @@ async function runL1Tick(args) {
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
     committed[shardKey] = (committed[shardKey] || 0) + cost;
 
-    const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index);
+    const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index, count);
     const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
     const d = res.body && typeof res.body === "object" ? res.body : {};
     if (res.status >= 200 && res.status < 300 && d.order_id) {
@@ -395,7 +442,7 @@ async function runL1Tick(args) {
       });
       ordersSent += 1;
       await setSession({ ordersSent });
-      await log("order", pick.side + " 1 at " + (pick.price * 100).toFixed(1) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
+      await log("order", pick.side + " " + count + " at " + (pick.price * 100).toFixed(1) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
       results.push(ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
       continue;
     }
@@ -413,12 +460,12 @@ async function runL1Tick(args) {
     await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
     return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
   }
-  await note(results.join("; ") || "Nothing to do.", { cash });
+  await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
   return { ok: true, results };
 }
 
 module.exports = {
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, l1Count, L1_SIZE_MAX, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };
