@@ -31,6 +31,10 @@ const API_ROOT = "/trade-api/v2";
 const TEST_CAP = 1.0;            // dollars, fee included
 const MIN_LEFT_MS = 120000;      // a market must have at least this long to run
 const COOLDOWN_MS = 60000;       // a second test within a minute of the last is refused
+// The demo's gold market (KXGOLD15M) has almost no resting orders, so a test there only ever reports "nothing to
+// trade against". The paper bot still watches both markets; only this one-off test is limited to Bitcoin.
+const DEMO_SERIES = ["KXBTC15M"];
+const CROSS_TOLERANCE = 0.05;    // dollars: how far the demo's own price may sit from the live signal price
 const RETRY_DELAYS_MS = [500, 1500];   // a transient failure is retried twice before giving up
 
 class NotDemo extends Error {}
@@ -119,6 +123,32 @@ function orderBody(signal, clientOrderId, exchangeIndex) {
   return body;
 }
 
+// The demo exchange has its own, thin book. An immediate order priced at the LIVE signal price only fills if the
+// demo book happens to hold an order at exactly that price, which is why the first tests came back "no fill".
+// So price the order to meet the demo's own touch instead: a YES buy takes the demo's YES ask, a NO buy (a YES
+// sell) takes its YES bid. The signal still decides WHAT to trade; the demo book decides at what price, and only
+// within CROSS_TOLERANCE of the live price, so a test never pays a price the live signal would not have.
+function crossPlan(signal, market) {
+  const yes = signal.side === "yes";
+  const num = (v) => (v === undefined || v === null || v === "" ? NaN : Number(v));
+  const touch = yes ? num(market.yes_ask_dollars) : num(market.yes_bid_dollars);
+  const size = num(yes ? market.yes_ask_size_fp : market.yes_bid_size_fp);
+  if (!(touch > 0 && touch < 1) || size === 0) {
+    return { ok: false, why: "the demo book has nothing on the side this order would take (" + (yes ? "no YES ask" : "no YES bid") + ")" };
+  }
+  const liveYes = yes ? signal.price : 1 - signal.price;
+  const gap = Math.abs(touch - liveYes);
+  if (gap > CROSS_TOLERANCE + 1e-9) {
+    return { ok: false, why: "the demo's price is " + touch.toFixed(2) + " against the live " + liveYes.toFixed(2) + ", more than " + CROSS_TOLERANCE.toFixed(2) + " apart" };
+  }
+  const sidePrice = yes ? touch : 1 - touch;
+  let count = signal.contracts;
+  const cost = (n) => sidePrice * n + bot.takerFee(sidePrice, n);
+  while (count > 1 && cost(count) > TEST_CAP + 1e-9) count--;
+  if (cost(count) > TEST_CAP + 1e-9) return { ok: false, why: "one contract at the demo's price would cost more than $" + TEST_CAP.toFixed(2) };
+  return { ok: true, signal: { ...signal, price: sidePrice, contracts: count }, touch };
+}
+
 function fundedShards(balanceBody) {
   const out = new Set();
   for (const b of (balanceBody && balanceBody.balance_breakdown) || []) {
@@ -175,7 +205,9 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn, sl
   const last = await store.lastTestAt();
   if (last && now - last < COOLDOWN_MS) return no("A test was sent less than a minute ago. Wait a moment.");
 
-  const signals = bot.planEntries(quotes, now, TEST_CAP);
+  const all = bot.planEntries(quotes, now, TEST_CAP);
+  const signals = all.filter((s) => DEMO_SERIES.includes(s.series));
+  if (!signals.length && all.length) return no("There is a signal, but only on gold, and the demo's gold market is too thin to test against. The demo test trades Bitcoin only. Try again in a few minutes.");
   if (!signals.length) return no("No signal right now: no market is at a 40c or 50c price with a tradable book. Try again in a few minutes.");
 
   // Say so plainly if the demo exchange is down, before anything is recorded. Kalshi's demo has gone down for
@@ -204,10 +236,16 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn, sl
   }
   if (!chosen) return no("There is a signal, but no tradable demo market for it (" + skipped.join("; ") + ").");
 
+  // Price against the demo's own book (see crossPlan). Nothing is recorded if there is nothing to trade against.
+  const plan = crossPlan(chosen, market);
+  if (!plan.ok) return no("There is a signal on " + chosen.ticker + ", but " + plan.why + ". Nothing was sent. Try again in a few minutes.");
+  const live = chosen;
+  chosen = plan.signal;
+
   const cid = "t-" + chosen.ticker;
   const record = {
     ticker: chosen.ticker, series: chosen.series, side: chosen.side, band: chosen.band, count: chosen.contracts,
-    price: chosen.price, exchangeIndex: market.exchange_index, clientOrderId: cid, status: "sending", ts: now, mode: "demo",
+    price: chosen.price, livePrice: live.price, exchangeIndex: market.exchange_index, clientOrderId: cid, status: "sending", ts: now, mode: "demo",
   };
   // Record first. If it already exists, an order for this market was already attempted: do not send another.
   if (!(await store.createTest(cid, record))) {
@@ -266,6 +304,6 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn, sl
 }
 
 module.exports = {
-  DEMO_BASE, TEST_CAP, COOLDOWN_MS, NotDemo, assertDemo, signRequest, demoRequest, orderFor, orderBody,
+  DEMO_BASE, TEST_CAP, DEMO_SERIES, CROSS_TOLERANCE, crossPlan, COOLDOWN_MS, NotDemo, assertDemo, signRequest, demoRequest, orderFor, orderBody,
   fundedShards, loadQuotes, runDemoTest,
 };

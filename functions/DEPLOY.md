@@ -134,6 +134,16 @@ market, so a double click, a retry or a second instance cannot place it twice (K
 repeated `client_order_id` with HTTP 409, measured on the demo). Each attempt is recorded in
 `kalshiDemoOrders` (admin read, no client write).
 
+The signal decides WHAT to trade; the demo's own book decides the price. The first tests were priced at the
+live price and came back "no fill" because the thin demo book held nothing there. The order now meets the
+demo's touch (a YES buy takes its YES ask, a NO buy takes its YES bid), only when that is within 5c of the
+live price and the one-contract cost still fits the $1 cap. If the demo book is empty on that side, or too far
+from the live price, nothing is sent or recorded and the page says why. Redeploy `kalshiDemoTrade` after
+pulling this: `firebase deploy --only functions:kalshiDemoTrade`.
+
+The test trades Bitcoin (`KXBTC15M`) only: the demo's gold market has too few resting orders to fill against.
+The paper bot is unaffected and still watches both markets.
+
 Set the two secrets BEFORE deploying, or the deploy fails (use a fresh demo key, not one that has been
 pasted into a chat, and never commit it):
 

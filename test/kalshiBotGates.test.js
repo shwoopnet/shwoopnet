@@ -403,6 +403,34 @@ gates.G23 = () => {
   assert.ok(/pos\.length >= 500/.test(html), 'say so if only the newest 500 trades were counted');
 };
 
+// A NO entry at exactly 42c or 52c must be planned. NO price is 1 - yes bid, and in
+// floating point 1 - 0.58 is 0.42000000000000004, which fails "<= 0.42": the bot silently
+// skipped a market it is meant to enter while taking the same price on the YES side.
+gates.KalshiNoEdge = () => {
+  const plan = (bid, ask) => lib.planEntries(
+    [{ series: 'KXBTC15M', m: { ticker: 'T', status: 'active', close_time: new Date(CLOSE).toISOString(),
+      yes_bid_dollars: bid.toFixed(4), yes_ask_dollars: ask.toFixed(4), yes_ask_size_fp: '100', yes_bid_size_fp: '100' } }],
+    NOON, 3);
+  // yes ask is out of band (0.60 / 0.54), so only the NO side can qualify.
+  const no42 = plan(0.58, 0.60);
+  assert.deepStrictEqual(no42.map((e) => [e.side, e.band, e.price]), [['no', '40c', 0.42]], 'NO at 42c must be planned');
+  const no52 = plan(0.48, 0.54);
+  assert.deepStrictEqual(no52.map((e) => [e.side, e.band, e.price]), [['no', '50c', 0.52]], 'NO at 52c must be planned');
+  // Every band edge on the NO side, in cents, is inside its band.
+  for (const c of [38, 42, 48, 52]) {
+    assert.strictEqual(plan((100 - c) / 100, (100 - c) / 100 + 0.06).filter((e) => e.side === 'no').length, 1, 'NO at ' + c + 'c');
+  }
+  // One cent outside either band is still skipped: rounding must not widen the band.
+  for (const c of [37, 43, 47, 53]) {
+    assert.strictEqual(plan((100 - c) / 100, (100 - c) / 100 + 0.06).filter((e) => e.side === 'no').length, 0, 'NO at ' + c + 'c');
+  }
+  // Exit: a NO position sells when the NO bid (1 - yes ask) reaches 80c, including exactly.
+  const pos = { side: 'no', entryAt: NOON - 1000 };
+  const mk = (ask) => ({ ticker: 'T', status: 'active', close_time: new Date(CLOSE).toISOString(), yes_bid_dollars: (ask - 0.02).toFixed(4), yes_ask_dollars: ask.toFixed(4) });
+  assert.ok(lib.exitDue(pos, mk(0.20), NOON), 'NO bid exactly 80c is due');
+  assert.ok(!lib.exitDue(pos, mk(0.21), NOON), 'NO bid 79c is not due');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

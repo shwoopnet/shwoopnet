@@ -18,6 +18,12 @@ const LIMITS = { perTradePct: 0.01, softPct: 0.03, hardPct: 0.05, breakMs: 2 * 6
 const TZ = "America/Chicago"; // the owner's day; the server clock is UTC
 
 const round2 = (x) => Math.round(x * 100) / 100;
+// The NO side of a YES quote is 1 - x, and in floating point 1 - 0.58 is
+// 0.42000000000000004, which is above the 0.42 band edge. Compared raw, a NO entry at
+// exactly 42c was skipped while the same price on the YES side was taken. Every derived
+// price is snapped to 4 places (sub-cent safe) before it meets a band or the target.
+const round4 = (x) => Math.round(x * 10000) / 10000;
+const noSide = (yesPrice) => round4(1 - yesPrice);
 
 // Rounded UP to a cent per order, as Kalshi does.
 function takerFee(price, contracts) {
@@ -104,7 +110,7 @@ function planEntries(quotes, nowMs, cap) {
     if (!Number.isFinite(q.closeMs) || q.closeMs - nowMs < MIN_LEFT_S * 1000) continue;
     if (!validQuote(q.bid, q.ask)) continue;
     for (const side of ["yes", "no"]) {
-      const price = side === "yes" ? q.ask : 1 - q.bid;
+      const price = side === "yes" ? q.ask : noSide(q.bid);
       const band = Object.keys(BANDS).find((b) => price >= BANDS[b][0] && price <= BANDS[b][1]);
       if (!band) continue;
       const n = sizeFor(price, cap, side === "yes" ? q.askSz : q.bidSz);
@@ -121,7 +127,7 @@ function planEntries(quotes, nowMs, cap) {
 function exitDue(pos, m, nowMs) {
   if (nowMs <= pos.entryAt) return false;
   const q = parseMarket(m);
-  const sideBid = pos.side === "yes" ? q.bid : (q.ask == null ? null : 1 - q.ask);
+  const sideBid = pos.side === "yes" ? q.bid : (q.ask == null ? null : noSide(q.ask));
   return sideBid != null && sideBid >= TARGET;
 }
 
