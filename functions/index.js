@@ -285,8 +285,18 @@ exports.kalshiLiveAccount = onCall(
         fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
         baseline: snap.exists ? snap.data() : null,
       });
+      // How each market of the fills shown ended ("yes", "no", or null while it is still open), so the page can show a profit or loss on
+      // every trade line. A public read of the market, one per ticker, never an order; a failed read just leaves that trade "open".
+      const results = {};
+      const tickers = [...new Set(((d.fills && d.fills.ok && d.fills.fills) || []).map((f) => f.ticker).filter(Boolean))].slice(0, 20);
+      await Promise.all(tickers.map(async (t) => {
+        try {
+          const m = (await kalshiGetJson("/markets/" + encodeURIComponent(t))).market || {};
+          results[t] = m.result === "yes" || m.result === "no" ? m.result : null;
+        } catch (e) { results[t] = null; }
+      }));
       // Whether the order switch is on, so the page can say so. It reveals nothing but "on" or "off".
-      return { ...d, liveSwitch: KALSHI_LIVE_ENABLED.value() === "on" };
+      return { ...d, results, liveSwitch: KALSHI_LIVE_ENABLED.value() === "on" };
     } catch (e) {
       if (e instanceof HttpsError) throw e;
       throw new HttpsError("internal", "Account read failed: " + String((e && e.message) || e).slice(0, 120));

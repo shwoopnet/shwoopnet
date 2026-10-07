@@ -9664,6 +9664,26 @@
     return (orders || []).some(function(o){ return o && o.orderId && o.orderId === fill.orderId; });
   }
 
+  // The bot's own order for a fill, matched by the order id the bot saved when it sent it.
+  function kalshiOrderFor(fill, orders){
+    if(!fill || !fill.orderId){ return null; }
+    return (orders || []).find(function(o){ return o && o.orderId && o.orderId === fill.orderId; }) || null;
+  }
+
+  // Profit or loss on one bot fill once its market has settled. A fill's price is the YES price whichever side was bought, so a NO costs 1 minus it.
+  // The side comes from the bot's own order record (the fill alone does not say it reliably). Fee: the one Kalshi charged on the order if saved,
+  // otherwise 7% x p x (1 - p) per contract. Returns null while the market is open or the result is unknown, and for a fill that is not the bot's.
+  function kalshiTradePnl(fill, order, result){
+    if(!fill || !order || (order.side !== 'yes' && order.side !== 'no') || (result !== 'yes' && result !== 'no')){ return null; }
+    var count = Number(fill.count), yesPrice = Number(fill.price);
+    if(!(count > 0) || !Number.isFinite(yesPrice) || yesPrice < 0 || yesPrice > 1){ return null; }
+    var paid = Math.round((order.side === 'yes' ? yesPrice : 1 - yesPrice) * 10000) / 10000;
+    var fee = Number(order.averageFeePaid);
+    if(!Number.isFinite(fee) || fee < 0){ fee = 0.07 * paid * (1 - paid); }
+    var won = result === order.side;
+    return { pnl: Math.round(((won ? 1 : 0) * count - paid * count - fee * count) * 10000) / 10000, paid: paid, won: won, side: order.side };
+  }
+
   function renderKalshiBot(){
     var a = kalshiLiveAcct;
     var el = document.getElementById('kalBotStatus');
@@ -9727,14 +9747,29 @@
     else if(!a.fills || !a.fills.ok){ trEl.innerHTML = '<div class="kal-note">Could not read fills: ' + escapeHtml(a.fills ? 'HTTP ' + a.fills.status + ' ' + (a.fills.error || '') : '') + '</div>'; }
     else {
       var fillsShown = a.fills.fills.slice(0, kalshiLiveShow.fills);
+      var settled = 0, open = 0, sum = 0;
       trEl.innerHTML = (a.fills.fills.length ? fillsShown.map(function(x){
         var bot = kalshiFillIsBot(x, kalshiLiveOrders);
+        var ord = kalshiOrderFor(x, kalshiLiveOrders);
+        var tp = kalshiTradePnl(x, ord, a.results ? a.results[x.ticker] : null);
+        var fillText, plCell;
+        if(ord && (ord.side === 'yes' || ord.side === 'no')){
+          var paidNow = Math.round((ord.side === 'yes' ? Number(x.price) : 1 - Number(x.price)) * 1000) / 10;
+          fillText = 'bought ' + ord.side.toUpperCase() + ' ' + escapeHtml(String(x.count)) + (Number.isFinite(paidNow) ? ' at ' + paidNow + 'c' : '');
+        } else {
+          fillText = escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '');
+        }
+        if(tp){ settled++; sum += tp.pnl; plCell = '<span class="' + (tp.pnl >= 0 ? 'kal-pos' : 'kal-neg') + ' kal-big">' + (tp.pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tp.pnl)) + '</span>'; }
+        else if(ord){ open++; plCell = '<span class="kal-lbl">open</span>'; }
+        else { plCell = '<span class="kal-lbl">n/a</span>'; }
         return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(String(x.ticker)) + '</div><span class="kal-lbl">' + escapeHtml(x.time ? new Date(x.time).toLocaleString() : '') + '</span></div>' +
-          '<div><span class="kal-lbl">Fill</span>' + escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '') + '</div>' +
+          '<div><span class="kal-lbl">Fill</span>' + fillText + '</div>' +
+          '<div><span class="kal-lbl">P/L</span>' + plCell + '</div>' +
           '<div><span class="kal-lbl">From</span>' + (bot ? 'bot' : 'manual') + '</div></div>';
       }).join('') + (a.fills.fills.length > fillsShown.length
         ? '<div class="kal-note">Showing ' + fillsShown.length + ' of ' + a.fills.fills.length + ' fills. <button type="button" class="kal-btn" data-more="fills">Show more</button></div>' : '')
         : '<div class="kal-empty">No fills since your starting line.</div>') +
+        (settled || open ? '<div class="kal-note">Settled P/L of the bot trades shown: <b class="' + (sum >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (sum >= 0 ? '+' : '-') + kalshiMoney(Math.abs(sum)) + '</b> over ' + settled + ' settled' + (open ? ', ' + open + ' still open' : '') + '.</div>' : '') +
         (a.fills.hiddenBeforeBaseline ? '<div class="kal-note">' + a.fills.hiddenBeforeBaseline + ' earlier fill' + (a.fills.hiddenBeforeBaseline === 1 ? ' is' : 's are') + ' hidden (before your starting line).</div>' : '');
     }
 
