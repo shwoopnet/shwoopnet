@@ -934,6 +934,27 @@ W2 2,525, W3 (Oct 5 to 7) 402.
   least trustworthy. Nothing here is a reason to size up. The overall power is low: with about 500 entries per window, an edge under about 5c is
   hard to see, which is why every candidate here shows up as "survives" at z of 2.5 to 3.5 and not 6.
 
+## Live waiver: rule D forward test, 24 hours at one contract (terms fixed 2026-10-07, before any code for it)
+
+The owner asked to forward test rule D. D came out of a search, so the 3.04c it shows in the backtest is selected, not pre-registered. This is
+its first clean test: days that were not in any selection, at real fills. It runs beside the L1 session, with its own session document, its own
+callable and its own card; the L1 session is not changed.
+
+- **The rule is D exactly as found, nothing tuned.** Bitcoin only (KXBTC15M). About 2 minutes before the close (accepted window: 95 to 155 seconds
+  left), re-read the market and, if a side's fresh price is 3c to 20c inclusive and the book is real and the spread is 1c or less, buy ONE contract of
+  that side at the touch, immediate-or-cancel. Held to settlement. One order per market, never a second try, never retried.
+- **Expectation, written now.** The backtest says +3.04c a contract on about 27 entries a day, winning about 11% to 14% of the time against a price
+  of about 9%. A day's profit has a standard deviation of about $1.68, so one day proves nothing; about 30 days of 27 entries is what it takes to
+  tell +3c from zero at z of 2.5. In the backtest the rule earned nothing in US trading hours (12:00 to 18:00 UTC), and that is information, not a filter.
+- **Hard limits, in code.** One contract and at most $2.00 including the fee. At most 60 orders. 24 hours. It ends when total cash falls $4.00 below its
+  level at the first tick, on the first order whose answer is lost or refused, and while an earlier order is unresolved. The server switch, the halt
+  switch and the balance on the market's own shard (cost plus $0.50) all apply. Production host only.
+- **Shared money.** The loss stops count total cash across both shards, so D's losses also move L1's stop and the reverse. With both running, the
+  tighter of the two stops ends first. That is intended: one shared risk budget.
+- **How it is read.** Net after fees, the fills and no-fills, and the win rate against the price paid, as one forward observation of D with n of about 27.
+  It does not re-run any verdict. A positive day proves nothing; a negative day is inside the expected noise unless it hits a stop. If after about
+  30 days the win rate against price is not above 1 point and the mean is not above 0, D is dropped.
+
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few
