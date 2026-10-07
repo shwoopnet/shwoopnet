@@ -613,7 +613,7 @@ fees x1.2, at least 300 observations; verdicts only as above.
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few
-seconds into `data/book.sqlite` (table `ob`), so L4 to L6 can be tested on real depth rather
+seconds into `data/ob.sqlite` (table `ob`), so L4 to L6 can be tested on real depth rather
 than a minute candle. It places nothing, needs no key, and reads only the public
 `/markets` and `/markets/{ticker}/orderbook` endpoints. It describes; it never judges.
 

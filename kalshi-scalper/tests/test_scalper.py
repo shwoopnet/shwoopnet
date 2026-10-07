@@ -844,3 +844,38 @@ _c9 = _re9.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_mm.__file__).read())
 assert not _re9.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c9)
 assert not _re9.search(r"place_order|/portfolio/", _c9), "research code never touches an order endpoint"
 print("market making tests passed")
+
+# ---- order-book recorder ----
+import sqlite3 as _sq10, json as _js10, re as _re10
+from scalper import recorder as _rc
+
+_BOOK = {"orderbook_fp": {"yes_dollars": [["0.3000", "5"], ["0.4000", "10"]], "no_dollars": [["0.5000", "7"], ["0.5500", "3"]]}}
+_b = _rc.parse_book(_BOOK)
+# A yes ask is what the best no bid implies. Getting this wrong would price every quote 1 - x off.
+assert _b["yes_bid"] == 0.40 and _b["no_bid"] == 0.55 and _b["yes_ask"] == 0.45 and _b["no_ask"] == 0.60, _b
+# An empty side is unknown, never a free price of zero.
+_e = _rc.parse_book({"orderbook_fp": {"yes_dollars": [], "no_dollars": [["0.5", "1"]]}})
+assert _e["yes_bid"] is None and _e["no_ask"] is None and _e["yes_ask"] == 0.5, _e
+assert _rc.parse_book({})["yes_bid"] is None, "a missing book must not crash or invent a price"
+
+_paths10 = []
+def _fake_get(path, p=None):
+    _paths10.append(path)
+    if path == "/markets":
+        if p["series_ticker"] == "KXGOLD15M":
+            raise RuntimeError("HTTP 429")
+        return {"markets": [{"ticker": "KXBTC15M-T", "close_time": "x", "yes_bid_dollars": "0.38", "yes_ask_dollars": "0.42"}]}
+    return _BOOK
+_db10 = _sq10.connect(":memory:")
+_db10.executescript(_rc.SCHEMA)
+_n10 = _rc.cycle(_db10, _fake_get, now=lambda: 1.0)
+# One series failing must not lose the other's rows, and the failure must be recorded, not swallowed.
+assert _n10 == 1 and _db10.execute("SELECT count(*) FROM ob").fetchone()[0] == 1
+assert _db10.execute("SELECT series, what FROM err").fetchall() == [("KXGOLD15M", "HTTP 429")]
+_r10 = _db10.execute("SELECT list_yes_bid, list_yes_ask, yes_ask FROM ob").fetchone()
+assert _r10 == (0.38, 0.42, 0.45), _r10     # the list price is kept beside the book so staleness can be measured
+assert all(p == "/markets" or p.endswith("/orderbook") for p in _paths10), "only read endpoints"
+
+_c10 = _re10.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_rc.__file__).read())
+assert not _re10.search(r"place_order|/portfolio/|POST|\bdata=", _c10), "the recorder never touches an order path"
+print("recorder tests passed")
