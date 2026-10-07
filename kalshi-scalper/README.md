@@ -894,6 +894,46 @@ anything used so far. Only that, and nothing newer, can serve as a clean test. T
 - **What a survivor means.** Permission to test it forward (the live session and the recorder), never "trade this". Fewer than five
   survivors, including none, is a complete and valid result and is reported as such.
 
+**2026-10-07: the overnight run on older data (`python -m scalper.overnight`, seed 11, 2 cycles; commit 4be67f3).** The history now runs
+Aug 1 to Oct 7 (11,092 markets: 6,432 Bitcoin, 4,660 gold; 97,624 minutes of Bitcoin spot). Windows: W0s 3,826 markets, W0h 1,988, W1 2,346,
+W2 2,525, W3 (Oct 5 to 7) 402.
+
+- **L1 replicated on data it never saw.** L1 is one fixed pre-registered rule with no selection. On the older W0 (1,810 entries) it made
+  **+1.10c net, z +2.68**, positive in both halves of that window (+0.92c and +1.46c), after losing its own bar on W1 and W2 at z 1.45.
+  Over all 68 days: 3,382 entries, +0.98c, z +2.76, about 50 trades a day. W3 (125 entries) is -0.47c, z -0.20, which is noise at that size.
+  A win rate of 94.1%, average win +6.8c, average loss -92.0c. Per contract: +$0.49 a day, standard deviation $1.47, 25 of 68 days losing,
+  worst day -$3.11, maximum drawdown $4.84. Bootstrapped from the days: over 30 days at one contract it ends positive 96% of the time.
+- **L3 (favorites at 2 minutes) lost on every window**, -1.22c on W0 (z -2.42): the reverse of L1, consistent with the profile below.
+- **L8 and L9 (averaged settlement) were run once and are `FALSIFIED`:** L9 -1.79c (z -2.31), L8 -2.38c (z -2.31), both halves negative.
+  The market's own price tracks the YES rate decile by decile far better than the averaged-variance model does.
+- **Exploratory profile (no verdict).** Favorites priced 80c to 97c: +0.1c to +1.2c at 5 to 8 minutes left in BOTH periods, -2.6c to -3.2c at 2
+  minutes left in both (z -3.4 and -4.2). Longshots priced 3c to 20c: -1.5c to -3.1c at 4 to 10 minutes in both periods (z -3 to -6), +1.0c at
+  2 minutes in both. A real favorite-longshot pattern that changes sign over the last minutes; L1 harvests its small positive side.
+- **The search.** Stage A: of the first search's 179 saved rules, 2 survive the fixed test on W0s, W0h and W2. Stage B: of 132 new rules found
+  on W0s, 2 survive on W0h, W1 and W2. The four: (1) 2 minutes left, either side priced 3c to 20c, Bitcoin only, spread 1c or less
+  (+2.1c, +5.3c, +2.1c out of sample, pooled z +3.46, and +4.35c on the newest 67 entries); (2) 2 minutes left, NO side, Bitcoin, the market moved
+  away from the side by 2c over 5 minutes, spread 4c or less (pooled z +2.87); (3) 8 minutes left, YES side priced 80c to 97c (pooled z +2.88);
+  (4) the same with spread 2c or less.
+- **The first control was invalid, twice.** The shuffle control broke the price-outcome link. The fair-market control that drew outcomes from
+  the last-minute price kept the real price dynamics, so it behaved like a resample of the real data (survivors in about half its runs) and
+  proves nothing; it is withdrawn. The valid null gives every rule zero edge at its OWN decision price: each entry wins with probability equal to
+  the side's mid, independent draws per rule, paying the ask and the fee, with the fixed survivor test applied to all 311 rules.
+  Over 500 repeats the best pooled z in that null has median +1.79, 95th percentile +2.75, maximum +4.25. **The real best, +3.46, beats it:
+  P(null best >= real best) = 0.008, and P(null survivors >= 4) = 0.000 (mean 0.11).** Independent draws across rules is the strict direction.
+  So at least one of the four is unlikely to be luck. That is a statement about the family, not about which one.
+- **A warning on the strongest.** The first rule earns +3.04c (z +4.11, n=1,822) only at exactly 2 minutes left on Bitcoin; at 1 minute it is
+  -0.85c, at 3 minutes -0.15c, and on gold -0.81c. A sharp spike at one minute on one series is what an artifact looks like, and also what a
+  quote refresh cadence would look like. Its wins exceed its price by 2 to 9 points in every price band (6.1% against 4.2%, 9.8% against 7.8%,
+  21.3% against 12.3%, 21.6% against 17.2%). Treat it as a hypothesis for the forward test, not a result.
+- **Combining.** Daily profit correlations are low between the favorites rules and the 2 minute rules (+0.08 and +0.01). Per contract of each:
+  L1 alone +$0.49/day; L1 with the 2 minute longshot rule +$1.30/day, sd $2.32, max drawdown $6.11; those two plus the 8 minute YES favorites
+  +$1.59/day, max drawdown $8.48; all four +$2.22/day, max drawdown $7.79. The 2 minute rules and the 8 minute rule were selected on the same
+  data, so those figures are optimistic. Fills are assumed at the ask on the decision minute; a live fill can be worse.
+- **What this does and does not support.** The pre-registered L1 is a small, replicated, out-of-sample positive of about +1c a contract (about
+  1.1% a trade): worth running forward at small size, which the 24 hour session is doing. The 2 minute rules are the most interesting and the
+  least trustworthy. Nothing here is a reason to size up. The overall power is low: with about 500 entries per window, an edge under about 5c is
+  hard to see, which is why every candidate here shows up as "survives" at z of 2.5 to 3.5 and not 6.
+
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few
