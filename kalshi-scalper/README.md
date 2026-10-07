@@ -592,7 +592,7 @@ hand is the other half of the idea: **do not leave a quote where the last minute
 
 - **Rule.** H5's rule with one change, using only what is known at the minute close. Let `move` be the
   change in the YES mid (bid plus ask over two) from the previous minute close to this one. If `move` is
-  at most -1c, rest NO bid (do not buy) this minute. If `move` is at least +1c, rest NO ask (do not sell).
+  at most -1c, place no YES bid this minute (do not buy; the ask still rests). If `move` is at least +1c, place no YES ask (do not sell; the bid still rests).
   Otherwise quote both sides as in H5. The first quote minute of a market has no previous mid and quotes
   both sides. Everything else is H5 unchanged: one contract a side, spread 10c or less, inventory cap 2,
   stop 5 minutes before close, hold the rest to settlement, strictly-through fills, taker fee on every
