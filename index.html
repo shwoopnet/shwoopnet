@@ -1988,6 +1988,7 @@
   var kalshiLiveTradeFn = httpsCallable(functions, 'kalshiLiveTrade');
   var kalshiLiveArmFn = httpsCallable(functions, 'kalshiLiveArm');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
+  var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
 
   // rememberMe controls whether Firebase's own session survives closing the
   // browser (browserLocalPersistence, the SDK's own default) or ends with
@@ -2450,6 +2451,11 @@
     // Read-only: balance per shard, open positions and recent fills from the live Kalshi account. Sends nothing.
     kalshiLiveAccount: function(){
       return kalshiLiveAccountFn({}).then(function(res){ return res.data; });
+    },
+    // One time: record "now" and the current total balance as the line the account view counts from. Reads only
+    // on Kalshi, and the server refuses to overwrite an existing line.
+    kalshiLiveBaseline: function(){
+      return kalshiLiveBaselineFn({}).then(function(res){ return res.data; });
     },
     // Arm or disarm the automatic scan. The server sets the 3 hour expiry itself; the page sends only on or off.
     kalshiLiveArm: function(on){
@@ -3330,6 +3336,11 @@
         <div class="kal-note">Reads your real Kalshi account with the live key: what each shard holds, open positions and recent fills. It cannot place or change anything. Funds are held per shard, and an order can only use the shard its market lives on (Bitcoin and gold were both on shard 2 when last checked).</div>
         <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
         <div class="kal-note" id="kalAcctMsg"></div>
+        <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
+        <div class="kal-actions">
+          <button class="kal-btn" id="kalAcctStart" type="button">Start fresh from now (one time)</button>
+          <span id="kalAcctStartConfirm" hidden><span class="kal-note">Everything before this moment is ignored from now on, and the balance shown becomes the starting balance. Nothing on Kalshi is changed. Do this only after your last personal trade. Go ahead?</span> <button class="kal-btn" id="kalAcctStartYes" type="button">Yes, start fresh</button> <button class="kal-btn" id="kalAcctStartNo" type="button">Cancel</button></span>
+        </div>
         <div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div>
       </div>
       <div class="kal-card">
@@ -10219,7 +10230,34 @@
         part('Open positions', posRows, p.ok ? null : 'HTTP ' + p.status + ' ' + p.error) +
         part('Recent fills', fillRows, f.ok ? null : 'HTTP ' + f.status + ' ' + f.error);
       msg.textContent = 'Read ' + new Date(d.at).toLocaleTimeString() + '.';
+      showBaseline(d.baseline, d.changeSinceStart, f.ok ? f.hiddenBeforeBaseline : 0);
     }
+    function showBaseline(bl, change, hidden){
+      var line = document.getElementById('kalAcctBaseline');
+      var go = document.getElementById('kalAcctStart');
+      if(!bl){ line.textContent = 'Counting everything on the account, including your own trades.'; go.hidden = false; return; }
+      go.hidden = true; document.getElementById('kalAcctStartConfirm').hidden = true;
+      line.textContent = 'Counting since ' + new Date(bl.since).toLocaleString() + ' from a starting balance of ' + money(bl.startingDollars) +
+        (change === null || change === undefined ? '.' : ': ' + (change >= 0 ? '+' : '-') + money(Math.abs(change)) + ' so far (includes any deposit or withdrawal).') +
+        (hidden ? ' ' + hidden + ' earlier fill' + (hidden === 1 ? ' is' : 's are') + ' hidden.' : '');
+    }
+    (function(){
+      var go = document.getElementById('kalAcctStart'), box = document.getElementById('kalAcctStartConfirm');
+      var yes = document.getElementById('kalAcctStartYes'), no = document.getElementById('kalAcctStartNo');
+      function ask(on){ box.hidden = !on; go.hidden = on; }
+      go.addEventListener('click', function(){ ask(true); });
+      no.addEventListener('click', function(){ ask(false); });
+      yes.addEventListener('click', function(){
+        var api = window.__shwoopAPI;
+        if(!api || !api.kalshiLiveBaseline || !currentUserIsAdmin){ return; }
+        yes.disabled = no.disabled = true;
+        msg.textContent = 'Setting the starting line...';
+        api.kalshiLiveBaseline().then(function(){ return api.kalshiLiveAccount(); }).then(render).catch(function(err){
+          msg.textContent = 'Could not set it: ' + ((err && err.message) || 'unknown');
+          ask(false);
+        }).then(function(){ yes.disabled = no.disabled = false; });
+      });
+    })();
     btn.addEventListener('click', function(){
       var api = window.__shwoopAPI;
       if(!api || !api.kalshiLiveAccount || !currentUserIsAdmin){ return; }

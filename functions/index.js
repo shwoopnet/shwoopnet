@@ -323,12 +323,44 @@ exports.kalshiLiveAccount = onCall(
   { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30 },
   async (request) => {
     await assertKalshiAdmin(request.auth);
+    ensureDefaultAdminApp();
     try {
-      return await account.readAccount({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now() });
+      const snap = await getFirestore().collection("kalshiLiveControl").doc("baseline").get();
+      return await account.readAccount({
+        fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
+        baseline: snap.exists ? snap.data() : null,
+      });
     } catch (e) {
       if (e instanceof HttpsError) throw e;
       throw new HttpsError("internal", "Account read failed: " + String((e && e.message) || e).slice(0, 120));
     }
+  }
+);
+
+// "Start fresh from now": the account is shared with the owner's own earlier trades, so this draws a permanent line.
+// It records the time and the current total balance ONCE (Firestore create(): it cannot be overwritten, and a second
+// press only reports the existing line). Nothing on Kalshi is changed or erased. To move the line, delete the
+// kalshiLiveControl/baseline document in the Firebase console. Reads only, takes nothing from the page.
+exports.kalshiLiveBaseline = onCall(
+  { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30 },
+  async (request) => {
+    await assertKalshiAdmin(request.auth);
+    ensureDefaultAdminApp();
+    const ref = getFirestore().collection("kalshiLiveControl").doc("baseline");
+    const existing = await ref.get();
+    if (existing.exists) return { set: false, alreadySet: true, baseline: existing.data() };
+    const now = Date.now();
+    const d = await account.readAccount({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now });
+    const total = d.balance.ok ? d.balance.totalDollars : null;
+    if (total === null) throw new HttpsError("failed-precondition", "The balance could not be read, so no baseline was set.");
+    const doc = { since: now, startingDollars: Math.round(total * 100) / 100, setAt: now };
+    try {
+      await ref.create(doc);
+    } catch (e) {
+      if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return { set: false, alreadySet: true, baseline: (await ref.get()).data() };
+      throw e;
+    }
+    return { set: true, baseline: doc };
   }
 );
 
