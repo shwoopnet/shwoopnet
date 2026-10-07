@@ -2469,12 +2469,13 @@
       return kalshiL1SessionFn({ on: on === true }).then(function(res){ return res.data; });
     },
     watchKalshiLiveControl: function(cb){
-      var st = { arm: null, last: null, session: null };
+      var st = { arm: null, last: null, session: null, account: null };
       var onErr = function(err){ console.error('Kalshi live control sync error:', err); };
       var un = [
         onSnapshot(doc(db, 'kalshiLiveControl', 'arm'), function(s){ st.arm = s.exists() ? s.data() : null; cb(st); }, onErr),
         onSnapshot(doc(db, 'kalshiLiveControl', 'last'), function(s){ st.last = s.exists() ? s.data() : null; cb(st); }, onErr),
-        onSnapshot(doc(db, 'kalshiLiveControl', 'session'), function(s){ st.session = s.exists() ? s.data() : null; cb(st); }, onErr)
+        onSnapshot(doc(db, 'kalshiLiveControl', 'session'), function(s){ st.session = s.exists() ? s.data() : null; cb(st); }, onErr),
+        onSnapshot(doc(db, 'kalshiLiveControl', 'account'), function(s){ st.account = s.exists() ? s.data() : null; cb(st); }, onErr)
       ];
       return function(){ un.forEach(function(f){ f(); }); };
     },
@@ -9640,6 +9641,7 @@
   var kalshiLiveEventsUnsub = null;
   var kalshiAcctTimer = null;
   var kalshiAcctRefresh = function(){};
+  var kalshiAcctFromServer = function(){};
 
   // Totals since the owner's starting line. Pure, so a test can run it on a fixture. Only the bot's own orders sent
   // after the line are counted: the account's fills also hold the owner's manual trades, which are not.
@@ -9820,7 +9822,7 @@
       control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); }
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiBot(); }); }
-    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; renderKalshiL1(); renderKalshiBot(); }); }
+    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } renderKalshiL1(); renderKalshiBot(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
@@ -9964,6 +9966,13 @@
         }).then(function(){ yes.disabled = no.disabled = false; });
       });
     })();
+    // The server stores a fresh read every minute, so the panel fills in at once on opening. The newer of that and the
+    // page's own read wins; an older one never replaces a newer one.
+    kalshiAcctFromServer = function(d){
+      if(!d || !d.balance || (kalshiLiveAcct && kalshiLiveAcct.at >= d.at)){ return; }
+      render(d);
+      msg.textContent = 'Read ' + new Date(d.at).toLocaleTimeString() + ' by the server.';
+    };
     function load(){
       var api = window.__shwoopAPI;
       if(!api || !api.kalshiLiveAccount || !currentUserIsAdmin || btn.disabled){ return; }

@@ -126,7 +126,7 @@ gates.R9 = () => {
   assert.ok(/total === null\) throw new HttpsError\("failed-precondition"/.test(b), 'no readable balance, no line');
   assert.ok(!/runLiveTest|runArmedTick|KALSHI_LIVE_ENABLED/.test(b), 'no order code, and independent of the order switch');
   assert.ok(fnSrc.indexOf('exports.kalshiLiveBaseline') < fnSrc.indexOf('exports.kalshiBookRecorder ='), 'defined before the book recorder');
-  const acc = /exports\.kalshiLiveAccount = onCall\(([\s\S]*?)\n\);/.exec(fnSrc)[1];
+  const acc = /async function readAccountFull\(db\) \{([\s\S]*?)\n\}\n/.exec(fnSrc)[1];
   assert.ok(/doc\("baseline"\)\.get\(\)/.test(acc) && /baseline: snap\.exists \? snap\.data\(\) : null/.test(acc), 'the account view applies the stored line');
   // The page: first click only asks, only the confirm click sets it, admin only, and nothing but one call site.
   const i = html.indexOf("var go = document.getElementById('kalAcctStart')");
@@ -154,15 +154,17 @@ gates.R6 = () => {
   const m = /exports\.kalshiLiveAccount = onCall\(([\s\S]*?)\n\);/.exec(fnSrc);
   assert.ok(m, 'kalshiLiveAccount not found');
   const body = m[1];
+  assert.ok(/readAccountFull\(getFirestore\(\)\)/.test(body), 'reads through the shared function');
+  const shared = /async function readAccountFull\(db\) \{([\s\S]*?)\n\}\n/.exec(fnSrc)[1];
   assert.ok(body.indexOf('assertKalshiAdmin(request.auth)') > -1 && body.indexOf('assertKalshiAdmin') < body.indexOf('readAccount'), 'admin check first');
   assert.ok(!/request\.data/.test(body), 'takes nothing from the caller');
   assert.ok(/secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(body), 'the live secrets');
   // Reading never depends on the order switch: the only mention allowed is REPORTING it, and nothing branches on it.
-  assert.ok(/return \{ \.\.\.d, results, liveSwitch: KALSHI_LIVE_ENABLED\.value\(\) === "on" \};/.test(body), 'the switch is only reported back');
+  assert.ok(/return \{ \.\.\.d, results, liveSwitch: KALSHI_LIVE_ENABLED\.value\(\) === "on" \};/.test(shared), 'the switch is only reported back');
   // The settled results are public market reads only: one GET per ticker through the keyless helper, never an order.
-  assert.ok(/kalshiGetJson\("\/markets\/" \+ encodeURIComponent\(t\)\)/.test(body) && !/POST|method\s*:|portfolio\/events/.test(body), 'results come from public market reads');
-  assert.ok(!/KALSHI_LIVE_ENABLED/.test(body.replace('liveSwitch: KALSHI_LIVE_ENABLED.value() === "on"', '')), 'no other use of the order switch');
-  assert.ok(!/runLiveTest|runArmedTick/.test(body), 'never goes near order code');
+  assert.ok(/kalshiGetJson\("\/markets\/" \+ encodeURIComponent\(t\)\)/.test(shared) && !/POST|method\s*:|portfolio\/events/.test(shared), 'results come from public market reads');
+  assert.ok(!/KALSHI_LIVE_ENABLED/.test(shared.replace('liveSwitch: KALSHI_LIVE_ENABLED.value() === "on"', '')), 'no other use of the order switch');
+  assert.ok(!/runLiveTest|runArmedTick/.test(shared), 'never goes near order code');
   assert.ok(fnSrc.indexOf('exports.kalshiLiveAccount') < fnSrc.indexOf('exports.kalshiBookRecorder ='), 'defined before the book recorder');
   assert.ok(!/KALSHI_LIVE|kalshiAccountLib/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBookRecorder ='))), 'the book recorder never sees the live key or the account module');
 };
@@ -178,6 +180,20 @@ gates.R7 = () => {
   assert.ok(!/kalshiLiveTrade|kalshiLiveArm/.test(iife), 'the account panel never calls an order or arm function');
   assert.ok(/kalshiLiveAccountFn\(\{\}\)/.test(html), 'the callable is sent no arguments');
   assert.ok(/escapeHtml\(String\(s\.shard\)\)/.test(iife) && /escapeHtml\(x\.ticker\)/.test(iife), 'values from Kalshi are escaped before they reach the page');
+};
+
+gates.R10 = () => {
+  // The once-a-minute snapshot: stored for the page to show on opening, written after the tick, and unable to fail
+  // the trading run, the watchdog ping or the session.
+  const m = /exports\.kalshiLiveArmed = onSchedule\(([\s\S]*?)\n\);/.exec(fnSrc)[1];
+  const at = m.indexOf('readAccountFull(db)');
+  assert.ok(at > m.indexOf('live.runL1Tick(') && at > m.indexOf('live.runArmedTick('), 'taken after the order logic has run');
+  const inner = m.slice(m.lastIndexOf('try {', at), m.indexOf('} catch (e) {', at));
+  assert.ok(/doc\("account"\)\.set\(/.test(inner), 'stored in kalshiLiveControl/account');
+  assert.ok(/catch \(e\) \{\s*console\.error\(/.test(m.slice(at)) && m.slice(at).indexOf('console.error') < m.slice(at).indexOf('failure = e'), 'a failed snapshot is logged and does not count as a failed run');
+  // The page: an older stored read never replaces a newer one the page already has.
+  const f = /kalshiAcctFromServer = function\(d\)\{([\s\S]*?)\n    \};/.exec(html)[1];
+  assert.ok(/kalshiLiveAcct\.at >= d\.at/.test(f) && /return;/.test(f), 'newer read wins');
 };
 
 (async () => {

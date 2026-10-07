@@ -224,3 +224,11 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
   one-contract test's limit of 5 ever; after a session the single test button will say the limit is reached.
 - **Reading it.** Net result after fees plus the counts of fills, no fills and refusals. About 55 trades a day, so a day is noise (plus or
   minus about $2); it tests fills, fees and timing.
+
+## Account snapshot (Oct 7, 2026)
+
+`kalshiLiveArmed` now also stores the same read the account panel makes (balance per shard, positions, fills and
+settled results) in `kalshiLiveControl/account` once a minute, after the order logic has run. The Bot tab shows it
+the moment it opens, so the panel is current even if the page was closed. A failed snapshot is logged and never fails
+the run, the session or the watchdog ping. Cost: about 3 Kalshi reads, up to 20 public market reads and one Firestore
+write a minute. Deploy: `firebase deploy --only functions`. No rules change (the document is admin read, server write).
