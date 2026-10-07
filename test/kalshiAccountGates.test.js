@@ -115,7 +115,7 @@ gates.R8 = async () => {
 
 gates.R9 = () => {
   // The baseline function: admin first, takes nothing from the caller, can be set exactly once, refuses without a
-  // readable balance, never touches order code, and defined before the paper bot.
+  // readable balance, never touches order code, and defined before the book recorder (the last export).
   const m = /exports\.kalshiLiveBaseline = onCall\(([\s\S]*?)\n\);/.exec(fnSrc);
   assert.ok(m, 'kalshiLiveBaseline not found');
   const b = m[1];
@@ -125,7 +125,7 @@ gates.R9 = () => {
   assert.ok(/existing\.exists\) return \{ set: false, alreadySet: true/.test(b), 'a second press reports the existing line');
   assert.ok(/total === null\) throw new HttpsError\("failed-precondition"/.test(b), 'no readable balance, no line');
   assert.ok(!/runLiveTest|runArmedTick|KALSHI_LIVE_ENABLED/.test(b), 'no order code, and independent of the order switch');
-  assert.ok(fnSrc.indexOf('exports.kalshiLiveBaseline') < fnSrc.indexOf('exports.kalshiBot ='), 'defined before the paper bot');
+  assert.ok(fnSrc.indexOf('exports.kalshiLiveBaseline') < fnSrc.indexOf('exports.kalshiBookRecorder ='), 'defined before the book recorder');
   const acc = /exports\.kalshiLiveAccount = onCall\(([\s\S]*?)\n\);/.exec(fnSrc)[1];
   assert.ok(/doc\("baseline"\)\.get\(\)/.test(acc) && /baseline: snap\.exists \? snap\.data\(\) : null/.test(acc), 'the account view applies the stored line');
   // The page: first click only asks, only the confirm click sets it, admin only, and nothing but one call site.
@@ -161,8 +161,8 @@ gates.R6 = () => {
   assert.ok(/return \{ \.\.\.d, liveSwitch: KALSHI_LIVE_ENABLED\.value\(\) === "on" \};/.test(body), 'the switch is only reported back');
   assert.ok(!/KALSHI_LIVE_ENABLED/.test(body.replace('liveSwitch: KALSHI_LIVE_ENABLED.value() === "on"', '')), 'no other use of the order switch');
   assert.ok(!/runLiveTest|runArmedTick/.test(body), 'never goes near order code');
-  assert.ok(fnSrc.indexOf('exports.kalshiLiveAccount') < fnSrc.indexOf('exports.kalshiBot ='), 'defined before the paper bot');
-  assert.ok(!/KALSHI_LIVE|kalshiAccountLib/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBot ='))), 'the paper bot never sees the live key or the account module');
+  assert.ok(fnSrc.indexOf('exports.kalshiLiveAccount') < fnSrc.indexOf('exports.kalshiBookRecorder ='), 'defined before the book recorder');
+  assert.ok(!/KALSHI_LIVE|kalshiAccountLib/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBookRecorder ='))), 'the book recorder never sees the live key or the account module');
 };
 
 gates.R7 = () => {

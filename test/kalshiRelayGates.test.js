@@ -42,13 +42,12 @@ gates.G3 = () => {
 gates.G4 = () => {
   assert.ok(!/kalshiRecorder/.test(fnSrc), 'the old Firebase recorder must stay removed');
   const scheduled = [...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]);
-  // The armed live test does nothing unless the owner has armed it (kalshiLiveGates L16 to L18); the book
-  // recorder is read only and keyless (kalshiBookGates); the paper bot never holds a secret. Both others are
-  // defined BEFORE the paper bot so the "no order code after exports.kalshiBot" slice in kalshiBotGates still
-  // covers the whole paper bot.
-  assert.deepStrictEqual(scheduled, ['kalshiLiveArmed', 'kalshiBookRecorder', 'kalshiBot'], 'only the armed live test, the book recorder and the paper bot are scheduled');
-  const botOpts = /exports\.kalshiBot = onSchedule\(\s*\{([^}]*)\}/.exec(fnSrc);
-  assert.ok(botOpts && !/secrets/.test(botOpts[1]), 'the paper bot is scheduled with no secrets');
+  // The armed live test does nothing unless the owner has armed it (kalshiLiveGates L16 to L18); the book recorder is
+  // read only and keyless (kalshiBookGates). The recorder is the LAST export, so the slice from it proves nothing after
+  // it can see a key or place an order. There is no simulated bot any more.
+  assert.deepStrictEqual(scheduled, ['kalshiLiveArmed', 'kalshiBookRecorder'], 'only the armed live test and the book recorder are scheduled');
+  const recOpts = /exports\.kalshiBookRecorder = onSchedule\(\s*\{([^}]*)\}/.exec(fnSrc);
+  assert.ok(recOpts && !/secrets/.test(recOpts[1]), 'the recorder is scheduled with no secrets');
 };
 
 // The relay stays read-only and keyless: GET only, nothing to place an order with.

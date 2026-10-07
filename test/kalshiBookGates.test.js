@@ -100,14 +100,13 @@ gates.B7 = async () => {
   assert.strictEqual(minute - out.pruned[0], 10 * 86400000);
 };
 
-// Read only, keyless, and nowhere near an order. The recorder is also defined before the paper bot.
+// Read only, keyless, and nowhere near an order. The recorder is the last export, so the slice from it proves nothing after it can see a key.
 gates.B8 = () => {
   const code = strip(lib);
   assert.ok(!/portfolio|orders\b(?!\?)|KALSHI-ACCESS|method\s*:|POST|require\(["']\.\/kalshiLive/i.test(code.replace(/\/orderbook/g, '')), 'no order or signing code in the recorder');
   const sched = /exports\.kalshiBookRecorder = onSchedule\(\s*\{([^}]*)\}/.exec(fnSrc);
   assert.ok(sched && !/secrets/.test(sched[1]), 'the recorder holds no secrets');
-  assert.ok(fnSrc.indexOf('exports.kalshiBookRecorder') < fnSrc.indexOf('exports.kalshiBot ='), 'defined before the paper bot');
-  assert.ok(!/kalshiBook/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBot ='))), 'the paper bot never touches the recorder');
+  assert.ok(fnSrc.indexOf('exports.kalshiLiveArmed') < fnSrc.indexOf('exports.kalshiBookRecorder'), 'the live arm comes before the recorder, which stays last');
 };
 
 // Only the admin can read the snapshots, and nobody can write them from a browser.

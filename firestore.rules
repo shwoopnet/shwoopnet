@@ -140,23 +140,8 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // The Kalshi paper bot (functions/kalshiBot*). Its records are written only by the
-    // scheduled function, which uses the Admin SDK and so bypasses these rules, and are
-    // readable only by the admin. The one thing a client may write is the halt switch,
-    // and only the admin, only a boolean, only the two fields the page sends. Nothing
-    // here can place or change a trade.
-    match /kalshiBotPositions/{id} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-    match /kalshiBotEvents/{id} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-    match /kalshiBotMeta/status {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
+    // The halt switch the live scan reads (kalshiBotMeta/control; the path predates the paper bot's removal and is
+    // kept so the saved setting survives). Only the admin may write it, only a boolean, only the two fields the page sends.
     match /kalshiBotMeta/control {
       allow read: if isAdmin();
       allow write: if isAdmin()
