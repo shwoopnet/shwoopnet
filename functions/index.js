@@ -435,10 +435,14 @@ exports.kalshiLiveArmed = onSchedule(
         });
       }
       // Keep the account page current while nobody has it open: the latest read is stored for the page to show the
-      // moment it loads. This runs after the tick and can never fail it: a bad read is logged and the minute still counts.
+      // moment it loads, at the minutes where the account can change (see snapshotDue). This runs after the tick and can never fail it: a bad read is logged and the minute still counts.
       try {
-        const full = await readAccountFull(db);
-        await db.collection("kalshiLiveControl").doc("account").set(JSON.parse(JSON.stringify(full)));
+        const accRef = db.collection("kalshiLiveControl").doc("account");
+        const prev = await accRef.get();
+        if (account.snapshotDue(now, prev.exists ? prev.data().at : NaN)) {
+          const full = await readAccountFull(db);
+          await accRef.set(JSON.parse(JSON.stringify(full)));
+        }
       } catch (e) {
         console.error("kalshiLiveArmed: account snapshot failed: " + String((e && e.message) || e).slice(0, 160));
       }

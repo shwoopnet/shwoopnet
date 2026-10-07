@@ -9826,7 +9826,7 @@
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
-    kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 15000);
+    kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
   }
   function stopKalshiBot(){
     if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }

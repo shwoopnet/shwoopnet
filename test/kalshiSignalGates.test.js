@@ -97,7 +97,7 @@ gates.G21 = () => {
   assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(start + ')'), 'only an admin may subscribe');
   const stop = block(/function stopKalshiBot\(\)\{([\s\S]*?)\n  \}\n/, html);
   assert.ok(/clearInterval\(kalshiAcctTimer\)/.test(stop) && /kalshiLiveEventsUnsub\(\)/.test(stop), 'leaving the tab stops the account timer and every listener');
-  assert.ok(/setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiAcctRefresh\(\); \} \}, 15000\)/.test(start), 'the account is re-read every 15 seconds, only while the tab is visible');
+  assert.ok(/setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiAcctRefresh\(\); \} \}, 600000\)/.test(start), 'the account is re-read once every 10 minutes, only while the tab is visible');
 };
 
 // The tab once showed only the newest 15 trades and 12 events with no way to see more, which hid most of the day. The

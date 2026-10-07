@@ -189,11 +189,24 @@ gates.R10 = () => {
   const at = m.indexOf('readAccountFull(db)');
   assert.ok(at > m.indexOf('live.runL1Tick(') && at > m.indexOf('live.runArmedTick('), 'taken after the order logic has run');
   const inner = m.slice(m.lastIndexOf('try {', at), m.indexOf('} catch (e) {', at));
-  assert.ok(/doc\("account"\)\.set\(/.test(inner), 'stored in kalshiLiveControl/account');
+  assert.ok(/doc\("account"\)/.test(inner) && /accRef\.set\(/.test(inner) && /snapshotDue\(/.test(inner), 'stored in kalshiLiveControl/account');
   assert.ok(/catch \(e\) \{\s*console\.error\(/.test(m.slice(at)) && m.slice(at).indexOf('console.error') < m.slice(at).indexOf('failure = e'), 'a failed snapshot is logged and does not count as a failed run');
   // The page: an older stored read never replaces a newer one the page already has.
   const f = /kalshiAcctFromServer = function\(d\)\{([\s\S]*?)\n    \};/.exec(html)[1];
   assert.ok(/kalshiLiveAcct\.at >= d\.at/.test(f) && /return;/.test(f), 'newer read wins');
+};
+
+gates.R11 = () => {
+  // The snapshot follows the trade cycle: it is taken just after settlement and just after the entry window, never
+  // the other 13 minutes of a quarter hour, and a missing or stale one is refreshed whatever the minute.
+  const at = (min) => Date.UTC(2026, 9, 7, 12, min, 5);
+  const due = (min, last) => acct.snapshotDue(at(min), last);
+  const fresh = at(0);
+  const hits = []; for (let m = 0; m < 60; m++) if (due(m, at(m) - 5 * 60000 > fresh ? at(m) - 5 * 60000 : fresh)) hits.push(m);
+  assert.deepStrictEqual(hits, [1, 10, 16, 25, 31, 40, 46, 55], 'minutes 1 and 10 of each quarter hour');
+  assert.ok(due(5, NaN) && due(5, undefined), 'no snapshot yet: take one now');
+  assert.ok(due(5, at(5) - 20 * 60000), 'a 20 minute old snapshot is refreshed off-cycle');
+  assert.ok(!due(1, at(1) - 30000), 'never twice in the same minute');
 };
 
 (async () => {

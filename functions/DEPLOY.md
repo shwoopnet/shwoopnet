@@ -228,7 +228,6 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
 ## Account snapshot (Oct 7, 2026)
 
 `kalshiLiveArmed` now also stores the same read the account panel makes (balance per shard, positions, fills and
-settled results) in `kalshiLiveControl/account` once a minute, after the order logic has run. The Bot tab shows it
+settled results) in `kalshiLiveControl/account` at minutes 1 and 10 of each quarter hour (just after a market settles and just after the entry window), or when none exists or it is 20 minutes old, after the order logic has run. The Bot tab shows it
 the moment it opens, so the panel is current even if the page was closed. A failed snapshot is logged and never fails
-the run, the session or the watchdog ping. Cost: about 3 Kalshi reads, up to 20 public market reads and one Firestore
-write a minute. Deploy: `firebase deploy --only functions`. No rules change (the document is admin read, server write).
+the run, the session or the watchdog ping. Cost: one small Firestore read a minute, and about 3 Kalshi reads plus up to 20 public market reads twice per quarter hour. Deploy: `firebase deploy --only functions`. No rules change (the document is admin read, server write).

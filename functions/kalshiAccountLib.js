@@ -78,4 +78,15 @@ function applyBaseline(d, baseline) {
   return { ...d, fills, baseline: { since: baseline.since, startingDollars: baseline.startingDollars }, changeSinceStart };
 }
 
-module.exports = { readAccount, applyBaseline, shapeBalance, shapePositions, shapeFills };
+// Trades enter about 6 minutes before a quarter-hour close and settle at the close, so the account only changes
+// shortly after :00/:15/:30/:45 (settled) and shortly after :09/:24/:39/:54 (an order may have filled). Reading at
+// minutes 1 and 10 of each quarter hour catches both; a missing or 20 minute old snapshot is also refreshed, so a
+// restart or a missed minute leaves no long gap.
+const SNAPSHOT_MINUTES = [1, 10];
+const SNAPSHOT_MAX_AGE_MS = 20 * 60000;
+function snapshotDue(now, lastAt) {
+  if (!Number.isFinite(lastAt) || now - lastAt >= SNAPSHOT_MAX_AGE_MS) return true;
+  return SNAPSHOT_MINUTES.includes(new Date(now).getUTCMinutes() % 15) && now - lastAt >= 60000;
+}
+
+module.exports = { snapshotDue, SNAPSHOT_MINUTES, readAccount, applyBaseline, shapeBalance, shapePositions, shapeFills };
