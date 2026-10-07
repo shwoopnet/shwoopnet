@@ -250,6 +250,39 @@ gates.N14 = () => {
   assert.deepStrictEqual(offenders, ['kalshiLiveLib.js']);
 };
 
+// Bitcoin and gold close together and share a shard. The balance is read once per tick, so money committed to the first
+// order must come off what the second may use: otherwise the second is sent without the funds and Kalshi's refusal ends the session.
+gates.N15 = async () => {
+  const G = 'KXGOLD15M-26OCT071415-15';
+  const w = world({ session: { startCash: 2 }, balance: { balance_breakdown: [{ balance: '2.0000', exchange_index: 2 }] }, fresh: { [G]: { exchange_index: 2 } } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  assert.strictEqual(w.posts.length, 1, 'the second market on the same shard is skipped, not sent without funds');
+  assert.ok(w.sess.endedBecause === undefined && w.sess.active === true, 'and the session keeps running');
+  const rich = world({ session: { startCash: 50 }, balance: { balance_breakdown: [{ balance: '50.0000', exchange_index: 2 }] }, fresh: { [G]: { exchange_index: 2 } } });
+  await tick(rich, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  assert.strictEqual(rich.posts.length, 2, 'with the funds, both are sent');
+};
+
+// The order limit holds inside a single tick, not only at its start.
+gates.N16 = async () => {
+  const G = 'KXGOLD15M-26OCT071415-15';
+  const w = world({ session: { ordersSent: 79 } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  assert.strictEqual(w.posts.length, 1, '79 sent plus two candidates is stopped at 80');
+  assert.strictEqual(w.sess.ordersSent, 80);
+};
+
+// A no-fill has to be explainable afterwards: the record carries the touch and size the order was decided on.
+gates.N17 = async () => {
+  const w = world({ fresh: { [T]: { yes_ask_size_fp: '3.00', yes_bid_size_fp: '12.00' } }, post: { status: 201, body: { order_id: 'o1', fill_count: '0.00', remaining_count: '0.00' } } });
+  await tick(w);
+  const rec = w.docs.get('L1-' + T);
+  assert.strictEqual(rec.status, 'no fill');
+  assert.deepStrictEqual([rec.seen.bid, rec.seen.ask, rec.seen.bidSize, rec.seen.askSize], [0.9, 0.91, 12, 3]);
+  const bare = world(); await tick(bare);
+  assert.strictEqual(bare.docs.get('L1-' + T).seen.askSize, null, 'a field Kalshi did not send is null, not a guess');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
