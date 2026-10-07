@@ -723,3 +723,114 @@ if _HAVE_CRYPTO:
     _gi = open(_os2.path.join(_os2.path.dirname(__file__), "..", "..", ".gitignore")).read()
     assert "*.pem" in _gi and "*.key" in _gi, "private keys are gitignored"
     print("demo trading tests passed")
+
+# ---- H5: two sided market making ----
+import random as _rd5, sqlite3 as _sq5, tempfile as _tf5, os as _os5
+import scalper.marketmaker as _mm
+
+# Quotes stop 5 minutes before close and need a usable two sided book.
+_cs = [(1000, 0.40, 0.44), (1060, 0.0, 0.44), (1120, 0.40, 0.44), (1700, 0.40, 0.44), (1701, 0.40, 0.44)]
+assert [q[0] for q in _mm.quote_minutes(_cs, 2000)] == [1000, 1120, 1700], "a dead quote is skipped, 300s or more must remain"
+assert [q[0] for q in _mm.quote_minutes(_cs, 1999)] == [1000, 1120], "299s left is too late"
+
+# A bid fills only when a taker SELLING yes prints strictly through it; an ask only for a taker buying through it.
+_T = lambda ts, side, y: (ts, side, y, round(1 - y, 4))
+assert _mm.fills_in([_T(10, "no", 0.39)], 0, 0.40, 0.44) == (True, False)
+assert _mm.fills_in([_T(10, "no", 0.40)], 0, 0.40, 0.44) == (False, False), "a print AT our price does not fill us"
+assert _mm.fills_in([_T(10, "no", 0.40)], 0, 0.40, 0.44, strict=False) == (True, False)
+assert _mm.fills_in([_T(10, "yes", 0.39)], 0, 0.40, 0.44) == (False, False), "a taker BUYING at a low price does not hit a bid"
+assert _mm.fills_in([_T(10, "yes", 0.45)], 0, 0.40, 0.44) == (False, True)
+assert _mm.fills_in([_T(10, "yes", 0.44)], 0, 0.40, 0.44) == (False, False)
+assert _mm.fills_in([_T(0, "no", 0.30), _T(61, "no", 0.30)], 0, 0.40, 0.44) == (False, False), "only the next minute counts, and not the current second"
+
+# Inventory can never pass the cap, either way.
+_q = [(1000 + 60 * i, 0.40, 0.44) for i in range(6)]
+_down = [_T(1000 + 60 * i + 5, "no", 0.30) for i in range(6)]
+_fl, _inv = _mm.walk(_q, _down, 2)
+assert _inv == 2 and len(_fl) == 2, "a falling market buys only up to the cap"
+_up = [_T(1000 + 60 * i + 5, "yes", 0.60) for i in range(6)]
+assert _mm.walk(_q, _up, 2)[1] == -2
+
+# A completed round trip captures the spread, and the fee is paid on both legs.
+_c = [(1000, 0.40, 0.44), (1060, 0.40, 0.44), (1120, 0.40, 0.44)]
+_tr = [_T(1010, "no", 0.39), _T(1070, "yes", 0.45)]
+_r = _mm.simulate(_c, 5000, "yes", _tr)
+assert _r["inv_end"] == 0 and abs(_r["rt_gross"] - 0.04) < 1e-9
+assert abs(_r["pnl"] - (0.04 - _mm.fee(0.40) - _mm.fee(0.44))) < 1e-9, _r
+assert abs(_r["pnl_nofee"] - 0.04) < 1e-9 and _r["pnl_stress"] < _r["pnl"] < _r["pnl_nofee"]
+assert abs(_r["rt_gross"] + _r["leftover"] - _r["pnl_nofee"]) < 1e-9, "round trips plus leftover reconcile to the total before fees"
+assert _mm.simulate(_c, 5000, "", _tr) is None and _mm.simulate([], 5000, "yes", _tr) is None
+
+# Leftover inventory settles at 0 or 1: bought at 40c and yes loses is -40c less fee.
+_r = _mm.simulate(_c, 5000, "no", [_T(1010, "no", 0.39)])
+assert _r["inv_end"] == 1 and abs(_r["pnl_nofee"] + 0.40) < 1e-9 and _r["rt_gross"] == 0
+
+# Outcome independent of fills (true value is the 50c mid, quotes 2c either side): before fees the strategy earns
+# exactly the half spread on each fill and nothing more, and fees take it below that. No hidden source of profit.
+_rg = _rd5.Random(5)
+_res = []
+for _ in range(3000):
+    _cd = [(1000 + 60 * i, 0.48, 0.52) for i in range(8)]
+    _t = [(1000 + 60 * i + _rg.randint(1, 59), _rg.choice(("yes", "no")), _p, round(1 - _p, 4))
+          for i in range(8) for _p in [_rg.choice((0.45, 0.47, 0.50, 0.53, 0.55))] if _rg.random() < 0.8]
+    _res.append(_mm.simulate(_cd, 5000, _rg.choice(("yes", "no")), _t))
+_nf = sum(r["pnl_nofee"] for r in _res) / len(_res)
+_pn = sum(r["pnl"] for r in _res) / len(_res)
+_fills = sum(r["n_buy"] + r["n_sell"] for r in _res) / len(_res)
+assert abs(_nf - 0.02 * _fills) < 0.04, (_nf, _fills)
+assert _pn < _nf - 0.5 * _mm.fee(0.5) * _fills, "fees are charged on every fill"
+
+# Adverse selection: a bid is only hit when the market is about to fall. Round trips look fine, the leftover loses it.
+_ad = []
+for _ in range(200):
+    _won = _rg.random() < 0.5
+    _tp5 = [_T(1010, "no", 0.30)] if not _won else [_T(1010, "yes", 0.60)]
+    _ad.append(_mm.simulate([(1000, 0.40, 0.44), (1060, 0.40, 0.44)], 5000, "yes" if _won else "no", _tp5))
+_lose = [r for r in _ad if r["n_buy"] == 1]
+assert _lose and all(abs(r["pnl_nofee"] + 0.40) < 1e-9 for r in _lose), "informed selling: every bid fill settles at zero"
+assert all(r["leftover"] < 0 for r in _lose)
+
+# The sample is by position in time, never by result.
+_ms = [(f"M{i}", "S", [], 100 + i, "yes" if i % 3 == 0 else "no") for i in range(20)]
+_sm = _mm.sample(_ms)
+assert [m[0] for m in _sm] == [f"M{i}" for i in range(0, 20, 4)]
+assert [m[0] for m in _mm.sample([(m[0], m[1], m[2], m[3], "yes") for m in _ms])] == [m[0] for m in _sm], "results never pick the sample"
+
+# Verdict: under 300 markets nothing is decided; a steady loser is FALSIFIED; no verdict word says to trade.
+_days = [f"2026-09-{d:02d}" for d in range(1, 11)]
+_rows = lambda n, f: [(_days[i % 10], i, f(i), f(i) - 0.001) for i in range(n)]
+assert _mm.verdict(_rows(299, lambda i: 0.05), 150)[0] == "NOT_ENOUGH_DATA"
+assert _mm.verdict(_rows(400, lambda i: -0.02 + (i % 5) * 0.001), 200)[0] == "FALSIFIED"
+assert _mm.verdict(_rows(400, lambda i: 0.05 + (i % 7) * 0.002), 200)[0] == "NOT_YET_FALSIFIED"
+
+# Fetch stores results only, and a rerun fetches nothing already stored.
+_p5 = _os5.path.join(_tf5.mkdtemp(), "t.sqlite")
+_d5 = _sq5.connect(_p5)
+_d5.executescript("CREATE TABLE market(ticker TEXT PRIMARY KEY, series TEXT, open_ts INTEGER, close_ts INTEGER, result TEXT, strike REAL, n_candles INTEGER);"
+                  "CREATE TABLE candle(ticker TEXT, series TEXT, end_ts INTEGER, bid_o REAL, bid_h REAL, bid_l REAL, bid_c REAL, ask_o REAL, ask_h REAL, ask_l REAL, ask_c REAL, price_c REAL, volume REAL, oi REAL, PRIMARY KEY (ticker, end_ts));")
+for _i in range(8):
+    _tk = f"K{_i}"
+    _d5.execute("INSERT INTO market VALUES(?,?,?,?,?,?,?)", (_tk, "KXBTC15M", 0, 5000 + _i * 1000, "yes", None, 1))
+    _d5.execute("INSERT INTO candle(ticker, series, end_ts, bid_c, ask_c) VALUES(?,?,?,?,?)", (_tk, "KXBTC15M", 1000 + _i * 1000, 0.40, 0.44))
+_d5.commit(); _d5.close()
+_calls5 = []
+def _ft(ticker, lo, hi):
+    _calls5.append(ticker)
+    return [(lo + 5, "no", 0.39, 0.61)]
+_o = (_mm.DB, _mm.fetch_trades)
+_mm.DB, _mm.fetch_trades = _p5, _ft
+try:
+    _mm.run_fetch(None)
+    _rs = _sq5.connect(_p5).execute("SELECT ticker, n_buy, inv_end, n_trades FROM mm").fetchall()
+    assert len(_rs) == 2 and all(r[1:] == (1, 1, 1) for r in _rs), _rs     # every 4th of 8, a raw tape is not stored
+    _n5 = len(_calls5)
+    _mm.run_fetch(None)
+    assert len(_calls5) == _n5 == 2, "a rerun must not refetch stored markets"
+finally:
+    _mm.DB, _mm.fetch_trades = _o
+
+import re as _re9
+_c9 = _re9.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_mm.__file__).read())
+assert not _re9.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c9)
+assert not _re9.search(r"place_order|/portfolio/", _c9), "research code never touches an order endpoint"
+print("market making tests passed")

@@ -207,6 +207,25 @@ no free gold spot series here.
 - **What it does not say.** Not tested: gold, anything faster than one minute, or
   whether resting orders earn the spread (candles cannot show fills).
 
+**2026-10-06: H5, quoting both sides as a market maker: `FALSIFIED`.**
+One run, on the sample and rules fixed before any code (see H5 above). Nothing was changed after seeing it.
+
+- 1,219 markets (every 4th per series by close time), z of -36.9, mean **-41.3c a market**, -40.6c and
+  -42.0c in the two halves, -45.6c with fees 20% higher. The bar was +1c and z of 2.1.
+- Decomposition: round trips **-16.6c**, leftover inventory **-3.4c**, fees **-21.3c**. About 8 fills a
+  side per market, 24% of markets ended flat.
+- **The prediction (adverse selection bigger than the spread) was right, but not where I expected it.**
+  The leftover was a small part. The loss is in the paired buys and sells: the quote follows the price, so
+  in a trending minute it buys at the old level and sells at the new, lower one. Fills are not independent
+  of direction, which is the same adverse selection arriving as a loss on completed pairs.
+- Information only: with no fee at all it is still -20.0c, with fills also on a print AT our price -22.2c,
+  inventory cap 1 -35.3c, cap 4 -44.1c. So the fee is about half of it, and removing it does not rescue it.
+  It does not depend on the cap.
+- **What it does not say.** The fee was charged at the taker formula on every fill, which a resting order
+  may not pay (unconfirmed). Quotes were refreshed once a minute and one contract each side; a quoter that
+  re-prices within the minute or skips quoting after a move is a different strategy and was not tested.
+  Fills are the conservative strictly-through model.
+
 ## Hypothesis H1: favourites are underpriced, held to settlement (fixed 2026-10-05, before any calibration data was looked at)
 
 The scalping verdict above says nothing about holding to settlement, which costs
@@ -513,6 +532,53 @@ band. `python -m scalper.bandscan` (to be written after this commit).
   band: choosing the best-looking cell afterwards is the thing this process forbids.
 - **Cost of this idea so far.** It is the fifth strategy variant tried (the 60s scalp, H1, H2, H3,
   H4); the spot lag study was exploratory and is not counted. Cuts examined for the verdict: 1 band.
+
+## Hypothesis H5: quote both sides as a market maker (fixed 2026-10-06, before any code or data)
+
+Chosen by the owner after H1 to H4 and H3 were falsified. H3 tested a resting BUY (a YES bid or a NO
+bid, which is the same act as a resting ask) held to settlement and lost to adverse selection. A market
+maker differs in what it does after a fill: it quotes BOTH sides every minute, a fill on one side invites
+a fill on the other that closes the position at a profit equal to the spread, inventory is capped, and
+only the leftover is held to settlement. Whether the spread captured on completed round trips beats the
+adverse selection on one-sided fills is the question. `python -m scalper.marketmaker` (to be written
+after this commit).
+
+- **Rule.** At every minute close from the first usable quote until 5 minutes before close (a real two
+  sided book, spread 10c or less): rest ONE contract at the YES bid and ONE at the YES ask, replaced at
+  the new touch each minute. Inventory is the YES contracts held, capped at 2 either way: no new bid at +2,
+  no new ask at -2. Quoting stops 5 minutes before close and the inventory is held to settlement ($1 per
+  contract if YES, else 0).
+- **Fill model, conservative, as H3.** A bid fills only when the tape prints strictly THROUGH it inside the
+  next minute: a taker buying NO at a YES price below our bid. An ask fills only when a taker buying YES
+  prints at a YES price above our ask. Both can fill in one minute (a round trip). A print AT our price does
+  not count: our queue place is unknown. This understates fills.
+- **Costs.** Every fill pays Kalshi's taker fee formula (7% of p times 1 minus p per contract), even
+  though a resting order may pay less: the schedule for these markets is not confirmed, and assuming a
+  discount would flatter it. A run with no fee is printed for information only.
+- **Counterparty.** Impatient takers on both sides, who pay the spread to trade now. The usual reason
+  this does not simply work is adverse selection: you are filled on the side the price is about to move
+  through, which H3 measured at about 4c a filled contract against about 1c of spread.
+- **Prediction.** Mean net profit of at least +1c a market. My honest expectation is negative: a
+  contract's spread is about 1c to 2c, a fee is about 1.5c to 1.75c a fill, and adverse selection is
+  larger than the spread.
+- **Unit and sample.** One market, net profit in cents per market (all fills, fees and the settled
+  inventory). The sample is fixed in advance: for each series, the markets sorted by close time and every
+  4th of them (about 1,200 markets over the 30 days), chosen by position and never by result. The full tape
+  for a market is about 30,000 trades, so a full run is days; a quarter keeps the detectable edge near
+  1c to 2c.
+- **Kill criteria.** FALSIFIED unless ALL hold: at least 300 markets; mean net profit per market positive
+  with a day clustered z of at least 2.1 (the bar H2 to H4 used); positive in BOTH halves of the period; and
+  positive with fees 20% higher. Fewer than 300 markets is NOT_ENOUGH_DATA. Best outcome is
+  `NOT_YET_FALSIFIED`, meaning permission to test on days 31 to 45 back, never a trade. No verdict means
+  "trade".
+- **The decomposition that says what a result means.** Always printed beside the verdict: profit from
+  completed round trips (the spread captured), profit from the leftover inventory held to settlement (the
+  adverse selection), fills on each side, and the share of markets that ended flat. A profit made on round
+  trips and given back on leftovers is the whole story and is reported as such.
+- **Printed for information only.** No fee, fills counted when a print is AT our price, and inventory cap
+  of 1 and of 4.
+- **Cost of this idea so far.** It is the sixth strategy variant tried (the 60s scalp, H1, H2, H3, H4, H5).
+  Cuts examined for the verdict: 1 configuration.
 
 ## The paper bot (starts with $100, cannot place a real order)
 
