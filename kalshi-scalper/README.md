@@ -207,6 +207,40 @@ no free gold spot series here.
 - **What it does not say.** Not tested: gold, anything faster than one minute, or
   whether resting orders earn the spread (candles cannot show fills).
 
+**2026-10-07: H7, how far spot sits from the target vs the market's price: `FALSIFIED`.**
+One run of the rule fixed in H7 above, on the half of the data that had not been looked at. Nothing changed after seeing it.
+
+- 2,843 Bitcoin markets with a usable quote at 6 minutes left. Estimation half 1,421, test half 1,422. The rule entered
+  **879** test markets and lost **2.69c** each (z of -2.06, so it is reliably negative, not just flat): -4.23c in the
+  first half of the test half, -1.14c in the second, -2.89c with fees 20% higher. The bar was +0 with z of 2.1.
+- Decomposition: gross -1.64c, fees -1.04c. YES entries won 36.7% at a mean price of 38.3% (548 of them), NO entries won
+  34.1% at 35.9% (331). In-sample, on the half that set the buckets, the same rule lost 1.79c, so there was nothing there
+  to lose out of sample either. My prediction was -1c to -3c, and it landed at -2.69c.
+- **The owner's question, answered from the estimation half (how often the market finished above its target, by how far
+  spot sat above it at 6 minutes left, in units of typical Bitcoin movement over those 6 minutes):**
+
+  | z bucket | markets | finished YES | YES ask charged |
+  |---|---|---|---|
+  | below -2 | 81 | 4.9% | 4.5% |
+  | -2 to -1 | 232 | 10.3% | 11.7% |
+  | -1 to -0.5 | 219 | 26.5% | 24.9% |
+  | -0.5 to 0 | 218 | 38.5% | 43.4% |
+  | 0 to 0.5 | 228 | 61.4% | 65.7% |
+  | 0.5 to 1 | 189 | 82.0% | 82.2% |
+  | 1 to 2 | 190 | 95.3% | 91.2% |
+  | above 2 | 64 | 98.4% | 96.5% |
+
+  So spot at 1 to 2 typical moves above the target finished above it 95% of the time, and Kalshi was already charging
+  about 91c for it. Across every bucket the price sits within about 4c of how often the outcome happened. The market
+  prices the distance to the target about as well as these buckets can.
+- **What it says.** Distance to the target is information the market already uses. The cheap-looking side the rule
+  bought lost its price plus fee more often than the bucket rate suggested, which is what picking the cheapest asks inside
+  a bucket does: it selects the quotes that are cheap because something else in the market (a recent move, a wide
+  spread) justified them.
+- **What it does not say.** One decision per market, at 6 minutes left, with one fixed margin and fixed buckets. Other
+  decision times, a finer distance measure or the settlement source itself (CF Benchmarks' 60 second average, not the
+  Coinbase closes used here) were not tested. Gold has no spot series here and was not tested.
+
 **2026-10-06: H5, quoting both sides as a market maker: `FALSIFIED`.**
 One run, on the sample and rules fixed before any code (see H5 above). Nothing was changed after seeing it.
 
@@ -579,6 +613,156 @@ after this commit).
   of 1 and of 4.
 - **Cost of this idea so far.** It is the sixth strategy variant tried (the 60s scalp, H1, H2, H3, H4, H5).
   Cuts examined for the verdict: 1 configuration.
+
+## Hypothesis H7: how far spot sits from the target predicts the outcome better than the market's price does (fixed 2026-10-07, before any code or data was looked at)
+
+Asked by the owner: Kalshi stores each market's target (the strike, "to beat"). Every test so far used the market's
+price and result, and none conditioned on how far Bitcoin spot sits from the target. The owner's question: of the
+times spot is X above (or below) the target with T minutes left, how often does the market finish above it, and does
+the price Kalshi charges match that? Bitcoin only: there is no free gold spot series here. Gold is not tested.
+
+- **Mechanism and counterparty.** If the market charges, say, 65c for YES when spot is far enough above the target that
+  YES wins 75% of the time, the sellers of that 65c are people pricing the distance badly (stale quotes, slow
+  repricing as spot moves, a flat price near 50c that ignores a large lead). The usual reason it fails: the
+  professional quoters on these markets already price the live index, and the lag study found no lag.
+- **Observation, one per market.** At the minute close `t = close_ts - 360` (6 minutes left), a market counts if it
+  has a usable two sided quote (spread 10c or less), spot closes exist for `t` and the 60 minutes before it, and the
+  strike is stored. One decision per market means the observations do not overlap, and there is no choosing of the
+  minute afterwards. Spot at `t` is the close of the 1 minute Coinbase candle that ends at `t` (the same alignment the
+  lag study used).
+- **Distance, in units of how far Bitcoin typically moves.** `z = ln(spot / strike) / (sigma * sqrt(6))` where `sigma`
+  is the standard deviation of the 1 minute log returns of spot over the 60 minutes before `t`, and 6 is the minutes
+  left. Fixed z buckets: below -2, -2 to -1, -1 to -0.5, -0.5 to 0, 0 to 0.5, 0.5 to 1, 1 to 2, above 2.
+- **Split.** The markets are ordered by close time. The first half is the ESTIMATION half and the second is the TEST
+  half. `p(bucket)` is the share of estimation-half markets in that bucket that resolved YES (buckets with fewer than
+  20 markets are not traded). The test half is not looked at until the verdict run.
+- **Descriptive output, labelled as such (no verdict, affects nothing).** For the estimation half only: for each z
+  bucket, the number of markets, how often they resolved YES, and the mean YES ask Kalshi was charging then. This
+  answers the owner's "how many times out of X" question in plain numbers.
+- **Rule (the only configuration run).** On the test half, at `t`, with `ask` the YES ask and `bid` the YES bid:
+  buy YES at `ask` if `p(bucket) - ask - fee(ask) > 0.02`; buy NO at `1 - bid` if `(1 - p(bucket)) - (1 - bid) -
+  fee(1 - bid) > 0.02`; otherwise do nothing. One contract, held to settlement, fee `0.07 * p * (1 - p)` per
+  contract (unrounded, because the measured real fee on 2026-10-07 was 1.67c for a 40c contract, which is exactly
+  that formula; a run with fees times 1.2 is the stress). The 2c margin, the buckets and the 6 minutes are fixed here
+  and are not tuned.
+- **Prediction, recorded before the run.** Negative: the market already prices distance within the minute, so I
+  expect a mean net of about -1c to -3c per entered market and a z below 2. If it comes out positive, suspect the
+  alignment first: Kalshi settles on the CF Benchmarks RTI average of the last 60 seconds, and this uses Coinbase 1
+  minute closes, so a spot figure that already contains information the strike does not is a lookahead to rule out.
+- **Unit and kill criteria.** One entered market, net cents. FALSIFIED unless ALL hold: at least 300 entered markets
+  in the test half; mean net positive with a day clustered z of at least 2.1; positive in BOTH halves of the test half;
+  positive with fees times 1.2. Fewer than 300 entered markets is NOT_ENOUGH_DATA and crosses nothing off. Best outcome
+  is `NOT_YET_FALSIFIED`, meaning permission to test on unseen days, never a trade.
+- **Decomposition, always printed.** Entries by side, win rate against the average price paid, mean gross and fees, and
+  the same table for the estimation half run through the rule, labelled in-sample so the gap between the halves is
+  visible.
+- **Known limits, stated up front.** Spot is not Kalshi's settlement source. One observation per market throws away
+  most minutes on purpose. Thirty days is one market regime. The estimation half decides the buckets' probabilities,
+  so the test is out of sample but the whole sample is one month.
+- **Cost of this idea so far.** The eighth variant tried. Cuts examined for the verdict: 1 configuration.
+
+## Idea ledger (written 2026-10-07, before any idea below was run)
+
+One line per idea, recorded BEFORE it is built, so a tried idea cannot be quietly retried
+and a rewording of a dead idea is visible as one. Status is only `OPEN`, `RUNNING`,
+`FALSIFIED`, `NOT_YET_FALSIFIED` or `NOT_RUNNABLE` (no simulator, nothing recorded).
+Strategy variants tried before this ledger: 8 (the 60s scalp and H1 to H7; the no-lag
+study was exploratory and does not count). Every idea that gets a verdict raises that count, and the bar rises with it.
+
+| # | Idea | Counterparty (who loses) | Prediction | Needs | Status |
+|---|---|---|---|---|---|
+| L1 | Favorite-longshot bias in the two markets we trade (Bitcoin and gold 15 minute only; the owner chose to keep the universe to these two) | Retail buyers overpaying for longshots | Cheap side loses more than its price implies by more than the fee | Settled history we hold (30 days, both series) | FALSIFIED 2026-10-07 |
+| L2 | H2 entered only when the first 30 seconds put spot within reach of the strike | Sellers who price the move as luck | Hit rate in the chosen bucket beats the price by at least 3c | Spot and candles (have; Bitcoin only, no gold spot) | FALSIFIED 2026-10-07 |
+| L3 | Settlement edge: buy the side already far from the strike at 90c or more, last 2 to 3 minutes | Holders who sell near-certainties early | Win rate above price plus fee (fee is smallest at extremes) | Candles (have) | FALSIFIED 2026-10-07 |
+| L4 | Maker entry that rests only when distance says the price is cheap | Takers crossing the spread | Net after maker fee above zero | Recorded order books | NOT_RUNNABLE until the recorder has data |
+| L5 | Quote staleness: list price lags the single-market read by about 2c | Stale resting orders | A stale-side fill beats its fee | Recorded order books at under 10 seconds | NOT_RUNNABLE until the recorder has data |
+| L6 | Bitcoin and gold on the same window, or related ladders, priced inconsistently | Slow quoters | Gap beats two fees | Recorded books, both series | NOT_RUNNABLE until the recorder has data |
+| L7 | Volatility regime gate on the best variant, regimes set by spread and liquidity, never by profit | Whoever misprices fat tails | Touch rate shifts by at least 5 points | Candles (have) | OPEN |
+
+Standing exclusions, so they are not re-proposed:
+
+- **Exit by a dead-trade stop.** H2 already ran a stop 20c below entry (-6.9c and -6.7c, against
+  -8c without one). A stop does not change the expected profit of a fair game.
+- **Hours chosen by profit.** Selecting a window on returns fits noise. Hours may be chosen on
+  liquidity or spread only.
+- **Half-price entry with a lock hedge.** A fair-game identity gives zero edge before cost.
+
+Rules for every row above: its counterparty, numeric prediction and kill criteria are written
+in its own section before any code runs; day-clustered z of at least 2.1, both halves positive,
+fees x1.2, at least 300 observations; verdicts only as above.
+
+## Pre-registration: L1, L2 and L3 (fixed 2026-10-07, before any code or any price was looked at for these rules)
+
+Run on the data we hold: 30 days of KXBTC15M (2,850 markets) and KXGOLD15M (2,026 markets). The owner chose to keep the
+universe to these two markets, so a broader survey is not used. **This is not unseen data.** H2, H4 and H7 were already run on
+these same days, so a pass here could never be more than permission to test forward on the recorder's data. Three rules means
+three more variants against the bar: 8 tried before this, 11 after.
+
+Common to all three, fixed now. Entry at the ask of the side bought (YES at its ask, NO at 1 minus the YES bid, snapped to 4
+places), real two sided book only (spread 10c or less, `valid_quote`). Held to settlement unless the rule says otherwise.
+Taker fee 7% x p x (1-p) per contract on the way in; settlement has no fee. One observation per market. Statistic: net profit
+per contract, day clustered z. Kill criteria: FALSIFIED unless n is at least 300 markets, mean net is positive with a day
+clustered z of at least 2.1, positive in BOTH halves (split by close time at the median), and positive with fees 20% higher.
+Fewer than 300 entries is `NOT_ENOUGH_DATA`. There is no verdict that means "trade". A simulator guard test runs the exact
+code on a simulated FAIR game and requires it to lose about its costs; a profit there means the simulator invents an edge.
+
+**L1. Favorite-longshot bias, 6 minutes left.**
+- **Rule.** At the minute close with 6 minutes left (the same decision point H7 used, not tuned), buy the side whose ask is in
+  [0.88, 0.97] (the favorite). Hold to settlement. Both series together; the split by series is printed for information only.
+- **Counterparty.** Whoever buys the cheap side (3c to 12c) and overpays for the small chance, the retail longshot buyer.
+- **Prediction.** Mean net at least +0.5c per contract. The fee at 90c is only 0.63c, so a small bias could survive it.
+- **Prior, stated honestly.** Low. At the ask the spread (1c to 2c at the extremes) is paid on entry, and these are liquid
+  markets whose price already reflects spot distance. It would need the favorite to win a few points more often than its
+  price says.
+
+**L2. H7's entries with H2's exit (sell at 80c).**
+- **Rule.** Take exactly the markets H7 would enter (its decision at 6 minutes left, its estimation half builds the bucket
+  table, its second half is the test), and instead of holding, sell at 80c on the first LATER minute close where that side's
+  bid is 80c or more, otherwise hold to settlement. Fee on the exit as in H2. Bitcoin only: gold has no spot series here.
+- **Counterparty.** The same as H7 (a market that prices spot distance badly) plus H2's (someone buying at 80c on momentum).
+- **Prediction.** Mean net at least +0.5c. The exit changes the payoff shape, not the information, and H7 itself lost 2.69c,
+  so the prior is very low. This is H7's signal wearing H2's exit, and it is recorded as that, not as a new mechanism. It is
+  run because the owner asked, and it may well return `NOT_ENOUGH_DATA` since only H7's test half is used.
+
+**L3. Settlement edge, 2 minutes left.**
+- **Rule.** At the minute close with 2 minutes left, buy the side whose ask is in [0.90, 0.98]. Hold to settlement.
+- **Counterparty.** Holders who sell a near-certain contract early to lock in a gain and free their money.
+- **Prediction.** Mean net at least +0.5c per contract.
+- **Overlap with L1, stated.** This is the same favorite-longshot bias measured later in the market's life, where the fee is
+  smallest and information is mostly in. If L1 is falsified, this has the same prior and is nearly the same trade; it is
+  registered because the timing differs, and it counts as its own variant.
+
+Verdicts are recorded below when the one run each has happened. No threshold, band, decision minute or fee changes after seeing them.
+
+**2026-10-07: L1, L2 and L3 each ran once (`python -m scalper.lstrats`, commit 962459f), all `FALSIFIED`.** 4,871 markets, 30 days.
+Nothing changed after seeing the numbers.
+
+| Rule | n | Gross | Mean net | z | 1st half | 2nd half | Fees x1.2 |
+|---|---|---|---|---|---|---|---|
+| L1 favorite 88c to 97c, 6 min left | 1,447 | +1.44c | +0.97c | +1.45 | +0.71c | +1.22c | +0.87c |
+| L3 favorite 90c to 98c, 2 min left | 1,374 | -1.38c | -1.71c | -2.94 | -1.91c | -1.50c | -1.77c |
+| L2 H7 entries, sell at 80c (Bitcoin) | 879 | -5.51c | -7.00c | -8.30 | -8.24c | -5.76c | -7.30c |
+
+- **L1 is the first rule here with a positive mean in both halves and under higher fees, and it still fails.** Its z is 1.45
+  against a bar of 2.1, so the data cannot tell +1c from zero. Bitcoin (+1.04c, 854) and gold (+0.85c, 593) agree in sign, which
+  is printed for information and decided nothing. Passing the pre-registered bar was the rule, and it was not met. At this
+  noise level a z of 2.1 would need about twice the sample (roughly 60 days), and the days we hold have already been
+  used by H2, H4 and H7. Any follow-up has to be a forward test on days not yet seen, with the band fixed as it is here.
+- **L3 lost 1.71c while L1 won 0.97c, from the same favorites bias measured at 2 minutes instead of 6 minutes.** The two are
+  the same trade at different times, so the sign flip says the favorites premium is not stable across the market's life:
+  early favorites were underpriced a little, late ones overpriced a little, and neither survives the bar. I registered them as two
+  variants and they count as two.
+- **L2 is H7's signal wearing H2's exit and it lost 7c.** The exit swaps a chance of a larger settlement win for a sure 80c,
+  and pays a second fee. It was registered as a duplicate of H7's information and the result agrees.
+
+Strategy variants tried so far: 11 (the 60s scalp, H1 to H7, L1, L2, L3), all `FALSIFIED`. The lag study was exploratory and does not count.
+
+## The order-book recorder (`recorder.py`, read only)
+
+Records the public order book of the open Bitcoin and gold 15 minute markets every few
+seconds into `data/ob.sqlite` (table `ob`), so L4 to L6 can be tested on real depth rather
+than a minute candle. It places nothing, needs no key, and reads only the public
+`/markets` and `/markets/{ticker}/orderbook` endpoints. It describes; it never judges.
 
 ## The paper bot (retired Oct 7, 2026)
 

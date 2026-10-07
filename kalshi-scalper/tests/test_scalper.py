@@ -844,3 +844,217 @@ _c9 = _re9.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_mm.__file__).read())
 assert not _re9.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c9)
 assert not _re9.search(r"place_order|/portfolio/", _c9), "research code never touches an order endpoint"
 print("market making tests passed")
+
+# ---- order-book recorder ----
+import sqlite3 as _sq10, json as _js10, re as _re10
+from scalper import recorder as _rc
+
+_BOOK = {"orderbook_fp": {"yes_dollars": [["0.3000", "5"], ["0.4000", "10"]], "no_dollars": [["0.5000", "7"], ["0.5500", "3"]]}}
+_b = _rc.parse_book(_BOOK)
+# A yes ask is what the best no bid implies. Getting this wrong would price every quote 1 - x off.
+assert _b["yes_bid"] == 0.40 and _b["no_bid"] == 0.55 and _b["yes_ask"] == 0.45 and _b["no_ask"] == 0.60, _b
+# An empty side is unknown, never a free price of zero.
+_e = _rc.parse_book({"orderbook_fp": {"yes_dollars": [], "no_dollars": [["0.5", "1"]]}})
+assert _e["yes_bid"] is None and _e["no_ask"] is None and _e["yes_ask"] == 0.5, _e
+assert _rc.parse_book({})["yes_bid"] is None, "a missing book must not crash or invent a price"
+
+_paths10 = []
+def _fake_get(path, p=None):
+    _paths10.append(path)
+    if path == "/markets":
+        if p["series_ticker"] == "KXGOLD15M":
+            raise RuntimeError("HTTP 429")
+        return {"markets": [{"ticker": "KXBTC15M-T", "close_time": "x", "yes_bid_dollars": "0.38", "yes_ask_dollars": "0.42"}]}
+    return _BOOK
+_db10 = _sq10.connect(":memory:")
+_db10.executescript(_rc.SCHEMA)
+_n10 = _rc.cycle(_db10, _fake_get, now=lambda: 1.0)
+# One series failing must not lose the other's rows, and the failure must be recorded, not swallowed.
+assert _n10 == 1 and _db10.execute("SELECT count(*) FROM ob").fetchone()[0] == 1
+assert _db10.execute("SELECT series, what FROM err").fetchall() == [("KXGOLD15M", "HTTP 429")]
+_r10 = _db10.execute("SELECT list_yes_bid, list_yes_ask, yes_ask FROM ob").fetchone()
+assert _r10 == (0.38, 0.42, 0.45), _r10     # the list price is kept beside the book so staleness can be measured
+assert all(p == "/markets" or p.endswith("/orderbook") for p in _paths10), "only read endpoints"
+
+_c10 = _re10.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_rc.__file__).read())
+assert not _re10.search(r"place_order|/portfolio/|POST|\bdata=", _c10), "the recorder never touches an order path"
+print("recorder tests passed")
+
+# ---- H7: distance to the target ----
+import math as _m7, random as _r7, re as _re7, sqlite3 as _sq7, tempfile as _tf7, os as _os7
+import scalper.distance as _d7
+from scalper.marketmaker import fee as _fee7
+
+# Buckets: a value exactly on an edge goes UP, the extremes are open, and there are eight.
+assert [_d7.bucket(z) for z in (-9, -2.0, -1.01, -1.0, -0.5, -0.01, 0.0, 0.5, 1.0, 1.99, 2.0, 9)] == [0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 7, 7], "edges go up"
+assert _d7.bucket(float("-inf")) == 0 and _d7.bucket(float("inf")) == 7 and len(_d7.EDGES) + 1 == 8
+assert [_d7.bucket_label(i) for i in (0, 1, 4, 7)] == ["below -2", "-2 to -1", "0 to 0.5", "above 2"]
+
+# z: the distance in units of typical movement over the 6 minutes left. A flat series has no sigma, so no z.
+_rets = [0.001, -0.001] * 30
+_cl = [100.0]
+for _r in _rets:
+    _cl.append(_cl[-1] * _m7.exp(_r))
+_sd = _m7.sqrt(sum((r - sum(_rets) / 60) ** 2 for r in _rets) / 59)
+assert abs(_d7.z_score(_cl, _cl[-1]) - 0.0) < 1e-12, "spot at the strike is z of zero"
+assert abs(_d7.z_score(_cl, _cl[-1] / 1.01) - _m7.log(1.01) / (_sd * _m7.sqrt(6))) < 1e-9, "spot above its strike is positive and uses sigma times sqrt(6)"
+assert _d7.z_score(_cl, _cl[-1] * 1.01) < 0, "spot below the strike is negative"
+assert _d7.z_score([100.0] * 61, 99.0) is None, "no movement, no z"
+assert _d7.z_score(_cl[:-1], 100.0) is None and _d7.z_score(_cl, 0) is None and _d7.z_score(_cl[:-1] + [None], 100.0) is None, "missing or bad data gives no z"
+
+# The rule: buy YES only when the bucket's YES rate beats ask + fee + 2c, NO only when the NO rate beats its price likewise.
+_p, _bid, _ask = 0.80, 0.68, 0.70
+_dc = _d7.decide(_p, _bid, _ask)
+assert _dc == ("yes", _ask), _dc
+assert _p - _ask - _fee7(_ask) > 0.02 and _d7.decide(0.73, _bid, _ask) is None, "a bucket rate that only just beats the ask does not clear the fee and margin"
+assert _d7.decide(0.20, 0.30, 0.32) == ("no", 0.70), "a low YES rate buys NO at 1 minus the bid"
+assert _d7.decide(0.27, 0.30, 0.32) is None, "a NO rate that only just beats its price does not clear the fee and margin either"
+assert _d7.decide(None, 0.5, 0.52) is None, "a thin bucket is never traded"
+assert _d7.decide(0.50, 0.49, 0.51) is None, "a fair price is not traded"
+# P and L: a won contract pays $1 less price and fee, a lost one loses price and fee; stress charges more fee.
+assert abs(_d7.net("yes", 0.40, True) - (1 - 0.40 - _fee7(0.40))) < 1e-12 and abs(_d7.net("yes", 0.40, False) - (-0.40 - _fee7(0.40))) < 1e-12
+assert abs(_d7.net("no", 0.30, False) - (1 - 0.30 - _fee7(0.30))) < 1e-12 and _d7.net("yes", 0.4, True, 1.2) < _d7.net("yes", 0.4, True)
+assert abs(_d7.net("yes", 0.4, True, 0.0) - 0.60) < 1e-12
+
+# Observations: one per market, at exactly 6 minutes left, with a usable quote and a full 61 minutes of spot.
+_close = 1_800_000_000
+_spot = {_close - 360 - 60 - 60 * k: 100.0 * (1 + 0.0005 * ((-1) ** k)) for k in range(0, 61)}
+_good = ("T1", _close, 99.0, "yes", {_close - 360: (0.60, 0.64)})
+assert len(_d7.observations([_good], _spot)) == 1
+_o = _d7.observations([_good], _spot)[0]
+assert _o["yes"] is True and _o["ask"] == 0.64 and _o["bid"] == 0.60 and _o["close_ts"] == _close
+for _bad in (("T2", _close, 99.0, "yes", {_close - 300: (0.60, 0.64)}),      # no candle at 6 minutes left
+             ("T3", _close, 99.0, "yes", {_close - 360: (0.01, 0.99)}),      # an empty book
+             ("T4", _close, None, "yes", {_close - 360: (0.60, 0.64)}),      # no strike
+             ("T5", _close, 99.0, "", {_close - 360: (0.60, 0.64)})):        # unresolved
+    assert _d7.observations([_bad], _spot) == [], _bad[0]
+assert _d7.observations([_good], {k: v for k, v in _spot.items() if k != _close - 360 - 60 - 60 * 30}) == [], "a missing spot minute drops the market"
+assert _d7.observations([_good], {}) == []
+
+# The split is by close time: the first half estimates, the second half tests, and they never overlap.
+_obs = [{"close_ts": 100 + i, "z": 0.0, "bid": 0.4, "ask": 0.42, "yes": True, "day": "d", "ticker": str(i)} for i in range(11)][::-1]
+_obs = sorted(_obs, key=lambda o: o["close_ts"])
+_e, _t = _d7.split(_obs)
+assert len(_e) == 5 and len(_t) == 6 and max(o["close_ts"] for o in _e) < min(o["close_ts"] for o in _t)
+
+# Estimation: thin buckets are not trusted, thick ones carry their rate.
+_est = [{"z": 1.5, "yes": i < 15, "close_ts": i, "bid": 0.5, "ask": 0.52, "day": "d", "ticker": "x"} for i in range(20)] + \
+       [{"z": -1.5, "yes": True, "close_ts": i, "bid": 0.5, "ask": 0.52, "day": "d", "ticker": "y"} for i in range(19)]
+_tb = _d7.estimate(_est)
+assert _tb[6] == {"n": 20, "p": 0.75} and _tb[1]["p"] is None and _tb[1]["n"] == 19, "19 markets is too few to trade"
+
+# The descriptive table answers the owner's question in plain numbers and shows the price charged beside it.
+_ds = {r["bucket"]: r for r in _d7.describe(_est)}
+assert _ds["1 to 2"]["n"] == 20 and abs(_ds["1 to 2"]["yes_rate"] - 0.75) < 1e-12 and abs(_ds["1 to 2"]["mean_ask"] - 0.52) < 1e-12
+assert _ds["above 2"]["n"] == 0 and _ds["above 2"]["yes_rate"] is None
+
+# A fair market: outcomes drawn at the price the market charges. The distance rule must lose about the fees, not win.
+_g = _r7.Random(11)
+def _world(n, informed):
+    out = []
+    for i in range(n):
+        z = _g.uniform(-3, 3)
+        p_true = 1 / (1 + _m7.exp(-1.6 * z))
+        ask = (p_true if not informed else 0.5) + 0.01
+        yes = _g.random() < p_true
+        out.append({"ticker": str(i), "close_ts": 1000 + i, "day": str(i // 40), "z": z, "bid": ask - 0.02, "ask": ask, "yes": yes})
+    return out
+_fair = _world(6000, informed=False)               # the price already reflects the distance
+_fe, _ft = _d7.split(_fair)
+_fentries = _d7.run(_ft, _d7.estimate(_fe))
+assert _fentries and sum(e["net"] for e in _fentries) / len(_fentries) < 0.01, "no edge when the price already reflects the distance"
+_blind = _world(6000, informed=True)               # the price ignores the distance, the outcomes do not
+_be, _bt = _d7.split(_blind)
+_bentries = _d7.run(_bt, _d7.estimate(_be))
+assert _bentries and sum(e["net"] for e in _bentries) / len(_bentries) > 0.05, "an edge is found when the price really does ignore the distance"
+
+# Verdict: under 300 entered markets nothing is decided; the words are the same three; none says to trade.
+_rows = lambda n, f: [{"day": f"2026-09-{1 + i % 10:02d}", "close_ts": i, "net": f(i), "stress": f(i) - 0.001} for i in range(n)]
+assert _d7.verdict(_rows(299, lambda i: 0.05))[0] == "NOT_ENOUGH_DATA"
+assert _d7.verdict(_rows(400, lambda i: -0.02 + (i % 5) * 0.001))[0] == "FALSIFIED"
+assert _d7.verdict(_rows(400, lambda i: 0.05 + (i % 7) * 0.002))[0] == "NOT_YET_FALSIFIED"
+
+# describe cannot see the test half: it takes the estimation half only, and main hands it nothing else.
+_src7 = _re7.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_d7.__file__).read())
+assert "describe(est)" in _src7 and "describe(test)" not in _src7 and "describe(obs)" not in _src7
+assert not _re7.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _src7)
+assert not _re7.search(r"place_order|/portfolio/", _src7), "research code never touches an order endpoint"
+print("distance tests passed")
+
+# ---- L1, L2, L3 ----
+import random as _rn
+from scalper import lstrats as _ls
+from scalper import distance as _di
+
+# Band edges are inclusive, and a NO price of exactly 97c survives floating point (1 - 0.03 must count as 0.97).
+assert _ls.favorite(0.87, 0.88, (0.88, 0.97)) == ("yes", 0.88)
+assert _ls.favorite(0.96, 0.97, (0.88, 0.97)) == ("yes", 0.97)
+assert _ls.favorite(0.97, 0.98, (0.88, 0.97)) is None, "98c is outside the L1 band"
+assert _ls.favorite(0.03, 0.04, (0.88, 0.97)) == ("no", 0.97)
+assert _ls.favorite(0.58, 0.60, (0.38, 0.42)) == ("no", 0.42), "1 - 0.58 is 0.42000000000000004 in floating point and must still be inside a band ending at 0.42"
+assert _ls.favorite(0.001, 1.0, (0.88, 0.97)) is None, "an empty book is not a quote"
+assert _ls.favorite(0.50, 0.52, (0.88, 0.97)) is None
+
+def _mk(ticker, close, bid, ask, res, left=360, series="KXBTC15M", extra=()):
+    cs = [(close - left, bid, ask, bid, ask)] + list(extra)
+    return (ticker, series, cs, close, res)
+
+# One observation per market, taken from the candle that ends EXACTLY left_s before the close: a nearby minute is never substituted.
+_C = 1_790_000_000 - (1_790_000_000 % 900)
+_m = [_mk("A", _C, 0.89, 0.90, "yes"),
+      _mk("B", _C + 900, 0.89, 0.90, "yes", left=420),      # the quote is a minute too early: no observation
+      _mk("C", _C + 1800, 0.89, 0.90, "")]                  # unresolved: no observation
+_r = _ls.hold_rule(_m, **_ls.L1)
+assert [o["ticker"] for o in _r] == ["A"], _r
+assert abs(_r[0]["net"] - (1.0 - 0.90 - _ls.fee(0.90))) < 1e-12, "a win nets 1 - price - entry fee"
+_l = _ls.hold_rule([_mk("D", _C, 0.89, 0.90, "no")], **_ls.L1)
+assert abs(_l[0]["net"] - (-0.90 - _ls.fee(0.90))) < 1e-12, "a loss costs the whole price plus the fee"
+assert _l[0]["stress"] < _l[0]["net"], "higher fees must cost more"
+
+# THE simulator guard: in a FAIR game (the true win rate equals the midpoint) holding favorites must LOSE about its costs,
+# the half spread plus the fee. A profit here would mean the simulator invents an edge.
+_g = _rn.Random(7)
+_fair = []
+for _i in range(4000):
+    _p = _g.choice([0.90, 0.92, 0.94])
+    _res = "yes" if _g.random() < _p else "no"
+    _fair.append(_mk(f"F{_i}", _C + 900 * _i, round(_p - 0.01, 4), round(_p + 0.01, 4), _res))
+_fr = _ls.hold_rule(_fair, **_ls.L1)
+_mean = sum(o["net"] for o in _fr) / len(_fr)
+assert len(_fr) > 3000 and -0.035 < _mean < -0.005, _mean
+assert _ls.verdict(_fr)[0] == "FALSIFIED", "a fair game must never pass"
+assert _ls.verdict(_fr[:100])[0] == "NOT_ENOUGH_DATA"
+
+# A rule that truly beats its price (favorite wins 5 points more than priced) passes: the verdict can say yes.
+_edge = []
+for _i in range(1500):
+    _res = "yes" if _g.random() < 0.97 else "no"
+    _edge.append(_mk(f"E{_i}", _C + 900 * _i, 0.89, 0.90, _res))
+assert _ls.verdict(_ls.hold_rule(_edge, **_ls.L1))[0] == "NOT_YET_FALSIFIED"
+
+# L2: a fixture where spot sits far above the target, so H7 buys YES at the ask once its estimation half has seen YES win.
+import math as _mt
+_N = 120
+_spot = {_C - 4020 + 60 * i: 110.0 * (1 + 0.0005 * _mt.sin(i)) for i in range((_N * 15) + 200)}
+def _l2m(i, later_bid, same_minute_bid=0.40, result="yes"):
+    close = _C + 900 * (i + 5)
+    q = {close - 360: (same_minute_bid, same_minute_bid + 0.01)}
+    if later_bid is not None:
+        q[close - 300] = (later_bid, later_bid + 0.01)
+    return ("T%d" % i, close, 100.0, result, q)
+_l2 = [_l2m(i, None) for i in range(_N // 2)] + [_l2m(_N // 2, 0.85), _l2m(_N // 2 + 1, 0.50), _l2m(_N // 2 + 2, None, same_minute_bid=0.85)] \
+      + [_l2m(i, None) for i in range(_N // 2 + 3, _N)]
+# The decision minute's own 85c bid must not trigger the exit (strictly later); only a LATER close at 80c or more does.
+_x = {e["ticker"]: e for e in _ls.l2_rule(_l2, _spot)}
+_exp = lambda m: _ls.EXIT - _ls.fee(_ls.EXIT, m) - 0.41 - _ls.fee(0.41, m)
+assert "T%d" % (_N // 2) in _x and _x["T%d" % (_N // 2)]["exited"], "a later close at 85c sells at 80c"
+assert abs(_x["T%d" % (_N // 2)]["net"] - (_ls.EXIT - _ls.fee(_ls.EXIT) - 0.41 - _ls.fee(0.41))) < 1e-12, "the exit is priced at 80c, not at the 85c bid"
+assert not _x["T%d" % (_N // 2 + 1)]["exited"] and abs(_x["T%d" % (_N // 2 + 1)]["net"] - _ls.net("yes", 0.41, True)) < 1e-12, "no 80c touch means hold to settlement"
+assert "T%d" % (_N // 2 + 2) not in _x or not _x["T%d" % (_N // 2 + 2)]["exited"], "the decision minute itself never exits"
+
+print("L1 L2 L3 tests passed")
+
+import re as _re11
+_c11 = _re11.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_ls.__file__).read())
+assert not _re11.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c11)
+assert not _re11.search(r"place_order|/portfolio/", _c11), "research code never touches an order endpoint"
