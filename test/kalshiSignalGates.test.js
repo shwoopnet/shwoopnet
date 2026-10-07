@@ -87,7 +87,8 @@ gates.G21 = () => {
   const halt = block(/setKalshiHalt: function\(halt\)\{([\s\S]*?)\n    \},/, html);
   assert.ok(/setDoc\(doc\(db, 'kalshiBotMeta', 'control'\), \{ halt: Boolean\(halt\), at: serverTimestamp\(\) \}\)/.test(halt),
     'the halt switch writes exactly { halt, at } to the control document');
-  assert.ok(/var kalshiTab = 'bot';/.test(html));
+  assert.ok(!/data-kal-tab|kalTabJournal|kalTabLive/.test(html), 'the Kalshi page is one page now: no tabs, no journal');
+  assert.ok(/function kalshiOnShow\(\)\{ startKalshiBot\(\); startKalshiPoll\(\); \}/.test(html), 'opening the page starts the bot view and the books');
   assert.ok(/if\(halted\)\{ el\.innerHTML \+= '<div class="kal-warn kal-big">Halted from this page/.test(html), 'the halt must show on the card at once');
   assert.ok(/var haltUnset = !kalshiBotState\.control \|\| kalshiBotState\.control\.halt === undefined;/.test(html) && /if\(haltUnset\)\{ el\.innerHTML \+= '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted/.test(html), 'an unsaved halt setting must not read as "not halted"');
   assert.ok(/if\(halted && !window\.confirm\(/.test(html), 'resuming entries must ask first');
@@ -164,7 +165,7 @@ gates.KalshiNoEdge = () => {
 // The Bot tab layout is customizable, but the live account card (halt) and the session card (stop) can never be hidden, and
 // the saved layout survives blocked storage.
 gates.G24 = () => {
-  const optional = /var OPTIONAL = \[([^\]]*\][^\]]*\][^\]]*\][^\]]*\])\]/.exec(html);
+  const optional = /var OPTIONAL = \[([^\]]*\][^\]]*\][^\]]*\][^\]]*\][^\]]*\])\]/.exec(html);
   assert.ok(optional, 'optional card list not found');
   assert.ok(!/'account'|'session'/.test(optional[1]), 'the account and session cards are not in the hideable list');
   assert.ok(/data-card="account"/.test(html) && /data-card="session"/.test(html));
