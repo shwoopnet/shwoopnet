@@ -16,6 +16,14 @@ const FINNHUB_API_KEY = defineSecret("FINNHUB_API_KEY");
 const KALSHI_DEMO_KEY_ID = defineSecret("KALSHI_DEMO_KEY_ID");
 const KALSHI_DEMO_PRIVATE_KEY = defineSecret("KALSHI_DEMO_PRIVATE_KEY");
 
+// The LIVE test order (real money). The secrets are separate from the demo ones, and the switch is off until the
+// owner sets KALSHI_LIVE_ENABLED=on in functions/.env and redeploys: deploying alone cannot place an order.
+//   firebase functions:secrets:set KALSHI_LIVE_KEY_ID
+//   firebase functions:secrets:set KALSHI_LIVE_PRIVATE_KEY   (--data-file, never paste the PEM into a chat)
+const KALSHI_LIVE_KEY_ID = defineSecret("KALSHI_LIVE_KEY_ID");
+const KALSHI_LIVE_PRIVATE_KEY = defineSecret("KALSHI_LIVE_PRIVATE_KEY");
+const KALSHI_LIVE_ENABLED = defineString("KALSHI_LIVE_ENABLED", { default: "off" });
+
 // Invite-gated, not single-owner: anyone with a real Firebase Auth
 // token may call these (matches firestore.rules, which lets any signed-in
 // account read/write only its own users/{uid} doc -- account creation
@@ -83,6 +91,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const botRun = require("./kalshiBotRun");
 const alerts = require("./kalshiAlertLib");
 const demo = require("./kalshiDemoLib");
+const live = require("./kalshiLiveLib");
 const kalshi = require("./kalshiLib");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
@@ -305,6 +314,58 @@ exports.kalshiDemoTrade = onCall(
     } catch (e) {
       if (e instanceof HttpsError) throw e;
       throw new HttpsError("internal", "Demo test failed: " + String((e && e.message) || e).slice(0, 120));
+    }
+  }
+);
+
+// ---- Kalshi LIVE test order (ONE contract, real money, admin only) ----------------
+// Step 1 of putting a small amount of real money behind this: it proves production signing, a real fill, the
+// real fee and the real duplicate-order behaviour with one contract. All the logic and all the order code are in
+// kalshiLiveLib.js (production host only, $2 cap, never retried, 2 a day and 5 ever). Takes nothing from the page.
+function firestoreLiveStore(db) {
+  const col = db.collection("kalshiLiveOrders");
+  return {
+    async halted() {
+      const s = await db.collection("kalshiBotMeta").doc("control").get();
+      return !s.exists || s.data().halt !== false;     // anything but an explicit "not halted" counts as halted
+    },
+    async countSince(ts) { return (await col.where("ts", ">=", ts).get()).size; },
+    async countEver() { return (await col.get()).size; },
+    async lastTestAt() {
+      const s = await col.orderBy("ts", "desc").limit(1).get();
+      return s.empty ? null : s.docs[0].data().ts;
+    },
+    async hasUnresolved() {
+      const s = await col.where("status", "in", ["sending", "unknown"]).limit(1).get();
+      return !s.empty;
+    },
+    async createTest(id, data) {
+      try {
+        await col.doc(id).create(data);
+        return true;
+      } catch (e) {
+        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
+        throw e;
+      }
+    },
+    async updateTest(id, patch) { await col.doc(id).update(patch); },
+  };
+}
+
+exports.kalshiLiveTrade = onCall(
+  { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 60 },
+  async (request) => {
+    await assertKalshiAdmin(request.auth);
+    ensureDefaultAdminApp();
+    try {
+      const { active, quotes } = await demo.loadQuotes(kalshiBotApi());
+      return await live.runLiveTest({
+        quotes, active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(getFirestore()), now: Date.now(),
+        keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
+      });
+    } catch (e) {
+      if (e instanceof HttpsError) throw e;
+      throw new HttpsError("internal", "Live test failed: " + String((e && e.message) || e).slice(0, 120));
     }
   }
 );

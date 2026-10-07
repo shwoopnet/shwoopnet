@@ -1986,6 +1986,7 @@
   var finnhubCompanyNewsFn = httpsCallable(functions, 'finnhubCompanyNews');
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
   var kalshiDemoTradeFn = httpsCallable(functions, 'kalshiDemoTrade');
+  var kalshiLiveTradeFn = httpsCallable(functions, 'kalshiLiveTrade');
 
   // rememberMe controls whether Firebase's own session survives closing the
   // browser (browserLocalPersistence, the SDK's own default) or ends with
@@ -2449,6 +2450,16 @@
       return onSnapshot(query(collection(db, 'kalshiDemoOrders'), orderBy('ts', 'desc'), limit(20)), function(q){
         cb(q.docs.map(function(d){ return d.data(); }));
       }, function(err){ console.error('Kalshi demo sync error:', err); });
+    },
+    // ONE contract of REAL money, Bitcoin only, from the bot's current signal. The server decides everything
+    // (and refuses unless its own switch is on): no ticker, price or size can be sent from here.
+    kalshiLiveTrade: function(){
+      return kalshiLiveTradeFn({}).then(function(res){ return res.data; });
+    },
+    watchKalshiLive: function(cb){
+      return onSnapshot(query(collection(db, 'kalshiLiveOrders'), orderBy('ts', 'desc'), limit(20)), function(q){
+        cb(q.docs.map(function(d){ return d.data(); }));
+      }, function(err){ console.error('Kalshi live sync error:', err); });
     },
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
@@ -3297,6 +3308,16 @@
         </div>
         <div class="kal-note" id="kalDemoMsg"></div>
         <div id="kalDemoList"><div class="kal-empty">No demo test trades yet.</div></div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">Live test trade (real money)</div>
+        <div class="kal-note">Sends ONE contract of REAL money to Kalshi from the bot's current Bitcoin signal, at most $2.00 including the fee. It proves the live path: the real fill, the real fee and the real duplicate-order behaviour. It does nothing unless the server switch is on, and it is limited to 2 a day and 5 ever. If Kalshi's answer is ever lost it says so, does not retry, and blocks the next test until you have looked at your Kalshi account.</div>
+        <div class="kal-actions">
+          <button class="kal-btn" id="kalLiveSend" type="button">Send one live test trade</button>
+          <span id="kalLiveConfirm" hidden><span class="kal-note">This places a REAL order with real money (up to $2.00). Send it?</span> <button class="kal-btn" id="kalLiveYes" type="button">Yes, send real order</button> <button class="kal-btn" id="kalLiveNo" type="button">Cancel</button></span>
+        </div>
+        <div class="kal-note" id="kalLiveMsg"></div>
+        <div id="kalLiveList"><div class="kal-empty">No live test trades yet.</div></div>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">What it did</div>
@@ -10065,6 +10086,17 @@
         '<div><span class="kal-lbl">Filled</span>' + escapeHtml(o.fillCount !== undefined ? String(o.fillCount) : '-') + '</div></div>';
     }).join('') : '<div class="kal-empty">No demo test trades yet.</div>';
   }
+  var kalshiLiveOrders = [];
+  var kalshiLiveUnsub = null;
+  function renderKalshiLive(){
+    document.getElementById('kalLiveList').innerHTML = kalshiLiveOrders.length ? kalshiLiveOrders.map(function(o){
+      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(o.ticker) + '</div><span class="kal-lbl">' + escapeHtml(new Date(o.ts).toLocaleString()) + '</span></div>' +
+        '<div><span class="kal-lbl">Order</span>' + escapeHtml(o.side) + ' ' + escapeHtml(String(o.count)) + ' at ' + (o.price * 100).toFixed(0) + 'c</div>' +
+        '<div><span class="kal-lbl">Result</span>' + escapeHtml(o.status || '') + '</div>' +
+        '<div><span class="kal-lbl">Filled</span>' + escapeHtml(o.fillCount !== undefined ? String(o.fillCount) : '-') +
+        (o.averageFeePaid ? ' (fee ' + escapeHtml(String(o.averageFeePaid)) + ')' : '') + '</div></div>';
+    }).join('') : '<div class="kal-empty">No live test trades yet.</div>';
+  }
   function startKalshiBot(){
     stopKalshiBot();
     var api = window.__shwoopAPI;
@@ -10076,10 +10108,12 @@
       events: function(e){ kalshiBotState.events = e; renderKalshiBot(); }
     });
     if(api.watchKalshiDemo){ kalshiDemoUnsub = api.watchKalshiDemo(function(o){ kalshiDemoOrders = o; renderKalshiDemo(); }); }
+    if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiLive(); }); }
   }
   function stopKalshiBot(){
     if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }
     if(kalshiDemoUnsub){ kalshiDemoUnsub(); kalshiDemoUnsub = null; }
+    if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
   setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
@@ -10112,6 +10146,29 @@
           : 'Not sent: ' + r.reason;
       }).catch(function(err){
         msg.textContent = 'Failed: ' + ((err && err.message) || 'unknown');
+      }).then(function(){ yes.disabled = no.disabled = false; ask(false); });
+    });
+  })();
+
+  // The LIVE test trade (real money) also asks twice, and only the second click sends anything. If the call
+  // itself fails the order may still have reached Kalshi, so the page says to look at the account first.
+  (function(){
+    var send = document.getElementById('kalLiveSend'), box = document.getElementById('kalLiveConfirm'), msg = document.getElementById('kalLiveMsg');
+    var yes = document.getElementById('kalLiveYes'), no = document.getElementById('kalLiveNo');
+    function ask(on){ box.hidden = !on; send.hidden = on; }
+    send.addEventListener('click', function(){ msg.textContent = ''; ask(true); });
+    no.addEventListener('click', function(){ ask(false); });
+    yes.addEventListener('click', function(){
+      var api = window.__shwoopAPI;
+      if(!api || !api.kalshiLiveTrade || !currentUserIsAdmin){ return; }
+      yes.disabled = no.disabled = true;
+      msg.textContent = 'Sending one live order...';
+      api.kalshiLiveTrade().then(function(r){
+        msg.textContent = r.ok
+          ? 'Sent to Kalshi (REAL money): ' + r.side + ' 1 of ' + r.ticker + ' at ' + (r.price * 100).toFixed(0) + 'c. ' + (r.filled ? 'Filled ' + r.fillCount + (r.averageFillPrice ? ' at ' + r.averageFillPrice : '') + (r.averageFeePaid ? ', fee ' + r.averageFeePaid : '') + '. It stays in your account until the market settles.' : 'No fill: nothing rests, and nothing was bought.')
+          : 'Not sent: ' + r.reason;
+      }).catch(function(err){
+        msg.textContent = 'The call failed (' + ((err && err.message) || 'unknown') + '). The order may or may not have reached Kalshi: check your Kalshi account (Portfolio, Orders) before doing anything else.';
       }).then(function(){ yes.disabled = no.disabled = false; ask(false); });
     });
   })();

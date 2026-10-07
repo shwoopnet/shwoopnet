@@ -174,6 +174,44 @@ gates.L10 = () => {
   assert.ok(!/postWithRetry|RETRY|setTimeout|for \(const base of/.test(src.replace(/\/\/[^\n]*/g, '')), 'no retry or failover loop in the live module');
 };
 
+// ---- wiring: who can reach it, what the page can send, who can read the records ----
+const fnSrc = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
+
+gates.L12 = () => {
+  const m = /exports\.kalshiLiveTrade = onCall\(([\s\S]*?)\n\);/.exec(fnSrc);
+  assert.ok(m, 'kalshiLiveTrade not found');
+  const body = m[1];
+  assert.ok(body.indexOf('assertKalshiAdmin(request.auth)') > -1 && body.indexOf('assertKalshiAdmin') < body.indexOf('runLiveTest'), 'the admin check comes first');
+  assert.ok(!/request\.data/.test(body), 'takes nothing from the caller: no ticker, price or size can be supplied');
+  assert.ok(/secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(body), 'its own secrets, never the demo ones');
+  assert.ok(!/KALSHI_DEMO/.test(body), 'the demo key is never used for a live order');
+  assert.ok(/enabled: KALSHI_LIVE_ENABLED\.value\(\) === "on"/.test(body), 'only the literal "on" enables it');
+  assert.ok(/defineString\("KALSHI_LIVE_ENABLED", \{ default: "off" \}\)/.test(fnSrc), 'off by default: deploying alone cannot place an order');
+  assert.ok(!/KALSHI_LIVE/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBot ='))), 'the scheduled bot never sees the live key or switch');
+};
+
+gates.L13 = () => {
+  // The page asks twice, only the second click calls the server, only for the admin, and a failed call says to look at the account.
+  const i = html.indexOf("getElementById('kalLiveSend')");
+  assert.ok(i > -1, 'live card wiring not found');
+  const iife = html.slice(i, html.indexOf('})();', i));
+  const firstClick = /send\.addEventListener\('click', function\(\)\{([\s\S]*?)\}\);/.exec(iife);
+  assert.ok(firstClick && !/kalshiLiveTrade\(/.test(firstClick[1]) && /ask\(true\)/.test(firstClick[1]), 'the first click only asks');
+  assert.ok(/yes\.addEventListener\('click'[\s\S]*currentUserIsAdmin[\s\S]*api\.kalshiLiveTrade\(\)/.test(iife), 'the confirm click calls the server, for the admin only');
+  assert.strictEqual((html.match(/kalshiLiveTrade\(/g) || []).length, 1, 'one call site in the page');
+  assert.ok(/may or may not have reached Kalshi/.test(iife), 'a failed call tells the owner to check the account');
+  assert.ok(/kalshiLiveTradeFn\(\{\}\)/.test(html), 'the callable is sent no arguments');
+  assert.ok(/REAL money/i.test(html.slice(html.indexOf('id="kalLiveConfirm"') - 200, html.indexOf('id="kalLiveConfirm"') + 400)), 'the confirmation says it is real money');
+};
+
+gates.L14 = () => {
+  const m = /match \/kalshiLiveOrders\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
+  assert.ok(m, 'rule for kalshiLiveOrders not found');
+  assert.ok(/allow read: if isAdmin\(\);/.test(m[1]) && /allow write: if false;/.test(m[1]), 'admin read, no client write');
+};
+
 gates.L11 = () => {
   // The scheduled bot and the demo module stay separate from the live one.
   const demoSrc = fs.readFileSync(path.join(root, 'functions', 'kalshiDemoLib.js'), 'utf8').replace(/\/\/[^\n]*/g, '');
