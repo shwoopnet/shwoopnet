@@ -1,7 +1,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 
-// Optional outside watchdog for the Kalshi bot. Put KALSHI_WATCHDOG_URL=<ping url> in
+// Optional outside watchdog for the live arm. Put KALSHI_WATCHDOG_URL=<ping url> in
 // functions/.env (gitignored) before deploying. Empty means no alerts, nothing else changes.
 const KALSHI_WATCHDOG_URL = defineString("KALSHI_WATCHDOG_URL", { default: "" });
 
@@ -81,8 +81,7 @@ exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (reque
 const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const botRun = require("./kalshiBotRun");
-const alerts = require("./kalshiAlertLib");
+const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
 const book = require("./kalshiBookLib");
 const account = require("./kalshiAccountLib");
@@ -193,18 +192,7 @@ exports.kalshiBooks = onCall(async (request) => {
   }
 });
 
-// ---- Kalshi PAPER bot, on the server ----------------------------------------
-// Runs once a minute on Google's servers, so nothing depends on a computer being
-// awake. PAPER ONLY: it simulates trades from Kalshi's public prices and cannot place
-// an order (the api object below has no order method, and a test asserts this file's
-// bot section contains no order code). The logic lives in kalshiBotLib.js and the tick
-// in kalshiBotRun.js, both tested without Firebase; this file only supplies Firestore
-// and Kalshi to them.
-//
-// State is in Firestore, not on a disk. A position is created by a key derived from its
-// market (h2-<ticker>) with create(), which fails if the document exists, so two runs at
-// the same moment cannot enter one market twice. The collections have no client write
-// rule except the admin's halt switch (see firestore.rules).
+// ---- Kalshi market reads (public, keyless, GET only) ----
 async function kalshiGetJson(pathAndQuery) {
   const failures = [];
   for (const base of KALSHI_HOSTS) {
@@ -212,7 +200,7 @@ async function kalshiGetJson(pathAndQuery) {
     try {
       const res = await fetch(base + pathAndQuery, {
         signal: AbortSignal.timeout(8000),
-        headers: { "User-Agent": "shwoopnet-bot/1.0 (paper)", "Accept": "application/json" },
+        headers: { "User-Agent": "shwoopnet-bot/1.0", "Accept": "application/json" },
       });
       if (res.ok) return await res.json();
       failures.push(host + " HTTP " + res.status);
@@ -223,45 +211,11 @@ async function kalshiGetJson(pathAndQuery) {
   throw new Error(pathAndQuery.split("?")[0] + ": " + failures.join(" | "));
 }
 
-function kalshiBotApi() {
+function kalshiMarketApi() {
   return {
     exchangeStatus: () => kalshiGetJson("/exchange/status"),
     markets: (series) => kalshiFetchSeries(series, "open", 5),
     market: async (ticker) => (await kalshiGetJson("/markets/" + encodeURIComponent(ticker))).market || {},
-  };
-}
-
-function firestoreBotStore(db) {
-  const positions = db.collection("kalshiBotPositions");
-  const events = db.collection("kalshiBotEvents");
-  const meta = db.collection("kalshiBotMeta");
-  const fromDocs = (snap) => snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
-  return {
-    async getStatus() { const s = await meta.doc("status").get(); return s.exists ? s.data() : null; },
-    async getControl() { const s = await meta.doc("control").get(); return s.exists ? s.data() : {}; },
-    async listOpen() { return fromDocs(await positions.where("status", "==", "open").get()); },
-    // One range filter on one field, so no composite index is needed.
-    async listClosedSince(ms) { return fromDocs(await positions.where("settledAt", ">=", ms).get()).filter((p) => p.status === "closed"); },
-    async createPosition(id, data) {
-      try {
-        await positions.doc(id).create(data);
-        return true;
-      } catch (e) {
-        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
-        throw e;
-      }
-    },
-    async closePosition(id, patch) {
-      return db.runTransaction(async (t) => {
-        const ref = positions.doc(id);
-        const snap = await t.get(ref);
-        if (!snap.exists || snap.data().status !== "open") return false;
-        t.update(ref, Object.assign({}, patch, { status: "closed" }));
-        return true;
-      });
-    },
-    async addEvent(e) { await events.add(e); },
-    async setStatus(st) { await meta.doc("status").set(st); },
   };
 }
 
@@ -305,7 +259,7 @@ exports.kalshiLiveTrade = onCall(
     await assertKalshiAdmin(request.auth);
     ensureDefaultAdminApp();
     try {
-      const { active, quotes } = await live.loadQuotes(kalshiBotApi());
+      const { active, quotes } = await live.loadQuotes(kalshiMarketApi());
       return await live.runLiveTest({
         quotes, active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(getFirestore()), now: Date.now(),
         keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
@@ -395,31 +349,40 @@ exports.kalshiLiveArm = onCall(async (request) => {
 exports.kalshiLiveArmed = onSchedule(
   { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
   async () => {
-    ensureDefaultAdminApp();
-    const db = getFirestore();
-    const armRef = db.collection("kalshiLiveControl").doc("arm");
-    const snap = await armRef.get();
-    const arm = snap.exists ? snap.data() : null;
-    const now = Date.now();
-    const args = {
-      arm, now, setArm: (patch) => armRef.set(patch, { merge: true }),
-      recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
-      logEvent: (e) => db.collection("kalshiLiveEvents").add(e),
-    };
-    if (arm && arm.armed === true && arm.until > now) {
-      const { active, quotes } = await live.loadQuotes(kalshiBotApi());
-      Object.assign(args, {
-        quotes, active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
-        keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
-      });
+    // The dead-man's switch pings after EVERY completed run, armed or not, so an idle but alive function keeps it
+    // alive and a dead one does not. A run that throws sends the failure ping instead of the success one.
+    let failure = null;
+    try {
+      ensureDefaultAdminApp();
+      const db = getFirestore();
+      const armRef = db.collection("kalshiLiveControl").doc("arm");
+      const snap = await armRef.get();
+      const arm = snap.exists ? snap.data() : null;
+      const now = Date.now();
+      const args = {
+        arm, now, setArm: (patch) => armRef.set(patch, { merge: true }),
+        recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
+        logEvent: (e) => db.collection("kalshiLiveEvents").add(e),
+      };
+      if (arm && arm.armed === true && arm.until > now) {
+        const { active, quotes } = await live.loadQuotes(kalshiMarketApi());
+        Object.assign(args, {
+          quotes, active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
+          keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
+        });
+      }
+      await live.runArmedTick(args);
+    } catch (e) {
+      failure = e;
     }
-    await live.runArmedTick(args);
+    await watchdog.sendAll(fetch, watchdog.pingsFor({ base: KALSHI_WATCHDOG_URL.value(), ok: !failure, reason: failure && failure.message }));
+    if (failure) throw failure;
   }
 );
 
 // Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
-// (see kalshiBookLib.js). READ ONLY and keyless. It stays out of the paper bot's code: defined BEFORE
-// exports.kalshiBot, so the "no order code after exports.kalshiBot" slice still covers only the bot.
+// (see kalshiBookLib.js). READ ONLY and keyless. It is the LAST export on purpose: the tests slice the file from
+// here to prove nothing after this point can see the live key or place an order.
 exports.kalshiBookRecorder = onSchedule(
   { schedule: "every 1 minutes", timeoutSeconds: 58, retryCount: 0, memory: "256MiB" },
   async () => {
@@ -438,15 +401,5 @@ exports.kalshiBookRecorder = onSchedule(
       },
     });
     console.log("kalshiBookRecorder: snaps=" + r.snaps + " errs=" + r.errs);
-  }
-);
-
-exports.kalshiBot = onSchedule(
-  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
-  async () => {
-    ensureDefaultAdminApp();
-    const r = await botRun.runTick({ store: firestoreBotStore(getFirestore()), api: kalshiBotApi(), now: Date.now() });
-    await alerts.sendAll(fetch, alerts.pingsFor({ base: KALSHI_WATCHDOG_URL.value(), ok: r.ok, tierMode: r.tier, prevTier: r.prevTier }));
-    console.log("kalshiBot tick: entered=" + r.entered + " tier=" + r.tier + (r.block ? " blocked=" + r.block : ""));
   }
 );

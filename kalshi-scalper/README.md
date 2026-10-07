@@ -580,29 +580,12 @@ after this commit).
 - **Cost of this idea so far.** It is the sixth strategy variant tried (the 60s scalp, H1, H2, H3, H4, H5).
   Cuts examined for the verdict: 1 configuration.
 
-## The paper bot (starts with $100, cannot place a real order)
+## The paper bot (retired Oct 7, 2026)
 
-It runs on the SERVER: a Firebase scheduled function (`functions/kalshiBot*` in
-this repo), once a minute, with its state in Firestore, watched and halted from
-the Bot tab of the Kalshi page. It depends on no computer being awake. Deploy
-and monitoring steps are in `functions/DEPLOY.md`. There is no copy of it in this
-folder: the Python version was retired so there is one implementation, not two
-that can drift.
-
-- **Strategy: H2, as plumbing.** H2 (buy near 40c or 50c, sell at 80c) was
-  falsified on 30 days of history and expects to lose roughly its costs. It is
-  there because it is simple and fully specified, so it exercises the whole loop
-  and gives a forward check of the verdict.
-- **$100 capital.** 1% a trade ($1.00), a 2 hour break at -3% (-$3), done for the
-  day at -5% (-$5). Kalshi rounds each order's fee up to a cent, so the fee is a
-  larger share of a small trade.
-- **Kill switch:** the Halt button on the Bot tab stops new entries. It does NOT
-  freeze positions already open, which keep being managed.
-- **Safety rules, each with a test in `test/kalshiBotGates.test.js`:** one position
-  per market from an id every process computes identically; no new entry on an
-  unreadable or partly unreadable feed, an inactive exchange, no bankroll, under 5
-  minutes left, a wide book or after the hard stop; never more contracts than the
-  touch shows; never an exit on the entry tick.
+The simulated server bot is removed from the code. It ran H2 on $100 of pretend money as plumbing, lost money as H2's
+verdict predicted, and nothing it did counts as evidence. The server keeps only H2's entry rule (as the signal the live test
+uses) and the halt switch. The bar near the top of this file was written for paper trading and is not met; the owner chose a
+small live plumbing test on Oct 7, which is a decision and not evidence of an edge.
 
 ## How real orders work on Kalshi (read from docs.kalshi.com on 2026-10-05)
 

@@ -2423,13 +2423,11 @@
     finnhubCompanyNews: function(symbol, from, to){
       return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
     },
-    // The halt switch and the quiet server-side PAPER bot's heartbeat (functions/kalshiBot*). The page only watches
-    // them, and flips the halt switch below; firestore.rules lets nobody else write a position or an event. The
-    // paper bot's trades are no longer shown here. `h` is { status, control }, each called on every change.
+    // The halt switch (kalshiBotMeta/control). The page only watches it and flips it below; firestore.rules lets nobody
+    // else write it. `h` is { control }, called on every change.
     watchKalshiBot: function(h){
       var un = [];
       var onErr = function(err){ console.error('Kalshi bot sync error:', err); };
-      un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'status'), function(s){ h.status(s.exists() ? s.data() : null); }, onErr));
       un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'control'), function(s){ h.control(s.exists() ? s.data() : {}); }, onErr));
       return function(){ un.forEach(function(f){ f(); }); };
     },
@@ -3306,7 +3304,7 @@
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-actions"><button class="kal-btn" id="kalBotHalt" type="button" hidden></button><span class="kal-note" id="kalBotHaltMsg"></span></div>
         <details class="kal-more"><summary>About this card</summary>
-          <div class="kal-note">Your real Kalshi account, read every minute while this tab is open. Halt blocks any new live order, including the automatic scan. The old $100 paper bot still runs quietly on the server and is not shown here.</div>
+          <div class="kal-note">Your real Kalshi account, read every minute while this tab is open. Halt blocks any new live order, including the automatic scan.</div>
         </details>
       </div>
       <div class="kal-card">
@@ -9981,18 +9979,7 @@
 
   // ---- server bot tab (read only, plus one halt switch) ----
 
-  // The bot runs once a minute, so the heartbeat is judged against that: two and a
-  // half minutes of silence is stale, five is down. The same three words as the
-  // Python status command and an outside watchdog would use.
-  function kalshiBotHealth(ageMs){
-    if(ageMs == null || !Number.isFinite(ageMs)){ return 'NEVER RAN'; }
-    return ageMs < 150000 ? 'OK' : (ageMs < 300000 ? 'STALE' : 'DOWN');
-  }
-
-  // What this tab shows is the live account: status, totals since the owner's "start fresh" line, open positions,
-  // recent trades and a log of what the live bot did. The old paper bot keeps running quietly on the server; only
-  // its heartbeat and the halt switch are read here.
-  var kalshiBotState = { status: null, control: {} };
+  var kalshiBotState = { control: {} };
   var kalshiLiveAcct = null;     // the latest read of the account (the account block below owns the read)
   var kalshiLiveEvents = [];
   var kalshiLiveShow = { events: 12 };
@@ -10048,8 +10035,6 @@
       h += '<div class="kal-status">Last scan ' + new Date(c.last.ts).toLocaleTimeString() + ': ' +
         escapeHtml(c.last.ok ? 'order sent' + (c.last.filled ? ' and filled' : ', no fill') : String(c.last.reason || 'nothing sent').slice(0, 220)) + '</div>';
     }
-    var ps = kalshiBotState.status;
-    if(ps && Number.isFinite(ps.lastTickMs)){ h += '<div class="kal-status">Paper bot (running quietly, not shown): ' + kalshiBotHealth(now - ps.lastTickMs) + '</div>'; }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
     if(halted){ el.innerHTML += '<div class="kal-warn kal-big">Halted from this page: no new entries</div>'; }
@@ -10149,7 +10134,6 @@
     var api = window.__shwoopAPI;
     if(!api || !api.watchKalshiBot || !currentUserIsAdmin){ return; }
     kalshiBotUnsub = api.watchKalshiBot({
-      status: function(s){ kalshiBotState.status = s; renderKalshiBot(); },
       control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); }
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiLive(); renderKalshiBot(); }); }
