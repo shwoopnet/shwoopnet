@@ -671,9 +671,9 @@ study was exploratory and does not count). Every idea that gets a verdict raises
 
 | # | Idea | Counterparty (who loses) | Prediction | Needs | Status |
 |---|---|---|---|---|---|
-| L1 | Favorite-longshot bias across liquid settled series, chosen on cost and liquidity | Retail buyers overpaying for longshots | Cheap side loses more than its price implies by more than the fee | Survey (running), settled history | OPEN |
-| L2 | H2 entered only when the first 30 seconds put spot within reach of the strike | Sellers who price the move as luck | Hit rate in the chosen bucket beats the price by at least 3c | Spot and candles (have) | OPEN |
-| L3 | Settlement edge: buy the side already far from the strike at 90c or more, last 2 to 3 minutes | Holders who sell near-certainties early | Win rate above price plus fee (fee is smallest at extremes) | Candles (have) | OPEN |
+| L1 | Favorite-longshot bias in the two markets we trade (Bitcoin and gold 15 minute only; the owner chose to keep the universe to these two) | Retail buyers overpaying for longshots | Cheap side loses more than its price implies by more than the fee | Settled history we hold (30 days, both series) | PRE-REGISTERED 2026-10-07 |
+| L2 | H2 entered only when the first 30 seconds put spot within reach of the strike | Sellers who price the move as luck | Hit rate in the chosen bucket beats the price by at least 3c | Spot and candles (have; Bitcoin only, no gold spot) | PRE-REGISTERED 2026-10-07 |
+| L3 | Settlement edge: buy the side already far from the strike at 90c or more, last 2 to 3 minutes | Holders who sell near-certainties early | Win rate above price plus fee (fee is smallest at extremes) | Candles (have) | PRE-REGISTERED 2026-10-07 |
 | L4 | Maker entry that rests only when distance says the price is cheap | Takers crossing the spread | Net after maker fee above zero | Recorded order books | NOT_RUNNABLE until the recorder has data |
 | L5 | Quote staleness: list price lags the single-market read by about 2c | Stale resting orders | A stale-side fill beats its fee | Recorded order books at under 10 seconds | NOT_RUNNABLE until the recorder has data |
 | L6 | Bitcoin and gold on the same window, or related ladders, priced inconsistently | Slow quoters | Gap beats two fees | Recorded books, both series | NOT_RUNNABLE until the recorder has data |
@@ -690,6 +690,49 @@ Standing exclusions, so they are not re-proposed:
 Rules for every row above: its counterparty, numeric prediction and kill criteria are written
 in its own section before any code runs; day-clustered z of at least 2.1, both halves positive,
 fees x1.2, at least 300 observations; verdicts only as above.
+
+## Pre-registration: L1, L2 and L3 (fixed 2026-10-07, before any code or any price was looked at for these rules)
+
+Run on the data we hold: 30 days of KXBTC15M (2,850 markets) and KXGOLD15M (2,026 markets). The owner chose to keep the
+universe to these two markets, so a broader survey is not used. **This is not unseen data.** H2, H4 and H7 were already run on
+these same days, so a pass here could never be more than permission to test forward on the recorder's data. Three rules means
+three more variants against the bar: 8 tried before this, 11 after.
+
+Common to all three, fixed now. Entry at the ask of the side bought (YES at its ask, NO at 1 minus the YES bid, snapped to 4
+places), real two sided book only (spread 10c or less, `valid_quote`). Held to settlement unless the rule says otherwise.
+Taker fee 7% x p x (1-p) per contract on the way in; settlement has no fee. One observation per market. Statistic: net profit
+per contract, day clustered z. Kill criteria: FALSIFIED unless n is at least 300 markets, mean net is positive with a day
+clustered z of at least 2.1, positive in BOTH halves (split by close time at the median), and positive with fees 20% higher.
+Fewer than 300 entries is `NOT_ENOUGH_DATA`. There is no verdict that means "trade". A simulator guard test runs the exact
+code on a simulated FAIR game and requires it to lose about its costs; a profit there means the simulator invents an edge.
+
+**L1. Favorite-longshot bias, 6 minutes left.**
+- **Rule.** At the minute close with 6 minutes left (the same decision point H7 used, not tuned), buy the side whose ask is in
+  [0.88, 0.97] (the favorite). Hold to settlement. Both series together; the split by series is printed for information only.
+- **Counterparty.** Whoever buys the cheap side (3c to 12c) and overpays for the small chance, the retail longshot buyer.
+- **Prediction.** Mean net at least +0.5c per contract. The fee at 90c is only 0.63c, so a small bias could survive it.
+- **Prior, stated honestly.** Low. At the ask the spread (1c to 2c at the extremes) is paid on entry, and these are liquid
+  markets near the money-making and the minute-level price reflects spot distance. It would need the favorite to win a few
+  points more often than its price says.
+
+**L2. H7's entries with H2's exit (sell at 80c).**
+- **Rule.** Take exactly the markets H7 would enter (its decision at 6 minutes left, its estimation half builds the bucket
+  table, its second half is the test), and instead of holding, sell at 80c on the first LATER minute close where that side's
+  bid is 80c or more, otherwise hold to settlement. Fee on the exit as in H2. Bitcoin only: gold has no spot series here.
+- **Counterparty.** The same as H7 (a market that prices spot distance badly) plus H2's (someone buying at 80c on momentum).
+- **Prediction.** Mean net at least +0.5c. The exit changes the payoff shape, not the information, and H7 itself lost 2.69c,
+  so the prior is very low. This is H7's signal wearing H2's exit, and it is recorded as that, not as a new mechanism. It is
+  run because the owner asked, and it may well return `NOT_ENOUGH_DATA` since only H7's test half is used.
+
+**L3. Settlement edge, 2 minutes left.**
+- **Rule.** At the minute close with 2 minutes left, buy the side whose ask is in [0.90, 0.98]. Hold to settlement.
+- **Counterparty.** Holders who sell a near-certain contract early to lock in a gain and free their money.
+- **Prediction.** Mean net at least +0.5c per contract.
+- **Overlap with L1, stated.** This is the same favorite-longshot bias measured later in the market's life, where the fee is
+  smallest and information is mostly in. If L1 is falsified, this has the same prior and is nearly the same trade; it is
+  registered because the timing differs, and it counts as its own variant.
+
+Verdicts are recorded below when the one run each has happened. No threshold, band, decision minute or fee changes after seeing them.
 
 ## The order-book recorder (`recorder.py`, read only)
 
