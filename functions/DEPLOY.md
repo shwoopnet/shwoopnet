@@ -178,3 +178,13 @@ re-reads the market and requires the price it would actually pay to be inside th
 of the signal). Deploy with `firebase deploy --only functions:kalshiLiveTrade,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`.
 `kalshiLiveArmed` is the second scheduled function (the paper bot is the first); the tests name exactly those two.
 
+### Kalshi account panel (read only)
+
+The Bot tab's "Kalshi account (live, read only)" card has a Refresh button. `kalshiLiveAccount` (admin only, takes
+nothing from the page) reads `/portfolio/balance`, `/portfolio/positions` and `/portfolio/fills` with the live key and
+shows balance per shard, open positions and recent fills. GET only, no order code (`kalshiAccountLib.js`, a test
+asserts it), and it works whether or not `KALSHI_LIVE_ENABLED` is on. Each part shows its own error, and a response
+shape it does not recognise is listed by field name. Deploy with
+`firebase deploy --only functions:kalshiLiveAccount`. It is the quickest way to see whether your funds sit on the same
+shard as the market (Bitcoin and gold were both on shard 2 when last checked) without waiting for a scan to refuse.
+
