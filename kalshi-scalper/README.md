@@ -580,6 +580,43 @@ after this commit).
 - **Cost of this idea so far.** It is the sixth strategy variant tried (the 60s scalp, H1, H2, H3, H4, H5).
   Cuts examined for the verdict: 1 configuration.
 
+## Idea ledger (written 2026-10-07, before any idea below was run)
+
+One line per idea, recorded BEFORE it is built, so a tried idea cannot be quietly retried
+and a rewording of a dead idea is visible as one. Status is only `OPEN`, `RUNNING`,
+`FALSIFIED`, `NOT_YET_FALSIFIED` or `NOT_RUNNABLE` (no simulator, nothing recorded).
+Strategy variants tried before this ledger: 9 (the 60s scalp, H1 to H7, plus the no-lag
+study). Every idea that gets a verdict raises that count, and the bar rises with it.
+
+| # | Idea | Counterparty (who loses) | Prediction | Needs | Status |
+|---|---|---|---|---|---|
+| L1 | Favorite-longshot bias across liquid settled series, chosen on cost and liquidity | Retail buyers overpaying for longshots | Cheap side loses more than its price implies by more than the fee | Survey (running), settled history | OPEN |
+| L2 | H2 entered only when the first 30 seconds put spot within reach of the strike | Sellers who price the move as luck | Hit rate in the chosen bucket beats the price by at least 3c | Spot and candles (have) | OPEN |
+| L3 | Settlement edge: buy the side already far from the strike at 90c or more, last 2 to 3 minutes | Holders who sell near-certainties early | Win rate above price plus fee (fee is smallest at extremes) | Candles (have) | OPEN |
+| L4 | Maker entry that rests only when distance says the price is cheap | Takers crossing the spread | Net after maker fee above zero | Recorded order books | NOT_RUNNABLE until the recorder has data |
+| L5 | Quote staleness: list price lags the single-market read by about 2c | Stale resting orders | A stale-side fill beats its fee | Recorded order books at under 10 seconds | NOT_RUNNABLE until the recorder has data |
+| L6 | Bitcoin and gold on the same window, or related ladders, priced inconsistently | Slow quoters | Gap beats two fees | Recorded books, both series | NOT_RUNNABLE until the recorder has data |
+| L7 | Volatility regime gate on the best variant, regimes set by spread and liquidity, never by profit | Whoever misprices fat tails | Touch rate shifts by at least 5 points | Candles (have) | OPEN |
+
+Standing exclusions, so they are not re-proposed:
+
+- **Exit by a dead-trade stop.** H2 already ran a stop 20c below entry (-6.9c and -6.7c, against
+  -8c without one). A stop does not change the expected profit of a fair game.
+- **Hours chosen by profit.** Selecting a window on returns fits noise. Hours may be chosen on
+  liquidity or spread only.
+- **Half-price entry with a lock hedge.** A fair-game identity gives zero edge before cost.
+
+Rules for every row above: its counterparty, numeric prediction and kill criteria are written
+in its own section before any code runs; day-clustered z of at least 2.1, both halves positive,
+fees x1.2, at least 300 observations; verdicts only as above.
+
+## The order-book recorder (`recorder.py`, read only)
+
+Records the public order book of the open Bitcoin and gold 15 minute markets every few
+seconds into `data/book.sqlite` (table `ob`), so L4 to L6 can be tested on real depth rather
+than a minute candle. It places nothing, needs no key, and reads only the public
+`/markets` and `/markets/{ticker}/orderbook` endpoints. It describes; it never judges.
+
 ## The paper bot (starts with $100, cannot place a real order)
 
 It runs on the SERVER: a Firebase scheduled function (`functions/kalshiBot*` in
