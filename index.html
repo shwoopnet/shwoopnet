@@ -9801,8 +9801,8 @@
     var running = !!(s && s.active === true && s.until > now);
     var t;
     if(running){
-      t = 'RUNNING until ' + new Date(s.until).toLocaleString() + '. Orders sent ' + (s.ordersSent || 0) + ' of 80.' +
-        (Number.isFinite(s.startCash) ? ' Cash at start $' + s.startCash.toFixed(2) + ', stops below $' + (s.startCash - 7).toFixed(2) + '.' : '') +
+      t = 'RUNNING until ' + new Date(s.until).toLocaleString() + '. Orders sent ' + (s.ordersSent || 0) + '.' +
+        ' Stops if the bot trades are down $7.00 (open ones counted as lost)' + (Number.isFinite(s.botNet) ? '; so far ' + (s.botNet >= 0 ? '+' : '-') + '$' + Math.abs(s.botNet).toFixed(2) + ' settled, $' + (s.botOpen || 0).toFixed(2) + ' open' : '') + '.' +
         (s.lastNote ? ' ' + s.lastNote : '');
     } else {
       t = 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '');

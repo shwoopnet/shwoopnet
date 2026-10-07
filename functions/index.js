@@ -250,6 +250,8 @@ function firestoreLiveStore(db) {
       }
     },
     async updateTest(id, patch) { await col.doc(id).update(patch); },
+    // Every order since a time, with its id. A single-field query, so it needs no composite index; the caller filters.
+    async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
   };
 }
 

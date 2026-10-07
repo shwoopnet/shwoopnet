@@ -27,6 +27,7 @@ function world(opts = {}) {
     async hasUnresolved() { return opts.unresolved === true || [...docs.values()].some((d) => d.status === 'sending' || d.status === 'unknown'); },
     async createTest(id, data) { if (docs.has(id)) return false; docs.set(id, { ...data }); return true; },
     async updateTest(id, patch) { Object.assign(docs.get(id), patch); },
+    async sessionTrades(since) { if (opts.tradesThrow) throw new Error('down'); return [...docs.entries()].filter(([, d]) => d.ts >= since).map(([id, d]) => ({ id, ...d })); },
   };
   const fetchFn = async (url, o) => {
     calls.push({ url, method: o.method, headers: o.headers, body: o.body ? JSON.parse(o.body) : null });
@@ -34,7 +35,7 @@ function world(opts = {}) {
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
       const over = (opts.fresh && opts.fresh[tk]) || {};
-      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + 360000), exchange_index: tk.includes('KXGOLD') ? 0 : 2, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
+      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + 360000), exchange_index: tk.includes('KXGOLD') ? 0 : 2, ...(opts.results && opts.results[tk] ? { result: opts.results[tk] } : {}), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
     }
     if (url.endsWith('/portfolio/balance')) return reply(opts.balStatus || 200, opts.balance || { balance_breakdown: [{ balance: '70.0000', exchange_index: 2 }, { balance: '30.0000', exchange_index: 0 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: opts.existing || [] });
@@ -165,18 +166,48 @@ gates.N8 = async () => {
   assert.strictEqual(w.posts.length, 0, 'money on shard 0 does not pay for shard 2');
 };
 
-// THE loss stop: cash more than $7 below where it started ends the session before any order.
+// THE loss stop follows the BOT's trades. Settled results count, open trades count as lost, and the account's cash does not.
+const botTrade = (n, over = {}) => [`L1-OLD-${n}`, Object.assign({ strategy: 'L1', ticker: `OLD-${n}`, side: 'yes', status: 'filled', fillCount: '1.00', maxCost: 0.92, ts: NOW - 3600000 }, over)];
 gates.N9 = async () => {
-  const w = world({ session: { startCash: 100 }, balance: { balance_breakdown: [{ balance: '92.9000', exchange_index: 2 }] } });
+  // Seven lost trades (7 x 0.92 = $6.44) leave room; the eighth reaches $7.36 and stops the session before any order.
+  const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
+  const lost = {}; for (let i = 0; i < 8; i++) lost[`OLD-${i}`] = 'no';
+  const w = world({ results: lost }); seed(w, 8);
   await tick(w);
   assert.strictEqual(w.posts.length, 0);
   assert.deepStrictEqual([w.sess.active, w.sess.endedBecause], [false, 'loss stop']);
-  const ok = world({ session: { startCash: 100 }, balance: { balance_breakdown: [{ balance: '93.5000', exchange_index: 2 }] } });
+  assert.ok([...w.docs.values()].filter((d) => d.settled === true).length === 8, 'each settled result is kept on its record, so it is read once');
+  const lostSeven = {}; for (let i = 0; i < 7; i++) lostSeven[`OLD-${i}`] = 'no';
+  const ok = world({ results: lostSeven }); seed(ok, 7);
   await tick(ok);
-  assert.strictEqual(ok.posts.length, 1, '$6.50 down is inside the allowance (it can be an open position)');
+  assert.strictEqual(ok.posts.length, 1, '$6.44 down is inside the allowance');
+  // Open trades are counted as lost: eight unsettled ones stop it just as eight settled losses do.
+  const open = world(); seed(open, 8);
+  await tick(open);
+  assert.deepStrictEqual([open.posts.length, open.sess.endedBecause], [0, 'loss stop']);
+  // Wins offset losses: eight settled wins are never a reason to stop.
+  const wins = {}; for (let i = 0; i < 8; i++) wins[`OLD-${i}`] = 'yes';
+  const won = world({ results: wins }); seed(won, 8);
+  await tick(won);
+  assert.strictEqual(won.posts.length, 1);
+  // Cash is not the measure: the account being $50 down because of the owner's own trades changes nothing.
+  const manual = world({ session: { startCash: 150 } });
+  await tick(manual);
+  assert.strictEqual(manual.posts.length, 1, 'manual trades moving the account do not trip the bot stop');
+  // Trades from before this session are not counted, and an unreadable record fails closed.
+  const before = world({ session: { since: NOW - 1000 } }); seed(before, 8);
+  await tick(before);
+  assert.strictEqual(before.posts.length, 1, 'earlier trades are not this session');
+  const down = world({ tradesThrow: true });
+  await tick(down);
+  assert.deepStrictEqual([down.posts.length, down.sess.active], [0, true], 'if the bot trades cannot be read, nothing is sent and the session keeps running');
+  // Orders that did not fill cost nothing.
+  const nofill = world(); seed(nofill, 8, { fillCount: '0.00', status: 'no fill' });
+  await tick(nofill);
+  assert.strictEqual(nofill.posts.length, 1, 'no-fills are not losses');
   const first = world({ session: { startCash: null } });
   await tick(first);
-  assert.strictEqual(first.sess.startCash, 100, 'the first tick records the starting cash');
+  assert.strictEqual(first.sess.startCash, 100, 'the first tick still records the starting cash');
 };
 
 // The order limit and the 24 hour limit end the session.
