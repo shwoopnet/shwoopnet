@@ -46,7 +46,7 @@ function shapeFills(r) {
     ticker: f.ticker || f.market_ticker, side: f.side, action: f.action || null,
     count: num(f.count_fp !== undefined ? f.count_fp : f.count),
     price: f.yes_price_dollars !== undefined ? String(f.yes_price_dollars) : (f.yes_price !== undefined ? String(f.yes_price) : null),
-    taker: f.is_taker === undefined ? null : f.is_taker === true, time: f.created_time || null,
+    taker: f.is_taker === undefined ? null : f.is_taker === true, time: f.created_time || null, orderId: f.order_id || null,
   }));
   return { ok: true, status: 200, fills, keys: keysOf(r.body), sampleKeys: list.length ? keysOf(list[0]) : [] };
 }

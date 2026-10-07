@@ -347,60 +347,67 @@ gates.G20 = () => {
   assert.strictEqual(health(NaN), 'NEVER RAN');
 };
 
-// The page can watch the bot and flip one switch, and cannot touch a trade. The Bot tab
-// is the default, resuming entries asks first, and leaving the page stops listening.
+// The page can watch the halt switch and the paper bot's heartbeat, flip that one switch, and cannot touch a trade.
+// The Bot tab is the default, resuming entries asks first, and leaving the page stops listening.
 gates.G21 = () => {
-  const bridge = block(/watchKalshiBot: function\(h\)\{([\s\S]*?)\n    \},\n    setKalshiHalt/, html);
-  assert.ok(/kalshiBotPositions/.test(bridge) && /kalshiBotEvents/.test(bridge) && /kalshiBotMeta/.test(bridge));
+  const bridge = block(/watchKalshiBot: function\(h\)\{([\s\S]*?)\n    \},\n    \/\/ What the live bot did/, html);
+  assert.ok(/kalshiBotMeta/.test(bridge) && /'status'/.test(bridge) && /'control'/.test(bridge), 'the heartbeat and the halt switch');
+  assert.ok(!/kalshiBotPositions|kalshiBotEvents/.test(html), 'the paper bot\'s trades and events are no longer read or shown by the page');
   assert.ok(!/setDoc|updateDoc|addDoc|deleteDoc/.test(bridge), 'watching must not write');
+  const ev = block(/watchKalshiLiveEvents: function\(cb\)\{([\s\S]*?)\n    \},/, html);
+  assert.ok(/kalshiLiveEvents/.test(ev) && !/setDoc|updateDoc|addDoc|deleteDoc/.test(ev), 'the live event log is read only');
   const halt = block(/setKalshiHalt: function\(halt\)\{([\s\S]*?)\n    \},/, html);
   assert.ok(/setDoc\(doc\(db, 'kalshiBotMeta', 'control'\), \{ halt: Boolean\(halt\), at: serverTimestamp\(\) \}\)/.test(halt),
     'the halt switch writes exactly { halt, at } to the control document');
   assert.ok(/var kalshiTab = 'bot';/.test(html));
   assert.ok(/if\(halted\)\{ el\.innerHTML \+= '<div class="kal-warn kal-big">Halted from this page/.test(html), 'the halt must show on the card at once');
+  assert.ok(/var haltUnset = !kalshiBotState\.control \|\| kalshiBotState\.control\.halt === undefined;/.test(html) && /if\(haltUnset\)\{ el\.innerHTML \+= '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted/.test(html), 'an unsaved halt setting must not read as "not halted"');
   assert.ok(/if\(halted && !window\.confirm\(/.test(html), 'resuming entries must ask first');
   assert.ok(/function kalshiOnHide\(\)\{ stopKalshiPoll\(\); stopKalshiBot\(\); \}/.test(html), 'leaving the page must stop listening');
-  assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(block(/function startKalshiBot\(\)\{([\s\S]*?)\n  \}\n  function stopKalshiBot/, html) + ')'), 'only an admin may subscribe');
+  const start = block(/function startKalshiBot\(\)\{([\s\S]*?)\n  \}\n  function stopKalshiBot/, html);
+  assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(start + ')'), 'only an admin may subscribe');
+  const stop = block(/function stopKalshiBot\(\)\{([\s\S]*?)\n  \}\n/, html);
+  assert.ok(/clearInterval\(kalshiAcctTimer\)/.test(stop) && /kalshiLiveEventsUnsub\(\)/.test(stop), 'leaving the tab stops the account timer and every listener');
+  assert.ok(/setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiAcctRefresh\(\); \} \}, 60000\)/.test(start), 'the account is re-read once a minute, only while the tab is visible');
 };
 
-// The Bot tab once showed only the newest 15 closed trades and 12 events with no way to see
-// more, which hid most of the day and made the limits look wrong when they were not.
+// The tab once showed only the newest 15 trades and 12 events with no way to see more, which hid most of the day. The
+// live log keeps a way to show more, the page says how many fills it is hiding, and nothing of the paper bot is listed.
 gates.G22 = () => {
-  assert.ok(!/limit\((12|40)\)/.test(html), 'the bot queries must not cap the history at a dozen rows');
-  assert.ok(!/\.slice\(0, 15\)/.test(html), 'closed trades must not be hard cut at 15');
-  assert.ok(/data-more="closed"/.test(html) && /data-more="events"/.test(html), 'both lists need a way to show more');
-  assert.ok(/Showing ' \+ closed\.length \+ ' of ' \+ closedTotal/.test(html), 'the page must say how many it is not showing');
+  assert.ok(!/limit\((12|40)\)/.test(html), 'no query may cap a history at a dozen rows');
+  assert.ok(/data-more="events"/.test(html) && /kalshiLiveShow\.events \+= 50/.test(html), 'the log needs a way to show more');
+  assert.ok(/Showing ' \+ evShown\.length \+ ' of ' \+ evAll\.length/.test(html), 'the page must say how many events it is not showing');
+  assert.ok(/earlier fill' \+ \(a\.fills\.hiddenBeforeBaseline === 1/.test(html), 'the page must say how many fills sit before the starting line');
+  assert.ok(!/id="kalBotClosed"[\s\S]{0,40}paper/i.test(html) && !/kalshiBotTotals/.test(html), 'no paper-bot totals or lists remain on the page');
 };
 
-// The owner added the Net column up by hand to learn how the bot was doing. The page now
-// does it, so the sum must match what a person gets: this is the real Oct 5 list, which
-// the bot's own status line reported as +$2.07 over 43 trades (27 wins, 16 losses).
+// The totals count what the bot did since the owner's starting line, not the owner's own trades on the same account.
 gates.G23 = () => {
-  const src = block(/(function kalshiBotTotals\(positions, dayOf\)\{[\s\S]*?\n  \})\n/, html);
-  const totals = new Function(src + '; return kalshiBotTotals;')();
-  const nets = [0.71, 0.75, 0.25, 0.24, -0.80, -0.84, -1, -1, -0.52, 0.57, 0.24, 0.57, -0.84, -0.53, -0.82, -0.82, -1,
-    0.57, 0.73, 0.75, 0.57, 0.24, -0.82, 0.26, -0.82, 0.24, -0.54, 0.75, 1.18, -1, 0.77, 0.75, 0.69, 0.57, 0.24, -0.80,
-    0.69, 0.71, 0.24, 0.26, 0.75, -0.84, 0.77];
-  const day = (ms) => new Date(ms).toISOString().slice(0, 10);
-  const D1 = Date.parse('2026-10-05T18:00:00Z'), D2 = D1 + 86400000;
-  const closed = nets.map((pnl, i) => ({ status: 'closed', pnl, settledAt: (i < 40 ? D1 : D2) + i * 60000 }));
-  const noise = [{ status: 'open', pnl: null, settledAt: null }, { status: 'closed', pnl: null, settledAt: D1 }, null];
-  const t = totals(closed.concat(noise), day);
-  assert.strictEqual(t.n, 43, 'open and unpriced positions are not trades');
-  assert.strictEqual(t.net, 2.07, 'must equal what the bot reported');
-  assert.strictEqual(t.wins, 27); assert.strictEqual(t.losses, 16);
-  assert.ok(Math.abs(t.winRate - 27 / 43) < 1e-12 && Math.abs(t.perTrade - 2.07 / 43) < 1e-12);
-  assert.ok(t.best === 1.18 && t.worst === -1);
-  assert.ok(t.breakEven > 0.58 && t.breakEven < 0.61, 'about 59% needed at these average sizes: ' + t.breakEven);
-  assert.deepStrictEqual(t.days.map((d) => [d.trades]), [[3], [40]], 'newest day first, grouped by the viewer\'s day');
-  assert.strictEqual(Math.round(t.days.reduce((a, d) => a + d.net, 0) * 100) / 100, 2.07, 'the days add up to the total');
-  const flat = totals([{ status: 'closed', pnl: 0, settledAt: D1 }, { status: 'closed', pnl: 1, settledAt: D1 }], day);
-  assert.ok(flat.n === 2 && flat.wins === 1 && flat.losses === 0, 'a break-even trade is neither a win nor a loss');
-  const none = totals([], day);
-  assert.ok(none.n === 0 && none.winRate === null && none.breakEven === null, 'no trades must not divide by zero');
-  // Wired into the page: a card, the render, and an honest note when the history is cut off.
-  assert.ok(/id="kalBotTotals"/.test(html) && /kalshiBotTotals\(pos,/.test(html));
-  assert.ok(/pos\.length >= 500/.test(html), 'say so if only the newest 500 trades were counted');
+  const totals = new Function(block(/(function kalshiLiveTotals\(acct, orders\)\{[\s\S]*?\n  \})\n/, html) + '; return kalshiLiveTotals;')();
+  const isBot = new Function(block(/(function kalshiFillIsBot\(fill, orders\)\{[\s\S]*?\n  \})\n/, html) + '; return kalshiFillIsBot;')();
+  const since = 1000;
+  const acct = { baseline: { since, startingDollars: 97.48 }, balance: { ok: true, totalDollars: 98.2 }, changeSinceStart: 0.72, fills: { ok: true, fills: [{}, {}, {}] } };
+  const orders = [
+    { ts: 500, status: 'filled', orderId: 'before' },       // before the line: not counted
+    { ts: 1000, status: 'filled', orderId: 'a' }, { ts: 1500, status: 'no fill', orderId: 'b' },
+    { ts: 2000, status: 'unknown', orderId: 'c' }, { ts: 2500, status: 'error' }, null,
+  ];
+  const t = totals(acct, orders);
+  assert.deepStrictEqual([t.sent, t.filled, t.noFill, t.other], [4, 1, 1, 2], 'only orders at or after the line, with unresolved ones set apart');
+  assert.deepStrictEqual([t.start, t.now, t.change, t.fills], [97.48, 98.2, 0.72, 3]);
+  assert.strictEqual(totals({ balance: { ok: true } }, orders), null, 'without a starting line there are no totals to show');
+  assert.strictEqual(totals(null, orders), null);
+  const bad = totals({ baseline: { since, startingDollars: 5 }, balance: { ok: false }, fills: { ok: false } }, []);
+  assert.ok(bad.now === null && bad.change === null && bad.fills === null && bad.sent === 0, 'a failed read shows n/a, not a number');
+  // A fill is the bot's only when its order id matches one the bot saved; everything else on the account is manual.
+  assert.strictEqual(isBot({ orderId: 'a' }, orders), true);
+  assert.strictEqual(isBot({ orderId: 'zzz' }, orders), false);
+  assert.strictEqual(isBot({ orderId: null }, orders), false);
+  assert.strictEqual(isBot({ orderId: 'a' }, [{ ts: 1 }]), false, 'an order saved without an id matches nothing');
+  assert.strictEqual(isBot(null, orders), false);
+  // Wired into the page.
+  assert.ok(/id="kalBotTotals"/.test(html) && /kalshiLiveTotals\(a, kalshiLiveOrders\)/.test(html));
+  assert.ok(/kalshiFillIsBot\(x, kalshiLiveOrders\)/.test(html) && /\(bot \? 'bot' : 'manual'\)/.test(html), 'each fill is labelled bot or manual');
 };
 
 // A NO entry at exactly 42c or 52c must be planned. NO price is 1 - yes bid, and in

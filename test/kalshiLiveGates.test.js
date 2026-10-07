@@ -251,18 +251,19 @@ gates.L14 = () => {
 };
 
 // ---- the armed scan: click once, it scans every minute, sends ONE order, then switches itself off ----
-function armed(state) {
-  const log = { sets: [], lasts: [] };
+function armed(state, logThrows) {
+  const log = { sets: [], lasts: [], events: [] };
   return {
     log,
     get arm() { return state; },
     setArm: async (p) => { log.sets.push(p); state = { ...state, ...p }; },
     recordLast: async (r) => { log.lasts.push(r); },
+    logEvent: async (e) => { if (logThrows) throw new Error('log down'); log.events.push(e); },
   };
 }
 const tick = (w, a, over = {}) => live.runArmedTick({
   quotes: [quote()], active: true, enabled: true, store: w.store, now: NOW, keyId: 'live-key', pem, fetchFn: w.fetchFn,
-  arm: a.arm, setArm: a.setArm, recordLast: a.recordLast, ...over,
+  arm: a.arm, setArm: a.setArm, recordLast: a.recordLast, logEvent: a.logEvent, ...over,
 });
 
 gates.L16 = async () => {
@@ -320,6 +321,44 @@ gates.L18 = async () => {
   await assert.rejects(() => tick(we, ae), /database down/);
   assert.deepStrictEqual([ae.arm.armed, ae.arm.endedBecause], [false, 'error']);
   assert.strictEqual(live.ARM_MS, 3 * 3600 * 1000);
+};
+
+gates.L22 = async () => {
+  // The event log shown on the Bot tab. A scan that ends says why, a refusal before sending logs nothing (it would
+  // be one line a minute), and a log that fails to write changes nothing about what the scan does.
+  const w1 = world(); const a1 = armed({ armed: true, until: NOW + 3600000 });
+  await tick(w1, a1);
+  assert.deepStrictEqual(a1.log.events.map((e) => [e.kind, e.detail, e.ts]), [['scan ended', 'order sent and filled', NOW]]);
+  const w2 = world({ post: { status: 201, body: { order_id: 'o1', fill_count: '0.00' } } }); const a2 = armed({ armed: true, until: NOW + 3600000 });
+  await tick(w2, a2);
+  assert.strictEqual(a2.log.events[0].detail, 'order sent, no fill');
+  const w3 = world({ post: { status: 503, body: 'x' } }); const a3 = armed({ armed: true, until: NOW + 3600000 });
+  await tick(w3, a3);
+  assert.ok(/needs a look/.test(a3.log.events[0].detail) && /MAY OR MAY NOT/.test(a3.log.events[0].detail));
+  const w4 = world(); const a4 = armed({ armed: true, until: NOW - 1 });
+  await tick(w4, a4);
+  assert.deepStrictEqual(a4.log.events.map((e) => e.detail), ['expired after 3 hours with nothing sent']);
+  const w5 = world(); w5.store.halted = async () => { throw new Error('database down'); }; const a5 = armed({ armed: true, until: NOW + 3600000 });
+  await assert.rejects(() => tick(w5, a5), /database down/);
+  assert.ok(/stopped on an error: database down/.test(a5.log.events[0].detail));
+  const w6 = world(); const a6 = armed({ armed: true, until: NOW + 3600000 });
+  await tick(w6, a6, { quotes: [] });
+  assert.strictEqual(a6.log.events.length, 0, 'a minute with no signal logs nothing');
+  const w7 = world(); const a7 = armed({ armed: true, until: NOW + 3600000 }, true);
+  const r7 = await tick(w7, a7);
+  assert.ok(r7.ok && w7.posts.length === 1 && a7.arm.armed === false, 'a failing log must not stop the order or the disarm');
+  const w8 = world(); const a8 = armed({ armed: true, until: NOW - 1 }, true);
+  assert.strictEqual((await tick(w8, a8)).skipped, 'expired');
+  assert.strictEqual(a8.arm.armed, false, 'a failing log must not keep an expired arm armed');
+  // No logEvent at all is fine too.
+  const w9 = world(); const a9 = armed({ armed: true, until: NOW + 3600000 });
+  assert.ok((await tick(w9, a9, { logEvent: undefined })).ok);
+  // Wiring: the arm function logs armed and disarmed, the scan passes the log in, and only the server can write it.
+  const arm = /exports\.kalshiLiveArm = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
+  assert.ok(/kind: "armed"/.test(arm) && /kind: "disarmed"/.test(arm) && /collection\("kalshiLiveEvents"\)/.test(arm), 'arming and disarming are logged');
+  assert.ok(/logEvent: \(e\) => db\.collection\("kalshiLiveEvents"\)\.add\(e\)/.test(fnSrc), 'the scheduled scan writes its endings to the log');
+  const ev = /match \/kalshiLiveEvents\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
+  assert.ok(ev && /allow read: if isAdmin\(\);/.test(ev[1]) && /allow write: if false;/.test(ev[1]), 'admin read, no client write');
 };
 
 gates.L19 = () => {

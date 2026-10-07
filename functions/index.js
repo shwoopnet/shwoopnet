@@ -326,10 +326,12 @@ exports.kalshiLiveAccount = onCall(
     ensureDefaultAdminApp();
     try {
       const snap = await getFirestore().collection("kalshiLiveControl").doc("baseline").get();
-      return await account.readAccount({
+      const d = await account.readAccount({
         fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
         baseline: snap.exists ? snap.data() : null,
       });
+      // Whether the order switch is on, so the page can say so. It reveals nothing but "on" or "off".
+      return { ...d, liveSwitch: KALSHI_LIVE_ENABLED.value() === "on" };
     } catch (e) {
       if (e instanceof HttpsError) throw e;
       throw new HttpsError("internal", "Account read failed: " + String((e && e.message) || e).slice(0, 120));
@@ -374,8 +376,10 @@ exports.kalshiLiveArm = onCall(async (request) => {
   ensureDefaultAdminApp();
   const on = request.data && request.data.on === true;
   const ref = getFirestore().collection("kalshiLiveControl").doc("arm");
+  const events = getFirestore().collection("kalshiLiveEvents");
   if (!on) {
     await ref.set({ armed: false, endedAt: Date.now(), endedBecause: "switched off by the owner" }, { merge: true });
+    await events.add({ ts: Date.now(), kind: "disarmed", detail: "switched off by you" });
     return { armed: false };
   }
   if (KALSHI_LIVE_ENABLED.value() !== "on") {
@@ -383,6 +387,7 @@ exports.kalshiLiveArm = onCall(async (request) => {
   }
   const now = Date.now();
   await ref.set({ armed: true, since: now, until: now + live.ARM_MS, endedAt: null, endedBecause: null });
+  await events.add({ ts: now, kind: "armed", detail: "scanning every minute for up to 3 hours, one order at most" });
   return { armed: true, until: now + live.ARM_MS };
 });
 
@@ -398,6 +403,7 @@ exports.kalshiLiveArmed = onSchedule(
     const args = {
       arm, now, setArm: (patch) => armRef.set(patch, { merge: true }),
       recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
+      logEvent: (e) => db.collection("kalshiLiveEvents").add(e),
     };
     if (arm && arm.armed === true && arm.until > now) {
       const { active, quotes } = await live.loadQuotes(kalshiBotApi());

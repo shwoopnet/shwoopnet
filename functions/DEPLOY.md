@@ -199,3 +199,22 @@ only after your last personal trade. To move the line, delete that one document 
 Deploy with `firebase deploy --only functions:kalshiLiveAccount,functions:kalshiLiveBaseline`. The bot's own journal and
 the live test records were never mixed with personal trades, so only this view needed the line.
 
+### The Bot tab now shows the live account (Oct 7, 2026)
+
+The Bot tab used to show the paper bot (status, totals, positions, trades, event log). It now shows the live account:
+a status card (balance by shard, whether the server's order switch is on, armed or not, the last scan's result, the
+halt state with its button), totals since your "start fresh" line (starting balance, now, change, how many orders the
+bot sent and how many filled), open positions, recent fills labelled bot or manual (matched by the order id the bot
+saved), and a log of what the live bot did. The account is read when the tab opens and once a minute while it stays
+visible: three GET requests, read only. Without a starting line the totals say so instead of guessing.
+
+- The old paper bot still runs on the server every minute, writes its records and keeps the outside alert and the halt
+  gate working. The page reads only its heartbeat (one line on the status card) and the halt switch. Its trades are in
+  the database and are no longer shown anywhere on the page. To stop it for good, delete or disable `kalshiBot`.
+- The halt button is the live kill switch: the live test and the armed scan refuse while halted. If the halt setting
+  was never saved, the scan treats that as halted and the card says so: press Halt, then Resume, once.
+- New collection `kalshiLiveEvents` (armed, disarmed, scan ended), written only by the server; admin read in the rules.
+  Minutes with no signal are not logged (the last scan's result is on the card).
+- Deploy: `firebase deploy --only functions:kalshiLiveAccount,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`.
+  Do it when the scan is not armed: redeploying `kalshiLiveArmed` restarts it for a moment.
+
