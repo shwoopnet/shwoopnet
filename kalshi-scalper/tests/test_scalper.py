@@ -834,3 +834,89 @@ _c9 = _re9.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_mm.__file__).read())
 assert not _re9.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c9)
 assert not _re9.search(r"place_order|/portfolio/", _c9), "research code never touches an order endpoint"
 print("market making tests passed")
+
+# ---- H6: stop quoting into a move ----
+import sqlite3 as _sq6, tempfile as _tf6, os as _os6
+import scalper.quotegate as _qg
+import scalper.marketmaker as _mm6
+
+_T6 = lambda ts, side, y: (ts, side, y, round(1 - y, 4))
+# The gate reads the move from the ADJACENT previous minute only.
+_s = _qg.sides([(1000, 0.40, 0.44), (1060, 0.38, 0.42), (1120, 0.38, 0.42), (1180, 0.41, 0.45), (1300, 0.30, 0.34)])
+assert [(a, b) for _, _, _, a, b in _s] == [(True, True), (False, True), (True, True), (True, False), (True, True)], _s
+assert [x[3] for x in _qg.sides([(1000, 0.40, 0.44), (1060, 0.395, 0.435)])] == [True, True], "a move under 1c is not a move"
+assert _qg.sides([(1000, 0.40, 0.44), (1060, 0.39, 0.43)])[1][3] is False, "exactly 1c down already counts"
+assert _qg.sides([(1000, 0.40, 0.44), (1120, 0.30, 0.34)])[1][3:] == (True, True), "no adjacent minute: the move is unknown, quote both"
+
+# A refused bid fills nothing even when the tape prints through it; the ask still can.
+_sq = _qg.sides([(1000, 0.40, 0.44), (1060, 0.38, 0.42)])
+_fl, _inv = _qg.gated_walk(_sq, [_T6(1070, "no", 0.30), _T6(1075, "yes", 0.50)], 2)
+assert _fl == [("s", 0.42)] and _inv == -1, _fl
+
+_su = _qg.sides([(1000, 0.40, 0.44), (1060, 0.43, 0.47)])
+_fl, _inv = _qg.gated_walk(_su, [_T6(1070, "yes", 0.60), _T6(1075, "no", 0.30)], 2)
+assert _fl == [("b", 0.43)] and _inv == 1, "after a rise the ask is refused even when the tape prints through it"
+
+# Flat market: the gate never fires, so it IS the control.
+_cf = [(1000 + 60 * i, 0.40, 0.44) for i in range(6)]
+_tf = [_T6(1000 + 60 * i + 5, "no", 0.39) for i in range(6)] + [_T6(1100, "yes", 0.46)]
+_r = _qg.simulate(_cf, 5000, "yes", _tf)
+assert _r["skipped"] == 0 and abs(_r["pnl"] - _r["ctl_pnl"]) < 1e-9 and _r["quotes"] == 12
+
+# The consequence: a falling market that keeps hitting the bid. Always quoting buys the fall and settles at zero;
+# the gate stops buying after the first fall and loses less.
+_fall = [(1000 + 60 * i, 0.60 - 0.04 * i, 0.64 - 0.04 * i) for i in range(6)]
+_tfall = [_T6(1000 + 60 * i + 5, "no", 0.50 - 0.04 * i) for i in range(6)]
+_r = _qg.simulate(_fall, 5000, "no", _tfall)
+assert _r["pnl"] > _r["ctl_pnl"], (_r["pnl"], _r["ctl_pnl"])
+assert _r["skipped"] > 0 and _r["skip_gave_up"] < 0, "what it refused would have lost"
+# ... and the same gate costs money where the move reverses: refused fills that would have won show as positive.
+_up = [(1000, 0.40, 0.44), (1060, 0.37, 0.41), (1120, 0.37, 0.41)]
+_r = _qg.simulate(_up, 5000, "yes", [_T6(1070, "no", 0.30)])
+assert _r["n_buy"] == 0 and _r["skip_gave_up"] > 0, "a refused winner is reported as given up"
+
+# The control is H5's rule, exactly.
+_cd = [(1000 + 60 * i, 0.50 - 0.02 * (i % 3), 0.54 - 0.02 * (i % 3)) for i in range(8)]
+_td = [_T6(1000 + 60 * i + 9, "no" if i % 2 else "yes", 0.40 + 0.03 * (i % 5)) for i in range(8)]
+assert abs(_qg.simulate(_cd, 5000, "yes", _td)["ctl_pnl"] - _mm6.simulate(_cd, 5000, "yes", _td)["pnl"]) < 1e-9
+
+# Disjoint from H5's sample, never picked by result.
+_ms = [(f"M{i}", "S", [], 100 + i, "yes" if i % 3 == 0 else "no") for i in range(20)]
+_a = {m[0] for m in _mm6.sample(_ms)}
+_b = {m[0] for m in _qg.sample(_ms)}
+assert _b == {f"M{i}" for i in range(2, 20, 4)} and not (_a & _b)
+assert {m[0] for m in _qg.sample([(m[0], m[1], m[2], m[3], "yes") for m in _ms])} == _b
+
+assert _qg.verdict is _mm6.verdict, "same kill criteria as H5"
+
+# Fetch stores results only, and a rerun fetches nothing stored.
+_p6 = _os6.path.join(_tf6.mkdtemp(), "t.sqlite")
+_d6 = _sq6.connect(_p6)
+_d6.executescript("CREATE TABLE market(ticker TEXT PRIMARY KEY, series TEXT, open_ts INTEGER, close_ts INTEGER, result TEXT, strike REAL, n_candles INTEGER);"
+                  "CREATE TABLE candle(ticker TEXT, series TEXT, end_ts INTEGER, bid_o REAL, bid_h REAL, bid_l REAL, bid_c REAL, ask_o REAL, ask_h REAL, ask_l REAL, ask_c REAL, price_c REAL, volume REAL, oi REAL, PRIMARY KEY (ticker, end_ts));")
+for _i in range(8):
+    _tk = f"K{_i}"
+    _d6.execute("INSERT INTO market VALUES(?,?,?,?,?,?,?)", (_tk, "KXBTC15M", 0, 5000 + _i * 1000, "yes", None, 1))
+    _d6.execute("INSERT INTO candle(ticker, series, end_ts, bid_c, ask_c) VALUES(?,?,?,?,?)", (_tk, "KXBTC15M", 1000 + _i * 1000, 0.40, 0.44))
+_d6.commit(); _d6.close()
+_calls6 = []
+def _ft6(ticker, lo, hi):
+    _calls6.append(ticker)
+    return [(lo + 5, "no", 0.39, 0.61)]
+_o6 = (_qg.DB, _qg.fetch_trades)
+_qg.DB, _qg.fetch_trades = _p6, _ft6
+try:
+    _qg.run_fetch(None)
+    _rs6 = _sq6.connect(_p6).execute("SELECT ticker, n_buy, inv_end, quotes, skipped FROM mm6 ORDER BY ticker").fetchall()
+    assert [r[0] for r in _rs6] == ["K2", "K6"] and all(r[1:] == (1, 1, 2, 0) for r in _rs6), _rs6
+    _n6 = len(_calls6)
+    _qg.run_fetch(None)
+    assert len(_calls6) == _n6 == 2, "a rerun must not refetch stored markets"
+finally:
+    _qg.DB, _qg.fetch_trades = _o6
+
+import re as _re10
+_c10 = _re10.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_qg.__file__).read())
+assert not _re10.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c10)
+assert not _re10.search(r"place_order|/portfolio/", _c10), "research code never touches an order endpoint"
+print("quote gate tests passed")
