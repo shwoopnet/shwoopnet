@@ -987,6 +987,10 @@
   .kal-layout-body select{ width:auto; }
   .kal-bot-grid > .kal-card{ margin-bottom:0; min-width:0; }
   .kal-bot-grid > .kal-span{ grid-column:1 / -1; }
+  /* Rearranging: only while "Unlock to rearrange" is ticked (never remembered, so a stray drag cannot happen on a normal visit). */
+  .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; cursor:grab; }
+  .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ opacity:.45; }
+  .kal-move{ display:flex; justify-content:flex-end; gap:6px; margin-bottom:6px; }
   .kal-bot-grid .kal-trade{ grid-template-columns:1fr 1fr; }
   .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr)); }
   .kal-bot-grid .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); }
@@ -2352,6 +2356,7 @@
         darkMode: typeof s.darkMode === 'boolean' ? s.darkMode : null, // null here means "no explicit choice", same as an absent localStorage key -- OS preference decides
         reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : false,
         tickerEnabled: typeof s.tickerEnabled === 'boolean' ? s.tickerEnabled : true,
+        kalBotLayout: (s.kalBotLayout && typeof s.kalBotLayout === 'object') ? s.kalBotLayout : null,
         tickerSpeed: typeof s.tickerSpeed === 'string' ? s.tickerSpeed : '100',
         tradeColumns: typeof s.tradeColumns === 'string' ? s.tradeColumns : '1',
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
@@ -3303,6 +3308,7 @@
           <div class="kal-layout-body">
             <label for="kalLayoutCols">Columns <select class="kal-input" id="kalLayoutCols"><option value="auto">Auto</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
             <div id="kalLayoutCards"></div>
+            <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its arrows)</label>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
         </details>
@@ -9636,7 +9642,7 @@
   var kalshiBotState = { control: {} };
   var kalshiLiveAcct = null;     // the latest read of the account (the account block below owns the read)
   var kalshiLiveEvents = [];
-  var kalshiLiveShow = { events: 12, fills: 8 };
+  var kalshiLiveShow = { events: 12, fills: 5 };   // the latest five trades, with a button for more
   var kalshiBotUnsub = null;
   var kalshiLiveEventsUnsub = null;
   var kalshiAcctTimer = null;
@@ -9769,7 +9775,7 @@
           '<div><span class="kal-lbl">P/L</span>' + plCell + '</div>' +
           '<div><span class="kal-lbl">From</span>' + (bot ? 'bot' : 'manual') + '</div></div>';
       }).join('') + (a.fills.fills.length > fillsShown.length
-        ? '<div class="kal-note">Showing ' + fillsShown.length + ' of ' + a.fills.fills.length + ' fills. <button type="button" class="kal-btn" data-more="fills">Show more</button></div>' : '')
+        ? '<div class="kal-note">Showing ' + fillsShown.length + ' of ' + a.fills.fills.length + ' fills. <button type="button" class="kal-btn" data-more="fills">Show more</button></div>' : (a.fills.fills.length > 5 ? '<div class="kal-note"><button type="button" class="kal-btn" data-less="fills">Show fewer</button></div>' : ''))
         : '<div class="kal-empty">No fills since your starting line.</div>') +
         (settled || open ? '<div class="kal-note">Settled P/L of the bot trades shown: <b class="' + (sum >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (sum >= 0 ? '+' : '-') + kalshiMoney(Math.abs(sum)) + '</b> over ' + settled + ' settled' + (open ? ', ' + open + ' still open' : '') + '.</div>' : '') +
         (a.fills.hiddenBeforeBaseline ? '<div class="kal-note">' + a.fills.hiddenBeforeBaseline + ' earlier fill' + (a.fills.hiddenBeforeBaseline === 1 ? ' is' : 's are') + ' hidden (before your starting line).</div>' : '');
@@ -9787,7 +9793,8 @@
   }
   // The 'Show more' button is re-created on every render, so one listener on its container does it.
   document.getElementById('kalBotClosed').addEventListener('click', function(e){
-    if(e.target && e.target.getAttribute('data-more') === 'fills'){ kalshiLiveShow.fills += 50; renderKalshiBot(); }
+    if(e.target && e.target.getAttribute('data-more') === 'fills'){ kalshiLiveShow.fills += 10; renderKalshiBot(); }
+    if(e.target && e.target.getAttribute('data-less') === 'fills'){ kalshiLiveShow.fills = 5; renderKalshiBot(); }
   });
   document.getElementById('kalBotEvents').addEventListener('click', function(e){
     if(e.target && e.target.getAttribute('data-more') === 'events'){ kalshiLiveShow.events += 50; renderKalshiBot(); }
@@ -9852,19 +9859,29 @@
   // account and the session card cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
     var OPTIONAL = [['positions', 'Open positions'], ['trades', 'Recent trades'], ['books', 'Live books'], ['detail', 'Account detail'], ['log', 'What it did']];
-    var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {} };
+    var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
       if(saved && typeof saved === 'object'){
         if(['auto', '1', '2', '3', '4'].indexOf(String(saved.cols)) > -1){ layout.cols = String(saved.cols); }
         OPTIONAL.forEach(function(o){ if(saved.hidden && saved.hidden[o[0]] === true){ layout.hidden[o[0]] = true; } });
+        if(Array.isArray(saved.order)){ layout.order = saved.order.filter(function(k){ return typeof k === 'string'; }); }
       }
     } catch(e){ /* storage can be blocked: the layout just resets each visit */ }
     var grid = document.getElementById('kalTabBot'), colsSel = document.getElementById('kalLayoutCols'), list = document.getElementById('kalLayoutCards');
     list.innerHTML = OPTIONAL.map(function(o){
       return '<label><input type="checkbox" data-card-toggle="' + o[0] + '"> ' + o[1] + '</label>';
     }).join('');
+    var DEFAULT_ORDER = Array.prototype.map.call(grid.querySelectorAll(':scope > [data-card]'), function(c){ return c.getAttribute('data-card'); });
+    function currentOrder(){ return Array.prototype.map.call(grid.querySelectorAll(':scope > [data-card]'), function(c){ return c.getAttribute('data-card'); }); }
+    // Saved order first (unknown names ignored), then any card the saved list does not mention, in its default place.
+    function applyOrder(){
+      var want = (layout.order || []).filter(function(k, i, a){ return DEFAULT_ORDER.indexOf(k) > -1 && a.indexOf(k) === i; });
+      DEFAULT_ORDER.forEach(function(k){ if(want.indexOf(k) < 0){ want.push(k); } });
+      want.forEach(function(k){ var c = grid.querySelector(':scope > [data-card="' + k + '"]'); if(c){ grid.appendChild(c); } });
+    }
     function apply(){
+      applyOrder();
       grid.style.gridTemplateColumns = layout.cols === 'auto' ? '' : 'repeat(' + layout.cols + ', minmax(0, 1fr))';
       colsSel.value = layout.cols;
       OPTIONAL.forEach(function(o){
@@ -9873,7 +9890,70 @@
         list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true;
       });
     }
-    function save(){ try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch(e){ /* optional */ } }
+    function save(skipSync){
+      try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch(e){ /* optional */ }
+      // Saved to the account too (like the other settings), so the arrangement follows the user to another device.
+      if(skipSync !== true && typeof syncUserSetting === 'function'){ syncUserSetting('kalBotLayout', layout, 300); }
+    }
+    // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens.
+    var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
+    function visibleCards(){ return Array.prototype.filter.call(grid.querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
+    function commitOrder(){ layout.order = currentOrder(); save(); }
+    function setUnlocked(on){
+      grid.classList.toggle('kal-unlocked', on);
+      Array.prototype.forEach.call(grid.querySelectorAll(':scope > [data-card]'), function(c){
+        c.draggable = on;
+        var old = c.querySelector(':scope > .kal-move');
+        if(old){ old.remove(); }
+        if(on){
+          var bar = document.createElement('div'); bar.className = 'kal-move';
+          bar.innerHTML = '<button type="button" class="kal-mini" data-move="-1" aria-label="Move this card earlier">&#9664;</button><button type="button" class="kal-mini" data-move="1" aria-label="Move this card later">&#9654;</button>';
+          c.insertBefore(bar, c.firstChild);
+        }
+      });
+    }
+    unlock.addEventListener('change', function(){ setUnlocked(unlock.checked); });
+    grid.addEventListener('click', function(e){
+      var d = e.target && e.target.getAttribute && e.target.getAttribute('data-move');
+      if(!d || !grid.classList.contains('kal-unlocked')){ return; }
+      var card = e.target.closest('[data-card]'), cards = visibleCards(), i = cards.indexOf(card), j = i + Number(d);
+      if(i < 0 || j < 0 || j >= cards.length){ return; }
+      if(Number(d) < 0){ grid.insertBefore(card, cards[j]); } else { grid.insertBefore(card, cards[j].nextSibling); }
+      commitOrder();
+    });
+    grid.addEventListener('dragstart', function(e){
+      var c = grid.classList.contains('kal-unlocked') && e.target.closest ? e.target.closest('[data-card]') : null;
+      if(!c || c.parentNode !== grid){ return; }
+      dragging = c; c.classList.add('kal-dragging');
+      if(e.dataTransfer){ e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', c.getAttribute('data-card')); } catch(x){ /* some browsers refuse */ } }
+    });
+    grid.addEventListener('dragover', function(e){
+      if(!dragging){ return; }
+      var over = e.target.closest ? e.target.closest('[data-card]') : null;
+      if(!over || over === dragging || over.parentNode !== grid){ return; }
+      e.preventDefault();
+      var r = over.getBoundingClientRect();
+      var after = over.classList.contains('kal-span') ? (e.clientY > r.top + r.height / 2) : (e.clientX > r.left + r.width / 2);
+      grid.insertBefore(dragging, after ? over.nextSibling : over);
+    });
+    grid.addEventListener('drop', function(e){ if(dragging){ e.preventDefault(); } });
+    grid.addEventListener('dragend', function(){
+      if(!dragging){ return; }
+      dragging.classList.remove('kal-dragging'); dragging = null; commitOrder();
+    });
+    // The account's saved layout arrives from the shared user-settings snapshot; it is applied without writing it straight back.
+    window.__kalBotLayout = {
+      get: function(){ return layout; },
+      set: function(l){
+        if(!l || typeof l !== 'object'){ return; }
+        var next = { cols: 'auto', hidden: {}, order: null };
+        if(['auto', '1', '2', '3', '4'].indexOf(String(l.cols)) > -1){ next.cols = String(l.cols); }
+        OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
+        if(Array.isArray(l.order)){ next.order = l.order.filter(function(k){ return typeof k === 'string'; }); }
+        layout = next; apply(); save(true);
+        if(unlock.checked){ setUnlocked(true); }
+      }
+    };
     colsSel.addEventListener('change', function(){ layout.cols = colsSel.value; apply(); save(); });
     list.addEventListener('change', function(e){
       var k = e.target && e.target.getAttribute('data-card-toggle');
@@ -9881,7 +9961,7 @@
       if(e.target.checked){ delete layout.hidden[k]; } else { layout.hidden[k] = true; }
       apply(); save();
     });
-    document.getElementById('kalLayoutReset').addEventListener('click', function(){ layout = { cols: 'auto', hidden: {} }; apply(); save(); });
+    document.getElementById('kalLayoutReset').addEventListener('click', function(){ layout = { cols: 'auto', hidden: {}, order: null }; apply(); save(); if(unlock.checked){ setUnlocked(true); } });
     apply();
   })();
 
@@ -10436,6 +10516,7 @@
       darkMode: document.documentElement.getAttribute('data-theme') === 'dark',
       reduceMotion: motionToggleBtn.getAttribute('aria-checked') === 'true',
       tickerEnabled: tickerToggleBtn.getAttribute('aria-checked') === 'true',
+      kalBotLayout: window.__kalBotLayout ? window.__kalBotLayout.get() : null,
       tickerSpeed: storedTickerSpeed,
       tradeColumns: storedTradeColumns,
       clockFormat: clockFormatPref || '24',
@@ -10485,6 +10566,7 @@
     applyDarkModePref(dark, true);
     applyMotionPref(shaped.reduceMotion, true);
     applyTickerPref(shaped.tickerEnabled, true);
+    if(shaped.kalBotLayout && window.__kalBotLayout){ window.__kalBotLayout.set(shaped.kalBotLayout); }
     applyTickerSpeedPref(shaped.tickerSpeed, true);
     applyTradeColumnsPref(shaped.tradeColumns, true);
 
