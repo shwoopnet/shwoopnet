@@ -981,12 +981,14 @@
   .kal-layout > summary{ list-style:none; cursor:pointer; }
   .kal-layout > summary::-webkit-details-marker{ display:none; }
   .kal-layout-body{ position:absolute; right:0; top:34px; z-index:5; min-width:240px; display:grid; gap:10px; padding:14px 16px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 8px 24px rgba(0,0,0,.18); }
-  .kal-layout-body label{ display:flex; align-items:center; gap:8px; font-size:13px; }
+  .kal-layout-body label{ display:flex; align-items:center; gap:10px; font-size:13px; min-height:34px; }
+  .kal-layout-body input[type=checkbox]{ width:18px; height:18px; }
+  .kal-layout-body .kal-mini{ min-height:36px; }
   .kal-layout-body select{ width:auto; }
   .kal-bot-grid > .kal-card{ margin-bottom:0; min-width:0; }
   .kal-bot-grid > .kal-span{ grid-column:1 / -1; }
   .kal-bot-grid .kal-trade{ grid-template-columns:1fr 1fr; }
-  .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); }
+  .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr)); }
   .kal-bot-grid .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); }
   .kal-more{ margin-top:10px; }
   .kal-more > summary{ cursor:pointer; color:var(--muted); font-size:12.5px; }
