@@ -297,7 +297,8 @@ const fnSrc = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
 gates.D10 = () => {
   const ORD = /portfolio\/events\/orders/;
   const offenders = fs.readdirSync(path.join(root, 'functions')).filter((f) => f.endsWith('.js') && ORD.test(fs.readFileSync(path.join(root, 'functions', f), 'utf8')));
-  assert.deepStrictEqual(offenders, ['kalshiDemoLib.js'], 'order code lives in exactly one module');
+  // Two modules, and only two: the demo trader, and the one-contract live test (kalshiLiveLib.js, see its own gates).
+  assert.deepStrictEqual(offenders, ['kalshiDemoLib.js', 'kalshiLiveLib.js'], 'order code lives in exactly the demo and live modules');
   const m = /exports\.kalshiDemoTrade = onCall\(([\s\S]*?)\n\);/.exec(fnSrc);
   assert.ok(m, 'kalshiDemoTrade not found');
   assert.ok(m[1].indexOf('assertKalshiAdmin(request.auth)') > -1 && m[1].indexOf('assertKalshiAdmin') < m[1].indexOf('runDemoTest'), 'admin check comes first');
