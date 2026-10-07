@@ -194,3 +194,19 @@ To turn it on, in this order, and not before:
 4. `firebase deploy --only functions:kalshiLiveTrade,firestore:rules`, then merge/deploy the page.
 5. Press the button on the Bot tab and check the order in your Kalshi account. Set the switch back to `off` after.
 
+### Armed live test: click once, it scans, sends ONE order, switches itself off
+
+The page card has an "Arm automatic scan (3 hours)" button (two clicks). Arming only flips a control document
+(`kalshiLiveControl/arm`, written by the `kalshiLiveArm` function with a server-set expiry; the page cannot write it).
+A scheduled function, `kalshiLiveArmed`, runs every minute and does nothing at all unless that document says
+armed and unexpired. When it is, it makes one ordinary live test attempt with every guard above. One arming can
+place at most ONE order: it switches off as soon as an order is sent (filled or not), or refused, or its answer
+was lost, on any error, and after 3 hours. A refusal before sending (no signal, price moved, shard empty) leaves
+it armed to try again next minute. The last scan's result is shown on the card. The position closes by
+settlement at the end of its 15 minute market; no exit order is placed.
+
+The signal price comes from Kalshi's market list, which lags the single-market read by about 2c, so the live test
+re-reads the market and requires the price it would actually pay to be inside the 40c or 50c band (and within 5c
+of the signal). Deploy with `firebase deploy --only functions:kalshiLiveTrade,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`.
+`kalshiLiveArmed` is the second scheduled function (the paper bot is the first); the tests name exactly those two.
+

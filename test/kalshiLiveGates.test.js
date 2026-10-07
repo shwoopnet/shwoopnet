@@ -187,8 +187,22 @@ gates.L9 = async () => {
 gates.L10 = () => {
   // The cap holds at the order's own price, and the body is fixed fields only.
   // One contract can never cost more than about $1.01, so the $2 cap is a backstop that cannot bind; it is asserted anyway.
-  const top = live.livePlan({ side: 'yes', price: 0.99 }, { yes_ask_dollars: '0.995' });
+  const top = live.livePlan({ side: 'yes', price: 0.52 }, { yes_ask_dollars: '0.52' });
   assert.ok(top.ok && top.cost <= live.LIVE_CAP && top.cost < 1.02);
+  // The price PAID must itself be inside a 40c or 50c band: the signal comes from a list that lags the single-market
+  // read by about 2c, so the fresh price decides, not the stale one. Edges count, and NO prices are rounded to cents.
+  assert.ok(live.livePlan({ side: 'yes', price: 0.40 }, { yes_ask_dollars: '0.38' }).ok, 'the 38c edge is in');
+  assert.ok(live.livePlan({ side: 'yes', price: 0.40 }, { yes_ask_dollars: '0.42' }).ok, 'the 42c edge is in');
+  assert.ok(!live.livePlan({ side: 'yes', price: 0.40 }, { yes_ask_dollars: '0.37' }).ok, '37c is out of the band');
+  assert.ok(!live.livePlan({ side: 'yes', price: 0.43 }, { yes_ask_dollars: '0.44' }).ok, '44c sits between the bands');
+  const no42 = live.livePlan({ side: 'no', price: 0.42 }, { yes_bid_dollars: '0.58' });
+  assert.ok(no42.ok && no42.sidePrice === 0.42, 'a NO entry at exactly 42c is taken: 1 - 0.58 must not read as 0.42000000000000004');
+  assert.ok(!live.livePlan({ side: 'yes', price: 0.40 }, { yes_ask_dollars: '0.46' }).ok && !live.livePlan({ side: 'yes', price: 0.40 }, { yes_ask_dollars: '0.34' }).ok, 'more than the wide bound is refused too');
+  // A jump from one band to the other is also refused (a stale signal), even though the fresh price is itself in a band.
+  assert.ok(!live.livePlan({ side: 'yes', price: 0.42 }, { yes_ask_dollars: '0.49' }).ok, '42c to 49c is a 7c jump, past the 5c bound');
+  assert.ok(live.livePlan({ side: 'yes', price: 0.42 }, { yes_ask_dollars: '0.48' }).ok === false, '6c is past the bound');
+  assert.ok(live.livePlan({ side: 'yes', price: 0.46 }, { yes_ask_dollars: '0.50' }).ok, '4c inside a band is fine');
+  assert.strictEqual(live.MOVE_TOLERANCE, 0.05);
   const p = live.livePlan({ side: 'yes', price: 0.4 }, { yes_ask_dollars: '0.41' });
   assert.ok(p.ok && p.cost <= live.LIVE_CAP);
   const body = live.liveOrderBody('T', 0.4, 'no', 'L-T', 2);
@@ -234,6 +248,108 @@ gates.L14 = () => {
   const m = /match \/kalshiLiveOrders\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
   assert.ok(m, 'rule for kalshiLiveOrders not found');
   assert.ok(/allow read: if isAdmin\(\);/.test(m[1]) && /allow write: if false;/.test(m[1]), 'admin read, no client write');
+};
+
+// ---- the armed scan: click once, it scans every minute, sends ONE order, then switches itself off ----
+function armed(state) {
+  const log = { sets: [], lasts: [] };
+  return {
+    log,
+    get arm() { return state; },
+    setArm: async (p) => { log.sets.push(p); state = { ...state, ...p }; },
+    recordLast: async (r) => { log.lasts.push(r); },
+  };
+}
+const tick = (w, a, over = {}) => live.runArmedTick({
+  quotes: [quote()], active: true, enabled: true, store: w.store, now: NOW, keyId: 'live-key', pem, fetchFn: w.fetchFn,
+  arm: a.arm, setArm: a.setArm, recordLast: a.recordLast, ...over,
+});
+
+gates.L16 = async () => {
+  // Not armed, or past its expiry: nothing happens, and an expired arm is switched off. No request of any kind is made.
+  const w0 = world(); const a0 = armed({ armed: false });
+  assert.strictEqual((await tick(w0, a0)).skipped, 'not armed');
+  assert.strictEqual(w0.calls.length, 0); assert.strictEqual(a0.log.sets.length, 0);
+  const w1 = world(); const a1 = armed(null);
+  assert.strictEqual((await tick(w1, a1, { arm: null })).skipped, 'not armed'); assert.strictEqual(w1.calls.length, 0);
+  const w2 = world(); const a2 = armed({ armed: true, until: NOW - 1 });
+  assert.strictEqual((await tick(w2, a2)).skipped, 'expired');
+  assert.strictEqual(w2.calls.length, 0, 'an expired arm sends nothing');
+  assert.deepStrictEqual([a2.log.sets[0].armed, a2.log.sets[0].endedBecause], [false, 'expired']);
+};
+
+gates.L17 = async () => {
+  // Armed with no qualifying signal: it stays armed and records why, so the page can show it. Nothing is sent.
+  const w = world(); const a = armed({ armed: true, until: NOW + 3600000 });
+  const r = await tick(w, a, { quotes: [] });
+  assert.ok(!r.ok && /No Bitcoin or gold signal/.test(r.reason));
+  assert.strictEqual(a.log.sets.length, 0, 'still armed');
+  assert.strictEqual(a.log.lasts.length, 1); assert.strictEqual(a.log.lasts[0].ok, false); assert.strictEqual(a.log.lasts[0].attempted, false);
+  assert.strictEqual(w.posts.length, 0);
+  // Refused before sending for any guard (price moved, shard empty, halted, daily limit) also stays armed.
+  for (const opts of [{ book: { yes_ask_dollars: '0.46' } }, { balance: { balance_breakdown: [{ balance: '0.0000', exchange_index: 2 }] } }, { halted: true }, { today: 2 }]) {
+    const wx = world(opts); const ax = armed({ armed: true, until: NOW + 3600000 });
+    const rx = await tick(wx, ax);
+    assert.ok(!rx.ok && !rx.attempted && ax.log.sets.length === 0 && wx.posts.length === 0, JSON.stringify([opts, rx]));
+  }
+};
+
+gates.L18 = async () => {
+  // One arming places at most ONE order: it switches off once an order is sent, however many minutes follow.
+  const w = world(); const a = armed({ armed: true, until: NOW + 3600000 });
+  const r = await tick(w, a);
+  assert.ok(r.ok && w.posts.length === 1);
+  assert.deepStrictEqual([a.log.sets[0].armed, a.log.sets[0].endedBecause], [false, 'sent']);
+  for (let i = 1; i <= 5; i++) await tick(w, a, { now: NOW + i * 60000 });
+  assert.strictEqual(w.posts.length, 1, 'five more minutes later, still exactly one order');
+  // A no-fill is still a sent order, so it also disarms.
+  const wn = world({ post: { status: 201, body: { order_id: 'o1', fill_count: '0.00', remaining_count: '0.00' } } });
+  const an = armed({ armed: true, until: NOW + 3600000 });
+  await tick(wn, an); assert.strictEqual(an.arm.armed, false);
+  // A refused (4xx), lost (5xx, timeout) or duplicate (409) answer also disarms: an order may exist, so no more scanning.
+  for (const opts of [{ post: { status: 400, body: { error: 'x' } } }, { post: { status: 503, body: 'x' } }, { postThrows: true }, { post: { status: 409, body: 'x' } }]) {
+    const wx = world(opts); const ax = armed({ armed: true, until: NOW + 3600000 });
+    const rx = await tick(wx, ax);
+    assert.ok(!rx.ok && rx.attempted === true && ax.arm.armed === false && ax.arm.endedBecause === 'attempted', JSON.stringify([opts, rx]));
+    for (let i = 1; i <= 3; i++) await tick(wx, ax, { now: NOW + i * 60000 });
+    assert.strictEqual(wx.posts.length, 1, 'never a second send after an attempt');
+  }
+  // An error mid-scan switches it off and is not swallowed.
+  const we = world(); we.store.halted = async () => { throw new Error('database down'); };
+  const ae = armed({ armed: true, until: NOW + 3600000 });
+  await assert.rejects(() => tick(we, ae), /database down/);
+  assert.deepStrictEqual([ae.arm.armed, ae.arm.endedBecause], [false, 'error']);
+  assert.strictEqual(live.ARM_MS, 3 * 3600 * 1000);
+};
+
+gates.L19 = () => {
+  // Wiring. The arm function only flips a document: no order code, no key. The scheduled one does nothing unless armed.
+  const am = /exports\.kalshiLiveArm = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc);
+  assert.ok(am, 'kalshiLiveArm not found');
+  const a = am[1];
+  assert.ok(a.indexOf('assertKalshiAdmin(request.auth)') > -1 && a.indexOf('assertKalshiAdmin') < a.indexOf('.set('), 'admin check first');
+  assert.ok(!/runLiveTest|runArmedTick|KALSHI_LIVE_KEY|KALSHI_LIVE_PRIVATE|portfolio|fetch/.test(a), 'arming touches no key and sends no request');
+  assert.ok(/request\.data && request\.data\.on === true/.test(a), 'the only thing read from the caller is an explicit true');
+  assert.ok(/KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(a) && /ref\.set\(\{ armed: true, since: now, until: now \+ live\.ARM_MS,/.test(a) && /return \{ armed: true, until: now \+ live\.ARM_MS \}/.test(a), 'refuses while the switch is off, and the expiry written is the server\'s own 3 hours');
+  const sm = /exports\.kalshiLiveArmed = onSchedule\(([\s\S]*?)\n\);/.exec(fnSrc);
+  assert.ok(sm, 'kalshiLiveArmed not found');
+  const s = sm[1];
+  assert.ok(/schedule: "every 1 minutes"/.test(s) && /secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(s) && !/KALSHI_DEMO/.test(s), 'its own live secrets only');
+  assert.ok(/retryCount: 0/.test(s) && !/retryCount: [1-9]/.test(s), 'a failed run is never retried by the platform');
+  const load = s.indexOf('demo.loadQuotes'), guard = s.indexOf('arm.armed === true && arm.until > now');
+  assert.ok(guard > -1 && load > guard, 'prices are loaded only inside the armed branch');
+  assert.ok(/live\.runArmedTick\(args\)/.test(s) && !/live\.runLiveTest/.test(s), 'it only ever goes through runArmedTick');
+  assert.ok(fnSrc.indexOf('exports.kalshiLiveArmed') < fnSrc.indexOf('exports.kalshiBot ='), 'defined before the paper bot, so the no-order-code slice still covers the paper bot');
+  const m = /match \/kalshiLiveControl\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
+  assert.ok(m && /allow read: if isAdmin\(\);/.test(m[1]) && /allow write: if false;/.test(m[1]), 'admin read, no client write');
+  // The page: the arm click only asks, the confirm click is the only one that arms, and it is admin only.
+  const i = html.indexOf("var arm = document.getElementById('kalLiveArm')");
+  assert.ok(i > -1, 'arm wiring not found');
+  const iife = html.slice(i, html.indexOf('})();', i));
+  const first = /arm\.addEventListener\('click', function\(\)\{([\s\S]*?)\}\);/.exec(iife);
+  assert.ok(first && !/kalshiLiveArm\(/.test(first[1]) && /ask\(true\)/.test(first[1]), 'the first click only asks');
+  assert.ok(/yes\.addEventListener\('click'[\s\S]*currentUserIsAdmin[\s\S]*api\.kalshiLiveArm\(true\)/.test(iife), 'the confirm click arms, for the admin only');
+  assert.ok(/kalshiLiveArmFn\(\{ on: on === true \}\)/.test(html), 'the page sends only on or off');
 };
 
 gates.L11 = () => {

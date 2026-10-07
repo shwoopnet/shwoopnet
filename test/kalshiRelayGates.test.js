@@ -41,7 +41,12 @@ gates.G3 = () => {
 gates.G4 = () => {
   assert.ok(!/kalshiRecorder/.test(fnSrc), 'the Firebase recorder must stay removed');
   const scheduled = [...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]);
-  assert.deepStrictEqual(scheduled, ['kalshiBot'], 'the only scheduled function is the paper bot');
+  // Exactly two: the armed live test, which does nothing unless the owner has armed it (kalshiLiveGates L16 to L18),
+  // and the paper bot. The paper bot never holds a secret, and the armed one is defined BEFORE it so the "no order
+  // code after exports.kalshiBot" slice in kalshiBotGates still covers the whole paper bot.
+  assert.deepStrictEqual(scheduled, ['kalshiLiveArmed', 'kalshiBot'], 'only the armed live test and the paper bot are scheduled');
+  const botOpts = /exports\.kalshiBot = onSchedule\(\s*\{([^}]*)\}/.exec(fnSrc);
+  assert.ok(botOpts && !/secrets/.test(botOpts[1]), 'the paper bot is scheduled with no secrets');
 };
 
 // The relay stays read-only and keyless: GET only, nothing to place an order with.
