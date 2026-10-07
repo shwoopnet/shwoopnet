@@ -46,6 +46,9 @@ gates.R2 = async () => {
   assert.ok(Math.abs(d.balance.totalDollars - 98.2) < 1e-9 && d.balance.totalFrom === 'sum of the shards');
   assert.deepStrictEqual(d.positions.positions.map((p) => [p.ticker, p.position]), [['KXBTC15M-26OCT071200-00', 1]]);
   assert.strictEqual(d.fills.fills[0].count, 1); assert.strictEqual(d.fills.fills[0].taker, true); assert.strictEqual(d.fills.fills[0].price, '41');
+  // The order id rides along on each fill, so the page can tell the bot's fills from the owner's own.
+  const withId = await read(world({ fills: world().reply(200, { fills: [{ ticker: 'T', side: 'yes', count: 1, yes_price: 41, order_id: 'ord-123' }, { ticker: 'U', side: 'no', count: 1 }] }) }));
+  assert.deepStrictEqual(withId.fills.fills.map((f) => f.orderId), ['ord-123', null]);
   // With no breakdown only the top-level balance exists, documented in cents, and the page is told which was used.
   const w = world({ balance: world().reply(200, { balance: 9810 }) });
   const b = (await read(w)).balance;
@@ -154,7 +157,10 @@ gates.R6 = () => {
   assert.ok(body.indexOf('assertKalshiAdmin(request.auth)') > -1 && body.indexOf('assertKalshiAdmin') < body.indexOf('readAccount'), 'admin check first');
   assert.ok(!/request\.data/.test(body), 'takes nothing from the caller');
   assert.ok(/secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(body), 'the live secrets');
-  assert.ok(!/KALSHI_LIVE_ENABLED|runLiveTest|runArmedTick/.test(body), 'reading is independent of the order switch and never goes near order code');
+  // Reading never depends on the order switch: the only mention allowed is REPORTING it, and nothing branches on it.
+  assert.ok(/return \{ \.\.\.d, liveSwitch: KALSHI_LIVE_ENABLED\.value\(\) === "on" \};/.test(body), 'the switch is only reported back');
+  assert.ok(!/KALSHI_LIVE_ENABLED/.test(body.replace('liveSwitch: KALSHI_LIVE_ENABLED.value() === "on"', '')), 'no other use of the order switch');
+  assert.ok(!/runLiveTest|runArmedTick/.test(body), 'never goes near order code');
   assert.ok(fnSrc.indexOf('exports.kalshiLiveAccount') < fnSrc.indexOf('exports.kalshiBot ='), 'defined before the paper bot');
   assert.ok(!/KALSHI_LIVE|kalshiAccountLib/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBot ='))), 'the paper bot never sees the live key or the account module');
 };

@@ -2417,21 +2417,21 @@
     finnhubCompanyNews: function(symbol, from, to){
       return finnhubCompanyNewsFn({ symbol: symbol, from: from, to: to }).then(function(res){ return res.data; });
     },
-    // The server-side Kalshi PAPER bot (functions/kalshiBot*). The page can only watch it
-    // and flip a halt switch; firestore.rules lets nobody else write a position or an event.
-    // `h` is { status, control, positions, events }, each a function called on every change.
+    // The halt switch and the quiet server-side PAPER bot's heartbeat (functions/kalshiBot*). The page only watches
+    // them, and flips the halt switch below; firestore.rules lets nobody else write a position or an event. The
+    // paper bot's trades are no longer shown here. `h` is { status, control }, each called on every change.
     watchKalshiBot: function(h){
       var un = [];
       var onErr = function(err){ console.error('Kalshi bot sync error:', err); };
       un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'status'), function(s){ h.status(s.exists() ? s.data() : null); }, onErr));
       un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'control'), function(s){ h.control(s.exists() ? s.data() : {}); }, onErr));
-      un.push(onSnapshot(query(collection(db, 'kalshiBotPositions'), orderBy('entryAt', 'desc'), limit(500)), function(q){
-        h.positions(q.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); }));
-      }, onErr));
-      un.push(onSnapshot(query(collection(db, 'kalshiBotEvents'), orderBy('ts', 'desc'), limit(500)), function(q){
-        h.events(q.docs.map(function(d){ return d.data(); }));
-      }, onErr));
       return function(){ un.forEach(function(f){ f(); }); };
+    },
+    // What the live bot did (armed, disarmed, scan ended), newest first. Written by the server only.
+    watchKalshiLiveEvents: function(cb){
+      return onSnapshot(query(collection(db, 'kalshiLiveEvents'), orderBy('ts', 'desc'), limit(200)), function(q){
+        cb(q.docs.map(function(d){ return d.data(); }));
+      }, function(err){ console.error('Kalshi live events sync error:', err); });
     },
     setKalshiHalt: function(halt){
       return setDoc(doc(db, 'kalshiBotMeta', 'control'), { halt: Boolean(halt), at: serverTimestamp() });
@@ -3283,7 +3283,7 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Kalshi</div>
-        <div class="trades-sub">Trade journal and risk limits for the 15 minute Bitcoin and gold markets. Admin only. Nothing on this page places an order.</div>
+        <div class="trades-sub">Trade journal and risk limits for the 15 minute Bitcoin and gold markets. Admin only. The Bot tab shows your live account and can send one real contract; the Journal and Live books tabs never place anything.</div>
       </div>
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span></div>
     </div>
@@ -3296,21 +3296,21 @@
 
     <div id="kalTabBot">
       <div class="kal-card">
-        <div class="kal-card-title">Server bot</div>
-        <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Waiting for the bot's first report.</div></div>
+        <div class="kal-card-title">Live bot (real money)</div>
+        <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-actions"><button class="kal-btn" id="kalBotHalt" type="button" hidden></button><span class="kal-note" id="kalBotHaltMsg"></span></div>
-        <div class="kal-note">PAPER only: it makes simulated trades from Kalshi's live prices once a minute on Google's servers, and cannot place a real order. Halt stops new entries; positions already open are still managed.</div>
+        <div class="kal-note">This is your real Kalshi account, read every minute while this tab is open. Halt blocks any new live order, including the automatic scan. The old $100 paper bot still runs quietly on the server, and its trades are no longer shown here.</div>
       </div>
       <div class="kal-card">
-        <div class="kal-card-title">Totals since the bot started</div>
-        <div id="kalBotTotals"><div class="kal-empty">No closed trades yet.</div></div>
+        <div class="kal-card-title">Totals since you started fresh</div>
+        <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">Open positions</div>
         <div id="kalBotOpen"></div>
       </div>
       <div class="kal-card">
-        <div class="kal-card-title">Recent closed trades</div>
+        <div class="kal-card-title">Recent trades</div>
         <div id="kalBotClosed"></div>
       </div>
       <div class="kal-card">
@@ -9974,130 +9974,135 @@
     return ageMs < 150000 ? 'OK' : (ageMs < 300000 ? 'STALE' : 'DOWN');
   }
 
-  var kalshiBotState = { status: null, control: {}, positions: [], events: [] };
-  // How many rows each list shows. The data is all there; these only size the view, and the
-  // 'Show more' buttons raise them, so a long history is never silently cut off.
-  var kalshiBotShow = { closed: 15, events: 12 };
+  // What this tab shows is the live account: status, totals since the owner's "start fresh" line, open positions,
+  // recent trades and a log of what the live bot did. The old paper bot keeps running quietly on the server; only
+  // its heartbeat and the halt switch are read here.
+  var kalshiBotState = { status: null, control: {} };
+  var kalshiLiveAcct = null;     // the latest read of the account (the account block below owns the read)
+  var kalshiLiveEvents = [];
+  var kalshiLiveShow = { events: 12 };
   var kalshiBotUnsub = null;
+  var kalshiLiveEventsUnsub = null;
+  var kalshiAcctTimer = null;
+  var kalshiAcctRefresh = function(){};
 
-  // Everything the bot has closed, added up. Pure, so a test can run it on a fixture. Only
-  // closed trades with a numeric pnl count; days are the viewer's local calendar days.
-  function kalshiBotTotals(positions, dayOf){
-    var closed = (positions || []).filter(function(p){ return p && p.status === 'closed' && typeof p.pnl === 'number'; });
-    var out = { n: closed.length, wins: 0, losses: 0, net: 0, grossWin: 0, grossLoss: 0, best: null, worst: null, days: [], first: null };
-    var byDay = {};
-    closed.forEach(function(p){
-      out.net += p.pnl;
-      if(p.pnl > 0){ out.wins++; out.grossWin += p.pnl; } else if(p.pnl < 0){ out.losses++; out.grossLoss += p.pnl; }
-      if(out.best === null || p.pnl > out.best) out.best = p.pnl;
-      if(out.worst === null || p.pnl < out.worst) out.worst = p.pnl;
-      if(out.first === null || p.settledAt < out.first) out.first = p.settledAt;
-      var d = dayOf(p.settledAt);
-      if(!byDay[d]){ byDay[d] = { day: d, trades: 0, net: 0, at: p.settledAt }; }
-      byDay[d].trades++; byDay[d].net += p.pnl;
-      if(p.settledAt > byDay[d].at){ byDay[d].at = p.settledAt; }
+  // Totals since the owner's starting line. Pure, so a test can run it on a fixture. Only the bot's own orders sent
+  // after the line are counted: the account's fills also hold the owner's manual trades, which are not.
+  function kalshiLiveTotals(acct, orders){
+    if(!acct || !acct.baseline){ return null; }
+    var since = acct.baseline.since;
+    var out = { start: acct.baseline.startingDollars, now: null, change: null, since: since, sent: 0, filled: 0, noFill: 0, other: 0,
+      fills: (acct.fills && acct.fills.ok) ? acct.fills.fills.length : null };
+    if(acct.balance && acct.balance.ok && acct.balance.totalDollars !== null){ out.now = acct.balance.totalDollars; }
+    if(typeof acct.changeSinceStart === 'number'){ out.change = acct.changeSinceStart; }
+    (orders || []).forEach(function(o){
+      if(!o || !(o.ts >= since)){ return; }
+      out.sent++;
+      if(o.status === 'filled'){ out.filled++; } else if(o.status === 'no fill'){ out.noFill++; } else { out.other++; }
     });
-    out.days = Object.keys(byDay).map(function(k){ return byDay[k]; }).sort(function(a, b){ return b.at - a.at; });
-    out.net = Math.round(out.net * 100) / 100;
-    out.winRate = out.n ? out.wins / out.n : null;
-    out.perTrade = out.n ? out.net / out.n : null;
-    out.avgWin = out.wins ? out.grossWin / out.wins : null;
-    out.avgLoss = out.losses ? out.grossLoss / out.losses : null;
-    // The share of trades that must win for these average sizes to break even.
-    out.breakEven = (out.avgWin !== null && out.avgLoss !== null) ? -out.avgLoss / (out.avgWin - out.avgLoss) : null;
     return out;
   }
 
+  // Whether a fill came from a bot order. The only link is the order id the bot saved when it sent each one.
+  function kalshiFillIsBot(fill, orders){
+    if(!fill || !fill.orderId){ return false; }
+    return (orders || []).some(function(o){ return o && o.orderId && o.orderId === fill.orderId; });
+  }
+
   function renderKalshiBot(){
-    var s = kalshiBotState.status;
+    var a = kalshiLiveAcct, c = kalshiLiveCtl, now = Date.now();
     var el = document.getElementById('kalBotStatus');
     var halted = kalshiBotState.control && kalshiBotState.control.halt === true;
-    if(!s){
-      el.innerHTML = '<div class="kal-big">Not running yet</div><div>The bot has not reported. After the next deploy it reports within a minute.</div>';
+    var haltUnset = !kalshiBotState.control || kalshiBotState.control.halt === undefined;
+    var armed = !!(c.arm && c.arm.armed === true && c.arm.until > now);
+    var h = '<div class="kal-big kal-warn">LIVE: real money</div>';
+    if(!a){
+      h += '<div>Reading the account...</div>';
+    } else if(!a.balance || !a.balance.ok){
+      h += '<div class="kal-neg">The account could not be read: ' + escapeHtml(a.balance ? ('HTTP ' + a.balance.status + ' ' + (a.balance.error || '')) : 'no balance') + '</div>';
     } else {
-      var age = Date.now() - s.lastTickMs;
-      var h = kalshiBotHealth(age);
-      var cls = h === 'OK' ? 'kal-pos' : (h === 'STALE' ? 'kal-warn' : 'kal-neg');
-      var secs = Math.max(0, Math.round(age / 1000));
-      var tier = { ok: 'Within limits', half: 'Half size after a break', break: 'On a break', done: 'Done for today' }[s.tierMode] || s.tierMode;
-      el.innerHTML = '<div class="kal-big ' + cls + '">Bot: ' + h + '</div>' +
-        '<div>Last run ' + (secs < 120 ? secs + 's' : Math.round(secs / 60) + ' min') + ' ago &middot; PAPER, no real orders &middot; bankroll ' + kalshiMoney(s.bankroll) + '</div>' +
-        '<div>' + escapeHtml(tier) + ' &middot; today ' + kalshiMoney(s.pnlToday) + ' &middot; ' + kalshiMoney(s.perTradeCap) + ' a trade &middot; break at -' + kalshiMoney(s.softLimit) + ' &middot; done at -' + kalshiMoney(s.hardLimit) + '</div>' +
-        (s.closedCounted === undefined ? '' : '<div class="kal-status">Limits counted ' + s.closedCounted + ' closed trade' + (s.closedCounted === 1 ? '' : 's') + ' since ' + new Date(s.dayStart).toLocaleString() + '</div>') +
-        '<div>' + (s.exchangeActive ? 'Exchange trading' : 'Exchange not trading') + (s.ok ? '' : ' &middot; <span class="kal-neg">prices unreadable: ' + escapeHtml(s.error || '') + '</span>') +
-        (s.lastBlock ? ' &middot; entries blocked: ' + escapeHtml(s.lastBlock) : '') + '</div>';
+      var shards = a.balance.shards.filter(function(x){ return x.dollars > 0; }).map(function(x){ return 'shard ' + x.shard + ' ' + kalshiMoney(x.dollars); }).join(', ');
+      h += '<div>Account ' + (a.balance.totalDollars === null ? 'balance unknown' : '<b>' + kalshiMoney(a.balance.totalDollars) + '</b>') +
+        (shards ? ' &middot; ' + escapeHtml(shards) : '') + ' &middot; read ' + new Date(a.at).toLocaleTimeString() + '</div>';
     }
-    // Shown the moment the switch is flipped, not only after the bot's next run reports it.
+    if(a){ h += '<div>Order switch on the server: <b>' + (a.liveSwitch ? 'ON' : 'OFF (nothing can be sent)') + '</b></div>'; }
+    h += '<div>Automatic scan: ' + (armed
+      ? '<b class="kal-pos">ARMED</b> until ' + new Date(c.arm.until).toLocaleTimeString() + ' (one order at most)'
+      : 'not armed' + (c.arm && c.arm.endedBecause ? ', last ended: ' + escapeHtml(String(c.arm.endedBecause)) : '')) + '</div>';
+    if(c.last){
+      h += '<div class="kal-status">Last scan ' + new Date(c.last.ts).toLocaleTimeString() + ': ' +
+        escapeHtml(c.last.ok ? 'order sent' + (c.last.filled ? ' and filled' : ', no fill') : String(c.last.reason || 'nothing sent').slice(0, 220)) + '</div>';
+    }
+    var ps = kalshiBotState.status;
+    if(ps && Number.isFinite(ps.lastTickMs)){ h += '<div class="kal-status">Paper bot (running quietly, not shown): ' + kalshiBotHealth(now - ps.lastTickMs) + '</div>'; }
+    el.innerHTML = h;
+    // Shown the moment the switch is flipped, not only after the next read.
     if(halted){ el.innerHTML += '<div class="kal-warn kal-big">Halted from this page: no new entries</div>'; }
+    // The live scan treats a halt setting that was never saved as halted, so say so instead of showing "not halted".
+    if(haltUnset){ el.innerHTML += '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted. Press Halt, then Resume, once.</div>'; }
     var btn = document.getElementById('kalBotHalt');
     btn.hidden = !currentUserIsAdmin;
     btn.textContent = halted ? 'Resume new entries' : 'Halt new entries';
-    var pos = kalshiBotState.positions;
-    var tot = kalshiBotTotals(pos, function(ms){ return new Date(ms).toLocaleDateString(); });
+
+    var tot = kalshiLiveTotals(a, kalshiLiveOrders);
     var totEl = document.getElementById('kalBotTotals');
-    if(!tot.n){
-      totEl.innerHTML = '<div class="kal-empty">No closed trades yet.</div>';
+    if(!a){
+      totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
+    } else if(!tot){
+      totEl.innerHTML = '<div class="kal-empty">No starting line yet. Press "Start fresh from now" in the account card below, so this counts only the bot.</div>';
     } else {
-      var pct = function(x){ return x === null ? 'n/a' : (x * 100).toFixed(0) + '%'; };
       var cell = function(label, value, cls){ return '<div><span class="kal-lbl">' + label + '</span><span class="' + (cls || '') + '">' + value + '</span></div>'; };
       totEl.innerHTML =
         '<div class="kal-trade kal-sum">' +
-          cell('Net P&amp;L', kalshiMoney(tot.net), tot.net >= 0 ? 'kal-pos kal-big' : 'kal-neg kal-big') +
-          cell('Closed trades', String(tot.n)) +
-          cell('Won / lost', tot.wins + ' / ' + tot.losses) +
-          cell('Win rate', pct(tot.winRate)) +
-          cell('Net per trade', kalshiMoney(tot.perTrade), tot.perTrade >= 0 ? 'kal-pos' : 'kal-neg') +
+          cell('Change since start', tot.change === null ? 'n/a' : (tot.change >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tot.change)), tot.change === null ? '' : (tot.change >= 0 ? 'kal-pos kal-big' : 'kal-neg kal-big')) +
+          cell('Starting balance', kalshiMoney(tot.start)) +
+          cell('Now', tot.now === null ? 'n/a' : kalshiMoney(tot.now)) +
         '</div>' +
         '<div class="kal-trade kal-sum">' +
-          cell('Average win', tot.avgWin === null ? 'n/a' : kalshiMoney(tot.avgWin)) +
-          cell('Average loss', tot.avgLoss === null ? 'n/a' : kalshiMoney(tot.avgLoss)) +
-          cell('Needs to win', pct(tot.breakEven)) +
-          cell('Best / worst', kalshiMoney(tot.best) + ' / ' + kalshiMoney(tot.worst)) +
-          cell('Days traded', String(tot.days.length)) +
+          cell('Bot orders sent', String(tot.sent)) +
+          cell('Filled / no fill', tot.filled + ' / ' + tot.noFill) +
+          cell('Other (needs a look)', String(tot.other), tot.other ? 'kal-warn' : '') +
+          cell('Fills since start', tot.fills === null ? 'n/a' : String(tot.fills)) +
         '</div>' +
-        '<div class="kal-note">Bar before any real money: 300 paper trades over at least 5 days (' + tot.n + ' trades over ' + tot.days.length + ' day' + (tot.days.length === 1 ? '' : 's') + ' so far), positive after fees. ' +
-        'Since ' + new Date(tot.first).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) + '.' +
-        (pos.length >= 500 ? ' Counted from the newest 500 trades only.' : '') + '</div>' +
-        '<div class="kal-note">By day (your local time)</div>' +
-        tot.days.map(function(d){
-          return '<div class="kal-trade kal-sum"><div class="kal-name">' + escapeHtml(d.day) + '</div>' +
-            '<div><span class="kal-lbl">Trades</span>' + d.trades + '</div>' +
-            '<div class="' + (d.net >= 0 ? 'kal-pos' : 'kal-neg') + '"><span class="kal-lbl">Net</span>' + kalshiMoney(d.net) + '</div></div>';
-        }).join('');
+        '<div class="kal-note">Since ' + escapeHtml(new Date(tot.since).toLocaleString()) + '. The change includes any deposit or withdrawal, and any manual trade you make on the account.</div>';
     }
-    var open = pos.filter(function(p){ return p.status === 'open'; });
-    var closed = pos.filter(function(p){ return p.status === 'closed'; })
-      .sort(function(a, b){ return b.settledAt - a.settledAt; });
-    var closedTotal = closed.length;
-    closed = closed.slice(0, kalshiBotShow.closed);
-    var name = function(p){ return (p.series === 'KXBTC15M' ? 'Bitcoin' : 'Gold') + ' ' + (p.side === 'yes' ? 'Up' : 'Down'); };
-    document.getElementById('kalBotOpen').innerHTML = open.length ? open.map(function(p){
-      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(name(p)) + '</div><span class="kal-lbl">' + escapeHtml(p.ticker) + '</span></div>' +
-        '<div><span class="kal-lbl">Bought</span>' + p.contracts + ' at ' + (p.entry * 100).toFixed(1) + 'c</div>' +
-        '<div><span class="kal-lbl">Band</span>' + escapeHtml(p.band) + '</div>' +
-        '<div><span class="kal-lbl">Opened</span>' + new Date(p.entryAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) + '</div></div>';
-    }).join('') : '<div class="kal-empty">No open positions.</div>';
-    document.getElementById('kalBotClosed').innerHTML = closed.length ? closed.map(function(p){
-      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(name(p)) + '</div><span class="kal-lbl">' + escapeHtml(p.ticker) + '</span></div>' +
-        '<div><span class="kal-lbl">Bought</span>' + p.contracts + ' at ' + (p.entry * 100).toFixed(1) + 'c</div>' +
-        '<div><span class="kal-lbl">Ended</span>' + (p.exit === 0.8 ? 'sold at 80c' : (p.exit === 1 ? 'won' : 'lost')) + '</div>' +
-        '<div class="' + (p.pnl >= 0 ? 'kal-pos' : 'kal-neg') + '"><span class="kal-lbl">Net</span>' + kalshiMoney(p.pnl) + '</div></div>';
-    }).join('') + (closedTotal > closed.length
-      ? '<div class="kal-note">Showing ' + closed.length + ' of ' + closedTotal + ' closed trades. <button type="button" class="kal-btn" data-more="closed">Show more</button></div>'
-      : (closedTotal > 15 ? '<div class="kal-note">All ' + closedTotal + ' closed trades shown.</div>' : '')) : '<div class="kal-empty">No closed trades yet.</div>';
-    var evAll = kalshiBotState.events, evShown = evAll.slice(0, kalshiBotShow.events);
+
+    var posEl = document.getElementById('kalBotOpen');
+    if(!a){ posEl.innerHTML = ''; }
+    else if(!a.positions || !a.positions.ok){ posEl.innerHTML = '<div class="kal-note">Could not read positions: ' + escapeHtml(a.positions ? 'HTTP ' + a.positions.status + ' ' + (a.positions.error || '') : '') + '</div>'; }
+    else { posEl.innerHTML = a.positions.positions.length ? a.positions.positions.map(function(x){
+      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(x.ticker) + '</div></div>' +
+        '<div><span class="kal-lbl">Held</span>' + escapeHtml(String(x.position)) + ' contracts</div>' +
+        '<div><span class="kal-lbl">Realized</span>' + (x.realizedPnl === null ? 'n/a' : escapeHtml(x.realizedPnl)) + '</div>' +
+        '<div><span class="kal-lbl">Fees</span>' + (x.feesPaid === null ? 'n/a' : escapeHtml(x.feesPaid)) + '</div></div>';
+    }).join('') : '<div class="kal-empty">No open positions.</div>'; }
+
+    var trEl = document.getElementById('kalBotClosed');
+    if(!a){ trEl.innerHTML = ''; }
+    else if(!a.fills || !a.fills.ok){ trEl.innerHTML = '<div class="kal-note">Could not read fills: ' + escapeHtml(a.fills ? 'HTTP ' + a.fills.status + ' ' + (a.fills.error || '') : '') + '</div>'; }
+    else {
+      trEl.innerHTML = (a.fills.fills.length ? a.fills.fills.map(function(x){
+        var bot = kalshiFillIsBot(x, kalshiLiveOrders);
+        return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(String(x.ticker)) + '</div><span class="kal-lbl">' + escapeHtml(x.time ? new Date(x.time).toLocaleString() : '') + '</span></div>' +
+          '<div><span class="kal-lbl">Fill</span>' + escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '') + '</div>' +
+          '<div><span class="kal-lbl">From</span>' + (bot ? 'bot' : 'manual') + '</div></div>';
+      }).join('') : '<div class="kal-empty">No fills since your starting line.</div>') +
+        (a.fills.hiddenBeforeBaseline ? '<div class="kal-note">' + a.fills.hiddenBeforeBaseline + ' earlier fill' + (a.fills.hiddenBeforeBaseline === 1 ? ' is' : 's are') + ' hidden (before your starting line).</div>' : '');
+    }
+
+    var evAll = kalshiLiveEvents.concat((kalshiLiveOrders || []).map(function(o){
+      return { ts: o.ts, kind: 'order', detail: String(o.side) + ' ' + String(o.count) + ' at ' + (o.price * 100).toFixed(0) + 'c on ' + String(o.ticker) + ': ' + String(o.status || '') };
+    })).sort(function(x, y){ return y.ts - x.ts; });
+    var evShown = evAll.slice(0, kalshiLiveShow.events);
     document.getElementById('kalBotEvents').innerHTML = evAll.length ? evShown.map(function(e){
-      return '<div class="kal-tnote">' + new Date(e.ts).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) + ' &middot; ' + escapeHtml(e.kind) + ' &middot; ' + escapeHtml(e.detail) + '</div>';
+      return '<div class="kal-tnote">' + new Date(e.ts).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) + ' &middot; ' + escapeHtml(e.kind) + ' &middot; ' + escapeHtml(e.detail) + '</div>';
     }).join('') + (evAll.length > evShown.length
       ? '<div class="kal-note">Showing ' + evShown.length + ' of ' + evAll.length + ' events. <button type="button" class="kal-btn" data-more="events">Show more</button></div>'
       : '') : '<div class="kal-empty">Nothing yet.</div>';
   }
-  // One listener for both 'Show more' buttons; they are re-created on every render.
-  document.getElementById('kalBotClosed').addEventListener('click', function(e){
-    if(e.target && e.target.getAttribute('data-more') === 'closed'){ kalshiBotShow.closed += 50; renderKalshiBot(); }
-  });
+  // The 'Show more' button is re-created on every render, so one listener on its container does it.
   document.getElementById('kalBotEvents').addEventListener('click', function(e){
-    if(e.target && e.target.getAttribute('data-more') === 'events'){ kalshiBotShow.events += 50; renderKalshiBot(); }
+    if(e.target && e.target.getAttribute('data-more') === 'events'){ kalshiLiveShow.events += 50; renderKalshiBot(); }
   });
 
   var kalshiLiveCtl = { arm: null, last: null };
@@ -10130,17 +10135,21 @@
     if(!api || !api.watchKalshiBot || !currentUserIsAdmin){ return; }
     kalshiBotUnsub = api.watchKalshiBot({
       status: function(s){ kalshiBotState.status = s; renderKalshiBot(); },
-      control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); },
-      positions: function(p){ kalshiBotState.positions = p; renderKalshiBot(); },
-      events: function(e){ kalshiBotState.events = e; renderKalshiBot(); }
+      control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); }
     });
-    if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiLive(); }); }
-    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last }; renderKalshiLiveArm(); }); }
+    if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiLive(); renderKalshiBot(); }); }
+    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last }; renderKalshiLiveArm(); renderKalshiBot(); }); }
+    if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
+    // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
+    kalshiAcctRefresh();
+    kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 60000);
   }
   function stopKalshiBot(){
     if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }
     if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
+    if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
+    if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
   setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
@@ -10214,6 +10223,7 @@
         (err ? '<div class="kal-note">Could not read: ' + escapeHtml(err) + '</div>' : (rows.length ? rows.join('') : '<div class="kal-empty">None.</div>')) + '</div>';
     }
     function render(d){
+      kalshiLiveAcct = d; renderKalshiBot();
       var b = d.balance, p = d.positions, f = d.fills;
       var shardRows = (b.ok ? b.shards : []).map(function(s){
         return '<div class="kal-note">Shard ' + escapeHtml(String(s.shard)) + ': <b>' + money(s.dollars) + '</b></div>';
@@ -10258,15 +10268,17 @@
         }).then(function(){ yes.disabled = no.disabled = false; });
       });
     })();
-    btn.addEventListener('click', function(){
+    function load(){
       var api = window.__shwoopAPI;
-      if(!api || !api.kalshiLiveAccount || !currentUserIsAdmin){ return; }
+      if(!api || !api.kalshiLiveAccount || !currentUserIsAdmin || btn.disabled){ return; }
       btn.disabled = true;
       msg.textContent = 'Reading the account...';
       api.kalshiLiveAccount().then(render).catch(function(err){
         msg.textContent = 'Could not read the account: ' + ((err && err.message) || 'unknown');
       }).then(function(){ btn.disabled = false; });
-    });
+    }
+    btn.addEventListener('click', load);
+    kalshiAcctRefresh = load;
   })();
 
   var kalshiTab = 'bot';

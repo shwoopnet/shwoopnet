@@ -241,9 +241,12 @@ async function runLiveTest({ quotes, active, enabled, store, now, keyId, pem, fe
 // than one order. A refusal before sending (no signal, price moved, shard empty) leaves it armed to try again.
 async function runArmedTick(args) {
   const { arm, now, setArm, recordLast } = args;
+  // The log is for the owner's page only. A failure to write it must never change what the scan does.
+  const log = async (kind, detail) => { if (args.logEvent) { try { await args.logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
   if (!arm || arm.armed !== true) return { skipped: "not armed" };
   if (!(arm.until > now)) {
     await setArm({ armed: false, endedAt: now, endedBecause: "expired" });
+    await log("scan ended", "expired after 3 hours with nothing sent");
     return { skipped: "expired" };
   }
   let r;
@@ -252,13 +255,17 @@ async function runArmedTick(args) {
   } catch (e) {
     await setArm({ armed: false, endedAt: now, endedBecause: "error" });
     await recordLast({ ts: now, ok: false, attempted: false, reason: "The scan stopped on an error: " + String((e && e.message) || e).slice(0, 120) });
+    await log("scan ended", "stopped on an error: " + String((e && e.message) || e).slice(0, 100));
     throw e;
   }
   await recordLast({
     ts: now, ok: r.ok === true, attempted: r.ok === true || r.attempted === true, reason: r.reason || null,
     ticker: r.ticker || null, filled: r.filled === true, fillCount: r.fillCount || null,
   });
-  if (r.ok === true || r.attempted === true) await setArm({ armed: false, endedAt: now, endedBecause: r.ok === true ? "sent" : "attempted" });
+  if (r.ok === true || r.attempted === true) {
+    await setArm({ armed: false, endedAt: now, endedBecause: r.ok === true ? "sent" : "attempted" });
+    await log("scan ended", r.ok === true ? "order sent" + (r.filled ? " and filled" : ", no fill") : "an order was attempted and needs a look: " + String(r.reason || "").slice(0, 100));
+  }
   return r;
 }
 
