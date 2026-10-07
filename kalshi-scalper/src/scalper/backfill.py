@@ -27,7 +27,7 @@ from .paths import DB
 
 SERIES = ("KXBTC15M", "KXGOLD15M")
 MAX_DAYS = 40
-PAUSE_S = 0.25  # stay inside Kalshi's public read limits; _get also waits out any 429
+PAUSE_S = 0.6  # stay inside Kalshi public read limits; _get also waits out any 429
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS market(
@@ -66,7 +66,7 @@ def parse_candle(c: dict, ticker: str, series: str) -> tuple | None:
             _d(p, "close_dollars"), api.f(c.get("volume_fp")), api.f(c.get("open_interest_fp")))
 
 
-BATCH = 50   # markets per candles request: 50 x about 16 candles is far under the endpoint's 10,000 candle limit
+BATCH = 20   # markets per candles request. The endpoint counts (window in minutes x tickers) against a 10,000 limit and answers 400 above it; 20 markets span about 300 minutes, so 6,000
 
 
 def _fetch(db: sqlite3.Connection, lo: int, hi: int, label: str, skip_empty: bool = False) -> tuple[int, int, int]:
@@ -86,9 +86,14 @@ def _fetch(db: sqlite3.Connection, lo: int, hi: int, label: str, skip_empty: boo
             o, c = iso_ts(m.get("open_time")), iso_ts(m.get("close_time"))
             if o is not None and c is not None:
                 todo.append((m, o, c))
+        todo.sort(key=lambda x: x[2])      # consecutive markets together, so a batch's window stays short
         for i in range(0, len(todo), BATCH):
             chunk = todo[i:i + BATCH]
-            got = api.batch_candlesticks([m["ticker"] for m, _, _ in chunk], min(o for _, o, _ in chunk), max(c for _, _, c in chunk))
+            try:
+                got = api.batch_candlesticks([m["ticker"] for m, _, _ in chunk], min(o for _, o, _ in chunk), max(c for _, _, c in chunk))
+            except RuntimeError as e:         # e.g. a window too wide for the endpoint: fall back to one request per market
+                print(f"  batch failed ({str(e)[-60:]}), fetching this chunk one by one", flush=True)
+                got = {m["ticker"]: api.candlesticks(series, m["ticker"], o, c) for m, o, c in chunk}
             for m, o, c in chunk:
                 t = m["ticker"]
                 rows = [r for r in (parse_candle(x, t, series) for x in got.get(t, [])) if r]

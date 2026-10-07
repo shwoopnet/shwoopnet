@@ -1242,12 +1242,25 @@ _api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES = _fa
 try:
     _db13 = _sq13.connect(":memory:"); _db13.executescript(_bf.SCHEMA)
     _st, _sk, _em = _bf._fetch(_db13, 0, 1, "test", skip_empty=True)
-    assert max(_calls13) <= _bf.BATCH and len(_calls13) == 3, ("120 markets go in batches of at most 50", _calls13)
+    assert max(_calls13) <= _bf.BATCH == 20 and len(_calls13) == 6, ("120 markets go in batches of at most 20", _calls13)
     assert (_st, _sk, _em) == (119, 0, 1), "a market with no candles is not stored when skip_empty is on"
     assert _db13.execute("SELECT COUNT(*) FROM market").fetchone()[0] == 119 and _db13.execute("SELECT COUNT(*) FROM candle").fetchone()[0] == 119
     _calls13.clear()
     _st2, _sk2, _ = _bf._fetch(_db13, 0, 1, "again", skip_empty=True)
-    assert _st2 == 0 and _sk2 == 119 and len(_calls13) == 1, "stored markets are never fetched again"
+    assert _st2 == 0 and _sk2 == 119 and len(_calls13) == 1, "stored markets are never fetched again (only the one empty market is retried)"
 finally:
     _api13.settled_markets, _api13.batch_candlesticks, _bf.PAUSE_S, _bf.SERIES = _o13
+# A batch the endpoint refuses falls back to one request per market instead of losing the chunk.
+def _bad_batch(tickers, a, b):
+    raise RuntimeError("GET /markets/candlesticks failed: HTTP Error 400: Bad Request")
+def _one(series, ticker, a, b):
+    return [{"end_period_ts": 1000, "yes_bid": {"close_dollars": "0.40"}, "yes_ask": {"close_dollars": "0.42"}}]
+_o14 = (_api13.settled_markets, _api13.batch_candlesticks, _api13.candlesticks, _bf.PAUSE_S, _bf.SERIES)
+_api13.settled_markets, _api13.batch_candlesticks, _api13.candlesticks, _bf.PAUSE_S, _bf.SERIES = _fake_settled, _bad_batch, _one, 0, ("KXBTC15M",)
+try:
+    _db14 = _sq13.connect(":memory:"); _db14.executescript(_bf.SCHEMA)
+    _st3, _, _ = _bf._fetch(_db14, 0, 1, "fallback")
+    assert _st3 == 120 and _db14.execute("SELECT COUNT(*) FROM candle").fetchone()[0] == 120, "every market stored via the fallback"
+finally:
+    _api13.settled_markets, _api13.batch_candlesticks, _api13.candlesticks, _bf.PAUSE_S, _bf.SERIES = _o14
 print("batched backfill tests passed")
