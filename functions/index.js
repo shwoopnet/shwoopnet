@@ -274,29 +274,35 @@ exports.kalshiLiveTrade = onCall(
 // ---- Kalshi account view (read only, admin only) -----------------------------------------------------------------
 // Balance per shard, open positions and recent fills, read with the live key. GET requests only and no order code
 // (kalshiAccountLib.js); it works whether or not the live test switch is on, and takes nothing from the page.
+// Balance, positions, fills and the settled result of each fill's market. Shared by the page's callable and the
+// once-a-minute snapshot, so both show the same thing. Reads only.
+async function readAccountFull(db) {
+  const snap = await db.collection("kalshiLiveControl").doc("baseline").get();
+  const d = await account.readAccount({
+    fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
+    baseline: snap.exists ? snap.data() : null,
+  });
+  // How each market of the fills shown ended ("yes", "no", or null while it is still open), so the page can show a profit or loss on
+  // every trade line. A public read of the market, one per ticker, never an order; a failed read just leaves that trade "open".
+  const results = {};
+  const tickers = [...new Set(((d.fills && d.fills.ok && d.fills.fills) || []).map((f) => f.ticker).filter(Boolean))].slice(0, 20);
+  await Promise.all(tickers.map(async (t) => {
+    try {
+      const m = (await kalshiGetJson("/markets/" + encodeURIComponent(t))).market || {};
+      results[t] = m.result === "yes" || m.result === "no" ? m.result : null;
+    } catch (e) { results[t] = null; }
+  }));
+  // Whether the order switch is on, so the page can say so. It reveals nothing but "on" or "off".
+  return { ...d, results, liveSwitch: KALSHI_LIVE_ENABLED.value() === "on" };
+}
+
 exports.kalshiLiveAccount = onCall(
   { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30 },
   async (request) => {
     await assertKalshiAdmin(request.auth);
     ensureDefaultAdminApp();
     try {
-      const snap = await getFirestore().collection("kalshiLiveControl").doc("baseline").get();
-      const d = await account.readAccount({
-        fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
-        baseline: snap.exists ? snap.data() : null,
-      });
-      // How each market of the fills shown ended ("yes", "no", or null while it is still open), so the page can show a profit or loss on
-      // every trade line. A public read of the market, one per ticker, never an order; a failed read just leaves that trade "open".
-      const results = {};
-      const tickers = [...new Set(((d.fills && d.fills.ok && d.fills.fills) || []).map((f) => f.ticker).filter(Boolean))].slice(0, 20);
-      await Promise.all(tickers.map(async (t) => {
-        try {
-          const m = (await kalshiGetJson("/markets/" + encodeURIComponent(t))).market || {};
-          results[t] = m.result === "yes" || m.result === "no" ? m.result : null;
-        } catch (e) { results[t] = null; }
-      }));
-      // Whether the order switch is on, so the page can say so. It reveals nothing but "on" or "off".
-      return { ...d, results, liveSwitch: KALSHI_LIVE_ENABLED.value() === "on" };
+      return await readAccountFull(getFirestore());
     } catch (e) {
       if (e instanceof HttpsError) throw e;
       throw new HttpsError("internal", "Account read failed: " + String((e && e.message) || e).slice(0, 120));
@@ -427,6 +433,18 @@ exports.kalshiLiveArmed = onSchedule(
           quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
         });
+      }
+      // Keep the account page current while nobody has it open: the latest read is stored for the page to show the
+      // moment it loads, at the minutes where the account can change (see snapshotDue). This runs after the tick and can never fail it: a bad read is logged and the minute still counts.
+      try {
+        const accRef = db.collection("kalshiLiveControl").doc("account");
+        const prev = await accRef.get();
+        if (account.snapshotDue(now, prev.exists ? prev.data().at : NaN)) {
+          const full = await readAccountFull(db);
+          await accRef.set(JSON.parse(JSON.stringify(full)));
+        }
+      } catch (e) {
+        console.error("kalshiLiveArmed: account snapshot failed: " + String((e && e.message) || e).slice(0, 160));
       }
     } catch (e) {
       failure = e;
