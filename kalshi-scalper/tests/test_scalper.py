@@ -1147,3 +1147,61 @@ import re as _re12
 _c12 = _re12.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_se.__file__).read())
 assert not _re12.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c12)
 assert not _re12.search(r"place_order|/portfolio/", _c12)
+
+# ---- overnight run: windows, the survivor test, and a pipeline that can say yes and can say no ----
+import tempfile as _tf3, random as _rn3
+from pathlib import Path as _P3
+from scalper import overnight as _ov
+
+def _world(edge, seed, old_days=24, orig_days=30, new_days=2, per_day=60):
+    g = _rn3.Random(seed); out = []
+    def day(base_ts, di):
+        for k in range(per_day):
+            p = g.choice([0.2, 0.4, 0.6, 0.8])
+            win = p + (edge if abs(p - 0.4) < 1e-9 else 0.0)
+            res = "yes" if g.random() < win else "no"
+            close = base_ts + di * 86400 + 3600 + k * 900
+            cs = [(close - 60 * L, round(p - 0.01, 4), round(p + 0.01, 4), round(p - 0.01, 4), round(p + 0.01, 4)) for L in _se.LEFTS]
+            out.append(("W%d_%d_%d" % (base_ts % 1000, di, k), "KXBTC15M" if k % 2 else "KXGOLD15M", cs, close, res))
+    for d in range(old_days): day(_ov.ORIG_START - old_days * 86400 - 3600 + 0, d)
+    for d in range(orig_days): day(_ov.ORIG_START + 3600, d)
+    for d in range(new_days): day(_ov.ORIG_END + 3600, d)
+    return _se.prep(out)
+
+_ms = _world(0.0, 1)
+_w = _ov.windows(_ms)
+assert set(_w) == {"W0s", "W0h", "W1", "W2", "W3"} and all(_w.values())
+assert all(m["close"] < _ov.ORIG_START for m in _w["W0s"] + _w["W0h"]), "W0 is the older data"
+assert all(_ov.ORIG_START <= m["close"] <= _ov.ORIG_END for m in _w["W1"] + _w["W2"]) and all(m["close"] > _ov.ORIG_END for m in _w["W3"])
+assert max(m["day"] for m in _w["W0s"]) < min(m["day"] for m in _w["W0h"]), "the locked third is the latest"
+_nd = len({m["day"] for m in _w["W0s"] + _w["W0h"]})
+assert (len({m["day"] for m in _w["W0s"]}), len({m["day"] for m in _w["W0h"]})) == (round(_nd * 2 / 3), _nd - round(_nd * 2 / 3)), "two thirds search, one third locked"
+assert max(m["day"] for m in _w["W1"]) < min(m["day"] for m in _w["W2"])
+assert not ({m["ticker"] for m in _w["W0s"]} & {m["ticker"] for m in _w["W0h"]})
+
+# The survivor test: a real edge passes, a fair game does not, and each way of failing fails.
+_edge = _world(0.15, 2); _ew = _ov.windows(_edge); _fw = _ov.windows(_world(0.0, 3))
+_r = {"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []}
+_yes = _ov.survivor(_r, [_ew["W0h"], _ew["W1"], _ew["W2"]])
+assert _yes["survivor"] and _yes["pooled_z"] >= 2.5 and all(p["mean"] > 0 for p in _yes["per_window"]), _yes
+_no = _ov.survivor(_r, [_fw["W0h"], _fw["W1"], _fw["W2"]])
+assert not _no["survivor"], _no
+assert not _ov.survivor(_r, [_ew["W0h"], _ew["W1"], _fw["W2"]])["survivor"], "one window with no edge fails the rule"
+assert not _ov.survivor(_r, [_ew["W0h"][:30], _ew["W1"], _ew["W2"]])["survivor"], "a window with fewer than 50 entries fails, however good its mean"
+assert _ov.survivor(_r, [_ew["W0h"], _ew["W1"], _ew["W2"]])["survivor"], "while the full window passes"
+
+# THE pipeline guard: with a real edge planted the search finds survivors; on a fair market it finds none, and neither does its control.
+import json as _js3
+with _tf3.TemporaryDirectory() as _empty, _tf3.TemporaryDirectory() as _saved:
+    (_P3(_saved) / "cycle1_A_top25.json").write_text(_js3.dumps([{"spec": {**_r, "filters": []}}]))
+    _res_a = _ov.run(_edge, seed=4, cycles=1, first_dir=_P3(_saved))
+    assert len(_res_a["stageA"]) == 1 and len(_res_a["stageA"][0]["per_window"]) == 3, "a stage A rule is judged on the three windows it did not search"
+    assert _res_a["stageA"][0]["per_window"][0]["n"] == len(_ov.observations(_ov.windows(_edge)["W0s"], _res_a["stageA"][0]["rule"])), "the first is W0s"
+    _res_e = _ov.run(_edge, seed=4, cycles=2, first_dir=_P3(_empty))
+    _res_f = _ov.run(_world(0.0, 5), seed=4, cycles=2, first_dir=_P3(_empty))
+assert any(r["survivor"] for r in _res_e["stageB"]), "a planted edge must be found out of sample"
+assert all(len(r["per_window"]) == 3 for r in _res_e["stageB"]), "a stage B rule is judged on W0h, W1 and W2"
+assert not any(r["survivor"] for r in _res_f["stageB"]) and not any(r["survivor"] for r in _res_f["control"]), "a fair market must produce no survivor"
+assert not any(r["survivor"] for r in _res_e["control"]), "the control of an edge world is a fair market too"
+assert _res_f["evaluated_B"] >= 200
+print("overnight tests passed")
