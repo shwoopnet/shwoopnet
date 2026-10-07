@@ -246,6 +246,16 @@ assert abs(simulate(nope, CLOSE, "no", B40)["net"] - (-0.40 - sfee(0.40))) < 1e-
 # The NO side is bought at 1 minus the YES bid and sold when the YES ask falls to 20c.
 n = simulate([cd(60, 0.59, 0.61), cd(120, 0.18, 0.20)], CLOSE, "yes", B40)
 assert n["side"] == "no" and abs(n["ask"] - 0.41) < 1e-9 and n["outcome"] == "target"
+# A NO entry at exactly 42c (YES bid 58c) is in the 40c band. In floating point
+# 1 - 0.58 is 0.42000000000000004, which used to fail "<= 0.42" and skip the trade.
+e42 = simulate([cd(60, 0.58, 0.60)], CLOSE, "no", B40)
+assert e42 is not None and e42["side"] == "no" and e42["ask"] == 0.42
+# Same at the 50c band's top edge, and a NO exit fires at exactly an 80c NO bid.
+assert simulate([cd(60, 0.48, 0.54)], CLOSE, "no", BANDS["50c"])["ask"] == 0.52
+assert simulate([cd(60, 0.58, 0.60), cd(120, 0.18, 0.20)], CLOSE, "yes", B40)["outcome"] == "target"
+# Rounding must not widen a band: 43c and 37c on the NO side are still skipped.
+assert simulate([cd(60, 0.57, 0.65)], CLOSE, "no", B40) is None
+assert simulate([cd(60, 0.63, 0.70)], CLOSE, "no", B40) is None
 # No entry: outside the band, under 5 minutes left, or an unusable quote.
 assert simulate([cd(60, 0.55, 0.57)], CLOSE, "yes", B40) is None
 assert simulate([cd(CLOSE - 240, 0.39, 0.40)], CLOSE, "yes", B40) is None

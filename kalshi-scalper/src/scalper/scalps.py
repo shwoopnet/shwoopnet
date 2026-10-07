@@ -69,7 +69,10 @@ def fee(price: float, mult: float = 1.0) -> float:
 def sides(c: tuple) -> dict:
     """Per side: ask, closing bid, bid high. c = (end, bid_c, ask_c, bid_h, ask_l)."""
     _, bid, ask, bid_h, ask_l = c
-    return {"yes": (ask, bid, bid_h), "no": (1 - bid, 1 - ask, None if ask_l is None else 1 - ask_l)}
+    # Snapped to 4 places: 1 - 0.58 is 0.42000000000000004, which fails "<= 0.42", so a NO
+    # entry at exactly 42c was skipped while the same price on the YES side was taken.
+    def no(x): return round(1 - x, 4)
+    return {"yes": (ask, bid, bid_h), "no": (no(bid), no(ask), None if ask_l is None else no(ask_l))}
 
 
 def simulate(candles: list[tuple], close_ts: int, result: str, band: tuple[float, float],
