@@ -980,3 +980,81 @@ assert "describe(est)" in _src7 and "describe(test)" not in _src7 and "describe(
 assert not _re7.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _src7)
 assert not _re7.search(r"place_order|/portfolio/", _src7), "research code never touches an order endpoint"
 print("distance tests passed")
+
+# ---- L1, L2, L3 ----
+import random as _rn
+from scalper import lstrats as _ls
+from scalper import distance as _di
+
+# Band edges are inclusive, and a NO price of exactly 97c survives floating point (1 - 0.03 must count as 0.97).
+assert _ls.favorite(0.87, 0.88, (0.88, 0.97)) == ("yes", 0.88)
+assert _ls.favorite(0.96, 0.97, (0.88, 0.97)) == ("yes", 0.97)
+assert _ls.favorite(0.97, 0.98, (0.88, 0.97)) is None, "98c is outside the L1 band"
+assert _ls.favorite(0.03, 0.04, (0.88, 0.97)) == ("no", 0.97)
+assert _ls.favorite(0.58, 0.60, (0.38, 0.42)) == ("no", 0.42), "1 - 0.58 is 0.42000000000000004 in floating point and must still be inside a band ending at 0.42"
+assert _ls.favorite(0.001, 1.0, (0.88, 0.97)) is None, "an empty book is not a quote"
+assert _ls.favorite(0.50, 0.52, (0.88, 0.97)) is None
+
+def _mk(ticker, close, bid, ask, res, left=360, series="KXBTC15M", extra=()):
+    cs = [(close - left, bid, ask, bid, ask)] + list(extra)
+    return (ticker, series, cs, close, res)
+
+# One observation per market, taken from the candle that ends EXACTLY left_s before the close: a nearby minute is never substituted.
+_C = 1_790_000_000 - (1_790_000_000 % 900)
+_m = [_mk("A", _C, 0.89, 0.90, "yes"),
+      _mk("B", _C + 900, 0.89, 0.90, "yes", left=420),      # the quote is a minute too early: no observation
+      _mk("C", _C + 1800, 0.89, 0.90, "")]                  # unresolved: no observation
+_r = _ls.hold_rule(_m, **_ls.L1)
+assert [o["ticker"] for o in _r] == ["A"], _r
+assert abs(_r[0]["net"] - (1.0 - 0.90 - _ls.fee(0.90))) < 1e-12, "a win nets 1 - price - entry fee"
+_l = _ls.hold_rule([_mk("D", _C, 0.89, 0.90, "no")], **_ls.L1)
+assert abs(_l[0]["net"] - (-0.90 - _ls.fee(0.90))) < 1e-12, "a loss costs the whole price plus the fee"
+assert _l[0]["stress"] < _l[0]["net"], "higher fees must cost more"
+
+# THE simulator guard: in a FAIR game (the true win rate equals the midpoint) holding favorites must LOSE about its costs,
+# the half spread plus the fee. A profit here would mean the simulator invents an edge.
+_g = _rn.Random(7)
+_fair = []
+for _i in range(4000):
+    _p = _g.choice([0.90, 0.92, 0.94])
+    _res = "yes" if _g.random() < _p else "no"
+    _fair.append(_mk(f"F{_i}", _C + 900 * _i, round(_p - 0.01, 4), round(_p + 0.01, 4), _res))
+_fr = _ls.hold_rule(_fair, **_ls.L1)
+_mean = sum(o["net"] for o in _fr) / len(_fr)
+assert len(_fr) > 3000 and -0.035 < _mean < -0.005, _mean
+assert _ls.verdict(_fr)[0] == "FALSIFIED", "a fair game must never pass"
+assert _ls.verdict(_fr[:100])[0] == "NOT_ENOUGH_DATA"
+
+# A rule that truly beats its price (favorite wins 5 points more than priced) passes: the verdict can say yes.
+_edge = []
+for _i in range(1500):
+    _res = "yes" if _g.random() < 0.97 else "no"
+    _edge.append(_mk(f"E{_i}", _C + 900 * _i, 0.89, 0.90, _res))
+assert _ls.verdict(_ls.hold_rule(_edge, **_ls.L1))[0] == "NOT_YET_FALSIFIED"
+
+# L2: a fixture where spot sits far above the target, so H7 buys YES at the ask once its estimation half has seen YES win.
+import math as _mt
+_N = 120
+_spot = {_C - 4020 + 60 * i: 110.0 * (1 + 0.0005 * _mt.sin(i)) for i in range((_N * 15) + 200)}
+def _l2m(i, later_bid, same_minute_bid=0.40, result="yes"):
+    close = _C + 900 * (i + 5)
+    q = {close - 360: (same_minute_bid, same_minute_bid + 0.01)}
+    if later_bid is not None:
+        q[close - 300] = (later_bid, later_bid + 0.01)
+    return ("T%d" % i, close, 100.0, result, q)
+_l2 = [_l2m(i, None) for i in range(_N // 2)] + [_l2m(_N // 2, 0.85), _l2m(_N // 2 + 1, 0.50), _l2m(_N // 2 + 2, None, same_minute_bid=0.85)] \
+      + [_l2m(i, None) for i in range(_N // 2 + 3, _N)]
+# The decision minute's own 85c bid must not trigger the exit (strictly later); only a LATER close at 80c or more does.
+_x = {e["ticker"]: e for e in _ls.l2_rule(_l2, _spot)}
+_exp = lambda m: _ls.EXIT - _ls.fee(_ls.EXIT, m) - 0.41 - _ls.fee(0.41, m)
+assert "T%d" % (_N // 2) in _x and _x["T%d" % (_N // 2)]["exited"], "a later close at 85c sells at 80c"
+assert abs(_x["T%d" % (_N // 2)]["net"] - (_ls.EXIT - _ls.fee(_ls.EXIT) - 0.41 - _ls.fee(0.41))) < 1e-12, "the exit is priced at 80c, not at the 85c bid"
+assert not _x["T%d" % (_N // 2 + 1)]["exited"] and abs(_x["T%d" % (_N // 2 + 1)]["net"] - _ls.net("yes", 0.41, True)) < 1e-12, "no 80c touch means hold to settlement"
+assert "T%d" % (_N // 2 + 2) not in _x or not _x["T%d" % (_N // 2 + 2)]["exited"], "the decision minute itself never exits"
+
+print("L1 L2 L3 tests passed")
+
+import re as _re11
+_c11 = _re11.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_ls.__file__).read())
+assert not _re11.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED)\b", _c11)
+assert not _re11.search(r"place_order|/portfolio/", _c11), "research code never touches an order endpoint"

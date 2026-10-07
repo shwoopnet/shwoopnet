@@ -712,8 +712,8 @@ code on a simulated FAIR game and requires it to lose about its costs; a profit 
 - **Counterparty.** Whoever buys the cheap side (3c to 12c) and overpays for the small chance, the retail longshot buyer.
 - **Prediction.** Mean net at least +0.5c per contract. The fee at 90c is only 0.63c, so a small bias could survive it.
 - **Prior, stated honestly.** Low. At the ask the spread (1c to 2c at the extremes) is paid on entry, and these are liquid
-  markets near the money-making and the minute-level price reflects spot distance. It would need the favorite to win a few
-  points more often than its price says.
+  markets whose price already reflects spot distance. It would need the favorite to win a few points more often than its
+  price says.
 
 **L2. H7's entries with H2's exit (sell at 80c).**
 - **Rule.** Take exactly the markets H7 would enter (its decision at 6 minutes left, its estimation half builds the bucket
