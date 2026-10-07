@@ -1993,6 +1993,7 @@
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
   var kalshiLiveTradeFn = httpsCallable(functions, 'kalshiLiveTrade');
   var kalshiLiveArmFn = httpsCallable(functions, 'kalshiLiveArm');
+  var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
   var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
 
@@ -2465,12 +2466,16 @@
     kalshiLiveArm: function(on){
       return kalshiLiveArmFn({ on: on === true }).then(function(res){ return res.data; });
     },
+    kalshiL1Session: function(on){
+      return kalshiL1SessionFn({ on: on === true }).then(function(res){ return res.data; });
+    },
     watchKalshiLiveControl: function(cb){
-      var st = { arm: null, last: null };
+      var st = { arm: null, last: null, session: null };
       var onErr = function(err){ console.error('Kalshi live control sync error:', err); };
       var un = [
         onSnapshot(doc(db, 'kalshiLiveControl', 'arm'), function(s){ st.arm = s.exists() ? s.data() : null; cb(st); }, onErr),
-        onSnapshot(doc(db, 'kalshiLiveControl', 'last'), function(s){ st.last = s.exists() ? s.data() : null; cb(st); }, onErr)
+        onSnapshot(doc(db, 'kalshiLiveControl', 'last'), function(s){ st.last = s.exists() ? s.data() : null; cb(st); }, onErr),
+        onSnapshot(doc(db, 'kalshiLiveControl', 'session'), function(s){ st.session = s.exists() ? s.data() : null; cb(st); }, onErr)
       ];
       return function(){ un.forEach(function(f){ f(); }); };
     },
@@ -3310,6 +3315,20 @@
       <div class="kal-card">
         <div class="kal-card-title">Totals since you started fresh</div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
+      </div>
+      <div class="kal-card">
+        <div class="kal-card-title">24 hour L1 session (real money)</div>
+        <div class="kal-note kal-first">Buys ONE contract about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, and holds it to settlement. At most 80 orders. Stops by itself after 24 hours, at $7.00 below the starting cash, or on any order that goes wrong.</div>
+        <div class="kal-actions">
+          <button class="kal-btn" id="kalL1Start" type="button">Start 24 hour session</button>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, one contract at a time (up to $2.00 each), for 24 hours, with no further click.</span> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <button class="kal-btn" id="kalL1Stop" type="button" hidden>Stop now</button>
+        </div>
+        <div id="kalL1Status" class="kal-note">Not running.</div>
+        <div class="kal-note" id="kalL1Msg"></div>
+        <details class="kal-more"><summary>What this is and is not</summary>
+          <div class="kal-note">This is strategy L1 exactly as written down before it ran. It failed its own test (z 1.45 against a bar of 2.1), so this is your decision to run it, not evidence that it works. A day of about 55 trades is mostly noise: expect plus or minus about $2, and the run is a test of fills, fees and timing. Halting from this page, the server switch and an unresolved order all block it. Worst case is roughly $9.</div>
+        </details>
       </div>
       <div class="kal-card">
         <div class="kal-card-title">Place a live trade (real money)</div>
@@ -10105,7 +10124,7 @@
     if(e.target && e.target.getAttribute('data-more') === 'events'){ kalshiLiveShow.events += 50; renderKalshiBot(); }
   });
 
-  var kalshiLiveCtl = { arm: null, last: null };
+  var kalshiLiveCtl = { arm: null, last: null, session: null };
   var kalshiLiveCtlUnsub = null;
   function renderKalshiLiveArm(){
     var a = kalshiLiveCtl.arm, l = kalshiLiveCtl.last, now = Date.now();
@@ -10117,6 +10136,23 @@
     document.getElementById('kalLiveArm').hidden = armed;
     document.getElementById('kalLiveDisarm').hidden = !armed;
     if(armed){ document.getElementById('kalLiveArmConfirm').hidden = true; }
+  }
+  // The 24 hour L1 session: status from the session document the server keeps; the page only starts and stops it.
+  function renderKalshiL1(){
+    var s = kalshiLiveCtl.session, now = Date.now();
+    var running = !!(s && s.active === true && s.until > now);
+    var t;
+    if(running){
+      t = 'RUNNING until ' + new Date(s.until).toLocaleString() + '. Orders sent ' + (s.ordersSent || 0) + ' of 80.' +
+        (Number.isFinite(s.startCash) ? ' Cash at start $' + s.startCash.toFixed(2) + ', stops below $' + (s.startCash - 7).toFixed(2) + '.' : '') +
+        (s.lastNote ? ' ' + s.lastNote : '');
+    } else {
+      t = 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '');
+    }
+    document.getElementById('kalL1Status').textContent = t;
+    document.getElementById('kalL1Start').hidden = running;
+    document.getElementById('kalL1Stop').hidden = !running;
+    if(running){ document.getElementById('kalL1Confirm').hidden = true; }
   }
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
@@ -10137,7 +10173,7 @@
       control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); }
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiLive(); renderKalshiBot(); }); }
-    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last }; renderKalshiLiveArm(); renderKalshiBot(); }); }
+    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; renderKalshiLiveArm(); renderKalshiL1(); renderKalshiBot(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
@@ -10209,6 +10245,33 @@
       if(!api || !api.kalshiLiveArm || !currentUserIsAdmin){ return; }
       api.kalshiLiveArm(false).then(function(){ msg.textContent = 'Disarmed.'; }).catch(function(err){
         msg.textContent = 'Could not disarm: ' + ((err && err.message) || 'unknown');
+      });
+    });
+  })();
+
+  // Starting the 24 hour session asks twice, like arming: the first click only asks, the confirm click is the only one that starts it.
+  (function(){
+    var start = document.getElementById('kalL1Start'), box = document.getElementById('kalL1Confirm'), msg = document.getElementById('kalL1Msg');
+    var yes = document.getElementById('kalL1Yes'), no = document.getElementById('kalL1No'), stop = document.getElementById('kalL1Stop');
+    function ask(on){ box.hidden = !on; start.hidden = on; }
+    start.addEventListener('click', function(){ msg.textContent = ''; ask(true); });
+    no.addEventListener('click', function(){ ask(false); });
+    yes.addEventListener('click', function(){
+      var api = window.__shwoopAPI;
+      if(!api || !api.kalshiL1Session || !currentUserIsAdmin){ return; }
+      yes.disabled = no.disabled = true;
+      msg.textContent = 'Starting...';
+      api.kalshiL1Session(true).then(function(){
+        msg.textContent = 'Started. You can close this page: the server does the trading.';
+      }).catch(function(err){
+        msg.textContent = 'Not started: ' + ((err && err.message) || 'unknown');
+      }).then(function(){ yes.disabled = no.disabled = false; ask(false); renderKalshiL1(); });
+    });
+    stop.addEventListener('click', function(){
+      var api = window.__shwoopAPI;
+      if(!api || !api.kalshiL1Session || !currentUserIsAdmin){ return; }
+      api.kalshiL1Session(false).then(function(){ msg.textContent = 'Stopped. Open positions settle on their own.'; }).catch(function(err){
+        msg.textContent = 'Could not stop: ' + ((err && err.message) || 'unknown');
       });
     });
   })();

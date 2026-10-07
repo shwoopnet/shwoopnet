@@ -205,3 +205,22 @@ This replaces the old Firebase recorder removed on 2026-10-05, which only reache
 CDN refuses from Google Cloud. `external-api.kalshi.com` works from there (the bots use it), and the
 status doc shows errors per minute if that ever changes. Stop it with
 `firebase functions:delete kalshiBookRecorder --region us-central1`.
+
+## The 24 hour L1 session (Oct 7, 2026)
+
+The owner's automatic run of strategy L1 in the live account. The terms are in `kalshi-scalper/README.md` under "Live waiver: L1 for
+24 hours", written before the code. L1 failed its own bar, so this is a decision to run it, not evidence that it works.
+
+- **What it does.** About 6 minutes before each Bitcoin or gold 15 minute close (330 to 400 seconds left), it re-reads the market and,
+  if a side's fresh price is 88c to 97c, buys ONE contract at the touch, immediate-or-cancel, and holds it to settlement. One order per
+  market (id `L1-<ticker>`, record created first), production host only, never retried.
+- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 80 orders, 24 hours, and the session ends when cash falls $7.00 below its
+  level at the first tick (a $5 loss allowance plus up to $2 in open positions). It also ends on the first order whose answer is lost or
+  refused, and while an earlier order is unresolved. The server switch, the halt switch and the shard balance all still apply.
+- **Start and stop** from the Bot tab ("24 hour L1 session", two clicks to start). It cannot run beside a single armed test order, and
+  each refuses to start while the other is on. The scheduled `kalshiLiveArmed` function runs it every minute and pings the watchdog.
+- **Deploy:** `firebase deploy --only functions:kalshiL1Session,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`.
+  `KALSHI_LIVE_ENABLED` must be `on` in `functions/.env`. Its orders appear in the same list as the test orders, so they count toward the
+  one-contract test's limit of 5 ever; after a session the single test button will say the limit is reached.
+- **Reading it.** Net result after fees plus the counts of fills, no fills and refusals. About 55 trades a day, so a day is noise (plus or
+  minus about $2); it tests fills, fees and timing.

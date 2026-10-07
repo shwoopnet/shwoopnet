@@ -340,10 +340,41 @@ exports.kalshiLiveArm = onCall(async (request) => {
   if (KALSHI_LIVE_ENABLED.value() !== "on") {
     throw new HttpsError("failed-precondition", "Live test trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to arm.");
   }
+  const sess = await getFirestore().collection("kalshiLiveControl").doc("session").get();
+  if (sess.exists && sess.data().active === true && sess.data().until > Date.now()) {
+    throw new HttpsError("failed-precondition", "The 24 hour L1 session is running. Stop it before arming a single test order.");
+  }
   const now = Date.now();
   await ref.set({ armed: true, since: now, until: now + live.ARM_MS, endedAt: null, endedBecause: null });
   await events.add({ ts: now, kind: "armed", detail: "scanning every minute for up to 3 hours, one order at most" });
   return { armed: true, until: now + live.ARM_MS };
+});
+
+// The owner's 24 hour L1 session (README: "Live waiver: L1 for 24 hours"). This only switches the session document
+// on or off, with a server-set expiry; the scheduled function below does the work, and every limit is in kalshiLiveLib.js.
+exports.kalshiL1Session = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  ensureDefaultAdminApp();
+  const on = request.data && request.data.on === true;
+  const db = getFirestore();
+  const ref = db.collection("kalshiLiveControl").doc("session");
+  const events = db.collection("kalshiLiveEvents");
+  if (!on) {
+    await ref.set({ active: false, endedAt: Date.now(), endedBecause: "switched off by the owner" }, { merge: true });
+    await events.add({ ts: Date.now(), kind: "session ended", detail: "switched off by you" });
+    return { active: false };
+  }
+  if (KALSHI_LIVE_ENABLED.value() !== "on") {
+    throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to start.");
+  }
+  const arm = await db.collection("kalshiLiveControl").doc("arm").get();
+  if (arm.exists && arm.data().armed === true && arm.data().until > Date.now()) {
+    throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the 24 hour session.");
+  }
+  const now = Date.now();
+  await ref.set({ active: true, since: now, until: now + live.L1_SESSION_MS, ordersSent: 0, startCash: null, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
+  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours: one contract at 88c to 97c about 6 minutes before the close, at most " + live.L1_MAX_ORDERS + " orders, stops at $" + live.L1_LOSS_STOP.toFixed(2) + " below the starting cash" });
+  return { active: true, until: now + live.L1_SESSION_MS };
 });
 
 exports.kalshiLiveArmed = onSchedule(
@@ -364,14 +395,29 @@ exports.kalshiLiveArmed = onSchedule(
         recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
         logEvent: (e) => db.collection("kalshiLiveEvents").add(e),
       };
-      if (arm && arm.armed === true && arm.until > now) {
-        const { active, quotes } = await live.loadQuotes(kalshiMarketApi());
+      const armedOn = Boolean(arm && arm.armed === true && arm.until > now);
+      const sessRef = db.collection("kalshiLiveControl").doc("session");
+      const sessSnap = await sessRef.get();
+      const session = sessSnap.exists ? sessSnap.data() : null;
+      const sessionOn = Boolean(session && session.active === true);
+      let market = null;
+      if (armedOn || sessionOn) market = await live.loadQuotes(kalshiMarketApi());
+      if (armedOn) {
         Object.assign(args, {
-          quotes, active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
+          quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
         });
       }
       await live.runArmedTick(args);
+      // A single armed test order and the session never run together; the callables refuse to start one while the
+      // other is on, and if both documents say "on" anyway, the session does nothing this minute.
+      if (sessionOn && !armedOn) {
+        await live.runL1Tick({
+          session, now, setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent,
+          quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
+          keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
+        });
+      }
     } catch (e) {
       failure = e;
     }
