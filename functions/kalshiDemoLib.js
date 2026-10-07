@@ -31,6 +31,9 @@ const API_ROOT = "/trade-api/v2";
 const TEST_CAP = 1.0;            // dollars, fee included
 const MIN_LEFT_MS = 120000;      // a market must have at least this long to run
 const COOLDOWN_MS = 60000;       // a second test within a minute of the last is refused
+// The demo's gold market (KXGOLD15M) has almost no resting orders, so a test there only ever reports "nothing to
+// trade against". The paper bot still watches both markets; only this one-off test is limited to Bitcoin.
+const DEMO_SERIES = ["KXBTC15M"];
 const CROSS_TOLERANCE = 0.05;    // dollars: how far the demo's own price may sit from the live signal price
 const RETRY_DELAYS_MS = [500, 1500];   // a transient failure is retried twice before giving up
 
@@ -202,7 +205,9 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn, sl
   const last = await store.lastTestAt();
   if (last && now - last < COOLDOWN_MS) return no("A test was sent less than a minute ago. Wait a moment.");
 
-  const signals = bot.planEntries(quotes, now, TEST_CAP);
+  const all = bot.planEntries(quotes, now, TEST_CAP);
+  const signals = all.filter((s) => DEMO_SERIES.includes(s.series));
+  if (!signals.length && all.length) return no("There is a signal, but only on gold, and the demo's gold market is too thin to test against. The demo test trades Bitcoin only. Try again in a few minutes.");
   if (!signals.length) return no("No signal right now: no market is at a 40c or 50c price with a tradable book. Try again in a few minutes.");
 
   // Say so plainly if the demo exchange is down, before anything is recorded. Kalshi's demo has gone down for
@@ -299,6 +304,6 @@ async function runDemoTest({ quotes, active, store, now, keyId, pem, fetchFn, sl
 }
 
 module.exports = {
-  DEMO_BASE, TEST_CAP, CROSS_TOLERANCE, crossPlan, COOLDOWN_MS, NotDemo, assertDemo, signRequest, demoRequest, orderFor, orderBody,
+  DEMO_BASE, TEST_CAP, DEMO_SERIES, CROSS_TOLERANCE, crossPlan, COOLDOWN_MS, NotDemo, assertDemo, signRequest, demoRequest, orderFor, orderBody,
   fundedShards, loadQuotes, runDemoTest,
 };

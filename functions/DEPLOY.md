@@ -141,6 +141,9 @@ live price and the one-contract cost still fits the $1 cap. If the demo book is 
 from the live price, nothing is sent or recorded and the page says why. Redeploy `kalshiDemoTrade` after
 pulling this: `firebase deploy --only functions:kalshiDemoTrade`.
 
+The test trades Bitcoin (`KXBTC15M`) only: the demo's gold market has too few resting orders to fill against.
+The paper bot is unaffected and still watches both markets.
+
 Set the two secrets BEFORE deploying, or the deploy fails (use a fresh demo key, not one that has been
 pasted into a chat, and never commit it):
 

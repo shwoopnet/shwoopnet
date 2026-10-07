@@ -49,10 +49,10 @@ gates.D2 = async () => {
 
 // ---- the order ----
 gates.D3 = () => {
-  const yes = { ticker: 'KXGOLD15M-A', side: 'yes', price: 0.40, contracts: 2, band: '40c' };
-  assert.deepStrictEqual(demo.orderBody(yes, 't-KXGOLD15M-A', 0), {
-    ticker: 'KXGOLD15M-A', side: 'bid', count: '2', price: '0.40', time_in_force: 'immediate_or_cancel',
-    self_trade_prevention_type: 'taker_at_cross', client_order_id: 't-KXGOLD15M-A', exchange_index: 0 });
+  const yes = { ticker: 'KXBTC15M-A', side: 'yes', price: 0.40, contracts: 2, band: '40c' };
+  assert.deepStrictEqual(demo.orderBody(yes, 't-KXBTC15M-A', 0), {
+    ticker: 'KXBTC15M-A', side: 'bid', count: '2', price: '0.40', time_in_force: 'immediate_or_cancel',
+    self_trade_prevention_type: 'taker_at_cross', client_order_id: 't-KXBTC15M-A', exchange_index: 0 });
   // Buying NO at 48c is selling YES at 52c on the YES book.
   const no = demo.orderBody({ ticker: 'T', side: 'no', price: 0.48, contracts: 2, band: '50c' }, 'c');
   assert.ok(no.side === 'ask' && no.price === '0.52' && !('exchange_index' in no), JSON.stringify(no));
@@ -67,8 +67,8 @@ gates.D4 = () => {
 };
 
 // ---- the flow, against a scripted demo exchange ----
-const quote = (over = {}) => ({ series: 'KXGOLD15M', m: Object.assign({
-  ticker: 'KXGOLD15M-26OCT061400-00', status: 'active', close_time: iso(NOW + 13 * 60000),
+const quote = (over = {}) => ({ series: 'KXBTC15M', m: Object.assign({
+  ticker: 'KXBTC15M-26OCT061400-00', status: 'active', close_time: iso(NOW + 13 * 60000),
   yes_bid_dollars: '0.38', yes_ask_dollars: '0.40', yes_bid_size_fp: '50', yes_ask_size_fp: '50' }, over) });
 
 function world(opts = {}) {
@@ -113,9 +113,9 @@ gates.D5 = async () => {
   const r = await run(w);
   assert.ok(r.ok && r.filled && r.count === 2 && r.sentSide === 'bid' && r.sentPrice === '0.40', JSON.stringify(r));
   assert.strictEqual(w.posts.length, 1);
-  assert.strictEqual(w.posts[0].client_order_id, 't-KXGOLD15M-26OCT061400-00', 'derived from the market, never random');
+  assert.strictEqual(w.posts[0].client_order_id, 't-KXBTC15M-26OCT061400-00', 'derived from the market, never random');
   assert.strictEqual(w.posts[0].exchange_index, 0);
-  const rec = w.docs.get('t-KXGOLD15M-26OCT061400-00');
+  const rec = w.docs.get('t-KXBTC15M-26OCT061400-00');
   assert.ok(rec.status === 'filled' && rec.orderId === 'ord-1' && rec.mode === 'demo');
   const post = w.calls.find((c) => c.method === 'POST');
   assert.ok(post.url.startsWith('https://external-api.demo.kalshi.co/'));
@@ -142,9 +142,9 @@ gates.D7 = async () => {
   const w = world({ post: { status: 409, body: { error: { code: 'order_already_exists', message: 'order already exists' } } } });
   const r = await run(w);
   assert.ok(!r.ok && /already has an order/.test(r.reason), 'a 409 whose order cannot be found is reported, not crashed on');
-  assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'duplicate refused');
+  assert.strictEqual(w.docs.get('t-KXBTC15M-26OCT061400-00').status, 'duplicate refused');
   const w2 = world({ post: { status: 409, body: { error: { code: 'order_already_exists' } } } });
-  w2.orders.set('t-KXGOLD15M-26OCT061400-00', { order_id: 'ord-9', client_order_id: 't-KXGOLD15M-26OCT061400-00', status: 'canceled', fill_count_fp: '0.00' });
+  w2.orders.set('t-KXBTC15M-26OCT061400-00', { order_id: 'ord-9', client_order_id: 't-KXBTC15M-26OCT061400-00', status: 'canceled', fill_count_fp: '0.00' });
   const r2 = await run(w2);
   assert.ok(r2.ok && r2.recovered && r2.orderId === 'ord-9' && !r2.filled, 'the existing order is reported as it stands: ' + JSON.stringify(r2));
 };
@@ -170,12 +170,12 @@ gates.D8 = async () => {
 gates.D9 = async () => {
   const w = world({ post: { status: 400, body: { error: { code: 'invalid_order' } } } });
   const r = await run(w);
-  assert.ok(!r.ok && /HTTP 400/.test(r.reason) && w.docs.get('t-KXGOLD15M-26OCT061400-00').status === 'error' && w.posts.length === 1, 'a 400 is not retried');
+  assert.ok(!r.ok && /HTTP 400/.test(r.reason) && w.docs.get('t-KXBTC15M-26OCT061400-00').status === 'error' && w.posts.length === 1, 'a 400 is not retried');
   const again = await run(w, { now: NOW + 5 * 60000 });
   assert.ok(!again.ok && /already sent/.test(again.reason) && w.posts.length === 1, 'and it blocks the market');
   // A crash after the record and before any answer leaves "sending", which blocks: nothing is sent twice.
   const w2 = world();
-  await w2.store.createTest('t-KXGOLD15M-26OCT061400-00', { ts: NOW - 120000, status: 'sending' });
+  await w2.store.createTest('t-KXBTC15M-26OCT061400-00', { ts: NOW - 120000, status: 'sending' });
   const stuck = await run(w2);
   assert.ok(!stuck.ok && /already sent/.test(stuck.reason) && w2.posts.length === 0);
 };
@@ -196,12 +196,12 @@ gates.D13 = async () => {
   const r = await run(w);
   assert.ok(!r.ok && /not answering \(HTTP 503\)/.test(r.reason), r.reason);
   assert.strictEqual(w.posts.length, 6, 'three attempts in the one call, each tried on both demo front doors');
-  assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'unavailable');
+  assert.strictEqual(w.docs.get('t-KXBTC15M-26OCT061400-00').status, 'unavailable');
   assert.strictEqual(w.orders.size, 0, 'nothing was placed');
   const retry = await run(w, { now: NOW + 5 * 60000 });
   assert.ok(retry.ok && w.orders.size === 1, 'the next press goes through once the exchange is back: ' + JSON.stringify(retry));
   assert.ok(new Set(w.posts.map((p) => p.client_order_id)).size === 1, 'every attempt carried the same order id');
-  assert.strictEqual(w.docs.get('t-KXGOLD15M-26OCT061400-00').status, 'filled');
+  assert.strictEqual(w.docs.get('t-KXBTC15M-26OCT061400-00').status, 'filled');
   // One retry inside the call is enough when the exchange recovers at once.
   const w2 = world({ postSeq: [{ status: 503, body: {} }] });
   const r2 = await run(w2);
@@ -217,7 +217,7 @@ gates.D14 = async () => {
   assert.ok(r.filled && r.fillCount === '2.00');
   const w2 = world({ netDown: true });
   const down = await run(w2);
-  assert.ok(!down.ok && w2.docs.get('t-KXGOLD15M-26OCT061400-00').status === 'unavailable' && w2.posts.length === 6, 'a network failure is retried on both front doors, then marked unavailable');
+  assert.ok(!down.ok && w2.docs.get('t-KXBTC15M-26OCT061400-00').status === 'unavailable' && w2.posts.length === 6, 'a network failure is retried on both front doors, then marked unavailable');
 };
 
 // Kalshi's recommended demo host returned 503 while the other demo host kept trading (2026-10-06). The order must go
@@ -277,6 +277,19 @@ gates.D18 = () => {
   assert.ok(shrunk.ok && shrunk.signal.contracts === 1, 'two contracts at 49c break the cap, so one is sent: ' + JSON.stringify(shrunk));
   assert.strictEqual(demo.CROSS_TOLERANCE, 0.05);
   assert.ok(demo.crossPlan(sig, { yes_ask_dollars: '0.45' }).ok && !demo.crossPlan(sig, { yes_ask_dollars: '0.46' }).ok, 'the tolerance is 5c, no more');
+};
+
+// The demo's gold market is too thin to test against, so the one-off test trades Bitcoin only.
+gates.D19 = async () => {
+  const gold = { series: 'KXGOLD15M', m: { ...quote().m, ticker: 'KXGOLD15M-26OCT061400-00' } };
+  const w = world();
+  const g = await run(w, { quotes: [gold] });
+  assert.ok(!g.ok && /only on gold/.test(g.reason) && w.posts.length === 0 && w.docs.size === 0, JSON.stringify(g));
+  // With both live, Bitcoin is the one that is sent, whatever the order.
+  const w2 = world();
+  const r = await run(w2, { quotes: [gold, quote()] });
+  assert.ok(r.ok && r.ticker.startsWith('KXBTC15M') && w2.posts[0].ticker.startsWith('KXBTC15M'), JSON.stringify(r));
+  assert.deepStrictEqual(demo.DEMO_SERIES, ['KXBTC15M']);
 };
 
 // ---- wiring: where the order code may live ----
