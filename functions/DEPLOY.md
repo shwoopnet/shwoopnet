@@ -218,3 +218,17 @@ visible: three GET requests, read only. Without a starting line the totals say s
 - Deploy: `firebase deploy --only functions:kalshiLiveAccount,functions:kalshiLiveArm,functions:kalshiLiveArmed,firestore:rules`.
   Do it when the scan is not armed: redeploying `kalshiLiveArmed` restarts it for a moment.
 
+
+## Order-book recorder (`kalshiBookRecorder`, read only)
+
+Scheduled once a minute; inside each run it takes about 5 snapshots, 10 seconds apart, of the real
+order book of the open Bitcoin and gold 15 minute markets. No key, no order code, no secrets.
+One Firestore document per minute (`kalshiBookSnaps/bk-<minute>`, admin read only), 10 days kept,
+and a heartbeat at `kalshiBookMeta/status` (`lastTickMs`, `snaps`, `errs`). About 1,440 writes a day.
+
+    firebase deploy --only functions:kalshiBookRecorder,firestore:rules
+
+This replaces the old Firebase recorder removed on 2026-10-05, which only reached the host Kalshi's
+CDN refuses from Google Cloud. `external-api.kalshi.com` works from there (the bots use it), and the
+status doc shows errors per minute if that ever changes. Stop it with
+`firebase functions:delete kalshiBookRecorder --region us-central1`.

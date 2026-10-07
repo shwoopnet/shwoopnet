@@ -84,6 +84,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const botRun = require("./kalshiBotRun");
 const alerts = require("./kalshiAlertLib");
 const live = require("./kalshiLiveLib");
+const book = require("./kalshiBookLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
 
@@ -413,6 +414,30 @@ exports.kalshiLiveArmed = onSchedule(
       });
     }
     await live.runArmedTick(args);
+  }
+);
+
+// Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
+// (see kalshiBookLib.js). READ ONLY and keyless. It stays out of the paper bot's code: defined BEFORE
+// exports.kalshiBot, so the "no order code after exports.kalshiBot" slice still covers only the bot.
+exports.kalshiBookRecorder = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 58, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const snaps = db.collection("kalshiBookSnaps");
+    const r = await book.recordMinute({
+      get: kalshiGetJson, now: Date.now, sleep: (ms) => new Promise((res) => setTimeout(res, ms)),
+      store: {
+        writeMinute: (id, doc) => snaps.doc(id).set(doc),
+        async pruneBefore(ts) {
+          const old = await snaps.where("ts", "<", ts).limit(50).get();
+          await Promise.all(old.docs.map((d) => d.ref.delete()));
+        },
+        setStatus: (st) => db.collection("kalshiBookMeta").doc("status").set(st),
+      },
+    });
+    console.log("kalshiBookRecorder: snaps=" + r.snaps + " errs=" + r.errs);
   }
 );
 

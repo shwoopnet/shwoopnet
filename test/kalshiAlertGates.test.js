@@ -74,7 +74,7 @@ gates.A8 = () => {
   const body = fnSrc.slice(fnSrc.indexOf('exports.kalshiBot = onSchedule('));
   assert.ok(body.indexOf('runTick(') > -1 && body.indexOf('runTick(') < body.indexOf('alerts.sendAll('), 'ping only after the tick completes');
   assert.ok(/defineString\("KALSHI_WATCHDOG_URL", \{ default: "" \}\)/.test(fnSrc), 'optional, empty by default');
-  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBot']);
+  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder', 'kalshiBot']);
 };
 
 (async () => {
