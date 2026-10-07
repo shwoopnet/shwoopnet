@@ -661,8 +661,6 @@ the price Kalshi charges match that? Bitcoin only: there is no free gold spot se
   so the test is out of sample but the whole sample is one month.
 - **Cost of this idea so far.** The eighth variant tried. Cuts examined for the verdict: 1 configuration.
 
-## The paper bot (starts with $100, cannot place a real order)
-
 ## Idea ledger (written 2026-10-07, before any idea below was run)
 
 One line per idea, recorded BEFORE it is built, so a tried idea cannot be quietly retried
