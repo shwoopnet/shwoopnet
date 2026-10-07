@@ -72,8 +72,8 @@ def describe(rule: dict) -> str:
     return (f"{rule['left']}m left, side {rule['side']} priced {rule['lo']:.2f}-{rule['hi']:.2f}" + (", " + ", ".join(f) if f else ""))
 
 
-def observe(m: dict, rule: dict):
-    """(day, net per contract) for one market under one rule, or None. Nothing here reads a result except to settle the trade."""
+def entry(m: dict, rule: dict):
+    """(day, side, price, side_mid) for one market under one rule, or None. Decided from prices only: nothing here reads a result."""
     t = m["close"] - rule["left"] * 60
     q = m["book"].get(t)
     if q is None or not valid_quote(q[0], q[1]):
@@ -106,8 +106,17 @@ def observe(m: dict, rule: dict):
             away = yes_move <= -d + 1e-9 if side == "yes" else yes_move >= d - 1e-9
             if not (toward if direction == "toward" else away):
                 return None
-    won = m["res"] == side
-    return m["day"], (1.0 if won else 0.0) - price - fee(price)
+    mid = (bid + ask) / 2
+    return m["day"], side, price, (mid if side == "yes" else 1 - mid)
+
+
+def observe(m: dict, rule: dict):
+    """(day, net per contract) for one market under one rule, or None. The result is read only to settle the trade."""
+    e = entry(m, rule)
+    if e is None:
+        return None
+    day, side, price, _ = e
+    return day, (1.0 if m["res"] == side else 0.0) - price - fee(price)
 
 
 def score(markets: list[dict], rule: dict) -> dict:

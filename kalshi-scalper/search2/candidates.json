@@ -1,0 +1,133 @@
+[
+ {
+  "name": "A  L1: favorite 88-97c, 6 min left (live now)",
+  "spec": {
+   "left": 6,
+   "lo": 0.88,
+   "hi": 0.97,
+   "side": "either",
+   "filters": []
+  },
+  "all": {
+   "n": 3382,
+   "mean_cents": 0.983,
+   "z": 2.76,
+   "per_day_mean": 0.489,
+   "per_day_sd": 1.466
+  }
+ },
+ {
+  "name": "B  favorite 80-97c YES side, 8 min left",
+  "spec": {
+   "left": 8,
+   "lo": 0.8,
+   "hi": 0.97,
+   "side": "yes",
+   "filters": []
+  },
+  "all": {
+   "n": 2223,
+   "mean_cents": 0.862,
+   "z": 1.52,
+   "per_day_mean": 0.282,
+   "per_day_sd": 1.52
+  }
+ },
+ {
+  "name": "C  favorite 80-97c, 6 min left, spread<=2c",
+  "spec": {
+   "left": 6,
+   "lo": 0.8,
+   "hi": 0.97,
+   "side": "either",
+   "filters": [
+    [
+     "spread",
+     0.02
+    ]
+   ]
+  },
+  "all": {
+   "n": 5114,
+   "mean_cents": 0.674,
+   "z": 1.73,
+   "per_day_mean": 0.507,
+   "per_day_sd": 2.407
+  }
+ },
+ {
+  "name": "D  longshot 3-20c, BTC, 2 min left, spread<=1c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.2,
+   "side": "either",
+   "filters": [
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.01
+    ]
+   ]
+  },
+  "all": {
+   "n": 1822,
+   "mean_cents": 3.043,
+   "z": 4.11,
+   "per_day_mean": 0.815,
+   "per_day_sd": 1.684
+  }
+ },
+ {
+  "name": "E  NO side, BTC, price moved away 2c over 5m, 2 min left, spread<=4c",
+  "spec": {
+   "left": 2,
+   "lo": 0.03,
+   "hi": 0.97,
+   "side": "no",
+   "filters": [
+    [
+     "move",
+     "away",
+     0.02,
+     5
+    ],
+    [
+     "series",
+     "KXBTC15M"
+    ],
+    [
+     "spread",
+     0.04
+    ]
+   ]
+  },
+  "all": {
+   "n": 1399,
+   "mean_cents": 3.081,
+   "z": 2.63,
+   "per_day_mean": 0.634,
+   "per_day_sd": 2.014
+  }
+ },
+ {
+  "name": "F  favorite 80-97c, either side, 5 min left",
+  "spec": {
+   "left": 5,
+   "lo": 0.8,
+   "hi": 0.97,
+   "side": "either",
+   "filters": []
+  },
+  "all": {
+   "n": 5329,
+   "mean_cents": 0.203,
+   "z": 0.53,
+   "per_day_mean": 0.159,
+   "per_day_sd": 2.47
+  }
+ }
+]

@@ -1264,3 +1264,28 @@ try:
 finally:
     _api13.settled_markets, _api13.batch_candlesticks, _api13.candlesticks, _bf.PAUSE_S, _bf.SERIES = _o14
 print("batched backfill tests passed")
+
+# The fair null: each rule has zero edge at its OWN decision price, so it loses its costs, never produces survivors by luck at the fixed bar
+# more than rarely, and ignores the real outcomes entirely (a planted edge changes nothing in it).
+_nrules = [{"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []}, {"left": 4, "lo": 0.10, "hi": 0.30, "side": "either", "filters": []}]
+_nw = _ov.windows(_world(0.0, 9)); _nw_edge = _ov.windows(_world(0.15, 9))
+_oos = [[_nw["W0h"], _nw["W1"], _nw["W2"]]] * 2
+_a1 = _ov.fair_null(_nrules, _oos, 60, seed=2)
+_a2 = _ov.fair_null(_nrules, [[_nw_edge["W0h"], _nw_edge["W1"], _nw_edge["W2"]]] * 2, 60, seed=2)
+assert _a1["best"] == _a2["best"], "the null never reads outcomes, so a planted edge cannot change it"
+assert sum(_a1["survivors"]) <= 3 and max(_a1["best"]) < 3.5, ("luck at the fixed bar is rare for two fair rules", _a1["survivors"], max(_a1["best"]))
+_en = _ov.entries_of(_nw["W1"], _nrules[0])
+assert _en and all(abs(c - (m + 0.0)) < 1.0 for _, c, m in _en) and sum(m - c for _, c, m in _en) < 0, "a fair rule loses its costs in expectation"
+# The criteria in one place, each condition on its own.
+assert _ov.passes([60, 60, 60], [0.01, 0.01, 0.01], 2.5) and not _ov.passes([60, 60, 60], [0.01, 0.01, 0.01], 2.49)
+assert not _ov.passes([60, 49, 60], [0.01, 0.01, 0.01], 3.0), "49 entries in a window fails"
+assert not _ov.passes([60, 60, 60], [0.01, 0.0, 0.01], 3.0) and not _ov.passes([60, 60, 60], [0.01, -0.01, 0.01], 3.0), "a non-positive window fails"
+# In the null, a window below 50 entries can never make a survivor, however lucky its draws (30 near-certain winners are positive almost every time).
+_tiny = _se.prep([_sm("Z%d" % i, _C0 + 86400 * (i // 10) + 900 * (i % 10), round(0.96 + 0.01 * (i % 3), 4), round(0.97 + 0.01 * (i % 3), 4), "yes") for i in range(30)])
+_tn = _ov.fair_null([{"left": 6, "lo": 0.90, "hi": 0.999, "side": "yes", "filters": []}], [[_tiny, _tiny, _tiny]], 40, seed=3)
+assert sum(_tn["survivors"]) == 0 and max(_tn["best"]) > 2.5, ("a lucky tiny window is positive with a high z yet cannot survive", _tn["best"][:3])
+# The entries a rule pays include the fee, not only the ask.
+_em = _se.prep([_sm("E1", _C0, 0.39, 0.41, "yes")])
+_ee = _ov.entries_of(_em, {"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []})
+assert len(_ee) == 1 and abs(_ee[0][1] - (0.41 + _se.fee(0.41))) < 1e-12 and abs(_ee[0][2] - 0.40) < 1e-12, _ee
+print("fair null tests passed")

@@ -45,20 +45,23 @@ def observations(markets: list[dict], rule: dict) -> list[tuple[str, float]]:
     return [o for o in (S.observe(m, rule) for m in markets) if o is not None]
 
 
+def passes(ns: list[int], means: list[float], pooled_z: float) -> bool:
+    """THE criteria, one definition used by the real test and by the null: every window has at least MIN_WINDOW_N entries and a positive mean,
+    and the pooled day clustered z is at least POOLED_Z."""
+    return all(n >= MIN_WINDOW_N and m > 0 for n, m in zip(ns, means)) and pooled_z >= POOLED_Z
+
+
 def survivor(rule: dict, wins: list[list[dict]]) -> dict:
     """The fixed test. wins: the windows the rule was NOT selected on."""
     per, pooled = [], []
-    ok = True
     for w in wins:
         obs = observations(w, rule)
         n = len(obs)
-        mean = sum(x for _, x in obs) / n if n else 0.0
-        per.append({"n": n, "mean": mean})
+        per.append({"n": n, "mean": sum(x for _, x in obs) / n if n else 0.0})
         pooled += obs
-        if n < MIN_WINDOW_N or mean <= 0:
-            ok = False
     _, _, z = cluster_mean_z(pooled)
-    return {"survivor": ok and z >= POOLED_Z, "per_window": per, "pooled_n": len(pooled), "pooled_z": z, "all_positive": ok}
+    ok = all(p["n"] >= MIN_WINDOW_N and p["mean"] > 0 for p in per)
+    return {"survivor": passes([p["n"] for p in per], [p["mean"] for p in per], z), "per_window": per, "pooled_n": len(pooled), "pooled_z": z, "all_positive": ok}
 
 
 def saved_rules(directory: Path) -> list[dict]:
@@ -107,6 +110,91 @@ def run(ms: list[dict], seed: int = 11, cycles: int = 2, first_dir: Path | None 
             "evaluated_B": real["evaluated"], "evaluated_control": null["evaluated"], "w": w, "real": real, "null": null}
 
 
+def entries_of(markets: list[dict], rule: dict) -> list[tuple]:
+    """(day, cost, side_mid) per entry: what a rule pays (ask plus fee) and the fair win probability at its own decision price."""
+    out = []
+    for m in markets:
+        e = S.entry(m, rule)
+        if e is not None:
+            out.append((e[0], e[2] + S.fee(e[2]), e[3]))
+    return out
+
+
+def fair_null(rules: list[dict], oos: list[list[list[dict]]], reps: int, seed: int = 1) -> dict:
+    """THE null for a search. Every rule gets zero edge at its OWN decision price: each entry wins with probability equal to the side's mid, drawn
+    independently per rule and per repeat, and pays the ask and the fee. The fixed survivor test (positive in every out of sample window with at
+    least 50 entries, pooled day clustered z of at least 2.5) is applied to every rule of every repeat. The result is how often luck alone gives a
+    survivor and how large the best pooled z gets across the whole family. Independent draws across rules is the strict direction: correlated rules
+    would give fewer effective tries."""
+    import random as _r
+    rng = _r.Random(seed)
+    prepared = [[entries_of(w, rule) for w in wins] for rule, wins in zip(rules, oos)]
+    best, surv = [], []
+    for _ in range(reps):
+        top, n_surv = -9.0, 0
+        for ent_w in prepared:
+            ns, means, n_all, s_all, days = [], [], 0, 0.0, {}
+            for ent in ent_w:
+                n, s = len(ent), 0.0
+                for d, cost, mid in ent:
+                    x = (1.0 if rng.random() < mid else 0.0) - cost
+                    s += x
+                    cell = days.setdefault(d, [0.0, 0])
+                    cell[0] += x
+                    cell[1] += 1
+                n_all += n
+                s_all += s
+                ns.append(n)
+                means.append(s / n if n else 0.0)
+            if n_all < 2:
+                continue
+            mean = s_all / n_all
+            se = math.sqrt(sum((c[0] - c[1] * mean) ** 2 for c in days.values())) / n_all
+            z = mean / se if se > 0 else 0.0
+            top = max(top, z)
+            if passes(ns, means, z):
+                n_surv += 1
+        best.append(top)
+        surv.append(n_surv)
+    return {"best": best, "survivors": surv}
+
+
+def saved_from(found: dict) -> list[dict]:
+    seen, out = set(), []
+    for rd in found["rounds"]:
+        for r in rd["top"]:
+            if r["key"] not in seen:
+                seen.add(r["key"])
+                out.append(r)
+    return out
+
+
+def family(res: dict, w: dict[str, list[dict]]) -> tuple[list[dict], list[list[list[dict]]]]:
+    """Every saved rule of both stages with the windows it was NOT selected on."""
+    rules, oos = [], []
+    for r in res["stageA"]:
+        rules.append(r["rule"]); oos.append([w["W0s"], w["W0h"], w["W2"]])
+    for r in res["stageB"]:
+        rules.append(r["rule"]); oos.append([w["W0h"], w["W1"], w["W2"]])
+    return rules, oos
+
+
+def null_report(reps: int) -> None:
+    markets, _ = S.load_markets()
+    ms = S.prep(markets)
+    res = run(ms)
+    w = res["w"]
+    rules, oos = family(res, w)
+    real_z = [r["pooled_z"] for r in res["stageA"] + res["stageB"]]
+    real_surv = sum(1 for r in res["stageA"] + res["stageB"] if r["survivor"])
+    nul = fair_null(rules, oos, reps)
+    best = sorted(nul["best"])
+    print(f"family of {len(rules)} saved rules; real best pooled z {max(real_z):+.2f}, real survivors {real_surv}")
+    print(f"fair null over {reps} repeats: best pooled z median {best[len(best) // 2]:+.2f}, 95th {best[int(len(best) * 0.95)]:+.2f}, max {best[-1]:+.2f}")
+    print(f"  P(null best z >= real best z) = {sum(1 for b in best if b >= max(real_z)) / reps:.3f}")
+    print(f"  P(null survivors >= {real_surv}) = {sum(1 for n in nul['survivors'] if n >= real_surv) / reps:.3f}; mean null survivors {sum(nul['survivors']) / reps:.2f}")
+
+
 def line(r: dict) -> str:
     per = " / ".join(f"{p['mean'] * 100:+.1f}c (n={p['n']})" for p in r["per_window"])
     return f"{S.describe(r['rule'])}\n      out of sample: {per}; pooled z {r['pooled_z']:+.2f}"
@@ -139,4 +227,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 2 and sys.argv[1] == "null":
+        null_report(int(sys.argv[2]))
+    else:
+        main()
