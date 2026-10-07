@@ -580,6 +580,53 @@ after this commit).
 - **Cost of this idea so far.** It is the sixth strategy variant tried (the 60s scalp, H1, H2, H3, H4, H5).
   Cuts examined for the verdict: 1 configuration.
 
+## Hypothesis H7: how far spot sits from the target predicts the outcome better than the market's price does (fixed 2026-10-07, before any code or data was looked at)
+
+Asked by the owner: Kalshi stores each market's target (the strike, "to beat"). Every test so far used the market's
+price and result, and none conditioned on how far Bitcoin spot sits from the target. The owner's question: of the
+times spot is X above (or below) the target with T minutes left, how often does the market finish above it, and does
+the price Kalshi charges match that? Bitcoin only: there is no free gold spot series here. Gold is not tested.
+
+- **Mechanism and counterparty.** If the market charges, say, 65c for YES when spot is far enough above the target that
+  YES wins 75% of the time, the sellers of that 65c are people pricing the distance badly (stale quotes, slow
+  repricing as spot moves, a flat price near 50c that ignores a large lead). The usual reason it fails: the
+  professional quoters on these markets already price the live index, and the lag study found no lag.
+- **Observation, one per market.** At the minute close `t = close_ts - 360` (6 minutes left), a market counts if it
+  has a usable two sided quote (spread 10c or less), spot closes exist for `t` and the 60 minutes before it, and the
+  strike is stored. One decision per market means the observations do not overlap, and there is no choosing of the
+  minute afterwards. Spot at `t` is the close of the 1 minute Coinbase candle that ends at `t` (the same alignment the
+  lag study used).
+- **Distance, in units of how far Bitcoin typically moves.** `z = ln(spot / strike) / (sigma * sqrt(6))` where `sigma`
+  is the standard deviation of the 1 minute log returns of spot over the 60 minutes before `t`, and 6 is the minutes
+  left. Fixed z buckets: below -2, -2 to -1, -1 to -0.5, -0.5 to 0, 0 to 0.5, 0.5 to 1, 1 to 2, above 2.
+- **Split.** The markets are ordered by close time. The first half is the ESTIMATION half and the second is the TEST
+  half. `p(bucket)` is the share of estimation-half markets in that bucket that resolved YES (buckets with fewer than
+  20 markets are not traded). The test half is not looked at until the verdict run.
+- **Descriptive output, labelled as such (no verdict, affects nothing).** For the estimation half only: for each z
+  bucket, the number of markets, how often they resolved YES, and the mean YES ask Kalshi was charging then. This
+  answers the owner's "how many times out of X" question in plain numbers.
+- **Rule (the only configuration run).** On the test half, at `t`, with `ask` the YES ask and `bid` the YES bid:
+  buy YES at `ask` if `p(bucket) - ask - fee(ask) > 0.02`; buy NO at `1 - bid` if `(1 - p(bucket)) - (1 - bid) -
+  fee(1 - bid) > 0.02`; otherwise do nothing. One contract, held to settlement, fee `0.07 * p * (1 - p)` per
+  contract (unrounded, because the measured real fee on 2026-10-07 was 1.67c for a 40c contract, which is exactly
+  that formula; a run with fees times 1.2 is the stress). The 2c margin, the buckets and the 6 minutes are fixed here
+  and are not tuned.
+- **Prediction, recorded before the run.** Negative: the market already prices distance within the minute, so I
+  expect a mean net of about -1c to -3c per entered market and a z below 2. If it comes out positive, suspect the
+  alignment first: Kalshi settles on the CF Benchmarks RTI average of the last 60 seconds, and this uses Coinbase 1
+  minute closes, so a spot figure that already contains information the strike does not is a lookahead to rule out.
+- **Unit and kill criteria.** One entered market, net cents. FALSIFIED unless ALL hold: at least 300 entered markets
+  in the test half; mean net positive with a day clustered z of at least 2.1; positive in BOTH halves of the test half;
+  positive with fees times 1.2. Fewer than 300 entered markets is NOT_ENOUGH_DATA and crosses nothing off. Best outcome
+  is `NOT_YET_FALSIFIED`, meaning permission to test on unseen days, never a trade.
+- **Decomposition, always printed.** Entries by side, win rate against the average price paid, mean gross and fees, and
+  the same table for the estimation half run through the rule, labelled in-sample so the gap between the halves is
+  visible.
+- **Known limits, stated up front.** Spot is not Kalshi's settlement source. One observation per market throws away
+  most minutes on purpose. Thirty days is one market regime. The estimation half decides the buckets' probabilities,
+  so the test is out of sample but the whole sample is one month.
+- **Cost of this idea so far.** The eighth variant tried. Cuts examined for the verdict: 1 configuration.
+
 ## The paper bot (starts with $100, cannot place a real order)
 
 It runs on the SERVER: a Firebase scheduled function (`functions/kalshiBot*` in
