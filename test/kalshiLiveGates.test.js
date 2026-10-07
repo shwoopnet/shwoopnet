@@ -231,17 +231,10 @@ gates.L12 = () => {
 };
 
 gates.L13 = () => {
-  // The page asks twice, only the second click calls the server, only for the admin, and a failed call says to look at the account.
-  const i = html.indexOf("getElementById('kalLiveSend')");
-  assert.ok(i > -1, 'live card wiring not found');
-  const iife = html.slice(i, html.indexOf('})();', i));
-  const firstClick = /send\.addEventListener\('click', function\(\)\{([\s\S]*?)\}\);/.exec(iife);
-  assert.ok(firstClick && !/kalshiLiveTrade\(/.test(firstClick[1]) && /ask\(true\)/.test(firstClick[1]), 'the first click only asks');
-  assert.ok(/yes\.addEventListener\('click'[\s\S]*currentUserIsAdmin[\s\S]*api\.kalshiLiveTrade\(\)/.test(iife), 'the confirm click calls the server, for the admin only');
-  assert.strictEqual((html.match(/kalshiLiveTrade\(/g) || []).length, 1, 'one call site in the page');
-  assert.ok(/may or may not have reached Kalshi/.test(iife), 'a failed call tells the owner to check the account');
-  assert.ok(/kalshiLiveTradeFn\(\{\}\)/.test(html), 'the callable is sent no arguments');
-  assert.ok(/REAL money/i.test(html.slice(html.indexOf('id="kalLiveConfirm"') - 200, html.indexOf('id="kalLiveConfirm"') + 400)), 'the confirmation says it is real money');
+  // The one contract test button was removed from the page when the 24 hour session replaced it. The server callable stays
+  // (admin only, switch off by default), but nothing in the page can call it, so no stray click can send an order.
+  assert.ok(!/kalLiveSend|kalLiveConfirm/.test(html), 'the single test controls are gone from the page');
+  assert.strictEqual((html.match(/kalshiLiveTrade/g) || []).length, 0, 'the page does not call kalshiLiveTrade');
 };
 
 gates.L14 = () => {
@@ -381,14 +374,8 @@ gates.L19 = () => {
   assert.ok(fnSrc.indexOf('exports.kalshiLiveArmed') < fnSrc.indexOf('exports.kalshiBookRecorder ='), 'defined before the recorder, so the no-order-code slice still covers it');
   const m = /match \/kalshiLiveControl\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
   assert.ok(m && /allow read: if isAdmin\(\);/.test(m[1]) && /allow write: if false;/.test(m[1]), 'admin read, no client write');
-  // The page: the arm click only asks, the confirm click is the only one that arms, and it is admin only.
-  const i = html.indexOf("var arm = document.getElementById('kalLiveArm')");
-  assert.ok(i > -1, 'arm wiring not found');
-  const iife = html.slice(i, html.indexOf('})();', i));
-  const first = /arm\.addEventListener\('click', function\(\)\{([\s\S]*?)\}\);/.exec(iife);
-  assert.ok(first && !/kalshiLiveArm\(/.test(first[1]) && /ask\(true\)/.test(first[1]), 'the first click only asks');
-  assert.ok(/yes\.addEventListener\('click'[\s\S]*currentUserIsAdmin[\s\S]*api\.kalshiLiveArm\(true\)/.test(iife), 'the confirm click arms, for the admin only');
-  assert.ok(/kalshiLiveArmFn\(\{ on: on === true \}\)/.test(html), 'the page sends only on or off');
+  // The arm controls were removed from the page with the single test; only the 24 hour session is started from it.
+  assert.ok(!/kalLiveArm|kalshiLiveArmFn/.test(html), 'the page has no arm controls');
 };
 
 gates.L20 = () => {
