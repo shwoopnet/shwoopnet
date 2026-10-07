@@ -328,30 +328,12 @@ gates.G19 = () => {
   assert.ok(!/kalshiBotPositions[\s\S]{0,200}allow write: if (isAdmin|signedIn)/.test(rules), 'no client may write a position');
 };
 
-// The heartbeat is judged against a once-a-minute schedule: 2.5 minutes of silence is
-// stale and 5 is down. A bot that never reported must not read as healthy.
-gates.G20 = () => {
-  const start = html.indexOf('function kalshiBotHealth(');
-  let d = 0, end = -1;
-  for (let i = html.indexOf('{', start); i < html.length; i++) {
-    if (html[i] === '{') d++; else if (html[i] === '}') { d--; if (!d) { end = i + 1; break; } }
-  }
-  const health = new Function('return (' + html.slice(start, end) + ')')();
-  assert.strictEqual(health(30000), 'OK');
-  assert.strictEqual(health(149000), 'OK');
-  assert.strictEqual(health(150000), 'STALE');
-  assert.strictEqual(health(299000), 'STALE');
-  assert.strictEqual(health(300000), 'DOWN');
-  assert.strictEqual(health(null), 'NEVER RAN');
-  assert.strictEqual(health(undefined), 'NEVER RAN');
-  assert.strictEqual(health(NaN), 'NEVER RAN');
-};
-
-// The page can watch the halt switch and the paper bot's heartbeat, flip that one switch, and cannot touch a trade.
+// The page can watch the halt switch, flip that one switch, and cannot touch a trade.
 // The Bot tab is the default, resuming entries asks first, and leaving the page stops listening.
 gates.G21 = () => {
   const bridge = block(/watchKalshiBot: function\(h\)\{([\s\S]*?)\n    \},\n    \/\/ What the live bot did/, html);
-  assert.ok(/kalshiBotMeta/.test(bridge) && /'status'/.test(bridge) && /'control'/.test(bridge), 'the heartbeat and the halt switch');
+  assert.ok(/kalshiBotMeta/.test(bridge) && /'control'/.test(bridge), 'the halt switch is watched');
+  assert.ok(!/'status'/.test(bridge) && !/Paper bot/.test(html), 'the page no longer shows or reads anything of the paper bot');
   assert.ok(!/kalshiBotPositions|kalshiBotEvents/.test(html), 'the paper bot\'s trades and events are no longer read or shown by the page');
   assert.ok(!/setDoc|updateDoc|addDoc|deleteDoc/.test(bridge), 'watching must not write');
   const ev = block(/watchKalshiLiveEvents: function\(cb\)\{([\s\S]*?)\n    \},/, html);
