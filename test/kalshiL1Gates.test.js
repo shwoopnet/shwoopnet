@@ -181,13 +181,13 @@ gates.N9 = async () => {
 
 // The order limit and the 24 hour limit end the session.
 gates.N10 = async () => {
-  const lim = world({ session: { ordersSent: 80 } });
+  const lim = world({ session: { ordersSent: 200 } });
   await tick(lim);
   assert.deepStrictEqual([lim.posts.length, lim.sess.endedBecause], [0, 'limit']);
   const exp = world({ session: { until: NOW - 1 } });
   await tick(exp);
   assert.deepStrictEqual([exp.posts.length, exp.sess.endedBecause], [0, 'expired']);
-  assert.strictEqual(live.L1_MAX_ORDERS, 80);
+  assert.ok(live.L1_MAX_ORDERS >= 2 * 96, 'the order backstop can never end a 24 hour session early');
   assert.strictEqual(live.L1_SESSION_MS, 24 * 3600 * 1000);
   assert.strictEqual(live.L1_LOSS_STOP, 7);
 };
@@ -266,10 +266,10 @@ gates.N15 = async () => {
 // The order limit holds inside a single tick, not only at its start.
 gates.N16 = async () => {
   const G = 'KXGOLD15M-26OCT071415-15';
-  const w = world({ session: { ordersSent: 79 } });
+  const w = world({ session: { ordersSent: 199 } });
   await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
-  assert.strictEqual(w.posts.length, 1, '79 sent plus two candidates is stopped at 80');
-  assert.strictEqual(w.sess.ordersSent, 80);
+  assert.strictEqual(w.posts.length, 1, '199 sent plus two candidates is stopped at 200');
+  assert.strictEqual(w.sess.ordersSent, 200);
 };
 
 // A no-fill has to be explainable afterwards: the record carries the touch and size the order was decided on.

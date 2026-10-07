@@ -276,7 +276,9 @@ async function runArmedTick(args) {
 // price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
 const L1_BAND = [0.88, 0.97];
 const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
-const L1_MAX_ORDERS = 80;                  // in one session
+// Not a trading limit: the owner asked for 24 hours and nothing else. Bitcoin and gold have 192 markets in a day (96 each), so
+// 200 can never end a 24 hour session; it only stops a runaway loop from sending orders without end. The loss stop is the real limit.
+const L1_MAX_ORDERS = 200;
 const L1_SESSION_MS = 24 * 3600 * 1000;
 const L1_LOSS_STOP = 7.0;                  // dollars of cash below the starting level: $5 of loss plus up to $2 sitting in open positions
 

@@ -389,7 +389,7 @@ exports.kalshiL1Session = onCall(async (request) => {
   }
   const now = Date.now();
   await ref.set({ active: true, since: now, until: now + live.L1_SESSION_MS, ordersSent: 0, startCash: null, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
-  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours: one contract at 88c to 97c about 6 minutes before the close, at most " + live.L1_MAX_ORDERS + " orders, stops at $" + live.L1_LOSS_STOP.toFixed(2) + " below the starting cash" });
+  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours: one contract at 88c to 97c about 6 minutes before the close, stops at $" + live.L1_LOSS_STOP.toFixed(2) + " below the starting cash" });
   return { active: true, until: now + live.L1_SESSION_MS };
 });
 
