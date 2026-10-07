@@ -671,7 +671,7 @@ Nothing below is implemented. It is what the live version will have to do.
   every call, while `demo-api.kalshi.co` answered 200 with all four shards trading, and a signed order
   placed through it was accepted and cancelled. Kalshi's published schedule showed the demo open at the
   time (its only daily closure is a 15 minute gap) and production was fine. So "the demo is down" can mean
-  one hostname is down. Both the website's test trader and `python3 -m scalper.demo` now try the second
+  one hostname is down. Both the website's test trader (since removed, Oct 7, once live testing began; this CLI stays) and `python3 -m scalper.demo` now try the second
   host when the first fails transiently (5xx, 429 or no answer), with the same order id. That is safe
   because they front one exchange and a repeated `client_order_id` is refused with 409, which the trader
   reads as "an earlier attempt landed".

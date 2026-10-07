@@ -124,50 +124,18 @@ firebase functions:log --only kalshiBot
   secret, never in the repo. See `kalshi-scalper/README.md`.
 
 
-## Kalshi demo test trader (one order, mock funds)
+## Retired: the Kalshi demo test trader (removed Oct 7, 2026)
 
-A button on the Kalshi page's Bot tab ("Send one test trade") that sends ONE tiny order to Kalshi's
-DEMO exchange from the bot's current signal, so the whole path is proved before anything is automated.
-It is admin only, takes nothing from the page (no ticker, price or size), and can only reach the demo
-hosts. It is capped at $1 including the fee, immediate-or-cancel, and the order id is derived from the
-market, so a double click, a retry or a second instance cannot place it twice (Kalshi also refuses a
-repeated `client_order_id` with HTTP 409, measured on the demo). Each attempt is recorded in
-`kalshiDemoOrders` (admin read, no client write).
+The website's demo trader (`kalshiDemoTrade`, its page card, `kalshiDemoLib.js` and the `kalshiDemoOrders`
+collection) was removed once live testing began; it had proved signing, shards, the duplicate-order refusal and the
+order shape on Kalshi's demo exchange. The research CLI (`kalshi-scalper`, `python3 -m scalper.demo`) and its README
+record are kept. Cleanup that code cannot do, once, by hand:
 
-The signal decides WHAT to trade; the demo's own book decides the price. The first tests were priced at the
-live price and came back "no fill" because the thin demo book held nothing there. The order now meets the
-demo's touch (a YES buy takes its YES ask, a NO buy takes its YES bid), only when that is within 5c of the
-live price and the one-contract cost still fits the $1 cap. If the demo book is empty on that side, or too far
-from the live price, nothing is sent or recorded and the page says why. Redeploy `kalshiDemoTrade` after
-pulling this: `firebase deploy --only functions:kalshiDemoTrade`.
+    firebase functions:delete kalshiDemoTrade --region us-central1     # the deployed function
+    firebase functions:secrets:destroy KALSHI_DEMO_KEY_ID              # then the same for KALSHI_DEMO_PRIVATE_KEY
 
-The test trades Bitcoin (`KXBTC15M`) only: the demo's gold market has too few resting orders to fill against.
-The paper bot is unaffected and still watches both markets.
-
-Set the two secrets BEFORE deploying, or the deploy fails (use a fresh demo key, not one that has been
-pasted into a chat, and never commit it):
-
-    firebase functions:secrets:set KALSHI_DEMO_KEY_ID          # the key id from the demo site
-    firebase functions:secrets:set KALSHI_DEMO_PRIVATE_KEY     # paste the whole PEM, including the BEGIN and END lines
-    firebase deploy --only functions,firestore:rules
-
-Demo markets sit on exchange shards and a balance belongs to a shard. If the signal's market is on a
-shard with no demo funds the button says so and sends nothing.
-
-**If the demo is down or flaky.** Kalshi's demo exchange has gone down for stretches (HTTP 503, and
-`/exchange/status` reporting `trading_active: false`). The trader checks that first and says "the demo
-exchange is down" without writing a record. A transient failure (503, 429, a timeout) is retried twice
-inside the call. If it never clears, the record says "unavailable" and the next press tries again with the
-same order id: that is safe because Kalshi refuses a repeated `client_order_id` (HTTP 409, measured on the
-demo) and, if an earlier attempt had in fact landed, the 409 makes the trader look that order up and report
-it. A refusal that is the caller's fault (HTTP 4xx) is recorded and blocks that market, and a record stuck at
-"sending" (the function was killed mid-flight) blocks it too, so nothing is ever sent twice. The duplicate
-protection was measured on the demo; confirm it on production before any real order.
-
-**Two demo hosts.** Kalshi documents two demo front doors, `external-api.demo.kalshi.co` (recommended) and
-`demo-api.kalshi.co`. On 2026-10-06 the first returned HTTP 503 for over an hour while the second kept
-trading, so a transient failure on the first is retried on the second, both on the allow list. If the
-button says the demo is down, both were failing.
+Also delete the demo API key on Kalshi's demo site (it was pasted into a chat once), and, if you want the old rows
+gone, the `kalshiDemoOrders` collection in the Firebase console.
 
 ## Kalshi LIVE test order (ONE contract, REAL money)
 

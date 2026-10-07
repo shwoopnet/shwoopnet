@@ -7,19 +7,43 @@
 // - Fails closed. It does nothing unless the switch KALSHI_LIVE_ENABLED is "on" (default off), the bot is not
 //   halted, the exchange is trading and the account balance is readable and enough.
 // - Hard totals: at most 2 a day and 5 ever. Past that this module refuses until a person edits it.
-// - NEVER retried. On the demo a lost answer could be re-sent safely because a repeat is refused with HTTP 409;
-//   on production that is not yet confirmed (the point of this step). So an ambiguous answer (no reply, a
-//   timeout, a 5xx) is recorded as "unknown", tells the owner to look at the Kalshi account, and blocks every
-//   further live test until that record is dealt with by hand.
+// - NEVER retried. On Kalshi's demo a repeated order id was refused with HTTP 409, but on production that is not
+//   yet confirmed (the point of this step). So an ambiguous answer (no reply, a timeout, a 5xx) is recorded as
+//   "unknown", tells the owner to look at the Kalshi account, and blocks every further live test until that
+//   record is dealt with by hand.
 // - The order id is derived from the market (L-<ticker>), never random, and the record is created first and
 //   atomically, so a double click or a second instance cannot send it twice.
-// - Production host only (the demo module refuses production, and this one refuses everything else). The key
+// - Production host only: every request is checked against the production host before it is sent. The key
 //   lives in Firebase secrets, signs and is never logged, recorded or returned.
 //
 // The scheduled bot (kalshiBotLib.js, kalshiBotRun.js, exports.kalshiBot) still has no order code.
 
+const crypto = require("crypto");
 const bot = require("./kalshiBotLib");
-const { signRequest } = require("./kalshiDemoLib");
+
+// Kalshi's scheme: sign timestamp + METHOD + the full path from the API root, query left out.
+// RSA keys use PSS with SHA-256 and a salt as long as the digest; Ed25519 signs the message.
+function signRequest(pem, timestamp, method, path) {
+  const key = crypto.createPrivateKey(String(pem).replace(/\\n/g, "\n"));
+  const message = Buffer.from(timestamp + method + String(path).split("?")[0]);
+  const type = key.asymmetricKeyType;
+  if (type === "ed25519") return crypto.sign(null, message, key).toString("base64");
+  if (type === "rsa") {
+    return crypto.sign("sha256", message, {
+      key, padding: crypto.constants.RSA_PKCS1_PSS_PADDING, saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST,
+    }).toString("base64");
+  }
+  throw new Error("unsupported key type: " + type);
+}
+
+// The live production prices the bot itself trades from. `api` has exchangeStatus() and markets(series).
+async function loadQuotes(api) {
+  const st = await api.exchangeStatus();
+  const active = Boolean(st.trading_active !== undefined ? st.trading_active : st.exchange_active);
+  const quotes = [];
+  for (const series of bot.SERIES) for (const m of await api.markets(series)) quotes.push({ series, m });
+  return { active, quotes };
+}
 
 const LIVE_BASE = "https://external-api.kalshi.com/trade-api/v2";
 const LIVE_HOSTS = ["external-api.kalshi.com"];
@@ -240,5 +264,5 @@ async function runArmedTick(args) {
 
 module.exports = {
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
-  liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS,
+  liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
 };
