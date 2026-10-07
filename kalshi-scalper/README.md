@@ -757,6 +757,30 @@ Nothing changed after seeing the numbers.
 
 Strategy variants tried so far: 11 (the 60s scalp, H1 to H7, L1, L2, L3), all `FALSIFIED`. The lag study was exploratory and does not count.
 
+## Live waiver: L1 for 24 hours in the live account (terms fixed 2026-10-07, before any code for it)
+
+The owner asked for the live account to run L1 automatically for 24 hours. L1 FAILED its own pre-registered bar (z +1.45 against
+2.1), so this is a waiver of that bar by the owner, recorded here with its terms. It is not evidence of an edge, and nothing in a
+24 hour run can become evidence of one: at about 55 trades a day, one trade's standard deviation of roughly 27c and an
+expected mean of +1c or less, a day's profit has a standard deviation of about $2 against an expected +$0.55. What the run does
+test is the plumbing at volume: fills, fees, rejections, shards, timing.
+
+- **The rule is L1 exactly as pre-registered, nothing tuned.** Bitcoin and gold 15 minute markets only. About 6 minutes before the
+  close (accepted window: 330 to 400 seconds left), buy ONE contract of the side whose fresh price is 88c to 97c inclusive, at the
+  touch, immediate-or-cancel. Held to settlement. No exit, no stop, no second try on the same market.
+- **Hard limits, in code, changed only by a reviewed change.** One contract per order and at most $2.00 including the fee. At most
+  80 orders in the session. The session switches itself off after 24 hours, on the first order whose answer is lost or refused,
+  and when the account's cash falls more than $7.00 below its level at the start (a $5.00 loss allowance plus the at most $2.00 that
+  can legitimately sit in the two open positions). At most one open position per series, so open exposure stays under about $2.
+- **Gates that always apply.** Server switch `KALSHI_LIVE_ENABLED` must be on. The halt switch blocks it (a missing halt setting
+  counts as halted). An unresolved earlier order blocks it. The balance on the market's own shard must cover the cost plus $0.50.
+  Production host only. Never retried.
+- **Worst case.** 80 orders that all lose is impossible inside the loss stop: the stop trips at about $7 of loss, about 8 losing
+  trades, and one more order can already be in flight. The honest worst case is therefore roughly $9.
+- **How the result is read, written now.** Net result after fees, and the count of fills, no fills and rejections. It is recorded
+  as one forward observation of L1 with n of about 55. It does not re-run the verdict, and no band or minute changes afterwards.
+  A positive day proves nothing; a negative day is within the expected noise unless it hits the stop.
+
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few
