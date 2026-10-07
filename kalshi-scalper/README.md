@@ -580,6 +580,51 @@ after this commit).
 - **Cost of this idea so far.** It is the sixth strategy variant tried (the 60s scalp, H1, H2, H3, H4, H5).
   Cuts examined for the verdict: 1 configuration.
 
+## Hypothesis H6: a market maker that stops quoting into a move (fixed 2026-10-07, before any code or data)
+
+H5 lost 41.3c a market and said where: the quote follows the price, so in a trending minute it buys at the
+old level and sells at the new one. The owner asked whether faster updates would fix that. They would be the
+right cure, but they cannot be tested here: **the only quote history we hold is one candle a minute**
+(Kalshi serves 1 minute, 1 hour and 1 day candles), and the trade tape has second level timestamps but no
+bids and asks. A simulator that re-prices every few seconds would have to invent the quotes, which is
+exactly the kind of number this directory exists to refuse. What can be tested honestly with the data in
+hand is the other half of the idea: **do not leave a quote where the last minute says it is stale.**
+
+- **Rule.** H5's rule with one change, using only what is known at the minute close. Let `move` be the
+  change in the YES mid (bid plus ask over two) from the previous minute close to this one. If `move` is
+  at most -1c, rest NO bid (do not buy) this minute. If `move` is at least +1c, rest NO ask (do not sell).
+  Otherwise quote both sides as in H5. The first quote minute of a market has no previous mid and quotes
+  both sides. Everything else is H5 unchanged: one contract a side, spread 10c or less, inventory cap 2,
+  stop 5 minutes before close, hold the rest to settlement, strictly-through fills, taker fee on every
+  fill. The 1c threshold is fixed here and is not tuned: it is the smallest move the data can show.
+- **Counterparty.** The same impatient takers as H5, minus the ones who arrive just after the price
+  moved, which are the informed ones. The usual reason it does not work: a market that moved 1c is not
+  always followed by more movement, so skipping may remove as many good fills as bad.
+- **Prediction.** Better than H5, still negative. H5 was -20.0c with no fee at all, and this rule can
+  remove only part of the loss and none of the fees, so I expect roughly -25c to -35c. A mean at or above
+  +1c would surprise me and would be checked for a lookahead before it is believed.
+- **Unit and sample.** One market, net cents per market. The sample is **disjoint from H5's**: per series,
+  markets in close time order, positions 2, 6, 10 and so on (H5 used 0, 4, 8). About 1,200 markets. The
+  H5 control below is run on this same sample so any difference is the rule, not the markets.
+- **Kill criteria.** As H5: FALSIFIED unless at least 300 markets, mean net positive with a day clustered z
+  of at least 2.1, positive in BOTH halves, and positive with fees 20% higher. Best outcome is
+  `NOT_YET_FALSIFIED`, meaning permission to test on days 31 to 45 back, never a trade. Fewer than 300
+  markets is NOT_ENOUGH_DATA.
+- **Decomposition, always printed.** Round trips, leftover inventory and fees, as H5, plus the share of
+  quote minutes skipped and the mean net of the skipped side's would-be fills (what the skip gave up).
+- **Printed for information only.** The H5 always-quote rule on this sample (the control), no fee, and
+  fills counted at our price.
+- **Cost of this idea so far.** The seventh variant tried. Cuts examined for the verdict: 1 configuration.
+  Because it is a variation on H5 and not a new mechanism, the next number it earns is judged against the
+  H5 control on the same markets, not against zero alone.
+
+### What would test faster updates (not run)
+
+To simulate re-pricing every few seconds we need a book recorded at that rate. Nothing records it today.
+A collector that polls the public order book of the two series every few seconds and stores the touch is
+read only (no signed requests, no orders) and would build that history forward, one day at a time. It is
+the prerequisite for any quote-speed question and is listed in the roadmap, not started.
+
 ## The paper bot (starts with $100, cannot place a real order)
 
 It runs on the SERVER: a Firebase scheduled function (`functions/kalshiBot*` in
