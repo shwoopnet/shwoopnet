@@ -585,8 +585,8 @@ after this commit).
 One line per idea, recorded BEFORE it is built, so a tried idea cannot be quietly retried
 and a rewording of a dead idea is visible as one. Status is only `OPEN`, `RUNNING`,
 `FALSIFIED`, `NOT_YET_FALSIFIED` or `NOT_RUNNABLE` (no simulator, nothing recorded).
-Strategy variants tried before this ledger: 9 (the 60s scalp, H1 to H7, plus the no-lag
-study). Every idea that gets a verdict raises that count, and the bar rises with it.
+Strategy variants tried before this ledger: 8 (the 60s scalp and H1 to H7; the no-lag
+study was exploratory and does not count). Every idea that gets a verdict raises that count, and the bar rises with it.
 
 | # | Idea | Counterparty (who loses) | Prediction | Needs | Status |
 |---|---|---|---|---|---|
