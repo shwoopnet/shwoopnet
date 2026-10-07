@@ -214,7 +214,7 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
 - **What it does.** About 6 minutes before each Bitcoin or gold 15 minute close (330 to 400 seconds left), it re-reads the market and,
   if a side's fresh price is 88c to 97c, buys ONE contract at the touch, immediate-or-cancel, and holds it to settlement. One order per
   market (id `L1-<ticker>`, record created first), production host only, never retried.
-- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 80 orders, 24 hours, and the session ends when cash falls $7.00 below its
+- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 24 hours, a 200 order backstop that a 24 hour session cannot reach (192 markets a day), and the session ends when cash falls $7.00 below its
   level at the first tick (a $5 loss allowance plus up to $2 in open positions). It also ends on the first order whose answer is lost or
   refused, and while an earlier order is unresolved. The server switch, the halt switch and the shard balance all still apply.
 - **Start and stop** from the Bot tab ("24 hour L1 session", two clicks to start). It cannot run beside a single armed test order, and

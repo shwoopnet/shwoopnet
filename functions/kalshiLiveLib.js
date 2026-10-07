@@ -276,7 +276,9 @@ async function runArmedTick(args) {
 // price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
 const L1_BAND = [0.88, 0.97];
 const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
-const L1_MAX_ORDERS = 80;                  // in one session
+// Not a trading limit: the owner asked for 24 hours and nothing else. Bitcoin and gold have 192 markets in a day (96 each), so
+// 200 can never end a 24 hour session; it only stops a runaway loop from sending orders without end. The loss stop is the real limit.
+const L1_MAX_ORDERS = 200;
 const L1_SESSION_MS = 24 * 3600 * 1000;
 const L1_LOSS_STOP = 7.0;                  // dollars of cash below the starting level: $5 of loss plus up to $2 sitting in open positions
 
@@ -299,6 +301,13 @@ function l1Pick(m) {
     return { side: "no", price: noPrice, limit, worst: r4(1 - limit) };
   }
   return null;
+}
+
+// The touch and the size resting on it, read off the market the order was decided on. Field names are Kalshi's; any
+// that are absent come back null instead of a guess.
+function bookSeen(m) {
+  const n = (v) => { const x = num(v); return Number.isFinite(x) ? x : null; };
+  return { bid: n(m.yes_bid_dollars), ask: n(m.yes_ask_dollars), bidSize: n(m.yes_bid_size_fp), askSize: n(m.yes_ask_size_fp), at: new Date().toISOString() };
 }
 
 const totalCash = (balanceBody) => {
@@ -342,7 +351,11 @@ async function runL1Tick(args) {
 
   const results = [];
   let ordersSent = sent;
+  // Bitcoin and gold close together and share a shard, and the balance above is read once. Money already committed to an
+  // order earlier in this same tick is taken off what the next market on that shard may use.
+  const committed = {};
   for (const c of candidates) {
+    if (ordersSent >= L1_MAX_ORDERS) { results.push("order limit reached"); break; }   // the limit also holds inside one tick
     const ticker = c.m.ticker;
     const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) });
     const m = mk.status === 200 && mk.body && mk.body.market;
@@ -353,7 +366,8 @@ async function runL1Tick(args) {
     if (!pick) { results.push(ticker + ": no side is priced 88c to 97c"); continue; }
     const cost = pick.worst + bot.takerFee(pick.worst, 1);
     if (cost > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost.toFixed(2) + ", above the cap"); continue; }
-    const avail = availableFor(bal.body, m.exchange_index);
+    const shardKey = String(m.exchange_index);
+    const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
     if (!Number.isFinite(avail)) { results.push(ticker + ": the balance came back in a shape this code does not recognise"); continue; }
     if (avail < cost + BALANCE_MARGIN) { results.push(ticker + ": only $" + avail.toFixed(2) + " on its shard"); continue; }
 
@@ -362,8 +376,12 @@ async function runL1Tick(args) {
       ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count: 1, price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
+      // What the book showed when the order was decided (null where Kalshi did not send a field), so a "no fill" can be
+      // explained afterwards: thin size at the touch, or a price that moved away.
+      seen: bookSeen(m),
     };
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
+    committed[shardKey] = (committed[shardKey] || 0) + cost;
 
     const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index);
     const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
