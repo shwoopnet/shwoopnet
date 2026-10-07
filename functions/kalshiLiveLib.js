@@ -30,7 +30,12 @@ const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
 const MIN_LEFT_MS = 300000;         // a live test needs 5 minutes left, not the demo's 2
-const MOVE_TOLERANCE = 0.02;        // the live touch may not have moved more than this since the signal
+// The signal comes from Kalshi's market LIST and the price to pay from the single-market read, and the two differ by
+// about 2c at the same instant (measured 2026-10-07: gold 21c/22c on the list, 19c/20c on the detail). A tight
+// tolerance therefore refused almost everything. The real test is that the FRESH price, the one actually paid, is
+// still inside the strategy's own 40c or 50c band; this wider bound only catches a market that has jumped.
+const MOVE_TOLERANCE = 0.05;
+const ARM_MS = 3 * 3600 * 1000;     // an armed scan switches itself off after this long, however it ended up
 const BALANCE_MARGIN = 0.5;         // dollars that must remain after the order
 
 class NotLive extends Error {}
@@ -71,6 +76,8 @@ async function liveRequest({ fetchFn, keyId, pem, method, path, params, body, no
 const isAmbiguous = (status) => status === 0 || status === 429 || status >= 500;
 const short = (b) => (typeof b === "string" ? b : JSON.stringify(b)).slice(0, 160);
 const no = (reason) => ({ ok: false, reason });
+// An outcome after a send was attempted (refused, answer lost, id already used): the caller must not scan again.
+const attempted = (reason) => ({ ok: false, attempted: true, reason });
 const num = (v) => (v === undefined || v === null || v === "" ? NaN : Number(v));
 
 // Which side of the live book the order takes, and the one contract's cost. A YES buy takes the YES ask; a NO buy
@@ -83,7 +90,9 @@ function livePlan(signal, market) {
   if (Math.abs(touch - signalYes) > MOVE_TOLERANCE + 1e-9) {
     return { ok: false, why: "the price moved from " + signalYes.toFixed(2) + " to " + touch.toFixed(2) + " since the signal" };
   }
-  const sidePrice = yes ? touch : 1 - touch;
+  const sidePrice = Math.round((yes ? touch : 1 - touch) * 100) / 100;   // cents, so 1 - 0.58 is 0.42 and not 0.42000000000000004
+  const inBand = Object.keys(bot.BANDS).some((b) => sidePrice >= bot.BANDS[b][0] - 1e-9 && sidePrice <= bot.BANDS[b][1] + 1e-9);
+  if (!inBand) return { ok: false, why: "the price moved from " + signalYes.toFixed(2) + " to " + touch.toFixed(2) + " and the side it would buy (" + sidePrice.toFixed(2) + ") is no longer in a 40c or 50c band" };
   const cost = sidePrice + bot.takerFee(sidePrice, 1);
   if (cost > LIVE_CAP + 1e-9) return { ok: false, why: "one contract would cost $" + cost.toFixed(2) + ", above the $" + LIVE_CAP.toFixed(2) + " cap" };
   return { ok: true, touch, sidePrice, cost };
@@ -191,17 +200,45 @@ async function runLiveTest({ quotes, active, enabled, store, now, keyId, pem, fe
     await store.updateTest(cid, found
       ? { status: Number(found.fill_count_fp || 0) > 0 ? "filled" : "no fill", orderId: found.order_id, fillCount: String(found.fill_count_fp || "0"), recovered: true, error409: true }
       : { status: "unknown", error: "HTTP 409 and the order could not be found: " + short(res.body) });
-    return no("Kalshi says an order with this id already exists. Check the Kalshi account for it. This is the first time production has been seen to refuse a repeated id.");
+    return attempted("Kalshi says an order with this id already exists. Check the Kalshi account for it. This is the first time production has been seen to refuse a repeated id.");
   }
   if (isAmbiguous(res.status)) {
     await store.updateTest(cid, { status: "unknown", error: "HTTP " + res.status + " " + short(res.body) });
-    return no("The answer from Kalshi was lost (HTTP " + res.status + "). THE ORDER MAY OR MAY NOT HAVE BEEN PLACED. Open the Kalshi account (Portfolio, Orders) and look before doing anything else. Nothing was retried, and further live tests are blocked until this record is resolved by hand.");
+    return attempted("The answer from Kalshi was lost (HTTP " + res.status + "). THE ORDER MAY OR MAY NOT HAVE BEEN PLACED. Open the Kalshi account (Portfolio, Orders) and look before doing anything else. Nothing was retried, and further live tests are blocked until this record is resolved by hand.");
   }
   await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
-  return no("Kalshi refused the order: HTTP " + res.status + " " + short(res.body) + ". Nothing was placed.");
+  return attempted("Kalshi refused the order: HTTP " + res.status + " " + short(res.body) + ". Nothing was placed.");
+}
+
+// One minute of an armed scan. `arm` is the control document ({armed, until}); setArm and recordLast write it and
+// the last outcome back. Not armed, or past `until`: nothing happens (and an expired arm is switched off). Armed:
+// one ordinary runLiveTest, with every one of its guards. The arm switches off as soon as an order has been SENT
+// (filled or not), or its answer was lost or refused, and on any error, so a single arming can never place more
+// than one order. A refusal before sending (no signal, price moved, shard empty) leaves it armed to try again.
+async function runArmedTick(args) {
+  const { arm, now, setArm, recordLast } = args;
+  if (!arm || arm.armed !== true) return { skipped: "not armed" };
+  if (!(arm.until > now)) {
+    await setArm({ armed: false, endedAt: now, endedBecause: "expired" });
+    return { skipped: "expired" };
+  }
+  let r;
+  try {
+    r = await runLiveTest(args);
+  } catch (e) {
+    await setArm({ armed: false, endedAt: now, endedBecause: "error" });
+    await recordLast({ ts: now, ok: false, attempted: false, reason: "The scan stopped on an error: " + String((e && e.message) || e).slice(0, 120) });
+    throw e;
+  }
+  await recordLast({
+    ts: now, ok: r.ok === true, attempted: r.ok === true || r.attempted === true, reason: r.reason || null,
+    ticker: r.ticker || null, filled: r.filled === true, fillCount: r.fillCount || null,
+  });
+  if (r.ok === true || r.attempted === true) await setArm({ armed: false, endedAt: now, endedBecause: r.ok === true ? "sent" : "attempted" });
+  return r;
 }
 
 module.exports = {
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
-  liveOrderBody, availableFor, runLiveTest,
+  liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS,
 };

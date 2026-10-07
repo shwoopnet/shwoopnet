@@ -135,7 +135,7 @@ const exitPnl = (pos) => round2(TARGET * pos.contracts - takerFee(TARGET, pos.co
 const settlePnl = (pos, result) => round2((result === pos.side ? pos.contracts : 0) - pos.entry * pos.contracts - pos.entryFee);
 
 module.exports = {
-  TARGET, SETTLE_GRACE_MS, BANKROLL, SERIES,
+  TARGET, SETTLE_GRACE_MS, BANKROLL, SERIES, BANDS,
   takerFee, validQuote, localDayStart, tierState, sizeFor, positionId,
   planEntries, exitDue, exitPnl, settlePnl, round2,
 };

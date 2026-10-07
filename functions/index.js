@@ -370,6 +370,52 @@ exports.kalshiLiveTrade = onCall(
   }
 );
 
+// ---- Armed live test: click once, it scans every minute, sends ONE order, then switches itself off ------------
+// kalshiLiveArm only flips a control document (no order code, no key). kalshiLiveArmed runs every minute, does
+// nothing unless that document says armed and unexpired, and then makes one ordinary kalshiLiveTrade attempt with
+// every one of its guards. One arming can place at most one order: it switches off as soon as an order is sent
+// (or refused, or its answer is lost), on any error, and after 3 hours regardless. All logic is in kalshiLiveLib.js.
+exports.kalshiLiveArm = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  ensureDefaultAdminApp();
+  const on = request.data && request.data.on === true;
+  const ref = getFirestore().collection("kalshiLiveControl").doc("arm");
+  if (!on) {
+    await ref.set({ armed: false, endedAt: Date.now(), endedBecause: "switched off by the owner" }, { merge: true });
+    return { armed: false };
+  }
+  if (KALSHI_LIVE_ENABLED.value() !== "on") {
+    throw new HttpsError("failed-precondition", "Live test trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to arm.");
+  }
+  const now = Date.now();
+  await ref.set({ armed: true, since: now, until: now + live.ARM_MS, endedAt: null, endedBecause: null });
+  return { armed: true, until: now + live.ARM_MS };
+});
+
+exports.kalshiLiveArmed = onSchedule(
+  { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const armRef = db.collection("kalshiLiveControl").doc("arm");
+    const snap = await armRef.get();
+    const arm = snap.exists ? snap.data() : null;
+    const now = Date.now();
+    const args = {
+      arm, now, setArm: (patch) => armRef.set(patch, { merge: true }),
+      recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
+    };
+    if (arm && arm.armed === true && arm.until > now) {
+      const { active, quotes } = await demo.loadQuotes(kalshiBotApi());
+      Object.assign(args, {
+        quotes, active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
+        keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
+      });
+    }
+    await live.runArmedTick(args);
+  }
+);
+
 exports.kalshiBot = onSchedule(
   { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
   async () => {
