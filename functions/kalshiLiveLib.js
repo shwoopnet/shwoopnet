@@ -269,7 +269,138 @@ async function runArmedTick(args) {
   return r;
 }
 
+// ---------------------------------------------------------------------------------------------------------------
+// L1 session: the owner's 24 hour automatic run of strategy L1 (README: "Live waiver: L1 for 24 hours"). Same module,
+// same order path, same production-only host and never-retry rules as the one contract test above, with its own limits.
+// The rule is L1 exactly as pre-registered: about 6 minutes before the close, buy ONE contract of the side whose fresh
+// price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
+const L1_BAND = [0.88, 0.97];
+const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
+const L1_MAX_ORDERS = 80;                  // in one session
+const L1_SESSION_MS = 24 * 3600 * 1000;
+const L1_LOSS_STOP = 7.0;                  // dollars of cash below the starting level: $5 of loss plus up to $2 sitting in open positions
+
+// The side whose FRESH price is inside the band, or null. YES is bought at its ask; NO at 1 minus the YES bid. Kalshi
+// prices run in tenths of a cent mid-book, so the limit sent is rounded in the direction that can only cross (YES up to
+// the next cent, NO down to the cent) and the worst price actually paid is bounded by it. The band is judged on the real
+// price, not the rounded one.
+function l1Pick(m) {
+  const bid = num(m.yes_bid_dollars), ask = num(m.yes_ask_dollars);
+  if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) return null;
+  const lo = L1_BAND[0] - 1e-9, hi = L1_BAND[1] + 1e-9;
+  const r4 = (x) => Math.round(x * 10000) / 10000;
+  if (r4(ask) >= lo && r4(ask) <= hi) {
+    const limit = Math.ceil(r4(ask) * 100 - 1e-9) / 100;
+    return { side: "yes", price: r4(ask), limit, worst: limit };
+  }
+  const noPrice = r4(1 - bid);
+  if (noPrice >= lo && noPrice <= hi) {
+    const limit = Math.floor(r4(bid) * 100 + 1e-9) / 100;
+    return { side: "no", price: noPrice, limit, worst: r4(1 - limit) };
+  }
+  return null;
+}
+
+const totalCash = (balanceBody) => {
+  const b = balanceBody && typeof balanceBody === "object" ? balanceBody : {};
+  if (Array.isArray(b.balance_breakdown) && b.balance_breakdown.length) {
+    const rows = b.balance_breakdown.map((r) => num(r.balance));
+    return rows.every(Number.isFinite) ? rows.reduce((a, x) => a + x, 0) : NaN;
+  }
+  const cents = num(b.balance);
+  return Number.isFinite(cents) ? cents / 100 : NaN;
+};
+
+// One minute of the session. session = {active, until, startCash, ordersSent}; setSession merges fields into it.
+// Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
+// another) on expiry, the order limit, the loss stop, an unresolved order, and any order whose answer was lost or refused.
+async function runL1Tick(args) {
+  const { session, now, setSession, enabled, active, store, keyId, pem, fetchFn, quotes } = args;
+  const log = async (kind, detail) => { if (args.logEvent) { try { await args.logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
+  if (!session || session.active !== true) return { skipped: "no session" };
+  const end = async (why, detail) => { await setSession({ active: false, endedAt: now, endedBecause: why }); await log("session ended", detail); return { ended: why }; };
+  const note = async (text, extra) => { await setSession(Object.assign({ lastTickAt: now, lastNote: String(text).slice(0, 300) }, extra || {})); };
+  if (!(session.until > now)) return end("expired", "24 hours are up");
+  if (enabled !== true) { await note("The server switch is off (KALSHI_LIVE_ENABLED), so nothing is sent."); return { skipped: "switch off" }; }
+  if (!active) { await note("The exchange is not trading right now."); return { skipped: "exchange inactive" }; }
+  if (await store.halted()) { await note("The bot is halted, so nothing is sent."); return { skipped: "halted" }; }
+  if (await store.hasUnresolved()) return end("attempted", "an earlier order is unresolved (sent, or its answer was lost). Check the Kalshi account before starting again");
+  const sent = session.ordersSent || 0;
+  if (sent >= L1_MAX_ORDERS) return end("limit", "the limit of " + L1_MAX_ORDERS + " orders has been reached");
+
+  const bal = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/balance", nowMs: now });
+  if (bal.status !== 200) { await note("The balance could not be read (HTTP " + bal.status + "), so nothing was sent."); return { skipped: "balance unreadable" }; }
+  const cash = totalCash(bal.body);
+  if (!Number.isFinite(cash)) { await note("The balance came back in a shape this code does not recognise, so nothing was sent."); return { skipped: "balance unrecognised" }; }
+  let startCash = session.startCash;
+  if (!Number.isFinite(startCash)) { startCash = cash; await setSession({ startCash }); }
+  if (cash < startCash - L1_LOSS_STOP + 1e-9) return end("loss stop", "cash is $" + cash.toFixed(2) + ", more than $" + L1_LOSS_STOP.toFixed(2) + " below the $" + startCash.toFixed(2) + " it started at");
+
+  const candidates = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status)
+    && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1]);
+  if (!candidates.length) { await note("Watching. No market is about 6 minutes from its close right now.", { cash }); return { skipped: "no market in the window" }; }
+
+  const results = [];
+  let ordersSent = sent;
+  for (const c of candidates) {
+    const ticker = c.m.ticker;
+    const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) });
+    const m = mk.status === 200 && mk.body && mk.body.market;
+    if (!m) { results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
+    const left = Date.parse(m.close_time) - now;
+    if (!["active", "open"].includes(m.status) || left < L1_WINDOW_MS[0] || left > L1_WINDOW_MS[1]) { results.push(ticker + ": not open in the 6 minute window"); continue; }
+    const pick = l1Pick(m);
+    if (!pick) { results.push(ticker + ": no side is priced 88c to 97c"); continue; }
+    const cost = pick.worst + bot.takerFee(pick.worst, 1);
+    if (cost > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost.toFixed(2) + ", above the cap"); continue; }
+    const avail = availableFor(bal.body, m.exchange_index);
+    if (!Number.isFinite(avail)) { results.push(ticker + ": the balance came back in a shape this code does not recognise"); continue; }
+    if (avail < cost + BALANCE_MARGIN) { results.push(ticker + ": only $" + avail.toFixed(2) + " on its shard"); continue; }
+
+    const cid = "L1-" + ticker;
+    const record = {
+      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count: 1, price: pick.price, limit: pick.limit,
+      exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
+      mode: "live", maxCost: Number(cost.toFixed(2)),
+    };
+    if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
+
+    const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index);
+    const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
+    const d = res.body && typeof res.body === "object" ? res.body : {};
+    if (res.status >= 200 && res.status < 300 && d.order_id) {
+      const filledCount = Number(d.fill_count || 0);
+      await store.updateTest(cid, {
+        status: filledCount > 0 ? "filled" : "no fill", orderId: d.order_id, fillCount: String(d.fill_count || "0"),
+        remainingCount: String(d.remaining_count || "0"), averageFillPrice: d.average_fill_price || null,
+        averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price,
+      });
+      ordersSent += 1;
+      await setSession({ ordersSent });
+      await log("order", pick.side + " 1 at " + (pick.price * 100).toFixed(1) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
+      results.push(ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
+      continue;
+    }
+    if (res.status === 409) {
+      const found = await findOrder({ fetchFn, keyId, pem, ticker, clientOrderId: cid, nowMs: Date.now() });
+      await store.updateTest(cid, found
+        ? { status: Number(found.fill_count_fp || 0) > 0 ? "filled" : "no fill", orderId: found.order_id, fillCount: String(found.fill_count_fp || "0"), recovered: true, error409: true }
+        : { status: "unknown", error: "HTTP 409 and the order could not be found: " + short(res.body) });
+      return end("attempted", "Kalshi says an order with id " + cid + " already exists. Check the Kalshi account for it");
+    }
+    if (isAmbiguous(res.status)) {
+      await store.updateTest(cid, { status: "unknown", error: "HTTP " + res.status + " " + short(res.body) });
+      return end("attempted", "the answer for " + ticker + " was lost (HTTP " + res.status + "). THE ORDER MAY OR MAY NOT EXIST. Check the Kalshi account (Portfolio, Orders) before starting again. Nothing was retried");
+    }
+    await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
+    return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
+  }
+  await note(results.join("; ") || "Nothing to do.", { cash });
+  return { ok: true, results };
+}
+
 module.exports = {
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
+  L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };
