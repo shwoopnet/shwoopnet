@@ -64,7 +64,12 @@ async function readAccount({ fetchFn, keyId, pem, now, baseline }) {
 // The account is shared with the owner's own earlier trades, which Kalshi cannot separate from the bot's. A baseline
 // ({since, startingDollars}, written once by the owner) draws the line: fills before `since` are hidden, and the
 // balance is shown as a change from the starting balance. Nothing on Kalshi is touched or erased, and without a
-// baseline everything is shown unchanged and flagged. The change includes any deposit or withdrawal after the line.
+// baseline everything is shown unchanged and flagged. Deposits and withdrawals the owner recorded are taken off the change; unrecorded ones still show up in it.
+// Money the owner added or took out since the line, kept on the baseline document as [{at, dollars}] and taken off the balance change.
+function adjustmentsTotal(list) {
+  return Array.isArray(list) ? Math.round(list.reduce((s, x) => s + (x && Number.isFinite(Number(x.dollars)) ? Number(x.dollars) : 0), 0) * 100) / 100 : 0;
+}
+
 function applyBaseline(d, baseline) {
   if (!baseline || !Number.isFinite(baseline.since)) return { ...d, baseline: null };
   let fills = d.fills;
@@ -74,8 +79,9 @@ function applyBaseline(d, baseline) {
     fills = { ...fills, fills: kept, hiddenBeforeBaseline: fills.fills.length - kept.length };
   }
   const total = d.balance.ok ? d.balance.totalDollars : null;
-  const changeSinceStart = total !== null && Number.isFinite(baseline.startingDollars) ? Math.round((total - baseline.startingDollars) * 100) / 100 : null;
-  return { ...d, fills, baseline: { since: baseline.since, startingDollars: baseline.startingDollars }, changeSinceStart };
+  const adjusted = adjustmentsTotal(baseline.adjustments);
+  const changeSinceStart = total !== null && Number.isFinite(baseline.startingDollars) ? Math.round((total - baseline.startingDollars - adjusted) * 100) / 100 : null;
+  return { ...d, fills, baseline: { since: baseline.since, startingDollars: baseline.startingDollars, adjustments: adjusted }, changeSinceStart };
 }
 
 // Trades enter about 6 minutes before a quarter-hour close and settle at the close, so the account only changes
@@ -89,4 +95,4 @@ function snapshotDue(now, lastAt) {
   return SNAPSHOT_MINUTES.includes(new Date(now).getUTCMinutes() % 15) && now - lastAt >= 60000;
 }
 
-module.exports = { snapshotDue, SNAPSHOT_MINUTES, readAccount, applyBaseline, shapeBalance, shapePositions, shapeFills };
+module.exports = { adjustmentsTotal, snapshotDue, SNAPSHOT_MINUTES, readAccount, applyBaseline, shapeBalance, shapePositions, shapeFills };
