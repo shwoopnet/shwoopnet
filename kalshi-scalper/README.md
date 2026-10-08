@@ -1699,7 +1699,7 @@ Two facts changed after P2 was written, both disclosed here before use.
 
 **2026-10-08: P2 simulator built (`python -m scalper.bookmaker`), not yet run on a settled market.** Code and tests exist before any result: the signal is the first snapshot 330 to 400 s before close with a side's ask at 0.90 to 0.97; the limit is one tick below that ask (0.1c above 90c, 1c at or below); a fill needs a LATER snapshot inside the window whose own side's ask is strictly below the limit. One deliberate departure from the P2 wording, in the conservative direction: P2 said "at or through"; the verdict counts only STRICTLY through, because a touch at our price says nothing about our place in the queue (H3's rule), and the touch rate is printed as a separate information column. The maker fee in the verdict equals the taker fee; coefficients 0 and 0.0175 are information only. A planted adverse selection test (every filled order loses, every missed one wins) must come out `FALSIFIED` with maker per signal below taker, and it does. At 10 hours of recording the result will be `NOT_ENOUGH_DATA` and printed as information only.
 
-## Pre-registration: three filters on L1, Q1 to Q3 (fixed 2026-10-08 03:20 UTC, before any code or any filtered result)
+## Pre-registration: three filters on L1, Q1 to Q3 (fixed 2026-10-08 03:12 UTC, before any code or any filtered result)
 
 The slot search tried rules from a grammar. This is the other direction: take the one rule that has held up best, L1, and ask whether a stated
 reason to distrust some of its entries removes the bad ones. Each filter is one fixed definition, with no threshold searched. The only things
