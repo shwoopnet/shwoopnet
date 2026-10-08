@@ -78,6 +78,33 @@ gates.Y7 = () => {
   assert.deepStrictEqual(extra.map((o) => o.ticker), ['T-B']);
 };
 
+// Usability: the status that matters is in a strip above the cards, trades and books are compact, and the ticker reads as a time.
+gates.Y8 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const short = new Function(block(/(function kalshiShortTicker\(t\)\{[\s\S]*?\n  \})\n/) + '; return kalshiShortTicker;')();
+  assert.strictEqual(short('KXBTC15M-26OCT072015-15'), 'BTC 8:15 PM ET');
+  assert.strictEqual(short('KXGOLD15M-26OCT070000-00'), 'GOLD 12:00 AM ET');
+  assert.strictEqual(short('KXBTC15M-26OCT071200-00'), 'BTC 12:00 PM ET');
+  assert.strictEqual(short('SOMETHING-ELSE'), 'SOMETHING-ELSE', 'an unfamiliar ticker is shown as it is');
+  assert.strictEqual(short('KXBTC15M-26OCT072575-15'), 'KXBTC15M-26OCT072575-15', 'an impossible time is not invented');
+  const strip = new Function(block(/(function kalshiStripHtml\(s, esc, money\)\{[\s\S]*?\n  \})\n/) + '; return kalshiStripHtml;')();
+  const esc = (x) => String(x).replace(/</g, '&lt;');
+  const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
+  const NOW = 1000000, run = { active: true, until: NOW + 5000, botNet: 0.78, nextLookAt: NOW + 60000 };
+  const acct = { balance: { ok: true, totalDollars: 114.54 } };
+  let h = strip({ switchOn: true, halted: false, session: run, acct, now: NOW }, esc, money);
+  assert.ok(/running/.test(h) && /\+\$0\.78/.test(h) && /\$114\.54/.test(h) && /Next look/.test(h), 'running shows the result, the account and the next look');
+  assert.ok(/kal-chip-bad/.test(strip({ switchOn: false, halted: false, session: run, acct, now: NOW }, esc, money)), 'the order switch being off is the loudest thing');
+  assert.ok(/halted/.test(strip({ switchOn: true, halted: true, session: run, acct, now: NOW }, esc, money)) && !/>running</.test(strip({ switchOn: true, halted: true, session: run, acct, now: NOW }, esc, money)), 'a halt is shown instead of running');
+  h = strip({ switchOn: true, halted: false, session: { active: false }, acct, now: NOW }, esc, money);
+  assert.ok(/not running/.test(h) && !/Bot P\/L/.test(h) && !/Next look/.test(h), 'not running shows no result or next look');
+  h = strip({ switchOn: true, halted: false, session: { active: true, until: NOW + 1, botNet: -1.5, nextLookAt: NOW - 1 }, acct: null, now: NOW }, esc, money);
+  assert.ok(/-\$1\.50/.test(h) && /kal-neg/.test(h) && !/Next look/.test(h) && !/Account/.test(h), 'a loss is red, a past next look and an unread account are left out');
+  assert.ok(/id="kalStrip"/.test(html) && html.indexOf('id="kalStrip"') < html.indexOf('id="kalTabBot"'), 'the strip sits above the cards');
+  assert.ok(/renderKalshiStrip\(\);\s*\}\s*\/\/ The 'Show more' button/.test(html) && /renderKalshiStrip\(\);\s*\}\s*var kalshiLiveOrders/.test(html), 'redrawn whenever the account or the session changes');
+  assert.ok(/class="kal-trow"/.test(html) && /class="kal-brow"/.test(html), 'compact trade and book rows');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
