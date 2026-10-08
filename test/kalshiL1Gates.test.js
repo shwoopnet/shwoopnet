@@ -464,7 +464,7 @@ gates.N20 = () => {
   const cb = /exports\.kalshiL1Session = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
   assert.ok(/const sizing = on && request\.data\.sizing === true;/.test(cb), 'only the literal true counts');
   assert.ok(/startCash: null, sizing,/.test(cb), 'kept on the session record');
-  assert.ok(/id="kalL1Sizing"/.test(html) && !/id="kalL1Sizing"[^>]*checked/.test(html), 'the box starts unticked');
+  assert.ok(/id="kalL1Sizing"[^>]*checked/.test(html), 'the scaling box starts ticked, so a restart cannot silently drop the bot to one contract (it cannot be changed once the session runs)');
 };
 
 // "No market is about 6 minutes from its close" is true at 3 minutes before a close, and unhelpful: the session says when the next look is.
