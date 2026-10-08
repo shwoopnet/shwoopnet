@@ -480,14 +480,14 @@ gates.N21 = async () => {
   const none = world(); await tick(none, { quotes: [closing] });
   assert.strictEqual(none.sess.nextLookAt, null, 'no later market known: no time is invented');
   assert.ok(/'Next look ' \+ \(Number\.isFinite\(s\.nextLookAt\) && s\.nextLookAt > now/.test(html), 'the page shows it only while it is still in the future');
-  assert.ok(!/At most 80 orders/.test(html) && /bot's own trades over the last 24 hours are down \$10\.00/.test(html), 'the rules text matches the live limits');
+  assert.ok(!/At most 80 orders/.test(html) && /its own trades over the last 24 hours are down by the stop \(5% of the balance at the last review with scaling, otherwise \$10;/.test(html), 'the rules text matches the live limits');
 };
 
 // The page quotes the limits in three places (the start confirmation, the rules text, the status line). They must say what the server does.
 gates.N22 = () => {
   const frac = Math.round(live.L1_SIZE_FRACTION * 1000) / 10, stop = Math.round(live.L1_SIZED_STOP_FRACTION * 100), flat = live.L1_LOSS_STOP;
   assert.ok(new RegExp('one contract per \\$' + live.SCALE_DOLLARS_PER_CONTRACT + ' of balance, up to ' + live.L1_SIZE_CEILING + ', raised one step every 3 days at most; stop at ' + stop + '% of the balance at the last review').test(html), 'the start confirmation');
-  assert.ok(new RegExp('are down \\$' + flat.toFixed(2).replace('.', '\\.') + ' \\(' + stop + '% of the balance at the last review with scaling').test(html), 'the rules text');
+  assert.ok(new RegExp('down by the stop \\(' + stop + '% of the balance at the last review with scaling, otherwise \\$' + flat.toFixed(0)).test(html), 'the rules text');
   assert.ok(new RegExp("\\(" + (stop / 100).toFixed(2) + " \\* base\\)\\.toFixed\\(2\\) : '\\$" + flat.toFixed(2).replace('.', '\\.') + "'").test(html), 'the status line');
   assert.ok(/live\.SCALE_DOLLARS_PER_CONTRACT/.test(fnSrc) && /live\.L1_SIZED_STOP_FRACTION \* 100/.test(fnSrc), 'the session start log is built from the constants, not typed');
 };
