@@ -381,5 +381,5 @@ gates.Y18 = () => {
 
 // Y19: the reinvest pool shows as pool / cost of the next extra contract, so progress is readable at a glance.
 {
-  assert.ok(/Reinvest pool/.test(html) && /\(ex \+ 1\) \* perC/.test(html) && /max extra/.test(html), 'the stake row shows the pool against the next extra contract');
+  assert.ok(/Reinvest pool/.test(html) && /\(ex \+ 1\) \* perC/.test(html) && !/max extra/.test(html), 'the stake row shows the pool against the next extra contract, with no cap branch');
 }

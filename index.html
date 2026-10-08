@@ -10329,7 +10329,7 @@
         var poolCell = '';
         if(ses.sizing === true && Number.isFinite(ses.sizePool)){
           var ex = Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0;
-          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, up to 2.">' + (ex >= 2 ? kalshiMoney(ses.sizePool) + ' (max extra)' : kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * perC)) + '</b></div>';
+          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * perC) + '</b></div>';
         }
         stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
       }

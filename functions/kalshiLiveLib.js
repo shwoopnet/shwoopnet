@@ -123,9 +123,9 @@ function livePlan(signal, market) {
 }
 
 // The order body is built from fixed fields only. count is 1 unless the owner turned on size scaling, and then a whole number
-// from 1 to L1_SIZE_CEILING; anything else is refused here rather than sent.
+// from 1 to L1_ORDER_CEILING; anything else is refused here rather than sent.
 function liveOrderBody(ticker, touch, side, clientOrderId, exchangeIndex, count = 1) {
-  if (!Number.isInteger(count) || count < 1 || count > L1_SIZE_CEILING) throw new Error("refusing to build an order for " + count + " contracts");
+  if (!Number.isInteger(count) || count < 1 || count > L1_ORDER_CEILING) throw new Error("refusing to build an order for " + count + " contracts");
   const body = {
     ticker, side: side === "yes" ? "bid" : "ask", count: String(count), price: touch.toFixed(2),
     time_in_force: "immediate_or_cancel", self_trade_prevention_type: "taker_at_cross", client_order_id: clientOrderId,
@@ -295,7 +295,7 @@ const L1_SIZE_FRACTION = 0.02;
 const L1_SIZED_STOP_FRACTION = 0.05;
 function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
-  return Math.max(1, Math.min(cap, L1_SIZE_CEILING, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
+  return Math.max(1, Math.min(cap, L1_ORDER_CEILING, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
 }
 
 // The cap on contracts per order follows the account, slowly (the owner keeps adding to it like a savings account). One contract per
@@ -304,6 +304,11 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
 // stop move together, every review. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
 // (3, what the owner was running), or lower if the balance is lower. Pure: the caller keeps the state.
 const L1_SIZE_CEILING = 10;
+// The balance-driven cap stops at L1_SIZE_CEILING, but contracts bought with reinvested PROFIT (the add-on) no longer have their own limit (Oct 8, 2026, the owner's
+// choice). What bounds them: the pool holds only skimmed profit, one extra contract needs one full contract cost of it, a loss comes out of the pool first, and the
+// 2% of cash rule in l1Count still caps every order, so the original capital is never put at more risk than before. L1_ORDER_CEILING is only a fat-finger guard on a
+// single order body, far above anything those rules allow; it is not a sizing rule.
+const L1_ORDER_CEILING = 50;
 const SCALE_DOLLARS_PER_CONTRACT = 85;
 // Steps were weekly at first and the owner asked for faster ones (Oct 8, 2026): a review, and at most one step up, every 3 days. A loss stop still holds the
 // cap and the profit add-on for a full week, so a bad run slows the climb more than a good one speeds it.
@@ -419,15 +424,14 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
 }
 
 // Profit reinvestment with a skim (the owner's idea, Oct 8, 2026). Only NEW net profit is split: the cumulative settled result since the state began
-// has a high-water mark, and when it rises to a new high, SKIM_REINVEST of the rise goes to a pool that buys extra contracts on later orders (never
-// more than SKIM_ADDON_MAX above the weekly cap, never past L1_SIZE_CEILING) and the rest is set aside as savings. The weekly review does NOT count
+// has a high-water mark, and when it rises to a new high, SKIM_REINVEST of the rise goes to a pool that buys extra contracts on later orders (one per full contract cost
+// in the pool, no fixed limit, still under the 2% of cash rule) and the rest is set aside as savings. The weekly review does NOT count
 // savings as balance, so skimmed money is never sized up on a second time. Skimming each win separately was tried first and is wrong: wins here are
 // 6c and losses 90c, so half of every WIN banks far more than the net profit and the base shrinks underneath it (in a replay, savings of $150 on a net
 // of -$6). A win that only recovers an earlier drop skims nothing. A loss comes out of the pool first (never below zero); a loss stop empties the
 // pool and switches the add-on off for a week. Orders are folded in once, in time order, behind a cursor that only moves past a run of orders that have
 // all settled, so an older order settling late is never skipped and nothing is counted twice. Orders from before the state existed are history. Pure.
 const SKIM_REINVEST = 0.5;
-const SKIM_ADDON_MAX = 2;
 function foldSkim(state, orders) {
   let pool = Number.isFinite(state.pool) ? state.pool : 0, saved = Number.isFinite(state.saved) ? state.saved : 0;
   let cum = Number.isFinite(state.cum) ? state.cum : 0, hwm = Number.isFinite(state.hwm) ? state.hwm : 0;
@@ -448,7 +452,7 @@ function foldSkim(state, orders) {
 }
 function skimAddon(state, now, perContract = 0.93) {
   if (Number.isFinite(state.lastStopAt) && now - state.lastStopAt < SCALE_STOP_PAUSE_MS) return 0;
-  return Math.max(0, Math.min(SKIM_ADDON_MAX, Math.floor((Number.isFinite(state.pool) ? state.pool : 0) / perContract + 1e-9)));
+  return Math.max(0, Math.floor((Number.isFinite(state.pool) ? state.pool : 0) / perContract + 1e-9));
 }
 
 // One minute of the session. session = {active, startCash, ordersSent}; setSession merges fields into it.
@@ -645,5 +649,5 @@ module.exports = {
   flattenAll,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, SKIM_ADDON_MAX, scaleTarget, L1_SIZE_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };

@@ -320,7 +320,7 @@ gates.N25 = async () => {
   assert.deepStrictEqual([gap.pool, gap.appliedTs], [0, 1000], 'an unsettled older order holds everything behind it, so a late settle is not skipped');
   const hist = live.foldSkim(st, [o('old', 500, 5)]);
   assert.strictEqual(hist.pool, 0, 'orders from before the state existed are history');
-  assert.deepStrictEqual([live.skimAddon({ pool: 0.5 }, 5), live.skimAddon({ pool: 0.95 }, 5), live.skimAddon({ pool: 99 }, 5)], [0, 1, live.SKIM_ADDON_MAX], 'one extra contract per 93c of pool, never above the add-on cap');
+  assert.deepStrictEqual([live.skimAddon({ pool: 0.5 }, 5), live.skimAddon({ pool: 0.95 }, 5), live.skimAddon({ pool: 99 }, 5)], [0, 1, 106], 'one extra contract per 93c of pool, with no fixed limit');
   assert.strictEqual(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 3 * 86400000), 0, 'off for a week after a loss stop');
   assert.ok(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 8 * 86400000) > 0);
   // Through a tick: the cap plus the add-on sets the size, and the balance the weekly review sees excludes savings.
@@ -333,7 +333,7 @@ gates.N25 = async () => {
   assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 100, 8 * 86400000).state.cap, 2, 'savings are not sized on: if the rest of the balance falls under $255 the cap follows it down');
   const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(ceil, { sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
-  assert.strictEqual(ceil.posts[0].count, '10', 'cap plus add-on can never pass the ceiling');
+  assert.strictEqual(ceil.posts[0].count, String(live.L1_ORDER_CEILING), 'a huge pool still stops at the order ceiling, the fat-finger guard');
 };
 
 // Wiring: the session is switched by a server callable with a server-set expiry; the scheduled arm function runs it; nothing
@@ -427,7 +427,7 @@ gates.N18 = async () => {
   assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(106.5, 0.92), live.l1Count(138, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
   assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.05, 3], 'the share of cash per order, the scaled stop and the cap');
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4).count, '4', 'the cap can rise, so four is a valid order');
-  assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, live.L1_SIZE_CEILING + 1), /refusing/, 'but never past the hard ceiling');
+  assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, live.L1_ORDER_CEILING + 1), /refusing/, 'but never past the order ceiling');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 1.5), /refusing/);
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2).count, '1', 'one contract unless told otherwise');
@@ -523,6 +523,12 @@ gates.N23 = async () => {
   assert.ok(/const trailing = on && request\.data\.trailing === true;/.test(cb) && /startCash: null, sizing, trailing,/.test(cb), 'only a literal true, kept on the session record');
   assert.ok(/id="kalL1Trailing"/.test(html) && !/id="kalL1Trailing"[^>]*checked/.test(html), 'the box starts unticked');
   assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(html) && /trailing: trailing === true/.test(html), 'and passed to the server');
+};
+
+gates.N30 = () => {
+  // Profit-funded contracts have no fixed limit, but the risk stays inside the 2% of cash rule and the pool holds only profit.
+  assert.strictEqual(live.skimAddon({ pool: 4.65 }, 5), 5, 'a pool of five contract costs buys five extras');
+  assert.strictEqual(live.l1Count(344, 0.93, 3 + 5), 7, 'but one order never risks more than 2% of cash, however large the pool');
 };
 
 (async () => {
