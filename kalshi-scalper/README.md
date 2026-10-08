@@ -29,9 +29,8 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 14 hypotheses with a verdict (the 60s scalp, H1 to H7, L1 to L3, L8, L9, M1) plus 729 rules from the two parameter searches
-(437 in the first, 292 new in the overnight Stage B; Stage A re-scored 179 rules already counted), so 743 tries in all as of 2026-10-08. The forward check
-of 5 of them adds none, and M1's 5 information cuts count against its bar. This line was stale at 2 and is corrected here. Cuts examined by the decision rule: 18, plus 3 entry times for H1.
+Strategy variants tried so far: 792 as of 2026-10-08, all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
+until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -1027,6 +1026,283 @@ tables and `ob.sqlite` (471 snapshots of 8 markets over 42 minutes on 2026-10-07
 | L11 taker flow | No | The trade tape. `tape.py` kept only fill flags for H3's orders, not the trades (about 28 million rows), so the imbalance cannot be rebuilt from the database. It is fetchable from the public API (a window per market, about 76 windows a minute) and is the one row worth building next; it has to be pre-registered with its decile cut and horizon before the fetch |
 | L13 volatility surprise | Not run | It is H7 (`FALSIFIED`) cut by volatility, which the ledger itself calls a likely duplicate. Registering it as new would reword a falsified idea |
 | L7 volatility regime gate | Not run | "The best variant" does not exist (every hypothesis is `FALSIFIED`; L1 is a different thing, one fixed rule). Regimes by spread and liquidity are already filters in the 729-rule search grammar (spread 1c, 2c, 4c), and F3 versus F4 already shows the spread cut changes nothing. Running regimes across variants would be a new parameter search, which needs the fair-market null and adds its rules to the count |
+
+## Pre-registration: the strategy search, S01 to S42 (fixed 2026-10-08, before any strategy was run)
+
+The owner asked for the search that was run on rules to be run on STRATEGIES: about 50 different mechanisms, all tested the same way, the
+best 25 saved, and an honest report of whether any clear the bar. The owner hoped for 5 profitable rule-sets. **Fewer, including none, is a
+complete result and nothing here is stretched to reach 5.** Nothing below places an order, and a survivor means permission to test forward,
+never "trade this".
+
+**How many, stated now.** 50 ideas were proposed: **42 runnable (S01 to S42)** and **8 NOT_RUNNABLE (N1 to N8)**, which are listed and not run.
+A further 10 ideas were thought of and thrown out before listing because their counterparty story rewords a falsified ledger row (R1 to R10
+below); they are not run and not counted. I could not find 50 runnable mechanisms that were distinct from the ledger, and I stopped at 42
+rather than pad. Of the 42, **5 are adjacent to the open row L13** (makers' volatility estimate is stale: S10, S12, S13, S28, S38, each with a
+different trigger) and **1 is a proxy for the open row L11** (S30); they are run, flagged, and share one mechanism cluster.
+
+**What I had seen when this was written (disclosed).** The schema and row counts of `data/book.sqlite`; two whole markets printed to learn what
+`volume`, `oi` and `price_c` mean (one Bitcoin market of 2026-10-05 10:30 and one gold market of 2026-10-06 17:00, including their candle paths
+and, for the first, its result); the hour-of-day counts of markets; and which consecutive markets are missing. No signal of any strategy below was
+computed, and no strategy was run on any window. I also know the README's earlier results (for example that favorites priced 80c to 97c earned
+about +0.1c to +1.2c at 5 to 8 minutes left on W0 and W1/W2, and that longshots lose), and W1 and W2 were used by the earlier searches. That
+knowledge is why the favorite and underdog strategies below carry a baseline control (K+). No threshold below came from a result.
+
+### Protocol, fixed
+
+- **Data and windows.** `overnight.windows`: W0s (design window), W0h, W1, W2 (out of sample), W3 (everything that closed after 2026-10-05
+  15:00 UTC, including the days added on 2026-10-08). **Every strategy is designed on W0s in the sense that its numbers were fixed before any data
+  was read and none is estimated from data; W0s results are printed as information and decide nothing.** The out-of-sample windows for every
+  strategy are W0h, W1 and W2. No strategy uses W1 or W2 for design. **W3 is locked**: no code path of the search reads it. It is read ONCE, at the
+  end, for the strategies that pass the survivor test, and if none does it is not read at all. The code refuses a second read.
+- **Clock and fills.** Candle `j` (1 to 15) ends at `open_ts + 60 j`. A signal may use only data with `end_ts <= open_ts + 60 js` (the signal
+  candle is `js`). The entry is on candle `je = js + 1`, strictly later than every candle the signal read. YES is bought at that candle's closing ask,
+  NO at 1 minus its closing bid (4 places). The quote must pass `valid_quote` (real two sided book, spread 10c or less). Taker fee
+  `0.07 p (1 - p)` per contract, unrounded (`scalps.fee`), on every leg; settlement pays no fee. Round trips sell at the exit candle's closing bid of
+  the side bought; an exit candle with no usable quote DROPS the trade and the drops are counted. Entry price must lie in **[0.10, 0.90]** unless a
+  tighter band is stated (a cost universe: the extremes are the favorite-longshot trades L1 and L3 already measured).
+- **No lookahead, enforced in code.** Every feature is read through a view that raises if asked for a candle after the signal candle, a spot minute that
+  closes after the signal, or a previous market that had not closed. Nothing is computed from the market's own result or final price. The result of an EARLIER
+  market is used only where stated, and only if that market closed at or before the signal candle. Rolling baselines use earlier data only. The
+  result of the market traded is read in one function that settles the trade.
+- **Unit.** One observation per market. "First qualifying" means the earliest signal candle in the stated range at which the signal holds; if the
+  entry quote at the next candle is unusable or out of band the market is simply not traded (no later candle is tried).
+- **Tools.** `strategies.py` (features and the 42 specs), `stratsearch.py` (runner, tests, null, output). Spot is Coinbase minute closes, Bitcoin
+  only; gold strategies use the stored strike and the market's own quotes. `strike` of the market, `oi`, `volume`, `price_c`, `bid_h`, `ask_l` are
+  fields of the stored candles.
+- **Signs are fixed by the counterparty story.** The mirror image of a rule is not run (that would be tuning the sign on the data).
+
+### Decision and ranking, fixed
+
+- **K, the kill criterion for every row.** On the pooled out-of-sample entries (W0h + W1 + W2): `FALSIFIED` unless ALL hold: n at least 300; mean net
+  positive with a day clustered z (UTC day of close) of at least 2.1; positive in both halves (split at the median close time); positive with fees
+  times 1.2 on every leg; AND the survivor test below. **K+, extra for S10, S12, S13, S28, S38 only:** the strategy's pooled mean must also exceed the
+  mean of its unconditional baseline (same side rule, band, entry candle and series, no trigger) on the same windows. The baselines are the two
+  information cuts "lower priced side in [0.10, 0.40] at candle 8" and "higher priced side in [0.60, 0.90] at candle 8".
+- **Survivor test (as in the overnight run).** Mean net after fees positive in EACH of W0h, W1 and W2 with at least 50 entries in each, and pooled day
+  clustered z at least 2.5.
+- **Verdict words, only these.** `NOT_ENOUGH_DATA` if the pooled out-of-sample n is below 300 (the survivor flag is still printed). `NOT_YET_FALSIFIED` only
+  if K, K+ (where it applies) and the survivor test all pass. Everything else `FALSIFIED`. `NOT_RUNNABLE` for N1 to N8. There is no verdict that
+  means trade. The table also prints, separately, how many pass the survivor test alone and how many pass the common bar alone.
+- **Ranking for the saved 25, fixed now.** Pooled out-of-sample day clustered z, descending (a strategy with fewer than 50 pooled entries ranks last). Ties
+  by mean net. The 25 are saved whatever their sign, in `search3/top25.json` with every parameter, and the full table of all 42 in `search3/all42.json`.
+- **The fair-market null over all 42 together.** Each strategy gets zero edge at its own decision price: every hold-to-settlement entry wins with
+  probability equal to the side's mid at its entry candle, independent draws per entry, per strategy and per repeat; every round trip keeps its real
+  entry and exit costs and spreads and has the sign of its realised mid change flipped with probability one half. The survivor test and the common bar
+  are applied to every strategy of every repeat. 500 repeats. Reported: the distribution of the best pooled z across the 42, P(null best >= real
+  best), P(null survivors >= real survivors), P(null passing K >= real).
+- **The deflated bar, stated now.** Best of N crosses z 2.1 by luck somewhere between N = 20 and N = 200. For N = 42 the expected best z of pure noise is
+  about sqrt(2 ln 42) = 2.73, and a family wise one sided 5% bar (Sidak) is the z with tail probability 1 - 0.95^(1/42) = 0.00122, about **3.03**. A
+  strategy whose pooled out-of-sample z is below 3.03 has not beaten what the best of 42 noise strategies does; passing the survivor test (2.5) is
+  permission to test forward and no more. The simulated null's 95th percentile of the best z replaces this estimate in the report.
+- **Counting.** Every one of the 42 counts as a variant tried, plus the 2 baseline information cuts. Information splits by series are descriptive,
+  feed no verdict and are not counted.
+
+### The strategies
+
+Notation: `mid_j` = (closing bid + closing ask)/2 of candle j; `ask`/`bid` are YES quotes; "lower priced side" is the side with the smaller entry price
+(tie: YES). `x` is the stored strike, `r_k = ln(x_k / x_(k-1))` the strike move, which equals the previous market's realised move, and "contiguous"
+means consecutive markets of one series 15 minutes apart. `s_k` is the Bitcoin spot close k minutes before the signal, `sigma1` the standard
+deviation of the 60 one minute log returns ending at the signal. Prediction is the expected mean net per contract in cents, written before any run; costs
+are about 2.4c for a hold at mid prices, 1.8c for the underdog band, 1.6c for the favorite band, 4.5c for a round trip, and the gross edge assumed is
+at most +0.5c, so I expect every row to lose. `HS` = hold to settlement. Universe is FIXED for every row (a series or calendar set stated in the row,
+never chosen on returns); the entry price band is the only cost based universe.
+
+**A. Cross market (Bitcoin and gold, same window).** Both series must have a market with the same `open_ts`, with usable quotes at the candles used.
+
+| ID | Mechanism and counterparty | Entry (signal at js, trade at js+1) | Exit | Prediction |
+|---|---|---|---|---|
+| S01 | Gold leads Bitcoin: a macro risk move shows in gold first. Loser: Bitcoin quoters who do not read the gold market. | js 5. d = gold mid_5 - gold mid_1. d >= +0.05 buy Bitcoin YES, d <= -0.05 buy Bitcoin NO | HS | net -2.4c |
+| S02 | Bitcoin leads gold, the same factor read the other way. Loser: the thinner gold quoters. | js 5. d = Bitcoin mid_5 - mid_1. d >= +0.05 buy gold YES, d <= -0.05 buy gold NO | HS | net -2.4c |
+| S03 | Laggard catch-up: when both move the same way the slower one has not finished. Loser: the slower market's resting quotes. | js 5. dB, dG (mid_5 - mid_1) both >= +0.05: buy YES on the series with the smaller rise (tie Bitcoin). Both <= -0.05: buy NO on the series with the smaller fall | HS | net -2.4c |
+| S04 | The last Bitcoin window's outcome carries into gold. Loser: gold makers who open at 50c without it. | js 1. Side = outcome of the Bitcoin market that opened 15 minutes before this window. Trade gold | HS | net -2.4c |
+| S05 | The last gold window's outcome carries into Bitcoin. Loser: Bitcoin makers. | js 1. Side = outcome of the gold market that opened 15 minutes earlier. Trade Bitcoin | HS | net -2.4c |
+
+**B. Serial structure (per series, contiguous markets only; both series pooled).**
+
+| ID | Mechanism and counterparty | Entry | Exit | Prediction |
+|---|---|---|---|---|
+| S06 | Persistence: the strike is a lagging average, so the last window's move leaves drift. Loser: makers who open at 50c. (Adjacent to L8's story; the measure is the realised outcome, not the spot gap.) | js 1. Side = previous market's outcome | HS | net -2.4c |
+| S07 | Streak exhaustion: retail extrapolates streaks. Loser: whoever buys the streak side. | js 1. The previous 3 contiguous outcomes identical: buy the opposite side | HS | net -2.4c |
+| S08 | Regime majority: a drift regime lasts hours. Loser: makers who treat each window as independent. | js 1. Previous 12 contiguous outcomes: YES count >= 8 buy YES, NO count >= 8 buy NO | HS | net -2.4c |
+| S09 | Shock reversal: after a move at least twice the recent typical one, 15 minute moves overshoot. Loser: momentum chasers. | js 1. m = r_N (previous market's move). M = median of the 24 previous absolute moves r_(N-1) back (26 contiguous strikes needed). If abs(m) >= 2 M buy the side opposite to sign(m) | HS | net -2.4c |
+| S10 | Surprise clustering (L13-adjacent): an upset marks a volatility burst the next window's quotes do not price. Loser: makers using last window's calm. | js 7. Previous contiguous market's mid_13 >= 0.85 and it resolved NO, or mid_13 <= 0.15 and it resolved YES. Buy the lower priced side if its ask is in [0.10, 0.40] | HS | net -1.8c, K+ vs baseline |
+| S11 | Autocorrelation regime: windows alternate between trending and mean reverting and the sign persists. Loser: makers with one fixed view. | js 1. rho = lag 1 correlation of the 24 most recent moves r_(N-23) to r_N (contiguous). rho >= 0.2: side = sign(r_N); rho <= -0.2: side = -sign(r_N) | HS | net -2.4c |
+
+**C. Calendar, fixed by mechanism now (UTC, never from returns).**
+
+| ID | Mechanism and counterparty | Entry | Exit | Prediction |
+|---|---|---|---|---|
+| S12 | US cash open (L13-adjacent, scheduled): volume and volatility jump at 13:30 and quotes use trailing volatility. Loser: makers pricing the favorite as if calm. | Bitcoin, Mon to Fri, markets opening 13:30, 13:45, 14:00 or 14:15. js 7. Buy the lower priced side if its ask is in [0.10, 0.40] | HS | net -1.8c, K+ |
+| S13 | Weekend quiet (L13-adjacent): Bitcoin trades thin and calm on Saturday and Sunday while quotes use a weekday volatility. Loser: makers who overstate the underdog. | Bitcoin, Saturday and Sunday, all markets. js 7. Buy the higher priced side if its ask is in [0.60, 0.90] | HS | net -1.6c, K+ |
+| S14 | Gold reopen gap fade: a gap across the daily break is partly filled. Loser: retail chasing the gap. | Gold, a market whose previous gold market opened 45 minutes or more earlier. js 1. g = ln(x_N / x_previous). abs(g) >= 0.0005: buy the side opposite to sign(g) | HS | net -2.4c |
+| S15 | London open breakout: stop orders sit beyond the Asian range. Loser: sellers fading the break. | Both series, markets opening 07:00 to 09:45. A = max and min of that series' strikes for the markets opening 00:00 to 06:45 the same UTC date (at least 20 of 28 present). js 1. x_N above A.max buy YES, below A.min buy NO | HS | net -2.4c |
+
+**D. Bitcoin spot path shape (Bitcoin only; needs the Coinbase minutes).**
+
+| ID | Mechanism and counterparty | Entry | Exit | Prediction |
+|---|---|---|---|---|
+| S16 | Acceleration: price processes extrapolate velocity, not acceleration. Loser: makers pricing a linear drift. | js 6. ra = ln(s_0/s_3), rb = ln(s_3/s_6). Same sign, abs(ra) >= 1.5 abs(rb), abs(ra) >= 0.75 sigma1 sqrt(3): side = sign(ra) | HS | net -2.4c |
+| S17 | Large move fade: a 5 minute move over 2 sigma is partly liquidity. Loser: those who buy the spike. | js 7. r5 = ln(s_0/s_5). abs(r5) >= 2 sigma1 sqrt(5): buy the side opposite sign(r5) | HS | net -2.4c |
+| S18 | Stretch from the hour's mean reverts. Loser: late trend buyers. | js 8. z = ln(s_0 / mean(s_0..s_59)) / (sigma1 sqrt(20)). abs(z) >= 1.5: buy opposite sign(z) | HS | net -2.4c |
+| S19 | Compression breakout: a quiet 20 minutes ends with a directional break. Loser: range traders. | js 6. range20 = (max - min of s_0..s_19)/s_0 at or below the 25th percentile of range20 over the previous 10,080 minutes (at least 5,000 present). s_0 = max of s_0..s_19: YES. s_0 = min: NO | HS | net -2.4c |
+| S20 | Multi scale trend agreement: when 5, 15 and 60 minute trends agree, the trend is robust. Loser: makers using one horizon. | js 8. r5, r15, r60 = ln(s_0/s_5), ln(s_0/s_15), ln(s_0/s_60) all the same sign and abs(r60) >= 0.5 sigma1 sqrt(60): side = that sign | HS | net -2.4c |
+| S21 | Jump reversal: a 3 sigma one minute jump is a liquidity event that retraces. Loser: those who trade the print. | js 7. Largest abs 1 minute return r* of the last 10 minutes; sigma_b = std of the 60 one minute returns of minutes 11 to 70 before the signal. abs(r*) >= 3 sigma_b: buy the side opposite sign(r*) | HS | net -2.4c |
+| S22 | Capitulation bounce: a 1% drawdown that prints a 15 minute low flushes leveraged longs (and the mirror at highs). Loser: the forced sellers. | js 8. Spot at or below 99% of its 180 minute high and s_0 = min(s_0..s_14): YES. Spot at or above 101% of its 180 minute low and s_0 = max(s_0..s_14): NO | HS | net -2.4c |
+| S23 | Run exhaustion: five same sign one minute returns in a row. Loser: those who chase the run. | js 7. Count of consecutive same sign nonzero one minute returns ending now >= 5: buy the opposite side | HS | net -2.4c |
+| S24 | Prior day extreme rejection: resting orders sit at yesterday's high and low. Loser: breakout buyers. | js 6. Previous UTC day's high and low of spot closes. s_0 within 0.10% below the high: NO. Within 0.10% above the low: YES | HS | net -2.4c |
+| S25 | Minute autocorrelation regime: bounce and trend regimes alternate. Loser: makers with one view. | js 7. rho = lag 1 correlation of the 60 one minute returns. r3 = ln(s_0/s_3) with abs(r3) >= 0.5 sigma1 sqrt(3). rho >= 0.15: side = sign(r3). rho <= -0.15: side = -sign(r3) | HS | net -2.4c |
+| S26 | Hourly open anchor: algorithms and traders anchor to the hour's open, so a stretch from it partly reverts. Loser: late trend buyers within the hour. | Bitcoin markets opening at minute :15, :30 or :45. js 7. H0 = spot close at the top of that hour; m = minutes from the top of the hour to the signal; z = ln(s_0 / H0) / (sigma1 sqrt(m)). abs(z) >= 1.5: buy the side opposite sign(z) | HS | net -2.4c |
+
+**E. The market's own price path (both series).**
+
+| ID | Mechanism and counterparty | Entry | Exit | Prediction |
+|---|---|---|---|---|
+| S27 | Spike fade scalp: a one minute mid jump of 12c overshoots and retraces. Loser: the taker who paid the jump. | First js in 3..10 with abs(mid_js - mid_(js-1)) >= 0.12: buy the side opposite the move | Sell 3 candles after entry at the bid | net -4.5c |
+| S28 | Choppy market underdog (L13-adjacent, own path): a mid that crossed 50c three times is noisy and its current leader is overpriced. Loser: whoever pays up for the latest lead. | js 9. Number of sign changes of (mid - 0.5) over the valid mids of candles 1..9 >= 3. Buy the lower priced side if its ask is in [0.10, 0.40] | HS | net -1.8c, K+ |
+| S29 | Wick rejection scalp: an intra minute spike that closed 10c back marks absorbed flow. Loser: the stops and takers at the extreme. | First js in 3..10: bid_h - bid_c >= 0.10 and bid_c in [0.15, 0.85]: buy NO. ask_c - ask_l >= 0.10 and ask_c in [0.15, 0.85]: buy YES (both: skip) | Sell 3 candles after entry at the bid | net -4.5c |
+| S30 | Flow proxy (L11 proxy, candle level only): the last trade price against the mid shows which side is paying the spread. Loser: slow quoters facing informed takers. | js 6. Mean of (price_c - mid) over candles 4..6 with a usable quote and a trade (at least 2). >= +0.01: YES. <= -0.01: NO | HS | net -2.4c |
+| S31 | Dwell reversion: a market that spent 70% of its life on one side and dipped is a dip in a persistent state. Loser: sellers of the dip. | js 10. At least 8 valid mids in 1..10, share above 0.5 at least 0.7 and mid_10 < 0.5: YES. Share at most 0.3 and mid_10 > 0.5: NO | HS | net -2.4c |
+| S32 | One sided quote pull: a maker who pulls only one side fears a move that way. Loser: the unpulled side's takers. | First js in 3..10: the bid fell by 0.03 or more from the previous candle while the ask did not fall by more than 0.01: buy NO. The ask rose by 0.03 or more while the bid did not rise by more than 0.01: buy YES | HS | net -2.4c |
+| S33 | Market price compression breakout: a mid that sat in a tight range then breaks. Loser: the range's fading takers. | js 9. At least 6 valid mids in 2..8 with max - min <= 0.08. mid_9 > max + 0.03: YES. mid_9 < min - 0.03: NO | HS | net -2.4c |
+
+**F. Spread, volume and open interest.**
+
+| ID | Mechanism and counterparty | Entry | Exit | Prediction |
+|---|---|---|---|---|
+| S34 | Spread shock: makers widen before a move they fear. Loser: the quoter who stays tight. | First js in 4..10: spread_js >= 0.03 and >= 3 times the median spread of the valid candles 2..js-1 (at least 3); abs(mid_js - mid_(js-2)) >= 0.03: side = sign of that change | HS | net -2.4c |
+| S35 | Volume surge follow-through: a move on 3 times the usual volume carries information. Loser: slow quoters. | First js in 5..11: vol_js >= 3 x mean vol of candles 2..js-1 (at least 3), abs(mid_js - mid_(js-1)) >= 0.04: side = direction of the move | HS | net -2.4c |
+| S36 | New money continuation: open interest rising with price means new positions, not covering. Loser: slow quoters. | js 8. oi_8 / oi_5 - 1 >= 0.10: mid_8 - mid_5 >= 0.05 YES, <= -0.05 NO | HS | net -2.4c |
+| S37 | Thin move reversion scalp: a jump on under half the usual volume is not information. Loser: the taker who paid it. | First js in 4..10: abs(mid_js - mid_(js-1)) >= 0.08 and vol_js <= 0.5 x mean vol of candles 2..js-1 (at least 3): buy the opposite side | Sell 3 candles after entry at the bid | net -4.5c |
+| S38 | Volume event underdog (L13-adjacent): a market with unusual volume is an event the stale volatility misprices. Loser: makers pricing the favorite as calm. | js 7. Total volume of candles 1..7 at or above the 90th percentile of the same sum over the previous 96 markets of the series (at least 48). Buy the lower priced side if its ask is in [0.10, 0.40] | HS | net -1.8c, K+ |
+| S39 | Opening burst lean: heavy first minute volume is informed flow that the quote has not finished absorbing. Loser: the quoter at the open. | js 1. vol_1 at or above the 90th percentile of the previous 96 markets' vol_1 (at least 48); valid quote at candle 1: mid_1 >= 0.55 YES, mid_1 <= 0.45 NO | HS | net -2.4c |
+
+**G. Strike relative, from the stored strikes (both series).**
+
+| ID | Mechanism and counterparty | Entry | Exit | Prediction |
+|---|---|---|---|---|
+| S40 | Channel extreme fade: when the strike is the highest of the last 4 hours, up bettors are crowded. Loser: breakout buyers. | js 1. With 15 contiguous previous strikes: x_N above all of them: NO. Below all: YES | HS | net -2.4c |
+| S41 | Efficiency ratio trend: a clean 2 hour trend persists. Loser: makers with no trend term. | js 1. 8 contiguous steps. ER = abs(x_N - x_(N-8)) / sum of abs steps >= 0.6: side = sign(x_N - x_(N-8)) | HS | net -2.4c |
+| S42 | Common factor trend: when Bitcoin and gold both moved the same way over the last hour the factor persists. Loser: makers who read each alone. | js 1. Both series' 4 step strike returns (x_N / x_(N-4)) have the same nonzero sign: buy that side on each series (two trades) | HS | net -2.4c |
+
+**NOT_RUNNABLE, listed and not run (no simulator, nothing recorded).**
+
+| ID | Idea | What it needs |
+|---|---|---|
+| N1 | Book depth imbalance predicts the next move (L12) | Depth for days; 471 snapshots only |
+| N2 | True taker flow from the trade tape (L11) | The tape; only fill flags are stored |
+| N3 | Release windows (CPI, jobs, FOMC) (L10) | A dated calendar; not written from memory |
+| N4 | Maker entry that rests only when distance says cheap (L4, L5) | Order books under 10 seconds for days |
+| N5 | Sub minute index lag | A BRTI feed |
+| N6 | CME gap fill for Bitcoin | CME futures closes |
+| N7 | Implied volatility regime gate | Options implied volatility |
+| N8 | Cross venue prediction market gaps | Other venues' prices |
+
+**Thought of and thrown out as rewordings of falsified rows (not run, not counted).** R1 fade of the opening move (the mirror of M1, whose mid drifted
+WITH the move). R2 drift of the mid between open and a fixed minute held to settlement (M1's information row). R3 the sign of spot minus strike at the
+open or at 6 minutes (L8, H7). R4 spot leading the Kalshi mid (the lag study found none). R5 gating favorites by realised spot volatility (H7 cut by
+volatility). R6 any price band by minutes left, or a side selector (L1, L3 and the grammar search). R7 buy cheap and sell at a target (H2, H4). R8
+the mirror sign of any rule above. R9 resting orders (H3, H5). R10 stop losses (standing exclusion).
+
+Verdicts are recorded below when the one run has happened. No threshold, minute, band or sign changes after seeing a number. A strategy changed after
+the run is contaminated, says so, and is a new variant that counts.
+
+**2026-10-08: the strategy search, run once (`python3 -m scalper.stratsearch null 500`, code commit 45632fe, output in `search3/`): no survivor. Nothing clears
+the survivor test, nothing clears the common bar, and the best z of the 42 is +1.17.** The pre-registered protocol above was followed without
+change: designed on W0s (printed as information only), judged on W0h, W1 and W2 pooled, W3 untouched. No threshold, minute, band, sign or ranking rule was changed
+after seeing a number. A smoke run that printed only signal and trade COUNTS on W0s (no outcomes) preceded it, to catch crashes. The real run printed once and the table below is that print.
+
+- **Headline.** 0 of 42 pass the survivor test (every out of sample window positive with at least 50 entries and pooled z of at least 2.5). 0 of 42 pass the
+  common bar (n of at least 300, z of at least 2.1, both halves positive, fees x1.2 positive). 0 are `NOT_YET_FALSIFIED`. 26 are `FALSIFIED` and 16
+  are `NOT_ENOUGH_DATA` (pooled out of sample entries under 300; they are not crossed off, they are too thin to judge). The owner hoped for 5; the honest count is 0,
+  and nothing was stretched to reach it. The best strategy by the pre-set ranking has z of +1.17, below even the 2.1 bar.
+- **What the average strategy did.** Over the 41,569 hold-to-settlement entries across the 39 hold strategies the mean gross was -0.17c and the mean net -1.66c, so
+  costs (fee plus the spread paid at the ask) were about 1.5c a contract and the signals added nothing on average. The 3 round trips (S27, S29, S37; 11,743
+  entries) had gross -1.18c and net -3.76c: the spike and wick fades lose about their two fees and two spreads and a little more. Net z of S27 and S29 is -14 and -16.
+- **Cost is still the binding constraint.** 9 of 42 pooled means are positive (S22, S24, S19, S30, S23, S15, S16, S35, S33) and every one of them has fewer than 300
+  entries or z under 1.5; the largest, S15 with 300 entries, is +0.68c at z of +0.29. The strategies with enough entries to see a 1c to 2c edge (S06, S04, S42, S36)
+  are all negative.
+- **The top of the ranking is small samples.** S22 (capitulation bounce) is first with +7.27c on 55 entries and z of +1.17: positive in W0h and W2 and negative in W1
+  (-4.24c on 16 entries). S19 (compression breakout) had the best design window z of any strategy (+3.11 on 77 entries in W0s, which decides nothing) and fell to +2.30c, z of
+  +0.86 out of sample, with W1 +7.11c and W2 -6.02c. That is what selection from a window looks like; no strategy was selected, so it is the same effect appearing without a
+  selector: with 42 independent looks at tiny samples, some will be large and of either sign.
+- **The valid fair market null over all 42 together (500 repeats, each entry given zero edge at its own decision price, independent draws, same survivor test).** The
+  best pooled z across the 42 has median +1.31, 95th percentile +2.41, maximum +4.27. **P(null best >= real best) =
+  0.596**: the real best is no better than the best of 42 strategies that have zero edge and pay these costs. The null produced
+  0.014 survivors per repeat on average (0.030 passes of the common bar), so a survivor here would have been unusual; there was none.
+- **The deflated bar for N = 42, stated before the run: best of N crosses z of 2.1 by luck.** Expected best z of pure noise 2.73 (sqrt(2 ln 42)); family wise
+  one sided 5% (Sidak) bar 3.03. The simulated null, which includes the costs every strategy pays, gives a lower 95th percentile (2.41) because most strategies
+  have a negative mean before any luck. The real best (+1.17) is under all three. A strategy would have needed z of about 3.0 pooled out of sample to be distinguishable
+  from the best of 42.
+- **Power, so FALSIFIED is read correctly.** The large strategies (n above 2,000) have a standard error of about 0.5c, so an edge over about 1.5c would have shown; those with 300
+  entries have a standard error of about 2c to 2.5c, so only an edge over about 6c would. 16 strategies have under 300 out of sample entries (S14 has 11, S33 has 29, S17 has 56) and say
+  `NOT_ENOUGH_DATA`: this search does not cross them off. Small samples come from narrow triggers on 69 days, not from a rule that was loosened.
+- **The locked window.** No strategy passed the survivor test, so W3 (closes after 2026-10-05 15:00 UTC, 445 markets) was NOT read, and `stratsearch w3` refuses to run without a survivor.
+  W3 is still locked for whatever is tested next.
+- **Ledger effects.** L11 stays `OPEN`: S30 is only a candle level proxy for taker flow (last trade against mid) and it did not clear anything; the real tape is not held. L13 is not marked
+  `FALSIFIED` by this, since its own wording (H7 cut by volatility) was not run, but five other triggers for the same stale volatility story did not clear the bar: S13 weekend quiet,
+  S28 choppy price path and S38 volume event are `FALSIFIED`; S10 upset in the previous window and S12 US cash open are `NOT_ENOUGH_DATA` (133 and 61 entries) and both are below
+  their baselines. K+ held for S13 (-0.03c against an unconditional baseline of -0.46c) and S38 (-2.42c against -2.98c), both negative and both far inside noise. The two baseline
+  information cuts (the lower priced side in 10c to 40c and the higher priced side in 60c to 90c, at candle 8, all markets) were run and are counted; they lost 2.98c and 0.46c.
+- **What could not be run.** N1 to N8 (book depth, the trade tape, a release calendar, resting order strategies, a sub minute index feed, CME closes, implied volatility, other venues).
+  No gold spot exists here, so the spot strategies (S16 to S26) trade Bitcoin only; the gold strategies use gold's stored strikes and quotes.
+- **Caveats.** One sample of 69 days and one regime. W1 and W2 were used by the earlier searches, so they are out of sample for these strategies' design but not unseen by the project.
+  Strikes are the stored strikes, the spot is Coinbase and not the settlement index, and fills are at the candle's closing quote (the real order could fill worse). A pass would only have been
+  permission to test forward.
+
+Full table, in the pre-set ranking order (pooled out of sample = W0h + W1 + W2; per window columns are n / mean net; the survivor flag was false for all 42):
+
+| Rank | ID | Strategy | n | Mean net | z | W0h | W1 | W2 | Fees x1.2 | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | S22 | Capitulation bounce | 55 | +7.27c | +1.17 | 17 / +10.20c | 16 / -4.24c | 22 / +13.38c | +7.03c | `NOT_ENOUGH_DATA` |
+| 2 | S24 | Prior day extreme rejection | 91 | +2.87c | +0.87 | 9 / -18.30c | 53 / +4.93c | 29 / +5.68c | +2.61c | `NOT_ENOUGH_DATA` |
+| 3 | S19 | Compression breakout | 214 | +2.30c | +0.86 | 55 / +5.80c | 86 / +7.11c | 73 / -6.02c | +2.04c | `NOT_ENOUGH_DATA` |
+| 4 | S30 | Last trade flow proxy (L11 proxy) | 158 | +1.18c | +0.38 | 54 / +5.53c | 49 / +2.55c | 55 / -4.32c | +0.90c | `NOT_ENOUGH_DATA` |
+| 5 | S23 | Run exhaustion | 117 | +1.25c | +0.36 | 39 / +6.79c | 43 / -2.31c | 35 / -0.54c | +1.02c | `NOT_ENOUGH_DATA` |
+| 6 | S15 | London open breakout of the Asian range | 300 | +0.68c | +0.29 | 70 / -0.85c | 102 / +0.37c | 128 / +1.76c | +0.36c | `FALSIFIED` |
+| 7 | S16 | Acceleration | 286 | +0.63c | +0.27 | 80 / -0.40c | 109 / +6.54c | 97 / -5.15c | +0.41c | `NOT_ENOUGH_DATA` |
+| 8 | S35 | Volume surge follow-through | 283 | +0.04c | +0.02 | 85 / +3.07c | 96 / -1.17c | 102 / -1.36c | -0.23c | `NOT_ENOUGH_DATA` |
+| 9 | S13 | Weekend quiet favorite (L13 adjacent) | 793 | -0.03c | -0.02 | 184 / +3.03c | 307 / -2.52c | 302 / +0.64c | -0.28c | `FALSIFIED` |
+| 10 | S03 | Laggard catch-up | 1143 | -0.27c | -0.20 | 341 / +0.26c | 387 / +3.19c | 415 / -3.92c | -0.54c | `FALSIFIED` |
+| 11 | S17 | Large 5 minute move fade | 56 | -1.11c | -0.21 | 16 / +7.14c | 21 / -8.24c | 19 / -0.19c | -1.32c | `NOT_ENOUGH_DATA` |
+| 12 | S05 | Previous gold outcome carries into Bitcoin | 2904 | -0.22c | -0.33 | 887 / +0.64c | 979 / +0.06c | 1038 / -1.24c | -0.54c | `FALSIFIED` |
+| 13 | S02 | Bitcoin leads gold | 2202 | -0.80c | -0.69 | 673 / -2.23c | 742 / -0.32c | 787 / -0.04c | -1.08c | `FALSIFIED` |
+| 14 | S20 | Multi scale trend agreement | 676 | -1.42c | -0.77 | 184 / -0.09c | 244 / -0.21c | 248 / -3.60c | -1.67c | `FALSIFIED` |
+| 15 | S21 | Jump reversal | 314 | -2.00c | -0.84 | 88 / -2.33c | 124 / +1.50c | 102 / -5.97c | -2.26c | `FALSIFIED` |
+| 16 | S31 | Dwell reversion | 494 | -1.82c | -1.05 | 131 / +0.95c | 183 / -4.92c | 180 / -0.70c | -2.10c | `FALSIFIED` |
+| 17 | S36 | Open interest new money | 3159 | -0.80c | -1.05 | 922 / +1.29c | 1112 / -0.70c | 1125 / -2.63c | -1.06c | `FALSIFIED` |
+| 18 | S12 | US cash open underdog (L13 adjacent) | 61 | -5.42c | -1.08 | 18 / -10.40c | 22 / +1.38c | 21 / -8.27c | -5.66c | `NOT_ENOUGH_DATA` |
+| 19 | S18 | Stretch from the hour's mean fade | 140 | -3.76c | -1.09 | 40 / -1.42c | 54 / +1.87c | 46 / -12.41c | -4.01c | `NOT_ENOUGH_DATA` |
+| 20 | S40 | Four hour channel extreme fade | 1625 | -1.20c | -1.13 | 455 / +1.62c | 556 / -1.99c | 614 / -2.58c | -1.52c | `FALSIFIED` |
+| 21 | S09 | Shock reversal | 1409 | -1.84c | -1.48 | 403 / -0.10c | 493 / -4.10c | 513 / -1.03c | -2.15c | `FALSIFIED` |
+| 22 | S38 | Volume event underdog (L13 adjacent) | 506 | -2.42c | -1.51 | 145 / -2.76c | 189 / -2.51c | 172 / -2.02c | -2.66c | `FALSIFIED` |
+| 23 | S01 | Gold leads Bitcoin | 2153 | -1.54c | -1.57 | 683 / -1.31c | 729 / +1.62c | 741 / -4.87c | -1.82c | `FALSIFIED` |
+| 24 | S25 | Minute autocorrelation regime | 502 | -3.76c | -1.62 | 122 / -8.82c | 202 / -2.52c | 178 / -1.70c | -4.03c | `FALSIFIED` |
+| 25 | S07 | Streak exhaustion | 1671 | -1.98c | -1.77 | 483 / +0.46c | 589 / -3.14c | 599 / -2.80c | -2.30c | `FALSIFIED` |
+| 26 | S41 | Efficiency ratio trend | 1145 | -3.12c | -2.03 | 323 / -5.23c | 415 / -4.46c | 407 / -0.09c | -3.44c | `FALSIFIED` |
+| 27 | S42 | Common factor trend | 3330 | -1.98c | -2.05 | 1060 / -3.38c | 1097 / -1.71c | 1173 / -0.98c | -2.30c | `FALSIFIED` |
+| 28 | S28 | Choppy market underdog (L13 adjacent) | 611 | -3.17c | -2.06 | 195 / -6.21c | 208 / -1.28c | 208 / -2.21c | -3.43c | `FALSIFIED` |
+| 29 | S34 | Spread shock | 56 | -10.04c | -2.17 | 14 / -26.41c | 18 / -13.24c | 24 / +1.90c | -10.31c | `NOT_ENOUGH_DATA` |
+| 30 | S26 | Hourly open anchor | 202 | -6.87c | -2.21 | 58 / -3.19c | 71 / -11.18c | 73 / -5.60c | -7.12c | `NOT_ENOUGH_DATA` |
+| 31 | S11 | Autocorrelation regime of strike moves | 2073 | -2.44c | -2.21 | 602 / -2.67c | 667 / -0.61c | 804 / -3.79c | -2.76c | `FALSIFIED` |
+| 32 | S06 | Outcome persistence | 6805 | -1.17c | -2.26 | 1978 / -1.34c | 2333 / -0.85c | 2494 / -1.33c | -1.48c | `FALSIFIED` |
+| 33 | S10 | Surprise clustering (L13 adjacent) | 133 | -7.55c | -2.58 | 39 / -4.56c | 49 / -6.78c | 45 / -10.99c | -7.80c | `NOT_ENOUGH_DATA` |
+| 34 | S04 | Previous Bitcoin outcome carries into gold | 2875 | -2.60c | -2.64 | 882 / -0.90c | 972 / -5.05c | 1021 / -1.72c | -2.91c | `FALSIFIED` |
+| 35 | S39 | Opening burst lean | 612 | -5.47c | -2.74 | 181 / -4.43c | 197 / -6.26c | 234 / -5.62c | -5.77c | `FALSIFIED` |
+| 36 | S37 | Thin move reversion scalp | 371 | -2.69c | -2.78 | 141 / -0.83c | 140 / -4.51c | 90 / -2.75c | -3.15c | `FALSIFIED` |
+| 37 | S08 | Regime majority | 2343 | -3.74c | -3.91 | 676 / -5.41c | 802 / -4.46c | 865 / -1.77c | -4.06c | `FALSIFIED` |
+| 38 | S27 | Spike fade scalp | 5247 | -3.96c | -14.10 | 1522 / -4.17c | 1816 / -3.32c | 1909 / -4.41c | -4.47c | `FALSIFIED` |
+| 39 | S29 | Wick rejection scalp | 6125 | -3.64c | -16.35 | 1794 / -3.43c | 2101 / -4.03c | 2230 / -3.45c | -4.18c | `FALSIFIED` |
+| 40 | S33 | Market price compression breakout | 29 | +11.40c | +1.46 | 9 / +15.55c | 9 / +9.58c | 11 / +9.50c | +11.14c | `NOT_ENOUGH_DATA` |
+| 41 | S32 | One sided quote pull | 32 | -9.61c | -1.13 | 7 / -25.85c | 12 / -1.18c | 13 / -8.64c | -9.87c | `NOT_ENOUGH_DATA` |
+| 42 | S14 | Gold reopen gap fade | 11 | -13.08c | -0.81 | 2 / -54.56c | 3 / +36.62c | 6 / -24.10c | -13.39c | `NOT_ENOUGH_DATA` |
+
+Files: `search3/all42.json` (all 42 with every parameter and every window), `search3/top25.json` (the 25 best by the pre-set ranking, saved whatever their sign),
+`search3/null.json`, `search3/run_output.txt` (the printed run).
+
+**Strategy variants tried so far: 792 as of 2026-10-08.** That is 742 before this search (13 hypotheses with a verdict, from the 60s scalp to L9, plus 729 rules from the two
+parameter searches, as restated on branch `claude/research-forward-check`), plus M1 and its 5 information cuts (branch `claude/research-early-momentum`), plus the 42 strategies of this search, plus its
+2 baseline information cuts. The forward check and early momentum branches named here have since been merged into `main`; this line is their union with this search; the line at the top of this file is updated to match. All are `FALSIFIED` or
+`NOT_ENOUGH_DATA`; the forward check of L1 and the four overnight survivors is still open.
 
 ## The order-book recorder (`recorder.py`, read only)
 

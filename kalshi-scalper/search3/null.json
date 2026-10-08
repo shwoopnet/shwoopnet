@@ -1,0 +1,19 @@
+{
+ "reps": 500,
+ "strategies": 42,
+ "real_best_z": 1.1689076615960945,
+ "null_best_median": 1.309271005049064,
+ "null_best_p95": 2.4149036829354853,
+ "null_best_max": 4.267267653680888,
+ "P_null_best_ge_real": 0.596,
+ "real_survivors": 0,
+ "P_null_survivors_ge_real": 1.0,
+ "mean_null_survivors": 0.014,
+ "real_common_bar": 0,
+ "P_null_common_ge_real": 1.0,
+ "mean_null_common": 0.03,
+ "real_both": 0,
+ "P_null_both_ge_real": 1.0,
+ "expected_best_of_N": 2.734106661519762,
+ "sidak_5pct_z": 3.030555037168647
+}

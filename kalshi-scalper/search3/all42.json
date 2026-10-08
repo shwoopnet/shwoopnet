@@ -1,0 +1,4664 @@
+[
+ {
+  "rank": 1,
+  "id": "S22",
+  "name": "Capitulation bounce",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 55,
+   "mean": 0.072704,
+   "se": 0.062198,
+   "z": 1.168908,
+   "h1": 0.0646,
+   "h2": 0.080519,
+   "stress": 0.070336,
+   "gross": 0.084545,
+   "mean_cents": 7.270413
+  },
+  "per_window": {
+   "W0s": {
+    "n": 32,
+    "mean": 0.056188,
+    "se": 0.147488,
+    "z": 0.380964
+   },
+   "W0h": {
+    "n": 17,
+    "mean": 0.10196,
+    "se": 0.118807,
+    "z": 0.8582
+   },
+   "W1": {
+    "n": 16,
+    "mean": -0.042395,
+    "se": 0.110854,
+    "z": -0.382441
+   },
+   "W2": {
+    "n": 22,
+    "mean": 0.133806,
+    "se": 0.081679,
+    "z": 1.638197
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 55,
+    "mean": 0.072704,
+    "se": 0.062198,
+    "z": 1.168908
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 82,
+    "noquote": 0,
+    "band": 50,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 51,
+    "noquote": 0,
+    "band": 34,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 45,
+    "noquote": 0,
+    "band": 29,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 61,
+    "noquote": 0,
+    "band": 39,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S22",
+   "name": "Capitulation bounce",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    8
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "hilo_minutes": 180,
+    "draw": 0.01,
+    "extreme_minutes": 15
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 2,
+  "id": "S24",
+  "name": "Prior day extreme rejection",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 91,
+   "mean": 0.028673,
+   "se": 0.033144,
+   "z": 0.86512,
+   "h1": -0.012191,
+   "h2": 0.068649,
+   "stress": 0.026078,
+   "gross": 0.041648,
+   "mean_cents": 2.86732
+  },
+  "per_window": {
+   "W0s": {
+    "n": 97,
+    "mean": -0.092061,
+    "se": 0.04536,
+    "z": -2.029592
+   },
+   "W0h": {
+    "n": 9,
+    "mean": -0.183024,
+    "se": 0.118654,
+    "z": -1.542495
+   },
+   "W1": {
+    "n": 53,
+    "mean": 0.049256,
+    "se": 0.028525,
+    "z": 1.726766
+   },
+   "W2": {
+    "n": 29,
+    "mean": 0.056756,
+    "se": 0.066018,
+    "z": 0.8597
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 91,
+    "mean": 0.028673,
+    "se": 0.033144,
+    "z": 0.86512
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 125,
+    "noquote": 0,
+    "band": 28,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 14,
+    "noquote": 0,
+    "band": 5,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 59,
+    "noquote": 0,
+    "band": 6,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 41,
+    "noquote": 0,
+    "band": 12,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S24",
+   "name": "Prior day extreme rejection",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    6
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "band": 0.001
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 3,
+  "id": "S19",
+  "name": "Compression breakout",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 214,
+   "mean": 0.022966,
+   "se": 0.026722,
+   "z": 0.859446,
+   "h1": 0.089247,
+   "h2": -0.043314,
+   "stress": 0.020448,
+   "gross": 0.035561,
+   "mean_cents": 2.296647
+  },
+  "per_window": {
+   "W0s": {
+    "n": 77,
+    "mean": 0.111212,
+    "se": 0.035746,
+    "z": 3.111132
+   },
+   "W0h": {
+    "n": 55,
+    "mean": 0.058024,
+    "se": 0.036914,
+    "z": 1.571852
+   },
+   "W1": {
+    "n": 86,
+    "mean": 0.071139,
+    "se": 0.039394,
+    "z": 1.805861
+   },
+   "W2": {
+    "n": 73,
+    "mean": -0.060198,
+    "se": 0.042056,
+    "z": -1.431373
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 214,
+    "mean": 0.022966,
+    "se": 0.026722,
+    "z": 0.859446
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 93,
+    "noquote": 0,
+    "band": 16,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 62,
+    "noquote": 0,
+    "band": 7,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 89,
+    "noquote": 0,
+    "band": 3,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 95,
+    "noquote": 0,
+    "band": 22,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S19",
+   "name": "Compression breakout",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    6
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "range_minutes": 20,
+    "pctl": 0.25,
+    "lookback_minutes": 10080,
+    "min_present": 5000
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 4,
+  "id": "S30",
+  "name": "Last trade flow proxy (L11 proxy)",
+  "family": "E",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 158,
+   "mean": 0.011763,
+   "se": 0.031162,
+   "z": 0.377462,
+   "h1": 0.012331,
+   "h2": 0.011194,
+   "stress": 0.008951,
+   "gross": 0.025823,
+   "mean_cents": 1.176262
+  },
+  "per_window": {
+   "W0s": {
+    "n": 283,
+    "mean": -0.045359,
+    "se": 0.017105,
+    "z": -2.65181
+   },
+   "W0h": {
+    "n": 54,
+    "mean": 0.05528,
+    "se": 0.045703,
+    "z": 1.209529
+   },
+   "W1": {
+    "n": 49,
+    "mean": 0.025504,
+    "se": 0.060451,
+    "z": 0.4219
+   },
+   "W2": {
+    "n": 55,
+    "mean": -0.043206,
+    "se": 0.049908,
+    "z": -0.865706
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 5,
+    "mean": 0.058129,
+    "se": 0.125657,
+    "z": 0.462605
+   },
+   "KXGOLD15M": {
+    "n": 153,
+    "mean": 0.010247,
+    "se": 0.031463,
+    "z": 0.325696
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 324,
+    "noquote": 2,
+    "band": 39,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 58,
+    "noquote": 0,
+    "band": 4,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 54,
+    "noquote": 0,
+    "band": 5,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 58,
+    "noquote": 1,
+    "band": 2,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S30",
+   "name": "Last trade flow proxy (L11 proxy)",
+   "family": "E",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    6
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "candles": [
+     4,
+     5,
+     6
+    ],
+    "thr": 0.01,
+    "min_obs": 2
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 5,
+  "id": "S23",
+  "name": "Run exhaustion",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 117,
+   "mean": 0.012544,
+   "se": 0.034512,
+   "z": 0.363466,
+   "h1": 0.029117,
+   "h2": -0.003749,
+   "stress": 0.010181,
+   "gross": 0.024359,
+   "mean_cents": 1.254387
+  },
+  "per_window": {
+   "W0s": {
+    "n": 51,
+    "mean": -0.134978,
+    "se": 0.048604,
+    "z": -2.777102
+   },
+   "W0h": {
+    "n": 39,
+    "mean": 0.067933,
+    "se": 0.045378,
+    "z": 1.497044
+   },
+   "W1": {
+    "n": 43,
+    "mean": -0.023126,
+    "se": 0.056891,
+    "z": -0.406494
+   },
+   "W2": {
+    "n": 35,
+    "mean": -0.005352,
+    "se": 0.074508,
+    "z": -0.071837
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 117,
+    "mean": 0.012544,
+    "se": 0.034512,
+    "z": 0.363466
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 113,
+    "noquote": 0,
+    "band": 62,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 66,
+    "noquote": 0,
+    "band": 27,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 70,
+    "noquote": 0,
+    "band": 27,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 88,
+    "noquote": 0,
+    "band": 53,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S23",
+   "name": "Run exhaustion",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "run": 5
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 6,
+  "id": "S15",
+  "name": "London open breakout of the Asian range",
+  "family": "C",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 300,
+   "mean": 0.006758,
+   "se": 0.022944,
+   "z": 0.294532,
+   "h1": 0.00404,
+   "h2": 0.009439,
+   "stress": 0.003596,
+   "gross": 0.022567,
+   "mean_cents": 0.675766
+  },
+  "per_window": {
+   "W0s": {
+    "n": 100,
+    "mean": 0.010138,
+    "se": 0.050173,
+    "z": 0.202063
+   },
+   "W0h": {
+    "n": 70,
+    "mean": -0.008492,
+    "se": 0.045399,
+    "z": -0.187051
+   },
+   "W1": {
+    "n": 102,
+    "mean": 0.003658,
+    "se": 0.030363,
+    "z": 0.120473
+   },
+   "W2": {
+    "n": 128,
+    "mean": 0.017567,
+    "se": 0.041136,
+    "z": 0.427054
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 175,
+    "mean": 0.020345,
+    "se": 0.03019,
+    "z": 0.673918
+   },
+   "KXGOLD15M": {
+    "n": 125,
+    "mean": -0.012265,
+    "se": 0.033609,
+    "z": -0.364945
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 100,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 70,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 102,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 128,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S15",
+   "name": "London open breakout of the Asian range",
+   "family": "C",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "trade_opens_utc": [
+     "07:00",
+     "09:45"
+    ],
+    "range_opens_utc": [
+     "00:00",
+     "06:45"
+    ],
+    "min_present": 20
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 7,
+  "id": "S16",
+  "name": "Acceleration",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 286,
+   "mean": 0.006333,
+   "se": 0.023855,
+   "z": 0.26549,
+   "h1": 0.007233,
+   "h2": 0.005434,
+   "stress": 0.00409,
+   "gross": 0.017552,
+   "mean_cents": 0.633341
+  },
+  "per_window": {
+   "W0s": {
+    "n": 178,
+    "mean": 0.029958,
+    "se": 0.025865,
+    "z": 1.158238
+   },
+   "W0h": {
+    "n": 80,
+    "mean": -0.00395,
+    "se": 0.027823,
+    "z": -0.141972
+   },
+   "W1": {
+    "n": 109,
+    "mean": 0.065383,
+    "se": 0.032231,
+    "z": 2.028576
+   },
+   "W2": {
+    "n": 97,
+    "mean": -0.05154,
+    "se": 0.047365,
+    "z": -1.088145
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 286,
+    "mean": 0.006333,
+    "se": 0.023855,
+    "z": 0.26549
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 270,
+    "noquote": 0,
+    "band": 92,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 117,
+    "noquote": 0,
+    "band": 37,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 160,
+    "noquote": 0,
+    "band": 51,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 172,
+    "noquote": 0,
+    "band": 75,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S16",
+   "name": "Acceleration",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    6
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "short": 3,
+    "ratio": 1.5,
+    "sigma_mult": 0.75
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 8,
+  "id": "S35",
+  "name": "Volume surge follow-through",
+  "family": "F",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 283,
+   "mean": 0.000374,
+   "se": 0.022038,
+   "z": 0.016972,
+   "h1": 0.005925,
+   "h2": -0.005138,
+   "stress": -0.0023,
+   "gross": 0.013746,
+   "mean_cents": 0.037402
+  },
+  "per_window": {
+   "W0s": {
+    "n": 123,
+    "mean": -0.030951,
+    "se": 0.031556,
+    "z": -0.980828
+   },
+   "W0h": {
+    "n": 85,
+    "mean": 0.030716,
+    "se": 0.03749,
+    "z": 0.819306
+   },
+   "W1": {
+    "n": 96,
+    "mean": -0.01169,
+    "se": 0.037501,
+    "z": -0.311734
+   },
+   "W2": {
+    "n": 102,
+    "mean": -0.013556,
+    "se": 0.037786,
+    "z": -0.358759
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 63,
+    "mean": -0.082028,
+    "se": 0.050476,
+    "z": -1.625073
+   },
+   "KXGOLD15M": {
+    "n": 220,
+    "mean": 0.023971,
+    "se": 0.025628,
+    "z": 0.935352
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 189,
+    "noquote": 0,
+    "band": 66,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 115,
+    "noquote": 0,
+    "band": 30,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 119,
+    "noquote": 0,
+    "band": 23,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 133,
+    "noquote": 0,
+    "band": 31,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S35",
+   "name": "Volume surge follow-through",
+   "family": "F",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "mult": 3.0,
+    "min_prior": 3,
+    "move": 0.04
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 9,
+  "id": "S13",
+  "name": "Weekend quiet favorite (L13 adjacent)",
+  "family": "C",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": -0.464,
+  "pooled_oos": {
+   "n": 793,
+   "mean": -0.000284,
+   "se": 0.014992,
+   "z": -0.018927,
+   "h1": 0.010109,
+   "h2": -0.01065,
+   "stress": -0.002752,
+   "gross": 0.012055,
+   "mean_cents": -0.028376
+  },
+  "per_window": {
+   "W0s": {
+    "n": 472,
+    "mean": 0.026452,
+    "se": 0.01966,
+    "z": 1.345467
+   },
+   "W0h": {
+    "n": 184,
+    "mean": 0.030348,
+    "se": 0.026099,
+    "z": 1.162777
+   },
+   "W1": {
+    "n": 307,
+    "mean": -0.025232,
+    "se": 0.023146,
+    "z": -1.090116
+   },
+   "W2": {
+    "n": 302,
+    "mean": 0.006414,
+    "se": 0.028424,
+    "z": 0.225663
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 793,
+    "mean": -0.000284,
+    "se": 0.014992,
+    "z": -0.018927
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 768,
+    "noquote": 0,
+    "band": 296,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 250,
+    "noquote": 0,
+    "band": 66,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 421,
+    "noquote": 0,
+    "band": 114,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 481,
+    "noquote": 0,
+    "band": 179,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S13",
+   "name": "Weekend quiet favorite (L13 adjacent)",
+   "family": "C",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.6,
+    0.9
+   ],
+   "params": {
+    "weekdays": "Sat, Sun"
+   },
+   "universe": "fixed",
+   "baseline": "over"
+  }
+ },
+ {
+  "rank": 10,
+  "id": "S03",
+  "name": "Laggard catch-up",
+  "family": "A",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 1143,
+   "mean": -0.002651,
+   "se": 0.013284,
+   "z": -0.199583,
+   "h1": 0.016525,
+   "h2": -0.021794,
+   "stress": -0.005433,
+   "gross": 0.01126,
+   "mean_cents": -0.26512
+  },
+  "per_window": {
+   "W0s": {
+    "n": 545,
+    "mean": -0.001108,
+    "se": 0.020774,
+    "z": -0.053319
+   },
+   "W0h": {
+    "n": 341,
+    "mean": 0.002596,
+    "se": 0.01845,
+    "z": 0.140712
+   },
+   "W1": {
+    "n": 387,
+    "mean": 0.031879,
+    "se": 0.023047,
+    "z": 1.383231
+   },
+   "W2": {
+    "n": 415,
+    "mean": -0.039163,
+    "se": 0.019007,
+    "z": -2.060506
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 595,
+    "mean": 0.000954,
+    "se": 0.016847,
+    "z": 0.056648
+   },
+   "KXGOLD15M": {
+    "n": 548,
+    "mean": -0.006566,
+    "se": 0.018174,
+    "z": -0.361276
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 600,
+    "noquote": 0,
+    "band": 55,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 369,
+    "noquote": 0,
+    "band": 28,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 413,
+    "noquote": 0,
+    "band": 26,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 457,
+    "noquote": 0,
+    "band": 42,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S03",
+   "name": "Laggard catch-up",
+   "family": "A",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    5
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "thr": 0.05,
+    "from": 1,
+    "to": 5,
+    "tie": "Bitcoin"
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 11,
+  "id": "S17",
+  "name": "Large 5 minute move fade",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 56,
+   "mean": -0.011143,
+   "se": 0.052269,
+   "z": -0.213182,
+   "h1": -0.004144,
+   "h2": -0.018142,
+   "stress": -0.013228,
+   "gross": -0.000714,
+   "mean_cents": -1.114279
+  },
+  "per_window": {
+   "W0s": {
+    "n": 28,
+    "mean": -0.070637,
+    "se": 0.076593,
+    "z": -0.922244
+   },
+   "W0h": {
+    "n": 16,
+    "mean": 0.071381,
+    "se": 0.100981,
+    "z": 0.706879
+   },
+   "W1": {
+    "n": 21,
+    "mean": -0.082352,
+    "se": 0.053745,
+    "z": -1.53229
+   },
+   "W2": {
+    "n": 19,
+    "mean": -0.001932,
+    "se": 0.108647,
+    "z": -0.01778
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 56,
+    "mean": -0.011143,
+    "se": 0.052269,
+    "z": -0.213182
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 131,
+    "noquote": 0,
+    "band": 103,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 55,
+    "noquote": 0,
+    "band": 39,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 73,
+    "noquote": 0,
+    "band": 52,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 100,
+    "noquote": 0,
+    "band": 81,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S17",
+   "name": "Large 5 minute move fade",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "minutes": 5,
+    "sigmas": 2.0
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 12,
+  "id": "S05",
+  "name": "Previous gold outcome carries into Bitcoin",
+  "family": "A",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 2904,
+   "mean": -0.002237,
+   "se": 0.006881,
+   "z": -0.325042,
+   "h1": 0.002951,
+   "h2": -0.007424,
+   "stress": -0.005409,
+   "gross": 0.013623,
+   "mean_cents": -0.223669
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1536,
+    "mean": -0.020121,
+    "se": 0.013384,
+    "z": -1.503288
+   },
+   "W0h": {
+    "n": 887,
+    "mean": 0.006446,
+    "se": 0.013813,
+    "z": 0.466662
+   },
+   "W1": {
+    "n": 979,
+    "mean": 0.00063,
+    "se": 0.012281,
+    "z": 0.051287
+   },
+   "W2": {
+    "n": 1038,
+    "mean": -0.01236,
+    "se": 0.009233,
+    "z": -1.338606
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 2904,
+    "mean": -0.002237,
+    "se": 0.006881,
+    "z": -0.325042
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 1540,
+    "noquote": 0,
+    "band": 4,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 888,
+    "noquote": 0,
+    "band": 1,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 979,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 1042,
+    "noquote": 0,
+    "band": 4,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S05",
+   "name": "Previous gold outcome carries into Bitcoin",
+   "family": "A",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "lag_windows": 1
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 13,
+  "id": "S02",
+  "name": "Bitcoin leads gold",
+  "family": "A",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 2202,
+   "mean": -0.00803,
+   "se": 0.011565,
+   "z": -0.694367,
+   "h1": -0.00769,
+   "h2": -0.00837,
+   "stress": -0.010791,
+   "gross": 0.005777,
+   "mean_cents": -0.803004
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1148,
+    "mean": -0.004925,
+    "se": 0.014426,
+    "z": -0.341412
+   },
+   "W0h": {
+    "n": 673,
+    "mean": -0.022322,
+    "se": 0.019376,
+    "z": -1.152065
+   },
+   "W1": {
+    "n": 742,
+    "mean": -0.003199,
+    "se": 0.025365,
+    "z": -0.12611
+   },
+   "W2": {
+    "n": 787,
+    "mean": -0.000363,
+    "se": 0.013039,
+    "z": -0.027853
+   }
+  },
+  "by_series_oos": {
+   "KXGOLD15M": {
+    "n": 2202,
+    "mean": -0.00803,
+    "se": 0.011565,
+    "z": -0.694367
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 1333,
+    "noquote": 48,
+    "band": 137,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 755,
+    "noquote": 0,
+    "band": 82,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 833,
+    "noquote": 0,
+    "band": 91,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 887,
+    "noquote": 8,
+    "band": 92,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S02",
+   "name": "Bitcoin leads gold",
+   "family": "A",
+   "series_traded": [
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    5
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "thr": 0.05,
+    "from": 1,
+    "to": 5,
+    "signal_market": "Bitcoin twin"
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 14,
+  "id": "S20",
+  "name": "Multi scale trend agreement",
+  "family": "D",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 676,
+   "mean": -0.014202,
+   "se": 0.018554,
+   "z": -0.765422,
+   "h1": 0.020305,
+   "h2": -0.048708,
+   "stress": -0.016737,
+   "gross": -0.001524,
+   "mean_cents": -1.420163
+  },
+  "per_window": {
+   "W0s": {
+    "n": 357,
+    "mean": 0.009498,
+    "se": 0.029682,
+    "z": 0.319987
+   },
+   "W0h": {
+    "n": 184,
+    "mean": -0.00091,
+    "se": 0.039637,
+    "z": -0.022967
+   },
+   "W1": {
+    "n": 244,
+    "mean": -0.00207,
+    "se": 0.027933,
+    "z": -0.074121
+   },
+   "W2": {
+    "n": 248,
+    "mean": -0.035998,
+    "se": 0.027777,
+    "z": -1.295984
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 676,
+    "mean": -0.014202,
+    "se": 0.018554,
+    "z": -0.765422
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 669,
+    "noquote": 0,
+    "band": 312,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 313,
+    "noquote": 0,
+    "band": 129,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 414,
+    "noquote": 0,
+    "band": 170,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 454,
+    "noquote": 0,
+    "band": 206,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S20",
+   "name": "Multi scale trend agreement",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    8
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "scales": [
+     5,
+     15,
+     60
+    ],
+    "sigma_mult": 0.5
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 15,
+  "id": "S21",
+  "name": "Jump reversal",
+  "family": "D",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 314,
+   "mean": -0.020011,
+   "se": 0.023758,
+   "z": -0.842285,
+   "h1": -0.038748,
+   "h2": -0.001274,
+   "stress": -0.022586,
+   "gross": -0.007134,
+   "mean_cents": -2.001073
+  },
+  "per_window": {
+   "W0s": {
+    "n": 211,
+    "mean": -0.026741,
+    "se": 0.019505,
+    "z": -1.370949
+   },
+   "W0h": {
+    "n": 88,
+    "mean": -0.02328,
+    "se": 0.026364,
+    "z": -0.883051
+   },
+   "W1": {
+    "n": 124,
+    "mean": 0.014974,
+    "se": 0.044966,
+    "z": 0.333012
+   },
+   "W2": {
+    "n": 102,
+    "mean": -0.059721,
+    "se": 0.038141,
+    "z": -1.565766
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 314,
+    "mean": -0.020011,
+    "se": 0.023758,
+    "z": -0.842285
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 371,
+    "noquote": 0,
+    "band": 160,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 140,
+    "noquote": 0,
+    "band": 52,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 191,
+    "noquote": 0,
+    "band": 67,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 208,
+    "noquote": 0,
+    "band": 106,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S21",
+   "name": "Jump reversal",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "window": 10,
+    "baseline_window": 60,
+    "sigmas": 3.0
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 16,
+  "id": "S31",
+  "name": "Dwell reversion",
+  "family": "E",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 494,
+   "mean": -0.018245,
+   "se": 0.017345,
+   "z": -1.051892,
+   "h1": -0.019272,
+   "h2": -0.017227,
+   "stress": -0.021036,
+   "gross": -0.004291,
+   "mean_cents": -1.824516
+  },
+  "per_window": {
+   "W0s": {
+    "n": 245,
+    "mean": -0.034012,
+    "se": 0.034068,
+    "z": -0.998338
+   },
+   "W0h": {
+    "n": 131,
+    "mean": 0.009499,
+    "se": 0.037395,
+    "z": 0.254005
+   },
+   "W1": {
+    "n": 183,
+    "mean": -0.049152,
+    "se": 0.028717,
+    "z": -1.711604
+   },
+   "W2": {
+    "n": 180,
+    "mean": -0.007014,
+    "se": 0.025138,
+    "z": -0.279036
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 261,
+    "mean": -0.004031,
+    "se": 0.028431,
+    "z": -0.141787
+   },
+   "KXGOLD15M": {
+    "n": 233,
+    "mean": -0.034167,
+    "se": 0.024628,
+    "z": -1.387359
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 297,
+    "noquote": 2,
+    "band": 50,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 152,
+    "noquote": 0,
+    "band": 21,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 205,
+    "noquote": 0,
+    "band": 22,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 208,
+    "noquote": 0,
+    "band": 28,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S31",
+   "name": "Dwell reversion",
+   "family": "E",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    10
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "candles": 10,
+    "min_valid": 8,
+    "share": 0.7
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 17,
+  "id": "S36",
+  "name": "Open interest new money",
+  "family": "F",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 3159,
+   "mean": -0.008039,
+   "se": 0.007639,
+   "z": -1.052387,
+   "h1": 0.006317,
+   "h2": -0.022386,
+   "stress": -0.01061,
+   "gross": 0.004815,
+   "mean_cents": -0.803887
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1693,
+    "mean": -0.025909,
+    "se": 0.011952,
+    "z": -2.1678
+   },
+   "W0h": {
+    "n": 922,
+    "mean": 0.012909,
+    "se": 0.014081,
+    "z": 0.916769
+   },
+   "W1": {
+    "n": 1112,
+    "mean": -0.006973,
+    "se": 0.010793,
+    "z": -0.646049
+   },
+   "W2": {
+    "n": 1125,
+    "mean": -0.02626,
+    "se": 0.01331,
+    "z": -1.9729
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 1868,
+    "mean": -4.7e-05,
+    "se": 0.009099,
+    "z": -0.005164
+   },
+   "KXGOLD15M": {
+    "n": 1291,
+    "mean": -0.019603,
+    "se": 0.011251,
+    "z": -1.742338
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 2584,
+    "noquote": 6,
+    "band": 885,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 1377,
+    "noquote": 1,
+    "band": 454,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 1623,
+    "noquote": 0,
+    "band": 511,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 1704,
+    "noquote": 2,
+    "band": 577,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S36",
+   "name": "Open interest new money",
+   "family": "F",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    8
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "from": 5,
+    "to": 8,
+    "oi_growth": 0.1,
+    "move": 0.05
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 18,
+  "id": "S12",
+  "name": "US cash open underdog (L13 adjacent)",
+  "family": "C",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": false,
+  "baseline_mean_cents": -2.952,
+  "pooled_oos": {
+   "n": 61,
+   "mean": -0.054166,
+   "se": 0.05033,
+   "z": -1.076229,
+   "h1": -0.040319,
+   "h2": -0.067567,
+   "stress": -0.056606,
+   "gross": -0.041967,
+   "mean_cents": -5.416649
+  },
+  "per_window": {
+   "W0s": {
+    "n": 40,
+    "mean": -0.027332,
+    "se": 0.055022,
+    "z": -0.496741
+   },
+   "W0h": {
+    "n": 18,
+    "mean": -0.103974,
+    "se": 0.06773,
+    "z": -1.535118
+   },
+   "W1": {
+    "n": 22,
+    "mean": 0.013839,
+    "se": 0.111389,
+    "z": 0.124244
+   },
+   "W2": {
+    "n": 21,
+    "mean": -0.082719,
+    "se": 0.069418,
+    "z": -1.191598
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 61,
+    "mean": -0.054166,
+    "se": 0.05033,
+    "z": -1.076229
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 64,
+    "noquote": 0,
+    "band": 24,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 36,
+    "noquote": 0,
+    "band": 18,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 40,
+    "noquote": 0,
+    "band": 18,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 44,
+    "noquote": 0,
+    "band": 23,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S12",
+   "name": "US cash open underdog (L13 adjacent)",
+   "family": "C",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.4
+   ],
+   "params": {
+    "opens_utc": [
+     "13:30",
+     "13:45",
+     "14:00",
+     "14:15"
+    ],
+    "weekdays": "Mon-Fri"
+   },
+   "universe": "fixed",
+   "baseline": "under"
+  }
+ },
+ {
+  "rank": 19,
+  "id": "S18",
+  "name": "Stretch from the hour's mean fade",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 140,
+   "mean": -0.037627,
+   "se": 0.034676,
+   "z": -1.085111,
+   "h1": -0.048759,
+   "h2": -0.026494,
+   "stress": -0.040052,
+   "gross": -0.0255,
+   "mean_cents": -3.762695
+  },
+  "per_window": {
+   "W0s": {
+    "n": 74,
+    "mean": -0.042056,
+    "se": 0.037948,
+    "z": -1.108251
+   },
+   "W0h": {
+    "n": 40,
+    "mean": -0.01421,
+    "se": 0.057938,
+    "z": -0.245254
+   },
+   "W1": {
+    "n": 54,
+    "mean": 0.018729,
+    "se": 0.060661,
+    "z": 0.308746
+   },
+   "W2": {
+    "n": 46,
+    "mean": -0.124147,
+    "se": 0.054287,
+    "z": -2.28686
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 140,
+    "mean": -0.037627,
+    "se": 0.034676,
+    "z": -1.085111
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 232,
+    "noquote": 0,
+    "band": 158,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 94,
+    "noquote": 0,
+    "band": 54,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 139,
+    "noquote": 0,
+    "band": 85,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 133,
+    "noquote": 0,
+    "band": 87,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S18",
+   "name": "Stretch from the hour's mean fade",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    8
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "mean_minutes": 60,
+    "z": 1.5,
+    "scale_sqrt": 20
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 20,
+  "id": "S40",
+  "name": "Four hour channel extreme fade",
+  "family": "G",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 1625,
+   "mean": -0.01203,
+   "se": 0.010656,
+   "z": -1.128971,
+   "h1": -0.001542,
+   "h2": -0.022506,
+   "stress": -0.015171,
+   "gross": 0.003674,
+   "mean_cents": -1.203011
+  },
+  "per_window": {
+   "W0s": {
+    "n": 924,
+    "mean": -0.023332,
+    "se": 0.016797,
+    "z": -1.389109
+   },
+   "W0h": {
+    "n": 455,
+    "mean": 0.016176,
+    "se": 0.023967,
+    "z": 0.674925
+   },
+   "W1": {
+    "n": 556,
+    "mean": -0.019946,
+    "se": 0.014974,
+    "z": -1.332039
+   },
+   "W2": {
+    "n": 614,
+    "mean": -0.025764,
+    "se": 0.016871,
+    "z": -1.527173
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 961,
+    "mean": -0.014055,
+    "se": 0.015724,
+    "z": -0.89387
+   },
+   "KXGOLD15M": {
+    "n": 664,
+    "mean": -0.009099,
+    "se": 0.013273,
+    "z": -0.68557
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 936,
+    "noquote": 6,
+    "band": 6,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 455,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 559,
+    "noquote": 0,
+    "band": 3,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 621,
+    "noquote": 2,
+    "band": 5,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S40",
+   "name": "Four hour channel extreme fade",
+   "family": "G",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "previous_strikes": 15
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 21,
+  "id": "S09",
+  "name": "Shock reversal",
+  "family": "B",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 1409,
+   "mean": -0.01838,
+   "se": 0.012433,
+   "z": -1.478244,
+   "h1": -0.02242,
+   "h2": -0.014345,
+   "stress": -0.021509,
+   "gross": -0.002732,
+   "mean_cents": -1.837968
+  },
+  "per_window": {
+   "W0s": {
+    "n": 726,
+    "mean": -0.010481,
+    "se": 0.018299,
+    "z": -0.57279
+   },
+   "W0h": {
+    "n": 403,
+    "mean": -0.000958,
+    "se": 0.018968,
+    "z": -0.050501
+   },
+   "W1": {
+    "n": 493,
+    "mean": -0.040979,
+    "se": 0.024155,
+    "z": -1.696465
+   },
+   "W2": {
+    "n": 513,
+    "mean": -0.010348,
+    "se": 0.018463,
+    "z": -0.560452
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 871,
+    "mean": -0.014389,
+    "se": 0.017559,
+    "z": -0.819476
+   },
+   "KXGOLD15M": {
+    "n": 538,
+    "mean": -0.02484,
+    "se": 0.0179,
+    "z": -1.387679
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 734,
+    "noquote": 3,
+    "band": 5,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 404,
+    "noquote": 0,
+    "band": 1,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 496,
+    "noquote": 0,
+    "band": 3,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 519,
+    "noquote": 4,
+    "band": 2,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S09",
+   "name": "Shock reversal",
+   "family": "B",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "baseline_moves": 24,
+    "mult": 2.0,
+    "strikes_needed": 26
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 22,
+  "id": "S38",
+  "name": "Volume event underdog (L13 adjacent)",
+  "family": "F",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": -2.978,
+  "pooled_oos": {
+   "n": 506,
+   "mean": -0.024154,
+   "se": 0.016008,
+   "z": -1.508853,
+   "h1": -0.032237,
+   "h2": -0.016072,
+   "stress": -0.026554,
+   "gross": -0.012154,
+   "mean_cents": -2.415435
+  },
+  "per_window": {
+   "W0s": {
+    "n": 319,
+    "mean": 0.008515,
+    "se": 0.026617,
+    "z": 0.319898
+   },
+   "W0h": {
+    "n": 145,
+    "mean": -0.027622,
+    "se": 0.03475,
+    "z": -0.794875
+   },
+   "W1": {
+    "n": 189,
+    "mean": -0.025135,
+    "se": 0.0226,
+    "z": -1.112161
+   },
+   "W2": {
+    "n": 172,
+    "mean": -0.020154,
+    "se": 0.027289,
+    "z": -0.738548
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 274,
+    "mean": -0.022652,
+    "se": 0.022276,
+    "z": -1.016888
+   },
+   "KXGOLD15M": {
+    "n": 232,
+    "mean": -0.025929,
+    "se": 0.026747,
+    "z": -0.969426
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 562,
+    "noquote": 0,
+    "band": 243,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 246,
+    "noquote": 0,
+    "band": 101,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 333,
+    "noquote": 0,
+    "band": 144,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 317,
+    "noquote": 0,
+    "band": 145,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S38",
+   "name": "Volume event underdog (L13 adjacent)",
+   "family": "F",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.4
+   ],
+   "params": {
+    "candles": 7,
+    "pctl": 0.9,
+    "prior_markets": 96,
+    "min_prior": 48
+   },
+   "universe": "fixed",
+   "baseline": "under"
+  }
+ },
+ {
+  "rank": 23,
+  "id": "S01",
+  "name": "Gold leads Bitcoin",
+  "family": "A",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 2153,
+   "mean": -0.015445,
+   "se": 0.00981,
+   "z": -1.574452,
+   "h1": -0.004954,
+   "h2": -0.025926,
+   "stress": -0.018198,
+   "gross": -0.001681,
+   "mean_cents": -1.544495
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1084,
+    "mean": -0.014749,
+    "se": 0.015718,
+    "z": -0.93831
+   },
+   "W0h": {
+    "n": 683,
+    "mean": -0.013106,
+    "se": 0.010933,
+    "z": -1.198773
+   },
+   "W1": {
+    "n": 729,
+    "mean": 0.016155,
+    "se": 0.011878,
+    "z": 1.360062
+   },
+   "W2": {
+    "n": 741,
+    "mean": -0.048689,
+    "se": 0.018954,
+    "z": -2.568769
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 2153,
+    "mean": -0.015445,
+    "se": 0.00981,
+    "z": -1.574452
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 1222,
+    "noquote": 0,
+    "band": 138,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 737,
+    "noquote": 0,
+    "band": 54,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 807,
+    "noquote": 0,
+    "band": 78,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 855,
+    "noquote": 0,
+    "band": 114,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S01",
+   "name": "Gold leads Bitcoin",
+   "family": "A",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    5
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "thr": 0.05,
+    "from": 1,
+    "to": 5,
+    "signal_market": "gold twin"
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 24,
+  "id": "S25",
+  "name": "Minute autocorrelation regime",
+  "family": "D",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 502,
+   "mean": -0.037617,
+   "se": 0.023219,
+   "z": -1.620106,
+   "h1": -0.075875,
+   "h2": 0.00064,
+   "stress": -0.040252,
+   "gross": -0.024442,
+   "mean_cents": -3.761728
+  },
+  "per_window": {
+   "W0s": {
+    "n": 265,
+    "mean": -0.079798,
+    "se": 0.024091,
+    "z": -3.312428
+   },
+   "W0h": {
+    "n": 122,
+    "mean": -0.088236,
+    "se": 0.039125,
+    "z": -2.255226
+   },
+   "W1": {
+    "n": 202,
+    "mean": -0.025245,
+    "se": 0.039794,
+    "z": -0.63438
+   },
+   "W2": {
+    "n": 178,
+    "mean": -0.016964,
+    "se": 0.035885,
+    "z": -0.472747
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 502,
+    "mean": -0.037617,
+    "se": 0.023219,
+    "z": -1.620106
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 369,
+    "noquote": 0,
+    "band": 104,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 163,
+    "noquote": 0,
+    "band": 41,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 246,
+    "noquote": 0,
+    "band": 44,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 249,
+    "noquote": 0,
+    "band": 71,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S25",
+   "name": "Minute autocorrelation regime",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "rho": 0.15,
+    "r3_minutes": 3,
+    "sigma_mult": 0.5
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 25,
+  "id": "S07",
+  "name": "Streak exhaustion",
+  "family": "B",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 1671,
+   "mean": -0.019787,
+   "se": 0.011193,
+   "z": -1.767733,
+   "h1": -0.013046,
+   "h2": -0.026519,
+   "stress": -0.022958,
+   "gross": -0.003932,
+   "mean_cents": -1.978684
+  },
+  "per_window": {
+   "W0s": {
+    "n": 882,
+    "mean": -0.015045,
+    "se": 0.015568,
+    "z": -0.966383
+   },
+   "W0h": {
+    "n": 483,
+    "mean": 0.004584,
+    "se": 0.020036,
+    "z": 0.228816
+   },
+   "W1": {
+    "n": 589,
+    "mean": -0.031433,
+    "se": 0.016376,
+    "z": -1.919505
+   },
+   "W2": {
+    "n": 599,
+    "mean": -0.027987,
+    "se": 0.020477,
+    "z": -1.366767
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 930,
+    "mean": -0.030276,
+    "se": 0.018265,
+    "z": -1.657603
+   },
+   "KXGOLD15M": {
+    "n": 741,
+    "mean": -0.006623,
+    "se": 0.014536,
+    "z": -0.455596
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 900,
+    "noquote": 10,
+    "band": 8,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 485,
+    "noquote": 1,
+    "band": 1,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 590,
+    "noquote": 0,
+    "band": 1,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 609,
+    "noquote": 5,
+    "band": 5,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S07",
+   "name": "Streak exhaustion",
+   "family": "B",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "streak": 3
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 26,
+  "id": "S41",
+  "name": "Efficiency ratio trend",
+  "family": "G",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 1145,
+   "mean": -0.03123,
+   "se": 0.015401,
+   "z": -2.027821,
+   "h1": -0.040047,
+   "h2": -0.022428,
+   "stress": -0.03437,
+   "gross": -0.015528,
+   "mean_cents": -3.122959
+  },
+  "per_window": {
+   "W0s": {
+    "n": 701,
+    "mean": -0.034058,
+    "se": 0.020364,
+    "z": -1.672451
+   },
+   "W0h": {
+    "n": 323,
+    "mean": -0.052262,
+    "se": 0.026217,
+    "z": -1.993442
+   },
+   "W1": {
+    "n": 415,
+    "mean": -0.044586,
+    "se": 0.023241,
+    "z": -1.918442
+   },
+   "W2": {
+    "n": 407,
+    "mean": -0.000919,
+    "se": 0.026783,
+    "z": -0.034328
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 640,
+    "mean": -0.024651,
+    "se": 0.020003,
+    "z": -1.232357
+   },
+   "KXGOLD15M": {
+    "n": 505,
+    "mean": -0.039567,
+    "se": 0.019154,
+    "z": -2.065726
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 716,
+    "noquote": 7,
+    "band": 8,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 323,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 418,
+    "noquote": 1,
+    "band": 2,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 416,
+    "noquote": 4,
+    "band": 5,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S41",
+   "name": "Efficiency ratio trend",
+   "family": "G",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "steps": 8,
+    "er": 0.6
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 27,
+  "id": "S42",
+  "name": "Common factor trend",
+  "family": "G",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 3330,
+   "mean": -0.019837,
+   "se": 0.009667,
+   "z": -2.051959,
+   "h1": -0.020893,
+   "h2": -0.018781,
+   "stress": -0.023008,
+   "gross": -0.003985,
+   "mean_cents": -1.983711
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1586,
+    "mean": -0.005934,
+    "se": 0.012167,
+    "z": -0.487677
+   },
+   "W0h": {
+    "n": 1060,
+    "mean": -0.033801,
+    "se": 0.014127,
+    "z": -2.392721
+   },
+   "W1": {
+    "n": 1097,
+    "mean": -0.017116,
+    "se": 0.023012,
+    "z": -0.743778
+   },
+   "W2": {
+    "n": 1173,
+    "mean": -0.009763,
+    "se": 0.009961,
+    "z": -0.980105
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 1674,
+    "mean": -0.027803,
+    "se": 0.013222,
+    "z": -2.102843
+   },
+   "KXGOLD15M": {
+    "n": 1656,
+    "mean": -0.011785,
+    "se": 0.012479,
+    "z": -0.94437
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 1616,
+    "noquote": 21,
+    "band": 9,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 1062,
+    "noquote": 1,
+    "band": 1,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 1100,
+    "noquote": 0,
+    "band": 3,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 1190,
+    "noquote": 6,
+    "band": 11,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S42",
+   "name": "Common factor trend",
+   "family": "G",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "steps": 4
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 28,
+  "id": "S28",
+  "name": "Choppy market underdog (L13 adjacent)",
+  "family": "E",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": false,
+  "baseline_mean_cents": -2.978,
+  "pooled_oos": {
+   "n": 611,
+   "mean": -0.031701,
+   "se": 0.015402,
+   "z": -2.058252,
+   "h1": -0.036845,
+   "h2": -0.026574,
+   "stress": -0.034267,
+   "gross": -0.018871,
+   "mean_cents": -3.170122
+  },
+  "per_window": {
+   "W0s": {
+    "n": 325,
+    "mean": -0.001753,
+    "se": 0.022775,
+    "z": -0.076949
+   },
+   "W0h": {
+    "n": 195,
+    "mean": -0.062142,
+    "se": 0.034129,
+    "z": -1.82078
+   },
+   "W1": {
+    "n": 208,
+    "mean": -0.012808,
+    "se": 0.022405,
+    "z": -0.571656
+   },
+   "W2": {
+    "n": 208,
+    "mean": -0.022056,
+    "se": 0.019559,
+    "z": -1.127671
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 356,
+    "mean": -0.027976,
+    "se": 0.019648,
+    "z": -1.42387
+   },
+   "KXGOLD15M": {
+    "n": 255,
+    "mean": -0.036902,
+    "se": 0.023208,
+    "z": -1.590042
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 532,
+    "noquote": 0,
+    "band": 207,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 298,
+    "noquote": 0,
+    "band": 103,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 349,
+    "noquote": 0,
+    "band": 141,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 330,
+    "noquote": 1,
+    "band": 121,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S28",
+   "name": "Choppy market underdog (L13 adjacent)",
+   "family": "E",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    9
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.4
+   ],
+   "params": {
+    "crossings": 3,
+    "candles": 9
+   },
+   "universe": "fixed",
+   "baseline": "under"
+  }
+ },
+ {
+  "rank": 29,
+  "id": "S34",
+  "name": "Spread shock",
+  "family": "F",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 56,
+   "mean": -0.100449,
+   "se": 0.046252,
+   "z": -2.171775,
+   "h1": -0.22704,
+   "h2": 0.026142,
+   "stress": -0.10311,
+   "gross": -0.087143,
+   "mean_cents": -10.044911
+  },
+  "per_window": {
+   "W0s": {
+    "n": 169,
+    "mean": -0.032526,
+    "se": 0.034837,
+    "z": -0.933662
+   },
+   "W0h": {
+    "n": 14,
+    "mean": -0.264125,
+    "se": 0.068834,
+    "z": -3.837152
+   },
+   "W1": {
+    "n": 18,
+    "mean": -0.132395,
+    "se": 0.076949,
+    "z": -1.720559
+   },
+   "W2": {
+    "n": 24,
+    "mean": 0.018988,
+    "se": 0.081867,
+    "z": 0.231937
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 5,
+    "mean": -0.299562,
+    "se": 0.17241,
+    "z": -1.737494
+   },
+   "KXGOLD15M": {
+    "n": 51,
+    "mean": -0.080928,
+    "se": 0.047253,
+    "z": -1.712642
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 211,
+    "noquote": 0,
+    "band": 42,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 15,
+    "noquote": 0,
+    "band": 1,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 20,
+    "noquote": 0,
+    "band": 2,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 24,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S34",
+   "name": "Spread shock",
+   "family": "F",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "spread": 0.03,
+    "mult": 3.0,
+    "min_prior": 3,
+    "move": 0.03
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 30,
+  "id": "S26",
+  "name": "Hourly open anchor",
+  "family": "D",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 202,
+   "mean": -0.068703,
+   "se": 0.0311,
+   "z": -2.209101,
+   "h1": -0.092091,
+   "h2": -0.045314,
+   "stress": -0.071245,
+   "gross": -0.05599,
+   "mean_cents": -6.870276
+  },
+  "per_window": {
+   "W0s": {
+    "n": 127,
+    "mean": -0.039465,
+    "se": 0.030805,
+    "z": -1.281119
+   },
+   "W0h": {
+    "n": 58,
+    "mean": -0.031878,
+    "se": 0.040481,
+    "z": -0.787464
+   },
+   "W1": {
+    "n": 71,
+    "mean": -0.111818,
+    "se": 0.059469,
+    "z": -1.880267
+   },
+   "W2": {
+    "n": 73,
+    "mean": -0.056027,
+    "se": 0.047957,
+    "z": -1.168264
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 202,
+    "mean": -0.068703,
+    "se": 0.0311,
+    "z": -2.209101
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 206,
+    "noquote": 0,
+    "band": 79,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 92,
+    "noquote": 0,
+    "band": 34,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 104,
+    "noquote": 0,
+    "band": 33,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 128,
+    "noquote": 0,
+    "band": 55,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S26",
+   "name": "Hourly open anchor",
+   "family": "D",
+   "series_traded": [
+    "KXBTC15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "open_minutes": [
+     15,
+     30,
+     45
+    ],
+    "z": 1.5
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 31,
+  "id": "S11",
+  "name": "Autocorrelation regime of strike moves",
+  "family": "B",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 2073,
+   "mean": -0.024424,
+   "se": 0.011041,
+   "z": -2.212168,
+   "h1": -0.010602,
+   "h2": -0.038232,
+   "stress": -0.027601,
+   "gross": -0.008538,
+   "mean_cents": -2.442351
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1051,
+    "mean": -0.042959,
+    "se": 0.011784,
+    "z": -3.645541
+   },
+   "W0h": {
+    "n": 602,
+    "mean": -0.026749,
+    "se": 0.023085,
+    "z": -1.158717
+   },
+   "W1": {
+    "n": 667,
+    "mean": -0.006071,
+    "se": 0.020668,
+    "z": -0.293737
+   },
+   "W2": {
+    "n": 804,
+    "mean": -0.037907,
+    "se": 0.011669,
+    "z": -3.248514
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 1267,
+    "mean": -0.028324,
+    "se": 0.012773,
+    "z": -2.217586
+   },
+   "KXGOLD15M": {
+    "n": 806,
+    "mean": -0.018291,
+    "se": 0.017232,
+    "z": -1.06149
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 1060,
+    "noquote": 0,
+    "band": 9,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 602,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 668,
+    "noquote": 0,
+    "band": 1,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 809,
+    "noquote": 1,
+    "band": 4,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S11",
+   "name": "Autocorrelation regime of strike moves",
+   "family": "B",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "moves": 24,
+    "rho": 0.2
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 32,
+  "id": "S06",
+  "name": "Outcome persistence",
+  "family": "B",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 6805,
+   "mean": -0.011664,
+   "se": 0.005165,
+   "z": -2.258433,
+   "h1": -0.009899,
+   "h2": -0.013429,
+   "stress": -0.014838,
+   "gross": 0.004204,
+   "mean_cents": -1.166416
+  },
+  "per_window": {
+   "W0s": {
+    "n": 3716,
+    "mean": -0.018152,
+    "se": 0.006878,
+    "z": -2.639022
+   },
+   "W0h": {
+    "n": 1978,
+    "mean": -0.013376,
+    "se": 0.005534,
+    "z": -2.416862
+   },
+   "W1": {
+    "n": 2333,
+    "mean": -0.00846,
+    "se": 0.009594,
+    "z": -0.881756
+   },
+   "W2": {
+    "n": 2494,
+    "mean": -0.013305,
+    "se": 0.009972,
+    "z": -1.334237
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 3937,
+    "mean": -0.014319,
+    "se": 0.006615,
+    "z": -2.164546
+   },
+   "KXGOLD15M": {
+    "n": 2868,
+    "mean": -0.00802,
+    "se": 0.008781,
+    "z": -0.913353
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 3808,
+    "noquote": 70,
+    "band": 22,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 1983,
+    "noquote": 1,
+    "band": 4,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 2340,
+    "noquote": 1,
+    "band": 6,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 2521,
+    "noquote": 10,
+    "band": 17,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S06",
+   "name": "Outcome persistence",
+   "family": "B",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "lag_windows": 1
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 33,
+  "id": "S10",
+  "name": "Surprise clustering (L13 adjacent)",
+  "family": "B",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": false,
+  "baseline_mean_cents": -2.978,
+  "pooled_oos": {
+   "n": 133,
+   "mean": -0.075528,
+   "se": 0.029223,
+   "z": -2.584531,
+   "h1": -0.055928,
+   "h2": -0.094836,
+   "stress": -0.078003,
+   "gross": -0.063158,
+   "mean_cents": -7.552842
+  },
+  "per_window": {
+   "W0s": {
+    "n": 72,
+    "mean": -0.056276,
+    "se": 0.055833,
+    "z": -1.007934
+   },
+   "W0h": {
+    "n": 39,
+    "mean": -0.045606,
+    "se": 0.053876,
+    "z": -0.846487
+   },
+   "W1": {
+    "n": 49,
+    "mean": -0.067793,
+    "se": 0.051065,
+    "z": -1.327566
+   },
+   "W2": {
+    "n": 45,
+    "mean": -0.109885,
+    "se": 0.047111,
+    "z": -2.33245
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 84,
+    "mean": -0.09858,
+    "se": 0.036926,
+    "z": -2.669702
+   },
+   "KXGOLD15M": {
+    "n": 49,
+    "mean": -0.036011,
+    "se": 0.067877,
+    "z": -0.530531
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 106,
+    "noquote": 0,
+    "band": 34,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 57,
+    "noquote": 0,
+    "band": 18,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 76,
+    "noquote": 0,
+    "band": 27,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 64,
+    "noquote": 0,
+    "band": 19,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S10",
+   "name": "Surprise clustering (L13 adjacent)",
+   "family": "B",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    7
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.4
+   ],
+   "params": {
+    "prev_candle": 13,
+    "extreme": 0.85
+   },
+   "universe": "fixed",
+   "baseline": "under"
+  }
+ },
+ {
+  "rank": 34,
+  "id": "S04",
+  "name": "Previous Bitcoin outcome carries into gold",
+  "family": "A",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 2875,
+   "mean": -0.025965,
+   "se": 0.009843,
+   "z": -2.637856,
+   "h1": -0.02774,
+   "h2": -0.02419,
+   "stress": -0.029127,
+   "gross": -0.010153,
+   "mean_cents": -2.596473
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1459,
+    "mean": -0.032388,
+    "se": 0.013902,
+    "z": -2.329754
+   },
+   "W0h": {
+    "n": 882,
+    "mean": -0.008991,
+    "se": 0.018,
+    "z": -0.499486
+   },
+   "W1": {
+    "n": 972,
+    "mean": -0.05055,
+    "se": 0.015263,
+    "z": -3.311988
+   },
+   "W2": {
+    "n": 1021,
+    "mean": -0.017223,
+    "se": 0.015553,
+    "z": -1.107349
+   }
+  },
+  "by_series_oos": {
+   "KXGOLD15M": {
+    "n": 2875,
+    "mean": -0.025965,
+    "se": 0.009843,
+    "z": -2.637856
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 1544,
+    "noquote": 75,
+    "band": 10,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 887,
+    "noquote": 1,
+    "band": 4,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 979,
+    "noquote": 1,
+    "band": 6,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 1043,
+    "noquote": 10,
+    "band": 12,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S04",
+   "name": "Previous Bitcoin outcome carries into gold",
+   "family": "A",
+   "series_traded": [
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "lag_windows": 1
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 35,
+  "id": "S39",
+  "name": "Opening burst lean",
+  "family": "F",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 612,
+   "mean": -0.054747,
+   "se": 0.019945,
+   "z": -2.744932,
+   "h1": -0.039905,
+   "h2": -0.069588,
+   "stress": -0.057722,
+   "gross": -0.039869,
+   "mean_cents": -5.474675
+  },
+  "per_window": {
+   "W0s": {
+    "n": 428,
+    "mean": -0.013947,
+    "se": 0.015831,
+    "z": -0.880965
+   },
+   "W0h": {
+    "n": 181,
+    "mean": -0.044299,
+    "se": 0.025818,
+    "z": -1.715801
+   },
+   "W1": {
+    "n": 197,
+    "mean": -0.062628,
+    "se": 0.037342,
+    "z": -1.677134
+   },
+   "W2": {
+    "n": 234,
+    "mean": -0.056193,
+    "se": 0.037112,
+    "z": -1.514168
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 365,
+    "mean": -0.078536,
+    "se": 0.027396,
+    "z": -2.866651
+   },
+   "KXGOLD15M": {
+    "n": 247,
+    "mean": -0.019593,
+    "se": 0.024102,
+    "z": -0.812922
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 435,
+    "noquote": 0,
+    "band": 7,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 184,
+    "noquote": 0,
+    "band": 3,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 203,
+    "noquote": 0,
+    "band": 6,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 240,
+    "noquote": 0,
+    "band": 6,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S39",
+   "name": "Opening burst lean",
+   "family": "F",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "pctl": 0.9,
+    "prior_markets": 96,
+    "min_prior": 48,
+    "lean": 0.05
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 36,
+  "id": "S37",
+  "name": "Thin move reversion scalp",
+  "family": "F",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 371,
+   "mean": -0.026851,
+   "se": 0.009666,
+   "z": -2.777897,
+   "h1": -0.016349,
+   "h2": -0.037296,
+   "stress": -0.031518,
+   "gross": -0.003512,
+   "mean_cents": -2.685062
+  },
+  "per_window": {
+   "W0s": {
+    "n": 229,
+    "mean": -0.039896,
+    "se": 0.012003,
+    "z": -3.323796
+   },
+   "W0h": {
+    "n": 141,
+    "mean": -0.008273,
+    "se": 0.015029,
+    "z": -0.550503
+   },
+   "W1": {
+    "n": 140,
+    "mean": -0.045136,
+    "se": 0.013713,
+    "z": -3.291573
+   },
+   "W2": {
+    "n": 90,
+    "mean": -0.02751,
+    "se": 0.021715,
+    "z": -1.266892
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 89,
+    "mean": -0.024762,
+    "se": 0.02068,
+    "z": -1.197422
+   },
+   "KXGOLD15M": {
+    "n": 282,
+    "mean": -0.02751,
+    "se": 0.012507,
+    "z": -2.199478
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 259,
+    "noquote": 1,
+    "band": 23,
+    "dropped": 6
+   },
+   "W0h": {
+    "signals": 150,
+    "noquote": 0,
+    "band": 9,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 154,
+    "noquote": 0,
+    "band": 14,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 98,
+    "noquote": 0,
+    "band": 8,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S37",
+   "name": "Thin move reversion scalp",
+   "family": "F",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "bid 3 candles after entry",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "move": 0.08,
+    "vol_frac": 0.5,
+    "min_prior": 3
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 37,
+  "id": "S08",
+  "name": "Regime majority",
+  "family": "B",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 2343,
+   "mean": -0.037399,
+   "se": 0.009553,
+   "z": -3.914901,
+   "h1": -0.045343,
+   "h2": -0.029475,
+   "stress": -0.040561,
+   "gross": -0.021588,
+   "mean_cents": -3.739886
+  },
+  "per_window": {
+   "W0s": {
+    "n": 1374,
+    "mean": -0.019853,
+    "se": 0.012214,
+    "z": -1.625503
+   },
+   "W0h": {
+    "n": 676,
+    "mean": -0.054053,
+    "se": 0.012998,
+    "z": -4.158609
+   },
+   "W1": {
+    "n": 802,
+    "mean": -0.04462,
+    "se": 0.017852,
+    "z": -2.499435
+   },
+   "W2": {
+    "n": 865,
+    "mean": -0.017688,
+    "se": 0.015011,
+    "z": -1.178317
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 1389,
+    "mean": -0.028186,
+    "se": 0.011235,
+    "z": -2.508641
+   },
+   "KXGOLD15M": {
+    "n": 954,
+    "mean": -0.050813,
+    "se": 0.015838,
+    "z": -3.208207
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 1400,
+    "noquote": 13,
+    "band": 13,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 678,
+    "noquote": 0,
+    "band": 2,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 805,
+    "noquote": 0,
+    "band": 3,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 885,
+    "noquote": 9,
+    "band": 11,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S08",
+   "name": "Regime majority",
+   "family": "B",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "window": 12,
+    "min_count": 8
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 38,
+  "id": "S27",
+  "name": "Spike fade scalp",
+  "family": "E",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 5247,
+   "mean": -0.039645,
+   "se": 0.002812,
+   "z": -14.096955,
+   "h1": -0.037423,
+   "h2": -0.041864,
+   "stress": -0.044654,
+   "gross": -0.0146,
+   "mean_cents": -3.9645
+  },
+  "per_window": {
+   "W0s": {
+    "n": 2853,
+    "mean": -0.044175,
+    "se": 0.003638,
+    "z": -12.143833
+   },
+   "W0h": {
+    "n": 1522,
+    "mean": -0.041714,
+    "se": 0.004263,
+    "z": -9.784779
+   },
+   "W1": {
+    "n": 1816,
+    "mean": -0.033198,
+    "se": 0.00496,
+    "z": -6.693846
+   },
+   "W2": {
+    "n": 1909,
+    "mean": -0.044128,
+    "se": 0.004453,
+    "z": -9.909789
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 3014,
+    "mean": -0.040328,
+    "se": 0.003777,
+    "z": -10.678304
+   },
+   "KXGOLD15M": {
+    "n": 2233,
+    "mean": -0.038724,
+    "se": 0.003831,
+    "z": -10.106988
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 3109,
+    "noquote": 5,
+    "band": 237,
+    "dropped": 14
+   },
+   "W0h": {
+    "signals": 1619,
+    "noquote": 0,
+    "band": 92,
+    "dropped": 5
+   },
+   "W1": {
+    "signals": 1927,
+    "noquote": 0,
+    "band": 111,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 2035,
+    "noquote": 1,
+    "band": 123,
+    "dropped": 2
+   }
+  },
+  "spec": {
+   "id": "S27",
+   "name": "Spike fade scalp",
+   "family": "E",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "bid 3 candles after entry",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "jump": 0.12
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 39,
+  "id": "S29",
+  "name": "Wick rejection scalp",
+  "family": "E",
+  "verdict": "FALSIFIED",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 6125,
+   "mean": -0.036441,
+   "se": 0.002229,
+   "z": -16.348396,
+   "h1": -0.037131,
+   "h2": -0.035752,
+   "stress": -0.041754,
+   "gross": -0.00988,
+   "mean_cents": -3.644144
+  },
+  "per_window": {
+   "W0s": {
+    "n": 3287,
+    "mean": -0.040388,
+    "se": 0.003206,
+    "z": -12.597801
+   },
+   "W0h": {
+    "n": 1794,
+    "mean": -0.034314,
+    "se": 0.004039,
+    "z": -8.49661
+   },
+   "W1": {
+    "n": 2101,
+    "mean": -0.040295,
+    "se": 0.003207,
+    "z": -12.565341
+   },
+   "W2": {
+    "n": 2230,
+    "mean": -0.034522,
+    "se": 0.004034,
+    "z": -8.558819
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 3552,
+    "mean": -0.032529,
+    "se": 0.003311,
+    "z": -9.824354
+   },
+   "KXGOLD15M": {
+    "n": 2573,
+    "mean": -0.041843,
+    "se": 0.003074,
+    "z": -13.613004
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 3413,
+    "noquote": 30,
+    "band": 84,
+    "dropped": 12
+   },
+   "W0h": {
+    "signals": 1816,
+    "noquote": 0,
+    "band": 21,
+    "dropped": 1
+   },
+   "W1": {
+    "signals": 2132,
+    "noquote": 1,
+    "band": 28,
+    "dropped": 2
+   },
+   "W2": {
+    "signals": 2279,
+    "noquote": 1,
+    "band": 47,
+    "dropped": 1
+   }
+  },
+  "spec": {
+   "id": "S29",
+   "name": "Wick rejection scalp",
+   "family": "E",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "bid 3 candles after entry",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "wick": 0.1,
+    "close_band": [
+     0.15,
+     0.85
+    ]
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 40,
+  "id": "S33",
+  "name": "Market price compression breakout",
+  "family": "E",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 29,
+   "mean": 0.11405,
+   "se": 0.078098,
+   "z": 1.460348,
+   "h1": 0.174815,
+   "h2": 0.057336,
+   "stress": 0.111411,
+   "gross": 0.127241,
+   "mean_cents": 11.404976
+  },
+  "per_window": {
+   "W0s": {
+    "n": 23,
+    "mean": 0.004829,
+    "se": 0.066639,
+    "z": 0.072466
+   },
+   "W0h": {
+    "n": 9,
+    "mean": 0.155516,
+    "se": 0.095642,
+    "z": 1.626028
+   },
+   "W1": {
+    "n": 9,
+    "mean": 0.095827,
+    "se": 0.155087,
+    "z": 0.617891
+   },
+   "W2": {
+    "n": 11,
+    "mean": 0.095032,
+    "se": 0.138789,
+    "z": 0.684723
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 21,
+    "mean": 0.139868,
+    "se": 0.085268,
+    "z": 1.640329
+   },
+   "KXGOLD15M": {
+    "n": 8,
+    "mean": 0.046276,
+    "se": 0.173612,
+    "z": 0.266552
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 31,
+    "noquote": 0,
+    "band": 8,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 11,
+    "noquote": 0,
+    "band": 2,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 14,
+    "noquote": 0,
+    "band": 5,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 15,
+    "noquote": 0,
+    "band": 4,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S33",
+   "name": "Market price compression breakout",
+   "family": "E",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    9
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "from": 2,
+    "to": 8,
+    "min_valid": 6,
+    "max_range": 0.08,
+    "break": 0.03
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 41,
+  "id": "S32",
+  "name": "One sided quote pull",
+  "family": "E",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 32,
+   "mean": -0.096092,
+   "se": 0.085197,
+   "z": -1.127877,
+   "h1": -0.069417,
+   "h2": -0.122766,
+   "stress": -0.098685,
+   "gross": -0.083125,
+   "mean_cents": -9.609163
+  },
+  "per_window": {
+   "W0s": {
+    "n": 72,
+    "mean": 0.019417,
+    "se": 0.042196,
+    "z": 0.460172
+   },
+   "W0h": {
+    "n": 7,
+    "mean": -0.258485,
+    "se": 0.142872,
+    "z": -1.809199
+   },
+   "W1": {
+    "n": 12,
+    "mean": -0.011822,
+    "se": 0.124965,
+    "z": -0.094603
+   },
+   "W2": {
+    "n": 13,
+    "mean": -0.086436,
+    "se": 0.152436,
+    "z": -0.567036
+   }
+  },
+  "by_series_oos": {
+   "KXBTC15M": {
+    "n": 2,
+    "mean": 0.21761,
+    "se": 0.006804,
+    "z": 31.983685
+   },
+   "KXGOLD15M": {
+    "n": 30,
+    "mean": -0.117005,
+    "se": 0.083401,
+    "z": -1.402926
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 94,
+    "noquote": 2,
+    "band": 20,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 8,
+    "noquote": 0,
+    "band": 1,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 14,
+    "noquote": 0,
+    "band": 2,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 14,
+    "noquote": 1,
+    "band": 0,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S32",
+   "name": "One sided quote pull",
+   "family": "E",
+   "series_traded": [
+    "KXBTC15M",
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "pull": 0.03,
+    "other_side_slack": 0.01
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ },
+ {
+  "rank": 42,
+  "id": "S14",
+  "name": "Gold reopen gap fade",
+  "family": "C",
+  "verdict": "NOT_ENOUGH_DATA",
+  "survivor_test": false,
+  "common_bar_K": false,
+  "K_plus": true,
+  "baseline_mean_cents": null,
+  "pooled_oos": {
+   "n": 11,
+   "mean": -0.130804,
+   "se": 0.160775,
+   "z": -0.813585,
+   "h1": 0.001448,
+   "h2": -0.241015,
+   "stress": -0.133874,
+   "gross": -0.115455,
+   "mean_cents": -13.080427
+  },
+  "per_window": {
+   "W0s": {
+    "n": 6,
+    "mean": -0.031908,
+    "se": 0.228275,
+    "z": -0.139779
+   },
+   "W0h": {
+    "n": 2,
+    "mean": -0.545645,
+    "se": 0.112662,
+    "z": -4.843207
+   },
+   "W1": {
+    "n": 3,
+    "mean": 0.366177,
+    "se": 0.238122,
+    "z": 1.537772
+   },
+   "W2": {
+    "n": 6,
+    "mean": -0.241015,
+    "se": 0.186935,
+    "z": -1.289299
+   }
+  },
+  "by_series_oos": {
+   "KXGOLD15M": {
+    "n": 11,
+    "mean": -0.130804,
+    "se": 0.160775,
+    "z": -0.813585
+   }
+  },
+  "counts": {
+   "W0s": {
+    "signals": 7,
+    "noquote": 1,
+    "band": 0,
+    "dropped": 0
+   },
+   "W0h": {
+    "signals": 3,
+    "noquote": 0,
+    "band": 1,
+    "dropped": 0
+   },
+   "W1": {
+    "signals": 3,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   },
+   "W2": {
+    "signals": 6,
+    "noquote": 0,
+    "band": 0,
+    "dropped": 0
+   }
+  },
+  "spec": {
+   "id": "S14",
+   "name": "Gold reopen gap fade",
+   "family": "C",
+   "series_traded": [
+    "KXGOLD15M"
+   ],
+   "signal_candles": [
+    1
+   ],
+   "entry_candle": "signal candle + 1",
+   "exit": "settlement",
+   "entry_price_band": [
+    0.1,
+    0.9
+   ],
+   "params": {
+    "min_gap_s": 2700,
+    "min_abs_log_gap": 0.0005
+   },
+   "universe": "fixed",
+   "baseline": null
+  }
+ }
+]
