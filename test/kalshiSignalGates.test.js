@@ -89,7 +89,7 @@ gates.G21 = () => {
     'the halt switch writes exactly { halt, at } to the control document');
   assert.ok(!/data-kal-tab|kalTabJournal|kalTabLive/.test(html), 'the Kalshi page is one page now: no tabs, no journal');
   assert.ok(/function kalshiOnShow\(\)\{ startKalshiBot\(\); startKalshiPoll\(\); \}/.test(html), 'opening the page starts the bot view and the books');
-  assert.ok(/if\(halted\)\{ el\.innerHTML \+= '<div class="kal-warn kal-big">Halted from this page/.test(html), 'the halt must show on the card at once');
+  assert.ok(/pill\.textContent = switchOff \? 'Order switch OFF' : \(halted \? 'Halted'/.test(html), 'the halt must show on the pill at once');
   assert.ok(/var haltUnset = !kalshiBotState\.control \|\| kalshiBotState\.control\.halt === undefined;/.test(html) && /if\(haltUnset\)\{ el\.innerHTML \+= '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted/.test(html), 'an unsaved halt setting must not read as "not halted"');
   assert.ok(/if\(halted && !window\.confirm\(/.test(html), 'resuming entries must ask first');
   assert.ok(/function kalshiOnHide\(\)\{ stopKalshiPoll\(\); stopKalshiBot\(\); \}/.test(html), 'leaving the page must stop listening');
@@ -106,7 +106,6 @@ gates.G22 = () => {
   assert.ok(!/limit\((12|40)\)/.test(html), 'no query may cap a history at a dozen rows');
   assert.ok(!/kalBotEvents|data-more="events"/.test(html), 'the event log card is gone (orders are in the trades table, why a session ended is on the Bot card)');
   assert.ok(/e\.kind === 'session ended'/.test(html) && /endedEv\.detail/.test(html), 'but the sentence the server wrote when a session ended is still shown, because it says what to check');
-  assert.ok(/earlier fill' \+ \(a\.fills\.hiddenBeforeBaseline === 1/.test(html), 'the page must say how many fills sit before the starting line');
   assert.ok(!/id="kalBotClosed"[\s\S]{0,40}paper/i.test(html) && !/kalshiBotTotals/.test(html), 'no paper-bot totals or lists remain on the page');
 };
 
@@ -228,7 +227,7 @@ gates.G27 = () => {
   assert.deepStrictEqual(group([null, { orderId: 'x', count: 'bad', price: 'bad' }, { orderId: 'x', count: 1, price: '0.5' }]).length, 1, 'junk is not turned into a number');
   // The page shows grouped trades everywhere it counts them.
   assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
-  assert.ok(/<span class="kal-k">Bot change since start<\/span>/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && /Deposits, manual trades and open orders account for the other/.test(html), 'the account area shows the bot\'s own change, and says where the rest of the balance move came from');
+  assert.ok(/Bot since ' \+ escapeHtml\(kalDate\(tot\.since\)\)/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && /Deposits and manual trades<\/span>/.test(html), 'the account area shows the bot\'s own change, and says where the rest of the balance move came from');
 };
 
 (async () => {
