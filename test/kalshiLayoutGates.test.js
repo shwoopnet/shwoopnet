@@ -132,6 +132,22 @@ gates.Y9 = () => {
   assert.ok(!/kalLayoutCols|colsSel/.test(html), 'no leftover column picker');
 };
 
+// Fit on a small screen: the account card lists only what the bot can spend (shard 2) and folds the rest into one line that appears only when it
+// matters, the order switch only speaks up when it is off, the Layout menu sits in the header, and the session card keeps four facts.
+gates.Y10 = () => {
+  const acct = html.slice(html.indexOf("var useShard = "), html.indexOf("    el.innerHTML = h;"));
+  assert.ok(/x\.shard === 2/.test(acct) && /Available to the bot/.test(acct), 'the line shown is the shard the bot can spend');
+  assert.ok(/otherSum >= 0\.5 \?/.test(acct) && /not usable/.test(acct), 'other shards are one line, and only when there is real money on them');
+  assert.ok(/a\.liveSwitch \? '' : '<div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
+  assert.ok(!/Shard ' \+/.test(acct), 'no per-shard rows');
+  const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
+  assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
+  assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
+  const facts = html.slice(html.indexOf("document.getElementById('kalL1Facts').innerHTML = running"), html.indexOf("var sizeNote"));
+  assert.strictEqual((facts.match(/fact\('/g) || []).length, 6, 'four facts while running and two when ended');
+  assert.ok(/id="kalL1Size"/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are one muted line');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
