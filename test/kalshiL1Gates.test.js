@@ -210,17 +210,29 @@ gates.N9 = async () => {
   assert.strictEqual(first.sess.startCash, 100, 'the first tick still records the starting cash');
 };
 
-// The order limit and the 24 hour limit end the session.
+// No end time: a session started days ago still trades. The order limit and the loss stop look at the last 24 hours, not the whole run.
 gates.N10 = async () => {
-  const lim = world({ session: { ordersSent: 200 } });
+  const old = world({ session: { until: NOW - 1, since: NOW - 30 * 86400000 } });
+  await tick(old);
+  assert.strictEqual(old.sess.active, true, 'an old session (even one carrying a past until) is not ended by time');
+  assert.strictEqual(old.posts.length, 1, 'and it still places its order');
+  const lim = world();
+  for (let i = 0; i < 200; i++) lim.docs.set('X' + i, { strategy: 'L1', ts: NOW - 3600000 - i, status: 'no fill', fillCount: '0.00' });
   await tick(lim);
-  assert.deepStrictEqual([lim.posts.length, lim.sess.endedBecause], [0, 'limit']);
-  const exp = world({ session: { until: NOW - 1 } });
-  await tick(exp);
-  assert.deepStrictEqual([exp.posts.length, exp.sess.endedBecause], [0, 'expired']);
-  assert.ok(live.L1_MAX_ORDERS >= 2 * 96, 'the order backstop can never end a 24 hour session early');
-  assert.strictEqual(live.L1_SESSION_MS, 24 * 3600 * 1000);
+  assert.deepStrictEqual([lim.posts.length, lim.sess.active], [0, true], 'the order limit waits, it does not end the session');
+  const roll = world();
+  for (let i = 0; i < 200; i++) roll.docs.set('X' + i, { strategy: 'L1', ts: NOW - 25 * 3600000 - i, status: 'no fill', fillCount: '0.00' });
+  await tick(roll);
+  assert.strictEqual(roll.posts.length, 1, 'orders older than 24 hours no longer count toward the limit');
+  assert.ok(live.L1_MAX_ORDERS >= 2 * 96, 'the backstop can never be reached by normal trading');
+  assert.strictEqual(live.L1_WINDOW_DAY_MS, 24 * 3600 * 1000);
   assert.strictEqual(live.L1_LOSS_STOP, 10);
+  // Old profits cannot hide a bad day: a loss that settled in the last 24 hours trips the stop even though the whole run is up.
+  const day = world({ session: { since: NOW - 30 * 86400000 } });
+  for (let i = 0; i < 5; i++) day.docs.set('W' + i, { strategy: 'L1', ts: NOW - 10 * 86400000 + i, ticker: 'W' + i, side: 'yes', fillCount: '2.00', count: 2, maxCost: 1.86, settled: true, result: 'yes' });
+  for (let i = 0; i < 6; i++) day.docs.set('L' + i, { strategy: 'L1', ts: NOW - 3600000 - i, ticker: 'L' + i, side: 'yes', fillCount: '2.00', count: 2, maxCost: 1.86, settled: true, result: 'no' });
+  await tick(day);
+  assert.deepStrictEqual([day.posts.length, day.sess.endedBecause], [0, 'loss stop'], 'six losses in the last day stop it');
 };
 
 // An answer that is lost or refused ends the session, is recorded, and is never retried.
@@ -255,11 +267,11 @@ gates.N12 = () => {
 // else is scheduled; it refuses to run beside a single armed test order; and the page asks twice.
 gates.N13 = () => {
   assert.ok(/exports\.kalshiL1Session = onCall\(async \(request\) => \{\s*await assertKalshiAdmin\(request\.auth\);/.test(fnSrc), 'admin only');
-  assert.ok(/ref\.set\(\{ active: true, since: now, until: now \+ live\.L1_SESSION_MS/.test(fnSrc), 'the expiry is set by the server, not the page');
+  assert.ok(/ref\.set\(\{ active: true, since: now, until: null,/.test(fnSrc), 'the session is written with no end time');
   assert.ok(/KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiL1Session'))), 'refuses when the server switch is off');
   assert.ok(/live\.runL1Tick\(/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed'))), 'run by the scheduled function');
   assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
-  assert.ok(/The 24 hour L1 session is running\. Stop it before arming/.test(fnSrc), 'arming refuses while the session runs');
+  assert.ok(/The L1 bot is running\. Stop it before arming/.test(fnSrc), 'arming refuses while the session runs');
   assert.ok(/A single test order is armed\. Disarm it before starting/.test(fnSrc), 'starting refuses while armed');
   assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder']);
   assert.ok(fnSrc.indexOf('exports.kalshiL1Session') < fnSrc.indexOf('exports.kalshiBookRecorder'), 'defined before the recorder, which stays last');
@@ -297,10 +309,10 @@ gates.N15 = async () => {
 // The order limit holds inside a single tick, not only at its start.
 gates.N16 = async () => {
   const G = 'KXGOLD15M-26OCT071415-15';
-  const w = world({ session: { ordersSent: 199 } });
+  const w = world();
+  for (let i = 0; i < 199; i++) w.docs.set('X' + i, { strategy: 'L1', ts: NOW - 3600000 - i, status: 'no fill', fillCount: '0.00' });
   await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
-  assert.strictEqual(w.posts.length, 1, '199 sent plus two candidates is stopped at 200');
-  assert.strictEqual(w.sess.ordersSent, 200);
+  assert.strictEqual(w.posts.length, 1, '199 in the last day plus two candidates is stopped at 200');
 };
 
 // A no-fill has to be explainable afterwards: the record carries the touch and size the order was decided on.
@@ -391,7 +403,7 @@ gates.N21 = async () => {
   const none = world(); await tick(none, { quotes: [closing] });
   assert.strictEqual(none.sess.nextLookAt, null, 'no later market known: no time is invented');
   assert.ok(/fact\('Next look', Number\.isFinite\(s\.nextLookAt\) && s\.nextLookAt > now/.test(html), 'the page shows it only while it is still in the future');
-  assert.ok(!/At most 80 orders/.test(html) && /bot's own trades are down \$10\.00/.test(html), 'the rules text matches the live limits');
+  assert.ok(!/At most 80 orders/.test(html) && /bot's own trades over the last 24 hours are down \$10\.00/.test(html), 'the rules text matches the live limits');
 };
 
 // The page quotes the limits in three places (the start confirmation, the rules text, the status line). They must say what the server does.
@@ -408,22 +420,22 @@ gates.N23 = async () => {
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
   const lost = (n) => { const r = {}; for (let i = 0; i < n; i++) r[`OLD-${i}`] = 'no'; return r; };
   // After a high point of +$5, six losses ($5.52) are $10.52 below it: the stop is $10, so a trailing session ends; a plain session has room.
-  const trail = world({ session: { trailing: true, peakNet: 5 }, results: lost(6) }); seed(trail, 6);
+  const trail = world({ session: { trailing: true, peakNet: 5, peakAt: NOW - 1000 }, results: lost(6) }); seed(trail, 6);
   await tick(trail);
   assert.deepStrictEqual([trail.posts.length, trail.sess.endedBecause], [0, 'loss stop'], 'the stop counts from the high point');
   assert.ok(/from their best/.test(trail.events.find((e) => e.kind === 'session ended').detail), 'and says so');
-  const plain = world({ session: { peakNet: 5 }, results: lost(6) }); seed(plain, 6);
+  const plain = world({ session: { peakNet: 5, peakAt: NOW - 1000 }, results: lost(6) }); seed(plain, 6);
   await tick(plain);
   assert.strictEqual(plain.posts.length, 1, 'without the option the same trades are well inside the $10 stop');
   // Inside the give-back it keeps trading: peak 5, down $4.60 from it is fine.
-  const ok = world({ session: { trailing: true, peakNet: 5 }, results: lost(1) }); seed(ok, 1);
+  const ok = world({ session: { trailing: true, peakNet: 5, peakAt: NOW - 1000 }, results: lost(1) }); seed(ok, 1);
   await tick(ok);
   assert.strictEqual(ok.posts.length, 1);
   // The peak rises with settled gains and never falls with losses, and is never below zero.
   const rise = world({ session: { trailing: true }, results: (() => { const r = {}; for (let i = 0; i < 13; i++) r[`OLD-${i}`] = 'yes'; return r; })() }); seed(rise, 13);
   await tick(rise);
   assert.ok(Math.abs(rise.sess.peakNet - 13 * 0.08) < 1e-6, 'thirteen wins of 8c set the peak at +$1.04: ' + rise.sess.peakNet);
-  const keep = world({ session: { trailing: true, peakNet: 3 } });
+  const keep = world({ session: { trailing: true, peakNet: 3, peakAt: NOW - 1000 } });
   await tick(keep);
   assert.strictEqual(keep.sess.peakNet === undefined ? 3 : keep.sess.peakNet, 3, 'a lower result does not lower the peak');
   const neg = world({ session: { trailing: true }, results: lost(2) }); seed(neg, 2);

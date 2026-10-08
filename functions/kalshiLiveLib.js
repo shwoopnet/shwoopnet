@@ -278,10 +278,13 @@ async function runArmedTick(args) {
 // price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
 const L1_BAND = [0.88, 0.97];
 const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
-// Not a trading limit: the owner asked for 24 hours and nothing else. Bitcoin and gold have 192 markets in a day (96 each), so
-// 200 can never end a 24 hour session; it only stops a runaway loop from sending orders without end. The loss stop is the real limit.
+// Not a trading limit. Bitcoin and gold have 192 markets in a day (96 each), so 200 orders in any rolling 24 hours can never be reached by
+// normal trading; it only stops a runaway loop from sending orders without end. Past it the bot waits (it does not end the session) and carries
+// on by itself once older orders fall out of the window. The loss stop is the real limit.
 const L1_MAX_ORDERS = 200;
-const L1_SESSION_MS = 24 * 3600 * 1000;
+// A session has no end time any more (the owner removed it on Oct 8, 2026): it runs until the owner stops it or a stop below ends it. What stayed
+// is the DAY: the loss stop and the order limit both look at the last 24 hours, so a long run cannot hide a bad day behind old profits.
+const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
 // Size scaling (off unless the owner ticks it when starting a session). Each order risks about 2% of the account's cash, at
 // least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 10% of the starting cash instead of the flat $10. Raised by the owner on
 // Oct 8, 2026 (from 1% and 7%/$7). At 2% a $106 account buys two contracts (two need about $92 to $98 of cash, three about $138 to $146).
@@ -382,22 +385,26 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
   return { net, openCost, worst: net - openCost, trades: trades.length };
 }
 
-// One minute of the session. session = {active, until, startCash, ordersSent}; setSession merges fields into it.
+// One minute of the session. session = {active, startCash, ordersSent}; setSession merges fields into it.
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
-// another) on expiry, the order limit, the loss stop, an unresolved order, and any order whose answer was lost or refused.
+// another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
 async function runL1Tick(args) {
   const { session, now, setSession, enabled, active, store, keyId, pem, fetchFn, quotes } = args;
   const log = async (kind, detail) => { if (args.logEvent) { try { await args.logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
   if (!session || session.active !== true) return { skipped: "no session" };
   const end = async (why, detail) => { await setSession({ active: false, endedAt: now, endedBecause: why }); await log("session ended", detail); return { ended: why }; };
   const note = async (text, extra) => { await setSession(Object.assign({ lastTickAt: now, lastNote: String(text).slice(0, 300) }, extra || {})); };
-  if (!(session.until > now)) return end("expired", "24 hours are up");
   if (enabled !== true) { await note("The server switch is off (KALSHI_LIVE_ENABLED), so nothing is sent."); return { skipped: "switch off" }; }
   if (!active) { await note("The exchange is not trading right now."); return { skipped: "exchange inactive" }; }
   if (await store.halted()) { await note("The bot is halted, so nothing is sent."); return { skipped: "halted" }; }
   if (await store.hasUnresolved()) return end("attempted", "an earlier order is unresolved (sent, or its answer was lost). Check the Kalshi account before starting again");
   const sent = session.ordersSent || 0;
-  if (sent >= L1_MAX_ORDERS) return end("limit", "the limit of " + L1_MAX_ORDERS + " orders has been reached");
+  // Orders in the last 24 hours, whether or not they filled. Fails closed: if they cannot be counted, nothing is sent this minute.
+  const dayStart = now - L1_WINDOW_DAY_MS;
+  let recentOrders;
+  try { recentOrders = (await store.sessionTrades(dayStart)).filter((t) => t.strategy === "L1").length; }
+  catch (e) { await note("The bot's recent orders could not be counted, so nothing was sent."); return { skipped: "orders unreadable" }; }
+  if (recentOrders >= L1_MAX_ORDERS) { await note("The limit of " + L1_MAX_ORDERS + " orders in 24 hours has been reached. It carries on by itself once older orders drop out."); return { skipped: "order limit" }; }
 
   const bal = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/balance", nowMs: now });
   if (bal.status !== 200) { await note("The balance could not be read (HTTP " + bal.status + "), so nothing was sent."); return { skipped: "balance unreadable" }; }
@@ -408,7 +415,7 @@ async function runL1Tick(args) {
   // The stop follows the BOT's trades, not the account: the owner trades the same account by hand, and a manual trade must
   // neither trip the stop nor hide a bot loss. Fails closed: if the bot's trades cannot be read, nothing is sent this minute.
   let risk;
-  try { risk = await botRisk({ store, since: session.since, fetchFn, nowMs: now }); }
+  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now }); }
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
   const stopAt = sizing ? L1_SIZED_STOP_FRACTION * startCash : L1_LOSS_STOP;
@@ -417,8 +424,10 @@ async function runL1Tick(args) {
   const trailing = session.trailing === true;
   let peak = 0;
   if (trailing) {
-    peak = Math.max(0, Number.isFinite(session.peakNet) ? session.peakNet : 0, risk.net);
-    if (!(Number.isFinite(session.peakNet) && session.peakNet >= peak)) await setSession({ peakNet: Number(peak.toFixed(4)) });
+    // A peak from before the window describes trades that no longer count, so it is not carried over.
+    const fresh = Number.isFinite(session.peakAt) && session.peakAt > dayStart;
+    peak = Math.max(0, fresh && Number.isFinite(session.peakNet) ? session.peakNet : 0, risk.net);
+    if (!(fresh && Number.isFinite(session.peakNet) && session.peakNet >= peak)) await setSession({ peakNet: Number(peak.toFixed(4)), peakAt: now });
   }
   const floor = peak - stopAt;
   if (risk.worst <= floor + 1e-9) {
@@ -443,7 +452,7 @@ async function runL1Tick(args) {
   // order earlier in this same tick is taken off what the next market on that shard may use.
   const committed = {};
   for (const c of candidates) {
-    if (ordersSent >= L1_MAX_ORDERS) { results.push("order limit reached"); break; }   // the limit also holds inside one tick
+    if (recentOrders + (ordersSent - sent) >= L1_MAX_ORDERS) { results.push("order limit reached"); break; }   // the limit also holds inside one tick
     const ticker = c.m.ticker;
     const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) });
     const m = mk.status === 200 && mk.body && mk.body.market;
@@ -511,5 +520,5 @@ async function runL1Tick(args) {
 module.exports = {
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, settleOpenOrders, settledFields, l1Count, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };

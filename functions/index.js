@@ -367,7 +367,7 @@ exports.kalshiLiveArm = onCall(async (request) => {
   }
   const sess = await getFirestore().collection("kalshiLiveControl").doc("session").get();
   if (sess.exists && sess.data().active === true && sess.data().until > Date.now()) {
-    throw new HttpsError("failed-precondition", "The 24 hour L1 session is running. Stop it before arming a single test order.");
+    throw new HttpsError("failed-precondition", "The L1 bot is running. Stop it before arming a single test order.");
   }
   const now = Date.now();
   await ref.set({ armed: true, since: now, until: now + live.ARM_MS, endedAt: null, endedBecause: null });
@@ -398,12 +398,12 @@ exports.kalshiL1Session = onCall(async (request) => {
   }
   const arm = await db.collection("kalshiLiveControl").doc("arm").get();
   if (arm.exists && arm.data().armed === true && arm.data().until > Date.now()) {
-    throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the 24 hour session.");
+    throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the bot.");
   }
   const now = Date.now();
-  await ref.set({ active: true, since: now, until: now + live.L1_SESSION_MS, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
-  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (" + (live.L1_SIZE_FRACTION * 100) + "% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
-  return { active: true, until: now + live.L1_SESSION_MS };
+  await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
+  await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (" + (live.L1_SIZE_FRACTION * 100) + "% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
+  return { active: true };
 });
 
 exports.kalshiLiveArmed = onSchedule(

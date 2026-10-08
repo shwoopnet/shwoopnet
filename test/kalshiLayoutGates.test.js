@@ -80,7 +80,7 @@ gates.Y6 = () => {
 
 // The history lists each order once, and the counts cover the whole session, not the newest 20 orders.
 gates.Y7 = () => {
-  assert.ok(/collection\(db, 'kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(300\)/.test(html), 'orders are read up to the most a 24 hour session can send, not 20');
+  assert.ok(/collection\(db, 'kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(1000\)/.test(html), 'orders are read for several days of a 24/7 bot, not 20');
   assert.ok(!/kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(20\)/.test(html));
   assert.ok(!/var loggedOrders|kalBotEvents/.test(html), 'the event log, and the dedupe that only it needed, are gone');
 };
@@ -249,7 +249,7 @@ gates.Y10 = () => {
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
   const facts = html.slice(html.indexOf("document.getElementById('kalL1Facts').innerHTML = running"), html.indexOf("var sizeNote"));
-  assert.strictEqual((facts.match(/fact\('/g) || []).length, 6, 'four facts while running and two when ended');
+  assert.strictEqual((facts.match(/fact\('/g) || []).length, 5, 'three facts while running (no end time any more) and two when ended');
   assert.ok(/id="kalL1Size"/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are one muted line');
 };
 
