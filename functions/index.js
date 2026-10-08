@@ -346,6 +346,27 @@ exports.kalshiLiveBaseline = onCall(
   }
 );
 
+// Deposits and withdrawals: the account change since the starting line is the whole balance move, so money added or taken out shows up as profit or
+// loss. The line cannot be moved (it hides every fill before it), so the amount is recorded here instead and taken off the change. Positive for money
+// put in, negative for money taken out. Appended inside a transaction to the fresh document, never overwritten; each entry keeps its time. It changes
+// only this display, nothing on Kalshi.
+exports.kalshiLiveAdjust = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  ensureDefaultAdminApp();
+  const dollars = Number(request.data && request.data.dollars);
+  if (!Number.isFinite(dollars) || dollars === 0 || Math.abs(dollars) > 1000000) throw new HttpsError("invalid-argument", "Give the amount in dollars, positive for a deposit and negative for a withdrawal.");
+  const db = getFirestore();
+  const ref = db.collection("kalshiLiveControl").doc("baseline");
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("failed-precondition", "There is no starting line yet. Press 'Start fresh from now' first.");
+    const list = Array.isArray(snap.data().adjustments) ? snap.data().adjustments.slice() : [];
+    list.push({ at: Date.now(), dollars: Math.round(dollars * 100) / 100 });
+    tx.update(ref, { adjustments: list });
+    return { adjustments: list, total: account.adjustmentsTotal(list) };
+  });
+});
+
 // ---- Armed live test: click once, it scans every minute, sends ONE order, then switches itself off ------------
 // kalshiLiveArm only flips a control document (no order code, no key). kalshiLiveArmed runs every minute, does
 // nothing unless that document says armed and unexpired, and then makes one ordinary kalshiLiveTrade attempt with
@@ -366,7 +387,7 @@ exports.kalshiLiveArm = onCall(async (request) => {
     throw new HttpsError("failed-precondition", "Live test trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to arm.");
   }
   const sess = await getFirestore().collection("kalshiLiveControl").doc("session").get();
-  if (sess.exists && sess.data().active === true && sess.data().until > Date.now()) {
+  if (sess.exists && sess.data().active === true) {
     throw new HttpsError("failed-precondition", "The L1 bot is running. Stop it before arming a single test order.");
   }
   const now = Date.now();

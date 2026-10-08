@@ -98,7 +98,10 @@ gates.R8 = async () => {
   assert.deepStrictEqual(d.fills.fills.map((f) => f.ticker), ['AT', 'NEW'], 'the line is inclusive, earlier and undated fills are hidden');
   assert.strictEqual(d.fills.hiddenBeforeBaseline, 2);
   assert.strictEqual(d.changeSinceStart, 0.72, '98.2 now against 97.48 at the start');
-  assert.deepStrictEqual(d.baseline, { since, startingDollars: 97.48 });
+  assert.deepStrictEqual(d.baseline, { since, startingDollars: 97.48, adjustments: 0 });
+  const dep = await acct.readAccount({ fetchFn: base.fetchFn, keyId: 'k', pem, now: NOW, baseline: { since, startingDollars: 97.48, adjustments: [{ at: NOW, dollars: 100 }, { at: NOW, dollars: -40 }] } });
+  assert.strictEqual(dep.changeSinceStart, -59.28, 'money put in is not profit and money taken out is not loss: 98.2 - 97.48 - (100 - 40)');
+  assert.strictEqual(dep.baseline.adjustments, 60);
   const none = await acct.readAccount({ fetchFn: world().fetchFn, keyId: 'k', pem, now: NOW });
   assert.strictEqual(none.baseline, null); assert.strictEqual(none.changeSinceStart, undefined);
   assert.strictEqual(none.fills.fills.length, 1, 'with no line nothing is hidden');
@@ -175,8 +178,8 @@ gates.R7 = () => {
   assert.ok(i > -1, 'account wiring not found');
   const iife = html.slice(i, html.indexOf("var kalshiTab = 'bot';", i));   // the whole account block, including the baseline control inside it
   assert.ok(/currentUserIsAdmin/.test(iife) && /btn\.disabled = true/.test(iife) && /api\.kalshiLiveAccount\(\)/.test(iife), 'admin only, disabled while reading');
-  // Two call sites, both reads: the Refresh button, and the refresh right after the starting line is set.
-  assert.strictEqual((html.match(/kalshiLiveAccount\(\)/g) || []).length, 2, 'exactly two calls in the page');
+  // Three call sites, all reads: the Refresh button, and the refresh right after the starting line is set or a deposit is recorded.
+  assert.strictEqual((html.match(/kalshiLiveAccount\(\)/g) || []).length, 3, 'exactly three calls in the page');
   assert.ok(!/kalshiLiveTrade|kalshiLiveArm/.test(iife), 'the account panel never calls an order or arm function');
   assert.ok(/kalshiLiveAccountFn\(\{\}\)/.test(html), 'the callable is sent no arguments');
   assert.ok(/escapeHtml\(String\(s\.shard\)\)/.test(iife) && /escapeHtml\(x\.ticker\)/.test(iife), 'values from Kalshi are escaped before they reach the page');

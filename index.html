@@ -2073,6 +2073,7 @@
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
   var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
   var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
+  var kalshiLiveAdjustFn = httpsCallable(functions, 'kalshiLiveAdjust');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
   var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
 
@@ -2537,6 +2538,10 @@
     // Arm or disarm the automatic scan. The server sets the 3 hour expiry itself; the page sends only on or off.
     kalshiL1Session: function(on, sizing, trailing){
       return kalshiL1SessionFn({ on: on === true, sizing: sizing === true, trailing: trailing === true }).then(function(res){ return res.data; });
+    },
+    // Record money put in (positive) or taken out (negative) so the account change does not count it as profit or loss.
+    kalshiLiveAdjust: function(dollars){
+      return kalshiLiveAdjustFn({ dollars: Number(dollars) }).then(function(res){ return res.data; });
     },
     // Emergency exit: halts the bot, ends its session and sells every open position (server side, admin only).
     kalshiFlattenAll: function(){
@@ -3397,6 +3402,11 @@
           <div class="kal-note" id="kalBookMsg">The recorder's saved order books (best three levels each side, every 10 seconds) as a compressed file you can send. Public market data only; it reads the recorder's documents and changes nothing.</div>
           <div class="kal-note" id="kalAcctMsg"></div>
           <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
+          <div class="kal-actions">
+            <label class="kal-note" style="margin:0">Money added (or taken out, as a minus) <input class="kal-input" id="kalAdjAmt" type="number" step="0.01" placeholder="200" style="width:90px"></label>
+            <button class="kal-btn kal-btn-ghost" id="kalAdjGo" type="button">Record it</button>
+          </div>
+          <div class="kal-note" id="kalAdjMsg">A deposit or withdrawal otherwise shows up as profit or loss in "Change since start". Recording it takes it off. Changes only this page's figure, nothing on Kalshi.</div>
           <div class="kal-actions">
             <button class="kal-btn" id="kalAcctStart" type="button">Start fresh from now (one time)</button>
             <span id="kalAcctStartConfirm" hidden><span class="kal-note">Everything before this moment is ignored from now on, and the balance shown becomes the starting balance. Nothing on Kalshi is changed. Go ahead?</span> <button class="kal-btn" id="kalAcctStartYes" type="button">Yes, start fresh</button> <button class="kal-btn" id="kalAcctStartNo" type="button">Cancel</button></span>
@@ -10212,7 +10222,7 @@
       totEl.innerHTML = '<div class="kal-rows">' +
         '<div><span class="kal-k">Change since start</span>' + (tot.change === null ? '<b>n/a</b>' : '<b class="' + (tot.change >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tot.change >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tot.change)) + '</b>') + '</div>' +
         '<div><span class="kal-k">Starting balance</span><b>' + kalshiMoney(tot.start) + '</b></div>' +
-        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(kalDate(tot.since)) + '. Includes deposits and manual trades.</div></div>';
+        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(kalDate(tot.since)) + '. Includes manual trades' + (a.baseline && a.baseline.adjustments ? '; ' + (a.baseline.adjustments > 0 ? '+' : '-') + kalshiMoney(Math.abs(a.baseline.adjustments)) + ' of recorded deposits taken off' : ', and any deposit you have not recorded under Tools') + '.</div></div>';
     }
 
     renderKalshiPositions();
@@ -10597,7 +10607,7 @@
       if(!bl){ line.textContent = 'Counting everything on the account, including your own trades.'; go.hidden = false; return; }
       go.hidden = true; document.getElementById('kalAcctStartConfirm').hidden = true;
       line.textContent = 'Counting since ' + kalDateTime(bl.since) + ' from a starting balance of ' + money(bl.startingDollars) +
-        (change === null || change === undefined ? '.' : ': ' + (change >= 0 ? '+' : '-') + money(Math.abs(change)) + ' so far (includes any deposit or withdrawal).') +
+        (change === null || change === undefined ? '.' : ': ' + (change >= 0 ? '+' : '-') + money(Math.abs(change)) + ' so far (deposits you recorded are taken off; ones you did not still count).') +
         (hidden ? ' ' + hidden + ' earlier fill' + (hidden === 1 ? ' is' : 's are') + ' hidden.' : '');
     }
     (function(){
@@ -10615,6 +10625,18 @@
           msg.textContent = 'Could not set it: ' + ((err && err.message) || 'unknown');
           ask(false);
         }).then(function(){ yes.disabled = no.disabled = false; });
+      });
+    })();
+    (function(){
+      var go = document.getElementById('kalAdjGo'), amt = document.getElementById('kalAdjAmt'), am = document.getElementById('kalAdjMsg');
+      go.addEventListener('click', function(){
+        var api = window.__shwoopAPI, v = Number(amt.value);
+        if(!api || !api.kalshiLiveAdjust || !currentUserIsAdmin){ return; }
+        if(!Number.isFinite(v) || v === 0){ am.textContent = 'Type an amount in dollars first.'; return; }
+        if(!window.confirm((v > 0 ? 'Record a deposit of ' : 'Record a withdrawal of ') + money(Math.abs(v)) + '? It is taken off "Change since start" and cannot be edited here afterwards.')){ return; }
+        go.disabled = true; am.textContent = 'Recording...';
+        api.kalshiLiveAdjust(v).then(function(){ return api.kalshiLiveAccount(); }).then(function(d){ render(d); amt.value = ''; am.textContent = 'Recorded. Change since start no longer counts it.'; })
+          .catch(function(err){ am.textContent = 'Could not record it: ' + ((err && err.message) || 'unknown'); }).then(function(){ go.disabled = false; });
       });
     })();
     // The server stores a fresh read every minute, so the panel fills in at once on opening. The newer of that and the
