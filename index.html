@@ -10011,41 +10011,78 @@
       '<text x="' + (W - R + 6) + '" y="' + (Y(last.v) + (opts.ref != null && Math.abs(Y(last.v) - Y(opts.ref)) < 12 ? (last.v >= opts.ref ? -6 : 14) : 4)).toFixed(1) + '" fill="' + col + '" font-size="11" font-weight="700">' + escapeHtml(opts.fmt(last.v)) + '</text></svg>';
   }
 
-  // Bitcoin's price by the minute from Coinbase's public candles (no key, the browser may call it). It is a stand-in for the index Kalshi settles on,
-  // so it can sit a little off the "to beat" line even when the market is right; the chart says Coinbase for that reason.
-  var kalshiSpot = { at: 0, busy: false, pts: [] };
+  // Both lines are built from a minute history that is fetched at once plus live readings added every 10 seconds, so a chart is never empty when a market
+  // has just opened and never waits for the page to collect points.
+  // Bitcoin: Coinbase's BTC-USD candles and ticker (public, no key, the browser may call it). A stand-in for the index Kalshi settles on, so it can sit a little
+  // off the "to beat" line even when the market is right; the tile says so.
+  var kalshiSpot = { at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] };
   var kalshiMid = {};
-  // Gold's price from gold-api.com (free, no key, the browser may call it). It has no history, so the line is built from what this page has seen since it was
-  // opened and fills from the left; Kalshi settles gold on a Pyth feed, so this can sit a dollar or so off the "to beat" line even when the market is right.
-  var kalshiGold = { at: 0, busy: false, failed: false, pts: [] };
+  // Gold: the live price is gold-api.com (free, no key). Its history is Coinbase's PAXG-USD candles (tokenized gold, within a few dollars of spot), shifted by the
+  // gap between the two right now so the line ends on the real gold price. The shape of the earlier minutes is approximate; Kalshi settles gold on a Pyth feed.
+  var kalshiGold = { at: 0, busy: false, failed: false, pts: [], hist: [], histAt: 0, histBusy: false, off: null };
+  // Two lists of {t, v} joined in time order, one reading per second at most.
+  function kalshiJoinSeries(a, b){
+    var all = (a || []).concat(b || []).filter(function(p){ return p && Number.isFinite(p.t) && Number.isFinite(p.v); }).sort(function(x, y){ return x.t - y.t; });
+    return all.filter(function(p, i){ return i === 0 || p.t - all[i - 1].t >= 1000; });
+  }
+  var KAL_ISO = function(ms){ return new Date(ms).toISOString().slice(0, 19) + 'Z'; };
+  function kalshiCandles(product, now){
+    return fetch('https://api.exchange.coinbase.com/products/' + product + '/candles?granularity=60&start=' + KAL_ISO(now - 20 * 60000) + '&end=' + KAL_ISO(now))
+      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(rows){
+        return (Array.isArray(rows) ? rows : []).map(function(c){ return { t: Math.min(Date.now(), (c[0] + 60) * 1000), v: Number(c[4]) }; })
+          .sort(function(a, b){ return a.t - b.t; });
+      });
+  }
+  function kalshiTicker(product){
+    return fetch('https://api.exchange.coinbase.com/products/' + product + '/ticker')
+      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(j){ var v = Number(j && j.price); if(!(v > 0)){ throw new Error('no price'); } return v; });
+  }
+  function kalshiFetchSpot(now){
+    if(!kalshiSpot.busy && now - kalshiSpot.at >= 30000){
+      kalshiSpot.busy = true;
+      kalshiCandles('BTC-USD', now).then(function(pts){ kalshiSpot.pts = pts; kalshiSpot.at = Date.now(); kalshiSpot.busy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); } })
+        .catch(function(){ kalshiSpot.at = Date.now(); kalshiSpot.busy = false; });
+    }
+    if(!kalshiSpot.tickBusy && now - kalshiSpot.tickAt >= 10000){
+      kalshiSpot.tickBusy = true;
+      kalshiTicker('BTC-USD').then(function(v){
+        kalshiSpot.live.push({ t: Date.now(), v: v }); if(kalshiSpot.live.length > 300){ kalshiSpot.live.shift(); }
+        kalshiSpot.tickAt = Date.now(); kalshiSpot.tickBusy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+      }).catch(function(){ kalshiSpot.tickAt = Date.now(); kalshiSpot.tickBusy = false; });
+    }
+  }
+  function kalshiSpotSeries(){ return kalshiJoinSeries(kalshiSpot.pts, kalshiSpot.live); }
   function kalshiFetchGold(now){
+    if(!kalshiGold.histBusy && now - kalshiGold.histAt >= 30000){
+      kalshiGold.histBusy = true;
+      kalshiCandles('PAXG-USD', now).then(function(pts){ kalshiGold.hist = pts; kalshiGold.histAt = Date.now(); kalshiGold.histBusy = false; })
+        .catch(function(){ kalshiGold.histAt = Date.now(); kalshiGold.histBusy = false; });
+    }
     if(kalshiGold.busy || now - kalshiGold.at < 10000){ return; }
     kalshiGold.busy = true;
+    var paxg = kalshiTicker('PAXG-USD').catch(function(){ return null; });
     fetch('https://api.gold-api.com/price/XAU')
       .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
       .then(function(j){
         var v = Number(j && j.price);
         if(!(v > 0)){ throw new Error('no price'); }
-        var t = Date.now(), last = kalshiGold.pts[kalshiGold.pts.length - 1];
-        if(!last || t - last.t >= 5000){ kalshiGold.pts.push({ t: t, v: v }); if(kalshiGold.pts.length > 300){ kalshiGold.pts.shift(); } }
-        kalshiGold.at = t; kalshiGold.busy = false; kalshiGold.failed = false;
-        if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+        return paxg.then(function(p){
+          if(p !== null){ kalshiGold.off = v - p; }
+          var t = Date.now(), last = kalshiGold.pts[kalshiGold.pts.length - 1];
+          if(!last || t - last.t >= 5000){ kalshiGold.pts.push({ t: t, v: v }); if(kalshiGold.pts.length > 300){ kalshiGold.pts.shift(); } }
+          kalshiGold.at = t; kalshiGold.busy = false; kalshiGold.failed = false;
+          if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+        });
       })
       .catch(function(){ kalshiGold.at = Date.now(); kalshiGold.busy = false; kalshiGold.failed = true; });
   }
-  function kalshiFetchSpot(now){
-    if(kalshiSpot.busy || now - kalshiSpot.at < 30000){ return; }
-    kalshiSpot.busy = true;
-    var iso = function(ms){ return new Date(ms).toISOString().slice(0, 19) + 'Z'; };
-    fetch('https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=60&start=' + iso(now - 20 * 60000) + '&end=' + iso(now))
-      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
-      .then(function(rows){
-        kalshiSpot.pts = (Array.isArray(rows) ? rows : []).map(function(c){ return { t: Math.min(Date.now(), (c[0] + 60) * 1000), v: Number(c[4]) }; })
-          .sort(function(a, b){ return a.t - b.t; });
-        kalshiSpot.at = Date.now(); kalshiSpot.busy = false;
-        if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
-      })
-      .catch(function(){ kalshiSpot.at = Date.now(); kalshiSpot.busy = false; });
+  function kalshiGoldSeries(){
+    var off = kalshiGold.off;
+    var hist = off === null ? [] : kalshiGold.hist.map(function(p){ return { t: p.t, v: p.v + off }; });
+    var firstLive = kalshiGold.pts.length ? kalshiGold.pts[0].t : Infinity;
+    return kalshiJoinSeries(hist.filter(function(p){ return p.t < firstLive; }), kalshiGold.pts);
   }
 
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
@@ -10058,10 +10095,10 @@
     var o = { from: close - 15 * 60000, to: close };
     var body;
     if(m.series === 'KXBTC15M' && m.strike != null){
-      body = kalshiSparkSvg(kalshiSpot.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
+      body = kalshiSparkSvg(kalshiSpotSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
     } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
-      body = kalshiSparkSvg(kalshiGold.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
+      body = kalshiSparkSvg(kalshiGoldSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
     } else {
       body = kalshiSparkSvg(kalshiMid[m.ticker], { from: o.from, to: o.to, ref: null, label: 'YES price in cents since this page was opened', empty: 'A line appears after a minute of watching.',
