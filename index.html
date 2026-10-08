@@ -1010,6 +1010,19 @@
   .kal-foot{ padding:12px 22px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); }
   .kal-charts{ display:grid; grid-template-columns:minmax(0,3fr) minmax(0,2fr); gap:24px; padding:18px 22px 22px 22px; border-top:1px solid var(--border); }
   .kal-chart-title{ font-size:12.5px; font-weight:600; margin-bottom:8px; }
+  .kal-chart-wide{ grid-column:1 / -1; }
+  .kal-perf{ padding:18px 22px 22px 22px; border-top:1px solid var(--border); }
+  .kal-perf-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .kal-perf-head select{ font:inherit; font-size:12.5px; background:var(--card); color:var(--ink); border:1px solid var(--border); border-radius:6px; padding:3px 6px; }
+  .kal-tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
+  .kal-tile{ display:flex; flex-direction:column; gap:3px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; min-width:0; }
+  .kal-tile b{ font-size:15px; font-weight:700; overflow-wrap:anywhere; }
+  .kal-tile .kal-lbl, .kal-perf-t .kal-lbl, .kal-perf-head .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
+  .kal-perf-head select{ margin-left:4px; }
+  .kal-perf-tabs{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:14px; }
+  .kal-perf-t{ display:flex; flex-direction:column; gap:6px; font-size:13px; }
+  .kal-perf-t > div{ display:flex; justify-content:space-between; gap:10px; border-top:1px solid var(--border); padding-top:6px; }
+  .kal-perf-t > div span:nth-child(2){ color:var(--muted); flex:1; text-align:right; }
   .kal-donut{ display:flex; align-items:center; gap:18px; }
   .kal-donut-leg{ display:flex; flex-direction:column; gap:6px; font-size:13px; min-width:0; }
   .kal-leg{ display:flex; align-items:center; gap:8px; } .kal-leg b{ font-weight:700; } .kal-leg-dot{ width:10px; height:10px; border-radius:50%; flex:none; }
@@ -3391,6 +3404,13 @@
         <div class="kal-charts">
           <div class="kal-chart"><div class="kal-chart-title">Bot P/L, settled trades</div><div id="kalChartLine"></div></div>
           <div class="kal-chart"><div class="kal-chart-title">How the bot's orders ended</div><div id="kalChartPie"></div></div>
+          <div class="kal-chart kal-chart-wide"><div class="kal-chart-title">Each settled trade</div><div id="kalChartBars"></div></div>
+        </div>
+        <div class="kal-perf">
+          <div class="kal-perf-head"><div class="kal-card-title" style="margin:0">Performance</div>
+            <label class="kal-lbl" for="kalChartRange">Showing <select id="kalChartRange"><option value="all">all sessions</option><option value="session">this session only</option></select></label></div>
+          <div id="kalPerf"></div>
+          <div class="kal-note" id="kalPerfNote"></div>
         </div>
       </div>
       <div class="kal-card kal-span" data-card="detail">
@@ -9742,7 +9762,7 @@
   // Profit or loss of one bot ORDER once it has settled: the server writes settledPnl on the order when it reads the market's result.
   // null while the order is open or unfilled, or when the figure is not there. Nothing is worked out here from prices.
   function kalshiOrderPnl(o){
-    if(!o || o.settled !== true || !(Number(o.fillCount) > 0)){ return null; }
+    if(!o || o.settled !== true || !(Number(o.fillCount) > 0) || o.settledPnl === null || o.settledPnl === undefined){ return null; }
     var v = Number(o.settledPnl);
     return Number.isFinite(v) ? v : null;
   }
@@ -9812,6 +9832,108 @@
     }).join('') + (other ? '<div class="kal-leg"><span class="kal-leg-dot" style="background:var(--muted)"></span><span>Other</span><b>' + other + '</b></div>' : '');
     return '<div class="kal-donut"><svg viewBox="0 0 42 42" role="img" aria-label="How ' + total + ' orders ended" style="width:120px;height:120px;flex:none"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--border)" stroke-width="6"/>' + segs +
       '<text x="21" y="20" text-anchor="middle" font-size="7" font-weight="700" fill="currentColor">' + total + '</text><text x="21" y="26" text-anchor="middle" font-size="3.4" fill="var(--muted)">orders</text></svg><div class="kal-donut-leg">' + legend + '</div></div>';
+  }
+
+  // An order the bot filled whose market has since settled, but which the server never marked settled (its checks stop when a session ends, so a loss that
+  // settles afterwards stayed "open" for ever and never reached the charts). The account read carries the result of each market it has fills for; with it the
+  // order is settled here, by the same rule the server uses: the order's worst-case cost (maxCost) is paid in proportion to what filled, and each winning
+  // contract pays $1. The copy is marked estimated. An order the server already settled, or with no known result, is returned untouched.
+  function kalshiResolveOrders(orders, results, fills){
+    return (orders || []).map(function(o){
+      if(!o || !(Number(o.fillCount) > 0)){ return o; }
+      var r = o.settled === true ? o.result : (results ? results[o.ticker] : null);
+      if(r !== 'yes' && r !== 'no'){ return o; }
+      var out = o;
+      if(o.settled !== true){
+        var cost = Number(o.maxCost);
+        if(!Number.isFinite(cost)){ return o; }
+        var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount), want);
+        out = Object.assign({}, o, { settled: true, result: r, settledPnl: Math.round(((r === o.side ? got : 0) - cost * (got / want)) * 10000) / 10000, estimated: true });
+      }
+      // The account's own fill for this order, when the read has it, is exact (the price actually paid and the fee Kalshi charged), and it is the figure the
+      // trades table shows. Use it, so a trade has one profit or loss on the page, not two.
+      var fill = o.orderId ? (fills || []).filter(function(f){ return f && f.orderId === o.orderId; })[0] : null;
+      var tp = fill ? kalshiTradePnl(fill, o, r) : null;
+      if(tp){ out = Object.assign({}, out, { settledPnl: tp.pnl, estimated: false, exact: true }); }
+      return out;
+    });
+  }
+
+  // The performance tracker: everything worth knowing about the bot's settled trades, worked out from the same per-order figures the line and pie use.
+  // Profit factor is null while there are no losses (it would be infinite), never a made-up number. Bands are by the price paid for the side bought.
+  function kalshiPerfStats(orders, since){
+    var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0) && kalshiOrderPnl(o) !== null; })
+      .sort(function(a, b){ return a.ts - b.ts; });
+    var st = { n: rows.length, wins: 0, losses: 0, flat: 0, total: 0, grossWin: 0, grossLoss: 0, best: null, worst: null, maxDrawdown: 0,
+      streak: { kind: null, n: 0 }, longestLoss: 0, winRate: null, avgWin: null, avgLoss: null, profitFactor: null, expectancy: null, bySeries: [], byBand: [] };
+    var cum = 0, peak = 0, run = 0, runKind = null, longest = 0;
+    var series = {}, bands = [[0.88, 0.90, '88c to 90c'], [0.90, 0.92, '90c to 92c'], [0.92, 0.95, '92c to 95c'], [0.95, 0.9701, '95c to 97c']].map(function(b){ return { lo: b[0], hi: b[1], label: b[2], n: 0, wins: 0, net: 0 }; });
+    rows.forEach(function(o){
+      var p = kalshiOrderPnl(o);
+      st.total += p;
+      if(p > 0){ st.wins++; st.grossWin += p; } else if(p < 0){ st.losses++; st.grossLoss += -p; } else { st.flat++; }
+      if(st.best === null || p > st.best){ st.best = p; }
+      if(st.worst === null || p < st.worst){ st.worst = p; }
+      cum += p; if(cum > peak){ peak = cum; } if(peak - cum > st.maxDrawdown){ st.maxDrawdown = peak - cum; }
+      var kind = p > 0 ? 'win' : (p < 0 ? 'loss' : 'flat');
+      if(kind === runKind){ run++; } else { runKind = kind; run = 1; }
+      if(kind === 'loss' && run > longest){ longest = run; }
+      var name = /GOLD/.test(String(o.series || o.ticker || '')) ? 'Gold' : 'Bitcoin';
+      var sr = series[name] || (series[name] = { label: name, n: 0, wins: 0, net: 0 }); sr.n++; sr.net += p; if(p > 0){ sr.wins++; }
+      var px = Number(o.price);
+      bands.forEach(function(b){ if(px >= b.lo - 1e-9 && px < b.hi){ b.n++; b.net += p; if(p > 0){ b.wins++; } } });
+    });
+    st.streak = { kind: runKind === 'flat' ? null : runKind, n: runKind === 'flat' ? 0 : run };
+    st.longestLoss = longest;
+    if(st.n){
+      st.winRate = st.wins / st.n; st.expectancy = st.total / st.n;
+      st.avgWin = st.wins ? st.grossWin / st.wins : null; st.avgLoss = st.losses ? -st.grossLoss / st.losses : null;
+      st.profitFactor = st.grossLoss > 0 ? st.grossWin / st.grossLoss : null;
+    }
+    st.bySeries = Object.keys(series).sort().map(function(k){ return series[k]; });
+    st.byBand = bands.filter(function(b){ return b.n > 0; });
+    return st;
+  }
+
+  // One bar per settled trade, oldest to newest: green up for a win, red down for a loss, so a loss is as visible as a win.
+  function kalshiBarsSvg(points, esc, money){
+    if(!points || !points.length){ return '<div class="kal-empty">Bars appear after the first settled trade.</div>'; }
+    var shown = points.slice(-60), W = 640, H = 150, T = 12, B = 20, L = 6, R = 6;
+    var hi = Math.max.apply(null, shown.map(function(p){ return p.pnl; }).concat([0.05])), lo = Math.min.apply(null, shown.map(function(p){ return p.pnl; }).concat([-0.05]));
+    var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+    var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
+    var bars = shown.map(function(p, i){
+      var x = L + slot * i + (slot - bw) / 2, y0 = Y(0), y1 = Y(p.pnl), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0));
+      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"><title>' +
+        esc(new Date(p.t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl))) + '</title></rect>';
+    }).join('');
+    var wins = shown.filter(function(p){ return p.pnl > 0; }).length, losses = shown.filter(function(p){ return p.pnl < 0; }).length;
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profit or loss of each of the last ' + shown.length + ' settled trades: ' + wins + ' wins, ' + losses + ' losses" style="width:100%;height:auto;display:block">' +
+      '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)"/>' + bars +
+      '<text x="' + L + '" y="' + (H - 5) + '" fill="var(--muted)" font-size="11">last ' + shown.length + ' settled trades: ' + wins + ' won, ' + losses + ' lost</text></svg>';
+  }
+
+  // The tracker's numbers as tiles and two small tables. Nothing is shown as a figure until there is a settled trade to base it on.
+  function kalshiPerfHtml(st, esc, money){
+    if(!st || !st.n){ return '<div class="kal-empty">The tracker fills in after the first settled trade.</div>'; }
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    var tile = function(k, v, cls){ return '<div class="kal-tile"><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
+    var pct = function(x){ return Math.round(x * 100) + '%'; };
+    var streak = st.streak.kind ? st.streak.n + ' ' + (st.streak.kind === 'win' ? (st.streak.n === 1 ? 'win' : 'wins') : (st.streak.n === 1 ? 'loss' : 'losses')) : 'none';
+    var tiles = tile('Settled trades', String(st.n)) + tile('Net', sg(st.total), st.total >= 0 ? 'kal-pos' : 'kal-neg') +
+      tile('Win rate', pct(st.winRate) + ' (' + st.wins + ' / ' + st.losses + ')') +
+      tile('Average win', st.avgWin === null ? 'none yet' : sg(st.avgWin), 'kal-pos') + tile('Average loss', st.avgLoss === null ? 'none yet' : sg(st.avgLoss), st.avgLoss === null ? '' : 'kal-neg') +
+      tile('Profit factor', st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2)) +
+      tile('Per trade', sg(st.expectancy), st.expectancy >= 0 ? 'kal-pos' : 'kal-neg') +
+      tile('Best / worst', sg(st.best) + ' / ' + sg(st.worst)) + tile('Deepest drawdown', st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none') +
+      tile('Streak now', streak) + tile('Longest losing run', String(st.longestLoss));
+    var table = function(title, rows){
+      if(!rows.length){ return ''; }
+      return '<div class="kal-perf-t"><span class="kal-lbl">' + esc(title) + '</span>' + rows.map(function(r){
+        return '<div><span>' + esc(r.label) + '</span><span>' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + esc(sg(r.net)) + '</b></div>';
+      }).join('') + '</div>';
+    };
+    return '<div class="kal-tiles">' + tiles + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + table('By price paid', st.byBand) + '</div>';
   }
 
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
@@ -10096,10 +10218,28 @@
   function renderKalshiCharts(){
     var lineEl = document.getElementById('kalChartLine'), pieEl = document.getElementById('kalChartPie');
     if(!lineEl || !pieEl){ return; }
-    var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = sess && Number.isFinite(sess.since) ? sess.since : 0;
-    lineEl.innerHTML = kalshiLineSvg(kalshiPnlSeries(kalshiLiveOrders, since), escapeHtml, kalshiMoney);
-    pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(kalshiLiveOrders, since), escapeHtml);
+    var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = kalshiChartRange === 'session' && sess && Number.isFinite(sess.since) ? sess.since : 0;
+    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    var series = kalshiPnlSeries(orders, since);
+    lineEl.innerHTML = kalshiLineSvg(series, escapeHtml, kalshiMoney);
+    pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
+    var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf'), noteEl = document.getElementById('kalPerfNote');
+    if(barsEl){ barsEl.innerHTML = kalshiBarsSvg(series, escapeHtml, kalshiMoney); }
+    if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
+    if(noteEl){
+      var est = orders.filter(function(o){ return o && o.estimated === true && o.ts >= since; }).length;
+      var exact = orders.filter(function(o){ return o && o.exact === true && o.ts >= since; }).length;
+      var stillOpen = orders.filter(function(o){ return o && o.ts >= since && Number(o.fillCount) > 0 && o.settled !== true; }).length;
+      noteEl.textContent = (est ? est + ' trade' + (est === 1 ? '' : 's') + ' settled on this page from the account read (the server had not marked them). ' : '') +
+        (stillOpen ? stillOpen + ' filled trade' + (stillOpen === 1 ? ' is' : 's are') + ' still open or not yet read, and not counted. ' : '') +
+        (exact ? exact + ' use the fill and fee from your account. ' : '') + 'The rest use the order\'s worst-case price, so a win is booked slightly low and a loss slightly high.';
+    }
   }
+  var kalshiChartRange = 'all';
+  (function(){
+    var sel = document.getElementById('kalChartRange');
+    if(sel){ sel.addEventListener('change', function(){ kalshiChartRange = sel.value === 'session' ? 'session' : 'all'; renderKalshiCharts(); }); }
+  })();
 
   function renderKalshiL1(){
     var s = kalshiLiveCtl.session, now = Date.now();
@@ -10116,7 +10256,7 @@
     plEl.className = 'kal-bigpl' + (net === null ? '' : (net >= 0 ? ' kal-pos' : ' kal-neg'));
     document.getElementById('kalL1PlLabel').textContent = running ? 'Bot P/L this session' : 'Bot P/L, last session';
     document.getElementById('kalL1PlSub').textContent = (s && Number.isFinite(s.botOpen) && s.botOpen > 0 ? 'Settled only. ' + kalshiMoney(s.botOpen) + ' still open.' : 'Settled trades only. Wins are booked slightly low.');
-    var oc = kalshiOutcomeCounts(kalshiLiveOrders, s && Number.isFinite(s.since) ? s.since : 0);
+    var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var fact = function(k, v){ return '<div><span class="kal-lbl">' + escapeHtml(k) + '</span><b>' + escapeHtml(v) + '</b></div>'; };
     var stopAt = s && s.sizing === true && Number.isFinite(s.startCash) ? '$' + (0.10 * s.startCash).toFixed(2) : '$10.00';
     document.getElementById('kalL1Facts').innerHTML = running ? (

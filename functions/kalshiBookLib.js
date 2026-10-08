@@ -15,9 +15,9 @@
 const { KALSHI_SERIES: SERIES, kalshiNum: num } = require("./kalshiLib");
 
 const LEVELS_KEPT = 3;
-const CYCLES = 5;
+const CYCLES = 6;                 // 0, 10, 20, 30, 40 and 50 s into the minute, so the whole minute is covered (five left the last 20 s of every minute blank)
 const EVERY_MS = 10000;
-const BUDGET_MS = 45000;          // stop starting new cycles after this, so the 58s timeout is never the thing that ends a run
+const BUDGET_MS = 55000;          // stop starting new cycles after this, so the function timeout is never the thing that ends a run
 const KEEP_DAYS = 10;
 
 const round4 = (x) => Math.round(x * 10000) / 10000;
