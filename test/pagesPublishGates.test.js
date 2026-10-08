@@ -22,8 +22,17 @@ gates.P2 = () => {
   const excluded = new Set([...cfg.matchAll(/^\s*-\s+(\S+)\s*$/gm)].map((m) => m[1]));
   const top = new Set(tracked().map((t) => t.file.split('/')[0]));
   const published = [...top].filter((n) => !excluded.has(n) && !n.startsWith('.') && !n.startsWith('_'));
-  assert.deepStrictEqual(published.sort(), ['index.html'], 'only the app is published; add anything else to the exclude list in _config.yml (published now: ' + published.join(', ') + ')');
+  assert.deepStrictEqual(published.sort(), ['apple-touch-icon.png', 'index.html'], 'only the app and its home screen icon are published; add anything else to the exclude list in _config.yml (published now: ' + published.join(', ') + ')');
   for (const must of ['functions', 'kalshi-scalper', 'docs', 'CLAUDE.md', 'SECURITY_REVIEW.md', 'SERVER_REVIEW_2026-10-08.md', 'firestore.rules']) assert.ok(excluded.has(must), must + ' is not served');
+};
+
+// The home screen icon the page points to must be the file that is published, a real 180 by 180 PNG (iOS ignores SVG here and would draw a plain letter instead).
+gates.P3 = () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.ok(/<link rel="apple-touch-icon" href="apple-touch-icon\.png">/.test(html), 'the page names the icon');
+  const png = fs.readFileSync(path.join(root, 'apple-touch-icon.png'));
+  assert.strictEqual(png.slice(1, 4).toString(), 'PNG', 'it is a PNG');
+  assert.deepStrictEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [180, 180], 'at 180 by 180');
 };
 
 (async () => {
