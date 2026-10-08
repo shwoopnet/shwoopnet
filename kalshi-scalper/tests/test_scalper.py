@@ -1985,3 +1985,11 @@ assert _BF.p2_signals(_rows, _res, start=_close) == [], "a market closing at or 
 _w = _BF.window_rows(_rows, _res)
 assert [round(x[3], 4) for x in _w] == [0.93, 0.9285] and _w[0][5] == 20, "window rows carry the ask and the size resting at the touch (the NO bid for a YES buy)"
 print("bookfile tests passed")
+
+# X5 to X7 (lower thresholds, registered later): seven tries in all, so the bar is 2.7 for them and stays 2.5 for X1 to X4.
+assert [_EX.THRESHOLDS[k] for k in ("X5", "X6", "X7")] == [0.40, 0.30, 0.20] and _EX.pass_z("X4") == 2.5 and _EX.pass_z("X5") == 2.7 and _EX.pass_z("X7") == 2.7
+_rows_hi = _EX.build(_good, _cand, 0.70)
+_dz = _EX.verdict(_rows_hi, None)[1]["diff_z"]
+assert _EX.verdict(_rows_hi, None, _dz + 0.5)[0] == "FALSIFIED" and _EX.verdict(_rows_hi, None, _dz - 0.5)[0] == "NOT_YET_FALSIFIED", "the z bar is applied as given"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.25, 0.30)], 0.20) is None and _EX.find_exit(_ent, [_cd(_cl, 240, 0.15, 0.20)], 0.20) == (0.15, 240), "20c only fires on a deep collapse"
+print("exit X5-X7 tests passed")

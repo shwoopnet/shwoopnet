@@ -21,10 +21,11 @@ from .analyze import valid_quote
 from .calibration import cluster_mean_z
 from .scalps import STRESS, fee, load as load_markets
 
-THRESHOLDS = {"X1": 0.50, "X2": 0.60, "X3": 0.70, "X4": 0.80}
+THRESHOLDS = {"X1": 0.50, "X2": 0.60, "X3": 0.70, "X4": 0.80, "X5": 0.40, "X6": 0.30, "X7": 0.20}
 CHECK_LEFT_S = (300, 240, 180, 120, 60)
 MIN_BID = 0.001
-PASS_Z = 2.5
+PASS_Z = 2.5                  # X1 to X4, four tries
+PASS_Z_SEVEN = 2.7            # X5 to X7 (registered later): seven tries in all
 MIN_N = 300
 MIN_DAYS = 5
 NULL_REPS = 500
@@ -120,14 +121,18 @@ def stats(rows: list[dict]) -> dict:
             "would_have_won": (sum(1 for r in stopped if r["hold"] > 0) / len(stopped)) if stopped else None}
 
 
-def verdict(rows: list[dict], null95: float | None) -> tuple[str, dict]:
+def pass_z(name: str) -> float:
+    return PASS_Z if name in ("X1", "X2", "X3", "X4") else PASS_Z_SEVEN
+
+
+def verdict(rows: list[dict], null95: float | None, z_bar: float = PASS_Z) -> tuple[str, dict]:
     s = stats(rows)
     diffs = [(r["day"], r["net"] - r["hold"]) for r in rows]
     dm, _, dz = cluster_mean_z(diffs)
     s.update(diff=dm, diff_z=dz, null95=null95, hold_mean=sum(r["hold"] for r in rows) / len(rows))
     if s["n"] < MIN_N or s["days"] < MIN_DAYS:
         return "NOT_ENOUGH_DATA", s
-    ok = (dm > 0 and dz >= PASS_Z and s["mean"] > 0 and s["h1"] > 0 and s["h2"] > 0
+    ok = (dm > 0 and dz >= z_bar and s["mean"] > 0 and s["h1"] > 0 and s["h2"] > 0
           and sum(r["stress"] for r in rows) / len(rows) > 0 and (null95 is None or dm > null95))
     return ("NOT_YET_FALSIFIED" if ok else "FALSIFIED"), s
 
@@ -158,11 +163,11 @@ def main() -> None:
     print(f"HOLD: n={b['n']} on {b['days']} days, mean {f(b['mean'])}, sd {b['sd'] * 100:.1f}c, worst loss {f(b['worst'])}, worst day {f(b['worst_day'])}, drawdown {b['drawdown'] * 100:.1f}c, two contracts rounded {f(rounded_two_contracts(base))}\n")
     for name, x in THRESHOLDS.items():
         rows = build(entries, candles, x)
-        v, s = verdict(rows, null_diff_p95(rows, late))
+        v, s = verdict(rows, null_diff_p95(rows, late), pass_z(name))
         print(f"{name} (sell at {x * 100:.0f}c): stopped {s['stopped'] * 100:.1f}% of entries ({s['would_have_won'] * 100:.0f}% of those would have won if held)")
         print(f"   mean {f(s['mean'])} vs HOLD {f(s['hold_mean'])}: difference {f(s['diff'])} (day clustered z {s['diff_z']:+.2f}), fair-market 95th percentile of the difference {f(s['null95'])}")
         print(f"   sd {s['sd'] * 100:.1f}c, worst loss {f(s['worst'])}, worst day {f(s['worst_day'])}, drawdown {s['drawdown'] * 100:.1f}c, halves {f(s['h1'])} / {f(s['h2'])}, fees x{STRESS} {f(s['stress'])}, two contracts rounded {f(rounded_two_contracts(rows))}")
-        print(f"   VERDICT (bar z>={PASS_Z}, n>={MIN_N}, both halves, fees x{STRESS}, above the fair-market difference): {v}\n")
+        print(f"   VERDICT (bar z>={pass_z(name)}, n>={MIN_N}, both halves, fees x{STRESS}, above the fair-market difference): {v}\n")
     print("No verdict here means trade.")
 
 
