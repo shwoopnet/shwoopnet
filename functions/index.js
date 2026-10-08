@@ -393,7 +393,7 @@ exports.kalshiL1Session = onCall(async (request) => {
   }
   const now = Date.now();
   await ref.set({ active: true, since: now, until: now + live.L1_SESSION_MS, ordersSent: 0, startCash: null, sizing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
-  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (1% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down 7% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) });
+  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (" + (live.L1_SIZE_FRACTION * 100) + "% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) });
   return { active: true, until: now + live.L1_SESSION_MS };
 });
 

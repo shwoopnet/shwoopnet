@@ -282,16 +282,17 @@ const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eli
 // 200 can never end a 24 hour session; it only stops a runaway loop from sending orders without end. The loss stop is the real limit.
 const L1_MAX_ORDERS = 200;
 const L1_SESSION_MS = 24 * 3600 * 1000;
-// Size scaling (off unless the owner ticks it when starting a session). Each order risks about 1% of the account's cash, at
-// least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 7% of the starting cash instead of $7.
+// Size scaling (off unless the owner ticks it when starting a session). Each order risks about 1.5% of the account's cash, at
+// least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 10% of the starting cash instead of the flat $10. Raised by the owner on
+// Oct 8, 2026 from 1% and 7% ($7): about half again as much. At a $100 account that still buys one contract; two come at about $123 of cash.
 const L1_SIZE_MAX = 3;
-const L1_SIZE_FRACTION = 0.01;
-const L1_SIZED_STOP_FRACTION = 0.07;
+const L1_SIZE_FRACTION = 0.015;
+const L1_SIZED_STOP_FRACTION = 0.10;
 function l1Count(cash, costPerContract) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
   return Math.max(1, Math.min(L1_SIZE_MAX, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
 }
-const L1_LOSS_STOP = 7.0;                  // dollars of cash below the starting level: $5 of loss plus up to $2 sitting in open positions
+const L1_LOSS_STOP = 10.0;                 // dollars the bot's own trades may be down (open ones counted as lost); was $7 until Oct 8, 2026
 
 // The side whose FRESH price is inside the band, or null. YES is bought at its ask; NO at 1 minus the YES bid. Kalshi
 // prices run in tenths of a cent mid-book, so the limit sent is rounded in the direction that can only cross (YES up to
@@ -473,5 +474,5 @@ async function runL1Tick(args) {
 module.exports = {
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, l1Count, L1_SIZE_MAX, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, l1Count, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };

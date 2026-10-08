@@ -3398,14 +3398,14 @@
         <div id="kalL1Status" class="kal-note">Not running.</div>
         <div class="kal-actions">
           <button class="kal-btn" id="kalL1Start" type="button">Start 24 hour session</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself for 24 hours, one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (about 1% of cash per order, up to 3 contracts, stop at 7% of starting cash)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself for 24 hours, one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (about 1.5% of cash per order, up to 3 contracts, stop at 10% of starting cash)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
           <button class="kal-btn" id="kalL1Stop" type="button" hidden>Stop session</button>
           <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
         </div>
         <div class="kal-note" id="kalL1Msg"></div>
         <span class="kal-note" id="kalBotHaltMsg"></span>
         <details class="kal-more"><summary>Rules and limits</summary>
-          <div class="kal-note">One contract (up to 3 if you ticked size scaling when starting) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Stops after 24 hours, when the bot's own trades are down $7.00 (7% of the starting cash with scaling; your manual trades do not count), or on any order that goes wrong. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
+          <div class="kal-note">One contract (up to 3 if you ticked size scaling when starting) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Stops after 24 hours, when the bot's own trades are down $10.00 (10% of the starting cash with scaling; your manual trades do not count), or on any order that goes wrong. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
         </details>
       </div>
       <div class="kal-card" data-card="account">
@@ -10159,7 +10159,7 @@
     document.getElementById('kalL1PlSub').textContent = (s && Number.isFinite(s.botOpen) && s.botOpen > 0 ? 'Settled only. ' + kalshiMoney(s.botOpen) + ' still open.' : 'Settled trades only. Wins are booked slightly low.');
     var oc = kalshiOutcomeCounts(kalshiLiveOrders, s && Number.isFinite(s.since) ? s.since : 0);
     var fact = function(k, v){ return '<div><span class="kal-lbl">' + escapeHtml(k) + '</span><b>' + escapeHtml(v) + '</b></div>'; };
-    var stopAt = s && s.sizing === true && Number.isFinite(s.startCash) ? '$' + (0.07 * s.startCash).toFixed(2) : '$7.00';
+    var stopAt = s && s.sizing === true && Number.isFinite(s.startCash) ? '$' + (0.10 * s.startCash).toFixed(2) : '$10.00';
     document.getElementById('kalL1Facts').innerHTML = running ? (
       fact('Next look', Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + fact('Ends', kalshiWhen(s.until, now)) +
       fact('Orders sent', String(s.ordersSent || 0)) + fact('Filled / no fill', (oc.won + oc.lost + oc.open) + ' / ' + oc.noFill)
