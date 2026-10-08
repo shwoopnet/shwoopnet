@@ -33,7 +33,7 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,574 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Strategy variants tried so far: **2,580 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
 Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
@@ -2109,14 +2109,103 @@ The owner asked for "the opposite end of the spectrum" from L1: instead of buyin
 | | Entries | Mean | Day clustered z | Halves | Fees x1.2 | Verdict |
 |---|---|---|---|---|---|---|
 | C1 5c target, else hold | 1,701 | -3.28c | -8.62 | -3.16c / -3.40c | -3.54c | `FALSIFIED` |
-| C2 5c target, else sell at 6 min left | 1,701 | -1.00c | -2.97 | -0.93c / -1.08c | -1.30c | `FALSIFIED` |
-| C3 10c target, else sell at 6 min left | 1,701 | -0.40c | -1.03 | -0.12c / -0.68c | -0.69c | `FALSIFIED` |
+| C2 5c target, else sell at 6 min left | 1,701 | **-2.27c** (first run said -1.00c, withdrawn) | -9.51 | -2.14c / -2.41c | -2.56c | `FALSIFIED` |
+| C3 10c target, else sell at 6 min left | 1,701 | **-2.33c** (first run said -0.40c, withdrawn) | -8.66 | -2.07c / -2.60c | -2.61c | `FALSIFIED` |
 
+- **CORRECTION, found the same afternoon (the C2 and C3 rows above are the corrected ones).** The first run searched for the target on every later candle, including the ones after the 6 minute mark where C2 and C3 had already sold, so a late bounce counted as a win the rule would not have realized. Every error found in this project so far has flattered the result, and that is how this one was caught: a result better than the registered prediction. Fixed against the rule as registered (the target is looked for only up to and including the 6 minute candle), with a test, and re-run once. C1 is unaffected (it has no time exit). Corrected: **C2 -2.27c, C3 -2.33c** (first run -1.00c and -0.40c). The verdicts did not change; the size of the loss did, and the paragraph below that read the first run is withdrawn.
 - **Prediction against outcome.** Predicted C1 between -2.5c and -0.5c, and C2 and C3 between -1.5c and -0.2c, all `FALSIFIED`. The verdicts were right. C2 (-1.00c) and C3 (-0.40c) fell inside their ranges; **C1 was worse than predicted (-3.28c against a floor of -2.5c)**, because holding to settlement from 8c to 15c loses the whole price more often than the early bounce pays: 41.2% hit the target, but holding the rest averaged -13.2c a loss against +10.9c a win.
 - **Information only: the target is hit often and the edge is still negative.** A +5c bounce arrives 41% of the time and a +10c bounce 31.5%, so cheap sides do tick up. Sold at the 6 minute mark instead of held, the loss shrinks from -3.28c to -1.00c (C2), and a larger target shrinks it again (C3). Stops and exits cannot create profit in a fair game; what they change is how much of the fee and spread is paid.
-- **Post hoc, computed after the verdicts and not part of them: it is cost, not signal.** With the fee set to zero the same trades make -1.99c (C1), **+0.45c (C2) and +1.05c (C3)**. Both legs' fees (about 0.6c each at 10c) turn a small positive gross into the net above, which is the same conclusion as the dispersion study: cost, not an absent signal, is the binding constraint. A gross of +1.05c on a 10c target is not distinguishable from zero here and the registered bar is net.
+- **WITHDRAWN (computed on the buggy first run): "it is cost, not signal".** It said that with the fee set to zero the same trades make -1.99c (C1), **+0.45c (C2) and +1.05c (C3)**. Both legs' fees (about 0.6c each at 10c) turn a small positive gross into the net above, which is the same conclusion as the dispersion study: cost, not an absent signal, is the binding constraint. A gross of +1.05c on a 10c target is not distinguishable from zero here and the registered bar is net. The corrected gross figures are **-1.99c (C1), -0.85c (C2) and -0.94c (C3)**: with no fees at all these trades still lose, so for the cheap side there is no hidden edge being eaten by cost.
 - **Same in both series.** Bitcoin and gold net within a few tenths of a cent of each other in every variant.
 - **Count.** Three variants: **2,577 as of this entry** (2,574 plus three).
+
+## Idea ledger addendum: the opening window, O1 to O50 (written 2026-10-08, before any of them was built or run)
+
+The owner asked for about 50 ideas for the first 9 minutes of each market, which the live bot leaves unused (it enters at 6 minutes left). **Listed here BEFORE any is run, so none is quietly retried.** Status of every row is `OPEN` unless its tag says otherwise. Tags: `NEW` = no ledger row covers it; `OVERLAP <id>` = its counterparty story rewords a ledger row or a falsified result, so it is NOT a new try and should not be run as one; `NOT_RUNNABLE` = no free data.
+Counts: **22 NEW, 26 OVERLAP, 2 NOT_RUNNABLE.** The binding constraint found so far is cost (a taker round trip costs about 1c to 3c), so the NEW rows are mostly resting (maker) entries, which pay no taker fee, and ideas that improve or extend L1, whose measured edge is positive. Anything needing book snapshots waits for the Firestore recorder to hold several days of data (it started 2026-10-08). No strategy variant is counted until it is run.
+
+| # | Family | Idea | Who pays us or why it should work | Needs | Tag |
+|---|---|---|---|---|---|
+| O1 | resting entries at the open | Bid at the best bid on the side spot leans toward, minutes 1 to 4, cancel at 5 | Takers who sell into a dip pay the spread to us; no taker fee | books | NEW (L4 adjacent) |
+| O2 | resting entries at the open | Penny the bid (+0.1c) when the best bid is under 50 contracts, exit resting at the ask | Takers crossing a thin book | books | NEW |
+| O3 | resting entries at the open | Lowball bids at 30c on both sides the moment a market opens, exit resting at 45c | Panic sellers into an empty opening book | tape | NEW |
+| O4 | resting entries at the open | Two sided quote only when the spread is 3c or more, 1 contract a side, 3 minute life | Takers crossing a wide spread | books | OVERLAP H5 (narrowed) |
+| O5 | resting entries at the open | Resting sell above the mid after a jump of 8c or more in the first 3 minutes (maker fade) | Late momentum chasers | books | NEW |
+| O6 | resting entries at the open | Resting bid 5c under the minute 1 ask on the cheap side, 4 minute life, hold if filled | Sellers who accept a discount | candles | OVERLAP P2 (resting fills landed on losers) |
+| O7 | resting entries at the open | Resting bids at round prices (25c, 75c) where size clusters | Takers who hit round numbers | books | NEW |
+| O8 | resting entries at the open | Join the bid and bid again one tick up each minute until filled, max 3 ticks | Sellers who give way over time | books | NEW |
+| O9 | structure and arbitrage | YES ask plus NO ask under $1 less both fees in the first 3 minutes | Stale quoters on one side | books | OVERLAP L14 |
+| O10 | structure and arbitrage | YES bid plus NO bid over $1 plus both fees: sell both sides | Stale bids on both sides | books | OVERLAP L14 |
+| O11 | structure and arbitrage | Stale quote: spot moves 0.1% in 10 seconds while the book is unchanged for 20 | Slow quoters | books under 10 s | OVERLAP L5 |
+| O12 | structure and arbitrage | Buy after the spread narrows from 6c or more to 2c or less within 2 minutes (liquidity arrival) | Impatient early sellers | books | NEW |
+| O13 | structure and arbitrage | First traded price of the market against the distance-implied fair price | Open price takers | tape and spot | OVERLAP H7 (distance) |
+| O14 | structure and arbitrage | Bitcoin and gold both open: trade the series whose first quote is farther from 50c | Slow quoters in the later series | books | OVERLAP L6 and S01 to S02 |
+| O15 | use the window to improve L1 | Retry a missed L1 fill at 5 minutes left if still in band (41% of signals miss) | More volume of an edge that averages +0.9c | candles and live | NEW |
+| O16 | use the window to improve L1 | Hybrid: rest a bid 1c under the touch from 9 to 6 minutes left, IOC at 6 as fallback | Cheaper entries on the ones that come back | books | OVERLAP P2 and hybrid result |
+| O17 | use the window to improve L1 | Size L1 up when the favorite was already 85c or more at minute 5 | Long-run favorites are not repriced | candles | NEW |
+| O18 | use the window to improve L1 | Skip L1 when the market mid crossed 50c three times or more in minutes 1 to 8 | Choppy markets end randomly | candles | OVERLAP Q filters |
+| O19 | use the window to improve L1 | Skip L1 when Bitcoin's realized volatility over the first 8 minutes is in its top decile | Fat tails break favorites | spot | OVERLAP L7 and L13 |
+| O20 | use the window to improve L1 | Skip L1 on days with a scheduled release (CPI, jobs, FOMC) | Slow quoters around releases | calendar | OVERLAP L10 |
+| O21 | use the window to improve L1 | Skip L1 when the spread at 6 minutes left is wider than 2c | A wide book is a thin book | candles | NEW |
+| O22 | use the window to improve L1 | Hold L1 but sell at 99c when it is offered before the close (free exit of the last cent) | Takers who pay up for certainty | books | NEW |
+| O23 | scalps on favorites | Buy a 70c to 90c favorite at minute 3, sell at +3c, else sell at 6 minutes left | Slow repricing of a trend | candles | NEW |
+| O24 | scalps on favorites | Same with a +5c target | Same | candles | NEW |
+| O25 | scalps on favorites | Buy a 55c to 70c side at minute 2 when spot confirms, sell at +4c | Slow repricing | candles and spot | OVERLAP M1 and H2 |
+| O26 | scalps on favorites | Buy a favorite at minute 4 and hold to settlement (the four slot grammar, early) | Favorite-longshot bias | candles | OVERLAP four slot search |
+| O27 | scalps on favorites | Buy the favorite on a dip of 3c in minutes 3 to 6, sell at the pre-dip price | Panic sellers in a stable market | candles | NEW |
+| O28 | scalps on favorites | Sell a favorite short-term when it exceeds 97c before minute 8 (buy the other side at 3c or less) | Overpaying for certainty | candles | OVERLAP L3 |
+| O29 | spot signals (Bitcoin) | Spot crosses the strike by 0.05% in minutes 2 to 4: buy that side | Slow repricing of spot | candles and spot | OVERLAP H7 and L2 |
+| O30 | spot signals (Bitcoin) | Spot reverses back through the strike after a 0.1% excursion: fade the excursion | Overreaction | candles and spot | OVERLAP S09 and S21 |
+| O31 | spot signals (Bitcoin) | Spot acceleration (second difference) over minutes 1 to 4 | Trend followers | candles and spot | OVERLAP S16 |
+| O32 | spot signals (Bitcoin) | Spot against its own last 60 second average at minute 5 (the settlement is an average) | Holders pricing a point, not an average | candles and spot | OVERLAP L9 |
+| O33 | spot signals (Bitcoin) | Spot move in the previous market's last 3 minutes against the new opening mid | Open price lag | candles and spot | OVERLAP L8 |
+| O34 | spot signals (Bitcoin) | Perpetual futures funding or basis as a lean | Slow quoters | external data | NOT_RUNNABLE (no free feed) |
+| O35 | cost-gated entries | Run any registered rule only in the 3 hours with the tightest opening spreads (chosen on cost) | Cost is the binding constraint | candles | NEW (allowed: selection on cost) |
+| O36 | cost-gated entries | Run only when the opening depth on both sides is 200 contracts or more | Thin books cost more | books | NEW |
+| O37 | cost-gated entries | Weekend against weekday opening spreads (a measurement first) | Wider weekend spreads | candles | NEW (measure) |
+| O38 | cost-gated entries | Gold only when Bitcoin's spread is also tight (a liquidity regime flag) | Shared liquidity cycles | candles | NEW |
+| O39 | calendar and settlement | Gold reopen after the daily break: first market's opening mid against the last price | Stale gold quotes | candles | OVERLAP S14 |
+| O40 | calendar and settlement | Bitcoin at the London and New York opens, first 5 minutes | Session opens | candles and spot | OVERLAP S15 and S12 |
+| O41 | calendar and settlement | Quarter-hour that includes the hourly mark (:00) against the other three | Hourly index effects | candles | OVERLAP S26 |
+| O42 | calendar and settlement | Last market before a settlement-day roll or maintenance window | Operational gaps | calendar | NOT_RUNNABLE (no calendar) |
+| O43 | hedges and portfolios | Straddle: buy both sides when the asks sum to $1.02 or less and sell the leg that moves | Whoever pays for volatility | books | NEW (cost likely binding) |
+| O44 | hedges and portfolios | Bitcoin and gold opposite sides when both open favorite-heavy | Correlation mispricing | candles | OVERLAP S01 to S05 |
+| O45 | hedges and portfolios | Buy a 5c longshot at minute 2 as insurance beside an L1 position in the other market | Reduces variance, not expectation | candles | NEW (variance only) |
+| O46 | hedges and portfolios | Scale in: half at 9 minutes left, half at 6 if the price held | Average entry price | candles | NEW |
+| O47 | book shape | Microprice (size weighted mid) against the plain mid at minute 3 | Quoters who ignore size | books | OVERLAP L12 |
+| O48 | book shape | Share of size on one side of the top 3 levels at minute 2 | Quoters who do not read depth | books | OVERLAP L12 |
+| O49 | book shape | A large resting order appearing and disappearing (spoof-like) as a signal | Slow reactors | books | NEW |
+| O50 | book shape | Time since the last book change as a staleness gauge | Slow quoters | books | OVERLAP L5 |
+
+
+## Pre-registration: favorite scalps and the dip buy, F1 to F3 (ledger rows O22, O23 and O26; fixed 2026-10-08 17:23 UTC, before any code and before any of these was priced)
+
+First three rows of the opening window ledger to run, because they need only the minute candles we hold. Named `OP1` to `OP3` in code to keep them apart from the forward looks F0 to F9.
+
+- **Counterparty.** Whoever sells a trending favorite too cheaply in the first minutes (a quoter whose price lags the move), or sells into a 3c dip in a market that is about to hold.
+- **Why the prior is negative, stated.** A fair price earns zero before costs. At 70c to 90c the fee is 1.1c to 1.9c a leg, so a scalp pays about 2.5c to 3.5c in fees and spread to earn a 3c or 5c target. All three are expected to lose, as C1 to C3 and M1 did.
+- **Rules, fixed.** Prices are the closing quotes of minute candles; the quote must pass `valid_quote`; YES is bought at its ask, NO at one minus the YES bid (4 places); taker fee both legs; one entry per market; exits are strictly later candles; a bid under 0.1c counts as 0.
+  - **OP1:** entry at the first candle close in the first 3 to 5 minutes (ending 720, 660 or 600 seconds before the close) where a side's ask is 0.70 to 0.90. Exit at the first later close with that side's bid at or above the entry ask plus **3c**, else sold at the bid 6 minutes before the close (a missing 6 minute candle holds to settlement, and is counted).
+  - **OP2:** as OP1 with a **5c** target.
+  - **OP3 (the dip):** entry at the first candle close in the first 3 to 6 minutes (ending 720, 660, 600 or 540 seconds before the close) where a side's ask is 0.70 to 0.90 AND at least 3c below that side's ask one minute earlier (the earlier candle must also be a real quote). Exit at the first later close with that side's bid at or above the earlier (pre-dip) ask minus 1c, else sold at the 6 minute bid as in OP1.
+- **Numeric prediction, before the run.** OP1 mean between -3.0c and -0.5c a contract; OP2 between -2.5c and -0.3c; OP3 between -3.0c and -0.5c. All three `FALSIFIED`. OP3 may have too few entries; fewer than 300 reports `NOT_ENOUGH_DATA`.
+- **Bar.** The common one for three tries: at least 300 entries on at least 5 days, day clustered z at least 2.5, both halves positive, positive with fees x1.2. Verdict words only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`.
+- **Information only, unable to rescue a failure:** target hit rate, gross with the fee set to zero, by series, and a measurement (no verdict, not a variant): the median spread of the first five minutes by UTC hour and weekday against weekend, which is what ledger rows O36 and O38 asked for first.
+- **Count.** Three variants: **2,580 as of this entry** (2,577 plus three).
+
+**2026-10-08 17:25 UTC: OP1 to OP3: all three `FALSIFIED`.** One run of `python -m scalper.openscalp` after its tests and after the correction below, under the rules fixed above. 11,220 markets over 69 days; 6,756 entries for OP1 and OP2, 1,886 for OP3.
+
+| | Entries | Mean | Day clustered z | Halves | Fees x1.2 | Gross of fees | Verdict |
+|---|---|---|---|---|---|---|---|
+| OP1 +3c, else sell at 6 min left | 6,756 | -3.19c | -16.49 | -3.18c / -3.20c | -3.65c | -0.90c | `FALSIFIED` |
+| OP2 +5c, else sell at 6 min left | 6,756 | -3.00c | -13.15 | -2.99c / -3.01c | -3.45c | -0.74c | `FALSIFIED` |
+| OP3 dip of 3c, sell near the pre-dip price | 1,886 | -3.04c | -6.18 | -2.35c / -3.74c | -3.50c | -0.78c | `FALSIFIED` |
+
+- **CORRECTION, and why it is in this entry.** The first run of this file (and of `cheapscalp`) looked for the target on every later candle, including those after the 6 minute mark where the position had already been sold. That run showed OP2 at +0.54c (z 2.40, both halves positive) and OP3 at +0.81c (z 1.98), better than the registered predictions, and the habit here is that every earlier error flattered the result, so it was audited before being believed. The bug was against the rule as registered; it is fixed, tested, and the numbers above are from the corrected run. The first run is withdrawn. Lesson, kept: **a result better than its own pre-registered prediction is a reason to audit, not to celebrate.** The same bug had also flattered C2 and C3, corrected above.
+- **Prediction against outcome.** Predicted OP1 between -3.0c and -0.5c, OP2 between -2.5c and -0.3c, OP3 between -3.0c and -0.5c, all \`FALSIFIED\`. The verdicts were right and the losses came out a little larger than the ranges (-3.19c, -3.00c, -3.04c). Hit rates are high (OP1 76.6%, OP2 71.4%, OP3 68.6%) and the average loss is large (-26c to -30c against +4.9c to +6.5c wins): the same lopsided shape as L1, without L1's favorite-longshot premium.
+- **No gross edge either.** With the fee set to zero these trades still lose (-0.74c to -0.90c). Selling a favorite early gives up the late favorite premium that L1 collects by holding to the close.
+- **Measurement, no verdict (ledger rows O36 and O38).** The median spread of the candles 1 to 5 minutes in is 1.0c in every UTC hour and for both weekdays and weekends. There are no cheap hours to select on; the spread is the same everywhere, so gating entries by hour cannot lower cost. Row O36 is closed by this measurement.
+- **Count.** Three variants: **2,580 as of 2026-10-08**.
 
 ## Amendment to the size ladder: reviews every 3 days, and a look at cheaper contracts (2026-10-08, information only, written before the change ships)
 

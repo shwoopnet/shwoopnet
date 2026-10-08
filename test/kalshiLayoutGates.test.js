@@ -341,6 +341,12 @@ gates.Y16 = () => {
   assert.ok(/kalshiSparkFor\(m\) \+ '<\/div>'/.test(html), 'each market row carries its chart');
   assert.ok(/fetch\('https:\/\/api\.gold-api\.com\/price\/XAU'\)/.test(html) && /m\.series === 'KXGOLD15M' && m\.strike != null && !kalshiGold\.failed/.test(html), 'gold draws its price against the strike, and falls back to the YES line if the feed fails');
   assert.ok(/now - kalshiGold\.at < 10000/.test(html), 'the gold feed is asked at most every 10 seconds');
+  // History plus live readings, so a chart is never empty right after a market opens.
+  const join = new Function(/(function kalshiJoinSeries\(a, b\)\{[\s\S]*?\n  \})\n/.exec(html)[1] + '; return kalshiJoinSeries;')();
+  const j = join([{ t: 3000, v: 3 }, { t: 1000, v: 1 }], [{ t: 3400, v: 99 }, { t: 5000, v: 5 }, { t: NaN, v: 1 }, { t: 6000, v: undefined }]);
+  assert.deepStrictEqual(j.map((p) => p.t), [1000, 3000, 5000], 'joined in time order, one reading a second at most, junk dropped');
+  assert.ok(/fetch\('https:\/\/api\.exchange\.coinbase\.com\/products\/' \+ product \+ '\/ticker'\)/.test(html) && /kalshiTicker\('BTC-USD'\)/.test(html) && /kalshiCandles\('PAXG-USD', now\)/.test(html), 'Bitcoin has a live ticker and gold has minute history, both from Coinbase');
+  assert.ok(/kalshiGold\.off = v - p/.test(html) && /v: p\.v \+ off/.test(html), 'gold history is shifted so the line ends on the real gold price');
 };
 
 (async () => {
