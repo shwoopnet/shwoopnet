@@ -2195,3 +2195,50 @@ assert _v == "FALSIFIED", "a losing rule is FALSIFIED"
 _few = [dict(e, net=0.1, stress=0.09) for e in _ent[:50]]
 assert _TF.verdict(_few, _few)[0] == "FALSIFIED", "fewer than 300 signals can never pass"
 print("T1 tests passed")
+
+# T2, the same signal closed before L1: sold at the bid on a later bar than the entry, fee on both legs, flat before L1's window (400 s to 330 s left) opens.
+import sqlite3 as _sq
+from scalper.scalps import fee as _fee
+assert _TF.ENTRY_END_S < _TF.EXIT_END_S <= 900 - 400, "the exit is after the entry and at least 400 s before the close, ahead of L1's window"
+_db = _sq.connect(":memory:")
+_db.executescript("CREATE TABLE market(ticker, series, open_ts, close_ts, result, strike, n_candles); CREATE TABLE candle(ticker, series, end_ts, bid_c, ask_c);"
+                  "CREATE TABLE tapeflow(ticker TEXT PRIMARY KEY, yes_ct REAL, no_ct REAL, n_trades INTEGER);")
+_db.execute("INSERT INTO market VALUES ('M1','KXBTC15M',1000000,1000900,'yes',0,0)")
+_db.execute("INSERT INTO candle VALUES ('M1','KXBTC15M',1000360,0.60,0.62)")
+_db.execute("INSERT INTO candle VALUES ('M1','KXBTC15M',1000480,0.66,0.68)")
+_db.execute("INSERT INTO tapeflow VALUES ('M1',80,0,40)")
+_e = _TF.entries(_db, roundtrip=True)
+assert len(_e) == 1 and abs(_e[0]["net"] - (0.66 - 0.62 - _fee(0.62) - _fee(0.66))) < 1e-9, "sold at the exit bid, entered at the entry ask, fee on both legs"
+_h = _TF.entries(_db)
+assert abs(_h[0]["net"] - (1.0 - 0.62 - _fee(0.62))) < 1e-9, "T1 is unchanged: held to settlement, one fee"
+_db.execute("DELETE FROM candle WHERE end_ts=1000480")
+assert _TF.entries(_db, roundtrip=True) == [] and len(_TF.entries(_db)) == 1, "no quote at the exit: T2 has no observation, T1 is unaffected"
+print("T2 tests passed")
+
+# T3, the early drift scalp at tick level: the signal uses only prints before second 60, the entry is a later print inside the band, the exit is a later bid print, fee on both legs.
+_b = lambda sec, y=None, n=None, last=None: (sec, y, n, last if last is not None else (y if y is not None else n), 1.0 if y else 0.0, 1.0 if n else 0.0)
+_up = [_b(10, y=0.50), _b(50, y=0.56), _b(59, y=0.62), _b(62, y=0.62), _b(70, n=0.68)]
+_t = _TF.t3_trade(_up)
+assert _t and abs(_t["price"] - 0.62) < 1e-9 and abs(_t["sell"] - 0.68) < 1e-9 and _t["hold"] == 8, "entry is the print at 62 s, not the one at 59 s; exit at the later bid print"
+assert abs(_t["net"] - (0.68 - 0.62 - _fee(0.62) - _fee(0.68))) < 1e-9, "fee on both legs"
+_dn = [_b(10, n=0.50), _b(50, n=0.44), _b(65, n=0.44), _b(80, y=0.60), _b(250, y=0.60)]      # YES falls from 50c to 44c: buy NO (a NO taker print at YES 0.44 costs 0.56), sell where a YES taker hits our bid
+_td = _TF.t3_trade(_dn)
+assert _td and _td["side"] == "no" and abs(_td["price"] - 0.56) < 1e-9 and abs(_td["sell"] - 0.40) < 1e-9, "the NO side prices off the other taker's print"
+assert _TF.t3_trade([_b(10, y=0.50), _b(50, y=0.52), _b(62, y=0.60), _b(70, n=0.70)]) is None, "a drift under 3c is no signal"
+assert _TF.t3_trade([_b(10, y=0.50), _b(50, y=0.56), _b(62, y=0.80), _b(70, n=0.85)]) is None, "an entry outside 55c to 70c is no observation"
+assert _TF.t3_trade([_b(10, y=0.50), _b(50, y=0.56), _b(62, y=0.62), _b(70, n=0.64)]) is None, "no print that reaches the target or the time exit: no observation"
+_late = _TF.t3_trade([_b(10, y=0.50), _b(50, y=0.56), _b(62, y=0.62), _b(70, n=0.64), _b(250, n=0.60)])
+assert _late and _late["hold"] == 188 and _late["net"] < 0, "otherwise it is sold at the first bid print at or after 240 s"
+assert _TF.T3_TIME_EXIT_S <= 900 - 400 - 60, "flat long before L1's window opens"
+print("T3 tests passed")
+
+# T4, the cheap side scalp at tick level: a 4c to 10c side, entered from second 61 and before 180, sold at +3c or at the first bid print from 240 s, fee on both legs.
+_c = [_b(30, y=0.06), _b(70, y=0.30), _b(90, y=0.06), _b(100, n=0.10)]          # the print at 30 s is before the entry window, the one at 70 s costs 30c, the one at 90 s is the entry
+_t4 = _TF.t4_trade(_c)
+assert _t4 and _t4["side"] == "yes" and abs(_t4["price"] - 0.06) < 1e-9 and abs(_t4["sell"] - 0.10) < 1e-9 and _t4["hold"] == 10, "entry at 90 s, exit on the bid print that reaches +3c"
+assert abs(_t4["net"] - (0.10 - 0.06 - _fee(0.06) - _fee(0.10))) < 1e-9, "fee on both legs, small on a cheap contract"
+_t4n = _TF.t4_trade([_b(70, n=0.93), _b(80, y=0.99)] + [_b(250, y=0.97)])        # a NO taker print at YES 0.93 costs NO 7c; later a YES taker at 0.99 leaves our NO bid at 1c, exit at 250 s
+assert _t4n and _t4n["side"] == "no" and abs(_t4n["price"] - 0.07) < 1e-9 and abs(_t4n["sell"] - 0.03) < 1e-9, "the NO side prices off the other taker's print and the time exit sells what is bid"
+assert _TF.t4_trade([_b(200, y=0.06), _b(210, n=0.30)]) is None, "no entry after second 180"
+assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.07)]) is None, "no print reaching +3c and none at 240 s: no observation"
+print("T4 tests passed")
