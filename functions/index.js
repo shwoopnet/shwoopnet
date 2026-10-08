@@ -39,10 +39,15 @@ async function finnhubGet(path, params) {
   return res.json();
 }
 
+// Any signed-in account can call these two, and each call spends the shared Finnhub key. Shapes are checked so a caller
+// cannot send an arbitrary string through to the vendor: a ticker-like symbol, and plain YYYY-MM-DD dates.
+const SYMBOL_RE = /^[A-Za-z0-9.\-:^=_]{1,30}$/;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 exports.finnhubQuote = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
   assertSignedIn(request.auth);
   const symbol = request.data && request.data.symbol;
-  if (!symbol || typeof symbol !== "string") {
+  if (!symbol || typeof symbol !== "string" || !SYMBOL_RE.test(symbol)) {
     throw new HttpsError("invalid-argument", "symbol is required");
   }
   return finnhubGet("quote", { symbol });
@@ -64,7 +69,7 @@ exports.finnhubQuote = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) =>
 exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
   assertSignedIn(request.auth);
   const { symbol, from, to } = request.data || {};
-  if (!symbol || !from || !to) {
+  if (typeof symbol !== "string" || !SYMBOL_RE.test(symbol) || typeof from !== "string" || !DATE_RE.test(from) || typeof to !== "string" || !DATE_RE.test(to)) {
     throw new HttpsError("invalid-argument", "symbol, from, and to are required");
   }
   return finnhubGet("company-news", { symbol, from, to });
