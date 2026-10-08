@@ -2226,3 +2226,20 @@ First three rows of the opening window ledger to run, because they need only the
 - **Cheaper in the other sense, a lower price band, is worse per dollar.** From B1 to B3: the 88c to 90c band returned -0.56% per dollar risked, 90c to 92c +1.37%, 92c to 95c +2.02%, 95c to 97c +0.24%. More contracts per dollar by buying the cheapest contracts concentrates risk in the weakest band.
 - **What this does not say.** Resampled history with a made-up fill rate; the edge (+0.9c a contract) is unproven and failed its own bar, and a size that doubles the mean also roughly doubles the loss if the edge is zero. Forward checks F0 to F9 still decide whether any of this is real.
 - Count: unchanged, **2,577 as of 2026-10-08**.
+
+## Pre-registration: two more filters on L1, OP4 and OP5 (ledger rows O17 and O19; fixed 2026-10-08 17:46 UTC, before any code and before either split was computed)
+
+Same method as Q1 to Q3: take L1 as live and ask whether a stated reason to distrust some entries removes the bad ones. Each filter is one fixed definition, with no threshold searched.
+
+**Base.** L1 as `lstrats.hold_rule(L1)`: the candle ending 6 minutes before the close, the favourite whose ask is 0.88 to 0.97, taker at the ask, fee `0.07 p (1 - p)`, held to settlement, both series, all 69 days. Every one of these days has been seen by L1, so a pass would only be permission to test forward.
+
+| Name | Arm (entries kept) | Complement (entries removed) | Excluded from both and counted |
+|---|---|---|---|
+| OP4 early favorite | The side bought already had an ask of **0.85 or more** at the candle ending 600 seconds before the close (10 minutes left, a real quote) | The same side's ask was below 0.85 at that candle | No valid quote at that candle |
+| OP5 tight book | The entry candle's spread (YES ask minus YES bid) is **0.02 or less** | The spread is wider than 0.02 | none |
+
+- **Counterparty.** OP4: whoever sells a favorite that has been a favorite for minutes is the longshot buyer, least wrong when the market agreed early and most wrong in markets that only became lopsided late. OP5: a wide book at 6 minutes left is a thin book where the favorite premium is smaller.
+- **Numeric prediction, before the run.** OP4: arm net about +1.2c a contract on about 1,500 entries, complement about +0.3c, difference under 1c. OP5: arm about +0.9c, nearly all entries, the complement too small to judge. **The pre-registered expectation is that neither passes.**
+- **Bar.** Two filters, so: the arm has at least 300 entries on at least 5 days, mean above zero with day clustered z at least 2.3, both halves positive, positive with fees x1.2, above the fair-market 95th percentile (each entry winning with probability equal to its own price), AND the arm minus the complement is positive with a day clustered z of at least 2.0. Verdict words only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. Passing is permission to test forward and nothing more.
+- **Size, stated.** The ledger row says "size up". A size rule does not change the per contract mean; it is only worth considering if the arm's per contract mean is clearly above the complement's, which is what the difference test checks. No sizing change is proposed here.
+- **Count.** Two variants: **2,582 as of this entry** (2,580 plus two).
