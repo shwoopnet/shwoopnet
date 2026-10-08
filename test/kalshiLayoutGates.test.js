@@ -52,7 +52,7 @@ gates.Y5 = () => {
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
   assert.deepStrictEqual(names(main), ['books', 'performance', 'trades'], 'the main column: books tiles, the charts and the trades (the bot card is gone; its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
-  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, stop and halt are always on screen');
+  for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
   const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];

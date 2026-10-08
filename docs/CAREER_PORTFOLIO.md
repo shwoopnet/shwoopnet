@@ -8,7 +8,7 @@ I built and operate a small automated trading system end to end: a single-file w
 
 ## Résumé bullets (pick what fits the role)
 
-- Designed and shipped an automated trading bot for Kalshi 15 minute markets running 24/7 against a live account, with order idempotency across overlapping deploys, a rolling 24 hour loss stop, fail-closed behavior on any unreadable state, and an emergency "flatten all + halt".
+- Designed and shipped an automated trading bot for Kalshi 15 minute markets running 24/7 against a live account, with order idempotency across overlapping deploys, a rolling 24 hour loss stop, fail-closed behavior on any unreadable state, and an emergency "flatten all" that pauses before it sells.
 - Built a research harness with a falsification-first process: every hypothesis registered with a counterparty, numeric prediction and kill criteria before any code runs; 2,577 variants tested, none passing the pre-set bar, and the result reported as such.
 - Found and fixed a class of error in my own tooling: a skim rule that looked sensible but banked $150 on a net loss, caught by replaying it on 69 days of history before it shipped.
 - Maintained a quality bar without a test framework: about 55 plain-node test files plus Python research tests, static checks of a 15,000 line single-file frontend, and a hand-run mutation check (66 mutants, 53 killed, 9 real gaps closed).

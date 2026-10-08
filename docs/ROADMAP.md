@@ -34,7 +34,7 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 
 ## Done recently (2026-10-07 and 2026-10-08)
 
-- 24/7 bot, weekly size scaling, reinvest and skim, Flatten all + halt, deposit recorder.
+- 24/7 bot, weekly size scaling, reinvest and skim, Flatten all, deposit recorder, and one Pause/Resume control in place of separate Stop and Halt buttons.
 - Performance tracker, readable open positions, simplified Kalshi page, market charts, Central time.
 - Exit, band, entry-side and fee studies; sizing replay; the cheap-side test (all falsified).
 - Security review fixes; hand-run mutation check of the money code.
