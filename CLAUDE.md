@@ -404,6 +404,17 @@ Do not undo these without understanding why they exist.
   user doc), so anything firing on the auth handler must guard on
   `alpacaConnected` or it produces a burst of 401s on every page load.
 
+## The Kalshi bot, in four rules
+
+The admin-only Kalshi page and `functions/` run strategy L1 on real money. Full description: `docs/PROJECT_OVERVIEW.md`.
+
+- **It runs 24/7.** No session end time. The loss stop and the 200 order limit look at the LAST 24 HOURS, so old profits cannot hide a bad day. After a stop it stays off until restarted, on purpose.
+- **Size follows the balance once a week** (`reviewSizing`, `foldSkim` in `functions/kalshiLiveLib.js`): one contract per $85, one step up at most per week, down at once, ceiling 10. Only NEW net profit highs are skimmed; skimming each win was tried first and is wrong (wins are 6c, losses 90c).
+- **Pages publishes the repo.** Everything not in `_config.yml`'s exclude list is on the public site, and a committed symlink breaks the build. `test/pagesPublishGates.test.js` guards both. Never `git add -A` in a worktree that has a `kalshi-scalper/data` symlink.
+- **Live and simulated numbers never share a column.** A research figure quoted as if it were the live record has already cost trust once.
+
+Docs in `docs/` (overview, roadmap, career notes, mock-ups) are refreshed weekly; the checklist is in `docs/README.md`.
+
 ## Conventions
 
 - Comments explain **why**, not what. Several exist specifically to stop a
