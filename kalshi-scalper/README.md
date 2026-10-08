@@ -1632,3 +1632,35 @@ names of the database and the existing `search.py`.
 - **Mixing.** Fewer than two slots had a passing rule, so no combination was evaluated, as the section said.
 - **What this does and does not say.** This grammar (one price band, one side, up to three filters, hold to settlement, taker at the ask), in these windows, on 69 days, finds nothing a fair market does not also produce. It does not say a different shape, such as a resting order or a sized ladder, has no edge. The `pair` filter (the other series pointing the same way) produced no top rule in either late slot.
 - **Count.** 1,760 distinct rules evaluated in the real runs. **Strategy variants tried so far: 2,553 as of 2026-10-08** (793 including P1, plus these 1,760). The line at the top of this file is updated. All `FALSIFIED` or `NOT_ENOUGH_DATA`.
+
+## Pre-registration: three more forward looks, F5 to F7, and a power table (fixed 2026-10-08 03:00 UTC, before any of them was run on any market)
+
+The slot search found nothing new, and the strategy space already written down is close to exhausted: L3 covers 2 minute favorites up to 98c
+(`-1.71c`), S06 and S07 cover the previous result and streaks, S01 to S05 cover the other series, R10 puts stop losses outside the program.
+So the useful overnight work is making the ideas that are still alive testable on clean data, not adding rules. Three forward looks are
+added to `forward.py`. Each is a subset or a variant of L1 that was named after seeing the 69 day numbers, so none of the 69 days counts for
+them. Their window is markets that **close after 2026-10-08 02:50 UTC** (close_ts above 1791427800), the moment P1 was written.
+
+| Name | Definition | Why it is here |
+|---|---|---|
+| F5 = P1 | L1 (6 minutes left, taker at the ask, hold) with the touch price 0.90 to 0.95 only, both series | The band split in the P1 section. |
+| F6 | L1 over its full band, gold only | Gold late looked better than Bitcoin late in the slot search (+1.95c vs +0.53c in the search window, +0.97c vs +0.68c on the holdout). Named after seeing that. |
+| F7 | L1 over its full band, Bitcoin only | The other half of that split, so F6 cannot be reported without it. |
+
+- **Counterparty.** The same as L1 for all three: the buyer of the cheap side of an almost decided market. No new mechanism.
+- **Numeric prediction, stated before the run.** F5 +1.0c (below the +1.66c seen post hoc); F6 +0.8c and F7 +0.8c, that is, the series split is
+  not expected to matter, and the expectation is that the two are within one standard error of each other. If F6 beats F7 by more than
+  its standard error on 300 entries each, that is reported, but a difference between two halves chosen after seeing a difference is not
+  a finding.
+- **Sample size and kill criteria.** The common bar and nothing looser: at least 300 entries on at least 5 UTC days, mean net positive with a
+  day clustered z of at least 2.1, positive in both halves of the window by close time, positive with fees times 1.2. Fewer than 300 or
+  5 days is `NOT_ENOUGH_DATA` and the numbers are information only. Each rule is read once, at the first run in which it has both, using
+  every market since the cutoff. F6 and F7 are two tests on one population and F5 is nested inside L1's population, so the true number of
+  independent tests is smaller than three, but each is counted.
+- **Order of reading.** F5 may only be called `NOT_YET_FALSIFIED` if it also exceeds F0 (full band L1) on the same markets, as in P1. F6 and
+  F7 are judged on their own and, if both pass, the series split is not a finding.
+- **Count.** F6 and F7 are two more variants. **Strategy variants tried so far: 2,555 as of 2026-10-08** (2,553 plus F6 and F7; F5 is P1,
+  already counted).
+- **Power table (information only, decides nothing, not a hypothesis).** `python -m scalper.power` resamples the 69 days of L1 entries by day
+  (a bootstrap over days, so the clustering is kept) and reports, for a true edge equal to what was measured and for half of it, how
+  often a forward sample of N entries clears z of 2.1, so that the wait for the bar is known before it is felt. It reads no forward data.
