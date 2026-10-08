@@ -1993,3 +1993,36 @@ _dz = _EX.verdict(_rows_hi, None)[1]["diff_z"]
 assert _EX.verdict(_rows_hi, None, _dz + 0.5)[0] == "FALSIFIED" and _EX.verdict(_rows_hi, None, _dz - 0.5)[0] == "NOT_YET_FALSIFIED", "the z bar is applied as given"
 assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.25, 0.30)], 0.20) is None and _EX.find_exit(_ent, [_cd(_cl, 240, 0.15, 0.20)], 0.20) == (0.15, 240), "20c only fires on a deep collapse"
 print("exit X5-X7 tests passed")
+
+# B1 to B3 bands: band edges, the choosing half never sees the test half, a chosen band must be positive after cent rounding with enough entries, the null redraws outcomes only.
+from scalper import bands as _BN
+assert [_BN.band_of(p) for p in (0.88, 0.8999, 0.90, 0.9199, 0.92, 0.9499, 0.95, 0.97)] == [0, 0, 1, 1, 2, 2, 3, 3] and _BN.band_of(0.87) is None and _BN.band_of(0.98) is None, "bands cover 88c to 97c inclusive, nothing else"
+def _en(i, day, price, win, series="KXBTC15M"):
+    net = (1.0 if win else 0.0) - price - _BN.fee(price)
+    return {"ticker": f"B{i}", "side": "yes", "price": price, "day": day, "close_ts": 1000 + i, "gross": (1.0 if win else 0.0) - price, "net": net, "stress": (1.0 if win else 0.0) - price - _BN.fee(price, 1.2), "series": series}
+_E = []
+for i in range(400):                                    # days 1-8 are the first half, 9-16 the second
+    day = f"2026-10-{1 + i % 16:02d}"
+    _E.append(_en(i, day, 0.91, win=True))              # 90c to 92c: always wins, clearly positive
+    _E.append(_en(1000 + i, day, 0.96, win=(i % 3 != 0)))   # 95c to 97c: wins two thirds, clearly negative
+    if i < 60:
+        _E.append(_en(2000 + i, day, 0.89, win=True))       # 88c to 90c: wins but only 60 entries
+_h1, _h2 = _BN.split_days(_E)
+assert len(_h1) == 8 and len(_h2) == 8 and not (_h1 & _h2)
+assert _BN.choose(_E, _h1) == {1}, "only the clearly positive band with enough entries is chosen: the thin band is not, the losing band is not"
+_tr, _ch = _BN.walk_forward(_E)
+assert _ch == {"fold1": [1], "fold2": [1]} and all(_BN.band_of(e["price"]) == 1 for e in _tr) and len(_tr) == 400, "each fold trades its chosen band on the OTHER half"
+_flip = [dict(e, **{"gross": (-1.0 - e["price"]), "net": -1.0 - e["price"] - _BN.fee(e["price"])}) if e["day"] in _h2 else e for e in _E]
+assert _BN.choose(_flip, _h1) == _BN.choose(_E, _h1), "what happens in the other half cannot change what the choosing half picks"
+assert all(0.90 <= e["price"] <= 0.9701 for e in _BN.fixed(_E, 0.90, 0.9701)) and not any(e["price"] == 0.89 for e in _BN.fixed(_E, 0.90, 0.9701)), "B3 drops 88c to 90c"
+_v, _s = _BN.verdict(_tr, _E, [[e for e in _tr if e["day"] in _h2], [e for e in _tr if e["day"] in _h1]], None)
+assert _v == "NOT_YET_FALSIFIED" and _s["diff"] > 0, _s
+assert _BN.verdict(_tr[:100], _E, [_tr[:50], _tr[50:100]], None)[0] == "NOT_ENOUGH_DATA"
+assert _BN.verdict(_tr, _E, [[], []], 10.0)[0] == "FALSIFIED", "above the fair-market difference is required"
+_rng = _rq.Random(1)
+_w = _BN.redraw(_E, {}, _rng)
+assert [e["price"] for e in _w] == [e["price"] for e in _E] and [e["ticker"] for e in _w] == [e["ticker"] for e in _E], "the null keeps the real prices and markets and redraws only outcomes"
+assert _BN.null_p95(_E, {}, lambda w: _BN.walk_forward(w)[0], reps=20) == _BN.null_p95(_E, {}, lambda w: _BN.walk_forward(w)[0], reps=20), "seeded"
+_tbl = _BN.band_table(_E)
+assert [r["band"] for r in _tbl] == ["88c to 90c", "90c to 92c", "95c to 97c"] and abs(_tbl[1]["win"] - 1.0) < 1e-9 and _tbl[1]["margin"] > 0 > _tbl[2]["margin"], "win rate against the win rate needed"
+print("bands B1-B3 tests passed")
