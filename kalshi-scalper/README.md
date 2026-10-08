@@ -29,7 +29,7 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 792 as of 2026-10-08, all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
+Strategy variants tried so far: 793 as of 2026-10-08 (P1 in the final section is the 793rd; the line below it is the 792 before P1), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
 until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -1495,3 +1495,74 @@ the same data every earlier test used, so a pass could only ever be permission t
 - **What it does not say.** One signal definition (minute 5 against minute 1 mid), minute quotes only, taker entry and exit. A resting entry, an earlier or later signal, or trade tape flow are different hypotheses. Same 69 days as most earlier tests, so even a pass would only have been permission to test forward.
 
 Strategy variants tried so far: 14 hypotheses (the 60s scalp, H1 to H7, L1, L2, L3, L8, L9, M1), all `FALSIFIED`, plus two parameter searches, and 5 information cuts for M1 counted against the bar.
+
+## Pre-registration: L1 in the 90c to 95c band, and resting-limit entries for L1 (fixed 2026-10-08 02:50 UTC, before any code, and before any data after this time exists)
+
+Why this exists. L1 holds every position to settlement, so the entry price and the fee are the whole trade. Two ways to improve the
+entry were proposed. Both are written down now so that every market that closes after the timestamp above is untouched test data.
+
+**What was observed post hoc, and is therefore NOT evidence for either idea.** In the 3,400 L1 entries over 69 days, split by price
+after the result was known: 88c to 90c n=518 gross +0.35c net -0.36c; 90c to 92c n=877 gross +1.89c net +1.30c; 92c to 95c n=1,119
+gross +2.37c net +1.94c; 95c to 97c n=886 gross +0.44c net +0.17c. The bands were chosen by looking at those numbers. The per band
+uncertainty is 0.6c to 1.3c, so the gaps between bands are not clearly more than noise. These 69 days can never count toward the
+band variant, and no band edge was moved after seeing them.
+
+### P1: L1 restricted to the 90c to 95c band
+
+- **Rule.** Exactly L1 (about 6 minutes before close, buy the side priced at touch in the window, hold to settlement, taker fee
+  `0.07 * p * (1 - p)` per contract), but only entries whose touch price is at least 90.0c and at most 95.0c. No other change.
+- **Universe, fixed.** Every L1 signal in both series on markets that close after 2026-10-08 02:50 UTC. Selected on price, which is
+  observable before the trade, not on returns. The comparison rule, L1 over its full 88c to 97c band, is computed on the same markets.
+- **Counterparty.** Whoever sells the favourite at 90c to 95c a few minutes from close, or buys the other side, is paying for a small
+  chance of a reversal. The edge exists only if that chance is priced a little too high. Same story as L1, not a new mechanism.
+  Below 90c the tick is 1c so the price is coarse, and above 95c the possible gain is under 5c against a fee that does not shrink as fast.
+- **Numeric prediction, stated before the run.** Net about +1.0c a contract, deliberately below the +1.66c seen post hoc because a
+  band picked after looking is expected to shrink. Expected entries: about 29 a day, so 300 entries in about 10 days. If the full band
+  L1 comes in near +0.96c, then this variant is predicted to be no better than L1 by more than its noise, and the pre-registered
+  expectation is that the band split does not survive.
+- **Kill criteria, the common bar.** `FALSIFIED` unless ALL hold: n of at least 300 entries on at least 5 different days; mean net
+  positive with a day clustered z (by UTC day of close) of at least 2.1; positive in both halves split by close time at the median;
+  positive with fees times 1.2. Fewer than 300 entries is `NOT_ENOUGH_DATA`. Additionally the variant must beat L1's full band on the
+  same markets by a positive margin in the same data, otherwise the band adds nothing and is `FALSIFIED` as an improvement. Best
+  outcome is `NOT_YET_FALSIFIED`, which is permission to keep testing, never a verdict that means size up.
+- **Fair-market null.** Each entry wins with probability equal to its own touch price at its decision point, pays the ask and the fee;
+  500 repeats; the real mean is placed against that distribution and must be clearly above it.
+- **Live implication.** None. The live bot keeps its 88c to 97c band. Narrowing it live would also be a change of order flow and fill
+  rate (fewer orders, and the 88c to 90c zone is where most live misses happened), so it needs this result first and a separate "merge".
+
+### P2: resting-limit entries (maker) for L1 signals
+
+Status: **`NOT_RUNNABLE` today and not recorded as a try.** The one-minute candles cannot say whether a resting order would have been
+reached or where it would have stood in the queue. Fabricating a fill model on candles is the exact failure this directory exists to
+prevent. It becomes runnable only on order book snapshots from the recorder (every 10 s, three levels), which started saving on
+2026-10-08, and only on markets closing after the timestamp above.
+
+- **Rule once runnable.** At an L1 signal (touch price 90c to 97c), instead of crossing, rest a buy for the favourite side one tick
+  below the touch, for the rest of the 330 to 400 second window (the order is cancelled at its end), then count a fill only under the
+  strictly-through model: a later snapshot shows the opposite side's best price at or through our limit (the ask at or below our bid
+  limit), and at least one snapshot later than the one that showed it before any fill is counted (no same snapshot fills). Queue
+  position is assumed to be the back of the visible size at our price. The fee schedule for a resting fill must be read from
+  docs.kalshi.com on the day of the run and written here first; no maker fee is assumed in this note.
+- **Counterparty.** An impatient seller of the favourite who crosses the spread near the close. The danger is adverse selection:
+  the sellers who reach our bid are the ones who know the favourite just weakened, so fills concentrate on the losers. The earlier
+  crypto maker test in `shwoopnet` showed exactly this: the skipped signals averaged more than the filled ones.
+- **Numeric prediction, stated before any book data is read.** Fill rate 30% to 50%. Net per FILLED contract higher than the taker
+  entry by about the saved tick and fee (about +0.8c), but win rate of the filled set lower than the missed set. Net per SIGNAL
+  (unfilled counted as zero) at or below the taker entry. **The pre-registered expectation is `FALSIFIED`.**
+- **Kill criteria.** `FALSIFIED` unless ALL hold: at least 300 signals with a determinable outcome on at least 5 days; net per
+  signal (unfilled at zero) exceeds the taker entry on the same signals with a day clustered z of at least 2.1 on the difference;
+  positive in both halves; positive with fees times 1.2; and the outcome of the unfilled signals is reported next to the filled ones
+  in every table. A profit factor that improves while the fill rate collapses is not a result. Fewer than 300 is `NOT_ENOUGH_DATA`.
+- **Live implication.** None. The order code uses IOC at the touch by design (a resting order that is never cancelled is exposure
+  nobody is watching). A resting entry would be a new order type with a cancel path, and is out of scope until this passes.
+
+### Not pre-registered, written down only so they are not found later by looking
+
+Entry time inside the 330 to 400 second window; skipping a side or series with a wide spread or thin visible size; sizing larger
+inside a band that has passed. Each needs its own section here, with its prediction and kill criteria, before any data is read for it.
+Nothing about them has been computed.
+
+### Count
+
+P1 is one more variant against the bar: **793** as of 2026-10-08 (792 before, plus P1). P2 is not counted until it runs.
+The fourteen hypotheses before it, and the 729 rules and 42 strategies searched, remain `FALSIFIED` or `NOT_ENOUGH_DATA`.
