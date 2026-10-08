@@ -33,8 +33,8 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,570 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
-Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
+Strategy variants tried so far: **2,573 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -2025,3 +2025,21 @@ have to do. Nothing below was run.
 - **Information only, printed with the verdict, may not rescue anything.** For each band: entries, mean price, the actual win rate, the win rate needed to break even (price plus fee) and the margin between them with its standard error, net per contract unrounded
   and cent-rounded at two contracts, and net per dollar risked. This is the "how high must the win rate be" view.
 - **Count.** Three variants: **2,573 as of 2026-10-08** (2,570 plus three).
+
+**2026-10-08: B1 to B3: all three `FALSIFIED`.** One run of `python -m scalper.bands` (after its tests). Nothing changed after seeing it. 3,432 L1 entries over 69 days, baseline mean +0.92c (+0.66c at two contracts, cent rounded).
+
+| | Trades | Mean | Baseline | Difference (z) | Fair-market 95th pct of the difference | Halves | Two contracts, rounded | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| B1 walk-forward | 2,302 | +0.69c | +0.92c | -0.08c (-0.24) | +0.55c | +0.82c / +0.59c | +0.43c | `FALSIFIED` |
+| B2 88c to 95c | 2,533 | +1.17c | +0.92c | +0.29c (+1.45) | +0.43c | +1.57c / +0.77c | +0.90c | `FALSIFIED` |
+| B3 90c to 97c | 2,911 | +1.18c | +0.92c | +0.26c (+0.93) | +0.39c | +1.58c / +0.75c | +0.92c | `FALSIFIED` |
+
+- **The selection did not hold up from one half to the other, which is the main result.** Choosing on the first 34 days kept 90c to 92c and 92c to 95c; choosing on the last 35 days kept 88c to 90c, 92c to 95c and 95c to 97c. The only band chosen both ways is 92c to 95c. Bands that look
+  clearly good or bad on the full 69 days are, half by half, decided by noise except that one. The walk-forward set earned less than trading everything (-0.08c, z -0.24).
+- **The skip-a-band rules are a little better than the baseline and not distinguishably so.** B2 and B3 each add about +0.3c a contract (+0.24c to +0.26c once cent rounded) with day clustered z of +1.45 and +0.93, below the bar and below the fair-market 95th percentile (+0.39c to +0.43c): in a market with no edge,
+  dropping the cheapest or the dearest band for fee reasons alone already adds a few tenths of a cent, so a gain of that size is not evidence.
+- **Prediction against outcome.** Predicted: all three `FALSIFIED`; B1 difference between -0.3c and +0.5c; B2 and B3 each +0.1c to +0.5c and indistinguishable. All as predicted.
+- **Information only: win rate against the win rate needed (all days, post hoc).** 88c to 90c: 88.7% against 89.2% needed (margin -0.5 points, standard error 1.4). 90c to 92c: 92.5% against 91.3% (+1.2, 0.9). **92c to 95c: 95.7% against 93.9% (+1.9, 0.6), about 3 standard errors above break even.**
+  95c to 97c: 96.6% against 96.3% (+0.2, 0.6). Per dollar risked: -0.56%, +1.37%, +2.02%, +0.24%. 92c to 95c is the one band with a margin well outside its noise, and it is also the band the walk-forward kept in both folds, but it was singled out
+  by looking, one of four, so it is a candidate for a forward look and not a finding (see F9).
+- **Count.** Three variants: **2,573 as of 2026-10-08**.
