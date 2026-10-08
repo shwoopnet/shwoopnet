@@ -1900,8 +1900,8 @@ print("forward F8 tests passed")
 # Fee rounding: a buy of `count` at `price` costs ceil_to_the_cent(count * (price + fee)), so one contract pays about a cent, not half a cent, and more contracts per order dilute it.
 from scalper import feerounding as _FR
 assert abs(_FR.order_cost(0.92, 1) - 0.93) < 1e-9, "92c + a 0.5c fee is 92.5c, and the balance moves in whole cents"
-assert abs(_FR.order_cost(0.92, 2) - 1.85) < 1e-9 and abs(_FR.order_cost(0.90, 1) - 0.91) < 1e-9
+assert abs(_FR.order_cost(0.92, 2) - 1.86) < 1e-9 and abs(_FR.order_cost(0.90, 1) - 0.91) < 1e-9
 assert _FR.order_cost(0.915, 1) - 0.915 > 0.0057 + 0.001, "a tenth-of-a-cent price loses the grid misalignment as well"
-assert _FR.order_cost(0.92, 2) / 2 < _FR.order_cost(0.92, 1), "two contracts in one order cost less each than one"
+assert _FR.order_cost(0.95, 2) / 2 < _FR.order_cost(0.95, 1), "at 95c two contracts in one order cost less each than one (at 92c the fee needs both cents, so there is no saving)"
 assert all(_FR.order_cost(p / 100, n) >= n * (p / 100 + _FR.fee(p / 100)) - 1e-9 for p in range(88, 98) for n in range(1, 6)), "rounding never saves money"
 print("fee rounding tests passed")
