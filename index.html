@@ -987,8 +987,9 @@
   .kal-card-bare{ background:none; border:0; box-shadow:none; padding:0; }
   .kal-card-flush{ padding:0; }
   .kal-rail .kal-acct-head{ padding:0 0 10px 0; }
-  .kal-botctl{ padding:0 0 12px 0; margin:0 0 12px 0; border-bottom:1px solid var(--border); }
-  .kal-botctl .kal-note{ margin-top:6px; }
+  .kal-botmenu > summary.kal-pill{ cursor:pointer; user-select:none; }
+  .kal-botmenu-body{ min-width:min(320px,86vw); right:0; top:30px; }
+  .kal-botmenu-body .kal-actions{ margin:4px 0 0 0; }
   .kal-card-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 22px 12px 22px; }
   .kal-bot-body{ padding:0 22px 16px 22px; }
   .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:12.5px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
@@ -3384,7 +3385,6 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Kalshi</div>
-        <div class="trades-sub">15 minute Bitcoin and gold. Your account, the bot and the live books.</div>
       </div>
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
@@ -3392,24 +3392,23 @@
 <div class="kal-flatten">
             <div class="kal-actions"><button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all + halt</button>
               <span id="kalFlattenConfirm" hidden><span class="kal-note">Stops the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span></div>
-            <div class="kal-note" id="kalFlattenMsg">The emergency exit. The only thing in this menu that sells.</div>
+            <div class="kal-note" id="kalFlattenMsg"></div>
           </div>
-          <div class="kal-note">The rest of this menu only reads your real Kalshi account with the live key. Funds are held per shard, and an order uses only its market's shard (Bitcoin and gold were both on shard 2).</div>
-          <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
-          <div class="kal-note" id="kalDiagMsg">The diagnostics are the bot's order records (times, prices, book sizes, results). No keys or secrets.</div>
+                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
+          <div class="kal-note" id="kalDiagMsg"></div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
           <div class="kal-actions">
             <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
             <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
           </div>
-          <div class="kal-note" id="kalBookMsg">The recorder's saved order books (best three levels each side, every 10 seconds) as a compressed file you can send. Public market data only; it reads the recorder's documents and changes nothing.</div>
+          <div class="kal-note" id="kalBookMsg"></div>
           <div class="kal-note" id="kalAcctMsg"></div>
           <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
           <div class="kal-actions">
             <label class="kal-note" style="margin:0">Money added (or taken out, as a minus) <input class="kal-input" id="kalAdjAmt" type="number" step="0.01" placeholder="200" style="width:90px"></label>
             <button class="kal-btn kal-btn-ghost" id="kalAdjGo" type="button">Record it</button>
           </div>
-          <div class="kal-note" id="kalAdjMsg">A deposit or withdrawal otherwise shows up as profit or loss in the account change under Tools (the Account card shows the bot only). Recording it takes it off. Changes only this page's figure, nothing on Kalshi.</div>
+          <div class="kal-note" id="kalAdjMsg"></div>
           <div class="kal-actions">
             <button class="kal-btn" id="kalAcctStart" type="button">Start fresh from now (one time)</button>
             <span id="kalAcctStartConfirm" hidden><span class="kal-note">Everything before this moment is ignored from now on, and the balance shown becomes the starting balance. Nothing on Kalshi is changed. Go ahead?</span> <button class="kal-btn" id="kalAcctStartYes" type="button">Yes, start fresh</button> <button class="kal-btn" id="kalAcctStartNo" type="button">Cancel</button></span>
@@ -3430,25 +3429,27 @@
     <div id="kalTabBot" class="kal-bot-grid kal-console">
       <div class="kal-rail">
       <div class="kal-card" data-card="account">
-        <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div><span id="kalL1Pill" class="kal-pill">Not running</span></div>
-        <div class="kal-botctl">
-          <div id="kalL1Status" class="kal-note">Not running.</div>
-          <div id="kalL1Size" class="kal-note"></div>
-        <div class="kal-actions">
-          <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
+        <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div>
+          <details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill" class="kal-pill">Not running</summary>
+            <div class="kal-layout-body kal-botmenu-body">
+              <div id="kalL1Status" class="kal-note">Not running.</div>
+              <div class="kal-actions">
+                <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
           <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you stop it or a stop ends it, one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (one contract per $85 of balance, up to 10, raised at most one step a week; stop at 10% of the balance at the weekly review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
-          <button class="kal-btn" id="kalL1Stop" type="button" hidden>Stop session</button>
-          <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
-        </div>
-          <div class="kal-note" id="kalL1Msg"></div>
-          <span class="kal-note" id="kalBotHaltMsg"></span>
-        <details class="kal-more"><summary>Rules and limits</summary>
-          <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised at most one step a week) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (10% of the balance at the weekly review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
-        </details>
+                <button class="kal-btn" id="kalL1Stop" type="button" hidden>Stop session</button>
+                <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
+              </div>
+              <div class="kal-note" id="kalL1Msg"></div>
+              <span class="kal-note" id="kalBotHaltMsg"></span>
+              <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
+                <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised at most one step a week) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (10% of the balance at the weekly review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
+              </details>
+            </div>
+          </details>
         </div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
-        <div class="kal-perf"><div id="kalPerf"></div><div class="kal-note" id="kalPerfNote"></div></div>
+        <div class="kal-perf"><div id="kalPerf"></div></div>
       </div>
       <div class="kal-card" data-card="positions">
         <div class="kal-card-title">Open positions</div>
@@ -3458,9 +3459,6 @@
       <div class="kal-main">
       <div class="kal-card kal-card-bare" data-card="books">
         <div id="kalBooks" class="kal-books"><div class="kal-empty">Loading...</div></div>
-        <details class="kal-more"><summary>How to read the books</summary>
-          <div class="kal-note">Round trip = crossing the spread (buy the ask, sell the bid) plus fees on both legs. Fees round up to a cent per order, so the 1 lot figure is the worst case. Fee rate is an unverified estimate.</div>
-        </details>
       </div>
       <div class="kal-card kal-card-flush" data-card="performance">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Charts</div>
@@ -9973,11 +9971,11 @@
     var tile = function(k, v, cls){ return '<div class="kal-tile"><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
     var pct = function(x){ return Math.round(x * 100) + '%'; };
     var streak = st.streak.kind ? st.streak.n + ' ' + (st.streak.kind === 'win' ? (st.streak.n === 1 ? 'win' : 'wins') : (st.streak.n === 1 ? 'loss' : 'losses')) : 'none';
-    var tiles = tile('Settled trades', String(st.n)) + tile('Net', sg(st.total), st.total >= 0 ? 'kal-pos' : 'kal-neg') +
+    var main = tile('Settled trades', String(st.n)) + tile('Net', sg(st.total), st.total >= 0 ? 'kal-pos' : 'kal-neg') +
       tile('Win rate', pct(st.winRate) + ' (' + st.wins + ' / ' + st.losses + ')') +
       tile('Average win', st.avgWin === null ? 'none yet' : sg(st.avgWin), 'kal-pos') + tile('Average loss', st.avgLoss === null ? 'none yet' : sg(st.avgLoss), st.avgLoss === null ? '' : 'kal-neg') +
-      tile('Profit factor', st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2)) +
-      tile('Per trade', sg(st.expectancy), st.expectancy >= 0 ? 'kal-pos' : 'kal-neg') +
+      tile('Profit factor', st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2));
+    var more = tile('Per trade', sg(st.expectancy), st.expectancy >= 0 ? 'kal-pos' : 'kal-neg') +
       tile('Best / worst', sg(st.best) + ' / ' + sg(st.worst)) + tile('Deepest drawdown', st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none') +
       tile('Streak now', streak) + tile('Longest losing run', String(st.longestLoss));
     var table = function(title, rows){
@@ -9986,14 +9984,15 @@
         return '<div><span>' + esc(r.label) + '</span><span>' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + esc(sg(r.net)) + '</b></div>';
       }).join('') + '</div>';
     };
-    return '<div class="kal-tiles">' + tiles + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + table('By price paid', st.byBand) + '</div>';
+    return '<div class="kal-tiles">' + main + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + '</div>' +
+      '<details class="kal-more"><summary>More stats</summary><div class="kal-tiles">' + more + '</div><div class="kal-perf-tabs">' + table('By price paid', st.byBand) + '</div></details>';
   }
 
   // A tiny line over one 15 minute market: points are {t (ms), v}, drawn across the market's whole window so it fills from the left as time passes.
   // `ref` is an optional level (a strike) drawn as a dashed line and kept inside the range; `fmt` formats numbers. Pure: reads nothing from the page.
   function kalshiSparkSvg(points, opts){
     var pts = (points || []).filter(function(p){ return p && Number.isFinite(p.t) && Number.isFinite(p.v) && p.t >= opts.from - 1000 && p.t <= opts.to + 1000; });
-    if(pts.length < 2){ return '<div class="kal-empty">' + (opts.empty || 'A line appears in a minute.') + '</div>'; }
+    if(pts.length < 1){ return '<div class="kal-empty">' + (opts.empty || 'A line appears in a minute.') + '</div>'; }   // one reading is drawn as a dot and its price, so a feed that has just started is not an empty box
     var W = 360, H = 86, L = 6, R = 62, T = 8, B = 8;
     var vals = pts.map(function(p){ return p.v; });
     if(opts.ref != null){ vals.push(opts.ref); }
@@ -10020,7 +10019,7 @@
   // opened and fills from the left; Kalshi settles gold on a Pyth feed, so this can sit a dollar or so off the "to beat" line even when the market is right.
   var kalshiGold = { at: 0, busy: false, failed: false, pts: [] };
   function kalshiFetchGold(now){
-    if(kalshiGold.busy || now - kalshiGold.at < 15000){ return; }
+    if(kalshiGold.busy || now - kalshiGold.at < 10000){ return; }
     kalshiGold.busy = true;
     fetch('https://api.gold-api.com/price/XAU')
       .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
@@ -10061,15 +10060,12 @@
     if(m.series === 'KXBTC15M' && m.strike != null){
       body = kalshiSparkSvg(kalshiSpot.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
-      body += '<div class="kal-note kal-spark-note">Coinbase price against the ' + escapeHtml('$' + Number(m.strike).toLocaleString('en-US', { maximumFractionDigits: 2 })) + ' target</div>';
     } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
       body = kalshiSparkSvg(kalshiGold.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
-      body += '<div class="kal-note kal-spark-note">Gold price against the ' + escapeHtml('$' + Number(m.strike).toLocaleString('en-US', { maximumFractionDigits: 2 })) + ' target, since you opened this page</div>';
     } else {
       body = kalshiSparkSvg(kalshiMid[m.ticker], { from: o.from, to: o.to, ref: null, label: 'YES price in cents since this page was opened', empty: 'A line appears after a minute of watching.',
         fmt: function(v){ return v.toFixed(0) + 'c'; } });
-      body += '<div class="kal-note kal-spark-note">YES price since you opened this page</div>';
     }
     return '<div class="kal-spark">' + body + '</div>';
   }
@@ -10286,15 +10282,14 @@
       // only when there are any worth noting; the account total above already includes them.
       var useShard = a.balance.shards.filter(function(x){ return x.shard === 2; })[0];
       var otherSum = a.balance.shards.filter(function(x){ return x.shard !== 2; }).reduce(function(n, x){ return n + x.dollars; }, 0);
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div><div class="kal-rows">' +
-        '<div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars) : '$0.00') + '</b></div>' +
-        (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum) + '</b></div>' : '') +
-        (a.liveSwitch ? '' : '<div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div>') + '</div>' +
-        '<div class="kal-note" style="margin-top:8px">Read ' + new Date(a.at).toLocaleTimeString() + (a.liveSwitch ? ', order switch on' : '') + '</div>';
+      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' +
+        // Funds on other shards cannot be spent by the bot, so they get a line only when there is something worth noting; otherwise the total is what the bot has.
+        ((otherSum >= 0.5 || !useShard) ? '<div class="kal-rows"><div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars) : '$0.00') + '</b></div>' +
+          (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum) + '</b></div>' : '') + '</div>' : '') +
+        (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
     }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
-    if(halted){ el.innerHTML += '<div class="kal-warn kal-big">Halted from this page: no new entries</div>'; }
     // The live scan treats a halt setting that was never saved as halted, so say so instead of showing "not halted".
     if(haltUnset){ el.innerHTML += '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted. Press Halt, then Resume, once.</div>'; }
     var btn = document.getElementById('kalBotHalt');
@@ -10316,10 +10311,8 @@
       var other = tot.now !== null && Number.isFinite(tot.start) ? Math.round((tot.now - tot.start - botNet) * 100) / 100 : null;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div><span class="kal-k">Bot change since start</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div>' +
-        '<div><span class="kal-k">Starting balance</span><b>' + kalshiMoney(tot.start) + '</b></div>' +
-        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(kalDate(tot.since)) + ', the bot\'s settled trades only. ' +
-        (other === null ? '' : 'Deposits, manual trades and open orders account for the other ' + signed(other) + ' of the balance change.') + '</div></div>';
+        '<div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div>' +
+        (other === null || Math.abs(other) < 0.5 ? '' : '<div><span class="kal-k">Deposits and manual trades</span><b>' + signed(other) + '</b></div>') + '</div>';
     }
 
     renderKalshiPositions();
@@ -10349,11 +10342,9 @@
           '<span class="kal-tr-f">' + fillText + '</span><span class="kal-tr-p">' + plCell + '</span><span class="kal-tr-s">' + (bot ? 'bot' : 'manual') + '</span></div>';
       }).join('');
       var foot = [];
-      if(settled || open){ foot.push('Settled bot trades shown: <b class="' + (sum >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (sum >= 0 ? '+' : '-') + kalshiMoney(Math.abs(sum)) + '</b> over ' + settled + ' settled' + (open ? ', ' + open + ' still open' : '') + '.'); }
-      if(gfills.length > fillsShown.length){ foot.push('Showing ' + fillsShown.length + ' of ' + gfills.length + ' trades. <button type="button" class="kal-link" data-more="fills">Show more</button>'); }
+      if(gfills.length > fillsShown.length){ foot.push(fillsShown.length + ' of ' + gfills.length + ' <button type="button" class="kal-link" data-more="fills">Show more</button>'); }
       else if(gfills.length > 5){ foot.push('<button type="button" class="kal-link" data-less="fills">Show fewer</button>'); }
-      if(a.fills.hiddenBeforeBaseline){ foot.push(a.fills.hiddenBeforeBaseline + ' earlier fill' + (a.fills.hiddenBeforeBaseline === 1 ? ' is' : 's are') + ' hidden (before your starting line).'); }
-      trEl.innerHTML = (gfills.length ? rowsHtml : '<div class="kal-foot">No fills since your starting line.</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
+      trEl.innerHTML = (gfills.length ? rowsHtml : '<div class="kal-foot">No trades yet.</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
     }
 
     renderKalshiCharts();
@@ -10405,17 +10396,9 @@
     var series = kalshiPnlSeries(orders, since);
     lineEl.innerHTML = kalshiLineSvg(series, escapeHtml, kalshiMoney);
     pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
-    var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf'), noteEl = document.getElementById('kalPerfNote');
+    var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf');
     if(barsEl){ barsEl.innerHTML = kalshiBarsSvg(series, escapeHtml, kalshiMoney); }
     if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
-    if(noteEl){
-      var est = orders.filter(function(o){ return o && o.estimated === true && o.ts >= since; }).length;
-      var exact = orders.filter(function(o){ return o && o.exact === true && o.ts >= since; }).length;
-      var stillOpen = orders.filter(function(o){ return o && o.ts >= since && Number(o.fillCount) > 0 && o.settled !== true; }).length;
-      noteEl.textContent = (est ? est + ' trade' + (est === 1 ? '' : 's') + ' settled on this page from the account read (the server had not marked them). ' : '') +
-        (stillOpen ? stillOpen + ' filled trade' + (stillOpen === 1 ? ' is' : 's are') + ' still open or not yet read, and not counted. ' : '') +
-        (exact ? exact + ' use the fill and fee from your account. ' : '') + 'The rest use the order\'s worst-case price, so a win is booked slightly low and a loss slightly high.';
-    }
   }
   var kalshiChartRange = 'all';
   (function(){
@@ -10436,11 +10419,10 @@
     var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.10 * base).toFixed(2) : '$10.00';
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
     var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + ', ' + (s.ordersSent || 0) + ' orders sent, ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
-    var sizeNote = document.getElementById('kalL1Size');
     var peakAt = Number.isFinite(s && s.peakNet) ? Math.max(0, s.peakNet) : 0;
-    sizeNote.textContent = running ? (s.sizing === true ? 'Size scales with the account: up to ' + (Number.isFinite(s.sizeCap) ? s.sizeCap : 3) + ' contracts' + (s.sizeAddon > 0 ? ' (+' + s.sizeAddon + ' from reinvested profit)' : '') + (Number.isFinite(s.sizeNextReview) ? ', next review ' + kalDate(s.sizeNextReview) : '') + (s.sizeSaved > 0 ? '. Skimmed to savings: ' + kalshiMoney(s.sizeSaved) : '') + '.' : 'One contract each.') + (s.trailing === true ? ' Stops if the bot gives back ' + stopAt + ' from its best (+$' + peakAt.toFixed(2) + ').' : ' Stops if the bot is down ' + stopAt + '.') : '';
+    var sizeText = running ? (s.sizing === true ? 'Size scales with the account: up to ' + (Number.isFinite(s.sizeCap) ? s.sizeCap : 3) + ' contracts' + (s.sizeAddon > 0 ? ' (+' + s.sizeAddon + ' from reinvested profit)' : '') + (Number.isFinite(s.sizeNextReview) ? ', next review ' + kalDate(s.sizeNextReview) : '') + (s.sizeSaved > 0 ? '. Skimmed to savings: ' + kalshiMoney(s.sizeSaved) : '') + '.' : 'One contract each.') + (s.trailing === true ? ' Stops if the bot gives back ' + stopAt + ' from its best (+$' + peakAt.toFixed(2) + ').' : ' Stops if the bot is down ' + stopAt + '.') : '';
     var endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
-    document.getElementById('kalL1Status').textContent = running ? (s.lastNote || '') + (doneLine ? ' ' + doneLine : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
+    document.getElementById('kalL1Status').textContent = running ? (s.lastNote || '') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
     document.getElementById('kalL1Start').hidden = running;
     document.getElementById('kalL1Stop').hidden = !running;
     if(running){ document.getElementById('kalL1Confirm').hidden = true; }

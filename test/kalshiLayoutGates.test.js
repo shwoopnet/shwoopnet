@@ -52,7 +52,7 @@ gates.Y5 = () => {
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
   assert.deepStrictEqual(names(main), ['books', 'performance', 'trades'], 'the main column: books tiles, the charts and the trades (the bot card is gone; its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
-  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Status', 'kalL1Size']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, stop and halt are always on screen');
+  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, stop and halt are always on screen');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
   const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
@@ -243,13 +243,13 @@ gates.Y10 = () => {
   const acct = html.slice(html.indexOf("var useShard = "), html.indexOf("    el.innerHTML = h;"));
   assert.ok(/x\.shard === 2/.test(acct) && /Available to the bot/.test(acct), 'the line shown is the shard the bot can spend');
   assert.ok(/otherSum >= 0\.5 \?/.test(acct) && /not usable/.test(acct), 'other shards are one line, and only when there is real money on them');
-  assert.ok(/a\.liveSwitch \? '' : '<div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
+  assert.ok(/a\.liveSwitch \? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
   assert.ok(!/Shard ' \+/.test(acct), 'no per-shard rows');
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
   assert.ok(/var doneLine = running \? 'Next look ' \+/.test(html) && /orders sent, ' \+/.test(html) && !/kalL1Facts/.test(html), 'when it looks next, orders sent and filled against no fill are one line of the status, not a row of facts');
-  assert.ok(/id="kalL1Size"/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are one muted line');
+  assert.ok(/var sizeText = running \?/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are part of the status line inside the bot menu, not a line on the page');
 };
 
 // The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
@@ -329,7 +329,9 @@ gates.Y16 = () => {
   const spark = new Function('escapeHtml', m[1] + '; return kalshiSparkSvg;')(escapeHtml);
   const from = 1000000, to = from + 900000, fmt = (v) => '$' + Math.round(v);
   const pts = [0, 1, 2, 3].map((i) => ({ t: from + i * 60000, v: 82500 + i * 10 }));
-  assert.ok(/kal-empty/.test(spark([pts[0]], { from, to, fmt })), 'one point is not a line');
+  assert.ok(/kal-empty/.test(spark([], { from, to, fmt })), 'no point draws nothing');
+  const one = spark([pts[0]], { from, to, fmt });
+  assert.ok(/<circle/.test(one) && !/kal-empty/.test(one) && /\$82500/.test(one), 'one reading is a dot and its price, not an empty box');
   assert.ok(/kal-empty/.test(spark(pts.map((p) => ({ t: p.t + 5e6, v: p.v })), { from, to, fmt })), 'points from outside the window are not drawn');
   const svg = spark(pts, { from, to, ref: 82676, refLabel: 'to beat', fmt });
   assert.ok(/to beat/.test(svg) && /stroke-dasharray/.test(svg) && /var\(--loss\)/.test(svg), 'strike drawn, and the line is red while the price is under it');
@@ -338,7 +340,7 @@ gates.Y16 = () => {
   assert.ok(ys.length === 1 && ys[0] >= 0 && ys[0] <= 86, 'a strike far above the price stays inside the chart');
   assert.ok(/kalshiSparkFor\(m\) \+ '<\/div>'/.test(html), 'each market row carries its chart');
   assert.ok(/fetch\('https:\/\/api\.gold-api\.com\/price\/XAU'\)/.test(html) && /m\.series === 'KXGOLD15M' && m\.strike != null && !kalshiGold\.failed/.test(html), 'gold draws its price against the strike, and falls back to the YES line if the feed fails');
-  assert.ok(/now - kalshiGold\.at < 15000/.test(html), 'the gold feed is asked at most every 15 seconds');
+  assert.ok(/now - kalshiGold\.at < 10000/.test(html), 'the gold feed is asked at most every 10 seconds');
 };
 
 (async () => {
