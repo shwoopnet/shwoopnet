@@ -282,11 +282,11 @@ const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eli
 // 200 can never end a 24 hour session; it only stops a runaway loop from sending orders without end. The loss stop is the real limit.
 const L1_MAX_ORDERS = 200;
 const L1_SESSION_MS = 24 * 3600 * 1000;
-// Size scaling (off unless the owner ticks it when starting a session). Each order risks about 1.5% of the account's cash, at
+// Size scaling (off unless the owner ticks it when starting a session). Each order risks about 2% of the account's cash, at
 // least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 10% of the starting cash instead of the flat $10. Raised by the owner on
-// Oct 8, 2026 from 1% and 7% ($7): about half again as much. At a $100 account that still buys one contract; two come at about $123 of cash.
+// Oct 8, 2026 (from 1% and 7%/$7). At 2% a $106 account buys two contracts (two need about $92 to $98 of cash, three about $138 to $146).
 const L1_SIZE_MAX = 3;
-const L1_SIZE_FRACTION = 0.015;
+const L1_SIZE_FRACTION = 0.02;
 const L1_SIZED_STOP_FRACTION = 0.10;
 function l1Count(cash, costPerContract) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;

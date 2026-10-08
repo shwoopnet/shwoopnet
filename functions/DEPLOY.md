@@ -236,10 +236,10 @@ the run, the session or the watchdog ping. Cost: one small Firestore read a minu
 ## Size scaling for the L1 session (off by default, Oct 7, 2026)
 
 A box on the start confirmation ("Scale size with the account") turns it on for that session only; it starts unticked and
-cannot be changed mid-run. On: each order buys `floor(1.5% of cash / cost of one contract)` contracts, never fewer than one or
+cannot be changed mid-run. On: each order buys `floor(2% of cash / cost of one contract)` contracts, never fewer than one or
 more than three, judged on the cash left after earlier orders in the same minute, and the loss stop becomes 10% of the starting
 cash (still counting the bot's own trades only, every contract, open ones as lost). Off: exactly as before, one contract and
-a $10.00 stop. On a $100 account it still buys one contract; it first buys two at about $123 and three at about $184.
+a $10.00 stop. On a $106 account it buys two contracts; two need about $92 to $98 of cash and three about $138 to $146.
 Deploy: `firebase deploy --only functions`.
 
 ## Moving money between shards
@@ -259,6 +259,6 @@ Deploy: `firebase deploy --only functions`. Within about two minutes `kalshiBook
 
 ## Risk raised a bit (Oct 8, 2026)
 
-At the owner's request the flat stop went from $7.00 to $10.00 and, with size scaling on, the share of cash per order from 1% to 1.5%
+At the owner's request the flat stop went from $7.00 to $10.00 and, with size scaling on, the share of cash per order from 1% to 2%
 and the stop from 7% to 10% of the starting cash. The 3 contract cap is unchanged. Needs `firebase deploy --only functions`; a running session picks
 up the new flat stop at once, and size scaling only applies to a session started with the box ticked.

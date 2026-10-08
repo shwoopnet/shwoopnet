@@ -210,6 +210,140 @@ gates.N9 = async () => {
   assert.strictEqual(first.sess.startCash, 100, 'the first tick still records the starting cash');
 };
 
+// The order limit and the 24 hour limit end the session.
+gates.N10 = async () => {
+  const lim = world({ session: { ordersSent: 200 } });
+  await tick(lim);
+  assert.deepStrictEqual([lim.posts.length, lim.sess.endedBecause], [0, 'limit']);
+  const exp = world({ session: { until: NOW - 1 } });
+  await tick(exp);
+  assert.deepStrictEqual([exp.posts.length, exp.sess.endedBecause], [0, 'expired']);
+  assert.ok(live.L1_MAX_ORDERS >= 2 * 96, 'the order backstop can never end a 24 hour session early');
+  assert.strictEqual(live.L1_SESSION_MS, 24 * 3600 * 1000);
+  assert.strictEqual(live.L1_LOSS_STOP, 10);
+};
+
+// An answer that is lost or refused ends the session, is recorded, and is never retried.
+gates.N11 = async () => {
+  for (const [name, wopts, status, said] of [
+    ['lost answer', { post: { status: 503, body: 'oops' } }, 'unknown', /MAY OR MAY NOT/],
+    ['network error', { postThrows: true }, 'unknown', /MAY OR MAY NOT/],
+    ['refusal', { post: { status: 400, body: { error: 'bad' } } }, 'error', /refused/],
+    ['duplicate id', { post: { status: 409, body: { error: 'exists' } } }, 'unknown', /already exists/],
+  ]) {
+    const w = world(wopts);
+    await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', 'KXGOLD15M-26OCT071415-15')] });
+    assert.strictEqual(w.posts.length, 1, name + ': nothing is retried and the next market is not tried');
+    assert.deepStrictEqual([w.sess.active, w.sess.endedBecause], [false, 'attempted'], name);
+    assert.strictEqual(w.docs.get('L1-' + T).status, status, name + ' is recorded for the owner to look at');
+    assert.ok(said.test(w.events.map((e) => e.detail).join(' ')), name + ' tells the owner what to check');
+  }
+  const nofill = world({ post: { status: 201, body: { order_id: 'o', fill_count: '0.00', remaining_count: '0.00' } } });
+  await tick(nofill);
+  assert.strictEqual(nofill.docs.get('L1-' + T).status, 'no fill');
+  assert.strictEqual(nofill.sess.active, true, 'an IOC that did not fill is normal, the session carries on');
+};
+
+// Worst case in the cost cap: a YES limit of 97c plus its fee is far under $2, and the cap is still checked.
+gates.N12 = () => {
+  assert.ok(live.LIVE_CAP === 2);
+  const p = live.l1Pick({ yes_bid_dollars: '0.9600', yes_ask_dollars: '0.9700' });
+  assert.ok(p.worst + 0.07 * p.worst * (1 - p.worst) < live.LIVE_CAP);
+};
+
+// Wiring: the session is switched by a server callable with a server-set expiry; the scheduled arm function runs it; nothing
+// else is scheduled; it refuses to run beside a single armed test order; and the page asks twice.
+gates.N13 = () => {
+  assert.ok(/exports\.kalshiL1Session = onCall\(async \(request\) => \{\s*await assertKalshiAdmin\(request\.auth\);/.test(fnSrc), 'admin only');
+  assert.ok(/ref\.set\(\{ active: true, since: now, until: now \+ live\.L1_SESSION_MS/.test(fnSrc), 'the expiry is set by the server, not the page');
+  assert.ok(/KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiL1Session'))), 'refuses when the server switch is off');
+  assert.ok(/live\.runL1Tick\(/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed'))), 'run by the scheduled function');
+  assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
+  assert.ok(/The 24 hour L1 session is running\. Stop it before arming/.test(fnSrc), 'arming refuses while the session runs');
+  assert.ok(/A single test order is armed\. Disarm it before starting/.test(fnSrc), 'starting refuses while armed');
+  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder']);
+  assert.ok(fnSrc.indexOf('exports.kalshiL1Session') < fnSrc.indexOf('exports.kalshiBookRecorder'), 'defined before the recorder, which stays last');
+  // The page: two clicks, a server call only on the confirm click, and a visible stop.
+  assert.ok(/kalL1Start'\)[\s\S]{0,400}addEventListener\('click', function\(\)\{ msg\.textContent = ''; ask\(true\); \}\)/.test(html), 'the first click only asks');
+  const yes = html.slice(html.indexOf("yes.addEventListener('click', function(){\n      var api = window.__shwoopAPI;\n      if(!api || !api.kalshiL1Session"));
+  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked\)/.test(yes.slice(0, 700)), 'the confirm click starts it');
+  assert.ok(/id="kalL1Stop"/.test(html) && /api\.kalshiL1Session\(false\)/.test(html), 'there is a stop button');
+  assert.ok(/httpsCallable\(functions, 'kalshiL1Session'\)/.test(html));
+};
+
+// Order code still lives in exactly one module, and the session never reads a result to choose what to buy.
+gates.N14 = () => {
+  const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
+  const l1 = src.slice(src.indexOf('const L1_BAND'), src.indexOf('module.exports'));
+  assert.ok(!/Math\.random|randomUUID/.test(l1), 'order ids are never random');
+  assert.ok(!/demo\.kalshi|demo-api/.test(l1));
+  const offenders = fs.readdirSync(path.join(root, 'functions')).filter((f) => f.endsWith('.js') && /portfolio\/events\/orders/.test(fs.readFileSync(path.join(root, 'functions', f), 'utf8').replace(/\/\/[^\n]*/g, '')));
+  assert.deepStrictEqual(offenders, ['kalshiLiveLib.js']);
+};
+
+// Bitcoin and gold close together and share a shard. The balance is read once per tick, so money committed to the first
+// order must come off what the second may use: otherwise the second is sent without the funds and Kalshi's refusal ends the session.
+gates.N15 = async () => {
+  const G = 'KXGOLD15M-26OCT071415-15';
+  const w = world({ session: { startCash: 2 }, balance: { balance_breakdown: [{ balance: '2.0000', exchange_index: 2 }] }, fresh: { [G]: { exchange_index: 2 } } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  assert.strictEqual(w.posts.length, 1, 'the second market on the same shard is skipped, not sent without funds');
+  assert.ok(w.sess.endedBecause === undefined && w.sess.active === true, 'and the session keeps running');
+  const rich = world({ session: { startCash: 50 }, balance: { balance_breakdown: [{ balance: '50.0000', exchange_index: 2 }] }, fresh: { [G]: { exchange_index: 2 } } });
+  await tick(rich, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  assert.strictEqual(rich.posts.length, 2, 'with the funds, both are sent');
+};
+
+// The order limit holds inside a single tick, not only at its start.
+gates.N16 = async () => {
+  const G = 'KXGOLD15M-26OCT071415-15';
+  const w = world({ session: { ordersSent: 199 } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  assert.strictEqual(w.posts.length, 1, '199 sent plus two candidates is stopped at 200');
+  assert.strictEqual(w.sess.ordersSent, 200);
+};
+
+// A no-fill has to be explainable afterwards: the record carries the touch and size the order was decided on.
+gates.N17 = async () => {
+  const w = world({ fresh: { [T]: { yes_ask_size_fp: '3.00', yes_bid_size_fp: '12.00' } }, post: { status: 201, body: { order_id: 'o1', fill_count: '0.00', remaining_count: '0.00' } } });
+  await tick(w);
+  const rec = w.docs.get('L1-' + T);
+  assert.strictEqual(rec.status, 'no fill');
+  assert.deepStrictEqual([rec.seen.bid, rec.seen.ask, rec.seen.bidSize, rec.seen.askSize], [0.9, 0.91, 12, 3]);
+  const bare = world(); await tick(bare);
+  assert.strictEqual(bare.docs.get('L1-' + T).seen.askSize, null, 'a field Kalshi did not send is null, not a guess');
+};
+
+// Size scaling: off unless the session was started with it, never fewer than one or more than three contracts, and the
+// money it risks is counted in the loss stop.
+gates.N18 = async () => {
+  const rich = { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] };
+  const off = world({ session: { startCash: 300 }, balance: rich });
+  await tick(off);
+  assert.strictEqual(off.posts[0].count, '1', 'off by default, even on a large account');
+  const on = world({ session: { startCash: 300, sizing: true }, balance: rich });
+  await tick(on);
+  assert.strictEqual(on.posts[0].count, '3', '1% of $300 buys three contracts at about 91c');
+  assert.strictEqual(on.docs.get('L1-' + T).count, 3);
+  assert.ok(on.docs.get('L1-' + T).maxCost > 2.7 && on.docs.get('L1-' + T).maxCost < 3, 'the record carries the cost of all three');
+  const small = world({ session: { startCash: 40, sizing: true }, balance: { balance_breakdown: [{ balance: '40.0000', exchange_index: 2 }] } });
+  await tick(small);
+  assert.strictEqual(small.posts[0].count, '1', 'a $40 account is one contract');
+  const mid = world({ session: { startCash: 106, sizing: true }, balance: { balance_breakdown: [{ balance: '106.0000', exchange_index: 2 }] } });
+  await tick(mid);
+  assert.strictEqual(mid.posts[0].count, '2', 'a $106 account buys two contracts');
+  assert.ok(mid.docs.get('L1-' + T).maxCost < 2.1, 'the two contracts together stay near $2');
+  const huge = world({ session: { startCash: 5000, sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
+  await tick(huge);
+  assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
+  assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(106.5, 0.92), live.l1Count(138, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
+  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.10, 3], 'the share of cash per order, the scaled stop and the cap');
+  assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4), /refusing/);
+  assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
+  assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 1.5), /refusing/);
+  assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2).count, '1', 'one contract unless told otherwise');
+};
+
 // With scaling on, the stop is L1_SIZED_STOP_FRACTION of the starting cash and counts every contract; a partial fill counts what filled.
 gates.N19 = async () => {
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
