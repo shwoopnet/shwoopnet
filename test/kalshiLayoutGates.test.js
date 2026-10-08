@@ -148,6 +148,33 @@ gates.Y10 = () => {
   assert.ok(/id="kalL1Size"/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are one muted line');
 };
 
+// The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
+gates.Y11 = () => {
+  const m = /(function kalshiDiagnosticsCsv\(orders, limit\)\{[\s\S]*?\n  \})\n/.exec(html);
+  assert.ok(m, 'builder not found');
+  const csv = new Function(m[1] + '; return kalshiDiagnosticsCsv;')();
+  const rows = (t) => t.split('\n');
+  const head = rows(csv([]))[0].split(',');
+  assert.deepStrictEqual(head.slice(0, 3), ['time', 'ticker', 'side'], 'a header even with no orders');
+  assert.strictEqual(rows(csv([])).length, 1);
+  const out = csv([
+    { ts: 1000, ticker: 'T-A', side: 'no', price: 0.89, limit: 0.89, status: 'no fill', fillCount: '0.00', seen: { bid: 0.11, ask: 0.12, bidSize: 12, askSize: 3, at: 'x' } },
+    { ts: 2000, ticker: 'T-B', side: 'yes', price: 0.92, limit: 0.92, status: 'filled', fillCount: '1.00', error: 'HTTP 400, "bad"' },
+    null,
+  ]);
+  const r = rows(out);
+  assert.strictEqual(r.length, 3, 'one row per order, junk skipped');
+  assert.ok(r[1].startsWith('1970-01-01T00:00:02') && r[2].startsWith('1970-01-01T00:00:01'), 'newest first');
+  const col = (line, name) => line.split(',')[head.indexOf(name)];
+  assert.deepStrictEqual([col(r[2], 'seenBid'), col(r[2], 'seenAsk'), col(r[2], 'bidSize'), col(r[2], 'askSize')], ['0.11', '0.12', '12', '3'], 'what the book showed is carried through');
+  assert.strictEqual(col(r[1], 'seenAsk'), '', 'a record with no book data leaves the cells empty, not zero');
+  assert.ok(/"HTTP 400, ""bad"""/.test(r[1]), 'commas and quotes in text are escaped so a row cannot break');
+  const big = csv(Array.from({ length: 400 }, (_, i) => ({ ts: i, ticker: 'T' + i })), 150);
+  assert.strictEqual(rows(big).length, 151, 'at most 150 rows');
+  assert.ok(!/orderId|clientOrderId|key|secret/i.test(head.join(',')), 'no ids that identify the account and no keys');
+  assert.ok(/id="kalDiagCopy"/.test(html) && /navigator\.clipboard\.writeText\(csv\)/.test(html) && /id="kalDiagBox"/.test(html), 'a button, with a manual fallback box');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
