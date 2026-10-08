@@ -248,8 +248,8 @@ gates.Y10 = () => {
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
-  assert.ok(/var doneLine = running \? 'Next look ' \+/.test(html) && /orders sent, ' \+/.test(html) && !/kalL1Facts/.test(html), 'when it looks next, orders sent and filled against no fill are one line of the status, not a row of facts');
-  assert.ok(/var sizeText = running \?/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are part of the status line inside the bot menu, not a line on the page');
+  assert.ok(/var doneLine = running \? 'Next look ' \+/.test(html) && /' orders: ' \+/.test(html) && !/kalL1Facts/.test(html), 'when it looks next, orders sent and filled against no fill are one line of the status, not a row of facts');
+  assert.ok(/var sizeText = running \?/.test(html) && /Stops if down/.test(html), 'size and stop are part of the status line inside the bot menu, not a line on the page');
 };
 
 // The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
