@@ -29,7 +29,9 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 14 hypotheses (the 60s scalp, H1 to H7, L1, L2, L3, L8, L9, M1), all FALSIFIED, plus two parameter searches (437 rules, then 311 saved rules) that count as that many more tries. Cuts examined by the decision rule: 18, plus 3 entry times for H1, plus 5 information cuts for M1. (This line was stale at 2 until M1; the ledger below and the Verdicts carry the history.)
+Strategy variants tried so far: 14 hypotheses with a verdict (the 60s scalp, H1 to H7, L1 to L3, L8, L9, M1) plus 729 rules from the two parameter searches
+(437 in the first, 292 new in the overnight Stage B; Stage A re-scored 179 rules already counted), so 743 tries in all as of 2026-10-08. The forward check
+of 5 of them adds none, and M1's 5 information cuts count against its bar. This line was stale at 2 and is corrected here. Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -933,6 +935,98 @@ W2 2,525, W3 (Oct 5 to 7) 402.
   1.1% a trade): worth running forward at small size, which the 24 hour session is doing. The 2 minute rules are the most interesting and the
   least trustworthy. Nothing here is a reason to size up. The overall power is low: with about 500 entries per window, an edge under about 5c is
   hard to see, which is why every candidate here shows up as "survives" at z of 2.5 to 3.5 and not 6.
+
+## Pre-registration: the forward check of L1 and the four overnight survivors (fixed 2026-10-08, before any rule was run on the new data)
+
+The overnight run left L1 (a fixed rule that was never selected) and four rules that were selected on returns in older windows. A rule
+chosen on returns can only be believed on days it did not choose from, so this is the first test on days that none of them has seen.
+Nothing is retuned: the definitions are the ones in the code and in `search2/stageA.json` and `search2/stageB.json`.
+
+**What I had seen when this was written (disclosed).** I downloaded the new markets and checked the schema, the count and the share
+with a result. I also counted how many entries each rule makes per day on the OLD data (counts only, no outcomes) to size the test.
+I had not run any rule on a market that closed after the old data ended.
+
+**The forward window.** Markets that closed after `2026-10-07 18:30:00 UTC` (close_ts above 1791397800), the last close in the database
+before the 2026-10-08 download. Both series. W3 (closes after 2026-10-05 15:00 UTC up to 2026-10-07 18:30 UTC) ends where this
+window starts, so the two share no market; the run prints the overlap count (it must be 0) and W3 is NOT pooled into any forward
+verdict, so nothing is counted twice. The 24 hour live L1 session trades the same markets; its fills are one more observation of L1
+and are not part of this table either.
+
+**The five rules, definitions exactly as coded** (cost: entry at the ask of the side bought, snapped to 4 places; taker fee 7% x p x
+(1-p); held to settlement; one observation per market):
+
+| Name | Definition | Code |
+|---|---|---|
+| F0 = L1 | 6 minutes left, favorite whose ask is 0.88 to 0.97, both series | `lstrats.hold_rule(L1)` |
+| F1 | 2 minutes left, either side priced 0.03 to 0.20, Bitcoin only, spread 1c or less | `search.observe`, stageA #1 |
+| F2 | 2 minutes left, NO side priced 0.03 to 0.97, YES price rose 2c or more over the last 5 minutes (the market moved away from NO), Bitcoin only, spread 4c or less | `search.observe`, stageA #2 |
+| F3 | 8 minutes left, YES side priced 0.80 to 0.97, both series | `search.observe`, stageB #1 |
+| F4 | F3 with spread 2c or less | `search.observe`, stageB #2 |
+
+F3 and F4 are nested (F4 takes 2,146 of F3's 2,223 older entries), so together they are ONE effective test, not two. F0 and F3 overlap
+in favorites priced 88c to 97c as well.
+
+**Counterparty, prediction and universe for each** (prediction recorded before the run; "universe" is cost or fixed, never returns):
+
+- **F0.** Loser: the retail buyer of the 3c to 12c side, who overpays for a small chance. Prediction: +1.0c a contract (it made +0.98c over
+  68 days). Universe: fixed (both series). Prior: moderate; it is the only one of the five that was not picked from a search.
+- **F1.** Loser: whoever sells the cheap side two minutes out, quoting the last-minute tail too close to zero. Prediction: +1.5c, below
+  its +2.1c to +5.3c out-of-sample reads, because the best of a family shrinks. Universe: fixed (Bitcoin only), but the rule was picked on
+  returns. Prior: low to moderate. The README already warns that it is positive only at exactly 2 minutes (1 minute -0.85c, 3 minutes
+  -0.15c, gold -0.81c), which is the shape of a quote-refresh artifact.
+- **F2.** Loser: the seller of NO after the YES price jumps, who treats a 2c YES rise as information and sells the other side too cheap.
+  Prediction: +2.0c. Universe: fixed, picked on returns. Prior: low to moderate.
+- **F3.** Loser: the same retail longshot buyer as F0, eight minutes out. Prediction: +1.5c. Universe: fixed, picked on returns. Prior:
+  low. It buys YES favorites only; the matching NO favorites do not pass in the same search, which is an asymmetry with no stated reason.
+- **F4.** As F3. Prediction: +1.5c. Same prior.
+
+**Sample size each needs before a verdict is allowed.** At least **300 entries** of that rule inside the forward window AND entries on at
+least **5 separate UTC days** (the project bar). Entries per day on the old data (counts only): F0 49.7, F3 32.7, F4 31.6, F1 26.8,
+F2 20.6. At those rates 300 entries take about **6 days (F0), 9.2 (F3), 9.5 (F4), 11.2 (F1) and 14.6 (F2)** of continuous markets, so
+all five can be read by about **2026-10-23**. Until then the verdict word for a rule is `NOT_ENOUGH_DATA` and its numbers are printed as
+information only, which cannot be used to stop early on a good-looking number or to give up on a bad one. A rule is read once, at the
+first run in which it has both 300 entries and 5 days, using every forward market up to that run. Later runs may be printed but cannot
+change that verdict.
+
+**Kill criteria (the common bar, same for all five).** `FALSIFIED` unless ALL hold: n at least 300 entries on at least 5 days; mean net
+after fees positive with a day clustered z of at least 2.1; positive in BOTH halves of the forward window (split by close time at the
+median entry); positive with fees 20% higher. All hold: `NOT_YET_FALSIFIED`, permission to keep testing forward and nothing more.
+
+**Multiplicity, stated now.** Five rules at one-sided z of 2.1 (p about 0.018 each) give about a 9% chance that at least one passes on
+luck alone if they were independent; they are not (F3 inside F4, F0 overlapping F3), so the true figure is lower but not 1.8%. One
+pass out of five is weak evidence, and only a pass of the same rule on a second, later block would count for more. The four survivors
+were also picked from 311 rules after 437 earlier ones, which is why they are tested here and not trusted.
+
+**Information only, decides nothing:** gross cents, win rate against mean price paid, Bitcoin and gold split for F0 and F3/F4, and for
+F1 the neighbouring minutes (1 and 3 minutes left) so an artifact at exactly 2 minutes shows up.
+
+**Cost of this idea so far.** No new rule is created, so the count of variants tried does not rise; these are five forward looks at
+rules already counted. Nothing may be changed after the first reading of a rule: a changed rule is a new variant and is counted.
+
+**2026-10-08: first reading of the forward check (`python -m scalper.forward`): all five `NOT_ENOUGH_DATA`.** The database was extended with
+`python -m scalper.backfill 1`: 43 new settled markets (24 Bitcoin, 19 gold; gold trades fewer hours) closing from 2026-10-07 18:45 to
+2026-10-08 00:30 UTC, about a quarter of one day, same schema as before, none without a result. Overlap with W3 (402 markets): 0, by
+construction and checked in the run. Entries so far: F0 18, F1 8, F2 2, F3 13, F4 13, on 1 or 2 days, against 300 entries and 5 days
+needed. Their means (F0 -2.74c, F1 -11.95c, F2 -1.32c, F3 and F4 -4.44c) are printed by the program as information only and are noise
+at these sizes (a single Bitcoin or gold longshot is -10c to -90c); they are neither a kill nor a confirmation and are not to be
+read as either. More days needed: about 6 for F0 up to 15 for F2 at the old entry rates, so the rules can be read from about 2026-10-23.
+Code `src/scalper/forward.py`, tests in `tests/test_scalper.py`.
+
+**2026-10-08: the OPEN and NOT_RUNNABLE ledger rows reviewed against the data we hold. None can be run today, so none was run and the count
+of tries is unchanged by this review.** Held: candles for 11,135 markets, Coinbase minute closes, the H3 `fills` flags, the H5 `mm`
+tables and `ob.sqlite` (471 snapshots of 8 markets over 42 minutes on 2026-10-07).
+
+| Row | Can it run today | What it needs |
+|---|---|---|
+| L4 maker entry when distance says cheap | No | Order books for days, not 42 minutes (the Firestore recorder snapshots, not in this container) |
+| L5 quote staleness | No | Book snapshots under 10 seconds apart, for days |
+| L6 Bitcoin and gold on the same window | No | Simultaneous books of both series, for days |
+| L12 depth imbalance | No | Book depth for days; 471 snapshots cannot show a move within a minute with any power |
+| L14 locked or crossed books | No | Simultaneous books under 10 seconds apart. Candle closes of the two sides are not simultaneous and a consistent book has ask plus other-side ask at or above 1 by construction. The goal is "one occurrence a day", which 42 minutes cannot answer |
+| L10 release windows | No | A dated release calendar (CPI, jobs, FOMC) with timestamps. I did not write one from memory, since a wrong date would void the test |
+| L11 taker flow | No | The trade tape. `tape.py` kept only fill flags for H3's orders, not the trades (about 28 million rows), so the imbalance cannot be rebuilt from the database. It is fetchable from the public API (a window per market, about 76 windows a minute) and is the one row worth building next; it has to be pre-registered with its decile cut and horizon before the fetch |
+| L13 volatility surprise | Not run | It is H7 (`FALSIFIED`) cut by volatility, which the ledger itself calls a likely duplicate. Registering it as new would reword a falsified idea |
+| L7 volatility regime gate | Not run | "The best variant" does not exist (every hypothesis is `FALSIFIED`; L1 is a different thing, one fixed rule). Regimes by spread and liquidity are already filters in the 729-rule search grammar (spread 1c, 2c, 4c), and F3 versus F4 already shows the spread cut changes nothing. Running regimes across variants would be a new parameter search, which needs the fair-market null and adds its rules to the count |
 
 ## The order-book recorder (`recorder.py`, read only)
 
