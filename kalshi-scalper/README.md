@@ -33,8 +33,8 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,563 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
-Q1 thresholds five; F8 one; N1 and N2 two), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
+Strategy variants tried so far: **2,574 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -1901,3 +1901,154 @@ is one mechanism tried at two times, not a new mechanism.
   estimation half's rates did not hold in the test half: the market's price at 1 to 2 minutes left already reflects spot better than a bucket table built on the
   first half of the days.
 - **Count.** Two variants: **2,563 as of 2026-10-08**. The top line of this file is updated.
+
+## Pre-registration: exits for L1, X1 to X4 (fixed 2026-10-08 13:55 UTC, before any code and before any exit was priced on any entry)
+
+The owner asked for an exit strategy backtest, in the light of L1's payoff: about 93c risked to make 7c, so one loss costs about 13 wins. **R10 (stop losses) was a
+standing exclusion in the idea ledger, because a stop on a fair market has no edge before costs; it is lifted for this one family at the owner's request**, and it is tested
+here as exactly that question: does selling a collapsing favourite early beat holding it to the close, after paying for the exit?
+
+- **Entries (fixed).** Every L1 entry exactly as `lstrats.hold_rule(L1)`: the candle ending 6 minutes before the close, favourite whose ask is 0.88 to 0.97, taker at the
+  ask, both series, all 69 days (3,400 entries). The baseline, HOLD, is the same entries held to settlement.
+- **The exit rule.** After entry the position is watched at each later candle close: those ending 5, 4, 3, 2 and 1 minutes before the close (strictly later than the entry
+  candle). At the first of them where the BID of the side held (YES: the YES bid close; NO: 1 minus the YES ask close) is at or below the threshold `X`, and that bid is a real
+  bid (at least 0.1c), the position is sold at that bid. No spread filter: a sale takes whatever the bid is. A taker fee `0.07 * p * (1 - p)` is paid on the exit leg as
+  well as the entry leg. If no candle triggers, the position is held to settlement as HOLD. A position is checked at candle closes only (a minute poll), never at an intrabar low.
+- **Variants, fixed now, four tries.** `X` = 50c (X1), 60c (X2), 70c (X3), 80c (X4). No other threshold, minute or rule is tried.
+- **Counterparty.** The seller who dumps a favourite near the end, or the buyer who takes the other side of a collapse: a favourite whose price has fallen from about 93c to under 70c
+  is, on average, already priced as the loser it is about to become, so selling it does not beat holding it before costs. Whoever is buying our early exit is paying its fair price.
+- **Numeric prediction, stated before the run.** The exit rule changes the VARIANCE a lot and the MEAN a little, and the mean change is negative: costs of the exit leg (a wide
+  bid-side spread on a collapsing book plus a fee) and the winners cut short that would have recovered. Predicted mean difference (exit minus hold, per entry) between -0.2c and
+  -1.0c for all four, and the worst single loss per contract falling from about -0.97 to about -0.50 or better at X3 and X4. **The pre-registered expectation is that all four
+  are `FALSIFIED` as an improvement in the mean**, with a real reduction in the size of the worst loss as the one thing they buy.
+- **Kill criteria.** Four tries, so the bar is stricter: a variant is `NOT_YET_FALSIFIED` only if ALL hold: at least 300 entries on at least 5 days; the mean net per
+  entry of the exit rule exceeds HOLD's on the same entries, with a day clustered z of the per day difference of at least **2.5**; the exit rule's own mean is positive; positive in
+  BOTH halves of the entries (by close time); positive with fees times 1.2 on both legs; and the difference is above the 95th percentile of the fair-market null (same entries and
+  prices, outcomes drawn from the price at 1 minute left, the same exit rule applied, 500 repeats), because the rule would cost roughly that much even in a market with no edge.
+  Anything else is `FALSIFIED`. A pass is permission to test forward on days not yet seen, and never a reason to change the live bot.
+- **Reported beside the verdict, information only, may not rescue anything.** For HOLD and each variant: mean, standard deviation, worst single loss per contract, worst day, deepest
+  drawdown of the running total, share of entries stopped, and of those stopped how many would have won if held (the winners the rule cuts). The cent-rounded cost for two
+  contracts (each leg rounds up to a cent, so an exit costs about a cent more than the model).
+- **Count.** Four variants: **2,567 as of 2026-10-08** (2,563 plus four).
+
+**2026-10-08: X1 to X4: all four `FALSIFIED` as an improvement in the mean.** One run of `python -m scalper.exits` (after its tests). Nothing changed after seeing it. 3,422 L1 entries (the database gained 22 markets since the 3,400 quoted elsewhere), 69 days. HOLD: mean +0.94c, standard deviation 23.5c, worst loss -97.2c, worst day -311c, deepest drawdown 699c, +0.68c a contract with the cent rounding at two contracts.
+
+| Sell when the side's bid is at or below | Entries stopped (of those, would have won if held) | Mean | Difference vs HOLD (z) | Fair-market 95th pct of the difference | Std dev | Worst loss | Worst day | Drawdown | Two contracts, rounded | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| X1 50c | 6.2% (32%) | +0.83c | -0.11c (-0.65) | +0.16c | 21.1c | -97.2c | -224c | 544c | +0.55c | `FALSIFIED` |
+| X2 60c | 7.6% (41%) | +0.78c | -0.16c (-0.75) | +0.13c | 20.1c | -96.6c | -254c | 606c | +0.49c | `FALSIFIED` |
+| X3 70c | 10.3% (53%) | +0.83c | -0.11c (-0.44) | +0.15c | 18.2c | -96.6c | -280c | 530c | +0.53c | `FALSIFIED` |
+| X4 80c | 15.6% (66%) | +0.77c | -0.17c (-0.57) | +0.09c | 15.7c | -95.2c | -312c | 441c | +0.46c | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: every variant `FALSIFIED` as an improvement, mean difference between -0.2c and -1.0c, and the worst loss falling to about -50c at X3 and X4. The verdicts were right. The
+  mean cost was smaller than predicted (-0.11c to -0.17c, none distinguishable from zero) and **the worst loss prediction was wrong: the worst single loss barely moves (-97c to -95c)**. The reason is in the data, not
+  a bug: the biggest losses are markets where the side's bid falls from the 90s to near zero between two minute checks (a move inside a minute), so the rule sells at an already collapsed bid. A stop cannot cap a loss that gaps.
+- **What the stop does buy.** It narrows the spread of results: the standard deviation falls from 23.5c to 15.7c (X4) and the deepest drawdown from 699c to 441c, at the cost of about 0.17c a contract of mean (more once cent
+  rounding of the exit leg is counted: +0.46c against +0.68c at two contracts). Earlier stops (X1) shorten the worst day (-311c to -224c) with less loss of mean. This is information only: the pre-set verdict is on the mean
+  and the stop does not improve it.
+- **It cuts winners.** At X4, 66% of the entries the rule sold would have won if held, and at X3 53%; those are the recoveries it gives up, which is the same trade-off as the failed-breakout exit found earlier.
+- **What this does not say.** One rule shape (a bid threshold checked once a minute). A resting stop order at the broker would react inside the minute, but Kalshi has no stop order type for these markets, so a faster check
+  would need the recorder's 10 second books (this day's snapshots could be used to ask how much a 10 second check would catch; that would be a new, pre-registered test). Nothing here changes the live bot.
+- **Count.** Four variants: **2,567 as of 2026-10-08**.
+
+## Book study 2: the Firestore recorder's first 12 hours (2026-10-08, information only)
+
+The owner downloaded the page's "book snapshots" file: **6,813 snapshots, 82 markets, 01:47 to 13:50 UTC on 2026-10-08, median gap 10.0 s (90th percentile 20 s)**. This is the unattended
+recorder working, with the six snapshots a minute fix from `claude/logic-check` not yet deployed when it was taken (so a hole in each minute remained). `python -m scalper.bookfile` parses it (as data only) and runs the
+same P2 and ask-drift code as for the container recorder. 80 of the 82 markets are settled in the database. P2 is applied to markets closing after 03:00 UTC (the amendment's rule); it stays `NOT_ENOUGH_DATA`
+(30 signals on 1 day against 300 on 5), so everything below is information only and decides nothing.
+
+- **P2 on 30 signals.** A resting buy one tick below the touch was strictly traded through on 53% of them (57% counting a touch). The signals that filled lost **-5.77c** a contract; the same signals taken lost
+  -6.02c. The signals that did not fill, taken, earned **+6.08c**. Per signal with unfilled counted as zero: **resting -3.08c against taking -0.38c.** (Lower maker fees move the resting figure only to -2.83c and -2.89c.) By ask
+  band: 90c to 92c, 9 signals, 5 filled; 92c to 95c, 11 signals, 6 filled; 95c to 97c, 10 signals, 5 filled. Thirty signals is far too few to read a band, but the **shape is the one P2 predicted**: the resting
+  order is filled disproportionately by the markets that then fall (someone selling to you is selling because it is falling), and misses the ones that rise. That is adverse selection, not a saving.
+- **Ask drift in the L1 window (108 consecutive pairs about 10 s apart).** The favourite's ask at the next snapshot: up 60.2%, the same 7.4%, down 32.4%; median spread 0.1c; median size at the touch about 1,141
+  contracts. The ask tends to creep up as the close approaches, so a touch read a second or more before the order can be left behind by a tick, which fits the live no-fill pattern. The size at the touch is large, so
+  thin books are not the reason.
+- **What this does and does not say.** One day, 30 signals. It does not test the maker idea; it shows that on this day the resting orders would have been filled mostly on the losers. The
+  full test is the 300 signals on 5 days P2 asks for, from this same recorder.
+
+## Pre-registration: lower exit thresholds, X5 to X7 (fixed 2026-10-08 14:10 UTC, before any of them was priced)
+
+The first exit family (X1 to X4) started at 50c, and the owner asked, rightly, what happens lower: a stop that only fires on a near total collapse costs less and cuts fewer winners, so
+the answer is not obvious from 50c to 80c alone. It should have been in the first registration; it is registered now, on the same rule and the same entries, before any result exists for it.
+
+- **Variants, fixed now, three more tries.** Sell when the held side's bid is at or below **40c (X5), 30c (X6), 20c (X7)**. Everything else is exactly as registered for X1 to X4: the same 3,422 L1 entries,
+  checks at the candle closes 5, 4, 3, 2 and 1 minutes before the close, a real bid of at least 0.1c, taker fee on both legs, no spread filter, HOLD as the baseline. The code is unchanged except for the
+  threshold table.
+- **Counterparty and numeric prediction, stated before the run.** Same counterparty story as X1 to X4 (the buyer on the other side of a collapse is paying a fair price). Predicted: the share of entries
+  stopped falls to about 5% (40c), 3% (30c) and 2% (20c); the mean difference against HOLD moves toward zero as the threshold falls, between -0.10c and +0.05c; the standard deviation falls only a little (to about
+  22c at 40c and about 23c at 20c) and the worst loss stays near -95c, because the large losses gap straight through these levels inside a minute. **The pre-registered expectation is that all three are
+  `FALSIFIED` as an improvement in the mean**, and that no threshold below 50c gives a worse deal than X1 or a better one.
+- **Kill criteria.** The same as X1 to X4 with the bar made stricter for seven tries in total: n at least 300 on at least 5 days; the exit rule's mean above HOLD's with a day clustered z of the per day
+  difference of at least **2.7** (X1 to X4 keep the 2.5 they were registered with); its own mean positive, positive in both halves, positive with fees times 1.2, and the difference above the 95th percentile of the
+  fair-market null. Anything else is `FALSIFIED`.
+- **Count.** Three variants: **2,570 as of 2026-10-08** (2,567 plus three).
+
+**2026-10-08: X5 to X7: all three `FALSIFIED`; the whole exit family is now X1 to X7.** One run of `python -m scalper.exits` (after the tests for the lower thresholds), same rule and entries. The database had grown by 10 markets since the X1 to X4 run, so the table below is the one run of all seven together on 3,432 L1 entries (HOLD +0.92c, standard deviation 23.5c, worst loss -97.2c, worst day -311c, drawdown 699c; X1 to X4 moved by at most 0.02c from the numbers above and none changed verdict).
+
+| Sell when the bid is at or below | Stopped (of those, would have won if held) | Mean | Difference vs HOLD (z) | Fair-market 95th pct | Std dev | Worst day | Drawdown | Two contracts, rounded | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| X7 20c | 3.4% (9%) | +0.92c | -0.00c (-0.02) | +0.06c | 22.9c | -295c | 706c | +0.65c | `FALSIFIED` |
+| X6 30c | 4.5% (16%) | +0.87c | -0.05c (-0.36) | +0.07c | 22.4c | -273c | 669c | +0.60c | `FALSIFIED` |
+| X5 40c | 5.2% (25%) | +0.76c | -0.16c (-0.97) | +0.10c | 22.0c | -287c | 647c | +0.49c | `FALSIFIED` |
+| X1 50c | 6.2% (32%) | +0.83c | -0.10c (-0.59) | +0.14c | 21.1c | -224c | 544c | +0.55c | `FALSIFIED` |
+| X2 60c | 7.6% (41%) | +0.77c | -0.15c (-0.71) | +0.17c | 20.1c | -254c | 606c | +0.49c | `FALSIFIED` |
+| X3 70c | 10.3% (52%) | +0.83c | -0.09c (-0.36) | +0.17c | 18.2c | -280c | 530c | +0.54c | `FALSIFIED` |
+| X4 80c | 15.6% (66%) | +0.77c | -0.15c (-0.50) | +0.05c | 15.7c | -312c | 441c | +0.47c | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: the share stopped falls to about 5%, 3% and 2%, the mean difference moves toward zero, the standard deviation falls little and the worst loss stays near -95c.
+  Measured: 5.2%, 4.5% and 3.4% stopped (a little more than predicted), the mean difference falls to -0.16c, -0.05c and -0.00c, the standard deviation 22.0c to 22.9c, the worst loss exactly -97.2c. All as predicted except the share stopped.
+- **What it says.** The difference from HOLD is never distinguishable from zero at any of the seven thresholds (z between -0.02 and -0.97), the worst single loss never drops below about -95c, and the risk reduction is
+  real only for the higher thresholds (X4 cuts the standard deviation by a third and the drawdown by 37%) at the cost of selling mostly winners (66%). Below 50c the rule almost never fires and almost changes nothing. 20c
+  is the only threshold that does not lose to holding, and it does so by being HOLD.
+- **Count.** Three more variants: **2,570 as of 2026-10-08**.
+
+## Pre-registration: the entry side, price bands for L1, B1 to B3 (fixed 2026-10-08 14:18 UTC, before any code and before any band selection was run)
+
+The exit family (X1 to X7) found that a stop cannot fix L1's payoff. The other lever is which entries to take. The post hoc band table in this file (88c to 90c negative after costs, 90c to 95c best, 95c to 97c about zero) was read off all 69 days after
+the fact, so it cannot be used as evidence. What can be tested honestly on these days is whether **choosing bands from half the days and applying the choice to the other half** generalizes, which is what a live rule would
+have to do. Nothing below was run.
+
+- **Bands, fixed.** By the price paid: 88c to 90c, 90c to 92c, 92c to 95c, 95c to 97c (the last includes 97c). Entries are every L1 entry (`lstrats.hold_rule(L1)`), both series, taker at the ask, held to settlement.
+- **B1, the walk-forward rule (the one real test).** Split the days in half by count (first half of the days, second half). Fold 1: choose bands on the first half, trade the chosen bands on the second half. Fold 2: choose on the second half, trade on the first.
+  A band is chosen if, in the choosing half, its net per contract is above zero AFTER the cent rounding at two contracts (`feerounding`) and it has at least 100 entries there. The trades are the union of the two folds' test entries. No band edge,
+  threshold or count is tuned. The baseline is every entry over the same days (each in its own test half).
+- **B2 and B3, fixed rules (information about the post hoc bands, counted as tries).** B2: trade only 88c to 95c (skip 95c to 97c). B3: trade only 90c to 97c (skip 88c to 90c). Evaluated on all 69 days and on each half, against the baseline. (P1, 90c to 95c, is
+  already registered and is being measured forward, so it is not repeated here.)
+- **Counterparty.** The same longshot buyer as L1; the claim is only that the edge is not uniform across the price range, because the fee is largest in the middle of it and the possible gain smallest at the top.
+- **Numeric prediction, stated before the run.** B1: the chosen set earns less than the post hoc bands suggest and not clearly more than the baseline: difference per trade between -0.3c and +0.5c, day clustered z below 2.4.
+  B2 and B3: each a little better than the baseline on all 69 days (+0.1c to +0.5c) and neither distinguishable from it. **The pre-registered expectation is that all three are `FALSIFIED`.**
+- **Kill criteria.** Three tries, so the bar is z of **2.4**. A rule is `NOT_YET_FALSIFIED` only if ALL hold: its trade set has at least 300 entries on at least 5 days; its mean net per trade is above the baseline's with a day clustered z of the per day difference of at least 2.4;
+  its own mean is positive; positive in BOTH halves (for B1, in both folds' test halves); positive with fees times 1.2; and the difference is above the 95th percentile of the fair-market null (outcomes redrawn from each market's late price, the same selection rule applied to
+  the redrawn outcomes, 500 repeats). Anything else is `FALSIFIED`. A pass is permission to test forward only; the forward look F5 (90c to 95c) is already running.
+- **Information only, printed with the verdict, may not rescue anything.** For each band: entries, mean price, the actual win rate, the win rate needed to break even (price plus fee) and the margin between them with its standard error, net per contract unrounded
+  and cent-rounded at two contracts, and net per dollar risked. This is the "how high must the win rate be" view.
+- **Count.** Three variants: **2,573 as of 2026-10-08** (2,570 plus three).
+
+**2026-10-08: B1 to B3: all three `FALSIFIED`.** One run of `python -m scalper.bands` (after its tests). Nothing changed after seeing it. 3,432 L1 entries over 69 days, baseline mean +0.92c (+0.66c at two contracts, cent rounded).
+
+| | Trades | Mean | Baseline | Difference (z) | Fair-market 95th pct of the difference | Halves | Two contracts, rounded | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| B1 walk-forward | 2,302 | +0.69c | +0.92c | -0.08c (-0.24) | +0.55c | +0.82c / +0.59c | +0.43c | `FALSIFIED` |
+| B2 88c to 95c | 2,533 | +1.17c | +0.92c | +0.29c (+1.45) | +0.43c | +1.57c / +0.77c | +0.90c | `FALSIFIED` |
+| B3 90c to 97c | 2,911 | +1.18c | +0.92c | +0.26c (+0.93) | +0.39c | +1.58c / +0.75c | +0.92c | `FALSIFIED` |
+
+- **The selection did not hold up from one half to the other, which is the main result.** Choosing on the first 34 days kept 90c to 92c and 92c to 95c; choosing on the last 35 days kept 88c to 90c, 92c to 95c and 95c to 97c. The only band chosen both ways is 92c to 95c. Bands that look
+  clearly good or bad on the full 69 days are, half by half, decided by noise except that one. The walk-forward set earned less than trading everything (-0.08c, z -0.24).
+- **The skip-a-band rules are a little better than the baseline and not distinguishably so.** B2 and B3 each add about +0.3c a contract (+0.24c to +0.26c once cent rounded) with day clustered z of +1.45 and +0.93, below the bar and below the fair-market 95th percentile (+0.39c to +0.43c): in a market with no edge,
+  dropping the cheapest or the dearest band for fee reasons alone already adds a few tenths of a cent, so a gain of that size is not evidence.
+- **Prediction against outcome.** Predicted: all three `FALSIFIED`; B1 difference between -0.3c and +0.5c; B2 and B3 each +0.1c to +0.5c and indistinguishable. All as predicted.
+- **Information only: win rate against the win rate needed (all days, post hoc).** 88c to 90c: 88.7% against 89.2% needed (margin -0.5 points, standard error 1.4). 90c to 92c: 92.5% against 91.3% (+1.2, 0.9). **92c to 95c: 95.7% against 93.9% (+1.9, 0.6), about 3 standard errors above break even.**
+  95c to 97c: 96.6% against 96.3% (+0.2, 0.6). Per dollar risked: -0.56%, +1.37%, +2.02%, +0.24%. 92c to 95c is the one band with a margin well outside its noise, and it is also the band the walk-forward kept in both folds, but it was singled out
+  by looking, one of four, so it is a candidate for a forward look and not a finding (see F9).
+- **Count.** Three variants: **2,573 as of 2026-10-08**.
+
+## Pre-registration: a forward look at 92c to 95c, F9 (fixed 2026-10-08 14:21 UTC, before it was run on any market after 14:30)
+
+B1 to B3 left one band standing out on all 69 days (92c to 95c: win rate 95.7% against 93.9% needed, about 3 standard errors) and kept by the walk-forward in both folds. It was singled out after looking, so the 69 days cannot count for it.
+
+- **F9.** L1 (6 minutes left, taker at the ask, hold) restricted to entries priced 0.92 to 0.95, both series, on markets that close after **2026-10-08 14:30:00 UTC** (close_ts above 1791469800). It is nested inside F5 (90c to 95c) and F0, so it is not an independent test of them.
+- **Prediction, stated before the run.** Net about +1.0c a contract (below the +1.88c seen on 69 days, which was selected by looking). **The expectation is that it does not pass.**
+- **Bar.** The common one: at least 300 entries on 5 days, z at least 2.1, both halves positive, fees times 1.2 positive, and above F0 on the same markets. About 16 entries a day, so 300 take about 19 days.
+- **Count.** One more variant: **2,574 as of 2026-10-08**.

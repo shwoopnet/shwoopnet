@@ -19,6 +19,7 @@ from .scalps import MIN_N, STRESS, Z_BAR, judge, load as load_markets
 OLD_END = 1791397800        # 2026-10-07 18:30:00 UTC, the last close in the database before the forward window
 W3_START = 1791212400       # the first close after the first search's data (2026-10-05 15:00 UTC); W3 is (W3_START, OLD_END]
 MIN_DAYS = 5
+F9_START = 1791469800       # 2026-10-08 14:30:00 UTC; F9 (L1 priced 0.92 to 0.95) uses only markets that close after it
 F8_START = 1791429900       # 2026-10-08 03:25:00 UTC; F8 uses only markets that close after it
 NEW_START = 1791427800      # 2026-10-08 02:50:00 UTC, when P1 and F5 to F7 were written; F5 to F7 use only markets that close after it
 
@@ -37,6 +38,12 @@ def new_rules(markets: list[tuple]) -> dict[str, list[dict]]:
             "F5 L1 priced 0.90-0.95": L.hold_rule(ms, L.L1["left_s"], (0.90, 0.95)),
             "F6 L1 gold only": [e for e in full if e["series"] == "KXGOLD15M"],
             "F7 L1 Bitcoin only": [e for e in full if e["series"] == "KXBTC15M"]}
+
+
+def f9_rule(markets: list[tuple]) -> tuple[list[dict], list[dict]]:
+    """F9: L1 priced 0.92 to 0.95 on markets closing after F9_START. Returns (F9 entries, F0 entries on the same markets)."""
+    ms = [m for m in markets if m[3] > F9_START]
+    return L.hold_rule(ms, L.L1["left_s"], (0.92, 0.95)), L.hold_rule(ms, **L.L1)
 
 
 def f8_rule(markets: list[tuple]) -> tuple[list[dict], list[dict]]:
@@ -146,6 +153,11 @@ def main() -> None:
     print(line("F8", f8))
     if f8 and f8_base:
         print(f"\n  F8 against F0 on the same markets: F8 {sum(e['net'] for e in f8) / len(f8) * 100:+.2f}c (n={len(f8)}), F0 {sum(e['net'] for e in f8_base) / len(f8_base) * 100:+.2f}c (n={len(f8_base)}); F8 may not pass unless it exceeds F0")
+    f9, f9_base = f9_rule(markets)
+    print(f"\nF9: L1 priced 0.92 to 0.95; markets closing after {F9_START} (2026-10-08 14:30 UTC)\n")
+    print(line("F9", f9))
+    if f9 and f9_base:
+        print(f"\n  F9 against F0 on the same markets: F9 {sum(e['net'] for e in f9) / len(f9) * 100:+.2f}c (n={len(f9)}), F0 {sum(e['net'] for e in f9_base) / len(f9_base) * 100:+.2f}c (n={len(f9_base)}); F9 may not pass unless it exceeds F0")
     print("\nNo verdict here means trade. NOT_YET_FALSIFIED is permission to keep testing forward and nothing more.")
 
 

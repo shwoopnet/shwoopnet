@@ -1919,3 +1919,119 @@ assert _BD.decide(_ents[:50])[0] == "NOT_ENOUGH_DATA"
 _weak = [dict(e, net=0.001 + (0.2 if i % 3 == 0 else -0.1)) for i, e in enumerate(_ents)]
 assert _BD.decide(_weak)[0] == "FALSIFIED", "a noisy small mean does not pass"
 print("boundary N1-N2 tests passed")
+
+# X1 to X4 exits: the first later check at or below the threshold sells at that bid (both legs pay a fee), a crash that recovers is a loss for the rule and a crash
+# that does not is a saving, nothing is sold on the entry candle or at a bid under 0.1c, NO is priced as one minus the YES ask, and the verdict needs the stricter z.
+from scalper import exits as _EX
+def _cd(close, left, bid, ask):
+    return (close - left, bid, ask, bid, ask)
+_cl = 10000
+_ent = {"ticker": "T", "side": "yes", "price": 0.93, "close_ts": _cl, "day": "2026-10-01", "gross": 0.07}          # a win if held
+assert _EX.find_exit(_ent, [_cd(_cl, 360, 0.40, 0.42)], 0.70) is None, "the entry candle itself is never an exit check"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.60, 0.62)], 0.70) == (0.60, 240), "sold at the bid of the first check at or below the threshold"
+assert _EX.find_exit(_ent, [_cd(_cl, 300, 0.85, 0.86), _cd(_cl, 240, 0.55, 0.57), _cd(_cl, 180, 0.30, 0.32)], 0.70) == (0.55, 240), "the first one, not the lowest"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.0005, 0.9)], 0.70) is None, "a bid under 0.1c is not a bid to sell into"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.71, 0.72)], 0.70) is None and _EX.find_exit(_ent, [_cd(_cl, 240, 0.70, 0.72)], 0.70) == (0.70, 240), "at the threshold counts, above it does not"
+_no = dict(_ent, side="no", price=0.93)
+assert _EX.find_exit(_no, [_cd(_cl, 240, 0.40, 0.45)], 0.70) == (0.55, 240), "a NO side bid is one minus the YES ask"
+_hold_win = _EX.outcome(_ent, None)
+_sold = _EX.outcome(_ent, (0.60, 240))
+assert abs(_hold_win - (1 - 0.93 - _EX.fee(0.93))) < 1e-12 and abs(_sold - (0.60 - 0.93 - _EX.fee(0.93) - _EX.fee(0.60))) < 1e-12, "the exit pays a fee on both legs"
+_lost = dict(_ent, gross=-0.93)
+_rows_rec = _EX.build([_ent], {"T": [_cd(_cl, 240, 0.60, 0.62)]}, 0.70)
+assert _rows_rec[0]["net"] < _rows_rec[0]["hold"], "a crash that recovered (it would have won) makes the stop a loss"
+_rows_crash = _EX.build([_lost], {"T": [_cd(_cl, 240, 0.60, 0.62)]}, 0.70)
+assert _rows_crash[0]["net"] > _rows_crash[0]["hold"], "a crash that did not recover is a saving"
+_rows_flat = _EX.build([_ent], {"T": [_cd(_cl, 240, 0.90, 0.92)]}, 0.70)
+assert _rows_flat[0]["net"] == _rows_flat[0]["hold"] and _rows_flat[0]["exit"] is None, "no trigger, same as holding"
+assert _EX.build([_ent, _lost], {"T": [_cd(_cl, 240, 0.60, 0.62)]}, -1.0)[0]["exit"] is None, "an unreachable threshold is HOLD"
+# the exit decision never reads the result: win and loss versions are sold at the same bid and the same price
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.60, 0.62)], 0.70) == _EX.find_exit(_lost, [_cd(_cl, 240, 0.60, 0.62)], 0.70)
+# verdict: a rule that saves money on every loser and never cuts a winner passes; one that cuts winners fails; too few entries is NOT_ENOUGH_DATA
+def _mk(i, win, stop_at=None):
+    e = {"ticker": f"T{i}", "side": "yes", "price": 0.93, "close_ts": 1000 + i, "day": f"2026-10-{1 + i % 12:02d}", "gross": 0.07 if win else -0.93}
+    return e, ({"T%d" % i: [_cd(1000 + i, 240, 0.50, 0.52)]} if stop_at else {})
+_good, _cand = [], {}
+for i in range(400):
+    e, c = _mk(i, win=(i % 10 != 0), stop_at=(i % 10 == 0))
+    _good.append(e); _cand.update(c)
+_vr, _sr = _EX.verdict(_EX.build(_good, _cand, 0.70), None)
+assert _vr == "NOT_YET_FALSIFIED" and _sr["diff"] > 0, _sr
+_bad, _cand2 = [], {}
+for i in range(400):
+    e, c = _mk(i, win=True, stop_at=(i % 10 == 0))                 # every stopped entry would have won
+    _bad.append(e); _cand2.update(c)
+assert _EX.verdict(_EX.build(_bad, _cand2, 0.70), None)[0] == "FALSIFIED", "cutting winners is not an improvement"
+assert _EX.verdict(_EX.build(_good[:50], _cand, 0.70), None)[0] == "NOT_ENOUGH_DATA"
+assert _EX.verdict(_EX.build(_good, _cand, 0.70), 10.0)[0] == "FALSIFIED", "the difference must beat the fair-market difference"
+print("exit X1-X4 tests passed")
+
+# bookfile: parses the page's CSV as data only (junk rows skipped, numbers through float), builds P2 signals and the L1 window rows from it.
+import gzip as _gz, os as _os, tempfile as _tf
+from scalper import bookfile as _BF
+_hdr = "t,series,ticker,listBid,listAsk,yesBid,yesAsk,noBid,noAsk,yesDepth3,noDepth3,y1p,y1q,y2p,y2q,y3p,y3q,n1p,n1q,n2p,n2q,n3p,n3q\n"
+_ln = lambda t, tk, yb, ya, nb, na: f"{int(t * 1000)},KXBTC15M,{tk},,,{yb},{ya},{nb},{na},,,,10,,,,,,20,,,,\n"
+_tk, _close = "KXBTC15M-TEST", 1791430000
+_body = _hdr + _ln(_close - 390, _tk, 0.92, 0.93, 0.07, 0.08) + _ln(_close - 380, _tk, 0.921, 0.9285, 0.07, 0.08) + "garbage,row\n" + ",,,\n" + _ln(_close - 60, _tk, 0.5, 0.51, 0.49, 0.5)
+_d = _tf.mkdtemp(); _p = _os.path.join(_d, "b.csv.gz")
+with _gz.open(_p, "wt") as _fh:
+    _fh.write(_body)
+_rows = _BF.read(_p)
+assert len(_rows) == 3 and _rows[0]["yes_ask"] == 0.93 and _rows[0]["no_top_q"] == 20 and _rows[0]["yes_top_q"] == 10, "junk rows are skipped, the three book rows are read"
+_res = {_tk: (_close, "yes")}
+_sg = _BF.p2_signals(_rows, _res, start=0)
+assert len(_sg) == 1 and _sg[0]["filled"] and _sg[0]["side"] == "yes", "the later snapshot strictly below the limit fills the resting order"
+assert _BF.p2_signals(_rows, _res, start=_close) == [], "a market closing at or before the start is not used"
+_w = _BF.window_rows(_rows, _res)
+assert [round(x[3], 4) for x in _w] == [0.93, 0.9285] and _w[0][5] == 20, "window rows carry the ask and the size resting at the touch (the NO bid for a YES buy)"
+print("bookfile tests passed")
+
+# X5 to X7 (lower thresholds, registered later): seven tries in all, so the bar is 2.7 for them and stays 2.5 for X1 to X4.
+assert [_EX.THRESHOLDS[k] for k in ("X5", "X6", "X7")] == [0.40, 0.30, 0.20] and _EX.pass_z("X4") == 2.5 and _EX.pass_z("X5") == 2.7 and _EX.pass_z("X7") == 2.7
+_rows_hi = _EX.build(_good, _cand, 0.70)
+_dz = _EX.verdict(_rows_hi, None)[1]["diff_z"]
+assert _EX.verdict(_rows_hi, None, _dz + 0.5)[0] == "FALSIFIED" and _EX.verdict(_rows_hi, None, _dz - 0.5)[0] == "NOT_YET_FALSIFIED", "the z bar is applied as given"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.25, 0.30)], 0.20) is None and _EX.find_exit(_ent, [_cd(_cl, 240, 0.15, 0.20)], 0.20) == (0.15, 240), "20c only fires on a deep collapse"
+print("exit X5-X7 tests passed")
+
+# B1 to B3 bands: band edges, the choosing half never sees the test half, a chosen band must be positive after cent rounding with enough entries, the null redraws outcomes only.
+from scalper import bands as _BN
+assert [_BN.band_of(p) for p in (0.88, 0.8999, 0.90, 0.9199, 0.92, 0.9499, 0.95, 0.97)] == [0, 0, 1, 1, 2, 2, 3, 3] and _BN.band_of(0.87) is None and _BN.band_of(0.98) is None, "bands cover 88c to 97c inclusive, nothing else"
+def _en(i, day, price, win, series="KXBTC15M"):
+    net = (1.0 if win else 0.0) - price - _BN.fee(price)
+    return {"ticker": f"B{i}", "side": "yes", "price": price, "day": day, "close_ts": 1000 + i, "gross": (1.0 if win else 0.0) - price, "net": net, "stress": (1.0 if win else 0.0) - price - _BN.fee(price, 1.2), "series": series}
+_E = []
+for i in range(400):                                    # days 1-8 are the first half, 9-16 the second
+    day = f"2026-10-{1 + i % 16:02d}"
+    _E.append(_en(i, day, 0.91, win=True))              # 90c to 92c: always wins, clearly positive
+    _E.append(_en(1000 + i, day, 0.96, win=(i % 3 != 0)))   # 95c to 97c: wins two thirds, clearly negative
+    if i < 60:
+        _E.append(_en(2000 + i, day, 0.89, win=True))       # 88c to 90c: wins but only 60 entries
+_h1, _h2 = _BN.split_days(_E)
+assert len(_h1) == 8 and len(_h2) == 8 and not (_h1 & _h2)
+assert _BN.choose(_E, _h1) == {1}, "only the clearly positive band with enough entries is chosen: the thin band is not, the losing band is not"
+_tr, _ch = _BN.walk_forward(_E)
+assert _ch == {"fold1": [1], "fold2": [1]} and all(_BN.band_of(e["price"]) == 1 for e in _tr) and len(_tr) == 400, "each fold trades its chosen band on the OTHER half"
+_flip = [dict(e, **{"gross": (-1.0 - e["price"]), "net": -1.0 - e["price"] - _BN.fee(e["price"])}) if e["day"] in _h2 else e for e in _E]
+assert _BN.choose(_flip, _h1) == _BN.choose(_E, _h1), "what happens in the other half cannot change what the choosing half picks"
+assert all(0.90 <= e["price"] <= 0.9701 for e in _BN.fixed(_E, 0.90, 0.9701)) and not any(e["price"] == 0.89 for e in _BN.fixed(_E, 0.90, 0.9701)), "B3 drops 88c to 90c"
+_v, _s = _BN.verdict(_tr, _E, [[e for e in _tr if e["day"] in _h2], [e for e in _tr if e["day"] in _h1]], None)
+assert _v == "NOT_YET_FALSIFIED" and _s["diff"] > 0, _s
+assert _BN.verdict(_tr[:100], _E, [_tr[:50], _tr[50:100]], None)[0] == "NOT_ENOUGH_DATA"
+assert _BN.verdict(_tr, _E, [[], []], 10.0)[0] == "FALSIFIED", "above the fair-market difference is required"
+_rng = _rq.Random(1)
+_w = _BN.redraw(_E, {}, _rng)
+assert [e["price"] for e in _w] == [e["price"] for e in _E] and [e["ticker"] for e in _w] == [e["ticker"] for e in _E], "the null keeps the real prices and markets and redraws only outcomes"
+assert _BN.null_p95(_E, {}, lambda w: _BN.walk_forward(w)[0], reps=20) == _BN.null_p95(_E, {}, lambda w: _BN.walk_forward(w)[0], reps=20), "seeded"
+_tbl = _BN.band_table(_E)
+assert [r["band"] for r in _tbl] == ["88c to 90c", "90c to 92c", "95c to 97c"] and abs(_tbl[1]["win"] - 1.0) < 1e-9 and _tbl[1]["margin"] > 0 > _tbl[2]["margin"], "win rate against the win rate needed"
+print("bands B1-B3 tests passed")
+
+# F9: only markets after the cutoff, only entries priced 0.92 to 0.95, F0 on the same markets alongside.
+_T9 = _fw.F9_START
+def _mk9(tk, series, close, ask, res):
+    return (tk, series, [(close - 360, round(ask - 0.01, 4), ask, 0, 0)], close, res)
+_f9m = [_mk9("N9a", "KXBTC15M", _T9 + 900, 0.93, "yes"), _mk9("N9b", "KXBTC15M", _T9 + 1800, 0.96, "yes"), _mk9("N9c", "KXBTC15M", _T9 + 2700, 0.91, "no"), _mk9("N9d", "KXBTC15M", _T9, 0.93, "yes")]
+_f9, _f9b = _fw.f9_rule(_f9m)
+assert [e["ticker"] for e in _f9] == ["N9a"] and {e["ticker"] for e in _f9b} == {"N9a", "N9b", "N9c"}, "a price band, markets after the cutoff only (one closing exactly at it is not after it)"
+print("forward F9 tests passed")
