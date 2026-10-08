@@ -2176,3 +2176,18 @@ Counts: **22 NEW, 26 OVERLAP, 2 NOT_RUNNABLE.** The binding constraint found so 
 | O49 | book shape | A large resting order appearing and disappearing (spoof-like) as a signal | Slow reactors | books | NEW |
 | O50 | book shape | Time since the last book change as a staleness gauge | Slow quoters | books | OVERLAP L5 |
 
+
+## Pre-registration: favorite scalps and the dip buy, F1 to F3 (ledger rows O22, O23 and O26; fixed 2026-10-08 17:23 UTC, before any code and before any of these was priced)
+
+First three rows of the opening window ledger to run, because they need only the minute candles we hold. Named `OP1` to `OP3` in code to keep them apart from the forward looks F0 to F9.
+
+- **Counterparty.** Whoever sells a trending favorite too cheaply in the first minutes (a quoter whose price lags the move), or sells into a 3c dip in a market that is about to hold.
+- **Why the prior is negative, stated.** A fair price earns zero before costs. At 70c to 90c the fee is 1.1c to 1.9c a leg, so a scalp pays about 2.5c to 3.5c in fees and spread to earn a 3c or 5c target. All three are expected to lose, as C1 to C3 and M1 did.
+- **Rules, fixed.** Prices are the closing quotes of minute candles; the quote must pass `valid_quote`; YES is bought at its ask, NO at one minus the YES bid (4 places); taker fee both legs; one entry per market; exits are strictly later candles; a bid under 0.1c counts as 0.
+  - **OP1:** entry at the first candle close in the first 3 to 5 minutes (ending 720, 660 or 600 seconds before the close) where a side's ask is 0.70 to 0.90. Exit at the first later close with that side's bid at or above the entry ask plus **3c**, else sold at the bid 6 minutes before the close (a missing 6 minute candle holds to settlement, and is counted).
+  - **OP2:** as OP1 with a **5c** target.
+  - **OP3 (the dip):** entry at the first candle close in the first 3 to 6 minutes (ending 720, 660, 600 or 540 seconds before the close) where a side's ask is 0.70 to 0.90 AND at least 3c below that side's ask one minute earlier (the earlier candle must also be a real quote). Exit at the first later close with that side's bid at or above the earlier (pre-dip) ask minus 1c, else sold at the 6 minute bid as in OP1.
+- **Numeric prediction, before the run.** OP1 mean between -3.0c and -0.5c a contract; OP2 between -2.5c and -0.3c; OP3 between -3.0c and -0.5c. All three `FALSIFIED`. OP3 may have too few entries; fewer than 300 reports `NOT_ENOUGH_DATA`.
+- **Bar.** The common one for three tries: at least 300 entries on at least 5 days, day clustered z at least 2.5, both halves positive, positive with fees x1.2. Verdict words only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`.
+- **Information only, unable to rescue a failure:** target hit rate, gross with the fee set to zero, by series, and a measurement (no verdict, not a variant): the median spread of the first five minutes by UTC hour and weekday against weekend, which is what ledger rows O36 and O38 asked for first.
+- **Count.** Three variants: **2,580 as of this entry** (2,577 plus three).
