@@ -159,7 +159,7 @@ gates.Y11 = () => {
   assert.strictEqual(rows(csv([])).length, 1);
   const out = csv([
     { ts: 1000, ticker: 'T-A', side: 'no', price: 0.89, limit: 0.89, status: 'no fill', fillCount: '0.00', seen: { bid: 0.11, ask: 0.12, bidSize: 12, askSize: 3, at: 'x' } },
-    { ts: 2000, ticker: 'T-B', side: 'yes', price: 0.92, limit: 0.92, status: 'filled', fillCount: '1.00', error: 'HTTP 400, "bad"' },
+    { ts: 2000, ticker: 'T-B', side: 'yes', price: 0.92, limit: 0.92, status: 'filled', fillCount: '1.00', averageFeePaid: '0.0100', error: 'HTTP 400, "bad"' },
     null,
   ]);
   const r = rows(out);
@@ -168,6 +168,7 @@ gates.Y11 = () => {
   const col = (line, name) => line.split(',')[head.indexOf(name)];
   assert.deepStrictEqual([col(r[2], 'seenBid'), col(r[2], 'seenAsk'), col(r[2], 'bidSize'), col(r[2], 'askSize')], ['0.11', '0.12', '12', '3'], 'what the book showed is carried through');
   assert.strictEqual(col(r[1], 'seenAsk'), '', 'a record with no book data leaves the cells empty, not zero');
+  assert.strictEqual(col(r[1], 'avgFee'), '0.0100', 'the fee Kalshi charged is carried through, so the rounding of fees to the cent can be checked against real orders');
   assert.ok(/"HTTP 400, ""bad"""/.test(r[1]), 'commas and quotes in text are escaped so a row cannot break');
   const big = csv(Array.from({ length: 400 }, (_, i) => ({ ts: i, ticker: 'T' + i })), 150);
   assert.strictEqual(rows(big).length, 151, 'at most 150 rows');

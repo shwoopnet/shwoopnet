@@ -9755,7 +9755,7 @@
   // The bot's order records as CSV, for working out why orders did not fill. Prices, sizes and ids only (no keys or secrets); newest first, at
   // most `limit` rows. A field a record does not have is left empty, never filled in. Commas and quotes in a text field are escaped.
   function kalshiDiagnosticsCsv(orders, limit){
-    var cols = ['time', 'ticker', 'side', 'band', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error'];
+    var cols = ['time', 'ticker', 'side', 'band', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'avgFee', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error'];
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -9764,7 +9764,7 @@
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return b.ts - a.ts; }).slice(0, limit || 150).map(function(o){
       var seen = o.seen || {};
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.side, o.band, o.price, o.limit, o.sentSide, o.sentPrice, o.status, o.fillCount, o.remainingCount,
-        o.averageFillPrice, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error].map(cell).join(',');
+        o.averageFillPrice, o.averageFeePaid, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }
