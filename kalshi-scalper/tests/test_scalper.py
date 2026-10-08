@@ -1965,3 +1965,23 @@ assert _EX.verdict(_EX.build(_bad, _cand2, 0.70), None)[0] == "FALSIFIED", "cutt
 assert _EX.verdict(_EX.build(_good[:50], _cand, 0.70), None)[0] == "NOT_ENOUGH_DATA"
 assert _EX.verdict(_EX.build(_good, _cand, 0.70), 10.0)[0] == "FALSIFIED", "the difference must beat the fair-market difference"
 print("exit X1-X4 tests passed")
+
+# bookfile: parses the page's CSV as data only (junk rows skipped, numbers through float), builds P2 signals and the L1 window rows from it.
+import gzip as _gz, os as _os, tempfile as _tf
+from scalper import bookfile as _BF
+_hdr = "t,series,ticker,listBid,listAsk,yesBid,yesAsk,noBid,noAsk,yesDepth3,noDepth3,y1p,y1q,y2p,y2q,y3p,y3q,n1p,n1q,n2p,n2q,n3p,n3q\n"
+_ln = lambda t, tk, yb, ya, nb, na: f"{int(t * 1000)},KXBTC15M,{tk},,,{yb},{ya},{nb},{na},,,,10,,,,,,20,,,,\n"
+_tk, _close = "KXBTC15M-TEST", 1791430000
+_body = _hdr + _ln(_close - 390, _tk, 0.92, 0.93, 0.07, 0.08) + _ln(_close - 380, _tk, 0.921, 0.9285, 0.07, 0.08) + "garbage,row\n" + ",,,\n" + _ln(_close - 60, _tk, 0.5, 0.51, 0.49, 0.5)
+_d = _tf.mkdtemp(); _p = _os.path.join(_d, "b.csv.gz")
+with _gz.open(_p, "wt") as _fh:
+    _fh.write(_body)
+_rows = _BF.read(_p)
+assert len(_rows) == 3 and _rows[0]["yes_ask"] == 0.93 and _rows[0]["no_top_q"] == 20 and _rows[0]["yes_top_q"] == 10, "junk rows are skipped, the three book rows are read"
+_res = {_tk: (_close, "yes")}
+_sg = _BF.p2_signals(_rows, _res, start=0)
+assert len(_sg) == 1 and _sg[0]["filled"] and _sg[0]["side"] == "yes", "the later snapshot strictly below the limit fills the resting order"
+assert _BF.p2_signals(_rows, _res, start=_close) == [], "a market closing at or before the start is not used"
+_w = _BF.window_rows(_rows, _res)
+assert [round(x[3], 4) for x in _w] == [0.93, 0.9285] and _w[0][5] == 20, "window rows carry the ask and the size resting at the touch (the NO bid for a YES buy)"
+print("bookfile tests passed")

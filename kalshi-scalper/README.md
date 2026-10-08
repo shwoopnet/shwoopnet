@@ -1950,3 +1950,20 @@ here as exactly that question: does selling a collapsing favourite early beat ho
 - **What this does not say.** One rule shape (a bid threshold checked once a minute). A resting stop order at the broker would react inside the minute, but Kalshi has no stop order type for these markets, so a faster check
   would need the recorder's 10 second books (this day's snapshots could be used to ask how much a 10 second check would catch; that would be a new, pre-registered test). Nothing here changes the live bot.
 - **Count.** Four variants: **2,567 as of 2026-10-08**.
+
+## Book study 2: the Firestore recorder's first 12 hours (2026-10-08, information only)
+
+The owner downloaded the page's "book snapshots" file: **6,813 snapshots, 82 markets, 01:47 to 13:50 UTC on 2026-10-08, median gap 10.0 s (90th percentile 20 s)**. This is the unattended
+recorder working, with the six snapshots a minute fix from `claude/logic-check` not yet deployed when it was taken (so a hole in each minute remained). `python -m scalper.bookfile` parses it (as data only) and runs the
+same P2 and ask-drift code as for the container recorder. 80 of the 82 markets are settled in the database. P2 is applied to markets closing after 03:00 UTC (the amendment's rule); it stays `NOT_ENOUGH_DATA`
+(30 signals on 1 day against 300 on 5), so everything below is information only and decides nothing.
+
+- **P2 on 30 signals.** A resting buy one tick below the touch was strictly traded through on 53% of them (57% counting a touch). The signals that filled lost **-5.77c** a contract; the same signals taken lost
+  -6.02c. The signals that did not fill, taken, earned **+6.08c**. Per signal with unfilled counted as zero: **resting -3.08c against taking -0.38c.** (Lower maker fees move the resting figure only to -2.83c and -2.89c.) By ask
+  band: 90c to 92c, 9 signals, 5 filled; 92c to 95c, 11 signals, 6 filled; 95c to 97c, 10 signals, 5 filled. Thirty signals is far too few to read a band, but the **shape is the one P2 predicted**: the resting
+  order is filled disproportionately by the markets that then fall (someone selling to you is selling because it is falling), and misses the ones that rise. That is adverse selection, not a saving.
+- **Ask drift in the L1 window (108 consecutive pairs about 10 s apart).** The favourite's ask at the next snapshot: up 60.2%, the same 7.4%, down 32.4%; median spread 0.1c; median size at the touch about 1,141
+  contracts. The ask tends to creep up as the close approaches, so a touch read a second or more before the order can be left behind by a tick, which fits the live no-fill pattern. The size at the touch is large, so
+  thin books are not the reason.
+- **What this does and does not say.** One day, 30 signals. It does not test the maker idea; it shows that on this day the resting orders would have been filled mostly on the losers. The
+  full test is the 300 signals on 5 days P2 asks for, from this same recorder.
