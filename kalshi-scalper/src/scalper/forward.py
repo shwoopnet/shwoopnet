@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from . import feerounding as FR
 from . import lstrats as L
 from . import search as S
 from .scalps import MIN_N, STRESS, Z_BAR, judge, load as load_markets
@@ -109,7 +110,7 @@ def line(name: str, entries: list[dict]) -> str:
     z = f"{s['z']:+.2f}" if s["days"] >= 2 else "n/a (one day)"       # one cluster has no spread to measure; the raw ratio is rounding noise
     return (f"{name}: n={s['n']} on {s['days']} day(s)  gross {s['gross']*100:+.2f}c  net {s['mean']*100:+.2f}c  z {z}  "
             f"1st half {s['h1']*100:+.2f}c  2nd half {s['h2']*100:+.2f}c  fees x{STRESS} {s['stress']*100:+.2f}c  "
-            f"win {s['win']*100:.1f}% at mean price {s['price']*100:.1f}c\n   VERDICT (n>={MIN_N}, days>={MIN_DAYS}, z>={Z_BAR}, both halves, fees x{STRESS}): {v}"
+            f"win {s['win']*100:.1f}% at mean price {s['price']*100:.1f}c  [information: cent-rounded fee, 2 contracts a order {FR.net_per_contract(entries, 2, True)*100:+.2f}c]\n   VERDICT (n>={MIN_N}, days>={MIN_DAYS}, z>={Z_BAR}, both halves, fees x{STRESS}): {v}"
             + ("" if v != "NOT_ENOUGH_DATA" else "   (numbers above are information only)"))
 
 
