@@ -263,7 +263,7 @@ gates.N12 = () => {
   assert.ok(p.worst + 0.07 * p.worst * (1 - p.worst) < live.LIVE_CAP);
 };
 
-// The weekly review: the cap follows the balance down at once, up by one step at most once a week, and never within a week of a loss stop.
+// The review (every 3 days): the cap follows the balance down at once, up by one step at most per review, and never within a week of a loss stop.
 gates.N24 = async () => {
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
   const DAY = 86400000, W = live.SCALE_REVIEW_MS;
@@ -271,13 +271,15 @@ gates.N24 = async () => {
   assert.deepStrictEqual([first.state.cap, first.state.base], [3, 341], 'the first review starts at the 3 the owner was running');
   assert.strictEqual(live.reviewSizing(null, 150, NOW).state.cap, 1, 'a small account starts lower');
   const st = { cap: 3, base: 341, reviewedAt: NOW, lastStopAt: null };
-  const early = live.reviewSizing(st, 900, NOW + 6 * DAY);
-  assert.deepStrictEqual([early.state.cap, early.changed], [3, false], 'the balance more than doubled but six days is not a week');
+  const early = live.reviewSizing(st, 900, NOW + 2 * DAY);
+  assert.deepStrictEqual([early.state.cap, early.changed], [3, false], 'the balance more than doubled but two days is not a review');
   const later = live.reviewSizing(st, 900, NOW + W);
-  assert.deepStrictEqual([later.state.cap, later.state.base, later.state.reviewedAt], [4, 900, NOW + W], 'a week later it rises ONE step, not to the nine the balance would allow');
+  assert.deepStrictEqual([later.state.cap, later.state.base, later.state.reviewedAt], [4, 900, NOW + W], 'a review later (3 days) it rises ONE step, not to the nine the balance would allow');
   assert.strictEqual(live.reviewSizing(later.state, 900, NOW + W + DAY).state.cap, 4, 'and not again the next day');
+  assert.strictEqual(live.reviewSizing(later.state, 900, NOW + 2 * W).state.cap, 5, 'the next review, 3 days on, is the next step');
+  assert.strictEqual(W, 3 * DAY, 'reviews are 3 days apart');
   assert.strictEqual(live.reviewSizing({ ...st, cap: 5 }, 240, NOW + DAY).state.cap, 2, 'a falling balance cuts the cap at once, mid week');
-  assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + W + DAY).state.cap, 3, 'no rise within a week of a loss stop');
+  assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + 6 * DAY).state.cap, 3, 'no rise within a week of a loss stop, even though reviews come every 3 days');
   assert.strictEqual(live.reviewSizing({ cap: 10, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, 10, 'the hard ceiling holds');
   // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
   const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '900.0000', exchange_index: 2 }] } });
@@ -483,8 +485,8 @@ gates.N21 = async () => {
 // The page quotes the limits in three places (the start confirmation, the rules text, the status line). They must say what the server does.
 gates.N22 = () => {
   const frac = Math.round(live.L1_SIZE_FRACTION * 1000) / 10, stop = Math.round(live.L1_SIZED_STOP_FRACTION * 100), flat = live.L1_LOSS_STOP;
-  assert.ok(new RegExp('one contract per \\$' + live.SCALE_DOLLARS_PER_CONTRACT + ' of balance, up to ' + live.L1_SIZE_CEILING + ', raised at most one step a week; stop at ' + stop + '% of the balance at the weekly review').test(html), 'the start confirmation');
-  assert.ok(new RegExp('are down \\$' + flat.toFixed(2).replace('.', '\\.') + ' \\(' + stop + '% of the balance at the weekly review with scaling').test(html), 'the rules text');
+  assert.ok(new RegExp('one contract per \\$' + live.SCALE_DOLLARS_PER_CONTRACT + ' of balance, up to ' + live.L1_SIZE_CEILING + ', raised one step every 3 days at most; stop at ' + stop + '% of the balance at the last review').test(html), 'the start confirmation');
+  assert.ok(new RegExp('are down \\$' + flat.toFixed(2).replace('.', '\\.') + ' \\(' + stop + '% of the balance at the last review with scaling').test(html), 'the rules text');
   assert.ok(new RegExp("\\(" + (stop / 100).toFixed(2) + " \\* base\\)\\.toFixed\\(2\\) : '\\$" + flat.toFixed(2).replace('.', '\\.') + "'").test(html), 'the status line');
   assert.ok(/live\.SCALE_DOLLARS_PER_CONTRACT/.test(fnSrc) && /live\.L1_SIZED_STOP_FRACTION \* 100/.test(fnSrc), 'the session start log is built from the constants, not typed');
 };
