@@ -1751,3 +1751,21 @@ pass could only ever be permission to test forward on days not yet seen, written
   favourite did worse than those where it did not (Q2). That is a pattern read off an information table (z -1.00); acting on it would need
   its own pre-registration and unseen data, and it is consistent with S06/S07 finding no useful persistence either way.
 - **Count.** Five variants (Q1 to Q3 and the two Q1 thresholds): **2,560 as of 2026-10-08** (2,555 plus 5). The top line of this file is updated.
+
+## Pre-registration: a forward look at the Q2 complement, F8 (fixed 2026-10-08 03:24 UTC, before it was run on any market after this time)
+
+Q2 was `FALSIFIED` as registered (the previous result AGREEING with the favourite). Its table also showed the complement, entries where the previous
+market in the same series resolved to the OTHER side, at +1.41c on 1,698 entries against +0.49c for the agreeing half. That was seen after the
+fact, so the 69 days cannot count for it. It is registered here as a forward look only, so that days after this time are clean.
+
+- **F8.** L1 (6 minutes left, 0.88 to 0.97, taker at the ask, hold) restricted to entries whose side differs from the result of the previous market in
+  the same series (it closed exactly 900 s earlier). Entries with no previous market are excluded and counted. Markets that close after
+  **2026-10-08 03:25:00 UTC** (close_ts above 1791429900) only.
+- **Counterparty.** The same longshot buyer as L1. The only new claim is a mean reverting residue after a result in the opposite direction; it is
+  adjacent to S07 (streak exhaustion, `FALSIFIED`) and is not expected to be a separate mechanism.
+- **Numeric prediction, stated before the run.** +0.9c a contract, below the +1.41c seen post hoc. **The pre-registered expectation is that it does
+  not pass**: the two halves of Q2 differ by 0.9c with a day clustered z of -1.00, so a regression to the L1 average (+0.96c) is the likeliest outcome.
+- **Kill criteria, the common bar.** At least 300 entries on at least 5 days; mean net positive with day clustered z at least 2.1; both halves
+  positive; positive with fees times 1.2; and the mean exceeds F0's mean on the same markets. Fewer than 300 is `NOT_ENOUGH_DATA`.
+  About 25 entries a day, so 300 entries need about 12 days.
+- **Count.** One more variant: **2,561 as of 2026-10-08**.
