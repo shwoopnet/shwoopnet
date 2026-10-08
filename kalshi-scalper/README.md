@@ -33,8 +33,8 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,567 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
-Q1 thresholds five; F8 one; N1 and N2 two; X1 to X4 four), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
+Strategy variants tried so far: **2,570 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -1984,3 +1984,22 @@ the answer is not obvious from 50c to 80c alone. It should have been in the firs
   difference of at least **2.7** (X1 to X4 keep the 2.5 they were registered with); its own mean positive, positive in both halves, positive with fees times 1.2, and the difference above the 95th percentile of the
   fair-market null. Anything else is `FALSIFIED`.
 - **Count.** Three variants: **2,570 as of 2026-10-08** (2,567 plus three).
+
+**2026-10-08: X5 to X7: all three `FALSIFIED`; the whole exit family is now X1 to X7.** One run of `python -m scalper.exits` (after the tests for the lower thresholds), same rule and entries. The database had grown by 10 markets since the X1 to X4 run, so the table below is the one run of all seven together on 3,432 L1 entries (HOLD +0.92c, standard deviation 23.5c, worst loss -97.2c, worst day -311c, drawdown 699c; X1 to X4 moved by at most 0.02c from the numbers above and none changed verdict).
+
+| Sell when the bid is at or below | Stopped (of those, would have won if held) | Mean | Difference vs HOLD (z) | Fair-market 95th pct | Std dev | Worst day | Drawdown | Two contracts, rounded | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| X7 20c | 3.4% (9%) | +0.92c | -0.00c (-0.02) | +0.06c | 22.9c | -295c | 706c | +0.65c | `FALSIFIED` |
+| X6 30c | 4.5% (16%) | +0.87c | -0.05c (-0.36) | +0.07c | 22.4c | -273c | 669c | +0.60c | `FALSIFIED` |
+| X5 40c | 5.2% (25%) | +0.76c | -0.16c (-0.97) | +0.10c | 22.0c | -287c | 647c | +0.49c | `FALSIFIED` |
+| X1 50c | 6.2% (32%) | +0.83c | -0.10c (-0.59) | +0.14c | 21.1c | -224c | 544c | +0.55c | `FALSIFIED` |
+| X2 60c | 7.6% (41%) | +0.77c | -0.15c (-0.71) | +0.17c | 20.1c | -254c | 606c | +0.49c | `FALSIFIED` |
+| X3 70c | 10.3% (52%) | +0.83c | -0.09c (-0.36) | +0.17c | 18.2c | -280c | 530c | +0.54c | `FALSIFIED` |
+| X4 80c | 15.6% (66%) | +0.77c | -0.15c (-0.50) | +0.05c | 15.7c | -312c | 441c | +0.47c | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: the share stopped falls to about 5%, 3% and 2%, the mean difference moves toward zero, the standard deviation falls little and the worst loss stays near -95c.
+  Measured: 5.2%, 4.5% and 3.4% stopped (a little more than predicted), the mean difference falls to -0.16c, -0.05c and -0.00c, the standard deviation 22.0c to 22.9c, the worst loss exactly -97.2c. All as predicted except the share stopped.
+- **What it says.** The difference from HOLD is never distinguishable from zero at any of the seven thresholds (z between -0.02 and -0.97), the worst single loss never drops below about -95c, and the risk reduction is
+  real only for the higher thresholds (X4 cuts the standard deviation by a third and the drawdown by 37%) at the cost of selling mostly winners (66%). Below 50c the rule almost never fires and almost changes nothing. 20c
+  is the only threshold that does not lose to holding, and it does so by being HOLD.
+- **Count.** Three more variants: **2,570 as of 2026-10-08**.
