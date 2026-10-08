@@ -1840,3 +1840,9 @@ _pure = [dict(_fake(i, True), won=1.0 if i % 10 else 0.0) for i in range(400)]
 assert _BM.verdict(_pure)[0] == "NOT_YET_FALSIFIED", "the same outcomes one tick cheaper is a real, if tiny, improvement"
 assert _BM.verdict([dict(o, filled=(i % 3 == 0), filled_at=(i % 3 == 0)) for i, o in enumerate(_pure)])[0] == "FALSIFIED", "filling a third of them gives up the saving on the rest and the winners that were missed"
 print("P2 resting entry tests passed")
+
+# obstats describes; it counts moves between consecutive snapshots of one market and skips gaps.
+from scalper import obstats as _OS
+_st = _OS.stats([(0, "A", 0, 0.93, 0.92, 100), (10, "A", 0, 0.931, 0.92, 50), (20, "A", 0, 0.931, 0.92, 70), (30, "A", 0, 0.93, 0.92, 70), (100, "A", 0, 0.99, 0.9, 1), (5, "B", 0, 0.93, 0.92, 10)])
+assert _st["pairs"] == 3 and _st["gaps"] == 1 and abs(_st["up"] - 1 / 3) < 1e-9 and abs(_st["same"] - 1 / 3) < 1e-9 and abs(_st["down"] - 1 / 3) < 1e-9
+print("obstats tests passed")
