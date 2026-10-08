@@ -981,6 +981,7 @@
   .kal-bot-grid > .kal-span{ grid-column:1 / -1; }
   /* Console layout: a fixed rail for the session, account and positions, and one wide column for the books, the trades and the log. */
   #page-kalshi .trades-header{ padding:20px 0 14px 0; }
+  #page-kalshi .kal-header-bare{ justify-content:flex-end; padding:8px 0 10px 0; }
   .kal-console{ grid-template-columns:340px minmax(0,1fr); gap:16px 28px; align-items:start; }
   .kal-rail, .kal-main{ display:flex; flex-direction:column; gap:16px; min-width:0; }
   .kal-console .kal-card{ margin-bottom:0; }
@@ -3382,10 +3383,7 @@
 
   <!-- ================= SETTINGS ================= -->
   <main class="page" id="page-kalshi" hidden>
-    <div class="trades-header">
-      <div>
-        <div class="trades-title">Kalshi</div>
-      </div>
+    <div class="trades-header kal-header-bare">
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
