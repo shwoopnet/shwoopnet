@@ -318,20 +318,41 @@ const SCALE_STEP = 1;
 function scaleTarget(cash) {
   return Number.isFinite(cash) ? Math.max(1, Math.min(L1_SIZE_CEILING, Math.floor(cash / SCALE_DOLLARS_PER_CONTRACT + 1e-9))) : 1;
 }
+// A balance that is LOW is not the same as one that LOST money: cash locked in an open position (the bot's own orders for 15 minutes, or a manual trade of any
+// size) leaves the balance for as long as it is open. On Oct 8, 2026 a manual trade of the whole account left the balance near $0, "falls at once" read that as a
+// real drop, and it cut the cap to 1 and the stop's base to 40c, which the 3 day steps then needed about 12 days to climb back from. So a fall now has to HOLD:
+// the cap is cut only when the target has stayed below it for SCALE_FALL_CONFIRM_MS. Real losses are still bounded in the meantime by the loss stop (which keeps
+// its old base while waiting), and money that was only locked comes back inside the window and clears the wait.
+const SCALE_FALL_CONFIRM_MS = 2 * 3600 * 1000;
+// Starting a session with scaling on sets state.reseed. The next review then raises the cap to what a fresh start would give (never lowers it, never raises it within
+// a week of a loss stop) and re-bases the stop on the current balance, so an owner who restarts after a collapse is not stuck waiting out the slow steps.
 function reviewSizing(state, cash, now) {
   const target = scaleTarget(cash);
   if (!state || !Number.isInteger(state.cap) || !Number.isFinite(state.reviewedAt) || !Number.isFinite(state.base)) {
-    return { state: { ...(state || {}), cap: Math.min(L1_SIZE_MAX, target), base: cash, reviewedAt: now, lastStopAt: state && Number.isFinite(state.lastStopAt) ? state.lastStopAt : null }, changed: true };
+    return { state: { ...(state || {}), cap: Math.min(L1_SIZE_MAX, target), base: cash, reviewedAt: now, lastStopAt: state && Number.isFinite(state.lastStopAt) ? state.lastStopAt : null, reseed: false, lowSince: null }, changed: true };
   }
   let { cap, base, reviewedAt } = state;
+  let lowSince = Number.isFinite(state.lowSince) ? state.lowSince : null;
   const lastStopAt = Number.isFinite(state.lastStopAt) ? state.lastStopAt : null;
-  if (target < cap) { cap = target; base = cash; }
-  else if (now - reviewedAt >= SCALE_REVIEW_MS) {
-    base = cash; reviewedAt = now;
-    if (target > cap && !(lastStopAt !== null && now - lastStopAt < SCALE_STOP_PAUSE_MS)) cap = Math.min(cap + SCALE_STEP, target);
+  const paused = lastStopAt !== null && now - lastStopAt < SCALE_STOP_PAUSE_MS;
+  if (state.reseed === true) {
+    if (!paused) cap = Math.max(cap, Math.min(L1_SIZE_MAX, target));
+    base = cash; reviewedAt = now; lowSince = null;
+    cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
+    return { state: { ...state, cap, base, reviewedAt, lastStopAt, reseed: false, lowSince }, changed: true };
+  }
+  if (target < cap) {
+    if (lowSince === null) lowSince = now;
+    else if (now - lowSince >= SCALE_FALL_CONFIRM_MS) { cap = target; base = cash; lowSince = null; }
+  } else {
+    lowSince = null;
+    if (now - reviewedAt >= SCALE_REVIEW_MS) {
+      base = cash; reviewedAt = now;
+      if (target > cap && !paused) cap = Math.min(cap + SCALE_STEP, target);
+    }
   }
   cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
-  return { state: { ...state, cap, base, reviewedAt, lastStopAt }, changed: cap !== state.cap || base !== state.base || reviewedAt !== state.reviewedAt };
+  return { state: { ...state, cap, base, reviewedAt, lastStopAt, lowSince }, changed: cap !== state.cap || base !== state.base || reviewedAt !== state.reviewedAt || lowSince !== (Number.isFinite(state.lowSince) ? state.lowSince : null) };
 }
 const L1_LOSS_STOP = 10.0;                 // dollars the bot's own trades may be down (open ones counted as lost); was $7 until Oct 8, 2026
 
@@ -649,5 +670,5 @@ module.exports = {
   flattenAll,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };

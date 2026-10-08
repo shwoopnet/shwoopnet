@@ -278,7 +278,7 @@ gates.N24 = async () => {
   assert.strictEqual(live.reviewSizing(later.state, 900, NOW + W + DAY).state.cap, 4, 'and not again the next day');
   assert.strictEqual(live.reviewSizing(later.state, 900, NOW + 2 * W).state.cap, 5, 'the next review, 3 days on, is the next step');
   assert.strictEqual(W, 3 * DAY, 'reviews are 3 days apart');
-  assert.strictEqual(live.reviewSizing({ ...st, cap: 5 }, 240, NOW + DAY).state.cap, 2, 'a falling balance cuts the cap at once, mid week');
+  assert.strictEqual((() => { const a = live.reviewSizing({ ...st, cap: 5 }, 240, NOW + DAY); return live.reviewSizing(a.state, 240, NOW + DAY + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 2, 'a balance that stays low cuts the cap, mid week, without waiting for a review');
   assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + 6 * DAY).state.cap, 3, 'no rise within a week of a loss stop, even though reviews come every 3 days');
   assert.strictEqual(live.reviewSizing({ cap: 10, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, 10, 'the hard ceiling holds');
   // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
@@ -330,7 +330,7 @@ gates.N25 = async () => {
   assert.strictEqual(w.posts[0].count, '5', 'cap 3 plus two from a $2 pool');
   assert.strictEqual(w.sess.sizeAddon, 2);
   assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 30, 8 * 86400000).state.cap, 3, 'with $30 saved the sizing balance is $311, which still supports three');
-  assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 100, 8 * 86400000).state.cap, 2, 'savings are not sized on: if the rest of the balance falls under $255 the cap follows it down');
+  assert.strictEqual((() => { const a = live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 100, 8 * 86400000); return live.reviewSizing(a.state, 341 - 100, 8 * 86400000 + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 2, 'savings are not sized on: if the rest of the balance falls under $255 the cap follows it down');
   const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(ceil, { sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   assert.strictEqual(ceil.posts[0].count, String(live.L1_ORDER_CEILING), 'a huge pool still stops at the order ceiling, the fat-finger guard');
@@ -523,6 +523,23 @@ gates.N23 = async () => {
   assert.ok(/const trailing = on && request\.data\.trailing === true;/.test(cb) && /startCash: null, sizing, trailing,/.test(cb), 'only a literal true, kept on the session record');
   assert.ok(/id="kalL1Trailing"/.test(html) && !/id="kalL1Trailing"[^>]*checked/.test(html), 'the box starts unticked');
   assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(html) && /trailing: trailing === true/.test(html), 'and passed to the server');
+};
+
+gates.N31 = () => {
+  const H = 3600000, T0 = 1e9, st = { cap: 3, base: 344, reviewedAt: T0, lastStopAt: null };
+  // The Oct 8 collapse: a manual trade of the whole account leaves the balance near $0 for a few minutes. That must not cut the cap or move the stop's base.
+  const dip = live.reviewSizing(st, 0.4, T0 + H);
+  assert.deepStrictEqual([dip.state.cap, dip.state.base], [3, 344], 'a dip alone changes neither the cap nor the stop base');
+  const back = live.reviewSizing(dip.state, 509, T0 + H + 600000);
+  assert.deepStrictEqual([back.state.cap, back.state.base, back.state.lowSince], [3, 344, null], 'money that comes back clears the wait');
+  const stayed = live.reviewSizing(live.reviewSizing(st, 100, T0 + H).state, 100, T0 + H + live.SCALE_FALL_CONFIRM_MS);
+  assert.strictEqual(stayed.state.cap, 1, 'a balance that stays low does cut the cap');
+  // Reseed (set by Start): raises a collapsed cap to what a fresh start gives, re-bases the stop, never lowers, never raises within a week of a loss stop.
+  const lowSt = { cap: 1, base: 0.4, reviewedAt: T0, lastStopAt: null, reseed: true };
+  const r = live.reviewSizing(lowSt, 509, T0 + H);
+  assert.deepStrictEqual([r.state.cap, r.state.base, r.state.reseed], [3, 509, false], 'a collapsed cap is restored on Start');
+  assert.strictEqual(live.reviewSizing({ ...lowSt, cap: 7 }, 509, T0 + H).state.cap, 7, 'a higher saved cap is never lowered by Start');
+  assert.strictEqual(live.reviewSizing({ ...lowSt, lastStopAt: T0 }, 509, T0 + H).state.cap, 1, 'no restoring within a week of a loss stop');
 };
 
 gates.N30 = () => {
