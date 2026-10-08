@@ -127,7 +127,7 @@ gates.Y8 = () => {
 gates.Y14 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function(names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiPnlSeries', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml']);
+  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // A filled order the server left unsettled: with the market's result known it is settled here, by the server's own rule.
@@ -141,6 +141,15 @@ gates.Y14 = () => {
   assert.strictEqual(lost.settled, undefined, 'the stored order is not changed');
   const server = Object.assign({}, lost, { settled: true, result: 'no', settledPnl: -1.8 });
   assert.strictEqual(f.kalshiResolveOrders([server], { 'T-L': 'yes' })[0].settledPnl, -1.8, 'what the server saved wins');
+  // The account's own fill, when the read has it, replaces the estimate: price actually paid and the fee Kalshi charged, the figure the trades table shows.
+  const withId = Object.assign({}, lost, { orderId: 'ord-1', averageFeePaid: '0.0100' });
+  const ex = f.kalshiResolveOrders([withId], { 'T-L': 'no' }, [{ orderId: 'ord-1', count: 2, price: '0.9300' }])[0];
+  assert.strictEqual(ex.settledPnl, -1.88, 'two contracts at 93c plus a cent of fee each, lost');
+  assert.ok(ex.exact === true && ex.estimated === false);
+  const exWin = f.kalshiResolveOrders([Object.assign({}, withId, { side: 'no' })], { 'T-L': 'no' }, [{ orderId: 'ord-1', count: 2, price: '0.0700' }])[0];
+  assert.strictEqual(exWin.settledPnl, 0.12, 'a NO bought at a 7c YES price costs 93c, pays $1 and a cent of fee, on two contracts');
+  const sv = f.kalshiResolveOrders([Object.assign({}, server, { orderId: 'ord-2', averageFeePaid: '0.0100' })], null, [{ orderId: 'ord-2', count: 2, price: '0.9300' }])[0];
+  assert.ok(sv.exact === true && sv.settledPnl === -1.88, 'a trade the server settled also takes the exact figure');
   assert.deepStrictEqual(f.kalshiOutcomeCounts(res, 0), { won: 1, lost: 1, open: 1, noFill: 0, other: 0 }, 'the loss reaches the pie');
   const series = f.kalshiPnlSeries(res, 0);
   assert.deepStrictEqual(series.map((p) => p.pnl), [0.16, -1.86], 'and the line');

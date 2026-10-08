@@ -9879,15 +9879,24 @@
   // settles afterwards stayed "open" for ever and never reached the charts). The account read carries the result of each market it has fills for; with it the
   // order is settled here, by the same rule the server uses: the order's worst-case cost (maxCost) is paid in proportion to what filled, and each winning
   // contract pays $1. The copy is marked estimated. An order the server already settled, or with no known result, is returned untouched.
-  function kalshiResolveOrders(orders, results){
+  function kalshiResolveOrders(orders, results, fills){
     return (orders || []).map(function(o){
-      if(!o || o.settled === true || !(Number(o.fillCount) > 0) || !results){ return o; }
-      var r = results[o.ticker];
-      var cost = Number(o.maxCost);
-      if((r !== 'yes' && r !== 'no') || !Number.isFinite(cost)){ return o; }
-      var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount), want);
-      var pnl = Math.round(((r === o.side ? got : 0) - cost * (got / want)) * 10000) / 10000;
-      return Object.assign({}, o, { settled: true, result: r, settledPnl: pnl, estimated: true });
+      if(!o || !(Number(o.fillCount) > 0)){ return o; }
+      var r = o.settled === true ? o.result : (results ? results[o.ticker] : null);
+      if(r !== 'yes' && r !== 'no'){ return o; }
+      var out = o;
+      if(o.settled !== true){
+        var cost = Number(o.maxCost);
+        if(!Number.isFinite(cost)){ return o; }
+        var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount), want);
+        out = Object.assign({}, o, { settled: true, result: r, settledPnl: Math.round(((r === o.side ? got : 0) - cost * (got / want)) * 10000) / 10000, estimated: true });
+      }
+      // The account's own fill for this order, when the read has it, is exact (the price actually paid and the fee Kalshi charged), and it is the figure the
+      // trades table shows. Use it, so a trade has one profit or loss on the page, not two.
+      var fill = o.orderId ? (fills || []).filter(function(f){ return f && f.orderId === o.orderId; })[0] : null;
+      var tp = fill ? kalshiTradePnl(fill, o, r) : null;
+      if(tp){ out = Object.assign({}, out, { settledPnl: tp.pnl, estimated: false, exact: true }); }
+      return out;
     });
   }
 
@@ -10251,7 +10260,7 @@
     var lineEl = document.getElementById('kalChartLine'), pieEl = document.getElementById('kalChartPie');
     if(!lineEl || !pieEl){ return; }
     var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = kalshiChartRange === 'session' && sess && Number.isFinite(sess.since) ? sess.since : 0;
-    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results);
+    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var series = kalshiPnlSeries(orders, since);
     lineEl.innerHTML = kalshiLineSvg(series, escapeHtml, kalshiMoney);
     pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
@@ -10260,10 +10269,11 @@
     if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
     if(noteEl){
       var est = orders.filter(function(o){ return o && o.estimated === true && o.ts >= since; }).length;
+      var exact = orders.filter(function(o){ return o && o.exact === true && o.ts >= since; }).length;
       var stillOpen = orders.filter(function(o){ return o && o.ts >= since && Number(o.fillCount) > 0 && o.settled !== true; }).length;
       noteEl.textContent = (est ? est + ' trade' + (est === 1 ? '' : 's') + ' settled on this page from the account read (the server had not marked them). ' : '') +
         (stillOpen ? stillOpen + ' filled trade' + (stillOpen === 1 ? ' is' : 's are') + ' still open or not yet read, and not counted. ' : '') +
-        'A win is booked slightly low and a loss slightly high (the order\'s worst-case price). Fees follow the model, not the cent rounding.';
+        (exact ? exact + ' use the fill and fee from your account. ' : '') + 'The rest use the order\'s worst-case price, so a win is booked slightly low and a loss slightly high.';
     }
   }
   var kalshiChartRange = 'all';
