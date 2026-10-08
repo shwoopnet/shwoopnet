@@ -3427,7 +3427,9 @@
       <div class="kal-card kal-span" data-card="detail">
         <details class="kal-fold"><summary class="kal-card-title">Account detail and starting line</summary>
           <div class="kal-note kal-first">Reads your real Kalshi account with the live key; it cannot place or change anything. Funds are held per shard, and an order uses only its market's shard (Bitcoin and gold were both on shard 2).</div>
-          <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
+          <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
+          <div class="kal-note" id="kalDiagMsg">The diagnostics are the bot's order records (times, prices, book sizes, results). No keys or secrets.</div>
+          <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
           <div class="kal-note" id="kalAcctMsg"></div>
           <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
           <div class="kal-actions">
@@ -9693,6 +9695,23 @@
     return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' ET';
   }
 
+  // The bot's order records as CSV, for working out why orders did not fill. Prices, sizes and ids only (no keys or secrets); newest first, at
+  // most `limit` rows. A field a record does not have is left empty, never filled in. Commas and quotes in a text field are escaped.
+  function kalshiDiagnosticsCsv(orders, limit){
+    var cols = ['time', 'ticker', 'side', 'band', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error'];
+    var cell = function(v){
+      if(v === undefined || v === null){ return ''; }
+      var t = String(v);
+      return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    };
+    var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return b.ts - a.ts; }).slice(0, limit || 150).map(function(o){
+      var seen = o.seen || {};
+      return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.side, o.band, o.price, o.limit, o.sentSide, o.sentPrice, o.status, o.fillCount, o.remainingCount,
+        o.averageFillPrice, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error].map(cell).join(',');
+    });
+    return [cols.join(',')].concat(rows).join('\n');
+  }
+
   // 'h:mm PM' today, 'Tomorrow h:mm PM' the next day, otherwise 'Oct 9 h:mm PM'. A date that does not parse is shown as nothing.
   function kalshiWhen(ms, nowMs){
     if(!Number.isFinite(ms)){ return ''; }
@@ -10017,6 +10036,15 @@
     renderKalshiCharts();
     renderKalshiL1();
   }
+  // Copies the order records as CSV. If the browser refuses clipboard access the text is shown in a box to copy by hand.
+  document.getElementById('kalDiagCopy').addEventListener('click', function(){
+    var csv = kalshiDiagnosticsCsv(kalshiLiveOrders, 150), n = Math.max(0, csv.split('\n').length - 1);
+    var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
+    var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders. Paste them into the chat.'; }, manual);
+    } else { manual(); }
+  });
   // The 'Show more' button is re-created on every render, so one listener on its container does it.
   document.getElementById('kalBotClosed').addEventListener('click', function(e){
     if(e.target && e.target.getAttribute('data-more') === 'fills'){ kalshiLiveShow.fills += 10; renderKalshiBot(); }
