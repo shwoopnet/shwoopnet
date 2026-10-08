@@ -187,6 +187,42 @@ gates.Y14 = () => {
   assert.ok(/kalshiResolveOrders\(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct\.results\)/.test(html), 'the charts read orders settled against the account read');
 };
 
+// Open positions, one readable row each: the side from the sign, cost from the bot's own fill, what it can win and lose, the chance now and the time left from
+// the live books. "Realized" and "Fees" are gone (an open position has no realized result). Show more / Show fewer are quiet links, not filled buttons.
+gates.Y15 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const lift = (names) => new Function(names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  const f = lift(['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiGroupFills', 'kalshiOrderFor', 'kalshiPositionRows', 'kalshiPositionsHtml']);
+  const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
+  const NOW = Date.parse('2026-10-08T14:40:00Z');
+  const T = 'KXBTC15M-26OCT081045-45';
+  const orders = [{ orderId: 'o1', ticker: T, side: 'no', fillCount: '2.00' }];
+  const fills = [{ ticker: T, orderId: 'o1', count: 2, price: '0.0420' }];
+  const books = [{ ticker: T, closeTime: '2026-10-08T14:45:00Z', yesBid: 0.004, yesAsk: 0.005 }];
+  const r = f.kalshiPositionRows([{ ticker: T, position: -2, realizedPnl: '0.000000', feesPaid: '0.005700' }], orders, fills, books, NOW)[0];
+  assert.deepStrictEqual([r.side, r.count, r.entry, r.cost, r.ifWin, r.ifLose, r.bot], ['no', 2, 0.958, 1.92, 0.08, -1.92, true], 'a NO bought at a 4.2c YES price costs 95.8c a contract: $1.92, wins $0.08, loses $1.92');
+  assert.strictEqual(Math.round(r.chance * 10000) / 10000, 0.9955, 'the chance now is the NO side of the live mid');
+  assert.strictEqual(r.cashOut, 1.99, 'cashing out a NO sells at 1 minus the YES ask');
+  assert.strictEqual(r.left, 300);
+  const out = f.kalshiPositionsHtml([r], esc, money);
+  assert.ok(/NO x 2/.test(out) && /Cost[\s\S]*\$1\.92/.test(out) && /\+\$0\.08/.test(out) && /-\$1\.92/.test(out) && /Chance now 99\.6%/.test(out) && /closes in 5:00/.test(out) && /about \$1\.99 before fees/.test(out), 'the row says it all');
+  assert.ok(!/Realized|Fees/.test(out) && !/Realized|feesPaid/.test(html.slice(html.indexOf('function kalshiPositionsHtml'), html.indexOf('function renderKalshiBot'))), 'no realized or fee line on an open position');
+  // A position the bot did not open, with no books: no invented figures.
+  const manual = f.kalshiPositionRows([{ ticker: 'KXGOLD15M-26OCT081045-45', position: 3 }], orders, fills, [], NOW)[0];
+  assert.deepStrictEqual([manual.side, manual.cost, manual.ifWin, manual.chance, manual.cashOut, manual.left, manual.bot], ['yes', null, null, null, null, null, false]);
+  const mo = f.kalshiPositionsHtml([manual], esc, money);
+  assert.ok(/n\/a/.test(mo) && /Not one of the bot/.test(mo) && !/Chance now/.test(mo));
+  assert.ok(/No open positions/.test(f.kalshiPositionsHtml([], esc, money)) && f.kalshiPositionRows([{ ticker: 'X', position: 0 }], [], [], [], NOW).length === 0, 'a flat position is not a row');
+  const yes = f.kalshiPositionRows([{ ticker: T, position: 1 }], [{ orderId: 'o2', ticker: T, side: 'yes' }], [{ ticker: T, orderId: 'o2', count: 1, price: '0.9300' }], [{ ticker: T, closeTime: '2026-10-08T14:45:00Z', yesBid: 0.96, yesAsk: 0.97 }], NOW)[0];
+  assert.deepStrictEqual([yes.side, yes.entry, yes.cost, yes.ifWin, yes.cashOut], ['yes', 0.93, 0.93, 0.07, 0.96], 'a YES position is priced on the YES side');
+  // The page keeps the positions in step with the books and the account.
+  assert.ok(/kalshiBooksLast = data \|\| null;\s*renderKalshiPositions\(\);/.test(html) && /renderKalshiPositions\(\);\s*\n\s*var trEl/.test(html), 'redrawn when the books or the account update');
+  // Show more and Show fewer are links, not the dark filled button.
+  assert.ok(!/class="kal-btn" data-(more|less)/.test(html) && (html.match(/class="kal-link" data-(more|less)/g) || []).length === 3, 'quiet links');
+  assert.ok(/\.kal-link\{ background:none; border:0;/.test(html), 'with no fill and no border');
+};
+
 // A card stays in its own column: reordering, arrows and dragging all work within the parent the card is in, never across the rail and the main column.
 gates.Y9 = () => {
   const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));

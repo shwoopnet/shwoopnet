@@ -988,6 +988,17 @@
   .kal-card-flush{ padding:0; }
   .kal-card-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 22px 12px 22px; }
   .kal-bot-body{ padding:0 22px 16px 22px; }
+  .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:12.5px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
+  .kal-link:hover{ text-decoration:underline; } .kal-link:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+  .kal-hold{ padding:12px 0; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
+  .kal-hold:first-child{ border-top:0; padding-top:0; }
+  .kal-hold-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .kal-hold-head .kal-name{ font-weight:700; font-size:14px; }
+  .kal-side{ font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; border:1px solid var(--border); white-space:nowrap; }
+  .kal-side-yes{ color:var(--gain); border-color:var(--gain); } .kal-side-no{ color:var(--amber); border-color:var(--amber); }
+  .kal-hold-stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  .kal-hold-stats .kal-lbl{ display:block; font-size:11px; color:var(--muted); } .kal-hold-stats b{ font-size:14px; font-weight:700; }
+  .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
   .kal-bot-body .kal-sess-row{ flex-direction:row; align-items:baseline; flex-wrap:wrap; gap:4px 12px; margin-bottom:8px; }
   .kal-bot-body .kal-sess-row .kal-bigpl{ font-size:26px; }
   .kal-bot-body .kal-facts{ grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); border-top:0; padding:4px 0 8px 0; }
@@ -9948,6 +9959,8 @@
   function renderKalshiBooks(data){
     var el = document.getElementById('kalBooks');
     var st = document.getElementById('kalStatus');
+    kalshiBooksLast = data || null;
+    renderKalshiPositions();
     var rows = (data && data.markets) || [];
     if(!rows.length){
       el.innerHTML = '<div class="kal-empty">No open markets right now.</div>';
@@ -10078,6 +10091,60 @@
     return { pnl: Math.round(((won ? 1 : 0) * count - paid * count - fee * count) * 10000) / 10000, paid: paid, won: won, side: order.side };
   }
 
+  // Open positions, one readable row each. A position's sign says the side (negative is NO), its entry price comes from the bot's own fill for that
+  // market when the account read has one (a YES price on the wire, so a NO costs 1 minus it), and the live books give the chance now, the time left and what a
+  // cash out would bring. What it can win and lose is plain arithmetic on the contracts: $1 a contract pays out, the cost is at risk. Nothing is guessed
+  // when a piece is missing: the figure is left out. Fees are not in these figures (shown as before fees where it matters).
+  function kalshiPositionRows(positions, orders, fills, books, nowMs){
+    var grouped = kalshiGroupFills(fills || []);
+    return (positions || []).filter(function(p){ return p && p.ticker && Number.isFinite(Number(p.position)) && Number(p.position) !== 0; }).map(function(p){
+      var pos = Number(p.position), side = pos < 0 ? 'no' : 'yes', count = Math.abs(pos);
+      var mine = grouped.filter(function(f){ return f.ticker === p.ticker; });
+      var fill = mine.filter(function(f){ return kalshiOrderFor(f, orders); })[0] || mine[0] || null;
+      var order = fill ? kalshiOrderFor(fill, orders) : null;
+      var yp = fill ? Number(fill.price) : NaN;
+      var entry = Number.isFinite(yp) && yp >= 0 && yp <= 1 ? Math.round((side === 'yes' ? yp : 1 - yp) * 10000) / 10000 : null;
+      var cost = entry === null ? null : Math.round(entry * count * 100) / 100;
+      var m = (books || []).filter(function(x){ return x && x.ticker === p.ticker; })[0] || null;
+      var chance = null, cashOut = null, left = null;
+      if(m && m.yesBid != null && m.yesAsk != null){
+        chance = side === 'yes' ? (m.yesBid + m.yesAsk) / 2 : 1 - (m.yesBid + m.yesAsk) / 2;
+        cashOut = Math.round((side === 'yes' ? m.yesBid : 1 - m.yesAsk) * count * 100) / 100;
+      }
+      if(m && m.closeTime){ left = kalshiSecsLeft(m.closeTime, nowMs); }
+      return { ticker: p.ticker, title: kalshiShortTicker(p.ticker), side: side, count: count, entry: entry, cost: cost,
+        ifWin: cost === null ? null : Math.round((count - cost) * 100) / 100, ifLose: cost === null ? null : -cost,
+        chance: chance, cashOut: cashOut, left: left, bot: !!order };
+    });
+  }
+
+  function kalshiPositionsHtml(rows, esc, money){
+    if(!rows || !rows.length){ return '<div class="kal-empty">No open positions.</div>'; }
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    return rows.map(function(r){
+      var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
+      var sub = [];
+      if(r.chance !== null){ sub.push('Chance now ' + (r.chance >= 0.9995 ? '99.9' : (r.chance * 100).toFixed(1)) + '%'); }
+      if(r.left !== null){ sub.push(r.left > 0 ? 'closes in ' + kalshiFmtLeft(r.left) : 'waiting for the result'); }
+      if(r.cashOut !== null){ sub.push('cash out now about ' + money(r.cashOut) + ' before fees'); }
+      return '<div class="kal-hold"><div class="kal-hold-head"><div class="kal-name">' + esc(r.title) + '</div><span class="kal-side kal-side-' + r.side + '">' + esc(r.side.toUpperCase()) + ' x ' + esc(String(r.count)) + '</span></div>' +
+        '<div class="kal-hold-stats">' + stat('Cost', r.cost === null ? 'n/a' : money(r.cost)) + stat('If it wins', r.ifWin === null ? 'n/a' : sg(r.ifWin), r.ifWin === null ? '' : 'kal-pos') +
+        stat('If it loses', r.ifLose === null ? 'n/a' : sg(r.ifLose), r.ifLose === null ? '' : 'kal-neg') + '</div>' +
+        (sub.length ? '<div class="kal-hold-sub">' + esc(sub.join(' · ')) + '</div>' : '') +
+        (r.bot ? '' : '<div class="kal-hold-sub">Not one of the bot\'s trades.</div>') + '</div>';
+    }).join('');
+  }
+
+  function renderKalshiPositions(){
+    var posEl = document.getElementById('kalBotOpen'), a = kalshiLiveAcct;
+    if(!posEl){ return; }
+    if(!a){ posEl.innerHTML = ''; return; }
+    if(!a.positions || !a.positions.ok){ posEl.innerHTML = '<div class="kal-note">Could not read positions: ' + escapeHtml(a.positions ? 'HTTP ' + a.positions.status + ' ' + (a.positions.error || '') : '') + '</div>'; return; }
+    var rows = kalshiPositionRows(a.positions.positions, kalshiLiveOrders, a.fills && a.fills.ok ? a.fills.fills : [], kalshiBooksLast && kalshiBooksLast.markets, Date.now());
+    posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoney);
+  }
+  var kalshiBooksLast = null;
+
   function renderKalshiBot(){
     var a = kalshiLiveAcct;
     var el = document.getElementById('kalBotStatus');
@@ -10122,15 +10189,7 @@
         '<div class="kal-note" style="margin:0">Since ' + escapeHtml(new Date(tot.since).toLocaleDateString([], { month: 'short', day: 'numeric' })) + '. Includes deposits and manual trades.</div></div>';
     }
 
-    var posEl = document.getElementById('kalBotOpen');
-    if(!a){ posEl.innerHTML = ''; }
-    else if(!a.positions || !a.positions.ok){ posEl.innerHTML = '<div class="kal-note">Could not read positions: ' + escapeHtml(a.positions ? 'HTTP ' + a.positions.status + ' ' + (a.positions.error || '') : '') + '</div>'; }
-    else { posEl.innerHTML = a.positions.positions.length ? a.positions.positions.map(function(x){
-      return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(x.ticker) + '</div></div>' +
-        '<div><span class="kal-lbl">Held</span>' + escapeHtml(String(x.position)) + ' contracts</div>' +
-        '<div><span class="kal-lbl">Realized</span>' + (x.realizedPnl === null ? 'n/a' : escapeHtml(x.realizedPnl)) + '</div>' +
-        '<div><span class="kal-lbl">Fees</span>' + (x.feesPaid === null ? 'n/a' : escapeHtml(x.feesPaid)) + '</div></div>';
-    }).join('') : '<div class="kal-empty">No open positions.</div>'; }
+    renderKalshiPositions();
 
     var trEl = document.getElementById('kalBotClosed');
     if(!a){ trEl.innerHTML = ''; }
@@ -10158,8 +10217,8 @@
       }).join('');
       var foot = [];
       if(settled || open){ foot.push('Settled bot trades shown: <b class="' + (sum >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (sum >= 0 ? '+' : '-') + kalshiMoney(Math.abs(sum)) + '</b> over ' + settled + ' settled' + (open ? ', ' + open + ' still open' : '') + '.'); }
-      if(gfills.length > fillsShown.length){ foot.push('Showing ' + fillsShown.length + ' of ' + gfills.length + ' trades. <button type="button" class="kal-btn" data-more="fills">Show more</button>'); }
-      else if(gfills.length > 5){ foot.push('<button type="button" class="kal-btn" data-less="fills">Show fewer</button>'); }
+      if(gfills.length > fillsShown.length){ foot.push('Showing ' + fillsShown.length + ' of ' + gfills.length + ' trades. <button type="button" class="kal-link" data-more="fills">Show more</button>'); }
+      else if(gfills.length > 5){ foot.push('<button type="button" class="kal-link" data-less="fills">Show fewer</button>'); }
       if(a.fills.hiddenBeforeBaseline){ foot.push(a.fills.hiddenBeforeBaseline + ' earlier fill' + (a.fills.hiddenBeforeBaseline === 1 ? ' is' : 's are') + ' hidden (before your starting line).'); }
       trEl.innerHTML = (gfills.length ? rowsHtml : '<div class="kal-foot">No fills since your starting line.</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
     }
@@ -10176,7 +10235,7 @@
     document.getElementById('kalBotEvents').innerHTML = evAll.length ? evShown.map(function(e){
       return '<div class="kal-tnote">' + new Date(e.ts).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) + ' &middot; ' + escapeHtml(e.kind) + ' &middot; ' + escapeHtml(e.detail) + '</div>';
     }).join('') + (evAll.length > evShown.length
-      ? '<div class="kal-note">Showing ' + evShown.length + ' of ' + evAll.length + ' events. <button type="button" class="kal-btn" data-more="events">Show more</button></div>'
+      ? '<div class="kal-note">Showing ' + evShown.length + ' of ' + evAll.length + ' events. <button type="button" class="kal-link" data-more="events">Show more</button></div>'
       : '') : '<div class="kal-empty">Nothing yet.</div>';
     renderKalshiCharts();
     renderKalshiL1();
