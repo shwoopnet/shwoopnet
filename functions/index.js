@@ -471,7 +471,7 @@ exports.kalshiLiveArmed = onSchedule(
 // (see kalshiBookLib.js). READ ONLY and keyless. It is the LAST export on purpose: the tests slice the file from
 // here to prove nothing after this point can see the live key or place an order.
 exports.kalshiBookRecorder = onSchedule(
-  { schedule: "every 1 minutes", timeoutSeconds: 58, retryCount: 0, memory: "256MiB" },
+  { schedule: "every 1 minutes", timeoutSeconds: 70, retryCount: 0, memory: "256MiB" },
   async () => {
     ensureDefaultAdminApp();
     const db = getFirestore();

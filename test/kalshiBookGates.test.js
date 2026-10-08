@@ -150,6 +150,22 @@ gates.B10 = async () => {
   assert.deepStrictEqual(firestoreProblems(parseBook({ orderbook_fp: { yes_dollars: [], no_dollars: [] } })), [], 'an empty book is accepted too');
 };
 
+// Snapshots cover the whole minute: six, ten seconds apart, the last one starting at about 50 s. Five left a 20 second hole in every minute, which
+// would hide a price move inside the L1 window (330 to 400 s before a close).
+gates.B11 = async () => {
+  const { args, out } = harness(okGet);
+  const start = args.now();
+  let clock = start; const starts = [];
+  args.now = () => clock;
+  const get0 = args.get;
+  args.get = async (p) => { if (p.indexOf('/markets?') === 0 && !starts.length || (starts.length && clock - start !== starts[starts.length - 1] && p.indexOf('/markets?') === 0)) { starts.push(clock - start); } return get0(p); };
+  args.sleep = async (ms) => { clock += ms; };
+  await recordMinute(args);
+  const firsts = [...new Set(starts)];
+  assert.deepStrictEqual(firsts.slice(0, 6), [0, 10000, 20000, 30000, 40000, 50000], 'cycles at 0, 10, ... 50 s');
+  assert.strictEqual(Object.values(out.docs)[0].snaps.length > 0, true);
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

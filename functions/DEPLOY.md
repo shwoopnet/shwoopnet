@@ -194,7 +194,7 @@ visible: three GET requests, read only. Without a starting line the totals say s
 
 ## Order-book recorder (`kalshiBookRecorder`, read only)
 
-Scheduled once a minute; inside each run it takes about 5 snapshots, 10 seconds apart, of the real
+Scheduled once a minute; inside each run it takes 6 snapshots, 10 seconds apart (0 to 50 s into the minute), of the real
 order book of the open Bitcoin and gold 15 minute markets. No key, no order code, no secrets.
 One Firestore document per minute (`kalshiBookSnaps/bk-<minute>`, admin read only), 10 days kept,
 and a heartbeat at `kalshiBookMeta/status` (`lastTickMs`, `snaps`, `errs`). About 1,440 writes a day.
