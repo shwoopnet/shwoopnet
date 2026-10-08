@@ -2491,7 +2491,7 @@
       return function(){ un.forEach(function(f){ f(); }); };
     },
     watchKalshiLive: function(cb){
-      return onSnapshot(query(collection(db, 'kalshiLiveOrders'), orderBy('ts', 'desc'), limit(20)), function(q){
+      return onSnapshot(query(collection(db, 'kalshiLiveOrders'), orderBy('ts', 'desc'), limit(300)), function(q){   // a 24 hour session sends at most 192 orders; 20 undercounted them and left older fills looking manual
         cb(q.docs.map(function(d){ return d.data(); }));
       }, function(err){ console.error('Kalshi live sync error:', err); });
     },
@@ -9845,7 +9845,12 @@
         (a.fills.hiddenBeforeBaseline ? '<div class="kal-note">' + a.fills.hiddenBeforeBaseline + ' earlier fill' + (a.fills.hiddenBeforeBaseline === 1 ? ' is' : 's are') + ' hidden (before your starting line).</div>' : '');
     }
 
-    var evAll = kalshiLiveEvents.concat((kalshiLiveOrders || []).map(function(o){
+    // The server logs an 'order' event for every order it sends, and the order records are listed too. An order the log already shows is
+    // not added a second time (it appeared twice, with the price written two ways); records with no matching event are still shown.
+    var loggedOrders = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'order'; }).map(function(e){ return String(e.detail); });
+    var evAll = kalshiLiveEvents.concat((kalshiLiveOrders || []).filter(function(o){
+      return !loggedOrders.some(function(d){ return d.indexOf(' on ' + String(o.ticker) + ':') > -1; });
+    }).map(function(o){
       return { ts: o.ts, kind: 'order', detail: String(o.side) + ' ' + String(o.count) + ' at ' + (o.price * 100).toFixed(0) + 'c on ' + String(o.ticker) + ': ' + String(o.status || '') };
     })).sort(function(x, y){ return y.ts - x.ts; });
     var evShown = evAll.slice(0, kalshiLiveShow.events);
