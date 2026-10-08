@@ -229,7 +229,7 @@ gates.G27 = () => {
   // The page shows grouped trades everywhere it counts them.
   assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
   assert.ok(/plEl\.textContent = net === null/.test(html) && /Number\.isFinite\(s\.botNet\)/.test(html) && /id="kalL1Pl"/.test(html), 'the headline is the bot\'s own settled P/L, from the server');
-  assert.ok(/<span class="kal-k">Change since start<\/span>/.test(html) && /Includes manual trades/.test(html) && /deposit you have not recorded/.test(html), 'and the account change is labelled as the account, not the bot');
+  assert.ok(/<span class="kal-k">Bot change since start<\/span>/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && /Deposits, manual trades and open orders account for the other/.test(html), 'the account area shows the bot\'s own change, and says where the rest of the balance move came from');
 };
 
 (async () => {

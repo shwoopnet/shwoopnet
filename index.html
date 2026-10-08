@@ -3406,7 +3406,7 @@
             <label class="kal-note" style="margin:0">Money added (or taken out, as a minus) <input class="kal-input" id="kalAdjAmt" type="number" step="0.01" placeholder="200" style="width:90px"></label>
             <button class="kal-btn kal-btn-ghost" id="kalAdjGo" type="button">Record it</button>
           </div>
-          <div class="kal-note" id="kalAdjMsg">A deposit or withdrawal otherwise shows up as profit or loss in "Change since start". Recording it takes it off. Changes only this page's figure, nothing on Kalshi.</div>
+          <div class="kal-note" id="kalAdjMsg">A deposit or withdrawal otherwise shows up as profit or loss in the account change under Tools (the Account card shows the bot only). Recording it takes it off. Changes only this page's figure, nothing on Kalshi.</div>
           <div class="kal-actions">
             <button class="kal-btn" id="kalAcctStart" type="button">Start fresh from now (one time)</button>
             <span id="kalAcctStartConfirm" hidden><span class="kal-note">Everything before this moment is ignored from now on, and the balance shown becomes the starting balance. Nothing on Kalshi is changed. Go ahead?</span> <button class="kal-btn" id="kalAcctStartYes" type="button">Yes, start fresh</button> <button class="kal-btn" id="kalAcctStartNo" type="button">Cancel</button></span>
@@ -10219,10 +10219,17 @@
       totEl.innerHTML = '<div class="kal-empty">No starting line yet. Open Tools and press "Start fresh from now" so this counts only the bot.</div>';
     } else {
       // The account change also holds deposits, withdrawals and manual trades, so it is not the bot's result (that is on the session card).
+      // Only the BOT's settled trades since the starting line. Deposits, withdrawals and your own trades are left out; the balance move that is not
+      // the bot's is shown on its own line so the two add up to the balance change.
+      var botOrders = kalshiResolveOrders(kalshiLiveOrders, a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
+      var botNet = kalshiPerfStats(botOrders, tot.since).total;
+      var other = tot.now !== null && Number.isFinite(tot.start) ? Math.round((tot.now - tot.start - botNet) * 100) / 100 : null;
+      var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div><span class="kal-k">Change since start</span>' + (tot.change === null ? '<b>n/a</b>' : '<b class="' + (tot.change >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tot.change >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tot.change)) + '</b>') + '</div>' +
+        '<div><span class="kal-k">Bot change since start</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div>' +
         '<div><span class="kal-k">Starting balance</span><b>' + kalshiMoney(tot.start) + '</b></div>' +
-        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(kalDate(tot.since)) + '. Includes manual trades' + (a.baseline && a.baseline.adjustments ? '; ' + (a.baseline.adjustments > 0 ? '+' : '-') + kalshiMoney(Math.abs(a.baseline.adjustments)) + ' of recorded deposits taken off' : ', and any deposit you have not recorded under Tools') + '.</div></div>';
+        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(kalDate(tot.since)) + ', the bot\'s settled trades only. ' +
+        (other === null ? '' : 'Deposits, manual trades and open orders account for the other ' + signed(other) + ' of the balance change.') + '</div></div>';
     }
 
     renderKalshiPositions();
@@ -10634,9 +10641,9 @@
         var api = window.__shwoopAPI, v = Number(amt.value);
         if(!api || !api.kalshiLiveAdjust || !currentUserIsAdmin){ return; }
         if(!Number.isFinite(v) || v === 0){ am.textContent = 'Type an amount in dollars first.'; return; }
-        if(!window.confirm((v > 0 ? 'Record a deposit of ' : 'Record a withdrawal of ') + money(Math.abs(v)) + '? It is taken off "Change since start" and cannot be edited here afterwards.')){ return; }
+        if(!window.confirm((v > 0 ? 'Record a deposit of ' : 'Record a withdrawal of ') + money(Math.abs(v)) + '? It is taken off the account change under Tools and cannot be edited here afterwards.')){ return; }
         go.disabled = true; am.textContent = 'Recording...';
-        api.kalshiLiveAdjust(v).then(function(){ return api.kalshiLiveAccount(); }).then(function(d){ render(d); amt.value = ''; am.textContent = 'Recorded. Change since start no longer counts it.'; })
+        api.kalshiLiveAdjust(v).then(function(){ return api.kalshiLiveAccount(); }).then(function(d){ render(d); amt.value = ''; am.textContent = 'Recorded. The account change under Tools no longer counts it.'; })
           .catch(function(err){ am.textContent = 'Could not record it: ' + ((err && err.message) || 'unknown'); }).then(function(){ go.disabled = false; });
       });
     })();
