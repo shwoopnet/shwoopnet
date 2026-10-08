@@ -2077,3 +2077,13 @@ The owner chose to scale size with the balance instead of waiting for step 1's e
 - **What this does not change.** The edge is about +0.7c a contract and failed its own bar (z 1.45 against 2.1). Size scales both the gain and the loss; a loss still costs the whole price and no stop can cap a gap. The forward checks (F0 to F9) still decide whether the edge is real, and the step-down rules above still apply: if the forward check returns `FALSIFIED`, the cap goes back to 1 contract.
 - **A flaw found on the way, kept so it is not rebuilt.** Skimming half of every WIN looked natural and is wrong here: wins are 6c and losses 90c, so it banked $150 of "savings" on a net of -$6 in a replay while the base shrank. Only new net highs are skimmed now, and a test asserts savings never exceed half the best net profit reached.
 - Count: unchanged, **2,574 as of 2026-10-08** (sizing, not a strategy variant).
+
+## Fee rounding, measured on the owner's own fills (2026-10-08, information only, no hypothesis, no verdict)
+
+The cost model check above assumed a buy costs `ceil_to_the_cent(count * (price + fee))`, which would make one contract at 92c pay about 1c of fee. The "Copy order diagnostics" export (the bot's own order records, 60 rows from Oct 7 and 8) settles it for the fee that Kalshi reports.
+
+- **`average_fee_paid` is the fee rounded up to $0.0001 over the whole order, not to the cent.** 21 fills checked (`observed_fee_per_contract`): a one contract buy at 7.1c reports 0.47c, the same price at three contracts reports 0.46c, a one contract buy at 4.4c reports 0.30c against an exact 0.294c. Whole-cent rounding fits 1 of 21; the sub-cent rule fits all 21.
+- **Prices are sub-cent too** (average fills such as 0.9599 and 0.0420), so this account moves in fractions of a cent. Nothing here shows the whole-cent balance alignment that `order_cost` models.
+- **What is not shown.** The export has the fee Kalshi reports, not the balance move. It does not prove the balance is never aligned to the cent; a one contract order's balance before and after would. The evidence leans against it.
+- **Consequence for earlier numbers.** `order_cost` (whole cent) was used by `feerounding`, `riskcap` and `sizing`. If this account is not charged whole cents, those numbers understate the edge slightly: the +0.49c (1 contract), +0.70c (2) and +0.79c (3) per contract move toward the unrounded +0.96c, and one contract orders stop being worse than three. Nothing about sizing decisions flips; every figure there is a little conservative.
+- Count: unchanged, **2,574 as of 2026-10-08**.
