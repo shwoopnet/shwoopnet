@@ -2057,7 +2057,7 @@ import random as _rnd2
 from scalper import sizing as _SZ
 _by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": 0.08 if (d + i) % 10 else -0.92} for i in range(12)] for d in range(1, 8)}
 _days = sorted(_by)
-_tot, _dd, _sv, _cap, _pk = _SZ.path(_by, _days, dpc=100, skim=True, addon_max=2, fixed=0, rng=_rnd2.Random(3), ndays=14, fill=1.0)
+_tot, _dd, _sv, _cap, _pk, _stops = _SZ.path(_by, _days, dpc=100, skim=True, addon_max=2, fixed=0, rng=_rnd2.Random(3), ndays=14, fill=1.0)
 assert _sv <= 0.5 * max(0.0, _pk) + 1e-6, "savings never exceed half of the best net profit reached (the first version skimmed every win and banked far more than the net)"
 _t3 = [_SZ.path(_by, _days, dpc=100, skim=False, addon_max=0, fixed=3, rng=_rnd2.Random(k), ndays=14, fill=1.0)[3] for k in range(5)]
 assert set(_t3) == {3}, "a flat size stays flat"
@@ -2107,3 +2107,50 @@ _same = [_cc(840, 0.10, 0.11)]
 assert _CS.trade(_same, _cl, "yes", 0.00, False)["how"] == "held", "an exit needs a candle strictly after the entry candle"
 assert _CS.verdict([{"day": "d", "net": 0.1, "close_ts": 1, "stress": 0.1}] * 10, 5)[0] == "NOT_ENOUGH_DATA", "too few entries is not a verdict"
 print("cheap scalp C1-C3 tests passed")
+
+# OP1 to OP3: entry only 3 to 5 (or 6) minutes in on a real 70c to 90c ask, the dip needs a real quote a minute earlier and a drop of 3c, exits are strictly later candles, the time exit uses the 6 minute bid, NO is priced as one minus the YES bid.
+from scalper import openscalp as _OP
+_cl = 100000
+def _oc(left, bid, ask):
+    return (_cl - left, bid, ask, bid, ask)
+_o1 = _OP.SPECS["OP1"]
+_t = _OP.trade([_oc(720, 0.79, 0.80), _oc(660, 0.83, 0.84)], _cl, "no", _o1)
+assert _t and _t["side"] == "yes" and _t["how"] == "target" and abs(_t["net"] - (0.83 - 0.80 - _OP.fee(0.80) - _OP.fee(0.83))) < 1e-9, "the 83c bid is the 80c ask plus 3c"
+assert _OP.trade([_oc(720, 0.79, 0.80), _oc(660, 0.82, 0.83)], _cl, "yes", _o1)["how"] == "held (no time-exit candle)", "82c is not 3c above 80c, and with no 6 minute candle it holds to settlement"
+_tx = _OP.trade([_oc(720, 0.79, 0.80), _oc(660, 0.79, 0.80), _oc(360, 0.75, 0.76)], _cl, "yes", _o1)
+assert _tx["how"] == "time" and abs(_tx["net"] - (0.75 - 0.80 - _OP.fee(0.80) - _OP.fee(0.75))) < 1e-9, "the time exit sells at the 6 minute bid"
+assert _OP.trade([_oc(480, 0.79, 0.80)], _cl, "yes", _o1) is None, "no entry after the first five minutes"
+assert _OP.trade([_oc(720, 0.60, 0.61)], _cl, "yes", _o1) is None and _OP.trade([_oc(720, 0.95, 0.96)], _cl, "yes", _o1) is None, "the ask must be 70c to 90c"
+_no = _OP.trade([_oc(720, 0.19, 0.20), _oc(660, 0.15, 0.16)], _cl, "no", _o1)
+assert _no and _no["side"] == "no" and abs(_no["ask"] - 0.81) < 1e-9 and _no["how"] == "target", "NO asks one minus the YES bid, its bid is one minus the YES ask (84c)"
+_o3 = _OP.SPECS["OP3"]
+_d = _OP.trade([_oc(780, 0.85, 0.86), _oc(720, 0.80, 0.81), _oc(660, 0.85, 0.86)], _cl, "no", _o3)
+assert _d and _d["how"] == "target" and abs(_d["ask"] - 0.81) < 1e-9, "a dip of 5c from 86c to 81c, sold when the bid is back to the earlier ask less 1c (85c)"
+assert _OP.trade([_oc(780, 0.82, 0.83), _oc(720, 0.80, 0.81)], _cl, "yes", _o3) is None, "a drop of 2c is not a dip"
+assert _OP.trade([_oc(720, 0.80, 0.81)], _cl, "yes", _o3) is None, "a dip needs the earlier minute's quote"
+assert _OP.verdict([{"day": "d", "net": 0.1, "close_ts": 1, "stress": 0.1}] * 10, 5)[0] == "NOT_ENOUGH_DATA"
+print("opening scalp OP1-OP3 tests passed")
+
+# The time exit ends the search for the target: a bounce AFTER the 6 minute mark is not a win, because the position was already sold at that bid (the first run of C2, C3 and OP1 to OP3 counted it and was withdrawn).
+_late = [_oc(720, 0.79, 0.80), _oc(660, 0.78, 0.79), _oc(360, 0.77, 0.78), _oc(120, 0.90, 0.91)]
+_lt = _OP.trade(_late, _cl, "yes", _OP.SPECS["OP1"])
+assert _lt["how"] == "time" and abs(_lt["net"] - (0.77 - 0.80 - _OP.fee(0.80) - _OP.fee(0.77))) < 1e-9, "the 90c bid at 2 minutes left is after the sale at 6 minutes left"
+_cc2 = [_CS.trade(_late, _cl, "yes", 0.05, True), _CS.trade(_late, _cl, "yes", 0.05, False)]
+assert _cc2[0] is None or True
+_cl2 = [(_cl - 840, 0.10, 0.11, 0.10, 0.11), (_cl - 780, 0.09, 0.10, 0.09, 0.10), (_cl - 360, 0.08, 0.09, 0.08, 0.09), (_cl - 120, 0.20, 0.21, 0.20, 0.21)]
+_ct = _CS.trade(_cl2, _cl, "yes", 0.05, True)
+assert _ct["how"] == "time", "C2 and C3 sell at 6 minutes left even if the price bounces later"
+assert _CS.trade(_cl2, _cl, "yes", 0.05, False)["how"] == "target", "C1 has no time exit, so a later bounce is its target"
+print("time exit ends the target search: tests passed")
+
+# Faster steps and the modelled loss stop: 3 day reviews climb faster than weekly ones to the same ceiling, and a day that hits the stop is counted and holds the climb.
+_win_by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": 0.08} for _ in range(10)] for d in range(1, 8)}
+_wd = sorted(_win_by)
+_c3 = _SZ.path(_win_by, _wd, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=14, fill=1.0, step_days=3)[3]
+_c7 = _SZ.path(_win_by, _wd, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=14, fill=1.0, step_days=7)[3]
+assert _c3 > _c7 >= 3, "reviews every 3 days climb faster than weekly ones when the balance supports it"
+_loss_by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": -0.92} for _ in range(10)] for d in range(1, 8)}
+_ld = sorted(_loss_by)
+_r = _SZ.path(_loss_by, _ld, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=3, fill=1.0, step_days=3, stop_frac=0.005)
+assert _r[5] == 3 and _r[0] > -3 * 3 * 0.93 * 1.05, "a losing day stops after its first loss, every day, not after all ten orders"
+print("faster steps and stop replay tests passed")

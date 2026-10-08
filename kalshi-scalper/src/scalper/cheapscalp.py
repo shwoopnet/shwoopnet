@@ -54,7 +54,9 @@ def trade(candles: list[tuple], close_ts: int, result: str, target: float, time_
         return None
     side, ask = e["side"], e["ask"]
     entry_cost = ask + fee(ask, mult)
-    later = sorted((c for c in candles if close_ts - c[0] < e["left"]), key=lambda c: c[0])
+    # With a time exit, the target is only looked for up to and including the 6 minute mark: after it the position has already been sold at that bid.
+    floor_left = TIME_EXIT_LEFT_S if time_exit else 0
+    later = sorted((c for c in candles if floor_left <= close_ts - c[0] < e["left"]), key=lambda c: c[0])
     for c in later:
         _, bid = side_prices(side, c)
         if bid is not None and bid >= ask + target - 1e-9 and valid_quote(c[1], c[2]):

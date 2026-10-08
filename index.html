@@ -3428,7 +3428,7 @@
               <div id="kalL1Status" class="kal-note">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (one contract per $85 of balance, up to 10, raised at most one step a week; stop at 10% of the balance at the weekly review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (one contract per $85 of balance, up to 10, raised one step every 3 days at most; stop at 10% of the balance at the last review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -3437,7 +3437,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised at most one step a week) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (10% of the balance at the weekly review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
+                <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised one step every 3 days at most) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (10% of the balance at the last review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
               </details>
             </div>
           </details>
@@ -10007,41 +10007,78 @@
       '<text x="' + (W - R + 6) + '" y="' + (Y(last.v) + (opts.ref != null && Math.abs(Y(last.v) - Y(opts.ref)) < 12 ? (last.v >= opts.ref ? -6 : 14) : 4)).toFixed(1) + '" fill="' + col + '" font-size="11" font-weight="700">' + escapeHtml(opts.fmt(last.v)) + '</text></svg>';
   }
 
-  // Bitcoin's price by the minute from Coinbase's public candles (no key, the browser may call it). It is a stand-in for the index Kalshi settles on,
-  // so it can sit a little off the "to beat" line even when the market is right; the chart says Coinbase for that reason.
-  var kalshiSpot = { at: 0, busy: false, pts: [] };
+  // Both lines are built from a minute history that is fetched at once plus live readings added every 10 seconds, so a chart is never empty when a market
+  // has just opened and never waits for the page to collect points.
+  // Bitcoin: Coinbase's BTC-USD candles and ticker (public, no key, the browser may call it). A stand-in for the index Kalshi settles on, so it can sit a little
+  // off the "to beat" line even when the market is right; the tile says so.
+  var kalshiSpot = { at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] };
   var kalshiMid = {};
-  // Gold's price from gold-api.com (free, no key, the browser may call it). It has no history, so the line is built from what this page has seen since it was
-  // opened and fills from the left; Kalshi settles gold on a Pyth feed, so this can sit a dollar or so off the "to beat" line even when the market is right.
-  var kalshiGold = { at: 0, busy: false, failed: false, pts: [] };
+  // Gold: the live price is gold-api.com (free, no key). Its history is Coinbase's PAXG-USD candles (tokenized gold, within a few dollars of spot), shifted by the
+  // gap between the two right now so the line ends on the real gold price. The shape of the earlier minutes is approximate; Kalshi settles gold on a Pyth feed.
+  var kalshiGold = { at: 0, busy: false, failed: false, pts: [], hist: [], histAt: 0, histBusy: false, off: null };
+  // Two lists of {t, v} joined in time order, one reading per second at most.
+  function kalshiJoinSeries(a, b){
+    var all = (a || []).concat(b || []).filter(function(p){ return p && Number.isFinite(p.t) && Number.isFinite(p.v); }).sort(function(x, y){ return x.t - y.t; });
+    return all.filter(function(p, i){ return i === 0 || p.t - all[i - 1].t >= 1000; });
+  }
+  var KAL_ISO = function(ms){ return new Date(ms).toISOString().slice(0, 19) + 'Z'; };
+  function kalshiCandles(product, now){
+    return fetch('https://api.exchange.coinbase.com/products/' + product + '/candles?granularity=60&start=' + KAL_ISO(now - 20 * 60000) + '&end=' + KAL_ISO(now))
+      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(rows){
+        return (Array.isArray(rows) ? rows : []).map(function(c){ return { t: Math.min(Date.now(), (c[0] + 60) * 1000), v: Number(c[4]) }; })
+          .sort(function(a, b){ return a.t - b.t; });
+      });
+  }
+  function kalshiTicker(product){
+    return fetch('https://api.exchange.coinbase.com/products/' + product + '/ticker')
+      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(j){ var v = Number(j && j.price); if(!(v > 0)){ throw new Error('no price'); } return v; });
+  }
+  function kalshiFetchSpot(now){
+    if(!kalshiSpot.busy && now - kalshiSpot.at >= 30000){
+      kalshiSpot.busy = true;
+      kalshiCandles('BTC-USD', now).then(function(pts){ kalshiSpot.pts = pts; kalshiSpot.at = Date.now(); kalshiSpot.busy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); } })
+        .catch(function(){ kalshiSpot.at = Date.now(); kalshiSpot.busy = false; });
+    }
+    if(!kalshiSpot.tickBusy && now - kalshiSpot.tickAt >= 10000){
+      kalshiSpot.tickBusy = true;
+      kalshiTicker('BTC-USD').then(function(v){
+        kalshiSpot.live.push({ t: Date.now(), v: v }); if(kalshiSpot.live.length > 300){ kalshiSpot.live.shift(); }
+        kalshiSpot.tickAt = Date.now(); kalshiSpot.tickBusy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+      }).catch(function(){ kalshiSpot.tickAt = Date.now(); kalshiSpot.tickBusy = false; });
+    }
+  }
+  function kalshiSpotSeries(){ return kalshiJoinSeries(kalshiSpot.pts, kalshiSpot.live); }
   function kalshiFetchGold(now){
+    if(!kalshiGold.histBusy && now - kalshiGold.histAt >= 30000){
+      kalshiGold.histBusy = true;
+      kalshiCandles('PAXG-USD', now).then(function(pts){ kalshiGold.hist = pts; kalshiGold.histAt = Date.now(); kalshiGold.histBusy = false; })
+        .catch(function(){ kalshiGold.histAt = Date.now(); kalshiGold.histBusy = false; });
+    }
     if(kalshiGold.busy || now - kalshiGold.at < 10000){ return; }
     kalshiGold.busy = true;
+    var paxg = kalshiTicker('PAXG-USD').catch(function(){ return null; });
     fetch('https://api.gold-api.com/price/XAU')
       .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
       .then(function(j){
         var v = Number(j && j.price);
         if(!(v > 0)){ throw new Error('no price'); }
-        var t = Date.now(), last = kalshiGold.pts[kalshiGold.pts.length - 1];
-        if(!last || t - last.t >= 5000){ kalshiGold.pts.push({ t: t, v: v }); if(kalshiGold.pts.length > 300){ kalshiGold.pts.shift(); } }
-        kalshiGold.at = t; kalshiGold.busy = false; kalshiGold.failed = false;
-        if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+        return paxg.then(function(p){
+          if(p !== null){ kalshiGold.off = v - p; }
+          var t = Date.now(), last = kalshiGold.pts[kalshiGold.pts.length - 1];
+          if(!last || t - last.t >= 5000){ kalshiGold.pts.push({ t: t, v: v }); if(kalshiGold.pts.length > 300){ kalshiGold.pts.shift(); } }
+          kalshiGold.at = t; kalshiGold.busy = false; kalshiGold.failed = false;
+          if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+        });
       })
       .catch(function(){ kalshiGold.at = Date.now(); kalshiGold.busy = false; kalshiGold.failed = true; });
   }
-  function kalshiFetchSpot(now){
-    if(kalshiSpot.busy || now - kalshiSpot.at < 30000){ return; }
-    kalshiSpot.busy = true;
-    var iso = function(ms){ return new Date(ms).toISOString().slice(0, 19) + 'Z'; };
-    fetch('https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=60&start=' + iso(now - 20 * 60000) + '&end=' + iso(now))
-      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
-      .then(function(rows){
-        kalshiSpot.pts = (Array.isArray(rows) ? rows : []).map(function(c){ return { t: Math.min(Date.now(), (c[0] + 60) * 1000), v: Number(c[4]) }; })
-          .sort(function(a, b){ return a.t - b.t; });
-        kalshiSpot.at = Date.now(); kalshiSpot.busy = false;
-        if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
-      })
-      .catch(function(){ kalshiSpot.at = Date.now(); kalshiSpot.busy = false; });
+  function kalshiGoldSeries(){
+    var off = kalshiGold.off;
+    var hist = off === null ? [] : kalshiGold.hist.map(function(p){ return { t: p.t, v: p.v + off }; });
+    var firstLive = kalshiGold.pts.length ? kalshiGold.pts[0].t : Infinity;
+    return kalshiJoinSeries(hist.filter(function(p){ return p.t < firstLive; }), kalshiGold.pts);
   }
 
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
@@ -10054,10 +10091,10 @@
     var o = { from: close - 15 * 60000, to: close };
     var body;
     if(m.series === 'KXBTC15M' && m.strike != null){
-      body = kalshiSparkSvg(kalshiSpot.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
+      body = kalshiSparkSvg(kalshiSpotSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
     } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
-      body = kalshiSparkSvg(kalshiGold.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
+      body = kalshiSparkSvg(kalshiGoldSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
     } else {
       body = kalshiSparkSvg(kalshiMid[m.ticker], { from: o.from, to: o.to, ref: null, label: 'YES price in cents since this page was opened', empty: 'A line appears after a minute of watching.',
@@ -10411,7 +10448,7 @@
     pill.className = 'kal-pill' + (switchOff ? ' bad' : (halted ? ' warn' : (running ? ' on' : '')));
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
-    var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last weekly review, once the server has made one
+    var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
     var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.10 * base).toFixed(2) : '$10.00';
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
     var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + ', ' + (s.ordersSent || 0) + ' orders sent, ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
