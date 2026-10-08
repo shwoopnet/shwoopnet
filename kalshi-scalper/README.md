@@ -29,7 +29,7 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 2,553 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
+Strategy variants tried so far: 2,560 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760, F6 and F7 two, Q1 to Q3 and two Q1 thresholds five), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
 until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -1731,3 +1731,23 @@ pass could only ever be permission to test forward on days not yet seen, written
 - **Information only, no verdict, may not rescue anything.** The base L1 on the same markets; each arm's price mix and its Bitcoin and gold split;
   Q1 at `K = 0.5` and `K = 2.0`. Those two extra thresholds are printed to show how steady the result is and are counted as tries.
 - **Count.** Q1, Q2 and Q3 are three variants and the two extra Q1 thresholds are two more: **2,560** as of 2026-10-08 (2,555 plus five).
+
+**2026-10-08: Q1 to Q3: all three `FALSIFIED`.** One run of `python -m scalper.filters` under the section above (commit after the pre-registration and the tests). Nothing was changed after seeing it. Base L1: 3,400 entries, +0.96c, z +2.71, 69 days.
+
+| Filter | Arm n | Arm net | z | Halves | Fees x1.2 | Complement n / net | Arm minus complement (z) | Fair market 95th pct | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| Q1 spot support (Bitcoin) | 1,653 | +0.86c | +1.43 | +0.63c / +1.08c | +0.77c | 331 / -0.64c | +1.16c (+0.64) | +0.55c | `FALSIFIED` |
+| Q2 previous result agrees | 1,694 | +0.49c | +1.03 | +1.10c / -0.12c | +0.40c | 1,698 / +1.41c | -0.83c (-1.00) | +0.61c | `FALSIFIED` |
+| Q3 other series agrees | 1,653 | +0.87c | +1.70 | +1.09c / +0.64c | +0.77c | 992 / +1.14c | -0.45c (-0.43) | +0.56c | `FALSIFIED` |
+| Q1 at K=0.5 (information) | 1,967 | +0.58c | +1.02 | | | 17 / +4.02c | | | `FALSIFIED` |
+| Q1 at K=2.0 (information) | 317 | +0.33c | +0.24 | | | 1,667 / +0.66c | | | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: none passes. Right on the verdicts. Q1 was predicted at about +1.2c with a difference of about 1c; it
+  measured +0.86c with a difference of +1.16c, the right sign and size but nowhere near the z of 2.4 or the 2.0 on the difference (arm and
+  complement have 1,653 and 331 entries). Q2 and Q3 were predicted within 0.5c of their complements; Q2 came out 0.83c BELOW it and Q3 0.45c below.
+- **What it says.** The Bitcoin entries that spot does not support lost 0.64c a contract and those it does support made 0.86c, which is the shape
+  the mechanism predicts, but the gap is inside its noise (z +0.64), and K=2.0 (the strongest support) is the weakest arm (+0.33c), the opposite
+  of a dose response. So there is no evidence that the spot filter removes the bad L1 entries. Entries where the previous market agreed with the
+  favourite did worse than those where it did not (Q2). That is a pattern read off an information table (z -1.00); acting on it would need
+  its own pre-registration and unseen data, and it is consistent with S06/S07 finding no useful persistence either way.
+- **Count.** Five variants (Q1 to Q3 and the two Q1 thresholds): **2,560 as of 2026-10-08** (2,555 plus 5). The top line of this file is updated.
