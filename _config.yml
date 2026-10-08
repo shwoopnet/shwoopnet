@@ -1,0 +1,14 @@
+exclude:
+  - docs
+  - functions
+  - kalshi-scalper
+  - test
+  - .claude
+  - CLAUDE.md
+  - MUTATION_NOTES.md
+  - REVIEW_NOTES.md
+  - SECURITY_REVIEW.md
+  - SERVER_REVIEW_2026-10-08.md
+  - firestore.rules
+  - firebase.json
+  - node_modules
