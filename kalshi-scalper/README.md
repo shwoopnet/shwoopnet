@@ -29,7 +29,7 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 793 as of 2026-10-08 (P1 in the final section is the 793rd; the line below it is the 792 before P1), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
+Strategy variants tried so far: 2,553 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
 until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -1615,3 +1615,20 @@ names of the database and the existing `search.py`.
   mix and none is run. No other combination is looked at.
 - **Live implication.** None from this section. Four slots would need a separate order id per slot (today the id is `L1-<ticker>`, one order per
   market), a per slot stop, and the size ladder; none of that is built or proposed until a rule passes forward.
+
+**2026-10-08: the four slot search: all four slots `FALSIFIED`, no rule passes.** One run of `python -m scalper.slots` (seed 11, 3 cycles per slot) under the section above. Nothing was changed after seeing it. 11,130 markets, search window 5,546, holdout 5,584 read once. Full rows in `search4/slots.json`.
+
+| Slot | Rules | Best search z, real | Best search z, control | Floor | Holdout of final 25: positive | Control rules on a fair holdout | Mean net on holdout | Passes |
+|---|---|---|---|---|---|---|---|---|
+| Bitcoin early | 439 | 3.51 | 1.71 | 3.49 | 7 | 7 | -1.58c | 0 |
+| Bitcoin late | 440 | 2.65 | 4.14 | 3.49 | 9 | 12 | -0.52c | 0 |
+| gold early | 441 | 1.99 | 3.34 | 3.49 | 7 | 2 | -0.79c | 0 |
+| gold late | 440 | 2.60 | 2.16 | 3.49 | 7 | 7 | -1.30c | 0 |
+
+- **Prediction against outcome.** Predicted: every slot `FALSIFIED`, best search z near the control and the floor, holdout mean below zero, no more than 6 of 25 positive. Measured: all four `FALSIFIED`, holdout means all negative. Two slots had 7 of 25 positive and one 9 of 25, against the 6 predicted; the control produced 7, 12 and 7 in the same slots, so this is the size of luck in this pipeline, and it is reported as the anomaly the section said to report, not as a finding. Gold early's 7 against the control's 2 is the one gap worth a sentence: none of those 7 had 300 holdout entries (all `NOT_ENOUGH_DATA`).
+- **Bitcoin early is the only slot whose real best (3.51) is above its floor (3.49) and well above its control (1.71).** It did not survive: the best rule (12 minutes left, either side priced 0.70 to 0.90, spread 2c or less) was +1.06c on 1,081 holdout entries with z of 0.77. A search window z at the floor that fades to 0.77 is what selection looks like.
+- **Best holdout rows.** Bitcoin late: 2 minutes left, priced 0.10 to 0.20, spread 2c or less, +5.79c on 353 entries, z 2.39, below the 3.0 mark and a longshot band in which the fair-market control also scores high. Gold early: 10 minutes left, 0.90 to 0.97, price moved toward the side by 2c over 3 minutes, other market agrees, +3.23c on only 101 entries (z 1.94): `NOT_ENOUGH_DATA`, and it is the only `pair` rule that came near the top. Gold late: +2.92c on 265 entries (z 1.30).
+- **L1 as live, per slot, information only.** Bitcoin late: search +0.53c (z 0.96), holdout +0.68c (z 0.70). Gold late: search +1.95c (z 2.59), holdout +0.97c (z 1.30). Positive in both halves for both series, and in both series the holdout is smaller than the search window, which is the same drift the forward check was built to watch. Neither series on its own clears z 2.1 on the holdout.
+- **Mixing.** Fewer than two slots had a passing rule, so no combination was evaluated, as the section said.
+- **What this does and does not say.** This grammar (one price band, one side, up to three filters, hold to settlement, taker at the ask), in these windows, on 69 days, finds nothing a fair market does not also produce. It does not say a different shape, such as a resting order or a sized ladder, has no edge. The `pair` filter (the other series pointing the same way) produced no top rule in either late slot.
+- **Count.** 1,760 distinct rules evaluated in the real runs. **Strategy variants tried so far: 2,553 as of 2026-10-08** (793 including P1, plus these 1,760). The line at the top of this file is updated. All `FALSIFIED` or `NOT_ENOUGH_DATA`.

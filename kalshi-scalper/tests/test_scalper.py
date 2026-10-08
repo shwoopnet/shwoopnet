@@ -1756,3 +1756,26 @@ for _id, _kind in (("S13", "over"), ("S10", "under"), ("S12", "under")):
     assert _by[_id]["K_plus"] == (_by[_id]["pooled"]["mean"] > _by[_id]["baseline_mean"])
 assert all(r["K_plus"] and r["baseline_mean"] is None for r in _rows50 if r["id"] not in ("S10", "S12", "S13", "S28", "S38")), "K+ applies to five strategies only"
 print("strategy baseline tests passed")
+
+# Four slot search: a slot rule decides from prices only, trades only its own series, and the pass mark cannot be met by luck-sized or thin results.
+from scalper import slots as _SL
+_book = {600 - 360: (0.91, 0.93), 600 - 420: (0.90, 0.92)}
+_m_yes = {"ticker": "A", "series": "KXBTC15M", "close": 600, "res": "yes", "day": "2026-10-01", "book": _book, "twin": None}
+_m_no = dict(_m_yes, res="no")
+_rule = {"series": "KXBTC15M", "left": 6, "lo": 0.90, "hi": 0.95, "side": "either", "filters": []}
+assert _SL.entry(_m_yes, _rule) == _SL.entry(_m_no, _rule), "the entry never reads the result"
+assert _SL.entry(dict(_m_yes, series="KXGOLD15M"), _rule) is None, "a slot rule never trades the other series"
+_pr = dict(_rule, filters=[("pair", "agree")])
+assert _SL.entry(_m_yes, _pr) is None, "no twin quote means no entry"
+_tw = dict(_m_yes, series="KXGOLD15M", book={600 - 360: (0.69, 0.71)})
+assert _SL.entry(dict(_m_yes, twin=_tw), _pr) is not None and _SL.entry(dict(_m_yes, twin=_tw), dict(_rule, filters=[("pair", "disagree")])) is None
+_tw_late = dict(_tw, book={600 - 300: (0.69, 0.71)})
+assert _SL.entry(dict(_m_yes, twin=_tw_late), _pr) is None, "the twin is read at the same minute, not at a later one"
+_good = {"n": 400, "mean": 0.02, "z": 3.2, "halves": [0.01, 0.03], "stress": 0.01}
+assert _SL.verdict(_good, 3.6, 3.5, 3.0) == "NOT_YET_FALSIFIED"
+assert _SL.verdict(dict(_good, n=299), 3.6, 3.5, 3.0) == "NOT_ENOUGH_DATA"
+assert _SL.verdict(dict(_good, z=2.9), 3.6, 3.5, 3.0) == "FALSIFIED", "a z of 2.9 is what the best of 100 noise reads reaches"
+assert _SL.verdict(dict(_good, halves=[-0.01, 0.05]), 3.6, 3.5, 3.0) == "FALSIFIED"
+assert _SL.verdict(dict(_good, stress=-0.001), 3.6, 3.5, 3.0) == "FALSIFIED"
+assert _SL.verdict(_good, 3.4, 3.5, 3.0) == "FALSIFIED", "the search z must beat the floor"
+print("slot search tests passed")
