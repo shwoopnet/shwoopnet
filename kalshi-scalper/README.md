@@ -1967,3 +1967,20 @@ same P2 and ask-drift code as for the container recorder. 80 of the 82 markets a
   thin books are not the reason.
 - **What this does and does not say.** One day, 30 signals. It does not test the maker idea; it shows that on this day the resting orders would have been filled mostly on the losers. The
   full test is the 300 signals on 5 days P2 asks for, from this same recorder.
+
+## Pre-registration: lower exit thresholds, X5 to X7 (fixed 2026-10-08 14:20 UTC, before any of them was priced)
+
+The first exit family (X1 to X4) started at 50c, and the owner asked, rightly, what happens lower: a stop that only fires on a near total collapse costs less and cuts fewer winners, so
+the answer is not obvious from 50c to 80c alone. It should have been in the first registration; it is registered now, on the same rule and the same entries, before any result exists for it.
+
+- **Variants, fixed now, three more tries.** Sell when the held side's bid is at or below **40c (X5), 30c (X6), 20c (X7)**. Everything else is exactly as registered for X1 to X4: the same 3,422 L1 entries,
+  checks at the candle closes 5, 4, 3, 2 and 1 minutes before the close, a real bid of at least 0.1c, taker fee on both legs, no spread filter, HOLD as the baseline. The code is unchanged except for the
+  threshold table.
+- **Counterparty and numeric prediction, stated before the run.** Same counterparty story as X1 to X4 (the buyer on the other side of a collapse is paying a fair price). Predicted: the share of entries
+  stopped falls to about 5% (40c), 3% (30c) and 2% (20c); the mean difference against HOLD moves toward zero as the threshold falls, between -0.10c and +0.05c; the standard deviation falls only a little (to about
+  22c at 40c and about 23c at 20c) and the worst loss stays near -95c, because the large losses gap straight through these levels inside a minute. **The pre-registered expectation is that all three are
+  `FALSIFIED` as an improvement in the mean**, and that no threshold below 50c gives a worse deal than X1 or a better one.
+- **Kill criteria.** The same as X1 to X4 with the bar made stricter for seven tries in total: n at least 300 on at least 5 days; the exit rule's mean above HOLD's with a day clustered z of the per day
+  difference of at least **2.7** (X1 to X4 keep the 2.5 they were registered with); its own mean positive, positive in both halves, positive with fees times 1.2, and the difference above the 95th percentile of the
+  fair-market null. Anything else is `FALSIFIED`.
+- **Count.** Three variants: **2,570 as of 2026-10-08** (2,567 plus three).
