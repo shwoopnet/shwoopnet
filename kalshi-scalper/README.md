@@ -2087,3 +2087,19 @@ The cost model check above assumed a buy costs `ceil_to_the_cent(count * (price 
 - **What is not shown.** The export has the fee Kalshi reports, not the balance move. It does not prove the balance is never aligned to the cent; a one contract order's balance before and after would. The evidence leans against it.
 - **Consequence for earlier numbers.** `order_cost` (whole cent) was used by `feerounding`, `riskcap` and `sizing`. If this account is not charged whole cents, those numbers understate the edge slightly: the +0.49c (1 contract), +0.70c (2) and +0.79c (3) per contract move toward the unrounded +0.96c, and one contract orders stop being worse than three. Nothing about sizing decisions flips; every figure there is a little conservative.
 - Count: unchanged, **2,574 as of 2026-10-08**.
+
+## Pre-registration: the cheap side, scalped early, C1 to C3 (fixed 2026-10-08 16:19 UTC, before any code and before any cheap-side trade was priced)
+
+The owner asked for "the opposite end of the spectrum" from L1: instead of buying the 88c to 97c favorite late and holding, buy the side that is only 8c to 15c in the first five minutes and take a few cents.
+
+- **What was and was not tried.** H2 and H4 bought 30c to 50c sides and sold at 80c (both `FALSIFIED`). L1 bought the favorite late. The 8c to 15c side with a small target, early in the market's life, is a price band and an exit not covered by any row above.
+- **Counterparty.** Whoever sells us the longshot early: a quoter whose early price lags a spot move, or a seller who accepts a few cents for a lottery ticket. If early quotes are slow, the cheap side should tick up toward its true value before the close.
+- **Why the prior is negative.** In a fair market a cheap side's price is its probability, so buying and selling for a small target earns zero before costs. Costs here are the fee in and out (about 0.6c each at 10c, quadratic) and the spread (0.1c to 1c). L1's +0.96c a contract on the favorite means the longshot side loses about that much on average, so the mirror image starts about -1c behind before costs.
+- **Rule, fixed.** Entry: the first minute close in the first five minutes of the market (candles ending 840, 780, 720, 660 or 600 seconds before the close) at which either side's ask (YES at its ask, NO at one minus the YES bid, snapped to 4 places) is 0.08 to 0.15 and the quote is real (`valid_quote`). One entry per market. Exit: the first LATER minute close at which that side's bid is at least the entry ask plus the target T, sold at that bid, taker fee on both legs.
+  - **C1:** T = 5c; otherwise held to settlement.
+  - **C2:** T = 5c; otherwise sold at the bid at the minute close 6 minutes before the close (no settlement risk; a bid under 0.1c counts as 0).
+  - **C3:** T = 10c; otherwise sold at 6 minutes left as in C2.
+- **Numeric prediction, stated before the run.** C1 mean between -2.5c and -0.5c a contract; C2 and C3 between -1.5c and -0.2c. All three expected `FALSIFIED`. The count of entries is unknown (early 8c to 15c needs a big spot move in the first five minutes); fewer than 300 entries reports `NOT_ENOUGH_DATA`.
+- **Bar.** The common one, for three tries: at least 300 entries on at least 5 days, day clustered z at least 2.5, both halves positive, positive with fees x1.2. Verdict words only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. Passing is permission to look at later data, never a reason to trade.
+- **Information only, printed beside the verdict and unable to rescue a failure:** the hit rate of the target, the average win and loss, by series, and the same rule with a 3c target.
+- **Count.** Three variants: **2,577 as of this entry** (2,574 plus three).
