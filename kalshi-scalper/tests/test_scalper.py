@@ -2154,3 +2154,16 @@ _ld = sorted(_loss_by)
 _r = _SZ.path(_loss_by, _ld, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=3, fill=1.0, step_days=3, stop_frac=0.005)
 assert _r[5] == 3 and _r[0] > -3 * 3 * 0.93 * 1.05, "a losing day stops after its first loss, every day, not after all ten orders"
 print("faster steps and stop replay tests passed")
+
+# OP4 and OP5: the early favorite filter reads the candle exactly 10 minutes before the close (NO as one minus the YES bid), needs a real quote there, and the tight book filter reads the entry candle's spread.
+from scalper import l1filters2 as _L2
+_cl = 100000
+_ent = [{"ticker": "A", "side": "yes", "day": "d", "net": 0.01, "stress": 0.0, "close_ts": 1, "price": 0.9}, {"ticker": "B", "side": "no", "day": "d", "net": 0.01, "stress": 0.0, "close_ts": 2, "price": 0.9},
+        {"ticker": "C", "side": "yes", "day": "d", "net": 0.01, "stress": 0.0, "close_ts": 3, "price": 0.9}, {"ticker": "D", "side": "yes", "day": "d", "net": 0.01, "stress": 0.0, "close_ts": 4, "price": 0.9}]
+_cs = {"A": [(_cl - 600, 0.85, 0.86, 0.85, 0.86)], "B": [(_cl - 600, 0.10, 0.12, 0.10, 0.12)], "C": [(_cl - 600, 0.70, 0.71, 0.70, 0.71)], "D": [(_cl - 540, 0.90, 0.91, 0.90, 0.91)]}
+_a, _c, _x = _L2.split_op4(_ent, _cs, {k: _cl for k in "ABCD"})
+assert [e["ticker"] for e in _a] == ["A", "B"] and [e["ticker"] for e in _c] == ["C"] and _x == 1, "A at 86c and NO on B at 1 - 0.10 = 90c are in; C at 71c is the complement; D has no candle at 10 minutes left and is excluded"
+_a5, _c5, _x5 = _L2.split_op5(_ent, {"A": 0.01, "B": 0.02, "C": 0.03})
+assert [e["ticker"] for e in _a5] == ["A", "B"] and [e["ticker"] for e in _c5] == ["C"] and _x5 == 1, "a spread of exactly 2c is tight, 3c is not, no candle is excluded"
+assert _L2.verdict(_ent, _ent)[0] == "NOT_ENOUGH_DATA", "too few entries is not a verdict"
+print("OP4 and OP5 tests passed")
