@@ -41,16 +41,19 @@ gates.Y4 = () => {
   assert.ok(/dropEffect = 'move'/.test(over) && /grid\.addEventListener\('dragenter'/.test(iife), 'a move is announced on enter and over');
 };
 
-// The live books sit in a column right after the trade history (so they land beside it on a wide screen), not in a full-width row
-// underneath, and their five figures wrap two across so they fit a column.
+// Console layout: a rail (session, account, positions) beside one main column (books, trades, detail, log), books tiles above the table.
 gates.Y5 = () => {
   const i = html.indexOf('id="kalTabBot"');
-  const order = [...html.slice(i, i + 12000).matchAll(/<div class="([^"]*)" data-card="(\w+)"/g)].map((m) => [m[2], m[1]]);
-  const names = order.map((o) => o[0]);
-  assert.ok(names.indexOf('books') === names.indexOf('trades') + 1, 'books come straight after trades: ' + names.join(','));
-  assert.ok(!/kal-span/.test(order.find((o) => o[0] === 'books')[1]), 'the books card is a column, not a full-width row');
-  assert.ok(/\.kal-bot-grid \.kal-books \.kal-row\{ grid-template-columns:1fr 1fr; \}/.test(html), 'each market wraps two figures across inside the column');
-  assert.ok(/data-card="account"/.test(html) && /data-card="session"/.test(html), 'the halt and stop cards are still there');
+  const seg = html.slice(i, html.indexOf('</main>', i));
+  const rail = /<div class="kal-rail">([\s\S]*?)\n      <\/div>\n      <div class="kal-main">/.exec(seg);
+  assert.ok(rail, 'the rail is there and the main column follows it');
+  const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
+  assert.deepStrictEqual(names(rail[1]), ['session', 'account', 'positions'], 'the rail holds the session first, then the account, then positions');
+  const main = seg.slice(seg.indexOf('<div class="kal-main">'));
+  assert.deepStrictEqual(names(main), ['books', 'trades', 'detail', 'log'], 'the main column: books tiles, trades, then the folded detail and log');
+  assert.ok(/\.kal-console\{ grid-template-columns:340px minmax\(0,1fr\);/.test(html), 'a fixed-width rail and a flexible main column');
+  assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'one column on a narrow screen, the rail first');
+  assert.ok(/id="kalBotHalt"/.test(rail[1]) && /id="kalL1Stop"/.test(rail[1]), 'halt and stop sit together in the session card');
 };
 
 // The account re-sends its saved layout on every update to the user document. It must not undo a drag in progress, or a move that has not
@@ -78,31 +81,55 @@ gates.Y7 = () => {
   assert.deepStrictEqual(extra.map((o) => o.ticker), ['T-B']);
 };
 
-// Usability: the status that matters is in a strip above the cards, trades and books are compact, and the ticker reads as a time.
+// The helpers behind the trades table and the two charts. All pure: they read nothing from the page.
 gates.Y8 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
-  const short = new Function(block(/(function kalshiShortTicker\(t\)\{[\s\S]*?\n  \})\n/) + '; return kalshiShortTicker;')();
-  assert.strictEqual(short('KXBTC15M-26OCT072015-15'), 'BTC 8:15 PM ET');
-  assert.strictEqual(short('KXGOLD15M-26OCT070000-00'), 'GOLD 12:00 AM ET');
-  assert.strictEqual(short('KXBTC15M-26OCT071200-00'), 'BTC 12:00 PM ET');
-  assert.strictEqual(short('SOMETHING-ELSE'), 'SOMETHING-ELSE', 'an unfamiliar ticker is shown as it is');
-  assert.strictEqual(short('KXBTC15M-26OCT072575-15'), 'KXBTC15M-26OCT072575-15', 'an impossible time is not invented');
-  const strip = new Function(block(/(function kalshiStripHtml\(s, esc, money\)\{[\s\S]*?\n  \})\n/) + '; return kalshiStripHtml;')();
-  const esc = (x) => String(x).replace(/</g, '&lt;');
+  const lift = (names) => new Function(names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  const f = lift(['kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiPnlSeries', 'kalshiLineSvg', 'kalshiDonutHtml']);
+  const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
-  const NOW = 1000000, run = { active: true, until: NOW + 5000, botNet: 0.78, nextLookAt: NOW + 60000 };
-  const acct = { balance: { ok: true, totalDollars: 114.54 } };
-  let h = strip({ switchOn: true, halted: false, session: run, acct, now: NOW }, esc, money);
-  assert.ok(/running/.test(h) && /\+\$0\.78/.test(h) && /\$114\.54/.test(h) && /Next look/.test(h), 'running shows the result, the account and the next look');
-  assert.ok(/kal-chip-bad/.test(strip({ switchOn: false, halted: false, session: run, acct, now: NOW }, esc, money)), 'the order switch being off is the loudest thing');
-  assert.ok(/halted/.test(strip({ switchOn: true, halted: true, session: run, acct, now: NOW }, esc, money)) && !/>running</.test(strip({ switchOn: true, halted: true, session: run, acct, now: NOW }, esc, money)), 'a halt is shown instead of running');
-  h = strip({ switchOn: true, halted: false, session: { active: false }, acct, now: NOW }, esc, money);
-  assert.ok(/not running/.test(h) && !/Bot P\/L/.test(h) && !/Next look/.test(h), 'not running shows no result or next look');
-  h = strip({ switchOn: true, halted: false, session: { active: true, until: NOW + 1, botNet: -1.5, nextLookAt: NOW - 1 }, acct: null, now: NOW }, esc, money);
-  assert.ok(/-\$1\.50/.test(h) && /kal-neg/.test(h) && !/Next look/.test(h) && !/Account/.test(h), 'a loss is red, a past next look and an unread account are left out');
-  assert.ok(/id="kalStrip"/.test(html) && html.indexOf('id="kalStrip"') < html.indexOf('id="kalTabBot"'), 'the strip sits above the cards');
-  assert.ok(/renderKalshiStrip\(\);\s*\}\s*\/\/ The 'Show more' button/.test(html) && /renderKalshiStrip\(\);\s*\}\s*var kalshiLiveOrders/.test(html), 'redrawn whenever the account or the session changes');
-  assert.ok(/class="kal-trow"/.test(html) && /class="kal-brow"/.test(html), 'compact trade and book rows');
+  // Ticker to a time. An unfamiliar ticker or an impossible time is shown as it is, never invented.
+  assert.strictEqual(f.kalshiShortTicker('KXBTC15M-26OCT072015-15'), 'BTC 8:15 PM ET');
+  assert.strictEqual(f.kalshiShortTicker('KXGOLD15M-26OCT070000-00'), 'GOLD 12:00 AM ET');
+  assert.strictEqual(f.kalshiShortTicker('KXBTC15M-26OCT071200-00'), 'BTC 12:00 PM ET');
+  assert.strictEqual(f.kalshiShortTicker('SOMETHING-ELSE'), 'SOMETHING-ELSE');
+  assert.strictEqual(f.kalshiShortTicker('KXBTC15M-26OCT072575-15'), 'KXBTC15M-26OCT072575-15');
+  // Today, tomorrow, later; nothing for a bad date.
+  const noon = new Date(2026, 9, 7, 12, 0, 0).getTime();
+  assert.ok(!/Tomorrow|Oct/.test(f.kalshiWhen(noon + 3600000, noon)) && /^Tomorrow /.test(f.kalshiWhen(noon + 86400000, noon)) && /^Oct 9 /.test(f.kalshiWhen(noon + 2 * 86400000, noon)));
+  assert.strictEqual(f.kalshiWhen(NaN, noon), '');
+  // An order's P/L is only what the server saved once it settled; nothing is worked out from prices here.
+  assert.strictEqual(f.kalshiOrderPnl({ settled: true, fillCount: '1.00', settledPnl: 0.08 }), 0.08);
+  assert.strictEqual(f.kalshiOrderPnl({ settled: true, fillCount: '1.00' }), null, 'settled with no saved figure is not guessed');
+  assert.strictEqual(f.kalshiOrderPnl({ settled: true, fillCount: '0.00', settledPnl: 0 }), null, 'an unfilled order has no P/L');
+  assert.strictEqual(f.kalshiOrderPnl({ fillCount: '1.00', settledPnl: 0.08 }), null, 'an order that has not settled has none yet');
+  // Outcome counts: won, lost, open, no fill; only the session's orders.
+  const o = (ts, status, side, result, fill) => ({ ts, status, side, result, settled: result ? true : undefined, fillCount: fill });
+  const c = f.kalshiOutcomeCounts([o(5, 'filled', 'no', 'no', '1'), o(6, 'filled', 'yes', 'no', '1'), o(7, 'filled', 'no', null, '1'), o(8, 'no fill', 'yes', null, '0'), o(9, 'error', 'yes', null, '0'), o(1, 'filled', 'no', 'no', '1'), null], 5);
+  assert.deepStrictEqual(c, { won: 1, lost: 1, open: 1, noFill: 1, other: 1 }, 'older orders are left out, an errored one is "other"');
+  // The running line: oldest first, cumulative, only settled trades.
+  const ser = f.kalshiPnlSeries([{ ts: 3, settled: true, fillCount: '1', settledPnl: -0.93 }, { ts: 1, settled: true, fillCount: '1', settledPnl: 0.08 }, { ts: 2, settled: true, fillCount: '1', settledPnl: 0.09 }, { ts: 4, fillCount: '1' }], 0);
+  assert.deepStrictEqual(ser.map((p) => [p.pnl, p.cum]), [[0.08, 0.08], [0.09, 0.17], [-0.93, -0.76]], 'cumulative in time order, the unsettled trade is not in it');
+  // The chart: nothing to draw below two points; a loss ends red; text from the page is escaped.
+  assert.ok(/two settled trades/.test(f.kalshiLineSvg([{ cum: 1, pnl: 1, t: 1 }], esc, money)));
+  const svg = f.kalshiLineSvg(ser, esc, money);
+  assert.ok(/<svg/.test(svg) && /stroke="var\(--loss\)"/.test(svg) && /-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is red and labelled with where it ended');
+  assert.ok(/stroke="var\(--gain\)"/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is green');
+  // The pie: no orders says so; slices add to the whole; zero slices are left out.
+  assert.ok(/No orders yet/.test(f.kalshiDonutHtml({ won: 0, lost: 0, open: 0, noFill: 0, other: 0 }, esc)));
+  const pie = f.kalshiDonutHtml({ won: 8, lost: 1, open: 1, noFill: 4, other: 0 }, esc);
+  assert.ok(/>14<\/text>/.test(pie) && /Won<\/span><b>8<\/b>/.test(pie) && /57%/.test(pie) && (pie.match(/stroke-dasharray="/g) || []).length === 4, 'the total, each slice, its share');
+  const pie2 = f.kalshiDonutHtml({ won: 3, lost: 0, open: 0, noFill: 0, other: 0 }, esc);
+  assert.ok(!/Lost<\/span>/.test(pie2) && /100%/.test(pie2) && (pie2.match(/stroke-dasharray="/g) || []).length === 1, 'a slice of zero is not drawn');
+};
+
+// A card stays in its own column: reordering, arrows and dragging all work within the parent the card is in, never across the rail and the main column.
+gates.Y9 = () => {
+  const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
+  assert.ok(/c\.parentNode\.appendChild\(c\)/.test(iife), 'a saved order puts each card back in its own column');
+  assert.ok(/visibleCards\(card\.parentNode\)/.test(iife) && /card\.parentNode\.insertBefore\(card, cards\[j\]\)/.test(iife), 'arrows move a card within its column');
+  assert.ok(/visibleCards\(dragging\.parentNode\)/.test(iife) && /dragging\.parentNode\.insertBefore\(dragging, want\)/.test(iife), 'a drag moves a card within its column');
+  assert.ok(!/kalLayoutCols|colsSel/.test(html), 'no leftover column picker');
 };
 
 (async () => {

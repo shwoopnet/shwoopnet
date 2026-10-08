@@ -207,8 +207,8 @@ gates.G26 = () => {
   assert.strictEqual(pnl({ count: 1, price: '0.9' }, { side: 'maybe' }, 'yes'), null);
   // Wired into the trade line: a P/L cell, the plain "bought NO at 94.2c" wording for the bot's own fills, and the settled results from the server.
   const row = html.slice(html.indexOf("var trEl = document.getElementById('kalBotClosed');"), html.indexOf('var evAll'));
-  assert.ok(/kalshiTradePnl\(x, ord, a\.results \? a\.results\[x\.ticker\] : null\)/.test(row) && /class="kal-trow-pl">' \+ plCell/.test(row), 'each trade line shows its P/L');
-  assert.ok(/'bought ' \+ ord\.side\.toUpperCase\(\)/.test(row), 'the bot\'s own fills read "bought NO at 94.2c"');
+  assert.ok(/kalshiTradePnl\(x, ord, a\.results \? a\.results\[x\.ticker\] : null\)/.test(row) && /class="kal-tr-p">' \+ plCell/.test(row), 'each trade line shows its P/L');
+  assert.ok(/'Bought ' \+ ord\.side\.toUpperCase\(\)/.test(row), 'the bot\'s own fills read "Bought NO at 94.2c"');
 };
 
 // One order that filled in pieces is ONE trade: the counts add up, the price is the count-weighted average, and nothing is invented for
@@ -228,8 +228,8 @@ gates.G27 = () => {
   assert.deepStrictEqual(group([null, { orderId: 'x', count: 'bad', price: 'bad' }, { orderId: 'x', count: 1, price: '0.5' }]).length, 1, 'junk is not turned into a number');
   // The page shows grouped trades everywhere it counts them.
   assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
-  assert.ok(/cell\('Bot P\/L, this session'|botCell = cell\('Bot P\/L, this session'/.test(html) && /Number\.isFinite\(sess\.botNet\)/.test(html), 'the headline is the bot\'s own settled P/L');
-  assert.ok(/cell\('Account change'/.test(html), 'and the account change is labelled as the account, not the bot');
+  assert.ok(/plEl\.textContent = net === null/.test(html) && /Number\.isFinite\(s\.botNet\)/.test(html) && /id="kalL1Pl"/.test(html), 'the headline is the bot\'s own settled P/L, from the server');
+  assert.ok(/<span class="kal-k">Change since start<\/span>/.test(html) && /Includes deposits, withdrawals and manual trades/.test(html), 'and the account change is labelled as the account, not the bot');
 };
 
 (async () => {

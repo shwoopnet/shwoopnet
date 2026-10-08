@@ -382,7 +382,7 @@ gates.N21 = async () => {
   assert.ok(/entry|6 minutes/.test(w.sess.lastNote) && !/about 6 minutes from its close right now/.test(w.sess.lastNote), 'the note says what the window is');
   const none = world(); await tick(none, { quotes: [closing] });
   assert.strictEqual(none.sess.nextLookAt, null, 'no later market known: no time is invented');
-  assert.ok(/Next look at/.test(html) && /s\.nextLookAt > now/.test(html), 'the page shows it only while it is still in the future');
+  assert.ok(/fact\('Next look', Number\.isFinite\(s\.nextLookAt\) && s\.nextLookAt > now/.test(html), 'the page shows it only while it is still in the future');
   assert.ok(!/At most 80 orders/.test(html) && /bot's own trades are down \$7\.00/.test(html), 'the rules text matches the live limits');
 };
 
