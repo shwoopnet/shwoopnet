@@ -1813,3 +1813,24 @@ By price band (information only, the same post hoc bands as P1, so the same caut
 Read with the rounding in mind, the 95c to 97c band is about zero after costs even at three contracts, and the 88c to 90c band loses at any size. That does
 not change P1 (which is still to be judged on days after 02:50 UTC with its pre-set bar), but if P1 passes its forward look, the rounded cost is the
 number to size it on.
+
+## Book study, night of 2026-10-08, information only
+
+First look at the order book recorder (`scalper.recorder`, top five levels, about every 10 s). No hypothesis, no verdict, nothing here decides anything.
+
+- **How little data this is.** The recorder runs only while a command is active in the research container; between turns the container idles and the process
+  stops. It wrote 02:52 to 03:20 UTC and then, in foreground chunks, about 05:30 to 07:00 UTC: 18 distinct markets (9 Bitcoin, 9 gold) and 49
+  snapshots inside the 330 to 400 s L1 window with a side priced 0.88 to 0.97. The Firestore recorder on Render-side Firebase functions is the only
+  source that runs unattended; this container's copy cannot give days of data.
+- **Ask persistence in the L1 window (37 consecutive pairs, 10 s apart, both series).** The favourite's ask at the next snapshot: up 62.2%,
+  the same 5.4%, down 32.4%. Median spread 0.1c, median size at the touch 1,006 contracts. With n=37 the up share has a wide margin (roughly
+  47% to 76%), but the direction fits the live no-fills: a favourite's ask tends to creep up as the close approaches, so an IOC at a touch read a
+  second or more earlier can be left behind by one tick.
+- **P2 on the 6 signals it found (3 filled).** Fill rate 50% (strictly through and touch-counted agree). On the filled ones the resting entry earned
+  +5.80c against +5.70c taking the same signals; the missed signals earned +6.61c taken. Per signal, unfilled counted as zero: maker +2.90c, taker +6.16c.
+  Six signals say nothing; the shape, however, is the one P2 predicted (the missed ones are not worse than the filled ones, so the resting entry gives
+  up winners). The verdict is `NOT_ENOUGH_DATA`.
+- **Not computed.** Spread and touch size by price band, and how often the touch disappears between snapshots, need hundreds of snapshots per band; there are 49
+  in all, so no band has enough to report.
+- **What would settle it.** The Firestore recorder's 24 hour download (Kalshi page, "Download book snapshots") has days of snapshots at the same cadence. P2, `obstats`
+  and this section should be re-run on that file, not on this one.
