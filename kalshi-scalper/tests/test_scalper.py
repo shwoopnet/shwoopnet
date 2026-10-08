@@ -1779,3 +1779,27 @@ assert _SL.verdict(dict(_good, halves=[-0.01, 0.05]), 3.6, 3.5, 3.0) == "FALSIFI
 assert _SL.verdict(dict(_good, stress=-0.001), 3.6, 3.5, 3.0) == "FALSIFIED"
 assert _SL.verdict(_good, 3.4, 3.5, 3.0) == "FALSIFIED", "the search z must beat the floor"
 print("slot search tests passed")
+
+# F5 to F7: only markets after the cutoff, F5 is a price subset of F0, F6 and F7 split F0 exactly.
+def _mk(tk, series, close, ask, res):
+    return (tk, series, [(close - 360, round(ask - 0.01, 4), ask, 0, 0)], close, res)
+_nm = [_mk("E", "KXBTC15M", _fw.NEW_START, 0.93, "yes"), _mk("A", "KXBTC15M", _fw.NEW_START + 900, 0.93, "yes"),
+       _mk("B", "KXGOLD15M", _fw.NEW_START + 1800, 0.89, "no"), _mk("C", "KXGOLD15M", _fw.NEW_START + 2700, 0.96, "yes")]
+_nr = _fw.new_rules(_nm)
+assert {e["ticker"] for e in _nr["F0 L1 (same markets)"]} == {"A", "B", "C"}, "a market closing exactly at the cutoff is not after it"
+assert [e["ticker"] for e in _nr["F5 L1 priced 0.90-0.95"]] == ["A"]
+assert len(_nr["F6 L1 gold only"]) + len(_nr["F7 L1 Bitcoin only"]) == len(_nr["F0 L1 (same markets)"])
+assert _fw.verdict(_nr["F5 L1 priced 0.90-0.95"])[0] == "NOT_ENOUGH_DATA"
+print("forward F5 to F7 tests passed")
+
+# Power table: it reads only the days it is given, a real edge passes more often than none, and more entries pass more often.
+from scalper import power as _PW
+import random as _rr
+_r = _rr.Random(1)
+_days = {f"d{i}": [0.02 + _r.gauss(0, 0.3) for _ in range(40)] for i in range(40)}
+_p1 = _PW.pass_rate(_days, 400, 1.0, reps=200)[0]
+_p0 = _PW.pass_rate(_days, 400, 0.0, reps=200)[0]
+assert _p1 > _p0, "a real edge clears the bar more often than no edge"
+assert _PW.pass_rate(_days, 2000, 1.0, reps=200)[0] > _p1, "more entries, more power"
+assert _PW.pass_rate(_days, 400, 1.0, reps=50) == _PW.pass_rate(_days, 400, 1.0, reps=50), "seeded, so it is repeatable"
+print("power table tests passed")

@@ -18,12 +18,23 @@ from .scalps import MIN_N, STRESS, Z_BAR, judge, load as load_markets
 OLD_END = 1791397800        # 2026-10-07 18:30:00 UTC, the last close in the database before the forward window
 W3_START = 1791212400       # the first close after the first search's data (2026-10-05 15:00 UTC); W3 is (W3_START, OLD_END]
 MIN_DAYS = 5
+NEW_START = 1791427800      # 2026-10-08 02:50:00 UTC, when P1 and F5 to F7 were written; F5 to F7 use only markets that close after it
 
 F1 = {"left": 2, "lo": 0.03, "hi": 0.20, "side": "either", "filters": [("series", "KXBTC15M"), ("spread", 0.01)]}
 F2 = {"left": 2, "lo": 0.03, "hi": 0.97, "side": "no", "filters": [("move", "away", 0.02, 5), ("series", "KXBTC15M"), ("spread", 0.04)]}
 F3 = {"left": 8, "lo": 0.80, "hi": 0.97, "side": "yes", "filters": []}
 F4 = {"left": 8, "lo": 0.80, "hi": 0.97, "side": "yes", "filters": [("spread", 0.02)]}
 SEARCH_RULES = {"F1": F1, "F2": F2, "F3": F3, "F4": F4}
+
+
+def new_rules(markets: list[tuple]) -> dict[str, list[dict]]:
+    """F5 (L1 priced 0.90 to 0.95), F6 (L1 gold only) and F7 (L1 Bitcoin only), on markets closing after NEW_START only."""
+    ms = [m for m in markets if m[3] > NEW_START]
+    full = L.hold_rule(ms, **L.L1)
+    return {"F0 L1 (same markets)": full,
+            "F5 L1 priced 0.90-0.95": L.hold_rule(ms, L.L1["left_s"], (0.90, 0.95)),
+            "F6 L1 gold only": [e for e in full if e["series"] == "KXGOLD15M"],
+            "F7 L1 Bitcoin only": [e for e in full if e["series"] == "KXBTC15M"]}
 
 
 def settle(side: str, price: float, yes_won: bool, mult: float) -> float:
@@ -110,6 +121,14 @@ def main() -> None:
     for left in (1, 3):
         ents = rule_entries(ms, dict(F1, left=left))
         print(f"  F1 at {left} minute(s) left: n={len(ents)}" + (f" mean net {sum(e['net'] for e in ents) / len(ents) * 100:+.2f}c" if ents else ""))
+    nw = new_rules(markets)
+    print(f"\nF5 to F7: markets closing after {NEW_START} (2026-10-08 02:50 UTC)\n")
+    for name, ents in nw.items():
+        print(line(name, ents))
+        print()
+    f0, f5 = nw["F0 L1 (same markets)"], nw["F5 L1 priced 0.90-0.95"]
+    if f0 and f5:
+        print(f"  F5 against F0 on the same markets: F5 {sum(e['net'] for e in f5) / len(f5) * 100:+.2f}c, F0 {sum(e['net'] for e in f0) / len(f0) * 100:+.2f}c (F5 may not pass unless it exceeds F0)")
     print("\nNo verdict here means trade. NOT_YET_FALSIFIED is permission to keep testing forward and nothing more.")
 
 

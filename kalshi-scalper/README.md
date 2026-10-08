@@ -1664,3 +1664,16 @@ them. Their window is markets that **close after 2026-10-08 02:50 UTC** (close_t
 - **Power table (information only, decides nothing, not a hypothesis).** `python -m scalper.power` resamples the 69 days of L1 entries by day
   (a bootstrap over days, so the clustering is kept) and reports, for a true edge equal to what was measured and for half of it, how
   often a forward sample of N entries clears z of 2.1, so that the wait for the bar is known before it is felt. It reads no forward data.
+
+**2026-10-08: the power table (`python -m scalper.power`, 1,000 resamples per cell).** L1: 3,400 entries over 69 days, 49.3 a day, measured mean net +0.96c.
+
+| Forward entries (days at 49 a day) | Pass rate if the edge is the measured +0.96c | If half of it | If zero (false pass) |
+|---|---|---|---|
+| 300 (6.6) | 21.4% | 12.2% | 7.1% |
+| 600 (12.7) | 25.6% | 13.2% | 5.7% |
+| 1,000 (20.8) | 33.8% | 14.3% | 4.5% |
+| 2,000 (41.1) | 52.8% | 18.2% | 2.7% |
+
+- **What it says.** The bar is deliberately hard to pass, and a +0.96c edge on a 5c to 12c risk per contract has a per entry standard deviation of about 0.3 dollars, so even a real edge of exactly the measured size is read as `NOT_YET_FALSIFIED` only one time in five at 300 entries and one time in two at 2,000 entries. The "both halves positive" and "fees x1.2" conditions are not in this table, so the true pass rates are lower still.
+- **What it does not say.** A failed reading at 300 entries is weak evidence against L1, not strong evidence: with a real +0.96c edge it fails 79% of the time. Equally a pass is weak evidence for it. The false pass rate at 300 entries (7.1%) is above the nominal 1.8% because 6.6 days is few clusters for a z statistic.
+- **Consequence for the size ladder.** The ladder's first step asks for a pass on 300 entries and 5 days. That gate will usually not be met even if L1 works, so a ladder that waits for it waits for luck. Whether to read the first step at 1,000 entries (about three weeks, 34% power at the measured edge) instead is a decision for the owner, to be written down before the data is read; this note changes nothing by itself.
