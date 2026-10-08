@@ -543,9 +543,11 @@ gates.N31 = () => {
 };
 
 gates.N30 = () => {
-  // Profit-funded contracts have no fixed limit, but the risk stays inside the 1% of cash rule and the pool holds only profit.
+  // Profit-funded contracts have no fixed limit, but the risk of the add-on is bounded by the pool, which holds only profit, and the account-funded part stays inside the 1% rule.
   assert.strictEqual(live.skimAddon({ pool: 4.65 }, 5), 5, 'a pool of five contract costs buys five extras');
-  assert.strictEqual(live.l1Count(509, 0.93, 3 + 5), 5, 'but one order never risks more than 1% of cash, however large the pool');
+  assert.strictEqual(live.l1Count(509, 0.93, 8, 0), 5, 'the account-funded part never risks more than 1% of cash');
+  assert.strictEqual(live.l1Count(509, 0.93, 5, 3), 8, 'profit-funded contracts sit outside the 1% rule and are simply added');
+  assert.strictEqual(live.l1Count(509, 0.93, 5, 999), live.L1_ORDER_CEILING, 'the fat-finger guard is the only fixed limit left');
 };
 
 (async () => {

@@ -295,9 +295,13 @@ const L1_SIZE_FRACTION = 0.01;
 // 5%, tightened from 10% on Oct 8, 2026 at the owner's choice: 10% of a $344 balance is $34, more than the worst modelled day at 5 contracts (about $20), so it
 // never tripped. 5% is about $17, a real circuit breaker that a bad day at 4 to 5 contracts can reach.
 const L1_SIZED_STOP_FRACTION = 0.05;
-function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
+function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
-  return Math.max(1, Math.min(cap, L1_ORDER_CEILING, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
+  // The 1% of cash rule bounds the part funded by the account (the review's cap). The add-on, bought with reinvested PROFIT (the pool), sits outside it: the owner's
+  // choice, Oct 8, 2026, so profit keeps compounding into size instead of waiting for the balance to catch up. Its risk is bounded by the pool, which holds only
+  // profit (one extra contract needs one full contract cost of it, and a loss comes out of the pool first). L1_ORDER_CEILING is the only fixed limit left on a single order.
+  const base = Math.max(1, Math.min(cap, L1_ORDER_CEILING, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
+  return Math.min(base + Math.max(0, Math.floor(addon || 0)), L1_ORDER_CEILING);
 }
 
 // The cap on contracts per order follows the account, slowly (the owner keeps adding to it like a savings account). One contract per
@@ -572,7 +576,7 @@ async function runL1Tick(args) {
     const cost1 = pick.worst + bot.takerFee(pick.worst, 1);
     if (cost1 > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
     // The cash the size is judged on is what is left after this tick's earlier orders, so two markets cannot both take the full share.
-    const count = sizing ? l1Count(cash - Object.values(committed).reduce((a, x) => a + x, 0), cost1, sizeCap + sizeAddon) : 1;
+    const count = sizing ? l1Count(cash - Object.values(committed).reduce((a, x) => a + x, 0), cost1, sizeCap, sizeAddon) : 1;
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);

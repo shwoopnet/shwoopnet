@@ -17,7 +17,7 @@ from . import lstrats as L
 from .feerounding import order_cost
 from .scalps import load as load_markets
 
-def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None, n_ceiling=10, cash_frac=None, base0=None, usable=None, trailing=False):
+def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None, n_ceiling=10, cash_frac=None, base0=None, usable=None, trailing=False, addon_outside=False):
     """One path of `ndays` days. step_days: days between reviews (one step up at most per review, down at once). stop_frac: if set, the loss stop of the live bot:
     a day's result at or below minus stop_frac of the balance at the last review ends that day (the owner restarts the next morning), empties the pool and
     holds step-ups and the add-on for 7 days. Returns total, deepest drawdown, saved, final cap, peak, stops."""
@@ -37,6 +37,8 @@ def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=3
             n=min(n_ceiling,cap+add)
             if cash_frac is not None:   # live l1Count: one order never risks more than cash_frac of cash, judged at one contract's cost
                 n=max(1,min(n,int(cash_frac*cash/order_cost(e['price'],1)+1e-9)))
+                if addon_outside:       # Oct 8 evening: only the account-funded part is held to cash_frac; the profit-funded add-on is added on top
+                    n=min(n_ceiling,max(1,min(cap,n_ceiling,int(cash_frac*cash/order_cost(e['price'],1)+1e-9)))+add)
             cost=order_cost(e['price'],n); won=e['gross']+e['price']>0.5
             pnl=(n if won else 0)-cost
             cash+=pnl; total+=pnl; day_pnl+=pnl
@@ -88,6 +90,7 @@ def current() -> None:
     kw = dict(dpc=85, skim=True, fixed=0, start=504.82, step_days=3, stop_frac=0.05, base0=344.0, cash_frac=0.01)
     run(by, days, "old: add-on max 2, ceiling 10, total balance", addon_max=2, n_ceiling=10, **kw)
     run(by, days, "now: add-on uncapped, total balance", addon_max=999, n_ceiling=50, **kw)
+    run(by, days, "add-on outside the 1% rule (this change)", addon_max=999, n_ceiling=50, addon_outside=True, **kw)
     run(by, days, "now: add-on uncapped, usable shard only", addon_max=999, n_ceiling=50, usable=348.02, **kw)
     run(by, days, "now + trailing stop, total balance", addon_max=999, n_ceiling=50, trailing=True, **kw)
     run(by, days, "cap 3 flat (the old stake), for scale", dpc=100, skim=False, addon_max=0, fixed=3, start=504.82, step_days=3, stop_frac=0.05, base0=344.0, cash_frac=0.01)
