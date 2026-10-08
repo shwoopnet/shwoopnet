@@ -29,7 +29,7 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 2,560 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760, F6 and F7 two, Q1 to Q3 and two Q1 thresholds five), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
+Strategy variants tried so far: 2,561 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760, F6 and F7 two, Q1 to Q3 and two Q1 thresholds five, F8 one), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
 until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
