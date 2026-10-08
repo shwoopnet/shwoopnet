@@ -130,7 +130,17 @@ def fetch(days: int = 30, limit: int = FETCH_LIMIT) -> None:
     todo = [r for _, r in ranked if r[0] not in have][:max(0, limit - len(have))]
     print(f"{len(rows)} markets in the last {days} days, {len(have)} stored, {len(todo)} to fetch (stop at {limit})")
     for i, (ticker, open_ts) in enumerate(todo, 1):
-        y, n, k, bars = fetch_one(ticker, open_ts)
+        for attempt in range(12):       # a rate limit that outlasts the client's own retries is waited out, not fatal: the run resumes on the same market
+            try:
+                y, n, k, bars = fetch_one(ticker, open_ts)
+                break
+            except RuntimeError as e:
+                print(f"  {ticker}: {str(e)[:90]} (attempt {attempt + 1}); waiting 120 s")
+                db.commit()
+                time.sleep(120)
+        else:
+            print(f"  {ticker}: gave up after 12 attempts, left unfetched")
+            continue
         db.executemany("INSERT OR REPLACE INTO tape_s VALUES (?,?,?,?,?,?,?)", [(ticker, *b) for b in bars])
         db.execute("INSERT OR REPLACE INTO tapeflow VALUES (?,?,?,?)", (ticker, y, n, k))
         if i % 50 == 0:
