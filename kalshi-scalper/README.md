@@ -2103,3 +2103,17 @@ The owner asked for "the opposite end of the spectrum" from L1: instead of buyin
 - **Bar.** The common one, for three tries: at least 300 entries on at least 5 days, day clustered z at least 2.5, both halves positive, positive with fees x1.2. Verdict words only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. Passing is permission to look at later data, never a reason to trade.
 - **Information only, printed beside the verdict and unable to rescue a failure:** the hit rate of the target, the average win and loss, by series, and the same rule with a 3c target.
 - **Count.** Three variants: **2,577 as of this entry** (2,574 plus three).
+
+**2026-10-08 16:38 UTC: C1 to C3: all three `FALSIFIED`.** One run of `python -m scalper.cheapscalp` (after its tests), under the rules fixed above. Nothing changed after seeing it. 11,220 markets over 69 days; 1,701 entries (933 Bitcoin, 768 gold).
+
+| | Entries | Mean | Day clustered z | Halves | Fees x1.2 | Verdict |
+|---|---|---|---|---|---|---|
+| C1 5c target, else hold | 1,701 | -3.28c | -8.62 | -3.16c / -3.40c | -3.54c | `FALSIFIED` |
+| C2 5c target, else sell at 6 min left | 1,701 | -1.00c | -2.97 | -0.93c / -1.08c | -1.30c | `FALSIFIED` |
+| C3 10c target, else sell at 6 min left | 1,701 | -0.40c | -1.03 | -0.12c / -0.68c | -0.69c | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted C1 between -2.5c and -0.5c, and C2 and C3 between -1.5c and -0.2c, all `FALSIFIED`. The verdicts were right. C2 (-1.00c) and C3 (-0.40c) fell inside their ranges; **C1 was worse than predicted (-3.28c against a floor of -2.5c)**, because holding to settlement from 8c to 15c loses the whole price more often than the early bounce pays: 41.2% hit the target, but holding the rest averaged -13.2c a loss against +10.9c a win.
+- **Information only: the target is hit often and the edge is still negative.** A +5c bounce arrives 41% of the time and a +10c bounce 31.5%, so cheap sides do tick up. Sold at the 6 minute mark instead of held, the loss shrinks from -3.28c to -1.00c (C2), and a larger target shrinks it again (C3). Stops and exits cannot create profit in a fair game; what they change is how much of the fee and spread is paid.
+- **Post hoc, computed after the verdicts and not part of them: it is cost, not signal.** With the fee set to zero the same trades make -1.99c (C1), **+0.45c (C2) and +1.05c (C3)**. Both legs' fees (about 0.6c each at 10c) turn a small positive gross into the net above, which is the same conclusion as the dispersion study: cost, not an absent signal, is the binding constraint. A gross of +1.05c on a 10c target is not distinguishable from zero here and the registered bar is net.
+- **Same in both series.** Bitcoin and gold net within a few tenths of a cent of each other in every variant.
+- **Count.** Three variants: **2,577 as of this entry** (2,574 plus three).

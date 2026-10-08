@@ -2076,3 +2076,34 @@ _cent_miss = sum(abs((_FR.order_cost(_p, _n) - _n * _p) / _n - _f) > 0.0004 for 
 assert _cent_miss >= 0.8 * len(_obs), f"whole-cent rounding fits only {len(_obs) - _cent_miss} of {len(_obs)} reported fees, it is not what this account is charged"
 assert abs(_FR.observed_fee_per_contract(0.071, 1) - 0.0047) < 1e-9 and abs(_FR.observed_fee_per_contract(0.071, 3) - 0.00463) < 1e-5
 print("observed fee tests passed")
+
+# C1 to C3, the cheap side scalped early: entry only in the first five minutes on a real quote with an ask of 8c to 15c, one entry per market, NO priced as one minus the YES bid,
+# exit only on a LATER candle at the entry ask plus the target, a time exit uses the bid 6 minutes before the close, and settlement only settles a position never sold.
+from scalper import cheapscalp as _CS
+_cl = 100000
+def _cc(left, bid, ask):
+    return (_cl - left, bid, ask, bid, ask)
+_yes = [_cc(840, 0.10, 0.11), _cc(780, 0.16, 0.17)]
+_t = _CS.trade(_yes, _cl, "no", 0.05, False)
+assert _t and _t["side"] == "yes" and abs(_t["ask"] - 0.11) < 1e-9 and _t["how"] == "target", "the 16c bid on a later candle is the 11c entry plus 5c"
+assert abs(_t["net"] - (0.16 - 0.11 - _CS.fee(0.11) - _CS.fee(0.16))) < 1e-9, "fee on both legs, sold at the bid"
+_no = [_cc(840, 0.88, 0.89), _cc(780, 0.80, 0.81)]
+_tn = _CS.trade(_no, _cl, "yes", 0.05, False)
+assert _tn and _tn["side"] == "no" and abs(_tn["ask"] - 0.12) < 1e-9, "the NO side asks one minus the YES bid"
+assert abs(_tn["net"] - (0.19 - 0.12 - _CS.fee(0.12) - _CS.fee(0.19))) < 1e-9, "its bid is one minus the YES ask"
+assert _CS.trade([_cc(540, 0.10, 0.11)], _cl, "yes", 0.05, False) is None, "after the first five minutes there is no entry"
+assert _CS.trade([_cc(840, 0.001, 0.30)], _cl, "yes", 0.05, False) is None, "no entry on a quote that is not real"
+assert _CS.trade([_cc(840, 0.20, 0.21)], _cl, "yes", 0.05, False) is None, "a 21c ask is outside 8c to 15c"
+_held = [_cc(840, 0.10, 0.11), _cc(780, 0.10, 0.11)]
+_h = _CS.trade(_held, _cl, "yes", 0.05, False)
+assert _h and abs(_h["net"] - (1 - 0.11 - _CS.fee(0.11))) < 1e-9, "never reached: held, and a win pays 1"
+_h2 = _CS.trade(_held, _cl, "no", 0.05, False)
+assert abs(_h2["net"] - (0 - 0.11 - _CS.fee(0.11))) < 1e-9, "never reached: held, and a loss pays 0"
+_tx = _CS.trade(_held + [_cc(360, 0.06, 0.07)], _cl, "yes", 0.05, True)
+assert _tx["how"] == "time" and abs(_tx["net"] - (0.06 - 0.11 - _CS.fee(0.11) - _CS.fee(0.06))) < 1e-9, "the time exit sells at the 6 minute bid whatever the result"
+_z = _CS.trade(_held + [_cc(360, 0.0, 0.05)], _cl, "yes", 0.05, True)
+assert abs(_z["net"] - (0 - 0.11 - _CS.fee(0.11))) < 1e-9, "a bid under 0.1c counts as 0"
+_same = [_cc(840, 0.10, 0.11)]
+assert _CS.trade(_same, _cl, "yes", 0.00, False)["how"] == "held", "an exit needs a candle strictly after the entry candle"
+assert _CS.verdict([{"day": "d", "net": 0.1, "close_ts": 1, "stress": 0.1}] * 10, 5)[0] == "NOT_ENOUGH_DATA", "too few entries is not a verdict"
+print("cheap scalp C1-C3 tests passed")
