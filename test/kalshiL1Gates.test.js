@@ -378,6 +378,7 @@ gates.N21 = async () => {
   await tick(w, { quotes: [closing, later] });
   assert.strictEqual(w.posts.length, 0);
   assert.strictEqual(w.sess.nextLookAt, NOW + 18 * 60000 - live.L1_WINDOW_MS[1], 'the next window opens 6:40 before the later close');
+  assert.ok(w.sess.botNet === 0 && w.sess.botOpen === 0, 'the bot\'s running total is kept current on every tick, not only ticks that trade');
   assert.ok(/entry|6 minutes/.test(w.sess.lastNote) && !/about 6 minutes from its close right now/.test(w.sess.lastNote), 'the note says what the window is');
   const none = world(); await tick(none, { quotes: [closing] });
   assert.strictEqual(none.sess.nextLookAt, null, 'no later market known: no time is invented');

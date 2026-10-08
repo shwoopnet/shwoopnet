@@ -241,3 +241,10 @@ more than three, judged on the cash left after earlier orders in the same minute
 cash (still counting the bot's own trades only, every contract, open ones as lost). Off: exactly as before, one contract and
 a $7.00 stop. On a $100 account it still buys one contract; it first buys two at about $180 and three at about $270.
 Deploy: `firebase deploy --only functions`.
+
+## Moving money between shards
+
+Each market lives on one shard (Bitcoin and gold are both on shard 2) and an order can only use the funds on its own shard. Placing a
+manual order does not move money between shards. What worked on Oct 7, 2026, reported by the owner: transfer the money from Predictions
+to Perps and back again in Kalshi, then place a trade; after that the whole balance was on shard 2. Check the Live account card, which
+shows the balance per shard, before relying on it.
