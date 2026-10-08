@@ -38,6 +38,6 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 - Live fills study: 35 of 35 fills won, 4 of 22 misses lost (p 0.019, one look, a lead). Do not chase the misses.
 - 24/7 bot, weekly size scaling, reinvest and skim, Flatten all, deposit recorder, and one Pause/Resume control in place of separate Stop and Halt buttons.
 - Performance tracker, readable open positions, simplified Kalshi page, market charts, Central time.
-- Exit, band, entry-side and fee studies; sizing replay; the cheap-side test (all falsified).
+- Exit, band, entry-side and fee studies; sizing replay; the cheap-side test, the favorite scalps and two more L1 filters (all falsified); a bug in the time-exit logic found and corrected.
 - Security review fixes; hand-run mutation check of the money code.
 - Pages build fixed and the repo's non-app files excluded from the public site.

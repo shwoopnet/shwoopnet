@@ -349,6 +349,19 @@ gates.Y16 = () => {
   assert.ok(/kalshiGold\.off = v - p/.test(html) && /v: p\.v \+ off/.test(html), 'gold history is shifted so the line ends on the real gold price');
 };
 
+// The default landing page can be Kalshi, for the admin only: the button is hidden until the account is known to be the admin, and because that is
+// known only after the first screen is up, a Kalshi preference shows the brief first and moves to Kalshi when the admin check comes back.
+gates.Y17 = () => {
+  assert.ok(/<button class="tf-btn" data-value="kalshi" id="landingKalshiBtn" hidden>Kalshi<\/button>/.test(html), 'a Kalshi choice exists and starts hidden');
+  assert.ok(/landKal\.hidden = !currentUserIsAdmin/.test(html), 'it is shown only to the admin');
+  const init = html.slice(html.indexOf('(function initLanding(){'));
+  assert.ok(/if\(pref === 'kalshi'\)\{[\s\S]*?landingKalshiPending = true;[\s\S]*?showPage\('brief'\);[\s\S]*?return;/.test(init), 'a Kalshi preference lands on the brief and marks the move as pending');
+  const admin = html.slice(html.indexOf('function applyAdminUI(){'), html.indexOf("document.getElementById('generateInviteBtn')"));
+  assert.ok(/currentUserIsAdmin && landingKalshiPending/.test(admin) && /!briefPage\.hidden && Date\.now\(\) - landingLoadedAt < 20000/.test(admin) && /showPage\('kalshi'\)/.test(admin), 'the move happens only for the admin, only if still on the first screen, and only within 20 seconds of loading');
+  assert.ok(/pref === 'kalshi' && currentUserIsAdmin \? 'kalshi' : 'brief'/.test(html), 'the logo takes the admin home to Kalshi too, and anyone else to the brief');
+  assert.ok(/if\(name === 'kalshi' && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi page, whatever is saved');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
