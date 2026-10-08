@@ -29,7 +29,7 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 2,561 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760, F6 and F7 two, Q1 to Q3 and two Q1 thresholds five, F8 one), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
+Strategy variants tried so far: 2,563 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760, F6 and F7 two, Q1 to Q3 and two Q1 thresholds five, F8 one, N1 and N2 two), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
 until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -1852,3 +1852,16 @@ is one mechanism tried at two times, not a new mechanism.
   halves of the test half positive, positive with fees times 1.2. Fewer than 300 is `NOT_ENOUGH_DATA`. Anything else is `FALSIFIED`. The universe is fixed (every
   Bitcoin market with a usable quote and 61 spot minutes).
 - **Count.** Two variants: **2,563 as of 2026-10-08**.
+
+**2026-10-08: N1 and N2: both `FALSIFIED`.** One run of `python -m scalper.boundary` under the section above (after its tests). Nothing changed after seeing it.
+
+| | Bitcoin markets usable | Test half | Entered | Gross | Net | z | Halves | Fees x1.2 | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| N1, 2 minutes left | 6,143 | 3,072 | 1,439 | -1.60c | -2.37c | -2.55 | -3.25c / -1.49c | -2.53c | `FALSIFIED` |
+| N2, 1 minute left | 4,450 | 2,225 | 906 | -1.55c | -2.31c | -2.36 | -2.38c / -2.24c | -2.47c | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted about -1c with 100 to 300 entries; measured about -2.3c with 906 to 1,439 entries (more entries than predicted because the rule
+  trades whenever a bucket's rate beats the price by the 2c margin). The sign and the verdict were right and the loss was larger. A negative z of -2.5 means the
+  estimation half's rates did not hold in the test half: the market's price at 1 to 2 minutes left already reflects spot better than a bucket table built on the
+  first half of the days.
+- **Count.** Two variants: **2,563 as of 2026-10-08**. The top line of this file is updated.
