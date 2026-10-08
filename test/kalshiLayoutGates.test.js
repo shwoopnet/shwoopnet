@@ -48,14 +48,16 @@ gates.Y5 = () => {
   const rail = /<div class="kal-rail">([\s\S]*?)\n      <\/div>\n      <div class="kal-main">/.exec(seg);
   assert.ok(rail, 'the rail is there and the main column follows it');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(rail[1]), ['performance', 'account', 'positions'], 'the rail holds the performance card first (where the session card used to be), then the account and the positions');
+  assert.deepStrictEqual(names(rail[1]), ['account', 'positions'], 'the rail holds the account (with the performance stats) and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['books', 'session', 'trades'], 'the main column: books tiles, the bot card (controls and session facts), and the trades; the account detail and event log folds are gone');
-  const bot = /<div class="kal-card kal-card-flush" data-card="session">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
-  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Facts', 'kalL1Pl']) assert.ok(bot.indexOf('id="' + id + '"') > -1, id + ' lives in the bot card');
+  assert.deepStrictEqual(names(main), ['books', 'session', 'performance', 'trades'], 'the main column: books tiles, the bot card, the charts and the trades');
+  const bot = /<div class="kal-card kal-card-flush" data-card="session">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="performance">/.exec(main)[1];
+  for (const id of ['kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Facts', 'kalL1Pl']) assert.ok(bot.indexOf('id="' + id + '"') > -1, id + ' lives in the bot card');
   assert.ok(!/kalChart|kalPerf/.test(bot), 'the charts and stats are not in the bot card');
-  const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card" data-card="account">/.exec(rail[1])[1];
-  for (const id of ['kalChartLine', 'kalChartPie', 'kalChartBars', 'kalPerf', 'kalChartRange']) assert.ok(perf.indexOf('id="' + id + '"') > -1, id + ' lives in the performance card');
+  assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]) && !/id="kalL1Pill"/.test(bot), 'the running pill sits at the top right of the account card, not on the bot card');
+  const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
+  for (const id of ['kalChartLine', 'kalChartPie', 'kalChartBars', 'kalChartRange']) assert.ok(perf.indexOf('id="' + id + '"') > -1, id + ' lives in the charts card on the bot page');
+  assert.ok(!/id="kalPerf"/.test(perf) && /data-card="account">[\s\S]*id="kalPerf"/.test(rail[1]), 'the stat tiles and tables sit in the account card in the rail');
   const trades = /data-card="trades">([\s\S]*)$/.exec(main)[1];
   assert.ok(!/kalChart|kalPerf/.test(trades) && /id="kalBotClosed"/.test(trades), 'the trades card is the table only');
   const page = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
@@ -63,7 +65,7 @@ gates.Y5 = () => {
   for (const id of ['kalAcctRefresh', 'kalDiagCopy', 'kalBookDownload', 'kalAcctStart', 'kalAcctBody']) assert.ok(tools.indexOf('id="' + id + '"') > -1, id + ' moved into the Tools menu in the header');
   assert.ok(/\.kal-console\{ grid-template-columns:340px minmax\(0,1fr\);/.test(html), 'a fixed-width rail and a flexible main column');
   assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'one column on a narrow screen, the rail first');
-  assert.ok(!/id="kalBotHalt"|id="kalL1Stop"/.test(rail[1]), 'the controls are not in the rail any more: they sit with the performance numbers');
+  assert.ok(!/id="kalBotHalt"|id="kalL1Stop"/.test(rail[1]), 'the controls are not in the rail: they sit with the bot');
 };
 
 // The account re-sends its saved layout on every update to the user document. It must not undo a drag in progress, or a move that has not
@@ -79,7 +81,7 @@ gates.Y6 = () => {
 
 // The history lists each order once, and the counts cover the whole session, not the newest 20 orders.
 gates.Y7 = () => {
-  assert.ok(/collection\(db, 'kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(300\)/.test(html), 'orders are read up to the most a 24 hour session can send, not 20');
+  assert.ok(/collection\(db, 'kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(1000\)/.test(html), 'orders are read for several days of a 24/7 bot, not 20');
   assert.ok(!/kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(20\)/.test(html));
   assert.ok(!/var loggedOrders|kalBotEvents/.test(html), 'the event log, and the dedupe that only it needed, are gone');
 };
@@ -248,7 +250,7 @@ gates.Y10 = () => {
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
   const facts = html.slice(html.indexOf("document.getElementById('kalL1Facts').innerHTML = running"), html.indexOf("var sizeNote"));
-  assert.strictEqual((facts.match(/fact\('/g) || []).length, 6, 'four facts while running and two when ended');
+  assert.strictEqual((facts.match(/fact\('/g) || []).length, 5, 'three facts while running (no end time any more) and two when ended');
   assert.ok(/id="kalL1Size"/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are one muted line');
 };
 

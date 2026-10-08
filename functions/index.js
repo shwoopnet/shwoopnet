@@ -346,6 +346,27 @@ exports.kalshiLiveBaseline = onCall(
   }
 );
 
+// Deposits and withdrawals: the account change since the starting line is the whole balance move, so money added or taken out shows up as profit or
+// loss. The line cannot be moved (it hides every fill before it), so the amount is recorded here instead and taken off the change. Positive for money
+// put in, negative for money taken out. Appended inside a transaction to the fresh document, never overwritten; each entry keeps its time. It changes
+// only this display, nothing on Kalshi.
+exports.kalshiLiveAdjust = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  ensureDefaultAdminApp();
+  const dollars = Number(request.data && request.data.dollars);
+  if (!Number.isFinite(dollars) || dollars === 0 || Math.abs(dollars) > 1000000) throw new HttpsError("invalid-argument", "Give the amount in dollars, positive for a deposit and negative for a withdrawal.");
+  const db = getFirestore();
+  const ref = db.collection("kalshiLiveControl").doc("baseline");
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("failed-precondition", "There is no starting line yet. Press 'Start fresh from now' first.");
+    const list = Array.isArray(snap.data().adjustments) ? snap.data().adjustments.slice() : [];
+    list.push({ at: Date.now(), dollars: Math.round(dollars * 100) / 100 });
+    tx.update(ref, { adjustments: list });
+    return { adjustments: list, total: account.adjustmentsTotal(list) };
+  });
+});
+
 // ---- Armed live test: click once, it scans every minute, sends ONE order, then switches itself off ------------
 // kalshiLiveArm only flips a control document (no order code, no key). kalshiLiveArmed runs every minute, does
 // nothing unless that document says armed and unexpired, and then makes one ordinary kalshiLiveTrade attempt with
@@ -366,8 +387,8 @@ exports.kalshiLiveArm = onCall(async (request) => {
     throw new HttpsError("failed-precondition", "Live test trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to arm.");
   }
   const sess = await getFirestore().collection("kalshiLiveControl").doc("session").get();
-  if (sess.exists && sess.data().active === true && sess.data().until > Date.now()) {
-    throw new HttpsError("failed-precondition", "The 24 hour L1 session is running. Stop it before arming a single test order.");
+  if (sess.exists && sess.data().active === true) {
+    throw new HttpsError("failed-precondition", "The L1 bot is running. Stop it before arming a single test order.");
   }
   const now = Date.now();
   await ref.set({ armed: true, since: now, until: now + live.ARM_MS, endedAt: null, endedBecause: null });
@@ -398,13 +419,40 @@ exports.kalshiL1Session = onCall(async (request) => {
   }
   const arm = await db.collection("kalshiLiveControl").doc("arm").get();
   if (arm.exists && arm.data().armed === true && arm.data().until > Date.now()) {
-    throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the 24 hour session.");
+    throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the bot.");
   }
   const now = Date.now();
-  await ref.set({ active: true, since: now, until: now + live.L1_SESSION_MS, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
-  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (" + (live.L1_SIZE_FRACTION * 100) + "% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
-  return { active: true, until: now + live.L1_SESSION_MS };
+  await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
+  await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed once a week, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
+  return { active: true };
 });
+
+// ---- Flatten all + halt (admin only, the owner's emergency button) ---------------------------------------------------------------
+// Order matters: the bot is stopped FIRST (halt switch on, session ended, any armed single order disarmed) with nothing but database writes, so
+// it cannot add to the account while the sells go out, and a failure of the exchange calls cannot leave it running. Then every open position is
+// sold (kalshiLiveLib.flattenAll). Takes nothing from the page.
+exports.kalshiFlattenAll = onCall(
+  { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 60 },
+  async (request) => {
+    await assertKalshiAdmin(request.auth);
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const now = Date.now();
+    await db.collection("kalshiBotMeta").doc("control").set({ halt: true, at: new Date(now) });
+    await db.collection("kalshiLiveControl").doc("session").set({ active: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
+    await db.collection("kalshiLiveControl").doc("arm").set({ armed: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
+    const events = db.collection("kalshiLiveEvents");
+    await events.add({ ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
+    let out;
+    try {
+      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now });
+    } catch (e) {
+      out = { ok: false, reason: "The sells failed: " + String((e && e.message) || e).slice(0, 120), results: [] };
+    }
+    try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
+    return { halted: true, ...out };
+  }
+);
 
 exports.kalshiLiveArmed = onSchedule(
   { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
@@ -425,6 +473,7 @@ exports.kalshiLiveArmed = onSchedule(
         logEvent: (e) => db.collection("kalshiLiveEvents").add(e),
       };
       const armedOn = Boolean(arm && arm.armed === true && arm.until > now);
+      const sizingRef = db.collection("kalshiLiveControl").doc("sizing");
       const sessRef = db.collection("kalshiLiveControl").doc("session");
       const sessSnap = await sessRef.get();
       const session = sessSnap.exists ? sessSnap.data() : null;
@@ -441,7 +490,9 @@ exports.kalshiLiveArmed = onSchedule(
       // A single armed test order and the session never run together; the callables refuse to start one while the
       // other is on, and if both documents say "on" anyway, the session does nothing this minute.
       if (sessionOn && !armedOn) {
+        const sizingSnap = await sizingRef.get();
         await live.runL1Tick({
+          sizingState: sizingSnap.exists ? sizingSnap.data() : null, setSizingState: (st) => sizingRef.set(st),
           session, now, setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent,
           quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,

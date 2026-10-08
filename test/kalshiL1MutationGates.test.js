@@ -90,10 +90,11 @@ gates.M3 = async () => {
 // With size scaling on, two markets on one shard cannot both take the full share: the second is sized on what is left.
 gates.M4 = async () => {
   const G = 'KXGOLD15M-26OCT071415-15';
-  const w = world({ session: { sizing: true, startCash: 140 }, balance: { balance_breakdown: [{ balance: '140.0000', exchange_index: 2 }] },
+  const w = world({ session: { sizing: true, startCash: 300 }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] },
     fresh: { [G]: { exchange_index: 2, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } } });
   await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
-  assert.deepStrictEqual(w.posts.map((p) => p.count), ['3', '2'], 'the first takes its share, the second is sized on the cash left');
+  assert.deepStrictEqual(w.posts.map((p) => p.count), ['3', '3'], 'both are held to the cap');
+  assert.ok(/l1Count\(cash - Object\.values\(committed\)/.test(fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8')), 'and the cash an earlier order in the same tick took is still taken off before sizing the next');
 };
 
 // Only the L1 session's own trades feed its stop: an older single test order on the same account does not.
