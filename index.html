@@ -991,7 +991,7 @@
   .kal-bot-grid > .kal-card{ margin-bottom:0; min-width:0; }
   .kal-bot-grid > .kal-span{ grid-column:1 / -1; }
   /* Rearranging: only while "Unlock to rearrange" is ticked (never remembered, so a stray drag cannot happen on a normal visit). */
-  .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; cursor:grab; }
+  .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; cursor:grab; user-select:none; -webkit-user-select:none; }
   .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ opacity:.45; }
   .kal-move{ display:flex; justify-content:flex-end; gap:6px; margin-bottom:6px; }
   .kal-bot-grid .kal-trade{ grid-template-columns:1fr 1fr; }
@@ -9955,7 +9955,9 @@
         list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true;
       });
     }
+    var localDirtyAt = 0, lastRemote = '';
     function save(skipSync){
+      if(skipSync !== true){ localDirtyAt = Date.now(); }   // a change of ours is on its way to the account: an older copy coming back must not undo it
       try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch(e){ /* optional */ }
       // Saved to the account too (like the other settings), so the arrangement follows the user to another device.
       if(skipSync !== true && typeof syncUserSetting === 'function'){ syncUserSetting('kalBotLayout', layout, 300); }
@@ -10026,6 +10028,12 @@
       get: function(){ return layout; },
       set: function(l){
         if(!l || typeof l !== 'object'){ return; }
+        // The account re-sends its saved layout on every update to the user document, which is constant. Apply it only when it is new, and
+        // never while a drag is in progress or just after our own change (the older copy would put the card straight back).
+        var key = JSON.stringify(l);
+        if(key === lastRemote){ return; }
+        if(dragging || Date.now() - localDirtyAt < 4000){ return; }
+        lastRemote = key;
         var next = { cols: 'auto', hidden: {}, order: null };
         if(['auto', '1', '2', '3', '4'].indexOf(String(l.cols)) > -1){ next.cols = String(l.cols); }
         OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
