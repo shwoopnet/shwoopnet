@@ -2154,3 +2154,14 @@ _ld = sorted(_loss_by)
 _r = _SZ.path(_loss_by, _ld, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=3, fill=1.0, step_days=3, stop_frac=0.005)
 assert _r[5] == 3 and _r[0] > -3 * 3 * 0.93 * 1.05, "a losing day stops after its first loss, every day, not after all ten orders"
 print("faster steps and stop replay tests passed")
+
+# Fill study: the one sided Fisher exact p is the hypergeometric tail, a miss is scored at its decision price, and the data file has the orders it says it has.
+from scalper import fillstudy as _FS
+assert abs(_FS.fisher_one_sided(4, 22, 0, 35) - 0.019) < 0.001, "4 losses all among 22 of 57 orders: p about 0.019"
+assert _FS.fisher_one_sided(0, 10, 0, 10) == 1.0 and abs(_FS.fisher_one_sided(1, 1, 0, 1) - 0.5) < 1e-9
+_rows = _FS.load()
+_s = _FS.summarize(_rows)
+assert (_s["filled"], _s["missed"], _s["lost_filled"], _s["lost_missed"]) == (35, 22, 0, 4), "the recorded sample"
+_won = {"ticker": "T", "side": "yes", "price": 0.9, "filled": False, "won": True, "pnl": 1 - 0.9 - _FS.fee(0.9)}
+assert _FS.summarize([_won])["mean_missed"] > 0 and _FS.summarize([_won])["filled"] == 0, "a missed order is scored on what it would have made at its decision price"
+print("fill study tests passed")
