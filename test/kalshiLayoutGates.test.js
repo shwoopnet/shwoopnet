@@ -50,11 +50,11 @@ gates.Y5 = () => {
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(names(rail[1]), ['account', 'positions'], 'the rail holds the account (with the performance stats) and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['books', 'session', 'performance', 'trades'], 'the main column: books tiles, the bot card, the charts and the trades');
-  const bot = /<div class="kal-card kal-card-flush" data-card="session">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="performance">/.exec(main)[1];
-  for (const id of ['kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Facts', 'kalL1Pl']) assert.ok(bot.indexOf('id="' + id + '"') > -1, id + ' lives in the bot card');
-  assert.ok(!/kalChart|kalPerf/.test(bot), 'the charts and stats are not in the bot card');
-  assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]) && !/id="kalL1Pill"/.test(bot), 'the running pill sits at the top right of the account card, not on the bot card');
+  assert.deepStrictEqual(names(main), ['books', 'performance', 'trades'], 'the main column: books tiles, the charts and the trades (the bot card is gone; its controls sit in the account card)');
+  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
+  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Status', 'kalL1Size']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, stop and halt are always on screen');
+  assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
+  assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
   const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
   for (const id of ['kalChartLine', 'kalChartPie', 'kalChartBars', 'kalChartRange']) assert.ok(perf.indexOf('id="' + id + '"') > -1, id + ' lives in the charts card on the bot page');
   assert.ok(!/id="kalPerf"/.test(perf) && /data-card="account">[\s\S]*id="kalPerf"/.test(rail[1]), 'the stat tiles and tables sit in the account card in the rail');
@@ -65,7 +65,6 @@ gates.Y5 = () => {
   for (const id of ['kalAcctRefresh', 'kalDiagCopy', 'kalBookDownload', 'kalAcctStart', 'kalAcctBody']) assert.ok(tools.indexOf('id="' + id + '"') > -1, id + ' moved into the Tools menu in the header');
   assert.ok(/\.kal-console\{ grid-template-columns:340px minmax\(0,1fr\);/.test(html), 'a fixed-width rail and a flexible main column');
   assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'one column on a narrow screen, the rail first');
-  assert.ok(!/id="kalBotHalt"|id="kalL1Stop"/.test(rail[1]), 'the controls are not in the rail: they sit with the bot');
 };
 
 // The account re-sends its saved layout on every update to the user document. It must not undo a drag in progress, or a move that has not
@@ -249,8 +248,7 @@ gates.Y10 = () => {
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
-  const facts = html.slice(html.indexOf("document.getElementById('kalL1Facts').innerHTML = running"), html.indexOf("var sizeNote"));
-  assert.strictEqual((facts.match(/fact\('/g) || []).length, 5, 'three facts while running (no end time any more) and two when ended');
+  assert.ok(/var doneLine = running \? 'Next look ' \+/.test(html) && /orders sent, ' \+/.test(html) && !/kalL1Facts/.test(html), 'when it looks next, orders sent and filled against no fill are one line of the status, not a row of facts');
   assert.ok(/id="kalL1Size"/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are one muted line');
 };
 
@@ -339,6 +337,8 @@ gates.Y16 = () => {
   const ys = [...svg.matchAll(/ y1="([\d.]+)"/g)].map((x) => Number(x[1]));
   assert.ok(ys.length === 1 && ys[0] >= 0 && ys[0] <= 86, 'a strike far above the price stays inside the chart');
   assert.ok(/kalshiSparkFor\(m\) \+ '<\/div>'/.test(html), 'each market row carries its chart');
+  assert.ok(/fetch\('https:\/\/api\.gold-api\.com\/price\/XAU'\)/.test(html) && /m\.series === 'KXGOLD15M' && m\.strike != null && !kalshiGold\.failed/.test(html), 'gold draws its price against the strike, and falls back to the YES line if the feed fails');
+  assert.ok(/now - kalshiGold\.at < 15000/.test(html), 'the gold feed is asked at most every 15 seconds');
 };
 
 (async () => {
