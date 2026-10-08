@@ -290,7 +290,9 @@ const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
 // Oct 8, 2026 (from 1% and 7%/$7). At 2% a $106 account buys two contracts (two need about $92 to $98 of cash, three about $138 to $146).
 const L1_SIZE_MAX = 3;
 const L1_SIZE_FRACTION = 0.02;
-const L1_SIZED_STOP_FRACTION = 0.10;
+// 5%, tightened from 10% on Oct 8, 2026 at the owner's choice: 10% of a $344 balance is $34, more than the worst modelled day at 5 contracts (about $20), so it
+// never tripped. 5% is about $17, a real circuit breaker that a bad day at 4 to 5 contracts can reach.
+const L1_SIZED_STOP_FRACTION = 0.05;
 function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
   return Math.max(1, Math.min(cap, L1_SIZE_CEILING, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
