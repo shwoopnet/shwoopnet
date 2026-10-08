@@ -46,6 +46,13 @@ T3_BAND = (0.55, 0.70)  # the side bought must cost 55c to 70c at the entry prin
 T3_TARGET = 0.05        # sell when the bid is 5c above the entry price
 T3_TIME_EXIT_S = 240    # otherwise sell at the first bid print at or after 240 s (11 minutes left), long before L1's window
 
+# T4 (README, Pre-registration: T4): the cheap side, scalped, fixed before any bar was read
+T4_BAND = (0.04, 0.10)  # the side bought costs 4c to 10c at the entry print (the owner's example: 6.2%, 14.9x)
+T4_ENTRY_FROM_S = 61    # first entry print at or after second 61 ...
+T4_ENTRY_TO_S = 180     # ... and before second 180
+T4_TARGET = 0.03        # sell when the bid is 3c above the entry price
+T4_TIME_EXIT_S = 240    # otherwise the first bid print at or after 240 s
+
 
 def window_flow(trades: list[dict], open_ts: int) -> tuple[float, float, int]:
     """(YES contracts, NO contracts, trades) from the trades that fall in [open, open + WINDOW_S). A trade stamped later is never counted."""
@@ -214,7 +221,48 @@ def t3_trade(bars: list[tuple]) -> dict | None:
             "stress": gross - fee(price, STRESS) - fee(exit_[1], STRESS), "won": gross > 0}
 
 
-def t3_entries(db, min_total: float = 0.0) -> tuple[list[dict], int, int]:
+def _sell_scan(bars: list[tuple], side: str, esec: int, price: float, target: float, time_exit_s: int):
+    """The first later second whose opposite taker print puts our bid at price + target or better, else the first such print at or after time_exit_s.
+    Our bid for YES is the YES price a NO taker paid; for NO it is 1 minus the YES price a YES taker paid. None when no exit prints."""
+    for b in bars:
+        if b[0] <= esec:
+            continue
+        bid = b[2] if side == "yes" else (None if b[1] is None else round(1 - b[1], 4))
+        if bid is None:
+            continue
+        if bid >= price + target or b[0] >= time_exit_s:
+            return b[0], bid
+    return None
+
+
+def t4_trade(bars: list[tuple]) -> dict | None:
+    """T4 on one market's bars. No signal: the first print, from second T4_ENTRY_FROM_S up to (not including) T4_ENTRY_TO_S, by a taker buying a side that costs
+    T4_BAND (YES at its price, NO at 1 minus the YES price of a NO taker print). Exit as T3 with T4_TARGET and T4_TIME_EXIT_S. Fee on both legs."""
+    entry = None
+    for b in bars:
+        if not (T4_ENTRY_FROM_S <= b[0] < T4_ENTRY_TO_S):
+            continue
+        cands = []
+        if b[1] is not None:
+            cands.append(("yes", b[1]))
+        if b[2] is not None:
+            cands.append(("no", round(1 - b[2], 4)))
+        hit = [c for c in cands if T4_BAND[0] <= c[1] <= T4_BAND[1]]
+        if hit:
+            entry = (b[0], hit[0][0], hit[0][1])
+            break
+    if entry is None:
+        return None
+    esec, side, price = entry
+    ex = _sell_scan(bars, side, esec, price, T4_TARGET, T4_TIME_EXIT_S)
+    if ex is None:
+        return None
+    gross = ex[1] - price
+    return {"price": price, "sell": ex[1], "hold": ex[0] - esec, "side": side, "net": gross - fee(price) - fee(ex[1]),
+            "stress": gross - fee(price, STRESS) - fee(ex[1], STRESS), "won": gross > 0}
+
+
+def t3_entries(db, min_total: float = 0.0, trade=None) -> tuple[list[dict], int, int]:
     """(observations, markets with bars, markets with no observation)."""
     out, seen = [], 0
     flow = {t: y + n for t, y, n in db.execute("SELECT ticker, yes_ct, no_ct FROM tapeflow")}
@@ -223,7 +271,7 @@ def t3_entries(db, min_total: float = 0.0) -> tuple[list[dict], int, int]:
             continue
         seen += 1
         bars = db.execute("SELECT sec, yes_px, no_px, last_px, cy, cn FROM tape_s WHERE ticker=? ORDER BY sec", (ticker,)).fetchall()
-        t = t3_trade(bars)
+        t = (trade or t3_trade)(bars)
         if t is None:
             continue
         out.append(dict(t, ticker=ticker, close_ts=close_ts, day=datetime.fromtimestamp(close_ts, timezone.utc).strftime("%Y-%m-%d")))
@@ -268,6 +316,14 @@ def run() -> None:
           f"halves {f(s3['h1'])} / {f(s3['h2'])}, fees x{STRESS} {f(s3['stress'])}, up {s3['win']:.1%}, median hold {holds[len(holds) // 2] if holds else 0:.0f}s, "
           f"at 100 contracts n={s3['strict_n']} net {f(s3['strict_mean'])}")
     print(f"VERDICT: {v3}")
+    t4, seen4, none4 = t3_entries(db, trade=t4_trade)
+    t4s, _, _ = t3_entries(db, MIN_TOTAL_STRICT, trade=t4_trade)
+    v4, s4 = verdict(t4, t4s)
+    holds4 = sorted(e["hold"] for e in t4)
+    print(f"T4 cheap side scalp, tick level: {seen4} markets read, {none4} with no observation; n={s4['n']} on {s4['days']} days, net {f(s4['mean'])} per contract, z {s4['z']:+.2f}, "
+          f"halves {f(s4['h1'])} / {f(s4['h2'])}, fees x{STRESS} {f(s4['stress'])}, up {s4['win']:.1%}, median hold {holds4[len(holds4) // 2] if holds4 else 0:.0f}s, "
+          f"at 100 contracts n={s4['strict_n']} net {f(s4['strict_mean'])}")
+    print(f"VERDICT: {v4}")
 
 
 if __name__ == "__main__":

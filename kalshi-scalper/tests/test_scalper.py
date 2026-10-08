@@ -2231,3 +2231,14 @@ _late = _TF.t3_trade([_b(10, y=0.50), _b(50, y=0.56), _b(62, y=0.62), _b(70, n=0
 assert _late and _late["hold"] == 188 and _late["net"] < 0, "otherwise it is sold at the first bid print at or after 240 s"
 assert _TF.T3_TIME_EXIT_S <= 900 - 400 - 60, "flat long before L1's window opens"
 print("T3 tests passed")
+
+# T4, the cheap side scalp at tick level: a 4c to 10c side, entered from second 61 and before 180, sold at +3c or at the first bid print from 240 s, fee on both legs.
+_c = [_b(30, y=0.06), _b(70, y=0.30), _b(90, y=0.06), _b(100, n=0.10)]          # the print at 30 s is before the entry window, the one at 70 s costs 30c, the one at 90 s is the entry
+_t4 = _TF.t4_trade(_c)
+assert _t4 and _t4["side"] == "yes" and abs(_t4["price"] - 0.06) < 1e-9 and abs(_t4["sell"] - 0.10) < 1e-9 and _t4["hold"] == 10, "entry at 90 s, exit on the bid print that reaches +3c"
+assert abs(_t4["net"] - (0.10 - 0.06 - _fee(0.06) - _fee(0.10))) < 1e-9, "fee on both legs, small on a cheap contract"
+_t4n = _TF.t4_trade([_b(70, n=0.93), _b(80, y=0.99)] + [_b(250, y=0.97)])        # a NO taker print at YES 0.93 costs NO 7c; later a YES taker at 0.99 leaves our NO bid at 1c, exit at 250 s
+assert _t4n and _t4n["side"] == "no" and abs(_t4n["price"] - 0.07) < 1e-9 and abs(_t4n["sell"] - 0.03) < 1e-9, "the NO side prices off the other taker's print and the time exit sells what is bid"
+assert _TF.t4_trade([_b(200, y=0.06), _b(210, n=0.30)]) is None, "no entry after second 180"
+assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.07)]) is None, "no print reaching +3c and none at 240 s: no observation"
+print("T4 tests passed")
