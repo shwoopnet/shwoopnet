@@ -391,7 +391,13 @@ async function runL1Tick(args) {
 
   const candidates = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status)
     && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1]);
-  if (!candidates.length) { await note("Watching. No market is about 6 minutes from its close right now.", { cash }); return { skipped: "no market in the window" }; }
+  if (!candidates.length) {
+    // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
+    const opens = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status))
+      .map((q) => Date.parse(q.m.close_time) - L1_WINDOW_MS[1]).filter((t) => t > now);
+    await note("Watching. Orders go in about 6 minutes before a close, and no market is at that point right now.", { cash, nextLookAt: opens.length ? Math.min(...opens) : null });
+    return { skipped: "no market in the window" };
+  }
 
   const results = [];
   let ordersSent = sent;
