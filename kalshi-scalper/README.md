@@ -1769,3 +1769,34 @@ fact, so the 69 days cannot count for it. It is registered here as a forward loo
   positive; positive with fees times 1.2; and the mean exceeds F0's mean on the same markets. Fewer than 300 is `NOT_ENOUGH_DATA`.
   About 25 entries a day, so 300 entries need about 12 days.
 - **Count.** One more variant: **2,561 as of 2026-10-08**.
+
+## Cost model check: fee rounding per order (2026-10-08, information only, no hypothesis, no verdict)
+
+Every backtest in this file charges the fee as `0.07 * p * (1 - p)` per contract, unrounded (`scalps.fee`). Kalshi's fee-rounding page
+(docs.kalshi.com, getting started, "Fee Rounding", fetched 2026-10-08) says a non-direct member's balance moves in whole cents, and the exchange
+charges a rounding fee to restore that: a fill's trade fee is rounded up to $0.000001, then the balance change is floored to the cent, and the
+difference is the rounding fee. For a buy that means the order costs `ceil_to_the_cent(count * (price + fee))`. The fee accumulator only
+refunds rounding across several fills of one order, so a single fill gets none back. `fees.py` already had a cent-rounded per-order fee and the
+backtests did not use it.
+
+`python -m scalper.feerounding` prices L1's 3,400 entries both ways (cents per contract, hold to settlement):
+
+| Contracts per order | Unrounded fee (every table above) | Cent-rounded order | Difference | Fee per contract, rounded |
+|---|---|---|---|---|
+| 1 | +0.96c | **+0.49c** | -0.48c | 0.95c |
+| 2 | +0.96c | **+0.70c** | -0.26c | 0.73c |
+| 3 | +0.96c | **+0.79c** | -0.17c | 0.64c |
+| 4 | +0.96c | +0.85c | -0.11c | 0.58c |
+| 5 | +0.96c | +0.86c | -0.11c | 0.58c |
+
+- **What it says.** If this is how the account is charged, a one contract L1 order has been earning about half of what the backtests say, and the
+  live bot's two contracts earn about 0.7c, not 0.96c. Larger orders lose less to rounding, which is an argument for fewer, larger orders over many
+  one contract ones (but it does not change the ladder: size is still earned by the forward check, not by this).
+- **What is not established.** The page describes the rule; it does not say which kind of member this account is. A direct member rounds to
+  $0.0001 and would pay almost exactly the unrounded fee. The P/L shown on the Kalshi page cannot tell the two apart (it displays whole cents).
+  The order diagnostics export now carries `avgFee` (the fee Kalshi charged, per the order response, on branch `claude/diag-fee`), so one paste of
+  real orders settles it: a one contract order at about 92c charging 0.01 means non-direct; 0.0052 means direct.
+- **Effect on the forward checks.** `forward.py`, `filters.py` and the rest still use the unrounded fee, so their nets are the optimistic column. The
+  bar's "fees times 1.2" stress is not the same thing as this (1.2 times 0.47c is 0.56c; the one contract rounding adds 0.48c). If the account is
+  non-direct, a pass of a forward check at the unrounded fee should be re-read at the rounded cost for the order size actually used before
+  anything is sized up. Nothing was changed in the existing code or the pre-set bars.
