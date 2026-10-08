@@ -123,6 +123,53 @@ gates.Y8 = () => {
   assert.ok(!/Lost<\/span>/.test(pie2) && /100%/.test(pie2) && (pie2.match(/stroke-dasharray="/g) || []).length === 1, 'a slice of zero is not drawn');
 };
 
+// The performance tracker: a loss is settled and drawn like a win, even when the server never marked it, and the numbers are the plain arithmetic of the trades.
+gates.Y14 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const lift = (names) => new Function(names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiPnlSeries', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml']);
+  const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
+  // A filled order the server left unsettled: with the market's result known it is settled here, by the server's own rule.
+  const lost = { ts: 3, ticker: 'T-L', side: 'yes', status: 'filled', fillCount: '2.00', count: 2, maxCost: 1.86, price: 0.93, series: 'KXBTC15M' };
+  const won = { ts: 1, ticker: 'T-W', side: 'no', status: 'filled', fillCount: '2.00', count: 2, maxCost: 1.84, price: 0.92, series: 'KXGOLD15M' };
+  const open = { ts: 4, ticker: 'T-O', side: 'yes', status: 'filled', fillCount: '1.00', count: 1, maxCost: 0.93, price: 0.93, series: 'KXBTC15M' };
+  const res = f.kalshiResolveOrders([won, lost, open], { 'T-L': 'no', 'T-W': 'no' });
+  assert.strictEqual(res[1].settledPnl, -1.86, 'a loss costs the whole order');
+  assert.strictEqual(res[0].settledPnl, 0.16, 'a win pays $1 a contract less what was paid');
+  assert.strictEqual(res[2].settled, undefined, 'a market with no known result stays open');
+  assert.strictEqual(lost.settled, undefined, 'the stored order is not changed');
+  const server = Object.assign({}, lost, { settled: true, result: 'no', settledPnl: -1.8 });
+  assert.strictEqual(f.kalshiResolveOrders([server], { 'T-L': 'yes' })[0].settledPnl, -1.8, 'what the server saved wins');
+  assert.deepStrictEqual(f.kalshiOutcomeCounts(res, 0), { won: 1, lost: 1, open: 1, noFill: 0, other: 0 }, 'the loss reaches the pie');
+  const series = f.kalshiPnlSeries(res, 0);
+  assert.deepStrictEqual(series.map((p) => p.pnl), [0.16, -1.86], 'and the line');
+  const bars = f.kalshiBarsSvg(series, esc, money);
+  assert.ok(/fill="var\(--gain\)"/.test(bars) && /fill="var\(--loss\)"/.test(bars) && /1 won, 1 lost/.test(bars), 'a green bar for the win and a red bar for the loss');
+  assert.ok(/after the first settled trade/.test(f.kalshiBarsSvg([], esc, money)));
+  // The tracker's arithmetic.
+  const t = (ts, pnl, series, price) => ({ ts, settled: true, fillCount: '1', settledPnl: pnl, series, price });
+  const st = f.kalshiPerfStats([t(1, 0.08, 'KXBTC15M', 0.92), t(2, 0.08, 'KXGOLD15M', 0.91), t(3, -0.92, 'KXBTC15M', 0.92), t(4, -0.92, 'KXBTC15M', 0.94), t(5, 0.06, 'KXGOLD15M', 0.96), t(6, null, 'KXBTC15M', 0.9)], 0);
+  assert.strictEqual(st.n, 5, 'an order with no settled figure is not a trade');
+  assert.deepStrictEqual([st.wins, st.losses], [3, 2]);
+  assert.strictEqual(Math.round(st.total * 100) / 100, -1.62);
+  assert.strictEqual(Math.round(st.winRate * 100), 60);
+  assert.strictEqual(Math.round(st.profitFactor * 100) / 100, 0.12, 'gross wins over gross losses');
+  assert.strictEqual(Math.round(st.maxDrawdown * 100) / 100, 1.84, 'the deepest fall from a peak');
+  assert.strictEqual(st.longestLoss, 2);
+  assert.deepStrictEqual([st.streak.kind, st.streak.n], ['win', 1], 'the run in progress');
+  assert.strictEqual(Math.round(st.worst * 100) / 100, -0.92);
+  assert.deepStrictEqual(st.bySeries.map((r) => [r.label, r.n]), [['Bitcoin', 3], ['Gold', 2]]);
+  assert.deepStrictEqual(st.byBand.map((r) => [r.label, r.n]), [['90c to 92c', 1], ['92c to 95c', 3], ['95c to 97c', 1]], 'by the price paid');
+  assert.strictEqual(f.kalshiPerfStats([t(1, 0.08, 'KXBTC15M', 0.92)], 0).profitFactor, null, 'no losses: no profit factor, not an infinite one');
+  assert.strictEqual(f.kalshiPerfStats([], 0).n, 0);
+  assert.ok(/fills in after the first settled trade/.test(f.kalshiPerfHtml(f.kalshiPerfStats([], 0), esc, money)));
+  const out = f.kalshiPerfHtml(st, esc, money);
+  assert.ok(/-\$1\.62/.test(out) && /60% \(3 \/ 2\)/.test(out) && /By price paid/.test(out) && /By market/.test(out), 'the tiles and tables show the figures');
+  assert.ok(/id="kalChartBars"/.test(html) && /id="kalPerf"/.test(html) && /id="kalChartRange"/.test(html), 'the page has the bar chart, the tracker and the range choice');
+  assert.ok(/kalshiResolveOrders\(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct\.results\)/.test(html), 'the charts read orders settled against the account read');
+};
+
 // A card stays in its own column: reordering, arrows and dragging all work within the parent the card is in, never across the rail and the main column.
 gates.Y9 = () => {
   const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
