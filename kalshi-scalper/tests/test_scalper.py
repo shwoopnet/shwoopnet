@@ -1803,3 +1803,40 @@ assert _p1 > _p0, "a real edge clears the bar more often than no edge"
 assert _PW.pass_rate(_days, 2000, 1.0, reps=200)[0] > _p1, "more entries, more power"
 assert _PW.pass_rate(_days, 400, 1.0, reps=50) == _PW.pass_rate(_days, 400, 1.0, reps=50), "seeded, so it is repeatable"
 print("power table tests passed")
+
+# P2 resting entries: filled only by a LATER snapshot strictly through the limit, unfilled counts zero, the verdict needs 300 signals and 5 days.
+from scalper import bookmaker as _BM
+_C = 10000.0
+def _snap(left, ya=None, na=None):
+    return {"ts": _C - left, "yes_ask": ya, "no_ask": na}
+_s1 = [_snap(390, 0.93, 0.08), _snap(380, 0.93, 0.08), _snap(340, 0.93, 0.08)]
+_o = _BM.simulate(_s1, _C, "yes")
+assert _o["side"] == "yes" and _o["ask"] == 0.93 and abs(_o["limit"] - 0.929) < 1e-9 and not _o["filled"], "a price that never trades through is a miss"
+_s2 = [_snap(390, 0.93, 0.08), _snap(380, 0.9285, 0.08)]
+assert _BM.simulate(_s2, _C, "yes")["filled"], "a later snapshot below the limit fills"
+_s3 = [_snap(390, 0.93, 0.08), _snap(380, 0.929, 0.08)]
+_o3 = _BM.simulate(_s3, _C, "yes")
+assert not _o3["filled"] and _o3["filled_at"], "a touch at the limit is not a fill in the verdict, only in the information column"
+assert not _BM.simulate([_snap(390, 0.9285, 0.08)], _C, "yes")["filled"], "the signal snapshot itself never fills"
+assert _BM.simulate([_snap(300, 0.93, 0.08), _snap(420, 0.93, 0.08)], _C, "yes") is None, "outside 330 to 400 seconds there is no signal"
+assert _BM.simulate([_snap(380, 0.5, 0.5)], _C, "yes") is None
+assert _BM.simulate([_snap(380, None, 0.93)], _C, "no")["side"] == "no", "a market with an empty YES side can still signal on NO"
+# the result is read only to settle the trade
+assert {k: v for k, v in _BM.simulate(_s2, _C, "yes").items() if k != "won"} == {k: v for k, v in _BM.simulate(_s2, _C, "no").items() if k != "won"}
+assert _BM.maker({"filled": False, "limit": 0.9, "won": 1.0}) == 0.0
+# a filled order pays the taker formula at the lower price, so a pure price saving shows as exactly one tick
+_f = {"filled": True, "limit": 0.929, "ask": 0.93, "won": 1.0}
+assert abs((_BM.maker(_f) - _BM.taker(_f)) - (0.001 + _BM.fee(0.93) - _BM.fee(0.929))) < 1e-12
+# adverse selection planted: every filled order loses, every missed order wins. Maker per signal is far below taker and the verdict is FALSIFIED.
+def _fake(i, filled):
+    return {"filled": filled, "filled_at": filled, "ask": 0.93, "limit": 0.929, "won": 0.0 if filled else 1.0, "day": f"2026-10-{1 + i % 8:02d}", "close": 1000.0 + i, "side": "yes", "t": 0}
+_adv = [_fake(i, i % 2 == 0) for i in range(400)]
+_v, _i = _BM.verdict(_adv)
+assert _v == "FALSIFIED" and _i["maker_per_signal"] < _i["taker_all"] and _i["missed_taker"] > 0 > _i["filled_taker"]
+assert _BM.verdict(_adv[:299])[0] == "NOT_ENOUGH_DATA", "300 signals needed"
+assert _BM.verdict([dict(o, day="2026-10-01") for o in _adv])[0] == "NOT_ENOUGH_DATA", "5 days needed"
+# a resting order that fills everything one tick cheaper and wins as often as a taker is a pure saving; it passes only if it is consistent
+_pure = [dict(_fake(i, True), won=1.0 if i % 10 else 0.0) for i in range(400)]
+assert _BM.verdict(_pure)[0] == "NOT_YET_FALSIFIED", "the same outcomes one tick cheaper is a real, if tiny, improvement"
+assert _BM.verdict([dict(o, filled=(i % 3 == 0), filled_at=(i % 3 == 0)) for i, o in enumerate(_pure)])[0] == "FALSIFIED", "filling a third of them gives up the saving on the rest and the winners that were missed"
+print("P2 resting entry tests passed")
