@@ -364,7 +364,7 @@ gates.Y17 = () => {
 
 // The Account card says what one order risks right now (contracts times the latest order's cost per contract), and the profit tile is named so it cannot be mistaken for it.
 gates.Y18 = () => {
-  assert.ok(/Stake per trade/.test(html) && /ses\.sizing === true \? \(Number\.isFinite\(ses\.sizeCap\) \? ses\.sizeCap : 3\) \+ \(Number\.isFinite\(ses\.sizeAddon\) \? ses\.sizeAddon : 0\) : 1/.test(html), 'the stake is the cap plus the profit add-on, or 1 when scaling is off');
+  assert.ok(/Stake per trade/.test(html) && /ses\.sizing === true \? \(Number\.isFinite\(ses\.sizeCap\) \? ses\.sizeCap : 1\) \+ \(Number\.isFinite\(ses\.sizeAddon\) \? ses\.sizeAddon : 0\) : 1/.test(html), 'the stake is the cap plus the profit add-on, or 1 when scaling is off');
   assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
   assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
   assert.ok(/tile\('Expectancy'/.test(html) && !/tile\('Per trade'/.test(html), 'the expectancy tile does not share the stake row name');
@@ -378,6 +378,11 @@ gates.Y18 = () => {
   }
   process.exit(failed ? 1 : 0);
 })();
+
+// Y20: no guessed size before the session's first look.
+gates.Y20 = () => {
+  assert.ok(/var sizeKnown = ses\.sizing !== true \|\| Number\.isFinite\(ses\.sizeCap\)/.test(html) && /sized at the first look/.test(html) && !/ses\.sizeCap : 3\)/.test(html), 'a new session shows no made-up stake');
+};
 
 // Y19: the reinvest pool shows as pool / cost of the next extra contract, so progress is readable at a glance.
 {
