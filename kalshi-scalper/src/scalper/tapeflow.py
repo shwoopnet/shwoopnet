@@ -114,15 +114,21 @@ def fetch_one(ticker: str, open_ts: int) -> tuple[float, float, int, list[tuple]
     return y, n, k, build_bars(trades, open_ts)
 
 
-def fetch(days: int = 30) -> None:
+FETCH_PASSES = (0, 4, 2, 6, 1, 5, 3, 7)    # the order markets are fetched in: every 8th market of the 30 days, then the next offset, so ANY stopping point is an even sample of all days
+FETCH_LIMIT = 1240                          # the pre-stated stopping point: two passes (offsets 0 and 4), about 620 markets each, unless the fetch finishes sooner
+
+
+def fetch(days: int = 30, limit: int = FETCH_LIMIT) -> None:
     db = sqlite3.connect(DB)
     db.execute(SCHEMA)
     db.execute(BARS)
     last = db.execute("SELECT MAX(close_ts) FROM market").fetchone()[0]
     rows = db.execute("SELECT ticker, open_ts FROM market WHERE close_ts >= ? AND result IN ('yes','no') ORDER BY close_ts", (last - days * 86400,)).fetchall()
     have = {r[0] for r in db.execute("SELECT ticker FROM tapeflow")}
-    todo = [r for r in rows if r[0] not in have]
-    print(f"{len(rows)} markets in the last {days} days, {len(todo)} to fetch")
+    order = {off: k for k, off in enumerate(FETCH_PASSES)}
+    ranked = sorted(enumerate(rows), key=lambda ir: (order[ir[0] % 8], ir[0]))
+    todo = [r for _, r in ranked if r[0] not in have][:max(0, limit - len(have))]
+    print(f"{len(rows)} markets in the last {days} days, {len(have)} stored, {len(todo)} to fetch (stop at {limit})")
     for i, (ticker, open_ts) in enumerate(todo, 1):
         y, n, k, bars = fetch_one(ticker, open_ts)
         db.executemany("INSERT OR REPLACE INTO tape_s VALUES (?,?,?,?,?,?,?)", [(ticker, *b) for b in bars])
