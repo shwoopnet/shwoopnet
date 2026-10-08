@@ -958,6 +958,25 @@
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .kal-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:20px; box-shadow:var(--card-shadow); }
   .kal-card-title{ font-family:'Public Sans', sans-serif; font-size:15px; font-weight:700; margin-bottom:14px; }
+  /* Status strip: what matters at a glance, above the cards, so it is in view without scrolling. */
+  .kal-strip{ display:flex; flex-wrap:wrap; gap:8px 10px; margin:0 0 16px 0; }
+  .kal-chip{ display:inline-flex; align-items:baseline; gap:8px; padding:8px 12px; background:var(--panel); border:1px solid var(--border); border-radius:999px; font-size:13px; box-shadow:var(--card-shadow); }
+  .kal-chip-l{ color:var(--muted); font-size:11px; letter-spacing:.02em; }
+  .kal-chip b{ font-family:'Public Sans', sans-serif; font-weight:700; }
+  .kal-chip-ok{ border-color:#1f9d55; } .kal-chip-warn{ border-color:#c58a00; } .kal-chip-bad{ border-color:#d64545; }
+  /* Trades: one compact entry each (what happened and its P/L on one line, the detail under it) instead of a tall grid of labels. */
+  .kal-trow{ padding:9px 0; border-top:1px solid var(--border); }
+  .kal-trow:first-child{ border-top:0; padding-top:0; }
+  .kal-trow-main{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:13.5px; }
+  .kal-trow-fill{ font-weight:600; min-width:0; }
+  .kal-trow-pl{ font-family:'Public Sans', sans-serif; font-weight:700; white-space:nowrap; }
+  .kal-trow-sub{ color:var(--muted); font-size:11.5px; margin-top:2px; }
+  /* Books: the market and its price on one line, the figures under it. */
+  .kal-brow{ padding:10px 0; border-top:1px solid var(--border); }
+  .kal-brow:first-child{ border-top:0; padding-top:0; }
+  .kal-brow-main{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .kal-brow-px{ font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; white-space:nowrap; }
+  .kal-brow-sub{ color:var(--muted); font-size:11.5px; margin-top:3px; line-height:1.5; }
   .kal-status{ color:var(--muted); font-size:12.5px; }
   .kal-books{ display:grid; gap:10px; }
   .kal-row{ display:grid; grid-template-columns:minmax(120px,1.4fr) repeat(4,minmax(70px,1fr)); gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--border); font-size:13px; }
@@ -998,7 +1017,7 @@
   .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr)); }
   /* The books card now sits in a column beside the trade history, so each market's figures wrap two across instead of five. */
   .kal-bot-grid .kal-books .kal-row{ grid-template-columns:1fr 1fr; }
-  .kal-bot-grid .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); }
+  .kal-bot-grid .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(72px,1fr)); }
   .kal-more{ margin-top:10px; }
   .kal-more > summary{ cursor:pointer; color:var(--muted); font-size:12.5px; }
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
@@ -3307,6 +3326,8 @@
       </div>
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span></div>
     </div>
+
+    <div id="kalStrip" class="kal-strip"></div>
 
     <div id="kalTabBot" class="kal-bot-grid">
       <div class="kal-span kal-layout-bar">
@@ -9611,6 +9632,33 @@
     return (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   }
 
+  // 'KXBTC15M-26OCT072015-15' -> 'BTC 8:15 PM ET'. Kalshi writes the close time in Eastern time inside the ticker. Anything that does not
+  // match is returned as it came, so an unfamiliar ticker is never hidden or guessed at.
+  function kalshiShortTicker(t){
+    var m = /^KX([A-Z]+?)15M-\d{2}[A-Z]{3}\d{2}(\d{2})(\d{2})-\d+$/.exec(String(t || ''));
+    if(!m){ return String(t || ''); }
+    var h = Number(m[2]), mi = m[3];
+    if(h > 23 || Number(mi) > 59){ return String(t); }
+    return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' ET';
+  }
+
+  // The status strip above the cards. s = { switchOn, halted, session, acct, now }. Pure: it reads nothing from the page.
+  function kalshiStripHtml(s, esc, money){
+    var chip = function(label, value, cls, vcls){ return '<span class="kal-chip' + (cls ? ' ' + cls : '') + '"><span class="kal-chip-l">' + esc(label) + '</span><b' + (vcls ? ' class="' + vcls + '"' : '') + '>' + esc(value) + '</b></span>'; };
+    var sess = s.session, running = !!(sess && sess.active === true && sess.until > s.now), out = [];
+    if(s.switchOn === false){ out.push(chip('Bot', 'order switch OFF', 'kal-chip-bad')); }
+    else if(s.halted){ out.push(chip('Bot', 'halted', 'kal-chip-warn')); }
+    else if(running){ out.push(chip('Bot', 'running', 'kal-chip-ok')); }
+    else { out.push(chip('Bot', 'not running', 'kal-chip-warn')); }
+    if(running && Number.isFinite(sess.botNet)){ out.push(chip('Bot P/L', (sess.botNet >= 0 ? '+' : '-') + money(Math.abs(sess.botNet)), '', sess.botNet >= 0 ? 'kal-pos' : 'kal-neg')); }
+    var a = s.acct;
+    if(a && a.balance && a.balance.ok && a.balance.totalDollars !== null){ out.push(chip('Account', money(a.balance.totalDollars))); }
+    if(running && Number.isFinite(sess.nextLookAt) && sess.nextLookAt > s.now){
+      out.push(chip('Next look', new Date(sess.nextLookAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })));
+    }
+    return out.join('');
+  }
+
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
 
   function renderKalshiBooks(data){
@@ -9629,12 +9677,9 @@
       var spread = hasBook ? m.yesAsk - m.yesBid : null;
       var rt = hasBook ? kalshiRoundTrip(m.yesAsk, m.yesBid, 1) : null;
       var left = kalshiSecsLeft(m.closeTime, now);
-      return '<div class="kal-row">' +
-        '<div><div class="kal-name">' + escapeHtml(names[m.series] || m.series) + '</div><span class="kal-lbl">' + escapeHtml(m.ticker) + '</span></div>' +
-        '<div><span class="kal-lbl">Yes bid / ask</span>' + (hasBook ? (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div><span class="kal-lbl">Spread</span>' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div><span class="kal-lbl">Round trip (1 lot)</span>' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div><span class="kal-lbl">Closes in</span>' + kalshiFmtLeft(left) + '</div>' +
+      return '<div class="kal-brow"><div class="kal-brow-main"><span class="kal-name">' + escapeHtml(names[m.series] || m.series) + '</span>' +
+        '<span class="kal-brow-px">' + (hasBook ? (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</span></div>' +
+        '<div class="kal-brow-sub">' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, 'closes ')) + ' &middot; yes bid / ask &middot; spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ' &middot; round trip (1 lot) ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + ' &middot; ' + kalshiFmtLeft(left) + ' left</div>' +
         '</div>';
     }).join('');
     st.textContent = 'Updated ' + new Date(data.fetchedAt).toLocaleTimeString();
@@ -9788,9 +9833,9 @@
       var botCell = cell('Bot P/L, this session', botNet === null ? 'n/a' : (botNet >= 0 ? '+' : '-') + kalshiMoney(Math.abs(botNet)), botNet === null ? '' : (botNet >= 0 ? 'kal-pos kal-big' : 'kal-neg kal-big'));
       totEl.innerHTML =
         '<div class="kal-trade kal-sum">' + botCell + '</div>' +
-        '<div class="kal-note">Settled trades only, from the bot\'s own orders' + (sess && Number.isFinite(sess.botOpen) && sess.botOpen > 0 ? '; ' + kalshiMoney(sess.botOpen) + ' still open' : '') + '. A slight underestimate of wins.</div>' +
+        '<div class="kal-note">Settled trades only, from the bot\'s own orders' + (sess && Number.isFinite(sess.botOpen) && sess.botOpen > 0 ? '; ' + kalshiMoney(sess.botOpen) + ' still open' : '') + '. Wins are booked slightly low.</div>' +
         '<div class="kal-trade kal-sum">' +
-          cell('Account change since start', tot.change === null ? 'n/a' : (tot.change >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tot.change)), tot.change === null ? '' : (tot.change >= 0 ? 'kal-pos kal-big' : 'kal-neg kal-big')) +
+          cell('Account change', tot.change === null ? 'n/a' : (tot.change >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tot.change)), tot.change === null ? '' : (tot.change >= 0 ? 'kal-pos kal-big' : 'kal-neg kal-big')) +
           cell('Starting balance', kalshiMoney(tot.start)) +
           cell('Now', tot.now === null ? 'n/a' : kalshiMoney(tot.now)) +
         '</div>' +
@@ -9834,10 +9879,8 @@
         if(tp){ settled++; sum += tp.pnl; plCell = '<span class="' + (tp.pnl >= 0 ? 'kal-pos' : 'kal-neg') + ' kal-big">' + (tp.pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tp.pnl)) + '</span>'; }
         else if(ord){ open++; plCell = '<span class="kal-lbl">open</span>'; }
         else { plCell = '<span class="kal-lbl">n/a</span>'; }
-        return '<div class="kal-trade"><div><div class="kal-name">' + escapeHtml(String(x.ticker)) + '</div><span class="kal-lbl">' + escapeHtml(x.time ? new Date(x.time).toLocaleString() : '') + '</span></div>' +
-          '<div><span class="kal-lbl">Fill</span>' + fillText + '</div>' +
-          '<div><span class="kal-lbl">P/L</span>' + plCell + '</div>' +
-          '<div><span class="kal-lbl">From</span>' + (bot ? 'bot' : 'manual') + '</div></div>';
+        return '<div class="kal-trow"><div class="kal-trow-main"><span class="kal-trow-fill">' + fillText + '</span><span class="kal-trow-pl">' + plCell + '</span></div>' +
+          '<div class="kal-trow-sub">' + escapeHtml(kalshiShortTicker(x.ticker)) + ' &middot; ' + escapeHtml(x.time ? new Date(x.time).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '') + ' &middot; ' + (bot ? 'bot' : 'manual') + '</div></div>';
       }).join('') + (gfills.length > fillsShown.length
         ? '<div class="kal-note">Showing ' + fillsShown.length + ' of ' + gfills.length + ' trades. <button type="button" class="kal-btn" data-more="fills">Show more</button></div>' : (gfills.length > 5 ? '<div class="kal-note"><button type="button" class="kal-btn" data-less="fills">Show fewer</button></div>' : ''))
         : '<div class="kal-empty">No fills since your starting line.</div>') +
@@ -9859,6 +9902,7 @@
     }).join('') + (evAll.length > evShown.length
       ? '<div class="kal-note">Showing ' + evShown.length + ' of ' + evAll.length + ' events. <button type="button" class="kal-btn" data-more="events">Show more</button></div>'
       : '') : '<div class="kal-empty">Nothing yet.</div>';
+    renderKalshiStrip();
   }
   // The 'Show more' button is re-created on every render, so one listener on its container does it.
   document.getElementById('kalBotClosed').addEventListener('click', function(e){
@@ -9872,6 +9916,16 @@
   var kalshiLiveCtl = { arm: null, last: null, session: null };
   var kalshiLiveCtlUnsub = null;
   // The 24 hour L1 session: status from the session document the server keeps; the page only starts and stops it.
+  function renderKalshiStrip(){
+    var el = document.getElementById('kalStrip');
+    if(!el){ return; }
+    var halted = !!(kalshiBotState.control && kalshiBotState.control.halt === true);
+    el.innerHTML = kalshiStripHtml({
+      switchOn: kalshiLiveAcct ? kalshiLiveAcct.liveSwitch !== false : null, halted: halted,
+      session: kalshiLiveCtl.session, acct: kalshiLiveAcct, now: Date.now()
+    }, escapeHtml, kalshiMoney);
+  }
+
   function renderKalshiL1(){
     var s = kalshiLiveCtl.session, now = Date.now();
     var running = !!(s && s.active === true && s.until > now);
@@ -9888,6 +9942,7 @@
     document.getElementById('kalL1Start').hidden = running;
     document.getElementById('kalL1Stop').hidden = !running;
     if(running){ document.getElementById('kalL1Confirm').hidden = true; }
+    renderKalshiStrip();
   }
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
