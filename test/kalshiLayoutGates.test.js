@@ -180,6 +180,10 @@ gates.Y14 = () => {
   const out = f.kalshiPerfHtml(st, esc, money);
   assert.ok(/-\$1\.62/.test(out) && /60% \(3 \/ 2\)/.test(out) && /By price paid/.test(out) && /By market/.test(out), 'the tiles and tables show the figures');
   assert.ok(/id="kalChartBars"/.test(html) && /id="kalPerf"/.test(html) && /id="kalChartRange"/.test(html), 'the page has the bar chart, the tracker and the range choice');
+  // In this palette --ink is the page background and --paper is the text colour (inverted names), and --card does not exist: a select using them showed dark text on dark in dark mode.
+  const sel = /\.kal-perf-head select\{ font:inherit;[^}]*\}/.exec(html)[0];
+  assert.ok(/color:var\(--paper\)/.test(sel) && /background:var\(--panel\)/.test(sel) && !/--card|color:var\(--ink\)/.test(sel), 'the range choice is readable in both themes');
+  assert.ok(!/var\(--card\)/.test(html), 'no rule uses a variable that is not defined');
   assert.ok(/kalshiResolveOrders\(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct\.results\)/.test(html), 'the charts read orders settled against the account read');
 };
 
