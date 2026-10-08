@@ -2064,3 +2064,15 @@ assert set(_t3) == {3}, "a flat size stays flat"
 _t10 = _SZ.path(_by, _days, dpc=1, skim=True, addon_max=2, fixed=0, rng=_rnd2.Random(3), ndays=70, fill=1.0)
 assert _t10[3] <= 10, "the cap never passes the hard ceiling however much the balance would allow"
 print("sizing replay tests passed")
+
+# Observed fees: 25 of the owner's real fills (count, average fill, reported average_fee_paid) match the fee rounded up to $0.0001 over the order, and
+# do NOT match whole-cent rounding, which would have reported 0.5c to 1c per contract.
+_obs = [(3, 0.0710, 0.0046), (3, 0.0740, 0.0048), (2, 0.9160, 0.0054), (2, 0.0420, 0.0028), (2, 0.0330, 0.0022), (2, 0.1400, 0.0084), (2, 0.9300, 0.0046),
+        (2, 0.9110, 0.0057), (2, 0.9470, 0.0035), (1, 0.0440, 0.0030), (1, 0.1300, 0.0080), (1, 0.0710, 0.0047), (1, 0.0960, 0.0061), (1, 0.1000, 0.0063),
+        (1, 0.9390, 0.0041), (1, 0.1600, 0.0095), (2, 0.0800, 0.0052), (2, 0.9599, 0.0027), (2, 0.9620, 0.0026), (1, 0.9490, 0.0034), (1, 0.0580, 0.0039)]
+for _n, _p, _f in _obs:
+    assert abs(round(_FR.observed_fee_per_contract(_p, _n), 4) - _f) < 1e-9 or abs(_FR.observed_fee_per_contract(_p, _n) - _f) < 5e-5 + 1e-9, (_n, _p, _f)
+_cent_miss = sum(abs((_FR.order_cost(_p, _n) - _n * _p) / _n - _f) > 0.0004 for _n, _p, _f in _obs)
+assert _cent_miss >= 0.8 * len(_obs), f"whole-cent rounding fits only {len(_obs) - _cent_miss} of {len(_obs)} reported fees, it is not what this account is charged"
+assert abs(_FR.observed_fee_per_contract(0.071, 1) - 0.0047) < 1e-9 and abs(_FR.observed_fee_per_contract(0.071, 3) - 0.00463) < 1e-5
+print("observed fee tests passed")

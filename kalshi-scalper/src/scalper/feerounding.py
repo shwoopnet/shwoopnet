@@ -21,6 +21,14 @@ def order_cost(price: float, count: int, mult: float = 1.0) -> float:
     return math.ceil(round(raw * 100, 6)) / 100.0
 
 
+def observed_fee_per_contract(price: float, count: int, mult: float = 1.0) -> float:
+    """What this account's order response reports as `average_fee_paid`, MEASURED on 25 of the owner's own fills (2026-10-08): the order's
+    whole fee 0.07 * count * p * (1 - p) rounded UP to $0.0001, shared over the contracts. Not the whole-cent rounding order_cost models: a
+    one contract buy at 7.1c reports a fee of 0.47c, not 1c."""
+    total = math.ceil(round(count * fee(price, mult) * 10000, 6)) / 10000.0
+    return total / count
+
+
 def net_per_contract(entries: list[dict], count: int, rounded: bool, mult: float = 1.0) -> float:
     tot = 0.0
     for e in entries:
