@@ -3430,7 +3430,7 @@
               <div id="kalL1Status" class="kal-note">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (one contract per $85 of balance, up to 10, raised one step every 3 days at most; stop at 10% of the balance at the last review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (one contract per $85 of balance, up to 10, raised one step every 3 days at most; stop at 5% of the balance at the last review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -3439,7 +3439,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised one step every 3 days at most) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (10% of the balance at the last review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
+                <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised one step every 3 days at most) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (5% of the balance at the last review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
               </details>
             </div>
           </details>
@@ -9973,7 +9973,7 @@
     var main = tile('Settled trades', String(st.n)) + tile('Win rate', pct(st.winRate) + ' (' + st.wins + ' / ' + st.losses + ')') +
       tile('Profit factor', st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2)) +
       tile('Average win', st.avgWin === null ? 'none yet' : sg(st.avgWin), 'kal-pos') + tile('Average loss', st.avgLoss === null ? 'none yet' : sg(st.avgLoss), st.avgLoss === null ? '' : 'kal-neg') +
-      tile('Per trade', sg(st.expectancy), st.expectancy >= 0 ? 'kal-pos' : 'kal-neg');
+      tile('Expectancy', sg(st.expectancy), st.expectancy >= 0 ? 'kal-pos' : 'kal-neg');
     var more = tile('Net', sg(st.total), st.total >= 0 ? 'kal-pos' : 'kal-neg') +
       tile('Best / worst', sg(st.best) + ' / ' + sg(st.worst)) + tile('Deepest drawdown', st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none') +
       tile('Streak now', streak) + tile('Longest losing run', String(st.longestLoss));
@@ -10318,7 +10318,16 @@
       // only when there are any worth noting; the account total above already includes them.
       var useShard = a.balance.shards.filter(function(x){ return x.shard === 2; })[0];
       var otherSum = a.balance.shards.filter(function(x){ return x.shard !== 2; }).reduce(function(n, x){ return n + x.dollars; }, 0);
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' +
+      // What one order risks right now: contracts (the cap plus any profit add-on) at the cost per contract of the latest order, so it follows the real prices.
+      var ses = kalshiLiveCtl && kalshiLiveCtl.session, stakeRow = '';
+      if(ses && ses.active === true){
+        var lastO = (kalshiLiveOrders || []).filter(function(o){ return o && Number(o.count) > 0 && Number.isFinite(Number(o.maxCost)) && o.strategy === 'L1'; }).sort(function(x, y){ return y.ts - x.ts; })[0];
+        var perC = lastO ? Number(lastO.maxCost) / Number(lastO.count) : 0.93;
+        var nC = ses.sizing === true ? (Number.isFinite(ses.sizeCap) ? ses.sizeCap : 3) + (Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0) : 1;
+        var stake = nC * perC, tb = a.balance.totalDollars;
+        stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div></div>';
+      }
+      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + stakeRow +
         // Funds on other shards cannot be spent by the bot, so they get a line only when there is something worth noting; otherwise the total is what the bot has.
         ((otherSum >= 0.5 || !useShard) ? '<div class="kal-rows"><div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars) : '$0.00') + '</b></div>' +
           (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum) + '</b></div>' : '') + '</div>' : '') +
@@ -10453,7 +10462,7 @@
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
-    var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.10 * base).toFixed(2) : '$10.00';
+    var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.05 * base).toFixed(2) : '$10.00';
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
     var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + ', ' + (s.ordersSent || 0) + ' orders sent, ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
     var peakAt = Number.isFinite(s && s.peakNet) ? Math.max(0, s.peakNet) : 0;

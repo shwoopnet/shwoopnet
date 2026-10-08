@@ -362,6 +362,15 @@ gates.Y17 = () => {
   assert.ok(/if\(name === 'kalshi' && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi page, whatever is saved');
 };
 
+// The Account card says what one order risks right now (contracts times the latest order's cost per contract), and the profit tile is named so it cannot be mistaken for it.
+gates.Y18 = () => {
+  assert.ok(/Stake per trade/.test(html) && /ses\.sizing === true \? \(Number\.isFinite\(ses\.sizeCap\) \? ses\.sizeCap : 3\) \+ \(Number\.isFinite\(ses\.sizeAddon\) \? ses\.sizeAddon : 0\) : 1/.test(html), 'the stake is the cap plus the profit add-on, or 1 when scaling is off');
+  assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
+  assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
+  assert.ok(/tile\('Expectancy'/.test(html) && !/tile\('Per trade'/.test(html), 'the expectancy tile does not share the stake row name');
+  assert.ok(/\(0\.05 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 5% stop');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

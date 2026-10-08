@@ -425,7 +425,7 @@ gates.N18 = async () => {
   await tick(huge);
   assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
   assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(106.5, 0.92), live.l1Count(138, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
-  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.10, 3], 'the share of cash per order, the scaled stop and the cap');
+  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.05, 3], 'the share of cash per order, the scaled stop and the cap');
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4).count, '4', 'the cap can rise, so four is a valid order');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, live.L1_SIZE_CEILING + 1), /refusing/, 'but never past the hard ceiling');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
@@ -438,13 +438,13 @@ gates.N19 = async () => {
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
   const loss = (n) => { const r = {}; for (let i = 0; i < n; i++) r[`OLD-${i}`] = 'no'; return r; };
   const bal = { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] };
-  // $300 start: the stop is $30. Three-contract trades cost 2.76 each: ten lost ones are $27.60, eleven are $30.36.
-  const ten = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(10) }); seed(ten, 10, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  // $300 start: the stop is $15 (5%). Three-contract trades cost 2.76 each: five lost ones are $13.80, six are $16.56.
+  const ten = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(5) }); seed(ten, 5, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   await tick(ten);
-  assert.strictEqual(ten.posts.length, 1, '$27.60 is inside a $30 stop');
-  const eleven = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(11) }); seed(eleven, 11, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  assert.strictEqual(ten.posts.length, 1, '$13.80 is inside a $15 stop');
+  const eleven = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(6) }); seed(eleven, 6, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   await tick(eleven);
-  assert.deepStrictEqual([eleven.posts.length, eleven.sess.endedBecause], [0, 'loss stop']);
+  assert.deepStrictEqual([eleven.posts.length, eleven.sess.endedBecause], [0, 'loss stop'], '$16.56 reaches the $15 stop');
   // With scaling off the flat $10 stop applies to the same trades and ends it far sooner: 3 x 2.76 = $8.28 is fine, 4 x 2.76 = $11.04 is not.
   const flat3 = world({ session: { startCash: 300 }, balance: bal, results: loss(3) }); seed(flat3, 3, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   await tick(flat3);

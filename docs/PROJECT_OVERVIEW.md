@@ -26,7 +26,7 @@ This document is mostly about the Kalshi subsystem, because it is where most of 
 
 **Safety, in the order it matters:**
 - Orders cannot duplicate. The order id derives from the market, so two server instances during a deploy produce the same id and Kalshi refuses the second.
-- The bot stops itself when its own trades over the last 24 hours are down $10 (or 10% of the balance at the last weekly review). Open orders count as lost. Manual trades do not count. After a stop it stays off until restarted.
+- The bot stops itself when its own trades over the last 24 hours are down $10 (or 5% of the balance at the last review, about $17 at $344). Open orders count as lost. Manual trades do not count. After a stop it stays off until restarted.
 - It fails closed: an unreadable balance, an unreadable order list, an unsaved size review, or a lost order answer all mean no order that minute.
 - More than 200 orders in 24 hours pauses it. A halt switch pauses entries. **Flatten all** (in the Running menu, next to **Pause bot**) pauses first, then sells every open position, one order each, never retried. Pause and Resume are the one everyday control; Start also lifts a pause left on after a Flatten.
 - Live credentials can only exist for the admin account, enforced in `firestore.rules`. Every function checks the admin first.
