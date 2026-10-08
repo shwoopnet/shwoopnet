@@ -72,9 +72,9 @@ gates.M1 = async () => {
 
 // Size is rounded DOWN: 1.7 contracts of risk budget buys one, never two.
 gates.M2 = () => {
-  assert.strictEqual(live.l1Count(80, 0.9157), 1, '1.75 contracts of budget is one contract');
-  assert.strictEqual(live.l1Count(138, 0.9157), 3, 'three whole contracts of budget is three');
-  assert.strictEqual(live.l1Count(120, 0.9157), 2, '2.62 is two');
+  assert.strictEqual(live.l1Count(160, 0.9157), 1, '1.75 contracts of budget is one contract');
+  assert.strictEqual(live.l1Count(276, 0.9157), 3, 'three whole contracts of budget is three');
+  assert.strictEqual(live.l1Count(240, 0.9157), 2, '2.62 is two');
 };
 
 // A market 329 s or 401 s out is outside the 330 to 400 s window, on the list and on the fresh read; 331 s and 399 s are inside.
