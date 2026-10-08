@@ -1633,7 +1633,7 @@ names of the database and the existing `search.py`.
 - **What this does and does not say.** This grammar (one price band, one side, up to three filters, hold to settlement, taker at the ask), in these windows, on 69 days, finds nothing a fair market does not also produce. It does not say a different shape, such as a resting order or a sized ladder, has no edge. The `pair` filter (the other series pointing the same way) produced no top rule in either late slot.
 - **Count.** 1,760 distinct rules evaluated in the real runs. **Strategy variants tried so far: 2,553 as of 2026-10-08** (793 including P1, plus these 1,760). The line at the top of this file is updated. All `FALSIFIED` or `NOT_ENOUGH_DATA`.
 
-## Pre-registration: three more forward looks, F5 to F7, and a power table (fixed 2026-10-08 03:00 UTC, before any of them was run on any market)
+## Pre-registration: three more forward looks, F5 to F7, and a power table (fixed 2026-10-08 02:51 UTC, before any of them was run on any market)
 
 The slot search found nothing new, and the strategy space already written down is close to exhausted: L3 covers 2 minute favorites up to 98c
 (`-1.71c`), S06 and S07 cover the previous result and streaks, S01 to S05 cover the other series, R10 puts stop losses outside the program.
@@ -1678,13 +1678,13 @@ them. Their window is markets that **close after 2026-10-08 02:50 UTC** (close_t
 - **What it does not say.** A failed reading at 300 entries is weak evidence against L1, not strong evidence: with a real +0.96c edge it fails 79% of the time. Equally a pass is weak evidence for it. The false pass rate at 300 entries (7.1%) is above the nominal 1.8% because 6.6 days is few clusters for a z statistic.
 - **Consequence for the size ladder.** The ladder's first step asks for a pass on 300 entries and 5 days. That gate will usually not be met even if L1 works, so a ladder that waits for it waits for luck. Whether to read the first step at 1,000 entries (about three weeks, 34% power at the measured edge) instead is a decision for the owner, to be written down before the data is read; this note changes nothing by itself.
 
-## Amendment to P2 (fixed 2026-10-08 03:30 UTC, before any resting-order simulation was run on any book)
+## Amendment to P2 (fixed 2026-10-08 02:56 UTC, before any resting-order simulation was run on any book)
 
 Two facts changed after P2 was written, both disclosed here before use.
 
 1. **Data source.** `scalper.recorder` (read only, public endpoints, no key) is now running in the research container, writing the top
-   five levels of both series' open markets to `data/ob.sqlite` every 10 seconds, started 2026-10-08 03:25 UTC for 10 hours. P2 may use
-   these snapshots as well as the Firestore recorder's. Only markets that close after 03:25 UTC count; the 471 older snapshots (42 minutes,
+   five levels of both series' open markets to `data/ob.sqlite` every 10 seconds, started 2026-10-08 02:52 UTC for 10 hours. P2 may use
+   these snapshots as well as the Firestore recorder's. Only markets that close after 03:00 UTC count (so every window is fully recorded); the 471 older snapshots (42 minutes,
    2026-10-07) never count. A snapshot is a separate view of the book every 10 seconds, so a resting order whose price was crossed for
    less than 10 seconds can be missed. That biases fills DOWN, which is the conservative direction for a maker test.
 2. **Maker fee.** The series endpoint reports `fee_type: quadratic, fee_multiplier: 1` for both series, which fits the taker formula used
