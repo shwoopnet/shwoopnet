@@ -1566,3 +1566,52 @@ Nothing about them has been computed.
 
 P1 is one more variant against the bar: **793** as of 2026-10-08 (792 before, plus P1). P2 is not counted until it runs.
 The fourteen hypotheses before it, and the 729 rules and 42 strategies searched, remain `FALSIFIED` or `NOT_ENOUGH_DATA`.
+
+## Pre-registration: the four slot search, BTC and gold each in an early and a late window (fixed 2026-10-08 02:50 UTC, before any code or any result)
+
+The owner asked to use the markets harder: one rule per series per window, so four live slots (Bitcoin early, Bitcoin late, gold early,
+gold late), each acting once per market. This is a search over rules for each slot, run with the protections of the first rule search
+(`search.py`) and a stricter pass mark because there are now four searches and a hundred holdout reads. It is a parameter search, so it
+can never produce a verdict that means trade. Nothing below has been run. The only things looked at before writing this are the table
+names of the database and the existing `search.py`.
+
+- **Slots, fixed.** *Early*: the decision is read at 14, 13, 12, 11 or 10 minutes left (minutes 1 to 5 of the market). *Late*: 6, 5, 4,
+  3, 2 or 1 minutes left (the last 6 minutes, the window L1 sits in). Each slot is one series, so a slot rule never trades the other
+  series and never trades in the other window. A market can therefore have up to two entries (one early, one late), and the two
+  windows never overlap in time.
+- **Grammar.** The same as `search.py` (price band from the fixed edges, side either/yes/no, optional spread filter, optional move
+  filter over 1, 3 or 5 minutes) with the minute drawn from the slot's own list and the series filter removed (the slot sets it). One
+  new filter, `pair`: the other series' market that closes at the same time, at the same minute, has a valid quote, and its YES mid
+  is at least 5c above 50c ("other up") or at least 5c below ("other down"); the rule requires the other market to point the same
+  way as the side bought (`agree`) or the opposite way (`disagree`). A slot rule with a `pair` filter and no other-series quote has no
+  entry. No filter reads a result. No hour of the day is a filter. Hold to settlement only, taker at the ask, fee `0.07 * p * (1 - p)`.
+- **Counterparty, stated once for the family.** For the early slot: whoever quotes the first minutes of a market before the price has
+  absorbed what the underlying already did. For the late slot: the same longshot-holder story as L1. For `pair`: a market that has
+  not yet repriced for what the other market is already saying. No new mechanism is claimed, and a rule is not described as having an
+  edge because it ranks first.
+- **Search protocol, per slot.** Seed 11, 3 cycles of 50 fresh rules, 50 more fresh rules, and 50 one-filter mutants of the top 50
+  (as in `search.py`), top 25 kept per round, at least 100 entries to be ranked, ranking by day clustered z of net profit per contract.
+  Only the first half of the days (by day count) is read while searching. The second half is the locked holdout, read once, for the
+  final 25 of each slot. For the late slots the rule L1 as live (6 minutes left, either side, 0.88 to 0.97, no filter) is scored
+  as an extra information row and is not part of the ranking.
+- **Control.** For every slot, the identical pipeline on the fair-market copy of its data (each result drawn from the market's own
+  last price), same seed. The best z the control finds is printed beside the real best.
+- **Every rule counts.** Distinct rules evaluated in the REAL runs of all four slots are added to the tally of variants tried
+  (792 before P1, 793 with P1, plus the four-slot total printed by the run). The floor for a search window z is `sqrt(2 ln N)` with N
+  the slot's own count. Control runs are not counted.
+- **Numeric prediction, stated before the run.** In every slot the best search-window z lands within 0.5 of the control's best and
+  near the floor (about 3.3 to 3.5), and the holdout of the final 25 shows a mean net below zero, as in the first search (6 of 25
+  positive, mean -1.85c). **The pre-registered expectation is that all four slots are `FALSIFIED`.** If any slot shows more than 6
+  of 25 rules positive on its holdout, that is reported as an anomaly, not as a finding.
+- **Pass mark, fixed.** A rule is `NOT_YET_FALSIFIED` only if ALL hold: its search window z is above both the floor and the control's best
+  for its slot; on the holdout it has at least 300 entries, mean net positive, day clustered z of at least **3.0** (the null
+  expectation of the best of the 100 holdout reads across 4 slots, `sqrt(2 ln 100)`, so ordinary luck cannot pass), both holdout
+  halves positive, and positive with fees times 1.2. A holdout with fewer than 300 entries is `NOT_ENOUGH_DATA` for that rule. Anything
+  else is `FALSIFIED`. A pass is permission to run a forward test on days not yet seen, written here before it starts, and never a reason
+  to change the live bot. The data is the same 69 days as every earlier test (the last half of them is not new to the project, only
+  new to these rules), so a pass could never be more than that.
+- **Mixing.** If at least one rule in each of two slots passes, the combination is evaluated once on the holdout as a portfolio (one entry
+  per slot per market, equal size) and reported with the same measures. If fewer than two slots have a passing rule there is nothing to
+  mix and none is run. No other combination is looked at.
+- **Live implication.** None from this section. Four slots would need a separate order id per slot (today the id is `L1-<ticker>`, one order per
+  market), a per slot stop, and the size ladder; none of that is built or proposed until a rule passes forward.
