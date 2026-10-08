@@ -1752,7 +1752,7 @@ pass could only ever be permission to test forward on days not yet seen, written
   its own pre-registration and unseen data, and it is consistent with S06/S07 finding no useful persistence either way.
 - **Count.** Five variants (Q1 to Q3 and the two Q1 thresholds): **2,560 as of 2026-10-08** (2,555 plus 5). The top line of this file is updated.
 
-## Pre-registration: a forward look at the Q2 complement, F8 (fixed 2026-10-08 03:24 UTC, before it was run on any market after this time)
+## Pre-registration: a forward look at the Q2 complement, F8 (fixed 2026-10-08 03:13 UTC, before it was run on any market after 03:25)
 
 Q2 was `FALSIFIED` as registered (the previous result AGREEING with the favourite). Its table also showed the complement, entries where the previous
 market in the same series resolved to the OTHER side, at +1.41c on 1,698 entries against +0.49c for the agreeing half. That was seen after the

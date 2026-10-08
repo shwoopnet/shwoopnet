@@ -1882,3 +1882,17 @@ assert _z2 == "NOT_ENOUGH_DATA", "5 days needed"
 assert _FL.null_p95(_fair, reps=100) == _FL.null_p95(_fair, reps=100) and _FL.null_p95(_fair, reps=100) < 0.03, "the fair market null is seeded and sits near the fee drag"
 assert all(not _insp2.signature(f).parameters.keys() & {"perf", "target", "until", "profit"} for f in (_FL.verdict, _FL.summarize, _FL.diff_z, _FL.null_p95))
 print("filter Q1-Q3 tests passed")
+
+# F8: only markets after the cutoff, only entries whose side differs from the previous market's result, none without a previous result.
+_T0 = _fw.F8_START
+_f8m = [_mk("P1", "KXBTC15M", _T0 + 900, 0.93, "no"),            # previous result: no
+        _mk("A1", "KXBTC15M", _T0 + 1800, 0.93, "yes"),          # favourite yes, previous no: disagrees -> in F8
+        _mk("B1", "KXBTC15M", _T0 + 2700, 0.93, "yes"),          # favourite yes, previous yes: agrees -> out
+        _mk("C1", "KXBTC15M", _T0 + 5400, 0.93, "yes"),          # no previous market: excluded
+        _mk("D1", "KXBTC15M", _T0, 0.93, "yes")]                 # closes exactly at the cutoff: not after it
+_f8, _f8b = _fw.f8_rule(_f8m)
+assert [e["ticker"] for e in _f8] == ["A1"], [e["ticker"] for e in _f8]
+assert "D1" not in {e["ticker"] for e in _f8b}, "a market closing exactly at the cutoff is not after it"
+assert "C1" in {e["ticker"] for e in _f8b} and "C1" not in {e["ticker"] for e in _f8}, "no previous result: in F0, not in F8"
+assert "B1" not in {e["ticker"] for e in _f8}, "agreeing with the previous result is the other arm"
+print("forward F8 tests passed")
