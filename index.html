@@ -9699,14 +9699,15 @@
     return (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   }
 
-  // 'KXBTC15M-26OCT072015-15' -> 'BTC 8:15 PM ET'. Kalshi writes the close time in Eastern time inside the ticker. Anything that does not
+  // 'KXBTC15M-26OCT072015-15' -> 'BTC 7:15 PM CT'. Kalshi writes the close time in Eastern time inside the ticker; shown here one hour earlier, in Central. Anything that does not
   // match is returned as it came, so an unfamiliar ticker is never hidden or guessed at.
   function kalshiShortTicker(t){
     var m = /^KX([A-Z]+?)15M-\d{2}[A-Z]{3}\d{2}(\d{2})(\d{2})-\d+$/.exec(String(t || ''));
     if(!m){ return String(t || ''); }
     var h = Number(m[2]), mi = m[3];
     if(h > 23 || Number(mi) > 59){ return String(t); }
-    return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' ET';
+    h = (h + 23) % 24;   // Central is always one hour behind Eastern (they change clocks on the same day)
+    return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' CT';
   }
 
   // What to tell the owner when an export has nothing in it, so a silent recorder, a stopped one and one whose Kalshi reads fail are told apart.
@@ -9769,14 +9770,28 @@
   }
 
   // 'h:mm PM' today, 'Tomorrow h:mm PM' the next day, otherwise 'Oct 9 h:mm PM'. A date that does not parse is shown as nothing.
+  // Every time on this page is shown in US Central (CT, CST or CDT as the date requires), not the browser's zone, so the page,
+  // the Kalshi app and the bot's logs all read the same clock wherever it is opened.
+  var KAL_TZ = 'America/Chicago';
+  function kalTime(ms){
+    return new Date(ms).toLocaleTimeString('en-US', { timeZone: KAL_TZ, hour: 'numeric', minute: '2-digit' });
+  }
+  function kalDate(ms){
+    return new Date(ms).toLocaleDateString('en-US', { timeZone: KAL_TZ, month: 'short', day: 'numeric' });
+  }
+  function kalDateTime(ms){
+    return new Date(ms).toLocaleString('en-US', { timeZone: KAL_TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' CT';
+  }
+  function kalDayKey(ms){
+    return new Date(ms).toLocaleDateString('en-CA', { timeZone: KAL_TZ });
+  }
   function kalshiWhen(ms, nowMs){
     if(!Number.isFinite(ms)){ return ''; }
-    var d = new Date(ms), n = new Date(nowMs), tm = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    var day = function(x){ return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); };
-    var diff = Math.round((day(d) - day(n)) / 86400000);
+    var tm = kalTime(ms);
+    var diff = Math.round((Date.parse(kalDayKey(ms)) - Date.parse(kalDayKey(nowMs))) / 86400000);
     if(diff === 0){ return tm; }
     if(diff === 1){ return 'Tomorrow ' + tm; }
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + tm;
+    return kalDate(ms) + ' ' + tm;
   }
 
   // Profit or loss of one bot ORDER once it has settled: the server writes settledPnl on the order when it reads the market's result.
@@ -9825,7 +9840,7 @@
     var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
     var dots = points.map(function(p, i){
       return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"><title>' +
-        esc(new Date(p.t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
+        esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
     }).join('');
     var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
@@ -9925,7 +9940,7 @@
     var bars = shown.map(function(p, i){
       var x = L + slot * i + (slot - bw) / 2, y0 = Y(0), y1 = Y(p.pnl), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0));
       return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"><title>' +
-        esc(new Date(p.t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl))) + '</title></rect>';
+        esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl))) + '</title></rect>';
     }).join('');
     var wins = shown.filter(function(p){ return p.pnl > 0; }).length, losses = shown.filter(function(p){ return p.pnl < 0; }).length;
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profit or loss of each of the last ' + shown.length + ' settled trades: ' + wins + ' wins, ' + losses + ' losses" style="width:100%;height:auto;display:block">' +
@@ -9981,7 +9996,7 @@
         '<div style="text-align:right"><div class="kal-brow-px">' + (hasBook ? (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
         '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div></div></div></div>';
     }).join('');
-    st.textContent = 'Updated ' + new Date(data.fetchedAt).toLocaleTimeString();
+    st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
   }
 
   var kalshiPollTimer = null;
@@ -10188,7 +10203,7 @@
       totEl.innerHTML = '<div class="kal-rows">' +
         '<div><span class="kal-k">Change since start</span>' + (tot.change === null ? '<b>n/a</b>' : '<b class="' + (tot.change >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tot.change >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tot.change)) + '</b>') + '</div>' +
         '<div><span class="kal-k">Starting balance</span><b>' + kalshiMoney(tot.start) + '</b></div>' +
-        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(new Date(tot.since).toLocaleDateString([], { month: 'short', day: 'numeric' })) + '. Includes deposits and manual trades.</div></div>';
+        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(kalDate(tot.since)) + '. Includes deposits and manual trades.</div></div>';
     }
 
     renderKalshiPositions();
@@ -10537,12 +10552,12 @@
         return '<div class="kal-note">' + escapeHtml(x.ticker) + ': ' + escapeHtml(String(x.position)) + ' contracts' + (x.realizedPnl !== null ? ', realized ' + escapeHtml(x.realizedPnl) : '') + (x.feesPaid !== null ? ', fees ' + escapeHtml(x.feesPaid) : '') + '</div>';
       });
       var fillRows = (f.ok ? f.fills : []).map(function(x){
-        return '<div class="kal-note">' + escapeHtml(x.time ? new Date(x.time).toLocaleString() : '') + ' ' + escapeHtml(String(x.ticker)) + ' ' + escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '') + (x.taker === null ? '' : (x.taker ? ' (taker)' : ' (maker)')) + '</div>';
+        return '<div class="kal-note">' + escapeHtml(x.time ? kalDateTime(x.time) : '') + ' ' + escapeHtml(String(x.ticker)) + ' ' + escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '') + (x.taker === null ? '' : (x.taker ? ' (taker)' : ' (maker)')) + '</div>';
       });
       body.innerHTML = part('Balance by shard', shardRows, b.ok ? null : 'HTTP ' + b.status + ' ' + b.error) +
         part('Open positions', posRows, p.ok ? null : 'HTTP ' + p.status + ' ' + p.error) +
         part('Recent fills', fillRows, f.ok ? null : 'HTTP ' + f.status + ' ' + f.error);
-      msg.textContent = 'Read ' + new Date(d.at).toLocaleTimeString() + '.';
+      msg.textContent = 'Read ' + kalTime(d.at) + ' CT.';
       showBaseline(d.baseline, d.changeSinceStart, f.ok ? f.hiddenBeforeBaseline : 0);
     }
     function showBaseline(bl, change, hidden){
@@ -10550,7 +10565,7 @@
       var go = document.getElementById('kalAcctStart');
       if(!bl){ line.textContent = 'Counting everything on the account, including your own trades.'; go.hidden = false; return; }
       go.hidden = true; document.getElementById('kalAcctStartConfirm').hidden = true;
-      line.textContent = 'Counting since ' + new Date(bl.since).toLocaleString() + ' from a starting balance of ' + money(bl.startingDollars) +
+      line.textContent = 'Counting since ' + kalDateTime(bl.since) + ' from a starting balance of ' + money(bl.startingDollars) +
         (change === null || change === undefined ? '.' : ': ' + (change >= 0 ? '+' : '-') + money(Math.abs(change)) + ' so far (includes any deposit or withdrawal).') +
         (hidden ? ' ' + hidden + ' earlier fill' + (hidden === 1 ? ' is' : 's are') + ' hidden.' : '');
     }
@@ -10576,7 +10591,7 @@
     kalshiAcctFromServer = function(d){
       if(!d || !d.balance || (kalshiLiveAcct && kalshiLiveAcct.at >= d.at)){ return; }
       render(d);
-      msg.textContent = 'Read ' + new Date(d.at).toLocaleTimeString() + ' by the server.';
+      msg.textContent = 'Read ' + kalTime(d.at) + ' CT by the server.';
     };
     function load(){
       var api = window.__shwoopAPI;
