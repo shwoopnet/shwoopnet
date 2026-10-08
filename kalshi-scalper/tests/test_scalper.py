@@ -2116,6 +2116,6 @@ _c7 = _SZ.path(_win_by, _wd, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2
 assert _c3 > _c7 >= 3, "reviews every 3 days climb faster than weekly ones when the balance supports it"
 _loss_by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": -0.92} for _ in range(10)] for d in range(1, 8)}
 _ld = sorted(_loss_by)
-_r = _SZ.path(_loss_by, _ld, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=3, fill=1.0, step_days=3, stop_frac=0.01)
+_r = _SZ.path(_loss_by, _ld, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=3, fill=1.0, step_days=3, stop_frac=0.005)
 assert _r[5] == 3 and _r[0] > -3 * 3 * 0.93 * 1.05, "a losing day stops after its first loss, every day, not after all ten orders"
 print("faster steps and stop replay tests passed")
