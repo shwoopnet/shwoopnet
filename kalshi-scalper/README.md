@@ -1800,3 +1800,16 @@ backtests did not use it.
   bar's "fees times 1.2" stress is not the same thing as this (1.2 times 0.47c is 0.56c; the one contract rounding adds 0.48c). If the account is
   non-direct, a pass of a forward check at the unrounded fee should be re-read at the rounded cost for the order size actually used before
   anything is sized up. Nothing was changed in the existing code or the pre-set bars.
+
+By price band (information only, the same post hoc bands as P1, so the same caution applies), net per contract, cents:
+
+| Band | n | Unrounded fee | 1 contract, rounded | 2 contracts, rounded | 3 contracts, rounded |
+|---|---|---|---|---|---|
+| 88c to 90c | 518 | -0.36 | -0.65 | -0.65 | -0.65 |
+| 90c to 92c | 877 | +1.30 | +0.83 | +1.01 | +1.17 |
+| 92c to 95c | 1,119 | +1.94 | +1.42 | +1.70 | +1.76 |
+| 95c to 97c | 886 | +0.17 | -0.37 | -0.08 | +0.03 |
+
+Read with the rounding in mind, the 95c to 97c band is about zero after costs even at three contracts, and the 88c to 90c band loses at any size. That does
+not change P1 (which is still to be judged on days after 02:50 UTC with its pre-set bar), but if P1 passes its forward look, the rounded cost is the
+number to size it on.
