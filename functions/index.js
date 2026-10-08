@@ -423,7 +423,7 @@ exports.kalshiL1Session = onCall(async (request) => {
   }
   const now = Date.now();
   await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
-  await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (" + (live.L1_SIZE_FRACTION * 100) + "% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
+  await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed once a week, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
   return { active: true };
 });
 
@@ -473,6 +473,7 @@ exports.kalshiLiveArmed = onSchedule(
         logEvent: (e) => db.collection("kalshiLiveEvents").add(e),
       };
       const armedOn = Boolean(arm && arm.armed === true && arm.until > now);
+      const sizingRef = db.collection("kalshiLiveControl").doc("sizing");
       const sessRef = db.collection("kalshiLiveControl").doc("session");
       const sessSnap = await sessRef.get();
       const session = sessSnap.exists ? sessSnap.data() : null;
@@ -489,7 +490,9 @@ exports.kalshiLiveArmed = onSchedule(
       // A single armed test order and the session never run together; the callables refuse to start one while the
       // other is on, and if both documents say "on" anyway, the session does nothing this minute.
       if (sessionOn && !armedOn) {
+        const sizingSnap = await sizingRef.get();
         await live.runL1Tick({
+          sizingState: sizingSnap.exists ? sizingSnap.data() : null, setSizingState: (st) => sizingRef.set(st),
           session, now, setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent,
           quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,

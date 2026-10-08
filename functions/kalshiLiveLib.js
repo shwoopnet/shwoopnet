@@ -123,9 +123,9 @@ function livePlan(signal, market) {
 }
 
 // The order body is built from fixed fields only. count is 1 unless the owner turned on size scaling, and then a whole number
-// from 1 to L1_SIZE_MAX; anything else is refused here rather than sent.
+// from 1 to L1_SIZE_CEILING; anything else is refused here rather than sent.
 function liveOrderBody(ticker, touch, side, clientOrderId, exchangeIndex, count = 1) {
-  if (!Number.isInteger(count) || count < 1 || count > L1_SIZE_MAX) throw new Error("refusing to build an order for " + count + " contracts");
+  if (!Number.isInteger(count) || count < 1 || count > L1_SIZE_CEILING) throw new Error("refusing to build an order for " + count + " contracts");
   const body = {
     ticker, side: side === "yes" ? "bid" : "ask", count: String(count), price: touch.toFixed(2),
     time_in_force: "immediate_or_cancel", self_trade_prevention_type: "taker_at_cross", client_order_id: clientOrderId,
@@ -291,9 +291,37 @@ const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
 const L1_SIZE_MAX = 3;
 const L1_SIZE_FRACTION = 0.02;
 const L1_SIZED_STOP_FRACTION = 0.10;
-function l1Count(cash, costPerContract) {
+function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
-  return Math.max(1, Math.min(L1_SIZE_MAX, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
+  return Math.max(1, Math.min(cap, L1_SIZE_CEILING, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
+}
+
+// The cap on contracts per order follows the account, slowly (the owner keeps adding to it like a savings account). One contract per
+// SCALE_DOLLARS_PER_CONTRACT of balance is the target. The cap FALLS to the target at once when the balance falls, and RISES at most one step
+// per SCALE_REVIEW_MS, and not at all within a week of a loss stop. The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
+// stop move together, once a week. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
+// (3, what the owner was running), or lower if the balance is lower. Pure: the caller keeps the state.
+const L1_SIZE_CEILING = 10;
+const SCALE_DOLLARS_PER_CONTRACT = 100;
+const SCALE_REVIEW_MS = 7 * 24 * 3600 * 1000;
+const SCALE_STEP = 1;
+function scaleTarget(cash) {
+  return Number.isFinite(cash) ? Math.max(1, Math.min(L1_SIZE_CEILING, Math.floor(cash / SCALE_DOLLARS_PER_CONTRACT + 1e-9))) : 1;
+}
+function reviewSizing(state, cash, now) {
+  const target = scaleTarget(cash);
+  if (!state || !Number.isInteger(state.cap) || !Number.isFinite(state.reviewedAt) || !Number.isFinite(state.base)) {
+    return { state: { cap: Math.min(L1_SIZE_MAX, target), base: cash, reviewedAt: now, lastStopAt: state && Number.isFinite(state.lastStopAt) ? state.lastStopAt : null }, changed: true };
+  }
+  let { cap, base, reviewedAt } = state;
+  const lastStopAt = Number.isFinite(state.lastStopAt) ? state.lastStopAt : null;
+  if (target < cap) { cap = target; base = cash; }
+  else if (now - reviewedAt >= SCALE_REVIEW_MS) {
+    base = cash; reviewedAt = now;
+    if (target > cap && !(lastStopAt !== null && now - lastStopAt < SCALE_REVIEW_MS)) cap = Math.min(cap + SCALE_STEP, target);
+  }
+  cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
+  return { state: { cap, base, reviewedAt, lastStopAt }, changed: cap !== state.cap || base !== state.base || reviewedAt !== state.reviewedAt };
 }
 const L1_LOSS_STOP = 10.0;                 // dollars the bot's own trades may be down (open ones counted as lost); was $7 until Oct 8, 2026
 
@@ -418,7 +446,17 @@ async function runL1Tick(args) {
   try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now }); }
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
-  const stopAt = sizing ? L1_SIZED_STOP_FRACTION * startCash : L1_LOSS_STOP;
+  // With scaling on, the cap and the stop's base come from the weekly review. Fails closed: a review that cannot be saved sends nothing this minute.
+  let sizeCap = L1_SIZE_MAX, sizeBase = startCash, sizeState = null;
+  if (sizing) {
+    const rv = reviewSizing(args.sizingState, cash, now);
+    sizeState = rv.state; sizeCap = rv.state.cap; sizeBase = rv.state.base;
+    if (rv.changed && args.setSizingState) {
+      try { await args.setSizingState(rv.state); } catch (e) { await note("The size review could not be saved, so nothing was sent."); return { skipped: "size review unsaved" }; }
+    }
+    await setSession({ sizeCap, sizeBase: Number(sizeBase.toFixed(2)), sizeNextReview: rv.state.reviewedAt + SCALE_REVIEW_MS });
+  }
+  const stopAt = sizing ? L1_SIZED_STOP_FRACTION * sizeBase : L1_LOSS_STOP;
   // Optional high-point stop (chosen when the session starts): the stop is measured from the best SETTLED result the session has reached, so gains
   // are protected too. The peak only ever rises, is never below zero, and is kept on the session so a restart of the function cannot lose it.
   const trailing = session.trailing === true;
@@ -431,6 +469,7 @@ async function runL1Tick(args) {
   }
   const floor = peak - stopAt;
   if (risk.worst <= floor + 1e-9) {
+    if (sizeState && args.setSizingState) { try { await args.setSizingState({ ...sizeState, lastStopAt: now }); } catch (e) { /* the stop still ends the session */ } }
     return end("loss stop", trailing
       ? "the bot's trades are down $" + (peak - risk.worst).toFixed(2) + " from their best (+$" + peak.toFixed(2) + ", now " + (risk.net >= 0 ? "+" : "-") + "$" + Math.abs(risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " open counted as lost), which reaches the $" + stopAt.toFixed(2) + " give-back stop"
       : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + stopAt.toFixed(2) + " stop");
@@ -464,7 +503,7 @@ async function runL1Tick(args) {
     const cost1 = pick.worst + bot.takerFee(pick.worst, 1);
     if (cost1 > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
     // The cash the size is judged on is what is left after this tick's earlier orders, so two markets cannot both take the full share.
-    const count = sizing ? l1Count(cash - Object.values(committed).reduce((a, x) => a + x, 0), cost1) : 1;
+    const count = sizing ? l1Count(cash - Object.values(committed).reduce((a, x) => a + x, 0), cost1, sizeCap) : 1;
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
@@ -564,5 +603,5 @@ module.exports = {
   flattenAll,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, scaleTarget, L1_SIZE_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };

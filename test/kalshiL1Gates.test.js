@@ -263,6 +263,39 @@ gates.N12 = () => {
   assert.ok(p.worst + 0.07 * p.worst * (1 - p.worst) < live.LIVE_CAP);
 };
 
+// The weekly review: the cap follows the balance down at once, up by one step at most once a week, and never within a week of a loss stop.
+gates.N24 = async () => {
+  const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
+  const DAY = 86400000, W = live.SCALE_REVIEW_MS;
+  const first = live.reviewSizing(null, 341, NOW);
+  assert.deepStrictEqual([first.state.cap, first.state.base], [3, 341], 'the first review starts at the 3 the owner was running');
+  assert.strictEqual(live.reviewSizing(null, 150, NOW).state.cap, 1, 'a small account starts lower');
+  const st = { cap: 3, base: 341, reviewedAt: NOW, lastStopAt: null };
+  const early = live.reviewSizing(st, 900, NOW + 6 * DAY);
+  assert.deepStrictEqual([early.state.cap, early.changed], [3, false], 'the balance more than doubled but six days is not a week');
+  const later = live.reviewSizing(st, 900, NOW + W);
+  assert.deepStrictEqual([later.state.cap, later.state.base, later.state.reviewedAt], [4, 900, NOW + W], 'a week later it rises ONE step, not to the nine the balance would allow');
+  assert.strictEqual(live.reviewSizing(later.state, 900, NOW + W + DAY).state.cap, 4, 'and not again the next day');
+  assert.strictEqual(live.reviewSizing({ ...st, cap: 5 }, 290, NOW + DAY).state.cap, 2, 'a falling balance cuts the cap at once, mid week');
+  assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + W + DAY).state.cap, 3, 'no rise within a week of a loss stop');
+  assert.strictEqual(live.reviewSizing({ cap: 10, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, 10, 'the hard ceiling holds');
+  // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
+  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '900.0000', exchange_index: 2 }] } });
+  const saved = [];
+  await tick(w, { sizingState: { cap: 4, base: 900, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
+  assert.strictEqual(w.posts[0].count, '4', 'sized by the stored cap, not by the 2% rule');
+  assert.strictEqual(w.sess.sizeCap, 4);
+  assert.strictEqual(w.sess.sizeBase, 900, 'the stop base is shown on the session');
+  const stopW = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] }, results: (() => { const r = {}; for (let i = 0; i < 11; i++) r['OLD-' + i] = 'no'; return r; })() });
+  seed(stopW, 11, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  const rec = [];
+  await tick(stopW, { sizingState: { cap: 3, base: 300, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { rec.push(x); } });
+  assert.deepStrictEqual([stopW.sess.endedBecause, rec[rec.length - 1].lastStopAt], ['loss stop', NOW], 'a loss stop is remembered so the cap cannot rise for a week');
+  const failSave = world({ session: { sizing: true } });
+  await tick(failSave, { sizingState: null, setSizingState: async () => { throw new Error('db down'); } });
+  assert.strictEqual(failSave.posts.length, 0, 'a review that cannot be saved sends nothing');
+};
+
 // Wiring: the session is switched by a server callable with a server-set expiry; the scheduled arm function runs it; nothing
 // else is scheduled; it refuses to run beside a single armed test order; and the page asks twice.
 gates.N13 = () => {
@@ -343,14 +376,17 @@ gates.N18 = async () => {
   assert.strictEqual(small.posts[0].count, '1', 'a $40 account is one contract');
   const mid = world({ session: { startCash: 106, sizing: true }, balance: { balance_breakdown: [{ balance: '106.0000', exchange_index: 2 }] } });
   await tick(mid);
-  assert.strictEqual(mid.posts[0].count, '2', 'a $106 account buys two contracts');
-  assert.ok(mid.docs.get('L1-' + T).maxCost < 2.1, 'the two contracts together stay near $2');
+  assert.strictEqual(mid.posts[0].count, '1', 'a $106 account is one contract (one per $100 of balance)');
+  const two = world({ session: { startCash: 250, sizing: true }, balance: { balance_breakdown: [{ balance: '250.0000', exchange_index: 2 }] } });
+  await tick(two);
+  assert.strictEqual(two.posts[0].count, '2', 'a $250 account is two contracts');
   const huge = world({ session: { startCash: 5000, sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(huge);
   assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
   assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(106.5, 0.92), live.l1Count(138, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
   assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.10, 3], 'the share of cash per order, the scaled stop and the cap');
-  assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4), /refusing/);
+  assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4).count, '4', 'the cap can rise, so four is a valid order');
+  assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, live.L1_SIZE_CEILING + 1), /refusing/, 'but never past the hard ceiling');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 1.5), /refusing/);
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2).count, '1', 'one contract unless told otherwise');
@@ -409,10 +445,10 @@ gates.N21 = async () => {
 // The page quotes the limits in three places (the start confirmation, the rules text, the status line). They must say what the server does.
 gates.N22 = () => {
   const frac = Math.round(live.L1_SIZE_FRACTION * 1000) / 10, stop = Math.round(live.L1_SIZED_STOP_FRACTION * 100), flat = live.L1_LOSS_STOP;
-  assert.ok(new RegExp('about ' + frac + '% of cash per order, up to ' + live.L1_SIZE_MAX + ' contracts, stop at ' + stop + '% of starting cash').test(html), 'the start confirmation');
-  assert.ok(new RegExp('are down \\$' + flat.toFixed(2).replace('.', '\\.') + ' \\(' + stop + '% of the starting cash with scaling').test(html), 'the rules text');
-  assert.ok(new RegExp("\\(" + (stop / 100).toFixed(2) + " \\* s\\.startCash\\)\\.toFixed\\(2\\) : '\\$" + flat.toFixed(2).replace('.', '\\.') + "'").test(html), 'the status line');
-  assert.ok(new RegExp('\\(" \\+ \\(live\\.L1_SIZE_FRACTION \\* 100\\)').test(fnSrc) && /live\.L1_SIZED_STOP_FRACTION \* 100/.test(fnSrc), 'the session start log is built from the constants, not typed');
+  assert.ok(new RegExp('one contract per \\$' + live.SCALE_DOLLARS_PER_CONTRACT + ' of balance, up to ' + live.L1_SIZE_CEILING + ', raised at most one step a week; stop at ' + stop + '% of the balance at the weekly review').test(html), 'the start confirmation');
+  assert.ok(new RegExp('are down \\$' + flat.toFixed(2).replace('.', '\\.') + ' \\(' + stop + '% of the balance at the weekly review with scaling').test(html), 'the rules text');
+  assert.ok(new RegExp("\\(" + (stop / 100).toFixed(2) + " \\* base\\)\\.toFixed\\(2\\) : '\\$" + flat.toFixed(2).replace('.', '\\.') + "'").test(html), 'the status line');
+  assert.ok(/live\.SCALE_DOLLARS_PER_CONTRACT/.test(fnSrc) && /live\.L1_SIZED_STOP_FRACTION \* 100/.test(fnSrc), 'the session start log is built from the constants, not typed');
 };
 
 // The high-point stop: measured from the best settled result, only when the session was started with it, and the peak never falls.
