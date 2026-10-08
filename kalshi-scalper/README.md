@@ -2003,3 +2003,25 @@ the answer is not obvious from 50c to 80c alone. It should have been in the firs
   real only for the higher thresholds (X4 cuts the standard deviation by a third and the drawdown by 37%) at the cost of selling mostly winners (66%). Below 50c the rule almost never fires and almost changes nothing. 20c
   is the only threshold that does not lose to holding, and it does so by being HOLD.
 - **Count.** Three more variants: **2,570 as of 2026-10-08**.
+
+## Pre-registration: the entry side, price bands for L1, B1 to B3 (fixed 2026-10-08 14:40 UTC, before any code and before any band selection was run)
+
+The exit family (X1 to X7) found that a stop cannot fix L1's payoff. The other lever is which entries to take. The post hoc band table in this file (88c to 90c negative after costs, 90c to 95c best, 95c to 97c about zero) was read off all 69 days after
+the fact, so it cannot be used as evidence. What can be tested honestly on these days is whether **choosing bands from half the days and applying the choice to the other half** generalizes, which is what a live rule would
+have to do. Nothing below was run.
+
+- **Bands, fixed.** By the price paid: 88c to 90c, 90c to 92c, 92c to 95c, 95c to 97c (the last includes 97c). Entries are every L1 entry (`lstrats.hold_rule(L1)`), both series, taker at the ask, held to settlement.
+- **B1, the walk-forward rule (the one real test).** Split the days in half by count (first half of the days, second half). Fold 1: choose bands on the first half, trade the chosen bands on the second half. Fold 2: choose on the second half, trade on the first.
+  A band is chosen if, in the choosing half, its net per contract is above zero AFTER the cent rounding at two contracts (`feerounding`) and it has at least 100 entries there. The trades are the union of the two folds' test entries. No band edge,
+  threshold or count is tuned. The baseline is every entry over the same days (each in its own test half).
+- **B2 and B3, fixed rules (information about the post hoc bands, counted as tries).** B2: trade only 88c to 95c (skip 95c to 97c). B3: trade only 90c to 97c (skip 88c to 90c). Evaluated on all 69 days and on each half, against the baseline. (P1, 90c to 95c, is
+  already registered and is being measured forward, so it is not repeated here.)
+- **Counterparty.** The same longshot buyer as L1; the claim is only that the edge is not uniform across the price range, because the fee is largest in the middle of it and the possible gain smallest at the top.
+- **Numeric prediction, stated before the run.** B1: the chosen set earns less than the post hoc bands suggest and not clearly more than the baseline: difference per trade between -0.3c and +0.5c, day clustered z below 2.4.
+  B2 and B3: each a little better than the baseline on all 69 days (+0.1c to +0.5c) and neither distinguishable from it. **The pre-registered expectation is that all three are `FALSIFIED`.**
+- **Kill criteria.** Three tries, so the bar is z of **2.4**. A rule is `NOT_YET_FALSIFIED` only if ALL hold: its trade set has at least 300 entries on at least 5 days; its mean net per trade is above the baseline's with a day clustered z of the per day difference of at least 2.4;
+  its own mean is positive; positive in BOTH halves (for B1, in both folds' test halves); positive with fees times 1.2; and the difference is above the 95th percentile of the fair-market null (outcomes redrawn from each market's late price, the same selection rule applied to
+  the redrawn outcomes, 500 repeats). Anything else is `FALSIFIED`. A pass is permission to test forward only; the forward look F5 (90c to 95c) is already running.
+- **Information only, printed with the verdict, may not rescue anything.** For each band: entries, mean price, the actual win rate, the win rate needed to break even (price plus fee) and the margin between them with its standard error, net per contract unrounded
+  and cent-rounded at two contracts, and net per dollar risked. This is the "how high must the win rate be" view.
+- **Count.** Three variants: **2,573 as of 2026-10-08** (2,570 plus three).
