@@ -10328,7 +10328,11 @@
         var perC = lastO ? Number(lastO.maxCost) / Number(lastO.count) : 0.93;
         // Until the new session's first look writes sizeCap there is no real size: showing a guess (it used to be 3) put a made-up stake on screen.
         var sizeKnown = ses.sizing !== true || Number.isFinite(ses.sizeCap);
-        var nC = ses.sizing === true ? (Number.isFinite(ses.sizeCap) ? ses.sizeCap : 1) + (Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0) : 1;
+        // The account-funded part is held to 1% of cash (as the server does); the profit-funded add-on sits outside that rule and is simply added.
+        var cashNow = a.balance.totalDollars;
+        var baseC = Number.isFinite(ses.sizeCap) ? ses.sizeCap : 1;
+        if(cashNow > 0 && perC > 0){ baseC = Math.max(1, Math.min(baseC, Math.floor(cashNow * 0.01 / perC + 1e-9))); }
+        var nC = ses.sizing === true ? baseC + (Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0) : 1;
         var stake = nC * perC, tb = a.balance.totalDollars;
         // Reinvest pool progress: pool dollars over what the NEXT extra contract needs (one more contract's cost than the extras already held), so X/Y reads as "how close".
         var poolCell = '';

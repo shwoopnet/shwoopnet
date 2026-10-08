@@ -2347,3 +2347,18 @@ The owner showed a Kalshi screen with Up priced at 6.2% (14.88x) and asked for a
 - **Stopping point, stated now.** The result is read ONCE, at **1,240 markets** (offsets 0 and 4, about 620 each) or when the fetch ends if that is sooner. No look at partial results, no extension if the sample disappoints.
 - **What this costs.** Power. With fewer markets, fewer observations: T1 needs 300 signals out of the markets with at least 50 taker contracts and a 60% imbalance, and may not reach it, in which case it is `FALSIFIED` by the pre-registered rule and says nothing about the idea. Each run prints the signal count first so an underpowered run is not mistaken for a real failure. T2 uses the same signals as T1 and has the same problem. T3 and T4 produce an observation for a larger share of markets and are more likely to reach 300.
 - **Counts.** Unchanged: T1 to T4 are four variants, **2,586 once run**.
+
+## Amendment: the profit-funded add-on sits outside the 1% rule (2026-10-08 evening, at the owner's direction; information only, no variant counted)
+
+The owner asked that contracts bought with reinvested profit have **no cap**, a hard cap on the rest being acceptable. The earlier change removed the add-on's own limit of 2 but left the 1% of cash rule on the whole order, so at $511 (cap 5, 1% of cash about 5 contracts) a pool of any size added nothing: the replay rows "old" and "now" were identical for that reason. The code now holds only the account-funded part to 1% of cash (`l1Count(cash, cost, cap, addon)`); the add-on is added on top, still bounded by the pool (one extra contract per full contract cost, a loss comes out of the pool first) and by the single order guard of 50.
+
+Replay, `python -m scalper.sizing current` (10 weeks from $504.82, 60% fills, the 5% stop, 3,000 paths):
+
+| Rule | Mean | 5th pct | 1st pct | Deepest drawdown (95th) | Paths that lose | Stop days a path |
+|---|---|---|---|---|---|---|
+| Add-on inside the 1% rule (deployed earlier) | +$82.6 | -$7.6 | -$42.0 | $73.4 | 6.5% | 0.00 |
+| Add-on outside the 1% rule (this change) | +$86.7 | -$10.1 | -$47.4 | $86.5 | 7.5% | 0.12 |
+
+- **The cost is real and small now.** About +$4 more in the average path, and the bad cases about 15% deeper (drawdown $86 against $73, 17% of the account). The stop trips on about one path in eight over the 10 weeks, where before it almost never did.
+- **It grows with success, which is the point and the risk.** The pool only grows after new profit highs, so early on it is a few extra contracts; later it can be a large share of an order. The pool bounds the add-on's risk to profit already made, but a run of losses empties the pool first and then eats into the account-funded part.
+- Count: unchanged, **2,582 as of 2026-10-08** (sizing, not a strategy variant).
