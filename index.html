@@ -5311,7 +5311,7 @@
       if(state.paused){
         banner.removeAttribute('hidden');
         if(bannerText){
-          bannerText.innerHTML = '<strong>Equities auto-trading paused</strong> — repeated order failures (' + reasonText +
+          bannerText.innerHTML = '<strong>Equities auto-trading paused</strong> — repeated order failures (' + escapeHtml(reasonText) +
             '). Review the activity log below, then resume once resolved.';
         }
       } else {
@@ -6437,7 +6437,7 @@
     var toastEl = document.createElement('div');
     toastEl.className = 'alert-toast';
     toastEl.innerHTML =
-      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag ' + (isWin ? 'news-toast-tag-win' : 'news-toast-tag-loss') + '">' + (isWin ? 'Closed +' : 'Closed −') + '</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<div class="toast-head"><span class="toast-sym mono">' + escapeHtml(sym) + '</span><span class="news-toast-tag ' + (isWin ? 'news-toast-tag-win' : 'news-toast-tag-loss') + '">' + (isWin ? 'Closed +' : 'Closed −') + '</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
       '<p class="toast-text">' + (isWin ? 'Closed in profit' : 'Closed at a loss') + ' — ' + (isWin ? '+' : '') + pnlPct.toFixed(2) + '% (exit $' + exitPrice.toFixed(2) + ').</p>';
     container.appendChild(toastEl);
     toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
@@ -6453,8 +6453,8 @@
     var toastEl = document.createElement('div');
     toastEl.className = 'alert-toast';
     toastEl.innerHTML =
-      '<div class="toast-head"><span class="toast-sym mono">' + sym + '</span><span class="news-toast-tag">Auto-closed</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
-      '<p class="toast-text">' + reason + '</p>';
+      '<div class="toast-head"><span class="toast-sym mono">' + escapeHtml(sym) + '</span><span class="news-toast-tag">Auto-closed</span><button class="toast-close" aria-label="Dismiss">×</button></div>' +
+      '<p class="toast-text">' + escapeHtml(reason) + '</p>';
     container.appendChild(toastEl);
     toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
     setTimeout(function(){ dismissToast(toastEl); }, 12000);
@@ -12930,21 +12930,21 @@
       if(item.kind === 'trade'){
         return '<div class="history-item history-item-trade">' +
           '<div class="history-item-head">' +
-            '<span class="history-item-sym mono">' + item.sym + '</span>' +
-            '<span class="history-tag-trade ' + item.tagCls + '">' + item.tag + '</span>' +
-            '<span class="history-item-time mono">' + item.timeLabel + '</span>' +
+            '<span class="history-item-sym mono">' + escapeHtml(item.sym) + '</span>' +
+            '<span class="history-tag-trade ' + item.tagCls + '">' + escapeHtml(item.tag) + '</span>' +
+            '<span class="history-item-time mono">' + escapeHtml(item.timeLabel) + '</span>' +
           '</div>' +
-          '<p class="history-item-body">' + item.text + '</p>' +
+          '<p class="history-item-body">' + escapeHtml(item.text) + '</p>' +
         '</div>';
       }
       return '<div class="history-item">' +
         '<div class="history-item-head">' +
-          '<span class="history-item-sym mono">' + item.sym + '</span>' +
-          '<span class="news-toast-tag ' + newsAlertTagClass(item.tag) + '">' + item.tag + '</span>' +
-          '<span class="history-item-time mono">' + item.dateLabel + (item.dateLabel && item.timeLabel ? ' · ' : '') + item.timeLabel + '</span>' +
+          '<span class="history-item-sym mono">' + escapeHtml(item.sym) + '</span>' +
+          '<span class="news-toast-tag ' + newsAlertTagClass(item.tag) + '">' + escapeHtml(item.tag) + '</span>' +
+          '<span class="history-item-time mono">' + escapeHtml(item.dateLabel + (item.dateLabel && item.timeLabel ? ' · ' : '') + item.timeLabel) + '</span>' +
         '</div>' +
-        '<p class="history-item-body">' + item.text + '</p>' +
-        '<a class="history-item-link" href="' + item.url + '" target="_blank" rel="noopener noreferrer">Read more →</a>' +
+        '<p class="history-item-body">' + escapeHtml(item.text) + '</p>' +
+        (safeHttpHref(item.url) ? '<a class="history-item-link" href="' + safeHttpHref(item.url) + '" target="_blank" rel="noopener noreferrer">Read more →</a>' : '') +
       '</div>';
     }).join('');
   }
@@ -13016,12 +13016,12 @@
     toastEl.className = 'alert-toast';
     toastEl.innerHTML =
       '<div class="toast-head">' +
-        '<span class="toast-sym mono">' + alert.sym + '</span>' +
-        '<span class="news-toast-tag ' + newsAlertTagClass(alert.tag) + '">' + alert.tag + '</span>' +
+        '<span class="toast-sym mono">' + escapeHtml(alert.sym) + '</span>' +
+        '<span class="news-toast-tag ' + newsAlertTagClass(alert.tag) + '">' + escapeHtml(alert.tag) + '</span>' +
         '<button class="toast-close" aria-label="Dismiss">×</button>' +
       '</div>' +
-      '<p class="toast-text">' + alert.text + '</p>' +
-      '<a class="toast-link" href="' + alert.url + '" target="_blank" rel="noopener noreferrer">View →</a>';
+      '<p class="toast-text">' + escapeHtml(alert.text) + '</p>' +
+      (safeHttpHref(alert.url) ? '<a class="toast-link" href="' + safeHttpHref(alert.url) + '" target="_blank" rel="noopener noreferrer">View →</a>' : '');
     container.appendChild(toastEl);
     toastEl.querySelector('.toast-close').addEventListener('click', function(){ dismissToast(toastEl); });
     setTimeout(function(){ dismissToast(toastEl); }, 12000);
@@ -14987,6 +14987,12 @@
     });
   }
 
+  // An article link is third-party text. Escaping stops it leaving the attribute, but `javascript:` needs no metacharacters,
+  // so only http(s) links are kept; anything else yields '' and the caller draws no anchor.
+  function safeHttpHref(u){
+    return /^https?:\/\//i.test(String(u || '')) ? escapeHtml(u) : '';
+  }
+
   var acknowledgedPriorityIds = {};
   try{
     var savedAck = JSON.parse(window.localStorage.getItem('shwoopnet:acknowledgedPriorityIds') || 'null');
@@ -15130,8 +15136,8 @@
       var tagClass = 'activity-log-tag' + (tagInfo.cls === 'sent' ? '' : ' activity-log-tag-' + tagInfo.cls);
       return '<div class="activity-log-row activity-log-row-cols">' +
         '<span class="' + tagClass + '">' + tagInfo.label + '</span>' +
-        '<span class="activity-log-sym mono">' + (entry.sym || '') + '</span>' +
-        '<span class="activity-log-text">' + entry.text + '</span>' +
+        '<span class="activity-log-sym mono">' + escapeHtml(entry.sym || '') + '</span>' +
+        '<span class="activity-log-text">' + escapeHtml(entry.text) + '</span>' +
         '<span class="activity-log-time">' + time + '</span>' +
       '</div>';
     }).join('');
