@@ -16,8 +16,9 @@ Reviewed `shwoopnet/shwoop-server` at `42366f1` (#164). Nothing in that repo was
 
 3. **Fallback order id is random when the bar time is missing (real money risk, cold path).** `src/autoTrade.js:228` and `:230` return
    `shwoop-<sym>-<uuid>` when `entryBarTime` is missing or unparsable. That is the exact per-call-only protection that let 15 duplicate orders
-   reach a real account during a deploy overlap. Today every pick carries `entryBarTime`, so this is a path nothing reaches, but if it were ever
-   reached a redeploy could double the order again. The project rule is to fail closed: skip the order with a stated reason (as the
+   reach a real account during a deploy overlap. The only caller (`autoTrade.js:587`) passes `t.entryBarTime` from the pick's analysis; I did not trace every screener path that builds it, so
+   I cannot say it is never missing, and the code around it (`autoTrade.js:450`) does handle a NaN bar time, which suggests it can be. If it ever were, a
+   redeploy could double the order again. The project rule is to fail closed: skip the order with a stated reason (as the
    `duplicate_client_order_id` skip at `:659` already does for its case) instead of inventing an id.
 
 4. **Dependency advisories (medium).** `yarn audit --groups dependencies`: 8 findings, 2 high, both via `firebase-admin`: `@grpc/grpc-js`
