@@ -1820,11 +1820,11 @@ First look at the order book recorder (`scalper.recorder`, top five levels, abou
 
 - **How little data this is.** The recorder runs only while a command is active in the research container; between turns the container idles and the process
   stops. It wrote 02:52 to 03:20 UTC and then, in foreground chunks, about 05:30 to 07:00 UTC: 18 distinct markets (9 Bitcoin, 9 gold) and 49
-  snapshots inside the 330 to 400 s L1 window with a side priced 0.88 to 0.97. The Firestore recorder on Render-side Firebase functions is the only
+  snapshots inside the 330 to 400 s L1 window with a side priced 0.88 to 0.97. The Firestore recorder (a scheduled Firebase function) is the only
   source that runs unattended; this container's copy cannot give days of data.
 - **Ask persistence in the L1 window (37 consecutive pairs, 10 s apart, both series).** The favourite's ask at the next snapshot: up 62.2%,
   the same 5.4%, down 32.4%. Median spread 0.1c, median size at the touch 1,006 contracts. With n=37 the up share has a wide margin (roughly
-  47% to 76%), but the direction fits the live no-fills: a favourite's ask tends to creep up as the close approaches, so an IOC at a touch read a
+  47% to 78%), but the direction fits the live no-fills: a favourite's ask tends to creep up as the close approaches, so an IOC at a touch read a
   second or more earlier can be left behind by one tick.
 - **P2 on the 6 signals it found (3 filled).** Fill rate 50% (strictly through and touch-counted agree). On the filled ones the resting entry earned
   +5.80c against +5.70c taking the same signals; the missed signals earned +6.61c taken. Per signal, unfilled counted as zero: maker +2.90c, taker +6.16c.
