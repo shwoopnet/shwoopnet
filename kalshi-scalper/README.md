@@ -29,7 +29,8 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 2 (see Verdicts). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
+Strategy variants tried so far: 792 as of 2026-10-08, all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
+until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -1112,6 +1113,104 @@ the mirror sign of any rule above. R9 resting orders (H3, H5). R10 stop losses (
 
 Verdicts are recorded below when the one run has happened. No threshold, minute, band or sign changes after seeing a number. A strategy changed after
 the run is contaminated, says so, and is a new variant that counts.
+
+**2026-10-08: the strategy search, run once (`python3 -m scalper.stratsearch null 500`, code commit 45632fe, output in `search3/`): no survivor. Nothing clears
+the survivor test, nothing clears the common bar, and the best z of the 42 is +1.17.** The pre-registered protocol above was followed without
+change: designed on W0s (printed as information only), judged on W0h, W1 and W2 pooled, W3 untouched. No threshold, minute, band, sign or ranking rule was changed
+after seeing a number. A smoke run that printed only signal and trade COUNTS on W0s (no outcomes) preceded it, to catch crashes. The real run printed once and the table below is that print.
+
+- **Headline.** 0 of 42 pass the survivor test (every out of sample window positive with at least 50 entries and pooled z of at least 2.5). 0 of 42 pass the
+  common bar (n of at least 300, z of at least 2.1, both halves positive, fees x1.2 positive). 0 are `NOT_YET_FALSIFIED`. 26 are `FALSIFIED` and 16
+  are `NOT_ENOUGH_DATA` (pooled out of sample entries under 300; they are not crossed off, they are too thin to judge). The owner hoped for 5; the honest count is 0,
+  and nothing was stretched to reach it. The best strategy by the pre-set ranking has z of +1.17, below even the 2.1 bar.
+- **What the average strategy did.** Over the 41,569 hold-to-settlement entries across the 39 hold strategies the mean gross was -0.17c and the mean net -1.66c, so
+  costs (fee plus the spread paid at the ask) were about 1.5c a contract and the signals added nothing on average. The 3 round trips (S27, S29, S37; 11,743
+  entries) had gross -1.18c and net -3.76c: the spike and wick fades lose about their two fees and two spreads and a little more. Net z of S27 and S29 is -14 and -16.
+- **Cost is still the binding constraint.** 9 of 42 pooled means are positive (S22, S24, S19, S30, S23, S15, S16, S35, S33) and every one of them has fewer than 300
+  entries or z under 1.5; the largest, S15 with 300 entries, is +0.68c at z of +0.29. The strategies with enough entries to see a 1c to 2c edge (S06, S04, S42, S36)
+  are all negative.
+- **The top of the ranking is small samples.** S22 (capitulation bounce) is first with +7.27c on 55 entries and z of +1.17: positive in W0h and W2 and negative in W1
+  (-4.24c on 16 entries). S19 (compression breakout) had the best design window z of any strategy (+3.11 on 77 entries in W0s, which decides nothing) and fell to +2.30c, z of
+  +0.86 out of sample, with W1 +7.11c and W2 -6.02c. That is what selection from a window looks like; no strategy was selected, so it is the same effect appearing without a
+  selector: with 42 independent looks at tiny samples, some will be large and of either sign.
+- **The valid fair market null over all 42 together (500 repeats, each entry given zero edge at its own decision price, independent draws, same survivor test).** The
+  best pooled z across the 42 has median +1.31, 95th percentile +2.41, maximum +4.27. **P(null best >= real best) =
+  0.596**: the real best is no better than the best of 42 strategies that have zero edge and pay these costs. The null produced
+  0.014 survivors per repeat on average (0.030 passes of the common bar), so a survivor here would have been unusual; there was none.
+- **The deflated bar for N = 42, stated before the run: best of N crosses z of 2.1 by luck.** Expected best z of pure noise 2.73 (sqrt(2 ln 42)); family wise
+  one sided 5% (Sidak) bar 3.03. The simulated null, which includes the costs every strategy pays, gives a lower 95th percentile (2.41) because most strategies
+  have a negative mean before any luck. The real best (+1.17) is under all three. A strategy would have needed z of about 3.0 pooled out of sample to be distinguishable
+  from the best of 42.
+- **Power, so FALSIFIED is read correctly.** The large strategies (n above 2,000) have a standard error of about 0.5c, so an edge over about 1.5c would have shown; those with 300
+  entries have a standard error of about 2c to 2.5c, so only an edge over about 6c would. 16 strategies have under 300 out of sample entries (S14 has 11, S33 has 29, S17 has 56) and say
+  `NOT_ENOUGH_DATA`: this search does not cross them off. Small samples come from narrow triggers on 69 days, not from a rule that was loosened.
+- **The locked window.** No strategy passed the survivor test, so W3 (closes after 2026-10-05 15:00 UTC, 445 markets) was NOT read, and `stratsearch w3` refuses to run without a survivor.
+  W3 is still locked for whatever is tested next.
+- **Ledger effects.** L11 stays `OPEN`: S30 is only a candle level proxy for taker flow (last trade against mid) and it did not clear anything; the real tape is not held. L13 is not marked
+  `FALSIFIED` by this, since its own wording (H7 cut by volatility) was not run, but five other triggers for the same stale volatility story did not clear the bar: S13 weekend quiet,
+  S28 choppy price path and S38 volume event are `FALSIFIED`; S10 upset in the previous window and S12 US cash open are `NOT_ENOUGH_DATA` (133 and 61 entries) and both are below
+  their baselines. K+ held for S13 (-0.03c against an unconditional baseline of -0.46c) and S38 (-2.42c against -2.98c), both negative and both far inside noise. The two baseline
+  information cuts (the lower priced side in 10c to 40c and the higher priced side in 60c to 90c, at candle 8, all markets) were run and are counted; they lost 2.98c and 0.46c.
+- **What could not be run.** N1 to N8 (book depth, the trade tape, a release calendar, resting order strategies, a sub minute index feed, CME closes, implied volatility, other venues).
+  No gold spot exists here, so the spot strategies (S16 to S26) trade Bitcoin only; the gold strategies use gold's stored strikes and quotes.
+- **Caveats.** One sample of 69 days and one regime. W1 and W2 were used by the earlier searches, so they are out of sample for these strategies' design but not unseen by the project.
+  Strikes are the stored strikes, the spot is Coinbase and not the settlement index, and fills are at the candle's closing quote (the real order could fill worse). A pass would only have been
+  permission to test forward.
+
+Full table, in the pre-set ranking order (pooled out of sample = W0h + W1 + W2; per window columns are n / mean net; the survivor flag was false for all 42):
+
+| Rank | ID | Strategy | n | Mean net | z | W0h | W1 | W2 | Fees x1.2 | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | S22 | Capitulation bounce | 55 | +7.27c | +1.17 | 17 / +10.20c | 16 / -4.24c | 22 / +13.38c | +7.03c | `NOT_ENOUGH_DATA` |
+| 2 | S24 | Prior day extreme rejection | 91 | +2.87c | +0.87 | 9 / -18.30c | 53 / +4.93c | 29 / +5.68c | +2.61c | `NOT_ENOUGH_DATA` |
+| 3 | S19 | Compression breakout | 214 | +2.30c | +0.86 | 55 / +5.80c | 86 / +7.11c | 73 / -6.02c | +2.04c | `NOT_ENOUGH_DATA` |
+| 4 | S30 | Last trade flow proxy (L11 proxy) | 158 | +1.18c | +0.38 | 54 / +5.53c | 49 / +2.55c | 55 / -4.32c | +0.90c | `NOT_ENOUGH_DATA` |
+| 5 | S23 | Run exhaustion | 117 | +1.25c | +0.36 | 39 / +6.79c | 43 / -2.31c | 35 / -0.54c | +1.02c | `NOT_ENOUGH_DATA` |
+| 6 | S15 | London open breakout of the Asian range | 300 | +0.68c | +0.29 | 70 / -0.85c | 102 / +0.37c | 128 / +1.76c | +0.36c | `FALSIFIED` |
+| 7 | S16 | Acceleration | 286 | +0.63c | +0.27 | 80 / -0.40c | 109 / +6.54c | 97 / -5.15c | +0.41c | `NOT_ENOUGH_DATA` |
+| 8 | S35 | Volume surge follow-through | 283 | +0.04c | +0.02 | 85 / +3.07c | 96 / -1.17c | 102 / -1.36c | -0.23c | `NOT_ENOUGH_DATA` |
+| 9 | S13 | Weekend quiet favorite (L13 adjacent) | 793 | -0.03c | -0.02 | 184 / +3.03c | 307 / -2.52c | 302 / +0.64c | -0.28c | `FALSIFIED` |
+| 10 | S03 | Laggard catch-up | 1143 | -0.27c | -0.20 | 341 / +0.26c | 387 / +3.19c | 415 / -3.92c | -0.54c | `FALSIFIED` |
+| 11 | S17 | Large 5 minute move fade | 56 | -1.11c | -0.21 | 16 / +7.14c | 21 / -8.24c | 19 / -0.19c | -1.32c | `NOT_ENOUGH_DATA` |
+| 12 | S05 | Previous gold outcome carries into Bitcoin | 2904 | -0.22c | -0.33 | 887 / +0.64c | 979 / +0.06c | 1038 / -1.24c | -0.54c | `FALSIFIED` |
+| 13 | S02 | Bitcoin leads gold | 2202 | -0.80c | -0.69 | 673 / -2.23c | 742 / -0.32c | 787 / -0.04c | -1.08c | `FALSIFIED` |
+| 14 | S20 | Multi scale trend agreement | 676 | -1.42c | -0.77 | 184 / -0.09c | 244 / -0.21c | 248 / -3.60c | -1.67c | `FALSIFIED` |
+| 15 | S21 | Jump reversal | 314 | -2.00c | -0.84 | 88 / -2.33c | 124 / +1.50c | 102 / -5.97c | -2.26c | `FALSIFIED` |
+| 16 | S31 | Dwell reversion | 494 | -1.82c | -1.05 | 131 / +0.95c | 183 / -4.92c | 180 / -0.70c | -2.10c | `FALSIFIED` |
+| 17 | S36 | Open interest new money | 3159 | -0.80c | -1.05 | 922 / +1.29c | 1112 / -0.70c | 1125 / -2.63c | -1.06c | `FALSIFIED` |
+| 18 | S12 | US cash open underdog (L13 adjacent) | 61 | -5.42c | -1.08 | 18 / -10.40c | 22 / +1.38c | 21 / -8.27c | -5.66c | `NOT_ENOUGH_DATA` |
+| 19 | S18 | Stretch from the hour's mean fade | 140 | -3.76c | -1.09 | 40 / -1.42c | 54 / +1.87c | 46 / -12.41c | -4.01c | `NOT_ENOUGH_DATA` |
+| 20 | S40 | Four hour channel extreme fade | 1625 | -1.20c | -1.13 | 455 / +1.62c | 556 / -1.99c | 614 / -2.58c | -1.52c | `FALSIFIED` |
+| 21 | S09 | Shock reversal | 1409 | -1.84c | -1.48 | 403 / -0.10c | 493 / -4.10c | 513 / -1.03c | -2.15c | `FALSIFIED` |
+| 22 | S38 | Volume event underdog (L13 adjacent) | 506 | -2.42c | -1.51 | 145 / -2.76c | 189 / -2.51c | 172 / -2.02c | -2.66c | `FALSIFIED` |
+| 23 | S01 | Gold leads Bitcoin | 2153 | -1.54c | -1.57 | 683 / -1.31c | 729 / +1.62c | 741 / -4.87c | -1.82c | `FALSIFIED` |
+| 24 | S25 | Minute autocorrelation regime | 502 | -3.76c | -1.62 | 122 / -8.82c | 202 / -2.52c | 178 / -1.70c | -4.03c | `FALSIFIED` |
+| 25 | S07 | Streak exhaustion | 1671 | -1.98c | -1.77 | 483 / +0.46c | 589 / -3.14c | 599 / -2.80c | -2.30c | `FALSIFIED` |
+| 26 | S41 | Efficiency ratio trend | 1145 | -3.12c | -2.03 | 323 / -5.23c | 415 / -4.46c | 407 / -0.09c | -3.44c | `FALSIFIED` |
+| 27 | S42 | Common factor trend | 3330 | -1.98c | -2.05 | 1060 / -3.38c | 1097 / -1.71c | 1173 / -0.98c | -2.30c | `FALSIFIED` |
+| 28 | S28 | Choppy market underdog (L13 adjacent) | 611 | -3.17c | -2.06 | 195 / -6.21c | 208 / -1.28c | 208 / -2.21c | -3.43c | `FALSIFIED` |
+| 29 | S34 | Spread shock | 56 | -10.04c | -2.17 | 14 / -26.41c | 18 / -13.24c | 24 / +1.90c | -10.31c | `NOT_ENOUGH_DATA` |
+| 30 | S26 | Hourly open anchor | 202 | -6.87c | -2.21 | 58 / -3.19c | 71 / -11.18c | 73 / -5.60c | -7.12c | `NOT_ENOUGH_DATA` |
+| 31 | S11 | Autocorrelation regime of strike moves | 2073 | -2.44c | -2.21 | 602 / -2.67c | 667 / -0.61c | 804 / -3.79c | -2.76c | `FALSIFIED` |
+| 32 | S06 | Outcome persistence | 6805 | -1.17c | -2.26 | 1978 / -1.34c | 2333 / -0.85c | 2494 / -1.33c | -1.48c | `FALSIFIED` |
+| 33 | S10 | Surprise clustering (L13 adjacent) | 133 | -7.55c | -2.58 | 39 / -4.56c | 49 / -6.78c | 45 / -10.99c | -7.80c | `NOT_ENOUGH_DATA` |
+| 34 | S04 | Previous Bitcoin outcome carries into gold | 2875 | -2.60c | -2.64 | 882 / -0.90c | 972 / -5.05c | 1021 / -1.72c | -2.91c | `FALSIFIED` |
+| 35 | S39 | Opening burst lean | 612 | -5.47c | -2.74 | 181 / -4.43c | 197 / -6.26c | 234 / -5.62c | -5.77c | `FALSIFIED` |
+| 36 | S37 | Thin move reversion scalp | 371 | -2.69c | -2.78 | 141 / -0.83c | 140 / -4.51c | 90 / -2.75c | -3.15c | `FALSIFIED` |
+| 37 | S08 | Regime majority | 2343 | -3.74c | -3.91 | 676 / -5.41c | 802 / -4.46c | 865 / -1.77c | -4.06c | `FALSIFIED` |
+| 38 | S27 | Spike fade scalp | 5247 | -3.96c | -14.10 | 1522 / -4.17c | 1816 / -3.32c | 1909 / -4.41c | -4.47c | `FALSIFIED` |
+| 39 | S29 | Wick rejection scalp | 6125 | -3.64c | -16.35 | 1794 / -3.43c | 2101 / -4.03c | 2230 / -3.45c | -4.18c | `FALSIFIED` |
+| 40 | S33 | Market price compression breakout | 29 | +11.40c | +1.46 | 9 / +15.55c | 9 / +9.58c | 11 / +9.50c | +11.14c | `NOT_ENOUGH_DATA` |
+| 41 | S32 | One sided quote pull | 32 | -9.61c | -1.13 | 7 / -25.85c | 12 / -1.18c | 13 / -8.64c | -9.87c | `NOT_ENOUGH_DATA` |
+| 42 | S14 | Gold reopen gap fade | 11 | -13.08c | -0.81 | 2 / -54.56c | 3 / +36.62c | 6 / -24.10c | -13.39c | `NOT_ENOUGH_DATA` |
+
+Files: `search3/all42.json` (all 42 with every parameter and every window), `search3/top25.json` (the 25 best by the pre-set ranking, saved whatever their sign),
+`search3/null.json`, `search3/run_output.txt` (the printed run).
+
+**Strategy variants tried so far: 792 as of 2026-10-08.** That is 742 before this search (13 hypotheses with a verdict, from the 60s scalp to L9, plus 729 rules from the two
+parameter searches, as restated on branch `claude/research-forward-check`), plus M1 and its 5 information cuts (branch `claude/research-early-momentum`), plus the 42 strategies of this search, plus its
+2 baseline information cuts. The two branches named are not merged into `main`, so this line is the union; the line at the top of this file is updated to match. All are `FALSIFIED` or
+`NOT_ENOUGH_DATA`; the forward check of L1 and the four overnight survivors is still open.
 
 ## The order-book recorder (`recorder.py`, read only)
 
