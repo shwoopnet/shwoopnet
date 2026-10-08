@@ -1001,6 +1001,15 @@ F1 the neighbouring minutes (1 and 3 minutes left) so an artifact at exactly 2 m
 **Cost of this idea so far.** No new rule is created, so the count of variants tried does not rise; these are five forward looks at
 rules already counted. Nothing may be changed after the first reading of a rule: a changed rule is a new variant and is counted.
 
+**2026-10-08: first reading of the forward check (`python -m scalper.forward`): all five `NOT_ENOUGH_DATA`.** The database was extended with
+`python -m scalper.backfill 1`: 43 new settled markets (24 Bitcoin, 19 gold; gold trades fewer hours) closing from 2026-10-07 18:45 to
+2026-10-08 00:30 UTC, about a quarter of one day, same schema as before, none without a result. Overlap with W3 (402 markets): 0, by
+construction and checked in the run. Entries so far: F0 18, F1 8, F2 2, F3 13, F4 13, on 1 or 2 days, against 300 entries and 5 days
+needed. Their means (F0 -2.74c, F1 -11.95c, F2 -1.32c, F3 and F4 -4.44c) are printed by the program as information only and are noise
+at these sizes (a single Bitcoin or gold longshot is -10c to -90c); they are neither a kill nor a confirmation and are not to be
+read as either. More days needed: about 6 for F0 up to 15 for F2 at the old entry rates, so the rules can be read from about 2026-10-23.
+Code `src/scalper/forward.py`, tests in `tests/test_scalper.py`.
+
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few
