@@ -227,7 +227,7 @@ gates.G27 = () => {
   assert.deepStrictEqual(group([null, { orderId: 'x', count: 'bad', price: 'bad' }, { orderId: 'x', count: 1, price: '0.5' }]).length, 1, 'junk is not turned into a number');
   // The page shows grouped trades everywhere it counts them.
   assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
-  assert.ok(/Bot since ' \+ escapeHtml\(kalDate\(tot\.since\)\)/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && /Deposits and manual trades/.test(html) && /Manual trades and open orders/.test(html) && /signed\(other - deposits\)/.test(html), 'the account area shows the bot\'s own change, and says where the rest of the balance move came from');
+  assert.ok(/Bot since ' \+ escapeHtml\(kalDate\(tot\.since\)\)/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && !/Deposits and manual trades/.test(html) && !/Manual trades and open orders/.test(html), 'the account area shows only the bot\'s own change; the line for deposits and manual trades is gone');
 };
 
 (async () => {
