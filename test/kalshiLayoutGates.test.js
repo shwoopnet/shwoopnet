@@ -321,6 +321,24 @@ gates.Y13 = () => {
   assert.ok(/getDoc\(doc\(db, 'kalshiBookMeta', 'status'\)\)/.test(html), 'the heartbeat is the recorder\'s own status document');
 };
 
+// The tiny chart under each market row: a line across the market's 15 minute window, the strike drawn and kept in range, and nothing drawn from too little data.
+gates.Y16 = () => {
+  const m = /(function kalshiSparkSvg\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html);
+  assert.ok(m, 'kalshiSparkSvg found');
+  const escapeHtml = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const spark = new Function('escapeHtml', m[1] + '; return kalshiSparkSvg;')(escapeHtml);
+  const from = 1000000, to = from + 900000, fmt = (v) => '$' + Math.round(v);
+  const pts = [0, 1, 2, 3].map((i) => ({ t: from + i * 60000, v: 82500 + i * 10 }));
+  assert.ok(/kal-empty/.test(spark([pts[0]], { from, to, fmt })), 'one point is not a line');
+  assert.ok(/kal-empty/.test(spark(pts.map((p) => ({ t: p.t + 5e6, v: p.v })), { from, to, fmt })), 'points from outside the window are not drawn');
+  const svg = spark(pts, { from, to, ref: 82676, refLabel: 'to beat', fmt });
+  assert.ok(/to beat/.test(svg) && /stroke-dasharray/.test(svg) && /var\(--loss\)/.test(svg), 'strike drawn, and the line is red while the price is under it');
+  assert.ok(/var\(--gain\)/.test(spark(pts, { from, to, ref: 82400, fmt })), 'green when over it');
+  const ys = [...svg.matchAll(/ y1="([\d.]+)"/g)].map((x) => Number(x[1]));
+  assert.ok(ys.length === 1 && ys[0] >= 0 && ys[0] <= 86, 'a strike far above the price stays inside the chart');
+  assert.ok(/kalshiSparkFor\(m\) \+ '<\/div>'/.test(html), 'each market row carries its chart');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
