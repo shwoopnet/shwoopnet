@@ -1,11 +1,12 @@
 # Mutation check of `functions/kalshiLiveLib.js`, 2026-10-08
 
-Method: 75 single-line mutations applied by hand to a scratch copy (stop thresholds, size rounding, window edges, price and limit rounding,
+Method: single-line mutations applied by hand (a script) to a scratch copy: stop thresholds, size rounding, window edges, price and limit rounding,
 band edges, balance and shard checks, create-first, halt, unresolved, expiry, order limit, the ambiguous-answer rules, `botRisk`, order body
-fields, production-host check), each run against `kalshiL1Gates`, `kalshiLiveGates`, `kalshiSignalGates` and `kalshiAccountGates`.
+fields, production-host check. Each was run against `kalshiL1Gates`, `kalshiLiveGates`, `kalshiSignalGates` and `kalshiAccountGates`.
 
-58 of the first 58 distinct mutants and 15 of the 17 line-specific repeats were killed; **10 survived**. Nine were real gaps and are now
-killed by `test/kalshiL1MutationGates.test.js` (M1 to M8):
+First pass: 58 mutants listed, 9 not applicable because the line occurs in both the single-order path and the L1 path (49 run, 39 killed, 10
+survived). Second pass: those 9 lines mutated one occurrence at a time (17 runs, 14 killed, 3 survived). Total 66 runs, 53 killed, **13 survived**.
+Nine of the 13 were real gaps and are now killed by `test/kalshiL1MutationGates.test.js` (M1 to M8):
 
 | Survivor | Why it mattered | Gate |
 |---|---|---|
