@@ -6,31 +6,36 @@ Research and risk tooling for Kalshi 15 minute BTC (`KXBTC15M`) and gold
 
 ## Status
 
-Nothing here places an order, and nothing here has to stay running: this folder
-is offline research over downloaded history. The bot that watches the markets
-runs on the server. Order placement does not exist yet and is added only after
-the bar below is cleared in paper trading.
+Nothing in this folder places an order; it is offline research over downloaded history and the recorder's snapshots. Real orders exist, and live
+elsewhere: `functions/kalshiLiveLib.js` in the repo root runs strategy L1 in the owner's real Kalshi account under the owner's written waiver ("Live waiver:
+L1 for 24 hours", below), with hard limits, a loss stop and a halt switch. **The bar below has NOT been cleared**: L1 is the best rule found, it has never
+passed its own forward test, and it is running because the owner chose to accept a thin and unproven edge, not because research approved it. Nothing
+here, and no verdict word, means "trade".
 
-## Build order
+## Build order (as it happened)
 
 1. `backfill.py`  fetch Kalshi's own 1 minute history for settled markets.
 2. `analyze.py`, `calibration.py`, `scalps.py`, `situations.py`  measure it.
-3. Strategy       only if the measurement shows room. Declares counterparty first.
-4. Paper bot      runs on the server (see below), not from this folder.
-5. Live, tiny     demo env, then smallest real size, behind hard limits.
+3. Strategy       only if the measurement shows room. Declares counterparty first. Every hypothesis tried so far is `FALSIFIED`.
+4. The paper bot  was built, measured and retired on 2026-10-07; the live bot replaced it (see "The paper bot (retired Oct 7, 2026)").
+5. Live, tiny     L1 only, behind hard limits, on the owner's waiver. Its size is governed by the size ladder, not by this folder.
 
 ## Bar to clear before any real money (written before any result exists)
 
-- At least 300 paper trades and 5 separate days.
+Not met by anything. Kept as the standard every forward check is judged by.
+
+- At least 300 trades and 5 separate days.
 - Positive net expectancy per trade AFTER fees, with fills priced at the
   ask going in and the bid going out, never the mid.
-- Net profit still positive when fees are assumed 20% higher than modelled.
+- Net profit still positive when fees are assumed 20% higher than modelled. (Kalshi also rounds fees up to the cent per order, which costs a
+  one contract order about half a cent more than the modelled fee: see "Cost model check: fee rounding per order".)
 - Predicted probabilities calibrated (60% calls win about 60%).
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 792 as of 2026-10-08, all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
-until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
+Strategy variants tried so far: **2,563 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Q1 thresholds five; F8 one; N1 and N2 two), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
+Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -1526,3 +1531,373 @@ the same data every earlier test used, so a pass could only ever be permission t
 - **What it does not say.** One signal definition (minute 5 against minute 1 mid), minute quotes only, taker entry and exit. A resting entry, an earlier or later signal, or trade tape flow are different hypotheses. Same 69 days as most earlier tests, so even a pass would only have been permission to test forward.
 
 Strategy variants tried so far: 14 hypotheses (the 60s scalp, H1 to H7, L1, L2, L3, L8, L9, M1), all `FALSIFIED`, plus two parameter searches, and 5 information cuts for M1 counted against the bar.
+
+## Pre-registration: L1 in the 90c to 95c band, and resting-limit entries for L1 (fixed 2026-10-08 02:50 UTC, before any code, and before any data after this time exists)
+
+Why this exists. L1 holds every position to settlement, so the entry price and the fee are the whole trade. Two ways to improve the
+entry were proposed. Both are written down now so that every market that closes after the timestamp above is untouched test data.
+
+**What was observed post hoc, and is therefore NOT evidence for either idea.** In the 3,400 L1 entries over 69 days, split by price
+after the result was known: 88c to 90c n=518 gross +0.35c net -0.36c; 90c to 92c n=877 gross +1.89c net +1.30c; 92c to 95c n=1,119
+gross +2.37c net +1.94c; 95c to 97c n=886 gross +0.44c net +0.17c. The bands were chosen by looking at those numbers. The per band
+uncertainty is 0.6c to 1.3c, so the gaps between bands are not clearly more than noise. These 69 days can never count toward the
+band variant, and no band edge was moved after seeing them.
+
+### P1: L1 restricted to the 90c to 95c band
+
+- **Rule.** Exactly L1 (about 6 minutes before close, buy the side priced at touch in the window, hold to settlement, taker fee
+  `0.07 * p * (1 - p)` per contract), but only entries whose touch price is at least 90.0c and at most 95.0c. No other change.
+- **Universe, fixed.** Every L1 signal in both series on markets that close after 2026-10-08 02:50 UTC. Selected on price, which is
+  observable before the trade, not on returns. The comparison rule, L1 over its full 88c to 97c band, is computed on the same markets.
+- **Counterparty.** Whoever sells the favourite at 90c to 95c a few minutes from close, or buys the other side, is paying for a small
+  chance of a reversal. The edge exists only if that chance is priced a little too high. Same story as L1, not a new mechanism.
+  Below 90c the tick is 1c so the price is coarse, and above 95c the possible gain is under 5c against a fee that does not shrink as fast.
+- **Numeric prediction, stated before the run.** Net about +1.0c a contract, deliberately below the +1.66c seen post hoc because a
+  band picked after looking is expected to shrink. Expected entries: about 29 a day, so 300 entries in about 10 days. If the full band
+  L1 comes in near +0.96c, then this variant is predicted to be no better than L1 by more than its noise, and the pre-registered
+  expectation is that the band split does not survive.
+- **Kill criteria, the common bar.** `FALSIFIED` unless ALL hold: n of at least 300 entries on at least 5 different days; mean net
+  positive with a day clustered z (by UTC day of close) of at least 2.1; positive in both halves split by close time at the median;
+  positive with fees times 1.2. Fewer than 300 entries is `NOT_ENOUGH_DATA`. Additionally the variant must beat L1's full band on the
+  same markets by a positive margin in the same data, otherwise the band adds nothing and is `FALSIFIED` as an improvement. Best
+  outcome is `NOT_YET_FALSIFIED`, which is permission to keep testing, never a verdict that means size up.
+- **Fair-market null.** Each entry wins with probability equal to its own touch price at its decision point, pays the ask and the fee;
+  500 repeats; the real mean is placed against that distribution and must be clearly above it.
+- **Live implication.** None. The live bot keeps its 88c to 97c band. Narrowing it live would also be a change of order flow and fill
+  rate (fewer orders, and the 88c to 90c zone is where most live misses happened), so it needs this result first and a separate "merge".
+
+### P2: resting-limit entries (maker) for L1 signals
+
+Status: **`NOT_RUNNABLE` today and not recorded as a try.** The one-minute candles cannot say whether a resting order would have been
+reached or where it would have stood in the queue. Fabricating a fill model on candles is the exact failure this directory exists to
+prevent. It becomes runnable only on order book snapshots from the recorder (every 10 s, three levels), which started saving on
+2026-10-08, and only on markets closing after the timestamp above.
+
+- **Rule once runnable.** At an L1 signal (touch price 90c to 97c), instead of crossing, rest a buy for the favourite side one tick
+  below the touch, for the rest of the 330 to 400 second window (the order is cancelled at its end), then count a fill only under the
+  strictly-through model: a later snapshot shows the opposite side's best price at or through our limit (the ask at or below our bid
+  limit), and at least one snapshot later than the one that showed it before any fill is counted (no same snapshot fills). Queue
+  position is assumed to be the back of the visible size at our price. The fee schedule for a resting fill must be read from
+  docs.kalshi.com on the day of the run and written here first; no maker fee is assumed in this note.
+- **Counterparty.** An impatient seller of the favourite who crosses the spread near the close. The danger is adverse selection:
+  the sellers who reach our bid are the ones who know the favourite just weakened, so fills concentrate on the losers. The earlier
+  crypto maker test in `shwoopnet` showed exactly this: the skipped signals averaged more than the filled ones.
+- **Numeric prediction, stated before any book data is read.** Fill rate 30% to 50%. Net per FILLED contract higher than the taker
+  entry by about the saved tick and fee (about +0.8c), but win rate of the filled set lower than the missed set. Net per SIGNAL
+  (unfilled counted as zero) at or below the taker entry. **The pre-registered expectation is `FALSIFIED`.**
+- **Kill criteria.** `FALSIFIED` unless ALL hold: at least 300 signals with a determinable outcome on at least 5 days; net per
+  signal (unfilled at zero) exceeds the taker entry on the same signals with a day clustered z of at least 2.1 on the difference;
+  positive in both halves; positive with fees times 1.2; and the outcome of the unfilled signals is reported next to the filled ones
+  in every table. A profit factor that improves while the fill rate collapses is not a result. Fewer than 300 is `NOT_ENOUGH_DATA`.
+- **Live implication.** None. The order code uses IOC at the touch by design (a resting order that is never cancelled is exposure
+  nobody is watching). A resting entry would be a new order type with a cancel path, and is out of scope until this passes.
+
+### Not pre-registered, written down only so they are not found later by looking
+
+Entry time inside the 330 to 400 second window; skipping a side or series with a wide spread or thin visible size; sizing larger
+inside a band that has passed. Each needs its own section here, with its prediction and kill criteria, before any data is read for it.
+Nothing about them has been computed.
+
+### Count
+
+P1 is one more variant against the bar: **793** as of 2026-10-08 (792 before, plus P1). P2 is not counted until it runs.
+The fourteen hypotheses before it, and the 729 rules and 42 strategies searched, remain `FALSIFIED` or `NOT_ENOUGH_DATA`.
+
+## Pre-registration: the four slot search, BTC and gold each in an early and a late window (fixed 2026-10-08 02:50 UTC, before any code or any result)
+
+The owner asked to use the markets harder: one rule per series per window, so four live slots (Bitcoin early, Bitcoin late, gold early,
+gold late), each acting once per market. This is a search over rules for each slot, run with the protections of the first rule search
+(`search.py`) and a stricter pass mark because there are now four searches and a hundred holdout reads. It is a parameter search, so it
+can never produce a verdict that means trade. Nothing below has been run. The only things looked at before writing this are the table
+names of the database and the existing `search.py`.
+
+- **Slots, fixed.** *Early*: the decision is read at 14, 13, 12, 11 or 10 minutes left (minutes 1 to 5 of the market). *Late*: 6, 5, 4,
+  3, 2 or 1 minutes left (the last 6 minutes, the window L1 sits in). Each slot is one series, so a slot rule never trades the other
+  series and never trades in the other window. A market can therefore have up to two entries (one early, one late), and the two
+  windows never overlap in time.
+- **Grammar.** The same as `search.py` (price band from the fixed edges, side either/yes/no, optional spread filter, optional move
+  filter over 1, 3 or 5 minutes) with the minute drawn from the slot's own list and the series filter removed (the slot sets it). One
+  new filter, `pair`: the other series' market that closes at the same time, at the same minute, has a valid quote, and its YES mid
+  is at least 5c above 50c ("other up") or at least 5c below ("other down"); the rule requires the other market to point the same
+  way as the side bought (`agree`) or the opposite way (`disagree`). A slot rule with a `pair` filter and no other-series quote has no
+  entry. No filter reads a result. No hour of the day is a filter. Hold to settlement only, taker at the ask, fee `0.07 * p * (1 - p)`.
+- **Counterparty, stated once for the family.** For the early slot: whoever quotes the first minutes of a market before the price has
+  absorbed what the underlying already did. For the late slot: the same longshot-holder story as L1. For `pair`: a market that has
+  not yet repriced for what the other market is already saying. No new mechanism is claimed, and a rule is not described as having an
+  edge because it ranks first.
+- **Search protocol, per slot.** Seed 11, 3 cycles of 50 fresh rules, 50 more fresh rules, and 50 one-filter mutants of the top 50
+  (as in `search.py`), top 25 kept per round, at least 100 entries to be ranked, ranking by day clustered z of net profit per contract.
+  Only the first half of the days (by day count) is read while searching. The second half is the locked holdout, read once, for the
+  final 25 of each slot. For the late slots the rule L1 as live (6 minutes left, either side, 0.88 to 0.97, no filter) is scored
+  as an extra information row and is not part of the ranking.
+- **Control.** For every slot, the identical pipeline on the fair-market copy of its data (each result drawn from the market's own
+  last price), same seed. The best z the control finds is printed beside the real best.
+- **Every rule counts.** Distinct rules evaluated in the REAL runs of all four slots are added to the tally of variants tried
+  (792 before P1, 793 with P1, plus the four-slot total printed by the run). The floor for a search window z is `sqrt(2 ln N)` with N
+  the slot's own count. Control runs are not counted.
+- **Numeric prediction, stated before the run.** In every slot the best search-window z lands within 0.5 of the control's best and
+  near the floor (about 3.3 to 3.5), and the holdout of the final 25 shows a mean net below zero, as in the first search (6 of 25
+  positive, mean -1.85c). **The pre-registered expectation is that all four slots are `FALSIFIED`.** If any slot shows more than 6
+  of 25 rules positive on its holdout, that is reported as an anomaly, not as a finding.
+- **Pass mark, fixed.** A rule is `NOT_YET_FALSIFIED` only if ALL hold: its search window z is above both the floor and the control's best
+  for its slot; on the holdout it has at least 300 entries, mean net positive, day clustered z of at least **3.0** (the null
+  expectation of the best of the 100 holdout reads across 4 slots, `sqrt(2 ln 100)`, so ordinary luck cannot pass), both holdout
+  halves positive, and positive with fees times 1.2. A holdout with fewer than 300 entries is `NOT_ENOUGH_DATA` for that rule. Anything
+  else is `FALSIFIED`. A pass is permission to run a forward test on days not yet seen, written here before it starts, and never a reason
+  to change the live bot. The data is the same 69 days as every earlier test (the last half of them is not new to the project, only
+  new to these rules), so a pass could never be more than that.
+- **Mixing.** If at least one rule in each of two slots passes, the combination is evaluated once on the holdout as a portfolio (one entry
+  per slot per market, equal size) and reported with the same measures. If fewer than two slots have a passing rule there is nothing to
+  mix and none is run. No other combination is looked at.
+- **Live implication.** None from this section. Four slots would need a separate order id per slot (today the id is `L1-<ticker>`, one order per
+  market), a per slot stop, and the size ladder; none of that is built or proposed until a rule passes forward.
+
+**2026-10-08: the four slot search: all four slots `FALSIFIED`, no rule passes.** One run of `python -m scalper.slots` (seed 11, 3 cycles per slot) under the section above. Nothing was changed after seeing it. 11,130 markets, search window 5,546, holdout 5,584 read once. Full rows in `search4/slots.json`.
+
+| Slot | Rules | Best search z, real | Best search z, control | Floor | Holdout of final 25: positive | Control rules on a fair holdout | Mean net on holdout | Passes |
+|---|---|---|---|---|---|---|---|---|
+| Bitcoin early | 439 | 3.51 | 1.71 | 3.49 | 7 | 7 | -1.58c | 0 |
+| Bitcoin late | 440 | 2.65 | 4.14 | 3.49 | 9 | 12 | -0.52c | 0 |
+| gold early | 441 | 1.99 | 3.34 | 3.49 | 7 | 2 | -0.79c | 0 |
+| gold late | 440 | 2.60 | 2.16 | 3.49 | 7 | 7 | -1.30c | 0 |
+
+- **Prediction against outcome.** Predicted: every slot `FALSIFIED`, best search z near the control and the floor, holdout mean below zero, no more than 6 of 25 positive. Measured: all four `FALSIFIED`, holdout means all negative. Two slots had 7 of 25 positive and one 9 of 25, against the 6 predicted; the control produced 7, 12 and 7 in the same slots, so this is the size of luck in this pipeline, and it is reported as the anomaly the section said to report, not as a finding. Gold early's 7 against the control's 2 is the one gap worth a sentence: none of those 7 had 300 holdout entries (all `NOT_ENOUGH_DATA`).
+- **Bitcoin early is the only slot whose real best (3.51) is above its floor (3.49) and well above its control (1.71).** It did not survive: the best rule (12 minutes left, either side priced 0.70 to 0.90, spread 2c or less) was +1.06c on 1,081 holdout entries with z of 0.77. A search window z at the floor that fades to 0.77 is what selection looks like.
+- **Best holdout rows.** Bitcoin late: 2 minutes left, priced 0.10 to 0.20, spread 2c or less, +5.79c on 353 entries, z 2.39, below the 3.0 mark and a longshot band in which the fair-market control also scores high. Gold early: 10 minutes left, 0.90 to 0.97, price moved toward the side by 2c over 3 minutes, other market agrees, +3.23c on only 101 entries (z 1.94): `NOT_ENOUGH_DATA`, and it is the only `pair` rule that came near the top. Gold late: +2.92c on 265 entries (z 1.30).
+- **L1 as live, per slot, information only.** Bitcoin late: search +0.53c (z 0.96), holdout +0.68c (z 0.70). Gold late: search +1.95c (z 2.59), holdout +0.97c (z 1.30). Positive in both halves for both series, and in both series the holdout is smaller than the search window, which is the same drift the forward check was built to watch. Neither series on its own clears z 2.1 on the holdout.
+- **Mixing.** Fewer than two slots had a passing rule, so no combination was evaluated, as the section said.
+- **What this does and does not say.** This grammar (one price band, one side, up to three filters, hold to settlement, taker at the ask), in these windows, on 69 days, finds nothing a fair market does not also produce. It does not say a different shape, such as a resting order or a sized ladder, has no edge. The `pair` filter (the other series pointing the same way) produced no top rule in either late slot.
+- **Count.** 1,760 distinct rules evaluated in the real runs. **Strategy variants tried so far: 2,553 as of 2026-10-08** (793 including P1, plus these 1,760). The line at the top of this file is updated. All `FALSIFIED` or `NOT_ENOUGH_DATA`.
+
+## Pre-registration: three more forward looks, F5 to F7, and a power table (fixed 2026-10-08 02:51 UTC, before any of them was run on any market)
+
+The slot search found nothing new, and the strategy space already written down is close to exhausted: L3 covers 2 minute favorites up to 98c
+(`-1.71c`), S06 and S07 cover the previous result and streaks, S01 to S05 cover the other series, R10 puts stop losses outside the program.
+So the useful overnight work is making the ideas that are still alive testable on clean data, not adding rules. Three forward looks are
+added to `forward.py`. Each is a subset or a variant of L1 that was named after seeing the 69 day numbers, so none of the 69 days counts for
+them. Their window is markets that **close after 2026-10-08 02:50 UTC** (close_ts above 1791427800), the moment P1 was written.
+
+| Name | Definition | Why it is here |
+|---|---|---|
+| F5 = P1 | L1 (6 minutes left, taker at the ask, hold) with the touch price 0.90 to 0.95 only, both series | The band split in the P1 section. |
+| F6 | L1 over its full band, gold only | Gold late looked better than Bitcoin late in the slot search (+1.95c vs +0.53c in the search window, +0.97c vs +0.68c on the holdout). Named after seeing that. |
+| F7 | L1 over its full band, Bitcoin only | The other half of that split, so F6 cannot be reported without it. |
+
+- **Counterparty.** The same as L1 for all three: the buyer of the cheap side of an almost decided market. No new mechanism.
+- **Numeric prediction, stated before the run.** F5 +1.0c (below the +1.66c seen post hoc); F6 +0.8c and F7 +0.8c, that is, the series split is
+  not expected to matter, and the expectation is that the two are within one standard error of each other. If F6 beats F7 by more than
+  its standard error on 300 entries each, that is reported, but a difference between two halves chosen after seeing a difference is not
+  a finding.
+- **Sample size and kill criteria.** The common bar and nothing looser: at least 300 entries on at least 5 UTC days, mean net positive with a
+  day clustered z of at least 2.1, positive in both halves of the window by close time, positive with fees times 1.2. Fewer than 300 or
+  5 days is `NOT_ENOUGH_DATA` and the numbers are information only. Each rule is read once, at the first run in which it has both, using
+  every market since the cutoff. F6 and F7 are two tests on one population and F5 is nested inside L1's population, so the true number of
+  independent tests is smaller than three, but each is counted.
+- **Order of reading.** F5 may only be called `NOT_YET_FALSIFIED` if it also exceeds F0 (full band L1) on the same markets, as in P1. F6 and
+  F7 are judged on their own and, if both pass, the series split is not a finding.
+- **Count.** F6 and F7 are two more variants. **Strategy variants tried so far: 2,555 as of 2026-10-08** (2,553 plus F6 and F7; F5 is P1,
+  already counted).
+- **Power table (information only, decides nothing, not a hypothesis).** `python -m scalper.power` resamples the 69 days of L1 entries by day
+  (a bootstrap over days, so the clustering is kept) and reports, for a true edge equal to what was measured and for half of it, how
+  often a forward sample of N entries clears z of 2.1, so that the wait for the bar is known before it is felt. It reads no forward data.
+
+**2026-10-08: the power table (`python -m scalper.power`, 1,000 resamples per cell).** L1: 3,400 entries over 69 days, 49.3 a day, measured mean net +0.96c.
+
+| Forward entries (days at 49 a day) | Pass rate if the edge is the measured +0.96c | If half of it | If zero (false pass) |
+|---|---|---|---|
+| 300 (6.6) | 21.4% | 12.2% | 7.1% |
+| 600 (12.7) | 25.6% | 13.2% | 5.7% |
+| 1,000 (20.8) | 33.8% | 14.3% | 4.5% |
+| 2,000 (41.1) | 52.8% | 18.2% | 2.7% |
+
+- **What it says.** The bar is deliberately hard to pass, and a +0.96c edge on a 5c to 12c risk per contract has a per entry standard deviation of about 0.3 dollars, so even a real edge of exactly the measured size is read as `NOT_YET_FALSIFIED` only one time in five at 300 entries and one time in two at 2,000 entries. The "both halves positive" and "fees x1.2" conditions are not in this table, so the true pass rates are lower still.
+- **What it does not say.** A failed reading at 300 entries is weak evidence against L1, not strong evidence: with a real +0.96c edge it fails 79% of the time. Equally a pass is weak evidence for it. The false pass rate at 300 entries (7.1%) is above the nominal 1.8% because 6.6 days is few clusters for a z statistic.
+- **Consequence for the size ladder.** The ladder's first step asks for a pass on 300 entries and 5 days. That gate will usually not be met even if L1 works, so a ladder that waits for it waits for luck. Whether to read the first step at 1,000 entries (about three weeks, 34% power at the measured edge) instead is a decision for the owner, to be written down before the data is read; this note changes nothing by itself.
+
+## Amendment to P2 (fixed 2026-10-08 02:56 UTC, before any resting-order simulation was run on any book)
+
+Two facts changed after P2 was written, both disclosed here before use.
+
+1. **Data source.** `scalper.recorder` (read only, public endpoints, no key) is now running in the research container, writing the top
+   five levels of both series' open markets to `data/ob.sqlite` every 10 seconds, started 2026-10-08 02:52 UTC for 10 hours. P2 may use
+   these snapshots as well as the Firestore recorder's. Only markets that close after 03:00 UTC count (so every window is fully recorded); the 471 older snapshots (42 minutes,
+   2026-10-07) never count. A snapshot is a separate view of the book every 10 seconds, so a resting order whose price was crossed for
+   less than 10 seconds can be missed. That biases fills DOWN, which is the conservative direction for a maker test.
+2. **Maker fee.** The series endpoint reports `fee_type: quadratic, fee_multiplier: 1` for both series, which fits the taker formula used
+   everywhere here. I could not find a maker rate in the pages I could fetch (docs.kalshi.com fee rounding says only that the fee accumulator
+   carries across taker and maker fills), and I will not write one from memory. So the pre-set verdict is judged with the **maker fee set
+   equal to the taker fee**, `0.07 * p * (1 - p)` per contract. Any saving from a lower maker rate is printed as a separate information
+   line with 0 and 0.0175 coefficients, and cannot create a pass. The only thing a pass can then come from is the entry price.
+- Everything else in P2 stands: back of the visible queue at our price, a fill only on a LATER snapshot whose opposite side's best price is at or
+  through our limit, the window is the 330 to 400 seconds before close, the outcome of unfilled signals is reported next to the filled
+  ones, kill criteria and 300 signals on 5 days unchanged. At 10 hours of recording there will be far fewer than 300 signals, so the
+  result will be `NOT_ENOUGH_DATA` and printed as information only.
+
+**2026-10-08: P2 simulator built (`python -m scalper.bookmaker`), not yet run on a settled market.** Code and tests exist before any result: the signal is the first snapshot 330 to 400 s before close with a side's ask at 0.90 to 0.97; the limit is one tick below that ask (0.1c above 90c, 1c at or below); a fill needs a LATER snapshot inside the window whose own side's ask is strictly below the limit. One deliberate departure from the P2 wording, in the conservative direction: P2 said "at or through"; the verdict counts only STRICTLY through, because a touch at our price says nothing about our place in the queue (H3's rule), and the touch rate is printed as a separate information column. The maker fee in the verdict equals the taker fee; coefficients 0 and 0.0175 are information only. A planted adverse selection test (every filled order loses, every missed one wins) must come out `FALSIFIED` with maker per signal below taker, and it does. At 10 hours of recording the result will be `NOT_ENOUGH_DATA` and printed as information only.
+
+## Pre-registration: three filters on L1, Q1 to Q3 (fixed 2026-10-08 03:12 UTC, before any code or any filtered result)
+
+The slot search tried rules from a grammar. This is the other direction: take the one rule that has held up best, L1, and ask whether a stated
+reason to distrust some of its entries removes the bad ones. Each filter is one fixed definition, with no threshold searched. The only things
+looked at before writing this are `distance.py` (H7's spot distance code, reused as is) and the table layout of the database.
+
+**Base.** L1 as `lstrats.hold_rule(L1)`: the candle ending 6 minutes before the close, the favourite whose ask is 0.88 to 0.97, taker at the ask,
+fee `0.07 * p * (1 - p)`, held to settlement. Both series unless stated. All 69 days. Every one of these days has been seen by L1 itself, so a
+pass could only ever be permission to test forward on days not yet seen, written down before it starts.
+
+| Name | Arm (entries kept) | Complement (entries removed) | Excluded from both and counted |
+|---|---|---|---|
+| Q1 spot support | Bitcoin only. `z = ln(spot / strike) / (sigma * sqrt(6))` exactly as `distance.z_score` at the decision minute; the arm is YES with `z >= +1.0` or NO with `z <= -1.0` | Bitcoin entries with a `z` that does not support the side | Entries with no `z` (missing spot or strike); gold entirely |
+| Q2 previous result | The previous market of the same series (it closed exactly 900 s earlier) resolved to the side bought | Resolved to the other side | Entries with no previous market in the data |
+| Q3 other series agrees | The other series' market with the same close time, at the same candle, has a valid quote with mid at least 5c on the side bought's side of 50c | Mid at least 5c on the opposite side | Twin missing, no valid quote, or mid within 5c of 50c |
+
+- **Counterparty, per filter.** Q1: the longshot buyer on the other side is least wrong when spot sits close to the strike and most wrong when it sits
+  a full sigma away, so entries with spot support should keep the edge and the rest should not. Q2 and Q3: the opposing buyer is more likely
+  to be wrong when the recent market or the other market is pointing the same way as the favourite. Q2 is adjacent to S06 (outcome persistence,
+  `FALSIFIED`): S06 asked whether the previous result predicts the next one, Q2 asks whether it improves the odds only on entries already priced 88c to 97c.
+- **Numeric prediction, stated before the run.** Q1: arm net about +1.2c a contract on about 700 entries, complement about 0c; arm and
+  complement differ by about 1c. Q2: arm and complement within 0.5c of each other (S06 found no persistence). Q3: the same, within 0.5c. **The
+  pre-registered expectation is that none of the three passes**: the arms hold 500 to 1,700 entries, where one standard error is 0.7c to 1.3c.
+- **Pass mark, fixed.** Three filters are tried, so the arm's day clustered z must be at least **2.4** (the one sided level for three tries at 5%),
+  not 2.1. A filter is `NOT_YET_FALSIFIED` only if ALL hold: at least 300 arm entries on at least 5 days; arm mean net positive with day clustered
+  z of at least 2.4; both halves of the arm positive (split by close time at the median); positive with fees times 1.2; the arm's mean exceeds the
+  complement's, with the day clustered z of the per day difference at least 2.0; and the arm's real mean sits above the 95th percentile of the
+  fair-market null (500 repeats; each arm entry wins with probability equal to its own ask, pays the ask and the fee). Fewer than 300 arm
+  entries is `NOT_ENOUGH_DATA`. Anything else is `FALSIFIED`.
+- **Information only, no verdict, may not rescue anything.** The base L1 on the same markets; each arm's price mix and its Bitcoin and gold split;
+  Q1 at `K = 0.5` and `K = 2.0`. Those two extra thresholds are printed to show how steady the result is and are counted as tries.
+- **Count.** Q1, Q2 and Q3 are three variants and the two extra Q1 thresholds are two more: **2,560** as of 2026-10-08 (2,555 plus five).
+
+**2026-10-08: Q1 to Q3: all three `FALSIFIED`.** One run of `python -m scalper.filters` under the section above (commit after the pre-registration and the tests). Nothing was changed after seeing it. Base L1: 3,400 entries, +0.96c, z +2.71, 69 days.
+
+| Filter | Arm n | Arm net | z | Halves | Fees x1.2 | Complement n / net | Arm minus complement (z) | Fair market 95th pct | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| Q1 spot support (Bitcoin) | 1,653 | +0.86c | +1.43 | +0.63c / +1.08c | +0.77c | 331 / -0.64c | +1.16c (+0.64) | +0.55c | `FALSIFIED` |
+| Q2 previous result agrees | 1,694 | +0.49c | +1.03 | +1.10c / -0.12c | +0.40c | 1,698 / +1.41c | -0.83c (-1.00) | +0.61c | `FALSIFIED` |
+| Q3 other series agrees | 1,653 | +0.87c | +1.70 | +1.09c / +0.64c | +0.77c | 992 / +1.14c | -0.45c (-0.43) | +0.56c | `FALSIFIED` |
+| Q1 at K=0.5 (information) | 1,967 | +0.58c | +1.02 | | | 17 / +4.02c | | | `FALSIFIED` |
+| Q1 at K=2.0 (information) | 317 | +0.33c | +0.24 | | | 1,667 / +0.66c | | | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: none passes. Right on the verdicts. Q1 was predicted at about +1.2c with a difference of about 1c; it
+  measured +0.86c with a difference of +1.16c, the right sign and size but nowhere near the z of 2.4 or the 2.0 on the difference (arm and
+  complement have 1,653 and 331 entries). Q2 and Q3 were predicted within 0.5c of their complements; Q2 came out 0.83c BELOW it and Q3 0.45c below.
+- **What it says.** The Bitcoin entries that spot does not support lost 0.64c a contract and those it does support made 0.86c, which is the shape
+  the mechanism predicts, but the gap is inside its noise (z +0.64), and K=2.0 (the strongest support) is the weakest arm (+0.33c), the opposite
+  of a dose response. So there is no evidence that the spot filter removes the bad L1 entries. Entries where the previous market agreed with the
+  favourite did worse than those where it did not (Q2). That is a pattern read off an information table (z -1.00); acting on it would need
+  its own pre-registration and unseen data, and it is consistent with S06/S07 finding no useful persistence either way.
+- **Count.** Five variants (Q1 to Q3 and the two Q1 thresholds): **2,560 as of 2026-10-08** (2,555 plus 5). The top line of this file is updated.
+
+## Pre-registration: a forward look at the Q2 complement, F8 (fixed 2026-10-08 03:13 UTC, before it was run on any market after 03:25)
+
+Q2 was `FALSIFIED` as registered (the previous result AGREEING with the favourite). Its table also showed the complement, entries where the previous
+market in the same series resolved to the OTHER side, at +1.41c on 1,698 entries against +0.49c for the agreeing half. That was seen after the
+fact, so the 69 days cannot count for it. It is registered here as a forward look only, so that days after this time are clean.
+
+- **F8.** L1 (6 minutes left, 0.88 to 0.97, taker at the ask, hold) restricted to entries whose side differs from the result of the previous market in
+  the same series (it closed exactly 900 s earlier). Entries with no previous market are excluded and counted. Markets that close after
+  **2026-10-08 03:25:00 UTC** (close_ts above 1791429900) only.
+- **Counterparty.** The same longshot buyer as L1. The only new claim is a mean reverting residue after a result in the opposite direction; it is
+  adjacent to S07 (streak exhaustion, `FALSIFIED`) and is not expected to be a separate mechanism.
+- **Numeric prediction, stated before the run.** +0.9c a contract, below the +1.41c seen post hoc. **The pre-registered expectation is that it does
+  not pass**: the two halves of Q2 differ by 0.9c with a day clustered z of -1.00, so a regression to the L1 average (+0.96c) is the likeliest outcome.
+- **Kill criteria, the common bar.** At least 300 entries on at least 5 days; mean net positive with day clustered z at least 2.1; both halves
+  positive; positive with fees times 1.2; and the mean exceeds F0's mean on the same markets. Fewer than 300 is `NOT_ENOUGH_DATA`.
+  About 25 entries a day, so 300 entries need about 12 days.
+- **Count.** One more variant: **2,561 as of 2026-10-08**.
+
+## Cost model check: fee rounding per order (2026-10-08, information only, no hypothesis, no verdict)
+
+Every backtest in this file charges the fee as `0.07 * p * (1 - p)` per contract, unrounded (`scalps.fee`). Kalshi's fee-rounding page
+(docs.kalshi.com, getting started, "Fee Rounding", fetched 2026-10-08) says a non-direct member's balance moves in whole cents, and the exchange
+charges a rounding fee to restore that: a fill's trade fee is rounded up to $0.000001, then the balance change is floored to the cent, and the
+difference is the rounding fee. For a buy that means the order costs `ceil_to_the_cent(count * (price + fee))`. The fee accumulator only
+refunds rounding across several fills of one order, so a single fill gets none back. `fees.py` already had a cent-rounded per-order fee and the
+backtests did not use it.
+
+`python -m scalper.feerounding` prices L1's 3,400 entries both ways (cents per contract, hold to settlement):
+
+| Contracts per order | Unrounded fee (every table above) | Cent-rounded order | Difference | Fee per contract, rounded |
+|---|---|---|---|---|
+| 1 | +0.96c | **+0.49c** | -0.48c | 0.95c |
+| 2 | +0.96c | **+0.70c** | -0.26c | 0.73c |
+| 3 | +0.96c | **+0.79c** | -0.17c | 0.64c |
+| 4 | +0.96c | +0.85c | -0.11c | 0.58c |
+| 5 | +0.96c | +0.86c | -0.11c | 0.58c |
+
+- **What it says.** If this is how the account is charged, a one contract L1 order has been earning about half of what the backtests say, and the
+  live bot's two contracts earn about 0.7c, not 0.96c. Larger orders lose less to rounding, which is an argument for fewer, larger orders over many
+  one contract ones (but it does not change the ladder: size is still earned by the forward check, not by this).
+- **What is not established.** The page describes the rule; it does not say which kind of member this account is. A direct member rounds to
+  $0.0001 and would pay almost exactly the unrounded fee. The P/L shown on the Kalshi page cannot tell the two apart (it displays whole cents).
+  The order diagnostics export now carries `avgFee` (the fee Kalshi charged, per the order response, on branch `claude/diag-fee`), so one paste of
+  real orders settles it: a one contract order at about 92c charging 0.01 means non-direct; 0.0052 means direct.
+- **Effect on the forward checks.** `forward.py`, `filters.py` and the rest still use the unrounded fee, so their nets are the optimistic column. The
+  bar's "fees times 1.2" stress is not the same thing as this (1.2 times 0.47c is 0.56c; the one contract rounding adds 0.48c). If the account is
+  non-direct, a pass of a forward check at the unrounded fee should be re-read at the rounded cost for the order size actually used before
+  anything is sized up. Nothing was changed in the existing code or the pre-set bars.
+
+By price band (information only, the same post hoc bands as P1, so the same caution applies), net per contract, cents:
+
+| Band | n | Unrounded fee | 1 contract, rounded | 2 contracts, rounded | 3 contracts, rounded |
+|---|---|---|---|---|---|
+| 88c to 90c | 518 | -0.36 | -0.65 | -0.65 | -0.65 |
+| 90c to 92c | 877 | +1.30 | +0.83 | +1.01 | +1.17 |
+| 92c to 95c | 1,119 | +1.94 | +1.42 | +1.70 | +1.76 |
+| 95c to 97c | 886 | +0.17 | -0.37 | -0.08 | +0.03 |
+
+Read with the rounding in mind, the 95c to 97c band is about zero after costs even at three contracts, and the 88c to 90c band loses at any size. That does
+not change P1 (which is still to be judged on days after 02:50 UTC with its pre-set bar), but if P1 passes its forward look, the rounded cost is the
+number to size it on.
+
+## Book study, night of 2026-10-08, information only
+
+First look at the order book recorder (`scalper.recorder`, top five levels, about every 10 s). No hypothesis, no verdict, nothing here decides anything.
+
+- **How little data this is.** The recorder runs only while a command is active in the research container; between turns the container idles and the process
+  stops. It wrote 02:52 to 03:20 UTC and then, in foreground chunks, about 05:30 to 07:00 UTC: 18 distinct markets (9 Bitcoin, 9 gold) and 49
+  snapshots inside the 330 to 400 s L1 window with a side priced 0.88 to 0.97. The Firestore recorder (a scheduled Firebase function) is the only
+  source that runs unattended; this container's copy cannot give days of data.
+- **Ask persistence in the L1 window (37 consecutive pairs, 10 s apart, both series).** The favourite's ask at the next snapshot: up 62.2%,
+  the same 5.4%, down 32.4%. Median spread 0.1c, median size at the touch 1,006 contracts. With n=37 the up share has a wide margin (roughly
+  47% to 78%), but the direction fits the live no-fills: a favourite's ask tends to creep up as the close approaches, so an IOC at a touch read a
+  second or more earlier can be left behind by one tick.
+- **P2 on the 6 signals it found (3 filled).** Fill rate 50% (strictly through and touch-counted agree). On the filled ones the resting entry earned
+  +5.80c against +5.70c taking the same signals; the missed signals earned +6.61c taken. Per signal, unfilled counted as zero: maker +2.90c, taker +6.16c.
+  Six signals say nothing; the shape, however, is the one P2 predicted (the missed ones are not worse than the filled ones, so the resting entry gives
+  up winners). The verdict is `NOT_ENOUGH_DATA`.
+- **Not computed.** Spread and touch size by price band, and how often the touch disappears between snapshots, need hundreds of snapshots per band; there are 49
+  in all, so no band has enough to report.
+- **What would settle it.** The Firestore recorder's 24 hour download (Kalshi page, "Download book snapshots") has days of snapshots at the same cadence. P2, `obstats`
+  and this section should be re-run on that file, not on this one.
+
+## Pre-registration: N1 and N2, H7's distance rule near the settlement boundary (fixed 2026-10-08 07:02 UTC, before any code or result for them)
+
+H7 (spot distance from the strike, in units of typical movement, at 6 minutes left) was `FALSIFIED`. What it did not do is look where distance matters most:
+with 2 or 1 minutes left the remaining movement is small, so a spot that sits a fraction of a sigma from the strike is a near certain outcome, and the market's
+price (a coin flip to a favourite) may lag. Nothing was run at these times. This is the same machinery and the same rule as H7 at a different decision minute, so it
+is one mechanism tried at two times, not a new mechanism.
+
+- **N1:** `distance.py` with the decision at 2 minutes left (`DECISION_LEFT_S = 120`, `MINUTES_LEFT = 2`). **N2:** the same at 1 minute left (60 s, 1). Everything else
+  is H7 as coded: Bitcoin only, sigma the standard deviation of the previous 60 one minute log returns, markets ordered by close time, the first half estimates the YES
+  share in each z bucket, the second half tests the single fixed rule (buy a side only when the bucket's rate beats the price, the fee and a margin of 2c).
+- **Counterparty.** Quoters who do not reprice a near-settled market for the last minute or two of spot movement. **Numeric prediction, stated before the run:** net
+  about -1c a contract for both, with 100 to 300 entries in the test half; the fee at prices near 50c is about 1.75c a contract and the information gain is small
+  once the market already reflects spot. **The pre-registered expectation is `FALSIFIED` or `NOT_ENOUGH_DATA`.**
+- **Kill criteria.** Two tries at the bar: at least 300 entered markets in the test half, mean net positive with a day clustered z of at least **2.4**, both
+  halves of the test half positive, positive with fees times 1.2. Fewer than 300 is `NOT_ENOUGH_DATA`. Anything else is `FALSIFIED`. The universe is fixed (every
+  Bitcoin market with a usable quote and 61 spot minutes).
+- **Count.** Two variants: **2,563 as of 2026-10-08**.
+
+**2026-10-08: N1 and N2: both `FALSIFIED`.** One run of `python -m scalper.boundary` under the section above (after its tests). Nothing changed after seeing it.
+
+| | Bitcoin markets usable | Test half | Entered | Gross | Net | z | Halves | Fees x1.2 | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| N1, 2 minutes left | 6,143 | 3,072 | 1,439 | -1.60c | -2.37c | -2.55 | -3.25c / -1.49c | -2.53c | `FALSIFIED` |
+| N2, 1 minute left | 4,450 | 2,225 | 906 | -1.55c | -2.31c | -2.36 | -2.38c / -2.24c | -2.47c | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted about -1c with 100 to 300 entries; measured about -2.3c with 906 to 1,439 entries (more entries than predicted because the rule
+  trades whenever a bucket's rate beats the price by the 2c margin). The sign and the verdict were right and the loss was larger. A negative z of -2.5 means the
+  estimation half's rates did not hold in the test half: the market's price at 1 to 2 minutes left already reflects spot better than a bucket table built on the
+  first half of the days.
+- **Count.** Two variants: **2,563 as of 2026-10-08**. The top line of this file is updated.

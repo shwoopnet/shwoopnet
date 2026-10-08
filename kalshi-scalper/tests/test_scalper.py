@@ -1756,3 +1756,166 @@ for _id, _kind in (("S13", "over"), ("S10", "under"), ("S12", "under")):
     assert _by[_id]["K_plus"] == (_by[_id]["pooled"]["mean"] > _by[_id]["baseline_mean"])
 assert all(r["K_plus"] and r["baseline_mean"] is None for r in _rows50 if r["id"] not in ("S10", "S12", "S13", "S28", "S38")), "K+ applies to five strategies only"
 print("strategy baseline tests passed")
+
+# Four slot search: a slot rule decides from prices only, trades only its own series, and the pass mark cannot be met by luck-sized or thin results.
+from scalper import slots as _SL
+_book = {600 - 360: (0.91, 0.93), 600 - 420: (0.90, 0.92)}
+_m_yes = {"ticker": "A", "series": "KXBTC15M", "close": 600, "res": "yes", "day": "2026-10-01", "book": _book, "twin": None}
+_m_no = dict(_m_yes, res="no")
+_rule = {"series": "KXBTC15M", "left": 6, "lo": 0.90, "hi": 0.95, "side": "either", "filters": []}
+assert _SL.entry(_m_yes, _rule) == _SL.entry(_m_no, _rule), "the entry never reads the result"
+assert _SL.entry(dict(_m_yes, series="KXGOLD15M"), _rule) is None, "a slot rule never trades the other series"
+_pr = dict(_rule, filters=[("pair", "agree")])
+assert _SL.entry(_m_yes, _pr) is None, "no twin quote means no entry"
+_tw = dict(_m_yes, series="KXGOLD15M", book={600 - 360: (0.69, 0.71)})
+assert _SL.entry(dict(_m_yes, twin=_tw), _pr) is not None and _SL.entry(dict(_m_yes, twin=_tw), dict(_rule, filters=[("pair", "disagree")])) is None
+_tw_late = dict(_tw, book={600 - 300: (0.69, 0.71)})
+assert _SL.entry(dict(_m_yes, twin=_tw_late), _pr) is None, "the twin is read at the same minute, not at a later one"
+_good = {"n": 400, "mean": 0.02, "z": 3.2, "halves": [0.01, 0.03], "stress": 0.01}
+assert _SL.verdict(_good, 3.6, 3.5, 3.0) == "NOT_YET_FALSIFIED"
+assert _SL.verdict(dict(_good, n=299), 3.6, 3.5, 3.0) == "NOT_ENOUGH_DATA"
+assert _SL.verdict(dict(_good, z=2.9), 3.6, 3.5, 3.0) == "FALSIFIED", "a z of 2.9 is what the best of 100 noise reads reaches"
+assert _SL.verdict(dict(_good, halves=[-0.01, 0.05]), 3.6, 3.5, 3.0) == "FALSIFIED"
+assert _SL.verdict(dict(_good, stress=-0.001), 3.6, 3.5, 3.0) == "FALSIFIED"
+assert _SL.verdict(_good, 3.4, 3.5, 3.0) == "FALSIFIED", "the search z must beat the floor"
+print("slot search tests passed")
+
+# F5 to F7: only markets after the cutoff, F5 is a price subset of F0, F6 and F7 split F0 exactly.
+def _mk(tk, series, close, ask, res):
+    return (tk, series, [(close - 360, round(ask - 0.01, 4), ask, 0, 0)], close, res)
+_nm = [_mk("E", "KXBTC15M", _fw.NEW_START, 0.93, "yes"), _mk("A", "KXBTC15M", _fw.NEW_START + 900, 0.93, "yes"),
+       _mk("B", "KXGOLD15M", _fw.NEW_START + 1800, 0.89, "no"), _mk("C", "KXGOLD15M", _fw.NEW_START + 2700, 0.96, "yes")]
+_nr = _fw.new_rules(_nm)
+assert {e["ticker"] for e in _nr["F0 L1 (same markets)"]} == {"A", "B", "C"}, "a market closing exactly at the cutoff is not after it"
+assert [e["ticker"] for e in _nr["F5 L1 priced 0.90-0.95"]] == ["A"]
+assert len(_nr["F6 L1 gold only"]) + len(_nr["F7 L1 Bitcoin only"]) == len(_nr["F0 L1 (same markets)"])
+assert _fw.verdict(_nr["F5 L1 priced 0.90-0.95"])[0] == "NOT_ENOUGH_DATA"
+print("forward F5 to F7 tests passed")
+
+# Power table: it reads only the days it is given, a real edge passes more often than none, and more entries pass more often.
+from scalper import power as _PW
+import random as _rr
+_r = _rr.Random(1)
+_days = {f"d{i}": [0.02 + _r.gauss(0, 0.3) for _ in range(40)] for i in range(40)}
+_p1 = _PW.pass_rate(_days, 400, 1.0, reps=200)[0]
+_p0 = _PW.pass_rate(_days, 400, 0.0, reps=200)[0]
+assert _p1 > _p0, "a real edge clears the bar more often than no edge"
+assert _PW.pass_rate(_days, 2000, 1.0, reps=200)[0] > _p1, "more entries, more power"
+assert _PW.pass_rate(_days, 400, 1.0, reps=50) == _PW.pass_rate(_days, 400, 1.0, reps=50), "seeded, so it is repeatable"
+print("power table tests passed")
+
+# P2 resting entries: filled only by a LATER snapshot strictly through the limit, unfilled counts zero, the verdict needs 300 signals and 5 days.
+from scalper import bookmaker as _BM
+_C = 10000.0
+def _snap(left, ya=None, na=None):
+    return {"ts": _C - left, "yes_ask": ya, "no_ask": na}
+_s1 = [_snap(390, 0.93, 0.08), _snap(380, 0.93, 0.08), _snap(340, 0.93, 0.08)]
+_o = _BM.simulate(_s1, _C, "yes")
+assert _o["side"] == "yes" and _o["ask"] == 0.93 and abs(_o["limit"] - 0.929) < 1e-9 and not _o["filled"], "a price that never trades through is a miss"
+_s2 = [_snap(390, 0.93, 0.08), _snap(380, 0.9285, 0.08)]
+assert _BM.simulate(_s2, _C, "yes")["filled"], "a later snapshot below the limit fills"
+_s3 = [_snap(390, 0.93, 0.08), _snap(380, 0.929, 0.08)]
+_o3 = _BM.simulate(_s3, _C, "yes")
+assert not _o3["filled"] and _o3["filled_at"], "a touch at the limit is not a fill in the verdict, only in the information column"
+assert not _BM.simulate([_snap(390, 0.9285, 0.08)], _C, "yes")["filled"], "the signal snapshot itself never fills"
+assert _BM.simulate([_snap(300, 0.93, 0.08), _snap(420, 0.93, 0.08)], _C, "yes") is None, "outside 330 to 400 seconds there is no signal"
+assert _BM.simulate([_snap(380, 0.5, 0.5)], _C, "yes") is None
+assert _BM.simulate([_snap(380, None, 0.93)], _C, "no")["side"] == "no", "a market with an empty YES side can still signal on NO"
+# the result is read only to settle the trade
+assert {k: v for k, v in _BM.simulate(_s2, _C, "yes").items() if k != "won"} == {k: v for k, v in _BM.simulate(_s2, _C, "no").items() if k != "won"}
+assert _BM.maker({"filled": False, "limit": 0.9, "won": 1.0}) == 0.0
+# a filled order pays the taker formula at the lower price, so a pure price saving shows as exactly one tick
+_f = {"filled": True, "limit": 0.929, "ask": 0.93, "won": 1.0}
+assert abs((_BM.maker(_f) - _BM.taker(_f)) - (0.001 + _BM.fee(0.93) - _BM.fee(0.929))) < 1e-12
+# adverse selection planted: every filled order loses, every missed order wins. Maker per signal is far below taker and the verdict is FALSIFIED.
+def _fake(i, filled):
+    return {"filled": filled, "filled_at": filled, "ask": 0.93, "limit": 0.929, "won": 0.0 if filled else 1.0, "day": f"2026-10-{1 + i % 8:02d}", "close": 1000.0 + i, "side": "yes", "t": 0}
+_adv = [_fake(i, i % 2 == 0) for i in range(400)]
+_v, _i = _BM.verdict(_adv)
+assert _v == "FALSIFIED" and _i["maker_per_signal"] < _i["taker_all"] and _i["missed_taker"] > 0 > _i["filled_taker"]
+assert _BM.verdict(_adv[:299])[0] == "NOT_ENOUGH_DATA", "300 signals needed"
+assert _BM.verdict([dict(o, day="2026-10-01") for o in _adv])[0] == "NOT_ENOUGH_DATA", "5 days needed"
+# a resting order that fills everything one tick cheaper and wins as often as a taker is a pure saving; it passes only if it is consistent
+_pure = [dict(_fake(i, True), won=1.0 if i % 10 else 0.0) for i in range(400)]
+assert _BM.verdict(_pure)[0] == "NOT_YET_FALSIFIED", "the same outcomes one tick cheaper is a real, if tiny, improvement"
+assert _BM.verdict([dict(o, filled=(i % 3 == 0), filled_at=(i % 3 == 0)) for i, o in enumerate(_pure)])[0] == "FALSIFIED", "filling a third of them gives up the saving on the rest and the winners that were missed"
+print("P2 resting entry tests passed")
+
+# obstats describes; it counts moves between consecutive snapshots of one market and skips gaps.
+from scalper import obstats as _OS
+_st = _OS.stats([(0, "A", 0, 0.93, 0.92, 100), (10, "A", 0, 0.931, 0.92, 50), (20, "A", 0, 0.931, 0.92, 70), (30, "A", 0, 0.93, 0.92, 70), (100, "A", 0, 0.99, 0.9, 1), (5, "B", 0, 0.93, 0.92, 10)])
+assert _st["pairs"] == 3 and _st["gaps"] == 1 and abs(_st["up"] - 1 / 3) < 1e-9 and abs(_st["same"] - 1 / 3) < 1e-9 and abs(_st["down"] - 1 / 3) < 1e-9
+print("obstats tests passed")
+
+# Q1 to Q3: filters split L1's entries into arm and complement, what cannot be evaluated is excluded from both, and a filter that adds nothing is FALSIFIED.
+from scalper import filters as _FL
+import inspect as _insp2
+import random as _rq
+def _e(i, side="yes", series="KXBTC15M", price=0.92, win=True, day=None):
+    net = (1.0 if win else 0.0) - price - _FL.fee(price)
+    return {"ticker": f"T{i}", "series": series, "day": day or f"2026-10-{1 + i % 10:02d}", "close_ts": 1000 + i * 900, "side": side, "price": price,
+            "net": net, "stress": (1.0 if win else 0.0) - price - _FL.fee(price, 1.2), "gross": 0.0}
+_zs = {"T0": 1.5, "T1": -1.5, "T2": 0.2, "T3": None, "T4": -1.0}
+_orig = _FL.spot_z
+_FL.spot_z = lambda close_ts, strike, spot: _zs.get({1000 + i * 900: f"T{i}" for i in range(6)}[close_ts])
+_arm, _comp, _ex = _FL.split_q1([_e(0, "yes"), _e(1, "yes"), _e(2, "yes"), _e(3, "yes"), _e(4, "no"), _e(5, "yes", "KXGOLD15M")], {}, {})
+_FL.spot_z = _orig
+assert [e["ticker"] for e in _arm] == ["T0", "T4"], "spot at least one sigma on the side's side; at exactly -1.0 a NO is supported"
+assert [e["ticker"] for e in _comp] == ["T1", "T2"] and _ex == 2, "wrong way or close is the complement; no z and gold are excluded and counted"
+_res = {("KXBTC15M", 1000 + 0 * 900 - 900): "yes", ("KXBTC15M", 1000 + 1 * 900 - 900): "no", ("KXBTC15M", 1000 + 2 * 900 - 900): None}
+_a2, _c2, _x2 = _FL.split_q2([_e(0, "yes"), _e(1, "yes"), _e(2, "yes"), _e(3, "yes")], _res)
+assert [e["ticker"] for e in _a2] == ["T0"] and [e["ticker"] for e in _c2] == ["T1"] and _x2 == 2, "the previous result is read at close - 900 s, nothing later"
+_q = {("KXGOLD15M", 1000): (0.69, 0.71), ("KXGOLD15M", 1900): (0.29, 0.31), ("KXGOLD15M", 2800): (0.49, 0.51)}
+_a3, _c3, _x3 = _FL.split_q3([_e(0, "yes"), _e(1, "yes"), _e(2, "yes"), _e(3, "yes")], _q)
+assert [e["ticker"] for e in _a3] == ["T0"] and [e["ticker"] for e in _c3] == ["T1"] and _x3 == 2, "a twin near 50c or missing is excluded, not counted as disagreeing"
+# A planted edge in the arm (wins 99%) with a fair complement passes; with no edge it fails; an arm no better than its complement fails.
+_r = _rq.Random(4)
+_good = [_e(i, win=_r.random() < 0.995, day=f"2026-10-{1 + i % 12:02d}") for i in range(500)]
+_fair = [_e(i + 1000, win=_r.random() < 0.92, day=f"2026-10-{1 + i % 12:02d}") for i in range(500)]
+_vg, _sg = _FL.verdict(_good, _fair, _FL.null_p95(_good, reps=100))
+assert _vg == "NOT_YET_FALSIFIED" and _sg["diff"] > 0, _sg
+_vz, _ = _FL.verdict(_fair, _fair)
+assert _vz == "FALSIFIED", "an arm identical to its complement adds nothing"
+assert _FL.verdict(_good[:299], _fair)[0] == "NOT_ENOUGH_DATA"
+_z2 = _FL.verdict([dict(e, day="2026-10-01") for e in _good], _fair)[0]
+assert _z2 == "NOT_ENOUGH_DATA", "5 days needed"
+assert _FL.null_p95(_fair, reps=100) == _FL.null_p95(_fair, reps=100) and _FL.null_p95(_fair, reps=100) < 0.03, "the fair market null is seeded and sits near the fee drag"
+assert all(not _insp2.signature(f).parameters.keys() & {"perf", "target", "until", "profit"} for f in (_FL.verdict, _FL.summarize, _FL.diff_z, _FL.null_p95))
+print("filter Q1-Q3 tests passed")
+
+# F8: only markets after the cutoff, only entries whose side differs from the previous market's result, none without a previous result.
+_T0 = _fw.F8_START
+_f8m = [_mk("P1", "KXBTC15M", _T0 + 900, 0.93, "no"),            # previous result: no
+        _mk("A1", "KXBTC15M", _T0 + 1800, 0.93, "yes"),          # favourite yes, previous no: disagrees -> in F8
+        _mk("B1", "KXBTC15M", _T0 + 2700, 0.93, "yes"),          # favourite yes, previous yes: agrees -> out
+        _mk("C1", "KXBTC15M", _T0 + 5400, 0.93, "yes"),          # no previous market: excluded
+        _mk("D1", "KXBTC15M", _T0, 0.93, "yes")]                 # closes exactly at the cutoff: not after it
+_f8, _f8b = _fw.f8_rule(_f8m)
+assert [e["ticker"] for e in _f8] == ["A1"], [e["ticker"] for e in _f8]
+assert "D1" not in {e["ticker"] for e in _f8b}, "a market closing exactly at the cutoff is not after it"
+assert "C1" in {e["ticker"] for e in _f8b} and "C1" not in {e["ticker"] for e in _f8}, "no previous result: in F0, not in F8"
+assert "B1" not in {e["ticker"] for e in _f8}, "agreeing with the previous result is the other arm"
+print("forward F8 tests passed")
+
+# Fee rounding: a buy of `count` at `price` costs ceil_to_the_cent(count * (price + fee)), so one contract pays about a cent, not half a cent, and more contracts per order dilute it.
+from scalper import feerounding as _FR
+assert abs(_FR.order_cost(0.92, 1) - 0.93) < 1e-9, "92c + a 0.5c fee is 92.5c, and the balance moves in whole cents"
+assert abs(_FR.order_cost(0.92, 2) - 1.86) < 1e-9 and abs(_FR.order_cost(0.90, 1) - 0.91) < 1e-9
+assert _FR.order_cost(0.915, 1) - 0.915 > 0.0057 + 0.001, "a tenth-of-a-cent price loses the grid misalignment as well"
+assert _FR.order_cost(0.95, 2) / 2 < _FR.order_cost(0.95, 1), "at 95c two contracts in one order cost less each than one (at 92c the fee needs both cents, so there is no saving)"
+assert all(_FR.order_cost(p / 100, n) >= n * (p / 100 + _FR.fee(p / 100)) - 1e-9 for p in range(88, 98) for n in range(1, 6)), "rounding never saves money"
+print("fee rounding tests passed")
+
+# N1/N2: the distance rule is re-pointed at another decision minute and the module is restored; the stricter z is applied.
+from scalper import boundary as _BD
+from scalper import distance as _DD
+_before = (_DD.DECISION_LEFT_S, _DD.MINUTES_LEFT)
+_BD.run_variant([], {}, 120, 2)
+assert (_DD.DECISION_LEFT_S, _DD.MINUTES_LEFT) == _before, "H7's constants are restored after a variant"
+_ents = [{"day": f"2026-10-{1 + i % 12:02d}", "close_ts": i, "net": 0.02 + (0.01 if i % 2 else -0.01), "stress": 0.015, "gross": 0.03} for i in range(400)]
+_v, _s = _BD.decide(_ents)
+assert _v in ("NOT_YET_FALSIFIED", "FALSIFIED") and _s is not None
+assert _BD.decide(_ents[:50])[0] == "NOT_ENOUGH_DATA"
+_weak = [dict(e, net=0.001 + (0.2 if i % 3 == 0 else -0.1)) for i, e in enumerate(_ents)]
+assert _BD.decide(_weak)[0] == "FALSIFIED", "a noisy small mean does not pass"
+print("boundary N1-N2 tests passed")

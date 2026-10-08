@@ -1,0 +1,3104 @@
+{
+ "BTC-early": {
+  "evaluated": 439,
+  "floor": 3.488,
+  "real_best_z": 3.512,
+  "control_best_z": 1.712,
+  "final25": [
+   {
+    "rule": "BTC 10m left, side no priced 0.70-0.97",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.7,
+     "hi": 0.97,
+     "side": "no",
+     "filters": []
+    },
+    "search_n": 796,
+    "search_mean_c": 1.335,
+    "search_z": 0.994,
+    "hold_n": 724,
+    "hold_mean_c": 0.804,
+    "hold_z": 0.666,
+    "halves_c": [
+     2.64,
+     -1.04
+    ],
+    "stress_c": 0.588,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side yes priced 0.80-0.97, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.8,
+     "hi": 0.97,
+     "side": "yes",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 202,
+    "search_mean_c": 2.049,
+    "search_z": 0.911,
+    "hold_n": 203,
+    "hold_mean_c": 1.454,
+    "hold_z": 0.6,
+    "halves_c": [
+     -1.92,
+     4.79
+    ],
+    "stress_c": 1.27,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 11m left, side no priced 0.80-0.97",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 11,
+     "lo": 0.8,
+     "hi": 0.97,
+     "side": "no",
+     "filters": []
+    },
+    "search_n": 272,
+    "search_mean_c": 1.426,
+    "search_z": 0.685,
+    "hold_n": 266,
+    "hold_mean_c": -1.05,
+    "hold_z": -0.429,
+    "halves_c": [
+     -1.9,
+     -0.2
+    ],
+    "stress_c": -1.229,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.60-0.70, price moved toward the side by 5c over 3m",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.6,
+     "hi": 0.7,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       3
+      ]
+     ]
+    },
+    "search_n": 629,
+    "search_mean_c": 1.334,
+    "search_z": 0.665,
+    "hold_n": 602,
+    "hold_mean_c": -2.76,
+    "hold_z": -1.268,
+    "halves_c": [
+     -0.91,
+     -4.61
+    ],
+    "stress_c": -3.076,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.40-0.90, other market agrees, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 1049,
+    "search_mean_c": 0.482,
+    "search_z": 0.385,
+    "hold_n": 1097,
+    "hold_mean_c": -0.517,
+    "hold_z": -0.405,
+    "halves_c": [
+     1.28,
+     -2.31
+    ],
+    "stress_c": -0.792,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side no priced 0.60-0.90, price moved away the side by 2c over 1m",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.6,
+     "hi": 0.9,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.02,
+       1
+      ]
+     ]
+    },
+    "search_n": 173,
+    "search_mean_c": 1.291,
+    "search_z": 0.357,
+    "hold_n": 162,
+    "hold_mean_c": -3.678,
+    "hold_z": -1.189,
+    "halves_c": [
+     -5.24,
+     -2.12
+    ],
+    "stress_c": -3.979,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 10m left, side yes priced 0.50-0.70",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.5,
+     "hi": 0.7,
+     "side": "yes",
+     "filters": []
+    },
+    "search_n": 851,
+    "search_mean_c": 0.363,
+    "search_z": 0.269,
+    "hold_n": 912,
+    "hold_mean_c": -3.826,
+    "hold_z": -2.59,
+    "halves_c": [
+     -2.69,
+     -4.96
+    ],
+    "stress_c": -4.157,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.40-0.80, price moved away the side by 5c over 3m, other market agrees, spread<=4c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.8,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       3
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 135,
+    "search_mean_c": 0.736,
+    "search_z": 0.255,
+    "hold_n": 132,
+    "hold_mean_c": -9.29,
+    "hold_z": -2.7,
+    "halves_c": [
+     -11.77,
+     -6.81
+    ],
+    "stress_c": -9.625,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.60-0.80, other market agrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.6,
+     "hi": 0.8,
+     "side": "either",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 582,
+    "search_mean_c": 0.368,
+    "search_z": 0.218,
+    "hold_n": 602,
+    "hold_mean_c": 0.42,
+    "hold_z": 0.205,
+    "halves_c": [
+     1.63,
+     -0.79
+    ],
+    "stress_c": 0.13,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side either priced 0.70-0.90, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.7,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 1072,
+    "search_mean_c": 0.105,
+    "search_z": 0.083,
+    "hold_n": 1081,
+    "hold_mean_c": 1.064,
+    "hold_z": 0.765,
+    "halves_c": [
+     1.0,
+     1.12
+    ],
+    "stress_c": 0.819,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side either priced 0.70-0.90, spread<=4c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.7,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 1072,
+    "search_mean_c": 0.105,
+    "search_z": 0.083,
+    "hold_n": 1081,
+    "hold_mean_c": 1.064,
+    "hold_z": 0.765,
+    "halves_c": [
+     1.0,
+     1.12
+    ],
+    "stress_c": 0.819,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.40-0.90, price moved toward the side by 2c over 3m, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 2231,
+    "search_mean_c": -0.136,
+    "search_z": -0.135,
+    "hold_n": 2244,
+    "hold_mean_c": -0.636,
+    "hold_z": -0.625,
+    "halves_c": [
+     0.2,
+     -1.47
+    ],
+    "stress_c": -0.905,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.40-0.90",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.9,
+     "side": "either",
+     "filters": []
+    },
+    "search_n": 3046,
+    "search_mean_c": -0.265,
+    "search_z": -0.337,
+    "hold_n": 3074,
+    "hold_mean_c": -1.293,
+    "hold_z": -1.572,
+    "halves_c": [
+     -1.21,
+     -1.37
+    ],
+    "stress_c": -1.577,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side yes priced 0.60-0.70",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.6,
+     "hi": 0.7,
+     "side": "yes",
+     "filters": []
+    },
+    "search_n": 578,
+    "search_mean_c": -0.74,
+    "search_z": -0.425,
+    "hold_n": 565,
+    "hold_mean_c": -1.464,
+    "hold_z": -0.651,
+    "halves_c": [
+     -1.06,
+     -1.87
+    ],
+    "stress_c": -1.781,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 11m left, side yes priced 0.10-0.97, price moved toward the side by 2c over 1m, other market disagrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 11,
+     "lo": 0.1,
+     "hi": 0.97,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 354,
+    "search_mean_c": -1.047,
+    "search_z": -0.431,
+    "hold_n": 369,
+    "hold_mean_c": -3.896,
+    "hold_z": -1.405,
+    "halves_c": [
+     -5.5,
+     -2.3
+    ],
+    "stress_c": -4.194,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.40-0.90, price moved away the side by 5c over 3m, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       3
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 427,
+    "search_mean_c": -1.071,
+    "search_z": -0.505,
+    "hold_n": 441,
+    "hold_mean_c": -4.25,
+    "hold_z": -1.857,
+    "halves_c": [
+     -5.56,
+     -2.95
+    ],
+    "stress_c": -4.584,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side yes priced 0.30-0.50, price moved away the side by 5c over 1m, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.3,
+     "hi": 0.5,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 124,
+    "search_mean_c": -2.217,
+    "search_z": -0.572,
+    "hold_n": 132,
+    "hold_mean_c": -0.795,
+    "hold_z": -0.25,
+    "halves_c": [
+     -4.0,
+     2.41
+    ],
+    "stress_c": -1.127,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 10m left, side no priced 0.40-0.97, price moved toward the side by 5c over 1m, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       1
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 845,
+    "search_mean_c": -1.014,
+    "search_z": -0.596,
+    "hold_n": 819,
+    "hold_mean_c": 0.708,
+    "hold_z": 0.384,
+    "halves_c": [
+     -0.24,
+     1.65
+    ],
+    "stress_c": 0.425,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 10m left, side either priced 0.40-0.80, spread<=4c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.8,
+     "side": "either",
+     "filters": [
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 2465,
+    "search_mean_c": -0.542,
+    "search_z": -0.597,
+    "hold_n": 2496,
+    "hold_mean_c": -1.64,
+    "hold_z": -1.837,
+    "halves_c": [
+     -0.9,
+     -2.38
+    ],
+    "stress_c": -1.948,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side yes priced 0.30-0.97, price moved away the side by 2c over 1m, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.3,
+     "hi": 0.97,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 289,
+    "search_mean_c": -1.49,
+    "search_z": -0.651,
+    "hold_n": 281,
+    "hold_mean_c": -5.756,
+    "hold_z": -2.12,
+    "halves_c": [
+     -4.19,
+     -7.31
+    ],
+    "stress_c": -6.081,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 12m left, side yes priced 0.30-0.50, price moved away the side by 5c over 1m, other market agrees, spread<=4c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.3,
+     "hi": 0.5,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 125,
+    "search_mean_c": -2.549,
+    "search_z": -0.658,
+    "hold_n": 132,
+    "hold_mean_c": -0.795,
+    "hold_z": -0.25,
+    "halves_c": [
+     -4.0,
+     2.41
+    ],
+    "stress_c": -1.127,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 14m left, side yes priced 0.50-0.60",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 14,
+     "lo": 0.5,
+     "hi": 0.6,
+     "side": "yes",
+     "filters": []
+    },
+    "search_n": 1052,
+    "search_mean_c": -1.204,
+    "search_z": -0.672,
+    "hold_n": 1105,
+    "hold_mean_c": -2.669,
+    "hold_z": -2.275,
+    "halves_c": [
+     -4.01,
+     -1.33
+    ],
+    "stress_c": -3.014,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 10m left, side no priced 0.03-0.70, other market agrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 10,
+     "lo": 0.03,
+     "hi": 0.7,
+     "side": "no",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 659,
+    "search_mean_c": -1.337,
+    "search_z": -0.706,
+    "hold_n": 710,
+    "hold_mean_c": 0.401,
+    "hold_z": 0.225,
+    "halves_c": [
+     2.56,
+     -1.76
+    ],
+    "stress_c": 0.1,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 11m left, side no priced 0.40-0.97, price moved toward the side by 5c over 1m, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 11,
+     "lo": 0.4,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       1
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 841,
+    "search_mean_c": -1.042,
+    "search_z": -0.71,
+    "hold_n": 858,
+    "hold_mean_c": -0.327,
+    "hold_z": -0.221,
+    "halves_c": [
+     0.24,
+     -0.89
+    ],
+    "stress_c": -0.613,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 12m left, side either priced 0.03-0.60, price moved away the side by 5c over 1m, other market agrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 12,
+     "lo": 0.03,
+     "hi": 0.6,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 381,
+    "search_mean_c": -1.435,
+    "search_z": -0.718,
+    "hold_n": 338,
+    "hold_mean_c": -0.68,
+    "hold_z": -0.4,
+    "halves_c": [
+     2.0,
+     -3.36
+    ],
+    "stress_c": -0.978,
+    "verdict": "FALSIFIED"
+   }
+  ]
+ },
+ "BTC-late": {
+  "evaluated": 440,
+  "floor": 3.489,
+  "real_best_z": 2.653,
+  "control_best_z": 4.139,
+  "final25": [
+   {
+    "rule": "BTC 2m left, side either priced 0.10-0.20, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.2,
+     "side": "either",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 326,
+    "search_mean_c": 5.343,
+    "search_z": 2.265,
+    "hold_n": 353,
+    "hold_mean_c": 5.794,
+    "hold_z": 2.392,
+    "halves_c": [
+     9.56,
+     2.05
+    ],
+    "stress_c": 5.619,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 3m left, side either priced 0.03-0.20, other market disagrees, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 3,
+     "lo": 0.03,
+     "hi": 0.2,
+     "side": "either",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 450,
+    "search_mean_c": 2.09,
+    "search_z": 1.958,
+    "hold_n": 477,
+    "hold_mean_c": 0.271,
+    "hold_z": 0.196,
+    "halves_c": [
+     0.05,
+     0.49
+    ],
+    "stress_c": 0.157,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 3m left, side either priced 0.10-0.40",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 3,
+     "lo": 0.1,
+     "hi": 0.4,
+     "side": "either",
+     "filters": []
+    },
+    "search_n": 956,
+    "search_mean_c": 1.951,
+    "search_z": 1.416,
+    "hold_n": 1074,
+    "hold_mean_c": 2.416,
+    "hold_z": 1.726,
+    "halves_c": [
+     4.72,
+     0.11
+    ],
+    "stress_c": 2.175,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 1m left, side either priced 0.50-0.90, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 1,
+     "lo": 0.5,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 124,
+    "search_mean_c": 5.009,
+    "search_z": 1.379,
+    "hold_n": 203,
+    "hold_mean_c": -3.919,
+    "hold_z": -1.101,
+    "halves_c": [
+     -3.07,
+     -4.76
+    ],
+    "stress_c": -4.172,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 4m left, side yes priced 0.03-0.80, price moved away the side by 2c over 5m, other market disagrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 4,
+     "lo": 0.03,
+     "hi": 0.8,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.02,
+       5
+      ],
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 410,
+    "search_mean_c": 1.722,
+    "search_z": 1.281,
+    "hold_n": 449,
+    "hold_mean_c": -1.327,
+    "hold_z": -0.861,
+    "halves_c": [
+     -0.85,
+     -1.8
+    ],
+    "stress_c": -1.517,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 2m left, side either priced 0.10-0.20, price moved away the side by 5c over 1m",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.2,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ]
+     ]
+    },
+    "search_n": 189,
+    "search_mean_c": 3.316,
+    "search_z": 1.157,
+    "hold_n": 216,
+    "hold_mean_c": 7.393,
+    "hold_z": 2.251,
+    "halves_c": [
+     12.67,
+     2.11
+    ],
+    "stress_c": 7.217,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 2m left, side no priced 0.20-0.80, other market agrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.2,
+     "hi": 0.8,
+     "side": "no",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 162,
+    "search_mean_c": 3.346,
+    "search_z": 0.853,
+    "hold_n": 235,
+    "hold_mean_c": -2.601,
+    "hold_z": -0.808,
+    "halves_c": [
+     -3.54,
+     -1.67
+    ],
+    "stress_c": -2.904,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 1m left, side either priced 0.50-0.90",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 1,
+     "lo": 0.5,
+     "hi": 0.9,
+     "side": "either",
+     "filters": []
+    },
+    "search_n": 455,
+    "search_mean_c": 1.344,
+    "search_z": 0.727,
+    "hold_n": 582,
+    "hold_mean_c": -4.198,
+    "hold_z": -2.458,
+    "halves_c": [
+     -6.48,
+     -1.91
+    ],
+    "stress_c": -4.457,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 2m left, side no priced 0.10-0.60, price moved away the side by 5c over 3m",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.6,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       3
+      ]
+     ]
+    },
+    "search_n": 332,
+    "search_mean_c": 1.633,
+    "search_z": 0.682,
+    "hold_n": 348,
+    "hold_mean_c": 4.374,
+    "hold_z": 1.557,
+    "halves_c": [
+     4.21,
+     4.54
+    ],
+    "stress_c": 4.113,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 2m left, side either priced 0.03-0.40, price moved toward the side by 5c over 3m",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.03,
+     "hi": 0.4,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       3
+      ]
+     ]
+    },
+    "search_n": 124,
+    "search_mean_c": 2.531,
+    "search_z": 0.55,
+    "hold_n": 141,
+    "hold_mean_c": 2.342,
+    "hold_z": 0.694,
+    "halves_c": [
+     5.2,
+     -0.48
+    ],
+    "stress_c": 2.078,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 4m left, side either priced 0.30-0.80, price moved toward the side by 5c over 1m, other market disagrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 4,
+     "lo": 0.3,
+     "hi": 0.8,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       1
+      ],
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 114,
+    "search_mean_c": 2.624,
+    "search_z": 0.52,
+    "hold_n": 168,
+    "hold_mean_c": -2.562,
+    "hold_z": -0.998,
+    "halves_c": [
+     -3.02,
+     -2.11
+    ],
+    "stress_c": -2.859,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 6m left, side yes priced 0.10-0.97, other market disagrees, spread<=4c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 6,
+     "lo": 0.1,
+     "hi": 0.97,
+     "side": "yes",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 773,
+    "search_mean_c": 0.704,
+    "search_z": 0.467,
+    "hold_n": 860,
+    "hold_mean_c": -3.127,
+    "hold_z": -2.365,
+    "halves_c": [
+     -3.19,
+     -3.06
+    ],
+    "stress_c": -3.372,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 3m left, side no priced 0.03-0.50, price moved away the side by 5c over 1m",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 3,
+     "lo": 0.03,
+     "hi": 0.5,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ]
+     ]
+    },
+    "search_n": 487,
+    "search_mean_c": 0.733,
+    "search_z": 0.425,
+    "hold_n": 502,
+    "hold_mean_c": 3.142,
+    "hold_z": 1.403,
+    "halves_c": [
+     6.91,
+     -0.63
+    ],
+    "stress_c": 2.949,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 1m left, side yes priced 0.30-0.90, price moved toward the side by 5c over 1m, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 1,
+     "lo": 0.3,
+     "hi": 0.9,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       1
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 153,
+    "search_mean_c": 1.297,
+    "search_z": 0.423,
+    "hold_n": 227,
+    "hold_mean_c": -3.451,
+    "hold_z": -1.089,
+    "halves_c": [
+     -5.89,
+     -1.03
+    ],
+    "stress_c": -3.717,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 6m left, side yes priced 0.10-0.20, price moved away the side by 5c over 5m, other market disagrees, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 6,
+     "lo": 0.1,
+     "hi": 0.2,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       5
+      ],
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 142,
+    "search_mean_c": 1.084,
+    "search_z": 0.392,
+    "hold_n": 131,
+    "hold_mean_c": -5.359,
+    "hold_z": -2.089,
+    "halves_c": [
+     -5.76,
+     -4.96
+    ],
+    "stress_c": -5.538,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 2m left, side either priced 0.10-0.80, price moved toward the side by 2c over 1m",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.8,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       1
+      ]
+     ]
+    },
+    "search_n": 341,
+    "search_mean_c": 0.825,
+    "search_z": 0.319,
+    "hold_n": 370,
+    "hold_mean_c": -0.841,
+    "hold_z": -0.368,
+    "halves_c": [
+     -2.89,
+     1.21
+    ],
+    "stress_c": -1.117,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 5m left, side no priced 0.20-0.30, spread<=4c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 5,
+     "lo": 0.2,
+     "hi": 0.3,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 283,
+    "search_mean_c": 0.61,
+    "search_z": 0.271,
+    "hold_n": 259,
+    "hold_mean_c": 0.263,
+    "hold_z": 0.102,
+    "halves_c": [
+     1.58,
+     -1.04
+    ],
+    "stress_c": 0.001,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 4m left, side either priced 0.30-0.60, other market disagrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 4,
+     "lo": 0.3,
+     "hi": 0.6,
+     "side": "either",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 194,
+    "search_mean_c": 0.773,
+    "search_z": 0.233,
+    "hold_n": 256,
+    "hold_mean_c": -1.652,
+    "hold_z": -0.601,
+    "halves_c": [
+     -2.56,
+     -0.74
+    ],
+    "stress_c": -1.98,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 5m left, side either priced 0.20-0.40, price moved away the side by 2c over 1m, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 5,
+     "lo": 0.2,
+     "hi": 0.4,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 173,
+    "search_mean_c": 0.569,
+    "search_z": 0.154,
+    "hold_n": 175,
+    "hold_mean_c": 0.54,
+    "hold_z": 0.191,
+    "halves_c": [
+     4.69,
+     -3.56
+    ],
+    "stress_c": 0.25,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "BTC 3m left, side either priced 0.03-0.20",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 3,
+     "lo": 0.03,
+     "hi": 0.2,
+     "side": "either",
+     "filters": []
+    },
+    "search_n": 1235,
+    "search_mean_c": -0.012,
+    "search_z": -0.016,
+    "hold_n": 1272,
+    "hold_mean_c": -0.421,
+    "hold_z": -0.522,
+    "halves_c": [
+     -0.19,
+     -0.65
+    ],
+    "stress_c": -0.534,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 1m left, side no priced 0.70-0.97, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 1,
+     "lo": 0.7,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 272,
+    "search_mean_c": -0.079,
+    "search_z": -0.037,
+    "hold_n": 324,
+    "hold_mean_c": -3.891,
+    "hold_z": -2.217,
+    "halves_c": [
+     -6.31,
+     -1.47
+    ],
+    "stress_c": -4.029,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 2m left, side no priced 0.10-0.90, spread<=2c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.9,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 846,
+    "search_mean_c": -0.163,
+    "search_z": -0.094,
+    "hold_n": 998,
+    "hold_mean_c": -0.196,
+    "hold_z": -0.125,
+    "halves_c": [
+     -1.54,
+     1.14
+    ],
+    "stress_c": -0.454,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 5m left, side yes priced 0.03-0.40, other market agrees",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 5,
+     "lo": 0.03,
+     "hi": 0.4,
+     "side": "yes",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 373,
+    "search_mean_c": -0.254,
+    "search_z": -0.122,
+    "hold_n": 323,
+    "hold_mean_c": -3.333,
+    "hold_z": -1.438,
+    "halves_c": [
+     -0.61,
+     -6.04
+    ],
+    "stress_c": -3.533,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 6m left, side yes priced 0.10-0.20, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 6,
+     "lo": 0.1,
+     "hi": 0.2,
+     "side": "yes",
+     "filters": [
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 418,
+    "search_mean_c": -0.253,
+    "search_z": -0.14,
+    "hold_n": 343,
+    "hold_mean_c": -2.335,
+    "hold_z": -1.245,
+    "halves_c": [
+     -2.52,
+     -2.15
+    ],
+    "stress_c": -2.517,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "BTC 2m left, side no priced 0.10-0.90, spread<=1c",
+    "spec": {
+     "series": "KXBTC15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.9,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 814,
+    "search_mean_c": -0.246,
+    "search_z": -0.143,
+    "hold_n": 980,
+    "hold_mean_c": -0.277,
+    "hold_z": -0.174,
+    "halves_c": [
+     -1.82,
+     1.27
+    ],
+    "stress_c": -0.534,
+    "verdict": "FALSIFIED"
+   }
+  ]
+ },
+ "GOLD-early": {
+  "evaluated": 441,
+  "floor": 3.49,
+  "real_best_z": 1.994,
+  "control_best_z": 3.336,
+  "final25": [
+   {
+    "rule": "GOL 12m left, side no priced 0.80-0.97, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 12,
+     "lo": 0.8,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 119,
+    "search_mean_c": 5.25,
+    "search_z": 1.968,
+    "hold_n": 130,
+    "hold_mean_c": -6.716,
+    "hold_z": -1.691,
+    "halves_c": [
+     -4.81,
+     -8.62
+    ],
+    "stress_c": -6.892,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 10m left, side yes priced 0.40-0.70, price moved toward the side by 5c over 1m, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.7,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       1
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 281,
+    "search_mean_c": 2.511,
+    "search_z": 0.891,
+    "hold_n": 332,
+    "hold_mean_c": -2.868,
+    "hold_z": -1.235,
+    "halves_c": [
+     -2.56,
+     -3.18
+    ],
+    "stress_c": -3.202,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side either priced 0.40-0.80, price moved away the side by 5c over 3m, other market agrees, spread<=4c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.8,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       3
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 128,
+    "search_mean_c": 2.876,
+    "search_z": 0.859,
+    "hold_n": 155,
+    "hold_mean_c": 4.57,
+    "hold_z": 1.395,
+    "halves_c": [
+     3.09,
+     6.03
+    ],
+    "stress_c": 4.237,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 10m left, side no priced 0.70-0.97",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.7,
+     "hi": 0.97,
+     "side": "no",
+     "filters": []
+    },
+    "search_n": 534,
+    "search_mean_c": 1.184,
+    "search_z": 0.643,
+    "hold_n": 584,
+    "hold_mean_c": -2.085,
+    "hold_z": -1.511,
+    "halves_c": [
+     -1.9,
+     -2.27
+    ],
+    "stress_c": -2.299,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side no priced 0.50-0.97, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.5,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 791,
+    "search_mean_c": 0.514,
+    "search_z": 0.358,
+    "hold_n": 1083,
+    "hold_mean_c": -0.782,
+    "hold_z": -0.62,
+    "halves_c": [
+     -0.37,
+     -1.19
+    ],
+    "stress_c": -1.056,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side no priced 0.20-0.97, price moved toward the side by 2c over 1m, other market agrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.2,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 428,
+    "search_mean_c": 0.65,
+    "search_z": 0.309,
+    "hold_n": 480,
+    "hold_mean_c": 2.463,
+    "hold_z": 1.568,
+    "halves_c": [
+     3.01,
+     1.92
+    ],
+    "stress_c": 2.194,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 14m left, side no priced 0.30-0.50, other market disagrees, spread<=4c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 14,
+     "lo": 0.3,
+     "hi": 0.5,
+     "side": "no",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 361,
+    "search_mean_c": 0.599,
+    "search_z": 0.266,
+    "hold_n": 425,
+    "hold_mean_c": 1.597,
+    "hold_z": 0.767,
+    "halves_c": [
+     3.12,
+     0.08
+    ],
+    "stress_c": 1.26,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side yes priced 0.40-0.70, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.4,
+     "hi": 0.7,
+     "side": "yes",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 341,
+    "search_mean_c": 0.71,
+    "search_z": 0.237,
+    "hold_n": 440,
+    "hold_mean_c": 0.214,
+    "hold_z": 0.097,
+    "halves_c": [
+     1.35,
+     -0.92
+    ],
+    "stress_c": -0.122,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 12m left, side no priced 0.70-0.97, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 12,
+     "lo": 0.7,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 259,
+    "search_mean_c": 0.327,
+    "search_z": 0.129,
+    "hold_n": 386,
+    "hold_mean_c": -3.372,
+    "hold_z": -1.311,
+    "halves_c": [
+     -4.84,
+     -1.91
+    ],
+    "stress_c": -3.612,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 14m left, side no priced 0.10-0.90, other market agrees, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 14,
+     "lo": 0.1,
+     "hi": 0.9,
+     "side": "no",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 546,
+    "search_mean_c": 0.219,
+    "search_z": 0.083,
+    "hold_n": 670,
+    "hold_mean_c": -2.302,
+    "hold_z": -1.415,
+    "halves_c": [
+     -1.25,
+     -3.36
+    ],
+    "stress_c": -2.632,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 14m left, side no priced 0.30-0.50",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 14,
+     "lo": 0.3,
+     "hi": 0.5,
+     "side": "no",
+     "filters": []
+    },
+    "search_n": 1031,
+    "search_mean_c": 0.075,
+    "search_z": 0.047,
+    "hold_n": 1068,
+    "hold_mean_c": -0.389,
+    "hold_z": -0.29,
+    "halves_c": [
+     0.57,
+     -1.34
+    ],
+    "stress_c": -0.727,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side no priced 0.50-0.97, price moved toward the side by 2c over 3m",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.5,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ]
+     ]
+    },
+    "search_n": 858,
+    "search_mean_c": 0.034,
+    "search_z": 0.022,
+    "hold_n": 902,
+    "hold_mean_c": -0.183,
+    "hold_z": -0.148,
+    "halves_c": [
+     -0.14,
+     -0.22
+    ],
+    "stress_c": -0.445,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side either priced 0.03-0.50, price moved toward the side by 2c over 1m, other market agrees, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.03,
+     "hi": 0.5,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 137,
+    "search_mean_c": -0.028,
+    "search_z": -0.008,
+    "hold_n": 223,
+    "hold_mean_c": 5.039,
+    "hold_z": 1.93,
+    "halves_c": [
+     5.68,
+     4.4
+    ],
+    "stress_c": 4.721,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 10m left, side either priced 0.90-0.97, price moved toward the side by 2c over 3m, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.9,
+     "hi": 0.97,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 121,
+    "search_mean_c": -0.067,
+    "search_z": -0.022,
+    "hold_n": 101,
+    "hold_mean_c": 3.225,
+    "hold_z": 1.937,
+    "halves_c": [
+     4.78,
+     1.7
+    ],
+    "stress_c": 3.126,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 10m left, side either priced 0.50-0.60",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.5,
+     "hi": 0.6,
+     "side": "either",
+     "filters": []
+    },
+    "search_n": 584,
+    "search_mean_c": -0.052,
+    "search_z": -0.03,
+    "hold_n": 617,
+    "hold_mean_c": -3.733,
+    "hold_z": -1.503,
+    "halves_c": [
+     -0.13,
+     -7.33
+    ],
+    "stress_c": -4.077,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 11m left, side yes priced 0.03-0.20, price moved away the side by 5c over 1m, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 11,
+     "lo": 0.03,
+     "hi": 0.2,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 104,
+    "search_mean_c": -0.227,
+    "search_z": -0.066,
+    "hold_n": 110,
+    "hold_mean_c": 6.041,
+    "hold_z": 1.428,
+    "halves_c": [
+     11.52,
+     0.56
+    ],
+    "stress_c": 5.865,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 13m left, side no priced 0.30-0.97, price moved away the side by 5c over 1m, other market agrees, spread<=4c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 13,
+     "lo": 0.3,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 195,
+    "search_mean_c": -0.646,
+    "search_z": -0.142,
+    "hold_n": 183,
+    "hold_mean_c": -3.926,
+    "hold_z": -1.039,
+    "halves_c": [
+     -1.74,
+     -6.08
+    ],
+    "stress_c": -4.259,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 12m left, side yes priced 0.30-0.97, price moved away the side by 2c over 1m, other market agrees, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 12,
+     "lo": 0.3,
+     "hi": 0.97,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 187,
+    "search_mean_c": -0.618,
+    "search_z": -0.166,
+    "hold_n": 292,
+    "hold_mean_c": -1.675,
+    "hold_z": -0.533,
+    "halves_c": [
+     -4.19,
+     0.84
+    ],
+    "stress_c": -2.001,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 12m left, side yes priced 0.30-0.97, price moved away the side by 2c over 1m, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 12,
+     "lo": 0.3,
+     "hi": 0.97,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 233,
+    "search_mean_c": -0.592,
+    "search_z": -0.175,
+    "hold_n": 310,
+    "hold_mean_c": -1.845,
+    "hold_z": -0.593,
+    "halves_c": [
+     -4.29,
+     0.59
+    ],
+    "stress_c": -2.17,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 14m left, side yes priced 0.60-0.90, other market agrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 14,
+     "lo": 0.6,
+     "hi": 0.9,
+     "side": "yes",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 224,
+    "search_mean_c": -0.72,
+    "search_z": -0.202,
+    "hold_n": 235,
+    "hold_mean_c": -6.823,
+    "hold_z": -2.688,
+    "halves_c": [
+     -11.2,
+     -2.48
+    ],
+    "stress_c": -7.122,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 10m left, side either priced 0.60-0.80, price moved toward the side by 2c over 3m",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.6,
+     "hi": 0.8,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ]
+     ]
+    },
+    "search_n": 967,
+    "search_mean_c": -0.57,
+    "search_z": -0.347,
+    "hold_n": 973,
+    "hold_mean_c": -0.38,
+    "hold_z": -0.325,
+    "halves_c": [
+     -1.01,
+     0.25
+    ],
+    "stress_c": -0.667,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 12m left, side yes priced 0.20-0.80, price moved away the side by 5c over 1m, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 12,
+     "lo": 0.2,
+     "hi": 0.8,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.05,
+       1
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 192,
+    "search_mean_c": -1.303,
+    "search_z": -0.364,
+    "hold_n": 253,
+    "hold_mean_c": -1.174,
+    "hold_z": -0.422,
+    "halves_c": [
+     -2.62,
+     0.26
+    ],
+    "stress_c": -1.493,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 12m left, side yes priced 0.30-0.97, other market agrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 12,
+     "lo": 0.3,
+     "hi": 0.97,
+     "side": "yes",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 813,
+    "search_mean_c": -0.841,
+    "search_z": -0.467,
+    "hold_n": 866,
+    "hold_mean_c": -1.258,
+    "hold_z": -0.766,
+    "halves_c": [
+     -1.8,
+     -0.72
+    ],
+    "stress_c": -1.565,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side no priced 0.50-0.97, price moved toward the side by 2c over 3m, other market disagrees, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.5,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ],
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 293,
+    "search_mean_c": -1.538,
+    "search_z": -0.635,
+    "hold_n": 313,
+    "hold_mean_c": -1.892,
+    "hold_z": -0.662,
+    "halves_c": [
+     -2.0,
+     -1.79
+    ],
+    "stress_c": -2.165,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 10m left, side no priced 0.50-0.97, other market disagrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 10,
+     "lo": 0.5,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 427,
+    "search_mean_c": -1.442,
+    "search_z": -0.681,
+    "hold_n": 453,
+    "hold_mean_c": -1.454,
+    "hold_z": -0.73,
+    "halves_c": [
+     -1.95,
+     -0.96
+    ],
+    "stress_c": -1.74,
+    "verdict": "FALSIFIED"
+   }
+  ]
+ },
+ "GOLD-late": {
+  "evaluated": 440,
+  "floor": 3.489,
+  "real_best_z": 2.596,
+  "control_best_z": 2.157,
+  "final25": [
+   {
+    "rule": "GOL 5m left, side no priced 0.80-0.97, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.8,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 495,
+    "search_mean_c": 2.179,
+    "search_z": 2.238,
+    "hold_n": 562,
+    "hold_mean_c": 0.033,
+    "hold_z": 0.028,
+    "halves_c": [
+     0.68,
+     -0.61
+    ],
+    "stress_c": -0.094,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 5m left, side either priced 0.60-0.70, price moved toward the side by 5c over 1m",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.6,
+     "hi": 0.7,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       1
+      ]
+     ]
+    },
+    "search_n": 130,
+    "search_mean_c": 6.537,
+    "search_z": 1.603,
+    "hold_n": 170,
+    "hold_mean_c": -5.858,
+    "hold_z": -1.478,
+    "halves_c": [
+     -2.59,
+     -9.12
+    ],
+    "stress_c": -6.173,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 5m left, side no priced 0.50-0.97, price moved toward the side by 5c over 1m, spread<=4c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.5,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       1
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 388,
+    "search_mean_c": 2.433,
+    "search_z": 1.183,
+    "hold_n": 440,
+    "hold_mean_c": -0.113,
+    "hold_z": -0.072,
+    "halves_c": [
+     -1.6,
+     1.37
+    ],
+    "stress_c": -0.333,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 5m left, side either priced 0.50-0.90, price moved toward the side by 2c over 5m, other market disagrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.5,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       5
+      ],
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 450,
+    "search_mean_c": 1.619,
+    "search_z": 0.843,
+    "hold_n": 464,
+    "hold_mean_c": -3.32,
+    "hold_z": -1.604,
+    "halves_c": [
+     -2.53,
+     -4.11
+    ],
+    "stress_c": -3.574,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 5m left, side no priced 0.50-0.90, price moved toward the side by 2c over 5m",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.5,
+     "hi": 0.9,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       5
+      ]
+     ]
+    },
+    "search_n": 504,
+    "search_mean_c": 1.345,
+    "search_z": 0.754,
+    "hold_n": 590,
+    "hold_mean_c": -0.841,
+    "hold_z": -0.527,
+    "halves_c": [
+     -0.2,
+     -1.48
+    ],
+    "stress_c": -1.09,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 6m left, side no priced 0.30-0.50, other market agrees, spread<=4c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 6,
+     "lo": 0.3,
+     "hi": 0.5,
+     "side": "no",
+     "filters": [
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 153,
+    "search_mean_c": 3.082,
+    "search_z": 0.737,
+    "hold_n": 167,
+    "hold_mean_c": 2.111,
+    "hold_z": 0.695,
+    "halves_c": [
+     3.52,
+     0.72
+    ],
+    "stress_c": 1.778,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 2m left, side either priced 0.03-0.70, price moved toward the side by 2c over 1m, other market disagrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 2,
+     "lo": 0.03,
+     "hi": 0.7,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       1
+      ],
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 142,
+    "search_mean_c": 1.845,
+    "search_z": 0.71,
+    "hold_n": 172,
+    "hold_mean_c": -3.855,
+    "hold_z": -1.291,
+    "halves_c": [
+     -1.31,
+     -6.4
+    ],
+    "stress_c": -4.1,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 1m left, side no priced 0.10-0.40, price moved away the side by 2c over 3m",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 1,
+     "lo": 0.1,
+     "hi": 0.4,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "away",
+       0.02,
+       3
+      ]
+     ]
+    },
+    "search_n": 162,
+    "search_mean_c": 1.582,
+    "search_z": 0.526,
+    "hold_n": 146,
+    "hold_mean_c": -2.488,
+    "hold_z": -0.916,
+    "halves_c": [
+     -1.55,
+     -3.43
+    ],
+    "stress_c": -2.722,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 2m left, side no priced 0.80-0.97, price moved toward the side by 2c over 5m, other market agrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 2,
+     "lo": 0.8,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       5
+      ],
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 160,
+    "search_mean_c": 0.75,
+    "search_z": 0.449,
+    "hold_n": 214,
+    "hold_mean_c": -1.517,
+    "hold_z": -0.94,
+    "halves_c": [
+     -4.31,
+     1.27
+    ],
+    "stress_c": -1.632,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 5m left, side no priced 0.50-0.90, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.5,
+     "hi": 0.9,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 594,
+    "search_mean_c": 0.843,
+    "search_z": 0.437,
+    "hold_n": 790,
+    "hold_mean_c": -1.615,
+    "hold_z": -1.207,
+    "halves_c": [
+     -1.17,
+     -2.06
+    ],
+    "stress_c": -1.876,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 2m left, side no priced 0.80-0.97",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 2,
+     "lo": 0.8,
+     "hi": 0.97,
+     "side": "no",
+     "filters": []
+    },
+    "search_n": 384,
+    "search_mean_c": 0.355,
+    "search_z": 0.371,
+    "hold_n": 447,
+    "hold_mean_c": -3.18,
+    "hold_z": -2.626,
+    "halves_c": [
+     -4.82,
+     -1.55
+    ],
+    "stress_c": -3.294,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 1m left, side no priced 0.50-0.97, price moved toward the side by 5c over 3m, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 1,
+     "lo": 0.5,
+     "hi": 0.97,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.05,
+       3
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 248,
+    "search_mean_c": 0.648,
+    "search_z": 0.356,
+    "hold_n": 309,
+    "hold_mean_c": 0.56,
+    "hold_z": 0.277,
+    "halves_c": [
+     6.39,
+     -5.24
+    ],
+    "stress_c": 0.39,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 5m left, side no priced 0.30-0.80, other market disagrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.3,
+     "hi": 0.8,
+     "side": "no",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ]
+     ]
+    },
+    "search_n": 321,
+    "search_mean_c": 1.022,
+    "search_z": 0.319,
+    "hold_n": 383,
+    "hold_mean_c": -4.92,
+    "hold_z": -2.358,
+    "halves_c": [
+     -3.23,
+     -6.6
+    ],
+    "stress_c": -5.231,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 3m left, side yes priced 0.20-0.60, other market disagrees, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 3,
+     "lo": 0.2,
+     "hi": 0.6,
+     "side": "yes",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 156,
+    "search_mean_c": 1.065,
+    "search_z": 0.312,
+    "hold_n": 218,
+    "hold_mean_c": -1.122,
+    "hold_z": -0.35,
+    "halves_c": [
+     1.13,
+     -3.37
+    ],
+    "stress_c": -1.43,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 2m left, side yes priced 0.10-0.90, price moved toward the side by 2c over 1m",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.9,
+     "side": "yes",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       1
+      ]
+     ]
+    },
+    "search_n": 330,
+    "search_mean_c": 0.685,
+    "search_z": 0.268,
+    "hold_n": 352,
+    "hold_mean_c": -0.714,
+    "hold_z": -0.303,
+    "halves_c": [
+     -3.53,
+     2.1
+    ],
+    "stress_c": -0.971,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 6m left, side either priced 0.70-0.90, price moved toward the side by 2c over 3m, other market agrees, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 6,
+     "lo": 0.7,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 325,
+    "search_mean_c": 0.452,
+    "search_z": 0.224,
+    "hold_n": 398,
+    "hold_mean_c": 1.777,
+    "hold_z": 0.944,
+    "halves_c": [
+     6.48,
+     -2.93
+    ],
+    "stress_c": 1.572,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 5m left, side either priced 0.50-0.90, other market disagrees, spread<=4c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.5,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 574,
+    "search_mean_c": 0.34,
+    "search_z": 0.205,
+    "hold_n": 645,
+    "hold_mean_c": -3.085,
+    "hold_z": -1.7,
+    "halves_c": [
+     -2.46,
+     -3.71
+    ],
+    "stress_c": -3.353,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 2m left, side either priced 0.30-0.70, price moved toward the side by 2c over 5m",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 2,
+     "lo": 0.3,
+     "hi": 0.7,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       5
+      ]
+     ]
+    },
+    "search_n": 138,
+    "search_mean_c": 0.757,
+    "search_z": 0.181,
+    "hold_n": 137,
+    "hold_mean_c": 1.506,
+    "hold_z": 0.373,
+    "halves_c": [
+     2.13,
+     0.9
+    ],
+    "stress_c": 1.177,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 2m left, side either priced 0.10-0.20, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 2,
+     "lo": 0.1,
+     "hi": 0.2,
+     "side": "either",
+     "filters": [
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 206,
+    "search_mean_c": 0.162,
+    "search_z": 0.081,
+    "hold_n": 274,
+    "hold_mean_c": -0.466,
+    "hold_z": -0.219,
+    "halves_c": [
+     4.8,
+     -5.73
+    ],
+    "stress_c": -0.643,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 5m left, side no priced 0.50-0.97",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.5,
+     "hi": 0.97,
+     "side": "no",
+     "filters": []
+    },
+    "search_n": 973,
+    "search_mean_c": 0.048,
+    "search_z": 0.038,
+    "hold_n": 1091,
+    "hold_mean_c": -1.086,
+    "hold_z": -1.188,
+    "halves_c": [
+     -0.65,
+     -1.52
+    ],
+    "stress_c": -1.299,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 3m left, side yes priced 0.30-0.70, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 3,
+     "lo": 0.3,
+     "hi": 0.7,
+     "side": "yes",
+     "filters": [
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 286,
+    "search_mean_c": -0.018,
+    "search_z": -0.006,
+    "hold_n": 398,
+    "hold_mean_c": -2.942,
+    "hold_z": -1.22,
+    "halves_c": [
+     -1.62,
+     -4.26
+    ],
+    "stress_c": -3.271,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 5m left, side no priced 0.50-0.90, price moved toward the side by 2c over 3m, other market agrees",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 5,
+     "lo": 0.5,
+     "hi": 0.9,
+     "side": "no",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ],
+      [
+       "pair",
+       "agree"
+      ]
+     ]
+    },
+    "search_n": 229,
+    "search_mean_c": -0.057,
+    "search_z": -0.022,
+    "hold_n": 265,
+    "hold_mean_c": 2.919,
+    "hold_z": 1.302,
+    "halves_c": [
+     1.31,
+     4.52
+    ],
+    "stress_c": 2.675,
+    "verdict": "NOT_ENOUGH_DATA"
+   },
+   {
+    "rule": "GOL 6m left, side either priced 0.70-0.90, price moved toward the side by 2c over 3m, other market agrees, spread<=1c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 6,
+     "lo": 0.7,
+     "hi": 0.9,
+     "side": "either",
+     "filters": [
+      [
+       "move",
+       "toward",
+       0.02,
+       3
+      ],
+      [
+       "pair",
+       "agree"
+      ],
+      [
+       "spread",
+       0.01
+      ]
+     ]
+    },
+    "search_n": 242,
+    "search_mean_c": -0.061,
+    "search_z": -0.025,
+    "hold_n": 356,
+    "hold_mean_c": 1.245,
+    "hold_z": 0.657,
+    "halves_c": [
+     6.14,
+     -3.64
+    ],
+    "stress_c": 1.039,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 1m left, side no priced 0.03-0.30, spread<=2c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 1,
+     "lo": 0.03,
+     "hi": 0.3,
+     "side": "no",
+     "filters": [
+      [
+       "spread",
+       0.02
+      ]
+     ]
+    },
+    "search_n": 365,
+    "search_mean_c": -0.165,
+    "search_z": -0.095,
+    "hold_n": 336,
+    "hold_mean_c": -3.676,
+    "hold_z": -2.703,
+    "halves_c": [
+     -2.45,
+     -4.9
+    ],
+    "stress_c": -3.816,
+    "verdict": "FALSIFIED"
+   },
+   {
+    "rule": "GOL 2m left, side either priced 0.03-0.70, other market disagrees, spread<=4c",
+    "spec": {
+     "series": "KXGOLD15M",
+     "left": 2,
+     "lo": 0.03,
+     "hi": 0.7,
+     "side": "either",
+     "filters": [
+      [
+       "pair",
+       "disagree"
+      ],
+      [
+       "spread",
+       0.04
+      ]
+     ]
+    },
+    "search_n": 698,
+    "search_mean_c": -0.117,
+    "search_z": -0.119,
+    "hold_n": 727,
+    "hold_mean_c": -1.801,
+    "hold_z": -1.396,
+    "halves_c": [
+     0.6,
+     -4.2
+    ],
+    "stress_c": -1.987,
+    "verdict": "FALSIFIED"
+   }
+  ]
+ }
+}
