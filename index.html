@@ -1037,7 +1037,9 @@
   .kal-rail .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
   .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:13px; } .kal-rail .kal-tile .kal-lbl{ font-size:10.5px; }
   .kal-tools-body{ min-width:min(420px,88vw); max-height:70vh; overflow:auto; }
-  .kal-tools-body .kal-actions{ margin:8px 0 2px; }
+  .kal-tools-body .kal-actions{ margin:4px 0 2px; }
+  .kal-tools-body .kal-note:empty, .kal-botmenu-body .kal-note:empty{ display:none; }
+  .kal-tools-body .kal-layout-body{ gap:6px; }
   .kal-flatten{ padding:0 0 10px 0; margin:0 0 10px 0; border-bottom:1px solid var(--border); }
   .kal-btn-danger{ background:var(--loss); border-color:var(--loss); color:#fff; }
   .kal-perf-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
@@ -3396,10 +3398,10 @@
           </div>
           <div class="kal-note" id="kalBookMsg"></div>
           <div class="kal-note" id="kalAcctMsg"></div>
-          <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
+          <div class="kal-note" id="kalAcctBaseline"></div>
           <div class="kal-actions">
-            <label class="kal-note" style="margin:0">Money added (or taken out, as a minus) <input class="kal-input" id="kalAdjAmt" type="number" step="0.01" placeholder="200" style="width:90px"></label>
-            <button class="kal-btn kal-btn-ghost" id="kalAdjGo" type="button">Record it</button>
+            <label class="kal-note" style="margin:0">Deposit (minus for a withdrawal) $<input class="kal-input" id="kalAdjAmt" type="number" step="0.01" placeholder="200" style="width:80px"></label>
+            <button class="kal-btn kal-btn-ghost" id="kalAdjGo" type="button">Record</button>
           </div>
           <div class="kal-note" id="kalAdjMsg"></div>
           <div class="kal-actions">
@@ -3579,6 +3581,7 @@
               <button class="tf-btn" data-value="auto">Auto</button>
               <button class="tf-btn" data-value="brief">Brief</button>
               <button class="tf-btn" data-value="trades">Trades</button>
+              <button class="tf-btn" data-value="kalshi" id="landingKalshiBtn" hidden>Kalshi</button>
             </div>
           </div>
 
@@ -10342,10 +10345,11 @@
       var botOrders = kalshiResolveOrders(kalshiLiveOrders, a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
       var botNet = kalshiPerfStats(botOrders, tot.since).total;
       var other = tot.now !== null && Number.isFinite(tot.start) ? Math.round((tot.now - tot.start - botNet) * 100) / 100 : null;
+      var deposits = a.baseline && Number.isFinite(a.baseline.adjustments) ? a.baseline.adjustments : 0;   // money the owner recorded under Tools, taken out of this line
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
         '<div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div>' +
-        (other === null || Math.abs(other) < 0.5 ? '' : '<div><span class="kal-k">Deposits and manual trades</span><b>' + signed(other) + '</b></div>') + '</div>';
+        (other === null || Math.abs(other - deposits) < 0.5 ? '' : '<div><span class="kal-k">' + (deposits ? 'Manual trades and open orders' : 'Deposits and manual trades') + '</span><b>' + signed(other - deposits) + '</b></div>') + '</div>';
     }
 
     renderKalshiPositions();
@@ -10697,17 +10701,16 @@
       body.innerHTML = part('Balance by shard', shardRows, b.ok ? null : 'HTTP ' + b.status + ' ' + b.error) +
         part('Open positions', posRows, p.ok ? null : 'HTTP ' + p.status + ' ' + p.error) +
         part('Recent fills', fillRows, f.ok ? null : 'HTTP ' + f.status + ' ' + f.error);
-      msg.textContent = 'Read ' + kalTime(d.at) + ' CT.';
+      msg.textContent = '';
       showBaseline(d.baseline, d.changeSinceStart, f.ok ? f.hiddenBeforeBaseline : 0);
     }
     function showBaseline(bl, change, hidden){
       var line = document.getElementById('kalAcctBaseline');
       var go = document.getElementById('kalAcctStart');
-      if(!bl){ line.textContent = 'Counting everything on the account, including your own trades.'; go.hidden = false; return; }
+      if(!bl){ line.textContent = 'No starting line yet: everything on the account counts, including your own trades.'; go.hidden = false; return; }
       go.hidden = true; document.getElementById('kalAcctStartConfirm').hidden = true;
-      line.textContent = 'Counting since ' + kalDateTime(bl.since) + ' from a starting balance of ' + money(bl.startingDollars) +
-        (change === null || change === undefined ? '.' : ': ' + (change >= 0 ? '+' : '-') + money(Math.abs(change)) + ' so far (deposits you recorded are taken off; ones you did not still count).') +
-        (hidden ? ' ' + hidden + ' earlier fill' + (hidden === 1 ? ' is' : 's are') + ' hidden.' : '');
+      line.textContent = '';   // the Account card already shows the bot's result and what is not the bot's
+
     }
     (function(){
       var go = document.getElementById('kalAcctStart'), box = document.getElementById('kalAcctStartConfirm');
@@ -10732,9 +10735,9 @@
         var api = window.__shwoopAPI, v = Number(amt.value);
         if(!api || !api.kalshiLiveAdjust || !currentUserIsAdmin){ return; }
         if(!Number.isFinite(v) || v === 0){ am.textContent = 'Type an amount in dollars first.'; return; }
-        if(!window.confirm((v > 0 ? 'Record a deposit of ' : 'Record a withdrawal of ') + money(Math.abs(v)) + '? It is taken off the account change under Tools and cannot be edited here afterwards.')){ return; }
+        if(!window.confirm((v > 0 ? 'Record a deposit of ' : 'Record a withdrawal of ') + money(Math.abs(v)) + '? It is taken out of the "Deposits and manual trades" line on the Account card and cannot be edited here afterwards.')){ return; }
         go.disabled = true; am.textContent = 'Recording...';
-        api.kalshiLiveAdjust(v).then(function(){ return api.kalshiLiveAccount(); }).then(function(d){ render(d); amt.value = ''; am.textContent = 'Recorded. The account change under Tools no longer counts it.'; })
+        api.kalshiLiveAdjust(v).then(function(){ return api.kalshiLiveAccount(); }).then(function(d){ render(d); amt.value = ''; am.textContent = 'Recorded. It is taken out of the "Deposits and manual trades" line.'; })
           .catch(function(err){ am.textContent = 'Could not record it: ' + ((err && err.message) || 'unknown'); }).then(function(){ go.disabled = false; });
       });
     })();
@@ -10743,7 +10746,7 @@
     kalshiAcctFromServer = function(d){
       if(!d || !d.balance || (kalshiLiveAcct && kalshiLiveAcct.at >= d.at)){ return; }
       render(d);
-      msg.textContent = 'Read ' + kalTime(d.at) + ' CT by the server.';
+      msg.textContent = '';
     };
     function load(){
       var api = window.__shwoopAPI;
@@ -10820,7 +10823,7 @@
   document.getElementById('brandHomeBtn').addEventListener('click', function(){
     var pref = 'auto';
     try{ pref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
-    showPage(pref === 'trades' ? 'trades' : 'brief');
+    showPage(pref === 'trades' ? 'trades' : (pref === 'kalshi' && currentUserIsAdmin ? 'kalshi' : 'brief'));
   });
 
   // ---------- Notepad (floating, carries over across pages) ----------
@@ -15654,6 +15657,7 @@
   // isAdmin is read live off the same user-doc snapshot every sign-in
   // (see watchUserDoc's callback below), never hardcoded here.
   var currentUserIsAdmin = false;
+  var landingKalshiPending = false, landingLoadedAt = Date.now();
 
   // Live trading and inviting others are both admin-only -- a non-admin
   // account never even sees the Live toggle or the invite generator, on
@@ -15671,6 +15675,15 @@
     // the journal field from anyone else.
     var kalNav = document.querySelector('.nav-item[data-page="kalshi"]');
     if(kalNav) kalNav.hidden = !currentUserIsAdmin;
+    var landKal = document.getElementById('landingKalshiBtn');
+    if(landKal) landKal.hidden = !currentUserIsAdmin;
+    // A Kalshi landing preference can only be honoured once the account is known to be the admin (the page is refused to anyone else), which is after the
+    // first screen is already up. If the owner has not moved off that first screen yet, take them to Kalshi now.
+    if(currentUserIsAdmin && landingKalshiPending){
+      landingKalshiPending = false;
+      var briefPage = document.getElementById('page-brief');
+      if(briefPage && !briefPage.hidden && Date.now() - landingLoadedAt < 20000){ showPage('kalshi'); }
+    }
     var kalPage = document.getElementById('page-kalshi');
     if(!currentUserIsAdmin && kalPage && !kalPage.hidden){ showPage('brief'); }
   }
@@ -16236,6 +16249,12 @@
     try{ pref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     if(pref === 'brief' || pref === 'trades'){
       showPage(pref);
+      return;
+    }
+    if(pref === 'kalshi'){
+      // Not known to be the admin yet (that arrives with the account), so show the brief and move on to Kalshi when applyAdminUI confirms it.
+      landingKalshiPending = true;
+      showPage('brief');
       return;
     }
 
