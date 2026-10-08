@@ -169,25 +169,25 @@ gates.N8 = async () => {
 // THE loss stop follows the BOT's trades. Settled results count, open trades count as lost, and the account's cash does not.
 const botTrade = (n, over = {}) => [`L1-OLD-${n}`, Object.assign({ strategy: 'L1', ticker: `OLD-${n}`, side: 'yes', status: 'filled', fillCount: '1.00', maxCost: 0.92, ts: NOW - 3600000 }, over)];
 gates.N9 = async () => {
-  // Seven lost trades (7 x 0.92 = $6.44) leave room; the eighth reaches $7.36 and stops the session before any order.
+  // Trades of 0.92 each. The stop is live.L1_LOSS_STOP ($10): ten lost ones ($9.20) leave room, the eleventh ($10.12) stops the session before any order.
+  const per = 0.92, stopN = Math.ceil(live.L1_LOSS_STOP / per), roomN = stopN - 1;
+  assert.ok(roomN * per < live.L1_LOSS_STOP && stopN * per >= live.L1_LOSS_STOP, 'the counts below straddle the stop');
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
-  const lost = {}; for (let i = 0; i < 8; i++) lost[`OLD-${i}`] = 'no';
-  const w = world({ results: lost }); seed(w, 8);
+  const results = (n, r) => { const o = {}; for (let i = 0; i < n; i++) o[`OLD-${i}`] = r; return o; };
+  const w = world({ results: results(stopN, 'no') }); seed(w, stopN);
   await tick(w);
   assert.strictEqual(w.posts.length, 0);
   assert.deepStrictEqual([w.sess.active, w.sess.endedBecause], [false, 'loss stop']);
-  assert.ok([...w.docs.values()].filter((d) => d.settled === true).length === 8, 'each settled result is kept on its record, so it is read once');
-  const lostSeven = {}; for (let i = 0; i < 7; i++) lostSeven[`OLD-${i}`] = 'no';
-  const ok = world({ results: lostSeven }); seed(ok, 7);
+  assert.ok([...w.docs.values()].filter((d) => d.settled === true).length === stopN, 'each settled result is kept on its record, so it is read once');
+  const ok = world({ results: results(roomN, 'no') }); seed(ok, roomN);
   await tick(ok);
-  assert.strictEqual(ok.posts.length, 1, '$6.44 down is inside the allowance');
-  // Open trades are counted as lost: eight unsettled ones stop it just as eight settled losses do.
-  const open = world(); seed(open, 8);
+  assert.strictEqual(ok.posts.length, 1, 'inside the allowance');
+  // Open trades are counted as lost: unsettled ones stop it just as settled losses do.
+  const open = world(); seed(open, stopN);
   await tick(open);
   assert.deepStrictEqual([open.posts.length, open.sess.endedBecause], [0, 'loss stop']);
-  // Wins offset losses: eight settled wins are never a reason to stop.
-  const wins = {}; for (let i = 0; i < 8; i++) wins[`OLD-${i}`] = 'yes';
-  const won = world({ results: wins }); seed(won, 8);
+  // Wins offset losses: settled wins are never a reason to stop.
+  const won = world({ results: results(stopN, 'yes') }); seed(won, stopN);
   await tick(won);
   assert.strictEqual(won.posts.length, 1);
   // Cash is not the measure: the account being $50 down because of the owner's own trades changes nothing.
@@ -195,14 +195,14 @@ gates.N9 = async () => {
   await tick(manual);
   assert.strictEqual(manual.posts.length, 1, 'manual trades moving the account do not trip the bot stop');
   // Trades from before this session are not counted, and an unreadable record fails closed.
-  const before = world({ session: { since: NOW - 1000 } }); seed(before, 8);
+  const before = world({ session: { since: NOW - 1000 } }); seed(before, stopN);
   await tick(before);
   assert.strictEqual(before.posts.length, 1, 'earlier trades are not this session');
   const down = world({ tradesThrow: true });
   await tick(down);
   assert.deepStrictEqual([down.posts.length, down.sess.active], [0, true], 'if the bot trades cannot be read, nothing is sent and the session keeps running');
   // Orders that did not fill cost nothing.
-  const nofill = world(); seed(nofill, 8, { fillCount: '0.00', status: 'no fill' });
+  const nofill = world(); seed(nofill, stopN, { fillCount: '0.00', status: 'no fill' });
   await tick(nofill);
   assert.strictEqual(nofill.posts.length, 1, 'no-fills are not losses');
   const first = world({ session: { startCash: null } });
@@ -220,7 +220,7 @@ gates.N10 = async () => {
   assert.deepStrictEqual([exp.posts.length, exp.sess.endedBecause], [0, 'expired']);
   assert.ok(live.L1_MAX_ORDERS >= 2 * 96, 'the order backstop can never end a 24 hour session early');
   assert.strictEqual(live.L1_SESSION_MS, 24 * 3600 * 1000);
-  assert.strictEqual(live.L1_LOSS_STOP, 7);
+  assert.strictEqual(live.L1_LOSS_STOP, 10);
 };
 
 // An answer that is lost or refused ends the session, is recorded, and is never retried.
@@ -326,35 +326,43 @@ gates.N18 = async () => {
   assert.strictEqual(on.posts[0].count, '3', '1% of $300 buys three contracts at about 91c');
   assert.strictEqual(on.docs.get('L1-' + T).count, 3);
   assert.ok(on.docs.get('L1-' + T).maxCost > 2.7 && on.docs.get('L1-' + T).maxCost < 3, 'the record carries the cost of all three');
-  const small = world({ session: { startCash: 100, sizing: true } });
+  const small = world({ session: { startCash: 40, sizing: true }, balance: { balance_breakdown: [{ balance: '40.0000', exchange_index: 2 }] } });
   await tick(small);
-  assert.strictEqual(small.posts[0].count, '1', 'a $100 account is still one contract');
+  assert.strictEqual(small.posts[0].count, '1', 'a $40 account is one contract');
+  const mid = world({ session: { startCash: 106, sizing: true }, balance: { balance_breakdown: [{ balance: '106.0000', exchange_index: 2 }] } });
+  await tick(mid);
+  assert.strictEqual(mid.posts[0].count, '2', 'a $106 account buys two contracts');
+  assert.ok(mid.docs.get('L1-' + T).maxCost < 2.1, 'the two contracts together stay near $2');
   const huge = world({ session: { startCash: 5000, sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(huge);
   assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
-  assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(180, 0.9), live.l1Count(1e9, 0.9)], [1, 1, 2, 3]);
+  assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(106.5, 0.92), live.l1Count(138, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
+  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.10, 3], 'the share of cash per order, the scaled stop and the cap');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4), /refusing/);
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 1.5), /refusing/);
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2).count, '1', 'one contract unless told otherwise');
 };
 
-// With scaling on, the stop is 7% of the starting cash and counts every contract; a partial fill counts what filled.
+// With scaling on, the stop is L1_SIZED_STOP_FRACTION of the starting cash and counts every contract; a partial fill counts what filled.
 gates.N19 = async () => {
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
   const loss = (n) => { const r = {}; for (let i = 0; i < n; i++) r[`OLD-${i}`] = 'no'; return r; };
   const bal = { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] };
-  // $300 start: the stop is $21. Three-contract trades cost 2.76 each: seven lost ones are $19.32, eight are $22.08.
-  const seven = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(7) }); seed(seven, 7, { count: 3, fillCount: '3.00', maxCost: 2.76 });
-  await tick(seven);
-  assert.strictEqual(seven.posts.length, 1, '$19.32 is inside a $21 stop');
-  const eight = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(8) }); seed(eight, 8, { count: 3, fillCount: '3.00', maxCost: 2.76 });
-  await tick(eight);
-  assert.deepStrictEqual([eight.posts.length, eight.sess.endedBecause], [0, 'loss stop']);
-  // The same eight trades with scaling off use the flat $7 stop and end it sooner.
-  const flat = world({ session: { startCash: 300 }, balance: bal, results: loss(3) }); seed(flat, 3, { count: 3, fillCount: '3.00', maxCost: 2.76 });
-  await tick(flat);
-  assert.strictEqual(flat.sess.endedBecause, 'loss stop', 'scaling off keeps the $7 stop: 3 x 2.76 = $8.28');
+  // $300 start: the stop is $30. Three-contract trades cost 2.76 each: ten lost ones are $27.60, eleven are $30.36.
+  const ten = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(10) }); seed(ten, 10, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  await tick(ten);
+  assert.strictEqual(ten.posts.length, 1, '$27.60 is inside a $30 stop');
+  const eleven = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(11) }); seed(eleven, 11, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  await tick(eleven);
+  assert.deepStrictEqual([eleven.posts.length, eleven.sess.endedBecause], [0, 'loss stop']);
+  // With scaling off the flat $10 stop applies to the same trades and ends it far sooner: 3 x 2.76 = $8.28 is fine, 4 x 2.76 = $11.04 is not.
+  const flat3 = world({ session: { startCash: 300 }, balance: bal, results: loss(3) }); seed(flat3, 3, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  await tick(flat3);
+  assert.strictEqual(flat3.posts.length, 1, 'scaling off: $8.28 is inside the flat $10 stop');
+  const flat4 = world({ session: { startCash: 300 }, balance: bal, results: loss(4) }); seed(flat4, 4, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  await tick(flat4);
+  assert.strictEqual(flat4.sess.endedBecause, 'loss stop', 'scaling off: $11.04 reaches the flat $10 stop');
   // A partial fill: 2 of 3 filled costs two thirds and pays two contracts.
   const part = world({ session: { startCash: 300, sizing: true }, balance: bal, results: { 'OLD-0': 'yes' } }); seed(part, 1, { count: 3, fillCount: '2.00', maxCost: 2.76 });
   await live.runL1Tick({ session: part.sess, now: NOW, setSession: async (p) => { Object.assign(part.sess, p); }, logEvent: async () => {}, quotes: [], active: true, enabled: true, store: part.store, keyId: 'k', pem, fetchFn: part.fetchFn });
@@ -383,7 +391,16 @@ gates.N21 = async () => {
   const none = world(); await tick(none, { quotes: [closing] });
   assert.strictEqual(none.sess.nextLookAt, null, 'no later market known: no time is invented');
   assert.ok(/fact\('Next look', Number\.isFinite\(s\.nextLookAt\) && s\.nextLookAt > now/.test(html), 'the page shows it only while it is still in the future');
-  assert.ok(!/At most 80 orders/.test(html) && /bot's own trades are down \$7\.00/.test(html), 'the rules text matches the live limits');
+  assert.ok(!/At most 80 orders/.test(html) && /bot's own trades are down \$10\.00/.test(html), 'the rules text matches the live limits');
+};
+
+// The page quotes the limits in three places (the start confirmation, the rules text, the status line). They must say what the server does.
+gates.N22 = () => {
+  const frac = Math.round(live.L1_SIZE_FRACTION * 1000) / 10, stop = Math.round(live.L1_SIZED_STOP_FRACTION * 100), flat = live.L1_LOSS_STOP;
+  assert.ok(new RegExp('about ' + frac + '% of cash per order, up to ' + live.L1_SIZE_MAX + ' contracts, stop at ' + stop + '% of starting cash').test(html), 'the start confirmation');
+  assert.ok(new RegExp('are down \\$' + flat.toFixed(2).replace('.', '\\.') + ' \\(' + stop + '% of the starting cash with scaling').test(html), 'the rules text');
+  assert.ok(new RegExp("\\(" + (stop / 100).toFixed(2) + " \\* s\\.startCash\\)\\.toFixed\\(2\\) : '\\$" + flat.toFixed(2).replace('.', '\\.') + "'").test(html), 'the status line');
+  assert.ok(new RegExp('\\(" \\+ \\(live\\.L1_SIZE_FRACTION \\* 100\\)').test(fnSrc) && /live\.L1_SIZED_STOP_FRACTION \* 100/.test(fnSrc), 'the session start log is built from the constants, not typed');
 };
 
 (async () => {

@@ -214,7 +214,7 @@ The owner's automatic run of strategy L1 in the live account. The terms are in `
 - **What it does.** About 6 minutes before each Bitcoin or gold 15 minute close (330 to 400 seconds left), it re-reads the market and,
   if a side's fresh price is 88c to 97c, buys ONE contract at the touch, immediate-or-cancel, and holds it to settlement. One order per
   market (id `L1-<ticker>`, record created first), production host only, never retried.
-- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 24 hours, a 200 order backstop that a 24 hour session cannot reach (192 markets a day), and the session ends when the BOT's own filled trades are down $7.00
+- **Limits in code** (`kalshiLiveLib.js`): $2.00 per order, 24 hours, a 200 order backstop that a 24 hour session cannot reach (192 markets a day), and the session ends when the BOT's own filled trades are down $10.00
   (settled results plus every unsettled trade counted as lost, at the order's worst-case cost). Your manual trades on the same account
   neither trip it nor hide a bot loss. If the bot's trades cannot be read, nothing is sent that minute. It also ends on the first order whose answer is lost or
   refused, and while an earlier order is unresolved. The server switch, the halt switch and the shard balance all still apply.
@@ -236,10 +236,10 @@ the run, the session or the watchdog ping. Cost: one small Firestore read a minu
 ## Size scaling for the L1 session (off by default, Oct 7, 2026)
 
 A box on the start confirmation ("Scale size with the account") turns it on for that session only; it starts unticked and
-cannot be changed mid-run. On: each order buys `floor(1% of cash / cost of one contract)` contracts, never fewer than one or
-more than three, judged on the cash left after earlier orders in the same minute, and the loss stop becomes 7% of the starting
+cannot be changed mid-run. On: each order buys `floor(2% of cash / cost of one contract)` contracts, never fewer than one or
+more than three, judged on the cash left after earlier orders in the same minute, and the loss stop becomes 10% of the starting
 cash (still counting the bot's own trades only, every contract, open ones as lost). Off: exactly as before, one contract and
-a $7.00 stop. On a $100 account it still buys one contract; it first buys two at about $180 and three at about $270.
+a $10.00 stop. On a $106 account it buys two contracts; two need about $92 to $98 of cash and three about $138 to $146.
 Deploy: `firebase deploy --only functions`.
 
 ## Moving money between shards
@@ -256,3 +256,9 @@ The first recorder stored each side's levels as `[[price, size], ...]`. Firestor
 for the recorder's first day. Levels are now `[{p, q}, ...]`, and a test checks the stored document against Firestore's rule.
 Deploy: `firebase deploy --only functions`. Within about two minutes `kalshiBookSnaps` should gain one document a minute and
 `kalshiBookMeta/status` should show recent `lastTickMs` with `errs` of 0; the Download book snapshots button then has data.
+
+## Risk raised a bit (Oct 8, 2026)
+
+At the owner's request the flat stop went from $7.00 to $10.00 and, with size scaling on, the share of cash per order from 1% to 2%
+and the stop from 7% to 10% of the starting cash. The 3 contract cap is unchanged. Needs `firebase deploy --only functions`; a running session picks
+up the new flat stop at once, and size scaling only applies to a session started with the box ticked.
