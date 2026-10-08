@@ -168,7 +168,7 @@ gates.G24 = () => {
   const optional = /var OPTIONAL = \[(.*)\];/.exec(html);
   assert.ok(optional, 'optional card list not found');
   assert.ok(!/'account'|'session'/.test(optional[1]), 'the account and session cards are not in the hideable list');
-  assert.ok(/data-card="account"/.test(html) && /data-card="session"/.test(html));
+  assert.ok(/data-card="account"/.test(html) && !/data-card="session"/.test(html), 'the account card holds the bot controls and there is no separate session card');
   const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
   assert.ok(/try \{\s*var saved = JSON\.parse\(localStorage\.getItem\(KEY\)/.test(iife) && /try \{ localStorage\.setItem\(KEY/.test(iife), 'storage reads and writes are guarded');
   assert.ok(/\['auto', '1', '2', '3', '4'\]\.indexOf\(String\(saved\.cols\)\)/.test(iife), 'a corrupt saved value cannot set a bad column count');
@@ -228,7 +228,6 @@ gates.G27 = () => {
   assert.deepStrictEqual(group([null, { orderId: 'x', count: 'bad', price: 'bad' }, { orderId: 'x', count: 1, price: '0.5' }]).length, 1, 'junk is not turned into a number');
   // The page shows grouped trades everywhere it counts them.
   assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
-  assert.ok(/plEl\.textContent = net === null/.test(html) && /Number\.isFinite\(s\.botNet\)/.test(html) && /id="kalL1Pl"/.test(html), 'the headline is the bot\'s own settled P/L, from the server');
   assert.ok(/<span class="kal-k">Bot change since start<\/span>/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && /Deposits, manual trades and open orders account for the other/.test(html), 'the account area shows the bot\'s own change, and says where the rest of the balance move came from');
 };
 

@@ -987,6 +987,8 @@
   .kal-card-bare{ background:none; border:0; box-shadow:none; padding:0; }
   .kal-card-flush{ padding:0; }
   .kal-rail .kal-acct-head{ padding:0 0 10px 0; }
+  .kal-botctl{ padding:0 0 12px 0; margin:0 0 12px 0; border-bottom:1px solid var(--border); }
+  .kal-botctl .kal-note{ margin-top:6px; }
   .kal-card-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 22px 12px 22px; }
   .kal-bot-body{ padding:0 22px 16px 22px; }
   .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:12.5px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
@@ -3418,7 +3420,7 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
-            <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its arrows)</label>
+            <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its up and down arrows)</label>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
         </details>
@@ -3429,6 +3431,21 @@
       <div class="kal-rail">
       <div class="kal-card" data-card="account">
         <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div><span id="kalL1Pill" class="kal-pill">Not running</span></div>
+        <div class="kal-botctl">
+          <div id="kalL1Status" class="kal-note">Not running.</div>
+          <div id="kalL1Size" class="kal-note"></div>
+        <div class="kal-actions">
+          <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you stop it or a stop ends it, one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (one contract per $85 of balance, up to 10, raised at most one step a week; stop at 10% of the balance at the weekly review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <button class="kal-btn" id="kalL1Stop" type="button" hidden>Stop session</button>
+          <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
+        </div>
+          <div class="kal-note" id="kalL1Msg"></div>
+          <span class="kal-note" id="kalBotHaltMsg"></span>
+        <details class="kal-more"><summary>Rules and limits</summary>
+          <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised at most one step a week) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (10% of the balance at the weekly review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
+        </details>
+        </div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-perf"><div id="kalPerf"></div><div class="kal-note" id="kalPerfNote"></div></div>
@@ -3444,25 +3461,6 @@
         <details class="kal-more"><summary>How to read the books</summary>
           <div class="kal-note">Round trip = crossing the spread (buy the ask, sell the bid) plus fees on both legs. Fees round up to a cent per order, so the 1 lot figure is the worst case. Fee rate is an unverified estimate.</div>
         </details>
-      </div>
-      <div class="kal-card kal-card-flush" data-card="session">
-        <div class="kal-bot-body">
-          <div class="kal-sess-pl kal-sess-row"><span class="kal-lbl" id="kalL1PlLabel">Bot P/L this session</span><span id="kalL1Pl" class="kal-bigpl">n/a</span><span class="kal-lbl" id="kalL1PlSub"></span></div>
-          <div id="kalL1Facts" class="kal-facts"></div>
-          <div id="kalL1Size" class="kal-note" style="margin:0 0 6px 0"></div>
-          <div id="kalL1Status" class="kal-note">Not running.</div>
-        <div class="kal-actions">
-          <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you stop it or a stop ends it, one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing"> Scale size with the account (one contract per $85 of balance, up to 10, raised at most one step a week; stop at 10% of the balance at the weekly review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
-          <button class="kal-btn" id="kalL1Stop" type="button" hidden>Stop session</button>
-          <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
-        </div>
-        <div class="kal-note" id="kalL1Msg"></div>
-        <span class="kal-note" id="kalBotHaltMsg"></span>
-        <details class="kal-more"><summary>Rules and limits</summary>
-          <div class="kal-note">One contract (more if you ticked size scaling when starting: one per $85 of balance, raised at most one step a week) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Runs around the clock until you stop it. It stops itself when the bot's own trades over the last 24 hours are down $10.00 (10% of the balance at the weekly review with scaling; your manual trades do not count), or on any order that goes wrong; after a stop it stays off until you start it again. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
-        </details>
-        </div>
       </div>
       <div class="kal-card kal-card-flush" data-card="performance">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Charts</div>
@@ -10018,6 +10016,24 @@
   // so it can sit a little off the "to beat" line even when the market is right; the chart says Coinbase for that reason.
   var kalshiSpot = { at: 0, busy: false, pts: [] };
   var kalshiMid = {};
+  // Gold's price from gold-api.com (free, no key, the browser may call it). It has no history, so the line is built from what this page has seen since it was
+  // opened and fills from the left; Kalshi settles gold on a Pyth feed, so this can sit a dollar or so off the "to beat" line even when the market is right.
+  var kalshiGold = { at: 0, busy: false, failed: false, pts: [] };
+  function kalshiFetchGold(now){
+    if(kalshiGold.busy || now - kalshiGold.at < 15000){ return; }
+    kalshiGold.busy = true;
+    fetch('https://api.gold-api.com/price/XAU')
+      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(j){
+        var v = Number(j && j.price);
+        if(!(v > 0)){ throw new Error('no price'); }
+        var t = Date.now(), last = kalshiGold.pts[kalshiGold.pts.length - 1];
+        if(!last || t - last.t >= 5000){ kalshiGold.pts.push({ t: t, v: v }); if(kalshiGold.pts.length > 300){ kalshiGold.pts.shift(); } }
+        kalshiGold.at = t; kalshiGold.busy = false; kalshiGold.failed = false;
+        if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+      })
+      .catch(function(){ kalshiGold.at = Date.now(); kalshiGold.busy = false; kalshiGold.failed = true; });
+  }
   function kalshiFetchSpot(now){
     if(kalshiSpot.busy || now - kalshiSpot.at < 30000){ return; }
     kalshiSpot.busy = true;
@@ -10035,8 +10051,8 @@
 
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
 
-  // The small chart under a market row. Bitcoin: Coinbase's price against the strike ("to beat"). Gold has no free price feed here, so it shows the
-  // market's own YES price (cents) as this page has seen it since it was opened.
+  // The small chart under a market row. Bitcoin: Coinbase's price against the strike ("to beat"). Gold: gold-api.com's price against the strike, as this page has
+  // seen it since it was opened; if that feed fails, the market's own YES price in cents instead.
   function kalshiSparkFor(m){
     var close = Date.parse(m.closeTime);
     if(!Number.isFinite(close)){ return ''; }
@@ -10046,6 +10062,10 @@
       body = kalshiSparkSvg(kalshiSpot.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
       body += '<div class="kal-note kal-spark-note">Coinbase price against the ' + escapeHtml('$' + Number(m.strike).toLocaleString('en-US', { maximumFractionDigits: 2 })) + ' target</div>';
+    } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
+      body = kalshiSparkSvg(kalshiGold.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
+        fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
+      body += '<div class="kal-note kal-spark-note">Gold price against the ' + escapeHtml('$' + Number(m.strike).toLocaleString('en-US', { maximumFractionDigits: 2 })) + ' target, since you opened this page</div>';
     } else {
       body = kalshiSparkSvg(kalshiMid[m.ticker], { from: o.from, to: o.to, ref: null, label: 'YES price in cents since this page was opened', empty: 'A line appears after a minute of watching.',
         fmt: function(v){ return v.toFixed(0) + 'c'; } });
@@ -10074,6 +10094,7 @@
       if(!h.length || data.fetchedAt > h[h.length - 1].t){ h.push({ t: data.fetchedAt, v: mid }); if(h.length > 400){ h.shift(); } }
     });
     if(rows.some(function(m){ return m.series === 'KXBTC15M'; })){ kalshiFetchSpot(now); }
+    if(rows.some(function(m){ return m.series === 'KXGOLD15M'; })){ kalshiFetchGold(now); }
     el.innerHTML = rows.map(function(m){
       var hasBook = m.yesBid != null && m.yesAsk != null;
       var spread = hasBook ? m.yesAsk - m.yesBid : null;
@@ -10410,26 +10431,16 @@
     var pill = document.getElementById('kalL1Pill');
     pill.className = 'kal-pill' + (switchOff ? ' bad' : (halted ? ' warn' : (running ? ' on' : '')));
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Halted' : (running ? 'Running' : 'Not running'));
-    // The bot's own settled result, from the server's running total (unsettled trades are counted as lost at the order's worst-case price).
-    var net = s && Number.isFinite(s.botNet) ? s.botNet : null;
-    var plEl = document.getElementById('kalL1Pl');
-    plEl.textContent = net === null ? 'n/a' : (net >= 0 ? '+' : '-') + kalshiMoney(Math.abs(net));
-    plEl.className = 'kal-bigpl' + (net === null ? '' : (net >= 0 ? ' kal-pos' : ' kal-neg'));
-    document.getElementById('kalL1PlLabel').textContent = running ? 'Bot P/L this session' : 'Bot P/L, last session';
-    document.getElementById('kalL1PlSub').textContent = (s && Number.isFinite(s.botOpen) && s.botOpen > 0 ? 'Settled only. ' + kalshiMoney(s.botOpen) + ' still open.' : 'Settled trades only. Wins are booked slightly low.');
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
-    var fact = function(k, v){ return '<div><span class="kal-lbl">' + escapeHtml(k) + '</span><b>' + escapeHtml(v) + '</b></div>'; };
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last weekly review, once the server has made one
     var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.10 * base).toFixed(2) : '$10.00';
-    document.getElementById('kalL1Facts').innerHTML = running ? (
-      fact('Next look', Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') +
-      fact('Orders sent', String(s.ordersSent || 0)) + fact('Filled / no fill', (oc.won + oc.lost + oc.open) + ' / ' + oc.noFill)
-    ) : (s && s.endedBecause ? fact('Last ended', String(s.endedBecause)) + fact('Orders sent', String(s.ordersSent || 0)) : '');
+    // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
+    var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + ', ' + (s.ordersSent || 0) + ' orders sent, ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
     var sizeNote = document.getElementById('kalL1Size');
     var peakAt = Number.isFinite(s && s.peakNet) ? Math.max(0, s.peakNet) : 0;
     sizeNote.textContent = running ? (s.sizing === true ? 'Size scales with the account: up to ' + (Number.isFinite(s.sizeCap) ? s.sizeCap : 3) + ' contracts' + (s.sizeAddon > 0 ? ' (+' + s.sizeAddon + ' from reinvested profit)' : '') + (Number.isFinite(s.sizeNextReview) ? ', next review ' + kalDate(s.sizeNextReview) : '') + (s.sizeSaved > 0 ? '. Skimmed to savings: ' + kalshiMoney(s.sizeSaved) : '') + '.' : 'One contract each.') + (s.trailing === true ? ' Stops if the bot gives back ' + stopAt + ' from its best (+$' + peakAt.toFixed(2) + ').' : ' Stops if the bot is down ' + stopAt + '.') : '';
     var endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
-    document.getElementById('kalL1Status').textContent = running ? (s.lastNote || '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
+    document.getElementById('kalL1Status').textContent = running ? (s.lastNote || '') + (doneLine ? ' ' + doneLine : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
     document.getElementById('kalL1Start').hidden = running;
     document.getElementById('kalL1Stop').hidden = !running;
     if(running){ document.getElementById('kalL1Confirm').hidden = true; }
@@ -10545,7 +10556,7 @@
         if(old){ old.remove(); }
         if(on){
           var bar = document.createElement('div'); bar.className = 'kal-move';
-          bar.innerHTML = '<button type="button" class="kal-mini" data-move="-1" aria-label="Move this card earlier">&#9664;</button><button type="button" class="kal-mini" data-move="1" aria-label="Move this card later">&#9654;</button>';
+          bar.innerHTML = '<button type="button" class="kal-mini" data-move="-1" aria-label="Move this card up">&#9650;</button><button type="button" class="kal-mini" data-move="1" aria-label="Move this card down">&#9660;</button>';
           c.insertBefore(bar, c.firstChild);
         }
       });
