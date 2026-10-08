@@ -2561,6 +2561,10 @@
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     },
     // The recorder's stored order-book snapshots (one document per minute, admin read only), oldest first, from a time. At most 1,500 minutes.
+    // The recorder's own heartbeat document (when it last ran and how many snapshots and errors it had).
+    kalshiBookStatus: function(){
+      return getDoc(doc(db, 'kalshiBookMeta', 'status')).then(function(s){ return s.exists() ? s.data() : null; });
+    },
     kalshiBookSnaps: function(sinceMs){
       return getDocs(query(collection(db, 'kalshiBookSnaps'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(1500))).then(function(q){
         return q.docs.map(function(d){ return d.data(); });
@@ -9706,6 +9710,23 @@
     return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' ET';
   }
 
+  // What to tell the owner when an export has nothing in it, so a silent recorder, a stopped one and one whose Kalshi reads fail are told apart.
+  // docs: the minute documents found; status: the heartbeat document or null; hours: the window asked for; now: ms.
+  function kalshiBookExportNote(docs, status, hours, now){
+    var ago = function(ms){ var m = Math.round((now - ms) / 60000); return m < 90 ? m + ' minutes ago' : Math.round(m / 60) + ' hours ago'; };
+    var d = (docs || []).filter(function(x){ return x && Array.isArray(x.snaps); });
+    if(d.length){
+      var snaps = d.reduce(function(n, x){ return n + x.snaps.length; }, 0);
+      if(snaps){ return ''; }
+      var firstErr = null;
+      d.forEach(function(x){ if(!firstErr && Array.isArray(x.errs) && x.errs[0]){ firstErr = x.errs[0].e || JSON.stringify(x.errs[0]); } });
+      return 'Found ' + d.length + ' minute documents, but none hold a snapshot. The recorder is running and its Kalshi reads are failing.' + (firstErr ? ' First error: ' + String(firstErr).slice(0, 160) : '');
+    }
+    if(!status || !Number.isFinite(status.lastTickMs)){ return 'The recorder has never saved anything (it has no heartbeat). It is not deployed or not running: check the Firebase functions logs for kalshiBookRecorder.'; }
+    if(now - status.lastTickMs > 180000){ return 'The recorder last ran ' + ago(status.lastTickMs) + ' and has stopped (' + (status.snaps || 0) + ' snapshots, ' + (status.errs || 0) + ' errors that run). Check the Firebase functions logs for kalshiBookRecorder.'; }
+    return 'The recorder ran ' + ago(status.lastTickMs) + ' (' + (status.snaps || 0) + ' snapshots, ' + (status.errs || 0) + ' errors) but no minute documents are in the last ' + hours + ' hours. Check Firestore for kalshiBookSnaps and the functions logs for write errors.';
+  }
+
   // The recorder's order-book snapshots as CSV, one row per snapshot, for testing the quoting ideas that need real depth. The recorder stores each
   // side's best three levels with the best LAST; here they are written best first. A side with no book is left empty, never 0 (zero would read
   // as a free price). Pure: it reads nothing from the page.
@@ -10077,9 +10098,9 @@
     if(!api || !api.kalshiBookSnaps || !currentUserIsAdmin){ msg.textContent = 'Not available: sign in as the admin first.'; return; }
     var hours = Number(document.getElementById('kalBookHours').value) || 6, since = Date.now() - hours * 3600000;
     btn.disabled = true; msg.textContent = 'Reading the recorder...';
-    api.kalshiBookSnaps(since).then(function(docs){
-      var r = kalshiBookCsv(docs);
-      if(!r.snaps){ msg.textContent = 'No snapshots in the last ' + hours + ' hours. Is the recorder deployed and running?'; return; }
+    Promise.all([api.kalshiBookSnaps(since), api.kalshiBookStatus ? api.kalshiBookStatus().catch(function(){ return null; }) : Promise.resolve(null)]).then(function(both){
+      var docs = both[0], r = kalshiBookCsv(docs);
+      if(!r.snaps){ msg.textContent = kalshiBookExportNote(docs, both[1], hours, Date.now()); return; }
       var stamp = new Date(since).toISOString().slice(0, 16).replace(/[-:T]/g, '');
       var save = function(blob, name){
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
