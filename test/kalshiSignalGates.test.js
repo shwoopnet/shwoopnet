@@ -89,7 +89,7 @@ gates.G21 = () => {
     'the halt switch writes exactly { halt, at } to the control document');
   assert.ok(!/data-kal-tab|kalTabJournal|kalTabLive/.test(html), 'the Kalshi page is one page now: no tabs, no journal');
   assert.ok(/function kalshiOnShow\(\)\{ startKalshiBot\(\); startKalshiPoll\(\); \}/.test(html), 'opening the page starts the bot view and the books');
-  assert.ok(/pill\.textContent = switchOff \? 'Order switch OFF' : \(halted \? 'Halted'/.test(html), 'the halt must show on the pill at once');
+  assert.ok(/pill\.textContent = switchOff \? 'Order switch OFF' : \(halted \? 'Paused'/.test(html), 'the halt must show on the pill at once');
   assert.ok(/var haltUnset = !kalshiBotState\.control \|\| kalshiBotState\.control\.halt === undefined;/.test(html) && /if\(haltUnset\)\{ el\.innerHTML \+= '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted/.test(html), 'an unsaved halt setting must not read as "not halted"');
   assert.ok(/if\(halted && !window\.confirm\(/.test(html), 'resuming entries must ask first');
   assert.ok(/function kalshiOnHide\(\)\{ stopKalshiPoll\(\); stopKalshiBot\(\); \}/.test(html), 'leaving the page must stop listening');

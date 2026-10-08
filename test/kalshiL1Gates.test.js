@@ -352,7 +352,8 @@ gates.N13 = () => {
   assert.ok(/kalL1Start'\)[\s\S]{0,400}addEventListener\('click', function\(\)\{ msg\.textContent = ''; ask\(true\); \}\)/.test(html), 'the first click only asks');
   const yes = html.slice(html.indexOf("yes.addEventListener('click', function(){\n      var api = window.__shwoopAPI;\n      if(!api || !api.kalshiL1Session"));
   assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(yes.slice(0, 800)), 'the confirm click starts it');
-  assert.ok(/id="kalL1Stop"/.test(html) && /api\.kalshiL1Session\(false\)/.test(html), 'there is a stop button');
+  assert.ok(!/id="kalL1Stop"/.test(html) && /id="kalBotHalt"/.test(html), 'one control stops entries (Pause, which can be resumed); there is no separate stop button');
+  assert.ok(/api\.setKalshiHalt\(false\)/.test(html.slice(html.indexOf("var wasPaused"))), 'starting lifts a pause left on, so Start after a Flatten is one step');
   assert.ok(/httpsCallable\(functions, 'kalshiL1Session'\)/.test(html));
 };
 

@@ -84,7 +84,8 @@ gates.F4 = () => {
 // The button: in the Tools menu, first in it, asks twice, and the menu no longer claims it cannot change anything.
 gates.F5 = () => {
   const tools = /id="kalTools"[\s\S]*?<\/details>\s*<details class="kal-layout" id="kalLayout"/.exec(html)[0];
-  assert.ok(tools.indexOf('id="kalFlatten"') > -1 && tools.indexOf('id="kalFlatten"') < tools.indexOf('id="kalAcctRefresh"'), 'first thing in Tools');
+  const menu = /id="kalBotMenu"[\s\S]*?id="kalBotHaltMsg"/.exec(html)[0];
+  assert.ok(menu.indexOf('id="kalFlatten"') > menu.indexOf('id="kalBotHalt"') && tools.indexOf('id="kalFlatten"') < 0, 'one place for the bot controls: Flatten sits with Pause in the Running menu, not in Tools');
   assert.ok(/id="kalFlattenConfirm" hidden/.test(html) && /go\.addEventListener\('click', function\(\)\{ ask\(true\); \}\)/.test(html), 'the first click only asks');
   assert.ok(/kalshiFlattenAll\(\)/.test(html.slice(html.indexOf("var yes = document.getElementById('kalFlattenYes')"))), 'only the confirm click sends');
   assert.ok(!/it cannot place or change anything/.test(tools), 'the menu does not claim to be read only');
