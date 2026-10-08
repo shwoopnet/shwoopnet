@@ -1053,3 +1053,53 @@ names in advance, an arming switch that is off by default, and the halt button i
 
 Data lands in `kalshi-scalper/data/` (not in git). It only reads Kalshi's public
 prices: no account, key or password.
+
+## Pre-registration: M1, early window momentum (fixed 2026-10-08, before any code or any signal value was computed)
+
+Only the schema was inspected before this was written: candle `end_ts` is exactly `open_ts + 60k`, and the database holds 11,135
+settled markets (6,456 KXBTC15M, 4,679 KXGOLD15M) from 2026-08-01 to 2026-10-07. No price, signal or outcome was looked at. This is
+the same data every earlier test used, so a pass could only ever be permission to test forward. One hypothesis against the bar:
+13 tried before, 14 after, plus the information cuts below.
+
+- **Universe, fixed, not selected on returns or cost.** Every settled market of both series in the database (result `yes` or `no`),
+  both series pooled. Series split printed for information only.
+- **Signal.** YES mid = (bid close + ask close) / 2 of a candle. `D` = YES mid of the candle ending `open_ts + 300` (the close of the
+  5th minute) minus YES mid of the candle ending `open_ts + 60` (the close of the 1st minute). `D >= +0.05` is UP, `D <= -0.05` is
+  DOWN, otherwise no trade. One observation per market. Both signal candles must have a usable quote (`valid_quote`: real two sided
+  book, spread 10c or less). A market whose first minute still shows an empty book has no signal; this is a no-signal count and is
+  printed, not a drop. (Using the empty book's 50c mid would invent a move.)
+- **Entry.** The candle ending `open_ts + 360`, the NEXT candle after the signal candle, so strictly later than every bar the signal
+  used. UP buys YES at that candle's ask close; DOWN buys NO at `1 - YES bid close` (snapped to 4 places). That candle must have a
+  usable quote, else there is no fill and the market is counted as "no entry quote". Taker fee `0.07 * p * (1 - p)` per contract,
+  unrounded (the repo's `scalps.fee`), as in H2 and L1 to L3.
+- **Exit.** Sell exactly 3 minutes after entry, at the candle ending `open_ts + 540`, at that side's bid (YES: YES bid close; NO:
+  `1 - YES ask close`). A taker fee on the exit leg as well, as in H2 (the 4c to 5c round trip in the prediction includes both legs).
+  If that candle is missing or has no usable two sided quote, the observation is DROPPED and counted, with the direction and the entry
+  price of the dropped ones printed, because the drop is not random: after a continuation to an extreme the winning side's book
+  empties at the top (ask above 99.9c), and after a collapse the losing side's bid is at 0.1c. Both ends of the distribution are
+  exactly the ones that go missing, so the surviving mean is conditioned on the price staying in the middle, which biases it toward
+  zero and cuts its variance. The direction of the net bias is not known in advance and is reported, not assumed away.
+- **Counterparty.** Slow quoters or resting orders that under-react to early flow in the first minutes of a market, so the move
+  continues for a few minutes after it is visible. Whoever is on the other side of our entry is quoting a price that has not yet
+  absorbed the first five minutes of information.
+- **Numeric prediction, stated before the run.** Average gross continuation over the 3 minute hold (exit mid minus entry mid in the
+  direction of the trade) of about +1c, against a round trip cost near 4c to 5c (about 2c of spread crossed at each end combined
+  plus about 3.5c of fees at mid prices). Expected net about -3c to -4c a trade. **The pre-registered expectation is that the test is
+  `FALSIFIED`.** The earlier lag study found no one minute lag, and H2 (a continuation bet) lost twice its costs.
+- **Kill criteria, the common bar.** `FALSIFIED` unless ALL hold: n of at least 300 markets with a completed round trip; mean net
+  positive with a day clustered z (by UTC day of close) of at least 2.1; positive in BOTH halves (split by close time at the median
+  of the entries); positive with fees times 1.2 (on both legs). Fewer than 300 is `NOT_ENOUGH_DATA`. Best outcome is
+  `NOT_YET_FALSIFIED`, meaning permission to test on unseen data, never evidence of an edge. There is no verdict that means trade.
+- **Fair-market null control, same rule.** (a) Hold-to-settlement version: each entered market wins with probability equal to the side's
+  mid at its entry candle (the price at its own decision point), pays the ask and the fee; 500 repeats; the real hold-to-settlement mean is
+  placed against the null's distribution. (b) Round trip version: each trade's realised change in the side's mid from entry to exit has its sign
+  flipped with probability one half (keeps the real volatility, spreads and fees, removes any direction), the exit bid is that mid
+  less the real exit half spread, clipped to [0.001, 0.999]; 500 repeats; the real round trip mean is placed against it. A real result that is
+  not clearly above this null is not an edge.
+- **Simulator guard.** A test runs the exact entry and exit code on a simulated fair game (a martingale mid with a fixed spread) and
+  requires it to lose about its costs, never to profit.
+- **Information only, decides nothing, may NOT be used to rescue the verdict.** The same rule with thresholds 3c and 8c (hold 3), hold 2 and 5
+  minutes (threshold 5c), and hold to settlement (threshold 5c, no exit, no exit fee, so no drops). Five cuts, printed in a table labelled
+  information only. They count against the bar: 1 hypothesis plus 5 cuts.
+- **Cost of this idea so far.** The fourteenth hypothesis tried. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. No
+  threshold, minute, hold or fee changes after seeing the numbers.
