@@ -86,13 +86,21 @@ function applyBaseline(d, baseline) {
 
 // Trades enter about 6 minutes before a quarter-hour close and settle at the close, so the account only changes
 // shortly after :00/:15/:30/:45 (settled) and shortly after :09/:24/:39/:54 (an order may have filled). Reading at
-// minutes 1 and 10 of each quarter hour catches both; a missing or 20 minute old snapshot is also refreshed, so a
-// restart or a missed minute leaves no long gap.
-const SNAPSHOT_MINUTES = [1, 10];
+// minutes 0, 1 and 10 of each quarter hour catches both: minute 0 is taken SNAPSHOT_SETTLE_MS into the minute (the caller waits for it), to give the close
+// time to settle (owner's request, Oct 8, 2026), and minute 1 stays as the backstop in case the settlement was slower than that. A missing or 20 minute old
+// snapshot is also refreshed, so a restart or a missed minute leaves no long gap.
+const SNAPSHOT_MINUTES = [0, 1, 10];
+const SNAPSHOT_SETTLE_MS = 20000;
+const SNAPSHOT_MIN_GAP_MS = 30000;
 const SNAPSHOT_MAX_AGE_MS = 20 * 60000;
 function snapshotDue(now, lastAt) {
   if (!Number.isFinite(lastAt) || now - lastAt >= SNAPSHOT_MAX_AGE_MS) return true;
-  return SNAPSHOT_MINUTES.includes(new Date(now).getUTCMinutes() % 15) && now - lastAt >= 60000;
+  return SNAPSHOT_MINUTES.includes(new Date(now).getUTCMinutes() % 15) && now - lastAt >= SNAPSHOT_MIN_GAP_MS;
+}
+// How long to wait before reading, in ms: only the quarter-hour minute waits, up to the settle mark, and never more than a cap so the run stays well inside its timeout.
+function snapshotWaitMs(now) {
+  if (new Date(now).getUTCMinutes() % 15 !== 0) return 0;
+  return Math.max(0, Math.min(SNAPSHOT_SETTLE_MS - (now % 60000), 25000));
 }
 
-module.exports = { adjustmentsTotal, snapshotDue, SNAPSHOT_MINUTES, readAccount, applyBaseline, shapeBalance, shapePositions, shapeFills };
+module.exports = { adjustmentsTotal, snapshotDue, snapshotWaitMs, SNAPSHOT_MINUTES, SNAPSHOT_SETTLE_MS, readAccount, applyBaseline, shapeBalance, shapePositions, shapeFills };

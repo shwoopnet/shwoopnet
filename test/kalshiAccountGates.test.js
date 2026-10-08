@@ -204,12 +204,17 @@ gates.R11 = () => {
   // the other 13 minutes of a quarter hour, and a missing or stale one is refreshed whatever the minute.
   const at = (min) => Date.UTC(2026, 9, 7, 12, min, 5);
   const due = (min, last) => acct.snapshotDue(at(min), last);
-  const fresh = at(0);
+  const fresh = at(0) - 10 * 60000;
   const hits = []; for (let m = 0; m < 60; m++) if (due(m, at(m) - 5 * 60000 > fresh ? at(m) - 5 * 60000 : fresh)) hits.push(m);
-  assert.deepStrictEqual(hits, [1, 10, 16, 25, 31, 40, 46, 55], 'minutes 1 and 10 of each quarter hour');
+  assert.deepStrictEqual(hits, [0, 1, 10, 15, 16, 25, 30, 31, 40, 45, 46, 55], 'minutes 0, 1 and 10 of each quarter hour');
   assert.ok(due(5, NaN) && due(5, undefined), 'no snapshot yet: take one now');
   assert.ok(due(5, at(5) - 20 * 60000), 'a 20 minute old snapshot is refreshed off-cycle');
-  assert.ok(!due(1, at(1) - 30000), 'never twice in the same minute');
+  assert.ok(!due(1, at(1) - 20000), 'never twice within 30 seconds');
+  assert.ok(due(1, at(1) - 40000), 'the minute-1 read still follows a minute-0 read taken about 20 seconds into the quarter');
+  const quarter = Date.UTC(2026, 9, 7, 12, 15, 3);
+  assert.strictEqual(acct.snapshotWaitMs(quarter), 17000, 'a run that starts 3 s into the quarter waits until 20 s');
+  assert.strictEqual(acct.snapshotWaitMs(Date.UTC(2026, 9, 7, 12, 15, 40)), 0, 'a run already past the mark does not wait');
+  assert.strictEqual(acct.snapshotWaitMs(Date.UTC(2026, 9, 7, 12, 16, 3)), 0, 'only the quarter-hour minute waits');
 };
 
 (async () => {

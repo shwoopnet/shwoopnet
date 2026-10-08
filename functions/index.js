@@ -513,6 +513,9 @@ exports.kalshiLiveArmed = onSchedule(
         const accRef = db.collection("kalshiLiveControl").doc("account");
         const prev = await accRef.get();
         if (account.snapshotDue(now, prev.exists ? prev.data().at : NaN)) {
+          // At the quarter-hour minute, give the close a few seconds to settle before reading (the next minute's read is the backstop).
+          const settleWait = account.snapshotWaitMs(Date.now());
+          if (settleWait > 0) await new Promise((r) => setTimeout(r, settleWait));
           const full = await readAccountFull(db);
           await accRef.set(JSON.parse(JSON.stringify(full)));
         }
