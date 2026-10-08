@@ -1919,3 +1919,49 @@ assert _BD.decide(_ents[:50])[0] == "NOT_ENOUGH_DATA"
 _weak = [dict(e, net=0.001 + (0.2 if i % 3 == 0 else -0.1)) for i, e in enumerate(_ents)]
 assert _BD.decide(_weak)[0] == "FALSIFIED", "a noisy small mean does not pass"
 print("boundary N1-N2 tests passed")
+
+# X1 to X4 exits: the first later check at or below the threshold sells at that bid (both legs pay a fee), a crash that recovers is a loss for the rule and a crash
+# that does not is a saving, nothing is sold on the entry candle or at a bid under 0.1c, NO is priced as one minus the YES ask, and the verdict needs the stricter z.
+from scalper import exits as _EX
+def _cd(close, left, bid, ask):
+    return (close - left, bid, ask, bid, ask)
+_cl = 10000
+_ent = {"ticker": "T", "side": "yes", "price": 0.93, "close_ts": _cl, "day": "2026-10-01", "gross": 0.07}          # a win if held
+assert _EX.find_exit(_ent, [_cd(_cl, 360, 0.40, 0.42)], 0.70) is None, "the entry candle itself is never an exit check"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.60, 0.62)], 0.70) == (0.60, 240), "sold at the bid of the first check at or below the threshold"
+assert _EX.find_exit(_ent, [_cd(_cl, 300, 0.85, 0.86), _cd(_cl, 240, 0.55, 0.57), _cd(_cl, 180, 0.30, 0.32)], 0.70) == (0.55, 240), "the first one, not the lowest"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.0005, 0.9)], 0.70) is None, "a bid under 0.1c is not a bid to sell into"
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.71, 0.72)], 0.70) is None and _EX.find_exit(_ent, [_cd(_cl, 240, 0.70, 0.72)], 0.70) == (0.70, 240), "at the threshold counts, above it does not"
+_no = dict(_ent, side="no", price=0.93)
+assert _EX.find_exit(_no, [_cd(_cl, 240, 0.40, 0.45)], 0.70) == (0.55, 240), "a NO side bid is one minus the YES ask"
+_hold_win = _EX.outcome(_ent, None)
+_sold = _EX.outcome(_ent, (0.60, 240))
+assert abs(_hold_win - (1 - 0.93 - _EX.fee(0.93))) < 1e-12 and abs(_sold - (0.60 - 0.93 - _EX.fee(0.93) - _EX.fee(0.60))) < 1e-12, "the exit pays a fee on both legs"
+_lost = dict(_ent, gross=-0.93)
+_rows_rec = _EX.build([_ent], {"T": [_cd(_cl, 240, 0.60, 0.62)]}, 0.70)
+assert _rows_rec[0]["net"] < _rows_rec[0]["hold"], "a crash that recovered (it would have won) makes the stop a loss"
+_rows_crash = _EX.build([_lost], {"T": [_cd(_cl, 240, 0.60, 0.62)]}, 0.70)
+assert _rows_crash[0]["net"] > _rows_crash[0]["hold"], "a crash that did not recover is a saving"
+_rows_flat = _EX.build([_ent], {"T": [_cd(_cl, 240, 0.90, 0.92)]}, 0.70)
+assert _rows_flat[0]["net"] == _rows_flat[0]["hold"] and _rows_flat[0]["exit"] is None, "no trigger, same as holding"
+assert _EX.build([_ent, _lost], {"T": [_cd(_cl, 240, 0.60, 0.62)]}, -1.0)[0]["exit"] is None, "an unreachable threshold is HOLD"
+# the exit decision never reads the result: win and loss versions are sold at the same bid and the same price
+assert _EX.find_exit(_ent, [_cd(_cl, 240, 0.60, 0.62)], 0.70) == _EX.find_exit(_lost, [_cd(_cl, 240, 0.60, 0.62)], 0.70)
+# verdict: a rule that saves money on every loser and never cuts a winner passes; one that cuts winners fails; too few entries is NOT_ENOUGH_DATA
+def _mk(i, win, stop_at=None):
+    e = {"ticker": f"T{i}", "side": "yes", "price": 0.93, "close_ts": 1000 + i, "day": f"2026-10-{1 + i % 12:02d}", "gross": 0.07 if win else -0.93}
+    return e, ({"T%d" % i: [_cd(1000 + i, 240, 0.50, 0.52)]} if stop_at else {})
+_good, _cand = [], {}
+for i in range(400):
+    e, c = _mk(i, win=(i % 10 != 0), stop_at=(i % 10 == 0))
+    _good.append(e); _cand.update(c)
+_vr, _sr = _EX.verdict(_EX.build(_good, _cand, 0.70), None)
+assert _vr == "NOT_YET_FALSIFIED" and _sr["diff"] > 0, _sr
+_bad, _cand2 = [], {}
+for i in range(400):
+    e, c = _mk(i, win=True, stop_at=(i % 10 == 0))                 # every stopped entry would have won
+    _bad.append(e); _cand2.update(c)
+assert _EX.verdict(_EX.build(_bad, _cand2, 0.70), None)[0] == "FALSIFIED", "cutting winners is not an improvement"
+assert _EX.verdict(_EX.build(_good[:50], _cand, 0.70), None)[0] == "NOT_ENOUGH_DATA"
+assert _EX.verdict(_EX.build(_good, _cand, 0.70), 10.0)[0] == "FALSIFIED", "the difference must beat the fair-market difference"
+print("exit X1-X4 tests passed")
