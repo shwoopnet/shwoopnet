@@ -184,7 +184,7 @@ gates.Y12 = () => {
   assert.deepStrictEqual([build([]).minutes, build([]).snaps, build([]).csv.split('\n').length], [0, 0, 1], 'a header and nothing else when empty');
   const r = build([
     { ts: 60000, snaps: [
-      { t: 61000, s: 'KXBTC15M', k: 'T-A', ly: 0.82, la: 0.83, yb: 0.91, ya: 0.92, nb: 0.08, na: 0.09, yd: 30, nd: 12, yl: [[0.89, 5], [0.9, 10], [0.91, 15]], nl: [[0.07, 4], [0.08, 8]] },
+      { t: 61000, s: 'KXBTC15M', k: 'T-A', ly: 0.82, la: 0.83, yb: 0.91, ya: 0.92, nb: 0.08, na: 0.09, yd: 30, nd: 12, yl: [{ p: 0.89, q: 5 }, { p: 0.9, q: 10 }, { p: 0.91, q: 15 }], nl: [[0.07, 4], [0.08, 8]] },
       { t: 62000, s: 'KXGOLD15M', k: 'T-B', yb: null, ya: null, nb: 0.5, na: null, yd: 0, nd: 7, yl: [], nl: [[0.5, 7]] } ] },
     { ts: 120000, snaps: 'junk' }, null, { ts: 130000 },
   ]);
@@ -198,6 +198,22 @@ gates.Y12 = () => {
   const h = html.slice(html.indexOf("document.getElementById('kalBookDownload').addEventListener"));
   assert.ok(/!currentUserIsAdmin\)\{ msg\.textContent = 'Not available/.test(h.slice(0, 600)), 'only the admin can run it');
   assert.ok(/CompressionStream\('gzip'\)/.test(h) && /kalshi-books-' \+ stamp \+ '\.csv'/.test(h), 'compressed when the browser can, plain CSV when not');
+};
+
+// An empty export says WHY: never saved, stopped, Kalshi reads failing, or saved elsewhere than expected. Nothing is guessed.
+gates.Y13 = () => {
+  const m = /(function kalshiBookExportNote\(docs, status, hours, now\)\{[\s\S]*?\n  \})\n/.exec(html);
+  assert.ok(m, 'not found');
+  const note = new Function(m[1] + '; return kalshiBookExportNote;')();
+  const NOW = 10 * 3600000;
+  assert.strictEqual(note([{ ts: 1, snaps: [{ t: 1 }] }], null, 6, NOW), '', 'data present: nothing to say');
+  assert.ok(/never saved anything/.test(note([], null, 6, NOW)) && /kalshiBookRecorder/.test(note([], null, 6, NOW)), 'no heartbeat at all: not deployed or not running');
+  assert.ok(/has stopped/.test(note([], { lastTickMs: NOW - 3600000, snaps: 0, errs: 5 }, 6, NOW)) && /60 minutes ago/.test(note([], { lastTickMs: NOW - 3600000 }, 6, NOW)), 'an old heartbeat: stopped, and when');
+  assert.ok(/no minute documents/.test(note([], { lastTickMs: NOW - 60000, snaps: 12, errs: 0 }, 6, NOW)), 'a fresh heartbeat but no documents: a write problem');
+  const failing = note([{ ts: 1, snaps: [], errs: [{ e: 'HTTP 403' }] }, { ts: 2, snaps: [], errs: [] }], { lastTickMs: NOW }, 6, NOW);
+  assert.ok(/2 minute documents/.test(failing) && /reads are failing/.test(failing) && /HTTP 403/.test(failing), 'documents with no snapshots: the reads are failing, with the first error');
+  assert.ok(/kalshiBookStatus/.test(html) && /kalshiBookExportNote\(docs, both\[1\], hours, Date\.now\(\)\)/.test(html), 'the button uses it, and reads the heartbeat');
+  assert.ok(/getDoc\(doc\(db, 'kalshiBookMeta', 'status'\)\)/.test(html), 'the heartbeat is the recorder\'s own status document');
 };
 
 (async () => {

@@ -248,3 +248,11 @@ Each market lives on one shard (Bitcoin and gold are both on shard 2) and an ord
 manual order does not move money between shards. What worked on Oct 7, 2026, reported by the owner: transfer the money from Predictions
 to Perps and back again in Kalshi, then place a trade; after that the whole balance was on shard 2. Check the Live account card, which
 shows the balance per shard, before relying on it.
+
+## Recorder fix (Oct 7, 2026)
+
+The first recorder stored each side's levels as `[[price, size], ...]`. Firestore refuses an array inside an array
+(`INVALID_ARGUMENT: Property array contains an invalid nested entity`), so every minute's write failed and nothing was saved
+for the recorder's first day. Levels are now `[{p, q}, ...]`, and a test checks the stored document against Firestore's rule.
+Deploy: `firebase deploy --only functions`. Within about two minutes `kalshiBookSnaps` should gain one document a minute and
+`kalshiBookMeta/status` should show recent `lastTickMs` with `errs` of 0; the Download book snapshots button then has data.
