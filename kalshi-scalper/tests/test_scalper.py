@@ -2178,3 +2178,20 @@ assert (_s["filled"], _s["missed"], _s["lost_filled"], _s["lost_missed"]) == (35
 _won = {"ticker": "T", "side": "yes", "price": 0.9, "filled": False, "won": True, "pnl": 1 - 0.9 - _FS.fee(0.9)}
 assert _FS.summarize([_won])["mean_missed"] > 0 and _FS.summarize([_won])["filled"] == 0, "a missed order is scored on what it would have made at its decision price"
 print("fill study tests passed")
+
+# T1, early taker flow: only trades inside the first 5 minutes count, the fill is on a later bar than the signal, and the verdict words are the two allowed ones.
+from scalper import tapeflow as _TF
+_open = 1_000_000
+_iso = lambda s: _dt50.datetime.fromtimestamp(_open + s, _dt50.timezone.utc).isoformat().replace("+00:00", "Z")
+_tr = [{"created_time": _iso(10), "count_fp": "30", "taker_side": "yes"}, {"created_time": _iso(299), "count_fp": "10", "taker_side": "no"},
+       {"created_time": _iso(300), "count_fp": "500", "taker_side": "yes"}, {"created_time": _iso(-1), "count_fp": "500", "taker_side": "no"},
+       {"created_time": _iso(900), "count_fp": "500", "taker_side": "no"}]
+assert _TF.window_flow(_tr, _open) == (30.0, 10.0, 2), "a trade stamped at 300 s or later, or before the open, must never enter the imbalance"
+assert _TF.ENTRY_END_S > _TF.WINDOW_S, "the fill candle starts after the signal minute"
+assert _TF.signals([("a", 70, 10), ("b", 50, 30), ("c", 10, 70), ("d", 3, 0), ("e", 30, 10)]) == [("a", "yes"), ("c", "no")], "0.60 and 50 contracts, both directions, nothing else"
+_ent = [{"ticker": "t%d" % i, "day": "2026-10-%02d" % (1 + i % 6), "close_ts": i, "price": 0.5, "won": False, "net": -0.5, "stress": -0.52} for i in range(400)]
+_v, _ = _TF.verdict(_ent, _ent)
+assert _v == "FALSIFIED", "a losing rule is FALSIFIED"
+_few = [dict(e, net=0.1, stress=0.09) for e in _ent[:50]]
+assert _TF.verdict(_few, _few)[0] == "FALSIFIED", "fewer than 300 signals can never pass"
+print("T1 tests passed")
