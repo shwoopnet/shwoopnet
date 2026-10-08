@@ -298,12 +298,15 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
 
 // The cap on contracts per order follows the account, slowly (the owner keeps adding to it like a savings account). One contract per
 // SCALE_DOLLARS_PER_CONTRACT of balance is the target. The cap FALLS to the target at once when the balance falls, and RISES at most one step
-// per SCALE_REVIEW_MS, and not at all within a week of a loss stop. The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
-// stop move together, once a week. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
+// per SCALE_REVIEW_MS (3 days), and not at all within a week of a loss stop. The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
+// stop move together, every review. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
 // (3, what the owner was running), or lower if the balance is lower. Pure: the caller keeps the state.
 const L1_SIZE_CEILING = 10;
 const SCALE_DOLLARS_PER_CONTRACT = 85;
-const SCALE_REVIEW_MS = 7 * 24 * 3600 * 1000;
+// Steps were weekly at first and the owner asked for faster ones (Oct 8, 2026): a review, and at most one step up, every 3 days. A loss stop still holds the
+// cap and the profit add-on for a full week, so a bad run slows the climb more than a good one speeds it.
+const SCALE_REVIEW_MS = 3 * 24 * 3600 * 1000;
+const SCALE_STOP_PAUSE_MS = 7 * 24 * 3600 * 1000;
 const SCALE_STEP = 1;
 function scaleTarget(cash) {
   return Number.isFinite(cash) ? Math.max(1, Math.min(L1_SIZE_CEILING, Math.floor(cash / SCALE_DOLLARS_PER_CONTRACT + 1e-9))) : 1;
@@ -318,7 +321,7 @@ function reviewSizing(state, cash, now) {
   if (target < cap) { cap = target; base = cash; }
   else if (now - reviewedAt >= SCALE_REVIEW_MS) {
     base = cash; reviewedAt = now;
-    if (target > cap && !(lastStopAt !== null && now - lastStopAt < SCALE_REVIEW_MS)) cap = Math.min(cap + SCALE_STEP, target);
+    if (target > cap && !(lastStopAt !== null && now - lastStopAt < SCALE_STOP_PAUSE_MS)) cap = Math.min(cap + SCALE_STEP, target);
   }
   cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
   return { state: { ...state, cap, base, reviewedAt, lastStopAt }, changed: cap !== state.cap || base !== state.base || reviewedAt !== state.reviewedAt };
@@ -442,7 +445,7 @@ function foldSkim(state, orders) {
   return { pool, saved, cum, hwm, appliedTs: cursor, changed: pool !== state.pool || saved !== state.saved || cum !== state.cum || hwm !== state.hwm || cursor !== state.appliedTs };
 }
 function skimAddon(state, now, perContract = 0.93) {
-  if (Number.isFinite(state.lastStopAt) && now - state.lastStopAt < SCALE_REVIEW_MS) return 0;
+  if (Number.isFinite(state.lastStopAt) && now - state.lastStopAt < SCALE_STOP_PAUSE_MS) return 0;
   return Math.max(0, Math.min(SKIM_ADDON_MAX, Math.floor((Number.isFinite(state.pool) ? state.pool : 0) / perContract + 1e-9)));
 }
 
@@ -640,5 +643,5 @@ module.exports = {
   flattenAll,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, SKIM_ADDON_MAX, scaleTarget, L1_SIZE_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, SKIM_ADDON_MAX, scaleTarget, L1_SIZE_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };

@@ -2057,7 +2057,7 @@ import random as _rnd2
 from scalper import sizing as _SZ
 _by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": 0.08 if (d + i) % 10 else -0.92} for i in range(12)] for d in range(1, 8)}
 _days = sorted(_by)
-_tot, _dd, _sv, _cap, _pk = _SZ.path(_by, _days, dpc=100, skim=True, addon_max=2, fixed=0, rng=_rnd2.Random(3), ndays=14, fill=1.0)
+_tot, _dd, _sv, _cap, _pk, _stops = _SZ.path(_by, _days, dpc=100, skim=True, addon_max=2, fixed=0, rng=_rnd2.Random(3), ndays=14, fill=1.0)
 assert _sv <= 0.5 * max(0.0, _pk) + 1e-6, "savings never exceed half of the best net profit reached (the first version skimmed every win and banked far more than the net)"
 _t3 = [_SZ.path(_by, _days, dpc=100, skim=False, addon_max=0, fixed=3, rng=_rnd2.Random(k), ndays=14, fill=1.0)[3] for k in range(5)]
 assert set(_t3) == {3}, "a flat size stays flat"
@@ -2142,3 +2142,15 @@ _ct = _CS.trade(_cl2, _cl, "yes", 0.05, True)
 assert _ct["how"] == "time", "C2 and C3 sell at 6 minutes left even if the price bounces later"
 assert _CS.trade(_cl2, _cl, "yes", 0.05, False)["how"] == "target", "C1 has no time exit, so a later bounce is its target"
 print("time exit ends the target search: tests passed")
+
+# Faster steps and the modelled loss stop: 3 day reviews climb faster than weekly ones to the same ceiling, and a day that hits the stop is counted and holds the climb.
+_win_by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": 0.08} for _ in range(10)] for d in range(1, 8)}
+_wd = sorted(_win_by)
+_c3 = _SZ.path(_win_by, _wd, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=14, fill=1.0, step_days=3)[3]
+_c7 = _SZ.path(_win_by, _wd, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=14, fill=1.0, step_days=7)[3]
+assert _c3 > _c7 >= 3, "reviews every 3 days climb faster than weekly ones when the balance supports it"
+_loss_by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": -0.92} for _ in range(10)] for d in range(1, 8)}
+_ld = sorted(_loss_by)
+_r = _SZ.path(_loss_by, _ld, dpc=10, skim=False, addon_max=0, fixed=0, rng=_rnd2.Random(1), ndays=3, fill=1.0, step_days=3, stop_frac=0.005)
+assert _r[5] == 3 and _r[0] > -3 * 3 * 0.93 * 1.05, "a losing day stops after its first loss, every day, not after all ten orders"
+print("faster steps and stop replay tests passed")

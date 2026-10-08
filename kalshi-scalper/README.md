@@ -2206,3 +2206,23 @@ First three rows of the opening window ledger to run, because they need only the
 - **No gross edge either.** With the fee set to zero these trades still lose (-0.74c to -0.90c). Selling a favorite early gives up the late favorite premium that L1 collects by holding to the close.
 - **Measurement, no verdict (ledger rows O36 and O38).** The median spread of the candles 1 to 5 minutes in is 1.0c in every UTC hour and for both weekdays and weekends. There are no cheap hours to select on; the spread is the same everywhere, so gating entries by hour cannot lower cost. Row O36 is closed by this measurement.
 - **Count.** Three variants: **2,580 as of 2026-10-08**.
+
+## Amendment to the size ladder: reviews every 3 days, and a look at cheaper contracts (2026-10-08, information only, written before the change ships)
+
+- **The change.** Size reviews, and at most one step up, now come every **3 days** instead of weekly (`SCALE_REVIEW_MS`). A loss stop still holds the cap and the profit add-on for a **full week** (`SCALE_STOP_PAUSE_MS`), so a bad run slows the climb more than a good one speeds it. The cap still falls at once when the balance falls. Overrides the ladder's evidence gates, as the earlier amendment did, at the owner's direction.
+- **"Cheaper contracts" read as a lower dollar figure per contract** (more contracts per dollar of balance). `python -m scalper.sizing` now prints the last table. 10 weeks resampled from the 69 days, start $344, 60% fills, skim on, with the live loss stop modelled (10% of the balance at the last review, the day ends and the owner restarts next morning, a week's pause on step-ups after a stop):
+
+| Dollars per contract | Steps | Mean | 5th pct | Deepest drawdown (95th) | Paths that lose | End cap |
+|---|---|---|---|---|---|---|
+| $100 | 3 days | +$47.8 | -$4.8 | $43 | 6.9% | 3.0 |
+| $85 (live) | 3 days | +$62.3 | -$6.8 | $50 | 7.6% | 3.9 |
+| $70 | 3 days | +$76.6 | -$2.0 | $60 | 5.9% | 4.8 |
+| $60 | 3 days | +$91.4 | -$2.2 | $71 | 5.8% | 5.8 |
+| $50 | 3 days | +$113.0 | -$3.7 | $85 | 5.7% | 7.3 |
+
+- **Steps barely matter; the dollar figure per contract does.** Weekly against 3 day steps at $85: +$60.8 against +$62.3. The cap reaches the balance's limit within a couple of reviews either way, so the speed of the steps changes little over 10 weeks. The dollars per contract set where it ends up.
+- **Each $10 cheaper adds roughly $14 to $20 of mean and about $10 to $14 of deepest drawdown.** The 5th percentile stays near break-even at every row, because most of the downside sits in the 1% tail, not the 5th (1st percentile -$27 at $85, -$45 at $50).
+- **The modelled loss stop never trips (0.00 stop days).** 10% of a $344 balance is $34, and a bad day at 4 to 7 contracts loses well under that in this history (one loss is $3 to $6). At this size the stop is a guard against a failure of the system, not a limit on a bad day of normal trading.
+- **Cheaper in the other sense, a lower price band, is worse per dollar.** From B1 to B3: the 88c to 90c band returned -0.56% per dollar risked, 90c to 92c +1.37%, 92c to 95c +2.02%, 95c to 97c +0.24%. More contracts per dollar by buying the cheapest contracts concentrates risk in the weakest band.
+- **What this does not say.** Resampled history with a made-up fill rate; the edge (+0.9c a contract) is unproven and failed its own bar, and a size that doubles the mean also roughly doubles the loss if the edge is zero. Forward checks F0 to F9 still decide whether any of this is real.
+- Count: unchanged, **2,577 as of 2026-10-08**.
