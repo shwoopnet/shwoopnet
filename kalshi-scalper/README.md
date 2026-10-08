@@ -1834,3 +1834,21 @@ First look at the order book recorder (`scalper.recorder`, top five levels, abou
   in all, so no band has enough to report.
 - **What would settle it.** The Firestore recorder's 24 hour download (Kalshi page, "Download book snapshots") has days of snapshots at the same cadence. P2, `obstats`
   and this section should be re-run on that file, not on this one.
+
+## Pre-registration: N1 and N2, H7's distance rule near the settlement boundary (fixed 2026-10-08 07:02 UTC, before any code or result for them)
+
+H7 (spot distance from the strike, in units of typical movement, at 6 minutes left) was `FALSIFIED`. What it did not do is look where distance matters most:
+with 2 or 1 minutes left the remaining movement is small, so a spot that sits a fraction of a sigma from the strike is a near certain outcome, and the market's
+price (a coin flip to a favourite) may lag. Nothing was run at these times. This is the same machinery and the same rule as H7 at a different decision minute, so it
+is one mechanism tried at two times, not a new mechanism.
+
+- **N1:** `distance.py` with the decision at 2 minutes left (`DECISION_LEFT_S = 120`, `MINUTES_LEFT = 2`). **N2:** the same at 1 minute left (60 s, 1). Everything else
+  is H7 as coded: Bitcoin only, sigma the standard deviation of the previous 60 one minute log returns, markets ordered by close time, the first half estimates the YES
+  share in each z bucket, the second half tests the single fixed rule (buy a side only when the bucket's rate beats the price, the fee and a margin of 2c).
+- **Counterparty.** Quoters who do not reprice a near-settled market for the last minute or two of spot movement. **Numeric prediction, stated before the run:** net
+  about -1c a contract for both, with 100 to 300 entries in the test half; the fee at prices near 50c is about 1.75c a contract and the information gain is small
+  once the market already reflects spot. **The pre-registered expectation is `FALSIFIED` or `NOT_ENOUGH_DATA`.**
+- **Kill criteria.** Two tries at the bar: at least 300 entered markets in the test half, mean net positive with a day clustered z of at least **2.4**, both
+  halves of the test half positive, positive with fees times 1.2. Fewer than 300 is `NOT_ENOUGH_DATA`. Anything else is `FALSIFIED`. The universe is fixed (every
+  Bitcoin market with a usable quote and 61 spot minutes).
+- **Count.** Two variants: **2,563 as of 2026-10-08**.
