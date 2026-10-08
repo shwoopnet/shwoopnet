@@ -33,8 +33,8 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,573 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
-Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
+Strategy variants tried so far: **2,574 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -2043,3 +2043,12 @@ have to do. Nothing below was run.
   95c to 97c: 96.6% against 96.3% (+0.2, 0.6). Per dollar risked: -0.56%, +1.37%, +2.02%, +0.24%. 92c to 95c is the one band with a margin well outside its noise, and it is also the band the walk-forward kept in both folds, but it was singled out
   by looking, one of four, so it is a candidate for a forward look and not a finding (see F9).
 - **Count.** Three variants: **2,573 as of 2026-10-08**.
+
+## Pre-registration: a forward look at 92c to 95c, F9 (fixed 2026-10-08 14:21 UTC, before it was run on any market after 14:30)
+
+B1 to B3 left one band standing out on all 69 days (92c to 95c: win rate 95.7% against 93.9% needed, about 3 standard errors) and kept by the walk-forward in both folds. It was singled out after looking, so the 69 days cannot count for it.
+
+- **F9.** L1 (6 minutes left, taker at the ask, hold) restricted to entries priced 0.92 to 0.95, both series, on markets that close after **2026-10-08 14:30:00 UTC** (close_ts above 1791469800). It is nested inside F5 (90c to 95c) and F0, so it is not an independent test of them.
+- **Prediction, stated before the run.** Net about +1.0c a contract (below the +1.88c seen on 69 days, which was selected by looking). **The expectation is that it does not pass.**
+- **Bar.** The common one: at least 300 entries on 5 days, z at least 2.1, both halves positive, fees times 1.2 positive, and above F0 on the same markets. About 16 entries a day, so 300 take about 19 days.
+- **Count.** One more variant: **2,574 as of 2026-10-08**.

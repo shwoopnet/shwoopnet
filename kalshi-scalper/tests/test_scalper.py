@@ -2026,3 +2026,12 @@ assert _BN.null_p95(_E, {}, lambda w: _BN.walk_forward(w)[0], reps=20) == _BN.nu
 _tbl = _BN.band_table(_E)
 assert [r["band"] for r in _tbl] == ["88c to 90c", "90c to 92c", "95c to 97c"] and abs(_tbl[1]["win"] - 1.0) < 1e-9 and _tbl[1]["margin"] > 0 > _tbl[2]["margin"], "win rate against the win rate needed"
 print("bands B1-B3 tests passed")
+
+# F9: only markets after the cutoff, only entries priced 0.92 to 0.95, F0 on the same markets alongside.
+_T9 = _fw.F9_START
+def _mk9(tk, series, close, ask, res):
+    return (tk, series, [(close - 360, round(ask - 0.01, 4), ask, 0, 0)], close, res)
+_f9m = [_mk9("N9a", "KXBTC15M", _T9 + 900, 0.93, "yes"), _mk9("N9b", "KXBTC15M", _T9 + 1800, 0.96, "yes"), _mk9("N9c", "KXBTC15M", _T9 + 2700, 0.91, "no"), _mk9("N9d", "KXBTC15M", _T9, 0.93, "yes")]
+_f9, _f9b = _fw.f9_rule(_f9m)
+assert [e["ticker"] for e in _f9] == ["N9a"] and {e["ticker"] for e in _f9b} == {"N9a", "N9b", "N9c"}, "a price band, markets after the cutoff only (one closing exactly at it is not after it)"
+print("forward F9 tests passed")
