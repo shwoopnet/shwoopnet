@@ -2051,3 +2051,16 @@ assert _r["tripped"] and _r["n"] == 3, "orders that have not settled count as lo
 _r = _RC.run_day([_re(100000, 0.92, True), _re(100900, 0.92, False)], 2, 10.0, _rnd.Random(1))
 assert not _r["tripped"] and abs(_r["pnl"] - ((2 - 1.86) - 1.86)) < 1e-9 and abs(_r["worst"] + 1.86) < 1e-9, "a win pays 1 a contract, a loss costs the whole order"
 print("risk cap tests passed")
+
+# Sizing replay: skim only banks half of NEW net highs (never more than half the net profit made), flat sizes stay flat, and the cap never passes the ceiling.
+import random as _rnd2
+from scalper import sizing as _SZ
+_by = {f"2026-10-{d:02d}": [{"price": 0.92, "gross": 0.08 if (d + i) % 10 else -0.92} for i in range(12)] for d in range(1, 8)}
+_days = sorted(_by)
+_tot, _dd, _sv, _cap, _pk = _SZ.path(_by, _days, dpc=100, skim=True, addon_max=2, fixed=0, rng=_rnd2.Random(3), ndays=14, fill=1.0)
+assert _sv <= 0.5 * max(0.0, _pk) + 1e-6, "savings never exceed half of the best net profit reached (the first version skimmed every win and banked far more than the net)"
+_t3 = [_SZ.path(_by, _days, dpc=100, skim=False, addon_max=0, fixed=3, rng=_rnd2.Random(k), ndays=14, fill=1.0)[3] for k in range(5)]
+assert set(_t3) == {3}, "a flat size stays flat"
+_t10 = _SZ.path(_by, _days, dpc=1, skim=True, addon_max=2, fixed=0, rng=_rnd2.Random(3), ndays=70, fill=1.0)
+assert _t10[3] <= 10, "the cap never passes the hard ceiling however much the balance would allow"
+print("sizing replay tests passed")
