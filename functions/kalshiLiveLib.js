@@ -332,6 +332,31 @@ const totalCash = (balanceBody) => {
   return Number.isFinite(cents) ? cents / 100 : NaN;
 };
 
+// What one filled order made once its market settled, by the one rule used everywhere: the order's worst-case cost (maxCost) is paid in
+// proportion to what filled, and each winning contract pays $1. A win is therefore booked slightly low and a loss slightly high.
+function settledFields(t, result) {
+  const cost = Number(t.maxCost);
+  const want0 = Number(t.count) > 0 ? Number(t.count) : 1, got0 = Math.min(Number(t.fillCount), want0);
+  return { settled: true, result, settledPnl: Number(((result === t.side ? got0 : 0) - cost * (got0 / want0)).toFixed(4)) };
+}
+
+// Settles filled orders whose market has finished, whether or not a session is running. The session's own check stops when the session ends, so a
+// trade that settled after a stop (or just after the 24 hours) stayed "open" in the records for ever and never reached the page's loss and win
+// counts. Called every minute by the scheduled function; reads at most `max` public markets, never places or changes an order, and a failed read
+// leaves the order open for the next minute.
+async function settleOpenOrders({ store, fetchFn, nowMs, max = 12 }) {
+  const open = (await store.openFilled()).filter((t) => t.settled !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
+  let settled = 0;
+  for (const t of open.slice(0, max)) {
+    const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
+    const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
+    if (r !== "yes" && r !== "no") continue;
+    await store.updateTest(t.id, settledFields(t, r));
+    settled += 1;
+  }
+  return { settled, looked: Math.min(open.length, max) };
+}
+
 // What the bot's own filled trades in this session have done. A settled trade is read once from the public market and
 // kept on its record; a trade not yet settled is counted at its full cost, as if it lost. Costs are the order's worst-case
 // price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
@@ -346,8 +371,7 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
       const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
       if (r === "yes" || r === "no") {
         result = r;
-        const want0 = Number(t.count) > 0 ? Number(t.count) : 1, got0 = Math.min(Number(t.fillCount), want0);
-        await store.updateTest(t.id, { settled: true, result, settledPnl: Number(((r === t.side ? got0 : 0) - cost * (got0 / want0)).toFixed(4)) });
+        await store.updateTest(t.id, settledFields(t, r));
       }
     }
     // A partial fill costs and pays in proportion; orders from before size scaling have count 1.
@@ -474,5 +498,5 @@ async function runL1Tick(args) {
 module.exports = {
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, l1Count, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, settleOpenOrders, settledFields, l1Count, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_SESSION_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
 };

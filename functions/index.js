@@ -236,6 +236,8 @@ function firestoreLiveStore(db) {
       const s = await col.orderBy("ts", "desc").limit(1).get();
       return s.empty ? null : s.docs[0].data().ts;
     },
+    // Filled orders (a single-field query, so no index); the caller keeps the ones not yet settled.
+    async openFilled() { return (await col.where("status", "==", "filled").get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
     async hasUnresolved() {
       const s = await col.where("status", "in", ["sending", "unknown"]).limit(1).get();
       return !s.empty;
@@ -437,6 +439,13 @@ exports.kalshiLiveArmed = onSchedule(
           quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
         });
+      }
+      // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
+      // delay the tick: a bad read is logged and the next minute tries again.
+      try {
+        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now });
+      } catch (e) {
+        console.error("kalshiLiveArmed: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
       }
       // Keep the account page current while nobody has it open: the latest read is stored for the page to show the
       // moment it loads, at the minutes where the account can change (see snapshotDue). This runs after the tick and can never fail it: a bad read is logged and the minute still counts.
