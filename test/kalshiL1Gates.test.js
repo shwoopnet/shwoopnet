@@ -324,7 +324,7 @@ gates.N25 = async () => {
   assert.strictEqual(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 3 * 86400000), 0, 'off for a week after a loss stop');
   assert.ok(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 8 * 86400000) > 0);
   // Through a tick: the cap plus the add-on sets the size, and the balance the weekly review sees excludes savings.
-  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '341.0000', exchange_index: 2 }] } });
+  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }] } });
   const saved = [];
   await tick(w, { sizingState: { cap: 3, base: 341, reviewedAt: NOW - 1000, pool: 2, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
   assert.strictEqual(w.posts[0].count, '5', 'cap 3 plus two from a $2 pool');
@@ -417,15 +417,15 @@ gates.N18 = async () => {
   assert.strictEqual(small.posts[0].count, '1', 'a $40 account is one contract');
   const mid = world({ session: { startCash: 106, sizing: true }, balance: { balance_breakdown: [{ balance: '106.0000', exchange_index: 2 }] } });
   await tick(mid);
-  assert.strictEqual(mid.posts[0].count, '1', 'a $106 account is one contract (one per $100 of balance)');
+  assert.strictEqual(mid.posts[0].count, '1', 'a $106 account is one contract (1% is $1.06)');
   const two = world({ session: { startCash: 250, sizing: true }, balance: { balance_breakdown: [{ balance: '250.0000', exchange_index: 2 }] } });
   await tick(two);
-  assert.strictEqual(two.posts[0].count, '2', 'a $250 account is two contracts');
+  assert.strictEqual(two.posts[0].count, '2', 'a $250 account is two contracts (1% is $2.50)');
   const huge = world({ session: { startCash: 5000, sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(huge);
   assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
-  assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(106.5, 0.92), live.l1Count(138, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
-  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.05, 3], 'the share of cash per order, the scaled stop and the cap');
+  assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(213, 0.92), live.l1Count(276, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
+  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.01, 0.05, 3], 'the share of cash per order, the scaled stop and the cap');
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4).count, '4', 'the cap can rise, so four is a valid order');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, live.L1_ORDER_CEILING + 1), /refusing/, 'but never past the order ceiling');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
@@ -537,15 +537,15 @@ gates.N31 = () => {
   // Reseed (set by Start): raises a collapsed cap to what a fresh start gives, re-bases the stop, never lowers, never raises within a week of a loss stop.
   const lowSt = { cap: 1, base: 0.4, reviewedAt: T0, lastStopAt: null, reseed: true };
   const r = live.reviewSizing(lowSt, 509, T0 + H);
-  assert.deepStrictEqual([r.state.cap, r.state.base, r.state.reseed], [3, 509, false], 'a collapsed cap is restored on Start');
+  assert.deepStrictEqual([r.state.cap, r.state.base, r.state.reseed], [5, 509, false], 'a collapsed cap goes straight to the balance target on Start');
   assert.strictEqual(live.reviewSizing({ ...lowSt, cap: 7 }, 509, T0 + H).state.cap, 7, 'a higher saved cap is never lowered by Start');
   assert.strictEqual(live.reviewSizing({ ...lowSt, lastStopAt: T0 }, 509, T0 + H).state.cap, 1, 'no restoring within a week of a loss stop');
 };
 
 gates.N30 = () => {
-  // Profit-funded contracts have no fixed limit, but the risk stays inside the 2% of cash rule and the pool holds only profit.
+  // Profit-funded contracts have no fixed limit, but the risk stays inside the 1% of cash rule and the pool holds only profit.
   assert.strictEqual(live.skimAddon({ pool: 4.65 }, 5), 5, 'a pool of five contract costs buys five extras');
-  assert.strictEqual(live.l1Count(344, 0.93, 3 + 5), 7, 'but one order never risks more than 2% of cash, however large the pool');
+  assert.strictEqual(live.l1Count(509, 0.93, 3 + 5), 5, 'but one order never risks more than 1% of cash, however large the pool');
 };
 
 (async () => {

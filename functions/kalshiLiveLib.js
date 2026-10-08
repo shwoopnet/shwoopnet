@@ -289,7 +289,9 @@ const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
 // least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 10% of the starting cash instead of the flat $10. Raised by the owner on
 // Oct 8, 2026 (from 1% and 7%/$7). At 2% a $106 account buys two contracts (two need about $92 to $98 of cash, three about $138 to $146).
 const L1_SIZE_MAX = 3;
-const L1_SIZE_FRACTION = 0.02;
+// One position never risks more than 1% of cash (the owner's choice, Oct 8, 2026, up from a 2% limit that never bound because the cap was 3). Two markets can trade
+// the same window; the second is sized on the cash left after the first, so both together stay at about 2%.
+const L1_SIZE_FRACTION = 0.01;
 // 5%, tightened from 10% on Oct 8, 2026 at the owner's choice: 10% of a $344 balance is $34, more than the worst modelled day at 5 contracts (about $20), so it
 // never tripped. 5% is about $17, a real circuit breaker that a bad day at 4 to 5 contracts can reach.
 const L1_SIZED_STOP_FRACTION = 0.05;
@@ -306,7 +308,7 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
 const L1_SIZE_CEILING = 10;
 // The balance-driven cap stops at L1_SIZE_CEILING, but contracts bought with reinvested PROFIT (the add-on) no longer have their own limit (Oct 8, 2026, the owner's
 // choice). What bounds them: the pool holds only skimmed profit, one extra contract needs one full contract cost of it, a loss comes out of the pool first, and the
-// 2% of cash rule in l1Count still caps every order, so the original capital is never put at more risk than before. L1_ORDER_CEILING is only a fat-finger guard on a
+// 1% of cash rule in l1Count still caps every order, so the original capital is never put at more risk than before. L1_ORDER_CEILING is only a fat-finger guard on a
 // single order body, far above anything those rules allow; it is not a sizing rule.
 const L1_ORDER_CEILING = 50;
 const SCALE_DOLLARS_PER_CONTRACT = 85;
@@ -324,7 +326,7 @@ function scaleTarget(cash) {
 // the cap is cut only when the target has stayed below it for SCALE_FALL_CONFIRM_MS. Real losses are still bounded in the meantime by the loss stop (which keeps
 // its old base while waiting), and money that was only locked comes back inside the window and clears the wait.
 const SCALE_FALL_CONFIRM_MS = 2 * 3600 * 1000;
-// Starting a session with scaling on sets state.reseed. The next review then raises the cap to what a fresh start would give (never lowers it, never raises it within
+// Starting a session with scaling on sets state.reseed. The next review then raises the cap to the balance's target (never lowers it, never raises it within
 // a week of a loss stop) and re-bases the stop on the current balance, so an owner who restarts after a collapse is not stuck waiting out the slow steps.
 function reviewSizing(state, cash, now) {
   const target = scaleTarget(cash);
@@ -336,7 +338,7 @@ function reviewSizing(state, cash, now) {
   const lastStopAt = Number.isFinite(state.lastStopAt) ? state.lastStopAt : null;
   const paused = lastStopAt !== null && now - lastStopAt < SCALE_STOP_PAUSE_MS;
   if (state.reseed === true) {
-    if (!paused) cap = Math.max(cap, Math.min(L1_SIZE_MAX, target));
+    if (!paused) cap = Math.max(cap, target);   // Start is the owner's deliberate act, so it goes straight to the target instead of the slow steps
     base = cash; reviewedAt = now; lowSince = null;
     cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
     return { state: { ...state, cap, base, reviewedAt, lastStopAt, reseed: false, lowSince }, changed: true };
@@ -446,7 +448,7 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
 
 // Profit reinvestment with a skim (the owner's idea, Oct 8, 2026). Only NEW net profit is split: the cumulative settled result since the state began
 // has a high-water mark, and when it rises to a new high, SKIM_REINVEST of the rise goes to a pool that buys extra contracts on later orders (one per full contract cost
-// in the pool, no fixed limit, still under the 2% of cash rule) and the rest is set aside as savings. The weekly review does NOT count
+// in the pool, no fixed limit, still under the 1% of cash rule) and the rest is set aside as savings. The weekly review does NOT count
 // savings as balance, so skimmed money is never sized up on a second time. Skimming each win separately was tried first and is wrong: wins here are
 // 6c and losses 90c, so half of every WIN banks far more than the net profit and the base shrinks underneath it (in a replay, savings of $150 on a net
 // of -$6). A win that only recovers an earlier drop skims nothing. A loss comes out of the pool first (never below zero); a loss stop empties the
