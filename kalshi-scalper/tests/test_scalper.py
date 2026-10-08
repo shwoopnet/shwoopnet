@@ -1846,3 +1846,39 @@ from scalper import obstats as _OS
 _st = _OS.stats([(0, "A", 0, 0.93, 0.92, 100), (10, "A", 0, 0.931, 0.92, 50), (20, "A", 0, 0.931, 0.92, 70), (30, "A", 0, 0.93, 0.92, 70), (100, "A", 0, 0.99, 0.9, 1), (5, "B", 0, 0.93, 0.92, 10)])
 assert _st["pairs"] == 3 and _st["gaps"] == 1 and abs(_st["up"] - 1 / 3) < 1e-9 and abs(_st["same"] - 1 / 3) < 1e-9 and abs(_st["down"] - 1 / 3) < 1e-9
 print("obstats tests passed")
+
+# Q1 to Q3: filters split L1's entries into arm and complement, what cannot be evaluated is excluded from both, and a filter that adds nothing is FALSIFIED.
+from scalper import filters as _FL
+import inspect as _insp2
+import random as _rq
+def _e(i, side="yes", series="KXBTC15M", price=0.92, win=True, day=None):
+    net = (1.0 if win else 0.0) - price - _FL.fee(price)
+    return {"ticker": f"T{i}", "series": series, "day": day or f"2026-10-{1 + i % 10:02d}", "close_ts": 1000 + i * 900, "side": side, "price": price,
+            "net": net, "stress": (1.0 if win else 0.0) - price - _FL.fee(price, 1.2), "gross": 0.0}
+_zs = {"T0": 1.5, "T1": -1.5, "T2": 0.2, "T3": None, "T4": -1.0}
+_orig = _FL.spot_z
+_FL.spot_z = lambda close_ts, strike, spot: _zs.get({1000 + i * 900: f"T{i}" for i in range(6)}[close_ts])
+_arm, _comp, _ex = _FL.split_q1([_e(0, "yes"), _e(1, "yes"), _e(2, "yes"), _e(3, "yes"), _e(4, "no"), _e(5, "yes", "KXGOLD15M")], {}, {})
+_FL.spot_z = _orig
+assert [e["ticker"] for e in _arm] == ["T0", "T4"], "spot at least one sigma on the side's side; at exactly -1.0 a NO is supported"
+assert [e["ticker"] for e in _comp] == ["T1", "T2"] and _ex == 2, "wrong way or close is the complement; no z and gold are excluded and counted"
+_res = {("KXBTC15M", 1000 + 0 * 900 - 900): "yes", ("KXBTC15M", 1000 + 1 * 900 - 900): "no", ("KXBTC15M", 1000 + 2 * 900 - 900): None}
+_a2, _c2, _x2 = _FL.split_q2([_e(0, "yes"), _e(1, "yes"), _e(2, "yes"), _e(3, "yes")], _res)
+assert [e["ticker"] for e in _a2] == ["T0"] and [e["ticker"] for e in _c2] == ["T1"] and _x2 == 2, "the previous result is read at close - 900 s, nothing later"
+_q = {("KXGOLD15M", 1000): (0.69, 0.71), ("KXGOLD15M", 1900): (0.29, 0.31), ("KXGOLD15M", 2800): (0.49, 0.51)}
+_a3, _c3, _x3 = _FL.split_q3([_e(0, "yes"), _e(1, "yes"), _e(2, "yes"), _e(3, "yes")], _q)
+assert [e["ticker"] for e in _a3] == ["T0"] and [e["ticker"] for e in _c3] == ["T1"] and _x3 == 2, "a twin near 50c or missing is excluded, not counted as disagreeing"
+# A planted edge in the arm (wins 99%) with a fair complement passes; with no edge it fails; an arm no better than its complement fails.
+_r = _rq.Random(4)
+_good = [_e(i, win=_r.random() < 0.995, day=f"2026-10-{1 + i % 12:02d}") for i in range(500)]
+_fair = [_e(i + 1000, win=_r.random() < 0.92, day=f"2026-10-{1 + i % 12:02d}") for i in range(500)]
+_vg, _sg = _FL.verdict(_good, _fair, _FL.null_p95(_good, reps=100))
+assert _vg == "NOT_YET_FALSIFIED" and _sg["diff"] > 0, _sg
+_vz, _ = _FL.verdict(_fair, _fair)
+assert _vz == "FALSIFIED", "an arm identical to its complement adds nothing"
+assert _FL.verdict(_good[:299], _fair)[0] == "NOT_ENOUGH_DATA"
+_z2 = _FL.verdict([dict(e, day="2026-10-01") for e in _good], _fair)[0]
+assert _z2 == "NOT_ENOUGH_DATA", "5 days needed"
+assert _FL.null_p95(_fair, reps=100) == _FL.null_p95(_fair, reps=100) and _FL.null_p95(_fair, reps=100) < 0.03, "the fair market null is seeded and sits near the fee drag"
+assert all(not _insp2.signature(f).parameters.keys() & {"perf", "target", "until", "profit"} for f in (_FL.verdict, _FL.summarize, _FL.diff_z, _FL.null_p95))
+print("filter Q1-Q3 tests passed")
