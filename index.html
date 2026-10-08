@@ -9736,7 +9736,8 @@
     var cell = function(v){ return v === undefined || v === null || (typeof v === 'number' && !Number.isFinite(v)) ? '' : String(v).replace(/[",\n]/g, ' '); };
     var lv = function(arr){
       var best = (Array.isArray(arr) ? arr : []).slice().reverse(), out = [];
-      for(var i = 0; i < 3; i++){ out.push(best[i] ? best[i][0] : '', best[i] ? best[i][1] : ''); }
+      // A level is {p, q} (Firestore does not allow arrays inside arrays); the older pair form [p, q] is still read.
+      for(var i = 0; i < 3; i++){ var L = best[i]; out.push(L ? (L.p !== undefined ? L.p : L[0]) : '', L ? (L.q !== undefined ? L.q : L[1]) : ''); }
       return out;
     };
     var rows = [], minutes = 0;
