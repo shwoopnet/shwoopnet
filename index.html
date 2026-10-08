@@ -614,14 +614,6 @@
     background: transparent; border:1px solid var(--loss); color: var(--loss);
     padding:8px 16px; border-radius:5px; font-size:12px; cursor:pointer;
   }
-  /* Same shape as the reset button, without the destructive red -- enabling
-     notifications is an ordinary action, not a dangerous one. */
-  .settings-action-btn{
-    background: transparent; border:1px solid var(--amber-dim); color: var(--amber);
-    padding:8px 16px; border-radius:5px; font-size:12px; cursor:pointer; flex-shrink:0;
-  }
-  .settings-action-btn:hover{ background: var(--amber-glow); }
-  .settings-action-btn[disabled]{ border-color: var(--border); color: var(--muted); cursor:default; background:transparent; }
   .settings-reset-btn:hover{ background: var(--loss-glow); }
   .settings-reset-btn.confirming{ background: var(--loss); color:#fff; animation: flattenPulse 1s ease-in-out infinite; }
   .settings-reset-btn[disabled]{ opacity:.6; cursor:default; }
@@ -657,8 +649,6 @@
     box-shadow: var(--card-shadow);
     transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
   }
-  .ft-since{ font-size:12px; color: var(--muted); line-height:1.6; margin-bottom:20px; }
-  .ft-since strong{ color: var(--paper); }
 
   /* Duplicate-trade warning. Sits directly above the stats row because
      these numbers are what a duplicate corrupts -- every one of them is
@@ -958,19 +948,11 @@
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .kal-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:20px; box-shadow:var(--card-shadow); }
   .kal-card-title{ font-family:'Public Sans', sans-serif; font-size:15px; font-weight:700; margin-bottom:14px; }
-  /* Trades: one compact entry each (what happened and its P/L on one line, the detail under it) instead of a tall grid of labels. */
-  .kal-trow{ padding:9px 0; border-top:1px solid var(--border); }
-  .kal-trow:first-child{ border-top:0; padding-top:0; }
-  .kal-trow-main{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:13.5px; }
-  .kal-trow-fill{ font-weight:600; min-width:0; }
-  .kal-trow-pl{ font-family:'Public Sans', sans-serif; font-weight:700; white-space:nowrap; }
-  .kal-trow-sub{ color:var(--muted); font-size:11.5px; margin-top:2px; }
   /* Books: the market and its price on one line, the figures under it. */
   .kal-brow{ padding:10px 0; border-top:1px solid var(--border); }
   .kal-brow:first-child{ border-top:0; padding-top:0; }
   .kal-brow-main{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
   .kal-brow-px{ font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; white-space:nowrap; }
-  .kal-brow-sub{ color:var(--muted); font-size:11.5px; margin-top:3px; line-height:1.5; }
   .kal-status{ color:var(--muted); font-size:12.5px; }
   .kal-books{ display:grid; gap:10px; }
   .kal-row{ display:grid; grid-template-columns:minmax(120px,1.4fr) repeat(4,minmax(70px,1fr)); gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--border); font-size:13px; }
@@ -979,13 +961,8 @@
   .kal-name{ font-weight:600; }
   .kal-empty{ color:var(--muted); font-size:13px; }
   .kal-note{ color:var(--muted); font-size:12px; margin-top:12px; line-height:1.5; }
-  .kal-form{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
-  .kal-form label{ display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
   .kal-input{ width:120px; padding:8px 10px; background:var(--ink); color:var(--paper); border:1px solid var(--border); border-radius:6px; font:inherit; }
-  .kal-check{ font-size:13.5px; line-height:1.6; }
-  .kal-check .kal-ok{ font-weight:700; }
   @media (max-width:640px){ .kal-row{ grid-template-columns:1fr 1fr; } }
-  .kal-wide{ width:260px; }
   select.kal-input{ appearance:auto; }
   .kal-actions{ display:flex; align-items:center; gap:12px; margin:12px 0 4px; flex-wrap:wrap; }
   .kal-btn{ background:var(--paper); color:var(--ink); border:0; border-radius:8px; padding:9px 16px; font:inherit; font-weight:600; cursor:pointer; }
@@ -1060,26 +1037,20 @@
   .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr)); }
   /* The books card now sits in a column beside the trade history, so each market's figures wrap two across instead of five. */
   .kal-bot-grid .kal-books .kal-row{ grid-template-columns:1fr 1fr; }
-  .kal-bot-grid .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(72px,1fr)); }
   .kal-more{ margin-top:10px; }
   .kal-more > summary{ cursor:pointer; color:var(--muted); font-size:12.5px; }
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
   .kal-fold[open] > summary{ margin-bottom:14px; }
   .kal-first{ margin-top:0; }
-  .kal-sub{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; margin:16px 0 6px; }
   .kal-limits{ font-size:14px; line-height:1.7; }
   .kal-big{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; }
   .kal-trade{ display:grid; grid-template-columns:minmax(110px,1.2fr) repeat(4,minmax(80px,1fr)) auto; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--border); font-size:13px; }
-  .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); }
   .kal-trade:first-child{ border-top:0; }
   .kal-trade .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
   .kal-tnote{ grid-column:1 / -1; color:var(--muted); font-size:12px; }
-  .kal-flag{ color:var(--muted); font-size:11px; border:1px solid var(--border); border-radius:999px; padding:1px 7px; margin-left:4px; }
   .kal-pos{ color:#1f9d55; }
   .kal-warn{ color:#c58a00; }
   .kal-neg{ color:#d64545; }
-  .kal-stat-row{ display:flex; gap:28px; flex-wrap:wrap; margin-bottom:10px; }
-  .kal-stat-row .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
   @media (max-width:640px){ .kal-trade{ grid-template-columns:1fr 1fr; } }
 
   /* ---------- Trade Overview: shared card header ---------- */
@@ -1292,19 +1263,7 @@
     .trade-modal{ padding:16px; }
     .trade-modal-body{ flex-direction:column; }
   }
-  .trade-chart-col{ width:100%; }
   .trade-notes-col{ width:100%; }
-  .trade-notes-toggle{
-    display:flex; justify-content:space-between; align-items:center; width:100%;
-    background:none; border:none; padding:0; margin:2px 0 12px 0; cursor:pointer;
-    font-family:inherit; text-align:left;
-  }
-  .trade-notes-toggle h3{
-    font-family:'Public Sans', sans-serif; font-size:11px; text-transform:uppercase;
-    letter-spacing:.06em; color:var(--muted); font-weight:600; margin:0;
-  }
-  .trade-notes-chevron{ color:var(--muted); font-size:14px; transition: transform .15s ease; }
-  .trade-notes-toggle.collapsed .trade-notes-chevron{ transform: rotate(-90deg); }
   .trade-notes-list{ list-style:none; margin:0; padding:0; }
   .trade-notes-list[hidden]{ display:none; }
   .trade-notes-list li{
