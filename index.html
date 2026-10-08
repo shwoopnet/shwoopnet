@@ -10361,16 +10361,13 @@
       totEl.innerHTML = '<div class="kal-empty">No starting line yet. Open Tools and press "Start fresh from now" so this counts only the bot.</div>';
     } else {
       // The account change also holds deposits, withdrawals and manual trades, so it is not the bot's result (that is on the session card).
-      // Only the BOT's settled trades since the starting line. Deposits, withdrawals and your own trades are left out; the balance move that is not
-      // the bot's is shown on its own line so the two add up to the balance change.
+      // Only the BOT's settled trades since the starting line. Deposits, withdrawals and your own trades are left out. The owner dropped the line that
+      // used to show the rest of the balance move (Oct 8, 2026), so only the bot's own result is shown.
       var botOrders = kalshiResolveOrders(kalshiLiveOrders, a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
       var botNet = kalshiPerfStats(botOrders, tot.since).total;
-      var other = tot.now !== null && Number.isFinite(tot.start) ? Math.round((tot.now - tot.start - botNet) * 100) / 100 : null;
-      var deposits = a.baseline && Number.isFinite(a.baseline.adjustments) ? a.baseline.adjustments : 0;   // money the owner recorded under Tools, taken out of this line
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div>' +
-        (other === null || Math.abs(other - deposits) < 0.5 ? '' : '<div><span class="kal-k">' + (deposits ? 'Manual trades and open orders' : 'Deposits and manual trades') + '</span><b>' + signed(other - deposits) + '</b></div>') + '</div>';
+        '<div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div></div>';
     }
 
     renderKalshiPositions();
@@ -10757,9 +10754,9 @@
         var api = window.__shwoopAPI, v = Number(amt.value);
         if(!api || !api.kalshiLiveAdjust || !currentUserIsAdmin){ return; }
         if(!Number.isFinite(v) || v === 0){ am.textContent = 'Type an amount in dollars first.'; return; }
-        if(!window.confirm((v > 0 ? 'Record a deposit of ' : 'Record a withdrawal of ') + money(Math.abs(v)) + '? It is taken out of the "Deposits and manual trades" line on the Account card and cannot be edited here afterwards.')){ return; }
+        if(!window.confirm((v > 0 ? 'Record a deposit of ' : 'Record a withdrawal of ') + money(Math.abs(v)) + '? It is kept out of the account change figures and cannot be edited here afterwards.')){ return; }
         go.disabled = true; am.textContent = 'Recording...';
-        api.kalshiLiveAdjust(v).then(function(){ return api.kalshiLiveAccount(); }).then(function(d){ render(d); amt.value = ''; am.textContent = 'Recorded. It is taken out of the "Deposits and manual trades" line.'; })
+        api.kalshiLiveAdjust(v).then(function(){ return api.kalshiLiveAccount(); }).then(function(d){ render(d); amt.value = ''; am.textContent = 'Recorded. It is kept out of the account change figures.'; })
           .catch(function(err){ am.textContent = 'Could not record it: ' + ((err && err.message) || 'unknown'); }).then(function(){ go.disabled = false; });
       });
     })();
