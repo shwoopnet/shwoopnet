@@ -376,6 +376,8 @@ exports.kalshiL1Session = onCall(async (request) => {
   const on = request.data && request.data.on === true;
   // Size scaling is off unless this is literally true. It is a choice made when starting, kept on the session, and cannot be changed mid-run.
   const sizing = on && request.data.sizing === true;
+  // The high-point stop is likewise off unless this is literally true, chosen at the start and kept on the session.
+  const trailing = on && request.data.trailing === true;
   const db = getFirestore();
   const ref = db.collection("kalshiLiveControl").doc("session");
   const events = db.collection("kalshiLiveEvents");
@@ -392,8 +394,8 @@ exports.kalshiL1Session = onCall(async (request) => {
     throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the 24 hour session.");
   }
   const now = Date.now();
-  await ref.set({ active: true, since: now, until: now + live.L1_SESSION_MS, ordersSent: 0, startCash: null, sizing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
-  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (" + (live.L1_SIZE_FRACTION * 100) + "% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) });
+  await ref.set({ active: true, since: now, until: now + live.L1_SESSION_MS, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
+  await events.add({ ts: now, kind: "session started", detail: "L1 for 24 hours at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (" + (live.L1_SIZE_FRACTION * 100) + "% of cash per order, up to " + live.L1_SIZE_MAX + " contracts), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the starting cash" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
   return { active: true, until: now + live.L1_SESSION_MS };
 });
 

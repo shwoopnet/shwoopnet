@@ -1304,6 +1304,37 @@ parameter searches, as restated on branch `claude/research-forward-check`), plus
 2 baseline information cuts. The forward check and early momentum branches named here have since been merged into `main`; this line is their union with this search; the line at the top of this file is updated to match. All are `FALSIFIED` or
 `NOT_ENOUGH_DATA`; the forward check of L1 and the four overnight survivors is still open.
 
+## The size ladder for L1 (written 2026-10-08, before the evidence exists)
+
+Written now so that raising the size is never decided in the moment after a good week. It is a commitment device: the owner can change it, but a
+change is a dated edit here, made before the size changes, never after.
+
+**Where it stands.** L1 trades 1 to 3 contracts (size scaling, 2% of cash per order, cap 3), stop 10% of the starting cash on the bot's own
+trades. The evidence is one pre-registered rule that failed its own 30 day test (z 1.45 against 2.1), replicated on older data it had not seen
+(+1.10c per contract, z +2.68), +0.96c over 69 days with an uncertainty of about 0.44c, and a short live record (13 settled wins and no
+losses at the time of writing, which says almost nothing). Simulations on its own history: at the measured edge a 30 day month loses money 12%
+of the time at any size, and 28% of the time if the true edge is half as large.
+
+**Step 1, cap 3 to cap 5.** All of these, read once each, in this order:
+1. The forward check of L1 (rule F0) has at least 300 entries on at least 5 separate days that closed after 2026-10-07 18:30 UTC (earliest read
+   about 2026-10-23), day clustered z at least 2.1, both halves positive, positive with fees x1.2. Verdict `NOT_YET_FALSIFIED` is the most it can say.
+2. The live record has at least 100 settled bot trades, at least one of them a loss (a record with no loss is not evidence about the loss), and a
+   settled bot P/L at or above zero.
+3. The account is at least $250, so five contracts (about $4.60) are under 2% of it.
+4. No session ended on its loss stop in the last 7 days.
+
+**Step 2, cap 5 to cap 8.** A second forward read on a fresh set of at least 300 entries on at least 5 further days that also clears step 1's test
+in item 1, at least 300 settled live trades, at least $400 in the account, and no loss-stop ending in the last 14 days.
+
+**Step down.** Back to 1 contract, and the cap stays there until the owner re-reads this section, if any of these happens: the forward check
+returns `FALSIFIED` (z at or below -2.1 on at least 300 entries), two sessions end on their loss stop within 7 days, or the bot's settled live
+P/L is below -2% of the starting balance.
+
+**Never.** Never raise the size on a winning streak (a streak of wins is the normal state of a rule that wins 94% of the time and loses 92c
+when it does not). Never loosen the stop and raise the size in the same change. Never skip a step. A step is a pull request that pastes the
+evidence it relies on, and the verdict words stay `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. The stop follows the high point only when
+the session was started with that option; the ladder does not require it.
+
 ## The order-book recorder (`recorder.py`, read only)
 
 Records the public order book of the open Bitcoin and gold 15 minute markets every few
