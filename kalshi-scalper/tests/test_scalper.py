@@ -1905,3 +1905,17 @@ assert _FR.order_cost(0.915, 1) - 0.915 > 0.0057 + 0.001, "a tenth-of-a-cent pri
 assert _FR.order_cost(0.95, 2) / 2 < _FR.order_cost(0.95, 1), "at 95c two contracts in one order cost less each than one (at 92c the fee needs both cents, so there is no saving)"
 assert all(_FR.order_cost(p / 100, n) >= n * (p / 100 + _FR.fee(p / 100)) - 1e-9 for p in range(88, 98) for n in range(1, 6)), "rounding never saves money"
 print("fee rounding tests passed")
+
+# N1/N2: the distance rule is re-pointed at another decision minute and the module is restored; the stricter z is applied.
+from scalper import boundary as _BD
+from scalper import distance as _DD
+_before = (_DD.DECISION_LEFT_S, _DD.MINUTES_LEFT)
+_BD.run_variant([], {}, 120, 2)
+assert (_DD.DECISION_LEFT_S, _DD.MINUTES_LEFT) == _before, "H7's constants are restored after a variant"
+_ents = [{"day": f"2026-10-{1 + i % 12:02d}", "close_ts": i, "net": 0.02 + (0.01 if i % 2 else -0.01), "stress": 0.015, "gross": 0.03} for i in range(400)]
+_v, _s = _BD.decide(_ents)
+assert _v in ("NOT_YET_FALSIFIED", "FALSIFIED") and _s is not None
+assert _BD.decide(_ents[:50])[0] == "NOT_ENOUGH_DATA"
+_weak = [dict(e, net=0.001 + (0.2 if i % 3 == 0 else -0.1)) for i, e in enumerate(_ents)]
+assert _BD.decide(_weak)[0] == "FALSIFIED", "a noisy small mean does not pass"
+print("boundary N1-N2 tests passed")
