@@ -2303,3 +2303,14 @@ The owner asked for more ideas for the first 5 to 10 minutes of each market. Eve
 - **Build order.** `tapeflow.py` fetches the first-5-minute trades for each market in the universe (resumable, one SQLite table, public endpoint only), with a test that no trade stamped after minute 5 can enter I. Then it runs once.
 
 **Rows left, and why they wait.** Resting entries (O1 to O3, O5, O7, O8), depth (O36, L12, O47 to O49) and staleness (L5, O11, O50) need days of recorded books, and the recorder started 2026-10-08. They are `NOT_RUNNABLE` today and not counted.
+
+## Pre-registration: T2, early taker flow, closed before L1 (fixed 2026-10-08, before the T1 fetch finished and before any T1 or T2 result was computed)
+
+The owner's design goal for the opening window is trades that **open and close inside it**, so they add to L1 instead of replacing it: L1 enters 6 minutes before the close (its window is 400 s to 330 s left) and must find the market and the cash free. T1 holds to settlement, which breaks that goal. T2 is the same signal with a time exit.
+
+- **Rule.** Same signal, universe and entry as T1 (README, "Pre-registration: T1"): at least 50 taker contracts and |YES minus NO| / total of at least 0.60 over the first 300 s, buy the favoured side at its ask on the candle ending 360 s after the open. **Exit:** sell at that side's bid on the candle ending 480 s after the open (7 minutes left, strictly later than the entry, a real two sided quote required; no quote means no observation). Taker fee on both legs, 7% unrounded. No target, no stop, one exit time. The position is flat 60 s or more before L1's window opens.
+- **Counterparty.** Same as T1: the market maker who quotes the first minutes and is late to a one sided flow.
+- **Prediction, before the run: it does not pass.** Every earlier round trip in this window (M1, C1 to C3, OP1 to OP3) was negative after cost, and opening spreads are 1.0c, so a round trip costs about 2c to 3c in spread and fees before any move. The registered point estimate is **-0.5c per contract**; it needs a gross drift above that cost to reach zero.
+- **Kill criteria.** Identical to T1: any one gives `FALSIFIED` (fewer than 300 signals, fewer than 5 days, day clustered z below 2.1, mean at or below zero, at or below zero with fees x1.2, either half negative, or negative at the 100 contract volume bar).
+- **Count.** One more variant when it runs: **2,584 after T1 and T2** (2,582 now). A result better than the prediction is an audit trigger first: check the exit candle starts after the entry candle and that only trades before 300 s are in the imbalance.
+- **Not a live proposal.** Even a pass would be `NOT_YET_FALSIFIED`: a forward window comes first, and running it live would also need the bot to hold a second position type and keep its cash and loss stop accounting separate from L1's.

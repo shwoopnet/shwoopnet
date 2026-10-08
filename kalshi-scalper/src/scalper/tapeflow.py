@@ -5,6 +5,8 @@ strictly before open + 300 s, and nothing else). Signal: at least 50 taker contr
 ending 360 s after the open (it STARTS after the signal minute, so the fill is on a later bar than the signal), a real two sided quote required, hold to settlement,
 one contract, fee 0.07 p (1 - p). Public endpoint only; no account, key or order.
 
+T2 (README, Pre-registration: T2) is the same signal and entry, closed at the bid on the candle ending 480 s after the open instead of held, so it is flat before L1.
+
 Usage: python -m scalper.tapeflow fetch [days]     (resumable)
        python -m scalper.tapeflow run
 """
@@ -24,6 +26,7 @@ from .scalps import MIN_N, STRESS, Z_BAR, fee
 
 WINDOW_S = 300          # trades in the first 5 minutes only
 ENTRY_END_S = 360       # the candle that ends 360 s after the open starts after the signal
+EXIT_END_S = 480        # T2 only: sell at the candle that ends 480 s after the open, 7 minutes before the close, ahead of L1's window (400 s to 330 s left)
 MIN_TOTAL = 50          # taker contracts in the window
 MIN_TOTAL_STRICT = 100  # the kill criterion: the result must survive this
 MIN_IMBALANCE = 0.60
@@ -94,7 +97,9 @@ def signals(rows: list[tuple], min_total: float = MIN_TOTAL) -> list[tuple]:
     return out
 
 
-def entries(db, min_total: float = MIN_TOTAL) -> list[dict]:
+def entries(db, min_total: float = MIN_TOTAL, roundtrip: bool = False) -> list[dict]:
+    """roundtrip=False is T1 (hold to settlement). roundtrip=True is T2: the same signal and entry, sold at the bid on the candle ending EXIT_END_S after the open
+    (a real two sided quote required, otherwise the market has no observation), with the fee on both legs, so the position is closed before L1's window opens."""
     flow = db.execute("SELECT ticker, yes_ct, no_ct FROM tapeflow").fetchall()
     out = []
     for ticker, side in signals(flow, min_total):
@@ -103,9 +108,19 @@ def entries(db, min_total: float = MIN_TOTAL) -> list[dict]:
         if c is None or not valid_quote(c[0], c[1]):
             continue
         price = c[1] if side == "yes" else round(1 - c[0], 4)
+        day = datetime.fromtimestamp(close_ts, timezone.utc).strftime("%Y-%m-%d")
+        if roundtrip:
+            x = db.execute("SELECT bid_c, ask_c FROM candle WHERE ticker=? AND end_ts=?", (ticker, open_ts + EXIT_END_S)).fetchone()
+            if x is None or not valid_quote(x[0], x[1]):
+                continue
+            sell = x[0] if side == "yes" else round(1 - x[1], 4)
+            gross = sell - price
+            out.append({"ticker": ticker, "day": day, "close_ts": close_ts, "price": price, "won": gross > 0,
+                        "net": gross - fee(price) - fee(sell), "stress": gross - fee(price, STRESS) - fee(sell, STRESS)})
+            continue
         won = (res == "yes") == (side == "yes")
         gross = (1.0 if won else 0.0) - price
-        out.append({"ticker": ticker, "day": datetime.fromtimestamp(close_ts, timezone.utc).strftime("%Y-%m-%d"), "close_ts": close_ts, "price": price,
+        out.append({"ticker": ticker, "day": day, "close_ts": close_ts, "price": price,
                     "won": won, "net": gross - fee(price), "stress": gross - fee(price, STRESS)})
     return sorted(out, key=lambda e: e["close_ts"])
 
@@ -135,6 +150,11 @@ def run() -> None:
     print(f"T1 early taker flow: n={s['n']} on {s['days']} days, net {f(s['mean'])} per contract, z {s['z']:+.2f}, halves {f(s['h1'])} / {f(s['h2'])}, "
           f"fees x{STRESS} {f(s['stress'])}, win {s['win']:.1%} against {s['paid']:.1%} paid, at 100 contracts n={s['strict_n']} net {f(s['strict_mean'])}")
     print(f"VERDICT: {v}")
+    r, rs = entries(db, roundtrip=True), entries(db, MIN_TOTAL_STRICT, roundtrip=True)
+    v2, s2 = verdict(r, rs)
+    print(f"T2 early taker flow, sold at 7 minutes left: n={s2['n']} on {s2['days']} days, net {f(s2['mean'])} per contract, z {s2['z']:+.2f}, halves {f(s2['h1'])} / {f(s2['h2'])}, "
+          f"fees x{STRESS} {f(s2['stress'])}, up {s2['win']:.1%}, at 100 contracts n={s2['strict_n']} net {f(s2['strict_mean'])}")
+    print(f"VERDICT: {v2}")
 
 
 if __name__ == "__main__":

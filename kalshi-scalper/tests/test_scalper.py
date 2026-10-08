@@ -2195,3 +2195,22 @@ assert _v == "FALSIFIED", "a losing rule is FALSIFIED"
 _few = [dict(e, net=0.1, stress=0.09) for e in _ent[:50]]
 assert _TF.verdict(_few, _few)[0] == "FALSIFIED", "fewer than 300 signals can never pass"
 print("T1 tests passed")
+
+# T2, the same signal closed before L1: sold at the bid on a later bar than the entry, fee on both legs, flat before L1's window (400 s to 330 s left) opens.
+import sqlite3 as _sq
+from scalper.scalps import fee as _fee
+assert _TF.ENTRY_END_S < _TF.EXIT_END_S <= 900 - 400, "the exit is after the entry and at least 400 s before the close, ahead of L1's window"
+_db = _sq.connect(":memory:")
+_db.executescript("CREATE TABLE market(ticker, series, open_ts, close_ts, result, strike, n_candles); CREATE TABLE candle(ticker, series, end_ts, bid_c, ask_c);"
+                  "CREATE TABLE tapeflow(ticker TEXT PRIMARY KEY, yes_ct REAL, no_ct REAL, n_trades INTEGER);")
+_db.execute("INSERT INTO market VALUES ('M1','KXBTC15M',1000000,1000900,'yes',0,0)")
+_db.execute("INSERT INTO candle VALUES ('M1','KXBTC15M',1000360,0.60,0.62)")
+_db.execute("INSERT INTO candle VALUES ('M1','KXBTC15M',1000480,0.66,0.68)")
+_db.execute("INSERT INTO tapeflow VALUES ('M1',80,0,40)")
+_e = _TF.entries(_db, roundtrip=True)
+assert len(_e) == 1 and abs(_e[0]["net"] - (0.66 - 0.62 - _fee(0.62) - _fee(0.66))) < 1e-9, "sold at the exit bid, entered at the entry ask, fee on both legs"
+_h = _TF.entries(_db)
+assert abs(_h[0]["net"] - (1.0 - 0.62 - _fee(0.62))) < 1e-9, "T1 is unchanged: held to settlement, one fee"
+_db.execute("DELETE FROM candle WHERE end_ts=1000480")
+assert _TF.entries(_db, roundtrip=True) == [] and len(_TF.entries(_db)) == 1, "no quote at the exit: T2 has no observation, T1 is unaffected"
+print("T2 tests passed")
