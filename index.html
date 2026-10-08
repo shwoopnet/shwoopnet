@@ -9958,14 +9958,29 @@
       dragging = c; c.classList.add('kal-dragging');
       if(e.dataTransfer){ e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', c.getAttribute('data-card')); } catch(x){ /* some browsers refuse */ } }
     });
+    // The card the pointer is over, or the nearest one when it is in a gap, so a drag does not stall between cards.
+    function cardNear(x, y){
+      var best = null, bestD = Infinity;
+      visibleCards().forEach(function(c){
+        if(c === dragging){ return; }
+        var r = c.getBoundingClientRect();
+        var dx = x < r.left ? r.left - x : (x > r.right ? x - r.right : 0), dy = y < r.top ? r.top - y : (y > r.bottom ? y - r.bottom : 0);
+        var d = dx * dx + dy * dy;
+        if(d < bestD){ bestD = d; best = c; }
+      });
+      return best;
+    }
+    grid.addEventListener('dragenter', function(e){ if(dragging){ e.preventDefault(); } });
     grid.addEventListener('dragover', function(e){
       if(!dragging){ return; }
-      var over = e.target.closest ? e.target.closest('[data-card]') : null;
-      if(!over || over === dragging || over.parentNode !== grid){ return; }
-      e.preventDefault();
+      e.preventDefault();   // every dragover must accept the drop, or some browsers stop reordering part way
+      if(e.dataTransfer){ e.dataTransfer.dropEffect = 'move'; }
+      var over = cardNear(e.clientX, e.clientY);
+      if(!over){ return; }
       var r = over.getBoundingClientRect();
       var after = over.classList.contains('kal-span') ? (e.clientY > r.top + r.height / 2) : (e.clientX > r.left + r.width / 2);
-      grid.insertBefore(dragging, after ? over.nextSibling : over);
+      var want = after ? over.nextSibling : over;
+      if(want !== dragging && dragging.nextSibling !== want){ grid.insertBefore(dragging, want); }
     });
     grid.addEventListener('drop', function(e){ if(dragging){ e.preventDefault(); } });
     grid.addEventListener('dragend', function(){
