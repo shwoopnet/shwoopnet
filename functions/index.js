@@ -406,6 +406,33 @@ exports.kalshiL1Session = onCall(async (request) => {
   return { active: true };
 });
 
+// ---- Flatten all + halt (admin only, the owner's emergency button) ---------------------------------------------------------------
+// Order matters: the bot is stopped FIRST (halt switch on, session ended, any armed single order disarmed) with nothing but database writes, so
+// it cannot add to the account while the sells go out, and a failure of the exchange calls cannot leave it running. Then every open position is
+// sold (kalshiLiveLib.flattenAll). Takes nothing from the page.
+exports.kalshiFlattenAll = onCall(
+  { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 60 },
+  async (request) => {
+    await assertKalshiAdmin(request.auth);
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const now = Date.now();
+    await db.collection("kalshiBotMeta").doc("control").set({ halt: true, at: new Date(now) });
+    await db.collection("kalshiLiveControl").doc("session").set({ active: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
+    await db.collection("kalshiLiveControl").doc("arm").set({ armed: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
+    const events = db.collection("kalshiLiveEvents");
+    await events.add({ ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
+    let out;
+    try {
+      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now });
+    } catch (e) {
+      out = { ok: false, reason: "The sells failed: " + String((e && e.message) || e).slice(0, 120), results: [] };
+    }
+    try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
+    return { halted: true, ...out };
+  }
+);
+
 exports.kalshiLiveArmed = onSchedule(
   { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
   async () => {

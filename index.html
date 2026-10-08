@@ -986,6 +986,7 @@
   .kal-console .kal-card{ margin-bottom:0; }
   .kal-card-bare{ background:none; border:0; box-shadow:none; padding:0; }
   .kal-card-flush{ padding:0; }
+  .kal-rail .kal-acct-head{ padding:0 0 10px 0; }
   .kal-card-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 22px 12px 22px; }
   .kal-bot-body{ padding:0 22px 16px 22px; }
   .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:12.5px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
@@ -1033,6 +1034,8 @@
   .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:13px; } .kal-rail .kal-tile .kal-lbl{ font-size:10.5px; }
   .kal-tools-body{ min-width:min(420px,88vw); max-height:70vh; overflow:auto; }
   .kal-tools-body .kal-actions{ margin:8px 0 2px; }
+  .kal-flatten{ padding:0 0 10px 0; margin:0 0 10px 0; border-bottom:1px solid var(--border); }
+  .kal-btn-danger{ background:var(--loss); border-color:var(--loss); color:#fff; }
   .kal-perf-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
   .kal-perf-head select{ font:inherit; font-size:12.5px; background:var(--panel); color:var(--paper); border:1px solid var(--border); border-radius:6px; padding:3px 6px; }
   .kal-tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
@@ -2069,6 +2072,7 @@
   var finnhubCompanyNewsFn = httpsCallable(functions, 'finnhubCompanyNews');
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
   var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
+  var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
   var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
 
@@ -2533,6 +2537,10 @@
     // Arm or disarm the automatic scan. The server sets the 3 hour expiry itself; the page sends only on or off.
     kalshiL1Session: function(on, sizing, trailing){
       return kalshiL1SessionFn({ on: on === true, sizing: sizing === true, trailing: trailing === true }).then(function(res){ return res.data; });
+    },
+    // Emergency exit: halts the bot, ends its session and sells every open position (server side, admin only).
+    kalshiFlattenAll: function(){
+      return kalshiFlattenAllFn({}).then(function(res){ return res.data; });
     },
     watchKalshiLiveControl: function(cb){
       var st = { arm: null, last: null, session: null, account: null };
@@ -3373,7 +3381,12 @@
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
-<div class="kal-note">Reads your real Kalshi account with the live key; it cannot place or change anything. Funds are held per shard, and an order uses only its market's shard (Bitcoin and gold were both on shard 2).</div>
+<div class="kal-flatten">
+            <div class="kal-actions"><button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all + halt</button>
+              <span id="kalFlattenConfirm" hidden><span class="kal-note">Stops the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span></div>
+            <div class="kal-note" id="kalFlattenMsg">The emergency exit. The only thing in this menu that sells.</div>
+          </div>
+          <div class="kal-note">The rest of this menu only reads your real Kalshi account with the live key. Funds are held per shard, and an order uses only its market's shard (Bitcoin and gold were both on shard 2).</div>
           <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
           <div class="kal-note" id="kalDiagMsg">The diagnostics are the bot's order records (times, prices, book sizes, results). No keys or secrets.</div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
@@ -3404,7 +3417,7 @@
     <div id="kalTabBot" class="kal-bot-grid kal-console">
       <div class="kal-rail">
       <div class="kal-card" data-card="account">
-        <div class="kal-card-title">Account</div>
+        <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div><span id="kalL1Pill" class="kal-pill">Not running</span></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-perf"><div id="kalPerf"></div><div class="kal-note" id="kalPerfNote"></div></div>
@@ -3422,7 +3435,6 @@
         </details>
       </div>
       <div class="kal-card kal-card-flush" data-card="session">
-        <div class="kal-card-head kal-bot-head"><div class="kal-card-title" style="margin:0">Bot</div><span id="kalL1Pill" class="kal-pill">Not running</span></div>
         <div class="kal-bot-body">
           <div class="kal-sess-pl kal-sess-row"><span class="kal-lbl" id="kalL1PlLabel">Bot P/L this session</span><span id="kalL1Pl" class="kal-bigpl">n/a</span><span class="kal-lbl" id="kalL1PlSub"></span></div>
           <div id="kalL1Facts" class="kal-facts"></div>
@@ -9930,7 +9942,7 @@
   // One bar per settled trade, oldest to newest: green up for a win, red down for a loss, so a loss is as visible as a win.
   function kalshiBarsSvg(points, esc, money){
     if(!points || !points.length){ return '<div class="kal-empty">Bars appear after the first settled trade.</div>'; }
-    var shown = points.slice(-40), W = 640, H = 120, T = 8, B = 18, L = 4, R = 4;
+    var shown = points.slice(-40), W = 800, H = 96, T = 8, B = 18, L = 4, R = 4;
     var hi = Math.max.apply(null, shown.map(function(p){ return p.pnl; }).concat([0.05])), lo = Math.min.apply(null, shown.map(function(p){ return p.pnl; }).concat([-0.05]));
     var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
     var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
@@ -10361,6 +10373,28 @@
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
   setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
+
+  // Flatten all + halt asks twice: the first click only asks, the confirm click is the only one that sends. The server stops the bot before it sells.
+  (function(){
+    var go = document.getElementById('kalFlatten'), box = document.getElementById('kalFlattenConfirm'), msg = document.getElementById('kalFlattenMsg');
+    var yes = document.getElementById('kalFlattenYes'), no = document.getElementById('kalFlattenNo');
+    function ask(on){ box.hidden = !on; go.hidden = on; }
+    go.addEventListener('click', function(){ ask(true); });
+    no.addEventListener('click', function(){ ask(false); });
+    yes.addEventListener('click', function(){
+      var api = window.__shwoopAPI;
+      if(!api || !api.kalshiFlattenAll || !currentUserIsAdmin){ return; }
+      yes.disabled = true; msg.textContent = 'Stopping the bot and selling...';
+      api.kalshiFlattenAll().then(function(r){
+        var rows = (r && r.results) || [];
+        var line = !r || r.ok === false ? ((r && r.reason) || 'The sells did not run.') + ' The bot is halted.' :
+          (rows.length ? rows.map(function(x){ return kalshiShortTicker(x.ticker) + ': ' + x.status + (x.detail ? ' (' + x.detail + ')' : ''); }).join('. ') : 'No open positions.') + '. The bot is halted and its session is stopped.';
+        msg.textContent = line;
+      }).catch(function(err){
+        msg.textContent = 'Could not reach the server: ' + ((err && err.message) || 'unknown') + '. Check the Kalshi app and press Halt entries here.';
+      }).then(function(){ yes.disabled = false; ask(false); });
+    });
+  })();
 
   document.getElementById('kalBotHalt').addEventListener('click', function(){
     var api = window.__shwoopAPI;

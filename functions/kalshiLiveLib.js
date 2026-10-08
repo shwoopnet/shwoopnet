@@ -517,7 +517,51 @@ async function runL1Tick(args) {
   return { ok: true, results };
 }
 
+// ---- Flatten: the owner's emergency exit -----------------------------------------------------------------------------------------
+// Sells every open position in the account (the bot's AND any the owner opened by hand) at whatever the book will pay, immediately, one
+// immediate-or-cancel order each, never retried. A long YES position is closed by a YES sell (side "ask") at the 1c floor, a long NO position by a
+// YES buy (side "bid") at the 99c ceiling; the limit only says how far the order may go, each contract fills at the book's own price, so
+// this takes the best available bids first and accepts the loss. The count is exactly the position held, so it can close the position and
+// never flip it. A market that is no longer open cannot be traded and settles on its own, so it is reported and skipped. The client order
+// id carries the minute, so a second press inside the same minute is refused by Kalshi instead of selling twice. Not capped by LIVE_CAP:
+// that cap bounds what a BUY may risk, and this only reduces exposure.
+async function flattenAll({ fetchFn, keyId, pem, now }) {
+  const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { limit: "200" }, nowMs: now });
+  if (pos.status !== 200 || !pos.body || typeof pos.body !== "object") return { ok: false, reason: "The positions could not be read (HTTP " + pos.status + "). Nothing was sold.", results: [] };
+  const list = Array.isArray(pos.body.market_positions) ? pos.body.market_positions : [];
+  const held = list.map((p) => ({ ticker: p.ticker, position: num(p.position_fp !== undefined ? p.position_fp : p.position) }))
+    .filter((p) => p.ticker && Number.isFinite(p.position) && p.position !== 0);
+  const results = [];
+  for (const p of held) {
+    const count = Math.abs(p.position);
+    const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(p.ticker), nowMs: now });
+    const m = mk.status === 200 && mk.body && mk.body.market;
+    if (!m) { results.push({ ticker: p.ticker, position: p.position, status: "error", detail: "could not read the market (HTTP " + mk.status + "), nothing sent for it" }); continue; }
+    if (!["active", "open"].includes(m.status)) { results.push({ ticker: p.ticker, position: p.position, status: "skipped", detail: "market is " + m.status + ", it settles on its own" }); continue; }
+    const longYes = p.position > 0;
+    const body = {
+      ticker: p.ticker, side: longYes ? "ask" : "bid", count: String(count), price: longYes ? "0.01" : "0.99",
+      time_in_force: "immediate_or_cancel", self_trade_prevention_type: "taker_at_cross",
+      client_order_id: "FLAT-" + p.ticker + "-" + Math.floor(now / 60000),
+    };
+    if (m.exchange_index !== undefined && m.exchange_index !== null) body.exchange_index = m.exchange_index;
+    const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
+    const d = res.body && typeof res.body === "object" ? res.body : {};
+    if (res.status >= 200 && res.status < 300 && d.order_id) {
+      const filled = Number(d.fill_count || 0);
+      results.push({ ticker: p.ticker, position: p.position, status: filled >= count - 1e-9 ? "sold" : (filled > 0 ? "partly sold" : "no fill"),
+        filled, wanted: count, averageFillPrice: d.average_fill_price || null, detail: filled >= count - 1e-9 ? "" : "the book had too little to take it all, run it again" });
+    } else if (res.status === 409) {
+      results.push({ ticker: p.ticker, position: p.position, status: "skipped", detail: "already sent in the last minute" });
+    } else {
+      results.push({ ticker: p.ticker, position: p.position, status: "error", detail: isAmbiguous(res.status) ? "no clear answer (HTTP " + res.status + "), check the Kalshi account before pressing again" : "refused: " + short(res.body) });
+    }
+  }
+  return { ok: true, results };
+}
+
 module.exports = {
+  flattenAll,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, l1Count, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,

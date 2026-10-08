@@ -52,8 +52,9 @@ gates.Y5 = () => {
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
   assert.deepStrictEqual(names(main), ['books', 'session', 'performance', 'trades'], 'the main column: books tiles, the bot card, the charts and the trades');
   const bot = /<div class="kal-card kal-card-flush" data-card="session">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="performance">/.exec(main)[1];
-  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Facts', 'kalL1Pl']) assert.ok(bot.indexOf('id="' + id + '"') > -1, id + ' lives in the bot card');
+  for (const id of ['kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Facts', 'kalL1Pl']) assert.ok(bot.indexOf('id="' + id + '"') > -1, id + ' lives in the bot card');
   assert.ok(!/kalChart|kalPerf/.test(bot), 'the charts and stats are not in the bot card');
+  assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]) && !/id="kalL1Pill"/.test(bot), 'the running pill sits at the top right of the account card, not on the bot card');
   const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
   for (const id of ['kalChartLine', 'kalChartPie', 'kalChartBars', 'kalChartRange']) assert.ok(perf.indexOf('id="' + id + '"') > -1, id + ' lives in the charts card on the bot page');
   assert.ok(!/id="kalPerf"/.test(perf) && /data-card="account">[\s\S]*id="kalPerf"/.test(rail[1]), 'the stat tiles and tables sit in the account card in the rail');
