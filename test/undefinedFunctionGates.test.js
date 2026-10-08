@@ -73,7 +73,7 @@ const GLOBALS = new Set([
   'setTimeout','setInterval','clearTimeout','clearInterval','requestAnimationFrame','cancelAnimationFrame',
   'fetch','alert','confirm','prompt','console','document','window','navigator','location','localStorage','sessionStorage',
   'Notification','AbortController','URL','URLSearchParams','FormData','Blob','FileReader','Image','Audio','Intl',
-  'AudioContext','webkitAudioContext','CustomEvent','Event','MutationObserver','IntersectionObserver','ResizeObserver','structuredClone','queueMicrotask','btoa','atob',
+  'Response','CompressionStream','AudioContext','webkitAudioContext','CustomEvent','Event','MutationObserver','IntersectionObserver','ResizeObserver','structuredClone','queueMicrotask','btoa','atob',
 ]);
 
 const gates = {};

@@ -132,6 +132,90 @@ gates.Y9 = () => {
   assert.ok(!/kalLayoutCols|colsSel/.test(html), 'no leftover column picker');
 };
 
+// Fit on a small screen: the account card lists only what the bot can spend (shard 2) and folds the rest into one line that appears only when it
+// matters, the order switch only speaks up when it is off, the Layout menu sits in the header, and the session card keeps four facts.
+gates.Y10 = () => {
+  const acct = html.slice(html.indexOf("var useShard = "), html.indexOf("    el.innerHTML = h;"));
+  assert.ok(/x\.shard === 2/.test(acct) && /Available to the bot/.test(acct), 'the line shown is the shard the bot can spend');
+  assert.ok(/otherSum >= 0\.5 \?/.test(acct) && /not usable/.test(acct), 'other shards are one line, and only when there is real money on them');
+  assert.ok(/a\.liveSwitch \? '' : '<div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
+  assert.ok(!/Shard ' \+/.test(acct), 'no per-shard rows');
+  const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
+  assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
+  assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
+  const facts = html.slice(html.indexOf("document.getElementById('kalL1Facts').innerHTML = running"), html.indexOf("var sizeNote"));
+  assert.strictEqual((facts.match(/fact\('/g) || []).length, 6, 'four facts while running and two when ended');
+  assert.ok(/id="kalL1Size"/.test(html) && /Stops if the bot is down/.test(html), 'size and stop are one muted line');
+};
+
+// The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
+gates.Y11 = () => {
+  const m = /(function kalshiDiagnosticsCsv\(orders, limit\)\{[\s\S]*?\n  \})\n/.exec(html);
+  assert.ok(m, 'builder not found');
+  const csv = new Function(m[1] + '; return kalshiDiagnosticsCsv;')();
+  const rows = (t) => t.split('\n');
+  const head = rows(csv([]))[0].split(',');
+  assert.deepStrictEqual(head.slice(0, 3), ['time', 'ticker', 'side'], 'a header even with no orders');
+  assert.strictEqual(rows(csv([])).length, 1);
+  const out = csv([
+    { ts: 1000, ticker: 'T-A', side: 'no', price: 0.89, limit: 0.89, status: 'no fill', fillCount: '0.00', seen: { bid: 0.11, ask: 0.12, bidSize: 12, askSize: 3, at: 'x' } },
+    { ts: 2000, ticker: 'T-B', side: 'yes', price: 0.92, limit: 0.92, status: 'filled', fillCount: '1.00', error: 'HTTP 400, "bad"' },
+    null,
+  ]);
+  const r = rows(out);
+  assert.strictEqual(r.length, 3, 'one row per order, junk skipped');
+  assert.ok(r[1].startsWith('1970-01-01T00:00:02') && r[2].startsWith('1970-01-01T00:00:01'), 'newest first');
+  const col = (line, name) => line.split(',')[head.indexOf(name)];
+  assert.deepStrictEqual([col(r[2], 'seenBid'), col(r[2], 'seenAsk'), col(r[2], 'bidSize'), col(r[2], 'askSize')], ['0.11', '0.12', '12', '3'], 'what the book showed is carried through');
+  assert.strictEqual(col(r[1], 'seenAsk'), '', 'a record with no book data leaves the cells empty, not zero');
+  assert.ok(/"HTTP 400, ""bad"""/.test(r[1]), 'commas and quotes in text are escaped so a row cannot break');
+  const big = csv(Array.from({ length: 400 }, (_, i) => ({ ts: i, ticker: 'T' + i })), 150);
+  assert.strictEqual(rows(big).length, 151, 'at most 150 rows');
+  assert.ok(!/orderId|clientOrderId|key|secret/i.test(head.join(',')), 'no ids that identify the account and no keys');
+  assert.ok(/id="kalDiagCopy"/.test(html) && /navigator\.clipboard\.writeText\(csv\)/.test(html) && /id="kalDiagBox"/.test(html), 'a button, with a manual fallback box');
+};
+
+// The book snapshot export: one row per snapshot, best level first, empty (never zero) where a side has no book, and only the admin can run it.
+gates.Y12 = () => {
+  const m = /(function kalshiBookCsv\(minuteDocs\)\{[\s\S]*?\n  \})\n/.exec(html);
+  assert.ok(m, 'builder not found');
+  const build = new Function(m[1] + '; return kalshiBookCsv;')();
+  const head = build([]).csv.split('\n')[0].split(',');
+  assert.deepStrictEqual([build([]).minutes, build([]).snaps, build([]).csv.split('\n').length], [0, 0, 1], 'a header and nothing else when empty');
+  const r = build([
+    { ts: 60000, snaps: [
+      { t: 61000, s: 'KXBTC15M', k: 'T-A', ly: 0.82, la: 0.83, yb: 0.91, ya: 0.92, nb: 0.08, na: 0.09, yd: 30, nd: 12, yl: [{ p: 0.89, q: 5 }, { p: 0.9, q: 10 }, { p: 0.91, q: 15 }], nl: [[0.07, 4], [0.08, 8]] },
+      { t: 62000, s: 'KXGOLD15M', k: 'T-B', yb: null, ya: null, nb: 0.5, na: null, yd: 0, nd: 7, yl: [], nl: [[0.5, 7]] } ] },
+    { ts: 120000, snaps: 'junk' }, null, { ts: 130000 },
+  ]);
+  const lines = r.csv.split('\n'), col = (line, n) => line.split(',')[head.indexOf(n)];
+  assert.deepStrictEqual([r.minutes, r.snaps, lines.length], [1, 2, 3], 'junk documents are skipped, one row per snapshot');
+  assert.deepStrictEqual(['y1p', 'y1q', 'y2p', 'y3p'].map((n) => col(lines[1], n)), ['0.91', '15', '0.9', '0.89'], 'the best level comes first');
+  assert.deepStrictEqual(['n1p', 'n2p', 'n3p', 'n3q'].map((n) => col(lines[1], n)), ['0.08', '0.07', '', ''], 'a missing level is empty');
+  assert.deepStrictEqual(['yesBid', 'yesAsk', 'y1p', 'y1q'].map((n) => col(lines[2], n)), ['', '', '', ''], 'a side with no book is empty, never 0');
+  assert.strictEqual(col(lines[2], 'noAsk'), '', 'an implied price that is null stays empty');
+  assert.ok(/getDocs\(query\(collection\(db, 'kalshiBookSnaps'\), where\('ts', '>=', sinceMs\), orderBy\('ts', 'asc'\), limit\(1500\)\)\)/.test(html), 'reads only the recorder documents, oldest first, bounded');
+  const h = html.slice(html.indexOf("document.getElementById('kalBookDownload').addEventListener"));
+  assert.ok(/!currentUserIsAdmin\)\{ msg\.textContent = 'Not available/.test(h.slice(0, 600)), 'only the admin can run it');
+  assert.ok(/CompressionStream\('gzip'\)/.test(h) && /kalshi-books-' \+ stamp \+ '\.csv'/.test(h), 'compressed when the browser can, plain CSV when not');
+};
+
+// An empty export says WHY: never saved, stopped, Kalshi reads failing, or saved elsewhere than expected. Nothing is guessed.
+gates.Y13 = () => {
+  const m = /(function kalshiBookExportNote\(docs, status, hours, now\)\{[\s\S]*?\n  \})\n/.exec(html);
+  assert.ok(m, 'not found');
+  const note = new Function(m[1] + '; return kalshiBookExportNote;')();
+  const NOW = 10 * 3600000;
+  assert.strictEqual(note([{ ts: 1, snaps: [{ t: 1 }] }], null, 6, NOW), '', 'data present: nothing to say');
+  assert.ok(/never saved anything/.test(note([], null, 6, NOW)) && /kalshiBookRecorder/.test(note([], null, 6, NOW)), 'no heartbeat at all: not deployed or not running');
+  assert.ok(/has stopped/.test(note([], { lastTickMs: NOW - 3600000, snaps: 0, errs: 5 }, 6, NOW)) && /60 minutes ago/.test(note([], { lastTickMs: NOW - 3600000 }, 6, NOW)), 'an old heartbeat: stopped, and when');
+  assert.ok(/no minute documents/.test(note([], { lastTickMs: NOW - 60000, snaps: 12, errs: 0 }, 6, NOW)), 'a fresh heartbeat but no documents: a write problem');
+  const failing = note([{ ts: 1, snaps: [], errs: [{ e: 'HTTP 403' }] }, { ts: 2, snaps: [], errs: [] }], { lastTickMs: NOW }, 6, NOW);
+  assert.ok(/2 minute documents/.test(failing) && /reads are failing/.test(failing) && /HTTP 403/.test(failing), 'documents with no snapshots: the reads are failing, with the first error');
+  assert.ok(/kalshiBookStatus/.test(html) && /kalshiBookExportNote\(docs, both\[1\], hours, Date\.now\(\)\)/.test(html), 'the button uses it, and reads the heartbeat');
+  assert.ok(/getDoc\(doc\(db, 'kalshiBookMeta', 'status'\)\)/.test(html), 'the heartbeat is the recorder\'s own status document');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

@@ -992,7 +992,6 @@
   .kal-mini{ background:transparent; color:var(--paper); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font:inherit; font-size:12px; cursor:pointer; margin-right:6px; }
   /* The Bot tab lays its cards side by side like the equities setup cards, and wraps to fewer columns on a narrow screen. */
   .kal-bot-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:20px; align-items:start; }
-  .kal-layout-bar{ display:flex; justify-content:flex-end; }
   .kal-layout{ position:relative; }
   .kal-layout > summary{ list-style:none; cursor:pointer; }
   .kal-layout > summary::-webkit-details-marker{ display:none; }
@@ -1004,8 +1003,8 @@
   .kal-bot-grid > .kal-card{ margin-bottom:0; min-width:0; }
   .kal-bot-grid > .kal-span{ grid-column:1 / -1; }
   /* Console layout: a fixed rail for the session, account and positions, and one wide column for the books, the trades and the log. */
-  .kal-console{ grid-template-columns:340px minmax(0,1fr); gap:20px 28px; align-items:start; }
-  .kal-console > .kal-layout-bar{ grid-column:1 / -1; }
+  #page-kalshi .trades-header{ padding:20px 0 14px 0; }
+  .kal-console{ grid-template-columns:340px minmax(0,1fr); gap:16px 28px; align-items:start; }
   .kal-rail, .kal-main{ display:flex; flex-direction:column; gap:16px; min-width:0; }
   .kal-console .kal-card{ margin-bottom:0; }
   .kal-card-bare{ background:none; border:0; box-shadow:none; padding:0; }
@@ -1018,7 +1017,10 @@
   .kal-sess-pl .kal-lbl{ display:block; }
   .kal-sess-pl{ display:flex; flex-direction:column; margin-bottom:12px; }
   .kal-bigpl{ font-family:'Public Sans', sans-serif; font-size:34px; font-weight:700; line-height:1.15; }
-  .kal-facts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px 0; border-top:1px solid var(--border); }
+  .kal-facts{ display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; padding:10px 0 8px 0; border-top:1px solid var(--border); }
+  .kal-rail .kal-card{ padding:16px 20px; }
+  .kal-rail .kal-note{ margin-top:8px; }
+  .kal-rail .kal-actions{ margin:10px 0 2px 0; }
   .kal-facts .kal-lbl{ display:block; font-size:11px; } .kal-facts b{ font-weight:600; font-size:13.5px; }
   .kal-btn-ghost{ background:transparent; color:var(--paper); border:1px solid var(--border); }
   .kal-acct-total{ font-family:'Public Sans', sans-serif; font-size:30px; font-weight:700; line-height:1.15; margin-bottom:8px; }
@@ -2045,7 +2047,7 @@
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction,
-    writeBatch, serverTimestamp, collection, query, orderBy, limit
+    writeBatch, serverTimestamp, collection, query, orderBy, limit, where, getDocs
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
   import {
     getFunctions, httpsCallable
@@ -2557,6 +2559,16 @@
     },
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
+    },
+    // The recorder's stored order-book snapshots (one document per minute, admin read only), oldest first, from a time. At most 1,500 minutes.
+    // The recorder's own heartbeat document (when it last ran and how many snapshots and errors it had).
+    kalshiBookStatus: function(){
+      return getDoc(doc(db, 'kalshiBookMeta', 'status')).then(function(s){ return s.exists() ? s.data() : null; });
+    },
+    kalshiBookSnaps: function(sinceMs){
+      return getDocs(query(collection(db, 'kalshiBookSnaps'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(1500))).then(function(q){
+        return q.docs.map(function(d){ return d.data(); });
+      });
     }
   });
 </script>
@@ -3363,13 +3375,9 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Kalshi</div>
-        <div class="trades-sub">Trade journal and risk limits for the 15 minute Bitcoin and gold markets. Admin only. One page: your live account, the 24 hour L1 session and the live books.</div>
+        <div class="trades-sub">15 minute Bitcoin and gold. Your account, the 24 hour session and the live books.</div>
       </div>
-      <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span></div>
-    </div>
-
-    <div id="kalTabBot" class="kal-bot-grid kal-console">
-      <div class="kal-span kal-layout-bar">
+      <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
@@ -3378,11 +3386,15 @@
           </div>
         </details>
       </div>
+    </div>
+
+    <div id="kalTabBot" class="kal-bot-grid kal-console">
       <div class="kal-rail">
       <div class="kal-card" data-card="session">
         <div class="kal-sess-head"><div class="kal-card-title" style="margin:0">24 hour session</div><span id="kalL1Pill" class="kal-pill">Not running</span></div>
         <div class="kal-sess-pl"><span class="kal-lbl" id="kalL1PlLabel">Bot P/L this session</span><span id="kalL1Pl" class="kal-bigpl">n/a</span><span class="kal-lbl" id="kalL1PlSub"></span></div>
         <div id="kalL1Facts" class="kal-facts"></div>
+        <div id="kalL1Size" class="kal-note" style="margin:0 0 6px 0"></div>
         <div id="kalL1Status" class="kal-note">Not running.</div>
         <div class="kal-actions">
           <button class="kal-btn" id="kalL1Start" type="button">Start 24 hour session</button>
@@ -3425,7 +3437,14 @@
       <div class="kal-card kal-span" data-card="detail">
         <details class="kal-fold"><summary class="kal-card-title">Account detail and starting line</summary>
           <div class="kal-note kal-first">Reads your real Kalshi account with the live key; it cannot place or change anything. Funds are held per shard, and an order uses only its market's shard (Bitcoin and gold were both on shard 2).</div>
-          <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
+          <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
+          <div class="kal-note" id="kalDiagMsg">The diagnostics are the bot's order records (times, prices, book sizes, results). No keys or secrets.</div>
+          <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
+          <div class="kal-actions">
+            <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
+            <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
+          </div>
+          <div class="kal-note" id="kalBookMsg">The recorder's saved order books (best three levels each side, every 10 seconds) as a compressed file you can send. Public market data only; it reads the recorder's documents and changes nothing.</div>
           <div class="kal-note" id="kalAcctMsg"></div>
           <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
           <div class="kal-actions">
@@ -9691,6 +9710,65 @@
     return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' ET';
   }
 
+  // What to tell the owner when an export has nothing in it, so a silent recorder, a stopped one and one whose Kalshi reads fail are told apart.
+  // docs: the minute documents found; status: the heartbeat document or null; hours: the window asked for; now: ms.
+  function kalshiBookExportNote(docs, status, hours, now){
+    var ago = function(ms){ var m = Math.round((now - ms) / 60000); return m < 90 ? m + ' minutes ago' : Math.round(m / 60) + ' hours ago'; };
+    var d = (docs || []).filter(function(x){ return x && Array.isArray(x.snaps); });
+    if(d.length){
+      var snaps = d.reduce(function(n, x){ return n + x.snaps.length; }, 0);
+      if(snaps){ return ''; }
+      var firstErr = null;
+      d.forEach(function(x){ if(!firstErr && Array.isArray(x.errs) && x.errs[0]){ firstErr = x.errs[0].e || JSON.stringify(x.errs[0]); } });
+      return 'Found ' + d.length + ' minute documents, but none hold a snapshot. The recorder is running and its Kalshi reads are failing.' + (firstErr ? ' First error: ' + String(firstErr).slice(0, 160) : '');
+    }
+    if(!status || !Number.isFinite(status.lastTickMs)){ return 'The recorder has never saved anything (it has no heartbeat). It is not deployed or not running: check the Firebase functions logs for kalshiBookRecorder.'; }
+    if(now - status.lastTickMs > 180000){ return 'The recorder last ran ' + ago(status.lastTickMs) + ' and has stopped (' + (status.snaps || 0) + ' snapshots, ' + (status.errs || 0) + ' errors that run). Check the Firebase functions logs for kalshiBookRecorder.'; }
+    return 'The recorder ran ' + ago(status.lastTickMs) + ' (' + (status.snaps || 0) + ' snapshots, ' + (status.errs || 0) + ' errors) but no minute documents are in the last ' + hours + ' hours. Check Firestore for kalshiBookSnaps and the functions logs for write errors.';
+  }
+
+  // The recorder's order-book snapshots as CSV, one row per snapshot, for testing the quoting ideas that need real depth. The recorder stores each
+  // side's best three levels with the best LAST; here they are written best first. A side with no book is left empty, never 0 (zero would read
+  // as a free price). Pure: it reads nothing from the page.
+  function kalshiBookCsv(minuteDocs){
+    var cols = ['t', 'series', 'ticker', 'listBid', 'listAsk', 'yesBid', 'yesAsk', 'noBid', 'noAsk', 'yesDepth3', 'noDepth3',
+      'y1p', 'y1q', 'y2p', 'y2q', 'y3p', 'y3q', 'n1p', 'n1q', 'n2p', 'n2q', 'n3p', 'n3q'];
+    var cell = function(v){ return v === undefined || v === null || (typeof v === 'number' && !Number.isFinite(v)) ? '' : String(v).replace(/[",\n]/g, ' '); };
+    var lv = function(arr){
+      var best = (Array.isArray(arr) ? arr : []).slice().reverse(), out = [];
+      // A level is {p, q} (Firestore does not allow arrays inside arrays); the older pair form [p, q] is still read.
+      for(var i = 0; i < 3; i++){ var L = best[i]; out.push(L ? (L.p !== undefined ? L.p : L[0]) : '', L ? (L.q !== undefined ? L.q : L[1]) : ''); }
+      return out;
+    };
+    var rows = [], minutes = 0;
+    (minuteDocs || []).forEach(function(d){
+      if(!d || !Array.isArray(d.snaps)){ return; }
+      minutes++;
+      d.snaps.forEach(function(x){
+        if(!x){ return; }
+        rows.push([x.t, x.s, x.k, x.ly, x.la, x.yb, x.ya, x.nb, x.na, x.yd, x.nd].concat(lv(x.yl), lv(x.nl)).map(cell).join(','));
+      });
+    });
+    return { csv: [cols.join(',')].concat(rows).join('\n'), minutes: minutes, snaps: rows.length };
+  }
+
+  // The bot's order records as CSV, for working out why orders did not fill. Prices, sizes and ids only (no keys or secrets); newest first, at
+  // most `limit` rows. A field a record does not have is left empty, never filled in. Commas and quotes in a text field are escaped.
+  function kalshiDiagnosticsCsv(orders, limit){
+    var cols = ['time', 'ticker', 'side', 'band', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error'];
+    var cell = function(v){
+      if(v === undefined || v === null){ return ''; }
+      var t = String(v);
+      return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    };
+    var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return b.ts - a.ts; }).slice(0, limit || 150).map(function(o){
+      var seen = o.seen || {};
+      return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.side, o.band, o.price, o.limit, o.sentSide, o.sentPrice, o.status, o.fillCount, o.remainingCount,
+        o.averageFillPrice, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error].map(cell).join(',');
+    });
+    return [cols.join(',')].concat(rows).join('\n');
+  }
+
   // 'h:mm PM' today, 'Tomorrow h:mm PM' the next day, otherwise 'Oct 9 h:mm PM'. A date that does not parse is shown as nothing.
   function kalshiWhen(ms, nowMs){
     if(!Number.isFinite(ms)){ return ''; }
@@ -9923,13 +10001,15 @@
     } else if(!a.balance || !a.balance.ok){
       h += '<div class="kal-neg">The account could not be read: ' + escapeHtml(a.balance ? ('HTTP ' + a.balance.status + ' ' + (a.balance.error || '')) : 'no balance') + '</div>';
     } else {
+      // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
+      // only when there are any worth noting; the account total above already includes them.
+      var useShard = a.balance.shards.filter(function(x){ return x.shard === 2; })[0];
+      var otherSum = a.balance.shards.filter(function(x){ return x.shard !== 2; }).reduce(function(n, x){ return n + x.dollars; }, 0);
       h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div><div class="kal-rows">' +
-        a.balance.shards.map(function(x){
-          var hint = x.shard === 2 ? ' (Bitcoin, gold)' : (x.dollars < 1 ? ' (idle)' : '');
-          return '<div><span class="kal-k">Shard ' + escapeHtml(String(x.shard)) + hint + '</span><b>' + kalshiMoney(x.dollars) + '</b></div>';
-        }).join('') +
-        '<div><span class="kal-k">Order switch</span>' + (a.liveSwitch ? '<b>on</b>' : '<b class="kal-neg">OFF, nothing can be sent</b>') + '</div></div>' +
-        '<div class="kal-note" style="margin-top:8px">Read ' + new Date(a.at).toLocaleTimeString() + '</div>';
+        '<div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars) : '$0.00') + '</b></div>' +
+        (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum) + '</b></div>' : '') +
+        (a.liveSwitch ? '' : '<div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div>') + '</div>' +
+        '<div class="kal-note" style="margin-top:8px">Read ' + new Date(a.at).toLocaleTimeString() + (a.liveSwitch ? ', order switch on' : '') + '</div>';
     }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
@@ -9951,7 +10031,7 @@
       totEl.innerHTML = '<div class="kal-rows">' +
         '<div><span class="kal-k">Change since start</span>' + (tot.change === null ? '<b>n/a</b>' : '<b class="' + (tot.change >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tot.change >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tot.change)) + '</b>') + '</div>' +
         '<div><span class="kal-k">Starting balance</span><b>' + kalshiMoney(tot.start) + '</b></div>' +
-        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(new Date(tot.since).toLocaleDateString([], { month: 'short', day: 'numeric' })) + '. Includes deposits, withdrawals and manual trades.</div></div>';
+        '<div class="kal-note" style="margin:0">Since ' + escapeHtml(new Date(tot.since).toLocaleDateString([], { month: 'short', day: 'numeric' })) + '. Includes deposits and manual trades.</div></div>';
     }
 
     var posEl = document.getElementById('kalBotOpen');
@@ -10013,6 +10093,35 @@
     renderKalshiCharts();
     renderKalshiL1();
   }
+  // Downloads the recorder's snapshots as a compressed CSV (plain CSV if the browser cannot compress). Admin only, and reads only.
+  document.getElementById('kalBookDownload').addEventListener('click', function(){
+    var api = window.__shwoopAPI, msg = document.getElementById('kalBookMsg'), btn = document.getElementById('kalBookDownload');
+    if(!api || !api.kalshiBookSnaps || !currentUserIsAdmin){ msg.textContent = 'Not available: sign in as the admin first.'; return; }
+    var hours = Number(document.getElementById('kalBookHours').value) || 6, since = Date.now() - hours * 3600000;
+    btn.disabled = true; msg.textContent = 'Reading the recorder...';
+    Promise.all([api.kalshiBookSnaps(since), api.kalshiBookStatus ? api.kalshiBookStatus().catch(function(){ return null; }) : Promise.resolve(null)]).then(function(both){
+      var docs = both[0], r = kalshiBookCsv(docs);
+      if(!r.snaps){ msg.textContent = kalshiBookExportNote(docs, both[1], hours, Date.now()); return; }
+      var stamp = new Date(since).toISOString().slice(0, 16).replace(/[-:T]/g, '');
+      var save = function(blob, name){
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        msg.textContent = 'Downloaded ' + name + ': ' + r.snaps + ' snapshots from ' + r.minutes + ' minutes (' + Math.round(blob.size / 1024) + ' KB). Attach it in the chat.';
+      };
+      if(typeof CompressionStream === 'function' && typeof Response === 'function'){
+        new Response(new Blob([r.csv]).stream().pipeThrough(new CompressionStream('gzip'))).blob().then(function(b){ save(b, 'kalshi-books-' + stamp + '.csv.gz'); }, function(){ save(new Blob([r.csv], { type: 'text/csv' }), 'kalshi-books-' + stamp + '.csv'); });
+      } else { save(new Blob([r.csv], { type: 'text/csv' }), 'kalshi-books-' + stamp + '.csv'); }
+    }).catch(function(err){ msg.textContent = 'Could not read the snapshots: ' + ((err && err.message) || 'unknown'); }).then(function(){ btn.disabled = false; });
+  });
+  // Copies the order records as CSV. If the browser refuses clipboard access the text is shown in a box to copy by hand.
+  document.getElementById('kalDiagCopy').addEventListener('click', function(){
+    var csv = kalshiDiagnosticsCsv(kalshiLiveOrders, 150), n = Math.max(0, csv.split('\n').length - 1);
+    var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
+    var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders. Paste them into the chat.'; }, manual);
+    } else { manual(); }
+  });
   // The 'Show more' button is re-created on every render, so one listener on its container does it.
   document.getElementById('kalBotClosed').addEventListener('click', function(e){
     if(e.target && e.target.getAttribute('data-more') === 'fills'){ kalshiLiveShow.fills += 10; renderKalshiBot(); }
@@ -10053,9 +10162,10 @@
     var stopAt = s && s.sizing === true && Number.isFinite(s.startCash) ? '$' + (0.07 * s.startCash).toFixed(2) : '$7.00';
     document.getElementById('kalL1Facts').innerHTML = running ? (
       fact('Next look', Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + fact('Ends', kalshiWhen(s.until, now)) +
-      fact('Orders sent', String(s.ordersSent || 0)) + fact('Filled / no fill', (oc.won + oc.lost + oc.open) + ' / ' + oc.noFill) +
-      fact('Size', s.sizing === true ? 'Scales, up to 3' : 'One contract') + fact('Stops at', stopAt + ' down')
+      fact('Orders sent', String(s.ordersSent || 0)) + fact('Filled / no fill', (oc.won + oc.lost + oc.open) + ' / ' + oc.noFill)
     ) : (s && s.endedBecause ? fact('Last ended', String(s.endedBecause)) + fact('Orders sent', String(s.ordersSent || 0)) : '');
+    var sizeNote = document.getElementById('kalL1Size');
+    sizeNote.textContent = running ? (s.sizing === true ? 'Size scales with the account, up to 3.' : 'One contract each.') + ' Stops if the bot is down ' + stopAt + '.' : '';
     document.getElementById('kalL1Status').textContent = running ? (s.lastNote || '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '');
     document.getElementById('kalL1Start').hidden = running;
     document.getElementById('kalL1Stop').hidden = !running;

@@ -31,6 +31,10 @@ function levels(raw) {
   return out.sort((a, b) => a[0] - b[0]);     // ascending, so the best bid is the LAST level
 }
 
+// Firestore refuses an array inside an array ("Property array contains an invalid nested entity"), which is what [[price, size], ...] is, so a level is a
+// map {p, q}. The first version stored pairs and the recorder failed on every write for its first day; a test now checks the stored document against that rule.
+const asLevels = (ls) => ls.slice(-LEVELS_KEPT).map((l) => ({ p: l[0], q: l[1] }));
+
 // Kalshi lists resting BIDS on each side. A yes ask is what the best no bid implies: 1 - it.
 // An empty side is null, never 0: zero would read as a free price.
 function parseBook(raw) {
@@ -44,7 +48,7 @@ function parseBook(raw) {
     ya: nb === null ? null : round4(1 - nb),
     na: yb === null ? null : round4(1 - yb),
     yd: depth(yes), nd: depth(no),
-    yl: yes.slice(-LEVELS_KEPT), nl: no.slice(-LEVELS_KEPT),
+    yl: asLevels(yes), nl: asLevels(no),
   };
 }
 

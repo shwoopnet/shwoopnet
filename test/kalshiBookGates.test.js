@@ -118,6 +118,38 @@ gates.B9 = () => {
   }
 };
 
+// Firestore's own rule for what a document may hold: no array directly inside an array, no undefined, no empty field names. The recorder first
+// wrote [[price, size]] levels and every write was refused ("invalid nested entity") for its whole first day, while a fake store accepted them.
+// The consequence tested here: the document the recorder writes is one Firestore will accept.
+function firestoreProblems(v, where = 'doc') {
+  const out = [];
+  const walk = (x, at, inArray) => {
+    if (x === undefined) out.push(at + ' is undefined');
+    else if (Array.isArray(x)) {
+      if (inArray) out.push(at + ' is an array inside an array');
+      x.forEach((y, i) => walk(y, at + '[' + i + ']', true));
+    } else if (x && typeof x === 'object') {
+      for (const [k, y] of Object.entries(x)) { if (k === '') out.push(at + ' has an empty field name'); walk(y, at + '.' + k, false); }
+    }
+  };
+  walk(v, where, false);
+  return out;
+}
+gates.B10 = async () => {
+  assert.ok(firestoreProblems({ yl: [[0.9, 10]] }).length === 1, 'a pair inside an array is refused');
+  assert.ok(firestoreProblems({ yl: [{ p: 0.9, q: 10 }] }).length === 0, 'a map inside an array is accepted');
+  assert.ok(firestoreProblems({ a: undefined }).length === 1);
+  const { args, out } = harness(okGet);
+  await recordMinute(args);
+  const all = Object.values(out.docs);
+  assert.ok(all.length > 0, 'the recorder wrote a document');
+  for (const d of all) assert.deepStrictEqual(firestoreProblems(d), [], 'the stored minute document is one Firestore will accept');
+  const b = parseBook(BOOK);
+  assert.deepStrictEqual(firestoreProblems(b), []);
+  assert.deepStrictEqual(b.yl, [{ p: 0.3, q: 5 }, { p: 0.4, q: 10 }], 'levels are maps, best last, with their sizes');
+  assert.deepStrictEqual(firestoreProblems(parseBook({ orderbook_fp: { yes_dollars: [], no_dollars: [] } })), [], 'an empty book is accepted too');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
