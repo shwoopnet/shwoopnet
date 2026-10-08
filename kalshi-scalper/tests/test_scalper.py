@@ -2035,3 +2035,19 @@ _f9m = [_mk9("N9a", "KXBTC15M", _T9 + 900, 0.93, "yes"), _mk9("N9b", "KXBTC15M",
 _f9, _f9b = _fw.f9_rule(_f9m)
 assert [e["ticker"] for e in _f9] == ["N9a"] and {e["ticker"] for e in _f9b} == {"N9a", "N9b", "N9c"}, "a price band, markets after the cutoff only (one closing exactly at it is not after it)"
 print("forward F9 tests passed")
+
+# Risk cap replay: the loss stop counts orders still open as lost, a stop that trips ends the day, and a win settles to its payout minus the cent-rounded cost.
+import random as _rnd
+from scalper import riskcap as _RC
+_RC.FILL = 1.0
+def _re(close, price, win):
+    return {"close_ts": close, "price": price, "gross": (1.0 - price) if win else -price}
+_lose = [_re(100000 + 900 * i, 0.92, False) for i in range(8)]
+_r = _RC.run_day(_lose, 1, 2.0, _rnd.Random(1))
+assert _r["tripped"] and _r["n"] == 3 and abs(_r["pnl"] + 3 * 0.93) < 1e-9, "three settled losses of 93c pass a $2 stop, so the fourth order is never sent"
+_together = [_re(100000, 0.92, False) for _ in range(8)]
+_r = _RC.run_day(_together, 1, 2.0, _rnd.Random(1))
+assert _r["tripped"] and _r["n"] == 3, "orders that have not settled count as lost, so concurrent orders stop sooner than a settled loss would"
+_r = _RC.run_day([_re(100000, 0.92, True), _re(100900, 0.92, False)], 2, 10.0, _rnd.Random(1))
+assert not _r["tripped"] and abs(_r["pnl"] - ((2 - 1.86) - 1.86)) < 1e-9 and abs(_r["worst"] + 1.86) < 1e-9, "a win pays 1 a contract, a loss costs the whole order"
+print("risk cap tests passed")

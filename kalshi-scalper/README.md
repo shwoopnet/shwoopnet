@@ -2052,3 +2052,18 @@ B1 to B3 left one band standing out on all 69 days (92c to 95c: win rate 95.7% a
 - **Prediction, stated before the run.** Net about +1.0c a contract (below the +1.88c seen on 69 days, which was selected by looking). **The expectation is that it does not pass.**
 - **Bar.** The common one: at least 300 entries on 5 days, z at least 2.1, both halves positive, fees times 1.2 positive, and above F0 on the same markets. About 16 entries a day, so 300 take about 19 days.
 - **Count.** One more variant: **2,574 as of 2026-10-08**.
+
+## Risk cap per trade (information only, no verdict, no variant counted)
+
+`python -m scalper.riskcap` replays the 3,432 L1 entries over 69 days in time order at a 60% fill rate (a round number between the 50% and 70% seen, not fitted), 40 fill draws per day. An order buys 1, 2 or 3 contracts and costs the cent-rounded `order_cost`. The loss stop is applied as the bot applies it: before each order, settled profit minus the whole cost of orders still open must be above minus the stop, otherwise the day ends. Bitcoin and gold overlap in the data as they do live.
+
+| Contracts | Mean/day | Std dev | 5th pct | Worst day | Stop trips at $10 | Worst single order |
+|---|---|---|---|---|---|---|
+| 1 | +$0.12 | $1.20 | -$1.99 | -$4.19 | 0% | -$0.98 |
+| 2 | +$0.37 | $2.41 | -$3.84 | -$8.27 | 0% | -$1.95 |
+| 3 | +$0.60 | $3.69 | -$6.08 | -$12.41 | 2.6% | -$2.92 |
+
+- **The stop level barely matters to the mean.** $7, $10 and $15 give means within a few cents of each other. At 3 contracts a $7 stop trips on 9.6% of days and only removes good days along with bad ones.
+- **A stop cannot cap a gap loss.** The worst single order is its whole cost, and the 3 contract worst day (-$12.41) passes the $10 stop because open orders settle together.
+- **Size scales the spread faster than the mean.** Typical bad day (5th percentile) against expected day: about -$2.0 against +$0.12 at 1 contract, -$3.8 against +$0.37 at 2, -$6.1 against +$0.60 at 3. Mean per day depends on the 0.6 fill rate and on 69 days; neither is a measurement of the live bot.
+- Count: unchanged at **2,574 as of 2026-10-08**.
