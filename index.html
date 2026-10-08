@@ -1028,9 +1028,6 @@
   .kal-chart-title{ font-size:12.5px; font-weight:600; margin-bottom:8px; }
   .kal-chart-wide{ grid-column:1 / -1; }
   .kal-perf{ padding:14px 22px 20px 22px; }
-  .kal-rail .kal-card-flush .kal-card-head{ padding:0 0 10px 0; }
-  .kal-rail .kal-charts{ grid-template-columns:minmax(0,1fr); gap:14px; padding:4px 0 0 0; border-top:0; }
-  .kal-rail .kal-chart-wide{ grid-column:auto; }
   .kal-rail .kal-perf{ padding:12px 0 0 0; }
   .kal-rail .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
   .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:13px; } .kal-rail .kal-tile .kal-lbl{ font-size:10.5px; }
@@ -3406,20 +3403,11 @@
 
     <div id="kalTabBot" class="kal-bot-grid kal-console">
       <div class="kal-rail">
-      <div class="kal-card kal-card-flush" data-card="performance">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Performance</div>
-          <label class="kal-lbl" for="kalChartRange">Showing <select id="kalChartRange"><option value="all">all sessions</option><option value="session">this session only</option></select></label></div>
-        <div class="kal-charts">
-          <div class="kal-chart"><div class="kal-chart-title">Bot P/L, settled trades</div><div id="kalChartLine"></div></div>
-          <div class="kal-chart"><div class="kal-chart-title">How the bot's orders ended</div><div id="kalChartPie"></div></div>
-          <div class="kal-chart kal-chart-wide"><div class="kal-chart-title">Each settled trade</div><div id="kalChartBars"></div></div>
-        </div>
-        <div class="kal-perf"><div id="kalPerf"></div><div class="kal-note" id="kalPerfNote"></div></div>
-      </div>
       <div class="kal-card" data-card="account">
         <div class="kal-card-title">Account</div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
+        <div class="kal-perf"><div id="kalPerf"></div><div class="kal-note" id="kalPerfNote"></div></div>
       </div>
       <div class="kal-card" data-card="positions">
         <div class="kal-card-title">Open positions</div>
@@ -3451,6 +3439,15 @@
         <details class="kal-more"><summary>Rules and limits</summary>
           <div class="kal-note">One contract (up to 3 if you ticked size scaling when starting) about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement; one contract never costs more than $2.00. Stops after 24 hours, when the bot's own trades are down $10.00 (10% of the starting cash with scaling; your manual trades do not count), or on any order that goes wrong. If you ticked "Stop follows the high point", the stop is measured from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
         </details>
+        </div>
+      </div>
+      <div class="kal-card kal-card-flush" data-card="performance">
+        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Charts</div>
+          <label class="kal-lbl" for="kalChartRange">Showing <select id="kalChartRange"><option value="all">all sessions</option><option value="session">this session only</option></select></label></div>
+        <div class="kal-charts">
+          <div class="kal-chart"><div class="kal-chart-title">Bot P/L, settled trades</div><div id="kalChartLine"></div></div>
+          <div class="kal-chart"><div class="kal-chart-title">How the bot's orders ended</div><div id="kalChartPie"></div></div>
+          <div class="kal-chart kal-chart-wide"><div class="kal-chart-title">Each settled trade</div><div id="kalChartBars"></div></div>
         </div>
       </div>
       <div class="kal-card kal-card-flush" data-card="trades">
@@ -9815,7 +9812,7 @@
   // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
   function kalshiLineSvg(points, esc, money){
     if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
-    var W = 360, H = 150, L = 8, R = 54, T = 14, B = 20;
+    var W = 640, H = 170, L = 8, R = 60, T = 14, B = 22;
     var vals = points.map(function(p){ return p.cum; }).concat([0]);
     var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
@@ -9918,7 +9915,7 @@
   // One bar per settled trade, oldest to newest: green up for a win, red down for a loss, so a loss is as visible as a win.
   function kalshiBarsSvg(points, esc, money){
     if(!points || !points.length){ return '<div class="kal-empty">Bars appear after the first settled trade.</div>'; }
-    var shown = points.slice(-40), W = 360, H = 110, T = 8, B = 18, L = 4, R = 4;
+    var shown = points.slice(-40), W = 640, H = 120, T = 8, B = 18, L = 4, R = 4;
     var hi = Math.max.apply(null, shown.map(function(p){ return p.pnl; }).concat([0.05])), lo = Math.min.apply(null, shown.map(function(p){ return p.pnl; }).concat([-0.05]));
     var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
     var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
