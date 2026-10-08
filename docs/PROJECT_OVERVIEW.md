@@ -22,7 +22,7 @@ This document is mostly about the Kalshi subsystem, because it is where most of 
 
 **Runs:** 24/7 since 2026-10-08 (it used to be a 24 hour session). It runs until the owner stops it or a stop ends it.
 
-**Size:** one contract per $85 of balance, raised at most one step a week, lowered at once if the balance falls, hard ceiling 10. First review starts at 3. Half of each NEW net profit high goes to a pool that buys up to 2 extra contracts; the other half is set aside as savings that the sizing never counts.
+**Size:** one contract per $85 of balance, raised at most one step a week, lowered at once if the balance falls, hard ceiling 10. First review starts at 3. Half of each NEW net profit high goes to a pool that buys extra contracts, one per full contract cost, with no fixed limit (one order is still held to 2% of cash); the other half is set aside as savings that the sizing never counts.
 
 **Safety, in the order it matters:**
 - Orders cannot duplicate. The order id derives from the market, so two server instances during a deploy produce the same id and Kalshi refuses the second.
