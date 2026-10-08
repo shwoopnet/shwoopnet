@@ -104,8 +104,8 @@ gates.G21 = () => {
 // live log keeps a way to show more, the page says how many fills it is hiding, and nothing of the paper bot is listed.
 gates.G22 = () => {
   assert.ok(!/limit\((12|40)\)/.test(html), 'no query may cap a history at a dozen rows');
-  assert.ok(/data-more="events"/.test(html) && /kalshiLiveShow\.events \+= 50/.test(html), 'the log needs a way to show more');
-  assert.ok(/Showing ' \+ evShown\.length \+ ' of ' \+ evAll\.length/.test(html), 'the page must say how many events it is not showing');
+  assert.ok(!/kalBotEvents|data-more="events"/.test(html), 'the event log card is gone (orders are in the trades table, why a session ended is on the Bot card)');
+  assert.ok(/e\.kind === 'session ended'/.test(html) && /endedEv\.detail/.test(html), 'but the sentence the server wrote when a session ended is still shown, because it says what to check');
   assert.ok(/earlier fill' \+ \(a\.fills\.hiddenBeforeBaseline === 1/.test(html), 'the page must say how many fills sit before the starting line');
   assert.ok(!/id="kalBotClosed"[\s\S]{0,40}paper/i.test(html) && !/kalshiBotTotals/.test(html), 'no paper-bot totals or lists remain on the page');
 };
@@ -165,7 +165,7 @@ gates.KalshiNoEdge = () => {
 // The Bot tab layout is customizable, but the live account card (halt) and the session card (stop) can never be hidden, and
 // the saved layout survives blocked storage.
 gates.G24 = () => {
-  const optional = /var OPTIONAL = \[([^\]]*\][^\]]*\][^\]]*\][^\]]*\][^\]]*\])\]/.exec(html);
+  const optional = /var OPTIONAL = \[(.*)\];/.exec(html);
   assert.ok(optional, 'optional card list not found');
   assert.ok(!/'account'|'session'/.test(optional[1]), 'the account and session cards are not in the hideable list');
   assert.ok(/data-card="account"/.test(html) && /data-card="session"/.test(html));
