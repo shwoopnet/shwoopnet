@@ -2271,6 +2271,24 @@ The owner asked about the 41% of L1 signals that do not fill. `python -m scalper
 - **Why it is weak.** 57 orders, 4 losses in all, a pooled loss rate of 7.0%, found by looking, once. It is not a pre-registered test and a p of 0.019 from one look at one sample is a lead, not a result. The right next step is to keep recording: a pre-registered version (misses lose more than fills, on at least 150 further orders) can be written now and read when the forward check reads, about 2026-10-23.
 - **Decision rule until then.** Do not raise the limit, add a retry or add a resting order to "fix" the fill rate. Count: unchanged, **2,582 as of 2026-10-08**.
 
+## Sizing replay at the deployed rule: 1% per position, $509, trailing stop (information only, no hypothesis, no verdict, no variant counted; 2026-10-08)
+
+`python -m scalper.sizing current` after the history was re-downloaded (11,050 markets, 69 days). Rule as deployed: cap starts at 3 with the stop base at $344 and reviews every 3 days, $85 a contract, only new net profit highs are skimmed (half to the pool), a position never risks more than 1% of cash, the stop is 5% of the balance at the last review. 10 weeks resampled by day, 60% fills, 3,000 paths, starting from $504.82.
+
+| Rule | Mean | 5th pct | 1st pct | Deepest drawdown (95th) | Paths that lose | End cap | Stop days |
+|---|---|---|---|---|---|---|---|
+| Old: add-on max 2, ceiling 10 | +$82.6 | -$7.6 | -$42.0 | $73.4 | 6.5% | 5.8 | 0.00 |
+| Deployed: add-on uncapped | +$82.6 | -$7.6 | -$42.0 | $73.4 | 6.5% | 5.8 | 0.00 |
+| Deployed + trailing stop | +$82.6 | -$7.2 | -$44.4 | $73.6 | 6.4% | 5.8 | 0.00 |
+| Sized on the usable shard only (before the shards were merged) | +$59.9 | -$10.3 | -$29.9 | $52.1 | 8.7% | 3.9 | 0.00 |
+| 3 contracts flat (the stake until this morning) | +$43.8 | -$6.1 | -$27.1 | $44.4 | 7.3% | 3.0 | 0.00 |
+
+- **Removing the add-on limit changes nothing at this balance.** Rows one and two are identical, because the 1% per position rule is what binds (about 5 contracts at $509). The uncapped add-on only matters once the balance, and so the 1% cap, rises well past the target of 5 or 6 contracts.
+- **The trailing stop changes nothing measurable either.** The stop trips on 0.00 days a path in all rows: in this model a day's losses almost never reach 5% of the base. Its mean is the same; its 1st percentile is a little worse in this sample (-$44.4 against -$42.0), inside the noise of 3,000 resampled paths. Whether it helps in a real gap (one bad cluster of orders) is not something this replay can show.
+- **What the 1% size costs.** Against 3 contracts flat: about +$39 more over 10 weeks, and the bad cases roughly 1.6 times as deep (1st percentile -$42 against -$27, drawdown $73 against $44, about 14% of the account). That is the trade, stated plainly: more money in the average path, a larger hole in the bad ones.
+- **Limits of the replay.** The 69 days were all seen by L1's design, the edge is thin (z 1.45 against a bar of 2.1 on the first test), fills are a round 60%, and the loss stop is modelled by day, not by a rolling 24 hours. Treat the mean as an upper bound and the drawdown as a floor.
+- Count: unchanged, **2,582 as of 2026-10-08** (sizing, not a strategy variant).
+
 ## Pre-registration: T1, early taker flow (ledger row L11; fixed 2026-10-08, before any trade was fetched and before any imbalance or result was computed)
 
 The owner asked for more ideas for the first 5 to 10 minutes of each market. Every NEW ledger row that can run on candles is already run or overlaps a falsified one (O21 is OP5 reworded: 3,350 of 3,432 entries already had a tight spread; O35 to O38 only gate rules that are already `FALSIFIED`; O46 changes the average entry, not the expectation). The rows that remain NEW need books (resting entries, depth, staleness), and the recorder has had under a day. **L11 is the one row that is new and can be built now**, because Kalshi's trade tape is public and not login gated. Nothing below has been run.

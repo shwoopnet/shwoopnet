@@ -17,24 +17,26 @@ from . import lstrats as L
 from .feerounding import order_cost
 from .scalps import load as load_markets
 
-def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None):
+def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None, n_ceiling=10, cash_frac=None, base0=None, usable=None, trailing=False):
     """One path of `ndays` days. step_days: days between reviews (one step up at most per review, down at once). stop_frac: if set, the loss stop of the live bot:
     a day's result at or below minus stop_frac of the balance at the last review ends that day (the owner restarts the next morning), empties the pool and
     holds step-ups and the add-on for 7 days. Returns total, deepest drawdown, saved, final cap, peak, stops."""
-    cash=start; base=start; pool=0.0; saved=0.0; cum=0.0; hwm=0.0; cap=3 if not fixed else fixed; peak=0.0; dd=0.0; total=0.0; stops=0; last_stop=-99
+    cash=start; base=start if base0 is None else base0; pool=0.0; saved=0.0; cum=0.0; hwm=0.0; cap=3 if not fixed else fixed; peak=0.0; dd=0.0; total=0.0; stops=0; last_stop=-99
     for d_i in range(ndays):
         d=rng.choice(days)
         if not fixed:
-            target=max(1,min(10,int((cash-saved)/dpc)))
+            target=max(1,min(10,int(((cash if usable is None else min(cash,usable+total))-saved)/dpc)))
             if target<cap: cap=target; base=cash
             elif d_i>0 and d_i%step_days==0:
                 base=cash
                 if target>cap and d_i-last_stop>=7: cap=min(cap+1,target)
-        day_pnl=0.0; stopped=False
+        day_pnl=0.0; day_peak=0.0; stopped=False
         for e in by[d]:
             if stopped or rng.random()>=fill: continue
             add=min(addon_max,int(pool/0.93)) if (skim and d_i-last_stop>=7) else 0
-            n=min(10,cap+add)
+            n=min(n_ceiling,cap+add)
+            if cash_frac is not None:   # live l1Count: one order never risks more than cash_frac of cash, judged at one contract's cost
+                n=max(1,min(n,int(cash_frac*cash/order_cost(e['price'],1)+1e-9)))
             cost=order_cost(e['price'],n); won=e['gross']+e['price']>0.5
             pnl=(n if won else 0)-cost
             cash+=pnl; total+=pnl; day_pnl+=pnl
@@ -43,7 +45,9 @@ def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=3
                 if cum>hwm: rise=cum-hwm; hwm=cum; pool+=0.5*rise; saved+=0.5*rise
                 elif pnl<0: pool=max(0.0,pool+pnl)
             peak=max(peak,total); dd=max(dd,peak-total)
-            if stop_frac is not None and day_pnl<=-stop_frac*base-1e-9:
+            day_peak=max(day_peak,day_pnl)
+            # trailing ('Stop follows the high point'): measured from the best result of the day so far instead of from zero
+            if stop_frac is not None and ((day_peak-day_pnl>=stop_frac*base-1e-9) if trailing else (day_pnl<=-stop_frac*base-1e-9)):
                 stopped=True; stops+=1; last_stop=d_i; pool=0.0
     return total,dd,saved,cap,peak,stops
 def run(by, days, name, **kw):
@@ -71,5 +75,24 @@ def main() -> None:
             run(by, days, f"every {step} days, $ {dpc} per contract, skim", dpc=dpc, skim=True, addon_max=2, fixed=0, start=344.0, step_days=step, stop_frac=0.10)
 
 
+def current() -> None:
+    """The rule as deployed on 2026-10-08 after the balance reached $504.82 ($348.02 usable on the bot's shard, $156.80 on other shards): cap starts at 3,
+    base $344 at the last review, 3 day steps, $85 a contract, stop 5% of base, add-on bounded only by the pool, one position at most 1% of cash, order
+    ceiling 50. Compares sizing on the TOTAL balance (what runL1Tick does) with sizing on the usable shard only."""
+    markets, _ = load_markets()
+    ents = L.hold_rule(markets, **L.L1)
+    by = defaultdict(list)
+    for e in ents: by[e["day"]].append(e)
+    days = sorted(by)
+    print("10 weeks from $504.82, 60% fills, WITH the loss stop (5% of base, base $344 until the first review)")
+    kw = dict(dpc=85, skim=True, fixed=0, start=504.82, step_days=3, stop_frac=0.05, base0=344.0, cash_frac=0.01)
+    run(by, days, "old: add-on max 2, ceiling 10, total balance", addon_max=2, n_ceiling=10, **kw)
+    run(by, days, "now: add-on uncapped, total balance", addon_max=999, n_ceiling=50, **kw)
+    run(by, days, "now: add-on uncapped, usable shard only", addon_max=999, n_ceiling=50, usable=348.02, **kw)
+    run(by, days, "now + trailing stop, total balance", addon_max=999, n_ceiling=50, trailing=True, **kw)
+    run(by, days, "cap 3 flat (the old stake), for scale", dpc=100, skim=False, addon_max=0, fixed=3, start=504.82, step_days=3, stop_frac=0.05, base0=344.0, cash_frac=0.01)
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    current() if "current" in sys.argv[1:] else main()
