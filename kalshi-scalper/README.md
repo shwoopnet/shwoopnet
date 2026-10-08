@@ -2255,3 +2255,18 @@ Same method as Q1 to Q3: take L1 as live and ask whether a stated reason to dist
 - **OP5: nearly every L1 entry is already a tight book.** 3,350 of 3,432 entries have a spread of 2c or less, so the arm is L1 itself (+1.02c against +0.92c). The 82 wide-book entries lost 2.95c on average, which sounds like the filter helping, but on 82 entries the day clustered z is +1.31. Skipping them would have added +0.10c to L1's mean.
 - **No sizing change.** The arm's per contract mean is not reliably above the complement's (OP4), so "size up on an early favorite" has no support beyond this noise.
 - **Count.** Two variants: **2,582 as of 2026-10-08**.
+
+## Live fills study: the signals the order misses are where the losses are (information only, no hypothesis, no verdict; 2026-10-08 17:59 UTC)
+
+The owner asked about the 41% of L1 signals that do not fill. `python -m scalper.fillstudy` reads `studies/fills_2026-10-08.csv`: all 57 L1 orders in the owner's own diagnostics export from 2026-10-07 and 2026-10-08, each scored at the price the bot SAW whether or not it filled (a miss is scored on what it would have made, not on a fill it never got), with the settled result taken from Kalshi's public market data afterwards. The 40c and 50c test orders are not included.
+
+| | Orders | Lost | Mean per contract at the decision price |
+|---|---|---|---|
+| Filled | 35 | 0 | +6.27c |
+| Missed (no fill) | 22 | 4 | -10.83c |
+
+- **The losses are concentrated in the misses.** All 4 losses were signals that did not fill; none of the 35 fills lost. One sided Fisher exact p = **0.019**. Bitcoin: 17 filled (0 lost), 13 missed (3 would have lost). Gold: 18 filled (0 lost), 9 missed (1 would have lost).
+- **The misses are not a limit price or size problem.** In the 37 orders that carry a book snapshot, every miss was marketable at the limit on the book the bot saw, and most had hundreds to thousands of contracts at the touch (the two with almost none were Bitcoin yes orders at an ask size of 0.02). The book moves in the roughly half second between the read and the order's arrival, and the misses are the ones where it moved away. Six of the 23 filled orders filled at 1c to 4.4c BETTER than the quote, and all six won.
+- **What it suggests, and does not prove.** An immediate-or-cancel order at the touch fills when the quote is stable and misses when it is flickering, and flickering quotes sit in the markets that end badly. So the 41% miss rate may be a free quality filter, and chasing the misses (a higher limit, a retry at 5 minutes left, a resting order) would add the worse trades. That agrees with the earlier finding that resting orders filled on losers (P2). It would also mean the backtest, which fills every signal at the ask, understates the per fill edge and overstates the volume.
+- **Why it is weak.** 57 orders, 4 losses in all, a pooled loss rate of 7.0%, found by looking, once. It is not a pre-registered test and a p of 0.019 from one look at one sample is a lead, not a result. The right next step is to keep recording: a pre-registered version (misses lose more than fills, on at least 150 further orders) can be written now and read when the forward check reads, about 2026-10-23.
+- **Decision rule until then.** Do not raise the limit, add a retry or add a resting order to "fix" the fill rate. Count: unchanged, **2,582 as of 2026-10-08**.

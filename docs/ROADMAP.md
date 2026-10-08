@@ -10,6 +10,7 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 | First weekly size review | 2026-10-15: expect the cap to step from 3 to 4 at about $344 balance |
 | Look at the new page live, including a phone | Account card, Running menu, market charts, gold line, Layout arrows |
 | Phone layout: the line and bar charts shrink to unreadable | Charts legible at 390 px wide |
+| Keep recording L1 orders (the diagnostics export) for a pre-registered fill study: do misses lose more than fills? | At least 150 further orders; read with the forward check |
 | Confirm fee rounding on the BALANCE side | Compare the balance before and after one single-contract order |
 | Merge this docs refresh and the Pages exclusion | Pages build green, site still loads |
 
@@ -34,6 +35,7 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 
 ## Done recently (2026-10-07 and 2026-10-08)
 
+- Live fills study: 35 of 35 fills won, 4 of 22 misses lost (p 0.019, one look, a lead). Do not chase the misses.
 - 24/7 bot, weekly size scaling, reinvest and skim, Flatten all, deposit recorder, and one Pause/Resume control in place of separate Stop and Halt buttons.
 - Performance tracker, readable open positions, simplified Kalshi page, market charts, Central time.
 - Exit, band, entry-side and fee studies; sizing replay; the cheap-side test, the favorite scalps and two more L1 filters (all falsified); a bug in the time-exit logic found and corrected.

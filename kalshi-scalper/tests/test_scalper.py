@@ -2167,3 +2167,14 @@ _a5, _c5, _x5 = _L2.split_op5(_ent, {"A": 0.01, "B": 0.02, "C": 0.03})
 assert [e["ticker"] for e in _a5] == ["A", "B"] and [e["ticker"] for e in _c5] == ["C"] and _x5 == 1, "a spread of exactly 2c is tight, 3c is not, no candle is excluded"
 assert _L2.verdict(_ent, _ent)[0] == "NOT_ENOUGH_DATA", "too few entries is not a verdict"
 print("OP4 and OP5 tests passed")
+
+# Fill study: the one sided Fisher exact p is the hypergeometric tail, a miss is scored at its decision price, and the data file has the orders it says it has.
+from scalper import fillstudy as _FS
+assert abs(_FS.fisher_one_sided(4, 22, 0, 35) - 0.019) < 0.001, "4 losses all among 22 of 57 orders: p about 0.019"
+assert _FS.fisher_one_sided(0, 10, 0, 10) == 1.0 and abs(_FS.fisher_one_sided(1, 1, 0, 1) - 0.5) < 1e-9
+_rows = _FS.load()
+_s = _FS.summarize(_rows)
+assert (_s["filled"], _s["missed"], _s["lost_filled"], _s["lost_missed"]) == (35, 22, 0, 4), "the recorded sample"
+_won = {"ticker": "T", "side": "yes", "price": 0.9, "filled": False, "won": True, "pnl": 1 - 0.9 - _FS.fee(0.9)}
+assert _FS.summarize([_won])["mean_missed"] > 0 and _FS.summarize([_won])["filled"] == 0, "a missed order is scored on what it would have made at its decision price"
+print("fill study tests passed")
