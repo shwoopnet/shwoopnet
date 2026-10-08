@@ -1968,7 +1968,7 @@ same P2 and ask-drift code as for the container recorder. 80 of the 82 markets a
 - **What this does and does not say.** One day, 30 signals. It does not test the maker idea; it shows that on this day the resting orders would have been filled mostly on the losers. The
   full test is the 300 signals on 5 days P2 asks for, from this same recorder.
 
-## Pre-registration: lower exit thresholds, X5 to X7 (fixed 2026-10-08 14:20 UTC, before any of them was priced)
+## Pre-registration: lower exit thresholds, X5 to X7 (fixed 2026-10-08 14:10 UTC, before any of them was priced)
 
 The first exit family (X1 to X4) started at 50c, and the owner asked, rightly, what happens lower: a stop that only fires on a near total collapse costs less and cuts fewer winners, so
 the answer is not obvious from 50c to 80c alone. It should have been in the first registration; it is registered now, on the same rule and the same entries, before any result exists for it.
