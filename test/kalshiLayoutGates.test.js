@@ -175,6 +175,31 @@ gates.Y11 = () => {
   assert.ok(/id="kalDiagCopy"/.test(html) && /navigator\.clipboard\.writeText\(csv\)/.test(html) && /id="kalDiagBox"/.test(html), 'a button, with a manual fallback box');
 };
 
+// The book snapshot export: one row per snapshot, best level first, empty (never zero) where a side has no book, and only the admin can run it.
+gates.Y12 = () => {
+  const m = /(function kalshiBookCsv\(minuteDocs\)\{[\s\S]*?\n  \})\n/.exec(html);
+  assert.ok(m, 'builder not found');
+  const build = new Function(m[1] + '; return kalshiBookCsv;')();
+  const head = build([]).csv.split('\n')[0].split(',');
+  assert.deepStrictEqual([build([]).minutes, build([]).snaps, build([]).csv.split('\n').length], [0, 0, 1], 'a header and nothing else when empty');
+  const r = build([
+    { ts: 60000, snaps: [
+      { t: 61000, s: 'KXBTC15M', k: 'T-A', ly: 0.82, la: 0.83, yb: 0.91, ya: 0.92, nb: 0.08, na: 0.09, yd: 30, nd: 12, yl: [[0.89, 5], [0.9, 10], [0.91, 15]], nl: [[0.07, 4], [0.08, 8]] },
+      { t: 62000, s: 'KXGOLD15M', k: 'T-B', yb: null, ya: null, nb: 0.5, na: null, yd: 0, nd: 7, yl: [], nl: [[0.5, 7]] } ] },
+    { ts: 120000, snaps: 'junk' }, null, { ts: 130000 },
+  ]);
+  const lines = r.csv.split('\n'), col = (line, n) => line.split(',')[head.indexOf(n)];
+  assert.deepStrictEqual([r.minutes, r.snaps, lines.length], [1, 2, 3], 'junk documents are skipped, one row per snapshot');
+  assert.deepStrictEqual(['y1p', 'y1q', 'y2p', 'y3p'].map((n) => col(lines[1], n)), ['0.91', '15', '0.9', '0.89'], 'the best level comes first');
+  assert.deepStrictEqual(['n1p', 'n2p', 'n3p', 'n3q'].map((n) => col(lines[1], n)), ['0.08', '0.07', '', ''], 'a missing level is empty');
+  assert.deepStrictEqual(['yesBid', 'yesAsk', 'y1p', 'y1q'].map((n) => col(lines[2], n)), ['', '', '', ''], 'a side with no book is empty, never 0');
+  assert.strictEqual(col(lines[2], 'noAsk'), '', 'an implied price that is null stays empty');
+  assert.ok(/getDocs\(query\(collection\(db, 'kalshiBookSnaps'\), where\('ts', '>=', sinceMs\), orderBy\('ts', 'asc'\), limit\(1500\)\)\)/.test(html), 'reads only the recorder documents, oldest first, bounded');
+  const h = html.slice(html.indexOf("document.getElementById('kalBookDownload').addEventListener"));
+  assert.ok(/!currentUserIsAdmin\)\{ msg\.textContent = 'Not available/.test(h.slice(0, 600)), 'only the admin can run it');
+  assert.ok(/CompressionStream\('gzip'\)/.test(h) && /kalshi-books-' \+ stamp \+ '\.csv'/.test(h), 'compressed when the browser can, plain CSV when not');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
