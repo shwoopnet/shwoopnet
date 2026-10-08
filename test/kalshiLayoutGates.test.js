@@ -48,13 +48,19 @@ gates.Y5 = () => {
   const rail = /<div class="kal-rail">([\s\S]*?)\n      <\/div>\n      <div class="kal-main">/.exec(seg);
   assert.ok(rail, 'the rail is there and the main column follows it');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(rail[1]), ['account', 'positions'], 'the rail holds the account and the positions');
+  assert.deepStrictEqual(names(rail[1]), ['performance', 'account', 'positions'], 'the rail holds the performance card first (where the session card used to be), then the account and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['books', 'session', 'trades', 'detail', 'log'], 'the main column: books tiles, the bot card (controls, session facts, charts, performance), trades, then the folded detail and log');
+  assert.deepStrictEqual(names(main), ['books', 'session', 'trades'], 'the main column: books tiles, the bot card (controls and session facts), and the trades; the account detail and event log folds are gone');
   const bot = /<div class="kal-card kal-card-flush" data-card="session">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
-  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Facts', 'kalL1Pl', 'kalChartLine', 'kalChartPie', 'kalChartBars', 'kalPerf', 'kalChartRange']) assert.ok(bot.indexOf('id="' + id + '"') > -1, id + ' lives in the one bot card');
-  const trades = /data-card="trades">([\s\S]*?)\n      <div class="kal-card kal-span" data-card="detail">/.exec(main)[1];
+  for (const id of ['kalL1Pill', 'kalL1Start', 'kalL1Stop', 'kalBotHalt', 'kalL1Facts', 'kalL1Pl']) assert.ok(bot.indexOf('id="' + id + '"') > -1, id + ' lives in the bot card');
+  assert.ok(!/kalChart|kalPerf/.test(bot), 'the charts and stats are not in the bot card');
+  const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card" data-card="account">/.exec(rail[1])[1];
+  for (const id of ['kalChartLine', 'kalChartPie', 'kalChartBars', 'kalPerf', 'kalChartRange']) assert.ok(perf.indexOf('id="' + id + '"') > -1, id + ' lives in the performance card');
+  const trades = /data-card="trades">([\s\S]*)$/.exec(main)[1];
   assert.ok(!/kalChart|kalPerf/.test(trades) && /id="kalBotClosed"/.test(trades), 'the trades card is the table only');
+  const page = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
+  const tools = /id="kalTools"[\s\S]*?<\/details>\s*<details class="kal-layout" id="kalLayout"/.exec(page)[0];
+  for (const id of ['kalAcctRefresh', 'kalDiagCopy', 'kalBookDownload', 'kalAcctStart', 'kalAcctBody']) assert.ok(tools.indexOf('id="' + id + '"') > -1, id + ' moved into the Tools menu in the header');
   assert.ok(/\.kal-console\{ grid-template-columns:340px minmax\(0,1fr\);/.test(html), 'a fixed-width rail and a flexible main column');
   assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'one column on a narrow screen, the rail first');
   assert.ok(!/id="kalBotHalt"|id="kalL1Stop"/.test(rail[1]), 'the controls are not in the rail any more: they sit with the performance numbers');
@@ -75,14 +81,7 @@ gates.Y6 = () => {
 gates.Y7 = () => {
   assert.ok(/collection\(db, 'kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(300\)/.test(html), 'orders are read up to the most a 24 hour session can send, not 20');
   assert.ok(!/kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(20\)/.test(html));
-  const i = html.indexOf('var loggedOrders');
-  assert.ok(i > -1 && /indexOf\(' on ' \+ String\(o\.ticker\) \+ ':'\) > -1/.test(html.slice(i, i + 600)), 'an order the log already shows is not listed a second time');
-  // The same filter, run: two events and the two matching order records become two lines, and an order with no logged event stays.
-  const evs = [{ ts: 2, kind: 'order', detail: 'no 1 at 89.0c on T-A: no fill' }, { ts: 3, kind: 'session ended', detail: 'x' }];
-  const orders = [{ ts: 2, side: 'no', count: 1, price: 0.89, ticker: 'T-A', status: 'no fill' }, { ts: 1, side: 'yes', count: 1, price: 0.92, ticker: 'T-B', status: 'filled' }];
-  const logged = evs.filter((e) => e && e.kind === 'order').map((e) => String(e.detail));
-  const extra = orders.filter((o) => !logged.some((d) => d.indexOf(' on ' + String(o.ticker) + ':') > -1));
-  assert.deepStrictEqual(extra.map((o) => o.ticker), ['T-B']);
+  assert.ok(!/var loggedOrders|kalBotEvents/.test(html), 'the event log, and the dedupe that only it needed, are gone');
 };
 
 // The helpers behind the trades table and the two charts. All pure: they read nothing from the page.
@@ -219,7 +218,7 @@ gates.Y15 = () => {
   // The page keeps the positions in step with the books and the account.
   assert.ok(/kalshiBooksLast = data \|\| null;\s*renderKalshiPositions\(\);/.test(html) && /renderKalshiPositions\(\);\s*\n\s*var trEl/.test(html), 'redrawn when the books or the account update');
   // Show more and Show fewer are links, not the dark filled button.
-  assert.ok(!/class="kal-btn" data-(more|less)/.test(html) && (html.match(/class="kal-link" data-(more|less)/g) || []).length === 3, 'quiet links');
+  assert.ok(!/class="kal-btn" data-(more|less)/.test(html) && (html.match(/class="kal-link" data-(more|less)/g) || []).length === 2, 'quiet links');
   assert.ok(/\.kal-link\{ background:none; border:0;/.test(html), 'with no fill and no border');
 };
 
