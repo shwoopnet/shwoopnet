@@ -29,7 +29,9 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 2 (see Verdicts). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
+Strategy variants tried so far: 13 hypotheses with a verdict (the 60s scalp, H1 to H7, L1 to L3, L8, L9) plus 729 rules from the two parameter searches
+(437 in the first, 292 new in the overnight Stage B; Stage A re-scored 179 rules already counted), so 742 tries in all as of 2026-10-08, and the forward check
+of 5 of them adds none. This line was stale at 2 and is corrected here. Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -1009,6 +1011,22 @@ needed. Their means (F0 -2.74c, F1 -11.95c, F2 -1.32c, F3 and F4 -4.44c) are pri
 at these sizes (a single Bitcoin or gold longshot is -10c to -90c); they are neither a kill nor a confirmation and are not to be
 read as either. More days needed: about 6 for F0 up to 15 for F2 at the old entry rates, so the rules can be read from about 2026-10-23.
 Code `src/scalper/forward.py`, tests in `tests/test_scalper.py`.
+
+**2026-10-08: the OPEN and NOT_RUNNABLE ledger rows reviewed against the data we hold. None can be run today, so none was run and the count
+of tries is unchanged by this review.** Held: candles for 11,135 markets, Coinbase minute closes, the H3 `fills` flags, the H5 `mm`
+tables and `ob.sqlite` (471 snapshots of 8 markets over 42 minutes on 2026-10-07).
+
+| Row | Can it run today | What it needs |
+|---|---|---|
+| L4 maker entry when distance says cheap | No | Order books for days, not 42 minutes (the Firestore recorder snapshots, not in this container) |
+| L5 quote staleness | No | Book snapshots under 10 seconds apart, for days |
+| L6 Bitcoin and gold on the same window | No | Simultaneous books of both series, for days |
+| L12 depth imbalance | No | Book depth for days; 471 snapshots cannot show a move within a minute with any power |
+| L14 locked or crossed books | No | Simultaneous books under 10 seconds apart. Candle closes of the two sides are not simultaneous and a consistent book has ask plus other-side ask at or above 1 by construction. The goal is "one occurrence a day", which 42 minutes cannot answer |
+| L10 release windows | No | A dated release calendar (CPI, jobs, FOMC) with timestamps. I did not write one from memory, since a wrong date would void the test |
+| L11 taker flow | No | The trade tape. `tape.py` kept only fill flags for H3's orders, not the trades (about 28 million rows), so the imbalance cannot be rebuilt from the database. It is fetchable from the public API (a window per market, about 76 windows a minute) and is the one row worth building next; it has to be pre-registered with its decile cut and horizon before the fetch |
+| L13 volatility surprise | Not run | It is H7 (`FALSIFIED`) cut by volatility, which the ledger itself calls a likely duplicate. Registering it as new would reword a falsified idea |
+| L7 volatility regime gate | Not run | "The best variant" does not exist (every hypothesis is `FALSIFIED`; L1 is a different thing, one fixed rule). Regimes by spread and liquidity are already filters in the 729-rule search grammar (spread 1c, 2c, 4c), and F3 versus F4 already shows the spread cut changes nothing. Running regimes across variants would be a new parameter search, which needs the fair-market null and adds its rules to the count |
 
 ## The order-book recorder (`recorder.py`, read only)
 
