@@ -29,7 +29,7 @@ the bar below is cleared in paper trading.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 2 (see Verdicts). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
+Strategy variants tried so far: 14 hypotheses (the 60s scalp, H1 to H7, L1, L2, L3, L8, L9, M1), all FALSIFIED, plus two parameter searches (437 rules, then 311 saved rules) that count as that many more tries. Cuts examined by the decision rule: 18, plus 3 entry times for H1, plus 5 information cuts for M1. (This line was stale at 2 until M1; the ledger below and the Verdicts carry the history.)
 
 ## Facts measured, not assumed (Oct 2026)
 
@@ -1103,3 +1103,25 @@ the same data every earlier test used, so a pass could only ever be permission t
   information only. They count against the bar: 1 hypothesis plus 5 cuts.
 - **Cost of this idea so far.** The fourteenth hypothesis tried. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. No
   threshold, minute, hold or fee changes after seeing the numbers.
+
+**2026-10-08: M1, early window momentum: `FALSIFIED`.** One run of `python -m scalper.momentum` (commit following 0b65d16) under the rule fixed in the M1 section above. Nothing was changed after seeing it.
+
+- **Funnel.** 11,135 settled markets (both series), 69 days. 113 had no usable quote at minute 1 or 5 (no signal), 1,783 moved less than 5c (no trade), 3 had no usable entry quote, 12 were dropped for an unusable exit quote, **9,224 completed round trips**.
+- **Result.** Mean net **-2.63c** a trade (gross -0.41c, fees 2.23c, spread crossed 0.95c), day clustered z **-14.66**, first half -2.37c, second half -2.90c, fees x1.2 -3.08c. The bar was positive with z of 2.1 in both halves and under higher fees. Detectable edge at this sample is about 0.5c, so there is no continuation edge anywhere near the cost. Bitcoin -2.07c (5,428), gold -3.44c (3,796); UP -3.12c, DOWN -2.13c (information only).
+- **Prediction against outcome.** Predicted continuation of about +1c and net of -3c to -4c. Measured mid continuation was +0.54c and net -2.63c, so the sign and the verdict were right and continuation was smaller than guessed, while the cost was a little lower than guessed (fees 2.2c, not 3.5c, because the entries sit at 71c on average where the fee curve is flatter).
+- **Fair-market null.** Round trip with the direction removed (500 repeats): null mean -3.72c (95% interval -4.11 to -3.35); the real -2.63c is above all of it (P null >= real 0.000). Hold to settlement with each entry winning at its own mid: null -1.74c (95% -2.59 to -0.90), real -0.35c, P null >= real 0.002. So there is a small real continuation tendency (mid +0.54c over 3 minutes, and a +0.9c gross edge held to settlement), clearly distinguishable from a fair market, and it is smaller than the cost of trading it. Part of the gap between real and null is that real exits drift toward the extremes where the fee is cheaper, which the sign flipped null does not do. The simulator guard (the exact code on a simulated fair game) loses about 2c of spread plus fees, as required.
+- **Drops and bias.** Only 12 of 9,236 entries (0.13%) had an unusable exit quote (9 UP, 3 DOWN, all with an entry price of 50c or more, mean 80c against 71c for the traded). That is the pattern predicted: the exit book empties after a run to an extreme. Even if all 12 had been full dollar winners the mean would move by 0.13c at most, against -2.63c and a standard error of 0.18c, so the drops cannot change the verdict.
+- **Information only (decides nothing, not used to rescue anything).**
+
+| Variant | n | Gross | Net | z | 1st half | 2nd half | Fees x1.2 |
+|---|---|---|---|---|---|---|---|
+| threshold 3c, hold 3 | 9,994 | -0.47c | -2.73c | -15.07 | -2.38c | -3.08c | -3.19c |
+| threshold 8c, hold 3 | 8,094 | -0.34c | -2.50c | -13.02 | -2.29c | -2.71c | -2.93c |
+| threshold 5c, hold 2 | 9,233 | -0.68c | -3.00c | -19.93 | -2.81c | -3.20c | -3.47c |
+| threshold 5c, hold 5 | 9,206 | +0.04c | -1.97c | -7.59 | -1.84c | -2.09c | -2.37c |
+| threshold 5c, hold to settlement | 9,236 | +0.88c | -0.35c | -0.80 | +0.02c | -0.72c | -0.60c |
+
+  Longer holds lose less, and settlement is the least bad at z of -0.80, which is still negative after fees and fails the bar. That is a pattern read off an information table, and it is not a hypothesis: acting on it would need a new pre-registration and unseen data.
+- **What it does not say.** One signal definition (minute 5 against minute 1 mid), minute quotes only, taker entry and exit. A resting entry, an earlier or later signal, or trade tape flow are different hypotheses. Same 69 days as most earlier tests, so even a pass would only have been permission to test forward.
+
+Strategy variants tried so far: 14 hypotheses (the 60s scalp, H1 to H7, L1, L2, L3, L8, L9, M1), all `FALSIFIED`, plus two parameter searches, and 5 information cuts for M1 counted against the bar.

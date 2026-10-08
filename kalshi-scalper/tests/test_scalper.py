@@ -1289,3 +1289,90 @@ _em = _se.prep([_sm("E1", _C0, 0.39, 0.41, "yes")])
 _ee = _ov.entries_of(_em, {"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []})
 assert len(_ee) == 1 and abs(_ee[0][1] - (0.41 + _se.fee(0.41))) < 1e-12 and abs(_ee[0][2] - 0.40) < 1e-12, _ee
 print("fair null tests passed")
+
+# ---- M1 early window momentum ----
+import inspect as _insp, random as _rnd
+from scalper import momentum as _mo
+
+def _mk(path, res="yes", open_ts=1_790_000_000 + 0, spread=0.02, tick="M1T", series="KXBTC15M"):
+    """A market whose YES mid at the close of minute k is path[k-1]; minutes beyond the path repeat its last value."""
+    book = {}
+    for k in range(1, 16):
+        mid = path[min(k, len(path)) - 1]
+        book[open_ts + 60 * k] = (round(mid - spread / 2, 4), round(mid + spread / 2, 4))
+    return {"ticker": tick, "series": series, "open": open_ts, "close": open_ts + 900, "res": res, "book": book}
+
+# no performance parameter in any signature: nothing here may read a result to choose what to do
+for _f in (_mo.signal, _mo.trade, _mo.run, _mo.verdict, _mo.load):
+    assert not {"target", "until", "promote", "profit", "pnl", "edge"} & set(_insp.signature(_f).parameters), _f
+# the verdict vocabulary has no word that means go (code only, comments and docstrings stripped)
+import io as _io, tokenize as _tk
+_code = " ".join(t.string for t in _tk.generate_tokens(_io.StringIO(Path(_mo.__file__).read_text()).readline) if t.type not in (_tk.COMMENT, _tk.STRING)).lower()
+assert "promote" not in _code and "trade_this" not in _code
+
+# A rise of exactly 5c from minute 1 to minute 5 is UP; 4c is no trade; a fall of 5c is DOWN.
+_up = _mk([0.50, 0.50, 0.50, 0.50, 0.55, 0.57, 0.58, 0.59, 0.60])
+assert _mo.signal(_up["book"], _up["open"], 0.05)[0] == "yes"
+assert _mo.signal(_mk([0.50, 0.5, 0.5, 0.5, 0.54])["book"], _up["open"], 0.05) == (None, "flat")
+assert _mo.signal(_mk([0.50, 0.5, 0.5, 0.5, 0.45])["book"], _up["open"], 0.05)[0] == "no"
+# A market whose first minute still shows the empty book (0.1c bid, $1 ask) has no signal: its 50c mid is not a price anyone saw.
+_empty = _mk([0.50, 0.5, 0.5, 0.5, 0.60]); _empty["book"][_empty["open"] + 60] = (0.001, 1.0)
+assert _mo.signal(_empty["book"], _empty["open"], 0.05) == (None, "quote")
+
+# The entry is priced at the NEXT candle, never at the signal candle: make minute 6 dearer than minute 5 and require the dearer price.
+_m = _mk([0.50, 0.5, 0.5, 0.5, 0.56, 0.70, 0.74, 0.76, 0.80])
+_t = _mo.trade(_m, 0.05, 3)
+assert _t["status"] == "traded" and abs(_t["price"] - 0.71) < 1e-9 and _t["entry_end"] == _m["open"] + 360, _t
+assert _t["price"] > _m["book"][_m["open"] + 300][1], "the entry may not be priced at a level the signal bar itself showed"
+# UP exits at the YES bid 3 minutes later (minute 9 = 0.80 mid, bid 0.79): net = bid - ask - both fees, exactly.
+assert abs(_t["exit"] - 0.79) < 1e-9
+assert abs(_t["net"] - (0.79 - _mo.fee(0.79) - 0.71 - _mo.fee(0.71))) < 1e-12
+# DOWN buys NO at 1 minus the YES bid and sells it at 1 minus the YES ask.
+_d = _mo.trade(_mk([0.50, 0.5, 0.5, 0.5, 0.44, 0.40, 0.36, 0.34, 0.30]), 0.05, 3)
+assert _d["side"] == "no" and abs(_d["price"] - (1 - 0.39)) < 1e-9 and abs(_d["exit"] - (1 - 0.31)) < 1e-9, _d
+# A flat market after a signal LOSES the spread and both fees, never breaks even.
+_flat = _mo.trade(_mk([0.50, 0.5, 0.5, 0.5, 0.56, 0.56, 0.56, 0.56, 0.56]), 0.05, 3)
+assert _flat["net"] <= -0.02 - (_mo.fee(0.57) + _mo.fee(0.55)) + 1e-9 and _flat["gross"] < 0
+# An unusable exit quote drops the observation and counts it; it is never repriced from a neighbouring candle.
+_dm = _mk([0.50, 0.5, 0.5, 0.5, 0.56, 0.60, 0.7, 0.8, 0.9]); _dm["book"][_dm["open"] + 540] = (0.97, 1.0)
+_r = _mo.run([_dm]); assert not _r["trades"] and _r["counts"]["dropped"] == 1 and len(_r["dropped"]) == 1
+_dm2 = _mk([0.50, 0.5, 0.5, 0.5, 0.56, 0.60, 0.7, 0.8, 0.9]); del _dm2["book"][_dm2["open"] + 540]
+assert _mo.run([_dm2])["counts"]["dropped"] == 1
+# Holding to settlement needs no exit quote, so the same market is a trade there and pays one fee: a winner nets 1 - ask - fee.
+_s = _mo.run([_dm], 0.05, None)["trades"]
+assert len(_s) == 1 and abs(_s[0]["net"] - (1.0 - 0.61 - _mo.fee(0.61))) < 1e-12
+
+# Simulator guard: on a simulated FAIR game (a martingale mid, 2c spread, outcome drawn from the mid) the exact code loses about its costs.
+def _fair_world(n, seed, drift=0.0):
+    rng = _rnd.Random(seed); ms = []
+    for i in range(n):
+        mid, path = 0.5, [0.5]
+        for _ in range(12):
+            mid = min(max(mid + rng.gauss(0, 0.04), 0.2), 0.8); path.append(mid)
+        if drift:       # planted continuation: after the signal minute the path keeps going in its own direction
+            for k in range(5, 12):
+                path[k] = min(max(path[4] + (path[4] - path[0]) * drift * (k - 4), 0.2), 0.8)
+        o = 1_790_000_000 + 86400 * (i % 20) + 900 * (i // 20)
+        ms.append(_mk(path, "yes" if rng.random() < path[-1] else "no", open_ts=o, tick="F%d" % i))
+    return ms
+_fw = _fair_world(4000, 5)
+_fr = _mo.run(_fw)["trades"]
+_fmean = sum(t["net"] for t in _fr) / len(_fr)
+assert len(_fr) > 300 and -0.09 < _fmean < -0.025, ("a fair game must lose about its costs (spread 2c plus two fees)", _fmean, len(_fr))
+assert abs(sum(t["gross"] for t in _fr) / len(_fr) + 0.02) < 0.012, "gross on a fair game is the crossed spread, nothing else"
+_fv, _fs = _mo.verdict(_fr); assert _fv == "FALSIFIED" and _fs["z"] < -2
+_fsr = _mo.run(_fw, 0.05, None)["trades"]
+assert sum(t["net"] for t in _fsr) / len(_fsr) < 0, "held to settlement on a fair game also loses its fee and spread"
+# Too few trades is NOT_ENOUGH_DATA, not a verdict.
+assert _mo.verdict(_fr[:50])[0] == "NOT_ENOUGH_DATA"
+# The harness can say yes when a strong continuation is planted (so a FALSIFIED elsewhere is not a harness that cannot pass).
+_pw = _mo.run(_fair_world(4000, 5, drift=0.9))["trades"]
+assert _mo.verdict(_pw)[0] == "NOT_YET_FALSIFIED", _mo.verdict(_pw)
+# The round trip null ignores direction: planting continuation does not change what it returns on a trade list with the same sizes.
+assert abs(_mo.null_roundtrip(_pw, 3) - _mo.null_roundtrip(_pw, 3)) < 1e-15
+assert _mo.null_roundtrip(_pw, 3) < sum(t["net"] for t in _pw) / len(_pw), "the direction-free null earns less than a real continuation"
+assert _mo.null_settle(_fsr, 4) < 0 and _mo.null_roundtrip(_fr, 4) < 0, "both nulls lose their costs"
+# The stressed figure charges fees x1.2 on BOTH legs (round trip) and on the one leg when held to settlement.
+assert abs(_t["stress"] - (0.79 - _mo.fee(0.79, 1.2) - 0.71 - _mo.fee(0.71, 1.2))) < 1e-12 and _t["stress"] < _t["net"]
+assert abs(_s[0]["stress"] - (1.0 - 0.61 - _mo.fee(0.61, 1.2))) < 1e-12 and _s[0]["stress"] < _s[0]["net"]
+print("M1 momentum tests passed")
