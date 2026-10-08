@@ -1677,3 +1677,22 @@ them. Their window is markets that **close after 2026-10-08 02:50 UTC** (close_t
 - **What it says.** The bar is deliberately hard to pass, and a +0.96c edge on a 5c to 12c risk per contract has a per entry standard deviation of about 0.3 dollars, so even a real edge of exactly the measured size is read as `NOT_YET_FALSIFIED` only one time in five at 300 entries and one time in two at 2,000 entries. The "both halves positive" and "fees x1.2" conditions are not in this table, so the true pass rates are lower still.
 - **What it does not say.** A failed reading at 300 entries is weak evidence against L1, not strong evidence: with a real +0.96c edge it fails 79% of the time. Equally a pass is weak evidence for it. The false pass rate at 300 entries (7.1%) is above the nominal 1.8% because 6.6 days is few clusters for a z statistic.
 - **Consequence for the size ladder.** The ladder's first step asks for a pass on 300 entries and 5 days. That gate will usually not be met even if L1 works, so a ladder that waits for it waits for luck. Whether to read the first step at 1,000 entries (about three weeks, 34% power at the measured edge) instead is a decision for the owner, to be written down before the data is read; this note changes nothing by itself.
+
+## Amendment to P2 (fixed 2026-10-08 03:30 UTC, before any resting-order simulation was run on any book)
+
+Two facts changed after P2 was written, both disclosed here before use.
+
+1. **Data source.** `scalper.recorder` (read only, public endpoints, no key) is now running in the research container, writing the top
+   five levels of both series' open markets to `data/ob.sqlite` every 10 seconds, started 2026-10-08 03:25 UTC for 10 hours. P2 may use
+   these snapshots as well as the Firestore recorder's. Only markets that close after 03:25 UTC count; the 471 older snapshots (42 minutes,
+   2026-10-07) never count. A snapshot is a separate view of the book every 10 seconds, so a resting order whose price was crossed for
+   less than 10 seconds can be missed. That biases fills DOWN, which is the conservative direction for a maker test.
+2. **Maker fee.** The series endpoint reports `fee_type: quadratic, fee_multiplier: 1` for both series, which fits the taker formula used
+   everywhere here. I could not find a maker rate in the pages I could fetch (docs.kalshi.com fee rounding says only that the fee accumulator
+   carries across taker and maker fills), and I will not write one from memory. So the pre-set verdict is judged with the **maker fee set
+   equal to the taker fee**, `0.07 * p * (1 - p)` per contract. Any saving from a lower maker rate is printed as a separate information
+   line with 0 and 0.0175 coefficients, and cannot create a pass. The only thing a pass can then come from is the entry price.
+- Everything else in P2 stands: back of the visible queue at our price, a fill only on a LATER snapshot whose opposite side's best price is at or
+  through our limit, the window is the 330 to 400 seconds before close, the outcome of unfilled signals is reported next to the filled
+  ones, kill criteria and 300 signals on 5 days unchanged. At 10 hours of recording there will be far fewer than 300 signals, so the
+  result will be `NOT_ENOUGH_DATA` and printed as information only.
