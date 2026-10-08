@@ -112,7 +112,7 @@ gates.G22 = () => {
 
 // The totals count what the bot did since the owner's starting line, not the owner's own trades on the same account.
 gates.G23 = () => {
-  const totals = new Function(block(/(function kalshiLiveTotals\(acct, orders\)\{[\s\S]*?\n  \})\n/, html) + '; return kalshiLiveTotals;')();
+  const totals = new Function(block(/(function kalshiGroupFills\(fills\)\{[\s\S]*?\n  \})\n/, html) + block(/(function kalshiLiveTotals\(acct, orders\)\{[\s\S]*?\n  \})\n/, html) + '; return kalshiLiveTotals;')();
   const isBot = new Function(block(/(function kalshiFillIsBot\(fill, orders\)\{[\s\S]*?\n  \})\n/, html) + '; return kalshiFillIsBot;')();
   const since = 1000;
   const acct = { baseline: { since, startingDollars: 97.48 }, balance: { ok: true, totalDollars: 98.2 }, changeSinceStart: 0.72, fills: { ok: true, fills: [{}, {}, {}] } };
@@ -209,6 +209,27 @@ gates.G26 = () => {
   const row = html.slice(html.indexOf("var trEl = document.getElementById('kalBotClosed');"), html.indexOf('var evAll'));
   assert.ok(/kalshiTradePnl\(x, ord, a\.results \? a\.results\[x\.ticker\] : null\)/.test(row) && /<span class="kal-lbl">P\/L<\/span>/.test(row), 'each trade line shows its P/L');
   assert.ok(/'bought ' \+ ord\.side\.toUpperCase\(\)/.test(row), 'the bot\'s own fills read "bought NO at 94.2c"');
+};
+
+// One order that filled in pieces is ONE trade: the counts add up, the price is the count-weighted average, and nothing is invented for
+// fills with no order id. The headline is the bot's own settled result from the server, never the account change that holds manual trades.
+gates.G27 = () => {
+  const group = new Function(block(/(function kalshiGroupFills\(fills\)\{[\s\S]*?\n  \})\n/, html) + '; return kalshiGroupFills;')();
+  const g = group([
+    { orderId: 'o1', ticker: 'T1', count: 0.83, price: '0.0710', time: 't1' }, { orderId: 'o1', ticker: 'T1', count: 0.17, price: '0.0710', time: 't1' },
+    { orderId: 'o2', ticker: 'T2', count: 1, price: '0.9000' },
+    { orderId: 'o3', ticker: 'T3', count: 1, price: '0.4000' }, { orderId: 'o3', ticker: 'T3', count: 3, price: '0.6000' },
+    { orderId: null, ticker: 'T4', count: 2, price: '0.5000' }, { orderId: null, ticker: 'T4', count: 2, price: '0.5000' },
+  ]);
+  assert.strictEqual(g.length, 5, 'o1 and o3 each collapse to one trade; the two with no order id stay separate');
+  assert.deepStrictEqual([g[0].count, g[0].price], [1, '0.0710'], '0.83 and 0.17 of a contract are one contract at the same price');
+  assert.deepStrictEqual([g[2].count, g[2].price], [4, '0.5500'], 'the price is weighted by count: (1 x 0.40 + 3 x 0.60) / 4');
+  assert.deepStrictEqual(group(null), []);
+  assert.deepStrictEqual(group([null, { orderId: 'x', count: 'bad', price: 'bad' }, { orderId: 'x', count: 1, price: '0.5' }]).length, 1, 'junk is not turned into a number');
+  // The page shows grouped trades everywhere it counts them.
+  assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
+  assert.ok(/cell\('Bot P\/L, this session'|botCell = cell\('Bot P\/L, this session'/.test(html) && /Number\.isFinite\(sess\.botNet\)/.test(html), 'the headline is the bot\'s own settled P/L');
+  assert.ok(/cell\('Account change since start'/.test(html), 'and the account change is labelled as the account, not the bot');
 };
 
 (async () => {

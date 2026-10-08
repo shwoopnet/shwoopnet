@@ -370,6 +370,22 @@ gates.N20 = () => {
   assert.ok(/id="kalL1Sizing"/.test(html) && !/id="kalL1Sizing"[^>]*checked/.test(html), 'the box starts unticked');
 };
 
+// "No market is about 6 minutes from its close" is true at 3 minutes before a close, and unhelpful: the session says when the next look is.
+gates.N21 = async () => {
+  const closing = quote({ close_time: iso(NOW + 180000) });                         // 3 minutes left: past its window
+  const later = quote({ close_time: iso(NOW + 18 * 60000) }, 'KXBTC15M', 'KXBTC15M-26OCT071430-30');   // 18 minutes left
+  const w = world();
+  await tick(w, { quotes: [closing, later] });
+  assert.strictEqual(w.posts.length, 0);
+  assert.strictEqual(w.sess.nextLookAt, NOW + 18 * 60000 - live.L1_WINDOW_MS[1], 'the next window opens 6:40 before the later close');
+  assert.ok(w.sess.botNet === 0 && w.sess.botOpen === 0, 'the bot\'s running total is kept current on every tick, not only ticks that trade');
+  assert.ok(/entry|6 minutes/.test(w.sess.lastNote) && !/about 6 minutes from its close right now/.test(w.sess.lastNote), 'the note says what the window is');
+  const none = world(); await tick(none, { quotes: [closing] });
+  assert.strictEqual(none.sess.nextLookAt, null, 'no later market known: no time is invented');
+  assert.ok(/Next look at/.test(html) && /s\.nextLookAt > now/.test(html), 'the page shows it only while it is still in the future');
+  assert.ok(!/At most 80 orders/.test(html) && /bot's own trades are down \$7\.00/.test(html), 'the rules text matches the live limits');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

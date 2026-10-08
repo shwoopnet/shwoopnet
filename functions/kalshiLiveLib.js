@@ -187,7 +187,7 @@ async function runLiveTest({ quotes, active, enabled, store, now, keyId, pem, fe
     const avail = availableFor(bal.body, m.exchange_index);
     if (!Number.isFinite(avail)) { skipped.push(s.ticker + ": the balance came back in a shape this code does not recognise"); continue; }
     if (avail < p.cost + BALANCE_MARGIN) {
-      skipped.push(s.ticker + ": the account has $" + avail.toFixed(2) + " available" + (m.exchange_index !== undefined ? " on shard " + m.exchange_index : "") + " and this order needs $" + (p.cost + BALANCE_MARGIN).toFixed(2) + ", and funds on another shard do not count, so move money to that shard in the Kalshi app first");
+      skipped.push(s.ticker + ": the account has $" + avail.toFixed(2) + " available" + (m.exchange_index !== undefined ? " on shard " + m.exchange_index : "") + " and this order needs $" + (p.cost + BALANCE_MARGIN).toFixed(2) + ", and funds on another shard do not count (see functions/DEPLOY.md, 'Moving money between shards')");
       continue;
     }
     chosen = s; market = m; plan = p;
@@ -391,7 +391,13 @@ async function runL1Tick(args) {
 
   const candidates = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status)
     && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1]);
-  if (!candidates.length) { await note("Watching. No market is about 6 minutes from its close right now.", { cash }); return { skipped: "no market in the window" }; }
+  if (!candidates.length) {
+    // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
+    const opens = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status))
+      .map((q) => Date.parse(q.m.close_time) - L1_WINDOW_MS[1]).filter((t) => t > now);
+    await note("Watching. Orders go in about 6 minutes before a close, and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
+    return { skipped: "no market in the window" };
+  }
 
   const results = [];
   let ordersSent = sent;
@@ -416,7 +422,7 @@ async function runL1Tick(args) {
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
     if (!Number.isFinite(avail)) { results.push(ticker + ": the balance came back in a shape this code does not recognise"); continue; }
-    if (avail < cost + BALANCE_MARGIN) { results.push(ticker + ": only $" + avail.toFixed(2) + " on its shard"); continue; }
+    if (avail < cost + BALANCE_MARGIN) { results.push(ticker + ": only $" + avail.toFixed(2) + " on its shard, and money on another shard does not count"); continue; }
 
     const cid = "L1-" + ticker;
     const record = {
