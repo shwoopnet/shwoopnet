@@ -34,6 +34,17 @@ MIN_DAYS = 5
 PAUSE_S = 0.12
 
 SCHEMA = "CREATE TABLE IF NOT EXISTS tapeflow(ticker TEXT PRIMARY KEY, yes_ct REAL, no_ct REAL, n_trades INTEGER)"
+# One row per second that had a trade. yes_px: price (of YES) at the first print by a taker buying YES in that second, an ask the taker paid. no_px: YES price at the
+# first print by a taker buying NO, which is where the YES bid was. last_px: YES price of the last print. cy, cn: contracts by taker side.
+BARS = "CREATE TABLE IF NOT EXISTS tape_s(ticker TEXT, sec INTEGER, yes_px REAL, no_px REAL, last_px REAL, cy REAL, cn REAL, PRIMARY KEY(ticker, sec))"
+
+# T3 (README, Pre-registration: T3), all fixed before any bar was read
+T3_LOOK_FROM_S = 20     # price at the end of second 20 ...
+T3_SIGNAL_S = 60        # ... against the price at the end of second 60: the drift of the first minute
+T3_MIN_DRIFT = 0.03     # at least 3c in one direction
+T3_BAND = (0.55, 0.70)  # the side bought must cost 55c to 70c at the entry print
+T3_TARGET = 0.05        # sell when the bid is 5c above the entry price
+T3_TIME_EXIT_S = 240    # otherwise sell at the first bid print at or after 240 s (11 minutes left), long before L1's window
 
 
 def window_flow(trades: list[dict], open_ts: int) -> tuple[float, float, int]:
@@ -53,7 +64,34 @@ def window_flow(trades: list[dict], open_ts: int) -> tuple[float, float, int]:
     return yes, no, n
 
 
-def fetch_one(ticker: str, open_ts: int) -> tuple[float, float, int]:
+def build_bars(trades: list[dict], open_ts: int) -> list[tuple]:
+    """Second by second summary of the trades inside [open, open + WINDOW_S). Trades are taken in time order; a second keeps the FIRST taker print on each side."""
+    rows = []
+    for t in trades:
+        ts = datetime.fromisoformat(t["created_time"].replace("Z", "+00:00")).timestamp()
+        sec = int(ts - open_ts)
+        if not (0 <= sec < WINDOW_S):
+            continue
+        rows.append((ts, sec, t.get("taker_side"), api.f(t.get("yes_price_dollars")), api.f(t.get("count_fp")) or 0.0))
+    rows.sort(key=lambda r: r[0])
+    by: dict[int, dict] = {}
+    for _, sec, side, px, c in rows:
+        b = by.setdefault(sec, {"yes_px": None, "no_px": None, "last_px": None, "cy": 0.0, "cn": 0.0})
+        if px is None:
+            continue
+        b["last_px"] = px
+        if side == "yes":
+            b["cy"] += c
+            if b["yes_px"] is None:
+                b["yes_px"] = px
+        elif side == "no":
+            b["cn"] += c
+            if b["no_px"] is None:
+                b["no_px"] = px
+    return [(sec, b["yes_px"], b["no_px"], b["last_px"], b["cy"], b["cn"]) for sec, b in sorted(by.items())]
+
+
+def fetch_one(ticker: str, open_ts: int) -> tuple[float, float, int, list[tuple]]:
     trades, cursor = [], None
     while True:
         params = {"ticker": ticker, "min_ts": open_ts, "max_ts": open_ts + WINDOW_S - 1, "limit": 1000}
@@ -65,19 +103,22 @@ def fetch_one(ticker: str, open_ts: int) -> tuple[float, float, int]:
         time.sleep(PAUSE_S)
         if not cursor or not r.get("trades"):
             break
-    return window_flow(trades, open_ts)
+    y, n, k = window_flow(trades, open_ts)
+    return y, n, k, build_bars(trades, open_ts)
 
 
 def fetch(days: int = 30) -> None:
     db = sqlite3.connect(DB)
     db.execute(SCHEMA)
+    db.execute(BARS)
     last = db.execute("SELECT MAX(close_ts) FROM market").fetchone()[0]
     rows = db.execute("SELECT ticker, open_ts FROM market WHERE close_ts >= ? AND result IN ('yes','no') ORDER BY close_ts", (last - days * 86400,)).fetchall()
     have = {r[0] for r in db.execute("SELECT ticker FROM tapeflow")}
     todo = [r for r in rows if r[0] not in have]
     print(f"{len(rows)} markets in the last {days} days, {len(todo)} to fetch")
     for i, (ticker, open_ts) in enumerate(todo, 1):
-        y, n, k = fetch_one(ticker, open_ts)
+        y, n, k, bars = fetch_one(ticker, open_ts)
+        db.executemany("INSERT OR REPLACE INTO tape_s VALUES (?,?,?,?,?,?,?)", [(ticker, *b) for b in bars])
         db.execute("INSERT OR REPLACE INTO tapeflow VALUES (?,?,?,?)", (ticker, y, n, k))
         if i % 50 == 0:
             db.commit(); print(f"  {i} fetched")
@@ -125,6 +166,70 @@ def entries(db, min_total: float = MIN_TOTAL, roundtrip: bool = False) -> list[d
     return sorted(out, key=lambda e: e["close_ts"])
 
 
+def t3_trade(bars: list[tuple]) -> dict | None:
+    """T3 on one market's bars, or None when there is no observation. bars: (sec, yes_px, no_px, last_px, cy, cn) in time order.
+    Signal from prints before second T3_SIGNAL_S only. Entry: the first print by a taker buying the leaning side at second T3_SIGNAL_S + 1 or later (one second of
+    latency), price inside T3_BAND. Exit: the first LATER second whose opposite taker print puts our bid at entry + T3_TARGET or better, else the first opposite taker
+    print at or after T3_TIME_EXIT_S. A market that never prints an exit has no observation. Fee on both legs."""
+    def last_before(sec: int):
+        v = None
+        for b in bars:
+            if b[0] < sec and b[3] is not None:
+                v = b[3]
+        return v
+    p0, p1 = last_before(T3_LOOK_FROM_S), last_before(T3_SIGNAL_S)
+    if p0 is None or p1 is None:
+        return None
+    drift = p1 - p0
+    if abs(drift) < T3_MIN_DRIFT:
+        return None
+    side = "yes" if drift > 0 else "no"
+    entry = None
+    for b in bars:
+        if b[0] < T3_SIGNAL_S + 1:
+            continue
+        px = b[1] if side == "yes" else (None if b[2] is None else round(1 - b[2], 4))   # a NO taker print at yes price q pays 1 - q for NO
+        taker_buys_side = (b[1] is not None) if side == "yes" else (b[2] is not None)
+        if taker_buys_side and px is not None and T3_BAND[0] <= px <= T3_BAND[1]:
+            entry = (b[0], px)
+            break
+    if entry is None:
+        return None
+    esec, price = entry
+    exit_ = None
+    for b in bars:
+        if b[0] <= esec:
+            continue
+        # our bid: a taker buying the OTHER side pays 1 - (what we hold); for YES that is the YES price a NO taker sells at
+        bid = b[2] if side == "yes" else (None if b[1] is None else round(1 - b[1], 4))
+        if bid is None:
+            continue
+        if bid >= price + T3_TARGET or b[0] >= T3_TIME_EXIT_S:
+            exit_ = (b[0], bid)
+            break
+    if exit_ is None:
+        return None
+    gross = exit_[1] - price
+    return {"price": price, "sell": exit_[1], "hold": exit_[0] - esec, "side": side, "net": gross - fee(price) - fee(exit_[1]),
+            "stress": gross - fee(price, STRESS) - fee(exit_[1], STRESS), "won": gross > 0}
+
+
+def t3_entries(db, min_total: float = 0.0) -> tuple[list[dict], int, int]:
+    """(observations, markets with bars, markets with no observation)."""
+    out, seen = [], 0
+    flow = {t: y + n for t, y, n in db.execute("SELECT ticker, yes_ct, no_ct FROM tapeflow")}
+    for ticker, open_ts, close_ts in db.execute("SELECT ticker, open_ts, close_ts FROM market WHERE ticker IN (SELECT ticker FROM tapeflow) ORDER BY close_ts").fetchall():
+        if flow.get(ticker, 0.0) < min_total:
+            continue
+        seen += 1
+        bars = db.execute("SELECT sec, yes_px, no_px, last_px, cy, cn FROM tape_s WHERE ticker=? ORDER BY sec", (ticker,)).fetchall()
+        t = t3_trade(bars)
+        if t is None:
+            continue
+        out.append(dict(t, ticker=ticker, close_ts=close_ts, day=datetime.fromtimestamp(close_ts, timezone.utc).strftime("%Y-%m-%d")))
+    return out, seen, seen - len(out)
+
+
 def verdict(es: list[dict], es_strict: list[dict]) -> tuple[str, dict]:
     mean, se, z = cluster_mean_z([(e["day"], e["net"]) for e in es])
     days = sorted({e["day"] for e in es})
@@ -155,6 +260,14 @@ def run() -> None:
     print(f"T2 early taker flow, sold at 7 minutes left: n={s2['n']} on {s2['days']} days, net {f(s2['mean'])} per contract, z {s2['z']:+.2f}, halves {f(s2['h1'])} / {f(s2['h2'])}, "
           f"fees x{STRESS} {f(s2['stress'])}, up {s2['win']:.1%}, at 100 contracts n={s2['strict_n']} net {f(s2['strict_mean'])}")
     print(f"VERDICT: {v2}")
+    t3, seen, none = t3_entries(db)
+    t3s, _, _ = t3_entries(db, MIN_TOTAL_STRICT)
+    v3, s3 = verdict(t3, t3s)
+    holds = sorted(e["hold"] for e in t3)
+    print(f"T3 early drift scalp, tick level: {seen} markets read, {none} with no observation; n={s3['n']} on {s3['days']} days, net {f(s3['mean'])} per contract, z {s3['z']:+.2f}, "
+          f"halves {f(s3['h1'])} / {f(s3['h2'])}, fees x{STRESS} {f(s3['stress'])}, up {s3['win']:.1%}, median hold {holds[len(holds) // 2] if holds else 0:.0f}s, "
+          f"at 100 contracts n={s3['strict_n']} net {f(s3['strict_mean'])}")
+    print(f"VERDICT: {v3}")
 
 
 if __name__ == "__main__":
