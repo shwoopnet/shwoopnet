@@ -996,6 +996,8 @@
   .kal-move{ display:flex; justify-content:flex-end; gap:6px; margin-bottom:6px; }
   .kal-bot-grid .kal-trade{ grid-template-columns:1fr 1fr; }
   .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr)); }
+  /* The books card now sits in a column beside the trade history, so each market's figures wrap two across instead of five. */
+  .kal-bot-grid .kal-books .kal-row{ grid-template-columns:1fr 1fr; }
   .kal-bot-grid .kal-sum{ grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); }
   .kal-more{ margin-top:10px; }
   .kal-more > summary{ cursor:pointer; color:var(--muted); font-size:12.5px; }
@@ -3336,20 +3338,20 @@
           <div class="kal-note">One contract about 6 minutes before each Bitcoin or gold 15 minute close, on the side priced 88c to 97c, held to settlement. At most 80 orders and $2.00 each. Stops after 24 hours, at $7.00 below the starting cash, or on any order that goes wrong. L1 failed its own test (z 1.45 against 2.1), so this is your decision, not evidence it works; a day is mostly noise, about plus or minus $2.</div>
         </details>
       </div>
-      <div class="kal-card" data-card="positions">
-        <div class="kal-card-title">Open positions</div>
-        <div id="kalBotOpen"></div>
-      </div>
       <div class="kal-card" data-card="trades">
         <div class="kal-card-title">Recent trades</div>
         <div id="kalBotClosed"></div>
       </div>
-      <div class="kal-card kal-span" data-card="books">
+      <div class="kal-card" data-card="books">
         <div class="kal-card-title">Live books</div>
         <div id="kalBooks" class="kal-books"><div class="kal-empty">Loading...</div></div>
         <details class="kal-more"><summary>How to read this</summary>
           <div class="kal-note">Round trip = crossing the spread (buy the ask, sell the bid) plus fees on both legs. Fees round up to a cent per order, so the 1 lot figure is the worst case. Fee rate is an unverified estimate.</div>
         </details>
+      </div>
+      <div class="kal-card" data-card="positions">
+        <div class="kal-card-title">Open positions</div>
+        <div id="kalBotOpen"></div>
       </div>
       <div class="kal-card kal-span" data-card="detail">
         <details class="kal-fold"><summary class="kal-card-title">Account detail and starting line</summary>

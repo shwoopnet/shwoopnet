@@ -41,6 +41,18 @@ gates.Y4 = () => {
   assert.ok(/dropEffect = 'move'/.test(over) && /grid\.addEventListener\('dragenter'/.test(iife), 'a move is announced on enter and over');
 };
 
+// The live books sit in a column right after the trade history (so they land beside it on a wide screen), not in a full-width row
+// underneath, and their five figures wrap two across so they fit a column.
+gates.Y5 = () => {
+  const i = html.indexOf('id="kalTabBot"');
+  const order = [...html.slice(i, i + 12000).matchAll(/<div class="([^"]*)" data-card="(\w+)"/g)].map((m) => [m[2], m[1]]);
+  const names = order.map((o) => o[0]);
+  assert.ok(names.indexOf('books') === names.indexOf('trades') + 1, 'books come straight after trades: ' + names.join(','));
+  assert.ok(!/kal-span/.test(order.find((o) => o[0] === 'books')[1]), 'the books card is a column, not a full-width row');
+  assert.ok(/\.kal-bot-grid \.kal-books \.kal-row\{ grid-template-columns:1fr 1fr; \}/.test(html), 'each market wraps two figures across inside the column');
+  assert.ok(/data-card="account"/.test(html) && /data-card="session"/.test(html), 'the halt and stop cards are still there');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
