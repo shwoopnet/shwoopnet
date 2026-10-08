@@ -302,7 +302,7 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX) {
 // stop move together, once a week. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
 // (3, what the owner was running), or lower if the balance is lower. Pure: the caller keeps the state.
 const L1_SIZE_CEILING = 10;
-const SCALE_DOLLARS_PER_CONTRACT = 100;
+const SCALE_DOLLARS_PER_CONTRACT = 85;
 const SCALE_REVIEW_MS = 7 * 24 * 3600 * 1000;
 const SCALE_STEP = 1;
 function scaleTarget(cash) {

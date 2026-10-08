@@ -276,7 +276,7 @@ gates.N24 = async () => {
   const later = live.reviewSizing(st, 900, NOW + W);
   assert.deepStrictEqual([later.state.cap, later.state.base, later.state.reviewedAt], [4, 900, NOW + W], 'a week later it rises ONE step, not to the nine the balance would allow');
   assert.strictEqual(live.reviewSizing(later.state, 900, NOW + W + DAY).state.cap, 4, 'and not again the next day');
-  assert.strictEqual(live.reviewSizing({ ...st, cap: 5 }, 290, NOW + DAY).state.cap, 2, 'a falling balance cuts the cap at once, mid week');
+  assert.strictEqual(live.reviewSizing({ ...st, cap: 5 }, 240, NOW + DAY).state.cap, 2, 'a falling balance cuts the cap at once, mid week');
   assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + W + DAY).state.cap, 3, 'no rise within a week of a loss stop');
   assert.strictEqual(live.reviewSizing({ cap: 10, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, 10, 'the hard ceiling holds');
   // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
@@ -328,7 +328,7 @@ gates.N25 = async () => {
   assert.strictEqual(w.posts[0].count, '5', 'cap 3 plus two from a $2 pool');
   assert.strictEqual(w.sess.sizeAddon, 2);
   assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 30, 8 * 86400000).state.cap, 3, 'with $30 saved the sizing balance is $311, which still supports three');
-  assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 60, 8 * 86400000).state.cap, 2, 'savings are not sized on: if the rest of the balance falls under $300 the cap follows it down');
+  assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 100, 8 * 86400000).state.cap, 2, 'savings are not sized on: if the rest of the balance falls under $255 the cap follows it down');
   const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(ceil, { sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   assert.strictEqual(ceil.posts[0].count, '10', 'cap plus add-on can never pass the ceiling');
