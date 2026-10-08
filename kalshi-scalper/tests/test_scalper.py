@@ -1289,3 +1289,51 @@ _em = _se.prep([_sm("E1", _C0, 0.39, 0.41, "yes")])
 _ee = _ov.entries_of(_em, {"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []})
 assert len(_ee) == 1 and abs(_ee[0][1] - (0.41 + _se.fee(0.41))) < 1e-12 and abs(_ee[0][2] - 0.40) < 1e-12, _ee
 print("fair null tests passed")
+
+# ---- the forward check ----
+import json as _jsf, random as _rf, re as _ref
+from scalper import forward as _fw
+
+def _fmk(n, per_day, win_p, price=0.905, seed=1, start=1791417600):
+    """n markets after the old data (start is 2026-10-08 00:00 UTC, so each block of 96 is one UTC day), each with a 0.90/0.91 book at 8, 6 and 2 minutes left.
+    win_p is the YES win rate."""
+    g = _rf.Random(seed); out = []
+    for i in range(n):
+        close = start + (i // per_day) * 86400 + (i % per_day) * 900
+        cs = [(close - 60 * left, round(price - 0.005, 4), round(price + 0.005, 4), round(price - 0.005, 4), round(price + 0.005, 4)) for left in (8, 6, 2)]
+        out.append(("F%d" % i, "KXBTC15M" if i % 2 else "KXGOLD15M", cs, close, "yes" if g.random() < win_p else "no"))
+    return out
+
+# A planted edge is seen only once there is enough of it. Under 300 entries, or on fewer than 5 days, the word is NOT_ENOUGH_DATA however good the numbers look.
+_big = _fw.all_rules(_fmk(600, 96, 1.0))                # 600 markets over 7 days, every favorite wins
+assert _fw.verdict(_big["F0 L1"])[0] == "NOT_YET_FALSIFIED" and _fw.verdict(_big["F3"])[0] == "NOT_YET_FALSIFIED", "the simulator can see a real edge"
+assert _fw.verdict(_fw.all_rules(_fmk(299, 96, 1.0))["F0 L1"])[0] == "NOT_ENOUGH_DATA", "299 entries is not enough"
+assert _fw.verdict(_fw.all_rules(_fmk(384, 96, 1.0))["F0 L1"])[0] == "NOT_ENOUGH_DATA", "384 entries on 4 days is not enough"
+assert _fw.verdict(_fw.all_rules(_fmk(480, 96, 1.0))["F0 L1"])[0] == "NOT_YET_FALSIFIED", "5 days is enough"
+# A fair market (the favorite wins as often as it is priced) loses its costs and must never pass.
+_fair_f = _fw.all_rules(_fmk(1500, 96, 0.905, seed=5))
+for _k in ("F0 L1", "F3", "F4"):
+    _s = _fw.stats(_fair_f[_k])
+    assert _fw.verdict(_fair_f[_k])[0] == "FALSIFIED" and _s["mean"] < 0 and _s["gross"] < 0.02, (_k, _s["mean"], "a fair game must lose about its fees")
+# Only markets that closed AFTER the old data count. One closing exactly at the old end is old data.
+_edge = [("O1", "KXBTC15M", [(_fw.OLD_END - 360, 0.90, 0.91, 0.90, 0.91)], _fw.OLD_END, "yes"),
+         ("N1", "KXBTC15M", [(_fw.OLD_END + 900 - 360, 0.90, 0.91, 0.90, 0.91)], _fw.OLD_END + 900, "yes")]
+assert [m[0] for m in _fw.forward_only(_edge)] == ["N1"], "the last old close is not forward data"
+# W3 ends where the forward window starts, so no market is in both and nothing is counted twice.
+assert _fw.W3_START < _fw.OLD_END == 1791397800 and _ov.ORIG_END < _fw.OLD_END
+# The four search rules are the saved survivors, byte for byte: nobody retuned them.
+_saved = {}
+for _f in ("stageA", "stageB"):
+    for _r in _jsf.loads((_P3(__file__).resolve().parents[1] / "search2" / (_f + ".json")).read_text()):
+        if _r["survivor"]:
+            _saved[_se.key(_se.normalize({**_r["spec"], "filters": [tuple(x) for x in _r["spec"]["filters"]]}))] = _r["rule"]
+assert sorted(_saved.values()) == sorted(_se.describe(r) for r in _fw.SEARCH_RULES.values()) and set(_saved) == {_se.key(_se.normalize(r)) for r in _fw.SEARCH_RULES.values()}
+# A series filter really keeps Bitcoin only, and F2 only ever buys NO.
+_f2 = _fw.rule_entries(_se.prep(_fmk(40, 40, 1.0)), dict(_fw.F2, filters=[("series", "KXBTC15M")], left=6))
+assert _f2 and all(e["series"] == "KXBTC15M" and e["side"] == "no" for e in _f2)
+# No verdict function takes a performance parameter, and the code (comments stripped) has no word for "go live".
+import inspect as _inf
+assert all(not _ref.search(r"perf|target|until|profit|promote", p) for f in (_fw.verdict, _fw.stats, _fw.rule_entries, _fw.forward_only, _fw.all_rules) for p in _inf.signature(f).parameters)
+_srcf = _ref.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_fw.__file__).read())
+assert not _ref.search(r"promote|trade_it|go_live|TRADE", _srcf)
+print("forward check tests passed")
