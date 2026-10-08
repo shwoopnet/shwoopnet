@@ -6,31 +6,36 @@ Research and risk tooling for Kalshi 15 minute BTC (`KXBTC15M`) and gold
 
 ## Status
 
-Nothing here places an order, and nothing here has to stay running: this folder
-is offline research over downloaded history. The bot that watches the markets
-runs on the server. Order placement does not exist yet and is added only after
-the bar below is cleared in paper trading.
+Nothing in this folder places an order; it is offline research over downloaded history and the recorder's snapshots. Real orders exist, and live
+elsewhere: `functions/kalshiLiveLib.js` in the repo root runs strategy L1 in the owner's real Kalshi account under the owner's written waiver ("Live waiver:
+L1 for 24 hours", below), with hard limits, a loss stop and a halt switch. **The bar below has NOT been cleared**: L1 is the best rule found, it has never
+passed its own forward test, and it is running because the owner chose to accept a thin and unproven edge, not because research approved it. Nothing
+here, and no verdict word, means "trade".
 
-## Build order
+## Build order (as it happened)
 
 1. `backfill.py`  fetch Kalshi's own 1 minute history for settled markets.
 2. `analyze.py`, `calibration.py`, `scalps.py`, `situations.py`  measure it.
-3. Strategy       only if the measurement shows room. Declares counterparty first.
-4. Paper bot      runs on the server (see below), not from this folder.
-5. Live, tiny     demo env, then smallest real size, behind hard limits.
+3. Strategy       only if the measurement shows room. Declares counterparty first. Every hypothesis tried so far is `FALSIFIED`.
+4. The paper bot  was built, measured and retired on 2026-10-07; the live bot replaced it (see "The paper bot (retired Oct 7, 2026)").
+5. Live, tiny     L1 only, behind hard limits, on the owner's waiver. Its size is governed by the size ladder, not by this folder.
 
 ## Bar to clear before any real money (written before any result exists)
 
-- At least 300 paper trades and 5 separate days.
+Not met by anything. Kept as the standard every forward check is judged by.
+
+- At least 300 trades and 5 separate days.
 - Positive net expectancy per trade AFTER fees, with fills priced at the
   ask going in and the bid going out, never the mid.
-- Net profit still positive when fees are assumed 20% higher than modelled.
+- Net profit still positive when fees are assumed 20% higher than modelled. (Kalshi also rounds fees up to the cent per order, which costs a
+  one contract order about half a cent more than the modelled fee: see "Cost model check: fee rounding per order".)
 - Predicted probabilities calibrated (60% calls win about 60%).
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: 2,563 as of 2026-10-08 (792 before P1, P1 is the 793rd, the four slot search adds 1,760, F6 and F7 two, Q1 to Q3 and two Q1 thresholds five, F8 one, N1 and N2 two), all `FALSIFIED` or `NOT_ENOUGH_DATA` (the count and how it adds up are at the end of the strategy search results; this line was stale at 2
-until then). Cuts examined by the decision rule: 18, plus 3 entry times for H1.
+Strategy variants tried so far: **2,563 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Q1 thresholds five; F8 one; N1 and N2 two), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
+Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
 
