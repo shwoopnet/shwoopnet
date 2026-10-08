@@ -64,6 +64,20 @@ gates.Y6 = () => {
   assert.ok(/kal-unlocked > \.kal-card\{[^}]*user-select:none/.test(html), 'text inside a card cannot be picked up instead of the card');
 };
 
+// The history lists each order once, and the counts cover the whole session, not the newest 20 orders.
+gates.Y7 = () => {
+  assert.ok(/collection\(db, 'kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(300\)/.test(html), 'orders are read up to the most a 24 hour session can send, not 20');
+  assert.ok(!/kalshiLiveOrders'\), orderBy\('ts', 'desc'\), limit\(20\)/.test(html));
+  const i = html.indexOf('var loggedOrders');
+  assert.ok(i > -1 && /indexOf\(' on ' \+ String\(o\.ticker\) \+ ':'\) > -1/.test(html.slice(i, i + 600)), 'an order the log already shows is not listed a second time');
+  // The same filter, run: two events and the two matching order records become two lines, and an order with no logged event stays.
+  const evs = [{ ts: 2, kind: 'order', detail: 'no 1 at 89.0c on T-A: no fill' }, { ts: 3, kind: 'session ended', detail: 'x' }];
+  const orders = [{ ts: 2, side: 'no', count: 1, price: 0.89, ticker: 'T-A', status: 'no fill' }, { ts: 1, side: 'yes', count: 1, price: 0.92, ticker: 'T-B', status: 'filled' }];
+  const logged = evs.filter((e) => e && e.kind === 'order').map((e) => String(e.detail));
+  const extra = orders.filter((o) => !logged.some((d) => d.indexOf(' on ' + String(o.ticker) + ':') > -1));
+  assert.deepStrictEqual(extra.map((o) => o.ticker), ['T-B']);
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
