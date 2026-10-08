@@ -33,8 +33,8 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,563 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
-Q1 thresholds five; F8 one; N1 and N2 two), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
+Strategy variants tried so far: **2,567 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Q1 thresholds five; F8 one; N1 and N2 two; X1 to X4 four), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
 ## Facts measured, not assumed (Oct 2026)
@@ -1930,3 +1930,23 @@ here as exactly that question: does selling a collapsing favourite early beat ho
   drawdown of the running total, share of entries stopped, and of those stopped how many would have won if held (the winners the rule cuts). The cent-rounded cost for two
   contracts (each leg rounds up to a cent, so an exit costs about a cent more than the model).
 - **Count.** Four variants: **2,567 as of 2026-10-08** (2,563 plus four).
+
+**2026-10-08: X1 to X4: all four `FALSIFIED` as an improvement in the mean.** One run of `python -m scalper.exits` (after its tests). Nothing changed after seeing it. 3,422 L1 entries (the database gained 22 markets since the 3,400 quoted elsewhere), 69 days. HOLD: mean +0.94c, standard deviation 23.5c, worst loss -97.2c, worst day -311c, deepest drawdown 699c, +0.68c a contract with the cent rounding at two contracts.
+
+| Sell when the side's bid is at or below | Entries stopped (of those, would have won if held) | Mean | Difference vs HOLD (z) | Fair-market 95th pct of the difference | Std dev | Worst loss | Worst day | Drawdown | Two contracts, rounded | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| X1 50c | 6.2% (32%) | +0.83c | -0.11c (-0.65) | +0.16c | 21.1c | -97.2c | -224c | 544c | +0.55c | `FALSIFIED` |
+| X2 60c | 7.6% (41%) | +0.78c | -0.16c (-0.75) | +0.13c | 20.1c | -96.6c | -254c | 606c | +0.49c | `FALSIFIED` |
+| X3 70c | 10.3% (53%) | +0.83c | -0.11c (-0.44) | +0.15c | 18.2c | -96.6c | -280c | 530c | +0.53c | `FALSIFIED` |
+| X4 80c | 15.6% (66%) | +0.77c | -0.17c (-0.57) | +0.09c | 15.7c | -95.2c | -312c | 441c | +0.46c | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: every variant `FALSIFIED` as an improvement, mean difference between -0.2c and -1.0c, and the worst loss falling to about -50c at X3 and X4. The verdicts were right. The
+  mean cost was smaller than predicted (-0.11c to -0.17c, none distinguishable from zero) and **the worst loss prediction was wrong: the worst single loss barely moves (-97c to -95c)**. The reason is in the data, not
+  a bug: the biggest losses are markets where the side's bid falls from the 90s to near zero between two minute checks (a move inside a minute), so the rule sells at an already collapsed bid. A stop cannot cap a loss that gaps.
+- **What the stop does buy.** It narrows the spread of results: the standard deviation falls from 23.5c to 15.7c (X4) and the deepest drawdown from 699c to 441c, at the cost of about 0.17c a contract of mean (more once cent
+  rounding of the exit leg is counted: +0.46c against +0.68c at two contracts). Earlier stops (X1) shorten the worst day (-311c to -224c) with less loss of mean. This is information only: the pre-set verdict is on the mean
+  and the stop does not improve it.
+- **It cuts winners.** At X4, 66% of the entries the rule sold would have won if held, and at X3 53%; those are the recoveries it gives up, which is the same trade-off as the failed-breakout exit found earlier.
+- **What this does not say.** One rule shape (a bid threshold checked once a minute). A resting stop order at the broker would react inside the minute, but Kalshi has no stop order type for these markets, so a faster check
+  would need the recorder's 10 second books (this day's snapshots could be used to ask how much a 10 second check would catch; that would be a new, pre-registered test). Nothing here changes the live bot.
+- **Count.** Four variants: **2,567 as of 2026-10-08**.
