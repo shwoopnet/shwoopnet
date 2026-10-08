@@ -2117,3 +2117,62 @@ The owner asked for "the opposite end of the spectrum" from L1: instead of buyin
 - **Post hoc, computed after the verdicts and not part of them: it is cost, not signal.** With the fee set to zero the same trades make -1.99c (C1), **+0.45c (C2) and +1.05c (C3)**. Both legs' fees (about 0.6c each at 10c) turn a small positive gross into the net above, which is the same conclusion as the dispersion study: cost, not an absent signal, is the binding constraint. A gross of +1.05c on a 10c target is not distinguishable from zero here and the registered bar is net.
 - **Same in both series.** Bitcoin and gold net within a few tenths of a cent of each other in every variant.
 - **Count.** Three variants: **2,577 as of this entry** (2,574 plus three).
+
+## Idea ledger addendum: the opening window, O1 to O50 (written 2026-10-08, before any of them was built or run)
+
+The owner asked for about 50 ideas for the first 9 minutes of each market, which the live bot leaves unused (it enters at 6 minutes left). **Listed here BEFORE any is run, so none is quietly retried.** Status of every row is `OPEN` unless its tag says otherwise. Tags: `NEW` = no ledger row covers it; `OVERLAP <id>` = its counterparty story rewords a ledger row or a falsified result, so it is NOT a new try and should not be run as one; `NOT_RUNNABLE` = no free data.
+Counts: **22 NEW, 26 OVERLAP, 2 NOT_RUNNABLE.** The binding constraint found so far is cost (a taker round trip costs about 1c to 3c), so the NEW rows are mostly resting (maker) entries, which pay no taker fee, and ideas that improve or extend L1, whose measured edge is positive. Anything needing book snapshots waits for the Firestore recorder to hold several days of data (it started 2026-10-08). No strategy variant is counted until it is run.
+
+| # | Family | Idea | Who pays us or why it should work | Needs | Tag |
+|---|---|---|---|---|---|
+| O1 | resting entries at the open | Bid at the best bid on the side spot leans toward, minutes 1 to 4, cancel at 5 | Takers who sell into a dip pay the spread to us; no taker fee | books | NEW (L4 adjacent) |
+| O2 | resting entries at the open | Penny the bid (+0.1c) when the best bid is under 50 contracts, exit resting at the ask | Takers crossing a thin book | books | NEW |
+| O3 | resting entries at the open | Lowball bids at 30c on both sides the moment a market opens, exit resting at 45c | Panic sellers into an empty opening book | tape | NEW |
+| O4 | resting entries at the open | Two sided quote only when the spread is 3c or more, 1 contract a side, 3 minute life | Takers crossing a wide spread | books | OVERLAP H5 (narrowed) |
+| O5 | resting entries at the open | Resting sell above the mid after a jump of 8c or more in the first 3 minutes (maker fade) | Late momentum chasers | books | NEW |
+| O6 | resting entries at the open | Resting bid 5c under the minute 1 ask on the cheap side, 4 minute life, hold if filled | Sellers who accept a discount | candles | OVERLAP P2 (resting fills landed on losers) |
+| O7 | resting entries at the open | Resting bids at round prices (25c, 75c) where size clusters | Takers who hit round numbers | books | NEW |
+| O8 | resting entries at the open | Join the bid and bid again one tick up each minute until filled, max 3 ticks | Sellers who give way over time | books | NEW |
+| O9 | structure and arbitrage | YES ask plus NO ask under $1 less both fees in the first 3 minutes | Stale quoters on one side | books | OVERLAP L14 |
+| O10 | structure and arbitrage | YES bid plus NO bid over $1 plus both fees: sell both sides | Stale bids on both sides | books | OVERLAP L14 |
+| O11 | structure and arbitrage | Stale quote: spot moves 0.1% in 10 seconds while the book is unchanged for 20 | Slow quoters | books under 10 s | OVERLAP L5 |
+| O12 | structure and arbitrage | Buy after the spread narrows from 6c or more to 2c or less within 2 minutes (liquidity arrival) | Impatient early sellers | books | NEW |
+| O13 | structure and arbitrage | First traded price of the market against the distance-implied fair price | Open price takers | tape and spot | OVERLAP H7 (distance) |
+| O14 | structure and arbitrage | Bitcoin and gold both open: trade the series whose first quote is farther from 50c | Slow quoters in the later series | books | OVERLAP L6 and S01 to S02 |
+| O15 | use the window to improve L1 | Retry a missed L1 fill at 5 minutes left if still in band (41% of signals miss) | More volume of an edge that averages +0.9c | candles and live | NEW |
+| O16 | use the window to improve L1 | Hybrid: rest a bid 1c under the touch from 9 to 6 minutes left, IOC at 6 as fallback | Cheaper entries on the ones that come back | books | OVERLAP P2 and hybrid result |
+| O17 | use the window to improve L1 | Size L1 up when the favorite was already 85c or more at minute 5 | Long-run favorites are not repriced | candles | NEW |
+| O18 | use the window to improve L1 | Skip L1 when the market mid crossed 50c three times or more in minutes 1 to 8 | Choppy markets end randomly | candles | OVERLAP Q filters |
+| O19 | use the window to improve L1 | Skip L1 when Bitcoin's realized volatility over the first 8 minutes is in its top decile | Fat tails break favorites | spot | OVERLAP L7 and L13 |
+| O20 | use the window to improve L1 | Skip L1 on days with a scheduled release (CPI, jobs, FOMC) | Slow quoters around releases | calendar | OVERLAP L10 |
+| O21 | use the window to improve L1 | Skip L1 when the spread at 6 minutes left is wider than 2c | A wide book is a thin book | candles | NEW |
+| O22 | use the window to improve L1 | Hold L1 but sell at 99c when it is offered before the close (free exit of the last cent) | Takers who pay up for certainty | books | NEW |
+| O23 | scalps on favorites | Buy a 70c to 90c favorite at minute 3, sell at +3c, else sell at 6 minutes left | Slow repricing of a trend | candles | NEW |
+| O24 | scalps on favorites | Same with a +5c target | Same | candles | NEW |
+| O25 | scalps on favorites | Buy a 55c to 70c side at minute 2 when spot confirms, sell at +4c | Slow repricing | candles and spot | OVERLAP M1 and H2 |
+| O26 | scalps on favorites | Buy a favorite at minute 4 and hold to settlement (the four slot grammar, early) | Favorite-longshot bias | candles | OVERLAP four slot search |
+| O27 | scalps on favorites | Buy the favorite on a dip of 3c in minutes 3 to 6, sell at the pre-dip price | Panic sellers in a stable market | candles | NEW |
+| O28 | scalps on favorites | Sell a favorite short-term when it exceeds 97c before minute 8 (buy the other side at 3c or less) | Overpaying for certainty | candles | OVERLAP L3 |
+| O29 | spot signals (Bitcoin) | Spot crosses the strike by 0.05% in minutes 2 to 4: buy that side | Slow repricing of spot | candles and spot | OVERLAP H7 and L2 |
+| O30 | spot signals (Bitcoin) | Spot reverses back through the strike after a 0.1% excursion: fade the excursion | Overreaction | candles and spot | OVERLAP S09 and S21 |
+| O31 | spot signals (Bitcoin) | Spot acceleration (second difference) over minutes 1 to 4 | Trend followers | candles and spot | OVERLAP S16 |
+| O32 | spot signals (Bitcoin) | Spot against its own last 60 second average at minute 5 (the settlement is an average) | Holders pricing a point, not an average | candles and spot | OVERLAP L9 |
+| O33 | spot signals (Bitcoin) | Spot move in the previous market's last 3 minutes against the new opening mid | Open price lag | candles and spot | OVERLAP L8 |
+| O34 | spot signals (Bitcoin) | Perpetual futures funding or basis as a lean | Slow quoters | external data | NOT_RUNNABLE (no free feed) |
+| O35 | cost-gated entries | Run any registered rule only in the 3 hours with the tightest opening spreads (chosen on cost) | Cost is the binding constraint | candles | NEW (allowed: selection on cost) |
+| O36 | cost-gated entries | Run only when the opening depth on both sides is 200 contracts or more | Thin books cost more | books | NEW |
+| O37 | cost-gated entries | Weekend against weekday opening spreads (a measurement first) | Wider weekend spreads | candles | NEW (measure) |
+| O38 | cost-gated entries | Gold only when Bitcoin's spread is also tight (a liquidity regime flag) | Shared liquidity cycles | candles | NEW |
+| O39 | calendar and settlement | Gold reopen after the daily break: first market's opening mid against the last price | Stale gold quotes | candles | OVERLAP S14 |
+| O40 | calendar and settlement | Bitcoin at the London and New York opens, first 5 minutes | Session opens | candles and spot | OVERLAP S15 and S12 |
+| O41 | calendar and settlement | Quarter-hour that includes the hourly mark (:00) against the other three | Hourly index effects | candles | OVERLAP S26 |
+| O42 | calendar and settlement | Last market before a settlement-day roll or maintenance window | Operational gaps | calendar | NOT_RUNNABLE (no calendar) |
+| O43 | hedges and portfolios | Straddle: buy both sides when the asks sum to $1.02 or less and sell the leg that moves | Whoever pays for volatility | books | NEW (cost likely binding) |
+| O44 | hedges and portfolios | Bitcoin and gold opposite sides when both open favorite-heavy | Correlation mispricing | candles | OVERLAP S01 to S05 |
+| O45 | hedges and portfolios | Buy a 5c longshot at minute 2 as insurance beside an L1 position in the other market | Reduces variance, not expectation | candles | NEW (variance only) |
+| O46 | hedges and portfolios | Scale in: half at 9 minutes left, half at 6 if the price held | Average entry price | candles | NEW |
+| O47 | book shape | Microprice (size weighted mid) against the plain mid at minute 3 | Quoters who ignore size | books | OVERLAP L12 |
+| O48 | book shape | Share of size on one side of the top 3 levels at minute 2 | Quoters who do not read depth | books | OVERLAP L12 |
+| O49 | book shape | A large resting order appearing and disappearing (spoof-like) as a signal | Slow reactors | books | NEW |
+| O50 | book shape | Time since the last book change as a staleness gauge | Slow quoters | books | OVERLAP L5 |
+
