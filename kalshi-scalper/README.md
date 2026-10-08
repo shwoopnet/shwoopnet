@@ -33,7 +33,7 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,580 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Strategy variants tried so far: **2,582 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
 Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
@@ -2226,3 +2226,32 @@ First three rows of the opening window ledger to run, because they need only the
 - **Cheaper in the other sense, a lower price band, is worse per dollar.** From B1 to B3: the 88c to 90c band returned -0.56% per dollar risked, 90c to 92c +1.37%, 92c to 95c +2.02%, 95c to 97c +0.24%. More contracts per dollar by buying the cheapest contracts concentrates risk in the weakest band.
 - **What this does not say.** Resampled history with a made-up fill rate; the edge (+0.9c a contract) is unproven and failed its own bar, and a size that doubles the mean also roughly doubles the loss if the edge is zero. Forward checks F0 to F9 still decide whether any of this is real.
 - Count: unchanged, **2,577 as of 2026-10-08**.
+
+## Pre-registration: two more filters on L1, OP4 and OP5 (ledger rows O17 and O19; fixed 2026-10-08 17:46 UTC, before any code and before either split was computed)
+
+Same method as Q1 to Q3: take L1 as live and ask whether a stated reason to distrust some entries removes the bad ones. Each filter is one fixed definition, with no threshold searched.
+
+**Base.** L1 as `lstrats.hold_rule(L1)`: the candle ending 6 minutes before the close, the favourite whose ask is 0.88 to 0.97, taker at the ask, fee `0.07 p (1 - p)`, held to settlement, both series, all 69 days. Every one of these days has been seen by L1, so a pass would only be permission to test forward.
+
+| Name | Arm (entries kept) | Complement (entries removed) | Excluded from both and counted |
+|---|---|---|---|
+| OP4 early favorite | The side bought already had an ask of **0.85 or more** at the candle ending 600 seconds before the close (10 minutes left, a real quote) | The same side's ask was below 0.85 at that candle | No valid quote at that candle |
+| OP5 tight book | The entry candle's spread (YES ask minus YES bid) is **0.02 or less** | The spread is wider than 0.02 | none |
+
+- **Counterparty.** OP4: whoever sells a favorite that has been a favorite for minutes is the longshot buyer, least wrong when the market agreed early and most wrong in markets that only became lopsided late. OP5: a wide book at 6 minutes left is a thin book where the favorite premium is smaller.
+- **Numeric prediction, before the run.** OP4: arm net about +1.2c a contract on about 1,500 entries, complement about +0.3c, difference under 1c. OP5: arm about +0.9c, nearly all entries, the complement too small to judge. **The pre-registered expectation is that neither passes.**
+- **Bar.** Two filters, so: the arm has at least 300 entries on at least 5 days, mean above zero with day clustered z at least 2.3, both halves positive, positive with fees x1.2, above the fair-market 95th percentile (each entry winning with probability equal to its own price), AND the arm minus the complement is positive with a day clustered z of at least 2.0. Verdict words only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. Passing is permission to test forward and nothing more.
+- **Size, stated.** The ledger row says "size up". A size rule does not change the per contract mean; it is only worth considering if the arm's per contract mean is clearly above the complement's, which is what the difference test checks. No sizing change is proposed here.
+- **Count.** Two variants: **2,582 as of this entry** (2,580 plus two).
+
+**2026-10-08 17:48 UTC: OP4 and OP5: both `FALSIFIED`.** One run of `python -m scalper.l1filters2` (after its tests), under the rules fixed above. Nothing was changed after seeing it. Base L1: 3,432 entries, +0.92c, z +2.61, 69 days.
+
+| Filter | Arm | Arm net (z) | Halves | Fees x1.2 | Complement | Arm minus complement (day clustered z) | Fair-market 95th pct | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| OP4 early favorite (ask 0.85 or more at 10 min left) | 863 | +1.84c (+2.62) | +2.27c / +1.42c | +1.76c | 2,561, +0.63c | +0.18c (+0.12) | +1.03c | `FALSIFIED` |
+| OP5 tight book (spread 0.02 or less) | 3,350 | +1.02c (+2.90) | +1.32c / +0.72c | +0.92c | 82, -2.95c | +7.73c (+1.31) | +0.24c | `FALSIFIED` |
+
+- **OP4: the arm looks good and the filter does not work.** The arm clears every arm test (z 2.62, both halves, fees x1.2, above the fair-market 95th percentile) and L1 as a whole nearly does too (z 2.61), so the arm test does not tell the filter apart from L1. What the filter has to show is that the arm beats its complement, and per day it does not: +0.18c, z +0.12 (pooled over all entries the gap is +1.21c, which shows how much of it is a few days). The prediction was an arm at about +1.2c and a gap under 1c: the arm came out higher (+1.84c), which is why the construction was audited (the candle read is 10 minutes before the close, earlier than the entry, and no result is read); nothing was wrong, it is selection and noise on 863 entries.
+- **OP5: nearly every L1 entry is already a tight book.** 3,350 of 3,432 entries have a spread of 2c or less, so the arm is L1 itself (+1.02c against +0.92c). The 82 wide-book entries lost 2.95c on average, which sounds like the filter helping, but on 82 entries the day clustered z is +1.31. Skipping them would have added +0.10c to L1's mean.
+- **No sizing change.** The arm's per contract mean is not reliably above the complement's (OP4), so "size up on an early favorite" has no support beyond this noise.
+- **Count.** Two variants: **2,582 as of 2026-10-08**.
