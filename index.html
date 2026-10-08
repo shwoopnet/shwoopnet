@@ -1053,6 +1053,7 @@
   /* Books as two tiles. */
   .kal-console .kal-books{ grid-template-columns:1fr 1fr; gap:16px; }
   .kal-console .kal-brow{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--card-shadow); padding:16px 20px; }
+  .kal-spark{ margin-top:10px; } .kal-spark-note{ margin:2px 0 0 0; font-size:11px; }
   .kal-brow-name{ font-weight:700; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
@@ -9990,7 +9991,68 @@
     return '<div class="kal-tiles">' + tiles + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + table('By price paid', st.byBand) + '</div>';
   }
 
+  // A tiny line over one 15 minute market: points are {t (ms), v}, drawn across the market's whole window so it fills from the left as time passes.
+  // `ref` is an optional level (a strike) drawn as a dashed line and kept inside the range; `fmt` formats numbers. Pure: reads nothing from the page.
+  function kalshiSparkSvg(points, opts){
+    var pts = (points || []).filter(function(p){ return p && Number.isFinite(p.t) && Number.isFinite(p.v) && p.t >= opts.from - 1000 && p.t <= opts.to + 1000; });
+    if(pts.length < 2){ return '<div class="kal-empty">' + (opts.empty || 'A line appears in a minute.') + '</div>'; }
+    var W = 360, H = 86, L = 6, R = 62, T = 8, B = 8;
+    var vals = pts.map(function(p){ return p.v; });
+    if(opts.ref != null){ vals.push(opts.ref); }
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), pad = (hi - lo) * 0.12 || Math.abs(hi) * 0.0005 || 0.5;
+    lo -= pad; hi += pad;
+    var X = function(t){ return L + (W - L - R) * Math.max(0, Math.min(1, (t - opts.from) / (opts.to - opts.from))); };
+    var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+    var last = pts[pts.length - 1];
+    var col = opts.ref == null ? 'var(--paper)' : (last.v >= opts.ref ? 'var(--gain)' : 'var(--loss)');
+    var path = pts.map(function(p, i){ return (i ? 'L' : 'M') + X(p.t).toFixed(1) + ' ' + Y(p.v).toFixed(1); }).join(' ');
+    var ref = opts.ref == null ? '' : '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(opts.ref).toFixed(1) + '" y2="' + Y(opts.ref).toFixed(1) + '" stroke="var(--muted)" stroke-dasharray="4 4"/>' +
+      '<text x="' + (W - R + 6) + '" y="' + (Y(opts.ref) + 4).toFixed(1) + '" fill="var(--muted)" font-size="10">' + escapeHtml(opts.refLabel || 'target') + '</text>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + escapeHtml(opts.label || 'Price this market') + '" style="width:100%;height:auto;display:block">' + ref +
+      '<path d="' + path + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round"/>' +
+      '<circle cx="' + X(last.t).toFixed(1) + '" cy="' + Y(last.v).toFixed(1) + '" r="3" fill="' + col + '"/>' +
+      '<text x="' + (W - R + 6) + '" y="' + (Y(last.v) + (opts.ref != null && Math.abs(Y(last.v) - Y(opts.ref)) < 12 ? (last.v >= opts.ref ? -6 : 14) : 4)).toFixed(1) + '" fill="' + col + '" font-size="11" font-weight="700">' + escapeHtml(opts.fmt(last.v)) + '</text></svg>';
+  }
+
+  // Bitcoin's price by the minute from Coinbase's public candles (no key, the browser may call it). It is a stand-in for the index Kalshi settles on,
+  // so it can sit a little off the "to beat" line even when the market is right; the chart says Coinbase for that reason.
+  var kalshiSpot = { at: 0, busy: false, pts: [] };
+  var kalshiMid = {};
+  function kalshiFetchSpot(now){
+    if(kalshiSpot.busy || now - kalshiSpot.at < 30000){ return; }
+    kalshiSpot.busy = true;
+    var iso = function(ms){ return new Date(ms).toISOString().slice(0, 19) + 'Z'; };
+    fetch('https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=60&start=' + iso(now - 20 * 60000) + '&end=' + iso(now))
+      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
+      .then(function(rows){
+        kalshiSpot.pts = (Array.isArray(rows) ? rows : []).map(function(c){ return { t: Math.min(Date.now(), (c[0] + 60) * 1000), v: Number(c[4]) }; })
+          .sort(function(a, b){ return a.t - b.t; });
+        kalshiSpot.at = Date.now(); kalshiSpot.busy = false;
+        if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+      })
+      .catch(function(){ kalshiSpot.at = Date.now(); kalshiSpot.busy = false; });
+  }
+
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
+
+  // The small chart under a market row. Bitcoin: Coinbase's price against the strike ("to beat"). Gold has no free price feed here, so it shows the
+  // market's own YES price (cents) as this page has seen it since it was opened.
+  function kalshiSparkFor(m){
+    var close = Date.parse(m.closeTime);
+    if(!Number.isFinite(close)){ return ''; }
+    var o = { from: close - 15 * 60000, to: close };
+    var body;
+    if(m.series === 'KXBTC15M' && m.strike != null){
+      body = kalshiSparkSvg(kalshiSpot.pts, { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
+        fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
+      body += '<div class="kal-note kal-spark-note">Coinbase price against the ' + escapeHtml('$' + Number(m.strike).toLocaleString('en-US', { maximumFractionDigits: 2 })) + ' target</div>';
+    } else {
+      body = kalshiSparkSvg(kalshiMid[m.ticker], { from: o.from, to: o.to, ref: null, label: 'YES price in cents since this page was opened', empty: 'A line appears after a minute of watching.',
+        fmt: function(v){ return v.toFixed(0) + 'c'; } });
+      body += '<div class="kal-note kal-spark-note">YES price since you opened this page</div>';
+    }
+    return '<div class="kal-spark">' + body + '</div>';
+  }
 
   function renderKalshiBooks(data){
     var el = document.getElementById('kalBooks');
@@ -10005,6 +10067,13 @@
     }
     var now = Date.now();
     var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m' };
+    rows.forEach(function(m){
+      if(m.yesBid == null || m.yesAsk == null){ return; }
+      var h = kalshiMid[m.ticker] = kalshiMid[m.ticker] || [];
+      var mid = (m.yesBid + m.yesAsk) * 50;
+      if(!h.length || data.fetchedAt > h[h.length - 1].t){ h.push({ t: data.fetchedAt, v: mid }); if(h.length > 400){ h.shift(); } }
+    });
+    if(rows.some(function(m){ return m.series === 'KXBTC15M'; })){ kalshiFetchSpot(now); }
     el.innerHTML = rows.map(function(m){
       var hasBook = m.yesBid != null && m.yesAsk != null;
       var spread = hasBook ? m.yesAsk - m.yesBid : null;
@@ -10013,7 +10082,7 @@
       return '<div class="kal-brow"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
         '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
         '<div style="text-align:right"><div class="kal-brow-px">' + (hasBook ? (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div></div></div></div>';
+        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div></div></div>' + kalshiSparkFor(m) + '</div>';
     }).join('');
     st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
   }
