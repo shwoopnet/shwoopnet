@@ -266,7 +266,7 @@ gates.N13 = () => {
   // The page: two clicks, a server call only on the confirm click, and a visible stop.
   assert.ok(/kalL1Start'\)[\s\S]{0,400}addEventListener\('click', function\(\)\{ msg\.textContent = ''; ask\(true\); \}\)/.test(html), 'the first click only asks');
   const yes = html.slice(html.indexOf("yes.addEventListener('click', function(){\n      var api = window.__shwoopAPI;\n      if(!api || !api.kalshiL1Session"));
-  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked\)/.test(yes.slice(0, 700)), 'the confirm click starts it');
+  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(yes.slice(0, 800)), 'the confirm click starts it');
   assert.ok(/id="kalL1Stop"/.test(html) && /api\.kalshiL1Session\(false\)/.test(html), 'there is a stop button');
   assert.ok(/httpsCallable\(functions, 'kalshiL1Session'\)/.test(html));
 };
@@ -401,6 +401,39 @@ gates.N22 = () => {
   assert.ok(new RegExp('are down \\$' + flat.toFixed(2).replace('.', '\\.') + ' \\(' + stop + '% of the starting cash with scaling').test(html), 'the rules text');
   assert.ok(new RegExp("\\(" + (stop / 100).toFixed(2) + " \\* s\\.startCash\\)\\.toFixed\\(2\\) : '\\$" + flat.toFixed(2).replace('.', '\\.') + "'").test(html), 'the status line');
   assert.ok(new RegExp('\\(" \\+ \\(live\\.L1_SIZE_FRACTION \\* 100\\)').test(fnSrc) && /live\.L1_SIZED_STOP_FRACTION \* 100/.test(fnSrc), 'the session start log is built from the constants, not typed');
+};
+
+// The high-point stop: measured from the best settled result, only when the session was started with it, and the peak never falls.
+gates.N23 = async () => {
+  const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
+  const lost = (n) => { const r = {}; for (let i = 0; i < n; i++) r[`OLD-${i}`] = 'no'; return r; };
+  // After a high point of +$5, six losses ($5.52) are $10.52 below it: the stop is $10, so a trailing session ends; a plain session has room.
+  const trail = world({ session: { trailing: true, peakNet: 5 }, results: lost(6) }); seed(trail, 6);
+  await tick(trail);
+  assert.deepStrictEqual([trail.posts.length, trail.sess.endedBecause], [0, 'loss stop'], 'the stop counts from the high point');
+  assert.ok(/from their best/.test(trail.events.find((e) => e.kind === 'session ended').detail), 'and says so');
+  const plain = world({ session: { peakNet: 5 }, results: lost(6) }); seed(plain, 6);
+  await tick(plain);
+  assert.strictEqual(plain.posts.length, 1, 'without the option the same trades are well inside the $10 stop');
+  // Inside the give-back it keeps trading: peak 5, down $4.60 from it is fine.
+  const ok = world({ session: { trailing: true, peakNet: 5 }, results: lost(1) }); seed(ok, 1);
+  await tick(ok);
+  assert.strictEqual(ok.posts.length, 1);
+  // The peak rises with settled gains and never falls with losses, and is never below zero.
+  const rise = world({ session: { trailing: true }, results: (() => { const r = {}; for (let i = 0; i < 13; i++) r[`OLD-${i}`] = 'yes'; return r; })() }); seed(rise, 13);
+  await tick(rise);
+  assert.ok(Math.abs(rise.sess.peakNet - 13 * 0.08) < 1e-6, 'thirteen wins of 8c set the peak at +$1.04: ' + rise.sess.peakNet);
+  const keep = world({ session: { trailing: true, peakNet: 3 } });
+  await tick(keep);
+  assert.strictEqual(keep.sess.peakNet === undefined ? 3 : keep.sess.peakNet, 3, 'a lower result does not lower the peak');
+  const neg = world({ session: { trailing: true }, results: lost(2) }); seed(neg, 2);
+  await tick(neg);
+  assert.ok(!(neg.sess.peakNet < 0), 'the peak is never below zero');
+  // Chosen at the start only, with a literal true; the page offers it unticked and passes it on.
+  const cb = /exports\.kalshiL1Session = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
+  assert.ok(/const trailing = on && request\.data\.trailing === true;/.test(cb) && /startCash: null, sizing, trailing,/.test(cb), 'only a literal true, kept on the session record');
+  assert.ok(/id="kalL1Trailing"/.test(html) && !/id="kalL1Trailing"[^>]*checked/.test(html), 'the box starts unticked');
+  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(html) && /trailing: trailing === true/.test(html), 'and passed to the server');
 };
 
 (async () => {

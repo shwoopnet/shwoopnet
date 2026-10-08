@@ -257,6 +257,13 @@ for the recorder's first day. Levels are now `[{p, q}, ...]`, and a test checks 
 Deploy: `firebase deploy --only functions`. Within about two minutes `kalshiBookSnaps` should gain one document a minute and
 `kalshiBookMeta/status` should show recent `lastTickMs` with `errs` of 0; the Download book snapshots button then has data.
 
+## High-point stop (option, Oct 8, 2026)
+
+A second box on the session start confirmation, "Stop follows the high point", off by default and kept on the session like size scaling. On:
+the stop is measured from the best SETTLED result the session has reached (`peakNet`, never below zero, only rising) instead of from
+zero, so the session also ends if the bot gives back the stop amount from its best. Off: exactly as before. It ends the session sooner
+than the plain stop whenever the bot has been ahead. Deploy: `firebase deploy --only functions`; it only applies to a session started with the box ticked.
+
 ## Risk raised a bit (Oct 8, 2026)
 
 At the owner's request the flat stop went from $7.00 to $10.00 and, with size scaling on, the share of cash per order from 1% to 2%

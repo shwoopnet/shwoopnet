@@ -388,7 +388,20 @@ async function runL1Tick(args) {
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
   const stopAt = sizing ? L1_SIZED_STOP_FRACTION * startCash : L1_LOSS_STOP;
-  if (risk.worst <= -stopAt + 1e-9) return end("loss stop", "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + stopAt.toFixed(2) + " stop");
+  // Optional high-point stop (chosen when the session starts): the stop is measured from the best SETTLED result the session has reached, so gains
+  // are protected too. The peak only ever rises, is never below zero, and is kept on the session so a restart of the function cannot lose it.
+  const trailing = session.trailing === true;
+  let peak = 0;
+  if (trailing) {
+    peak = Math.max(0, Number.isFinite(session.peakNet) ? session.peakNet : 0, risk.net);
+    if (!(Number.isFinite(session.peakNet) && session.peakNet >= peak)) await setSession({ peakNet: Number(peak.toFixed(4)) });
+  }
+  const floor = peak - stopAt;
+  if (risk.worst <= floor + 1e-9) {
+    return end("loss stop", trailing
+      ? "the bot's trades are down $" + (peak - risk.worst).toFixed(2) + " from their best (+$" + peak.toFixed(2) + ", now " + (risk.net >= 0 ? "+" : "-") + "$" + Math.abs(risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " open counted as lost), which reaches the $" + stopAt.toFixed(2) + " give-back stop"
+      : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + stopAt.toFixed(2) + " stop");
+  }
 
   const candidates = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status)
     && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1]);
