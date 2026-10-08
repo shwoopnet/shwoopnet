@@ -296,6 +296,44 @@ gates.N24 = async () => {
   assert.strictEqual(failSave.posts.length, 0, 'a review that cannot be saved sends nothing');
 };
 
+// Reinvest and skim: half of each win's profit buys extra contracts later, half is set aside; losses come out of the pool; nothing counts twice.
+gates.N25 = async () => {
+  const st = { cap: 3, base: 341, reviewedAt: 1000, pool: 0, saved: 0, cum: 0, hwm: 0, lastStopAt: null };
+  const o = (id, ts, pnl, over = {}) => ({ id, strategy: 'L1', ts, fillCount: '3.00', maxCost: 2.79, settled: true, settledPnl: pnl, ...over });
+  const a = live.foldSkim(st, [o('a', 2000, 0.20), o('b', 3000, 0.20)]);
+  assert.deepStrictEqual([a.pool, a.saved, a.hwm, a.appliedTs], [0.2, 0.2, 0.4, 3000], 'net profit of 40c: 20c to the pool and 20c to savings');
+  const again = live.foldSkim({ ...st, ...a }, [o('a', 2000, 0.20), o('b', 3000, 0.20)]);
+  assert.deepStrictEqual([again.pool, again.saved, again.changed], [0.2, 0.2, false], 'the same orders are never counted twice');
+  const loss = live.foldSkim({ ...st, pool: 0.5, saved: 1, cum: 2, hwm: 2 }, [o('c', 4000, -2.79)]);
+  assert.deepStrictEqual([loss.pool, loss.saved], [0, 1], 'a loss comes out of the pool first, the pool stops at zero, and savings are untouched');
+  // The flaw the first version had: wins of 20c and one loss of $2.79. Skimming each win banked half of every win; only net new highs are skimmed now.
+  const seq = [];
+  for (let i = 0; i < 10; i++) seq.push(o('w' + i, 2000 + i, 0.20));
+  seq.push(o('L', 3000, -2.79));
+  for (let i = 0; i < 10; i++) seq.push(o('v' + i, 4000 + i, 0.20));
+  const flaw = live.foldSkim(st, seq);
+  assert.ok(Math.abs(flaw.cum - (4 - 2.79)) < 1e-6 && flaw.saved <= 0.5 * flaw.hwm + 1e-9, 'savings never exceed half of the net high-water profit (here ' + flaw.saved + ' of ' + flaw.hwm + ')');
+  assert.ok(flaw.saved < 1.5, 'ten recovery wins after a loss skimmed nothing while they were only winning back the loss');
+  const gap = live.foldSkim(st, [o('d', 2000, 0.2, { settled: false, settledPnl: undefined }), o('e', 3000, 0.2)]);
+  assert.deepStrictEqual([gap.pool, gap.appliedTs], [0, 1000], 'an unsettled older order holds everything behind it, so a late settle is not skipped');
+  const hist = live.foldSkim(st, [o('old', 500, 5)]);
+  assert.strictEqual(hist.pool, 0, 'orders from before the state existed are history');
+  assert.deepStrictEqual([live.skimAddon({ pool: 0.5 }, 5), live.skimAddon({ pool: 0.95 }, 5), live.skimAddon({ pool: 99 }, 5)], [0, 1, live.SKIM_ADDON_MAX], 'one extra contract per 93c of pool, never above the add-on cap');
+  assert.strictEqual(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 3 * 86400000), 0, 'off for a week after a loss stop');
+  assert.ok(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 8 * 86400000) > 0);
+  // Through a tick: the cap plus the add-on sets the size, and the balance the weekly review sees excludes savings.
+  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '341.0000', exchange_index: 2 }] } });
+  const saved = [];
+  await tick(w, { sizingState: { cap: 3, base: 341, reviewedAt: NOW - 1000, pool: 2, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
+  assert.strictEqual(w.posts[0].count, '5', 'cap 3 plus two from a $2 pool');
+  assert.strictEqual(w.sess.sizeAddon, 2);
+  assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 30, 8 * 86400000).state.cap, 3, 'with $30 saved the sizing balance is $311, which still supports three');
+  assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 60, 8 * 86400000).state.cap, 2, 'savings are not sized on: if the rest of the balance falls under $300 the cap follows it down');
+  const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
+  await tick(ceil, { sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  assert.strictEqual(ceil.posts[0].count, '10', 'cap plus add-on can never pass the ceiling');
+};
+
 // Wiring: the session is switched by a server callable with a server-set expiry; the scheduled arm function runs it; nothing
 // else is scheduled; it refuses to run beside a single armed test order; and the page asks twice.
 gates.N13 = () => {
