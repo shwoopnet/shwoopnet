@@ -33,7 +33,7 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,574 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Strategy variants tried so far: **2,580 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
 Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
@@ -2109,12 +2109,13 @@ The owner asked for "the opposite end of the spectrum" from L1: instead of buyin
 | | Entries | Mean | Day clustered z | Halves | Fees x1.2 | Verdict |
 |---|---|---|---|---|---|---|
 | C1 5c target, else hold | 1,701 | -3.28c | -8.62 | -3.16c / -3.40c | -3.54c | `FALSIFIED` |
-| C2 5c target, else sell at 6 min left | 1,701 | -1.00c | -2.97 | -0.93c / -1.08c | -1.30c | `FALSIFIED` |
-| C3 10c target, else sell at 6 min left | 1,701 | -0.40c | -1.03 | -0.12c / -0.68c | -0.69c | `FALSIFIED` |
+| C2 5c target, else sell at 6 min left | 1,701 | **-2.27c** (first run said -1.00c, withdrawn) | -9.51 | -2.14c / -2.41c | -2.56c | `FALSIFIED` |
+| C3 10c target, else sell at 6 min left | 1,701 | **-2.33c** (first run said -0.40c, withdrawn) | -8.66 | -2.07c / -2.60c | -2.61c | `FALSIFIED` |
 
+- **CORRECTION, found the same afternoon (the C2 and C3 rows above are the corrected ones).** The first run searched for the target on every later candle, including the ones after the 6 minute mark where C2 and C3 had already sold, so a late bounce counted as a win the rule would not have realized. Every error found in this project so far has flattered the result, and that is how this one was caught: a result better than the registered prediction. Fixed against the rule as registered (the target is looked for only up to and including the 6 minute candle), with a test, and re-run once. C1 is unaffected (it has no time exit). Corrected: **C2 -2.27c, C3 -2.33c** (first run -1.00c and -0.40c). The verdicts did not change; the size of the loss did, and the paragraph below that read the first run is withdrawn.
 - **Prediction against outcome.** Predicted C1 between -2.5c and -0.5c, and C2 and C3 between -1.5c and -0.2c, all `FALSIFIED`. The verdicts were right. C2 (-1.00c) and C3 (-0.40c) fell inside their ranges; **C1 was worse than predicted (-3.28c against a floor of -2.5c)**, because holding to settlement from 8c to 15c loses the whole price more often than the early bounce pays: 41.2% hit the target, but holding the rest averaged -13.2c a loss against +10.9c a win.
 - **Information only: the target is hit often and the edge is still negative.** A +5c bounce arrives 41% of the time and a +10c bounce 31.5%, so cheap sides do tick up. Sold at the 6 minute mark instead of held, the loss shrinks from -3.28c to -1.00c (C2), and a larger target shrinks it again (C3). Stops and exits cannot create profit in a fair game; what they change is how much of the fee and spread is paid.
-- **Post hoc, computed after the verdicts and not part of them: it is cost, not signal.** With the fee set to zero the same trades make -1.99c (C1), **+0.45c (C2) and +1.05c (C3)**. Both legs' fees (about 0.6c each at 10c) turn a small positive gross into the net above, which is the same conclusion as the dispersion study: cost, not an absent signal, is the binding constraint. A gross of +1.05c on a 10c target is not distinguishable from zero here and the registered bar is net.
+- **WITHDRAWN (computed on the buggy first run): "it is cost, not signal".** It said that with the fee set to zero the same trades make -1.99c (C1), **+0.45c (C2) and +1.05c (C3)**. Both legs' fees (about 0.6c each at 10c) turn a small positive gross into the net above, which is the same conclusion as the dispersion study: cost, not an absent signal, is the binding constraint. A gross of +1.05c on a 10c target is not distinguishable from zero here and the registered bar is net. The corrected gross figures are **-1.99c (C1), -0.85c (C2) and -0.94c (C3)**: with no fees at all these trades still lose, so for the cheap side there is no hidden edge being eaten by cost.
 - **Same in both series.** Bitcoin and gold net within a few tenths of a cent of each other in every variant.
 - **Count.** Three variants: **2,577 as of this entry** (2,574 plus three).
 
@@ -2191,3 +2192,17 @@ First three rows of the opening window ledger to run, because they need only the
 - **Bar.** The common one for three tries: at least 300 entries on at least 5 days, day clustered z at least 2.5, both halves positive, positive with fees x1.2. Verdict words only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`.
 - **Information only, unable to rescue a failure:** target hit rate, gross with the fee set to zero, by series, and a measurement (no verdict, not a variant): the median spread of the first five minutes by UTC hour and weekday against weekend, which is what ledger rows O36 and O38 asked for first.
 - **Count.** Three variants: **2,580 as of this entry** (2,577 plus three).
+
+**2026-10-08 17:25 UTC: OP1 to OP3: all three `FALSIFIED`.** One run of `python -m scalper.openscalp` after its tests and after the correction below, under the rules fixed above. 11,220 markets over 69 days; 6,756 entries for OP1 and OP2, 1,886 for OP3.
+
+| | Entries | Mean | Day clustered z | Halves | Fees x1.2 | Gross of fees | Verdict |
+|---|---|---|---|---|---|---|---|
+| OP1 +3c, else sell at 6 min left | 6,756 | -3.19c | -16.49 | -3.18c / -3.20c | -3.65c | -0.90c | `FALSIFIED` |
+| OP2 +5c, else sell at 6 min left | 6,756 | -3.00c | -13.15 | -2.99c / -3.01c | -3.45c | -0.74c | `FALSIFIED` |
+| OP3 dip of 3c, sell near the pre-dip price | 1,886 | -3.04c | -6.18 | -2.35c / -3.74c | -3.50c | -0.78c | `FALSIFIED` |
+
+- **CORRECTION, and why it is in this entry.** The first run of this file (and of `cheapscalp`) looked for the target on every later candle, including those after the 6 minute mark where the position had already been sold. That run showed OP2 at +0.54c (z 2.40, both halves positive) and OP3 at +0.81c (z 1.98), better than the registered predictions, and the habit here is that every earlier error flattered the result, so it was audited before being believed. The bug was against the rule as registered; it is fixed, tested, and the numbers above are from the corrected run. The first run is withdrawn. Lesson, kept: **a result better than its own pre-registered prediction is a reason to audit, not to celebrate.** The same bug had also flattered C2 and C3, corrected above.
+- **Prediction against outcome.** Predicted OP1 between -3.0c and -0.5c, OP2 between -2.5c and -0.3c, OP3 between -3.0c and -0.5c, all \`FALSIFIED\`. The verdicts were right and the losses came out a little larger than the ranges (-3.19c, -3.00c, -3.04c). Hit rates are high (OP1 76.6%, OP2 71.4%, OP3 68.6%) and the average loss is large (-26c to -30c against +4.9c to +6.5c wins): the same lopsided shape as L1, without L1's favorite-longshot premium.
+- **No gross edge either.** With the fee set to zero these trades still lose (-0.74c to -0.90c). Selling a favorite early gives up the late favorite premium that L1 collects by holding to the close.
+- **Measurement, no verdict (ledger rows O36 and O38).** The median spread of the candles 1 to 5 minutes in is 1.0c in every UTC hour and for both weekdays and weekends. There are no cheap hours to select on; the spread is the same everywhere, so gating entries by hour cannot lower cost. Row O36 is closed by this measurement.
+- **Count.** Three variants: **2,580 as of 2026-10-08**.

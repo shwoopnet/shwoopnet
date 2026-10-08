@@ -40,7 +40,7 @@ Account card (balance, bot change since start, stat tiles, by market, a Running 
 Everything in `kalshi-scalper/` follows one discipline: write the hypothesis, the counterparty (who loses money and why), a numeric prediction and kill criteria BEFORE any code or data. Verdict words are only `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. The bar is at least 300 entries on 5 days, day clustered z of at least 2.1 (2.5 for a few tries), both halves positive, and still positive with fees times 1.2. The count of variants tried is kept in the README and every try raises the bar.
 
 State on 2026-10-08:
-- 2,577 variants tried, none passing the bar. That includes stops, exits, price bands, resting orders, other minutes and the opposite end (the cheap side scalped early, C1 to C3, which lost 0.4c to 3.3c per contract).
+- 2,580 variants tried, none passing the bar. That includes stops, exits, price bands, resting orders, other minutes and the opposite end (the cheap side scalped early, C1 to C3, which lost 2.3c to 3.3c per contract).
 - L1 itself, on 69 days and 3,432 entries: about +0.9c per contract before fee rounding, day clustered z 1.45 against 2.1. It failed its own bar, so running it is the owner's decision and not evidence it works. Forward checks F0 to F9 accumulate until about 2026-10-23.
 - Fees were measured on the owner's own fills (21 of them): the reported fee is the order's fee rounded up to $0.0001, not to the whole cent. Earlier cost figures were a little pessimistic.
 - Live record so far: 37 settled bot trades, 36 won, about +$3 net. A small sample; one loss costs about the same as 14 wins.
