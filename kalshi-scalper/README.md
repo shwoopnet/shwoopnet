@@ -2004,7 +2004,7 @@ the answer is not obvious from 50c to 80c alone. It should have been in the firs
   is the only threshold that does not lose to holding, and it does so by being HOLD.
 - **Count.** Three more variants: **2,570 as of 2026-10-08**.
 
-## Pre-registration: the entry side, price bands for L1, B1 to B3 (fixed 2026-10-08 14:40 UTC, before any code and before any band selection was run)
+## Pre-registration: the entry side, price bands for L1, B1 to B3 (fixed 2026-10-08 14:18 UTC, before any code and before any band selection was run)
 
 The exit family (X1 to X7) found that a stop cannot fix L1's payoff. The other lever is which entries to take. The post hoc band table in this file (88c to 90c negative after costs, 90c to 95c best, 95c to 97c about zero) was read off all 69 days after
 the fact, so it cannot be used as evidence. What can be tested honestly on these days is whether **choosing bands from half the days and applying the choice to the other half** generalizes, which is what a live rule would
