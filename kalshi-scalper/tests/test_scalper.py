@@ -1289,3 +1289,335 @@ _em = _se.prep([_sm("E1", _C0, 0.39, 0.41, "yes")])
 _ee = _ov.entries_of(_em, {"left": 6, "lo": 0.30, "hi": 0.50, "side": "yes", "filters": []})
 assert len(_ee) == 1 and abs(_ee[0][1] - (0.41 + _se.fee(0.41))) < 1e-12 and abs(_ee[0][2] - 0.40) < 1e-12, _ee
 print("fair null tests passed")
+
+# ---- the strategy search (S01 to S42): consequences, not mechanisms ----
+import math as _m50
+import random as _r50
+import tempfile as _tf50
+from pathlib import Path as _P50
+import scalper.strategies as _ST
+import scalper.stratsearch as _SS
+import scalper.overnight as _O50
+
+
+def _s50_world(seed=1, days=14, prior_days=8):
+    """A FAIR synthetic world: each market's quotes are the posterior of an observer who sees noisy evidence about a hidden result drawn
+    first, so the quote at every candle is exactly the chance the market resolves YES. No strategy can have an edge in it."""
+    rng = _r50.Random(seed)
+    T0 = 1_790_000_000 - 1_790_000_000 % 86400
+    spot, s = {}, 87000.0
+    for k in range((prior_days + days) * 1440 + 120):
+        s *= _m50.exp(rng.gauss(0, 0.0004))
+        spot[T0 + 60 * k] = round(s, 2)
+    ms, sk = [], {_ST.BTC: 87000.0, _ST.GOLD: 4100.0}
+    for series in (_ST.BTC, _ST.GOLD):
+        for k in range(prior_days * 96, (prior_days + days) * 96):
+            op = T0 + 900 * k
+            if series == _ST.GOLD and (op % 86400) // 3600 == 21:
+                continue
+            sk[series] *= _m50.exp(rng.gauss(0, 0.002))
+            R = 1 if rng.random() < 0.5 else 0
+            L, cand, bc, ac = 0.0, {}, 0.5, 0.5
+            vol0, oi = rng.uniform(1e4, 5e4), rng.uniform(1e4, 5e4)
+            for j in range(1, 16):
+                if j < 15:
+                    L += 0.7 * ((0.35 if R else -0.35) + rng.gauss(0, 1.0))
+                    p = 1 / (1 + _m50.exp(-L))
+                    wid_b = 0.01 + (0.03 if rng.random() < 0.06 else 0.0)
+                    wid_a = 0.01 + (0.03 if rng.random() < 0.06 else 0.0)
+                    nb, na = round(min(max(p - wid_b, 0.01), 0.98), 2), round(min(max(p + wid_a, 0.02), 0.99), 2)
+                else:
+                    nb, na = (0.99, 1.0) if R else (0.0, 0.01)
+                bo, ao, bc, ac = bc, ac, nb, na
+                oi *= 1 + abs(rng.gauss(0, 0.04))
+                cand[j] = (bo, round(max(bo, bc) + abs(rng.gauss(0, 0.05)), 2), min(bo, bc), bc, ao, max(ao, ac), max(round(min(ao, ac) - abs(rng.gauss(0, 0.05)), 2), 0.0), ac,
+                           None if rng.random() < 0.1 else round((bc + ac) / 2 + rng.choice([-0.01, 0, 0.01]), 2), vol0 * rng.uniform(0.3, 3.0), oi)
+            ms.append(_ST.make_market(f"{series}-{op}", series, op, op + 900, "yes" if R else "no", round(sk[series], 2), cand))
+    return _ST.World(ms, spot)
+
+
+def _s50_cand(rng):
+    b = round(rng.uniform(0.05, 0.9), 2)
+    a = round(b + 0.02, 2)
+    return (b, b + 0.05, b - 0.03, b, a, a + 0.03, a - 0.05, a, 0.5, rng.uniform(1e3, 9e4), rng.uniform(1e3, 9e4))
+
+
+def _s50_scramble(w, m, js, rng):
+    """Replace EVERYTHING that was not known at the close of candle js with noise: the market's own later candles and result, its twin's, every later
+    market, and the spot after the signal. Returns an undo function."""
+    saved_m, saved_sp = [], []
+    cut = m["open"] + 60 * js
+    def hit(mk, upto, strike):
+        saved_m.append((mk, dict(mk["cand"]), mk["res"], mk["strike"], mk["V7"], mk["vol1"]))
+        for j in range(upto + 1, 16):
+            mk["cand"][j] = _s50_cand(rng)
+        mk["res"] = "no" if mk["res"] == "yes" else "yes"
+        if strike and mk["strike"] is not None:
+            mk["strike"] *= rng.uniform(0.9, 1.1)
+        cs = [mk["cand"].get(j) for j in range(1, 8)]
+        mk["V7"] = sum(c[9] for c in cs if c is not None)
+        mk["vol1"] = mk["cand"][1][9] if 1 in mk["cand"] else None
+    hit(m, js, False)
+    other = _ST.GOLD if m["series"] == _ST.BTC else _ST.BTC
+    tw = w.by.get((other, m["open"]))
+    if tw is not None:
+        hit(tw, js, False)
+    later = [x for x in w.ms if x["open"] > m["open"]][:150]
+    for x in later:
+        hit(x, 0, True)
+    i0 = (cut - 60 - w.t0) // 60 + 1
+    for i in range(i0, min(i0 + 1500, len(w.sp))):
+        saved_sp.append((i, w.sp[i]))
+        w.sp[i] = rng.uniform(80000, 94000)
+    w._range20, w._day = None, {}
+    def undo():
+        for mk, cand, res, strike, v7, v1 in reversed(saved_m):
+            mk["cand"], mk["res"], mk["strike"], mk["V7"], mk["vol1"] = cand, res, strike, v7, v1
+        for i, v in saved_sp:
+            w.sp[i] = v
+        w._range20, w._day = None, {}
+    return undo
+
+
+def _s50_leaks(w, sig_of, pairs, seed=5):
+    """(market ticker, js) pairs whose signal CHANGES when everything after the signal candle is replaced by noise."""
+    rng = _r50.Random(seed)
+    bad = []
+    for m, js in pairs:
+        a = sig_of(_ST.Ctx(w, m, js))
+        undo = _s50_scramble(w, m, js, rng)
+        try:
+            b = sig_of(_ST.Ctx(w, m, js))
+        finally:
+            undo()
+        if a != b:
+            bad.append((m["ticker"], js))
+    return bad
+
+
+_W50 = _s50_world(1)
+_fire = {}
+for _sp in _ST.SPECS:
+    _pairs_fire, _pairs_quiet = [], []
+    for _mk in _W50.ms[::7]:
+        if _mk["series"] not in _sp["series"]:
+            continue
+        for _js in _sp["js"]:
+            (_pairs_fire if _sp["sig"](_ST.Ctx(_W50, _mk, _js)) else _pairs_quiet).append((_mk, _js))
+        if len(_pairs_fire) >= 6 and len(_pairs_quiet) >= 3:
+            break
+    _fire[_sp["id"]] = (_sp, _pairs_fire[:6] + _pairs_quiet[:3], len(_pairs_fire))
+# The harness has teeth: a signal that reads the market's own result, or the next candle, or a later market is caught.
+_some = [(_mk, 5) for _mk in _W50.ms[2000:2040]]
+assert _s50_leaks(_W50, lambda c: c.m["res"], _some), "reading the market's own result must be caught"
+assert _s50_leaks(_W50, lambda c: "yes" if c.m["cand"][c.js + 1][3] > 0.5 else "no", _some), "reading the next candle must be caught"
+assert _s50_leaks(_W50, lambda c: "yes" if (c.w.series[c.m["series"]][c.m["i"] + 1]["strike"] or 0) > c.m["strike"] else "no", _some), "reading the next strike must be caught"
+assert _s50_leaks(_W50, lambda c: "yes" if (c.w.spot_end(c.cut + 120) or 0) > (c.w.spot_end(c.cut) or 0) else "no", _some), "reading future spot must be caught"
+# No strategy's signal depends on anything after its signal candle, whatever happens to the future.
+_total_fired = 0
+for _id, (_sp, _pairs, _nf) in _fire.items():
+    _total_fired += _nf
+    assert not _s50_leaks(_W50, _sp["sig"], _pairs), (_id, "the signal changed when only the future changed")
+assert sum(1 for _sp, _p, _nf in _fire.values() if _nf > 0) >= 36, "the synthetic world must make nearly every strategy fire, or this test proves nothing"
+# The Ctx refuses to look ahead.
+_c50 = _ST.Ctx(_W50, _W50.ms[2100], 4)
+for _bad in (lambda: _c50.cand(5), lambda: _c50.mid(9), lambda: _c50.vol(15), lambda: _c50.s(-1), lambda: _c50.spot_at(_c50.cut + 60)):
+    try:
+        _bad()
+        raise SystemExit("a look ahead was allowed")
+    except _ST.Lookahead:
+        pass
+print("strategy signals cannot see the future tests passed")
+
+# The trade is on the candle AFTER the signal, at that candle's quotes, whatever the signal candle showed.
+def _s50_mk(res="yes", quotes=None, series=_ST.BTC, op=1_791_000_000 - 1_791_000_000 % 900, strike=100.0):
+    q = quotes or {}
+    cand = {j: (b, b, b, b, a, a, a, a, None, 100.0, 100.0) for j, (b, a) in q.items()}
+    return _ST.make_market("T%d" % op, series, op, op + 900, res, strike, cand)
+_mk1 = _s50_mk("yes", {1: (0.40, 0.42), 2: (0.44, 0.46), 3: (0.60, 0.62), 4: (0.61, 0.63), 5: (0.30, 0.32)})
+_t, _ = _SS.trade(_mk1, "yes", 2, (0.10, 0.90), None)
+assert abs(_t["price"] - 0.46) < 1e-12, "YES is bought at the ask of the ENTRY candle, not the signal candle's"
+_t, _ = _SS.trade(_mk1, "no", 2, (0.10, 0.90), None)
+assert abs(_t["price"] - 0.56) < 1e-12, "NO costs one minus the YES bid"
+# A YES winner held to settlement pays $1 less price less one entry fee and nothing on the way out.
+_t, _ = _SS.trade(_mk1, "yes", 2, (0.10, 0.90), None)
+assert abs(_t["net"] - (1 - 0.46 - 0.07 * 0.46 * 0.54)) < 1e-12 and _t["stress"] < _t["net"] < _t["gross"], _t
+_t, _ = _SS.trade(_mk1, "no", 2, (0.10, 0.90), None)
+assert abs(_t["net"] - (0 - 0.56 - 0.07 * 0.56 * 0.44)) < 1e-12, "a losing hold loses the price and the fee"
+# A fixed minute exit sells at the real BID and pays the fee on BOTH legs.
+_t, _ = _SS.trade(_mk1, "yes", 2, (0.10, 0.90), 2)
+assert abs(_t["net"] - (0.61 - 0.07 * 0.61 * 0.39 - 0.46 - 0.07 * 0.46 * 0.54)) < 1e-12, ("exit at the bid 0.61, two fees", _t)
+_t, _ = _SS.trade(_mk1, "no", 2, (0.10, 0.90), 2)
+assert abs(_t["exit"] - round(1 - 0.63, 4)) < 1e-12, "a NO is sold at one minus the YES ask"
+# An exit candle with no usable quote DROPS the trade; it is never filled at a made up price.
+_t, why = _SS.trade(_mk1, "yes", 2, (0.10, 0.90), 5)
+assert _t is None and why == "dropped"
+# The universal band: a 95c favorite is not bought; the lower priced side is chosen by price.
+_t, why = _SS.trade(_s50_mk("yes", {2: (0.94, 0.95)}), "yes", 2, (0.10, 0.90), None)
+assert _t is None and why == "band"
+_t, _ = _SS.trade(_s50_mk("yes", {2: (0.70, 0.72)}), "under", 2, (0.10, 0.40), None)
+assert _t["side"] == "no" and abs(_t["price"] - 0.30) < 1e-12 and abs(_t["mid"] - 0.29) < 1e-12
+_t, _ = _SS.trade(_s50_mk("yes", {2: (0.70, 0.72)}), "over", 2, (0.60, 0.90), None)
+assert _t["side"] == "yes" and abs(_t["price"] - 0.72) < 1e-12
+# run_spec trades one candle after the signal candle: S06 signals at candle 1 and must enter at candle 2.
+_w2 = _ST.World([_s50_mk("yes", {1: (0.45, 0.47), 2: (0.50, 0.52)}, op=1_791_000_000 - 1_791_000_000 % 900 - 900),
+                 _s50_mk("yes", {1: (0.30, 0.32), 2: (0.50, 0.52)})])
+_tr, _ = _SS.run_spec(_w2, [s for s in _ST.SPECS if s["id"] == "S06"][0], [_w2.ms[1]])
+assert len(_tr) == 1 and _tr[0]["side"] == "yes" and abs(_tr[0]["price"] - 0.52) < 1e-12 and _tr[0]["js"] == 1, _tr
+print("strategy fill model tests passed")
+
+# Hand checked signals, stated as consequences.
+def _s50_chain(results, last_quotes=None):
+    base = 1_791_000_000 - 1_791_000_000 % 900 - 900 * len(results)
+    ms = [_s50_mk(r, {1: (0.45, 0.47), 2: (0.50, 0.52)}, op=base + 900 * i, strike=100.0 + i) for i, r in enumerate(results)]
+    return _ST.World(ms), ms
+def _sig(id_, w, m, js):
+    return [s for s in _ST.SPECS if s["id"] == id_][0]["sig"](_ST.Ctx(w, m, js))
+_w, _ms = _s50_chain(["yes", "no", "no", "no", "yes"])
+assert _sig("S06", _w, _ms[4], 1) == "no" and _sig("S06", _w, _ms[1], 1) == "yes", "persistence follows the previous outcome"
+_w, _ms = _s50_chain(["no", "no", "no", "yes"])
+assert _sig("S07", _w, _ms[3], 1) == "yes", "after three NO in a row the exhaustion rule buys YES"
+_w, _ms = _s50_chain(["no", "yes", "no", "yes"])
+assert _sig("S07", _w, _ms[3], 1) is None, "a broken streak is not a streak"
+_w, _ms = _s50_chain(["yes"] * 8 + ["no"] * 4 + ["yes"])
+_w, _ms = _s50_chain(["yes"] * 3 + ["no"] * 9 + ["yes"])
+assert _sig("S08", _w, _ms[12], 1) == "no", "9 NO in the last 12 means the regime rule buys NO"
+# A gap in the chain (a missing market) means there is no streak to read, not a streak across the hole.
+_w, _ms = _s50_chain(["no", "no", "no", "yes"])
+_w3 = _ST.World([_ms[0], _ms[2], _ms[3]])
+assert _sig("S07", _w3, _ms[3], 1) is None, "markets that are not contiguous are not a streak"
+# Strike rules: a new 4 hour high is faded; a clean trend is followed.
+def _s50_strikes(xs):
+    base = 1_791_000_000 - 1_791_000_000 % 900 - 900 * len(xs)
+    ms = [_s50_mk("yes", {1: (0.45, 0.47), 2: (0.50, 0.52)}, op=base + 900 * i, strike=x) for i, x in enumerate(xs)]
+    return _ST.World(ms), ms
+_w, _ms = _s50_strikes([100 + (i % 3) for i in range(15)] + [110])
+assert _sig("S40", _w, _ms[15], 1) == "no", "a strike above the previous 15 is faded"
+_w, _ms = _s50_strikes([110] + [100 + (i % 3) for i in range(14)] + [90])
+assert _sig("S40", _w, _ms[15], 1) == "yes"
+_w, _ms = _s50_strikes([100, 101, 102, 103, 104, 105, 106, 107, 108])
+assert _sig("S41", _w, _ms[8], 1) == "yes", "a perfectly efficient rise is followed"
+_w, _ms = _s50_strikes([100, 105, 100, 105, 100, 105, 100, 105, 106])
+assert _sig("S41", _w, _ms[8], 1) is None, "a choppy path is not a trend"
+# Cross market: gold moving up by 8c in the first five minutes makes S01 buy Bitcoin YES, and only if a gold twin exists.
+_op = 1_791_000_000 - 1_791_000_000 % 900
+_g = _s50_mk("yes", {1: (0.40, 0.42), 5: (0.48, 0.50)}, series=_ST.GOLD, op=_op)
+_b = _s50_mk("yes", {1: (0.45, 0.47), 5: (0.45, 0.47)}, series=_ST.BTC, op=_op)
+assert _sig("S01", _ST.World([_g, _b]), _b, 5) == "yes" and _sig("S01", _ST.World([_b]), _b, 5) is None
+# S03 buys the SMALLER mover: gold rose 8c, Bitcoin only 5c, so Bitcoin is the laggard.
+_b2 = _s50_mk("yes", {1: (0.45, 0.47), 5: (0.50, 0.52)}, series=_ST.BTC, op=_op)
+_r = _sig("S03", _ST.World([_g, _b2]), _b2, 5)
+assert _r == ("yes", "self"), _r
+# Calendar: the weekend rule fires on Saturday and not on Monday.
+import datetime as _dt50
+_sat = 1_790_000_000 - 1_790_000_000 % 86400
+while _dt50.datetime.fromtimestamp(_sat, _dt50.timezone.utc).weekday() != 5:
+    _sat += 86400
+_ms_sat = _s50_mk("yes", {7: (0.30, 0.32)}, op=_sat + 36000)
+_ms_mon = _s50_mk("yes", {7: (0.30, 0.32)}, op=_sat + 2 * 86400 + 36000)
+assert _sig("S13", _ST.World([_ms_sat]), _ms_sat, 7) == "over" and _sig("S13", _ST.World([_ms_mon]), _ms_mon, 7) is None
+# A spike fade buys against the jump: the mid rose 15c, so it buys NO.
+_sp1 = _s50_mk("yes", {3: (0.39, 0.41), 4: (0.54, 0.56)})
+assert _sig("S27", _ST.World([_sp1]), _sp1, 4) == "no"
+print("strategy signal tests passed")
+
+# Fair game guard: in a world where every price is exactly calibrated, the exact trading code loses about its costs and finds nothing.
+_ws = {"W0s": [], "W0h": [], "W1": [], "W2": []}
+_days = sorted({m["day"] for m in _W50.ms})
+_cuts = {d: ["W0s", "W0h", "W1", "W2"][min(3, i * 4 // len(_days))] for i, d in enumerate(_days)}
+for _mk in _W50.ms:
+    _ws[_cuts[_mk["day"]]].append(_mk)
+_rows50 = _SS.evaluate_all(_W50, _ws)
+_tot_n = sum(r["pooled"]["n"] for r in _rows50)
+_tot_net = sum(r["pooled"]["n"] * r["pooled"]["mean"] for r in _rows50)
+assert _tot_n > 3000 and _tot_net / _tot_n < -0.005, ("across all strategies a fair market costs money", _tot_net / _tot_n)
+assert max(r["pooled"]["z"] for r in _rows50 if r["pooled"]["n"] >= 50) < 4.0, "no strategy finds an edge in a fair market"
+_by = {r["id"]: r for r in _rows50}
+assert -0.05 < _by["S06"]["pooled"]["mean"] < 0.0, ("a plain hold loses about its fee and spread", _by["S06"]["pooled"]["mean"])
+assert _by["S27"]["pooled"]["mean"] < -0.02 and _by["S27"]["pooled"]["mean"] > -0.12, ("a round trip loses about two fees and a spread", _by["S27"]["pooled"]["mean"])
+assert not any(r["verdict"] == "NOT_YET_FALSIFIED" for r in _rows50), "a fair market has no survivors"
+assert all(r["verdict"] in _SS.WORDS for r in _rows50) and sorted(r["rank"] for r in _rows50) == list(range(1, 43))
+print("strategy fair market tests passed")
+
+# The pre-set verdict logic.
+def _p50(n, mean=0.02, z=3.0, h1=0.02, h2=0.02, stress=0.01):
+    return {"n": n, "mean": mean, "z": z, "h1": h1, "h2": h2, "stress": stress}
+assert _SS.common_bar(_p50(300)) and not _SS.common_bar(_p50(299)), "n of 300"
+assert not _SS.common_bar(_p50(500, z=2.09)) and _SS.common_bar(_p50(500, z=2.1))
+assert not _SS.common_bar(_p50(500, h2=-0.001)) and not _SS.common_bar(_p50(500, h1=0.0)), "both halves must be positive"
+assert not _SS.common_bar(_p50(500, stress=-0.001)), "fees x1.2 must stay positive"
+_pw = [{"n": 60, "mean": 0.01}] * 3
+assert _SS.survivor_test(_pw, 2.5) and not _SS.survivor_test(_pw, 2.49)
+assert not _SS.survivor_test([{"n": 49, "mean": 0.01}, {"n": 60, "mean": 0.01}, {"n": 60, "mean": 0.01}], 3.0), "49 entries in a window fails"
+assert not _SS.survivor_test([{"n": 60, "mean": -0.001}, {"n": 60, "mean": 0.02}, {"n": 60, "mean": 0.02}], 3.0), "a negative window fails"
+assert _SS.verdict_word(_p50(299), True, True, True) == "NOT_ENOUGH_DATA", "a big z on under 300 entries is not enough data"
+assert _SS.verdict_word(_p50(400), True, True, True) == "NOT_YET_FALSIFIED"
+assert _SS.verdict_word(_p50(400), True, False, True) == "FALSIFIED", "K+ (beat the unconditional baseline) is required where it applies"
+assert _SS.verdict_word(_p50(400), True, True, False) == "FALSIFIED" and _SS.verdict_word(_p50(400), False, True, True) == "FALSIFIED"
+import re as _re50
+_code50 = _re50.sub(r"#[^\n]*|\"\"\"[\s\S]*?\"\"\"", "", open(_SS.__file__).read() + open(_ST.__file__).read())
+assert not _re50.search(r"\b(PROMOTE|TRADE_THIS|GO_LIVE|APPROVED|target|deadline)\b", _code50), "no verdict or parameter that means go"
+assert _SS.WORDS == ("FALSIFIED", "NOT_YET_FALSIFIED", "NOT_ENOUGH_DATA", "NOT_RUNNABLE")
+# The deflated bar: best of 42 noise strategies.
+assert abs(_SS.sidak_z(42) - 3.03) < 0.02 and abs(_m50.sqrt(2 * _m50.log(42)) - 2.73) < 0.01
+# The ranking puts a strategy with under 50 entries last, whatever its z.
+_fake = [{"id": "a", "pooled": {"n": 10, "z": 9.0, "mean": 0.5}}, {"id": "b", "pooled": {"n": 80, "z": 1.0, "mean": 0.01}}, {"id": "c", "pooled": {"n": 80, "z": 2.0, "mean": 0.0}}]
+_SS.rank(_fake)
+assert [r["rank"] for r in _fake] == [3, 2, 1]
+# Every strategy in the code is in the README with its counterparty row, and the other way round.
+_readme = (_P50(__file__).resolve().parents[1] / "README.md").read_text()
+assert all(f"| {s['id']} |" in _readme for s in _ST.SPECS) and len(_ST.SPECS) == 42 and len({s["id"] for s in _ST.SPECS}) == 42
+assert sorted(set(_re50.findall(r"\| (S\d\d) \|", _readme))) == sorted(s["id"] for s in _ST.SPECS)
+assert all(s["params"] and s["js"] and s["band"][0] < s["band"][1] and s["universe"] == "fixed" for s in _ST.SPECS), "every parameter is declared"
+print("strategy verdict tests passed")
+
+# The locked window: the stage 1 code refuses it, and the one read cannot be repeated.
+try:
+    _SS.evaluate_all(_W50, dict(_ws, W3=[]))
+    raise SystemExit("W3 was accepted by the search")
+except AssertionError:
+    pass
+_o50 = (_SS.W3_FILE, _SS.OUT)
+_td50 = _P50(_tf50.mkdtemp())
+_SS.OUT, _SS.W3_FILE = _td50, _td50 / "w3_read_once.json"
+try:
+    _rows_s = [{"id": "S06", "survivor_test": True}, {"id": "S07", "survivor_test": False}]
+    _first = _SS.read_w3_once(_W50, _ws["W2"], _rows_s)
+    assert set(_first) == {"S06"}, "only survivors are read on the locked window"
+    try:
+        _SS.read_w3_once(_W50, _ws["W2"], _rows_s)
+        raise SystemExit("a second read of W3 was allowed")
+    except RuntimeError:
+        pass
+finally:
+    _SS.W3_FILE, _SS.OUT = _o50
+print("strategy locked window tests passed")
+
+# The null: it never reads who won, it loses the costs, and it rarely makes survivors.
+_prep = _SS.prepare_null(_rows50)
+_rows_flip = [dict(r, oos_trades=[dict(t, net=-t["net"], gross=-t["gross"], stress=-t["stress"]) for t in r["oos_trades"]]) for r in _rows50]
+assert _SS.prepare_null(_rows_flip) == _prep, "the null is built from prices and costs only, never from outcomes"
+_nul = _SS.run_null(_rows50, 40, seed=3, procs=1)
+_rep = _SS.null_report(_rows50, _nul)
+assert _rep["strategies"] == 42 and _rep["reps"] == 40 and 0.0 <= _rep["P_null_best_ge_real"] <= 1.0
+assert _rep["mean_null_survivors"] < 1.0, "luck at the fixed bar is rare"
+# A strategy with a planted edge beats its own null; the same strategy at zero edge does not.
+_ent = [{"id": "X", "n": 400, "win": [0] * 150 + [1] * 150 + [2] * 100, "day": [i // 4 for i in range(400)], "half": [0] * 200 + [1] * 200, "price": [0.5] * 400,
+         "c1": [0.5 + 0.0175] * 400, "cs": [0.5 + 0.021] * 400, "mid": [0.5] * 400, "rt": [False] * 400, "delta": [0.0] * 400, "hexit": [0.0] * 400, "ndays": 100}]
+_rng50 = _r50.Random(9)
+_zs = [_SS.null_once(_rng50, _ent[0])[0] for _ in range(200)]
+assert sum(_zs) / len(_zs) < -0.5, "at a fair 50c with a fee, the null's mean z is negative"
+assert max(_zs) < 3.0 and not any(_SS.null_once(_rng50, _ent[0])[1] for _ in range(200)), "a zero edge entry set essentially never survives"
+_ent_rt = dict(_ent[0], rt=[True] * 400, delta=[0.04] * 400, hexit=[0.01] * 400, mid=[0.5] * 400)
+_zr = [_SS.null_once(_rng50, _ent_rt)[0] for _ in range(100)]
+assert sum(_zr) / len(_zr) < -1.0, "a round trip with a spread and two fees loses money in the null"
+print("strategy null tests passed")
+
+# K+: a conditional underdog/favorite strategy is compared with the SAME entry without its trigger, on the same windows and the same series.
+for _id, _kind in (("S13", "over"), ("S10", "under"), ("S12", "under")):
+    _sp = [s for s in _ST.SPECS if s["id"] == _id][0]
+    _bt = [t for k in _SS.OOS for t in _SS.run_spec(_W50, _SS.baseline_specs()[_kind], _ws[k])[0] if t["series"] in _sp["series"]]
+    assert _by[_id]["baseline_mean"] is not None and abs(_by[_id]["baseline_mean"] - sum(t["net"] for t in _bt) / len(_bt)) < 1e-12, _id
+    assert _by[_id]["K_plus"] == (_by[_id]["pooled"]["mean"] > _by[_id]["baseline_mean"])
+assert all(r["K_plus"] and r["baseline_mean"] is None for r in _rows50 if r["id"] not in ("S10", "S12", "S13", "S28", "S38")), "K+ applies to five strategies only"
+print("strategy baseline tests passed")
