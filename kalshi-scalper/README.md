@@ -1698,3 +1698,36 @@ Two facts changed after P2 was written, both disclosed here before use.
   result will be `NOT_ENOUGH_DATA` and printed as information only.
 
 **2026-10-08: P2 simulator built (`python -m scalper.bookmaker`), not yet run on a settled market.** Code and tests exist before any result: the signal is the first snapshot 330 to 400 s before close with a side's ask at 0.90 to 0.97; the limit is one tick below that ask (0.1c above 90c, 1c at or below); a fill needs a LATER snapshot inside the window whose own side's ask is strictly below the limit. One deliberate departure from the P2 wording, in the conservative direction: P2 said "at or through"; the verdict counts only STRICTLY through, because a touch at our price says nothing about our place in the queue (H3's rule), and the touch rate is printed as a separate information column. The maker fee in the verdict equals the taker fee; coefficients 0 and 0.0175 are information only. A planted adverse selection test (every filled order loses, every missed one wins) must come out `FALSIFIED` with maker per signal below taker, and it does. At 10 hours of recording the result will be `NOT_ENOUGH_DATA` and printed as information only.
+
+## Pre-registration: three filters on L1, Q1 to Q3 (fixed 2026-10-08 03:20 UTC, before any code or any filtered result)
+
+The slot search tried rules from a grammar. This is the other direction: take the one rule that has held up best, L1, and ask whether a stated
+reason to distrust some of its entries removes the bad ones. Each filter is one fixed definition, with no threshold searched. The only things
+looked at before writing this are `distance.py` (H7's spot distance code, reused as is) and the table layout of the database.
+
+**Base.** L1 as `lstrats.hold_rule(L1)`: the candle ending 6 minutes before the close, the favourite whose ask is 0.88 to 0.97, taker at the ask,
+fee `0.07 * p * (1 - p)`, held to settlement. Both series unless stated. All 69 days. Every one of these days has been seen by L1 itself, so a
+pass could only ever be permission to test forward on days not yet seen, written down before it starts.
+
+| Name | Arm (entries kept) | Complement (entries removed) | Excluded from both and counted |
+|---|---|---|---|
+| Q1 spot support | Bitcoin only. `z = ln(spot / strike) / (sigma * sqrt(6))` exactly as `distance.z_score` at the decision minute; the arm is YES with `z >= +1.0` or NO with `z <= -1.0` | Bitcoin entries with a `z` that does not support the side | Entries with no `z` (missing spot or strike); gold entirely |
+| Q2 previous result | The previous market of the same series (it closed exactly 900 s earlier) resolved to the side bought | Resolved to the other side | Entries with no previous market in the data |
+| Q3 other series agrees | The other series' market with the same close time, at the same candle, has a valid quote with mid at least 5c on the side bought's side of 50c | Mid at least 5c on the opposite side | Twin missing, no valid quote, or mid within 5c of 50c |
+
+- **Counterparty, per filter.** Q1: the longshot buyer on the other side is least wrong when spot sits close to the strike and most wrong when it sits
+  a full sigma away, so entries with spot support should keep the edge and the rest should not. Q2 and Q3: the opposing buyer is more likely
+  to be wrong when the recent market or the other market is pointing the same way as the favourite. Q2 is adjacent to S06 (outcome persistence,
+  `FALSIFIED`): S06 asked whether the previous result predicts the next one, Q2 asks whether it improves the odds only on entries already priced 88c to 97c.
+- **Numeric prediction, stated before the run.** Q1: arm net about +1.2c a contract on about 700 entries, complement about 0c; arm and
+  complement differ by about 1c. Q2: arm and complement within 0.5c of each other (S06 found no persistence). Q3: the same, within 0.5c. **The
+  pre-registered expectation is that none of the three passes**: the arms hold 500 to 1,700 entries, where one standard error is 0.7c to 1.3c.
+- **Pass mark, fixed.** Three filters are tried, so the arm's day clustered z must be at least **2.4** (the one sided level for three tries at 5%),
+  not 2.1. A filter is `NOT_YET_FALSIFIED` only if ALL hold: at least 300 arm entries on at least 5 days; arm mean net positive with day clustered
+  z of at least 2.4; both halves of the arm positive (split by close time at the median); positive with fees times 1.2; the arm's mean exceeds the
+  complement's, with the day clustered z of the per day difference at least 2.0; and the arm's real mean sits above the 95th percentile of the
+  fair-market null (500 repeats; each arm entry wins with probability equal to its own ask, pays the ask and the fee). Fewer than 300 arm
+  entries is `NOT_ENOUGH_DATA`. Anything else is `FALSIFIED`.
+- **Information only, no verdict, may not rescue anything.** The base L1 on the same markets; each arm's price mix and its Bitcoin and gold split;
+  Q1 at `K = 0.5` and `K = 2.0`. Those two extra thresholds are printed to show how steady the result is and are counted as tries.
+- **Count.** Q1, Q2 and Q3 are three variants and the two extra Q1 thresholds are two more: **2,560** as of 2026-10-08 (2,555 plus five).
