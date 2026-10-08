@@ -1901,3 +1901,32 @@ is one mechanism tried at two times, not a new mechanism.
   estimation half's rates did not hold in the test half: the market's price at 1 to 2 minutes left already reflects spot better than a bucket table built on the
   first half of the days.
 - **Count.** Two variants: **2,563 as of 2026-10-08**. The top line of this file is updated.
+
+## Pre-registration: exits for L1, X1 to X4 (fixed 2026-10-08 13:55 UTC, before any code and before any exit was priced on any entry)
+
+The owner asked for an exit strategy backtest, in the light of L1's payoff: about 93c risked to make 7c, so one loss costs about 13 wins. **R10 (stop losses) was a
+standing exclusion in the idea ledger, because a stop on a fair market has no edge before costs; it is lifted for this one family at the owner's request**, and it is tested
+here as exactly that question: does selling a collapsing favourite early beat holding it to the close, after paying for the exit?
+
+- **Entries (fixed).** Every L1 entry exactly as `lstrats.hold_rule(L1)`: the candle ending 6 minutes before the close, favourite whose ask is 0.88 to 0.97, taker at the
+  ask, both series, all 69 days (3,400 entries). The baseline, HOLD, is the same entries held to settlement.
+- **The exit rule.** After entry the position is watched at each later candle close: those ending 5, 4, 3, 2 and 1 minutes before the close (strictly later than the entry
+  candle). At the first of them where the BID of the side held (YES: the YES bid close; NO: 1 minus the YES ask close) is at or below the threshold `X`, and that bid is a real
+  bid (at least 0.1c), the position is sold at that bid. No spread filter: a sale takes whatever the bid is. A taker fee `0.07 * p * (1 - p)` is paid on the exit leg as
+  well as the entry leg. If no candle triggers, the position is held to settlement as HOLD. A position is checked at candle closes only (a minute poll), never at an intrabar low.
+- **Variants, fixed now, four tries.** `X` = 50c (X1), 60c (X2), 70c (X3), 80c (X4). No other threshold, minute or rule is tried.
+- **Counterparty.** The seller who dumps a favourite near the end, or the buyer who takes the other side of a collapse: a favourite whose price has fallen from about 93c to under 70c
+  is, on average, already priced as the loser it is about to become, so selling it does not beat holding it before costs. Whoever is buying our early exit is paying its fair price.
+- **Numeric prediction, stated before the run.** The exit rule changes the VARIANCE a lot and the MEAN a little, and the mean change is negative: costs of the exit leg (a wide
+  bid-side spread on a collapsing book plus a fee) and the winners cut short that would have recovered. Predicted mean difference (exit minus hold, per entry) between -0.2c and
+  -1.0c for all four, and the worst single loss per contract falling from about -0.97 to about -0.50 or better at X3 and X4. **The pre-registered expectation is that all four
+  are `FALSIFIED` as an improvement in the mean**, with a real reduction in the size of the worst loss as the one thing they buy.
+- **Kill criteria.** Four tries, so the bar is stricter: a variant is `NOT_YET_FALSIFIED` only if ALL hold: at least 300 entries on at least 5 days; the mean net per
+  entry of the exit rule exceeds HOLD's on the same entries, with a day clustered z of the per day difference of at least **2.5**; the exit rule's own mean is positive; positive in
+  BOTH halves of the entries (by close time); positive with fees times 1.2 on both legs; and the difference is above the 95th percentile of the fair-market null (same entries and
+  prices, outcomes drawn from the price at 1 minute left, the same exit rule applied, 500 repeats), because the rule would cost roughly that much even in a market with no edge.
+  Anything else is `FALSIFIED`. A pass is permission to test forward on days not yet seen, and never a reason to change the live bot.
+- **Reported beside the verdict, information only, may not rescue anything.** For HOLD and each variant: mean, standard deviation, worst single loss per contract, worst day, deepest
+  drawdown of the running total, share of entries stopped, and of those stopped how many would have won if held (the winners the rule cuts). The cent-rounded cost for two
+  contracts (each leg rounds up to a cent, so an exit costs about a cent more than the model).
+- **Count.** Four variants: **2,567 as of 2026-10-08** (2,563 plus four).
