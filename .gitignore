@@ -13,3 +13,8 @@ GATES.md
 *.pem
 *.key
 .kalshi/
+
+# The research data folder (sqlite files) is local only. A symlink to it was committed once and made GitHub Pages fail to build
+# (Jekyll cannot resolve a dangling symlink), so ignore the name itself, not just a folder.
+kalshi-scalper/data
+kalshi-scalper/data/
