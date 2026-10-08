@@ -2047,7 +2047,7 @@
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction,
-    writeBatch, serverTimestamp, collection, query, orderBy, limit
+    writeBatch, serverTimestamp, collection, query, orderBy, limit, where, getDocs
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
   import {
     getFunctions, httpsCallable
@@ -2559,6 +2559,12 @@
     },
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
+    },
+    // The recorder's stored order-book snapshots (one document per minute, admin read only), oldest first, from a time. At most 1,500 minutes.
+    kalshiBookSnaps: function(sinceMs){
+      return getDocs(query(collection(db, 'kalshiBookSnaps'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(1500))).then(function(q){
+        return q.docs.map(function(d){ return d.data(); });
+      });
     }
   });
 </script>
@@ -3430,6 +3436,11 @@
           <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
           <div class="kal-note" id="kalDiagMsg">The diagnostics are the bot's order records (times, prices, book sizes, results). No keys or secrets.</div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
+          <div class="kal-actions">
+            <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
+            <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
+          </div>
+          <div class="kal-note" id="kalBookMsg">The recorder's saved order books (best three levels each side, every 10 seconds) as a compressed file you can send. Public market data only; it reads the recorder's documents and changes nothing.</div>
           <div class="kal-note" id="kalAcctMsg"></div>
           <div class="kal-note" id="kalAcctBaseline">Counting everything on the account, including your own trades.</div>
           <div class="kal-actions">
@@ -9695,6 +9706,30 @@
     return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' ET';
   }
 
+  // The recorder's order-book snapshots as CSV, one row per snapshot, for testing the quoting ideas that need real depth. The recorder stores each
+  // side's best three levels with the best LAST; here they are written best first. A side with no book is left empty, never 0 (zero would read
+  // as a free price). Pure: it reads nothing from the page.
+  function kalshiBookCsv(minuteDocs){
+    var cols = ['t', 'series', 'ticker', 'listBid', 'listAsk', 'yesBid', 'yesAsk', 'noBid', 'noAsk', 'yesDepth3', 'noDepth3',
+      'y1p', 'y1q', 'y2p', 'y2q', 'y3p', 'y3q', 'n1p', 'n1q', 'n2p', 'n2q', 'n3p', 'n3q'];
+    var cell = function(v){ return v === undefined || v === null || (typeof v === 'number' && !Number.isFinite(v)) ? '' : String(v).replace(/[",\n]/g, ' '); };
+    var lv = function(arr){
+      var best = (Array.isArray(arr) ? arr : []).slice().reverse(), out = [];
+      for(var i = 0; i < 3; i++){ out.push(best[i] ? best[i][0] : '', best[i] ? best[i][1] : ''); }
+      return out;
+    };
+    var rows = [], minutes = 0;
+    (minuteDocs || []).forEach(function(d){
+      if(!d || !Array.isArray(d.snaps)){ return; }
+      minutes++;
+      d.snaps.forEach(function(x){
+        if(!x){ return; }
+        rows.push([x.t, x.s, x.k, x.ly, x.la, x.yb, x.ya, x.nb, x.na, x.yd, x.nd].concat(lv(x.yl), lv(x.nl)).map(cell).join(','));
+      });
+    });
+    return { csv: [cols.join(',')].concat(rows).join('\n'), minutes: minutes, snaps: rows.length };
+  }
+
   // The bot's order records as CSV, for working out why orders did not fill. Prices, sizes and ids only (no keys or secrets); newest first, at
   // most `limit` rows. A field a record does not have is left empty, never filled in. Commas and quotes in a text field are escaped.
   function kalshiDiagnosticsCsv(orders, limit){
@@ -10036,6 +10071,26 @@
     renderKalshiCharts();
     renderKalshiL1();
   }
+  // Downloads the recorder's snapshots as a compressed CSV (plain CSV if the browser cannot compress). Admin only, and reads only.
+  document.getElementById('kalBookDownload').addEventListener('click', function(){
+    var api = window.__shwoopAPI, msg = document.getElementById('kalBookMsg'), btn = document.getElementById('kalBookDownload');
+    if(!api || !api.kalshiBookSnaps || !currentUserIsAdmin){ msg.textContent = 'Not available: sign in as the admin first.'; return; }
+    var hours = Number(document.getElementById('kalBookHours').value) || 6, since = Date.now() - hours * 3600000;
+    btn.disabled = true; msg.textContent = 'Reading the recorder...';
+    api.kalshiBookSnaps(since).then(function(docs){
+      var r = kalshiBookCsv(docs);
+      if(!r.snaps){ msg.textContent = 'No snapshots in the last ' + hours + ' hours. Is the recorder deployed and running?'; return; }
+      var stamp = new Date(since).toISOString().slice(0, 16).replace(/[-:T]/g, '');
+      var save = function(blob, name){
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        msg.textContent = 'Downloaded ' + name + ': ' + r.snaps + ' snapshots from ' + r.minutes + ' minutes (' + Math.round(blob.size / 1024) + ' KB). Attach it in the chat.';
+      };
+      if(typeof CompressionStream === 'function' && typeof Response === 'function'){
+        new Response(new Blob([r.csv]).stream().pipeThrough(new CompressionStream('gzip'))).blob().then(function(b){ save(b, 'kalshi-books-' + stamp + '.csv.gz'); }, function(){ save(new Blob([r.csv], { type: 'text/csv' }), 'kalshi-books-' + stamp + '.csv'); });
+      } else { save(new Blob([r.csv], { type: 'text/csv' }), 'kalshi-books-' + stamp + '.csv'); }
+    }).catch(function(err){ msg.textContent = 'Could not read the snapshots: ' + ((err && err.message) || 'unknown'); }).then(function(){ btn.disabled = false; });
+  });
   // Copies the order records as CSV. If the browser refuses clipboard access the text is shown in a box to copy by hand.
   document.getElementById('kalDiagCopy').addEventListener('click', function(){
     var csv = kalshiDiagnosticsCsv(kalshiLiveOrders, 150), n = Math.max(0, csv.split('\n').length - 1);
