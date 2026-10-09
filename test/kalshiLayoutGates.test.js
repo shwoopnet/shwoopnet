@@ -430,6 +430,11 @@ gates.Y20 = () => {
   assert.ok(/'No open positions'\)\.replace\(\/\\\.\\s\*\$\/, ''\) \+ '\. The bot is halted/.test(html) && !/'No open positions\.'\) \+ '\. The bot/.test(html), 'no doubled period after "No open positions"');
 }
 
+// Y27: the end label of the profit line is right-aligned to the edge and the plot makes room for its length, so a larger total is never cut off.
+{
+  assert.ok(/R = Math\.max\(60, endLabel\.length \* 9 \+ 16\)/.test(html) && /x="' \+ \(W - 4\) \+ '" y="' \+ \(Y\(last\.cum\) \+ 5\)\.toFixed\(1\) \+ '" text-anchor="end"/.test(html), 'the end label is right-anchored with room reserved for it');
+}
+
 // Y26: the "More stats" fold keeps its open or closed state across the card's rebuilds instead of closing every few seconds.
 {
   assert.ok(/var kalshiMoreOpen = false;/.test(html) && /classList\.contains\('kal-more'\)\)\{ kalshiMoreOpen = t\.open; \}/.test(html), 'the fold records when it is toggled');
