@@ -10006,6 +10006,13 @@
       '<text x="' + L + '" y="' + (H - 5) + '" fill="var(--muted)" font-size="11">last ' + shown.length + ' settled trades: ' + wins + ' won, ' + losses + ' lost</text></svg>';
   }
 
+  // The card is rebuilt every few seconds, which closed an opened <details> each time. Its state is kept here and written back into the markup on every build.
+  var kalshiMoreOpen = false;
+  document.addEventListener('toggle', function(ev){
+    var t = ev.target;
+    if(t && t.classList && t.classList.contains('kal-more')){ kalshiMoreOpen = t.open; }
+  }, true);   // toggle does not bubble, so it is caught on the way down
+
   // The tracker's numbers as tiles and two small tables. Nothing is shown as a figure until there is a settled trade to base it on.
   function kalshiPerfHtml(st, esc, money){
     if(!st || !st.n){ return '<div class="kal-empty">The tracker fills in after the first settled trade.</div>'; }
@@ -10028,7 +10035,7 @@
       }).join('') + '</div>';
     };
     return '<div class="kal-tiles">' + main + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + '</div>' +
-      '<details class="kal-more"><summary>More stats</summary><div class="kal-tiles">' + more + '</div><div class="kal-perf-tabs">' + table('By price paid', st.byBand) + '</div></details>';
+      '<details class="kal-more"' + (typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen ? ' open' : '') + '><summary>More stats</summary><div class="kal-tiles">' + more + '</div><div class="kal-perf-tabs">' + table('By price paid', st.byBand) + '</div></details>';
   }
 
   // A tiny line over one 15 minute market: points are {t (ms), v}, drawn across the market's whole window so it fills from the left as time passes.

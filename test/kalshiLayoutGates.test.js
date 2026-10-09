@@ -429,3 +429,9 @@ gates.Y20 = () => {
   assert.ok(/getElementById\('kalFlattenMsg'\); if\(fm\)\{ fm\.textContent = ''; \}/.test(html), 'Start clears the old Flatten all message');
   assert.ok(/'No open positions'\)\.replace\(\/\\\.\\s\*\$\/, ''\) \+ '\. The bot is halted/.test(html) && !/'No open positions\.'\) \+ '\. The bot/.test(html), 'no doubled period after "No open positions"');
 }
+
+// Y26: the "More stats" fold keeps its open or closed state across the card's rebuilds instead of closing every few seconds.
+{
+  assert.ok(/var kalshiMoreOpen = false;/.test(html) && /classList\.contains\('kal-more'\)\)\{ kalshiMoreOpen = t\.open; \}/.test(html), 'the fold records when it is toggled');
+  assert.ok(/'<details class="kal-more"' \+ \(typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen \? ' open' : ''\) \+ '><summary>More stats/.test(html), 'the rebuilt markup restores the state');
+}
