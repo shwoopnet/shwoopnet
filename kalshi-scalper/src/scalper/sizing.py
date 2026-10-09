@@ -30,7 +30,7 @@ def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=3
             elif d_i>0 and d_i%step_days==0:
                 base=cash
                 if target>cap and d_i-last_stop>=7: cap=min(cap+1,target)
-        day_pnl=0.0; day_peak=0.0; stopped=False
+        day_pnl=0.0; day_peak=0.0; day_allow=0.0; stopped=False
         for e in by[d]:
             if stopped or rng.random()>=fill: continue
             add=min(addon_max,int(pool/0.93)) if (skim and d_i-last_stop>=7) else 0
@@ -41,6 +41,8 @@ def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=3
                     n=min(n_ceiling,max(1,min(cap,n_ceiling,int(cash_frac*cash/order_cost(e['price'],1)+1e-9)))+add)
             cost=order_cost(e['price'],n); won=e['gross']+e['price']>0.5
             pnl=(n if won else 0)-cost
+            if addon_outside and not won and n>0:
+                day_allow+=cost*max(0,n-max(1,min(cap,n_ceiling,int((cash_frac or 1)*cash/order_cost(e['price'],1)+1e-9) if cash_frac else cap)))/n   # profit-funded share of a lost order
             cash+=pnl; total+=pnl; day_pnl+=pnl
             if skim:
                 cum+=pnl
@@ -49,7 +51,7 @@ def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=3
             peak=max(peak,total); dd=max(dd,peak-total)
             day_peak=max(day_peak,day_pnl)
             # trailing ('Stop follows the high point'): measured from the best result of the day so far instead of from zero
-            if stop_frac is not None and ((day_peak-day_pnl>=stop_frac*base-1e-9) if trailing else (day_pnl<=-stop_frac*base-1e-9)):
+            if stop_frac is not None and ((day_peak-day_pnl>=stop_frac*base+day_allow-1e-9) if trailing else (day_pnl<=-(stop_frac*base+day_allow)-1e-9)):
                 stopped=True; stops+=1; last_stop=d_i; pool=0.0
     return total,dd,saved,cap,peak,stops
 def run(by, days, name, **kw):

@@ -430,7 +430,7 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12 }) {
 // price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
 async function botRisk({ store, since, fetchFn, nowMs }) {
   const trades = (await store.sessionTrades(Number.isFinite(since) ? since : 0)).filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
-  let net = 0, openCost = 0;
+  let net = 0, openCost = 0, addonAtRisk = 0;
   for (const t of trades) {
     const cost = Number(t.maxCost);
     let result = t.settled === true ? t.result : null;
@@ -444,10 +444,13 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
     }
     // A partial fill costs and pays in proportion; orders from before size scaling have count 1.
     const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want), paid = cost * (got / want);
-    if (result === "yes" || result === "no") net += (result === t.side ? got : 0) - paid;
-    else openCost += paid;
+    const addonPaid = Number.isFinite(Number(t.addonCost)) && Number(t.addonCost) > 0 ? Number(t.addonCost) * (got / want) : 0;
+    if (result === "yes" || result === "no") {
+      net += (result === t.side ? got : 0) - paid;
+      if (result !== t.side) addonAtRisk += addonPaid;   // only a LOST order burned the profit that bought its add-on
+    } else { openCost += paid; addonAtRisk += addonPaid; }   // an open order is counted as lost, so its add-on is too
   }
-  return { net, openCost, worst: net - openCost, trades: trades.length };
+  return { net, openCost, worst: net - openCost, addonAtRisk, trades: trades.length };
 }
 
 // Profit reinvestment with a skim (the owner's idea, Oct 8, 2026). Only NEW net profit is split: the cumulative settled result since the state began
@@ -540,12 +543,16 @@ async function runL1Tick(args) {
     peak = Math.max(0, fresh && Number.isFinite(session.peakNet) ? session.peakNet : 0, risk.net);
     if (!(fresh && Number.isFinite(session.peakNet) && session.peakNet >= peak)) await setSession({ peakNet: Number(peak.toFixed(4)), peakAt: now });
   }
-  const floor = peak - stopAt;
+  // The stop protects the ACCOUNT, not the profit already made: the part of a lost or open order that was bought with reinvested profit (the add-on) does not count
+  // toward it. Without this a big enough add-on would make one loss, or even one open order counted as lost, reach the stop on its own and lock the bot out
+  // (the owner's rule, Oct 9, 2026). The account's own share of the loss is still held to the same 5% of the balance at the last review.
+  const allowance = Number.isFinite(risk.addonAtRisk) ? risk.addonAtRisk : 0;
+  const floor = peak - (stopAt + allowance);
   if (risk.worst <= floor + 1e-9) {
     if (sizeState && args.setSizingState) { try { await args.setSizingState({ ...sizeState, lastStopAt: now, pool: 0 }); } catch (e) { /* the stop still ends the session */ } }
     return end("loss stop", trailing
       ? "the bot's trades are down $" + (peak - risk.worst).toFixed(2) + " from their best (+$" + peak.toFixed(2) + ", now " + (risk.net >= 0 ? "+" : "-") + "$" + Math.abs(risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " open counted as lost), which reaches the $" + stopAt.toFixed(2) + " give-back stop"
-      : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + stopAt.toFixed(2) + " stop");
+      : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + (stopAt + allowance).toFixed(2) + " stop" + (allowance > 0 ? " ($" + stopAt.toFixed(2) + " plus $" + allowance.toFixed(2) + " of reinvested profit that was at risk)" : ""));
   }
 
   const candidates = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status)
@@ -576,7 +583,10 @@ async function runL1Tick(args) {
     const cost1 = pick.worst + bot.takerFee(pick.worst, 1);
     if (cost1 > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
     // The cash the size is judged on is what is left after this tick's earlier orders, so two markets cannot both take the full share.
-    const count = sizing ? l1Count(cash - Object.values(committed).reduce((a, x) => a + x, 0), cost1, sizeCap, sizeAddon) : 1;
+    const cashLeft = cash - Object.values(committed).reduce((a, x) => a + x, 0);
+    const count = sizing ? l1Count(cashLeft, cost1, sizeCap, sizeAddon) : 1;
+    // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
+    const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
@@ -585,7 +595,7 @@ async function runL1Tick(args) {
 
     const cid = "L1-" + ticker;
     const record = {
-      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count, price: pick.price, limit: pick.limit,
+      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
       // What the book showed when the order was decided (null where Kalshi did not send a field), so a "no fill" can be

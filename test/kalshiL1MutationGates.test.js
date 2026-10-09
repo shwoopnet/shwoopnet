@@ -94,7 +94,7 @@ gates.M4 = async () => {
     fresh: { [G]: { exchange_index: 2, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } } });
   await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
   assert.deepStrictEqual(w.posts.map((p) => p.count), ['3', '3'], 'both are held to the cap');
-  assert.ok(/l1Count\(cash - Object\.values\(committed\)/.test(fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8')), 'and the cash an earlier order in the same tick took is still taken off before sizing the next');
+  assert.ok(/const cashLeft = cash - Object\.values\(committed\)[\s\S]{0,200}l1Count\(cashLeft/.test(fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8')), 'and the cash an earlier order in the same tick took is still taken off before sizing the next');
 };
 
 // Only the L1 session's own trades feed its stop: an older single test order on the same account does not.

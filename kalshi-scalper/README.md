@@ -2381,3 +2381,20 @@ Count: four variants, **2,586 as of 2026-10-09**.
 - **T3 is a decisive, large sample failure, worse than predicted (-4.11c against -1.5c).** It wins most of the time (69.2% of trades sold above entry, median hold 61 seconds, a +5c target) and still loses 4c a trade: many small wins, and a minority of exits at the time limit far below entry that outweigh them. Both halves negative and z -10 make this the clearest result of the day. Fees alone are about 3c of it. It tells us the owner's recorded trade, taken as a rule at tick level with real trade prices, loses money on average; a single winning trade is inside the noise of that.
 - **T4 almost never fires, and that is a finding about the design, not an edge.** Only 19 of 1,240 markets had a taker print on a 4c to 10c side between seconds 61 and 179 and a later exit print. At the open the market is near 50 to 50, so a 6c side does not exist yet. **The owner's own examples were at about 5.6 and 8 minutes into the market**, outside this window; the window was set to "early" without checking that against the examples. A later window (for example minutes 4 to 9 after the open) is a different question and would be a new variant (2,587) registered before it runs; the +1.07c on 19 trades is not evidence of anything.
 - **Audit triggers.** None fired: no result was better than its prediction except T4's, which has 19 observations (far under 300). The invariants held by test: the entry print is after the signal second and the exit print after the entry in T3 and T4; only trades before second 300 enter the first-5-minute flow.
+
+## Amendment: the loss stop does not count profit-funded losses (2026-10-09, at the owner's direction; information only, no variant counted)
+
+**The problem.** The stop trips when the bot's own trades over the last 24 hours, settled losses plus open orders counted as lost, are down by 5% of the balance at the last review (about $25 at $509). The profit-funded add-on has no count cap. If the pool ever bought enough extra contracts (about 25 at $0.95 each, or about $28 for one order), a single loss, or even one such order merely sitting open, would reach the stop by itself and end the session. The stop is checked at the start of each minute, so the open order alone would have been enough.
+
+**The rule.** Each order now records how many of its contracts were bought with reinvested profit (`addon`, `addonCost`). The stop becomes **5% of the balance at the last review plus the profit-funded cost of the orders that are lost or still open** in the 24 hour window. In words: the stop counts only the account's own share of a loss. A $28 order whose add-on cost $23.80 can lose in full without stopping the bot (only $4.20 was account money), and a loss that eats the profit and then more than 5% of the account still stops it. Orders from before this change carry no add-on fields and behave as before. Winning orders add nothing to the allowance. It applies to the trailing stop the same way.
+
+**Why it is consistent.** The pool holds only profit already banked, and a loss comes out of the pool first. The widened stop is exactly the profit that was staked plus the same 5% of capital as before, so the account's exposure to a stop-level loss is unchanged.
+
+**Replay (`python -m scalper.sizing current`, 10 weeks from $504.82, 60% fills, 3,000 paths), add-on outside the 1% rule:**
+
+| Stop | Mean | 5th pct | 1st pct | Deepest drawdown (95th) | Paths that lose | Stop days a path |
+|---|---|---|---|---|---|---|
+| Plain 5% | +$86.7 | -$10.1 | -$47.4 | $86.5 | 7.5% | 0.12 |
+| 5% plus the profit-funded share of a lost order | +$86.8 | -$8.4 | -$44.6 | $88.6 | 6.9% | 0.00 |
+
+The widened stop almost never fires in the model, which is what it is for: it keeps the bot running through the one bad order that the add-on's own size would otherwise end it on. The deeper drawdown is about $2, inside the noise of the sample. Count: unchanged, **2,586 as of 2026-10-09** (a stop rule, not a strategy variant).
