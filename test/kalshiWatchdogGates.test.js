@@ -36,7 +36,7 @@ gates.W4 = () => {
   assert.ok(arm.indexOf('runArmedTick(') > -1 && arm.indexOf('runArmedTick(') < arm.lastIndexOf('watchdog.sendAll('), 'ping only after the check completes');
   assert.ok(/ok: !failure/.test(arm) && /if \(failure\) throw failure;/.test(arm), 'a failed run reports failure and is still thrown to the scheduler');
   assert.ok(/defineString\("KALSHI_WATCHDOG_URL", \{ default: "" \}\)/.test(fnSrc), 'optional, empty by default');
-  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder']);
+  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiSimTick', 'kalshiLiveArmed', 'kalshiBookRecorder']);
 };
 
 // The bot's own stop alert: opt-in, one POST with the reason, and only for a session that ended by itself.

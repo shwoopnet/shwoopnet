@@ -92,6 +92,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
 const book = require("./kalshiBookLib");
+const sim = require("./kalshiSimLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
 
@@ -393,6 +394,74 @@ exports.kalshiFlattenAll = onCall(
     }
     try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
     return { halted: true, ...out };
+  }
+);
+
+// ---- Simulated L1 on ETH and SOL (no orders, no key) ---------------------------------------------------------------------------
+// The owner's Oct 9, 2026 request: watch the same rule on live prices for a day or three before any real order exists. All the logic is in kalshiSimLib.js,
+// which has no signing, no key and no order call. This function is declared with NO secrets, so it cannot trade even by mistake, and it writes only its own
+// documents. It reads the live session's size fields and the account snapshot only to size a trade like a Bitcoin or gold trade.
+function firestoreSimStore(db) {
+  const col = db.collection("kalshiSimOrders");
+  return {
+    async openFilled() { return (await col.where("status", "==", "filled").get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+    async createTest(id, data) {
+      try {
+        await col.doc(id).create(data);
+        return true;
+      } catch (e) {
+        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
+        throw e;
+      }
+    },
+    async updateTest(id, patch) { await col.doc(id).update(patch); },
+  };
+}
+
+exports.kalshiSimSession = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  ensureDefaultAdminApp();
+  const on = request.data && request.data.on === true;
+  const ref = getFirestore().collection("kalshiSimControl").doc("state");
+  const now = Date.now();
+  await ref.set(on
+    ? { active: true, since: now, endedAt: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." }
+    : { active: false, endedAt: now }, { merge: true });
+  return { active: on };
+});
+
+exports.kalshiSimTick = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const stateRef = db.collection("kalshiSimControl").doc("state");
+    const stateSnap = await stateRef.get();
+    const state = stateSnap.exists ? stateSnap.data() : null;
+    const now = Date.now();
+    const store = firestoreSimStore(db);
+    if (state && state.active === true) {
+      const api = kalshiMarketApi();
+      const st = await api.exchangeStatus();
+      const quotes = [];
+      for (const series of sim.ALL_SERIES) for (const m of await api.markets(series)) quotes.push({ series, m });
+      const sessSnap = await db.collection("kalshiLiveControl").doc("session").get();
+      const accSnap = await db.collection("kalshiLiveControl").doc("account").get();
+      const acc = accSnap.exists ? accSnap.data() : null;
+      await sim.runSimTick({
+        state, now, quotes, active: Boolean(st.trading_active !== undefined ? st.trading_active : st.exchange_active),
+        session: sessSnap.exists ? sessSnap.data() : null,
+        cash: acc && acc.balance && Number.isFinite(acc.balance.totalDollars) ? acc.balance.totalDollars : NaN,
+        store, readMarket: api.market, sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+        setState: (patch) => stateRef.set(patch, { merge: true }),
+      });
+    }
+    // Settle finished simulated trades whether or not the simulation is on (the same sweep the live orders use; public reads, nothing placed).
+    try {
+      await live.settleOpenOrders({ store, fetchFn: fetch, nowMs: now });
+    } catch (e) {
+      console.error("kalshiSimTick: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
+    }
   }
 );
 

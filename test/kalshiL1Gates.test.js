@@ -346,7 +346,7 @@ gates.N13 = () => {
   assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
   assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'there is no arm callable left to refuse');
   assert.ok(/A single test order is armed\. Disarm it before starting/.test(fnSrc), 'starting refuses while armed');
-  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder']);
+  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiSimTick', 'kalshiLiveArmed', 'kalshiBookRecorder']);   // the simulation (no secrets, no orders: see test/kalshiSimGates.test.js) comes first
   assert.ok(fnSrc.indexOf('exports.kalshiL1Session') < fnSrc.indexOf('exports.kalshiBookRecorder'), 'defined before the recorder, which stays last');
   // The page: two clicks, a server call only on the confirm click, and a visible stop.
   assert.ok(/kalL1Start'\)[\s\S]{0,400}addEventListener\('click', function\(\)\{ msg\.textContent = ''; ask\(true\); \}\)/.test(html), 'the first click only asks');
