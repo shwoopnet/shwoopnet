@@ -2425,3 +2425,12 @@ The owner chose a 2% base per position (ladder $43 a contract, ladder ceiling 25
 - **Stopping point, stated now.** Fetch order is the T1 to T4 order (every 8th market, then the next offset) restricted to those 1,240 markets, so any stopping point is an even sample. The result is read ONCE, at all 1,240 or when the fetch ends. No look at partial results, no extension if the sample disappoints.
 - **Count.** One more variant: **2,587 as of 2026-10-09**. One parameter set; no re-run with other bands, targets or times.
 - **Limits.** A taker print is a real price but not our fill, and cheap sides are the thinnest part of the book. Seconds 300 to 570 overlap L1's window (500 to 570), so a pass would also need its own cash and stop accounting next to L1. A pass would be `NOT_YET_FALSIFIED` only, with a forward window; the bot is not changed by this section.
+
+**Correction to the table above (2026-10-09, same day).** The first run left the cap starting at 3 and the ladder ceiling at 10, so it did not model what Start and the deployed ceiling of 25 do (the cap goes straight to the target, 12 at this balance). `sizing.path` now takes `cap0` and `cap_ceiling`. Re-run with the deployed settings (70 days, from $547.96, 60% fills, 5% stop, 3000 paths):
+
+| Rule | Mean (10 wk) | 1st pct | Deepest drawdown (95th) | P(loss) | Stop days |
+|---|---|---|---|---|---|
+| 1% base, $85, ceiling 10, cap 6 | +$100 | -$44 | $97 | 8% | 0.01 |
+| 2% base, $43, ceiling 25, cap 12 | +$223 | -$103 | $187 | 8% | 2.68 |
+
+So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and the bad drawdown is about 34% of the account (not 27%) with a stop day about once every 26 days (not 0.84 in the window). The first table understated both the gain and the risk; the direction of the conclusion (more return for proportionally more risk) is unchanged. The same replay, 2% base, at three horizons from $550: mean $638 / $738 / $842 at 30 / 60 / 90 days (5th to 95th percentile $486 to $829, $509 to $1,044, $545 to $1,252); from $1,000: $1,163 / $1,342 / $1,522. About the same percentage growth, about 1.8 times the dollars.

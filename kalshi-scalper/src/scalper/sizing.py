@@ -17,15 +17,15 @@ from . import lstrats as L
 from .feerounding import order_cost
 from .scalps import load as load_markets
 
-def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None, n_ceiling=10, cash_frac=None, base0=None, usable=None, trailing=False, addon_outside=False):
+def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None, n_ceiling=10, cash_frac=None, base0=None, usable=None, trailing=False, addon_outside=False, cap_ceiling=10, cap0=None):
     """One path of `ndays` days. step_days: days between reviews (one step up at most per review, down at once). stop_frac: if set, the loss stop of the live bot:
     a day's result at or below minus stop_frac of the balance at the last review ends that day (the owner restarts the next morning), empties the pool and
     holds step-ups and the add-on for 7 days. Returns total, deepest drawdown, saved, final cap, peak, stops."""
-    cash=start; base=start if base0 is None else base0; pool=0.0; saved=0.0; cum=0.0; hwm=0.0; cap=3 if not fixed else fixed; peak=0.0; dd=0.0; total=0.0; stops=0; last_stop=-99
+    cash=start; base=start if base0 is None else base0; pool=0.0; saved=0.0; cum=0.0; hwm=0.0; cap=(3 if cap0 is None else cap0) if not fixed else fixed; peak=0.0; dd=0.0; total=0.0; stops=0; last_stop=-99
     for d_i in range(ndays):
         d=rng.choice(days)
         if not fixed:
-            target=max(1,min(10,int(((cash if usable is None else min(cash,usable+total))-saved)/dpc)))
+            target=max(1,min(cap_ceiling,int(((cash if usable is None else min(cash,usable+total))-saved)/dpc)))
             if target<cap: cap=target; base=cash
             elif d_i>0 and d_i%step_days==0:
                 base=cash
@@ -109,9 +109,9 @@ def base2() -> None:
     days = sorted(by)
     print("from $547.96, base re-seeded, 60% fills, WITH the loss stop (5% of base)")
     kw = dict(skim=True, fixed=0, start=547.96, step_days=3, stop_frac=0.05, base0=547.96, addon_max=999, n_ceiling=50, addon_outside=True)
-    run(by, days, "1% base, $85 a contract (as of Oct 8)", dpc=85, cash_frac=0.01, **kw)
-    run(by, days, "2% base, $43 a contract (Oct 9 change)", dpc=43, cash_frac=0.02, **kw)
-
+    # Corrected 2026-10-09: the first version left the cap at 3 and the ladder ceiling at 10, which is not what Start (reseed) and the deployed 25 do.
+    run(by, days, "1% base, $85, ceiling 10 (as of Oct 8)", dpc=85, cash_frac=0.01, cap0=6, cap_ceiling=10, **kw)
+    run(by, days, "2% base, $43, ceiling 25 (Oct 9 change)", dpc=43, cash_frac=0.02, cap0=12, cap_ceiling=25, **kw)
 
 if __name__ == "__main__":
     import sys
