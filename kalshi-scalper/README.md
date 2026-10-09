@@ -2434,3 +2434,19 @@ The owner chose a 2% base per position (ladder $43 a contract, ladder ceiling 25
 | 2% base, $43, ceiling 25, cap 12 | +$223 | -$103 | $187 | 8% | 2.68 |
 
 So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and the bad drawdown is about 34% of the account (not 27%) with a stop day about once every 26 days (not 0.84 in the window). The first table understated both the gain and the risk; the direction of the conclusion (more return for proportionally more risk) is unchanged. The same replay, 2% base, at three horizons from $550: mean $638 / $738 / $842 at 30 / 60 / 90 days (5th to 95th percentile $486 to $829, $509 to $1,044, $545 to $1,252); from $1,000: $1,163 / $1,342 / $1,522. About the same percentage growth, about 1.8 times the dollars.
+
+## Pre-registration: S1, size 2x for the first 10 filled trades after a start or a loss (the owner's idea; fixed 2026-10-09, before any code for it and before any result; information only, no verdict word that means trade, no variant counted)
+
+**The idea, as the owner put it.** "Start huge, scale down after x winners": back-to-back losses look unlikely, so be big right after a start or a loss and scale back as wins accumulate.
+
+**Premise check, done before this section from the history (not a result for S1).** Over 3,379 L1 entries the chance the next entry loses after a loss is 5.4% against a 6.0% base rate; the 192 losing runs were 181 singles, 11 doubles and no triples; days with 3 or more losses were 43 against about 38 expected if independent. So adjacent losses are rare and nearly independent, with a mild day-level clustering.
+
+**Rule (fixed now, one parameter set).** In the `sizing.path` replay, a countdown starts at 10 at the start of a path and is reset to 10 by every filled order that loses. While it is above zero, each filled order is sized at **2 times** what the deployed rule would send (base plus pool extras), still capped at the 50 contract order ceiling; each filled order counts it down by one. The boosted contracts are account funded: only the pool add-on counts as profit funded for the stop's allowance. Everything else is the deployed rule (2% base, $43 ladder, ceiling 40, cap starting at the balance target, 5% stop, 3 day reviews, 60% fills, 3000 paths, the real 67 days drawn with replacement). The baseline is the same run with no boost. Both at the $1,000 account and at $550.
+
+**Counterparty / mechanism.** None new. The only claim is statistical: if losses are close to independent, the size schedule changes dollars at risk per trade, not the odds, so the average should move in proportion to the average size and the bad tail should move with it or worse (a loss is more likely to land in a boosted trade, because the boost always sits right after a loss).
+
+**Numeric prediction, before the run.** The mean 10 week gain rises by less than 25% over baseline, while the 1st percentile outcome and the 95th percentile drawdown each worsen by more than 25%, so the mean per dollar of drawdown falls. Stop days rise. I expect the boost **not** to improve the mean gain per dollar of 95th percentile drawdown.
+
+**Reading rule.** Reported side by side: mean, 5th, 1st and 95th percentile ending balance, 95th percentile drawdown, mean gain divided by that drawdown, stop days. The boost is called not helpful if the mean per dollar of drawdown is lower than baseline. A better ratio is reported as an audit trigger first (check the boost applies only after a loss or at the start, and that the stop's allowance is not counting boosted contracts), and as a replay of the past only. Nothing here changes the bot.
+
+**Limits.** The replay's loss rate comes from the 67 days; the live run so far is 74 wins in 74. A 2x boost doubles the size of a single order, and the market's depth at that size is unmeasured.
