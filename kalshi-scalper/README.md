@@ -2464,3 +2464,27 @@ So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and t
 - **Prediction against outcome.** Predicted: the mean rises by less than 25%, the bad tail worsens by more than 25%, the ratio falls, stop days rise. Measured: the ratio fell and stop days rose as predicted; the 1st percentile worsened 65% and the drawdown 57%, as predicted. **The mean rose 30% at both account sizes, not under 25%**, so that part of the prediction was wrong; the boost does add average profit, it just adds more risk than profit.
 - **Audit triggers.** No result was better than the baseline on the ratio, so none fired. The boost sits only after a start or a loss by construction, and the stop's allowance counts the pool add-on only.
 - **Caveat.** A replay of the past at the history's loss rate; the live record (74 of 74) is far better, and a doubled order is double the depth this market has been measured to fill (nothing measured yet).
+
+## Pre-registration: E1 and E2, L1 unchanged on the ETH and SOL 15 minute markets (the owner's idea; fixed 2026-10-09, before any ETH or SOL market was downloaded and before any result)
+
+**The question.** Does the rule that runs live on Bitcoin and gold (L1) work on the other 15 minute crypto series with enough volume to hold size? The owner wants, if it works, to expand there: first a simulated run, then a small live stake that scales up faster than BTC and gold did until it matches their dollar amounts. This section is only the first step, the test on history.
+
+**Why ETH and SOL, and nothing else.** A check of Kalshi's public data on 2026-10-09 (median contracts traded per settled market, sample of 20): Bitcoin 3,503,802; gold 458,140; ETH 174,633; SOL 90,434; XRP 71,986; DOGE 33,609; the rest 12,000 to 19,000. ETH and SOL are the only ones with enough depth to be a candidate at 20 to 40 contracts, and even they are 5% and 2.6% of Bitcoin's volume. XRP is next and is **not** included, to keep this to the two the owner named.
+
+**Data.** `python -m scalper.altseries fetch`: every settled KXETH15M and KXSOL15M market that closed in the last 66 days (Kalshi keeps candles about that far back) with its 1 minute bid/ask candles, into a **separate database, `data/alts.sqlite`**, so the Bitcoin and gold history and every earlier result are untouched.
+
+**Rule (fixed now, one parameter set, identical to L1).** One observation per market, from the candle that ENDS exactly 360 s before the close; buy the favourite when its ask is 0.88 to 0.97 (either side), hold to settlement, taker at the ask, the same fee model as `lstrats.net`. Nothing is tuned, no filter, no other band or minute. A market with no candle at that minute, no quote in the band, or no result has no observation.
+
+**Counterparty.** The same as L1's, and no new one is claimed: whoever holds the 3c to 12c longshot side near the close and sells it to the favourite buyer for less than it is worth. ETH and SOL are partly the same bet as Bitcoin (they move with it), so a pass would not be independent evidence of a different edge.
+
+**Numeric prediction, before the run.** ETH lands near Bitcoin's thin figure, **+0.5c per contract net**, z between 0 and 1.5; SOL lower, **at or below 0.0c**, because its spread is wider and the favourite's ask costs more of the edge. **Expected verdict: both `FALSIFIED`.** If either shows a mean above +1.5c it is an audit trigger first (check the entry candle ends 360 s before the close and the settlement side).
+
+**Pass bar, fixed (the same as every earlier test).** Each series is `NOT_YET_FALSIFIED` only if ALL hold: at least 300 observations; at least 5 days; day clustered z of net per contract at least 2.1; mean net above zero; both halves of the days positive; mean above zero with fees times 1.2. Anything else is `FALSIFIED`. A pass is permission for the next stage only, and never a reason to change the live bot.
+
+**Information, not part of the verdict.** For each series: observations and per day, win rate against the mean price paid, mean net by half, and the **median traded volume of the entry minute's candle in contracts**, against the order sizes the bot would send (about 12 to 40), as a first look at depth. The book recorder's data (from about Oct 12 to 13) is the proper depth test and is not replaced by this.
+
+**The stages after a pass, written now so they are not invented later.** (1) A forward shadow run on days not yet seen: the would-be entries are logged with no orders (needs a server change and a deploy, which the owner has asked not to do for another strategy yet, so none is built); (2) only after a shadow run that stays above the same bar, a small live stake with its own cash accounting and stop, scaled by the same review rules as BTC and gold but with an evidence gate for each step; (3) matching BTC and gold sizes only at the pace those gates allow. Nothing in stages 1 to 3 is built or started by this section.
+
+**Count.** Two variants, one parameter set each: **2,589 as of 2026-10-09** (2,587 with T5). The control, as in the earlier searches, is not needed here because nothing is searched.
+
+**Limits.** Candle asks are quotes, not our fills: the live bot fills about 56 to 59% of its signals (the misses are where the losses are), and the replay assumes the quote is available. Thin books fill less at size. The 66 day window is the same one L1 was measured on.
