@@ -10164,6 +10164,23 @@
   // off the "to beat" line even when the market is right; the tile says so.
   var kalshiSpot = { at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] };
   var kalshiMid = {};
+  // ETH and SOL (the simulation's markets): the same recipe as Bitcoin, Coinbase's candles for the minute history and its ticker every 10 seconds.
+  var kalshiAlt = { ETH: { product: 'ETH-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] }, SOL: { product: 'SOL-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] } };
+  function kalshiFetchAlt(key, now){
+    var a = kalshiAlt[key];
+    if(!a.busy && now - a.at >= 30000){
+      a.busy = true;
+      kalshiCandles(a.product, now).then(function(pts){ a.pts = pts; a.at = Date.now(); a.busy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); } })
+        .catch(function(){ a.at = Date.now(); a.busy = false; });
+    }
+    if(!a.tickBusy && now - a.tickAt >= 10000){
+      a.tickBusy = true;
+      kalshiTicker(a.product).then(function(v){
+        a.live.push({ t: Date.now(), v: v }); if(a.live.length > 300){ a.live.shift(); }
+        a.tickAt = Date.now(); a.tickBusy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
+      }).catch(function(){ a.tickAt = Date.now(); a.tickBusy = false; });
+    }
+  }
   // Gold: the live price is gold-api.com (free, no key). Its history is Coinbase's PAXG-USD candles (tokenized gold, within a few dollars of spot), shifted by the
   // gap between the two right now so the line ends on the real gold price. The shape of the earlier minutes is approximate; Kalshi settles gold on a Pyth feed.
   var kalshiGold = { at: 0, busy: false, failed: false, pts: [], hist: [], histAt: 0, histBusy: false, off: null };
@@ -10244,6 +10261,10 @@
     if(m.series === 'KXBTC15M' && m.strike != null){
       body = kalshiSparkSvg(kalshiSpotSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
+    } else if((m.series === 'KXETH15M' || m.series === 'KXSOL15M') && m.strike != null){
+      var alt = kalshiAlt[m.series === 'KXETH15M' ? 'ETH' : 'SOL'];
+      body = kalshiSparkSvg(kalshiJoinSeries(alt.pts, alt.live), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: (m.series === 'KXETH15M' ? 'Ethereum' : 'Solana') + ' price from Coinbase against the strike', empty: 'Loading the price...',
+        fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
     } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
       body = kalshiSparkSvg(kalshiGoldSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
@@ -10266,7 +10287,7 @@
       return;
     }
     var now = Date.now();
-    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m' };
+    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: 'Ethereum 15m (simulated only)', KXSOL15M: 'Solana 15m (simulated only)' };
     rows.forEach(function(m){
       if(m.yesBid == null || m.yesAsk == null){ return; }
       var h = kalshiMid[m.ticker] = kalshiMid[m.ticker] || [];
@@ -10275,6 +10296,8 @@
     });
     if(rows.some(function(m){ return m.series === 'KXBTC15M'; })){ kalshiFetchSpot(now); }
     if(rows.some(function(m){ return m.series === 'KXGOLD15M'; })){ kalshiFetchGold(now); }
+    if(rows.some(function(m){ return m.series === 'KXETH15M'; })){ kalshiFetchAlt('ETH', now); }
+    if(rows.some(function(m){ return m.series === 'KXSOL15M'; })){ kalshiFetchAlt('SOL', now); }
     el.innerHTML = rows.map(function(m){
       var hasBook = m.yesBid != null && m.yesAsk != null;
       var spread = hasBook ? m.yesAsk - m.yesBid : null;

@@ -191,6 +191,15 @@ exports.kalshiBooks = onCall(async (request) => {
       const raw = await kalshiFetchSeries(series, "open", 5);
       raw.forEach((m) => markets.push(kalshi.trimMarket(series, m)));
     }
+    // The extra display series must never take the page's Bitcoin and gold cards down with them: a failure here is skipped, not thrown.
+    for (const series of kalshi.KALSHI_EXTRA_SERIES) {
+      try {
+        const raw = await kalshiFetchSeries(series, "open", 5);
+        raw.forEach((m) => markets.push(kalshi.trimMarket(series, m)));
+      } catch (e) {
+        console.error("kalshiBooks: " + series + " skipped: " + String((e && e.message) || e).slice(0, 120));
+      }
+    }
     const body = { fetchedAt: Date.now(), markets };
     kalshiCache = { at: Date.now(), body };
     return body;

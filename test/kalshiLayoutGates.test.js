@@ -473,6 +473,18 @@ gates.Y30 = () => {
   assert.deepStrictEqual(f.kalshiSimFidelity(sims, real), { pairs: 3, agree: 2, simFill: 2, realFill: 1 }, 'only calibration orders with a real order on the same market are compared');
 };
 
+// Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
+gates.Y31 = () => {
+  assert.ok(/KXETH15M: 'Ethereum 15m \(simulated only\)', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'labelled so nobody reads them as traded');
+  assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && /product: 'SOL-USD'/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && /kalshiFetchAlt\('SOL', now\)/.test(html), 'Coinbase history and ticker for both');
+  const lib = require('../functions/kalshiLib.js');
+  assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXSOL15M']);
+  const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
+  assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
+};
+
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
 (async () => {
   let failed = 0;
