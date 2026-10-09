@@ -2450,3 +2450,17 @@ So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and t
 **Reading rule.** Reported side by side: mean, 5th, 1st and 95th percentile ending balance, 95th percentile drawdown, mean gain divided by that drawdown, stop days. The boost is called not helpful if the mean per dollar of drawdown is lower than baseline. A better ratio is reported as an audit trigger first (check the boost applies only after a loss or at the start, and that the stop's allowance is not counting boosted contracts), and as a replay of the past only. Nothing here changes the bot.
 
 **Limits.** The replay's loss rate comes from the 67 days; the live run so far is 74 wins in 74. A 2x boost doubles the size of a single order, and the market's depth at that size is unmeasured.
+
+**Results: S1, one run, read once (2026-10-09; the rule, prediction and reading rule are those registered above; nothing was changed after seeing them).** `PYTHONPATH=src python -m scalper.sizing s1`, 70 days, 60% fills, 3000 paths, the deployed rule with the 5% stop.
+
+| Account | Run | Mean gain | 5th pct end | 1st pct end | Drawdown (95th) | Gain per $ of drawdown | P(loss) | Stop days |
+|---|---|---|---|---|---|---|---|---|
+| $1,000 | baseline | +$411 | $960 | $820 | $322 | 1.28 | 7% | 2.84 |
+| $1,000 | 2x for 10 after a start or loss | +$536 | $881 | $703 | $505 | 1.06 | 10% | 9.71 |
+| $550 | baseline | +$223 | $526 | $447 | $187 | 1.19 | 8% | 2.68 |
+| $550 | 2x for 10 after a start or loss | +$293 | $477 | $362 | $293 | 1.00 | 11% | 10.15 |
+
+- **Reading rule: not helpful.** The mean gain per dollar of 95th percentile drawdown falls (1.28 to 1.06, 1.19 to 1.00), and stop days rise about 3.5 times (a stop roughly every 7 days, each one emptying the pool and switching the add-on off for a week).
+- **Prediction against outcome.** Predicted: the mean rises by less than 25%, the bad tail worsens by more than 25%, the ratio falls, stop days rise. Measured: the ratio fell and stop days rose as predicted; the 1st percentile worsened 65% and the drawdown 57%, as predicted. **The mean rose 30% at both account sizes, not under 25%**, so that part of the prediction was wrong; the boost does add average profit, it just adds more risk than profit.
+- **Audit triggers.** No result was better than the baseline on the ratio, so none fired. The boost sits only after a start or a loss by construction, and the stop's allowance counts the pool add-on only.
+- **Caveat.** A replay of the past at the history's loss rate; the live record (74 of 74) is far better, and a doubled order is double the depth this market has been measured to fill (nothing measured yet).
