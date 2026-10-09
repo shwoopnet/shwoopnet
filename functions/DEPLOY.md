@@ -117,6 +117,8 @@ gone, the `kalshiDemoOrders` collection in the Firebase console.
 
 ## Kalshi LIVE test order (ONE contract, REAL money)
 
+> **Removed 2026-10-08:** `kalshiLiveTrade` and `kalshiLiveArm` (and `kalshiLiveAdjust`) no longer exist; the notes below are history. Deploying this change asks whether to delete them: answer yes.
+
 Step 1 of the owner's decision (2026-10-07) to put $100 to $150 of real money behind this. It proves the
 live path with one contract, and it is not the bot: `kalshiLiveTrade` sends at most ONE Bitcoin or gold contract,
 $2.00 cap including the fee, immediate-or-cancel, to the PRODUCTION host only. It is admin only, takes nothing

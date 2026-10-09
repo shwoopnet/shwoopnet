@@ -178,8 +178,8 @@ gates.R7 = () => {
   assert.ok(i > -1, 'account wiring not found');
   const iife = html.slice(i, html.indexOf("var kalshiTab = 'bot';", i));   // the whole account block, including the baseline control inside it
   assert.ok(/currentUserIsAdmin/.test(iife) && /btn\.disabled = true/.test(iife) && /api\.kalshiLiveAccount\(\)/.test(iife), 'admin only, disabled while reading');
-  // Three call sites, all reads: the Refresh button, and the refresh right after the starting line is set or a deposit is recorded.
-  assert.strictEqual((html.match(/kalshiLiveAccount\(\)/g) || []).length, 3, 'exactly three calls in the page');
+  // Two call sites, both reads: the Refresh button, and the refresh right after the starting line is set.
+  assert.strictEqual((html.match(/kalshiLiveAccount\(\)/g) || []).length, 2, 'exactly two calls in the page');
   assert.ok(!/kalshiLiveTrade|kalshiLiveArm/.test(iife), 'the account panel never calls an order or arm function');
   assert.ok(/kalshiLiveAccountFn\(\{\}\)/.test(html), 'the callable is sent no arguments');
   assert.ok(/escapeHtml\(String\(s\.shard\)\)/.test(iife) && /escapeHtml\(x\.ticker\)/.test(iife), 'values from Kalshi are escaped before they reach the page');

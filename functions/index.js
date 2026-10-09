@@ -265,23 +265,6 @@ function firestoreLiveStore(db) {
   };
 }
 
-exports.kalshiLiveTrade = onCall(
-  { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 60 },
-  async (request) => {
-    await assertKalshiAdmin(request.auth);
-    ensureDefaultAdminApp();
-    try {
-      const { active, quotes } = await live.loadQuotes(kalshiMarketApi());
-      return await live.runLiveTest({
-        quotes, active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(getFirestore()), now: Date.now(),
-        keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
-      });
-    } catch (e) {
-      if (e instanceof HttpsError) throw e;
-      throw new HttpsError("internal", "Live test failed: " + String((e && e.message) || e).slice(0, 120));
-    }
-  }
-);
 
 // ---- Kalshi account view (read only, admin only) -----------------------------------------------------------------
 // Balance per shard, open positions and recent fills, read with the live key. GET requests only and no order code
@@ -349,55 +332,9 @@ exports.kalshiLiveBaseline = onCall(
   }
 );
 
-// Deposits and withdrawals: the account change since the starting line is the whole balance move, so money added or taken out shows up as profit or
-// loss. The line cannot be moved (it hides every fill before it), so the amount is recorded here instead and taken off the change. Positive for money
-// put in, negative for money taken out. Appended inside a transaction to the fresh document, never overwritten; each entry keeps its time. It changes
-// only this display, nothing on Kalshi.
-exports.kalshiLiveAdjust = onCall(async (request) => {
-  await assertKalshiAdmin(request.auth);
-  ensureDefaultAdminApp();
-  const dollars = Number(request.data && request.data.dollars);
-  if (!Number.isFinite(dollars) || dollars === 0 || Math.abs(dollars) > 1000000) throw new HttpsError("invalid-argument", "Give the amount in dollars, positive for a deposit and negative for a withdrawal.");
-  const db = getFirestore();
-  const ref = db.collection("kalshiLiveControl").doc("baseline");
-  return db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists) throw new HttpsError("failed-precondition", "There is no starting line yet. Press 'Start fresh from now' first.");
-    const list = Array.isArray(snap.data().adjustments) ? snap.data().adjustments.slice() : [];
-    list.push({ at: Date.now(), dollars: Math.round(dollars * 100) / 100 });
-    tx.update(ref, { adjustments: list });
-    return { adjustments: list, total: account.adjustmentsTotal(list) };
-  });
-});
-
-// ---- Armed live test: click once, it scans every minute, sends ONE order, then switches itself off ------------
-// kalshiLiveArm only flips a control document (no order code, no key). kalshiLiveArmed runs every minute, does
-// nothing unless that document says armed and unexpired, and then makes one ordinary kalshiLiveTrade attempt with
-// every one of its guards. One arming can place at most one order: it switches off as soon as an order is sent
-// (or refused, or its answer is lost), on any error, and after 3 hours regardless. All logic is in kalshiLiveLib.js.
-exports.kalshiLiveArm = onCall(async (request) => {
-  await assertKalshiAdmin(request.auth);
-  ensureDefaultAdminApp();
-  const on = request.data && request.data.on === true;
-  const ref = getFirestore().collection("kalshiLiveControl").doc("arm");
-  const events = getFirestore().collection("kalshiLiveEvents");
-  if (!on) {
-    await ref.set({ armed: false, endedAt: Date.now(), endedBecause: "switched off by the owner" }, { merge: true });
-    await events.add({ ts: Date.now(), kind: "disarmed", detail: "switched off by you" });
-    return { armed: false };
-  }
-  if (KALSHI_LIVE_ENABLED.value() !== "on") {
-    throw new HttpsError("failed-precondition", "Live test trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to arm.");
-  }
-  const sess = await getFirestore().collection("kalshiLiveControl").doc("session").get();
-  if (sess.exists && sess.data().active === true) {
-    throw new HttpsError("failed-precondition", "The L1 bot is running. Stop it before arming a single test order.");
-  }
-  const now = Date.now();
-  await ref.set({ armed: true, since: now, until: now + live.ARM_MS, endedAt: null, endedBecause: null });
-  await events.add({ ts: now, kind: "armed", detail: "scanning every minute for up to 3 hours, one order at most" });
-  return { armed: true, until: now + live.ARM_MS };
-});
+// The single test order and its arming switch (kalshiLiveTrade, kalshiLiveArm) were removed on Oct 8, 2026: nothing could arm them any more and they were
+// the only callables that could place an order outside the L1 session. kalshiLiveArmed below still reads the old arm document and runs its tick, which is
+// inert unless that document says armed; deleting that path and its library code is a separate, larger change.
 
 // The owner's 24 hour L1 session (README: "Live waiver: L1 for 24 hours"). This only switches the session document
 // on or off, with a server-set expiry; the scheduled function below does the work, and every limit is in kalshiLiveLib.js.

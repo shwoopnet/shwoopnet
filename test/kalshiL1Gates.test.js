@@ -344,7 +344,7 @@ gates.N13 = () => {
   assert.ok(/KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiL1Session'))), 'refuses when the server switch is off');
   assert.ok(/live\.runL1Tick\(/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed'))), 'run by the scheduled function');
   assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
-  assert.ok(/The L1 bot is running\. Stop it before arming/.test(fnSrc), 'arming refuses while the session runs');
+  assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'there is no arm callable left to refuse');
   assert.ok(/A single test order is armed\. Disarm it before starting/.test(fnSrc), 'starting refuses while armed');
   assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder']);
   assert.ok(fnSrc.indexOf('exports.kalshiL1Session') < fnSrc.indexOf('exports.kalshiBookRecorder'), 'defined before the recorder, which stays last');
