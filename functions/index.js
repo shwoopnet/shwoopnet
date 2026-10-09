@@ -429,14 +429,20 @@ function firestoreSimStore(db) {
 
 exports.kalshiSimSession = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
-  ensureDefaultAdminApp();
-  const on = request.data && request.data.on === true;
-  const ref = getFirestore().collection("kalshiSimControl").doc("state");
-  const now = Date.now();
-  await ref.set(on
-    ? { active: true, since: now, endedAt: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." }
-    : { active: false, endedAt: now }, { merge: true });
-  return { active: on };
+  // Any failure past the admin check is named, never left to reach the page as a bare "internal" (the same lesson as assertKalshiAdmin).
+  try {
+    ensureDefaultAdminApp();
+    const on = request.data && request.data.on === true;
+    const ref = getFirestore().collection("kalshiSimControl").doc("state");
+    const now = Date.now();
+    await ref.set(on
+      ? { active: true, since: now, endedAt: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." }
+      : { active: false, endedAt: now }, { merge: true });
+    return { active: on };
+  } catch (e) {
+    console.error("kalshiSimSession failed:", e);
+    throw new HttpsError("unavailable", "Could not save the simulation switch: " + String((e && e.message) || e).slice(0, 140));
+  }
 });
 
 exports.kalshiSimTick = onSchedule(
@@ -450,20 +456,27 @@ exports.kalshiSimTick = onSchedule(
     const now = Date.now();
     const store = firestoreSimStore(db);
     if (state && state.active === true) {
-      const api = kalshiMarketApi();
-      const st = await api.exchangeStatus();
-      const quotes = [];
-      for (const series of sim.ALL_SERIES) for (const m of await api.markets(series)) quotes.push({ series, m });
-      const sessSnap = await db.collection("kalshiLiveControl").doc("session").get();
-      const accSnap = await db.collection("kalshiLiveControl").doc("account").get();
-      const acc = accSnap.exists ? accSnap.data() : null;
-      await sim.runSimTick({
-        state, now, quotes, active: Boolean(st.trading_active !== undefined ? st.trading_active : st.exchange_active),
-        session: sessSnap.exists ? sessSnap.data() : null,
-        cash: acc && acc.balance && Number.isFinite(acc.balance.totalDollars) ? acc.balance.totalDollars : NaN,
-        store, readMarket: api.market, sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
-        setState: (patch) => stateRef.set(patch, { merge: true }),
-      });
+      // A Kalshi outage or one bad read is a note on the page and a log line, not a failed run: the settle sweep below must still happen.
+      try {
+        const api = kalshiMarketApi();
+        const st = await api.exchangeStatus();
+        const quotes = [];
+        for (const series of sim.ALL_SERIES) for (const m of await api.markets(series)) quotes.push({ series, m });
+        const sessSnap = await db.collection("kalshiLiveControl").doc("session").get();
+        const accSnap = await db.collection("kalshiLiveControl").doc("account").get();
+        const acc = accSnap.exists ? accSnap.data() : null;
+        await sim.runSimTick({
+          state, now, quotes, active: Boolean(st.trading_active !== undefined ? st.trading_active : st.exchange_active),
+          session: sessSnap.exists ? sessSnap.data() : null,
+          cash: acc && acc.balance && Number.isFinite(acc.balance.totalDollars) ? acc.balance.totalDollars : NaN,
+          store, readMarket: api.market, sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+          setState: (patch) => stateRef.set(patch, { merge: true }),
+        });
+      } catch (e) {
+        const why = String((e && e.message) || e).slice(0, 200);
+        console.error("kalshiSimTick: " + why);
+        try { await stateRef.set({ lastTickAt: now, lastNote: "This minute could not be read: " + why.slice(0, 120) }, { merge: true }); } catch (e2) { /* the note is optional */ }
+      }
     }
     // Settle finished simulated trades whether or not the simulation is on (the same sweep the live orders use; public reads, nothing placed).
     try {
