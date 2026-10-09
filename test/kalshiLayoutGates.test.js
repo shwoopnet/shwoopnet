@@ -7,9 +7,9 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const gates = {};
 
 gates.Y1 = () => {
-  assert.ok(/var kalshiLiveShow = \{ events: 12, fills: 5 \};/.test(html), 'the trades card opens on the latest five');
-  assert.ok(/data-more="fills">Show more/.test(html) && /data-less="fills">Show fewer/.test(html), 'with a way to see more and to go back');
-  assert.ok(/data-less'\) === 'fills'\)\{ kalshiLiveShow\.fills = 5;/.test(html), 'show fewer returns to five');
+  assert.ok(/var kalshiLiveShow = \{ events: 12, fills: 5, page: 0, pageSize: 10 \};/.test(html), 'the trades card pages ten at a time, newest first');
+  assert.ok(/data-trstep="newer"/.test(html) && /data-trstep="older"/.test(html) && !/data-more="fills"/.test(html), 'with Newer and Older page controls instead of Show more');
+  assert.ok(/getAttribute\('data-trstep'\)/.test(html) && /kalshiLiveShow\.page \+= 1/.test(html) && /Math\.max\(0, kalshiLiveShow\.page - 1\)/.test(html), 'the buttons step the page, never below the first'); assert.ok(/o\.ts < oldestFill/.test(html) && /!\(o\.orderId && seenIds\[o\.orderId\]\)/.test(html), 'history adds the bot\'s older saved orders, never repeating one already shown from a fill');
 };
 
 gates.Y2 = () => {
@@ -223,8 +223,8 @@ gates.Y15 = () => {
   assert.deepStrictEqual([yes.side, yes.entry, yes.cost, yes.ifWin, yes.cashOut], ['yes', 0.93, 0.93, 0.07, 0.96], 'a YES position is priced on the YES side');
   // The page keeps the positions in step with the books and the account.
   assert.ok(/kalshiBooksLast = data \|\| null;\s*renderKalshiPositions\(\);/.test(html) && /renderKalshiPositions\(\);\s*\n\s*var trEl/.test(html), 'redrawn when the books or the account update');
-  // Show more and Show fewer are links, not the dark filled button.
-  assert.ok(!/class="kal-btn" data-(more|less)/.test(html) && (html.match(/class="kal-link" data-(more|less)/g) || []).length === 2, 'quiet links');
+  // The Newer and Older page controls are quiet links, not the dark filled button.
+  assert.ok(!/class="kal-btn" data-trstep/.test(html) && (html.match(/class="kal-link" data-trstep/g) || []).length === 2, 'quiet links');
   assert.ok(/\.kal-link\{ background:none; border:0;/.test(html), 'with no fill and no border');
 };
 
