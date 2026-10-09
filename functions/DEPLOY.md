@@ -100,6 +100,8 @@ same as before: a healthchecks.io check with period 1 minute and grace time 5 mi
 nothing is sent. A failed ping never affects the arm check. The URL lets anyone ping your check, so keep it out of git and chat.
 Real orders are covered in the live test sections below and in `kalshi-scalper/README.md`.
 
+**Stop alert (optional).** The bot stops itself on the loss stop, an unresolved order or a lost order answer, and then stays off until you start it. To get a push when that happens: install the free ntfy app, subscribe to a long random topic name, and add `KALSHI_STOP_ALERT_URL=https://ntfy.sh/<that topic>` to `functions/.env`, then `firebase deploy --only functions`. It sends one POST with the reason. It does not fire for stops you press (switch off, flatten all). Leave it unset and nothing is sent.
+
 ## Retired: the Kalshi demo test trader (removed Oct 7, 2026)
 
 The website's demo trader (`kalshiDemoTrade`, its page card, `kalshiDemoLib.js` and the `kalshiDemoOrders`

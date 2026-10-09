@@ -349,7 +349,7 @@ gates.L22 = async () => {
   // Wiring: the arm function logs armed and disarmed, the scan passes the log in, and only the server can write it.
   const arm = /exports\.kalshiLiveArm = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
   assert.ok(/kind: "armed"/.test(arm) && /kind: "disarmed"/.test(arm) && /collection\("kalshiLiveEvents"\)/.test(arm), 'arming and disarming are logged');
-  assert.ok(/logEvent: \(e\) => db\.collection\("kalshiLiveEvents"\)\.add\(e\)/.test(fnSrc), 'the scheduled scan writes its endings to the log');
+  assert.ok(/logEvent: async \(e\) => \{\s*await db\.collection\("kalshiLiveEvents"\)\.add\(e\);/.test(fnSrc), 'the scheduled scan writes its endings to the log');
   const ev = /match \/kalshiLiveEvents\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
   assert.ok(ev && /allow read: if isAdmin\(\);/.test(ev[1]) && /allow write: if false;/.test(ev[1]), 'admin read, no client write');
 };
