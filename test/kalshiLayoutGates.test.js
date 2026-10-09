@@ -396,6 +396,12 @@ gates.Y23 = () => {
   assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi'\)/.test(html), 'only the Kalshi page turns it on, and every other page turns it off');
 };
 
+// Y24: the logo's ground flash sits inside the logo row, above the tagline, not across it.
+gates.Y24 = () => {
+  const rule = /\.brand-ground\{([\s\S]*?)\}/.exec(html)[1];
+  assert.ok(/bottom:2px/.test(rule) && !/bottom:-/.test(rule), 'the flash line is above the tagline');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
