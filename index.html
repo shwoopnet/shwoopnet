@@ -3444,7 +3444,7 @@
               <div id="kalL1Status" class="kal-note">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing" checked> Scale size with the account (one contract per $85 of balance, up to 10, raised one step every 3 days at most; stop at 5% of the balance at the last review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing" checked> Scale size with the account (one contract per $43 of balance, up to 25, raised one step every 3 days at most; stop at 5% of the balance at the last review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -3453,7 +3453,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">About 6 minutes before each Bitcoin or gold 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $85 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
+                <div class="kal-note">About 6 minutes before each Bitcoin or gold 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
               </details>
             </div>
           </details>
@@ -10369,10 +10369,10 @@
         var perC = lastO ? Number(lastO.maxCost) / Number(lastO.count) : 0.93;
         // Until the new session's first look writes sizeCap there is no real size: showing a guess (it used to be 3) put a made-up stake on screen.
         var sizeKnown = ses.sizing !== true || Number.isFinite(ses.sizeCap);
-        // The account-funded part is held to 1% of cash (as the server does); the profit-funded add-on sits outside that rule and is simply added.
+        // The account-funded part is held to 2% of cash (as the server does); the profit-funded add-on sits outside that rule and is simply added.
         var cashNow = a.balance.totalDollars;
         var baseC = Number.isFinite(ses.sizeCap) ? ses.sizeCap : 1;
-        if(cashNow > 0 && perC > 0){ baseC = Math.max(1, Math.min(baseC, Math.floor(cashNow * 0.01 / perC + 1e-9))); }
+        if(cashNow > 0 && perC > 0){ baseC = Math.max(1, Math.min(baseC, Math.floor(cashNow * 0.02 / perC + 1e-9))); }
         var nC = ses.sizing === true ? baseC + (Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0) : 1;
         var stake = nC * perC, tb = a.balance.totalDollars;
         // Reinvest pool progress: pool dollars over what the NEXT extra contract needs (one more contract's cost than the extras already held), so X/Y reads as "how close".

@@ -240,7 +240,7 @@ the run, the session or the watchdog ping. Cost: one small Firestore read a minu
 ## Size scaling for the L1 session (off by default, Oct 7, 2026)
 
 A box on the start confirmation ("Scale size with the account") turns it on for that session only; it starts unticked and
-cannot be changed mid-run. On: each order buys `floor(1% of cash / cost of one contract)` contracts for the account-funded part (never above the review's cap), plus the profit-funded add-on on top,, never fewer than one or
+cannot be changed mid-run. On: each order buys `floor(2% of cash / cost of one contract)` contracts for the account-funded part (never above the review's cap), plus the profit-funded add-on on top,, never fewer than one or
 more than three, judged on the cash left after earlier orders in the same minute, and the loss stop becomes 10% of the starting
 cash (still counting the bot's own trades only, every contract, open ones as lost). Off: exactly as before, one contract and
 a $10.00 stop. On a $106 account it buys two contracts; two need about $92 to $98 of cash and three about $138 to $146.
