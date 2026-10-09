@@ -2488,3 +2488,21 @@ So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and t
 **Count.** Two variants, one parameter set each: **2,589 as of 2026-10-09** (2,587 with T5). The control, as in the earlier searches, is not needed here because nothing is searched.
 
 **Limits.** Candle asks are quotes, not our fills: the live bot fills about 56 to 59% of its signals (the misses are where the losses are), and the replay assumes the quote is available. Thin books fill less at size. The 66 day window is the same one L1 was measured on.
+
+## Results: E1 and E2, one run, read once (2026-10-09; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+`python -m scalper.altseries run`, 12,506 markets (6,253 each), 66 days, `data/alts.sqlite`. Signal counts first, as promised.
+
+| Series | Observations | Days | Mean net per contract | Day clustered z | Halves | Fees x1.2 | Win rate vs mean price paid | Entry-minute volume (median) | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| E1 ETH | 2,001 (29.9/day) | 67 | +0.57c | +1.21 | +0.95c / +0.15c | +0.48c | 93.8% vs 92.8% | 4,377 contracts | `FALSIFIED` |
+| E2 SOL | 2,011 (30.0/day) | 67 | +0.54c | +1.24 | +0.57c / +0.52c | +0.45c | 93.8% vs 92.8% | 1,623 contracts | `FALSIFIED` |
+| reference: Bitcoin | 1,955 | 67 | +0.43c | +0.75 | +0.35c / +0.51c | +0.33c | 93.5% vs 92.6% | not read | `FALSIFIED` |
+| reference: gold | 1,424 | 63 | +1.47c | +2.80 | +1.99c / +0.91c | +1.38c | 94.7% vs 92.7% | not read | `NOT_YET_FALSIFIED` |
+
+- **Both fail the bar on z (1.21 and 1.24 against 2.1), as Bitcoin does.** Everything else holds: both are positive, positive in both halves, positive with fees x1.2, with plenty of observations. The edge is the same thin one as Bitcoin's, about +0.5c a contract, with the same shape (a win rate about one point above the price paid).
+- **Prediction against outcome.** ETH: predicted about +0.5c with z between 0 and 1.5; measured +0.57c, z +1.21. **SOL: predicted at or below 0.0c; measured +0.54c, so that prediction was wrong** (the wider spread did not eat the edge in this window). Predicted verdict for both, `FALSIFIED`, as measured.
+- **Gold is what carries L1.** It is the only one of the four that clears the bar on its own.
+- **Information, not part of the verdict: ETH and SOL are mostly the same bet as Bitcoin.** In windows where both had an entry, when Bitcoin's entry lost, ETH's lost **51%** of the time (base rate 6.4%) over 70 cases, and SOL's 43% (base 6.1%) over 51; ETH and SOL lost together 56% of the time one of them lost. Bitcoin and gold: 6% against a 6.1% base. Adding ETH and SOL would not diversify the account, it would triple the size of the loss on the days Bitcoin loses.
+- **Depth, first look only:** the median 1 minute candle at the entry minute traded 4,377 contracts (ETH) and 1,623 (SOL), so a 12 to 40 contract order is 0.3% to 2.5% of it. The order book recorder's data is the real depth test.
+- **Count.** Two variants: **2,589 as of 2026-10-09** (with T5's 2,587). Both `FALSIFIED`. The bot, the site and the Bitcoin and gold history are unchanged; the stages after a pass (a forward shadow run, then a small stake) do not start.
