@@ -2411,3 +2411,29 @@ The owner chose a 2% base per position (ladder $43 a contract, ladder ceiling 25
 - **About 1.7 times the mean for about 2 times the bad tail.** The 1st percentile doubles (-$45.9 to -$90.6) and the bad drawdown goes from about 17% to about 27% of the account. That is the trade the owner chose, written down so it is not rediscovered.
 - **The stop starts to bind.** 0.84 stop days over the window against none at 1%: two losses at this size reach 5% of the base.
 - **A replay of the past, not a forecast.** The win rate it replays is the tape's, and the 73 of 74 live record is a small sample (the one loss was the early 40c test order).
+
+## Rule for adding money to the account (written 2026-10-09, before any further result, at the owner's request; information only, no hypothesis, no variant counted)
+
+Decided now, while the live record is 74 wins in 74 and nothing makes a deposit feel urgent, so a good week is not what decides it. This is a rule for the owner's own money, not advice, and the owner can override it; the point is that an override is then a visible choice.
+
+**Why a rule.** The live record is about 2.5 days. The 67 day history of the same rule shows about a 94% win rate and +0.87c per contract, which is close to break even at the current size, and every earlier strategy here looked good early and faded as the window grew. L1 itself failed its own pre-set forward test (z 1.45 against 2.1). Extra capital scales dollars and risk by the same factor (the 10 week replay: about 1.8 times the dollars and about 1.7 times the bad drawdown for $1,000 against $550); it does not improve the edge.
+
+**An add is allowed only when ALL of these hold.**
+1. At least **200 settled live bot trades** have accumulated since the last add (or since Oct 7 for the first one).
+2. **At least one real loss** has been seen at a size of 10 contracts or more, and the stop and the pool behaved as designed. A record with no loss has never tested the stop.
+3. The win rate over those trades is **96% or better**, and net profit after fees is positive over the last 100.
+4. At least **14 days** since the last add.
+5. No loss stop has ended a session in the **last 7 days**.
+6. The Oct 23 fill study has been read.
+
+**Size of an add.** At most **25% of the current account** per add (at $550, no more than about $140), and only money whose loss would not change the owner's life.
+
+**Stop adding, with no exceptions made in the moment, when any of these happen.** The win rate over the last 100 trades falls below 94%; a loss stop trips twice in 30 days; the account is down 15% from its high.
+
+**Where extra capital stops helping.** With the ladder at $43 a contract and a base ceiling of 40, size stops growing near **$1,720**. Until the order-book recorder shows the touch can fill that many contracts at about 93c, do not add past about **$1,700**.
+
+**Savings.** The savings half of new profit highs is never traded. Withdrawing it is a decision for the owner at any time; it does not change the bot's sizing, because sizing already excludes it.
+
+**Records.** Each deposit is written down with its date and the account balance and bot profit on that day, so the results can be read separately from the deposits.
+
+**Replacing a salary.** At the history's +0.87c per contract and 30 trades a day, $240 a day needs about 900 contracts per order and an account of about $43,000 at the 2% rule, far beyond the depth and ceiling here, and the edge would likely shrink as size grows. This strategy should be treated as a side income. If that view is ever to change, it should change on a forward read of many weeks, not on a week.
