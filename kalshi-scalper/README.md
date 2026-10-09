@@ -2437,3 +2437,19 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 **Records.** Each deposit is written down with its date and the account balance and bot profit on that day, so the results can be read separately from the deposits.
 
 **Replacing a salary.** At the history's +0.87c per contract and 30 trades a day, $240 a day needs about 900 contracts per order and an account of about $43,000 at the 2% rule, far beyond the depth and ceiling here, and the edge would likely shrink as size grows. This strategy should be treated as a side income. If that view is ever to change, it should change on a forward read of many weeks, not on a week.
+
+## Simulated ETH and SOL run, and the risk settings that must scale if it ever goes live (the owner's requirement, 2026-10-09)
+
+**What was built.** `functions/kalshiSimLib.js` and the scheduled `kalshiSimTick`: L1 unchanged on KXETH15M and KXSOL15M, on live prices, with no order. It follows the live bot's path (same market list, same 6 minute window, same fresh read, same 88c to 97c pick, same stake) and replaces the order with a second read of the book half a second later, judged as an immediate-or-cancel buy at the touch (fills only if the price is still inside the limit, and only up to the size resting there). It is keyless by construction (no signing, no key, no `/portfolio`, no POST; the function is declared with no secrets) and writes only `kalshiSimOrders` and `kalshiSimControl`. Bitcoin and gold are simulated too, flagged `calibration`, only so the sim's fill can be compared with the real bot's on the same markets.
+
+**The requirement.** If the simulation is ever promoted to real orders, the risk settings must scale with it, not be left sized for two markets. Written down now so it is a condition, not an afterthought:
+
+1. **One stop for the account, not one per series.** The loss stop must count Bitcoin, gold, ETH and SOL together (the same `botRisk` rule: open orders counted as lost, the profit-funded part of a loss not counted).
+2. **ETH and SOL are treated as part of the Bitcoin position.** In the 66 day history, when Bitcoin's entry lost, ETH's lost 51% of the time and SOL's 43% (base rate about 6%); gold's lost 6%. A window in which all three crypto series fire is closer to one bet three times the size than three bets. The per-position 2% base would otherwise become up to 6% of the account on one outcome.
+3. **A combined cap on exposure per window, and on what one correlated loss can cost.** Set from the correlated loss, not the number of series.
+4. **Position size per series ramps by evidence.** A small stake first, with its own gate for each step, until it matches Bitcoin and gold in dollars.
+5. **Cash accounting per shard and the order ceiling are per series and total.** The second and third positions in a window are sized on the cash left after the first, as the live bot already does for two.
+
+**What the simulation records so this can be checked before any real order.** Every simulated order keeps `maxCost`, `addon` and `addonCost`, the fields the loss stop reads, so the real stop rule can be run over Bitcoin and gold's live orders together with ETH and SOL's simulated ones, and the page can show what the combined stop would have done over the 24 to 72 hours.
+
+**Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.
