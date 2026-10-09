@@ -542,6 +542,35 @@ gates.N31 = () => {
   assert.strictEqual(live.reviewSizing({ ...lowSt, lastStopAt: T0 }, 509, T0 + H).state.cap, 1, 'no restoring within a week of a loss stop');
 };
 
+gates.N32 = async () => {
+  // The stop protects the account, not profit already made: the part of a lost (or open) order that was bought with reinvested profit does not count toward it,
+  // so a big add-on cannot lock the bot out after one loss. $509 base: the stop is 5%, $25.45.
+  const bal = { balance_breakdown: [{ balance: '509.0000', exchange_index: 2 }] };
+  const sess = { startCash: 509, sizing: true };
+  const sizing = { cap: 5, base: 509, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null, cum: 0, hwm: 0 };
+  const run = async (trade, result) => {
+    const w = world({ session: { ...sess }, balance: bal, results: result ? { 'OLD-0': result } : {} });
+    const [id, d] = botTrade(0, trade); w.docs.set(id, d);
+    await tick(w, { sizingState: { ...sizing }, setSizingState: async () => {} });
+    return w;
+  };
+  // A $28 order of which $23.80 was profit: one loss is -$28, past the plain $25.45 stop, but only $4.20 of it was the account's.
+  const big = { count: 30, fillCount: '30.00', maxCost: 28, addon: 25, addonCost: 23.8 };
+  const lost = await run(big, 'no');
+  assert.notStrictEqual(lost.sess.endedBecause, 'loss stop', 'one loss of a profit-funded order does not lock the bot out');
+  const open = await run(big, null);
+  assert.notStrictEqual(open.sess.endedBecause, 'loss stop', 'nor does the same order sitting open, counted as lost');
+  // The same $28 loss with NO add-on is all account money and does reach the stop.
+  const plain = await run({ count: 30, fillCount: '30.00', maxCost: 28, addon: 0, addonCost: 0 }, 'no');
+  assert.strictEqual(plain.sess.endedBecause, 'loss stop', 'a loss of account money past 5% still stops it');
+  // And a loss that eats the allowance PLUS more than 5% of the account stops it: $23.80 of profit and $26 of account money is a $49.80 loss.
+  const worse = await run({ count: 55, fillCount: '55.00', maxCost: 49.8, addon: 25, addonCost: 23.8 }, 'no');
+  assert.strictEqual(worse.sess.endedBecause, 'loss stop', 'the account share of the loss is still held to the stop');
+  // Old orders that carry no add-on fields behave as before.
+  const risk = await live.botRisk({ store: world({ results: { 'OLD-0': 'no' } }).store, since: 0, fetchFn: world({ results: { 'OLD-0': 'no' } }).fetchFn, nowMs: NOW });
+  assert.strictEqual(risk.addonAtRisk, 0);
+};
+
 gates.N30 = () => {
   // Profit-funded contracts have no fixed limit, but the risk of the add-on is bounded by the pool, which holds only profit, and the account-funded part stays inside the 1% rule.
   assert.strictEqual(live.skimAddon({ pool: 4.65 }, 5), 5, 'a pool of five contract costs buys five extras');
