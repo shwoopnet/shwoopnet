@@ -10413,7 +10413,7 @@
       }).join('');
       var foot = [];
       if(pages > 1){
-        foot.push('<button type="button" class="kal-link" data-trstep="newer"' + (kalshiLiveShow.page <= 0 ? ' disabled style="opacity:.4"' : '') + '>Newer</button> Page ' + (kalshiLiveShow.page + 1) + ' of ' + pages + ' (' + allRows.length + ' trades) <button type="button" class="kal-link" data-trstep="older"' + (kalshiLiveShow.page >= pages - 1 ? ' disabled style="opacity:.4"' : '') + '>Older</button>');
+        foot.push('<button type="button" class="kal-link" data-trstep="newer" aria-label="Newer trades" title="Newer"' + (kalshiLiveShow.page <= 0 ? ' disabled style="opacity:.4"' : '') + '>&#8249;</button> Page ' + (kalshiLiveShow.page + 1) + ' of ' + pages + ' (' + allRows.length + ' trades) <button type="button" class="kal-link" data-trstep="older" aria-label="Older trades" title="Older"' + (kalshiLiveShow.page >= pages - 1 ? ' disabled style="opacity:.4"' : '') + '>&#8250;</button>');
         if(kalshiLiveShow.page >= pages - 1 && kalshiTradeFilter === 'all'){ foot.push('<span style="color:var(--muted)">Older bot trades are kept; manual trades older than the latest fills are not stored.</span>'); }
       }
       trEl.innerHTML = (allRows.length ? rowsHtml : '<div class="kal-foot">' + (kalshiTradeFilter === 'all' ? 'No trades yet.' : 'No bot trades yet.') + '</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
