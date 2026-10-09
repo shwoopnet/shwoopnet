@@ -123,6 +123,14 @@ gates.S8 = () => {
   }
 };
 
+// S9: a failure past the admin check names its cause (never a bare "internal" on the page), and a Kalshi outage does not fail the tick before the settle sweep.
+gates.S9 = () => {
+  const sess = idxSrc.slice(idxSrc.indexOf('exports.kalshiSimSession'), idxSrc.indexOf('exports.kalshiSimTick'));
+  assert.ok(/try \{[\s\S]*\} catch \(e\) \{[\s\S]*new HttpsError\("unavailable", "Could not save the simulation switch: "/.test(sess), 'the switch names its failure');
+  const tick = idxSrc.slice(idxSrc.indexOf('exports.kalshiSimTick'), idxSrc.indexOf('exports.kalshiLiveArmed'));
+  assert.ok(tick.indexOf('This minute could not be read') > -1 && tick.indexOf('This minute could not be read') < tick.indexOf('live.settleOpenOrders'), 'a failed minute is a note, and the settle sweep still runs after it');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
