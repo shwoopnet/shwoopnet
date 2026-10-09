@@ -3,7 +3,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { pingsFor, sendAll } = require('../functions/kalshiWatchdogLib');
+const { pingsFor, stopAlertPings, sendAll } = require('../functions/kalshiWatchdogLib');
 
 const fnSrc = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
 const URL_ = 'https://hc-ping.com/abc';
@@ -33,10 +33,28 @@ gates.W3 = async () => {
 // Wired into the live arm, after the check runs (so a failed run sends nothing good), and the failure still surfaces.
 gates.W4 = () => {
   const arm = fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed = onSchedule('), fnSrc.indexOf('exports.kalshiBookRecorder'));
-  assert.ok(arm.indexOf('runArmedTick(') > -1 && arm.indexOf('runArmedTick(') < arm.indexOf('watchdog.sendAll('), 'ping only after the check completes');
+  assert.ok(arm.indexOf('runArmedTick(') > -1 && arm.indexOf('runArmedTick(') < arm.lastIndexOf('watchdog.sendAll('), 'ping only after the check completes');
   assert.ok(/ok: !failure/.test(arm) && /if \(failure\) throw failure;/.test(arm), 'a failed run reports failure and is still thrown to the scheduler');
   assert.ok(/defineString\("KALSHI_WATCHDOG_URL", \{ default: "" \}\)/.test(fnSrc), 'optional, empty by default');
   assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder']);
+};
+
+// The bot's own stop alert: opt-in, one POST with the reason, and only for a session that ended by itself.
+gates.W5 = async () => {
+  assert.deepStrictEqual(stopAlertPings({ base: '', detail: 'x' }), [], 'no URL, no alert');
+  const p = stopAlertPings({ base: ' https://ntfy.sh/topic/ ', detail: 'the stop was reached' });
+  assert.strictEqual(p.length, 1);
+  assert.strictEqual(p[0].url, 'https://ntfy.sh/topic', 'the URL is trimmed');
+  assert.ok(/stopped itself/.test(p[0].body) && /the stop was reached/.test(p[0].body), 'the message says it stopped and why');
+  assert.strictEqual(p[0].headers.Title, 'Kalshi bot stopped');
+  let sent = null;
+  await sendAll(async (url, opts) => { sent = { url, opts }; return { ok: true }; }, p);
+  assert.ok(sent.opts.method === 'POST' && sent.opts.headers.Priority === 'high', 'sent as a POST with its headers');
+  assert.ok(/defineString\("KALSHI_STOP_ALERT_URL", \{ default: "" \}\)/.test(fnSrc), 'optional, empty by default');
+  const arm = fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed = onSchedule('), fnSrc.indexOf('exports.kalshiBookRecorder'));
+  assert.ok(/e\.kind === "session ended"\) await watchdog\.sendAll\(fetch, watchdog\.stopAlertPings\(/.test(arm), 'wired to the session-ended event of the scheduled run');
+  const callables = fnSrc.slice(0, fnSrc.indexOf('exports.kalshiLiveArmed = onSchedule('));
+  assert.ok(!/watchdog\.stopAlertPings\(/.test(callables), 'the owner\'s own stops (switch off, flatten all) never alert');
 };
 
 (async () => {

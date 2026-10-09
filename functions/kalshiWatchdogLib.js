@@ -17,11 +17,21 @@ function pingsFor({ base, ok, reason }) {
     : [{ url: url + "/fail", body: String(reason || "arm check failed").slice(0, 200) }];
 }
 
+// The bot's own stop alert (opt-in, KALSHI_STOP_ALERT_URL): when a session ends BY ITSELF (the loss stop, an unresolved or lost order answer), say so, because
+// otherwise it stays off until the owner happens to look. Not sent for stops the owner pressed. Written for ntfy.sh style URLs (a POST body is the message, the
+// Title and Priority headers shape the push), which any plain webhook receiver also accepts.
+function stopAlertPings({ base, detail }) {
+  const url = String(base || "").trim().replace(/\/+$/, "");
+  if (!url) return [];
+  return [{ url, body: "The Kalshi bot stopped itself and stays off until you start it. " + String(detail || "").slice(0, 300),
+            headers: { Title: "Kalshi bot stopped", Priority: "high", Tags: "warning" } }];
+}
+
 // A ping that fails must never break the run that already finished: log and move on.
 async function sendAll(fetchFn, pings, log) {
   for (const p of pings) {
     try {
-      const res = await fetchFn(p.url, { method: "POST", body: p.body, signal: AbortSignal.timeout(5000) });
+      const res = await fetchFn(p.url, { method: "POST", body: p.body, ...(p.headers ? { headers: p.headers } : {}), signal: AbortSignal.timeout(5000) });
       if (!res.ok) (log || console.warn)("watchdog ping HTTP " + res.status);
     } catch (e) {
       (log || console.warn)("watchdog ping failed: " + String((e && e.message) || e).slice(0, 80));
@@ -29,4 +39,4 @@ async function sendAll(fetchFn, pings, log) {
   }
 }
 
-module.exports = { pingsFor, sendAll };
+module.exports = { pingsFor, stopAlertPings, sendAll };

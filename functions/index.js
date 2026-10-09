@@ -4,6 +4,9 @@ const { defineSecret, defineString } = require("firebase-functions/params");
 // Optional outside watchdog for the live arm. Put KALSHI_WATCHDOG_URL=<ping url> in
 // functions/.env (gitignored) before deploying. Empty means no alerts, nothing else changes.
 const KALSHI_WATCHDOG_URL = defineString("KALSHI_WATCHDOG_URL", { default: "" });
+// Optional push when the bot stops ITSELF (see kalshiWatchdogLib.stopAlertPings). Put KALSHI_STOP_ALERT_URL=https://ntfy.sh/<a-long-random-topic> in functions/.env.
+// Empty means no alert, nothing else changes.
+const KALSHI_STOP_ALERT_URL = defineString("KALSHI_STOP_ALERT_URL", { default: "" });
 
 // Set once via: firebase functions:secrets:set FINNHUB_API_KEY
 // Never committed -- this is the only place the real key lives now.
@@ -409,7 +412,11 @@ exports.kalshiLiveArmed = onSchedule(
       const args = {
         arm, now, setArm: (patch) => armRef.set(patch, { merge: true }),
         recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
-        logEvent: (e) => db.collection("kalshiLiveEvents").add(e),
+        // A session that ends by itself (the loss stop, a lost order answer) pushes an alert, if one is configured. The owner's own stops never come through here.
+        logEvent: async (e) => {
+          await db.collection("kalshiLiveEvents").add(e);
+          if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
+        },
       };
       const armedOn = Boolean(arm && arm.armed === true && arm.until > now);
       const sizingRef = db.collection("kalshiLiveControl").doc("sizing");

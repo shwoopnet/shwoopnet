@@ -344,7 +344,7 @@ gates.L22 = async () => {
   assert.ok((await tick(w9, a9, { logEvent: undefined })).ok);
   // Wiring: the arm function logs armed and disarmed, the scan passes the log in, and only the server can write it.
   assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'the arm callable is gone, so nothing can arm a single test order');
-  assert.ok(/logEvent: \(e\) => db\.collection\("kalshiLiveEvents"\)\.add\(e\)/.test(fnSrc), 'the scheduled scan writes its endings to the log');
+  assert.ok(/logEvent: async \(e\) => \{\s*await db\.collection\("kalshiLiveEvents"\)\.add\(e\);/.test(fnSrc), 'the scheduled scan writes its endings to the log');
   const ev = /match \/kalshiLiveEvents\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
   assert.ok(ev && /allow read: if isAdmin\(\);/.test(ev[1]) && /allow write: if false;/.test(ev[1]), 'admin read, no client write');
 };
