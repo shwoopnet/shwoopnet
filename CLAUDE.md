@@ -419,7 +419,7 @@ Docs in `docs/` (overview, roadmap, career notes, mock-ups) are refreshed weekly
 
 - Comments explain **why**, not what. Several exist specifically to stop a
   future change from reintroducing a bug; keep them.
-- The palette is fixed ("Ledger"). Don't introduce a second design system.
+- The palette is "Ledger", with one optional skin, "Mono Ink" (`html[data-skin="mono"]`, chosen under Settings, Theme, added at the owner's request on 2026-10-09). A skin only re-points the existing tokens and never the gain or loss colors. Don't introduce another design system.
 - `firestore.rules` enforces that only the admin account can ever hold
   live-trading credentials. The backend relies on that and does no admin
   check of its own.

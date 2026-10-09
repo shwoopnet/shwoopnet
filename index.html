@@ -16,9 +16,10 @@
     /* Ledger -- one fixed palette, modeled on a consumer brokerage's own
        actual design principles (warm off-white ground, a single blue
        accent doing double duty as brand and "direction" chip, calm
-       card surfaces with real breathing room). No theme picker, no
-       novelty packs -- light and dark are the only two states, and both
-       render this exact same identity, just inverted. */
+       card surfaces with real breathing room). Light and dark are the
+       two modes, and both render this exact same identity, just
+       inverted. One optional second skin, Mono Ink, exists at the
+       owner's request (Settings, Theme); no novelty packs beyond it. */
     --ink: #FAFAF8;
     --panel: #FFFFFF;
     --panel-raised: #F5F6F8;
@@ -65,6 +66,21 @@
     --ticker-fg-dim: #8891A3;
     --ticker-bg: #181C25;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
+     sharp corners and no shadows. Gain and loss colors are deliberately NOT overridden here (same invariant as the palettes above): --loss is also the
+     live-trading safety color. The ambient grid and glow follow --amber, so they turn white-on-black by themselves. */
+  html[data-skin="mono"]{
+    --ink: #FFFFFF; --panel: #FFFFFF; --panel-raised: #F4F4F4; --border: #D9D9D9; --paper: #000000; --muted: #6B6B6B;
+    --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
+    --ticker-fg: #000000; --ticker-fg-dim: #6B6B6B; --ticker-bg: #FFFFFF;
+    --radius: 4px; --card-shadow: none;
+  }
+  html[data-skin="mono"][data-theme="dark"]{
+    --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
+    --amber: #FFFFFF; --amber-dim: #CFCFCF; --amber-glow: rgba(255,255,255,0.12); --amber-contrast: #000000;
+    --ticker-fg: #FFFFFF; --ticker-fg-dim: #8E8E8E; --ticker-bg: #0B0B0B;
   }
 
   *{ box-sizing:border-box; }
@@ -2020,6 +2036,7 @@
       var saved = window.localStorage.getItem('shwoopnet:darkMode');
       var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      if(window.localStorage.getItem('shwoopnet:skin') === 'mono'){ document.documentElement.setAttribute('data-skin', 'mono'); }
     }catch(e){}
   })();
 </script>
@@ -2437,6 +2454,7 @@
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
         soundAlerts: typeof s.soundAlerts === 'boolean' ? s.soundAlerts : true,
         landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto',
+        skin: s.skin === 'mono' ? 'mono' : (s.skin === 'ledger' ? 'ledger' : null), // null = no explicit choice synced yet, so this device's own choice stays
         growthChartRange: typeof s.growthChartRange === 'string' ? s.growthChartRange : 'all',
         alpacaDockHiddenCols: (s.alpacaDockHiddenCols && typeof s.alpacaDockHiddenCols === 'object') ? s.alpacaDockHiddenCols : { target: true, stop: true },
         alpacaDockSort: s.alpacaDockSort === 'pl' ? 'pl' : 'default',
@@ -3564,6 +3582,17 @@
             <button class="settings-toggle-switch" id="darkModeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode">
               <span class="toggle-knob"></span>
             </button>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Theme</div>
+              <div class="settings-row-desc">Ledger is the default look. Mono Ink is black and white with sharp corners. Both follow the dark mode switch above.</div>
+            </div>
+            <div class="settings-choice-group" id="skinChoice">
+              <button class="tf-btn" data-value="ledger">Ledger</button>
+              <button class="tf-btn" data-value="mono">Mono Ink</button>
+            </div>
           </div>
 
           <div class="settings-row">
@@ -9233,6 +9262,24 @@
     applyLandingPref(saved);
   })();
 
+  // ---------- Settings: theme (Ledger or Mono Ink) ----------
+  var skinChoiceEl = document.getElementById('skinChoice');
+  function applySkinPref(val, skipSync){
+    var skin = val === 'mono' ? 'mono' : 'ledger';
+    if(skin === 'mono'){ document.documentElement.setAttribute('data-skin', 'mono'); } else { document.documentElement.removeAttribute('data-skin'); }
+    skinChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.value === skin); });
+    try{ window.localStorage.setItem('shwoopnet:skin', skin); }catch(e){}
+    if(!skipSync) syncUserSetting('skin', skin);
+  }
+  skinChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
+    b.addEventListener('click', function(){ applySkinPref(b.dataset.value); });
+  });
+  (function initSkinPref(){
+    var saved = 'ledger';
+    try{ saved = window.localStorage.getItem('shwoopnet:skin') || 'ledger'; }catch(e){}
+    applySkinPref(saved, true);
+  })();
+
   // ---------- Settings: clock format ----------
   var clockFormatEl = document.getElementById('clockFormatChoice');
   function applyClockFormat(val, skipSync){
@@ -11285,6 +11332,7 @@
     userSettingsAdoptionInFlight = null;
 
     applyLandingPref(shaped.landingPref, true);
+    if(shaped.skin !== null){ applySkinPref(shaped.skin, true); }
     applyClockFormat(shaped.clockFormat, true);
     applySoundAlertsPref(shaped.soundAlerts, true);
     var dark = shaped.darkMode !== null ? shaped.darkMode
