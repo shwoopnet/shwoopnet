@@ -218,14 +218,10 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
 
 gates.L12 = () => {
-  const m = /exports\.kalshiLiveTrade = onCall\(([\s\S]*?)\n\);/.exec(fnSrc);
-  assert.ok(m, 'kalshiLiveTrade not found');
-  const body = m[1];
-  assert.ok(body.indexOf('assertKalshiAdmin(request.auth)') > -1 && body.indexOf('assertKalshiAdmin') < body.indexOf('runLiveTest'), 'the admin check comes first');
-  assert.ok(!/request\.data/.test(body), 'takes nothing from the caller: no ticker, price or size can be supplied');
-  assert.ok(/secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(body), 'its own secrets, never the demo ones');
-  assert.ok(!/KALSHI_DEMO/.test(body), 'the demo key is never used for a live order');
-  assert.ok(/enabled: KALSHI_LIVE_ENABLED\.value\(\) === "on"/.test(body), 'only the literal "on" enables it');
+  // The single test order callable was removed on Oct 8, 2026: the only way the server places an order now is the L1 session's scheduled tick.
+  assert.ok(!/exports\.kalshiLiveTrade\b/.test(fnSrc), 'kalshiLiveTrade is gone');
+  assert.ok(!/request\.data\.(ticker|price|count|side)/.test(fnSrc), 'no callable takes a ticker, price or size from the caller');
+  assert.ok(!/KALSHI_DEMO/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiL1Session'))), 'the demo key is never used for a live order');
   assert.ok(/defineString\("KALSHI_LIVE_ENABLED", \{ default: "off" \}\)/.test(fnSrc), 'off by default: deploying alone cannot place an order');
   assert.ok(!/KALSHI_LIVE/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiBookRecorder ='))), 'nothing after the live arm sees the live key or switch');
 };
@@ -347,22 +343,15 @@ gates.L22 = async () => {
   const w9 = world(); const a9 = armed({ armed: true, until: NOW + 3600000 });
   assert.ok((await tick(w9, a9, { logEvent: undefined })).ok);
   // Wiring: the arm function logs armed and disarmed, the scan passes the log in, and only the server can write it.
-  const arm = /exports\.kalshiLiveArm = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
-  assert.ok(/kind: "armed"/.test(arm) && /kind: "disarmed"/.test(arm) && /collection\("kalshiLiveEvents"\)/.test(arm), 'arming and disarming are logged');
+  assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'the arm callable is gone, so nothing can arm a single test order');
   assert.ok(/logEvent: \(e\) => db\.collection\("kalshiLiveEvents"\)\.add\(e\)/.test(fnSrc), 'the scheduled scan writes its endings to the log');
   const ev = /match \/kalshiLiveEvents\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
   assert.ok(ev && /allow read: if isAdmin\(\);/.test(ev[1]) && /allow write: if false;/.test(ev[1]), 'admin read, no client write');
 };
 
 gates.L19 = () => {
-  // Wiring. The arm function only flips a document: no order code, no key. The scheduled one does nothing unless armed.
-  const am = /exports\.kalshiLiveArm = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc);
-  assert.ok(am, 'kalshiLiveArm not found');
-  const a = am[1];
-  assert.ok(a.indexOf('assertKalshiAdmin(request.auth)') > -1 && a.indexOf('assertKalshiAdmin') < a.indexOf('.set('), 'admin check first');
-  assert.ok(!/runLiveTest|runArmedTick|KALSHI_LIVE_KEY|KALSHI_LIVE_PRIVATE|portfolio|fetch/.test(a), 'arming touches no key and sends no request');
-  assert.ok(/request\.data && request\.data\.on === true/.test(a), 'the only thing read from the caller is an explicit true');
-  assert.ok(/KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(a) && /ref\.set\(\{ armed: true, since: now, until: now \+ live\.ARM_MS,/.test(a) && /return \{ armed: true, until: now \+ live\.ARM_MS \}/.test(a), 'refuses while the switch is off, and the expiry written is the server\'s own 3 hours');
+  // Wiring. The arm callable was removed on Oct 8, 2026; the scheduled function stays and does nothing unless an old arm document says armed.
+  assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'kalshiLiveArm is gone');
   const sm = /exports\.kalshiLiveArmed = onSchedule\(([\s\S]*?)\n\);/.exec(fnSrc);
   assert.ok(sm, 'kalshiLiveArmed not found');
   const s = sm[1];

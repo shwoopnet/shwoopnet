@@ -22,7 +22,7 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 | Size ladder step 1 decision | The owner overrode the evidence gates on 2026-10-08. After the forward read, either keep or step back to 1 contract per the README |
 | Use the recorder's order-book data | Book depth imbalance and locked books, pre-registered before running |
 | 10 second stop test | Needs several days of recorder data |
-| Remove the unused single-order path (`kalshiLiveTrade`, `kalshiLiveArm`) | Owner decision, then a deploy. Shrinks the code that can move money |
+| Delete the library code behind the removed single-order path (`runLiveTest`, `runArmedTick`) and the arm branch of `kalshiLiveArmed` | The callables `kalshiLiveTrade`, `kalshiLiveArm` and `kalshiLiveAdjust` were removed on 2026-10-08; this inert code and its tests are what is left |
 | shwoop-server fixes (separate repo, owner decides) | Timing-safe secret compare; fail closed when the bar time is missing instead of a random order id; `firebase-admin` bump; fixed error text |
 
 ## Later
