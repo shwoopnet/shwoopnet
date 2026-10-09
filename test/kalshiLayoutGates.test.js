@@ -423,3 +423,9 @@ gates.Y20 = () => {
   assert.strictEqual(live.skimAddon({ pool: 7.43 }, 5), 7, 'server: 7.43 buys 7 extras');
   assert.strictEqual(live.skimAddon({ pool: 7.44 }, 5), 8, 'server: 8 x 0.93 = 7.44 buys the 8th, which is what the page target shows');
 }
+
+// Y25: the Flatten all result is cleared when the bot is started, and does not end in a doubled period.
+{
+  assert.ok(/getElementById\('kalFlattenMsg'\); if\(fm\)\{ fm\.textContent = ''; \}/.test(html), 'Start clears the old Flatten all message');
+  assert.ok(/'No open positions'\)\.replace\(\/\\\.\\s\*\$\/, ''\) \+ '\. The bot is halted/.test(html) && !/'No open positions\.'\) \+ '\. The bot/.test(html), 'no doubled period after "No open positions"');
+}

@@ -10596,7 +10596,7 @@
       api.kalshiFlattenAll().then(function(r){
         var rows = (r && r.results) || [];
         var line = !r || r.ok === false ? ((r && r.reason) || 'The sells did not run.') + ' The bot is halted.' :
-          (rows.length ? rows.map(function(x){ return kalshiShortTicker(x.ticker) + ': ' + x.status + (x.detail ? ' (' + x.detail + ')' : ''); }).join('. ') : 'No open positions.') + '. The bot is halted and its session is stopped.';
+          (rows.length ? rows.map(function(x){ return kalshiShortTicker(x.ticker) + ': ' + x.status + (x.detail ? ' (' + x.detail + ')' : ''); }).join('. ') : 'No open positions').replace(/\.\s*$/, '') + '. The bot is halted and its session is stopped.';
         msg.textContent = line;
       }).catch(function(err){
         msg.textContent = 'Could not reach the server: ' + ((err && err.message) || 'unknown') + '. Check the Kalshi app and press Pause bot here.';
@@ -10762,6 +10762,8 @@
         return wasPaused && api.setKalshiHalt ? api.setKalshiHalt(false) : null;
       }).then(function(){
         msg.textContent = 'Started. You can close this page: the server does the trading.';
+        // The Flatten all result ("The bot is halted and its session is stopped") stays on screen until cleared, and read as the current state next to a Running badge.
+        var fm = document.getElementById('kalFlattenMsg'); if(fm){ fm.textContent = ''; }
       }).catch(function(err){
         msg.textContent = 'Not started: ' + ((err && err.message) || 'unknown');
       }).then(function(){ yes.disabled = no.disabled = false; ask(false); renderKalshiL1(); });
