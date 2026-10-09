@@ -225,6 +225,9 @@
   button:focus-visible, a:focus-visible{ outline: 2px solid var(--amber); outline-offset: 2px; }
 
   .app{ max-width: 1400px; margin: 0 auto; padding: 0 0 40px 0; }
+  /* The Kalshi page is a console, not an article: on a wide monitor it uses more of the width instead of leaving wide empty gutters (the owner's note, Oct 9, 2026).
+     The other pages keep the 1400px column. */
+  .app.app-wide{ max-width: 1640px; }
 
   /* ---------- Ticker tape (signature element, global) ---------- */
   .ticker-tape{
@@ -10857,6 +10860,7 @@
     document.getElementById('page-trades').hidden = (name !== 'trades');
     document.getElementById('page-journal').hidden = (name !== 'journal');
     document.getElementById('page-kalshi').hidden = (name !== 'kalshi');
+    var appEl = document.querySelector('.app'); if(appEl){ appEl.classList.toggle('app-wide', name === 'kalshi'); }
     document.getElementById('page-settings').hidden = (name !== 'settings');
     document.getElementById('page-changelog').hidden = (name !== 'changelog');
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){

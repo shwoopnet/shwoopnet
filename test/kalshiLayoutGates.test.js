@@ -390,6 +390,12 @@ gates.Y22 = () => {
   assert.ok(/syncUserSetting\('skin', skin\)/.test(html) && /skin: s\.skin === 'mono' \? 'mono' : \(s\.skin === 'ledger' \? 'ledger' : null\)/.test(html) && /if\(shaped\.skin !== null\)\{ applySkinPref\(shaped\.skin, true\); \}/.test(html), 'synced with the account, and an unsynced account keeps the device choice');
 };
 
+// Y23: the Kalshi page uses more width on a wide monitor, and the other pages keep the 1400px column.
+gates.Y23 = () => {
+  assert.ok(/\.app\{ max-width: 1400px;/.test(html) && /\.app\.app-wide\{ max-width: 1640px; \}/.test(html), 'the base column stays 1400px; the wide class is 1640px');
+  assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi'\)/.test(html), 'only the Kalshi page turns it on, and every other page turns it off');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
