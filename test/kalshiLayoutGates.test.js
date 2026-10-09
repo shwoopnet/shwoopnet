@@ -417,5 +417,9 @@ gates.Y20 = () => {
 
 // Y19: the reinvest pool shows as pool / cost of the next extra contract, so progress is readable at a glance.
 {
-  assert.ok(/Reinvest pool/.test(html) && /\(ex \+ 1\) \* perC/.test(html) && !/max extra/.test(html), 'the stake row shows the pool against the next extra contract, with no cap branch');
+  assert.ok(/Reinvest pool/.test(html) && /\(ex \+ 1\) \* 0\.93/.test(html) && !/max extra/.test(html), 'the stake row shows the pool against the next extra contract, with no cap branch');
+  // The server counts extras at a flat 0.93 (skimAddon's default). A target priced on the live fill showed 7.32 / 7.18 while the server still needed 7.44 for the 8th extra.
+  const live = require('../functions/kalshiLiveLib.js');
+  assert.strictEqual(live.skimAddon({ pool: 7.43 }, 5), 7, 'server: 7.43 buys 7 extras');
+  assert.strictEqual(live.skimAddon({ pool: 7.44 }, 5), 8, 'server: 8 x 0.93 = 7.44 buys the 8th, which is what the page target shows');
 }

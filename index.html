@@ -10375,11 +10375,11 @@
         if(cashNow > 0 && perC > 0){ baseC = Math.max(1, Math.min(baseC, Math.floor(cashNow * 0.01 / perC + 1e-9))); }
         var nC = ses.sizing === true ? baseC + (Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0) : 1;
         var stake = nC * perC, tb = a.balance.totalDollars;
-        // Reinvest pool progress: pool dollars over what the NEXT extra contract needs (one more contract's cost than the extras already held), so X/Y reads as "how close".
+        // Reinvest pool progress: pool dollars over what the NEXT extra contract needs. The server counts extras at a flat $0.93 per contract (skimAddon), NOT the live price, so the target must use the same figure or the pool can read as past the line while no extra is added.
         var poolCell = '';
         if(ses.sizing === true && Number.isFinite(ses.sizePool)){
           var ex = Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0;
-          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * perC) + '</b></div>';
+          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * 0.93) + '</b></div>';
         }
         if(!sizeKnown) stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
         else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
