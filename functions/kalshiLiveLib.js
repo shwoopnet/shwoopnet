@@ -309,8 +309,10 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
 // per SCALE_REVIEW_MS (3 days), and not at all within a week of a loss stop. The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
 // stop move together, every review. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
 // (3, what the owner was running), or lower if the balance is lower. Pure: the caller keeps the state.
-// Raised from 10 to 25 on Oct 9, 2026 with the 2% base, or the ceiling would hold the base near 1% of a $550 account.
-const L1_SIZE_CEILING = 25;
+// Raised from 10 to 25 on Oct 9, 2026 with the 2% base, or the ceiling would hold the base near 1% of a $550 account; then to 40 at the owner's request, which keeps
+// 10 contracts of room under L1_ORDER_CEILING (50) for the profit add-on. 25 was a judgement call, not a measured depth limit; the book recorder's data should say how
+// many contracts the touch can fill at 93c before this is raised again.
+const L1_SIZE_CEILING = 40;
 // The balance-driven cap stops at L1_SIZE_CEILING, but contracts bought with reinvested PROFIT (the add-on) no longer have their own limit (Oct 8, 2026, the owner's
 // choice). What bounds them: the pool holds only skimmed profit, one extra contract needs one full contract cost of it, a loss comes out of the pool first, and the
 // 1% of cash rule in l1Count still caps every order, so the original capital is never put at more risk than before. L1_ORDER_CEILING is only a fat-finger guard on a
