@@ -2398,3 +2398,16 @@ Count: four variants, **2,586 as of 2026-10-09**.
 | 5% plus the profit-funded share of a lost order | +$86.8 | -$8.4 | -$44.6 | $88.6 | 6.9% | 0.00 |
 
 The widened stop almost never fires in the model, which is what it is for: it keeps the bot running through the one bad order that the add-on's own size would otherwise end it on. The deeper drawdown is about $2, inside the noise of the sample. Count: unchanged, **2,586 as of 2026-10-09** (a stop rule, not a strategy variant).
+
+## Sizing replay: 2% base per position instead of 1% (information only, no hypothesis, no verdict, no variant counted; 2026-10-09)
+
+The owner chose a 2% base per position (ladder $43 a contract, ladder ceiling 25) over the 1% set the day before. `PYTHONPATH=src python -m scalper.sizing base2`, same 69 days of history, from $547.96 with the base re-seeded to it (what Start does), 60% fills, 5% stop, pool add-on outside the base rule.
+
+| Rule | Mean (10 wk) | 5th pct | 1st pct | Deepest drawdown (95th) | P(loss) | Stop days |
+|---|---|---|---|---|---|---|
+| 1% base, $85 | +$95.1 | -$12.6 | -$45.9 | $94.3 | 8.5% | 0.00 |
+| 2% base, $43 | +$157.7 | -$9.5 | -$90.6 | $146.3 | 6.3% | 0.84 |
+
+- **About 1.7 times the mean for about 2 times the bad tail.** The 1st percentile doubles (-$45.9 to -$90.6) and the bad drawdown goes from about 17% to about 27% of the account. That is the trade the owner chose, written down so it is not rediscovered.
+- **The stop starts to bind.** 0.84 stop days over the window against none at 1%: two losses at this size reach 5% of the base.
+- **A replay of the past, not a forecast.** The win rate it replays is the tape's, and the 73 of 74 live record is a small sample (the one loss was the early 40c test order).

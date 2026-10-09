@@ -269,7 +269,7 @@ gates.N24 = async () => {
   const DAY = 86400000, W = live.SCALE_REVIEW_MS;
   const first = live.reviewSizing(null, 341, NOW);
   assert.deepStrictEqual([first.state.cap, first.state.base], [3, 341], 'the first review starts at the 3 the owner was running');
-  assert.strictEqual(live.reviewSizing(null, 150, NOW).state.cap, 1, 'a small account starts lower');
+  assert.strictEqual(live.reviewSizing(null, 40, NOW).state.cap, 1, 'a small account starts lower');
   const st = { cap: 3, base: 341, reviewedAt: NOW, lastStopAt: null };
   const early = live.reviewSizing(st, 900, NOW + 2 * DAY);
   assert.deepStrictEqual([early.state.cap, early.changed], [3, false], 'the balance more than doubled but two days is not a review');
@@ -278,9 +278,9 @@ gates.N24 = async () => {
   assert.strictEqual(live.reviewSizing(later.state, 900, NOW + W + DAY).state.cap, 4, 'and not again the next day');
   assert.strictEqual(live.reviewSizing(later.state, 900, NOW + 2 * W).state.cap, 5, 'the next review, 3 days on, is the next step');
   assert.strictEqual(W, 3 * DAY, 'reviews are 3 days apart');
-  assert.strictEqual((() => { const a = live.reviewSizing({ ...st, cap: 5 }, 240, NOW + DAY); return live.reviewSizing(a.state, 240, NOW + DAY + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 2, 'a balance that stays low cuts the cap, mid week, without waiting for a review');
+  assert.strictEqual((() => { const a = live.reviewSizing({ ...st, cap: 5 }, 130, NOW + DAY); return live.reviewSizing(a.state, 130, NOW + DAY + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 3, 'a balance that stays low cuts the cap, mid week, without waiting for a review');
   assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + 6 * DAY).state.cap, 3, 'no rise within a week of a loss stop, even though reviews come every 3 days');
-  assert.strictEqual(live.reviewSizing({ cap: 10, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, 10, 'the hard ceiling holds');
+  assert.strictEqual(live.reviewSizing({ cap: 25, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, 25, 'the hard ceiling holds');
   // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
   const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '900.0000', exchange_index: 2 }] } });
   const saved = [];
@@ -329,8 +329,8 @@ gates.N25 = async () => {
   await tick(w, { sizingState: { cap: 3, base: 341, reviewedAt: NOW - 1000, pool: 2, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
   assert.strictEqual(w.posts[0].count, '5', 'cap 3 plus two from a $2 pool');
   assert.strictEqual(w.sess.sizeAddon, 2);
-  assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 30, 8 * 86400000).state.cap, 3, 'with $30 saved the sizing balance is $311, which still supports three');
-  assert.strictEqual((() => { const a = live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 100, 8 * 86400000); return live.reviewSizing(a.state, 341 - 100, 8 * 86400000 + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 2, 'savings are not sized on: if the rest of the balance falls under $255 the cap follows it down');
+  assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 30, 8 * 86400000).state.cap, 4, 'with $30 saved the sizing balance is $311, which supports seven at $43 but rises one step to four');
+  assert.strictEqual((() => { const a = live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 250, 8 * 86400000); return live.reviewSizing(a.state, 341 - 250, 8 * 86400000 + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 2, 'savings are not sized on: if the rest of the balance falls to $91 the cap follows it down');
   const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(ceil, { sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   assert.strictEqual(ceil.posts[0].count, String(live.L1_ORDER_CEILING), 'a huge pool still stops at the order ceiling, the fat-finger guard');
@@ -417,15 +417,15 @@ gates.N18 = async () => {
   assert.strictEqual(small.posts[0].count, '1', 'a $40 account is one contract');
   const mid = world({ session: { startCash: 106, sizing: true }, balance: { balance_breakdown: [{ balance: '106.0000', exchange_index: 2 }] } });
   await tick(mid);
-  assert.strictEqual(mid.posts[0].count, '1', 'a $106 account is one contract (1% is $1.06)');
+  assert.strictEqual(mid.posts[0].count, '2', 'a $106 account is two contracts (2% is $2.12 at about 91c)');
   const two = world({ session: { startCash: 250, sizing: true }, balance: { balance_breakdown: [{ balance: '250.0000', exchange_index: 2 }] } });
   await tick(two);
-  assert.strictEqual(two.posts[0].count, '2', 'a $250 account is two contracts (1% is $2.50)');
+  assert.strictEqual(two.posts[0].count, '3', 'a $250 account is capped at three by the starting cap (2% would allow five)');
   const huge = world({ session: { startCash: 5000, sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
   await tick(huge);
   assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
-  assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(213, 0.92), live.l1Count(276, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 2, 3, 3]);
-  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.01, 0.05, 3], 'the share of cash per order, the scaled stop and the cap');
+  assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(213, 0.92), live.l1Count(276, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 3, 3, 3]);
+  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.05, 3], 'the share of cash per order, the scaled stop and the cap');
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4).count, '4', 'the cap can rise, so four is a valid order');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, live.L1_ORDER_CEILING + 1), /refusing/, 'but never past the order ceiling');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
@@ -532,13 +532,13 @@ gates.N31 = () => {
   assert.deepStrictEqual([dip.state.cap, dip.state.base], [3, 344], 'a dip alone changes neither the cap nor the stop base');
   const back = live.reviewSizing(dip.state, 509, T0 + H + 600000);
   assert.deepStrictEqual([back.state.cap, back.state.base, back.state.lowSince], [3, 344, null], 'money that comes back clears the wait');
-  const stayed = live.reviewSizing(live.reviewSizing(st, 100, T0 + H).state, 100, T0 + H + live.SCALE_FALL_CONFIRM_MS);
+  const stayed = live.reviewSizing(live.reviewSizing(st, 40, T0 + H).state, 40, T0 + H + live.SCALE_FALL_CONFIRM_MS);
   assert.strictEqual(stayed.state.cap, 1, 'a balance that stays low does cut the cap');
   // Reseed (set by Start): raises a collapsed cap to what a fresh start gives, re-bases the stop, never lowers, never raises within a week of a loss stop.
   const lowSt = { cap: 1, base: 0.4, reviewedAt: T0, lastStopAt: null, reseed: true };
   const r = live.reviewSizing(lowSt, 509, T0 + H);
-  assert.deepStrictEqual([r.state.cap, r.state.base, r.state.reseed], [5, 509, false], 'a collapsed cap goes straight to the balance target on Start');
-  assert.strictEqual(live.reviewSizing({ ...lowSt, cap: 7 }, 509, T0 + H).state.cap, 7, 'a higher saved cap is never lowered by Start');
+  assert.deepStrictEqual([r.state.cap, r.state.base, r.state.reseed], [11, 509, false], 'a collapsed cap goes straight to the balance target on Start');
+  assert.strictEqual(live.reviewSizing({ ...lowSt, cap: 15 }, 509, T0 + H).state.cap, 15, 'a higher saved cap is never lowered by Start');
   assert.strictEqual(live.reviewSizing({ ...lowSt, lastStopAt: T0 }, 509, T0 + H).state.cap, 1, 'no restoring within a week of a loss stop');
 };
 
@@ -572,10 +572,11 @@ gates.N32 = async () => {
 };
 
 gates.N30 = () => {
-  // Profit-funded contracts have no fixed limit, but the risk of the add-on is bounded by the pool, which holds only profit, and the account-funded part stays inside the 1% rule.
+  // Profit-funded contracts have no fixed limit, but the risk of the add-on is bounded by the pool, which holds only profit, and the account-funded part stays inside the 2% rule.
   assert.strictEqual(live.skimAddon({ pool: 4.65 }, 5), 5, 'a pool of five contract costs buys five extras');
-  assert.strictEqual(live.l1Count(509, 0.93, 8, 0), 5, 'the account-funded part never risks more than 1% of cash');
-  assert.strictEqual(live.l1Count(509, 0.93, 5, 3), 8, 'profit-funded contracts sit outside the 1% rule and are simply added');
+  assert.strictEqual(live.l1Count(509, 0.93, 20, 0), 10, 'the account-funded part never risks more than 2% of cash');
+  assert.strictEqual(live.l1Count(548, 0.93, 25, 0), 11, 'at $548 the 2% base is 11 contracts, as agreed with the owner on Oct 9');
+  assert.strictEqual(live.l1Count(509, 0.93, 5, 3), 8, 'profit-funded contracts sit outside the 2% rule and are simply added');
   assert.strictEqual(live.l1Count(509, 0.93, 5, 999), live.L1_ORDER_CEILING, 'the fat-finger guard is the only fixed limit left');
 };
 

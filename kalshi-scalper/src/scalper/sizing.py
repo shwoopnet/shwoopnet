@@ -98,6 +98,21 @@ def current() -> None:
     run(by, days, "cap 3 flat (the old stake), for scale", dpc=100, skim=False, addon_max=0, fixed=3, start=504.82, step_days=3, stop_frac=0.05, base0=344.0, cash_frac=0.01)
 
 
+def base2() -> None:
+    """Oct 9, 2026, information only: the owner asked for a 2% base per position (ladder $43 a contract) instead of 1% ($85). Both rows start at the
+    current $547.96 with the base re-seeded to it (what Start does), pool add-on outside the base rule, order ceiling 50, 5% stop, 3 day steps,
+    60% fills, the same 69 days of history. A replay of the past, not a forecast: the add-on and the stop are modelled as deployed."""
+    markets, _ = load_markets()
+    ents = L.hold_rule(markets, **L.L1)
+    by = defaultdict(list)
+    for e in ents: by[e["day"]].append(e)
+    days = sorted(by)
+    print("from $547.96, base re-seeded, 60% fills, WITH the loss stop (5% of base)")
+    kw = dict(skim=True, fixed=0, start=547.96, step_days=3, stop_frac=0.05, base0=547.96, addon_max=999, n_ceiling=50, addon_outside=True)
+    run(by, days, "1% base, $85 a contract (as of Oct 8)", dpc=85, cash_frac=0.01, **kw)
+    run(by, days, "2% base, $43 a contract (Oct 9 change)", dpc=43, cash_frac=0.02, **kw)
+
+
 if __name__ == "__main__":
     import sys
-    current() if "current" in sys.argv[1:] else main()
+    base2() if "base2" in sys.argv[1:] else current() if "current" in sys.argv[1:] else main()
