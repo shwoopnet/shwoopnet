@@ -434,3 +434,9 @@ gates.Y20 = () => {
 {
   assert.ok(/R = Math\.max\(60, endLabel\.length \* 9 \+ 16\)/.test(html) && /x="' \+ \(W - 4\) \+ '" y="' \+ \(Y\(last\.cum\) \+ 5\)\.toFixed\(1\) \+ '" text-anchor="end"/.test(html), 'the end label is right-anchored with room reserved for it');
 }
+
+// Y26: the "More stats" fold keeps its open or closed state across the card's rebuilds instead of closing every few seconds.
+{
+  assert.ok(/var kalshiMoreOpen = false;/.test(html) && /classList\.contains\('kal-more'\)\)\{ kalshiMoreOpen = t\.open; \}/.test(html), 'the fold records when it is toggled');
+  assert.ok(/'<details class="kal-more"' \+ \(typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen \? ' open' : ''\) \+ '><summary>More stats/.test(html), 'the rebuilt markup restores the state');
+}
