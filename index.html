@@ -3460,7 +3460,8 @@
         </div>
       </div>
       <div class="kal-card kal-card-flush" data-card="trades">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div></div>
+        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
+          <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div class="kal-tr kal-tr-head"><span>Time</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
       </div>
@@ -10378,7 +10379,9 @@
       var olderBot = kalshiResolveOrders(kalshiLiveOrders, a.results, gfills).filter(function(o){
         return o && Number(o.fillCount) > 0 && o.strategy === 'L1' && !(o.orderId && seenIds[o.orderId]) && o.ts < oldestFill;
       }).sort(function(x, y){ return y.ts - x.ts; });
-      var allRows = gfills.map(function(x){ return { fill: x }; }).concat(olderBot.map(function(o){ return { order: o }; }));
+      // Manual trades are hidden by default (the owner's choice, Oct 9, 2026); the dropdown on the card brings them back.
+      var shownFills = kalshiTradeFilter === 'all' ? gfills : gfills.filter(function(x){ return kalshiFillIsBot(x, kalshiLiveOrders); });
+      var allRows = shownFills.map(function(x){ return { fill: x }; }).concat(olderBot.map(function(o){ return { order: o }; }));
       var pageSize = kalshiLiveShow.pageSize, pages = Math.max(1, Math.ceil(allRows.length / pageSize));
       if(kalshiLiveShow.page > pages - 1){ kalshiLiveShow.page = pages - 1; }
       if(kalshiLiveShow.page < 0){ kalshiLiveShow.page = 0; }
@@ -10411,9 +10414,9 @@
       var foot = [];
       if(pages > 1){
         foot.push('<button type="button" class="kal-link" data-trstep="newer"' + (kalshiLiveShow.page <= 0 ? ' disabled style="opacity:.4"' : '') + '>Newer</button> Page ' + (kalshiLiveShow.page + 1) + ' of ' + pages + ' (' + allRows.length + ' trades) <button type="button" class="kal-link" data-trstep="older"' + (kalshiLiveShow.page >= pages - 1 ? ' disabled style="opacity:.4"' : '') + '>Older</button>');
-        if(kalshiLiveShow.page >= pages - 1){ foot.push('<span style="color:var(--muted)">Older bot trades are kept; manual trades older than the latest fills are not stored.</span>'); }
+        if(kalshiLiveShow.page >= pages - 1 && kalshiTradeFilter === 'all'){ foot.push('<span style="color:var(--muted)">Older bot trades are kept; manual trades older than the latest fills are not stored.</span>'); }
       }
-      trEl.innerHTML = (allRows.length ? rowsHtml : '<div class="kal-foot">No trades yet.</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
+      trEl.innerHTML = (allRows.length ? rowsHtml : '<div class="kal-foot">' + (kalshiTradeFilter === 'all' ? 'No trades yet.' : 'No bot trades yet.') + '</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
     }
 
     renderKalshiCharts();
@@ -10471,6 +10474,11 @@
     if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
   }
   var kalshiChartRange = 'all';
+  var kalshiTradeFilter = 'bot';   // 'bot' hides manual trades from the Recent trades card, 'all' shows both
+  (function(){
+    var sel = document.getElementById('kalTradeFilter');
+    if(sel){ sel.addEventListener('change', function(){ kalshiTradeFilter = sel.value === 'all' ? 'all' : 'bot'; kalshiLiveShow.page = 0; renderKalshiBot(); }); }
+  })();
   (function(){
     var sel = document.getElementById('kalChartRange');
     if(sel){ sel.addEventListener('change', function(){ kalshiChartRange = sel.value === 'session' ? 'session' : 'all'; renderKalshiCharts(); }); }
