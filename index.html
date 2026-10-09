@@ -10168,7 +10168,7 @@
   var kalshiBotState = { control: {} };
   var kalshiLiveAcct = null;     // the latest read of the account (the account block below owns the read)
   var kalshiLiveEvents = [];
-  var kalshiLiveShow = { events: 12, fills: 5 };   // the latest five trades, with a button for more
+  var kalshiLiveShow = { events: 12, fills: 5, page: 0, pageSize: 10 };   // the trades card pages ten at a time, newest first
   var kalshiBotUnsub = null;
   var kalshiLiveEventsUnsub = null;
   var kalshiAcctTimer = null;
@@ -10371,9 +10371,27 @@
     else if(!a.fills || !a.fills.ok){ trEl.innerHTML = '<div class="kal-note">Could not read fills: ' + escapeHtml(a.fills ? 'HTTP ' + a.fills.status + ' ' + (a.fills.error || '') : '') + '</div>'; }
     else {
       var gfills = kalshiGroupFills(a.fills.fills);
-      var fillsShown = gfills.slice(0, kalshiLiveShow.fills);
+      // History: the account keeps only the latest fills (about a dozen trades), so older rows come from the bot's own saved orders, which are kept far longer.
+      // Manual trades older than the account's fills are not stored anywhere, so they cannot appear. An order already shown from a fill is not repeated.
+      var seenIds = {}, oldestFill = Infinity;
+      gfills.forEach(function(x){ if(x.orderId){ seenIds[x.orderId] = true; } var t = x.time ? Date.parse(x.time) : NaN; if(Number.isFinite(t) && t < oldestFill){ oldestFill = t; } });
+      var olderBot = kalshiResolveOrders(kalshiLiveOrders, a.results, gfills).filter(function(o){
+        return o && Number(o.fillCount) > 0 && o.strategy === 'L1' && !(o.orderId && seenIds[o.orderId]) && o.ts < oldestFill;
+      }).sort(function(x, y){ return y.ts - x.ts; });
+      var allRows = gfills.map(function(x){ return { fill: x }; }).concat(olderBot.map(function(o){ return { order: o }; }));
+      var pageSize = kalshiLiveShow.pageSize, pages = Math.max(1, Math.ceil(allRows.length / pageSize));
+      if(kalshiLiveShow.page > pages - 1){ kalshiLiveShow.page = pages - 1; }
+      if(kalshiLiveShow.page < 0){ kalshiLiveShow.page = 0; }
+      var fillsShown = allRows.slice(kalshiLiveShow.page * pageSize, (kalshiLiveShow.page + 1) * pageSize);
       var settled = 0, open = 0, sum = 0, nowD = new Date();
-      var rowsHtml = fillsShown.map(function(x){
+      var rowsHtml = fillsShown.map(function(item){
+        if(item.order){
+          var o = item.order, pnl = kalshiOrderPnl(o), cnt = Number(o.fillCount), paid = Number.isFinite(Number(o.maxCost)) && Number(o.count) > 0 ? Number(o.maxCost) / Number(o.count) : Number(o.price);
+          var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl)) + '</span>' : '<span style="color:var(--muted)">open</span>';
+          return '<div class="kal-tr"><span class="kal-tr-t">' + escapeHtml(kalshiWhen(o.ts, nowD.getTime())) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(o.ticker)) + '</span>' +
+            '<span class="kal-tr-f">Bought ' + escapeHtml(String(o.side || '').toUpperCase()) + ' ' + escapeHtml(String(Math.round(cnt * 100) / 100)) + (Number.isFinite(paid) ? ' at ' + (Math.round(paid * 1000) / 10).toFixed(1) + 'c' : '') + '</span><span class="kal-tr-p">' + oPl + '</span><span class="kal-tr-s">bot</span></div>';
+        }
+        var x = item.fill;
         var bot = kalshiFillIsBot(x, kalshiLiveOrders);
         var ord = kalshiOrderFor(x, kalshiLiveOrders);
         var tp = kalshiTradePnl(x, ord, a.results ? a.results[x.ticker] : null);
@@ -10391,9 +10409,11 @@
           '<span class="kal-tr-f">' + fillText + '</span><span class="kal-tr-p">' + plCell + '</span><span class="kal-tr-s">' + (bot ? 'bot' : 'manual') + '</span></div>';
       }).join('');
       var foot = [];
-      if(gfills.length > fillsShown.length){ foot.push(fillsShown.length + ' of ' + gfills.length + ' <button type="button" class="kal-link" data-more="fills">Show more</button>'); }
-      else if(gfills.length > 5){ foot.push('<button type="button" class="kal-link" data-less="fills">Show fewer</button>'); }
-      trEl.innerHTML = (gfills.length ? rowsHtml : '<div class="kal-foot">No trades yet.</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
+      if(pages > 1){
+        foot.push('<button type="button" class="kal-link" data-trstep="newer"' + (kalshiLiveShow.page <= 0 ? ' disabled style="opacity:.4"' : '') + '>Newer</button> Page ' + (kalshiLiveShow.page + 1) + ' of ' + pages + ' (' + allRows.length + ' trades) <button type="button" class="kal-link" data-trstep="older"' + (kalshiLiveShow.page >= pages - 1 ? ' disabled style="opacity:.4"' : '') + '>Older</button>');
+        if(kalshiLiveShow.page >= pages - 1){ foot.push('<span style="color:var(--muted)">Older bot trades are kept; manual trades older than the latest fills are not stored.</span>'); }
+      }
+      trEl.innerHTML = (allRows.length ? rowsHtml : '<div class="kal-foot">No trades yet.</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
     }
 
     renderKalshiCharts();
@@ -10428,10 +10448,11 @@
       navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders. Paste them into the chat.'; }, manual);
     } else { manual(); }
   });
-  // The 'Show more' button is re-created on every render, so one listener on its container does it.
+  // The page buttons are re-created on every render, so one listener on their container does it.
   document.getElementById('kalBotClosed').addEventListener('click', function(e){
-    if(e.target && e.target.getAttribute('data-more') === 'fills'){ kalshiLiveShow.fills += 10; renderKalshiBot(); }
-    if(e.target && e.target.getAttribute('data-less') === 'fills'){ kalshiLiveShow.fills = 5; renderKalshiBot(); }
+    var t = e.target && e.target.getAttribute ? e.target.getAttribute('data-trstep') : null;
+    if(t === 'older'){ kalshiLiveShow.page += 1; renderKalshiBot(); }
+    if(t === 'newer'){ kalshiLiveShow.page = Math.max(0, kalshiLiveShow.page - 1); renderKalshiBot(); }
   });
 
   var kalshiLiveCtl = { arm: null, last: null, session: null };
