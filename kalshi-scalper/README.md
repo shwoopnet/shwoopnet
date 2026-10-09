@@ -33,7 +33,7 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,582 as of 2026-10-08** (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Strategy variants tried so far: **2,586 as of 2026-10-09** (T1 to T4 added to the 2,582 of 2026-10-08; (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
 Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
@@ -2362,3 +2362,22 @@ Replay, `python -m scalper.sizing current` (10 weeks from $504.82, 60% fills, th
 - **The cost is real and small now.** About +$4 more in the average path, and the bad cases about 15% deeper (drawdown $86 against $73, 17% of the account). The stop trips on about one path in eight over the 10 weeks, where before it almost never did.
 - **It grows with success, which is the point and the risk.** The pool only grows after new profit highs, so early on it is a few extra contracts; later it can be a large share of an order. The pool bounds the add-on's risk to profit already made, but a run of losses empties the pool first and then eats into the account-funded part.
 - Count: unchanged, **2,582 as of 2026-10-08** (sizing, not a strategy variant).
+
+
+## Results: T1 to T4, one run each, read once at 1,240 markets (2026-10-09 05:50 UTC; the rules, thresholds, predictions and kill criteria are those registered above and in the amendment; nothing was changed after seeing them)
+
+`python -m scalper.tapeflow run` over an even sample of 1,240 of the last 30 days' 4,964 settled BTC and gold markets (interleaved fetch, stopping point fixed in advance). Signal counts first, as promised:
+
+| Test | Markets read | Observations | Days | Mean net per contract | Day clustered z | Halves | Fees x1.2 | Predicted | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| T1 early taker flow, held to settlement | 1,240 | **13** | 10 | -8.92c | -1.03 | -3.90c / -13.22c | -9.08c | +1.0c | `FALSIFIED` |
+| T2 the same, sold 7 minutes before the close | 1,240 | **13** | 10 | -6.52c | -2.54 | -6.46c / -6.57c | -6.81c | -0.5c | `FALSIFIED` |
+| T3 early drift scalp (the owner's recorded trade) | 1,240 | **780** (460 with no observation) | 31 | -4.11c | -10.22 | -3.72c / -4.52c | -4.74c | -1.5c | `FALSIFIED` |
+| T4 cheap side scalp, seconds 61 to 179 | 1,240 | **19** (1,221 with no observation) | 14 | +1.07c | +1.22 | +0.52c / +1.57c | +0.82c | -1.0c | `FALSIFIED` |
+
+Count: four variants, **2,586 as of 2026-10-09**.
+
+- **T1 and T2 are underpowered, and the verdict says nothing about the idea.** Only 13 markets had at least 50 taker contracts and a 60% one sided flow. The reason is in the data: the typical market's first 5 minutes holds about 250,000 contracts a side, almost evenly split, so a 60% imbalance is rare. The 13 that qualified paid an average of 15.8c for the side bought (win 7.7%), which shows the registered flow measure counts CONTRACTS, and contracts are dominated by cheap lottery-ticket buying, not by money. That is a flaw in the pre-registered metric, found after the run; a dollar weighted flow is a different variant and would have to be registered as one. Nothing was re-run.
+- **T3 is a decisive, large sample failure, worse than predicted (-4.11c against -1.5c).** It wins most of the time (69.2% of trades sold above entry, median hold 61 seconds, a +5c target) and still loses 4c a trade: many small wins, and a minority of exits at the time limit far below entry that outweigh them. Both halves negative and z -10 make this the clearest result of the day. Fees alone are about 3c of it. It tells us the owner's recorded trade, taken as a rule at tick level with real trade prices, loses money on average; a single winning trade is inside the noise of that.
+- **T4 almost never fires, and that is a finding about the design, not an edge.** Only 19 of 1,240 markets had a taker print on a 4c to 10c side between seconds 61 and 179 and a later exit print. At the open the market is near 50 to 50, so a 6c side does not exist yet. **The owner's own examples were at about 5.6 and 8 minutes into the market**, outside this window; the window was set to "early" without checking that against the examples. A later window (for example minutes 4 to 9 after the open) is a different question and would be a new variant (2,587) registered before it runs; the +1.07c on 19 trades is not evidence of anything.
+- **Audit triggers.** None fired: no result was better than its prediction except T4's, which has 19 observations (far under 300). The invariants held by test: the entry print is after the signal second and the exit print after the entry in T3 and T4; only trades before second 300 enter the first-5-minute flow.
