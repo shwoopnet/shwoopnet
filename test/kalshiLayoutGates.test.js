@@ -373,7 +373,7 @@ gates.Y18 = () => {
 
 // Y21: manual trades are hidden from the Recent trades card by default, with a small dropdown to bring them back.
 gates.Y21 = () => {
-  assert.ok(/data-trstep="newer"[^>]*>&#8249;<\/button>/.test(html) && /data-trstep="older"[^>]*>&#8250;<\/button>/.test(html) && !/>Newer<|>Older</.test(html), 'the page controls are arrows, with labels for screen readers');
+  assert.ok(/data-trstep="newer"[\s\S]{0,260}'>&#8249;<\/button>/.test(html) && /data-trstep="older"[\s\S]{0,260}'>&#8250;<\/button>/.test(html) && !/>Newer<|>Older</.test(html), 'the page controls are arrows, with labels for screen readers');
   assert.ok(/id="kalTradeFilter"/.test(html) && /<option value="bot">bot trades<\/option><option value="all">bot and manual<\/option>/.test(html), 'a small Showing dropdown on the trades card, bot trades first');
   assert.ok(/var kalshiTradeFilter = 'bot';/.test(html), 'manual trades are hidden until the owner asks');
   assert.ok(/kalshiTradeFilter === 'all' \? gfills : gfills\.filter\(function\(x\)\{ return kalshiFillIsBot\(x, kalshiLiveOrders\); \}\)/.test(html), 'the filter drops manual fills only');
