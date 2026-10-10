@@ -2453,3 +2453,8 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 **What the simulation records so this can be checked before any real order.** Every simulated order keeps `maxCost`, `addon` and `addonCost`, the fields the loss stop reads, so the real stop rule can be run over Bitcoin and gold's live orders together with ETH and SOL's simulated ones, and the page can show what the combined stop would have done over the 24 to 72 hours.
 
 **Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.
+
+
+## The exit watch was built (the owner's decision, 2026-10-10; information only, no variant counted)
+
+After the exploratory read of the first 24 hours of 10 second books (Friday's loss slid for four minutes and an exit at 70c would have kept about three quarters of it), the owner asked for the stop loss to be implemented. It is built (`runExitWatch`, `kalshiLiveExit`, `kalshiExitMode`) behind a three way switch on the page that defaults to **log only**, so the first thing it produces is evidence: each time a position's bid falls to 70c it records what it would have sold. Turning it to **sell** is the owner's choice and is not a research verdict: the registered fresh-data test (X8) is still the way to find out whether a 70c exit pays for the winners it stops, and the 67 day test of exits (X1 to X7) found that it did not. The log-only records on real orders are a second, live source for that question.

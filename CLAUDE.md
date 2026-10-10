@@ -427,3 +427,7 @@ Docs in `docs/` (overview, roadmap, career notes, mock-ups) are refreshed weekly
 - `firestore.rules` enforces that only the admin account can ever hold
   live-trading credentials. The backend relies on that and does no admin
   check of its own.
+
+## The exit watch only closes what the bot opened
+
+`runExitWatch` (`functions/kalshiLiveLib.js`, run by `kalshiLiveExit`) sells a position when the side's bid falls to 70c, and only in "sell" mode (the owner's switch; the default is "log", which sells nothing). Its invariants are tested in `test/kalshiExitGates.test.js` and are not to be loosened: it iterates the bot's own order documents (never the account's positions), reads the live position first (a YES sell on a position that is gone would OPEN the opposite one), sells at most what the order filled, claims each sell atomically with a fixed client order id, never retries a lost answer (it ends the session instead), and its only order is an immediate-or-cancel close. A realised exit is recorded as `settled: true, result: "exit"` with `settledPnl`, which is what the loss stop and the pool read.
