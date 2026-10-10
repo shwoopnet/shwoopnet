@@ -689,6 +689,42 @@ gates.X8 = () => {
   assert.ok(/extraLiveCounts\(session\)/.test(armed) && /quotes skipped/.test(armed), 'the extra series\' quotes are added, and a failure there never stops Bitcoin and gold');
 };
 
+// W1 to W3: the combined cap per window. Bitcoin, gold and Ethereum close together and move together, so one window may put only so much of the account at risk, however many series fire.
+const BTCW = 'KXBTC15M-26OCT091500-00';
+const GOLD = 'KXGOLD15M-26OCT091500-00';
+const wsess = (extra) => ({ sizing: true, sizeCap: 40, sizeAddon: 0, sizeBase: 1000, sizeNextReview: NOW + 86400000, liveExtra: extra });
+const wstate = { cap: 40, base: 1000, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null };
+const rich = { balance_breakdown: [{ balance: '1000.0000', exchange_index: 2 }, { balance: '1000.0000', exchange_index: 0 }] };
+gates.W1 = async () => {
+  // a window's account money never exceeds the combined limit, whatever number of series fire
+  const w = world({ session: wsess({ KXETH15M: 50 }), balance: rich, fresh: { [ETH]: { exchange_index: 0 }, [GOLD]: { exchange_index: 0 } } });
+  await tick(w, { quotes: [quote({}, 'KXBTC15M', BTCW), quote({}, 'KXGOLD15M', GOLD), quote({}, 'KXETH15M', ETH)], sizingState: wstate, setSizingState: async () => {} });
+  const spent = [...w.docs.values()].reduce((a, d) => a + d.maxCost, 0);
+  assert.ok(spent <= live.L1_WINDOW_CAP_FRACTION * 1000 + 1e-9, 'three series in one window put $' + spent.toFixed(2) + ' at risk, over the limit');
+  assert.ok(w.posts.length >= 1, 'and the window still trades');
+};
+gates.W2 = async () => {
+  // Ethereum is the one that goes without when the room is used: Bitcoin is sent first, at its full size
+  const w = world({ session: wsess({ KXETH15M: 50 }), balance: rich });
+  const solo = world({ session: wsess({}), balance: rich });
+  await tick(solo, { quotes: [quote({}, 'KXBTC15M', BTCW)], sizingState: wstate, setSizingState: async () => {} });
+  await tick(w, { quotes: [quote({}, 'KXETH15M', ETH), quote({}, 'KXBTC15M', BTCW)], sizingState: wstate, setSizingState: async () => {} });
+  const btc = w.posts.find((p) => p.ticker === BTCW);
+  assert.ok(btc && btc.count === solo.posts[0].count, 'Bitcoin trades its full stake even when Ethereum is listed first: ' + (btc && btc.count));
+};
+gates.W3 = async () => {
+  // orders from an earlier tick in the same window count, so the next minute cannot start the window over
+  const w = world({ session: wsess({}), balance: rich });
+  const used = live.L1_WINDOW_CAP_FRACTION * 1000;
+  w.docs.set('L1-earlier', { strategy: 'L1', ticker: BTCW.replace(/-00$/, '-99'), status: 'filled', maxCost: used, addonCost: 0, ts: NOW - 60000 });
+  await tick(w, { quotes: [quote({}, 'KXBTC15M', BTCW)], sizingState: wstate, setSizingState: async () => {} });
+  assert.strictEqual(w.posts.length, 0, 'a window already at the limit takes no more');
+  const other = world({ session: wsess({}), balance: rich });
+  other.docs.set('L1-earlier', { strategy: 'L1', ticker: 'KXBTC15M-26OCT090000-00', status: 'filled', maxCost: used, addonCost: 0, ts: NOW - 60000 });
+  await tick(other, { quotes: [quote({}, 'KXBTC15M', BTCW)], sizingState: wstate, setSizingState: async () => {} });
+  assert.ok(other.posts.length === 1, 'a different window is unaffected');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
