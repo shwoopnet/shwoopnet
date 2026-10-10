@@ -3495,11 +3495,12 @@
               <div class="kal-note kal-ethrow"><label for="kalEthLive"><b>Ethereum live, largest order</b></label> <select id="kalEthLive"><option value="off">Off</option><option value="one">1 contract</option><option value="two">2 contracts</option><option value="three">3 contracts</option><option value="five">5 contracts</option><option value="ten">10 contracts</option><option value="match">Same as Bitcoin and gold</option></select> <span id="kalEthMsg"></span></div>
               <div class="kal-note">When on, the bot also trades Ethereum's 15 minute markets by the same rule, with REAL money, at no more than this size and never more than a Bitcoin or gold trade. It shares the loss stop and the exit with the rest. Off by default. Ethereum's losses often come together with Bitcoin's.</div>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">About 6 minutes before each Bitcoin or gold 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
+                <div class="kal-note">About 6 minutes before each Bitcoin or gold (and Ethereum, if you turned it on) 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
               </details>
             </div>
           </details>
         </div>
+        <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-perf"><div id="kalPerf"></div></div>
@@ -9899,6 +9900,23 @@
     return kalDate(ms) + ' ' + tm;
   }
 
+  // Why the bot is not trading, in one line for the Account card (the full status sits inside the bot menu, which is shut). '' when it is running, so the line hides.
+  // Every reason the server writes is named; an unknown one is shown as written rather than guessed at.
+  function kalshiStopReason(s, ev, halted, switchOff, when){
+    if(s && s.active === true && !halted && !switchOff){ return ''; }
+    if(switchOff){ return "The server's order switch (KALSHI_LIVE_ENABLED) is off, so nothing is sent."; }
+    if(halted){ return 'Paused by you. Press Resume bot in the bot menu to let it trade again.'; }
+    var why = s && s.endedBecause ? String(s.endedBecause) : '';
+    if(!s || (!why && !Number.isFinite(s.endedAt))){ return 'Not started yet. Open the bot menu and press Start bot.'; }
+    var at = Number.isFinite(s.endedAt) ? ' at ' + when(s.endedAt) : '';
+    var detail = ev && ev.detail ? ' ' + String(ev.detail).slice(0, 220) : '';
+    if(why === 'loss stop'){ return 'Stopped by the loss stop' + at + '.' + detail + ' It stays off until you press Start bot.'; }
+    if(why === 'attempted'){ return 'Stopped' + at + " because an order's answer was lost or refused." + detail + ' Check the Kalshi account (Portfolio, Orders) before pressing Start bot.'; }
+    if(why === 'switched off by the owner'){ return 'Switched off by you' + at + '.'; }
+    if(why === 'flattened by the owner'){ return 'Stopped when you pressed Flatten all' + at + '.'; }
+    return 'Stopped' + at + (why ? ': ' + why + '.' : ' with no reason recorded.') + detail;
+  }
+
   // Profit or loss of one bot ORDER once it has settled: the server writes settledPnl on the order when it reads the market's result.
   // null while the order is open or unfilled, or when the figure is not there. Nothing is worked out here from prices.
   function kalshiOrderPnl(o){
@@ -10763,6 +10781,8 @@
     var capN = Number.isFinite(s && s.sizeCap) ? s.sizeCap : 3;
     var sizeText = running ? (s.sizing === true ? 'Size: up to ' + capN + (capN === 1 ? ' contract' : ' contracts') + (s.sizeAddon > 0 ? ' (+' + s.sizeAddon + ' from profit)' : '') + (Number.isFinite(s.sizeNextReview) ? ', next review ' + kalDate(s.sizeNextReview) : '') + '.' + (s.sizeSaved > 0 ? ' Saved: ' + kalshiMoney(s.sizeSaved) + '.' : '') : 'One contract each.') + (s.trailing === true ? ' Stops if it gives back ' + stopAt + ' from its best (+$' + peakAt.toFixed(2) + ').' : ' Stops if down ' + stopAt + '.') : '';
     var endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
+    var whyEl = document.getElementById('kalL1Why');
+    if(whyEl){ var why = kalshiStopReason(s, endedEv, halted, switchOff, function(ms){ return kalshiWhen(ms, now); }); whyEl.textContent = why; whyEl.hidden = !why; }
     document.getElementById('kalL1Status').textContent = running ? String(s.lastNote || '').replace(/^Watching\. Orders go in about 6 minutes before a close, and no market is at that point right now\./, 'Watching. No market is 6 minutes from its close right now.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
