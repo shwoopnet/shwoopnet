@@ -50,7 +50,7 @@ gates.Y5 = () => {
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(names(rail[1]), ['account', 'positions'], 'the rail holds the account (with the performance stats) and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['books', 'performance', 'sim', 'trades'], 'the main column: books tiles, the charts, the ETH and SOL simulation and the trades (the bot card is gone; its controls sit in the account card)');
+  assert.deepStrictEqual(names(main), ['books', 'performance', 'trades'], 'the main column: books tiles, the charts and the trades (the bot card is gone; its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
@@ -434,53 +434,13 @@ gates.Y20 = () => {
   assert.ok(/'<details class="kal-more"' \+ \(typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen \? ' open' : ''\) \+ '><summary>More stats/.test(html), 'the rebuilt markup restores the state');
 }
 
-// Y28 to Y30: the ETH and SOL simulation card's arithmetic (results, the loss stop that would have applied if it were live, how real the simulated fill is).
-const simLift = () => {
-  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
-  const names = ['kalshiOrderPnl', 'kalshiSimLegs', 'kalshiSimSummary', 'kalshiSimRisk', 'kalshiSimFidelity'];
-  return new Function("var KAL_SIM_NAMES = { KXSOL15M: 'SOL' };\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-};
-const simOrd = (series, ts, over) => Object.assign({ series, ticker: series + '-' + ts, ts, side: 'yes', status: 'filled', count: 20, fillCount: '20', maxCost: 18.7, addonCost: 7.5, price: 0.93, strategy: 'L1', calibration: false }, over || {});
-gates.Y28 = () => {
-  const f = simLift();
-  const orders = [simOrd('KXETH15M', 1, { settled: true, settledPnl: 1.2, result: 'yes' }), simOrd('KXETH15M', 2, { status: 'no fill', fillCount: '0' }),
-    simOrd('KXSOL15M', 3, { settled: true, settledPnl: -18.7, result: 'no' }), simOrd('KXSOL15M', 4, { fillCount: '7' }), simOrd('KXBTC15M', 5, { calibration: true, settled: true, settledPnl: 5 })];
-  const s = f.kalshiSimSummary(orders);
-  assert.strictEqual(s.all.sent, 2, 'a calibration order (Bitcoin or gold) and an old simulated Ethereum record (Ethereum is live now) are never candidate results');
-  assert.ok(!s.rows.ETH, 'Ethereum is not in the simulation component at all');
-  assert.deepStrictEqual([s.rows.SOL.sent, s.rows.SOL.filled, s.rows.SOL.partial], [2, 2, 1], 'a short fill is partial');
-  assert.ok(Math.abs(s.all.net + 18.7) < 1e-9 && s.all.settled === 1 && s.all.wins === 0, 'net is the settled sum');
-};
-gates.Y29 = () => {
-  const f = simLift();
-  // Two real positions open at once and the loss stop at 5% of $548: counted as lost, 2 x $18.70 against the stop plus the profit-funded $7.50 each does not trip.
-  const live2 = [simOrd('KXBTC15M', 1000000), simOrd('KXGOLD15M', 1000500)];
-  const simmed = [simOrd('KXETH15M', 1001000), simOrd('KXSOL15M', 1001500)];
-  const r = f.kalshiSimRisk(live2, simmed, 27.4, 0);
-  assert.strictEqual(r.liveOnly.trips, 0, 'Bitcoin and gold open together do not reach the stop');
-  assert.strictEqual(r.withSim.trips, 1, 'with ETH and SOL open in the same window the same stop is reached: the risk settings would need scaling');
-  assert.ok(r.withSim.worst < r.liveOnly.worst, 'the lowest point is lower with the extra positions');
-  const settledWin = (o) => Object.assign({}, o, { settled: true, settledPnl: 1.2, result: 'yes' });
-  const spaced = [simOrd('KXBTC15M', 1000000), simOrd('KXETH15M', 2000000), simOrd('KXSOL15M', 3000000), simOrd('KXGOLD15M', 4000000)].map(settledWin);
-  assert.strictEqual(f.kalshiSimRisk(spaced.slice(0, 2), spaced.slice(2), 27.4, 0).withSim.trips, 0, 'winning trades, one open at a time, never trip it');
-  const together = f.kalshiSimRisk(live2.map(settledWin), simmed.map(settledWin), 27.4, 0);
-  assert.strictEqual(together.withSim.trips, 1, 'even four winners trip it while they are all open together, because an open order is counted as lost (the live rule)');
-  assert.strictEqual(f.kalshiSimRisk([], [], 27.4, 0).withSim.trips, 0, 'nothing in, nothing tripped');
-};
-gates.Y30 = () => {
-  const f = simLift();
-  const sims = [simOrd('KXBTC15M', 1, { ticker: 'A', calibration: true }), simOrd('KXGOLD15M', 2, { ticker: 'B', calibration: true, status: 'no fill', fillCount: '0' }), simOrd('KXBTC15M', 3, { ticker: 'C', calibration: true }), simOrd('KXETH15M', 4, { ticker: 'D' })];
-  const real = [simOrd('KXBTC15M', 1, { ticker: 'A' }), simOrd('KXGOLD15M', 2, { ticker: 'B', status: 'no fill', fillCount: '0' }), simOrd('KXBTC15M', 3, { ticker: 'C', status: 'no fill', fillCount: '0' })];
-  assert.deepStrictEqual(f.kalshiSimFidelity(sims, real), { pairs: 3, agree: 2, simFill: 2, realFill: 1 }, 'only calibration orders with a real order on the same market are compared');
-};
-
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
 gates.Y31 = () => {
-  assert.ok(/KXETH15M: 'Ethereum 15m', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'Ethereum is an ordinary live market card now; Solana is always simulated only');
-  assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && /product: 'SOL-USD'/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && /kalshiFetchAlt\('SOL', now\)/.test(html), 'Coinbase history and ticker for both');
+  assert.ok(/KXETH15M: 'Ethereum 15m' \}/.test(html) && !/KXSOL15M|Solana/.test(html), 'Ethereum is an ordinary live market card; there is no Solana anywhere on the page');
+  assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && !/SOL-USD/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && !/kalshiFetchAlt\('SOL'/.test(html), 'Coinbase history and ticker for both');
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
-  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXSOL15M']);
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M']);
   const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
