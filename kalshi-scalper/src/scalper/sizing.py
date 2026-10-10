@@ -17,7 +17,7 @@ from . import lstrats as L
 from .feerounding import order_cost
 from .scalps import load as load_markets
 
-def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None, n_ceiling=10, cash_frac=None, base0=None, usable=None, trailing=False, addon_outside=False, cap_ceiling=10, cap0=None, boost=None):
+def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=341.0, step_days=7, stop_frac=None, n_ceiling=10, cash_frac=None, base0=None, usable=None, trailing=False, addon_outside=False, cap_ceiling=10, cap0=None, boost=None, reset_on_loss=False, pool_every_win=False):
     """One path of `ndays` days. step_days: days between reviews (one step up at most per review, down at once). stop_frac: if set, the loss stop of the live bot:
     a day's result at or below minus stop_frac of the balance at the last review ends that day (the owner restarts the next morning), empties the pool and
     holds step-ups and the add-on for 7 days. Returns total, deepest drawdown, saved, final cap, peak, stops."""
@@ -52,8 +52,14 @@ def path(by, days, dpc, skim, addon_max, fixed, rng, ndays=70, fill=0.6, start=3
             cash+=pnl; total+=pnl; day_pnl+=pnl
             if skim:
                 cum+=pnl
-                if cum>hwm: rise=cum-hwm; hwm=cum; pool+=0.5*rise; saved+=0.5*rise
+                if pool_every_win:
+                    # the rule built for the owner (Oct 10): the pool rebuilds from half of EVERY win and loses every loss; savings still take half of a NEW high only
+                    if cum>hwm: rise=cum-hwm; hwm=cum; saved+=0.5*rise
+                    if pnl>0: pool+=0.5*pnl
+                    else: pool=max(0.0,pool+pnl)
+                elif cum>hwm: rise=cum-hwm; hwm=cum; pool+=0.5*rise; saved+=0.5*rise
                 elif pnl<0: pool=max(0.0,pool+pnl)
+                if reset_on_loss and pnl<0: hwm=cum   # the LITERAL restart on every loss: makes half of every win a saving, which never absorbs a loss (see the README)
             peak=max(peak,total); dd=max(dd,peak-total)
             day_peak=max(day_peak,day_pnl)
             # trailing ('Stop follows the high point'): measured from the best result of the day so far instead of from zero
@@ -140,6 +146,24 @@ def s1() -> None:
             print(f"  ${start:.0f} {name:13s} mean {start + m:7.0f} (gain {m:+6.0f})  5th {start + t[150]:7.0f}  1st {start + t[30]:7.0f}  dd95 {d95:6.0f}  gain/dd95 {m / d95:5.2f}  P(loss) {sum(x < 0 for x in t) / 3000:3.0%}  stop days {st.mean(x[5] for x in res):.2f}")
 
 
+def pool() -> None:
+    """Oct 10, 2026, information only: how the reinvest pool rebuilds after a loss. Three rules from $750 with the deployed sizing (2% base, $43 ladder, ceiling 40), 60% fills, 5% stop,
+    3000 paths over the real 67 days: the original (half of each new profit high), the literal restart of the high-water mark on every loss, and the pool refilling from half of every win."""
+    markets, _ = load_markets()
+    ents = L.hold_rule(markets, **L.L1)
+    by = defaultdict(list)
+    for e in ents: by[e["day"]].append(e)
+    days = sorted(by)
+    for nd in (30, 90):
+        for label, extra in (("original: pool from new highs", {}), ("literal restart on every loss", dict(reset_on_loss=True)), ("pool refills from every win", dict(pool_every_win=True))):
+            rng = random.Random(5)
+            kw = dict(dpc=43, skim=True, fixed=0, start=750.0, step_days=3, stop_frac=0.05, base0=750.0, addon_max=999, n_ceiling=50, addon_outside=True, cash_frac=0.02, fill=0.6, ndays=nd, cap0=17, cap_ceiling=40)
+            kw.update(extra)
+            res = [path(by, days, rng=rng, **kw) for _ in range(3000)]
+            t = sorted(x[0] for x in res); dd = sorted(x[1] for x in res)
+            print(f"$750 {nd:2d}d {label:31s} mean gain {st.mean(t):+7.1f}  5th {t[150]:+7.1f}  1st {t[30]:+7.1f}  dd95 {dd[2850]:6.1f}  savings {st.mean(x[2] for x in res):6.1f}  stop days {st.mean(x[5] for x in res):.2f}")
+
+
 if __name__ == "__main__":
     import sys
-    s1() if "s1" in sys.argv[1:] else base2() if "base2" in sys.argv[1:] else current() if "current" in sys.argv[1:] else main()
+    pool() if "pool" in sys.argv[1:] else s1() if "s1" in sys.argv[1:] else base2() if "base2" in sys.argv[1:] else current() if "current" in sys.argv[1:] else main()

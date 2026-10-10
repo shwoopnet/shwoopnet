@@ -505,6 +505,14 @@ gates.Y33 = () => {
   assert.ok(f.kalshiTradePnl({ count: 20, price: '0.915' }, held, 'no').pnl < -18, 'a trade held to settlement is computed as before');
 };
 
+// Y34: the pool rule's switch on the page: two rules, 'After every win' asks first, the switch shows the server's rule (the original by default).
+gates.Y34 = () => {
+  assert.ok(/<select id="kalPoolRule"><option value="highs">after new profit highs<\/option><option value="wins">after every win<\/option><\/select>/.test(html));
+  assert.ok(/kalshiPoolRule: function\(rule\)/.test(html) && /httpsCallable\(functions, 'kalshiPoolRule'\)/.test(html), 'the page can set it');
+  assert.ok(/want === 'wins' && !window\.confirm\(/.test(html), 'the riskier rule asks first');
+  assert.ok(/poolSel\.value = s && s\.poolRule === 'wins' \? 'wins' : 'highs'/.test(html), 'the original rule by default');
+};
+
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
 (async () => {
   let failed = 0;
