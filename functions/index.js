@@ -91,6 +91,10 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
+// The owner asked for everything to be shut off (Oct 10, 2026). While this is true NO live order is sent by the bot, whatever the session or the server switch say, and the bot cannot be
+// started. It is a code change on purpose: it holds even if a session document says "on". To trade again, set it to false in review and deploy. The exit watch is untouched (it only
+// closes positions the bot already opened).
+const CODE_KILL_SWITCH = true;
 const book = require("./kalshiBookLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
@@ -416,6 +420,9 @@ exports.kalshiL1Session = onCall(async (request) => {
     await events.add({ ts: Date.now(), kind: "session ended", detail: "switched off by you" });
     return { active: false };
   }
+  if (CODE_KILL_SWITCH) {
+    throw new HttpsError("failed-precondition", "Live trading is switched off in the code (CODE_KILL_SWITCH in functions/index.js), so the bot cannot be started.");
+  }
   if (KALSHI_LIVE_ENABLED.value() !== "on") {
     throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to start.");
   }
@@ -546,7 +553,7 @@ exports.kalshiLiveArmed = onSchedule(
         await live.runL1Tick({
           sizingState: sizingSnap.exists ? sizingSnap.data() : null, setSizingState: (st) => sizingRef.set(st),
           session, now, setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent,
-          quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
+          quotes: market.quotes, active: market.active, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
         });
       }
