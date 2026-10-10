@@ -466,7 +466,11 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
 // pool and switches the add-on off for a week. Orders are folded in once, in time order, behind a cursor that only moves past a run of orders that have
 // all settled, so an older order settling late is never skipped and nothing is counted twice. Orders from before the state existed are history. Pure.
 const SKIM_REINVEST = 0.5;
-function foldSkim(state, orders) {
+// opts.everyWin (the owner's choice, Oct 10, 2026, session.poolRule "wins"): the pool rebuilds from half of EVERY win and loses every loss, so after a loss it starts filling at once instead of waiting
+// to get back above the old high. Savings are untouched: they still take half of a NEW high only. Why not the literal "restart the high-water mark on every loss": that makes half of every win
+// a saving, savings never absorb a loss, so the sizing balance (cash minus savings) shrinks while the account is flat; replayed on 69 days it more than halved the 90 day gain. Rebuilding only the pool
+// (a bookkeeping allowance, not segregated money) kept the profit and raised it about 47%, at about 60% deeper drawdowns: README, "Pool rebuilds after every win".
+function foldSkim(state, orders, opts = {}) {
   let pool = Number.isFinite(state.pool) ? state.pool : 0, saved = Number.isFinite(state.saved) ? state.saved : 0;
   let cum = Number.isFinite(state.cum) ? state.cum : 0, hwm = Number.isFinite(state.hwm) ? state.hwm : 0;
   let cursor = Number.isFinite(state.appliedTs) ? state.appliedTs : (Number.isFinite(state.reviewedAt) ? state.reviewedAt : 0);
@@ -476,7 +480,11 @@ function foldSkim(state, orders) {
     if (t.settled !== true || !Number.isFinite(Number(t.settledPnl))) break;
     const pnl = Number(t.settledPnl);
     cum += pnl;
-    if (cum > hwm) { const rise = cum - hwm; hwm = cum; pool += SKIM_REINVEST * rise; saved += (1 - SKIM_REINVEST) * rise; }
+    if (opts.everyWin === true) {
+      if (cum > hwm) { const rise = cum - hwm; hwm = cum; saved += (1 - SKIM_REINVEST) * rise; }
+      if (pnl > 0) pool += SKIM_REINVEST * pnl;
+      else if (pnl < 0) pool = Math.max(0, pool + pnl);
+    } else if (cum > hwm) { const rise = cum - hwm; hwm = cum; pool += SKIM_REINVEST * rise; saved += (1 - SKIM_REINVEST) * rise; }
     else if (pnl < 0) pool = Math.max(0, pool + pnl);
     cursor = t.ts;
   }
@@ -528,7 +536,7 @@ async function runL1Tick(args) {
     // The weekly review sees the balance WITHOUT what has been skimmed to savings, so saved profit is never sized up on.
     const priorSaved = args.sizingState && Number.isFinite(args.sizingState.saved) ? args.sizingState.saved : 0;
     const rv = reviewSizing(args.sizingState, Math.max(0, cash - priorSaved), now);
-    const fs = foldSkim(rv.state, recentList);
+    const fs = foldSkim(rv.state, recentList, { everyWin: session.poolRule === "wins" });
     sizeState = { ...rv.state, pool: fs.pool, saved: fs.saved, cum: fs.cum, hwm: fs.hwm, appliedTs: fs.appliedTs };
     sizeCap = sizeState.cap; sizeBase = sizeState.base; sizeAddon = skimAddon(sizeState, now);
     if ((rv.changed || fs.changed) && args.setSizingState) {

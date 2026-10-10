@@ -581,6 +581,48 @@ gates.N30 = () => {
   assert.strictEqual(live.l1Count(509, 0.93, 5, 999), live.L1_ORDER_CEILING, 'the fat-finger guard is the only fixed limit left');
 };
 
+// P1 to P5: the pool rule. "highs" is the original (half of each NEW profit high); "wins" refills the pool from half of every win, right after a loss, with savings untouched.
+gates.P1 = () => {
+  const st = { pool: 0, saved: 0, cum: 0, hwm: 0, appliedTs: 0 };
+  const o = (id, ts, pnl) => ({ id, strategy: 'L1', ts, fillCount: '3.00', maxCost: 2.79, settled: true, settledPnl: pnl });
+  const seq = [o('a', 1, 4), o('b', 2, 4), o('c', 3, -6), o('d', 4, 1), o('e', 5, 1), o('f', 6, 1)];   // +8, a loss of 6 (to +2), then three wins of 1 (back to +5, still below the high of +8)
+  const highs = live.foldSkim(st, seq), wins = live.foldSkim(st, seq, { everyWin: true });
+  assert.deepStrictEqual([highs.pool, highs.saved], [0, 4], 'original rule: after the loss the pool stays empty until the old high is regained (the pool took half of +8, the loss emptied it)');
+  assert.ok(Math.abs(wins.pool - 1.5) < 1e-9, 'new rule: the three wins after the loss put half of each in the pool at once: ' + wins.pool);
+  assert.strictEqual(wins.saved, 4, 'savings are exactly as before: half of the net high only');
+};
+gates.P2 = () => {
+  const o = (id, ts, pnl) => ({ id, strategy: 'L1', ts, fillCount: '3.00', maxCost: 2.79, settled: true, settledPnl: pnl });
+  const st = { pool: 3, saved: 3, cum: 6, hwm: 6, appliedTs: 0 };
+  assert.strictEqual(live.foldSkim(st, [o('x', 1, -10)], { everyWin: true }).pool, 0, 'a loss comes out of the pool first and the pool stops at zero, under the new rule too');
+  assert.strictEqual(live.foldSkim(st, [o('x', 1, -10)]).pool, 0, 'and under the original');
+  assert.strictEqual(live.foldSkim(st, [o('x', 1, -1)], { everyWin: true }).pool, 2, 'a small loss takes only its size');
+};
+gates.P3 = () => {
+  // The flaw the owner would hit with the literal restart: savings are a ratchet. Under "wins" savings stay at half the net high and never more.
+  const o = (id, ts, pnl) => ({ id, strategy: 'L1', ts, fillCount: '3.00', maxCost: 2.79, settled: true, settledPnl: pnl });
+  let rows = [], ts = 1, cum = 0, hi = 0, fs = { pool: 0, saved: 0, cum: 0, hwm: 0, appliedTs: 0 };
+  for (let i = 0; i < 400; i++) { const pnl = (i % 17 === 16) ? -10.5 : 0.6; rows.push(o('r' + i, ts++, pnl)); cum += pnl; hi = Math.max(hi, cum); }
+  const wins = live.foldSkim(fs, rows, { everyWin: true });
+  assert.ok(wins.saved <= 0.5 * hi + 1e-6, 'savings never exceed half of the best net result (' + wins.saved.toFixed(2) + ' of ' + hi.toFixed(2) + ')');
+  assert.ok(wins.pool >= 0, 'the pool is never negative');
+};
+gates.P4 = () => {
+  // With no opts the function is exactly the original, so every existing order and the saved state behave as before until the owner switches the rule.
+  const o = (id, ts, pnl) => ({ id, strategy: 'L1', ts, fillCount: '3.00', maxCost: 2.79, settled: true, settledPnl: pnl });
+  const st = { pool: 0, saved: 0, cum: 0, hwm: 0, appliedTs: 0 };
+  const a = live.foldSkim(st, [o('a', 1, 2), o('b', 2, -1), o('c', 3, 3)]);
+  assert.deepStrictEqual(a, live.foldSkim(st, [o('a', 1, 2), o('b', 2, -1), o('c', 3, 3)], {}), 'no opts is the original');
+  assert.deepStrictEqual(a, live.foldSkim(st, [o('a', 1, 2), o('b', 2, -1), o('c', 3, 3)], { everyWin: false }), 'everyWin false is the original');
+};
+gates.P5 = () => {
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(/foldSkim\(rv\.state, recentList, \{ everyWin: session\.poolRule === "wins" \}\)/.test(fnSrcLib()), 'the tick reads the owner\'s rule from the session');
+  const setter = idx.slice(idx.indexOf('exports.kalshiPoolRule = onCall'), idx.indexOf('exports.kalshiL1Session = onCall'));
+  assert.ok(/assertKalshiAdmin/.test(setter) && /rule !== "highs" && rule !== "wins"/.test(setter) && /HttpsError\("unavailable"/.test(setter), 'admin only, two named values, a named failure');
+};
+function fnSrcLib() { return require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8'); }
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

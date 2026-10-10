@@ -2453,3 +2453,21 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 **What the simulation records so this can be checked before any real order.** Every simulated order keeps `maxCost`, `addon` and `addonCost`, the fields the loss stop reads, so the real stop rule can be run over Bitcoin and gold's live orders together with ETH and SOL's simulated ones, and the page can show what the combined stop would have done over the 24 to 72 hours.
 
 **Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.
+
+## Pool rebuilds after every win (the owner's request, 2026-10-10; information only, no hypothesis, no verdict, no variant counted)
+
+The owner asked for the reinvest pool to restart building on each loss instead of waiting for new profit highs. `PYTHONPATH=src python -m scalper.sizing pool`, from $750 with the deployed sizing (2% base, $43 ladder, ceiling 40), 60% fills, 5% stop, 3000 paths over the real 67 days:
+
+| Rule | Days | Mean gain | 5th pct | 1st pct | Deepest drawdown (95th) | End savings | Stop days |
+|---|---|---|---|---|---|---|---|
+| Original: pool from half of each new high | 30 | +$121 | -$82 | -$133 | $187 | $90 | 1.38 |
+| Literal restart of the high-water mark on every loss | 30 | +$131 | -$127 | -$177 | $222 | **$581** | 0.31 |
+| Pool refills from half of every win | 30 | +$181 | -$154 | -$225 | $287 | $147 | 0.84 |
+| Original | 90 | +$403 | -$12 | -$113 | $269 | $238 | 3.42 |
+| Literal restart on every loss | 90 | **+$188** | -$98 | -$167 | $226 | **$873** | 0.31 |
+| Pool refills from every win | 90 | +$591 | -$132 | -$284 | $438 | $368 | 1.86 |
+
+- **The literal version is a trap.** Restarting the high-water mark on every loss makes half of every win a saving, and savings never absorb a loss and are not counted in the sizing balance. The savings figure explodes ($873 on a $750 account over 90 days) while the account is flat, size stops growing, and the 90 day gain falls to less than half of the original. This is the flaw the file already recorded when skimming each win was first tried.
+- **What the owner asked for, kept: the pool refills right after a loss.** Rebuilt as "half of every win goes to the pool, a loss comes out of the pool, savings only take half of a NEW high" (`pool_every_win`), it keeps the profit and raises it: about +47% at both horizons.
+- **The price is risk, about in proportion.** The bad percentiles roughly double (90 day 1st percentile -$284 against -$113), the deepest drawdown is about 60% larger ($438 against $269), and the mean per dollar of drawdown is slightly lower (1.35 against 1.50). It is the same trade as a larger size, because the pool's extra contracts are back in play sooner after each loss. Stop days fall because the pool is full of contracts again but each stop trips later in the run, not because the risk is lower.
+- **Built as a switch** (`session.poolRule`, `foldSkim`'s `everyWin`), default the original rule, so the owner decides when it starts. It applies only to orders settled after it is switched. A replay of the past, not a forecast; the live record (82 of 83) is far better than the history it replays.

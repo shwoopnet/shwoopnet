@@ -2111,6 +2111,7 @@
   var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
   var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
   var kalshiSimSessionFn = httpsCallable(functions, 'kalshiSimSession');
+  var kalshiPoolRuleFn = httpsCallable(functions, 'kalshiPoolRule');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
   var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
 
@@ -2598,6 +2599,10 @@
       }, function(err){ console.error('Kalshi live sync error:', err); });
     },
     // The ETH and SOL simulation: on or off (admin only, no order exists behind it), and its records, which only the server writes.
+    // How the reinvest pool rebuilds: 'highs' (half of each new profit high) or 'wins' (half of every win, so it fills again right after a loss). Admin only.
+    kalshiPoolRule: function(rule){
+      return kalshiPoolRuleFn({ rule: rule }).then(function(res){ return res.data; });
+    },
     kalshiSimSession: function(on){
       return kalshiSimSessionFn({ on: on === true }).then(function(res){ return res.data; });
     },
@@ -3473,6 +3478,8 @@
               <div class="kal-note" id="kalFlattenMsg"></div>
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
+              <div class="kal-note kal-poolrow"><label for="kalPoolRule"><b>Reinvest pool rebuilds</b></label> <select id="kalPoolRule"><option value="highs">after new profit highs</option><option value="wins">after every win</option></select> <span id="kalPoolMsg"></span></div>
+              <div class="kal-note">"After every win" starts refilling the pool right after a loss instead of waiting to get back above the old high. In a replay of the history it raised the profit about 47% and made the bad drawdowns about 60% deeper. Applies to orders from now on.</div>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
                 <div class="kal-note">About 6 minutes before each Bitcoin or gold 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
               </details>
@@ -10718,6 +10725,8 @@
     var pill = document.getElementById('kalL1Pill');
     pill.className = 'kal-pill' + (switchOff ? ' bad' : (halted ? ' warn' : (running ? ' on' : '')));
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
+    var poolSel = document.getElementById('kalPoolRule');
+    if(poolSel && document.activeElement !== poolSel){ poolSel.value = s && s.poolRule === 'wins' ? 'wins' : 'highs'; }
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
     var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.05 * base).toFixed(2) : '$10.00';
@@ -10734,6 +10743,20 @@
   }
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
+
+  // The pool rule's switch. 'After every win' makes size grow faster after a loss, so it asks first; going back to the original rule does not.
+  (function(){
+    var sel = document.getElementById('kalPoolRule'), msg = document.getElementById('kalPoolMsg');
+    if(!sel){ return; }
+    var current = function(){ var s = kalshiLiveCtl.session; return s && s.poolRule === 'wins' ? 'wins' : 'highs'; };
+    sel.addEventListener('change', function(){
+      var api = window.__shwoopAPI, want = sel.value;
+      if(!api || !api.kalshiPoolRule || !currentUserIsAdmin){ sel.value = current(); return; }
+      if(want === 'wins' && !window.confirm('The pool will refill from half of every win, including right after a loss. In the history replay that raised the profit about 47% and made the bad drawdowns about 60% deeper. Turn it on?')){ sel.value = current(); return; }
+      sel.disabled = true; msg.textContent = 'Saving...';
+      api.kalshiPoolRule(want).then(function(){ msg.textContent = 'Saved.'; }, function(err){ msg.textContent = 'Not changed: ' + ((err && err.message) || 'unknown'); sel.value = current(); }).then(function(){ sel.disabled = false; });
+    });
+  })();
 
   // The simulation's switch. Nothing it does can reach the account, so there is no confirmation to click through.
   (function(){

@@ -348,6 +348,25 @@ exports.kalshiLiveBaseline = onCall(
 
 // The owner's 24 hour L1 session (README: "Live waiver: L1 for 24 hours"). This only switches the session document
 // on or off, with a server-set expiry; the scheduled function below does the work, and every limit is in kalshiLiveLib.js.
+// How the reinvest pool rebuilds: "highs" (half of each NEW profit high, the original rule) or "wins" (half of every win; a loss comes out of the pool in both). Kept on the session
+// document with the exit mode so a restart of the session keeps it. Admin only. Affects only orders settled from now on.
+exports.kalshiPoolRule = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const rule = request.data && request.data.rule;
+  if (rule !== "highs" && rule !== "wins") throw new HttpsError("invalid-argument", "The pool rule must be highs or wins.");
+  try {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const now = Date.now();
+    await db.collection("kalshiLiveControl").doc("session").set({ poolRule: rule, poolRuleAt: now }, { merge: true });
+    await db.collection("kalshiLiveEvents").add({ ts: now, kind: "pool rule", detail: "the reinvest pool now rebuilds from " + (rule === "wins" ? "half of every win (it starts filling again right after a loss)" : "half of each new profit high") });
+    return { rule };
+  } catch (e) {
+    console.error("kalshiPoolRule failed:", e);
+    throw new HttpsError("unavailable", "Could not save the pool rule: " + String((e && e.message) || e).slice(0, 140));
+  }
+});
+
 exports.kalshiL1Session = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
   ensureDefaultAdminApp();
