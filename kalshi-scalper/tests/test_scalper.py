@@ -2243,6 +2243,39 @@ assert _TF.t4_trade([_b(200, y=0.06), _b(210, n=0.30)]) is None, "no entry after
 assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.07)]) is None, "no print reaching +3c and none at 240 s: no observation"
 print("T4 tests passed")
 
+# X8: the exit at 70c on 10 second books. A losing slide is cut, a winner that never reaches 70c is untouched, one that dips under 70c and recovers is stopped (the cost), the exit is always a LATER snapshot than the
+# entry, snapshots before the registered cutoff never enter, and fewer than 300 entries is NOT_ENOUGH_DATA, never a pass.
+from datetime import datetime as _dt0, timezone as _tz0
+from scalper import exit10s as _X
+_cm = int(_dt0(2026, 10, 10, 14, 0, tzinfo=_tz0.utc).timestamp() * 1000)
+_tk = "KXBTC15M-26OCT101000-00"       # 10:00 EDT = 14:00 UTC
+assert _X.close_ms(_tk) == _cm, "tickers are in Eastern time"
+assert _X.close_ms("KXBTC15M-26NOV021000-00") == int(_dt0(2026, 11, 2, 15, 0, tzinfo=_tz0.utc).timestamp() * 1000), "and after the clocks change it is EST"
+def _book(ticker, cm, ybids):
+    out, t = [], cm - 372_000
+    for yb in ybids:
+        out.append((t, "KXBTC15M", yb, yb + 0.01, 1 - yb - 0.01, 1 - yb)); t += 10_000
+    return {ticker: out}
+_slide = [0.92, 0.92, 0.85, 0.71, 0.70, 0.54, 0.40, 0.15, 0.03] + [0.02] * 30
+_lose = _X.entries(_book(_tk, _cm, _slide))
+assert len(_lose) == 1 and _lose[0]["res"] == "loss" and _lose[0]["stopped"], "a slide to zero is a loss that the exit stops"
+assert _lose[0]["exit"] > _lose[0]["hold"] + 0.5, "selling at 0.70 keeps most of the loss: " + str(_lose[0])
+_win = _X.entries(_book(_tk, _cm, [0.92, 0.91, 0.85, 0.80, 0.78, 0.9] + [0.99] * 33))
+assert len(_win) == 1 and _win[0]["res"] == "win" and not _win[0]["stopped"] and abs(_win[0]["diff"]) < 1e-12, "a winner that only dipped to 0.78 is untouched"
+_dip = _X.entries(_book(_tk, _cm, [0.92, 0.91, 0.66, 0.9] + [0.99] * 35))
+assert len(_dip) == 1 and _dip[0]["res"] == "win" and _dip[0]["stopped"] and _dip[0]["diff"] < -0.2, "a winner that dips to 0.66 and recovers is stopped, which is the cost of the rule"
+assert _X.entries(_book(_tk, _cm, [0.92] * 5 + [0.69] + [0.99] * 33))[0]["stopped"], "0.69 triggers"
+assert not _X.entries(_book(_tk, _cm, [0.92] * 5 + [0.71] + [0.99] * 33))[0]["stopped"], "0.71 does not"
+_early = {k: [(t - 10 ** 9, *rest) for (t, *rest) in v] for k, v in _book(_tk, _cm, _slide).items()}
+assert _X.CUTOFF_MS > _X.close_ms("KXBTC15M-26OCT092245-45") - 10 ** 7, "the exploratory file ended before the cutoff"
+_few = [{"ticker": "t%d" % i, "day": "2026-10-%02d" % (11 + i % 8), "close_ts": i, "diff": 0.05, "diff_stress": 0.04, "res": "win", "stopped": False, "hold": 0.0, "exit": 0.05, "series": "x"} for i in range(299)]
+assert _X.verdict(_few)[0] == "NOT_ENOUGH_DATA" and _X.verdict([])[0] == "NOT_ENOUGH_DATA", "fewer than 300 entries is never a pass"
+_many = [{"ticker": "m%d" % i, "day": "2026-10-%02d" % (11 + i % 8), "close_ts": i, "diff": 0.05 + (0.01 if i % 2 else -0.01), "diff_stress": 0.04, "res": "win", "stopped": False, "hold": 0.0, "exit": 0.05, "series": "x"} for i in range(400)]
+assert _X.verdict(_many)[0] == "NOT_YET_FALSIFIED", "a steady positive difference over 300 entries on 8 days passes the bar"
+_neg = [dict(e, diff=-0.02, diff_stress=-0.03) for e in _many]
+assert _X.verdict(_neg)[0] == "FALSIFIED"
+print("X8 tests passed")
+
 # B4: the 84c to 88c band takes asks from 0.84 up to but not including 0.88, so it never overlaps L1 (88c to 97c) and leaves no gap, and its pass bar is the same as every earlier test.
 from scalper import band84 as _B4, lstrats as _L4
 def _mk(ticker, ask, bid, res="yes"):
