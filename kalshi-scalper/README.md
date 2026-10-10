@@ -2600,6 +2600,13 @@ The owner downloaded the order-book recorder's snapshots (`kalshi-books-20261009
 
 **Limits.** Snapshots every 10 seconds can step over a gap; the sell is assumed at the bid of the snapshot that first shows 0.70 or lower, not a later and worse one, and a live bot would be a second or two slower (no resting stop order exists on Kalshi; the bot would have to watch and sell by itself). A winner that dips and recovers between two snapshots is not seen. At roughly 30 entries a day a 10 day read is about 300 entries and about 18 losses: enough to pass `NOT_ENOUGH_DATA` and too few to be sure of a small mean difference. A pass would not change the bot; building a selling path on a live-money bot is a separate, careful step (a sell must never touch the owner's manual trades, must not double-sell, and needs its own gates).
 
+**How to read it (a runbook, added 2026-10-10; it changes nothing registered above).**
+
+1. On the Kalshi page, Tools, "Download book snapshots". The recorder keeps 10 days, so download again every few days and keep every file: the reader merges and de-duplicates them.
+2. `cd kalshi-scalper/src && python -m scalper.exit10s FILE1 FILE2 ...` (`.csv` or `.csv.gz`). Snapshots before 2026-10-10 12:57 UTC are dropped by the code, not by the reader.
+3. Read the verdict line once. `NOT_ENOUGH_DATA` is a normal first answer, not a failure: at about 30 entries a day the 300 entry minimum is about ten days of data, so a read around Oct 20 may land just short. Wait and read again with more days; do not change the threshold, the cadence or the bar to get a verdict sooner.
+4. The owner has the exit set to Sell on the real account, so the page's "Exit at 70c" block (More stats) is the live record of the same question: positions that fell to 70c, what the sells got, and what holding paid. It is a second source with few events, not a replacement for this test.
+
 ## Pre-registration: B4, L1 one band lower, 84c to 88c (the owner's idea; fixed 2026-10-10, before any code for it and before any 84c to 88c result)
 
 **The question.** A live Bitcoin market sat at "Below 86%" six minutes from its close and the bot, whose floor is 88c, correctly took nothing (the real price of the Below side was about 87c). The owner asked whether the same rule one band lower, 84c to 88c, is worth taking. This is the first test of anything below 88c on this rule; every earlier band test (B1 to B3, P1) was inside 88c to 97c.

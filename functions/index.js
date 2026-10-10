@@ -448,7 +448,9 @@ exports.kalshiL1Session = onCall(async (request) => {
     throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the bot.");
   }
   const now = Date.now();
-  await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
+  // Starting replaces the session document, so the owner's switches (exit mode, pool rule, Ethereum size) are carried across explicitly.
+  const prior = (await ref.get()).data() || {};
+  await ref.set({ ...live.ownerSettings(prior), active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
   // Flag the saved sizing state so the next review raises a collapsed cap to what a fresh start gives (see reviewSizing). Pool, savings and the loss-stop clock are kept.
   if (sizing) await db.collection("kalshiLiveControl").doc("sizing").set({ reseed: true }, { merge: true });
   await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed every 3 days, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
