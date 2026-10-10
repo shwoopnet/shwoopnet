@@ -522,6 +522,59 @@ gates.Y35 = () => {
   assert.ok(/\/GOLD\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Gold' : \(\/ETH\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Ethereum' : 'Bitcoin'\)/.test(html), 'an Ethereum trade is counted under Ethereum in the stats');
 };
 
+// Y37: the exit watch read back from the bot's own order records, inside More stats. Consequences: slip is trigger bid minus fill, "better or worse than holding" is only
+// computed where the market's result is known, and a logged-only order (held to settlement) counts its real outcome as the hold result.
+gates.Y37 = () => {
+  const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
+  const f = new Function(['kalshiOrderPnl', 'kalshiExitReport', 'kalshiExitHtml'].map(grab).join('\n') + '; return { kalshiExitReport, kalshiExitHtml };')();
+  const base = { side: 'yes', count: 10, fillCount: '10', maxCost: 9.6, strategy: 'L1' };
+  const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.69, exitAvg: 0.66, settled: true, result: 'exit', settledPnl: -3.0 });
+  const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.68 }, settled: true, result: 'no', settledPnl: -9.6 });
+  const heldWon = Object.assign({}, base, { ticker: 'C', exitShadow: { bid: 0.7 }, settled: true, result: 'yes', settledPnl: 0.4 });
+  const untouched = Object.assign({}, base, { ticker: 'D', settled: true, result: 'yes', settledPnl: 0.4 });
+  const r = f.kalshiExitReport([sold, heldLost, heldWon, untouched], { A: 'no' });
+  assert.deepStrictEqual([r.touched, r.sold, r.loggedOnly], [3, 1, 2], 'an order the watch never touched is not counted');
+  assert.ok(Math.abs(r.avgSlip - 0.03) < 1e-9, 'slip is the trigger bid minus the fill: ' + r.avgSlip);
+  assert.strictEqual(r.realised, -3.0);
+  assert.ok(Math.abs(r.exitMinusHold - (-3.0 - (-9.6))) < 1e-9 && r.holdKnownSold === 1, 'selling beat holding by $6.60 where the market went against us');
+  assert.deepStrictEqual([r.known, r.recovered], [3, 1], 'recovered = the side won after touching 70c');
+  const win = f.kalshiExitReport([Object.assign({}, sold)], { A: 'yes' });
+  assert.ok(Math.abs(win.exitMinusHold - (-3.0 - 0.4)) < 1e-9, 'when the side would have won, selling was worse than holding by the win it gave up (fees included in cost)');
+  assert.strictEqual(f.kalshiExitReport([Object.assign({}, sold)], null).holdKnownSold, 0, 'no market result, no hold comparison: never guessed');
+  assert.strictEqual(f.kalshiExitReport([untouched], {}).touched, 0);
+  const none = f.kalshiExitHtml(f.kalshiExitReport([untouched], {}), (x) => x, (x) => '$' + x.toFixed(2));
+  assert.ok(/nothing to read/.test(none), 'with nothing touched it says so rather than showing zeros as a result');
+  assert.ok(/kalshiExitReport\(kalshiLiveOrders/.test(html) && /table\('By price paid', st\.byBand\) \+ \(exitRep !== undefined/.test(html), 'wired into More stats');
+};
+
+// Y36: the Account card says why the bot is not trading, without opening the bot menu.
+gates.Y36 = () => {
+  const m = /(function kalshiStopReason\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'helper present');
+  const f = new Function(m[1] + '; return kalshiStopReason;')();
+  const when = (ms) => 'T' + ms;
+  assert.strictEqual(f({ active: true }, null, false, false, when), '', 'running: no line');
+  assert.ok(/Paused by you/.test(f({ active: true }, null, true, false, when)), 'a pause is named, even with a live session');
+  assert.ok(/order switch/.test(f({ active: true }, null, false, true, when)), 'the server switch being off is named');
+  assert.ok(/Not started/.test(f(null, null, false, false, when)) && /Not started/.test(f({ active: false }, null, false, false, when)), 'never started');
+  const stop = f({ active: false, endedBecause: 'loss stop', endedAt: 5 }, { detail: 'the bot\'s trades are down $27' }, false, false, when);
+  assert.ok(/loss stop at T5/.test(stop) && /down \$27/.test(stop) && /stays off/.test(stop), 'a loss stop says when, how far down, and that it stays off: ' + stop);
+  assert.ok(/Check the Kalshi account/.test(f({ active: false, endedBecause: 'attempted', endedAt: 5 }, { detail: 'the answer was lost' }, false, false, when)), 'a lost answer tells the owner to check the account first');
+  assert.ok(/Switched off by you/.test(f({ active: false, endedBecause: 'switched off by the owner', endedAt: 5 }, null, false, false, when)));
+  assert.ok(/Flatten all/.test(f({ active: false, endedBecause: 'flattened by the owner', endedAt: 5 }, null, false, false, when)));
+  assert.ok(/mystery/.test(f({ active: false, endedBecause: 'mystery', endedAt: 5 }, null, false, false, when)), 'an unknown reason is shown as written, never guessed');
+  assert.ok(/no reason recorded/.test(f({ active: false, endedAt: 5 }, null, false, false, when)), 'an end with no reason says so');
+  assert.ok(/id="kalL1Why" hidden/.test(html) && /document\.getElementById\('kalL1Why'\)/.test(html), 'the line sits on the Account card, outside the menu');
+};
+
+// Y38: a slow load must not look like a broken account. "Never saved" is only said once the halt document has ARRIVED, and the trade figures say loading until the orders arrive.
+gates.Y38 = () => {
+  assert.ok(/var kalshiBotState = \{ control: null \};/.test(html), 'control starts as not loaded (null), not as an empty saved setting');
+  assert.ok(/var haltUnset = kalshiBotState\.control !== null && kalshiBotState\.control\.halt === undefined;/.test(html), 'the never-saved warning needs a loaded document');
+  assert.ok(/function stopKalshiBot\(\)\{\n    kalshiBotState\.control = null; kalshiOrdersLoaded = false;/.test(html), 'leaving the tab resets it, so the next open is loading again');
+  assert.ok(/kalshiOrdersLoaded = true; renderKalshiBot\(\)/.test(html) && /<b>loading\.\.\.<\/b>/.test(html) && /Loading the bot\\'s trades\.\.\./.test(html), 'figures say loading until the orders arrive, never +$0.00');
+  assert.ok(/error: function\(err\)\{ kalshiSyncError/.test(html) && /Reload the page; if it keeps happening/.test(html), 'a listener that fails is shown, not left as an endless loading state');
+};
+
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
 (async () => {
   let failed = 0;
