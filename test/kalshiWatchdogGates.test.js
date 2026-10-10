@@ -36,7 +36,7 @@ gates.W4 = () => {
   assert.ok(arm.indexOf('runArmedTick(') > -1 && arm.indexOf('runArmedTick(') < arm.lastIndexOf('watchdog.sendAll('), 'ping only after the check completes');
   assert.ok(/ok: !failure/.test(arm) && /if \(failure\) throw failure;/.test(arm), 'a failed run reports failure and is still thrown to the scheduler');
   assert.ok(/defineString\("KALSHI_WATCHDOG_URL", \{ default: "" \}\)/.test(fnSrc), 'optional, empty by default');
-  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiSimTick', 'kalshiLiveArmed', 'kalshiBookRecorder']);
+  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiSimTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiBookRecorder']);
 };
 
 // The bot's own stop alert: opt-in, one POST with the reason, and only for a session that ended by itself.
@@ -53,8 +53,11 @@ gates.W5 = async () => {
   assert.ok(/defineString\("KALSHI_STOP_ALERT_URL", \{ default: "" \}\)/.test(fnSrc), 'optional, empty by default');
   const arm = fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed = onSchedule('), fnSrc.indexOf('exports.kalshiBookRecorder'));
   assert.ok(/e\.kind === "session ended"\) await watchdog\.sendAll\(fetch, watchdog\.stopAlertPings\(/.test(arm), 'wired to the session-ended event of the scheduled run');
-  const callables = fnSrc.slice(0, fnSrc.indexOf('exports.kalshiLiveArmed = onSchedule('));
+  // Everything before the exit watch (the callables, including the owner's own stops, and the keyless simulation) never alerts; the exit watch and the armed run alert only on a session that ended by itself.
+  const callables = fnSrc.slice(0, fnSrc.indexOf('exports.kalshiLiveExit = onSchedule('));
   assert.ok(!/watchdog\.stopAlertPings\(/.test(callables), 'the owner\'s own stops (switch off, flatten all) never alert');
+  const exitFn = fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveExit = onSchedule('), fnSrc.indexOf('exports.kalshiLiveArmed = onSchedule('));
+  assert.ok(/e\.kind === "session ended"\) await watchdog\.sendAll/.test(exitFn), 'the exit watch alerts when a lost sell answer ends the session');
 };
 
 (async () => {
