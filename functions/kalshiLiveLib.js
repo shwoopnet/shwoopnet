@@ -406,10 +406,14 @@ const totalCash = (balanceBody) => {
 
 // What one filled order made once its market settled, by the one rule used everywhere: the order's worst-case cost (maxCost) is paid in
 // proportion to what filled, and each winning contract pays $1. A win is therefore booked slightly low and a loss slightly high.
+// An order the exit watch sold some or all of (exitCount contracts, exitProceeds dollars after the exit fee) pays $1 only on the contracts still held at the close, and the
+// proceeds of the sale are added. An order with no exit has exitCount 0 and is computed exactly as before.
 function settledFields(t, result) {
   const cost = Number(t.maxCost);
   const want0 = Number(t.count) > 0 ? Number(t.count) : 1, got0 = Math.min(Number(t.fillCount), want0);
-  return { settled: true, result, settledPnl: Number(((result === t.side ? got0 : 0) - cost * (got0 / want0)).toFixed(4)) };
+  const sold = Number(t.exitCount) > 0 ? Math.min(Number(t.exitCount), got0) : 0;
+  const proceeds = sold > 0 && Number.isFinite(Number(t.exitProceeds)) ? Number(t.exitProceeds) : 0;
+  return { settled: true, result, settledPnl: Number((((result === t.side ? got0 - sold : 0)) + proceeds - cost * (got0 / want0)).toFixed(4)) };
 }
 
 // Settles filled orders whose market has finished, whether or not a session is running. The session's own check stops when the session ends, so a
@@ -449,10 +453,19 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
     // A partial fill costs and pays in proportion; orders from before size scaling have count 1.
     const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want), paid = cost * (got / want);
     const addonPaid = Number.isFinite(Number(t.addonCost)) && Number(t.addonCost) > 0 ? Number(t.addonCost) * (got / want) : 0;
+    // Sold early by the exit watch (completely): the realised figure on the record is the result, and a loss burned its share of the profit-funded add-on.
+    if (t.settled === true && t.result === "exit") {
+      const pnl = Number(t.settledPnl);
+      net += Number.isFinite(pnl) ? pnl : -paid;
+      if (!Number.isFinite(pnl) || pnl < 0) addonAtRisk += paid > 0 ? (Number.isFinite(pnl) ? -pnl : paid) * (addonPaid / paid) : 0;
+      continue;
+    }
+    const sold = Number(t.exitCount) > 0 ? Math.min(Number(t.exitCount), got) : 0, soldShare = got > 0 ? sold / got : 0;
+    const proceeds = sold > 0 && Number.isFinite(Number(t.exitProceeds)) ? Number(t.exitProceeds) : 0;
     if (result === "yes" || result === "no") {
-      net += (result === t.side ? got : 0) - paid;
+      net += (result === t.side ? got - sold : 0) + proceeds - paid;
       if (result !== t.side) addonAtRisk += addonPaid;   // only a LOST order burned the profit that bought its add-on
-    } else { openCost += paid; addonAtRisk += addonPaid; }   // an open order is counted as lost, so its add-on is too
+    } else { net += proceeds - paid * soldShare; openCost += paid * (1 - soldShare); addonAtRisk += addonPaid * (1 - soldShare); }   // an open order is counted as lost, so its add-on is too
   }
   return { net, openCost, worst: net - openCost, addonAtRisk, trades: trades.length };
 }
@@ -643,6 +656,116 @@ async function runL1Tick(args) {
   return { ok: true, results };
 }
 
+// ---- The exit watch (the owner's decision, Oct 10, 2026) ---------------------------------------------------------------------------------
+// L1 holds every trade to settlement, so a favourite that reverses costs the whole stake. This watches the bot's OWN open L1 positions every few seconds and, when the
+// side's bid falls to EXIT_THRESHOLD (70c) or lower, sells them. Why 70c and why it is behind a switch: README, "Exploratory read ... Friday's loss" and "Pre-registration: X8".
+// The 24 hour read that suggested 70c is three losses, and the 67 day test of exits (X1 to X7) found they cost winners that recover; X8 is the fresh-data test. So the owner chooses:
+//   off  - nothing.   log - records when it WOULD have sold (exitShadow on the order) and sells nothing (the default).   sell - sells, for real.
+// What it will not do, by construction:
+//   - touch a position that is not one of the bot's own records (it iterates the bot's order documents, nothing else), or sell more than that order filled;
+//   - sell unless the live account actually holds the position (a YES sell on a position that is already gone would OPEN the opposite one);
+//   - send the same sell twice (the sell is claimed atomically on the order document and carries a fixed client order id), or retry an answer that was lost;
+//   - ever buy: its only order is an immediate-or-cancel close of an existing long.
+// A lost answer to a sell ends the bot's session and says so, like a lost answer to a buy.
+const EXIT_THRESHOLD = 0.70;
+const EXIT_SLIPPAGE = 0.15;          // how far past the bid it saw the immediate-or-cancel sell may go; it still fills at the book's own prices
+const EXIT_MAX_TRIES = 3;
+const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
+const EXIT_MODES = ["off", "log", "sell"];
+
+function exitBody(ticker, side, count, limit, cid, exchangeIndex) {
+  if (!Number.isInteger(count) || count < 1 || count > L1_ORDER_CEILING) throw new Error("refusing to build an exit for " + count + " contracts");
+  if (!(limit >= 0.01 && limit <= 0.99)) throw new Error("refusing to build an exit at " + limit);
+  // Closing a long YES is a YES sell (side "ask"); closing a long NO is a YES buy (side "bid"). The price is the YES price the order may go to.
+  const body = {
+    ticker, side: side === "yes" ? "ask" : "bid", count: String(count), price: limit.toFixed(2),
+    time_in_force: "immediate_or_cancel", self_trade_prevention_type: "taker_at_cross", client_order_id: cid,
+  };
+  if (exchangeIndex !== undefined && exchangeIndex !== null) body.exchange_index = exchangeIndex;
+  return body;
+}
+
+async function runExitWatch(args) {
+  const { mode, store, fetchFn, keyId, pem, now, enabled, setSession, logEvent, threshold = EXIT_THRESHOLD } = args;
+  if (!EXIT_MODES.includes(mode) || mode === "off") return { skipped: "off" };
+  const log = async (kind, detail) => { if (logEvent) { try { await logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
+  const selling = mode === "sell" && enabled === true;
+  const r4 = (x) => Math.round(x * 10000) / 10000;
+  const list = (await store.recentFilled(now - EXIT_LOOKBACK_MS)).filter((t) => t.strategy === "L1" && t.settled !== true && Number(t.fillCount) > 0
+    && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no") && t.exitStatus !== "sold" && t.exitStatus !== "unknown" && t.exitStatus !== "sending" && t.exitStatus !== "skipped");
+  const results = [];
+  for (const t of list) {
+    const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
+    const sold = Number(t.exitCount) > 0 ? Number(t.exitCount) : 0;
+    const remaining = Math.floor(got - sold + 1e-9);
+    if (remaining < 1) continue;
+    const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs: now });
+    const m = mk.status === 200 && mk.body && mk.body.market;
+    if (!m || !["active", "open"].includes(m.status)) continue;
+    const yb = num(m.yes_bid_dollars), ya = num(m.yes_ask_dollars);
+    if (!bot.validQuote(Number.isFinite(yb) ? yb : null, Number.isFinite(ya) ? ya : null)) continue;
+    const ourBid = t.side === "yes" ? r4(yb) : r4(1 - ya);
+    if (!(ourBid > 0) || ourBid > threshold + 1e-9) continue;
+    const left = Date.parse(m.close_time) - now;
+    if (!selling) {
+      if (t.exitShadow) continue;     // logged once per order
+      await store.updateTest(t.id, { exitShadow: { at: now, bid: ourBid, left: Number.isFinite(left) ? left : null, wouldSell: remaining, mode } });
+      await log("exit (log only)", t.ticker + ": the " + t.side.toUpperCase() + " side's bid fell to " + (ourBid * 100).toFixed(0) + "c with " + (Number.isFinite(left) ? Math.round(left / 1000) + " s" : "unknown time") + " left; it would have sold " + remaining + " contracts. Nothing was sent.");
+      results.push(t.ticker + ": logged");
+      continue;
+    }
+    const tries = Number(t.exitTries) > 0 ? Number(t.exitTries) : 0;
+    if (tries >= EXIT_MAX_TRIES) continue;
+    // The live account must hold the position, or a sell would open the opposite one.
+    const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker: t.ticker, limit: "20" }, nowMs: now });
+    let held = NaN;
+    if (pos.status === 200 && pos.body && Array.isArray(pos.body.market_positions)) {
+      const row = pos.body.market_positions.find((x) => x.ticker === t.ticker);
+      held = row ? num(row.position_fp !== undefined ? row.position_fp : row.position) : 0;     // readable and absent: nothing held
+    }
+    if (!Number.isFinite(held)) { results.push(t.ticker + ": the position could not be read, nothing sold"); continue; }
+    const holding = t.side === "yes" ? Math.max(0, held) : Math.max(0, -held);     // YES is a positive position, NO a negative one
+    const count = Math.min(remaining, Math.floor(holding + 1e-9));
+    if (count < 1) { await store.updateTest(t.id, { exitStatus: "skipped", exitNote: "the account holds no " + t.side.toUpperCase() + " position in it (already closed?)" }); results.push(t.ticker + ": no position held, nothing sold"); continue; }
+    if (!(await store.claimExit(t.id, tries))) continue;     // another instance has it
+    const limit = t.side === "yes" ? Math.max(0.01, r4(ourBid - EXIT_SLIPPAGE)) : Math.min(0.99, r4(ya + EXIT_SLIPPAGE));
+    const cid = "X-" + t.ticker + "-" + (tries + 1);
+    const body = exitBody(t.ticker, t.side, count, Math.round(limit * 100) / 100, cid, m.exchange_index);
+    const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
+    const d = res.body && typeof res.body === "object" ? res.body : {};
+    if (res.status >= 200 && res.status < 300 && d.order_id) {
+      const filled = Number(d.fill_count || 0);
+      let p = Number(d.average_fill_price);
+      if (!Number.isFinite(p) || p <= 0 || p >= 1) p = t.side === "yes" ? ourBid : r4(1 - ourBid);     // a YES price either way; the book price we saw is the fallback
+      const soldPrice = t.side === "yes" ? p : r4(1 - p);                    // what each contract fetched on OUR side
+      const fee = filled > 0 ? bot.takerFee(soldPrice, filled) : 0;
+      const exitCount = sold + filled, exitProceeds = Number(((Number(t.exitProceeds) || 0) + filled * soldPrice - fee).toFixed(4));
+      const patch = { exitStatus: filled >= count - 1e-9 ? "sold" : (filled > 0 ? "partly sold" : "no fill"), exitCount, exitProceeds, exitAvg: filled > 0 ? soldPrice : (t.exitAvg || null), exitAt: now, exitBid: ourBid, exitOrderId: d.order_id };
+      if (exitCount >= Math.floor(got + 1e-9) - 1e-9 && filled > 0) Object.assign(patch, settledFields({ ...t, exitCount, exitProceeds }, "exit"));
+      await store.updateTest(t.id, patch);
+      await log("exit", t.ticker + ": " + t.side.toUpperCase() + " bid at " + (ourBid * 100).toFixed(0) + "c, " + patch.exitStatus + " " + filled + " of " + count + (filled > 0 ? " at about " + (soldPrice * 100).toFixed(0) + "c" : ""));
+      results.push(t.ticker + ": " + patch.exitStatus);
+      continue;
+    }
+    if (res.status === 409) {
+      await store.updateTest(t.id, { exitStatus: "unknown", exitNote: "HTTP 409: an order with id " + cid + " already exists" });
+      await log("exit", t.ticker + ": Kalshi says the exit order " + cid + " already exists. Check the Kalshi account for it");
+      results.push(t.ticker + ": id already used");
+      continue;
+    }
+    if (isAmbiguous(res.status)) {
+      await store.updateTest(t.id, { exitStatus: "unknown", exitNote: "HTTP " + res.status + " " + short(res.body) });
+      if (setSession) await setSession({ active: false, endedAt: now, endedBecause: "attempted" });
+      await log("session ended", "the answer for the exit sell on " + t.ticker + " was lost (HTTP " + res.status + "). THE SELL MAY OR MAY NOT HAVE HAPPENED. Check the Kalshi account (Portfolio, Orders) before starting again. Nothing was retried");
+      return { ended: true, results };
+    }
+    await store.updateTest(t.id, { exitStatus: "error", exitNote: "HTTP " + res.status + " " + short(res.body), exitTries: tries + 1 });
+    await log("exit", t.ticker + ": Kalshi refused the exit sell: HTTP " + res.status + " " + short(res.body).slice(0, 80));
+    results.push(t.ticker + ": refused");
+  }
+  return { ok: true, results };
+}
+
 // ---- Flatten: the owner's emergency exit -----------------------------------------------------------------------------------------
 // Sells every open position in the account (the bot's AND any the owner opened by hand) at whatever the book will pay, immediately, one
 // immediate-or-cancel order each, never retried. A long YES position is closed by a YES sell (side "ask") at the 1c floor, a long NO position by a
@@ -687,7 +810,7 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
 }
 
 module.exports = {
-  flattenAll,
+  flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MODES, EXIT_MAX_TRIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,

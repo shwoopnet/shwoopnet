@@ -2563,6 +2563,11 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 
 **Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.
 
+
+## The exit watch was built (the owner's decision, 2026-10-10; information only, no variant counted)
+
+After the exploratory read of the first 24 hours of 10 second books (Friday's loss slid for four minutes and an exit at 70c would have kept about three quarters of it), the owner asked for the stop loss to be implemented. It is built (`runExitWatch`, `kalshiLiveExit`, `kalshiExitMode`) behind a three way switch on the page that defaults to **log only**, so the first thing it produces is evidence: each time a position's bid falls to 70c it records what it would have sold. Turning it to **sell** is the owner's choice and is not a research verdict: the registered fresh-data test (X8) is still the way to find out whether a 70c exit pays for the winners it stops, and the 67 day test of exits (X1 to X7) found that it did not. The log-only records on real orders are a second, live source for that question.
+
 ## Exploratory read: the first 24 hours of 10 second books, and Friday's loss (information only, no hypothesis, no verdict, no variant counted; 2026-10-10)
 
 The owner downloaded the order-book recorder's snapshots (`kalshi-books-202610091257.csv.gz`: Bitcoin and gold, one snapshot about every 10 seconds, 2026-10-09 12:58 UTC to 2026-10-10 12:56 UTC, 130 markets). **This is the first time L1's own entries could be watched second by second instead of minute by minute.** Everything in this section is read after the fact on 31 entries and 3 losses, so it is a lead and not evidence, and the file is excluded from the registered test below.

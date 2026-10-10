@@ -272,6 +272,19 @@ function firestoreLiveStore(db) {
     async updateTest(id, patch) { await col.doc(id).update(patch); },
     // Every order since a time, with its id. A single-field query, so it needs no composite index; the caller filters.
     async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+    // The exit watch's few recent filled orders (a single-field query again), not every filled order ever: it looks several times a minute.
+    async recentFilled(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => o.status === "filled"); },
+    // Atomic: only one instance gets to send each exit sell. False when another has it, when it has already been tried this many times, or when the order has settled.
+    async claimExit(id, tries) {
+      const ref = col.doc(id);
+      return db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        const d = snap.exists ? snap.data() : null;
+        if (!d || d.exitStatus === "sending" || (Number(d.exitTries) || 0) !== tries || d.settled === true) return false;
+        tx.update(ref, { exitStatus: "sending", exitTries: tries + 1 });
+        return true;
+      });
+    },
   };
 }
 
@@ -348,6 +361,27 @@ exports.kalshiLiveBaseline = onCall(
 
 // The owner's 24 hour L1 session (README: "Live waiver: L1 for 24 hours"). This only switches the session document
 // on or off, with a server-set expiry; the scheduled function below does the work, and every limit is in kalshiLiveLib.js.
+// The exit watch's switch (off, log, sell), kept on the session document so it survives a restart of the session. Admin only. "sell" needs the server's own live switch on.
+exports.kalshiExitMode = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const mode = request.data && request.data.mode;
+  if (!live.EXIT_MODES.includes(mode)) throw new HttpsError("invalid-argument", "The exit mode must be off, log or sell.");
+  if (mode === "sell" && KALSHI_LIVE_ENABLED.value() !== "on") {
+    throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing for the exit to sell.");
+  }
+  try {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const now = Date.now();
+    await db.collection("kalshiLiveControl").doc("session").set({ exitMode: mode, exitModeAt: now }, { merge: true });
+    await db.collection("kalshiLiveEvents").add({ ts: now, kind: "exit mode", detail: "the exit at " + Math.round(live.EXIT_THRESHOLD * 100) + "c is now " + (mode === "sell" ? "SELLING (real orders)" : (mode === "log" ? "log only (it records what it would sell and sells nothing)" : "off")) });
+    return { mode };
+  } catch (e) {
+    console.error("kalshiExitMode failed:", e);
+    throw new HttpsError("unavailable", "Could not save the exit mode: " + String((e && e.message) || e).slice(0, 140));
+  }
+});
+
 exports.kalshiL1Session = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
   ensureDefaultAdminApp();
@@ -483,6 +517,41 @@ exports.kalshiSimTick = onSchedule(
       await live.settleOpenOrders({ store, fetchFn: fetch, nowMs: now });
     } catch (e) {
       console.error("kalshiSimTick: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
+    }
+  }
+);
+
+// The exit watch: looks at the bot's own open positions about every 10 seconds for most of each minute (a scheduled function cannot run more often than once a minute, so it
+// loops inside its run). It is the only function besides the armed bot that holds the live key, and it can only close a long the bot opened (kalshiLiveLib.runExitWatch).
+// Mode is read from the session document each look: off, log (the default: it records what it would sell) or sell.
+exports.kalshiLiveExit = onSchedule(
+  { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 58, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const sessRef = db.collection("kalshiLiveControl").doc("session");
+    const store = firestoreLiveStore(db);
+    const stopAt = Date.now() + 47000;
+    for (;;) {
+      try {
+        const snap = await sessRef.get();
+        const session = snap.exists ? snap.data() : null;
+        const mode = session && live.EXIT_MODES.includes(session.exitMode) ? session.exitMode : "log";
+        if (session && mode !== "off") {
+          await live.runExitWatch({
+            mode, store, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
+            enabled: KALSHI_LIVE_ENABLED.value() === "on", setSession: (patch) => sessRef.set(patch, { merge: true }),
+            logEvent: async (e) => {
+              await db.collection("kalshiLiveEvents").add(e);
+              if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
+            },
+          });
+        }
+      } catch (e) {
+        console.error("kalshiLiveExit: " + String((e && e.message) || e).slice(0, 200));
+      }
+      if (Date.now() + 11000 > stopAt) break;
+      await new Promise((r) => setTimeout(r, 10000));
     }
   }
 );
