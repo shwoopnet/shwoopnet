@@ -2453,3 +2453,21 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 **What the simulation records so this can be checked before any real order.** Every simulated order keeps `maxCost`, `addon` and `addonCost`, the fields the loss stop reads, so the real stop rule can be run over Bitcoin and gold's live orders together with ETH and SOL's simulated ones, and the page can show what the combined stop would have done over the 24 to 72 hours.
 
 **Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.
+
+## Pre-registration: B4, L1 one band lower, 84c to 88c (the owner's idea; fixed 2026-10-10, before any code for it and before any 84c to 88c result)
+
+**The question.** A live Bitcoin market sat at "Below 86%" six minutes from its close and the bot, whose floor is 88c, correctly took nothing (the real price of the Below side was about 87c). The owner asked whether the same rule one band lower, 84c to 88c, is worth taking. This is the first test of anything below 88c on this rule; every earlier band test (B1 to B3, P1) was inside 88c to 97c.
+
+**Rule (fixed now, one parameter set, identical to L1 except the band).** Bitcoin and gold only (the markets the bot trades), the 67 day history in `data/book.sqlite`. One observation per market from the candle that ENDS exactly 360 s before the close; buy the side whose ask is **0.84 up to but not including 0.88** (`band = (0.84, 0.8799)`, so an ask of exactly 0.88 stays with L1 and nothing is counted twice), either side, hold to settlement, taker at the ask, the same fee model as `lstrats.net`. Nothing is tuned: no filter, no other band edge, no other minute. A market with no candle at that minute, no quote in the band or no result has no observation.
+
+**Counterparty.** The same as L1's and not a new one: whoever holds the longshot side near the close and sells it to the favourite buyer for less than it is worth. The mechanism weakens as the favourite gets cheaper, because the longshot being sold is then worth more (a 14c to 16c side, not 3c to 12c).
+
+**Numeric prediction, before the run: it does not pass.** Mean net per contract between **-0.8c and +0.3c**, day clustered z under 1.0, win rate within 1 point of the mean price paid (about 86%). The reasons: the weakest band L1 already takes (88c to 90c) was negative after costs in the post hoc table, a pattern that continues downward is the default, and the fee is largest near 50c (about 0.07 x p x (1-p), about 0.8c a side at 86c against 0.3c at 95c). **Expected verdict: `FALSIFIED`.** A result above +1.0c is an audit trigger first (check the entry candle ends 360 s before the close and the band excludes 0.88).
+
+**Pass bar, fixed (the same as every earlier test).** `NOT_YET_FALSIFIED` only if ALL hold: at least 300 observations on at least 5 days; day clustered z of net per contract at least **2.1**; mean net above zero; both halves of the days positive; above zero with fees times 1.2. Anything else is `FALSIFIED`. A pass is permission for a forward test on days not yet seen, never a reason to change the live bot (which has a fixed 88c floor).
+
+**Information, not part of the verdict.** Observations and per day; by series (Bitcoin and gold separately); the two sub-bands 84c to 86c and 86c to 88c (read-only, so the edge is not chosen); win rate against mean price paid; and, for scale, the same read on L1's own band over the same days.
+
+**Count.** One variant: **2,590 as of 2026-10-10** (2,589 before). No re-run with another band edge.
+
+**Limits.** Candle asks are quotes, not our fills (the live bot fills about 56% of its signals, and the misses are where the losses are). The same 67 days as every earlier test. A pass would not change the bot: it would need its own band logic and sizing, and the size ladder, stop and pool were all built around 88c to 97c entries.
