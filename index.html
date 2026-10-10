@@ -10260,7 +10260,8 @@
     var st = document.getElementById('kalStatus');
     kalshiBooksLast = data || null;
     renderKalshiPositions();
-    var rows = (data && data.markets) || [];
+    // Only the markets the page knows. The deployed relay can lag the page by a deploy and still send a market that was dropped, which would show up as a bare ticker.
+    var rows = ((data && data.markets) || []).filter(function(m){ return m && ['KXBTC15M', 'KXGOLD15M', 'KXETH15M'].indexOf(m.series) > -1; });
     if(!rows.length){
       el.innerHTML = '<div class="kal-empty">No open markets right now.</div>';
       st.textContent = 'No open markets';

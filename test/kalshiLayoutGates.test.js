@@ -533,6 +533,11 @@ gates.Y38 = () => {
   assert.ok(/error: function\(err\)\{ kalshiSyncError/.test(html) && /Reload the page; if it keeps happening/.test(html), 'a listener that fails is shown, not left as an endless loading state');
 };
 
+// Y39: a market the page does not know is never shown. The deployed relay can lag the page by a deploy, and Solana once appeared as a bare "KXSOL15M" card after it was removed.
+gates.Y39 = () => {
+  assert.ok(/var rows = \(\(data && data\.markets\) \|\| \[\]\)\.filter\(function\(m\)\{ return m && \['KXBTC15M', 'KXGOLD15M', 'KXETH15M'\]\.indexOf\(m\.series\) > -1; \}\);/.test(html), 'only Bitcoin, gold and Ethereum cards are drawn');
+};
+
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
 (async () => {
   let failed = 0;
