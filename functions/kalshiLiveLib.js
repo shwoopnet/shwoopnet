@@ -498,8 +498,9 @@ function foldSkim(state, orders, opts = {}) {
   let cursor = Number.isFinite(state.appliedTs) ? state.appliedTs : (Number.isFinite(state.reviewedAt) ? state.reviewedAt : 0);
   const rows = (orders || []).filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && Number.isFinite(t.ts) && t.ts > cursor)
     .sort((a, b) => a.ts - b.ts || String(a.id).localeCompare(String(b.id)));
+  let blocked = null;   // the first order the cursor could not pass (not settled yet), so a pool that does not move can say why
   for (const t of rows) {
-    if (t.settled !== true || !Number.isFinite(Number(t.settledPnl))) break;
+    if (t.settled !== true || !Number.isFinite(Number(t.settledPnl))) { blocked = { ticker: t.ticker || null, ts: t.ts }; break; }
     const pnl = Number(t.settledPnl);
     cum += pnl;
     if (opts.everyWin === true) {
@@ -512,7 +513,7 @@ function foldSkim(state, orders, opts = {}) {
   }
   const r4 = (x) => Number(x.toFixed(4));
   pool = r4(pool); saved = r4(saved); cum = r4(cum); hwm = r4(hwm);
-  return { pool, saved, cum, hwm, appliedTs: cursor, changed: pool !== state.pool || saved !== state.saved || cum !== state.cum || hwm !== state.hwm || cursor !== state.appliedTs };
+  return { pool, saved, cum, hwm, appliedTs: cursor, blocked, changed: pool !== state.pool || saved !== state.saved || cum !== state.cum || hwm !== state.hwm || cursor !== state.appliedTs };
 }
 function skimAddon(state, now, perContract = 0.93) {
   if (Number.isFinite(state.lastStopAt) && now - state.lastStopAt < SCALE_STOP_PAUSE_MS) return 0;
@@ -568,7 +569,7 @@ async function runL1Tick(args) {
     if ((rv.changed || fs.changed) && args.setSizingState) {
       try { await args.setSizingState(sizeState); } catch (e) { await note("The size review could not be saved, so nothing was sent."); return { skipped: "size review unsaved" }; }
     }
-    await setSession({ sizeCap, sizeAddon, sizePool: sizeState.pool, sizeSaved: sizeState.saved, sizeBase: Number(sizeBase.toFixed(2)), sizeNextReview: rv.state.reviewedAt + SCALE_REVIEW_MS });
+    await setSession({ sizeCap, sizeAddon, sizePool: sizeState.pool, sizePoolRule: session.poolRule === "wins" ? "wins" : "highs", sizePoolThrough: sizeState.appliedTs, sizePoolBlocked: fs.blocked ? fs.blocked.ticker : null, sizeSaved: sizeState.saved, sizeBase: Number(sizeBase.toFixed(2)), sizeNextReview: rv.state.reviewedAt + SCALE_REVIEW_MS });
   }
   const stopAt = sizing ? L1_SIZED_STOP_FRACTION * sizeBase : L1_LOSS_STOP;
   // Optional high-point stop (chosen when the session starts): the stop is measured from the best SETTLED result the session has reached, so gains
