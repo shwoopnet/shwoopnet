@@ -485,6 +485,34 @@ gates.Y31 = () => {
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
 };
 
+// Y32 and Y33: the exit watch's switch, and how an exited trade is shown (its realised result, not "held to settlement"; the sell fill is not a trade of its own).
+gates.Y32 = () => {
+  assert.ok(/<select id="kalExitMode"><option value="off">Off<\/option><option value="log">Log only<\/option><option value="sell">Sell<\/option><\/select>/.test(html), 'the three modes');
+  assert.ok(/kalshiExitMode: function\(mode\)/.test(html) && /httpsCallable\(functions, 'kalshiExitMode'\)/.test(html), 'the page can set it');
+  assert.ok(/want === 'sell' && !window\.confirm\(/.test(html), 'Sell asks first; Log only and Off do not');
+  assert.ok(/exitSel\.value = \(s && \['off', 'log', 'sell'\]\.indexOf\(s\.exitMode\) > -1\) \? s\.exitMode : 'log'/.test(html), 'the switch shows the server\'s mode, log by default');
+};
+gates.Y33 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const names = ['kalshiIsExitFill', 'kalshiTradePnl'];
+  const f = new Function(names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  const sold = { side: 'yes', settled: true, result: 'exit', settledPnl: -5.17, orderId: 'buy-1', exitOrderId: 'sell-1', exitCount: 20 };
+  assert.strictEqual(f.kalshiTradePnl({ count: 20, price: '0.915' }, sold, 'no').pnl, -5.17, 'an exited trade shows what the exit made, even though the market later settled against it');
+  assert.strictEqual(f.kalshiIsExitFill({ orderId: 'sell-1' }, [sold]), true, 'the sell fill is recognised');
+  assert.strictEqual(f.kalshiIsExitFill({ orderId: 'buy-1' }, [sold]), false, 'the buy is not');
+  assert.strictEqual(f.kalshiIsExitFill({ orderId: 'manual-9' }, [sold]), false, 'a manual order is not');
+  const held = { side: 'yes', count: 20, orderId: 'b2', averageFeePaid: 0.0057 };
+  assert.ok(f.kalshiTradePnl({ count: 20, price: '0.915' }, held, 'no').pnl < -18, 'a trade held to settlement is computed as before');
+};
+
+// Y34: the pool rule's switch on the page: two rules, 'After every win' asks first, the switch shows the server's rule (the original by default).
+gates.Y34 = () => {
+  assert.ok(/<select id="kalPoolRule"><option value="highs">after new profit highs<\/option><option value="wins">after every win<\/option><\/select>/.test(html));
+  assert.ok(/kalshiPoolRule: function\(rule\)/.test(html) && /httpsCallable\(functions, 'kalshiPoolRule'\)/.test(html), 'the page can set it');
+  assert.ok(/want === 'wins' && !window\.confirm\(/.test(html), 'the riskier rule asks first');
+  assert.ok(/poolSel\.value = s && s\.poolRule === 'wins' \? 'wins' : 'highs'/.test(html), 'the original rule by default');
+};
+
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
 gates.Y35 = () => {
   assert.ok(/<select id="kalEthLive"><option value="off">Off<\/option><option value="one">1 contract<\/option><option value="two">2 contracts<\/option><option value="three">3 contracts<\/option><option value="five">5 contracts<\/option><option value="ten">10 contracts<\/option><option value="match">Same as Bitcoin and gold<\/option><\/select>/.test(html));

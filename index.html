@@ -2111,6 +2111,8 @@
   var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
   var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
   var kalshiSimSessionFn = httpsCallable(functions, 'kalshiSimSession');
+  var kalshiExitModeFn = httpsCallable(functions, 'kalshiExitMode');
+  var kalshiPoolRuleFn = httpsCallable(functions, 'kalshiPoolRule');
   var kalshiExtraSeriesFn = httpsCallable(functions, 'kalshiExtraSeries');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
   var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
@@ -2599,7 +2601,15 @@
       }, function(err){ console.error('Kalshi live sync error:', err); });
     },
     // The ETH and SOL simulation: on or off (admin only, no order exists behind it), and its records, which only the server writes.
-    // Ethereum live: the largest order the bot may place in it, from a fixed list of names (off, one, two, three, five, ten); the server caps it at the Bitcoin and gold stake. Admin only.
+    // The exit watch's switch: 'off', 'log' (records what it would sell, sells nothing) or 'sell' (real sell orders for the bot's own positions only). Admin only.
+    kalshiExitMode: function(mode){
+      return kalshiExitModeFn({ mode: mode }).then(function(res){ return res.data; });
+    },
+    // How the reinvest pool rebuilds: 'highs' (half of each new profit high) or 'wins' (half of every win, so it fills again right after a loss). Admin only.
+    kalshiPoolRule: function(rule){
+      return kalshiPoolRuleFn({ rule: rule }).then(function(res){ return res.data; });
+    },
+    // Ethereum live: the largest order the bot may place in it, from a fixed list of names (off, one, two, three, five, ten, match); the server caps it at the Bitcoin and gold stake. Admin only.
     kalshiExtraSeries: function(series, level){
       return kalshiExtraSeriesFn({ series: series, level: level }).then(function(res){ return res.data; });
     },
@@ -3476,8 +3486,12 @@
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
               </div>
               <div class="kal-note" id="kalFlattenMsg"></div>
+              <div class="kal-note kal-exitrow"><label for="kalExitMode"><b>Exit at 70c</b></label> <select id="kalExitMode"><option value="off">Off</option><option value="log">Log only</option><option value="sell">Sell</option></select> <span id="kalExitMsg"></span></div>
+              <div class="kal-note">If a position's price falls to 70c, Sell closes it (only positions the bot opened, never your manual trades). Log only records what it would have sold and sells nothing. It checks about every 10 seconds and cannot beat a price that jumps straight through 70c.</div>
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
+              <div class="kal-note kal-poolrow"><label for="kalPoolRule"><b>Reinvest pool rebuilds</b></label> <select id="kalPoolRule"><option value="highs">after new profit highs</option><option value="wins">after every win</option></select> <span id="kalPoolMsg"></span></div>
+              <div class="kal-note">"After every win" starts refilling the pool right after a loss instead of waiting to get back above the old high. In a replay of the history it raised the profit about 47% and made the bad drawdowns about 60% deeper. Applies to orders from now on.</div>
               <div class="kal-note kal-ethrow"><label for="kalEthLive"><b>Ethereum live, largest order</b></label> <select id="kalEthLive"><option value="off">Off</option><option value="one">1 contract</option><option value="two">2 contracts</option><option value="three">3 contracts</option><option value="five">5 contracts</option><option value="ten">10 contracts</option><option value="match">Same as Bitcoin and gold</option></select> <span id="kalEthMsg"></span></div>
               <div class="kal-note">When on, the bot also trades Ethereum's 15 minute markets by the same rule, with REAL money, at no more than this size and never more than a Bitcoin or gold trade. It shares the loss stop and the exit with the rest. Off by default. Ethereum's losses often come together with Bitcoin's.</div>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
@@ -10417,7 +10431,15 @@
   // Profit or loss on one bot fill once its market has settled. A fill's price is the YES price whichever side was bought, so a NO costs 1 minus it.
   // The side comes from the bot's own order record (the fill alone does not say it reliably). Fee: the one Kalshi charged on the order if saved,
   // otherwise 7% x p x (1 - p) per contract. Returns null while the market is open or the result is unknown, and for a fill that is not the bot's.
+  // The sell the exit watch sent is one of the bot's own orders, but it is not a trade of its own: its result is on the buy it closed (settledPnl), so the sell fill is left out of the list.
+  function kalshiIsExitFill(fill, orders){
+    if(!fill || !fill.orderId){ return false; }
+    return (orders || []).some(function(o){ return o && o.exitOrderId && o.exitOrderId === fill.orderId; });
+  }
   function kalshiTradePnl(fill, order, result){
+    if(order && order.settled === true && order.result === 'exit' && Number.isFinite(Number(order.settledPnl)) && fill && Number(fill.count) > 0){
+      return { pnl: Math.round(Number(order.settledPnl) * 10000) / 10000, paid: NaN, won: false, side: order.side, exit: true };   // sold early: the realised figure on the record, not "held to settlement"
+    }
     if(!fill || !order || (order.side !== 'yes' && order.side !== 'no') || (result !== 'yes' && result !== 'no')){ return null; }
     var count = Number(fill.count), yesPrice = Number(fill.price);
     if(!(count > 0) || !Number.isFinite(yesPrice) || yesPrice < 0 || yesPrice > 1){ return null; }
@@ -10565,7 +10587,7 @@
         return o && Number(o.fillCount) > 0 && o.strategy === 'L1' && !(o.orderId && seenIds[o.orderId]) && o.ts < oldestFill;
       }).sort(function(x, y){ return y.ts - x.ts; });
       // Manual trades are hidden by default (the owner's choice, Oct 9, 2026); the dropdown on the card brings them back.
-      var shownFills = kalshiTradeFilter === 'all' ? gfills : gfills.filter(function(x){ return kalshiFillIsBot(x, kalshiLiveOrders); });
+      var shownFills = (kalshiTradeFilter === 'all' ? gfills : gfills.filter(function(x){ return kalshiFillIsBot(x, kalshiLiveOrders); })).filter(function(x){ return !kalshiIsExitFill(x, kalshiLiveOrders); });
       var allRows = shownFills.map(function(x){ return { fill: x }; }).concat(olderBot.map(function(o){ return { order: o }; }));
       var pageSize = kalshiLiveShow.pageSize, pages = Math.max(1, Math.ceil(allRows.length / pageSize));
       if(kalshiLiveShow.page > pages - 1){ kalshiLiveShow.page = pages - 1; }
@@ -10586,7 +10608,7 @@
         var fillText, plCell;
         if(ord && (ord.side === 'yes' || ord.side === 'no')){
           var paidNow = Math.round((ord.side === 'yes' ? Number(x.price) : 1 - Number(x.price)) * 1000) / 10;
-          fillText = 'Bought ' + ord.side.toUpperCase() + ' ' + escapeHtml(String(x.count)) + (Number.isFinite(paidNow) ? ' at ' + paidNow.toFixed(1) + 'c' : '');
+          fillText = 'Bought ' + ord.side.toUpperCase() + ' ' + escapeHtml(String(x.count)) + (Number.isFinite(paidNow) ? ' at ' + paidNow.toFixed(1) + 'c' : '') + (Number(ord.exitCount) > 0 ? ', sold early' + (Number.isFinite(Number(ord.exitAvg)) ? ' at ' + (Math.round(Number(ord.exitAvg) * 1000) / 10).toFixed(1) + 'c' : '') : '');
         } else {
           fillText = escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '');
         }
@@ -10726,6 +10748,10 @@
     var pill = document.getElementById('kalL1Pill');
     pill.className = 'kal-pill' + (switchOff ? ' bad' : (halted ? ' warn' : (running ? ' on' : '')));
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
+    var exitSel = document.getElementById('kalExitMode');
+    if(exitSel && document.activeElement !== exitSel){ exitSel.value = (s && ['off', 'log', 'sell'].indexOf(s.exitMode) > -1) ? s.exitMode : 'log'; }
+    var poolSel = document.getElementById('kalPoolRule');
+    if(poolSel && document.activeElement !== poolSel){ poolSel.value = s && s.poolRule === 'wins' ? 'wins' : 'highs'; }
     var ethSel = document.getElementById('kalEthLive');
     if(ethSel && document.activeElement !== ethSel){ var en = s && s.liveExtra ? Number(s.liveExtra.KXETH15M) : 0; ethSel.value = { 1: 'one', 2: 'two', 3: 'three', 5: 'five', 10: 'ten', 50: 'match' }[en] || 'off'; }
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
@@ -10744,6 +10770,34 @@
   }
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
+
+  // The exit watch's switch. Sell places real sell orders (only for positions the bot opened), so that one asks first; Log only and Off are safe.
+  (function(){
+    var sel = document.getElementById('kalExitMode'), msg = document.getElementById('kalExitMsg');
+    if(!sel){ return; }
+    var current = function(){ var s = kalshiLiveCtl.session; return s && ['off', 'log', 'sell'].indexOf(s.exitMode) > -1 ? s.exitMode : 'log'; };
+    sel.addEventListener('change', function(){
+      var api = window.__shwoopAPI, want = sel.value;
+      if(!api || !api.kalshiExitMode || !currentUserIsAdmin){ sel.value = current(); return; }
+      if(want === 'sell' && !window.confirm('Sell mode places REAL sell orders for the positions the bot opened when their price falls to 70c or lower. It never touches your manual trades. Turn it on?')){ sel.value = current(); return; }
+      sel.disabled = true; msg.textContent = 'Saving...';
+      api.kalshiExitMode(want).then(function(){ msg.textContent = 'Saved.'; }, function(err){ msg.textContent = 'Not changed: ' + ((err && err.message) || 'unknown'); sel.value = current(); }).then(function(){ sel.disabled = false; });
+    });
+  })();
+
+  // The pool rule's switch. 'After every win' makes size grow faster after a loss, so it asks first; going back to the original rule does not.
+  (function(){
+    var sel = document.getElementById('kalPoolRule'), msg = document.getElementById('kalPoolMsg');
+    if(!sel){ return; }
+    var current = function(){ var s = kalshiLiveCtl.session; return s && s.poolRule === 'wins' ? 'wins' : 'highs'; };
+    sel.addEventListener('change', function(){
+      var api = window.__shwoopAPI, want = sel.value;
+      if(!api || !api.kalshiPoolRule || !currentUserIsAdmin){ sel.value = current(); return; }
+      if(want === 'wins' && !window.confirm('The pool will refill from half of every win, including right after a loss. In the history replay that raised the profit about 47% and made the bad drawdowns about 60% deeper. Turn it on?')){ sel.value = current(); return; }
+      sel.disabled = true; msg.textContent = 'Saving...';
+      api.kalshiPoolRule(want).then(function(){ msg.textContent = 'Saved.'; }, function(err){ msg.textContent = 'Not changed: ' + ((err && err.message) || 'unknown'); sel.value = current(); }).then(function(){ sel.disabled = false; });
+    });
+  })();
 
   // Ethereum live. Any size above off places REAL orders, so it asks; turning it off does not.
   (function(){

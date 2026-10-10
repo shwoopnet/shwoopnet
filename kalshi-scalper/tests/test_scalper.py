@@ -2242,3 +2242,80 @@ assert _t4n and _t4n["side"] == "no" and abs(_t4n["price"] - 0.07) < 1e-9 and ab
 assert _TF.t4_trade([_b(200, y=0.06), _b(210, n=0.30)]) is None, "no entry after second 180"
 assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.07)]) is None, "no print reaching +3c and none at 240 s: no observation"
 print("T4 tests passed")
+
+# X8: the exit at 70c on 10 second books. A losing slide is cut, a winner that never reaches 70c is untouched, one that dips under 70c and recovers is stopped (the cost), the exit is always a LATER snapshot than the
+# entry, snapshots before the registered cutoff never enter, and fewer than 300 entries is NOT_ENOUGH_DATA, never a pass.
+from datetime import datetime as _dt0, timezone as _tz0
+from scalper import exit10s as _X
+_cm = int(_dt0(2026, 10, 10, 14, 0, tzinfo=_tz0.utc).timestamp() * 1000)
+_tk = "KXBTC15M-26OCT101000-00"       # 10:00 EDT = 14:00 UTC
+assert _X.close_ms(_tk) == _cm, "tickers are in Eastern time"
+assert _X.close_ms("KXBTC15M-26NOV021000-00") == int(_dt0(2026, 11, 2, 15, 0, tzinfo=_tz0.utc).timestamp() * 1000), "and after the clocks change it is EST"
+def _book(ticker, cm, ybids):
+    out, t = [], cm - 372_000
+    for yb in ybids:
+        out.append((t, "KXBTC15M", yb, yb + 0.01, 1 - yb - 0.01, 1 - yb)); t += 10_000
+    return {ticker: out}
+_slide = [0.92, 0.92, 0.85, 0.71, 0.70, 0.54, 0.40, 0.15, 0.03] + [0.02] * 30
+_lose = _X.entries(_book(_tk, _cm, _slide))
+assert len(_lose) == 1 and _lose[0]["res"] == "loss" and _lose[0]["stopped"], "a slide to zero is a loss that the exit stops"
+assert _lose[0]["exit"] > _lose[0]["hold"] + 0.5, "selling at 0.70 keeps most of the loss: " + str(_lose[0])
+_win = _X.entries(_book(_tk, _cm, [0.92, 0.91, 0.85, 0.80, 0.78, 0.9] + [0.99] * 33))
+assert len(_win) == 1 and _win[0]["res"] == "win" and not _win[0]["stopped"] and abs(_win[0]["diff"]) < 1e-12, "a winner that only dipped to 0.78 is untouched"
+_dip = _X.entries(_book(_tk, _cm, [0.92, 0.91, 0.66, 0.9] + [0.99] * 35))
+assert len(_dip) == 1 and _dip[0]["res"] == "win" and _dip[0]["stopped"] and _dip[0]["diff"] < -0.2, "a winner that dips to 0.66 and recovers is stopped, which is the cost of the rule"
+assert _X.entries(_book(_tk, _cm, [0.92] * 5 + [0.69] + [0.99] * 33))[0]["stopped"], "0.69 triggers"
+assert not _X.entries(_book(_tk, _cm, [0.92] * 5 + [0.71] + [0.99] * 33))[0]["stopped"], "0.71 does not"
+_early = {k: [(t - 10 ** 9, *rest) for (t, *rest) in v] for k, v in _book(_tk, _cm, _slide).items()}
+assert _X.CUTOFF_MS > _X.close_ms("KXBTC15M-26OCT092245-45") - 10 ** 7, "the exploratory file ended before the cutoff"
+_few = [{"ticker": "t%d" % i, "day": "2026-10-%02d" % (11 + i % 8), "close_ts": i, "diff": 0.05, "diff_stress": 0.04, "res": "win", "stopped": False, "hold": 0.0, "exit": 0.05, "series": "x"} for i in range(299)]
+assert _X.verdict(_few)[0] == "NOT_ENOUGH_DATA" and _X.verdict([])[0] == "NOT_ENOUGH_DATA", "fewer than 300 entries is never a pass"
+_many = [{"ticker": "m%d" % i, "day": "2026-10-%02d" % (11 + i % 8), "close_ts": i, "diff": 0.05 + (0.01 if i % 2 else -0.01), "diff_stress": 0.04, "res": "win", "stopped": False, "hold": 0.0, "exit": 0.05, "series": "x"} for i in range(400)]
+assert _X.verdict(_many)[0] == "NOT_YET_FALSIFIED", "a steady positive difference over 300 entries on 8 days passes the bar"
+_neg = [dict(e, diff=-0.02, diff_stress=-0.03) for e in _many]
+assert _X.verdict(_neg)[0] == "FALSIFIED"
+print("X8 tests passed")
+
+# B4: the 84c to 88c band takes asks from 0.84 up to but not including 0.88, so it never overlaps L1 (88c to 97c) and leaves no gap, and its pass bar is the same as every earlier test.
+from scalper import band84 as _B4, lstrats as _L4
+def _mk(ticker, ask, bid, res="yes"):
+    close = 1_000_000
+    return (ticker, "KXBTC15M", [(close - 360, bid, ask, bid, ask)], close, res)
+_ms = [_mk("a", 0.87, 0.86), _mk("b", 0.88, 0.87), _mk("c", 0.84, 0.83), _mk("d", 0.83, 0.82), _mk("e", 0.60, 0.59)]
+_got = {e["ticker"] for e in _L4.hold_rule(_ms, left_s=_B4.LEFT_S, band=_B4.BAND)}
+assert _got == {"a", "c"}, "0.87 and 0.84 are in, 0.88 belongs to L1, 0.83 and 0.60 are out: " + str(_got)
+_l1 = {e["ticker"] for e in _L4.hold_rule(_ms, **_L4.L1)}
+assert _l1 == {"b"} and not (_l1 & _got), "no market is counted by both L1 and B4"
+_mine = lambda i, net: {"ticker": "t%d" % i, "day": "2026-10-%02d" % (1 + i % 8), "close_ts": i, "price": 0.86, "net": net, "stress": net - 0.001, "gross": net + 0.01}
+assert _B4.summarize([])[0] == "FALSIFIED" and _B4.summarize([_mine(i, -0.2) for i in range(400)])[0] == "FALSIFIED"
+assert _B4.summarize([_mine(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(299)])[0] == "FALSIFIED", "299 observations can never pass"
+assert _B4.summarize([_mine(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(400)])[0] == "NOT_YET_FALSIFIED", "a steady winner over 300 observations on 8 days passes the bar"
+print("B4 tests passed")
+
+# T5, T4's rule in minutes 5 to 8: entry from second 300 and before 510, time exit at 570, the same band and target, reading seconds 300 to 599 only.
+_o5 = [{"created_time": _iso(299), "count_fp": "9", "taker_side": "yes", "yes_price_dollars": "0.06"}, {"created_time": _iso(300), "count_fp": "9", "taker_side": "yes", "yes_price_dollars": "0.06"},
+       {"created_time": _iso(599), "count_fp": "9", "taker_side": "no", "yes_price_dollars": "0.10"}, {"created_time": _iso(600), "count_fp": "9", "taker_side": "no", "yes_price_dollars": "0.10"}]
+_b5 = _TF.build_bars(_o5, _open, _TF.T5_FETCH_FROM_S, _TF.T5_FETCH_TO_S)
+assert [x[0] for x in _b5] == [300, 599], "T5 bars hold seconds 300 to 599 only: 299 and 600 are outside"
+_t5 = _TF.t5_trade([_b(299, y=0.06), _b(320, y=0.06), _b(330, n=0.10)])
+assert _t5 and _t5["entry_sec"] == 320 and abs(_t5["price"] - 0.06) < 1e-9 and abs(_t5["sell"] - 0.10) < 1e-9, "a print at 299 s is not an entry; the one at 320 s is"
+assert _TF.t5_trade([_b(520, y=0.06), _b(530, n=0.10)]) is None, "no entry at or after second 510"
+assert _TF.t5_trade([_b(509, y=0.06), _b(520, n=0.07)]) is None, "no print reaching +3c and none at 570 s: no observation"
+_t5l = _TF.t5_trade([_b(509, y=0.06), _b(520, n=0.07), _b(570, n=0.05)])
+assert _t5l and _t5l["sell"] == 0.05 and _t5l["net"] < 0, "otherwise sold at the first bid print at or after 570 s"
+assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.10)]) and _TF.T4_ENTRY_TO_S == 180, "T4 is unchanged by the refactor"
+assert _TF.T5_TIME_EXIT_S == 900 - 330, "the time exit is the end of L1's window"
+print("T5 tests passed")
+
+# E1 and E2: the pass bar for L1 on ETH and SOL is the same as every earlier test; an empty or losing set is FALSIFIED and a large steady winner passes.
+from scalper import altseries as _AL
+assert _AL.summarize([])[0] == "FALSIFIED"
+_mk = lambda i, net: {"ticker": "t%d" % i, "day": "2026-10-%02d" % (1 + i % 8), "close_ts": i, "price": 0.93, "net": net, "stress": net - 0.001, "gross": net + 0.004}
+assert _AL.summarize([_mk(i, -0.2) for i in range(400)])[0] == "FALSIFIED", "a losing rule is FALSIFIED"
+assert _AL.summarize([_mk(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(299)])[0] == "FALSIFIED", "299 observations can never pass"
+assert _AL.summarize([_mk(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(400)])[0] == "NOT_YET_FALSIFIED", "a steady winner over 300 observations on 8 days passes the bar"
+_h = [_mk(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(400)]
+for e in _h[200:]: e["net"] = -0.001; e["stress"] = -0.002
+assert _AL.summarize(_h)[0] == "FALSIFIED", "a negative second half fails"
+assert _AL.ALT_DB.name == "alts.sqlite" and _AL.ALT_DB != _AL.load_main.__globals__["DB"], "the ETH and SOL history never goes into book.sqlite"
+print("E1 and E2 tests passed")

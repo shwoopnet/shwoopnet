@@ -33,7 +33,7 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,586 as of 2026-10-09** (T1 to T4 added to the 2,582 of 2026-10-08; (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Strategy variants tried so far: **2,591 as of 2026-10-10** (X8 is registered, not run: it needs fresh data). Earlier today: **2,590 as of 2026-10-10** (T5, E1, E2 and B4 added after the 2,586 below; all `FALSIFIED`). Earlier tally: **2,586 as of 2026-10-09** (T1 to T4 added to the 2,582 of 2026-10-08; (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
 Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
@@ -2412,6 +2412,115 @@ The owner chose a 2% base per position (ladder $43 a contract, ladder ceiling 25
 - **The stop starts to bind.** 0.84 stop days over the window against none at 1%: two losses at this size reach 5% of the base.
 - **A replay of the past, not a forecast.** The win rate it replays is the tape's, and the 73 of 74 live record is a small sample (the one loss was the early 40c test order).
 
+## Pre-registration: T5, the cheap side scalped at tick level in minutes 5 to 8 (the owner's idea, a corrected window for T4; fixed 2026-10-09, before any trade after second 299 was fetched and before any result was computed)
+
+**Why this exists.** T4 was meant to test the owner's cheap-side scalp but its window (seconds 61 to 179) was set without checking it against the owner's own examples, which were about 5.6 and 8 minutes into a market. At second 61 to 179 the market is near 50 to 50, so a 4c to 10c side almost never exists (19 observations in 1,240 markets). T5 is the same rule in the window the examples came from. It is disclosed as a **re-test at tick level of a falsified family (C1 to C3, T4), not a new mechanism**; what it adds is a window in which the cheap side exists.
+
+**Data, and what was found before writing this.** The stored tape (`tape_s`, the 1,240 markets T1 to T4 used) covers only seconds 0 to 298, so it cannot test this window. A new table `tape5` is fetched for the SAME 1,240 markets, seconds 300 to 599 (a timing probe on one Bitcoin market: 12 pages, 11,552 trades, 23 s; about 8 hours for all 1,240). Nothing from seconds 300 to 599 has been read.
+
+- **Rule (fixed now, one parameter set, identical to T4 except the clock).** No signal. Entry: the first print from second **300** up to but not including second **510** by a taker buying a side that costs **4c to 10c** (YES at its print price, NO at 1 minus the YES price of a NO taker print), at that print's price. Exit: the first later second whose opposite taker print puts our bid at **entry plus 3c or better**, else the first opposite taker print at or after second **570** (the end of L1's window, 330 s left). A market that never prints an exit has no observation and is counted. Taker fee on both legs, 7% unrounded, one contract.
+- **Counterparty.** Whoever sells a cheap contract just before spot moves toward the strike: a cheap side near the strike is convex, so a small move reprices it by several cents, and the market makers quoting it are slow. Same story as T4; it is not a new one.
+- **Numeric prediction, before the run: it does not pass.** Point estimate **-1.0c per contract**, win rate (exit above entry) under 40%. The same reason as T4, plus one that matters more here: by minutes 5 to 8 a 4c to 10c side usually means the market has already decided, so the cheap side decays toward zero rather than bouncing. Expected observations: **100 to 400** (a guess; T4's 19 is no guide because the window differs), so the 300 minimum may well not be reached.
+- **Kill criteria.** The same as T4, any one gives `FALSIFIED`: fewer than 300 observations, fewer than 5 days, day clustered z below 2.1, mean at or below zero, at or below zero with fees x1.2, either half of the days negative, or negative among markets with at least 100 taker contracts in the first 300 s. **If fewer than 300 observations is the only thing that fails, the report says so first**, because that is `FALSIFIED` by the rule and says nothing about the idea (the T1 and T2 situation). A better result than -1.0c is an audit trigger first: check the entry print is inside seconds 300 to 509 and the exit print is after the entry second.
+- **Stopping point, stated now.** Fetch order is the T1 to T4 order (every 8th market, then the next offset) restricted to those 1,240 markets, so any stopping point is an even sample. The result is read ONCE, at all 1,240 or when the fetch ends. No look at partial results, no extension if the sample disappoints.
+- **Count.** One more variant: **2,587 as of 2026-10-09**. One parameter set; no re-run with other bands, targets or times.
+- **Limits.** A taker print is a real price but not our fill, and cheap sides are the thinnest part of the book. Seconds 300 to 570 overlap L1's window (500 to 570), so a pass would also need its own cash and stop accounting next to L1. A pass would be `NOT_YET_FALSIFIED` only, with a forward window; the bot is not changed by this section.
+
+**Correction to the table above (2026-10-09, same day).** The first run left the cap starting at 3 and the ladder ceiling at 10, so it did not model what Start and the deployed ceiling of 25 do (the cap goes straight to the target, 12 at this balance). `sizing.path` now takes `cap0` and `cap_ceiling`. Re-run with the deployed settings (70 days, from $547.96, 60% fills, 5% stop, 3000 paths):
+
+| Rule | Mean (10 wk) | 1st pct | Deepest drawdown (95th) | P(loss) | Stop days |
+|---|---|---|---|---|---|
+| 1% base, $85, ceiling 10, cap 6 | +$100 | -$44 | $97 | 8% | 0.01 |
+| 2% base, $43, ceiling 25, cap 12 | +$223 | -$103 | $187 | 8% | 2.68 |
+
+So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and the bad drawdown is about 34% of the account (not 27%) with a stop day about once every 26 days (not 0.84 in the window). The first table understated both the gain and the risk; the direction of the conclusion (more return for proportionally more risk) is unchanged. The same replay, 2% base, at three horizons from $550: mean $638 / $738 / $842 at 30 / 60 / 90 days (5th to 95th percentile $486 to $829, $509 to $1,044, $545 to $1,252); from $1,000: $1,163 / $1,342 / $1,522. About the same percentage growth, about 1.8 times the dollars.
+
+## Pre-registration: S1, size 2x for the first 10 filled trades after a start or a loss (the owner's idea; fixed 2026-10-09, before any code for it and before any result; information only, no verdict word that means trade, no variant counted)
+
+**The idea, as the owner put it.** "Start huge, scale down after x winners": back-to-back losses look unlikely, so be big right after a start or a loss and scale back as wins accumulate.
+
+**Premise check, done before this section from the history (not a result for S1).** Over 3,379 L1 entries the chance the next entry loses after a loss is 5.4% against a 6.0% base rate; the 192 losing runs were 181 singles, 11 doubles and no triples; days with 3 or more losses were 43 against about 38 expected if independent. So adjacent losses are rare and nearly independent, with a mild day-level clustering.
+
+**Rule (fixed now, one parameter set).** In the `sizing.path` replay, a countdown starts at 10 at the start of a path and is reset to 10 by every filled order that loses. While it is above zero, each filled order is sized at **2 times** what the deployed rule would send (base plus pool extras), still capped at the 50 contract order ceiling; each filled order counts it down by one. The boosted contracts are account funded: only the pool add-on counts as profit funded for the stop's allowance. Everything else is the deployed rule (2% base, $43 ladder, ceiling 40, cap starting at the balance target, 5% stop, 3 day reviews, 60% fills, 3000 paths, the real 67 days drawn with replacement). The baseline is the same run with no boost. Both at the $1,000 account and at $550.
+
+**Counterparty / mechanism.** None new. The only claim is statistical: if losses are close to independent, the size schedule changes dollars at risk per trade, not the odds, so the average should move in proportion to the average size and the bad tail should move with it or worse (a loss is more likely to land in a boosted trade, because the boost always sits right after a loss).
+
+**Numeric prediction, before the run.** The mean 10 week gain rises by less than 25% over baseline, while the 1st percentile outcome and the 95th percentile drawdown each worsen by more than 25%, so the mean per dollar of drawdown falls. Stop days rise. I expect the boost **not** to improve the mean gain per dollar of 95th percentile drawdown.
+
+**Reading rule.** Reported side by side: mean, 5th, 1st and 95th percentile ending balance, 95th percentile drawdown, mean gain divided by that drawdown, stop days. The boost is called not helpful if the mean per dollar of drawdown is lower than baseline. A better ratio is reported as an audit trigger first (check the boost applies only after a loss or at the start, and that the stop's allowance is not counting boosted contracts), and as a replay of the past only. Nothing here changes the bot.
+
+**Limits.** The replay's loss rate comes from the 67 days; the live run so far is 74 wins in 74. A 2x boost doubles the size of a single order, and the market's depth at that size is unmeasured.
+
+**Results: S1, one run, read once (2026-10-09; the rule, prediction and reading rule are those registered above; nothing was changed after seeing them).** `PYTHONPATH=src python -m scalper.sizing s1`, 70 days, 60% fills, 3000 paths, the deployed rule with the 5% stop.
+
+| Account | Run | Mean gain | 5th pct end | 1st pct end | Drawdown (95th) | Gain per $ of drawdown | P(loss) | Stop days |
+|---|---|---|---|---|---|---|---|---|
+| $1,000 | baseline | +$411 | $960 | $820 | $322 | 1.28 | 7% | 2.84 |
+| $1,000 | 2x for 10 after a start or loss | +$536 | $881 | $703 | $505 | 1.06 | 10% | 9.71 |
+| $550 | baseline | +$223 | $526 | $447 | $187 | 1.19 | 8% | 2.68 |
+| $550 | 2x for 10 after a start or loss | +$293 | $477 | $362 | $293 | 1.00 | 11% | 10.15 |
+
+- **Reading rule: not helpful.** The mean gain per dollar of 95th percentile drawdown falls (1.28 to 1.06, 1.19 to 1.00), and stop days rise about 3.5 times (a stop roughly every 7 days, each one emptying the pool and switching the add-on off for a week).
+- **Prediction against outcome.** Predicted: the mean rises by less than 25%, the bad tail worsens by more than 25%, the ratio falls, stop days rise. Measured: the ratio fell and stop days rose as predicted; the 1st percentile worsened 65% and the drawdown 57%, as predicted. **The mean rose 30% at both account sizes, not under 25%**, so that part of the prediction was wrong; the boost does add average profit, it just adds more risk than profit.
+- **Audit triggers.** No result was better than the baseline on the ratio, so none fired. The boost sits only after a start or a loss by construction, and the stop's allowance counts the pool add-on only.
+- **Caveat.** A replay of the past at the history's loss rate; the live record (74 of 74) is far better, and a doubled order is double the depth this market has been measured to fill (nothing measured yet).
+
+## Pre-registration: E1 and E2, L1 unchanged on the ETH and SOL 15 minute markets (the owner's idea; fixed 2026-10-09, before any ETH or SOL market was downloaded and before any result)
+
+**The question.** Does the rule that runs live on Bitcoin and gold (L1) work on the other 15 minute crypto series with enough volume to hold size? The owner wants, if it works, to expand there: first a simulated run, then a small live stake that scales up faster than BTC and gold did until it matches their dollar amounts. This section is only the first step, the test on history.
+
+**Why ETH and SOL, and nothing else.** A check of Kalshi's public data on 2026-10-09 (median contracts traded per settled market, sample of 20): Bitcoin 3,503,802; gold 458,140; ETH 174,633; SOL 90,434; XRP 71,986; DOGE 33,609; the rest 12,000 to 19,000. ETH and SOL are the only ones with enough depth to be a candidate at 20 to 40 contracts, and even they are 5% and 2.6% of Bitcoin's volume. XRP is next and is **not** included, to keep this to the two the owner named.
+
+**Data.** `python -m scalper.altseries fetch`: every settled KXETH15M and KXSOL15M market that closed in the last 66 days (Kalshi keeps candles about that far back) with its 1 minute bid/ask candles, into a **separate database, `data/alts.sqlite`**, so the Bitcoin and gold history and every earlier result are untouched.
+
+**Rule (fixed now, one parameter set, identical to L1).** One observation per market, from the candle that ENDS exactly 360 s before the close; buy the favourite when its ask is 0.88 to 0.97 (either side), hold to settlement, taker at the ask, the same fee model as `lstrats.net`. Nothing is tuned, no filter, no other band or minute. A market with no candle at that minute, no quote in the band, or no result has no observation.
+
+**Counterparty.** The same as L1's, and no new one is claimed: whoever holds the 3c to 12c longshot side near the close and sells it to the favourite buyer for less than it is worth. ETH and SOL are partly the same bet as Bitcoin (they move with it), so a pass would not be independent evidence of a different edge.
+
+**Numeric prediction, before the run.** ETH lands near Bitcoin's thin figure, **+0.5c per contract net**, z between 0 and 1.5; SOL lower, **at or below 0.0c**, because its spread is wider and the favourite's ask costs more of the edge. **Expected verdict: both `FALSIFIED`.** If either shows a mean above +1.5c it is an audit trigger first (check the entry candle ends 360 s before the close and the settlement side).
+
+**Pass bar, fixed (the same as every earlier test).** Each series is `NOT_YET_FALSIFIED` only if ALL hold: at least 300 observations; at least 5 days; day clustered z of net per contract at least 2.1; mean net above zero; both halves of the days positive; mean above zero with fees times 1.2. Anything else is `FALSIFIED`. A pass is permission for the next stage only, and never a reason to change the live bot.
+
+**Information, not part of the verdict.** For each series: observations and per day, win rate against the mean price paid, mean net by half, and the **median traded volume of the entry minute's candle in contracts**, against the order sizes the bot would send (about 12 to 40), as a first look at depth. The book recorder's data (from about Oct 12 to 13) is the proper depth test and is not replaced by this.
+
+**The stages after a pass, written now so they are not invented later.** (1) A forward shadow run on days not yet seen: the would-be entries are logged with no orders (needs a server change and a deploy, which the owner has asked not to do for another strategy yet, so none is built); (2) only after a shadow run that stays above the same bar, a small live stake with its own cash accounting and stop, scaled by the same review rules as BTC and gold but with an evidence gate for each step; (3) matching BTC and gold sizes only at the pace those gates allow. Nothing in stages 1 to 3 is built or started by this section.
+
+**Count.** Two variants, one parameter set each: **2,589 as of 2026-10-09** (2,587 with T5). The control, as in the earlier searches, is not needed here because nothing is searched.
+
+**Limits.** Candle asks are quotes, not our fills: the live bot fills about 56 to 59% of its signals (the misses are where the losses are), and the replay assumes the quote is available. Thin books fill less at size. The 66 day window is the same one L1 was measured on.
+
+## Results: E1 and E2, one run, read once (2026-10-09; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+`python -m scalper.altseries run`, 12,506 markets (6,253 each), 66 days, `data/alts.sqlite`. Signal counts first, as promised.
+
+| Series | Observations | Days | Mean net per contract | Day clustered z | Halves | Fees x1.2 | Win rate vs mean price paid | Entry-minute volume (median) | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| E1 ETH | 2,001 (29.9/day) | 67 | +0.57c | +1.21 | +0.95c / +0.15c | +0.48c | 93.8% vs 92.8% | 4,377 contracts | `FALSIFIED` |
+| E2 SOL | 2,011 (30.0/day) | 67 | +0.54c | +1.24 | +0.57c / +0.52c | +0.45c | 93.8% vs 92.8% | 1,623 contracts | `FALSIFIED` |
+| reference: Bitcoin | 1,955 | 67 | +0.43c | +0.75 | +0.35c / +0.51c | +0.33c | 93.5% vs 92.6% | not read | `FALSIFIED` |
+| reference: gold | 1,424 | 63 | +1.47c | +2.80 | +1.99c / +0.91c | +1.38c | 94.7% vs 92.7% | not read | `NOT_YET_FALSIFIED` |
+
+- **Both fail the bar on z (1.21 and 1.24 against 2.1), as Bitcoin does.** Everything else holds: both are positive, positive in both halves, positive with fees x1.2, with plenty of observations. The edge is the same thin one as Bitcoin's, about +0.5c a contract, with the same shape (a win rate about one point above the price paid).
+- **Prediction against outcome.** ETH: predicted about +0.5c with z between 0 and 1.5; measured +0.57c, z +1.21. **SOL: predicted at or below 0.0c; measured +0.54c, so that prediction was wrong** (the wider spread did not eat the edge in this window). Predicted verdict for both, `FALSIFIED`, as measured.
+- **Gold is what carries L1.** It is the only one of the four that clears the bar on its own.
+- **Information, not part of the verdict: ETH and SOL are mostly the same bet as Bitcoin.** In windows where both had an entry, when Bitcoin's entry lost, ETH's lost **51%** of the time (base rate 6.4%) over 70 cases, and SOL's 43% (base 6.1%) over 51; ETH and SOL lost together 56% of the time one of them lost. Bitcoin and gold: 6% against a 6.1% base. Adding ETH and SOL would not diversify the account, it would triple the size of the loss on the days Bitcoin loses.
+- **Depth, first look only:** the median 1 minute candle at the entry minute traded 4,377 contracts (ETH) and 1,623 (SOL), so a 12 to 40 contract order is 0.3% to 2.5% of it. The order book recorder's data is the real depth test.
+- **Count.** Two variants: **2,589 as of 2026-10-09** (with T5's 2,587). Both `FALSIFIED`. The bot, the site and the Bitcoin and gold history are unchanged; the stages after a pass (a forward shadow run, then a small stake) do not start.
+
+## Results: T5, one run, read once at all 1,240 markets (2026-10-10; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+`python -m scalper.tapeflow run5` over `tape5` (seconds 300 to 599 of the same 1,240 markets T1 to T4 read). Signal count first, as promised: **444 observations** (796 markets with no observation), on 31 days. That is above the 300 minimum, so this is **not** an underpowered result.
+
+| Test | Observations | Days | Mean net per contract | Day clustered z | Halves | Fees x1.2 | Exit above entry | Mean price paid | Median hold | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| T5 cheap side scalp, minutes 5 to 8 | 444 | 31 | **-1.52c** | **-5.16** | -1.70c / -1.35c | -1.74c | 51.4% | 9.2% | 88 s | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: about -1.0c per contract, win rate under 40%, 100 to 400 observations, `FALSIFIED`. Measured: **-1.52c** (worse), **51.4% up (the win-rate prediction was wrong)**, 444 observations (just above the range), `FALSIFIED`.
+- **Same shape as T3.** It wins more than half the time (51% of trades sold above entry, a median hold under a minute and a half) and still loses 1.5c a trade, with both halves negative and z of -5. Many small wins and a minority of exits at the time limit far below entry, plus a fee and spread on both legs of a 9c contract (a 1c spread is 11% of the price).
+- **What the owner's idea needed and did not get.** The window the examples came from (5.6 and 8 minutes in) now exists in the data, 444 times, and the cheap side scalped there loses. The two windows tried (T4 at seconds 61 to 179, too early for a cheap side to exist; T5 here, where it does) bracket the idea at tick level.
+- **Audit triggers.** None: no result was better than predicted. The entry print is inside seconds 300 to 509 and the exit print after the entry second, by test.
+- **Count.** One variant: **2,587 after T5**, and **2,589 with E1 and E2**. The bot and the site are unchanged.
+
 ## Rule for adding money to the account (written 2026-10-09, before any further result, at the owner's request; information only, no hypothesis, no variant counted)
 
 Decided now, while the live record is 74 wins in 74 and nothing makes a deposit feel urgent, so a good week is not what decides it. This is a rule for the owner's own money, not advice, and the owner can override it; the point is that an override is then a visible choice.
@@ -2455,6 +2564,92 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 **Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.
 
 
+## The exit watch was built (the owner's decision, 2026-10-10; information only, no variant counted)
+
+After the exploratory read of the first 24 hours of 10 second books (Friday's loss slid for four minutes and an exit at 70c would have kept about three quarters of it), the owner asked for the stop loss to be implemented. It is built (`runExitWatch`, `kalshiLiveExit`, `kalshiExitMode`) behind a three way switch on the page that defaults to **log only**, so the first thing it produces is evidence: each time a position's bid falls to 70c it records what it would have sold. Turning it to **sell** is the owner's choice and is not a research verdict: the registered fresh-data test (X8) is still the way to find out whether a 70c exit pays for the winners it stops, and the 67 day test of exits (X1 to X7) found that it did not. The log-only records on real orders are a second, live source for that question.
+
+## Exploratory read: the first 24 hours of 10 second books, and Friday's loss (information only, no hypothesis, no verdict, no variant counted; 2026-10-10)
+
+The owner downloaded the order-book recorder's snapshots (`kalshi-books-202610091257.csv.gz`: Bitcoin and gold, one snapshot about every 10 seconds, 2026-10-09 12:58 UTC to 2026-10-10 12:56 UTC, 130 markets). **This is the first time L1's own entries could be watched second by second instead of minute by minute.** Everything in this section is read after the fact on 31 entries and 3 losses, so it is a lead and not evidence, and the file is excluded from the registered test below.
+
+**L1's rule on that day (6 minutes left, a side priced 88c to 97c at the ask):** 31 entries (23 Bitcoin, 8 gold), 28 wins, 3 losses.
+
+- **Friday's loss (Bitcoin, 21:38 CDT, YES bought at 91.5c, 364 s left) was not a gap.** The bid stayed at 0.91 to 0.92 for about 70 seconds, then slid: 0.85, 0.71 (235 s left), 0.70 (185 s), 0.54 (175 s), 0.40 (155 s), 0.15 (125 s), 0.03. At 22 contracts: held to settlement **-$20.25**; exiting at the first 10 second check at or below 80c would have sold at 0.71 for **-$4.95**; at 70c, 0.70, **-$5.17**; at 60c, 0.54, **-$8.75**; at 50c, 0.40, **-$11.82**.
+- **The other two losses:** Bitcoin 12:24 CDT, NO bought at 0.90, bid 0.92 then 0.60 (221 s left), 0.41 (180 s), 0.06 (109 s): also a slide, an exit at 60c to 70c would sell at 0.60 (-30c against -92c). Gold 13:38 CDT, NO at 0.89: a **gap**, the bid went 0.83 to 0.36 in one 10 second step (173 s left), an exit at 70c still sells at 0.36 (-55c against -89c).
+- **The winners:** the lowest bid any of the 28 winners touched after entry was 0.71; **none touched 0.70 or lower**, six touched 0.80 or lower (so an 80c exit would have stopped six winners).
+- **Depth was not the problem.** At every one of these triggers the best bid held hundreds to thousands of contracts (the largest requirement here is 22), so the sell fills at the bid.
+- **On these 31 entries** (poll every 10 s, sell at the bid seen, fee both legs): HOLD mean -2.96c a contract (worst trade -92c); exit at 70c +2.24c (worst -55c); at 60c +1.71c; at 50c +0.65c; at 80c -1.25c; at 30c -1.43c.
+
+**What this changes, and what it does not.** It corrects a line written earlier in this file and repeated to the owner: that a stop cannot cap L1's losses because they gap (X1 to X7, 1 minute candles). On this day two of three losses slid for minutes and one gapped, and on the one that matters most an exit at 60c to 80c would have kept about three quarters of the loss. It does **not** overturn X1 to X7: over 67 days of minute candles, a 70c exit stopped 10.3% of entries and 53% of those would have won if held (X3), where here no winner touched 70c; 31 entries is one calm day for winners; and the threshold ranking above was read off these same 3 losses. Which of the two is right is what the registered test below is for.
+
+## Pre-registration: X8, an exit at 70c on 10 second books (fixed 2026-10-10, before any fresh day of 10 second data has been read)
+
+**The question.** Does selling a position as soon as its side's bid falls to 70c or lower, checked at the recorder's cadence (about 10 seconds), improve L1 net of what it costs by stopping winners that would have recovered?
+
+**Data (fresh only).** The recorder's snapshots with a timestamp **at or after 2026-10-10 12:57 UTC**, i.e. every snapshot after the exploratory file above. Nothing before that moment enters the test, so the three losses that suggested the rule cannot also confirm it. The recorder keeps 10 days, so a first read is possible about 2026-10-20 and the owner can download more than one file; files are merged and de-duplicated on (timestamp, ticker).
+
+**Rule (fixed now, one parameter set).** Entries are L1's: one per market, the snapshot nearest 365 s before the close inside the 330 s to 400 s window, the side whose ask is 0.88 to 0.97 (either side), taker at the ask. **Exit:** the first later snapshot, up to the close, at which the side's best bid is **0.70 or lower**; sold at that bid, fee on both legs (7% of p(1-p), unrounded). Otherwise held to settlement. The settled side is the one whose last bid before the close is 0.90 or more; a market whose last bid is between 0.10 and 0.90 is unresolved and left out of both arms. No other threshold is run.
+
+**Counterparty / mechanism.** None new. The claim is statistical: a favourite that has lost 20c to 25c of its value with minutes left is, more often than not, one that will lose, and the book it sells into is deep enough to take the size.
+
+**Numeric prediction, before the data.** Over the first read the exit stops **60% to 90% of the losses** before settlement and **3% to 10% of the winners**, and the mean per entry difference (exit minus hold) is between **-0.3c and +0.6c**, not distinguishable from zero. In plain terms: I expect it to cut the size of the bad days a lot and to cost about what it saves in the mean. **A result better than +1.0c is an audit trigger first** (check the exit is a LATER snapshot than the entry and sells at that snapshot's bid).
+
+**Reading rule, fixed.** The test is on the per entry difference (exit minus hold, same entries), reported with the day clustered z. `NOT_YET_FALSIFIED` only if ALL hold: at least **300 entries** on at least **5 days**; the mean difference is above zero; day clustered z of the difference at least **2.1**; both halves of the days positive; and positive with fees times 1.2. Fewer than 300 entries is `NOT_ENOUGH_DATA` and says nothing about the idea; anything else is `FALSIFIED`. **Reported beside the verdict, because a pass on the mean is not the whole question:** losses stopped and winners stopped (counts), worst entry, worst day and deepest drawdown with and without the exit, and the largest 10 second gap loss. The owner may reasonably prefer a smaller worst day to a slightly lower mean; that is a choice about risk, made with these figures, and is not a verdict.
+
+**Count.** One variant, **2,591** (2,590 after B4). No re-run with another threshold or cadence.
+
+**Limits.** Snapshots every 10 seconds can step over a gap; the sell is assumed at the bid of the snapshot that first shows 0.70 or lower, not a later and worse one, and a live bot would be a second or two slower (no resting stop order exists on Kalshi; the bot would have to watch and sell by itself). A winner that dips and recovers between two snapshots is not seen. At roughly 30 entries a day a 10 day read is about 300 entries and about 18 losses: enough to pass `NOT_ENOUGH_DATA` and too few to be sure of a small mean difference. A pass would not change the bot; building a selling path on a live-money bot is a separate, careful step (a sell must never touch the owner's manual trades, must not double-sell, and needs its own gates).
+
+## Pre-registration: B4, L1 one band lower, 84c to 88c (the owner's idea; fixed 2026-10-10, before any code for it and before any 84c to 88c result)
+
+**The question.** A live Bitcoin market sat at "Below 86%" six minutes from its close and the bot, whose floor is 88c, correctly took nothing (the real price of the Below side was about 87c). The owner asked whether the same rule one band lower, 84c to 88c, is worth taking. This is the first test of anything below 88c on this rule; every earlier band test (B1 to B3, P1) was inside 88c to 97c.
+
+**Rule (fixed now, one parameter set, identical to L1 except the band).** Bitcoin and gold only (the markets the bot trades), the 67 day history in `data/book.sqlite`. One observation per market from the candle that ENDS exactly 360 s before the close; buy the side whose ask is **0.84 up to but not including 0.88** (`band = (0.84, 0.8799)`, so an ask of exactly 0.88 stays with L1 and nothing is counted twice), either side, hold to settlement, taker at the ask, the same fee model as `lstrats.net`. Nothing is tuned: no filter, no other band edge, no other minute. A market with no candle at that minute, no quote in the band or no result has no observation.
+
+**Counterparty.** The same as L1's and not a new one: whoever holds the longshot side near the close and sells it to the favourite buyer for less than it is worth. The mechanism weakens as the favourite gets cheaper, because the longshot being sold is then worth more (a 14c to 16c side, not 3c to 12c).
+
+**Numeric prediction, before the run: it does not pass.** Mean net per contract between **-0.8c and +0.3c**, day clustered z under 1.0, win rate within 1 point of the mean price paid (about 86%). The reasons: the weakest band L1 already takes (88c to 90c) was negative after costs in the post hoc table, a pattern that continues downward is the default, and the fee is largest near 50c (about 0.07 x p x (1-p), about 0.8c a side at 86c against 0.3c at 95c). **Expected verdict: `FALSIFIED`.** A result above +1.0c is an audit trigger first (check the entry candle ends 360 s before the close and the band excludes 0.88).
+
+**Pass bar, fixed (the same as every earlier test).** `NOT_YET_FALSIFIED` only if ALL hold: at least 300 observations on at least 5 days; day clustered z of net per contract at least **2.1**; mean net above zero; both halves of the days positive; above zero with fees times 1.2. Anything else is `FALSIFIED`. A pass is permission for a forward test on days not yet seen, never a reason to change the live bot (which has a fixed 88c floor).
+
+**Information, not part of the verdict.** Observations and per day; by series (Bitcoin and gold separately); the two sub-bands 84c to 86c and 86c to 88c (read-only, so the edge is not chosen); win rate against mean price paid; and, for scale, the same read on L1's own band over the same days.
+
+**Count.** One variant: **2,590 as of 2026-10-10** (2,589 before). No re-run with another band edge.
+
+**Limits.** Candle asks are quotes, not our fills (the live bot fills about 56% of its signals, and the misses are where the losses are). The same 67 days as every earlier test. A pass would not change the bot: it would need its own band logic and sizing, and the size ladder, stop and pool were all built around 88c to 97c entries.
+
+## Results: B4, one run, read once (2026-10-10; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+`python -m scalper.band84`, Bitcoin and gold, 67 days. Signal count first: **953 observations** (14.2 a day), well above the 300 minimum, so this is not underpowered.
+
+| Test | Observations | Days | Mean net per contract | Day clustered z | Halves | Fees x1.2 | Win rate vs mean price paid | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| B4 84c to 88c, both series | 953 | 67 | **-0.05c** | **-0.05** | -0.40c / +0.32c | -0.22c | 86.4% vs 85.5% | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: mean between -0.8c and +0.3c, z under 1.0, win rate within 1 point of the price paid, `FALSIFIED`. Measured: -0.05c, z -0.05, 0.9 points, `FALSIFIED`. All of it inside the registered ranges.
+- **The band is break-even before costs of being wrong about fills.** The mean is zero, one half is negative and one positive, and it is negative with fees x1.2. There is nothing to take.
+- **Information only (not part of the verdict, and the edges were not chosen from it).** Bitcoin: -0.90c (z -0.70, 581 entries). Gold: +1.29c (z +0.76, 372 entries, halves -0.72c / +3.50c). Sub-band 84c to 86c: -1.09c; 86c to 88c: +0.99c (z +0.76, halves -0.69c / +2.87c). The 86c to 88c figure is exactly the kind of cell that is tempting to cut out after the fact and would be a new, separately counted try; it is not significant and one of its halves is negative.
+- **For scale: L1's own band on the same days.** 3,379 entries, +0.87c, z +2.42, positive in both halves and with fees x1.2 (`NOT_YET_FALSIFIED` on these days, which are the same days it was found on).
+- **What it means for the live bot.** Nothing changes. The 88c floor stays. The Bitcoin market at 86% that prompted the question was correctly skipped, and the history says skipping the 84c to 88c band costs nothing.
+- **Count.** One variant: **2,590 as of 2026-10-10**, counting T5, E1 and E2 (PR 367) ahead of it. `FALSIFIED`.
+
+## Pool rebuilds after every win (the owner's request, 2026-10-10; information only, no hypothesis, no verdict, no variant counted)
+
+The owner asked for the reinvest pool to restart building on each loss instead of waiting for new profit highs. `PYTHONPATH=src python -m scalper.sizing pool`, from $750 with the deployed sizing (2% base, $43 ladder, ceiling 40), 60% fills, 5% stop, 3000 paths over the real 67 days:
+
+| Rule | Days | Mean gain | 5th pct | 1st pct | Deepest drawdown (95th) | End savings | Stop days |
+|---|---|---|---|---|---|---|---|
+| Original: pool from half of each new high | 30 | +$121 | -$82 | -$133 | $187 | $90 | 1.38 |
+| Literal restart of the high-water mark on every loss | 30 | +$131 | -$127 | -$177 | $222 | **$581** | 0.31 |
+| Pool refills from half of every win | 30 | +$181 | -$154 | -$225 | $287 | $147 | 0.84 |
+| Original | 90 | +$403 | -$12 | -$113 | $269 | $238 | 3.42 |
+| Literal restart on every loss | 90 | **+$188** | -$98 | -$167 | $226 | **$873** | 0.31 |
+| Pool refills from every win | 90 | +$591 | -$132 | -$284 | $438 | $368 | 1.86 |
+
+- **The literal version is a trap.** Restarting the high-water mark on every loss makes half of every win a saving, and savings never absorb a loss and are not counted in the sizing balance. The savings figure explodes ($873 on a $750 account over 90 days) while the account is flat, size stops growing, and the 90 day gain falls to less than half of the original. This is the flaw the file already recorded when skimming each win was first tried.
+- **What the owner asked for, kept: the pool refills right after a loss.** Rebuilt as "half of every win goes to the pool, a loss comes out of the pool, savings only take half of a NEW high" (`pool_every_win`), it keeps the profit and raises it: about +47% at both horizons.
+- **The price is risk, about in proportion.** The bad percentiles roughly double (90 day 1st percentile -$284 against -$113), the deepest drawdown is about 60% larger ($438 against $269), and the mean per dollar of drawdown is slightly lower (1.35 against 1.50). It is the same trade as a larger size, because the pool's extra contracts are back in play sooner after each loss. Stop days fall because the pool is full of contracts again but each stop trips later in the run, not because the risk is lower.
+- **Built as a switch** (`session.poolRule`, `foldSkim`'s `everyWin`), default the original rule, so the owner decides when it starts. It applies only to orders settled after it is switched. A replay of the past, not a forecast; the live record (82 of 83) is far better than the history it replays.
 ## Ethereum live: built behind a size switch, and the ramp it must follow (the owner's decision, 2026-10-10; information only, no variant counted)
 
 **What was built.** L1, unchanged, can trade the Ethereum 15 minute markets with real money when the owner sets a size for them (`session.liveExtra.KXETH15M`, 0 or absent is off, the default). The page's "Ethereum live, largest order" select offers named presets (off, 1, 2, 3, 5, 10 contracts, "same as Bitcoin and gold"); the server maps the name to a number, caps it at the Bitcoin and gold stake on every order (`min(stake, preset)`), turns it on only with the server's own live switch, and refuses any series that is not on a hard list in the code (`EXTRA_LIVE_SERIES`, Ethereum only; Solana is deliberately not on it). An Ethereum order is an ordinary L1 order (same rule, band, window, ids, loss stop, pool and exit), so one stop and one pool cover the whole account. Its market must have the money on its own shard; the tick skips it with the reason otherwise.
