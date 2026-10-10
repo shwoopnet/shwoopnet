@@ -45,7 +45,7 @@ gates.G4 = () => {
   // The armed live test does nothing unless the owner has armed it (kalshiLiveGates L16 to L18); the book recorder is
   // read only and keyless (kalshiBookGates). The recorder is the LAST export, so the slice from it proves nothing after
   // it can see a key or place an order. There is no simulated bot any more.
-  assert.deepStrictEqual(scheduled, ['kalshiSimTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiBookRecorder'], 'only the keyless simulation, the exit watch, the armed live test and the book recorder are scheduled');
+  assert.deepStrictEqual(scheduled, ['kalshiLiveExit', 'kalshiLiveArmed', 'kalshiBookRecorder'], 'only the exit watch, the armed live test and the book recorder are scheduled');
   const recOpts = /exports\.kalshiBookRecorder = onSchedule\(\s*\{([^}]*)\}/.exec(fnSrc);
   assert.ok(recOpts && !/secrets/.test(recOpts[1]), 'the recorder is scheduled with no secrets');
 };

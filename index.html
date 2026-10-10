@@ -1072,13 +1072,6 @@
   .kal-tile .kal-lbl, .kal-perf-t .kal-lbl, .kal-perf-head .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
   .kal-perf-head select{ margin-left:4px; }
   .kal-perf-tabs{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:14px; }
-  .kal-sim-ctl{ display:flex; align-items:center; gap:10px; }
-  .kal-sim-body{ padding:0 22px 18px 22px; font-size:13px; }
-  .kal-sim-body .kal-note{ margin-top:10px; }
-  .kal-sim-t{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
-  .kal-sim-t > div{ display:grid; grid-template-columns:1.2fr repeat(4, 1fr); gap:8px; border-top:1px solid var(--border); padding-top:6px; }
-  .kal-sim-t > div.kal-sim-h{ border-top:0; padding-top:0; color:var(--muted); font-size:11px; }
-  .kal-sim-t span:not(:first-child), .kal-sim-t b:not(:first-child){ text-align:right; }
   .kal-perf-t{ display:flex; flex-direction:column; gap:6px; font-size:13px; }
   .kal-perf-t > div{ display:flex; justify-content:space-between; gap:10px; border-top:1px solid var(--border); padding-top:6px; }
   .kal-perf-t > div span:nth-child(2){ color:var(--muted); flex:1; text-align:right; }
@@ -2110,7 +2103,6 @@
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
   var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
   var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
-  var kalshiSimSessionFn = httpsCallable(functions, 'kalshiSimSession');
   var kalshiExitModeFn = httpsCallable(functions, 'kalshiExitMode');
   var kalshiPoolRuleFn = httpsCallable(functions, 'kalshiPoolRule');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
@@ -2599,7 +2591,6 @@
         cb(q.docs.map(function(d){ return d.data(); }));
       }, function(err){ console.error('Kalshi live sync error:', err); if(errCb){ errCb(err); } });
     },
-    // The ETH and SOL simulation: on or off (admin only, no order exists behind it), and its records, which only the server writes.
     // The exit watch's switch: 'off', 'log' (records what it would sell, sells nothing) or 'sell' (real sell orders for the bot's own positions only). Admin only.
     kalshiExitMode: function(mode){
       return kalshiExitModeFn({ mode: mode }).then(function(res){ return res.data; });
@@ -2607,18 +2598,6 @@
     // How the reinvest pool rebuilds: 'highs' (half of each new profit high) or 'wins' (half of every win, so it fills again right after a loss). Admin only.
     kalshiPoolRule: function(rule){
       return kalshiPoolRuleFn({ rule: rule }).then(function(res){ return res.data; });
-    },
-    kalshiSimSession: function(on){
-      return kalshiSimSessionFn({ on: on === true }).then(function(res){ return res.data; });
-    },
-    watchKalshiSim: function(cb){
-      var st = { orders: [], state: null };
-      var onErr = function(err){ console.error('Kalshi simulation sync error:', err); };
-      var un = [
-        onSnapshot(query(collection(db, 'kalshiSimOrders'), orderBy('ts', 'desc'), limit(1000)), function(q){ st.orders = q.docs.map(function(d){ return d.data(); }); cb(st); }, onErr),
-        onSnapshot(doc(db, 'kalshiSimControl', 'state'), function(d){ st.state = d.exists() ? d.data() : null; cb(st); }, onErr)
-      ];
-      return function(){ un.forEach(function(f){ f(); }); };
     },
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
@@ -3515,11 +3494,6 @@
           <div class="kal-chart"><div class="kal-chart-title">How the bot's orders ended</div><div id="kalChartPie"></div></div>
           <div class="kal-chart kal-chart-wide"><div class="kal-chart-title">Each settled trade</div><div id="kalChartBars"></div></div>
         </div>
-      </div>
-      <div class="kal-card kal-card-flush" data-card="sim">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Solana simulation</div>
-          <div class="kal-sim-ctl"><span class="kal-pill" id="kalSimPill">Not running</span> <button class="kal-btn" id="kalSimBtn" type="button">Start simulation</button></div></div>
-        <div class="kal-sim-body" id="kalSim"><div class="kal-empty">Not started. Press Start simulation to run the same rule on live Solana prices with no real orders.</div></div>
       </div>
       <div class="kal-card kal-card-flush" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
@@ -9942,75 +9916,6 @@
     return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum }; });
   }
 
-  // ---- The ETH and SOL simulation card (no real orders exist behind any of this) --------------------------------------------------
-  var KAL_SIM_NAMES = { KXSOL15M: 'SOL' };   // Ethereum is live now; any old simulated Ethereum record is ignored below
-  // What one order puts at risk: the share of its worst-case cost that filled, and the part of that bought with reinvested profit (the add-on).
-  function kalshiSimLegs(o){
-    var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount) || 0, want), share = got / want;
-    return { got: got, cost: (Number(o.maxCost) || 0) * share, addon: (Number(o.addonCost) || 0) * share };
-  }
-  // Results per series and together, from the simulated orders that are candidates (Bitcoin and gold are in the same collection only to be compared with the real bot, flagged calibration).
-  function kalshiSimSummary(orders){
-    var mk = function(){ return { sent: 0, filled: 0, partial: 0, settled: 0, wins: 0, net: 0, contracts: 0 }; };
-    var rows = {}, all = mk();
-    (orders || []).forEach(function(o){
-      if(!o || o.calibration === true || !KAL_SIM_NAMES[o.series] || (o.status !== 'filled' && o.status !== 'no fill')){ return; }
-      var name = KAL_SIM_NAMES[o.series];
-      var r = rows[name] = rows[name] || mk();
-      var filled = Number(o.fillCount) > 0, p = kalshiOrderPnl(o);
-      [r, all].forEach(function(x){
-        x.sent++;
-        if(filled){ x.filled++; x.contracts += Number(o.fillCount); if(Number(o.fillCount) < Number(o.count)){ x.partial++; } }
-        if(p !== null){ x.settled++; x.net += p; if(p > 0){ x.wins++; } }
-      });
-    });
-    return { rows: rows, all: all };
-  }
-  // What the loss stop WOULD have done, by the live rule (botRisk): the bot's trades over a rolling 24 hours, an open order counted as lost, the stop being `base` (5% of the
-  // balance at the last review) plus the profit-funded part of every lost or open order. Run twice over the same period: on the live Bitcoin and gold orders alone, and with the
-  // simulated Solana orders added (Ethereum is live now, so it is in the real orders). Evaluated when each order is sent and again once it has settled. This is the check the owner asked for, that the risk settings are
-  // scaled before anything goes live: three or four positions open at once, counted as lost, can reach a stop that two never did.
-  function kalshiSimRisk(liveOrders, simOrders, base, sinceMs){
-    var DAY = 86400000, SETTLE = 420000, list = [];
-    (liveOrders || []).forEach(function(o){ if(o && o.strategy === 'L1' && Number(o.fillCount) > 0 && o.ts >= sinceMs){ list.push({ o: o, sim: false }); } });
-    (simOrders || []).forEach(function(o){ if(o && o.calibration !== true && KAL_SIM_NAMES[o.series] && Number(o.fillCount) > 0 && o.ts >= sinceMs){ list.push({ o: o, sim: true }); } });
-    var points = [];
-    list.forEach(function(x){ points.push(x.o.ts); points.push(x.o.ts + SETTLE); });
-    points.sort(function(a, b){ return a - b; });
-    function run(withSim){
-      var worst = 0, trips = 0, was = false, tripped = [];
-      points.forEach(function(t){
-        var net = 0, open = 0, allow = 0;
-        list.forEach(function(x){
-          if(x.sim && !withSim){ return; }
-          var o = x.o;
-          if(!(o.ts > t - DAY && o.ts <= t)){ return; }
-          var L = kalshiSimLegs(o), p = kalshiOrderPnl(o);
-          if(o.settled === true && p !== null && o.ts + SETTLE <= t){ net += p; if(p < 0){ allow += L.addon; } }
-          else { open += L.cost; allow += L.addon; }
-        });
-        var low = net - open, hit = low <= -(base + allow) + 1e-9;
-        if(low < worst){ worst = low; }
-        if(hit && !was){ trips++; tripped.push(t); }
-        was = hit;
-      });
-      return { worst: worst, trips: trips, at: tripped };
-    }
-    return { base: base, liveOnly: run(false), withSim: run(true), orders: list.length };
-  }
-  // How closely the simulated fill matches the real bot's on the same Bitcoin and gold markets: the same market, did both fill or both not.
-  function kalshiSimFidelity(simOrders, liveOrders){
-    var real = {};
-    (liveOrders || []).forEach(function(o){ if(o && o.strategy === 'L1' && (o.status === 'filled' || o.status === 'no fill')){ real[o.ticker] = o; } });
-    var f = { pairs: 0, agree: 0, simFill: 0, realFill: 0 };
-    (simOrders || []).forEach(function(o){
-      if(!o || o.calibration !== true || (o.status !== 'filled' && o.status !== 'no fill') || !real[o.ticker]){ return; }
-      var a = Number(o.fillCount) > 0, b = Number(real[o.ticker].fillCount) > 0;
-      f.pairs++; if(a === b){ f.agree++; } if(a){ f.simFill++; } if(b){ f.realFill++; }
-    });
-    return f;
-  }
-
   // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
   // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
   function kalshiLineSvg(points, esc, money){
@@ -10239,8 +10144,8 @@
   // off the "to beat" line even when the market is right; the tile says so.
   var kalshiSpot = { at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] };
   var kalshiMid = {};
-  // ETH (live) and SOL (simulated): the same recipe as Bitcoin, Coinbase's candles for the minute history and its ticker every 10 seconds.
-  var kalshiAlt = { ETH: { product: 'ETH-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] }, SOL: { product: 'SOL-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] } };
+  // ETH: the same recipe as Bitcoin, Coinbase's candles for the minute history and its ticker every 10 seconds.
+  var kalshiAlt = { ETH: { product: 'ETH-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] } };
   function kalshiFetchAlt(key, now){
     var a = kalshiAlt[key];
     if(!a.busy && now - a.at >= 30000){
@@ -10336,9 +10241,9 @@
     if(m.series === 'KXBTC15M' && m.strike != null){
       body = kalshiSparkSvg(kalshiSpotSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
-    } else if((m.series === 'KXETH15M' || m.series === 'KXSOL15M') && m.strike != null){
-      var alt = kalshiAlt[m.series === 'KXETH15M' ? 'ETH' : 'SOL'];
-      body = kalshiSparkSvg(kalshiJoinSeries(alt.pts, alt.live), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: (m.series === 'KXETH15M' ? 'Ethereum' : 'Solana') + ' price from Coinbase against the strike', empty: 'Loading the price...',
+    } else if(m.series === 'KXETH15M' && m.strike != null){
+      var alt = kalshiAlt.ETH;
+      body = kalshiSparkSvg(kalshiJoinSeries(alt.pts, alt.live), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Ethereum' + ' price from Coinbase against the strike', empty: 'Loading the price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
     } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
       body = kalshiSparkSvg(kalshiGoldSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
@@ -10362,7 +10267,7 @@
       return;
     }
     var now = Date.now();
-    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: 'Ethereum 15m', KXSOL15M: 'Solana 15m (simulated only)' };
+    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: 'Ethereum 15m' };
     rows.forEach(function(m){
       if(m.yesBid == null || m.yesAsk == null){ return; }
       var h = kalshiMid[m.ticker] = kalshiMid[m.ticker] || [];
@@ -10372,7 +10277,6 @@
     if(rows.some(function(m){ return m.series === 'KXBTC15M'; })){ kalshiFetchSpot(now); }
     if(rows.some(function(m){ return m.series === 'KXGOLD15M'; })){ kalshiFetchGold(now); }
     if(rows.some(function(m){ return m.series === 'KXETH15M'; })){ kalshiFetchAlt('ETH', now); }
-    if(rows.some(function(m){ return m.series === 'KXSOL15M'; })){ kalshiFetchAlt('SOL', now); }
     el.innerHTML = rows.map(function(m){
       var hasBook = m.yesBid != null && m.yesAsk != null;
       var spread = hasBook ? m.yesAsk - m.yesBid : null;
@@ -10757,55 +10661,6 @@
     if(sel){ sel.addEventListener('change', function(){ kalshiChartRange = sel.value === 'session' ? 'session' : 'all'; renderKalshiCharts(); }); }
   })();
 
-  var kalshiSimData = { orders: [], state: null };
-  var kalshiSimUnsub = null;
-  function renderKalshiSim(){
-    var box = document.getElementById('kalSim'), pill = document.getElementById('kalSimPill'), btn = document.getElementById('kalSimBtn');
-    if(!box || !pill || !btn){ return; }
-    var st = kalshiSimData.state, on = !!(st && st.active === true), now = Date.now();
-    pill.className = 'kal-pill' + (on ? ' on' : '');
-    pill.textContent = on ? 'Simulating' : 'Not running';
-    btn.textContent = on ? 'Stop simulation' : 'Start simulation';
-    var money = kalshiMoney, sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, pct = function(a, b){ return b > 0 ? Math.round(a / b * 100) + '%' : 'none yet'; };
-    var sum = kalshiSimSummary(kalshiSimData.orders), h = '';
-    h += '<div class="kal-note" style="margin-top:0">Simulated: no real order is ever sent. It runs the same rule as the live bot on live Solana prices, sized like a Bitcoin or gold trade today, and judges each fill on a second look at the book half a second later. ' +
-      (on && Number.isFinite(st.since) ? 'Running for ' + (Math.max(0, now - st.since) / 3600000).toFixed(1) + ' hours. ' : '') + (st && st.lastNote ? escapeHtml(st.lastNote) : '') + '</div>';
-    var names = Object.keys(sum.rows).sort();
-    if(!names.length){
-      h += '<div class="kal-empty">' + (on ? 'No simulated order yet. One is made when a market is about 6 minutes from its close and a side is priced 88c to 97c.' : 'No simulated trades yet.') + '</div>';
-    } else {
-      h += '<div class="kal-sim-t"><div class="kal-sim-h"><span>Series</span><span>Signals</span><span>Fill rate</span><span>Win rate</span><span>Settled P/L</span></div>' +
-        names.concat(['All']).map(function(n){
-          var r = n === 'All' ? sum.all : sum.rows[n];
-          return '<div><b>' + escapeHtml(n) + '</b><span>' + r.sent + '</span><span>' + pct(r.filled, r.sent) + '</span><span>' + (r.settled ? pct(r.wins, r.settled) + ' (' + r.wins + ' / ' + r.settled + ')' : 'none yet') + '</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (r.settled ? sg(r.net) : '--') + '</b></div>';
-        }).join('') + '</div>';
-      var cand = kalshiSimData.orders.filter(function(o){ return o && o.calibration !== true && KAL_SIM_NAMES[o.series] && o.status === 'filled'; });
-      h += '<div class="kal-chart" style="margin-top:14px"><div class="kal-chart-title">Simulated P/L, settled trades</div>' + kalshiLineSvg(kalshiPnlSeries(cand, 0), escapeHtml, money) + '</div>';
-    }
-    // The risk check: the live stop rule over the real orders (Bitcoin, gold, Ethereum), then with the simulated Solana ones added.
-    var s = kalshiLiveCtl.session, base = s && Number.isFinite(s.sizeBase) ? 0.05 * s.sizeBase : NaN;
-    var since = st && Number.isFinite(st.since) ? st.since : NaN;
-    if(Number.isFinite(base) && Number.isFinite(since) && sum.all.filled){
-      var rk = kalshiSimRisk(kalshiLiveOrders, kalshiSimData.orders, base, since);
-      var line = function(r){ return 'lowest point ' + sg(r.worst) + ', the stop would have tripped ' + r.trips + (r.trips === 1 ? ' time' : ' times'); };
-      h += '<div class="kal-note"><b>If this were live, the loss stop</b> (' + money(base) + ' plus the profit-funded part of any lost or open order, open orders counted as lost) over the same period: The real orders alone, ' + line(rk.liveOnly) +
-        '. With Solana added, ' + line(rk.withSim) + '. Solana loses together with Bitcoin about half the time, so the risk settings would need scaling before any real order.</div>';
-    }
-    var fid = kalshiSimFidelity(kalshiSimData.orders, kalshiLiveOrders);
-    if(fid.pairs >= 5){
-      h += '<div class="kal-note"><b>How real is the simulated fill?</b> On ' + fid.pairs + ' Bitcoin and gold markets where the real bot also sent an order, the simulation and the real fill agreed on ' + fid.agree + ' (' + pct(fid.agree, fid.pairs) +
-        '). It filled ' + pct(fid.simFill, fid.pairs) + ' of them, the real bot ' + pct(fid.realFill, fid.pairs) + '.</div>';
-    }
-    var recent = kalshiSimData.orders.filter(function(o){ return o && o.calibration !== true && (o.status === 'filled' || o.status === 'no fill'); }).slice(0, 8);
-    if(recent.length){
-      h += '<div class="kal-sim-t"><div class="kal-sim-h"><span>Time</span><span>Market</span><span>Trade</span><span>Fill</span><span>P/L</span></div>' + recent.map(function(o){
-        var p = kalshiOrderPnl(o), name = KAL_SIM_NAMES[o.series] || o.series;
-        return '<div title="' + escapeHtml(o.reason || '') + '"><span>' + escapeHtml(kalDateTime(o.ts)) + '</span><span>' + escapeHtml(name) + '</span><span>' + escapeHtml(String(o.side).toUpperCase() + ' x' + o.count + ' at ' + Math.round((Number(o.price) || 0) * 100) + 'c') + '</span><span>' +
-          (Number(o.fillCount) > 0 ? Number(o.fillCount) + ' filled' : 'no fill') + '</span><b class="' + (p === null ? '' : (p >= 0 ? 'kal-pos' : 'kal-neg')) + '">' + (p === null ? (Number(o.fillCount) > 0 ? 'open' : '--') : sg(p)) + '</b></div>';
-      }).join('') + '</div>';
-    }
-    box.innerHTML = h;
-  }
   function renderKalshiL1(){
     var s = kalshiLiveCtl.session, now = Date.now();
     var running = !!(s && s.active === true);
@@ -10865,21 +10720,6 @@
     });
   })();
 
-  // The simulation's switch. Nothing it does can reach the account, so there is no confirmation to click through.
-  (function(){
-    var b = document.getElementById('kalSimBtn');
-    if(!b){ return; }
-    b.addEventListener('click', function(){
-      var api = window.__shwoopAPI;
-      if(!api || !api.kalshiSimSession || !currentUserIsAdmin){ return; }
-      var on = !(kalshiSimData.state && kalshiSimData.state.active === true);
-      b.disabled = true;
-      api.kalshiSimSession(on).catch(function(err){
-        var box = document.getElementById('kalSim');
-        if(box){ box.insertAdjacentHTML('afterbegin', '<div class="kal-neg">Could not change it: ' + escapeHtml((err && err.message) || 'unknown') + '</div>'); }
-      }).then(function(){ b.disabled = false; });
-    });
-  })();
   function startKalshiBot(){
     stopKalshiBot();
     var api = window.__shwoopAPI;
@@ -10891,7 +10731,6 @@
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; renderKalshiBot(); }, function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; renderKalshiBot(); }); }
     if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } renderKalshiL1(); renderKalshiBot(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
-    if(api.watchKalshiSim){ kalshiSimUnsub = api.watchKalshiSim(function(d){ kalshiSimData = { orders: d.orders, state: d.state }; renderKalshiSim(); }); }
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
     kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
@@ -10902,7 +10741,6 @@
     if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
-    if(kalshiSimUnsub){ kalshiSimUnsub(); kalshiSimUnsub = null; }
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
@@ -10943,7 +10781,7 @@
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['performance', 'Performance'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['sim', 'Solana simulation'], ['books', 'Live books']];
+    var OPTIONAL = [['performance', 'Performance'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['books', 'Live books']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
