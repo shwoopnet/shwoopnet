@@ -746,6 +746,15 @@ gates.K1 = () => {
   assert.ok(/const prior = \(await ref\.get\(\)\)\.data\(\) \|\| \{\};\n\s*await ref\.set\(\{ \.\.\.live\.ownerSettings\(prior\), active: true,/.test(start), 'Start reads the old document and writes the switches back');
 };
 
+// K3: the code-level kill switch. While it is on, the scheduled tick is told live trading is off whatever the server switch says, and the bot cannot be started.
+gates.K3 = () => {
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(/const CODE_KILL_SWITCH = true;/.test(idx), 'the switch is on');
+  assert.ok(/enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED\.value\(\) === "on"/.test(idx), 'the tick is told trading is off');
+  const start = idx.slice(idx.indexOf('exports.kalshiL1Session = onCall'), idx.indexOf('// ---- Flatten all + halt'));
+  assert.ok(/if \(CODE_KILL_SWITCH\) \{\n\s*throw new HttpsError\("failed-precondition"/.test(start), 'Start refuses, before anything is written');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
