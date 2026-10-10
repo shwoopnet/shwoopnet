@@ -522,6 +522,15 @@ function skimAddon(state, now, perContract = 0.93) {
 // One minute of the session. session = {active, startCash, ordersSent}; setSession merges fields into it.
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
+// The owner's own switches on the session document (exit mode, pool rule, Ethereum size). Starting the bot REPLACES that document, so these are read first and written back:
+// before this, pressing Start quietly set the exit back to "log only", the pool back to "after new highs" and Ethereum back to off (Oct 10, 2026), while the page still read as configured.
+const OWNER_SETTINGS = ["exitMode", "exitModeAt", "poolRule", "poolRuleAt", "liveExtra", "liveExtraAt"];
+function ownerSettings(prior) {
+  const out = {};
+  if (prior && typeof prior === "object") for (const k of OWNER_SETTINGS) if (prior[k] !== undefined) out[k] = prior[k];
+  return out;
+}
+
 // A window is the 15 minutes a market closes in, shared by every series: the part of the ticker after the series name (KXBTC15M-26OCT101200-00 gives 26OCT101200).
 const L1_WINDOW_CAP_FRACTION = 0.045;
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
@@ -855,5 +864,5 @@ module.exports = {
   flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MODES, EXIT_MAX_TRIES, EXTRA_LIVE_SERIES, extraLiveCounts,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
+  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, ownerSettings, OWNER_SETTINGS, windowKey, L1_WINDOW_CAP_FRACTION,
 };
