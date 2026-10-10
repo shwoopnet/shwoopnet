@@ -482,7 +482,7 @@ exports.kalshiFlattenAll = onCall(
   }
 );
 
-// ---- Simulated L1 on ETH and SOL (no orders, no key) ---------------------------------------------------------------------------
+// ---- Simulated L1 on SOL (no orders, no key; ETH is live now and no longer simulated) ---------------------------------------------------------------------------
 // The owner's Oct 9, 2026 request: watch the same rule on live prices for a day or three before any real order exists. All the logic is in kalshiSimLib.js,
 // which has no signing, no key and no order call. This function is declared with NO secrets, so it cannot trade even by mistake, and it writes only its own
 // documents. It reads the live session's size fields and the account snapshot only to size a trade like a Bitcoin or gold trade.

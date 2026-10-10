@@ -18,7 +18,8 @@
 const bot = require("./kalshiSignalLib");
 const live = require("./kalshiLiveLib");
 
-const SIM_SERIES = ["KXETH15M", "KXSOL15M"];
+// Ethereum left the simulation on Oct 10, 2026: it trades live now (EXTRA_LIVE_SERIES in kalshiLiveLib.js), and a market must never be both simulated and live.
+const SIM_SERIES = ["KXSOL15M"];
 const CALIBRATION_SERIES = ["KXBTC15M", "KXGOLD15M"];
 const ALL_SERIES = SIM_SERIES.concat(CALIBRATION_SERIES);
 const ARRIVAL_MS = 500;

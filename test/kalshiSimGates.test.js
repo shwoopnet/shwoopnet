@@ -38,23 +38,23 @@ gates.S1 = () => {
 // S2: the fill is judged on a second read of the book, the way an immediate-or-cancel order at the touch would be.
 gates.S2 = () => {
   const yes = { side: 'yes', price: 0.91, limit: 0.91, worst: 0.91 };
-  assert.deepStrictEqual(sim.simFill(yes, 20, mkt('KXETH15M')), { fillCount: 20, price: 0.91, reason: 'filled' }, 'price held, plenty of size: fills in full');
-  assert.strictEqual(sim.simFill(yes, 20, mkt('KXETH15M', { yes_ask_dollars: '0.9200' })).fillCount, 0, 'the ask moved one cent past the limit: no fill');
-  assert.strictEqual(sim.simFill(yes, 20, mkt('KXETH15M', { yes_ask_dollars: '0.9000' })).price, 0.9, 'a better ask is paid at the touch');
-  assert.strictEqual(sim.simFill(yes, 20, mkt('KXETH15M', { yes_ask_size_fp: '7.00' })).fillCount, 7, 'a partial fill, only what rests at the touch');
-  assert.strictEqual(sim.simFill(yes, 20, mkt('KXETH15M', { yes_ask_size_fp: '0.00' })).fillCount, 0, 'nothing resting is no fill');
-  assert.strictEqual(sim.simFill(yes, 20, mkt('KXETH15M', { yes_ask_size_fp: undefined })).fillCount, 0, 'an unknown size is no fill, never a guess');
-  assert.strictEqual(sim.simFill(yes, 20, mkt('KXETH15M', { yes_bid_dollars: '0.9500', yes_ask_dollars: '0.9100' })).fillCount, 0, 'a crossed book is no fill');
+  assert.deepStrictEqual(sim.simFill(yes, 20, mkt('KXSOL15M')), { fillCount: 20, price: 0.91, reason: 'filled' }, 'price held, plenty of size: fills in full');
+  assert.strictEqual(sim.simFill(yes, 20, mkt('KXSOL15M', { yes_ask_dollars: '0.9200' })).fillCount, 0, 'the ask moved one cent past the limit: no fill');
+  assert.strictEqual(sim.simFill(yes, 20, mkt('KXSOL15M', { yes_ask_dollars: '0.9000' })).price, 0.9, 'a better ask is paid at the touch');
+  assert.strictEqual(sim.simFill(yes, 20, mkt('KXSOL15M', { yes_ask_size_fp: '7.00' })).fillCount, 7, 'a partial fill, only what rests at the touch');
+  assert.strictEqual(sim.simFill(yes, 20, mkt('KXSOL15M', { yes_ask_size_fp: '0.00' })).fillCount, 0, 'nothing resting is no fill');
+  assert.strictEqual(sim.simFill(yes, 20, mkt('KXSOL15M', { yes_ask_size_fp: undefined })).fillCount, 0, 'an unknown size is no fill, never a guess');
+  assert.strictEqual(sim.simFill(yes, 20, mkt('KXSOL15M', { yes_bid_dollars: '0.9500', yes_ask_dollars: '0.9100' })).fillCount, 0, 'a crossed book is no fill');
   const no = { side: 'no', price: 0.91, limit: 0.09, worst: 0.91 };
-  assert.deepStrictEqual(sim.simFill(no, 20, mkt('KXETH15M', { yes_bid_dollars: '0.0900', yes_ask_dollars: '0.1000' })), { fillCount: 20, price: 0.91, reason: 'filled' }, 'NO side prices off the yes bid');
-  assert.strictEqual(sim.simFill(no, 20, mkt('KXETH15M', { yes_bid_dollars: '0.0800', yes_ask_dollars: '0.0900' })).fillCount, 0, 'NO moved to 92c, past the limit');
+  assert.deepStrictEqual(sim.simFill(no, 20, mkt('KXSOL15M', { yes_bid_dollars: '0.0900', yes_ask_dollars: '0.1000' })), { fillCount: 20, price: 0.91, reason: 'filled' }, 'NO side prices off the yes bid');
+  assert.strictEqual(sim.simFill(no, 20, mkt('KXSOL15M', { yes_bid_dollars: '0.0800', yes_ask_dollars: '0.0900' })).fillCount, 0, 'NO moved to 92c, past the limit');
 };
 
 // S3: a trade here is the size a live Bitcoin or gold trade is: the same l1Count on the live session's cap, add-on and the account's cash.
 gates.S3 = async () => {
-  const w = world({ markets: [mkt('KXETH15M')] });
+  const w = world({ markets: [mkt('KXSOL15M')] });
   await sim.runSimTick(w.args);
-  const r = w.docs.get('SIM-KXETH15M-T1');
+  const r = w.docs.get('SIM-KXSOL15M-T1');
   const cost1 = 0.91 + require('../functions/kalshiSignalLib.js').takerFee(0.91, 1);
   assert.strictEqual(r.count, live.l1Count(553, cost1, 12, 8), 'same stake as the live rule');
   assert.ok(r.count > 12, 'the base plus the profit add-on, not one contract');
@@ -62,18 +62,18 @@ gates.S3 = async () => {
   assert.strictEqual(r.mode, 'sim');
   assert.strictEqual(r.calibration, false);
   assert.ok(r.maxCost > 0 && r.addon > 0 && r.addonCost > 0, 'carries the fields the loss stop and the page stats read');
-  const off = world({ markets: [mkt('KXETH15M')], session: { sizing: false } });
+  const off = world({ markets: [mkt('KXSOL15M')], session: { sizing: false } });
   await sim.runSimTick(off.args);
-  assert.strictEqual(off.docs.get('SIM-KXETH15M-T1').count, 1, 'a session without scaling sends one contract, and so does the sim');
+  assert.strictEqual(off.docs.get('SIM-KXSOL15M-T1').count, 1, 'a session without scaling sends one contract, and so does the sim');
 };
 
 // S4: nothing happens when it is off, outside the 6 minute window, or when no side is priced 88c to 97c; one record per market, however often the minute runs.
 gates.S4 = async () => {
-  const w = world({ markets: [mkt('KXETH15M')], state: { active: false } });
+  const w = world({ markets: [mkt('KXSOL15M')], state: { active: false } });
   assert.deepStrictEqual(await sim.runSimTick(w.args), { skipped: 'off' }); assert.strictEqual(w.docs.size, 0);
-  const early = world({ markets: [mkt('KXETH15M', { close_time: new Date(NOW + 600000).toISOString() })] });
+  const early = world({ markets: [mkt('KXSOL15M', { close_time: new Date(NOW + 600000).toISOString() })] });
   await sim.runSimTick(early.args); assert.strictEqual(early.docs.size, 0, '10 minutes left is outside the window');
-  const mid = world({ markets: [mkt('KXETH15M', { yes_bid_dollars: '0.4900', yes_ask_dollars: '0.5100' })] });
+  const mid = world({ markets: [mkt('KXSOL15M', { yes_bid_dollars: '0.4900', yes_ask_dollars: '0.5100' })] });
   await sim.runSimTick(mid.args); assert.strictEqual(mid.docs.size, 0, 'a 50c market is not a signal');
   const twice = world({ markets: [mkt('KXSOL15M')] });
   await sim.runSimTick(twice.args); await sim.runSimTick(twice.args);
@@ -83,16 +83,16 @@ gates.S4 = async () => {
 
 // S5: a price that moves between the decision and the arrival is a no fill, which is what makes the sim's fill rate comparable with the real bot's.
 gates.S5 = async () => {
-  const w = world({ markets: [mkt('KXETH15M')], second: { 'KXETH15M-T1': mkt('KXETH15M', { yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9400' }) } });
+  const w = world({ markets: [mkt('KXSOL15M')], second: { 'KXSOL15M-T1': mkt('KXSOL15M', { yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9400' }) } });
   await sim.runSimTick(w.args);
-  const r = w.docs.get('SIM-KXETH15M-T1');
+  const r = w.docs.get('SIM-KXSOL15M-T1');
   assert.strictEqual(r.status, 'no fill'); assert.strictEqual(r.fillCount, '0'); assert.ok(/moved/.test(r.reason));
   assert.ok(r.seen && r.seen2 && r.seen2.ask === 0.94, 'both books are kept so a no fill can be explained afterwards');
-  const failed = world({ markets: [mkt('KXETH15M')] });
+  const failed = world({ markets: [mkt('KXSOL15M')] });
   const rm = failed.args.readMarket; let n = 0;
   failed.args.readMarket = async (t) => { n++; if (n === 2) throw new Error('timeout'); return rm(t); };
   await sim.runSimTick(failed.args);
-  assert.strictEqual(failed.docs.get('SIM-KXETH15M-T1').status, 'error', 'a failed second read is an error record, not a guessed fill');
+  assert.strictEqual(failed.docs.get('SIM-KXSOL15M-T1').status, 'error', 'a failed second read is an error record, not a guessed fill');
 };
 
 // S6: Bitcoin and gold run through the same code only to be compared with the real bot's fills, and are flagged so the page never counts them as candidates.
@@ -101,15 +101,18 @@ gates.S6 = async () => {
   await sim.runSimTick(w.args);
   assert.strictEqual(w.docs.get('SIM-KXBTC15M-T1').calibration, true);
   assert.strictEqual(w.docs.get('SIM-KXGOLD15M-T1').calibration, true);
-  assert.ok(!w.docs.has('SIM-KXXRP15M-T1'), 'only the four named series');
-  assert.deepStrictEqual(sim.SIM_SERIES, ['KXETH15M', 'KXSOL15M']);
+  assert.ok(!w.docs.has('SIM-KXXRP15M-T1'), 'only the named series');
+  const eth = world({ markets: [mkt('KXETH15M')] });
+  await sim.runSimTick(eth.args);
+  assert.strictEqual(eth.docs.size, 0, 'Ethereum is live now: the simulation never makes an order on it');
+  assert.deepStrictEqual(sim.SIM_SERIES, ['KXSOL15M']);
 };
 
 // S7: a simulated order settles with the same arithmetic as a live one, so its profit is comparable.
 gates.S7 = async () => {
-  const w = world({ markets: [mkt('KXETH15M')] });
+  const w = world({ markets: [mkt('KXSOL15M')] });
   await sim.runSimTick(w.args);
-  const r = w.docs.get('SIM-KXETH15M-T1');
+  const r = w.docs.get('SIM-KXSOL15M-T1');
   const won = live.settledFields(r, r.side).settledPnl, lost = live.settledFields(r, r.side === 'yes' ? 'no' : 'yes').settledPnl;
   assert.ok(won > 0 && lost < 0, 'a win is positive and a loss is negative');
   assert.ok(Math.abs(lost + r.maxCost) < 1e-6, 'a full loss costs the whole order, which is what the stop counts');

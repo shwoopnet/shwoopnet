@@ -438,7 +438,7 @@ gates.Y20 = () => {
 const simLift = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const names = ['kalshiOrderPnl', 'kalshiSimLegs', 'kalshiSimSummary', 'kalshiSimRisk', 'kalshiSimFidelity'];
-  return new Function("var KAL_SIM_NAMES = { KXETH15M: 'ETH', KXSOL15M: 'SOL' };\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  return new Function("var KAL_SIM_NAMES = { KXSOL15M: 'SOL' };\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
 };
 const simOrd = (series, ts, over) => Object.assign({ series, ticker: series + '-' + ts, ts, side: 'yes', status: 'filled', count: 20, fillCount: '20', maxCost: 18.7, addonCost: 7.5, price: 0.93, strategy: 'L1', calibration: false }, over || {});
 gates.Y28 = () => {
@@ -446,9 +446,10 @@ gates.Y28 = () => {
   const orders = [simOrd('KXETH15M', 1, { settled: true, settledPnl: 1.2, result: 'yes' }), simOrd('KXETH15M', 2, { status: 'no fill', fillCount: '0' }),
     simOrd('KXSOL15M', 3, { settled: true, settledPnl: -18.7, result: 'no' }), simOrd('KXSOL15M', 4, { fillCount: '7' }), simOrd('KXBTC15M', 5, { calibration: true, settled: true, settledPnl: 5 })];
   const s = f.kalshiSimSummary(orders);
-  assert.strictEqual(s.all.sent, 4, 'a calibration order (Bitcoin or gold) is never a candidate result');
-  assert.deepStrictEqual([s.rows.ETH.sent, s.rows.ETH.filled, s.rows.SOL.partial], [2, 1, 1], 'a no fill is a signal, a short fill is partial');
-  assert.ok(Math.abs(s.all.net - (1.2 - 18.7)) < 1e-9 && s.all.settled === 2 && s.all.wins === 1, 'net is the settled sum');
+  assert.strictEqual(s.all.sent, 2, 'a calibration order (Bitcoin or gold) and an old simulated Ethereum record (Ethereum is live now) are never candidate results');
+  assert.ok(!s.rows.ETH, 'Ethereum is not in the simulation component at all');
+  assert.deepStrictEqual([s.rows.SOL.sent, s.rows.SOL.filled, s.rows.SOL.partial], [2, 2, 1], 'a short fill is partial');
+  assert.ok(Math.abs(s.all.net + 18.7) < 1e-9 && s.all.settled === 1 && s.all.wins === 0, 'net is the settled sum');
 };
 gates.Y29 = () => {
   const f = simLift();
@@ -475,7 +476,7 @@ gates.Y30 = () => {
 
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
 gates.Y31 = () => {
-  assert.ok(/KXETH15M: ethLive >= 1 \? 'Ethereum 15m \(live, ' \+ \(ethLive >= 50 \? 'same size as Bitcoin' : 'up to ' \+ ethLive\) \+ '\)' : 'Ethereum 15m \(simulated only\)', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'labelled simulated only unless the owner has turned Ethereum live on, and then labelled live with its size; Solana is always simulated only');
+  assert.ok(/KXETH15M: ethLive >= 1 \? 'Ethereum 15m \(live, ' \+ \(ethLive >= 50 \? 'same size as Bitcoin' : 'up to ' \+ ethLive\) \+ '\)' : 'Ethereum 15m \(not trading\)', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'labelled live with its size when the owner has turned Ethereum live on, and not trading otherwise (never simulated); Solana is always simulated only');
   assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && /product: 'SOL-USD'/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && /kalshiFetchAlt\('SOL', now\)/.test(html), 'Coinbase history and ticker for both');
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
