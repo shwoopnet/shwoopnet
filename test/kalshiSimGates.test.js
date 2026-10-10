@@ -29,7 +29,7 @@ const gates = {};
 gates.S1 = () => {
   const code = libSrc.replace(/\/\/.*$/gm, '');
   for (const bad of ['signRequest', 'PRIVATE', 'KEY_ID', '/portfolio', 'POST', 'liveRequest', 'runL1Tick', 'flattenAll', 'createOrder']) assert.ok(!code.includes(bad), 'the simulation library must not contain ' + bad);
-  const tick = idxSrc.slice(idxSrc.indexOf('exports.kalshiSimTick = onSchedule('), idxSrc.indexOf('exports.kalshiLiveArmed = onSchedule('));
+  const tick = idxSrc.slice(idxSrc.indexOf('exports.kalshiSimTick = onSchedule('), idxSrc.indexOf('exports.kalshiLiveExit = onSchedule('));
   assert.ok(/exports\.kalshiSimTick = onSchedule\(\s*\{ schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" \}/.test(tick), 'declared with no secrets');
   assert.ok(!/KALSHI_LIVE_KEY_ID|KALSHI_LIVE_PRIVATE_KEY|secrets:/.test(tick + idxSrc.slice(idxSrc.indexOf('exports.kalshiSimSession'), idxSrc.indexOf('exports.kalshiSimTick'))), 'neither sim function can see the live key');
   assert.ok(idxSrc.indexOf('exports.kalshiSimTick') < idxSrc.indexOf('exports.kalshiBookRecorder'), 'the recorder stays last');
@@ -127,7 +127,7 @@ gates.S8 = () => {
 gates.S9 = () => {
   const sess = idxSrc.slice(idxSrc.indexOf('exports.kalshiSimSession'), idxSrc.indexOf('exports.kalshiSimTick'));
   assert.ok(/try \{[\s\S]*\} catch \(e\) \{[\s\S]*new HttpsError\("unavailable", "Could not save the simulation switch: "/.test(sess), 'the switch names its failure');
-  const tick = idxSrc.slice(idxSrc.indexOf('exports.kalshiSimTick'), idxSrc.indexOf('exports.kalshiLiveArmed'));
+  const tick = idxSrc.slice(idxSrc.indexOf('exports.kalshiSimTick'), idxSrc.indexOf('exports.kalshiLiveExit'));
   assert.ok(tick.indexOf('This minute could not be read') > -1 && tick.indexOf('This minute could not be read') < tick.indexOf('live.settleOpenOrders'), 'a failed minute is a note, and the settle sweep still runs after it');
 };
 

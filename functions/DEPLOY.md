@@ -284,3 +284,14 @@ firebase deploy --only functions,firestore:rules
 ```
 
 The rules change adds read-only access for the admin to `kalshiSimOrders` and `kalshiSimControl` (writes are server only). The simulation reads the live session's size fields and the account snapshot only to size a trade like a Bitcoin or gold trade; it cannot place an order, and `test/kalshiSimGates.test.js` (S1) fails if its library or its function ever gains a key, a signing call, a POST or a secret.
+
+
+## The exit watch (sells the bot's own open positions when the price falls to 70c)
+
+New: `kalshiLiveExit` (scheduled each minute, holds the live key, loops about every 10 seconds inside its run) and `kalshiExitMode` (the page's switch). Deploy with:
+
+```
+firebase deploy --only functions
+```
+
+It starts in **log only**: it records on each order when it WOULD have sold and sells nothing. Change it on the Kalshi page (the bot menu, "Exit at 70c": Off, Log only, Sell). **Sell** asks for confirmation and places real sell orders. It needs the server's own `KALSHI_LIVE_ENABLED=on`, like buying. What it can and cannot do, and why 70c is a decision and not a result, is in `kalshi-scalper/README.md` ("Exploratory read ... Friday's loss" and "Pre-registration: X8"). If a sell's answer is ever lost it ends the bot's session and says so; check the Kalshi account before starting again.
