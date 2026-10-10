@@ -2453,3 +2453,18 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 **What the simulation records so this can be checked before any real order.** Every simulated order keeps `maxCost`, `addon` and `addonCost`, the fields the loss stop reads, so the real stop rule can be run over Bitcoin and gold's live orders together with ETH and SOL's simulated ones, and the page can show what the combined stop would have done over the 24 to 72 hours.
 
 **Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.
+
+
+## Ethereum live: built behind a size switch, and the ramp it must follow (the owner's decision, 2026-10-10; information only, no variant counted)
+
+**What was built.** L1, unchanged, can trade the Ethereum 15 minute markets with real money when the owner sets a size for them (`session.liveExtra.KXETH15M`, 0 or absent is off, the default). The page's "Ethereum live, largest order" select offers named presets (off, 1, 2, 3, 5, 10 contracts, "same as Bitcoin and gold"); the server maps the name to a number, caps it at the Bitcoin and gold stake on every order (`min(stake, preset)`), turns it on only with the server's own live switch, and refuses any series that is not on a hard list in the code (`EXTRA_LIVE_SERIES`, Ethereum only; Solana is deliberately not on it). An Ethereum order is an ordinary L1 order (same rule, band, window, ids, loss stop, pool and exit), so one stop and one pool cover the whole account. Its market must have the money on its own shard; the tick skips it with the reason otherwise.
+
+**What the evidence is, said plainly.** The history test (E1) found Ethereum thin and short of the bar (z +1.21 against 2.1, +0.57c a contract, positive in both halves), and its losses coincided with Bitcoin's 51% of the time against a 6% base rate. The simulation (`kalshiSimTick`) is the forward look; its results are the owner's to read on the card and are not part of this section. Going live is the owner's decision and not a research verdict.
+
+**The ramp (decided now, before any live Ethereum trade).** One step up the presets at a time, by the owner, never automatic:
+1. Start at **1 contract**. Stay until there are at least **40 filled Ethereum orders at that size** or 7 days, whichever is later.
+2. To step up: no loss stop in the last 7 days; Ethereum's fill rate within 15 points of Bitcoin's over the same orders (so the fill model and the depth hold); Ethereum's realised result over those orders not worse than -1% of the account; the simulation still agrees with the live fills (the card's fidelity line).
+3. Do not select **"same as Bitcoin and gold"** until the loss stop has been re-scaled for correlated exposure. At today's size three positions open at once (Bitcoin, gold, Ethereum) put about $33 of base-funded risk against a stop of about $37 at a $750 balance, and an open order counts as lost, so there is almost no headroom, and the three crypto-and-gold windows coincide often. A combined cap per window is the missing piece and is not built.
+4. A loss stop that ends the session, or Ethereum losing together with Bitcoin twice in a week, sends the preset back to a lower step; so does any change to the rule.
+
+**Not built, on purpose:** Solana; a size that follows the account automatically; a combined cap per window.

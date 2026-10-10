@@ -427,3 +427,7 @@ Docs in `docs/` (overview, roadmap, career notes, mock-ups) are refreshed weekly
 - `firestore.rules` enforces that only the admin account can ever hold
   live-trading credentials. The backend relies on that and does no admin
   check of its own.
+
+## Extra live series are a hard list in code
+
+Only `EXTRA_LIVE_SERIES` in `functions/kalshiLiveLib.js` (Ethereum) can trade live beyond Bitcoin and gold, and only while the owner has set a size for it on the session. A value stored in Firestore can never add a series; adding one is a deliberate code edit and review (Solana is deliberately absent). The size is chosen from named presets (no callable takes a size from the caller, test L12), is capped at the Bitcoin and gold stake on every order, and everything else (loss stop, pool, exit) treats the order as an ordinary L1 order. Tests X1 to X8 in `test/kalshiL1Gates.test.js`.

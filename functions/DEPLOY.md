@@ -284,3 +284,8 @@ firebase deploy --only functions,firestore:rules
 ```
 
 The rules change adds read-only access for the admin to `kalshiSimOrders` and `kalshiSimControl` (writes are server only). The simulation reads the live session's size fields and the account snapshot only to size a trade like a Bitcoin or gold trade; it cannot place an order, and `test/kalshiSimGates.test.js` (S1) fails if its library or its function ever gains a key, a signing call, a POST or a secret.
+
+
+## Ethereum live (off by default)
+
+New callable `kalshiExtraSeries` (the page's "Ethereum live, largest order" select) and the tick now reads `session.liveExtra`. Deploy with `firebase deploy --only functions`. Nothing changes until you pick a size on the page: Off is the default, any size asks for confirmation, and it only works with `KALSHI_LIVE_ENABLED=on`. The order is capped at the Bitcoin and gold stake, and Ethereum's money must be on its own shard (the bot skips it with the reason otherwise). Read `kalshi-scalper/README.md`, "Ethereum live", for the ramp before stepping up.

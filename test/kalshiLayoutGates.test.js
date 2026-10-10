@@ -475,7 +475,7 @@ gates.Y30 = () => {
 
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
 gates.Y31 = () => {
-  assert.ok(/KXETH15M: 'Ethereum 15m \(simulated only\)', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'labelled so nobody reads them as traded');
+  assert.ok(/KXETH15M: ethLive >= 1 \? 'Ethereum 15m \(live, ' \+ \(ethLive >= 50 \? 'same size as Bitcoin' : 'up to ' \+ ethLive\) \+ '\)' : 'Ethereum 15m \(simulated only\)', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'labelled simulated only unless the owner has turned Ethereum live on, and then labelled live with its size; Solana is always simulated only');
   assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && /product: 'SOL-USD'/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && /kalshiFetchAlt\('SOL', now\)/.test(html), 'Coinbase history and ticker for both');
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
@@ -483,6 +483,14 @@ gates.Y31 = () => {
   const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
+};
+
+// Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
+gates.Y35 = () => {
+  assert.ok(/<select id="kalEthLive"><option value="off">Off<\/option><option value="one">1 contract<\/option><option value="two">2 contracts<\/option><option value="three">3 contracts<\/option><option value="five">5 contracts<\/option><option value="ten">10 contracts<\/option><option value="match">Same as Bitcoin and gold<\/option><\/select>/.test(html));
+  assert.ok(/kalshiExtraSeries: function\(series, level\)/.test(html) && /api\.kalshiExtraSeries\('KXETH15M', want\)/.test(html), 'the page sends a series and a named level, never a number');
+  assert.ok(/want !== 'off' && !window\.confirm\(/.test(html), 'any size above off asks first');
+  assert.ok(/\/GOLD\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Gold' : \(\/ETH\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Ethereum' : 'Bitcoin'\)/.test(html), 'an Ethereum trade is counted under Ethereum in the stats');
 };
 
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
