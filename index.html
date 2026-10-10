@@ -10131,8 +10131,51 @@
     if(t && t.classList && t.classList.contains('kal-more')){ kalshiMoreOpen = t.open; }
   }, true);   // toggle does not bubble, so it is caught on the way down
 
+  // The exit watch, read back from the bot's own order records (no download needed): how many positions fell to 70c, what the sells got, and what holding would have paid.
+  // `results` is the account read's market results by ticker; when a market's result is not known yet the hold figure is left out rather than guessed.
+  // "Touched" is an order the watch acted on or logged (exitStatus or exitShadow); a logged-only order was held to settlement, so its real result IS the hold result.
+  function kalshiExitReport(orders, results){
+    var r = { touched: 0, loggedOnly: 0, sold: 0, partly: 0, failed: 0, avgBid: null, avgFill: null, avgSlip: null, realised: 0, known: 0, recovered: 0, exitMinusHold: 0, holdKnownSold: 0 };
+    var bids = [], fills = [], slips = [];
+    (orders || []).forEach(function(o){
+      if(!o || !(Number(o.fillCount) > 0) || !(o.exitStatus || o.exitShadow)){ return; }
+      r.touched++;
+      var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount), want), cost = (Number(o.maxCost) || 0) * (got / want);
+      var res = o.settled === true && (o.result === 'yes' || o.result === 'no') ? o.result : (results && (results[o.ticker] === 'yes' || results[o.ticker] === 'no') ? results[o.ticker] : null);
+      var holdPnl = res ? Math.round(((res === o.side ? got : 0) - cost) * 10000) / 10000 : null;
+      if(Number(o.exitCount) > 0){
+        if(o.exitStatus === 'partly sold'){ r.partly++; } else { r.sold++; }
+        if(Number.isFinite(Number(o.exitBid))){ bids.push(Number(o.exitBid)); }
+        if(Number.isFinite(Number(o.exitAvg))){ fills.push(Number(o.exitAvg)); if(Number.isFinite(Number(o.exitBid))){ slips.push(Number(o.exitBid) - Number(o.exitAvg)); } }
+        var p = kalshiOrderPnl(o); if(p !== null){ r.realised += p; }
+        if(holdPnl !== null && p !== null){ r.holdKnownSold++; r.exitMinusHold += p - holdPnl; }
+      } else if(o.exitStatus){
+        r.failed++;
+      } else {
+        r.loggedOnly++;
+        if(Number.isFinite(Number(o.exitShadow && o.exitShadow.bid))){ bids.push(Number(o.exitShadow.bid)); }
+      }
+      if(holdPnl !== null){ r.known++; if(res === o.side){ r.recovered++; } }
+    });
+    var avg = function(a){ return a.length ? a.reduce(function(x, y){ return x + y; }, 0) / a.length : null; };
+    r.avgBid = avg(bids); r.avgFill = avg(fills); r.avgSlip = avg(slips);
+    return r;
+  }
+  function kalshiExitHtml(x, esc, money){
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, c = function(v){ return v === null ? 'n/a' : (v * 100).toFixed(1) + 'c'; };
+    if(!x || !x.touched){ return '<div class="kal-perf-t"><span class="kal-lbl">Exit at 70c</span><div><span>No position has fallen to 70c yet, so there is nothing to read.</span></div></div>'; }
+    var row = function(k, v){ return '<div><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
+    var h = '<div class="kal-perf-t"><span class="kal-lbl">Exit at 70c</span>' + row('Positions that fell to 70c', String(x.touched)) +
+      row('Sold / partly sold / logged only', x.sold + ' / ' + x.partly + ' / ' + x.loggedOnly) + (x.failed ? row('Sell did not fill or was skipped', String(x.failed)) : '') +
+      row('Average bid when it triggered', c(x.avgBid));
+    if(x.sold + x.partly){ h += row('Average price the sell got', c(x.avgFill)) + row('Average slip (trigger bid minus fill)', x.avgSlip === null ? 'n/a' : (x.avgSlip * 100).toFixed(1) + 'c') + row('Realised on sold orders', sg(x.realised)); }
+    h += row('Settled since, and the side recovered', x.known ? x.recovered + ' of ' + x.known + ' (' + Math.round(x.recovered / x.known * 100) + '%)' : 'none known yet');
+    if(x.holdKnownSold){ h += row('Sells vs holding, on ' + x.holdKnownSold + ' sold', sg(x.exitMinusHold) + (x.exitMinusHold >= 0 ? ' better' : ' worse')); }
+    return h + '</div>';
+  }
+
   // The tracker's numbers as tiles and two small tables. Nothing is shown as a figure until there is a settled trade to base it on.
-  function kalshiPerfHtml(st, esc, money){
+  function kalshiPerfHtml(st, esc, money, exitRep){
     if(!st || !st.n){ return '<div class="kal-empty">The tracker fills in after the first settled trade.</div>'; }
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     var tile = function(k, v, cls){ return '<div class="kal-tile"><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
@@ -10153,7 +10196,7 @@
       }).join('') + '</div>';
     };
     return '<div class="kal-tiles">' + main + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + '</div>' +
-      '<details class="kal-more"' + (typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen ? ' open' : '') + '><summary>More stats</summary><div class="kal-tiles">' + more + '</div><div class="kal-perf-tabs">' + table('By price paid', st.byBand) + '</div></details>';
+      '<details class="kal-more"' + (typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen ? ' open' : '') + '><summary>More stats</summary><div class="kal-tiles">' + more + '</div><div class="kal-perf-tabs">' + table('By price paid', st.byBand) + (exitRep !== undefined ? kalshiExitHtml(exitRep, esc, money) : '') + '</div></details>';
   }
 
   // A tiny line over one 15 minute market: points are {t (ms), v}, drawn across the market's whole window so it fills from the left as time passes.
@@ -10678,7 +10721,7 @@
     pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
     var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf');
     if(barsEl){ barsEl.innerHTML = kalshiBarsSvg(series, escapeHtml, kalshiMoney); }
-    if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
+    if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney, kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results)); }
   }
   var kalshiChartRange = 'all';
   var kalshiTradeFilter = 'bot';   // 'bot' hides manual trades from the Recent trades card, 'all' shows both
