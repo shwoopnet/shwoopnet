@@ -340,7 +340,7 @@ gates.N25 = async () => {
 // else is scheduled; it refuses to run beside a single armed test order; and the page asks twice.
 gates.N13 = () => {
   assert.ok(/exports\.kalshiL1Session = onCall\(async \(request\) => \{\s*await assertKalshiAdmin\(request\.auth\);/.test(fnSrc), 'admin only');
-  assert.ok(/ref\.set\(\{ active: true, since: now, until: null,/.test(fnSrc), 'the session is written with no end time');
+  assert.ok(/ref\.set\(\{ \.\.\.live\.ownerSettings\(prior\), active: true, since: now, until: null,/.test(fnSrc), 'the session is written with no end time');
   assert.ok(/KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiL1Session'))), 'refuses when the server switch is off');
   assert.ok(/live\.runL1Tick\(/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed'))), 'run by the scheduled function');
   assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
@@ -723,6 +723,18 @@ gates.W3 = async () => {
   other.docs.set('L1-earlier', { strategy: 'L1', ticker: 'KXBTC15M-26OCT090000-00', status: 'filled', maxCost: used, addonCost: 0, ts: NOW - 60000 });
   await tick(other, { quotes: [quote({}, 'KXBTC15M', BTCW)], sizingState: wstate, setSizingState: async () => {} });
   assert.ok(other.posts.length === 1, 'a different window is unaffected');
+};
+
+// K1: pressing Start must not undo the owner's switches. It replaces the session document, and once reset the exit to log only, the pool to "after new highs" and Ethereum to off,
+// while the page's own menu still looked configured.
+gates.K1 = () => {
+  const prior = { active: false, exitMode: 'sell', exitModeAt: 1, poolRule: 'wins', poolRuleAt: 2, liveExtra: { KXETH15M: 50 }, liveExtraAt: 3, ordersSent: 99, sizeCap: 12, peakNet: 4 };
+  assert.deepStrictEqual(live.ownerSettings(prior), { exitMode: 'sell', exitModeAt: 1, poolRule: 'wins', poolRuleAt: 2, liveExtra: { KXETH15M: 50 }, liveExtraAt: 3 }, 'only the three switches are carried, nothing else about the old run');
+  assert.deepStrictEqual(live.ownerSettings({ exitMode: 'log' }), { exitMode: 'log' }, 'a switch never set stays unset (the defaults apply)');
+  assert.deepStrictEqual(live.ownerSettings(null), {});
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  const start = idx.slice(idx.indexOf('exports.kalshiL1Session = onCall'), idx.indexOf('// ---- Flatten all + halt'));
+  assert.ok(/const prior = \(await ref\.get\(\)\)\.data\(\) \|\| \{\};\n\s*await ref\.set\(\{ \.\.\.live\.ownerSettings\(prior\), active: true,/.test(start), 'Start reads the old document and writes the switches back');
 };
 
 (async () => {
