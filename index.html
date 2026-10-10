@@ -9911,7 +9911,7 @@
     var at = Number.isFinite(s.endedAt) ? ' at ' + when(s.endedAt) : '';
     var detail = ev && ev.detail ? ' ' + String(ev.detail).slice(0, 220) : '';
     if(why === 'loss stop'){ return 'Stopped by the loss stop' + at + '.' + detail + ' It stays off until you press Start bot.'; }
-    if(why === 'attempted'){ return 'Stopped' + at + " because an order's answer was lost or refused." + detail + ' Check the Kalshi account (Portfolio, Orders) before pressing Start bot.'; }
+    if(why === 'attempted'){ return 'Stopped' + at + " because an order's answer was lost or refused." + detail + ' Check the Kalshi account, under Portfolio then Orders, before pressing Start bot.'; }
     if(why === 'switched off by the owner'){ return 'Switched off by you' + at + '.'; }
     if(why === 'flattened by the owner'){ return 'Stopped when you pressed Flatten all' + at + '.'; }
     return 'Stopped' + at + (why ? ': ' + why + '.' : ' with no reason recorded.') + detail;
