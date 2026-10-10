@@ -2506,3 +2506,17 @@ So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and t
 - **Information, not part of the verdict: ETH and SOL are mostly the same bet as Bitcoin.** In windows where both had an entry, when Bitcoin's entry lost, ETH's lost **51%** of the time (base rate 6.4%) over 70 cases, and SOL's 43% (base 6.1%) over 51; ETH and SOL lost together 56% of the time one of them lost. Bitcoin and gold: 6% against a 6.1% base. Adding ETH and SOL would not diversify the account, it would triple the size of the loss on the days Bitcoin loses.
 - **Depth, first look only:** the median 1 minute candle at the entry minute traded 4,377 contracts (ETH) and 1,623 (SOL), so a 12 to 40 contract order is 0.3% to 2.5% of it. The order book recorder's data is the real depth test.
 - **Count.** Two variants: **2,589 as of 2026-10-09** (with T5's 2,587). Both `FALSIFIED`. The bot, the site and the Bitcoin and gold history are unchanged; the stages after a pass (a forward shadow run, then a small stake) do not start.
+
+## Results: T5, one run, read once at all 1,240 markets (2026-10-10; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+`python -m scalper.tapeflow run5` over `tape5` (seconds 300 to 599 of the same 1,240 markets T1 to T4 read). Signal count first, as promised: **444 observations** (796 markets with no observation), on 31 days. That is above the 300 minimum, so this is **not** an underpowered result.
+
+| Test | Observations | Days | Mean net per contract | Day clustered z | Halves | Fees x1.2 | Exit above entry | Mean price paid | Median hold | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| T5 cheap side scalp, minutes 5 to 8 | 444 | 31 | **-1.52c** | **-5.16** | -1.70c / -1.35c | -1.74c | 51.4% | 9.2% | 88 s | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: about -1.0c per contract, win rate under 40%, 100 to 400 observations, `FALSIFIED`. Measured: **-1.52c** (worse), **51.4% up (the win-rate prediction was wrong)**, 444 observations (just above the range), `FALSIFIED`.
+- **Same shape as T3.** It wins more than half the time (51% of trades sold above entry, a median hold under a minute and a half) and still loses 1.5c a trade, with both halves negative and z of -5. Many small wins and a minority of exits at the time limit far below entry, plus a fee and spread on both legs of a 9c contract (a 1c spread is 11% of the price).
+- **What the owner's idea needed and did not get.** The window the examples came from (5.6 and 8 minutes in) now exists in the data, 444 times, and the cheap side scalped there loses. The two windows tried (T4 at seconds 61 to 179, too early for a cheap side to exist; T5 here, where it does) bracket the idea at tick level.
+- **Audit triggers.** None: no result was better than predicted. The entry print is inside seconds 300 to 509 and the exit print after the entry second, by test.
+- **Count.** One variant: **2,587 after T5**, and **2,589 with E1 and E2**. The bot and the site are unchanged.
