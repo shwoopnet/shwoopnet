@@ -522,6 +522,31 @@ gates.Y35 = () => {
   assert.ok(/\/GOLD\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Gold' : \(\/ETH\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Ethereum' : 'Bitcoin'\)/.test(html), 'an Ethereum trade is counted under Ethereum in the stats');
 };
 
+// Y37: the exit watch read back from the bot's own order records, inside More stats. Consequences: slip is trigger bid minus fill, "better or worse than holding" is only
+// computed where the market's result is known, and a logged-only order (held to settlement) counts its real outcome as the hold result.
+gates.Y37 = () => {
+  const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
+  const f = new Function(['kalshiOrderPnl', 'kalshiExitReport', 'kalshiExitHtml'].map(grab).join('\n') + '; return { kalshiExitReport, kalshiExitHtml };')();
+  const base = { side: 'yes', count: 10, fillCount: '10', maxCost: 9.6, strategy: 'L1' };
+  const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.69, exitAvg: 0.66, settled: true, result: 'exit', settledPnl: -3.0 });
+  const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.68 }, settled: true, result: 'no', settledPnl: -9.6 });
+  const heldWon = Object.assign({}, base, { ticker: 'C', exitShadow: { bid: 0.7 }, settled: true, result: 'yes', settledPnl: 0.4 });
+  const untouched = Object.assign({}, base, { ticker: 'D', settled: true, result: 'yes', settledPnl: 0.4 });
+  const r = f.kalshiExitReport([sold, heldLost, heldWon, untouched], { A: 'no' });
+  assert.deepStrictEqual([r.touched, r.sold, r.loggedOnly], [3, 1, 2], 'an order the watch never touched is not counted');
+  assert.ok(Math.abs(r.avgSlip - 0.03) < 1e-9, 'slip is the trigger bid minus the fill: ' + r.avgSlip);
+  assert.strictEqual(r.realised, -3.0);
+  assert.ok(Math.abs(r.exitMinusHold - (-3.0 - (-9.6))) < 1e-9 && r.holdKnownSold === 1, 'selling beat holding by $6.60 where the market went against us');
+  assert.deepStrictEqual([r.known, r.recovered], [3, 1], 'recovered = the side won after touching 70c');
+  const win = f.kalshiExitReport([Object.assign({}, sold)], { A: 'yes' });
+  assert.ok(Math.abs(win.exitMinusHold - (-3.0 - 0.4)) < 1e-9, 'when the side would have won, selling was worse than holding by the win it gave up (fees included in cost)');
+  assert.strictEqual(f.kalshiExitReport([Object.assign({}, sold)], null).holdKnownSold, 0, 'no market result, no hold comparison: never guessed');
+  assert.strictEqual(f.kalshiExitReport([untouched], {}).touched, 0);
+  const none = f.kalshiExitHtml(f.kalshiExitReport([untouched], {}), (x) => x, (x) => '$' + x.toFixed(2));
+  assert.ok(/nothing to read/.test(none), 'with nothing touched it says so rather than showing zeros as a result');
+  assert.ok(/kalshiExitReport\(kalshiLiveOrders/.test(html) && /table\('By price paid', st\.byBand\) \+ \(exitRep !== undefined/.test(html), 'wired into More stats');
+};
+
 // Y36: the Account card says why the bot is not trading, without opening the bot menu.
 gates.Y36 = () => {
   const m = /(function kalshiStopReason\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'helper present');
