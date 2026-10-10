@@ -3523,9 +3523,9 @@
         </div>
       </div>
       <div class="kal-card kal-card-flush" data-card="sim">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">ETH and SOL simulation</div>
+        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Solana simulation</div>
           <div class="kal-sim-ctl"><span class="kal-pill" id="kalSimPill">Not running</span> <button class="kal-btn" id="kalSimBtn" type="button">Start simulation</button></div></div>
-        <div class="kal-sim-body" id="kalSim"><div class="kal-empty">Not started. Press Start simulation to run the same rule on live ETH and SOL prices with no real orders.</div></div>
+        <div class="kal-sim-body" id="kalSim"><div class="kal-empty">Not started. Press Start simulation to run the same rule on live Solana prices with no real orders.</div></div>
       </div>
       <div class="kal-card kal-card-flush" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
@@ -9932,7 +9932,7 @@
   }
 
   // ---- The ETH and SOL simulation card (no real orders exist behind any of this) --------------------------------------------------
-  var KAL_SIM_NAMES = { KXETH15M: 'ETH', KXSOL15M: 'SOL' };
+  var KAL_SIM_NAMES = { KXSOL15M: 'SOL' };   // Ethereum is live now; any old simulated Ethereum record is ignored below
   // What one order puts at risk: the share of its worst-case cost that filled, and the part of that bought with reinvested profit (the add-on).
   function kalshiSimLegs(o){
     var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount) || 0, want), share = got / want;
@@ -9943,8 +9943,8 @@
     var mk = function(){ return { sent: 0, filled: 0, partial: 0, settled: 0, wins: 0, net: 0, contracts: 0 }; };
     var rows = {}, all = mk();
     (orders || []).forEach(function(o){
-      if(!o || o.calibration === true || (o.status !== 'filled' && o.status !== 'no fill')){ return; }
-      var name = KAL_SIM_NAMES[o.series] || o.series;
+      if(!o || o.calibration === true || !KAL_SIM_NAMES[o.series] || (o.status !== 'filled' && o.status !== 'no fill')){ return; }
+      var name = KAL_SIM_NAMES[o.series];
       var r = rows[name] = rows[name] || mk();
       var filled = Number(o.fillCount) > 0, p = kalshiOrderPnl(o);
       [r, all].forEach(function(x){
@@ -9957,12 +9957,12 @@
   }
   // What the loss stop WOULD have done, by the live rule (botRisk): the bot's trades over a rolling 24 hours, an open order counted as lost, the stop being `base` (5% of the
   // balance at the last review) plus the profit-funded part of every lost or open order. Run twice over the same period: on the live Bitcoin and gold orders alone, and with the
-  // simulated ETH and SOL orders added. Evaluated when each order is sent and again once it has settled. This is the check the owner asked for, that the risk settings are
+  // simulated Solana orders added (Ethereum is live now, so it is in the real orders). Evaluated when each order is sent and again once it has settled. This is the check the owner asked for, that the risk settings are
   // scaled before anything goes live: three or four positions open at once, counted as lost, can reach a stop that two never did.
   function kalshiSimRisk(liveOrders, simOrders, base, sinceMs){
     var DAY = 86400000, SETTLE = 420000, list = [];
     (liveOrders || []).forEach(function(o){ if(o && o.strategy === 'L1' && Number(o.fillCount) > 0 && o.ts >= sinceMs){ list.push({ o: o, sim: false }); } });
-    (simOrders || []).forEach(function(o){ if(o && o.calibration !== true && Number(o.fillCount) > 0 && o.ts >= sinceMs){ list.push({ o: o, sim: true }); } });
+    (simOrders || []).forEach(function(o){ if(o && o.calibration !== true && KAL_SIM_NAMES[o.series] && Number(o.fillCount) > 0 && o.ts >= sinceMs){ list.push({ o: o, sim: true }); } });
     var points = [];
     list.forEach(function(x){ points.push(x.o.ts); points.push(x.o.ts + SETTLE); });
     points.sort(function(a, b){ return a - b; });
@@ -10185,7 +10185,7 @@
   // off the "to beat" line even when the market is right; the tile says so.
   var kalshiSpot = { at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] };
   var kalshiMid = {};
-  // ETH and SOL (the simulation's markets): the same recipe as Bitcoin, Coinbase's candles for the minute history and its ticker every 10 seconds.
+  // ETH (live) and SOL (simulated): the same recipe as Bitcoin, Coinbase's candles for the minute history and its ticker every 10 seconds.
   var kalshiAlt = { ETH: { product: 'ETH-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] }, SOL: { product: 'SOL-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] } };
   function kalshiFetchAlt(key, now){
     var a = kalshiAlt[key];
@@ -10309,7 +10309,7 @@
     }
     var now = Date.now();
     var ethLive = kalshiLiveCtl.session && kalshiLiveCtl.session.liveExtra ? Number(kalshiLiveCtl.session.liveExtra.KXETH15M) : 0;   // 50 is "same as Bitcoin and gold"
-    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: ethLive >= 1 ? 'Ethereum 15m (live, ' + (ethLive >= 50 ? 'same size as Bitcoin' : 'up to ' + ethLive) + ')' : 'Ethereum 15m (simulated only)', KXSOL15M: 'Solana 15m (simulated only)' };
+    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: ethLive >= 1 ? 'Ethereum 15m (live, ' + (ethLive >= 50 ? 'same size as Bitcoin' : 'up to ' + ethLive) + ')' : 'Ethereum 15m (not trading)', KXSOL15M: 'Solana 15m (simulated only)' };
     rows.forEach(function(m){
       if(m.yesBid == null || m.yesAsk == null){ return; }
       var h = kalshiMid[m.ticker] = kalshiMid[m.ticker] || [];
@@ -10702,7 +10702,7 @@
     btn.textContent = on ? 'Stop simulation' : 'Start simulation';
     var money = kalshiMoney, sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, pct = function(a, b){ return b > 0 ? Math.round(a / b * 100) + '%' : 'none yet'; };
     var sum = kalshiSimSummary(kalshiSimData.orders), h = '';
-    h += '<div class="kal-note" style="margin-top:0">Simulated: no real order is ever sent. It runs the same rule as the live bot on live ETH and SOL prices, sized like a Bitcoin or gold trade today, and judges each fill on a second look at the book half a second later. ' +
+    h += '<div class="kal-note" style="margin-top:0">Simulated: no real order is ever sent. It runs the same rule as the live bot on live Solana prices, sized like a Bitcoin or gold trade today, and judges each fill on a second look at the book half a second later. ' +
       (on && Number.isFinite(st.since) ? 'Running for ' + (Math.max(0, now - st.since) / 3600000).toFixed(1) + ' hours. ' : '') + (st && st.lastNote ? escapeHtml(st.lastNote) : '') + '</div>';
     var names = Object.keys(sum.rows).sort();
     if(!names.length){
@@ -10713,17 +10713,17 @@
           var r = n === 'All' ? sum.all : sum.rows[n];
           return '<div><b>' + escapeHtml(n) + '</b><span>' + r.sent + '</span><span>' + pct(r.filled, r.sent) + '</span><span>' + (r.settled ? pct(r.wins, r.settled) + ' (' + r.wins + ' / ' + r.settled + ')' : 'none yet') + '</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (r.settled ? sg(r.net) : '--') + '</b></div>';
         }).join('') + '</div>';
-      var cand = kalshiSimData.orders.filter(function(o){ return o && o.calibration !== true && o.status === 'filled'; });
+      var cand = kalshiSimData.orders.filter(function(o){ return o && o.calibration !== true && KAL_SIM_NAMES[o.series] && o.status === 'filled'; });
       h += '<div class="kal-chart" style="margin-top:14px"><div class="kal-chart-title">Simulated P/L, settled trades</div>' + kalshiLineSvg(kalshiPnlSeries(cand, 0), escapeHtml, money) + '</div>';
     }
-    // The risk check: the live stop rule over Bitcoin and gold's real orders, then with the simulated ETH and SOL ones added.
+    // The risk check: the live stop rule over the real orders (Bitcoin, gold, Ethereum), then with the simulated Solana ones added.
     var s = kalshiLiveCtl.session, base = s && Number.isFinite(s.sizeBase) ? 0.05 * s.sizeBase : NaN;
     var since = st && Number.isFinite(st.since) ? st.since : NaN;
     if(Number.isFinite(base) && Number.isFinite(since) && sum.all.filled){
       var rk = kalshiSimRisk(kalshiLiveOrders, kalshiSimData.orders, base, since);
       var line = function(r){ return 'lowest point ' + sg(r.worst) + ', the stop would have tripped ' + r.trips + (r.trips === 1 ? ' time' : ' times'); };
-      h += '<div class="kal-note"><b>If this were live, the loss stop</b> (' + money(base) + ' plus the profit-funded part of any lost or open order, open orders counted as lost) over the same period: Bitcoin and gold alone, ' + line(rk.liveOnly) +
-        '. With ETH and SOL added, ' + line(rk.withSim) + '. ETH and SOL lose together with Bitcoin about half the time, so the risk settings would need scaling before any real order.</div>';
+      h += '<div class="kal-note"><b>If this were live, the loss stop</b> (' + money(base) + ' plus the profit-funded part of any lost or open order, open orders counted as lost) over the same period: The real orders alone, ' + line(rk.liveOnly) +
+        '. With Solana added, ' + line(rk.withSim) + '. Solana loses together with Bitcoin about half the time, so the risk settings would need scaling before any real order.</div>';
     }
     var fid = kalshiSimFidelity(kalshiSimData.orders, kalshiLiveOrders);
     if(fid.pairs >= 5){
@@ -10889,7 +10889,7 @@
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['performance', 'Performance'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['sim', 'ETH and SOL simulation'], ['books', 'Live books']];
+    var OPTIONAL = [['performance', 'Performance'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['sim', 'Solana simulation'], ['books', 'Live books']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');

@@ -275,7 +275,7 @@ and the stop from 7% to 10% of the starting cash. The 3 contract cap is unchange
 up the new flat stop at once, and size scaling only applies to a session started with the box ticked.
 
 
-## Simulated ETH and SOL run (no orders, no key)
+## Simulated Solana run (no orders, no key; Ethereum left it when it went live)
 
 `kalshiSimTick` (scheduled each minute, no secrets) and `kalshiSimSession` (the on/off switch the page calls) are new. The simulation is OFF until you press its button on the Kalshi page. Deploy with:
 

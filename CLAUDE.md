@@ -45,7 +45,7 @@ remote:
 
 ## Simulated runs have no key
 
-The ETH and SOL simulation (`functions/kalshiSimLib.js`, `kalshiSimTick`) is keyless on purpose: no signing, no key, no `/portfolio` call, no POST, and its scheduled function is declared with no secrets. `test/kalshiSimGates.test.js` S1 enforces it. Keep it that way: a simulation that can place an order is not a simulation. If it is ever promoted to real orders, the risk settings (one combined stop, ETH and SOL treated as part of the Bitcoin position) must scale with it; see the README section on it.
+The Solana simulation (Ethereum left it on Oct 10, 2026 when it went live; `functions/kalshiSimLib.js`, `kalshiSimTick`) is keyless on purpose: no signing, no key, no `/portfolio` call, no POST, and its scheduled function is declared with no secrets. `test/kalshiSimGates.test.js` S1 enforces it. Keep it that way: a simulation that can place an order is not a simulation. If it is ever promoted to real orders, the risk settings (one combined stop, ETH and SOL treated as part of the Bitcoin position) must scale with it; see the README section on it.
 
 ## Git workflow
 
