@@ -476,7 +476,7 @@ gates.Y30 = () => {
 
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
 gates.Y31 = () => {
-  assert.ok(/KXETH15M: ethLive >= 1 \? 'Ethereum 15m \(live, ' \+ \(ethLive >= 50 \? 'same size as Bitcoin' : 'up to ' \+ ethLive\) \+ '\)' : 'Ethereum 15m \(not trading\)', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'labelled live with its size when the owner has turned Ethereum live on, and not trading otherwise (never simulated); Solana is always simulated only');
+  assert.ok(/KXETH15M: 'Ethereum 15m', KXSOL15M: 'Solana 15m \(simulated only\)'/.test(html), 'Ethereum is an ordinary live market card now; Solana is always simulated only');
   assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && /product: 'SOL-USD'/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && /kalshiFetchAlt\('SOL', now\)/.test(html), 'Coinbase history and ticker for both');
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
@@ -516,10 +516,8 @@ gates.Y34 = () => {
 
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
 gates.Y35 = () => {
-  assert.ok(/<select id="kalEthLive"><option value="off">Off<\/option><option value="one">1 contract<\/option><option value="two">2 contracts<\/option><option value="three">3 contracts<\/option><option value="five">5 contracts<\/option><option value="ten">10 contracts<\/option><option value="match">Same as Bitcoin and gold<\/option><\/select>/.test(html));
-  assert.ok(/kalshiExtraSeries: function\(series, level\)/.test(html) && /api\.kalshiExtraSeries\('KXETH15M', want\)/.test(html), 'the page sends a series and a named level, never a number');
-  assert.ok(/want !== 'off' && !window\.confirm\(/.test(html), 'any size above off asks first');
-  assert.ok(/\/GOLD\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Gold' : \(\/ETH\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Ethereum' : 'Bitcoin'\)/.test(html), 'an Ethereum trade is counted under Ethereum in the stats');
+  assert.ok(!/kalEthLive|kalEthMsg|kalshiExtraSeries|liveExtra/.test(html), 'the Ethereum size dropdown, its handler and its callable are gone from the page');
+  assert.ok(/\/GOLD\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Gold' : \(\/ETH\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Ethereum' : 'Bitcoin'\)/.test(html), 'an Ethereum trade is counted under Ethereum in the performance table, not under Bitcoin');
 };
 
 // Y37: the exit watch read back from the bot's own order records, inside More stats. Consequences: slip is trigger bid minus fill, "better or worse than holding" is only
