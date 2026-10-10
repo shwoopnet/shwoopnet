@@ -53,6 +53,13 @@ T4_ENTRY_TO_S = 180     # ... and before second 180
 T4_TARGET = 0.03        # sell when the bid is 3c above the entry price
 T4_TIME_EXIT_S = 240    # otherwise the first bid print at or after 240 s
 
+# T5 (README, Pre-registration: T5): T4's rule in the window the owner's examples came from, fixed before any trade after second 299 was fetched
+T5_FETCH_FROM_S, T5_FETCH_TO_S = 300, 600
+T5_ENTRY_FROM_S = 300   # first entry print at or after second 300 ...
+T5_ENTRY_TO_S = 510     # ... and before second 510
+T5_TIME_EXIT_S = 570    # otherwise the first bid print at or after 570 s (330 s left, the end of L1's window); band and target are T4's
+BARS5 = "CREATE TABLE IF NOT EXISTS tape5(ticker TEXT, sec INTEGER, yes_px REAL, no_px REAL, last_px REAL, cy REAL, cn REAL, PRIMARY KEY(ticker, sec))"
+
 
 def window_flow(trades: list[dict], open_ts: int) -> tuple[float, float, int]:
     """(YES contracts, NO contracts, trades) from the trades that fall in [open, open + WINDOW_S). A trade stamped later is never counted."""
@@ -71,13 +78,13 @@ def window_flow(trades: list[dict], open_ts: int) -> tuple[float, float, int]:
     return yes, no, n
 
 
-def build_bars(trades: list[dict], open_ts: int) -> list[tuple]:
+def build_bars(trades: list[dict], open_ts: int, lo: int = 0, hi: int = WINDOW_S) -> list[tuple]:
     """Second by second summary of the trades inside [open, open + WINDOW_S). Trades are taken in time order; a second keeps the FIRST taker print on each side."""
     rows = []
     for t in trades:
         ts = datetime.fromisoformat(t["created_time"].replace("Z", "+00:00")).timestamp()
         sec = int(ts - open_ts)
-        if not (0 <= sec < WINDOW_S):
+        if not (lo <= sec < hi):
             continue
         rows.append((ts, sec, t.get("taker_side"), api.f(t.get("yes_price_dollars")), api.f(t.get("count_fp")) or 0.0))
     rows.sort(key=lambda r: r[0])
@@ -251,12 +258,12 @@ def _sell_scan(bars: list[tuple], side: str, esec: int, price: float, target: fl
     return None
 
 
-def t4_trade(bars: list[tuple]) -> dict | None:
-    """T4 on one market's bars. No signal: the first print, from second T4_ENTRY_FROM_S up to (not including) T4_ENTRY_TO_S, by a taker buying a side that costs
-    T4_BAND (YES at its price, NO at 1 minus the YES price of a NO taker print). Exit as T3 with T4_TARGET and T4_TIME_EXIT_S. Fee on both legs."""
+def cheap_trade(bars: list[tuple], frm: int, to: int, time_exit_s: int) -> dict | None:
+    """The cheap-side scalp on one market's bars. No signal: the first print, from second frm up to (not including) to, by a taker buying a side that costs
+    T4_BAND (YES at its price, NO at 1 minus the YES price of a NO taker print). Exit as T3 with T4_TARGET and time_exit_s. Fee on both legs."""
     entry = None
     for b in bars:
-        if not (T4_ENTRY_FROM_S <= b[0] < T4_ENTRY_TO_S):
+        if not (frm <= b[0] < to):
             continue
         cands = []
         if b[1] is not None:
@@ -270,23 +277,33 @@ def t4_trade(bars: list[tuple]) -> dict | None:
     if entry is None:
         return None
     esec, side, price = entry
-    ex = _sell_scan(bars, side, esec, price, T4_TARGET, T4_TIME_EXIT_S)
+    ex = _sell_scan(bars, side, esec, price, T4_TARGET, time_exit_s)
     if ex is None:
         return None
     gross = ex[1] - price
     return {"price": price, "sell": ex[1], "hold": ex[0] - esec, "side": side, "net": gross - fee(price) - fee(ex[1]),
-            "stress": gross - fee(price, STRESS) - fee(ex[1], STRESS), "won": gross > 0}
+            "stress": gross - fee(price, STRESS) - fee(ex[1], STRESS), "won": gross > 0, "entry_sec": esec}
 
 
-def t3_entries(db, min_total: float = 0.0, trade=None) -> tuple[list[dict], int, int]:
+def t4_trade(bars: list[tuple]) -> dict | None:
+    """T4: seconds 61 to 179 of the first 300 s tape."""
+    return cheap_trade(bars, T4_ENTRY_FROM_S, T4_ENTRY_TO_S, T4_TIME_EXIT_S)
+
+
+def t5_trade(bars: list[tuple]) -> dict | None:
+    """T5: the same rule from second 300 up to (not including) 510, time exit at 570. Reads the `tape5` table."""
+    return cheap_trade(bars, T5_ENTRY_FROM_S, T5_ENTRY_TO_S, T5_TIME_EXIT_S)
+
+
+def t3_entries(db, min_total: float = 0.0, trade=None, table: str = "tape_s") -> tuple[list[dict], int, int]:
     """(observations, markets with bars, markets with no observation)."""
     out, seen = [], 0
     flow = {t: y + n for t, y, n in db.execute("SELECT ticker, yes_ct, no_ct FROM tapeflow")}
-    for ticker, open_ts, close_ts in db.execute("SELECT ticker, open_ts, close_ts FROM market WHERE ticker IN (SELECT ticker FROM tapeflow) ORDER BY close_ts").fetchall():
+    for ticker, open_ts, close_ts in db.execute("SELECT ticker, open_ts, close_ts FROM market WHERE ticker IN (SELECT ticker FROM " + ("tape5_done" if table == "tape5" else "tapeflow") + ") ORDER BY close_ts").fetchall():
         if flow.get(ticker, 0.0) < min_total:
             continue
         seen += 1
-        bars = db.execute("SELECT sec, yes_px, no_px, last_px, cy, cn FROM tape_s WHERE ticker=? ORDER BY sec", (ticker,)).fetchall()
+        bars = db.execute(f"SELECT sec, yes_px, no_px, last_px, cy, cn FROM {table} WHERE ticker=? ORDER BY sec", (ticker,)).fetchall()
         t = (trade or t3_trade)(bars)
         if t is None:
             continue
@@ -342,5 +359,71 @@ def run() -> None:
     print(f"VERDICT: {v4}")
 
 
+def fetch5(limit: int = 10 ** 9) -> None:
+    """T5's data: seconds 300 to 599 of the SAME markets the T1 to T4 sample holds, in the same even-sample order. Resumable: a stored market is skipped.
+    `tape5_done` marks a market whose fetch finished (a market with no trades in the window is done and simply has no bars)."""
+    db = sqlite3.connect(DB)
+    db.execute(BARS5)
+    db.execute("CREATE TABLE IF NOT EXISTS tape5_done(ticker TEXT PRIMARY KEY)")
+    last = db.execute("SELECT MAX(close_ts) FROM market").fetchone()[0]
+    rows = db.execute("SELECT ticker, open_ts FROM market WHERE close_ts >= ? AND result IN ('yes','no') ORDER BY close_ts", (last - 30 * 86400,)).fetchall()
+    mine = {r[0] for r in db.execute("SELECT ticker FROM tapeflow")}
+    have = {r[0] for r in db.execute("SELECT ticker FROM tape5_done")}
+    order = {off: k for k, off in enumerate(FETCH_PASSES)}
+    ranked = sorted(enumerate(rows), key=lambda ir: (order[ir[0] % 8], ir[0]))
+    todo = [r for _, r in ranked if r[0] in mine and r[0] not in have][:limit]
+    print(f"{len(mine)} markets in the T1 to T4 sample, {len(have)} done, {len(todo)} to fetch")
+    for i, (ticker, open_ts) in enumerate(todo, 1):
+        for attempt in range(12):
+            try:
+                trades, cursor = [], None
+                while True:
+                    params = {"ticker": ticker, "min_ts": open_ts + T5_FETCH_FROM_S, "max_ts": open_ts + T5_FETCH_TO_S - 1, "limit": 1000}
+                    if cursor:
+                        params["cursor"] = cursor
+                    r = api._get("/markets/trades", params)
+                    trades += r.get("trades", [])
+                    cursor = r.get("cursor")
+                    time.sleep(PAUSE_S)
+                    if not cursor or not r.get("trades"):
+                        break
+                break
+            except RuntimeError as e:
+                print(f"  {ticker}: {str(e)[:90]} (attempt {attempt + 1}); waiting 120 s")
+                db.commit()
+                time.sleep(120)
+        else:
+            print(f"  {ticker}: gave up after 12 attempts, left unfetched")
+            continue
+        bars = build_bars(trades, open_ts, T5_FETCH_FROM_S, T5_FETCH_TO_S)
+        db.executemany("INSERT OR REPLACE INTO tape5 VALUES (?,?,?,?,?,?,?)", [(ticker, *b) for b in bars])
+        db.execute("INSERT OR REPLACE INTO tape5_done VALUES (?)", (ticker,))
+        if i % 25 == 0:
+            db.commit(); print(f"  {i} fetched")
+    db.commit()
+
+
+def run5() -> None:
+    db = sqlite3.connect(DB)
+    done = db.execute("SELECT COUNT(*) FROM tape5_done").fetchone()[0]
+    t5, seen, none = t3_entries(db, trade=t5_trade, table="tape5")
+    t5s, _, _ = t3_entries(db, MIN_TOTAL_STRICT, trade=t5_trade, table="tape5")
+    f = lambda x: f"{x * 100:+.2f}c"
+    print(f"T5 markets fetched: {done}; signal count first: {seen} markets read, {none} with no observation, n={len(t5)}")
+    if not t5:
+        print("VERDICT: FALSIFIED (no observations; the rule's minimum is 300 and says nothing about the idea)")
+        return
+    v5, s5 = verdict(t5, t5s)
+    holds = sorted(e["hold"] for e in t5)
+    print(f"T5 cheap side scalp, minutes 5 to 8: n={s5['n']} on {s5['days']} days, net {f(s5['mean'])} per contract, z {s5['z']:+.2f}, halves {f(s5['h1'])} / {f(s5['h2'])}, "
+          f"fees x{STRESS} {f(s5['stress'])}, up {s5['win']:.1%}, paid {s5['paid']:.1%}, median hold {holds[len(holds) // 2]:.0f}s, at 100 contracts n={s5['strict_n']} net {f(s5['strict_mean'])}")
+    print(f"VERDICT: {v5}")
+
+
 if __name__ == "__main__":
-    fetch(int(sys.argv[2]) if len(sys.argv) > 2 else 30) if sys.argv[1:2] == ["fetch"] else run()
+    if sys.argv[1:2] == ["fetch5"]:
+        fetch5()
+    elif sys.argv[1:2] == ["run5"]:
+        run5()
+    else:
+        fetch(int(sys.argv[2]) if len(sys.argv) > 2 else 30) if sys.argv[1:2] == ["fetch"] else run()

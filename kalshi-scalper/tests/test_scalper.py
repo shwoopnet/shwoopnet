@@ -2242,3 +2242,31 @@ assert _t4n and _t4n["side"] == "no" and abs(_t4n["price"] - 0.07) < 1e-9 and ab
 assert _TF.t4_trade([_b(200, y=0.06), _b(210, n=0.30)]) is None, "no entry after second 180"
 assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.07)]) is None, "no print reaching +3c and none at 240 s: no observation"
 print("T4 tests passed")
+
+# T5, T4's rule in minutes 5 to 8: entry from second 300 and before 510, time exit at 570, the same band and target, reading seconds 300 to 599 only.
+_o5 = [{"created_time": _iso(299), "count_fp": "9", "taker_side": "yes", "yes_price_dollars": "0.06"}, {"created_time": _iso(300), "count_fp": "9", "taker_side": "yes", "yes_price_dollars": "0.06"},
+       {"created_time": _iso(599), "count_fp": "9", "taker_side": "no", "yes_price_dollars": "0.10"}, {"created_time": _iso(600), "count_fp": "9", "taker_side": "no", "yes_price_dollars": "0.10"}]
+_b5 = _TF.build_bars(_o5, _open, _TF.T5_FETCH_FROM_S, _TF.T5_FETCH_TO_S)
+assert [x[0] for x in _b5] == [300, 599], "T5 bars hold seconds 300 to 599 only: 299 and 600 are outside"
+_t5 = _TF.t5_trade([_b(299, y=0.06), _b(320, y=0.06), _b(330, n=0.10)])
+assert _t5 and _t5["entry_sec"] == 320 and abs(_t5["price"] - 0.06) < 1e-9 and abs(_t5["sell"] - 0.10) < 1e-9, "a print at 299 s is not an entry; the one at 320 s is"
+assert _TF.t5_trade([_b(520, y=0.06), _b(530, n=0.10)]) is None, "no entry at or after second 510"
+assert _TF.t5_trade([_b(509, y=0.06), _b(520, n=0.07)]) is None, "no print reaching +3c and none at 570 s: no observation"
+_t5l = _TF.t5_trade([_b(509, y=0.06), _b(520, n=0.07), _b(570, n=0.05)])
+assert _t5l and _t5l["sell"] == 0.05 and _t5l["net"] < 0, "otherwise sold at the first bid print at or after 570 s"
+assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.10)]) and _TF.T4_ENTRY_TO_S == 180, "T4 is unchanged by the refactor"
+assert _TF.T5_TIME_EXIT_S == 900 - 330, "the time exit is the end of L1's window"
+print("T5 tests passed")
+
+# E1 and E2: the pass bar for L1 on ETH and SOL is the same as every earlier test; an empty or losing set is FALSIFIED and a large steady winner passes.
+from scalper import altseries as _AL
+assert _AL.summarize([])[0] == "FALSIFIED"
+_mk = lambda i, net: {"ticker": "t%d" % i, "day": "2026-10-%02d" % (1 + i % 8), "close_ts": i, "price": 0.93, "net": net, "stress": net - 0.001, "gross": net + 0.004}
+assert _AL.summarize([_mk(i, -0.2) for i in range(400)])[0] == "FALSIFIED", "a losing rule is FALSIFIED"
+assert _AL.summarize([_mk(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(299)])[0] == "FALSIFIED", "299 observations can never pass"
+assert _AL.summarize([_mk(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(400)])[0] == "NOT_YET_FALSIFIED", "a steady winner over 300 observations on 8 days passes the bar"
+_h = [_mk(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(400)]
+for e in _h[200:]: e["net"] = -0.001; e["stress"] = -0.002
+assert _AL.summarize(_h)[0] == "FALSIFIED", "a negative second half fails"
+assert _AL.ALT_DB.name == "alts.sqlite" and _AL.ALT_DB != _AL.load_main.__globals__["DB"], "the ETH and SOL history never goes into book.sqlite"
+print("E1 and E2 tests passed")
