@@ -725,6 +725,20 @@ gates.W3 = async () => {
   assert.ok(other.posts.length === 1, 'a different window is unaffected');
 };
 
+// K2: a pool that does not move must be explainable. The fold reports the order it is waiting on, the tick saves the rule in force and how far it counted, and the page shows both.
+gates.K2 = () => {
+  const st = { pool: 0, saved: 0, cum: 0, hwm: 0, appliedTs: 100 };
+  const row = (ts, p, settled) => ({ id: 'o' + ts, ticker: 'T' + ts, strategy: 'L1', fillCount: '12', maxCost: 11.3, ts, settled, settledPnl: settled ? p : undefined });
+  const f = live.foldSkim(st, [row(200, 0.4, true), row(300, 0.5, false), row(400, 0.6, true)], { everyWin: true });
+  assert.deepStrictEqual(f.blocked, { ticker: 'T300', ts: 300 }, 'names the unsettled order that stops the count');
+  assert.ok(Math.abs(f.pool - 0.2) < 1e-9 && f.appliedTs === 200, 'and counts nothing past it');
+  assert.strictEqual(live.foldSkim(st, [row(200, 0.4, true)], { everyWin: true }).blocked, null, 'nothing blocked when everything settled');
+  const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
+  assert.ok(/sizePoolRule: session\.poolRule === "wins" \? "wins" : "highs", sizePoolThrough: sizeState\.appliedTs, sizePoolBlocked: fs\.blocked \? fs\.blocked\.ticker : null/.test(src), 'the tick saves them');
+  const html = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(/Pool rule in use/.test(html) && /Counted through/.test(html) && /waiting on /.test(html), 'the page shows them');
+};
+
 // K1: pressing Start must not undo the owner's switches. It replaces the session document, and once reset the exit to log only, the pool to "after new highs" and Ethereum to off,
 // while the page's own menu still looked configured.
 gates.K1 = () => {

@@ -10600,6 +10600,11 @@
         if(ses.sizing === true && Number.isFinite(ses.sizePool)){
           var ex = Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0;
           poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * 0.93) + '</b></div>';
+          // Which rule the SERVER is using and how far it has counted: a pool that does not move is then explained on the screen, not guessed at. A blocked order is the one the count is waiting on.
+          if(ses.sizePoolRule){
+            poolCell += '<div><span class="kal-k">Pool rule in use</span><b>' + (ses.sizePoolRule === 'wins' ? 'after every win' : 'after new profit highs') + '</b></div>' +
+              '<div><span class="kal-k">Counted through</span><b>' + (Number.isFinite(ses.sizePoolThrough) && ses.sizePoolThrough > 0 ? escapeHtml(kalshiWhen(ses.sizePoolThrough, Date.now())) : 'nothing yet') + (ses.sizePoolBlocked ? ' (waiting on ' + escapeHtml(kalshiShortTicker(ses.sizePoolBlocked)) + ')' : '') + '</b></div>';
+          }
         }
         if(!sizeKnown) stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
         else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
