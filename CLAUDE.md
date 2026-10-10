@@ -434,3 +434,7 @@ Docs in `docs/` (overview, roadmap, career notes, mock-ups) are refreshed weekly
 ## Extra live series are a hard list in code
 
 Only `EXTRA_LIVE_SERIES` in `functions/kalshiLiveLib.js` (Ethereum) can trade live beyond Bitcoin and gold, and only while the owner has set a size for it on the session. A value stored in Firestore can never add a series; adding one is a deliberate code edit and review (Solana is deliberately absent). The size is chosen from named presets (no callable takes a size from the caller, test L12), is capped at the Bitcoin and gold stake on every order, and everything else (loss stop, pool, exit) treats the order as an ordinary L1 order. Tests X1 to X8 in `test/kalshiL1Gates.test.js`.
+
+## One window, one limit
+
+Bitcoin, gold and Ethereum close in the same 15 minutes and move together, so `runL1Tick` holds the account money put into one window (matched by the ticker's time part, counting earlier ticks) to `L1_WINDOW_CAP_FRACTION` (4.5%) of the sizing base, under the 5% loss stop. Bitcoin and gold are sent first, so Ethereum is the one that goes without. The add-on (profit) is not counted; the first order in a window is never cut to zero. Tests W1 to W3 in `test/kalshiL1Gates.test.js`.

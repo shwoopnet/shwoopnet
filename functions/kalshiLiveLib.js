@@ -522,6 +522,10 @@ function skimAddon(state, now, perContract = 0.93) {
 // One minute of the session. session = {active, startCash, ordersSent}; setSession merges fields into it.
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
+// A window is the 15 minutes a market closes in, shared by every series: the part of the ticker after the series name (KXBTC15M-26OCT101200-00 gives 26OCT101200).
+const L1_WINDOW_CAP_FRACTION = 0.045;
+function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
+
 async function runL1Tick(args) {
   const { session, now, setSession, enabled, active, store, keyId, pem, fetchFn, quotes } = args;
   const log = async (kind, detail) => { if (args.logEvent) { try { await args.logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
@@ -591,8 +595,10 @@ async function runL1Tick(args) {
 
   const extra = extraLiveCounts(session);
   const tradable = LIVE_SERIES.concat(Object.keys(extra));
+  // Bitcoin and gold first, extras last: when the window's room runs short it is the extra series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
-    && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1]);
+    && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1])
+    .sort((x, y) => (extra[x.series] !== undefined ? 1 : 0) - (extra[y.series] !== undefined ? 1 : 0));
   if (!candidates.length) {
     // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
     const opens = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status))
@@ -606,6 +612,7 @@ async function runL1Tick(args) {
   // Bitcoin and gold close together and share a shard, and the balance above is read once. Money already committed to an
   // order earlier in this same tick is taken off what the next market on that shard may use.
   const committed = {};
+  const windowSpent = {};   // account money put into each window earlier in THIS tick (the store does not hold it yet)
   for (const c of candidates) {
     if (recentOrders + (ordersSent - sent) >= L1_MAX_ORDERS) { results.push("order limit reached"); break; }   // the limit also holds inside one tick
     const ticker = c.m.ticker;
@@ -625,6 +632,19 @@ async function runL1Tick(args) {
     if (extra[c.series] !== undefined) count = Math.max(1, Math.min(count, extra[c.series]));
     // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
     const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
+    // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
+    // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
+    // from earlier ticks in the same window count too. The loss stop is 5% of the base; a window may use 4.5%, so one window alone cannot reach it.
+    const wkey = windowKey(ticker);
+    const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
+      .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);
+    const room = L1_WINDOW_CAP_FRACTION * sizeBase - windowUsed;
+    // The first order in a window is never cut to nothing by a tiny base (the single-order size rules already bound it); the cap is for the second and third.
+    const allowed = Math.max(windowUsed <= 0 ? 1 : 0, Math.floor(room / cost1 + 1e-9));
+    if (sizing && count - addonUsed > allowed) {
+      if (allowed + addonUsed < 1) { results.push(ticker + ": this window already has $" + windowUsed.toFixed(2) + " at risk, and the combined limit is $" + (L1_WINDOW_CAP_FRACTION * sizeBase).toFixed(2)); continue; }
+      count = allowed + addonUsed;
+    }
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
@@ -642,6 +662,7 @@ async function runL1Tick(args) {
     };
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
     committed[shardKey] = (committed[shardKey] || 0) + cost;
+    windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
 
     const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index, count);
     const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
@@ -834,5 +855,5 @@ module.exports = {
   flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MODES, EXIT_MAX_TRIES, EXTRA_LIVE_SERIES, extraLiveCounts,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,
+  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
 };
