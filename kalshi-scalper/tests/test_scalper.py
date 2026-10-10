@@ -2243,6 +2243,22 @@ assert _TF.t4_trade([_b(200, y=0.06), _b(210, n=0.30)]) is None, "no entry after
 assert _TF.t4_trade([_b(70, y=0.06), _b(80, n=0.07)]) is None, "no print reaching +3c and none at 240 s: no observation"
 print("T4 tests passed")
 
+# B4: the 84c to 88c band takes asks from 0.84 up to but not including 0.88, so it never overlaps L1 (88c to 97c) and leaves no gap, and its pass bar is the same as every earlier test.
+from scalper import band84 as _B4, lstrats as _L4
+def _mk(ticker, ask, bid, res="yes"):
+    close = 1_000_000
+    return (ticker, "KXBTC15M", [(close - 360, bid, ask, bid, ask)], close, res)
+_ms = [_mk("a", 0.87, 0.86), _mk("b", 0.88, 0.87), _mk("c", 0.84, 0.83), _mk("d", 0.83, 0.82), _mk("e", 0.60, 0.59)]
+_got = {e["ticker"] for e in _L4.hold_rule(_ms, left_s=_B4.LEFT_S, band=_B4.BAND)}
+assert _got == {"a", "c"}, "0.87 and 0.84 are in, 0.88 belongs to L1, 0.83 and 0.60 are out: " + str(_got)
+_l1 = {e["ticker"] for e in _L4.hold_rule(_ms, **_L4.L1)}
+assert _l1 == {"b"} and not (_l1 & _got), "no market is counted by both L1 and B4"
+_mine = lambda i, net: {"ticker": "t%d" % i, "day": "2026-10-%02d" % (1 + i % 8), "close_ts": i, "price": 0.86, "net": net, "stress": net - 0.001, "gross": net + 0.01}
+assert _B4.summarize([])[0] == "FALSIFIED" and _B4.summarize([_mine(i, -0.2) for i in range(400)])[0] == "FALSIFIED"
+assert _B4.summarize([_mine(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(299)])[0] == "FALSIFIED", "299 observations can never pass"
+assert _B4.summarize([_mine(i, 0.05 + (0.01 if i % 2 else -0.01)) for i in range(400)])[0] == "NOT_YET_FALSIFIED", "a steady winner over 300 observations on 8 days passes the bar"
+print("B4 tests passed")
+
 # T5, T4's rule in minutes 5 to 8: entry from second 300 and before 510, time exit at 570, the same band and target, reading seconds 300 to 599 only.
 _o5 = [{"created_time": _iso(299), "count_fp": "9", "taker_side": "yes", "yes_price_dollars": "0.06"}, {"created_time": _iso(300), "count_fp": "9", "taker_side": "yes", "yes_price_dollars": "0.06"},
        {"created_time": _iso(599), "count_fp": "9", "taker_side": "no", "yes_price_dollars": "0.10"}, {"created_time": _iso(600), "count_fp": "9", "taker_side": "no", "yes_price_dollars": "0.10"}]
