@@ -50,6 +50,15 @@ const LIVE_HOSTS = ["external-api.kalshi.com"];
 const API_ROOT = "/trade-api/v2";
 const LIVE_CAP = 2.0;               // dollars, fee included. Not a parameter: change it here, in review.
 const LIVE_SERIES = ["KXBTC15M", "KXGOLD15M"];   // gold has real volume on production; only the DEMO's gold book is empty
+// Series that may trade live ONLY while the owner has set a maximum order size for them (session.liveExtra[series], 0 or absent = off). A hard list in code: adding a series here is a
+// deliberate edit and review, never something a stored value can do. ETH only for now (the owner, Oct 10, 2026); SOL is deliberately not on it. The size is capped at the Bitcoin and gold stake.
+const EXTRA_LIVE_SERIES = ["KXETH15M"];
+function extraLiveCounts(session) {
+  const out = {};
+  const x = session && session.liveExtra && typeof session.liveExtra === "object" ? session.liveExtra : {};
+  for (const k of EXTRA_LIVE_SERIES) { const n = x[k]; if (typeof n === "number" && Number.isInteger(n) && n >= 1 && n <= 50) out[k] = n; }
+  return out;
+}
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -580,11 +589,13 @@ async function runL1Tick(args) {
       : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + (stopAt + allowance).toFixed(2) + " stop" + (allowance > 0 ? " ($" + stopAt.toFixed(2) + " plus $" + allowance.toFixed(2) + " of reinvested profit that was at risk)" : ""));
   }
 
-  const candidates = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status)
+  const extra = extraLiveCounts(session);
+  const tradable = LIVE_SERIES.concat(Object.keys(extra));
+  const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
     && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1]);
   if (!candidates.length) {
     // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
-    const opens = (quotes || []).filter((q) => LIVE_SERIES.includes(q.series) && ["active", "open"].includes(q.m.status))
+    const opens = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status))
       .map((q) => Date.parse(q.m.close_time) - L1_WINDOW_MS[1]).filter((t) => t > now);
     await note("Watching. Orders go in about 6 minutes before a close, and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
     return { skipped: "no market in the window" };
@@ -609,7 +620,9 @@ async function runL1Tick(args) {
     if (cost1 > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
     // The cash the size is judged on is what is left after this tick's earlier orders, so two markets cannot both take the full share.
     const cashLeft = cash - Object.values(committed).reduce((a, x) => a + x, 0);
-    const count = sizing ? l1Count(cashLeft, cost1, sizeCap, sizeAddon) : 1;
+    let count = sizing ? l1Count(cashLeft, cost1, sizeCap, sizeAddon) : 1;
+    // An extra series (ETH) trades at the owner's maximum, and never more than a Bitcoin or gold trade is today.
+    if (extra[c.series] !== undefined) count = Math.max(1, Math.min(count, extra[c.series]));
     // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
     const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
@@ -622,7 +635,7 @@ async function runL1Tick(args) {
     const record = {
       ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
-      mode: "live", maxCost: Number(cost.toFixed(2)),
+      mode: "live", extraSeries: extra[c.series] !== undefined, maxCost: Number(cost.toFixed(2)),
       // What the book showed when the order was decided (null where Kalshi did not send a field), so a "no fill" can be
       // explained afterwards: thin size at the touch, or a price that moved away.
       seen: bookSeen(m),
@@ -818,7 +831,7 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
 }
 
 module.exports = {
-  flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MODES, EXIT_MAX_TRIES,
+  flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MODES, EXIT_MAX_TRIES, EXTRA_LIVE_SERIES, extraLiveCounts,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick,

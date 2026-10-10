@@ -401,6 +401,29 @@ exports.kalshiPoolRule = onCall(async (request) => {
   }
 });
 
+// The owner's maximum order size for an extra live series (ETH), chosen from NAMED presets (the page never sends a number: no callable takes a size from the caller, see test L12). The tick
+// caps whatever is chosen at the Bitcoin and gold stake. Stored on the session document. Admin only, only series on the code's own list, and turning it ON needs the server's live switch.
+const EXTRA_LEVELS = { off: 0, one: 1, two: 2, three: 3, five: 5, ten: 10, match: 50 };   // "match" is no cap of its own: the tick still caps at the Bitcoin and gold stake, so it means the same size
+exports.kalshiExtraSeries = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const series = request.data && request.data.series, level = request.data && request.data.level;
+  if (!live.EXTRA_LIVE_SERIES.includes(series)) throw new HttpsError("invalid-argument", "That series is not available for live trading.");
+  if (typeof level !== "string" || !Object.prototype.hasOwnProperty.call(EXTRA_LEVELS, level)) throw new HttpsError("invalid-argument", "The size must be one of: " + Object.keys(EXTRA_LEVELS).join(", ") + ".");
+  const n = EXTRA_LEVELS[level];
+  if (n > 0 && KALSHI_LIVE_ENABLED.value() !== "on") throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to send.");
+  try {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const now = Date.now();
+    await db.collection("kalshiLiveControl").doc("session").set({ liveExtra: { [series]: n }, liveExtraAt: now }, { merge: true });
+    await db.collection("kalshiLiveEvents").add({ ts: now, kind: "extra series", detail: series + " live orders " + (n > 0 ? "up to " + n + " contract" + (n > 1 ? "s" : "") + " (never more than a Bitcoin or gold trade)" : "off") });
+    return { series, level, count: n };
+  } catch (e) {
+    console.error("kalshiExtraSeries failed:", e);
+    throw new HttpsError("unavailable", "Could not save the setting: " + String((e && e.message) || e).slice(0, 140));
+  }
+});
+
 exports.kalshiL1Session = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
   ensureDefaultAdminApp();
@@ -605,6 +628,13 @@ exports.kalshiLiveArmed = onSchedule(
       const sessionOn = Boolean(session && session.active === true);
       let market = null;
       if (armedOn || sessionOn) market = await live.loadQuotes(kalshiMarketApi());
+      // The extra series the owner has switched on (ETH): its markets are added to the list the tick reads. A failure here is skipped, never allowed to stop Bitcoin and gold.
+      if (sessionOn && market) {
+        for (const series of Object.keys(live.extraLiveCounts(session))) {
+          try { for (const m of await kalshiMarketApi().markets(series)) market.quotes.push({ series, m }); }
+          catch (e) { console.error("kalshiLiveArmed: " + series + " quotes skipped: " + String((e && e.message) || e).slice(0, 120)); }
+        }
+      }
       if (armedOn) {
         Object.assign(args, {
           quotes: market.quotes, active: market.active, enabled: KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),

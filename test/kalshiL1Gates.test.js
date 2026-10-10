@@ -622,6 +622,72 @@ gates.P5 = () => {
   assert.ok(/assertKalshiAdmin/.test(setter) && /rule !== "highs" && rule !== "wins"/.test(setter) && /HttpsError\("unavailable"/.test(setter), 'admin only, two named values, a named failure');
 };
 function fnSrcLib() { return require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8'); }
+// X1 to X8: Ethereum live (the owner's decision, Oct 10, 2026). Off unless the owner sets a size; never more than a Bitcoin or gold trade; only series on the code's list; the stop and the exit read it like any L1 order.
+const ETH = 'KXETH15M-26OCT091500-00';
+gates.X1 = async () => {
+  const base = { sizing: true, sizeCap: 12, sizeAddon: 8, sizeBase: 500, sizePool: 7.4, sizeSaved: 5, sizeNextReview: NOW + 86400000 };
+  const w = world({ session: base, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }, { balance: '400.0000', exchange_index: 0 }] } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXETH15M', ETH)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  assert.strictEqual(w.posts.length, 1, 'with no size set for Ethereum, only the Bitcoin market is traded');
+  assert.ok(w.posts[0].ticker === T, 'and it is the Bitcoin one');
+};
+gates.X2 = async () => {
+  const sess = { sizing: true, sizeCap: 12, sizeAddon: 8, liveExtra: { KXETH15M: 2 } };
+  const w = world({ session: sess, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }, { balance: '400.0000', exchange_index: 2 }] } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXETH15M', ETH)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const btc = w.posts.find((p) => p.ticker === T), eth = w.posts.find((p) => p.ticker === ETH);
+  assert.ok(btc && eth, 'both markets are traded when Ethereum is on');
+  assert.strictEqual(eth.count, '2', 'Ethereum is capped at the owner\'s maximum');
+  assert.ok(Number(btc.count) > 2, 'Bitcoin is untouched at its full stake: ' + btc.count);
+  const rec = w.docs.get('L1-' + ETH);
+  assert.strictEqual(rec.series, 'KXETH15M'); assert.strictEqual(rec.extraSeries, true); assert.strictEqual(rec.strategy, 'L1');
+  assert.ok(rec.addon === 0 && rec.addonCost === 0, 'an order at or under the base stake carries no profit-funded part');
+};
+gates.X3 = async () => {
+  // never more than a Bitcoin or gold trade, whatever the owner chose
+  const sess = { sizing: true, sizeCap: 3, sizeAddon: 0, liveExtra: { KXETH15M: 10 } };
+  const w = world({ session: sess });
+  await tick(w, { quotes: [quote({}, 'KXETH15M', ETH)], sizingState: { cap: 3, base: 300, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const eth = w.posts.find((p) => p.ticker === ETH);
+  assert.ok(eth && Number(eth.count) <= 3, 'a 10 contract setting still sends at most the 3 contract stake: ' + (eth && eth.count));
+};
+gates.X4 = () => {
+  assert.deepStrictEqual(live.EXTRA_LIVE_SERIES, ['KXETH15M'], 'only Ethereum is on the list; Solana is not');
+  assert.deepStrictEqual(live.extraLiveCounts({ liveExtra: { KXETH15M: 2, KXSOL15M: 5, KXXRP15M: 5 } }), { KXETH15M: 2 }, 'a series that is not on the code\'s list is ignored, whatever is stored');
+  for (const bad of [0, -1, 1.5, '2', null, 51, NaN, undefined]) assert.deepStrictEqual(live.extraLiveCounts({ liveExtra: { KXETH15M: bad } }), {}, 'an invalid size is off: ' + String(bad));
+  assert.deepStrictEqual(live.extraLiveCounts(null), {}); assert.deepStrictEqual(live.extraLiveCounts({}), {}); assert.deepStrictEqual(live.extraLiveCounts({ liveExtra: 'x' }), {});
+};
+gates.X5 = async () => {
+  // Solana stored on the session is never traded, even if its quotes arrive
+  const w = world({ session: { liveExtra: { KXSOL15M: 5 } } });
+  await tick(w, { quotes: [quote({}, 'KXSOL15M', 'KXSOL15M-26OCT091500-00')] });
+  assert.strictEqual(w.posts.length, 0, 'a series that is not on the list never trades');
+};
+gates.X6 = async () => {
+  // Ethereum sits on a shard with too little money: skipped with the reason, Bitcoin still trades
+  const sess = { liveExtra: { KXETH15M: 2 } };
+  const w = world({ session: sess, fresh: { [ETH]: { exchange_index: 0 } }, balance: { balance_breakdown: [{ balance: '90.0000', exchange_index: 2 }, { balance: '0.2000', exchange_index: 0 }] } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXETH15M', ETH)] });
+  assert.strictEqual(w.posts.filter((p) => p.ticker === T).length, 1, 'Bitcoin, with money on its own shard, still trades');
+  assert.strictEqual(w.posts.filter((p) => p.ticker === ETH).length, 0, 'no money on its shard, no order');
+};
+gates.X7 = async () => {
+  // the loss stop and the pool read Ethereum orders like any other L1 order: one stop for the whole account
+  const lostEth = { id: 'L1-' + ETH, strategy: 'L1', ticker: ETH, series: 'KXETH15M', side: 'yes', count: 2, fillCount: '2.00', maxCost: 1.88, addonCost: 0, ts: NOW - 1000, settled: true, result: 'no', settledPnl: -1.88 };
+  const risk = await live.botRisk({ store: { sessionTrades: async () => [lostEth], updateTest: async () => {} }, since: 0, fetchFn: async () => { throw new Error('settled records need no network'); }, nowMs: NOW });
+  assert.ok(Math.abs(risk.net + 1.88) < 1e-9, 'an Ethereum loss counts toward the same stop as Bitcoin and gold');
+  const fold = live.foldSkim({ pool: 3, saved: 3, cum: 6, hwm: 6, appliedTs: 0 }, [{ ...lostEth, ts: 5 }]);
+  assert.ok(fold.pool < 3, 'and comes out of the same pool');
+};
+gates.X8 = () => {
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  const setter = idx.slice(idx.indexOf('exports.kalshiExtraSeries = onCall'), idx.indexOf('exports.kalshiL1Session = onCall'));
+  assert.ok(/assertKalshiAdmin/.test(setter) && /EXTRA_LIVE_SERIES\.includes\(series\)/.test(setter) && /EXTRA_LEVELS/.test(setter), 'admin only, only the code\'s list, only named levels');
+  assert.ok(/n > 0 && KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(setter), 'turning it on needs the server\'s live switch, like any buy');
+  assert.ok(!/request\.data\.(ticker|price|count|side)/.test(idx), 'still no callable takes a ticker, price or size from the caller');
+  const armed = idx.slice(idx.indexOf('exports.kalshiLiveArmed = onSchedule('));
+  assert.ok(/extraLiveCounts\(session\)/.test(armed) && /quotes skipped/.test(armed), 'the extra series\' quotes are added, and a failure there never stops Bitcoin and gold');
+};
 
 (async () => {
   let failed = 0;
