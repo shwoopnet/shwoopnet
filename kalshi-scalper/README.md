@@ -2520,3 +2520,45 @@ So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and t
 - **What the owner's idea needed and did not get.** The window the examples came from (5.6 and 8 minutes in) now exists in the data, 444 times, and the cheap side scalped there loses. The two windows tried (T4 at seconds 61 to 179, too early for a cheap side to exist; T5 here, where it does) bracket the idea at tick level.
 - **Audit triggers.** None: no result was better than predicted. The entry print is inside seconds 300 to 509 and the exit print after the entry second, by test.
 - **Count.** One variant: **2,587 after T5**, and **2,589 with E1 and E2**. The bot and the site are unchanged.
+
+## Rule for adding money to the account (written 2026-10-09, before any further result, at the owner's request; information only, no hypothesis, no variant counted)
+
+Decided now, while the live record is 74 wins in 74 and nothing makes a deposit feel urgent, so a good week is not what decides it. This is a rule for the owner's own money, not advice, and the owner can override it; the point is that an override is then a visible choice.
+
+**Why a rule.** The live record is about 2.5 days. The 67 day history of the same rule shows about a 94% win rate and +0.87c per contract, which is close to break even at the current size, and every earlier strategy here looked good early and faded as the window grew. L1 itself failed its own pre-set forward test (z 1.45 against 2.1). Extra capital scales dollars and risk by the same factor (the 10 week replay: about 1.8 times the dollars and about 1.7 times the bad drawdown for $1,000 against $550); it does not improve the edge.
+
+**An add is allowed only when ALL of these hold.**
+1. At least **200 settled live bot trades** have accumulated since the last add (or since Oct 7 for the first one).
+2. **At least one real loss** has been seen at a size of 10 contracts or more, and the stop and the pool behaved as designed. A record with no loss has never tested the stop.
+3. The win rate over those trades is **96% or better**, and net profit after fees is positive over the last 100.
+4. At least **14 days** since the last add.
+5. No loss stop has ended a session in the **last 7 days**.
+6. The Oct 23 fill study has been read.
+
+**Size of an add.** At most **25% of the current account** per add (at $550, no more than about $140), and only money whose loss would not change the owner's life.
+
+**Stop adding, with no exceptions made in the moment, when any of these happen.** The win rate over the last 100 trades falls below 94%; a loss stop trips twice in 30 days; the account is down 15% from its high.
+
+**Where extra capital stops helping.** With the ladder at $43 a contract and a base ceiling of 40, size stops growing near **$1,720**. Until the order-book recorder shows the touch can fill that many contracts at about 93c, do not add past about **$1,700**.
+
+**Savings.** The savings half of new profit highs is never traded. Withdrawing it is a decision for the owner at any time; it does not change the bot's sizing, because sizing already excludes it.
+
+**Records.** Each deposit is written down with its date and the account balance and bot profit on that day, so the results can be read separately from the deposits.
+
+**Replacing a salary.** At the history's +0.87c per contract and 30 trades a day, $240 a day needs about 900 contracts per order and an account of about $43,000 at the 2% rule, far beyond the depth and ceiling here, and the edge would likely shrink as size grows. This strategy should be treated as a side income. If that view is ever to change, it should change on a forward read of many weeks, not on a week.
+
+## Simulated ETH and SOL run, and the risk settings that must scale if it ever goes live (the owner's requirement, 2026-10-09)
+
+**What was built.** `functions/kalshiSimLib.js` and the scheduled `kalshiSimTick`: L1 unchanged on KXETH15M and KXSOL15M, on live prices, with no order. It follows the live bot's path (same market list, same 6 minute window, same fresh read, same 88c to 97c pick, same stake) and replaces the order with a second read of the book half a second later, judged as an immediate-or-cancel buy at the touch (fills only if the price is still inside the limit, and only up to the size resting there). It is keyless by construction (no signing, no key, no `/portfolio`, no POST; the function is declared with no secrets) and writes only `kalshiSimOrders` and `kalshiSimControl`. Bitcoin and gold are simulated too, flagged `calibration`, only so the sim's fill can be compared with the real bot's on the same markets.
+
+**The requirement.** If the simulation is ever promoted to real orders, the risk settings must scale with it, not be left sized for two markets. Written down now so it is a condition, not an afterthought:
+
+1. **One stop for the account, not one per series.** The loss stop must count Bitcoin, gold, ETH and SOL together (the same `botRisk` rule: open orders counted as lost, the profit-funded part of a loss not counted).
+2. **ETH and SOL are treated as part of the Bitcoin position.** In the 66 day history, when Bitcoin's entry lost, ETH's lost 51% of the time and SOL's 43% (base rate about 6%); gold's lost 6%. A window in which all three crypto series fire is closer to one bet three times the size than three bets. The per-position 2% base would otherwise become up to 6% of the account on one outcome.
+3. **A combined cap on exposure per window, and on what one correlated loss can cost.** Set from the correlated loss, not the number of series.
+4. **Position size per series ramps by evidence.** A small stake first, with its own gate for each step, until it matches Bitcoin and gold in dollars.
+5. **Cash accounting per shard and the order ceiling are per series and total.** The second and third positions in a window are sized on the cash left after the first, as the live bot already does for two.
+
+**What the simulation records so this can be checked before any real order.** Every simulated order keeps `maxCost`, `addon` and `addonCost`, the fields the loss stop reads, so the real stop rule can be run over Bitcoin and gold's live orders together with ETH and SOL's simulated ones, and the page can show what the combined stop would have done over the 24 to 72 hours.
+
+**Stages, unchanged.** Nothing here moves the bot. A simulated result is read after 24 to 72 hours; real orders for ETH or SOL need the owner's go-ahead and a separate change.

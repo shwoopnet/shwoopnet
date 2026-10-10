@@ -273,3 +273,14 @@ than the plain stop whenever the bot has been ahead. Deploy: `firebase deploy --
 At the owner's request the flat stop went from $7.00 to $10.00 and, with size scaling on, the share of cash per order from 1% to 2%
 and the stop from 7% to 10% of the starting cash. The 3 contract cap is unchanged. Needs `firebase deploy --only functions`; a running session picks
 up the new flat stop at once, and size scaling only applies to a session started with the box ticked.
+
+
+## Simulated ETH and SOL run (no orders, no key)
+
+`kalshiSimTick` (scheduled each minute, no secrets) and `kalshiSimSession` (the on/off switch the page calls) are new. The simulation is OFF until you press its button on the Kalshi page. Deploy with:
+
+```
+firebase deploy --only functions,firestore:rules
+```
+
+The rules change adds read-only access for the admin to `kalshiSimOrders` and `kalshiSimControl` (writes are server only). The simulation reads the live session's size fields and the account snapshot only to size a trade like a Bitcoin or gold trade; it cannot place an order, and `test/kalshiSimGates.test.js` (S1) fails if its library or its function ever gains a key, a signing call, a POST or a secret.

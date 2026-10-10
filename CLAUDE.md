@@ -43,6 +43,10 @@ remote:
   shell commands — read `SECURITY.md` before running a ledger this repo
   didn't write.
 
+## Simulated runs have no key
+
+The ETH and SOL simulation (`functions/kalshiSimLib.js`, `kalshiSimTick`) is keyless on purpose: no signing, no key, no `/portfolio` call, no POST, and its scheduled function is declared with no secrets. `test/kalshiSimGates.test.js` S1 enforces it. Keep it that way: a simulation that can place an order is not a simulation. If it is ever promoted to real orders, the risk settings (one combined stop, ETH and SOL treated as part of the Bitcoin position) must scale with it; see the README section on it.
+
 ## Git workflow
 
 `main` is squash-merged, so a long-lived branch drifts fast. Always:
@@ -409,7 +413,7 @@ Do not undo these without understanding why they exist.
 The admin-only Kalshi page and `functions/` run strategy L1 on real money. Full description: `docs/PROJECT_OVERVIEW.md`.
 
 - **It runs 24/7.** No session end time. The loss stop and the 200 order limit look at the LAST 24 HOURS, so old profits cannot hide a bad day. After a stop it stays off until restarted, on purpose.
-- **Size follows the balance once a week** (`reviewSizing`, `foldSkim` in `functions/kalshiLiveLib.js`): one contract per $43 (a 2% base), one step up at most every 3 days, down at once, ceiling 25. Only NEW net profit highs are skimmed; skimming each win was tried first and is wrong (wins are 6c, losses 90c).
+- **Size follows the balance once a week** (`reviewSizing`, `foldSkim` in `functions/kalshiLiveLib.js`): one contract per $43 (a 2% base), one step up at most every 3 days, down at once, ceiling 40. Only NEW net profit highs are skimmed; skimming each win was tried first and is wrong (wins are 6c, losses 90c).
 - **Pages publishes the repo.** Everything not in `_config.yml`'s exclude list is on the public site, and a committed symlink breaks the build. `test/pagesPublishGates.test.js` guards both. Never `git add -A` in a worktree that has a `kalshi-scalper/data` symlink.
 - **Live and simulated numbers never share a column.** A research figure quoted as if it were the live record has already cost trust once.
 

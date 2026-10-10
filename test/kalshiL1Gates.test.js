@@ -280,7 +280,7 @@ gates.N24 = async () => {
   assert.strictEqual(W, 3 * DAY, 'reviews are 3 days apart');
   assert.strictEqual((() => { const a = live.reviewSizing({ ...st, cap: 5 }, 130, NOW + DAY); return live.reviewSizing(a.state, 130, NOW + DAY + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 3, 'a balance that stays low cuts the cap, mid week, without waiting for a review');
   assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + 6 * DAY).state.cap, 3, 'no rise within a week of a loss stop, even though reviews come every 3 days');
-  assert.strictEqual(live.reviewSizing({ cap: 25, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, 25, 'the hard ceiling holds');
+  assert.strictEqual(live.reviewSizing({ cap: live.L1_SIZE_CEILING, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, live.L1_SIZE_CEILING, 'the hard ceiling holds');
   // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
   const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '900.0000', exchange_index: 2 }] } });
   const saved = [];
@@ -346,7 +346,7 @@ gates.N13 = () => {
   assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
   assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'there is no arm callable left to refuse');
   assert.ok(/A single test order is armed\. Disarm it before starting/.test(fnSrc), 'starting refuses while armed');
-  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveArmed', 'kalshiBookRecorder']);
+  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiSimTick', 'kalshiLiveArmed', 'kalshiBookRecorder']);   // the simulation (no secrets, no orders: see test/kalshiSimGates.test.js) comes first
   assert.ok(fnSrc.indexOf('exports.kalshiL1Session') < fnSrc.indexOf('exports.kalshiBookRecorder'), 'defined before the recorder, which stays last');
   // The page: two clicks, a server call only on the confirm click, and a visible stop.
   assert.ok(/kalL1Start'\)[\s\S]{0,400}addEventListener\('click', function\(\)\{ msg\.textContent = ''; ask\(true\); \}\)/.test(html), 'the first click only asks');
@@ -572,6 +572,7 @@ gates.N32 = async () => {
 };
 
 gates.N30 = () => {
+  assert.ok(live.L1_SIZE_CEILING < live.L1_ORDER_CEILING, 'the base ceiling leaves room under the order ceiling for the profit add-on');
   // Profit-funded contracts have no fixed limit, but the risk of the add-on is bounded by the pool, which holds only profit, and the account-funded part stays inside the 2% rule.
   assert.strictEqual(live.skimAddon({ pool: 4.65 }, 5), 5, 'a pool of five contract costs buys five extras');
   assert.strictEqual(live.l1Count(509, 0.93, 20, 0), 10, 'the account-funded part never risks more than 2% of cash');
