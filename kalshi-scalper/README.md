@@ -33,7 +33,7 @@ Not met by anything. Kept as the standard every forward check is judged by.
 - Fewer than N strategy variants tried, N recorded here as we go, because
   best-of-many crosses any bar by luck.
 
-Strategy variants tried so far: **2,586 as of 2026-10-09** (T1 to T4 added to the 2,582 of 2026-10-08; (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
+Strategy variants tried so far: **2,589 as of 2026-10-10** (T5, E1 and E2 added after the 2,586 below; all `FALSIFIED`). Earlier tally: **2,586 as of 2026-10-09** (T1 to T4 added to the 2,582 of 2026-10-08; (792 before P1; P1 is the 793rd; the four slot search adds 1,760; F6 and F7 two; Q1 to Q3 and two
 Q1 thresholds five; F8 one; N1 and N2 two; X1 to X7 seven; B1 to B3 three; F9 one), all `FALSIFIED` or `NOT_ENOUGH_DATA`. The running total is kept up to date in the section that last changed it.
 Cuts examined by the decision rule: 18, plus 3 entry times for H1.
 
