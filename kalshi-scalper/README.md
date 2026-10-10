@@ -2471,3 +2471,18 @@ Decided now, while the live record is 74 wins in 74 and nothing makes a deposit 
 **Count.** One variant: **2,590 as of 2026-10-10** (2,589 before). No re-run with another band edge.
 
 **Limits.** Candle asks are quotes, not our fills (the live bot fills about 56% of its signals, and the misses are where the losses are). The same 67 days as every earlier test. A pass would not change the bot: it would need its own band logic and sizing, and the size ladder, stop and pool were all built around 88c to 97c entries.
+
+## Results: B4, one run, read once (2026-10-10; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+`python -m scalper.band84`, Bitcoin and gold, 67 days. Signal count first: **953 observations** (14.2 a day), well above the 300 minimum, so this is not underpowered.
+
+| Test | Observations | Days | Mean net per contract | Day clustered z | Halves | Fees x1.2 | Win rate vs mean price paid | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| B4 84c to 88c, both series | 953 | 67 | **-0.05c** | **-0.05** | -0.40c / +0.32c | -0.22c | 86.4% vs 85.5% | `FALSIFIED` |
+
+- **Prediction against outcome.** Predicted: mean between -0.8c and +0.3c, z under 1.0, win rate within 1 point of the price paid, `FALSIFIED`. Measured: -0.05c, z -0.05, 0.9 points, `FALSIFIED`. All of it inside the registered ranges.
+- **The band is break-even before costs of being wrong about fills.** The mean is zero, one half is negative and one positive, and it is negative with fees x1.2. There is nothing to take.
+- **Information only (not part of the verdict, and the edges were not chosen from it).** Bitcoin: -0.90c (z -0.70, 581 entries). Gold: +1.29c (z +0.76, 372 entries, halves -0.72c / +3.50c). Sub-band 84c to 86c: -1.09c; 86c to 88c: +0.99c (z +0.76, halves -0.69c / +2.87c). The 86c to 88c figure is exactly the kind of cell that is tempting to cut out after the fact and would be a new, separately counted try; it is not significant and one of its halves is negative.
+- **For scale: L1's own band on the same days.** 3,379 entries, +0.87c, z +2.42, positive in both halves and with fees x1.2 (`NOT_YET_FALSIFIED` on these days, which are the same days it was found on).
+- **What it means for the live bot.** Nothing changes. The 88c floor stays. The Bitcoin market at 86% that prompted the question was correctly skipped, and the history says skipping the 84c to 88c band costs nothing.
+- **Count.** One variant: **2,590 as of 2026-10-10**, counting T5, E1 and E2 (PR 367) ahead of it. `FALSIFIED`.
