@@ -539,6 +539,7 @@ gates.Y36 = () => {
   assert.ok(/mystery/.test(f({ active: false, endedBecause: 'mystery', endedAt: 5 }, null, false, false, when)), 'an unknown reason is shown as written, never guessed');
   assert.ok(/no reason recorded/.test(f({ active: false, endedAt: 5 }, null, false, false, when)), 'an end with no reason says so');
   assert.ok(/id="kalL1Why" hidden/.test(html) && /document\.getElementById\('kalL1Why'\)/.test(html), 'the line sits on the Account card, outside the menu');
+};
 
 // Y38: a slow load must not look like a broken account. "Never saved" is only said once the halt document has ARRIVED, and the trade figures say loading until the orders arrive.
 gates.Y38 = () => {
