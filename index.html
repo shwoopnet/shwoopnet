@@ -2551,7 +2551,7 @@
     // else write it. `h` is { control }, called on every change.
     watchKalshiBot: function(h){
       var un = [];
-      var onErr = function(err){ console.error('Kalshi bot sync error:', err); };
+      var onErr = function(err){ console.error('Kalshi bot sync error:', err); if(h.error){ h.error(err); } };
       un.push(onSnapshot(doc(db, 'kalshiBotMeta', 'control'), function(s){ h.control(s.exists() ? s.data() : {}); }, onErr));
       return function(){ un.forEach(function(f){ f(); }); };
     },
@@ -2595,10 +2595,10 @@
       ];
       return function(){ un.forEach(function(f){ f(); }); };
     },
-    watchKalshiLive: function(cb){
+    watchKalshiLive: function(cb, errCb){
       return onSnapshot(query(collection(db, 'kalshiLiveOrders'), orderBy('ts', 'desc'), limit(1000)), function(q){   // a 24 hour session sends at most 192 orders; 20 undercounted them and left older fills looking manual
         cb(q.docs.map(function(d){ return d.data(); }));
-      }, function(err){ console.error('Kalshi live sync error:', err); });
+      }, function(err){ console.error('Kalshi live sync error:', err); if(errCb){ errCb(err); } });
     },
     // The ETH and SOL simulation: on or off (admin only, no order exists behind it), and its records, which only the server writes.
     // The exit watch's switch: 'off', 'log' (records what it would sell, sells nothing) or 'sell' (real sell orders for the bot's own positions only). Admin only.
@@ -3495,11 +3495,12 @@
               <div class="kal-note kal-ethrow"><label for="kalEthLive"><b>Ethereum live, largest order</b></label> <select id="kalEthLive"><option value="off">Off</option><option value="one">1 contract</option><option value="two">2 contracts</option><option value="three">3 contracts</option><option value="five">5 contracts</option><option value="ten">10 contracts</option><option value="match">Same as Bitcoin and gold</option></select> <span id="kalEthMsg"></span></div>
               <div class="kal-note">When on, the bot also trades Ethereum's 15 minute markets by the same rule, with REAL money, at no more than this size and never more than a Bitcoin or gold trade. It shares the loss stop and the exit with the rest. Off by default. Ethereum's losses often come together with Bitcoin's.</div>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">About 6 minutes before each Bitcoin or gold 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
+                <div class="kal-note">About 6 minutes before each Bitcoin or gold (and Ethereum, if you turned it on) 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
               </details>
             </div>
           </details>
         </div>
+        <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-perf"><div id="kalPerf"></div></div>
@@ -9899,6 +9900,23 @@
     return kalDate(ms) + ' ' + tm;
   }
 
+  // Why the bot is not trading, in one line for the Account card (the full status sits inside the bot menu, which is shut). '' when it is running, so the line hides.
+  // Every reason the server writes is named; an unknown one is shown as written rather than guessed at.
+  function kalshiStopReason(s, ev, halted, switchOff, when){
+    if(s && s.active === true && !halted && !switchOff){ return ''; }
+    if(switchOff){ return "The server's order switch (KALSHI_LIVE_ENABLED) is off, so nothing is sent."; }
+    if(halted){ return 'Paused by you. Press Resume bot in the bot menu to let it trade again.'; }
+    var why = s && s.endedBecause ? String(s.endedBecause) : '';
+    if(!s || (!why && !Number.isFinite(s.endedAt))){ return 'Not started yet. Open the bot menu and press Start bot.'; }
+    var at = Number.isFinite(s.endedAt) ? ' at ' + when(s.endedAt) : '';
+    var detail = ev && ev.detail ? ' ' + String(ev.detail).slice(0, 220) : '';
+    if(why === 'loss stop'){ return 'Stopped by the loss stop' + at + '.' + detail + ' It stays off until you press Start bot.'; }
+    if(why === 'attempted'){ return 'Stopped' + at + " because an order's answer was lost or refused." + detail + ' Check the Kalshi account, under Portfolio then Orders, before pressing Start bot.'; }
+    if(why === 'switched off by the owner'){ return 'Switched off by you' + at + '.'; }
+    if(why === 'flattened by the owner'){ return 'Stopped when you pressed Flatten all' + at + '.'; }
+    return 'Stopped' + at + (why ? ': ' + why + '.' : ' with no reason recorded.') + detail;
+  }
+
   // Profit or loss of one bot ORDER once it has settled: the server writes settledPnl on the order when it reads the market's result.
   // null while the order is open or unfilled, or when the figure is not there. Nothing is worked out here from prices.
   function kalshiOrderPnl(o){
@@ -10408,7 +10426,9 @@
 
   // ---- server bot tab (read only, plus one halt switch) ----
 
-  var kalshiBotState = { control: {} };
+  // control is null until the first snapshot arrives; {} means it arrived and nothing was ever saved. Mixing the two showed "the halt setting has never been saved" on every slow load.
+  var kalshiBotState = { control: null };
+  var kalshiOrdersLoaded = false, kalshiSyncError = '';
   var kalshiLiveAcct = null;     // the latest read of the account (the account block below owns the read)
   var kalshiLiveEvents = [];
   var kalshiLiveShow = { events: 12, fills: 5, page: 0, pageSize: 10 };   // the trades card pages ten at a time, newest first
@@ -10551,7 +10571,7 @@
     var a = kalshiLiveAcct;
     var el = document.getElementById('kalBotStatus');
     var halted = kalshiBotState.control && kalshiBotState.control.halt === true;
-    var haltUnset = !kalshiBotState.control || kalshiBotState.control.halt === undefined;
+    var haltUnset = kalshiBotState.control !== null && kalshiBotState.control.halt === undefined;
     var h = '';
     if(!a){
       h += '<div>Reading the account...</div>';
@@ -10593,6 +10613,8 @@
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
     // The live scan treats a halt setting that was never saved as halted, so say so instead of showing "not halted".
+    if(kalshiSyncError){ el.innerHTML += '<div class="kal-warn">The bot\'s saved data could not be read (' + escapeHtml(kalshiSyncError) + '). Reload the page; if it keeps happening, sign out and back in.</div>'; }
+    else if(kalshiBotState.control === null || !kalshiOrdersLoaded){ el.innerHTML += '<div class="kal-note">Loading the bot\'s saved data...</div>'; }
     if(haltUnset){ el.innerHTML += '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted. Press Halt, then Resume, once.</div>'; }
     var btn = document.getElementById('kalBotHalt');
     btn.hidden = !currentUserIsAdmin;
@@ -10608,11 +10630,14 @@
       // The account change also holds deposits, withdrawals and manual trades, so it is not the bot's result (that is on the session card).
       // Only the BOT's settled trades since the starting line. Deposits, withdrawals and your own trades are left out. The owner dropped the line that
       // used to show the rest of the balance move (Oct 8, 2026), so only the bot's own result is shown.
+      if(!kalshiOrdersLoaded){ totEl.innerHTML = '<div class="kal-rows"><div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b>loading...</b></div></div>'; }
+      else {
       var botOrders = kalshiResolveOrders(kalshiLiveOrders, a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
       var botNet = kalshiPerfStats(botOrders, tot.since).total;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
         '<div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div></div>';
+      }
     }
 
     renderKalshiPositions();
@@ -10721,7 +10746,8 @@
     pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
     var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf');
     if(barsEl){ barsEl.innerHTML = kalshiBarsSvg(series, escapeHtml, kalshiMoney); }
-    if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney, kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results)); }
+    if(perfEl && !kalshiOrdersLoaded){ perfEl.innerHTML = '<div class="kal-empty">Loading the bot\'s trades...</div>'; }
+    else if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney, kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results)); }
   }
   var kalshiChartRange = 'all';
   var kalshiTradeFilter = 'bot';   // 'bot' hides manual trades from the Recent trades card, 'all' shows both
@@ -10806,6 +10832,8 @@
     var capN = Number.isFinite(s && s.sizeCap) ? s.sizeCap : 3;
     var sizeText = running ? (s.sizing === true ? 'Size: up to ' + capN + (capN === 1 ? ' contract' : ' contracts') + (s.sizeAddon > 0 ? ' (+' + s.sizeAddon + ' from profit)' : '') + (Number.isFinite(s.sizeNextReview) ? ', next review ' + kalDate(s.sizeNextReview) : '') + '.' + (s.sizeSaved > 0 ? ' Saved: ' + kalshiMoney(s.sizeSaved) + '.' : '') : 'One contract each.') + (s.trailing === true ? ' Stops if it gives back ' + stopAt + ' from its best (+$' + peakAt.toFixed(2) + ').' : ' Stops if down ' + stopAt + '.') : '';
     var endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
+    var whyEl = document.getElementById('kalL1Why');
+    if(whyEl){ var why = kalshiStopReason(s, endedEv, halted, switchOff, function(ms){ return kalshiWhen(ms, now); }); whyEl.textContent = why; whyEl.hidden = !why; }
     document.getElementById('kalL1Status').textContent = running ? String(s.lastNote || '').replace(/^Watching\. Orders go in about 6 minutes before a close, and no market is at that point right now\./, 'Watching. No market is 6 minutes from its close right now.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
@@ -10876,9 +10904,10 @@
     var api = window.__shwoopAPI;
     if(!api || !api.watchKalshiBot || !currentUserIsAdmin){ return; }
     kalshiBotUnsub = api.watchKalshiBot({
-      control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); }
+      control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); },
+      error: function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; renderKalshiBot(); }
     });
-    if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; renderKalshiBot(); }); }
+    if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; renderKalshiBot(); }, function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; renderKalshiBot(); }); }
     if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } renderKalshiL1(); renderKalshiBot(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
     if(api.watchKalshiSim){ kalshiSimUnsub = api.watchKalshiSim(function(d){ kalshiSimData = { orders: d.orders, state: d.state }; renderKalshiSim(); }); }
@@ -10887,6 +10916,7 @@
     kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
   }
   function stopKalshiBot(){
+    kalshiBotState.control = null; kalshiOrdersLoaded = false; kalshiSyncError = '';
     if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }
     if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
