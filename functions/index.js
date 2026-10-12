@@ -98,6 +98,7 @@ const CODE_KILL_SWITCH = true;
 const book = require("./kalshiBookLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
+const opening = require("./kalshiOpeningLib");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
 // behind a CDN that refuses Google Cloud addresses (HTTP 403), so it is only the
@@ -426,6 +427,69 @@ exports.kalshiFlattenAll = onCall(
     }
     try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
     return { halted: true, ...out };
+  }
+);
+
+// ---- The opening window test, O1: PAPER ONLY --------------------------------------------------------------------------------------------------
+// Records, every minute, what two simple rules would have bought about 10 minutes before a close (kalshiOpeningLib.js; README, "Pre-registration: O1"). It is KEYLESS: this function
+// is declared with no secrets, signs nothing and sends nothing, and the only documents it can write are kalshiOpeningOrders and kalshiOpeningControl. There is deliberately no switch for it
+// (the owner wants an anti-degen site, and a recorder that costs nothing needs none) and no live path behind it: going live is a separate reviewed change under a written waiver.
+// It is not behind CODE_KILL_SWITCH because it cannot trade, and that switch must never be able to start it.
+function firestoreOpeningStore(db) {
+  const col = db.collection("kalshiOpeningOrders");
+  return {
+    async createTest(id, data) {
+      try {
+        await col.doc(id).create(data);
+        return true;
+      } catch (e) {
+        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
+        throw e;
+      }
+    },
+    async updateTest(id, patch) { await col.doc(id).update(patch); },
+    // Only the filled orders that have not settled (two equality filters, served without a composite index), so the minute sweep does not re-read a growing history.
+    async openFilled() { return (await col.where("status", "==", "filled").where("settled", "==", false).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+    // Every record since a time (a single-field query); the caller filters.
+    async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+  };
+}
+
+exports.kalshiOpeningTick = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const stateRef = db.collection("kalshiOpeningControl").doc("state");
+    const store = firestoreOpeningStore(db);
+    const now = Date.now();
+    // A Kalshi outage or one bad read is a note on the page and a log line, not a failed run: the settle sweep below must still happen.
+    try {
+      const api = kalshiMarketApi();
+      const st = await api.exchangeStatus();
+      const quotes = [];
+      for (const series of opening.OPENING_SERIES) for (const m of await api.markets(series)) quotes.push({ series, m });
+      const sessSnap = await db.collection("kalshiLiveControl").doc("session").get();
+      const accSnap = await db.collection("kalshiLiveControl").doc("account").get();
+      const acc = accSnap.exists ? accSnap.data() : null;
+      await opening.runOpeningTick({
+        now, quotes, active: Boolean(st.trading_active !== undefined ? st.trading_active : st.exchange_active),
+        session: sessSnap.exists ? sessSnap.data() : null,
+        cash: acc && acc.balance && Number.isFinite(acc.balance.totalDollars) ? acc.balance.totalDollars : NaN,
+        store, readMarket: api.market, sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+        setState: (patch) => stateRef.set(patch, { merge: true }),
+      });
+    } catch (e) {
+      const why = String((e && e.message) || e).slice(0, 200);
+      console.error("kalshiOpeningTick: " + why);
+      try { await stateRef.set({ lastTickAt: now, lastNote: "This minute could not be read: " + why.slice(0, 120) }, { merge: true }); } catch (e2) { /* the note is optional */ }
+    }
+    // Settle finished paper trades (the same sweep the live orders use: a public read of each market's result, nothing placed).
+    try {
+      await live.settleOpenOrders({ store, fetchFn: fetch, nowMs: now });
+    } catch (e) {
+      console.error("kalshiOpeningTick: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
+    }
   }
 );
 
