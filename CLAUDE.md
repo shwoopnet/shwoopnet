@@ -1,12 +1,15 @@
 # shwoopnet
 
-Frontend for an automated trading app (Pocket Advisor). Firebase auth +
-Firestore, deployed to GitHub Pages. Its backend is a separate repo,
-`shwoop-server`, which runs the actual trading cycles on Render.
+Frontend for a personal dashboard (Pocket Advisor): the Market Brief, the
+Kalshi page and Settings, and nothing else since Oct 12, 2026 (see "The blank
+slate" below). Firebase auth + Firestore, deployed to GitHub Pages. The Kalshi
+bot runs from `functions/` here. `shwoop-server` is a separate repo that still
+runs equities trading cycles against Alpaca on Render; this page no longer
+shows or controls them.
 
 ## The one structural fact that governs everything
 
-**The entire frontend is one ~13,000-line `index.html`.** No build step,
+**The entire frontend is one ~3,800-line `index.html`** (it was ~16,700 lines before the blank slate). No build step,
 no bundler, no type checking, no framework. Nothing catches a deleted CSS
 rule, a stale `getElementById`, or an unbalanced brace until a human
 notices the page is broken in production.
@@ -43,6 +46,12 @@ remote:
   shell commands — read `SECURITY.md` before running a ledger this repo
   didn't write.
 
+## The blank slate (Oct 12, 2026)
+
+At the owner's request ("an anti-degen proof website ... to prevent myself from full porting") the site was cut down to the Market Brief, the Kalshi page and Settings. Gone: the Trade Overview, Journal, Changelog, Notes and History, the ticker tape, the account dock and the trade modals; the Alpaca, Finnhub and Twelve Data integrations (and the Twelve Data proxy secret that sat in the page in plaintext); creating an account from the page, and the invite generator. `test/blankSlateGates.test.js` and `test/removedFeaturesStayRemovedGates.test.js` hold the line: three pages, a fixed list of hosts and of Firebase methods, exactly the Settings rows that exist, no sign-up. A new row, host or method has to be added to those gates on purpose; that is the point.
+
+The page makes no market-data call. The Brief reads `shared/marketSnapshot`, which shwoop-server writes. **shwoop-server still trades Alpaca for any account with keys stored, and the page can no longer show or pause it.** Much of what is written further down about the equities strategy, the Labs page and the account dock describes code that no longer exists; it is kept as the research record, and git history has the code.
+
 ## There is no simulation any more
 
 The keyless Ethereum and Solana simulation (`kalshiSimLib.js`, `kalshiSimTick`, `kalshiSimSession`, the page's simulation card) was removed on Oct 10, 2026 at the owner's request: Ethereum went live and Solana was dropped. Nothing in this repo places a simulated order. If a simulation is ever added again it must be keyless (no signing, no key, no `/portfolio` call, no POST, no secrets on its scheduled function) and, if promoted to real orders, its risk settings (one combined stop, one combined window limit) must scale with it.
@@ -62,12 +71,12 @@ Push with `-u origin <branch>`. Never push to `main` directly.
 
 ## Verifying frontend work without a live account
 
-Most of the app is behind auth and a real Alpaca connection, but almost
+Most of the app is behind auth and a real Kalshi connection, but almost
 everything can still be verified headlessly, and should be:
 
 - Lift a function out of `index.html` with `new Function(...)` on the file
-  text and test it directly. Used for the dock columns, duplicate
-  detection, the progress bar and the backtest engine.
+  text and test it directly. Used for the Kalshi charts and tallies, the
+  brief headline, the settings sync and `showPage`.
 - Load the page in Chromium with the network blocked
   (`executablePath: '/opt/pw-browsers/chromium'`), un-hide `#authGate`,
   inject fixture data, and screenshot against the real CSS.

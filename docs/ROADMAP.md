@@ -36,6 +36,8 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 
 ## Done recently (2026-10-07 and 2026-10-08)
 
+- 2026-10-12: the blank slate. The site is the Brief, Kalshi and Settings; the trading pages, Alpaca, Finnhub, Twelve Data and sign-up are gone. Open follow-ups: decide whether shwoop-server should stop trading Alpaca (the page can no longer pause it), turn off Auth sign-up in the Firebase console, rotate the Twelve Data proxy secret, answer yes to deleting the two Finnhub functions.
+
 - Live fills study: 35 of 35 fills won, 4 of 22 misses lost (p 0.019, one look, a lead). Do not chase the misses.
 - 24/7 bot, weekly size scaling, reinvest and skim, Flatten all, deposit recorder, and one Pause/Resume control in place of separate Stop and Halt buttons.
 - Performance tracker, readable open positions, simplified Kalshi page, market charts, Central time.

@@ -5,9 +5,10 @@
 // own preference is restored from localStorage on load (defaulting to
 // checked, matching the SDK's implicit prior behavior for anyone who's
 // never touched the control), and that setPersistence is wired to run
-// BEFORE the actual sign-in/sign-up call for both auth flows -- it
-// configures how the credential that call is about to produce gets
-// stored, not something that could be applied retroactively afterward.
+// BEFORE the actual sign-in call -- it configures how the credential that
+// call is about to produce gets stored, not something that could be
+// applied retroactively afterward. Sign-in is the only auth flow: there is
+// no sign-up on the page.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -41,7 +42,7 @@ function main() {
     console.log('G1 PASS the remember-me checkbox restores the saved preference, defaulting to checked');
   }
 
-  // ---- The submit handler must read the checkbox and thread it through both flows ----
+  // ---- The submit handler must read the checkbox and thread it through sign-in, and there is no other flow ----
   {
     const start = html.indexOf("authFormEl.addEventListener('submit'");
     assert.notStrictEqual(start, -1, 'could not find the auth form submit handler');
@@ -50,25 +51,20 @@ function main() {
 
     assert.ok(/var rememberMe = document\.getElementById\('authRememberMe'\)\.checked;/.test(handler),
       'the submit handler must read the checkbox\'s current state');
-    assert.ok(/window\.__shwoopAPI\.signUp\(email, password, rememberMe\)/.test(handler),
-      'sign-up must pass rememberMe through to the API');
     assert.ok(/window\.__shwoopAPI\.signIn\(email, password, rememberMe\)/.test(handler),
       'sign-in must pass rememberMe through to the API');
-    console.log('G2 PASS the submit handler reads the checkbox and passes it to both signUp and signIn');
+    assert.ok(!/signUp|createUser|redeemInvite/.test(handler), 'the form has no sign-up path: an account is created by hand, never from this page');
+    console.log('G2 PASS the submit handler reads the checkbox and passes it to signIn, and has no sign-up branch');
   }
 
-  // ---- setPersistence must resolve before the actual Firebase auth call, for both flows ----
+  // ---- setPersistence must resolve before the actual Firebase auth call ----
   {
-    const signUpMatch = html.match(/signUp: function\(email, password, rememberMe\)\{([\s\S]{0,300}?)\},\s*\n\s*signIn:/);
-    assert.ok(signUpMatch, 'could not find the signUp API method');
-    assert.ok(/withPersistence\(rememberMe\)\.then\(function\(\)\{\s*\n\s*return createUserWithEmailAndPassword/.test(signUpMatch[1]),
-      'signUp must call withPersistence and wait for it to resolve before createUserWithEmailAndPassword');
-
     const signInMatch = html.match(/signIn: function\(email, password, rememberMe\)\{([\s\S]{0,300}?)\},/);
     assert.ok(signInMatch, 'could not find the signIn API method');
     assert.ok(/withPersistence\(rememberMe\)\.then\(function\(\)\{\s*\n\s*return signInWithEmailAndPassword/.test(signInMatch[1]),
       'signIn must call withPersistence and wait for it to resolve before signInWithEmailAndPassword');
-    console.log('G3 PASS both signUp and signIn set persistence before the actual Firebase auth call');
+    assert.ok(!/signUp:|createUserWithEmailAndPassword/.test(html), 'the API has no way to create an account');
+    console.log('G3 PASS signIn sets persistence before the actual Firebase auth call, and nothing can create an account');
   }
 
   console.log('\nAll auth remember-me gates passed.');

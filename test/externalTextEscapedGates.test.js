@@ -1,8 +1,8 @@
 'use strict';
-// News headlines, article links and broker error text are written by other people. They reach the page through innerHTML
-// (the alert toast, the History list, the Activity log and the trade toasts), and a headline containing markup would run as
-// script in a session that can read the Alpaca keys and, for the admin, place Kalshi orders. The article LIST already
-// escaped its text and scheme-checked its link; these gates hold the other paths to the same rule.
+// News headlines, article links and earnings symbols are written by other people. They reach the page through innerHTML, and a headline
+// containing markup would run as script in a session that, for the admin, can place Kalshi orders. shared/marketSnapshot is read by EVERY
+// signed-in account, so one bad headline reaches every open tab at once. These gates hold the Brief's two lists to the rule: text is text,
+// and a link is drawn only for http(s).
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -22,38 +22,47 @@ function fnSource(name) {
 
 const EVIL = '<img src=x onerror=alert(1)>';
 
+// A fake document with one element per id; innerHTML is whatever the renderer last wrote.
+function fakeDoc() {
+  const els = {};
+  return { els, getElementById: (id) => (els[id] = els[id] || { innerHTML: '' }) };
+}
+
 gates.X1 = () => {
-  const made = [];
-  const doc = {
-    getElementById: () => ({ appendChild: () => {} }),
-    createElement: () => { const el = { classList: { add() {} }, remove() {}, querySelector: () => ({ addEventListener() {} }), set innerHTML(v) { made.push(v); } }; return el; },
-  };
-  const src = ['escapeHtml', 'safeHttpHref', 'newsAlertTagClass', 'showToast'].map(fnSource).join('\n');
-  const f = new Function('document', 'repositionToastContainer', 'dismissToast', 'setTimeout', src + '\nreturn showToast;')(doc, () => {}, () => {}, () => {});
-  f({ sym: EVIL, tag: EVIL, text: EVIL, url: 'javascript:alert(1)' });
-  assert.ok(!/<img/i.test(made[0]), 'markup in a headline, symbol or tag is text, not elements');
-  assert.ok(!/javascript:/i.test(made[0]) && !/<a /i.test(made[0]), 'a non-http link draws no anchor');
-  f({ sym: 'AAPL', tag: 'News', text: 'Up 5% & rising', url: 'https://example.com/a?x=1&y="2"' });
-  assert.ok(/href="https:\/\/example\.com\/a\?x=1&amp;y=&quot;2&quot;"/.test(made[1]), 'a real link is kept, attribute-escaped');
-  assert.ok(/Up 5% &amp; rising/.test(made[1]));
+  const doc = fakeDoc();
+  const src = ['escapeHtml', 'renderMarketNews'].map(fnSource).join('\n');
+  const render = new Function('document', src + '\nreturn renderMarketNews;')(doc);
+  render([{ headline: EVIL, source: EVIL, url: 'javascript:alert(1)', datetime: 1 }, { headline: 'Up 5% & rising', source: 'Wire', url: 'https://example.com/a?x=1&y="2"', datetime: 1 }]);
+  const out = doc.els.marketNewsList.innerHTML;
+  assert.ok(!/<img/i.test(out), 'markup in a headline or source is text, not elements');
+  assert.ok(!/javascript:/i.test(out), 'a non-http link draws no anchor');
+  assert.strictEqual((out.match(/<a /g) || []).length, 1, 'only the real link is an anchor');
+  assert.ok(/href="https:\/\/example\.com\/a\?x=1&amp;y=&quot;2&quot;"/.test(out), 'a real link is kept, attribute-escaped');
+  assert.ok(/Up 5% &amp; rising/.test(out));
+  render([]);
+  assert.ok(/No headlines available/.test(doc.els.marketNewsList.innerHTML), 'no headlines says so, rather than leaving the last list up');
 };
 
 gates.X2 = () => {
-  const h = fnSource('renderHistoryList');
-  for (const field of ['item.sym', 'item.tag', 'item.text', 'item.timeLabel']) {
-    const bare = new RegExp("\\+ " + field.replace('.', '\\.') + " \\+");
-    assert.ok(!bare.test(h), field + ' is never concatenated into the markup unescaped');
-  }
-  assert.ok(!/href="' \+ item\.url/.test(h), 'the link goes through the scheme check');
-  assert.ok((h.match(/safeHttpHref\(item\.url\)/g) || []).length >= 2, 'no link, no anchor');
+  const doc = fakeDoc();
+  const src = ['escapeHtml', 'renderEarningsCalendar'].map(fnSource).join('\n');
+  // The filter only lets a tracked symbol through; escaping is the second wall, for the day that filter is relaxed.
+  const render = new Function('document', 'watchlist', src + '\nreturn renderEarningsCalendar;')(doc, [{ sym: EVIL }, { sym: 'AAPL' }]);
+  render({ earningsCalendar: [{ symbol: EVIL, date: '2026-10-14', hour: 'amc' }, { symbol: 'AAPL', date: '2026-10-15', hour: 'bmo' }, { symbol: 'ZZZZ', date: '2026-10-15', hour: 'bmo' }] });
+  const out = doc.els.earningsList.innerHTML;
+  assert.ok(!/<img/i.test(out), 'a symbol with markup is text, not elements');
+  assert.ok(/AAPL/.test(out) && !/ZZZZ/.test(out), 'only tracked symbols are listed');
 };
 
 gates.X3 = () => {
-  const closed = fnSource('showPositionClosedToast');
-  assert.ok(/escapeHtml\(sym\)/.test(closed) && /escapeHtml\(reason\)/.test(closed), 'the auto-close toast escapes the symbol and the reason');
-  assert.ok(/escapeHtml\(sym\)/.test(fnSource('showTradeResolvedToast')), 'the closed-trade toast escapes the symbol');
-  assert.ok(/escapeHtml\(entry\.text\)/.test(html) && /escapeHtml\(entry\.sym \|\| ''\)/.test(html), 'the Activity log escapes broker error text');
-  assert.ok(/escapeHtml\(reasonText\)/.test(html), 'the pause banner escapes the pause reason');
+  // The escaper itself: the five characters that matter, and a non-string.
+  const escapeHtml = new Function(fnSource('escapeHtml') + '\nreturn escapeHtml;')();
+  assert.strictEqual(escapeHtml('<a href="x" onclick=\'y\'>&</a>'), '&lt;a href=&quot;x&quot; onclick=&#39;y&#39;&gt;&amp;&lt;/a&gt;');
+  assert.strictEqual(escapeHtml(12), '12');
+  // Every place a snapshot string reaches the page goes through it.
+  const news = fnSource('renderMarketNews');
+  for (const field of ['a.headline', 'a.source']) assert.ok(new RegExp('escapeHtml\\(' + field.replace('.', '\\.')).test(news), field + ' is escaped');
+  assert.ok(/escapeHtml\(a\.url\)/.test(news) && /\^https\?:/.test(news), 'the link is scheme-checked and attribute-escaped');
 };
 
 (async () => {

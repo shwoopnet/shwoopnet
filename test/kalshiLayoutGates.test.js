@@ -195,9 +195,11 @@ gates.Y14 = () => {
   const out = f.kalshiPerfHtml(st, esc, money);
   assert.ok(/-\$1\.62/.test(out) && /60% \(3 \/ 2\)/.test(out) && /By price paid/.test(out) && /By market/.test(out), 'the tiles and tables show the figures');
   assert.ok(/id="kalChartBars"/.test(html) && /id="kalPerf"/.test(html) && /id="kalChartRange"/.test(html), 'the page has the bar chart, the tracker and the range choice');
-  // In this palette --ink is the page background and --paper is the text colour (inverted names), and --card does not exist: a select using them showed dark text on dark in dark mode.
-  const sel = /\.kal-perf-head select\{ font:inherit;[^}]*\}/.exec(html)[0];
-  assert.ok(/color:var\(--paper\)/.test(sel) && /background:var\(--panel\)/.test(sel) && !/--card|color:var\(--ink\)/.test(sel), 'the range choice is readable in both themes');
+  // In this palette --ink is the page background and --paper is the text colour (inverted names), and --card does not exist: a select styled with them showed dark text on dark in dark mode.
+  // This used to read one named rule (.kal-perf-head select), which no markup used, so it guarded nothing; it now reads every rule that touches a select.
+  const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
+  const selectRules = css.match(/[^{}]*\bselect\b[^{}]*\{[^}]*\}/g) || [];
+  assert.ok(selectRules.length > 0 && selectRules.every((r) => !/--card|color:\s*var\(--ink\)/.test(r)), 'no rule on a select uses the page background as its text colour');
   assert.ok(!/var\(--card\)/.test(html), 'no rule uses a variable that is not defined');
   assert.ok(/kalshiResolveOrders\(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct\.results\)/.test(html), 'the charts read orders settled against the account read');
 };

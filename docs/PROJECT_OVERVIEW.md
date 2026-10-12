@@ -8,9 +8,9 @@ Shwoop (Pocket Advisor) is a personal trading app with three parts that live in 
 
 | Part | Where | What it does |
 |---|---|---|
-| Frontend | this repo, `index.html` | One file, no build step. Firebase auth and Firestore. Hosted on GitHub Pages. Equities journal and settings, plus an admin-only Kalshi page. |
+| Frontend | this repo, `index.html` | One file, no build step. Firebase auth and Firestore. Hosted on GitHub Pages. Three pages since 2026-10-12: the Market Brief, the admin-only Kalshi page and Settings. The equities pages, the broker and market-data integrations and sign-up were removed. |
 | Cloud Functions | this repo, `functions/` | The Kalshi bot, the order-book recorder, the account reads and the emergency controls. Deployed with `firebase deploy --only functions`. |
-| Equities trading server | separate repo `shwoop-server`, on Render | Runs the equities and options cycles against Alpaca for every connected account. Not touched from this repo; reviewed read only. |
+| Equities trading server | separate repo `shwoop-server`, on Render | Runs the equities and options cycles against Alpaca for every connected account, and writes the shared market snapshot the Brief reads. Not touched from this repo; reviewed read only. **The page no longer shows or pauses it.** |
 
 This document is mostly about the Kalshi subsystem, because it is where most of the recent work went.
 
