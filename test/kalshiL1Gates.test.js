@@ -734,7 +734,7 @@ gates.W3 = async () => {
   assert.ok(other.posts.length === 1, 'a different window is unaffected');
 };
 
-// K2: a pool that does not move must be explainable. The fold reports the order it is waiting on, the tick saves the rule in force and how far it counted, and the page shows both.
+// K2: a pool that does not move must be explainable. The fold reports the order it is waiting on and the tick saves the rule in force and how far it counted (the page no longer prints either).
 gates.K2 = () => {
   const st = { pool: 0, saved: 0, cum: 0, hwm: 0, appliedTs: 100 };
   const row = (ts, p, settled) => ({ id: 'o' + ts, ticker: 'T' + ts, strategy: 'L1', fillCount: '12', maxCost: 11.3, ts, settled, settledPnl: settled ? p : undefined });
@@ -745,7 +745,8 @@ gates.K2 = () => {
   const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.ok(/sizePoolRule: "wins", sizePoolThrough: sizeState\.appliedTs, sizePoolBlocked: fs\.blocked \? fs\.blocked\.ticker : null/.test(src), 'the tick saves them');
   const html = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
-  assert.ok(/Pool rule in use/.test(html) && /Counted through/.test(html) && /waiting on /.test(html), 'the page shows them');
+  // The page no longer shows them (owner's cleanup, Oct 12, 2026): the rule is fixed in the code, so "Pool rule in use" described a setting that does not exist, and "Counted through" was bookkeeping.
+  assert.ok(!/Pool rule in use|Counted through|waiting on /.test(html), 'the page does not show the fixed rule or the count position');
 };
 
 // K1: pressing Start can no longer undo the owner's risk settings, because there are none to undo. It replaces the session document, and it once reset the exit to log only and the pool to "after new highs"
@@ -788,6 +789,59 @@ gates.K5 = () => {
   const guard = start.indexOf('running.data().active === true');
   assert.ok(guard > 0 && /throw new HttpsError\("failed-precondition", "The bot is already running/.test(start.slice(guard, guard + 200)), 'a running bot refuses Start');
   assert.ok(guard < start.indexOf('await ref.set({ active: true, since: now'), 'and it refuses before the session document is replaced');
+};
+
+// K6: the tick reads the last 24 hours of orders ONCE and shares them with the loss-stop sum (a read is billed, and this runs every minute), and every new order is written
+// settled: false so the settle sweep can ask only for the unsettled ones.
+gates.K6 = async () => {
+  const w = world();
+  let reads = 0; const orig = w.store.sessionTrades; w.store.sessionTrades = async (since) => { reads++; return orig(since); };
+  await tick(w);
+  assert.strictEqual(reads, 1, 'one read of the order history per tick, not one for the count and another for the stop');
+  assert.strictEqual(w.posts.length, 1, 'control: the tick still trades');
+  assert.strictEqual([...w.docs.values()][0].settled, false, 'a new order is written settled: false');
+  // sharing the list must not change the number: orders older than the window are left out, as the store query would have
+  const old = { id: 'A', ts: NOW - 5000, strategy: 'L1', fillCount: '1', maxCost: 1, count: 1, side: 'yes', ticker: 'X', settled: true, result: 'no' };
+  const older = { ...old, id: 'B', ts: NOW - 99999999 };
+  const r = await live.botRisk({ store: {}, since: NOW - 10000, fetchFn: async () => { throw new Error('no network'); }, nowMs: NOW, orders: [old, older] });
+  assert.ok(r.net < 0 && r.net > -1.5, 'only the order inside the window counts (one lost $1, not two): ' + r.net);
+};
+
+// K7: the exit watch is skipped only when it truly has nothing to watch. Outside the minutes L1 buys in, with no open filled order: idle. Anything else, or anything unreadable: it runs.
+gates.K7 = async () => {
+  const at = (minute) => Date.UTC(2026, 9, 12, 14, 0, 0) + minute * 60000;      // 14:00 UTC is a quarter hour, so minute m is minute m of the cycle
+  const empty = { recentFilled: async () => [] };
+  assert.strictEqual(await live.exitWatchIdle({ store: empty, now: at(3) }), true, 'nothing open, not a buy minute: idle');
+  const open = { recentFilled: async () => [{ strategy: 'L1', settled: false, fillCount: '9' }] };
+  assert.strictEqual(await live.exitWatchIdle({ store: open, now: at(3) }), false, 'a filled, unsettled L1 order: it must run');
+  assert.strictEqual(await live.exitWatchIdle({ store: { recentFilled: async () => [{ strategy: 'L1', settled: true, fillCount: '9' }] }, now: at(3) }), true, 'a settled order is nothing to watch');
+  assert.strictEqual(await live.exitWatchIdle({ store: { recentFilled: async () => { throw new Error('down'); } }, now: at(3) }), false, 'unreadable: it runs');
+  // Every second in which L1 may place an order falls in a minute the watch runs, and so does the minute after it: an order placed late in minute 9 is watched from minute 10.
+  for (let left = 330000; left <= 400000; left += 1000) {
+    const t = at(15) - left;
+    assert.strictEqual(await live.exitWatchIdle({ store: empty, now: t }), false, 'with ' + left / 1000 + 's left the watch runs');
+    assert.strictEqual(await live.exitWatchIdle({ store: empty, now: t + 60000 }), false, 'and so does the next minute');
+  }
+  assert.ok(live.EXIT_BUY_MINUTES.length >= 4 && live.EXIT_BUY_MINUTES.length <= 6, 'a handful of minutes in fifteen, not all of them');
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  const fn = idx.slice(idx.indexOf('exports.kalshiLiveExit = onSchedule'), idx.indexOf('exports.kalshiLiveArmed = onSchedule'));
+  assert.ok(fn.indexOf('live.exitWatchIdle') > 0 && fn.indexOf('live.exitWatchIdle') < fn.indexOf('for (;;)'), 'the scheduled function asks before it loops');
+};
+
+// K8: the research book recorder is off, and nothing that trades depends on it.
+gates.K8 = () => {
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(/const BOOK_RECORDER_ON = false;/.test(idx), 'the recorder is off');
+  const rec = idx.slice(idx.indexOf('exports.kalshiBookRecorder = onSchedule'));
+  assert.ok(rec.indexOf('if (!BOOK_RECORDER_ON) return;') > 0 && rec.indexOf('if (!BOOK_RECORDER_ON) return;') < rec.indexOf('book.recordMinute'), 'it returns before it reads or writes anything');
+};
+
+// K9: the settle sweep finds an unsettled order whether or not it carries the settled field (orders created before it existed do not).
+gates.K9 = () => {
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  const live = idx.slice(idx.indexOf('function firestoreLiveStore'), idx.indexOf('// ---- Kalshi account view'));
+  assert.ok(/where\("status", "==", "filled"\)\.where\("settled", "==", false\)/.test(live), 'asks for filled and unsettled, not every filled order');
+  assert.ok(/where\("ts", ">=", Date\.now\(\) - 3 \* 3600 \* 1000\)/.test(live), 'and also the last few hours, for orders written without the field');
 };
 
 (async () => {

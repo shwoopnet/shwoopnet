@@ -212,7 +212,17 @@ function firestoreLiveStore(db) {
       return s.empty ? null : s.docs[0].data().ts;
     },
     // Filled orders (a single-field query, so no index); the caller keeps the ones not yet settled.
-    async openFilled() { return (await col.where("status", "==", "filled").get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+    // Orders are created with settled: false, so "filled and not settled" is a handful of documents, not every order ever filled (this runs every minute and reads are billed). Orders
+    // created before that field existed have no such field and would be missed, so the last few hours are read as well; the caller keeps the ones not yet settled.
+    async openFilled() {
+      const [open, recent] = await Promise.all([
+        col.where("status", "==", "filled").where("settled", "==", false).get(),
+        col.where("ts", ">=", Date.now() - 3 * 3600 * 1000).get(),
+      ]);
+      const byId = new Map();
+      for (const d of [...open.docs, ...recent.docs]) { const x = d.data(); if (x.status === "filled") byId.set(d.id, { id: d.id, ...x }); }
+      return [...byId.values()];
+    },
     async hasUnresolved() {
       const s = await col.where("status", "in", ["sending", "unknown"]).limit(1).get();
       return !s.empty;
@@ -462,6 +472,8 @@ exports.kalshiLiveExit = onSchedule(
     const db = getFirestore();
     const sessRef = db.collection("kalshiLiveControl").doc("session");
     const store = firestoreLiveStore(db);
+    // Nothing open and not a minute L1 can buy in: skip the whole minute rather than sit in the loop below (compute time is the bill). Fails open (see exitWatchIdle).
+    if (await live.exitWatchIdle({ store, now: Date.now() })) return;
     const stopAt = Date.now() + 47000;
     for (;;) {
       try {
@@ -574,9 +586,12 @@ exports.kalshiLiveArmed = onSchedule(
 // Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
 // (see kalshiBookLib.js). READ ONLY and keyless. It is the LAST export on purpose: the tests slice the file from
 // here to prove nothing after this point can see the live key or place an order.
+const BOOK_RECORDER_ON = false;
 exports.kalshiBookRecorder = onSchedule(
   { schedule: "every 1 minutes", timeoutSeconds: 70, retryCount: 0, memory: "256MiB" },
   async () => {
+    // Switched off on Oct 12, 2026 at the owner's request to cut the Firebase bill: it trades nothing and only fed research that has concluded. Remove this line to record again.
+    if (!BOOK_RECORDER_ON) return;
     ensureDefaultAdminApp();
     const db = getFirestore();
     const snaps = db.collection("kalshiBookSnaps");

@@ -440,8 +440,11 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12 }) {
 // What the bot's own filled trades in this session have done. A settled trade is read once from the public market and
 // kept on its record; a trade not yet settled is counted at its full cost, as if it lost. Costs are the order's worst-case
 // price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
-async function botRisk({ store, since, fetchFn, nowMs }) {
-  const trades = (await store.sessionTrades(Number.isFinite(since) ? since : 0)).filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
+// `orders` is a list the caller has already read (the tick reads the last 24 hours once and shares it, so the same documents are not billed twice a minute); without it the store is asked.
+async function botRisk({ store, since, fetchFn, nowMs, orders }) {
+  const from = Number.isFinite(since) ? since : 0;
+  const read = Array.isArray(orders) ? orders.filter((t) => Number(t.ts) >= from) : await store.sessionTrades(from);
+  const trades = read.filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
   let net = 0, openCost = 0, addonAtRisk = 0;
   for (const t of trades) {
     const cost = Number(t.maxCost);
@@ -549,7 +552,7 @@ async function runL1Tick(args) {
   // The stop follows the BOT's trades, not the account: the owner trades the same account by hand, and a manual trade must
   // neither trip the stop nor hide a bot loss. Fails closed: if the bot's trades cannot be read, nothing is sent this minute.
   let risk;
-  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now }); }
+  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList }); }
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
   // With scaling on, the cap and the stop's base come from the weekly review. Fails closed: a review that cannot be saved sends nothing this minute.
@@ -650,6 +653,8 @@ async function runL1Tick(args) {
       ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
+      // Written false so the settle sweep can ask for "filled and not settled" and read a handful of documents each minute instead of every order ever filled (a Firestore read is billed).
+      settled: false,
       // What the book showed when the order was decided (null where Kalshi did not send a field), so a "no fill" can be
       // explained afterwards: thin size at the touch, or a price that moved away.
       seen: bookSeen(m),
@@ -710,6 +715,23 @@ const EXIT_THRESHOLD = 0.50;
 const EXIT_SLIPPAGE = 0.15;          // how far past the bid it saw the immediate-or-cancel sell may go; it still fills at the book's own prices
 const EXIT_MAX_TRIES = 3;
 const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
+
+// The exit watch loops for most of every minute, and compute time is what a scheduled function is billed for. Most minutes there is nothing for it to watch: no open position, and
+// not a minute in which L1 can buy. L1 buys only when 5.5 to 6.7 minutes are left (L1_WINDOW_MS), which is minute 8 or 9 of each quarter hour (markets close on the quarter hour, and the
+// epoch starts on one), so the minutes either side are covered too. Idle means ALL of: outside those minutes, and no filled L1 order that is not settled. Anything that cannot be
+// read counts as NOT idle: skipping the watch is the unsafe direction, running it for nothing only costs compute.
+const EXIT_BUY_MINUTES = (() => {
+  const first = Math.floor((900000 - L1_WINDOW_MS[1]) / 60000) - 1, last = Math.floor((900000 - L1_WINDOW_MS[0]) / 60000) + 1;
+  const out = []; for (let m = first; m <= last; m++) out.push(m);
+  return out;
+})();
+async function exitWatchIdle({ store, now }) {
+  try {
+    if (EXIT_BUY_MINUTES.includes(Math.floor(now / 60000) % 15)) return false;
+    const recent = await store.recentFilled(now - EXIT_LOOKBACK_MS);
+    return !recent.some((t) => t.strategy === "L1" && t.settled !== true && Number(t.fillCount) > 0);
+  } catch (e) { return false; }
+}
 
 function exitBody(ticker, side, count, limit, cid, exchangeIndex) {
   if (!Number.isInteger(count) || count < 1 || count > L1_ORDER_CEILING) throw new Error("refusing to build an exit for " + count + " contracts");
@@ -847,7 +869,7 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
 }
 
 module.exports = {
-  flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
+  flattenAll, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
