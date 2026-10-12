@@ -478,12 +478,12 @@ gates.Y33 = () => {
   assert.ok(f.kalshiTradePnl({ count: 20, price: '0.915' }, held, 'no').pnl < -18, 'a trade held to settlement is computed as before');
 };
 
-// Y34: the pool rule has no switch on the page (removed Oct 12, 2026: it always rebuilds after every win). The page still reports which rule the server says it used.
+// Y34: the pool rule has no switch on the page (removed Oct 12, 2026: it always rebuilds after every win). The page no longer reports a rule at all (Oct 12, 2026 cleanup).
 gates.Y34 = () => {
   assert.ok(!/kalPoolRule|kalPoolMsg|kal-poolrow|kalshiPoolRule/.test(html), 'the pool selector, its saver and its callable are gone from the page');
   assert.ok(!/want === 'wins' && !window\.confirm/.test(html), 'and so is its confirm dialog');
   assert.ok(/<b>Reinvest pool rebuilds after every win \(fixed, always on\)\.<\/b>/.test(html), 'the rules and limits fold says so');
-  assert.ok(/ses\.sizePoolRule === 'wins' \? 'after every win' : 'after new profit highs'/.test(html), 'the read-out still names the rule the server reports using');
+  assert.ok(!/ses\.sizePoolRule|after new profit highs/.test(html), 'the page no longer reports a rule: there is only one, and a row for it described a setting that does not exist');
 };
 
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
