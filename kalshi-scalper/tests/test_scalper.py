@@ -1387,7 +1387,8 @@ def _fmk(n, per_day, win_p, price=0.905, seed=1, start=1791417600):
     g = _rf.Random(seed); out = []
     for i in range(n):
         close = start + (i // per_day) * 86400 + (i % per_day) * 900
-        cs = [(close - 60 * left, round(price - 0.005, 4), round(price + 0.005, 4), round(price - 0.005, 4), round(price + 0.005, 4)) for left in (8, 6, 2)]
+        px = price + (0.01 if (i // per_day) % 2 else 0.0)   # a book that is never exactly the same two days running: identical outcomes give a zero standard error, and a zero spread is not an edge the bar can see
+        cs = [(close - 60 * left, round(px - 0.005, 4), round(px + 0.005, 4), round(px - 0.005, 4), round(px + 0.005, 4)) for left in (8, 6, 2)]
         out.append(("F%d" % i, "KXBTC15M" if i % 2 else "KXGOLD15M", cs, close, "yes" if g.random() < win_p else "no"))
     return out
 

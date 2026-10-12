@@ -90,22 +90,22 @@ gates.G1 = () => {
 
   assert.deepStrictEqual(missing, [],
     'called but never defined: ' + missing.join(', ')
-    + ' -- this parses fine and throws at render time, which is how the whole '
-    + 'Backend Status card shipped dead');
+    + ' -- this parses fine and throws at render time, which is how a whole '
+    + 'status card once shipped dead');
   console.log('G1 PASS every function called in the main script is defined somewhere in it');
 };
 
-// The specific one, named, so its absence can never be mistaken for a
-// refactor that legitimately removed it.
+// The specific ones, named, so their absence can never be mistaken for a
+// refactor that legitimately removed them: the Brief's refresh path and the
+// page switch are the two things every signed-in visit goes through.
 gates.G2 = () => {
-  assert.ok(/function\s+serverSettingSource\s*\(/.test(code),
-    'serverSettingSource must exist: the Backend Status rows call it');
-  const calls = (code.match(/serverSettingSource\s*\(/g) || []).length;
-  // Definition plus one call site per Backend Status settings row --
-  // equities and crypto, since the fade row was removed along with the
-  // rest of the fade strategy's frontend surfaces.
-  assert.ok(calls >= 3, 'expected the definition plus its call sites, found ' + calls);
-  console.log('G2 PASS serverSettingSource is defined, and its callers still call it');
+  for (const name of ['handleSharedMarketSnapshotUpdate', 'renderBriefHeadline', 'showPage', 'handleUserSettingsDocUpdate']) {
+    assert.ok(new RegExp('function\\s+' + name + '\\s*\\(').test(code), name + ' must exist');
+    // A callback handed to the API (watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate)) is a use too, not only a bare call.
+    const uses = (code.match(new RegExp('(^|[^\\w$.])' + name + '(?![\\w$])', 'g')) || []).length;
+    assert.ok(uses >= 2, name + ' is defined but nothing uses it (' + uses + ' matches including the definition)');
+  }
+  console.log('G2 PASS the brief refresh, the page switch and the settings sync are defined and used');
 };
 
 function main() {

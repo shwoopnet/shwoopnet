@@ -19,6 +19,7 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 | Item | Gate or check |
 |---|---|
 | Forward checks F0 to F9 read | At least 300 entries on at least 5 days; z, halves and fees x1.2 as registered |
+| OW1 first read (opening window, paper only) | 2026-11-03, once: `python -m scalper.backfill` then `python -m scalper.opening`. Bar as registered; a short lane gets one final read on 2026-11-16. Nothing goes live from it without its own waiver |
 | Size ladder step 1 decision | The owner overrode the evidence gates on 2026-10-08. After the forward read, either keep or step back to 1 contract per the README |
 | Use the recorder's order-book data | Book depth imbalance and locked books, pre-registered before running |
 | 10 second stop test | Needs several days of recorder data |
@@ -34,6 +35,8 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 - Weekly digest of the bot's real results against the forward-check thresholds.
 
 ## Done recently (2026-10-07 and 2026-10-08)
+
+- 2026-10-12: the blank slate. The site is the Brief, Kalshi and Settings; the trading pages, Alpaca, Finnhub, Twelve Data and sign-up are gone. Open follow-ups: decide whether shwoop-server should stop trading Alpaca (the page can no longer pause it), turn off Auth sign-up in the Firebase console, rotate the Twelve Data proxy secret, answer yes to deleting the two Finnhub functions.
 
 - Live fills study: 35 of 35 fills won, 4 of 22 misses lost (p 0.019, one look, a lead). Do not chase the misses.
 - 24/7 bot, weekly size scaling, reinvest and skim, Flatten all, deposit recorder, and one Pause/Resume control in place of separate Stop and Halt buttons.

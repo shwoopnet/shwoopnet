@@ -8,10 +8,6 @@ const KALSHI_WATCHDOG_URL = defineString("KALSHI_WATCHDOG_URL", { default: "" })
 // Empty means no alert, nothing else changes.
 const KALSHI_STOP_ALERT_URL = defineString("KALSHI_STOP_ALERT_URL", { default: "" });
 
-// Set once via: firebase functions:secrets:set FINNHUB_API_KEY
-// Never committed -- this is the only place the real key lives now.
-const FINNHUB_API_KEY = defineSecret("FINNHUB_API_KEY");
-
 // The LIVE test order (real money). The switch is off until the owner sets KALSHI_LIVE_ENABLED=on in
 // functions/.env and redeploys: deploying alone cannot place an order.
 //   firebase functions:secrets:set KALSHI_LIVE_KEY_ID
@@ -20,63 +16,20 @@ const KALSHI_LIVE_KEY_ID = defineSecret("KALSHI_LIVE_KEY_ID");
 const KALSHI_LIVE_PRIVATE_KEY = defineSecret("KALSHI_LIVE_PRIVATE_KEY");
 const KALSHI_LIVE_ENABLED = defineString("KALSHI_LIVE_ENABLED", { default: "off" });
 
-// Invite-gated, not single-owner: anyone with a real Firebase Auth
-// token may call these (matches firestore.rules, which lets any signed-in
-// account read/write only its own users/{uid} doc -- account creation
-// itself is what's gated, via the invite-code system, not access to
-// these functions once an account exists).
+// Any signed-in caller passes this first wall; the Kalshi functions then
+// require the owner's email AND the isAdmin flag (assertKalshiAdmin below).
+// There is no sign-up on the site: an account is created by hand, and
+// firestore.rules refuses to create a users document from a browser.
 function assertSignedIn(auth) {
   if (!auth) {
     throw new HttpsError("permission-denied", "Sign in required.");
   }
 }
 
-async function finnhubGet(path, params) {
-  const url = new URL("https://finnhub.io/api/v1/" + path);
-  Object.keys(params).forEach((key) => url.searchParams.set(key, params[key]));
-  url.searchParams.set("token", FINNHUB_API_KEY.value());
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new HttpsError("unavailable", "Finnhub " + path + " HTTP " + res.status);
-  }
-  return res.json();
-}
-
-// Any signed-in account can call these two, and each call spends the shared Finnhub key. Shapes are checked so a caller
-// cannot send an arbitrary string through to the vendor: a ticker-like symbol, and plain YYYY-MM-DD dates.
-const SYMBOL_RE = /^[A-Za-z0-9.\-:^=_]{1,30}$/;
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-exports.finnhubQuote = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertSignedIn(request.auth);
-  const symbol = request.data && request.data.symbol;
-  if (!symbol || typeof symbol !== "string" || !SYMBOL_RE.test(symbol)) {
-    throw new HttpsError("invalid-argument", "symbol is required");
-  }
-  return finnhubGet("quote", { symbol });
-});
-
-// finnhubNews and finnhubEarningsCalendar used to sit here. Nothing called
-// them: index.html wires exactly two callables (finnhubQuote,
-// finnhubCompanyNews), and general news and the earnings calendar now arrive
-// through the backend's shared market snapshot instead.
-//
-// They were deployed functions holding a binding on the Finnhub API key, so
-// removing them narrows what can spend that key -- which is why this is worth
-// doing rather than leaving two harmless dead exports.
-//
-// NOTE: deleting them here does not undeploy them. `firebase deploy --only
-// functions` does not remove functions absent from source either; they have
-// to go with `firebase functions:delete finnhubNews finnhubEarningsCalendar`.
-
-exports.finnhubCompanyNews = onCall({ secrets: [FINNHUB_API_KEY] }, async (request) => {
-  assertSignedIn(request.auth);
-  const { symbol, from, to } = request.data || {};
-  if (typeof symbol !== "string" || !SYMBOL_RE.test(symbol) || typeof from !== "string" || !DATE_RE.test(from) || typeof to !== "string" || !DATE_RE.test(to)) {
-    throw new HttpsError("invalid-argument", "symbol, from, and to are required");
-  }
-  return finnhubGet("company-news", { symbol, from, to });
-});
+// The Finnhub proxy (finnhubQuote, finnhubCompanyNews) and its FINNHUB_API_KEY secret were removed on 2026-10-12 with the rest of the site's
+// market-data integrations: the page no longer calls a vendor, and the Brief reads shared/marketSnapshot, which shwoop-server writes.
+// Deleting them from this file does not undeploy them: `firebase deploy` asks whether to delete them (answer yes), and the secret goes with
+// `firebase functions:secrets:destroy FINNHUB_API_KEY`.
 
 // ---- Kalshi read-only relay and recorder -----------------------------------
 // Kalshi's API answers 403 to any request carrying a browser Origin header and
@@ -98,6 +51,7 @@ const CODE_KILL_SWITCH = true;
 const book = require("./kalshiBookLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
+const opening = require("./kalshiOpeningLib");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
 // behind a CDN that refuses Google Cloud addresses (HTTP 403), so it is only the
@@ -426,6 +380,69 @@ exports.kalshiFlattenAll = onCall(
     }
     try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
     return { halted: true, ...out };
+  }
+);
+
+// ---- The opening window test, OW1: PAPER ONLY --------------------------------------------------------------------------------------------------
+// Records, every minute, what two simple rules would have bought about 10 minutes before a close (kalshiOpeningLib.js; README, "Pre-registration: OW1"). It is KEYLESS: this function
+// is declared with no secrets, signs nothing and sends nothing, and the only documents it can write are kalshiOpeningOrders and kalshiOpeningControl. There is deliberately no switch for it
+// (the owner wants an anti-degen site, and a recorder that costs nothing needs none) and no live path behind it: going live is a separate reviewed change under a written waiver.
+// It is not behind CODE_KILL_SWITCH because it cannot trade, and that switch must never be able to start it.
+function firestoreOpeningStore(db) {
+  const col = db.collection("kalshiOpeningOrders");
+  return {
+    async createTest(id, data) {
+      try {
+        await col.doc(id).create(data);
+        return true;
+      } catch (e) {
+        if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false;
+        throw e;
+      }
+    },
+    async updateTest(id, patch) { await col.doc(id).update(patch); },
+    // Only the filled orders that have not settled (two equality filters, served without a composite index), so the minute sweep does not re-read a growing history.
+    async openFilled() { return (await col.where("status", "==", "filled").where("settled", "==", false).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+    // Every record since a time (a single-field query); the caller filters.
+    async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+  };
+}
+
+exports.kalshiOpeningTick = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const stateRef = db.collection("kalshiOpeningControl").doc("state");
+    const store = firestoreOpeningStore(db);
+    const now = Date.now();
+    // A Kalshi outage or one bad read is a note on the page and a log line, not a failed run: the settle sweep below must still happen.
+    try {
+      const api = kalshiMarketApi();
+      const st = await api.exchangeStatus();
+      const quotes = [];
+      for (const series of opening.OPENING_SERIES) for (const m of await api.markets(series)) quotes.push({ series, m });
+      const sessSnap = await db.collection("kalshiLiveControl").doc("session").get();
+      const accSnap = await db.collection("kalshiLiveControl").doc("account").get();
+      const acc = accSnap.exists ? accSnap.data() : null;
+      await opening.runOpeningTick({
+        now, quotes, active: Boolean(st.trading_active !== undefined ? st.trading_active : st.exchange_active),
+        session: sessSnap.exists ? sessSnap.data() : null,
+        cash: acc && acc.balance && Number.isFinite(acc.balance.totalDollars) ? acc.balance.totalDollars : NaN,
+        store, readMarket: api.market, sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+        setState: (patch) => stateRef.set(patch, { merge: true }),
+      });
+    } catch (e) {
+      const why = String((e && e.message) || e).slice(0, 200);
+      console.error("kalshiOpeningTick: " + why);
+      try { await stateRef.set({ lastTickAt: now, lastNote: "This minute could not be read: " + why.slice(0, 120) }, { merge: true }); } catch (e2) { /* the note is optional */ }
+    }
+    // Settle finished paper trades (the same sweep the live orders use: a public read of each market's result, nothing placed).
+    try {
+      await live.settleOpenOrders({ store, fetchFn: fetch, nowMs: now });
+    } catch (e) {
+      console.error("kalshiOpeningTick: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
+    }
   }
 );
 
