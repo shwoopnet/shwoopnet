@@ -2856,3 +2856,12 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 **My prediction, before the run.** Nothing passes. The best training cell will be inside the placebo's range and the frozen top 10 will have a validation mean at or below zero. The earlier OW and SS families, the 15 minute efficiency findings and the cost arithmetic all point the same way.
 
 **Count.** 1,760 variants: **4,576** tried once run (2,816 before this). Registered, not yet run.
+
+**2026-10-12: SS2 ran once (`python -m scalper.ss2`, commit after the pre-registration, 10,288 settled markets, 40 days, Bitcoin, gold and Ethereum): nothing passes.**
+- **Training days (6,254 markets, before 2026-09-26):** 742 of 1,760 cells had enough entries; **87 of them had a positive mean after fees**. The best was +4.47c a contract (all three series pooled, 720 s left, ask 0.88 to 0.93, hold, 155 entries).
+- **Fair-market placebo (10 reps, the same entries and prices, outcomes drawn at the mid price):** the best hold cell on the training days looks like **+3.4c to +7.6c, median +5.4c** by luck alone. **The real best cell (+4.47c) is below the placebo median**, so it is not distinguishable from luck. The placebo's best frozen cell read on validation reaches a z of at most +0.43 (the bar is 3.0).
+- **Frozen top 10 read once on the 4,034 validation markets:** one had 405 validation entries and was `FALSIFIED` (-1.11c, z -0.77). The other nine had fewer than 300 validation entries and are `NOT_ENOUGH_DATA`, which is not a pass. For information only, their validation means were +0.10c, +1.48c, -3.03c, -3.63c, +0.01c, -1.25c (twice, the same trades), +1.77c and -1.22c; the average over the ten is about -0.8c, with positive and negative cells on both sides of zero.
+- **Against the prediction.** Predicted: nothing passes, the best training cell is inside the placebo's range, the frozen ten sit at or below zero. All three held.
+- **What it establishes.** Another 1,760 combinations of series, entry minute, price band, condition and exit found no rule that survives a split. About 12% of cells looked positive on the training days, which a fair market also produces. The selection picked mostly thin, 150 to 400 entry cells, which is where luck lives.
+- **Nothing is built from it.** L1 is not changed.
+- **Count.** 1,760 variants: **4,576** tried in total.
