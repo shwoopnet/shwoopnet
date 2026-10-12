@@ -38,7 +38,7 @@ assert abs(rows[0]["net"] - (1 - 0.92 - scalps.fee(0.92))) < 1e-9 and abs(rows[1
 btc = dict(hold, series="KXBTC15M")
 assert S.rows_for(btc, [("G", "KXGOLD15M", by(candle(360, 0.90, 0.92)), CLOSE, "yes")]) == []
 # Conditions.
-assert S.find_entry(by(candle(360, 0.89, 0.93)), CLOSE, dict(hold, cond="wide")) is None and S.find_entry(by(candle(360, 0.90, 0.93)), CLOSE, dict(hold, cond="wide")) is not None
+assert S.find_entry(by(candle(360, 0.90, 0.91)), CLOSE, dict(hold, cond="wide")) is None and S.find_entry(by(candle(360, 0.89, 0.93)), CLOSE, dict(hold, cond="wide")) is not None
 assert S.find_entry(by(candle(360, 0.90, 0.91)), CLOSE, dict(hold, cond="tight")) is not None and S.find_entry(by(candle(360, 0.89, 0.93)), CLOSE, dict(hold, cond="tight")) is None
 mom = dict(hold, cond="momentum")
 assert S.find_entry(by(candle(420, 0.86, 0.88), candle(360, 0.90, 0.92)), CLOSE, mom) is not None and S.find_entry(by(candle(360, 0.90, 0.92)), CLOSE, mom) is None
