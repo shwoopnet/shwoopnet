@@ -595,6 +595,7 @@
   .kal-perf-t{ display:flex; flex-direction:column; gap:6px; font-size:13px; }
   .kal-perf-t > div{ display:flex; justify-content:space-between; gap:10px; border-top:1px solid var(--border); padding-top:6px; }
   .kal-perf-t > div span:nth-child(2){ color:var(--muted); flex:1; text-align:right; }
+  .kal-perf-t > div b{ white-space:nowrap; }
   .kal-donut{ display:flex; align-items:center; gap:18px; }
   .kal-donut-leg{ display:flex; flex-direction:column; gap:6px; font-size:13px; min-width:0; }
   .kal-leg{ display:flex; align-items:center; gap:8px; } .kal-leg b{ font-weight:700; } .kal-leg-dot{ width:10px; height:10px; border-radius:50%; flex:none; }
@@ -2194,7 +2195,10 @@
   function kalshiExitReport(orders, results){
     var AT = 0.5;
     var r = { at: AT, earlier: 0, touched: 0, loggedOnly: 0, sold: 0, partly: 0, failed: 0, avgBid: null, avgFill: null, avgSlip: null, realised: 0, known: 0, recovered: 0, exitMinusHold: 0, holdKnownSold: 0 };
-    var bids = [], fills = [], slips = [];
+    // Sold orders that have both the trigger bid and the fill price. The three averages are over these same orders, so trigger bid minus sold-at IS the slip. (The bid used to be averaged over
+    // every order the watch touched, logged-only ones included, so the three figures could not be subtracted from each other: 36c, 24c and a 4c slip.)
+    var pairs = [];
+    var num = function(v){ return v !== undefined && v !== null && v !== '' && Number.isFinite(Number(v)) ? Number(v) : null; };
     (orders || []).forEach(function(o){
       if(!o || !(Number(o.fillCount) > 0) || !(o.exitStatus || o.exitShadow)){ return; }
       var trig = (o.exitBid !== undefined && o.exitBid !== null && Number.isFinite(Number(o.exitBid))) ? Number(o.exitBid)
@@ -2206,35 +2210,36 @@
       var holdPnl = res ? Math.round(((res === o.side ? got : 0) - cost) * 10000) / 10000 : null;
       if(Number(o.exitCount) > 0){
         if(o.exitStatus === 'partly sold'){ r.partly++; } else { r.sold++; }
-        if(Number.isFinite(Number(o.exitBid))){ bids.push(Number(o.exitBid)); }
-        if(Number.isFinite(Number(o.exitAvg))){ fills.push(Number(o.exitAvg)); if(Number.isFinite(Number(o.exitBid))){ slips.push(Number(o.exitBid) - Number(o.exitAvg)); } }
+        if(num(o.exitBid) !== null && num(o.exitAvg) !== null){ pairs.push([num(o.exitBid), num(o.exitAvg)]); }
         var p = kalshiOrderPnl(o); if(p !== null){ r.realised += p; }
         if(holdPnl !== null && p !== null){ r.holdKnownSold++; r.exitMinusHold += p - holdPnl; }
       } else if(o.exitStatus){
         r.failed++;
       } else {
         r.loggedOnly++;
-        if(Number.isFinite(Number(o.exitShadow && o.exitShadow.bid))){ bids.push(Number(o.exitShadow.bid)); }
       }
       if(holdPnl !== null){ r.known++; if(res === o.side){ r.recovered++; } }
     });
     var avg = function(a){ return a.length ? a.reduce(function(x, y){ return x + y; }, 0) / a.length : null; };
-    r.avgBid = avg(bids); r.avgFill = avg(fills); r.avgSlip = avg(slips);
+    r.avgBid = avg(pairs.map(function(x){ return x[0]; })); r.avgFill = avg(pairs.map(function(x){ return x[1]; })); r.avgSlip = avg(pairs.map(function(x){ return x[0] - x[1]; }));
     return r;
   }
   function kalshiExitHtml(x, esc, money){
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, c = function(v){ return v === null ? 'n/a' : (v * 100).toFixed(1) + 'c'; };
     var at = Math.round(((x && x.at) || 0.5) * 100) + 'c';
-    var row = function(k, v){ return '<div><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
-    var earlier = x && x.earlier ? row('Records from the earlier 70c line, not counted here', String(x.earlier)) : '';
-    if(!x || !x.touched){ return '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span><div><span>No position has fallen to ' + at + ' yet, so there is nothing to read.</span></div>' + earlier + '</div>'; }
-    var h = '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span>' + row('Positions that fell to ' + at, String(x.touched)) + earlier +
-      row('Sold / partly sold / logged only', x.sold + ' / ' + x.partly + ' / ' + x.loggedOnly) + (x.failed ? row('Sell did not fill or was skipped', String(x.failed)) : '') +
-      row('Average bid when it triggered', c(x.avgBid));
-    if(x.sold + x.partly){ h += row('Average price the sell got', c(x.avgFill)) + row('Average slip (trigger bid minus fill)', x.avgSlip === null ? 'n/a' : (x.avgSlip * 100).toFixed(1) + 'c') + row('Realised on sold orders', sg(x.realised)); }
-    h += row('Settled since, and the side recovered', x.known ? x.recovered + ' of ' + x.known + ' (' + Math.round(x.recovered / x.known * 100) + '%)' : 'none known yet');
-    if(x.holdKnownSold){ h += row('Sells vs holding, on ' + x.holdKnownSold + ' sold', sg(x.exitMinusHold) + (x.exitMinusHold >= 0 ? ' better' : ' worse')); }
-    return h + '</div>';
+    // One line a row: a long label used to wrap and squeeze its figure onto a second line. A count that is zero is left out, and records taken under the old 70c line are a quiet note under
+    // the block, not a data row: they are not a fall to 50c and are never mixed into these figures.
+    var row = function(k, v, tip){ return '<div' + (tip ? ' title="' + esc(tip) + '"' : '') + '><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
+    var note = x && x.earlier ? '<div><span class="kal-lbl">' + esc(x.earlier === 1 ? '1 older record, taken when the line was 70c, is left out.' : x.earlier + ' older records, taken when the line was 70c, are left out.') + '</span></div>' : '';
+    if(!x || !x.touched){ return '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span><div><span>No position has fallen to ' + at + ' yet.</span></div>' + note + '</div>'; }
+    var h = '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span>' + row('Fell to ' + at, String(x.touched)) + row('Sold', String(x.sold));
+    if(x.partly){ h += row('Partly sold', String(x.partly)); }
+    if(x.failed){ h += row('Sell failed or skipped', String(x.failed)); }
+    if(x.loggedOnly){ h += row('Logged, not sent', String(x.loggedOnly)); }
+    if(x.sold + x.partly){ h += row('Trigger bid (avg)', c(x.avgBid)) + row('Sold at (avg)', c(x.avgFill)) + row('Slip (avg)', c(x.avgSlip)) + row('Realised on sells', sg(x.realised)); }
+    h += row('Won after falling', x.known ? x.recovered + ' of ' + x.known + ' (' + Math.round(x.recovered / x.known * 100) + '%)' : 'none known yet', 'Of the positions that fell to ' + at + ' and have since settled, how many ended on the winning side.');
+    if(x.holdKnownSold){ h += row('Sells vs holding', sg(x.exitMinusHold) + (x.exitMinusHold >= 0 ? ' better' : ' worse'), 'Across the ' + x.holdKnownSold + ' sold position' + (x.holdKnownSold === 1 ? '' : 's') + ' whose market has settled: what selling made compared with holding to the end.'); }
+    return h + note + '</div>';
   }
 
   // The tracker's numbers as tiles and two small tables. Nothing is shown as a figure until there is a settled trade to base it on.
