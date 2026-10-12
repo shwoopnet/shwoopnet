@@ -2745,6 +2745,20 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 **Count.** Four variants: **2,597 once run** (2,593 after OW1). Registered, not yet run.
 
 **Limits.** Minute candles hide what happens inside a minute, so an intrabar touch of the target is never credited (conservative), and a fill at the candle's closing ask or bid is assumed (optimistic where the book is thin). A taker round trip crosses the spread twice; the closing quotes already include that.
+
+**2026-10-12: OW2 ran once (`python -m scalper.ow2`, commit afbb3e0, 4,831 markets, 31 days): all four variants `FALSIFIED`.**
+
+| Variant | n | Net a contract | z | 1st half | 2nd half | Fees x1.2 | Target hit | Gross before fees |
+|---|---|---|---|---|---|---|---|---|
+| OW2-A (20c to 40c, +10%) | 3,086 | -4.49c | -13.95 | -4.53c | -4.45c | -5.06c | 57.9% | -1.62c |
+| OW2-B (20c to 40c, +15%) | 3,086 | -4.46c | -13.32 | -4.37c | -4.55c | -5.03c | 54.1% | -1.60c |
+| OW2-C (40c to 80c, +10%) | 4,763 | -4.00c | -12.43 | -4.46c | -3.55c | -4.61c | 64.1% | -0.98c |
+| OW2-D (40c to 80c, +15%) | 4,763 | -3.84c | -11.65 | -4.32c | -3.35c | -4.43c | 57.4% | -0.85c |
+
+- **Against the prediction.** A and B landed inside the predicted -2c to -5c. C and D were predicted at -1c to -3c and came in worse, at -4.0c and -3.8c. No variant came near the bar.
+- **What it establishes.** The target is hit more than half the time, and the trade still loses, because the target is about the size of what the trade costs. Fees take about 2.9c to 3.0c a round trip and the spread (entry at the ask, exit at the bid) about 1c to 1.6c, so the gross figure is already negative before any fee. There is no early-move edge to rescue with a better exit. This is the same result as OP1 to OP3 and S27 to S37: cost, not signal, is the binding constraint.
+- **Nothing is built from it.** No recorder, no collection, no page row. A `FALSIFIED` rule earns nothing.
+- **Count.** Four variants: **2,597** tried in total (2,593 after OW1).
 ## Pre-registration: OW3, OW4, OW7, three hold-to-settlement contrasts (the owner asked for new strategies; fixed 2026-10-12 before any of them was run)
 
 **Where they came from.** A research pass listed everything already tried (about 2,597 variants, every one `FALSIFIED` or `NOT_ENOUGH_DATA`) and proposed eight candidates, OW3 to OW10. None gives a different kind of exposure or is flat before L1 buys: a round trip costs about 1.3c of fees plus at least 1c of spread at 90c and about 3.5c plus spread at 50c, and every scalp family is already falsified on that arithmetic. So all of these hold to settlement and pay one fee. **Three of the eight are run.** OW5 (frozen gold feed) has about 49 windows in 31 days, so it can only ever return `NOT_ENOUGH_DATA`. OW6 (round-number asks), OW8 (hourly-bar close) and OW9 (turnover z-score) are weak rewordings of tried ideas or of OW4, and each one run raises the bar for everything after it. OW10 (the 08:00 UTC Deribit expiry) has 15 entries a month. None of those five is run. **A subset of L1 can only remove entries from L1; it cannot create a new strategy.** OW4 and OW7 are therefore tests of whether L1 could be filtered, not new trades.
