@@ -2726,3 +2726,16 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 **OW7, the opening open-interest ratio.** L1's band at 360 s left. Feature = (open interest at the candle ending 360 s left minus open interest at the candle ending 600 s left) divided by the larger of 1 and the summed volume of the candles ending 540, 480, 420 and 360 s left. A candle with no open interest or volume makes the market unusable for this test and it is counted and reported. Arm B is the lowest tercile of the feature over all usable entries, arm A is the other two. *Counterparty:* new money paying us; informed exiters are the adverse side. *Prediction:* the L1 mean rises from about +1.0c to **+1.5c** when the lowest tercile is skipped. The units of `oi` and `volume` are checked and printed before the contrast is read.
 
 **Count.** Three hypotheses: **2,600** tried once run (2,597 after OW2). **Isolation from L1:** these are offline readings of history and place nothing. **What a pass would mean:** `NOT_YET_FALSIFIED` earns one forward read on data written down then, and no change to L1, whose entry rule is not touched by anything here.
+
+**2026-10-12: OW3, OW4 and OW7 each ran once (`python -m scalper.ow3`, commit a960233, 4,831 markets, 31 days): all three `FALSIFIED`.**
+
+| | n A | n B | days | Mean A | Mean B | A minus B | z | 1st half | 2nd half | A with fees x1.2 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| OW3 NO minus YES (price-matched residuals) | 2,371 | 2,485 | 31 | -0.43c | +0.41c | **-0.83c** | -0.90 | -2.29c | +0.55c | -0.26c |
+| OW4 US hours minus other weekday hours | 324 | 834 | 21 | -0.57c | +0.84c | **-1.41c** | -0.92 | -1.28c | -1.50c | -0.66c |
+| OW7 kept two terciles minus lowest tercile | 967 | 485 | 31 | +0.96c | -0.47c | **+1.43c** | +1.15 | +1.98c | +1.07c | +0.88c |
+
+- **Against the predictions.** OW3 and OW4 came out on the wrong side of zero (predicted +1.0c and +2.0c); neither is distinguishable from zero. OW7 had the predicted sign, +1.43c against a predicted +0.5c rise, positive in both halves and positive with fees 20% higher, but z was 1.15 against a bar of 2.5, so it fails on power, not on sign.
+- **OW7 units check.** All 4,831 markets had a usable feature (min -0.343, median 0.229, max 0.879), so nothing was dropped.
+- **What it establishes.** Nothing here beats the common bar and nothing can be built from it. OW7 is the one to note: skipping the lowest open-interest-ratio tercile of L1's entries is worth about +1.4c with a standard error of 1.25c, which is a hint, not a result. It is a filter on L1, so it could only remove L1 entries, and a hint with a z of 1.15 is the kind that moves on the next sample. It is NOT carried forward automatically and L1 is not changed.
+- **Count.** Three variants: **2,600** tried in total (2,597 after OW2).
