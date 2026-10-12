@@ -19,6 +19,7 @@ Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for e
 | Item | Gate or check |
 |---|---|
 | Forward checks F0 to F9 read | At least 300 entries on at least 5 days; z, halves and fees x1.2 as registered |
+| OW1 first read (opening window, paper only) | 2026-11-03, once: `python -m scalper.backfill` then `python -m scalper.opening`. Bar as registered; a short lane gets one final read on 2026-11-16. Nothing goes live from it without its own waiver |
 | Size ladder step 1 decision | The owner overrode the evidence gates on 2026-10-08. After the forward read, either keep or step back to 1 contract per the README |
 | Use the recorder's order-book data | Book depth imbalance and locked books, pre-registered before running |
 | 10 second stop test | Needs several days of recorder data |
