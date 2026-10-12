@@ -1041,7 +1041,6 @@
             <span class="brand-ground"></span>
           </span>
         </div>
-        <div class="brand-sub">We trade. You live your life.</div>
       </div>
     </button>
 
@@ -1230,7 +1229,7 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Settings</div>
-        <div class="trades-sub">Preferences for this browser.</div>
+        <div class="trades-sub">Display preferences.</div>
       </div>
     </div>
 
@@ -1258,7 +1257,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Dark mode</div>
-              <div class="settings-row-desc">Switches the whole app to a dark palette. Follows your system setting the first time you visit.</div>
+              <div class="settings-row-desc">Dark palette. Follows your system setting the first time.</div>
             </div>
             <button class="settings-toggle-switch" id="darkModeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode">
               <span class="toggle-knob"></span>
@@ -1268,7 +1267,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Theme</div>
-              <div class="settings-row-desc">Ledger is the default look. Mono Ink is black and white with sharp corners. Both follow the dark mode switch above.</div>
+              <div class="settings-row-desc">Ledger or Mono Ink (black and white).</div>
             </div>
             <div class="settings-choice-group" id="skinChoice">
               <button class="tf-btn" data-value="ledger">Ledger</button>
@@ -1303,7 +1302,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Reduce motion</div>
-              <div class="settings-row-desc">Turns off the logo bounce and other animations.</div>
+              <div class="settings-row-desc">Stops animations.</div>
             </div>
             <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
               <span class="toggle-knob"></span>
@@ -1317,14 +1316,14 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Reset preferences</div>
-              <div class="settings-row-desc">Clears the preferences this browser has stored, then reloads the page.</div>
+              <div class="settings-row-desc">Clears saved preferences and reloads.</div>
             </div>
             <button class="settings-reset-btn" id="resetPrefsBtn">Reset</button>
           </div>
         </div>
       </div>
 
-      <div class="settings-note">Your theme, clock, landing page and Kalshi layout sync to your account and follow you across devices.</div>
+      <div class="settings-note">Your theme, clock, landing page and Kalshi layout sync to your account.</div>
     </div>
   </main>
 
@@ -1333,10 +1332,8 @@
   </div>
 
   <footer class="site-footer">
-    <div class="footer-copyright">&copy; 2026 Shwoop. All rights reserved.</div>
-    <p>Shwoop is an independent personal dashboard: a market brief and a Kalshi trading panel. It is not affiliated with, endorsed by, or sponsored by any exchange, broker, data provider, or any company, product, or ticker shown. All names, symbols, and trademarks belong to their respective owners and appear for identification only.</p>
-    <p>Nothing here is financial, investment, legal, or tax advice, and Shwoop is not a licensed broker, advisor, or fiduciary. Trading and investing carry substantial risk, including the loss of all capital. Past or simulated results do not predict future results. Automated tools can fail, misfire, or act on stale or incorrect data. Use is entirely at your own risk, and you alone are responsible for your decisions and your accounts.</p>
-    <p>Data comes from third parties and may be delayed, incomplete, or wrong. Shwoop makes no warranty of accuracy, availability, or fitness for any purpose, and accepts no liability for losses or damages of any kind arising from its use. This is experimental, single-owner software under active testing.</p>
+    <div class="footer-copyright">&copy; 2026 Shwoop</div>
+    <p>Personal dashboard. Not financial advice. Trading can lose all of your money, automated tools can fail, and data from third parties can be late or wrong.</p>
   </footer>
 
 </div>
@@ -2457,7 +2454,7 @@
       var refused = m.indexOf('403') >= 0;
       document.getElementById('kalBooks').innerHTML = '<div class="kal-empty">' +
         (refused
-          ? 'Kalshi refuses requests from Google Cloud, which the live relay runs on, so live books are not available here. The journal does not need them.'
+          ? 'Kalshi refuses requests from Google Cloud, which the live relay runs on, so live prices are not available here.'
           : 'Could not load Kalshi data. The relay function may not be deployed yet.') + '</div>';
       st.textContent = refused ? 'Kalshi refused the request (HTTP 403)'
         : 'Error: ' + m.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
@@ -2679,7 +2676,7 @@
     if(!a){
       totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
     } else if(!tot){
-      totEl.innerHTML = '<div class="kal-empty">No starting line yet. Open Tools and press "Start fresh from now" so this counts only the bot.</div>';
+      totEl.innerHTML = '<div class="kal-empty">No starting point yet. Set one in Tools.</div>';
     } else {
       // The account change also holds deposits, withdrawals and manual trades, so it is not the bot's result (that is on the session card).
       // Only the BOT's settled trades since the starting line. Deposits, withdrawals and your own trades are left out. The owner dropped the line that
@@ -2766,7 +2763,7 @@
       var save = function(blob, name){
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
         setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-        msg.textContent = 'Downloaded ' + name + ': ' + r.snaps + ' snapshots from ' + r.minutes + ' minutes (' + Math.round(blob.size / 1024) + ' KB). Attach it in the chat.';
+        msg.textContent = 'Downloaded ' + name + ': ' + r.snaps + ' snapshots from ' + r.minutes + ' minutes (' + Math.round(blob.size / 1024) + ' KB).';
       };
       if(typeof CompressionStream === 'function' && typeof Response === 'function'){
         new Response(new Blob([r.csv]).stream().pipeThrough(new CompressionStream('gzip'))).blob().then(function(b){ save(b, 'kalshi-books-' + stamp + '.csv.gz'); }, function(){ save(new Blob([r.csv], { type: 'text/csv' }), 'kalshi-books-' + stamp + '.csv'); });
@@ -2779,7 +2776,7 @@
     var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
     var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders. Paste them into the chat.'; }, manual);
+      navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders.'; }, manual);
     } else { manual(); }
   });
   // The page buttons are re-created on every render, so one listener on their container does it.
@@ -3109,7 +3106,7 @@
     function showBaseline(bl, change, hidden){
       var line = document.getElementById('kalAcctBaseline');
       var go = document.getElementById('kalAcctStart');
-      if(!bl){ line.textContent = 'No starting line yet: everything on the account counts, including your own trades.'; go.hidden = false; return; }
+      if(!bl){ line.textContent = 'No starting point yet: everything on the account counts, including your own trades.'; go.hidden = false; return; }
       go.hidden = true; document.getElementById('kalAcctStartConfirm').hidden = true;
       line.textContent = '';   // the Account card already shows the bot's result and what is not the bot's
 
@@ -3521,7 +3518,7 @@
         }).join('') +
       '</div>' +
       '<div class="breadth-meta">' +
-        '<span class="breadth-label ' + labelClass + '">' + label + ' — that\'s the bias going into today</span>' +
+        '<span class="breadth-label ' + labelClass + '">' + label + '</span>' +
       '</div>';
   }
 
