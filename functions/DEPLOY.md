@@ -271,6 +271,16 @@ Firestore and have no rule, so nothing can read them; delete them in the Firebas
 
     firebase deploy --only functions,firestore:rules
 
+## The market tape (`marketTapeTick`)
+
+Every 5 minutes, around the clock, with NO secrets: public Yahoo chart prices (S&P 500, Nasdaq 100, Dow, Russell 2000, 10 year yield, long bonds, VIX, gold, Bitcoin, and
+SPY, QQQ and DIA for the Brief's cards) and the public CNBC and MarketWatch RSS feeds are written to `shared/marketTape`, which every signed-in account reads and no client can
+write. The page shows them in a strip above every page and on the Brief's index cards, with an "as of" line that turns red if the feed stops for 20 minutes. Each symbol and each feed
+fails on its own and keeps its older value. The Yahoo endpoint is unofficial: if it refuses requests from Google Cloud the strip goes stale and says so, and `errors` on the document
+names what failed (look at `shared/marketTape` in the Firebase console after the first run). After the first deploy:
+
+    firebase deploy --only functions
+
 ## The blank slate (Oct 12, 2026)
 
 The site is the Market Brief, the Kalshi page and Settings. The trading pages, the Alpaca, Finnhub and Twelve Data integrations and
