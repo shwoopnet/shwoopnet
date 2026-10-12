@@ -25,7 +25,7 @@ from datetime import datetime
 from . import api
 from .paths import DB
 
-SERIES = ("KXBTC15M", "KXGOLD15M")
+SERIES = ("KXBTC15M", "KXGOLD15M", "KXETH15M")
 MAX_DAYS = 40
 PAUSE_S = 0.6  # stay inside Kalshi public read limits; _get also waits out any 429
 
