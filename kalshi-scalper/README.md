@@ -2775,3 +2775,11 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 **What a pass would earn.** `NOT_YET_FALSIFIED` earns a forward paper read on days written down then, in its own recorder and collections, and nothing else. A pass on a search of 216 cells is a hint and not a result: the forward days are what count.
 
 **Count.** 216 variants: **2,816** tried once run (2,600 after OW3 to OW7). Registered, not yet run.
+
+**2026-10-12: SS1 ran once (`python -m scalper.ss1`, commit 23749f4, 4,831 markets): `FALSIFIED`. No scalp is close to profitable.**
+- **Training days (3,450 markets, before 2026-10-03): 0 of 180 cells with entries had a positive mean after fees.** The best cell with at least 300 entries was **-2.91c a contract, profit factor 0.63** (entry 660 s, band 0.60 to 0.80, target +8c, no stop). Four cells with a better mean (-1.12c at best) were dip entries with only 175 trades, below the 300 bar, so they were not eligible; they are not a hidden winner, they are small samples.
+- **Frozen cell on the validation days (1,381 markets, 10 days, read once):** n=759, **-3.77c**, z -5.27, profit factor 0.56, target hit 48.1%, -4.32c with fees 20% higher. `FALSIFIED`, and worse than on the training days, which is what a selected cell does.
+- **Against the prediction.** Predicted: nothing close, best training cell negative, frozen winner loses on validation. All three held.
+- **What it establishes.** Across 216 combinations of entry minute, price band, momentum or dip condition, target and stop, with a flat-before-minute-8 cut-off, none is profitable even on the data it was chosen on. Refining entries and exits until the profit factor rises would find the cell that was luckiest on those days, not one that works. The fee plus spread of a round trip is bigger than any 3c to 8c target at these prices. The higher the price band, the less it loses (0.60 to 0.80 beats 0.20 to 0.40), which points at fees shrinking toward the extremes, not at a signal.
+- **Nothing is built from it.** No recorder, no collection, no page row.
+- **Count.** 216 variants: **2,816** tried in total (2,600 after OW3 to OW7).
