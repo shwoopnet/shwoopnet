@@ -1114,9 +1114,17 @@
   .kal-trade:first-child{ border-top:0; }
   .kal-trade .kal-lbl{ color:var(--muted); font-size:11px; display:block; }
   .kal-tnote{ grid-column:1 / -1; color:var(--muted); font-size:12px; }
-  .kal-pos{ color:#1f9d55; }
+  /* Gain and loss text use the same two tokens as the chart bars, the line and the background glow, so there is one green and one red on the page.
+     These two used to be hard-coded copies of their own and sat next to the charts as a slightly different green and red. */
+  .kal-pos{ color:var(--gain); }
   .kal-warn{ color:#c58a00; }
-  .kal-neg{ color:#d64545; }
+  .kal-neg{ color:var(--loss); }
+  /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
+  .kal-hit{ cursor:default; }
+  .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
+  .kal-tip{ position:fixed; z-index:150; pointer-events:none; padding:7px 10px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel-raised); color:var(--paper); box-shadow:var(--card-shadow); font-size:12px; line-height:1.4; white-space:nowrap; }
+  .kal-tip-when, .kal-tip-mkt{ color:var(--muted); }
+  .kal-tip-pnl{ font-size:15px; font-weight:700; }
   @media (max-width:640px){ .kal-trade{ grid-template-columns:1fr 1fr; } }
 
   /* ---------- Trade Overview: shared card header ---------- */
@@ -9896,13 +9904,18 @@
     return c;
   }
 
+  // Which market an order was in, by its series (or ticker). One rule for the By market table and the hover on the bars, so a trade has one name on the page.
+  function kalshiMarketName(o){
+    return /GOLD/.test(String(o.series || o.ticker || '')) ? 'Gold' : (/ETH/.test(String(o.series || o.ticker || '')) ? 'Ethereum' : 'Bitcoin');
+  }
+
   // The bot's running settled result, one point per settled trade, oldest first.
   function kalshiPnlSeries(orders, since){
     var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
-      .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o) }; }).filter(function(r){ return r.p !== null; })
+      .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
       .sort(function(x, y){ return x.t - y.t; });
     var cum = 0;
-    return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum }; });
+    return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum, m: r.m }; });
   }
 
   // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
@@ -9994,7 +10007,7 @@
       var kind = p > 0 ? 'win' : (p < 0 ? 'loss' : 'flat');
       if(kind === runKind){ run++; } else { runKind = kind; run = 1; }
       if(kind === 'loss' && run > longest){ longest = run; }
-      var name = /GOLD/.test(String(o.series || o.ticker || '')) ? 'Gold' : (/ETH/.test(String(o.series || o.ticker || '')) ? 'Ethereum' : 'Bitcoin');
+      var name = kalshiMarketName(o);
       var sr = series[name] || (series[name] = { label: name, n: 0, wins: 0, net: 0 }); sr.n++; sr.net += p; if(p > 0){ sr.wins++; }
       var px = Number(o.price);
       bands.forEach(function(b){ if(px >= b.lo - 1e-9 && px < b.hi){ b.n++; b.net += p; if(p > 0){ b.wins++; } } });
@@ -10012,6 +10025,8 @@
   }
 
   // One bar per settled trade, oldest to newest: green up for a win, red down for a loss, so a loss is as visible as a win.
+  // Each bar also has a transparent hit column the full height of the plot, carrying its date and time, profit or loss and market for the hover (kalshiTipWire). A native <title> on the
+  // bar itself used to do this, but it showed only after a long hover and only over the bar's own pixels, and a win is about two pixels tall: most of the chart told you nothing.
   function kalshiBarsSvg(points, esc, money){
     if(!points || !points.length){ return '<div class="kal-empty">Bars appear after the first settled trade.</div>'; }
     var shown = points.slice(-40), W = 800, H = 96, T = 8, B = 18, L = 4, R = 4;
@@ -10020,13 +10035,59 @@
     var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
     var bars = shown.map(function(p, i){
       var x = L + slot * i + (slot - bw) / 2, y0 = Y(0), y1 = Y(p.pnl), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0));
-      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"><title>' +
-        esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl))) + '</title></rect>';
+      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"/>';
+    }).join('');
+    var hits = shown.map(function(p, i){
+      return '<rect class="kal-hit" x="' + (L + slot * i).toFixed(1) + '" y="0" width="' + slot.toFixed(1) + '" height="' + (H - B) + '" fill="transparent" pointer-events="all" data-up="' + (p.pnl >= 0 ? '1' : '0') +
+        '" data-when="' + esc(kalDateTime(p.t)) + '" data-pnl="' + esc((p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl))) + '"' + (p.m ? ' data-mkt="' + esc(p.m) + '"' : '') + '/>';
     }).join('');
     var wins = shown.filter(function(p){ return p.pnl > 0; }).length, losses = shown.filter(function(p){ return p.pnl < 0; }).length;
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profit or loss of each of the last ' + shown.length + ' settled trades: ' + wins + ' wins, ' + losses + ' losses" style="width:100%;height:auto;display:block">' +
-      '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)"/>' + bars +
+      '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)"/>' + bars + hits +
       '<text x="' + L + '" y="' + (H - 5) + '" fill="var(--muted)" font-size="11">last ' + shown.length + ' settled trades: ' + wins + ' won, ' + losses + ' lost</text></svg>';
+  }
+
+  // Hover (and tap) details for the bars above: one tooltip element for the page, filled from the data-* of the hit column under the pointer. Where it goes is a pure function so the
+  // edges can be tested: centred on the column, just above the pointer, kept inside the window, and flipped below the pointer when there is no room above.
+  function kalshiTipPlace(a, w, h, vw, vh){
+    var gap = 10, left = a.left + a.width / 2 - w / 2, top = a.top - h - gap;
+    left = Math.max(8, Math.min(left, vw - w - 8));
+    if(top < 8){ top = Math.min(a.bottom + gap + 8, vh - h - 8); }
+    return { left: Math.round(left), top: Math.round(Math.max(8, top)) };
+  }
+  var kalshiTipEl = null, kalshiTipHit = null;
+  function kalshiTipShow(hit, pointerY){
+    if(!kalshiTipEl){
+      kalshiTipEl = document.createElement('div'); kalshiTipEl.className = 'kal-tip'; kalshiTipEl.setAttribute('role', 'tooltip'); kalshiTipEl.hidden = true;
+      document.body.appendChild(kalshiTipEl);
+    }
+    var tip = kalshiTipEl, up = hit.getAttribute('data-up') === '1';
+    tip.textContent = '';   // text only, never markup: the values come from attributes
+    [['kal-tip-when', hit.getAttribute('data-when')], ['kal-tip-pnl ' + (up ? 'kal-pos' : 'kal-neg'), hit.getAttribute('data-pnl')], ['kal-tip-mkt', hit.getAttribute('data-mkt')]].forEach(function(row){
+      if(!row[1]){ return; }
+      var line = document.createElement('div'); line.className = row[0]; line.textContent = row[1]; tip.appendChild(line);
+    });
+    tip.hidden = false;
+    var r = hit.getBoundingClientRect(), pos = kalshiTipPlace({ left: r.left, width: r.width, top: pointerY, bottom: pointerY }, tip.offsetWidth, tip.offsetHeight, window.innerWidth, window.innerHeight);
+    tip.style.left = pos.left + 'px'; tip.style.top = pos.top + 'px';
+    if(kalshiTipHit && kalshiTipHit !== hit){ kalshiTipHit.classList.remove('on'); }
+    hit.classList.add('on'); kalshiTipHit = hit;
+  }
+  function kalshiTipHide(){
+    if(kalshiTipEl){ kalshiTipEl.hidden = true; }
+    if(kalshiTipHit){ kalshiTipHit.classList.remove('on'); kalshiTipHit = null; }
+  }
+  // The listeners sit on the chart's container, so they survive every rebuild of its markup. A mouse leaving hides the tip; a touch has no hover, so a tap shows it and a tap anywhere
+  // else (or a scroll or resize) hides it.
+  function kalshiTipWire(box){
+    if(!box){ return; }
+    var hitOf = function(e){ return e.target && e.target.closest ? e.target.closest('.kal-hit') : null; };
+    box.addEventListener('pointermove', function(e){ var h = hitOf(e); if(h){ kalshiTipShow(h, e.clientY); } else { kalshiTipHide(); } });
+    box.addEventListener('pointerdown', function(e){ var h = hitOf(e); if(h){ kalshiTipShow(h, e.clientY); } });
+    box.addEventListener('pointerleave', function(e){ if(e.pointerType !== 'touch'){ kalshiTipHide(); } });
+    document.addEventListener('pointerdown', function(e){ if(!box.contains(e.target)){ kalshiTipHide(); } });
+    window.addEventListener('scroll', kalshiTipHide, true);
+    window.addEventListener('resize', kalshiTipHide);
   }
 
   // The card is rebuilt every few seconds, which closed an opened <details> each time. Its state is kept here and written back into the markup on every build.
@@ -10644,11 +10705,14 @@
     lineEl.innerHTML = kalshiLineSvg(series, escapeHtml, kalshiMoney);
     pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
     var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf');
-    if(barsEl){ barsEl.innerHTML = kalshiBarsSvg(series, escapeHtml, kalshiMoney); }
+    // Rebuilt only when the bars actually change (a new settled trade, or the range choice). This runs on every bot update, and replacing the markup under a pointer closed the hover tip.
+    if(barsEl){ var barsHtml = kalshiBarsSvg(series, escapeHtml, kalshiMoney); if(barsHtml !== kalshiBarsHtml){ kalshiBarsHtml = barsHtml; barsEl.innerHTML = barsHtml; kalshiTipHide(); } }
     if(perfEl && !kalshiOrdersLoaded){ perfEl.innerHTML = '<div class="kal-empty">Loading the bot\'s trades...</div>'; }
     else if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney, kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results)); }
   }
   var kalshiChartRange = 'all';
+  var kalshiBarsHtml = null;
+  kalshiTipWire(document.getElementById('kalChartBars'));
   var kalshiTradeFilter = 'bot';   // 'bot' hides manual trades from the Recent trades card, 'all' shows both
   (function(){
     var sel = document.getElementById('kalTradeFilter');

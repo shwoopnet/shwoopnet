@@ -89,7 +89,7 @@ gates.Y7 = () => {
 gates.Y8 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiPnlSeries', 'kalshiLineSvg', 'kalshiDonutHtml']);
+  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiLineSvg', 'kalshiDonutHtml']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // Ticker to a time. An unfamiliar ticker or an impossible time is shown as it is, never invented.
@@ -136,7 +136,7 @@ gates.Y8 = () => {
 gates.Y14 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml']);
+  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // A filled order the server left unsettled: with the market's result known it is settled here, by the server's own rule.
@@ -165,6 +165,16 @@ gates.Y14 = () => {
   const bars = f.kalshiBarsSvg(series, esc, money);
   assert.ok(/fill="var\(--gain\)"/.test(bars) && /fill="var\(--loss\)"/.test(bars) && /1 won, 1 lost/.test(bars), 'a green bar for the win and a red bar for the loss');
   assert.ok(/after the first settled trade/.test(f.kalshiBarsSvg([], esc, money)));
+  // Hover details: every bar has a transparent column over the whole plot height (a win is about two pixels tall, so the bar itself is a hopeless target), carrying its date and time, its
+  // profit or loss and its market. The slow native <title> is gone, so the two tooltips can never show at once.
+  assert.deepStrictEqual(series.map((p) => p.m), ['Gold', 'Bitcoin'], 'each point knows its market, by the same rule as the By market table');
+  const hitTags = bars.match(/<rect class="kal-hit"[^>]*>/g) || [];
+  assert.strictEqual(hitTags.length, series.length, 'one hover column per bar');
+  assert.ok(hitTags.every((t) => /y="0"/.test(t) && /height="78"/.test(t)), 'each column spans the whole plot, not just the bar');
+  assert.ok(!/<title>/.test(bars), 'no native title is left to compete with the tooltip');
+  assert.ok(/data-pnl="\+\$0\.16"/.test(hitTags[0]) && /data-up="1"/.test(hitTags[0]) && /data-mkt="Gold"/.test(hitTags[0]) && /data-when="[^"]*\d:\d\d [AP]M CT"/.test(hitTags[0]), 'the win column says what it made, when and where');
+  assert.ok(/data-pnl="-\$1\.86"/.test(hitTags[1]) && /data-up="0"/.test(hitTags[1]) && /data-mkt="Bitcoin"/.test(hitTags[1]), 'and the loss column says what it lost');
+  assert.ok(bars.indexOf('class="kal-hit"') > bars.lastIndexOf('rx="1.5"'), 'the columns are drawn after the bars, so they are on top and take the pointer');
   // The tracker's arithmetic.
   const t = (ts, pnl, series, price) => ({ ts, settled: true, fillCount: '1', settledPnl: pnl, series, price });
   const st = f.kalshiPerfStats([t(1, 0.08, 'KXBTC15M', 0.92), t(2, 0.08, 'KXGOLD15M', 0.91), t(3, -0.92, 'KXBTC15M', 0.92), t(4, -0.92, 'KXBTC15M', 0.94), t(5, 0.06, 'KXGOLD15M', 0.96), t(6, null, 'KXBTC15M', 0.9)], 0);
@@ -544,6 +554,31 @@ gates.Y38 = () => {
 // Y39: a market the page does not know is never shown. The deployed relay can lag the page by a deploy, and Solana once appeared as a bare "KXSOL15M" card after it was removed.
 gates.Y39 = () => {
   assert.ok(/var rows = \(\(data && data\.markets\) \|\| \[\]\)\.filter\(function\(m\)\{ return m && \['KXBTC15M', 'KXGOLD15M', 'KXETH15M'\]\.indexOf\(m\.series\) > -1; \}\);/.test(html), 'only Bitcoin, gold and Ethereum cards are drawn');
+};
+
+// Y40: the hover on the settled-trade bars. Placement is pure, so its edges are tested: centred on the column, just above the pointer, inside the window at both sides, flipped below the
+// pointer when there is no room above. The tip is filled as text (the values come from attributes, never markup), shown for a mouse over a column and for a tap, hidden when a mouse leaves but
+// NOT when a touch "leaves" (a touch has no hover, so hiding on leave would close the tip the instant the finger lifts), and the chart is only rebuilt when its markup changes, because
+// replacing it under the pointer closed the tip. Gain and loss text share the bars' tokens: one green, one red.
+gates.Y40 = () => {
+  const m = /(function kalshiTipPlace\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiTipPlace not found');
+  const place = new Function(m[1] + '; return kalshiTipPlace;')();
+  const at = (left, top, width = 10) => ({ left, width, top, bottom: top });
+  assert.deepStrictEqual(place(at(100, 200), 120, 60, 1000, 800), { left: 45, top: 130 }, 'centred on the column and just above the pointer');
+  assert.strictEqual(place(at(0, 200), 120, 60, 1000, 800).left, 8, 'kept off the left edge of the window');
+  assert.strictEqual(place(at(990, 200), 120, 60, 1000, 800).left, 872, 'kept off the right edge of the window');
+  assert.deepStrictEqual(place(at(500, 30), 120, 60, 1000, 800), { left: 445, top: 48 }, 'flipped below the pointer when there is no room above');
+  assert.ok(place(at(500, 790), 120, 60, 1000, 800).top + 60 <= 800 - 8 + 0.5, 'and never pushed off the bottom');
+  assert.ok(/kalshiTipWire\(document\.getElementById\('kalChartBars'\)\);/.test(html), 'the bars are wired');
+  const wire = /function kalshiTipWire\(box\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
+  assert.ok(/addEventListener\('pointermove'/.test(wire) && /addEventListener\('pointerdown'/.test(wire), 'a mouse hover and a tap both show it');
+  assert.ok(/pointerleave', function\(e\)\{ if\(e\.pointerType !== 'touch'\)/.test(wire), 'a mouse leaving hides it, a touch lifting does not');
+  assert.ok(/document\.addEventListener\('pointerdown'[\s\S]*kalshiTipHide/.test(wire) && /'scroll', kalshiTipHide, true/.test(wire), 'a tap elsewhere, a scroll or a resize hides it');
+  const show = /function kalshiTipShow\([^)]*\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
+  assert.ok(/\.textContent = /.test(show) && !/innerHTML/.test(show), 'filled as text, never as markup');
+  assert.ok(/if\(barsHtml !== kalshiBarsHtml\)\{[^}]*kalshiTipHide\(\)/.test(html), 'the bars are only rebuilt when they change, and a rebuild hides the old tip');
+  assert.ok(/\.kal-pos\{ color:var\(--gain\); \}/.test(html) && /\.kal-neg\{ color:var\(--loss\); \}/.test(html), 'gain and loss text use the same tokens as the bars: one green, one red');
+  assert.ok(!/#1f9d55|#d64545/i.test(html), 'and the two stray hard-coded copies of them are gone');
 };
 
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
