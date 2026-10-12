@@ -328,7 +328,7 @@ exports.kalshiLiveBaseline = onCall(
 
 // The owner's 24 hour L1 session (README: "Live waiver: L1 for 24 hours"). This only switches the session document
 // on or off, with a server-set expiry; the scheduled function below does the work, and every limit is in kalshiLiveLib.js.
-// kalshiExitMode and kalshiPoolRule (the page's two switches) were removed on Oct 12, 2026 at the owner's request: the exit is fixed at 50c and always sells, and the
+// kalshiExitMode and kalshiPoolRule (the page's two switches) were removed on Oct 12, 2026 at the owner's request: the exit is fixed at 25c and always sells, and the
 // reinvest pool always rebuilds after every win. There is deliberately no callable that can change either, and nothing stored on the session document is read for them
 // (the scheduled exit and runL1Tick ignore any old exitMode or poolRule). Do not add one back as a convenience: a risk setting that can be toggled from the page can be toggled in a bad hour.
 exports.kalshiL1Session = onCall(async (request) => {
@@ -364,7 +364,7 @@ exports.kalshiL1Session = onCall(async (request) => {
     throw new HttpsError("failed-precondition", "The bot is already running. Switch it off first if you want to start it again.");
   }
   const now = Date.now();
-  // Starting replaces the session document. There are no owner switches to carry across any more: the exit (50c, always selling) and the pool rule (after every win) are fixed in the code.
+  // Starting replaces the session document. There are no owner switches to carry across any more: the exit (25c, always selling) and the pool rule (after every win) are fixed in the code.
   await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
   // Flag the saved sizing state so the next review raises a collapsed cap to what a fresh start gives (see reviewSizing). Pool, savings and the loss-stop clock are kept.
   if (sizing) await db.collection("kalshiLiveControl").doc("sizing").set({ reseed: true }, { merge: true });
@@ -464,7 +464,7 @@ exports.kalshiOpeningTick = onSchedule(
 
 // The exit watch: looks at the bot's own open positions about every 10 seconds for most of each minute (a scheduled function cannot run more often than once a minute, so it
 // loops inside its run). It is the only function besides the armed bot that holds the live key, and it can only close a long the bot opened (kalshiLiveLib.runExitWatch).
-// There is no mode: it always sells (at 50c) while the server's live switch is on, and only records what it would have sold when that switch is off. Nothing on the session document can turn it off.
+// There is no mode: it always sells (at 25c) while the server's live switch is on, and only records what it would have sold when that switch is off. Nothing on the session document can turn it off.
 exports.kalshiLiveExit = onSchedule(
   { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 58, retryCount: 0, memory: "256MiB" },
   async () => {

@@ -699,11 +699,11 @@ async function runL1Tick(args) {
   return { ok: true, results };
 }
 
-// ---- The exit watch (the owner's decision, Oct 10, 2026; fixed at 50c and always selling, Oct 12, 2026) -----------------------------------------
+// ---- The exit watch (the owner's decision, Oct 10, 2026; fixed at 50c and always selling, Oct 12, 2026; moved to 25c the same day at the owner's request) -----------------------------------------
 // L1 holds every trade to settlement, so a favourite that reverses costs the whole stake. This watches the bot's OWN open L1 positions every few seconds and, when the
-// side's bid falls to EXIT_THRESHOLD (50c) or lower, sells them. It began at 70c behind an off / log only / sell switch (README, "Exploratory read ... Friday's loss" and
-// "Pre-registration: X8"); the owner removed the switch and moved the line to 50c on Oct 12, 2026, so there is no mode any more and nothing stored on the session
-// document can turn it off. A 50c line is a later, looser stop than 70c: it stops fewer winners that would have recovered and keeps less of a slide.
+// side's bid falls to EXIT_THRESHOLD (25c) or lower, sells them. It began at 70c behind an off / log only / sell switch (README, "Exploratory read ... Friday's loss" and
+// "Pre-registration: X8"); the owner removed the switch and moved the line to 50c, then to 25c, on Oct 12, 2026, so there is no mode any more and nothing stored on the session
+// document can turn it off. A 25c line is a later, looser stop than 50c or 70c: it stops fewer winners that would have recovered and keeps less of a slide. On a 93c entry a triggered exit now costs about 68c a contract, not 44c, so a stopped trade loses more; it still caps the loss below holding to zero.
 // The one thing that makes it record instead of sell is the server's own live switch being off (`enabled`): it then logs when it WOULD have sold (exitShadow on the order) and sends nothing.
 // What it will not do, by construction:
 //   - touch a position that is not one of the bot's own records (it iterates the bot's order documents, nothing else), or sell more than that order filled;
@@ -711,7 +711,7 @@ async function runL1Tick(args) {
 //   - send the same sell twice (the sell is claimed atomically on the order document and carries a fixed client order id), or retry an answer that was lost;
 //   - ever buy: its only order is an immediate-or-cancel close of an existing long.
 // A lost answer to a sell ends the bot's session and says so, like a lost answer to a buy.
-const EXIT_THRESHOLD = 0.50;
+const EXIT_THRESHOLD = 0.25;
 const EXIT_SLIPPAGE = 0.15;          // how far past the bid it saw the immediate-or-cancel sell may go; it still fills at the book's own prices
 const EXIT_MAX_TRIES = 3;
 const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
