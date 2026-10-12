@@ -21,9 +21,10 @@ const quote = (over = {}, series = 'KXBTC15M', ticker = T) => ({ series, m: Obje
 
 function world(opts = {}) {
   const calls = [], posts = [], docs = new Map(), events = [];
+  let haltReads = 0;
   const sess = Object.assign({ active: true, until: NOW + 3600000, ordersSent: 0, startCash: 100 }, opts.session || {});
   const store = {
-    async halted() { return opts.halted === true; },
+    async halted() { if (opts.haltAfterFirstRead) return haltReads++ > 0; return opts.halted === true; },
     async hasUnresolved() { return opts.unresolved === true || [...docs.values()].some((d) => d.status === 'sending' || d.status === 'unknown'); },
     async createTest(id, data) { if (docs.has(id)) return false; docs.set(id, { ...data }); return true; },
     async updateTest(id, patch) { Object.assign(docs.get(id), patch); },
@@ -765,6 +766,28 @@ gates.K3 = () => {
   assert.ok(/enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED\.value\(\) === "on"/.test(idx), 'the tick is told trading is off');
   const start = idx.slice(idx.indexOf('exports.kalshiL1Session = onCall'), idx.indexOf('// ---- Flatten all + halt'));
   assert.ok(/if \(CODE_KILL_SWITCH\) \{\n\s*throw new HttpsError\("failed-precondition"/.test(start), 'Start refuses, before anything is written');
+};
+
+// K4: a Flatten or Stop that lands while a tick is already running cannot be followed by an order from that tick. The tick read "not halted" at its start, then spent seconds on the
+// balance and the markets; the halt is read again right before the order is recorded.
+gates.K4 = async () => {
+  const w = world({ haltAfterFirstRead: true });
+  await tick(w);
+  assert.strictEqual(w.posts.length, 0, 'halted mid-tick: no order is sent');
+  assert.strictEqual(w.docs.size, 0, 'and no order record is created');
+  const ok = world();
+  await tick(ok);
+  assert.strictEqual(ok.posts.length, 1, 'control: the same tick without a halt does send');
+};
+
+// K5: Start on a bot that is already running is refused before anything is written. Starting replaces the session document, and the loss stop counts from its `since`, so a stale tab
+// could otherwise give a bot that is down most of its stop a fresh budget.
+gates.K5 = () => {
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  const start = idx.slice(idx.indexOf('exports.kalshiL1Session = onCall'), idx.indexOf('// ---- Flatten all + halt'));
+  const guard = start.indexOf('running.data().active === true');
+  assert.ok(guard > 0 && /throw new HttpsError\("failed-precondition", "The bot is already running/.test(start.slice(guard, guard + 200)), 'a running bot refuses Start');
+  assert.ok(guard < start.indexOf('await ref.set({ active: true, since: now'), 'and it refuses before the session document is replaced');
 };
 
 (async () => {

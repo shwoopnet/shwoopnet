@@ -654,6 +654,8 @@ async function runL1Tick(args) {
       // explained afterwards: thin size at the touch, or a price that moved away.
       seen: bookSeen(m),
     };
+    // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
+    if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
     committed[shardKey] = (committed[shardKey] || 0) + cost;
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));

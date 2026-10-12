@@ -347,6 +347,12 @@ exports.kalshiL1Session = onCall(async (request) => {
   if (arm.exists && arm.data().armed === true && arm.data().until > Date.now()) {
     throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the bot.");
   }
+  // Starting replaces the session document, and the loss stop is measured from its `since`. A second Start (a stale tab, a double tap) on a bot that is already running would hand it a
+  // fresh stop budget mid-loss, so a running bot refuses it. Stop it first if you mean to start again.
+  const running = await ref.get();
+  if (running.exists && running.data().active === true) {
+    throw new HttpsError("failed-precondition", "The bot is already running. Switch it off first if you want to start it again.");
+  }
   const now = Date.now();
   // Starting replaces the session document. There are no owner switches to carry across any more: the exit (50c, always selling) and the pool rule (after every win) are fixed in the code.
   await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
