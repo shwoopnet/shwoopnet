@@ -44,10 +44,10 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
-// The owner asked for everything to be shut off (Oct 10, 2026). While this is true NO live order is sent by the bot, whatever the session or the server switch say, and the bot cannot be
-// started. It is a code change on purpose: it holds even if a session document says "on". To trade again, set it to false in review and deploy. The exit watch is untouched (it only
-// closes positions the bot already opened).
-const CODE_KILL_SWITCH = true;
+// The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
+// session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
+// deploy, stops all buying and Start with one token. The exit watch is untouched either way (it only closes positions the bot already opened).
+const CODE_KILL_SWITCH = false;
 const book = require("./kalshiBookLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
