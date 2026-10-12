@@ -2749,3 +2749,29 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 - **Read:** the +1.4c with z 1.15 is about 14 losses. It may be real and it may not; the first sample cannot say, so a new sample must.
 
 **The one forward read of OW7 (fixed now).** Markets closing on or after **2026-10-13 00:00 UTC**, which the first read never saw. **One read, on 2026-11-16, not earlier**, after `python -m scalper.backfill 30` then `python -m scalper.ow3 --forward 2026-10-13`. The boundary between arm A and arm B is **fixed at 0.2395** (the value from the first 31 days, never refit on the new data). The bar is the same: z at least 2.5, positive in both halves, arm A positive with fees 20% higher, at least 300 entries in each arm on at least 5 days. Fewer than 300 gives `NOT_ENOUGH_DATA`. **A pass would mean one thing:** keep reading forward; L1's entry rule is not changed on any read of this sample. **Count:** a forward read of an already counted variant adds none (2,600).
+
+## Pre-registration: SS1, a train and validation search for an opening scalp that is flat before L1 buys (the owner's request; fixed 2026-10-12 before it was run)
+
+**What was asked.** "Find a paper scalp that is close to profitable and refine entries and exits until it has a high profit factor." Refining until the number is high is selection, and selection on the data it is judged on always produces a good-looking number: best-of-N crosses profit factor 1.5 somewhere between N=20 and N=200 on pure noise (`lib/deflate.py` in shwoop-server's research notes). So the refining is allowed and is fenced: it happens on one part of the history, one rule is frozen, and only the part it never saw can say whether it worked.
+
+**Disclosure: what was looked at before this was written.** OW2 (four variants, all `FALSIFIED`, gross negative before fees: -0.85c to -1.62c before the entry fee, which is the spread alone) and the earlier scalp families (60 second scalps, OP1 to OP3, S27 to S37, H4). No SS1 cell had been computed. **My prediction, before the run: nothing is close.** The best cell on the training days will still be negative after fees and the single frozen winner will lose on the validation days. A scalp pays about 3c of fees plus 1c to 1.6c of spread to move a few cents, and the earlier searches (2,591 variants) found nothing. I expect `FALSIFIED`.
+
+**The grid (fixed now, nothing added after seeing a result).** Every cell is one try.
+- **Entry minute:** one per cell: the minute candle that ends 840, 780, 720 or 660 s before the close (the first four minutes). Never another minute, never two entries.
+- **Band (ask of the side bought):** 0.20 to 0.40, 0.40 to 0.60 or 0.60 to 0.80. YES is tried before NO.
+- **Entry condition:** none; momentum (that side's ask is at least 3c above its previous candle's ask); dip (at least 3c below).
+- **Target:** closing bid at least the entry ask plus 3c, 5c or 8c.
+- **Stop:** none, or a closing bid at least 4c below the entry ask (sold at that candle's bid).
+- **Cut-off:** nothing is ever held past the candle that ends 480 s before the close (80 s before L1's earliest buy); it is sold at that candle's bid. A market with no valid candle at 480 s is not counted and is reported.
+- **Costs:** taker fee `0.07 p (1 - p)` unrounded on both legs; closing ask in, closing bid out; a candle's high or low is never used.
+- **Cells:** 4 x 3 x 3 x 3 x 2 = **216**.
+
+**The split (fixed now).** Train: the first 21 days of the 31 day history (markets closing before the cut). Validation: the remaining markets. The cut is the date 21 days after the first market closes, written into the code as a function of the data's first date, not tuned.
+
+**Selection (fixed now, the only free choice).** On the training days only: among cells with at least 300 training entries on at least 5 days, take the one with the highest mean net a contract after fees. Profit factor is printed for every cell but it is not the selector, because it rewards a few lucky wins. **That one cell is frozen and read once on the validation days.** No second cell, no tuning after seeing validation.
+
+**Kill criteria for the frozen cell (validation days only), any one gives `FALSIFIED`:** fewer than 300 validation entries or fewer than 5 days (`NOT_ENOUGH_DATA`); a day-clustered z below 2.5; a mean not above zero; a mean not above zero with fees 20% higher. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. There is no `promote`.
+
+**What a pass would earn.** `NOT_YET_FALSIFIED` earns a forward paper read on days written down then, in its own recorder and collections, and nothing else. A pass on a search of 216 cells is a hint and not a result: the forward days are what count.
+
+**Count.** 216 variants: **2,816** tried once run (2,600 after OW3 to OW7). Registered, not yet run.
