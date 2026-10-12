@@ -8,6 +8,7 @@ These files are working notes, not part of the app. They are excluded from the p
 | `ROADMAP.md` | Now, next, later, each with its gate | Weekly |
 | `CAREER_PORTFOLIO.md` | Résumé bullets, stories, quotable numbers with caveats | Weekly, or after a notable change |
 | `OPENING_STRATEGY.md` | History only: the retired opening window paper test (OW1), synopsis and theory | Never; the recorder was removed on 2026-10-12 |
+| `PROPOSALS.md` | Plain-words proposals for money you oversee while L1 runs: core savings, idle cash, a drawdown rule, L1 itself, a paper-first Kalshi experiment, and what is not proposed | When a research result changes the evidence, and before any new money goes anywhere |
 | `mockups/` | Fixture-rendered screenshots of the Kalshi page (wide, menu open, phone) | When the page changes |
 
 ## Weekly refresh checklist

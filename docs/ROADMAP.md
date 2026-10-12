@@ -30,6 +30,10 @@ Make money on Kalshi without having to watch it. Right now one bot trades for yo
 | Keep the Market Brief fresh and add the ticker | Built: a free scheduled function writes prices and headlines every 5 minutes, and a strip shows S&P, Nasdaq, Dow, Russell, bonds, the 10 year yield, VIX, gold and Bitcoin | Check the strip fills after the next deploy |
 | Tidy the site | The look stays exactly as it is (Ledger palette, Mono Ink skin, the current layout). Nothing is cut unless you name it | Only on your request |
 
+## Proposals for money you oversee
+
+See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, keep only a working balance on Kalshi, keep L1 small and watched, and paper-track anything else before it gets money.
+
 ## How a new idea gets in
 
 1. I write down the rule and what would make it fail, before testing.
