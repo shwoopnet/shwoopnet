@@ -2739,3 +2739,13 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 - **OW7 units check.** All 4,831 markets had a usable feature (min -0.343, median 0.229, max 0.879), so nothing was dropped.
 - **What it establishes.** Nothing here beats the common bar and nothing can be built from it. OW7 is the one to note: skipping the lowest open-interest-ratio tercile of L1's entries is worth about +1.4c with a standard error of 1.25c, which is a hint, not a result. It is a filter on L1, so it could only remove L1 entries, and a hint with a z of 1.15 is the kind that moves on the next sample. It is NOT carried forward automatically and L1 is not changed.
 - **Count.** Three variants: **2,600** tried in total (2,597 after OW2).
+
+## Registered: the OW7 forward read, and an exploratory look at what it was (2026-10-12, after the first read, before any new data)
+
+**Exploratory, information only, no verdict, no variant counted** (`ow3.py` features on the same 31 days, 1,452 L1-band entries at 6 minutes left; it is not a candidate and must not be used to choose a rule). What it showed, so nobody builds on it by accident:
+- **It is not monotone.** Net by feature quintile, low to high: -0.08c, -0.42c, **+2.15c**, +1.38c, -0.60c. A rising line would suggest a mechanism. A hump is what noise and a subgroup look like.
+- **It is concentrated.** The lowest tercile's weakness sits mostly in Bitcoin NO-side entries (-2.82c on 194). Gold's lowest tercile is +2.03c. The loss rate is 8.0% (39 of 485) in the lowest tercile against about 5.5% (53 of 967) in the other two: about 14 extra losses.
+- **The feature barely varies in sign.** Open interest rose in 1,441 of 1,452 entries, so the feature is essentially the share of volume that opened new positions.
+- **Read:** the +1.4c with z 1.15 is about 14 losses. It may be real and it may not; the first sample cannot say, so a new sample must.
+
+**The one forward read of OW7 (fixed now).** Markets closing on or after **2026-10-13 00:00 UTC**, which the first read never saw. **One read, on 2026-11-16, not earlier**, after `python -m scalper.backfill 30` then `python -m scalper.ow3 --forward 2026-10-13`. The boundary between arm A and arm B is **fixed at 0.2395** (the value from the first 31 days, never refit on the new data). The bar is the same: z at least 2.5, positive in both halves, arm A positive with fees 20% higher, at least 300 entries in each arm on at least 5 days. Fewer than 300 gives `NOT_ENOUGH_DATA`. **A pass would mean one thing:** keep reading forward; L1's entry rule is not changed on any read of this sample. **Count:** a forward read of an already counted variant adds none (2,600).

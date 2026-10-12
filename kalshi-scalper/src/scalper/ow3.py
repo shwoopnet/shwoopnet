@@ -8,6 +8,7 @@ Usage: python -m scalper.ow3
 from __future__ import annotations
 
 import math
+import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -111,7 +112,11 @@ def load_oi() -> dict:
     return out
 
 
-def ow7_arms(markets: list[tuple], raw: dict):
+OW7_FIXED_CUT = 0.2395      # the lowest-tercile boundary of the 31 day sample the first read used (largest bottom value 0.23924, smallest kept value 0.23968); the forward read does not refit it
+
+
+def ow7_arms(markets: list[tuple], raw: dict, fixed_cut: float | None = None):
+    """Arm B is the lowest tercile. The first read took the tercile of its own sample; the forward read passes fixed_cut so the boundary comes from the old data, never the new."""
     rows = []
     for e in L.hold_rule(markets, L1_LEFT, L1_BAND):
         f = raw.get(e["ticker"])
@@ -119,11 +124,33 @@ def ow7_arms(markets: list[tuple], raw: dict):
             rows.append(dict(e, feature=f))
     if len(rows) < 3:
         return [], [], len(rows)
-    cut = sorted(r["feature"] for r in rows)[len(rows) // 3]
+    cut = fixed_cut if fixed_cut is not None else sorted(r["feature"] for r in rows)[len(rows) // 3]
     return [r for r in rows if r["feature"] > cut], [r for r in rows if r["feature"] <= cut], len(rows)
 
 
+def forward(after: str) -> None:
+    """The one forward read of OW7: markets closing on or after `after` (a UTC date), the old fixed boundary, the same bar. OW3 and OW4 are not rerun."""
+    markets, _ = load_markets()
+    cutoff = int(datetime.strptime(after, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp())
+    markets = [m for m in markets if m[3] >= cutoff]
+    if not markets:
+        print("No markets on or after " + after + ". Run: python -m scalper.backfill 30")
+        return
+    mid = (min(m[3] for m in markets) + max(m[3] for m in markets)) / 2
+    oi = load_oi()
+    raw = {t: f for t, _, cs, c, _r in markets if (f := oi_feature(oi.get(t, {}), c)) is not None}
+    a, b, n = ow7_arms(markets, raw, OW7_FIXED_CUT)
+    v, s = verdict(a, b, mid)
+    print(f"OW7 forward, markets closing on or after {after}: {len(markets)} markets, {n} usable entries, boundary {OW7_FIXED_CUT} fixed.")
+    print(f"  arm A (kept) n={len(a)}  arm B (lowest tercile) n={len(b)}  {v}")
+    if "z" in s:
+        print(f"  A {s['mean_a']*100:+.2f}c  B {s['mean_b']*100:+.2f}c  diff {s['diff']*100:+.2f}c  z {s['z']:+.2f}  halves {s['h1']*100:+.2f}c / {s['h2']*100:+.2f}c  A x1.2 {s['stress']*100:+.2f}c")
+
+
 def main() -> None:
+    if len(sys.argv) == 3 and sys.argv[1] == "--forward":
+        forward(sys.argv[2])
+        return
     markets, mid = load_markets()
     print(f"{len(markets)} markets. Three hold-to-settlement contrasts, net cents a contract (A minus B).\n")
     head = f"{'':5} {'n A':>6} {'n B':>6} {'days':>5} {'mean A':>8} {'mean B':>8} {'diff':>7} {'se':>6} {'z':>6} {'1st half':>9} {'2nd half':>9} {'A x1.2':>8}  verdict"

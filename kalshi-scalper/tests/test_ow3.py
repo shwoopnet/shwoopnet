@@ -76,6 +76,11 @@ assert abs(W.oi_feature(full, C) - (130 - 100) / 40.0) < 1e-9
 assert W.oi_feature({k: v for k, v in full.items() if k != C - 480}, C) is None
 assert W.oi_feature({**full, C - 420: (115, None)}, C) is None
 assert W.oi_feature({**full, C - 360: (None, 10)}, C) is None
+# The forward read uses the OLD boundary: a feature of 0.2395 or less is arm B whatever the new sample looks like.
+fm = [("T%d" % i, "KXBTC15M", [(C + i * 900 - 360, 0.9, 0.91, 0.9, 0.91)], C + i * 900, "yes") for i in range(6)]
+raw7 = {"T0": 0.10, "T1": 0.20, "T2": 0.2395, "T3": 0.24, "T4": 0.50, "T5": 0.90}
+fa, fb, fn = W.ow7_arms(fm, raw7, W.OW7_FIXED_CUT)
+assert sorted(r["ticker"] for r in fb) == ["T0", "T1", "T2"] and sorted(r["ticker"] for r in fa) == ["T3", "T4", "T5"], "the boundary is fixed, not refit"
 a7, b7, n = W.ow7_arms([], {})
 assert a7 == [] and b7 == [] and n == 0
 print("OW7 feature passed")
