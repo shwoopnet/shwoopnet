@@ -10149,7 +10149,7 @@
     if(t && t.classList && t.classList.contains('kal-more')){ kalshiMoreOpen = t.open; }
   }, true);   // toggle does not bubble, so it is caught on the way down
 
-  // ---- The strategy view: Closing (the live L1 bot), Opening (the paper test O1) or Both ----
+  // ---- The strategy view: Closing (the live L1 bot), Opening (the paper test OW1) or Both ----
   // The opening strategy places no orders. Its records are PAPER, written by a keyless scheduled function, so its dollars are what it WOULD have made. They are drawn in their own blocks and are never
   // added to the live account's figures, in any view ("Live and simulated numbers never share a column", CLAUDE.md): Both shows the two side by side, not a sum. When the opening strategy
   // is ever live, summing is a deliberate change that has to filter on the record's `mode`.

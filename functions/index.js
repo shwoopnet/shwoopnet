@@ -430,8 +430,8 @@ exports.kalshiFlattenAll = onCall(
   }
 );
 
-// ---- The opening window test, O1: PAPER ONLY --------------------------------------------------------------------------------------------------
-// Records, every minute, what two simple rules would have bought about 10 minutes before a close (kalshiOpeningLib.js; README, "Pre-registration: O1"). It is KEYLESS: this function
+// ---- The opening window test, OW1: PAPER ONLY --------------------------------------------------------------------------------------------------
+// Records, every minute, what two simple rules would have bought about 10 minutes before a close (kalshiOpeningLib.js; README, "Pre-registration: OW1"). It is KEYLESS: this function
 // is declared with no secrets, signs nothing and sends nothing, and the only documents it can write are kalshiOpeningOrders and kalshiOpeningControl. There is deliberately no switch for it
 // (the owner wants an anti-degen site, and a recorder that costs nothing needs none) and no live path behind it: going live is a separate reviewed change under a written waiver.
 // It is not behind CODE_KILL_SWITCH because it cannot trade, and that switch must never be able to start it.

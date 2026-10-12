@@ -603,7 +603,7 @@ gates.Y41 = () => {
   const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiLaneName', 'kalshiLaneRows', 'kalshiLaneHtml', 'kalshiPaperRowsHtml', 'kalshiPaperOpenHtml']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
-  const base = { strategy: 'O1', mode: 'paper', side: 'yes', count: 11, status: 'filled', fillCount: '11', maxCost: 9.2, settled: true, price: 0.84, series: 'KXBTC15M', ticker: 'KXBTC15M-26OCT121115-15' };
+  const base = { strategy: 'OW1', mode: 'paper', side: 'yes', count: 11, status: 'filled', fillCount: '11', maxCost: 9.2, settled: true, price: 0.84, series: 'KXBTC15M', ticker: 'KXBTC15M-26OCT121115-15' };
   const P = (ts, lane, over) => Object.assign({}, base, { ts, lane }, over);
   const orders = [P(1, 'F', { settledPnl: 1.8, result: 'yes' }), P(2, 'F', { settledPnl: -9.2, result: 'no' }), P(3, 'U', { price: 0.25, settledPnl: 8.1, result: 'yes' }), P(4, 'U', { price: 0.25, settledPnl: -2.9, result: 'no' }),
     P(5, 'U', { status: 'no fill', fillCount: '0', settled: false, reason: 'the price moved' }), P(6, 'U', { settled: false, price: 0.25, maxCost: 3.0 }), { ts: 7, strategy: 'L1', status: 'filled', fillCount: '5', settled: true, settledPnl: 0.3 }];

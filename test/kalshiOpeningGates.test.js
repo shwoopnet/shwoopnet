@@ -1,4 +1,4 @@
-// The opening window test, O1 (functions/kalshiOpeningLib.js): it records on paper what two rules would have bought about 10 minutes before a close, and it can never place an order.
+// The opening window test, OW1 (functions/kalshiOpeningLib.js): it records on paper what two rules would have bought about 10 minutes before a close, and it can never place an order.
 // Plain node, no framework. Each gate states the consequence, not the mechanism.
 const assert = require('assert');
 const fs = require('fs');
@@ -46,7 +46,7 @@ gates.O1 = () => {
   assert.ok(!/KALSHI_LIVE_KEY_ID|KALSHI_LIVE_PRIVATE_KEY|secrets:|CODE_KILL_SWITCH|KALSHI_LIVE_ENABLED/.test(bcode), 'it cannot see the live key, and neither switch has anything to do with it');
   assert.ok(!/exports\.\w+ = onCall/.test(block), 'no callable switches it on or off');
   assert.ok(idxSrc.indexOf('exports.kalshiOpeningTick') < idxSrc.indexOf('exports.kalshiBookRecorder'), 'the recorder stays last');
-  assert.strictEqual((idxSrc.match(/strategy: "O1"/g) || []).length, 0, 'nothing in the functions file writes an O1 order: the only writer is the keyless library');
+  assert.strictEqual((idxSrc.match(/strategy: "OW1"/g) || []).length, 0, 'nothing in the functions file writes an OW1 order: the only writer is the keyless library');
 };
 
 // O2: each lane buys the side the owner described, judged on the real price (YES at its ask, NO at one minus the yes bid), both ends of the band included, one cent outside excluded.
@@ -100,18 +100,18 @@ gates.O3 = async () => {
 gates.O4 = async () => {
   const w = world({ markets: [mkt('KXBTC15M')] });
   await opening.runOpeningTick(w.args);
-  const r = w.docs.get('O1-F-KXBTC15M-26OCT121115-15');
+  const r = w.docs.get('OW1-F-KXBTC15M-26OCT121115-15');
   const cost1 = 0.82 + bot.takerFee(0.82, 1);
   assert.strictEqual(r.count, live.l1Count(553, cost1, 12, 0), 'the same stake rule as the live bot, without its profit add-on');
-  assert.deepStrictEqual([r.strategy, r.lane, r.mode, r.settled, r.status], ['O1', 'F', 'paper', false, 'filled']);
+  assert.deepStrictEqual([r.strategy, r.lane, r.mode, r.settled, r.status], ['OW1', 'F', 'paper', false, 'filled']);
   assert.ok(r.maxCost > 0 && Math.abs(r.maxCost - (0.82 * r.count + bot.takerFee(0.82, r.count))) < 0.006, 'carries the order cost with the fee, which settlement reads');
   assert.ok(r.seen && r.seen2 && r.leftMs === 600000, 'both books and the time left are kept so a result can be explained afterwards');
   const one = world({ markets: [mkt('KXBTC15M')], session: { sizing: false } });
   await opening.runOpeningTick(one.args);
-  assert.strictEqual(one.docs.get('O1-F-KXBTC15M-26OCT121115-15').count, 1, 'with the live bot not scaling it is one contract, as live');
+  assert.strictEqual(one.docs.get('OW1-F-KXBTC15M-26OCT121115-15').count, 1, 'with the live bot not scaling it is one contract, as live');
   const none = world({ markets: [mkt('KXBTC15M')], session: null, cash: NaN });
   await opening.runOpeningTick(none.args);
-  assert.strictEqual(none.docs.get('O1-F-KXBTC15M-26OCT121115-15').count, 1, 'no live session to read: one contract, never a guess');
+  assert.strictEqual(none.docs.get('OW1-F-KXBTC15M-26OCT121115-15').count, 1, 'no live session to read: one contract, never a guess');
   assert.ok(live.LIVE_CAP === 2 && opening.OPENING_MAX_ORDERS === live.L1_MAX_ORDERS && opening.OPENING_WINDOW_CAP_FRACTION === live.L1_WINDOW_CAP_FRACTION, 'the limits it records are the live bot\'s own constants, not copies');
 };
 
@@ -125,13 +125,13 @@ gates.O5 = async () => {
   assert.strictEqual(opening.simFill(yes, 11, mkt('KXBTC15M', { yes_bid_dollars: '0.9000', yes_ask_dollars: '0.8200' })).fillCount, 0, 'a crossed book is no fill');
   const w = world({ markets: [mkt('KXBTC15M')], second: { 'KXBTC15M-26OCT121115-15': mkt('KXBTC15M', { yes_bid_dollars: '0.8400', yes_ask_dollars: '0.8500' }) } });
   await opening.runOpeningTick(w.args);
-  const r = w.docs.get('O1-F-KXBTC15M-26OCT121115-15');
+  const r = w.docs.get('OW1-F-KXBTC15M-26OCT121115-15');
   assert.deepStrictEqual([r.status, r.fillCount], ['no fill', '0']); assert.ok(/moved/.test(r.reason) && r.seen2.ask === 0.85);
   const failed = world({ markets: [mkt('KXBTC15M')] });
   const rm = failed.args.readMarket; let n = 0;
   failed.args.readMarket = async (t) => { n++; if (n === 2) throw new Error('timeout'); return rm(t); };
   await opening.runOpeningTick(failed.args);
-  assert.strictEqual(failed.docs.get('O1-F-KXBTC15M-26OCT121115-15').status, 'error', 'a failed second read is an error record, not a guessed fill');
+  assert.strictEqual(failed.docs.get('OW1-F-KXBTC15M-26OCT121115-15').status, 'error', 'a failed second read is an error record, not a guessed fill');
 };
 
 // O6: one record per market and lane, however often the minute runs or how many instances run it (a deploy briefly runs two); a book is only the lanes it fits; a bad market never stops the others.
@@ -142,21 +142,21 @@ gates.O6 = async () => {
   assert.ok(/already recorded/.test(w.notes[w.notes.length - 1]));
   const both = world({ markets: [mkt('KXBTC15M', { yes_bid_dollars: '0.8300', yes_ask_dollars: '0.8400' }), mkt('KXGOLD15M', { yes_bid_dollars: '0.8400', yes_ask_dollars: '0.8500' })] });
   await opening.runOpeningTick(both.args);
-  assert.deepStrictEqual([...both.docs.keys()].sort(), ['O1-F-KXBTC15M-26OCT121115-15', 'O1-F-KXGOLD15M-26OCT121115-15'], 'one favourite record per market');
+  assert.deepStrictEqual([...both.docs.keys()].sort(), ['OW1-F-KXBTC15M-26OCT121115-15', 'OW1-F-KXGOLD15M-26OCT121115-15'], 'one favourite record per market');
   const fav = world({ markets: [mkt('KXBTC15M', { yes_bid_dollars: '0.8200', yes_ask_dollars: '0.8300' })] });
   await opening.runOpeningTick(fav.args);
-  assert.deepStrictEqual([...fav.docs.keys()], ['O1-F-KXBTC15M-26OCT121115-15'], 'a book that is only a favourite is only lane F');
+  assert.deepStrictEqual([...fav.docs.keys()], ['OW1-F-KXBTC15M-26OCT121115-15'], 'a book that is only a favourite is only lane F');
   const dog = world({ markets: [mkt('KXBTC15M', { yes_bid_dollars: '0.2500', yes_ask_dollars: '0.2600' })] });
   await opening.runOpeningTick(dog.args);
-  assert.deepStrictEqual([...dog.docs.keys()], ['O1-U-KXBTC15M-26OCT121115-15'], 'a 26c YES side is only the underdog lane');
+  assert.deepStrictEqual([...dog.docs.keys()], ['OW1-U-KXBTC15M-26OCT121115-15'], 'a 26c YES side is only the underdog lane');
   const hedge = world({ markets: [mkt('KXBTC15M', { yes_bid_dollars: '0.8000', yes_ask_dollars: '0.8200' })] });
   await opening.runOpeningTick(hedge.args);
-  assert.deepStrictEqual([...hedge.docs.keys()], ['O1-F-KXBTC15M-26OCT121115-15'], 'a book that fits both lanes records the favourite only: never both legs of one market');
+  assert.deepStrictEqual([...hedge.docs.keys()], ['OW1-F-KXBTC15M-26OCT121115-15'], 'a book that fits both lanes records the favourite only: never both legs of one market');
   const bad = world({ markets: [mkt('KXBTC15M'), mkt('KXGOLD15M')] });
   const rm = bad.args.readMarket;
   bad.args.readMarket = async (t) => { if (/BTC/.test(t)) throw new Error('boom'); return rm(t); };
   const r = await opening.runOpeningTick(bad.args);
-  assert.ok(r.ok && bad.docs.has('O1-F-KXGOLD15M-26OCT121115-15') && !bad.docs.has('O1-F-KXBTC15M-26OCT121115-15'), 'one bad read never stops the other market');
+  assert.ok(r.ok && bad.docs.has('OW1-F-KXGOLD15M-26OCT121115-15') && !bad.docs.has('OW1-F-KXBTC15M-26OCT121115-15'), 'one bad read never stops the other market');
 };
 
 // O7: a paper trade settles with the same arithmetic as a live one, so the dollars are comparable; a no fill or an unfinished market is never settled, and the sweep reads only unsettled filled records.
@@ -170,7 +170,7 @@ gates.O7 = async () => {
   };
   const out = await live.settleOpenOrders({ store: w.store, fetchFn, nowMs: NOW + 1000000 });
   assert.strictEqual(out.settled, 2);
-  const fav = w.docs.get('O1-F-KXBTC15M-26OCT121115-15'), dog = w.docs.get('O1-U-KXGOLD15M-26OCT121115-15');
+  const fav = w.docs.get('OW1-F-KXBTC15M-26OCT121115-15'), dog = w.docs.get('OW1-U-KXGOLD15M-26OCT121115-15');
   assert.ok(fav.settled === true && fav.result === 'yes' && fav.settledPnl > 0, 'the favourite won: it paid $1 a contract less what it cost');
   assert.ok(Math.abs(fav.settledPnl - (fav.count * 1 - fav.maxCost)) < 1e-3, 'exactly count minus cost');
   assert.ok(dog.settled === true && dog.result === 'no' && dog.side === 'yes' && Math.abs(dog.settledPnl + dog.maxCost) < 1e-3, 'the 26c YES lost: a full loss costs the whole order');
@@ -203,7 +203,7 @@ gates.O10 = () => {
   const liveStore = idxSrc.slice(idxSrc.indexOf('function firestoreLiveStore'), idxSrc.indexOf('function firestoreOpeningStore') > -1 ? idxSrc.indexOf('exports.kalshiLiveExit') : undefined);
   assert.ok(/db\.collection\("kalshiLiveOrders"\)/.test(liveStore), 'the live store is unchanged');
   const liveLib = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
-  assert.ok(!/kalshiOpeningOrders|kalshiOpeningLib|"O1"/.test(liveLib), 'the live library knows nothing about the paper engine');
+  assert.ok(!/kalshiOpeningOrders|kalshiOpeningLib|"OW1"/.test(liveLib), 'the live library knows nothing about the paper engine');
   assert.ok(!/kalshiOpeningOrders/.test(idxSrc.slice(idxSrc.indexOf('exports.kalshiLiveExit'))), 'nothing after the paper function (the exit watch, the live tick, the recorder) reads its records');
 };
 
@@ -222,7 +222,7 @@ gates.O11 = async () => {
   assert.strictEqual(f(many.slice(1), 'X-26OCT121115-15', 1, base, NOW).orderCap, false, '199 is not');
   const w = world({ markets: [mkt('KXBTC15M')], preload: many });
   await opening.runOpeningTick(w.args);
-  const r = w.docs.get('O1-F-KXBTC15M-26OCT121115-15');
+  const r = w.docs.get('OW1-F-KXBTC15M-26OCT121115-15');
   assert.ok(r && r.caps.orderCap === true && r.status === 'filled', 'past the 24 hour cap it is still recorded and settled, only flagged');
 };
 

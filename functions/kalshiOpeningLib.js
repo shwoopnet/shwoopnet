@@ -1,5 +1,5 @@
 "use strict";
-// The OPENING WINDOW test, O1 (README: "Pre-registration: O1, the opening window, two lanes"). Every minute it looks at the Bitcoin, gold and Ethereum 15 minute markets that are
+// The OPENING WINDOW test, OW1 (README: "Pre-registration: OW1, the opening window, two lanes"). Every minute it looks at the Bitcoin, gold and Ethereum 15 minute markets that are
 // about 10 minutes from their close (five minutes after the open) and records, ON PAPER, what two simple rules would have bought there. NOTHING HERE PLACES AN ORDER, AND NOTHING HERE CAN.
 //
 // KEYLESS by construction, which is the rule CLAUDE.md sets for any simulation in this repo: this file has no signing, no key, no /portfolio call and no POST, and its scheduled
@@ -7,12 +7,12 @@
 // constants and the stake rule, so a paper trade is the size a live trade would be today.
 //
 // THERE IS NO LIVE PATH, on purpose (the owner asked for an anti-degen site, and the theory has not been read yet). Going live is a separate reviewed change under a written waiver,
-// and it must carry every gate runL1Tick has: the halt switch, an unresolved order, the loss stop shared with L1, one combined limit per window shared with L1 (an O1 order at 10 minutes
+// and it must carry every gate runL1Tick has: the halt switch, an unresolved order, the loss stop shared with L1, one combined limit per window shared with L1 (an OW1 order at 10 minutes
 // left and an L1 order at 6 minutes left in the same market are the same window), the 24 hour order cap, $2.00 a contract, and the size ladder. It must have its own code gate that is
 // NOT CODE_KILL_SWITCH: flipping that switch to restart L1 must never start this.
 //
 // Two lanes, one decision per market and lane, both taker at the ask and held to settlement (no exit: L1's 50c exit was set for 88c to 97c entries and means nothing at 20c to 30c):
-//   F, the early favourite: the side whose fresh ask is 82c to 87c, the band just under L1's 88c floor. A win pays 13c to 18c, about twice L1's, against a win rate the price says is 82% to 87%.
+//   F, the early favourite: the side whose fresh ask is 82c to 87c, the band just under L1's 88c floor. A win pays 13c to 18c (L1's pays 3c to 12c), against a win rate the price says is 82% to 87%.
 //   U, the early underdog (the flip lane): the side whose fresh ask is 20c to 30c, the "30% flips". A win pays 70c to 80c against a win rate the price says is 20% to 30%.
 // The owner's two instincts, each tested as a pre-registered rule. Their predicted outcomes and kill criteria are in the README section, written before any record existed.
 // One market never gets both lanes. The two sides of a market sum to about $1, so a favourite at 82c has an underdog at about 19c, and a favourite at 80c with a 2c spread has one at 20c:
@@ -130,9 +130,9 @@ async function runOpeningTick(args) {
         if (cost1 > live.LIVE_CAP + 1e-9) { results.push(ticker + " " + pick.lane + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
         const count = sizing && Number.isFinite(cashNow) ? live.l1Count(cashNow, cost1, sizeCap, 0) : 1;
         const cost = pick.worst * count + bot.takerFee(pick.worst, count);
-        const cid = "O1-" + pick.lane + "-" + ticker;
+        const cid = "OW1-" + pick.lane + "-" + ticker;
         const record = {
-          ticker, series: c.series, strategy: "O1", lane: pick.lane, mode: "paper", side: pick.side, band: Math.round(OPENING_LANES[pick.lane].band[0] * 100) + "-" + Math.round(OPENING_LANES[pick.lane].band[1] * 100) + "c",
+          ticker, series: c.series, strategy: "OW1", lane: pick.lane, mode: "paper", side: pick.side, band: Math.round(OPENING_LANES[pick.lane].band[0] * 100) + "-" + Math.round(OPENING_LANES[pick.lane].band[1] * 100) + "c",
           count, price: pick.price, limit: pick.limit, leftMs: left, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid,
           status: "sending", settled: false, ts: now, maxCost: Number(cost.toFixed(2)), seen: bookSeen(m, now), caps: capFlags(recent, ticker, cost, sizeBase, now),
         };
