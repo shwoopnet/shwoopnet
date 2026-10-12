@@ -1171,9 +1171,12 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">About 6 minutes before a Bitcoin, gold or Ethereum 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, reviewed every 3 days. It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best result so far. L1 failed its own test, so none of this is proof it works. A single day is mostly noise.</div>
-                <div class="kal-note"><b>Exit at 50c (fixed, always on).</b> If a position's price falls to 50c, the bot sells it. It only closes positions the bot opened, and it checks about every 10 seconds, so a price that jumps straight through 50c sells below it.</div>
-                <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool, including right after a loss.</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a Bitcoin, gold or Ethereum 15 minute close, then holds to settlement.</div>
+                <div class="kal-note">At most $2.00 a contract. With scaling on, one contract per $43 of balance.</div>
+                <div class="kal-note">Stops itself if its trades over the last 24 hours are down 5% of the balance (otherwise $10), or if any order goes wrong. Manual trades do not count.</div>
+                <div class="kal-note"><b>Exit at 50c (fixed, always on).</b> If a position's price falls to 50c, the bot sells it.</div>
+                <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool.</div>
+                <div class="kal-note">L1 failed its own test. Nothing here is proof it works.</div>
               </details>
             </div>
           </details>
@@ -2832,14 +2835,14 @@
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
     var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.05 * base).toFixed(2) : '$10.00';
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
-    var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + '. ' + (s.ordersSent || 0) + ' orders: ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
+    var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + '. ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
     var peakAt = Number.isFinite(s && s.peakNet) ? Math.max(0, s.peakNet) : 0;
     var capN = Number.isFinite(s && s.sizeCap) ? s.sizeCap : 3;
-    var sizeText = running ? (s.sizing === true ? 'Size: up to ' + capN + (capN === 1 ? ' contract' : ' contracts') + (s.sizeAddon > 0 ? ' (+' + s.sizeAddon + ' from profit)' : '') + (Number.isFinite(s.sizeNextReview) ? ', next review ' + kalDate(s.sizeNextReview) : '') + '.' + (s.sizeSaved > 0 ? ' Saved: ' + kalshiMoney(s.sizeSaved) + '.' : '') : 'One contract each.') + (s.trailing === true ? ' Stops if it gives back ' + stopAt + ' from its best (+$' + peakAt.toFixed(2) + ').' : ' Stops if down ' + stopAt + '.') : '';
+    var sizeText = running ? (s.sizing === true ? 'Up to ' + capN + (capN === 1 ? ' contract' : ' contracts') + (s.sizeAddon > 0 ? ' (+' + s.sizeAddon + ' from profit)' : '') + '.' : 'One contract each.') + (s.trailing === true ? ' Stops if it gives back ' + stopAt + ' from its best (+$' + peakAt.toFixed(2) + ').' : ' Stops if down ' + stopAt + '.') : '';
     var endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
     var whyEl = document.getElementById('kalL1Why');
     if(whyEl){ var why = kalshiStopReason(s, endedEv, halted, switchOff, function(ms){ return kalshiWhen(ms, now); }); whyEl.textContent = why; whyEl.hidden = !why; }
-    document.getElementById('kalL1Status').textContent = running ? String(s.lastNote || '').replace(/^Watching\. Orders go in about 6 minutes before a close, and no market is at that point right now\./, 'Watching. No market is 6 minutes from its close right now.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
+    document.getElementById('kalL1Status').textContent = running ? String(s.lastNote || '').replace(/^Watching\. Orders go in about 6 minutes before a close, and no market is at that point right now\./, 'Watching.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
     renderKalshiCharts();
