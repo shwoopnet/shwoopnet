@@ -347,7 +347,7 @@ gates.N13 = () => {
   assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
   assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'there is no arm callable left to refuse');
   assert.ok(/A single test order is armed\. Disarm it before starting/.test(fnSrc), 'starting refuses while armed');
-  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiOpeningTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiBookRecorder']);   // the opening window's paper recorder (no secrets, no orders: see test/kalshiOpeningGates.test.js) comes first, then the exit watch (test/kalshiExitGates.test.js)
+  assert.deepStrictEqual([...fnSrc.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveExit', 'kalshiLiveArmed', 'kalshiBookRecorder']);   // the opening window's paper recorder (no secrets, no orders: see test/kalshiOpeningGates.test.js) comes first, then the exit watch (test/kalshiExitGates.test.js)
   assert.ok(fnSrc.indexOf('exports.kalshiL1Session') < fnSrc.indexOf('exports.kalshiBookRecorder'), 'defined before the recorder, which stays last');
   // The page: two clicks, a server call only on the confirm click, and a visible stop.
   assert.ok(/kalL1Start'\)[\s\S]{0,400}addEventListener\('click', function\(\)\{ msg\.textContent = ''; ask\(true\); \}\)/.test(html), 'the first click only asks');
@@ -842,6 +842,19 @@ gates.K9 = () => {
   const live = idx.slice(idx.indexOf('function firestoreLiveStore'), idx.indexOf('// ---- Kalshi account view'));
   assert.ok(/where\("status", "==", "filled"\)\.where\("settled", "==", false\)/.test(live), 'asks for filled and unsettled, not every filled order');
   assert.ok(/where\("ts", ">=", Date\.now\(\) - 3 \* 3600 \* 1000\)/.test(live), 'and also the last few hours, for orders written without the field');
+};
+
+// K10: L1 is the only strategy. The opening window paper recorder (OW1) was removed on Oct 12, 2026 at the owner's request: the strategies must not overlap in mindset or position, and nothing
+// that holds to settlement can avoid overlapping L1. There is no recorder function, no module, no collection rule and no page code for it. The research record stays in kalshi-scalper.
+gates.K10 = () => {
+  const fs = require('fs'), path = require('path');
+  const root = path.join(__dirname, '..');
+  assert.ok(!fs.existsSync(path.join(root, 'functions', 'kalshiOpeningLib.js')), 'the recorder module is gone');
+  const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
+  assert.ok(!/kalshiOpening|OPENING_SERIES|runOpeningTick/.test(idx), 'no recorder function, store or require in index.js');
+  const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
+  assert.ok(!/kalshiOpening/.test(rules), 'no rule for its collections: they are denied by default');
+  assert.deepStrictEqual([...idx.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['kalshiLiveExit', 'kalshiLiveArmed', 'kalshiBookRecorder'], 'the scheduled functions are the exit watch, the live bot and the (off) recorder');
 };
 
 (async () => {
