@@ -7,7 +7,7 @@ These files are working notes, not part of the app. They are excluded from the p
 | `PROJECT_OVERVIEW.md` | What the system is, how the bot works, safety, research state, quality, incidents | Weekly |
 | `ROADMAP.md` | Now, next, later, each with its gate | Weekly |
 | `CAREER_PORTFOLIO.md` | Résumé bullets, stories, quotable numbers with caveats | Weekly, or after a notable change |
-| `OPENING_STRATEGY.md` | The opening window paper test (OW1): synopsis, theory, what the history says about bigger wins | When OW1 is read (2026-11-03), then when its lanes change |
+| `OPENING_STRATEGY.md` | History only: the retired opening window paper test (OW1), synopsis and theory | Never; the recorder was removed on 2026-10-12 |
 | `mockups/` | Fixture-rendered screenshots of the Kalshi page (wide, menu open, phone) | When the page changes |
 
 ## Weekly refresh checklist

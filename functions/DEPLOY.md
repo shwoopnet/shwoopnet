@@ -1,7 +1,6 @@
 # Deploying the functions
 
-The functions in this folder are the Kalshi relay, the order-book recorder, the live bot and its exit watch, and the paper-only
-opening window recorder. The Finnhub proxy that used to open this file was removed on 2026-10-12 (see "The blank slate" at the end).
+The functions in this folder are the Kalshi relay, the order-book recorder, the live bot and its exit watch. The Finnhub proxy that used to open this file was removed on 2026-10-12 (see "The blank slate" at the end).
 
 ## One-time setup
 
@@ -264,13 +263,11 @@ What it can and cannot do, and why the line is a decision and not a result, is i
 Since Oct 10, 2026 Ethereum trades live with Bitcoin and gold by the same rule, size, loss stop, pool and exit; there is no "Ethereum live" setting and the `kalshiExtraSeries` callable is gone. Deploy with `firebase deploy --only functions`. It trades as soon as the new function is live and `KALSHI_LIVE_ENABLED=on`. Its money must be on its own shard (the bot skips it with the reason otherwise), and when a window's combined limit is reached Ethereum is the one that goes without. To stop trading it, the only ways are to pause the bot or to change the code's `L1_SERIES` list.
 
 
-## The opening window paper recorder (`kalshiOpeningTick`, OW1)
+## The opening window paper recorder was removed (Oct 12, 2026)
 
-Scheduled once a minute with NO secrets: it holds no key, signs nothing, calls no `/portfolio` endpoint and cannot place an order (the
-tests pin each). About 10 minutes before a close it records, on paper, what two rules would have bought (an early favourite at 82c to 87c
-and an early underdog at 20c to 30c) in `kalshiOpeningOrders`, with a heartbeat in `kalshiOpeningControl/state`; both are admin read only
-and written only by this function. It is not behind `CODE_KILL_SWITCH` because it cannot trade. The rules, predictions and read dates are
-in `kalshi-scalper/README.md` ("Pre-registration: OW1") and `docs/OPENING_STRATEGY.md`.
+`kalshiOpeningTick` and its module are gone: L1 is the only strategy, so the strategies cannot overlap. The next deploy asks whether to delete the
+function `kalshiOpeningTick` from the project; answer `y` for that one name. Its old documents (`kalshiOpeningOrders`, `kalshiOpeningControl`) stay in
+Firestore and have no rule, so nothing can read them; delete them in the Firebase console if you want them gone.
 
     firebase deploy --only functions,firestore:rules
 

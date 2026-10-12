@@ -43,7 +43,7 @@ gates.B2 = () => {
   assert.deepStrictEqual(methods, [
     'kalshiBookSnaps', 'kalshiBookStatus', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline',
     'onAuthChange', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
-    'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchKalshiOpening', 'watchSharedMarketSnapshot', 'watchUserDoc',
+    'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchSharedMarketSnapshot', 'watchUserDoc',
   ], 'the Firebase surface the page can reach');
   // No exit, pool or size setter: the exit is fixed at 50c and the pool rebuilds after every win, in the server code.
   assert.ok(!/setExit|setPool|exitMode|poolRule/i.test(mod), 'no setter for a risk setting');

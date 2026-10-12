@@ -1,3 +1,5 @@
+> **Retired 2026-10-12.** The paper recorder and the page's Opening view were removed so that L1 is the only strategy. This file is kept as the record of what was tried and why. See "L1 is the only strategy" in CLAUDE.md.
+
 # Opening window test (OW1): synopsis, theory, and what it says about bigger wins
 
 Written 2026-10-12 at the owner's request. Refresh when OW1 is read (2026-11-03). **Paper only: nothing in this feature places an order.** The rules, predictions and kill criteria are fixed in `kalshi-scalper/README.md` ("Pre-registration: OW1"); this file is the readable version.

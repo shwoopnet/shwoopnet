@@ -2710,3 +2710,124 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 **Count.** Two variants, one parameter set each: **2,593 once run** (2,591 as of 2026-10-10). Registered, not yet run.
 
 **Limits.** The candle readout prices every entry at the ask of a minute candle and always fills; the recorder shows what fills. "10 minutes left" is a clock, not a state of the spot. Half of lane F's entries (274 of 549) sit in markets where L1 enters later, so a live F would stack on L1's exposure in the same window. Bitcoin and gold move together, and 29 days is one regime.
+
+## Pre-registration: OW2, the opening scalp that is flat before L1 buys (the owner's request; fixed 2026-10-12 before any OW2 rule was run on any market)
+
+**Why this exists.** The owner wants an opening-window trade that is opened, managed and closed within a few minutes and never holds a position while L1 does. L1 buys 5.5 to 6.7 minutes before a close (minute 8.3 to 9.5 of the quarter hour) and holds to settlement. OW1 holds to settlement and therefore overlaps it, which is why this is a separate rule and OW1 is left exactly as registered.
+
+**Disclosure: what was looked at before this was written.** The cost arithmetic only. Kalshi's fee is `0.07 p (1 - p)` per contract on each leg: about 1.3c each way at 25c, 1.75c at 50c, so a round trip costs about 10% of a 25c stake and 7% of a 50c stake before the spread. A 10% target at 25c therefore nets about zero. The earlier opening scalps OP1 to OP3 (favourites at 70c to 90c, targets of 3c and 5c) were all `FALSIFIED` on 11,220 markets. No OW2 number had been computed when this section was committed. The 30 day history it runs on was backfilled after this commit.
+
+**The rules (fixed now).**
+- **Entry:** the market's first two minutes only: the minute candle that ends 840 s before the close, else the one that ends 780 s before. The side whose ask is inside the variant's band is bought at the ask. One leg per market, YES tried before NO, taker.
+- **Exit:** a later minute candle whose closing BID is at least entry ask times (1 + target); a candle's high or low is never used. If none, the position is sold at the closing bid of the candle that ends 480 s before the close. **Nothing is ever held past that candle**, which is 80 s before L1's earliest buy. A market with no valid candle at 480 s is not counted and is reported as unresolvable (never settled as if held).
+- **No stop** other than that time exit: a stop is a second parameter and nothing here is tuned.
+- **Costs:** taker fee `0.07 p (1 - p)` unrounded on both legs.
+
+**The four variants (the whole family, no others will be run).**
+
+| Variant | Band (ask) | Target |
+|---|---|---|
+| OW2-A | 0.20 to 0.40 | +10% |
+| OW2-B | 0.20 to 0.40 | +15% |
+| OW2-C | 0.40 to 0.80 | +10% |
+| OW2-D | 0.40 to 0.80 | +15% |
+
+**Counterparty.** The taker who paid an early opening move at the open, before the market had settled on a price. The claim is that early prices overshoot and the 10% to 15% retrace is paid back inside five minutes. The prior is against it: spike-fade scalps (S27 to S37) and the opening favourite scalps (OP1 to OP3) were falsified, and the cost per round trip is the same size as the target.
+
+**Numeric predictions, before the first run.** Net per contract **-2c to -5c** for A and B (fees and spread are about the size of the gross move), **-1c to -3c** for C and D, a target hit rate of 25% to 45% for the 10% targets and 15% to 35% for the 15% targets, and **no variant passes**. A passing variant is an audit trigger first: check the entry candle ends 840 s or 780 s before the close, the exit never reads a candle that ends before the entry, and no exit is after the 480 s candle.
+
+**Kill criteria** (the common bar, per variant, any one gives `FALSIFIED`): fewer than 300 entries or fewer than 5 days is `NOT_ENOUGH_DATA` (says nothing about the idea); a day-clustered z below 2.5; a mean not above zero in BOTH halves of the history split at the midpoint; a mean not above zero with fees 20% higher. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. There is no `promote`.
+
+**Reading rule.** `python -m scalper.backfill 30` then `python -m scalper.ow2`. **One read on the 30 day history.** If a variant is `NOT_YET_FALSIFIED` it earns a forward paper test in its own recorder and its own collections (never `kalshiOpeningOrders`, never L1's), read once on a date written down then. It earns nothing else: there is no path to real money from this section.
+
+**Isolation from L1, written now.** Any recorder for this idea has its own scheduled function, its own collections, no Kalshi key, no signing, no portfolio call and no POST, and shares no document with L1. It cannot hold a position during L1's buy window by construction, because the rule above closes it first.
+
+**Count.** Four variants: **2,597 once run** (2,593 after OW1). Registered, not yet run.
+
+**Limits.** Minute candles hide what happens inside a minute, so an intrabar touch of the target is never credited (conservative), and a fill at the candle's closing ask or bid is assumed (optimistic where the book is thin). A taker round trip crosses the spread twice; the closing quotes already include that.
+
+**2026-10-12: OW2 ran once (`python -m scalper.ow2`, commit afbb3e0, 4,831 markets, 31 days): all four variants `FALSIFIED`.**
+
+| Variant | n | Net a contract | z | 1st half | 2nd half | Fees x1.2 | Target hit | Gross before fees |
+|---|---|---|---|---|---|---|---|---|
+| OW2-A (20c to 40c, +10%) | 3,086 | -4.49c | -13.95 | -4.53c | -4.45c | -5.06c | 57.9% | -1.62c |
+| OW2-B (20c to 40c, +15%) | 3,086 | -4.46c | -13.32 | -4.37c | -4.55c | -5.03c | 54.1% | -1.60c |
+| OW2-C (40c to 80c, +10%) | 4,763 | -4.00c | -12.43 | -4.46c | -3.55c | -4.61c | 64.1% | -0.98c |
+| OW2-D (40c to 80c, +15%) | 4,763 | -3.84c | -11.65 | -4.32c | -3.35c | -4.43c | 57.4% | -0.85c |
+
+- **Against the prediction.** A and B landed inside the predicted -2c to -5c. C and D were predicted at -1c to -3c and came in worse, at -4.0c and -3.8c. No variant came near the bar.
+- **What it establishes.** The target is hit more than half the time, and the trade still loses, because the target is about the size of what the trade costs. Fees take about 2.9c to 3.0c a round trip and the spread (entry at the ask, exit at the bid) about 1c to 1.6c, so the gross figure is already negative before any fee. There is no early-move edge to rescue with a better exit. This is the same result as OP1 to OP3 and S27 to S37: cost, not signal, is the binding constraint.
+- **Nothing is built from it.** No recorder, no collection, no page row. A `FALSIFIED` rule earns nothing.
+- **Count.** Four variants: **2,597** tried in total (2,593 after OW1).
+## Pre-registration: OW3, OW4, OW7, three hold-to-settlement contrasts (the owner asked for new strategies; fixed 2026-10-12 before any of them was run)
+
+**Where they came from.** A research pass listed everything already tried (about 2,597 variants, every one `FALSIFIED` or `NOT_ENOUGH_DATA`) and proposed eight candidates, OW3 to OW10. None gives a different kind of exposure or is flat before L1 buys: a round trip costs about 1.3c of fees plus at least 1c of spread at 90c and about 3.5c plus spread at 50c, and every scalp family is already falsified on that arithmetic. So all of these hold to settlement and pay one fee. **Three of the eight are run.** OW5 (frozen gold feed) has about 49 windows in 31 days, so it can only ever return `NOT_ENOUGH_DATA`. OW6 (round-number asks), OW8 (hourly-bar close) and OW9 (turnover z-score) are weak rewordings of tried ideas or of OW4, and each one run raises the bar for everything after it. OW10 (the 08:00 UTC Deribit expiry) has 15 entries a month. None of those five is run. **A subset of L1 can only remove entries from L1; it cannot create a new strategy.** OW4 and OW7 are therefore tests of whether L1 could be filtered, not new trades.
+
+**Disclosure: what was looked at before this was written.** Entry counts, strike steps and the median mid of frozen gold windows. No profit or loss of any of these rules was computed. The NO-lean idea (OW3) comes from public Kalshi analyses that the research pass recalled from memory and did not verify.
+
+**Common definitions (fixed now).** Entries are one per market and time, from the minute candle that ENDS exactly the stated time before the close, bought at the ask and held to settlement, taker fee `0.07 p (1 - p)` on the entry only (`lstrats.hold_rule`). Each hypothesis compares an arm A (the one that would be traded) against an arm B. The statistic is the difference of mean net a contract (A minus B) with a day-clustered standard error, z = difference / standard error. **Family bar, because three are run: z at least 2.5**, the difference positive in BOTH halves of the history (split at the midpoint), arm A's own mean net above zero with fees 20% higher, and at least 300 entries in each arm on at least 5 days. Anything short is `FALSIFIED`; too few entries is `NOT_ENOUGH_DATA`. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. There is no `promote`.
+
+**OW3, the NO-side lean.** Favourite side ask 0.82 to 0.97 at 600, 480 and 360 s left, pooled. Arm A is NO favourites, arm B is YES favourites. To keep price from deciding it, each entry's net is replaced by its net minus the mean net of all entries at the same time and the same 2c price bucket, and the contrast is taken on those residuals. *Counterparty:* retail takers who lean YES. *Prediction:* NO minus YES = **+1.0c**, standard error about 1.3c, so underpowered. *Extra kill:* arm A's mean net at or below 0.
+
+**OW4, US waking hours.** L1's band (0.88 to 0.97) at 360 s left, on weekdays only. Arm A: markets closing 13:30 to 20:00 UTC. Arm B: other weekday hours. Contrast per weekday, then the day-clustered z. *Counterparty:* lottery buyers when retail is active. *Prediction:* **+2.0c** against **+0.7c**, difference standard error about 1.6c.
+
+**OW7, the opening open-interest ratio.** L1's band at 360 s left. Feature = (open interest at the candle ending 360 s left minus open interest at the candle ending 600 s left) divided by the larger of 1 and the summed volume of the candles ending 540, 480, 420 and 360 s left. A candle with no open interest or volume makes the market unusable for this test and it is counted and reported. Arm B is the lowest tercile of the feature over all usable entries, arm A is the other two. *Counterparty:* new money paying us; informed exiters are the adverse side. *Prediction:* the L1 mean rises from about +1.0c to **+1.5c** when the lowest tercile is skipped. The units of `oi` and `volume` are checked and printed before the contrast is read.
+
+**Count.** Three hypotheses: **2,600** tried once run (2,597 after OW2). **Isolation from L1:** these are offline readings of history and place nothing. **What a pass would mean:** `NOT_YET_FALSIFIED` earns one forward read on data written down then, and no change to L1, whose entry rule is not touched by anything here.
+
+**2026-10-12: OW3, OW4 and OW7 each ran once (`python -m scalper.ow3`, commit a960233, 4,831 markets, 31 days): all three `FALSIFIED`.**
+
+| | n A | n B | days | Mean A | Mean B | A minus B | z | 1st half | 2nd half | A with fees x1.2 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| OW3 NO minus YES (price-matched residuals) | 2,371 | 2,485 | 31 | -0.43c | +0.41c | **-0.83c** | -0.90 | -2.29c | +0.55c | -0.26c |
+| OW4 US hours minus other weekday hours | 324 | 834 | 21 | -0.57c | +0.84c | **-1.41c** | -0.92 | -1.28c | -1.50c | -0.66c |
+| OW7 kept two terciles minus lowest tercile | 967 | 485 | 31 | +0.96c | -0.47c | **+1.43c** | +1.15 | +1.98c | +1.07c | +0.88c |
+
+- **Against the predictions.** OW3 and OW4 came out on the wrong side of zero (predicted +1.0c and +2.0c); neither is distinguishable from zero. OW7 had the predicted sign, +1.43c against a predicted +0.5c rise, positive in both halves and positive with fees 20% higher, but z was 1.15 against a bar of 2.5, so it fails on power, not on sign.
+- **OW7 units check.** All 4,831 markets had a usable feature (min -0.343, median 0.229, max 0.879), so nothing was dropped.
+- **What it establishes.** Nothing here beats the common bar and nothing can be built from it. OW7 is the one to note: skipping the lowest open-interest-ratio tercile of L1's entries is worth about +1.4c with a standard error of 1.25c, which is a hint, not a result. It is a filter on L1, so it could only remove L1 entries, and a hint with a z of 1.15 is the kind that moves on the next sample. It is NOT carried forward automatically and L1 is not changed.
+- **Count.** Three variants: **2,600** tried in total (2,597 after OW2).
+
+## Registered: the OW7 forward read, and an exploratory look at what it was (2026-10-12, after the first read, before any new data)
+
+**Exploratory, information only, no verdict, no variant counted** (`ow3.py` features on the same 31 days, 1,452 L1-band entries at 6 minutes left; it is not a candidate and must not be used to choose a rule). What it showed, so nobody builds on it by accident:
+- **It is not monotone.** Net by feature quintile, low to high: -0.08c, -0.42c, **+2.15c**, +1.38c, -0.60c. A rising line would suggest a mechanism. A hump is what noise and a subgroup look like.
+- **It is concentrated.** The lowest tercile's weakness sits mostly in Bitcoin NO-side entries (-2.82c on 194). Gold's lowest tercile is +2.03c. The loss rate is 8.0% (39 of 485) in the lowest tercile against about 5.5% (53 of 967) in the other two: about 14 extra losses.
+- **The feature barely varies in sign.** Open interest rose in 1,441 of 1,452 entries, so the feature is essentially the share of volume that opened new positions.
+- **Read:** the +1.4c with z 1.15 is about 14 losses. It may be real and it may not; the first sample cannot say, so a new sample must.
+
+**The one forward read of OW7 (fixed now).** Markets closing on or after **2026-10-13 00:00 UTC**, which the first read never saw. **One read, on 2026-11-16, not earlier**, after `python -m scalper.backfill 30` then `python -m scalper.ow3 --forward 2026-10-13`. The boundary between arm A and arm B is **fixed at 0.2395** (the value from the first 31 days, never refit on the new data). The bar is the same: z at least 2.5, positive in both halves, arm A positive with fees 20% higher, at least 300 entries in each arm on at least 5 days. Fewer than 300 gives `NOT_ENOUGH_DATA`. **A pass would mean one thing:** keep reading forward; L1's entry rule is not changed on any read of this sample. **Count:** a forward read of an already counted variant adds none (2,600).
+
+## Pre-registration: SS1, a train and validation search for an opening scalp that is flat before L1 buys (the owner's request; fixed 2026-10-12 before it was run)
+
+**What was asked.** "Find a paper scalp that is close to profitable and refine entries and exits until it has a high profit factor." Refining until the number is high is selection, and selection on the data it is judged on always produces a good-looking number: best-of-N crosses profit factor 1.5 somewhere between N=20 and N=200 on pure noise (`lib/deflate.py` in shwoop-server's research notes). So the refining is allowed and is fenced: it happens on one part of the history, one rule is frozen, and only the part it never saw can say whether it worked.
+
+**Disclosure: what was looked at before this was written.** OW2 (four variants, all `FALSIFIED`, gross negative before fees: -0.85c to -1.62c before the entry fee, which is the spread alone) and the earlier scalp families (60 second scalps, OP1 to OP3, S27 to S37, H4). No SS1 cell had been computed. **My prediction, before the run: nothing is close.** The best cell on the training days will still be negative after fees and the single frozen winner will lose on the validation days. A scalp pays about 3c of fees plus 1c to 1.6c of spread to move a few cents, and the earlier searches (2,591 variants) found nothing. I expect `FALSIFIED`.
+
+**The grid (fixed now, nothing added after seeing a result).** Every cell is one try.
+- **Entry minute:** one per cell: the minute candle that ends 840, 780, 720 or 660 s before the close (the first four minutes). Never another minute, never two entries.
+- **Band (ask of the side bought):** 0.20 to 0.40, 0.40 to 0.60 or 0.60 to 0.80. YES is tried before NO.
+- **Entry condition:** none; momentum (that side's ask is at least 3c above its previous candle's ask); dip (at least 3c below).
+- **Target:** closing bid at least the entry ask plus 3c, 5c or 8c.
+- **Stop:** none, or a closing bid at least 4c below the entry ask (sold at that candle's bid).
+- **Cut-off:** nothing is ever held past the candle that ends 480 s before the close (80 s before L1's earliest buy); it is sold at that candle's bid. A market with no valid candle at 480 s is not counted and is reported.
+- **Costs:** taker fee `0.07 p (1 - p)` unrounded on both legs; closing ask in, closing bid out; a candle's high or low is never used.
+- **Cells:** 4 x 3 x 3 x 3 x 2 = **216**.
+
+**The split (fixed now).** Train: the first 21 days of the 31 day history (markets closing before the cut). Validation: the remaining markets. The cut is the date 21 days after the first market closes, written into the code as a function of the data's first date, not tuned.
+
+**Selection (fixed now, the only free choice).** On the training days only: among cells with at least 300 training entries on at least 5 days, take the one with the highest mean net a contract after fees. Profit factor is printed for every cell but it is not the selector, because it rewards a few lucky wins. **That one cell is frozen and read once on the validation days.** No second cell, no tuning after seeing validation.
+
+**Kill criteria for the frozen cell (validation days only), any one gives `FALSIFIED`:** fewer than 300 validation entries or fewer than 5 days (`NOT_ENOUGH_DATA`); a day-clustered z below 2.5; a mean not above zero; a mean not above zero with fees 20% higher. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. There is no `promote`.
+
+**What a pass would earn.** `NOT_YET_FALSIFIED` earns a forward paper read on days written down then, in its own recorder and collections, and nothing else. A pass on a search of 216 cells is a hint and not a result: the forward days are what count.
+
+**Count.** 216 variants: **2,816** tried once run (2,600 after OW3 to OW7). Registered, not yet run.
+
+**2026-10-12: SS1 ran once (`python -m scalper.ss1`, commit 23749f4, 4,831 markets): `FALSIFIED`. No scalp is close to profitable.**
+- **Training days (3,450 markets, before 2026-10-03): 0 of 180 cells with entries had a positive mean after fees.** The best cell with at least 300 entries was **-2.91c a contract, profit factor 0.63** (entry 660 s, band 0.60 to 0.80, target +8c, no stop). Four cells with a better mean (-1.12c at best) were dip entries with only 175 trades, below the 300 bar, so they were not eligible; they are not a hidden winner, they are small samples.
+- **Frozen cell on the validation days (1,381 markets, 10 days, read once):** n=759, **-3.77c**, z -5.27, profit factor 0.56, target hit 48.1%, -4.32c with fees 20% higher. `FALSIFIED`, and worse than on the training days, which is what a selected cell does.
+- **Against the prediction.** Predicted: nothing close, best training cell negative, frozen winner loses on validation. All three held.
+- **What it establishes.** Across 216 combinations of entry minute, price band, momentum or dip condition, target and stop, with a flat-before-minute-8 cut-off, none is profitable even on the data it was chosen on. Refining entries and exits until the profit factor rises would find the cell that was luckiest on those days, not one that works. The fee plus spread of a round trip is bigger than any 3c to 8c target at these prices. The higher the price band, the less it loses (0.60 to 0.80 beats 0.20 to 0.40), which points at fees shrinking toward the extremes, not at a signal.
+- **Nothing is built from it.** No recorder, no collection, no page row.
+- **Count.** 216 variants: **2,816** tried in total (2,600 after OW3 to OW7).

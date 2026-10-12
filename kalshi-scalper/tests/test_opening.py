@@ -34,13 +34,9 @@ def planted(n, per_day, ask, win_p, seed, start, prefix=0):
 
 
 # The lanes are the registered ones, and they are the ones the paper recorder runs: the research number and the page's paper tally describe the same rule.
+# The lanes are the registered ones. The paper recorder that used to write them was removed on Oct 12, 2026 (L1 is the only strategy); the offline research readout stays as history.
 assert OW.LANES == {"F": (0.82, 0.87), "U": (0.20, 0.30)} and OW.LEFT_S == 600
-_js = (ROOT / "functions" / "kalshiOpeningLib.js").read_text()
-assert re.search(r"F: \{ label: \"early favourite\", band: \[0\.82, 0\.87\] \}", _js), "the recorder's favourite lane is the registered band"
-assert re.search(r"U: \{ label: \"early underdog\", band: \[0\.20, 0\.30\] \}", _js), "the recorder's underdog lane is the registered band"
-_w = re.search(r"OPENING_WINDOW_MS = \[(\d+), (\d+)\]", _js)
-assert _w and int(_w.group(1)) <= OW.LEFT_S * 1000 <= int(_w.group(2)), "the recorder decides inside the window that contains the 600 s candle"
-print("OW1 lanes match the recorder")
+print("OW1 lanes passed")
 
 # One market never gets both lanes. A 5c wide book can put the YES ask at 84c (a favourite) and the NO price at 21c (an underdog): buying both is a guaranteed small loss.
 _t = OW.OW1_START + 900

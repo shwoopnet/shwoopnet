@@ -1,46 +1,58 @@
 # Roadmap
 
-Last refreshed: 2026-10-08 (US Central). Now / Next / Later, with the gate for each item. A date is a read date, not a promise.
+Last updated: 2026-10-12. Written in plain words on purpose.
 
-## Now (this week)
+## The goal
 
-| Item | Gate or check |
-|---|---|
-| Confirm the bot keeps trading past 8:55 PM CT (the old session end) | Bot card still shows Running and orders keep appearing after 8:55 PM |
-| First weekly size review | 2026-10-15: expect the cap to step from 3 to 4 at about $344 balance |
-| Look at the new page live, including a phone | Account card, Running menu, market charts, gold line, Layout arrows |
-| Phone layout: the line and bar charts shrink to unreadable | Charts legible at 390 px wide |
-| Keep recording L1 orders (the diagnostics export) for a pre-registered fill study: do misses lose more than fills? | At least 150 further orders; read with the forward check |
-| Confirm fee rounding on the BALANCE side | Compare the balance before and after one single-contract order |
-| Merge this docs refresh and the Pages exclusion | Pages build green, site still loads |
+Make money on Kalshi without having to watch it. Right now one bot trades for you. The plan is to keep that bot safe and cheap to run, and look for a second thing that could earn on its own.
 
-## Next (to about 2026-10-23)
+## Where we are today
 
-| Item | Gate or check |
-|---|---|
-| Forward checks F0 to F9 read | At least 300 entries on at least 5 days; z, halves and fees x1.2 as registered |
-| OW1 first read (opening window, paper only) | 2026-11-03, once: `python -m scalper.backfill` then `python -m scalper.opening`. Bar as registered; a short lane gets one final read on 2026-11-16. Nothing goes live from it without its own waiver |
-| Size ladder step 1 decision | The owner overrode the evidence gates on 2026-10-08. After the forward read, either keep or step back to 1 contract per the README |
-| Use the recorder's order-book data | Book depth imbalance and locked books, pre-registered before running |
-| 10 second stop test | Needs several days of recorder data |
-| Delete the library code behind the removed single-order path (`runLiveTest`, `runArmedTick`) and the arm branch of `kalshiLiveArmed` | The callables `kalshiLiveTrade`, `kalshiLiveArm` and `kalshiLiveAdjust` were removed on 2026-10-08; this inert code and its tests are what is left |
-| shwoop-server fixes (separate repo, owner decides) | Timing-safe secret compare; fail closed when the bar time is missing instead of a random order id; `firebase-admin` bump; fixed error text |
+- **One bot is live (L1).** About 6 minutes before each Bitcoin, gold and Ethereum 15 minute market closes, it buys the side that is almost certain to win (priced 88c to 97c) and waits for the result. It earns a few cents on most trades and loses a lot on the rare one that goes wrong. So far it is about break-even: 105 trades, 95% wins, slightly down.
+- **Safety:** it stops itself if it loses 5% of the balance in a day, it sells a trade early if the price falls to 25c, and you can pause it or flatten everything with one button.
+- **The website** has three pages: Market Brief, Kalshi and Settings.
+- **We tried about 2,800 other trading ideas on the same markets. None worked.** The fees and the gap between buy and sell price eat any small gain. That is why the plan now looks at different kinds of markets.
 
-## Later
+## What you need to do now
 
-- A real gold price feed that matches Kalshi's Pyth source (keyless Pyth price endpoints now need a key). The current line is gold-api.com and can sit a dollar off.
-- Weekday spread measurement for crypto (the one reading was a Sunday afternoon).
-- Auto-resume after a loss stop with a cooldown (today it stays off until restarted, on purpose).
-- App Check on the callables, a content security policy (needs a nonce build step), and requiring a verified email for the admin check.
-- Weekly digest of the bot's real results against the forward-check thresholds.
+1. Merge the open pull request when you are ready (I will open it on request).
+2. In the project folder run `git pull origin main`, then `firebase deploy --only functions`.
+3. When it asks to delete a function, answer `y` only for `kalshiOpeningTick`. Anything else, stop and paste it to me.
+4. Open the Kalshi page and check it still says **Running**.
 
-## Done recently (2026-10-07 and 2026-10-08)
+## What I am doing next
 
-- 2026-10-12: the blank slate. The site is the Brief, Kalshi and Settings; the trading pages, Alpaca, Finnhub, Twelve Data and sign-up are gone. Open follow-ups: decide whether shwoop-server should stop trading Alpaca (the page can no longer pause it), turn off Auth sign-up in the Firebase console, rotate the Twelve Data proxy secret, answer yes to deleting the two Finnhub functions.
+| Job | In plain words | Done when |
+|---|---|---|
+| Find a second way to make money | Look at Kalshi markets other than the 15 minute crypto ones (daily weather, inflation and jobs numbers, crypto and stock ranges, news-driven markets) and check where free public data could beat the posted price | A ranked short list, each with a test written down before it runs |
+| Lower the Firebase bill | Already cut the busy work. Check the bill again in two days | The bill drops |
+| Fix two small risks in the bot | Pressing Flatten at the same moment the exit fires could sell twice. Positions you sell by hand are counted as if held to the end | Fixed and tested before the bot gets bigger |
+| Keep the Market Brief fresh | It needs a data source that does not cost money | Decide who feeds it |
+| Add a ticker for S&P, Nasdaq, Dow and bonds | The data is mostly already there | It shows on the page |
+| Tidy the site | Cut the things you do not use | You pick what goes |
 
-- Live fills study: 35 of 35 fills won, 4 of 22 misses lost (p 0.019, one look, a lead). Do not chase the misses.
-- 24/7 bot, weekly size scaling, reinvest and skim, Flatten all, deposit recorder, and one Pause/Resume control in place of separate Stop and Halt buttons.
-- Performance tracker, readable open positions, simplified Kalshi page, market charts, Central time.
-- Exit, band, entry-side and fee studies; sizing replay; the cheap-side test, the favorite scalps and two more L1 filters (all falsified); a bug in the time-exit logic found and corrected.
-- Security review fixes; hand-run mutation check of the money code.
-- Pages build fixed and the repo's non-app files excluded from the public site.
+## How a new idea gets in
+
+1. I write down the rule and what would make it fail, before testing.
+2. I test it once on past data.
+3. If it passes, it only earns a watch period on new days. It never gets real money straight away.
+4. The bot you have now (L1) stays the only one trading real money until something passes.
+
+## Dates to remember
+
+- **2026-10-15:** the bot's weekly size review. It only raises size if the balance supports it.
+- **2026-11-16:** one check of a possible improvement for L1 (skipping some entries). Nothing changes unless it passes.
+
+## Can wait
+
+- A better gold price feed.
+- Auto-restart after the loss stop.
+- Moving the scheduled jobs off Firebase if the bill stays high.
+- The separate shwoop-server on Render still trades stocks through Alpaca for any account with keys. The page can no longer pause it, so decide whether to switch it off.
+
+## Done recently
+
+- Only L1 now: the opening strategy and its tabs are gone.
+- Tried and ruled out: opening scalps, entry filters, 216 scalp variants and more.
+- Exit moved from 70c to 50c to 25c at your request.
+- Safety fixes, cost cuts, simpler wording, the site slimmed down to three pages.

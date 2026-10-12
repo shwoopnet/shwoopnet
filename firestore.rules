@@ -126,16 +126,6 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // The opening window test's PAPER records and its heartbeat (kalshiOpeningLib.js). Written only by a scheduled function that holds no secrets and cannot place an order.
-    match /kalshiOpeningOrders/{id} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-    match /kalshiOpeningControl/{id} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-
     // Everything else is denied by default -- Firestore rules deny any
     // request that doesn't match an explicit allow rule, so no further
     // catch-all is needed, but this comment documents that this is

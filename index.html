@@ -632,13 +632,6 @@
   .kal-warn{ color:#c58a00; }
   .kal-neg{ color:var(--loss); }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
-  /* The strategy view (Closing, Opening, Both). In this palette --ink is the page background and --paper the text colour, so the selected button is the inverse. */
-  .kal-lens{ display:inline-flex; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; vertical-align:middle; margin-right:8px; }
-  .kal-lens-btn{ font:inherit; font-size:12px; padding:5px 11px; background:var(--panel); color:var(--paper); border:0; cursor:pointer; }
-  .kal-lens-btn + .kal-lens-btn{ border-left:1px solid var(--border); }
-  .kal-lens-btn.on{ background:var(--paper); color:var(--ink); font-weight:600; }
-  .kal-lens-head{ font-size:11px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); margin:12px 0 6px; }
-  .kal-paper-note{ border:1px dashed var(--border); border-radius:var(--radius); padding:8px 12px; margin:0 0 12px 0; }
   .kal-hit{ cursor:default; }
   .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
   .kal-tip{ position:fixed; z-index:150; pointer-events:none; padding:7px 10px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel-raised); color:var(--paper); box-shadow:var(--card-shadow); font-size:12px; line-height:1.4; white-space:nowrap; }
@@ -953,17 +946,6 @@
         cb(q.docs.map(function(d){ return d.data(); }));
       }, function(err){ console.error('Kalshi live sync error:', err); if(errCb){ errCb(err); } });
     },
-    // The opening window test's PAPER records and its heartbeat (admin read only). Written by a keyless scheduled function that cannot place an order, so nothing here is a trade.
-    watchKalshiOpening: function(cb, errCb){
-      var st = { orders: [], state: null }, failed = false;
-      // Once either half has failed the records are unavailable: the other half succeeding must not clear that (it would show an empty list as if nothing had been recorded).
-      var onErr = function(err){ failed = true; console.error('Kalshi opening sync error:', err); if(errCb){ errCb(err); } };
-      var un = [
-        onSnapshot(query(collection(db, 'kalshiOpeningOrders'), orderBy('ts', 'desc'), limit(1000)), function(q){ st.orders = q.docs.map(function(d){ return d.data(); }); if(!failed){ cb(st); } }, onErr),
-        onSnapshot(doc(db, 'kalshiOpeningControl', 'state'), function(s){ st.state = s.exists() ? s.data() : null; if(!failed){ cb(st); } }, onErr)
-      ];
-      return function(){ un.forEach(function(f){ f(); }); };
-    },
     // No exit or pool-rule setter exists on purpose (Oct 12, 2026): the exit is fixed at 25c and always sells, the pool always rebuilds after every win, both in the server code.
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
@@ -1121,7 +1103,6 @@
   <main class="page" id="page-kalshi" hidden>
     <div class="trades-header kal-header-bare">
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
-        <div class="kal-lens" id="kalLens" role="group" aria-label="Strategy view"><button type="button" class="kal-lens-btn" data-lens="closing">Closing</button><button type="button" class="kal-lens-btn" data-lens="opening">Opening</button><button type="button" class="kal-lens-btn" data-lens="both">Both</button></div>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
                     <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
@@ -1151,7 +1132,6 @@
       </div>
     </div>
 
-    <div class="kal-note kal-paper-note" id="kalPaperNote" hidden><b>Opening strategy: paper only.</b> It places no orders. The dollars shown for it are what it would have made, kept apart from the live account and never added to it.</div>
 
     <div id="kalTabBot" class="kal-bot-grid kal-console">
       <div class="kal-rail">
@@ -1184,15 +1164,11 @@
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
-        <div id="kalBotTotalsO" hidden></div>
-        <div class="kal-lens-head" id="kalHeadPerfC" hidden>Closing strategy, live</div>
         <div class="kal-perf" id="kalPerfWrapC"><div id="kalPerf"></div></div>
-        <div class="kal-perf" id="kalPerfWrapO" hidden><div id="kalPerfO"></div></div>
       </div>
       <div class="kal-card" data-card="positions">
         <div class="kal-card-title">Open positions</div>
         <div id="kalBotOpen"></div>
-        <div id="kalBotOpenO" hidden></div>
       </div>
       </div>
       <div class="kal-main">
@@ -1200,21 +1176,12 @@
         <div id="kalBooks" class="kal-books"><div class="kal-empty">Loading...</div></div>
       </div>
       <div class="kal-card kal-card-flush" data-card="performance">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Charts</div>
+        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Performance</div>
           <label class="kal-lbl" for="kalChartRange">Showing <select id="kalChartRange"><option value="all">all sessions</option><option value="session">this session only</option></select></label></div>
         <div class="kal-charts" id="kalChartsC">
-          <div class="kal-lens-head kal-chart-wide" id="kalHeadChartsC" hidden>Closing strategy, live</div>
           <div class="kal-chart"><div class="kal-chart-title">Bot P/L, settled trades</div><div id="kalChartLine"></div></div>
           <div class="kal-chart"><div class="kal-chart-title">How the bot's orders ended</div><div id="kalChartPie"></div></div>
           <div class="kal-chart kal-chart-wide"><div class="kal-chart-title">Each settled trade</div><div id="kalChartBars"></div></div>
-        </div>
-        <div id="kalChartsO" hidden>
-          <div class="kal-charts">
-            <div class="kal-lens-head kal-chart-wide">Opening strategy, paper (no money)</div>
-            <div class="kal-chart"><div class="kal-chart-title">Paper P/L, settled trades</div><div id="kalChartLineO"></div></div>
-            <div class="kal-chart"><div class="kal-chart-title">How the paper orders ended</div><div id="kalChartPieO"></div></div>
-            <div class="kal-chart kal-chart-wide"><div class="kal-chart-title">Each settled paper trade</div><div id="kalChartBarsO"></div></div>
-          </div>
         </div>
       </div>
       <div class="kal-card kal-card-flush" data-card="trades">
@@ -1222,7 +1189,6 @@
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div class="kal-tr kal-tr-head"><span>Time</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
-        <div id="kalBotClosedO" hidden></div>
       </div>
       </div>
     </div>
@@ -1891,18 +1857,13 @@
     return /GOLD/.test(String(o.series || o.ticker || '')) ? 'Gold' : (/ETH/.test(String(o.series || o.ticker || '')) ? 'Ethereum' : 'Bitcoin');
   }
 
-  // The lane of an opening-window PAPER order (F, the early favourite, or U, the early underdog); empty for a live order, which has none.
-  function kalshiLaneName(o){
-    return o && o.lane === 'F' ? 'early favourite' : (o && o.lane === 'U' ? 'early underdog' : '');
-  }
-
   // The bot's running settled result, one point per settled trade, oldest first.
   function kalshiPnlSeries(orders, since){
     var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
-      .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o), l: kalshiLaneName(o) }; }).filter(function(r){ return r.p !== null; })
+      .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
       .sort(function(x, y){ return x.t - y.t; });
     var cum = 0;
-    return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum, m: r.m, l: r.l }; });
+    return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum, m: r.m }; });
   }
 
   // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
@@ -2026,7 +1987,7 @@
     }).join('');
     var hits = shown.map(function(p, i){
       return '<rect class="kal-hit" x="' + (L + slot * i).toFixed(1) + '" y="0" width="' + slot.toFixed(1) + '" height="' + (H - B) + '" fill="transparent" pointer-events="all" data-up="' + (p.pnl >= 0 ? '1' : '0') +
-        '" data-when="' + esc(kalDateTime(p.t)) + '" data-pnl="' + esc((p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl))) + '"' + (p.m ? ' data-mkt="' + esc(p.m + (p.l ? ', ' + p.l : '')) + '"' : '') + '/>';
+        '" data-when="' + esc(kalDateTime(p.t)) + '" data-pnl="' + esc((p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl))) + '"' + (p.m ? ' data-mkt="' + esc(p.m) + '"' : '') + '/>';
     }).join('');
     var wins = shown.filter(function(p){ return p.pnl > 0; }).length, losses = shown.filter(function(p){ return p.pnl < 0; }).length;
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profit or loss of each of the last ' + shown.length + ' settled trades: ' + wins + ' wins, ' + losses + ' losses" style="width:100%;height:auto;display:block">' +
@@ -2095,97 +2056,6 @@
     var t = ev.target;
     if(t && t.classList && t.classList.contains('kal-more')){ kalshiMoreOpen = t.open; }
   }, true);   // toggle does not bubble, so it is caught on the way down
-
-  // ---- The strategy view: Closing (the live L1 bot), Opening (the paper test OW1) or Both ----
-  // The opening strategy places no orders. Its records are PAPER, written by a keyless scheduled function, so its dollars are what it WOULD have made. They are drawn in their own blocks and are never
-  // added to the live account's figures, in any view ("Live and simulated numbers never share a column", CLAUDE.md): Both shows the two side by side, not a sum. When the opening strategy
-  // is ever live, summing is a deliberate change that has to filter on the record's `mode`.
-  var kalshiLens = 'closing';
-  try{ var savedLens = localStorage.getItem('kalshiLens'); if(savedLens === 'opening' || savedLens === 'both'){ kalshiLens = savedLens; } }catch(e){ /* a blocked store only means the default view */ }
-  var kalshiOpeningOrders = [], kalshiOpeningState = null, kalshiOpeningLoaded = false, kalshiOpeningError = null;
-  var kalshiOpeningUnsub = null;
-  function kalshiLensShows(which){ return kalshiLens === 'both' || kalshiLens === which; }
-
-  // Per lane: settled trades, wins, net, and the orders that did not fill or are still open. Paper orders only; a lane with nothing yet is left out.
-  function kalshiLaneRows(orders, since){
-    var by = {};
-    (orders || []).forEach(function(o){
-      if(!o || !(o.ts >= (since || 0)) || (o.lane !== 'F' && o.lane !== 'U')){ return; }
-      var r = by[o.lane] || (by[o.lane] = { lane: o.lane, label: kalshiLaneName(o), n: 0, wins: 0, net: 0, noFill: 0, open: 0 });
-      var p = kalshiOrderPnl(o);
-      if(p !== null){ r.n++; r.net += p; if(p > 0){ r.wins++; } }
-      else if(o.status === 'no fill'){ r.noFill++; }
-      else if(Number(o.fillCount) > 0){ r.open++; }
-    });
-    return ['F', 'U'].filter(function(k){ return by[k]; }).map(function(k){ return by[k]; });
-  }
-  function kalshiLaneHtml(rows, esc, money){
-    if(!rows || !rows.length){ return ''; }
-    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    return '<div class="kal-perf-t"><span class="kal-lbl">By lane</span>' + rows.map(function(r){
-      return '<div><span>' + esc(r.label) + '</span><span>' + r.n + ' trades, ' + (r.n ? Math.round(r.wins / r.n * 100) : 0) + '% won' + (r.noFill ? ', ' + r.noFill + ' no fill' : '') + (r.open ? ', ' + r.open + ' open' : '') +
-        '</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + esc(sg(r.net)) + '</b></div>';
-    }).join('') + '</div>';
-  }
-
-  // The latest paper trades, newest first, as rows in the same shape as the live trade list. None of them is a fill: P/L is the settled figure, "open" while the market runs, "n/a" for a no fill.
-  function kalshiPaperRowsHtml(orders, nowMs, esc, money){
-    var rows = (orders || []).filter(function(o){ return o && (o.lane === 'F' || o.lane === 'U'); }).sort(function(a, b){ return b.ts - a.ts; }).slice(0, 40);
-    return rows.map(function(o){
-      var pnl = kalshiOrderPnl(o), filled = Number(o.fillCount) > 0, cnt = Math.round(Number(o.fillCount) * 100) / 100;
-      var what = filled ? 'Bought ' + String(o.side || '').toUpperCase() + ' ' + cnt + (Number.isFinite(Number(o.price)) ? ' at ' + (Math.round(Number(o.price) * 1000) / 10).toFixed(1) + 'c' : '') : 'No fill' + (o.reason ? ' (' + o.reason + ')' : '');
-      var pl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + money(Math.abs(pnl)) + '</span>' : '<span style="color:var(--muted)">' + (filled ? 'open' : 'n/a') + '</span>';
-      return '<div class="kal-tr"><span class="kal-tr-t">' + esc(kalshiWhen(o.ts, nowMs)) + '</span><span class="kal-tr-m">' + esc(kalshiShortTicker(o.ticker)) + '</span><span class="kal-tr-f">' + esc(what) +
-        '</span><span class="kal-tr-p">' + pl + '</span><span class="kal-tr-s">paper ' + esc(o.lane) + '</span></div>';
-    }).join('');
-  }
-  // Paper positions still running, in the card style of the live ones. What a win or a loss would make is worked out from the order's own cost.
-  function kalshiPaperOpenHtml(orders, nowMs, esc, money){
-    var open = (orders || []).filter(function(o){ return o && (o.lane === 'F' || o.lane === 'U') && Number(o.fillCount) > 0 && o.settled !== true; }).sort(function(a, b){ return b.ts - a.ts; });
-    if(!open.length){ return '<div class="kal-empty">No paper positions open.</div>'; }
-    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    return open.map(function(o){
-      var count = Math.round(Number(o.fillCount) * 100) / 100, cost = Number(o.maxCost), left = Number.isFinite(Number(o.leftMs)) ? o.ts + Number(o.leftMs) - nowMs : null;
-      var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
-      var side = o.side === 'no' ? 'no' : 'yes';
-      return '<div class="kal-hold"><div class="kal-hold-head"><div class="kal-name">' + esc(kalshiShortTicker(o.ticker)) + '</div><span class="kal-side kal-side-' + side + '">' + esc(side.toUpperCase()) + ' x ' + esc(String(count)) + '</span></div>' +
-        '<div class="kal-hold-stats">' + stat('Cost', Number.isFinite(cost) ? money(cost) : 'n/a') + stat('If it wins', Number.isFinite(cost) ? sg(count - cost) : 'n/a', 'kal-pos') + stat('If it loses', Number.isFinite(cost) ? sg(-cost) : 'n/a', 'kal-neg') + '</div>' +
-        '<div class="kal-hold-sub">' + esc('paper ' + kalshiLaneName(o) + (left !== null && left > 0 ? ' · closes in about ' + Math.max(1, Math.round(left / 60000)) + ' min' : ' · waiting for the result')) + '</div></div>';
-    }).join('');
-  }
-
-  // Shows and hides the blocks for the chosen view. The live bot's blocks are the ones that were always there; the paper blocks sit beside them and are hidden unless the view asks for them.
-  function renderKalshiLens(){
-    var set = function(id, show){ var el = document.getElementById(id); if(el){ el.hidden = !show; } };
-    var c = kalshiLensShows('closing'), o = kalshiLensShows('opening'), both = kalshiLens === 'both';
-    document.querySelectorAll('#kalLens .kal-lens-btn').forEach(function(b){ var on = b.getAttribute('data-lens') === kalshiLens; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
-    set('kalPaperNote', o);
-    set('kalBotTotals', c); set('kalPerfWrapC', c); set('kalBotOpen', c); set('kalBotClosed', c); set('kalChartsC', c);
-    set('kalBotTotalsO', o); set('kalPerfWrapO', o); set('kalBotOpenO', o); set('kalBotClosedO', o); set('kalChartsO', o);
-    set('kalHeadPerfC', both); set('kalHeadChartsC', both);
-    // The chart range and the manual-trade filter belong to the live bot's lists only.
-    ['kalChartRange', 'kalTradeFilter'].forEach(function(id){ var el = document.getElementById(id); if(el && el.parentNode){ el.parentNode.hidden = !c; } });
-  }
-
-  function renderKalshiOpening(){
-    if(!kalshiLensShows('opening')){ return; }
-    var g = function(id){ return document.getElementById(id); };
-    var orders = kalshiOpeningOrders, now = Date.now();
-    var beat = kalshiOpeningState && Number.isFinite(kalshiOpeningState.lastTickAt) ? ' (the recorder last ran ' + kalshiWhen(kalshiOpeningState.lastTickAt, now) + ')' : ' (no heartbeat from the recorder yet)';
-    var msg = kalshiOpeningError ? '<div class="kal-note">The opening strategy\'s paper records could not be read (' + escapeHtml(kalshiOpeningError) + '). They need the Firestore rules and the functions deployed.</div>'
-      : (!kalshiOpeningLoaded ? '<div class="kal-empty">Loading the paper records...</div>'
-      : (!orders.length ? '<div class="kal-empty">No paper trades yet. A decision is taken about 10 minutes before each Bitcoin, gold and Ethereum close' + escapeHtml(beat) + '.</div>' : ''));
-    var since = orders.reduce(function(m, o){ return o && Number.isFinite(o.ts) && o.ts < m ? o.ts : m; }, Infinity);
-    var net = kalshiPerfStats(orders, 0).total, signed = (net >= 0 ? '+' : '-') + kalshiMoney(Math.abs(net));
-    g('kalBotTotalsO').innerHTML = orders.length ? '<div class="kal-rows"><div><span class="kal-k">Opening (paper) since ' + escapeHtml(kalDate(since)) + '</span><b class="' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed + '</b></div></div>' : msg;
-    g('kalPerfO').innerHTML = '<div class="kal-lens-head">Opening strategy, paper (no money)</div>' + (orders.length ? kalshiPerfHtml(kalshiPerfStats(orders, 0), escapeHtml, kalshiMoney, undefined, kalshiLaneHtml(kalshiLaneRows(orders, 0), escapeHtml, kalshiMoney)) : '');
-    var series = kalshiPnlSeries(orders, 0);
-    g('kalChartLineO').innerHTML = kalshiLineSvg(series, escapeHtml, kalshiMoney);
-    g('kalChartPieO').innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, 0), escapeHtml);
-    kalshiSetBars(g('kalChartBarsO'), kalshiBarsSvg(series, escapeHtml, kalshiMoney));
-    g('kalBotOpenO').innerHTML = '<div class="kal-lens-head">Opening strategy, paper (no money)</div>' + (orders.length ? kalshiPaperOpenHtml(orders, now, escapeHtml, kalshiMoney) : msg);
-    g('kalBotClosedO').innerHTML = (kalshiLens === 'both' ? '<div class="kal-lens-head">Opening strategy, paper (no money)</div>' : '') + (orders.length ? kalshiPaperRowsHtml(orders, now, escapeHtml, kalshiMoney) + '<div class="kal-foot">Latest 40 paper trades.</div>' : msg);
-  }
 
   // The exit watch, read back from the bot's own order records (no download needed): how many positions fell to 25c, what the sells got, and what holding would have paid.
   // `results` is the account read's market results by ticker; when a market's result is not known yet the hold figure is left out rather than guessed.
@@ -2633,7 +2503,7 @@
       var otherSum = a.balance.shards.filter(function(x){ return x.shard !== 2; }).reduce(function(n, x){ return n + x.dollars; }, 0);
       // What one order risks right now: contracts (the cap plus any profit add-on) at the cost per contract of the latest order, so it follows the real prices.
       var ses = kalshiLiveCtl && kalshiLiveCtl.session, stakeRow = '';
-      if(ses && ses.active === true && kalshiLensShows('closing')){
+      if(ses && ses.active === true){
         var lastO = (kalshiLiveOrders || []).filter(function(o){ return o && Number(o.count) > 0 && Number.isFinite(Number(o.maxCost)) && o.strategy === 'L1'; }).sort(function(x, y){ return y.ts - x.ts; })[0];
         var perC = lastO ? Number(lastO.maxCost) / Number(lastO.count) : 0.93;
         // Until the new session's first look writes sizeCap there is no real size: showing a guess (it used to be 3) put a made-up stake on screen.
@@ -2745,8 +2615,6 @@
 
     renderKalshiCharts();
     renderKalshiL1();
-    renderKalshiLens();
-    renderKalshiOpening();
   }
   // Downloads the recorder's snapshots as a compressed CSV (plain CSV if the browser cannot compress). Admin only, and reads only.
   document.getElementById('kalBookDownload').addEventListener('click', function(){
@@ -2802,17 +2670,6 @@
   }
   var kalshiChartRange = 'all';
   kalshiTipWire(document.getElementById('kalChartBars'));
-  kalshiTipWire(document.getElementById('kalChartBarsO'));
-  // The strategy view buttons. The choice is remembered on this device only (a convenience, never state that matters), and a click re-renders the page's blocks for it.
-  document.querySelectorAll('#kalLens .kal-lens-btn').forEach(function(b){
-    b.addEventListener('click', function(){
-      var v = b.getAttribute('data-lens');
-      kalshiLens = (v === 'opening' || v === 'both') ? v : 'closing';
-      try{ localStorage.setItem('kalshiLens', kalshiLens); }catch(e){ /* the view still changes without it */ }
-      renderKalshiBot();
-    });
-  });
-  renderKalshiLens();
   var kalshiTradeFilter = 'bot';   // 'bot' hides manual trades from the Recent trades card, 'all' shows both
   (function(){
     var sel = document.getElementById('kalTradeFilter');
@@ -2863,11 +2720,6 @@
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; renderKalshiBot(); }, function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; renderKalshiBot(); }); }
     if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } renderKalshiL1(); renderKalshiBot(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
-    // The opening strategy's paper records. A failure here (the rules not deployed yet, say) is shown in the paper blocks only: it must never be reported as the live bot's saved data failing.
-    if(api.watchKalshiOpening){
-      kalshiOpeningUnsub = api.watchKalshiOpening(function(st){ kalshiOpeningOrders = st.orders || []; kalshiOpeningState = st.state; kalshiOpeningLoaded = true; kalshiOpeningError = null; renderKalshiBot(); },
-        function(err){ kalshiOpeningError = (err && (err.code || err.message)) || 'unknown'; kalshiOpeningLoaded = true; renderKalshiBot(); });
-    }
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
     kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
@@ -2878,8 +2730,6 @@
     if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
-    if(kalshiOpeningUnsub){ kalshiOpeningUnsub(); kalshiOpeningUnsub = null; }
-    kalshiOpeningLoaded = false; kalshiOpeningError = null;
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
