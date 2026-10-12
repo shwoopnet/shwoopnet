@@ -462,7 +462,7 @@ gates.Y31 = () => {
 gates.Y32 = () => {
   assert.ok(!/kalExitMode|kalExitMsg|kal-exitrow|kalshiExitMode/.test(html), 'the exit selector, its saver and its callable are gone from the page, so it cannot be turned down in a bad hour');
   assert.ok(!/want === 'sell' && !window\.confirm|Log only|Sell mode/.test(html), 'and so is the old confirm dialog and the log only wording');
-  assert.ok(/<b>Exit at 50c \(fixed, always on\)\.<\/b>/.test(html), 'the rules and limits fold says the exit is 50c and always on');
+  assert.ok(/<b>Exit at 25c \(fixed, always on\)\.<\/b>/.test(html), 'the rules and limits fold says the exit is 25c and always on');
   assert.ok(!/Exit at 70c|falls to 70c/.test(html), 'no page text still describes the old 70c line');
 };
 gates.Y33 = () => {
@@ -498,54 +498,54 @@ gates.Y37 = () => {
   const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
   const f = new Function(['kalshiOrderPnl', 'kalshiExitReport', 'kalshiExitHtml'].map(grab).join('\n') + '; return { kalshiExitReport, kalshiExitHtml };')();
   const base = { side: 'yes', count: 10, fillCount: '10', maxCost: 9.6, strategy: 'L1' };
-  const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.49, exitAvg: 0.46, settled: true, result: 'exit', settledPnl: -3.0 });
-  const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.48 }, settled: true, result: 'no', settledPnl: -9.6 });
-  const heldWon = Object.assign({}, base, { ticker: 'C', exitShadow: { bid: 0.5 }, settled: true, result: 'yes', settledPnl: 0.4 });
+  const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.24, exitAvg: 0.21, settled: true, result: 'exit', settledPnl: -3.0 });
+  const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.23 }, settled: true, result: 'no', settledPnl: -9.6 });
+  const heldWon = Object.assign({}, base, { ticker: 'C', exitShadow: { bid: 0.25 }, settled: true, result: 'yes', settledPnl: 0.4 });
   const untouched = Object.assign({}, base, { ticker: 'D', settled: true, result: 'yes', settledPnl: 0.4 });
   const r = f.kalshiExitReport([sold, heldLost, heldWon, untouched], { A: 'no' });
   assert.deepStrictEqual([r.touched, r.sold, r.loggedOnly], [3, 1, 2], 'an order the watch never touched is not counted');
   assert.ok(Math.abs(r.avgSlip - 0.03) < 1e-9, 'slip is the trigger bid minus the fill: ' + r.avgSlip);
   assert.strictEqual(r.realised, -3.0);
   assert.ok(Math.abs(r.exitMinusHold - (-3.0 - (-9.6))) < 1e-9 && r.holdKnownSold === 1, 'selling beat holding by $6.60 where the market went against us');
-  assert.deepStrictEqual([r.known, r.recovered], [3, 1], 'recovered = the side won after touching 50c');
-  // Records taken under the earlier 70c line (trigger bid above 50c) are not a fall to 50c: they are counted apart and never mixed into figures labelled 50c.
-  const older = Object.assign({}, base, { ticker: 'E', exitShadow: { bid: 0.69 }, settled: true, result: 'yes', settledPnl: 0.4 });
+  assert.deepStrictEqual([r.known, r.recovered], [3, 1], 'recovered = the side won after touching 25c');
+  // Records taken under an earlier line (a trigger bid above 25c: the 50c and 70c lines) are not a fall to 25c: they are counted apart and never mixed into figures labelled 25c.
+  const older = Object.assign({}, base, { ticker: 'E', exitShadow: { bid: 0.49 }, settled: true, result: 'yes', settledPnl: 0.4 });
   const oldSold = Object.assign({}, base, { ticker: 'F', exitStatus: 'sold', exitCount: 10, exitBid: 0.7, exitAvg: 0.68, settled: true, result: 'exit', settledPnl: -2.0 });
   const mixed = f.kalshiExitReport([sold, heldLost, heldWon, untouched, older, oldSold], { A: 'no' });
-  assert.deepStrictEqual([mixed.touched, mixed.earlier], [3, 2], 'two records from the 70c line are set apart, the three real 50c touches are counted');
-  assert.strictEqual(mixed.realised, -3.0, 'and the earlier sale is not added into the 50c result');
+  assert.deepStrictEqual([mixed.touched, mixed.earlier], [3, 2], 'two records from the earlier lines are set apart, the three real 25c touches are counted');
+  assert.strictEqual(mixed.realised, -3.0, 'and the earlier sale is not added into the 25c result');
   const out = f.kalshiExitHtml(mixed, (x) => x, (x) => '$' + x.toFixed(2));
-  assert.ok(/Exit at 50c/.test(out) && /Fell to 50c/.test(out), 'the block is labelled 50c');
-  assert.ok(/2 older records, taken when the line was 70c, are left out\./.test(out) && !/earlier 70c line, not counted here/.test(out), 'how many earlier records it left out is a quiet note under the block, not a wrapped data row');
-  assert.ok(/1 older record, taken when the line was 70c, is left out\./.test(f.kalshiExitHtml(f.kalshiExitReport([sold, older], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2))), 'and it reads right for one');
+  assert.ok(/Exit at 25c/.test(out) && /Fell to 25c/.test(out), 'the block is labelled 25c');
+  assert.ok(/2 older records, taken under an earlier exit line, are left out\./.test(out) && !/earlier 70c line, not counted here/.test(out), 'how many earlier records it left out is a quiet note under the block, not a wrapped data row');
+  assert.ok(/1 older record, taken under an earlier exit line, is left out\./.test(f.kalshiExitHtml(f.kalshiExitReport([sold, older], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2))), 'and it reads right for one');
   assert.ok(!/older record/.test(f.kalshiExitHtml(f.kalshiExitReport([sold], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2))), 'no note when nothing was left out');
   // One line a row. A label long enough to wrap squeezed its figure onto a second line (the old block did it twice), so no label is longer than 24 characters and a figure never wraps.
   const rowsOf = (html) => [...html.matchAll(/<div[^>]*><span>([^<]*)<\/span><b>([^<]*)<\/b>/g)].map((m) => [m[1], m[2]]);
-  const full = f.kalshiExitHtml(f.kalshiExitReport([sold, heldLost, heldWon, Object.assign({}, base, { ticker: 'P', exitStatus: 'sell failed', exitBid: 0.4, settled: true, result: 'no', settledPnl: -9.6 })], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2));
+  const full = f.kalshiExitHtml(f.kalshiExitReport([sold, heldLost, heldWon, Object.assign({}, base, { ticker: 'P', exitStatus: 'sell failed', exitBid: 0.2, settled: true, result: 'no', settledPnl: -9.6 })], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2));
   const rows = rowsOf(full);
   assert.ok(rows.length >= 9 && rows.every(([k]) => k.length <= 24), 'every row label fits on one line: ' + rows.filter(([k]) => k.length > 24).map(([k]) => k).join(' | '));
-  assert.deepStrictEqual(rows.map(([k]) => k), ['Fell to 50c', 'Sold', 'Sell failed or skipped', 'Logged, not sent', 'Trigger bid (avg)', 'Sold at (avg)', 'Slip (avg)', 'Realised on sells', 'Won after falling', 'Sells vs holding'], 'the rows, in the order they read');
+  assert.deepStrictEqual(rows.map(([k]) => k), ['Fell to 25c', 'Sold', 'Sell failed or skipped', 'Logged, not sent', 'Trigger bid (avg)', 'Sold at (avg)', 'Slip (avg)', 'Realised on sells', 'Won after falling', 'Sells vs holding'], 'the rows, in the order they read');
   assert.ok(/\.kal-perf-t > div b\{ white-space:nowrap; \}/.test(html), 'a figure never wraps under its label');
   // A count that is zero is left out, and the sold figures only appear once something was sold.
   const quiet = rowsOf(f.kalshiExitHtml(f.kalshiExitReport([heldLost], { B: 'no' }), (x) => x, (x) => '$' + x.toFixed(2))).map(([k]) => k);
-  assert.deepStrictEqual(quiet, ['Fell to 50c', 'Sold', 'Logged, not sent', 'Won after falling'], 'nothing sold: no sell figures, no failed row, no partly row');
+  assert.deepStrictEqual(quiet, ['Fell to 25c', 'Sold', 'Logged, not sent', 'Won after falling'], 'nothing sold: no sell figures, no failed row, no partly row');
   const onlySold = rowsOf(f.kalshiExitHtml(f.kalshiExitReport([sold], null), (x) => x, (x) => '$' + x.toFixed(2))).map(([k]) => k);
-  assert.deepStrictEqual(onlySold, ['Fell to 50c', 'Sold', 'Trigger bid (avg)', 'Sold at (avg)', 'Slip (avg)', 'Realised on sells', 'Won after falling'], 'one clean sell: no logged row, no failed row, and no hold comparison without a market result');
+  assert.deepStrictEqual(onlySold, ['Fell to 25c', 'Sold', 'Trigger bid (avg)', 'Sold at (avg)', 'Slip (avg)', 'Realised on sells', 'Won after falling'], 'one clean sell: no logged row, no failed row, and no hold comparison without a market result');
   // The three sell figures are over the SAME sold orders, so they can be subtracted: trigger bid minus sold at is the slip. A logged-only order's bid (here 20c) and a sold order with no bid on record
   // (here a null, which must not count as a 0c bid) are not in them.
-  const sold2 = Object.assign({}, base, { ticker: 'S', exitStatus: 'sold', exitCount: 10, exitBid: 0.45, exitAvg: 0.4, settled: true, result: 'exit', settledPnl: -3.6 });
+  const sold2 = Object.assign({}, base, { ticker: 'S', exitStatus: 'sold', exitCount: 10, exitBid: 0.2, exitAvg: 0.15, settled: true, result: 'exit', settledPnl: -3.6 });
   const deep = Object.assign({}, base, { ticker: 'G', exitShadow: { bid: 0.2 }, settled: true, result: 'no', settledPnl: -9.6 });
   const noBid = Object.assign({}, base, { ticker: 'H', exitStatus: 'sold', exitCount: 10, exitBid: null, exitAvg: 0.3, settled: true, result: 'exit', settledPnl: -3.4 });
   const co = f.kalshiExitReport([sold, sold2, deep, noBid], {});
   assert.deepStrictEqual([co.touched, co.sold], [4, 3], 'all three sells are counted as sells');
-  assert.ok(Math.abs(co.avgBid - 0.47) < 1e-9 && Math.abs(co.avgFill - 0.43) < 1e-9 && Math.abs(co.avgSlip - 0.04) < 1e-9, 'averaged over the two sells that have both numbers: ' + [co.avgBid, co.avgFill, co.avgSlip]);
+  assert.ok(Math.abs(co.avgBid - 0.22) < 1e-9 && Math.abs(co.avgFill - 0.18) < 1e-9 && Math.abs(co.avgSlip - 0.04) < 1e-9, 'averaged over the two sells that have both numbers: ' + [co.avgBid, co.avgFill, co.avgSlip]);
   assert.ok(Math.abs((co.avgBid - co.avgFill) - co.avgSlip) < 1e-9, 'trigger bid minus sold at equals the slip');
   const win = f.kalshiExitReport([Object.assign({}, sold)], { A: 'yes' });
   assert.ok(Math.abs(win.exitMinusHold - (-3.0 - 0.4)) < 1e-9, 'when the side would have won, selling was worse than holding by the win it gave up (fees included in cost)');
   assert.strictEqual(f.kalshiExitReport([Object.assign({}, sold)], null).holdKnownSold, 0, 'no market result, no hold comparison: never guessed');
   assert.strictEqual(f.kalshiExitReport([untouched], {}).touched, 0);
   const none = f.kalshiExitHtml(f.kalshiExitReport([untouched], {}), (x) => x, (x) => '$' + x.toFixed(2));
-  assert.ok(/No position has fallen to 50c yet\./.test(none) && !/<b>/.test(none), 'with nothing touched it says so rather than showing zeros as a result');
+  assert.ok(/No position has fallen to 25c yet\./.test(none) && !/<b>/.test(none), 'with nothing touched it says so rather than showing zeros as a result');
   assert.ok(/kalshiExitReport\(kalshiLiveOrders/.test(html) && /table\('By price paid', st\.byBand\) \+ \(exitRep !== undefined/.test(html), 'wired into More stats');
 };
 

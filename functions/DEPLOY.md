@@ -246,7 +246,7 @@ up the new flat stop at once, and size scaling only applies to a session started
 
 `kalshiSimTick` and `kalshiSimSession` no longer exist. When you deploy, Firebase will ask whether to delete those two functions: answer yes. The `kalshiSimOrders` and `kalshiSimControl` collections are left in Firestore (nothing reads them now; delete them in the console whenever you like).
 
-## The exit watch (sells the bot's own open positions when the price falls to 50c)
+## The exit watch (sells the bot's own open positions when the price falls to 25c)
 
 `kalshiLiveExit` (scheduled each minute, holds the live key, loops about every 10 seconds inside its run). Deploy with:
 
@@ -254,7 +254,7 @@ up the new flat stop at once, and size scaling only applies to a session started
 firebase deploy --only functions
 ```
 
-Since Oct 12, 2026 it is fixed at **50c** and always **sells**: there is no off / log only / sell switch. The same change removed the page's two switches, so `kalshiExitMode` and `kalshiPoolRule` no longer exist; when you deploy, Firebase will ask whether to delete those two functions: answer yes. The reinvest pool always rebuilds after every win. An old `exitMode` or `poolRule` left on the `kalshiLiveControl/session` document is ignored by everything.
+Since Oct 12, 2026 it is fixed at **25c** (50c until the owner moved it the same day) and always **sells**: there is no off / log only / sell switch. The same change removed the page's two switches, so `kalshiExitMode` and `kalshiPoolRule` no longer exist; when you deploy, Firebase will ask whether to delete those two functions: answer yes. The reinvest pool always rebuilds after every win. An old `exitMode` or `poolRule` left on the `kalshiLiveControl/session` document is ignored by everything.
 
 It needs the server's own `KALSHI_LIVE_ENABLED=on`, like buying; with that switch off it only records on each order when it WOULD have sold and sends nothing. It is **not** behind `CODE_KILL_SWITCH` (that stops buys and Start only), because it can only close a long the bot itself opened. So with the kill switch on and `KALSHI_LIVE_ENABLED=on`, the bot's own recent open positions would still be sold at 50c.
 
