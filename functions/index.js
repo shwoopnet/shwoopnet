@@ -364,46 +364,9 @@ exports.kalshiLiveBaseline = onCall(
 
 // The owner's 24 hour L1 session (README: "Live waiver: L1 for 24 hours"). This only switches the session document
 // on or off, with a server-set expiry; the scheduled function below does the work, and every limit is in kalshiLiveLib.js.
-// The exit watch's switch (off, log, sell), kept on the session document so it survives a restart of the session. Admin only. "sell" needs the server's own live switch on.
-exports.kalshiExitMode = onCall(async (request) => {
-  await assertKalshiAdmin(request.auth);
-  const mode = request.data && request.data.mode;
-  if (!live.EXIT_MODES.includes(mode)) throw new HttpsError("invalid-argument", "The exit mode must be off, log or sell.");
-  if (mode === "sell" && KALSHI_LIVE_ENABLED.value() !== "on") {
-    throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing for the exit to sell.");
-  }
-  try {
-    ensureDefaultAdminApp();
-    const db = getFirestore();
-    const now = Date.now();
-    await db.collection("kalshiLiveControl").doc("session").set({ exitMode: mode, exitModeAt: now }, { merge: true });
-    await db.collection("kalshiLiveEvents").add({ ts: now, kind: "exit mode", detail: "the exit at " + Math.round(live.EXIT_THRESHOLD * 100) + "c is now " + (mode === "sell" ? "SELLING (real orders)" : (mode === "log" ? "log only (it records what it would sell and sells nothing)" : "off")) });
-    return { mode };
-  } catch (e) {
-    console.error("kalshiExitMode failed:", e);
-    throw new HttpsError("unavailable", "Could not save the exit mode: " + String((e && e.message) || e).slice(0, 140));
-  }
-});
-
-// How the reinvest pool rebuilds: "highs" (half of each NEW profit high) or "wins" (half of every win; a loss comes out of the pool in both). Kept on the session document with the exit
-// mode so a restart of the session keeps it. Admin only. Affects only orders settled from now on.
-exports.kalshiPoolRule = onCall(async (request) => {
-  await assertKalshiAdmin(request.auth);
-  const rule = request.data && request.data.rule;
-  if (rule !== "highs" && rule !== "wins") throw new HttpsError("invalid-argument", "The pool rule must be highs or wins.");
-  try {
-    ensureDefaultAdminApp();
-    const db = getFirestore();
-    const now = Date.now();
-    await db.collection("kalshiLiveControl").doc("session").set({ poolRule: rule, poolRuleAt: now }, { merge: true });
-    await db.collection("kalshiLiveEvents").add({ ts: now, kind: "pool rule", detail: "the reinvest pool now rebuilds from " + (rule === "wins" ? "half of every win (it starts filling again right after a loss)" : "half of each new profit high") });
-    return { rule };
-  } catch (e) {
-    console.error("kalshiPoolRule failed:", e);
-    throw new HttpsError("unavailable", "Could not save the pool rule: " + String((e && e.message) || e).slice(0, 140));
-  }
-});
-
+// kalshiExitMode and kalshiPoolRule (the page's two switches) were removed on Oct 12, 2026 at the owner's request: the exit is fixed at 50c and always sells, and the
+// reinvest pool always rebuilds after every win. There is deliberately no callable that can change either, and nothing stored on the session document is read for them
+// (the scheduled exit and runL1Tick ignore any old exitMode or poolRule). Do not add one back as a convenience: a risk setting that can be toggled from the page can be toggled in a bad hour.
 exports.kalshiL1Session = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
   ensureDefaultAdminApp();
@@ -431,9 +394,8 @@ exports.kalshiL1Session = onCall(async (request) => {
     throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the bot.");
   }
   const now = Date.now();
-  // Starting replaces the session document, so the owner's switches (exit mode, pool rule, Ethereum size) are carried across explicitly.
-  const prior = (await ref.get()).data() || {};
-  await ref.set({ ...live.ownerSettings(prior), active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
+  // Starting replaces the session document. There are no owner switches to carry across any more: the exit (50c, always selling) and the pool rule (after every win) are fixed in the code.
+  await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
   // Flag the saved sizing state so the next review raises a collapsed cap to what a fresh start gives (see reviewSizing). Pool, savings and the loss-stop clock are kept.
   if (sizing) await db.collection("kalshiLiveControl").doc("sizing").set({ reseed: true }, { merge: true });
   await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed every 3 days, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
@@ -469,7 +431,7 @@ exports.kalshiFlattenAll = onCall(
 
 // The exit watch: looks at the bot's own open positions about every 10 seconds for most of each minute (a scheduled function cannot run more often than once a minute, so it
 // loops inside its run). It is the only function besides the armed bot that holds the live key, and it can only close a long the bot opened (kalshiLiveLib.runExitWatch).
-// Mode is read from the session document each look: off, log (the default: it records what it would sell) or sell.
+// There is no mode: it always sells (at 50c) while the server's live switch is on, and only records what it would have sold when that switch is off. Nothing on the session document can turn it off.
 exports.kalshiLiveExit = onSchedule(
   { schedule: "every 1 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 58, retryCount: 0, memory: "256MiB" },
   async () => {
@@ -482,10 +444,9 @@ exports.kalshiLiveExit = onSchedule(
       try {
         const snap = await sessRef.get();
         const session = snap.exists ? snap.data() : null;
-        const mode = session && live.EXIT_MODES.includes(session.exitMode) ? session.exitMode : "log";
-        if (session && mode !== "off") {
+        if (session) {
           await live.runExitWatch({
-            mode, store, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
+            store, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
             enabled: KALSHI_LIVE_ENABLED.value() === "on", setSession: (patch) => sessRef.set(patch, { merge: true }),
             logEvent: async (e) => {
               await db.collection("kalshiLiveEvents").add(e);

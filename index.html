@@ -2103,8 +2103,6 @@
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
   var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
   var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
-  var kalshiExitModeFn = httpsCallable(functions, 'kalshiExitMode');
-  var kalshiPoolRuleFn = httpsCallable(functions, 'kalshiPoolRule');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
   var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
 
@@ -2591,14 +2589,7 @@
         cb(q.docs.map(function(d){ return d.data(); }));
       }, function(err){ console.error('Kalshi live sync error:', err); if(errCb){ errCb(err); } });
     },
-    // The exit watch's switch: 'off', 'log' (records what it would sell, sells nothing) or 'sell' (real sell orders for the bot's own positions only). Admin only.
-    kalshiExitMode: function(mode){
-      return kalshiExitModeFn({ mode: mode }).then(function(res){ return res.data; });
-    },
-    // How the reinvest pool rebuilds: 'highs' (half of each new profit high) or 'wins' (half of every win, so it fills again right after a loss). Admin only.
-    kalshiPoolRule: function(rule){
-      return kalshiPoolRuleFn({ rule: rule }).then(function(res){ return res.data; });
-    },
+    // No exit or pool-rule setter exists on purpose (Oct 12, 2026): the exit is fixed at 50c and always sells, the pool always rebuilds after every win, both in the server code.
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     },
@@ -3460,14 +3451,12 @@
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
               </div>
               <div class="kal-note" id="kalFlattenMsg"></div>
-              <div class="kal-note kal-exitrow"><label for="kalExitMode"><b>Exit at 70c</b></label> <select id="kalExitMode"><option value="off">Off</option><option value="log">Log only</option><option value="sell">Sell</option></select> <span id="kalExitMsg"></span></div>
-              <div class="kal-note">If a position's price falls to 70c, Sell closes it (only positions the bot opened, never your manual trades). Log only records what it would have sold and sells nothing. It checks about every 10 seconds and cannot beat a price that jumps straight through 70c.</div>
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
-              <div class="kal-note kal-poolrow"><label for="kalPoolRule"><b>Reinvest pool rebuilds</b></label> <select id="kalPoolRule"><option value="highs">after new profit highs</option><option value="wins">after every win</option></select> <span id="kalPoolMsg"></span></div>
-              <div class="kal-note">"After every win" starts refilling the pool right after a loss instead of waiting to get back above the old high. In a replay of the history it raised the profit about 47% and made the bad drawdowns about 60% deeper. Applies to orders from now on.</div>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">About 6 minutes before each Bitcoin, gold or Ethereum 15 minute close, it buys the side priced 88c to 97c and holds to settlement. One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
+                <div class="kal-note">About 6 minutes before each Bitcoin, gold or Ethereum 15 minute close, it buys the side priced 88c to 97c and holds to settlement unless that side's price falls to 50c first (see Exit at 50c below). One contract never costs more than $2.00. With scaling on, size is one contract per $43 of balance, up one step every 3 days at most, and down if a fall in the balance lasts 2 hours (cash tied up in an open trade does not count). It runs around the clock until you pause it. It stops itself when its own trades over the last 24 hours are down by the stop (5% of the balance at the last review with scaling, otherwise $10; your manual trades do not count) or when any order goes wrong, and stays off until you start it again. "Stop follows the high point" measures the stop from the best settled result instead of from zero. L1 failed its own test (z 1.45 against 2.1), so this is your call, not proof it works. A day is mostly noise, about plus or minus $2.</div>
+                <div class="kal-note"><b>Exit at 50c (fixed, always on).</b> If a position's price falls to 50c, the bot sells it. This only ever closes positions the bot opened, never your manual trades. It checks about every 10 seconds and cannot beat a price that jumps straight through 50c. It needs the server's order switch on, like buying. There is no setting for it on purpose.</div>
+                <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> The pool refills from half of every win, including right after a loss, instead of waiting to get back above the old high. In a replay of the history this raised the profit about 47% and made the bad drawdowns about 60% deeper. There is no setting for it on purpose.</div>
               </details>
             </div>
           </details>
@@ -10047,14 +10036,20 @@
     if(t && t.classList && t.classList.contains('kal-more')){ kalshiMoreOpen = t.open; }
   }, true);   // toggle does not bubble, so it is caught on the way down
 
-  // The exit watch, read back from the bot's own order records (no download needed): how many positions fell to 70c, what the sells got, and what holding would have paid.
+  // The exit watch, read back from the bot's own order records (no download needed): how many positions fell to 50c, what the sells got, and what holding would have paid.
   // `results` is the account read's market results by ticker; when a market's result is not known yet the hold figure is left out rather than guessed.
   // "Touched" is an order the watch acted on or logged (exitStatus or exitShadow); a logged-only order was held to settlement, so its real result IS the hold result.
+  // The line was 70c until Oct 12, 2026 (server EXIT_THRESHOLD). A record whose trigger bid was above 50c was taken under that earlier line and is not a fall to 50c, so it is
+  // counted apart (`earlier`) instead of being mixed into figures that are labelled 50c.
   function kalshiExitReport(orders, results){
-    var r = { touched: 0, loggedOnly: 0, sold: 0, partly: 0, failed: 0, avgBid: null, avgFill: null, avgSlip: null, realised: 0, known: 0, recovered: 0, exitMinusHold: 0, holdKnownSold: 0 };
+    var AT = 0.5;
+    var r = { at: AT, earlier: 0, touched: 0, loggedOnly: 0, sold: 0, partly: 0, failed: 0, avgBid: null, avgFill: null, avgSlip: null, realised: 0, known: 0, recovered: 0, exitMinusHold: 0, holdKnownSold: 0 };
     var bids = [], fills = [], slips = [];
     (orders || []).forEach(function(o){
       if(!o || !(Number(o.fillCount) > 0) || !(o.exitStatus || o.exitShadow)){ return; }
+      var trig = (o.exitBid !== undefined && o.exitBid !== null && Number.isFinite(Number(o.exitBid))) ? Number(o.exitBid)
+        : ((o.exitShadow && o.exitShadow.bid !== undefined && o.exitShadow.bid !== null && Number.isFinite(Number(o.exitShadow.bid))) ? Number(o.exitShadow.bid) : null);
+      if(trig !== null && trig > AT + 1e-9){ r.earlier++; return; }
       r.touched++;
       var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount), want), cost = (Number(o.maxCost) || 0) * (got / want);
       var res = o.settled === true && (o.result === 'yes' || o.result === 'no') ? o.result : (results && (results[o.ticker] === 'yes' || results[o.ticker] === 'no') ? results[o.ticker] : null);
@@ -10079,9 +10074,11 @@
   }
   function kalshiExitHtml(x, esc, money){
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, c = function(v){ return v === null ? 'n/a' : (v * 100).toFixed(1) + 'c'; };
-    if(!x || !x.touched){ return '<div class="kal-perf-t"><span class="kal-lbl">Exit at 70c</span><div><span>No position has fallen to 70c yet, so there is nothing to read.</span></div></div>'; }
+    var at = Math.round(((x && x.at) || 0.5) * 100) + 'c';
     var row = function(k, v){ return '<div><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
-    var h = '<div class="kal-perf-t"><span class="kal-lbl">Exit at 70c</span>' + row('Positions that fell to 70c', String(x.touched)) +
+    var earlier = x && x.earlier ? row('Records from the earlier 70c line, not counted here', String(x.earlier)) : '';
+    if(!x || !x.touched){ return '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span><div><span>No position has fallen to ' + at + ' yet, so there is nothing to read.</span></div>' + earlier + '</div>'; }
+    var h = '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span>' + row('Positions that fell to ' + at, String(x.touched)) + earlier +
       row('Sold / partly sold / logged only', x.sold + ' / ' + x.partly + ' / ' + x.loggedOnly) + (x.failed ? row('Sell did not fill or was skipped', String(x.failed)) : '') +
       row('Average bid when it triggered', c(x.avgBid));
     if(x.sold + x.partly){ h += row('Average price the sell got', c(x.avgFill)) + row('Average slip (trigger bid minus fill)', x.avgSlip === null ? 'n/a' : (x.avgSlip * 100).toFixed(1) + 'c') + row('Realised on sold orders', sg(x.realised)); }
@@ -10670,10 +10667,6 @@
     var pill = document.getElementById('kalL1Pill');
     pill.className = 'kal-pill' + (switchOff ? ' bad' : (halted ? ' warn' : (running ? ' on' : '')));
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
-    var exitSel = document.getElementById('kalExitMode');
-    if(exitSel && document.activeElement !== exitSel){ exitSel.value = (s && ['off', 'log', 'sell'].indexOf(s.exitMode) > -1) ? s.exitMode : 'log'; }
-    var poolSel = document.getElementById('kalPoolRule');
-    if(poolSel && document.activeElement !== poolSel){ poolSel.value = s && s.poolRule === 'wins' ? 'wins' : 'highs'; }
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
     var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.05 * base).toFixed(2) : '$10.00';
@@ -10693,33 +10686,7 @@
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
 
-  // The exit watch's switch. Sell places real sell orders (only for positions the bot opened), so that one asks first; Log only and Off are safe.
-  (function(){
-    var sel = document.getElementById('kalExitMode'), msg = document.getElementById('kalExitMsg');
-    if(!sel){ return; }
-    var current = function(){ var s = kalshiLiveCtl.session; return s && ['off', 'log', 'sell'].indexOf(s.exitMode) > -1 ? s.exitMode : 'log'; };
-    sel.addEventListener('change', function(){
-      var api = window.__shwoopAPI, want = sel.value;
-      if(!api || !api.kalshiExitMode || !currentUserIsAdmin){ sel.value = current(); return; }
-      if(want === 'sell' && !window.confirm('Sell mode places REAL sell orders for the positions the bot opened when their price falls to 70c or lower. It never touches your manual trades. Turn it on?')){ sel.value = current(); return; }
-      sel.disabled = true; msg.textContent = 'Saving...';
-      api.kalshiExitMode(want).then(function(){ msg.textContent = 'Saved.'; }, function(err){ msg.textContent = 'Not changed: ' + ((err && err.message) || 'unknown'); sel.value = current(); }).then(function(){ sel.disabled = false; });
-    });
-  })();
-
-  // The pool rule's switch. 'After every win' makes size grow faster after a loss, so it asks first; going back to the original rule does not.
-  (function(){
-    var sel = document.getElementById('kalPoolRule'), msg = document.getElementById('kalPoolMsg');
-    if(!sel){ return; }
-    var current = function(){ var s = kalshiLiveCtl.session; return s && s.poolRule === 'wins' ? 'wins' : 'highs'; };
-    sel.addEventListener('change', function(){
-      var api = window.__shwoopAPI, want = sel.value;
-      if(!api || !api.kalshiPoolRule || !currentUserIsAdmin){ sel.value = current(); return; }
-      if(want === 'wins' && !window.confirm('The pool will refill from half of every win, including right after a loss. In the history replay that raised the profit about 47% and made the bad drawdowns about 60% deeper. Turn it on?')){ sel.value = current(); return; }
-      sel.disabled = true; msg.textContent = 'Saving...';
-      api.kalshiPoolRule(want).then(function(){ msg.textContent = 'Saved.'; }, function(err){ msg.textContent = 'Not changed: ' + ((err && err.message) || 'unknown'); sel.value = current(); }).then(function(){ sel.disabled = false; });
-    });
-  })();
+  // There is no switch for the exit (fixed at 50c, always selling) or the pool rule (always after every win): both live in the server code, on purpose (Oct 12, 2026).
 
   function startKalshiBot(){
     stopKalshiBot();

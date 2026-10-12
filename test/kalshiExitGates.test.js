@@ -1,4 +1,5 @@
-// The exit watch (functions/kalshiLiveLib.js, runExitWatch): it sells the bot's OWN open L1 positions when the side's bid falls to 70c, only when switched to "sell". Plain node, no framework.
+// The exit watch (functions/kalshiLiveLib.js, runExitWatch): it sells the bot's OWN open L1 positions when the side's bid falls to 50c. It always sells, with no setting (the owner
+// removed the off / log only / sell switch and moved the line from 70c on Oct 12, 2026); the only thing that stops a sale is the server's own live switch being off. Plain node, no framework.
 const assert = require('assert');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -20,7 +21,7 @@ function world(o = {}) {
     async updateTest(id, patch) { Object.assign(docs.get(id), patch); },
     async claimExit(id, tries) { const d = docs.get(id); if (d.exitStatus === 'sending' || (Number(d.exitTries) || 0) !== tries || d.settled === true) return false; d.exitStatus = 'sending'; d.exitTries = tries + 1; return true; },
   };
-  const market = Object.assign({ status: 'active', close_time: iso(NOW + 200000), yes_bid_dollars: '0.6900', yes_ask_dollars: '0.7100', exchange_index: 2 }, o.market || {});
+  const market = Object.assign({ status: 'active', close_time: iso(NOW + 200000), yes_bid_dollars: '0.4900', yes_ask_dollars: '0.5100', exchange_index: 2 }, o.market || {});
   const fetchFn = async (url, init) => {
     calls.push({ url, method: init.method, body: init.body ? JSON.parse(init.body) : null });
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
@@ -29,12 +30,12 @@ function world(o = {}) {
     if (init.method === 'POST') {
       posts.push(JSON.parse(init.body));
       if (o.post) return reply(o.post.status, o.post.body);
-      return reply(201, { order_id: 'x-' + posts.length, fill_count: o.fill !== undefined ? o.fill : '20.00', remaining_count: '0.00', average_fill_price: o.avg || '0.6900' });
+      return reply(201, { order_id: 'x-' + posts.length, fill_count: o.fill !== undefined ? o.fill : '20.00', remaining_count: '0.00', average_fill_price: o.avg || '0.4900' });
     }
     throw new Error('unexpected ' + init.method + ' ' + url);
   };
   return { docs, events, calls, posts, sess, store, fetchFn, mk,
-    run: (extra = {}) => live.runExitWatch(Object.assign({ mode: 'sell', store, fetchFn, keyId: 'k', pem, now: NOW, enabled: true, setSession: async (p) => Object.assign(sess, p), logEvent: async (e) => events.push(e) }, extra)) };
+    run: (extra = {}) => live.runExitWatch(Object.assign({ store, fetchFn, keyId: 'k', pem, now: NOW, enabled: true, setSession: async (p) => Object.assign(sess, p), logEvent: async (e) => events.push(e) }, extra)) };
 }
 
 const gates = {};
@@ -45,36 +46,44 @@ gates.E1 = () => {
   assert.strictEqual((code.match(/method: "POST"/g) || []).length, 1, 'one place sends an order');
   assert.ok(/\/portfolio\/positions/.test(code) && code.indexOf('/portfolio/positions') < code.indexOf('method: "POST"'), 'the position is read before anything is sent');
   assert.ok(!/liveOrderBody|l1Count|runL1Tick/.test(code), 'it shares nothing with the buying path');
-  assert.deepStrictEqual(live.EXIT_MODES, ['off', 'log', 'sell']);
-  assert.strictEqual(live.EXIT_THRESHOLD, 0.70);
-  const yes = live.exitBody('T', 'yes', 20, 0.54, 'X-T-1', 2), no = live.exitBody('T', 'no', 20, 0.46, 'X-T-1', 2);
+  assert.strictEqual(live.EXIT_MODES, undefined, 'there is no off / log only / sell switch to export any more');
+  assert.ok(!/\bmode\b/.test(code), 'the watch takes no mode, so no caller can switch it down to log only or off');
+  assert.strictEqual(live.EXIT_THRESHOLD, 0.50);
+  const yes = live.exitBody('T', 'yes', 20, 0.34, 'X-T-1', 2), no = live.exitBody('T', 'no', 20, 0.66, 'X-T-1', 2);
   assert.deepStrictEqual([yes.side, no.side], ['ask', 'bid'], 'a long YES is closed by selling YES, a long NO by buying YES back');
   assert.deepStrictEqual([yes.time_in_force, yes.count, yes.exchange_index], ['immediate_or_cancel', '20', 2]);
   assert.throws(() => live.exitBody('T', 'yes', 0, 0.5, 'c'), /refusing/); assert.throws(() => live.exitBody('T', 'yes', 51, 0.5, 'c'), /refusing/); assert.throws(() => live.exitBody('T', 'yes', 5, 1.2, 'c'), /refusing/);
 };
 
-// E2: off does nothing; log records that it WOULD have sold, once, and sends nothing; sell without the live switch behaves as log.
+// E2: with the server's live switch off it records that it WOULD have sold, once, and sends nothing; only the literal true sells. There is no other way to make it record instead of sell.
 gates.E2 = async () => {
-  const off = world(); off.mk('L1-KXBTC15M-T1'); await off.run({ mode: 'off' });
-  assert.strictEqual(off.calls.length, 0, 'off makes no request at all');
-  const lg = world(); lg.mk('L1-KXBTC15M-T1'); await lg.run({ mode: 'log' }); await lg.run({ mode: 'log' });
-  const d = lg.docs.get('L1-KXBTC15M-T1');
-  assert.ok(d.exitShadow && d.exitShadow.bid === 0.69 && d.exitShadow.wouldSell === 20, 'it records the bid and the size it would have sold');
-  assert.strictEqual(lg.posts.length, 0, 'and sends nothing');
-  assert.strictEqual(lg.calls.filter((c) => c.url.includes('/portfolio/')).length, 0, 'log mode never touches the account at all');
-  assert.strictEqual(lg.events.filter((e) => e.kind === 'exit (log only)').length, 1, 'logged once per order');
-  const sw = world(); sw.mk('L1-KXBTC15M-T1'); await sw.run({ mode: 'sell', enabled: false });
-  assert.strictEqual(sw.posts.length, 0, 'sell with the live switch off sends nothing');
-  assert.ok(sw.docs.get('L1-KXBTC15M-T1').exitShadow, 'it logs instead');
+  const sw = world(); sw.mk('L1-KXBTC15M-T1'); await sw.run({ enabled: false }); await sw.run({ enabled: false });
+  const d = sw.docs.get('L1-KXBTC15M-T1');
+  assert.ok(d.exitShadow && d.exitShadow.bid === 0.49 && d.exitShadow.wouldSell === 20, 'it records the bid and the size it would have sold');
+  assert.strictEqual(sw.posts.length, 0, 'and sends nothing');
+  assert.strictEqual(sw.calls.filter((c) => c.url.includes('/portfolio/')).length, 0, 'it never touches the account when the switch is off');
+  assert.strictEqual(sw.events.filter((e) => e.kind === 'exit (log only)').length, 1, 'logged once per order');
+  for (const v of [undefined, null, 'on', 1]) {
+    const w = world(); w.mk('L1-KXBTC15M-T1'); await w.run({ enabled: v });
+    assert.strictEqual(w.posts.length, 0, 'enabled must be the literal true to sell, not ' + String(v));
+  }
+  const on = world(); on.mk('L1-KXBTC15M-T1'); await on.run();
+  assert.strictEqual(on.posts.length, 1, 'with the switch on and nothing else configured it sells: there is no mode to leave it in');
 };
 
-// E3: a bid above 70c does nothing; 70c itself triggers; a closed market, a crossed book and an empty bid do nothing.
+// E3: a bid above 50c does nothing; 50c itself triggers; a closed market, a crossed book and an empty bid do nothing. The old 70c line is gone: a bid of 70c, 69c or 60c sells nothing now.
 gates.E3 = async () => {
-  const up = world({ market: { yes_bid_dollars: '0.7100', yes_ask_dollars: '0.7300' } }); up.mk('L1-KXBTC15M-T1'); await up.run(); assert.strictEqual(up.posts.length, 0, '71c is not a trigger');
-  const at = world({ market: { yes_bid_dollars: '0.7000', yes_ask_dollars: '0.7200' } }); at.mk('L1-KXBTC15M-T1'); await at.run(); assert.strictEqual(at.posts.length, 1, '70c is');
+  const up = world({ market: { yes_bid_dollars: '0.5100', yes_ask_dollars: '0.5300' } }); up.mk('L1-KXBTC15M-T1'); await up.run(); assert.strictEqual(up.posts.length, 0, '51c is not a trigger');
+  const at = world({ market: { yes_bid_dollars: '0.5000', yes_ask_dollars: '0.5200' } }); at.mk('L1-KXBTC15M-T1'); await at.run(); assert.strictEqual(at.posts.length, 1, '50c is');
+  for (const [bid, ask] of [['0.7000', '0.7200'], ['0.6900', '0.7100'], ['0.6000', '0.6200']]) {
+    const old = world({ market: { yes_bid_dollars: bid, yes_ask_dollars: ask } }); old.mk('L1-KXBTC15M-T1'); await old.run();
+    assert.strictEqual(old.posts.length, 0, 'a bid of ' + bid + ' is above the line now, so the position is held');
+  }
   const closed = world({ market: { status: 'closed' } }); closed.mk('L1-KXBTC15M-T1'); await closed.run(); assert.strictEqual(closed.posts.length, 0, 'a market that is no longer open settles on its own');
-  const crossed = world({ market: { yes_bid_dollars: '0.6000', yes_ask_dollars: '0.5000' } }); crossed.mk('L1-KXBTC15M-T1'); await crossed.run(); assert.strictEqual(crossed.posts.length, 0, 'a crossed book is no quote');
+  const crossed = world({ market: { yes_bid_dollars: '0.4800', yes_ask_dollars: '0.4000' } }); crossed.mk('L1-KXBTC15M-T1'); await crossed.run(); assert.strictEqual(crossed.posts.length, 0, 'a crossed book is no quote, even with a bid under the line');
   const empty = world({ market: { yes_bid_dollars: '0.0000', yes_ask_dollars: '0.0100' } }); empty.mk('L1-KXBTC15M-T1'); await empty.run(); assert.strictEqual(empty.posts.length, 0, 'nothing bid is nothing to sell into');
+  // A fresh position cannot trigger the exit by itself: the bot buys at 88c to 97c, and the line is far below that band.
+  assert.ok(live.EXIT_THRESHOLD < live.L1_BAND[0] - 0.3, 'the line sits well under the entry band');
 };
 
 // E4: the sell is the right order for the position, sized to the order, and the record shows a realised result the loss stop and the pool can use.
@@ -83,18 +92,19 @@ gates.E4 = async () => {
   assert.strictEqual(w.posts.length, 1);
   const b = w.posts[0];
   assert.deepStrictEqual([b.side, b.count, b.time_in_force, b.client_order_id, b.ticker], ['ask', '20', 'immediate_or_cancel', 'X-KXBTC15M-T1-1', 'KXBTC15M-T1']);
-  assert.strictEqual(b.price, '0.54', 'a floor 15c under the bid it saw, so a collapsing book is not sold into at 1c');
+  assert.strictEqual(b.price, '0.34', 'a floor 15c under the bid it saw, so a collapsing book is not sold into at 1c');
   const d = w.docs.get('L1-KXBTC15M-T1');
   assert.deepStrictEqual([d.exitStatus, d.settled, d.result, d.exitCount], ['sold', true, 'exit', 20]);
-  const want = 20 * 0.69 - require('../functions/kalshiSignalLib.js').takerFee(0.69, 20) - 18.7;
+  const want = 20 * 0.49 - require('../functions/kalshiSignalLib.js').takerFee(0.49, 20) - 18.7;
   assert.ok(Math.abs(d.settledPnl - want) < 0.001, 'realised pnl = proceeds after the fee minus the order cost: ' + d.settledPnl + ' vs ' + want.toFixed(4));
   assert.ok(d.settledPnl < 0 && d.settledPnl > -18.7, 'a saved loss, smaller than holding it');
+  assert.ok(d.settledPnl < -8, 'at a 50c line a triggered exit still costs about 44c a contract on a 93c entry; it caps the loss, it does not make it small');
   assert.ok(w.events.some((e) => e.kind === 'exit'));
   // NO side: closed by a YES buy at a ceiling 15c over the yes ask; our NO bid is one minus the yes ask
-  const n = world({ market: { yes_bid_dollars: '0.2900', yes_ask_dollars: '0.3100' }, positions: [{ ticker: 'KXBTC15M-T1', position_fp: '-20.00' }], avg: '0.3100' });
+  const n = world({ market: { yes_bid_dollars: '0.4900', yes_ask_dollars: '0.5100' }, positions: [{ ticker: 'KXBTC15M-T1', position_fp: '-20.00' }], avg: '0.5100' });
   n.mk('L1-KXBTC15M-T1', { side: 'no' }); await n.run();
-  assert.deepStrictEqual([n.posts[0].side, n.posts[0].price, n.posts[0].count], ['bid', '0.46', '20'], 'NO: buy YES back, ceiling 46c');
-  assert.ok(Math.abs(n.docs.get('L1-KXBTC15M-T1').exitAvg - 0.69) < 1e-9, 'the NO sale price is one minus the YES price paid');
+  assert.deepStrictEqual([n.posts[0].side, n.posts[0].price, n.posts[0].count], ['bid', '0.66', '20'], 'NO: buy YES back, ceiling 66c');
+  assert.ok(Math.abs(n.docs.get('L1-KXBTC15M-T1').exitAvg - 0.49) < 1e-9, 'the NO sale price is one minus the YES price paid');
 };
 
 // E5: never more than the account holds, never when it holds nothing, and never a position that is not the bot's own record.
@@ -170,9 +180,11 @@ gates.E9 = async () => {
 gates.E10 = () => {
   const fn = idxSrc.slice(idxSrc.indexOf('exports.kalshiLiveExit = onSchedule('), idxSrc.indexOf('exports.kalshiLiveArmed = onSchedule('));
   assert.ok(/secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(fn) && /runExitWatch/.test(fn), 'the only function that can sell is declared with the key');
-  assert.ok(/exitMode/.test(fn) && /"log"/.test(fn), 'it reads the switch from the session, default log');
-  const setter = idxSrc.slice(idxSrc.indexOf('exports.kalshiExitMode = onCall'), idxSrc.indexOf('exports.kalshiL1Session = onCall'));
-  assert.ok(/assertKalshiAdmin/.test(setter) && /EXIT_MODES/.test(setter) && /HttpsError/.test(setter), 'admin only, and only the three named modes');
+  const code = fn.replace(/\/\/.*$/gm, '');
+  assert.ok(!/exitMode|EXIT_MODES|\bmode\b/.test(code), 'it reads no mode from the session: a stored exitMode of off or log cannot stop the sells');
+  assert.ok(/runExitWatch\(\{\s*store, fetchFn: fetch,/.test(code), 'and passes none');
+  const all = idxSrc.replace(/\/\/.*$/gm, '');
+  assert.ok(!/kalshiExitMode|kalshiPoolRule/.test(all), 'neither setter callable exists, so nothing can change the exit or the pool rule from the page');
   assert.ok(idxSrc.indexOf('exports.kalshiLiveExit') < idxSrc.indexOf('exports.kalshiBookRecorder'), 'the recorder stays last');
 };
 
