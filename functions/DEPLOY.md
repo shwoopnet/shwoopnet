@@ -1,10 +1,7 @@
-# Deploying the Finnhub proxy
+# Deploying the functions
 
-This replaces the hardcoded Finnhub API key that used to live in plaintext in
-`index.html` (visible to anyone who read the page source or the public repo,
-and shared/rate-limited across every browser that loaded the site). Market
-data calls now go through these four Cloud Functions instead of straight from
-the browser to Finnhub.
+The functions in this folder are the Kalshi relay, the order-book recorder, the live bot and its exit watch, and the paper-only
+opening window recorder. The Finnhub proxy that used to open this file was removed on 2026-10-12 (see "The blank slate" at the end).
 
 ## One-time setup
 
@@ -17,48 +14,18 @@ the browser to Finnhub.
 2. **Blaze plan required.** Cloud Functions (2nd gen) need billing enabled on
    the `shwoopnet` Firebase project, even though actual usage here is tiny
    (well within the free monthly quota). Enable it at
-   console.firebase.google.com → shwoopnet → Upgrade, if not already on Blaze.
+   console.firebase.google.com, shwoopnet, Upgrade, if not already on Blaze.
 
-3. **Store the Finnhub key as a secret** (this is the same key that used to
-   be hardcoded — grab it from your Finnhub dashboard or the old commit
-   history if you don't have it handy):
-   ```
-   firebase functions:secrets:set FINNHUB_API_KEY
-   ```
-   Paste the key when prompted. It's stored in Google Secret Manager, not in
-   this repo.
+3. **Pull `main` first.** `firebase deploy` compares what is deployed with what is in YOUR checkout and offers to delete anything
+   missing from it. A stale checkout therefore lists real functions for deletion. Run `git checkout main && git pull`, then check
+   the deletion list against the one named in the section you are deploying. Answer no to anything else.
 
 ## Deploy
 
 From the repo root:
 ```
-firebase deploy --only functions
+firebase deploy --only functions,firestore:rules
 ```
-
-This deploys two callables: `finnhubQuote` and `finnhubCompanyNews`. Each one checks that the
-caller has a real signed-in Firebase Auth token (matching firestore.rules'
-own model: any account with a real `users/{uid}` document, not one specific
-owner email) before it will spend the Finnhub key on a request — so the
-function URLs being technically public doesn't open the key back up.
-Account creation itself is invite-gated (see firestore.rules), not these
-functions.
-
-## After deploying
-
-Nothing else to change in `index.html` — it's already wired to call these
-functions via the Firebase SDK (`window.__shwoopAPI.finnhubQuote(...)` etc. in
-the `<script type="module">` block). Reload the deployed page and the Brief
-page / quote loop should pull data through the proxy automatically. Check the
-Functions logs (`firebase functions:log`) if something doesn't load — a 403
-there means the request had no signed-in token at all, not a Finnhub
-problem.
-
-## If you'd rather not deploy this yet
-
-The old direct-to-Finnhub code path has been fully removed from `index.html`,
-so until this is deployed, the Brief page's quotes/news/earnings and the
-per-trade news alerts will fail closed (console errors, "Couldn't load..."
-placeholders) rather than silently falling back to the old exposed key.
 
 ## Kalshi page (admin only)
 
@@ -295,3 +262,33 @@ What it can and cannot do, and why the line is a decision and not a result, is i
 ## Ethereum is a regular live market (no switch)
 
 Since Oct 10, 2026 Ethereum trades live with Bitcoin and gold by the same rule, size, loss stop, pool and exit; there is no "Ethereum live" setting and the `kalshiExtraSeries` callable is gone. Deploy with `firebase deploy --only functions`. It trades as soon as the new function is live and `KALSHI_LIVE_ENABLED=on`. Its money must be on its own shard (the bot skips it with the reason otherwise), and when a window's combined limit is reached Ethereum is the one that goes without. To stop trading it, the only ways are to pause the bot or to change the code's `L1_SERIES` list.
+
+
+## The opening window paper recorder (`kalshiOpeningTick`, OW1)
+
+Scheduled once a minute with NO secrets: it holds no key, signs nothing, calls no `/portfolio` endpoint and cannot place an order (the
+tests pin each). About 10 minutes before a close it records, on paper, what two rules would have bought (an early favourite at 82c to 87c
+and an early underdog at 20c to 30c) in `kalshiOpeningOrders`, with a heartbeat in `kalshiOpeningControl/state`; both are admin read only
+and written only by this function. It is not behind `CODE_KILL_SWITCH` because it cannot trade. The rules, predictions and read dates are
+in `kalshi-scalper/README.md` ("Pre-registration: OW1") and `docs/OPENING_STRATEGY.md`.
+
+    firebase deploy --only functions,firestore:rules
+
+## The blank slate (Oct 12, 2026)
+
+The site is the Market Brief, the Kalshi page and Settings. The trading pages, the Alpaca, Finnhub and Twelve Data integrations and
+creating an account from the page were removed at the owner's request. What that means here:
+
+- **Functions.** `finnhubQuote` and `finnhubCompanyNews` and the `FINNHUB_API_KEY` secret are gone from the code. Deploying asks whether to
+  delete the two functions: answer yes. Then `firebase functions:secrets:destroy FINNHUB_API_KEY`.
+- **Rules.** A browser can no longer create a `users` document, and the `invites` collection has no rule. Deploy with
+  `firebase deploy --only firestore:rules` (or with the functions, as above). Existing accounts, the admin flag and the live-credential
+  guard are untouched.
+- **Sign-up in Firebase Authentication.** The page no longer offers it, but the Auth API still accepts a sign-up from anyone holding the
+  public web key. Turn it off in the Firebase console (Authentication, Settings, User actions, untick "Enable create (sign-up)"). That is
+  the one step the code cannot do.
+- **The Twelve Data proxy secret.** It sat in `index.html` in plaintext for months and is in the public history of this repository. The
+  page no longer sends it, but treat it as leaked: rotate it on shwoop-server, or remove the `/twelvedata` route there.
+- **Left behind on purpose.** `users/{uid}` documents still carry the old fields (`journalEntries`, `alpacaKeyId`, `alpacaSecretKey` and
+  the rest). The page ignores them. **shwoop-server still reads them and still trades Alpaca for any account that has keys stored**, with no
+  page left to see it or pause it. Stopping that is done on the server or by deleting those fields in the console, not here.
