@@ -27,8 +27,7 @@ Make money on Kalshi without having to watch it. Right now one bot trades for yo
 | Find a second way to make money | Look at Kalshi markets other than the 15 minute crypto ones (daily weather, inflation and jobs numbers, crypto and stock ranges, news-driven markets) and check where free public data could beat the posted price | A ranked short list, each with a test written down before it runs |
 | Lower the Firebase bill | Already cut the busy work. Check the bill again in two days | The bill drops |
 | Fix two small risks in the bot | Pressing Flatten at the same moment the exit fires could sell twice. Positions you sell by hand are counted as if held to the end | Fixed and tested before the bot gets bigger |
-| Keep the Market Brief fresh | It needs a data source that does not cost money | Decide who feeds it |
-| Add a ticker for S&P, Nasdaq, Dow and bonds | The data is mostly already there | It shows on the page |
+| Keep the Market Brief fresh and add the ticker | Built: a free scheduled function writes prices and headlines every 5 minutes, and a strip shows S&P, Nasdaq, Dow, Russell, bonds, the 10 year yield, VIX, gold and Bitcoin | Check the strip fills after the next deploy |
 | Tidy the site | Cut the things you do not use | You pick what goes |
 
 ## How a new idea gets in

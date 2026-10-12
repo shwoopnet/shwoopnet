@@ -49,6 +49,7 @@ const live = require("./kalshiLiveLib");
 // deploy, stops all buying and Start with one token. The exit watch is untouched either way (it only closes positions the bot already opened).
 const CODE_KILL_SWITCH = false;
 const book = require("./kalshiBookLib");
+const marketTape = require("./marketTapeLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
 
@@ -395,6 +396,25 @@ exports.kalshiFlattenAll = onCall(
     }
     try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
     return { halted: true, ...out };
+  }
+);
+
+// ---- The market tape: prices for the ticker strip and the Brief, and a few headlines -------------------------------------------------------
+// Every 5 minutes, around the clock, with NO secrets: public Yahoo chart prices and the public CNBC and MarketWatch RSS feeds (marketTapeLib.js), written to the one document
+// shared/marketTape that every signed-in account reads. It places no order and holds no key. It replaces the Brief's dependence on shwoop-server (prices only between 08:00 and 17:00
+// Eastern, news behind a paid key). Quotes are merged into the stored document one symbol at a time, so a symbol or feed that fails keeps its older value with its own asOf
+// and the page says how old it is; `errors` names what failed on the last run.
+exports.marketTapeTick = onSchedule(
+  { schedule: "every 5 minutes", timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },
+  async () => {
+    ensureDefaultAdminApp();
+    const db = getFirestore();
+    const r = await marketTape.readTape({ fetchFn: fetch, now: Date.now() });
+    const patch = { updatedAt: Date.now(), errors: r.errors };
+    if (Object.keys(r.quotes).length) patch.quotes = r.quotes;
+    if (r.news) patch.news = r.news;
+    await db.collection("shared").doc("marketTape").set(patch, { merge: true });
+    console.log("marketTapeTick: quotes=" + Object.keys(r.quotes).length + " news=" + (r.news ? r.news.length : 0) + " errors=" + r.errors.length);
   }
 );
 

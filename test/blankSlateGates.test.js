@@ -43,7 +43,7 @@ gates.B2 = () => {
   assert.deepStrictEqual(methods, [
     'kalshiBookSnaps', 'kalshiBookStatus', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline',
     'onAuthChange', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
-    'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchSharedMarketSnapshot', 'watchUserDoc',
+    'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchMarketTape', 'watchSharedMarketSnapshot', 'watchUserDoc',
   ], 'the Firebase surface the page can reach');
   // No exit, pool or size setter: the exit is fixed at 50c and the pool rebuilds after every win, in the server code.
   assert.ok(!/setExit|setPool|exitMode|poolRule/i.test(mod), 'no setter for a risk setting');
@@ -115,11 +115,11 @@ gates.B7 = () => {
 
 // A snapshot adds symbols and prices and nothing else; the watchlist never invents a price.
 gates.B8 = () => {
-  const src = ['ensureInWatchlist', 'handleSharedMarketSnapshotUpdate'].map(fnSource).join('\n');
+  const src = ['ensureInWatchlist', 'tapeNews', 'handleSharedMarketSnapshotUpdate'].map(fnSource).join('\n');
   const calls = [];
   const watchlist = [{ sym: 'PLTR', price: null, prevClose: null }];
-  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderIndices', 'renderSentiment', 'renderBriefHeadline', 'renderMovers', 'renderMarketNews', 'renderEarningsCalendar',
-    src + '\nreturn { handle: handleSharedMarketSnapshotUpdate, ensure: ensureInWatchlist };')(watchlist, [], () => {}, () => {}, () => {}, () => {}, (n) => calls.push(['news', n]), () => {});
+  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderIndices', 'renderSentiment', 'renderBriefHeadline', 'renderMovers', 'renderMarketNews', 'renderEarningsCalendar', 'marketTapeData',
+    src + '\nreturn { handle: handleSharedMarketSnapshotUpdate, ensure: ensureInWatchlist };')(watchlist, [], () => {}, () => {}, () => {}, () => {}, (n) => calls.push(['news', n]), () => {}, null);
   f.handle(null);
   assert.deepStrictEqual(watchlist, [{ sym: 'PLTR', price: null, prevClose: null }], 'no snapshot yet leaves the page as it was');
   f.handle({ quotes: { PLTR: { price: 24.5, prevClose: 23.1 }, COIN: { price: 190, prevClose: 185 }, BAD: { price: null } }, news: [] });

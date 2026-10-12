@@ -452,6 +452,17 @@
   .index-card .ix-chg{ font-size:12px; margin-top:7px; display:block; }
   .index-card .ix-chg.up{ color:var(--gain); }
   .index-card .ix-chg.down{ color:var(--loss); }
+  /* The market strip (every page) and the Brief's "as of" line. No animation: a still row that scrolls sideways on a narrow screen. */
+  .tape{ display:flex; align-items:baseline; gap:14px; overflow-x:auto; white-space:nowrap; padding:8px 14px; margin:8px 28px 0 28px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); font-size:12px; scrollbar-width:thin; }
+  .tape-item{ display:inline-flex; gap:6px; align-items:baseline; }
+  .tape-name{ color:var(--muted); }
+  .tape-px{ font-weight:600; }
+  .tape-chg.up{ color:var(--gain); }
+  .tape-chg.down{ color:var(--loss); }
+  .tape-asof, .brief-asof{ color:var(--muted); font-size:11px; }
+  .tape-asof{ margin-left:auto; padding-left:12px; }
+  .tape-asof.stale, .brief-asof.stale{ color:var(--loss); }
+  .brief-asof{ margin:-6px 0 14px 2px; }
 
   .brief-section-title{
     font-family:'Public Sans', sans-serif; font-size:12px; text-transform:uppercase;
@@ -852,6 +863,14 @@
     // read-only from the client SDK) -- general market data that's the
     // same for everyone (index/watchlist quotes, headlines, earnings
     // calendar).
+    // The market tape: prices for the strip and the index cards, and a few headlines, written every 5 minutes by a keyless scheduled function (functions/marketTapeLib.js).
+    watchMarketTape: function(callback){
+      return onSnapshot(doc(db, 'shared', 'marketTape'), function(snap){
+        callback(snap.exists() ? snap.data() : null);
+      }, function(err){
+        console.error('Market tape sync error:', err);
+      });
+    },
     watchSharedMarketSnapshot: function(callback){
       return onSnapshot(doc(db, 'shared', 'marketSnapshot'), function(snap){
         callback(snap.exists() ? snap.data() : null);
@@ -1055,6 +1074,7 @@
   <!-- ================= MARKET BRIEF (HOME) ================= -->
   <div class="app-layout">
     <div class="app-pages">
+  <div class="tape" id="marketTape" role="region" aria-label="Markets" hidden></div>
   <main class="page" id="page-brief">
     <div class="brief-hero">
       <div class="brief-page-header">
@@ -1067,6 +1087,7 @@
     </div>
 
     <div class="brief-indices" id="indexSnapshot"></div>
+    <div class="brief-asof" id="briefAsOf"></div>
 
     <div class="brief-two-col">
       <div class="brief-col">
@@ -3113,6 +3134,7 @@
   }
   var userDocUnsubscribe = null;
   var sharedSnapshotUnsubscribe = null;
+  var tapeUnsubscribe = null;
   var currentUid = null;
 
   function escapeHtml(s){
@@ -3262,6 +3284,7 @@
     api.onAuthChange(function(user){
       if(userDocUnsubscribe){ userDocUnsubscribe(); userDocUnsubscribe = null; }
       if(sharedSnapshotUnsubscribe){ sharedSnapshotUnsubscribe(); sharedSnapshotUnsubscribe = null; }
+      if(tapeUnsubscribe){ tapeUnsubscribe(); tapeUnsubscribe = null; }
 
       if(user){
         if(forceReauthPending){
@@ -3292,6 +3315,7 @@
         // own. Before the first snapshot lands the cards read "Loading…"
         // (see indexReads) rather than a hardcoded level.
         sharedSnapshotUnsubscribe = api.watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate);
+        tapeUnsubscribe = api.watchMarketTape(handleMarketTapeUpdate);
         INDEX_PROXIES.forEach(function(ix){
           ensureInWatchlist(ix.sym, null, null);
         });
@@ -3468,6 +3492,8 @@
       var q = quotes[sym];
       if(!q || q.price == null) return;
       var existing = watchlist.filter(function(w){ return w.sym === sym; })[0];
+      // The market tape is newer than this snapshot for the three index proxies: never let an older price replace it.
+      if(existing && existing.tapeAsOf && existing.tapeAsOf >= (Number(q.priceAsOf) || 0)) return;
       if(existing){
         existing.price = q.price;
         existing.prevClose = q.prevClose;
@@ -3479,8 +3505,71 @@
     renderSentiment();
     renderBriefHeadline();
     renderMovers();
-    renderMarketNews(data.news);
+    renderMarketNews(tapeNews() || data.news);
     renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
+  }
+
+  // ---------- The market tape (strip on every page, index cards, headlines, "as of") ----------
+  // Prices here come from shared/marketTape, written every 5 minutes around the clock by a keyless function. The page makes no market-data call of its own.
+  var TAPE_ITEMS = [
+    { sym:'^GSPC', name:'S&P 500', kind:'index' }, { sym:'^NDX', name:'Nasdaq 100', kind:'index' }, { sym:'^DJI', name:'Dow', kind:'index' },
+    { sym:'^RUT', name:'Russell 2000', kind:'index' }, { sym:'^TNX', name:'10Y yield', kind:'yield' }, { sym:'TLT', name:'Long bonds', kind:'etf' },
+    { sym:'^VIX', name:'VIX', kind:'index' }, { sym:'GC=F', name:'Gold', kind:'future' }, { sym:'BTC-USD', name:'Bitcoin', kind:'crypto' }
+  ];
+  var TAPE_STALE_MS = 20 * 60 * 1000;
+  var marketTapeData = null;
+  function tapeNews(){ return marketTapeData && marketTapeData.news && marketTapeData.news.length ? marketTapeData.news : null; }
+  function tapeStateWord(s){ return s === 'pre' ? 'Pre-market' : (s === 'post' ? 'After hours' : (s === 'closed' ? 'Market closed' : 'Market open')); }
+  function tapeAsOfText(data, now){
+    var upd = data && Number(data.updatedAt);
+    if(!Number.isFinite(upd) || upd <= 0){ return { text: '', stale: false }; }
+    var spy = data.quotes && (data.quotes['^GSPC'] || data.quotes.SPY);
+    var word = spy && spy.state ? tapeStateWord(spy.state) + '. ' : '';
+    if(now - upd > TAPE_STALE_MS){ return { text: word + 'Prices last updated ' + kalDate(upd) + ' ' + kalTime(upd) + ' CT. The feed may be down.', stale: true }; }
+    return { text: word + 'Updated ' + kalTime(upd) + ' CT', stale: false };
+  }
+  function tapeItemHtml(item, q){
+    var money = function(v){ var d = v >= 1000 && item.kind === 'crypto' ? 0 : 2; return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+    if(!q || !(q.price > 0) || !(q.prevClose > 0)){
+      return '<span class="tape-item"><span class="tape-name">' + item.name + '</span><span class="tape-px mono">&mdash;</span></span>';
+    }
+    var d = item.kind === 'yield' ? (q.price - q.prevClose) * 100 : pct(q.price, q.prevClose);
+    var up = d >= 0;
+    var shown = item.kind === 'yield' ? q.price.toFixed(2) + '%' : money(q.price);
+    var chg = Math.abs(d).toFixed(item.kind === 'yield' ? 1 : 2) + (item.kind === 'yield' ? ' bp' : '%');
+    return '<span class="tape-item"><span class="tape-name">' + item.name + '</span><span class="tape-px mono">' + shown + '</span>' +
+      '<span class="tape-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + chg + '</span></span>';
+  }
+  function renderMarketTape(){
+    var el = document.getElementById('marketTape');
+    var asof = document.getElementById('briefAsOf');
+    var data = marketTapeData;
+    var now = Date.now();
+    if(!el){ return; }
+    if(!data || !data.quotes){ el.hidden = true; if(asof){ asof.textContent = ''; } return; }
+    var a = tapeAsOfText(data, now);
+    el.innerHTML = TAPE_ITEMS.map(function(it){ return tapeItemHtml(it, data.quotes[it.sym]); }).join('') +
+      (a.stale ? '<span class="tape-asof stale">' + escapeHtml(a.text) + '</span>' : '');
+    el.hidden = false;
+    if(asof){ asof.textContent = a.text; asof.className = 'brief-asof' + (a.stale ? ' stale' : ''); }
+  }
+  function handleMarketTapeUpdate(data){
+    marketTapeData = data || null;
+    if(data && data.quotes){
+      ['SPY', 'QQQ', 'DIA'].forEach(function(sym){
+        var q = data.quotes[sym];
+        if(!q || !(q.price > 0) || !(q.prevClose > 0)) return;
+        var existing = findQuote(sym);
+        if(existing){ existing.price = q.price; existing.prevClose = q.prevClose; existing.tapeAsOf = Number(q.asOf) || 0; }
+        else { watchlist.push({ sym: sym, price: q.price, prevClose: q.prevClose, tapeAsOf: Number(q.asOf) || 0 }); }
+      });
+      renderIndices();
+      renderSentiment();
+      renderBriefHeadline();
+      renderMovers();
+    }
+    renderMarketTape();
+    if(tapeNews()){ renderMarketNews(tapeNews()); }
   }
 
   // ---------- Market News & Earnings Calendar (signed-in accounts only) ----------
