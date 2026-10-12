@@ -28,7 +28,7 @@ Make money on Kalshi without having to watch it. Right now one bot trades for yo
 | Lower the Firebase bill | Already cut the busy work. Check the bill again in two days | The bill drops |
 | Fix two small risks in the bot | Pressing Flatten at the same moment the exit fires could sell twice. Positions you sell by hand are counted as if held to the end | Fixed and tested before the bot gets bigger |
 | Keep the Market Brief fresh and add the ticker | Built: a free scheduled function writes prices and headlines every 5 minutes, and a strip shows S&P, Nasdaq, Dow, Russell, bonds, the 10 year yield, VIX, gold and Bitcoin | Check the strip fills after the next deploy |
-| Tidy the site | Cut the things you do not use | You pick what goes |
+| Tidy the site | The look stays exactly as it is (Ledger palette, Mono Ink skin, the current layout). Nothing is cut unless you name it | Only on your request |
 
 ## How a new idea gets in
 
