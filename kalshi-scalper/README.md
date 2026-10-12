@@ -2711,6 +2711,40 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 
 **Limits.** The candle readout prices every entry at the ask of a minute candle and always fills; the recorder shows what fills. "10 minutes left" is a clock, not a state of the spot. Half of lane F's entries (274 of 549) sit in markets where L1 enters later, so a live F would stack on L1's exposure in the same window. Bitcoin and gold move together, and 29 days is one regime.
 
+## Pre-registration: OW2, the opening scalp that is flat before L1 buys (the owner's request; fixed 2026-10-12 before any OW2 rule was run on any market)
+
+**Why this exists.** The owner wants an opening-window trade that is opened, managed and closed within a few minutes and never holds a position while L1 does. L1 buys 5.5 to 6.7 minutes before a close (minute 8.3 to 9.5 of the quarter hour) and holds to settlement. OW1 holds to settlement and therefore overlaps it, which is why this is a separate rule and OW1 is left exactly as registered.
+
+**Disclosure: what was looked at before this was written.** The cost arithmetic only. Kalshi's fee is `0.07 p (1 - p)` per contract on each leg: about 1.3c each way at 25c, 1.75c at 50c, so a round trip costs about 10% of a 25c stake and 7% of a 50c stake before the spread. A 10% target at 25c therefore nets about zero. The earlier opening scalps OP1 to OP3 (favourites at 70c to 90c, targets of 3c and 5c) were all `FALSIFIED` on 11,220 markets. No OW2 number had been computed when this section was committed. The 30 day history it runs on was backfilled after this commit.
+
+**The rules (fixed now).**
+- **Entry:** the market's first two minutes only: the minute candle that ends 840 s before the close, else the one that ends 780 s before. The side whose ask is inside the variant's band is bought at the ask. One leg per market, YES tried before NO, taker.
+- **Exit:** a later minute candle whose closing BID is at least entry ask times (1 + target); a candle's high or low is never used. If none, the position is sold at the closing bid of the candle that ends 480 s before the close. **Nothing is ever held past that candle**, which is 80 s before L1's earliest buy. A market with no valid candle at 480 s is not counted and is reported as unresolvable (never settled as if held).
+- **No stop** other than that time exit: a stop is a second parameter and nothing here is tuned.
+- **Costs:** taker fee `0.07 p (1 - p)` unrounded on both legs.
+
+**The four variants (the whole family, no others will be run).**
+
+| Variant | Band (ask) | Target |
+|---|---|---|
+| OW2-A | 0.20 to 0.40 | +10% |
+| OW2-B | 0.20 to 0.40 | +15% |
+| OW2-C | 0.40 to 0.80 | +10% |
+| OW2-D | 0.40 to 0.80 | +15% |
+
+**Counterparty.** The taker who paid an early opening move at the open, before the market had settled on a price. The claim is that early prices overshoot and the 10% to 15% retrace is paid back inside five minutes. The prior is against it: spike-fade scalps (S27 to S37) and the opening favourite scalps (OP1 to OP3) were falsified, and the cost per round trip is the same size as the target.
+
+**Numeric predictions, before the first run.** Net per contract **-2c to -5c** for A and B (fees and spread are about the size of the gross move), **-1c to -3c** for C and D, a target hit rate of 25% to 45% for the 10% targets and 15% to 35% for the 15% targets, and **no variant passes**. A passing variant is an audit trigger first: check the entry candle ends 840 s or 780 s before the close, the exit never reads a candle that ends before the entry, and no exit is after the 480 s candle.
+
+**Kill criteria** (the common bar, per variant, any one gives `FALSIFIED`): fewer than 300 entries or fewer than 5 days is `NOT_ENOUGH_DATA` (says nothing about the idea); a day-clustered z below 2.5; a mean not above zero in BOTH halves of the history split at the midpoint; a mean not above zero with fees 20% higher. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. There is no `promote`.
+
+**Reading rule.** `python -m scalper.backfill 30` then `python -m scalper.ow2`. **One read on the 30 day history.** If a variant is `NOT_YET_FALSIFIED` it earns a forward paper test in its own recorder and its own collections (never `kalshiOpeningOrders`, never L1's), read once on a date written down then. It earns nothing else: there is no path to real money from this section.
+
+**Isolation from L1, written now.** Any recorder for this idea has its own scheduled function, its own collections, no Kalshi key, no signing, no portfolio call and no POST, and shares no document with L1. It cannot hold a position during L1's buy window by construction, because the rule above closes it first.
+
+**Count.** Four variants: **2,597 once run** (2,593 after OW1). Registered, not yet run.
+
+**Limits.** Minute candles hide what happens inside a minute, so an intrabar touch of the target is never credited (conservative), and a fill at the candle's closing ask or bid is assumed (optimistic where the book is thin). A taker round trip crosses the spread twice; the closing quotes already include that.
 ## Pre-registration: OW3, OW4, OW7, three hold-to-settlement contrasts (the owner asked for new strategies; fixed 2026-10-12 before any of them was run)
 
 **Where they came from.** A research pass listed everything already tried (about 2,597 variants, every one `FALSIFIED` or `NOT_ENOUGH_DATA`) and proposed eight candidates, OW3 to OW10. None gives a different kind of exposure or is flat before L1 buys: a round trip costs about 1.3c of fees plus at least 1c of spread at 90c and about 3.5c plus spread at 50c, and every scalp family is already falsified on that arithmetic. So all of these hold to settlement and pay one fee. **Three of the eight are run.** OW5 (frozen gold feed) has about 49 windows in 31 days, so it can only ever return `NOT_ENOUGH_DATA`. OW6 (round-number asks), OW8 (hourly-bar close) and OW9 (turnover z-score) are weak rewordings of tried ideas or of OW4, and each one run raises the bar for everything after it. OW10 (the 08:00 UTC Deribit expiry) has 15 entries a month. None of those five is run. **A subset of L1 can only remove entries from L1; it cannot create a new strategy.** OW4 and OW7 are therefore tests of whether L1 could be filtered, not new trades.
