@@ -38,6 +38,7 @@ function main() {
     var document = {
       getElementById: function(id){ return PAGES[id] || null; },
       querySelectorAll: function(){ return []; },
+      querySelector: function(){ return null; },   // showPage widens the app shell for Kalshi through this; a missing shell is simply skipped
     };
     var window = { scrollTo: function(x, y){ SCROLL_CALLS.push([x, y]); } };
     var history = { replaceState: function(){} };

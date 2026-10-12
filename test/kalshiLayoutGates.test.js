@@ -446,12 +446,12 @@ gates.Y31 = () => {
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
 };
 
-// Y32 and Y33: the exit watch's switch, and how an exited trade is shown (its realised result, not "held to settlement"; the sell fill is not a trade of its own).
+// Y32 and Y33: the exit watch has no switch on the page (the owner removed it on Oct 12, 2026: fixed at 50c, always selling), and how an exited trade is shown (its realised result, not "held to settlement"; the sell fill is not a trade of its own).
 gates.Y32 = () => {
-  assert.ok(/<select id="kalExitMode"><option value="off">Off<\/option><option value="log">Log only<\/option><option value="sell">Sell<\/option><\/select>/.test(html), 'the three modes');
-  assert.ok(/kalshiExitMode: function\(mode\)/.test(html) && /httpsCallable\(functions, 'kalshiExitMode'\)/.test(html), 'the page can set it');
-  assert.ok(/want === 'sell' && !window\.confirm\(/.test(html), 'Sell asks first; Log only and Off do not');
-  assert.ok(/exitSel\.value = \(s && \['off', 'log', 'sell'\]\.indexOf\(s\.exitMode\) > -1\) \? s\.exitMode : 'log'/.test(html), 'the switch shows the server\'s mode, log by default');
+  assert.ok(!/kalExitMode|kalExitMsg|kal-exitrow|kalshiExitMode/.test(html), 'the exit selector, its saver and its callable are gone from the page, so it cannot be turned down in a bad hour');
+  assert.ok(!/want === 'sell' && !window\.confirm|Log only|Sell mode/.test(html), 'and so is the old confirm dialog and the log only wording');
+  assert.ok(/<b>Exit at 50c \(fixed, always on\)\.<\/b>/.test(html), 'the rules and limits fold says the exit is 50c and always on');
+  assert.ok(!/Exit at 70c|falls to 70c/.test(html), 'no page text still describes the old 70c line');
 };
 gates.Y33 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
@@ -466,12 +466,12 @@ gates.Y33 = () => {
   assert.ok(f.kalshiTradePnl({ count: 20, price: '0.915' }, held, 'no').pnl < -18, 'a trade held to settlement is computed as before');
 };
 
-// Y34: the pool rule's switch on the page: two rules, 'After every win' asks first, the switch shows the server's rule (the original by default).
+// Y34: the pool rule has no switch on the page (removed Oct 12, 2026: it always rebuilds after every win). The page still reports which rule the server says it used.
 gates.Y34 = () => {
-  assert.ok(/<select id="kalPoolRule"><option value="highs">after new profit highs<\/option><option value="wins">after every win<\/option><\/select>/.test(html));
-  assert.ok(/kalshiPoolRule: function\(rule\)/.test(html) && /httpsCallable\(functions, 'kalshiPoolRule'\)/.test(html), 'the page can set it');
-  assert.ok(/want === 'wins' && !window\.confirm\(/.test(html), 'the riskier rule asks first');
-  assert.ok(/poolSel\.value = s && s\.poolRule === 'wins' \? 'wins' : 'highs'/.test(html), 'the original rule by default');
+  assert.ok(!/kalPoolRule|kalPoolMsg|kal-poolrow|kalshiPoolRule/.test(html), 'the pool selector, its saver and its callable are gone from the page');
+  assert.ok(!/want === 'wins' && !window\.confirm/.test(html), 'and so is its confirm dialog');
+  assert.ok(/<b>Reinvest pool rebuilds after every win \(fixed, always on\)\.<\/b>/.test(html), 'the rules and limits fold says so');
+  assert.ok(/ses\.sizePoolRule === 'wins' \? 'after every win' : 'after new profit highs'/.test(html), 'the read-out still names the rule the server reports using');
 };
 
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
@@ -486,16 +486,24 @@ gates.Y37 = () => {
   const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
   const f = new Function(['kalshiOrderPnl', 'kalshiExitReport', 'kalshiExitHtml'].map(grab).join('\n') + '; return { kalshiExitReport, kalshiExitHtml };')();
   const base = { side: 'yes', count: 10, fillCount: '10', maxCost: 9.6, strategy: 'L1' };
-  const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.69, exitAvg: 0.66, settled: true, result: 'exit', settledPnl: -3.0 });
-  const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.68 }, settled: true, result: 'no', settledPnl: -9.6 });
-  const heldWon = Object.assign({}, base, { ticker: 'C', exitShadow: { bid: 0.7 }, settled: true, result: 'yes', settledPnl: 0.4 });
+  const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.49, exitAvg: 0.46, settled: true, result: 'exit', settledPnl: -3.0 });
+  const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.48 }, settled: true, result: 'no', settledPnl: -9.6 });
+  const heldWon = Object.assign({}, base, { ticker: 'C', exitShadow: { bid: 0.5 }, settled: true, result: 'yes', settledPnl: 0.4 });
   const untouched = Object.assign({}, base, { ticker: 'D', settled: true, result: 'yes', settledPnl: 0.4 });
   const r = f.kalshiExitReport([sold, heldLost, heldWon, untouched], { A: 'no' });
   assert.deepStrictEqual([r.touched, r.sold, r.loggedOnly], [3, 1, 2], 'an order the watch never touched is not counted');
   assert.ok(Math.abs(r.avgSlip - 0.03) < 1e-9, 'slip is the trigger bid minus the fill: ' + r.avgSlip);
   assert.strictEqual(r.realised, -3.0);
   assert.ok(Math.abs(r.exitMinusHold - (-3.0 - (-9.6))) < 1e-9 && r.holdKnownSold === 1, 'selling beat holding by $6.60 where the market went against us');
-  assert.deepStrictEqual([r.known, r.recovered], [3, 1], 'recovered = the side won after touching 70c');
+  assert.deepStrictEqual([r.known, r.recovered], [3, 1], 'recovered = the side won after touching 50c');
+  // Records taken under the earlier 70c line (trigger bid above 50c) are not a fall to 50c: they are counted apart and never mixed into figures labelled 50c.
+  const older = Object.assign({}, base, { ticker: 'E', exitShadow: { bid: 0.69 }, settled: true, result: 'yes', settledPnl: 0.4 });
+  const oldSold = Object.assign({}, base, { ticker: 'F', exitStatus: 'sold', exitCount: 10, exitBid: 0.7, exitAvg: 0.68, settled: true, result: 'exit', settledPnl: -2.0 });
+  const mixed = f.kalshiExitReport([sold, heldLost, heldWon, untouched, older, oldSold], { A: 'no' });
+  assert.deepStrictEqual([mixed.touched, mixed.earlier], [3, 2], 'two records from the 70c line are set apart, the three real 50c touches are counted');
+  assert.strictEqual(mixed.realised, -3.0, 'and the earlier sale is not added into the 50c result');
+  const out = f.kalshiExitHtml(mixed, (x) => x, (x) => '$' + x.toFixed(2));
+  assert.ok(/Exit at 50c/.test(out) && /Positions that fell to 50c/.test(out) && /earlier 70c line, not counted here/.test(out), 'the block is labelled 50c and says how many earlier records it left out');
   const win = f.kalshiExitReport([Object.assign({}, sold)], { A: 'yes' });
   assert.ok(Math.abs(win.exitMinusHold - (-3.0 - 0.4)) < 1e-9, 'when the side would have won, selling was worse than holding by the win it gave up (fees included in cost)');
   assert.strictEqual(f.kalshiExitReport([Object.assign({}, sold)], null).holdKnownSold, 0, 'no market result, no hold comparison: never guessed');

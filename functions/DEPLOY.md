@@ -279,15 +279,19 @@ up the new flat stop at once, and size scaling only applies to a session started
 
 `kalshiSimTick` and `kalshiSimSession` no longer exist. When you deploy, Firebase will ask whether to delete those two functions: answer yes. The `kalshiSimOrders` and `kalshiSimControl` collections are left in Firestore (nothing reads them now; delete them in the console whenever you like).
 
-## The exit watch (sells the bot's own open positions when the price falls to 70c)
+## The exit watch (sells the bot's own open positions when the price falls to 50c)
 
-New: `kalshiLiveExit` (scheduled each minute, holds the live key, loops about every 10 seconds inside its run) and `kalshiExitMode` (the page's switch). Deploy with:
+`kalshiLiveExit` (scheduled each minute, holds the live key, loops about every 10 seconds inside its run). Deploy with:
 
 ```
 firebase deploy --only functions
 ```
 
-It starts in **log only**: it records on each order when it WOULD have sold and sells nothing. Change it on the Kalshi page (the bot menu, "Exit at 70c": Off, Log only, Sell). **Sell** asks for confirmation and places real sell orders. It needs the server's own `KALSHI_LIVE_ENABLED=on`, like buying. What it can and cannot do, and why 70c is a decision and not a result, is in `kalshi-scalper/README.md` ("Exploratory read ... Friday's loss" and "Pre-registration: X8"). If a sell's answer is ever lost it ends the bot's session and says so; check the Kalshi account before starting again.
+Since Oct 12, 2026 it is fixed at **50c** and always **sells**: there is no off / log only / sell switch. The same change removed the page's two switches, so `kalshiExitMode` and `kalshiPoolRule` no longer exist; when you deploy, Firebase will ask whether to delete those two functions: answer yes. The reinvest pool always rebuilds after every win. An old `exitMode` or `poolRule` left on the `kalshiLiveControl/session` document is ignored by everything.
+
+It needs the server's own `KALSHI_LIVE_ENABLED=on`, like buying; with that switch off it only records on each order when it WOULD have sold and sends nothing. It is **not** behind `CODE_KILL_SWITCH` (that stops buys and Start only), because it can only close a long the bot itself opened. So with the kill switch on and `KALSHI_LIVE_ENABLED=on`, the bot's own recent open positions would still be sold at 50c.
+
+What it can and cannot do, and why the line is a decision and not a result, is in `kalshi-scalper/README.md` ("Exploratory read ... Friday's loss", "Pre-registration: X8" and "The exit is now fixed at 50c"). If a sell's answer is ever lost it ends the bot's session and says so; check the Kalshi account before starting again.
 ## Ethereum is a regular live market (no switch)
 
 Since Oct 10, 2026 Ethereum trades live with Bitcoin and gold by the same rule, size, loss stop, pool and exit; there is no "Ethereum live" setting and the `kalshiExtraSeries` callable is gone. Deploy with `firebase deploy --only functions`. It trades as soon as the new function is live and `KALSHI_LIVE_ENABLED=on`. Its money must be on its own shard (the bot skips it with the reason otherwise), and when a window's combined limit is reached Ethereum is the one that goes without. To stop trading it, the only ways are to pause the bot or to change the code's `L1_SERIES` list.

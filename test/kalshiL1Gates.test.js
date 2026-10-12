@@ -340,7 +340,7 @@ gates.N25 = async () => {
 // else is scheduled; it refuses to run beside a single armed test order; and the page asks twice.
 gates.N13 = () => {
   assert.ok(/exports\.kalshiL1Session = onCall\(async \(request\) => \{\s*await assertKalshiAdmin\(request\.auth\);/.test(fnSrc), 'admin only');
-  assert.ok(/ref\.set\(\{ \.\.\.live\.ownerSettings\(prior\), active: true, since: now, until: null,/.test(fnSrc), 'the session is written with no end time');
+  assert.ok(/ref\.set\(\{ active: true, since: now, until: null,/.test(fnSrc), 'the session is written with no end time');
   assert.ok(/KALSHI_LIVE_ENABLED\.value\(\) !== "on"/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiL1Session'))), 'refuses when the server switch is off');
   assert.ok(/live\.runL1Tick\(/.test(fnSrc.slice(fnSrc.indexOf('exports.kalshiLiveArmed'))), 'run by the scheduled function');
   assert.ok(/if \(sessionOn && !armedOn\)/.test(fnSrc), 'never beside an armed single test');
@@ -616,10 +616,23 @@ gates.P4 = () => {
   assert.deepStrictEqual(a, live.foldSkim(st, [o('a', 1, 2), o('b', 2, -1), o('c', 3, 3)], { everyWin: false }), 'everyWin false is the original');
 };
 gates.P5 = () => {
+  // The owner removed the pool-rule switch on Oct 12, 2026: the pool always rebuilds after every win, and nothing stored or callable can bring the original rule back.
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
-  assert.ok(/foldSkim\(rv\.state, recentList, \{ everyWin: session\.poolRule === "wins" \}\)/.test(fnSrcLib()), 'the tick reads the owner\'s rule from the session');
-  const setter = idx.slice(idx.indexOf('exports.kalshiPoolRule = onCall'), idx.indexOf('exports.kalshiL1Session = onCall'));
-  assert.ok(/assertKalshiAdmin/.test(setter) && /rule !== "highs" && rule !== "wins"/.test(setter) && /HttpsError\("unavailable"/.test(setter), 'admin only, two named values, a named failure');
+  const lib = fnSrcLib().replace(/\/\/.*$/gm, '');
+  assert.ok(/foldSkim\(rv\.state, recentList, \{ everyWin: true \}\)/.test(lib), 'the tick always passes everyWin');
+  assert.ok(!/session\.poolRule|\.poolRule\b/.test(lib) && !/poolRule|kalshiPoolRule/.test(idx.replace(/\/\/.*$/gm, '')), 'nothing reads a stored pool rule and no callable sets one');
+};
+gates.P6 = async () => {
+  // Through a real tick: win, loss, win. After a loss the old rule waits for a new high, so it ends with an empty pool; "after every win" has refilled by half of the last win.
+  // A stored poolRule of "highs" (what the removed switch used to write) must not bring the old rule back.
+  const o = (id, ts, pnl) => ({ strategy: 'L1', ticker: 'KXBTC15M-OLD-' + id, series: 'KXBTC15M', side: 'yes', count: 3, fillCount: '3.00', maxCost: 2.79, ts, status: 'filled', settled: true, settledPnl: pnl, result: pnl > 0 ? 'yes' : 'no' });
+  const w = world({ session: { sizing: true, poolRule: 'highs' }, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }] } });
+  w.docs.set('a', o('a', NOW - 3 * 3600000, 0.6)); w.docs.set('b', o('b', NOW - 2 * 3600000, -10.5)); w.docs.set('c', o('c', NOW - 3600000, 0.6));
+  const saved = [];
+  await tick(w, { sizingState: { cap: 3, base: 600, reviewedAt: NOW - 1000, pool: 0, saved: 0, cum: 0, hwm: 0, appliedTs: NOW - 4 * 3600000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
+  assert.strictEqual(saved.length, 1, 'the folded state was saved');
+  assert.ok(Math.abs(saved[0].pool - 0.3) < 1e-9, 'the pool refilled by half of the win that followed the loss (' + saved[0].pool + '), which the original rule would have left at 0');
+  assert.strictEqual(w.sess.sizePoolRule, 'wins', 'and the page is told which rule is in use');
 };
 function fnSrcLib() { return require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8'); }
 // X1 to X8: Ethereum is a regular live market (the owner folded it in, Oct 10, 2026): same rule, size, stop and exit as Bitcoin and gold, only series on the code's list, Solana never.
@@ -729,21 +742,20 @@ gates.K2 = () => {
   assert.ok(Math.abs(f.pool - 0.2) < 1e-9 && f.appliedTs === 200, 'and counts nothing past it');
   assert.strictEqual(live.foldSkim(st, [row(200, 0.4, true)], { everyWin: true }).blocked, null, 'nothing blocked when everything settled');
   const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
-  assert.ok(/sizePoolRule: session\.poolRule === "wins" \? "wins" : "highs", sizePoolThrough: sizeState\.appliedTs, sizePoolBlocked: fs\.blocked \? fs\.blocked\.ticker : null/.test(src), 'the tick saves them');
+  assert.ok(/sizePoolRule: "wins", sizePoolThrough: sizeState\.appliedTs, sizePoolBlocked: fs\.blocked \? fs\.blocked\.ticker : null/.test(src), 'the tick saves them');
   const html = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(/Pool rule in use/.test(html) && /Counted through/.test(html) && /waiting on /.test(html), 'the page shows them');
 };
 
-// K1: pressing Start must not undo the owner's switches. It replaces the session document, and once reset the exit to log only, the pool to "after new highs" and Ethereum to off,
-// while the page's own menu still looked configured.
+// K1: pressing Start can no longer undo the owner's risk settings, because there are none to undo. It replaces the session document, and it once reset the exit to log only and the pool to "after new highs"
+// while the page's menu still looked configured (Oct 10, 2026). The switches were removed on Oct 12, 2026: the exit (50c, always selling) and the pool (after every win) are fixed in the code, so a restart
+// cannot leave either one in a different state, and an old exitMode or poolRule left on the document is not read by anything.
 gates.K1 = () => {
-  const prior = { active: false, exitMode: 'sell', exitModeAt: 1, poolRule: 'wins', poolRuleAt: 2, liveExtra: { KXETH15M: 50 }, liveExtraAt: 3, ordersSent: 99, sizeCap: 12, peakNet: 4 };
-  assert.deepStrictEqual(live.ownerSettings(prior), { exitMode: 'sell', exitModeAt: 1, poolRule: 'wins', poolRuleAt: 2 }, 'only the two switches are carried, nothing else about the old run');
-  assert.deepStrictEqual(live.ownerSettings({ exitMode: 'log' }), { exitMode: 'log' }, 'a switch never set stays unset (the defaults apply)');
-  assert.deepStrictEqual(live.ownerSettings(null), {});
+  assert.strictEqual(live.ownerSettings, undefined, 'no owner switches are carried across a Start');
+  assert.strictEqual(live.OWNER_SETTINGS, undefined);
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const start = idx.slice(idx.indexOf('exports.kalshiL1Session = onCall'), idx.indexOf('// ---- Flatten all + halt'));
-  assert.ok(/const prior = \(await ref\.get\(\)\)\.data\(\) \|\| \{\};\n\s*await ref\.set\(\{ \.\.\.live\.ownerSettings\(prior\), active: true,/.test(start), 'Start reads the old document and writes the switches back');
+  assert.ok(/await ref\.set\(\{ active: true, since: now,/.test(start) && !/ownerSettings|prior/.test(start.replace(/\/\/.*$/gm, '')), 'Start writes a fresh session document and reads nothing from the old one');
 };
 
 // K3: the code-level kill switch. While it is on, the scheduled tick is told live trading is off whatever the server switch says, and the bot cannot be started.

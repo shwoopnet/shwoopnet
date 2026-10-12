@@ -483,8 +483,8 @@ async function botRisk({ store, since, fetchFn, nowMs }) {
 // pool and switches the add-on off for a week. Orders are folded in once, in time order, behind a cursor that only moves past a run of orders that have
 // all settled, so an older order settling late is never skipped and nothing is counted twice. Orders from before the state existed are history. Pure.
 const SKIM_REINVEST = 0.5;
-// opts.everyWin (the owner's choice, Oct 10, 2026, session.poolRule "wins"): the pool rebuilds from half of EVERY win and loses every loss, so after a loss it starts filling at once instead of waiting
-// to get back above the old high. Savings are untouched: they still take half of a NEW high only. Why not the literal "restart the high-water mark on every loss": that makes half of every win
+// opts.everyWin (the owner's choice, Oct 10, 2026; fixed on, with no setting, on Oct 12, 2026: runL1Tick always passes true): the pool rebuilds from half of EVERY win and loses every loss, so after a loss it starts filling at once instead of waiting
+// to get back above the old high. The original "new highs" rule stays here only as the default of this pure function, the baseline its replay tests and the README table compare against. Savings are untouched: they still take half of a NEW high only. Why not the literal "restart the high-water mark on every loss": that makes half of every win
 // a saving, savings never absorb a loss, so the sizing balance (cash minus savings) shrinks while the account is flat; replayed on 69 days it more than halved the 90 day gain. Rebuilding only the pool
 // (a bookkeeping allowance, not segregated money) kept the profit and raised it about 47%, at about 60% deeper drawdowns: README, "Pool rebuilds after every win".
 function foldSkim(state, orders, opts = {}) {
@@ -518,15 +518,6 @@ function skimAddon(state, now, perContract = 0.93) {
 // One minute of the session. session = {active, startCash, ordersSent}; setSession merges fields into it.
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
-// The owner's own switches on the session document (exit mode and pool rule). Starting the bot REPLACES that document, so these are read first and written back:
-// before this, pressing Start quietly set the exit back to "log only" and the pool back to "after new highs" (Oct 10, 2026), while the page still read as configured.
-const OWNER_SETTINGS = ["exitMode", "exitModeAt", "poolRule", "poolRuleAt"];
-function ownerSettings(prior) {
-  const out = {};
-  if (prior && typeof prior === "object") for (const k of OWNER_SETTINGS) if (prior[k] !== undefined) out[k] = prior[k];
-  return out;
-}
-
 // A window is the 15 minutes a market closes in, shared by every series: the part of the ticker after the series name (KXBTC15M-26OCT101200-00 gives 26OCT101200).
 const L1_WINDOW_CAP_FRACTION = 0.045;
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
@@ -567,13 +558,14 @@ async function runL1Tick(args) {
     // The weekly review sees the balance WITHOUT what has been skimmed to savings, so saved profit is never sized up on.
     const priorSaved = args.sizingState && Number.isFinite(args.sizingState.saved) ? args.sizingState.saved : 0;
     const rv = reviewSizing(args.sizingState, Math.max(0, cash - priorSaved), now);
-    const fs = foldSkim(rv.state, recentList, { everyWin: session.poolRule === "wins" });
+    // The pool always rebuilds after every win. Nothing stored on the session document can change that (the owner removed the switch, Oct 12, 2026).
+    const fs = foldSkim(rv.state, recentList, { everyWin: true });
     sizeState = { ...rv.state, pool: fs.pool, saved: fs.saved, cum: fs.cum, hwm: fs.hwm, appliedTs: fs.appliedTs };
     sizeCap = sizeState.cap; sizeBase = sizeState.base; sizeAddon = skimAddon(sizeState, now);
     if ((rv.changed || fs.changed) && args.setSizingState) {
       try { await args.setSizingState(sizeState); } catch (e) { await note("The size review could not be saved, so nothing was sent."); return { skipped: "size review unsaved" }; }
     }
-    await setSession({ sizeCap, sizeAddon, sizePool: sizeState.pool, sizePoolRule: session.poolRule === "wins" ? "wins" : "highs", sizePoolThrough: sizeState.appliedTs, sizePoolBlocked: fs.blocked ? fs.blocked.ticker : null, sizeSaved: sizeState.saved, sizeBase: Number(sizeBase.toFixed(2)), sizeNextReview: rv.state.reviewedAt + SCALE_REVIEW_MS });
+    await setSession({ sizeCap, sizeAddon, sizePool: sizeState.pool, sizePoolRule: "wins", sizePoolThrough: sizeState.appliedTs, sizePoolBlocked: fs.blocked ? fs.blocked.ticker : null, sizeSaved: sizeState.saved, sizeBase: Number(sizeBase.toFixed(2)), sizeNextReview: rv.state.reviewedAt + SCALE_REVIEW_MS });
   }
   const stopAt = sizing ? L1_SIZED_STOP_FRACTION * sizeBase : L1_LOSS_STOP;
   // Optional high-point stop (chosen when the session starts): the stop is measured from the best SETTLED result the session has reached, so gains
@@ -700,22 +692,22 @@ async function runL1Tick(args) {
   return { ok: true, results };
 }
 
-// ---- The exit watch (the owner's decision, Oct 10, 2026) ---------------------------------------------------------------------------------
+// ---- The exit watch (the owner's decision, Oct 10, 2026; fixed at 50c and always selling, Oct 12, 2026) -----------------------------------------
 // L1 holds every trade to settlement, so a favourite that reverses costs the whole stake. This watches the bot's OWN open L1 positions every few seconds and, when the
-// side's bid falls to EXIT_THRESHOLD (70c) or lower, sells them. Why 70c and why it is behind a switch: README, "Exploratory read ... Friday's loss" and "Pre-registration: X8".
-// The 24 hour read that suggested 70c is three losses, and the 67 day test of exits (X1 to X7) found they cost winners that recover; X8 is the fresh-data test. So the owner chooses:
-//   off  - nothing.   log - records when it WOULD have sold (exitShadow on the order) and sells nothing (the default).   sell - sells, for real.
+// side's bid falls to EXIT_THRESHOLD (50c) or lower, sells them. It began at 70c behind an off / log only / sell switch (README, "Exploratory read ... Friday's loss" and
+// "Pre-registration: X8"); the owner removed the switch and moved the line to 50c on Oct 12, 2026, so there is no mode any more and nothing stored on the session
+// document can turn it off. A 50c line is a later, looser stop than 70c: it stops fewer winners that would have recovered and keeps less of a slide.
+// The one thing that makes it record instead of sell is the server's own live switch being off (`enabled`): it then logs when it WOULD have sold (exitShadow on the order) and sends nothing.
 // What it will not do, by construction:
 //   - touch a position that is not one of the bot's own records (it iterates the bot's order documents, nothing else), or sell more than that order filled;
 //   - sell unless the live account actually holds the position (a YES sell on a position that is already gone would OPEN the opposite one);
 //   - send the same sell twice (the sell is claimed atomically on the order document and carries a fixed client order id), or retry an answer that was lost;
 //   - ever buy: its only order is an immediate-or-cancel close of an existing long.
 // A lost answer to a sell ends the bot's session and says so, like a lost answer to a buy.
-const EXIT_THRESHOLD = 0.70;
+const EXIT_THRESHOLD = 0.50;
 const EXIT_SLIPPAGE = 0.15;          // how far past the bid it saw the immediate-or-cancel sell may go; it still fills at the book's own prices
 const EXIT_MAX_TRIES = 3;
 const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
-const EXIT_MODES = ["off", "log", "sell"];
 
 function exitBody(ticker, side, count, limit, cid, exchangeIndex) {
   if (!Number.isInteger(count) || count < 1 || count > L1_ORDER_CEILING) throw new Error("refusing to build an exit for " + count + " contracts");
@@ -730,10 +722,9 @@ function exitBody(ticker, side, count, limit, cid, exchangeIndex) {
 }
 
 async function runExitWatch(args) {
-  const { mode, store, fetchFn, keyId, pem, now, enabled, setSession, logEvent, threshold = EXIT_THRESHOLD } = args;
-  if (!EXIT_MODES.includes(mode) || mode === "off") return { skipped: "off" };
+  const { store, fetchFn, keyId, pem, now, enabled, setSession, logEvent, threshold = EXIT_THRESHOLD } = args;
   const log = async (kind, detail) => { if (logEvent) { try { await logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
-  const selling = mode === "sell" && enabled === true;
+  const selling = enabled === true;
   const r4 = (x) => Math.round(x * 10000) / 10000;
   const list = (await store.recentFilled(now - EXIT_LOOKBACK_MS)).filter((t) => t.strategy === "L1" && t.settled !== true && Number(t.fillCount) > 0
     && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no") && t.exitStatus !== "sold" && t.exitStatus !== "unknown" && t.exitStatus !== "sending" && t.exitStatus !== "skipped");
@@ -753,8 +744,8 @@ async function runExitWatch(args) {
     const left = Date.parse(m.close_time) - now;
     if (!selling) {
       if (t.exitShadow) continue;     // logged once per order
-      await store.updateTest(t.id, { exitShadow: { at: now, bid: ourBid, left: Number.isFinite(left) ? left : null, wouldSell: remaining, mode } });
-      await log("exit (log only)", t.ticker + ": the " + t.side.toUpperCase() + " side's bid fell to " + (ourBid * 100).toFixed(0) + "c with " + (Number.isFinite(left) ? Math.round(left / 1000) + " s" : "unknown time") + " left; it would have sold " + remaining + " contracts. Nothing was sent.");
+      await store.updateTest(t.id, { exitShadow: { at: now, bid: ourBid, left: Number.isFinite(left) ? left : null, wouldSell: remaining } });
+      await log("exit (log only)", t.ticker + ": the " + t.side.toUpperCase() + " side's bid fell to " + (ourBid * 100).toFixed(0) + "c with " + (Number.isFinite(left) ? Math.round(left / 1000) + " s" : "unknown time") + " left; it would have sold " + remaining + " contracts. Nothing was sent, because the server's order switch is off.");
       results.push(t.ticker + ": logged");
       continue;
     }
@@ -854,8 +845,8 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
 }
 
 module.exports = {
-  flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MODES, EXIT_MAX_TRIES, L1_SERIES,
+  flattenAll, runExitWatch, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, ownerSettings, OWNER_SETTINGS, windowKey, L1_WINDOW_CAP_FRACTION,
+  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
 };
