@@ -2909,3 +2909,27 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 **What the cost is made of.** A contract bought near 50c costs about 2.2c: the fee alone is 0.07 x 0.5 x 0.5 = 1.75c, plus about half a cent of spread. That is why BK6 (narrow spread only) barely helps (-2.26c against -2.32c): 92% of entries already had a spread of 1c or less, and the fee is the big part. The fee is smallest at the ends (0.07 x 0.9 x 0.1 = 0.63c at 90c), which is the arithmetic reason L1 buys at 88c to 97c, not at coin-flip prices.
 
 **BK7** found only 18 entries on 13 days: Ethereum is usually priced in by the time Bitcoin is at an extreme with 8 minutes left, which is a finding about how fast Ethereum quotes follow Bitcoin, not a verdict on the idea. It stays NOT_ENOUGH_DATA and consumes no further try. Mutation notes: the tests killed every mutant I tried on the rules, after one same-second bytecode cache hiccup (stale `.pyc` after a same-size edit) that I caught by clearing `__pycache__` and re-running with `-B`.
+
+## Pre-registration: E3, L1 unchanged on seven more 15 minute series (written 2026-10-13 before any of these markets was downloaded and before any result)
+
+**The question.** The owner asked for "something with an edge that I can expand on", trading often enough to watch, simple to drop money into. L1 is the only thing live with a measured positive edge, and the E1 and E2 results say it is the same thin edge (+0.5c a contract) on every crypto series and a larger one on gold (+1.47c, z +2.80, the only series that cleared the bar alone). So the cheapest honest expansion is the same rule on more markets of the same kind. This section is that test on history, and nothing else.
+
+**What was checked first (2026-10-13, public Kalshi data, counts and volumes only, no result).** Series that exist as 15 minute up/down markets and settled in the last 30 days, with median contracts traded per settled market: XRP 74,819; Dogecoin 36,878; HYPE 23,523; BNB 17,154; EUR/USD 4,538; GBP/USD 4,229; USD/JPY 3,781 (USD/CAD and AUD/USD only started Oct 7, 1,100 each, left out). The S&P, Nasdaq, Dow and Treasury yield 15 minute series have **no settled markets in the last 30 days** and are left out. Cardano has none either. For scale, Bitcoin was 3.5 million, gold 458,000, ETH 175,000, SOL 90,000 at the E1 check. The FX series are thin (their open books show 2c to 4c spreads), so they are the weak candidates and are included because gold, the non-crypto market, is the one that carries L1.
+
+**Data.** `python -m scalper.e3 fetch`: every settled market of the seven series that closed in the last 40 days, with 1 minute bid/ask candles, into a **separate database `data/alts2.sqlite`**; `book.sqlite` and `alts.sqlite` and every earlier result are untouched.
+
+**Rule (fixed now, identical to L1 and to E1, E2).** One observation per market from the candle that ENDS exactly 360 s before the close; buy the favourite when its ask is 0.88 to 0.97 (either side), hold to settlement, taker at the ask, the same fee model as `lstrats.net`. No filter, no other band or minute. A market with no candle at that minute, no quote in the band, or no result has no observation.
+
+**Seven tries (XRP, DOGE, HYPE, BNB, EURUSD, GBPUSD, USDJPY), no variants.** Also reported as information, not a try: the seven pooled, the four crypto pooled and the three FX pooled.
+
+**Counterparty.** The same as L1's and no new one is claimed. Crypto alts move with Bitcoin, so a pass would not be independent evidence (E1 and E2 measured that: when Bitcoin's entry lost, ETH's lost 51% of the time and SOL's 43%, against about 6%).
+
+**Numeric prediction, before the run.** Crypto alts: about +0.5c a contract like ETH and SOL, z between 0 and 1.5, **FALSIFIED** on z. FX: at or below 0.0c because of the 2c to 4c spreads, **FALSIFIED**. If any series shows a mean above +1.5c it is an audit trigger first.
+
+**Pass bar, fixed (the same as every earlier test).** `NOT_YET_FALSIFIED` only if ALL hold: at least 300 observations; at least 5 days; day clustered z of net per contract at least 2.1; mean net above zero; both halves of the days positive; mean above zero with fees times 1.2. Anything else is `FALSIFIED`. With seven tries, about 12% of the time one would pass by luck alone, so a single pass means "watch it forward", never "trade it". A pass is permission for the next stage only (a forward shadow run on new days, then a small stake), and never a reason to change the live bot.
+
+**Information, not part of the verdict.** Per series: observations per day, win rate against the mean price paid, mean net by half, median traded volume of the entry minute's candle in contracts, and the median spread at the entry candle.
+
+**Count.** Seven variants, one parameter set each. The running total in this file was 4,576 before today's BK1 (7), so it is 4,590 with these seven. The control is not needed because nothing is searched.
+
+**Limits.** Candle asks are quotes, not our fills: the live bot fills about 56 to 59% of its signals. Thin books fill less at size, and the FX books are thin. The window is 40 days or whatever exists, so the FX series have under 20 days.
