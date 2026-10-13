@@ -2865,3 +2865,27 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 - **What it establishes.** Another 1,760 combinations of series, entry minute, price band, condition and exit found no rule that survives a split. About 12% of cells looked positive on the training days, which a fair market also produces. The selection picked mostly thin, 150 to 400 entry cells, which is where luck lives.
 - **Nothing is built from it.** L1 is not changed.
 - **Count.** 1,760 variants: **4,576** tried in total.
+
+## Pre-registration: BK1 (seven basket and pair ideas, written 2026-10-13 before `bk1.py` was run on any market)
+
+Source: the owner's question "what if we had a strategy that covered a broader market with the same direction, i.e. buy yes on all 15 min markets, 1 share each", and the 165 idea brainstorm (`07_ideas_list.md` in the handoff folder). Measured before this section, on the same 40 days (10,293 settled markets), as controls and not counted as tries: YES resolved 50.2% overall (Bitcoin 50.1, Ethereum 50.6, gold 50.0); buying YES on every market at the open cost -2.27c a contract and NO -2.14c; at the L1 time -1.66c and -1.47c. So the bar for every idea below is not "beats zero" but "beats a random side bought at the same prices and times".
+
+**Data and split.** `data/book.sqlite` as it stands (Bitcoin, gold and Ethereum 15 minute series, Sep 2 to Oct 12 2026). First 20 days and last 20 days are reported as halves. Nothing is tuned: every rule below is fixed here.
+
+**One convention for every idea.** The signal candle S is the candle ending 840 s before the close (the first minute after the open); the entry candle E is the next one, ending 780 s before the close, so the entry is on a bar strictly later than the signal. Entry is a taker at E's closing ask, 1 contract per leg, held to settlement, fee 0.07 x p x (1-p) per contract (stress: fee x 1.2). A market with an unusable quote (`valid_quote` false) at S or E is dropped, never bridged. BK7 uses its own candles, stated below.
+
+**The seven ideas (7 tries, no variants).**
+
+| ID | Idea | Counterparty | Rule | Matched baseline (a random side at the same prices) | Prediction |
+|---|---|---|---|---|---|
+| BK1 | Favorite at the open | Sellers who price favorites too low | Buy the side with the higher mid at S (skip an exact 50c) | Average of the YES and NO buys at E in the same markets | Contrast between -0.5c and +0.5c; net about -2c |
+| BK2 | Underdog at the open | Longshot buyers, if the bias exists | The other side of BK1 | Same | Contrast mirrors BK1, net about -2c |
+| BK3 | Bitcoin YES plus Ethereum NO, every window both exist | Makers who quote them independently | Two legs at E; unit is the pair | Average of the four side combinations for the same pair of markets | Net about -4c a pair, contrast near 0 |
+| BK4 | Bitcoin YES plus gold NO | Same | Same with gold | Same | Same |
+| BK5 | Divergence pair | Slow quoters on the cheaper series | Only when the Bitcoin and Ethereum mids at S differ by 0.10 or more: YES on the lower mid, NO on the higher | Average of the four combinations, same windows | Net about -4c, contrast near 0 |
+| BK6 | Narrow spread only | Nobody (a cost selection, allowed because spread is seen before the trade) | Buy YES at E only when E's spread is 1c or less | YES at E in all markets of the same days | Net less negative than the baseline by about 1c, still negative |
+| BK7 | Ethereum lags Bitcoin's early extreme | Slower Ethereum quoters | At the candle ending 480 s before the close, if the Bitcoin mid is 0.95 or more, buy Ethereum YES at the next candle's ask when that ask is 0.90 or less; if the Bitcoin mid is 0.05 or less, buy Ethereum NO under the same ask cap | A random Ethereum side at the same candle in the same windows | The only one with a plausible positive contrast; most likely too few entries |
+
+**Verdict words:** FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA. There is no promote verb. NOT_ENOUGH_DATA if fewer than 300 entries or fewer than 5 days. Otherwise NOT_YET_FALSIFIED only if ALL of: net mean per unit above 0 on the full 40 days; day-clustered z of net at least 2.1; contrast (net minus matched baseline) mean above 0 with day-clustered z at least 2.1; both halves' net means above 0; stress net above 0. Anything else is FALSIFIED. With 7 tries the chance one passes on luck alone at this bar is about 12%, so a single pass would mean "watch it on new days", never "trade it".
+
+**Overlap with L1 (the rule from "L1 is the only strategy").** All seven hold to settlement, so they overlap L1 in mindset and position. They are research only. Nothing here places an order.
