@@ -3248,3 +3248,25 @@ The prediction said XRP and DOGE would be about +0.5c and fail on z; they did no
 **Numeric prediction, before the run.** Regression to the mean: a true edge of about +0.5c, pooled z under 1.5, **FALSIFIED**. About 25 days at roughly 60 entries a day is about 1,500 entries; the standard error is about 0.6c so the minimum detectable edge is about 1.3c. A pass here AND a pass in E3F would be two independent confirmations (still only "put up for a small separate decision", never a change to the live bot); a pass here alone, or a fail here with a pass in E3F, would each be reported as it is.
 
 **Count.** One variant: 4,599 after E3F, 4,600 after E3B.
+
+## Pre-registration: ARB1, locked arithmetic across a mutually exclusive event (written 2026-10-13 before any snapshot was taken)
+
+**The idea (structural, not directional; overlaps L14 only in spirit).** L14, O9 and O10 looked for a locked or crossed book on ONE market. This is a different object: Kalshi marks events whose outcomes are **mutually exclusive** (at most one market resolves YES; the event list carries `mutually_exclusive`). If you buy the NO side of K legs of such an event, you receive at least K-1 dollars whatever happens (at most one leg is YES, so at most one NO loses). So if the YES bids of the legs sum to more than 1 plus the fees, that is a **riskless profit with no view on any outcome**. It needs no exhaustiveness (a "none of these" outcome only helps: you then receive K). Buying the YES side of every leg is NOT tested, because that needs exhaustiveness and the flag does not say it.
+
+**Counterparty.** Whoever is bidding YES on several mutually exclusive legs without noticing the bids sum past 100%: a stale quoter, or a retail buyer paying a high price on one leg while another leg's bid is also high. The reason it might exist is that many events have dozens of thin legs and no one maintains the sum; the reason it might not is that market makers do exactly this arithmetic.
+
+**Snapshots.** `python -m scalper.arb1 scan` reads every open event with its nested markets (about 6,000 events, 1,650 mutually exclusive, about 18,000 markets, 2 to 3 minutes) and stores, for each mutually exclusive event with at least 2 active legs that have a positive YES bid, the sum of those bids, the per set lock after fees, and the capacity (the smallest YES bid size among the legs, in contracts). **Twelve scans, at least 15 minutes apart**, taken once in a background loop. Then `python -m scalper.arb1 report`, once.
+
+**Lock, fixed now.** For the legs with a positive YES bid: `lock = sum(bids) - 1 - sum(fee(bid_i))`, with `fee(p) = 0.07 p (1-p)` per contract (the unrounded model the rest of this file uses; the per contract fee on a NO at price 1-p equals the one on a YES at p). The cent-rounded fee is reported as information. Top of book only; no walking the book.
+
+**An opportunity** is an event in one scan with `lock >= 0.01` and capacity `>= 10` contracts. **Persistent** means the same event is an opportunity in at least two scans at least 15 minutes apart (a flicker that a real order could not catch is not an opportunity).
+
+**Pass bar, fixed.** `NOT_YET_FALSIFIED` only if ALL hold: at least **3 distinct events** are persistent opportunities; and the sum over distinct persistent events of `lock x min(capacity, 50)` (one fill per event, at most 50 sets) is at least **$1.00 per day of scanning** (the scans cover about 4 hours, so the per day figure is the total times 6; that scale-up is stated because it is generous). Otherwise `FALSIFIED`. If the number of scans completed is under 8 the verdict is `NOT_ENOUGH_DATA`.
+
+**Numeric prediction, before the run.** Fewer than 3 persistent events, **FALSIFIED**; the handful of locks that appear are on thin legs where the capacity is under 10 or the quote is stale and gone at the next scan. If any lock above 5c at capacity 10 or more is persistent, it is an audit trigger first (a misread flag or an event that is not really exclusive).
+
+**Information, not part of the verdict.** Distribution of `sum(bids)` over events (median, 95th percentile, share over 1.00); the number of events scanned; the largest lock seen and its event; the share of locks that vanish by the next scan.
+
+**What a pass would and would not mean.** No order is placed. Even a pass would only open the question "can this be executed as a basket of simultaneous NO orders at size, with all legs filling" (the leg risk is not zero: a partial fill leaves a directional position), which is a separate, reviewed change and not a change to the live bot.
+
+**Count.** One variant: 4,601 after ARB1.
