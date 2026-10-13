@@ -3290,3 +3290,25 @@ The prediction said XRP and DOGE would be about +0.5c and fail on z; they did no
 **Count.** Two variants: 4,603 after PM1.
 
 **Limits.** The two venues do not settle on the same index, so the outcome (taken from Kalshi's result) is the one Kalshi settles; a tie or a close call can differ. Polymarket's price is a midpoint or last trade, not a quote we could trade at; this is a test of information, not of an executable strategy.
+
+## Pre-registration: FLB1, favourites in long-dated, non-sports, non-price markets (written 2026-10-13 before any such market was downloaded)
+
+**Why.** Everything that produced L1's +0.4c lives on Bitcoin, gold and a few look-alikes that move together, so thousands of entries are a few hundred independent events (README, the "pooled L1 evidence" note). SP1 asked the same question on 535 nearly independent sports events and got -4.2c. This asks it on the rest of Kalshi: elections, politics, entertainment, "mentions", economics, science, companies, health. These are many truly independent events with long lives, so the same rule, at a horizon of days instead of minutes, is a real out-of-sample test of "do favourites beat their price".
+
+**Counterparty.** The same as L1's and no new one is claimed: whoever holds the longshot side and sells it too cheaply to the favourite buyer. (It is still tested because the universe is different; a pass or a fail here says whether L1's pattern is a property of 15 minute crypto or of prediction markets in general.)
+
+**Universe, fixed now.** Events from the public events list (`status=settled`, `with_nested_markets`) with at least one market closing in the last 60 days; the event `category` is NOT one of `Sports`, `Financials`, `Crypto` (sports is SP1, and Financials and Crypto are price-driven look-alikes of L1). Every market of such an event with result YES or NO and a lifetime (open to close) of at least 3 days. Selected on category and lifetime only, never on price or result.
+
+**Rule (three leads, one parameter set each).** At the hourly candle that ENDS at the latest hour boundary at or before `close - lead`, with lead 24 h, 72 h or 168 h: buy the favourite when its ask is 0.88 to 0.97 (either side, the L1 band) and the quote is valid (`analyze.valid_quote`), hold to settlement, taker at the ask, the same fee model as `lstrats.net`. A market with no candle at that hour, no quote in the band or no result has no observation.
+
+**Three tries (24 h, 72 h, 168 h).** They share markets, so they are not independent; they are counted as three anyway.
+
+**Pass bar, fixed, per lead.** `NOT_ENOUGH_DATA` if fewer than 300 entries or fewer than 60 distinct events. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: mean net above zero; z clustered by EVENT (not by day: the strikes or candidates of one event are one bet) at least 2.1; both halves of the markets (split by close time at the median) positive; positive with fees x1.2; and above the 95th percentile of 200 placebo draws (the favourite's side drawn at random with the market's own mid as the probability). Anything else `FALSIFIED`.
+
+**Numeric prediction, before the run.** Mean net between -2.0c and +1.0c at every lead, z under 1.5, **FALSIFIED** at all three. If any lead shows a mean above +2c it is an audit trigger first (a stale quote in a thin market that the settlement result happens to confirm is the first suspect). The minimum detectable edge is reported; with about a thousand entries clustered by event it is likely near 2c, so a FALSIFIED here may mean "not shown".
+
+**Information, not part of the verdict.** Entries and mean net per category, per price decile within the band, the loss rate against the break-even loss rate at the mean price paid, and the median volume of the entry candle.
+
+**Count.** Three variants: 4,606 after FLB1.
+
+**Limits.** An hourly candle days before the close in a thin market is a stale quote (its ask may be what one person once offered); we buy at that ask, which is exactly what the rule would do and not an error of the test, but a real order would find the book empty more often than the candle suggests. Fills are not modelled.
