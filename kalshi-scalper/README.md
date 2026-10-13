@@ -3232,3 +3232,19 @@ The prediction said XRP and DOGE would be about +0.5c and fail on z; they did no
 **Kill criterion.** Any of the bar's conditions failing is FALSIFIED. The live record has nothing to say about it, because the live bot does not trade these series.
 
 **Count.** One variant: 4,599 after E3F.
+
+## Pre-registration: E3B, the backward holdout for E3's two passes (written 2026-10-13 before the older XRP and Dogecoin history was downloaded)
+
+**Why this exists.** E3F needs 33 days to pass before it can be read. But E3 only downloaded the last 40 days, and Kalshi keeps 1 minute candles back about 68 days. The XRP and Dogecoin markets that closed 41 to 68 days ago were **never downloaded, never read and played no part in picking these two series**, so they are an honest holdout that exists today. (Checked 2026-10-13, counts only: both series have 12 settled markets in each 3 hour sample at 45, 55, 62 and 66 days back and none at 70.) The regime may differ (older days, a different market), which is a limit on the test, not a way to tune it.
+
+**Data.** `python -m scalper.e3b fetch` into its own `data/e3b.sqlite`: settled markets of XRP and Dogecoin closing in the last 69 days. Only markets closing **strictly before 2026-09-03 20:00 UTC** (`FLOOR_TS`, the earliest close in E3's data) count; entries on or after it are dropped in code and a test asserts it.
+
+**Rule.** L1 unchanged (candle ending 360 s before the close, favourite's ask 0.88 to 0.97, hold to settlement, taker, same fee model).
+
+**One try, pooled** (the two series together, as in E3F), by the same argument: they were chosen together. Per series results are information.
+
+**Pass bar, fixed.** At least 500 pooled entries and at least 10 days; mean net above zero; day clustered z at least 2.1; both halves of the days positive; positive with fees x1.2. Otherwise `FALSIFIED`; too little data `NOT_ENOUGH_DATA`.
+
+**Numeric prediction, before the run.** Regression to the mean: a true edge of about +0.5c, pooled z under 1.5, **FALSIFIED**. About 25 days at roughly 60 entries a day is about 1,500 entries; the standard error is about 0.6c so the minimum detectable edge is about 1.3c. A pass here AND a pass in E3F would be two independent confirmations (still only "put up for a small separate decision", never a change to the live bot); a pass here alone, or a fail here with a pass in E3F, would each be reported as it is.
+
+**Count.** One variant: 4,599 after E3F, 4,600 after E3B.
