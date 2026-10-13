@@ -46,6 +46,10 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 - **2026-10-15:** the bot's weekly size review. It only raises size if the balance supports it.
 - **2026-11-16:** one check of a possible improvement for L1 (skipping some entries). Nothing changes unless it passes.
 
+## Parked on purpose
+
+- **Equities day trading and a stocks tab.** Shelved on 2026-10-13. At $500 with cash-account settlement the same dollars can be reused about once a day, every stock idea tested so far lost to cost, and a strategy that nets +0.1% a day earns about $10 a month on $500. It also repeats the first equities bot's path (capital too small, then day-only, then profits given back before the close). The full plan (brokers, dashboard mapping, safety rules, phases) is kept in the handoff folder as `09_equities_plan.md`. Revisit when the account is past $2,000 to $25,000, or if a pre-registered research pass on free data clearly beats the old tests.
+
 ## Can wait
 
 - A better gold price feed.

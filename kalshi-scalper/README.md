@@ -2933,3 +2933,29 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 **Count.** Seven variants, one parameter set each. The running total in this file was 4,576 before today's BK1 (7), so it is 4,590 with these seven. The control is not needed because nothing is searched.
 
 **Limits.** Candle asks are quotes, not our fills: the live bot fills about 56 to 59% of its signals. Thin books fill less at size, and the FX books are thin. The window is 40 days or whatever exists, so the FX series have under 20 days.
+
+## Pre-registration: E4, L1 unchanged on the hourly ladders (written 2026-10-13 before any ladder market was downloaded and before any result)
+
+**The question.** The owner asked for L1's rule on Kalshi's hourly "price above or below" ladders: more trades a day, same simple mechanism. Each hourly close lists many strikes at once (checked 2026-10-13, counts only: Bitcoin 188 strikes per close with a close every hour, 4,592 settled markets a day; Ethereum 300 per close, 7,240 a day; S&P 500 60 per close, 7 closes a day during US hours, 420 a day), so a single rule fires on several strikes in the same hour.
+
+**Why this is not a bigger version of the 15 minute tests.** Every qualifying strike in one hour hinges on the same price move, so their outcomes are close to perfectly correlated: one adverse last-six-minutes move can lose five or six entries at once. The effective sample is hours, not markets. That makes the test far less powerful than E1 to E3 for the same number of entries, and the registration says so up front.
+
+**Data.** `python -m scalper.e4 fetch`: every settled market closing in the window below, with the 1 minute candles from 420 s to 300 s before its close (the entry candle and its neighbours; one request covers 100 strikes), into a **separate database `data/ladders.sqlite`**. Windows: S&P `KXINXU` 40 days; Bitcoin `KXBTCD` and Ethereum `KXETHD` 30 days.
+
+**Rule (fixed now, identical to L1 and to E1 to E3).** One observation per market from the candle that ENDS exactly 360 s before the close; buy the favourite when its ask is 0.88 to 0.97 (either side), hold to settlement, taker at the ask, the same fee model as `lstrats.net`. No filter, no other band or minute. A market with no candle at that minute, no quote in the band, or no result has no observation.
+
+**Three tries (KXINXU, KXBTCD, KXETHD), no variants.**
+
+**Counterparty.** The same as L1's, plus one specific to ladders: a market maker quoting 60 to 300 strikes at once reprices the deep strikes less carefully than the near ones, and retail buys the cheap tail. No new claim beyond that. Bitcoin and Ethereum are the same bet as each other (E1 measured it), so a pass on both would count as one piece of evidence.
+
+**Numeric prediction, before the run.** Each series lands near L1's thin figure, **+0.5c per contract net, z between 0 and 1.5**, and the minimum detectable edge reads above 1c: this test probably cannot see a +0.5c edge. **Expected verdict: all three `FALSIFIED`** (the word says "not shown", see the rule below). If a series shows a mean above +1.5c it is an audit trigger first.
+
+**Pass bar, fixed (the same as every earlier test).** `NOT_YET_FALSIFIED` only if ALL hold: at least 300 observations; at least 5 days; day clustered z of net per contract at least 2.1; mean net above zero; both halves of the days positive; mean above zero with fees times 1.2. Anything else is `FALSIFIED`. With three tries, about 5% of the time one would pass by luck, so a single pass means "watch it forward", never "trade it".
+
+**The power rule, fixed now.** For each series the run also prints the **minimum detectable edge** (2.1 times the day clustered standard error of the mean net). **If that is above +1.0c, a `FALSIFIED` means "not shown at this sample size" and is reported that way; it is not evidence the edge is absent.** The next stage in that case is a forward shadow record on new days (needs a server change and a deploy, not built), not more history.
+
+**Information, not part of the verdict.** Per series: observations per hour that has any, hours with at least one observation, the same z clustered by HOUR instead of day, the worst single hour (the sum of net over that hour's entries, which is the real size of a ladder loss), win rate against the mean price paid, mean net by half, and one row for "one entry per hour" (the entry whose ask is nearest 0.925, ties to the lower strike), which is what a live bot with a one-order-per-hour cap would take.
+
+**Count.** Three variants, one parameter set each. The running total in this file was 4,590 before E4 (4,576, plus BK1's 7, plus E3's 7), so it is 4,593 with these three. The control is not needed because nothing is searched.
+
+**Limits.** Candle asks are quotes, not our fills (the live bot fills 56% to 59% of its signals), and a ladder hour spreads several orders across thin strikes, so fills are likely worse than for one 15 minute market. Settlement of hourly markets uses a different reference than the 15 minute ones (an hourly price, not a 60 second average), so this is not the same bet on a different clock.
