@@ -3430,3 +3430,27 @@ That was the pre-registered information split and it was looked at once, on the 
 **Numeric prediction, before the run.** A mean between +0.3c and +1.0c; with about 85 entries a day over 33 days the standard error is about 0.45c, so a true +0.8c would reach z 2.1 only about half the time. I expect z between 1 and 2.5. **FALSIFIED** is the more likely verdict and would mean "not shown", not "gone". Information: per series, per ISO week.
 
 **Count.** One variant: 4,610 -> 4,611 after FWD1 (PM2 was already counted).
+
+## Pre-registration: E5, L1 unchanged on the other commodities and two more coins (written 2026-10-13 before any of these markets was downloaded and before any result)
+
+**Why.** Gold is where L1 is strongest (+1.54c, z +2.94 over 68 days, the only live series that clears the bar alone), and every earlier universe check looked only at crypto and FX. Kalshi lists 15 minute markets on silver, crude oil, natural gas, copper, platinum and palladium that were never tested. Checked 2026-10-13, counts and volumes only, no result (median contracts traded per settled market, over samples 20 to 60 days back): silver 26,000 to 54,000; crude oil (WTI) 23,000 to 71,000; natural gas 10,000 to 17,000; copper 13,000 to 22,000; platinum 7,800 and palladium 9,200 (both exist for about 20 days only); Zcash 4,700 to 29,000; NEAR 3,900 to 29,000. For scale, XRP is 74,000 and gold 458,000. Left out: the stock index, Treasury yield and several coin series that have no settled markets in the last 60 days; the "coin race" and "crypto comparison" series, which are not up or down markets.
+
+**Counterparty.** The same as L1's and no new one is claimed. Commodity 15 minute markets are quoted by the same kind of maker as gold's.
+
+**Data.** `python -m scalper.e5 fetch` into its own `data/alts3.sqlite`: every settled market of the eight series in the last 69 days with 1 minute candles. Nothing else is touched.
+
+**Rule (fixed now, identical to L1).** One observation per market from the candle that ENDS exactly 360 s before the close; buy the favourite when its ask is 0.88 to 0.97 (either side), hold to settlement, taker at the ask, the same fee model as `lstrats.net`. No filter, no other band or minute.
+
+**Design, fixed now: a discovery window and a holdout, decided before looking.** Discovery = markets closing on or after **2026-09-03 20:00 UTC** (the last 40 days, the same cut as E3). Holdout = markets closing before it. Stage 1: each series is tested on discovery with the common bar. Stage 2: only a series that passes Stage 1 is read on the holdout, with the same bar. A series is `NOT_YET_FALSIFIED` only if it passes both stages; a series that passes Stage 1 but has fewer than 300 holdout entries is `NOT_ENOUGH_DATA` (platinum and palladium may be). The holdout is not a try; it is the confirmation that E3 only had after the fact.
+
+**Eight tries (silver, WTI, natural gas, copper, platinum, palladium, Zcash, NEAR), no variants.** Also reported as information, not tries: the six commodities pooled and the two coins pooled, on each window.
+
+**Pass bar, fixed (the same as every earlier test).** At least 300 observations; at least 5 days; day clustered z of net per contract at least 2.1; mean net above zero; both halves of the days positive; positive with fees x1.2. With eight tries about 15% of the time one passes Stage 1 by luck alone, which is why Stage 2 exists.
+
+**Numeric prediction, before the run.** Commodities: between +0.3c and +1.0c, z between 0 and 2; Zcash and NEAR: about +0.5c, **most or all FALSIFIED at Stage 1**. If a series shows a mean above +1.5c at Stage 1 it is an audit trigger first (a stale quote that the result happens to confirm in a thin series).
+
+**Information, not part of the verdict.** Per series and window: entries per day, win rate against the mean price paid, median entry-minute volume, median spread at the entry candle.
+
+**Count.** Eight variants: the running total in this file was 4,611 after FWD1, so it is 4,619 with these eight.
+
+**Limits.** Candle asks are quotes, not our fills; thin books fill less at size. Platinum and palladium have about 20 days. The live bot would need a code edit for any of these (`L1_SERIES` is a hard list) and the 4.5% window limit would still apply; nothing here changes the bot.
