@@ -3469,3 +3469,15 @@ The live bot holds the money put into one 15 minute window to 4.5% of the sizing
 **Reading it.** Appending the two series costs the existing trades nothing, because they only fill the second slot in the 3,000-odd windows where the live three left room, and it doubles the expected net per day in sample, with a similar worst day (the window limit is unchanged). Day-to-day volatility rises by about 20% and double-loss windows go from 28 to 52 because XRP and Dogecoin lose with Bitcoin about 40% of the time. The orderings that put XRP and Dogecoin first or rank by 68 day edge are fitted to this sample and are not recommendations.
 
 **What it does not say.** The XRP/Dogecoin edge is the part that is not yet forward-confirmed (E3F is due on or after 2026-11-16) and they were found on 41 days and held on 29; their fill rates on a thinner book are unmeasured (median entry-minute volume about 1,200 contracts); each is a new series for the 5% loss stop and the sizing review to see. Not a change to the live bot; written as a proposal in `docs/PROPOSALS.md`.
+
+## Result: E4, L1 unchanged on the hourly ladders (run once on 2026-10-13)
+
+61,743 ladder markets with a usable candle (S&P `KXINXU` 40 days, Bitcoin `KXBTCD` and Ethereum `KXETHD` 14 days). Rule as registered.
+
+| Series | Entries | Hours with an entry | Net per contract | z (by day) | z (by hour) | Halves | Minimum detectable edge | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| S&P 500 hourly | 250 on 27 days | 162 | **-2.78c** | -1.78 | -1.58 | -2.21 / -3.44 | +3.28c | FALSIFIED |
+| Bitcoin hourly | 348 on 15 days | 235 | +0.96c | +0.96 | +0.83 | +2.29 / -0.56 | +2.10c | FALSIFIED (NOT SHOWN) |
+| Ethereum hourly | 280 on 15 days | 217 | +0.64c | +0.64 | +0.49 | +0.76 / +0.51 | +2.12c | FALSIFIED (NOT SHOWN) |
+
+One entry per hour (information): S&P -3.65c (z -2.37), Bitcoin +0.40c, Ethereum +0.84c. The prediction was that nothing would be shown; it was right, and the S&P ladder is negative with the wrong sign (the quoted favourite at the 88c to 97c band six minutes before the hourly close lost 8.8% of the time against 6.4% paid, worst single hour -1.78 dollars over 3 entries). The Bitcoin and Ethereum ladders are positive and small like their 15 minute versions, but the sample (14 days, 1.3 to 1.5 entries per hour) cannot tell +0.6c from zero. The entries per hour shows why a ladder is a worse place for this rule: every qualifying strike in an hour hinges on the same price move, so one bad last six minutes loses several at once. **Not a way to add volume.** Count unchanged at 4,606 (E4's three tries were counted when registered).
