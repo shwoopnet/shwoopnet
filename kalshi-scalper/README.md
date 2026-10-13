@@ -3481,3 +3481,19 @@ The live bot holds the money put into one 15 minute window to 4.5% of the sizing
 | Ethereum hourly | 280 on 15 days | 217 | +0.64c | +0.64 | +0.49 | +0.76 / +0.51 | +2.12c | FALSIFIED (NOT SHOWN) |
 
 One entry per hour (information): S&P -3.65c (z -2.37), Bitcoin +0.40c, Ethereum +0.84c. The prediction was that nothing would be shown; it was right, and the S&P ladder is negative with the wrong sign (the quoted favourite at the 88c to 97c band six minutes before the hourly close lost 8.8% of the time against 6.4% paid, worst single hour -1.78 dollars over 3 entries). The Bitcoin and Ethereum ladders are positive and small like their 15 minute versions, but the sample (14 days, 1.3 to 1.5 entries per hour) cannot tell +0.6c from zero. The entries per hour shows why a ladder is a worse place for this rule: every qualifying strike in an hour hinges on the same price move, so one bad last six minutes loses several at once. **Not a way to add volume.** Count unchanged (E4's three tries were counted when registered).
+
+## Pre-registration: VOL1, skip Bitcoin and Ethereum entries made in a busy minute (written 2026-10-13 before any day it covers existed)
+
+**What was seen first, disclosed.** On the 68 days of candles, splitting each series' L1 entries into terciles of the entry minute's traded volume (information only): Bitcoin +1.15c / +0.57c / **-0.36c** (low, middle, high) and Ethereum +1.66c / +0.48c / **-0.34c**; gold, XRP and Dogecoin show no such pattern (non-monotone, all positive). For Bitcoin and Ethereum pooled, entries above the top tercile's lower edge (Bitcoin 132,766 contracts, Ethereum 5,751) earned -0.91c on 391 entries in the older 28 days and -0.11c on 942 in the 40 day book window, against +1.49c on 1,348 and +0.43c on 1,319 for the rest: the same sign in both windows, but the tercile edges were taken from the very data they are shown on, so this is a candidate and not a result.
+
+**The idea.** A busy entry minute means the price is moving and informed traders are in the book, so a 90c favourite is more likely to be one that is about to be hit. The counterparty story is L1's again (the longshot holder) with a time-varying twist: the favourite is least safe when the book is busiest. This is a filter on L1, not a new strategy.
+
+**Rule (fixed now).** On the days after 2026-10-13 (the same forward data as FWD1, read from `data/fwd1.sqlite` in the same single read): L1 entries on Bitcoin and Ethereum are `skipped` if the entry candle's traded volume is strictly above **132,766** (Bitcoin) or **5,751** (Ethereum) contracts; otherwise `kept`. The thresholds are the numbers above and are not refitted. **One try**, Bitcoin and Ethereum pooled.
+
+**Pass bar, fixed.** `NOT_ENOUGH_DATA` if fewer than 150 skipped entries or fewer than 10 days. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: the skipped mean net is below zero; it is below the kept mean in the whole sample and in both halves of the days; and the improvement (kept mean minus the all-entries mean) exceeds the 95th percentile of 200 permutation draws in which the same number of entries per series are skipped at random.
+
+**Numeric prediction, before the run.** Regression to the mean: the skipped group is about -0.1c to +0.3c, the kept group about +0.5c; the gap is under 0.7c and the permutation test does not clear. **FALSIFIED** more likely than not. Power: about 60 Bitcoin and Ethereum entries a day, a third of them skipped, so about 650 skipped over 33 days; the gap seen in sample (about 1.3c) would show about half the time.
+
+**What a pass would and would not mean.** A pass would put "skip a busy minute" up for a decision, never into the live bot from here (the server would need the entry minute's volume at order time, which the market list may not carry). The same single read as E3F and FWD1, on or after 2026-11-16.
+
+**Count.** One variant: 4,620 after VOL1.
