@@ -3100,3 +3100,20 @@ The live exit watch sells a held L1 position when its bid reaches 25c (the owner
 | With the line and 5c of extra slippage | -85.4c on those 146; **+0.197c** against **+0.411c** (-652c over 3,038 entries) |
 
 **What it says.** Once the bid is at 25c or lower the position wins 11% of the time, close to what it would fetch if sold (the bid at the first minute close below the line averaged only about 11c, because these markets fall in jumps and the line is already behind them at the next close). So the line is close to neutral in this history: it neither saves money nor costs much, and each cent of slippage on the sale makes it a little worse. This does not say to change it: the exit watch exists to cut a tail (a position that is going to zero), and the history cannot see the seconds inside a minute where the live watch acts. The earlier exit studies (X1 to X8) reach the same conclusion at other lines.
+
+## Information: how stable is L1's edge week to week, and how thin is it in loss-rate terms (2026-10-13; not a hypothesis, nothing counted)
+
+L1 entries by calendar week of the 40 day history (mean net per contract in cents; entries in brackets):
+
+| Week from | All | Bitcoin | Gold | Ethereum |
+|---|---|---|---|---|
+| Sep 2 | +0.7 (507) | +0.7 (174) | +1.8 (138) | +0.0 (195) |
+| Sep 9 | +0.5 (531) | -0.7 (189) | +1.8 (143) | +0.6 (199) |
+| Sep 16 | +1.2 (574) | +3.1 (220) | -1.8 (150) | +1.4 (204) |
+| Sep 23 | +1.0 (539) | +2.4 (193) | +1.7 (133) | -0.7 (213) |
+| Sep 30 | **-1.2** (546) | -2.7 (206) | +2.3 (138) | -2.1 (202) |
+| Oct 7 (partial) | +0.1 (341) | -1.1 (139) | +0.1 (75) | +1.5 (127) |
+
+- **The weekly figure is noise-sized.** One week of about 540 entries has a standard error of about 1.0c (an average win of +6.8c, an average loss of -91.8c). Every week is within about 1.5 standard errors of the overall +0.4c; the -1.2c week of Sep 30 is the lowest and the last two weeks are the weakest, which is worth watching and is not distinguishable from luck.
+- **The edge in loss-rate terms.** The break-even loss rate is 6.8 / (6.8 + 91.8) = **6.9%**. Observed loss rates: Bitcoin 6.5% (73 of 1,121), gold 5.9% (46 of 777), Ethereum 6.8% (77 of 1,140). The whole +0.4c edge is a loss rate half a point below break-even, which is why 3,000 entries cannot separate it from zero (z about 1.5) and why one extra loss in 50 trades changes the sign.
+- **Gold is the only series clearly below break-even** (5.9% against 6.9%, about one standard error of 0.85 points per 100 entries... 46 losses against 54 expected); Bitcoin and Ethereum are within a loss or two per hundred of it.
