@@ -3539,3 +3539,16 @@ Information (not part of the verdict): Bitcoin skipped 296 entries, loss rate **
 The prediction (between -2.0c and +1.0c, FALSIFIED at all three) was right. **Favourites in the rest of Kalshi do not beat their price; at 72 hours they lose.** L1's pattern is a property of 15 minute crypto and gold markets and not of Kalshi in general (SP1 said the same for sports).
 
 Information, not tries: by category at 72 h, Politics -6.40c (225), Elections -2.42c (69), Entertainment -1.74c (351), Climate and Weather -2.80c (58), Science and Technology -0.66c, Economics -0.02c, Mentions -0.36c. **A deviation to state:** the "Commodities" category was not on the registered exclusion list, so daily and weekly commodity price brackets (price-driven look-alikes of L1, the very kind this test was meant to leave out) are in the universe: 718 of 2,196 entries at 72 h, -1.79c. Excluding them would not change a verdict that already reads FALSIFIED, and the rule was not changed after the fact. The median entry-candle volume is 0 contracts: most of these quotes are posted asks with no trading at that hour, the stale-quote problem the registration warned about. The mean price paid of 0.93 with a loss rate of 6.6% to 7.9% is just a fair price after a 0.4c to 0.5c fee, with a small negative drift. **Count unchanged** (FLB1's three tries were counted when registered).
+
+## Information: the account simulation with XRP and Dogecoin appended (GROWTH2, 2026-10-13, not a try)
+
+`python -m scalper.growth2`: the GROWTH simulation (live sizing at $46.50 a contract, 4.5% window limit, 5% day stop, fills 58% of the time, $500 plus $500 every 30 days, 400 paths of 360 days) on a day-block bootstrap of the 69 days of public candles (9,782 entries), with and without XRP and Dogecoin at the END of the list. The 69 days average +0.87c on the live three, so the baseline here is stronger than GROWTH's 40 day one. XRP and Dogecoin measured +1.61c on 4,385 entries.
+
+| Case | Day 90 median | Day 180 median | Day 360 median (5th to 95th percentile) | Paths below paid-in at day 360 |
+|---|---|---|---|---|
+| Live three only | $2,322 | $5,168 | $10,773 ($8,848 to $12,630) | 0% |
+| + XRP, Dogecoin as measured (+1.61c) | $3,518 | $8,514 | $18,330 ($15,617 to $20,975) | 0% |
+| + XRP, Dogecoin at +0.5c | $2,553 | $5,729 | $12,653 ($10,053 to $15,428) | 0% |
+| + XRP, Dogecoin at 0.0c | $2,120 | $4,832 | $10,575 ($7,801 to $12,928) | 0% |
+
+**Reading it.** At zero edge the appended series do not hurt (the median is within 2% of the baseline; the window limit and the day stop keep the loss per window unchanged); at +0.5c they add about $1,900 over a year; at the measured edge they add about $7,500. The downside is bounded the way the proposal says and the upside depends on the edge holding. This is a bootstrap of past days with the profit add-on and the weekly review left out, not a forecast, and it inherits everything the proposal's caveats say (thin books, 40% correlated losses, E3F still to read).
