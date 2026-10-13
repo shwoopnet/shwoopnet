@@ -3552,3 +3552,22 @@ Information, not tries: by category at 72 h, Politics -6.40c (225), Elections -2
 | + XRP, Dogecoin at 0.0c | $2,120 | $4,832 | $10,575 ($7,801 to $12,928) | 0% |
 
 **Reading it.** At zero edge the appended series do not hurt (the median is within 2% of the baseline; the window limit and the day stop keep the loss per window unchanged); at +0.5c they add about $1,900 over a year; at the measured edge they add about $7,500. The downside is bounded the way the proposal says and the upside depends on the edge holding. This is a bootstrap of past days with the profit add-on and the weekly review left out, not a forecast, and it inherits everything the proposal's caveats say (thin books, 40% correlated losses, E3F still to read).
+
+## Information: what the sizing knobs do (GROWTH3, 2026-10-13, not a try)
+
+`python -m scalper.growth3`: the account simulation on the live three series over 68 days (5,397 entries, measured mean +0.79c), varying the two sizing knobs: dollars of balance per contract (live: 46.5) and the contract ceiling (live: 40). Fills 58%, 4.5% window limit, 5% day stop, $500 plus $500 every 30 days, 400 paths of 360 days. Year-end balance (median, 5th and 95th percentile), share of paths ending below what was paid in, and the largest fall from a running peak (median and 95th percentile of paths):
+
+| True edge | $ / contract | Ceiling | Median | 5th | 95th | Below paid-in | Median worst drop | 95th pct worst drop |
+|---|---|---|---|---|---|---|---|---|
+| 0.00c | 46.5 | 40 | $5,909 | $4,328 | $7,737 | 56% | 25.2% | 36.4% |
+| 0.00c | 46.5 | 80 | $5,998 | $3,264 | $8,827 | 50% | 29.8% | 41.2% |
+| 0.00c | 30 | 80 | $6,014 | $3,401 | $9,643 | 50% | 34.5% | 51.0% |
+| +0.41c | 46.5 | 40 | $8,411 | $6,232 | $10,069 | 4% | 19.2% | 30.8% |
+| +0.41c | 46.5 | 80 | $10,068 | $6,651 | $13,373 | 2% | 21.7% | 33.4% |
+| +0.41c | 30 | 80 | $10,471 | $6,988 | $14,007 | 2% | 27.3% | 42.6% |
+| +0.79c | 46.5 | 40 | $10,699 | $8,564 | $12,604 | 0% | 16.0% | 26.9% |
+| +0.79c | 46.5 | 80 | $14,141 | $10,620 | $17,841 | 0% | 18.1% | 27.5% |
+| +0.79c | 30 | 80 | $14,772 | $11,428 | $18,336 | 0% | 22.4% | 36.7% |
+| +0.79c | 20 | 80 | $15,009 | $11,350 | $19,159 | 0% | 28.8% | 47.3% |
+
+(The full 15 row grid is printed by the script.) **Reading it.** At the live setting the ceiling of 40 contracts is reached at a balance of about $1,860 and growth after that is close to linear, which is why raising it to 80 adds 20% to 30% to the year-end median at a similar drawdown, while shrinking the dollars per contract with the ceiling left at 40 changes almost nothing. Smaller dollars per contract with a higher ceiling buys a few more percent for a much deeper drawdown (a 95th percentile fall of 47% at 20 dollars per contract). Even with a zero edge the live setting has a median worst fall of 25% in a year, because the loss on a failed favourite is about 90c against a 6c win. Nothing here is a recommendation to change the sizing; the weekly size review and the owner's comfort with a 25% to 35% fall decide that.
