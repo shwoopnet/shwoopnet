@@ -3412,3 +3412,21 @@ That was the pre-registered information split and it was looked at once, on the 
 ## GROWTH at a higher edge (information, 2026-10-13)
 
 `python -m scalper.growth` prints, for the live sizing and stop rules with $500 and $500 a month: at +0.41c a median of about $8,400 after 360 days on $6,000 paid in; **at +1.00c a median of about $11,600 (5th percentile $9,960, 95th $13,540), with no path below what was paid in**; at 0.00c about $6,100; at -0.50c about $3,900 and 98% of paths below paid-in. The 68 day mean of +0.79c sits between the +0.41c and +1.00c rows. These are paths drawn from the 40 day entry history with the live sizing, not forecasts, and they leave out the profit add-on pool and the weekly size review.
+
+**Information, 2026-10-13 (not a try, nothing registered on it): the "cheaper favourites carry the edge" reading does not hold up on the live series.** E3B's XRP and Dogecoin entries under 93c earned +3.7c against about 0 at 93c and over. On Bitcoin, Ethereum and gold the split reverses between windows: the older 28 days favour entries under 93c (+1.82c on 1,192 against +0.72c on 1,167) and the 40 day book window favours 93c and over (-0.09c on 1,561 against +0.95c on 1,477); over all 68 days it is +0.74c (z +1.42) under 93c and +0.84c (z +2.20) at 93c and over. By price bucket over the 68 days: 88c to 90c -0.73c (11.6% losses), 90c to 92c +1.08c, 92c to 94c +1.88c, 94c to 96c +0.59c, 96c to 97c +0.61c. A pattern that flips sign between two windows is noise until shown otherwise, so no band rule is proposed.
+
+## Pre-registration: FWD1, the live series on days that do not exist yet (written 2026-10-13 before any such day)
+
+**The question.** Do Bitcoin, Ethereum and gold under L1's unchanged rule keep a positive edge on days after 2026-10-13? E3F reads XRP and Dogecoin forward; this reads the three series the bot actually trades, on public candles, independent of the bot's own fills.
+
+**Data.** `python -m scalper.fwd1 fetch` into its own `data/fwd1.sqlite` (the last N days, N chosen to cover 2026-10-14). Only markets closing on or after **2026-10-14 00:00 UTC** count; a test asserts it.
+
+**Rule.** L1 unchanged. **One try:** the three series pooled.
+
+**Single read.** `python -m scalper.fwd1 run` refuses before 2026-11-16 and is run ONCE, on or after that date, together with E3F's read.
+
+**Pass bar, fixed (E3F's, imported).** At least 500 entries, 10 days; mean net above zero; day clustered z at least 2.1; both halves of the days positive; positive with fees x1.2. Otherwise `FALSIFIED`.
+
+**Numeric prediction, before the run.** A mean between +0.3c and +1.0c; with about 85 entries a day over 33 days the standard error is about 0.45c, so a true +0.8c would reach z 2.1 only about half the time. I expect z between 1 and 2.5. **FALSIFIED** is the more likely verdict and would mean "not shown", not "gone". Information: per series, per ISO week.
+
+**Count.** One variant: 4,610 -> 4,611 after FWD1 (PM2 was already counted).
