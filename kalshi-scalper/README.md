@@ -3015,3 +3015,20 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 **Count.** One variant: the running total in this file was 4,594 before DT1 (WX1 included), so it is 4,595 with it.
 
 **Limits.** A skip rule needs the live bot to see the same features at the same moment, with its own latency. The 6% loss rate means about 3,000 entries hold only about 180 losses, so the tree is fitted to few events, which is why the shuffled-label null is the arbiter and not the raw improvement.
+
+### DT1 result (run once, 2026-10-13, `cd src && python -B -m scalper.dt1`; the rule, bar and prediction are those registered above)
+
+3,037 L1 entries with every feature (Bitcoin, gold, Ethereum, 40 days): TRAIN 1,532 (before Sep 22), VALIDATION 1,505. The tree fitted on TRAIN split first on UTC hour (6 and earlier), then side, price and the 3 minute move, and flagged three leaves (-3.33c over 230 entries, -2.22c over 255, and one more negative) as losers to skip.
+
+| | Value |
+|---|---|
+| Validation entries skipped | 537 of 1,505 (35.7%) |
+| Skipped entries' mean net | **+0.79c** (day clustered z +0.64; halves +0.59c / +0.98c) |
+| Traded entries' mean net | -0.29c against a baseline of +0.10c |
+| Improvement | -20.26c per day; shuffled-label null 5th / 50th / 95th percentile -28.70c / -2.14c / +27.08c |
+| Verdict | **`FALSIFIED`** |
+
+- **Prediction against outcome.** Predicted: leaves that look bad in TRAIN do not stay bad in VALIDATION, improvement inside the null band, `FALSIFIED`, 5% to 25% skipped. Measured: as predicted, except that 35.7% was skipped (above the range I guessed).
+- **The skipped entries did not lose, they won slightly more than the rest** (+0.79c against a +0.10c baseline). The "bad" leaves in TRAIN were noise: with about 90 losses among 1,532 training entries a depth 3 tree can always find regions with a bad run, and they did not repeat. The shuffled-label null has a 95th percentile of +27c per day, so even a large improvement would not have counted; this one was negative.
+- **Audit triggers.** None: nothing was better than predicted. The feature code reads only candles at or before the entry candle and the previous market's result, by test.
+- **Count.** One variant: 4,595 as of 2026-10-13. The bot is unchanged.
