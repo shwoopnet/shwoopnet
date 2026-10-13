@@ -3117,3 +3117,35 @@ L1 entries by calendar week of the 40 day history (mean net per contract in cent
 - **The weekly figure is noise-sized.** One week of about 540 entries has a standard error of about 1.0c (an average win of +6.8c, an average loss of -91.8c). Every week is within about 1.5 standard errors of the overall +0.4c; the -1.2c week of Sep 30 is the lowest and the last two weeks are the weakest, which is worth watching and is not distinguishable from luck.
 - **The edge in loss-rate terms.** The break-even loss rate is 6.8 / (6.8 + 91.8) = **6.9%**. Observed loss rates: Bitcoin 6.5% (73 of 1,121), gold 5.9% (46 of 777), Ethereum 6.8% (77 of 1,140). The whole +0.4c edge is a loss rate half a point below break-even, which is why 3,000 entries cannot separate it from zero (z about 1.5) and why one extra loss in 50 trades changes the sign.
 - **Gold is the lowest loss rate, and still only about one standard deviation under break-even:** 46 losses in 777 entries against 54 expected at 6.9% (a standard deviation of about 7 losses, so z about -1.1). Bitcoin (73 against 77 expected) and Ethereum (77 against 79) sit within a loss or two per hundred of break-even.
+
+### WX1 result (run once on the complete download, 2026-10-13, `cd src && python -B -m scalper.wx1 run`; the rule, bar and prediction are those registered above, nothing was changed after seeing them)
+
+(An earlier `run` read an empty database after the first download crashed on a dropped TLS handshake; that printed `NOT_ENOUGH_DATA` on zero markets and is not a result. The fetch got retries and was rerun.) 2,898 market-days, seven cities, 69 days; 988 trades on 48 test days; 1,714 priced buckets scored.
+
+| | Value |
+|---|---|
+| Trades | 988 on 48 days (627 NO, 361 YES) |
+| Mean net per contract | **-3.26c**, day clustered z **-2.51** |
+| Halves | -1.88c / -4.60c |
+| Fees x 1.2 | -3.50c |
+| Fair-market placebo, 95th percentile of the mean | +0.38c |
+| Minimum detectable edge | +2.72c (below the 3c flag, so this is a real `FALSIFIED`, not "not shown") |
+| Verdict | **`FALSIFIED`** |
+
+| City | Trades | Net | Brier: model | Brier: market |
+|---|---|---|---|---|
+| Chicago | 149 | -3.59c | 0.1663 | 0.1154 |
+| New York | 133 | -5.60c | 0.1556 | 0.1042 |
+| Miami | 157 | -3.66c | 0.1589 | 0.1231 |
+| Austin | 137 | -4.30c | 0.1468 | 0.1204 |
+| Denver | 144 | -5.79c | 0.1380 | 0.0988 |
+| Los Angeles | 135 | **+4.73c** | 0.1367 | 0.1232 |
+| Philadelphia | 133 | -4.38c | 0.1507 | 0.1224 |
+| All | 988 | -3.26c | **0.1504** | **0.1153** |
+
+Threshold sensitivity (information only): edge at least 0, 0.02, 0.03, 0.05 gives -3.45c, -3.91c, -3.26c, -3.20c on 1,136, 1,044, 988 and 865 trades: no threshold turns it.
+
+- **Prediction against outcome.** Predicted: net -1c to -2c, `FALSIFIED`, the model's Brier within a few percent of the market's. Measured: `FALSIFIED` as predicted, but **worse** than predicted: -3.26c with a significantly negative z, and the model's Brier is **30% worse** than the market's (0.1504 against 0.1153), not within a few percent.
+- **What it means.** The day-ahead markets are priced by something better informed than a day-old model run plus a rolling bias fit: the market beats the forecast model in every one of the seven cities on probability accuracy, so a trader using that model bets against better information and pays for it. The one positive city (Los Angeles, +4.73c on 135 trades) is the best of seven cities and sits inside what chance gives; with the minimum detectable edge at +2.72c per whole sample, one city with a fifth of the trades cannot show a real edge of that size.
+- **Audit triggers.** None: nothing was better than predicted. The tests prove the calibration never uses a result that arrives after the decision, the entry candle is strictly later than the decision candle, and the fit is the last 20 days only.
+- **Count.** One variant: 4,596 as of 2026-10-13 with WX1 (counting DT1's and XM1's registrations the running total is 4,597 once XM1 runs). Weather lows, rain and the other cities are not tried: the same calibration gap would apply and no result here supports spending a try on them.
