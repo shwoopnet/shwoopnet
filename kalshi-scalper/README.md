@@ -3065,3 +3065,25 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 ## Information: why there is no WX2 (late-day weather certainty), 2026-10-13
 
 The idea: by the evening the day's high temperature is nearly known from observations, so a late quote of 85c to 97c on the favourite bucket might still be cheap. Before registering anything, the Chicago daily-high series was checked for PRICES only (no outcomes, no model): at 8 hours before the close 8 of 351 quoted buckets had a side priced 80c to 98c, and at 6, 4, 3 and 2 hours before the close **none of about 310 did**. The market has already moved to the extremes (98c or more, or 20c or less) by then, so there is nothing in the band to buy. Not registered, not run, no variant counted; the idea is closed by availability.
+
+## Pre-registration: XM1, does the hourly ladder price the 15 minute market better than the 15 minute market does (written 2026-10-13 before any ladder strike was downloaded for this test and before any result)
+
+**The idea (new: a cross-market consistency test, not an L1 variant).** Every hour a Bitcoin (and Ethereum) 15 minute up/down market closes at the same moment as the hourly "price above X" ladder, which has 188 (Bitcoin) or 300 (Ethereum) strikes and, in an example looked at while writing this (quotes only, one hour), strikes $100 apart near the money with 1c spreads. The 15 minute market's strike is the price at its open, so the ladder, read between the two strikes that bracket it, is an independent price for the same event. If the ladder is the better-informed (deeper, more watched) market, the 15 minute market's quote should drift to the ladder's; where it has not by 6 minutes before the close, the gap is the trade. Counterparty: whoever quotes the 15 minute market without reading the ladder.
+
+**What was checked first (2026-10-13; quotes of one hour, no outcomes used):** at the close of KXBTC15M-26OCT131400 (strike 83,132.07) the ladder's YES bid/ask 6 minutes before the close were 83,099.99: 0.01 / 0.02, 83,199.99: 0.00 / 0.01 and 82,999.99: 0.08 / 0.09, and the 15 minute market's own quote was 0.012 / 0.013, so in that hour they agreed. One hour proves nothing; it shows the join is possible and that the expected result is "they agree".
+
+**Data.** Hourly-aligned 15 minute markets (close on the hour) of Bitcoin and Ethereum from `data/book.sqlite` (about 40 days, up to 960 windows each). For each, `python -m scalper.xm1 fetch` lists that hour's ladder (`KXBTCD`, `KXETHD`), keeps the strikes within 1.5% of the 15 minute market's strike (chosen from the strike alone, never from any outcome), and stores their quote at the candle ending 360 s before the close, into a **separate database `data/xm1.sqlite`**.
+
+**Rule (fixed now, one parameter set per series).** At the candle ending 360 s before the close: `p` = the mid of the ladder's YES (above) quote interpolated linearly in strike between the two ladder strikes that bracket the 15 minute strike (both must have a valid quote: bid at least 0.001, ask at most 0.999, ask not below bid; no bracket, no trade). edge_YES = p - ask_15m - fee, edge_NO = (1 - p) - (1 - bid_15m) - fee. Take the side with the larger edge if it is at least 0.02 and its price is between 0.03 and 0.97. One trade per window, taker at the 15 minute market's ask, hold to settlement, fee 0.07 x p x (1 - p) per contract. No tuning of the 0.02, the 1.5% or the minute.
+
+**Two tries (Bitcoin, Ethereum), no variants.**
+
+**Pass bar, fixed (as for WX1).** `NOT_ENOUGH_DATA` if fewer than 200 trades or fewer than 20 days. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: mean net above zero; z clustered by day at least 2.1; both halves of the days positive; positive with fees x 1.2; and above the 95th percentile of a fair-market placebo (200 repetitions, outcomes drawn at the 15 minute mid). Anything else is `FALSIFIED`. The power rule: the run prints the minimum detectable edge and, if it is above 2c, a `FALSIFIED` is reported as "not shown at this sample size".
+
+**Numeric prediction, before the run.** The two markets agree to within a cent or two nearly always, so few windows trade (fewer than 200 is likely, `NOT_ENOUGH_DATA`), and those that do net about -1c. If a series reaches a mean above +1.5c it is an audit trigger first (check that the interpolation uses only quotes at or before the entry candle and that the strike comes from the 15 minute market's own ticker).
+
+**Information, not part of the verdict.** The distribution of the gap (p minus the 15 minute mid) in cents: median, 5th and 95th percentile and the share above 2c; windows with a bracket; the Brier score of the ladder's p against the 15 minute mid's, on the same windows.
+
+**Count.** Two variants: the running total in this file was 4,595 before XM1, so it is 4,597 with it.
+
+**Limits.** The 15 minute market settles on a 60 second average and the hourly ladder on a single reference value, so the two are not the same bet to the cent. Ladder quotes are mids of tight books, not fills; the 15 minute side fills about 56% to 59% of the time live.
