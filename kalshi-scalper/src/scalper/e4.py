@@ -22,7 +22,7 @@ from .paths import DATA_DIR
 from .scalps import STRESS, Z_BAR
 
 LADDER_DB = DATA_DIR / "ladders.sqlite"
-SERIES_DAYS = {"KXINXU": 40, "KXBTCD": 30, "KXETHD": 30}
+SERIES_DAYS = {"KXINXU": 40, "KXBTCD": 14, "KXETHD": 14}
 WINDOW_BEFORE_S = 420          # candles from this long before the close ...
 WINDOW_AFTER_S = 300           # ... to this long before it: the entry candle (360 s) is inside, with a minute either side
 CHUNK = 100                    # tickers per candles request (the endpoint's limit)

@@ -8,7 +8,7 @@ from scalper import e4 as E
 from scalper import lstrats as L
 
 # The three registered series and windows, no more: another series would be an unregistered try. History goes to its own file.
-assert E.SERIES_DAYS == {"KXINXU": 40, "KXBTCD": 30, "KXETHD": 30}
+assert E.SERIES_DAYS == {"KXINXU": 40, "KXBTCD": 14, "KXETHD": 14}
 assert E.LADDER_DB.name == "ladders.sqlite"
 # The rule is L1's, unchanged, and the entry candle (360 s before the close) is always inside the fetched window, with a minute either side.
 assert L.L1 == {"left_s": 360, "band": (0.88, 0.97)}
