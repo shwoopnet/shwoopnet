@@ -322,7 +322,8 @@ gates.N25 = async () => {
   const hist = live.foldSkim(st, [o('old', 500, 5)]);
   assert.strictEqual(hist.pool, 0, 'orders from before the state existed are history');
   assert.deepStrictEqual([live.skimAddon({ pool: 0.5 }, 5), live.skimAddon({ pool: 0.95 }, 5), live.skimAddon({ pool: 99 }, 5)], [0, 1, 106], 'one extra contract per 93c of pool, with no fixed limit');
-  assert.strictEqual(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 3 * 86400000), 0, 'off for a week after a loss stop');
+  assert.ok(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 3 * 86400000) > 0, 'the profit add-on is NOT held after a loss stop: a pool that has refilled buys extras at once (owner, Oct 13, 2026)');
+  assert.strictEqual(live.skimAddon({ pool: 0, lastStopAt: 1000 }, 1000 + 3 * 86400000), 0, 'a stop empties the pool, so there is nothing to buy with until wins refill it');
   assert.ok(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 8 * 86400000) > 0);
   // Through a tick: the cap plus the add-on sets the size, and the balance the weekly review sees excludes savings.
   const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }] } });
