@@ -3525,3 +3525,17 @@ Information (not part of the verdict): Bitcoin skipped 296 entries, loss rate **
 **What a pass would and would not mean.** A pass would be the first filter in this file confirmed on three separate stretches (the 40 days it was found on, 28 older days, and new days). Even then the live bot cannot use it from here: it would need an external Polymarket read at order time, a dependency the owner has not asked for. It would be put to the owner as a proposal, not made.
 
 **Count.** One variant: 4,621 after PM3.
+
+## Result: FLB1, favourites in long-dated, non-sports, non-price markets (run once on 2026-10-13)
+
+28,005 eligible markets in 2,669 events (lifetime of at least 3 days, closing in the last 60 days, category not Sports, Financials or Crypto). Rule as registered.
+
+| Lead | Entries | Events | Mean price paid | Loss rate | Net per contract | z (by event) | Halves | Placebo 95th pct | Minimum detectable edge | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 24 h | 1,837 | 701 | 0.936 | 6.6% | -0.64c | -0.81 | +0.09 / -1.36 | -0.75c | +1.67c | FALSIFIED (NOT SHOWN) |
+| 72 h | 2,196 | 799 | 0.935 | 7.9% | **-1.83c** | **-2.43** | -2.57 / -1.10 | -0.97c | +1.58c | FALSIFIED |
+| 168 h | 873 | 436 | 0.933 | 7.1% | -0.88c | -0.95 | -1.54 / -0.22 | -0.65c | +1.94c | FALSIFIED (NOT SHOWN) |
+
+The prediction (between -2.0c and +1.0c, FALSIFIED at all three) was right. **Favourites in the rest of Kalshi do not beat their price; at 72 hours they lose.** L1's pattern is a property of 15 minute crypto and gold markets and not of Kalshi in general (SP1 said the same for sports).
+
+Information, not tries: by category at 72 h, Politics -6.40c (225), Elections -2.42c (69), Entertainment -1.74c (351), Climate and Weather -2.80c (58), Science and Technology -0.66c, Economics -0.02c, Mentions -0.36c. **A deviation to state:** the "Commodities" category was not on the registered exclusion list, so daily and weekly commodity price brackets (price-driven look-alikes of L1, the very kind this test was meant to leave out) are in the universe: 718 of 2,196 entries at 72 h, -1.79c. Excluding them would not change a verdict that already reads FALSIFIED, and the rule was not changed after the fact. The median entry-candle volume is 0 contracts: most of these quotes are posted asks with no trading at that hour, the stale-quote problem the registration warned about. The mean price paid of 0.93 with a loss rate of 6.6% to 7.9% is just a fair price after a 0.4c to 0.5c fee, with a small negative drift. **Count unchanged** (FLB1's three tries were counted when registered).
