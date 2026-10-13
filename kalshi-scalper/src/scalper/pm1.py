@@ -68,9 +68,9 @@ def _get(url: str, params: list[tuple[str, str]] | dict, retries: int = 6):
     raise RuntimeError(f"GET {url} failed: {last}")
 
 
-def windows() -> list[dict]:
+def windows(src=DB) -> list[dict]:
     """Kalshi windows of the two registered series that have a result and a valid quote at the entry candle."""
-    db = sqlite3.connect(DB)
+    db = sqlite3.connect(src)
     out = []
     for t, s, c, r in db.execute("SELECT ticker, series, close_ts, result FROM market WHERE series IN ('KXBTC15M','KXETH15M') AND result IN ('yes','no')"):
         row = db.execute("SELECT bid_c, ask_c FROM candle WHERE ticker=? AND end_ts=?", (t, c - ENTRY_LEFT_S)).fetchone()
@@ -80,12 +80,17 @@ def windows() -> list[dict]:
 
 
 def fetch() -> None:
+    fetch_windows(PM_DB, windows())
+
+
+def fetch_windows(db_path, wins: list[dict]) -> None:
+    """Download the Polymarket event and price history for every window not yet stored in `db_path`. Shared with PM2, which only changes WHICH windows and WHERE they go."""
     DATA_DIR.mkdir(exist_ok=True)
-    pm = sqlite3.connect(PM_DB)
+    pm = sqlite3.connect(db_path)
     pm.executescript("""CREATE TABLE IF NOT EXISTS event(slug TEXT PRIMARY KEY, token TEXT, volume REAL);
 CREATE TABLE IF NOT EXISTS pt(slug TEXT, t INTEGER, p REAL, PRIMARY KEY(slug, t));""")
     done = {r[0] for r in pm.execute("SELECT slug FROM event")}
-    todo = [(slug(ASSETS[w["series"]], w["close_ts"]), w["close_ts"]) for w in windows()]
+    todo = [(slug(ASSETS[w["series"]], w["close_ts"]), w["close_ts"]) for w in wins]
     todo = [x for x in todo if x[0] not in done]
     print(f"{len(todo)} windows to fetch", flush=True)
     for i in range(0, len(todo), BATCH):
