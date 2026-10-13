@@ -3173,3 +3173,62 @@ Threshold sensitivity (information only): edge at least 0, 0.02, 0.03, 0.05 give
 **Count.** One variant: the running total in this file was 4,597 after XM1's registration, so it is 4,598 with SP1.
 
 **Limits.** An hourly candle 12 hours before the expected end is a stale price for sports that start much later than that (tennis, in particular, has no fixed schedule, so for some matches the candle is a day-early quote); that is a property of the rule, fixed here, not tuned. Whether a favourite at 88c to 97c half a day before the event is the same bet as one in the last minutes of L1's 15 minute market is exactly what the test asks. Candle asks are quotes, not fills.
+
+## Result: SP1, heavy favourites in sports game-winner markets (run once on 2026-10-13)
+
+9,118 settled markets in 12 series over 40 days; 535 qualified (YES ask 0.88 to 0.97 on the hourly candle ending at or before 12 hours before the expected end), on 40 days.
+
+SP1: mean price paid 0.923, loss rate 11.40% (break-even about 7.7%), **net -4.19c per contract, z -2.79**, halves -3.84c / -4.67c, fees x1.2 -4.29c, placebo 95th percentile -4.94c. **FALSIFIED.** Minimum detectable edge +3.15c, so a small positive edge would not have been seen; but this is not a "not shown" case, it is the wrong sign with z -2.79 and both halves negative. The prediction (between -0.5c and +1.0c) was wrong on the low side.
+
+Information, not tries. Per series: Challenger tennis `KXATPCHALLENGERMATCH` 209 entries, loss rate 17.7%, **-10.40c** (the bulk of the damage); NCAA football 157 entries, -0.46c; women's Challenger tennis +3.44c on 78; WTA +3.10c on 40; every other series under 25 entries. By price band: the loss rate does not fall as the price rises (11.7%, 14.0%, 14.7%, 11.9%, 5.5% over five bands), the opposite of a calibrated favourite. Why this matters: an hourly candle 12 hours early is a quote on a market that may be thin and stale, and we buy at its ask. In the thin tennis series the "favourite" at that time often changes before the match. A reading of this, not tested: the 88c to 97c favourite 12 hours early is **overpriced**, not underpriced, so favourite-longshot bias does not run in the direction that would pay a buyer of favourites here. The mirror (selling favourites / buying the longshot) is NOT registered, because choosing it after seeing this result would be the selection the deflation floor exists to stop.
+
+**Count: 4,598** (SP1 was the one try).
+
+## Result: E3, L1 unchanged on seven more 15 minute series (run once on 2026-10-13)
+
+19,139 markets, 40 days (FX 16 to 17 days). Rule as registered.
+
+| Series | n | net / contract | z | halves | fees x1.2 | verdict |
+|---|---|---|---|---|---|---|
+| XRP | 1,262 | **+1.43c** | +2.37 | +1.18 / +1.71 | +1.34 | NOT_YET_FALSIFIED |
+| Dogecoin | 1,206 | **+1.54c** | +2.97 | +1.48 / +1.61 | +1.45 | NOT_YET_FALSIFIED |
+| HYPE | 1,245 | -0.18c | -0.24 | | | FALSIFIED |
+| BNB | 1,083 | -0.84c | -1.16 | | | FALSIFIED |
+| EUR/USD | 340 | -0.56c | -0.50 | | | FALSIFIED |
+| GBP/USD | 343 | -2.72c | -1.93 | | | FALSIFIED |
+| USD/JPY | 345 | -4.29c | -2.18 | | | FALSIFIED |
+
+Pooled (information): all seven -0.01c (z -0.03); four crypto +0.53c (z +1.30); three FX -2.53c (z -3.07, **FX is losing with a significant sign**).
+
+The prediction said XRP and DOGE would be about +0.5c and fail on z; they did not, so that prediction was wrong for two of the seven. DOGE's +1.54c is over the registered +1.5c audit trigger, so the audit came first.
+
+**Audit (information, no new parameter, nothing selected).**
+- The quotes are real: median entry-minute volume 2,614 contracts (XRP) and 1,219 (DOGE), median spread 0.4c and 0.7c. The entry candle is the same one L1 uses (ends 360 s before the close), and the code is the same `hold_rule`.
+- **The gain is concentrated.** The five best days of 41 carry 56% (XRP) and 51% (DOGE) of the total net. Without those five days: XRP +0.72c (z +1.22), DOGE +0.86c (z +1.75). Neither would pass the bar without its best five days.
+- **It is not independent of Bitcoin.** In the windows where Bitcoin's L1 entry also existed and lost (32 for XRP's overlap, 26 for DOGE's), XRP also lost 13 and DOGE 10: about 40%, against a loss rate near 6% when independent. One adverse move in Bitcoin is also an adverse move in them.
+- Entries in windows where Bitcoin had no L1 entry did better (+1.91c, +2.12c) than overlapping ones, so the series are not just copies of the Bitcoin result.
+- Selection: two of four crypto series pass; the pooled four does not (z +1.30), because HYPE and BNB are negative. With seven tries about 12% of the time one passes by luck alone; two passing is about 1.3% under independence, but crypto alts are far from independent, so the honest reading is "one cluster, one draw, unusually good".
+
+**What this is and is not.** By the registered rule a pass means "watch it forward", never "trade it" and never "change the live bot". Because the live bot already holds the window to 4.5% and sends series in order Bitcoin, gold, Ethereum, adding XRP and DOGE would mostly be starved by that window limit, so even a confirmed edge would not add much until the limit is a deliberate decision. Nothing in the live bot changes.
+
+**Count: 4,598** (E3's seven were already counted).
+
+## Pre-registration: E3F, the forward read of E3's two passes (written 2026-10-13 before any day it covers existed)
+
+**The question.** Does L1 unchanged on XRP and Dogecoin keep its edge on days that did not exist when it was found?
+
+**Why this is one try and not two.** The two series were selected because they passed in E3. Testing them separately would double-count one finding. They are tested **pooled**, as one variant, on **new days only**.
+
+**Data.** `python -m scalper.e3f fetch` into its own `data/e3f.sqlite`. Only markets closing on or after **2026-10-14 00:00 UTC** count (`START_TS`). The fetch window is 60 days, but entries before the start are dropped in code (a test asserts it).
+
+**Rule.** L1 unchanged (candle ending 360 s before the close, favourite's ask 0.88 to 0.97, hold to settlement, taker, same fee model).
+
+**Single read.** `python -m scalper.e3f run` refuses to run before 2026-11-16 (a test asserts it). It is run **once**, on or after that date, and the result is recorded whatever it says. If the data are not yet enough at that date the verdict is `NOT_ENOUGH_DATA` and the read is repeated only after the stated minimum is met, never to chase a pass.
+
+**Pass bar, fixed.** At least 500 pooled entries (about 60 a day, so about 9 days) and at least 10 days; mean net above zero; day clustered z at least 2.1; both halves of the days positive; positive with fees x1.2. Otherwise `FALSIFIED`. No placebo: the rule is L1's and the bar is the one L1's tests used.
+
+**Numeric prediction, before the run.** The E3 figures (+1.4c, +1.5c) were the best two of seven and they rest on five days each; the regression-to-the-mean forecast is a true edge of about +0.5c, a pooled z under 1.5, **FALSIFIED**. Power: with about 33 days the standard error is about 0.5c, so the minimum detectable edge is about 1.0c; a true edge of +0.5c would be missed (that case reads FALSIFIED here and means "not shown"). A pass would still not change the live bot; it would put XRP and DOGE up for a size-capped, separate decision about the window limit.
+
+**Kill criterion.** Any of the bar's conditions failing is FALSIFIED. The live record has nothing to say about it, because the live bot does not trade these series.
+
+**Count.** One variant: 4,599 after E3F.
