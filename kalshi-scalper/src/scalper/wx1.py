@@ -209,8 +209,15 @@ def fetch_forecast(lat: float, lon: float, start: str, end: str) -> dict[int, fl
         d_end = min(d0 + timedelta(days=29), d1)
         q = urllib.parse.urlencode({"latitude": lat, "longitude": lon, "hourly": "temperature_2m_previous_day1", "start_date": d0.date().isoformat(),
                                     "end_date": d_end.date().isoformat(), "timezone": "GMT", "temperature_unit": "fahrenheit"})
-        with urllib.request.urlopen("https://previous-runs-api.open-meteo.com/v1/forecast?" + q, timeout=30) as r:
-            h = json.load(r)["hourly"]
+        for attempt in range(6):          # the proxy drops a TLS handshake now and then: wait and try again, never skip a month
+            try:
+                with urllib.request.urlopen("https://previous-runs-api.open-meteo.com/v1/forecast?" + q, timeout=45) as r:
+                    h = json.load(r)["hourly"]
+                break
+            except Exception:
+                if attempt == 5:
+                    raise
+                time.sleep(5 * (attempt + 1))
         for t, v in zip(h["time"], h["temperature_2m_previous_day1"]):
             if v is not None:
                 out[_iso_utc(t)] = float(v)
