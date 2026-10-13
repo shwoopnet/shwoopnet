@@ -2989,3 +2989,29 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 **Count.** One variant. The running total in this file was 4,593 before WX1, so it is 4,594 with it.
 
 **Limits.** Candle asks are quotes, not fills; the bucket quotes are thin for the smaller cities. The last few evening hours of a climate day are forecast by a run initialised about 24 hours before THOSE hours, which can be a little after the 22:00 local decision; they only matter on days when the maximum falls late in the evening, which is rare, and the effect cannot be removed without changing the registered rule. A forecast for a grid point is not the airport station's thermometer, which is what the bias term is for. Open-Meteo's "previous day" values are archived model output, and whether any archived value was revised after the fact is not something I can check.
+
+## Pre-registration: DT1, a decision tree that skips L1 entries it flags as losers (written 2026-10-13 before any tree was fitted)
+
+**Why.** The owner suggested decision trees and sub rules. L1 enters about 70 times a day with a 6% loss rate, so the only way to add edge without new markets is to skip the entries that are worse than the rest. Earlier filters were single, hand-picked conditions (`l1filters2.py`, S and F families, OW7 still on forward read). A shallow tree is the honest way to ask the question once: do the features available at entry say which entries lose, on days the tree never saw?
+
+**Data and split.** `data/book.sqlite` as it stands: every L1 entry (the rule of `lstrats.L1`: the candle ending 360 s before the close, favourite ask 0.88 to 0.97, either side) on Bitcoin, gold and Ethereum, 40 days. The first 20 days are TRAIN, the last 20 days are VALIDATION, read once.
+
+**Features, fixed now (all known at the entry candle or earlier).** (1) price paid; (2) side is YES; (3) spread at the entry candle; (4) change in the favourite side's mid over the last 1 minute; (5) the same over 3 minutes; (6) the favourite side's mid now minus its mid at the first candle of the market; (7) log volume of the entry candle; (8) UTC hour; (9) series is gold; (10) series is Ethereum; (11) the previous market of the same series resolved YES. Eleven features and nothing else; no feature is added after seeing results.
+
+**The tree.** Regression on net per contract, depth at most 3, at least 150 training entries in a leaf, splits at the deciles of each feature, chosen by variance reduction. Written in numpy in `dt1.py`; there is no tuning of depth, leaf size or deciles.
+
+**The rule.** Skip an entry if the tree's training-mean net for its leaf is at most -0.5c; trade all others. The tree and the rule are fixed on TRAIN alone, then applied to VALIDATION.
+
+**The null (what luck produces).** 200 refits of the same tree on TRAIN with the net values shuffled across training entries within each series, each applied to VALIDATION with the same rule. The real result must beat what a tree fitted to noise achieves on the same days.
+
+**One try, no variants.** The count is one tree and one skip rule.
+
+**Pass bar, fixed.** `NOT_ENOUGH_DATA` if the tree skips fewer than 100 validation entries. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: the skipped validation entries' mean net is below zero with a day clustered z of at most -2.1; the improvement (minus the sum of the skipped entries' net, per validation day) is above the 95th percentile of the null; the skipped entries' mean net is below zero in both halves of the validation days; and the traded entries' mean net is higher than the baseline mean. Anything else is `FALSIFIED`. A pass means "watch it on new days", never "change the bot": the live bot does not change for any research result here, and the next stage would be a forward shadow record (needs a server change, not built).
+
+**Prediction, before the run.** The tree finds leaves that look bad in TRAIN, none of them stay bad in VALIDATION, and the improvement sits inside the null band. `FALSIFIED`. The skipped set is expected to be 5% to 25% of entries.
+
+**Information, not part of the verdict.** The fitted tree printed in words, TRAIN and VALIDATION mean net by leaf, the share of entries skipped, and the improvement in cents per day with the null's 5th, 50th and 95th percentiles.
+
+**Count.** One variant: the running total in this file was 4,594 before DT1 (WX1 included), so it is 4,595 with it.
+
+**Limits.** A skip rule needs the live bot to see the same features at the same moment, with its own latency. The 6% loss rate means about 3,000 entries hold only about 180 losses, so the tree is fitted to few events, which is why the shuffled-label null is the arbiter and not the raw improvement.
