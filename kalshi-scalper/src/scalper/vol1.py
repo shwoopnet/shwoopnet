@@ -38,11 +38,11 @@ def entries(raw: list[dict], vol: dict) -> list[dict]:
     return out
 
 
-def verdict(es: list[dict], null: list[float]) -> tuple[str, dict]:
+def verdict(es: list[dict], null: list[float], min_skipped: int = MIN_SKIPPED) -> tuple[str, dict]:
     skipped = [e for e in es if e["skip"]]
     kept = [e for e in es if not e["skip"]]
     days = sorted({e["day"] for e in es})
-    if len(skipped) < MIN_SKIPPED or len(days) < MIN_DAYS or not kept:
+    if len(skipped) < min_skipped or len(days) < MIN_DAYS or not kept:
         return "NOT_ENOUGH_DATA", {"skipped": len(skipped), "kept": len(kept), "days": len(days)}
     mid = days[len(days) // 2]
     mean = lambda g: sum(e["net"] for e in g) / len(g) if g else None
