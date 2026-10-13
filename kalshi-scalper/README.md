@@ -3346,3 +3346,42 @@ E3B pooled XRP + Dogecoin: **n=1,917 on 29 days, net +1.76c per contract, z +3.9
 **What each outcome would mean.** A pass on a series is "the live bot's edge on that series also holds on 29 older days", which is evidence for keeping it, not for sizing it up. A fail with a mean at or below 0 on a series is evidence against that series being worth its slot, to be put to the owner (the bot is not changed from here). Power: with roughly 29 days of entries the standard error is about 0.7c per series, so a true edge of +0.4c cannot reach z 2.1; most of the value is in the sign of the pooled mean and its size relative to the book window.
 
 **Count.** Three variants: 4,609 after L1B.
+
+## Result: PM1, Polymarket's 15 minute price against Kalshi's (run once on 2026-10-13)
+
+7,584 Kalshi windows with a quote, 7,582 with a Polymarket point within 180 s before the entry second.
+
+| | Observations | Brier gain of the 50/50 blend over Kalshi alone | z | Halves | Verdict |
+|---|---|---|---|---|---|
+| Bitcoin | 3,791 | **-0.0029** | -3.84 | -0.0033 / -0.0026 | FALSIFIED |
+| Ethereum | 3,791 | **-0.0022** | -2.51 | -0.0025 / -0.0019 | FALSIFIED |
+
+As predicted: Polymarket's price is the worse predictor (Brier Bitcoin 0.1523 against Kalshi's 0.1406; Ethereum 0.1432 against 0.1328; median gap between the two venues 5.0c), so averaging it in makes things worse. No audit trigger (the gain was negative).
+
+**Information only (the registered split, not a test).** L1-style entries split by whether Polymarket's price for the side bought was 5 points or more below Kalshi's mid:
+- Bitcoin: Polymarket disagrees 393 entries, loss rate 9.4%, **-1.72c**; agrees 728 entries, loss rate 4.9%, **+1.52c**.
+- Ethereum: disagrees 437, loss rate 7.8%, -0.48c; agrees 703, loss rate 6.1%, +0.35c.
+
+That was the pre-registered information split and it was looked at once, on the same 40 days that L1 itself was tuned on. A loss-rate gap of 4.5 points with 393 and 728 entries is about 2.6 standard errors on Bitcoin and 1.0 on Ethereum; it is a candidate, not a finding, because a result seen after a failed test is the textbook case of picking the one thing that looks good. It is tested separately on days it has not seen (PM2, below), which is the registered next stage for a filter.
+
+**Count: 4,606** (PM1's two tries were counted when registered).
+
+## Pre-registration: PM2, skip an L1 entry when Polymarket disagrees (written 2026-10-13 before any Polymarket price for these days was downloaded)
+
+**The question.** PM1's information split suggested that L1 entries where Polymarket's price for the side bought sits 5 or more points under Kalshi's mid lose more often. Does that hold on days the split was never computed on?
+
+**Counterparty.** Kalshi's own favourite buyer at those moments: when the other venue prices the same event 5 points less likely, Kalshi's 88c to 97c ask is more often too high. A thin market's stale quote would work against this idea, not for it (PM1 showed Polymarket is the worse predictor on average), which is why the prior is against it.
+
+**Data.** The Bitcoin and Ethereum windows closing **strictly before 2026-09-02 19:30 UTC** in `data/l1b.sqlite` (the L1B download, 29 days nobody has looked at), and for each the Polymarket "Up" price history fetched the PM1 way into its own `data/pm2.sqlite`. No day in this window was in PM1.
+
+**Rule (fixed now, no variants).** L1 entries as defined (favourite's ask 0.88 to 0.97 at the candle ending 360 s before the close) with a Polymarket point at or before the entry second and no more than 180 s old. `skip` = the Polymarket price of the side bought is at least **0.05** below Kalshi's mid of that side. Bitcoin and Ethereum pooled, **one try**.
+
+**Pass bar, fixed.** `NOT_ENOUGH_DATA` if fewer than 100 skipped entries. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: the skipped entries' mean net is below zero; its day clustered z is at most -2.1; the skipped mean is negative in both halves of the days; the kept entries' mean is above the all-entries mean (skipping would have helped); and the improvement (kept mean minus all-entries mean) exceeds the 95th percentile of 200 permutation draws in which the same number of entries per series are flagged at random. Anything else `FALSIFIED`.
+
+**Numeric prediction, before the run.** The split does not replicate: the skipped entries' mean net between -1c and +1c, z above -1.5, **FALSIFIED**. Power: about 800 entries over 29 days with roughly 280 skipped; the standard error of the skipped mean is about 1.5c, so a true gap as large as the one seen in sample (about 3c) would be seen only about half the time. A FALSIFIED here can therefore mean "not shown".
+
+**What a pass would and would not mean.** It would put a Polymarket-disagreement filter up for a forward read, never into the live bot; the bot's server cannot be changed from here and its Polymarket read would be a new external dependency the owner has not asked for.
+
+**Information, not part of the verdict.** Skipped and kept counts, loss rates and mean net by series; the loss rate in the skipped group against the kept group.
+
+**Count.** One variant: 4,610 after PM2 (4,609 after L1B).
