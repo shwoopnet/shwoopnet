@@ -2889,3 +2889,23 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 **Verdict words:** FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA. There is no promote verb. NOT_ENOUGH_DATA if fewer than 300 entries or fewer than 5 days. Otherwise NOT_YET_FALSIFIED only if ALL of: net mean per unit above 0 on the full 40 days; day-clustered z of net at least 2.1; contrast (net minus matched baseline) mean above 0 with day-clustered z at least 2.1; both halves' net means above 0; stress net above 0. Anything else is FALSIFIED. With 7 tries the chance one passes on luck alone at this bar is about 12%, so a single pass would mean "watch it on new days", never "trade it".
 
 **Overlap with L1 (the rule from "L1 is the only strategy").** All seven hold to settlement, so they overlap L1 in mindset and position. They are research only. Nothing here places an order.
+
+### BK1 result (run once, 2026-10-13, `cd src && python -B -m scalper.bk1`)
+
+10,288 settled markets in 3,792 windows, Sep 2 to Oct 12. Controls (not tries): YES at E in every market -2.32c, NO -1.92c. Net is per unit after the fee; contrast is net minus the matched random-side baseline; halves are the first and last 20 days.
+
+| Idea | n | Net | z | Contrast | zc | Half 1 | Half 2 | Stress | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| BK1 favorite at the open | 10,239 | -2.21c | -3.75 | -0.09c | -0.16 | -2.24c | -2.18c | -2.53c | FALSIFIED |
+| BK2 underdog at the open | 10,239 | -2.02c | -3.43 | +0.09c | +0.16 | -2.05c | -2.00c | -2.34c | FALSIFIED |
+| BK3 Bitcoin YES + Ethereum NO (pair) | 3,792 | -5.06c | -7.69 | -0.83c | -1.27 | -5.20c | -4.91c | -5.69c | FALSIFIED |
+| BK4 Bitcoin YES + gold NO (pair) | 2,692 | -4.76c | -4.19 | -0.54c | -0.47 | -3.54c | -6.10c | -5.39c | FALSIFIED |
+| BK5 divergence pair | 453 | -3.39c | -2.10 | +0.83c | +0.51 | -2.17c | -4.41c | -4.02c | FALSIFIED |
+| BK6 narrow spread only | 9,455 | -2.26c | -3.81 | +0.07c | +0.46 | -2.05c | -2.48c | -2.58c | FALSIFIED |
+| BK7 Ethereum lags Bitcoin's early extreme | 18 | -4.55c | -0.75 | -3.00c | -0.50 | n/a | n/a | n/a | NOT_ENOUGH_DATA |
+
+**Seven tries, all FALSIFIED or NOT_ENOUGH_DATA, as predicted.** No contrast reaches 1c in either direction, and none has |zc| above 1.3: choosing the favorite, the underdog, a pair, or a narrow spread beats a random side by nothing, so the whole result is the cost. A basket across Bitcoin, Ethereum and gold adds size, not edge.
+
+**What the cost is made of.** A contract bought near 50c costs about 2.2c: the fee alone is 0.07 x 0.5 x 0.5 = 1.75c, plus about half a cent of spread. That is why BK6 (narrow spread only) barely helps (-2.26c against -2.32c): 92% of entries already had a spread of 1c or less, and the fee is the big part. The fee is smallest at the ends (0.07 x 0.9 x 0.1 = 0.63c at 90c), which is the arithmetic reason L1 buys at 88c to 97c, not at coin-flip prices.
+
+**BK7** found only 18 entries on 13 days: Ethereum is usually priced in by the time Bitcoin is at an extreme with 8 minutes left, which is a finding about how fast Ethereum quotes follow Bitcoin, not a verdict on the idea. It stays NOT_ENOUGH_DATA and consumes no further try. Mutation notes: the tests killed every mutant I tried on the rules, after one same-second bytecode cache hiccup (stale `.pyc` after a same-size edit) that I caught by clearing `__pycache__` and re-running with `-B`.
