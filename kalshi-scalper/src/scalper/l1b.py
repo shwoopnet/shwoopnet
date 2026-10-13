@@ -5,10 +5,13 @@ History goes into its OWN database (`data/l1b.sqlite`). Reuses altseries' fetche
 """
 from __future__ import annotations
 
+import sqlite3
 import sys
+import time
 from datetime import datetime, timezone
 
 from . import altseries as A
+from . import backfill
 from . import lstrats as L
 from .paths import DATA_DIR
 
@@ -19,8 +22,16 @@ FETCH_DAYS = 69
 
 
 def fetch() -> None:
-    A.ALTS = SERIES
-    A.fetch(FETCH_DAYS)
+    """Only the days before FLOOR_TS are downloaded: the later 40 are already in book.sqlite and are not this test's data."""
+    DATA_DIR.mkdir(exist_ok=True)
+    db = sqlite3.connect(A.ALT_DB)
+    db.executescript(backfill.SCHEMA)
+    saved, backfill.SERIES = backfill.SERIES, SERIES     # the shared fetcher walks backfill.SERIES; restored below so nothing else is affected
+    try:
+        stored, skipped, empty = backfill._fetch(db, int(time.time()) - FETCH_DAYS * 86400, FLOOR_TS - 1, "before the book's first day", skip_empty=True)
+        print(f"done: {stored} new markets, {skipped} already stored, {empty} with no candles (not stored)", flush=True)
+    finally:
+        backfill.SERIES = saved
 
 
 def holdout(entries: list[dict]) -> list[dict]:
