@@ -3048,3 +3048,16 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 **What it says.** If the measured edge is real, L1 would add about 40% on top of the deposits over a year at this size, which is real money on a growing balance and still not an income that replaces anything. If the edge is zero the account just returns the deposits less a coin-flip's worth of noise (46% of paths below paid-in), and a small negative edge (a fee change, worse fills) loses most of the deposits over a year. The measured edge has a z of about 1.5, so all rows are live; the live record (about 165 settled trades by Oct 13) is too short to choose between them.
 
 **Left out on purpose:** the profit add-on pool, the weekly review's step timing, open positions counted as lost, correlated losses across series within a window beyond the window cap, fills that depend on price (the order data suggests the misses lose more than the fills, see below), and the chance that the edge decays. Treat the table as a size-of-the-thing check, not a forecast.
+
+## Information: do the orders that fill differ from the ones that miss? (2026-10-13; the owner's pasted order diagnostics, not a hypothesis, not a try)
+
+150 live L1 orders (2026-10-08 to 10-12) joined to the settled results in `book.sqlite` (133 had a result in the database). For an order that missed, the outcome is what it WOULD have earned at its decision price.
+
+| | Orders | Won | Mean net per contract |
+|---|---|---|---|
+| Filled | 80 | 77 (96.2%) | **+2.68c** |
+| Missed (hypothetical at the decision price) | 53 | 48 (90.6%) | **-1.79c** |
+
+- **The gap is not significant.** 96.2% against 90.6% is a difference of 5.6 points with a standard error of about 4.5 (z about 1.25, 3 losses against 5). It is a pattern worth watching, not a result.
+- **The limit cushion.** Orders sent with a limit at the decision price filled 36% of the time (17 of 47), and those that did fill averaged +3.13c; orders with a cushion filled 73% (63 of 86) at +2.56c a contract. Per signal (a miss earns nothing) the cushioned orders earned +1.88c against +1.13c. The pattern fits "more fills, and the extra fills are not worse than the rest", but with 133 orders and 8 losses nothing here can say whether a cushion helps.
+- **What would settle it.** The same join on a few hundred more orders (the page's "Copy order diagnostics" export), or the forward shadow record. Until then the live bot, its limits and its cushion stay exactly as they are.
