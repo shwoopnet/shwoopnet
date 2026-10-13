@@ -3312,3 +3312,37 @@ The prediction said XRP and DOGE would be about +0.5c and fail on z; they did no
 **Count.** Three variants: 4,606 after FLB1.
 
 **Limits.** An hourly candle days before the close in a thin market is a stale quote (its ask may be what one person once offered); we buy at that ask, which is exactly what the rule would do and not an error of the test, but a real order would find the book empty more often than the candle suggests. Fills are not modelled.
+
+## Result: E3B, the backward holdout for XRP and Dogecoin (run once on 2026-10-13)
+
+13,062 markets downloaded (69 days); the holdout is the 29 days before E3's data began (closes before 2026-09-03 20:00 UTC).
+
+E3B pooled XRP + Dogecoin: **n=1,917 on 29 days, net +1.76c per contract, z +3.97**, halves +0.81c / +2.68c, fees x1.2 +1.67c, minimum detectable edge +0.93c -> **NOT_YET_FALSIFIED.** Per series (information): XRP n=998 +1.62c (z +2.43), Dogecoin n=919 +1.92c (z +2.47). **My prediction (FALSIFIED, a true edge near +0.5c) was wrong.** The two series that passed E3 on 41 days also pass on 29 days nobody had looked at.
+
+**Audit (information, no new parameter).**
+- Loss rate 4.9% against a break-even of about 7.2% at the mean price paid 0.929; median entry-minute volume 1,167 contracts.
+- The weekly series is positive every week (+0.23c, +2.43c, +1.59c, +2.29c, +2.36c, +3.65c), so it is not one lucky stretch.
+- The gain is still concentrated in the best days: the five best of 29 carry 50% of the pooled total. **Without those five days the pooled result is +1.07c (z +2.63)**, which still clears 2.1; XRP alone without its best five is +0.52c (z +0.85) and Dogecoin alone +0.85c (z +1.10).
+- **It sits in the cheaper favourites.** Entries priced under 93c: +3.72c on 901; at 93c and over: +0.03c on 1,016. In E3 the same split was +2.33c / +0.50c for XRP and +1.52c / +1.57c for Dogecoin, so that part is not stable. Not a rule, not tested, not to be tuned on.
+
+**What this does and does not say.** This is the first mechanism in this file that was positive on data it was found on and then positive again on a holdout it never saw. It is still the same mechanism as L1 (the favourite buyer against the longshot buyer) in series where the quoter is a thinner, slower market maker (median spread 0.4c and 0.7c on XRP and Dogecoin). The correlation with Bitcoin found in the E3 audit stands (about 40% of the losses coincide), so these two are one bet on "crypto moves late" more than two. E3F (new days, one read on or after 2026-11-16) remains the forward test. **Nothing about the live bot changes** on this: adding a series is a deliberate code edit and review (`L1_SERIES`), and the 4.5% window limit means XRP and Dogecoin would be starved by the series ahead of them unless the order of the list is also a decision.
+
+**Count: 4,606** (E3B was the one try already counted).
+
+## Pre-registration: L1B, L1 on Bitcoin, Ethereum and gold, on the older days the book never held (written 2026-10-13 before those markets were downloaded)
+
+**The question.** L1's rule (favourite's ask 0.88 to 0.97, 360 s before the close) was chosen on the last 40 days of Bitcoin, Ethereum and gold, and everything about its live edge (+0.41c, z about 1.5) is measured on those same days or on live orders. The 29 days before them were never downloaded for these three series. They are the first real holdout the live bot's own rule has had.
+
+**Data.** `python -m scalper.l1b fetch` into its own `data/l1b.sqlite`: settled `KXBTC15M`, `KXETH15M`, `KXGOLD15M` markets of the last 69 days with 1 minute candles. Only markets closing **strictly before 2026-09-02 19:30 UTC** (`FLOOR_TS`, the earliest close in `book.sqlite`) count; a test asserts it.
+
+**Rule.** L1 unchanged (`lstrats.L1`: candle ending 360 s before the close, favourite's ask 0.88 to 0.97, hold to settlement, taker, the same fee model).
+
+**Three tries (Bitcoin, Ethereum, gold), no variants.** The pooled result is information, not a try.
+
+**Pass bar, fixed (the same as E3).** `altseries.summarize`: at least 300 entries and 5 days; day clustered z of net per contract at least 2.1; mean above zero; both halves of the days positive; positive with fees x1.2. Otherwise `FALSIFIED`.
+
+**Numeric prediction, before the run.** Bitcoin and Ethereum: about +0.3c to +0.5c, z between 0 and 1.5, **FALSIFIED** on z. Gold: its measured +1.47c (z +2.80) on the book window was the only series that cleared the bar alone, and it is the likeliest to regress; predicted +0.5c, **FALSIFIED**. Pooled three: between 0.0c and +0.8c.
+
+**What each outcome would mean.** A pass on a series is "the live bot's edge on that series also holds on 29 older days", which is evidence for keeping it, not for sizing it up. A fail with a mean at or below 0 on a series is evidence against that series being worth its slot, to be put to the owner (the bot is not changed from here). Power: with roughly 29 days of entries the standard error is about 0.7c per series, so a true edge of +0.4c cannot reach z 2.1; most of the value is in the sign of the pooled mean and its size relative to the book window.
+
+**Count.** Three variants: 4,609 after L1B.
