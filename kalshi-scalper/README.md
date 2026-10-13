@@ -3087,3 +3087,16 @@ The idea: by the evening the day's high temperature is nearly known from observa
 **Count.** Two variants: the running total in this file was 4,595 before XM1, so it is 4,597 with it.
 
 **Limits.** The 15 minute market settles on a 60 second average and the hourly ladder on a single reference value, so the two are not the same bet to the cent. Ladder quotes are mids of tight books, not fills; the 15 minute side fills about 56% to 59% of the time live.
+
+## Information: the 25c exit on 40 days (2026-10-13; `cd src && python -B -m scalper.exit25`; not a hypothesis, not a try, nothing counted)
+
+The live exit watch sells a held L1 position when its bid reaches 25c (the owner's setting since Oct 12). On the 3,038 L1 entries of the 40 day history, using the minute candle closes after the entry (a coarse proxy for a watch that looks about every 10 seconds, so triggers here are a lower bound):
+
+| | Value |
+|---|---|
+| Entries whose held side's bid closes at or below 25c at some later minute | 146 of 3,038 (4.8%) |
+| Of those 146 held to settlement | 16 won (**11.0%**), mean net **-80.9c** per contract |
+| With the line (sold at that minute's bid), optimistic | -81.7c on those 146; over all entries **+0.374c** against hold-only **+0.411c** (-114c over 3,038 entries, about -0.04c an entry) |
+| With the line and 5c of extra slippage | -85.4c on those 146; **+0.197c** against **+0.411c** (-652c over 3,038 entries) |
+
+**What it says.** Once the bid is at 25c or lower the position wins 11% of the time, close to what it would fetch if sold (the bid at the first minute close below the line averaged only about 11c, because these markets fall in jumps and the line is already behind them at the next close). So the line is close to neutral in this history: it neither saves money nor costs much, and each cent of slippage on the sale makes it a little worse. This does not say to change it: the exit watch exists to cut a tail (a position that is going to zero), and the history cannot see the seconds inside a minute where the live watch acts. The earlier exit studies (X1 to X8) reach the same conclusion at other lines.
