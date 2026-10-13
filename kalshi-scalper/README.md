@@ -3032,3 +3032,19 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 - **The skipped entries did not lose, they won slightly more than the rest** (+0.79c against a +0.10c baseline). The "bad" leaves in TRAIN were noise: with about 90 losses among 1,532 training entries a depth 3 tree can always find regions with a bad run, and they did not repeat. The shuffled-label null has a 95th percentile of +27c per day, so even a large improvement would not have counted; this one was negative.
 - **Audit triggers.** None: nothing was better than predicted. The feature code reads only candles at or before the entry candle and the previous market's result, by test.
 - **Count.** One variant: 4,595 as of 2026-10-13. The bot is unchanged.
+
+## Information: GROWTH, what L1 could do to an account with monthly deposits (2026-10-13; not a hypothesis, not a try, no variant counted)
+
+`cd src && python -B -m scalper.growth`: a day-block bootstrap of the 3,038 L1 entries (Bitcoin, gold, Ethereum, 41 days, measured mean net **+0.41c** per contract after fees), each filled with probability 58% (the live fill rate), under a simplified version of the live sizing and stop rules (contracts = start-of-day balance / $46.50, at most 40; one window's cost held to 4.5% of the balance; a day stops at -5%). Start $500 plus $500 every 30 days, 400 paths of 360 days per scenario. Every scenario shifts each entry's net by a constant so the mean net per contract equals the stated true edge.
+
+| True edge | Day 90 median (paid in $1,500) | Day 360 median (paid in $6,000) | Day 360 5th to 95th percentile | Paths below what was paid in at day 360 |
+|---|---|---|---|---|
+| -0.50c | $1,201 | $3,857 | $2,317 to $5,353 | 98% |
+| 0.00c | $1,556 | $6,139 | $4,342 to $7,912 | 46% |
+| +0.25c | $1,746 | $7,444 | $5,768 to $9,438 | 9% |
+| **+0.41c (measured)** | $1,908 | **$8,428** | $6,611 to $10,231 | **1%** |
+| +1.00c | $2,533 | $11,595 | $9,962 to $13,543 | 0% |
+
+**What it says.** If the measured edge is real, L1 would add about 40% on top of the deposits over a year at this size, which is real money on a growing balance and still not an income that replaces anything. If the edge is zero the account just returns the deposits less a coin-flip's worth of noise (46% of paths below paid-in), and a small negative edge (a fee change, worse fills) loses most of the deposits over a year. The measured edge has a z of about 1.5, so all rows are live; the live record (about 165 settled trades by Oct 13) is too short to choose between them.
+
+**Left out on purpose:** the profit add-on pool, the weekly review's step timing, open positions counted as lost, correlated losses across series within a window beyond the window cap, fills that depend on price (the order data suggests the misses lose more than the fills, see below), and the chance that the edge decays. Treat the table as a size-of-the-thing check, not a forecast.
