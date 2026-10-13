@@ -19,7 +19,7 @@ kept = F.forward([mk("KXBTC15M", F.START_TS - 1), mk("KXBTC15M", F.START_TS), mk
 assert [(e["series"], e["close_ts"]) for e in kept] == [("KXBTC15M", F.START_TS), ("KXGOLD15M", F.START_TS + 5)]
 # The download always reaches back to the start: on the read date it is 33 or 34 days, never fewer.
 d = F.fetch_days(F.EARLIEST_READ_TS)
-assert d >= 33 and F.fetch_days(F.START_TS) == 2, d
+assert d == 34 and F.fetch_days(F.START_TS) == 2 and F.fetch_days(F.START_TS + 86401) == 3, d
 assert F.START_TS >= F.EARLIEST_READ_TS - d * 86400
 # The single read is refused before the registered date and records nothing.
 buf = io.StringIO()
