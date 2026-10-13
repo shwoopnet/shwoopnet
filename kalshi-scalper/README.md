@@ -3497,3 +3497,31 @@ One entry per hour (information): S&P -3.65c (z -2.37), Bitcoin +0.40c, Ethereum
 **What a pass would and would not mean.** A pass would put "skip a busy minute" up for a decision, never into the live bot from here (the server would need the entry minute's volume at order time, which the market list may not carry). The same single read as E3F and FWD1, on or after 2026-11-16.
 
 **Count.** One variant: 4,620 after VOL1.
+
+## Result: PM2, skip an L1 entry when Polymarket disagrees, on the 28 older days (run once on 2026-10-13)
+
+5,269 Kalshi windows with a quote, 1,738 L1 entries (Bitcoin and Ethereum) with a Polymarket point within 180 s, on 28 days.
+
+PM2: skipped 605 of 1,738 entries (34.8%). **Skipped entries' mean net -1.69c (day clustered z -1.34); halves +1.03c / -3.95c. Kept entries +2.36c against +0.95c for all entries; improvement +1.41c per entry, permutation 95th percentile +0.68c. -> FALSIFIED** (the bar requires z of the skipped mean at most -2.1 and a negative skipped mean in both halves; neither holds).
+
+Information (not part of the verdict): Bitcoin skipped 296 entries, loss rate **9.8%**, -2.03c, against kept 541 entries, loss rate **4.6%**, +1.96c; Ethereum skipped 309, loss rate **8.7%**, -1.38c, against kept 592, loss rate **3.7%**, +2.72c. In the 40 day split that suggested it, the loss-rate gaps were 4.5 points (Bitcoin) and 1.7 points (Ethereum); on the older 28 days they are 5.2 and 5.0 points, the same direction and not smaller.
+
+**Honest reading.** The registered verdict is FALSIFIED and stays FALSIFIED. Two things in the numbers are worth keeping apart from that verdict. (1) The z in the bar tests the skipped mean against ZERO, a harsh statistic for a filter whose worth is the gap to the kept entries; the first half of the older window had the skipped group at +1.03c, the second at -3.95c, so the sign is not stable within the window. (2) The improvement per entry, +1.41c, is twice the 95th percentile of what skipping the same number of entries at random gives (+0.68c): the permutation test, which asks the question the filter is for, is cleared by a wide margin. That is a candidate with two windows of the same sign, not a pass; and the registered bar was not met. It is tested on days neither window saw as PM3, below, with a bar that asks the filter's own question and is written down before those days exist. The Polymarket price itself still does not predict outcomes better than Kalshi's (PM1), so what is being claimed is narrower: "when the other venue's price for the same side is 5 points lower, an L1 entry is riskier than usual".
+
+**Count: 4,610** (PM2 was one try, already counted).
+
+## Pre-registration: PM3, the Polymarket-disagreement filter on days that do not exist yet (written 2026-10-13 before any such day)
+
+**The question.** Does skipping L1 entries on Bitcoin and Ethereum where Polymarket's price for the side bought is 5 points or more below Kalshi's mid make the remaining entries better, on days after 2026-10-13?
+
+**Data.** The forward Kalshi windows in `data/fwd1.sqlite` (FWD1's download) for Bitcoin and Ethereum closing on or after 2026-10-14 00:00 UTC, and for each the Polymarket price history, fetched the PM1 way into its own `data/pm3.sqlite`. The same rule, thresholds and flag as PM2 (`pm2.entries`, DISAGREE 0.05, 180 s freshness). One try, Bitcoin and Ethereum pooled.
+
+**Single read.** `python -m scalper.pm3 fetch` then `python -m scalper.pm3 run`, once, on or after 2026-11-16, together with E3F, FWD1 and VOL1.
+
+**Pass bar, fixed (a bar for a filter, not the zero test PM2 used).** `NOT_ENOUGH_DATA` if fewer than 100 skipped entries or fewer than 10 days. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: the skipped mean net is below zero; it is below the kept mean in the whole sample and in both halves of the days; and the improvement (kept mean minus the all-entries mean) exceeds the 95th percentile of 200 permutation draws in which the same number of entries per series are skipped at random.
+
+**Numeric prediction, before the run.** The gap shrinks toward zero as the PM2 half-window pattern suggests: skipped mean between -1.0c and +0.5c, kept mean about +0.6c, the permutation test not cleared. **FALSIFIED** is more likely than not. About 60 Bitcoin and Ethereum entries a day over 33 days gives about 600 skipped entries, so a gap of 3c would show.
+
+**What a pass would and would not mean.** A pass would be the first filter in this file confirmed on three separate stretches (the 40 days it was found on, 28 older days, and new days). Even then the live bot cannot use it from here: it would need an external Polymarket read at order time, a dependency the owner has not asked for. It would be put to the owner as a proposal, not made.
+
+**Count.** One variant: 4,621 after PM3.
