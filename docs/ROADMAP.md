@@ -11,7 +11,7 @@ Make money on Kalshi without having to watch it. Right now one bot trades for yo
 - **One bot is live (L1).** About 6 minutes before each Bitcoin, gold and Ethereum 15 minute market closes, it buys the side that is almost certain to win (priced 88c to 97c) and waits for the result. It earns a few cents on most trades and loses a lot on the rare one that goes wrong. So far it is about break-even: 105 trades, 95% wins, slightly down.
 - **Safety:** it stops itself if it loses 5% of the balance in a day, it sells a trade early if the price falls to 25c, and you can pause it or flatten everything with one button.
 - **The website** has three pages: Market Brief, Kalshi and Settings.
-- **We tried about 2,800 other trading ideas on the same markets. None worked.** The fees and the gap between buy and sell price eat any small gain. That is why the plan now looks at different kinds of markets.
+- **We tried about 4,600 other trading ideas on the same markets. None worked.** The fees and the gap between buy and sell price eat any small gain. What changed on 2026-10-13 is that L1's own rule was checked on 28 older days it was never tuned on: +1.3c a contract after fees (z +3.2), +0.8c over all 68 days. See `kalshi-scalper/README.md` (L1B) and `docs/PROPOSALS.md` (proposal 6, XRP and Dogecoin at the end of the list, a decision for after 2026-11-16).
 
 ## What you need to do now
 
@@ -44,7 +44,7 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 ## Dates to remember
 
 - **2026-10-15:** the bot's weekly size review. It only raises size if the balance supports it.
-- **2026-11-16:** one check of a possible improvement for L1 (skipping some entries). Nothing changes unless it passes.
+- **2026-11-16:** the single forward reads of new days: XRP and Dogecoin (E3F), the live series (FWD1), a busy-minute filter (VOL1), a Polymarket-disagreement filter (PM3), plus the earlier opening-window read. Nothing changes unless it passes and you decide.
 
 ## Parked on purpose
 
