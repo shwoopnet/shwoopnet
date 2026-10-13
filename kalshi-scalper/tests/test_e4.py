@@ -49,8 +49,9 @@ _, _, z_naive = cluster_mean_z([(str(i), v) for i, (_, v) in enumerate(obs)])
 assert abs(z_hour) < abs(z_naive), "clustering by hour is more careful than counting each entry"
 
 # The minimum detectable edge is exactly the pass bar's z times the day clustered standard error: the edge a test of this size could just barely see.
-days = [entry(f"d{i}", 3000 + i, 0.92, -0.9 if i % 5 == 0 else 0.06, day=f"2026-10-{10 + i % 4}") for i in range(20)]
+days = [entry(f"d{i}", 3000 + i, 0.92, -0.9 if i % 6 == 0 else 0.06, day=f"2026-10-{10 + i % 4}") for i in range(20)]
 _, se, _ = cluster_mean_z([(e["day"], e["net"]) for e in days])
+assert se > 0, "the fixture must have a nonzero standard error or this check proves nothing"
 assert abs(E.hour_stats(days)["mde"] - E.Z_BAR * se) < 1e-12 and E.Z_BAR == 2.1
 
 # The power rule: FALSIFIED with a wide minimum detectable edge is labelled "not shown", never "absent".
