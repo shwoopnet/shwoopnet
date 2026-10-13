@@ -3270,3 +3270,23 @@ The prediction said XRP and DOGE would be about +0.5c and fail on z; they did no
 **What a pass would and would not mean.** No order is placed. Even a pass would only open the question "can this be executed as a basket of simultaneous NO orders at size, with all legs filling" (the leg risk is not zero: a partial fill leaves a directional position), which is a separate, reviewed change and not a change to the live bot.
 
 **Count.** One variant: 4,601 after ARB1.
+
+## Pre-registration: PM1, does Polymarket's 15 minute price carry information Kalshi's does not (written 2026-10-13 before any Polymarket price was downloaded)
+
+**The idea (a second venue's price for the same event).** Polymarket lists "Bitcoin Up or Down" and "Ethereum Up or Down" for every 15 minute window (slug `btc-updown-15m-<window start>`, resolved by a Chainlink TWAP against the price at the start of the window). Kalshi's `KXBTC15M` and `KXETH15M` are the same bet with a slightly different reference index. If the two venues' quotes carry partly independent noise, averaging them predicts the outcome better than Kalshi's alone, and that would be a filter for L1 (skip an entry the other venue disagrees with). The same idea as XM1, with an independent venue instead of an hourly ladder.
+
+**Counterparty.** Slow or thin quoters on either venue. The prior is against it: Polymarket's windows are thin (the check on 2026-10-13: the window starting 2026-10-13 00:00 UTC traded $34,000 on Bitcoin and $6,000 on Ethereum, against millions of Kalshi contracts), and its history shows quotes parked at 0.525 for minutes at a time. A stale quote adds noise, not information.
+
+**Data.** `python -m scalper.pm1 fetch` into its own `data/pm1.sqlite`: for every `KXBTC15M` and `KXETH15M` market in `book.sqlite` (3,792 each, 40 days), the Polymarket event with slug `<btc|eth>-updown-15m-<close minus 900>` (batched, public read-only API, no key) and the "Up" token's price history (1 minute fidelity) from 15 minutes before to 6 minutes before the close. No order is ever sent.
+
+**Observation.** One per Kalshi window with a valid quote (`analyze.valid_quote`) at the candle ending 360 s before the close AND a Polymarket history point at or before that second and no more than 180 s earlier. `p_k` = mid of Kalshi's YES quote; `p_pm` = the Polymarket "Up" price of that point; `y` = 1 if Kalshi's result is YES. A window with no Polymarket event, no recent point or no Kalshi quote has no observation.
+
+**Test, one per series (two tries: Bitcoin, Ethereum), no variants.** Paired difference per window `d = (p_k - y)^2 - (0.5 p_k + 0.5 p_pm - y)^2` (positive when the 50/50 blend predicts better than Kalshi alone; the weight 0.5 is fixed now, not fitted). `NOT_ENOUGH_DATA` if fewer than 500 observations or 10 days. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: mean `d` above zero; day clustered z at least 2.1; both halves of the days positive. Anything else `FALSIFIED`.
+
+**Numeric prediction, before the run.** The blend is worse than Kalshi alone (mean `d` below zero) on both series; **FALSIFIED**. If mean `d` is above +0.002 (the blend improving the Brier score by 0.2 of a point) it is an audit trigger first (a lookahead in the Polymarket timestamps is the first suspect).
+
+**Information, not part of the verdict.** Brier of Kalshi alone, of Polymarket alone, and of the blend; the median absolute gap `|p_pm - p_k|`; the share of windows with a usable Polymarket point; the L1 entries (favourite ask 0.88 to 0.97 at that candle) split by whether Polymarket's price for the same side was 5 points or more below Kalshi's mid ("disagrees") or not: the number of entries and the loss rate in each. That split is NOT a test and gates nothing; if the blend passes, a filter on L1 would need its own registration.
+
+**Count.** Two variants: 4,603 after PM1.
+
+**Limits.** The two venues do not settle on the same index, so the outcome (taken from Kalshi's result) is the one Kalshi settles; a tie or a close call can differ. Polymarket's price is a midpoint or last trade, not a quote we could trade at; this is a test of information, not of an executable strategy.
