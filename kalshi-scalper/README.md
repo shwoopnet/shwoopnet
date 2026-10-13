@@ -3454,3 +3454,18 @@ That was the pre-registered information split and it was looked at once, on the 
 **Count.** Eight variants: the running total in this file was 4,611 after FWD1, so it is 4,619 with these eight.
 
 **Limits.** Candle asks are quotes, not our fills; thin books fill less at size. Platinum and palladium have about 20 days. The live bot would need a code edit for any of these (`L1_SERIES` is a hard list) and the 4.5% window limit would still apply; nothing here changes the bot.
+
+## Information: what adding XRP and Dogecoin at the END of L1's list would do to the window limit (2026-10-13, ORDER1, not a try, nothing registered on it)
+
+The live bot holds the money put into one 15 minute window to 4.5% of the sizing base, and each entry costs about 2%, so at most **two entries fit in a window** and the series are taken in list order (Bitcoin, gold, Ethereum). On the 68 days of public candles, with every window's L1 entries on Bitcoin, gold, Ethereum, XRP and Dogecoin lined up: a window has 1 entry in 1,827 cases, 2 in 1,376, 3 in 960, 4 in 467 and 5 in 91 (4,721 windows with any entry). With one contract per entry and no fill model:
+
+| List (at most two entries a window) | Entries | Net per entry | Mean day | Day sd | Worst day | 5th percentile day | Windows where both entries lose |
+|---|---|---|---|---|---|---|---|
+| Bitcoin, gold, Ethereum (live) | 5,154 | +0.87c | +0.65 | 1.86 | -4.89 | -2.73 | 28 |
+| ... then XRP, Dogecoin at the end | 7,615 | +1.18c | +1.30 | 2.24 | -4.32 | -2.64 | 52 |
+| XRP, Dogecoin first (in sample) | 7,615 | +1.39c | | | | | |
+| gold, XRP, Dogecoin, Ethereum, Bitcoin (68 day edge order, in sample) | 7,615 | +1.41c | | | | | |
+
+**Reading it.** Appending the two series costs the existing trades nothing, because they only fill the second slot in the 3,000-odd windows where the live three left room, and it doubles the expected net per day in sample, with a similar worst day (the window limit is unchanged). Day-to-day volatility rises by about 20% and double-loss windows go from 28 to 52 because XRP and Dogecoin lose with Bitcoin about 40% of the time. The orderings that put XRP and Dogecoin first or rank by 68 day edge are fitted to this sample and are not recommendations.
+
+**What it does not say.** The XRP/Dogecoin edge is the part that is not yet forward-confirmed (E3F is due on or after 2026-11-16) and they were found on 41 days and held on 29; their fill rates on a thinner book are unmeasured (median entry-minute volume about 1,200 contracts); each is a new series for the 5% loss stop and the sizing review to see. Not a change to the live bot; written as a proposal in `docs/PROPOSALS.md`.
