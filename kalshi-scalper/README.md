@@ -3385,3 +3385,30 @@ That was the pre-registered information split and it was looked at once, on the 
 **Information, not part of the verdict.** Skipped and kept counts, loss rates and mean net by series; the loss rate in the skipped group against the kept group.
 
 **Count.** One variant: 4,610 after PM2 (4,609 after L1B).
+
+## Result: L1B, the live rule on the 28 days before the book (run once on 2026-10-13)
+
+7,213 markets downloaded (the days before 2026-09-02 19:30 UTC; 14 with no candles skipped). L1 unchanged.
+
+| Series | Entries | Days | Net per contract | z | Halves | Fees x1.2 | Verdict |
+|---|---|---|---|---|---|---|---|
+| Bitcoin | 838 | 28 | **+0.55c** | +0.88 | +1.24 / -0.11 | +0.46c | FALSIFIED (on z) |
+| Ethereum | 901 | 28 | **+1.32c** | +2.24 | +1.67 / +1.02 | +1.22c | NOT_YET_FALSIFIED |
+| Gold | 620 | 26 | **+2.20c** | +2.73 | +1.63 / +2.69 | +2.11c | NOT_YET_FALSIFIED |
+| pooled (information, not a try) | 2,359 | 28 | **+1.28c** | **+3.20** | +1.50 / +1.08 | +1.18c | |
+
+**My prediction was wrong for two of the three** (I predicted +0.3c to +0.5c and FALSIFIED for all): Ethereum and gold cleared the bar on days the rule was never fitted to. Bitcoin, the most liquid and the largest series, is the weakest and the only one that did not. Win rate 93.6% / 94.6% / 95.5% against 92.5% / 92.8% / 92.8% paid.
+
+**Information, not a try: both windows together (68 days, 5,397 entries).** Mean net **+0.79c per contract, day clustered z +2.52**. By series over the 68 days: Bitcoin +0.45c (z +0.81, 1,959 entries), Ethereum +0.60c (z +1.26, 2,041), **gold +1.54c (z +2.94, 1,397)**. By ISO week the pooled mean is +2.74, +1.79, -0.02, +2.04, +0.23, +1.02, +0.35, +1.99, -0.92, +0.24 cents (the last week is partial and was not trusted), so the sign is positive in 8 of 10 weeks and the size is noisy; the weeks are not getting better.
+
+**What this does and does not say.**
+- The live bot's rule has a positive edge on 28 days it was never fitted to, which is the first time that has been checked. The earlier thin +0.41c (z about 1.5) was probably an underestimate of a real edge of somewhere around +0.8c, or a lucky older window; two windows 68 days apart are not enough to tell which.
+- It is still before the live bot's real costs: the fill rate (about 58%), partial fills, and the 25c exit the owner chose (neutral on the 40 day sample).
+- It does not say the edge is stable. The older window is stronger than the recent one in Bitcoin (+0.55c against about +0.3c) and gold (+2.20c against +1.47c), and 15 minute crypto and gold markets could be more efficiently quoted now than in August.
+- Every number here is gross of nothing but Kalshi's taker fee model; it is a backtest on candle asks.
+
+**Count: 4,609** (L1B's three tries were counted when registered). The pooled rows are information.
+
+## GROWTH at a higher edge (information, 2026-10-13)
+
+`python -m scalper.growth` prints, for the live sizing and stop rules with $500 and $500 a month: at +0.41c a median of about $8,400 after 360 days on $6,000 paid in; **at +1.00c a median of about $11,600 (5th percentile $9,960, 95th $13,540), with no path below what was paid in**; at 0.00c about $6,100; at -0.50c about $3,900 and 98% of paths below paid-in. The 68 day mean of +0.79c sits between the +0.41c and +1.00c rows. These are paths drawn from the 40 day entry history with the live sizing, not forecasts, and they leave out the profit add-on pool and the weekly size review.
