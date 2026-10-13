@@ -2831,3 +2831,37 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 - **What it establishes.** Across 216 combinations of entry minute, price band, momentum or dip condition, target and stop, with a flat-before-minute-8 cut-off, none is profitable even on the data it was chosen on. Refining entries and exits until the profit factor rises would find the cell that was luckiest on those days, not one that works. The fee plus spread of a round trip is bigger than any 3c to 8c target at these prices. The higher the price band, the less it loses (0.60 to 0.80 beats 0.20 to 0.40), which points at fees shrinking toward the extremes, not at a signal.
 - **Nothing is built from it.** No recorder, no collection, no page row.
 - **Count.** 216 variants: **2,816** tried in total (2,600 after OW3 to OW7).
+
+## Pre-registration: SS2, a 1,760 cell search on 40 days with Ethereum, train and validation, with a fair-market placebo (the owner's request; fixed 2026-10-12 before it was run)
+
+**Why now.** The history was extended from 31 to 40 days (2026-09-02 to 2026-10-12) and Ethereum was added (3,792 markets), so there is new data the earlier tests never saw for 9 days of Bitcoin and gold and for all of Ethereum. The owner asked for at least 1,000 more Kalshi variants. 2,816 variants have been tried on overlapping data, so the bar below is raised and the split is strict: nothing is judged on the data it was chosen on.
+
+**The grid (fixed now, every cell is one try; N = 1,760).**
+- **Series:** KXBTC15M, KXGOLD15M, KXETH15M, or all three pooled (4).
+- **Entry minute:** the candle ending 840, 720, 600, 480 or 360 s before the close (5).
+- **Band (ask of the side bought):** 0.05 to 0.15, 0.15 to 0.30, 0.30 to 0.50, 0.50 to 0.70, 0.70 to 0.82, 0.82 to 0.88, 0.88 to 0.93, 0.93 to 0.97 (8). YES is tried before NO; one leg per market.
+- **Condition:** none; momentum (the side's ask is at least 3c above the previous candle's); dip (at least 3c below); wide spread (ask minus bid at least 3c); tight spread (at most 1c) (5).
+- **Exit:** hold to settlement (all entry minutes); or, for entry minutes 840, 720 and 600 only, a scalp with a +3c or +5c target on the closing bid and a time exit at the candle ending 480 s before the close (80 s before L1's earliest buy), as in SS1 (3 entry minutes x 2 targets).
+- **Cell count:** per series, hold 5 x 8 x 5 = 200 and scalps 3 x 2 x 8 x 5 = 240, so 440; four series 1,760.
+- **Costs:** taker fee `0.07 p (1 - p)` unrounded on the entry (and on the exit for scalps); settlement pays no fee; closing ask in, closing bid out.
+
+**The split (fixed now).** Train: markets closing in the first 24 days after the first close. Validation: everything after, about 16 days, never used for any choice.
+
+**Selection (the only free choice).** On the training days only, among cells with at least 150 training entries on at least 5 days, take the 10 with the highest mean net a contract after fees. Those 10 are frozen and each is read once on the validation days. Profit factor is printed, not used to select.
+
+**Bar for a frozen cell (validation days only):** at least 300 validation entries on at least 5 days (fewer is `NOT_ENOUGH_DATA`, which is not a pass); a day-clustered z of at least **3.0** (raised from 2.5 because ten cells are read and 1,760 were searched); a mean above zero; still above zero with fees 20% higher. Verdict words: `FALSIFIED`, `NOT_YET_FALSIFIED`, `NOT_ENOUGH_DATA`. There is no `promote`.
+
+**Fair-market placebo (hold cells).** The same selection and read run 10 times in a world where every outcome is drawn as a Bernoulli with probability equal to the entry's mid price (a market with no mispricing), keeping the real entries, prices, days and fees. It shows how good the best of 880 hold cells and its frozen top 10 look by luck alone. The real result is only interesting if it clearly exceeds the placebo's best.
+
+**My prediction, before the run.** Nothing passes. The best training cell will be inside the placebo's range and the frozen top 10 will have a validation mean at or below zero. The earlier OW and SS families, the 15 minute efficiency findings and the cost arithmetic all point the same way.
+
+**Count.** 1,760 variants: **4,576** tried once run (2,816 before this). Registered, not yet run.
+
+**2026-10-12: SS2 ran once (`python -m scalper.ss2`, commit after the pre-registration, 10,288 settled markets, 40 days, Bitcoin, gold and Ethereum): nothing passes.**
+- **Training days (6,254 markets, before 2026-09-26):** 742 of 1,760 cells had enough entries; **87 of them had a positive mean after fees**. The best was +4.47c a contract (all three series pooled, 720 s left, ask 0.88 to 0.93, hold, 155 entries).
+- **Fair-market placebo (10 reps, the same entries and prices, outcomes drawn at the mid price):** the best hold cell on the training days looks like **+3.4c to +7.6c, median +5.4c** by luck alone. **The real best cell (+4.47c) is below the placebo median**, so it is not distinguishable from luck. The placebo's best frozen cell read on validation reaches a z of at most +0.43 (the bar is 3.0).
+- **Frozen top 10 read once on the 4,034 validation markets:** one had 405 validation entries and was `FALSIFIED` (-1.11c, z -0.77). The other nine had fewer than 300 validation entries and are `NOT_ENOUGH_DATA`, which is not a pass. For information only, their validation means were +0.10c, +1.48c, -3.03c, -3.63c, +0.01c, -1.25c (twice, the same trades), +1.77c and -1.22c; the average over the ten is about -0.8c, with positive and negative cells on both sides of zero.
+- **Against the prediction.** Predicted: nothing passes, the best training cell is inside the placebo's range, the frozen ten sit at or below zero. All three held.
+- **What it establishes.** Another 1,760 combinations of series, entry minute, price band, condition and exit found no rule that survives a split. About 12% of cells looked positive on the training days, which a fair market also produces. The selection picked mostly thin, 150 to 400 entry cells, which is where luck lives.
+- **Nothing is built from it.** L1 is not changed.
+- **Count.** 1,760 variants: **4,576** tried in total.

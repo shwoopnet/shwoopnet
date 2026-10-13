@@ -1,6 +1,6 @@
 {
   "name": "shwoopnet-functions",
-  "description": "Cloud Functions proxy for Finnhub calls, keeping the API key server-side.",
+  "description": "Cloud Functions for the Kalshi bot and the keyless market tape.",
   "main": "index.js",
   "engines": {
     "node": "22"

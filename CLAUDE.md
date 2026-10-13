@@ -359,20 +359,6 @@ asserting two things match is worth nothing, and a test asserting it is
 worth everything -- G1 now fails if live gains a parameter the backtest
 does not have.
 
-### Removed from Labs, and what went with them
-
-- **Equities backtest and Method** -- see above.
-- **Crypto backtest checkboxes** (trend-exit, maker-limit, hybrid). All
-  three were experiments, all three are measured and recorded here, and
-  none changed what runs live. The backtest now models exactly one entry:
-  the market order the live system actually sends.
-- **Options data-depth probe.** Answered its question: ~2.5 years of daily
-  option bars, back to Feb 2024. Recorded, tool removed.
-- **Crypto spread probe.** Answered its question: 0.200% median, per-pair
-  figures above. What is now unmeasured is the WEEKDAY spread -- the one
-  reading taken was a Sunday afternoon, likely the worst case. If crypto
-  execution is ever revisited, that measurement has to be rebuilt first.
-
 ### Things that were measured and did NOT work
 
 Keep this list. Re-running a settled experiment is a real cost, and an
@@ -405,17 +391,6 @@ Do not undo these without understanding why they exist.
   favorable move and then handing the trade that move for free. Reported
   PF 13.26. Entries must always be priced at the bar you would actually
   fill on.
-- **Demo page removal took `.trade-progress-*` with it**, because those
-  rules sat interleaved among demo styles. The stop/target bar shipped as
-  bare "StopTarget" text. This is check #3 in `pre-ship`.
-- **Crypto charts loaded ~9 bars**, which froze the zoom clamp at `[8, 9]`
-  and made the x-axis appear broken. Alpaca bars return **ascending from
-  `start`**, so a wide window plus a `limit` cap returns the *oldest*
-  bars: size the window to ~1.5x what you need, paginate to the END, then
-  `slice(-limit)`.
-- **Credentials arrive after auth resolves** (they live in the Firestore
-  user doc), so anything firing on the auth handler must guard on
-  `alpacaConnected` or it produces a burst of 401s on every page load.
 
 ## The Kalshi bot, in four rules
 

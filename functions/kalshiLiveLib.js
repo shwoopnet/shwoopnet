@@ -325,7 +325,7 @@ const L1_ORDER_CEILING = 50;
 // $43 (was $85) so the ladder's target is about 2% of balance at a 93c contract, matching L1_SIZE_FRACTION; at $85 it, not the 2% rule, would have set the base.
 const SCALE_DOLLARS_PER_CONTRACT = 43;
 // Steps were weekly at first and the owner asked for faster ones (Oct 8, 2026): a review, and at most one step up, every 3 days. A loss stop still holds the
-// cap and the profit add-on for a full week, so a bad run slows the climb more than a good one speeds it.
+// cap for a full week (it used to hold the profit add-on too; that hold was removed Oct 13, 2026), so a bad run slows the climb more than a good one speeds it.
 const SCALE_REVIEW_MS = 3 * 24 * 3600 * 1000;
 const SCALE_STOP_PAUSE_MS = 7 * 24 * 3600 * 1000;
 const SCALE_STEP = 1;
@@ -483,7 +483,7 @@ async function botRisk({ store, since, fetchFn, nowMs, orders }) {
 // savings as balance, so skimmed money is never sized up on a second time. Skimming each win separately was tried first and is wrong: wins here are
 // 6c and losses 90c, so half of every WIN banks far more than the net profit and the base shrinks underneath it (in a replay, savings of $150 on a net
 // of -$6). A win that only recovers an earlier drop skims nothing. A loss comes out of the pool first (never below zero); a loss stop empties the
-// pool and switches the add-on off for a week. Orders are folded in once, in time order, behind a cursor that only moves past a run of orders that have
+// pool (extras come back as wins refill it; there is no hold on them since Oct 13, 2026). Orders are folded in once, in time order, behind a cursor that only moves past a run of orders that have
 // all settled, so an older order settling late is never skipped and nothing is counted twice. Orders from before the state existed are history. Pure.
 const SKIM_REINVEST = 0.5;
 // opts.everyWin (the owner's choice, Oct 10, 2026; fixed on, with no setting, on Oct 12, 2026: runL1Tick always passes true): the pool rebuilds from half of EVERY win and loses every loss, so after a loss it starts filling at once instead of waiting
@@ -513,8 +513,9 @@ function foldSkim(state, orders, opts = {}) {
   pool = r4(pool); saved = r4(saved); cum = r4(cum); hwm = r4(hwm);
   return { pool, saved, cum, hwm, appliedTs: cursor, blocked, changed: pool !== state.pool || saved !== state.saved || cum !== state.cum || hwm !== state.hwm || cursor !== state.appliedTs };
 }
+// No pause after a loss stop (the owner's rule, Oct 13, 2026: the profit add-on must keep sizing up). A stop already empties the pool, so extras only come back as wins
+// refill it, one per full contract cost; the week-long hold now applies to the base size's steps up (reviewSizing) only. `now` is kept so callers do not change.
 function skimAddon(state, now, perContract = 0.93) {
-  if (Number.isFinite(state.lastStopAt) && now - state.lastStopAt < SCALE_STOP_PAUSE_MS) return 0;
   return Math.max(0, Math.floor((Number.isFinite(state.pool) ? state.pool : 0) / perContract + 1e-9));
 }
 
