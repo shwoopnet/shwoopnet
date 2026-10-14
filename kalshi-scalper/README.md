@@ -3607,3 +3607,9 @@ Information (not tries): the six commodities pooled earned +0.34c (z +0.85) on d
 The prediction (the ladder is the worse price, FALSIFIED) was right. The median gap between the ladder-implied probability and the 15 minute mid is about zero, but the 5th and 95th percentiles are about ±12c to ±14c, and trading toward the ladder loses: the 15 minute market is the better-calibrated price, and a ladder interpolated between strikes adds noise. Ethereum is clearly negative. **Count unchanged** (XM1's two tries were counted when registered).
 
 **Control for L1B (information, 2026-10-14).** The same 2,359 older-window entries with the outcome redrawn at random with the market's own mid as the probability (300 draws): placebo mean **-0.80c**, 95th percentile +0.09c, largest +0.77c, against the observed **+1.28c**. The side bought costs on average 0.32c above its mid. So the L1B result is not an artifact of how entries are chosen (a fair market would have lost 0.8c), and the favourites really did win about 2.1 points more often than the mid priced them.
+
+## Result: ARB1, locked arithmetic across mutually exclusive events (12 scans, 3.5 hours, 2026-10-13 and 14)
+
+Twelve snapshots of every open event (about 13,700 to 14,100 events, 5,400 to 5,800 mutually exclusive, 5,070 to 5,430 usable with at least 2 legs bidding). **Zero opportunities in every scan** (a lock of at least 1c after fees on at least 10 contracts); zero persistent events; the verdict is FALSIFIED, as predicted.
+
+Information: the sum of YES bids across the legs of a usable event has a median of 0.900 and a 95th percentile of 0.990; 0.98% of event-scans have a sum above 1.00, but none by enough to clear the fee on every leg. The largest lock seen was **-0.12c** (a two-leg House race, capacity 99), -0.14c with cent-rounded fees. Market makers keep exclusive events inside the arithmetic. Nothing to build. **Count unchanged** (one try, already counted).
