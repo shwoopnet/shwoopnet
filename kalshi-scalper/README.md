@@ -3685,3 +3685,20 @@ By market: Bitcoin 91 trades, 92% won, **-$20.62**; Ethereum 34 trades, 94%, +$5
 **Counterparty and prior.** The counterparty is the seller during a drawdown who does not wait for the recovery; the prior is against it, because stocks drift up, cash earns nothing here and a rule that waits for a dip spends many months out of the market. **Prediction: median R at or below 1.00 for all six, FALSIFIED.** If any median is above 1.00 it is an audit trigger first (a lookahead in the signal).
 
 **Information, not part of the verdict:** mean cash held, share of months fully invested, worst-case R, and the same with cash earning 4% a year. **Count:** this file's running total was 4,624; six tries makes it **4,630**.
+
+## Result: BUYDIP1, buy at key levels against plain monthly buying (run once on 2026-10-14)
+
+Public Yahoo daily total-return closes: SCHD 3,767 days from 2011-10-20, SPY and QQQ 6,311 days from 2001-09-10, JEPQ 1,116 days from 2022-05-04. $500 a month for 60 months, cash earning 0%.
+
+| Fund | Rule | Start months | Median R (rule / DCA end value) | R above 1 | Halves | Worst / best R | Cash held | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| SCHD | DIP10 | 121 | 0.987 | 7% | 0.983 / 0.990 | 0.962 / 1.012 | 77% of days | FALSIFIED |
+| SCHD | MA200 | 121 | 0.986 | 4% | 0.981 / 0.989 | 0.961 / 1.006 | 67% | FALSIFIED |
+| SPY | DIP10 | 242 | 0.982 | 0% | 0.984 / 0.980 | 0.962 / 1.000 | 71% | FALSIFIED |
+| SPY | MA200 | 242 | 0.982 | 2% | 0.987 / 0.978 | 0.953 / 1.004 | 67% | FALSIFIED |
+| QQQ | DIP10 | 242 | 0.993 | 27% | 0.991 / 0.996 | 0.962 / 1.040 | 65% | FALSIFIED |
+| QQQ | MA200 | 242 | 0.982 | 7% | 0.989 / 0.975 | 0.956 / 1.039 | 66% | FALSIFIED |
+
+The prediction (median R at or below 1.00 for all six) was right and no audit trigger fired. Waiting for a "key level" ended with 0.7% to 1.8% LESS money than buying each month at the median, and beat monthly buying in 0% to 27% of start months. With cash earning 4% the gap shrinks to 0% to 1.1% and the rules still lose most months (QQQ DIP10 reaches median R 1.000, 48% of months above 1). JEPQ (36 month windows, information): DIP10 median R 0.957, MA200 0.979. **What this does and does not close:** these two rules (a 10% fall from the 252 day high, a close under the 200 day average) with a 6 month fallback lose to monthly buying on all three funds; it is not a proof that no entry level works, and with start months overlapping the 15 years of SCHD hold about 3 independent 5 year windows. It is consistent with the general finding that a saver who waits holds cash through the rises that make up most of the return. **Count: 4,630.**
+
+**Information (2026-10-14).** Total return from public prices: SCHD 13.2% a year over 15 years against SPY 15.2% and QQQ 19.8% (worst falls 33%, 34%, 35%); JEPQ 16.3% a year over 4.4 years against QQQ 20.8% and SPY 15.9% (worst falls 20%, 23%, 19%); over the last 3 years SCHD 16.7% against SPY 23.2%, JEPQ 21.3% against QQQ 27.4%. JEPQ is one market cycle old, so its numbers are an anecdote about a rising Nasdaq with calls sold against it.
