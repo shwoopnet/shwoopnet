@@ -3642,3 +3642,16 @@ To see whether any long-dated cell was worth a registered test, the FLB1 candles
 ## Result: E5B, crude oil on E5's holdout (run once on 2026-10-14)
 
 `KXWTI15M` L1 unchanged, markets closing before 2026-09-03 20:00 UTC: **n=588 on 28 days, net -0.88c per contract, z -0.97**, halves -1.23c / -0.56c, fees x1.2 -0.97c, win 92.5% against 92.9% paid -> **FALSIFIED**. WTI's discovery result (+0.89c, z +1.10) did not repeat: it moved to the same size on the other side of zero, which is what chance looks like. Crude oil is closed (wrong sign on its own holdout). **Count: 4,622** after E5B (E3C's two tries are counted when it runs: 4,624).
+
+## Result: E3C, HYPE and BNB on the 29 older days (run once on 2026-10-14)
+
+5,442 markets downloaded (the days before 2026-09-03 20:00 UTC). L1 unchanged.
+
+| Series | Entries | Net per contract | z | Halves | Fees x1.2 | Verdict |
+|---|---|---|---|---|---|---|
+| HYPE | 880 on 29 days | **-0.41c** | -0.60 | +0.08 / -0.91 | -0.51c | FALSIFIED |
+| BNB | 897 on 29 days | **-0.64c** | -0.74 | +0.46 / -1.73 | -0.73c | FALSIFIED |
+
+The prediction (both around 0c) was right. The two series that were slightly negative on E3's 41 days (-0.18c, -0.84c) are slightly negative on the older 29 as well: the win rate equals the price paid (93.0% against 92.9%), which is what a fair market gives after fees. Closed. These are "no edge", not "wrong sign with a large z". **Count: 4,624.**
+
+**Where this leaves the series question.** On the 68 days, with a separate window for each, L1's rule shows an edge in gold, XRP and Dogecoin (confirmed on a holdout), Ethereum (older days only, +0.60c over 68) and Bitcoin (+0.45c, not significant); it shows none in HYPE, BNB, silver, oil, copper, platinum, palladium, Zcash, NEAR or the currency pairs. Natural gas is the only thin, unconfirmed lead (+1.39c, z +1.94, discovery only, 160 holdout entries): too small to test further without more days.
