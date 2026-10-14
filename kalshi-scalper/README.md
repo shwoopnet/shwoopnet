@@ -3663,3 +3663,25 @@ The prediction (both around 0c) was right. The two series that were slightly neg
 By market: Bitcoin 91 trades, 92% won, **-$20.62**; Ethereum 34 trades, 94%, +$5.11; gold 63 trades, 97%, **+$15.63**. By price paid: 88c to 90c 20 trades, 85% won, +$3.64; 90c to 92c 39, 90%, -$27.19; 92c to 95c 67, 96%, +$7.17; 95c to 97c 61, 100%, +$16.92.
 
 **Reading it against the 68 day backtest.** The win rates sit where the candle backtest put them (Bitcoin 92% live against 93.6% older and about 93% recent; Ethereum 94% against 94.6%; gold 97% against 95.5%; by band the live 85%, 90%, 96%, 100% against a backtest loss rate of 11.6%, 7.6%, 4.7%, 3%), and **the series order is the same as the backtest's: gold best, Ethereum next, Bitcoin worst**. The dollar result is about zero, against about +$12 expected at +0.8c a contract on roughly 1,500 contracts. One trade is a loss of about $7 and one standard deviation of the total over 188 trades is about $24, so +$0.12 is half a standard deviation under +0.8c and the same distance over zero: **188 trades cannot tell +0.8c from zero.** The 25c exit was not the cause: the record shows the same few large losses a hold-only rule would have had. What the record does confirm is the mechanics (fills, sizing, stop, the series ranking); what it cannot yet confirm or deny is the edge. A few hundred more trades, and the 16 November reads, can.
+
+## Pre-registration: BUYDIP1, "buy at key levels" against plain monthly buying, for SCHD, SPY and QQQ (written 2026-10-14 before any rule was run)
+
+**The owner's question.** Buy and hold SCHD and JEPQ, adding at key levels instead of every month, and possibly fund them from an intraday strategy. Nothing in this file had tested a "buy the dip" rule on these funds by name (the earlier dividend work, about 6,000 variants, asked whether a dividend tilt beats SPY and found it does not).
+
+**Facts first (public Yahoo daily total-return prices, information, 2026-10-14).** SCHD, 2011-10-20 to 2026-10-13: 6.44x, 13.2% a year, worst fall 33%; SPY over the same days 8.30x, 15.2% a year, worst fall 34%; QQQ 14.95x, 19.8% a year, worst fall 35%. JEPQ, 2022-05-04 to 2026-10-13 (4.4 years, one market cycle): 1.96x, 16.3% a year, worst fall 20%; QQQ 2.32x, 20.8% a year, worst fall 23%; SPY 1.93x. So the covered-call fund earned about what SPY did with a slightly smaller drop and gave up about 4.5 points a year to QQQ, the index it writes calls on; SCHD gave up about 2 points a year to SPY over 15 years. Neither is a free lunch; they are a choice of how the return arrives (income now, less upside).
+
+**The question tested.** A saver receives $500 on the first trading day of every month. Does holding the cash and buying only at a "key level" end with more money than buying at once each month?
+
+**Rules (all fixed now; signals use only closes up to and including the day, adjusted close).** Contributions of $500 arrive monthly for 60 months; cash earns 0%; the end value is the units held times the final adjusted close plus any cash left.
+- **DCA:** buy at that day's close on arrival.
+- **DIP10:** keep cash; spend ALL cash on the first close at least 10% below the highest close of the previous 252 trading days.
+- **MA200:** keep cash; spend ALL cash on the first close below its 200 day average close.
+- For both: any contribution that has waited 6 months is spent (with everything else waiting) on that day, so cash never sits forever.
+
+**Tries (6, no variants):** DIP10 and MA200 on SCHD, SPY and QQQ. JEPQ is too short for 60 month windows; it gets 36 month windows as information only, not a try.
+
+**Statistic.** For every start month with a full 60 months of data, R = end value of the rule divided by end value of DCA. `NOT_ENOUGH_DATA` if fewer than 24 start months. Otherwise `NOT_YET_FALSIFIED` only if ALL hold: median R above 1.00; R above 1.00 in at least 60% of the start months; median R above 1.00 in both halves of the start months. Anything else `FALSIFIED`. **Power is low and stated:** start months overlap, so SCHD's 15 years hold about 3 independent 5 year windows and SPY and QQQ about 5; the bar can show a rule loses, not that one wins.
+
+**Counterparty and prior.** The counterparty is the seller during a drawdown who does not wait for the recovery; the prior is against it, because stocks drift up, cash earns nothing here and a rule that waits for a dip spends many months out of the market. **Prediction: median R at or below 1.00 for all six, FALSIFIED.** If any median is above 1.00 it is an audit trigger first (a lookahead in the signal).
+
+**Information, not part of the verdict:** mean cash held, share of months fully invested, worst-case R, and the same with cash earning 4% a year. **Count:** this file's running total was 4,624; six tries makes it **4,630**.
