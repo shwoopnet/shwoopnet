@@ -3617,3 +3617,14 @@ Information: the sum of YES bids across the legs of a usable event has a median 
 ## Information: an exploratory scan of the FLB1 download by category, side and price bucket (2026-10-14, looks, not tries; nothing registered)
 
 To see whether any long-dated cell was worth a registered test, the FLB1 candles of the OLDER half of the markets (closing before 2026-09-16 10:30 UTC; the newer half was left unread) were split by category (7), side (YES, NO), price bucket (5) and lead (24 h and 72 h), keeping cells with 120 or more entries at both leads and the same sign. About 70 cells were looked at. The only cells with |z| above 2.5 at both leads were **buying YES in Mentions markets** at 10c to 30c (-7.1c, z -3.6 at 24 h; -8.9c, z -3.7 at 72 h) and at 30c to 70c (-6.7c and -13.0c), and buying NO in Commodities price brackets (-7c to -23c), i.e. YES on a "will they say it" market is overpaid for. The mirror, buying NO on Mentions at 70c to 90c, earns only +0.5c (24 h) and +3.9c (72 h) with z 0.24 and 1.42, because the NO buyer also pays the spread and fee. With 70 cells looked at, a few of this size would appear by chance, and the executable side shows no edge, so **nothing is registered from it**. The newer half stays unread in case a later idea needs it as a holdout.
+
+## What FALSIFIED means here, and which results are only "not shown" (written 2026-10-14 at the owner's request)
+
+**Definition.** `FALSIFIED` means the test did not clear a bar fixed before it ran: enough entries and days; mean net above zero; day clustered z of at least 2.1 (higher when several variants were tried); positive in both halves of the days; positive with fees x1.2; sometimes above a fair-market placebo. It is a statement about the evidence in that sample, not about the idea. `NOT_YET_FALSIFIED` is the best outcome and means "watch on new days"; there is no verdict that means "trade".
+
+**Three kinds of FALSIFIED, kept apart.**
+1. *Wrong sign, clearly:* SP1 (sports favourites -4.2c, z -2.8), FLB1 at 72 h (-1.8c, z -2.4), XM1 Ethereum (-7.5c, z -4.2), PM1 (Polymarket worse than Kalshi, z -3.8), E4 S&P (-2.8c), E5 Zcash (-1.9c, z -2.2), FX pairs (E3).
+2. *Not shown (the minimum detectable edge is larger than any plausible edge):* E4 Bitcoin and Ethereum hourly ladders (14 days, MDE about 2.1c; means +0.96c and +0.64c), L1B Bitcoin (+0.55c, z +0.88), E5 natural gas (+1.39c, z +1.94, one try of eight), E5 oil (+0.89c, z +1.10), FLB1 at 24 h and 168 h, XM1 Bitcoin, E3 HYPE and BNB (-0.2c, -0.8c), the pooled six commodities on discovery (+0.34c).
+3. *Failed its bar but carried a signal, re-registered:* PM2 (skipped entries lost 9.8% and 8.7% against 4.6% and 3.7%; now PM3 on new days).
+
+**What stays open on purpose.** Group 2 can only be closed or confirmed with more data, not with a different rule: more days of the same test, or a forward read. Re-running the same rule on the same days is not allowed (it is the same try).
