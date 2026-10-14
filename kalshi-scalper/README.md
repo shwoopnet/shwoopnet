@@ -3594,3 +3594,14 @@ Information, not tries: by category at 72 h, Politics -6.40c (225), Elections -2
 Information (not tries): the six commodities pooled earned +0.34c (z +0.85) on discovery and **-0.50c** (z -0.77, 1,533 entries) on the older window; the two coins pooled -1.33c (z -2.15) on discovery and -0.55c on the holdout. The prediction (commodities +0.3c to +1.0c, coins about +0.5c, nearly all FALSIFIED) was right on the verdicts and a little optimistic on the coins. No audit trigger. Natural gas came closest (z +1.94) and has only 160 holdout entries, and it is one try of eight.
 
 **What it says.** The L1 edge is not a property of "commodity" or "small coin" markets. The series where it has held on a separate window are gold, Ethereum (older days), XRP and Dogecoin; silver, oil, copper, platinum, palladium, Zcash, NEAR, HYPE, BNB and the currency pairs do not show it. Counting every 15 minute series tried on L1's rule (Bitcoin, Ethereum, Solana, gold, XRP, Dogecoin, HYPE, BNB, three currency pairs, six commodities, two coins) the honest base rate of "a series that passes on one window" is a handful out of about twenty, which is why XRP and Dogecoin needed their holdout and still wait for new days. **Count unchanged** (E5's eight tries were counted when registered).
+
+## Result: XM1, the hourly ladder as a second price for the 15 minute market (run once on 2026-10-14)
+
+1,896 hourly-aligned 15 minute windows (Bitcoin and Ethereum, 40 days), 1,870 with ladder quotes. Rule as registered.
+
+| Series | Windows with a bracket | Trades | Net per contract | z | Halves | Placebo 95th pct | Minimum detectable edge | Brier: ladder vs 15 minute mid | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| Bitcoin | 773 | 363 on 40 days | -2.05c | -0.90 | -1.38 / -2.66 | +2.09c | +4.75c | 0.1465 vs 0.1395 | FALSIFIED (NOT SHOWN) |
+| Ethereum | 671 | 380 on 41 days | **-7.45c** | **-4.20** | -9.04 / -5.87 | +2.03c | +3.73c | 0.1470 vs 0.1321 | FALSIFIED |
+
+The prediction (the ladder is the worse price, FALSIFIED) was right. The median gap between the ladder-implied probability and the 15 minute mid is about zero, but the 5th and 95th percentiles are about ±12c to ±14c, and trading toward the ladder loses: the 15 minute market is the better-calibrated price, and a ladder interpolated between strikes adds noise. Ethereum is clearly negative. **Count unchanged** (XM1's two tries were counted when registered).
