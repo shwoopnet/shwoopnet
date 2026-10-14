@@ -3628,3 +3628,13 @@ To see whether any long-dated cell was worth a registered test, the FLB1 candles
 3. *Failed its bar but carried a signal, re-registered:* PM2 (skipped entries lost 9.8% and 8.7% against 4.6% and 3.7%; now PM3 on new days).
 
 **What stays open on purpose.** Group 2 can only be closed or confirmed with more data, not with a different rule: more days of the same test, or a forward read. Re-running the same rule on the same days is not allowed (it is the same try).
+
+## Pre-registration: E5B and E3C, holdouts for two "not shown" series (written 2026-10-14; E5B reads data already downloaded, E3C downloads days never read)
+
+**Why.** Two series were closed on thin evidence rather than a wrong sign, and the days that could test them again exist without waiting.
+
+**E5B: crude oil (WTI) on the E5 holdout.** WTI was +0.89c (z +1.10) on discovery, FALSIFIED at Stage 1, so under E5's own design the holdout was not read (588 WTI entries before 2026-09-03 20:00 UTC exist in `data/alts3.sqlite`, unread). Natural gas (160 holdout entries) is too small to test and is left alone. Reading WTI's holdout now is a **new try that was chosen after seeing its discovery result**, which is disclosed here; the holdout days themselves were never looked at. Rule: L1 unchanged on `KXWTI15M` closing before the E5 split. Bar: at least 300 entries, 5 days, z at least 2.1, mean above zero, both halves positive, positive with fees x1.2 (the common bar). Prediction: +0.3c to +1.0c, **FALSIFIED (not shown)**; the MDE with about 590 entries is near 1.7c.
+
+**E3C: HYPE and BNB on the 29 older days.** Both were slightly negative on E3's 41 days (-0.18c, -0.84c; z -0.24, -1.16) and never tested on older days. `python -m scalper.e3c fetch` into `data/alts4.sqlite` downloads only markets closing before 2026-09-03 20:00 UTC (E3's floor). Rule: L1 unchanged. Two tries (HYPE, BNB), the common bar. Prediction: both around 0c, **FALSIFIED**. A pass in either would be worth a forward read; a fail ends them.
+
+**Count.** Three variants (WTI, HYPE, BNB): 4,621 -> 4,624.
