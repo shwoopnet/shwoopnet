@@ -3726,3 +3726,18 @@ The prediction (median R at or below 1.00 for all six) was right and no audit tr
 **The options side (information, not a try).** Without historical chains, the volatility risk premium can only be read from the index: the gap between the VIX (30 day implied volatility) and the volatility that SPY then realised over the next 30 days, from public daily data. It is printed as a distribution (mean gap, share of months positive, worst months, drop from a rule that is short that gap), and it cannot say anything about fills, skew or margin. **The thing that would unlock options research is data:** a daily recorder of the SPY, QQQ and IWM option chains (bid, ask, implied volatility, open interest) on the broker's live snapshot, so that six months from now the put-selling and spread mechanisms have a history to be tested on. That is a code change to the server that I have not made.
 
 **Count:** the Kalshi total in this file was 4,630; the four tries here are kept in their own count (4) with their own bar and not added to it.
+
+## Result: IDX1, overnight drift, turn of the month and the pre-holiday session (run once on 2026-10-14)
+
+Public Yahoo daily data: SPY 8,484 sessions from 1993, QQQ 6,942 from 1999, ^VIX from 1993. Discovery to 2011-12-31, holdout from 2012-01-01. Alpha is annualised and net of 2 basis points per round trip (the stress cost is 4).
+
+| Rule | Holdout active periods | Holdout net alpha | Month clustered z | Halves | At 4 bp | Discovery alpha (z) | Verdict |
+|---|---|---|---|---|---|---|---|
+| Overnight, SPY | 3,717 days | **-2.05%** | -1.01 | -3.12% / -0.97% | -7.09% | +3.07% (+1.76) | FALSIFIED |
+| Overnight, QQQ | 3,717 days | +0.57% | +0.25 | +0.37% / +0.78% | -4.47% | +8.34% (+2.25) | FALSIFIED |
+| Turn of the month, SPY | 178 months | +1.09% | +0.72 | -0.02% / +1.93% | +0.84% | +3.41% (+2.27) | FALSIFIED (not shown) |
+| Pre-holiday, SPY | 139 holidays | | | | | | NOT_ENOUGH_DATA |
+
+The predictions were right on every verdict (discovery positive, holdout indistinguishable from zero or negative, all four not passing). **Overnight drift existed before 2012 and is gone after costs**: SPY earned +3.1% a year of alpha in discovery and -2.1% in the holdout, QQQ +8.3% then +0.6%, and at 4 basis points a day both are clearly negative; holding only overnight returned +4.4% a year on SPY against +15.4% for buying and holding it over 2012 to 2026. **The turn of the month is positive in both periods (+3.4%, +1.1%) but under 1 z in the holdout**, which is "not shown" with 178 months, and its gain per month is small compared with a 2 basis point cost and the idle cash. **Pre-holiday**: the holdout has 139 holidays, under the 150 the bar required, so it is NOT_ENOUGH_DATA; my minimum was set without checking that a holiday count could reach it, a registration mistake that I am leaving as written instead of lowering the bar after seeing the number. The index-level calendar effects that were published in the 1990s and 2000s did not survive into the data after 2011 as something a retail account can trade. Own count (4 tries): 4.
+
+**Options side, information:** over 403 non-overlapping 21 session windows since 1993 the VIX exceeded the volatility SPY then realised by **+3.66 vol points on average, in 83% of windows (median +4.46)**, and was below it by more than 6.5 points in the worst 5% and by **46 points in the worst month** (the 2020 and 2008 type months). So the premium that makes put selling look attractive is real in the index data, and so is the loss that comes with it; whether a defined-risk version (a put spread, not a naked short) keeps enough of the +3.7 points after bid-ask costs and capped gains cannot be answered without option chains, which is the data gap named above.
