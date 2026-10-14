@@ -3638,3 +3638,7 @@ To see whether any long-dated cell was worth a registered test, the FLB1 candles
 **E3C: HYPE and BNB on the 29 older days.** Both were slightly negative on E3's 41 days (-0.18c, -0.84c; z -0.24, -1.16) and never tested on older days. `python -m scalper.e3c fetch` into `data/alts4.sqlite` downloads only markets closing before 2026-09-03 20:00 UTC (E3's floor). Rule: L1 unchanged. Two tries (HYPE, BNB), the common bar. Prediction: both around 0c, **FALSIFIED**. A pass in either would be worth a forward read; a fail ends them.
 
 **Count.** Three variants (WTI, HYPE, BNB): 4,621 -> 4,624.
+
+## Result: E5B, crude oil on E5's holdout (run once on 2026-10-14)
+
+`KXWTI15M` L1 unchanged, markets closing before 2026-09-03 20:00 UTC: **n=588 on 28 days, net -0.88c per contract, z -0.97**, halves -1.23c / -0.56c, fees x1.2 -0.97c, win 92.5% against 92.9% paid -> **FALSIFIED**. WTI's discovery result (+0.89c, z +1.10) did not repeat: it moved to the same size on the other side of zero, which is what chance looks like. Crude oil is closed (wrong sign on its own holdout). **Count: 4,622** after E5B (E3C's two tries are counted when it runs: 4,624).
