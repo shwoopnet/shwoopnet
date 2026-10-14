@@ -3575,3 +3575,22 @@ Information, not tries: by category at 72 h, Politics -6.40c (225), Elections -2
 ## Information: the 25c exit on the 28 older days (2026-10-13, not a try)
 
 `exit25` run on the L1B download (2,359 L1 entries on Bitcoin, Ethereum and gold): the line is crossed at a minute close in 98 entries (4.2%); of those 98, held to settlement 7 won (7.1%, mean -84.8c per contract). With an optimistic 0c slip the line adds +0.13c per entry (+1.407c against +1.276c hold-only); with a 5c slip it costs 0.03c (+1.243c against +1.276c). The 40 day sample said -0.04c, so the exit is neutral on both windows, as before: it limits the size of the rare loss, and its cost or gain is inside the noise either way.
+
+## Result: E5, L1 unchanged on other commodities and two more coins (run once on 2026-10-14)
+
+32,314 markets downloaded (30 with no candles skipped). Stage 1 on the 40 day discovery window, the holdout read only if Stage 1 passed. Rule as registered.
+
+| Series | Entries (days) | Net per contract | z | Halves | Fees x1.2 | Median spread | Stage 1 |
+|---|---|---|---|---|---|---|---|
+| Silver | 742 (37) | +0.18c | +0.20 | -0.10 / +0.47 | +0.08c | 0.6c | FALSIFIED |
+| Crude oil (WTI) | 784 (40) | +0.89c | +1.10 | +1.43 / +0.29 | +0.79c | 0.5c | FALSIFIED |
+| Natural gas | 860 (40) | **+1.39c** | +1.94 | +1.13 / +1.68 | +1.30c | 1.0c | FALSIFIED (z below 2.1) |
+| Copper | 837 (35) | -0.18c | -0.17 | +1.86 / -2.33 | -0.27c | 1.0c | FALSIFIED |
+| Platinum | 436 (20) | -0.34c | -0.30 | +1.00 / -1.73 | -0.43c | 2.0c | FALSIFIED |
+| Palladium | 394 (21) | -0.87c | -0.74 | -2.09 / +0.41 | -0.97c | 2.0c | FALSIFIED |
+| Zcash | 1,155 (41) | **-1.85c** | **-2.24** | -2.85 / -0.80 | -1.94c | 1.2c | FALSIFIED |
+| NEAR | 1,201 (41) | -0.84c | -1.05 | -1.40 / -0.25 | -0.93c | 1.0c | FALSIFIED |
+
+Information (not tries): the six commodities pooled earned +0.34c (z +0.85) on discovery and **-0.50c** (z -0.77, 1,533 entries) on the older window; the two coins pooled -1.33c (z -2.15) on discovery and -0.55c on the holdout. The prediction (commodities +0.3c to +1.0c, coins about +0.5c, nearly all FALSIFIED) was right on the verdicts and a little optimistic on the coins. No audit trigger. Natural gas came closest (z +1.94) and has only 160 holdout entries, and it is one try of eight.
+
+**What it says.** The L1 edge is not a property of "commodity" or "small coin" markets. The series where it has held on a separate window are gold, Ethereum (older days), XRP and Dogecoin; silver, oil, copper, platinum, palladium, Zcash, NEAR, HYPE, BNB and the currency pairs do not show it. Counting every 15 minute series tried on L1's rule (Bitcoin, Ethereum, Solana, gold, XRP, Dogecoin, HYPE, BNB, three currency pairs, six commodities, two coins) the honest base rate of "a series that passes on one window" is a handful out of about twenty, which is why XRP and Dogecoin needed their holdout and still wait for new days. **Count unchanged** (E5's eight tries were counted when registered).
