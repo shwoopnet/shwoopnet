@@ -3847,3 +3847,25 @@ The owner asked to expand to more short-term strategies and markets, so the whol
 ## Information: the research data is archived (2026-10-20, not a try)
 
 The databases under `kalshi-scalper/data/` are gitignored and lived only in the cloud research container, and Kalshi's history reaches back about 69 days, so the early August days (the L1 holdout `l1b`, the E3B and E5 holdouts) would have been unrecoverable once the container ended or mid-September passed. They are now on the branch **`research-data`** of `shwoopnet/shwoopnet`: 14 databases and one price-file archive, 44 MB compressed, with `MANIFEST.md` (size, coverage, checksum per file) and `restore.sh` (decompresses into `kalshi-scalper/data/`; tested: `l1b` restores with its 7,213 markets and passes SQLite's integrity check; `book` and `e3b` were integrity-checked too). Public Kalshi market data and public price files only; no keys, balances or account data. The branch is not published by Pages (it is not the default branch) but it is readable by anyone who can read the repository, and a full clone now downloads about 44 MB more. The archive is a snapshot of 2026-10-20: forward days after it (for example the 2026-11-16 reads) come from fresh downloads, and a second snapshot should be taken before about 2026-12-01 so the early days are never the only copy.
+
+## Information: a census of Kalshi's 340 daily series (2026-10-20, counts and volumes only, not a try)
+
+The follow-up to the short-term census above: every daily series was asked for its settled markets in the last 69 days. Nothing was priced or tested.
+
+**What trades.** 143 of the 340 daily series had a settled market in the window; 197 are listed and idle. Total contracts traded by category: weather 165 million (51 series), economics 61 million (56), commodities 22 million (6), politics 15 million (5), sports 9 million (1), financials 5 million (19), crypto 1 million (2), entertainment and science almost nothing.
+
+**Weather is where the volume is, and it is already crossed off.** The seven daily-high cities tested in WX1 (Los Angeles, Miami, New York, Chicago, Austin, Denver, Philadelphia) are the seven most liquid (median 5,600 to 73,800 contracts a market). The untested ones are the same mechanism in other cities: San Francisco, Phoenix, Seattle, Dallas, Atlanta, Houston, Las Vegas, Oklahoma City, Boston, Minneapolis, Washington DC and New Orleans highs (median 2,100 to 8,200), plus daily lows. By this file's own rule a new city is a rewording of a crossed-off mechanism, not a new one: WX1 found the market beats the public forecast (-3.3c, z -2.5), FLB1 found long-dated favourites lose (-0.6c to -1.8c), and the one new angle, late-day certainty, is closed by availability (WX2: by 6 hours before the close no quoted bucket is left inside 80c to 98c).
+
+**Not weather and not yet looked at (median contracts a market, days with data of 69):**
+
+| Series | What | Markets | Days | Median volume |
+|---|---|---|---|---|
+| KXTRUMPAPPROVE | Trump approval rating | 441 | 49 | 25,885 |
+| KXINXDUD | S&P 500 up or down on the day | 46 | 46 | 16,551 |
+| KXRAIN | where it will rain, daily | 1,000+ | 34 | 15,647 |
+| KXAAAGASD | US average gas price up | 1,000+ | 55 | 8,238 |
+| KXNASDAQDUD | Nasdaq 100 up or down on the day | 46 | 46 | 3,989 |
+| KXVHGCB | VoteHub generic ballot | 232 | 26 | 2,585 |
+| KXBRENTD | Brent oil on the day | 790 | 36 | 2,330 |
+
+**Reading.** Two structural problems limit all of them. Index up or down markets are one a day, so 46 days is 46 observations per series against the 300 the bar needs (about 300 days). The approval, gas price and generic ballot markets are driven by a published number (a poll average, AAA's daily price), so any edge would have to come from reading that number before the market does, which is a different test from L1's and has to be registered with its own source and timing before any price is downloaded. Nothing here is a candidate for money. The only candidates worth a registered paper track are the ones with a public daily source and enough strikes a day to reach 300 entries in a month or two: the gas price series first.
