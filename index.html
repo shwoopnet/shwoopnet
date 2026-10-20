@@ -528,6 +528,7 @@
   .kal-brow{ padding:10px 0; border-top:1px solid var(--border); }
   .kal-brow:first-child{ border-top:0; padding-top:0; }
   .kal-brow-main{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .kal-brow-r{ text-align:right; }
   .kal-brow-px{ font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; white-space:nowrap; }
   .kal-brow-side{ font-weight:600; font-size:12px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
   .kal-status{ color:var(--muted); font-size:12.5px; }
@@ -627,6 +628,9 @@
   @media (max-width:700px){
     .kal-spark{ display:none; }
     .kal-card[data-card="performance"]{ display:none; }
+    /* The price block drops under the name instead of sharing its row, so "spread, round trip" and the size line stay on one line each. */
+    .kal-brow-main{ flex-direction:column; align-items:stretch; gap:6px; }
+    .kal-brow-r{ text-align:left; }
   }
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
@@ -2377,7 +2381,7 @@
       var left = kalshiSecsLeft(m.closeTime, now);
       return '<div class="kal-brow"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
         '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
-        '<div style="text-align:right"><div class="kal-brow-px" title="The price of a YES contract: what buyers bid and what sellers ask. A NO contract costs 100c minus these.">' + (hasBook ? '<span class="kal-brow-side">Yes</span> ' + (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
+        '<div class="kal-brow-r"><div class="kal-brow-px" title="The price of a YES contract: what buyers bid and what sellers ask. A NO contract costs 100c minus these.">' + (hasBook ? '<span class="kal-brow-side">Yes</span> ' + (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
         '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + kalshiSparkFor(m) + '</div>';
     }).join('');
     st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
