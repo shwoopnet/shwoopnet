@@ -525,7 +525,9 @@ function skimAddon(state, now, perContract = 0.93) {
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
 // A window is the 15 minutes a market closes in, shared by every series: the part of the ticker after the series name (KXBTC15M-26OCT101200-00 gives 26OCT101200).
-const L1_WINDOW_CAP_FRACTION = 0.045;
+// Raised from 4.5% to 5.5% at the owner's request (Oct 20, 2026), after Dogecoin, last in the list, got 1 contract while XRP got 4. That is ABOVE the 5% loss stop (L1_SIZED_STOP_FRACTION): one window in which every
+// favourite flips can now lose more than the stop allows before the stop can act on it. The owner chose that knowingly; raising the stop with it was offered and not asked for.
+const L1_WINDOW_CAP_FRACTION = 0.055;
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
 
 async function runL1Tick(args) {
@@ -634,7 +636,7 @@ async function runL1Tick(args) {
     const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
-    // from earlier ticks in the same window count too. The loss stop is 5% of the base; a window may use 4.5%, so one window alone cannot reach it.
+    // from earlier ticks in the same window count too. The loss stop is 5% of the base and a window may use 5.5% (since Oct 20, 2026), so one window alone CAN reach it: the stop then ends the session after that window, it cannot prevent it.
     const wkey = windowKey(ticker);
     const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
       .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);

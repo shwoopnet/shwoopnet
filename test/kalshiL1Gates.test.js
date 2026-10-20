@@ -722,6 +722,14 @@ gates.W2 = async () => {
   const btc = w.posts.find((p) => p.ticker === BTCW);
   assert.ok(btc && btc.count === solo.posts[0].count, 'Bitcoin trades its full stake even when Ethereum is listed first: ' + (btc && btc.count));
 };
+// W4: the window limit is 5.5% (the owner's choice, Oct 20, 2026, so the last series in the list stops getting 1 contract). It is deliberately ABOVE the 5% loss stop: a window where every favourite
+// flips can lose more than the stop, and the stop ends the session afterwards. Pinned so nobody "fixes" the mismatch back, or raises it further, without deciding to.
+gates.W4 = () => {
+  assert.strictEqual(live.L1_WINDOW_CAP_FRACTION, 0.055, 'the window limit the owner chose');
+  assert.ok(live.L1_WINDOW_CAP_FRACTION > live.L1_SIZED_STOP_FRACTION, 'above the loss stop on purpose, so one window can reach it');
+  assert.ok(live.L1_WINDOW_CAP_FRACTION < 0.10, 'and nowhere near a tenth of the account');
+};
+
 gates.W3 = async () => {
   // orders from an earlier tick in the same window count, so the next minute cannot start the window over
   const w = world({ session: wsess({}), balance: rich });
