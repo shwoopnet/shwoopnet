@@ -22,7 +22,7 @@ gates.P2 = () => {
   const excluded = new Set([...cfg.matchAll(/^\s*-\s+(\S+)\s*$/gm)].map((m) => m[1]));
   const top = new Set(tracked().map((t) => t.file.split('/')[0]));
   const published = [...top].filter((n) => !excluded.has(n) && !n.startsWith('.') && !n.startsWith('_'));
-  assert.deepStrictEqual(published.sort(), ['apple-touch-icon.png', 'index.html'], 'only the app and its home screen icon are published; add anything else to the exclude list in _config.yml (published now: ' + published.join(', ') + ')');
+  assert.deepStrictEqual(published.sort(), ['apple-touch-icon.png', 'index.html', 'manifest.webmanifest', 'sw.js'], 'only the app, its home screen icon and the phone alerts files (the manifest and the service worker, Oct 20, 2026) are published; add anything else to the exclude list in _config.yml (published now: ' + published.join(', ') + ')');
   for (const must of ['functions', 'kalshi-scalper', 'docs', 'CLAUDE.md', 'SECURITY_REVIEW.md', 'SERVER_REVIEW_2026-10-08.md', 'firestore.rules']) assert.ok(excluded.has(must), must + ' is not served');
 };
 

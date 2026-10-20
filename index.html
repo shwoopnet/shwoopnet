@@ -633,6 +633,8 @@
     /* The price block drops under the name instead of sharing its row, so "spread, round trip" and the size line stay on one line each. */
     .kal-brow-main{ flex-direction:column; align-items:stretch; gap:6px; }
     .kal-brow-r{ text-align:left; }
+    /* The Tools menu opens as a sheet above the bottom bar, the full width of the screen. Anchored to its button it ran off the left edge of a phone and cut the buttons in half. */
+    .kal-tools-body{ position:fixed; left:12px; right:12px; top:auto; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); min-width:0; max-width:none; max-height:65vh; }
   }
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
