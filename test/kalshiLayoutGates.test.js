@@ -384,7 +384,7 @@ gates.Y18 = () => {
   assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
   assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
   assert.ok(/tile\('Expectancy'/.test(html) && !/tile\('Per trade'/.test(html), 'the expectancy tile does not share the stake row name');
-  assert.ok(/\(0\.05 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 5% stop');
+  assert.ok(/\(0\.06 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 6% stop');
 };
 
 // Y21: manual trades are hidden from the Recent trades card by default, with a small dropdown to bring them back.
