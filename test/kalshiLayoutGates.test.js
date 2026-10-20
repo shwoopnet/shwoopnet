@@ -354,7 +354,7 @@ gates.Y16 = () => {
   assert.ok(/var\(--gain\)/.test(spark(pts, { from, to, ref: 82400, fmt })), 'green when over it');
   const ys = [...svg.matchAll(/ y1="([\d.]+)"/g)].map((x) => Number(x[1]));
   assert.ok(ys.length === 1 && ys[0] >= 0 && ys[0] <= 86, 'a strike far above the price stays inside the chart');
-  assert.ok(/kalshiSparkFor\(m\) \+ '<\/div>'/.test(html), 'each market row carries its chart');
+  assert.ok(/\(kalshiInTrade\(m\.ticker\) \? kalshiSparkFor\(m\) : ''\) \+ '<\/div>'/.test(html), 'a market row carries its chart only while the account is in a trade in that market');
   assert.ok(/fetch\('https:\/\/api\.gold-api\.com\/price\/XAU'\)/.test(html) && /m\.series === 'KXGOLD15M' && m\.strike != null && !kalshiGold\.failed/.test(html), 'gold draws its price against the strike, and falls back to the YES line if the feed fails');
   assert.ok(/now - kalshiGold\.at < 10000/.test(html), 'the gold feed is asked at most every 10 seconds');
   // History plus live readings, so a chart is never empty right after a market opens.
@@ -608,6 +608,20 @@ gates.Y43 = () => {
   assert.ok(m, 'a 700px block exists');
   assert.ok(/\.kal-spark\{ display:none; \}/.test(m[1]) && /\.kal-card\[data-card="performance"\]\{ display:none; \}/.test(m[1]), 'the sparklines and the Performance card are hidden on a phone');
   assert.ok(!/kalPerfWrapC|kal-perf\b/.test(m[1]) && !/data-card="account"/.test(m[1]), 'the stats card stays');
+};
+
+// Y44: a market's price chart shows only while the account holds a position in it (the owner's request, Oct 20, 2026). "In a trade" is a real position, not an order that was sent; positions that
+// could not be read, or a position of zero, mean no chart.
+gates.Y44 = () => {
+  const m = /(function kalshiInTrade\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiInTrade not found');
+  const inTrade = (acct, ticker) => new Function('kalshiLiveAcct', m[1] + '; return kalshiInTrade;')(acct)(ticker);
+  const acct = (positions, ok = true) => ({ positions: { ok, positions } });
+  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 3 }]), 'A'), true, 'a held YES position shows its chart');
+  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: -2 }]), 'A'), true, 'a held NO position shows its chart');
+  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 3 }]), 'B'), false, 'another market stays chartless');
+  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 0 }]), 'A'), false, 'a closed position (zero) shows no chart');
+  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 3 }], false), 'A'), false, 'positions that could not be read show no chart');
+  assert.strictEqual(inTrade(null, 'A'), false, 'before the account is read there is no chart');
 };
 
 // Y40: the hover on the settled-trade bars. Placement is pure, so its edges are tested: centred on the column, just above the pointer, inside the window at both sides, flipped below the
