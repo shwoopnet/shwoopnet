@@ -632,8 +632,6 @@
   .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ opacity:.45; }
   .kal-move{ display:flex; justify-content:flex-end; gap:6px; margin-bottom:6px; }
   .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr)); }
-  .kal-more{ margin-top:10px; }
-  .kal-more > summary{ cursor:pointer; color:var(--muted); font-size:12.5px; }
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
   .kal-fold[open] > summary{ margin-bottom:14px; }
   .kal-limits{ font-size:14px; line-height:1.7; }
@@ -1126,7 +1124,7 @@
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
-                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button></div>
+                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button></div>
           <div class="kal-note" id="kalDiagMsg"></div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
           <div class="kal-actions">
@@ -2072,13 +2070,6 @@
     kalshiBarsMemo[el.id] = html; el.innerHTML = html; kalshiTipHide();
   }
 
-  // The card is rebuilt every few seconds, which closed an opened <details> each time. Its state is kept here and written back into the markup on every build.
-  var kalshiMoreOpen = false;
-  document.addEventListener('toggle', function(ev){
-    var t = ev.target;
-    if(t && t.classList && t.classList.contains('kal-more')){ kalshiMoreOpen = t.open; }
-  }, true);   // toggle does not bubble, so it is caught on the way down
-
   // The exit watch, read back from the bot's own order records (no download needed): how many positions fell to 25c, what the sells got, and what holding would have paid.
   // `results` is the account read's market results by ticker; when a market's result is not known yet the hold figure is left out rather than guessed.
   // "Touched" is an order the watch acted on or logged (exitStatus or exitShadow); a logged-only order was held to settlement, so its real result IS the hold result.
@@ -2134,6 +2125,31 @@
     return h + note + '</div>';
   }
 
+  // Every stat the tracker computes, as plain text, for the Copy all stats button: the tiles on the page, the ones that are no longer shown, both tables and the exit at 25c block.
+  function kalshiStatsText(st, x, money){
+    if(!st || !st.n){ return 'No settled trades yet.'; }
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, pct = function(v){ return Math.round(v * 100) + '%'; };
+    var c = function(v){ return v === null || v === undefined ? 'n/a' : (v * 100).toFixed(1) + 'c'; };
+    var streak = st.streak && st.streak.kind ? st.streak.n + ' ' + (st.streak.kind === 'win' ? 'win(s)' : 'loss(es)') : 'none';
+    var L = ['Settled trades: ' + st.n, 'Win rate: ' + pct(st.winRate) + ' (' + st.wins + ' won, ' + st.losses + ' lost)', 'Profit factor: ' + (st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2)),
+      'Average win: ' + (st.avgWin === null ? 'none' : sg(st.avgWin)), 'Average loss: ' + (st.avgLoss === null ? 'none' : sg(st.avgLoss)), 'Expectancy per trade: ' + sg(st.expectancy),
+      'Net: ' + sg(st.total), 'Best / worst: ' + sg(st.best) + ' / ' + sg(st.worst), 'Deepest drawdown: ' + (st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none'),
+      'Streak now: ' + streak, 'Longest losing run: ' + st.longestLoss, '', 'By market'];
+    (st.bySeries || []).forEach(function(r){ L.push('  ' + r.label + ': ' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won, ' + sg(r.net)); });
+    L.push('', 'By price paid');
+    (st.byBand || []).forEach(function(r){ L.push('  ' + r.label + ': ' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won, ' + sg(r.net)); });
+    L.push('', 'Exit at ' + (x ? Math.round(x.at * 100) : 25) + 'c');
+    if(!x || !x.touched){ L.push('  No position has fallen to the line yet.'); }
+    else {
+      L.push('  Fell to the line: ' + x.touched, '  Sold: ' + x.sold + (x.partly ? ', partly sold: ' + x.partly : ''), '  Sell failed or skipped: ' + x.failed, '  Logged, not sent: ' + x.loggedOnly,
+        '  Trigger bid (avg): ' + c(x.avgBid), '  Sold at (avg): ' + c(x.avgFill), '  Slip (avg): ' + c(x.avgSlip), '  Realised on sells: ' + sg(x.realised),
+        '  Won after falling: ' + (x.known ? x.recovered + ' of ' + x.known : 'none known yet'));
+      if(x.holdKnownSold){ L.push('  Sells vs holding: ' + sg(x.exitMinusHold) + ' over ' + x.holdKnownSold + ' sold position(s)'); }
+      if(x.earlier){ L.push('  Older records taken under an earlier exit line, left out: ' + x.earlier); }
+    }
+    return L.join('\n');
+  }
+
   // The tracker's numbers as tiles and two small tables. Nothing is shown as a figure until there is a settled trade to base it on.
   function kalshiPerfHtml(st, esc, money, exitRep, afterMarket){
     if(!st || !st.n){ return '<div class="kal-empty">The tracker fills in after the first settled trade.</div>'; }
@@ -2155,8 +2171,9 @@
         return '<div><span>' + esc(r.label) + '</span><span>' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + esc(sg(r.net)) + '</b></div>';
       }).join('') + '</div>';
     };
-    return '<div class="kal-tiles">' + main + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + (afterMarket || '') + '</div>' +
-      '<details class="kal-more"' + (typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen ? ' open' : '') + '><summary>More stats</summary><div class="kal-tiles">' + more + '</div><div class="kal-perf-tabs">' + table('By price paid', st.byBand) + (exitRep !== undefined ? kalshiExitHtml(exitRep, esc, money) : '') + '</div></details>';
+    // Only the tiles, By market and By price paid are shown. Everything else (net, best and worst, drawdown, streaks, the exit at 25c block) stays computed from the stored orders and is copied
+    // with the Copy all stats button in Tools (kalshiStatsText), so it can be reviewed without cluttering the page.
+    return '<div class="kal-tiles">' + main + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + (afterMarket || '') + table('By price paid', st.byBand) + '</div>';
   }
 
   // A tiny line over one 15 minute market: points are {t (ms), v}, drawn across the market's whole window so it fills from the left as time passes.
@@ -2189,7 +2206,9 @@
   var kalshiSpot = { at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] };
   var kalshiMid = {};
   // ETH: the same recipe as Bitcoin, Coinbase's candles for the minute history and its ticker every 10 seconds.
-  var kalshiAlt = { ETH: { product: 'ETH-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] } };
+  var kalshiAlt = { ETH: { product: 'ETH-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] },
+    XRP: { product: 'XRP-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] },
+    DOGE: { product: 'DOGE-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] } };
   function kalshiFetchAlt(key, now){
     var a = kalshiAlt[key];
     if(!a.busy && now - a.at >= 30000){
@@ -2277,6 +2296,7 @@
 
   // The small chart under a market row. Bitcoin: Coinbase's price against the strike ("to beat"). Gold: gold-api.com's price against the strike, as this page has
   // seen it since it was opened; if that feed fails, the market's own YES price in cents instead.
+  var KAL_ALT_OF = { KXETH15M: 'ETH', KXXRP15M: 'XRP', KXDOGE15M: 'DOGE' }, KAL_ALT_NAME = { ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin' };
   function kalshiSparkFor(m){
     var close = Date.parse(m.closeTime);
     if(!Number.isFinite(close)){ return ''; }
@@ -2285,10 +2305,10 @@
     if(m.series === 'KXBTC15M' && m.strike != null){
       body = kalshiSparkSvg(kalshiSpotSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
-    } else if(m.series === 'KXETH15M' && m.strike != null){
-      var alt = kalshiAlt.ETH;
-      body = kalshiSparkSvg(kalshiJoinSeries(alt.pts, alt.live), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Ethereum' + ' price from Coinbase against the strike', empty: 'Loading the price...',
-        fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
+    } else if(KAL_ALT_OF[m.series] && m.strike != null){
+      var altKey = KAL_ALT_OF[m.series], alt = kalshiAlt[altKey], digits = altKey === 'ETH' ? 2 : 4;
+      body = kalshiSparkSvg(kalshiJoinSeries(alt.pts, alt.live), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: KAL_ALT_NAME[altKey] + ' price from Coinbase against the strike', empty: 'Loading the price...',
+        fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }); } });
     } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
       body = kalshiSparkSvg(kalshiGoldSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
         fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
@@ -2305,14 +2325,14 @@
     kalshiBooksLast = data || null;
     renderKalshiPositions();
     // Only the markets the page knows. The deployed relay can lag the page by a deploy and still send a market that was dropped, which would show up as a bare ticker.
-    var rows = ((data && data.markets) || []).filter(function(m){ return m && ['KXBTC15M', 'KXGOLD15M', 'KXETH15M'].indexOf(m.series) > -1; });
+    var rows = ((data && data.markets) || []).filter(function(m){ return m && ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'].indexOf(m.series) > -1; });
     if(!rows.length){
       el.innerHTML = '<div class="kal-empty">No open markets right now.</div>';
       st.textContent = 'No open markets';
       return;
     }
     var now = Date.now();
-    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: 'Ethereum 15m' };
+    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: 'Ethereum 15m', KXXRP15M: 'XRP 15m', KXDOGE15M: 'Dogecoin 15m' };
     rows.forEach(function(m){
       if(m.yesBid == null || m.yesAsk == null){ return; }
       var h = kalshiMid[m.ticker] = kalshiMid[m.ticker] || [];
@@ -2322,6 +2342,8 @@
     if(rows.some(function(m){ return m.series === 'KXBTC15M'; })){ kalshiFetchSpot(now); }
     if(rows.some(function(m){ return m.series === 'KXGOLD15M'; })){ kalshiFetchGold(now); }
     if(rows.some(function(m){ return m.series === 'KXETH15M'; })){ kalshiFetchAlt('ETH', now); }
+    if(rows.some(function(m){ return m.series === 'KXXRP15M'; })){ kalshiFetchAlt('XRP', now); }
+    if(rows.some(function(m){ return m.series === 'KXDOGE15M'; })){ kalshiFetchAlt('DOGE', now); }
     el.innerHTML = rows.map(function(m){
       var hasBook = m.yesBid != null && m.yesAsk != null;
       var spread = hasBook ? m.yesAsk - m.yesBid : null;
@@ -2665,6 +2687,17 @@
     var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders.'; }, manual);
+    } else { manual(); }
+  });
+  // Copies every stat the tracker computes, including the ones the page no longer shows, as plain text. Same clipboard fallback as the diagnostics button.
+  document.getElementById('kalStatsCopy').addEventListener('click', function(){
+    var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = kalshiChartRange === 'session' && sess && Number.isFinite(sess.since) ? sess.since : 0;
+    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    var text = kalshiStatsText(kalshiPerfStats(orders, since), kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), kalshiMoney);
+    var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
+    var manual = function(){ box.style.display = ''; box.value = text; box.focus(); box.select(); msg.textContent = 'Select all and copy the text below.'; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied all stats.'; }, manual);
     } else { manual(); }
   });
   // The page buttons are re-created on every render, so one listener on their container does it.

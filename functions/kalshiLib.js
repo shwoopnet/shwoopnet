@@ -2,9 +2,9 @@
 // repo's plain-node tests can load this without installing anything.
 
 const KALSHI_SERIES = ["KXBTC15M", "KXGOLD15M"];
-// Shown on the Live books tab as read-only market cards (Ethereum's market, which the live bot trades but the signal library does not read). Deliberately NOT part of KALSHI_SERIES: the live signal library and the book
+// Shown on the Live books tab as read-only market cards (Ethereum, XRP and Dogecoin: markets the live bot trades but the signal library does not read). Deliberately NOT part of KALSHI_SERIES: the live signal library and the book
 // recorder read that list, and the live bot must never see these as candidates.
-const KALSHI_EXTRA_SERIES = ["KXETH15M"];
+const KALSHI_EXTRA_SERIES = ["KXETH15M", "KXXRP15M", "KXDOGE15M"];
 
 function kalshiNum(x) {
   const n = parseFloat(x);

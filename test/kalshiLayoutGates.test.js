@@ -136,7 +136,7 @@ gates.Y8 = () => {
 gates.Y14 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml']);
+  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml', 'kalshiStatsText']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // A filled order the server left unsettled: with the market's result known it is settled here, by the server's own rule.
@@ -193,7 +193,11 @@ gates.Y14 = () => {
   assert.strictEqual(f.kalshiPerfStats([], 0).n, 0);
   assert.ok(/fills in after the first settled trade/.test(f.kalshiPerfHtml(f.kalshiPerfStats([], 0), esc, money)));
   const out = f.kalshiPerfHtml(st, esc, money);
-  assert.ok(/-\$1\.62/.test(out) && /60% \(3 \/ 2\)/.test(out) && /By price paid/.test(out) && /By market/.test(out), 'the tiles and tables show the figures');
+  assert.ok(/60% \(3 \/ 2\)/.test(out) && /By price paid/.test(out) && /By market/.test(out), 'the tiles and tables show the figures');
+  assert.ok(!/Deepest drawdown|Longest losing run|Streak now|Best \/ worst|Exit at/.test(out), 'the extra stats are not on the card');
+  const text = f.kalshiStatsText(st, null, money);
+  assert.ok(/Net: -\$1\.62/.test(text) && /Deepest drawdown:/.test(text) && /Streak now:/.test(text) && /Longest losing run:/.test(text) && /By market\n  Bitcoin: 3 trades/.test(text) && /By price paid\n  90c to 92c: 1 trades/.test(text) && /Exit at 25c\n  No position has fallen/.test(text), 'every stat is in the copied text, including the hidden ones');
+  assert.strictEqual(f.kalshiStatsText(f.kalshiPerfStats([], 0), null, money), 'No settled trades yet.');
   assert.ok(/id="kalChartBars"/.test(html) && /id="kalPerf"/.test(html) && /id="kalChartRange"/.test(html), 'the page has the bar chart, the tracker and the range choice');
   // In this palette --ink is the page background and --paper is the text colour (inverted names), and --card does not exist: a select styled with them showed dark text on dark in dark mode.
   // This used to read one named rule (.kal-perf-head select), which no markup used, so it guarded nothing; it now reads every rule that touches a select.
@@ -440,19 +444,20 @@ gates.Y20 = () => {
   assert.ok(/R = Math\.max\(60, endLabel\.length \* 9 \+ 16\)/.test(html) && /x="' \+ \(W - 4\) \+ '" y="' \+ \(Y\(last\.cum\) \+ 5\)\.toFixed\(1\) \+ '" text-anchor="end"/.test(html), 'the end label is right-anchored with room reserved for it');
 }
 
-// Y26: the "More stats" fold keeps its open or closed state across the card's rebuilds instead of closing every few seconds.
+// Y26: the stats card shows the six tiles, By market and By price paid and nothing else; every other stat is copied with the Copy all stats button instead of being shown.
 {
-  assert.ok(/var kalshiMoreOpen = false;/.test(html) && /classList\.contains\('kal-more'\)\)\{ kalshiMoreOpen = t\.open; \}/.test(html), 'the fold records when it is toggled');
-  assert.ok(/'<details class="kal-more"' \+ \(typeof kalshiMoreOpen !== 'undefined' && kalshiMoreOpen \? ' open' : ''\) \+ '><summary>More stats/.test(html), 'the rebuilt markup restores the state');
+  assert.ok(!/kalshiMoreOpen|kal-more|More stats/.test(html), 'the More stats fold and its open/closed state are gone');
+  assert.ok(/table\('By market', st\.bySeries\) \+ \(afterMarket \|\| ''\) \+ table\('By price paid', st\.byBand\)/.test(html), 'By market and By price paid are the only tables on the card');
+  assert.ok(/id="kalStatsCopy"/.test(html) && /function kalshiStatsText\(st, x, money\)/.test(html), 'the Copy all stats button and its text builder exist');
 }
 
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
 gates.Y31 = () => {
-  assert.ok(/KXETH15M: 'Ethereum 15m' \}/.test(html) && !/KXSOL15M|Solana/.test(html), 'Ethereum is an ordinary live market card; there is no Solana anywhere on the page');
-  assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && !/SOL-USD/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && !/kalshiFetchAlt\('SOL'/.test(html), 'Coinbase history and ticker for both');
+  assert.ok(/KXETH15M: 'Ethereum 15m', KXXRP15M: 'XRP 15m', KXDOGE15M: 'Dogecoin 15m' \}/.test(html) && !/KXSOL15M|Solana/.test(html), 'Ethereum is an ordinary live market card; there is no Solana anywhere on the page');
+  assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && /XRP: \{ product: 'XRP-USD'/.test(html) && /DOGE: \{ product: 'DOGE-USD'/.test(html) && !/SOL-USD/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && /kalshiFetchAlt\('XRP', now\)/.test(html) && /kalshiFetchAlt\('DOGE', now\)/.test(html) && !/kalshiFetchAlt\('SOL'/.test(html), 'Coinbase history and ticker for Ethereum, XRP and Dogecoin');
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
-  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M']);
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M']);
   const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
@@ -546,7 +551,7 @@ gates.Y37 = () => {
   assert.strictEqual(f.kalshiExitReport([untouched], {}).touched, 0);
   const none = f.kalshiExitHtml(f.kalshiExitReport([untouched], {}), (x) => x, (x) => '$' + x.toFixed(2));
   assert.ok(/No position has fallen to 25c yet\./.test(none) && !/<b>/.test(none), 'with nothing touched it says so rather than showing zeros as a result');
-  assert.ok(/kalshiExitReport\(kalshiLiveOrders/.test(html) && /table\('By price paid', st\.byBand\) \+ \(exitRep !== undefined/.test(html), 'wired into More stats');
+  assert.ok(/kalshiExitReport\(kalshiLiveOrders/.test(html) && /kalshiStatsText\(kalshiPerfStats\(orders, since\), kalshiExitReport\(/.test(html), 'the exit report is still computed (for the copied stats)');
 };
 
 // Y36: the Account card says why the bot is not trading, without opening the bot menu.
@@ -579,7 +584,7 @@ gates.Y38 = () => {
 
 // Y39: a market the page does not know is never shown. The deployed relay can lag the page by a deploy, and Solana once appeared as a bare "KXSOL15M" card after it was removed.
 gates.Y39 = () => {
-  assert.ok(/var rows = \(\(data && data\.markets\) \|\| \[\]\)\.filter\(function\(m\)\{ return m && \['KXBTC15M', 'KXGOLD15M', 'KXETH15M'\]\.indexOf\(m\.series\) > -1; \}\);/.test(html), 'only Bitcoin, gold and Ethereum cards are drawn');
+  assert.ok(/var rows = \(\(data && data\.markets\) \|\| \[\]\)\.filter\(function\(m\)\{ return m && \['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'\]\.indexOf\(m\.series\) > -1; \}\);/.test(html), 'only Bitcoin, gold, Ethereum, XRP and Dogecoin cards are drawn');
 };
 
 // Y40: the hover on the settled-trade bars. Placement is pure, so its edges are tested: centred on the column, just above the pointer, inside the window at both sides, flipped below the
