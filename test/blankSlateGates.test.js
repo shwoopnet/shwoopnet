@@ -42,6 +42,7 @@ gates.B2 = () => {
   const methods = [...mod.matchAll(/^    (\w+): function/gm)].map((m) => m[1]).sort();
   assert.deepStrictEqual(methods, [
     'kalshiBookSnaps', 'kalshiBookStatus', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline',
+    'kalshiPushKey', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe',      // the phone alerts (Oct 20, 2026): the owner's own functions, admin only
     'onAuthChange', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
     'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchMarketTape', 'watchSharedMarketSnapshot', 'watchUserDoc',
   ], 'the Firebase surface the page can reach');

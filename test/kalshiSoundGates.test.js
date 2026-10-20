@@ -84,7 +84,7 @@ gates.S5 = () => {   // nothing leaves the device, and the browser notification 
   const keyLines = src.split('\n').filter((l) => l.indexOf('shwoopnet:kalSound') >= 0);
   assert.ok(keyLines.length >= 2 && keyLines.every((l) => /localStorage/.test(l)), 'the choice is only ever read and written in localStorage');
   assert.ok(!/kalshiSoundOn/.test(src.slice(0, src.indexOf('  var kalshiSoundOn = false'))), 'it is not referenced ahead of its own block (no settings sync)');
-  assert.ok(!/new Notification\(/.test(code) && !/Notification\.requestPermission/.test(code), 'no browser notification');
+  assert.ok(!/new Notification\(/.test(code), 'no browser notification is constructed by the page');
   assert.ok(/id="kalSoundToggle"/.test(src), 'the switch is on the Kalshi Tools card');
 };
 
