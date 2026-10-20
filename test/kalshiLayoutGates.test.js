@@ -384,7 +384,7 @@ gates.Y18 = () => {
   assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
   assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
   assert.ok(/tile\('Expectancy'/.test(html) && !/tile\('Per trade'/.test(html), 'the expectancy tile does not share the stake row name');
-  assert.ok(/\(0\.05 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 5% stop');
+  assert.ok(/\(0\.06 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 6% stop');
 };
 
 // Y21: manual trades are hidden from the Recent trades card by default, with a small dropdown to bring them back.
@@ -665,7 +665,7 @@ gates.Y40 = () => {
 // Oct 12, 2026 at the owner's request ("lets go back to only L1 for now": the strategies must not overlap in mindset or position). Live and paper never shared a column, and now there is no paper.
 gates.Y41 = () => {
   assert.ok(!/id="kalLens"|data-lens=|kalshiLens|kal-lens|kalPaperNote|kal-paper-note/.test(html), 'no strategy switch, no paper note, no view state');
-  assert.ok(!/kalshiOpening|watchKalshiOpening|kalshiLane|kalshiPaper|kalChartsO|kalBotOpenO|kalBotClosedO|kalBotTotalsO|kalPerfWrapO|kalPerfO|kalChartLineO|kalChartPieO|kalChartBarsO/.test(html), 'no opening records, lane table, paper rows or paper charts');
+  assert.ok(!/kalshiOpening|watchKalshiOpening|kalshiLane|kalChartsO|kalBotOpenO|kalBotClosedO|kalBotTotalsO|kalPerfWrapO|kalPerfO|kalChartLineO|kalChartPieO|kalChartBarsO/.test(html), 'no opening records, lane table, opening paper rows or paper charts (the PAPER1 candidates card, Oct 20, 2026, is a different thing: kalshiPaperOrders, kalPaperCard)');
   assert.ok(!/Opening strategy|early favourite|early underdog|paper F|paper U/.test(html), 'no opening wording is left on the page');
   assert.ok(/if\(ses && ses\.active === true\)\{/.test(html), 'the live stake row follows the live session alone');
 };

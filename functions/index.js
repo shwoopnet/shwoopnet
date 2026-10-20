@@ -54,6 +54,7 @@ const book = require("./kalshiBookLib");
 const marketTape = require("./marketTapeLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
+const paper = require("./kalshiPaperLib");
 const push = require("./kalshiPushLib");
 const webpush = require("web-push");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
@@ -555,6 +556,41 @@ exports.kalshiLiveArmed = onSchedule(
   }
 );
 
+// ---- The paper tracker (PAPER1), keyless ---------------------------------------------------------------------------------------------------
+// Records what L1's rule WOULD have bought on three candidate markets (kalshiPaperLib.js), one contract, no money, and settles each from the public result. It holds NO secret, signs nothing, calls no
+// /portfolio endpoint and sends no order: public market reads and its own Firestore records only. Each entry document is created once (its id is the ticker), so two processes during a deploy cannot
+// record a market twice. It is not imported by, and shares nothing with, the trading code; a failure here is logged and costs a paper row at most.
+async function kalshiFetchMarket(ticker) {
+  for (const base of KALSHI_HOSTS) {
+    try {
+      const res = await fetch(base + "/markets/" + encodeURIComponent(ticker), { signal: AbortSignal.timeout(8000), headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" } });
+      if (res.ok) { const data = await res.json(); return data.market || null; }
+    } catch (e) { /* try the next host */ }
+  }
+  return null;
+}
+exports.kalshiPaperTick = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 50, retryCount: 0, memory: "256MiB" },
+  async () => {
+    try {
+      ensureDefaultAdminApp();
+      const col = getFirestore().collection("kalshiPaperOrders");
+      const r = await paper.runPaperTick({
+        now: Date.now(),
+        store: {
+          async openDocs() { return (await col.where("settled", "==", false).limit(60).get()).docs.map((d) => ({ id: d.id, data: d.data() })); },
+          async create(id, doc) { try { await col.doc(id).create(doc); return true; } catch (e) { if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false; throw e; } },
+          async update(id, patch) { await col.doc(id).update(patch); },
+        },
+        fetchSeries: (series) => kalshiFetchSeries(series, "open", 6),
+        fetchMarket: kalshiFetchMarket,
+        log: (m) => console.error("kalshiPaperTick: " + m),
+      });
+      if (r.entries || r.settled) console.log("kalshiPaperTick: entries=" + r.entries + " settled=" + r.settled);
+    } catch (e) { console.error("kalshiPaperTick: " + String((e && e.message) || e).slice(0, 200)); }
+  }
+);
+
 // ---- Phone alerts (Web Push), admin only ---------------------------------------------------------------------------------------------
 // The Kalshi page subscribes this phone or browser (a service worker and the owner's tap); the two triggers below read what the bot already wrote and push a short text to every stored
 // subscription. Nothing here places or changes an order, holds a Kalshi key, or is called by the trading code, and each trigger catches every error: an alert that fails costs an alert, never a trade.
@@ -564,10 +600,15 @@ async function pushSend(db, kinds, doc, tagBase) {
   const subsSnap = await db.collection("kalshiPushSubs").get();
   const subs = subsSnap.docs.map((d) => ({ id: d.id, subscription: d.data().subscription })).filter((x) => x.subscription);
   if (!subs.length) return;
+  // The last 24 hours of the bot's own trades go into a settled or sold alert, so the lock screen says how the day is going. One read of the recent orders, only when such an alert is sent.
+  let ctx = {};
+  if (kinds.includes("settled") || kinds.includes("sell")) {
+    try { const now = Date.now(); ctx = { day: push.dayNet((await db.collection("kalshiLiveOrders").where("ts", ">=", now - 24 * 3600 * 1000).get()).docs.map((d) => d.data()), now) }; } catch (e) { ctx = {}; }
+  }
   const priv = KALSHI_PUSH_VAPID_PRIVATE.value();
   const details = { subject: PUSH_SUBJECT, publicKey: push.publicKeyFromPrivate(priv), privateKey: priv };
   for (const kind of kinds) {
-    const m = push.message(kind, doc);
+    const m = push.message(kind, doc, ctx);
     await push.sendAll({
       subs, payload: { title: m.title, body: m.body, tag: m.tag || tagBase },
       send: (subscription, body) => webpush.sendNotification(subscription, body, { vapidDetails: details, TTL: 3600, urgency: "high" }),

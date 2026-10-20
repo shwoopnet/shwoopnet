@@ -300,7 +300,8 @@ const L1_SIZE_MAX = 3;
 const L1_SIZE_FRACTION = 0.02;
 // 5%, tightened from 10% on Oct 8, 2026 at the owner's choice: 10% of a $344 balance is $34, more than the worst modelled day at 5 contracts (about $20), so it
 // never tripped. 5% is about $17, a real circuit breaker that a bad day at 4 to 5 contracts can reach.
-const L1_SIZED_STOP_FRACTION = 0.05;
+// Raised from 5% to 6% on Oct 20, 2026 at the owner's choice, together with the per-window limit (4.5% to 5.5%), so that one window alone still cannot reach the stop. 6% is about $11.76 of a $196 base.
+const L1_SIZED_STOP_FRACTION = 0.06;
 function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
   // The 2% of cash rule bounds the part funded by the account (the review's cap). The add-on, bought with reinvested PROFIT (the pool), sits outside it: the owner's
@@ -525,7 +526,9 @@ function skimAddon(state, now, perContract = 0.93) {
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
 // A window is the 15 minutes a market closes in, shared by every series: the part of the ticker after the series name (KXBTC15M-26OCT101200-00 gives 26OCT101200).
-const L1_WINDOW_CAP_FRACTION = 0.045;
+// Raised from 4.5% to 5.5% at the owner's request (Oct 20, 2026), after Dogecoin, last in the list, got 1 contract while XRP got 4. The loss stop (L1_SIZED_STOP_FRACTION) was raised with it, from 5% to 6%,
+// so the window limit still sits UNDER the stop and one window alone cannot reach it.
+const L1_WINDOW_CAP_FRACTION = 0.055;
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
 
 async function runL1Tick(args) {
@@ -586,7 +589,7 @@ async function runL1Tick(args) {
   }
   // The stop protects the ACCOUNT, not the profit already made: the part of a lost or open order that was bought with reinvested profit (the add-on) does not count
   // toward it. Without this a big enough add-on would make one loss, or even one open order counted as lost, reach the stop on its own and lock the bot out
-  // (the owner's rule, Oct 9, 2026). The account's own share of the loss is still held to the same 5% of the balance at the last review.
+  // (the owner's rule, Oct 9, 2026). The account's own share of the loss is still held to the same 6% of the balance at the last review.
   const allowance = Number.isFinite(risk.addonAtRisk) ? risk.addonAtRisk : 0;
   const floor = peak - (stopAt + allowance);
   if (risk.worst <= floor + 1e-9) {
@@ -634,7 +637,7 @@ async function runL1Tick(args) {
     const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
-    // from earlier ticks in the same window count too. The loss stop is 5% of the base; a window may use 4.5%, so one window alone cannot reach it.
+    // from earlier ticks in the same window count too. The loss stop is 6% of the base and a window may use 5.5% (both since Oct 20, 2026), so one window alone cannot reach it.
     const wkey = windowKey(ticker);
     const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
       .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);
