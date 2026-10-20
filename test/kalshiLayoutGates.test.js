@@ -489,7 +489,7 @@ gates.Y34 = () => {
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
 gates.Y35 = () => {
   assert.ok(!/kalEthLive|kalEthMsg|kalshiExtraSeries|liveExtra/.test(html), 'the Ethereum size dropdown, its handler and its callable are gone from the page');
-  assert.ok(/\/GOLD\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Gold' : \(\/ETH\/\.test\(String\(o\.series \|\| o\.ticker \|\| ''\)\) \? 'Ethereum' : 'Bitcoin'\)/.test(html), 'an Ethereum trade is counted under Ethereum in the performance table, not under Bitcoin');
+  assert.ok(/return \/GOLD\/\.test\(s\) \? 'Gold' : \/ETH\/\.test\(s\) \? 'Ethereum' : \/XRP\/\.test\(s\) \? 'XRP' : \/DOGE\/\.test\(s\) \? 'Dogecoin' : 'Bitcoin';/.test(html), 'an Ethereum, XRP or Dogecoin trade is counted under its own name in the performance table, never under Bitcoin');
 };
 
 // Y37: the exit watch read back from the bot's own order records, inside More stats. Consequences: slip is trigger bid minus fill, "better or worse than holding" is only

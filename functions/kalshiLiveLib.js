@@ -53,7 +53,9 @@ const LIVE_SERIES = ["KXBTC15M", "KXGOLD15M"];   // gold has real volume on prod
 // The markets the bot's L1 rule trades: Bitcoin, gold and Ethereum, all by the same rule, size and stop (the owner folded Ethereum in on Oct 10, 2026; it was a separate switch before).
 // A hard list in code: adding a series is a deliberate edit and review, never something a stored value can do. Solana is deliberately not on it. Order matters: when a window's room
 // runs short (L1_WINDOW_CAP_FRACTION) the later series goes without, so Ethereum is last. LIVE_SERIES above is the older single-order path and is left alone.
-const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M"];
+// XRP and Dogecoin were appended on 2026-10-20 at the owner's choice, on the strength of kalshi-scalper/README.md (E3, E3B: +1.4c and +1.5c, then +1.8c on 29 older days; forward read E3F due 2026-11-16).
+// They go LAST, so they only take a window's second slot when Bitcoin, gold and Ethereum left room.
+const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
