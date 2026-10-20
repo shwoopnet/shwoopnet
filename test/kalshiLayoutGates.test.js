@@ -624,6 +624,16 @@ gates.Y44 = () => {
   assert.strictEqual(inTrade(null, 'A'), false, 'before the account is read there is no chart');
 };
 
+// Y45: on a phone the Tools menu is a full-width sheet above the bottom bar. Anchored to its button it ran off the left edge and cut the buttons in half (owner's screenshot, Oct 20, 2026).
+gates.Y45 = () => {
+  const m = /@media \(max-width:700px\)\{([\s\S]*?)\n  \}/.exec(html);
+  assert.ok(m, 'a 700px block exists');
+  const rule = /\.kal-tools-body\{([^}]*)\}/.exec(m[1]);
+  assert.ok(rule, 'the phone block restyles the Tools menu');
+  assert.ok(/position:fixed/.test(rule[1]) && /left:12px/.test(rule[1]) && /right:12px/.test(rule[1]), 'it is pinned to both sides of the screen, so it cannot run off either edge');
+  assert.ok(/min-width:0/.test(rule[1]) && /max-height:65vh/.test(rule[1]), 'it keeps no minimum width and scrolls instead of growing past the screen');
+};
+
 // Y40: the hover on the settled-trade bars. Placement is pure, so its edges are tested: centred on the column, just above the pointer, inside the window at both sides, flipped below the
 // pointer when there is no room above. The tip is filled as text (the values come from attributes, never markup), shown for a mouse over a column and for a tap, hidden when a mouse leaves but
 // NOT when a touch "leaves" (a touch has no hover, so hiding on leave would close the tip the instant the finger lifts), and the chart is only rebuilt when its markup changes, because
