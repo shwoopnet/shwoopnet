@@ -2327,6 +2327,12 @@
   // The small chart under a market row. Bitcoin: Coinbase's price against the strike ("to beat"). Gold: gold-api.com's price against the strike, as this page has
   // seen it since it was opened; if that feed fails, the market's own YES price in cents instead.
   var KAL_ALT_OF = { KXETH15M: 'ETH', KXXRP15M: 'XRP', KXDOGE15M: 'DOGE' }, KAL_ALT_NAME = { ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin' };
+  // A market's price chart shows only while the account holds a position in it (the owner's request, Oct 20, 2026, on desktop; phones never show these charts). Read from the account's own positions,
+  // the same list the Open positions card uses, so "in a trade" means a real position, not an order that was sent. No position, or positions not read yet, means no chart.
+  function kalshiInTrade(ticker){
+    var a = kalshiLiveAcct, list = a && a.positions && a.positions.ok && Array.isArray(a.positions.positions) ? a.positions.positions : [];
+    return list.some(function(p){ return p && p.ticker === ticker && Number.isFinite(Number(p.position)) && Number(p.position) !== 0; });
+  }
   function kalshiSparkFor(m){
     var close = Date.parse(m.closeTime);
     if(!Number.isFinite(close)){ return ''; }
@@ -2382,7 +2388,7 @@
       return '<div class="kal-brow"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
         '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
         '<div class="kal-brow-r"><div class="kal-brow-px" title="The price of a YES contract: what buyers bid and what sellers ask. A NO contract costs 100c minus these.">' + (hasBook ? '<span class="kal-brow-side">Yes</span> ' + (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + kalshiSparkFor(m) + '</div>';
+        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + (kalshiInTrade(m.ticker) ? kalshiSparkFor(m) : '') + '</div>';
     }).join('');
     st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
   }
