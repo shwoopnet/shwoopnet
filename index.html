@@ -1140,7 +1140,7 @@
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
-                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button></div>
+                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button></div>
           <div class="kal-note" id="kalDiagMsg"></div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
           <div class="kal-actions">
@@ -2555,7 +2555,58 @@
   }
   var kalshiBooksLast = null;
 
+  // Sound alerts (the owner's request, Oct 20, 2026): a short tone while THIS PAGE IS OPEN when the bot enters a trade, sells one, or hits a stop or an issue (a sell that errored, did not fill or
+  // has an unknown answer, or a session that ended by itself). It is not a notification: nothing is requested from the browser, nothing leaves the device, and the choice lives in this browser's
+  // localStorage only (never in Firestore or the settings document), off until switched on, because a browser will not play audio before a tap. The first snapshot after load never sounds.
+  var kalshiSoundOn = false, kalshiSoundCtx = null, kalshiSoundSeen = null, kalshiSoundSession = null;
+  try{ kalshiSoundOn = window.localStorage.getItem('shwoopnet:kalSound') === 'on'; }catch(e){}
+  function kalshiSoundTone(kind){
+    if(!kalshiSoundOn){ return; }
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC){ return; }
+      kalshiSoundCtx = kalshiSoundCtx || new AC();
+      if(kalshiSoundCtx.state === 'suspended'){ kalshiSoundCtx.resume(); }
+      var notes = kind === 'enter' ? [[660, 0, 0.16], [880, 0.16, 0.16]] : (kind === 'sell' ? [[880, 0, 0.16], [660, 0.16, 0.16]] : [[220, 0, 0.22], [220, 0.3, 0.22], [220, 0.6, 0.22]]);
+      var t0 = kalshiSoundCtx.currentTime;
+      notes.forEach(function(n){
+        var o = kalshiSoundCtx.createOscillator(), g = kalshiSoundCtx.createGain();
+        o.type = kind === 'issue' ? 'triangle' : 'sine'; o.frequency.value = n[0];
+        g.gain.setValueAtTime(0.0001, t0 + n[1]);
+        g.gain.exponentialRampToValueAtTime(0.12, t0 + n[1] + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + n[1] + n[2]);
+        o.connect(g); g.connect(kalshiSoundCtx.destination);
+        o.start(t0 + n[1]); o.stop(t0 + n[1] + n[2] + 0.02);
+      });
+    }catch(e){}
+  }
+  // Compares each L1 order with what it looked like at the last look: entered (a fill appeared), sold (an exit sold or partly sold), issue (an exit error, no fill or unknown answer, or an order left unknown).
+  function kalshiSoundCheck(){
+    if(!kalshiOrdersLoaded){ return; }
+    var now = {}, fire = {};
+    (kalshiLiveOrders || []).forEach(function(o){
+      if(!o || o.strategy !== 'L1' || !o.clientOrderId){ return; }
+      var f = { e: Number(o.fillCount) > 0, s: o.exitStatus === 'sold' || o.exitStatus === 'partly sold', i: o.exitStatus === 'error' || o.exitStatus === 'unknown' || o.exitStatus === 'no fill' || o.status === 'unknown' || o.status === 'error' };
+      now[o.clientOrderId] = f;
+      if(kalshiSoundSeen === null){ return; }
+      var was = kalshiSoundSeen[o.clientOrderId] || { e: false, s: false, i: false };
+      if(f.e && !was.e){ fire.enter = true; }
+      if(f.s && !was.s){ fire.sell = true; }
+      if(f.i && !was.i){ fire.issue = true; }
+    });
+    kalshiSoundSeen = now;
+    var ses = kalshiLiveCtl && kalshiLiveCtl.session;
+    if(ses){
+      var act = ses.active === true;
+      if(kalshiSoundSession === true && !act && !/by the owner/i.test(String(ses.endedBecause || ''))){ fire.issue = true; }
+      kalshiSoundSession = act;
+    }
+    if(fire.issue){ kalshiSoundTone('issue'); }
+    else if(fire.sell){ kalshiSoundTone('sell'); }
+    else if(fire.enter){ kalshiSoundTone('enter'); }
+  }
   function renderKalshiBot(){
+    kalshiSoundCheck();
     var a = kalshiLiveAcct;
     var el = document.getElementById('kalBotStatus');
     var halted = kalshiBotState.control && kalshiBotState.control.halt === true;
@@ -2706,6 +2757,14 @@
     }).catch(function(err){ msg.textContent = 'Could not read the snapshots: ' + ((err && err.message) || 'unknown'); }).then(function(){ btn.disabled = false; });
   });
   // Copies the order records as CSV. If the browser refuses clipboard access the text is shown in a box to copy by hand.
+  function kalshiSoundLabel(){ document.getElementById('kalSoundToggle').textContent = 'Sound alerts: ' + (kalshiSoundOn ? 'on' : 'off'); }
+  document.getElementById('kalSoundToggle').addEventListener('click', function(){
+    kalshiSoundOn = !kalshiSoundOn;
+    try{ window.localStorage.setItem('shwoopnet:kalSound', kalshiSoundOn ? 'on' : 'off'); }catch(e){}
+    kalshiSoundLabel();
+    if(kalshiSoundOn){ kalshiSoundTone('enter'); }     // the tap is what lets the browser play audio, and the tone says it works
+  });
+  kalshiSoundLabel();
   document.getElementById('kalDiagCopy').addEventListener('click', function(){
     var csv = kalshiDiagnosticsCsv(kalshiLiveOrders, 150), n = Math.max(0, csv.split('\n').length - 1);
     var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
@@ -2761,6 +2820,7 @@
   })();
 
   function renderKalshiL1(){
+    kalshiSoundCheck();
     var s = kalshiLiveCtl.session, now = Date.now();
     var running = !!(s && s.active === true);
     var halted = !!(kalshiBotState.control && kalshiBotState.control.halt === true);
