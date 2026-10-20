@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploys ONLY kalshiLiveArmed (the function that runs the L1 tick and the sizing) to the shwoopnet project, from a fresh clone, typed on a phone in Cloud Shell:
+# Deploys ONLY kalshiLiveArmed (the function that runs the L1 tick and the sizing) and kalshiBooks (the read-only relay that feeds the market cards) to the shwoopnet project, from a fresh clone, typed on a phone in Cloud Shell:
 #
 #   git clone https://github.com/shwoopnet/shwoopnet && bash shwoopnet/functions/deploy-sizing.sh
 #
@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV_FILE=functions/.env
 PROJECT=shwoopnet
-ONLY=functions:kalshiLiveArmed
+ONLY=functions:kalshiLiveArmed,functions:kalshiBooks
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 
