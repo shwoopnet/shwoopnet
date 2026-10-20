@@ -665,7 +665,7 @@ gates.X3 = async () => {
   assert.ok(eth && Number(eth.count) <= 3, 'a 3 contract cap holds for Ethereum too: ' + (eth && eth.count));
 };
 gates.X4 = () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXBTC15M', 'KXGOLD15M', 'KXETH15M'], 'Bitcoin, gold and Ethereum, in that order (the later one yields when a window is full); Solana is not on it');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'Bitcoin, gold and Ethereum, then XRP and Dogecoin LAST (the later ones yield when a window is full); Solana is not on it');
   assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the older single-order path is untouched');
   assert.ok(!('EXTRA_LIVE_SERIES' in live) && !('extraLiveCounts' in live), 'no separate Ethereum switch is left in the library');
 };

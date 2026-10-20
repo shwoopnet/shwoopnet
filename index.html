@@ -1875,7 +1875,8 @@
 
   // Which market an order was in, by its series (or ticker). One rule for the By market table and the hover on the bars, so a trade has one name on the page.
   function kalshiMarketName(o){
-    return /GOLD/.test(String(o.series || o.ticker || '')) ? 'Gold' : (/ETH/.test(String(o.series || o.ticker || '')) ? 'Ethereum' : 'Bitcoin');
+    var s = String(o.series || o.ticker || '');
+    return /GOLD/.test(s) ? 'Gold' : /ETH/.test(s) ? 'Ethereum' : /XRP/.test(s) ? 'XRP' : /DOGE/.test(s) ? 'Dogecoin' : 'Bitcoin';
   }
 
   // The bot's running settled result, one point per settled trade, oldest first.
