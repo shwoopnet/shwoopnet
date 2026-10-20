@@ -49,6 +49,8 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 ## Parked on purpose
 
 - **Equities day trading and a stocks tab.** Shelved on 2026-10-13. At $500 with cash-account settlement the same dollars can be reused about once a day, every stock idea tested so far lost to cost, and a strategy that nets +0.1% a day earns about $10 a month on $500. It also repeats the first equities bot's path (capital too small, then day-only, then profits given back before the close). The full plan (brokers, dashboard mapping, safety rules, phases) is kept in the handoff folder as `09_equities_plan.md`. Revisit when the account is past $2,000 to $25,000, or if a pre-registered research pass on free data clearly beats the old tests.
+- **The Alpaca question (2026-10-20).** The old `shwoop-server` can still trade Alpaca for accounts with keys stored. The owner parked deciding what to do about it. Nothing was changed.
+- **SCHD and JEPQ research (2026-10-20).** Cancelled at the owner's request. What was found is in `kalshi-scalper/README.md` (BUYDIP1: waiting for "key levels" lost to monthly buying on SCHD, SPY and QQQ). No further work planned.
 
 ## Can wait
 
