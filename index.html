@@ -42,6 +42,7 @@
     --radius: 10px;
     --card-shadow: 0 1px 2px rgba(16,24,43,0.06), 0 8px 20px -12px rgba(16,24,43,0.22);
     --card-shadow-lift: 0 2px 4px rgba(16,24,43,0.08), 0 14px 28px -12px rgba(16,24,43,0.30);
+    --brand-depth: #2a3a5e; --ghost-line: rgba(16,24,43,0.07); --ghost-fill: rgba(16,24,43,0.025);
   }
 
   /* Dark mode -- same Ledger identity, inverted surfaces. Set on
@@ -63,6 +64,7 @@
     --amber-contrast: #0B1220;
     --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
     --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
+    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035);
   }
 
   /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
@@ -73,11 +75,13 @@
     --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
     --ticker-fg: #000000; --ticker-fg-dim: #6B6B6B; --ticker-bg: #FFFFFF;
     --radius: 4px; --card-shadow: none; --card-shadow-lift: none;
+    --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02);
   }
   html[data-skin="mono"][data-theme="dark"]{
     --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
     --amber: #FFFFFF; --amber-dim: #CFCFCF; --amber-glow: rgba(255,255,255,0.12); --amber-contrast: #000000;
     --ticker-fg: #FFFFFF; --ticker-fg-dim: #8E8E8E; --ticker-bg: #0B0B0B;
+    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02);
   }
 
   *{ box-sizing:border-box; }
@@ -145,6 +149,13 @@
      never intercept a click meant for whatever's actually on the page. */
   .bg-ambient{
     position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
+  }
+  /* A big ghost of the wordmark sits behind the page, straight (no tilt), outlined and barely filled, so the cards float over something. Static: no animation, so reduce-motion has nothing to stop.
+     It follows the theme and skin through --ghost-line and --ghost-fill and never carries a gain or loss colour. */
+  .bg-ghost{
+    position:absolute; left:50%; bottom:9vh; transform:translateX(-50%); white-space:nowrap; user-select:none;
+    font-family:'Titan One', 'Public Sans', sans-serif; font-size:min(18vw, 260px); line-height:1; letter-spacing:.03em;
+    color:var(--ghost-fill); -webkit-text-stroke:2px var(--ghost-line);
   }
   .bg-ambient::before, .bg-ambient::after{
     content:''; position:absolute; width:60vmax; height:60vmax; border-radius:50%;
@@ -383,7 +394,7 @@
   /* The wordmark (the owner's idea, Oct 20, 2026): bubbly graffiti letters, white inside with a thick black outline. The outline is a ring of hard text shadows rather than -webkit-text-stroke, so it is
      the same in every browser and the white fill stays whole. It is black in every theme and skin on purpose: on the dark page it merges with the background and leaves the white letters with a soft drop. */
   .brand-name{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; font-size: 26px; line-height:1.05; letter-spacing: 0.04em; color:#fff;
-    text-shadow: -2px -2px 0 #000, 0 -2px 0 #000, 2px -2px 0 #000, 2px 0 0 #000, 2px 2px 0 #000, 0 2px 0 #000, -2px 2px 0 #000, -2px 0 0 #000, -1px -2px 0 #000, 1px -2px 0 #000, 2px -1px 0 #000, 2px 1px 0 #000, 1px 2px 0 #000, -1px 2px 0 #000, -2px 1px 0 #000, -2px -1px 0 #000, 3px 4px 0 #000;
+    text-shadow: -2px -2px 0 #000, 0 -2px 0 #000, 2px -2px 0 #000, 2px 0 0 #000, 2px 2px 0 #000, 0 2px 0 #000, -2px 2px 0 #000, -2px 0 0 #000, -1px -2px 0 #000, 1px -2px 0 #000, 2px -1px 0 #000, 2px 1px 0 #000, 1px 2px 0 #000, -1px 2px 0 #000, -2px 1px 0 #000, -2px -1px 0 #000, 2.9px 3.1px 0 var(--brand-depth), 3.8px 4.2px 0 var(--brand-depth), 4.7px 5.3px 0 var(--brand-depth), 5.6px 6.4px 0 var(--brand-depth), 6.5px 7.5px 0 var(--brand-depth), 7.4px 8.6px 0 var(--brand-depth), 8.3px 9.7px 0 var(--brand-depth), 9.2px 10.8px 0 var(--brand-depth), 12px 15px 10px rgba(0,0,0,0.45);
     transition: color .15s ease; }
   .brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
 
@@ -806,7 +817,7 @@
 </head>
 <body>
 
-<div class="bg-ambient" aria-hidden="true"><div class="bg-grid"></div><div class="bg-grain"></div></div>
+<div class="bg-ambient" aria-hidden="true"><div class="bg-ghost">SHWOOP</div><div class="bg-grid"></div><div class="bg-grain"></div></div>
 
 <script>
   // Decouples the deferred Firebase module from the rest of the app so
