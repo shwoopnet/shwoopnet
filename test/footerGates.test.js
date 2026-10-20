@@ -10,7 +10,8 @@ const gates = {
   F1: () => {
     assert.ok(/Shwoop Financials/.test(text) && /All rights reserved/.test(text), 'the owner of the site is named');
     assert.ok(!/LLC/.test(text), 'no "LLC" until the registration is complete (a company is not held out as an LLC before it is one)');
-    assert.ok(/not financial advice/i.test(text) && /real money/.test(text), 'the short line says what it is and that the money is real');
+    assert.ok(/Nothing on this site is investment, financial, legal or tax advice/.test(text) && /real money|loss of everything/.test(text), 'the disclosure says it is not advice and that money can be lost');
+    assert.ok(text.indexOf('Legal and risk disclosure') < 80, 'the visible footer is one line: the name and the disclosure link');
   },
   F2: () => {
     for (const [re, why] of [[/not a broker-dealer/, 'not a broker'], [/investment adviser/, 'not an adviser'], [/substantial risk of loss/, 'risk of loss'], [/does not guarantee a maximum loss/, 'a loss limit is not a guarantee'],
@@ -21,7 +22,7 @@ const gates = {
   F3: () => {
     assert.ok(!/Kalshi|Alpaca|Polymarket|Coinbase|Yahoo|CNBC|MarketWatch|Firebase|Render|GitHub/i.test(text), 'the footer names no exchange, broker, vendor or data provider');
     assert.ok(!/—/.test(footer[1]), 'no em dashes');
-    assert.ok(/class="brand-name footer-brand"/.test(footer[1]), 'the wordmark uses the brand style');
+    assert.ok(!/footer-brand/.test(footer[1]), 'no second wordmark: the header carries it');
   },
 };
 let failed = 0;
