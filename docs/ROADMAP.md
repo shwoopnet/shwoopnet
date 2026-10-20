@@ -106,6 +106,8 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 - The separate shwoop-server on Render still trades stocks through Alpaca for any account with keys. The page can no longer pause it, so decide whether to switch it off.
 
 ## Done recently
+- 2026-10-20: the research data (Kalshi market history, 44 MB compressed) is archived on the `research-data` branch with a manifest and a restore script, because the early August days could not be downloaded again. Take a second snapshot before about 2026-12-01.
+- 2026-10-20: the SHWOOP wordmark is bubbly graffiti with a straight extrusion and a ghost wordmark sits behind the page (#411, #412).
 - 2026-10-20: 4 contracts live (cap edited by hand after the loss-stop hold); XRP and Dogecoin added to the series list; Yes label and phone layout on the market cards; charts only while in a trade (desktop; no charts on phones); optional sound alerts on the Kalshi page (#400); Flatten and the 25c exit share a claim per market (#401, needs a full functions deploy); phone alerts via Web Push (#403, needs the same deploy; the ntfy phone push was declined by the owner).
 - 2026-10-20: **TP1, a 99c take-profit on L1, FALSIFIED** in both windows (flip rate from 99c 0.50% and 0.27%, below the 1% to 1.5% break-even). Nothing built.
 
