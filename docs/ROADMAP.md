@@ -92,6 +92,12 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 - **The Alpaca question (2026-10-20).** The old `shwoop-server` can still trade Alpaca for accounts with keys stored. The owner parked deciding what to do about it. Nothing was changed.
 - **SCHD and JEPQ research (2026-10-20).** Cancelled at the owner's request. What was found is in `kalshi-scalper/README.md` (BUYDIP1: waiting for "key levels" lost to monthly buying on SCHD, SPY and QQQ). No further work planned.
 
+## To do later (owner's request, 2026-10-20)
+
+- **Alternative strategies.** Look for ways to make money besides L1. Start from what is already crossed off (`kalshi-scalper/README.md`, and `research/MECHANISMS.md` in `shwoop-server`) so nothing is tried twice; each new idea is written down with its pass bar before it is run.
+- **Alternate markets.** Look beyond the 15 minute Bitcoin, gold, Ethereum, XRP and Dogecoin markets. Already tried without an edge: sports favourites, weather, hourly ladders, long-dated favourites, other commodities and coins, Polymarket as a second price. Not yet runnable: options (the chain recorder is built on a `shwoop-server` branch and not deployed). Equities day trading is parked (see above).
+- **Waiting on data, not on you:** the 2026-11-16 forward reads (XRP and Dogecoin, the live series, the busy-minute filter, the Polymarket filter).
+
 ## Can wait
 
 - A better gold price feed.
@@ -100,6 +106,8 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 - The separate shwoop-server on Render still trades stocks through Alpaca for any account with keys. The page can no longer pause it, so decide whether to switch it off.
 
 ## Done recently
+- 2026-10-20: 4 contracts live (cap edited by hand after the loss-stop hold); XRP and Dogecoin added to the series list; Yes label and phone layout on the market cards; charts only while in a trade (desktop; no charts on phones); optional sound alerts on the Kalshi page (#400); Flatten and the 25c exit share a claim per market (#401, needs a full functions deploy); phone alerts via Web Push (#403, needs the same deploy; the ntfy phone push was declined by the owner).
+- 2026-10-20: **TP1, a 99c take-profit on L1, FALSIFIED** in both windows (flip rate from 99c 0.50% and 0.27%, below the 1% to 1.5% break-even). Nothing built.
 
 - Only L1 now: the opening strategy and its tabs are gone.
 - Tried and ruled out: opening scalps, entry filters, 216 scalp variants and more.
