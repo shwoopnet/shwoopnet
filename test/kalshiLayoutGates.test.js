@@ -587,6 +587,29 @@ gates.Y39 = () => {
   assert.ok(/var rows = \(\(data && data\.markets\) \|\| \[\]\)\.filter\(function\(m\)\{ return m && \['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'\]\.indexOf\(m\.series\) > -1; \}\);/.test(html), 'only Bitcoin, gold, Ethereum, XRP and Dogecoin cards are drawn');
 };
 
+// Y42: depth. Market rows show the contracts waiting at the best bid and ask with a bar, only when both sizes are known, and the card shadows are layered tokens that the Mono Ink skin turns off.
+gates.Y42 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const f = new Function(block(/(function kalshiDepthHtml\(m\)\{[\s\S]*?\n  \})\n/) + '; return kalshiDepthHtml;')();
+  const out = f({ yesBidSz: 1169.77, yesAskSz: 1069.44 });
+  assert.ok(/size 1,170 bid \/ 1,069 ask/.test(out) && /width:52\.2%/.test(out), 'sizes are rounded to contracts and the bar is the bid share');
+  assert.strictEqual(f({ yesBidSz: null, yesAskSz: 10 }), '', 'a missing size draws nothing');
+  assert.strictEqual(f({}), '');
+  assert.strictEqual(f({ yesBidSz: 0, yesAskSz: 0 }), '', 'an empty book draws nothing');
+  assert.ok(/width:0\.0%/.test(f({ yesBidSz: 0, yesAskSz: 50 })) && /width:100\.0%/.test(f({ yesBidSz: 50, yesAskSz: 0 })), 'one empty side is a full bar the other way');
+  assert.ok(/kalshiDepthHtml\(m\)/.test(html), 'the market row calls it');
+  assert.ok(/--card-shadow-lift:/.test(html) && /--card-shadow: none; --card-shadow-lift: none;/.test(html), 'a lift shadow exists and the Mono Ink skin keeps the page flat');
+  assert.ok(/\.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html) && /\[data-reduce-motion="true"\] \.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html), 'no lift for people who asked for no motion, by the OS or by the Settings toggle');
+};
+
+// Y43: on a phone (700px and narrower) the charts are hidden: the price line under each market and the whole Performance card; the stats card is not touched.
+gates.Y43 = () => {
+  const m = /@media \(max-width:700px\)\{([^}]*\}[^}]*)\}/.exec(html);
+  assert.ok(m, 'a 700px block exists');
+  assert.ok(/\.kal-spark\{ display:none; \}/.test(m[1]) && /\.kal-card\[data-card="performance"\]\{ display:none; \}/.test(m[1]), 'the sparklines and the Performance card are hidden on a phone');
+  assert.ok(!/kalPerfWrapC|kal-perf\b/.test(m[1]) && !/data-card="account"/.test(m[1]), 'the stats card stays');
+};
+
 // Y40: the hover on the settled-trade bars. Placement is pure, so its edges are tested: centred on the column, just above the pointer, inside the window at both sides, flipped below the
 // pointer when there is no room above. The tip is filled as text (the values come from attributes, never markup), shown for a mouse over a column and for a tap, hidden when a mouse leaves but
 // NOT when a touch "leaves" (a touch has no hover, so hiding on leave would close the tip the instant the finger lifts), and the chart is only rebuilt when its markup changes, because
