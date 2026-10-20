@@ -15,12 +15,14 @@ function publicKeyFromPrivate(privateB64url) {
   return ecdh.getPublicKey().toString("base64url");
 }
 
-// What an L1 order document looks like to the alerts: entered (a fill appeared), sold (an exit sold or partly sold), issue (an exit that errored, did not fill or has an unknown answer, or an order left unknown).
-// The same three flags the page's sound alerts use, so a sound on the open page and a push on the phone agree.
+// What an L1 order document looks like to the alerts: entered (a fill appeared), sold (an exit sold or partly sold), settled (the market finished and the order was settled by its result, a win or a loss; a
+// position the exit sold is settled with result "exit" and already alerted as a sell), issue (an exit that errored, did not fill or has an unknown answer, or an order left unknown).
+// Entered, sold and issue are the flags the page's sound alerts use, so a sound on the open page and a push on the phone agree for those; settled is phone only.
 function flags(o) {
-  if (!o || o.strategy !== "L1") return { e: false, s: false, i: false };
+  if (!o || o.strategy !== "L1") return { e: false, s: false, d: false, i: false };
   return {
     e: Number(o.fillCount) > 0,
+    d: o.settled === true && (o.result === "yes" || o.result === "no"),
     s: o.exitStatus === "sold" || o.exitStatus === "partly sold",
     i: o.exitStatus === "error" || o.exitStatus === "unknown" || o.exitStatus === "no fill" || o.status === "unknown" || o.status === "error",
   };
@@ -31,6 +33,7 @@ function orderKinds(before, after) {
   const out = [];
   if (now.i && !was.i) out.push("issue");
   if (now.s && !was.s) out.push("sell");
+  if (now.d && !was.d) out.push("settled");
   if (now.e && !was.e) out.push("enter");
   return out;
 }
@@ -45,6 +48,12 @@ function message(kind, o) {
   const name = nameOf(o);
   if (kind === "enter") return { title: "Bot bought " + name, body: Number(o.fillCount) + " " + String(o.side || "").toUpperCase() + (Number.isFinite(Number(o.price)) ? " at about " + Math.round(Number(o.price) * 100) + "c" : ""), tag: "enter-" + (o.clientOrderId || o.ticker) };
   if (kind === "sell") return { title: "Bot sold " + name, body: "The 25c exit " + String(o.exitStatus || "sold") + (Number.isFinite(Number(o.exitCount)) ? ": " + Number(o.exitCount) + " contracts" : ""), tag: "sell-" + (o.clientOrderId || o.ticker) };
+  if (kind === "settled") {
+    const pnl = Number(o.settledPnl), n = Number(o.fillCount);
+    const money = Number.isFinite(pnl) ? (pnl >= 0 ? "+$" : "-$") + Math.abs(pnl).toFixed(2) : "";
+    const title = !Number.isFinite(pnl) || pnl === 0 ? "Bot closed " + name : (pnl > 0 ? "Bot won " : "Bot lost ") + name;
+    return { title, body: (money ? money + " on " : "") + (Number.isFinite(n) && n > 0 ? n + (n === 1 ? " contract" : " contracts") : "the trade"), tag: "settled-" + (o.clientOrderId || o.ticker) };
+  }
   return { title: "Check the bot", body: o && o.series ? name + ": the exit " + String(o.exitStatus || o.status || "needs a look") : "The session ended: " + String((o && o.endedBecause) || "see the page").slice(0, 80), tag: "issue-" + ((o && (o.clientOrderId || o.endedAt)) || "x") };
 }
 

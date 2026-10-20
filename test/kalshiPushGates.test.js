@@ -27,6 +27,12 @@ gates.P1 = () => {
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4 }), order({ fillCount: 4, exitStatus: 'skipped' })), [], 'a position already gone is not an issue');
   assert.deepStrictEqual(push.orderKinds(null, order({ fillCount: 4, status: 'filled' })), ['enter'], 'created already filled counts');
   assert.deepStrictEqual(push.orderKinds(null, order({ strategy: 'OW1', fillCount: 4 })), [], 'only L1 orders alert');
+  // A trade that finishes on its own alerts once, as a win or a loss; one the exit sold is a sell, not also a settlement; one already settled before the alerts existed stays silent.
+  const held = order({ fillCount: 4, status: 'filled' });
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), ['settled']);
+  assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4, status: 'filled', settled: true, result: 'yes' }), order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), [], 'rewritten after it settled: silent');
+  assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4, exitStatus: 'sold' }), order({ fillCount: 4, exitStatus: 'sold', settled: true, result: 'exit', settledPnl: -2.7 })), [], 'an exit already alerted as a sell, and result exit is not a settlement');
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', exitStatus: 'sold', settled: true, result: 'exit', settledPnl: -2.7 })), ['sell'], 'sold and closed in one write is one sell alert');
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4 }), order({ fillCount: 4, exitStatus: 'error', status: 'unknown' })), ['issue'], 'an issue wins over nothing else being new');
 };
 
@@ -82,7 +88,11 @@ gates.P6 = () => {
   assert.strictEqual(push.message('sell', order({ series: 'KXGOLD15M', exitStatus: 'sold', exitCount: 3 })).title, 'Bot sold Gold');
   assert.ok(/XRP/.test(push.message('issue', order({ series: 'KXXRP15M', exitStatus: 'error' })).body));
   assert.ok(/loss stop/.test(push.message('issue', { endedBecause: 'loss stop' }).body));
-  for (const k of ['enter', 'sell', 'issue']) { const m = push.message(k, order({ fillCount: 1 })); assert.ok(m.title.length < 40 && m.body.length < 120); }
+  const won = push.message('settled', order({ fillCount: 4, settledPnl: 0.2412, result: 'yes' })), lost = push.message('settled', order({ series: 'KXETH15M', fillCount: 1, settledPnl: -3.6, result: 'no' }));
+  assert.deepStrictEqual([won.title, won.body], ['Bot won Bitcoin', '+$0.24 on 4 contracts']);
+  assert.deepStrictEqual([lost.title, lost.body], ['Bot lost Ethereum', '-$3.60 on 1 contract']);
+  assert.strictEqual(push.message('settled', order({ fillCount: 2 })).title, 'Bot closed Bitcoin', 'no figure, no claim of a win or a loss');
+  for (const k of ['enter', 'sell', 'issue', 'settled']) { const m = push.message(k, order({ fillCount: 1 })); assert.ok(m.title.length < 40 && m.body.length < 120); }
 };
 
 // Structure: alerts only READ. Nothing in the trading code imports the alert code; the alert code imports nothing that can trade or sign; every callable checks the owner; every trigger catches everything.
