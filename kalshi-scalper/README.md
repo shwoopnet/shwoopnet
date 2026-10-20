@@ -3791,3 +3791,22 @@ Both pages were written from this README and the owner's figures; nothing in the
 **Kill criterion.** Any condition failing in either window is FALSIFIED. There is also a plain figure reported whatever the verdict: of the entries whose bid reached 99c at a check, the share that then lost at settlement (the flip rate). Break-even is about 1% to 1.5%; a flip rate above that with a failed bar means the sample was too small, not that the rule is wrong, and would be re-registered on new days rather than re-read.
 
 **Running count of tries.** About 4,625 on Kalshi with this one.
+
+## Result: TP1, take profit at 99c on L1's entries (run once on 2026-10-20)
+
+**Verdict: `FALSIFIED` in both windows.**
+
+| Window | Entries | Line reached | Of those, lost at settlement | Rule | Hold | Difference | Day clustered z | Fair-market 95th pct | Halves | Fees x1.2 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 40 days (`book.sqlite`, primary) | 3,038 on 41 days | 2,409 (79.3%) | 12 (0.50%) | +0.32c | +0.41c | **-0.09c** | -0.76 | +0.17c | +0.07c / -0.24c | -0.10c |
+| 28 older days (`l1b.sqlite`, holdout) | 2,359 on 28 days | 1,831 (77.6%) | 5 (0.27%) | +1.00c | +1.28c | **-0.27c** | -3.14 | +0.45c | -0.30c / -0.25c | -0.28c |
+
+**Reading.**
+- The flip rate from 99c is **0.50% and 0.27%**, below the roughly 1% to 1.5% break-even, so the market prices a last-minute reversal from 99c higher than it happens. Selling there pays for insurance that was already priced above its risk.
+- The cash-out was never positive: -0.09c on the primary window (inside the noise) and -0.27c on the holdout (z -3.14, a clear cost). Neither half of the days cleared zero in the holdout.
+- **The prediction was right on the verdict and wrong on the size.** It said -1.0c to -1.4c per entry; the real cost is 0.1c to 0.3c, because the bid at the checks is often above 0.99, so the give-up per winner is smaller than the full cent assumed. Recorded as it was.
+- Not tried here, deliberately: other lines (0.98, 0.97), each another try.
+
+**What it does not say.** It uses minute candles read at five checks before the close, so a spike to 99c between checks, or a bid at 99c that a real sell could not fill at size, is not seen; both can only make the live rule worse than this. Four contracts at the touch is small, so depth is not the issue.
+
+**Decision.** Nothing built, nothing changed live. Running count of tries on Kalshi: about 4,625.
