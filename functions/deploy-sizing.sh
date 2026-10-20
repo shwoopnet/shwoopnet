@@ -18,7 +18,9 @@ run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 # Keep any lines already in the file (the optional watchdog and stop alert URLs); only make sure the order switch line is there.
 touch "$ENV_FILE"
 if ! grep -q '^KALSHI_LIVE_ENABLED=on$' "$ENV_FILE"; then
-  sed -i '/^KALSHI_LIVE_ENABLED=/d' "$ENV_FILE"
+  # grep -v and a temp file instead of sed -i: macOS sed wants a backup suffix after -i and breaks on the Linux form.
+  grep -v '^KALSHI_LIVE_ENABLED=' "$ENV_FILE" > "$ENV_FILE.tmp" || true
+  mv "$ENV_FILE.tmp" "$ENV_FILE"
   echo 'KALSHI_LIVE_ENABLED=on' >> "$ENV_FILE"
 fi
 grep -q '^KALSHI_LIVE_ENABLED=on$' "$ENV_FILE" || { echo "STOP: the order switch line is missing from $ENV_FILE, not deploying."; exit 1; }
