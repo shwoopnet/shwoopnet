@@ -31,6 +31,7 @@ gates.B1 = () => {
     'api.exchange.coinbase.com',  // Bitcoin spot for the Kalshi charts
     'api.gold-api.com',           // gold spot for the Kalshi charts
     'www.w3.org',                 // the SVG namespace, not a request
+    'shwoopnet.github.io',        // this site's own address in the og:image tag (link previews); the page never fetches it
   ]);
   const extra = [...hosts].filter((h) => !allowed.has(h));
   assert.deepStrictEqual(extra, [], 'the page may only reference the hosts listed here; found ' + extra.join(', '));
