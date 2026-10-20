@@ -426,3 +426,9 @@ Bitcoin, gold and Ethereum close in the same 15 minutes and move together, so `r
 ## L1 is the only strategy (Oct 12, 2026)
 
 The opening window paper recorder (`OW1`, `kalshiOpeningTick`, `kalshiOpeningLib.js`) and the page's Closing / Opening / Both switch were removed at the owner's request ("lets go back to only L1 for now"): the strategies must not overlap in mindset or position, and anything that holds to settlement overlaps L1 in both. Nothing profitable that is flat before L1 buys exists in the history: `OW2` (four variants) and `SS1` (216 cells, a train and validation search) are all `FALSIFIED` in `kalshi-scalper/README.md`, and every earlier scalp family fell to cost. `test/kalshiL1Gates.test.js` K10 and `test/kalshiLayoutGates.test.js` Y41 pin the absence. The research record (`kalshi-scalper/`, `docs/OPENING_STRATEGY.md`) stays as history; the old `kalshiOpeningOrders` and `kalshiOpeningControl` documents are untouched in Firestore and have no rule, so nothing can read them. A second strategy is a deliberate, reviewed change that must show how it cannot hold a position at the same time as L1 and why it is a different bet, not a different lane of the same one.
+
+## How to talk to the owner (standing rule, set 2026-10-20)
+
+- Keep it short and plain. Lead with the meat and the important numbers. No long explanations, no background the owner did not ask for.
+- Every message ends with numbered options (Option 1, Option 2, Option 3) and a one-line recommendation, so the owner can pick a number instead of waiting on a reply or writing an answer.
+- Assume the owner does not remember earlier context. Say what a thing is in a few words, then the decision.
