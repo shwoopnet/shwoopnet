@@ -38,7 +38,8 @@
     --loss: #D93025;
     --loss-glow: rgba(217,48,37,0.14);
     --radius: 10px;
-    --card-shadow: 0 1px 3px rgba(16,24,43,0.06);
+    --card-shadow: 0 1px 2px rgba(16,24,43,0.06), 0 8px 20px -12px rgba(16,24,43,0.22);
+    --card-shadow-lift: 0 2px 4px rgba(16,24,43,0.08), 0 14px 28px -12px rgba(16,24,43,0.30);
   }
 
   /* Dark mode -- same Ledger identity, inverted surfaces. Set on
@@ -58,7 +59,8 @@
     --amber-dim: #3E76D6;
     --amber-glow: rgba(91,155,255,0.18);
     --amber-contrast: #0B1220;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
+    --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
   /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
@@ -68,7 +70,7 @@
     --ink: #FFFFFF; --panel: #FFFFFF; --panel-raised: #F4F4F4; --border: #D9D9D9; --paper: #000000; --muted: #6B6B6B;
     --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
     --ticker-fg: #000000; --ticker-fg-dim: #6B6B6B; --ticker-bg: #FFFFFF;
-    --radius: 4px; --card-shadow: none;
+    --radius: 4px; --card-shadow: none; --card-shadow-lift: none;
   }
   html[data-skin="mono"][data-theme="dark"]{
     --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
@@ -614,7 +616,17 @@
   .kal-console .kal-books{ grid-template-columns:1fr 1fr; gap:16px; }
   .kal-console .kal-brow{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--card-shadow); padding:16px 20px; }
   .kal-spark{ margin-top:10px; }
+  /* Depth: a market row rises a little under the pointer, and shows the size sitting at the best bid and ask (contracts) with a bar for how the two compare. */
+  .kal-console .kal-brow{ transition: box-shadow .2s ease, transform .2s ease; }
+  .kal-console .kal-brow:hover{ box-shadow: var(--card-shadow-lift); transform: translateY(-1px); }
+  .kal-depth{ display:flex; height:4px; border-radius:2px; overflow:hidden; margin-top:6px; background:var(--border); }
+  .kal-depth > i{ display:block; height:100%; background:var(--paper); opacity:.55; }
   .kal-brow-name{ font-weight:700; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
+  /* Phones: no charts. The price lines under each market and the whole Performance card (P/L line, orders donut, settled-trade bars) are hidden; the tiles, By market and By price paid stay. */
+  @media (max-width:700px){
+    .kal-spark{ display:none; }
+    .kal-card[data-card="performance"]{ display:none; }
+  }
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
     .kal-console .kal-books{ grid-template-columns:1fr; }
@@ -750,6 +762,8 @@
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
     .bg-grid{ animation: none; }
+    .kal-console .kal-brow{ transition: none; }
+    .kal-console .kal-brow:hover{ transform: none; }
   }
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
@@ -758,6 +772,8 @@
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
+  [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
+  [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
 </style>
 <script>
   // Runs synchronously before <body> paints anything, so dark mode is
@@ -2294,6 +2310,15 @@
 
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
 
+  // Top of book: how many contracts are waiting at the best bid and the best ask, and a bar for the bid's share of the two. Only drawn when both sizes are known; a thin side is plain to see.
+  function kalshiDepthHtml(m){
+    var b = Number(m && m.yesBidSz), a = Number(m && m.yesAskSz);
+    if(!(b >= 0) || !(a >= 0) || b + a <= 0 || m.yesBidSz == null || m.yesAskSz == null){ return ''; }
+    var fmt = function(v){ return v.toLocaleString('en-US', { maximumFractionDigits: 0 }); };
+    return '<div class="kal-brow-when" title="Contracts waiting at the best bid and the best ask">size ' + fmt(b) + ' bid / ' + fmt(a) + ' ask</div>' +
+      '<div class="kal-depth" aria-hidden="true"><i style="width:' + (b / (b + a) * 100).toFixed(1) + '%"></i></div>';
+  }
+
   // The small chart under a market row. Bitcoin: Coinbase's price against the strike ("to beat"). Gold: gold-api.com's price against the strike, as this page has
   // seen it since it was opened; if that feed fails, the market's own YES price in cents instead.
   var KAL_ALT_OF = { KXETH15M: 'ETH', KXXRP15M: 'XRP', KXDOGE15M: 'DOGE' }, KAL_ALT_NAME = { ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin' };
@@ -2352,7 +2377,7 @@
       return '<div class="kal-brow"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
         '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
         '<div style="text-align:right"><div class="kal-brow-px">' + (hasBook ? (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div></div></div>' + kalshiSparkFor(m) + '</div>';
+        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + kalshiSparkFor(m) + '</div>';
     }).join('');
     st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
   }
