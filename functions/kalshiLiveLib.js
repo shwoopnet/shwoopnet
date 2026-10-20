@@ -422,18 +422,47 @@ function settledFields(t, result) {
   return { settled: true, result, settledPnl: Number((((result === t.side ? got0 - sold : 0)) + proceeds - cost * (got0 / want0)).toFixed(4)) };
 }
 
+// A position the owner closed BY HAND (a manual sell, or Flatten) is not a trade the bot held to the end, but the market's result is all settledFields has to go on, so it booked a win or a loss
+// the owner never got: into the stats, the loss stop and the profit pool. This asks the account. The order is "closed by hand" only when the account's sell fills on its market and side, made
+// after the order and NOT by the bot's own exit order, cover everything the bot still held (a partly sold position is left to the old rule, which books the rest as held: counted, not hidden,
+// because hiding the rest of a loss from the loss stop is the unsafe direction). The exit watch's own "skipped" (it found nothing held when the price touched its line) says the same thing
+// without a read. Anything that cannot be read is `unknown`: the order stays open, which the loss stop counts as lost, until the next look. Never places or changes an order.
+async function closedByHand({ fetchFn, keyId, pem, t, nowMs }) {
+  if (t.exitStatus === "skipped") return { hand: true, sold: null };
+  const r = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/fills", params: { ticker: t.ticker, limit: "100" }, nowMs });
+  if (r.status !== 200 || !r.body || !Array.isArray(r.body.fills)) return { unknown: true };
+  const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
+  const botSold = Number(t.exitCount) > 0 ? Math.min(Number(t.exitCount), got) : 0;
+  let sold = 0;
+  for (const f of r.body.fills) {
+    if (!f || (f.ticker || f.market_ticker) !== t.ticker || f.action !== "sell" || f.side !== t.side) continue;
+    if (t.exitOrderId && f.order_id === t.exitOrderId) continue;
+    const at = Date.parse(f.created_time);
+    if (Number.isFinite(at) && Number.isFinite(Number(t.ts)) && at < Number(t.ts) - 5000) continue;
+    const c = num(f.count_fp !== undefined ? f.count_fp : f.count);
+    if (Number.isFinite(c) && c > 0) sold += c;
+  }
+  return sold > 0 && sold + 1e-9 >= got - botSold ? { hand: true, sold } : { hand: false, sold };
+}
+// What the order document records for a position closed by hand: settled (so nothing waits on it or counts it open), no profit figure (so no stat, stop or pool can use one), and a result the
+// page reads as "sold by hand".
+function handFields(h) { return Object.assign({ settled: true, result: "hand" }, Number.isFinite(h.sold) ? { handSold: h.sold } : {}); }
+
 // Settles filled orders whose market has finished, whether or not a session is running. The session's own check stops when the session ends, so a
 // trade that settled after a stop (or just after the 24 hours) stayed "open" in the records for ever and never reached the page's loss and win
 // counts. Called every minute by the scheduled function; reads at most `max` public markets, never places or changes an order, and a failed read
 // leaves the order open for the next minute.
-async function settleOpenOrders({ store, fetchFn, nowMs, max = 12 }) {
+async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem }) {
   const open = (await store.openFilled()).filter((t) => t.settled !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
   let settled = 0;
   for (const t of open.slice(0, max)) {
     const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
     const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
     if (r !== "yes" && r !== "no") continue;
-    await store.updateTest(t.id, settledFields(t, r));
+    // With the account's key, ask whether the owner closed it by hand first (see closedByHand). Without a key (older callers) the old rule applies.
+    const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs }) : { hand: false };
+    if (h.unknown) continue;
+    await store.updateTest(t.id, h.hand ? handFields(h) : settledFields(t, r));
     settled += 1;
   }
   return { settled, looked: Math.min(open.length, max) };
@@ -443,7 +472,7 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12 }) {
 // kept on its record; a trade not yet settled is counted at its full cost, as if it lost. Costs are the order's worst-case
 // price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
 // `orders` is a list the caller has already read (the tick reads the last 24 hours once and shares it, so the same documents are not billed twice a minute); without it the store is asked.
-async function botRisk({ store, since, fetchFn, nowMs, orders }) {
+async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem }) {
   const from = Number.isFinite(since) ? since : 0;
   const read = Array.isArray(orders) ? orders.filter((t) => Number(t.ts) >= from) : await store.sessionTrades(from);
   const trades = read.filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
@@ -455,10 +484,12 @@ async function botRisk({ store, since, fetchFn, nowMs, orders }) {
       const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
       const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
       if (r === "yes" || r === "no") {
-        result = r;
-        await store.updateTest(t.id, settledFields(t, r));
+        const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs }) : { hand: false };
+        if (h.hand) { await store.updateTest(t.id, handFields(h)); continue; }     // closed by hand: not the bot's result, so not in its net, its stop or its open cost
+        if (!h.unknown) { result = r; await store.updateTest(t.id, settledFields(t, r)); }     // unreadable: stays open and counted as lost until the next look
       }
     }
+    if (t.settled === true && t.result === "hand") continue;
     // A partial fill costs and pays in proportion; orders from before size scaling have count 1.
     const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want), paid = cost * (got / want);
     const addonPaid = Number.isFinite(Number(t.addonCost)) && Number(t.addonCost) > 0 ? Number(t.addonCost) * (got / want) : 0;
@@ -500,6 +531,7 @@ function foldSkim(state, orders, opts = {}) {
     .sort((a, b) => a.ts - b.ts || String(a.id).localeCompare(String(b.id)));
   let blocked = null;   // the first order the cursor could not pass (not settled yet), so a pool that does not move can say why
   for (const t of rows) {
+    if (t.settled === true && t.result === "hand") { cursor = t.ts; continue; }     // closed by hand: not the bot's trade, passed without a profit or a loss
     if (t.settled !== true || !Number.isFinite(Number(t.settledPnl))) { blocked = { ticker: t.ticker || null, ts: t.ts }; break; }
     const pnl = Number(t.settledPnl);
     cum += pnl;
@@ -555,7 +587,7 @@ async function runL1Tick(args) {
   // The stop follows the BOT's trades, not the account: the owner trades the same account by hand, and a manual trade must
   // neither trip the stop nor hide a bot loss. Fails closed: if the bot's trades cannot be read, nothing is sent this minute.
   let risk;
-  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList }); }
+  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList, keyId, pem }); }
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
   // With scaling on, the cap and the stop's base come from the weekly review. Fails closed: a review that cannot be saved sends nothing this minute.
@@ -896,5 +928,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
 };

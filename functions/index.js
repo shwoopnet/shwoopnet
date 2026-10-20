@@ -528,7 +528,7 @@ exports.kalshiLiveArmed = onSchedule(
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
       // delay the tick: a bad read is logged and the next minute tries again.
       try {
-        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now });
+        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value() });
       } catch (e) {
         console.error("kalshiLiveArmed: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
       }
