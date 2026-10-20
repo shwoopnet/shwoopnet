@@ -19,10 +19,14 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').rep
 
 const gates = {};
 
-// Nothing may raise an OS-level notification or prompt for the permission.
+// Nothing may raise an OS-level notification from the page. The one exception the owner asked for (Oct 20, 2026): the Kalshi page's "Phone alerts" switch may ask for notification permission, once,
+// from the owner's tap, and only inside kalshiPushToggle. The page still never constructs a Notification itself; the service worker shows pushes the server sent.
 gates.G1 = () => {
   assert.ok(!/new Notification\(/.test(code), 'no code may construct a browser Notification');
-  assert.ok(!/Notification\.requestPermission/.test(code), 'no code may prompt for notification permission');
+  assert.strictEqual((code.match(/Notification\.requestPermission/g) || []).length, 1, 'permission is asked for in exactly one place');
+  const fn = /function kalshiPushToggle\(\)\{[\s\S]*?\n  \}\n/.exec(code);
+  assert.ok(fn && /Notification\.requestPermission/.test(fn[0]), 'and that place is the phone alerts switch, which runs from a tap');
+  assert.ok(!/requestPermission/.test(code.replace(fn[0], '')), 'nothing else asks (no prompt on load)');
 };
 
 // The Labs page and its forward-test record stay gone.

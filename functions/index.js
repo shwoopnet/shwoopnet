@@ -15,6 +15,8 @@ const KALSHI_STOP_ALERT_URL = defineString("KALSHI_STOP_ALERT_URL", { default: "
 const KALSHI_LIVE_KEY_ID = defineSecret("KALSHI_LIVE_KEY_ID");
 const KALSHI_LIVE_PRIVATE_KEY = defineSecret("KALSHI_LIVE_PRIVATE_KEY");
 const KALSHI_LIVE_ENABLED = defineString("KALSHI_LIVE_ENABLED", { default: "off" });
+// Phone alerts (Web Push, kalshiPushLib.js): ONE secret, the VAPID private key; the public key is derived from it. Set it with functions/deploy-push.sh, never by pasting it anywhere.
+const KALSHI_PUSH_VAPID_PRIVATE = defineSecret("KALSHI_PUSH_VAPID_PRIVATE");
 
 // Any signed-in caller passes this first wall; the Kalshi functions then
 // require the owner's email AND the isAdmin flag (assertKalshiAdmin below).
@@ -52,6 +54,9 @@ const book = require("./kalshiBookLib");
 const marketTape = require("./marketTapeLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
+const push = require("./kalshiPushLib");
+const webpush = require("web-push");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
 // behind a CDN that refuses Google Cloud addresses (HTTP 403), so it is only the
@@ -549,6 +554,65 @@ exports.kalshiLiveArmed = onSchedule(
     if (failure) throw failure;
   }
 );
+
+// ---- Phone alerts (Web Push), admin only ---------------------------------------------------------------------------------------------
+// The Kalshi page subscribes this phone or browser (a service worker and the owner's tap); the two triggers below read what the bot already wrote and push a short text to every stored
+// subscription. Nothing here places or changes an order, holds a Kalshi key, or is called by the trading code, and each trigger catches every error: an alert that fails costs an alert, never a trade.
+const PUSH_SUBJECT = "https://shwoopnet.github.io";
+async function pushSend(db, kinds, doc, tagBase) {
+  if (!kinds.length) return;
+  const subsSnap = await db.collection("kalshiPushSubs").get();
+  const subs = subsSnap.docs.map((d) => ({ id: d.id, subscription: d.data().subscription })).filter((x) => x.subscription);
+  if (!subs.length) return;
+  const priv = KALSHI_PUSH_VAPID_PRIVATE.value();
+  const details = { subject: PUSH_SUBJECT, publicKey: push.publicKeyFromPrivate(priv), privateKey: priv };
+  for (const kind of kinds) {
+    const m = push.message(kind, doc);
+    await push.sendAll({
+      subs, payload: { title: m.title, body: m.body, tag: m.tag || tagBase },
+      send: (subscription, body) => webpush.sendNotification(subscription, body, { vapidDetails: details, TTL: 3600, urgency: "high" }),
+      remove: (id) => db.collection("kalshiPushSubs").doc(id).delete(),
+    });
+  }
+}
+exports.kalshiPushKey = onCall({ secrets: [KALSHI_PUSH_VAPID_PRIVATE] }, async (request) => {
+  await assertKalshiAdmin(request.auth);
+  return { key: push.publicKeyFromPrivate(KALSHI_PUSH_VAPID_PRIVATE.value()) };
+});
+exports.kalshiPushSubscribe = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const sub = push.cleanSubscription(request.data && request.data.subscription);
+  if (!sub) throw new HttpsError("invalid-argument", "That is not a push subscription.");
+  const db = getFirestore();
+  const have = await db.collection("kalshiPushSubs").get();
+  if (have.size >= 10 && !have.docs.some((d) => d.id === push.subId(sub.endpoint))) throw new HttpsError("resource-exhausted", "Ten phones or browsers are already subscribed.");
+  await db.collection("kalshiPushSubs").doc(push.subId(sub.endpoint)).set({ subscription: sub, at: Date.now() });
+  return { ok: true, count: have.size + 1 };
+});
+exports.kalshiPushUnsubscribe = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const endpoint = request.data && request.data.endpoint;
+  if (typeof endpoint !== "string" || !endpoint) throw new HttpsError("invalid-argument", "No endpoint.");
+  await getFirestore().collection("kalshiPushSubs").doc(push.subId(endpoint)).delete();
+  return { ok: true };
+});
+exports.kalshiPushOrder = onDocumentWritten({ document: "kalshiLiveOrders/{id}", secrets: [KALSHI_PUSH_VAPID_PRIVATE], retry: false, memory: "256MiB" }, async (event) => {
+  try {
+    ensureDefaultAdminApp();
+    const before = event.data && event.data.before && event.data.before.exists ? event.data.before.data() : null;
+    const after = event.data && event.data.after && event.data.after.exists ? event.data.after.data() : null;
+    if (!after) return;
+    await pushSend(getFirestore(), push.orderKinds(before, after), after, event.params.id);
+  } catch (e) { console.error("kalshiPushOrder: " + String((e && e.message) || e).slice(0, 200)); }
+});
+exports.kalshiPushSession = onDocumentWritten({ document: "kalshiLiveControl/session", secrets: [KALSHI_PUSH_VAPID_PRIVATE], retry: false, memory: "256MiB" }, async (event) => {
+  try {
+    ensureDefaultAdminApp();
+    const before = event.data && event.data.before && event.data.before.exists ? event.data.before.data() : null;
+    const after = event.data && event.data.after && event.data.after.exists ? event.data.after.data() : null;
+    await pushSend(getFirestore(), push.sessionKinds(before, after), after, "session");
+  } catch (e) { console.error("kalshiPushSession: " + String((e && e.message) || e).slice(0, 200)); }
+});
 
 // Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
 // (see kalshiBookLib.js). READ ONLY and keyless. It is the LAST export on purpose: the tests slice the file from

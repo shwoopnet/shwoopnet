@@ -7,6 +7,8 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2310182B%22/><path d=%22M56 14 26 56h18l-6 30 34-42H54z%22 fill=%22%230B5CD8%22/></svg>">
 <!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the header wallet mark on the navy tile, full bleed because iOS rounds the corners itself. -->
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Shwoop">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -849,6 +851,9 @@
   var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
   var kalshiLiveBaselineFn = httpsCallable(functions, 'kalshiLiveBaseline');
+  var kalshiPushKeyFn = httpsCallable(functions, 'kalshiPushKey');
+  var kalshiPushSubscribeFn = httpsCallable(functions, 'kalshiPushSubscribe');
+  var kalshiPushUnsubscribeFn = httpsCallable(functions, 'kalshiPushUnsubscribe');
 
   // rememberMe controls whether Firebase's own session survives closing the
   // browser (browserLocalPersistence, the SDK's own default) or ends with
@@ -985,6 +990,10 @@
       }, function(err){ console.error('Kalshi live sync error:', err); if(errCb){ errCb(err); } });
     },
     // No exit or pool-rule setter exists on purpose (Oct 12, 2026): the exit is fixed at 25c and always sells, the pool always rebuilds after every win, both in the server code.
+    // Phone alerts: the owner's own Cloud Functions (admin only). The key is the public half of the server's push key; a subscription is the phone's address for pushes, stored by the server.
+    kalshiPushKey: function(){ return kalshiPushKeyFn({}).then(function(res){ return res.data; }); },
+    kalshiPushSubscribe: function(subscription){ return kalshiPushSubscribeFn({ subscription: subscription }).then(function(res){ return res.data; }); },
+    kalshiPushUnsubscribe: function(endpoint){ return kalshiPushUnsubscribeFn({ endpoint: endpoint }).then(function(res){ return res.data; }); },
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     },
@@ -1145,7 +1154,8 @@
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
-                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button></div>
+                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
+          <div class="kal-note" id="kalPushMsg"></div>
           <div class="kal-note" id="kalDiagMsg"></div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
           <div class="kal-actions">
@@ -2768,6 +2778,43 @@
     }).catch(function(err){ msg.textContent = 'Could not read the snapshots: ' + ((err && err.message) || 'unknown'); }).then(function(){ btn.disabled = false; });
   });
   // Copies the order records as CSV. If the browser refuses clipboard access the text is shown in a box to copy by hand.
+  // Phone alerts (the owner's request, Oct 20, 2026): Web Push to this phone or browser, sent by the owner's own Cloud Functions when the bot enters, sells, stops or has an issue (kalshiPushLib.js).
+  // It is a switch in the Tools card: off until the owner taps it, and the browser's own permission prompt appears only from that tap (the one place the page asks for notification permission).
+  // On an iPhone it only works once the site is added to the Home Screen (Share, Add to Home Screen) and opened from there. Nothing is stored in the settings document.
+  function kalshiPushBytes(b64url){
+    var pad = '='.repeat((4 - b64url.length % 4) % 4), raw = atob((b64url + pad).replace(/-/g, '+').replace(/_/g, '/')), out = new Uint8Array(raw.length);
+    for(var i = 0; i < raw.length; i++){ out[i] = raw.charCodeAt(i); }
+    return out;
+  }
+  function kalshiPushSay(t){ var el = document.getElementById('kalPushMsg'); if(el){ el.textContent = t || ''; } }
+  function kalshiPushLabel(on){ document.getElementById('kalPushToggle').textContent = 'Phone alerts: ' + (on ? 'on' : 'off'); }
+  function kalshiPushSupported(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function kalshiPushInit(){
+    if(!kalshiPushSupported() || Notification.permission !== 'granted'){ return; }
+    navigator.serviceWorker.getRegistration().then(function(reg){ return reg ? reg.pushManager.getSubscription() : null; }).then(function(sub){ kalshiPushLabel(!!sub); }).catch(function(){});
+  }
+  function kalshiPushToggle(){
+    var api = window.__shwoopAPI;
+    if(!kalshiPushSupported()){ kalshiPushSay('This browser cannot receive phone alerts. On an iPhone, add the site to the Home Screen first (Share, Add to Home Screen), then open it from there.'); return; }
+    if(!api || !api.kalshiPushKey){ kalshiPushSay('Sign in first.'); return; }
+    navigator.serviceWorker.register('sw.js').then(function(){ return navigator.serviceWorker.ready; }).then(function(reg){
+      return reg.pushManager.getSubscription().then(function(sub){
+        if(sub){
+          return api.kalshiPushUnsubscribe(sub.endpoint).catch(function(){}).then(function(){ return sub.unsubscribe(); }).then(function(){ kalshiPushLabel(false); kalshiPushSay('Phone alerts are off for this device.'); });
+        }
+        return Notification.requestPermission().then(function(perm){
+          if(perm !== 'granted'){ kalshiPushSay('Notifications are blocked for this site. Allow them in the browser or phone settings, then tap again.'); return; }
+          return api.kalshiPushKey().then(function(k){
+            return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: kalshiPushBytes(k.key) });
+          }).then(function(newSub){
+            return api.kalshiPushSubscribe(newSub.toJSON());
+          }).then(function(){ kalshiPushLabel(true); kalshiPushSay('Phone alerts are on for this device: entries, sells, stops and issues.'); });
+        });
+      });
+    }).catch(function(e){ kalshiPushSay('Phone alerts could not be set up: ' + String((e && (e.message || e.code)) || e).slice(0, 140)); });
+  }
+  document.getElementById('kalPushToggle').addEventListener('click', kalshiPushToggle);
+  kalshiPushInit();
   function kalshiSoundLabel(){ document.getElementById('kalSoundToggle').textContent = 'Sound alerts: ' + (kalshiSoundOn ? 'on' : 'off'); }
   document.getElementById('kalSoundToggle').addEventListener('click', function(){
     kalshiSoundOn = !kalshiSoundOn;

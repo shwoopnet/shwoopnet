@@ -68,7 +68,7 @@ const defined = new Set();
 // Host and language globals this app legitimately calls.
 const GLOBALS = new Set([
   'if','for','while','switch','catch','return','function','typeof','new','else','do','void','delete','in','of','case','throw','with','yield','await',
-  'Math','Number','String','Array','Date','JSON','Object','Boolean','RegExp','Error','Promise','Set','Map','Symbol','BigInt',
+  'Math','Number','String','Array','Date','JSON','Object','Boolean','RegExp','Error','Promise','Set','Map','Symbol','BigInt','Uint8Array',
   'parseInt','parseFloat','isNaN','isFinite','encodeURIComponent','decodeURIComponent','encodeURI','decodeURI',
   'setTimeout','setInterval','clearTimeout','clearInterval','requestAnimationFrame','cancelAnimationFrame',
   'fetch','alert','confirm','prompt','console','document','window','navigator','location','localStorage','sessionStorage',
