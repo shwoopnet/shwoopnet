@@ -604,7 +604,7 @@ gates.Y42 = () => {
 
 // Y43: on a phone (700px and narrower) the charts are hidden: the price line under each market and the whole Performance card; the stats card is not touched.
 gates.Y43 = () => {
-  const m = /@media \(max-width:700px\)\{([^}]*\}[^}]*)\}/.exec(html);
+  const m = /@media \(max-width:700px\)\{([\s\S]*?)\n  \}/.exec(html);
   assert.ok(m, 'a 700px block exists');
   assert.ok(/\.kal-spark\{ display:none; \}/.test(m[1]) && /\.kal-card\[data-card="performance"\]\{ display:none; \}/.test(m[1]), 'the sparklines and the Performance card are hidden on a phone');
   assert.ok(!/kalPerfWrapC|kal-perf\b/.test(m[1]) && !/data-card="account"/.test(m[1]), 'the stats card stays');
