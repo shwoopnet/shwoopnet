@@ -43,8 +43,8 @@ const resourceRefs = []
   // An inline data: icon makes no network request, so it is not an external
   // resource. Its SVG contains '>' characters, so the tag match is cut short;
   // the filter keys on the href prefix instead.
-  // The home-screen icon and the web manifest (the phone alerts, Oct 20, 2026) are local files next to index.html (no scheme), so they are not external resources either.
-  .concat((src.match(/<link\b[^>]*>/g) || []).filter(tag => !/\bhref="data:/.test(tag) && !/\brel="apple-touch-icon"\s+href="[^":/]+"/.test(tag) && !/\brel="manifest"\s+href="[^":/]+"/.test(tag)))
+  // The home-screen icon and the web manifest (the phone alerts, Oct 20, 2026) are local files next to index.html (no scheme), so they are not external resources either. The tab icon (favicon-64.png, brand mark A, Oct 20, 2026) is the same kind of local file.
+  .concat((src.match(/<link\b[^>]*>/g) || []).filter(tag => !/\bhref="data:/.test(tag) && !/\brel="apple-touch-icon"\s+href="[^":/]+"/.test(tag) && !/\brel="manifest"\s+href="[^":/]+"/.test(tag) && !/\brel="icon"\s+type="image\/png"\s+href="[^":/]+"/.test(tag)))
   .concat(src.match(/<script\b[^>]*\bsrc=[^>]*>/g) || [])
   .concat(src.match(/<img\b[^>]*\bsrc=[^>]*>/g) || [])
   .concat(src.match(/url\((["']?)https?:[^)]*\)/g) || []);
