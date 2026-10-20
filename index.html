@@ -768,6 +768,11 @@
   .site-footer .footer-copyright{ color: var(--paper); font-size:11.5px; font-weight:600; margin-bottom:6px; }
   .site-footer p{ margin:0 0 6px 0; max-width:680px; margin-left:auto; margin-right:auto; }
   .site-footer p:last-child{ margin-bottom:0; }
+  .site-footer .footer-brand{ font-size:18px; margin:0 0 16px 0; display:inline-block; }
+  .site-footer details{ max-width:680px; margin:8px auto 0 auto; text-align:left; }
+  .site-footer summary{ cursor:pointer; text-align:center; color:var(--paper); font-weight:600; list-style:none; }
+  .site-footer summary::-webkit-details-marker{ display:none; }
+  .site-footer details[open] summary{ margin-bottom:8px; }
 
   /* THE TICKER IS DELIBERATELY NOT LISTED HERE.
      Stopping it is `animation: none`, which parks the track at
@@ -1378,8 +1383,16 @@
   </div>
 
   <footer class="site-footer">
-    <div class="footer-copyright">&copy; 2026 Shwoop</div>
-    <p>Personal dashboard. Not financial advice. Trading can lose all of your money, automated tools can fail, and data from third parties can be late or wrong.</p>
+    <div class="brand-name footer-brand">SHWOOP</div>
+    <div class="footer-copyright">&copy; 2026 Shwoop Financials. All rights reserved.</div>
+    <p>A private, personal dashboard and automated trading tool. Its trading uses real money and can lose all of it. Not financial advice.</p>
+    <details class="footer-legal">
+      <summary>Legal and risk disclosure</summary>
+      <p>Nothing on this site is investment, financial, legal or tax advice, or an offer or solicitation to buy or sell anything. Shwoop is not a broker-dealer, an investment adviser, a commodity trading advisor or an exchange, and it does not manage money for anyone else.</p>
+      <p>Trading involves substantial risk of loss, including the loss of everything put into it. Automated trading can fail, act on bad data, or place orders you did not intend. A loss limit can end the bot after losses; it does not guarantee a maximum loss. Past performance does not guarantee future results.</p>
+      <p>Paper and backtest results are hypothetical. They use no real money, leave out real-world costs and fills, and do not predict future results. Data from third parties can be late, incomplete or wrong.</p>
+      <p>This site and its software are provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;, without warranties of any kind. To the fullest extent permitted by law, Shwoop Financials and its owners are not liable for any loss or damage arising from their use. Shwoop is not affiliated with or endorsed by any exchange, broker or data provider.</p>
+    </details>
   </footer>
 
 </div>
