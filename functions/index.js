@@ -241,6 +241,17 @@ function firestoreLiveStore(db) {
     async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
     // The exit watch's few recent filled orders (a single-field query again), not every filled order ever: it looks several times a minute.
     async recentFilled(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => o.status === "filled"); },
+    // One closer per market at a time (the exit watch or Flatten, see kalshiLiveLib.claimClose). False when the OTHER closer took it less than ttl ago; the same closer may take it again.
+    async claimClose(ticker, who, now, ttl) {
+      const ref = db.collection("kalshiLiveClosing").doc(String(ticker));
+      return db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        const d = snap.exists ? snap.data() : null;
+        if (d && d.by !== who && now - Number(d.at) < ttl) return false;
+        tx.set(ref, { by: who, at: now });
+        return true;
+      });
+    },
     // Atomic: only one instance gets to send each exit sell. False when another has it, when it has already been tried this many times, or when the order has settled.
     async claimExit(id, tries) {
       const ref = col.doc(id);
@@ -390,7 +401,7 @@ exports.kalshiFlattenAll = onCall(
     await events.add({ ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
     let out;
     try {
-      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now });
+      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now, store: firestoreLiveStore(db) });
     } catch (e) {
       out = { ok: false, reason: "The sells failed: " + String((e && e.message) || e).slice(0, 120), results: [] };
     }

@@ -736,6 +736,16 @@ async function exitWatchIdle({ store, now }) {
   } catch (e) { return false; }
 }
 
+// The exit watch and Flatten both close positions, and each reads the position a moment before it sells. With nothing shared, one could sell between the other's read and its sell, and the second
+// sell then goes out on a position that is gone: a YES sell with nothing held OPENS the opposite position, real exposure nobody intended. So both take a short claim on the MARKET first (a document
+// per ticker, taken in a transaction) and read the position only after holding it. A claim held by the other closer refuses; the same closer may take it again (the exit watch's own instances are
+// kept apart by claimExit on the order). It lapses after CLOSE_CLAIM_MS by itself, so a function that died holding one cannot block the next closer for long. Fails closed: a claim that
+// cannot be made means nothing is sold for that market this time, and the caller says so.
+const CLOSE_CLAIM_MS = 90 * 1000;
+async function claimClose(store, ticker, who, now) {
+  try { return !!store && typeof store.claimClose === "function" && (await store.claimClose(ticker, who, now, CLOSE_CLAIM_MS)) === true; } catch (e) { return false; }
+}
+
 function exitBody(ticker, side, count, limit, cid, exchangeIndex) {
   if (!Number.isInteger(count) || count < 1 || count > L1_ORDER_CEILING) throw new Error("refusing to build an exit for " + count + " contracts");
   if (!(limit >= 0.01 && limit <= 0.99)) throw new Error("refusing to build an exit at " + limit);
@@ -778,6 +788,8 @@ async function runExitWatch(args) {
     }
     const tries = Number(t.exitTries) > 0 ? Number(t.exitTries) : 0;
     if (tries >= EXIT_MAX_TRIES) continue;
+    // Flatten may be closing this market right now; if it holds the claim, leave it (the position is about to be, or already is, gone).
+    if (!(await claimClose(store, t.ticker, "exit", now))) { results.push(t.ticker + ": Flatten is closing it (or the claim could not be made), nothing sold"); continue; }
     // The live account must hold the position, or a sell would open the opposite one.
     const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker: t.ticker, limit: "20" }, nowMs: now });
     let held = NaN;
@@ -836,7 +848,7 @@ async function runExitWatch(args) {
 // never flip it. A market that is no longer open cannot be traded and settles on its own, so it is reported and skipped. The client order
 // id carries the minute, so a second press inside the same minute is refused by Kalshi instead of selling twice. Not capped by LIVE_CAP:
 // that cap bounds what a BUY may risk, and this only reduces exposure.
-async function flattenAll({ fetchFn, keyId, pem, now }) {
+async function flattenAll({ fetchFn, keyId, pem, now, store }) {
   const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { limit: "200" }, nowMs: now });
   if (pos.status !== 200 || !pos.body || typeof pos.body !== "object") return { ok: false, reason: "The positions could not be read (HTTP " + pos.status + "). Nothing was sold.", results: [] };
   const list = Array.isArray(pos.body.market_positions) ? pos.body.market_positions : [];
@@ -844,6 +856,15 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
     .filter((p) => p.ticker && Number.isFinite(p.position) && p.position !== 0);
   const results = [];
   for (const p of held) {
+    // The list above was read before this market's turn came, and the exit watch may have sold it since. Take the claim, THEN read this one position again and sell exactly that: a count from
+    // the older list could be of a position that is already closed, and selling it would open the opposite one.
+    if (!(await claimClose(store, p.ticker, "flatten", now))) { results.push({ ticker: p.ticker, position: p.position, status: "skipped", detail: "the exit watch is closing it right now (or the claim could not be made), press again in a minute" }); continue; }
+    const fresh = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker: p.ticker, limit: "20" }, nowMs: now });
+    if (fresh.status !== 200 || !fresh.body || !Array.isArray(fresh.body.market_positions)) { results.push({ ticker: p.ticker, position: p.position, status: "error", detail: "could not read the position again (HTTP " + fresh.status + "), nothing sent for it" }); continue; }
+    const row = fresh.body.market_positions.find((x) => x.ticker === p.ticker);
+    const nowPos = row ? num(row.position_fp !== undefined ? row.position_fp : row.position) : 0;
+    if (!Number.isFinite(nowPos) || nowPos === 0) { results.push({ ticker: p.ticker, position: p.position, status: "skipped", detail: "already closed" }); continue; }
+    p.position = nowPos;
     const count = Math.abs(p.position);
     const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(p.ticker), nowMs: now });
     const m = mk.status === 200 && mk.body && mk.body.market;
@@ -872,7 +893,7 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
 }
 
 module.exports = {
-  flattenAll, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
