@@ -3832,7 +3832,7 @@ The owner asked to expand to more short-term strategies and markets, so the whol
 2. **KXUSDCAD15M**, never tested (the same).
 3. **KXNATGAS15M**, tested in E5 on discovery and holdout and not shown (closest of the commodities, +1.4c, z 1.9); this is a forward read of a near miss, so it counts as a try.
 
-**Rule (identical to L1).** Every minute inside the L1 window (330 to 400 s before the close) for each candidate's open markets: buy the favourite when its ask (YES) or one minus its bid (NO) is 0.88 to 0.97, one contract, taker at that price, the same fee model as `kalshiSignalLib.takerFee`, hold to settlement. One entry per market (a deterministic document id, so two processes cannot record it twice). Nothing reads a result to decide an entry.
+**Rule (identical to L1).** Every minute inside the L1 window (330 to 400 s before the close) for each candidate's open markets: buy the favourite when its ask (YES) or one minus its bid (NO) is 0.88 to 0.97, one contract, taker at that price, fee 7% x p x (1 - p) per contract (the research's `scalps.fee`, NOT `kalshiSignalLib.takerFee`: that rounds up to a cent per order, which at one contract would charge about 1c where the research charges about 0.5c, and would bias every paper result down; corrected on 2026-10-20 while building, before any entry existed), hold to settlement. One entry per market (a deterministic document id, so two processes cannot record it twice). Nothing reads a result to decide an entry.
 
 **Counterparty.** The same as L1's and no new one is claimed: retail buying the cheap side of a near-certain short-dated market. For the FX pairs there is no earlier evidence that this holds.
 
