@@ -3822,3 +3822,24 @@ The owner asked to expand to more short-term strategies and markets, so the whol
 **Hourly series (78).** 47 are tested or have no settled markets. The other 31 have 1 to 5 days of history; the one with real volume is Miami hourly temperature (median about 1,000 contracts, 5 days); the 8 other temperature series run at 1 to 56; the Treasury, Nikkei, Dow, metals, coin and Nasdaq hourly series sit at a median volume of 0.
 
 **Reading.** The liquid, repeating, short-term Kalshi markets have been covered. What is left is thin (AUDUSD and USDCAD at 15 minutes, 12 days) or untested only because it is not traded. A second strategy therefore has to come from a different rule on markets already covered, or from the 340 daily series (weather was tested and lost, WX1 -3.3c; the economics, financials and entertainment dailies have not been looked at for liquidity), not from a new 15 minute or hourly series. Candidates worth a registered test: L1 unchanged on AUDUSD and USDCAD once they have enough days (the same rule, about 30 more days needed to reach 300 entries), and the hourly Bitcoin and Ethereum ladders again with more days (E4: positive, too few entries to tell from zero).
+
+## Pre-registration: PAPER1, forward paper tracking of three candidates (written 2026-10-20 before any paper entry exists)
+
+**What it is.** A keyless scheduled function (`kalshiPaperTick`) reads public open markets and records what L1's rule WOULD have bought, one contract, no money, and later the public result. It places nothing, signs nothing, holds no key, makes no `/portfolio` call and no POST. Its records are never shown next to the live record.
+
+**Why paper, and why these three.** The owner wants more short-term strategies and markets. The 2026-10-20 census of Kalshi's short-term series found the liquid, repeating markets already covered; what is left is thin or only now trading. Forward paper entries are the only way to add days for a candidate that cannot be tested on history (AUDUSD and USDCAD have 12 days of it) and to read a near miss on days it was not selected on (natural gas). Three candidates, fixed now, no others:
+1. **KXAUDUSD15M**, never tested (12 days of history, median volume about 1,600 contracts a market).
+2. **KXUSDCAD15M**, never tested (the same).
+3. **KXNATGAS15M**, tested in E5 on discovery and holdout and not shown (closest of the commodities, +1.4c, z 1.9); this is a forward read of a near miss, so it counts as a try.
+
+**Rule (identical to L1).** Every minute inside the L1 window (330 to 400 s before the close) for each candidate's open markets: buy the favourite when its ask (YES) or one minus its bid (NO) is 0.88 to 0.97, one contract, taker at that price, the same fee model as `kalshiSignalLib.takerFee`, hold to settlement. One entry per market (a deterministic document id, so two processes cannot record it twice). Nothing reads a result to decide an entry.
+
+**Counterparty.** The same as L1's and no new one is claimed: retail buying the cheap side of a near-certain short-dated market. For the FX pairs there is no earlier evidence that this holds.
+
+**Pass bar for promotion to a real-money slot, fixed now.** One read per candidate, on or after **2026-11-30** (about 40 days of entries), at least **300** paper entries and at least **10** days; mean net above zero; day clustered z at least **2.1**; both halves of the days positive; positive with fees x1.2; and then still only a candidate for a small capped slot with its own loss stop that cannot hold a position at the same time as L1's (see CLAUDE.md, "L1 is the only strategy"). A candidate that does not reach 300 entries by 2026-12-31 reads `NOT_ENOUGH_DATA`, never a pass or a fail. The read is run **once**; if the data are not enough it is repeated only after the minimum is met, never to chase a pass.
+
+**Numeric prediction, before the first entry.** AUDUSD and USDCAD: net about +0.3c per entry, z under 1.5 at 40 days, **FALSIFIED or NOT_ENOUGH_DATA** (FX 15 minute markets are thin and the three FX pairs already tested were negative: -0.6c to -4.3c in the earlier FX check). Natural gas: about +0.5c, z under 1.5, FALSIFIED. Minimum detectable edge at 300 entries is about +1.0c, so a true +0.5c edge cannot be seen.
+
+**Kill criterion.** Any bar condition failing is FALSIFIED. The paper record has nothing to say about slippage on a real order at size; a pass is only permission to consider a small live slot.
+
+**Count.** Three tries: the running total in this file was about 4,625 after TP1, so it is about 4,628.
