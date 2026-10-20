@@ -529,6 +529,7 @@
   .kal-brow:first-child{ border-top:0; padding-top:0; }
   .kal-brow-main{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
   .kal-brow-px{ font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; white-space:nowrap; }
+  .kal-brow-side{ font-weight:600; font-size:12px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
   .kal-status{ color:var(--muted); font-size:12.5px; }
   .kal-books{ display:grid; gap:10px; }
   .kal-name{ font-weight:600; }
@@ -2376,7 +2377,7 @@
       var left = kalshiSecsLeft(m.closeTime, now);
       return '<div class="kal-brow"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
         '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
-        '<div style="text-align:right"><div class="kal-brow-px">' + (hasBook ? (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
+        '<div style="text-align:right"><div class="kal-brow-px" title="The price of a YES contract: what buyers bid and what sellers ask. A NO contract costs 100c minus these.">' + (hasBook ? '<span class="kal-brow-side">Yes</span> ' + (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
         '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + kalshiSparkFor(m) + '</div>';
     }).join('');
     st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
