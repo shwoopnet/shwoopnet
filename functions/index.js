@@ -564,10 +564,15 @@ async function pushSend(db, kinds, doc, tagBase) {
   const subsSnap = await db.collection("kalshiPushSubs").get();
   const subs = subsSnap.docs.map((d) => ({ id: d.id, subscription: d.data().subscription })).filter((x) => x.subscription);
   if (!subs.length) return;
+  // The last 24 hours of the bot's own trades go into a settled or sold alert, so the lock screen says how the day is going. One read of the recent orders, only when such an alert is sent.
+  let ctx = {};
+  if (kinds.includes("settled") || kinds.includes("sell")) {
+    try { const now = Date.now(); ctx = { day: push.dayNet((await db.collection("kalshiLiveOrders").where("ts", ">=", now - 24 * 3600 * 1000).get()).docs.map((d) => d.data()), now) }; } catch (e) { ctx = {}; }
+  }
   const priv = KALSHI_PUSH_VAPID_PRIVATE.value();
   const details = { subject: PUSH_SUBJECT, publicKey: push.publicKeyFromPrivate(priv), privateKey: priv };
   for (const kind of kinds) {
-    const m = push.message(kind, doc);
+    const m = push.message(kind, doc, ctx);
     await push.sendAll({
       subs, payload: { title: m.title, body: m.body, tag: m.tag || tagBase },
       send: (subscription, body) => webpush.sendNotification(subscription, body, { vapidDetails: details, TTL: 3600, urgency: "high" }),

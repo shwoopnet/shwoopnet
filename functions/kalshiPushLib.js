@@ -44,17 +44,48 @@ function sessionKinds(before, after) {
   return [];
 }
 
-function message(kind, o) {
-  const name = nameOf(o);
-  if (kind === "enter") return { title: "Bot bought " + name, body: Number(o.fillCount) + " " + String(o.side || "").toUpperCase() + (Number.isFinite(Number(o.price)) ? " at about " + Math.round(Number(o.price) * 100) + "c" : ""), tag: "enter-" + (o.clientOrderId || o.ticker) };
-  if (kind === "sell") return { title: "Bot sold " + name, body: "The 25c exit " + String(o.exitStatus || "sold") + (Number.isFinite(Number(o.exitCount)) ? ": " + Number(o.exitCount) + " contracts" : ""), tag: "sell-" + (o.clientOrderId || o.ticker) };
-  if (kind === "settled") {
-    const pnl = Number(o.settledPnl), n = Number(o.fillCount);
-    const money = Number.isFinite(pnl) ? (pnl >= 0 ? "+$" : "-$") + Math.abs(pnl).toFixed(2) : "";
-    const title = !Number.isFinite(pnl) || pnl === 0 ? "Bot closed " + name : (pnl > 0 ? "Bot won " : "Bot lost ") + name;
-    return { title, body: (money ? money + " on " : "") + (Number.isFinite(n) && n > 0 ? n + (n === 1 ? " contract" : " contracts") : "the trade"), tag: "settled-" + (o.clientOrderId || o.ticker) };
+// The close time in Central, from the ticker (KXBTC15M-26OCT201330-30: 13:30 Eastern, so 12:30 PM CT; Central is always one hour behind Eastern). null when the ticker is not that shape.
+function closesAt(ticker) {
+  const m = /^KX[A-Z]+?15M-\d{2}[A-Z]{3}\d{2}(\d{2})(\d{2})-\d+$/.exec(String(ticker || ""));
+  if (!m || Number(m[1]) > 23 || Number(m[2]) > 59) return null;
+  const h = (Number(m[1]) + 23) % 24;
+  return (h % 12 === 0 ? 12 : h % 12) + ":" + m[2] + " " + (h < 12 ? "AM" : "PM") + " CT";
+}
+const money = (v) => (v >= 0 ? "+$" : "-$") + Math.abs(v).toFixed(2);
+// What the bot's own trades did over the last 24 hours (settled ones, in the bot's own figures; trades the owner closed by hand have no figure and are left out). Pure.
+function dayNet(orders, now) {
+  let net = 0, n = 0;
+  for (const t of orders || []) {
+    if (!t || t.strategy !== "L1" || t.settled !== true || t.result === "hand" || !Number.isFinite(Number(t.settledPnl)) || !(Number(t.ts) >= now - 24 * 3600 * 1000)) continue;
+    net += Number(t.settledPnl); n++;
   }
-  return { title: "Check the bot", body: o && o.series ? name + ": the exit " + String(o.exitStatus || o.status || "needs a look") : "The session ended: " + String((o && o.endedBecause) || "see the page").slice(0, 80), tag: "issue-" + ((o && (o.clientOrderId || o.endedAt)) || "x") };
+  return { net: Math.round(net * 100) / 100, n };
+}
+const dayText = (ctx) => (ctx && ctx.day && ctx.day.n > 0 ? "Last 24h " + money(ctx.day.net) + " (" + ctx.day.n + (ctx.day.n === 1 ? " trade" : " trades") + ")" : "");
+const joinParts = (...p) => p.filter(Boolean).join(" · ");
+
+// The words (v2, Oct 20, 2026). iOS stacks every alert from the site as "5 Notifications", showing only the title, so the title carries the facts (market, size, price, the amount) and the body the
+// rest. The tag is the TRADE, not the event: a sell or a settlement replaces the buy alert of the same trade in place (the service worker renotifies), so the lock screen holds at most one line per
+// trade. An issue keeps its own tag, so it is never replaced by a routine alert.
+function message(kind, o, ctx) {
+  const name = nameOf(o), trade = "trade-" + ((o && (o.clientOrderId || o.ticker)) || "x");
+  const n = Number(o && o.fillCount), px = Number(o && o.price);
+  const size = (Number.isFinite(n) && n > 0 ? n + " " + String(o.side || "").toUpperCase() : "") + (Number.isFinite(px) ? " at about " + Math.round(px * 100) + "c" : "");
+  if (kind === "enter") {
+    const risk = Number(o.maxCost);
+    return { title: "Bought " + name + (size ? ": " + size : ""), body: joinParts(Number.isFinite(risk) ? "$" + risk.toFixed(2) + " at risk" : "", closesAt(o.ticker) ? "closes " + closesAt(o.ticker) : ""), tag: trade };
+  }
+  if (kind === "sell") {
+    const pnl = Number(o.settledPnl);
+    return { title: "Sold " + name + " early" + (Number.isFinite(pnl) ? ": " + money(pnl) : ""), body: joinParts("The 25c exit " + String(o.exitStatus || "sold") + (Number.isFinite(Number(o.exitCount)) ? " " + Number(o.exitCount) + " contracts" : ""), dayText(ctx)), tag: trade };
+  }
+  if (kind === "settled") {
+    const pnl = Number(o.settledPnl);
+    const title = !Number.isFinite(pnl) || pnl === 0 ? "Closed " + name : (pnl > 0 ? "Won " : "Lost ") + name + " " + money(pnl);
+    return { title, body: joinParts(size, dayText(ctx)), tag: trade };
+  }
+  if (o && o.series) return { title: "Check the bot: " + name + " exit " + String(o.exitStatus || o.status || "needs a look"), body: "Open the Kalshi page and look at the order", tag: "issue-" + (o.clientOrderId || o.ticker) };
+  return { title: "Bot stopped: " + String((o && o.endedBecause) || "see the page").slice(0, 60), body: "It stays off until you restart it on the Kalshi page", tag: "issue-" + ((o && o.endedAt) || "stop") };
 }
 
 // Sends one payload to every stored subscription. A subscription the push relay says is gone (404 or 410) is removed; any other failure leaves it for the next alert. Never throws.
@@ -85,4 +116,4 @@ function cleanSubscription(raw) {
 }
 const subId = (endpoint) => crypto.createHash("sha256").update(String(endpoint)).digest("hex").slice(0, 40);
 
-module.exports = { publicKeyFromPrivate, flags, orderKinds, sessionKinds, message, sendAll, cleanSubscription, subId, NAMES };
+module.exports = { publicKeyFromPrivate, flags, orderKinds, sessionKinds, message, closesAt, dayNet, sendAll, cleanSubscription, subId, NAMES };
