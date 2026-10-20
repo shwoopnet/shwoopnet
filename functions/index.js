@@ -54,6 +54,7 @@ const book = require("./kalshiBookLib");
 const marketTape = require("./marketTapeLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
+const paper = require("./kalshiPaperLib");
 const push = require("./kalshiPushLib");
 const webpush = require("web-push");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
@@ -552,6 +553,41 @@ exports.kalshiLiveArmed = onSchedule(
     }
     await watchdog.sendAll(fetch, watchdog.pingsFor({ base: KALSHI_WATCHDOG_URL.value(), ok: !failure, reason: failure && failure.message }));
     if (failure) throw failure;
+  }
+);
+
+// ---- The paper tracker (PAPER1), keyless ---------------------------------------------------------------------------------------------------
+// Records what L1's rule WOULD have bought on three candidate markets (kalshiPaperLib.js), one contract, no money, and settles each from the public result. It holds NO secret, signs nothing, calls no
+// /portfolio endpoint and sends no order: public market reads and its own Firestore records only. Each entry document is created once (its id is the ticker), so two processes during a deploy cannot
+// record a market twice. It is not imported by, and shares nothing with, the trading code; a failure here is logged and costs a paper row at most.
+async function kalshiFetchMarket(ticker) {
+  for (const base of KALSHI_HOSTS) {
+    try {
+      const res = await fetch(base + "/markets/" + encodeURIComponent(ticker), { signal: AbortSignal.timeout(8000), headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" } });
+      if (res.ok) { const data = await res.json(); return data.market || null; }
+    } catch (e) { /* try the next host */ }
+  }
+  return null;
+}
+exports.kalshiPaperTick = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 50, retryCount: 0, memory: "256MiB" },
+  async () => {
+    try {
+      ensureDefaultAdminApp();
+      const col = getFirestore().collection("kalshiPaperOrders");
+      const r = await paper.runPaperTick({
+        now: Date.now(),
+        store: {
+          async openDocs() { return (await col.where("settled", "==", false).limit(60).get()).docs.map((d) => ({ id: d.id, data: d.data() })); },
+          async create(id, doc) { try { await col.doc(id).create(doc); return true; } catch (e) { if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false; throw e; } },
+          async update(id, patch) { await col.doc(id).update(patch); },
+        },
+        fetchSeries: (series) => kalshiFetchSeries(series, "open", 6),
+        fetchMarket: kalshiFetchMarket,
+        log: (m) => console.error("kalshiPaperTick: " + m),
+      });
+      if (r.entries || r.settled) console.log("kalshiPaperTick: entries=" + r.entries + " settled=" + r.settled);
+    } catch (e) { console.error("kalshiPaperTick: " + String((e && e.message) || e).slice(0, 200)); }
   }
 );
 

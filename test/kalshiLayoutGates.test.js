@@ -665,7 +665,7 @@ gates.Y40 = () => {
 // Oct 12, 2026 at the owner's request ("lets go back to only L1 for now": the strategies must not overlap in mindset or position). Live and paper never shared a column, and now there is no paper.
 gates.Y41 = () => {
   assert.ok(!/id="kalLens"|data-lens=|kalshiLens|kal-lens|kalPaperNote|kal-paper-note/.test(html), 'no strategy switch, no paper note, no view state');
-  assert.ok(!/kalshiOpening|watchKalshiOpening|kalshiLane|kalshiPaper|kalChartsO|kalBotOpenO|kalBotClosedO|kalBotTotalsO|kalPerfWrapO|kalPerfO|kalChartLineO|kalChartPieO|kalChartBarsO/.test(html), 'no opening records, lane table, paper rows or paper charts');
+  assert.ok(!/kalshiOpening|watchKalshiOpening|kalshiLane|kalChartsO|kalBotOpenO|kalBotClosedO|kalBotTotalsO|kalPerfWrapO|kalPerfO|kalChartLineO|kalChartPieO|kalChartBarsO/.test(html), 'no opening records, lane table, opening paper rows or paper charts (the PAPER1 candidates card, Oct 20, 2026, is a different thing: kalshiPaperOrders, kalPaperCard)');
   assert.ok(!/Opening strategy|early favourite|early underdog|paper F|paper U/.test(html), 'no opening wording is left on the page');
   assert.ok(/if\(ses && ses\.active === true\)\{/.test(html), 'the live stake row follows the live session alone');
 };
