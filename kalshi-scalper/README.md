@@ -3810,3 +3810,15 @@ Both pages were written from this README and the owner's figures; nothing in the
 **What it does not say.** It uses minute candles read at five checks before the close, so a spike to 99c between checks, or a bid at 99c that a real sell could not fill at size, is not seen; both can only make the live rule worse than this. Four contracts at the touch is small, so depth is not the issue.
 
 **Decision.** Nothing built, nothing changed live. Running count of tries on Kalshi: about 4,625.
+
+## Information: a census of Kalshi's short-term series (2026-10-20, counts and volumes only, not a try)
+
+The owner asked to expand to more short-term strategies and markets, so the whole series catalog was read (public `/series`, then `/markets?status=settled` with a 69 day window for each untested series). Nothing was priced or tested.
+
+**Catalog.** 15,289 series; short-term repeating ones: 35 at 15 minutes, 78 hourly, 340 daily (weather 136, financials 105, economics 64, crypto 61, entertainment 30, commodities 19).
+
+**15 minute series (35).** 19 are already tested (every liquid crypto and commodity one, EURUSD, GBPUSD, USDJPY). Of the 16 never tested: Brent, Cardano, Bitcoin Cash, TON, the Dow, the S&P 500 and the Nasdaq 100 have **no settled markets at all in the last 69 days** (listed, not trading); the four Treasury yield series (2, 5, 10, 30 year) have 66 markets on **2 days** at a median volume of **1 to 4 contracts**; the two "coin race" and "comparison" series are not up or down markets; one is a test series. **Only AUDUSD and USDCAD are live and new: 837 settled markets each on 12 days, median volume about 1,600 contracts a market** (for scale, gold is about 458,000, XRP 74,000, and the thinnest series tested before were 4,000 to 10,000).
+
+**Hourly series (78).** 47 are tested or have no settled markets. The other 31 have 1 to 5 days of history; the one with real volume is Miami hourly temperature (median about 1,000 contracts, 5 days); the 8 other temperature series run at 1 to 56; the Treasury, Nikkei, Dow, metals, coin and Nasdaq hourly series sit at a median volume of 0.
+
+**Reading.** The liquid, repeating, short-term Kalshi markets have been covered. What is left is thin (AUDUSD and USDCAD at 15 minutes, 12 days) or untested only because it is not traded. A second strategy therefore has to come from a different rule on markets already covered, or from the 340 daily series (weather was tested and lost, WX1 -3.3c; the economics, financials and entertainment dailies have not been looked at for liquidity), not from a new 15 minute or hourly series. Candidates worth a registered test: L1 unchanged on AUDUSD and USDCAD once they have enough days (the same rule, about 30 more days needed to reach 300 entries), and the hourly Bitcoin and Ethereum ladders again with more days (E4: positive, too few entries to tell from zero).
