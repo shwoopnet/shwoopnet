@@ -294,6 +294,17 @@ async function runArmedTick(args) {
 // price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
 const L1_BAND = [0.88, 0.97];
 const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
+// Early entry probes (the research session's FWD7, the owner: "live probes at 10 minutes", Oct 21, 2026). XRP and natural gas are entered about 10 minutes before the close INSTEAD of 6, one contract, to test whether
+// entering earlier beats the 6 minute rule (the 69 day history says it might; it has not been tested live). It is the same rule on the same market, never a second position: both entries use the client
+// order id "L1-" + ticker, and these two series no longer have a 6 minute window at all, so a market is decided once, at 10 minutes. Every order records
+// which lead it was entered at (entryLead) so the two can be read apart afterwards.
+const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M", "KXBTC15M"];
+const EARLY_WINDOW_MS = [570000, 640000];   // about 10 minutes left
+function entryLead(series, left) {
+  // XRP and natural gas decide ONLY at 10 minutes (the owner's choice, Oct 21, 2026): a market not in the band then is skipped, not tried again at 6, so the 10 minute claim is tested on its own.
+  if (EARLY_PROBE_SERIES.includes(series)) return left >= EARLY_WINDOW_MS[0] && left <= EARLY_WINDOW_MS[1] ? "10m" : null;
+  return left >= L1_WINDOW_MS[0] && left <= L1_WINDOW_MS[1] ? "6m" : null;
+}
 // Not a trading limit. Bitcoin and gold have 192 markets in a day (96 each), so 200 orders in any rolling 24 hours can never be reached by
 // normal trading; it only stops a runaway loop from sending orders without end. Past it the bot waits (it does not end the session) and carries
 // on by itself once older orders fall out of the window. The loss stop is the real limit.
@@ -727,13 +738,13 @@ async function runL1Tick(args) {
   const tradable = L1_SERIES.filter((x) => !dropped.includes(x));
   // In list order (Bitcoin, gold, Ethereum): when the window's room runs short it is the later series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
-    && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1])
+    && entryLead(q.series, Date.parse(q.m.close_time) - now) !== null)
     .sort((x, y) => L1_SERIES.indexOf(x.series) - L1_SERIES.indexOf(y.series));
   if (!candidates.length) {
     // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
     const opens = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status))
-      .map((q) => Date.parse(q.m.close_time) - L1_WINDOW_MS[1]).filter((t) => t > now);
-    await note("Watching. Orders go in about 6 minutes before a close, and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
+      .map((q) => Date.parse(q.m.close_time) - (EARLY_PROBE_SERIES.includes(q.series) ? EARLY_WINDOW_MS[1] : L1_WINDOW_MS[1])).filter((t) => t > now);
+    await note("Watching. Orders go in about 6 minutes before a close (10 for Bitcoin, XRP and natural gas), and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
     return { skipped: "no market in the window" };
   }
 
@@ -750,7 +761,8 @@ async function runL1Tick(args) {
     const m = mk.status === 200 && mk.body && mk.body.market;
     if (!m) { results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
     const left = Date.parse(m.close_time) - now;
-    if (!["active", "open"].includes(m.status) || left < L1_WINDOW_MS[0] || left > L1_WINDOW_MS[1]) { results.push(ticker + ": not open in the 6 minute window"); continue; }
+    const lead = entryLead(c.series, left);
+    if (!["active", "open"].includes(m.status) || !lead) { results.push(ticker + ": not open in its entry window"); continue; }
     const pick = l1Pick(m);
     if (!pick) { results.push(ticker + ": no side is priced 88c to 97c"); continue; }
     const cost1 = pick.worst + bot.takerFee(pick.worst, 1);
@@ -783,7 +795,7 @@ async function runL1Tick(args) {
 
     const cid = "L1-" + ticker;
     const record = {
-      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
+      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", entryLead: lead, count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
       // Written false so the settle sweep can ask for "filled and not settled" and read a handful of documents each minute instead of every order ever filled (a Firestore read is billed).
@@ -854,7 +866,7 @@ const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
 // epoch starts on one), so the minutes either side are covered too. Idle means ALL of: outside those minutes, and no filled L1 order that is not settled. Anything that cannot be
 // read counts as NOT idle: skipping the watch is the unsafe direction, running it for nothing only costs compute.
 const EXIT_BUY_MINUTES = (() => {
-  const first = Math.floor((900000 - L1_WINDOW_MS[1]) / 60000) - 1, last = Math.floor((900000 - L1_WINDOW_MS[0]) / 60000) + 1;
+  const first = Math.floor((900000 - Math.max(L1_WINDOW_MS[1], EARLY_WINDOW_MS[1])) / 60000) - 1, last = Math.floor((900000 - L1_WINDOW_MS[0]) / 60000) + 1;
   const out = []; for (let m = first; m <= last; m++) out.push(m);
   return out;
 })();
@@ -1026,5 +1038,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };

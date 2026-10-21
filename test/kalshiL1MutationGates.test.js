@@ -16,8 +16,10 @@ const pem = ed.privateKey.export({ type: 'pkcs8', format: 'pem' });
 const gates = {};
 
 const T = 'KXBTC15M-26OCT071415-15';
+// Bitcoin, XRP and natural gas decide 10 minutes before the close, the rest 6, so a test about something else lands in the series' own entry window.
+const leftFor = (series) => (live.EARLY_PROBE_SERIES.includes(series) ? 600000 : 360000);
 const quote = (over = {}, series = 'KXBTC15M', ticker = T) => ({ series, m: Object.assign({
-  ticker, status: 'active', close_time: iso(NOW + 360000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
+  ticker, status: 'active', close_time: iso(NOW + leftFor(series)), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
 
 function world(opts = {}) {
   const calls = [], posts = [], docs = new Map(), events = [];
@@ -35,7 +37,7 @@ function world(opts = {}) {
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
       const over = (opts.fresh && opts.fresh[tk]) || {};
-      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + 360000), exchange_index: tk.includes('KXGOLD') ? 0 : 2, ...(opts.results && opts.results[tk] ? { result: opts.results[tk] } : {}), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
+      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + leftFor(tk.split('-')[0])), exchange_index: tk.includes('KXGOLD') ? 0 : 2, ...(opts.results && opts.results[tk] ? { result: opts.results[tk] } : {}), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
     }
     if (url.endsWith('/portfolio/balance')) return reply(opts.balStatus || 200, opts.balance || { balance_breakdown: [{ balance: '70.0000', exchange_index: 2 }, { balance: '30.0000', exchange_index: 0 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: opts.existing || [] });
@@ -80,11 +82,14 @@ gates.M2 = () => {
 
 // A market 329 s or 401 s out is outside the 330 to 400 s window, on the list and on the fresh read; 331 s and 399 s are inside.
 gates.M3 = async () => {
-  for (const [ms, expect] of [[329000, 0], [331000, 1], [399000, 1], [401000, 0]]) {
-    const close_time = iso(NOW + ms);
-    const w = world({ fresh: { [T]: { close_time } } });
-    await tick(w, { quotes: [quote({ close_time })] });
-    assert.strictEqual(w.posts.length, expect, ms + ' ms before the close');
+  // The edges of the entry windows: Bitcoin decides 10 minutes before the close (570 to 640 s), Ethereum 6 minutes (330 to 400 s). One second outside either is nothing.
+  for (const [series, ticker, cases] of [['KXBTC15M', T, [[569000, 0], [571000, 1], [639000, 1], [641000, 0], [360000, 0]]], ['KXETH15M', 'KXETH15M-26OCT071415-15', [[329000, 0], [331000, 1], [399000, 1], [401000, 0], [600000, 0]]]]) {
+    for (const [ms, expect] of cases) {
+      const close_time = iso(NOW + ms);
+      const w = world({ fresh: { [ticker]: { close_time } } });
+      await tick(w, { quotes: [quote({ close_time }, series, ticker)] });
+      assert.strictEqual(w.posts.length, expect, series + ' ' + ms + ' ms before the close');
+    }
   }
 };
 

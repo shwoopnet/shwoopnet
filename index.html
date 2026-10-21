@@ -344,14 +344,17 @@
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
   }
-  .brand:hover .brand-name{ color: var(--amber); }
+  /* Hover (the owner, Oct 21, 2026): the wordmark used to turn --amber under the pointer, which is BLACK in Mono Ink, so the white letters went dark. No colour change now; the letters hop one after another instead.
+     Transform only, off under the OS reduce-motion setting and the Limit graphics switch. */
+  .brand-name span{ display:inline-block; transition: transform .25s cubic-bezier(.2,.9,.3,1.5) calc(var(--i) * 40ms); }
+  .brand:hover .brand-name span{ transform: translateY(-5px); }
   .brand-text{ position:relative; }
   .brand-name-row{ display:flex; align-items:center; gap:8px; }
   /* The wordmark (the owner's idea, Oct 20, 2026): bubbly graffiti letters, white inside with a thick black outline. The outline is a ring of hard text shadows rather than -webkit-text-stroke, so it is
      the same in every browser and the white fill stays whole. It is black in every theme and skin on purpose: on the dark page it merges with the background and leaves the white letters with a soft drop. */
-  .brand-name{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; font-size: 26px; line-height:1.05; letter-spacing: 0.04em; color:#fff;
+  .brand-name{ display:flex; font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; font-size: 26px; line-height:1.05; letter-spacing: 0.04em; color:#fff;
     text-shadow: -2px -2px 0 #000, 0 -2px 0 #000, 2px -2px 0 #000, 2px 0 0 #000, 2px 2px 0 #000, 0 2px 0 #000, -2px 2px 0 #000, -2px 0 0 #000, -1px -2px 0 #000, 1px -2px 0 #000, 2px -1px 0 #000, 2px 1px 0 #000, 1px 2px 0 #000, -1px 2px 0 #000, -2px 1px 0 #000, -2px -1px 0 #000, 2.9px 3.1px 0 var(--brand-depth), 3.8px 4.2px 0 var(--brand-depth), 4.7px 5.3px 0 var(--brand-depth), 5.6px 6.4px 0 var(--brand-depth), 6.5px 7.5px 0 var(--brand-depth), 7.4px 8.6px 0 var(--brand-depth), 8.3px 9.7px 0 var(--brand-depth), 9.2px 10.8px 0 var(--brand-depth), 12px 15px 10px rgba(0,0,0,0.45);
-    transition: color .15s ease; }
+    }
   /* FINANCIALS under the wordmark (the company is Shwoop Financials): plain spaced capitals, so the bubbly letters stay the one loud thing. No line, no arrow (the owner dropped both). */
   .brand-fin{ font-family:'Public Sans', sans-serif; font-weight:800; font-size:11px; letter-spacing:.5em; text-transform:uppercase; color:var(--paper); margin-top:10px; padding-left:2px; line-height:1; }
 
@@ -795,6 +798,8 @@
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
     .bg-grid{ animation: none; }
+    .brand-name span{ transition: none; }
+    .brand:hover .brand-name span{ transform: none; }
     .kal-console .kal-brow{ transition: none; }
     .kal-console .kal-brow:hover{ transform: none; }
     .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .index-card, .page.enter .kal-tile{ animation: none; }
@@ -806,6 +811,8 @@
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
   [data-reduce-motion="true"] .bg-grid{ animation: none; }
+  [data-reduce-motion="true"] .brand-name span{ transition: none; }
+  [data-reduce-motion="true"] .brand:hover .brand-name span{ transform: none; }
   /* Limit graphics (the same switch as reduce motion, renamed Oct 21, 2026): it also drops the glow, the grid and the ghost wordmark, so the page is plain panels on a flat ground. */
   [data-reduce-motion="true"] .bg-ambient::before, [data-reduce-motion="true"] .bg-ambient::after, [data-reduce-motion="true"] .bg-ghost, [data-reduce-motion="true"] .bg-grid{ display:none; }
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
@@ -1090,7 +1097,7 @@
     <button class="brand" id="brandHomeBtn" aria-label="Go to home page">
       <div class="brand-text">
         <div class="brand-name-row">
-          <div class="brand-name">SHWOOP</div>
+          <div class="brand-name" role="img" aria-label="Shwoop"><span aria-hidden="true" style="--i:0">S</span><span aria-hidden="true" style="--i:1">H</span><span aria-hidden="true" style="--i:2">W</span><span aria-hidden="true" style="--i:3">O</span><span aria-hidden="true" style="--i:4">O</span><span aria-hidden="true" style="--i:5">P</span></div>
         </div>
         <div class="brand-fin">Financials</div>
       </div>
@@ -1236,7 +1243,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. Markets, in order: gold, Bitcoin, Ethereum, XRP, Dogecoin, then three one-contract tests (AUD/USD, USD/CAD, natural gas).</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes (Bitcoin, XRP and natural gas are entered about 10 minutes out instead, one contract, as a test), then holds to settlement. Markets, in order: gold, Bitcoin, Ethereum, XRP, Dogecoin, then three one-contract tests (AUD/USD, USD/CAD, natural gas).</div>
                 <div class="kal-note"><b>Size.</b> Only gold grows with the account (one contract per $43 of balance, plus a contract from profit). Every other market is always one contract. At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
@@ -3082,7 +3089,7 @@
     var endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
     var whyEl = document.getElementById('kalL1Why');
     if(whyEl){ var why = kalshiStopReason(s, endedEv, halted, switchOff, function(ms){ return kalshiWhen(ms, now); }); whyEl.textContent = why; whyEl.hidden = !why; }
-    document.getElementById('kalL1Status').textContent = running ? String(s.lastNote || '').replace(/^Watching\. Orders go in about 6 minutes before a close, and no market is at that point right now\./, 'Watching.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
+    document.getElementById('kalL1Status').textContent = running ? String(s.lastNote || '').replace(/^Watching\. Orders go in about 6 minutes before a close(?: \(10 for (?:Bitcoin, )?XRP and natural gas\))?, and no market is at that point right now\./, 'Watching.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
     renderKalshiCharts();
