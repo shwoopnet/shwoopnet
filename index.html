@@ -563,6 +563,7 @@
   .data-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-top:20px; }
   .data-grid > .kal-card{ margin-bottom:0; min-width:0; }
   .data-tiles{ margin-top:6px; }
+  .data-details > summary{ cursor:pointer; list-style:none; margin:0; } .data-details[open] > summary{ margin-bottom:6px; } .data-details .kal-perf{ padding:6px 0 0 0; }
   .data-row{ display:grid; grid-template-columns:1.3fr repeat(5,minmax(0,1fr)); gap:6px; padding:9px 18px; font-size:12.5px; border-top:1px solid var(--border); align-items:center; }
   .data-row.data-head{ color:var(--muted); font-size:11px; border-top:0; }
   .data-row span:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
@@ -633,6 +634,8 @@
   .kal-tools-body .kal-actions{ margin:4px 0 2px; }
   .kal-tools-body .kal-note:empty, .kal-botmenu-body .kal-note:empty{ display:none; }
   .kal-tools-body .kal-layout-body{ gap:6px; }
+  .kal-tools-group{ display:grid; gap:6px; padding-bottom:10px; border-bottom:1px solid var(--border); } .kal-tools-group:last-child{ border-bottom:0; padding-bottom:0; }
+  .kal-tools-h{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:14px; letter-spacing:.02em; }
   .kal-btn-danger{ background:var(--loss); border-color:var(--loss); color:#fff; }
   .kal-tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
   .kal-tile{ display:flex; flex-direction:column; gap:3px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; min-width:0; }
@@ -1222,22 +1225,29 @@
         <button class="kal-mini" id="kalDataBtn" type="button">Data</button>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
-                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button><button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
-          <div class="kal-note" id="kalPushMsg"></div>
-          <div class="kal-note" id="kalDiagMsg"></div>
-          <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
-          <div class="kal-actions">
-            <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
-            <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
-          </div>
-          <div class="kal-note" id="kalBookMsg"></div>
-          <div class="kal-note" id="kalAcctMsg"></div>
-          <div class="kal-note" id="kalAcctBaseline"></div>
-          <div class="kal-actions">
+          <div class="kal-tools-group"><div class="kal-tools-h">Account</div>
+            <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button></div>
+            <div class="kal-note" id="kalAcctMsg"></div>
+            <div class="kal-note" id="kalAcctBaseline"></div>
+            <div class="kal-actions">
             <button class="kal-btn" id="kalAcctStart" type="button">Start fresh from now (one time)</button>
             <span id="kalAcctStartConfirm" hidden><span class="kal-note">Everything before this moment is ignored from now on, and the balance shown becomes the starting balance. Nothing on Kalshi is changed. Go ahead?</span> <button class="kal-btn" id="kalAcctStartYes" type="button">Yes, start fresh</button> <button class="kal-btn" id="kalAcctStartNo" type="button">Cancel</button></span>
           </div>
-          <details class="kal-fold"><summary class="kal-lbl">Raw account read</summary><div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div></details>
+            <details class="kal-fold"><summary class="kal-lbl">Raw account read</summary><div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div></details>
+          </div>
+          <div class="kal-tools-group"><div class="kal-tools-h">Export</div>
+            <div class="kal-actions"><button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button></div>
+            <div class="kal-note" id="kalDiagMsg"></div>
+            <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
+            <div class="kal-actions">
+            <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
+            <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
+          </div>
+            <div class="kal-note" id="kalBookMsg"></div>
+          </div>
+          <div class="kal-tools-group"><div class="kal-tools-h">Alerts</div>
+            <div class="kal-actions"><button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
+            <div class="kal-note" id="kalPushMsg"></div>
           </div>
         </details>
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
@@ -1270,9 +1280,9 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a Bitcoin, gold or Ethereum 15 minute close, then holds to settlement.</div>
-                <div class="kal-note">At most $2.00 a contract. With scaling on, one contract per $43 of balance.</div>
-                <div class="kal-note">Stops itself if its trades over the last 24 hours are down 12% of the balance (otherwise $10), or if any order goes wrong. Manual trades do not count.</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. Markets, in order: gold, Bitcoin, Ethereum, XRP, Dogecoin, then three one-contract tests (AUD/USD, USD/CAD, natural gas).</div>
+                <div class="kal-note"><b>Size.</b> Only gold grows with the account (one contract per $43 of balance, plus a contract from profit). Every other market is always one contract. At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
+                <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
                 <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool.</div>
                 <div class="kal-note">L1 failed its own test. Nothing here is proof it works.</div>
@@ -1283,7 +1293,6 @@
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
-        <div class="kal-perf" id="kalPerfWrapC"><div id="kalPerf"></div></div>
       </div>
       <div class="kal-card" data-card="positions">
         <div class="kal-card-title">Open positions</div>
@@ -1324,6 +1333,9 @@
       <div class="kal-card" data-card="data-share"><div class="kal-card-title">Share of trades by market</div><div id="dataShare"></div></div>
       <div class="kal-card kal-card-flush" data-card="data-markets"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">By market</div></div><div id="dataMarkets"></div></div>
     </div>
+    <details class="kal-card data-details" id="dataDetails" style="margin-top:20px"><summary class="kal-card-title">All the numbers</summary>
+      <div class="kal-perf" id="kalPerfWrapC"><div id="kalPerf"></div></div>
+    </details>
     <div class="kal-note" id="dataNote"></div>
   </main>
 

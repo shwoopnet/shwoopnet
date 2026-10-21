@@ -57,7 +57,10 @@ gates.Y5 = () => {
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
   const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
   for (const id of ['kalChartLine', 'kalChartPie', 'kalChartBars', 'kalChartRange']) assert.ok(perf.indexOf('id="' + id + '"') > -1, id + ' lives in the charts card on the bot page');
-  assert.ok(!/id="kalPerf"/.test(perf) && /data-card="account">[\s\S]*id="kalPerf"/.test(rail[1]), 'the stat tiles and tables sit in the account card in the rail');
+  // Oct 21, 2026 cleanup: the stat tiles and tables left the account card (a tall column) and live in the Data page's "All the numbers" fold; the account card is the status and the controls.
+  assert.ok(!/id="kalPerf"/.test(perf) && !/id="kalPerf"/.test(rail[1]), 'the stat tiles and tables are not in the rail or the charts card');
+  const dataPage = html.slice(html.indexOf('id="page-data"'), html.indexOf('id="page-settings"'));
+  assert.ok(/<details class="kal-card data-details" id="dataDetails"[\s\S]*id="kalPerfWrapC"><div id="kalPerf"><\/div>/.test(dataPage), 'they sit in a fold on the Data page, closed until opened');
   const trades = /data-card="trades">([\s\S]*)$/.exec(main)[1];
   assert.ok(!/kalChart|kalPerf/.test(trades) && /id="kalBotClosed"/.test(trades), 'the trades card is the table only');
   const page = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
