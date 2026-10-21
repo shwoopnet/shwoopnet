@@ -526,6 +526,14 @@ exports.kalshiLiveArmed = onSchedule(
         const sizingSnap = await sizingRef.get();
         await live.runL1Tick({
           sizingState: sizingSnap.exists ? sizingSnap.data() : null, setSizingState: (st) => sizingRef.set(st),
+          // The probe drop record (kalshiLiveControl/probeRecord): applied to the FRESH document inside a transaction, so two instances during a deploy cannot overwrite each other's entries. Admin read only and no client write (the kalshiLiveControl rule): only this function writes it.
+          updateProbeRecord: (apply) => db.runTransaction(async (tx) => {
+            const ref = db.collection("kalshiLiveControl").doc("probeRecord");
+            const snap = await tx.get(ref);
+            const r = apply(snap.exists ? snap.data() : {});
+            if (r.changed) tx.set(ref, r.record);
+            return r.record;
+          }),
           session, now, setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent,
           quotes: market.quotes, active: market.active, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,

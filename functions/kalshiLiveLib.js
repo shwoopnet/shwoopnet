@@ -596,6 +596,36 @@ function skimAddon(state, now, perContract = 0.93) {
 const L1_WINDOW_CAP_FRACTION = 0.055;
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
 
+// The probe drop rule (DL1, the research session, Oct 21, 2026; the owner: "do it"). A probe market (PROBE_SERIES) is dropped when its last PROBE_DROP_WINDOW settled entries net negative.
+// It is an ADMISSION filter for markets that have not earned a place, NOT a short-term brake: on the five live series the same rule would have hurt, because they bounce after a bad stretch, so it is
+// never applied to them. It only ever REMOVES a series from what the tick may trade, never adds one, and a dropped probe stays dropped (no new entries arrive to change its record), so putting one
+// back is a deliberate code edit or deleting the record by hand, never something the page can do. Fails closed: if the record cannot be read or saved, no probe trades that minute.
+// The record is built from the 24 hours of orders the tick already reads (no extra order reads) and holds only settled, finite results of the bot's own entries; orders closed by hand are not the
+// bot's result and are left out, as everywhere else. Entries from before the record existed are not in it, so the rule cannot fire until the record itself holds PROBE_DROP_WINDOW entries.
+const PROBE_DROP_WINDOW = 200;
+function probeRingUpdate(record, orders, now) {
+  const cur = record && typeof record === "object" ? record : {};
+  const rings = {};
+  for (const sr of PROBE_SERIES) rings[sr] = Array.isArray(cur.rings && cur.rings[sr]) ? cur.rings[sr].filter((e) => e && typeof e.id === "string" && Number.isFinite(e.pnl) && Number.isFinite(e.ts)) : [];
+  let changed = false;
+  for (const sr of PROBE_SERIES) {
+    const have = new Set(rings[sr].map((e) => e.id));
+    const seen = new Set();
+    const fresh = (orders || []).filter((t) => t && t.id && t.series === sr && t.strategy === "L1" && t.settled === true && t.result !== "hand" && Number(t.fillCount) > 0
+      && Number.isFinite(Number(t.settledPnl)) && Number.isFinite(Number(t.ts)) && !have.has(t.id) && !seen.has(t.id) && seen.add(t.id));
+    if (!fresh.length) continue;
+    changed = true;
+    rings[sr] = rings[sr].concat(fresh.map((t) => ({ id: t.id, ts: Number(t.ts), pnl: Number(t.settledPnl) }))).sort((a, b) => a.ts - b.ts).slice(-PROBE_DROP_WINDOW);
+  }
+  const droppedAt = Object.assign({}, cur.droppedAt), newlyDropped = [];
+  for (const sr of PROBE_SERIES) if (probeNet(rings[sr]) !== null && probeNet(rings[sr]) < 0 && !Number.isFinite(droppedAt[sr])) { droppedAt[sr] = now; newlyDropped.push(sr); changed = true; }
+  return { record: { rings, droppedAt }, changed, newlyDropped };
+}
+// The net of a probe's record, or null while it holds fewer than PROBE_DROP_WINDOW entries (too few to judge: never dropped on a short record).
+function probeNet(ring) { return Array.isArray(ring) && ring.length >= PROBE_DROP_WINDOW ? Number(ring.reduce((a, e) => a + e.pnl, 0).toFixed(4)) : null; }
+// Dropped once the record said so and it still does (a stored drop alone is enough: the record cannot gain entries without trading).
+function probeDropped(record, series) { return Boolean(record && record.droppedAt && Number.isFinite(record.droppedAt[series])); }
+
 async function runL1Tick(args) {
   const { session, now, setSession, enabled, active, store, keyId, pem, fetchFn, quotes } = args;
   const log = async (kind, detail) => { if (args.logEvent) { try { await args.logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
@@ -664,7 +694,17 @@ async function runL1Tick(args) {
       : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + (stopAt + allowance).toFixed(2) + " stop" + (allowance > 0 ? " ($" + stopAt.toFixed(2) + " plus $" + allowance.toFixed(2) + " of reinvested profit that was at risk)" : ""));
   }
 
-  const tradable = L1_SERIES;
+  // Probe drop rule (see PROBE_DROP_WINDOW). Only probes can be removed. A record that cannot be read or saved removes ALL probes this minute; the other series trade as usual.
+  let dropped = [];
+  if (typeof args.updateProbeRecord === "function") {
+    try {
+      let newly = [];
+      const rec = await args.updateProbeRecord((cur) => { const u = probeRingUpdate(cur, recentList, now); newly = u.newlyDropped; return u; });
+      for (const sr of PROBE_SERIES) if (probeDropped(rec, sr)) dropped.push(sr);
+      for (const sr of newly) await log("probe dropped", sr + " is dropped: its last " + PROBE_DROP_WINDOW + " settled entries net $" + probeNet(rec.rings && rec.rings[sr]) + ". It stays off until the record is reset by hand.");
+    } catch (e) { dropped = PROBE_SERIES.slice(); }
+  }
+  const tradable = L1_SERIES.filter((x) => !dropped.includes(x));
   // In list order (Bitcoin, gold, Ethereum): when the window's room runs short it is the later series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
     && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1])
@@ -966,5 +1006,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };
