@@ -4365,3 +4365,5 @@ Code `scalper/fund1.py` and `tests/test_fund1.py` were committed before the run;
 4. **Venue risk.** A failure or freeze of the exchange holding the short leg loses the hedge.
 
 **Decision.** `NOT_YET_FALSIFIED` is permission to look for a venue and a forward record, not a switch. The cheapest honest next step is to **record the funding rate of a venue the owner can actually use** (Kalshi's perpetual, a US-accessible perpetual, or a spot-futures basis) for a few weeks and run FUND1 again on that data. That needs the main session or the owner to name the venue; nothing built here. **Tries: 1 (carry family), plus 10 in the ETF family and about 4,641 on Kalshi.**
+
+**Owner's decision on FUND1 (2026-10-21): drop carry.** About $9 a year on $200 at the last 12 months' yield does not pay for the basis, margin and venue risk. No venue search, no premium split, no rerun. The result stands as written.
