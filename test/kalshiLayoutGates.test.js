@@ -550,11 +550,11 @@ gates.Y35 = () => {
   assert.deepStrictEqual(['KXAUDUSD15M-26OCT201615-T1', 'KXUSDCAD15M-X', 'KXNATGAS15M-X', 'KXBTC15M-X', 'KXETH15M-X'].map((t) => name({ ticker: t })), ['AUD/USD', 'USD/CAD', 'Natural gas', 'Bitcoin', 'Ethereum']);
 };
 
-// Y37: the exit watch read back from the bot's own order records, inside More stats. Consequences: slip is trigger bid minus fill, "better or worse than holding" is only
+// Y37: the exit watch read back from the bot's own order records (the numbers behind Copy all stats; the on-page block was removed in the tidy-up, Oct 21, 2026). Consequences: slip is trigger bid minus fill, "better or worse than holding" is only
 // computed where the market's result is known, and a logged-only order (held to settlement) counts its real outcome as the hold result.
 gates.Y37 = () => {
   const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
-  const f = new Function(['kalshiOrderPnl', 'kalshiExitReport', 'kalshiExitHtml'].map(grab).join('\n') + '; return { kalshiExitReport, kalshiExitHtml };')();
+  const f = new Function(['kalshiOrderPnl', 'kalshiExitReport'].map(grab).join('\n') + '; return { kalshiExitReport };')();
   const base = { side: 'yes', count: 10, fillCount: '10', maxCost: 9.6, strategy: 'L1' };
   const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.24, exitAvg: 0.21, settled: true, result: 'exit', settledPnl: -3.0 });
   const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.23 }, settled: true, result: 'no', settledPnl: -9.6 });
@@ -572,23 +572,6 @@ gates.Y37 = () => {
   const mixed = f.kalshiExitReport([sold, heldLost, heldWon, untouched, older, oldSold], { A: 'no' });
   assert.deepStrictEqual([mixed.touched, mixed.earlier], [3, 2], 'two records from the earlier lines are set apart, the three real 25c touches are counted');
   assert.strictEqual(mixed.realised, -3.0, 'and the earlier sale is not added into the 25c result');
-  const out = f.kalshiExitHtml(mixed, (x) => x, (x) => '$' + x.toFixed(2));
-  assert.ok(/Exit at 25c/.test(out) && /Fell to 25c/.test(out), 'the block is labelled 25c');
-  assert.ok(/2 older records, taken under an earlier exit line, are left out\./.test(out) && !/earlier 70c line, not counted here/.test(out), 'how many earlier records it left out is a quiet note under the block, not a wrapped data row');
-  assert.ok(/1 older record, taken under an earlier exit line, is left out\./.test(f.kalshiExitHtml(f.kalshiExitReport([sold, older], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2))), 'and it reads right for one');
-  assert.ok(!/older record/.test(f.kalshiExitHtml(f.kalshiExitReport([sold], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2))), 'no note when nothing was left out');
-  // One line a row. A label long enough to wrap squeezed its figure onto a second line (the old block did it twice), so no label is longer than 24 characters and a figure never wraps.
-  const rowsOf = (html) => [...html.matchAll(/<div[^>]*><span>([^<]*)<\/span><b>([^<]*)<\/b>/g)].map((m) => [m[1], m[2]]);
-  const full = f.kalshiExitHtml(f.kalshiExitReport([sold, heldLost, heldWon, Object.assign({}, base, { ticker: 'P', exitStatus: 'sell failed', exitBid: 0.2, settled: true, result: 'no', settledPnl: -9.6 })], { A: 'no' }), (x) => x, (x) => '$' + x.toFixed(2));
-  const rows = rowsOf(full);
-  assert.ok(rows.length >= 9 && rows.every(([k]) => k.length <= 24), 'every row label fits on one line: ' + rows.filter(([k]) => k.length > 24).map(([k]) => k).join(' | '));
-  assert.deepStrictEqual(rows.map(([k]) => k), ['Fell to 25c', 'Sold', 'Sell failed or skipped', 'Logged, not sent', 'Trigger bid (avg)', 'Sold at (avg)', 'Slip (avg)', 'Realised on sells', 'Won after falling', 'Sells vs holding'], 'the rows, in the order they read');
-  assert.ok(/\.kal-perf-t > div b\{ white-space:nowrap; \}/.test(html), 'a figure never wraps under its label');
-  // A count that is zero is left out, and the sold figures only appear once something was sold.
-  const quiet = rowsOf(f.kalshiExitHtml(f.kalshiExitReport([heldLost], { B: 'no' }), (x) => x, (x) => '$' + x.toFixed(2))).map(([k]) => k);
-  assert.deepStrictEqual(quiet, ['Fell to 25c', 'Sold', 'Logged, not sent', 'Won after falling'], 'nothing sold: no sell figures, no failed row, no partly row');
-  const onlySold = rowsOf(f.kalshiExitHtml(f.kalshiExitReport([sold], null), (x) => x, (x) => '$' + x.toFixed(2))).map(([k]) => k);
-  assert.deepStrictEqual(onlySold, ['Fell to 25c', 'Sold', 'Trigger bid (avg)', 'Sold at (avg)', 'Slip (avg)', 'Realised on sells', 'Won after falling'], 'one clean sell: no logged row, no failed row, and no hold comparison without a market result');
   // The three sell figures are over the SAME sold orders, so they can be subtracted: trigger bid minus sold at is the slip. A logged-only order's bid (here 20c) and a sold order with no bid on record
   // (here a null, which must not count as a 0c bid) are not in them.
   const sold2 = Object.assign({}, base, { ticker: 'S', exitStatus: 'sold', exitCount: 10, exitBid: 0.2, exitAvg: 0.15, settled: true, result: 'exit', settledPnl: -3.6 });
@@ -602,8 +585,6 @@ gates.Y37 = () => {
   assert.ok(Math.abs(win.exitMinusHold - (-3.0 - 0.4)) < 1e-9, 'when the side would have won, selling was worse than holding by the win it gave up (fees included in cost)');
   assert.strictEqual(f.kalshiExitReport([Object.assign({}, sold)], null).holdKnownSold, 0, 'no market result, no hold comparison: never guessed');
   assert.strictEqual(f.kalshiExitReport([untouched], {}).touched, 0);
-  const none = f.kalshiExitHtml(f.kalshiExitReport([untouched], {}), (x) => x, (x) => '$' + x.toFixed(2));
-  assert.ok(/No position has fallen to 25c yet\./.test(none) && !/<b>/.test(none), 'with nothing touched it says so rather than showing zeros as a result');
   assert.ok(/kalshiExitReport\(kalshiLiveOrders/.test(html) && /kalshiStatsText\(kalshiPerfStats\(orders, since\), kalshiExitReport\(/.test(html), 'the exit report is still computed (for the copied stats)');
 };
 

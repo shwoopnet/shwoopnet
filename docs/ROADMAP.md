@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 2026-10-21. Written in plain words on purpose.
+Last updated: 2026-10-21, afternoon. Written in plain words on purpose.
 
 ## The goal
 
@@ -8,29 +8,29 @@ Make money on Kalshi without having to watch it. One bot trades for you. The pla
 
 ## Where we are today
 
-- **One bot is live (L1), on eight markets.** About 6 minutes before each 15 minute market closes, it buys the side that is almost certain to win (priced 88c to 97c) and waits for the result. Five markets are fully sized: Bitcoin, gold, Ethereum, XRP, Dogecoin. Three are one contract each, as a live test: AUD/USD, USD/CAD and natural gas (merged 2026-10-21, **not live until the deploy is run**).
-- **The live record so far (bot only, 2026-10-21):** 303 settled trades, 93.3% won, net **-$2.93**, profit factor 0.98. A win earns about $0.41 and a loss costs about $5.95, so the bot needs 94 wins in 100 to break even and has been at 93.3. Gold is +$28.35 on 98 trades; every other market is slightly negative (Bitcoin -$20.91, Ethereum -$4.18, XRP -$3.53, Dogecoin -$2.66). The exit at 25c fired on 16 trades and sold 14; the page reports those 14 sells as -$73.73 realised in total, which is most of what the 20 losing trades cost. Only 1 of the 4 positions whose result is known would have won if held, which is what a 25c line predicts.
-- **Safety:** one combined limit per 15 minute window (5.5% of the base), a stop at **12%** of the base (changed from 6% on 2026-10-20 after a full open window plus ordinary losses ended the bot with only $6.06 actually lost; open trades are still counted as lost), a sell at 25c, a one-click pause and flatten, and phone alerts for every buy, sell, settle and stop.
-- **The website** has three pages: Market Brief, Kalshi and Settings. New look: bubbly SHWOOP wordmark over FINANCIALS, a short footer with the legal disclosure. The paper-candidates card is gone.
-- **We have tried about 4,630 ideas on the same data. None passed the bar.** On 2026-10-21 three more were tested on history in one sitting and all failed: the gas price ladder (-7.5c a contract), commodity daily ladders (-7.3c, z -4.3) and the approval-rating ladder (not enough data, and its model scored worse than the market). In each, the market's own prices predicted the outcome about three times better than our models. Cost and a well-informed market are what keep winning.
+- **One bot is live (L1), on eight markets.** It buys the side that is almost certain to win (priced 88c to 97c) and waits for the result. Gold keeps the size ladder (6 contracts now). Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract. AUD/USD, USD/CAD and natural gas are one-contract probes. **Since about 2:15 PM CT on 2026-10-21, Bitcoin, XRP and natural gas enter about 10 minutes before the close instead of 6** (a live test); the first one, XRP, won +$0.12.
+- **The live record so far (bot only, 2026-10-21):** 365 settled trades, about 93% won, net **-$4.55**. Gold is +$28.81 on 110 trades; every other market is slightly negative (Bitcoin -$23.34, Ethereum -$1.99, XRP -$6.50, Dogecoin -$1.07, natural gas -$0.47). A win earns about $0.40 and a loss costs about $6, so the bot needs 94 wins in 100 to break even and sits at about 93.
+- **Safety:** one combined limit per 15 minute window (5.5% of the base), a stop at **12%** of the base, a sell at 25c (a study this week found the line barely matters on Bitcoin, XRP and natural gas, so it stays), a one-click pause and flatten, phone alerts, and a rule that drops a probe market whose last 200 trades net negative.
+- **The website** has four pages: Market Brief, Bot, Data (read only) and Settings. This week: Privacy toggle, a Today line, readable light themes, plain headings and numbers with the bubble font only on the logo, and a layout fix so the trades list no longer squeezes into four-line rows.
+- **We have tried about 4,640 ideas on the same data. None passed the bar for a deployable edge.** This week's tries (decision trees, volatility-managed ETFs, risk parity, factor ETFs, hedges, scale-outs) were all falsified. Capital, not ideas, is the limit: slow strategies tested so far are worth about $5 to $9 a year at $200.
 
 ## What you need to do now
 
-1. Merge any open pull request you want live (I open them on request).
-2. From `~/shwoopnet`, after `git pull origin main`, run `bash functions/deploy-sizing.sh` then `bash functions/deploy-push.sh`. Start right after an entry minute has passed (about :11, :26, :41 or :56 on the clock). This puts the 12% stop and the three new markets live.
-3. Open the Kalshi page and check it still says **Running** and that the rules text says "down 12%".
-4. Tap **Tools, then Copy all orders**, and send me the result, so I can line every trade up against what was changed when.
+1. Merge [#454](https://github.com/shwoopnet/shwoopnet/pull/454) (order exports carry the entry tag) so the research reads can split 10-minute from 6-minute orders. It only changes the exports.
+2. Merge the tidy and fixes pull request when you are ready (it has this refresh in it).
+3. Send a Recent trades screenshot now and then, or use **Tools, Copy all orders**, so the first reads of the 10-minute entry can be checked.
+4. Decide what to do about the equities server on Render (below).
 
 ## What I am doing next
 
 | Job | In plain words | Done when |
 |---|---|---|
-| Read the first fills on the three new markets | They are thin (about 1,600 contracts a market), so some orders will show "no fill". That is a real result | A short note on fill rate, fees and result per market |
-| Compare the bot's profit with what we added | The more markets and size we add, the bigger the losses and the same small wins. Check it against the order list | A table of result by change, with the noise caveat |
-| Gold first | Gold is the only market that clears the bar on its own (+1.54c a contract, z 2.9 on 68 days, and +$28 live). Build a forward scoreboard per market, then give more size only to the ones that keep earning | Rules written first, then built |
-| Maker (resting) orders | Fees are about half the edge. Test resting orders live at one contract, as their own pull request with a cancel path | Only after real fills come in on the new markets |
-| Fix the hand-sold problem | A position you sell by hand is still booked at the market result. Built (#407), not merged | You confirm the first alert, then merge and run `deploy-sizing.sh` |
-| US500 perpetuals (parked) | Kalshi launched a leveraged S&P perpetual on 2026-10-06. Different product, different API, 13.7x to 15.3x leverage, fees of 12 bps a side for a taker. Not a fit for an anti-degen site | Only if you ask |
+| Render decision | The equities server still trades Alpaca for any account with keys and the page cannot pause it. Decide keep, pause or shut down | You choose; I find the monthly price and the steps |
+| Read the 10 minute entry | Bitcoin, XRP and natural gas now enter earlier. Orders are tagged `10m`. Few markets are in the band at 10 minutes, so this fills slowly | FWD8 reads at 60 filled orders per series or 2026-12-01 |
+| Read the probes | AUD/USD, USD/CAD and gas, one contract each, plus the drop rule | FWD5 reads at 100 orders per group or 2026-12-01 |
+| Gold first, forward scoreboard | Gold earns; the others have to earn the ladder back from their own live record (150 settled trades, a result above +0.5c in both halves) | Rules already written, reads as the trades arrive |
+| Maker (resting) orders | Fees are about half the edge. Test resting orders live at one contract, as their own pull request with a cancel path | Only after real fills come in on the probes |
+| US500 perpetuals (parked) | Different product, high leverage, not a fit for an anti-degen site | Only if you ask. A research recorder already logs Kalshi's perps hourly to a data branch |
 
 ## Proposals for money you oversee
 
@@ -45,21 +45,22 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 
 ## Dates to remember
 
-- **2026-11-16:** the registered forward reads (E3F, FWD1, VOL1, PM3, and the OW7 look). One run each; nothing changes unless it passes.
-- **2026-11-30:** the paper tracker's registered read on the three FX and gas markets. The page card is gone and live trading on them replaces it, but the server still records, so the read is free.
-- **About 2026-12-01:** a second snapshot of the research data (Kalshi's history only reaches back about 69 days).
+- **From 2026-10-22:** the forward reads FWD5 and FWD6 start counting; FWD7 and FWD8 count from the 10 minute go-live (2026-10-21, about 19:15 UTC).
+- **2026-11-16 and 2026-11-17:** the registered forward reads (E3F, FWD1, VOL1, PM3, OW7, then FWD2, FWD3 and GOLD1-F). One run each; nothing changes unless it passes.
+- **2026-12-01:** the default read date for FWD5, FWD6, FWD7 and FWD8, and a second snapshot of the research data (Kalshi's history only reaches back about 69 days).
+- **About 3 to 4 weeks:** a rerun of the funding study on the perps data the recorder is collecting.
 - **The first weekly size review after a stop:** a loss stop holds size increases for 7 days.
 
 ## Can wait
 
-- Resting orders on the three probes (after real fills).
-- Removing the server-side paper tracker (needs a deploy; costs very little).
-- State-by-state gas ladders, a gasoline-futures input for gas, and the daily index markets (about one a day, so 300 days to test).
-- The separate shwoop-server on Render still trades stocks through Alpaca for any account with keys. The page can no longer pause it, so decide whether to switch it off.
+- Resting orders on the probes (after real fills).
+- A recorder for the economics markets (CPI, payrolls): parked, the history is too short and the owner said not now.
+- State-by-state gas ladders and the daily index markets (about one a day, so 300 days to test).
 - Auto-restart after the loss stop.
 
 ## Done recently
 
-- 2026-10-21: three live probe markets merged; the stop set to 12%; paper card removed; "Copy all orders" button; new logo, icon and share card; footer disclosure; strategy ideas list (`docs/STRATEGY_IDEAS.md`).
-- 2026-10-20: phone alerts (Web Push, no third party), sound alerts, XRP and Dogecoin added, window limit 5.5%, shared Flatten and exit claim, cash-out at 99c tested and ruled out (TP1).
+- 2026-10-21 (afternoon): the 10 minute entry for Bitcoin, XRP and natural gas went live; the probe drop rule and a cost cut (about $2 a month, and roughly $3 a month of that is given back by the exit watch running through the early minutes) went live; light themes made readable; numbers and headings in the plain font, the bubble font kept for the logo and a hop on hover; Today line; order exports with the entry tag (open); a perps recorder; the hand-sold fix and repair; gold-first sizing; the Data page.
+- 2026-10-21 (morning): three live probe markets; the stop set to 12%; paper card removed; Copy all orders; new logo, icon and share card; footer disclosure.
+- 2026-10-20: phone alerts, sound alerts, XRP and Dogecoin added, window limit 5.5%, shared Flatten and exit claim, cash-out at 99c tested and ruled out (TP1).
 - Earlier: only L1; opening strategy removed; exit moved from 70c to 50c to 25c; the site slimmed to three pages.
