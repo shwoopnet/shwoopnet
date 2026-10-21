@@ -106,19 +106,11 @@ gates.R6 = () => {
   assert.ok(rule && /allow read: if isAdmin\(\)/.test(rule[1]) && /allow write: if false/.test(rule[1]), 'the admin reads it, nobody writes it from a browser');
 };
 
-// The page: its own card and collection, never in the live totals; the figures per candidate, with the bar stated; nothing is ordered from it.
+// The page no longer shows the tracker (the owner, Oct 21, 2026: "dont need to forward test on paper anymore", live forward testing replaced it, see the probe markets in CLAUDE.md). The server function and its
+// collection are untouched; only the card, its listener and its figures are gone, so no admin read of kalshiPaperOrders happens from the page.
 gates.R7 = () => {
-  const stats = new Function(/(function kalshiPaperStats\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html)[1] + '; return kalshiPaperStats;')();
-  const rows = [{ candidate: 'A', settled: true, pnl: 0.06, result: 'yes', side: 'yes', day: 'd1' }, { candidate: 'A', settled: true, pnl: -0.94, result: 'no', side: 'yes', day: 'd2' }, { candidate: 'A', settled: false }, { candidate: 'B', settled: true, pnl: 0.06, result: 'yes', side: 'yes', day: 'd1' }];
-  const s = stats(rows, 'A');
-  assert.deepStrictEqual([s.entries, s.settled, s.wins, s.days], [3, 2, 1, 2]);
-  assert.ok(Math.abs(s.perContract - (-0.44)) < 1e-9, 'per contract over the settled ones only');
-  assert.strictEqual(stats([], 'A').perContract, null, 'no result yet says so, not zero');
-  assert.ok(/id="kalPaperCard"/.test(html) && /Paper candidates \(no money\)/.test(html), 'its own card, labelled');
-  assert.ok(/Hypothetical: one contract each[\s\S]{0,200}nothing is ordered/.test(html) && /on or after Nov 30, with at least 300 settled entries on 10 days/.test(html), 'it says what it is and when it can say anything');
-  const render = /function renderKalshiPaper\(\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
-  assert.ok(!/kalshiLiveOrders|kalshiPerfStats|kalshiLiveTotals/.test(render), 'it never touches the live record');
-  assert.ok(/KAL_PAPER = \[\['KXAUDUSD15M'[\s\S]*?'KXUSDCAD15M'[\s\S]*?'KXNATGAS15M'/.test(html), 'the same three candidates as the server');
+  assert.ok(!/kalPaperCard|id="kalPaper"|Paper candidates|renderKalshiPaper|kalshiPaperStats|KAL_PAPER|kalshiPaperOrders|watchKalshiPaper/.test(html), 'the page has no paper candidates card, listener or figures');
+  assert.ok(!/kalshiPaperOrders/.test(html), 'and never reads the tracker collection');
 };
 
 // The deploy: only the tracker and the rule, no secrets, no switch that has to be kept.
