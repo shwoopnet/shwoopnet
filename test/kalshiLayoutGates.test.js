@@ -409,7 +409,7 @@ gates.Y16 = () => {
 // The default landing page can be Kalshi, for the admin only: the button is hidden until the account is known to be the admin, and because that is
 // known only after the first screen is up, a Kalshi preference shows the brief first and moves to Kalshi when the admin check comes back.
 gates.Y17 = () => {
-  assert.ok(/<button class="tf-btn" data-value="kalshi" id="landingKalshiBtn" hidden>Kalshi<\/button>/.test(html), 'a Kalshi choice exists and starts hidden');
+  assert.ok(/<button class="tf-btn" data-value="kalshi" id="landingKalshiBtn" hidden>Bot<\/button>/.test(html), 'a Bot choice exists and starts hidden');
   assert.ok(/landKal\.hidden = !currentUserIsAdmin/.test(html), 'it is shown only to the admin');
   const init = html.slice(html.indexOf('(function initLanding(){'));
   assert.ok(/if\(pref === 'kalshi'\)\{[\s\S]*?landingKalshiPending = true;[\s\S]*?showPage\('brief'\);[\s\S]*?return;/.test(init), 'a Kalshi preference lands on the brief and marks the move as pending');
