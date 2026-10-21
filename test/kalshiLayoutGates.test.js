@@ -628,11 +628,13 @@ gates.Y42 = () => {
   assert.ok(/\.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html) && /\[data-reduce-motion="true"\] \.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html), 'no lift for people who asked for no motion, by the OS or by the Settings toggle');
 };
 
-// Y43: on a phone (700px and narrower) the charts are hidden: the price line under each market and the whole Performance card; the stats card is not touched.
+// Y43: on a phone (700px and narrower) the price line under each market is hidden; the Performance card is shown again (the owner, Oct 21, 2026, after the calm view); the stats card is not touched.
 gates.Y43 = () => {
   const m = /@media \(max-width:700px\)\{([\s\S]*?)\n  \}/.exec(html);
   assert.ok(m, 'a 700px block exists');
-  assert.ok(/\.kal-spark\{ display:none; \}/.test(m[1]) && /\.kal-card\[data-card="performance"\]\{ display:none; \}/.test(m[1]), 'the sparklines and the Performance card are hidden on a phone');
+  assert.ok(/\.kal-spark\{ display:none; \}/.test(m[1]), 'the sparklines are hidden on a phone');
+  assert.ok(!/data-card="performance"\]\{ display:none/.test(html), 'the Performance card is not hidden on a phone');
+  assert.ok(/@media \(max-width:\d+px\)\{[\s\S]{0,900}\.kal-charts\{ grid-template-columns:1fr; \}/.test(html), 'and on a narrow screen its charts stack to one column');
   assert.ok(!/kalPerfWrapC|kal-perf\b/.test(m[1]) && !/data-card="account"/.test(m[1]), 'the stats card stays');
 };
 
