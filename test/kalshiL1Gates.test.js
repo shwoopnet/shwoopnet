@@ -40,6 +40,7 @@ function world(opts = {}) {
     }
     if (url.endsWith('/portfolio/balance')) return reply(opts.balStatus || 200, opts.balance || { balance_breakdown: [{ balance: '70.0000', exchange_index: 2 }, { balance: '30.0000', exchange_index: 0 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: opts.existing || [] });
+    if (url.includes('/portfolio/fills')) return reply(200, { fills: opts.fills || [] });     // the account's own fills: nothing sold by hand unless a gate says so
     if (o.method === 'POST') {
       posts.push(JSON.parse(o.body));
       if (opts.postThrows) throw new Error('timeout');
