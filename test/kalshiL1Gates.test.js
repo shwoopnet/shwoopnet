@@ -924,7 +924,11 @@ gates.K8 = () => {
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(/const BOOK_RECORDER_ON = false;/.test(idx), 'the recorder is off');
   const rec = idx.slice(idx.indexOf('exports.kalshiBookRecorder = onSchedule'));
-  assert.ok(rec.indexOf('if (!BOOK_RECORDER_ON) return;') > 0 && rec.indexOf('if (!BOOK_RECORDER_ON) return;') < rec.indexOf('book.recordMinute'), 'it returns before it reads or writes anything');
+  const off = rec.slice(rec.indexOf('if (!BOOK_RECORDER_ON) {'), rec.indexOf('book.recordMinute'));
+  assert.ok(off.length > 0 && off.indexOf('book.recordMinute') < 0, 'while off it never reads a market or records a snapshot');
+  // Oct 21, 2026 cost review: off, it only deletes snapshots older than a day (the recorder was the only thing that ever pruned them, so the ones from before Oct 12 kept billing as stored data).
+  assert.ok(/\.where\("ts", "<", Date\.now\(\) - 86400000\)\.limit\(200\)/.test(off) && /\.delete\(\)/.test(off) && !/\.set\(|\.add\(|\.update\(|fetch|kalshiGetJson/.test(off), 'it only deletes old snapshots');
+  assert.ok(/const PAPER_TRACKER_ON = false;/.test(idx) && idx.indexOf('if (!PAPER_TRACKER_ON) return;') > idx.indexOf('exports.kalshiPaperTick = onSchedule'), 'the paper tracker returns at once');
 };
 
 // K9: the settle sweep finds an unsettled order whether or not it carries the settled field (orders created before it existed do not).

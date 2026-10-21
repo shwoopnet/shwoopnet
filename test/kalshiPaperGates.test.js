@@ -121,6 +121,14 @@ gates.R8 = () => {
   assert.ok(!/secrets:set|KALSHI_LIVE|sed -i/.test(sh), 'it holds no secret and no order switch');
 };
 
+// Oct 21, 2026 cost review: the cost deploy touches only the two keyless housekeeping functions and needs no order switch.
+gates.R9 = () => {
+  const out = execFileSync('bash', [path.join(root, 'functions', 'deploy-cost.sh')], { env: Object.assign({}, process.env, { DRY_RUN: '1' }), encoding: 'utf8' });
+  assert.deepStrictEqual(/deploy --only (\S+)/.exec(out)[1].split(',').sort(), ['functions:kalshiBookRecorder', 'functions:kalshiPaperTick']);
+  const sh = fs.readFileSync(path.join(root, 'functions', 'deploy-cost.sh'), 'utf8').replace(/#.*$/gm, '');
+  assert.ok(!/secrets:set|KALSHI_LIVE|sed -i/.test(sh), 'it holds no secret and no order switch');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
