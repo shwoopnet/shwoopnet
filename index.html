@@ -3386,6 +3386,7 @@
 
   // ---------- Navigation ----------
   // Bubble pop motion (see the CSS above it): a page's cards rise in once when it is shown, then the class is taken off so the minute's re-render never replays it. Nothing here runs when motion is reduced.
+  var kalshiWatching = false;
   var pageEnterTimer = null;
   function motionReduced(){
     try{
@@ -3421,7 +3422,9 @@
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
-    if(name === 'kalshi' || name === 'data'){ kalshiOnShow(); } else { kalshiOnHide(); }
+    // Bot and Data share one set of live listeners (the last 1,000 orders, the events, the account). Moving between the two must not tear them down and re-read everything, which billed about
+    // 1,200 Firestore reads on every switch (Oct 21, 2026 cost review); they start when either page is first shown and stop when the owner leaves both.
+    if(name === 'kalshi' || name === 'data'){ if(!kalshiWatching){ kalshiWatching = true; kalshiOnShow(); } } else if(kalshiWatching){ kalshiWatching = false; kalshiOnHide(); }
     if(name === 'data'){ renderDataCenter(); }
     pageEnter(document.getElementById('page-' + name));
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
