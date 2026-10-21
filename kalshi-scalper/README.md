@@ -4456,3 +4456,27 @@ Code `scalper/vm.py` and `tests/test_vm.py` were committed before the run; resul
 **Information only, not tries:** annualised return, volatility, Sharpe and worst drawdown of each cell against QQQ and V2 on the test window; how often each override fired.
 
 **Single read.** `python -m scalper.vm2 run`, once (data from the VM fetch). Nothing here goes live. **Family tries: 15.**
+
+## Results: VM2, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/vm2.py` and `tests/test_vm2.py` were committed before the run; result file `data/vm2_result.txt`. Test window 2010-03 to 2026-09, 198 months, the same for every cell and both benchmarks. Bar z 2.8.
+
+| | Return a year | Volatility | Sharpe | Worst drawdown |
+|---|---|---|---|---|
+| QQQ bought and held | **19.1%** | 18.5% | 1.04 | -33.7% |
+| V2 (volatility managed) | 11.4% | 10.3% | 1.10 | -12.8% |
+| R1 (recovery rule) | 12.5% | 11.4% | 1.09 | -15.7% |
+| T1 (walk-forward tree) | 16.4% | 15.5% | 1.06 | -27.6% |
+
+| Cell | Excess over QQQ a year | NW z (bar 2.8) | Halves | Over V2 a year | Placebo p95 | Verdict |
+|---|---|---|---|---|---|---|
+| R1 | **-6.78%** | -3.22 | -4.34% / -9.22% | +1.12% | none | **FALSIFIED** |
+| T1 | **-2.81%** | -1.38 | -0.10% / -5.53% | +5.09% | -2.02% | **FALSIFIED** |
+
+- **Prediction:** neither cell beats QQQ (about 90%). Right on the verdicts. R1 was worse than my range (-3% to +1%) at -6.8%; T1 landed inside its range (-4% to +1%) at -2.8%. Recorded as it was.
+- **The honest picture.** Over 2010 to 2026 buying QQQ returned 19.1% a year, and every managed version earned less. The tree recovered most of V2's shortfall (11.4% to 16.4%) by being fully invested in 129 of 198 months, but it landed **below its own placebo** (the same walk-forward on shuffled returns averaged -2.0% at the 95th percentile and the real one did -2.8%), so the extra exposure came from holding more equity, not from the tree reading anything.
+- **The best the rules do is a tie on Sharpe, not a win on return.** T1's Sharpe (1.06) is a hair above QQQ's (1.04) with a shallower drawdown (-27.6% against -33.7%), which is less market risk for less return, again. The recovery rule R1 added only +1.1% a year over V2 and cost drawdown.
+- **Why this was close to hopeless by design.** A rule that is invested at most 100% can only beat buy and hold by being out of the market at the right times; in a 16 year bull market with sharp V-shaped recoveries, being out is expensive, and about 200 monthly rows is too few for a tree to learn timing (TREE1's lesson).
+- **Not run, and why:** other thresholds, a leverage cap above 1x, other features or deeper trees would be new tries chosen after seeing this. A leveraged version (for example holding the 2x QLD fund) changes the risk the owner is taking and is a different, explicit decision. **Family tries: 15.**
+
+**Decision.** Nothing built, nothing changed live. The volatility-managed QQQ stays a risk tool (V2), not a way to beat the ETF.
