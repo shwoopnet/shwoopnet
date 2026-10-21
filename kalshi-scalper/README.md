@@ -4120,3 +4120,19 @@ The owner asked to try gold against silver again with a fairer funding model. Be
 - **Not run, and why:** a rule that keeps only a spread under 3c, or only the best leaves, would be a **new try** on the same rows and is not run here. It needs fresh days (nothing after 2026-10-12 is in these databases), and the live bot's own per-order log does not record the quote's spread at entry.
 
 **Decision.** Nothing built, nothing changed live. If a forward test is ever wanted, the cheapest honest one is to have the live bot **log the spread (and `d3`, `dip`) at each entry** and read the live record against a rule registered first; that needs a code change to the live bot and so the owner's go. **Count: about 4,637 tries.**
+
+## Pre-registration: FWD2, a forward read of "skip a wide spread" on the live bot's own orders (the owner's choice after TREE2; written 2026-10-21 before any live order's spread was looked at)
+
+**Why.** TREE2's strongest and plainest finding was that L1 entries with a quote spread over 3c did worse than the rest (the tree's first split; kept minus skipped +1.45c, z +3.14 across 18 series), while its absolute bar failed. The live bot already saves the quote it saw on every order (`seen.bid`, `seen.ask`), so the spread of every live L1 order is on record without any change to the bot. The all-orders CSV on the page now exports `seenBid` and `seenAsk` (PR from `claude/log-entry-quote`; no live code touched). **One more try; the bar is stated below, not raised, because this is a one-sided forward read of a single pre-named cut with no search.** Running count: about **4,638**.
+
+**Disclosed.** TREE2's cut (3c) was read off its final tree and its per-series table. No live order's spread has been computed or compared with its result; the 477 orders exported earlier did not include the quote.
+
+**Rule (fixed here).** For L1 orders the bot sent **on or after 2026-10-22 00:00 UTC** that filled and settled with a win or loss (`result` is not `hand`, not `exit`; an `exit` is read separately below): **spread = seen.ask minus seen.bid**, per contract net = saved P/L divided by contracts filled. **Wide** is spread **over 0.03**; **narrow** is 0.03 or less. Orders with no saved quote are excluded and counted.
+
+**Counterparty / mechanism.** A wide spread means few resting orders on one side; the favourite there is priced by a thin book that a single order can move, and the same state is where a flip is least visible to the price.
+
+**Prediction, recorded first.** Wide orders are **10% to 30%** of fills; the wide group's mean net per contract is **at least 1.0c below** the narrow group's; verdict `NOT_YET_FALSIFIED` (about **40%**; a spread cut measured on 1 minute candles may not equal the spread at the decision second).
+
+**Read (once).** At the first of **250 filled settled orders or 2026-12-01**. `NOT_YET_FALSIFIED` needs: wide group at least **40** orders; narrow group mean net **above zero**; narrow minus wide **above zero** with a day-clustered z of at least **2.0**; and the narrow group above zero in **both halves** (by time). Anything else is `FALSIFIED`; fewer than 40 wide orders is `NOT_ENOUGH_DATA`, never a pass. Information only, not part of the verdict: the same split by series; orders that were exited at 50c, read separately (the exit watch makes their net not comparable).
+
+**What a pass would and would not mean.** It would be a reason to put a "skip when the spread is over 3c" rule to the owner as a choice, with its own gate tests; it is never a switch, and a rule added to live code would cost the entries it skips (about the share above). **Running count: about 4,638 tries.**
