@@ -4706,3 +4706,30 @@ Halves -4.19c / -3.03c; at fees x1.2 -4.03c. **Verdict: `FALSIFIED`.**
 **SIZE1, sizing by calibration gap (information only).** For gold, Bitcoin and Ethereum on the 69 days: the Kelly fraction of bankroll per position, f = (w b - (1 - w)) / b, with b = (1 - p - fee) / (p + fee) at the series' mean price and the 0.50c fee, at (i) the observed loss rate, (ii) the Jeffreys 95% **upper** loss rate (the worst plausible), and half of each. Read against the live base (2% per position) and the window cap. No verdict, no try.
 
 **Single reads.** `python -m scalper.hedge2 run` (HL1 and SL1, once; a refused rerun unless `data/hedge2_result.txt` is deleted on purpose), `python -m scalper.size1` (information). Nothing goes live.
+
+## Results: HL1 and SL1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)
+
+Code `scalper/hedge2.py` and `tests/test_hedge2.py` were committed before the run; result file `data/hedge2_result.txt`. Bar z 2.8. Every entry counts.
+
+| | Entries | Strategy net per entry | Plain net | Strategy minus plain | Standard deviation (strategy / plain) | Verdict |
+|---|---|---|---|---|---|---|
+| **HL1**, 0.10 of the other side on every L1 favourite | 24,793 | -0.13c (z -0.82) | +0.12c (z +0.68) | **-0.25c** (z -14.55) | 22.2c / 24.7c | **FALSIFIED** |
+| **SL1**, sell a third at 60c, a third at 80c, hold the rest | 69,867 | -6.49c (z -33.58) | -2.88c | **-3.61c** (z -40.92) | 37.2c / 49.5c | **FALSIFIED** |
+
+- **HL1 prediction** (diff -0.35c to -0.05c, risk down 8% to 12%, `FALSIFIED`): exactly right. The L1 hedge lowers the spread of outcomes by 10% and costs 0.25c a contract, about as much as L1 earns in total (+0.12c), so the hedged version is net zero. It is the favourite effect in numbers: the cheap side is the overpriced side.
+- **SL1 prediction** (mean -4c to -1.5c, diff -1.0c to +0.5c, `FALSIFIED`): the verdict was right and the size was not. The ladder lost **3.6c more** than holding, far outside my range.
+- **Why the ladder lost so much (information check, same data).** Prices jump through targets rather than stopping at them: for the 65c trigger in HS1 the mean bid at the trigger close was **73.3c**, and the held side then won **74.6%** of the time (1.3 points more than priced). A resting sell at 60c fills at 60c while the market is already near 73c, so a fixed-price ladder gives away about 13c on the part it sells. A trader who sells at the observed bid instead of a resting limit would give away less; that is a different rule (a market sell at the observed price) and I have not run it. **If it were run it would be a new try; the prior stays low** because the same data shows only a 1.3 point drift after the trigger.
+- **Kalshi tries: about 4,654.** Nothing built, nothing changed live.
+
+## Information: SIZE1, how much the measured edge can carry (2026-10-21; `python -m scalper.size1`; no hypothesis, no verdict, no try)
+
+Kelly fraction of bankroll per position from L1's loss rate on the 69 days (price 92.7c, fee 0.50c), at the observed loss rate and at the Jeffreys 95% **upper** (worst plausible) loss rate:
+
+| Series | n | Loss rate (95% upper) | Break-even loss | Kelly at the observed rate | Kelly at the worst plausible | Half-Kelly (observed) |
+|---|---|---|---|---|---|---|
+| Gold | 1,397 | 5.30% (6.57%) | 6.80% | 22.1% | **3.5%** | 11.1% |
+| Bitcoin | 1,959 | 6.48% (7.64%) | 6.91% | 6.2% | **0.0%** | 3.1% |
+| Ethereum | 2,041 | 6.17% (7.28%) | 6.74% | 8.4% | **0.0%** | 4.2% |
+
+- **Reading.** A loss costs 93c and a win pays 7c, so the optimal bet swings from 22% of the bankroll to 3.5% across gold's own interval; the number to use is the cautious one. At the worst plausible loss rate **gold can carry about 3.5% per position, and Bitcoin and Ethereum cannot be sized at all**, which matches the owner's choice of one contract on those two. The live base is about 2% per position, so gold sits under its worst-case Kelly and above half of it nowhere.
+- **What this ignores, all in the unfavourable direction:** the edge was +2.2c then +1.0c across the two windows (the full-sample rate may be too kind), series are correlated (the 4.5% window cap is the binding rule, not Kelly), and a loss streak of 5 to 8 trades in a row is not rare at a 5% loss rate. **It does not argue for a bigger gold size.** It says the present gold size is not reckless.
