@@ -4838,3 +4838,5 @@ The exit costs about 0.4c to 0.6c on average with 10 minute entries (an earlier 
 **Prediction, recorded first.** Natural gas mean net **+0.3c to +2.5c** (history +2.6c to +3.2c shrinks on new days), `NOT_YET_FALSIFIED` about **30%**; XRP **+0.3c to +2.2c**, about **35%**. At 5 to 12 orders a day, 60 orders takes 1 to 3 weeks for XRP and 3 to 6 weeks for natural gas.
 
 **Power.** At 60 one-contract orders a 5% loss rate is three losses: the bar can reject a series that loses clearly and will usually say "not shown" otherwise. **A pass is a reason to leave the probe running and consider Bitcoin and the next series at 10 minutes, never a reason to size up.**
+
+**Owner's decision on the 10 minute proposal (2026-10-21): go, natural gas and XRP only.** Relayed to the main session to build (this session changes no live code); Bitcoin waits for FWD7 and the ML1 claims. FWD8 starts counting from the first order the change sends; the go-live date and the order tag are to be recorded here when the main session reports them.
