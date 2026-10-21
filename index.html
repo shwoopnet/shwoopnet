@@ -416,7 +416,7 @@
   .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
   .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
   .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
-  .index-card .ix-val{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:23px; letter-spacing:.02em; display:block; }
+  .index-card .ix-val{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; font-size:23px; letter-spacing:0; display:block; }
   .index-card .ix-chg{ font-size:12px; margin-top:7px; display:block; }
   .index-card .ix-chg.up{ color:var(--gain); }
   .index-card .ix-chg.down{ color:var(--loss); }
@@ -578,7 +578,7 @@
   .kal-btn-danger{ background:var(--loss); border-color:var(--loss); color:#fff; }
   .kal-tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
   .kal-tile{ display:flex; flex-direction:column; gap:3px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; min-width:0; }
-  .kal-tile b{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:17px; font-weight:400; letter-spacing:.02em; overflow-wrap:anywhere; }
+  .kal-tile b{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; overflow-wrap:anywhere; }
   .kal-tile .kal-lbl, .kal-perf-t .kal-lbl { color:var(--muted); font-size:11px; display:block; }
   .kal-perf-tabs{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:14px; }
   .kal-perf-t{ display:flex; flex-direction:column; gap:6px; font-size:13px; }
@@ -763,10 +763,10 @@
      for the same user than letting it move. Every other animation here
      is decorative and genuinely loses nothing by stopping. */
 
-  /* Bubble pop (the owner, Oct 21, 2026: "more visual appeal and interactivity"). The bubbly Titan One of the wordmark now carries the headings, the stat figures and the chart labels; small table figures stay in Public Sans so
-     numbers stay easy to read. Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render),  over a card, cards and tiles lift a
+  /* Bubble pop (the owner, Oct 21, 2026: "more visual appeal and interactivity"). The bubbly Titan One of the wordmark now carries the headings and market names (words only); every number, big or small, is in Public Sans so numbers stay easy to read (the owner, Oct 21, 2026, about a figure like 774.14). Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render),  over a card, cards and tiles lift a
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
-  .kal-bub{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; letter-spacing:.02em; }
+  /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One stays for words only. */
+  .kal-bub{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; }
   .kal-card, .settings-card, .breadth-widget, .movers-col, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
   .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }

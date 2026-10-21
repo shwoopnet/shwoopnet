@@ -19,11 +19,16 @@ function fnSource(name) {
   throw new Error('unbalanced ' + name);
 }
 
-// The headings, the stat figures and the chart labels use the wordmark's font; table figures stay in the plain font so numbers stay easy to read.
+// The headings and market names (words) use the wordmark's font; every NUMBER stays in the plain font, tabular, so figures like 774.14 stay easy to read (the owner, Oct 21, 2026).
 gates.P1 = () => {
-  for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-tile b', '.kal-bub', '.kal-brow-name']) {
+  for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-brow-name']) {
     const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
     assert.ok(m && /Titan One/.test(m[2]), sel + ' is set in Titan One');
+  }
+  for (const sel of ['.kal-tile b', '.kal-bub', '.index-card .ix-val', '.kal-acct-total']) {
+    const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
+    assert.ok(m && !/Titan One/.test(m[2]) && /Public Sans/.test(m[2]), sel + ' (a number) is in the plain font');
+    if (sel !== '.kal-acct-total') assert.ok(/tabular-nums/.test(m[2]), sel + ' uses tabular digits');
   }
   assert.ok(!/\.kal-perf-row[^{]*\{[^}]*Titan One/.test(css) && !/\.data-row[^{]*\{[^}]*Titan One/.test(css), 'table rows stay in the plain font');
 };
