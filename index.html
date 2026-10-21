@@ -684,6 +684,11 @@
   .kal-pos{ color:var(--gain); }
   .kal-warn{ color:#c58a00; }
   .kal-neg{ color:var(--loss); }
+  /* Calm view (the owner, Oct 21, 2026: shown from across a room the page "looks like a christmas tree"). Green and red stay for the few things that carry the verdict: the "Bot since" line, the end
+     label of the P/L line and the losing bars. Every other figure (the stat tiles and the By market and By price paid rows) is plain text; its sign still says which way it went. The market rows
+     keep the name, the time left and the YES price; the spread, round trip and size lines and the depth bar are one tap away in Copy all stats, not on the face of the page. */
+  .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
+  .kal-brow-r .kal-brow-when, .kal-brow-r .kal-depth{ display:none; }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
   .kal-hit{ cursor:default; }
   .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
@@ -1971,20 +1976,22 @@
     var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
     var last = points[points.length - 1], up = last.cum >= 0, col = up ? 'var(--gain)' : 'var(--loss)';
     var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
+    // Calm view: the line is one plain stroke and the points are invisible hover targets (a green or red dot per trade was hundreds of lights); only the end label carries the colour.
     var dots = points.map(function(p, i){
-      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"><title>' +
+      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="transparent"><title>' +
         esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
     }).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
-      '<path d="' + path + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round"/>' + dots +
+      '<path d="' + path + '" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
       '<text x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="14" font-weight="700">' + esc(fmt(last.cum)) + '</text>' +
       '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="11">' + points.length + ' settled trades, oldest to newest</text></svg>';
   }
 
   // Pie of how the orders ended. Slices that are zero are left out; no orders at all says so.
   function kalshiDonutHtml(c, esc){
-    var parts = [['Won', c.won, 'var(--gain)'], ['Lost', c.lost, 'var(--loss)'], ['Open', c.open, 'var(--amber)'], ['No fill', c.noFill, '#98A2B3']];
+    // Calm view: won is the plain text colour and no fill a muted grey, so the only colour in the ring is the red sliver of losses (and amber while something is open).
+    var parts = [['Won', c.won, 'var(--paper)'], ['Lost', c.lost, 'var(--loss)'], ['Open', c.open, 'var(--amber)'], ['No fill', c.noFill, 'var(--muted)']];
     var other = c.other || 0, total = parts.reduce(function(n, x){ return n + x[1]; }, 0) + other;
     if(!total){ return '<div class="kal-empty">No orders yet.</div>'; }
     var offset = 25, segs = '';
@@ -2073,7 +2080,7 @@
     var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
     var bars = shown.map(function(p, i){
       var x = L + slot * i + (slot - bw) / 2, y0 = Y(0), y1 = Y(p.pnl), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0));
-      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"/>';
+      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--muted)' : 'var(--loss)') + '"' + (p.pnl >= 0 ? ' fill-opacity="0.55"' : '') + '/>';
     }).join('');
     var hits = shown.map(function(p, i){
       return '<rect class="kal-hit" x="' + (L + slot * i).toFixed(1) + '" y="0" width="' + slot.toFixed(1) + '" height="' + (H - B) + '" fill="transparent" pointer-events="all" data-up="' + (p.pnl >= 0 ? '1' : '0') +

@@ -414,6 +414,7 @@ Docs in `docs/` (overview, roadmap, career notes, mock-ups) are refreshed weekly
 - Comments explain **why**, not what. Several exist specifically to stop a
   future change from reintroducing a bug; keep them.
 - The palette is "Ledger", with one optional skin, "Mono Ink" (`html[data-skin="mono"]`, chosen under Settings, Theme, added at the owner's request on 2026-10-09). A skin only re-points the existing tokens and never the gain or loss colors. Don't introduce another design system.
+- **Calm view on the Kalshi page (Oct 21, 2026, the owner: it "looks like a christmas tree" shown from across a room).** Green and red are kept for the few things that carry the verdict: the "Bot since" line, the end label of the P/L line, the losing bars and the lost slice of the ring. Every other figure (stat tiles, By market, By price paid) is plain text with its sign; the P/L line is one plain stroke; winning bars and the Won slice are neutral; the market rows show the name, time left and YES price only. Do not add a new coloured figure without taking one away. The gain and loss tokens themselves are unchanged (gates Y8, Y14).
 - `firestore.rules` enforces that only the admin account can ever hold
   live-trading credentials. The backend relies on that and does no admin
   check of its own.
