@@ -4861,3 +4861,5 @@ The exit costs about 0.4c to 0.6c on average with 10 minute entries (an earlier 
   The hybrid beats 6 minute only by **+0.17c (XRP), +0.69c (natural gas) and +0.48c (Bitcoin)** a contract and enters more markets. Of the 10 minute entries, 415 of 849 (XRP), 123 of 354 (natural gas) and 304 of 564 (Bitcoin) would not have qualified at 6 minutes (the price drifted out of the band), so a 10 minute entry also captures favourites the 6 minute rule would have missed.
 - **Extra line, information:** the hybrid total (all orders on the series from deploy, "10m" plus "6m") against these history figures, before the exit.
 - **Timing of the count.** The count starts at the deploy date the main session gives the owner. FWD8's other terms, the prediction and the power remarks stand.
+
+**Owner's decision (2026-10-21): Bitcoin goes into the first build with XRP and natural gas** (relayed to the main session to add to PR #453 or its successor; size unchanged, still one contract). FWD8 therefore has three series (z 2.4 each, Kalshi count about 4,659) and counts from the deploy date the main session reports, which is to be written here.
