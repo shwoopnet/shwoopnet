@@ -412,8 +412,8 @@
 
   .settings-page{ display:flex; flex-direction:column; gap:28px; margin-top:24px; }
   .settings-section-title{
-    font-family:'Public Sans', sans-serif; font-size:12px; text-transform:uppercase;
-    letter-spacing:.08em; color:var(--muted); font-weight:600; margin: 0 0 12px 2px;
+    font-family:'Titan One', 'Public Sans', sans-serif; font-size:17px; color:var(--paper);
+    letter-spacing:.02em; font-weight:400; margin: 0 0 12px 2px; text-shadow:0 2px 0 var(--bubble-shadow);
   }
   .settings-card{
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
@@ -475,7 +475,7 @@
   .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
   .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
   .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
-  .index-card .ix-val{ font-size:21px; display:block; }
+  .index-card .ix-val{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:23px; letter-spacing:.02em; display:block; }
   .index-card .ix-chg{ font-size:12px; margin-top:7px; display:block; }
   .index-card .ix-chg.up{ color:var(--gain); }
   .index-card .ix-chg.down{ color:var(--loss); }
@@ -531,6 +531,7 @@
   .news-item{ display:flex; flex-direction:column; gap:3px; padding:11px 0; text-decoration:none; color: var(--paper); }
   .news-item + .news-item{ border-top:1px solid var(--border); }
   .news-item:hover .news-item-headline{ color: var(--amber); }
+  .news-item, .mover-row{ transition: transform .15s ease; } .news-item:hover, .mover-row:hover{ transform: translateX(3px); }
   .news-item-headline{ font-size:12.5px; line-height:1.5; }
   .news-item-meta{ font-size:10.5px; color: var(--muted); }
   .earnings-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; font-size:12.5px; }
@@ -813,8 +814,8 @@
      numbers stay easy to read. Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render), a soft light follows the pointer over a card, cards and tiles lift a
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
   .kal-bub{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; letter-spacing:.02em; }
-  .kal-card, .settings-card, .breadth-widget, .movers-col{ background-image: radial-gradient(280px circle at var(--mx, -999px) var(--my, -999px), var(--spot), transparent 65%); transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
-  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
+  .kal-card, .settings-card, .breadth-widget, .movers-col, .index-card{ background-image: radial-gradient(280px circle at var(--mx, -999px) var(--my, -999px), var(--spot), transparent 65%); transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
+  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
   .kal-tile:hover{ transform: translateY(-2px) scale(1.02); border-color: var(--paper); }
   .kal-leg{ transition: transform .15s ease; } .kal-leg:hover{ transform: translateX(3px); }
@@ -826,7 +827,7 @@
   @keyframes cardRise{ from{ opacity:0; transform: translateY(14px) scale(.985); } to{ opacity:1; transform:none; } }
   @keyframes lineDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
   @keyframes markPop{ from{ opacity:0; transform: scaleY(.2); } to{ opacity:1; transform:none; } }
-  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .index-card, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
@@ -838,10 +839,11 @@
     .bg-grid{ animation: none; }
     .kal-console .kal-brow{ transition: none; }
     .kal-console .kal-brow:hover{ transform: none; }
-    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .kal-tile{ animation: none; }
+    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .index-card, .page.enter .kal-tile{ animation: none; }
     .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
-    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
+    .news-item:hover, .mover-row:hover{ transform: none; }
+    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
@@ -852,10 +854,11 @@
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
   [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
-  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .movers-col, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
+  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .movers-col, [data-reduce-motion="true"] .page.enter .index-card, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
-  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .movers-col:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
+  [data-reduce-motion="true"] .news-item:hover, [data-reduce-motion="true"] .mover-row:hover{ transform: none; }
+  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .movers-col:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
 </style>
 <script>
   // Runs synchronously before <body> paints anything, so dark mode is
@@ -1147,8 +1150,8 @@
     <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
       <span class="side-nav-icon">◆</span><span class="side-nav-label">Brief</span>
     </button>
-    <button class="side-nav-item nav-item" data-page="kalshi" title="Kalshi" hidden>
-      <span class="side-nav-icon">◐</span><span class="side-nav-label">Kalshi</span>
+    <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
+      <span class="side-nav-icon">◐</span><span class="side-nav-label">Bot</span>
     </button>
     <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
       <span class="side-nav-icon">▦</span><span class="side-nav-label">Data</span>
@@ -1217,6 +1220,7 @@
   <!-- ================= SETTINGS ================= -->
   <main class="page" id="page-kalshi" hidden>
     <div class="trades-header kal-header-bare">
+      <div class="trades-title">Bot</div>
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <button class="kal-mini" id="kalPresentBtn" type="button" aria-pressed="false">Hide balances</button>
         <button class="kal-mini" id="kalDataBtn" type="button">Data</button>
@@ -1385,7 +1389,7 @@
             <div class="settings-choice-group" id="landingChoice">
               <button class="tf-btn" data-value="auto">Auto</button>
               <button class="tf-btn" data-value="brief">Brief</button>
-              <button class="tf-btn" data-value="kalshi" id="landingKalshiBtn" hidden>Kalshi</button>
+              <button class="tf-btn" data-value="kalshi" id="landingKalshiBtn" hidden>Bot</button>
             </div>
           </div>
 
@@ -1425,7 +1429,7 @@
         </div>
       </div>
 
-      <div class="settings-note">Your theme, clock, landing page and Kalshi layout sync to your account.</div>
+      <div class="settings-note">Your theme, clock, landing page and Bot page layout sync to your account.</div>
     </div>
   </main>
 
@@ -3438,7 +3442,7 @@
   }
   function pageEnter(pageEl){
     if(!pageEl || motionReduced()){ return; }
-    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .movers-col, .kal-tile');
+    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .movers-col, .index-card, .kal-tile');
     for(var i = 0; i < items.length; i++){ items[i].style.setProperty('--i', String(Math.min(i, 12))); }
     pageEl.classList.remove('enter'); void pageEl.offsetWidth; pageEl.classList.add('enter');
     clearTimeout(pageEnterTimer);
@@ -3446,7 +3450,7 @@
   }
   // A soft light follows the pointer over a card (two custom properties on the card, nothing else). Mouse and pen only, and never wired to do anything when motion is reduced.
   (function(){
-    var raf = 0, last = null, CARD = '.kal-card, .settings-card, .breadth-widget, .movers-col';
+    var raf = 0, last = null, CARD = '.kal-card, .settings-card, .breadth-widget, .movers-col, .index-card';
     document.addEventListener('pointermove', function(e){
       if(e.pointerType === 'touch' || motionReduced() || !e.target || !e.target.closest){ return; }
       var t = e.target.closest(CARD);
