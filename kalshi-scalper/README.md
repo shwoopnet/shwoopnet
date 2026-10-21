@@ -3912,3 +3912,21 @@ The follow-up to the short-term census above: every daily series was asked for i
 **If one passes.** The owner's instruction of 2026-10-21 is that a strategy that passes goes to a small live slot. That slot is a separate, reviewed change and must show how it cannot hold a position at the same time as L1 (its own series, its own cash limit and its own loss stop; CLAUDE.md, "L1 is the only strategy"). A paper tracker for it is built first or alongside, so its forward days accumulate from the first day.
 
 **Single read.** Each of GAS1, APP1 and CMD1 is run once, on the data downloaded above; a fix to the code that is not a change to a rule or a number above (a parse error, a crash) is made and logged, and the run repeated only for that reason. **Running count of tries on Kalshi: about 4,631 with these three.**
+
+## Results: GAS1, APP1 and CMD1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)
+
+Code: `scalper/pub1.py`, committed before any run. Result files: `data/pub1_result_GAS1.txt`, `..._APP1.txt`, `..._CMD1.txt` (a second run is refused unless the file is deleted).
+
+| | Entries | Days | Net per contract | Day clustered z | Halves | Fees x1.2 | Placebo 95th pct | Brier model vs market | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| GAS1, AAA gas price ladder | 184 | 47 | **-7.50c** | -2.27 | -4.59c / -11.63c | -7.70c | +2.28c | 0.2351 vs **0.0826** | **FALSIFIED** |
+| APP1, RCP approval ladder | 97 | 27 | not computed (below the 100 entry and 25 day minimum) | | | | | 0.0926 vs **0.0746** | **NOT_ENOUGH_DATA** |
+| CMD1, six commodity daily ladders, pooled | 1,054 | 42 | **-7.28c** | **-4.31** | -7.60c / -7.00c | -7.48c | -0.93c | 0.2115 vs **0.0789** | **FALSIFIED** |
+
+**Predictions against results.** GAS1 predicted -1.5c to +0.8c and FALSIFIED: the verdict was right and the loss is five times larger than the range I gave. APP1 predicted FALSIFIED and got NOT_ENOUGH_DATA (97 entries against a minimum of 100): the verdict word was wrong by three entries, and its model is still sharper than nothing but worse than the market on Brier. CMD1 predicted -1.5c to +1.0c and FALSIFIED: right on the word, wrong on the size (-7.3c, z -4.3). In every case the market's own probability scored far better than the model's (Brier about a third to a half), which is the plain reading: **the market in each of these ladders is better informed than a persistence or a spot-distance model, and trading against it costs about 7c a contract.** Recorded as it was.
+
+**Information, not a try: is CMD1's miss a coding error or a result?** The standard deviation of the standardised error (settled value against the model's centre, divided by its own predicted spread; 1.00 means the volatility rule is right): gold 1.02, silver 0.95, WTI 1.43, copper 1.50, Brent 2.03, natural gas 3.79. Gold and silver are calibrated and still lost (-7.1c and -0.2c), so the market is simply sharper there. Brent and natural gas are not calibrated: the Yahoo front-month contract is not the contract Kalshi settles on, and a 10-day median basis does not absorb that, so those two series are mis-measured by the proxy and are not a fair read of the idea. They are **not** re-run (a changed rule is a new try, and the pooled verdict is far outside the bar either way, z -4.3 with gold and silver alone negative).
+
+**What the three results do and do not say.** They say a persistence or a distance-from-spot rule does not beat these ladders on this history, and that the cost of being wrong is large (7c a contract against about a 3c edge threshold). They do not say a published-number edge cannot exist: the one lead left is APP1 at 97 entries (Brier worse than the market's, so I do not expect it), and a model with a better input than yesterday's value (the futures curve for gas) was not tested.
+
+**Decision.** Nothing built, nothing changed live. **Count: about 4,631 tries on Kalshi.** APP1 reads NOT_ENOUGH_DATA, so by its own registration it is repeated only after the minimum is met, on days it has not seen.
