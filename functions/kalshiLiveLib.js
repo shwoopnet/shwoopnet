@@ -442,7 +442,11 @@ function settledFields(t, result) {
 // because hiding the rest of a loss from the loss stop is the unsafe direction). The exit watch's own "skipped" (it found nothing held when the price touched its line) says the same thing
 // without a read. Anything that cannot be read is `unknown`: the order stays open, which the loss stop counts as lost, until the next look. Never places or changes an order.
 async function closedByHand({ fetchFn, keyId, pem, t, nowMs }) {
-  if (t.exitStatus === "skipped") return { hand: true, sold: null };
+  // Oct 21, 2026: this used to treat the exit watch's "skipped" as proof of a hand sale and to read the bot's OWN entry fill as a sale. Kalshi's order API books everything on the YES side
+  // (a NO buy is sent as side "ask"), so the fill for a NO buy can read as action "sell", side "no": every NO order the bot bought looked like a position the owner sold, and was left out of
+  // the stats, the loss stop and the pool, losses included. Now: without the entry order's id the entry cannot be told from a sale, so the order is NOT called hand (a loss stays counted, the
+  // safe direction); the entry's own fill is never a sale; and "skipped" alone is no evidence (the position can simply have settled before the exit watch looked).
+  if (!t.orderId) return { hand: false, sold: 0 };
   const r = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/fills", params: { ticker: t.ticker, limit: "100" }, nowMs });
   if (r.status !== 200 || !r.body || !Array.isArray(r.body.fills)) return { unknown: true };
   const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
@@ -451,6 +455,7 @@ async function closedByHand({ fetchFn, keyId, pem, t, nowMs }) {
   for (const f of r.body.fills) {
     if (!f || (f.ticker || f.market_ticker) !== t.ticker || f.action !== "sell" || f.side !== t.side) continue;
     if (t.exitOrderId && f.order_id === t.exitOrderId) continue;
+    if (f.order_id === t.orderId) continue;                // the bot's own entry, whatever Kalshi calls it
     const at = Date.parse(f.created_time);
     if (Number.isFinite(at) && Number.isFinite(Number(t.ts)) && at < Number(t.ts) - 5000) continue;
     const c = num(f.count_fp !== undefined ? f.count_fp : f.count);
@@ -479,7 +484,22 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem })
     await store.updateTest(t.id, h.hand ? handFields(h) : settledFields(t, r));
     settled += 1;
   }
-  return { settled, looked: Math.min(open.length, max) };
+  // Repair (Oct 21, 2026): orders the old check wrongly marked "hand" (every NO order, see closedByHand) are asked again with the fixed check, and the ones that were never sold by hand are settled as the
+  // win or loss they were, so the stats, the loss stop and the pool see them. A genuine hand sale stays hand and is marked checked so it is not asked again. Reads only, like the rest of this sweep.
+  let repaired = 0;
+  if (keyId && pem && typeof store.handOrders === "function") {
+    const flagged = (await store.handOrders()).filter((t) => t.result === "hand" && t.handChecked !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
+    for (const t of flagged.slice(0, max)) {
+      const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
+      const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
+      if (r !== "yes" && r !== "no") continue;
+      const h = await closedByHand({ fetchFn, keyId, pem, t, nowMs });
+      if (h.unknown) continue;
+      await store.updateTest(t.id, h.hand ? { handChecked: true } : Object.assign(settledFields(t, r), { handChecked: true, handRepaired: true }));
+      if (!h.hand) repaired += 1;
+    }
+  }
+  return { settled, repaired, looked: Math.min(open.length, max) };
 }
 
 // What the bot's own filled trades in this session have done. A settled trade is read once from the public market and
