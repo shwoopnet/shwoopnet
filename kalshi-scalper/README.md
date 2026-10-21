@@ -4516,3 +4516,18 @@ Code `scalper/vm2.py` and `tests/test_vm2.py` were committed before the run; res
 **Dollar size (information).** Excess times $200 and $500; annualised return, volatility, Sharpe and drawdown of QLD managed, QQQ, and QLD bought and held.
 
 **Single read.** `python -m scalper.lq1 fetch` then `python -m scalper.lq1 run`, once. Nothing goes live; holding a 2x fund is a different risk the owner would have to choose. **Family tries: 16.**
+
+## Results: DL1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/dl1.py` and `tests/test_dl1.py` were committed before the run; result file `data/dl1_result.txt`. 24,793 L1 entries, 18 series, 69 days; 19,639 decided out of sample (700 had under 100 prior entries in their series and were excluded and counted).
+
+**Registered verdict: `NOT_YET_FALSIFIED`.** Skipped 8,845 of 19,639 (**45.0%**, inside the predicted 20% to 50%). Kept 10,794 on 55 days: net **+0.69c**, day-clustered z **+3.42** (bar 2.7), halves +0.88c / +0.50c, at fees x1.2 +0.60c. All decided entries: **+0.20c**. Kept minus skipped **+1.08c** (z +3.33); gain +0.49c against a placebo 95th percentile of +0.31c; the kept set beat the all-decided mean in **every month** (Aug +1.50c vs +0.66c, Sep +0.56c vs +0.26c, Oct +0.16c vs -0.25c).
+
+**My prediction was wrong.** I said `FALSIFIED` (about 80%), most likely on the placebo gain; it cleared the placebo with room. Recorded as it was.
+
+**What is under the pass (information from the same run; per-series kept versus skipped means):**
+- **For the series the bot trades live, the rule would have hurt.** Skipped entries did better than kept ones in Bitcoin (+0.30c skipped vs +0.19c kept), Ethereum (+0.71c vs +0.16c), gold (+1.95c vs +1.42c), Dogecoin (+4.24c vs +1.69c) and XRP (+4.29c vs +1.64c): after a bad stretch these series bounced, which is ordinary regression to the mean. A demotion rule applied to the live set would have given up money.
+- **The pooled gain comes from the other side:** series with a persistently poor record sit mostly in the skipped group (ZEC -1.8c, USDJPY -2.6c, GBPUSD -2.7c, BNB -0.47c skipped, and HYPE and platinum turning negative), while kept sets of silver, WTI, NEAR and natural gas earned +0.5c to +1.7c. So the rule works mainly as a **series-level admission filter** (do not trade a series whose last 200 entries net negative) and not as a short-term "stop after a bad run" brake. Several series show noise at the edges (GBPUSD kept 5 entries at -32c).
+- **Same ranking story as TREE2,** now from a rule a person could apply from the page's per-market table: kept minus skipped is positive and reliable, the absolute kept mean is small (+0.69c).
+
+**Decision.** Nothing built, nothing changed live. The rule passes as registered, but it does not apply to the five series the bot trades with size (the sample says leave them alone). **A use I would put to the owner as a choice:** apply it to the 1-contract probes (AUD/USD, USD/CAD, natural gas and any new series), where it asks "are the last 200 entries net negative?" and drops the probe if so; FWD5 already reads those probes forward and would test exactly that. **Kalshi tries: about 4,644.**
