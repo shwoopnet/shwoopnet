@@ -643,6 +643,17 @@
     .kal-tr > .kal-tr-s{ text-align:left; }
     .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
   }
+  /* The trades list stacks its rows by the width of its OWN box, not the window: with the account rail beside it the list can be about 550px wide in a 1,000px window, which squeezed the Trade
+     column into four lines ("Bought / NO 1 / at / 94.3c", the owner, Oct 21, 2026). Same stacked rows as the phone layout above. */
+  #kalBotClosed{ container-type:inline-size; }
+  @container (max-width:640px){
+    .kal-tr{ grid-template-columns:minmax(0,1fr) auto; row-gap:2px; padding:10px 18px; }
+    .kal-tr-head{ display:none; }
+    .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:11.5px; }
+    .kal-tr > .kal-tr-f{ grid-column:1; font-weight:600; }
+    .kal-tr > .kal-tr-s{ text-align:left; }
+    .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
+  }
 
   /* Rearranging: only while "Unlock to rearrange" is ticked (never remembered, so a stray drag cannot happen on a normal visit). */
   .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; cursor:grab; user-select:none; -webkit-user-select:none; }
@@ -2227,23 +2238,6 @@
     var avg = function(a){ return a.length ? a.reduce(function(x, y){ return x + y; }, 0) / a.length : null; };
     r.avgBid = avg(pairs.map(function(x){ return x[0]; })); r.avgFill = avg(pairs.map(function(x){ return x[1]; })); r.avgSlip = avg(pairs.map(function(x){ return x[0] - x[1]; }));
     return r;
-  }
-  function kalshiExitHtml(x, esc, money){
-    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, c = function(v){ return v === null ? 'n/a' : (v * 100).toFixed(1) + 'c'; };
-    var at = Math.round(((x && x.at) || 0.25) * 100) + 'c';
-    // One line a row: a long label used to wrap and squeeze its figure onto a second line. A count that is zero is left out, and records taken under an earlier line are a quiet note under
-    // the block, not a data row: they are not a fall to 25c and are never mixed into these figures.
-    var row = function(k, v, tip){ return '<div' + (tip ? ' title="' + esc(tip) + '"' : '') + '><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
-    var note = x && x.earlier ? '<div><span class="kal-lbl">' + esc(x.earlier === 1 ? '1 older record, taken under an earlier exit line, is left out.' : x.earlier + ' older records, taken under an earlier exit line, are left out.') + '</span></div>' : '';
-    if(!x || !x.touched){ return '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span><div><span>No position has fallen to ' + at + ' yet.</span></div>' + note + '</div>'; }
-    var h = '<div class="kal-perf-t"><span class="kal-lbl">Exit at ' + at + '</span>' + row('Fell to ' + at, String(x.touched)) + row('Sold', String(x.sold));
-    if(x.partly){ h += row('Partly sold', String(x.partly)); }
-    if(x.failed){ h += row('Sell failed or skipped', String(x.failed)); }
-    if(x.loggedOnly){ h += row('Logged, not sent', String(x.loggedOnly)); }
-    if(x.sold + x.partly){ h += row('Trigger bid (avg)', c(x.avgBid)) + row('Sold at (avg)', c(x.avgFill)) + row('Slip (avg)', c(x.avgSlip)) + row('Realised on sells', sg(x.realised)); }
-    h += row('Won after falling', x.known ? x.recovered + ' of ' + x.known + ' (' + Math.round(x.recovered / x.known * 100) + '%)' : 'none known yet', 'Of the positions that fell to ' + at + ' and have since settled, how many ended on the winning side.');
-    if(x.holdKnownSold){ h += row('Sells vs holding', sg(x.exitMinusHold) + (x.exitMinusHold >= 0 ? ' better' : ' worse'), 'Across the ' + x.holdKnownSold + ' sold position' + (x.holdKnownSold === 1 ? '' : 's') + ' whose market has settled: what selling made compared with holding to the end.'); }
-    return h + note + '</div>';
   }
 
   // Every stat the tracker computes, as plain text, for the Copy all stats button: the tiles on the page, the ones that are no longer shown, both tables and the exit at 25c block.
