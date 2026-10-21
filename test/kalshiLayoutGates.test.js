@@ -122,10 +122,10 @@ gates.Y8 = () => {
   // The chart: nothing to draw below two points; a loss ends red; text from the page is escaped.
   assert.ok(/two settled trades/.test(f.kalshiLineSvg([{ cum: 1, pnl: 1, t: 1 }], esc, money)));
   const svg = f.kalshiLineSvg(ser, esc, money);
-  assert.ok(/<svg/.test(svg) && /fill="var\(--loss\)" font-size="14"[^>]*>-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is labelled in red with where it ended');
+  assert.ok(/<svg/.test(svg) && /fill="var\(--loss\)" font-size="15"[^>]*>-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is labelled in red with where it ended');
   // Calm view (Oct 21, 2026): the line itself is one plain stroke and the per-trade points are invisible hover targets, so the only colour on the chart is the end label.
   assert.ok(/stroke="var\(--paper\)"/.test(svg) && !/<circle[^>]*fill="var\(--(gain|loss)\)"/.test(svg) && /<circle[^>]*fill="transparent"><title>/.test(svg), 'a plain line, no coloured dots, the points still carry their hover text');
-  assert.ok(/fill="var\(--gain\)" font-size="14"[^>]*>\+\$0\.20/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is labelled in green');
+  assert.ok(/fill="var\(--gain\)" font-size="15"[^>]*>\+\$0\.20/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is labelled in green');
   // The pie: no orders says so; slices add to the whole; zero slices are left out.
   assert.ok(/No orders yet/.test(f.kalshiDonutHtml({ won: 0, lost: 0, open: 0, noFill: 0, other: 0 }, esc)));
   const pie = f.kalshiDonutHtml({ won: 8, lost: 1, open: 1, noFill: 4, other: 0 }, esc);

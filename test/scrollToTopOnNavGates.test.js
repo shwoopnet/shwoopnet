@@ -43,6 +43,7 @@ function main() {
     function kalshiOnShow(){}
     function kalshiOnHide(){}
     function renderDataCenter(){}
+    function pageEnter(){}
     var currentUserIsAdmin = IS_ADMIN;
     ${lift('showPage')}
     return showPage;
