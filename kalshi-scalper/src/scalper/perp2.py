@@ -150,7 +150,7 @@ def placebo(series_by: dict, trades: list[dict], reps: int = P1.PLACEBO_REPS, se
             if t["market"] == "GOLD/SILVER":
                 rows = series_by["GOLD/SILVER"]
                 j = rng.randrange(P1.N_ENTRY, len(rows) - hold - 1)
-                (g0, s0), (g1, s1) = rows[j], rows[j + hold]
+                (g0, s0, _d0), (g1, s1, _d1) = rows[j], rows[j + hold]
                 days = max(1, (datetime.strptime(rows[j + hold][2], "%Y-%m-%d") - datetime.strptime(rows[j][2], "%Y-%m-%d")).days)
                 tot += t["side"] * ((g1 / g0 - 1.0) - (s1 / s0 - 1.0)) - 2 * P1.cost(days)
             else:

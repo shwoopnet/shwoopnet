@@ -4019,3 +4019,20 @@ By market: gold -0.65% (206 trades), S&P 500 -0.66% (216), Bitcoin +3.55% (186),
 **Information only, not tries:** per market, per calendar year, win rate and stop share; for PERP2 the buy-and-hold of each market; for PERP3 long-gold and short-gold sides separately.
 
 **Single read.** `python -m scalper.perp2 fetch` then `python -m scalper.perp2 run`, once each; a second run is refused unless the result file is deleted on purpose (a crash fix only). **Running count: about 4,634 tries.**
+
+## Results: PERP2 and PERP3, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)
+
+Code `scalper/perp2.py`, `tests/test_perp2.py`, committed before the runs; result files `data/perp2_result_PERP2.txt` and `..._PERP3.txt`. **One crash fix, logged:** the first PERP3 run crashed in the placebo (a tuple unpacked as 2 values when the rows carry 3: `(g0, s0, date)`) before it wrote a result file, so no PERP3 number had been seen; the one line was fixed and the run repeated. No rule, number or threshold changed.
+
+| | Trades | Mean net per trade | Month-clustered z | Halves | Costs x1.2 | Placebo 95th pct | Verdict |
+|---|---|---|---|---|---|---|---|
+| PERP2, buy the dip in an uptrend | 393 over 17 years | +0.32% | +1.31 | +0.13% / +0.51% | +0.25% | +0.56% | **FALSIFIED** |
+| PERP3, gold against silver | 84 over 17 years | **-1.67%** | **-2.07** | -0.87% / -2.47% | -2.05% | -0.46% | **FALSIFIED** |
+
+**Predictions against results.** PERP2 predicted -0.3% to +0.4%, `FALSIFIED` (about 80%): right on the word, and the mean (+0.32%) landed inside the range. PERP3 predicted -0.3% to +0.3%, `NOT_ENOUGH_DATA` or `FALSIFIED`: right on the word, but the loss (-1.67%) is about five times the range's edge.
+
+**PERP2, information.** Every market is slightly positive (Bitcoin +0.84%, gold +0.19%, Ethereum +0.15%, S&P 500 +0.11%) with a 62% to 69% win rate and about a 5 to 7 day hold, but the pooled edge (+0.32%) does not clear the placebo (+0.56%): random long entries held the same lengths did as well, which means the result is the markets' upward drift, not the dip signal. By year it swings from -2.9% (2022) to +2.6% (2020).
+
+**PERP3, information.** Average hold about 35 days (most trades ran into the 30 bar time stop, so the ratio did not come back quickly); only 4% hit the |z| 4 stop; long gold -2.12%, short gold -1.33%. Costs were about 1.9% a trade, of which the funding placeholder (0.02% a day on EACH leg, charged against both) is about 1.4%, so the gross edge was about +0.2% before costs. **The funding assumption is the harshest part of the registration for a pair**: the two legs are opposite sides, so in reality part of the funding offsets. That is a fact about the registered cost model, not a reason to overturn the verdict; a corrected cost model would be a new try.
+
+**What this adds to PERP1.** Three simple daily ideas on the public histories of the four underlyings: one passed only through crypto's early years (PERP1), one is the markets' drift (PERP2), and one is eaten by funding (PERP3). The common finding is again that cost and drift, not signal, decide these. **Decision.** Nothing built, nothing changed live. **Count: about 4,634 tries.**
