@@ -48,7 +48,7 @@
     --radius: 10px;
     --card-shadow: 0 1px 2px rgba(16,24,43,0.06), 0 8px 20px -12px rgba(16,24,43,0.22);
     --card-shadow-lift: 0 2px 4px rgba(16,24,43,0.08), 0 14px 28px -12px rgba(16,24,43,0.30);
-    --brand-depth: #2a3a5e; --ghost-line: rgba(16,24,43,0.07); --ghost-fill: rgba(16,24,43,0.025);
+    --brand-depth: #2a3a5e; --ghost-line: rgba(16,24,43,0.07); --ghost-fill: rgba(16,24,43,0.025); --bubble-shadow: rgba(16,24,43,0.14); --spot: rgba(16,24,43,0.05);
   }
 
   /* Dark mode -- same Ledger identity, inverted surfaces. Set on
@@ -70,7 +70,7 @@
     --amber-contrast: #0B1220;
     --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
     --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
-    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035);
+    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035); --bubble-shadow: rgba(0,0,0,0.6); --spot: rgba(255,255,255,0.05);
   }
 
   /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
@@ -81,13 +81,13 @@
     --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
     --ticker-fg: #000000; --ticker-fg-dim: #6B6B6B; --ticker-bg: #FFFFFF;
     --radius: 4px; --card-shadow: none; --card-shadow-lift: none;
-    --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02);
+    --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02); --bubble-shadow: rgba(0,0,0,0.16); --spot: rgba(0,0,0,0.05);
   }
   html[data-skin="mono"][data-theme="dark"]{
     --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
     --amber: #FFFFFF; --amber-dim: #CFCFCF; --amber-glow: rgba(255,255,255,0.12); --amber-contrast: #000000;
     --ticker-fg: #FFFFFF; --ticker-fg-dim: #8E8E8E; --ticker-bg: #0B0B0B;
-    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02);
+    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02); --bubble-shadow: rgba(0,0,0,0.7); --spot: rgba(255,255,255,0.06);
   }
 
   *{ box-sizing:border-box; }
@@ -492,8 +492,8 @@
   .brief-asof{ margin:-6px 0 14px 2px; }
 
   .brief-section-title{
-    font-family:'Public Sans', sans-serif; font-size:12px; text-transform:uppercase;
-    letter-spacing:.08em; color:var(--muted); font-weight:600; margin: 0 0 16px 0;
+    font-family:'Titan One', 'Public Sans', sans-serif; font-size:17px; color:var(--paper); font-weight:400;
+    letter-spacing:.02em; margin: 0 0 16px 0; text-shadow:0 2px 0 var(--bubble-shadow);
   }
 
   .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
@@ -544,11 +544,11 @@
     display:flex; justify-content:space-between; align-items:center;
     padding: 36px 0 20px 0; flex-wrap:wrap; gap:12px;
   }
-  .trades-title{ font-family:'Public Sans', sans-serif; font-size:22px; font-weight:700; }
+  .trades-title{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:30px; font-weight:400; letter-spacing:.02em; line-height:1.1; text-shadow:0 2px 0 var(--bubble-shadow); }
   .trades-sub{ color:var(--muted); font-size:12.5px; margin-top:4px; }
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .kal-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:20px; box-shadow:var(--card-shadow); }
-  .kal-card-title{ font-family:'Public Sans', sans-serif; font-size:15px; font-weight:700; margin-bottom:14px; }
+  .kal-card-title{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:18px; font-weight:400; letter-spacing:.02em; margin-bottom:14px; text-shadow:0 2px 0 var(--bubble-shadow); }
   /* Books: the market and its price on one line, the figures under it. */
   .kal-brow{ padding:10px 0; border-top:1px solid var(--border); }
   .kal-brow:first-child{ border-top:0; padding-top:0; }
@@ -628,7 +628,7 @@
   .kal-perf{ padding:14px 22px 20px 22px; }
   .kal-rail .kal-perf{ padding:12px 0 0 0; }
   .kal-rail .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-  .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:13px; } .kal-rail .kal-tile .kal-lbl{ font-size:10.5px; }
+  .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:12.5px; } .kal-rail .kal-tile .kal-lbl{ font-size:10.5px; }
   .kal-tools-body{ min-width:min(420px,88vw); max-height:70vh; overflow:auto; }
   .kal-tools-body .kal-actions{ margin:4px 0 2px; }
   .kal-tools-body .kal-note:empty, .kal-botmenu-body .kal-note:empty{ display:none; }
@@ -636,7 +636,7 @@
   .kal-btn-danger{ background:var(--loss); border-color:var(--loss); color:#fff; }
   .kal-tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
   .kal-tile{ display:flex; flex-direction:column; gap:3px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; min-width:0; }
-  .kal-tile b{ font-size:15px; font-weight:700; overflow-wrap:anywhere; }
+  .kal-tile b{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:17px; font-weight:400; letter-spacing:.02em; overflow-wrap:anywhere; }
   .kal-tile .kal-lbl, .kal-perf-t .kal-lbl { color:var(--muted); font-size:11px; display:block; }
   .kal-perf-tabs{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:14px; }
   .kal-perf-t{ display:flex; flex-direction:column; gap:6px; font-size:13px; }
@@ -655,7 +655,7 @@
   .kal-console .kal-brow:hover{ box-shadow: var(--card-shadow-lift); transform: translateY(-1px); }
   .kal-depth{ display:flex; height:4px; border-radius:2px; overflow:hidden; margin-top:6px; background:var(--border); }
   .kal-depth > i{ display:block; height:100%; background:var(--paper); opacity:.55; }
-  .kal-brow-name{ font-weight:700; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
+  .kal-brow-name{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; font-size:17px; letter-spacing:.02em; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
   /* Phones: the price lines under each market are hidden. The Performance card (P/L line, orders ring, settled-trade bars) came back on phones on Oct 21, 2026 at the owner's request, now that the calm view made
      it quiet enough to fit; it stacks to one column below. */
   @media (max-width:700px){
@@ -808,6 +808,27 @@
      making most of it permanently unreadable, which is a worse outcome
      for the same user than letting it move. Every other animation here
      is decorative and genuinely loses nothing by stopping. */
+
+  /* Bubble pop (the owner, Oct 21, 2026: "more visual appeal and interactivity"). The bubbly Titan One of the wordmark now carries the headings, the stat figures and the chart labels; small table figures stay in Public Sans so
+     numbers stay easy to read. Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render), a soft light follows the pointer over a card, cards and tiles lift a
+     little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
+  .kal-bub{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; letter-spacing:.02em; }
+  .kal-card, .settings-card, .breadth-widget, .movers-col{ background-image: radial-gradient(280px circle at var(--mx, -999px) var(--my, -999px), var(--spot), transparent 65%); transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
+  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
+  .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
+  .kal-tile:hover{ transform: translateY(-2px) scale(1.02); border-color: var(--paper); }
+  .kal-leg{ transition: transform .15s ease; } .kal-leg:hover{ transform: translateX(3px); }
+  .kal-donut svg circle[data-seg]{ transition: stroke-width .15s ease, opacity .15s ease; pointer-events:stroke; }
+  .kal-donut svg:hover circle[data-seg]{ opacity:.5; }
+  .kal-donut svg circle[data-seg]:hover{ opacity:1; stroke-width:7.6; }
+  .data-bar{ transition: filter .15s ease, transform .15s ease; transform-box: fill-box; transform-origin: center; }
+  .data-bar:hover{ filter: brightness(1.35); transform: scaleX(1.08); }
+  @keyframes cardRise{ from{ opacity:0; transform: translateY(14px) scale(.985); } to{ opacity:1; transform:none; } }
+  @keyframes lineDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
+  @keyframes markPop{ from{ opacity:0; transform: scaleY(.2); } to{ opacity:1; transform:none; } }
+  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+  .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
+  .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
     .brand-mark{ animation: none; }
     .brand-ground{ animation: none; display:none; }
@@ -817,6 +838,10 @@
     .bg-grid{ animation: none; }
     .kal-console .kal-brow{ transition: none; }
     .kal-console .kal-brow:hover{ transform: none; }
+    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .kal-tile{ animation: none; }
+    .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
+    .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
+    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
@@ -827,6 +852,10 @@
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
   [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
+  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .movers-col, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
+  [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
+  [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
+  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .movers-col:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
 </style>
 <script>
   // Runs synchronously before <body> paints anything, so dark mode is
@@ -2019,8 +2048,8 @@
     }).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
-      '<path d="' + path + '" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
-      '<text x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="14" font-weight="700">' + esc(fmt(last.cum)) + '</text>' +
+      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
+      '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15">' + esc(fmt(last.cum)) + '</text>' +
       '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="11">' + points.length + ' settled trades, oldest to newest</text></svg>';
   }
 
@@ -2034,14 +2063,14 @@
     parts.forEach(function(x){
       if(!x[1]){ return; }
       var pct = x[1] / total * 100;
-      segs += '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="' + x[2] + '" stroke-width="6" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + offset.toFixed(3) + '"/>';
+      segs += '<circle data-seg="1" cx="21" cy="21" r="15.9155" fill="none" stroke="' + x[2] + '" stroke-width="6" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + offset.toFixed(3) + '"><title>' + esc(x[0]) + ': ' + x[1] + ' (' + Math.round(pct) + '%)</title></circle>';
       offset -= pct;
     });
     var legend = parts.filter(function(x){ return x[1]; }).map(function(x){
       return '<div class="kal-leg"><span class="kal-leg-dot" style="background:' + x[2] + '"></span><span>' + esc(x[0]) + '</span><b>' + x[1] + '</b><span class="kal-lbl">' + Math.round(x[1] / total * 100) + '%</span></div>';
     }).join('') + (other ? '<div class="kal-leg"><span class="kal-leg-dot" style="background:var(--muted)"></span><span>Other</span><b>' + other + '</b></div>' : '');
     return '<div class="kal-donut"><svg viewBox="0 0 42 42" role="img" aria-label="How ' + total + ' orders ended" style="width:120px;height:120px;flex:none"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--border)" stroke-width="6"/>' + segs +
-      '<text x="21" y="20" text-anchor="middle" font-size="7" font-weight="700" fill="currentColor">' + total + '</text><text x="21" y="26" text-anchor="middle" font-size="3.4" fill="var(--muted)">orders</text></svg><div class="kal-donut-leg">' + legend + '</div></div>';
+      '<text class="kal-bub" x="21" y="20" text-anchor="middle" font-size="7.5" fill="currentColor">' + total + '</text><text x="21" y="26" text-anchor="middle" font-size="3.4" fill="var(--muted)">orders</text></svg><div class="kal-donut-leg">' + legend + '</div></div>';
   }
 
   // An order the bot filled whose market has since settled, but which the server never marked settled (its checks stop when a session ends, so a loss that
@@ -2116,7 +2145,7 @@
     var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
     var bars = shown.map(function(p, i){
       var x = L + slot * i + (slot - bw) / 2, y0 = Y(0), y1 = Y(p.pnl), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0));
-      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--muted)' : 'var(--loss)') + '"' + (p.pnl >= 0 ? ' fill-opacity="0.55"' : '') + '/>';
+      return '<rect data-mark="1" style="--i:' + i + '" x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--muted)' : 'var(--loss)') + '"' + (p.pnl >= 0 ? ' fill-opacity="0.55"' : '') + '/>';
     }).join('');
     var hits = shown.map(function(p, i){
       return '<rect class="kal-hit" x="' + (L + slot * i).toFixed(1) + '" y="0" width="' + slot.toFixed(1) + '" height="' + (H - B) + '" fill="transparent" pointer-events="all" data-up="' + (p.pnl >= 0 ? '1' : '0') +
@@ -2978,8 +3007,8 @@
     var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     var bars = shown.map(function(w, i){
       var cx = L + slot * i + slot / 2, y0 = Y(0), y1 = Y(w.net), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0)), up = w.net >= 0;
-      return '<rect x="' + (cx - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + (up ? 'var(--muted)' : 'var(--loss)') + '"' + (up ? ' fill-opacity="0.55"' : '') + '><title>' + esc('Week of ' + dataWeekLabel(w.key) + ': ' + fmt(w.net) + ' over ' + w.n + ' settled trades') + '</title></rect>' +
-        '<text x="' + cx.toFixed(1) + '" y="' + (up ? top - 6 : top + h + 14).toFixed(1) + '" text-anchor="middle" fill="var(--paper)" font-size="12">' + esc(fmt(w.net)) + '</text>' +
+      return '<rect class="data-bar" data-mark="1" style="--i:' + i + '" x="' + (cx - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + (up ? 'var(--muted)' : 'var(--loss)') + '"' + (up ? ' fill-opacity="0.55"' : '') + '><title>' + esc('Week of ' + dataWeekLabel(w.key) + ': ' + fmt(w.net) + ' over ' + w.n + ' settled trades') + '</title></rect>' +
+        '<text class="kal-bub" x="' + cx.toFixed(1) + '" y="' + (up ? top - 6 : top + h + 15).toFixed(1) + '" text-anchor="middle" fill="var(--paper)" font-size="13">' + esc(fmt(w.net)) + '</text>' +
         '<text x="' + cx.toFixed(1) + '" y="' + (H - 14) + '" text-anchor="middle" fill="var(--muted)" font-size="11">' + esc(dataWeekLabel(w.key)) + '</text>' +
         '<text x="' + cx.toFixed(1) + '" y="' + (H - 2) + '" text-anchor="middle" fill="var(--muted)" font-size="10">' + w.n + ' trades</text>';
     }).join('');
@@ -3004,12 +3033,12 @@
     var offset = 25, segs = '', legend = '';
     rows.forEach(function(r, i){
       var pct = r.n / total * 100, op = Math.max(0.18, 0.95 - i * 0.14);
-      segs += '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--paper)" stroke-opacity="' + op.toFixed(2) + '" stroke-width="6" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + offset.toFixed(3) + '"/>';
+      segs += '<circle data-seg="1" cx="21" cy="21" r="15.9155" fill="none" stroke="var(--paper)" stroke-opacity="' + op.toFixed(2) + '" stroke-width="6" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + offset.toFixed(3) + '"><title>' + esc(r.name) + ': ' + r.n + ' (' + Math.round(pct) + '%)</title></circle>';
       offset -= pct;
       legend += '<div class="kal-leg"><span class="kal-leg-dot" style="background:var(--paper);opacity:' + op.toFixed(2) + '"></span><span>' + esc(r.name) + '</span><b>' + r.n + '</b><span class="kal-lbl">' + Math.round(pct) + '%</span></div>';
     });
     return '<div class="kal-donut"><svg viewBox="0 0 42 42" role="img" aria-label="Share of ' + total + ' settled trades by market" style="width:140px;height:140px;flex:none"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--border)" stroke-width="6"/>' + segs +
-      '<text x="21" y="20" text-anchor="middle" font-size="7" font-weight="700" fill="currentColor">' + total + '</text><text x="21" y="26" text-anchor="middle" font-size="3.4" fill="var(--muted)">settled</text></svg><div class="kal-legend">' + legend + '</div></div>';
+      '<text class="kal-bub" x="21" y="20" text-anchor="middle" font-size="7.5" fill="currentColor">' + total + '</text><text x="21" y="26" text-anchor="middle" font-size="3.4" fill="var(--muted)">settled</text></svg><div class="kal-legend">' + legend + '</div></div>';
   }
   function dataTilesHtml(st, esc, money){
     var sign = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
@@ -3399,6 +3428,44 @@
   function kalshiOnHide(){ stopKalshiPoll(); stopKalshiBot(); }
 
   // ---------- Navigation ----------
+  // Bubble pop motion (see the CSS above it): a page's cards rise in once when it is shown, then the class is taken off so the minute's re-render never replays it. Nothing here runs when motion is reduced.
+  var pageEnterTimer = null;
+  function motionReduced(){
+    try{
+      if(document.documentElement.getAttribute('data-reduce-motion') === 'true'){ return true; }
+      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }catch(e){ return false; }
+  }
+  function pageEnter(pageEl){
+    if(!pageEl || motionReduced()){ return; }
+    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .movers-col, .kal-tile');
+    for(var i = 0; i < items.length; i++){ items[i].style.setProperty('--i', String(Math.min(i, 12))); }
+    pageEl.classList.remove('enter'); void pageEl.offsetWidth; pageEl.classList.add('enter');
+    clearTimeout(pageEnterTimer);
+    pageEnterTimer = setTimeout(function(){ pageEl.classList.remove('enter'); }, 2200);
+  }
+  // A soft light follows the pointer over a card (two custom properties on the card, nothing else). Mouse and pen only, and never wired to do anything when motion is reduced.
+  (function(){
+    var raf = 0, last = null, CARD = '.kal-card, .settings-card, .breadth-widget, .movers-col';
+    document.addEventListener('pointermove', function(e){
+      if(e.pointerType === 'touch' || motionReduced() || !e.target || !e.target.closest){ return; }
+      var t = e.target.closest(CARD);
+      if(!t){ return; }
+      last = { t: t, x: e.clientX, y: e.clientY };
+      if(raf){ return; }
+      raf = requestAnimationFrame(function(){
+        raf = 0;
+        var r = last.t.getBoundingClientRect();
+        last.t.style.setProperty('--mx', (last.x - r.left).toFixed(0) + 'px');
+        last.t.style.setProperty('--my', (last.y - r.top).toFixed(0) + 'px');
+      });
+    }, { passive: true });
+    document.addEventListener('pointerout', function(e){
+      var t = e.target && e.target.closest ? e.target.closest(CARD) : null;
+      if(t && !(e.relatedTarget && t.contains(e.relatedTarget))){ t.style.removeProperty('--mx'); t.style.removeProperty('--my'); }
+    }, { passive: true });
+  })();
+
   function showPage(name){
     // Switching pages via nav used to leave the scroll position exactly
     // where it was on the PREVIOUS page -- landing on a short page already
@@ -3420,6 +3487,7 @@
     });
     if(name === 'kalshi' || name === 'data'){ kalshiOnShow(); } else { kalshiOnHide(); }
     if(name === 'data'){ renderDataCenter(); }
+    pageEnter(document.getElementById('page-' + name));
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
 
