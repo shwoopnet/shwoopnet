@@ -574,9 +574,13 @@ async function kalshiFetchMarket(ticker) {
   }
   return null;
 }
+// Switched off on Oct 21, 2026 at the owner's request to cut the Firebase bill: its page card is gone and live one-contract probes replaced it, so it recorded for nobody. The function stays exported
+// (the tests and the deploy scripts name it) and returns at once, which costs almost nothing; set this to true to record again. Its collection and its pass bar in the research README are untouched.
+const PAPER_TRACKER_ON = false;
 exports.kalshiPaperTick = onSchedule(
   { schedule: "every 1 minutes", timeoutSeconds: 50, retryCount: 0, memory: "256MiB" },
   async () => {
+    if (!PAPER_TRACKER_ON) return;
     try {
       ensureDefaultAdminApp();
       const col = getFirestore().collection("kalshiPaperOrders");
@@ -668,7 +672,16 @@ exports.kalshiBookRecorder = onSchedule(
   { schedule: "every 1 minutes", timeoutSeconds: 70, retryCount: 0, memory: "256MiB" },
   async () => {
     // Switched off on Oct 12, 2026 at the owner's request to cut the Firebase bill: it trades nothing and only fed research that has concluded. Remove this line to record again.
-    if (!BOOK_RECORDER_ON) return;
+    if (!BOOK_RECORDER_ON) {
+      // Switched off, it still tidies up (Oct 21, 2026 cost review): the only thing that ever deleted old snapshots was the recorder itself, so the ones written before Oct 12 were never removed and kept
+      // billing as stored data. One small delete-only query a minute until they are gone (an empty result costs one read); it reads no market and places nothing.
+      try {
+        ensureDefaultAdminApp();
+        const old = await getFirestore().collection("kalshiBookSnaps").where("ts", "<", Date.now() - 86400000).limit(200).get();
+        if (!old.empty) await Promise.all(old.docs.map((d) => d.ref.delete()));
+      } catch (e) { console.error("kalshiBookRecorder prune: " + String((e && e.message) || e).slice(0, 160)); }
+      return;
+    }
     ensureDefaultAdminApp();
     const db = getFirestore();
     const snaps = db.collection("kalshiBookSnaps");
