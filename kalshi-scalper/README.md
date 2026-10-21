@@ -4341,3 +4341,27 @@ L1 (ask 88c to 97c at 6 minutes left, held to settlement, fee 7% x p x (1-p)) on
 **Information only, not tries:** gross funding yield by calendar year and by coin; the share of 30-day windows with negative funding; the worst 30-day net; break-even holding period in months at the base cost.
 
 **Single read.** `python -m scalper.fund1 run` reads `data/fund1_hl.json`; a second run is refused unless the result file is deleted on purpose (a crash fix only). **Tries: 1 (carry family).**
+
+## Results: FUND1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/fund1.py` and `tests/test_fund1.py` were committed before the run; result file `data/fund1_result.txt`. **39 full months, 2023-07 to 2026-09** (the registration said 40; Hyperliquid's history starts mid-May 2023 and the first usable full month was July; 39 still clears the 36 month minimum).
+
+**Registered verdict: `NOT_YET_FALSIFIED`.** Net of the one-off 0.94% round trip, amortised over a year: **+13.3% a year, Newey-West z 4.31** (bar 2.1); first half +20.4%, second half +6.5%; **last 12 months +5.2%**; at the x1.2 cost +13.1%.
+
+| Gross funding yield, BTC and ETH average, a year | 2023 | 2024 | 2025 | 2026 (to Sep) |
+|---|---|---|---|---|
+| Basket | **18.9%** | **23.2%** | **9.6%** | **5.4%** |
+
+- **My prediction was half wrong.** I said gross 4% to 10% and net +3% to +9% a year over the sample; the sample came in at gross 14.2%, net 13.3%, because 2023 and 2024 were far richer than I expected. I was right that the last 12 months are lower (+5.2% net) and that they are the weak condition; the verdict landed on the side I put at 55%.
+- **The yield is falling every year** (18.9%, 23.2%, 9.6%, 5.4%). It is the same shape as every earlier edge in this log: a premium that lived in the early window. A pass on the full sample says the carry paid while leverage was in the market; the number to plan on is the last 12 months, not 13.3%.
+- **Worst case in the data:** 3.9% of rolling 30 day windows had negative funding; the worst 30 day window cost 0.48% of notional. Funding is not where the risk is.
+- **The venue baseline, a caution.** Perpetual funding on most venues includes a fixed interest component (Hyperliquid's is about 11% a year at its 0.01% per 8 hours baseline). So 2026's 5.4% gross is already **below** that baseline, which means the *premium* part has turned negative this year. I did not separate the two components; that is information I did not compute.
+- **Dollar size (information).** On the last-12-month yield (+5.2% net) with a 20% margin buffer: about **$8.70 a year on $200 and $21.70 on $500**. On the full-sample yield it would be $22 and $55; I would plan on the former.
+
+**What this does not show (the real risks, none measured here).**
+1. **Access.** Hyperliquid is not available to US persons. Kalshi's perpetuals and other US-regulated perpetuals have no funding history I can fetch, and their fees (PERP1 assumed 0.12% a side) are placeholders.
+2. **Basis.** Spot and perpetual prices were assumed to cancel; a sharp move can open a gap and force a margin call on the short leg while the spot leg is fine.
+3. **Capital use.** Fully hedged, the position needs about 1.2 dollars of capital per dollar of notional and earns nothing on the idle part.
+4. **Venue risk.** A failure or freeze of the exchange holding the short leg loses the hedge.
+
+**Decision.** `NOT_YET_FALSIFIED` is permission to look for a venue and a forward record, not a switch. The cheapest honest next step is to **record the funding rate of a venue the owner can actually use** (Kalshi's perpetual, a US-accessible perpetual, or a spot-futures basis) for a few weeks and run FUND1 again on that data. That needs the main session or the owner to name the venue; nothing built here. **Tries: 1 (carry family), plus 10 in the ETF family and about 4,641 on Kalshi.**
