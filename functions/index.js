@@ -204,6 +204,8 @@ function kalshiMarketApi() {
 // Step 1 of putting a small amount of real money behind this: it proves production signing, a real fill, the
 // real fee and the real duplicate-order behaviour with one contract. All the logic and all the order code are in
 // kalshiLiveLib.js (production host only, $2 cap, never retried, 2 a day and 5 ever). Takes nothing from the page.
+// One reader per function instance, so the older part of the 24 hour list is read once every 15 minutes instead of every minute.
+const l1OrderReader = live.makeRecentOrderReader(async (ts) => (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", ts).get()).docs.map((d) => ({ id: d.id, ...d.data() })));
 function firestoreLiveStore(db) {
   const col = db.collection("kalshiLiveOrders");
   return {
@@ -250,8 +252,12 @@ function firestoreLiveStore(db) {
     async updateTest(id, patch) { await col.doc(id).update(patch); },
     // Every order since a time, with its id. A single-field query, so it needs no composite index; the caller filters.
     async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+    // The tick's 24 hour read, with the older part kept in memory (see makeRecentOrderReader).
+    sessionTradesCached(since, now) { return l1OrderReader(since, now); },
     // The exit watch's few recent filled orders (a single-field query again), not every filled order ever: it looks several times a minute.
-    async recentFilled(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => o.status === "filled"); },
+    // Cost (Oct 21, 2026): asks for filled AND unsettled orders only (two equalities, so no index) instead of every order of the last 25 minutes, because it runs several times a minute. Every order is written with settled: false,
+    // and the exit watch only ever acts on an unsettled one, so nothing it would sell is left out. The time filter is applied here.
+    async recentFilled(since) { return (await col.where("status", "==", "filled").where("settled", "==", false).get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => Number(o.ts) >= since); },
     // One closer per market at a time (the exit watch or Flatten, see kalshiLiveLib.claimClose). False when the OTHER closer took it less than ttl ago; the same closer may take it again.
     async claimClose(ticker, who, now, ttl) {
       const ref = db.collection("kalshiLiveClosing").doc(String(ticker));
@@ -541,8 +547,9 @@ exports.kalshiLiveArmed = onSchedule(
       }
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
       // delay the tick: a bad read is logged and the next minute tries again.
+      // The hand-sold repair pass re-reads every order marked hand, which is no longer needed every minute: once every 10 minutes is enough for something that only ever looks back.
       try {
-        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value() });
+        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), repair: Math.floor(now / 60000) % 10 === 0 });
       } catch (e) {
         console.error("kalshiLiveArmed: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
       }

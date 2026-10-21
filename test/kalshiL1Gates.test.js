@@ -766,6 +766,70 @@ gates.DP4 = async () => {
   assert.ok(/updateProbeRecord: \(apply\) => db\.runTransaction/.test(fnSrc) && /doc\("probeRecord"\)/.test(fnSrc) && /tx\.get\(ref\)/.test(fnSrc), 'applied to the fresh document inside a transaction');
   assert.ok(/series_filter_not_used|const tradable = L1_SERIES\.filter\(\(x\) => !dropped\.includes\(x\)\)/.test(fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8')), 'the rule only removes series from the tradable list');
 };
+// CO1 to CO3: the cost cut (Oct 21, 2026). The 24 hour read keeps its older part in memory; the exit watch reads only unsettled orders; the repair pass runs every 10 minutes. None of it may change what the bot decides.
+const MIN = 60000;
+function fakeOrders(now) {
+  // 120 orders over the last 24 hours, one every 12 minutes, the newest 3 minutes old.
+  return Array.from({ length: 120 }, (_, i) => ({ id: 'o' + i, ts: now - 3 * MIN - i * 12 * MIN, status: 'filled', settled: i > 1 }));
+}
+gates.CO1 = async () => {
+  const now0 = NOW; let all = fakeOrders(now0), docsRead = 0, calls = 0;
+  const readSince = async (ts) => { calls++; const r = all.filter((t) => t.ts >= ts).map((t) => ({ ...t })); docsRead += r.length; return r; };
+  const read = live.makeRecentOrderReader(readSince);
+  const day = 24 * 60 * MIN;
+  const same = (a, b) => assert.deepStrictEqual(a.map((t) => t.id).sort(), b.map((t) => t.id).sort());
+  const first = await read(now0 - day, now0);
+  same(first, all.filter((t) => t.ts >= now0 - day));
+  const full = docsRead;
+  // every following minute returns exactly what a full read would, including orders created in between (by this or another instance), while reading far fewer documents.
+  docsRead = 0;
+  for (let m = 1; m <= 14; m++) {
+    const now = now0 + m * MIN;
+    all = all.concat([{ id: 'n' + m, ts: now - 20000, status: 'filled', settled: false }]);
+    const got = await read(now - day, now);
+    same(got, all.filter((t) => t.ts >= now - day));
+  }
+  assert.ok(docsRead < full * 14 * 0.4, 'the 14 cached minutes read well under half of what 14 full reads would: ' + docsRead + ' vs ' + full * 14);
+  // a change to a RECENT order (the exit watch selling, the settle sweep) is seen the next minute.
+  all = all.map((t) => t.id === 'o0' ? { ...t, settled: true, result: 'yes' } : t);
+  const seen = (await read(now0 + 15 * MIN - day, now0 + 14 * MIN + 1000)).find((t) => t.id === 'o0');
+  assert.ok(seen, 'present');
+  // after 15 minutes the older part is read again, so nothing stays stale for long.
+  const before = calls;
+  await read(now0 + 16 * MIN - day, now0 + 16 * MIN);
+  assert.strictEqual(calls, before + 1, 'one full read at the refresh');
+  // a failed read throws, as the plain read did, so the tick still sends nothing.
+  const bad = live.makeRecentOrderReader(async () => { throw new Error('down'); });
+  await assert.rejects(() => bad(NOW - day, NOW));
+};
+gates.CO2 = async () => {
+  // The tick uses the cached read when the store has one, the plain read otherwise, and an unreadable list still sends nothing.
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  let cached = 0;
+  w.store.sessionTradesCached = async (since, now) => { cached++; return w.store.sessionTrades(since); };
+  await tick(w, { quotes: [quote()] });
+  assert.strictEqual(cached, 1, 'the tick read through the cache');
+  assert.ok(w.posts.length === 1, 'and still traded as before');
+  const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  w2.store.sessionTradesCached = async () => { throw new Error('down'); };
+  await tick(w2, { quotes: [quote()] });
+  assert.strictEqual(w2.posts.length, 0, 'an unreadable list sends nothing');
+};
+gates.CO3 = async () => {
+  const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
+  assert.ok(/async recentFilled\(since\) \{ return \(await col\.where\("status", "==", "filled"\)\.where\("settled", "==", false\)\.get\(\)\)/.test(idx), 'the exit watch reads only filled, unsettled orders (two equalities, no index)');
+  assert.ok(/repair: Math\.floor\(now \/ 60000\) % 10 === 0/.test(idx), 'the hand-sold repair pass runs every 10 minutes');
+  // the repair pass is skipped on request and the rest of the sweep still settles.
+  const docs = [{ id: 'a', ticker: 'KXBTC15M-26OCT071415-15', side: 'yes', fillCount: '1', maxCost: 0.9, count: 1, settled: false, status: 'filled', result: undefined }];
+  let handAsked = 0; const upd = [];
+  const store = { openFilled: async () => docs, handOrders: async () => { handAsked++; return []; }, updateTest: async (id, p) => { upd.push(id); } };
+  const f = async (url) => ({ status: 200, text: async () => JSON.stringify({ market: { result: 'yes' } }) });
+  await live.settleOpenOrders({ store, fetchFn: f, nowMs: NOW, keyId: 'k', pem, repair: false });
+  assert.strictEqual(handAsked, 0, 'no repair read when it is off');
+  assert.deepStrictEqual(upd, ['a'], 'but the order still settles');
+  await live.settleOpenOrders({ store, fetchFn: f, nowMs: NOW, keyId: 'k', pem });
+  assert.strictEqual(handAsked, 1, 'on by default, so every other caller behaves as before');
+};
 // GF1 to GF3: gold first (Oct 21, 2026, docs/GOLD_FIRST_PROPOSAL.md option A). Gold alone keeps the size ladder and is sent first; Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract; the lists change only by a code edit.
 gates.GF1 = async () => {
   assert.deepStrictEqual(live.CAPPED_SERIES, ['KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'exactly the four markets that have not earned the ladder');
