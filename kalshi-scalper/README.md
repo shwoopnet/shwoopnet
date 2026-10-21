@@ -3958,3 +3958,35 @@ Code: `scalper/pub1.py`, committed before any run. Result files: `data/pub1_resu
 **Kill criterion.** Any condition of the bar failing. A pass on the pooled set that holds in only one market is reported as exactly that.
 
 **Count.** One try: about **4,632** on Kalshi-related ideas. Single run: `python -m scalper.perp1 fetch` then `python -m scalper.perp1 run`; a second run is refused unless the result file is deleted on purpose (a crash fix only).
+
+## Result: PERP1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/perp1.py` and `tests/test_perp1.py`, committed before the run. Result file `data/perp1_result.txt`.
+
+**Registered verdict: `NOT_YET_FALSIFIED`.** 745 trades on four markets over 17 years: mean net **+1.40% per trade on notional**, month-clustered z **+2.76**, halves +1.94% and +0.86%, positive with costs x1.2 (+1.28%), above the placebo 95th percentile (+0.46%). Minimum detectable edge +1.06%.
+
+**My prediction was wrong.** I said -0.4% to +0.5% a trade, z under 1.5, `FALSIFIED` (about 85%). The pooled result is nearly three times the top of that range. Recorded as it was.
+
+**What is under the pooled number (information; each of these cuts was made after seeing the result, so none is a try and none is evidence):**
+
+| Cut | Trades | Mean net | z |
+|---|---|---|---|
+| Bitcoin and Ethereum, all years | 323 | **+4.09%** | +3.44 |
+| Gold and S&P 500, all years | 422 | **-0.66%** | **-4.87** |
+| Entries from 2022 on, all markets | 287 | **0.00%** | -0.01 |
+| Entries from 2022 on, Bitcoin and Ethereum | 168 | +0.46% | +0.40 |
+| Entries from 2022 on, gold and S&P 500 | 119 | -0.66% | -2.70 |
+| Longs | 389 | +3.26% | +3.83 |
+| Shorts | 356 | -0.63% | -1.20 |
+| All trades except the 10 best | 735 | +0.35% | +0.99 |
+
+By market: gold -0.65% (206 trades), S&P 500 -0.66% (216), Bitcoin +3.55% (186), Ethereum +4.82% (137). By year of entry: 2017 +7.6%, 2018 +3.1%, 2019 +2.9%, **2020 +7.7%**, 2021 +1.4%, then 2022 -0.4%, 2023 +0.4%, 2024 +0.2%, 2025 -0.3%, 2026 +0.1%. The ten best trades (+46% to +129% on notional each) are all Bitcoin or Ethereum, eight of them from 2017 to 2021.
+
+**Honest reading.**
+- The pass is real as registered, and it is a pass of "long Bitcoin and Ethereum through their enormous early run" (buy and hold on those two returned +18,149% and +669% over their samples), carried by a handful of very large winners. Without the 10 best trades the z is 1.0.
+- **Gold and the S&P 500 lose at every cut** (z -4.9 pooled), so a daily trend rule on the two markets without crypto's drift is worse than nothing after costs.
+- **The edge is not visible in the last five years:** 287 trades from 2022 on average 0.00% (z -0.01). This is the same shape as the "window series" finding for the earlier strategies (an edge that lives in the early, flattering window).
+- The pass therefore says "a simple rule rode a historic bull market", not "there is a perps trend edge today". Permission to consider a probe is not a reason to build one.
+- The funding charge (0.02% a day) is a placeholder; the real rate is unmeasured. Long positions in a strong uptrend usually PAY funding, so the pass is not flattered by it, but the sign and size are unknown.
+
+**Decision.** Nothing built, nothing changed live. A follow-up (crypto only, or from 2022 on) would be a new try, registered first and run once; because it would be chosen after seeing these cuts, it would need a stricter bar and ideally days that do not exist yet (a forward record). **Count: about 4,632 tries.**
