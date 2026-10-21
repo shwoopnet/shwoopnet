@@ -290,6 +290,22 @@ gates.Y11b = () => {
   assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiLiveOrders\)/.test(html), 'a button, built from the bot\'s own orders');
 };
 
+// Presentation view (Oct 21, 2026): one Layout-menu switch that only HIDES the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. It is a page
+// attribute and is never saved, so a reload is always the full page and nothing can look "gone" by accident; no number is changed.
+gates.Y11c = () => {
+  const m = /(function kalshiSetPresent\(on\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiSetPresent not found');
+  const attrs = {}; const doc = { documentElement: { setAttribute: (k, v) => { attrs[k] = v; }, removeAttribute: (k) => { delete attrs[k]; } } };
+  const set = new Function('document', m[1] + '; return kalshiSetPresent;')(doc);
+  set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on' }, 'on sets the page attribute');
+  set(false); assert.deepStrictEqual(attrs, {}, 'off removes it, back to the full page');
+  assert.ok(!/localStorage[^;]*[Pp]resent|[Pp]resent[^;]*localStorage/.test(html) && !/syncUserSetting\('kalPresent/.test(html), 'it is never saved, in this browser or in the account');
+  assert.ok(/id="kalPresent"/.test(html) && /id="kalPresent"[\s\S]{0,200}id="kalLayoutUnlock"/.test(html), 'a checkbox in the Layout menu');
+  const css = /html\[data-present="on"\] \.kal-acct-total[^{]*\{ display:none; \}/.exec(html); assert.ok(css, 'the rule exists');
+  for (const hidden of ['.kal-acct-total', '#kalBotStatus .kal-rows', '[data-card="positions"]', '[data-card="trades"]', '.kal-perf-band', '#kalTools']) assert.ok(css[0].includes('html[data-present="on"] ' + hidden), hidden + ' is hidden');
+  for (const kept of ['performance', 'books', 'account']) assert.ok(!css[0].includes('data-card="' + kept + '"'), kept + ' stays');
+  assert.ok(/kal-perf-t' \+ \(title === 'By price paid' \? ' kal-perf-band' : ''\)/.test(html), 'only the By price paid table carries the hide class');
+};
+
 // The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
 gates.Y11 = () => {
   const m = /(function kalshiDiagnosticsCsv\(orders, limit\)\{[\s\S]*?\n  \})\n/.exec(html);
