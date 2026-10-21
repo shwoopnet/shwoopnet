@@ -291,6 +291,7 @@ gates.Y11b = () => {
   assert.deepStrictEqual([1, 2, 3].map((i) => col(out[i], 'ticker')), ['A', 'C', 'B'], 'oldest first');
   assert.strictEqual(col(out[3], 'pnl'), '0.24', 'a settled order carries the bot\'s saved P/L');
   assert.strictEqual(col(out[1], 'pnl'), '', 'an open order has none');
+  assert.ok(['entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize'].every((c) => head.includes(c)), 'the full export carries the entry lead and what the research reads need');
   assert.deepStrictEqual([col(out[3], 'seenBid'), col(out[3], 'seenAsk'), col(out[1], 'seenAsk')], ['0.91', '0.94', ''], 'the quote the bot saw is exported (the spread forward test reads it); an order with none leaves it empty');
   assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiLiveOrders\)/.test(html), 'a button, built from the bot\'s own orders');
 };
@@ -325,7 +326,8 @@ gates.Y11 = () => {
   const csv = new Function(m[1] + '; return kalshiDiagnosticsCsv;')();
   const rows = (t) => t.split('\n');
   const head = rows(csv([]))[0].split(',');
-  assert.deepStrictEqual(head.slice(0, 3), ['time', 'ticker', 'side'], 'a header even with no orders');
+  assert.deepStrictEqual(head.slice(0, 2), ['time', 'ticker'], 'a header even with no orders');
+  assert.ok(['series', 'entryLead', 'count'].every((c) => head.includes(c)), 'the series, the entry lead (10m or 6m) and the size are exported so the forward reads can split orders');
   assert.strictEqual(rows(csv([])).length, 1);
   const out = csv([
     { ts: 1000, ticker: 'T-A', side: 'no', price: 0.89, limit: 0.89, status: 'no fill', fillCount: '0.00', seen: { bid: 0.11, ask: 0.12, bidSize: 12, askSize: 3, at: 'x' } },
