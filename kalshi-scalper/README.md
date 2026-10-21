@@ -4605,3 +4605,20 @@ Prediction (alpha -1% to +2%, z under 2.0, both `FALSIFIED`, about 85%): right o
 **ML1, L1 by minutes left, descriptive then a forward claim.** *Information (no try):* L1's band (ask 88c to 97c) at 10, 9, 8, 7, 6, 5, 4, 3 minutes left on `book` and `l1b` for gold, Bitcoin and Ethereum: n, net per contract and loss rate by window and series. *Forward claim (registered now, before the read, three tries, Kalshi count about 4,650):* for each series, the window with the highest pooled net in that table **if it differs from 6 minutes** is named in a second note here before any forward day is looked at; its claim is that net per contract exceeds the 6 minute rule's on the same days after the archive ends (days from 2026-10-13, fresh public candles). The z bar is 2.4 (three tries). Read once at 30 days or 2026-12-01. Power is low and will be stated.
 
 **Dollar size (information) for every cell:** alpha times $200 and $500, with drawdown and Sharpe against the benchmark. **Single reads:** `python -m scalper.fam4 run` (RP1, CS1, FA1, once; a second run is refused unless the result file is deleted on purpose), `python -m scalper.ml1` (information only). Nothing goes live. **ETF family tries: 21.**
+
+## Results: RP1, CS1 and FA1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)
+
+Code `scalper/fam4.py` and `tests/test_fam4.py` were committed before the run; result file `data/fam4_result.txt`. Bar z 2.9 (family of 21).
+
+| Cell | Months | Net alpha a year | z | Halves | 2019 on | Placebo p95 | Managed / held: return, Sharpe, worst drawdown | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| RP1, inverse-volatility SPY/TLT/GLD/DBC vs 60/40 | 244 | +2.36% | 1.58 | +1.57% / +3.13% | +4.14% | +2.45% | 7.6%, 0.84, -17.7% vs 8.5%, 0.82, -29.3% | **FALSIFIED** |
+| CS1, Bitcoin spot volatility managed | 143 | +1.92% | 0.45 | +2.37% / +1.40% | +1.29% | +6.43% | 44%, 0.93, -61.5% vs 60%, 0.98, -74.5% | **FALSIFIED** |
+| FA1, MTUM/QUAL/VLUE/SIZE vs SPY | 158 | **-0.43%** | -0.41 | +0.15% / -0.89% | -1.23% | none | 13.5%, 0.89, -26.7% vs 14.0%, 0.94, -23.8% | **FALSIFIED** |
+| CS1 on ETH (information, 106 months) | 106 | +3.68% | 0.77 | +5.49% / +3.66% | +1.65% | +9.06% | 27%, 0.68, -56% vs 22%, 0.65, -90% | `NOT_ENOUGH_DATA` |
+
+- **Predictions:** all three `FALSIFIED` (about 85%, 80%, 88%). Right on every verdict and every alpha range.
+- **RP1 is the near miss that matters:** the same Sharpe as 60/40 (0.84 against 0.82) at 9.3% volatility against 10.7% and a **-17.7% worst drawdown against -29.3%**, positive in both halves and since 2019, but z 1.58 and no better than shuffled weights (placebo p95 +2.45% against its +2.36%). It is a lower-risk portfolio at the same return per unit of risk, not a source of extra return.
+- **CS1:** managed Bitcoin earned 44% a year against 60% for holding it, with a shallower drawdown; the placebo (+6.4%) says leverage-free timing of a 143 month Bitcoin bull run is mostly the average exposure. ETH looks better (+3.68% alpha) but has too few months to count.
+- **FA1:** the four published factor ETFs together **earned slightly less than SPY** over 2013 to 2026 (-0.43% a year, z -0.41), with a worse drawdown. The premia were not there after costs and fees in this window.
+- **Dollar size:** RP1's +2.36% is $4.70 on $200 and $11.80 on $500; the others are about zero. **Family tries: 21.** Nothing live.
