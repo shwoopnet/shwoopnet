@@ -301,6 +301,8 @@ gates.Y11c = () => {
   set(false); assert.deepStrictEqual(attrs, {}, 'off removes it, back to the full page');
   assert.ok(!/localStorage[^;]*[Pp]resent|[Pp]resent[^;]*localStorage/.test(html) && !/syncUserSetting\('kalPresent/.test(html), 'it is never saved, in this browser or in the account');
   assert.ok(/id="kalPresent"/.test(html) && /id="kalPresent"[\s\S]{0,200}id="kalLayoutUnlock"/.test(html), 'a checkbox in the Layout menu');
+  assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Hide balances<\/button>\s*<button class="kal-mini" id="kalDataBtn"[^>]*>Data<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header, outside the Tools menu so presentation view cannot hide it, with a Data button beside it');
+  assert.ok(!/html\[data-present="on"\] #kalPresentBtn/.test(html), 'and nothing hides the button that turns it off');
   const css = /html\[data-present="on"\] \.kal-acct-total[^{]*\{ display:none; \}/.exec(html); assert.ok(css, 'the rule exists');
   for (const hidden of ['.kal-acct-total', '#kalBotStatus .kal-rows', '[data-card="positions"]', '[data-card="trades"]', '.kal-perf-band', '#kalTools']) assert.ok(css[0].includes('html[data-present="on"] ' + hidden), hidden + ' is hidden');
   for (const kept of ['performance', 'books', 'account']) assert.ok(!css[0].includes('data-card="' + kept + '"'), kept + ' stays');
