@@ -79,6 +79,13 @@ gates.P5 = () => {
   }
 };
 
+// Limit graphics is the old reduce-motion switch under a wider name: one stored setting, and it also removes the glow, the grid, the ghost wordmark and the pointer light's gradient.
+gates.P6 = () => {
+  assert.ok(/<div class="settings-row-title">Limit graphics<\/div>/.test(html) && !/<div class="settings-row-title">Reduce motion<\/div>/.test(html), 'the Settings row says Limit graphics');
+  for (const sel of ['.bg-ghost', '.bg-grid', '.bg-ambient::before']) assert.ok(css.includes('[data-reduce-motion="true"] ' + sel), sel + ' is dropped when graphics are limited');
+  assert.ok(/\[data-reduce-motion="true"\] \.kal-card[^{]*\{ background-image: none; \}/.test(css), 'and so is the pointer light gradient on cards');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

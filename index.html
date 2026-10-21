@@ -851,6 +851,9 @@
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
   [data-reduce-motion="true"] .bg-grid{ animation: none; }
+  /* Limit graphics (the same switch as reduce motion, renamed Oct 21, 2026): it also drops the glow, the grid, the ghost wordmark and the pointer light's gradient, so the page is plain panels on a flat ground. */
+  [data-reduce-motion="true"] .bg-ambient::before, [data-reduce-motion="true"] .bg-ambient::after, [data-reduce-motion="true"] .bg-ghost, [data-reduce-motion="true"] .bg-grid{ display:none; }
+  [data-reduce-motion="true"] .kal-card, [data-reduce-motion="true"] .settings-card, [data-reduce-motion="true"] .breadth-widget, [data-reduce-motion="true"] .movers-col, [data-reduce-motion="true"] .index-card{ background-image: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
@@ -1419,8 +1422,8 @@
 
           <div class="settings-row">
             <div>
-              <div class="settings-row-title">Reduce motion</div>
-              <div class="settings-row-desc">Stops animations.</div>
+              <div class="settings-row-title">Limit graphics</div>
+              <div class="settings-row-desc">Stops animations and hover effects, the light that follows your cursor, and the glowing background.</div>
             </div>
             <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
               <span class="toggle-knob"></span>
