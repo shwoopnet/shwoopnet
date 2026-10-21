@@ -4550,3 +4550,27 @@ Code `scalper/lq1.py` and `tests/test_lq1.py` were committed before the run; res
 - **Not run, and why:** other targets, a cap above 1x on the fund, or a 3x fund would be new tries chosen after seeing this. **Family tries: 16.**
 
 **Decision.** Nothing built, nothing changed live. Across VM, VM2 and LQ1 the pattern is consistent: in this data, volatility management lowers risk and does not raise return beyond what its leverage buys.
+
+## Pre-registration: FWD6, the best hour of each live series, read forward (written 2026-10-21 before any live order from 2026-10-22 was looked at by hour; the owner's pick)
+
+**Why.** GOLD1 Part I showed each series has one best UTC block in the 69 day history: gold **Europe 07 to 13** (+4.41c, loss 2.6%), Bitcoin **US 13 to 21** (+2.42c, loss 4.6%), Ethereum **late 21 to 24** (+3.61c, loss 3.2%). Picking the best of four blocks per series is a search, so those numbers are inflated (a winner's curse); gold's four blocks were statistically one loss rate (chi-square 6.1 on 3). This reads the three named blocks on orders that do not exist yet. **Three tries; running count about 4,647.**
+
+**Rule (fixed).** Population: the bot's own L1 orders on `KXGOLD15M`, `KXBTC15M` and `KXETH15M` sent on or after **2026-10-22 00:00 UTC** that filled and settled as a win or loss (not `hand`, not `exit`). The block of an order is the UTC hour of its decision time (close minus 6 minutes). Net per contract = saved P/L over contracts filled. The three claims: **gold in Europe, Bitcoin in the US block, Ethereum in the late block** each earns a net per contract above zero and **above the same series' other three blocks pooled**.
+- **Read once per series,** at **60 filled settled orders in the named block or 2026-12-01**, whichever is first. `NOT_ENOUGH_DATA` below **30** in the block. `NOT_YET_FALSIFIED` needs ALL of: block mean net above zero; block minus other-blocks above zero with a day-clustered z of at least **2.4** (three tries); and the block above zero in both halves by time. Otherwise `FALSIFIED`.
+- **Counterparty / mechanism.** None is claimed. Gold in Europe is the only block with a story (the COMEX gold futures session is thin when London is open and the US is closed, so quoters are slower); Bitcoin's US block (cash-market hours, deepest flow) and Ethereum's late block have no story I can state, which is a reason to expect them to fail.
+- **Prediction, recorded first.** All three regress: at most **one** of three reads `NOT_YET_FALSIFIED` (about **85%**); gold is the likeliest at about **25%**, Bitcoin about **10%**, Ethereum about **8%**.
+- **Power.** 60 orders in a block with a 5% loss rate is three losses; this can separate a block from a clearly worse one and will usually say "not shown". **A pass would be a reason to look, not to size up.**
+
+## Pre-registration: V3 and V4, volatility-managed bonds and gold (written 2026-10-21 before any return of the managed series was computed; the owner's pick)
+
+**Why.** VM found volatility management cut risk on QQQ and SPY without adding return. Bonds and gold are the diversifiers one would hold beside them, and their risk is just as unstable (bonds in 2022, gold in 2013). **Prior about 10%.**
+
+**Disclosed.** `data/slow1_bars.json` already holds adjusted closes for TLT (from 2002-07-30) and GLD (from 2004-11-18) from SLOW1; no volatility, weight or managed return has been computed on them.
+
+**Cells (two tries), the VM rule unchanged.** Monthly, signal at the last trading day close, entry and exit at the next trading day's close, weight = min(1, 10% / trailing 21 day realised volatility), the rest in cash at zero, 5 basis points a side on traded weight (6 at stress), no leverage. **V3: TLT. V4: GLD.** Benchmark: the same ETF bought and held. Statistic: alpha (intercept on the ETF's monthly return, annualised), Newey-West z, as in VM.
+
+**Bar.** Family count was 16; with two cells it is **18**: Sidak p = 0.05/18, **z bar 2.8**. Pass: at least 120 months; alpha above zero; z at least 2.8; positive in both halves and from 2019 on; positive at x1.2 cost; above the 95th percentile of **200 placebo draws** (the monthly weights shuffled across months). Otherwise `FALSIFIED`.
+
+**Prediction, recorded first.** Alpha between **-1% and +2%** a year, z below 2.0, both `FALSIFIED` (about **85%**).
+
+**Single read.** `python -m scalper.vm34 run`, once. Nothing here goes live. **Family tries: 18.**
