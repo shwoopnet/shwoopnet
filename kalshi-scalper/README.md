@@ -4760,3 +4760,19 @@ Code `scalper/el1.py` and `tests/test_el1.py` were committed before the run; res
 - **What the per-series table does show (information, not a test).** Entering at 10 minutes was better than at 6 minutes in 13 of 18 series, including the largest 10 minute nets: **natural gas +3.19c** (354 entries), **XRP +2.91c** (849), **Bitcoin +2.53c** (564), copper +1.88c, WTI +1.29c, HYPE +1.09c, Dogecoin +1.08c. It was worse for gold (-0.30c against +1.54c), Ethereum, silver, palladium and Dogecoin's 6 minute figure (+1.71c). Different entry sets, so the columns are not comparable cell by cell.
 - **Reading.** Earlier entry looks better on average and in a majority of series, but the edge per series is small, the sample thin (354 to 1,137 each), and the pooled z is 1.71. It is a **lead**, not a result. Bitcoin at 10 minutes is already a registered forward claim (ML1); XRP, natural gas and copper at 10 minutes are not, and each has a 6 minute record on the bot already (XRP and natural gas are live probes).
 - **Count: Kalshi tries about 4,655.** Nothing built, nothing changed live.
+
+## Pre-registration: FWD7, L1 entered at 10 minutes left on all 18 series, read forward (the owner's pick after EL1; written 2026-10-21 before any fresh-day 10 minute entry was computed)
+
+**Why.** EL1 found 10 minute entry better than 6 minute in 13 of 18 series (pooled +0.58c against +0.12c, z 1.71, 9 of 18 positive) but missed its bar. This is the pooled forward read the owner chose, on days that were not in that sample. **One more Kalshi try; running count about 4,656.**
+
+**Data and population.** Public 1 minute candles for the 18 series of TREE2's pool, **markets closing on or after 2026-10-13 00:00 UTC** (the archive ends 2026-10-12), downloaded by `scalper.backfill` into `data/fresh.sqlite` (also AUD/USD and USD/CAD, kept out of the verdict as probes). `hold_rule` with `left_s = 600` and the L1 band (ask 88c to 97c), one entry per market, fee 7% x p x (1-p), x1.2 at stress. The 6 minute rule on the same fresh days is the comparison arm.
+
+**Rule and bar (read once, at 30 fresh days or 2026-12-01, whichever is first).** `NOT_ENOUGH_DATA` below 20 fresh days or 1,500 entries. `NOT_YET_FALSIFIED` needs ALL of: pooled 10 minute mean net above zero with a day-clustered z of at least **2.4**; positive in both halves by time and at fees x1.2; **at least 10 of the 18 series positive**; and the difference between the 10 minute and the 6 minute rule, **computed per day from each arm's own entries and NOT restricted to markets entered at both times** (that restriction conditions on the future and is the flaw found in EL1), above zero with a day-clustered z of at least **2.0**. Otherwise `FALSIFIED`.
+
+**Mechanism / counterparty.** Earlier entry meets a favourite that has had less time to be verified by the underlying, so sellers are less informed than at 6 minutes. Blind spot: fewer markets qualify and the winners are lopsided.
+
+**Prediction, recorded first.** Pooled mean net **-0.3c to +0.8c**, `NOT_YET_FALSIFIED` about **30%** (EL1's +0.58c shrinks toward the 6 minute record on new days, as every earlier lead has; the sign of the 10 minus 6 minute difference stays positive about 60% of the time).
+
+**Power and use.** About 30 fresh days is roughly 4,500 entries; a true edge near +1c is borderline. A pass would be a proposal to the main session to test 10 minute entry on the live series with a gate test, never a switch.
+
+**Single read.** `python -m scalper.fwd7 run`, once, when the date is reached; a refused rerun unless `data/fwd7_result.txt` is deleted on purpose. The code is written when the read is due, not now, to avoid editing it after seeing partial data.
