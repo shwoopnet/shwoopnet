@@ -4842,3 +4842,22 @@ The exit costs about 0.4c to 0.6c on average with 10 minute entries (an earlier 
 **Owner's decision on the 10 minute proposal (2026-10-21): go, natural gas and XRP only.** Relayed to the main session to build (this session changes no live code); Bitcoin waits for FWD7 and the ML1 claims. FWD8 starts counting from the first order the change sends; the go-live date and the order tag are to be recorded here when the main session reports them.
 
 **Correction to the owner's decision above (2026-10-21, minutes later): the owner chose option 2, so Bitcoin is included.** The 10 minute entry is for **natural gas, XRP and Bitcoin**, one contract each (Bitcoin's size is not changed). FWD8 therefore has **three series and three tries; the Kalshi count is about 4,659**, the z bar for each is 2.4, and its Bitcoin line is a live read in addition to the ML1 claim on public candles (the two are reported separately). Gold, Ethereum, Dogecoin and the currency probes stay at 6 minutes. Bitcoin's 10 minute history is +2.53c held (564 entries, loss rate 5.85% against an 8.45% break-even), the weakest margin of the three after the exit (about +2.1c); its prediction: mean net **+0.2c to +2.2c**, `NOT_YET_FALSIFIED` about **30%**.
+
+## Amendment to FWD8 from the main session's build (2026-10-21; PR #453 reported by the main session, not merged or deployed when relayed; written before any 10 minute order exists)
+
+**What the main session built, as relayed.** XRP (`KXXRP15M`) and natural gas (`KXNATGAS15M`) may be entered **9.5 to 10.7 minutes** before the close (a tick window, not my exact 600 seconds), one contract, the same 88c to 97c rule; the order id is the 6 minute one ("L1-" plus the ticker), so a market never gets two orders; **a market not in band at 10 minutes can still be entered at 6**. Every new order carries `entryLead` "10m" or "6m". Bitcoin is not in that PR (my correction adding it may have arrived after it was written; to be confirmed).
+
+**What this changes for the read.**
+- **FWD8 reads the `entryLead` "10m" orders per series** exactly as registered (net per contract after the actual fee, loss rate against break-even, z 2.2 for natural gas and XRP, 2.4 if Bitcoin is added, both halves, 60 orders or 2026-12-01 after deploy). This group is the same population as the history's 10 minute entries (markets whose favourite was already in band at 10 minutes).
+- **The "6m" orders on these two series are no longer the old 6 minute population.** They are the markets that were NOT in band at 10 minutes and became a favourite later; reading them against the old 6 minute record would compare different markets. They get their own line, information only.
+- **From the history (information, same pool and code as EL1):** the hybrid rule ("10 minute entry if in band, otherwise 6 minute") against 6 minute only, held to settlement:
+
+| Series | 10m entries | 6m fallback entries (not in band at 10m) | Hybrid total | 6m only |
+|---|---|---|---|---|
+| XRP | 849 at +2.91c | 1,827 at +1.04c | 2,676 at **+1.64c** | 2,261 at +1.47c |
+| Natural gas | 354 at +3.19c | 789 at +0.32c | 1,143 at **+1.21c** | 1,020 at +0.52c |
+| Bitcoin | 564 at +2.53c | 1,699 at +0.40c | 2,263 at **+0.93c** | 1,959 at +0.45c |
+
+  The hybrid beats 6 minute only by **+0.17c (XRP), +0.69c (natural gas) and +0.48c (Bitcoin)** a contract and enters more markets. Of the 10 minute entries, 415 of 849 (XRP), 123 of 354 (natural gas) and 304 of 564 (Bitcoin) would not have qualified at 6 minutes (the price drifted out of the band), so a 10 minute entry also captures favourites the 6 minute rule would have missed.
+- **Extra line, information:** the hybrid total (all orders on the series from deploy, "10m" plus "6m") against these history figures, before the exit.
+- **Timing of the count.** The count starts at the deploy date the main session gives the owner. FWD8's other terms, the prediction and the power remarks stand.
