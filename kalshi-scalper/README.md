@@ -4259,3 +4259,20 @@ Code `scalper/slow1.py` and `tests/test_slow1.py` were committed before the run;
 **Information only, not tries:** return, volatility, Sharpe and worst drawdown against the equal-weight benchmark; alpha by calendar year; how often each sector is held.
 
 **Single read.** `python -m scalper.sect1 fetch` then `python -m scalper.sect1 run`, once; a second run is refused unless the result file is deleted on purpose (a crash fix only). Nothing here goes live. **Family tries: 10.**
+
+## Results: SECT1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/sect1.py` and `tests/test_sect1.py` were committed before the run; result file `data/sect1_result.txt`. Sample 1998-12-22 to 2026-10-21, nine sector ETFs; first signals 1999.
+
+| Cell | Months | Net alpha a year | NW z (bar 2.6) | Halves | 2019 on | At x1.2 cost | Placebo p95 | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| C1, 12-1 month momentum | 321 | +2.23% | 1.90 | +1.65% / +2.59% | +5.56% | +2.18% | +1.14% | **FALSIFIED** (z) |
+| C2, 6-1 month momentum | 327 | +0.51% | 0.40 | +1.09% / -0.69% | -1.70% | +0.44% | +1.54% | **FALSIFIED** (z, halves, 2019 on, placebo) |
+
+- **Prediction:** alpha between -1.5% and +2.5%, z under 1.5, both `FALSIFIED`. The verdicts and alpha range were right; C1's z (1.90) was above the 1.5 I guessed. Recorded as it was.
+- **C1 is the closest miss, and the same shape as SLOW1:** positive in both halves, positive from 2019 on, above the placebo, but z 1.90 against 2.6. Held at 0.84 beta, it returned 9.7% a year against 8.9% for the equal-weight nine, with a worst drawdown of -42% against -51%. A small improvement, not a different outcome.
+- **C2 shows nothing:** half the sample negative, negative since 2019. The 12-1 result does not carry over to a 6-1 lookback, which is what a fluke in one cell looks like.
+- **Dollar size:** C1 +2.23% a year is about **$4.46 on $200 and $11.15 on $500**.
+- **Not run, and why:** other lookbacks, top 2 or top 4, or shorting the bottom sectors would be new tries chosen after seeing C1. Not run.
+
+**Decision.** Nothing built, nothing changed live. **Family tries: 10.** Across SLOW1 and SECT1, five ETF cells positive in the same recent window (alpha +0.5% to +2.75%) and none clearing z 2.5; the ETF timing and momentum premia exist in this data at a size of about 2% a year, which is too small for the bar and too small for a small account.
