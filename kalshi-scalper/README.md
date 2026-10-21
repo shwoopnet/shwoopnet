@@ -4863,3 +4863,19 @@ The exit costs about 0.4c to 0.6c on average with 10 minute entries (an earlier 
 - **Timing of the count.** The count starts at the deploy date the main session gives the owner. FWD8's other terms, the prediction and the power remarks stand.
 
 **Owner's decision (2026-10-21): Bitcoin goes into the first build with XRP and natural gas** (relayed to the main session to add to PR #453 or its successor; size unchanged, still one contract). FWD8 therefore has three series (z 2.4 each, Kalshi count about 4,659) and counts from the deploy date the main session reports, which is to be written here.
+
+## Pre-registration: EX10, which exit line suits 10 minute entries (the owner's pick; written 2026-10-21 before any exit line was priced on 10 minute entries beyond the 25c information table above)
+
+**Why.** With 10 minute entries the 25c exit fired on 7.3% of entries (5.0% at 6 minutes) and cost about 0.5c a contract, because the price has more time to dip below the line and recover. Is there a better line? **The exit stays on (the owner's rule: it only ever reduces exposure); "no exit" is not a candidate.** One selection procedure, counted as **one Kalshi try; running count about 4,660**; z bar 2.4.
+
+**Disclosed.** The 25c and held figures for 10 minute entries (information table above) and the earlier 25c-on-40-days study are seen. No other line has been priced on 10 minute entries.
+
+**Population and rule.** The 10,779 L1 entries at 600 seconds before the close on TREE2's 18 series pool (`hold_rule`, band 88c to 97c, fee 7% x p x (1-p)). A candidate line L in **{0.10, 0.15, 0.20, 0.25, 0.30, 0.35}**: after the entry candle, at the first minute close where the held side's bid is at or below L, sell at **bid minus 2c** (a middle slippage; 0c and 5c are also printed) with the sale fee, otherwise hold to settlement. Days are ordered; the **first two thirds of days are training, the last third is the holdout**. **Choose the line with the highest training mean net; evaluate that line, the live 0.25 line and the best other line's training rank on the holdout.**
+
+**Pass bar.** On the holdout, chosen line minus the 0.25 line, **paired by entry**, above zero with a day-clustered z of at least **2.4**; chosen line's holdout mean net at least the 0.25 line's at the 5c slippage as well; and the difference positive in both halves of the holdout. If the chosen line is 0.25 itself, nothing is better and the verdict is `FALSIFIED`. Otherwise `FALSIFIED`; fewer than 500 holdout entries is `NOT_ENOUGH_DATA`.
+
+**Mechanism.** A lower line sells less often into a dip that recovers (a favourite at 90c that dips to 30c comes back more often than a line at 35c assumes), a higher line limits the loss of a real flip. The blind spot: the candle closes are a coarse proxy for the live 10 second watch, a flip through the line may print at a much lower bid than the line, and the exit exists to cap exactly those.
+
+**Prediction, recorded first.** The training pick is **0.10 or 0.15** (lower lines sell less); the holdout improvement over 0.25 is **+0.1c to +0.6c** at the 2c slippage but **not** significant (z 1 to 2); `FALSIFIED` (about **80%**). Information: the training and holdout mean net, exit trigger share and the worst single exit for every line, and the same table for Bitcoin, XRP and natural gas alone.
+
+**Single read.** `python -m scalper.ex10 run`, once; a refused rerun unless `data/ex10_result.txt` is deleted on purpose. Nothing here goes live; the exit line is the owner's decision and the main session's code, and a change would need its own gate test (`test/kalshiExitGates.test.js`).
