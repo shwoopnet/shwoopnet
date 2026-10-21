@@ -3990,3 +3990,32 @@ By market: gold -0.65% (206 trades), S&P 500 -0.66% (216), Bitcoin +3.55% (186),
 - The funding charge (0.02% a day) is a placeholder; the real rate is unmeasured. Long positions in a strong uptrend usually PAY funding, so the pass is not flattered by it, but the sign and size are unknown.
 
 **Decision.** Nothing built, nothing changed live. A follow-up (crypto only, or from 2022 on) would be a new try, registered first and run once; because it would be chosen after seeing these cuts, it would need a stricter bar and ideally days that do not exist yet (a forward record). **Count: about 4,632 tries.**
+
+## Pre-registration: PERP2 (buy the dip in an uptrend) and PERP3 (gold against silver), written 2026-10-21 before either was computed
+
+**Why.** PERP1 passed as registered but only because of Bitcoin's and Ethereum's early years (flat since 2022; gold and the S&P lost at every cut). The owner chose to try a different perps idea first. These are the guide's ideas B and C (`docs/PERPS_STRATEGY_GUIDE.md`). Each is run once on the same daily prices as PERP1 plus daily silver (`SI=F`, from 2010-01-04); the bars, costs and placebo method are PERP1's (`scalper/perp1.py`), so nothing about the market data or the fee model is new. **Two more tries; the z bar is raised from 2.1 to 2.4 for each** (a step for the tries made together).
+
+**Disclosed before registering.** PERP1's full result and its cuts (gold and the S&P lose, crypto carried it, flat since 2022) were seen first. Both ideas were written in the guide before PERP1 ran and are not shaped by its cuts, except that PERP2 is registered on all four markets and PERP3 on gold and silver only. No silver bar has been downloaded or read; no PERP2 or PERP3 signal, trade or return has been computed.
+
+**PERP2: buy the dip in an uptrend (long only; gold, S&P 500, Bitcoin and Ethereum, as PERP1).**
+- **Signal at a day's close:** the close is above its 100-day simple average (including that day), AND the last three closes each fell (close < previous close, three days running).
+- **Entry:** at the NEXT day's open, long. One position per market; a fresh signal is needed after any exit.
+- **Stop:** entry open minus 2.0 x ATR(14) (ATR from the signal day, as PERP1), fills intrabar or at the open if the day gaps through it.
+- **Exit:** at the close of any day from the entry day on, if the close is above the highest close of the previous 5 days, exit at the NEXT open; also exit at the NEXT open once 20 daily bars have been held.
+- **Costs:** PERP1's: 0.12% a side fee, 0.01% a side slippage, funding 0.02% of notional per calendar day held, charged against the position.
+- **Counterparty.** Panic sellers after a short drop within a rising market. The blind spot: a trend that is actually breaking, where the dip is the first leg of a larger fall.
+- **Prediction.** Pooled mean net per trade between **-0.3% and +0.4%**, **`FALSIFIED`** (about 80%). Crypto's drift will flatter it, which is what the placebo is for.
+
+**PERP3: gold against silver (a pairs trade; two legs of equal dollars; gold `GC=F` and silver `SI=F` daily bars, dates present in both).**
+- **Ratio** R = gold close / silver close. At day i (59 days of history needed), z = (R_i minus the mean of R over days i-59 to i) / the population standard deviation of R over the same days.
+- **Signal at the close:** z above +2.0 -> short gold / long silver; z below -2.0 -> long gold / short silver. Filled at the NEXT day's open on both legs. One position at a time.
+- **Exit at the NEXT open** after the first close where z has crossed back through zero (a short-gold position exits when z is at or below 0; long-gold when at or above 0), or where |z| is at least 4.0 (the stop: the spread kept running), or after 30 daily bars held.
+- **Return per trade** r = side x (gold exit/entry - 1 - (silver exit/entry - 1)) - 2 x cost(days), with side +1 = long gold / short silver, per $1 of EACH leg, where cost(days) is PERP1's single-leg cost; so both legs pay fees, slippage and the funding assumption.
+- **Counterparty.** Whoever must rebalance between the two metals (index and fund flows, industrial buyers). The blind spot: the ratio shifting for months, which the |z| = 4 stop is for.
+- **Prediction.** Mean net **-0.3% to +0.3%**, **`NOT_ENOUGH_DATA` or `FALSIFIED`** (about 90%).
+
+**Pass bar, per idea, one run each (PERP1's, with the z step).** PERP2: at least **100 trades** and **4 calendar years**; PERP3: at least **40 trades** and **4 calendar years** (a pairs trade is rare; fewer reads `NOT_ENOUGH_DATA`, never a pass or a fail). Mean net r above zero; month-clustered z at least **2.4**; positive in both halves (trades split at the median entry date); positive with all costs x1.2; and above the 95th percentile of **200 placebo draws** (same side and holding length, entry date moved uniformly at random within the market's history; no stops; PERP3 moves both legs together). Otherwise `FALSIFIED`. A pass means "permission to consider a small probe" and nothing more.
+
+**Information only, not tries:** per market, per calendar year, win rate and stop share; for PERP2 the buy-and-hold of each market; for PERP3 long-gold and short-gold sides separately.
+
+**Single read.** `python -m scalper.perp2 fetch` then `python -m scalper.perp2 run`, once each; a second run is refused unless the result file is deleted on purpose (a crash fix only). **Running count: about 4,634 tries.**
