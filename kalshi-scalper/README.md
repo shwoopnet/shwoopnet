@@ -4785,3 +4785,21 @@ Code `scalper/el1.py` and `tests/test_el1.py` were committed before the run; res
 - **Perps recorder.** The main session's hourly Kalshi perpetuals recorder writes to the `perp-data` branch (`perps/perps-YYYY-MM-DD.csv`, 29 markets an hour from 2026-10-21 16:56 UTC; no funding-rate field, so the premium is rebuilt from price against `reference_price` and the cap and deadband). **FUND1 is dropped by the owner's decision, so nothing is rerun;** if the owner reopens it in mid-November, the first step is to check whether the premium series has any dispersion.
 - **QQQ volatility-managed leg (V2).** Research only, on the idea list; nothing built or traded and no live test plan.
 - **Macro markets vs nowcast.** No forward recorder, per the owner; parked as `NOT_RUNNABLE`.
+
+## Information: L1 by minutes left on five more series, 6 to 12 minutes (2026-10-21; same pool and code as EL1; descriptive, no hypothesis, no verdict, not a try)
+
+Net per contract (loss rate) by minutes left; band 88c to 97c, fee 0.50c. Break-even loss rate is 8% to 9% at 10 to 12 minutes and 6.4% to 6.9% at 6.
+
+| Min left | XRP | Natural gas | Copper | WTI | Bitcoin |
+|---|---|---|---|---|---|
+| 12 | +2.62c (6.6%, n 275) | -1.27c (9.6%, n 166) | +3.45c (4.9%, n 163) | +3.62c (5.1%, n 178) | +2.13c (7.3%, n 137) |
+| 11 | +2.05c (6.7%) | +1.17c (7.1%) | +2.08c (6.0%) | +2.33c (6.0%) | +2.37c (6.5%) |
+| 10 | +2.91c (5.4%, n 849) | +3.19c (4.8%, n 354) | +1.88c (5.9%) | +1.29c (6.7%) | +2.53c (5.9%) |
+| 9 | +1.51c (6.4%) | +2.25c (5.4%) | +0.47c (6.9%) | +2.69c (4.9%) | +2.12c (5.8%) |
+| 8 | +1.71c (5.7%) | +1.85c (5.4%) | +1.09c (5.7%) | +1.94c (5.4%) | +0.61c (7.0%) |
+| 7 | +1.47c (5.5%) | +0.26c (6.6%) | +0.38c (6.2%) | +1.17c (5.9%) | +1.19c (6.0%) |
+| **6 (live)** | +1.47c (5.3%, n 2,261) | +0.52c (6.0%, n 1,020) | **-0.10c** (6.6%) | +0.13c (6.6%) | +0.45c (6.5%) |
+
+- **The same slope shows up in five different underlyings:** net is highest 9 to 12 minutes before the close and falls toward zero by 6, and **in every one of the five the 6 minute net is the lowest or near-lowest of the 7 to 12 minute range** (copper and WTI go from +3.5c to about zero). Crypto series move together, but copper, WTI and natural gas are independent markets, so this is not one coin's quirk. The calibration reading from GOLD1 fits: a distant favourite at 88c to 97c is underpriced by 2 to 3 points; near the close the price is efficient.
+- **At 10 to 12 minutes the margin over break-even is 2 to 4 points of loss rate; at 6 it is 0.5 to 1.5.** The per-row samples are small (137 to 849 entries) and neighbouring minutes use the same markets, so each row alone proves nothing; the consistency across rows and series is the information.
+- **What it does and does not mean.** It makes FWD7 (pooled 10 minute entry, read forward) the right test to wait for, and it is a reason to expect L1's thin live record to improve if the bot entered earlier. It does not change the 6 minute rule, which is the main session's code. The earlier 12 minute rows have so few entries that a favourite at 88c with 12 minutes left is rare, so volume is the cost of going earlier: entries per series fall from about 2,000 at 6 minutes to 150 to 280 at 12.
