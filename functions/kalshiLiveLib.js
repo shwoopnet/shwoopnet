@@ -301,6 +301,26 @@ const L1_MAX_ORDERS = 200;
 // A session has no end time any more (the owner removed it on Oct 8, 2026): it runs until the owner stops it or a stop below ends it. What stayed
 // is the DAY: the loss stop and the order limit both look at the last 24 hours, so a long run cannot hide a bad day behind old profits.
 const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
+
+// Cost (Oct 21, 2026, the owner: "cut costs"). The bot re-read the whole last 24 hours of orders every minute only to count them and sum their results. Orders older than OLDER_AFTER_MS are final
+// (the exit watch acts within minutes of a buy and the settle sweep within minutes of the close), so they are read once and kept in this instance's memory for REFRESH_MS; only the recent block is read
+// each minute. The recent block starts at a fixed point and grows until the older part is read again, so no order ever falls between the two. This can only make the bot's picture STALER in
+// the cautious direction: a stale copy shows an order as unsettled or unsold, which the loss stop counts as lost, and any new order (from this or another instance) is inside the recent block
+// because it is minutes old. The cache is per instance and never shared, so two instances during a deploy each keep their own. A failed read throws, exactly as the plain read did (the tick then sends nothing).
+const L1_OLDER_AFTER_MS = 30 * 60 * 1000, L1_OLDER_REFRESH_MS = 15 * 60 * 1000;
+function makeRecentOrderReader(readSince) {
+  let older = null, olderAt = 0, olderSince = 0, split = 0;
+  return async function read(since, now) {
+    if (!older || now - olderAt >= L1_OLDER_REFRESH_MS || since < olderSince) {
+      const all = await readSince(since);
+      split = now - L1_OLDER_AFTER_MS;
+      older = all.filter((t) => !(Number(t.ts) >= split)); olderAt = now; olderSince = since;
+      return all;
+    }
+    const recent = await readSince(split);
+    return older.filter((t) => Number(t.ts) >= since).concat(recent);
+  };
+}
 // Size scaling (off unless the owner ticks it when starting a session). Each order risks about 2% of the account's cash, at
 // least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 10% of the starting cash instead of the flat $10. Raised by the owner on
 // Oct 8, 2026 (from 1% and 7%/$7). At 2% a $106 account buys two contracts (two need about $92 to $98 of cash, three about $138 to $146).
@@ -471,7 +491,7 @@ function handFields(h) { return Object.assign({ settled: true, result: "hand" },
 // trade that settled after a stop (or just after the 24 hours) stayed "open" in the records for ever and never reached the page's loss and win
 // counts. Called every minute by the scheduled function; reads at most `max` public markets, never places or changes an order, and a failed read
 // leaves the order open for the next minute.
-async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem }) {
+async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, repair = true }) {
   const open = (await store.openFilled()).filter((t) => t.settled !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
   let settled = 0;
   for (const t of open.slice(0, max)) {
@@ -487,7 +507,7 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem })
   // Repair (Oct 21, 2026): orders the old check wrongly marked "hand" (every NO order, see closedByHand) are asked again with the fixed check, and the ones that were never sold by hand are settled as the
   // win or loss they were, so the stats, the loss stop and the pool see them. A genuine hand sale stays hand and is marked checked so it is not asked again. Reads only, like the rest of this sweep.
   let repaired = 0;
-  if (keyId && pem && typeof store.handOrders === "function") {
+  if (repair && keyId && pem && typeof store.handOrders === "function") {
     const flagged = (await store.handOrders()).filter((t) => t.result === "hand" && t.handChecked !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
     for (const t of flagged.slice(0, max)) {
       const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
@@ -640,7 +660,7 @@ async function runL1Tick(args) {
   // Orders in the last 24 hours, whether or not they filled. Fails closed: if they cannot be counted, nothing is sent this minute.
   const dayStart = now - L1_WINDOW_DAY_MS;
   let recentOrders, recentList;
-  try { recentList = (await store.sessionTrades(dayStart)).filter((t) => t.strategy === "L1"); recentOrders = recentList.length; }
+  try { recentList = (await (typeof store.sessionTradesCached === "function" ? store.sessionTradesCached(dayStart, now) : store.sessionTrades(dayStart))).filter((t) => t.strategy === "L1"); recentOrders = recentList.length; }
   catch (e) { await note("The bot's recent orders could not be counted, so nothing was sent."); return { skipped: "orders unreadable" }; }
   if (recentOrders >= L1_MAX_ORDERS) { await note("The limit of " + L1_MAX_ORDERS + " orders in 24 hours has been reached. It carries on by itself once older orders drop out."); return { skipped: "order limit" }; }
 
@@ -1006,5 +1026,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };
