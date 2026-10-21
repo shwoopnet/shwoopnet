@@ -16,8 +16,10 @@ const pem = ed.privateKey.export({ type: 'pkcs8', format: 'pem' });
 const gates = {};
 
 const T = 'KXBTC15M-26OCT071415-15';
+// How long a market has left when the bot looks at it: 10 minutes for the series that decide early (Bitcoin, XRP, natural gas), 6 for the rest, so a test about something else lands in the series' own entry window.
+const leftFor = (series) => (live.EARLY_PROBE_SERIES.includes(series) ? 600000 : 360000);
 const quote = (over = {}, series = 'KXBTC15M', ticker = T) => ({ series, m: Object.assign({
-  ticker, status: 'active', close_time: iso(NOW + 360000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
+  ticker, status: 'active', close_time: iso(NOW + leftFor(series)), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
 
 // Gold first (Oct 21, 2026): gold is the only market that keeps the size ladder, so the sizing gates tick a gold market (its own shard, 0).
 const GT = 'KXGOLD15M-26OCT071415-15';
@@ -39,7 +41,7 @@ function world(opts = {}) {
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
       const over = (opts.fresh && opts.fresh[tk]) || {};
-      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + 360000), exchange_index: tk.includes('KXGOLD') ? 0 : 2, ...(opts.results && opts.results[tk] ? { result: opts.results[tk] } : {}), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
+      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + leftFor(tk.split('-')[0])), exchange_index: tk.includes('KXGOLD') ? 0 : 2, ...(opts.results && opts.results[tk] ? { result: opts.results[tk] } : {}), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
     }
     if (url.endsWith('/portfolio/balance')) return reply(opts.balStatus || 200, opts.balance || { balance_breakdown: [{ balance: '70.0000', exchange_index: 2 }, { balance: '30.0000', exchange_index: 0 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: opts.existing || [] });
@@ -480,7 +482,7 @@ gates.N21 = async () => {
   const w = world();
   await tick(w, { quotes: [closing, later] });
   assert.strictEqual(w.posts.length, 0);
-  assert.strictEqual(w.sess.nextLookAt, NOW + 18 * 60000 - live.L1_WINDOW_MS[1], 'the next window opens 6:40 before the later close');
+  assert.strictEqual(w.sess.nextLookAt, NOW + 18 * 60000 - live.EARLY_WINDOW_MS[1], 'the next window opens 10:40 before the later close (Bitcoin decides at 10 minutes)');
   assert.ok(w.sess.botNet === 0 && w.sess.botOpen === 0, 'the bot\'s running total is kept current on every tick, not only ticks that trade');
   assert.ok(/entry|6 minutes/.test(w.sess.lastNote) && !/about 6 minutes from its close right now/.test(w.sess.lastNote), 'the note says what the window is');
   const none = world(); await tick(none, { quotes: [closing] });
@@ -834,18 +836,24 @@ gates.CO3 = async () => {
 const XRP10 = 'KXXRP15M-26OCT071415-10';
 const q10 = (series, ticker, over = {}) => ({ series, m: Object.assign({ ticker, status: 'active', close_time: iso(NOW + 600000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
 gates.EP1 = async () => {
-  assert.deepStrictEqual(live.EARLY_PROBE_SERIES, ['KXXRP15M', 'KXNATGAS15M'], 'exactly XRP and natural gas');
+  assert.deepStrictEqual(live.EARLY_PROBE_SERIES, ['KXXRP15M', 'KXNATGAS15M', 'KXBTC15M'], 'exactly XRP, natural gas and Bitcoin (the owner added Bitcoin, Oct 21, 2026)');
   assert.strictEqual(live.entryLead('KXXRP15M', 600000), '10m');
   assert.strictEqual(live.entryLead('KXXRP15M', 360000), null, 'XRP no longer decides at 6 minutes: it is 10 minutes only');
   assert.strictEqual(live.entryLead('KXNATGAS15M', 360000), null, 'nor does natural gas');
-  assert.strictEqual(live.entryLead('KXBTC15M', 360000), '6m', 'every other series is unchanged');
+  assert.strictEqual(live.entryLead('KXBTC15M', 360000), null, 'Bitcoin is 10 minutes only too');
+  assert.strictEqual(live.entryLead('KXETH15M', 360000), '6m', 'every other series is unchanged');
   assert.strictEqual(live.entryLead('KXXRP15M', 480000), null, 'between the two windows: nothing');
-  assert.strictEqual(live.entryLead('KXBTC15M', 600000), null, 'Bitcoin has no early window, nor does any other live series');
+  assert.strictEqual(live.entryLead('KXBTC15M', 600000), '10m');
+  assert.strictEqual(live.entryLead('KXETH15M', 600000), null, 'Ethereum has no early window, nor do gold, Dogecoin or the currency probes');
   assert.strictEqual(live.entryLead('KXGOLD15M', 600000), null);
+  assert.strictEqual(live.entryLead('KXDOGE15M', 600000), null);
   const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) }, 'KXBTC15M-26OCT071415-10': { close_time: iso(NOW + 600000) } } });
   await tick(w, { quotes: [q10('KXXRP15M', XRP10), q10('KXBTC15M', 'KXBTC15M-26OCT071415-10')] });
-  assert.strictEqual(w.posts.length, 1, 'only XRP is entered at 10 minutes');
-  assert.ok(w.posts[0].ticker === XRP10 && Number(w.posts[0].count) === 1, 'one contract on XRP');
+  assert.strictEqual(w.posts.length, 2, 'XRP and Bitcoin are both entered at 10 minutes');
+  assert.ok(w.posts.every((p) => Number(p.count) === 1) && w.posts.some((p) => p.ticker === XRP10), 'one contract each');
+  const w5 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { 'KXETH15M-26OCT071415-10': { close_time: iso(NOW + 600000) } } });
+  await tick(w5, { quotes: [q10('KXETH15M', 'KXETH15M-26OCT071415-10')] });
+  assert.strictEqual(w5.posts.length, 0, 'Ethereum is not entered at 10 minutes');
   const rec = w.docs.get('L1-' + XRP10);
   assert.ok(rec.entryLead === '10m' && rec.strategy === 'L1' && !rec.addon, 'recorded as an ordinary L1 order tagged with the lead it was entered at');
 };
@@ -860,8 +868,11 @@ gates.EP2 = async () => {
   await tick(w3, { quotes: [quote({ close_time: iso(NOW + 360000) }, 'KXXRP15M', 'KXXRP15M-26OCT071415-06'), quote({ close_time: iso(NOW + 360000) }, 'KXNATGAS15M', 'KXNATGAS15M-26OCT071415-06')] });
   assert.strictEqual(w3.posts.length, 0, 'XRP and natural gas are not entered at 6 minutes at all');
   const w4 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
-  await tick(w4, { quotes: [quote({ close_time: iso(NOW + 360000) })] });
-  assert.strictEqual(w4.posts.length, 1, 'Bitcoin is still entered at 6 minutes');
+  await tick(w4, { quotes: [quote({ close_time: iso(NOW + 360000) }, 'KXETH15M', 'KXETH15M-26OCT071415-06')] });
+  assert.strictEqual(w4.posts.length, 1, 'Ethereum is still entered at 6 minutes');
+  const w6 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  await tick(w6, { quotes: [quote({ close_time: iso(NOW + 360000) })] });
+  assert.strictEqual(w6.posts.length, 0, 'Bitcoin is not entered at 6 minutes any more');
 };
 gates.EP3 = async () => {
   // The exit watch must be running when an early order lands: every minute from just before the 10 minute window to the end of the 6 minute window is a watch minute.
@@ -882,8 +893,7 @@ gates.GF1 = async () => {
     sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   const by = (frag) => w.posts.filter((p) => p.ticker.includes(frag));
   assert.ok(by('KXGOLD').length === 1 && Number(by('KXGOLD')[0].count) > 2, 'gold takes the ladder size: ' + by('KXGOLD').map((p) => p.count));
-  assert.strictEqual(by('KXXRP').length, 0, 'XRP decides only at 10 minutes now (EP1), so it takes no 6 minute order');
-  for (const frag of ['KXBTC', 'KXETH', 'KXDOGE']) assert.ok(by(frag).length === 1 && Number(by(frag)[0].count) === 1, frag + ' is capped at one contract even with a large ladder and a full pool: ' + by(frag).map((p) => p.count));
+  for (const frag of ['KXBTC', 'KXETH', 'KXXRP', 'KXDOGE']) assert.ok(by(frag).length === 1 && Number(by(frag)[0].count) === 1, frag + ' is capped at one contract even with a large ladder and a full pool: ' + by(frag).map((p) => p.count));
   for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD')), 'a capped market never carries reinvested profit: ' + p.ticker); }
 };
 gates.GF2 = async () => {

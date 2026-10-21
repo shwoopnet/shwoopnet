@@ -298,7 +298,7 @@ const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eli
 // entering earlier beats the 6 minute rule (the 69 day history says it might; it has not been tested live). It is the same rule on the same market, never a second position: both entries use the client
 // order id "L1-" + ticker, and these two series no longer have a 6 minute window at all, so a market is decided once, at 10 minutes. Every order records
 // which lead it was entered at (entryLead) so the two can be read apart afterwards.
-const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M"];
+const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M", "KXBTC15M"];
 const EARLY_WINDOW_MS = [570000, 640000];   // about 10 minutes left
 function entryLead(series, left) {
   // XRP and natural gas decide ONLY at 10 minutes (the owner's choice, Oct 21, 2026): a market not in the band then is skipped, not tried again at 6, so the 10 minute claim is tested on its own.
@@ -744,7 +744,7 @@ async function runL1Tick(args) {
     // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
     const opens = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status))
       .map((q) => Date.parse(q.m.close_time) - (EARLY_PROBE_SERIES.includes(q.series) ? EARLY_WINDOW_MS[1] : L1_WINDOW_MS[1])).filter((t) => t > now);
-    await note("Watching. Orders go in about 6 minutes before a close (10 for XRP and natural gas), and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
+    await note("Watching. Orders go in about 6 minutes before a close (10 for Bitcoin, XRP and natural gas), and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
     return { skipped: "no market in the window" };
   }
 
