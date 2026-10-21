@@ -414,7 +414,7 @@ gates.Y17 = () => {
   const admin = html.slice(html.indexOf('function applyAdminUI(){'), html.indexOf("document.getElementById('generateInviteBtn')"));
   assert.ok(/currentUserIsAdmin && landingKalshiPending/.test(admin) && /!briefPage\.hidden && Date\.now\(\) - landingLoadedAt < 20000/.test(admin) && /showPage\('kalshi'\)/.test(admin), 'the move happens only for the admin, only if still on the first screen, and only within 20 seconds of loading');
   assert.ok(/pref === 'kalshi' && currentUserIsAdmin \? 'kalshi' : 'brief'/.test(html), 'the logo takes the admin home to Kalshi too, and anyone else to the brief');
-  assert.ok(/if\(name === 'kalshi' && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi page, whatever is saved');
+  assert.ok(/if\(\(name === 'kalshi' \|\| name === 'data'\) && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi or Data page, whatever is saved');
 };
 
 // The Account card says what one order risks right now (contracts times the latest order's cost per contract), and the profit tile is named so it cannot be mistaken for it.
@@ -448,7 +448,7 @@ gates.Y22 = () => {
 // Y23: the Kalshi page uses more width on a wide monitor, and the other pages keep the 1400px column.
 gates.Y23 = () => {
   assert.ok(/\.app\{ max-width: 1400px;/.test(html) && /\.app\.app-wide\{ max-width: 1640px; \}/.test(html), 'the base column stays 1400px; the wide class is 1640px');
-  assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi'\)/.test(html), 'only the Kalshi page turns it on, and every other page turns it off');
+  assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi' \|\| name === 'data'\)/.test(html), 'only the Kalshi and Data pages turn it on, and every other page turns it off');
 };
 
 // Y24: the logo's ground flash sits inside the logo row, above the tagline, not across it.
