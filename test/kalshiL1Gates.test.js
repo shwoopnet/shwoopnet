@@ -19,6 +19,9 @@ const T = 'KXBTC15M-26OCT071415-15';
 const quote = (over = {}, series = 'KXBTC15M', ticker = T) => ({ series, m: Object.assign({
   ticker, status: 'active', close_time: iso(NOW + 360000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
 
+// Gold first (Oct 21, 2026): gold is the only market that keeps the size ladder, so the sizing gates tick a gold market (its own shard, 0).
+const GT = 'KXGOLD15M-26OCT071415-15';
+const gq = () => quote({}, 'KXGOLD15M', GT);
 function world(opts = {}) {
   const calls = [], posts = [], docs = new Map(), events = [];
   let haltReads = 0;
@@ -126,7 +129,7 @@ gates.N5 = async () => {
   const both = world();
   await tick(both, { quotes: [quote(), quote({}, 'KXGOLD15M', 'KXGOLD15M-26OCT071415-15')] });
   assert.strictEqual(both.posts.length, 2, 'one order per market, so both series trade');
-  assert.strictEqual(both.posts[1].exchange_index, 0, 'gold is placed on its own shard');
+  assert.strictEqual(both.posts.find((p) => p.ticker.includes('KXGOLD')).exchange_index, 0, 'gold is placed on its own shard');
 };
 
 // A price that has left the band on the fresh read is not bought, whatever the list said.
@@ -249,7 +252,7 @@ gates.N11 = async () => {
     await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', 'KXGOLD15M-26OCT071415-15')] });
     assert.strictEqual(w.posts.length, 1, name + ': nothing is retried and the next market is not tried');
     assert.deepStrictEqual([w.sess.active, w.sess.endedBecause], [false, 'attempted'], name);
-    assert.strictEqual(w.docs.get('L1-' + T).status, status, name + ' is recorded for the owner to look at');
+    assert.strictEqual(w.docs.get('L1-KXGOLD15M-26OCT071415-15').status, status, name + ' is recorded for the owner to look at (gold is tried first)');
     assert.ok(said.test(w.events.map((e) => e.detail).join(' ')), name + ' tells the owner what to check');
   }
   const nofill = world({ post: { status: 201, body: { order_id: 'o', fill_count: '0.00', remaining_count: '0.00' } } });
@@ -284,19 +287,19 @@ gates.N24 = async () => {
   assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + 6 * DAY).state.cap, 3, 'no rise within a week of a loss stop, even though reviews come every 3 days');
   assert.strictEqual(live.reviewSizing({ cap: live.L1_SIZE_CEILING, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, live.L1_SIZE_CEILING, 'the hard ceiling holds');
   // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
-  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '900.0000', exchange_index: 2 }] } });
+  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '900.0000', exchange_index: 0 }] } });
   const saved = [];
-  await tick(w, { sizingState: { cap: 4, base: 900, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
+  await tick(w, { quotes: [gq()], sizingState: { cap: 4, base: 900, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
   assert.strictEqual(w.posts[0].count, '4', 'sized by the stored cap, not by the 2% rule');
   assert.strictEqual(w.sess.sizeCap, 4);
   assert.strictEqual(w.sess.sizeBase, 900, 'the stop base is shown on the session');
-  const stopW = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] }, results: (() => { const r = {}; for (let i = 0; i < 14; i++) r['OLD-' + i] = 'no'; return r; })() });
+  const stopW = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 0 }] }, results: (() => { const r = {}; for (let i = 0; i < 14; i++) r['OLD-' + i] = 'no'; return r; })() });
   seed(stopW, 14, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   const rec = [];
-  await tick(stopW, { sizingState: { cap: 3, base: 300, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { rec.push(x); } });
+  await tick(stopW, { quotes: [gq()], sizingState: { cap: 3, base: 300, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { rec.push(x); } });
   assert.deepStrictEqual([stopW.sess.endedBecause, rec[rec.length - 1].lastStopAt], ['loss stop', NOW], 'a loss stop is remembered so the cap cannot rise for a week');
   const failSave = world({ session: { sizing: true } });
-  await tick(failSave, { sizingState: null, setSizingState: async () => { throw new Error('db down'); } });
+  await tick(failSave, { quotes: [gq()], sizingState: null, setSizingState: async () => { throw new Error('db down'); } });
   assert.strictEqual(failSave.posts.length, 0, 'a review that cannot be saved sends nothing');
 };
 
@@ -327,15 +330,15 @@ gates.N25 = async () => {
   assert.strictEqual(live.skimAddon({ pool: 0, lastStopAt: 1000 }, 1000 + 3 * 86400000), 0, 'a stop empties the pool, so there is nothing to buy with until wins refill it');
   assert.ok(live.skimAddon({ pool: 99, lastStopAt: 1000 }, 1000 + 8 * 86400000) > 0);
   // Through a tick: the cap plus the add-on sets the size, and the balance the weekly review sees excludes savings.
-  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }] } });
+  const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 0 }] } });
   const saved = [];
-  await tick(w, { sizingState: { cap: 3, base: 341, reviewedAt: NOW - 1000, pool: 2, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
+  await tick(w, { quotes: [gq()], sizingState: { cap: 3, base: 341, reviewedAt: NOW - 1000, pool: 2, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
   assert.strictEqual(w.posts[0].count, '5', 'cap 3 plus two from a $2 pool');
   assert.strictEqual(w.sess.sizeAddon, 2);
   assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 30, 8 * 86400000).state.cap, 4, 'with $30 saved the sizing balance is $311, which supports seven at $43 but rises one step to four');
   assert.strictEqual((() => { const a = live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 250, 8 * 86400000); return live.reviewSizing(a.state, 341 - 250, 8 * 86400000 + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 2, 'savings are not sized on: if the rest of the balance falls to $91 the cap follows it down');
-  const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
-  await tick(ceil, { sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 0 }] } });
+  await tick(ceil, { quotes: [gq()], sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   assert.strictEqual(ceil.posts[0].count, String(live.L1_ORDER_CEILING), 'a huge pool still stops at the order ceiling, the fat-finger guard');
 };
 
@@ -406,26 +409,26 @@ gates.N17 = async () => {
 // Size scaling: off unless the session was started with it, never fewer than one or more than three contracts, and the
 // money it risks is counted in the loss stop.
 gates.N18 = async () => {
-  const rich = { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] };
+  const rich = { balance_breakdown: [{ balance: '300.0000', exchange_index: 0 }] };
   const off = world({ session: { startCash: 300 }, balance: rich });
-  await tick(off);
+  await tick(off, { quotes: [gq()] });
   assert.strictEqual(off.posts[0].count, '1', 'off by default, even on a large account');
   const on = world({ session: { startCash: 300, sizing: true }, balance: rich });
-  await tick(on);
+  await tick(on, { quotes: [gq()] });
   assert.strictEqual(on.posts[0].count, '3', '1% of $300 buys three contracts at about 91c');
-  assert.strictEqual(on.docs.get('L1-' + T).count, 3);
-  assert.ok(on.docs.get('L1-' + T).maxCost > 2.7 && on.docs.get('L1-' + T).maxCost < 3, 'the record carries the cost of all three');
-  const small = world({ session: { startCash: 40, sizing: true }, balance: { balance_breakdown: [{ balance: '40.0000', exchange_index: 2 }] } });
-  await tick(small);
+  assert.strictEqual(on.docs.get('L1-' + GT).count, 3);
+  assert.ok(on.docs.get('L1-' + GT).maxCost > 2.7 && on.docs.get('L1-' + GT).maxCost < 3, 'the record carries the cost of all three');
+  const small = world({ session: { startCash: 40, sizing: true }, balance: { balance_breakdown: [{ balance: '40.0000', exchange_index: 0 }] } });
+  await tick(small, { quotes: [gq()] });
   assert.strictEqual(small.posts[0].count, '1', 'a $40 account is one contract');
-  const mid = world({ session: { startCash: 106, sizing: true }, balance: { balance_breakdown: [{ balance: '106.0000', exchange_index: 2 }] } });
-  await tick(mid);
+  const mid = world({ session: { startCash: 106, sizing: true }, balance: { balance_breakdown: [{ balance: '106.0000', exchange_index: 0 }] } });
+  await tick(mid, { quotes: [gq()] });
   assert.strictEqual(mid.posts[0].count, '2', 'a $106 account is two contracts (2% is $2.12 at about 91c)');
-  const two = world({ session: { startCash: 250, sizing: true }, balance: { balance_breakdown: [{ balance: '250.0000', exchange_index: 2 }] } });
-  await tick(two);
+  const two = world({ session: { startCash: 250, sizing: true }, balance: { balance_breakdown: [{ balance: '250.0000', exchange_index: 0 }] } });
+  await tick(two, { quotes: [gq()] });
   assert.strictEqual(two.posts[0].count, '3', 'a $250 account is capped at three by the starting cap (2% would allow five)');
-  const huge = world({ session: { startCash: 5000, sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }] } });
-  await tick(huge);
+  const huge = world({ session: { startCash: 5000, sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 0 }] } });
+  await tick(huge, { quotes: [gq()] });
   assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
   assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(213, 0.92), live.l1Count(276, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 3, 3, 3]);
   assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.12, 3], 'the share of cash per order, the scaled stop and the cap');
@@ -648,12 +651,13 @@ gates.X1 = async () => {
   assert.ok(w.posts.some((p) => p.ticker === T), 'and Bitcoin still does');
 };
 gates.X2 = async () => {
+  // Gold first (Oct 21, 2026): Ethereum is an ordinary L1 series (same rule, stop, pool and exit) but is CAPPED at one contract while gold keeps the ladder.
   const sess = { sizing: true, sizeCap: 12, sizeAddon: 8 };
-  const w = world({ session: sess, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }, { balance: '400.0000', exchange_index: 2 }] } });
-  await tick(w, { quotes: [quote(), quote({}, 'KXETH15M', ETH)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
-  const btc = w.posts.find((p) => p.ticker === T), eth = w.posts.find((p) => p.ticker === ETH);
-  assert.ok(btc && eth, 'both markets are traded');
-  assert.ok(Number(eth.count) > 2 && Number(eth.count) <= Number(btc.count), 'Ethereum is sized by the same rule as Bitcoin, never above it: ' + eth.count + ' vs ' + btc.count);
+  const w = world({ session: sess, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 0 }, { balance: '400.0000', exchange_index: 0 }] }, fresh: { [ETH]: { exchange_index: 0 } } });
+  await tick(w, { quotes: [gq(), quote({}, 'KXETH15M', ETH)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const gold = w.posts.find((p) => p.ticker === GT), eth = w.posts.find((p) => p.ticker === ETH);
+  assert.ok(gold && eth, 'both markets are traded');
+  assert.ok(Number(gold.count) > 2 && Number(eth.count) === 1, 'gold gets the ladder size and Ethereum is capped at one: ' + gold.count + ' vs ' + eth.count);
   const rec = w.docs.get('L1-' + ETH);
   assert.strictEqual(rec.series, 'KXETH15M'); assert.strictEqual(rec.strategy, 'L1'); assert.ok(!('extraSeries' in rec), 'it is an ordinary L1 order, not a special kind');
 };
@@ -666,7 +670,7 @@ gates.X3 = async () => {
   assert.ok(eth && Number(eth.count) <= 3, 'a 3 contract cap holds for Ethereum too: ' + (eth && eth.count));
 };
 gates.X4 = () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'Bitcoin, gold and Ethereum, then XRP and Dogecoin, then the three probe markets LAST (the later ones yield when a window is full); Solana is not on it');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'GOLD FIRST, then Bitcoin, Ethereum, XRP and Dogecoin, then the three probe markets LAST (the later ones yield when a window is full); Solana is not on it');
   assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the older single-order path is untouched');
   assert.ok(!('EXTRA_LIVE_SERIES' in live) && !('extraLiveCounts' in live), 'no separate Ethereum switch is left in the library');
 };
@@ -674,17 +678,17 @@ gates.X4 = () => {
 const AUD = 'KXAUDUSD15M-26OCT091500-00';
 gates.PR1 = async () => {
   const base = { sizing: true, sizeCap: 12, sizeAddon: 8, sizeBase: 500, sizePool: 7.4, sizeSaved: 5, sizeNextReview: NOW + 86400000 };
-  const w = world({ session: base, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }, { balance: '400.0000', exchange_index: 2 }] } });
-  await tick(w, { quotes: [quote({}, 'KXETH15M', ETH), quote({}, 'KXAUDUSD15M', AUD)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
-  const eth = w.posts.find((p) => p.ticker === ETH), aud = w.posts.find((p) => p.ticker === AUD);
-  assert.ok(eth && Number(eth.count) > 1, 'Ethereum is sized by the ladder: ' + (eth && eth.count));
+  const w = world({ session: base, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 0 }, { balance: '400.0000', exchange_index: 0 }] }, fresh: { [AUD]: { exchange_index: 0 } } });
+  await tick(w, { quotes: [gq(), quote({}, 'KXAUDUSD15M', AUD)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const gold = w.posts.find((p) => p.ticker === GT), aud = w.posts.find((p) => p.ticker === AUD);
+  assert.ok(gold && Number(gold.count) > 1, 'gold is sized by the ladder: ' + (gold && gold.count));
   assert.ok(aud, 'the probe market trades');
   assert.strictEqual(Number(aud.count), 1, 'but a probe market is always ONE contract, however high the ladder and the reinvested profit are: ' + aud.count);
   const rec = w.docs.get('L1-' + AUD);
   assert.ok(rec.strategy === 'L1' && rec.series === 'KXAUDUSD15M' && !rec.addon && !rec.addonCost, 'it is an ordinary L1 order with no profit money in it, so the loss stop, pool and exit read it like any other');
 };
 gates.PR2 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES.slice(0, 5), ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'the five markets that earned their place come first');
+  assert.deepStrictEqual(live.L1_SERIES.slice(0, 5), ['KXGOLD15M', 'KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'gold, then the four capped markets, come first');
   assert.deepStrictEqual(live.L1_SERIES.slice(5), live.PROBE_SERIES, 'the probe markets come last, so they only take what a window has left');
   // a window already at its combined limit takes no probe order
   const w = world({ session: wsess({}), balance: rich });
@@ -698,6 +702,36 @@ gates.PR3 = () => {
   assert.ok(!/request\.data\.(ticker|price|count|side)/.test(idx), 'still no callable takes a ticker, price or size from the caller');
   const push = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiPushLib.js'), 'utf8');
   for (const s of live.PROBE_SERIES) assert.ok(push.includes(s), s + ' has a name in the alerts, not a raw ticker');
+};
+// GF1 to GF3: gold first (Oct 21, 2026, docs/GOLD_FIRST_PROPOSAL.md option A). Gold alone keeps the size ladder and is sent first; Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract; the lists change only by a code edit.
+gates.GF1 = async () => {
+  assert.deepStrictEqual(live.CAPPED_SERIES, ['KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'exactly the four markets that have not earned the ladder');
+  assert.ok(!live.CAPPED_SERIES.includes('KXGOLD15M') && !live.CAPPED_SERIES.some((x) => live.PROBE_SERIES.includes(x)), 'gold is not capped, and a market is in at most one of the two lists');
+  const base = { sizing: true, sizeCap: 12, sizeAddon: 8, sizeBase: 500, sizePool: 7.4, sizeSaved: 5, sizeNextReview: NOW + 86400000 };
+  const rich = { balance_breakdown: [{ balance: '600.0000', exchange_index: 0 }, { balance: '400.0000', exchange_index: 0 }] };
+  const w = world({ session: base, balance: rich, fresh: { 'KXBTC15M-26OCT091500-00': { exchange_index: 0 }, 'KXXRP15M-26OCT091500-00': { exchange_index: 0 }, 'KXDOGE15M-26OCT091500-00': { exchange_index: 0 }, [ETH]: { exchange_index: 0 } } });
+  await tick(w, { quotes: [quote({}, 'KXBTC15M', 'KXBTC15M-26OCT091500-00'), quote({}, 'KXETH15M', ETH), quote({}, 'KXXRP15M', 'KXXRP15M-26OCT091500-00'), quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT091500-00'), gq()],
+    sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const by = (frag) => w.posts.filter((p) => p.ticker.includes(frag));
+  assert.ok(by('KXGOLD').length === 1 && Number(by('KXGOLD')[0].count) > 2, 'gold takes the ladder size: ' + by('KXGOLD').map((p) => p.count));
+  for (const frag of ['KXBTC', 'KXETH', 'KXXRP', 'KXDOGE']) assert.ok(by(frag).length === 1 && Number(by(frag)[0].count) === 1, frag + ' is capped at one contract even with a large ladder and a full pool: ' + by(frag).map((p) => p.count));
+  for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD')), 'a capped market never carries reinvested profit: ' + p.ticker); }
+};
+gates.GF2 = async () => {
+  // Gold is sent first whatever order the quotes arrive in: it takes its full size even when a capped market is listed ahead of it and the window's limit is tight.
+  const solo = world({ session: wsess({}), balance: rich });
+  await tick(solo, { quotes: [quote({}, 'KXGOLD15M', GOLD)], sizingState: wstate, setSizingState: async () => {} });
+  const w = world({ session: wsess({}), balance: rich });
+  await tick(w, { quotes: [quote({}, 'KXBTC15M', BTCW), quote({}, 'KXETH15M', ETH), quote({}, 'KXGOLD15M', GOLD)], sizingState: wstate, setSizingState: async () => {} });
+  const gold = w.posts.find((p) => p.ticker === GOLD);
+  assert.ok(gold && gold.count === solo.posts[0].count, 'gold trades its full stake even when listed last: ' + (gold && gold.count) + ' vs ' + solo.posts[0].count);
+  assert.strictEqual(w.posts[0].ticker, GOLD, 'and it is the first order sent');
+};
+gates.GF3 = () => {
+  const src = fnSrcLib();
+  assert.ok(/const CAPPED_SERIES = \["KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"\];/.test(src) && /PROBE_SERIES\.includes\(c\.series\) \|\| CAPPED_SERIES\.includes\(c\.series\)/.test(src), 'the capped list is a hard list in code and is applied beside the probe rule');
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(!/CAPPED_SERIES|request\.data\.(ticker|price|count|side)/.test(idx), 'no callable or stored value can change which markets are capped or how many contracts an order has');
 };
 gates.X5 = async () => {
   // Solana stored on the session is never traded, even if its quotes arrive

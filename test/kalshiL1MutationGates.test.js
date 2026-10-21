@@ -90,10 +90,11 @@ gates.M3 = async () => {
 
 // With size scaling on, two markets on one shard cannot both take the full share: the second is sized on what is left.
 gates.M4 = async () => {
-  const G = 'KXGOLD15M-26OCT071415-15';
-  const w = world({ session: { sizing: true, startCash: 300 }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] },
-    fresh: { [G]: { exchange_index: 2, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } } });
-  await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  // Gold first (Oct 21, 2026): only gold keeps the ladder, so the two markets here are two gold windows on one shard.
+  const G = 'KXGOLD15M-26OCT071415-15', G2 = 'KXGOLD15M-26OCT071430-30';
+  const w = world({ session: { sizing: true, startCash: 300 }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 0 }] },
+    fresh: { [G]: { exchange_index: 0, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, [G2]: { exchange_index: 0, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } } });
+  await tick(w, { quotes: [quote({}, 'KXGOLD15M', G), quote({}, 'KXGOLD15M', G2)] });
   assert.deepStrictEqual(w.posts.map((p) => p.count), ['3', '3'], 'both are held to the cap');
   assert.ok(/const cashLeft = cash - Object\.values\(committed\)[\s\S]{0,200}l1Count\(cashLeft/.test(fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8')), 'and the cash an earlier order in the same tick took is still taken off before sizing the next');
 };

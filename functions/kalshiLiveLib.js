@@ -59,7 +59,13 @@ const LIVE_SERIES = ["KXBTC15M", "KXGOLD15M"];   // gold has real volume on prod
 // USD/CAD, a near miss on gas; kalshi-scalper/README.md PAPER1). ALWAYS one contract per order, whatever the size ladder says, so each costs about $0.90 at risk; they are the LAST in the list, so they only
 // take what Bitcoin, gold, Ethereum, XRP and Dogecoin left in a window's combined limit, and they count toward the same loss stop, pool and 25c exit as every other L1 order. Adding to this list is a code edit.
 const PROBE_SERIES = ["KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M"];
-const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", ...PROBE_SERIES];
+// GOLD FIRST (2026-10-21, the owner's choice after docs/GOLD_FIRST_PROPOSAL.md, option A). The first 302 settled bot trades: gold +$28.35 (2 losses in 98), Bitcoin -$20.55, Ethereum -$4.40, XRP -$3.63,
+// Dogecoin -$2.66; the 68 day backtest agrees on gold and on nothing else; and Ethereum's losses came in the same window as Bitcoin's. So gold is the ONLY market that keeps the size ladder and it goes
+// FIRST in the list (it gets a window's room before anything else); Bitcoin, Ethereum, XRP and Dogecoin are CAPPED at one contract like the probes, so they keep trading and keep their record growing,
+// but a bad run on them costs about $0.90 a trade, not $4. A capped market earns its ladder size back only from its own live record (150 settled trades at one contract, a result above +0.5c a contract in
+// both halves) and a ladder-sized market drops back if its last 100 trades are negative: either is a reviewed edit of THIS list, never a stored value. The 12% stop, the 5.5% window limit and the 25c exit are unchanged.
+const CAPPED_SERIES = ["KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
+const L1_SERIES = ["KXGOLD15M", "KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", ...PROBE_SERIES];
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -675,7 +681,7 @@ async function runL1Tick(args) {
     // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
     let addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
     // A probe market is one contract, always: no ladder step and no reinvested profit goes into a market that has not earned it.
-    if (PROBE_SERIES.includes(c.series)) { count = 1; addonUsed = 0; }
+    if (PROBE_SERIES.includes(c.series) || CAPPED_SERIES.includes(c.series)) { count = 1; addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
     // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.
@@ -937,7 +943,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
 }
 
 module.exports = {
-  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
