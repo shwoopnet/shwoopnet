@@ -1172,7 +1172,7 @@
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
-                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
+                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button><button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
           <div class="kal-note" id="kalPushMsg"></div>
           <div class="kal-note" id="kalDiagMsg"></div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
@@ -1856,6 +1856,22 @@
       var seen = o.seen || {};
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.side, o.band, o.price, o.limit, o.sentSide, o.sentPrice, o.status, o.fillCount, o.remainingCount,
         o.averageFillPrice, o.averageFeePaid, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error].map(cell).join(',');
+    });
+    return [cols.join(',')].concat(rows).join('\n');
+  }
+
+  // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
+  // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
+  function kalshiAllOrdersCsv(orders){
+    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy'];
+    var cell = function(v){
+      if(v === undefined || v === null){ return ''; }
+      var t = String(v);
+      return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    };
+    var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return a.ts - b.ts; }).map(function(o){
+      return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.side, o.price, o.count, o.fillCount, o.maxCost, o.status, o.settled === true ? 'yes' : '', o.result, kalshiOrderPnl(o),
+        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }
@@ -2846,6 +2862,14 @@
     if(kalshiSoundOn){ kalshiSoundTone('enter'); }     // the tap is what lets the browser play audio, and the tone says it works
   });
   kalshiSoundLabel();
+  document.getElementById('kalOrdersCopy').addEventListener('click', function(){
+    var csv = kalshiAllOrdersCsv(kalshiLiveOrders), n = Math.max(0, csv.split('\n').length - 1);
+    var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
+    var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders.'; }, manual);
+    } else { manual(); }
+  });
   document.getElementById('kalDiagCopy').addEventListener('click', function(){
     var csv = kalshiDiagnosticsCsv(kalshiLiveOrders, 150), n = Math.max(0, csv.split('\n').length - 1);
     var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');

@@ -268,6 +268,26 @@ gates.Y10 = () => {
   assert.ok(/var sizeText = running \?/.test(html) && /Stops if down/.test(html), 'size and stop are part of the status line inside the bot menu, not a line on the page');
 };
 
+// The all-orders export (Oct 20, 2026): every order the BOT sent, oldest first, with its saved result. Manual trades never have an order document, so they are not in it; nothing is invented (an open order has no P/L).
+gates.Y11b = () => {
+  const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
+  const csv = new Function(['kalshiOrderPnl', 'kalshiAllOrdersCsv'].map(grab).join('\n') + '; return kalshiAllOrdersCsv;')();
+  const rows = (t) => t.split('\n');
+  assert.deepStrictEqual(rows(csv([])), [rows(csv([]))[0]], 'a header even with no orders');
+  const out = rows(csv([
+    { ts: 3000, ticker: 'B', series: 'KXGOLD15M', side: 'yes', price: 0.93, count: 4, fillCount: '4.00', maxCost: 3.9, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24, strategy: 'L1' },
+    { ts: 1000, ticker: 'A', series: 'KXBTC15M', side: 'no', price: 0.9, count: 1, fillCount: '1.00', maxCost: 0.92, status: 'filled', strategy: 'L1' },
+    { ts: 2000, ticker: 'C', series: 'KXETH15M', side: 'yes', status: 'no fill', fillCount: '0.00', strategy: 'L1' },
+  ]));
+  const head = out[0].split(',');
+  const col = (r, name) => r.split(',')[head.indexOf(name)];
+  assert.strictEqual(out.length, 4, 'one row per order, none dropped (this is not capped at 150)');
+  assert.deepStrictEqual([1, 2, 3].map((i) => col(out[i], 'ticker')), ['A', 'C', 'B'], 'oldest first');
+  assert.strictEqual(col(out[3], 'pnl'), '0.24', 'a settled order carries the bot\'s saved P/L');
+  assert.strictEqual(col(out[1], 'pnl'), '', 'an open order has none');
+  assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiLiveOrders\)/.test(html), 'a button, built from the bot\'s own orders');
+};
+
 // The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
 gates.Y11 = () => {
   const m = /(function kalshiDiagnosticsCsv\(orders, limit\)\{[\s\S]*?\n  \})\n/.exec(html);
