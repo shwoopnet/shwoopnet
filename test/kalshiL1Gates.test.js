@@ -830,13 +830,15 @@ gates.CO3 = async () => {
   await live.settleOpenOrders({ store, fetchFn: f, nowMs: NOW, keyId: 'k', pem });
   assert.strictEqual(handAsked, 1, 'on by default, so every other caller behaves as before');
 };
-// EP1 to EP3: early entry probes (FWD7, Oct 21, 2026). XRP and natural gas may also be entered about 10 minutes before the close, one contract; never two positions in one market.
+// EP1 to EP3: early entry probes (FWD7 and FWD8, Oct 21, 2026). XRP and natural gas are entered about 10 minutes before the close INSTEAD of 6, one contract; a market is decided once.
 const XRP10 = 'KXXRP15M-26OCT071415-10';
 const q10 = (series, ticker, over = {}) => ({ series, m: Object.assign({ ticker, status: 'active', close_time: iso(NOW + 600000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
 gates.EP1 = async () => {
   assert.deepStrictEqual(live.EARLY_PROBE_SERIES, ['KXXRP15M', 'KXNATGAS15M'], 'exactly XRP and natural gas');
   assert.strictEqual(live.entryLead('KXXRP15M', 600000), '10m');
-  assert.strictEqual(live.entryLead('KXXRP15M', 360000), '6m');
+  assert.strictEqual(live.entryLead('KXXRP15M', 360000), null, 'XRP no longer decides at 6 minutes: it is 10 minutes only');
+  assert.strictEqual(live.entryLead('KXNATGAS15M', 360000), null, 'nor does natural gas');
+  assert.strictEqual(live.entryLead('KXBTC15M', 360000), '6m', 'every other series is unchanged');
   assert.strictEqual(live.entryLead('KXXRP15M', 480000), null, 'between the two windows: nothing');
   assert.strictEqual(live.entryLead('KXBTC15M', 600000), null, 'Bitcoin has no early window, nor does any other live series');
   assert.strictEqual(live.entryLead('KXGOLD15M', 600000), null);
@@ -848,18 +850,18 @@ gates.EP1 = async () => {
   assert.ok(rec.entryLead === '10m' && rec.strategy === 'L1' && !rec.addon, 'recorded as an ordinary L1 order tagged with the lead it was entered at');
 };
 gates.EP2 = async () => {
-  // Once a market has its order, the 6 minute tick cannot send a second one on it; a market not entered at 10 minutes still can be at 6.
+  // A market is decided once. After its 10 minute order the 6 minute tick sends nothing on it, and a market not in the band at 10 minutes is NOT tried again at 6.
   const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } } });
   await tick(w, { quotes: [q10('KXXRP15M', XRP10)] });
   assert.strictEqual(w.posts.length, 1);
-  const later = NOW + 4 * 60000;
-  const w2 = { ...w, fresh: {} };
-  await live.runL1Tick({ session: w.sess, now: later, setSession: async (p) => { Object.assign(w.sess, p); }, logEvent: async () => {}, quotes: [{ series: 'KXXRP15M', m: { ticker: XRP10, status: 'active', close_time: iso(NOW + 600000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } }], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn });
+  await live.runL1Tick({ session: w.sess, now: NOW + 4 * 60000, setSession: async (p) => { Object.assign(w.sess, p); }, logEvent: async () => {}, quotes: [{ series: 'KXXRP15M', m: { ticker: XRP10, status: 'active', close_time: iso(NOW + 600000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } }], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn });
   assert.strictEqual(w.posts.length, 1, 'no second order on the same market at 6 minutes');
   const w3 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
-  await tick(w3, { quotes: [quote({ close_time: iso(NOW + 360000) }, 'KXXRP15M', 'KXXRP15M-26OCT071415-06')] });
-  assert.strictEqual(w3.posts.length, 1, 'XRP not entered earlier is still entered at 6 minutes as before');
-  assert.strictEqual(w3.docs.get('L1-KXXRP15M-26OCT071415-06').entryLead, '6m');
+  await tick(w3, { quotes: [quote({ close_time: iso(NOW + 360000) }, 'KXXRP15M', 'KXXRP15M-26OCT071415-06'), quote({ close_time: iso(NOW + 360000) }, 'KXNATGAS15M', 'KXNATGAS15M-26OCT071415-06')] });
+  assert.strictEqual(w3.posts.length, 0, 'XRP and natural gas are not entered at 6 minutes at all');
+  const w4 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  await tick(w4, { quotes: [quote({ close_time: iso(NOW + 360000) })] });
+  assert.strictEqual(w4.posts.length, 1, 'Bitcoin is still entered at 6 minutes');
 };
 gates.EP3 = async () => {
   // The exit watch must be running when an early order lands: every minute from just before the 10 minute window to the end of the 6 minute window is a watch minute.
@@ -880,7 +882,8 @@ gates.GF1 = async () => {
     sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   const by = (frag) => w.posts.filter((p) => p.ticker.includes(frag));
   assert.ok(by('KXGOLD').length === 1 && Number(by('KXGOLD')[0].count) > 2, 'gold takes the ladder size: ' + by('KXGOLD').map((p) => p.count));
-  for (const frag of ['KXBTC', 'KXETH', 'KXXRP', 'KXDOGE']) assert.ok(by(frag).length === 1 && Number(by(frag)[0].count) === 1, frag + ' is capped at one contract even with a large ladder and a full pool: ' + by(frag).map((p) => p.count));
+  assert.strictEqual(by('KXXRP').length, 0, 'XRP decides only at 10 minutes now (EP1), so it takes no 6 minute order');
+  for (const frag of ['KXBTC', 'KXETH', 'KXDOGE']) assert.ok(by(frag).length === 1 && Number(by(frag)[0].count) === 1, frag + ' is capped at one contract even with a large ladder and a full pool: ' + by(frag).map((p) => p.count));
   for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD')), 'a capped market never carries reinvested profit: ' + p.ticker); }
 };
 gates.GF2 = async () => {

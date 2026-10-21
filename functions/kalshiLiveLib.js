@@ -294,16 +294,16 @@ async function runArmedTick(args) {
 // price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
 const L1_BAND = [0.88, 0.97];
 const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
-// Early entry probes (the research session's FWD7, the owner: "live probes at 10 minutes", Oct 21, 2026). XRP and natural gas may ALSO be entered about 10 minutes before the close, one contract, to test whether
+// Early entry probes (the research session's FWD7, the owner: "live probes at 10 minutes", Oct 21, 2026). XRP and natural gas are entered about 10 minutes before the close INSTEAD of 6, one contract, to test whether
 // entering earlier beats the 6 minute rule (the 69 day history says it might; it has not been tested live). It is the same rule on the same market, never a second position: both entries use the client
-// order id "L1-" + ticker, so once a market has an order (at 10 minutes) createTest refuses the 6 minute one, and a market that was not in the band at 10 minutes can still be entered at 6. Every order records
+// order id "L1-" + ticker, and these two series no longer have a 6 minute window at all, so a market is decided once, at 10 minutes. Every order records
 // which lead it was entered at (entryLead) so the two can be read apart afterwards.
 const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M"];
 const EARLY_WINDOW_MS = [570000, 640000];   // about 10 minutes left
 function entryLead(series, left) {
-  if (left >= L1_WINDOW_MS[0] && left <= L1_WINDOW_MS[1]) return "6m";
-  if (EARLY_PROBE_SERIES.includes(series) && left >= EARLY_WINDOW_MS[0] && left <= EARLY_WINDOW_MS[1]) return "10m";
-  return null;
+  // XRP and natural gas decide ONLY at 10 minutes (the owner's choice, Oct 21, 2026): a market not in the band then is skipped, not tried again at 6, so the 10 minute claim is tested on its own.
+  if (EARLY_PROBE_SERIES.includes(series)) return left >= EARLY_WINDOW_MS[0] && left <= EARLY_WINDOW_MS[1] ? "10m" : null;
+  return left >= L1_WINDOW_MS[0] && left <= L1_WINDOW_MS[1] ? "6m" : null;
 }
 // Not a trading limit. Bitcoin and gold have 192 markets in a day (96 each), so 200 orders in any rolling 24 hours can never be reached by
 // normal trading; it only stops a runaway loop from sending orders without end. Past it the bot waits (it does not end the session) and carries
@@ -743,7 +743,7 @@ async function runL1Tick(args) {
   if (!candidates.length) {
     // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
     const opens = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status))
-      .flatMap((q) => [Date.parse(q.m.close_time) - L1_WINDOW_MS[1]].concat(EARLY_PROBE_SERIES.includes(q.series) ? [Date.parse(q.m.close_time) - EARLY_WINDOW_MS[1]] : [])).filter((t) => t > now);
+      .map((q) => Date.parse(q.m.close_time) - (EARLY_PROBE_SERIES.includes(q.series) ? EARLY_WINDOW_MS[1] : L1_WINDOW_MS[1])).filter((t) => t > now);
     await note("Watching. Orders go in about 6 minutes before a close (10 for XRP and natural gas), and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
     return { skipped: "no market in the window" };
   }
