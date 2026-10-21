@@ -4676,3 +4676,19 @@ L1's band (ask 88c to 97c, held to settlement, fee 7% x p x (1-p)) at each minut
 **Prediction, recorded first.** Hedged strategy mean net **-3c to -0.5c** per entry (a fair-game entry less two fees, plus the favourite effect); hedged minus plain hold **between -1.5c and +0.5c**; `FALSIFIED` (about **95%**). The variance reduction is real and is not what is being tested.
 
 **Single read.** `python -m scalper.hs1 run-all`, once; a second run is refused unless `data/hs1b_result.txt` is deleted on purpose. Nothing here goes live.
+
+## Result: HS1b, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/hs1.py` (`run-all`) and `tests/test_hs1.py` were committed before the run; result file `data/hs1b_result.txt`. 69,867 entries over 69 days (38,800, or 55.5%, fired the 65c trigger). Every entry counts.
+
+| | Mean net per entry | Day-clustered z | Standard deviation |
+|---|---|---|---|
+| Hedged strategy (half a contract of the other side at 65c) | **-3.61c** | -17.00 | 40.5c |
+| Plain hold to settlement (same entries) | -2.88c | -11.21 | 49.5c |
+| Hedged minus plain hold | **-0.73c** | -9.68 | |
+
+Halves -4.19c / -3.03c; at fees x1.2 -4.03c. **Verdict: `FALSIFIED`.**
+
+- **Prediction:** hedged strategy -3c to -0.5c (actual -3.61c, slightly outside), hedged minus plain hold -1.5c to +0.5c (actual -0.73c, inside), `FALSIFIED` (about 95%). Right on the verdict.
+- **What it says.** Buying a side at 38c to 52c and holding loses 2.9c a contract on this data (the fee plus spread of a fair game); the hedge halves the swings by 20% (standard deviation 49.5c to 40.5c) and costs another 0.7c on top, because it gives up the winner's upside and pays a second fee. This is the "fair-game identity" in the ledger, now measured.
+- **Count:** the mistake in HS1 and its correction both count: Kalshi tries about **4,652**. Nothing built, nothing changed live.
