@@ -4903,3 +4903,10 @@ Code `scalper/ex10.py` and `tests/test_ex10.py` were committed before the run; r
 - **Nothing recommended.** The exit line is the owner's rule (anti-degen) and the main session's code with its own gate test. At 10 minutes on Bitcoin, XRP and natural gas, 25c is as good as any line, so there is no case from this table to touch it.
 
 **Count: Kalshi tries about 4,660.** Nothing built, nothing changed live.
+
+## Amendment to FWD8: "10 minutes only" (the main session's note, 2026-10-21 ~19:00 UTC, relayed, not verified by me; PR #453 not merged or deployed at that time)
+
+The owner chose **"10 minutes only"**: in PR #453 `KXXRP15M` and `KXNATGAS15M` decide **only** at 10 minutes (570 to 640 seconds left), with **no 6 minute window for them, so a market not in band at 10 minutes is skipped**. Same band, one contract, 25c exit, stop and window cap; gate tests EP1 to EP3. Orders carry `entryLead` "10m" (or "6m" for XRP and natural gas orders from before go-live) and `ts`. The start date is the owner's deploy date, to be relayed and recorded here.
+- **This is the rule I originally proposed, so the history figures apply directly:** XRP 10 minute entries +2.91c held (+2.46c with the exit; about 12 a day), natural gas +3.19c (+2.78c; about 5 a day). The hybrid table in the previous amendment no longer describes the build (there is no fallback); it stays as information.
+- **Consequence for the XRP and natural gas record:** their live series now trades fewer markets (849 of 6,531 for XRP in the history, against 2,261 at 6 minutes), so fewer dollars a day, by design. The older 6 minute orders are a different strategy and are read in FWD5, not FWD8.
+- **FWD8 reads:** orders with `entryLead` "10m" from the deploy date, XRP and natural gas (z 2.2 each, count about 4,658). **Bitcoin is not in #453 as reported to me; the owner's earlier answer asked for it, and I have asked the main session to confirm.** If Bitcoin is not built, FWD8 has two series, and Bitcoin's 10 minute claim is read only on public candles in ML1.
