@@ -1885,7 +1885,7 @@
   // The bot's order records as CSV, for working out why orders did not fill. Prices, sizes and ids only (no keys or secrets); newest first, at
   // most `limit` rows. A field a record does not have is left empty, never filled in. Commas and quotes in a text field are escaped.
   function kalshiDiagnosticsCsv(orders, limit){
-    var cols = ['time', 'ticker', 'side', 'band', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'avgFee', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error'];
+    var cols = ['time', 'ticker', 'series', 'entryLead', 'side', 'band', 'count', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'avgFee', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error'];
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -1893,7 +1893,7 @@
     };
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return b.ts - a.ts; }).slice(0, limit || 150).map(function(o){
       var seen = o.seen || {};
-      return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.side, o.band, o.price, o.limit, o.sentSide, o.sentPrice, o.status, o.fillCount, o.remainingCount,
+      return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.entryLead, o.side, o.band, o.count, o.price, o.limit, o.sentSide, o.sentPrice, o.status, o.fillCount, o.remainingCount,
         o.averageFillPrice, o.averageFeePaid, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
@@ -1912,7 +1912,7 @@
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
   // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
   function kalshiAllOrdersCsv(orders){
-    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk'];
+    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize'];
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -1920,7 +1920,7 @@
     };
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return a.ts - b.ts; }).map(function(o){
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.side, o.price, o.count, o.fillCount, o.maxCost, o.status, o.settled === true ? 'yes' : '', o.result, kalshiOrderPnl(o),
-        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask].map(cell).join(',');
+        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }
