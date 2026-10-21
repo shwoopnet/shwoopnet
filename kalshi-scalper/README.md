@@ -4622,3 +4622,23 @@ Code `scalper/fam4.py` and `tests/test_fam4.py` were committed before the run; r
 - **CS1:** managed Bitcoin earned 44% a year against 60% for holding it, with a shallower drawdown; the placebo (+6.4%) says leverage-free timing of a 143 month Bitcoin bull run is mostly the average exposure. ETH looks better (+3.68% alpha) but has too few months to count.
 - **FA1:** the four published factor ETFs together **earned slightly less than SPY** over 2013 to 2026 (-0.43% a year, z -0.41), with a worse drawdown. The premia were not there after costs and fees in this window.
 - **Dollar size:** RP1's +2.36% is $4.70 on $200 and $11.80 on $500; the others are about zero. **Family tries: 21.** Nothing live.
+
+## Information and forward claims: ML1, L1 by minutes left (2026-10-21; `python -m scalper.ml1`; the table is information, not a try; the three claims are the tries)
+
+L1's band (ask 88c to 97c, held to settlement, fee 7% x p x (1-p)) at each minutes-left value, gold / Bitcoin / Ethereum on 69 days (`l1b` + `book`); net per contract and loss rate, with the 6 minute rule (the live one) in the middle.
+
+| Minutes left | Gold net (loss) | Bitcoin net (loss) | Ethereum net (loss) |
+|---|---|---|---|
+| 10 | -0.30c (8.6%) | **+2.53c** (5.9%) | -0.04c (8.2%) |
+| 9 | +0.37c (7.5%) | +2.12c (5.8%) | **+1.04c** (6.7%) |
+| 8 | +1.04c (6.5%) | +0.61c (7.0%) | +0.65c (6.6%) |
+| 7 | **+2.03c** (5.1%) | +1.19c (6.0%) | +0.38c (6.7%) |
+| **6 (live)** | +1.54c (5.3%) | +0.45c (6.5%) | +0.60c (6.2%) |
+| 5 | +0.73c (5.8%) | -0.45c (7.0%) | -0.32c (6.8%) |
+| 4 | +0.56c (5.8%) | +0.23c (6.2%) | -0.26c (6.6%) |
+| 3 | +0.01c (6.2%) | -0.58c (6.9%) | -0.17c (6.5%) |
+
+- **The shape is the finding.** For Bitcoin the net falls from +2.5c at 10 minutes to about zero at 3 minutes; Ethereum is flat to slightly down; gold peaks at 7 minutes and is positive from 8 down to 4. Each window uses the same markets, so the columns are strongly dependent; Jeffreys 95% loss intervals for neighbouring rows overlap almost entirely (for example gold at 7 minutes 3.95% to 6.44% against 6 minutes 4.21% to 6.57%). L3's old result (2 minutes loses, -1.71c) fits the same slope.
+- **Forward claims, named now before any forward day is looked at (three tries; Kalshi count about 4,650).** The best window in the table that differs from 6 minutes: **gold 7 minutes** (+2.03c against +1.54c), **Bitcoin 10 minutes** (+2.53c against +0.45c), **Ethereum 9 minutes** (+1.04c against +0.60c). Each claim: on the same fresh days, the series' net per contract at that window is **above the 6 minute rule's** with a day-clustered paired z of at least **2.4**, and above zero by itself. **Fresh days are the public candles for days from 2026-10-13 on** (the archive ends 2026-10-12); read once at **30 days of such data or 2026-12-01**, by the same `hold_rule` code with `left_s` changed. Fewer than 25 days is `NOT_ENOUGH_DATA`.
+- **Prediction, recorded first.** At most one of the three claims holds (about 85%); Bitcoin at 10 minutes is the likeliest (about 25%) because it is the only one with a gap of two points and a slope; gold at 7 minutes about 10% (the gap is half a cent inside the noise); Ethereum about 5%.
+- **What a pass would mean.** The live bot enters at a fixed 6 minutes. A different minute would change `functions/kalshiLiveLib.js`, so it is a proposal to the main session with a gate test, never a switch. Power is low; a true 0.5c improvement will usually read as "not shown".
