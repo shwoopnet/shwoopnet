@@ -4036,3 +4036,12 @@ Code `scalper/perp2.py`, `tests/test_perp2.py`, committed before the runs; resul
 **PERP3, information.** Average hold about 35 days (most trades ran into the 30 bar time stop, so the ratio did not come back quickly); only 4% hit the |z| 4 stop; long gold -2.12%, short gold -1.33%. Costs were about 1.9% a trade, of which the funding placeholder (0.02% a day on EACH leg, charged against both) is about 1.4%, so the gross edge was about +0.2% before costs. **The funding assumption is the harshest part of the registration for a pair**: the two legs are opposite sides, so in reality part of the funding offsets. That is a fact about the registered cost model, not a reason to overturn the verdict; a corrected cost model would be a new try.
 
 **What this adds to PERP1.** Three simple daily ideas on the public histories of the four underlyings: one passed only through crypto's early years (PERP1), one is the markets' drift (PERP2), and one is eaten by funding (PERP3). The common finding is again that cost and drift, not signal, decide these. **Decision.** Nothing built, nothing changed live. **Count: about 4,634 tries.**
+
+## Information: PERP3's arithmetic under other cost models (2026-10-21, no hypothesis, no verdict, no variant counted)
+
+The owner asked to try gold against silver again with a fairer funding model. Before registering a new try, the arithmetic on the SAME 84 PERP3 trades (already seen, so this is not evidence of anything):
+- Mean gross return per trade (before any cost): **+0.237%**; average hold 34.6 days; 60% of trades positive before costs.
+- Fixed round-trip cost of two legs: **0.52%** at the 0.12% taker fee plus 1bp slippage a side; **0.24%** at a 5bp maker fee.
+- Mean net for funding per leg per day of 0.00% / 0.01% / 0.02%: taker **-0.28% / -0.98% / -1.67%**; maker **-0.00% / -0.70% / -1.39%**.
+
+**So no funding model, however generous, makes the taker version positive** (it is -0.28% with zero funding), and only a zero-funding, all-maker version reaches break-even. A new registered try would be decided by the arithmetic above before it ran; it was therefore **not registered** (running it would spend a try, and raise the deflation floor for everything after it, on a result already known). Real funding rates and real maker fills would change this only if a recorder measured them; that is the recorder's job, not a backtest's.
