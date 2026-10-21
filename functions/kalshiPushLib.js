@@ -5,7 +5,7 @@
 // Nothing in this file is imported by the trading code, and a failure here can never touch an order (see the triggers in index.js, which catch everything).
 const crypto = require("crypto");
 
-const NAMES = { KXBTC15M: "Bitcoin", KXGOLD15M: "Gold", KXETH15M: "Ethereum", KXXRP15M: "XRP", KXDOGE15M: "Dogecoin" };
+const NAMES = { KXBTC15M: "Bitcoin", KXGOLD15M: "Gold", KXETH15M: "Ethereum", KXXRP15M: "XRP", KXDOGE15M: "Dogecoin", KXAUDUSD15M: "AUD/USD", KXUSDCAD15M: "USD/CAD", KXNATGAS15M: "Natural gas" };
 const nameOf = (o) => NAMES[o && o.series] || (o && o.ticker ? String(o.ticker).split("-")[0] : "a market");
 
 // The VAPID public key is derived from the private key (the one secret), so nothing else needs storing or pasting.

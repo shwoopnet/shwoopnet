@@ -665,9 +665,38 @@ gates.X3 = async () => {
   assert.ok(eth && Number(eth.count) <= 3, 'a 3 contract cap holds for Ethereum too: ' + (eth && eth.count));
 };
 gates.X4 = () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'Bitcoin, gold and Ethereum, then XRP and Dogecoin LAST (the later ones yield when a window is full); Solana is not on it');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'Bitcoin, gold and Ethereum, then XRP and Dogecoin, then the three probe markets LAST (the later ones yield when a window is full); Solana is not on it');
   assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the older single-order path is untouched');
   assert.ok(!('EXTRA_LIVE_SERIES' in live) && !('extraLiveCounts' in live), 'no separate Ethereum switch is left in the library');
+};
+// PR1 to PR3: the probe markets (AUD/USD, USD/CAD, natural gas; the owner's "live forward testing", Oct 21, 2026). L1's rule, ONE contract whatever the ladder says, last in line, inside the same limits.
+const AUD = 'KXAUDUSD15M-26OCT091500-00';
+gates.PR1 = async () => {
+  const base = { sizing: true, sizeCap: 12, sizeAddon: 8, sizeBase: 500, sizePool: 7.4, sizeSaved: 5, sizeNextReview: NOW + 86400000 };
+  const w = world({ session: base, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 2 }, { balance: '400.0000', exchange_index: 2 }] } });
+  await tick(w, { quotes: [quote({}, 'KXETH15M', ETH), quote({}, 'KXAUDUSD15M', AUD)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const eth = w.posts.find((p) => p.ticker === ETH), aud = w.posts.find((p) => p.ticker === AUD);
+  assert.ok(eth && Number(eth.count) > 1, 'Ethereum is sized by the ladder: ' + (eth && eth.count));
+  assert.ok(aud, 'the probe market trades');
+  assert.strictEqual(Number(aud.count), 1, 'but a probe market is always ONE contract, however high the ladder and the reinvested profit are: ' + aud.count);
+  const rec = w.docs.get('L1-' + AUD);
+  assert.ok(rec.strategy === 'L1' && rec.series === 'KXAUDUSD15M' && !rec.addon && !rec.addonCost, 'it is an ordinary L1 order with no profit money in it, so the loss stop, pool and exit read it like any other');
+};
+gates.PR2 = async () => {
+  assert.deepStrictEqual(live.L1_SERIES.slice(0, 5), ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'the five markets that earned their place come first');
+  assert.deepStrictEqual(live.L1_SERIES.slice(5), live.PROBE_SERIES, 'the probe markets come last, so they only take what a window has left');
+  // a window already at its combined limit takes no probe order
+  const w = world({ session: wsess({}), balance: rich });
+  w.docs.set('L1-earlier', { strategy: 'L1', ticker: BTCW.replace(/-00$/, '-99'), status: 'filled', maxCost: live.L1_WINDOW_CAP_FRACTION * 1000, addonCost: 0, ts: NOW - 60000 });
+  await tick(w, { quotes: [quote({}, 'KXAUDUSD15M', AUD.replace(/-00$/, '-98'))], sizingState: wstate, setSizingState: async () => {} });
+  assert.strictEqual(w.posts.length, 0, 'a full window takes no probe order (the first order in a window is the only one never cut to nothing)');
+};
+gates.PR3 = () => {
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(/live\.L1_SERIES\.filter\(\(x\) => !live\.LIVE_SERIES\.includes\(x\)\)/.test(idx), 'the probe markets\' quotes are read by the same loop as Ethereum, XRP and Dogecoin, and a failure there never stops the rest');
+  assert.ok(!/request\.data\.(ticker|price|count|side)/.test(idx), 'still no callable takes a ticker, price or size from the caller');
+  const push = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiPushLib.js'), 'utf8');
+  for (const s of live.PROBE_SERIES) assert.ok(push.includes(s), s + ' has a name in the alerts, not a raw ticker');
 };
 gates.X5 = async () => {
   // Solana stored on the session is never traded, even if its quotes arrive
