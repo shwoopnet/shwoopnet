@@ -3930,3 +3930,31 @@ Code: `scalper/pub1.py`, committed before any run. Result files: `data/pub1_resu
 **What the three results do and do not say.** They say a persistence or a distance-from-spot rule does not beat these ladders on this history, and that the cost of being wrong is large (7c a contract against about a 3c edge threshold). They do not say a published-number edge cannot exist: the one lead left is APP1 at 97 entries (Brier worse than the market's, so I do not expect it), and a model with a better input than yesterday's value (the futures curve for gas) was not tested.
 
 **Decision.** Nothing built, nothing changed live. **Count: about 4,631 tries on Kalshi.** APP1 reads NOT_ENOUGH_DATA, so by its own registration it is repeated only after the minimum is met, on days it has not seen.
+
+## Pre-registration: PERP1, a daily trend breakout on four liquid perpetual markets (written 2026-10-21 before any return was computed)
+
+**Why.** The owner likes leverage in Kalshi's perpetual futures (bigger gains on small moves, less capital tied up) and asked whether a perps strategy is worth pursuing (`docs/PERPS_THEORY.md`, `docs/PERPS_STRATEGY_GUIDE.md`). Kalshi's perps API has no historical data, but a slow daily-bar idea can be tested on years of public daily prices of the same underlyings with Kalshi's fees applied. This is the first and simplest idea in the guide. My odds that it passes are about 10 to 15%.
+
+**Disclosed before registering.** I downloaded the daily bars (Yahoo chart, `interval=1d`) and read only their counts and date ranges: gold `GC=F` 2010-01-04 on (4,226 bars), the S&P 500 `^GSPC` 2010-01-04 on (4,225), Bitcoin `BTC-USD` 2014-09-17 on (4,418), Ethereum `ETH-USD` 2017-11-09 on (3,269). No signal, trade or return has been computed.
+
+**Proxies, and why they can only mislead one way or the other.** `GC=F` is the continuous front-month gold future (roll gaps; Kalshi's `KXGOLDPERP` tracks spot gold); `^GSPC` is the index, which does not trade overnight or at weekends (Kalshi's `KXUS500PERP` tracks the MerQube US Large Cap Index around the clock); Bitcoin and Ethereum are 24/7 daily bars closing at 00:00 UTC. These are proxies, not the instruments.
+
+**Rule (fixed now; one run).** Daily bars per market; all signals use only data through the signal day's close; every fill is on a LATER bar.
+- **Entry.** Long when the day's close is above the highest close of the previous 20 days; short when it is below the lowest close of the previous 20 days. Filled at the NEXT day's open. One position per market, no adding, no re-entry until a fresh signal.
+- **Stop.** Fixed at entry open minus (long) or plus (short) 1.5 times ATR(14), where ATR is the simple mean of the last 14 true ranges ending on the signal day. Checked every day from the entry day: a long is stopped when the day's low is at or below the stop and exits at the stop, or at the open if the day opens beyond it; shorts mirror with the high.
+- **Exit.** At the close of any day after entry, a long whose close is below the lowest close of the previous 10 days (a short: above the highest of the previous 10) exits at the NEXT day's open. If the same close also gives a 20-day breakout the other way, that opposite position opens at the same next open.
+- **Costs.** Taker fee 0.12% a side (0.24% a round trip, from CFTC filing summaries, unconfirmed against Kalshi's fee page), slippage 0.01% a side, and a funding charge assumed AGAINST the position at 0.02% of notional per calendar day held (the real funding rate is unmeasured; this is a deliberately harsh placeholder). Net return per trade on notional r = side x (exit / entry - 1) - 0.0026 - 0.0002 x days held.
+- **Unit and statistic.** One trade. The statistic is mean net r per trade on notional, pooled over the four markets, with the standard error clustered by calendar month of entry (`calibration.cluster_mean_z`), because Bitcoin and Ethereum trend together.
+- **Leverage, for information only:** equity return = min(3, 0.02 / stop distance as a fraction of entry) x r, i.e. 2% risked per trade and leverage capped at 3x.
+
+**Pass bar, fixed (one try, so the single-try bar).** At least **100 trades** across at least **4 calendar years**; mean net r above zero; day-clustered (month-clustered) z of at least **2.1**; positive in both halves (trades split at the median entry date); positive with fees, slippage and funding all x1.2; and above the 95th percentile of **200 placebo draws** (the same trades' sides and holding lengths with each entry date moved uniformly at random within its market's history, no stops, same costs). Otherwise `FALSIFIED`; fewer than 100 trades or 4 years reads `NOT_ENOUGH_DATA`; a pass is `NOT_YET_FALSIFIED` and means permission to consider a one-contract-scale live probe on a small separate balance, never evidence of an edge. The minimum detectable edge is printed with the result.
+
+**Information only, not tries:** trades, mean r, win rate and stop-hit share per market; mean r per calendar year; buy-and-hold return of each market over its sample; equity-return mean at the stated leverage rule.
+
+**Counterparty story.** Slow money that acts late on a persistent move, and holders who sell into a trend too early. The blind spot: markets with no persistence, where the rule is stopped out repeatedly and pays 0.26% plus funding each time.
+
+**Numeric prediction, before the run.** Pooled mean net r per trade between **-0.4% and +0.5%**, z below 1.5, **`FALSIFIED`** (my probability about 85%). The cost placeholder of 0.26% plus 0.02% a day is large against a typical trade, and our own record on trend strategies (the withdrawn Alpaca figures) says the edge was thin before costs.
+
+**Kill criterion.** Any condition of the bar failing. A pass on the pooled set that holds in only one market is reported as exactly that.
+
+**Count.** One try: about **4,632** on Kalshi-related ideas. Single run: `python -m scalper.perp1 fetch` then `python -m scalper.perp1 run`; a second run is refused unless the result file is deleted on purpose (a crash fix only).
