@@ -646,7 +646,7 @@
   .kal-pos{ color:var(--gain); }
   .kal-warn{ color:#c58a00; }
   .kal-neg{ color:var(--loss); }
-  /* Calm view (the owner, Oct 21, 2026: shown from across a room the page "looks like a christmas tree"). Green and red stay for the few things that carry the verdict: the "Bot since" line, the end
+  /* Calm view (the owner, Oct 21, 2026: shown from across a room the page "looks like a christmas tree"). Green and red stay for the few things that carry the verdict: the "Today" line, the end
      label of the P/L line and the losing bars. Every other figure (the stat tiles and the By market and By price paid rows) is plain text; its sign still says which way it went. The market rows
      keep the name, the time left and the YES price; the spread, round trip and size lines and the depth bar are one tap away in Copy all stats, not on the face of the page. */
   .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
@@ -2263,7 +2263,7 @@
     var tile = function(k, v, cls){ return '<div class="kal-tile"><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
     var pct = function(x){ return Math.round(x * 100) + '%'; };
     var streak = st.streak.kind ? st.streak.n + ' ' + (st.streak.kind === 'win' ? (st.streak.n === 1 ? 'win' : 'wins') : (st.streak.n === 1 ? 'loss' : 'losses')) : 'none';
-    // Net is the "Bot since" line above on the account card, so it is not a tile here; per trade takes its place.
+    // Net is the all-time total (not on the account card any more) on the account card, so it is not a tile here; per trade takes its place.
     var main = tile('Settled trades', String(st.n)) + tile('Win rate', pct(st.winRate) + ' (' + st.wins + ' / ' + st.losses + ')') +
       tile('Profit factor', st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2)) +
       tile('Average win', st.avgWin === null ? 'none yet' : sg(st.avgWin), 'kal-pos') + tile('Average loss', st.avgLoss === null ? 'none yet' : sg(st.avgLoss), st.avgLoss === null ? '' : 'kal-neg') +
@@ -2761,20 +2761,19 @@
     var totEl = document.getElementById('kalBotTotals');
     if(!a){
       totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
-    } else if(!tot){
-      totEl.innerHTML = '<div class="kal-empty">No starting point yet. Set one in Tools.</div>';
+    } else if(!kalshiOrdersLoaded){
+      totEl.innerHTML = '<div class="kal-rows"><div><span class="kal-k">Today</span><b>loading...</b></div></div>';
     } else {
-      // The account change also holds deposits, withdrawals and manual trades, so it is not the bot's result (that is on the session card).
-      // Only the BOT's settled trades since the starting line. Deposits, withdrawals and your own trades are left out. The owner dropped the line that
-      // used to show the rest of the balance move (Oct 8, 2026), so only the bot's own result is shown.
-      if(!kalshiOrdersLoaded){ totEl.innerHTML = '<div class="kal-rows"><div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b>loading...</b></div></div>'; }
-      else {
+      // Today's result (the owner, Oct 21, 2026: this line used to be "Bot since <date>", the all-time total). Only the BOT's settled trades whose
+      // order time falls on today's US Central date, the same clock as the rest of the page, so it starts again at midnight CT. Deposits,
+      // withdrawals, your own trades and orders you closed by hand are left out, as before. The all-time total still lives on the Data page.
       var botOrders = kalshiResolveOrders(kalshiLiveOrders, a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
-      var botNet = kalshiPerfStats(botOrders, tot.since).total;
+      var todayKey = kalDayKey(Date.now());
+      var todayOrders = botOrders.filter(function(o){ return Number.isFinite(o.ts) && kalDayKey(o.ts) === todayKey; });
+      var botNet = kalshiPerfStats(todayOrders, 0).total;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div><span class="kal-k">Bot since ' + escapeHtml(kalDate(tot.since)) + '</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div></div>';
-      }
+        '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div></div>';
     }
 
     renderKalshiPositions();
