@@ -277,7 +277,7 @@ gates.Y11b = () => {
   const rows = (t) => t.split('\n');
   assert.deepStrictEqual(rows(csv([])), [rows(csv([]))[0]], 'a header even with no orders');
   const out = rows(csv([
-    { ts: 3000, ticker: 'B', series: 'KXGOLD15M', side: 'yes', price: 0.93, count: 4, fillCount: '4.00', maxCost: 3.9, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24, strategy: 'L1' },
+    { ts: 3000, ticker: 'B', series: 'KXGOLD15M', side: 'yes', price: 0.93, count: 4, fillCount: '4.00', maxCost: 3.9, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24, strategy: 'L1', seen: { bid: 0.91, ask: 0.94 } },
     { ts: 1000, ticker: 'A', series: 'KXBTC15M', side: 'no', price: 0.9, count: 1, fillCount: '1.00', maxCost: 0.92, status: 'filled', strategy: 'L1' },
     { ts: 2000, ticker: 'C', series: 'KXETH15M', side: 'yes', status: 'no fill', fillCount: '0.00', strategy: 'L1' },
   ]));
@@ -287,6 +287,7 @@ gates.Y11b = () => {
   assert.deepStrictEqual([1, 2, 3].map((i) => col(out[i], 'ticker')), ['A', 'C', 'B'], 'oldest first');
   assert.strictEqual(col(out[3], 'pnl'), '0.24', 'a settled order carries the bot\'s saved P/L');
   assert.strictEqual(col(out[1], 'pnl'), '', 'an open order has none');
+  assert.deepStrictEqual([col(out[3], 'seenBid'), col(out[3], 'seenAsk'), col(out[1], 'seenAsk')], ['0.91', '0.94', ''], 'the quote the bot saw is exported (the spread forward test reads it); an order with none leaves it empty');
   assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiLiveOrders\)/.test(html), 'a button, built from the bot\'s own orders');
 };
 
