@@ -96,7 +96,7 @@ def cut_points(rows: list[dict]) -> list[list[float]]:
     """Per feature, up to N_CUTS decile cut points of the whole sample's feature values (labels never enter)."""
     out = []
     ok = [r["feats"] for r in rows if r["feats"] is not None]
-    for f in range(len(FEATURES)):
+    for f in range(len(ok[0])):
         vals = sorted(x[f] for x in ok)
         pts = sorted({vals[min(len(vals) - 1, (len(vals) * (j + 1)) // (N_CUTS + 1))] for j in range(N_CUTS)})
         # a cut that equals the largest value would send every row left; drop it
@@ -112,7 +112,7 @@ def fit_tree(X: list[list[float]], y: list[float], cuts: list[list[float]], dept
     """Greedy regression tree. Returns a leaf mean (float) or (feature, cut index, left, right). Split chosen by the largest
     sum of squared error removed; a split leaving a side under min_leaf rows is not allowed."""
     idx = list(range(len(y)))
-    bins = [[_bin(x[f], cuts[f]) for f in range(len(FEATURES))] for x in X]
+    bins = [[_bin(x[f], cuts[f]) for f in range(len(cuts))] for x in X]
 
     def grow(ix: list[int], d: int):
         n = len(ix)
@@ -121,7 +121,7 @@ def fit_tree(X: list[list[float]], y: list[float], cuts: list[list[float]], dept
         if d == 0 or n < 2 * min_leaf:
             return mean
         best = None
-        for f in range(len(FEATURES)):
+        for f in range(len(cuts)):
             nb = len(cuts[f]) + 1
             cnt = [0] * nb
             sm = [0.0] * nb
@@ -155,12 +155,13 @@ def predict(tree, x: list[float], cuts: list[list[float]]) -> float:
     return tree
 
 
-def describe(tree, cuts, pad: str = "") -> list[str]:
+def describe(tree, cuts, pad: str = "", names: list[str] | None = None) -> list[str]:
+    names = names or FEATURES
     if not isinstance(tree, tuple):
         return [f"{pad}leaf: training mean net {tree * 100:+.2f}c"]
     f, j, left, right = tree
-    return ([f"{pad}if {FEATURES[f]} <= {cuts[f][j]:.4f}:"] + describe(left, cuts, pad + "   ")
-            + [f"{pad}else:"] + describe(right, cuts, pad + "   "))
+    return ([f"{pad}if {names[f]} <= {cuts[f][j]:.4f}:"] + describe(left, cuts, pad + "   ", names)
+            + [f"{pad}else:"] + describe(right, cuts, pad + "   ", names))
 
 
 # ---------------------------------------------------------------- walk-forward
@@ -169,20 +170,23 @@ def day_order(rows: list[dict]) -> list[str]:
     return sorted({r["day"] for r in rows})
 
 
-def tree_walk(rows: list[dict], y: list[float], cuts, burn: int = BURN_DAYS) -> dict[int, bool]:
+def tree_walk(rows: list[dict], y: list[float], cuts, burn: int = BURN_DAYS, refit_every: int = 1,
+              depth: int = DEPTH, min_leaf: int = MIN_LEAF) -> dict[int, bool]:
     """{row index: skipped?} for every out-of-sample row with features. A day's decisions use rows of strictly earlier days only."""
     days = day_order(rows)
     by_day = defaultdict(list)
     for i, r in enumerate(rows):
         by_day[r["day"]].append(i)
     out: dict[int, bool] = {}
+    tree = None
     for di, day in enumerate(days):
         if di < burn:
             continue
-        past = [i for d in days[:di] for i in by_day[d] if rows[i]["feats"] is not None]
-        if len(past) < 2 * MIN_LEAF:
-            continue
-        tree = fit_tree([rows[i]["feats"] for i in past], [y[i] for i in past], cuts)
+        if tree is None or (di - burn) % refit_every == 0:
+            past = [i for d in days[:di] for i in by_day[d] if rows[i]["feats"] is not None]
+            if len(past) < 2 * min_leaf:
+                continue
+            tree = fit_tree([rows[i]["feats"] for i in past], [y[i] for i in past], cuts, depth, min_leaf)
         for i in by_day[day]:
             if rows[i]["feats"] is not None:
                 out[i] = predict(tree, rows[i]["feats"], cuts) < 0
