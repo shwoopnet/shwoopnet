@@ -4879,3 +4879,27 @@ The exit costs about 0.4c to 0.6c on average with 10 minute entries (an earlier 
 **Prediction, recorded first.** The training pick is **0.10 or 0.15** (lower lines sell less); the holdout improvement over 0.25 is **+0.1c to +0.6c** at the 2c slippage but **not** significant (z 1 to 2); `FALSIFIED` (about **80%**). Information: the training and holdout mean net, exit trigger share and the worst single exit for every line, and the same table for Bitcoin, XRP and natural gas alone.
 
 **Single read.** `python -m scalper.ex10 run`, once; a refused rerun unless `data/ex10_result.txt` is deleted on purpose. Nothing here goes live; the exit line is the owner's decision and the main session's code, and a change would need its own gate test (`test/kalshiExitGates.test.js`).
+
+## Result: EX10, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/ex10.py` and `tests/test_ex10.py` were committed before the run; result file `data/ex10_result.txt`. 10,779 entries at 10 minutes on the 18 series pool; training 6,236 (days before 2026-09-21), holdout 4,543. Sale at the bid minus 2c with the sale fee.
+
+| Line | Training net | Holdout net | Holdout exits | Worst single exit | Holdout net at 5c slip |
+|---|---|---|---|---|---|
+| 0.10 | **+0.22c** | **+0.34c** | 4.7% | -96.6c | +0.25c |
+| 0.15 | +0.14c | +0.18c | 5.7% | -96.6c | +0.05c |
+| 0.20 | +0.02c | +0.16c | 6.2% | -95.7c | +0.00c |
+| **0.25 (live)** | -0.17c | -0.10c | 7.0% | -95.7c | -0.28c |
+| 0.30 | -0.29c | -0.15c | 7.7% | -95.7c | -0.36c |
+| 0.35 | -0.28c | -0.28c | 8.6% | -95.7c | -0.52c |
+| *held to settlement (no exit)* | *+0.55c* | *+0.62c* | | | |
+
+**Chosen on training: 0.10. Holdout: 0.10 minus 0.25 = +0.44c a contract, day-clustered z +3.66** (bar 2.4); +0.53c at 5c slip; halves +0.45c / +0.43c. **Registered verdict: `NOT_YET_FALSIFIED`.** Prediction: the training pick 0.10 or 0.15 (right), improvement +0.1c to +0.6c (right, +0.44c) but not significant, `FALSIFIED` about 80% (**wrong**: z 3.66). Recorded as it was.
+
+**What it does not say, from the same run.**
+- **On the three live series the choice of line barely matters.** Holdout net by line (0.10 / 0.15 / 0.20 / 0.25 / 0.30 / 0.35): **Bitcoin** (n 236) +2.29 / +2.10 / +2.28 / +2.03 / +2.39 / +2.37c; **XRP** (n 330) +3.44 / +3.34 / +3.43 / +3.43 / +3.44 / +3.59c; **natural gas** (n 182) +4.21 / +4.21 / +4.34 / +4.38 / +4.38 / +3.60c. Differences are within about 0.4c and not in one direction (natural gas is best at 0.25 to 0.30). The pooled gain comes from the other 15 series, which the bot does not trade.
+- **Every exit costs money against holding in this data:** held to settlement +0.62c on the holdout, the 0.25 line -0.10c. The exit is a risk tool, not an earner; a lower line costs less and protects less.
+- **What a lower line gives up.** The worst single exit is about -96c on every line: when the price gaps through the line the sale prints near zero and the line did nothing. A line at 10c sells fewer dips that recover and also sells later in a real flip. The candle-close proxy cannot see the live 10 second watch, so how the live exit behaves at 10c is not measured here.
+- **Nothing recommended.** The exit line is the owner's rule (anti-degen) and the main session's code with its own gate test. At 10 minutes on Bitcoin, XRP and natural gas, 25c is as good as any line, so there is no case from this table to touch it.
+
+**Count: Kalshi tries about 4,660.** Nothing built, nothing changed live.
