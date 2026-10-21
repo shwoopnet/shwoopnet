@@ -4233,3 +4233,29 @@ Code `scalper/slow1.py` and `tests/test_slow1.py` were committed before the run;
 - **Not run, and why:** a looser z or a shorter sample would be a new try chosen after seeing this; so would other lookbacks or shorting. A reading of "NOT_YET_FALSIFIED in spirit" is not allowed: the verdict is `FALSIFIED`. If it is ever wanted forward, it needs a registered paper record from today (nothing here goes live), and the owner has said he prefers live over paper, so this one is put to him as a choice, not recommended.
 
 **Decision.** Nothing built, nothing changed live. **Family tries: 8 (unchanged by the reading).**
+
+## Pre-registration: SECT1, sector momentum on the nine original SPDR sector ETFs (written 2026-10-21 before any sector return was computed; the owner's instruction: find a strategy or an edge to deploy)
+
+**Why this and not another.** The mechanisms index above (about 180 registered ideas) shows Kalshi 15 minute, ladder, weather, sports, perpetual and single-stock ideas all crossed off. The one family with a published reason to work, a long clean history, near-zero cost and no overlap with anything tried is **cross-sectional momentum**: winners among industries keep beating losers for months because industry news diffuses slowly across investors (Moskowitz and Grinblatt, 1999; Hong, Torous and Valkanov, 2007). SLOW1 asked "should I be in the market"; this asks "which parts of it". **Prior that it passes: about 15%.** The published effect weakened after 2000, which is the reason to expect `FALSIFIED`, and the sample below is mostly after 2000.
+
+**Disclosed.** I know the ETF tickers and approximate start dates from memory (the nine Select Sector SPDRs launched in December 1998). I have not downloaded them. No return, rank or signal has been computed. SLOW1 (same universe type, different question) is the only related result, and it used different ETFs.
+
+**Universe and sample.** XLB (materials), XLE (energy), XLF (financials), XLI (industrials), XLK (technology), XLP (staples), XLU (utilities), XLV (health care), XLY (discretionary). Yahoo daily adjusted close (total return), common sample from the first full month after all nine exist (expected 1999) to 2026-10-21. XLRE and XLC are excluded (they start in 2015 and 2018 and would change the universe mid-sample).
+
+**Rule (fixed; one run, two cells).** At each month's last trading day close, rank the nine by their return from **L days ago to 21 trading days ago** (skipping the latest month, the standard 12-1 or 6-1 construction; L = 252 for cell C1, L = 126 for cell C2). **Hold the top 3 at equal weight for the next month**; the other six are not held (cash share is zero, the account is always fully invested). Entry and exit at the **next trading day's close** after the signal (a one day lag). The benchmark `b` is all nine at equal weight, rebalanced monthly.
+- **Costs.** 5 basis points per side on traded weight (6 in the x1.2 stress). No shorting, no leverage, no borrow.
+- **Statistic.** Monthly net return `s` of the held portfolio; alpha = intercept of `s` on `b`, annualised x12; z from Newey-West errors with 3 lags (the SLOW1 code, reused unchanged).
+
+**Tries and the bar.** Two cells. The family count was 8 (IDX1 4, PERP1 1, SLOW1 3); it is **10** after this registration. Sidak one-sided p = 0.05/10 = 0.005, **z bar = 2.6** for each cell.
+
+**Pass bar, per cell.** At least **120 months**; alpha net of costs above zero; Newey-West z at least **2.6**; alpha above zero in **both halves** (months split at the median) **and in the last 8 years (2019 on)**; alpha above zero at the x1.2 stress cost; alpha above the 95th percentile of **200 placebo draws** (3 sectors picked uniformly at random each month, same costs and one day lag). Anything else `FALSIFIED`; under 120 months `NOT_ENOUGH_DATA`; a pass is `NOT_YET_FALSIFIED`, permission to propose a probe and nothing more. **A near miss is a miss.**
+
+**Counterparty.** Investors who adjust industry exposure slowly (committees, quarterly rebalancers, benchmarked managers). The blind spot: when leadership rotates fast, the rule buys last year's winners just as they turn.
+
+**Prediction, recorded first.** Net alpha between **-1.5% and +2.5% a year**, z below 1.5 in both cells, both `FALSIFIED` (about **85%**). Turnover costs are small (5 bp on about half the portfolio a month, around 0.6% a year), so a miss would be about the signal, not the cost.
+
+**Dollar size (information).** Alpha in percent a year times $200 and $500.
+
+**Information only, not tries:** return, volatility, Sharpe and worst drawdown against the equal-weight benchmark; alpha by calendar year; how often each sector is held.
+
+**Single read.** `python -m scalper.sect1 fetch` then `python -m scalper.sect1 run`, once; a second run is refused unless the result file is deleted on purpose (a crash fix only). Nothing here goes live. **Family tries: 10.**
