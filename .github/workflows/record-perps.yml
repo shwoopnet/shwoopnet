@@ -1,0 +1,39 @@
+# Records Kalshi's PUBLIC perpetual-market data once an hour into a data branch (research only, Oct 21, 2026).
+# No secret is used or needed: the script makes one plain GET to a public endpoint, and the built-in GITHUB_TOKEN only pushes the CSV to the `perp-data` branch, never to main.
+# Why: FUND1 (README, kalshi-scalper) needs Kalshi's own funding premium history, which the Perps API does not provide, so it has to be recorded from now on.
+name: record-perps
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-perps
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Get the recorder script from main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin perp-data; then git checkout -q -b perp-data FETCH_HEAD; else git checkout -q --orphan perp-data; fi
+      - name: Record one sample
+        run: python3 code/scripts/record_perps.py data/perps
+      - name: Commit and push the data branch
+        run: |
+          cd data
+          git config user.name "perp-recorder"
+          git config user.email "perp-recorder@users.noreply.github.com"
+          git add perps
+          git commit -q -m "perps sample $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          git push -q origin perp-data
