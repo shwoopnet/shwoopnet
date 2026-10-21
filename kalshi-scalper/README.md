@@ -4574,3 +4574,14 @@ Code `scalper/lq1.py` and `tests/test_lq1.py` were committed before the run; res
 **Prediction, recorded first.** Alpha between **-1% and +2%** a year, z below 2.0, both `FALSIFIED` (about **85%**).
 
 **Single read.** `python -m scalper.vm34 run`, once. Nothing here goes live. **Family tries: 18.**
+
+## Results: V3 and V4, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/vm34.py` and `tests/test_vm34.py` were committed before the run; result file `data/vm34_result.txt`. Bar z 2.8.
+
+| Cell | Months | Net alpha a year | z | Halves | 2019 on | Placebo p95 | Return / Sharpe / worst drawdown (managed vs held) | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| V3, TLT | 289 | +0.50% | 0.92 | +0.48% / +0.63% | +0.76% | +0.71% | 2.7% / 0.32 / -33% vs 3.0% / 0.28 / -46% | **FALSIFIED** |
+| V4, GLD | 261 | +0.69% | 0.79 | +0.48% / +0.58% | +1.01% | +1.19% | 7.2% / 0.69 / -35% vs 10.6% / 0.67 / -43% | **FALSIFIED** |
+
+Prediction (alpha -1% to +2%, z under 2.0, both `FALSIFIED`, about 85%): right on every point. Managing the weight cut drawdowns by 9 to 13 points for a similar Sharpe, as in VM, and added nothing beyond that. Dollar size: $1 to $1.40 a year on $200. **Family tries: 18.** Nothing live.
