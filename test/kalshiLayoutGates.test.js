@@ -299,17 +299,21 @@ gates.Y11b = () => {
 gates.Y11c = () => {
   const m = /(function kalshiSetPresent\(on\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiSetPresent not found');
   const attrs = {}; const doc = { documentElement: { setAttribute: (k, v) => { attrs[k] = v; }, removeAttribute: (k) => { delete attrs[k]; } } };
-  const set = new Function('document', m[1] + '; return kalshiSetPresent;')(doc);
-  set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on' }, 'on sets the page attribute');
-  set(false); assert.deepStrictEqual(attrs, {}, 'off removes it, back to the full page');
+  const set = new Function('document', 'var kalshiMasked = false;' + m[1] + '; return { set: kalshiSetPresent, masked: function(){ return kalshiMasked; } };')(doc);
+  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on' }, 'on sets the page attribute'); assert.strictEqual(set.masked(), true, 'and masks the amounts');
+  set.set(false); assert.deepStrictEqual(attrs, {}, 'off removes it, back to the full page'); assert.strictEqual(set.masked(), false);
   assert.ok(!/localStorage[^;]*[Pp]resent|[Pp]resent[^;]*localStorage/.test(html) && !/syncUserSetting\('kalPresent/.test(html), 'it is never saved, in this browser or in the account');
-  assert.ok(/id="kalPresent"/.test(html) && /id="kalPresent"[\s\S]{0,200}id="kalLayoutUnlock"/.test(html), 'a checkbox in the Layout menu');
-  assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Hide balances<\/button>\s*<button class="kal-mini" id="kalDataBtn"[^>]*>Data<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header, outside the Tools menu so presentation view cannot hide it, with a Data button beside it');
+  assert.ok(/id="kalPresent"/.test(html) && /id="kalPresent"[\s\S]{0,260}id="kalLayoutUnlock"/.test(html), 'a checkbox in the Layout menu');
+  assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Mask amounts<\/button>\s*<button class="kal-mini" id="kalDataBtn"[^>]*>Data<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header, outside the Tools menu so presentation view cannot hide it, with a Data button beside it');
   assert.ok(!/html\[data-present="on"\] #kalPresentBtn/.test(html), 'and nothing hides the button that turns it off');
-  const css = /html\[data-present="on"\] \.kal-acct-total[^{]*\{ display:none; \}/.exec(html); assert.ok(css, 'the rule exists');
-  for (const hidden of ['.kal-acct-total', '#kalBotStatus .kal-rows', '[data-card="positions"]', '[data-card="trades"]', '.kal-perf-band', '#kalTools']) assert.ok(css[0].includes('html[data-present="on"] ' + hidden), hidden + ' is hidden');
-  for (const kept of ['performance', 'books', 'account']) assert.ok(!css[0].includes('data-card="' + kept + '"'), kept + ' stays');
-  assert.ok(/kal-perf-t' \+ \(title === 'By price paid' \? ' kal-perf-band' : ''\)/.test(html), 'only the By price paid table carries the hide class');
+  // Oct 21, 2026 (the owner: "instead of hide, turn sensitive information into ****"): nothing is hidden any more except the Tools menu, which holds the raw account read; amounts are masked.
+  const css = /html\[data-present="on"\][^{]*\{[^}]*\}/.exec(html); assert.ok(css && /^html\[data-present="on"\] #kalTools\{ display:none; \}$/.test(css[0]), 'only the Tools menu is hidden: ' + (css && css[0]));
+  assert.ok(!/data-present="on"\] \[data-card|data-present="on"\] \.kal-acct-total|kal-perf-band/.test(html.slice(html.indexOf('<style>'), html.indexOf('</style>')).replace(/\/\*[\s\S]*?\*\//g, '')), 'no card or figure is hidden by the page attribute');
+  // The amounts: one formatter masks every dollar figure and keeps the sign; the export formatter never masks.
+  const f = new Function('var kalshiMasked = false;' + [/(function kalshiMoneyRaw\([^)]*\)\{[\s\S]*?\n  \})\n/, /(function kalshiMoney\([^)]*\)\{[\s\S]*?\n  \})\n/].map((re) => re.exec(html)[1]).join('\n') + '; return { money: kalshiMoney, raw: kalshiMoneyRaw, mask: function(v){ kalshiMasked = v; } };')();
+  assert.strictEqual(f.money(-3.5), '-$3.50'); f.mask(true);
+  assert.deepStrictEqual([f.money(-3.5), f.money(12.34), f.raw(-3.5)], ['-****', '****', '-$3.50'], 'masked: the sign stays, the figure does not, and the raw formatter used by the exports is unchanged');
+  assert.ok(/kalshiStatsText\([^;]*kalshiMoneyRaw\);/.test(html), 'Copy all stats exports real figures');
 };
 
 // The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
@@ -428,7 +432,7 @@ gates.Y18 = () => {
   assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
   assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
   assert.ok(/tile\('Expectancy'/.test(html) && !/tile\('Per trade'/.test(html), 'the expectancy tile does not share the stake row name');
-  assert.ok(/\(0\.12 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 12% stop');
+  assert.ok(/kalshiMoney\(0\.12 \* base\)/.test(html), 'the status line quotes the 12% stop (through the money formatter, so presentation view masks it)');
 };
 
 // Y21: manual trades are hidden from the Recent trades card by default, with a small dropdown to bring them back.

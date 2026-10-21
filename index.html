@@ -702,8 +702,7 @@
   .kal-brow-r .kal-brow-when, .kal-brow-r .kal-depth{ display:none; }
   /* Presentation view (the owner, Oct 21, 2026: a clean page to show people). One switch in the Layout menu sets data-present on the page; it is never saved, so a reload is always the full page. It only HIDES:
      the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. Every number is still computed and the bot is untouched. */
-  html[data-present="on"] .kal-acct-total, html[data-present="on"] #kalBotStatus .kal-rows, html[data-present="on"] [data-card="positions"], html[data-present="on"] [data-card="trades"],
-  html[data-present="on"] .kal-perf-band, html[data-present="on"] #kalTools{ display:none; }
+  html[data-present="on"] #kalTools{ display:none; }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
   .kal-hit{ cursor:default; }
   .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
@@ -1228,7 +1227,7 @@
     <div class="trades-header kal-header-bare">
       <div class="trades-title">Bot</div>
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
-        <button class="kal-mini" id="kalPresentBtn" type="button" aria-pressed="false">Hide balances</button>
+        <button class="kal-mini" id="kalPresentBtn" type="button" aria-pressed="false">Mask amounts</button>
         <button class="kal-mini" id="kalDataBtn" type="button">Data</button>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
@@ -1260,7 +1259,7 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
-            <label><input type="checkbox" id="kalPresent"> Presentation view (hides the balance, open positions, recent trades and the price table; reset when the page reloads)</label>
+            <label><input type="checkbox" id="kalPresent"> Presentation view (shows **** instead of every dollar amount and hides the Tools menu; reset when the page reloads)</label>
             <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its up and down arrows)</label>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
@@ -1870,8 +1869,14 @@
     return Math.floor(secs / 60) + ':' + ('0' + (secs % 60)).slice(-2);
   }
 
-  function kalshiMoney(x){
+  // Presentation view shows **** where an amount of money would be (the owner, Oct 21, 2026: "instead of hide, turn sensitive information into ****"). The sign stays, so a loss still reads as a loss; the figure does not.
+  // Every dollar amount on the Bot and Data pages goes through kalshiMoney, so one flag masks them all, and the exports use kalshiMoneyRaw so a copied stat is always real.
+  var kalshiMasked = false;
+  function kalshiMoneyRaw(x){
     return (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
+  }
+  function kalshiMoney(x){
+    return kalshiMasked ? (x < 0 ? '-' : '') + '****' : kalshiMoneyRaw(x);
   }
 
   // 'KXBTC15M-26OCT072015-15' -> 'BTC 7:15 PM CT'. Kalshi writes the close time in Eastern time inside the ticker; shown here one hour earlier, in Central. Anything that does not
@@ -1947,6 +1952,11 @@
   // Presentation view on or off. Only sets (or removes) the page attribute the CSS reads; nothing is saved, so the next load is always the full page.
   function kalshiSetPresent(on){
     if(on){ document.documentElement.setAttribute('data-present', 'on'); } else { document.documentElement.removeAttribute('data-present'); }
+    kalshiMasked = !!on;
+    // Everything that already drew an amount draws it again, masked or not.
+    if(typeof renderKalshiBot === 'function'){ renderKalshiBot(); }
+    if(typeof renderKalshiCharts === 'function'){ renderKalshiCharts(); }
+    if(typeof renderDataCenter === 'function'){ renderDataCenter(); }
   }
 
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
@@ -2976,7 +2986,7 @@
   document.getElementById('kalStatsCopy').addEventListener('click', function(){
     var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = kalshiChartRange === 'session' && sess && Number.isFinite(sess.since) ? sess.since : 0;
     var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    var text = kalshiStatsText(kalshiPerfStats(orders, since), kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), kalshiMoney);
+    var text = kalshiStatsText(kalshiPerfStats(orders, since), kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), kalshiMoneyRaw);
     var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
     var manual = function(){ box.style.display = ''; box.value = text; box.focus(); box.select(); msg.textContent = 'Select all and copy the text below.'; };
     if(navigator.clipboard && navigator.clipboard.writeText){
@@ -3126,7 +3136,7 @@
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
-    var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.12 * base).toFixed(2) : '$10.00';
+    var stopAt = s && s.sizing === true && Number.isFinite(base) ? kalshiMoney(0.12 * base) : kalshiMoney(10);
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
     var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + '. ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
     var peakAt = Number.isFinite(s && s.peakNet) ? Math.max(0, s.peakNet) : 0;
@@ -3247,7 +3257,7 @@
     // Presentation view: a page attribute only, deliberately not stored anywhere (a reload is the full page again).
     var presentBox = document.getElementById('kalPresent');
     var presentBtn = document.getElementById('kalPresentBtn');
-    var syncPresent = function(on){ if(presentBox){ presentBox.checked = on; } if(presentBtn){ presentBtn.textContent = on ? 'Show balances' : 'Hide balances'; presentBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); } };
+    var syncPresent = function(on){ if(presentBox){ presentBox.checked = on; } if(presentBtn){ presentBtn.textContent = on ? 'Show amounts' : 'Mask amounts'; presentBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); } };
     if(presentBox){ presentBox.addEventListener('change', function(){ kalshiSetPresent(presentBox.checked); syncPresent(presentBox.checked); }); }
     // The same switch as a button in the page header (the Layout menu was too easy to miss): it only toggles the page attribute, and it is never hidden by it, so the page can always be brought back.
     if(presentBtn){ presentBtn.addEventListener('click', function(){ var on = document.documentElement.getAttribute('data-present') !== 'on'; kalshiSetPresent(on); syncPresent(on); }); }
