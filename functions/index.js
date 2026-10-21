@@ -229,6 +229,11 @@ function firestoreLiveStore(db) {
       for (const d of [...open.docs, ...recent.docs]) { const x = d.data(); if (x.status === "filled") byId.set(d.id, { id: d.id, ...x }); }
       return [...byId.values()];
     },
+    // Orders marked "hand" (a single-field query, so no index). A handful: the repair pass in settleOpenOrders asks each of them once more with the fixed check and marks it checked.
+    async handOrders() {
+      const s = await col.where("result", "==", "hand").get();
+      return s.docs.map((d) => ({ id: d.id, ...d.data() }));
+    },
     async hasUnresolved() {
       const s = await col.where("status", "in", ["sending", "unknown"]).limit(1).get();
       return !s.empty;

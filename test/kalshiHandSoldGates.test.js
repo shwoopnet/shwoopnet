@@ -31,7 +31,7 @@ function world({ result = 'no', fills = [], fillsStatus = 200, orders = {} } = {
   };
   return { docs, calls, store, fetchFn, settle: () => live.settleOpenOrders({ store, fetchFn, nowMs: NOW, keyId: 'k', pem }), risk: () => live.botRisk({ store, since: 0, fetchFn, nowMs: NOW, keyId: 'k', pem, orders: [...docs.entries()].map(([id, d]) => ({ id, ...d })) }) };
 }
-const order = (over) => Object.assign({ strategy: 'L1', ticker: 'KXBTC15M-T1', series: 'KXBTC15M', side: 'yes', count: 4, fillCount: '4', maxCost: 3.72, price: 0.93, status: 'filled', ts: TS, settled: false }, over || {});
+const order = (over) => Object.assign({ strategy: 'L1', orderId: 'entry-1', ticker: 'KXBTC15M-T1', series: 'KXBTC15M', side: 'yes', count: 4, fillCount: '4', maxCost: 3.72, price: 0.93, status: 'filled', ts: TS, settled: false }, over || {});
 const sell = (over) => Object.assign({ ticker: 'KXBTC15M-T1', side: 'yes', action: 'sell', count_fp: '4.00', order_id: 'hand-1', created_time: iso(TS + 120000) }, over || {});
 
 const gates = {};
@@ -72,12 +72,49 @@ gates.H4 = async () => {
   assert.ok(risk.openCost > 3.7 && risk.net < -3.7 + 1e-9 || risk.worst < -3.7, 'and counted against the loss stop meanwhile: ' + JSON.stringify(risk));
 };
 
-// The exit watch's own "skipped" (it found nothing held when the price touched its line) is the same fact, and needs no read.
+// The exit watch's "skipped" (it found nothing held when the price touched its line) is NOT proof of a hand sale: the market may simply have settled before it looked. Oct 21, 2026: it used to say hand, which hid
+// that loss from the loss stop. Now it is no evidence at all: with no sale in the account's fills the order settles as the loss it was.
 gates.H5 = async () => {
   const w = world({ result: 'no', orders: { a: order({ exitStatus: 'skipped' }) } });
   await w.settle();
-  assert.strictEqual(w.docs.get('a').result, 'hand');
-  assert.ok(!w.calls.some((u) => u.includes('/portfolio/fills')), 'no fills read');
+  assert.strictEqual(w.docs.get('a').result, 'no', 'settled by the market result, not called hand');
+  assert.ok(w.docs.get('a').settledPnl < 0, 'and the loss is on the record');
+};
+
+// Oct 21, 2026, the owner: "why are so many of these selling by hand? im not doing anything". Every NO order the bot bought was marked hand: Kalshi books a NO buy on the YES side (the order is sent as "ask"), so its own entry
+// fill can read as action "sell", side "no", and looked like a sale of the whole position. The consequence was a NO loss that the stats, the loss stop and the pool never saw. The entry order's own fill is never a sale.
+gates.H11 = async () => {
+  const entry = sell({ side: 'no', order_id: 'entry-1', created_time: iso(TS + 1000) });      // the buy, as Kalshi reports it
+  const w = world({ result: 'yes', fills: [entry], orders: { a: order({ side: 'no' }) } });         // the market went against a NO: a real loss
+  await w.settle();
+  const d = w.docs.get('a');
+  assert.deepStrictEqual([d.result, d.settled], ['yes', true], 'settled by the market, not called hand');
+  assert.ok(d.settledPnl < -3, 'and the whole loss is on the record: ' + d.settledPnl);
+  const r = await world({ result: 'yes', fills: [entry], orders: { a: order({ side: 'no' }) } }).risk();
+  assert.ok(r.net < -3, 'the loss stop sees it: ' + JSON.stringify(r));
+};
+
+// An order whose entry id was never saved cannot be told from a sale, so it is never called hand (a loss stays counted).
+gates.H12 = async () => {
+  const w = world({ result: 'no', fills: [sell()], orders: { a: order({ orderId: undefined }) } });
+  await w.settle();
+  assert.strictEqual(w.docs.get('a').result, 'no');
+};
+
+// The repair: orders the old check marked hand are asked again; the ones the owner did not sell are settled as what they were, a real hand sale stays hand and is not asked again.
+gates.H13 = async () => {
+  const wrong = order({ side: 'no', ticker: 'KXBTC15M-W', settled: true, result: 'hand', handSold: 4, ts: TS });
+  const real = order({ ticker: 'KXBTC15M-R', settled: true, result: 'hand', handSold: 4, orderId: 'entry-2' });
+  const docs = { w: wrong, r: real };
+  const w = world({ result: 'yes', orders: docs, fills: [sell({ side: 'no', order_id: 'entry-1', ticker: 'KXBTC15M-W' }), sell({ ticker: 'KXBTC15M-R', order_id: 'hand-9' })] });
+  w.store.handOrders = async () => [...w.docs.entries()].filter(([, d]) => d.result === 'hand').map(([id, d]) => ({ id, ...d }));
+  const out = await w.settle();
+  assert.strictEqual(out.repaired, 1);
+  assert.deepStrictEqual([w.docs.get('w').result, w.docs.get('w').handRepaired], ['yes', true], 'the wrongly flagged NO is settled by the market');
+  assert.ok(w.docs.get('w').settledPnl < -3, 'as the loss it was');
+  assert.deepStrictEqual([w.docs.get('r').result, w.docs.get('r').handChecked], ['hand', true], 'a real hand sale stays hand and is marked checked');
+  const again = await w.settle();
+  assert.strictEqual(again.repaired, 0);
 };
 
 // Other sells do not count: another market side, a sell from before the order, a buy.
@@ -113,7 +150,7 @@ gates.H9 = () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
   const body = /async function closedByHand[\s\S]*?\n}\n/.exec(src)[0];
   assert.ok(!/method: "POST"|method: "DELETE"/.test(body), 'it only reads');
-  assert.strictEqual((src.match(/await closedByHand\(/g) || []).length, 2, 'settleOpenOrders and botRisk each ask');
+  assert.strictEqual((src.match(/await closedByHand\(/g) || []).length, 3, 'settleOpenOrders (twice: the sweep and the repair) and botRisk each ask');
   const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(/settleOpenOrders\(\{[^}]*keyId: KALSHI_LIVE_KEY_ID\.value\(\)/.test(idx), 'the scheduled settle sweep passes the key');
   assert.ok(/botRisk\(\{[^}]*keyId, pem \}\)/.test(src), 'the loss stop passes the key');
