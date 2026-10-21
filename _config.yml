@@ -4,6 +4,8 @@ exclude:
   - kalshi-scalper
   - test
   - .claude
+  - .github
+  - scripts
   - CLAUDE.md
   - firestore.rules
   - firebase.json
