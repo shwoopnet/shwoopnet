@@ -649,10 +649,10 @@
   .kal-depth{ display:flex; height:4px; border-radius:2px; overflow:hidden; margin-top:6px; background:var(--border); }
   .kal-depth > i{ display:block; height:100%; background:var(--paper); opacity:.55; }
   .kal-brow-name{ font-weight:700; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
-  /* Phones: no charts. The price lines under each market and the whole Performance card (P/L line, orders donut, settled-trade bars) are hidden; the tiles, By market and By price paid stay. */
+  /* Phones: the price lines under each market are hidden. The Performance card (P/L line, orders ring, settled-trade bars) came back on phones on Oct 21, 2026 at the owner's request, now that the calm view made
+     it quiet enough to fit; it stacks to one column below. */
   @media (max-width:700px){
     .kal-spark{ display:none; }
-    .kal-card[data-card="performance"]{ display:none; }
     /* The price block drops under the name instead of sharing its row, so "spread, round trip" and the size line stay on one line each. */
     .kal-brow-main{ flex-direction:column; align-items:stretch; gap:6px; }
     .kal-brow-r{ text-align:left; }
