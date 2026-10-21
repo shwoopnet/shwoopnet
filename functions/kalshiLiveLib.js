@@ -305,7 +305,10 @@ const L1_SIZE_FRACTION = 0.02;
 // 5%, tightened from 10% on Oct 8, 2026 at the owner's choice: 10% of a $344 balance is $34, more than the worst modelled day at 5 contracts (about $20), so it
 // never tripped. 5% is about $17, a real circuit breaker that a bad day at 4 to 5 contracts can reach.
 // Raised from 5% to 6% on Oct 20, 2026 at the owner's choice, together with the per-window limit (4.5% to 5.5%), so that one window alone still cannot reach the stop. 6% is about $11.76 of a $196 base.
-const L1_SIZED_STOP_FRACTION = 0.06;
+// Raised again from 6% to 12% on Oct 20, 2026 (the owner's choice, the same night) after the stop ended the bot with $6.06 SETTLED down and a full window ($8.43) open: an open order is counted as lost, so with the
+// window limit at 5.5% a full open window left only about $0.80 to $2.30 of room for real losses, and one ordinary loss (about $3.70) was enough to stop it. At 12% a full window leaves about $10.60 of room. Open
+// orders are STILL counted as lost, so the true worst case is unchanged in kind: the stop holds the account to 12% of the base (about 10% of the balance) however the open window ends.
+const L1_SIZED_STOP_FRACTION = 0.12;
 function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
   // The 2% of cash rule bounds the part funded by the account (the review's cap). The add-on, bought with reinvested PROFIT (the pool), sits outside it: the owner's
@@ -643,7 +646,7 @@ async function runL1Tick(args) {
     if (PROBE_SERIES.includes(c.series)) { count = 1; addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
-    // from earlier ticks in the same window count too. The loss stop is 6% of the base and a window may use 5.5% (both since Oct 20, 2026), so one window alone cannot reach it.
+    // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.
     const wkey = windowKey(ticker);
     const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
       .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);

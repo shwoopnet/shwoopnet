@@ -289,8 +289,8 @@ gates.N24 = async () => {
   assert.strictEqual(w.posts[0].count, '4', 'sized by the stored cap, not by the 2% rule');
   assert.strictEqual(w.sess.sizeCap, 4);
   assert.strictEqual(w.sess.sizeBase, 900, 'the stop base is shown on the session');
-  const stopW = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] }, results: (() => { const r = {}; for (let i = 0; i < 11; i++) r['OLD-' + i] = 'no'; return r; })() });
-  seed(stopW, 11, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  const stopW = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] }, results: (() => { const r = {}; for (let i = 0; i < 14; i++) r['OLD-' + i] = 'no'; return r; })() });
+  seed(stopW, 14, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   const rec = [];
   await tick(stopW, { sizingState: { cap: 3, base: 300, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { rec.push(x); } });
   assert.deepStrictEqual([stopW.sess.endedBecause, rec[rec.length - 1].lastStopAt], ['loss stop', NOW], 'a loss stop is remembered so the cap cannot rise for a week');
@@ -427,7 +427,7 @@ gates.N18 = async () => {
   await tick(huge);
   assert.strictEqual(huge.posts[0].count, '3', 'never more than three');
   assert.deepStrictEqual([live.l1Count(NaN, 0.9), live.l1Count(50, 0.9), live.l1Count(40, 0.9), live.l1Count(213, 0.92), live.l1Count(276, 0.92), live.l1Count(1e9, 0.9)], [1, 1, 1, 3, 3, 3]);
-  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.06, 3], 'the share of cash per order, the scaled stop and the cap');
+  assert.deepStrictEqual([live.L1_SIZE_FRACTION, live.L1_SIZED_STOP_FRACTION, live.L1_SIZE_MAX], [0.02, 0.12, 3], 'the share of cash per order, the scaled stop and the cap');
   assert.strictEqual(live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 4).count, '4', 'the cap can rise, so four is a valid order');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, live.L1_ORDER_CEILING + 1), /refusing/, 'but never past the order ceiling');
   assert.throws(() => live.liveOrderBody('X', 0.9, 'yes', 'id', 2, 0), /refusing/);
@@ -440,13 +440,13 @@ gates.N19 = async () => {
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
   const loss = (n) => { const r = {}; for (let i = 0; i < n; i++) r[`OLD-${i}`] = 'no'; return r; };
   const bal = { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] };
-  // $300 start: the stop is $18 (6%). Three-contract trades cost 2.76 each: five lost ones are $13.80, seven are $19.32.
-  const ten = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(5) }); seed(ten, 5, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  // $300 start: the stop is $36 (12%, since Oct 20, 2026; it was 6% and ended the bot on one ordinary loss with a full window open). Three-contract trades cost 2.76 each: thirteen lost ones are $35.88, fourteen are $38.64.
+  const ten = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(13) }); seed(ten, 13, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   await tick(ten);
-  assert.strictEqual(ten.posts.length, 1, '$13.80 is inside an $18 stop');
-  const eleven = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(7) }); seed(eleven, 7, { count: 3, fillCount: '3.00', maxCost: 2.76 });
+  assert.strictEqual(ten.posts.length, 1, '$35.88 is inside a $36 stop');
+  const eleven = world({ session: { startCash: 300, sizing: true }, balance: bal, results: loss(14) }); seed(eleven, 14, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   await tick(eleven);
-  assert.deepStrictEqual([eleven.posts.length, eleven.sess.endedBecause], [0, 'loss stop'], '$19.32 reaches the $18 stop');
+  assert.deepStrictEqual([eleven.posts.length, eleven.sess.endedBecause], [0, 'loss stop'], '$38.64 reaches the $36 stop');
   // With scaling off the flat $10 stop applies to the same trades and ends it far sooner: 3 x 2.76 = $8.28 is fine, 4 x 2.76 = $11.04 is not.
   const flat3 = world({ session: { startCash: 300 }, balance: bal, results: loss(3) }); seed(flat3, 3, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   await tick(flat3);
@@ -482,7 +482,7 @@ gates.N21 = async () => {
   const none = world(); await tick(none, { quotes: [closing] });
   assert.strictEqual(none.sess.nextLookAt, null, 'no later market known: no time is invented');
   assert.ok(/'Next look ' \+ \(Number\.isFinite\(s\.nextLookAt\) && s\.nextLookAt > now/.test(html), 'the page shows it only while it is still in the future');
-  assert.ok(!/At most 80 orders/.test(html) && /its trades over the last 24 hours are down 6% of the balance \(otherwise \$10\)/.test(html), 'the rules text matches the live limits');
+  assert.ok(!/At most 80 orders/.test(html) && /its trades over the last 24 hours are down 12% of the balance \(otherwise \$10\)/.test(html), 'the rules text matches the live limits');
 };
 
 // The page quotes the limits in three places (the start confirmation, the rules text, the status line). They must say what the server does.
@@ -546,7 +546,7 @@ gates.N31 = () => {
 
 gates.N32 = async () => {
   // The stop protects the account, not profit already made: the part of a lost (or open) order that was bought with reinvested profit does not count toward it,
-  // so a big add-on cannot lock the bot out after one loss. $509 base: the stop is 6%, $30.54.
+  // so a big add-on cannot lock the bot out after one loss. $509 base: the stop is 12%, $61.08.
   const bal = { balance_breakdown: [{ balance: '509.0000', exchange_index: 2 }] };
   const sess = { startCash: 509, sizing: true };
   const sizing = { cap: 5, base: 509, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null, cum: 0, hwm: 0 };
@@ -556,17 +556,17 @@ gates.N32 = async () => {
     await tick(w, { sizingState: { ...sizing }, setSizingState: async () => {} });
     return w;
   };
-  // A $34 order of which $23.80 was profit: one loss is -$34, past the plain $30.54 stop, but only $10.20 of it was the account's.
-  const big = { count: 37, fillCount: '37.00', maxCost: 34, addon: 25, addonCost: 23.8 };
+  // A $70 order of which $59.50 was profit: one loss is -$70, past the plain $61.08 stop, but only $10.50 of it was the account's.
+  const big = { count: 75, fillCount: '75.00', maxCost: 70, addon: 64, addonCost: 59.5 };
   const lost = await run(big, 'no');
   assert.notStrictEqual(lost.sess.endedBecause, 'loss stop', 'one loss of a profit-funded order does not lock the bot out');
   const open = await run(big, null);
   assert.notStrictEqual(open.sess.endedBecause, 'loss stop', 'nor does the same order sitting open, counted as lost');
-  // The same $34 loss with NO add-on is all account money and does reach the stop.
-  const plain = await run({ count: 37, fillCount: '37.00', maxCost: 34, addon: 0, addonCost: 0 }, 'no');
-  assert.strictEqual(plain.sess.endedBecause, 'loss stop', 'a loss of account money past 6% still stops it');
-  // And a loss that eats the allowance PLUS more than 6% of the account stops it: $23.80 of profit and $31.10 of account money is a $54.90 loss.
-  const worse = await run({ count: 59, fillCount: '59.00', maxCost: 54.9, addon: 25, addonCost: 23.8 }, 'no');
+  // The same $70 loss with NO add-on is all account money and does reach the stop.
+  const plain = await run({ count: 75, fillCount: '75.00', maxCost: 70, addon: 0, addonCost: 0 }, 'no');
+  assert.strictEqual(plain.sess.endedBecause, 'loss stop', 'a loss of account money past 12% still stops it');
+  // And a loss that eats the allowance PLUS more than 12% of the account stops it: $59.50 of profit and $65 of account money is a $124.50 loss.
+  const worse = await run({ count: 130, fillCount: '130.00', maxCost: 124.5, addon: 64, addonCost: 59.5 }, 'no');
   assert.strictEqual(worse.sess.endedBecause, 'loss stop', 'the account share of the loss is still held to the stop');
   // Old orders that carry no add-on fields behave as before.
   const risk = await live.botRisk({ store: world({ results: { 'OLD-0': 'no' } }).store, since: 0, fetchFn: world({ results: { 'OLD-0': 'no' } }).fetchFn, nowMs: NOW });
@@ -755,8 +755,26 @@ gates.W2 = async () => {
 // UNDER the stop, so one window alone cannot reach it. Pinned so neither is moved without the other being decided.
 gates.W4 = () => {
   assert.strictEqual(live.L1_WINDOW_CAP_FRACTION, 0.055, 'the window limit the owner chose');
-  assert.strictEqual(live.L1_SIZED_STOP_FRACTION, 0.06, 'the loss stop the owner chose with it');
+  assert.strictEqual(live.L1_SIZED_STOP_FRACTION, 0.12, 'the loss stop the owner chose (6% on Oct 20, then 12% the same night)');
   assert.ok(live.L1_WINDOW_CAP_FRACTION < live.L1_SIZED_STOP_FRACTION, 'one window alone cannot reach the loss stop');
+};
+
+// W5: the night of Oct 20, 2026. $6.06 of SETTLED losses (two ordinary ones) with a full window ($8.43) still open ended the bot at a 6% stop, because an open order is counted as lost and the window limit (5.5%)
+// left almost no room under it. At 12% the same book does not stop, and a book that is really bad still does.
+gates.W5 = async () => {
+  const base = 163;
+  const mk = async (lost, open) => {
+    const w = world({ results: Object.fromEntries(lost.map((_, i) => ['OLD-' + i, 'no'])) });
+    lost.forEach((c, i) => { const [id, d] = botTrade(i, { count: 4, fillCount: '4.00', maxCost: c }); w.docs.set(id, d); });
+    open.forEach((c, i) => { const [id, d] = botTrade(lost.length + i, { count: 4, fillCount: '4.00', maxCost: c }); w.docs.set(id, d); });
+    return live.botRisk({ store: w.store, since: 0, fetchFn: w.fetchFn, nowMs: NOW });
+  };
+  const night = await mk([3.03, 3.03], [4.215, 4.215]);
+  assert.ok(Math.abs(night.net + 6.06) < 1e-9 && Math.abs(night.openCost - 8.43) < 1e-9, 'the book from that night: -$6.06 settled, $8.43 open');
+  assert.ok(night.worst <= -(0.06 * base + 0.92), 'at the old 6% (plus the $0.92 of reinvested profit) this book stopped the bot');
+  assert.ok(night.worst > -(live.L1_SIZED_STOP_FRACTION * base + 0.92), 'at the current stop it does not');
+  const bad = await mk([3.03, 3.03, 6.5], [4.215, 4.215]);
+  assert.ok(bad.worst <= -(live.L1_SIZED_STOP_FRACTION * base), 'a book that is really down ($12.56 settled with a full window open) still stops it');
 };
 
 gates.W3 = async () => {
