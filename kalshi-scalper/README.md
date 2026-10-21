@@ -4803,3 +4803,38 @@ Net per contract (loss rate) by minutes left; band 88c to 97c, fee 0.50c. Break-
 - **The same slope shows up in five different underlyings:** net is highest 9 to 12 minutes before the close and falls toward zero by 6, and **in every one of the five the 6 minute net is the lowest or near-lowest of the 7 to 12 minute range** (copper and WTI go from +3.5c to about zero). Crypto series move together, but copper, WTI and natural gas are independent markets, so this is not one coin's quirk. The calibration reading from GOLD1 fits: a distant favourite at 88c to 97c is underpriced by 2 to 3 points; near the close the price is efficient.
 - **At 10 to 12 minutes the margin over break-even is 2 to 4 points of loss rate; at 6 it is 0.5 to 1.5.** The per-row samples are small (137 to 849 entries) and neighbouring minutes use the same markets, so each row alone proves nothing; the consistency across rows and series is the information.
 - **What it does and does not mean.** It makes FWD7 (pooled 10 minute entry, read forward) the right test to wait for, and it is a reason to expect L1's thin live record to improve if the bot entered earlier. It does not change the 6 minute rule, which is the main session's code. The earlier 12 minute rows have so few entries that a favourite at 88c with 12 minutes left is rare, so volume is the cost of going earlier: entries per series fall from about 2,000 at 6 minutes to 150 to 280 at 12.
+
+## Information: the 25c exit with 10 minute entries (2026-10-21; same pool and exit logic as `exit25`, entry time moved to 10 minutes; not a hypothesis, not a try)
+
+Exit assumed at a minute close with the held side's bid at 25c or below, sold at that bid (slippage 0c and an optimistic-to-pessimistic 5c both shown); candle closes are a coarse proxy for the live 10 second watch, so triggers are a lower bound.
+
+| | Entries | Held to settlement | With 25c exit (0c / 5c slip) | Exit triggers |
+|---|---|---|---|---|
+| All 18 series, 10 min | 10,779 | +0.58c | -0.00c / -0.33c | 7.3% |
+| All 18 series, 6 min | 24,793 | +0.12c | +0.01c / -0.19c | 5.0% |
+| Natural gas, 10 min | 354 | +3.19c | **+2.78c** / +2.61c | 4.0% |
+| XRP, 10 min | 849 | +2.91c | **+2.46c** / +2.22c | 5.7% |
+| Natural gas, 6 min | 1,020 | +0.52c | +0.46c / +0.29c | 4.2% |
+| XRP, 6 min | 2,261 | +1.47c | +1.28c / +1.10c | 4.5% |
+
+The exit costs about 0.4c to 0.6c on average with 10 minute entries (an earlier entry has more time for a dip below 25c that later recovers, 7.3% of entries against 5.0%), so the 10 minute edge **with the exit the bot always runs is about +2.5c in natural gas and XRP, not +3c**. It stays above the 6 minute figures in both series.
+
+## Proposal (not applied) to the main session: a 10 minute entry for natural gas and XRP only, with a forward read FWD8 (drafted 2026-10-21; this session changes no live code)
+
+**What.** In `runL1Tick`, for `KXNATGAS15M` and `KXXRP15M` only, decide at **600 seconds** before the close instead of 360, same band (ask 88c to 97c), same 1 contract, same 25c exit watch and loss stop, same window-cap logic. Bitcoin, gold, Ethereum, Dogecoin and the currency probes stay at 360.
+- **One entry per market.** Those two series must NOT also enter at 6 minutes: a second buy in the same market doubles exposure and breaks the "strategies must not hold at the same time" rule in CLAUDE.md.
+- **Keep the record clean.** Orders from the change on should carry the decision time (they already carry `ts`) and a strategy tag distinct from the 6 minute L1 (for example `L1E`), so the page's per-market table and FWD5 do not mix two entry times in one column. FWD5's natural gas read ends at the change date.
+- **Gate tests,** in the style of `test/kalshiL1Gates.test.js`: (1) the 600 second rule applies to exactly these two series and no other; (2) a market never gets two L1 orders; (3) the exit watch still iterates the bot's own order documents only; (4) the window cap still counts the earlier-timed windows; (5) no callable takes a decision time from the caller.
+- **Size and cost.** 1 contract each (XRP is already capped there, natural gas is a probe): at most about 12 XRP and 5 natural gas orders a day. Worst loss per order about 90c.
+
+**Why these two and not the others.** They are the two live series where the 10 minute record in the history is best (natural gas +3.19c, XRP +2.91c held; +2.78c and +2.46c with the exit), they already trade at one contract, and both are probes or capped so a wrong call is cheap. Bitcoin's 10 minute figure (+2.53c) is a registered forward claim already (ML1); gold and Ethereum looked worse early.
+
+## Pre-registration: FWD8, the live 10 minute probes on natural gas and XRP (written 2026-10-21 before any such order exists; only meaningful if the main session and the owner decide to build the proposal above)
+
+**Population.** The bot's own orders in `KXNATGAS15M` and `KXXRP15M` decided at 600 seconds, from the first day the change is live; filled and settled as a win or loss (not `hand`, not `exit`; exits read separately). Net per contract is the saved P/L after the actual fee (the exit watch's sales are included in a separate line, since the bot always runs them). **Two tries (one per series); Kalshi count about 4,658.**
+
+**Read (per series, once)** at **60 filled settled orders in that series or 2026-12-01 after go-live**, whichever is first. `NOT_ENOUGH_DATA` below **40**. `NOT_YET_FALSIFIED` needs ALL of: mean net per contract above zero; observed loss rate below the break-even loss rate at the mean price paid and the actual fee; day-clustered z at least **2.2**; net above zero in both halves by time. Otherwise `FALSIFIED`.
+
+**Prediction, recorded first.** Natural gas mean net **+0.3c to +2.5c** (history +2.6c to +3.2c shrinks on new days), `NOT_YET_FALSIFIED` about **30%**; XRP **+0.3c to +2.2c**, about **35%**. At 5 to 12 orders a day, 60 orders takes 1 to 3 weeks for XRP and 3 to 6 weeks for natural gas.
+
+**Power.** At 60 one-contract orders a 5% loss rate is three losses: the bar can reject a series that loses clearly and will usually say "not shown" otherwise. **A pass is a reason to leave the probe running and consider Bitcoin and the next series at 10 minutes, never a reason to size up.**
