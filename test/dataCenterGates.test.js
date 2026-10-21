@@ -71,6 +71,21 @@ gates.D5 = () => {
   assert.ok(out.includes('-$1.50') && out.includes('var(--loss)') && out.includes('+$0.30'));
 };
 
+// Cost (Oct 21, 2026): Bot and Data share one set of live listeners. Moving between them must not stop and restart them (every restart re-reads the last 1,000 orders and the events, about 1,200 billed reads), and leaving both stops them.
+gates.D6 = () => {
+  const calls = [];
+  const page = () => ({ hidden: true, classList: { add() {}, remove() {}, toggle() {} }, querySelectorAll: () => [], offsetWidth: 1 });
+  const pages = { 'page-brief': page(), 'page-kalshi': page(), 'page-data': page(), 'page-settings': page() };
+  const f = new Function('document', 'window', 'history', 'calls', 'var currentUserIsAdmin = true; var kalshiWatching = false; var pageEnterTimer = null;\nfunction kalshiOnShow(){ calls.push("show"); } function kalshiOnHide(){ calls.push("hide"); } function renderDataCenter(){} function pageEnter(){}\n' + fnSource('showPage') + '; return showPage;')(
+    { getElementById: (id) => pages[id] || null, querySelectorAll: () => [], querySelector: () => null }, { scrollTo() {} }, { replaceState() {} }, calls);
+  f('kalshi'); f('data'); f('kalshi');
+  assert.deepStrictEqual(calls, ['show'], 'one start for any number of switches between Bot and Data');
+  f('brief');
+  assert.deepStrictEqual(calls, ['show', 'hide'], 'leaving both stops them');
+  f('data');
+  assert.deepStrictEqual(calls, ['show', 'hide', 'show'], 'and coming back starts them once');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
