@@ -435,3 +435,11 @@ Bitcoin, gold and Ethereum close in the same 15 minutes and move together, so `r
 ## L1 is the only strategy (Oct 12, 2026)
 
 The opening window paper recorder (`OW1`, `kalshiOpeningTick`, `kalshiOpeningLib.js`) and the page's Closing / Opening / Both switch were removed at the owner's request ("lets go back to only L1 for now"): the strategies must not overlap in mindset or position, and anything that holds to settlement overlaps L1 in both. Nothing profitable that is flat before L1 buys exists in the history: `OW2` (four variants) and `SS1` (216 cells, a train and validation search) are all `FALSIFIED` in `kalshi-scalper/README.md`, and every earlier scalp family fell to cost. `test/kalshiL1Gates.test.js` K10 and `test/kalshiLayoutGates.test.js` Y41 pin the absence. The research record (`kalshi-scalper/`, `docs/OPENING_STRATEGY.md`) stays as history; the old `kalshiOpeningOrders` and `kalshiOpeningControl` documents are untouched in Firestore and have no rule, so nothing can read them. A second strategy is a deliberate, reviewed change that must show how it cannot hold a position at the same time as L1 and why it is a different bet, not a different lane of the same one.
+
+## How to talk to the owner (standing rules, set 2026-10-20, updated 2026-10-21)
+
+- Keep replies short and plain. Lead with the result and the numbers. Assume the owner remembers nothing from earlier in the conversation, so say where a thing is and what it is.
+- **Offer choices with the pop-up menu (the AskUserQuestion tool), not a numbered list typed into the reply** (the owner, 2026-10-21: "from now on in this project"). Put the recommended option first and mark it "(Recommended)". A closing line of text is still fine for what happens next, but the choices themselves go in the pop-up.
+- Never use em dashes. Use they/them for anyone whose pronouns are not stated.
+- Never ask for, or accept, credentials, keys or sign-in codes in chat.
+- Merge a pull request only when the owner says so. Keep the current look: no new design system (see Conventions).
