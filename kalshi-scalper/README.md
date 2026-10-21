@@ -4660,3 +4660,19 @@ L1's band (ask 88c to 97c, held to settlement, fee 7% x p x (1-p)) at each minut
 **Prediction, recorded first.** Triggers fire in **25% to 45%** of entries; the hedged mean is **below** the unhedged by **1.0c to 3.0c** (two fees plus the favourite effect); hedged net **-4c to +0.5c**; `FALSIFIED` (about **97%**). The hedge reduces the standard deviation of net per entry by 30% to 50%, which is what it is for, and is reported but not part of the verdict.
 
 **Single read.** `python -m scalper.hs1 run`, once; a second run is refused unless the result file is deleted on purpose. Nothing here goes live. **Kalshi tries: about 4,651.**
+
+## Result: HS1, one run, read once (2026-10-21), and a registration mistake in it
+
+`python -m scalper.hs1 run` on 79,852 markets, 69 days: the 38c to 52c entry fired a 65c trigger in 38,800 markets (48.6%). **Registered verdict `FALSIFIED`** (hedged minus unhedged **-1.32c**, day-clustered z -9.74, bar +2.0). The hedge halved the spread of outcomes (standard deviation of net per entry 23.1c against 43.7c) and cost 1.32c a triggered entry. The held side won 74.6% of triggered entries; mean entry price 45.3c, mean hedge price 26.7c.
+
+**The absolute numbers in that run are an artefact and must not be quoted.** The printed "hedged net +26.2c (z +179)" and "unhedged +27.5c" come from my registered population rule, "markets whose trigger never fires have no observation". That keeps only entries that later rose to 65c and drops every entry that never did and was held to a loss, which selects the winners by the future. **It is lookahead, written into the rule by me**, and the pass bar (hedged net above zero) was meaningless for that reason. What survives is the **paired** comparison, hedged minus unhedged on the same triggered entries, which is fair because both arms use the same selection: **the hedge costs 1.32c a triggered entry**. I am leaving the registration and the run as written and fixing the test as a new try below.
+
+## Pre-registration: HS1b, the same hedge with every entry counted (written 2026-10-21 before it was run; corrects the HS1 population rule)
+
+**Rule.** Exactly HS1's entry (first minute with at least 5 minutes left, YES then NO ask in 38c to 52c, one contract) and trigger (a later close at least 1 minute before the close with the held side's bid at 65c or more, then half a contract of the other side bought at its ask), **but every entry is an observation**: an entry whose trigger never fires is held to settlement unhedged and counts at its actual net. Comparison arm: the same entries held to settlement with no hedge ever (**plain hold**). Costs, fees and stress as HS1.
+
+**Pass bar.** At least 300 entries on 10 days (all entries now, not only triggered ones); hedged-strategy mean net above zero with a day-clustered z of at least **2.7**; positive in both halves and at x1.2; and **hedged minus plain hold** above zero with a day-clustered z of at least **2.0**. Otherwise `FALSIFIED`. **One more Kalshi try: running count about 4,652.**
+
+**Prediction, recorded first.** Hedged strategy mean net **-3c to -0.5c** per entry (a fair-game entry less two fees, plus the favourite effect); hedged minus plain hold **between -1.5c and +0.5c**; `FALSIFIED` (about **95%**). The variance reduction is real and is not what is being tested.
+
+**Single read.** `python -m scalper.hs1 run-all`, once; a second run is refused unless `data/hs1b_result.txt` is deleted on purpose. Nothing here goes live.
