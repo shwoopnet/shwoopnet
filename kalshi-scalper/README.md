@@ -4480,3 +4480,39 @@ Code `scalper/vm2.py` and `tests/test_vm2.py` were committed before the run; res
 - **Not run, and why:** other thresholds, a leverage cap above 1x, other features or deeper trees would be new tries chosen after seeing this. A leveraged version (for example holding the 2x QLD fund) changes the risk the owner is taking and is a different, explicit decision. **Family tries: 15.**
 
 **Decision.** Nothing built, nothing changed live. The volatility-managed QQQ stays a risk tool (V2), not a way to beat the ETF.
+
+## Pre-registration: DL1, drop a Kalshi series when its recent L1 record turns negative (written 2026-10-21 before the rule was computed on any series; picked by the owner from the idea ledger)
+
+**Why.** The live bot is a portfolio of series (Bitcoin, gold, Ethereum, XRP, Dogecoin and probes). TREE2 learned series and hours from many features and failed its absolute bar; this asks the plain question a risk manager would ask: **if a series has just been losing, is stopping it better than carrying on?** That is a rule the owner could actually apply from the page's per-market table, with no model. One more Kalshi try; the z bar is raised from 2.6 to **2.7**. Running count: about **4,644**.
+
+**Disclosed.** TREE2's per-series printout (kept and skipped means) was seen; no rolling record, window or demotion decision has been computed. The prior is low because regression to the mean usually beats persistence in 69 days of data.
+
+**Population.** TREE2's pool: L1 entries (`lstrats.hold_rule` with `L1`) on every 15 minute series in `alts2`, `alts3`, `alts4`, `book`, `l1b`, `e3b` (about 24,800 entries, 18 series, 69 days), de-duplicated by ticker; costs and the x1.2 stress as in every L1 test.
+
+**Rule (fixed).** Entries in close-time order. For each entry, take that series' **last 200 entries whose market closed at least 360 seconds before this entry's decision time** (their results are known). **Active** if the mean net of those 200 is **above zero**; otherwise **skipped**. A series with fewer than **100** prior entries is not decided (counted, excluded). The first **14 UTC days** are history only. Prior results of skipped entries still count (the series is watched on paper), so a series can be promoted back.
+
+**Pass bar (TREE2's, with the z step).** Kept set at least **1,000 entries on 10 days**; mean net above zero with day-clustered z at least **2.7**; positive in both halves; positive at fees x1.2; kept minus skipped above zero with day-clustered z at least **2.0**; **gain** (kept mean minus all-decided mean) above the 95th percentile of **100 placebo draws** (every entry's net shuffled among entries of the same day, the rule re-run); and the kept set beats the all-decided mean in **every month** with at least 300 decided entries. Otherwise `FALSIFIED`.
+
+**Counterparty / mechanism.** Whoever sells us favourites in a series where quoting has recently become sharper (a new market maker, a regime change in the underlying). Such regimes last days, not minutes. The blind spot: pure noise, where 200 entries carry only about 13 losses and the rule chases luck.
+
+**Prediction, recorded first.** DL1 skips **20% to 50%** of decided entries; the kept mean lands between the all-decided mean and that mean plus **0.8c**; `FALSIFIED` (about **80%**), most likely on the gain-over-placebo condition.
+
+**Single read.** `python -m scalper.dl1 run`, once; a second run is refused unless the result file is deleted on purpose. A pass would only suggest a demotion rule to put to the owner; never a switch, no live code. **Kalshi tries: about 4,644.**
+
+## Pre-registration: LQ1, volatility-managed QLD (a real 2x QQQ fund) aimed at beating buy-and-hold QQQ (the owner's pick; written 2026-10-21 before any QLD return was computed)
+
+**Why.** VM2 showed that with a weight capped at 1x no rule or tree beats QQQ's return in a bull market. The one honest way to try is to **hold more than 1x when the market is calm**. QLD (ProShares Ultra QQQ) delivers twice QQQ's daily return and is available in an ordinary account. **Prior it passes the bar below: about 20%.** The risk is the one the rule is built for: a 2x fund in a crash.
+
+**Disclosed.** QLD launched 2006-06-21 (from memory; its first bar is not yet fetched). QQQ's 2010 to 2026 return (19.1% a year) and V2's weights are known from VM and VM2. No QLD return, volatility or weight has been computed.
+
+**Rule (fixed; one cell).** Monthly, signal at the last trading day close, entry and exit at the **next trading day's close**. Hold QLD at weight `w = min(1, 20% / QLD's 21 day realised volatility, annualised)`, the rest in cash (earning zero); no further leverage. Cost 5 basis points a side on traded weight (6 at stress); QLD's own fee (about 0.95% a year) is inside its adjusted close. Benchmark: QQQ bought and held over the same months. Window: the first full month after QLD's first 21 days of history to 2026-09 (about 230 months).
+
+**Statistic and bar.** Monthly excess = the cell's net return minus QQQ's; mean excess with a Newey-West z (3 lags). Family count was 15; with this cell it is **16**; selection after seeing V2 raises the bar to **z 2.8**. `NOT_YET_FALSIFIED` needs ALL of: at least 120 months; mean excess above zero; z at least **2.8**; excess above zero in both halves; excess above zero at the x1.2 cost; above the 95th percentile of **200 placebo draws** (the same monthly weights shuffled across months, so leverage is kept and timing destroyed); and **the cell's worst drawdown no worse than QQQ's over the same months** (more return bought with more drawdown is not an improvement). Otherwise `FALSIFIED`.
+
+**Counterparty / mechanism.** Investors who hold a constant leverage ratio take the same risk in a turbulent month as in a quiet one; the compensation for risk is not proportional to its level, so scaling exposure up when risk is low and down when it is high raises return per unit of risk (Moreira and Muir, 2017, extended to a levered fund). The blind spot: a fast drop from a calm level (the weight is highest right before it), the 2x fund's daily reset decay in a choppy market, and a fund whose financing cost rises with interest rates.
+
+**Prediction, recorded first.** Mean excess between **-3% and +6%** a year; z below 2.0; worst drawdown similar to or worse than QQQ's; `FALSIFIED` (about **75%**).
+
+**Dollar size (information).** Excess times $200 and $500; annualised return, volatility, Sharpe and drawdown of QLD managed, QQQ, and QLD bought and held.
+
+**Single read.** `python -m scalper.lq1 fetch` then `python -m scalper.lq1 run`, once. Nothing goes live; holding a 2x fund is a different risk the owner would have to choose. **Family tries: 16.**
