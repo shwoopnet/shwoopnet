@@ -4749,3 +4749,14 @@ Kelly fraction of bankroll per position from L1's loss rate on the 69 days (pric
 **Prediction, recorded first.** Pooled mean **-0.5c to +0.6c**, about **2,000 to 6,000** entries (far fewer than at 6 minutes), `FALSIFIED` (about **80%**), most likely on the series count (only Bitcoin and a few crypto series positive) or the paired comparison.
 
 **Single read.** `python -m scalper.el1 run`, once; a refused rerun unless `data/el1_result.txt` is deleted on purpose. Nothing goes live. **Kalshi tries: about 4,655.**
+
+## Result: EL1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/el1.py` and `tests/test_el1.py` were committed before the run; result file `data/el1_result.txt`. 79,852 markets, 18 series, 69 days; **10,779 entries at 10 minutes** (against 24,793 at 6 minutes).
+
+- **Pooled 10 minute net +0.58c, day-clustered z +1.71** (bar 2.8); halves +0.51c / +0.64c; at fees x1.2 +0.47c. **9 of 18 series positive** (bar 10). The 6 minute rule over the same markets: +0.12c.
+- **Verdict: `FALSIFIED`** on the z bar and the series count. Prediction: pooled mean -0.5c to +0.6c (right, +0.58c), 2,000 to 6,000 entries (wrong: 10,779), `FALSIFIED` (right).
+- **A flaw in my own paired test, disclosed.** The registered comparison "10 minute minus 6 minute on markets entered at both times" came out **+2.21c (z +18.6)**, which would pass its bar. It is not evidence: restricting to markets that are a favourite at BOTH times conditions on the future (the price rose between the two times, so the earlier entry is cheaper by construction). It is the same mistake as HS1's population rule. It does not change the verdict (the main bar fails) and I did not use it.
+- **What the per-series table does show (information, not a test).** Entering at 10 minutes was better than at 6 minutes in 13 of 18 series, including the largest 10 minute nets: **natural gas +3.19c** (354 entries), **XRP +2.91c** (849), **Bitcoin +2.53c** (564), copper +1.88c, WTI +1.29c, HYPE +1.09c, Dogecoin +1.08c. It was worse for gold (-0.30c against +1.54c), Ethereum, silver, palladium and Dogecoin's 6 minute figure (+1.71c). Different entry sets, so the columns are not comparable cell by cell.
+- **Reading.** Earlier entry looks better on average and in a majority of series, but the edge per series is small, the sample thin (354 to 1,137 each), and the pooled z is 1.71. It is a **lead**, not a result. Bitcoin at 10 minutes is already a registered forward claim (ML1); XRP, natural gas and copper at 10 minutes are not, and each has a 6 minute record on the bot already (XRP and natural gas are live probes).
+- **Count: Kalshi tries about 4,655.** Nothing built, nothing changed live.
