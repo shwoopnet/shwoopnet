@@ -1020,12 +1020,6 @@
       }, function(err){ console.error('Kalshi live sync error:', err); if(errCb){ errCb(err); } });
     },
     // No exit or pool-rule setter exists on purpose (Oct 12, 2026): the exit is fixed at 25c and always sells, the pool always rebuilds after every win, both in the server code.
-    // The paper tracker's records (admin read only; written by the keyless scheduled function): what L1's rule would have bought on candidate markets, no money.
-    watchKalshiPaper: function(cb, errCb){
-      return onSnapshot(query(collection(db, 'kalshiPaperOrders'), orderBy('ts', 'desc'), limit(1500)), function(q){
-        cb(q.docs.map(function(d){ return d.data(); }));
-      }, function(err){ console.error('Kalshi paper sync error:', err); if(errCb){ errCb(err); } });
-    },
     // Phone alerts: the owner's own Cloud Functions (admin only). The key is the public half of the server's push key; a subscription is the phone's address for pushes, stored by the server.
     kalshiPushKey: function(){ return kalshiPushKeyFn({}).then(function(res){ return res.data; }); },
     kalshiPushSubscribe: function(subscription){ return kalshiPushSubscribeFn({ subscription: subscription }).then(function(res){ return res.data; }); },
@@ -1263,10 +1257,6 @@
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div class="kal-tr kal-tr-head"><span>Time</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
-      </div>
-      <div class="kal-card kal-card-flush" id="kalPaperCard">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Paper candidates (no money)</div></div>
-        <div id="kalPaper" style="padding:0 22px 18px"></div>
       </div>
       </div>
     </div>
@@ -2476,30 +2466,6 @@
   var kalshiLiveShow = { events: 12, fills: 5, page: 0, pageSize: 10 };   // the trades card pages ten at a time, newest first
   var kalshiBotUnsub = null;
   var kalshiLiveEventsUnsub = null;
-  // The paper tracker (PAPER1): what L1's rule WOULD have bought on three candidate markets, one contract each, from public quotes, no money. Its own collection, its own card, never in the live record's
-  // totals, stats or charts. The bar for ever promoting one is fixed in the README before the first entry: at least 300 entries on 10 days, read once on or after 2026-11-30.
-  var kalshiPaperOrders = [];
-  var kalshiPaperUnsub = null;
-  var KAL_PAPER = [['KXAUDUSD15M', 'AUD/USD 15m'], ['KXUSDCAD15M', 'USD/CAD 15m'], ['KXNATGAS15M', 'Natural gas 15m']];
-  function kalshiPaperStats(orders, series){
-    var mine = (orders || []).filter(function(o){ return o && o.candidate === series; });
-    var done = mine.filter(function(o){ return o.settled === true && Number.isFinite(Number(o.pnl)); });
-    var days = {}; done.forEach(function(o){ days[o.day] = true; });
-    var net = done.reduce(function(a, o){ return a + Number(o.pnl); }, 0);
-    var wins = done.filter(function(o){ return o.result === o.side; }).length;
-    return { entries: mine.length, settled: done.length, wins: wins, days: Object.keys(days).length, perContract: done.length ? net / done.length : null };
-  }
-  function renderKalshiPaper(){
-    var el = document.getElementById('kalPaper');
-    if(!el){ return; }
-    var out = '<div class="kal-rows">' + KAL_PAPER.map(function(c){
-      var st = kalshiPaperStats(kalshiPaperOrders, c[0]);
-      var net = st.perContract === null ? 'no result yet' : (st.perContract >= 0 ? '+' : '-') + (Math.abs(st.perContract) * 100).toFixed(2) + 'c a contract';
-      return '<div><span class="kal-k">' + escapeHtml(c[1]) + '</span><b>' + st.settled + ' of 300 settled, ' + st.days + ' of 10 days, ' + (st.settled ? Math.round(st.wins / st.settled * 100) + '% won, ' : '') + net + '</b></div>';
-    }).join('') + '</div>';
-    out += '<div class="kal-note">Hypothetical: one contract each, bought by L1\'s rule at public quotes, nothing is ordered. Never part of the bot\'s record. It is read once, on or after Nov 30, with at least 300 settled entries on 10 days; below that it says nothing.</div>';
-    el.innerHTML = out;
-  }
   var kalshiAcctTimer = null;
   var kalshiAcctRefresh = function(){};
   var kalshiAcctFromServer = function(){};
@@ -2974,7 +2940,6 @@
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; renderKalshiBot(); }, function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; renderKalshiBot(); }); }
     if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } renderKalshiL1(); renderKalshiBot(); }); }
-    if(api.watchKalshiPaper){ kalshiPaperUnsub = api.watchKalshiPaper(function(o){ kalshiPaperOrders = o; renderKalshiPaper(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
@@ -2986,7 +2951,6 @@
     if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
-    if(kalshiPaperUnsub){ kalshiPaperUnsub(); kalshiPaperUnsub = null; }
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
