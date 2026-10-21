@@ -4420,3 +4420,39 @@ Code `scalper/vm.py` and `tests/test_vm.py` were committed before the run; resul
 - **L1m is nothing:** the minimum-volatility ETF earned +3.2% a year of alpha in the first half and -1.7% in the second, the usual decay.
 - **Dollar size.** V2's +3.45% a year is about **$6.90 on $200 and $17.25 on $500**, on a position that earns less than buying QQQ.
 - **Not run:** other targets (8%, 12%), other windows or other assets, which would be new tries chosen after seeing V2. **Family tries: 13.**
+
+## Pre-registration: FWD5, do the live probe series (AUD/USD, USD/CAD, natural gas) earn money under L1? (idea N3; written 2026-10-21 before any live order on those series from 2026-10-22 was looked at)
+
+**Why.** The bot trades AUD/USD (`KXAUDUSD15M`), USD/CAD (`KXUSDCAD15M`) and natural gas (`KXNATGAS15M`) as 1-contract probes, and the only record on L1 for liquid currency pairs says they lose (TREE2's disclosed per-series printout: USDJPY about -4.3c, GBPUSD about -2.7c, EURUSD about -0.6c a contract). A probe that costs money for weeks is a cost, so the question is whether to keep paying for it. This is a stop-or-continue read, not a search. **Two tries (the currency group and natural gas); running count about 4,643.**
+
+**Disclosed.** AUD/USD and USD/CAD were not in that printout and I have not computed L1 on them or on natural gas live. The natural gas backtest is in E5 (+0.5c, not shown). The probe orders exported earlier were not split by series.
+
+**Rule (fixed).** Two groups: **FX** (AUD/USD and USD/CAD together) and **NG** (natural gas). Population: L1 orders the bot sent on or after **2026-10-22 00:00 UTC** that filled and settled as a win or loss (not `hand`, not `exit`). Net per contract = saved P/L over contracts filled, after the actual fee. The claim under test for each group is **"this group earns a positive net per contract under L1"**.
+- **Read once per group**, at **100 filled settled orders in that group or 2026-12-01**, whichever is first. `NOT_ENOUGH_DATA` below **60**. `NOT_YET_FALSIFIED` needs ALL of: mean net per contract above zero; observed loss rate below the break-even loss rate at the mean price paid and the actual fee; day-clustered z at least **2.2** (two tries); net above zero in both halves by time. Anything else `FALSIFIED`.
+- **Counterparty / mechanism.** A currency pair is the deepest, most watched market there is, so its 15 minute favourite is priced by competent quoters (no edge, fee only); natural gas is a thinner, lumpier market where a favourite may be underpriced.
+- **Prediction, recorded first.** FX: mean net **-3c to +0.5c**, `FALSIFIED` (about **75%**). NG: mean net **-1c to +2c**, `NOT_YET_FALSIFIED` about **25%**.
+- **Power.** At 100 one-contract orders a 5% loss rate is five losses; the bar can only reject a clearly losing group or confirm a clearly winning one, and I will say "not shown" otherwise. **A pass is a reason to keep the probe, not to size it up.**
+
+**Proposal to the main session, not applied.** If FX reads `FALSIFIED`, stop the two FX probes (they cost about the fee plus the edge on every contract). Nothing changes live from here.
+
+## Pre-registration: VM2, rules and a decision tree on top of volatility-managed QQQ, aimed at beating buy-and-hold QQQ (the owner's request after V2; written 2026-10-21 before any rule or tree was computed)
+
+**Why.** V2 earns less than QQQ (7.9% a year against 10.8%) for a third of the risk because it averages 57% invested. The owner asked whether added rules or a tree can lift that to outperform the ETF. **That is a search on a series where one pass was already seen (V2 itself), so the bar is raised and the prior is low: about 5% that either cell beats QQQ after costs.** Both cells use the same monthly framework as VM (signal at the last trading day close, fill at the next close, no leverage, no shorting, 5 bp a side on traded weight, 6 at stress, cash earns zero).
+
+**Disclosed.** V2's monthly weights and QQQ's returns are known from the VM run; no rule or tree below has been computed. The 2009 to 2020 rebounds, in which a volatility-managed weight is low at the bottom, are the reason these rules were chosen; their thresholds were fixed from that general knowledge and not by trying values.
+
+**Cells (two tries).**
+- **R1, a recovery rule.** Weight 1.0 (fully invested) when **QQQ is more than 15% below its running high AND its 21 day volatility is below 0.8 times its 63 day volatility** (turbulence is fading); otherwise V2's weight min(1, 10% over 21 day realised volatility).
+- **T1, a walk-forward tree that can only raise exposure.** Features from closes up to the signal day: 21 day annualised volatility, return over 21, 63 and 252 days, drawdown from the running high, the ratio of 21 day to 63 day volatility, and distance from the 200 day mean. Learner: TREE1's greedy regression tree on **next month's QQQ return**, depth 2, at least 40 training months a leaf, 9 decile thresholds from the whole sample's features. **Weight 1.0 if the leaf's training mean return is above the training mean of all months; otherwise V2's weight.** First 120 months training only; refit every 12 months on all earlier months.
+
+**Test window.** Both cells and both benchmarks are scored on the same out-of-sample months (from month 121, about 2009 on).
+
+**Tries and bar.** Family count was 13; with two cells it is **15**: Sidak p = 0.05/15, z about 2.7; raised to **2.8** because V2 was selected after seeing it. **Pass bar, per cell:** mean monthly (cell minus buy-and-hold QQQ) **above zero with a Newey-West z of at least 2.8**; mean (cell minus V2) above zero; excess over QQQ above zero in **both halves** of the test window and with the **x1.2 stress cost**; for T1 also above the 95th percentile of **100 placebo draws** (the same walk-forward with the next-month returns shuffled across months, features untouched). Anything else `FALSIFIED`. **A near miss is a miss.**
+
+**Mechanism and counterparty.** After a crash, a volatility-managed weight is low until volatility falls, so it misses the first leg of the recovery; buyers who wait for calm pay for that. The blind spot: a recovery that fails (2008, 2022), where re-entering early is exactly the loss.
+
+**Prediction, recorded first.** Neither cell beats QQQ after costs; R1's excess over QQQ lands between **-3% and +1%** a year, T1's between **-4% and +1%** with no pass (about **90%**). The tree has about 210 monthly rows to learn from and TREE1's lesson was that a learner needs far more.
+
+**Information only, not tries:** annualised return, volatility, Sharpe and worst drawdown of each cell against QQQ and V2 on the test window; how often each override fired.
+
+**Single read.** `python -m scalper.vm2 run`, once (data from the VM fetch). Nothing here goes live. **Family tries: 15.**
