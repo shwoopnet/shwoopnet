@@ -1189,6 +1189,8 @@
   <main class="page" id="page-kalshi" hidden>
     <div class="trades-header kal-header-bare">
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
+        <button class="kal-mini" id="kalPresentBtn" type="button" aria-pressed="false">Hide balances</button>
+        <button class="kal-mini" id="kalDataBtn" type="button">Data</button>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
                     <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button><button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
@@ -3196,7 +3198,13 @@
     // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens.
     // Presentation view: a page attribute only, deliberately not stored anywhere (a reload is the full page again).
     var presentBox = document.getElementById('kalPresent');
-    if(presentBox){ presentBox.addEventListener('change', function(){ kalshiSetPresent(presentBox.checked); }); }
+    var presentBtn = document.getElementById('kalPresentBtn');
+    var syncPresent = function(on){ if(presentBox){ presentBox.checked = on; } if(presentBtn){ presentBtn.textContent = on ? 'Show balances' : 'Hide balances'; presentBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); } };
+    if(presentBox){ presentBox.addEventListener('change', function(){ kalshiSetPresent(presentBox.checked); syncPresent(presentBox.checked); }); }
+    // The same switch as a button in the page header (the Layout menu was too easy to miss): it only toggles the page attribute, and it is never hidden by it, so the page can always be brought back.
+    if(presentBtn){ presentBtn.addEventListener('click', function(){ var on = document.documentElement.getAttribute('data-present') !== 'on'; kalshiSetPresent(on); syncPresent(on); }); }
+    var dataBtn = document.getElementById('kalDataBtn');
+    if(dataBtn){ dataBtn.addEventListener('click', function(){ showPage('data'); }); }
     var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
     function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
     function commitOrder(){ layout.order = currentOrder(); save(); }
