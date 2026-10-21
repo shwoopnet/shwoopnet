@@ -494,7 +494,11 @@ gates.Y34 = () => {
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
 gates.Y35 = () => {
   assert.ok(!/kalEthLive|kalEthMsg|kalshiExtraSeries|liveExtra/.test(html), 'the Ethereum size dropdown, its handler and its callable are gone from the page');
-  assert.ok(/return \/GOLD\/\.test\(s\) \? 'Gold' : \/ETH\/\.test\(s\) \? 'Ethereum' : \/XRP\/\.test\(s\) \? 'XRP' : \/DOGE\/\.test\(s\) \? 'Dogecoin' : 'Bitcoin';/.test(html), 'an Ethereum, XRP or Dogecoin trade is counted under its own name in the performance table, never under Bitcoin');
+  assert.ok(/return \/GOLD\/\.test\(s\) \? 'Gold' : \/ETH\/\.test\(s\) \? 'Ethereum' : \/XRP\/\.test\(s\) \? 'XRP' : \/DOGE\/\.test\(s\) \? 'Dogecoin' : \/AUDUSD\/\.test\(s\) \? 'AUD\/USD' : \/USDCAD\/\.test\(s\) \? 'USD\/CAD' : \/NATGAS\/\.test\(s\) \? 'Natural gas' : 'Bitcoin';/.test(html), 'an Ethereum, XRP, Dogecoin or probe-market trade is counted under its own name in the performance table, never under Bitcoin');
+  // Run the real function: a probe trade must never be labelled Bitcoin, because Bitcoin is the fallback for an unknown ticker.
+  const m = /(function kalshiMarketName\(o\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'missing kalshiMarketName');
+  const name = new Function(m[1] + '; return kalshiMarketName;')();
+  assert.deepStrictEqual(['KXAUDUSD15M-26OCT201615-T1', 'KXUSDCAD15M-X', 'KXNATGAS15M-X', 'KXBTC15M-X', 'KXETH15M-X'].map((t) => name({ ticker: t })), ['AUD/USD', 'USD/CAD', 'Natural gas', 'Bitcoin', 'Ethereum']);
 };
 
 // Y37: the exit watch read back from the bot's own order records, inside More stats. Consequences: slip is trigger bid minus fill, "better or worse than holding" is only

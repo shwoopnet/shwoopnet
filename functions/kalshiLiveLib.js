@@ -55,7 +55,11 @@ const LIVE_SERIES = ["KXBTC15M", "KXGOLD15M"];   // gold has real volume on prod
 // runs short (L1_WINDOW_CAP_FRACTION) the later series goes without, so Ethereum is last. LIVE_SERIES above is the older single-order path and is left alone.
 // XRP and Dogecoin were appended on 2026-10-20 at the owner's choice, on the strength of kalshi-scalper/README.md (E3, E3B: +1.4c and +1.5c, then +1.8c on 29 older days; forward read E3F due 2026-11-16).
 // They go LAST, so they only take a window's second slot when Bitcoin, gold and Ethereum left room.
-const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
+// The PROBE markets (2026-10-21, the owner's choice: "live forward testing", no more paper): L1's own rule on AUD/USD, USD/CAD and natural gas, which history could not settle (12 days of AUD/USD and
+// USD/CAD, a near miss on gas; kalshi-scalper/README.md PAPER1). ALWAYS one contract per order, whatever the size ladder says, so each costs about $0.90 at risk; they are the LAST in the list, so they only
+// take what Bitcoin, gold, Ethereum, XRP and Dogecoin left in a window's combined limit, and they count toward the same loss stop, pool and 25c exit as every other L1 order. Adding to this list is a code edit.
+const PROBE_SERIES = ["KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M"];
+const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", ...PROBE_SERIES];
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -634,7 +638,9 @@ async function runL1Tick(args) {
     const cashLeft = cash - Object.values(committed).reduce((a, x) => a + x, 0);
     let count = sizing ? l1Count(cashLeft, cost1, sizeCap, sizeAddon) : 1;
     // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
-    const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
+    let addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
+    // A probe market is one contract, always: no ladder step and no reinvested profit goes into a market that has not earned it.
+    if (PROBE_SERIES.includes(c.series)) { count = 1; addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
     // from earlier ticks in the same window count too. The loss stop is 6% of the base and a window may use 5.5% (both since Oct 20, 2026), so one window alone cannot reach it.
@@ -896,7 +902,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
 }
 
 module.exports = {
-  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
