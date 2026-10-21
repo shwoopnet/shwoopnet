@@ -4531,3 +4531,22 @@ Code `scalper/dl1.py` and `tests/test_dl1.py` were committed before the run; res
 - **Same ranking story as TREE2,** now from a rule a person could apply from the page's per-market table: kept minus skipped is positive and reliable, the absolute kept mean is small (+0.69c).
 
 **Decision.** Nothing built, nothing changed live. The rule passes as registered, but it does not apply to the five series the bot trades with size (the sample says leave them alone). **A use I would put to the owner as a choice:** apply it to the 1-contract probes (AUD/USD, USD/CAD, natural gas and any new series), where it asks "are the last 200 entries net negative?" and drops the probe if so; FWD5 already reads those probes forward and would test exactly that. **Kalshi tries: about 4,644.**
+
+## Results: LQ1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/lq1.py` and `tests/test_lq1.py` were committed before the run; result file `data/lq1_result.txt`. QLD from 2006-06-21; 242 months, 2006-07 to 2026-09.
+
+| | Return a year | Volatility | Sharpe | Worst drawdown |
+|---|---|---|---|---|
+| QLD managed (the cell) | **18.5%** | 20.9% | 0.92 | **-40.8%** |
+| QQQ bought and held | 17.0% | 19.9% | 0.89 | -50.4% |
+| QLD bought and held (information) | 26.3% | 40.5% | 0.79 | -81.3% |
+
+**Verdict: `FALSIFIED`.** Excess over QQQ **+1.49% a year, Newey-West z 0.74** (bar 2.8); halves +1.97% / +1.02%; +1.47% at the x1.2 cost. It failed the z bar and the placebo: shuffled weights earned a 95th percentile excess of **+5.24%**, because holding a levered fund in 2009 to 2026 pays on average whatever the timing. Mean weight 0.62.
+
+- **Prediction:** excess between -3% and +6%, z below 2.0, `FALSIFIED` (about 75%). All three right. The drawdown was better than I predicted (-40.8% against QQQ's -50.4%), recorded as it was.
+- **Reading.** The managed 2x fund earned about 1.5 points a year more than QQQ with a shallower drawdown, but the gap is statistically indistinguishable from zero over 20 years, and an untimed leveraged position did better than the managed one in this window (the placebo). Managing the leverage reduced risk, as intended, not return.
+- **Dollar size (information):** +1.49% a year is about **$3 on $200 and $7.50 on $500**.
+- **Not run, and why:** other targets, a cap above 1x on the fund, or a 3x fund would be new tries chosen after seeing this. **Family tries: 16.**
+
+**Decision.** Nothing built, nothing changed live. Across VM, VM2 and LQ1 the pattern is consistent: in this data, volatility management lowers risk and does not raise return beyond what its leverage buys.
