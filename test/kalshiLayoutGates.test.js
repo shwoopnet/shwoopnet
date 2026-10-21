@@ -122,8 +122,10 @@ gates.Y8 = () => {
   // The chart: nothing to draw below two points; a loss ends red; text from the page is escaped.
   assert.ok(/two settled trades/.test(f.kalshiLineSvg([{ cum: 1, pnl: 1, t: 1 }], esc, money)));
   const svg = f.kalshiLineSvg(ser, esc, money);
-  assert.ok(/<svg/.test(svg) && /stroke="var\(--loss\)"/.test(svg) && /-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is red and labelled with where it ended');
-  assert.ok(/stroke="var\(--gain\)"/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is green');
+  assert.ok(/<svg/.test(svg) && /fill="var\(--loss\)" font-size="14"[^>]*>-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is labelled in red with where it ended');
+  // Calm view (Oct 21, 2026): the line itself is one plain stroke and the per-trade points are invisible hover targets, so the only colour on the chart is the end label.
+  assert.ok(/stroke="var\(--paper\)"/.test(svg) && !/<circle[^>]*fill="var\(--(gain|loss)\)"/.test(svg) && /<circle[^>]*fill="transparent"><title>/.test(svg), 'a plain line, no coloured dots, the points still carry their hover text');
+  assert.ok(/fill="var\(--gain\)" font-size="14"[^>]*>\+\$0\.20/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is labelled in green');
   // The pie: no orders says so; slices add to the whole; zero slices are left out.
   assert.ok(/No orders yet/.test(f.kalshiDonutHtml({ won: 0, lost: 0, open: 0, noFill: 0, other: 0 }, esc)));
   const pie = f.kalshiDonutHtml({ won: 8, lost: 1, open: 1, noFill: 4, other: 0 }, esc);
@@ -163,7 +165,7 @@ gates.Y14 = () => {
   const series = f.kalshiPnlSeries(res, 0);
   assert.deepStrictEqual(series.map((p) => p.pnl), [0.16, -1.86], 'and the line');
   const bars = f.kalshiBarsSvg(series, esc, money);
-  assert.ok(/fill="var\(--gain\)"/.test(bars) && /fill="var\(--loss\)"/.test(bars) && /1 won, 1 lost/.test(bars), 'a green bar for the win and a red bar for the loss');
+  assert.ok(/fill="var\(--muted\)" fill-opacity="0\.55"/.test(bars) && /fill="var\(--loss\)"/.test(bars) && !/fill="var\(--gain\)"/.test(bars) && /1 won, 1 lost/.test(bars), 'a muted bar for the win and a red bar for the loss (calm view: a loss is the only coloured bar, so it is as visible as ever)');
   assert.ok(/after the first settled trade/.test(f.kalshiBarsSvg([], esc, money)));
   // Hover details: every bar has a transparent column over the whole plot height (a win is about two pixels tall, so the bar itself is a hopeless target), carrying its date and time, its
   // profit or loss and its market. The slow native <title> is gone, so the two tooltips can never show at once.
