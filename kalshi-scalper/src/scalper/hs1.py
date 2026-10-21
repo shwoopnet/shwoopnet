@@ -20,6 +20,7 @@ BAND, MIN_LEFT_S, TRIGGER_BID, MIN_LEFT_TRIGGER_S, HEDGE = (0.38, 0.52), 300, 0.
 MIN_N, MIN_DAYS, Z_BAR, DIFF_Z_BAR = 300, 10, 2.7, 2.0
 SOURCES = ["alts2", "alts3", "alts4", "book", "l1b", "e3b"]
 RESULT = DATA_DIR / "hs1_result.txt"
+RESULT_ALL = DATA_DIR / "hs1b_result.txt"
 
 
 def load() -> list[tuple]:
@@ -79,7 +80,72 @@ def simulate(candles: list[tuple], close_ts: int, res: str, mult: float = 1.0):
     return None
 
 
+def simulate_all(candles: list[tuple], close_ts: int, res: str, mult: float = 1.0):
+    """HS1b: every entry counts. An entry whose trigger never fires is held to settlement unhedged (hedged net = unhedged net)."""
+    if res not in ("yes", "no"):
+        return None
+    r = simulate(candles, close_ts, res, mult)
+    if r is not None:
+        r["triggered"] = True
+        return r
+    entry = None
+    for c in candles:
+        if close_ts - c[0] < MIN_LEFT_S:
+            break
+        if c[1] is None or c[2] is None or not valid_quote(c[1], c[2]):
+            continue
+        for side in ("yes", "no"):
+            ask = side_quote(c, side)[1]
+            if BAND[0] <= ask <= BAND[1]:
+                entry = (side, ask)
+                break
+        if entry:
+            break
+    if not entry:
+        return None
+    side, p0 = entry
+    won = (side == "yes") == (res == "yes")
+    unh = (1 - p0 - fee(p0, mult)) if won else -(p0 + fee(p0, mult))
+    return {"unh": unh, "hed": unh, "p0": p0, "q": None, "triggered": False}
+
+
+def main_all() -> None:
+    if RESULT_ALL.exists():
+        print(f"Refusing to run again: {RESULT_ALL} exists. Delete it on purpose only for a crash fix, and log that in the README.")
+        return
+    mk = load()
+    rows = []
+    for tk, s, c, close_ts, res in mk:
+        r, r2 = simulate_all(c, close_ts, res), simulate_all(c, close_ts, res, STRESS)
+        if r is None:
+            continue
+        r["close_ts"], r["hed_stress"] = close_ts, r2["hed"]
+        r["day"] = datetime.fromtimestamp(close_ts, timezone.utc).strftime("%Y-%m-%d")
+        rows.append(r)
+    rows.sort(key=lambda r: r["close_ts"])
+    n, days = len(rows), len({r["day"] for r in rows})
+    mh, _, zh = cluster_mean_z([(r["day"], r["hed"]) for r in rows])
+    mu, _, zu = cluster_mean_z([(r["day"], r["unh"]) for r in rows])
+    md, _, zd = cluster_mean_z([(r["day"], r["hed"] - r["unh"]) for r in rows])
+    h = n // 2
+    h1, h2 = st.mean(r["hed"] for r in rows[:h]), st.mean(r["hed"] for r in rows[h:])
+    stress = st.mean(r["hed_stress"] for r in rows)
+    trig = [r for r in rows if r["triggered"]]
+    ok = n >= MIN_N and days >= MIN_DAYS and mh > 0 and zh >= Z_BAR and h1 > 0 and h2 > 0 and stress > 0 and md > 0 and zd >= DIFF_Z_BAR
+    c = lambda x: f"{x * 100:+.2f}c"
+    out = "\n".join([
+        f"HS1b on {n} entries ({len(trig)} triggered, {100 * len(trig) / n:.1f}%) over {days} days",
+        f"   hedged strategy net {c(mh)} z {zh:+.2f} halves {c(h1)} / {c(h2)} fees x{STRESS} {c(stress)}",
+        f"   plain hold net {c(mu)} z {zu:+.2f}; hedged minus plain hold {c(md)} (day clustered z {zd:+.2f})",
+        f"   standard deviation of net per entry: hedged {st.pstdev(r['hed'] for r in rows) * 100:.1f}c, plain hold {st.pstdev(r['unh'] for r in rows) * 100:.1f}c",
+        f"   VERDICT: {'NOT_YET_FALSIFIED' if ok else 'FALSIFIED'}"])
+    RESULT_ALL.write_text(out + "\n")
+    print(out)
+
+
 def main(argv: list[str]) -> None:
+    if len(argv) >= 2 and argv[1] == "run-all":
+        return main_all()
     if len(argv) < 2 or argv[1] != "run":
         print(__doc__)
         return

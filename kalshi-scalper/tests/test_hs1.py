@@ -22,4 +22,10 @@ assert abs(r2["hed"] - (-(0.45 + fee(0.45)) + 0.5 * (1 - 0.34 - fee(0.34)))) < 1
 assert H.simulate([(close - 600, 0.44, 0.45), (close - 540, 0.50, 0.52)], close, "yes") is None
 assert H.simulate([(close - 600, 0.44, 0.45), (close - 30, 0.90, 0.91)], close, "yes") is None
 assert H.simulate([(close - 200, 0.44, 0.45), (close - 120, 0.90, 0.91)], close, "yes") is None, "entry minute must have 5 minutes left"
+# HS1b: an entry with no trigger still counts, held unhedged to settlement
+nt = [(close - 600, 0.44, 0.45), (close - 540, 0.50, 0.52)]
+a = H.simulate_all(nt, close, "no")
+assert a and a["triggered"] is False and abs(a["unh"] + 0.45 + fee(0.45)) < 1e-12 and a["hed"] == a["unh"], "non-triggered entries count"
+b = H.simulate_all(c, close, "yes")
+assert b["triggered"] is True and abs(b["hed"] - r["hed"]) < 1e-12
 print("test_hs1: ok")
