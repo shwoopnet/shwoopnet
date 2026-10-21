@@ -23,7 +23,9 @@ gates.P2 = () => {
   const top = new Set(tracked().map((t) => t.file.split('/')[0]));
   const published = [...top].filter((n) => !excluded.has(n) && !n.startsWith('.') && !n.startsWith('_'));
   assert.deepStrictEqual(published.sort(), ['apple-touch-icon.png', 'favicon-64.png', 'icon-192.png', 'icon-512.png', 'index.html', 'manifest.webmanifest', 'og-image.png', 'sw.js'], 'only the app, its home screen icon and the phone alerts files (the manifest and the service worker, Oct 20, 2026), the tab icon, the two install icons and the link preview image (brand mark A, Oct 20, 2026) are published; add anything else to the exclude list in _config.yml (published now: ' + published.join(', ') + ')');
-  for (const must of ['functions', 'kalshi-scalper', 'docs', 'CLAUDE.md', 'SECURITY_REVIEW.md', 'SERVER_REVIEW_2026-10-08.md', 'firestore.rules']) assert.ok(excluded.has(must), must + ' is not served');
+  for (const must of ['functions', 'kalshi-scalper', 'docs', 'CLAUDE.md', 'firestore.rules']) assert.ok(excluded.has(must), must + ' is not served');
+  // The review notes (security, server, mutation) used to sit in the repo root with a line each in the exclude list; since Oct 21, 2026 they live under docs/reviews/, which is excluded as a whole, so a new note cannot be published by forgetting a line.
+  for (const f of ['SECURITY_REVIEW.md', 'SERVER_REVIEW_2026-10-08.md', 'REVIEW_NOTES.md', 'MUTATION_NOTES.md']) assert.ok(tracked().some((t) => t.file === 'docs/reviews/' + f) && !tracked().some((t) => t.file === f), f + ' lives under docs/reviews, not the root');
 };
 
 // The home screen icon the page points to must be the file that is published, a real 180 by 180 PNG (iOS ignores SVG here and would draw a plain letter instead).
