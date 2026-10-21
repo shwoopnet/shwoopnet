@@ -4182,3 +4182,34 @@ Primary source: `kalshi.com/docs/kalshi-fee-schedule.pdf`. Fetching the PDF itse
 3. **Population widened:** the bot's own filled, settled L1 orders from 2026-10-22 on, plus any days a longer export covers that the 2026-10-15 to 2026-10-21 file does not (those days are read as a separate, older block and are never pooled with the forward block for the verdict).
 4. **Prediction for arm B:** thin-touch orders are **15% to 40%** of fills and lose at least 3 points more often; `NOT_YET_FALSIFIED` about **25%**. A pre-trade skip costs the entries it skips, so arm B must also show the skipped group's mean net below zero, not merely below the kept group.
 Nothing else changes. Live code is untouched; a pass of either arm is put to the owner as a choice with gate tests, never a switch.
+
+## Pre-registration: SLOW1, time-series trend on nine liquid ETFs, one family of three cells (written 2026-10-21 before any return was computed; the owner's "cross-asset screen of documented slow return sources")
+
+**What the request asked for and what is already done (so nothing is retried under a new name).**
+- *Overnight vs intraday on SPY/QQQ*: **already run as IDX1 (2026-10-14), FALSIFIED** (SPY holdout alpha -2.05% a year, QQQ +0.57%, both negative at 4 bp). A rerun on the SIP open and close would test the same effect; I have no Alpaca key (and never ask for one), so it is **not run here**. If the owner wants it, the main session can run it with the account's key as a separate, registered try.
+- *Turn of the month*: **already run as IDX1, FALSIFIED (not shown)**, +1.09% a year, z 0.72. Not rerun as a "control".
+- *Post-earnings drift*: **`NOT_RUNNABLE` here.** It needs point-in-time earnings dates and surprise figures; no free source I can fetch gives them, and I will not fabricate. `shwoop-server/research/MECHANISMS.md` is said in this README to hold it as FALSIFIED; that file is not in this checkout, so I cannot confirm it.
+- *Trend*: PERP1 (20 day breakout, gold/S&P/Bitcoin/Ethereum, 2010 on) passed as registered, but only through crypto's early run; **entries from 2022 on averaged 0.00%**. SLOW1 below is a different rule (monthly, long or cash, nine ETFs, no crypto), so crypto's bull market cannot carry it.
+- `src/scalper/deflate.py` named in the request **does not exist in this checkout**. I price the tries with a Sidak correction instead (below) and say so.
+
+**Disclosed.** I downloaded Yahoo daily bars (adjusted close, total return) and printed only counts and date ranges: SPY from 1993, QQQ 1999, EFA 2001, EEM 2003, TLT and IEF 2002, GLD 2004, DBC 2006, UUP 2007-03-01, all to 2026-10-21. No signal or return has been computed.
+
+**Universe and sample.** SPY, QQQ, EFA, EEM, TLT, IEF, GLD, DBC, UUP (US large and tech, developed and emerging stocks, long and mid Treasuries, gold, broad commodities, the dollar). Common sample starts 2007-03-01 (UUP's first bar) to 2026-10-21, about 19.5 years of months. Source: Yahoo chart API, `interval=1d`, adjusted close.
+
+**Rule (fixed; one run, three cells).** At each month's last trading day close, for each ETF: if its trailing total return over the last **L trading days** (L = 252, 126, 63 for cells S1, S2, S3) is above zero, hold it next month; otherwise hold cash (return zero; cash earning nothing is deliberately harsh). Weight 1/9 per ETF, so the portfolio is a share in cash when few ETFs trend. Entry and exit are at the **next trading day's close** after the signal (a one day lag, no signal-day fills). Rebalanced monthly; the benchmark `b` is the same nine ETFs, equal weight, rebalanced monthly, always invested.
+- **Costs.** 5 basis points per side on each ETF's traded weight (spread plus slippage; Alpaca charges no commission on ETFs), 6 in the stress case (x1.2). No shorting, no leverage, no funding.
+- **Statistic.** Monthly return `s` of the timed portfolio net of costs; alpha = intercept of `s` on `b`, annualised x12; z from Newey-West errors with 3 lags (monthly returns overlap in volatility). It asks whether timing earns more than its own market exposure explains.
+
+**Tries and the bar (priced for the family).** Cells: S1, S2, S3 = **3 tries**. The same family of calendar and trend ideas has already used IDX1 (4) and PERP1 (1), so the family count is **8**; a Sidak one-sided p of 0.05/8 = 0.0064 is **z = 2.5**. That is the bar for each cell. Kalshi running count unchanged (this is not a Kalshi idea; its own count is 8 family tries).
+
+**Pass bar, per cell.** At least **120 months**; alpha net of costs above zero; Newey-West z at least **2.5**; alpha above zero in **both halves** (months split at the median) **and in 2022 on**; alpha still above zero at the stress cost; alpha above the 95th percentile of **200 placebo draws** (for each ETF, the same number of invested months placed at random months, same costs). Anything else `FALSIFIED`; under 120 months `NOT_ENOUGH_DATA`; a pass is `NOT_YET_FALSIFIED`, which is permission to consider a forward probe, never evidence of an edge.
+
+**Counterparty.** Slow money that reacts late and unevenly to a persistent move (investors who rebalance quarterly, pensions, anyone anchored to last year's level), and the documented time-series momentum premium in futures and ETFs. The blind spot: since 2009 the cost of cash drag in a long bull market, and trend reversals that arrive faster than a monthly review.
+
+**Prediction, recorded first.** Net alpha between **-1% and +2% a year** per cell, z below 1.5, all three `FALSIFIED` (about **80%**). The likeliest "good" outcome is lower drawdown for the same average return, which this bar does not count as alpha; I report drawdown and Sharpe as information.
+
+**Dollar size (information).** For any cell with positive alpha: alpha in percent a year times a $200 account. At 2% a year that is $4; the report states it so a statistically real edge is not mistaken for a useful one.
+
+**Information only, not tries:** timed versus buy-and-hold return, volatility, Sharpe and worst drawdown; alpha by calendar year; months invested; per-ETF contribution.
+
+**Single read.** `python -m scalper.slow1 fetch` then `python -m scalper.slow1 run`, once; the result file blocks a rerun unless deleted on purpose (a crash fix only). Nothing here goes live. **Family tries: 8.**
