@@ -4367,3 +4367,39 @@ Code `scalper/fund1.py` and `tests/test_fund1.py` were committed before the run;
 **Decision.** `NOT_YET_FALSIFIED` is permission to look for a venue and a forward record, not a switch. The cheapest honest next step is to **record the funding rate of a venue the owner can actually use** (Kalshi's perpetual, a US-accessible perpetual, or a spot-futures basis) for a few weeks and run FUND1 again on that data. That needs the main session or the owner to name the venue; nothing built here. **Tries: 1 (carry family), plus 10 in the ETF family and about 4,641 on Kalshi.**
 
 **Owner's decision on FUND1 (2026-10-21): drop carry.** About $9 a year on $200 at the last 12 months' yield does not pay for the basis, margin and venue risk. No venue search, no premium split, no rerun. The result stands as written.
+
+## Idea ledger: new strategies by construction (written 2026-10-21 before any row below was computed; the owner's "explore creating new strategies" and "stop treating a failure as a reason to wait")
+
+**Method.** A strategy is created by naming who loses money and why, then checking the cheapest way to see it in data I have or can fetch; the shape of a chart is never the source. Each row has a prior (my probability it passes its bar) so the effort goes where the odds are. **Crossed off already and not listed:** direction on single stocks, overnight and calendar effects (IDX1), all Kalshi 15 minute filters tried so far, trend and sector momentum (SLOW1, SECT1), crypto carry (FUND1, dropped), perpetual trend and dip (PERP1 to 3), resting-limit entries, scalps, baskets and pairs (BK1), Polymarket disagreement, weather, sports favourites, long-dated favourites.
+
+| ID | Idea | Counterparty (who pays) | Data now | Prior | Status |
+|---|---|---|---|---|---|
+| N1 | **Volatility-managed index**: hold SPY (and QQQ) at a weight of target volatility over trailing realised volatility, capped at 1x, rest cash | Investors who hold a fixed weight in a market whose risk changes; Moreira and Muir (2017) | 1993/1999 to now, fetched | 15% | **Registered below (VM)** |
+| N2 | **Low-volatility equities**: hold a minimum-volatility ETF (USMV) against SPY | Investors who overpay for lottery-like high-beta stocks; leverage-constrained buyers | USMV from 2011-10 | 10% | **Registered below (VM)** |
+| N3 | **Where L1 works**: a series-level rule (skip FX majors, trade only thin or commodity series) fixed from mechanism, read forward on the live probes AUD/USD, USD/CAD and natural gas | Whoever sells a favourite in a thin quote | TREE2's 18 series; the live probes are forward data | 25% | Next to register; needs the owner's go to read live probes |
+| N4 | **Scheduled releases (L10)**: gold and Bitcoin favourites in the 15 minutes around CPI, jobs and FOMC | Quoters slow to widen | 69 days hold only about 6 to 8 such events: **underpowered** | 5% | Not runnable until about 30 events exist |
+| N5 | **Macro event markets against a public nowcast** (Kalshi CPI and jobs markets against the Cleveland Fed's inflation nowcast) | Traders who anchor on last print | Kalshi series exist; no history fetched | 15% | Needs a census first (counts only) |
+| N6 | **New series, first weeks**: favourites in a newly listed Kalshi series, when books are thinnest | Early quoters with no model | The probes are the sample | 20% | Merge with N3 |
+| N7 | **Crypto weekday and weekend** seasonality (BTC, ETH) | none named | long daily history | 5% | Skipped: no counterparty |
+| N8 | **Credit versus Treasuries** (HYG less IEF) as a risk-on signal for an equity switch | Slow credit repricing | 2007 to now | 8% | Skipped: close to SLOW1 |
+
+**Rule for the ledger.** Only rows with a prior of 15% or more and a runnable dataset are registered this session; the rest are recorded so they are not rediscovered as new. **Next:** N1 and N2 below (runnable now); N3 and N6 as one forward test for the owner's go; N5 starts with a census.
+
+## Pre-registration: VM, volatility-managed index and a minimum-volatility ETF (N1 and N2; written 2026-10-21 before any return was computed)
+
+**Disclosed.** Yahoo daily adjusted close counts and dates were printed earlier for SPY (1993-01-29), QQQ (1999-03-10); USMV's start (October 2011) is from memory and not yet fetched. SLOW1 already used SPY and QQQ as part of nine-ETF baskets; nothing computed there tests a volatility weight. No volatility, weight or return for these cells has been computed.
+
+**Cells (three tries).** All monthly, signal at the last trading day close, entry and exit at the **next trading day's close**, no shorting, no leverage, cash earns zero, cost 5 basis points a side on traded weight (6 at stress), benchmark the same asset bought and held.
+- **V1: SPY volatility-managed.** Weight = min(1, 10% / trailing 21 day realised volatility annualised, daily returns through the signal day), held to the next month's signal day + 1.
+- **V2: QQQ volatility-managed.** The same rule at the same 10% target.
+- **L1m: USMV against SPY.** Hold USMV (iShares MSCI USA Min Vol) buy and hold, monthly returns; alpha is the intercept of USMV's monthly return on SPY's, total return adjusted; no rule, so no timing cost beyond the entry (5 bp a side once, amortised over the sample).
+
+**Statistic and bar.** Alpha = intercept of the strategy's monthly return on the benchmark's, annualised x12, Newey-West z with 3 lags (the SLOW1 code, reused). Family count was 10 (IDX1 4, PERP1 1, SLOW1 3, SECT1 2); with these three it is **13**: Sidak one-sided p = 0.05/13 = 0.0038, **z bar = 2.7**. Pass bar per cell: at least **120 months**; net alpha above zero; z at least 2.7; alpha above zero in **both halves** and **from 2019 on**; alpha above zero at the x1.2 cost; for V1 and V2 also above the 95th percentile of **200 placebo draws** (the same monthly weights shuffled across months, so exposure is kept and timing is destroyed); L1m has no placebo (it has no timing rule). Anything else `FALSIFIED`; under 120 months `NOT_ENOUGH_DATA`. **A near miss is a miss.**
+
+**Counterparty / mechanism.** V1 and V2: investors hold a fixed weight while risk is high, and expected return does not rise with risk, so risk-adjusted return is better when the exposure is cut in turbulence. L1m: leverage-constrained investors bid up high-beta stocks and leave low-beta ones cheap. **The common blind spot:** a fast V-shaped recovery (the weight is low at the bottom) and, for L1m, a market that rewards beta for years.
+
+**Prediction, recorded first.** V1 and V2 alpha between **-1% and +2.5% a year**, z below 2.0; L1m alpha between **-1% and +2%**, z below 1.5; all three `FALSIFIED` (about **85%** each). The likeliest reading is the SLOW1 shape again: a lower drawdown at a similar Sharpe but a lower return.
+
+**Dollar size (information).** Alpha times $200 and $500; drawdown and Sharpe against buy and hold.
+
+**Single read.** `python -m scalper.vm fetch` then `python -m scalper.vm run`, once; a second run is refused unless the result file is deleted on purpose. Nothing here goes live. **Family tries: 13.**
