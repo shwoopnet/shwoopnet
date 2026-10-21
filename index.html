@@ -48,7 +48,7 @@
     --radius: 10px;
     --card-shadow: 0 1px 2px rgba(16,24,43,0.06), 0 8px 20px -12px rgba(16,24,43,0.22);
     --card-shadow-lift: 0 2px 4px rgba(16,24,43,0.08), 0 14px 28px -12px rgba(16,24,43,0.30);
-    --brand-depth: #2a3a5e; --ghost-line: rgba(16,24,43,0.07); --ghost-fill: rgba(16,24,43,0.025); --bubble-shadow: rgba(16,24,43,0.14); --spot: rgba(16,24,43,0.05);
+    --brand-depth: #2a3a5e; --ghost-line: rgba(16,24,43,0.07); --ghost-fill: rgba(16,24,43,0.025); --bubble-shadow: rgba(16,24,43,0.14);
   }
 
   /* Dark mode -- same Ledger identity, inverted surfaces. Set on
@@ -70,7 +70,7 @@
     --amber-contrast: #0B1220;
     --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
     --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
-    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035); --bubble-shadow: rgba(0,0,0,0.6); --spot: rgba(255,255,255,0.05);
+    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035); --bubble-shadow: rgba(0,0,0,0.6);
   }
 
   /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
@@ -81,13 +81,13 @@
     --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
     --ticker-fg: #000000; --ticker-fg-dim: #6B6B6B; --ticker-bg: #FFFFFF;
     --radius: 4px; --card-shadow: none; --card-shadow-lift: none;
-    --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02); --bubble-shadow: rgba(0,0,0,0.16); --spot: rgba(0,0,0,0.05);
+    --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02); --bubble-shadow: rgba(0,0,0,0.16);
   }
   html[data-skin="mono"][data-theme="dark"]{
     --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
     --amber: #FFFFFF; --amber-dim: #CFCFCF; --amber-glow: rgba(255,255,255,0.12); --amber-contrast: #000000;
     --ticker-fg: #FFFFFF; --ticker-fg-dim: #8E8E8E; --ticker-bg: #0B0B0B;
-    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02); --bubble-shadow: rgba(0,0,0,0.7); --spot: rgba(255,255,255,0.06);
+    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02); --bubble-shadow: rgba(0,0,0,0.7);
   }
 
   *{ box-sizing:border-box; }
@@ -813,10 +813,10 @@
      is decorative and genuinely loses nothing by stopping. */
 
   /* Bubble pop (the owner, Oct 21, 2026: "more visual appeal and interactivity"). The bubbly Titan One of the wordmark now carries the headings, the stat figures and the chart labels; small table figures stay in Public Sans so
-     numbers stay easy to read. Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render), a soft light follows the pointer over a card, cards and tiles lift a
+     numbers stay easy to read. Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render),  over a card, cards and tiles lift a
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
   .kal-bub{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; letter-spacing:.02em; }
-  .kal-card, .settings-card, .breadth-widget, .movers-col, .index-card{ background-image: radial-gradient(280px circle at var(--mx, -999px) var(--my, -999px), var(--spot), transparent 65%); transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
+  .kal-card, .settings-card, .breadth-widget, .movers-col, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
   .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
   .kal-tile:hover{ transform: translateY(-2px) scale(1.02); border-color: var(--paper); }
@@ -850,9 +850,8 @@
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
   [data-reduce-motion="true"] .bg-grid{ animation: none; }
-  /* Limit graphics (the same switch as reduce motion, renamed Oct 21, 2026): it also drops the glow, the grid, the ghost wordmark and the pointer light's gradient, so the page is plain panels on a flat ground. */
+  /* Limit graphics (the same switch as reduce motion, renamed Oct 21, 2026): it also drops the glow, the grid and the ghost wordmark, so the page is plain panels on a flat ground. */
   [data-reduce-motion="true"] .bg-ambient::before, [data-reduce-motion="true"] .bg-ambient::after, [data-reduce-motion="true"] .bg-ghost, [data-reduce-motion="true"] .bg-grid{ display:none; }
-  [data-reduce-motion="true"] .kal-card, [data-reduce-motion="true"] .settings-card, [data-reduce-motion="true"] .breadth-widget, [data-reduce-motion="true"] .movers-col, [data-reduce-motion="true"] .index-card{ background-image: none; }
   [data-reduce-motion="true"] .brand-mark{ animation: none; }
   [data-reduce-motion="true"] .brand-ground{ animation: none; display:none; }
   [data-reduce-motion="true"] .brand-impact-ring{ animation: none; display:none; }
@@ -3457,27 +3456,6 @@
     clearTimeout(pageEnterTimer);
     pageEnterTimer = setTimeout(function(){ pageEl.classList.remove('enter'); }, 2200);
   }
-  // A soft light follows the pointer over a card (two custom properties on the card, nothing else). Mouse and pen only, and never wired to do anything when motion is reduced.
-  (function(){
-    var raf = 0, last = null, CARD = '.kal-card, .settings-card, .breadth-widget, .movers-col, .index-card';
-    document.addEventListener('pointermove', function(e){
-      if(e.pointerType === 'touch' || motionReduced() || !e.target || !e.target.closest){ return; }
-      var t = e.target.closest(CARD);
-      if(!t){ return; }
-      last = { t: t, x: e.clientX, y: e.clientY };
-      if(raf){ return; }
-      raf = requestAnimationFrame(function(){
-        raf = 0;
-        var r = last.t.getBoundingClientRect();
-        last.t.style.setProperty('--mx', (last.x - r.left).toFixed(0) + 'px');
-        last.t.style.setProperty('--my', (last.y - r.top).toFixed(0) + 'px');
-      });
-    }, { passive: true });
-    document.addEventListener('pointerout', function(e){
-      var t = e.target && e.target.closest ? e.target.closest(CARD) : null;
-      if(t && !(e.relatedTarget && t.contains(e.relatedTarget))){ t.style.removeProperty('--mx'); t.style.removeProperty('--my'); }
-    }, { passive: true });
-  })();
 
   function showPage(name){
     // Switching pages via nav used to leave the scroll position exactly
