@@ -4403,3 +4403,20 @@ Code `scalper/fund1.py` and `tests/test_fund1.py` were committed before the run;
 **Dollar size (information).** Alpha times $200 and $500; drawdown and Sharpe against buy and hold.
 
 **Single read.** `python -m scalper.vm fetch` then `python -m scalper.vm run`, once; a second run is refused unless the result file is deleted on purpose. Nothing here goes live. **Family tries: 13.**
+
+## Results: VM, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/vm.py` and `tests/test_vm.py` were committed before the run; result file `data/vm_result.txt`. Bar z 2.7 (family of 13).
+
+| Cell | Months | Net alpha a year | NW z (bar 2.7) | Halves | 2019 on | At x1.2 | Placebo p95 | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| V1, SPY managed (1993 on) | 402 | +2.07% | 2.47 | +2.54% / +1.17% | +1.45% | +2.05% | +1.22% | **FALSIFIED** (z only) |
+| V2, QQQ managed (1999 on) | 329 | **+3.45%** | **3.42** | +2.87% / +1.53% | +1.82% | +3.43% | +1.86% | **NOT_YET_FALSIFIED** |
+| L1m, USMV against SPY (2011 on) | 179 | +0.80% | 0.48 | +3.17% / -1.73% | -1.43% | +0.80% | none | **FALSIFIED** (z, halves, 2019 on) |
+
+- **Prediction:** all three `FALSIFIED` (about 85% each). Two were right; **V2 was wrong**, recorded as it was.
+- **What V2 passed is not what it sounds like.** QQQ managed returned **7.9% a year against 10.8% for holding QQQ**, with volatility 10.2% against 24.9%, worst drawdown **-28.9% against -79.6%**, and Sharpe 0.80 against 0.54. The weight averages 57%, so beta is 0.35 and most of the "alpha" is the 2000 to 2002 crash that the rule mostly sat out. Both halves and 2019 on are positive, but the second half and the recent window (+1.53%, +1.82%) are about half the first half's size. **It is a risk-reduction result: you keep about three quarters of the return for a third of the risk. It is not a way to earn more.**
+- **The two index cells disagree.** The same rule on SPY misses the bar (z 2.47) and on QQQ clears it (z 3.42); with the SLOW1 family the cells are not independent, and the QQQ pass leans on one crash. I would not read V2 as "volatility management works", only as "it worked on QQQ".
+- **L1m is nothing:** the minimum-volatility ETF earned +3.2% a year of alpha in the first half and -1.7% in the second, the usual decay.
+- **Dollar size.** V2's +3.45% a year is about **$6.90 on $200 and $17.25 on $500**, on a position that earns less than buying QQQ.
+- **Not run:** other targets (8%, 12%), other windows or other assets, which would be new tries chosen after seeing V2. **Family tries: 13.**
