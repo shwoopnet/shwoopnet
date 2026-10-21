@@ -703,6 +703,69 @@ gates.PR3 = () => {
   const push = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiPushLib.js'), 'utf8');
   for (const s of live.PROBE_SERIES) assert.ok(push.includes(s), s + ' has a name in the alerts, not a raw ticker');
 };
+// DP1 to DP4: the probe drop rule (DL1, Oct 21, 2026). A probe market is dropped when its last 200 settled entries net negative; the live series never are.
+const settledProbe = (series, i, pnl) => ({ id: 'o-' + series + '-' + i, series, strategy: 'L1', status: 'filled', settled: true, result: pnl > 0 ? 'yes' : 'no', settledPnl: pnl, fillCount: 1, ts: NOW - 3600000 + i * 1000 });
+const memoryRecord = (initial) => {
+  const box = { rec: initial || {} };
+  return { box, update: async (apply) => { const r = apply(box.rec); if (r.changed) box.rec = r.record; return r.record; } };
+};
+gates.DP1 = async () => {
+  // 200 entries netting -$0.50 drops the probe; 199 do not (too few to judge), and 200 netting +$0.50 do not.
+  const mk = (n, net) => Array.from({ length: n }, (_, i) => settledProbe('KXAUDUSD15M', i, i === 0 ? net - 0.05 * (n - 1) : 0.05));
+  assert.strictEqual(live.PROBE_DROP_WINDOW, 200);
+  let u = live.probeRingUpdate({}, mk(199, -0.5), NOW);
+  assert.ok(!live.probeDropped(u.record, 'KXAUDUSD15M') && live.probeNet(u.record.rings.KXAUDUSD15M) === null, '199 entries are too few to judge, even if they net negative');
+  u = live.probeRingUpdate({}, mk(200, -0.5), NOW);
+  assert.ok(live.probeDropped(u.record, 'KXAUDUSD15M') && u.newlyDropped.join() === 'KXAUDUSD15M', 'the last 200 settled entries net negative: dropped');
+  u = live.probeRingUpdate({}, mk(200, 0.5), NOW);
+  assert.ok(!live.probeDropped(u.record, 'KXAUDUSD15M'), 'the last 200 net positive: kept');
+  // only the last 200 count: an old loss falls out of the record.
+  const all = [settledProbe('KXAUDUSD15M', 0, -5)].concat(Array.from({ length: 200 }, (_, i) => settledProbe('KXAUDUSD15M', i + 1, 0.01)));
+  u = live.probeRingUpdate({}, all, NOW);
+  assert.ok(u.record.rings.KXAUDUSD15M.length === 200 && !live.probeDropped(u.record, 'KXAUDUSD15M'), 'the 201st oldest entry is out of the window');
+  // the same order twice is one entry, a hand-closed order is not the bot's result, and an unsettled one is not a result yet.
+  const dup = [settledProbe('KXUSDCAD15M', 1, -1), settledProbe('KXUSDCAD15M', 1, -1), { ...settledProbe('KXUSDCAD15M', 2, -1), result: 'hand' }, { ...settledProbe('KXUSDCAD15M', 3, -1), settled: false }];
+  u = live.probeRingUpdate({}, dup, NOW);
+  assert.strictEqual(u.record.rings.KXUSDCAD15M.length, 1, 'each order counts once, and only settled, non-hand ones');
+  // a live series is never put in the record.
+  u = live.probeRingUpdate({}, [settledProbe('KXGOLD15M', 1, -1), settledProbe('KXBTC15M', 2, -1)], NOW);
+  assert.deepStrictEqual(Object.keys(u.record.rings).sort(), [...live.PROBE_SERIES].sort(), 'only probe markets have a record, so the rule can never touch gold, Bitcoin, Ethereum, XRP or Dogecoin');
+};
+gates.DP2 = async () => {
+  // A dropped probe takes no order; the other series trade as usual; and it stays dropped on the next minute without any new entry.
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  const rec = memoryRecord({ rings: {}, droppedAt: { KXAUDUSD15M: NOW - 60000 } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXAUDUSD15M', AUD)], updateProbeRecord: rec.update });
+  assert.ok(w.posts.some((p) => p.ticker === T), 'Bitcoin still trades');
+  assert.ok(!w.posts.some((p) => p.ticker === AUD), 'the dropped probe takes no order');
+  // the same market with no drop does trade (so the test above is about the rule and nothing else)
+  const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  await tick(w2, { quotes: [quote({}, 'KXAUDUSD15M', AUD)], updateProbeRecord: memoryRecord().update });
+  assert.ok(w2.posts.some((p) => p.ticker === AUD), 'an undropped probe trades');
+};
+gates.DP3 = async () => {
+  // The tick builds the record from the orders it already read, drops the probe in the same minute, and says so once in the log.
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  // The 24 hour list holds at most 200 orders of every kind, so the record grows over many minutes: 199 earlier entries are already in it, and one more settled loss arrives in this minute's list.
+  const earlier = Array.from({ length: 199 }, (_, i) => ({ id: 'e-' + i, ts: NOW - 86400000 * 2 + i, pnl: 0.01 }));
+  { const { id, ...d } = settledProbe('KXUSDCAD15M', 1, -9); w.docs.set('L1-last', d); }
+  const rec = memoryRecord({ rings: { KXUSDCAD15M: earlier }, droppedAt: {} });
+  await tick(w, { quotes: [quote({}, 'KXUSDCAD15M', 'KXUSDCAD15M-26OCT071415-00')], updateProbeRecord: rec.update });
+  assert.ok(live.probeDropped(rec.box.rec, 'KXUSDCAD15M'), 'the record was built from the 24 hour orders and the probe dropped');
+  assert.strictEqual(w.posts.length, 0, 'and it did not trade in that same minute');
+  assert.strictEqual(w.events.filter((e) => e.kind === 'probe dropped').length, 1, 'one log line');
+  await tick(w, { quotes: [quote({}, 'KXUSDCAD15M', 'KXUSDCAD15M-26OCT071415-00')], updateProbeRecord: rec.update });
+  assert.strictEqual(w.events.filter((e) => e.kind === 'probe dropped').length, 1, 'not logged again every minute');
+};
+gates.DP4 = async () => {
+  // Fails closed: a record that cannot be read or saved takes the probes out for that minute, and nothing else.
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
+  await tick(w, { quotes: [quote(), quote({}, 'KXAUDUSD15M', AUD)], updateProbeRecord: async () => { throw new Error('down'); } });
+  assert.ok(w.posts.some((p) => p.ticker === T) && !w.posts.some((p) => p.ticker === AUD), 'Bitcoin trades, the probe waits');
+  // and the wiring: a transaction on the fresh document, in the one collection only the server writes.
+  assert.ok(/updateProbeRecord: \(apply\) => db\.runTransaction/.test(fnSrc) && /doc\("probeRecord"\)/.test(fnSrc) && /tx\.get\(ref\)/.test(fnSrc), 'applied to the fresh document inside a transaction');
+  assert.ok(/series_filter_not_used|const tradable = L1_SERIES\.filter\(\(x\) => !dropped\.includes\(x\)\)/.test(fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8')), 'the rule only removes series from the tradable list');
+};
 // GF1 to GF3: gold first (Oct 21, 2026, docs/GOLD_FIRST_PROPOSAL.md option A). Gold alone keeps the size ladder and is sent first; Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract; the lists change only by a code edit.
 gates.GF1 = async () => {
   assert.deepStrictEqual(live.CAPPED_SERIES, ['KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'exactly the four markets that have not earned the ladder');
