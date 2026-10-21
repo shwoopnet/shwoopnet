@@ -3,16 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shwoop — We trade. You live your life.</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2310182B%22/><path d=%22M56 14 26 56h18l-6 30 34-42H54z%22 fill=%22%230B5CD8%22/></svg>">
-<!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the header wallet mark on the navy tile, full bleed because iOS rounds the corners itself. -->
+<title>Shwoop Financials: We trade. You live your life.</title>
+<link rel="icon" type="image/png" href="favicon-64.png">
+<!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the bubbly white S on black (brand mark A, Oct 20, 2026), full bleed because iOS rounds the corners itself. -->
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
+<!-- Link previews (texts, chats) read these. The image URL has to be absolute or the preview app cannot find it; it is a pointer for other apps to fetch, not a request this page makes. -->
+<meta property="og:title" content="Shwoop Financials">
+<meta property="og:description" content="We trade. You live your life.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://shwoopnet.github.io/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Shwoop">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Titan+One&display=swap" rel="stylesheet">
 <style>
   :root{
     /* Ledger -- one fixed palette, modeled on a consumer brokerage's own
@@ -42,6 +48,7 @@
     --radius: 10px;
     --card-shadow: 0 1px 2px rgba(16,24,43,0.06), 0 8px 20px -12px rgba(16,24,43,0.22);
     --card-shadow-lift: 0 2px 4px rgba(16,24,43,0.08), 0 14px 28px -12px rgba(16,24,43,0.30);
+    --brand-depth: #2a3a5e; --ghost-line: rgba(16,24,43,0.07); --ghost-fill: rgba(16,24,43,0.025);
   }
 
   /* Dark mode -- same Ledger identity, inverted surfaces. Set on
@@ -63,6 +70,7 @@
     --amber-contrast: #0B1220;
     --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
     --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
+    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035);
   }
 
   /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
@@ -73,11 +81,13 @@
     --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
     --ticker-fg: #000000; --ticker-fg-dim: #6B6B6B; --ticker-bg: #FFFFFF;
     --radius: 4px; --card-shadow: none; --card-shadow-lift: none;
+    --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02);
   }
   html[data-skin="mono"][data-theme="dark"]{
     --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
     --amber: #FFFFFF; --amber-dim: #CFCFCF; --amber-glow: rgba(255,255,255,0.12); --amber-contrast: #000000;
     --ticker-fg: #FFFFFF; --ticker-fg-dim: #8E8E8E; --ticker-bg: #0B0B0B;
+    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02);
   }
 
   *{ box-sizing:border-box; }
@@ -145,6 +155,13 @@
      never intercept a click meant for whatever's actually on the page. */
   .bg-ambient{
     position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
+  }
+  /* A big ghost of the wordmark sits behind the page, straight (no tilt), outlined and barely filled, so the cards float over something. Static: no animation, so reduce-motion has nothing to stop.
+     It follows the theme and skin through --ghost-line and --ghost-fill and never carries a gain or loss colour. */
+  .bg-ghost{
+    position:absolute; left:50%; bottom:9vh; transform:translateX(-50%); white-space:nowrap; user-select:none;
+    font-family:'Titan One', 'Public Sans', sans-serif; font-size:min(18vw, 260px); line-height:1; letter-spacing:.03em;
+    color:var(--ghost-fill); -webkit-text-stroke:2px var(--ghost-line);
   }
   .bg-ambient::before, .bg-ambient::after{
     content:''; position:absolute; width:60vmax; height:60vmax; border-radius:50%;
@@ -380,8 +397,14 @@
     54%{ opacity:.85; transform: translateX(-50%) rotate(45deg) scale(.5); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
     72%, 100%{ opacity:0; transform: translateX(-50%) rotate(45deg) scale(1.8); }
   }
-  .brand-name{ font-family:'Public Sans', sans-serif; font-weight:700; font-size: 20px; letter-spacing: 0.04em; transition: color .15s ease; }
+  /* The wordmark (the owner's idea, Oct 20, 2026): bubbly graffiti letters, white inside with a thick black outline. The outline is a ring of hard text shadows rather than -webkit-text-stroke, so it is
+     the same in every browser and the white fill stays whole. It is black in every theme and skin on purpose: on the dark page it merges with the background and leaves the white letters with a soft drop. */
+  .brand-name{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; font-size: 26px; line-height:1.05; letter-spacing: 0.04em; color:#fff;
+    text-shadow: -2px -2px 0 #000, 0 -2px 0 #000, 2px -2px 0 #000, 2px 0 0 #000, 2px 2px 0 #000, 0 2px 0 #000, -2px 2px 0 #000, -2px 0 0 #000, -1px -2px 0 #000, 1px -2px 0 #000, 2px -1px 0 #000, 2px 1px 0 #000, 1px 2px 0 #000, -1px 2px 0 #000, -2px 1px 0 #000, -2px -1px 0 #000, 2.9px 3.1px 0 var(--brand-depth), 3.8px 4.2px 0 var(--brand-depth), 4.7px 5.3px 0 var(--brand-depth), 5.6px 6.4px 0 var(--brand-depth), 6.5px 7.5px 0 var(--brand-depth), 7.4px 8.6px 0 var(--brand-depth), 8.3px 9.7px 0 var(--brand-depth), 9.2px 10.8px 0 var(--brand-depth), 12px 15px 10px rgba(0,0,0,0.45);
+    transition: color .15s ease; }
   .brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
+  /* FINANCIALS under the wordmark (the company is Shwoop Financials): plain spaced capitals, so the bubbly letters stay the one loud thing. No line, no arrow (the owner dropped both). */
+  .brand-fin{ font-family:'Public Sans', sans-serif; font-weight:800; font-size:11px; letter-spacing:.5em; text-transform:uppercase; color:var(--paper); margin-top:10px; padding-left:2px; line-height:1; }
 
   .topbar-right{ display:flex; align-items:center; gap:18px; }
   .clock{ color: var(--muted); font-size: 13px; text-align:right; }
@@ -661,6 +684,11 @@
   .kal-pos{ color:var(--gain); }
   .kal-warn{ color:#c58a00; }
   .kal-neg{ color:var(--loss); }
+  /* Calm view (the owner, Oct 21, 2026: shown from across a room the page "looks like a christmas tree"). Green and red stay for the few things that carry the verdict: the "Bot since" line, the end
+     label of the P/L line and the losing bars. Every other figure (the stat tiles and the By market and By price paid rows) is plain text; its sign still says which way it went. The market rows
+     keep the name, the time left and the YES price; the spread, round trip and size lines and the depth bar are one tap away in Copy all stats, not on the face of the page. */
+  .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
+  .kal-brow-r .kal-brow-when, .kal-brow-r .kal-depth{ display:none; }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
   .kal-hit{ cursor:default; }
   .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
@@ -753,6 +781,11 @@
   .site-footer .footer-copyright{ color: var(--paper); font-size:11.5px; font-weight:600; margin-bottom:6px; }
   .site-footer p{ margin:0 0 6px 0; max-width:680px; margin-left:auto; margin-right:auto; }
   .site-footer p:last-child{ margin-bottom:0; }
+  .site-footer details{ max-width:680px; margin:8px auto 0 auto; text-align:left; }
+  .site-footer summary{ cursor:pointer; text-align:center; color:var(--muted); list-style:none; }
+  .site-footer summary .footer-copyright{ display:inline; margin:0; font-weight:600; color:var(--paper); }
+  .site-footer summary::-webkit-details-marker{ display:none; }
+  .site-footer details[open] summary{ margin-bottom:8px; }
 
   /* THE TICKER IS DELIBERATELY NOT LISTED HERE.
      Stopping it is `animation: none`, which parks the track at
@@ -802,7 +835,7 @@
 </head>
 <body>
 
-<div class="bg-ambient" aria-hidden="true"><div class="bg-grid"></div><div class="bg-grain"></div></div>
+<div class="bg-ambient" aria-hidden="true"><div class="bg-ghost">SHWOOP</div><div class="bg-grid"></div><div class="bg-grain"></div></div>
 
 <script>
   // Decouples the deferred Firebase module from the rest of the app so
@@ -1058,20 +1091,8 @@
       <div class="brand-text">
         <div class="brand-name-row">
           <div class="brand-name">SHWOOP</div>
-          <span class="brand-mark-scroller">
-            <span class="brand-mark-wrap">
-              <svg class="brand-mark" viewBox="0 0 100 100" width="27" height="27" aria-hidden="true">
-                <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
-                <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
-                <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-                <rect x="32" y="28" width="60" height="46" rx="10" fill="none" stroke="var(--amber)" stroke-width="6"/>
-                <circle cx="74" cy="51" r="7" fill="var(--amber)"/>
-              </svg>
-              <span class="brand-impact-ring"></span>
-            </span>
-            <span class="brand-ground"></span>
-          </span>
         </div>
+        <div class="brand-fin">Financials</div>
       </div>
     </button>
 
@@ -1156,7 +1177,7 @@
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
-                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
+                    <div class="kal-actions"><button class="kal-btn" id="kalAcctRefresh" type="button">Refresh account</button> <button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button><button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button> <button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
           <div class="kal-note" id="kalPushMsg"></div>
           <div class="kal-note" id="kalDiagMsg"></div>
           <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
@@ -1194,7 +1215,7 @@
               <div id="kalL1Status" class="kal-note">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing" checked> Scale size with the account (one contract per $43 of balance, up to 40, raised one step every 3 days at most; stop at 5% of the balance at the last review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) unless you tick the box.</span> <label class="kal-note"><input type="checkbox" id="kalL1Sizing" checked> Scale size with the account (one contract per $43 of balance, up to 40, raised one step every 3 days at most; stop at 12% of the balance at the last review)</label> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -1205,7 +1226,7 @@
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
                 <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a Bitcoin, gold or Ethereum 15 minute close, then holds to settlement.</div>
                 <div class="kal-note">At most $2.00 a contract. With scaling on, one contract per $43 of balance.</div>
-                <div class="kal-note">Stops itself if its trades over the last 24 hours are down 5% of the balance (otherwise $10), or if any order goes wrong. Manual trades do not count.</div>
+                <div class="kal-note">Stops itself if its trades over the last 24 hours are down 12% of the balance (otherwise $10), or if any order goes wrong. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
                 <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool.</div>
                 <div class="kal-note">L1 failed its own test. Nothing here is proof it works.</div>
@@ -1353,8 +1374,13 @@
   </div>
 
   <footer class="site-footer">
-    <div class="footer-copyright">&copy; 2026 Shwoop</div>
-    <p>Personal dashboard. Not financial advice. Trading can lose all of your money, automated tools can fail, and data from third parties can be late or wrong.</p>
+    <details class="footer-legal">
+      <summary><span class="footer-copyright">&copy; 2026 Shwoop Financials</span> <span class="footer-sep">&middot;</span> Legal and risk disclosure</summary>
+      <p>Nothing on this site is investment, financial, legal or tax advice, or an offer or solicitation to buy or sell anything. Shwoop is not a broker-dealer, an investment adviser, a commodity trading advisor or an exchange, and it does not manage money for anyone else.</p>
+      <p>Trading involves substantial risk of loss, including the loss of everything put into it. Automated trading can fail, act on bad data, or place orders you did not intend. A loss limit can end the bot after losses; it does not guarantee a maximum loss. Past performance does not guarantee future results.</p>
+      <p>Paper and backtest results are hypothetical. They use no real money, leave out real-world costs and fills, and do not predict future results. Data from third parties can be late, incomplete or wrong.</p>
+      <p>This site and its software are provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;, without warranties of any kind. To the fullest extent permitted by law, Shwoop Financials and its owners are not liable for any loss or damage arising from their use. Shwoop is not affiliated with or endorsed by any exchange, broker or data provider. All rights reserved.</p>
+    </details>
   </footer>
 
 </div>
@@ -1839,6 +1865,22 @@
     return [cols.join(',')].concat(rows).join('\n');
   }
 
+  // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
+  // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
+  function kalshiAllOrdersCsv(orders){
+    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy'];
+    var cell = function(v){
+      if(v === undefined || v === null){ return ''; }
+      var t = String(v);
+      return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    };
+    var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return a.ts - b.ts; }).map(function(o){
+      return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.side, o.price, o.count, o.fillCount, o.maxCost, o.status, o.settled === true ? 'yes' : '', o.result, kalshiOrderPnl(o),
+        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy].map(cell).join(',');
+    });
+    return [cols.join(',')].concat(rows).join('\n');
+  }
+
   // 'h:mm PM' today, 'Tomorrow h:mm PM' the next day, otherwise 'Oct 9 h:mm PM'. A date that does not parse is shown as nothing.
   // Every time on this page is shown in US Central (CT, CST or CDT as the date requires), not the browser's zone, so the page,
   // the Kalshi app and the bot's logs all read the same clock wherever it is opened.
@@ -1907,7 +1949,7 @@
   // Which market an order was in, by its series (or ticker). One rule for the By market table and the hover on the bars, so a trade has one name on the page.
   function kalshiMarketName(o){
     var s = String(o.series || o.ticker || '');
-    return /GOLD/.test(s) ? 'Gold' : /ETH/.test(s) ? 'Ethereum' : /XRP/.test(s) ? 'XRP' : /DOGE/.test(s) ? 'Dogecoin' : 'Bitcoin';
+    return /GOLD/.test(s) ? 'Gold' : /ETH/.test(s) ? 'Ethereum' : /XRP/.test(s) ? 'XRP' : /DOGE/.test(s) ? 'Dogecoin' : /AUDUSD/.test(s) ? 'AUD/USD' : /USDCAD/.test(s) ? 'USD/CAD' : /NATGAS/.test(s) ? 'Natural gas' : 'Bitcoin';
   }
 
   // The bot's running settled result, one point per settled trade, oldest first.
@@ -1934,20 +1976,22 @@
     var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
     var last = points[points.length - 1], up = last.cum >= 0, col = up ? 'var(--gain)' : 'var(--loss)';
     var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
+    // Calm view: the line is one plain stroke and the points are invisible hover targets (a green or red dot per trade was hundreds of lights); only the end label carries the colour.
     var dots = points.map(function(p, i){
-      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"><title>' +
+      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="transparent"><title>' +
         esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
     }).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
-      '<path d="' + path + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round"/>' + dots +
+      '<path d="' + path + '" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
       '<text x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="14" font-weight="700">' + esc(fmt(last.cum)) + '</text>' +
       '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="11">' + points.length + ' settled trades, oldest to newest</text></svg>';
   }
 
   // Pie of how the orders ended. Slices that are zero are left out; no orders at all says so.
   function kalshiDonutHtml(c, esc){
-    var parts = [['Won', c.won, 'var(--gain)'], ['Lost', c.lost, 'var(--loss)'], ['Open', c.open, 'var(--amber)'], ['No fill', c.noFill, '#98A2B3']];
+    // Calm view: won is the plain text colour and no fill a muted grey, so the only colour in the ring is the red sliver of losses (and amber while something is open).
+    var parts = [['Won', c.won, 'var(--paper)'], ['Lost', c.lost, 'var(--loss)'], ['Open', c.open, 'var(--amber)'], ['No fill', c.noFill, 'var(--muted)']];
     var other = c.other || 0, total = parts.reduce(function(n, x){ return n + x[1]; }, 0) + other;
     if(!total){ return '<div class="kal-empty">No orders yet.</div>'; }
     var offset = 25, segs = '';
@@ -2036,7 +2080,7 @@
     var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
     var bars = shown.map(function(p, i){
       var x = L + slot * i + (slot - bw) / 2, y0 = Y(0), y1 = Y(p.pnl), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0));
-      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--gain)' : 'var(--loss)') + '"/>';
+      return '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1.5" fill="' + (p.pnl >= 0 ? 'var(--muted)' : 'var(--loss)') + '"' + (p.pnl >= 0 ? ' fill-opacity="0.55"' : '') + '/>';
     }).join('');
     var hits = shown.map(function(p, i){
       return '<rect class="kal-hit" x="' + (L + slot * i).toFixed(1) + '" y="0" width="' + slot.toFixed(1) + '" height="' + (H - B) + '" fill="transparent" pointer-events="all" data-up="' + (p.pnl >= 0 ? '1' : '0') +
@@ -2827,6 +2871,14 @@
     if(kalshiSoundOn){ kalshiSoundTone('enter'); }     // the tap is what lets the browser play audio, and the tone says it works
   });
   kalshiSoundLabel();
+  document.getElementById('kalOrdersCopy').addEventListener('click', function(){
+    var csv = kalshiAllOrdersCsv(kalshiLiveOrders), n = Math.max(0, csv.split('\n').length - 1);
+    var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
+    var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders.'; }, manual);
+    } else { manual(); }
+  });
   document.getElementById('kalDiagCopy').addEventListener('click', function(){
     var csv = kalshiDiagnosticsCsv(kalshiLiveOrders, 150), n = Math.max(0, csv.split('\n').length - 1);
     var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
@@ -2892,7 +2944,7 @@
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
-    var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.05 * base).toFixed(2) : '$10.00';
+    var stopAt = s && s.sizing === true && Number.isFinite(base) ? '$' + (0.12 * base).toFixed(2) : '$10.00';
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
     var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + '. ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
     var peakAt = Number.isFinite(s && s.peakNet) ? Math.max(0, s.peakNet) : 0;

@@ -55,7 +55,11 @@ const LIVE_SERIES = ["KXBTC15M", "KXGOLD15M"];   // gold has real volume on prod
 // runs short (L1_WINDOW_CAP_FRACTION) the later series goes without, so Ethereum is last. LIVE_SERIES above is the older single-order path and is left alone.
 // XRP and Dogecoin were appended on 2026-10-20 at the owner's choice, on the strength of kalshi-scalper/README.md (E3, E3B: +1.4c and +1.5c, then +1.8c on 29 older days; forward read E3F due 2026-11-16).
 // They go LAST, so they only take a window's second slot when Bitcoin, gold and Ethereum left room.
-const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
+// The PROBE markets (2026-10-21, the owner's choice: "live forward testing", no more paper): L1's own rule on AUD/USD, USD/CAD and natural gas, which history could not settle (12 days of AUD/USD and
+// USD/CAD, a near miss on gas; kalshi-scalper/README.md PAPER1). ALWAYS one contract per order, whatever the size ladder says, so each costs about $0.90 at risk; they are the LAST in the list, so they only
+// take what Bitcoin, gold, Ethereum, XRP and Dogecoin left in a window's combined limit, and they count toward the same loss stop, pool and 25c exit as every other L1 order. Adding to this list is a code edit.
+const PROBE_SERIES = ["KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M"];
+const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", ...PROBE_SERIES];
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -300,7 +304,11 @@ const L1_SIZE_MAX = 3;
 const L1_SIZE_FRACTION = 0.02;
 // 5%, tightened from 10% on Oct 8, 2026 at the owner's choice: 10% of a $344 balance is $34, more than the worst modelled day at 5 contracts (about $20), so it
 // never tripped. 5% is about $17, a real circuit breaker that a bad day at 4 to 5 contracts can reach.
-const L1_SIZED_STOP_FRACTION = 0.05;
+// Raised from 5% to 6% on Oct 20, 2026 at the owner's choice, together with the per-window limit (4.5% to 5.5%), so that one window alone still cannot reach the stop. 6% is about $11.76 of a $196 base.
+// Raised again from 6% to 12% on Oct 20, 2026 (the owner's choice, the same night) after the stop ended the bot with $6.06 SETTLED down and a full window ($8.43) open: an open order is counted as lost, so with the
+// window limit at 5.5% a full open window left only about $0.80 to $2.30 of room for real losses, and one ordinary loss (about $3.70) was enough to stop it. At 12% a full window leaves about $10.60 of room. Open
+// orders are STILL counted as lost, so the true worst case is unchanged in kind: the stop holds the account to 12% of the base (about 10% of the balance) however the open window ends.
+const L1_SIZED_STOP_FRACTION = 0.12;
 function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
   // The 2% of cash rule bounds the part funded by the account (the review's cap). The add-on, bought with reinvested PROFIT (the pool), sits outside it: the owner's
@@ -557,7 +565,9 @@ function skimAddon(state, now, perContract = 0.93) {
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
 // A window is the 15 minutes a market closes in, shared by every series: the part of the ticker after the series name (KXBTC15M-26OCT101200-00 gives 26OCT101200).
-const L1_WINDOW_CAP_FRACTION = 0.045;
+// Raised from 4.5% to 5.5% at the owner's request (Oct 20, 2026), after Dogecoin, last in the list, got 1 contract while XRP got 4. The loss stop (L1_SIZED_STOP_FRACTION) was raised with it, from 5% to 6%,
+// so the window limit still sits UNDER the stop and one window alone cannot reach it.
+const L1_WINDOW_CAP_FRACTION = 0.055;
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
 
 async function runL1Tick(args) {
@@ -618,7 +628,7 @@ async function runL1Tick(args) {
   }
   // The stop protects the ACCOUNT, not the profit already made: the part of a lost or open order that was bought with reinvested profit (the add-on) does not count
   // toward it. Without this a big enough add-on would make one loss, or even one open order counted as lost, reach the stop on its own and lock the bot out
-  // (the owner's rule, Oct 9, 2026). The account's own share of the loss is still held to the same 5% of the balance at the last review.
+  // (the owner's rule, Oct 9, 2026). The account's own share of the loss is still held to the same 6% of the balance at the last review.
   const allowance = Number.isFinite(risk.addonAtRisk) ? risk.addonAtRisk : 0;
   const floor = peak - (stopAt + allowance);
   if (risk.worst <= floor + 1e-9) {
@@ -663,10 +673,12 @@ async function runL1Tick(args) {
     const cashLeft = cash - Object.values(committed).reduce((a, x) => a + x, 0);
     let count = sizing ? l1Count(cashLeft, cost1, sizeCap, sizeAddon) : 1;
     // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
-    const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
+    let addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
+    // A probe market is one contract, always: no ladder step and no reinvested profit goes into a market that has not earned it.
+    if (PROBE_SERIES.includes(c.series)) { count = 1; addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
-    // from earlier ticks in the same window count too. The loss stop is 5% of the base; a window may use 4.5%, so one window alone cannot reach it.
+    // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.
     const wkey = windowKey(ticker);
     const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
       .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);
@@ -925,7 +937,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
 }
 
 module.exports = {
-  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,

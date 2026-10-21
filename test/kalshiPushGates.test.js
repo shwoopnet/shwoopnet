@@ -80,19 +80,36 @@ gates.P5 = () => {
   const req = webpush.generateRequestDetails(sub, JSON.stringify({ title: m.title, body: m.body, tag: m.tag }), { vapidDetails: { subject: 'https://shwoopnet.github.io', publicKey: k.publicKey, privateKey: k.privateKey }, TTL: 3600, urgency: 'high' });
   assert.ok(/^vapid /.test(req.headers.Authorization), 'signed with the owner\'s VAPID key');
   assert.ok(Buffer.isBuffer(req.body) && !req.body.toString('utf8').includes('Bitcoin'), 'the text travels encrypted, so the relay cannot read it');
-  assert.deepStrictEqual([m.title, m.body], ['Bot bought Bitcoin', '4 YES at about 93c']);
+  assert.deepStrictEqual([m.title, m.body], ['Bought Bitcoin: 4 YES at about 93c', 'closes 12:30 PM CT']);
+  const m2 = push.message('enter', order({ fillCount: 4, price: 0.93, maxCost: 3.72 }));
+  assert.strictEqual(m2.body, '$3.72 at risk · closes 12:30 PM CT', 'the close time is Central, one hour behind the Eastern time in the ticker');
 };
 
 // The wording: short, no secrets, names the market.
 gates.P6 = () => {
-  assert.strictEqual(push.message('sell', order({ series: 'KXGOLD15M', exitStatus: 'sold', exitCount: 3 })).title, 'Bot sold Gold');
-  assert.ok(/XRP/.test(push.message('issue', order({ series: 'KXXRP15M', exitStatus: 'error' })).body));
-  assert.ok(/loss stop/.test(push.message('issue', { endedBecause: 'loss stop' }).body));
+  assert.strictEqual(push.message('sell', order({ series: 'KXGOLD15M', exitStatus: 'sold', exitCount: 3, settledPnl: -2.7 })).title, 'Sold Gold early: -$2.70');
+  assert.ok(/XRP/.test(push.message('issue', order({ series: 'KXXRP15M', exitStatus: 'error' })).title));
+  assert.ok(/loss stop/.test(push.message('issue', { endedBecause: 'loss stop' }).title));
   const won = push.message('settled', order({ fillCount: 4, settledPnl: 0.2412, result: 'yes' })), lost = push.message('settled', order({ series: 'KXETH15M', fillCount: 1, settledPnl: -3.6, result: 'no' }));
-  assert.deepStrictEqual([won.title, won.body], ['Bot won Bitcoin', '+$0.24 on 4 contracts']);
-  assert.deepStrictEqual([lost.title, lost.body], ['Bot lost Ethereum', '-$3.60 on 1 contract']);
-  assert.strictEqual(push.message('settled', order({ fillCount: 2 })).title, 'Bot closed Bitcoin', 'no figure, no claim of a win or a loss');
-  for (const k of ['enter', 'sell', 'issue', 'settled']) { const m = push.message(k, order({ fillCount: 1 })); assert.ok(m.title.length < 40 && m.body.length < 120); }
+  assert.deepStrictEqual([won.title, won.body], ['Won Bitcoin +$0.24', '4 YES'], 'the title carries the market and the amount, the body the size');
+  assert.deepStrictEqual(lost.title, 'Lost Ethereum -$3.60');
+  assert.strictEqual(push.message('settled', order({ fillCount: 2 })).title, 'Closed Bitcoin', 'no figure, no claim of a win or a loss');
+  for (const k of ['enter', 'sell', 'issue', 'settled']) { const m = push.message(k, order({ fillCount: 1, price: 0.93, maxCost: 0.93, settledPnl: -0.93 }), { day: { net: -0.93, n: 1 } }); assert.ok(m.title.length < 60 && m.body.length < 120, k + ': ' + m.title.length + '/' + m.body.length); }
+  // One line per TRADE: a sell or a settlement replaces that trade's buy alert; an issue keeps its own tag.
+  const o = order({ fillCount: 4, price: 0.93 });
+  assert.strictEqual(push.message('enter', o).tag, push.message('settled', Object.assign({}, o, { settledPnl: 0.2 })).tag, 'same trade, same tag');
+  assert.notStrictEqual(push.message('enter', o).tag, push.message('enter', order({ clientOrderId: 'c2' })).tag, 'another trade, another line');
+  assert.ok(/^issue-/.test(push.message('issue', Object.assign({}, o, { exitStatus: 'error' })).tag), 'an issue is never replaced by a routine alert');
+  assert.ok(/renotify: true/.test(fs.readFileSync(path.join(root, 'sw.js'), 'utf8')), 'and the replacement still alerts');
+};
+
+// The day's line: only the bot's own settled L1 trades of the last 24 hours, never a trade the owner closed by hand, never an unsettled one.
+gates.P6b = () => {
+  const now = Date.parse('2026-10-20T20:00:00Z'), t = (over) => Object.assign({ strategy: 'L1', ts: now - 3600000, settled: true, result: 'yes', settledPnl: 0.2 }, over || {});
+  assert.deepStrictEqual(push.dayNet([t(), t({ settledPnl: -3.6, result: 'no' }), t({ result: 'hand', settledPnl: undefined }), t({ settled: false }), t({ ts: now - 25 * 3600000 }), t({ strategy: 'OW1' })], now), { net: -3.4, n: 2 });
+  assert.deepStrictEqual(push.dayNet([], now), { net: 0, n: 0 });
+  assert.strictEqual(push.closesAt('KXBTC15M-26OCT200030-30'), '11:30 PM CT', 'half past midnight Eastern is 11:30 PM Central the day before');
+  assert.strictEqual(push.closesAt('not a ticker'), null);
 };
 
 // Structure: alerts only READ. Nothing in the trading code imports the alert code; the alert code imports nothing that can trade or sign; every callable checks the owner; every trigger catches everything.

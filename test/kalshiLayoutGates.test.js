@@ -122,8 +122,10 @@ gates.Y8 = () => {
   // The chart: nothing to draw below two points; a loss ends red; text from the page is escaped.
   assert.ok(/two settled trades/.test(f.kalshiLineSvg([{ cum: 1, pnl: 1, t: 1 }], esc, money)));
   const svg = f.kalshiLineSvg(ser, esc, money);
-  assert.ok(/<svg/.test(svg) && /stroke="var\(--loss\)"/.test(svg) && /-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is red and labelled with where it ended');
-  assert.ok(/stroke="var\(--gain\)"/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is green');
+  assert.ok(/<svg/.test(svg) && /fill="var\(--loss\)" font-size="14"[^>]*>-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is labelled in red with where it ended');
+  // Calm view (Oct 21, 2026): the line itself is one plain stroke and the per-trade points are invisible hover targets, so the only colour on the chart is the end label.
+  assert.ok(/stroke="var\(--paper\)"/.test(svg) && !/<circle[^>]*fill="var\(--(gain|loss)\)"/.test(svg) && /<circle[^>]*fill="transparent"><title>/.test(svg), 'a plain line, no coloured dots, the points still carry their hover text');
+  assert.ok(/fill="var\(--gain\)" font-size="14"[^>]*>\+\$0\.20/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is labelled in green');
   // The pie: no orders says so; slices add to the whole; zero slices are left out.
   assert.ok(/No orders yet/.test(f.kalshiDonutHtml({ won: 0, lost: 0, open: 0, noFill: 0, other: 0 }, esc)));
   const pie = f.kalshiDonutHtml({ won: 8, lost: 1, open: 1, noFill: 4, other: 0 }, esc);
@@ -163,7 +165,7 @@ gates.Y14 = () => {
   const series = f.kalshiPnlSeries(res, 0);
   assert.deepStrictEqual(series.map((p) => p.pnl), [0.16, -1.86], 'and the line');
   const bars = f.kalshiBarsSvg(series, esc, money);
-  assert.ok(/fill="var\(--gain\)"/.test(bars) && /fill="var\(--loss\)"/.test(bars) && /1 won, 1 lost/.test(bars), 'a green bar for the win and a red bar for the loss');
+  assert.ok(/fill="var\(--muted\)" fill-opacity="0\.55"/.test(bars) && /fill="var\(--loss\)"/.test(bars) && !/fill="var\(--gain\)"/.test(bars) && /1 won, 1 lost/.test(bars), 'a muted bar for the win and a red bar for the loss (calm view: a loss is the only coloured bar, so it is as visible as ever)');
   assert.ok(/after the first settled trade/.test(f.kalshiBarsSvg([], esc, money)));
   // Hover details: every bar has a transparent column over the whole plot height (a win is about two pixels tall, so the bar itself is a hopeless target), carrying its date and time, its
   // profit or loss and its market. The slow native <title> is gone, so the two tooltips can never show at once.
@@ -266,6 +268,26 @@ gates.Y10 = () => {
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
   assert.ok(/var doneLine = running \? 'Next look ' \+/.test(html) && /' filled, ' \+/.test(html) && !/kalL1Facts/.test(html), 'when it looks next, orders sent and filled against no fill are one line of the status, not a row of facts');
   assert.ok(/var sizeText = running \?/.test(html) && /Stops if down/.test(html), 'size and stop are part of the status line inside the bot menu, not a line on the page');
+};
+
+// The all-orders export (Oct 20, 2026): every order the BOT sent, oldest first, with its saved result. Manual trades never have an order document, so they are not in it; nothing is invented (an open order has no P/L).
+gates.Y11b = () => {
+  const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
+  const csv = new Function(['kalshiOrderPnl', 'kalshiAllOrdersCsv'].map(grab).join('\n') + '; return kalshiAllOrdersCsv;')();
+  const rows = (t) => t.split('\n');
+  assert.deepStrictEqual(rows(csv([])), [rows(csv([]))[0]], 'a header even with no orders');
+  const out = rows(csv([
+    { ts: 3000, ticker: 'B', series: 'KXGOLD15M', side: 'yes', price: 0.93, count: 4, fillCount: '4.00', maxCost: 3.9, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24, strategy: 'L1' },
+    { ts: 1000, ticker: 'A', series: 'KXBTC15M', side: 'no', price: 0.9, count: 1, fillCount: '1.00', maxCost: 0.92, status: 'filled', strategy: 'L1' },
+    { ts: 2000, ticker: 'C', series: 'KXETH15M', side: 'yes', status: 'no fill', fillCount: '0.00', strategy: 'L1' },
+  ]));
+  const head = out[0].split(',');
+  const col = (r, name) => r.split(',')[head.indexOf(name)];
+  assert.strictEqual(out.length, 4, 'one row per order, none dropped (this is not capped at 150)');
+  assert.deepStrictEqual([1, 2, 3].map((i) => col(out[i], 'ticker')), ['A', 'C', 'B'], 'oldest first');
+  assert.strictEqual(col(out[3], 'pnl'), '0.24', 'a settled order carries the bot\'s saved P/L');
+  assert.strictEqual(col(out[1], 'pnl'), '', 'an open order has none');
+  assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiLiveOrders\)/.test(html), 'a button, built from the bot\'s own orders');
 };
 
 // The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
@@ -384,7 +406,7 @@ gates.Y18 = () => {
   assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
   assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
   assert.ok(/tile\('Expectancy'/.test(html) && !/tile\('Per trade'/.test(html), 'the expectancy tile does not share the stake row name');
-  assert.ok(/\(0\.05 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 5% stop');
+  assert.ok(/\(0\.12 \* base\)\.toFixed\(2\)/.test(html), 'the status line quotes the 12% stop');
 };
 
 // Y21: manual trades are hidden from the Recent trades card by default, with a small dropdown to bring them back.
@@ -494,7 +516,11 @@ gates.Y34 = () => {
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
 gates.Y35 = () => {
   assert.ok(!/kalEthLive|kalEthMsg|kalshiExtraSeries|liveExtra/.test(html), 'the Ethereum size dropdown, its handler and its callable are gone from the page');
-  assert.ok(/return \/GOLD\/\.test\(s\) \? 'Gold' : \/ETH\/\.test\(s\) \? 'Ethereum' : \/XRP\/\.test\(s\) \? 'XRP' : \/DOGE\/\.test\(s\) \? 'Dogecoin' : 'Bitcoin';/.test(html), 'an Ethereum, XRP or Dogecoin trade is counted under its own name in the performance table, never under Bitcoin');
+  assert.ok(/return \/GOLD\/\.test\(s\) \? 'Gold' : \/ETH\/\.test\(s\) \? 'Ethereum' : \/XRP\/\.test\(s\) \? 'XRP' : \/DOGE\/\.test\(s\) \? 'Dogecoin' : \/AUDUSD\/\.test\(s\) \? 'AUD\/USD' : \/USDCAD\/\.test\(s\) \? 'USD\/CAD' : \/NATGAS\/\.test\(s\) \? 'Natural gas' : 'Bitcoin';/.test(html), 'an Ethereum, XRP, Dogecoin or probe-market trade is counted under its own name in the performance table, never under Bitcoin');
+  // Run the real function: a probe trade must never be labelled Bitcoin, because Bitcoin is the fallback for an unknown ticker.
+  const m = /(function kalshiMarketName\(o\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'missing kalshiMarketName');
+  const name = new Function(m[1] + '; return kalshiMarketName;')();
+  assert.deepStrictEqual(['KXAUDUSD15M-26OCT201615-T1', 'KXUSDCAD15M-X', 'KXNATGAS15M-X', 'KXBTC15M-X', 'KXETH15M-X'].map((t) => name({ ticker: t })), ['AUD/USD', 'USD/CAD', 'Natural gas', 'Bitcoin', 'Ethereum']);
 };
 
 // Y37: the exit watch read back from the bot's own order records, inside More stats. Consequences: slip is trigger bid minus fill, "better or worse than holding" is only
@@ -665,7 +691,7 @@ gates.Y40 = () => {
 // Oct 12, 2026 at the owner's request ("lets go back to only L1 for now": the strategies must not overlap in mindset or position). Live and paper never shared a column, and now there is no paper.
 gates.Y41 = () => {
   assert.ok(!/id="kalLens"|data-lens=|kalshiLens|kal-lens|kalPaperNote|kal-paper-note/.test(html), 'no strategy switch, no paper note, no view state');
-  assert.ok(!/kalshiOpening|watchKalshiOpening|kalshiLane|kalshiPaper|kalChartsO|kalBotOpenO|kalBotClosedO|kalBotTotalsO|kalPerfWrapO|kalPerfO|kalChartLineO|kalChartPieO|kalChartBarsO/.test(html), 'no opening records, lane table, paper rows or paper charts');
+  assert.ok(!/kalshiOpening|watchKalshiOpening|kalshiLane|kalChartsO|kalBotOpenO|kalBotClosedO|kalBotTotalsO|kalPerfWrapO|kalPerfO|kalChartLineO|kalChartPieO|kalChartBarsO/.test(html), 'no opening records, lane table, opening paper rows or paper charts (the PAPER1 candidates card, Oct 20, 2026, is a different thing: kalshiPaperOrders, kalPaperCard)');
   assert.ok(!/Opening strategy|early favourite|early underdog|paper F|paper U/.test(html), 'no opening wording is left on the page');
   assert.ok(/if\(ses && ses\.active === true\)\{/.test(html), 'the live stake row follows the live session alone');
 };
