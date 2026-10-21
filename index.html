@@ -689,6 +689,10 @@
      keep the name, the time left and the YES price; the spread, round trip and size lines and the depth bar are one tap away in Copy all stats, not on the face of the page. */
   .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
   .kal-brow-r .kal-brow-when, .kal-brow-r .kal-depth{ display:none; }
+  /* Presentation view (the owner, Oct 21, 2026: a clean page to show people). One switch in the Layout menu sets data-present on the page; it is never saved, so a reload is always the full page. It only HIDES:
+     the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. Every number is still computed and the bot is untouched. */
+  html[data-present="on"] .kal-acct-total, html[data-present="on"] #kalBotStatus .kal-rows, html[data-present="on"] [data-card="positions"], html[data-present="on"] [data-card="trades"],
+  html[data-present="on"] .kal-perf-band, html[data-present="on"] #kalTools{ display:none; }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
   .kal-hit{ cursor:default; }
   .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
@@ -1198,6 +1202,7 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
+            <label><input type="checkbox" id="kalPresent"> Presentation view (hides the balance, open positions, recent trades and the price table; reset when the page reloads)</label>
             <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its up and down arrows)</label>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
@@ -1865,6 +1870,11 @@
     return [cols.join(',')].concat(rows).join('\n');
   }
 
+  // Presentation view on or off. Only sets (or removes) the page attribute the CSS reads; nothing is saved, so the next load is always the full page.
+  function kalshiSetPresent(on){
+    if(on){ document.documentElement.setAttribute('data-present', 'on'); } else { document.documentElement.removeAttribute('data-present'); }
+  }
+
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
   // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
   function kalshiAllOrdersCsv(orders){
@@ -2244,7 +2254,7 @@
       tile('Streak now', streak) + tile('Longest losing run', String(st.longestLoss));
     var table = function(title, rows){
       if(!rows.length){ return ''; }
-      return '<div class="kal-perf-t"><span class="kal-lbl">' + esc(title) + '</span>' + rows.map(function(r){
+      return '<div class="kal-perf-t' + (title === 'By price paid' ? ' kal-perf-band' : '') + '"><span class="kal-lbl">' + esc(title) + '</span>' + rows.map(function(r){
         return '<div><span>' + esc(r.label) + '</span><span>' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + esc(sg(r.net)) + '</b></div>';
       }).join('') + '</div>';
     };
@@ -3062,6 +3072,9 @@
       if(skipSync !== true && typeof syncUserSetting === 'function'){ syncUserSetting('kalBotLayout', layout, 300); }
     }
     // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens.
+    // Presentation view: a page attribute only, deliberately not stored anywhere (a reload is the full page again).
+    var presentBox = document.getElementById('kalPresent');
+    if(presentBox){ presentBox.addEventListener('change', function(){ kalshiSetPresent(presentBox.checked); }); }
     var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
     function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
     function commitOrder(){ layout.order = currentOrder(); save(); }
