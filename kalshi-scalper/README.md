@@ -4213,3 +4213,23 @@ Nothing else changes. Live code is untouched; a pass of either arm is put to the
 **Information only, not tries:** timed versus buy-and-hold return, volatility, Sharpe and worst drawdown; alpha by calendar year; months invested; per-ETF contribution.
 
 **Single read.** `python -m scalper.slow1 fetch` then `python -m scalper.slow1 run`, once; the result file blocks a rerun unless deleted on purpose (a crash fix only). Nothing here goes live. **Family tries: 8.**
+
+## Results: SLOW1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/slow1.py` and `tests/test_slow1.py` were committed before the run; result file `data/slow1_result.txt`. Sample 2007-03-01 to 2026-10-21, nine ETFs, 4,943 common days.
+
+| Cell | Months | Net alpha a year | NW z (bar 2.5) | Halves | 2022 on | At x1.2 cost | Placebo p95 | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| S1, 252 day lookback | 223 | **+2.32%** | **2.30** | +1.98% / +2.06% | +4.31% | +2.31% | +1.10% | **FALSIFIED** |
+| S2, 126 day lookback | 229 | **+2.75%** | **2.27** | +3.20% / +1.35% | +2.44% | +2.73% | +0.92% | **FALSIFIED** |
+| S3, 63 day lookback | 232 | **+2.70%** | **2.10** | +2.09% / +3.02% | +3.67% | +2.67% | +0.85% | **FALSIFIED** |
+
+- **Every cell failed on the z bar alone** (2.30, 2.27, 2.10 against 2.5). Every other condition passed: positive in both halves, positive from 2022 on, positive at x1.2 cost, and above the placebo's 95th percentile (about twice it).
+- **My prediction was wrong.** I said alpha between -1% and +2% a year, z under 1.5, all `FALSIFIED` (about 80%). The verdicts match; the sizes do not. Recorded as it was.
+- **What the timing does (information).** It is invested about 62% to 66% of the time and cuts the worst drawdown from **-28.3% to -7.6%** (S1), with volatility 5.9% against 9.8% and Sharpe 0.90 against 0.73. But its return is **lower**: 5.2% a year against 6.9% for buying and holding the same nine ETFs. The "alpha" is mostly that it holds less market (beta 0.33 to 0.41) at a similar Sharpe edge. This is a risk-reduction result, not a way to earn more.
+- **The three cells are one idea at three lookbacks**, so they are not three independent confirmations; agreement among them says little beyond "trend over 3 to 12 months looks the same".
+- **Dollar size.** +2.3% to +2.75% a year on a $200 account is **about $4.60 to $5.50 a year** before any account fees or tax. Real, if it is real, and not worth the attention at this size.
+- **Window check.** The edge is not a recent-window artefact (positive 2007 to 2014 and 2015 on, and larger from 2022), which is the main difference from PERP1 and the overnight work.
+- **Not run, and why:** a looser z or a shorter sample would be a new try chosen after seeing this; so would other lookbacks or shorting. A reading of "NOT_YET_FALSIFIED in spirit" is not allowed: the verdict is `FALSIFIED`. If it is ever wanted forward, it needs a registered paper record from today (nothing here goes live), and the owner has said he prefers live over paper, so this one is put to him as a choice, not recommended.
+
+**Decision.** Nothing built, nothing changed live. **Family tries: 8 (unchanged by the reading).**
