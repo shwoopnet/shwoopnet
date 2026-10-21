@@ -227,7 +227,9 @@ gates.G27 = () => {
   assert.deepStrictEqual(group([null, { orderId: 'x', count: 'bad', price: 'bad' }, { orderId: 'x', count: 1, price: '0.5' }]).length, 1, 'junk is not turned into a number');
   // The page shows grouped trades everywhere it counts them.
   assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
-  assert.ok(/Bot since ' \+ escapeHtml\(kalDate\(tot\.since\)\)/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && !/Deposits and manual trades/.test(html) && !/Manual trades and open orders/.test(html), 'the account area shows only the bot\'s own change; the line for deposits and manual trades is gone');
+  // The account card's line is TODAY's result on the US Central date (the owner, Oct 21, 2026), not the all-time total: yesterday's trades must not count, and it needs no starting line.
+  var code = html.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  assert.ok(/<span class="kal-k">Today<\/span>/.test(html) && /kalDayKey\(o\.ts\) === todayKey/.test(html) && /kalshiPerfStats\(todayOrders, 0\)\.total/.test(html) && !/Bot since/.test(code) && !/Deposits and manual trades/.test(html) && !/Manual trades and open orders/.test(html), 'the account area shows only the bot own result for today; the line for deposits and manual trades is gone');
 };
 
 (async () => {
