@@ -462,10 +462,9 @@ gates.Y23 = () => {
   assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi' \|\| name === 'data'\)/.test(html), 'only the Kalshi and Data pages turn it on, and every other page turns it off');
 };
 
-// Y24: the logo's ground flash sits inside the logo row, above the tagline, not across it.
+// Y24 (retired Oct 21, 2026): the bouncing logo cube and its ground flash were dead CSS (no markup used them) and were removed in the tidy-up; this gate now says they stay gone.
 gates.Y24 = () => {
-  const rule = /\.brand-ground\{([\s\S]*?)\}/.exec(html)[1];
-  assert.ok(/bottom:2px/.test(rule) && !/bottom:-/.test(rule), 'the flash line is above the tagline');
+  assert.ok(!/brand-ground|brand-impact-ring|brand-mark|brandBounce/.test(html), 'the unused logo animation CSS is gone');
 };
 
 
@@ -662,7 +661,8 @@ gates.Y43 = () => {
   assert.ok(m, 'a 700px block exists');
   assert.ok(/\.kal-spark\{ display:none; \}/.test(m[1]), 'the sparklines are hidden on a phone');
   assert.ok(!/data-card="performance"\]\{ display:none/.test(html), 'the Performance card is not hidden on a phone');
-  assert.ok(/@media \(max-width:\d+px\)\{[\s\S]{0,900}\.kal-charts\{ grid-template-columns:1fr; \}/.test(html), 'and on a narrow screen its charts stack to one column');
+  assert.ok(!/\.kal-charts\b/.test(html), 'the old Performance charts grid is gone (the charts live on the Data page, whose grid stacks to one column on a narrow screen)');
+  assert.ok(/@media \(max-width:900px\)\{ \.data-grid\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'and the Data page grid stacks to one column');
   assert.ok(!/kalPerfWrapC|kal-perf\b/.test(m[1]) && !/data-card="account"/.test(m[1]), 'the stats card stays');
 };
 
