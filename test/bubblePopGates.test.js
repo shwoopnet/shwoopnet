@@ -21,10 +21,13 @@ function fnSource(name) {
 
 // The headings and market names (words) use the wordmark's font; every NUMBER stays in the plain font, tabular, so figures like 774.14 stay easy to read (the owner, Oct 21, 2026).
 gates.P1 = () => {
-  for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-brow-name']) {
+  // Titan One is the wordmark and its ghost only (the owner, Oct 21, 2026): headings and market names are in the plain font too, with no bubble shadow.
+  for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-brow-name', '.kal-tools-h', '.settings-section-title']) {
     const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
-    assert.ok(m && /Titan One/.test(m[2]), sel + ' is set in Titan One');
+    assert.ok(m && !/Titan One/.test(m[2]) && /Public Sans/.test(m[2]) && !/text-shadow/.test(m[2]), sel + ' is in the plain font with no bubble shadow');
   }
+  const users = css.split('\n').filter((l) => /Titan One/.test(l) && !/^\s*(\/\*|\*)/.test(l));
+  assert.ok(users.length <= 2 && users.every((l) => /\.brand-name|font-size:min\(18vw/.test(l) || /bg-ghost/.test(css)), 'only the wordmark and its ghost use Titan One: ' + users.map((l) => l.trim().slice(0, 50)).join(' | '));
   for (const sel of ['.kal-tile b', '.kal-bub', '.index-card .ix-val', '.kal-acct-total']) {
     const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
     assert.ok(m && !/Titan One/.test(m[2]) && /Public Sans/.test(m[2]), sel + ' (a number) is in the plain font');

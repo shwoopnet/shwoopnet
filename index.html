@@ -364,8 +364,8 @@
 
   .settings-page{ display:flex; flex-direction:column; gap:28px; margin-top:24px; }
   .settings-section-title{
-    font-family:'Titan One', 'Public Sans', sans-serif; font-size:17px; color:var(--paper);
-    letter-spacing:.02em; font-weight:400; margin: 0 0 12px 2px; text-shadow:0 2px 0 var(--bubble-shadow);
+    font-family:'Public Sans', sans-serif; font-size:17px; color:var(--paper);
+    letter-spacing:0; font-weight:700; margin: 0 0 12px 2px;
   }
   .settings-card{
     background: var(--panel); border:1px solid var(--border); border-radius: var(--radius);
@@ -444,8 +444,8 @@
   .brief-asof{ margin:-6px 0 14px 2px; }
 
   .brief-section-title{
-    font-family:'Titan One', 'Public Sans', sans-serif; font-size:17px; color:var(--paper); font-weight:400;
-    letter-spacing:.02em; margin: 0 0 16px 0; text-shadow:0 2px 0 var(--bubble-shadow);
+    font-family:'Public Sans', sans-serif; font-size:17px; color:var(--paper); font-weight:700;
+    letter-spacing:0; margin: 0 0 16px 0;
   }
 
   .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
@@ -497,11 +497,11 @@
     display:flex; justify-content:space-between; align-items:center;
     padding: 36px 0 20px 0; flex-wrap:wrap; gap:12px;
   }
-  .trades-title{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:30px; font-weight:400; letter-spacing:.02em; line-height:1.1; text-shadow:0 2px 0 var(--bubble-shadow); }
+  .trades-title{ font-family:'Public Sans', sans-serif; font-size:28px; font-weight:800; letter-spacing:-.01em; line-height:1.1; }
   .trades-sub{ color:var(--muted); font-size:12.5px; margin-top:4px; }
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .kal-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:20px; box-shadow:var(--card-shadow); }
-  .kal-card-title{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:18px; font-weight:400; letter-spacing:.02em; margin-bottom:14px; text-shadow:0 2px 0 var(--bubble-shadow); }
+  .kal-card-title{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; letter-spacing:0; margin-bottom:14px; }
   /* Books: the market and its price on one line, the figures under it. */
   .kal-brow{ padding:10px 0; border-top:1px solid var(--border); }
   .kal-brow:first-child{ border-top:0; padding-top:0; }
@@ -585,7 +585,7 @@
   .kal-tools-body .kal-note:empty, .kal-botmenu-body .kal-note:empty{ display:none; }
   .kal-tools-body .kal-layout-body{ gap:6px; }
   .kal-tools-group{ display:grid; gap:6px; padding-bottom:10px; border-bottom:1px solid var(--border); } .kal-tools-group:last-child{ border-bottom:0; padding-bottom:0; }
-  .kal-tools-h{ font-family:'Titan One', 'Public Sans', sans-serif; font-size:14px; letter-spacing:.02em; }
+  .kal-tools-h{ font-family:'Public Sans', sans-serif; font-size:14px; font-weight:700; letter-spacing:0; }
   .kal-btn-danger{ background:var(--loss); border-color:var(--loss); color:#fff; }
   .kal-tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
   .kal-tile{ display:flex; flex-direction:column; gap:3px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; min-width:0; }
@@ -608,7 +608,7 @@
   .kal-console .kal-brow:hover{ box-shadow: var(--card-shadow-lift); transform: translateY(-1px); }
   .kal-depth{ display:flex; height:4px; border-radius:2px; overflow:hidden; margin-top:6px; background:var(--border); }
   .kal-depth > i{ display:block; height:100%; background:var(--paper); opacity:.55; }
-  .kal-brow-name{ font-family:'Titan One', 'Public Sans', sans-serif; font-weight:400; font-size:17px; letter-spacing:.02em; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
+  .kal-brow-name{ font-family:'Public Sans', sans-serif; font-weight:700; font-size:17px; letter-spacing:0; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
   /* Phones: the price lines under each market are hidden. The Performance card (P/L line, orders ring, settled-trade bars) came back on phones on Oct 21, 2026 at the owner's request, now that the calm view made
      it quiet enough to fit; it stacks to one column below. */
   @media (max-width:700px){
@@ -774,9 +774,9 @@
      for the same user than letting it move. Every other animation here
      is decorative and genuinely loses nothing by stopping. */
 
-  /* Bubble pop (the owner, Oct 21, 2026: "more visual appeal and interactivity"). The bubbly Titan One of the wordmark now carries the headings and market names (words only); every number, big or small, is in Public Sans so numbers stay easy to read (the owner, Oct 21, 2026, about a figure like 774.14). Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render),  over a card, cards and tiles lift a
+  /* Bubble pop (the owner, Oct 21, 2026: "more visual appeal and interactivity"). The bubbly Titan One is for the wordmark ONLY (the owner, Oct 21, 2026: bubble text is good for the logo but not for the whole site, and the black blocky headings looked like a game); headings, market names and every number are in Public Sans so everything stays easy to read (the owner, Oct 21, 2026, about a figure like 774.14). Motion is decoration only and never moves a number: cards rise in once when a page is shown (never again on the minute's re-render),  over a card, cards and tiles lift a
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
-  /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One stays for words only. */
+  /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One is only the wordmark. */
   .kal-bub{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; }
   .kal-card, .settings-card, .breadth-widget, .movers-col, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
   .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
