@@ -1225,10 +1225,8 @@
   <!-- ================= SETTINGS ================= -->
   <main class="page" id="page-kalshi" hidden>
     <div class="trades-header kal-header-bare">
-      <div class="trades-title">Bot</div>
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
-        <button class="kal-mini" id="kalPresentBtn" type="button" aria-pressed="false">Mask amounts</button>
-        <button class="kal-mini" id="kalDataBtn" type="button">Data</button>
+        <button class="kal-mini" id="kalPresentBtn" type="button" aria-pressed="false" title="Shows **** instead of dollar amounts">Privacy</button>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
           <div class="kal-tools-group"><div class="kal-tools-h">Account</div>
@@ -1259,7 +1257,7 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
-            <label><input type="checkbox" id="kalPresent"> Presentation view (shows **** instead of every dollar amount and hides the Tools menu; reset when the page reloads)</label>
+            <label><input type="checkbox" id="kalPresent"> Privacy view (shows **** instead of every dollar amount and hides the Tools menu; reset when the page reloads)</label>
             <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its up and down arrows)</label>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
@@ -1309,15 +1307,6 @@
       <div class="kal-card kal-card-bare" data-card="books">
         <div id="kalBooks" class="kal-books"><div class="kal-empty">Loading...</div></div>
       </div>
-      <div class="kal-card kal-card-flush" data-card="performance">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Performance</div>
-          <label class="kal-lbl" for="kalChartRange">Showing <select id="kalChartRange"><option value="all">all sessions</option><option value="session">this session only</option></select></label></div>
-        <div class="kal-charts" id="kalChartsC">
-          <div class="kal-chart"><div class="kal-chart-title">Bot P/L, settled trades</div><div id="kalChartLine"></div></div>
-          <div class="kal-chart"><div class="kal-chart-title">How the bot's orders ended</div><div id="kalChartPie"></div></div>
-          <div class="kal-chart kal-chart-wide"><div class="kal-chart-title">Each settled trade</div><div id="kalChartBars"></div></div>
-        </div>
-      </div>
       <div class="kal-card kal-card-flush" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
@@ -1337,7 +1326,9 @@
       <div class="kal-card" data-card="data-weekly"><div class="kal-card-title">Result by week</div><div id="dataWeekly"></div></div>
       <div class="kal-card" data-card="data-growth"><div class="kal-card-title">Growth trend</div><div id="dataLine"></div></div>
       <div class="kal-card" data-card="data-share"><div class="kal-card-title">Share of trades by market</div><div id="dataShare"></div></div>
+      <div class="kal-card" data-card="data-ended"><div class="kal-card-title">How the orders ended</div><div class="kal-chart"><div id="kalChartPie"></div></div></div>
       <div class="kal-card kal-card-flush" data-card="data-markets"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">By market</div></div><div id="dataMarkets"></div></div>
+      <div class="kal-card" data-card="data-bars"><div class="kal-card-title">Each settled trade</div><div class="kal-chart"><div id="kalChartBars"></div></div></div>
     </div>
     <details class="kal-card data-details" id="dataDetails" style="margin-top:20px"><summary class="kal-card-title">All the numbers</summary>
       <div class="kal-perf" id="kalPerfWrapC"><div id="kalPerf"></div></div>
@@ -3101,12 +3092,11 @@
   }
 
   function renderKalshiCharts(){
-    var lineEl = document.getElementById('kalChartLine'), pieEl = document.getElementById('kalChartPie');
-    if(!lineEl || !pieEl){ return; }
+    var pieEl = document.getElementById('kalChartPie');
+    if(!pieEl){ return; }
     var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = kalshiChartRange === 'session' && sess && Number.isFinite(sess.since) ? sess.since : 0;
     var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var series = kalshiPnlSeries(orders, since);
-    lineEl.innerHTML = kalshiLineSvg(series, escapeHtml, kalshiMoney);
     pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
     var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf');
     kalshiSetBars(barsEl, barsEl ? kalshiBarsSvg(series, escapeHtml, kalshiMoney) : '');
@@ -3119,10 +3109,6 @@
   (function(){
     var sel = document.getElementById('kalTradeFilter');
     if(sel){ sel.addEventListener('change', function(){ kalshiTradeFilter = sel.value === 'all' ? 'all' : 'bot'; kalshiLiveShow.page = 0; renderKalshiBot(); }); }
-  })();
-  (function(){
-    var sel = document.getElementById('kalChartRange');
-    if(sel){ sel.addEventListener('change', function(){ kalshiChartRange = sel.value === 'session' ? 'session' : 'all'; renderKalshiCharts(); }); }
   })();
 
   function renderKalshiL1(){
@@ -3216,7 +3202,7 @@
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['performance', 'Performance'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['books', 'Live books']];
+    var OPTIONAL = [['positions', 'Open positions'], ['trades', 'Recent trades'], ['books', 'Live books']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -3257,12 +3243,10 @@
     // Presentation view: a page attribute only, deliberately not stored anywhere (a reload is the full page again).
     var presentBox = document.getElementById('kalPresent');
     var presentBtn = document.getElementById('kalPresentBtn');
-    var syncPresent = function(on){ if(presentBox){ presentBox.checked = on; } if(presentBtn){ presentBtn.textContent = on ? 'Show amounts' : 'Mask amounts'; presentBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); } };
+    var syncPresent = function(on){ if(presentBox){ presentBox.checked = on; } if(presentBtn){ presentBtn.textContent = on ? 'Privacy on' : 'Privacy'; presentBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); } };
     if(presentBox){ presentBox.addEventListener('change', function(){ kalshiSetPresent(presentBox.checked); syncPresent(presentBox.checked); }); }
     // The same switch as a button in the page header (the Layout menu was too easy to miss): it only toggles the page attribute, and it is never hidden by it, so the page can always be brought back.
     if(presentBtn){ presentBtn.addEventListener('click', function(){ var on = document.documentElement.getAttribute('data-present') !== 'on'; kalshiSetPresent(on); syncPresent(on); }); }
-    var dataBtn = document.getElementById('kalDataBtn');
-    if(dataBtn){ dataBtn.addEventListener('click', function(){ showPage('data'); }); }
     var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
     function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
     function commitOrder(){ layout.order = currentOrder(); save(); }

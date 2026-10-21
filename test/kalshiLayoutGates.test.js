@@ -50,15 +50,16 @@ gates.Y5 = () => {
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(names(rail[1]), ['account', 'positions'], 'the rail holds the account (with the performance stats) and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['books', 'performance', 'trades'], 'the main column: books tiles, the charts and the trades (the bot card is gone; its controls sit in the account card)');
+  assert.deepStrictEqual(names(main), ['books', 'trades'], 'the main column: books tiles and the trades (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
-  const perf = /data-card="performance">([\s\S]*?)\n      <div class="kal-card kal-card-flush" data-card="trades">/.exec(main)[1];
-  for (const id of ['kalChartLine', 'kalChartPie', 'kalChartBars', 'kalChartRange']) assert.ok(perf.indexOf('id="' + id + '"') > -1, id + ' lives in the charts card on the bot page');
+  const dataPage0 = html.slice(html.indexOf('id="page-data"'), html.indexOf('id="page-settings"'));
+  for (const id of ['kalChartPie', 'kalChartBars', 'dataLine', 'dataWeekly']) assert.ok(dataPage0.indexOf('id="' + id + '"') > -1, id + ' lives on the Data page');
+  assert.ok(!/data-card="performance"/.test(html) && !/id="kalChartRange"/.test(html) && !/id="kalChartLine"/.test(html), 'and the Performance card, its range choice and its duplicate line are gone from the Bot page');
   // Oct 21, 2026 cleanup: the stat tiles and tables left the account card (a tall column) and live in the Data page's "All the numbers" fold; the account card is the status and the controls.
-  assert.ok(!/id="kalPerf"/.test(perf) && !/id="kalPerf"/.test(rail[1]), 'the stat tiles and tables are not in the rail or the charts card');
+  assert.ok(!/id="kalPerf"/.test(rail[1]), 'the stat tiles and tables are not in the rail');
   const dataPage = html.slice(html.indexOf('id="page-data"'), html.indexOf('id="page-settings"'));
   assert.ok(/<details class="kal-card data-details" id="dataDetails"[\s\S]*id="kalPerfWrapC"><div id="kalPerf"><\/div>/.test(dataPage), 'they sit in a fold on the Data page, closed until opened');
   const trades = /data-card="trades">([\s\S]*)$/.exec(main)[1];
@@ -203,7 +204,7 @@ gates.Y14 = () => {
   const text = f.kalshiStatsText(st, null, money);
   assert.ok(/Net: -\$1\.62/.test(text) && /Deepest drawdown:/.test(text) && /Streak now:/.test(text) && /Longest losing run:/.test(text) && /By market\n  Bitcoin: 3 trades/.test(text) && /By price paid\n  90c to 92c: 1 trades/.test(text) && /Exit at 25c\n  No position has fallen/.test(text), 'every stat is in the copied text, including the hidden ones');
   assert.strictEqual(f.kalshiStatsText(f.kalshiPerfStats([], 0), null, money), 'No settled trades yet.');
-  assert.ok(/id="kalChartBars"/.test(html) && /id="kalPerf"/.test(html) && /id="kalChartRange"/.test(html), 'the page has the bar chart, the tracker and the range choice');
+  assert.ok(/id="kalChartBars"/.test(html) && /id="kalPerf"/.test(html), 'the page has the bar chart and the tracker (both on the Data page now)');
   // In this palette --ink is the page background and --paper is the text colour (inverted names), and --card does not exist: a select styled with them showed dark text on dark in dark mode.
   // This used to read one named rule (.kal-perf-head select), which no markup used, so it guarded nothing; it now reads every rule that touches a select.
   const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
@@ -304,7 +305,8 @@ gates.Y11c = () => {
   set.set(false); assert.deepStrictEqual(attrs, {}, 'off removes it, back to the full page'); assert.strictEqual(set.masked(), false);
   assert.ok(!/localStorage[^;]*[Pp]resent|[Pp]resent[^;]*localStorage/.test(html) && !/syncUserSetting\('kalPresent/.test(html), 'it is never saved, in this browser or in the account');
   assert.ok(/id="kalPresent"/.test(html) && /id="kalPresent"[\s\S]{0,260}id="kalLayoutUnlock"/.test(html), 'a checkbox in the Layout menu');
-  assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Mask amounts<\/button>\s*<button class="kal-mini" id="kalDataBtn"[^>]*>Data<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header, outside the Tools menu so presentation view cannot hide it, with a Data button beside it');
+  assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Privacy<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header called Privacy, outside the Tools menu so the privacy view cannot hide it; there is no Data button (the sidebar has it)');
+  assert.ok(!/id="kalDataBtn"/.test(html) && !/<div class="trades-title">Bot<\/div>/.test(html), 'and no big Bot title next to the updated time');
   assert.ok(!/html\[data-present="on"\] #kalPresentBtn/.test(html), 'and nothing hides the button that turns it off');
   // Oct 21, 2026 (the owner: "instead of hide, turn sensitive information into ****"): nothing is hidden any more except the Tools menu, which holds the raw account read; amounts are masked.
   const css = /html\[data-present="on"\][^{]*\{[^}]*\}/.exec(html); assert.ok(css && /^html\[data-present="on"\] #kalTools\{ display:none; \}$/.test(css[0]), 'only the Tools menu is hidden: ' + (css && css[0]));
