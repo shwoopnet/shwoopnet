@@ -4136,3 +4136,19 @@ The owner asked to try gold against silver again with a fairer funding model. Be
 **Read (once).** At the first of **250 filled settled orders or 2026-12-01**. `NOT_YET_FALSIFIED` needs: wide group at least **40** orders; narrow group mean net **above zero**; narrow minus wide **above zero** with a day-clustered z of at least **2.0**; and the narrow group above zero in **both halves** (by time). Anything else is `FALSIFIED`; fewer than 40 wide orders is `NOT_ENOUGH_DATA`, never a pass. Information only, not part of the verdict: the same split by series; orders that were exited at 50c, read separately (the exit watch makes their net not comparable).
 
 **What a pass would and would not mean.** It would be a reason to put a "skip when the spread is over 3c" rule to the owner as a choice, with its own gate tests; it is never a switch, and a rule added to live code would cost the entries it skips (about the share above). **Running count: about 4,638 tries.**
+
+## Information: slippage and fees from the owner's own order diagnostics (2026-10-21; no hypothesis, no verdict, no variant counted)
+
+The owner asked whether slippage on the bot's immediate-or-cancel limit orders is what makes fees "kill" it. `studies/order_diagnostics_2026-10-21.csv` is the page's "Copy order diagnostics" export (150 bot orders, 2026-10-15 to 2026-10-21; 103 filled, 101 with a public settled result in `..._results.json`). A NO order's `avgFill` is the YES-book price, so the price paid is 1 minus it. Settlement result per market from Kalshi's public market endpoint. Hold-to-settlement P/L at the ACTUAL fill price and actual fee; exit-watch sells are not modelled (an exited order is scored as the held loss).
+
+| | |
+|---|---|
+| Filled orders / contracts | 103 / 384 |
+| Slippage against the decision price | mean **-0.99c** (negative = filled BETTER), median -0.10c; worse than decided by over 0.5c on only **5** of 103 orders, better by over 0.5c on **38** |
+| Actual fee per contract | **0.50c**, equal to Kalshi's 7% x p x (1 - p) at the fill price (mean difference -0.001c), so the order-level round-up is already inside it |
+| All 101 settled | **-$10.61** (-2.83c a contract), 9 losses (8.9%); before fees at the actual fills **-$8.71**, fees **$1.90** |
+| Filled better than decided by over 0.5c | 37 orders, 6 lost, **-$11.91 (-8.8c a contract)** |
+| Filled within 0.5c of decided | 59 orders, 2 lost, **+$5.09 (+2.31c a contract)** |
+| Filled worse than decided by over 0.5c | 5 orders, 1 lost, -$3.79 |
+
+**Reading (one look, not pre-registered, so a lead and not a result).** Slippage is not what costs the bot: fills are on average better than the decision price, and fees are exactly the formula. What the table shows is **adverse selection in the price improvement**: when the order fills 1c to 25c BETTER than the quote, the book had moved against the position between the read and the order landing, and those fills lose far more often (16% against 3%). An IOC at the touch is therefore filling a mix of stable quotes (good) and collapsing ones (bad), as the 2026-10-08 live fills study also suggested. Two cheap, testable consequences, neither run here: (1) refuse a fill that is more than about 1c better than the decision price (it needs a limit on the other side, which Kalshi does not offer on an IOC, so the check would be after the fact, by selling or by sending a smaller order first), and (2) the maker/resting idea is unchanged by this table. Any rule built from this table is a new try and needs a pre-registration and fresh orders; the forward set is the bot's own new orders (FWD2 already reads their spread).
