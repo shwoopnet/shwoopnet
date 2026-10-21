@@ -4733,3 +4733,19 @@ Kelly fraction of bankroll per position from L1's loss rate on the 69 days (pric
 
 - **Reading.** A loss costs 93c and a win pays 7c, so the optimal bet swings from 22% of the bankroll to 3.5% across gold's own interval; the number to use is the cautious one. At the worst plausible loss rate **gold can carry about 3.5% per position, and Bitcoin and Ethereum cannot be sized at all**, which matches the owner's choice of one contract on those two. The live base is about 2% per position, so gold sits under its worst-case Kelly and above half of it nowhere.
 - **What this ignores, all in the unfavourable direction:** the edge was +2.2c then +1.0c across the two windows (the full-sample rate may be too kind), series are correlated (the 4.5% window cap is the binding rule, not Kelly), and a loss streak of 5 to 8 trades in a row is not rare at a 5% loss rate. **It does not argue for a bigger gold size.** It says the present gold size is not reckless.
+
+## Pre-registration: EL1, L1 entered at 10 minutes left instead of 6, on every 15 minute series (written 2026-10-21 before the rule was computed on the pool; the owner's "keep generating strategies")
+
+**Why.** The ML1 table showed Bitcoin's L1 edge is largest early (+2.53c at 10 minutes, loss 5.85% at a 91.0c mean price, whose whole 95% interval 4.13% to 8.02% sits under the 8.5% break-even) and fades to zero by 3 minutes, and L3 (2 minutes) lost. Gold and Ethereum are flat. This asks whether **earlier entry is a general feature of the favourite effect** or a Bitcoin quirk, on the 18 series of TREE2's pool, which the forward claims do not cover. **One more Kalshi try; running count about 4,655.** The z bar is 2.8.
+
+**Disclosed.** The ML1 table for gold, Bitcoin and Ethereum is seen (the three series are 3 of the 18); nothing else has been computed at 10 minutes. The result for the other 15 series is unknown to me.
+
+**Rule (fixed).** `lstrats.hold_rule` with `left_s = 600` and the L1 band (ask 88c to 97c), held to settlement, on TREE2's pool (`alts2`, `alts3`, `alts4`, `book`, `l1b`, `e3b`; 15 minute series; de-duplicated by ticker), fee 7% x p x (1-p), x1.2 at stress. One entry per market. Comparison: L1 at 6 minutes on the same pool (the +0.20c all-decided figure from DL1 is for a different subset; EL1 prints its own 6 minute baseline over the same markets).
+
+**Pass bar.** At least **1,000 entries on 10 days**; mean net above zero with a day-clustered z of at least **2.8**; positive in both halves and at x1.2; **at least 10 of the 18 series positive** (so one series cannot carry it); and **10 minute entries beat 6 minute entries** on the markets that qualify under both rules (paired by market, day-clustered z of at least 2.0). Otherwise `FALSIFIED`.
+
+**Mechanism / counterparty.** With 10 minutes left the favourite has had less time to be verified by the underlying's move, so sellers pricing it at 88c to 97c are less informed than at 6 minutes, and the price has not yet absorbed the strike distance. The blind spot: fewer markets qualify early (the favourite is rarely at 88c with 10 minutes left), so the sample is smaller and the winners are the lopsided ones.
+
+**Prediction, recorded first.** Pooled mean **-0.5c to +0.6c**, about **2,000 to 6,000** entries (far fewer than at 6 minutes), `FALSIFIED` (about **80%**), most likely on the series count (only Bitcoin and a few crypto series positive) or the paired comparison.
+
+**Single read.** `python -m scalper.el1 run`, once; a refused rerun unless `data/el1_result.txt` is deleted on purpose. Nothing goes live. **Kalshi tries: about 4,655.**
