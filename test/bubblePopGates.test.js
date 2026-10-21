@@ -81,6 +81,14 @@ gates.P6 = () => {
   for (const sel of ['.bg-ghost', '.bg-grid', '.bg-ambient::before']) assert.ok(css.includes('[data-reduce-motion="true"] ' + sel), sel + ' is dropped when graphics are limited');
 };
 
+// P7: the wordmark never changes colour under the pointer (the owner, Oct 21, 2026). It used to turn --amber, which is black in Mono Ink, so the white letters went dark. It hops instead, and the hop stops under reduce motion.
+gates.P7 = () => {
+  assert.ok(!/\.brand:hover[^{]*\{[^}]*\bcolor\s*:/.test(css), 'no hover rule on the wordmark sets a colour');
+  assert.ok(/\.brand:hover \.brand-name span\{[^}]*translateY/.test(css), 'the letters hop on hover');
+  assert.ok((html.match(/<div class="brand-name"[^>]*>((?:<span[^>]*>.<\/span>){6})<\/div>/) || [])[1], 'the wordmark is six letters in six spans');
+  assert.ok(css.includes('[data-reduce-motion="true"] .brand-name span') && /prefers-reduced-motion: reduce\)\{[\s\S]*?\.brand-name span\{ transition: none; \}/.test(css), 'the hop is off under reduce motion, in both blocks');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
