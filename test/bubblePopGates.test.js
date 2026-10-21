@@ -60,14 +60,10 @@ gates.P3 = () => {
   assert.ok(!r.el.cls.has('enter') && !r.calls.timers.length, 'nothing happens when motion is reduced');
 };
 
-// The pointer light only sets two custom properties on a card, for a mouse or pen, and is never wired up when motion is reduced.
+// The cursor spotlight was removed on Oct 21, 2026 at the owner's request: no pointer listener, no --mx/--my, no gradient on cards.
 gates.P4 = () => {
-  const i = html.indexOf('var raf = 0, last = null, CARD');
-  assert.ok(i > 0);
-  const block = html.slice(i, html.indexOf('})();', i));
-  assert.ok(/e\.pointerType === 'touch' \|\| motionReduced\(\)/.test(block), 'not for touch, not when reduced');
-  const sets = [...block.matchAll(/style\.(setProperty|removeProperty)\('([^']+)'/g)].map((m) => m[2]);
-  assert.deepStrictEqual([...new Set(sets)].sort(), ['--mx', '--my'], 'it touches nothing but --mx and --my');
+  assert.ok(!/document\.addEventListener\('pointer(move|out)'/.test(html), 'no page-wide pointer listener (the chart hover tip listens on its own box only)');
+  assert.ok(!/--mx|--my|--spot/.test(html), 'no cursor light variables');
 };
 
 // Hover lift and the entrance are switched off by both reduce-motion routes (the OS setting and the Settings switch).
@@ -79,11 +75,10 @@ gates.P5 = () => {
   }
 };
 
-// Limit graphics is the old reduce-motion switch under a wider name: one stored setting, and it also removes the glow, the grid, the ghost wordmark and the pointer light's gradient.
+// Limit graphics is the old reduce-motion switch under a wider name: one stored setting, and it also removes the glow, the grid and the ghost wordmark.
 gates.P6 = () => {
   assert.ok(/<div class="settings-row-title">Limit graphics<\/div>/.test(html) && !/<div class="settings-row-title">Reduce motion<\/div>/.test(html), 'the Settings row says Limit graphics');
   for (const sel of ['.bg-ghost', '.bg-grid', '.bg-ambient::before']) assert.ok(css.includes('[data-reduce-motion="true"] ' + sel), sel + ' is dropped when graphics are limited');
-  assert.ok(/\[data-reduce-motion="true"\] \.kal-card[^{]*\{ background-image: none; \}/.test(css), 'and so is the pointer light gradient on cards');
 };
 
 let failed = 0;
