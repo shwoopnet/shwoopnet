@@ -5008,3 +5008,19 @@ The owner confirmed the crowded-window filter as a forward read. **Nothing in th
 - **XLEAD1, does a Bitcoin flip in the previous window predict the next window for other coins?** Followers: ETH, XRP, DOGE, HYPE, NEAR, BNB, ZEC. Group A: a follower entry whose window's previous window (900 seconds earlier, closed before the decision) had a **Bitcoin L1 entry that lost**; group B: the previous window had a Bitcoin L1 entry that **won**; windows with no Bitcoin entry are excluded. Mechanism: a Bitcoin flip marks a volatile crypto regime that persists into the next 15 minutes (or the opposite, an overreaction the next window's favourites benefit from). **Prediction:** group A lower than B by **0c to 1.5c**, |z| under 2.0 (about **80%** `FALSIFIED`).
 
 **Single read.** `python -m scalper.cuts3 run`, once; a refused rerun unless `data/cuts3_result.txt` is deleted on purpose. Nothing goes live.
+
+## Results: SIDE1, HOUR1 and XLEAD1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)
+
+Code `scalper/cuts3.py` and `tests/test_cuts3.py` were committed before the run; result file `data/cuts3_result.txt`. Bar |z| 2.4, two-sided.
+
+| Test | Group a | Group b | a minus b per day | z | Verdict |
+|---|---|---|---|---|---|
+| SIDE1 (360 s) | YES favourite, n 12,426, +0.39c | NO favourite, n 12,367, -0.15c | +0.44c | +1.18 | **FALSIFIED** (not shown) |
+| SIDE1 at 600 s (information) | YES, n 5,798, **+1.28c** | NO, n 4,981, **-0.24c** | **+1.35c** | **+1.97** | not a try |
+| HOUR1 | closes on the hour, n 6,043, +0.57c | :15 :30 :45, n 18,750, -0.02c | +0.77c | +1.51 | **FALSIFIED** (not shown) |
+| XLEAD1 | after a Bitcoin L1 loss, n 293 | after a Bitcoin win, n 4,059 | | | **NOT_ENOUGH_DATA** (group a under 500) |
+
+- **Predictions** (|difference| under 1.0c and |z| under 2.0 for SIDE1 and HOUR1; XLEAD1 lower after a loss by 0c to 1.5c): SIDE1 and HOUR1 right; XLEAD1 could not be judged, because a Bitcoin L1 loss is rare (293 follower entries after one), which I should have counted before registering. Recorded as it was.
+- **A lead, from the information row only:** at **10 minutes** YES favourites earned **+1.28c** against **-0.24c** for NO favourites (z +1.97, both halves positive: +2.25c, +0.94c). It missed the 2.4 bar and was not registered for 10 minutes, so it is a lead. Mechanism fits the registration (retail leans to buying up). For a series like Bitcoin, XRP or natural gas now entered at 10 minutes this would mean the NO side is the weaker half.
+- **Registered now, before any fresh-day entry is classified (FWD7 secondary claim; one more Kalshi try: about 4,671):** on the fresh public candles read for FWD7, the pooled 10 minute **YES favourite net minus NO favourite net** is above zero with a day-clustered z of at least **2.4**, and the YES group above zero by itself. Read with FWD7 (30 fresh days or 2026-12-01). **Prediction:** difference **+0.3c to +1.5c**, `NOT_YET_FALSIFIED` about **20%**. A pass would be a proposal to the main session, with the owner's go, to skip NO-side 10 minute entries; nothing changes now. Also printed from the bot's own `entryLead` "10m" orders as information (side is stored on the order).
+- **Count: Kalshi tries about 4,671.** Nothing built, nothing changed live.
