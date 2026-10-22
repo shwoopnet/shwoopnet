@@ -5651,3 +5651,7 @@ Owner: "keep going". Idea: volatility clusters, so after a recent favourite flip
 - **FALSIFIED** if diff < +0.3c or z < 1.0; otherwise NOT_ENOUGH_DATA unless every condition holds.
 - **Information only:** the same with the market-wide version (any series, any loss in the stretch); loss rates of both groups.
 - Tries: +1 (running count about 4,705). Run once: `python -m scalper.losscl1 run`.
+
+### LOSSCL1 result (2026-10-22, run once): FALSIFIED, no clustering of flips within a series
+
+Same series: RL 1,527 entries (loss rate 6.29%, +0.42c) against NOT_RL 15,157 (6.54%, +0.14c); NOT_RL minus RL **-0.26c, z -0.37** (needed +1.0c and z 2.0). Halves -0.55c and -0.01c; the loss rates are the same, so a flip in the last hour tells nothing about the next one. The prediction (+0.8c) was wrong in size and sign, so the rule is dead. The market-wide version (information only, not a claim): RL 11,532, NOT_RL 13,175, difference -0.93c, z -2.40, wrong sign for the idea and almost half of all entries are "RL" (any of 18 series lost in the stretch), so it mostly marks busy hours, not volatility. Not pursued. Tries: +1 (running count about 4,705).
