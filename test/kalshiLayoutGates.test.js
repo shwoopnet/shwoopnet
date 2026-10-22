@@ -291,7 +291,7 @@ gates.Y11b = () => {
   assert.deepStrictEqual([1, 2, 3].map((i) => col(out[i], 'ticker')), ['A', 'C', 'B'], 'oldest first');
   assert.strictEqual(col(out[3], 'pnl'), '0.24', 'a settled order carries the bot\'s saved P/L');
   assert.strictEqual(col(out[1], 'pnl'), '', 'an open order has none');
-  assert.ok(['entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3'].every((c) => head.includes(c)), 'the full export carries the entry lead and what the research reads need');
+  assert.ok(['entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5'].every((c) => head.includes(c)), 'the full export carries the entry lead and what the research reads need');
   assert.deepStrictEqual([col(out[3], 'seenBid'), col(out[3], 'seenAsk'), col(out[1], 'seenAsk')], ['0.91', '0.94', ''], 'the quote the bot saw is exported (the spread forward test reads it); an order with none leaves it empty');
   assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiLiveOrders\)/.test(html), 'a button, built from the bot\'s own orders');
 };

@@ -1211,6 +1211,26 @@ gates.RR1 = async () => {
   assert.deepStrictEqual([h.calls.length, r3.status], [2, 429], 'a second 429 comes back as it is, after one retry only');
 };
 
+// RL3: rng5, the 5 minute range of the bought side's mid, is logged beside rise3 (the research session's FLAT2 lead, Oct 22, 2026). Logging only. Consequence: a quiet market and a jumpy one can be told apart after the fact, and a thin read logs nothing rather than a wrong range.
+gates.RL3 = async () => {
+  const nowSec = Math.floor(NOW / 1000);
+  const mids = [0.80, 0.86, 0.83, 0.84, 0.88, 0.90];   // oldest first, six minute marks t-300 .. t
+  const cs = mids.map((m, i) => candle(nowSec - 300 + i * 60, (m - 0.01).toFixed(2), (m + 0.01).toFixed(2)));
+  const yes = live.riseFromCandles(cs, 'yes', nowSec), no = live.riseFromCandles(cs, 'no', nowSec);
+  assert.ok(Math.abs(yes.rng - 0.10) < 1e-9 && Math.abs(no.rng - 0.10) < 1e-9, 'the range is max minus min of the six marks, the same for either side: ' + [yes.rng, no.rng]);
+  assert.ok(Math.abs(yes.rise - 0.07) < 1e-9, 'rise3 is unchanged by it: ' + yes.rise);
+  const five = live.riseFromCandles(cs.slice(1), 'yes', nowSec);
+  assert.ok(five && five.rng === null, 'a missing mark leaves the range out, and the rise (which has its own mark) is still read');
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } }, candles: cs });
+  await tick(w, { quotes: [q10('KXXRP15M', XRP10)] });
+  const rec = w.docs.get('L1-' + XRP10);
+  assert.ok(w.posts.length === 1 && Math.abs(rec.rng5 - 0.10) < 1e-9, 'the order carries rng5: ' + rec.rng5);
+  const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } }, candles: cs.slice(1) });
+  await tick(w2, { quotes: [q10('KXXRP15M', XRP10)] });
+  const rec2 = w2.docs.get('L1-' + XRP10);
+  assert.ok(w2.posts.length === 1 && rec2.rng5 === undefined && rec2.rise3 !== undefined, 'a five-mark read logs the rise and no range');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
