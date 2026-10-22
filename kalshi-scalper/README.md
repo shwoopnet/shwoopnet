@@ -5155,3 +5155,27 @@ The owner said **yes to logging the 3 minute rise**. PR #458 gives each **10 min
 - **Use.** The registered JUMP1 and JUMP1b verdicts stay on the **public candles at 360 seconds** (one definition for every series). The bot's own `rise3` on 10 minute orders is read as **information**, split at 5c and 20c, from the deploy date the main session will give. Note the cuts were found at 6 minutes; at 10 minutes the rise is larger on average (about 91% of 10 minute entries rose 5c or more in the history), so the 20c cut is the one that can separate groups there.
 
 **Update (2026-10-22 ~01:46 UTC, the main session's note, relayed):** `rise3` goes on **every** new bot order, 6 minute and 10 minute, not only the 10 minute ones (PR #458 updated, not merged or deployed when relayed). The first order with `rise3` is the first one after the deploy date the main session will give. This means the bot's own 6 minute orders (gold, Ethereum, Dogecoin, the currency probes) can also be split at 5c and 20c as **information** next to the registered public-candle verdicts, which are unchanged.
+
+## Information: the combined "firm favourite" rule on the history (2026-10-22; TREE2's pool, 69 days; in-sample, nested cuts, no verdict, not a try)
+
+L1 entries held to settlement, 1 contract each across the 18 series. `tib` = minutes already in the band, `dip` = the lowest the side's mid had been earlier in the market, `rise` = the 3 minute rise of the side's mid. "c/day" is the sum of net over all kept entries per day across the pool, not the live system.
+
+| Rule | n (per day) | Net per contract | Halves | Loss rate | c/day |
+|---|---|---|---|---|---|
+| **6 minutes:** all entries | 24,793 (359) | +0.12c | +0.44 / -0.21 | 6.6% | +43 |
+| tib 4 or more | 3,363 (49) | +1.64c | +1.68 / +1.61 | 3.5% | +80 |
+| dip 0.6 or more | 6,710 (97) | +1.09c | +1.38 / +0.81 | 5.1% | +106 |
+| rise under 5c | 6,511 (94) | +1.35c | +1.82 / +0.89 | 5.3% | +128 |
+| rise under 20c | 18,226 (264) | +0.60c | +0.92 / +0.28 | 6.0% | **+158** |
+| tib 4+ and dip 0.6+ | 1,865 (27) | **+2.24c** | +2.37 / +2.11 | **2.8%** | +61 |
+| tib 2+ and dip 0.6+ and rise under 20c | 3,857 (56) | +1.23c | +1.41 / +1.05 | 4.1% | +69 |
+| tib 4+, dip 0.6+, rise under 5c | 1,568 (23) | +2.19c | +2.43 / +1.95 | 3.1% | +50 |
+| **10 minutes:** all entries | 10,779 (156) | +0.58c | +0.51 / +0.64 | 7.4% | +90 |
+| dip 0.6 or more | 5,751 (83) | +1.04c | +1.43 / +0.68 | 6.7% | +87 |
+| rise under 20c | 5,983 (87) | +0.99c | +1.11 / +0.89 | 7.0% | +86 |
+| tib 4 or more | 128 (1.9) | +3.47c | +2.67 / +4.26 | 2.3% | +6 |
+
+- **Stacking works in the history.** The strictest 6 minute rule (tib 4+ and dip 0.6+) has a 2.8% loss rate against the 6.8% break-even and +2.24c a contract in both halves, on 27 entries a day. Each feature alone gives +1.1c to +1.6c; together about +2.2c; looser cuts keep more volume at lower edge.
+- **There is a trade-off between edge per contract and volume.** The loosest filter (rise under 20c) keeps 74% of entries at +0.60c and has the **largest total (+158 c/day, 3.7 times the unfiltered +43)**; the strictest has the highest edge per contract and a third of the total. Which one matters depends on whether the bot's limit is the number of entries it can take or the window cap (the main session's side): if the cap binds, edge per contract is what counts.
+- **At 10 minutes the "firm" rules mostly cannot be used:** `tib` of 4 or more happens only 1.9 times a day (a market is only 5 minutes old at 10 minutes left); `dip` and `rise` cuts still help (+1.0c against +0.58c) but less.
+- **Caveats, repeated:** all in the data every lead in this file came from; the combinations are nested and were chosen after seeing the single features; the forward claims JUMP1, JUMP1b, TIB1 and DIP1 on fresh public candles are the evidence. **A combined rule is not registered** (it would be a new try after the components read); nothing is built and nothing changes live.
