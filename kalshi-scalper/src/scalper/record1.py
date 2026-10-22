@@ -104,7 +104,7 @@ def _git(*args: str) -> bytes:
 
 def runs() -> dict[str, dict[str, list[dict]]]:
     """run folder -> file name -> rows, for every folder on the branch that has all five files."""
-    names = _git("ls-tree", "-r", "--name-only", BRANCH).decode().split("\n")
+    names = _git("ls-tree", "-r", "--full-tree", "--name-only", BRANCH).decode().split("\n")
     folders = defaultdict(set)
     for n in names:
         parts = n.split("/")
