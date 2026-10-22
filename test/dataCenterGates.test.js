@@ -162,6 +162,17 @@ gates.D11 = () => {
   assert.strictEqual(f.kalshiSkipNote(undefined, tick, now), '', 'no note, no line');
 };
 
+// D12: today's result as a share of the account. Consequence: a +$0.80 day on a $203.48 account is +0.39%, measured against where the day started, and an unknown balance shows nothing rather than a wrong percentage.
+gates.D12 = () => {
+  const f = lift(['kalshiTodayPct']);
+  assert.strictEqual(f.kalshiTodayPct(0.8, 203.48), ' (+0.39%)', 'the base is the total minus today: 0.80 / 202.68');
+  assert.strictEqual(f.kalshiTodayPct(-2, 200), ' (-0.99%)', 'a loss shows its sign: -2 / 202');
+  assert.strictEqual(f.kalshiTodayPct(0, 200), ' (+0.00%)');
+  assert.strictEqual(f.kalshiTodayPct(1, null), '', 'unknown balance: nothing');
+  assert.strictEqual(f.kalshiTodayPct(5, 5), '', 'a start of zero: nothing');
+  assert.ok(/kalshiTodayPct\(botNet/.test(html), 'the Today line uses it');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
