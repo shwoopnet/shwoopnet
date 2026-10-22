@@ -5109,3 +5109,17 @@ Code `scalper/cuts4.py` and `tests/test_cuts4.py` were committed before the run;
 **Dollar size and the entry-quality family.** Alpha times $200 and $500 are printed. The entry-quality features (time in band, distance from the day's high, spread change, volume change) are being run as a descriptive table first (no tries) and only then registered one by one as forward claims; the first claims are JUMP1 and JUMP1b.
 
 **Single reads.** `python -m scalper.fam5 run` (CM1 and VT1, once); a refused rerun unless `data/fam5_result.txt` is deleted on purpose. Nothing goes live.
+
+## Results: CM1 and VT1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)
+
+Code `scalper/fam5.py` and `tests/test_fam5.py` were committed before the run; result file `data/fam5_result.txt`. Bar z 3.0 (family of 24).
+
+| Cell | Window | Net alpha a year | z | Halves | 2019 on | Placebo p95 | Verdict |
+|---|---|---|---|---|---|---|---|
+| **CM1**, top 5 of 17 country ETFs by 12-1 momentum | 354 months from 1997-03 | **+0.86%** | 0.69 | +1.94% / -0.25% | +1.58% | +0.18% | **FALSIFIED** |
+| **VT1**, SVXY when VIX / VIX3M < 0.95 | 3,783 days from 2011-10 | **+5.55%** | 0.57 | **+9.82% / -6.52%** | **-6.99%** | +2.45% | **FALSIFIED** |
+
+- **Predictions:** CM1 alpha -1% to +3%, z under 2.0 (right); VT1 alpha +2% to +12%, z under 3.0, maximum drawdown worse than -50% (all right).
+- **CM1:** the portfolio returned 7.7% a year against 7.3% for the equal-weight 17 at the same volatility (19.9%) and a worst drawdown near -59%. Country momentum earned about nothing after costs in this window.
+- **VT1:** the curve filter was invested **82% of days** (it rarely says "no"), so it is mostly SVXY with a thin filter. Alpha was **+9.8% in the first half and -6.5% in the second, -7.0% since 2019**, with beta 1.21 on SPY. **Worst drawdown -67% for the strategy against -95% for buying and holding SVXY** (the 2018-02-05 day in this series: -32% for SVXY, in the position). The first-half premium is real in this data and did not last; the wrapper that makes it tradable at $500 is the same one that fell 95%.
+- **Dollar size:** CM1 about $1.70 on $200 and $4.30 on $500 a year; VT1's +5.55% would be $11 and $28 a year, with a drawdown of two thirds of the account. **ETF and index family tries: 24.** Nothing built, nothing changed live.
