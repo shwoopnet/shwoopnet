@@ -5633,3 +5633,9 @@ Owner: "get more aggressive with our edges" (hunt bigger edges). A different mar
 - **Prediction (now):** FALSIFIED (about 70%). The market already uses the same models; I expect the model probabilities to be well calibrated and the trades that clear 7c to be mostly edges in the thin tails. If it passes, the first suspect is the 12Z run's availability time.
 - **Information only:** calibration of p against outcomes by decile; the same rule at a 3 cent threshold; by city.
 - Tries: +1 (running count about 4,704). The fetch step and the run are separate: `python -m scalper.wx1 fetch`, then `python -m scalper.wx1 run` once.
+
+### WX1 result (2026-10-22, run once): FALSIFIED, and the loss is significant
+
+Seven cities, 2,772 settled markets with a forecast and a price, 69 days. The rule (buy where the NBS-normal probability beats the ask or bid price by at least 7c after the fee) fired on **1,197 trades over 67 days**: mean net **-4.70c a contract, day-clustered z -4.17**, both halves negative (-2.80c, -6.60c), fee stress -4.91c, only 1 of 7 cities positive (Austin +0.54c; New York -11.8c, Los Angeles -6.5c). The 3c threshold version is the same (-4.26c, z -4.74, 1,659 trades, 0 of 7 cities positive).
+
+The model itself is not badly calibrated (observed YES rate by decile of model probability: 6% at the 0 to 10% decile, 17%, 23%, 36%, then thin), yet every trade it picks loses: where the forecast disagrees with the market, **the market is right**. The market uses at least as much information as the NBS point forecast and its stated spread (other models, the newest runs, and real-time observations). The prediction (FALSIFIED, about 70%) held. No claim is made on the reverse (taking the market's side of every disagreement), because that pays the spread and fee on both legs and was not registered. Tries: +1 (running count about 4,704).
