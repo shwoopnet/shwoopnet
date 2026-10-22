@@ -27,7 +27,6 @@ gates.B1 = () => {
   const hosts = new Set([...text.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)].map((m) => m[1].toLowerCase()));
   const allowed = new Set([
     'www.gstatic.com',            // the Firebase SDK
-    'fonts.googleapis.com', 'fonts.gstatic.com',
     'api.exchange.coinbase.com',  // Bitcoin spot for the Kalshi charts
     'api.gold-api.com',           // gold spot for the Kalshi charts
     'www.w3.org',                 // the SVG namespace, not a request

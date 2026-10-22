@@ -7,6 +7,11 @@
   // Clickjacking guard (Oct 22, 2026): this page has Start, Pause and Flatten buttons, and the host cannot send a frame-blocking header, so if anything frames the page it hides itself and tries to leave the frame.
   if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) { /* a cross-origin parent may refuse; the page stays hidden */ } }
 </script>
+<!-- A private dashboard on a public host: ask search engines not to list it (Oct 22, 2026). This only asks; the sign-in is what keeps it private. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Private trading dashboard. Authorized users only.">
+<meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <title>Shwoop Financials: We trade. You live your life.</title>
 <link rel="icon" type="image/png" href="favicon-64.png">
 <!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the bubbly white S on black (brand mark A, Oct 20, 2026), full bleed because iOS rounds the corners itself. -->
@@ -20,10 +25,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Shwoop">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Titan+One&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/PublicSans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  /* Fonts are served from this site (Oct 22, 2026), not from a font service: nothing outside leaves with a visitor's network address, and the page does not wait on a third party. Latin subset; see fonts/README.md. */
+  @font-face{ font-family:'Public Sans'; font-style:normal; font-weight:400 700; font-display:swap; src:url(fonts/PublicSans-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face{ font-family:'IBM Plex Mono'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/IBMPlexMono-400-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face{ font-family:'IBM Plex Mono'; font-style:normal; font-weight:500; font-display:swap; src:url(fonts/IBMPlexMono-500-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face{ font-family:'Titan One'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/TitanOne-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
   :root{
     /* Ledger -- one fixed palette, modeled on a consumer brokerage's own
        actual design principles (warm off-white ground, a single blue
@@ -245,7 +253,7 @@
   .display{ font-family: 'Public Sans', sans-serif; }
   button, input{ font-family: inherit; }
   button{ background:none; }
-  button:focus-visible, a:focus-visible{ outline: 2px solid var(--amber); outline-offset: 2px; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible{ outline: 2px solid var(--amber); outline-offset: 2px; }
 
   .app{ max-width: 1400px; margin: 0 auto; padding: 0 0 40px 0; }
   /* The Kalshi page is a console, not an article: on a wide monitor it uses more of the width instead of leaving wide empty gutters (the owner's note, Oct 9, 2026).
@@ -746,6 +754,7 @@
     font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; letter-spacing:.05em;
   }
   .auth-title{ font-family:'Public Sans', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
+  .auth-sub{ font-size:12.5px; color: var(--muted); margin:-8px 0 14px; }
   .auth-status{ font-size:12px; color: var(--muted); margin-bottom:14px; }
   .auth-gate form{ text-align:left; }
   .auth-submit{ width:100%; margin-top:4px; }
@@ -1083,6 +1092,7 @@
       SHWOOP
     </div>
     <div class="auth-title">Sign in</div>
+    <div class="auth-sub">Private trading dashboard. Authorized users only.</div>
     <div class="auth-status" id="authStatus">Connecting…</div>
     <form id="authForm" hidden>
       <div class="modal-field">
@@ -1220,6 +1230,11 @@
             <div class="kal-actions"><button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button></div>
             <div class="kal-note" id="kalDiagMsg"></div>
             <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
+            <div class="kal-actions">
+              <label class="kal-note" style="margin:0">Statement <select class="kal-input" id="kalStmtPeriod" style="width:auto"><option value="0">This month</option><option value="1">Last month</option></select></label>
+              <button class="kal-btn kal-btn-ghost" id="kalStmtPrint" type="button">Print statement</button>
+            </div>
+            <div class="kal-note" id="kalStmtMsg"></div>
             <div class="kal-actions">
             <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
             <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
@@ -1425,6 +1440,7 @@
   <footer class="site-footer">
     <details class="footer-legal">
       <summary><span class="footer-copyright">&copy; 2026 Shwoop Financials</span> <span class="footer-sep">&middot;</span> Legal and risk disclosure</summary>
+      <p>Privacy: this is a private tool. Sign-in and saved settings run on a third-party cloud service, and your display choices are kept in this browser and in your account. The site has no advertising and no analytics. Its fonts and the Bot page's chart prices are loaded from third-party services in your browser, so those services can see your network address.</p>
       <p>Nothing on this site is investment, financial, legal or tax advice, or an offer or solicitation to buy or sell anything. Shwoop is not a broker-dealer, an investment adviser, a commodity trading advisor or an exchange, and it does not manage money for anyone else.</p>
       <p>Trading involves substantial risk of loss, including the loss of everything put into it. Automated trading can fail, act on bad data, or place orders you did not intend. A loss limit can end the bot after losses; it does not guarantee a maximum loss. Past performance does not guarantee future results.</p>
       <p>Paper and backtest results are hypothetical. They use no real money, leave out real-world costs and fills, and do not predict future results. Data from third parties can be late, incomplete or wrong.</p>
@@ -2668,6 +2684,15 @@
     }).join('');
   }
 
+  // Today's result as a share of the account (Oct 22, 2026, the owner's request). The base is the account total at the START of today, taken as the total now minus today's bot result, so a good day is not
+  // measured against a balance it already grew. The total includes anything done outside the bot (your own trades, deposits), which is why this is "of the account" and not a return on the bot alone.
+  // '' when the total is unknown or not above zero. It is a percentage, not a dollar figure, so the Privacy toggle leaves it showing.
+  function kalshiTodayPct(botNet, total){
+    var start = Number(total) - Number(botNet);
+    if(total === null || total === undefined || !Number.isFinite(start) || !(start > 0)){ return ''; }
+    var pct = botNet / start * 100;
+    return ' (' + (pct >= 0 ? '+' : '-') + Math.abs(pct).toFixed(2) + '%)';
+  }
   function renderKalshiPositions(){
     var posEl = document.getElementById('kalBotOpen'), a = kalshiLiveAcct;
     if(!posEl){ return; }
@@ -2799,7 +2824,7 @@
       var botNet = kalshiPerfStats(todayOrders, 0).total;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + '</b></div></div>';
+        '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
     }
 
     renderKalshiPositions();
@@ -2942,6 +2967,14 @@
       navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders.'; }, manual);
     } else { manual(); }
   });
+  document.getElementById('kalStmtPrint').addEventListener('click', function(){
+    var back = document.getElementById('kalStmtPeriod').value === '1' ? 1 : 0, msg = document.getElementById('kalStmtMsg'), now = Date.now();
+    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    var key = kalshiStatementMonth(now, back);
+    if(!orders.some(function(o){ return o && Number.isFinite(o.ts) && kalshiOrderPnl(o) !== null && kalDayKey(o.ts).slice(0, 7) === key; })){ msg.textContent = 'No settled trades in that month yet.'; return; }
+    kalshiPrintHtml(kalshiStatementHtml(orders, key, now, escapeHtml));
+    msg.textContent = 'Opening the print dialog. Choose Save as PDF to keep a copy.';
+  });
   // Copies every stat the tracker computes, including the ones the page no longer shows, as plain text. Same clipboard fallback as the diagnostics button.
   document.getElementById('kalStatsCopy').addEventListener('click', function(){
     var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = kalshiChartRange === 'session' && sess && Number.isFinite(sess.since) ? sess.since : 0;
@@ -3074,6 +3107,45 @@
         (per === null ? '-' : esc((per >= 0 ? '+' : '-') + Math.abs(per).toFixed(1) + 'c')) + '</span></div>';
     }).join('') + '<div class="kal-note" style="padding:10px 18px 14px">A live test that started on 2026-10-21. The 6 minute rows include every older trade, and the two groups are not the same markets. It takes weeks to mean anything.</div>';
   }
+  // The statement (Oct 22, 2026, the owner: make the site feel official). A printable month of the bot's settled trades, drawn from the same orders and the same figures as the Data page, opened in a quiet
+  // frame so the browser's own print dialog can save it as a PDF. It is an export, so its dollar figures are raw and not masked by Privacy, like Copy all orders. It reads only what the page already holds.
+  function kalshiStatementMonth(nowMs, back){
+    var p = kalDayKey(nowMs).split('-').map(Number), y = p[0], m = p[1] - (back || 0);
+    while(m < 1){ m += 12; y--; }
+    return y + '-' + (m < 10 ? '0' : '') + m;
+  }
+  function kalshiStatementHtml(orders, monthKey, nowMs, esc){
+    var rows = (orders || []).filter(function(o){ return o && Number.isFinite(o.ts) && kalshiOrderPnl(o) !== null && kalDayKey(o.ts).slice(0, 7) === monthKey; }).sort(function(a, b){ return a.ts - b.ts; });
+    var st = kalshiPerfStats(rows, 0), mk = dataMarketRows(rows, nowMs), sg = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoneyRaw(Math.abs(v)); };
+    var ym = monthKey.split('-').map(Number), label = new Date(Date.UTC(ym[0], ym[1] - 1, 1)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' });
+    var be = st.avgWin !== null && st.avgLoss !== null ? (-st.avgLoss / (st.avgWin - st.avgLoss) * 100).toFixed(1) + '%' : 'n/a';
+    var kv = function(k, v){ return '<tr><td>' + esc(k) + '</td><td class="r">' + esc(v) + '</td></tr>'; };
+    var summary = kv('Settled trades', String(st.n)) + kv('Result', sg(st.total)) + kv('Win rate', st.winRate === null ? 'n/a' : (st.winRate * 100).toFixed(1) + '%') + kv('Break-even win rate', be) +
+      kv('Profit factor', st.profitFactor === null ? (st.losses ? 'n/a' : 'no losses') : st.profitFactor.toFixed(2)) + kv('Average win', st.avgWin === null ? 'n/a' : '+' + kalshiMoneyRaw(st.avgWin)) +
+      kv('Average loss', st.avgLoss === null ? 'n/a' : '-' + kalshiMoneyRaw(Math.abs(st.avgLoss))) + kv('Worst trade', st.worst === null ? 'n/a' : sg(st.worst)) + kv('Deepest drawdown in the month', st.maxDrawdown > 0 ? '-' + kalshiMoneyRaw(st.maxDrawdown) : 'none');
+    var markets = mk.map(function(r){ return '<tr><td>' + esc(r.name) + '</td><td class="r">' + r.n + '</td><td class="r">' + Math.round(r.wins / r.n * 100) + '%</td><td class="r">' + esc(r.n < 30 ? 'too few' : (r.gl > 0 ? (r.gw / r.gl).toFixed(2) : 'no losses')) + '</td><td class="r">' + esc(sg(r.net)) + '</td></tr>'; }).join('');
+    var trades = rows.map(function(o){
+      var c = Number(o.fillCount) || 0, px = Number(o.price);
+      return '<tr><td>' + esc(kalDateTime(o.ts)) + '</td><td>' + esc(kalshiMarketName(o)) + '</td><td>' + esc(String(o.side || '').toUpperCase()) + '</td><td class="r">' + (Number.isFinite(px) ? (px * 100).toFixed(1) + 'c' : '') +
+        '</td><td class="r">' + esc(String(Math.round(c * 100) / 100)) + '</td><td class="r">' + esc(sg(kalshiOrderPnl(o))) + '</td></tr>';
+    }).join('');
+    var css = '@page{margin:14mm}body{font:12px/1.45 Helvetica,Arial,sans-serif;color:#111;margin:0}h1{font-size:20px;margin:0 0 2px}h2{font-size:13px;margin:22px 0 6px;border-bottom:1px solid #111;padding-bottom:3px}' +
+      '.sub{color:#444;margin:0 0 14px}table{width:100%;border-collapse:collapse}td,th{padding:4px 6px;border-bottom:1px solid #ddd;text-align:left;font-variant-numeric:tabular-nums}th{font-weight:600;color:#444;font-size:11px}.r{text-align:right}' +
+      '.fine{color:#555;font-size:10.5px;margin-top:22px}tr{page-break-inside:avoid}';
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Shwoop Financials statement, ' + esc(label) + '</title><style>' + css + '</style></head><body>' +
+      '<h1>Shwoop Financials</h1><p class="sub">Trading activity statement for ' + esc(label) + ' (US Central time). Generated ' + esc(kalDateTime(nowMs)) + '.</p>' +
+      (st.n ? '<h2>Summary</h2><table>' + summary + '</table><h2>By market</h2><table><tr><th>Market</th><th class="r">Trades</th><th class="r">Won</th><th class="r">Profit factor</th><th class="r">Result</th></tr>' + markets + '</table>' +
+        '<h2>Settled trades</h2><table><tr><th>Time</th><th>Market</th><th>Side</th><th class="r">Price</th><th class="r">Contracts</th><th class="r">Result</th></tr>' + trades + '</table>' : '<p>No settled trades in this month.</p>') +
+      '<p class="fine">Only orders the bot sent are counted; a trade closed by hand is left out. Results are the settled result of each order after fees as recorded; they are not audited. Nothing in this statement is investment, financial, legal or tax advice. ' +
+      'Trading involves substantial risk of loss. Past performance does not guarantee future results.</p></body></html>';
+  }
+  function kalshiPrintHtml(html){
+    var f = document.createElement('iframe');
+    f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+    f.onload = function(){ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} setTimeout(function(){ if(f.parentNode){ f.parentNode.removeChild(f); } }, 60000); };
+    f.srcdoc = html;
+    document.body.appendChild(f);
+  }
   // The strategy in numbers (Oct 22, 2026, the owner: "so i dont get lost"). The same figures the health check reads, in plain rows and plain text (no new colours): profit factor is what the wins add up to over what the
   // losses add up to, and the break-even win rate is the share of wins the bot needs so that average win times wins equals average loss times losses. A win rate under it loses money however the average trade looks.
   function dataStatsHtml(st, esc, money){
@@ -3123,7 +3195,7 @@
     set('dataLiveTests', dataLiveHtml(dataLiveTests(kalshiLiveOrders), escapeHtml));
     set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
     set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoney));
-    set('dataNote', 'Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
+    set('dataNote', 'As of ' + kalTime(Date.now()) + ' CT. Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
   }
 
   function renderKalshiCharts(){
@@ -3494,6 +3566,12 @@
     pageEnterTimer = setTimeout(function(){ pageEl.classList.remove('enter'); }, 2200);
   }
 
+  // The tab and the browser history say which page this is (Oct 22, 2026). While the sign-in box is up the tab keeps the full tagline title, so a signed-out visitor never sees a page name.
+  var DEFAULT_PAGE_TITLE = document.title, currentPageName = 'brief';
+  function setPageTitle(){
+    var gate = document.getElementById('authGate'), names = { brief: 'Market Brief', kalshi: 'Bot', data: 'Data', settings: 'Settings' };
+    document.title = gate && !gate.hasAttribute('hidden') ? DEFAULT_PAGE_TITLE : (names[currentPageName] || 'Market Brief') + ' | Shwoop Financials';
+  }
   function showPage(name){
     // Switching pages via nav used to leave the scroll position exactly
     // where it was on the PREVIOUS page -- landing on a short page already
@@ -3505,6 +3583,7 @@
     // Four pages are left (Data joined Oct 21, 2026, admin only like Kalshi). Anything else (an old #trades link, a stored landing choice) lands on the brief.
     if(name !== 'brief' && name !== 'kalshi' && name !== 'data' && name !== 'settings'){ name = 'brief'; }
     if((name === 'kalshi' || name === 'data') && !currentUserIsAdmin){ name = 'brief'; }
+    currentPageName = name; setPageTitle();
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-kalshi').hidden = (name !== 'kalshi');
     document.getElementById('page-data').hidden = (name !== 'data');
@@ -3774,7 +3853,7 @@
           return;
         }
         currentUid = user.uid;
-        authGateEl.setAttribute('hidden', '');
+        authGateEl.setAttribute('hidden', ''); setPageTitle();
         if(accountEmailDesc){ accountEmailDesc.textContent = 'Signed in as ' + user.email; }
         if(signOutBtn){ signOutBtn.textContent = 'Sign out'; }
         userDocUnsubscribe = api.watchUserDoc(user.uid, function(data){
@@ -3805,7 +3884,7 @@
         currentUserIsAdmin = false;
         applyAdminUI();
         resetNewsAndEarnings();
-        authGateEl.removeAttribute('hidden');
+        authGateEl.removeAttribute('hidden'); setPageTitle();
         document.getElementById('authEmail').value = '';
         document.getElementById('authPassword').value = '';
       }
