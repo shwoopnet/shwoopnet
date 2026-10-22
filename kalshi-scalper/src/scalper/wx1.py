@@ -1,305 +1,189 @@
-"""WX1 (README, Pre-registration: WX1): daily high-temperature markets against a public forecast. Rules fixed in the README before this file ran on any market.
-Research only: nothing here places an order. Verdict words: FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA. Nothing here means trade.
-
-History goes into its OWN database (`data/weather.sqlite`). Usage: python -m scalper.wx1 fetch   then   python -m scalper.wx1 run
+"""WX1 (README, Pre-registration: WX1): Kalshi daily-high temperature markets against the NBS blended forecast of the previous day. Research only.
+Verdict words: FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA. Nothing here means trade.
+Usage: python -m scalper.wx1 fetch    (downloads the forecasts, markets and prices into data/wx1.json; resumable)
+       python -m scalper.wx1 run      (once; a second run is refused unless the result file is deleted on purpose, a crash fix only)
 """
 from __future__ import annotations
 
+import csv
+import io
 import json
 import math
-import random
-import sqlite3
 import statistics as st
 import sys
 import time
-import urllib.parse
 import urllib.request
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
-from . import api, backfill
+from . import api
+from .backfill import iso_ts, parse_candle
 from .calibration import cluster_mean_z
 from .paths import DATA_DIR
-from .scalps import STRESS, fee
 
-WX_DB = DATA_DIR / "weather.sqlite"
-CITIES = {  # series -> (name, latitude, longitude): the registered seven
-    "KXHIGHCHI": ("Chicago", 41.7860, -87.7524),
-    "KXHIGHNY": ("New York", 40.7789, -73.9692),
-    "KXHIGHMIA": ("Miami", 25.7959, -80.2870),
-    "KXHIGHAUS": ("Austin", 30.1945, -97.6699),
-    "KXHIGHDEN": ("Denver", 39.8466, -104.6562),
-    "KXHIGHLAX": ("Los Angeles", 33.9382, -118.3866),
-    "KXHIGHPHIL": ("Philadelphia", 39.8719, -75.2411),
-}
-DAYS = 69
-DECISION_LEFT_S = 26 * 3600     # decision candle: ends 26 h before the close (22:00 local standard time the evening before)
-ENTRY_LEFT_S = 25 * 3600        # entry candle: the NEXT hourly candle, strictly later
-FIT_DAYS = 20                   # the last 20 resolved days at most ...
-MIN_FIT = 10                    # ... and at least 10 usable ones
-MIN_PRIOR = 20                  # a test day needs 20 prior resolved days
-SIGMA_FLOOR = 1.5
-EDGE = 0.03
-BAND = (0.05, 0.95)
-MIN_TRADES = 200
-MIN_DAYS = 20
-Z_BAR = 2.1
-PLACEBO_REPS = 200
-MDE_FLAG = 0.03
-SENSITIVITY = (0.0, 0.02, 0.03, 0.05)
+# ---- fixed in the README before any fetch ----
+CITIES = {"KXHIGHAUS": "KAUS", "KXHIGHCHI": "KMDW", "KXHIGHDEN": "KDEN", "KXHIGHLAX": "KLAX", "KXHIGHMIA": "KMIA", "KXHIGHNY": "KNYC", "KXHIGHPHIL": "KPHL"}
+THRESH, THRESH_INFO, PRICE_HOUR_UTC = 0.07, 0.03, 20
+MEAN_C, Z_BAR, FALSIFY_C, FALSIFY_Z, MIN_N, MIN_DAYS, MIN_CITIES, STRESS = 0.020, 3.0, 0.005, 1.0, 300, 20, 5, 1.2
+DATA, RESULT = DATA_DIR / "wx1.json", DATA_DIR / "wx1_result.txt"
+MONTHS = {m: i + 1 for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"])}
 
 
-def ncdf(x: float) -> float:
-    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+def phi(x: float) -> float:
+    return 0.5 * (1 + math.erf(x / math.sqrt(2)))
 
 
-def bucket_range(stype: str, floor: float | None, cap: float | None) -> tuple[float, float] | None:
-    """The continuous temperature range a bucket covers, with integer rounding: 'between 69 and 70' is [68.5, 70.5), 'less' with cap 69 is below 68.5, 'greater' with floor 76 is 76.5 and up."""
-    if stype == "between" and floor is not None and cap is not None:
-        return (floor - 0.5, cap + 0.5)
-    if stype == "less" and cap is not None:
-        return (-1e9, cap - 0.5)
-    if stype == "greater" and floor is not None:
-        return (floor + 0.5, 1e9)
+def p_yes(kind: str, floor, cap, mean: float, sd: float) -> float:
+    """P(the market resolves YES) for a whole degree maximum ~ Normal(mean, sd): greater than floor means max >= floor + 1; less than cap means max <= cap - 1; between is inclusive."""
+    sd = max(sd, 1.0)
+    if kind == "greater":
+        return 1 - phi((floor + 0.5 - mean) / sd)
+    if kind == "less":
+        return phi((cap - 0.5 - mean) / sd)
+    if kind == "between":
+        return phi((cap + 0.5 - mean) / sd) - phi((floor - 0.5 - mean) / sd)
+    raise ValueError(kind)
+
+
+def fee(p: float) -> float:
+    return 0.07 * p * (1 - p)
+
+
+def decide(p: float, bid: float, ask: float, thresh: float):
+    """('yes', price) / ('no', price) when the expected edge after the fee clears thresh, else None."""
+    if p - ask - fee(ask) >= thresh:
+        return "yes", ask
+    pn = 1 - bid
+    if (1 - p) - pn - fee(pn) >= thresh:
+        return "no", pn
     return None
 
 
-def bucket_prob(mu: float, sigma: float, rng: tuple[float, float]) -> float:
-    lo, hi = rng
-    hi_c = 1.0 if hi >= 1e8 else ncdf((hi - mu) / sigma)
-    lo_c = 0.0 if lo <= -1e8 else ncdf((lo - mu) / sigma)
-    return max(0.0, min(1.0, hi_c - lo_c))
+def net(side: str, price: float, result: str, mult: float = 1.0) -> float:
+    f = fee(price) * mult
+    return (1 - price - f) if side == result else -(price + f)
 
 
-def observed(stype: str, floor: float | None, cap: float | None) -> float | None:
-    """The temperature a resolved-YES bucket implies: its midpoint. A tail says too little and is dropped from the fit."""
-    if stype == "between" and floor is not None and cap is not None:
-        return (floor + cap) / 2.0
-    return None
-
-
-def calibrate(history: list[tuple[float, float]]) -> tuple[float, float] | None:
-    """(bias, sigma) from (mu, observed) pairs: bias is the mean of observed minus mu; sigma is the standard deviation of that error, never below SIGMA_FLOOR. None if too few."""
-    if len(history) < MIN_FIT:
-        return None
-    errs = [o - m for m, o in history]
-    return st.mean(errs), max(st.pstdev(errs), SIGMA_FLOOR)
-
-
-def climate_mu(forecast: dict[int, float], close_ts: int) -> float | None:
-    """The maximum of the hourly previous-day-1 forecasts over the 24 hours ending at the close, or None when an hour is missing."""
-    hrs = [forecast.get(t) for t in range(close_ts - 86400, close_ts, 3600)]
-    return max(hrs) if all(h is not None for h in hrs) else None
-
-
-def valid(bid: float | None, ask: float | None) -> bool:
-    return bid is not None and ask is not None and bid >= 0.01 and ask <= 0.99 and ask >= bid
-
-
-def pick_trade(p: float, bid: float, ask: float, edge: float = EDGE):
-    """The side with the larger edge after the fee if it is at least `edge` and its price lies inside BAND, else None. Returns (side, price, edge)."""
-    no_ask = round(1.0 - bid, 4)
-    e_yes = p - ask - fee(ask)
-    e_no = (1.0 - p) - no_ask - fee(no_ask)
-    side, price, e = ("yes", ask, e_yes) if e_yes >= e_no else ("no", no_ask, e_no)
-    if e >= edge - 1e-12 and BAND[0] - 1e-9 <= price <= BAND[1] + 1e-9:
-        return side, price, e
-    return None
-
-
-def load() -> tuple[dict, dict]:
-    """({series: {close_ts: [bucket dicts]}}, {series: {ts: temp_f}})."""
-    db = sqlite3.connect(WX_DB)
-    quotes: dict = defaultdict(dict)
-    for t, end, bc, ac, v in db.execute("SELECT ticker, end_ts, bid_c, ask_c, volume FROM candle"):
-        quotes[t][end] = (bc, ac, v)
-    days: dict = {s: defaultdict(list) for s in CITIES}
-    for t, s, close_ts, res, stype, fl, cp in db.execute("SELECT ticker, series, close_ts, result, strike_type, floor, cap FROM market"):
-        if s in days:
-            days[s][close_ts].append({"ticker": t, "result": res, "type": stype, "floor": fl, "cap": cp, "q": quotes.get(t, {})})
-    fc: dict = {s: {} for s in CITIES}
-    for city, ts, tf in db.execute("SELECT city, ts, temp_f FROM forecast"):
-        if city in fc:
-            fc[city][ts] = tf
-    return days, fc
-
-
-def simulate(days: dict, fc: dict, edge: float = EDGE) -> tuple[list[dict], list[dict]]:
-    """(trades, brier rows). Walk forward: a day's fit uses only days whose close is at or before that day's DECISION time, so the previous day, which closes two hours after it, is never in."""
-    trades, brier = [], []
-    for series, by_close in days.items():
-        closes = sorted(by_close)
-        mus = {c: climate_mu(fc.get(series, {}), c) for c in closes}
-        obs = {}
-        for c in closes:
-            win = [b for b in by_close[c] if b["result"] == "yes"]
-            obs[c] = observed(win[0]["type"], win[0]["floor"], win[0]["cap"]) if len(win) == 1 else None
-        resolved = [c for c in closes if any(b["result"] in ("yes", "no") for b in by_close[c])]
-        for c in closes:
-            decision_ts = c - DECISION_LEFT_S
-            prior = [x for x in resolved if x <= decision_ts]
-            if len(prior) < MIN_PRIOR or mus[c] is None:
-                continue
-            hist = [(mus[x], obs[x]) for x in prior[-FIT_DAYS:] if mus[x] is not None and obs[x] is not None]
-            cal = calibrate(hist)
-            if cal is None:
-                continue
-            bias, sigma = cal
-            for b in by_close[c]:
-                q = b["q"].get(c - ENTRY_LEFT_S)
-                rng = bucket_range(b["type"], b["floor"], b["cap"])
-                if q is None or rng is None or b["result"] not in ("yes", "no") or not valid(q[0], q[1]):
-                    continue
-                p = bucket_prob(mus[c] + bias, sigma, rng)
-                yes = b["result"] == "yes"
-                mid = (q[0] + q[1]) / 2.0
-                brier.append({"series": series, "close_ts": c, "model": (p - (1.0 if yes else 0.0)) ** 2, "market": (mid - (1.0 if yes else 0.0)) ** 2})
-                pk = pick_trade(p, q[0], q[1], edge)
-                if pk is None:
-                    continue
-                side, price, e = pk
-                won = yes if side == "yes" else (not yes)
-                net = (1.0 if won else 0.0) - price - fee(price)
-                stress = (1.0 if won else 0.0) - price - fee(price, STRESS)
-                p_side_mid = mid if side == "yes" else 1.0 - mid
-                trades.append({"series": series, "close_ts": c, "day": datetime.fromtimestamp(c, timezone.utc).strftime("%Y-%m-%d"), "side": side, "price": price,
-                               "net": net, "stress": stress, "mid": p_side_mid})
-    return sorted(trades, key=lambda t: t["close_ts"]), brier
-
-
-def placebo_means(trades: list[dict], reps: int = PLACEBO_REPS, seed: int = 11) -> list[float]:
-    """A fair market: the same entries, prices and fees, each outcome drawn as a Bernoulli at the entry's mid price."""
-    rng = random.Random(seed)
-    out = []
-    for _ in range(reps):
-        tot = 0.0
-        for t in trades:
-            tot += (1.0 if rng.random() < t["mid"] else 0.0) - t["price"] - fee(t["price"])
-        out.append(tot / len(trades))
-    return out
-
-
-def verdict(trades: list[dict], placebo: list[float]) -> tuple[str, dict]:
-    n = len(trades)
-    days = sorted({t["day"] for t in trades})
-    if n < MIN_TRADES or len(days) < MIN_DAYS:
-        return "NOT_ENOUGH_DATA", {"n": n, "days": len(days)}
-    mean, se, z = cluster_mean_z([(t["day"], t["net"]) for t in trades])
-    half = days[len(days) // 2]
-    h1 = [t["net"] for t in trades if t["day"] < half]
-    h2 = [t["net"] for t in trades if t["day"] >= half]
-    m1 = sum(h1) / len(h1) if h1 else 0.0
-    m2 = sum(h2) / len(h2) if h2 else 0.0
-    stress = sum(t["stress"] for t in trades) / n
-    p95 = sorted(placebo)[int(0.95 * (len(placebo) - 1))] if placebo else float("inf")
-    ok = mean > 0 and z >= Z_BAR and m1 > 0 and m2 > 0 and stress > 0 and mean > p95
-    return ("NOT_YET_FALSIFIED" if ok else "FALSIFIED"), {"n": n, "days": len(days), "mean": mean, "z": z, "h1": m1, "h2": m2, "stress": stress, "p95": p95, "mde": Z_BAR * se}
-
-
-# ---------------------------------------------------------------- download
-def _iso_utc(s: str) -> int:
-    return int(datetime.fromisoformat(s).replace(tzinfo=timezone.utc).timestamp())
-
-
-def fetch_forecast(lat: float, lon: float, start: str, end: str) -> dict[int, float]:
-    out: dict[int, float] = {}
-    d0 = datetime.fromisoformat(start)
-    d1 = datetime.fromisoformat(end)
-    while d0 <= d1:
-        d_end = min(d0 + timedelta(days=29), d1)
-        q = urllib.parse.urlencode({"latitude": lat, "longitude": lon, "hourly": "temperature_2m_previous_day1", "start_date": d0.date().isoformat(),
-                                    "end_date": d_end.date().isoformat(), "timezone": "GMT", "temperature_unit": "fahrenheit"})
-        for attempt in range(6):          # the proxy drops a TLS handshake now and then: wait and try again, never skip a month
-            try:
-                with urllib.request.urlopen("https://previous-runs-api.open-meteo.com/v1/forecast?" + q, timeout=45) as r:
-                    h = json.load(r)["hourly"]
-                break
-            except Exception:
-                if attempt == 5:
-                    raise
-                time.sleep(5 * (attempt + 1))
-        for t, v in zip(h["time"], h["temperature_2m_previous_day1"]):
-            if v is not None:
-                out[_iso_utc(t)] = float(v)
-        d0 = d_end + timedelta(days=1)
-        time.sleep(0.5)
-    return out
+def target_date(ticker: str):
+    t = ticker.split("-")[1]
+    return datetime(2000 + int(t[:2]), MONTHS[t[2:5]], int(t[5:7]), tzinfo=timezone.utc)
 
 
 def fetch() -> None:
-    DATA_DIR.mkdir(exist_ok=True)
-    db = sqlite3.connect(WX_DB)
-    db.executescript("""CREATE TABLE IF NOT EXISTS market(ticker TEXT PRIMARY KEY, series TEXT, open_ts INTEGER, close_ts INTEGER, result TEXT, strike_type TEXT, floor REAL, cap REAL);
-CREATE TABLE IF NOT EXISTS candle(ticker TEXT, end_ts INTEGER, bid_c REAL, ask_c REAL, volume REAL, PRIMARY KEY(ticker, end_ts));
-CREATE TABLE IF NOT EXISTS forecast(city TEXT, ts INTEGER, temp_f REAL, PRIMARY KEY(city, ts));""")
-    have = {r[0] for r in db.execute("SELECT ticker FROM market")}
+    cache = json.loads(DATA.read_text()) if DATA.exists() else {"nbs": {}, "markets": {}}
     now = int(time.time())
-    start = (datetime.fromtimestamp(now, timezone.utc) - timedelta(days=DAYS + 2)).strftime("%Y-%m-%d")
-    end = datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%d")
-    for series, (name, lat, lon) in CITIES.items():
-        fc = fetch_forecast(lat, lon, start, end)
-        db.executemany("INSERT OR REPLACE INTO forecast VALUES(?,?,?)", [(series, t, v) for t, v in fc.items()])
-        listed = [m for m in api.settled_markets(series, now - DAYS * 86400, now) if m.get("result") in ("yes", "no")]
-        by_day: dict = defaultdict(list)
-        for m in listed:
-            by_day[m["close_time"]].append(m)
-        stored = 0
-        for close_iso in sorted(by_day):
-            ms = [m for m in by_day[close_iso] if m["ticker"] not in have]
-            if not ms:
+    lo = now - 69 * 86400
+    days = [datetime.fromtimestamp(lo, timezone.utc).replace(hour=12, minute=0, second=0, microsecond=0) + timedelta(days=i) for i in range(0, 71)]
+    for station in CITIES.values():
+        have = cache["nbs"].setdefault(station, {})
+        for d in days:
+            key = d.strftime("%Y-%m-%d")
+            if key in have or d > datetime.now(timezone.utc):
                 continue
-            close_ts = backfill.iso_ts(close_iso)
-            open_ts = min(backfill.iso_ts(m.get("open_time")) or close_ts for m in ms)
-            got = api._get("/markets/candlesticks", {"market_tickers": ",".join(m["ticker"] for m in ms), "start_ts": open_ts, "end_ts": close_ts, "period_interval": 60})
-            by_t = {x.get("market_ticker"): x.get("candlesticks", []) for x in got.get("markets", [])}
-            for m in ms:
-                rows = [r for r in (backfill.parse_candle(c, m["ticker"], series) for c in by_t.get(m["ticker"], [])) if r]
-                db.executemany("INSERT OR REPLACE INTO candle VALUES(?,?,?,?,?)", [(r[0], r[2], r[6], r[10], r[12]) for r in rows])
-                db.execute("INSERT OR REPLACE INTO market VALUES(?,?,?,?,?,?,?,?)", (m["ticker"], series, backfill.iso_ts(m.get("open_time")), close_ts, m["result"],
-                                                                                  m.get("strike_type"), m.get("floor_strike"), m.get("cap_strike")))
-                have.add(m["ticker"])
-                stored += 1
-            db.commit()
-            time.sleep(0.4)
-        print(f"{series} ({name}): {len(listed)} settled markets, {stored} new, {len(fc)} forecast hours", flush=True)
-    print("done", flush=True)
-
-
-def run() -> None:
-    days, fc = load()
-    trades, brier = simulate(days, fc)
-    n_days = len({t["day"] for t in trades})
-    print(f"{sum(len(v) for d in days.values() for v in d.values())} market-days loaded; {len(trades)} trades on {n_days} days; {len(brier)} priced buckets scored. Signal counts first.\n")
-    pl = placebo_means(trades) if trades else []
-    v, s = verdict(trades, pl)
-    f = lambda x: f"{x * 100:+.2f}c"
-    if "mean" in s:
-        print(f"WX1: n={s['n']} on {s['days']} days, net {f(s['mean'])} per contract, z {s['z']:+.2f}, halves {f(s['h1'])} / {f(s['h2'])}, fees x{STRESS} {f(s['stress'])}, "
-              f"placebo 95th percentile {f(s['p95'])} -> {v}")
-        note = "  (FALSIFIED here means NOT SHOWN at this sample size: the minimum detectable edge is above 3c)" if v == "FALSIFIED" and s["mde"] > MDE_FLAG else ""
-        print(f"    minimum detectable edge {f(s['mde'])}{note}")
-    else:
-        print(f"WX1: n={s['n']} on {s['days']} days -> {v}")
-    print("\nPer city (information):")
-    for series, (name, _, _) in CITIES.items():
-        mine = [t for t in trades if t["series"] == series]
-        bm = [b for b in brier if b["series"] == series]
-        if not bm:
-            print(f"  {name:<13} no scored buckets")
+            ts = d.strftime("%Y-%m-%dT%H:%MZ")
+            try:
+                txt = urllib.request.urlopen(f"https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py?station={station}&model=NBS&sts={ts}&ets={ts}&format=csv", timeout=60).read().decode()
+            except Exception as e:
+                print(f"  {station} {key}: {str(e)[:60]}", flush=True)
+                continue
+            rows = {r["ftime"]: (r["txn"], r["xnd"]) for r in csv.DictReader(io.StringIO(txt)) if r.get("txn") and r.get("xnd")}
+            have[key] = rows
+            time.sleep(0.15)
+        DATA.write_text(json.dumps(cache))
+        print(f"{station}: forecasts for {len(have)} runs", flush=True)
+    for series in CITIES:
+        listed = [m for m in api.settled_markets(series, lo, now) if m.get("result") in ("yes", "no")]
+        for m in listed:
+            cache["markets"].setdefault(m["ticker"], {"series": series, "kind": m.get("strike_type"), "floor": m.get("floor_strike"), "cap": m.get("cap_strike"), "result": m["result"], "prices": None})
+        print(f"{series}: {len(listed)} settled markets", flush=True)
+    by_date = defaultdict(list)
+    for tk, m in cache["markets"].items():
+        if m["prices"] is None:
+            by_date[target_date(tk)].append(tk)
+    for D, tks in sorted(by_date.items()):
+        t = int((D - timedelta(days=1)).replace(hour=PRICE_HOUR_UTC).timestamp())
+        try:
+            got = api._get("/markets/candlesticks", {"market_tickers": ",".join(tks), "start_ts": t - 7200, "end_ts": t + 3600, "period_interval": 60})
+        except Exception as e:
+            print(f"  prices {D.date()}: {str(e)[:60]}", flush=True)
             continue
-        net = f"{st.mean(t['net'] for t in mine) * 100:+.2f}c" if mine else "n/a"
-        print(f"  {name:<13} trades {len(mine):>3} net {net:>8}   Brier model {st.mean(b['model'] for b in bm):.4f} vs market {st.mean(b['market'] for b in bm):.4f} over {len(bm)} buckets")
-    if brier:
-        print(f"  all           Brier model {st.mean(b['model'] for b in brier):.4f} vs market {st.mean(b['market'] for b in brier):.4f}  (lower is better)")
-    print("\nThreshold sensitivity (information only, not tries):")
-    for e in SENSITIVITY:
-        tr, _ = simulate(days, fc, e)
-        print(f"  edge >= {e:.2f}: {len(tr):>4} trades, net {f(st.mean(t['net'] for t in tr)) if tr else 'n/a'}")
-    sides = defaultdict(int)
-    for t in trades:
-        sides[t["side"]] += 1
-    print("\nTrades by side:", dict(sides))
+        cm = {x.get("market_ticker"): x.get("candlesticks", []) for x in got.get("markets", [])}
+        for tk in tks:
+            cs = [parse_candle(c, tk, cache["markets"][tk]["series"]) for c in cm.get(tk, [])]
+            cs = [(r[2], r[6], r[10]) for r in cs if r and r[6] is not None and r[10] is not None]
+            if cs:
+                k = min(cs, key=lambda x: abs(x[0] - t))
+                cache["markets"][tk]["prices"] = [k[1], k[2], k[0] - t]
+            else:
+                cache["markets"][tk]["prices"] = []
+        time.sleep(0.3)
+    DATA.write_text(json.dumps(cache))
+    print("done:", sum(1 for m in cache["markets"].values() if m["prices"]), "markets with a price", flush=True)
+
+
+def build_trades(cache: dict, thresh: float) -> list[dict]:
+    out = []
+    for tk, m in cache["markets"].items():
+        if not m.get("prices"):
+            continue
+        D = target_date(tk)
+        run = (D - timedelta(days=1)).strftime("%Y-%m-%d")
+        fc = cache["nbs"].get(CITIES[m["series"]], {}).get(run, {})
+        key = (D + timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")
+        if key not in fc:
+            continue
+        mean, sd = float(fc[key][0]), float(fc[key][1])
+        p = p_yes(m["kind"], m["floor"], m["cap"], mean, sd)
+        bid, ask = m["prices"][0], m["prices"][1]
+        d = decide(p, bid, ask, thresh)
+        out.append({"day": D.strftime("%Y-%m-%d"), "city": m["series"], "p": p, "result": m["result"], "bid": bid, "ask": ask, "trade": d,
+                    "net": net(d[0], d[1], m["result"]) if d else None, "stress": net(d[0], d[1], m["result"], STRESS) if d else None})
+    return out
+
+
+def summarize(rows: list[dict]) -> dict:
+    tr = [r for r in rows if r["trade"]]
+    if len(tr) < 2:
+        return {"n": len(tr)}
+    m, _, z = cluster_mean_z([(r["day"], r["net"]) for r in tr])
+    ordered = sorted(tr, key=lambda r: r["day"])
+    h = len(ordered) // 2
+    cities = defaultdict(list)
+    for r in tr:
+        cities[r["city"]].append(r["net"])
+    return {"n": len(tr), "days": len({r["day"] for r in tr}), "mean": m, "z": z, "h1": st.mean(r["net"] for r in ordered[:h]), "h2": st.mean(r["net"] for r in ordered[h:]),
+            "stress": st.mean(r["stress"] for r in tr), "cities_positive": sum(1 for v in cities.values() if st.mean(v) > 0), "by_city": {k: (len(v), st.mean(v)) for k, v in cities.items()}}
+
+
+def main(argv: list[str]) -> None:
+    if len(argv) >= 2 and argv[1] == "fetch":
+        return fetch()
+    if len(argv) < 2 or argv[1] != "run":
+        print(__doc__)
+        return
+    if RESULT.exists():
+        print(f"Refusing to run again: {RESULT} exists. Delete it on purpose only for a crash fix, and log that in the README.")
+        return
+    cache = json.loads(DATA.read_text())
+    rows = build_trades(cache, THRESH)
+    s = summarize(rows)
+    if s["n"] < MIN_N or s.get("days", 0) < MIN_DAYS:
+        verdict = "NOT_ENOUGH_DATA"
+    elif s["mean"] >= MEAN_C and s["z"] >= Z_BAR and s["h1"] > 0 and s["h2"] > 0 and s["stress"] > 0 and s["cities_positive"] >= MIN_CITIES:
+        verdict = "NOT_YET_FALSIFIED"
+    elif s["mean"] < FALSIFY_C or s["z"] < FALSIFY_Z:
+        verdict = "FALSIFIED"
+    else:
+        verdict = "NOT_ENOUGH_DATA"
+    out = [f"WX1: verdict {verdict}", f"markets with forecast and price: {len(rows)}", json.dumps(s, default=str)]
+    cal = defaultdict(list)
+    for r in rows:
+        cal[min(9, int(r["p"] * 10))].append(1.0 if r["result"] == "yes" else 0.0)
+    out.append("info: calibration (decile of model p: n, observed yes rate): " + "; ".join(f"{k}: {len(v)}, {st.mean(v):.2f}" for k, v in sorted(cal.items())))
+    out.append("info: same rule at 3c threshold: " + json.dumps(summarize(build_trades(cache, THRESH_INFO)), default=str))
+    RESULT.write_text("\n".join(out) + "\n")
+    print("\n".join(out))
 
 
 if __name__ == "__main__":
-    fetch() if sys.argv[1:2] == ["fetch"] else run()
+    main(sys.argv)
