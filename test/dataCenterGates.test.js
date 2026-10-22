@@ -183,6 +183,7 @@ gates.D13 = () => {
   assert.ok(/kalStmtPrint/.test(html) && !/id="kalStmtPrint"[\s\S]{0,40}page-data/.test(html), 'the print button is in the Tools menu');
   const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
   assert.ok(!/kalStmt/.test(page), 'and not on the read only Data page');
+};
 
 // D12: today's result as a share of the account. Consequence: a +$0.80 day on a $203.48 account is +0.39%, measured against where the day started, and an unknown balance shows nothing rather than a wrong percentage.
 gates.D12 = () => {
