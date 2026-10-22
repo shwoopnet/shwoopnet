@@ -41,6 +41,7 @@ remote:
   2026; it used to review the withdrawn equities strategy), with thresholds
   decided in advance so a losing week can't be argued into looking fine. The
   equities version stays in the `shwoop-server` repo.
+- **`security-audit`** and the **`security` agent** (`.claude/agents/security.md`, Oct 22, 2026) — the project's security engineer. The skill runs a deterministic scan (`node .claude/skills/security-audit/scripts/scan.js`: secrets, workflows, database rules, server functions, the page, dependencies; it prints no secret value and exits 1 on a FAIL) and the agent reads what a script cannot, proves each finding, and fixes it as a small pull request with a gate in `test/`. It never merges, never deploys, never writes the details of an unfixed weakness into this PUBLIC repo, and never touches trading rules (`test/securityAgentGates.test.js`, which also proves the scan fails on a deliberately bad fake repo). Run it before merging a change to `functions/`, `firestore.rules`, sign-in code or workflows, and weekly.
 - **`ask-the-advisors`** — six-perspective board for project decisions.
 - **`unlazy`** — vendored from upstream (see its `PROVENANCE.md`). Writes
   acceptance gates before the work and re-measures them before reporting,
