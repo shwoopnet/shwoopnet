@@ -5421,3 +5421,16 @@ Two facts that matter for the decision:
 Not applied; a proposal only. Tries: +1 (running count about 4,688).
 
 Owner's pick after CROWD1 (2026-10-22): Option 1. Keep #459 as is; the skip-whole-window idea is dropped, not proposed.
+
+## Pre-registration: CONC1 (2026-10-22), enter an L1 favourite only when the other crypto series agree
+
+Idea: crowded windows lose together (CROWD1: both lose 5.7x more often than chance), so a favourite that the other crypto markets do NOT back may be an idiosyncratic move that reverses. Test whether agreement across series separates good L1 entries from bad ones. A proposed filter only; never applied by me.
+
+- **Data:** `lstrats.hold_rule(markets, 360, (0.88, 0.97))`, entries for Bitcoin, Ethereum, XRP, Dogecoin only. For each entry, read every OTHER of those four series' candle in the same window at the same minute (close minus 360 s). Its lean is YES if the yes mid is at least 0.60, NO if at most 0.40, otherwise neutral (ignored).
+- **Groups (known at the entry minute):** AGREE = at least one other series has a lean and none leans against the entry's side. DISAGREE = at least one other leans against the entry's side. Entries with no leaning series are not used. Each group is compared per day from its own entries.
+- **Primary claim:** AGREE minus DISAGREE mean net per contract is at least +1.0c.
+- **Prediction (now):** +1.5c; honestly uncertain, the sign could be reversed if disagreement marks a mispriced alt.
+- **Supported (NOT_YET_FALSIFIED) needs all of:** DISAGREE n >= 300 and >= 10 days; diff >= +1.0c with day-clustered z >= 2.0; same sign in both halves by time; same sign under the x1.2 fee stress; same sign in at least 2 of the months present (months with at least 30 DISAGREE entries); placebo (100 random relabels of the same group sizes) 95th percentile of diff z below the observed.
+- **FALSIFIED:** diff < +0.3c or z < 1.0. Anything else NOT_ENOUGH_DATA.
+- **Information only:** the share of entries that are DISAGREE, and the loss rates of both groups.
+- Tries: +1 (Kalshi running count about 4,689). Run once: `python -m scalper.conc1 run`.
