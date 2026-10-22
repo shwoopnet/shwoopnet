@@ -5535,3 +5535,18 @@ Owner's pick. FLAT2 was found at 6 minutes before the close. FLAT3 reads the sam
 - **Per entry minute, the FLAT2 conditions:** FLAT n >= 300 and >= 10 days; FLAT minus MOVING >= +1.0c with day-clustered z >= 2.0; same sign in both halves and under the x1.2 fee stress; same sign in at least 2 of the months present with 100 or more FLAT entries; placebo (100 random relabels) 95th percentile of diff z below the observed. FALSIFIED if diff < +0.3c or z < 1.0; otherwise NOT_ENOUGH_DATA. Four separate words, one per minute.
 - **Prediction (now):** the gap shrinks with distance from the close: 300 s +2.0c, 420 s +1.5c, 480 s +1.0c, 540 s +0.5c. If it instead grows earlier, the 10 minute miss in STACK1 was low power.
 - Tries: +4 (running count about 4,699). Run once: `python -m scalper.flat3 run`.
+
+### FLAT3 result (2026-10-22, run once): the gap fades with distance from the close
+
+FLAT minus MOVING, mean net per contract, history to 2026-10-13, same cut:
+
+| Seconds left | FLAT n | FLAT | MOVING | Difference | z | Word |
+|---|---|---|---|---|---|---|
+| 300 (5 min) | 4,185 | +0.96c | -0.56c | **+1.43c** | 3.66 | NOT_YET_FALSIFIED |
+| 360 (6 min, FLAT2) | 3,727 | +1.76c | -0.17c | **+1.87c** | 5.25 | NOT_YET_FALSIFIED |
+| 420 (7 min) | 2,666 | +1.22c | +0.34c | +1.01c | 1.89 | NOT_ENOUGH_DATA |
+| 480 (8 min) | 1,449 | +1.27c | +0.56c | +0.95c | 1.12 | NOT_ENOUGH_DATA |
+| 540 (9 min) | 471 | +1.50c | +0.67c | +0.10c | 0.06 | FALSIFIED |
+| 600 (10 min, STACK1 A) | 494 | +2.00c | +0.51c | +0.89c | 0.69 | FALSIFIED (low power) |
+
+The prediction (shrinks with distance) held in shape: strongest at 5 to 6 minutes, fading by 8 to 9. At 300 s the gap was smaller than predicted (+1.43c against +2.0c), and at 420 it just missed the +1.0c and z 2.0 bars (z 1.89). October is the weakest month at 300 s (+0.81c) and 420 s (+0.60c). The edge lives in the last 5 to 6 minutes, which is where the live L1 rule already sits (6 minutes), and it fades by 8 minutes, where the market has not yet settled into a firm favourite. Not new evidence (same history). Tries: +4 (running count about 4,699).
