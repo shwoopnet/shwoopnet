@@ -1,0 +1,48 @@
+# PILOT (Oct 22, 2026, research only): records Kalshi's 15 minute crypto quotes next to Coinbase, Kraken and Bitstamp spot prices in the last seconds of each window.
+# Why: the research session's RECORD1 asks whether Kalshi's quotes lag spot, which one minute candles cannot show. This pilot measures how many windows a free runner catches
+# (scheduled jobs start late, Kalshi's public read limit) before anyone commits to 14 days. No secret is used or needed: only public data is read, and the built-in GITHUB_TOKEN
+# pushes the files to the `quote-data` branch, never to main. It places no order.
+name: record-quotes
+on:
+  schedule:
+    - cron: "2 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-quotes
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Get the recorder script from main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: code
+      - name: Install the websocket library
+        run: pip install --quiet websockets==13.1
+      - name: Open the data branch (created empty the first time)
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record until the top of the next hour
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/quotes/$STAMP"
+          python3 code/scripts/record_quotes.py "data/quotes/$STAMP" --minutes 62
+          gzip -9 -f data/quotes/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always()
+        run: |
+          cd data
+          git config user.name "quote-recorder"
+          git config user.email "quote-recorder@users.noreply.github.com"
+          git add quotes
+          git commit -q -m "quotes $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1
