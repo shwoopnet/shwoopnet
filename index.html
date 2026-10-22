@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- A private dashboard on a public host: ask search engines not to list it (Oct 22, 2026). This only asks; the sign-in is what keeps it private. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Private trading dashboard. Authorized users only.">
+<meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <title>Shwoop Financials: We trade. You live your life.</title>
 <link rel="icon" type="image/png" href="favicon-64.png">
 <!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the bubbly white S on black (brand mark A, Oct 20, 2026), full bleed because iOS rounds the corners itself. -->
@@ -241,7 +246,7 @@
   .display{ font-family: 'Public Sans', sans-serif; }
   button, input{ font-family: inherit; }
   button{ background:none; }
-  button:focus-visible, a:focus-visible{ outline: 2px solid var(--amber); outline-offset: 2px; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible{ outline: 2px solid var(--amber); outline-offset: 2px; }
 
   .app{ max-width: 1400px; margin: 0 auto; padding: 0 0 40px 0; }
   /* The Kalshi page is a console, not an article: on a wide monitor it uses more of the width instead of leaving wide empty gutters (the owner's note, Oct 9, 2026).
@@ -742,6 +747,7 @@
     font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; letter-spacing:.05em;
   }
   .auth-title{ font-family:'Public Sans', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
+  .auth-sub{ font-size:12.5px; color: var(--muted); margin:-8px 0 14px; }
   .auth-status{ font-size:12px; color: var(--muted); margin-bottom:14px; }
   .auth-gate form{ text-align:left; }
   .auth-submit{ width:100%; margin-top:4px; }
@@ -1079,6 +1085,7 @@
       SHWOOP
     </div>
     <div class="auth-title">Sign in</div>
+    <div class="auth-sub">Private trading dashboard. Authorized users only.</div>
     <div class="auth-status" id="authStatus">Connecting…</div>
     <form id="authForm" hidden>
       <div class="modal-field">
@@ -1421,6 +1428,7 @@
   <footer class="site-footer">
     <details class="footer-legal">
       <summary><span class="footer-copyright">&copy; 2026 Shwoop Financials</span> <span class="footer-sep">&middot;</span> Legal and risk disclosure</summary>
+      <p>Privacy: this is a private tool. Sign-in and saved settings run on a third-party cloud service, and your display choices are kept in this browser and in your account. The site has no advertising and no analytics. Its fonts and the Bot page's chart prices are loaded from third-party services in your browser, so those services can see your network address.</p>
       <p>Nothing on this site is investment, financial, legal or tax advice, or an offer or solicitation to buy or sell anything. Shwoop is not a broker-dealer, an investment adviser, a commodity trading advisor or an exchange, and it does not manage money for anyone else.</p>
       <p>Trading involves substantial risk of loss, including the loss of everything put into it. Automated trading can fail, act on bad data, or place orders you did not intend. A loss limit can end the bot after losses; it does not guarantee a maximum loss. Past performance does not guarantee future results.</p>
       <p>Paper and backtest results are hypothetical. They use no real money, leave out real-world costs and fills, and do not predict future results. Data from third parties can be late, incomplete or wrong.</p>
@@ -3490,6 +3498,12 @@
     pageEnterTimer = setTimeout(function(){ pageEl.classList.remove('enter'); }, 2200);
   }
 
+  // The tab and the browser history say which page this is (Oct 22, 2026). While the sign-in box is up the tab keeps the full tagline title, so a signed-out visitor never sees a page name.
+  var DEFAULT_PAGE_TITLE = document.title, currentPageName = 'brief';
+  function setPageTitle(){
+    var gate = document.getElementById('authGate'), names = { brief: 'Market Brief', kalshi: 'Bot', data: 'Data', settings: 'Settings' };
+    document.title = gate && !gate.hasAttribute('hidden') ? DEFAULT_PAGE_TITLE : (names[currentPageName] || 'Market Brief') + ' | Shwoop Financials';
+  }
   function showPage(name){
     // Switching pages via nav used to leave the scroll position exactly
     // where it was on the PREVIOUS page -- landing on a short page already
@@ -3501,6 +3515,7 @@
     // Four pages are left (Data joined Oct 21, 2026, admin only like Kalshi). Anything else (an old #trades link, a stored landing choice) lands on the brief.
     if(name !== 'brief' && name !== 'kalshi' && name !== 'data' && name !== 'settings'){ name = 'brief'; }
     if((name === 'kalshi' || name === 'data') && !currentUserIsAdmin){ name = 'brief'; }
+    currentPageName = name; setPageTitle();
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-kalshi').hidden = (name !== 'kalshi');
     document.getElementById('page-data').hidden = (name !== 'data');
@@ -3770,7 +3785,7 @@
           return;
         }
         currentUid = user.uid;
-        authGateEl.setAttribute('hidden', '');
+        authGateEl.setAttribute('hidden', ''); setPageTitle();
         if(accountEmailDesc){ accountEmailDesc.textContent = 'Signed in as ' + user.email; }
         if(signOutBtn){ signOutBtn.textContent = 'Sign out'; }
         userDocUnsubscribe = api.watchUserDoc(user.uid, function(data){
@@ -3801,7 +3816,7 @@
         currentUserIsAdmin = false;
         applyAdminUI();
         resetNewsAndEarnings();
-        authGateEl.removeAttribute('hidden');
+        authGateEl.removeAttribute('hidden'); setPageTitle();
         document.getElementById('authEmail').value = '';
         document.getElementById('authPassword').value = '';
       }
