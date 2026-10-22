@@ -337,7 +337,11 @@ function riseFromCandles(candles, side, nowSec) {
   const then = mids.get(latest - RISE_LOOKBACK_S);
   if (!Number.isFinite(then)) return null;
   const dir = side === "no" ? -1 : 1, now = mids.get(latest);
-  return { rise: Number((dir * (now - then)).toFixed(4)), midNow: Number(now.toFixed(4)), midThen: Number(then.toFixed(4)), candleAt: latest };
+  // rng5 (Oct 22, 2026, the research session's FLAT2 lead, the owner: "yes, log rng5"): the max minus the min of the mid over the six minute marks from 5 minutes ago to now, so a quiet market reads small.
+  // A range is the same for either side (a NO mid is one minus the YES mid), so it needs no direction. Any missing mark leaves it out; the order is never held for it.
+  const marks = [0, 60, 120, 180, 240, 300].map((d) => mids.get(latest - d));
+  const rng = marks.every(Number.isFinite) ? Number((Math.max(...marks) - Math.min(...marks)).toFixed(4)) : null;
+  return { rise: Number((dir * (now - then)).toFixed(4)), midNow: Number(now.toFixed(4)), midThen: Number(then.toFixed(4)), candleAt: latest, rng };
 }
 async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs }) {
   try {
@@ -347,7 +351,7 @@ async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs }) {
     if (res.status !== 200 || !res.body || !Array.isArray(res.body.candlesticks)) return false;
     const r = riseFromCandles(res.body.candlesticks, side, nowSec);
     if (!r) return false;
-    await store.updateTest(cid, { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen });
+    await store.updateTest(cid, { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen, ...(r.rng === null ? {} : { rng5: r.rng }) });
     return true;
   } catch (e) { return false; }      // logging only: never allowed to affect a trade
 }
