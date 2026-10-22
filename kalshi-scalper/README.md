@@ -5065,3 +5065,13 @@ Code `scalper/dl10.py` and `tests/test_dl10.py` were committed before the run; r
 2. **Thin-series book recorder.** The thin-series market-making idea is `NOT_RUNNABLE` today: the book snapshots on hand cover Bitcoin, gold and Ethereum only. Hourly-or-faster snapshots of XRP, Dogecoin and natural gas (bid and ask size at several levels, like the perps recorder) for about two weeks would make a pre-registered test possible.
 
 **Single reads.** `python -m scalper.cuts4 run` (FIX1 and the JUMP1 history look, once) and `python -m scalper.vrp2 fetch` then `run` (once). Nothing goes live.
+
+## Result: VRP2, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/vrp2.py` and `tests/test_vrp2.py` were committed before the run; result file `data/vrp2_result.txt`. 440 months, 1990-02 to 2026-09 (^GSPC with ^VIX). A synthetic 5% wide put credit spread (short 0.95 x S, long 0.90 x S), 21 trading days, priced at the VIX with flat volatility, held to expiry, cost 3% of the width.
+
+- **Mean net return on margin +2.16% a month, Newey-West z 2.02** (bar 2.9). Halves **+3.64% then +0.68%**; from 2012 on **+1.92%**; at the 4% cost **+1.05%**; before any cost **+5.49%**. Win rate 74.3%. **Verdict: `FALSIFIED`** (z only; every other condition passed).
+- **Prediction:** mean net -1.5% to +2.0%, z under 2.0, `FALSIFIED` (about 70%): the verdict held, the mean landed just above my range (+2.16%) and z just above 2.0.
+- **The tail, as printed.** The five worst months were 2009-02, 2008-10, 2009-01, 2020-03 and 1998-08, each **-104% of margin** (the full width lost plus the cost). With 2% of the account at risk per spread, the account's maximum drawdown over the 440 months was -8.9%.
+- **What this does and does not mean for a $500 account.** The premium is real in this data (more than 5% a month on margin before cost, about 2% after) and shrank in the second half (+0.68%). But **a $5-wide SPY spread ties up about $430 of margin, which is 86% of a $500 account, so one worst month loses almost everything**; risking 2% per spread, the sizing behind that -8.9% drawdown, needs an account near $20,000. At the owner's size the strategy is not the one tested here, and a recorder run would add data, not a way to trade it today.
+- **Caveats stated before the run still apply:** flat volatility understates the credit of real puts, rates and dividends are ignored, no early assignment or margin call is modelled. **Count: ETF and index family tries 22.** Nothing built, nothing changed live.
