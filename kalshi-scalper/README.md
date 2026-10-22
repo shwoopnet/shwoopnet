@@ -5396,3 +5396,16 @@ Source: the main session's condensed order table, saved as `studies/live_orders_
 - **Eras:** Oct 7 to 10 ramp +$2.77 (79 orders); Oct 10 to 19 sized -$0.60 (196); Oct 20 on, small size, -$13.91 (111 orders, 10 losses, 9.0% loss rate, against a break-even near 6.8%). The most recent era is the weak one: gold (-$5.37) and XRP (-$6.26) lead it.
 - **Price band:** .94 and up lost 3 of 171 (+$30.50, +2.9c a contract); .90 to .94 lost 16 of 163 (-$39.05, -4.0c); under .90 lost 8 of 52. This is mostly the market pricing risk correctly, and 3 losses is far too few to call an edge. Since Oct 20 the top band is -3.16c on 47 orders, so it does not hold up in the newest data. Treated as a lead only, not registered.
 - 21 exits (25c rule) total -$97.05 of settled P/L in the table, which is the sum of the losses that were cut; the earlier result (holding would have cost more, $2.20 difference) stands.
+
+## Pre-registration: CROWD1 (2026-10-22), skip the whole window when two or more live series qualify
+
+Idea: #459 keeps only the first crypto order in a crowded window. LIVE2 showed crowded windows lose 14.3% against 4.4% for single-fill windows. CROWD1 asks whether the FIRST entry of a crowded window is itself worse than a solo entry, which would argue for skipping the window entirely (a proposal for the owner and main session, never applied by me).
+
+- **Data:** the 15-minute history in `data/*.sqlite` via `lstrats.hold_rule(markets, 360, L1 band)` (same entries as every L1 study). Series: Bitcoin, Ethereum, XRP, Dogecoin, gold (the live L1 set). Window = the market close time.
+- **Groups (all known at the 360 second mark, no lookahead):** k = number of the five series with a qualifying favourite in the window. SOLO = entries in windows with k = 1. CROWD_FIRST = the first entry in windows with k >= 2, in order Bitcoin, Ethereum, XRP, Dogecoin, gold. CROWD_EXTRA = the rest (what #459 already removes; reported, not the claim).
+- **Primary claim:** mean net per contract of CROWD_FIRST is at least 1.5c LOWER than SOLO. Each group uses its own entries, compared per day on days where both exist (day-clustered diff z).
+- **Prediction (recorded now):** diff about -1.5c, honestly a coin flip. Crowding raises variance by correlation, which does not change the mean per entry; if the mean is the same, the right fix is size, not skipping.
+- **Supported (NOT_YET_FALSIFIED) needs all of:** CROWD_FIRST n >= 300 and >= 10 days; diff <= -1.5c with diff z <= -2.0; both halves by time have the same sign; the x1.2 fee stress has the same sign; at least 3 of the months present have the same sign; the placebo (100 random relabels of the same size drawn from SOLO plus CROWD_FIRST) 95th percentile of diff z does not reach the observed.
+- **FALSIFIED:** diff > -0.5c or diff z > -1.0. Anything else NOT_ENOUGH_DATA.
+- **Also reported, information only:** CROWD_EXTRA mean, windows' loss counts against independent-loss expectation, results with crowds defined on crypto only.
+- Tries: +1 (Kalshi running count about 4,688). Run once: `python -m scalper.crowd1 run`.
