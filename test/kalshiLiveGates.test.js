@@ -209,7 +209,10 @@ gates.L10 = () => {
   assert.deepStrictEqual(Object.keys(body).sort(), ['client_order_id', 'count', 'exchange_index', 'price', 'self_trade_prevention_type', 'side', 'ticker', 'time_in_force']);
   assert.strictEqual(body.count, '1'); assert.strictEqual(body.side, 'ask');
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
-  assert.ok(!/postWithRetry|RETRY|setTimeout|for \(const base of/.test(src.replace(/\/\/[^\n]*/g, '')), 'no retry or failover loop in the live module');
+  // Orders are never retried or failed over. A read (GET) that Kalshi refuses with 429 is asked once more after a short wait (Oct 22, 2026); test RR1 in
+  // kalshiL1Gates.test.js proves a POST is sent once, so the wait (setTimeout) and its constant are allowed here and nothing else about retrying is.
+  assert.ok(!/postWithRetry|for \(const base of/.test(src.replace(/\/\/[^\n]*/g, '')), 'no retry or failover loop in the live module');
+  assert.ok((src.replace(/\/\/[^\n]*/g, '').match(/setTimeout/g) || []).length === 1, 'the only wait in the live module is the single GET retry');
 };
 
 // ---- wiring: who can reach it, what the page can send, who can read the records ----
