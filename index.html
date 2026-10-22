@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Clickjacking guard (Oct 22, 2026): this page has Start, Pause and Flatten buttons, and the host cannot send a frame-blocking header, so if anything frames the page it hides itself and tries to leave the frame.
+  if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) { /* a cross-origin parent may refuse; the page stays hidden */ } }
+</script>
 <title>Shwoop Financials: We trade. You live your life.</title>
 <link rel="icon" type="image/png" href="favicon-64.png">
 <!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the bubbly white S on black (brand mark A, Oct 20, 2026), full bleed because iOS rounds the corners itself. -->
