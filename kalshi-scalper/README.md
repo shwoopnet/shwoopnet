@@ -5554,3 +5554,15 @@ The prediction (shrinks with distance) held in shape: strongest at 5 to 6 minute
 ### FLAT2 by series (2026-10-22, information only, no claim, no new try)
 
 FLAT minus rest at 6 minutes, history, series with at least 40 entries in both groups: ZEC +4.43c (z 3.37), WTI +4.42c (2.48), platinum +4.27c, GBP/USD +3.54c, **ETH +3.36c (3.43), BTC +3.21c (2.55)**, silver +3.06c (2.44), natural gas +2.77c (2.27), HYPE +2.68c, **XRP +2.48c (2.51)**, copper +1.12c, **Dogecoin +0.68c (0.49)**, NEAR +0.18c, BNB -0.47c, palladium -1.66c, EUR/USD -2.40c, **gold -2.74c (-0.89)**. 13 of 17 positive. Gold, the live series with the size ladder, is the one live series where flat entries did WORSE (+0.29c against +1.76c for the rest, 210 flat entries), so any use of FLAT must leave gold out until proven there. The edge is strongest on Bitcoin, Ethereum, XRP, natural gas, WTI and silver. Split by series, the groups are small; nothing here replaces the forward read.
+
+## Pre-registration: FLAT-R (2026-10-22), FLAT2 replicated on 15 minute series no study has touched
+
+Owner: "more we can do instead of just waiting". The honest fast test is an independent sample. Kalshi lists 35 fifteen-minute series; my history uses 18. The 15 below were never in any study here (none of `data/*.sqlite` holds them), and they share the mechanism (one strike at the open, a favourite emerges as the close nears). Same rule, same cut, run once.
+
+- **Series (fixed now, before any download):** KXADA15M, KXAUDUSD15M, KXBCH15M, KXBRENT15M, KXDJIA15M, KXINX15M, KXNDQ15M, KXSOL15M, KXTON15M, KXUSDCAD15M, KXUSDMXN15M, KX2YRRATE15M, KX5YRRATE15M, KX10YRRATE15M, KX30YRRATE15M. Left out on purpose: KXCRYPTOCOMP15M and KXCRYPTOLEAD15M (comparison markets, not a strike). Candles are downloaded into `data/rep.sqlite` over the whole 69 day reach Kalshi serves (a market with no candles is not stored).
+- **Rule:** `feat1.build(markets, 360)` rows (L1 band 0.88 to 0.97 at 360 s left), FLAT = `rng5 <= 0.15` and `abs(rise3) <= 0.05` (exactly FLAT2), MOVING = the rest, each group from its own entries, compared per day (day-clustered).
+- **Claim:** FLAT minus MOVING >= +1.0c with z >= 2.0; FLAT n >= 300 and >= 10 days; same sign in both halves and under the x1.2 fee stress; same sign in at least 2 of the months present with 100 or more FLAT entries; placebo 95th percentile of diff z below the observed. FALSIFIED if diff < +0.3c or z < 1.0; otherwise NOT_ENOUGH_DATA.
+- **Prediction (now):** +1.2c, less than FLAT2's +1.87c because replications of a found effect shrink and several of these series are thin.
+- **Information only:** the same split by series, and the pooled comparison with the original 18.
+- Thin series have wide quotes and few fills in practice. This test reads edge on posted asks only, so it says nothing about fillability.
+- Tries: +1 (running count about 4,700). Run once: `python -m scalper.flat_r run`.
