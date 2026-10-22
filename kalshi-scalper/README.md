@@ -5123,3 +5123,28 @@ Code `scalper/fam5.py` and `tests/test_fam5.py` were committed before the run; r
 - **CM1:** the portfolio returned 7.7% a year against 7.3% for the equal-weight 17 at the same volatility (19.9%) and a worst drawdown near -59%. Country momentum earned about nothing after costs in this window.
 - **VT1:** the curve filter was invested **82% of days** (it rarely says "no"), so it is mostly SVXY with a thin filter. Alpha was **+9.8% in the first half and -6.5% in the second, -7.0% since 2019**, with beta 1.21 on SPY. **Worst drawdown -67% for the strategy against -95% for buying and holding SVXY** (the 2018-02-05 day in this series: -32% for SVXY, in the position). The first-half premium is real in this data and did not last; the wrapper that makes it tradable at $500 is the same one that fell 95%.
 - **Dollar size:** CM1 about $1.70 on $200 and $4.30 on $500 a year; VT1's +5.55% would be $11 and $28 a year, with a drawdown of two thirds of the account. **ETF and index family tries: 24.** Nothing built, nothing changed live.
+
+## Information: entry-quality features, a descriptive table (2026-10-22; TREE2's pool, 24,793 L1 entries at 6 minutes, held to settlement; no verdict, no try)
+
+Features from candles up to the decision candle only. `tib` = consecutive earlier minutes in which the held side's ask was already 88c or more; `dip` = the lowest the held side's mid had been earlier in this market; `dsp` = the spread now minus the spread 3 minutes earlier.
+
+| Feature and bucket | n | Net per contract | Halves | Loss rate |
+|---|---|---|---|---|
+| tib 0 (just arrived) | 8,632 | **-0.50c** | -0.02 / -0.97 | 8.9% |
+| tib 1 | 5,808 | -0.29c | -0.40 / -0.19 | 6.8% |
+| tib 2 to 3 | 6,990 | +0.49c | +1.09 / -0.11 | 5.1% |
+| tib 4 to 5 | 2,590 | **+1.73c** | +1.84 / +1.61 | **3.5%** |
+| tib 6 or more | 773 | +1.36c | +1.15 / +1.59 | 3.5% |
+| dip under 0.4 | 5,036 | -0.50c | | 7.7% |
+| dip 0.4 to 0.6 | 13,359 | -0.15c | +0.46 / -0.78 | 6.9% |
+| dip 0.6 to 0.8 | 6,410 | +1.00c | +1.32 / +0.69 | 5.3% |
+| **dip 0.8 or more (never doubted)** | 311 | **+3.03c** | +3.04 / +3.02 | **2.3%** |
+| spread widened by 0.015 to 0.035 | 1,198 | **-2.79c** | -1.96 / -3.86 | 10.3% |
+| spread widened by 0.035 or more | 352 | **-4.91c** | | 12.2% |
+
+- **Reading.** The three measure one thing: how long and how firmly the market has believed in this favourite. Gradients are monotone in `tib` and `dip` and the top buckets keep their sign in both halves. A favourite that has already sat in the band for 4 or more minutes lost 3.5% of the time against the 6.8% break-even; one that just arrived lost 8.9%. These are **in-sample** (the same data every Kalshi lead here came from) and the buckets overlap with the 3 minute rise (a price that has been in the band for 4 minutes has not just jumped); they prove nothing yet.
+- **Registered now, before any fresh day is classified (two more Kalshi tries: running count about 4,677; each a forward read of one pre-named cut):** on the fresh public candles (the FWD7 download, markets closing from 2026-10-13), pooled at 360 seconds.
+  - **TIB1:** entries with `tib` **4 or more** minus entries with `tib` **1 or less**: net above zero with a day-clustered z of at least **2.4**, the high group above zero by itself, at least 200 entries in each group.
+  - **DIP1:** entries with `dip` **0.60 or more** minus entries with `dip` **below 0.60**: same bar.
+  - Read with FWD7 (30 fresh days or 2026-12-01). **Prediction:** TIB1 high minus low **+1.0c to +2.5c** (`NOT_YET_FALSIFIED` about **30%**); DIP1 **+0.8c to +2.0c** (about **30%**). They are correlated with JUMP1 and JUMP1b: four tries, one underlying idea. A single combined "firm favourite" rule would be a later, separate try.
+- **What the bot could log (the main session's call, no change to entries):** `tib` and `dip` need the market's quote history, which the bot does not hold at the decision, so they would need a per-market quote log; the 3 minute rise needs only one earlier quote and was already requested.
