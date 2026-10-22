@@ -5450,3 +5450,11 @@ Owner's pick (Option 1). CONC1 found, against its own prediction, that crypto fa
 - **Prediction (now):** +1.0c. The CONC1 gap was +1.99c; a lead found by looking shrinks, so I predict half.
 - **Gate:** read through `fwd_reads` with the existing gate (30 fresh days, about 2026-11-12, or 2026-12-01), once, with the other FWD claims. An information look at partial days is allowed and decides nothing. FALSIFIED if the claim fails; NOT_YET_FALSIFIED only if every condition holds.
 - Tries: +1 (running count about 4,690).
+
+## LIVE3: fills against no-fills in the full live export (2026-10-22, information only)
+
+The owner's full "Copy all orders" export (607 orders, Oct 7 to 22) arrived in three parts. I saved the 219 L1 orders that did not fill (`studies/live_nofills_2026-10-22.csv`; count matches 607 minus the 387 fills) and scored them next to the fills (`src/scalper/live_fill.py`), both held to settlement at the order's limit price with the fee, using public results. This removes the exit rule and the actual fill price from the comparison. No registered claim, no verdict; adds no tries.
+
+- Fills: 366 settled, loss rate **5.7%**, **+0.92c** a contract. No-fills: 209 settled, loss rate **8.1%**, **-0.82c** (30 orders on XRP, Dogecoin and natural gas cannot be settled from the candles I hold).
+- The no-fills are not hidden winners. The orders that did not fill would have done worse than the ones that did, so the live record is not adverse-selected by the IOC fill rule. Per-day paired difference is -0.87c with z -0.19 over only 13 days with both, so treat the sign as unresolved, not as an edge.
+- Held to settlement, the 366 fills lose 5.7%, under the roughly 6.8% break-even. The live net P/L (-$11.74) is therefore not the entry rule; it comes from size (the two large Bitcoin losses), the exits and the crowded windows (LIVE2).
