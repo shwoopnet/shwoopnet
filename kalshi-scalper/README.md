@@ -4957,3 +4957,24 @@ Code `scalper/sess_sci.py` and `tests/test_sess_sci.py` were committed before th
 **CAP1, the window cap's allocation (information only; no verdict, no try).** In the history: how often two or more of Bitcoin, gold, Ethereum, XRP, Dogecoin and natural gas have an L1 favourite in the same window, which series are in those windows, and each series' net when it is alone against when others are present. The cap value and the live sizes are the main session's, so nothing about dollars is computed here.
 
 **Single reads.** `python -m scalper.mc_sf run` (MC1, SF1 and the CAP1 table, once; a refused rerun unless `data/mc_sf_result.txt` is deleted on purpose). Nothing goes live.
+
+## Results: MC1, SF1 and CAP1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)
+
+Code `scalper/mc_sf.py` and `tests/test_mc_sf.py` were committed before the run; result file `data/mc_sf_result.txt`.
+
+- **MC1: `FALSIFIED`.** 12,987 out-of-sample entries (days from 2026-08-27): net **+0.52c** (z +1.83, bar 2.8), halves +0.86c / +0.17c, +0.42c at fees x1.2. Plain 6 minute entries on the same days +0.06c; **chooser minus plain +0.39c (z +1.49)**. A fixed 10 minute rule on the same days did better than the chooser: 8,085 entries at **+0.71c**, chooser minus fixed 10 minutes -0.44c (z -1.31). The chooser picked 6, 8 and 10 minutes in 38%, 32% and 30% of series-weeks. Prediction (chooser +0.0c to +0.7c, above plain by +0.1c to +0.5c, `FALSIFIED` about 80%): right. **Reading:** letting each series pick its own minute added nothing over a fixed 10 minute entry; the pooled slope is a common feature, not a series-specific one.
+- **SF1: `FALSIFIED`.** After a flip in the series' previous 3 entries: 4,572 entries at **+0.40c** (z +1.09); calm: 20,167 at +0.06c; **after-flip minus calm +0.72c, day-clustered z +1.73** (bar 2.4). Prediction (within ±1.0c, |z| under 2.0): right. The sign is a bounce after a flip, the same direction as DL1's finding for the live series (skipped did better than kept); not shown at this size.
+- **CAP1 (information).** Of 4,994 windows in which at least one of the six live series had a favourite, **3,170 (63%) had two or more at once** (1: 1,824; 2: 1,452; 3: 1,001; 4: 537; 5: 156; 6: 24). Net per contract when the series is the only favourite in its window against when others are also present:
+
+| Series | Alone | With others |
+|---|---|---|
+| Bitcoin | **+2.92c** (n 246) | **+0.10c** (n 1,713) |
+| Natural gas | +1.91c (272) | +0.02c (748) |
+| Dogecoin | +2.96c (346) | +1.47c (1,779) |
+| Ethereum | +0.68c (253) | +0.59c (1,788) |
+| XRP | +1.10c (349) | +1.54c (1,912) |
+| Gold | +1.75c (358) | +1.46c (1,039) |
+
+  **A lead, not a result.** It was not registered, so it proves nothing, and the "alone" groups are small. But Bitcoin, natural gas and Dogecoin each earn more when they are the only favourite, which would make sense if windows with many favourites are windows with one large common move that has already been priced in. If the owner wants it tested, the rule is a **crowded-window filter** ("skip a series when two or more other live series also have a favourite in the same window"), to be registered first and read on fresh days. **Not run.**
+- **FWD9** stays a pure forward read (natural gas 10 minute orders by spread); nothing to report.
+- **Count: Kalshi tries about 4,664** (MC1, SF1; FWD9 registered). Nothing built, nothing changed live.
