@@ -5409,3 +5409,13 @@ Idea: #459 keeps only the first crypto order in a crowded window. LIVE2 showed c
 - **FALSIFIED:** diff > -0.5c or diff z > -1.0. Anything else NOT_ENOUGH_DATA.
 - **Also reported, information only:** CROWD_EXTRA mean, windows' loss counts against independent-loss expectation, results with crowds defined on crypto only.
 - Tries: +1 (Kalshi running count about 4,688). Run once: `python -m scalper.crowd1 run`.
+
+### CROWD1 result (2026-10-22, run once): NOT_ENOUGH_DATA
+
+Five live series, 69 days (Aug to Oct): SOLO 1,828 entries at +1.84c a contract; CROWD_FIRST 2,894 at +0.42c; difference **-1.40c**, day-clustered z **-2.08**, placebo tail -1.70 (observed beats it). Halves -2.16c and -0.68c, fee stress -1.40c, all three months negative (-2.43, -0.40, -1.72). It misses only the registered bar of -1.5c, so by the rule written first the word is NOT_ENOUGH_DATA, not "supported". The crypto-only variant (information only, not the claim) reads -1.71c, z -2.23, and would have passed; I do not promote it because it was not the registered claim.
+
+Two facts that matter for the decision:
+- **CROWD_EXTRA earns +1.31c a contract** (5,061 entries), positive on its own. So what #459 removes is positive in the mean; its gain is in the tail, not the average. The contagion is real: in two-entry windows both lose **1.82%** of the time against 0.32% if independent (about 5.7x).
+- Skipping the whole crowded window would drop 2,894 more positive-mean entries (+0.42c each) to lose the correlation. That is a tail-for-income trade, worth it only if the account cannot afford a double loss.
+
+Not applied; a proposal only. Tries: +1 (running count about 4,688).
