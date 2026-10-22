@@ -5579,3 +5579,9 @@ Idea: FLAT's value may be where the size goes, not which trades are skipped. Pol
 - **FALSIFIED** if claim (1) fails (z < 1.0 or the difference <= 0); NOT_YET_FALSIFIED only if both hold; otherwise NOT_ENOUGH_DATA. Days >= 30.
 - **Information only:** the same without gold; B with 3 contracts; days where B lost more than A.
 - Tries: +1 (running count about 4,701). Run once: `python -m scalper.size_flat run`.
+
+### SIZE1 result (2026-10-22, run once): NOT_ENOUGH_DATA (claim 1 passes, the risk claim fails)
+
+Five live series, 69 days, dollars per day (history, fees in, posted asks). A (1 contract on every entry): **+$1.63 a day**, sd $2.80, 5th percentile day -$2.81, worst day -$5.01. B (6 contracts on FLAT only): **+$3.42 a day**, sd $5.39, 5th percentile day **-$6.89**, worst day **-$15.73**. B minus A +$1.80 a day, paired day-clustered z 3.40; halves +$2.38 and +$1.23; B lost more than A on 21 of 69 days. Claim 1 holds; claim 2 (5th percentile day no more than 25% worse than A) fails, B is about 2.5x worse. Without gold the picture is the same (A +$1.32, B +$3.37, B 5th percentile -$7.39).
+
+The reading that matters: B roughly doubles both the mean and the spread (mean to sd about 0.64 for B against 0.58 for A). It is close to leverage, not a free improvement. At 3 contracts on FLAT, the mean equals A ($1.71 against $1.63, difference +$0.08, z 0.28) with about the same spread, so concentrating size on FLAT at equal risk adds little. FLAT's edge per trade is real in this history, but at constant risk it does not pay much more than trading everything. Tries: +1 (running count about 4,701).
