@@ -19,13 +19,13 @@ Make money on Kalshi without having to watch it. One bot trades for you. The pla
 1. Merge [#454](https://github.com/shwoopnet/shwoopnet/pull/454) (order exports carry the entry tag) so the research reads can split 10-minute from 6-minute orders. It only changes the exports.
 2. Merge the tidy and fixes pull request when you are ready (it has this refresh in it).
 3. Send a Recent trades screenshot now and then, or use **Tools, Copy all orders**, so the first reads of the 10-minute entry can be checked.
-4. Decide what to do about the equities server on Render (below).
+4. Nothing about Render: it is free and left running (decided 2026-10-22).
 
 ## What I am doing next
 
 | Job | In plain words | Done when |
 |---|---|---|
-| Render decision | The equities server still trades Alpaca for any account with keys and the page cannot pause it. Decide keep, pause or shut down | You choose; I find the monthly price and the steps |
+| Render (decided 2026-10-22) | The equities server is on Render's free plan, so it costs nothing, and it feeds the Brief's movers and earnings. The owner chose to leave it running as is | Revisit only if it starts trading unexpectedly or the free plan changes |
 | Read the 10 minute entry | Bitcoin, XRP and natural gas now enter earlier. Orders are tagged `10m`. Few markets are in the band at 10 minutes, so this fills slowly | FWD8 reads at 60 filled orders per series or 2026-12-01 |
 | Read the probes | AUD/USD, USD/CAD and gas, one contract each, plus the drop rule | FWD5 reads at 100 orders per group or 2026-12-01 |
 | Gold first, forward scoreboard | Gold earns; the others have to earn the ladder back from their own live record (150 settled trades, a result above +0.5c in both halves) | Rules already written, reads as the trades arrive |
