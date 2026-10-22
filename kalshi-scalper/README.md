@@ -5502,3 +5502,5 @@ Scored ONLY on markets closing from 2026-10-14 00:00 UTC, so no day that produce
 - **Prediction (now):** +1.0c, about half the in-sample gap, because an in-sample cut shrinks forward.
 - **FALSIFIED** if the claim fails and FLAT n >= 300. NOT_ENOUGH_DATA if FLAT n < 300. An information look at partial days is allowed and decides nothing.
 - Tries: +1 (running count about 4,693).
+
+Owner's pick after FLAT2 (2026-10-22): Option 1. Sent the main session a logging-only proposal: add `rng5` (6-mark range of the bought side's mid, t-300 to t) beside `rise3` on every L1 order record. No trade, size or setting change; the main session and the owner decide. Fresh-day information look (decides nothing): FLAT 287 entries at +1.62c against +0.02c for the rest, z 2.63, 9 days.
