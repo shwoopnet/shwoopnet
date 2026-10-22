@@ -5566,3 +5566,16 @@ Owner: "more we can do instead of just waiting". The honest fast test is an inde
 - **Information only:** the same split by series, and the pooled comparison with the original 18.
 - Thin series have wide quotes and few fills in practice. This test reads edge on posted asks only, so it says nothing about fillability.
 - Tries: +1 (running count about 4,700). Run once: `python -m scalper.flat_r run`.
+
+Main session (2026-10-22): the owner confirmed "deployed" at about 15:30 to 16:00 UTC (exact minute not given). Live now: #459, #460 (one retry of a refused GET read, never an order) and #461 (`rng5`, logging only). Orders from the next quarter hour carry `rng5`; these are the live FLAT record for the 2026-11-17 review.
+
+## Pre-registration: SIZE1 (2026-10-22), put the contracts on FLAT entries at the same total contracts
+
+Idea: FLAT's value may be where the size goes, not which trades are skipped. Policy B puts 6 contracts on every FLAT entry and none on the rest (FLAT is about 14% to 15% of entries, so B holds about 85% of policy A's contracts a day). Policy A is today's 1 contract on every entry. History only, in dollars per day, no live code.
+
+- **Data and rule:** `feat1.build(markets, 360)` rows (L1, 6 minutes, band 0.88 to 0.97) for the five live series (Bitcoin, Ethereum, XRP, Dogecoin, gold), FLAT = `rng5 <= 0.15` and `abs(rise3) <= 0.05` (FLAT2's cut). Per day: A = sum of `net` over all entries (1 contract each); B = 6 x sum of `net` over FLAT entries. `net` already includes the fee. No fill assumption beyond the posted ask (live fills were within about a cent in LIVE3).
+- **Claims, both needed:** (1) B's mean daily P/L minus A's is positive with a day-clustered paired z >= 2.0, same sign in both halves of the days; (2) B is not riskier: B's 5th percentile day is no more than 25% worse than A's (B_p5 >= 1.25 x A_p5 when A_p5 is negative), and B's worst single trade is the 6 contract loss (reported, not a pass condition).
+- **Prediction (now):** (1) yes, B about 2x A per day; (2) borderline, because 6 contract losses on a 3.5% loss rate make worse bad days.
+- **FALSIFIED** if claim (1) fails (z < 1.0 or the difference <= 0); NOT_YET_FALSIFIED only if both hold; otherwise NOT_ENOUGH_DATA. Days >= 30.
+- **Information only:** the same without gold; B with 3 contracts; days where B lost more than A.
+- Tries: +1 (running count about 4,701). Run once: `python -m scalper.size_flat run`.
