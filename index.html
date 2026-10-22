@@ -1298,6 +1298,7 @@
       <div class="kal-card" data-card="data-share"><div class="kal-card-title">Share of trades by market</div><div id="dataShare"></div></div>
       <div class="kal-card" data-card="data-ended"><div class="kal-card-title">How the orders ended</div><div class="kal-chart"><div id="kalChartPie"></div></div></div>
       <div class="kal-card kal-card-flush" data-card="data-markets"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">By market</div></div><div id="dataMarkets"></div></div>
+      <div class="kal-card kal-card-flush" data-card="data-lead"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">Entry timing test</div></div><div id="dataLead"></div></div>
       <div class="kal-card" data-card="data-bars"><div class="kal-card-title">Each settled trade</div><div class="kal-chart"><div id="kalChartBars"></div></div></div>
     </div>
     <details class="kal-card data-details" id="dataDetails" style="margin-top:20px"><summary class="kal-card-title">All the numbers</summary>
@@ -3028,6 +3029,33 @@
         (per === null ? '-' : esc((per >= 0 ? '+' : '-') + Math.abs(per).toFixed(1) + 'c')) + '</span><span>' + esc(sign(r.week)) + '</span></div>';
     }).join('');
   }
+  // The entry timing test (Oct 21, 2026, FWD8): Bitcoin, XRP and natural gas now enter about 10 minutes before the close, and every order records which entry time it used (entryLead). One row per market and
+  // entry time, in the order the markets are sent. An order with no entryLead is from before the change and was a 6 minute entry. A pairing with no settled trades yet says "none yet", never zero.
+  // The two groups are NOT the same markets (a 6 minute order on these three now exists only where there was no 10 minute entry), and the 6 minute rows include the older trades, so this is a view, not a verdict.
+  function dataLeadRows(orders){
+    var names = ['Bitcoin', 'XRP', 'Natural gas'], by = {};
+    names.forEach(function(n){ ['10 min', '6 min'].forEach(function(l){ by[n + '|' + l] = { name: n, lead: l, n: 0, wins: 0, net: 0, contracts: 0 }; }); });
+    (orders || []).forEach(function(o){
+      var p = kalshiOrderPnl(o);
+      if(p === null){ return; }
+      var name = kalshiMarketName(o), lead = o.entryLead === '10m' ? '10 min' : '6 min', m = by[name + '|' + lead];
+      if(!m){ return; }
+      m.n++; m.net += p; m.contracts += Number(o.fillCount) || 0; if(p > 0){ m.wins++; }
+    });
+    var out = [];
+    names.forEach(function(n){ out.push(by[n + '|10 min'], by[n + '|6 min']); });
+    return out;
+  }
+  function dataLeadHtml(rows, esc, money){
+    var sign = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    var head = '<div class="data-row data-head"><span>Market</span><span>Entry</span><span>Trades</span><span>Won</span><span>Result</span><span>Per contract</span></div>';
+    return head + rows.map(function(r){
+      if(!r.n){ return '<div class="data-row"><span>' + esc(r.name) + '</span><span>' + esc(r.lead) + '</span><span>0</span><span>none yet</span><span>-</span><span>-</span></div>'; }
+      var per = r.contracts > 0 ? (r.net / r.contracts * 100) : null;
+      return '<div class="data-row"><span>' + esc(r.name) + '</span><span>' + esc(r.lead) + '</span><span>' + r.n + '</span><span>' + Math.round(r.wins / r.n * 100) + '%</span><span>' + esc(sign(r.net)) + '</span><span>' +
+        (per === null ? '-' : esc((per >= 0 ? '+' : '-') + Math.abs(per).toFixed(1) + 'c')) + '</span></div>';
+    }).join('') + '<div class="kal-note" style="padding:10px 18px 14px">A live test that started on 2026-10-21. The 6 minute rows include every older trade, and the two groups are not the same markets. It takes weeks to mean anything.</div>';
+  }
   function renderDataCenter(){
     var pg = document.getElementById('page-data');
     if(!pg || pg.hidden){ return; }
@@ -3040,6 +3068,7 @@
     set('dataLine', kalshiLineSvg(kalshiPnlSeries(orders, 0), escapeHtml, kalshiMoney));
     set('dataShare', dataShareDonutHtml(rows, escapeHtml));
     set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
+    set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoney));
     set('dataNote', 'Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
   }
 

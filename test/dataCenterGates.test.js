@@ -25,7 +25,7 @@ gates.D1 = () => {
   const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
   assert.ok(page.length > 200);
   assert.ok(!/<(button|input|select|textarea|form|a )\b/i.test(page), 'the Data page has no control in it');
-  const code = ['dataWeekKey', 'dataWeeklyRows', 'dataWeekBarsSvg', 'dataMarketRows', 'dataShareDonutHtml', 'dataTilesHtml', 'dataMarketsHtml', 'renderDataCenter'].map(fnSource).join('\n');
+  const code = ['dataWeekKey', 'dataWeeklyRows', 'dataWeekBarsSvg', 'dataMarketRows', 'dataShareDonutHtml', 'dataTilesHtml', 'dataMarketsHtml', 'dataLeadRows', 'dataLeadHtml', 'renderDataCenter'].map(fnSource).join('\n');
   assert.ok(!/api\.|window\.__shwoopAPI|fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code), 'and its code calls nothing: it only draws what the Kalshi page already loaded');
 };
 
@@ -50,6 +50,23 @@ gates.D3 = () => {
   assert.ok(Math.abs(rows[0].net - (-0.69)) < 1e-9 && Math.abs(rows[0].week - 0.24) < 1e-9, 'net over all, and the last 7 days on their own');
   const out = f.dataMarketsHtml(rows, esc, money);
   assert.ok(out.includes('-13.8c'), 'per contract is net over contracts filled: -0.69 / 5 = -13.8c');
+};
+
+// The entry timing test (FWD8): Bitcoin, XRP and natural gas split by the entry time each order recorded. An order with no entryLead is an older 6 minute entry, a pairing with nothing settled says so, other markets are not in it, and a hand-closed order is not counted.
+gates.D7 = () => {
+  const f = lift(['kalshiOrderPnl', 'kalshiMarketName', 'dataLeadRows', 'dataLeadHtml']);
+  const o = (series, lead, c, p, extra) => Object.assign({ ts: 1000, series, entryLead: lead, settled: true, fillCount: c, settledPnl: p }, extra || {});
+  const rows = f.dataLeadRows([o('KXXRP15M', '10m', '1.00', 0.1), o('KXXRP15M', '10m', '1.00', -0.9), o('KXXRP15M', undefined, '1.00', 0.05), o('KXGOLD15M', undefined, '5.00', 0.4),
+    o('KXBTC15M', '10m', '1.00', 0.2, { result: 'hand', settledPnl: undefined }), { ts: 1, series: 'KXNATGAS15M', entryLead: '10m', settled: false, fillCount: '1.00' }]);
+  assert.deepStrictEqual(rows.map((r) => r.name + ' ' + r.lead), ['Bitcoin 10 min', 'Bitcoin 6 min', 'XRP 10 min', 'XRP 6 min', 'Natural gas 10 min', 'Natural gas 6 min'], 'three markets, both entry times each, in the bot\'s order; gold is not in it');
+  const x10 = rows[2], x6 = rows[3];
+  assert.deepStrictEqual([x10.n, x10.wins, x10.contracts], [2, 1, 2], 'two 10 minute XRP trades, one won');
+  assert.ok(Math.abs(x10.net - (-0.8)) < 1e-9, 'result summed');
+  assert.deepStrictEqual([x6.n, x6.wins], [1, 1], 'an order with no entryLead counts as a 6 minute entry');
+  assert.deepStrictEqual([rows[0].n, rows[4].n], [0, 0], 'a hand-closed order and an unsettled one are not counted');
+  const out = f.dataLeadHtml(rows, esc, money);
+  assert.ok(out.includes('-40.0c') && out.includes('none yet'), 'per contract is net over contracts filled (-0.80 / 2 = -40.0c) and an empty pairing says none yet, not zero');
+  assert.ok(/takes weeks to mean anything/.test(out) && !/<(button|input|select)/.test(out), 'it says it is a view, not a verdict, and has no control');
 };
 
 // The share ring is a count: its slices add to the whole, and with no trades it says so instead of drawing an empty ring.
