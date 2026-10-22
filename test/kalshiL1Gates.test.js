@@ -852,8 +852,8 @@ gates.EP1 = async () => {
   assert.strictEqual(live.entryLead('KXETH15M', 600000), null, 'Ethereum has no early window, nor do gold, Dogecoin or the currency probes');
   assert.strictEqual(live.entryLead('KXGOLD15M', 600000), null);
   assert.strictEqual(live.entryLead('KXDOGE15M', 600000), null);
-  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) }, 'KXBTC15M-26OCT071415-10': { close_time: iso(NOW + 600000) } } });
-  await tick(w, { quotes: [q10('KXXRP15M', XRP10), q10('KXBTC15M', 'KXBTC15M-26OCT071415-10')] });
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) }, 'KXBTC15M-26OCT071430-10': { close_time: iso(NOW + 600000) } } });
+  await tick(w, { quotes: [q10('KXXRP15M', XRP10), q10('KXBTC15M', 'KXBTC15M-26OCT071430-10')] });
   assert.strictEqual(w.posts.length, 2, 'XRP and Bitcoin are both entered at 10 minutes');
   assert.ok(w.posts.every((p) => Number(p.count) === 1) && w.posts.some((p) => p.ticker === XRP10), 'one contract each');
   const w5 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { 'KXETH15M-26OCT071415-10': { close_time: iso(NOW + 600000) } } });
@@ -940,7 +940,9 @@ gates.GF1 = async () => {
     sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   const by = (frag) => w.posts.filter((p) => p.ticker.includes(frag));
   assert.ok(by('KXGOLD').length === 1 && Number(by('KXGOLD')[0].count) > 2, 'gold takes the ladder size: ' + by('KXGOLD').map((p) => p.count));
-  for (const frag of ['KXBTC', 'KXETH', 'KXXRP', 'KXDOGE']) assert.ok(by(frag).length === 1 && Number(by(frag)[0].count) === 1, frag + ' is capped at one contract even with a large ladder and a full pool: ' + by(frag).map((p) => p.count));
+  // One crypto order per window: of the four capped markets sharing this window only the first in list order (Bitcoin) is sent, still at one contract.
+  const crypto = w.posts.filter((p) => !p.ticker.includes('KXGOLD'));
+  assert.ok(crypto.length === 1 && crypto[0].ticker.includes('KXBTC') && Number(crypto[0].count) === 1, 'one capped market per window, at one contract even with a large ladder and a full pool: ' + crypto.map((p) => p.ticker + 'x' + p.count));
   for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD')), 'a capped market never carries reinvested profit: ' + p.ticker); }
 };
 gates.GF2 = async () => {
@@ -1182,6 +1184,17 @@ gates.K10 = () => {
   const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
   assert.ok(!/kalshiOpening/.test(rules), 'no rule for its collections: they are denied by default');
   assert.deepStrictEqual([...idx.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['marketTapeTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiPaperTick', 'kalshiBookRecorder'], 'the scheduled functions are the exit watch, the live bot, the keyless paper tracker (PAPER1, Oct 20, 2026) and the (off) recorder');
+};
+
+// OC1: only one of Bitcoin, Ethereum, XRP, Dogecoin per window (Oct 22, 2026). Consequence: two correlated crypto positions never lose together in one window, and a missed order does not block the window.
+gates.OC1 = async () => {
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { 'KXBTC15M-26OCT091500-00': {}, 'KXETH15M-26OCT091500-00': {}, 'KXDOGE15M-26OCT091500-00': {} } });
+  await tick(w, { quotes: [quote({}, 'KXBTC15M', 'KXBTC15M-26OCT091500-00'), quote({}, 'KXETH15M', 'KXETH15M-26OCT091500-00'), quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT091500-00')] });
+  assert.strictEqual(w.posts.length, 1, 'three crypto markets in one window place one order: ' + w.posts.map((p) => p.ticker));
+  assert.ok(w.posts[0].ticker.includes('KXBTC'));
+  const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { 'KXBTC15M-26OCT091500-00': {}, 'KXETH15M-26OCT091515-15': {} } });
+  await tick(w2, { quotes: [quote({}, 'KXBTC15M', 'KXBTC15M-26OCT091500-00'), quote({}, 'KXETH15M', 'KXETH15M-26OCT091515-15')] });
+  assert.strictEqual(w2.posts.length, 2, 'different windows are independent');
 };
 
 (async () => {

@@ -784,6 +784,7 @@ async function runL1Tick(args) {
   // Bitcoin and gold close together and share a shard, and the balance above is read once. Money already committed to an
   // order earlier in this same tick is taken off what the next market on that shard may use.
   const committed = {};
+  const cryptoTaken = {};   // windows where a crypto order is already placed THIS tick (the store does not hold it yet)
   const windowSpent = {};   // account money put into each window earlier in THIS tick (the store does not hold it yet)
   for (const c of candidates) {
     if (recentOrders + (ordersSent - sent) >= L1_MAX_ORDERS) { results.push("order limit reached"); break; }   // the limit also holds inside one tick
@@ -809,6 +810,13 @@ async function runL1Tick(args) {
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
     // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.
     const wkey = windowKey(ticker);
+    // One crypto order per window (Oct 22, 2026, the research session's live diagnosis, the owner's choice): Bitcoin, Ethereum, XRP and Dogecoin
+    // flip together, and 72% of the recent loss dollars came from three windows where two of them lost at once. An order that did not fill
+    // does not count, so a missed first order leaves the window open to the next series. Gold and the probes are not part of this rule.
+    if (CAPPED_SERIES.includes(c.series)) {
+      const held = cryptoTaken[wkey] || recentList.some((t) => windowKey(t.ticker) === wkey && CAPPED_SERIES.includes(t.series) && ["filled", "sending", "unknown"].includes(t.status));
+      if (held) { results.push(ticker + ": another crypto market already holds this window"); continue; }
+    }
     const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
       .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);
     const room = L1_WINDOW_CAP_FRACTION * sizeBase - windowUsed;
@@ -840,6 +848,7 @@ async function runL1Tick(args) {
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
     riseLog.push({ cid, series: c.series, ticker, side: pick.side });
     committed[shardKey] = (committed[shardKey] || 0) + cost;
+    if (CAPPED_SERIES.includes(c.series)) cryptoTaken[wkey] = true;
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
 
     const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index, count);
