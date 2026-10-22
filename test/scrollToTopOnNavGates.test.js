@@ -46,6 +46,7 @@ function main() {
     var kalshiWatching = false;
     function pageEnter(){}
     var currentUserIsAdmin = IS_ADMIN;
+    var currentPageName; function setPageTitle(){}
     ${lift('showPage')}
     return showPage;
   `;
