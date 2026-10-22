@@ -24,7 +24,7 @@ Written by the strategy-research session. Plain numbers; nothing here changes a 
 ## 4. The one strong lead: FLAT
 Rule: take an L1 favourite only if its 5-minute price range was 15c or less and it moved 5c or less in the last 3 minutes (about 15% of entries).
 - History, 69 days, 24,792 entries: **+1.76c against -0.17c** (z 5.25), every month and half the same sign.
-- Fresh days, 287 flat entries: +1.62c against +0.02c (z 2.63), 9 days. Replication on untouched series (mostly SOL): same direction, z 1.67, too few entries to confirm.
+- Fresh days, **refreshed 19:15Z (information only)**: 349 flat entries at +0.21c against +0.35c for the rest (z 0.12). An earlier look at 287 entries (+1.62c, z 2.63) did not hold as more days and series arrived: in the series first seen it is +1.04c against -0.05c (z 1.40); in series added since it is -3.99c on 58 entries. Small sample, but the fresh evidence is now mixed, not supportive. Replication on untouched series (mostly SOL): same direction, z 1.67, too few entries to confirm.
 - Works on crypto, energy and metals at the 6-minute entry. **Does not work on gold, Dogecoin or FX.** Adds nothing at the 10-minute entry (Bitcoin, XRP, natural gas already use it).
 - **Decision taken:** log only. Re-propose a filter (Ethereum only, 6-minute entry) at the review if the live data supports it. Check then: live FLAT rate should be near 15%.
 
