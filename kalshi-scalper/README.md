@@ -5458,3 +5458,16 @@ The owner's full "Copy all orders" export (607 orders, Oct 7 to 22) arrived in t
 - Fills: 366 settled, loss rate **5.7%**, **+0.92c** a contract. No-fills: 209 settled, loss rate **8.1%**, **-0.82c** (30 orders on XRP, Dogecoin and natural gas cannot be settled from the candles I hold).
 - The no-fills are not hidden winners. The orders that did not fill would have done worse than the ones that did, so the live record is not adverse-selected by the IOC fill rule. Per-day paired difference is -0.87c with z -0.19 over only 13 days with both, so treat the sign as unresolved, not as an edge.
 - Held to settlement, the 366 fills lose 5.7%, under the roughly 6.8% break-even. The live net P/L (-$11.74) is therefore not the entry rule; it comes from size (the two large Bitcoin losses), the exits and the crowded windows (LIVE2).
+
+## Pre-registration: FLAT1 (2026-10-22), a firm and flat favourite in the 5 minutes before entry
+
+Owner's pick (Option 2). Idea: an L1 favourite whose price has barely moved in the last 5 minutes has no pending reversal, while one that is still moving may overshoot. This is a single simple rule on two features the model studies (FEAT1 to FEAT4) only used inside a fitted blend. It overlaps TIB1 and DIP1 (firm favourites) in spirit; those are forward claims on fresh days and this is a different, simpler cut tested on the history. I count it as a separate try.
+
+- **Data:** `feat1.build(markets, 360)` rows (L1 entries at 360 s, band 0.88 to 0.97, all 18 series in the history). Features per row: `rise3` (3 minute change of the bought side's mid) and `rng5` (5 minute range of that mid).
+- **Groups (known at the entry minute):** FLAT = `rng5 <= 0.02` and `abs(rise3) <= 0.01`. MOVING = every other entry. Each group from its own entries, compared per day (day-clustered).
+- **Primary claim:** FLAT minus MOVING mean net per contract is at least +1.0c.
+- **Prediction (now):** +0.8c; I expect a smaller gap than the clean +1.0c because FEAT showed these features carry only part of the signal.
+- **Supported (NOT_YET_FALSIFIED) needs all of:** FLAT n >= 1,500 and >= 10 days; diff >= +1.0c with day-clustered z >= 2.0; same sign in both halves by time; same sign under the x1.2 fee stress; same sign in at least 2 of the months present (months with at least 200 FLAT entries); placebo (100 random relabels of the same group sizes) 95th percentile of diff z below the observed.
+- **FALSIFIED:** diff < +0.3c or z < 1.0. Anything else NOT_ENOUGH_DATA.
+- **Information only:** FLAT share of entries, loss rates of both groups, results on the live five series alone.
+- Tries: +1 (running count about 4,691). Run once: `python -m scalper.flat1 run`.
