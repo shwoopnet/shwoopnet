@@ -46,4 +46,11 @@ with tempfile.TemporaryDirectory() as d:
     db.commit()
     got = R.load_fresh(p)
     assert [m[0] for m in got] == ["NEW"], "only fresh days and only the registered series"
+# SQ1, TS1, CW10 constants and TS1's stage logic on a fixture
+assert (R.SQ_FIRM_W, R.SQ_POOR_W, R.SQ_Z, R.SQ_MIN_FIRM, R.SQ_MIN_N, R.TS_Z, R.TS_MIN_N, R.CW10_SERIES, R.CW10_Z, R.CW10_MIN_N, R.CW10_MIN_DAYS) == (2.0, 0.5, 2.4, 200, 1500, 2.4, 1500, ("KXCOPPER15M", "KXWTI15M"), 2.4, 100, 25), "the registered numbers"
+steady = ("S", "KXBTC15M", [(close - 900 + 60 * (i + 1), 0.90, 0.91, 0, 0) for i in range(14)], close, "yes")        # favourite from the start, never doubted
+late = ("L", "KXBTC15M", [(close - 900 + 60 * (i + 1), 0.30 if i < 9 else 0.90, 0.31 if i < 9 else 0.91, 0, 0) for i in range(14)], close, "yes")   # jumped in at 6 minutes left
+got = {e["ticker"]: e for e in R.ts1_entries([steady, late])}
+assert got["S"]["close_ts"] == close and abs(got["S"]["price"] - 0.91) < 1e-9, "a steady favourite is entered at stage 1 (600 s)"
+assert "L" not in got, "a favourite that jumped 59c in 3 minutes is skipped (rise 0.20 or more)"
 print("test_fwd_reads: ok")

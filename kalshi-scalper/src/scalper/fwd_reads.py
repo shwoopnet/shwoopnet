@@ -35,6 +35,9 @@ LIVE6 = ("KXBTC15M", "KXGOLD15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXNATGAS
 FWD10_SERIES, FWD10_Z, FWD10_MIN_ALONE, FWD10_MIN_DAYS = ("KXBTC15M", "KXNATGAS15M", "KXDOGE15M"), 2.4, 60, 20
 ML1 = {"KXGOLD15M": 420, "KXBTC15M": 600, "KXETH15M": 540}          # seconds before the close, against the 360 second rule
 ML1_Z, ML1_MIN_DAYS = 2.4, 25
+SQ_FIRM_W, SQ_POOR_W, SQ_Z, SQ_MIN_FIRM, SQ_MIN_N = 2.0, 0.5, 2.4, 200, 1500
+TS_Z, TS_MIN_N = 2.4, 1500
+CW10_SERIES, CW10_Z, CW10_MIN_N, CW10_MIN_DAYS = ("KXCOPPER15M", "KXWTI15M"), 2.4, 100, 25
 POOL18 = ["KXBNB15M", "KXBTC15M", "KXCOPPER15M", "KXDOGE15M", "KXETH15M", "KXEURUSD15M", "KXGBPUSD15M", "KXGOLD15M", "KXHYPE15M", "KXNATGAS15M", "KXNEAR15M",
           "KXPALLADIUM15M", "KXPLATINUM15M", "KXSILVER15M", "KXUSDJPY15M", "KXWTI15M", "KXXRP15M", "KXZEC15M"]
 
@@ -188,8 +191,75 @@ def ml1(markets: list[tuple]):
     return lines
 
 
+def sq1(markets: list[tuple]):
+    """Size by quality: firm (tib>=4 and dip>=0.60) x2.0, poor (rise>=0.20, not firm) x0.5, else x1.0. Return on capital deployed per day, weighted minus flat."""
+    f = features(markets, entries(markets, 360), 360)
+    for e in f:
+        firm = e["tib"] >= TIB_HI and e["dip"] >= DIP_CUT
+        e["w"] = SQ_FIRM_W if firm else (SQ_POOR_W if e["rise"] >= JUMP_CUT_B else 1.0)
+        e["firm"] = firm
+    byday = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0])
+    for e in f:
+        a = byday[e["day"]]
+        a[0] += e["w"] * e["net"]; a[1] += e["w"] * e["price"]; a[2] += e["net"]; a[3] += e["price"]
+    rows = [(d, v[0] / v[1] - v[2] / v[3]) for d, v in byday.items() if v[1] > 0 and v[3] > 0]
+    n, nf = len(f), sum(1 for e in f if e["firm"])
+    if n < SQ_MIN_N or nf < SQ_MIN_FIRM or len(rows) < 2:
+        return f"SQ1: NOT_ENOUGH_DATA (entries {n}, firm {nf})"
+    dm, _, dz = cluster_mean_z(rows)
+    own_w = sum(e["w"] * e["net"] for e in f) / sum(e["w"] * e["price"] for e in f)
+    flat = sum(e["net"] for e in f) / sum(e["price"] for e in f)
+    v = "NOT_YET_FALSIFIED" if (dm > 0 and dz >= SQ_Z and own_w > 0) else "FALSIFIED"
+    return (f"SQ1: entries n={n} (firm {nf}); weighted return on capital deployed {own_w * 1e4:+.0f}bp, flat {flat * 1e4:+.0f}bp; weighted minus flat per day {dm * 1e4:+.0f}bp "
+            f"(day clustered z {dz:+.2f}, {len(rows)} days); VERDICT: {v}")
+
+
+def ts1_entries(markets: list[tuple]) -> list[dict]:
+    """Stage 1 at 600 s (dip>=0.60 and rise<0.20), else stage 2 at 360 s (rise<0.20). One entry per market."""
+    e10 = {e["ticker"]: e for e in features(markets, entries(markets, 600), 600)}
+    e6 = {e["ticker"]: e for e in features(markets, entries(markets, 360), 360)}
+    out = []
+    for tk in sorted(set(e10) | set(e6)):
+        a = e10.get(tk)
+        if a is not None and a["dip"] >= DIP_CUT and a["rise"] < JUMP_CUT_B:
+            out.append(a)
+        elif tk in e6 and e6[tk]["rise"] < JUMP_CUT_B:
+            out.append(e6[tk])
+    return out
+
+
+def ts1(markets: list[tuple]):
+    ts = ts1_entries(markets)
+    plain = entries(markets, 360)
+    if len(ts) < TS_MIN_N:
+        return f"TS1: NOT_ENOUGH_DATA (entries {len(ts)})"
+    tm, _, tz = own(ts)
+    pm, _, _ = own(plain)
+    dm, dz, nd = diff(ts, plain)
+    v = "NOT_YET_FALSIFIED" if (dm > 0 and dz >= TS_Z and tm > 0) else "FALSIFIED"
+    c = lambda x: f"{x * 100:+.2f}c"
+    return f"TS1: two-stage n={len(ts)} at {c(tm)} (z {tz:+.2f}); plain 360 n={len(plain)} at {c(pm)}; difference per day {c(dm)} (day clustered z {dz:+.2f}, {nd} days); VERDICT: {v}"
+
+
+def cw10(markets: list[tuple]):
+    lines = []
+    for s in CW10_SERIES:
+        mm = [m for m in markets if m[1] == s]
+        a, b = entries(mm, 600), entries(mm, 360)
+        days = len({e["day"] for e in a})
+        if len(a) < CW10_MIN_N or days < CW10_MIN_DAYS:
+            lines.append(f"CW10 {s}: NOT_ENOUGH_DATA (10 minute entries {len(a)} on {days} days)")
+            continue
+        am, _, az = own(a)
+        dm, dz, nd = diff(a, b)
+        v = "NOT_YET_FALSIFIED" if (am > 0 and dm > 0 and dz >= CW10_Z) else "FALSIFIED"
+        c = lambda x: f"{x * 100:+.2f}c"
+        lines.append(f"CW10 {s}: 10 minute n={len(a)} at {c(am)} (z {az:+.2f}); 6 minute n={len(b)} at {c(own(b)[0])}; difference per day {c(dm)} (day clustered z {dz:+.2f}, {nd} days); VERDICT: {v}")
+    return lines
+
+
 def report(markets: list[tuple]) -> list[str]:
-    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets)
+    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets) + [sq1(markets), ts1(markets)] + cw10(markets)
 
 
 def main(argv: list[str]) -> None:
