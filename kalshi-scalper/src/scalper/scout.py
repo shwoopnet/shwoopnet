@@ -6,6 +6,7 @@ A series is flagged a LEAD only with at least 150 entries on 10 days, mean net a
 """
 from __future__ import annotations
 
+import itertools
 import json
 import statistics as st
 import sys
@@ -57,6 +58,9 @@ def net_of(side: str, price: float, result: str) -> float:
     return (1.0 if side == result else 0.0) - price - fee(price)
 
 
+CAP_MARKETS = 600                                                     # per series; "markets" is a floor when "capped" is true
+
+
 def census() -> None:
     now = int(time.time())
     lo = now - WINDOW_DAYS * 86400
@@ -71,14 +75,14 @@ def census() -> None:
         if s["ticker"] in out:
             continue
         try:
-            ms = list(api.settled_markets(s["ticker"], lo, now))
+            ms = list(itertools.islice(api.settled_markets(s["ticker"], lo, now), CAP_MARKETS))      # a busy series needs no more than a floor for ranking
         except Exception as e:                                   # a series that errors is recorded as such, not guessed
             out[s["ticker"]] = {"error": str(e)[:80], "frequency": s.get("frequency"), "category": s.get("category"), "title": s.get("title")}
             continue
         vols = [float(m.get("volume_fp") or 0) for m in ms]
         lives = [(iso_ts(m.get("close_time")) or 0) - (iso_ts(m.get("open_time")) or 0) for m in ms]
         out[s["ticker"]] = {"frequency": s.get("frequency"), "category": s.get("category"), "title": s.get("title"), "markets": len(ms), "total_volume": sum(vols),
-                            "median_volume": st.median(vols) if vols else 0.0, "median_life_s": st.median(lives) if lives else 0, "days": len({(m.get("close_time") or "")[:10] for m in ms})}
+                            "median_volume": st.median(vols) if vols else 0.0, "median_life_s": st.median(lives) if lives else 0, "days": len({(m.get("close_time") or "")[:10] for m in ms}), "capped": len(ms) >= CAP_MARKETS}
         if len(out) % 5 == 0:                                                   # every 5 done, not by index: skipped series must not hide the save
             partial.write_text(json.dumps(out))
             print(f"  {len(out)} done / {len(cand)}", flush=True)
