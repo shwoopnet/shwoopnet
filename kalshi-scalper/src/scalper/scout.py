@@ -79,9 +79,9 @@ def census() -> None:
         lives = [(iso_ts(m.get("close_time")) or 0) - (iso_ts(m.get("open_time")) or 0) for m in ms]
         out[s["ticker"]] = {"frequency": s.get("frequency"), "category": s.get("category"), "title": s.get("title"), "markets": len(ms), "total_volume": sum(vols),
                             "median_volume": st.median(vols) if vols else 0.0, "median_life_s": st.median(lives) if lives else 0, "days": len({(m.get("close_time") or "")[:10] for m in ms})}
-        if k % 20 == 0:
+        if len(out) % 5 == 0:                                                   # every 5 done, not by index: skipped series must not hide the save
             partial.write_text(json.dumps(out))
-            print(f"  {k} / {len(cand)}", flush=True)
+            print(f"  {len(out)} done / {len(cand)}", flush=True)
         time.sleep(0.15)
     CENSUS.write_text(json.dumps({"as_of": now, "series": out}))
     if partial.exists():
