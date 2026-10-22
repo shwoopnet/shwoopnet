@@ -5075,3 +5075,25 @@ Code `scalper/vrp2.py` and `tests/test_vrp2.py` were committed before the run; r
 - **The tail, as printed.** The five worst months were 2009-02, 2008-10, 2009-01, 2020-03 and 1998-08, each **-104% of margin** (the full width lost plus the cost). With 2% of the account at risk per spread, the account's maximum drawdown over the 440 months was -8.9%.
 - **What this does and does not mean for a $500 account.** The premium is real in this data (more than 5% a month on margin before cost, about 2% after) and shrank in the second half (+0.68%). But **a $5-wide SPY spread ties up about $430 of margin, which is 86% of a $500 account, so one worst month loses almost everything**; risking 2% per spread, the sizing behind that -8.9% drawdown, needs an account near $20,000. At the owner's size the strategy is not the one tested here, and a recorder run would add data, not a way to trade it today.
 - **Caveats stated before the run still apply:** flat volatility understates the credit of real puts, rates and dividends are ignored, no early assignment or margin call is modelled. **Count: ETF and index family tries 22.** Nothing built, nothing changed live.
+
+## Results: FIX1 and the JUMP1 history look (2026-10-22; FIX1 as registered; the JUMP1 split is information, JUMP1 itself is a forward read)
+
+Code `scalper/cuts4.py` and `tests/test_cuts4.py` were committed before the run; result file `data/cuts4_result.txt`.
+
+- **FIX1: `FALSIFIED`.** Gold entries within 30 minutes of the 09:30 and 14:00 UTC fixes: n 113 at +0.52c; other weekday entries n 1,223 at +1.59c; difference per day +0.19c, z +0.09. Prediction (|difference| under 2c, FALSIFIED or NOT_ENOUGH_DATA): right.
+- **JUMP1 on the history (information, in the same data TREE2's tree was fitted on, so it is not evidence by itself).** At 6 minutes **stable** (the held side's mid rose less than 5c over the last 3 minutes) n 6,511 at **+1.35c**; **jumped** (5c or more) n 18,282 at **-0.32c**; stable minus jumped **+1.76c a contract, day-clustered z +5.32**, both halves (+1.73c, +1.62c). **My prediction of the jumped share was wrong:** I said 15% to 45%; it is **74%**, because favourites usually rise into the band (the median 3 minute rise is 11c). Recorded as it was; the claim's other terms stand.
+- **It is a gradient, not a threshold (6 minutes, same data):**
+
+| 3 minute rise | n | Net per contract | Loss rate |
+|---|---|---|---|
+| fell or flat (under 0c) | 1,741 | +1.42c | 6.4% |
+| 0c to 2c | 1,672 | +0.83c | 5.5% |
+| 2c to 5c | 3,098 | +1.59c | 4.6% |
+| 5c to 10c | 5,011 | +0.08c | 6.3% |
+| 10c to 20c | 6,704 | +0.25c | 6.4% |
+| **20c or more** | 6,567 | **-1.21c** | **8.3%** |
+
+  Stable beat jumped in **14 of 18 series** (exceptions: gold, the three currency pairs and palladium within noise; Bitcoin +2.25c against -0.02c, XRP +3.81c against +0.63c, Ethereum +2.28c against +0.11c, natural gas +2.13c against -0.17c). **At 10 minutes** the same cut gives stable (n 952) +1.38c against jumped (n 9,827) +0.50c, and the 20c-or-more bucket (n 4,796) +0.06c against about +0.99c for the rest. Mechanism: a price that reached 88c to 97c in a hurry is partly over-reaction or news the quoters have not finished pricing; one that settled there is tested.
+- **Registered now, before any fresh day is classified (JUMP1b, one more Kalshi try; running count about 4,675):** on the fresh public candles (the FWD7 download, markets closing from 2026-10-13), pooled at **360 seconds**, entries with `d3` of **0.20 or more** versus entries with `d3` below 0.20: the below-0.20 group's net minus the 0.20-or-more group's is above zero with a day-clustered z of at least **2.4**, and the below-0.20 group is above zero by itself; at least 200 entries in the 0.20-or-more group; read with FWD7 (30 fresh days or 2026-12-01). **Prediction:** difference **+0.8c to +2.0c**, the 0.20-or-more group's net negative, `NOT_YET_FALSIFIED` about **30%**. A pass would be a proposal to the main session, with the owner's go, to skip entries that rose 20c or more in the last 3 minutes; nothing changes now.
+- **What it would mean if it held.** At 6 minutes, skipping the 20c-or-more bucket would lift L1's mean from +0.12c to about **+0.60c** on 74% of the entries (arithmetic on this sample, not a result). Both JUMP1 claims are the same idea at two cuts; they are two tries and are counted so.
+- **Count: Kalshi tries about 4,675.** Nothing built, nothing changed live.
