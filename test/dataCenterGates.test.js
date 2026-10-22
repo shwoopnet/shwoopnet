@@ -162,6 +162,29 @@ gates.D11 = () => {
   assert.strictEqual(f.kalshiSkipNote(undefined, tick, now), '', 'no note, no line');
 };
 
+// D13: the printable statement. Consequence: a month's figures on paper are the same ones the Data page shows, only that month's settled trades are in it, it is plain (no script, no control) and says it is not advice.
+gates.D13 = () => {
+  const f = lift(['kalDayKey', 'kalDateTime', 'kalshiMoneyRaw', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPerfStats', 'dataMarketRows', 'kalshiStatementMonth', 'kalshiStatementHtml']);
+  assert.strictEqual(f.kalshiStatementMonth(Date.UTC(2026, 9, 22, 18), 0), '2026-10', 'this month on the Central clock');
+  assert.strictEqual(f.kalshiStatementMonth(Date.UTC(2026, 9, 22, 18), 1), '2026-09', 'last month');
+  assert.strictEqual(f.kalshiStatementMonth(Date.UTC(2026, 0, 5, 18), 1), '2025-12', 'January looks back to December of the year before');
+  assert.strictEqual(f.kalshiStatementMonth(Date.UTC(2026, 10, 1, 3), 0), '2026-10', '11pm on Oct 31 in Chicago is still October');
+  const o = (ts, series, side, price, c, p) => ({ ts, series, side, price, settled: true, fillCount: c, settledPnl: p });
+  const orders = [o(Date.UTC(2026, 9, 10, 15), 'KXGOLD15M', 'yes', 0.93, '4.00', 0.28), o(Date.UTC(2026, 9, 12, 15), 'KXGOLD15M', 'no', 0.9, '4.00', -3.6), o(Date.UTC(2026, 8, 30, 15), 'KXBTC15M', 'yes', 0.9, '1.00', 0.1),
+    { ts: Date.UTC(2026, 9, 13, 15), series: 'KXBTC15M', settled: false, fillCount: '1.00' }];
+  const html2 = f.kalshiStatementHtml(orders, '2026-10', Date.UTC(2026, 9, 22, 18), esc);
+  assert.ok(/October 2026/.test(html2) && /Settled trades<\/td><td class="r">2</.test(html2), 'only the two October settled trades are in it: ' + html2.replace(/<[^>]*>/g, ' ').slice(0, 220));
+  assert.ok(html2.includes('-$3.32') && html2.includes('+$0.28') && html2.includes('-$3.60'), 'the result and each trade are shown with their sign');
+  assert.ok(html2.includes('0.08') && html2.includes('50.0%'), 'profit factor 0.28 / 3.60 = 0.08 and a 50% win rate');
+  assert.ok(!/KXBTC|Bitcoin/.test(html2), 'a September trade and an unsettled one are not in it');
+  assert.ok(!/<script|<button|<input|<select/i.test(html2), 'a plain document');
+  assert.ok(/Nothing in this statement is investment, financial, legal or tax advice/.test(html2) && /substantial risk of loss/.test(html2), 'it carries the disclosure');
+  assert.ok(/No settled trades in this month/.test(f.kalshiStatementHtml(orders, '2026-08', Date.UTC(2026, 9, 22, 18), esc)), 'an empty month says so');
+  assert.ok(/kalStmtPrint/.test(html) && !/id="kalStmtPrint"[\s\S]{0,40}page-data/.test(html), 'the print button is in the Tools menu');
+  const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
+  assert.ok(!/kalStmt/.test(page), 'and not on the read only Data page');
+};
+
 // D12: today's result as a share of the account. Consequence: a +$0.80 day on a $203.48 account is +0.39%, measured against where the day started, and an unknown balance shows nothing rather than a wrong percentage.
 gates.D12 = () => {
   const f = lift(['kalshiTodayPct']);

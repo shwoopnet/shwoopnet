@@ -1217,6 +1217,11 @@
             <div class="kal-note" id="kalDiagMsg"></div>
             <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
             <div class="kal-actions">
+              <label class="kal-note" style="margin:0">Statement <select class="kal-input" id="kalStmtPeriod" style="width:auto"><option value="0">This month</option><option value="1">Last month</option></select></label>
+              <button class="kal-btn kal-btn-ghost" id="kalStmtPrint" type="button">Print statement</button>
+            </div>
+            <div class="kal-note" id="kalStmtMsg"></div>
+            <div class="kal-actions">
             <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
             <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
           </div>
@@ -2947,6 +2952,14 @@
       navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders.'; }, manual);
     } else { manual(); }
   });
+  document.getElementById('kalStmtPrint').addEventListener('click', function(){
+    var back = document.getElementById('kalStmtPeriod').value === '1' ? 1 : 0, msg = document.getElementById('kalStmtMsg'), now = Date.now();
+    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    var key = kalshiStatementMonth(now, back);
+    if(!orders.some(function(o){ return o && Number.isFinite(o.ts) && kalshiOrderPnl(o) !== null && kalDayKey(o.ts).slice(0, 7) === key; })){ msg.textContent = 'No settled trades in that month yet.'; return; }
+    kalshiPrintHtml(kalshiStatementHtml(orders, key, now, escapeHtml));
+    msg.textContent = 'Opening the print dialog. Choose Save as PDF to keep a copy.';
+  });
   // Copies every stat the tracker computes, including the ones the page no longer shows, as plain text. Same clipboard fallback as the diagnostics button.
   document.getElementById('kalStatsCopy').addEventListener('click', function(){
     var sess = kalshiLiveCtl && kalshiLiveCtl.session, since = kalshiChartRange === 'session' && sess && Number.isFinite(sess.since) ? sess.since : 0;
@@ -3079,6 +3092,45 @@
         (per === null ? '-' : esc((per >= 0 ? '+' : '-') + Math.abs(per).toFixed(1) + 'c')) + '</span></div>';
     }).join('') + '<div class="kal-note" style="padding:10px 18px 14px">A live test that started on 2026-10-21. The 6 minute rows include every older trade, and the two groups are not the same markets. It takes weeks to mean anything.</div>';
   }
+  // The statement (Oct 22, 2026, the owner: make the site feel official). A printable month of the bot's settled trades, drawn from the same orders and the same figures as the Data page, opened in a quiet
+  // frame so the browser's own print dialog can save it as a PDF. It is an export, so its dollar figures are raw and not masked by Privacy, like Copy all orders. It reads only what the page already holds.
+  function kalshiStatementMonth(nowMs, back){
+    var p = kalDayKey(nowMs).split('-').map(Number), y = p[0], m = p[1] - (back || 0);
+    while(m < 1){ m += 12; y--; }
+    return y + '-' + (m < 10 ? '0' : '') + m;
+  }
+  function kalshiStatementHtml(orders, monthKey, nowMs, esc){
+    var rows = (orders || []).filter(function(o){ return o && Number.isFinite(o.ts) && kalshiOrderPnl(o) !== null && kalDayKey(o.ts).slice(0, 7) === monthKey; }).sort(function(a, b){ return a.ts - b.ts; });
+    var st = kalshiPerfStats(rows, 0), mk = dataMarketRows(rows, nowMs), sg = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoneyRaw(Math.abs(v)); };
+    var ym = monthKey.split('-').map(Number), label = new Date(Date.UTC(ym[0], ym[1] - 1, 1)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' });
+    var be = st.avgWin !== null && st.avgLoss !== null ? (-st.avgLoss / (st.avgWin - st.avgLoss) * 100).toFixed(1) + '%' : 'n/a';
+    var kv = function(k, v){ return '<tr><td>' + esc(k) + '</td><td class="r">' + esc(v) + '</td></tr>'; };
+    var summary = kv('Settled trades', String(st.n)) + kv('Result', sg(st.total)) + kv('Win rate', st.winRate === null ? 'n/a' : (st.winRate * 100).toFixed(1) + '%') + kv('Break-even win rate', be) +
+      kv('Profit factor', st.profitFactor === null ? (st.losses ? 'n/a' : 'no losses') : st.profitFactor.toFixed(2)) + kv('Average win', st.avgWin === null ? 'n/a' : '+' + kalshiMoneyRaw(st.avgWin)) +
+      kv('Average loss', st.avgLoss === null ? 'n/a' : '-' + kalshiMoneyRaw(Math.abs(st.avgLoss))) + kv('Worst trade', st.worst === null ? 'n/a' : sg(st.worst)) + kv('Deepest drawdown in the month', st.maxDrawdown > 0 ? '-' + kalshiMoneyRaw(st.maxDrawdown) : 'none');
+    var markets = mk.map(function(r){ return '<tr><td>' + esc(r.name) + '</td><td class="r">' + r.n + '</td><td class="r">' + Math.round(r.wins / r.n * 100) + '%</td><td class="r">' + esc(r.n < 30 ? 'too few' : (r.gl > 0 ? (r.gw / r.gl).toFixed(2) : 'no losses')) + '</td><td class="r">' + esc(sg(r.net)) + '</td></tr>'; }).join('');
+    var trades = rows.map(function(o){
+      var c = Number(o.fillCount) || 0, px = Number(o.price);
+      return '<tr><td>' + esc(kalDateTime(o.ts)) + '</td><td>' + esc(kalshiMarketName(o)) + '</td><td>' + esc(String(o.side || '').toUpperCase()) + '</td><td class="r">' + (Number.isFinite(px) ? (px * 100).toFixed(1) + 'c' : '') +
+        '</td><td class="r">' + esc(String(Math.round(c * 100) / 100)) + '</td><td class="r">' + esc(sg(kalshiOrderPnl(o))) + '</td></tr>';
+    }).join('');
+    var css = '@page{margin:14mm}body{font:12px/1.45 Helvetica,Arial,sans-serif;color:#111;margin:0}h1{font-size:20px;margin:0 0 2px}h2{font-size:13px;margin:22px 0 6px;border-bottom:1px solid #111;padding-bottom:3px}' +
+      '.sub{color:#444;margin:0 0 14px}table{width:100%;border-collapse:collapse}td,th{padding:4px 6px;border-bottom:1px solid #ddd;text-align:left;font-variant-numeric:tabular-nums}th{font-weight:600;color:#444;font-size:11px}.r{text-align:right}' +
+      '.fine{color:#555;font-size:10.5px;margin-top:22px}tr{page-break-inside:avoid}';
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Shwoop Financials statement, ' + esc(label) + '</title><style>' + css + '</style></head><body>' +
+      '<h1>Shwoop Financials</h1><p class="sub">Trading activity statement for ' + esc(label) + ' (US Central time). Generated ' + esc(kalDateTime(nowMs)) + '.</p>' +
+      (st.n ? '<h2>Summary</h2><table>' + summary + '</table><h2>By market</h2><table><tr><th>Market</th><th class="r">Trades</th><th class="r">Won</th><th class="r">Profit factor</th><th class="r">Result</th></tr>' + markets + '</table>' +
+        '<h2>Settled trades</h2><table><tr><th>Time</th><th>Market</th><th>Side</th><th class="r">Price</th><th class="r">Contracts</th><th class="r">Result</th></tr>' + trades + '</table>' : '<p>No settled trades in this month.</p>') +
+      '<p class="fine">Only orders the bot sent are counted; a trade closed by hand is left out. Results are the settled result of each order after fees as recorded; they are not audited. Nothing in this statement is investment, financial, legal or tax advice. ' +
+      'Trading involves substantial risk of loss. Past performance does not guarantee future results.</p></body></html>';
+  }
+  function kalshiPrintHtml(html){
+    var f = document.createElement('iframe');
+    f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+    f.onload = function(){ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} setTimeout(function(){ if(f.parentNode){ f.parentNode.removeChild(f); } }, 60000); };
+    f.srcdoc = html;
+    document.body.appendChild(f);
+  }
   // The strategy in numbers (Oct 22, 2026, the owner: "so i dont get lost"). The same figures the health check reads, in plain rows and plain text (no new colours): profit factor is what the wins add up to over what the
   // losses add up to, and the break-even win rate is the share of wins the bot needs so that average win times wins equals average loss times losses. A win rate under it loses money however the average trade looks.
   function dataStatsHtml(st, esc, money){
@@ -3128,7 +3180,7 @@
     set('dataLiveTests', dataLiveHtml(dataLiveTests(kalshiLiveOrders), escapeHtml));
     set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
     set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoney));
-    set('dataNote', 'Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
+    set('dataNote', 'As of ' + kalTime(Date.now()) + ' CT. Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
   }
 
   function renderKalshiCharts(){
