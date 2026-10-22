@@ -5477,3 +5477,13 @@ Owner's pick (Option 2). Idea: an L1 favourite whose price has barely moved in t
 My thresholds were set without counting the group first (the same mistake as XLEAD1). Only **31 of 24,792** entries met `rng5 <= 0.02` and `abs(rise3) <= 0.01` (0.13%), over 21 days; the claim needed 1,500. The figures are not evidence: flat +2.25c against moving +0.12c, difference +2.71c, z 1.15, first half +5.61c and second half -1.10c, no month with 200 flat entries. The live-five-series information cut has 8 flat entries. Nothing was concluded.
 
 Feature distribution (no outcomes looked at): the median 5 minute range at the 6 minute mark is **0.24**, and the 5th, 25th percentiles are 0.067 and 0.15; |rise3| 25th percentile is 0.049, median 0.11. Favourites at 6 minutes have mostly just arrived, so a "flat for 5 minutes" favourite is very rare. A fair test needs a looser cut, chosen from these quantiles and not from outcomes, and registered as a new try (FLAT2). Tries: +1 (running count about 4,691).
+
+## Pre-registration: FLAT2 (2026-10-22), FLAT1 with a looser cut chosen from the feature quantiles
+
+Owner's pick. FLAT1 had 31 qualifying entries, so it said nothing. FLAT2 is the same idea and the same claim with the cut set from feature quantiles only (no outcome was looked at): FLAT = `rng5 <= 0.15` and `abs(rise3) <= 0.05`. A count of the group (features only) before registering gives **3,727 of 24,792 entries over 69 days; August 1,306, September 1,605, October 816**, so the sample bar below is reachable.
+
+- **Everything else exactly as FLAT1:** `feat1.build(markets, 360)` rows, groups FLAT and MOVING from their own entries, compared per day (day-clustered). Primary claim: FLAT minus MOVING mean net per contract is at least +1.0c.
+- **Prediction (now):** +0.8c.
+- **Supported (NOT_YET_FALSIFIED) needs all of:** FLAT n >= 1,500 and >= 10 days; diff >= +1.0c with day-clustered z >= 2.0; same sign in both halves; same sign under the x1.2 fee stress; same sign in at least 2 of the months present (months with at least 200 FLAT entries); placebo (100 random relabels) 95th percentile of diff z below the observed.
+- **FALSIFIED:** diff < +0.3c or z < 1.0. Anything else NOT_ENOUGH_DATA.
+- Tries: +1 (running count about 4,692). It is a related try to FLAT1 and counted as one more; the z bar is not lowered. Run once: `python -m scalper.flat2 run`.
