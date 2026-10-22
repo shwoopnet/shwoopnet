@@ -1,0 +1,94 @@
+{
+ "model": "studies/feat2_model_2026-10-22.json",
+ "feature_order": [
+  "price",
+  "spread",
+  "rise3",
+  "d1",
+  "tib",
+  "dip",
+  "rng5",
+  "series dummies in the model's series list order"
+ ],
+ "formula": "z=(x-mu)/sd per feature; logit=w0+sum(w_i*z_i); p_loss=1/(1+exp(-logit)); expected_net=(1-p)*(1-price-f)-p*(price+f), f=0.07*price*(1-price); keep if expected_net >= keep_threshold_expected_net",
+ "cases": [
+  {
+   "series": "KXBTC15M",
+   "price": 0.93,
+   "spread": 0.01,
+   "rise3": 0.02,
+   "d1": 0.01,
+   "tib": 4,
+   "dip": 0.8,
+   "rng5": 0.1,
+   "p_loss": 0.043962,
+   "expected_net": 0.021481,
+   "keep": true
+  },
+  {
+   "series": "KXBTC15M",
+   "price": 0.93,
+   "spread": 0.01,
+   "rise3": 0.25,
+   "d1": 0.15,
+   "tib": 0,
+   "dip": 0.3,
+   "rng5": 0.35,
+   "p_loss": 0.072398,
+   "expected_net": -0.006955,
+   "keep": false
+  },
+  {
+   "series": "KXXRP15M",
+   "price": 0.91,
+   "spread": 0.02,
+   "rise3": 0.04,
+   "d1": 0.02,
+   "tib": 5,
+   "dip": 0.85,
+   "rng5": 0.08,
+   "p_loss": 0.046915,
+   "expected_net": 0.037352,
+   "keep": true
+  },
+  {
+   "series": "KXGOLD15M",
+   "price": 0.95,
+   "spread": 0.01,
+   "rise3": 0.01,
+   "d1": 0.0,
+   "tib": 6,
+   "dip": 0.9,
+   "rng5": 0.05,
+   "p_loss": 0.023637,
+   "expected_net": 0.023038,
+   "keep": true
+  },
+  {
+   "series": "KXETH15M",
+   "price": 0.89,
+   "spread": 0.03,
+   "rise3": 0.3,
+   "d1": 0.2,
+   "tib": 1,
+   "dip": 0.35,
+   "rng5": 0.4,
+   "p_loss": 0.122651,
+   "expected_net": -0.019504,
+   "keep": false
+  },
+  {
+   "series": "KXNATGAS15M",
+   "price": 0.92,
+   "spread": 0.02,
+   "rise3": 0.06,
+   "d1": 0.03,
+   "tib": 3,
+   "dip": 0.7,
+   "rng5": 0.15,
+   "p_loss": 0.053457,
+   "expected_net": 0.021391,
+   "keep": true
+  }
+ ]
+}
