@@ -887,7 +887,7 @@ gates.EP3 = async () => {
   assert.deepStrictEqual(live.L1_WINDOW_MS, [330000, 400000]);
   assert.ok(live.EARLY_PROBE_SERIES.every((x) => live.L1_SERIES.includes(x)) && live.EARLY_PROBE_SERIES.every((x) => live.CAPPED_SERIES.includes(x) || live.PROBE_SERIES.includes(x)), 'both are already one-contract series, so an early entry can never be larger than a normal one');
 };
-// RL1 and RL2: the 3 minute rise is LOGGED on 10 minute orders (the research session's JUMP1 lead, Oct 22, 2026). Logging only: after the order, public candles, never able to change a trade.
+// RL1 and RL2: the 3 minute rise is LOGGED on every new order (the research session's JUMP1 lead, Oct 22, 2026). Logging only: after the order, public candles, never able to change a trade.
 const candle = (endSec, bid, ask) => ({ end_period_ts: endSec, yes_bid: { close_dollars: String(bid) }, yes_ask: { close_dollars: String(ask) } });
 gates.RL1 = async () => {
   const nowSec = Math.floor(NOW / 1000);
@@ -906,11 +906,16 @@ gates.RL1 = async () => {
   assert.ok(Math.abs(rec.rise3 - 0.1) < 1e-9 && rec.entryLead === '10m' && rec.status === 'filled', 'and carries the 3 minute rise: ' + rec.rise3);
   const order = w.calls.map((c) => c.method + ' ' + c.url.split('/').slice(-1)[0].split('?')[0]);
   assert.ok(order.indexOf('POST orders') < order.findIndex((x) => /candlesticks/.test(x)), 'the candles are read AFTER the order is sent, never before');
-  // a 6 minute order never reads candles.
+  // a 6 minute order carries it too (the research session reads the lead on every order).
   const w6 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs });
   await tick(w6, { quotes: [quote({}, 'KXETH15M', 'KXETH15M-26OCT071415-06')] });
   assert.strictEqual(w6.posts.length, 1);
-  assert.ok(!w6.calls.some((c) => /candlesticks/.test(c.url)), 'a 6 minute order reads no candles');
+  const rec6 = w6.docs.get('L1-KXETH15M-26OCT071415-06');
+  assert.ok(rec6.entryLead === '6m' && Math.abs(rec6.rise3 - 0.1) < 1e-9, 'a 6 minute order carries the rise too: ' + rec6.rise3);
+  // a market that was not entered (not in the band) reads no candles.
+  const wn = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs, fresh: { 'KXETH15M-26OCT071415-07': { yes_bid_dollars: '0.5000', yes_ask_dollars: '0.5100' } } });
+  await tick(wn, { quotes: [quote({ yes_bid_dollars: '0.5000', yes_ask_dollars: '0.5100' }, 'KXETH15M', 'KXETH15M-26OCT071415-07')] });
+  assert.ok(wn.posts.length === 0 && !wn.calls.some((c) => /candlesticks/.test(c.url)), 'no order, no candle read');
 };
 gates.RL2 = async () => {
   // Whatever goes wrong with the candles, the order is exactly what it was.

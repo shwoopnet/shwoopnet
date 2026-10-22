@@ -312,7 +312,7 @@ const L1_MAX_ORDERS = 200;
 // A session has no end time any more (the owner removed it on Oct 8, 2026): it runs until the owner stops it or a stop below ends it. What stayed
 // is the DAY: the loss stop and the order limit both look at the last 24 hours, so a long run cannot hide a bad day behind old profits.
 const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
-// Logging only (Oct 22, 2026, the research session's JUMP1 lead, the owner: "log it"). How far the side's mid price rose over the last 3 minutes, written on each 10 minute order AFTER the whole minute's orders
+// Logging only (Oct 22, 2026, the research session's JUMP1 lead, the owner: "log it"). How far the side's mid price rose over the last 3 minutes, written on every new order (10 minute and 6 minute) AFTER the whole minute's orders
 // have been sent, from the public one minute candles. It never decides anything: no order waits for it, it reads no key, and a read that fails or is thin leaves the order exactly as it was. The figure is for the side
 // that was bought (a NO order's side rises when the YES mid falls). The research reads it with the order's own price and result.
 const RISE_LOOKBACK_S = 180;
@@ -779,7 +779,7 @@ async function runL1Tick(args) {
   }
 
   const results = [];
-  const riseLog = [];   // 10 minute orders to log the 3 minute rise on, after every order of this minute is sent
+  const riseLog = [];   // every order of this minute, to log the 3 minute rise on after all of them are sent
   let ordersSent = sent;
   // Bitcoin and gold close together and share a shard, and the balance above is read once. Money already committed to an
   // order earlier in this same tick is taken off what the next market on that shard may use.
@@ -838,7 +838,7 @@ async function runL1Tick(args) {
     // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
     if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
-    if (lead === "10m") riseLog.push({ cid, series: c.series, ticker, side: pick.side });
+    riseLog.push({ cid, series: c.series, ticker, side: pick.side });
     committed[shardKey] = (committed[shardKey] || 0) + cost;
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
 
