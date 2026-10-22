@@ -63,8 +63,13 @@ def census() -> None:
     allseries = api._get("/series", {"limit": 20000}).get("series", [])
     cand = [s for s in allseries if s.get("frequency") in FREQS]
     print(f"{len(allseries)} series, {len(cand)} hourly, daily or weekly", flush=True)
-    out = {}
+    partial = DATA_DIR / "scout_census_partial.json"
+    out = json.loads(partial.read_text()) if partial.exists() else {}          # resumable: a restart keeps what is done
+    if out:
+        print(f"resuming with {len(out)} series already done", flush=True)
     for k, s in enumerate(sorted(cand, key=lambda x: x["ticker"])):
+        if s["ticker"] in out:
+            continue
         try:
             ms = list(api.settled_markets(s["ticker"], lo, now))
         except Exception as e:                                   # a series that errors is recorded as such, not guessed
@@ -74,10 +79,13 @@ def census() -> None:
         lives = [(iso_ts(m.get("close_time")) or 0) - (iso_ts(m.get("open_time")) or 0) for m in ms]
         out[s["ticker"]] = {"frequency": s.get("frequency"), "category": s.get("category"), "title": s.get("title"), "markets": len(ms), "total_volume": sum(vols),
                             "median_volume": st.median(vols) if vols else 0.0, "median_life_s": st.median(lives) if lives else 0, "days": len({(m.get("close_time") or "")[:10] for m in ms})}
-        if k % 40 == 0:
+        if k % 20 == 0:
+            partial.write_text(json.dumps(out))
             print(f"  {k} / {len(cand)}", flush=True)
         time.sleep(0.15)
     CENSUS.write_text(json.dumps({"as_of": now, "series": out}))
+    if partial.exists():
+        partial.unlink()
     traded = [v for v in out.values() if v.get("markets")]
     print(f"done: {len(traded)} of {len(cand)} had a settled market in {WINDOW_DAYS} days")
 
