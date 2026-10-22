@@ -5612,3 +5612,9 @@ The 10 minute entry (PR #453) helped Bitcoin, XRP and natural gas. ENTRY1 asks w
 - **FALSIFIED** if the difference is below +0.2c or z < 1.0. NOT_YET_FALSIFIED only if every condition holds; otherwise NOT_ENOUGH_DATA.
 - **Information only:** which minute each series picked, and the full table of mean net by series and minute on TRAIN and TEST.
 - Tries: +1 (running count about 4,703; the choice step itself is searched over 144 cells, which is why it is walk-forward). Run once: `python -m scalper.entry1 run`.
+
+### ENTRY1 result (2026-10-22, run once): FALSIFIED
+
+Choosing each series' entry minute from the first 46 days and using it on the last 23 days: 11 series changed minute; chosen minus fixed 360, per test day, **+0.32c, z 0.69** (needed +0.5c and z 2.0; z below 1.0 is FALSIFIED). Halves -0.22c and +0.81c; fee stress +0.31c; the placebo (random minute per series) 95th percentile of z was +1.92. The picks were scattered (BNB 540, BTC 540, COPPER 600, DOGE 480, ETH 660, GOLD 360, HYPE 540, NATGAS 600, NEAR 420, PALLADIUM 360, PLATINUM 360, SILVER 360, WTI 660, XRP 660, ZEC 480), which is what overfit looks like. Conclusion: a per-series best entry minute does not survive walk-forward. Thin series are noisy (palladium and platinum at 540 to 600 show train means of -24c to -28c on a handful of entries).
+
+Information only (from the table the run printed, not a claim): in the TEST days the early columns (600 to 660 s) are often above 360 for the crypto and commodity series that matter (BTC 660: +2.9c, 600: +2.6c against 360: +0.3c; NATGAS 600: +4.1c against +1.8c; WTI 540: +4.8c against +0.1c; XRP 600: +3.3c against +1.5c) and below for others (ETH 600: -3.0c). A single FIXED early minute for all series is the already registered FWD7 and FWD8 (10 minute entry, on fresh days), so I do not register it again. Tries: +1 (running count about 4,703).
