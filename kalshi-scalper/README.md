@@ -4978,3 +4978,19 @@ Code `scalper/mc_sf.py` and `tests/test_mc_sf.py` were committed before the run;
   **A lead, not a result.** It was not registered, so it proves nothing, and the "alone" groups are small. But Bitcoin, natural gas and Dogecoin each earn more when they are the only favourite, which would make sense if windows with many favourites are windows with one large common move that has already been priced in. If the owner wants it tested, the rule is a **crowded-window filter** ("skip a series when two or more other live series also have a favourite in the same window"), to be registered first and read on fresh days. **Not run.**
 - **FWD9** stays a pure forward read (natural gas 10 minute orders by spread); nothing to report.
 - **Count: Kalshi tries about 4,664** (MC1, SF1; FWD9 registered). Nothing built, nothing changed live.
+
+## Pre-registration: FWD10, the crowded-window filter, read on fresh days (the owner's pick; written 2026-10-22 before any fresh-day crowded or alone entry was computed)
+
+**Why.** CAP1 (unregistered, same data as the idea) showed that Bitcoin, natural gas and Dogecoin earn more when their favourite is the only one among the six live series in its window (Bitcoin +2.92c against +0.10c; natural gas +1.91c against +0.02c; Dogecoin +2.96c against +1.47c). **Three tries (one per series); Kalshi count about 4,667.**
+
+**Disclosed.** CAP1's table is seen. Gold, Ethereum and XRP showed no gap and are not part of the claim. No fresh-day window has been classified.
+
+**Definitions (fixed).** The six live series are `KXBTC15M`, `KXGOLD15M`, `KXETH15M`, `KXXRP15M`, `KXDOGE15M`, `KXNATGAS15M`. L1 as defined for the history: the favourite (ask 88c to 97c) at the candle ending **360 seconds** before the close, one entry per market. A window is the close time; **alone** = exactly one of the six has an L1 entry in that window; **crowded** = two or more do. (The live bot enters Bitcoin, XRP and natural gas at 10 minutes now; the claim is read on public candles with the 6 minute definition used by the history, and a live version, if it ever passes, would need its own 10 minute analogue and gate test.)
+
+**Claim and bar (per series: Bitcoin, natural gas, Dogecoin).** On fresh public candles for markets closing from **2026-10-13 00:00 UTC** (`data/fresh.sqlite`, the same download as FWD7), net per contract of **alone** entries minus **crowded** entries, each from its own entries, day-clustered difference z at least **2.4**, and the alone group above zero by itself. **Read once, at 30 fresh days or 2026-12-01**, whichever is first. `NOT_ENOUGH_DATA` below 60 alone entries or 20 days. Otherwise `FALSIFIED`.
+
+**Mechanism / counterparty.** A window with many simultaneous favourites is one with a large common move across risk assets; by the time 6 minutes remain the favourite has been priced off that move, so the market's 88c to 97c carries less of the favourite effect. An isolated favourite is an idiosyncratic one that sellers underprice. The blind spot: both are the same favourite effect in a different mix of days, and the 69 day gap may be a few large days.
+
+**Prediction, recorded first.** At most **one** of the three holds (about **85%**); Bitcoin the likeliest at about **20%**, natural gas **12%**, Dogecoin **10%**. The alone-minus-crowded gap shrinks toward the pooled +0.5c on new days, as every earlier lead has.
+
+**Single read.** Code is written when the read is due (so it is not edited after partial data); a refused rerun unless the result file is deleted on purpose. Nothing here goes live; a pass would be a proposal to the main session, with the owner's go, to skip a series when other live series have a favourite in the same window.
