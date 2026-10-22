@@ -38,6 +38,11 @@ function world(opts = {}) {
   const fetchFn = async (url, o) => {
     calls.push({ url, method: o.method, headers: o.headers, body: o.body ? JSON.parse(o.body) : null });
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
+    if (url.includes('/candlesticks')) {
+      if (opts.candlesThrow) throw new Error('down');
+      if (opts.candles === 'none') return reply(404, {});
+      return reply(200, { candlesticks: opts.candles || [] });
+    }
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
       const over = (opts.fresh && opts.fresh[tk]) || {};
@@ -881,6 +886,43 @@ gates.EP3 = async () => {
   // and nothing else about the entry changed: no other series gained an early window, the band and the sizing are the same.
   assert.deepStrictEqual(live.L1_WINDOW_MS, [330000, 400000]);
   assert.ok(live.EARLY_PROBE_SERIES.every((x) => live.L1_SERIES.includes(x)) && live.EARLY_PROBE_SERIES.every((x) => live.CAPPED_SERIES.includes(x) || live.PROBE_SERIES.includes(x)), 'both are already one-contract series, so an early entry can never be larger than a normal one');
+};
+// RL1 and RL2: the 3 minute rise is LOGGED on 10 minute orders (the research session's JUMP1 lead, Oct 22, 2026). Logging only: after the order, public candles, never able to change a trade.
+const candle = (endSec, bid, ask) => ({ end_period_ts: endSec, yes_bid: { close_dollars: String(bid) }, yes_ask: { close_dollars: String(ask) } });
+gates.RL1 = async () => {
+  const nowSec = Math.floor(NOW / 1000);
+  // pure: YES side rose from 0.80 to 0.90 over 3 candles = +0.10; a NO order's side rose when the YES mid fell; thin or stale data gives nothing.
+  const cs = [candle(nowSec - 180, 0.79, 0.81), candle(nowSec - 120, 0.84, 0.86), candle(nowSec - 60, 0.87, 0.89), candle(nowSec, 0.89, 0.91)];
+  const yes = live.riseFromCandles(cs, 'yes', nowSec), no = live.riseFromCandles(cs, 'no', nowSec);
+  assert.ok(Math.abs(yes.rise - 0.1) < 1e-9 && Math.abs(no.rise + 0.1) < 1e-9, 'the rise is for the side that was bought: ' + [yes.rise, no.rise]);
+  assert.strictEqual(live.riseFromCandles(cs.slice(1), 'yes', nowSec), null, 'no candle 3 minutes earlier: nothing is logged');
+  assert.strictEqual(live.riseFromCandles(cs, 'yes', nowSec + 600), null, 'a stale latest candle: nothing is logged');
+  assert.strictEqual(live.riseFromCandles([], 'yes', nowSec), null);
+  // in the bot: the 10 minute XRP order carries the rise, after being sent as usual.
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } }, candles: cs });
+  await tick(w, { quotes: [q10('KXXRP15M', XRP10)] });
+  assert.strictEqual(w.posts.length, 1, 'the order went out');
+  const rec = w.docs.get('L1-' + XRP10);
+  assert.ok(Math.abs(rec.rise3 - 0.1) < 1e-9 && rec.entryLead === '10m' && rec.status === 'filled', 'and carries the 3 minute rise: ' + rec.rise3);
+  const order = w.calls.map((c) => c.method + ' ' + c.url.split('/').slice(-1)[0].split('?')[0]);
+  assert.ok(order.indexOf('POST orders') < order.findIndex((x) => /candlesticks/.test(x)), 'the candles are read AFTER the order is sent, never before');
+  // a 6 minute order never reads candles.
+  const w6 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs });
+  await tick(w6, { quotes: [quote({}, 'KXETH15M', 'KXETH15M-26OCT071415-06')] });
+  assert.strictEqual(w6.posts.length, 1);
+  assert.ok(!w6.calls.some((c) => /candlesticks/.test(c.url)), 'a 6 minute order reads no candles');
+};
+gates.RL2 = async () => {
+  // Whatever goes wrong with the candles, the order is exactly what it was.
+  for (const opts of [{ candlesThrow: true }, { candles: 'none' }, { candles: [] }, { candles: [{ end_period_ts: 'x' }] }]) {
+    const w = world(Object.assign({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } } }, opts));
+    const r = await tick(w, { quotes: [q10('KXXRP15M', XRP10)] });
+    assert.ok(r && r.ok, 'the tick still completes');
+    const rec = w.docs.get('L1-' + XRP10);
+    assert.ok(w.posts.length === 1 && rec.status === 'filled' && rec.rise3 === undefined, 'order sent and recorded, nothing logged: ' + JSON.stringify(opts).slice(0, 40));
+  }
+  const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
+  assert.ok(!/keyId|pem/.test(src.slice(src.indexOf('async function logRise'), src.indexOf('async function logRise') + 900)), 'it reads public candles with no key');
 };
 // GF1 to GF3: gold first (Oct 21, 2026, docs/GOLD_FIRST_PROPOSAL.md option A). Gold alone keeps the size ladder and is sent first; Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract; the lists change only by a code edit.
 gates.GF1 = async () => {

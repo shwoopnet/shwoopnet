@@ -312,6 +312,36 @@ const L1_MAX_ORDERS = 200;
 // A session has no end time any more (the owner removed it on Oct 8, 2026): it runs until the owner stops it or a stop below ends it. What stayed
 // is the DAY: the loss stop and the order limit both look at the last 24 hours, so a long run cannot hide a bad day behind old profits.
 const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
+// Logging only (Oct 22, 2026, the research session's JUMP1 lead, the owner: "log it"). How far the side's mid price rose over the last 3 minutes, written on each 10 minute order AFTER the whole minute's orders
+// have been sent, from the public one minute candles. It never decides anything: no order waits for it, it reads no key, and a read that fails or is thin leaves the order exactly as it was. The figure is for the side
+// that was bought (a NO order's side rises when the YES mid falls). The research reads it with the order's own price and result.
+const RISE_LOOKBACK_S = 180;
+function riseFromCandles(candles, side, nowSec) {
+  const mids = new Map();
+  for (const c of Array.isArray(candles) ? candles : []) {
+    const end = Number(c && c.end_period_ts), b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars);
+    if (Number.isFinite(end) && Number.isFinite(b) && Number.isFinite(a) && end <= nowSec + 60) mids.set(end, (b + a) / 2);
+  }
+  if (!mids.size) return null;
+  const latest = Math.max(...mids.keys());
+  if (nowSec - latest > 150) return null;          // stale: the latest candle must be from about now
+  const then = mids.get(latest - RISE_LOOKBACK_S);
+  if (!Number.isFinite(then)) return null;
+  const dir = side === "no" ? -1 : 1, now = mids.get(latest);
+  return { rise: Number((dir * (now - then)).toFixed(4)), midNow: Number(now.toFixed(4)), midThen: Number(then.toFixed(4)), candleAt: latest };
+}
+async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs }) {
+  try {
+    const nowSec = Math.floor(nowMs / 1000);
+    const res = await liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
+      params: { start_ts: String(nowSec - 900), end_ts: String(nowSec + 60), period_interval: "1" }, nowMs });
+    if (res.status !== 200 || !res.body || !Array.isArray(res.body.candlesticks)) return false;
+    const r = riseFromCandles(res.body.candlesticks, side, nowSec);
+    if (!r) return false;
+    await store.updateTest(cid, { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen });
+    return true;
+  } catch (e) { return false; }      // logging only: never allowed to affect a trade
+}
 
 // Cost (Oct 21, 2026, the owner: "cut costs"). The bot re-read the whole last 24 hours of orders every minute only to count them and sum their results. Orders older than OLDER_AFTER_MS are final
 // (the exit watch acts within minutes of a buy and the settle sweep within minutes of the close), so they are read once and kept in this instance's memory for REFRESH_MS; only the recent block is read
@@ -749,6 +779,7 @@ async function runL1Tick(args) {
   }
 
   const results = [];
+  const riseLog = [];   // 10 minute orders to log the 3 minute rise on, after every order of this minute is sent
   let ordersSent = sent;
   // Bitcoin and gold close together and share a shard, and the balance above is read once. Money already committed to an
   // order earlier in this same tick is taken off what the next market on that shard may use.
@@ -807,6 +838,7 @@ async function runL1Tick(args) {
     // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
     if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
+    if (lead === "10m") riseLog.push({ cid, series: c.series, ticker, side: pick.side });
     committed[shardKey] = (committed[shardKey] || 0) + cost;
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
 
@@ -840,6 +872,7 @@ async function runL1Tick(args) {
     await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
     return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
   }
+  for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now });
   await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
   return { ok: true, results };
 }
@@ -1038,5 +1071,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };
