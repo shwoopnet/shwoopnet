@@ -88,7 +88,7 @@ def fetch() -> None:
                 continue
             rows = {r["ftime"]: (r["txn"], r["xnd"]) for r in csv.DictReader(io.StringIO(txt)) if r.get("txn") and r.get("xnd")}
             have[key] = rows
-            time.sleep(0.15)
+            time.sleep(0.7)
         DATA.write_text(json.dumps(cache))
         print(f"{station}: forecasts for {len(have)} runs", flush=True)
     for series in CITIES:
