@@ -5516,3 +5516,9 @@ Owner's pick. FLAT2 was found on 6 minute entries across all series. The live bo
 - **Prediction (now):** A +1.0c, B +1.5c.
 - Overlap: history is the same one that produced FLAT2, so this is a robustness check, not independent evidence. The FLAT2-F fresh-day read still decides.
 - Tries: +2 (running count about 4,695). Run once: `python -m scalper.stack1 run`.
+
+### STACK1 result (2026-10-22, run once): claim A FALSIFIED, claim B NOT_YET_FALSIFIED; "stacks" is not supported
+
+- **A, 10 minute entries:** FLAT 494 (4.6% of 10,779) at +2.00c, MOVING at +0.51c; difference **+0.89c, z 0.69**. Under the written bar (z < 1.0 is FALSIFIED), so the word is FALSIFIED. The point estimate is positive in both halves (+1.41c, +1.58c), under the fee stress (+0.90c) and in every month (+0.60c, +1.01c, +3.17c), so this is a low-power miss (about 7 flat entries a day), not a reversal. Nothing was concluded beyond the written word. At 10 minutes the whole entry population already earns +0.51c, so there is less for the filter to separate.
+- **B, one crypto order per window at 6 minutes:** FLAT 556 (13.0% of 4,263) at **+3.27c**, MOVING +0.55c; difference **+2.49c, z 2.34**, placebo tail 1.85; halves +3.68c and +1.76c; stress +2.50c; August +4.63c, September +1.24c, October +2.26c. Meets every written condition.
+- Both had to hold for "stacks", so the combined claim fails. What it does support: inside the #459 rule, flat first-in-window entries are the good ones (+3.27c against +0.55c), which agrees with CROWD1 (the first entry in a crowded window is the weak one). Still in-sample on the history that produced FLAT2. Tries: +2 (running count about 4,695).
