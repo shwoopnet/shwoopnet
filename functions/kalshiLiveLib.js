@@ -87,8 +87,17 @@ function assertLive(url) {
   }
 }
 
-// One request. Never retried, never throws on an HTTP status. A network error or timeout comes back as status 0.
-async function liveRequest({ fetchFn, keyId, pem, method, path, params, body, nowMs }) {
+// One request. An order (anything but a GET) is never retried, and nothing throws on an HTTP status. A network error or timeout comes back as status 0.
+// A GET that Kalshi answers with 429 (too many requests) is asked once more after a short wait (Oct 22, 2026): the balance and position reads share one key with the
+// exit watch's 10 second loop, and a single refused read made the account card say "could not be read". A read has no effect, so asking twice is safe; a second 429 comes back as is.
+async function liveRequest(args) {
+  const first = await liveRequestOnce(args);
+  if (first.status !== 429 || args.method !== "GET") return first;
+  await new Promise((r) => setTimeout(r, RATE_LIMIT_RETRY_MS));
+  return liveRequestOnce({ ...args, nowMs: args.nowMs === undefined ? undefined : args.nowMs + RATE_LIMIT_RETRY_MS });
+}
+const RATE_LIMIT_RETRY_MS = 1200;
+async function liveRequestOnce({ fetchFn, keyId, pem, method, path, params, body, nowMs }) {
   const url = LIVE_BASE + path + (params ? "?" + new URLSearchParams(params).toString() : "");
   assertLive(url);
   const headers = { Accept: "application/json", "User-Agent": "shwoopnet-live/1.0" };

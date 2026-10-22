@@ -1197,6 +1197,20 @@ gates.OC1 = async () => {
   assert.strictEqual(w2.posts.length, 2, 'different windows are independent');
 };
 
+// RR1: a read that Kalshi refuses with 429 is asked once more, an order never is. Consequence: one refused balance read no longer skips a minute's entries or blanks the account card, and a refused order is never sent twice.
+gates.RR1 = async () => {
+  const mk = (status) => { const calls = []; return { calls, fetchFn: async (url, o) => { calls.push(o.method); return { status: calls.length === 1 ? status : 200, text: async () => '{}' }; } }; };
+  const g = mk(429);
+  const r = await live.liveRequest({ fetchFn: g.fetchFn, method: 'GET', path: '/portfolio/balance' });
+  assert.deepStrictEqual([g.calls.length, r.status], [2, 200], 'a refused GET is asked once more');
+  const p = mk(429);
+  const r2 = await live.liveRequest({ fetchFn: p.fetchFn, method: 'POST', path: '/portfolio/events/orders', body: {} });
+  assert.deepStrictEqual([p.calls.length, r2.status], [1, 429], 'an order is never retried');
+  const h = { calls: [], fetchFn: async (u, o) => { h.calls.push(1); return { status: 429, text: async () => '{}' }; } };
+  const r3 = await live.liveRequest({ fetchFn: h.fetchFn, method: 'GET', path: '/portfolio/balance' });
+  assert.deepStrictEqual([h.calls.length, r3.status], [2, 429], 'a second 429 comes back as it is, after one retry only');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
