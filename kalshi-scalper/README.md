@@ -5434,3 +5434,9 @@ Idea: crowded windows lose together (CROWD1: both lose 5.7x more often than chan
 - **FALSIFIED:** diff < +0.3c or z < 1.0. Anything else NOT_ENOUGH_DATA.
 - **Information only:** the share of entries that are DISAGREE, and the loss rates of both groups.
 - Tries: +1 (Kalshi running count about 4,689). Run once: `python -m scalper.conc1 run`.
+
+### CONC1 result (2026-10-22, run once): FALSIFIED
+
+As registered (agreement is better): AGREE 7,452 entries at +0.88c; DISAGREE 912 at +2.90c; AGREE minus DISAGREE **-1.99c**, z -1.79. The claim needed at least +0.3c, so the word is FALSIFIED. The sign is the opposite of the prediction. It was negative in both halves (-2.41c, -1.64c), under the fee stress (-1.98c) and in all three months (-2.43, -1.20, -2.28). Loss rates: AGREE 5.77%, DISAGREE 4.82%. Placebo tail on the positive side was +1.23, so a +1.99c gap of this size is not unusual by chance alone (z -1.79 is below the 2.0 bar).
+
+Recorded as a **lead, not a result**: the reverse (favourites the other crypto series contradict earn more) was never the registered claim and z is under 2, so on this data it counts as nothing. If it is ever tested it must be a new pre-registration scored only on days after 2026-10-22 (the same-data version would be fitting the lead to the data that produced it). Tries: +1 (running count about 4,689).
