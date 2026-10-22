@@ -5471,3 +5471,9 @@ Owner's pick (Option 2). Idea: an L1 favourite whose price has barely moved in t
 - **FALSIFIED:** diff < +0.3c or z < 1.0. Anything else NOT_ENOUGH_DATA.
 - **Information only:** FLAT share of entries, loss rates of both groups, results on the live five series alone.
 - Tries: +1 (running count about 4,691). Run once: `python -m scalper.flat1 run`.
+
+### FLAT1 result (2026-10-22, run once): NOT_ENOUGH_DATA
+
+My thresholds were set without counting the group first (the same mistake as XLEAD1). Only **31 of 24,792** entries met `rng5 <= 0.02` and `abs(rise3) <= 0.01` (0.13%), over 21 days; the claim needed 1,500. The figures are not evidence: flat +2.25c against moving +0.12c, difference +2.71c, z 1.15, first half +5.61c and second half -1.10c, no month with 200 flat entries. The live-five-series information cut has 8 flat entries. Nothing was concluded.
+
+Feature distribution (no outcomes looked at): the median 5 minute range at the 6 minute mark is **0.24**, and the 5th, 25th percentiles are 0.067 and 0.15; |rise3| 25th percentile is 0.049, median 0.11. Favourites at 6 minutes have mostly just arrived, so a "flat for 5 minutes" favourite is very rare. A fair test needs a looser cut, chosen from these quantiles and not from outcomes, and registered as a new try (FLAT2). Tries: +1 (running count about 4,691).
