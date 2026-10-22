@@ -5040,3 +5040,12 @@ Code `scalper/cuts3.py` and `tests/test_cuts3.py` were committed before the run;
 **Prediction, recorded first.** DL10 skips **15% to 45%** of decided entries; kept mean between the all-decided mean and that mean plus **1.0c**; `NOT_YET_FALSIFIED` about **40%** (the 6 minute pass suggests it can pass; the shorter window and smaller sample argue against). If it passes, the per-series table will show Bitcoin, XRP and natural gas with skipped at least as good as kept (bounce), so it is an admission rule for **new** series, as DL1 was.
 
 **Single read.** `python -m scalper.dl10 run`, once; a refused rerun unless `data/dl10_result.txt` is deleted on purpose. Nothing goes live.
+
+## Result: DL10, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)
+
+Code `scalper/dl10.py` and `tests/test_dl10.py` were committed before the run; result file `data/dl10_result.txt`. 10,779 entries at 10 minutes; 8,704 decided (350 had under 50 prior entries).
+
+- **Skipped 3,442 (39.5%). Kept 5,262 on 55 days: net +0.91c, z +2.04 (bar 2.8)**, halves +0.86c / +0.96c, +0.80c at fees x1.2. All decided entries: **+0.73c**. **Kept minus skipped +0.32c (z +0.48)**; gain +0.18c against a placebo 95th percentile of +0.29c; September kept +0.70c against +0.99c for all decided. **Verdict: `FALSIFIED`** (z, difference, placebo and September all fail).
+- **Prediction:** skips 15% to 45% (right, 39.5%), kept mean between the all-decided mean and that plus 1.0c (right, +0.91c against +0.73c), `NOT_YET_FALSIFIED` about 40% (not reached). Right on the sizes, the verdict went the other way from the 6 minute rule's pass.
+- **Per series (information).** The live 10 minute series: Bitcoin kept 448 at +2.14c (skipped 8 at +8.98c), XRP kept 675 at +3.20c (skipped 23 at +8.00c), natural gas kept 219 at +4.92c against skipped 85 at +2.20c. The skip rule would have dropped almost nothing from Bitcoin and XRP and the pieces it dropped did better. Skipped beat kept in BNB, EUR/USD, HYPE, NEAR, platinum, silver and WTI, so at 10 minutes the recent record of a series does not separate good from bad ones the way it did at 6 minutes.
+- **Reading.** A series filter does not rescue the pooled 10 minute number (+0.73c all decided, +0.91c kept, both under the absolute z bar). The 10 minute edge sits in a few series (natural gas, XRP, Bitcoin, copper, WTI, Dogecoin) and not in a rule that can find them from recent results. **Count: Kalshi tries about 4,672.** Nothing built, nothing changed live.
