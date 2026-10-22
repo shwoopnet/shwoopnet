@@ -5487,3 +5487,18 @@ Owner's pick. FLAT1 had 31 qualifying entries, so it said nothing. FLAT2 is the 
 - **Supported (NOT_YET_FALSIFIED) needs all of:** FLAT n >= 1,500 and >= 10 days; diff >= +1.0c with day-clustered z >= 2.0; same sign in both halves; same sign under the x1.2 fee stress; same sign in at least 2 of the months present (months with at least 200 FLAT entries); placebo (100 random relabels) 95th percentile of diff z below the observed.
 - **FALSIFIED:** diff < +0.3c or z < 1.0. Anything else NOT_ENOUGH_DATA.
 - Tries: +1 (running count about 4,692). It is a related try to FLAT1 and counted as one more; the z bar is not lowered. Run once: `python -m scalper.flat2 run`.
+
+### FLAT2 result (2026-10-22, run once): NOT_YET_FALSIFIED, in sample
+
+All 18 series, 69 days (Aug to Oct 13): FLAT (`rng5 <= 0.15`, `|rise3| <= 0.05`) 3,727 entries (15.0%) at **+1.76c** a contract, loss rate 4.5%; MOVING 21,065 at -0.17c, loss rate 7.0%. Difference **+1.87c**, day-clustered **z 5.25** (placebo 95th percentile 1.85). Halves +1.86c and +2.00c; fee stress +1.88c; August +2.29c, September +1.61c, October +1.98c. Live five series only (information): FLAT 1,387 at +2.84c, MOVING 8,396 at +0.87c, difference +1.96c, z 3.59 (labelled NOT_ENOUGH_DATA only because of the 1,500 sample bar).
+
+What this is and is not. It meets every condition written before the run, with the Sidak-style deflation for about 4,692 tries still leaving it well under a 0.001 level. But it is **in sample on a history that also produced the firm-favourite findings** (TIB1, DIP1, JUMP1, FEAT: the same idea that firm favourites do better), and the cut was chosen after FLAT1 failed. So it is a strong lead, not a deployable result. The next step is the forward read, below. Nothing is proposed for the live bot yet.
+
+## Pre-registration: FLAT2-F (2026-10-22), FLAT2 on fresh days only
+
+Scored ONLY on markets closing from 2026-10-14 00:00 UTC, so no day that produced FLAT2 is reused. Same rule, groups and thresholds as FLAT2, all 18 series from `data/fresh.sqlite` (read with the existing fresh-day gate in `fwd_reads`: 30 fresh days, about 2026-11-12, or 2026-12-01, once).
+
+- **Claim:** FLAT minus MOVING mean net per contract >= +1.0c, day-clustered z >= 2.0, same sign in both halves and under the x1.2 fee stress, FLAT n >= 300.
+- **Prediction (now):** +1.0c, about half the in-sample gap, because an in-sample cut shrinks forward.
+- **FALSIFIED** if the claim fails and FLAT n >= 300. NOT_ENOUGH_DATA if FLAT n < 300. An information look at partial days is allowed and decides nothing.
+- Tries: +1 (running count about 4,693).

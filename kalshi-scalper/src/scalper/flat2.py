@@ -41,3 +41,26 @@ def main(argv: list[str]) -> None:
 
 if __name__ == "__main__":
     main(sys.argv)
+
+
+FRESH_FROM, F_DIFF_C, F_Z, F_MIN_N = "2026-10-14", 0.010, 2.0, 300
+
+
+def flat2f(markets: list[tuple]) -> str:
+    """FLAT2-F (README): FLAT2 on fresh markets closing from FRESH_FROM, never used to choose the cut."""
+    import statistics as st
+    rows, _, _ = F.build(markets, 360)
+    rows = [r for r in rows if r["day"] >= FRESH_FROM]
+    flat, moving = split(rows)
+    if len(flat) < F_MIN_N or not moving:
+        return f"FLAT2-F: NOT_ENOUGH_DATA (FLAT n={len(flat)}, MOVING n={len(moving)})"
+    m, z, nd = flat1.diff_z(flat, moving)
+    ms, _, _ = flat1.diff_z(flat, moving, "stress")
+    a, b = sorted(flat, key=lambda r: r["close_ts"]), sorted(moving, key=lambda r: r["close_ts"])
+    ha, hb = len(a) // 2, len(b) // 2
+    h1 = st.mean(r["net"] for r in a[:ha]) - st.mean(r["net"] for r in b[:hb])
+    h2 = st.mean(r["net"] for r in a[ha:]) - st.mean(r["net"] for r in b[hb:])
+    ok = m >= F_DIFF_C and z >= F_Z and ms > 0 and h1 > 0 and h2 > 0
+    c = lambda x: f"{x * 100:+.2f}c"
+    return (f"FLAT2-F: FLAT n={len(flat)} at {c(st.mean(r['net'] for r in flat))}, MOVING n={len(moving)} at {c(st.mean(r['net'] for r in moving))} on {nd} days; "
+            f"difference {c(m)} (day clustered z {z:+.2f}); halves {c(h1)} / {c(h2)}; stress {c(ms)}; VERDICT: {'NOT_YET_FALSIFIED' if ok else 'FALSIFIED'}")

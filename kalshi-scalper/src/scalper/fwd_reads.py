@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 
 from . import lstrats as L
 from .calibration import cluster_mean_z
-from . import conc1
+from . import conc1, flat2
 from .paths import DATA_DIR
 from .scalps import STRESS
 
@@ -306,7 +306,7 @@ def feat4f(markets: list[tuple]):
 
 
 def report(markets: list[tuple]) -> list[str]:
-    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets) + [sq1(markets), ts1(markets)] + cw10(markets) + [feat2f(markets), feat4f(markets), conc1.conc2f(markets)]
+    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets) + [sq1(markets), ts1(markets)] + cw10(markets) + [feat2f(markets), feat4f(markets), conc1.conc2f(markets), flat2.flat2f(markets)]
 
 
 def main(argv: list[str]) -> None:
