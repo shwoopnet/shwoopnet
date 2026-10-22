@@ -519,6 +519,9 @@
   .data-details > summary{ cursor:pointer; list-style:none; margin:0; } .data-details[open] > summary{ margin-bottom:6px; } .data-details .kal-perf{ padding:6px 0 0 0; }
   .data-row{ display:grid; grid-template-columns:1.3fr repeat(5,minmax(0,1fr)); gap:6px; padding:9px 18px; font-size:12.5px; border-top:1px solid var(--border); align-items:center; }
   .data-row.data-head{ color:var(--muted); font-size:11px; border-top:0; }
+  .data-row.data-row7{ grid-template-columns:1.3fr repeat(6,minmax(0,1fr)); }
+  .data-kv-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 18px; font-size:12.5px; border-top:1px solid var(--border); align-items:baseline; }
+  .data-kv-row b{ font-weight:600; font-variant-numeric:tabular-nums; text-align:right; }
   .data-row span:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
   @media (max-width:900px){ .data-grid{ grid-template-columns:minmax(0,1fr); } .data-row{ padding:9px 14px; gap:4px; font-size:12px; } }
   .kal-note{ color:var(--muted); font-size:12px; margin-top:12px; line-height:1.5; }
@@ -1297,6 +1300,8 @@
       <div class="kal-card" data-card="data-growth"><div class="kal-card-title">Growth trend</div><div id="dataLine"></div></div>
       <div class="kal-card" data-card="data-share"><div class="kal-card-title">Share of trades by market</div><div id="dataShare"></div></div>
       <div class="kal-card" data-card="data-ended"><div class="kal-card-title">How the orders ended</div><div class="kal-chart"><div id="kalChartPie"></div></div></div>
+      <div class="kal-card kal-card-flush" data-card="data-stats"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">The strategy in numbers</div></div><div id="dataStats"></div></div>
+      <div class="kal-card kal-card-flush" data-card="data-live"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">Live tests</div></div><div id="dataLiveTests"></div></div>
       <div class="kal-card kal-card-flush" data-card="data-markets"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">By market</div></div><div id="dataMarkets"></div></div>
       <div class="kal-card kal-card-flush" data-card="data-lead"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">Entry timing test</div></div><div id="dataLead"></div></div>
       <div class="kal-card" data-card="data-bars"><div class="kal-card-title">Each settled trade</div><div class="kal-chart"><div id="kalChartBars"></div></div></div>
@@ -1952,6 +1957,13 @@
   }
   function kalDayKey(ms){
     return new Date(ms).toLocaleDateString('en-CA', { timeZone: KAL_TZ });
+  }
+  // A minute the bot skipped, said plainly (Oct 22, 2026). The server writes why it sent nothing; a read Kalshi refused with 429 is now retried once on its own, so say so. Any other note is shown as written.
+  function kalshiSkipNote(note, tickAt, now){
+    var n = String(note || '');
+    if(!/nothing (?:was|is) sent|so nothing/i.test(n)){ return n; }
+    var at = Number.isFinite(tickAt) ? kalshiWhen(tickAt, now) : '';
+    return 'Skipped a minute' + (at ? ' (' + at + ')' : '') + ': ' + n + (/HTTP 429/.test(n) ? ' Kalshi asked it to slow down; a refused read is now asked once more on its own.' : '') + ' It looks again every minute.';
   }
   function kalshiWhen(ms, nowMs){
     if(!Number.isFinite(ms)){ return ''; }
@@ -2994,8 +3006,8 @@
     (orders || []).forEach(function(o){
       var p = kalshiOrderPnl(o);
       if(p === null){ return; }
-      var name = kalshiMarketName(o), m = by[name] || (by[name] = { name: name, n: 0, wins: 0, net: 0, contracts: 0, week: 0 });
-      m.n++; m.net += p; m.contracts += Number(o.fillCount) || 0; if(p > 0){ m.wins++; } if(o.ts >= weekAgo){ m.week += p; }
+      var name = kalshiMarketName(o), m = by[name] || (by[name] = { name: name, n: 0, wins: 0, net: 0, contracts: 0, week: 0, gw: 0, gl: 0 });
+      m.n++; m.net += p; m.contracts += Number(o.fillCount) || 0; if(p > 0){ m.wins++; m.gw += p; } else if(p < 0){ m.gl += -p; } if(o.ts >= weekAgo){ m.week += p; }
     });
     return Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.n - a.n; });
   }
@@ -3022,10 +3034,12 @@
   function dataMarketsHtml(rows, esc, money){
     if(!rows.length){ return '<div class="kal-empty" style="padding:0 22px 18px">No settled trades yet.</div>'; }
     var sign = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    var head = '<div class="data-row data-head"><span>Market</span><span>Trades</span><span>Won</span><span>Result</span><span>Per contract</span><span>Last 7 days</span></div>';
+    var head = '<div class="data-row data-row7 data-head"><span>Market</span><span>Trades</span><span>Won</span><span>Profit factor</span><span>Result</span><span>Per contract</span><span>Last 7 days</span></div>';
     return head + rows.map(function(r){
       var per = r.contracts > 0 ? (r.net / r.contracts * 100) : null;
-      return '<div class="data-row"><span>' + esc(r.name) + '</span><span>' + r.n + '</span><span>' + Math.round(r.wins / r.n * 100) + '%</span><span>' + esc(sign(r.net)) + '</span><span>' +
+      // A market with fewer than 30 settled trades is a count, not a result (the health check's rule), so its profit factor is not shown.
+      var pf = r.n < 30 ? 'too few' : (r.gl > 0 ? (r.gw / r.gl).toFixed(2) : 'no losses');
+      return '<div class="data-row data-row7"><span>' + esc(r.name) + '</span><span>' + r.n + '</span><span>' + Math.round(r.wins / r.n * 100) + '%</span><span>' + esc(pf) + '</span><span>' + esc(sign(r.net)) + '</span><span>' +
         (per === null ? '-' : esc((per >= 0 ? '+' : '-') + Math.abs(per).toFixed(1) + 'c')) + '</span><span>' + esc(sign(r.week)) + '</span></div>';
     }).join('');
   }
@@ -3056,6 +3070,40 @@
         (per === null ? '-' : esc((per >= 0 ? '+' : '-') + Math.abs(per).toFixed(1) + 'c')) + '</span></div>';
     }).join('') + '<div class="kal-note" style="padding:10px 18px 14px">A live test that started on 2026-10-21. The 6 minute rows include every older trade, and the two groups are not the same markets. It takes weeks to mean anything.</div>';
   }
+  // The strategy in numbers (Oct 22, 2026, the owner: "so i dont get lost"). The same figures the health check reads, in plain rows and plain text (no new colours): profit factor is what the wins add up to over what the
+  // losses add up to, and the break-even win rate is the share of wins the bot needs so that average win times wins equals average loss times losses. A win rate under it loses money however the average trade looks.
+  function dataStatsHtml(st, esc, money){
+    if(!st || !st.n){ return '<div class="kal-empty" style="padding:0 22px 18px">No settled trades yet.</div>'; }
+    var row = function(l, v){ return '<div class="data-kv-row"><span>' + esc(l) + '</span><b>' + esc(v) + '</b></div>'; };
+    var pf = st.profitFactor === null ? (st.losses ? 'none yet' : 'no losses yet') : st.profitFactor.toFixed(2);
+    var be = st.avgWin !== null && st.avgLoss !== null ? (-st.avgLoss / (st.avgWin - st.avgLoss) * 100).toFixed(1) + '%' : 'none yet';
+    return row('Profit factor', pf) + row('Win rate', st.winRate === null ? 'none yet' : (st.winRate * 100).toFixed(1) + '%') + row('Break-even win rate', be) +
+      row('Average win', st.avgWin === null ? 'none yet' : '+' + money(st.avgWin)) + row('Average loss', st.avgLoss === null ? 'none yet' : '-' + money(Math.abs(st.avgLoss))) +
+      row('Deepest drawdown', st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none yet') + row('Longest losing run', String(st.longestLoss)) +
+      '<div class="kal-note" style="padding:10px 18px 14px">Profit factor under 1.00 means the bot is losing. It needs a win rate above break-even to earn, and one loss costs about as much as many wins. Trust a market only after 30 or more trades.</div>';
+  }
+  // Live tests (Oct 22, 2026): checks that the new rules do what they should. Read only; they change nothing. The two dates are when each change went live (approximate: the owner reported the deploys, not the minute).
+  // One crypto order per window should leave NO window with two filled crypto orders; rng5 should be on (nearly) every order sent after its deploy.
+  function dataLiveTests(orders){
+    var ONE_FROM = Date.UTC(2026, 9, 22, 3, 0, 0), RNG_FROM = Date.UTC(2026, 9, 22, 17, 0, 0), wins = {}, rngN = 0, rngOf = 0;
+    (orders || []).forEach(function(o){
+      if(!o || !Number.isFinite(o.ts)){ return; }
+      if(o.ts >= RNG_FROM){ rngOf++; if(o.rng5 !== undefined && o.rng5 !== null && o.rng5 !== '' && Number.isFinite(Number(o.rng5))){ rngN++; } }
+      var t = String(o.ticker || '');
+      if(o.ts >= ONE_FROM && /^(KXBTC15M|KXETH15M|KXXRP15M|KXDOGE15M)-/.test(t) && Number(o.fillCount) > 0){
+        var k = t.split('-')[1];
+        if(k){ (wins[k] || (wins[k] = {}))[t] = 1; }
+      }
+    });
+    var keys = Object.keys(wins);
+    return { windows: keys.length, twoFill: keys.filter(function(k){ return Object.keys(wins[k]).length >= 2; }).length, rngLogged: rngN, rngOrders: rngOf };
+  }
+  function dataLiveHtml(r, esc){
+    var row = function(l, v){ return '<div class="data-kv-row"><span>' + esc(l) + '</span><b>' + esc(v) + '</b></div>'; };
+    return row('Windows with two filled crypto orders', r.windows ? r.twoFill + ' of ' + r.windows + ' (should stay 0)' : 'none yet') +
+      row('Orders carrying rng5', r.rngOrders ? r.rngLogged + ' of ' + r.rngOrders : 'none yet') +
+      '<div class="kal-note" style="padding:10px 18px 14px">Checks that the new rules are doing their job. They change nothing. Counted from 2026-10-22 03:00 UTC (one crypto order per window) and 17:00 UTC (rng5); both times are approximate.</div>';
+  }
   function renderDataCenter(){
     var pg = document.getElementById('page-data');
     if(!pg || pg.hidden){ return; }
@@ -3067,6 +3115,8 @@
     set('dataWeekly', dataWeekBarsSvg(dataWeeklyRows(orders), escapeHtml, kalshiMoney));
     set('dataLine', kalshiLineSvg(kalshiPnlSeries(orders, 0), escapeHtml, kalshiMoney));
     set('dataShare', dataShareDonutHtml(rows, escapeHtml));
+    set('dataStats', dataStatsHtml(st, escapeHtml, kalshiMoney));
+    set('dataLiveTests', dataLiveHtml(dataLiveTests(kalshiLiveOrders), escapeHtml));
     set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
     set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoney));
     set('dataNote', 'Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
@@ -3112,7 +3162,7 @@
     var endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
     var whyEl = document.getElementById('kalL1Why');
     if(whyEl){ var why = kalshiStopReason(s, endedEv, halted, switchOff, function(ms){ return kalshiWhen(ms, now); }); whyEl.textContent = why; whyEl.hidden = !why; }
-    document.getElementById('kalL1Status').textContent = running ? String(s.lastNote || '').replace(/^Watching\. Orders go in about 6 minutes before a close(?: \(10 for (?:Bitcoin, )?XRP and natural gas\))?, and no market is at that point right now\./, 'Watching.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
+    document.getElementById('kalL1Status').textContent = running ? kalshiSkipNote(s.lastNote, s.lastTickAt, now).replace(/^Watching\. Orders go in about 6 minutes before a close(?: \(10 for (?:Bitcoin, )?XRP and natural gas\))?, and no market is at that point right now\./, 'Watching.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
     renderKalshiCharts();
