@@ -5504,3 +5504,15 @@ Scored ONLY on markets closing from 2026-10-14 00:00 UTC, so no day that produce
 - Tries: +1 (running count about 4,693).
 
 Owner's pick after FLAT2 (2026-10-22): Option 1. Sent the main session a logging-only proposal: add `rng5` (6-mark range of the bought side's mid, t-300 to t) beside `rise3` on every L1 order record. No trade, size or setting change; the main session and the owner decide. Fresh-day information look (decides nothing): FLAT 287 entries at +1.62c against +0.02c for the rest, z 2.63, 9 days.
+
+## Pre-registration: STACK1 (2026-10-22), does FLAT2 stack with the 10 minute entry and the one-crypto-order-per-window rule
+
+Owner's pick. FLAT2 was found on 6 minute entries across all series. The live bot now enters Bitcoin, XRP and natural gas at 10 minutes (PR #453) and sends one crypto order per window (PR #459). STACK1 asks whether FLAT's gap is still there inside each of those two live conditions. Two claims; BOTH must hold for "stacks" (counted as 2 tries).
+
+- **Rule:** FLAT = `rng5 <= 0.15` and `abs(rise3) <= 0.05` at the decision minute (exactly FLAT2's cut), MOVING = the rest, each group from its own entries, compared per day (day-clustered).
+- **Claim A (10 minute entries):** `feat1.build(markets, 600)` rows, all series, history to 2026-10-13. FLAT n = 494 over 68 days (a feature count, no outcomes looked at). FLAT minus MOVING >= +1.0c.
+- **Claim B (one crypto order per window):** at 360 s, keep the first of Bitcoin, Ethereum, XRP, Dogecoin per window in that order (the #459 rule). FLAT n = 556. FLAT minus MOVING >= +1.0c.
+- **Each claim is supported only if:** FLAT n >= 300 and >= 10 days; diff >= +1.0c with z >= 2.0; same sign in both halves and under the x1.2 fee stress; same sign in at least 2 of the months present with 100 or more FLAT entries; placebo 95th percentile of diff z below the observed. FALSIFIED if diff < +0.3c or z < 1.0; otherwise NOT_ENOUGH_DATA.
+- **Prediction (now):** A +1.0c, B +1.5c.
+- Overlap: history is the same one that produced FLAT2, so this is a robustness check, not independent evidence. The FLAT2-F fresh-day read still decides.
+- Tries: +2 (running count about 4,695). Run once: `python -m scalper.stack1 run`.

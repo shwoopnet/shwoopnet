@@ -29,7 +29,7 @@ def split(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     return flat, [r for r in rows if id(r) not in ids]
 
 
-def judge(flat: list[dict], moving: list[dict]) -> dict:
+def judge(flat: list[dict], moving: list[dict], min_n: int = MIN_N, month_min: int = MONTH_MIN) -> dict:
     n, days = len(flat), len({r["day"] for r in flat})
     m, z, _ = diff_z(flat, moving)
     a, b = sorted(flat, key=lambda r: r["close_ts"]), sorted(moving, key=lambda r: r["close_ts"])
@@ -42,7 +42,7 @@ def judge(flat: list[dict], moving: list[dict]) -> dict:
         months[r["day"][:7]][0].append(r["net"])
     for r in moving:
         months[r["day"][:7]][1].append(r["net"])
-    mdiff = {k: st.mean(v[0]) - st.mean(v[1]) for k, v in months.items() if len(v[0]) >= MONTH_MIN and v[1]}
+    mdiff = {k: st.mean(v[0]) - st.mean(v[1]) for k, v in months.items() if len(v[0]) >= month_min and v[1]}
     rng = random.Random(SEED)
     pool = flat + moving
     pz = []
@@ -50,9 +50,9 @@ def judge(flat: list[dict], moving: list[dict]) -> dict:
         rng.shuffle(pool)
         pz.append(diff_z(pool[:len(flat)], pool[len(flat):])[1])
     p95 = sorted(pz)[int(0.95 * len(pz)) - 1]
-    ok = (n >= MIN_N and days >= MIN_DAYS and m >= DIFF_C and z >= DIFF_Z_BAR and h1 > 0 and h2 > 0 and ms > 0
+    ok = (n >= min_n and days >= MIN_DAYS and m >= DIFF_C and z >= DIFF_Z_BAR and h1 > 0 and h2 > 0 and ms > 0
           and sum(1 for v in mdiff.values() if v > 0) >= min(2, len(mdiff)) and z > p95)
-    if n < MIN_N or days < MIN_DAYS:
+    if n < min_n or days < MIN_DAYS:
         verdict = "NOT_ENOUGH_DATA"
     elif ok:
         verdict = "NOT_YET_FALSIFIED"
