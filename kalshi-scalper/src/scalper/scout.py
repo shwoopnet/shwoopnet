@@ -100,8 +100,11 @@ def screen() -> None:
     elig = sorted([(v["total_volume"], t) for t, v in ser.items() if v.get("markets", 0) >= MIN_MARKETS and v.get("median_volume", 0) >= MIN_MEDIAN_VOLUME and 0 < v.get("median_life_s", 0) <= MAX_LIFE_S], reverse=True)
     now = int(time.time())
     lo = now - WINDOW_DAYS * 86400
-    results = {}
+    partial = DATA_DIR / "scout_screen_partial.json"
+    results = json.loads(partial.read_text()) if partial.exists() else {}               # resumable: a restart keeps the series already screened
     for vol, t in elig:
+        if t in results or t in results.get("_empty", []):
+            continue
         try:
             ms = [m for m in api.settled_markets(t, lo, now) if m.get("result") in ("yes", "no")]
         except Exception:
@@ -139,6 +142,8 @@ def screen() -> None:
             results[t] = {"n": len(rows), "days": len({r[0] for r in rows}), "net": mean, "z": z, "loss": sum(r[3] for r in rows) / len(rows), "price": st.mean(r[2] for r in rows),
                           "median_volume": st.median(r[4] for r in rows), "title": ser[t].get("title"), "category": ser[t].get("category"), "frequency": ser[t].get("frequency"), "life_h": life / 3600}
         print(f"  {t}: {len(rows)} entries", flush=True)
+        partial.write_text(json.dumps(results))
+    results.pop("_empty", None)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     STUDIES.mkdir(exist_ok=True)
     (STUDIES / f"scout_{today}.json").write_text(json.dumps({"census_as_of": snap["as_of"], "results": results}, indent=1))
