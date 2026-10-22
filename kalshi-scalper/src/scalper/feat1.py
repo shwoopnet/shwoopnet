@@ -23,11 +23,11 @@ NUM = ["price", "spread", "rise3", "d1", "tib", "dip", "rng5"]
 RESULT = DATA_DIR / "feat1_result.txt"
 
 
-def build(markets: list[tuple], left_s: int):
+def build(markets: list[tuple], left_s: int, series=None):
     """Entries with the numeric features and the series; entries lacking the needed candles are dropped and counted."""
     idx = {m[0]: m[2] for m in markets}
     ents = L.hold_rule(markets, left_s, L.L1["band"])
-    series = sorted({e["series"] for e in ents})
+    series = series if series is not None else sorted({e["series"] for e in ents})
     rows, dropped = [], 0
     for e in ents:
         c = idx[e["ticker"]]

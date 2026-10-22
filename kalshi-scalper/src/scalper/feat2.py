@@ -46,7 +46,44 @@ def walk(rows: list[dict], lost: list[float]) -> dict[int, bool]:
     return dec
 
 
+MODEL_FILE = DATA_DIR.parent / "studies" / "feat2_model_2026-10-22.json"
+
+
+def freeze() -> None:
+    """Fit FEAT2's model once on all history and write it (weights, standardisation, series list, keep threshold) so it can be read on fresh days without refitting."""
+    import json
+    if MODEL_FILE.exists():
+        print(f"Refusing: {MODEL_FILE} exists (the model is frozen; delete only on purpose and log it in the README).")
+        return
+    mk = [m for m in load() if all(x[1] is not None and x[2] is not None for x in m[2])]
+    full = [(t, s, [(e, b, a, b, a) for e, b, a in c], cl, r) for t, s, c, cl, r in mk]
+    rows, series, _ = F.build(full, F.LEFT_S)
+    X = np.array([r["x"] for r in rows])
+    y = np.array([r["lost"] for r in rows])
+    model = F.fit_logit(X, y)
+    ev = expected_net(F.predict(model, X), X[:, 0])
+    thr = float(np.quantile(ev, 1 - KEEP_Q))
+    MODEL_FILE.write_text(json.dumps({"numeric": F.NUM, "series": series, "mu": model[0].tolist(), "sd": model[1].tolist(), "w": model[2].tolist(), "keep_threshold_expected_net": thr,
+                                      "trained_entries": len(rows), "kept_share_in_training": float((ev >= thr).mean())}, indent=1))
+    print(f"frozen on {len(rows)} entries; threshold {thr:.5f}; wrote {MODEL_FILE}")
+
+
+def apply_frozen(markets: list[tuple]):
+    """(kept, skipped) entry lists on `markets` using the frozen model; entries of a series the model has not seen are dropped and counted."""
+    import json
+    m = json.loads(MODEL_FILE.read_text())
+    rows, _, dropped = F.build(markets, F.LEFT_S, m["series"])
+    rows = [r for r in rows if r["series"] in m["series"]]
+    X = np.array([r["x"] for r in rows])
+    model = (np.array(m["mu"]), np.array(m["sd"]), np.array(m["w"]))
+    ev = expected_net(F.predict(model, X), X[:, 0])
+    thr = m["keep_threshold_expected_net"]
+    return [r for r, e in zip(rows, ev) if e >= thr], [r for r, e in zip(rows, ev) if e < thr], dropped
+
+
 def main(argv: list[str]) -> None:
+    if len(argv) >= 2 and argv[1] == "freeze":
+        return freeze()
     if len(argv) < 2 or argv[1] != "run":
         print(__doc__)
         return

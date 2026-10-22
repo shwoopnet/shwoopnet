@@ -53,4 +53,7 @@ late = ("L", "KXBTC15M", [(close - 900 + 60 * (i + 1), 0.30 if i < 9 else 0.90, 
 got = {e["ticker"]: e for e in R.ts1_entries([steady, late])}
 assert got["S"]["close_ts"] == close and abs(got["S"]["price"] - 0.91) < 1e-9, "a steady favourite is entered at stage 1 (600 s)"
 assert "L" not in got, "a favourite that jumped 59c in 3 minutes is skipped (rise 0.20 or more)"
+# FEAT2-F: the frozen model file exists and the reader returns a text line (no fresh data in the fixture)
+assert (R.F2_Z, R.F2_DIFF_Z, R.F2_MIN_KEPT, R.F2_MIN_DAYS) == (2.4, 2.0, 1000, 20)
+assert R.feat2f([steady, late]).startswith("FEAT2-F: NOT_ENOUGH_DATA"), "two fixture markets are far below the minimum"
 print("test_fwd_reads: ok")

@@ -38,6 +38,7 @@ ML1_Z, ML1_MIN_DAYS = 2.4, 25
 SQ_FIRM_W, SQ_POOR_W, SQ_Z, SQ_MIN_FIRM, SQ_MIN_N = 2.0, 0.5, 2.4, 200, 1500
 TS_Z, TS_MIN_N = 2.4, 1500
 CW10_SERIES, CW10_Z, CW10_MIN_N, CW10_MIN_DAYS = ("KXCOPPER15M", "KXWTI15M"), 2.4, 100, 25
+F2_Z, F2_DIFF_Z, F2_MIN_KEPT, F2_MIN_DAYS = 2.4, 2.0, 1000, 20
 POOL18 = ["KXBNB15M", "KXBTC15M", "KXCOPPER15M", "KXDOGE15M", "KXETH15M", "KXEURUSD15M", "KXGBPUSD15M", "KXGOLD15M", "KXHYPE15M", "KXNATGAS15M", "KXNEAR15M",
           "KXPALLADIUM15M", "KXPLATINUM15M", "KXSILVER15M", "KXUSDJPY15M", "KXWTI15M", "KXXRP15M", "KXZEC15M"]
 
@@ -258,8 +259,33 @@ def cw10(markets: list[tuple]):
     return lines
 
 
+def feat2f(markets: list[tuple]):
+    """FEAT2-F: the frozen FEAT2 model (studies/feat2_model_2026-10-22.json, never refitted) read on the fresh days."""
+    from . import feat2
+    kept, skipped, dropped = feat2.apply_frozen(markets)
+    days = len({e["day"] for e in kept})
+    if len(kept) < F2_MIN_KEPT or days < F2_MIN_DAYS:
+        return f"FEAT2-F: NOT_ENOUGH_DATA (kept {len(kept)} on {days} days; {dropped} dropped)"
+    km, _, kz = own(kept)
+    sm, _, _ = own(skipped)
+    allv = kept + skipped
+    am, _, _ = own(allv)
+    dm, dz, nd = diff(kept, skipped)
+    o = sorted(allv, key=lambda e: e["close_ts"])
+    cut = o[len(o) // 2]["close_ts"]
+    halves = []
+    for sel in (lambda e: e["close_ts"] < cut, lambda e: e["close_ts"] >= cut):
+        k = [e["net"] for e in kept if sel(e)]
+        a = [e["net"] for e in allv if sel(e)]
+        halves.append(st.mean(k) - st.mean(a) if k and a else 0.0)
+    v = "NOT_YET_FALSIFIED" if (km > 0 and kz >= F2_Z and dm > 0 and dz >= F2_DIFF_Z and halves[0] > 0 and halves[1] > 0) else "FALSIFIED"
+    c = lambda x: f"{x * 100:+.2f}c"
+    return (f"FEAT2-F: kept n={len(kept)} on {days} days at {c(km)} (z {kz:+.2f}); skipped n={len(skipped)} at {c(sm)}; all {c(am)}; kept minus skipped per day {c(dm)} (day clustered z {dz:+.2f}, {nd} days); "
+            f"kept minus all by half {c(halves[0])} / {c(halves[1])}; kept loss rate {100 * sum(1 for e in kept if e['gross'] < 0) / len(kept):.1f}%; VERDICT: {v}")
+
+
 def report(markets: list[tuple]) -> list[str]:
-    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets) + [sq1(markets), ts1(markets)] + cw10(markets)
+    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets) + [sq1(markets), ts1(markets)] + cw10(markets) + [feat2f(markets)]
 
 
 def main(argv: list[str]) -> None:
