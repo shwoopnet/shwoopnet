@@ -5419,3 +5419,5 @@ Two facts that matter for the decision:
 - Skipping the whole crowded window would drop 2,894 more positive-mean entries (+0.42c each) to lose the correlation. That is a tail-for-income trade, worth it only if the account cannot afford a double loss.
 
 Not applied; a proposal only. Tries: +1 (running count about 4,688).
+
+Owner's pick after CROWD1 (2026-10-22): Option 1. Keep #459 as is; the skip-whole-window idea is dropped, not proposed.
