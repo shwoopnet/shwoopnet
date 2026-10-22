@@ -5440,3 +5440,13 @@ Idea: crowded windows lose together (CROWD1: both lose 5.7x more often than chan
 As registered (agreement is better): AGREE 7,452 entries at +0.88c; DISAGREE 912 at +2.90c; AGREE minus DISAGREE **-1.99c**, z -1.79. The claim needed at least +0.3c, so the word is FALSIFIED. The sign is the opposite of the prediction. It was negative in both halves (-2.41c, -1.64c), under the fee stress (-1.98c) and in all three months (-2.43, -1.20, -2.28). Loss rates: AGREE 5.77%, DISAGREE 4.82%. Placebo tail on the positive side was +1.23, so a +1.99c gap of this size is not unusual by chance alone (z -1.79 is below the 2.0 bar).
 
 Recorded as a **lead, not a result**: the reverse (favourites the other crypto series contradict earn more) was never the registered claim and z is under 2, so on this data it counts as nothing. If it is ever tested it must be a new pre-registration scored only on days after 2026-10-22 (the same-data version would be fitting the lead to the data that produced it). Tries: +1 (running count about 4,689).
+
+## Pre-registration: CONC2-F (2026-10-22), the reverse CONC1 lead, scored only on fresh days
+
+Owner's pick (Option 1). CONC1 found, against its own prediction, that crypto favourites the other crypto series contradict earned +2.90c against +0.88c for agreed ones (z -1.79, not significant). This is that lead as a forward claim. It is scored ONLY on markets closing from 2026-10-14 00:00 UTC (CONC1's history ends 2026-10-13 22:15), so no day that produced the lead is reused.
+
+- **Rule and groups:** exactly CONC1's (L1 entries at 360 s, band 0.88 to 0.97, Bitcoin, Ethereum, XRP, Dogecoin; AGREE and DISAGREE as defined there; lean at the yes mid 0.60 and 0.40). Fresh markets come from `data/fresh.sqlite` (XRP, the last series, is still being fetched, so the read needs all 18 series done).
+- **Claim:** DISAGREE minus AGREE mean net per contract is at least +1.0c, day-clustered z at least 2.0, with the same sign in both halves by time and under the x1.2 fee stress, and DISAGREE n at least 300.
+- **Prediction (now):** +1.0c. The CONC1 gap was +1.99c; a lead found by looking shrinks, so I predict half.
+- **Gate:** read through `fwd_reads` with the existing gate (30 fresh days, about 2026-11-12, or 2026-12-01), once, with the other FWD claims. An information look at partial days is allowed and decides nothing. FALSIFIED if the claim fails; NOT_YET_FALSIFIED only if every condition holds.
+- Tries: +1 (running count about 4,690).

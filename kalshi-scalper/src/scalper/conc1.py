@@ -103,3 +103,33 @@ def main(argv: list[str]) -> None:
 
 if __name__ == "__main__":
     main(sys.argv)
+
+
+FRESH_FROM = "2026-10-14"                       # CONC1's history ends 2026-10-13 22:15; the forward claim uses later days only
+F_DIFF_C, F_Z, F_MIN_N = 0.010, 2.0, 300
+
+
+def conc2f(markets: list[tuple]) -> str:
+    """CONC2-F (README): DISAGREE minus AGREE on fresh days from FRESH_FROM; the reverse of CONC1's registered claim."""
+    quotes = {}
+    for _, s, candles, close_ts, _ in markets:
+        if s in CRYPTO:
+            c = next((x for x in candles if x[0] == close_ts - L.L1["left_s"]), None)
+            if c:
+                quotes[(close_ts, s)] = (c[1], c[2])
+    ents = [e for e in L.hold_rule(markets, L.L1["left_s"], L.L1["band"]) if e["day"] >= FRESH_FROM]
+    agree, dis = classify(ents, quotes)
+    days = len({r["day"] for r in dis})
+    if len(dis) < 2 or not agree:
+        return f"CONC2-F: DISAGREE n={len(dis)}, AGREE n={len(agree)}; VERDICT: NOT_ENOUGH_DATA"
+    m, z, _ = diff_z(dis, agree)
+    ms, _, _ = diff_z(dis, agree, "stress")
+    d, a = sorted(dis, key=lambda r: r["close_ts"]), sorted(agree, key=lambda r: r["close_ts"])
+    hd, ha = len(d) // 2, len(a) // 2
+    h1 = st.mean(r["net"] for r in d[:hd]) - st.mean(r["net"] for r in a[:ha])
+    h2 = st.mean(r["net"] for r in d[hd:]) - st.mean(r["net"] for r in a[ha:])
+    ok = len(dis) >= F_MIN_N and m >= F_DIFF_C and z >= F_Z and ms > 0 and h1 > 0 and h2 > 0
+    v = "NOT_YET_FALSIFIED" if ok else ("NOT_ENOUGH_DATA" if len(dis) < F_MIN_N else "FALSIFIED")
+    c = lambda x: f"{x * 100:+.2f}c"
+    return (f"CONC2-F: DISAGREE n={len(dis)} on {days} days at {c(st.mean(r['net'] for r in dis))}, AGREE n={len(agree)} at {c(st.mean(r['net'] for r in agree))}; "
+            f"difference {c(m)} (day clustered z {z:+.2f}); halves {c(h1)} / {c(h2)}; stress {c(ms)}; VERDICT: {v}")

@@ -10,3 +10,9 @@ agree, dis = C.classify(ents, q)
 assert [x["close_ts"] for x in dis] == [1], dis          # XRP leans no against a yes entry
 assert [x["close_ts"] for x in agree] == [2], agree      # ETH leans yes; windows 3 (neutral) and 4 (no data) are unused
 print("ok")
+
+# CONC2-F: the verdict line runs on a tiny fixture and uses only days from FRESH_FROM
+mk = [("t1", "KXBTC15M", [(100 - 360 + 0, 0.90, 0.92)], 100, "yes")]
+line = C.conc2f(mk)
+assert line.startswith("CONC2-F") and "NOT_ENOUGH_DATA" in line, line
+print("ok2")
