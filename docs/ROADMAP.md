@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 2026-10-21, afternoon. Written in plain words on purpose.
+Last updated: 2026-10-22, late morning. Written in plain words on purpose.
 
 ## The goal
 
@@ -9,17 +9,19 @@ Make money on Kalshi without having to watch it. One bot trades for you. The pla
 ## Where we are today
 
 - **One bot is live (L1), on eight markets.** It buys the side that is almost certain to win (priced 88c to 97c) and waits for the result. Gold keeps the size ladder (6 contracts now). Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract. AUD/USD, USD/CAD and natural gas are one-contract probes. **Since about 2:15 PM CT on 2026-10-21, Bitcoin, XRP and natural gas enter about 10 minutes before the close instead of 6** (a live test); the first one, XRP, won +$0.12.
-- **The live record so far (bot only, 2026-10-21):** 365 settled trades, about 93% won, net **-$4.55**. Gold is +$28.81 on 110 trades; every other market is slightly negative (Bitcoin -$23.34, Ethereum -$1.99, XRP -$6.50, Dogecoin -$1.07, natural gas -$0.47). A win earns about $0.40 and a loss costs about $6, so the bot needs 94 wins in 100 to break even and sits at about 93.
+- **The live record so far (bot only, 2026-10-22 about 11 AM CT):** 414 settled trades, 93% won, net **-$9.91**. At 386 trades gold was +$21.73 on 113 and every other market slightly negative (Bitcoin -$23.39, Ethereum -$1.54, XRP -$6.24, Dogecoin -$1.54, natural gas -$0.40). A win earns about $0.36 and a loss costs about $5, so the bot needs about 93.5 wins in 100 to break even and sits at 93. The diagnosis: about two thirds of the loss is the two big Bitcoin losses on Oct 9 to 10 (capped now) and windows where two crypto markets lost together. The 25c exit is not the leak.
+- **New on 2026-10-22:** only one of Bitcoin, Ethereum, XRP and Dogecoin may place an order per 15 minute window (a test: it should roughly halve crypto profit and remove the worst clusters); a refused Kalshi read is retried once; every order also logs `rise3` and `rng5` for the research reads. None of the logging changes an order.
 - **Safety:** one combined limit per 15 minute window (5.5% of the base), a stop at **12%** of the base, a sell at 25c (a study this week found the line barely matters on Bitcoin, XRP and natural gas, so it stays), a one-click pause and flatten, phone alerts, and a rule that drops a probe market whose last 200 trades net negative.
 - **The website** has four pages: Market Brief, Bot, Data (read only) and Settings. This week: Privacy toggle, a Today line, readable light themes, plain headings and numbers with the bubble font only on the logo, and a layout fix so the trades list no longer squeezes into four-line rows.
 - **We have tried about 4,640 ideas on the same data. None passed the bar for a deployable edge.** This week's tries (decision trees, volatility-managed ETFs, risk parity, factor ETFs, hedges, scale-outs) were all falsified. Capital, not ideas, is the limit: slow strategies tested so far are worth about $5 to $9 a year at $200.
 
 ## What you need to do now
 
-1. Merge [#454](https://github.com/shwoopnet/shwoopnet/pull/454) (order exports carry the entry tag) so the research reads can split 10-minute from 6-minute orders. It only changes the exports.
-2. Merge the tidy and fixes pull request when you are ready (it has this refresh in it).
-3. Send a Recent trades screenshot now and then, or use **Tools, Copy all orders**, so the first reads of the 10-minute entry can be checked.
-4. Nothing about Render: it is free and left running (decided 2026-10-22).
+1. Re-copy **Tools, Copy all orders** in a day or two so the one-crypto-per-window rule and the first `rng5` values can be read.
+2. Send your balance history since Oct 7, and whether the loss stop fired during the gap from Oct 17 to Oct 20.
+3. Watch the Bot page for "Running" and for any repeat of the "HTTP 429" line.
+4. Merge this refresh when you are ready.
+5. Nothing about Render: it is free and left running (decided 2026-10-22).
 
 ## What I am doing next
 
@@ -46,6 +48,7 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 ## Dates to remember
 
 - **From 2026-10-22:** the forward reads FWD5 and FWD6 start counting; FWD7 and FWD8 count from the 10 minute go-live (2026-10-21, about 19:15 UTC).
+- **2026-11-17:** the review of the new rules: continue, pause or narrow, read on the live record (FWD7, FWD8, GOLD1-F, the research session's live diagnosis). Suggested tripwires, yours to edit and none automatic: net result since the #453, #458 and #459 deploys at or below -$15 means stop and look; two windows in a week where two filled crypto orders both lost means look (it should be zero now).
 - **2026-11-16 and 2026-11-17:** the registered forward reads (E3F, FWD1, VOL1, PM3, OW7, then FWD2, FWD3 and GOLD1-F). One run each; nothing changes unless it passes.
 - **2026-12-01:** the default read date for FWD5, FWD6, FWD7 and FWD8, and a second snapshot of the research data (Kalshi's history only reaches back about 69 days).
 - **About 3 to 4 weeks:** a rerun of the funding study on the perps data the recorder is collecting.
@@ -60,6 +63,7 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 
 ## Done recently
 
+- 2026-10-22: live-account diagnosis with the research session; one crypto order per window (#459); a refused Kalshi read retried once (#460); `rise3` and `rng5` logged on every order (#458, #461); order exports carry entry time, fills, fees, book sizes, `rise3` and `rng5`; the Bot page Today line; the weekly health check rewritten for the Kalshi bot.
 - 2026-10-21 (afternoon): the 10 minute entry for Bitcoin, XRP and natural gas went live; the probe drop rule and a cost cut (about $2 a month, and roughly $3 a month of that is given back by the exit watch running through the early minutes) went live; light themes made readable; numbers and headings in the plain font, the bubble font kept for the logo and a hop on hover; Today line; order exports with the entry tag (open); a perps recorder; the hand-sold fix and repair; gold-first sizing; the Data page.
 - 2026-10-21 (morning): three live probe markets; the stop set to 12%; paper card removed; Copy all orders; new logo, icon and share card; footer disclosure.
 - 2026-10-20: phone alerts, sound alerts, XRP and Dogecoin added, window limit 5.5%, shared Flatten and exit claim, cash-out at 99c tested and ruled out (TP1).

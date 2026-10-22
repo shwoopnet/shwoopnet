@@ -1,6 +1,6 @@
 # Career portfolio notes
 
-Private working notes for résumé, interviews and a portfolio write-up. Last refreshed: 2026-10-21 (US Central). Everything below is checkable in the git history (PR numbers #300 and up) and the tests. Edit freely; keep it honest.
+Private working notes for résumé, interviews and a portfolio write-up. Last refreshed: 2026-10-22 (US Central). Everything below is checkable in the git history (PR numbers #300 and up) and the tests. Edit freely; keep it honest.
 
 ## One paragraph
 
@@ -31,7 +31,8 @@ I built and operate a small automated trading system end to end: a single-file w
 | Claim | Number | Caveat |
 |---|---|---|
 | Variants tested | about 4,640, none passing the bar for a deployable edge | Many overlap; each try raises the bar for the next |
-| Live record (bot only, 2026-10-21) | 365 settled, about 93% won, net -$4.55; gold +$28.81 on 110 trades | One loss costs about 14 wins; only gold is clearly positive; small samples elsewhere |
+| Live record (bot only, 2026-10-22) | 414 settled, 93% won, net -$9.91; gold +$21.73 on 113 trades (at 386 trades) | One loss costs about 14 wins; only gold is clearly positive; small samples elsewhere; the bot sits just under its own break-even win rate |
+| Loss diagnosis (2026-10-22) | the 21 real 25c exits cost $2.20 against holding; most of the loss was two oversized Bitcoin trades and clustered crypto windows | Found with a second analysis session, then acted on with a one-order-per-window rule that is still a test |
 | Account size | about $202 | Real money, small amounts, by design |
 | Tests | 33 JS files (about 330 named gates), 6 Python test files | Plain assert scripts, no framework |
 | Mutation check | 66 mutants, 53 killed | Hand-run on the money code only, early October |
