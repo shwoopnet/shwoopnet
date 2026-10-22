@@ -72,7 +72,50 @@ def walk(rows: list[dict], lost: np.ndarray, X: np.ndarray, price: np.ndarray) -
     return taken
 
 
+MODEL_FILE = DATA_DIR.parent / "studies" / "feat4_model_2026-10-22.json"
+
+
+def freeze() -> None:
+    """Fit FEAT4's model once on all rows and write it (standardisation, weights, series list, keep threshold) for the fresh-day read."""
+    import json
+    if MODEL_FILE.exists():
+        print(f"Refusing: {MODEL_FILE} exists (the model is frozen; delete only on purpose and log it in the README).")
+        return
+    mk = [m for m in load() if all(x[1] is not None and x[2] is not None for x in m[2])]
+    full = [(t, s, [(e, b, a, b, a) for e, b, a in c], cl, r) for t, s, c, cl, r in mk]
+    rows, series = build_all(full)
+    X = np.array([r["x"] for r in rows])
+    model = F.fit_logit(X, np.array([r["lost"] for r in rows]))
+    thr = float(np.quantile(expected_net(F.predict(model, X), X[:, 0]), 1 - KEEP_Q))
+    MODEL_FILE.write_text(json.dumps({"series": series, "mu": model[0].tolist(), "sd": model[1].tolist(), "w": model[2].tolist(), "keep_threshold_expected_net": thr, "trained_rows": len(rows)}, indent=1))
+    print(f"frozen on {len(rows)} rows; threshold {thr:.5f}")
+
+
+def apply_frozen(markets: list[tuple]):
+    """(entries, plain_360) on `markets` with the frozen model: the earliest yes per market, and every 360 second L1 entry for comparison."""
+    import json
+    m = json.loads(MODEL_FILE.read_text())
+    rows = []
+    for left in LEFTS:
+        rs, _, _ = F.build(markets, left, m["series"])
+        for r in rs:
+            r["left"] = left
+            r["x"] = r["x"] + [float(left)]
+            rows.append(r)
+    if not rows:
+        return [], []
+    X = np.array([r["x"] for r in rows])
+    ev = expected_net(F.predict((np.array(m["mu"]), np.array(m["sd"]), np.array(m["w"])), X), X[:, 0])
+    by = defaultdict(list)
+    for i, (r, e) in enumerate(zip(rows, ev)):
+        by[r["ticker"]].append((r["left"], bool(e >= m["keep_threshold_expected_net"]), i))
+    taken = [rows[j] for j in (first_yes(c) for c in by.values()) if j >= 0]
+    return taken, [r for r in rows if r["left"] == 360]
+
+
 def main(argv: list[str]) -> None:
+    if len(argv) >= 2 and argv[1] == "freeze":
+        return freeze()
     if len(argv) < 2 or argv[1] != "run":
         print(__doc__)
         return

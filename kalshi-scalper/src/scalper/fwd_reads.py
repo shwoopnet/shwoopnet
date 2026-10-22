@@ -39,6 +39,7 @@ SQ_FIRM_W, SQ_POOR_W, SQ_Z, SQ_MIN_FIRM, SQ_MIN_N = 2.0, 0.5, 2.4, 200, 1500
 TS_Z, TS_MIN_N = 2.4, 1500
 CW10_SERIES, CW10_Z, CW10_MIN_N, CW10_MIN_DAYS = ("KXCOPPER15M", "KXWTI15M"), 2.4, 100, 25
 F2_Z, F2_DIFF_Z, F2_MIN_KEPT, F2_MIN_DAYS = 2.4, 2.0, 1000, 20
+F4_Z, F4_DIFF_Z, F4_MIN_N, F4_MIN_DAYS = 2.4, 2.0, 1500, 20
 POOL18 = ["KXBNB15M", "KXBTC15M", "KXCOPPER15M", "KXDOGE15M", "KXETH15M", "KXEURUSD15M", "KXGBPUSD15M", "KXGOLD15M", "KXHYPE15M", "KXNATGAS15M", "KXNEAR15M",
           "KXPALLADIUM15M", "KXPLATINUM15M", "KXSILVER15M", "KXUSDJPY15M", "KXWTI15M", "KXXRP15M", "KXZEC15M"]
 
@@ -284,8 +285,27 @@ def feat2f(markets: list[tuple]):
             f"kept minus all by half {c(halves[0])} / {c(halves[1])}; kept loss rate {100 * sum(1 for e in kept if e['gross'] < 0) / len(kept):.1f}%; VERDICT: {v}")
 
 
+def feat4f(markets: list[tuple]):
+    """FEAT4-F: the frozen FEAT4 stopping-rule model (studies/feat4_model_2026-10-22.json, never refitted) read on the fresh days."""
+    from . import feat4
+    taken, plain = feat4.apply_frozen(markets)
+    days = len({e["day"] for e in taken})
+    if len(taken) < F4_MIN_N or days < F4_MIN_DAYS:
+        return f"FEAT4-F: NOT_ENOUGH_DATA (entries {len(taken)} on {days} days)"
+    km, _, kz = own(taken)
+    pm, _, _ = own(plain)
+    dm, dz, nd = diff(taken, plain)
+    o = sorted(taken, key=lambda e: e["close_ts"])
+    h = len(o) // 2
+    h1, h2 = st.mean(e["net"] for e in o[:h]), st.mean(e["net"] for e in o[h:])
+    v = "NOT_YET_FALSIFIED" if (km > 0 and kz >= F4_Z and dm > 0 and dz >= F4_DIFF_Z and h1 > 0 and h2 > 0) else "FALSIFIED"
+    c = lambda x: f"{x * 100:+.2f}c"
+    return (f"FEAT4-F: entries n={len(taken)} on {days} days at {c(km)} (z {kz:+.2f}); halves {c(h1)} / {c(h2)}; plain 360 n={len(plain)} at {c(pm)}; difference per day {c(dm)} "
+            f"(day clustered z {dz:+.2f}, {nd} days); mean seconds left {st.mean(e['left'] for e in taken):.0f}; VERDICT: {v}")
+
+
 def report(markets: list[tuple]) -> list[str]:
-    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets) + [sq1(markets), ts1(markets)] + cw10(markets) + [feat2f(markets)]
+    return fwd7(markets) + cut_claims(markets) + fwd10(markets) + ml1(markets) + [sq1(markets), ts1(markets)] + cw10(markets) + [feat2f(markets), feat4f(markets)]
 
 
 def main(argv: list[str]) -> None:
