@@ -5202,3 +5202,11 @@ L1 entries held to settlement, 1 contract each across the 18 series. `tib` = min
 **CW10, copper and WTI at 10 minutes (two tries).** On fresh candles, per series: net per contract at **600 seconds** (band 88c to 97c) above zero **and** above the same series' 360 second rule (own entries, per day), day-clustered difference z at least **2.4**; at least 100 entries at 600 seconds and 25 fresh days. **Disclosed:** their history is copper +1.88c at 10 minutes (+3.45c at 12) against -0.10c at 6; WTI +1.29c (+3.62c at 12) against +0.13c. **Prediction:** copper **+0.3c to +2.5c**, about **20%**; WTI **+0.3c to +2.0c**, about **20%**. A pass would be a proposal to the main session, with the owner's go, to add one-contract 10 minute probes on copper and WTI; nothing is built now.
 
 **Single reads.** Added to `scalper.fwd_reads` (the same `look` and `read` commands, and the same refusals) before any fresh result is seen; the history information is `python -m scalper.hist_sq_ts`. Nothing goes live.
+
+## Information: SQ1, TS1 and CW10 on the history (2026-10-22; `python -m scalper.hist_sq_ts`; in-sample by construction, decides nothing, not a try beyond the four registered)
+
+The fixed rules above, on TREE2's pool (69 days), using the same functions that will read the fresh days:
+- **SQ1:** 24,793 entries (1,865 firm). Weighted return on capital deployed **+51 basis points** against **+13** flat; weighted minus flat **+39 bp a day, z +6.46**. By construction (the weights come from this data).
+- **TS1:** two-stage entries n 20,774 at **+0.60c** (z +3.04) against plain 6 minute L1 n 24,793 at +0.12c; difference **+0.50c a day, z +3.59**. By construction.
+- **CW10 on the history, without the fresh-day filter (this is not the registered read):** copper 10 minutes n 425 at +1.88c against 6 minutes -0.10c, difference +2.36c a day (z +2.00); WTI 10 minutes n 520 at +1.29c against +0.13c, difference +0.68c a day (z +0.55). Both would fail the 2.4 bar even in-sample.
+- **Reading.** The sizing and timing rules are the firm-favourite lead in two forms, and the history shows they are large (about four times the return on capital, and +0.5c a contract) only because the cuts were read off it. Whether any of it survives is the forward read. Copper and WTI at 10 minutes are weaker than natural gas, XRP and Bitcoin were, so a probe there has a lower prior.
