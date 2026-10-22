@@ -37,8 +37,10 @@ Committed under `.claude/skills/`, so they load in every session, local or
 remote:
 
 - **`pre-ship`** — the static checks above, plus the backend suite.
-- **`health-check`** — the weekly strategy review, with thresholds decided
-  in advance so a losing week can't be argued into looking fine.
+- **`health-check`** — the weekly review of the Kalshi bot (rewritten Oct 22,
+  2026; it used to review the withdrawn equities strategy), with thresholds
+  decided in advance so a losing week can't be argued into looking fine. The
+  equities version stays in the `shwoop-server` repo.
 - **`ask-the-advisors`** — six-perspective board for project decisions.
 - **`unlazy`** — vendored from upstream (see its `PROVENANCE.md`). Writes
   acceptance gates before the work and re-measures them before reporting,
