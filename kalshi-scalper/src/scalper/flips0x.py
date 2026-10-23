@@ -92,6 +92,31 @@ def forward(now: float | None = None) -> str:
         btc_eth = [r for r in rows if r["series"] in ("KXBTC15M", "KXETH15M")]
         out = (f"FLIPS0-F: {v}; n={len(rows)} adjusted mean {100 * m:+.2f}c z {z:+.2f} raw PF {pf:.2f} halves {100 * h[0]:+.2f}c / {100 * h[1]:+.2f}c; "
                f"Bitcoin and Ethereum alone n={len(btc_eth)} adjusted {100 * st.mean(r['net'] for r in btc_eth):+.2f}c" if btc_eth else f"FLIPS0-F: {v}; n={len(rows)} adjusted mean {100 * m:+.2f}c z {z:+.2f}")
+    # the two better-defined smoothness variants found by SMOOTH20 (registered before the read): same data, adjusted the same way, bars as the FLIPS0-F claim with n >= 300
+    from . import smooth20 as S
+    left, band = D.ENTRIES["L1360"]
+    lines = [out]
+    for name in ("MAXPULL_LE_010", "EFF_LE_11"):
+        rule = dict(S.rules())[name]
+        vr = []
+        for s_ in FWD_SERIES:
+            mk = {tk: m for tk, m in I.load_btc(s_).items() if m["close"] >= FWD_START}
+            if mk:
+                vr += S.entries_for(mk, s_, rule, left, band)
+        if len(vr) < 300:
+            lines.append(f"{name}-F: NOT_ENOUGH_DATA (n={len(vr)}, need 300)")
+            continue
+        m, _, z = cluster_mean_z([(r["day"], r["net"]) for r in vr])
+        ds = sorted({r["day"] for r in vr})
+        mid = ds[len(ds) // 2]
+        h = [st.mean(r["net"] for r in vr if (r["day"] < mid) == first) for first in (True, False)]
+        w = sum(r["raw"] for r in vr if r["raw"] > 0)
+        l = -sum(r["raw"] for r in vr if r["raw"] < 0)
+        pf = w / l if l else float("inf")
+        ok = m >= FWD_C and z >= FWD_Z and h[0] > 0 and h[1] > 0 and pf >= FWD_PF
+        v = "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if (m < 0.003 or z < 1.0) else "NOT_ENOUGH_DATA")
+        lines.append(f"{name}-F: {v}; n={len(vr)} adjusted mean {100 * m:+.2f}c z {z:+.2f} raw PF {pf:.2f} halves {100 * h[0]:+.2f}c / {100 * h[1]:+.2f}c")
+    out = "\n".join(lines)
     FWD_RESULT.write_text(out + "\n")
     return out
 
