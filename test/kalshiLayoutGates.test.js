@@ -56,12 +56,10 @@ gates.Y5 = () => {
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
   const dataPage0 = html.slice(html.indexOf('id="page-data"'), html.indexOf('id="page-settings"'));
-  for (const id of ['kalChartPie', 'kalChartBars', 'dataLine', 'dataWeekly']) assert.ok(dataPage0.indexOf('id="' + id + '"') > -1, id + ' lives on the Data page');
+  for (const id of ['dataVerdict', 'dataLine', 'dataTrial']) assert.ok(dataPage0.indexOf('id="' + id + '"') > -1, id + ' lives on the Data page (the page is one screen since Oct 23, 2026)');
   assert.ok(!/data-card="performance"/.test(html) && !/id="kalChartRange"/.test(html) && !/id="kalChartLine"/.test(html), 'and the Performance card, its range choice and its duplicate line are gone from the Bot page');
   // Oct 21, 2026 cleanup: the stat tiles and tables left the account card (a tall column) and live in the Data page's "All the numbers" fold; the account card is the status and the controls.
   assert.ok(!/id="kalPerf"/.test(rail[1]), 'the stat tiles and tables are not in the rail');
-  const dataPage = html.slice(html.indexOf('id="page-data"'), html.indexOf('id="page-settings"'));
-  assert.ok(/<details class="kal-card data-details" id="dataDetails"[\s\S]*id="kalPerfWrapC"><div id="kalPerf"><\/div>/.test(dataPage), 'they sit in a fold on the Data page, closed until opened');
   const trades = /data-card="trades">([\s\S]*)$/.exec(main)[1];
   assert.ok(!/kalChart|kalPerf/.test(trades) && /id="kalBotClosed"/.test(trades), 'the trades card is the table only');
   const page = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
@@ -93,7 +91,7 @@ gates.Y7 = () => {
 gates.Y8 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiLineSvg', 'kalshiDonutHtml']);
+  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiLineSvg']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // Ticker to a time. An unfamiliar ticker or an impossible time is shown as it is, never invented.
@@ -130,19 +128,13 @@ gates.Y8 = () => {
   // Calm view (Oct 21, 2026): the line itself is one plain stroke and the per-trade points are invisible hover targets, so the only colour on the chart is the end label.
   assert.ok(/stroke="var\(--paper\)"/.test(svg) && !/<circle[^>]*fill="var\(--(gain|loss)\)"/.test(svg) && /<circle[^>]*fill="transparent"><title>/.test(svg), 'a plain line, no coloured dots, the points still carry their hover text');
   assert.ok(/fill="var\(--gain\)" font-size="15"[^>]*>\+\$0\.20/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is labelled in green');
-  // The pie: no orders says so; slices add to the whole; zero slices are left out.
-  assert.ok(/No orders yet/.test(f.kalshiDonutHtml({ won: 0, lost: 0, open: 0, noFill: 0, other: 0 }, esc)));
-  const pie = f.kalshiDonutHtml({ won: 8, lost: 1, open: 1, noFill: 4, other: 0 }, esc);
-  assert.ok(/>14<\/text>/.test(pie) && /Won<\/span><b>8<\/b>/.test(pie) && /57%/.test(pie) && (pie.match(/stroke-dasharray="/g) || []).length === 4, 'the total, each slice, its share');
-  const pie2 = f.kalshiDonutHtml({ won: 3, lost: 0, open: 0, noFill: 0, other: 0 }, esc);
-  assert.ok(!/Lost<\/span>/.test(pie2) && /100%/.test(pie2) && (pie2.match(/stroke-dasharray="/g) || []).length === 1, 'a slice of zero is not drawn');
 };
 
 // The performance tracker: a loss is settled and drawn like a win, even when the server never marked it, and the numbers are the plain arithmetic of the trades.
 gates.Y14 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiBarsSvg', 'kalshiPerfHtml', 'kalshiStatsText']);
+  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiStatsText']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // A filled order the server left unsettled: with the market's result known it is settled here, by the server's own rule.
@@ -168,19 +160,7 @@ gates.Y14 = () => {
   assert.deepStrictEqual(f.kalshiOutcomeCounts(res, 0), { won: 1, lost: 1, open: 1, noFill: 0, other: 0 }, 'the loss reaches the pie');
   const series = f.kalshiPnlSeries(res, 0);
   assert.deepStrictEqual(series.map((p) => p.pnl), [0.16, -1.86], 'and the line');
-  const bars = f.kalshiBarsSvg(series, esc, money);
-  assert.ok(/fill="var\(--muted\)" fill-opacity="0\.55"/.test(bars) && /fill="var\(--loss\)"/.test(bars) && !/fill="var\(--gain\)"/.test(bars) && /1 won, 1 lost/.test(bars), 'a muted bar for the win and a red bar for the loss (calm view: a loss is the only coloured bar, so it is as visible as ever)');
-  assert.ok(/after the first settled trade/.test(f.kalshiBarsSvg([], esc, money)));
-  // Hover details: every bar has a transparent column over the whole plot height (a win is about two pixels tall, so the bar itself is a hopeless target), carrying its date and time, its
-  // profit or loss and its market. The slow native <title> is gone, so the two tooltips can never show at once.
   assert.deepStrictEqual(series.map((p) => p.m), ['Gold', 'Bitcoin'], 'each point knows its market, by the same rule as the By market table');
-  const hitTags = bars.match(/<rect class="kal-hit"[^>]*>/g) || [];
-  assert.strictEqual(hitTags.length, series.length, 'one hover column per bar');
-  assert.ok(hitTags.every((t) => /y="0"/.test(t) && /height="78"/.test(t)), 'each column spans the whole plot, not just the bar');
-  assert.ok(!/<title>/.test(bars), 'no native title is left to compete with the tooltip');
-  assert.ok(/data-pnl="\+\$0\.16"/.test(hitTags[0]) && /data-up="1"/.test(hitTags[0]) && /data-mkt="Gold"/.test(hitTags[0]) && /data-when="[^"]*\d:\d\d [AP]M CT"/.test(hitTags[0]), 'the win column says what it made, when and where');
-  assert.ok(/data-pnl="-\$1\.86"/.test(hitTags[1]) && /data-up="0"/.test(hitTags[1]) && /data-mkt="Bitcoin"/.test(hitTags[1]), 'and the loss column says what it lost');
-  assert.ok(bars.indexOf('class="kal-hit"') > bars.lastIndexOf('rx="1.5"'), 'the columns are drawn after the bars, so they are on top and take the pointer');
   // The tracker's arithmetic.
   const t = (ts, pnl, series, price) => ({ ts, settled: true, fillCount: '1', settledPnl: pnl, series, price });
   const st = f.kalshiPerfStats([t(1, 0.08, 'KXBTC15M', 0.92), t(2, 0.08, 'KXGOLD15M', 0.91), t(3, -0.92, 'KXBTC15M', 0.92), t(4, -0.92, 'KXBTC15M', 0.94), t(5, 0.06, 'KXGOLD15M', 0.96), t(6, null, 'KXBTC15M', 0.9)], 0);
@@ -197,14 +177,9 @@ gates.Y14 = () => {
   assert.deepStrictEqual(st.byBand.map((r) => [r.label, r.n]), [['90c to 92c', 1], ['92c to 95c', 3], ['95c to 97c', 1]], 'by the price paid');
   assert.strictEqual(f.kalshiPerfStats([t(1, 0.08, 'KXBTC15M', 0.92)], 0).profitFactor, null, 'no losses: no profit factor, not an infinite one');
   assert.strictEqual(f.kalshiPerfStats([], 0).n, 0);
-  assert.ok(/fills in after the first settled trade/.test(f.kalshiPerfHtml(f.kalshiPerfStats([], 0), esc, money)));
-  const out = f.kalshiPerfHtml(st, esc, money);
-  assert.ok(/By price paid/.test(out) && /90c to 92c/.test(out) && !/Win rate|Profit factor|By market/.test(out), 'the fold shows the price bands and nothing the rest of the page already shows');
-  assert.ok(!/Deepest drawdown|Longest losing run|Streak now|Best \/ worst|Exit at/.test(out), 'the extra stats are not on the card');
   const text = f.kalshiStatsText(st, null, money);
   assert.ok(/Net: -\$1\.62/.test(text) && /Deepest drawdown:/.test(text) && /Streak now:/.test(text) && /Longest losing run:/.test(text) && /By market\n  Bitcoin: 3 trades/.test(text) && /By price paid\n  90c to 92c: 1 trades/.test(text) && /Exit at 25c\n  No position has fallen/.test(text), 'every stat is in the copied text, including the hidden ones');
   assert.strictEqual(f.kalshiStatsText(f.kalshiPerfStats([], 0), null, money), 'No settled trades yet.');
-  assert.ok(/id="kalChartBars"/.test(html) && /id="kalPerf"/.test(html), 'the page has the bar chart and the tracker (both on the Data page now)');
   // In this palette --ink is the page background and --paper is the text colour (inverted names), and --card does not exist: a select styled with them showed dark text on dark in dark mode.
   // This used to read one named rule (.kal-perf-head select), which no markup used, so it guarded nothing; it now reads every rule that touches a select.
   const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
@@ -547,7 +522,6 @@ gates.Y20 = () => {
 // Y26: the stats card shows the six tiles, By market and By price paid and nothing else; every other stat is copied with the Copy all stats button instead of being shown.
 {
   assert.ok(!/kalshiMoreOpen|kal-more|More stats/.test(html), 'the More stats fold and its open/closed state are gone');
-  assert.ok(/function kalshiPerfHtml\(st, esc, money\)/.test(html) && !/table\('By market'/.test(html), 'By price paid is the only table in the fold; By market has its own card');
   assert.ok(/id="kalStatsCopy"/.test(html) && /function kalshiStatsText\(st, x, money\)/.test(html), 'the Copy all stats button and its text builder exist');
 }
 
@@ -682,7 +656,6 @@ gates.Y43 = () => {
   assert.ok(m, 'a 700px block exists');
   assert.ok(!/data-card="performance"\]\{ display:none/.test(html), 'the Performance card is not hidden on a phone');
   assert.ok(!/\.kal-charts\b/.test(html), 'the old Performance charts grid is gone (the charts live on the Data page, whose grid stacks to one column on a narrow screen)');
-  assert.ok(/@media \(max-width:900px\)\{ \.data-grid\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'and the Data page grid stacks to one column');
   assert.ok(!/kalPerfWrapC|kal-perf\b/.test(m[1]) && !/data-card="account"/.test(m[1]), 'the stats card stays');
 };
 
@@ -707,24 +680,6 @@ gates.Y45 = () => {
 // NOT when a touch "leaves" (a touch has no hover, so hiding on leave would close the tip the instant the finger lifts), and the chart is only rebuilt when its markup changes, because
 // replacing it under the pointer closed the tip. Gain and loss text share the bars' tokens: one green, one red.
 gates.Y40 = () => {
-  const m = /(function kalshiTipPlace\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiTipPlace not found');
-  const place = new Function(m[1] + '; return kalshiTipPlace;')();
-  const at = (left, top, width = 10) => ({ left, width, top, bottom: top });
-  assert.deepStrictEqual(place(at(100, 200), 120, 60, 1000, 800), { left: 45, top: 130 }, 'centred on the column and just above the pointer');
-  assert.strictEqual(place(at(0, 200), 120, 60, 1000, 800).left, 8, 'kept off the left edge of the window');
-  assert.strictEqual(place(at(990, 200), 120, 60, 1000, 800).left, 872, 'kept off the right edge of the window');
-  assert.deepStrictEqual(place(at(500, 30), 120, 60, 1000, 800), { left: 445, top: 48 }, 'flipped below the pointer when there is no room above');
-  assert.ok(place(at(500, 790), 120, 60, 1000, 800).top + 60 <= 800 - 8 + 0.5, 'and never pushed off the bottom');
-  assert.ok(/kalshiTipWire\(document\.getElementById\('kalChartBars'\)\);/.test(html), 'the bars are wired');
-  const wire = /function kalshiTipWire\(box\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
-  assert.ok(/addEventListener\('pointermove'/.test(wire) && /addEventListener\('pointerdown'/.test(wire), 'a mouse hover and a tap both show it');
-  assert.ok(/pointerleave', function\(e\)\{ if\(e\.pointerType !== 'touch'\)/.test(wire), 'a mouse leaving hides it, a touch lifting does not');
-  assert.ok(/document\.addEventListener\('pointerdown'[\s\S]*kalshiTipHide/.test(wire) && /'scroll', kalshiTipHide, true/.test(wire), 'a tap elsewhere, a scroll or a resize hides it');
-  const show = /function kalshiTipShow\([^)]*\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
-  assert.ok(/\.textContent = /.test(show) && !/innerHTML/.test(show), 'filled as text, never as markup');
-  const setBars = /function kalshiSetBars\(el, html\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
-  assert.ok(/kalshiBarsMemo\[el\.id\] === html/.test(setBars) && /kalshiTipHide\(\)/.test(setBars), 'each chart is only rebuilt when its markup changes, and a rebuild hides the old tip');
-  assert.ok(/kalshiTipGlobal/.test(wire) && /if\(!hitOf\(e\)\)\{ kalshiTipHide\(\); \}/.test(wire), 'the page-wide listeners are attached once and test for a hit column, so a tap on the second chart is not dismissed by the first');
   assert.ok(/\.kal-pos\{ color:var\(--gain\); \}/.test(html) && /\.kal-neg\{ color:var\(--loss\); \}/.test(html), 'gain and loss text use the same tokens as the bars: one green, one red');
   assert.ok(!/#1f9d55|#d64545/i.test(html), 'and the two stray hard-coded copies of them are gone');
 };
