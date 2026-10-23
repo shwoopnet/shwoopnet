@@ -12,5 +12,6 @@ const copy = gate.replace(/<[^>]*>/g, ' ');
 assert.ok(!/\$\s?\d|\d\s?%|\bwin rate\b|\bprofit\b|\breturns?\b|\bperformance\b|Bitcoin|gold|Kalshi|contract[s]? per|stop at/i.test(copy.replace(/security or contract/g, '').replace(/Past results do not predict future results/g, '').replace(/offer, advice or a solicitation to buy or sell any security or contract/g, '')),
   'no figures, markets, venue or performance claim on a public page');
 assert.ok(/not a broker, investment adviser or fund/.test(gate) && /loss of all capital/.test(gate), 'the risk notice is there');
+assert.ok(/href="mailto:shwoopadvisor@gmail\.com"/.test(gate), 'the footer has the contact address the owner chose');
 assert.ok(!/<svg|<script|<img|href="http/.test(gate), 'no image, script or outside link in the front page');
 console.log('frontPageGates: ok');
