@@ -413,7 +413,13 @@ exports.kalshiShardSplit = onCall(
     ensureDefaultAdminApp();
     const apply = !!(request.data && request.data.action === "apply");
     const args = { fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), nowMs: Date.now() };
-    const out = apply ? await live.applyShardSplit(args) : await live.readShardSplit(args);
+    // Anything that throws (a signing problem, an unreadable secret) is reported as its own message instead of the page's blank "internal", so the owner can see WHY it did not work. No secret value is in these messages.
+    let out;
+    try {
+      out = apply ? await live.applyShardSplit(args) : await live.readShardSplit(args);
+    } catch (e) {
+      out = { ok: false, status: 0, reason: "The split call failed before Kalshi answered: " + String((e && e.message) || e).slice(0, 140) };
+    }
     if (apply) {
       try { await getFirestore().collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: Date.now(), kind: "shard split", detail: out.ok ? "target set: " + out.allocations.map((x) => "shard " + x.exchange_index + " " + x.percent + "%").join(", ") : String(out.reason || "failed").slice(0, 120) }); } catch (e) { /* the event is a note, never a reason to fail */ }
     }
