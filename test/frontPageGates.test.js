@@ -7,7 +7,8 @@ for (const id of ['authStatus', 'authForm', 'authEmail', 'authPassword', 'authPa
   assert.ok(new RegExp('id="' + id + '"').test(gate), 'the sign-in code still finds #' + id);
 }
 assert.ok(/<form id="authForm" hidden>/.test(gate), 'the form still starts hidden until the sign-in code shows it');
-const copy = gate.replace(/<[^>]*>/g, ' ');
+const noShots = gate.slice(0, gate.indexOf('<div class="front-shots">')) + gate.slice(gate.indexOf('</main>'));
+const copy = noShots.replace(/<[^>]*>/g, ' ');
 assert.ok(!/\$\s?\d|\d\s?%|\bwin rate\b|\bprofit\b|\breturns?\b|\bperformance\b|Bitcoin|gold|Kalshi|contract[s]? per|stop at/i.test(copy.replace(/security or contract/g, '').replace(/Past results do not predict future results/g, '').replace(/offer, advice or a solicitation to buy or sell any security or contract/g, '')),
   'no figures, markets, venue or performance claim on a public page');
 assert.ok(/not a broker, investment adviser or fund/.test(gate) && /loss of all capital/.test(gate), 'the risk notice is there');
@@ -16,7 +17,12 @@ assert.ok(!/<svg|<script|<img|href="http/.test(gate), 'no image, script or outsi
 // The front page (Oct 23, 2026): the slogan, a small sign-in and two window snapshots (the Account page and the Market Brief) with every figure blurred to bars. Consequence: the page has its OWN palette in two colours on the gate (the dashboard theme is untouched), three layouts picked in Settings, and every animation stops when motion is not wanted.
 assert.ok(/<h1 class="front-h1">Trade less\.<br><span>Live more\.<\/span><\/h1>/.test(gate) && /Systematic trading/.test(gate), 'the slogan and the Systematic trading label are on the front page');
 assert.ok(/Shwoop Financials builds systematic trading tools:<\/b> rules written in advance, run by software, reviewed by people\./.test(gate) && /Shwoop Financials, LLC/.test(gate), 'the line under the slogan and the LLC footer');
-assert.ok(/front-win-a/.test(gate) && /front-win-b/.test(gate) && /Market Brief/.test(gate) && !/\d/.test(gate.slice(gate.indexOf('<div class="front-shots">'), gate.indexOf('</main>')).replace(/style="[^"]*"/g, '').replace(/<[^>]*>/g, '')), 'the two snapshots are there and show no figures at all (every number is a blurred bar)');
+const shots = gate.slice(gate.indexOf('<div class="front-shots">'), gate.indexOf('</main>'));
+const shotText = shots.replace(/<[^>]*>/g, ' ');
+assert.ok(/front-win-a/.test(gate) && /front-win-b/.test(gate) && /Market Brief/.test(gate), 'the two snapshots are there');
+assert.ok((shots.match(/Sample data/g) || []).length === 2 && /Sample screens with made-up numbers, shown for illustration only\. They are not real account data or results\./.test(gate), 'each window says Sample data and a caption says the numbers are made up and not real results');
+assert.ok(!/%|\+\s?\$|win rate|profit|return|performance|Bitcoin|gold|Kalshi|contracts?\b/i.test(shotText.replace(/Reinvest pool|Stake per trade/g, '')), 'the sample screens show no gain, percentage, result or market name, only obviously dummy numbers');
+assert.ok(!/class="[^"]*\b(g|gain|loss)\b/.test(shots), 'and nothing in them is coloured as a gain or a loss');
 assert.ok(/id="loginLayoutChoice"/.test(html) && /id="loginColorChoice"/.test(html) && /data-login-layout/.test(html) && /data-login-color/.test(html), 'Settings picks the login layout and colour, and the page reads them before first paint');
 const front = (/\/\* The signed-out screen[\s\S]*?\.auth-title\{/.exec(html) || [''])[0].replace(/\/\*[\s\S]*?\*\//g, '');
 const palettes = [...front.matchAll(/\.auth-gate\{([^}]*)\}/g)].map((m) => m[1]);
