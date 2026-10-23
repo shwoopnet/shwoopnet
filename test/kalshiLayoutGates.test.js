@@ -555,7 +555,7 @@ gates.Y20 = () => {
 gates.Y31 = () => {
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
-  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M']);
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'every market the bot can hold has a price on the relay, so its open position can draw a chance and a chart');
   const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
