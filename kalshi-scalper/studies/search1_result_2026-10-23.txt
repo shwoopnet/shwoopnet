@@ -1,0 +1,4 @@
+SEARCH1: 14750 markets, 270 combinations, 225 with discovery n >= 300; discovery before 2026-09-27
+top 5 on discovery (information): 420s (0.97, 0.995) SL50 z +4.55 +1.45c n 379; 240s (0.97, 0.995) T120 z +4.08 +0.38c n 2289; 360s (0.97, 0.995) T120 z +3.70 +0.78c n 837; 300s (0.97, 0.995) T120 z +3.51 +0.53c n 1480; 420s (0.93, 0.97) T120 z +3.48 +1.30c n 1207
+CHOSEN 420s band (0.97, 0.995) exit SL50 (discovery z +4.55, +1.45c, n 379): FALSIFIED; confirmation n=361 mean +0.43c z +0.79 halves +0.90c / +0.03c PF 1.31
+combinations at or above the chosen discovery z: 1
