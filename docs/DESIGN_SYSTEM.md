@@ -59,12 +59,9 @@ Every number is Public Sans with tabular digits, never Titan One. Headings are n
 
 ## 4. Background
 
-Same ground on every page, signed in or out:
-- A vertical gradient from `--ink` to `--front-g1`.
-- One soft light pooled right of centre: `radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%)` with `--front-g2` white at 9%.
-- The faint scrolling grid (`.bg-grid`, 64px tiles, accent lines at 5% opacity, a slow linear drift) and the grain layer stay behind the content on the app pages. They are tinted by `--amber`, which is white, so they read as a quiet grey texture. They must never compete with a number.
-- The ghost wordmark behind the page is part of the logo and is left as it is.
-- The blurred blobs are removed or kept at the lowest opacity; no colour patches.
+The same ground on every page, signed in or out, and it is the front page's: a vertical gradient from `--ink` to `--front-g1` with one soft light pooled right of centre (`radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%)`, white at 9%), fixed behind the content.
+
+Nothing else. No grid, no grain, no drifting blobs, no ghost wordmark (the owner, Oct 23, 2026: "you still have the shwoop watermark, and some grid in there"; an earlier line here that kept the grid was wrong, the front page never had one). The logo itself stays in the top bar.
 
 ## 5. Layout
 
@@ -91,17 +88,17 @@ Same ground on every page, signed in or out:
 
 ## 8. Fixed things (not part of this redesign)
 
-- The logo: SHWOOP in Titan One with its bubble shadow and the spaced FINANCIALS line, and the ghost wordmark. Leave exactly as is.
+- The logo: SHWOOP in Titan One with its bubble shadow and the spaced FINANCIALS line, in the top bar. Leave exactly as is. (The ghost wordmark behind the page was removed Oct 23, 2026.)
 - Gain and loss colours, the live-trading red banner, the Privacy mask, `kalshiMoney` on every dollar figure.
 - Gates stay: `blankSlateGates`, `removedFeaturesStayRemovedGates`, `mobileGates`, `motionHonestyGates`, `bubblePopGates`, `frontPageGates`. A gate that pins an old look is updated on purpose, in the same change.
 
 ## 9. Migration order
 
 1. Foundation (done): one black and white palette, the sign-in page.
-2. Market Brief (started, branch `claude/brief-redesign`): window grid.
-3. Navigation: the window rail on desktop, the bottom bar on a phone.
+2. Market Brief: the first window-grid try was removed at the owner's request; new concepts are being chosen.
+3. Navigation: done, the window rail (the owner: fine for now).
 4. Bot page, Data page, Settings.
 5. Shared parts: buttons, inputs, menus, toasts, tables, charts (white lines, gain and loss only for verdicts).
-6. Background: grid and gradient on every page, as in section 4.
+6. Background: the gradient ground on every page, done Oct 23, 2026 (grid, grain, blobs and ghost wordmark removed).
 
 Each step ships as its own pull request, verified with the frontend check, the security scan, the whole `test/` suite and an offline render of the pages it touches.

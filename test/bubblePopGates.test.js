@@ -87,7 +87,7 @@ gates.P5 = () => {
 // Limit graphics is the old reduce-motion switch under a wider name: one stored setting, and it also removes the glow, the grid and the ghost wordmark.
 gates.P6 = () => {
   assert.ok(/<div class="settings-row-title">Limit graphics<\/div>/.test(html) && !/<div class="settings-row-title">Reduce motion<\/div>/.test(html), 'the Settings row says Limit graphics');
-  for (const sel of ['.bg-ghost', '.bg-grid', '.bg-ambient::before']) assert.ok(css.includes('[data-reduce-motion="true"] ' + sel), sel + ' is dropped when graphics are limited');
+  assert.ok(!/bg-ghost|bg-grid|bg-ambient|bg-grain/.test(html.replace(/\/\*[\s\S]*?\*\//g, '')), 'the ghost wordmark, the grid, the grain and the blobs are gone from the ground (the owner, Oct 23, 2026); the ground is the front page gradient');
 };
 
 // P7: the wordmark never changes colour under the pointer (the owner, Oct 21, 2026). It used to turn --amber, which is black in Mono Ink, so the white letters went dark. It hops instead, and the hop stops under reduce motion.
