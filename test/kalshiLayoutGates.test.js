@@ -302,15 +302,21 @@ gates.Y11c = () => {
   const m = /(function kalshiSetPresent\(on\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiSetPresent not found');
   const attrs = {}; const doc = { documentElement: { setAttribute: (k, v) => { attrs[k] = v; }, removeAttribute: (k) => { delete attrs[k]; } } };
   const mk = (choice) => new Function('document', 'var kalshiMasked = false; var kalshiPrivacyChoice = ' + JSON.stringify(choice) + ';' + m[1] + '; return { set: kalshiSetPresent, masked: function(){ return kalshiMasked; } };')(doc);
-  let set = mk({ money: true, tools: true, lists: true });
-  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on', 'data-p-tools': 'on', 'data-p-lists': 'on' }, 'on sets the page attributes'); assert.strictEqual(set.masked(), true, 'and masks the amounts');
+  const all = { balance: true, today: true, trades: true, positions: true, data: true, tools: true };
+  let set = mk(all);
+  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on', 'data-p-tools': 'on' }, 'on sets the page attributes'); assert.strictEqual(set.masked(), true);
   set.set(false); assert.deepStrictEqual(attrs, {}, 'off removes them, back to the full page'); assert.strictEqual(set.masked(), false);
-  set = mk({ money: false, tools: true, lists: false });
-  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on', 'data-p-tools': 'on' }, 'each sub option works on its own'); assert.strictEqual(set.masked(), false, 'amounts stay readable when that option is off'); set.set(false);
+  set = mk(Object.assign({}, all, { tools: false }));
+  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on' }, 'the Tools menu choice works on its own'); set.set(false);
+  // Which figures are masked is decided per kind by kalshiMoney: each Settings choice covers its own figures and nothing else.
+  const mm = new Function('var kalshiMasked = false; var kalshiPrivacyChoice = { balance: true, today: false, trades: true, positions: true, data: true };' + [/(function kalshiMoneyRaw\([^)]*\)\{[\s\S]*?\n  \})\n/, /(function kalshiMoney\([^)]*\)\{[\s\S]*?\n  \})\n/].map((re) => re.exec(html)[1]).join('\n') + '; return { money: kalshiMoney, mask: function(v){ kalshiMasked = v; } };')();
+  mm.mask(true);
+  assert.deepStrictEqual([mm.money(5, 'balance'), mm.money(-2, 'trades'), mm.money(7, 'today'), mm.money(3)], ['****', '-****', '$7.00', '****'], 'a choice that is off leaves its figures readable; a figure with no kind is always masked');
+  mm.mask(false); assert.strictEqual(mm.money(5, 'balance'), '$5.00', 'nothing is masked with the view off');
   assert.ok(!/syncUserSetting\('(kalPresent|privacy)/.test(html), 'the view is never saved to the account');
   assert.ok(!/localStorage[^;]*privacyOpts[^;]*present|data-present[^;]*localStorage/.test(html), 'the on/off state is not saved; only the three choices are, in this browser');
   assert.ok(!/id="kalPresent"/.test(html), 'the Layout menu no longer carries a privacy checkbox');
-  for(const id of ['privacyToggle', 'privacyMoney', 'privacyTools', 'privacyLists']){ assert.ok(new RegExp('id="' + id + '" role="switch"').test(html), id + ' is a switch in Settings'); }
+  for(const id of ['privacyToggle', 'privacyBalance', 'privacyToday', 'privacyTrades', 'privacyPositions', 'privacyData', 'privacyTools']){ assert.ok(new RegExp('id="' + id + '" role="switch"').test(html), id + ' is a switch in Settings'); }
   assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Privacy<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header called Privacy, outside the Tools menu so the privacy view cannot hide it; there is no Data button (the sidebar has it)');
   assert.ok(!/id="kalDataBtn"/.test(html) && !/<div class="trades-title">Bot<\/div>/.test(html), 'and no big Bot title next to the updated time');
   assert.ok(!/html\[data-present="on"\] #kalPresentBtn/.test(html), 'and nothing hides the button that turns it off');
@@ -420,7 +426,7 @@ gates.Y18 = () => {
   assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
   assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
   assert.ok(!/tile\('Per trade'/.test(html), 'no tile reuses the stake row name (the expectancy tile itself left with the duplicate tiles in the fold, Oct 23, 2026; Average trade is on the Data page)');
-  assert.ok(/kalshiMoney\(0\.12 \* base\)/.test(html), 'the status line quotes the 12% stop (through the money formatter, so presentation view masks it)');
+  assert.ok(/kalshiMoney\(0\.12 \* base, 'balance'\)/.test(html), 'the status line quotes the 12% stop (through the money formatter, so presentation view masks it)');
 };
 
 // Y21: manual trades are hidden from the Recent trades card by default, with a small dropdown to bring them back.
