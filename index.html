@@ -160,7 +160,7 @@
   /* Desktop: a small group of four icons in the top right, beside the clock (the owner, Oct 23, 2026: "F was a good idea", then "move it to the top right next to the clock", then "#2 there is nice", the ghost look: no box, dimmed icons, a white tile on the open page). It is fixed so it stays put while the page scrolls, takes no width from the pages, and the page name shows as a tooltip on hover or keyboard focus. On a phone it is the bottom bar below. */
   .side-nav-glyph{ display:none; }
   @media (min-width: 901px){
-    .side-nav{ top:22px; right:18px; left:auto; width:auto; flex-direction:row; align-items:center; gap:4px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; overflow:visible; max-height:none; z-index:160; }
+    .side-nav{ position:relative; top:auto; right:auto; left:auto; width:auto; flex-direction:row; align-items:center; gap:4px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; overflow:visible; max-height:none; z-index:160; }
     .side-nav-item:not(.current){ opacity:.7; }
     .side-nav-item.current{ box-shadow:0 10px 24px -8px rgba(0,0,0,.9); }
     .side-nav-item{ width:36px; height:36px; padding:0; justify-content:center; border-radius:9px; }
@@ -169,7 +169,8 @@
     .side-nav-label{ position:absolute; right:0; top:calc(100% + 10px); background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease; }
     .side-nav-item:hover .side-nav-label, .side-nav-item:focus-visible .side-nav-label{ opacity:1; }
     .side-nav-divider{ width:1px; height:auto; align-self:stretch; margin:6px 2px; }
-    .topbar-right{ margin-right:176px; }
+    .topbar-right{ gap:18px; }
+    .clock{ padding-right:18px; border-right:1px solid var(--border); }
   }
   @media (max-width: 900px){
     .side-nav{
@@ -217,8 +218,11 @@
   .brand-fin{ font-family:'Public Sans', sans-serif; font-weight:800; font-size:11px; letter-spacing:.5em; text-transform:uppercase; color:var(--paper); margin-top:10px; padding-left:2px; line-height:1; }
 
   .topbar-right{ display:flex; align-items:center; gap:18px; }
-  .clock{ color: var(--muted); font-size: 13px; text-align:right; }
-  .clock .time{ color: var(--paper); font-size: 15px; }
+  /* The clock (the owner, Oct 23, 2026: "a weird text and a weird placement"): hours and minutes in the page font, the seconds quieter beside them, and a small line under it with the day and the time zone. On a desktop it sits right beside the page icons, with a hairline between. */
+  .clock{ color: var(--muted); text-align:right; line-height:1.2; font-variant-numeric:tabular-nums; }
+  .clock .time{ color: var(--paper); font-size:16px; font-weight:700; letter-spacing:.01em; }
+  .clock .clock-sec{ color:var(--muted); font-size:13px; font-weight:600; margin-left:2px; }
+  .clock .clock-sub{ font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--muted); margin-top:2px; white-space:nowrap; }
 
   .settings-page{ display:flex; flex-direction:column; gap:28px; margin-top:24px; }
   .settings-section-title{
@@ -243,8 +247,8 @@
      other [hidden] override already present elsewhere in this file. */
   .settings-row[hidden]{ display:none; }
   .settings-row:last-of-type{ border-bottom:none; }
-  .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
-  .settings-row-desc{ font-size:11.5px; color: var(--muted); }
+  .settings-row-title{ font-size:14px; margin-bottom:4px; }
+  .settings-row-desc{ font-size:12px; color: var(--muted); }
   .settings-choice-group{ display:flex; gap:4px; }
 
   .settings-toggle-switch{
@@ -284,7 +288,7 @@
   .mood-hd b{ font-variant-numeric:tabular-nums; }
   .mood-track{ position:relative; height:8px; border-radius:4px; background:rgba(255,255,255,.1); margin:10px 0 6px; }
   .mood-track i{ position:absolute; top:-4px; width:3px; height:16px; margin-left:-1px; border-radius:2px; background:var(--paper); }
-  .mood-ends{ display:flex; justify-content:space-between; color:var(--muted); font-size:10.5px; }
+  .mood-ends{ display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
   .mood-kv{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); font-size:13px; }
   .mood-kv > span:first-child{ color:var(--muted); }
   .mood-up{ color:var(--gain); } .mood-down{ color:var(--loss); }
@@ -302,7 +306,7 @@
   .brief-chart-chg{ font-size:12px; }
   .brief-chart-d{ font:600 12px 'Public Sans', sans-serif; margin-left:6px; } .brief-chart-d.up{ color:var(--gain); } .brief-chart-d.down{ color:var(--loss); }
   .brief-chart-ft{ display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
-  .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:10px; }
+  .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:11px; }
   .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss); }
   .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; }
   .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
@@ -310,7 +314,7 @@
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
 
   /* The market strip (every page) and the Brief's "as of" line. No animation: a still row that scrolls sideways on a narrow screen. */
-  .tape{ display:flex; align-items:center; white-space:nowrap; flex:1; min-width:0; margin:0 28px; padding:0; border:0; background:none; font-size:12.5px; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  .tape{ display:flex; align-items:center; white-space:nowrap; flex:1; min-width:0; margin:0 28px; padding:0; border:0; background:none; font-size:13px; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
   /* The strip scrolls again like it used to (the owner, Oct 23, 2026: "make it scroll like it used to"): two copies of the row side by side slide left one copy's width and start over, so there is never a gap. It keeps scrolling under the pointer
      and stops under the reduce-motion setting and the Settings switch, where it becomes a row you can scroll by hand. */
   .tape-view{ flex:1; min-width:0; overflow:hidden; }
@@ -320,7 +324,7 @@
   @keyframes tapeScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   .tape-item{ display:inline-flex; gap:6px; align-items:baseline; }
   .tape-name{ color:var(--muted); }
-  .tape-px{ font-weight:600; }
+  .tape-px, .tape-chg{ font-weight:600; }
   .tape-chg.up{ color:var(--gain); }
   .tape-chg.down{ color:var(--loss); }
   .tape-asof, .brief-asof{ color:var(--muted); font-size:11px; }
@@ -341,8 +345,8 @@
   .news-item + .news-item{ border-top:1px solid var(--border); }
   .news-item:hover .news-item-headline{ color: var(--amber); }
   .news-item{ transition: transform .15s ease; } .news-item:hover{ transform: translateX(3px); }
-  .news-item-headline{ font-size:12.5px; line-height:1.5; }
-  .news-item-meta{ font-size:10.5px; color: var(--muted); }
+  .news-item-headline{ font-size:13px; line-height:1.5; }
+  .news-item-meta{ font-size:11px; color: var(--muted); }
 
   /* ---------- Trade Overview page ---------- */
   .trades-header{
@@ -350,12 +354,12 @@
     padding: 36px 0 20px 0; flex-wrap:wrap; gap:12px;
   }
   .trades-title{ font-family:'Public Sans', sans-serif; font-size:28px; font-weight:800; letter-spacing:-.01em; line-height:1.1; }
-  .trades-sub{ color:var(--muted); font-size:12.5px; margin-top:4px; }
+  .trades-sub{ color:var(--muted); font-size:13px; margin-top:4px; }
   .trades-header-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .kal-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:20px; box-shadow:var(--card-shadow); }
   .kal-card-title{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; letter-spacing:0; margin-bottom:14px; }
   /* Books: the market and its price on one line, the figures under it. */
-  .kal-status{ color:var(--muted); font-size:12.5px; }
+  .kal-status{ color:var(--muted); font-size:13px; }
   .kal-name{ font-weight:600; }
   .kal-empty{ color:var(--muted); font-size:13px; }
   .data-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-top:20px; }
@@ -366,10 +370,10 @@
   .data-grid > [data-card="data-markets"], .data-grid > [data-card="data-tests"], .data-grid > [data-card="data-bars"]{ grid-column:1 / -1; }
   .data-sub{ padding:14px 22px 6px; border-top:1px solid var(--border); margin-top:6px; color:var(--muted); font:700 11px 'Public Sans', sans-serif; letter-spacing:.2em; text-transform:uppercase; }
   .data-details > summary{ cursor:pointer; list-style:none; margin:0; } .data-details[open] > summary{ margin-bottom:6px; } .data-details .kal-perf{ padding:6px 0 0 0; }
-  .data-row{ display:grid; grid-template-columns:1.3fr repeat(5,minmax(0,1fr)); gap:6px; padding:9px 18px; font-size:12.5px; border-top:1px solid var(--border); align-items:center; }
+  .data-row{ display:grid; grid-template-columns:1.3fr repeat(5,minmax(0,1fr)); gap:6px; padding:9px 18px; font-size:13px; border-top:1px solid var(--border); align-items:center; }
   .data-row.data-head{ color:var(--muted); font-size:11px; border-top:0; }
   .data-row.data-row7{ grid-template-columns:1.3fr repeat(6,minmax(0,1fr)); }
-  .data-kv-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 18px; font-size:12.5px; border-top:1px solid var(--border); align-items:baseline; }
+  .data-kv-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 18px; font-size:13px; border-top:1px solid var(--border); align-items:baseline; }
   .data-kv-row b{ font-weight:600; font-variant-numeric:tabular-nums; text-align:right; }
   .data-row span:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
   /* On a phone the wide tables scroll inside their own card instead of squeezing seven columns together. */
@@ -408,8 +412,8 @@
   .kal-botmenu-body{ min-width:min(320px,86vw); right:0; top:30px; }
   .kal-rail .kal-botmenu-body{ left:0; right:0; top:100%; min-width:0; margin-top:6px; z-index:30; box-shadow:0 14px 34px rgba(0,0,0,.28); }
   .kal-botmenu-body .kal-actions{ margin:4px 0 0 0; }
-  .kal-card-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 22px 12px 22px; }
-  .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:12.5px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
+  .kal-card-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding:18px 22px 12px 22px; }
+  .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:13px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
   .kal-link:hover{ text-decoration:underline; } .kal-link:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
   .kal-hold{ padding:12px 0; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
   .kal-hold:first-child{ border-top:0; padding-top:0; }
@@ -432,7 +436,7 @@
   .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss); border-color:var(--loss); }
-  .kal-console .kal-lbl{ color:var(--muted); font-size:11.5px; }
+  .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
   .kal-rail .kal-card{ padding:16px 20px; }
   .kal-rail .kal-note{ margin-top:8px; }
   .kal-rail .kal-actions{ margin:10px 0 2px 0; }
@@ -441,8 +445,8 @@
   .kal-rows{ display:flex; flex-direction:column; gap:8px; padding-top:10px; border-top:1px solid var(--border); font-size:13px; }
   .kal-rows > div{ display:flex; justify-content:space-between; gap:12px; } .kal-rows .kal-k{ color:var(--muted); } .kal-rows b{ font-weight:600; }
   /* Trades as a table. */
-  .kal-tr{ display:grid; grid-template-columns:130px 150px minmax(0,1fr) 150px 70px; gap:12px; padding:11px 22px; border-top:1px solid var(--border); align-items:center; font-size:13.5px; }
-  .kal-tr-head{ background:var(--panel-raised); color:var(--muted); font-size:11.5px; font-weight:600; padding-top:8px; padding-bottom:8px; border-top:0; }
+  .kal-tr{ display:grid; grid-template-columns:130px 150px minmax(0,1fr) 150px 70px; gap:12px; padding:11px 22px; border-top:1px solid var(--border); align-items:center; font-size:14px; }
+  .kal-tr-head{ background:var(--panel-raised); color:var(--muted); font-size:12px; font-weight:600; padding-top:8px; padding-bottom:8px; border-top:0; }
   /* The dollar result and its percentage are the same fact (the owner, Oct 23, 2026), so they share one size, weight and colour; only a quiet dot separates them. */
   .kal-tr-sep{ margin:0 7px; opacity:.5; font-weight:400; }
   .kal-tr-t, .kal-tr-s{ color:var(--muted); } .kal-tr-p, .kal-tr-s{ text-align:right; } .kal-tr-p{ font-family:'Public Sans', sans-serif; font-weight:700; }
@@ -450,7 +454,7 @@
   .kal-perf{ padding:14px 22px 20px 22px; }
   .kal-rail .kal-perf{ padding:12px 0 0 0; }
   .kal-rail .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-  .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:12.5px; } .kal-rail .kal-tile .kal-lbl{ font-size:10.5px; }
+  .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:13px; } .kal-rail .kal-tile .kal-lbl{ font-size:11px; }
   .kal-tools-body{ min-width:min(420px,88vw); max-height:70vh; overflow:auto; }
   .kal-tools-body .kal-actions{ margin:4px 0 2px; }
   .kal-tools-body .kal-note:empty, .kal-botmenu-body .kal-note:empty{ display:none; }
@@ -467,8 +471,8 @@
   .kal-perf-t > div{ display:flex; justify-content:space-between; gap:10px; border-top:1px solid var(--border); padding-top:6px; }
   .kal-perf-t > div span:nth-child(2){ color:var(--muted); flex:1; text-align:right; }
   .kal-perf-t > div b{ white-space:nowrap; }
-  .kal-donut{ display:flex; align-items:center; gap:18px; }
-  .kal-donut-leg{ display:flex; flex-direction:column; gap:6px; font-size:13px; min-width:0; }
+  .kal-donut{ display:flex; align-items:center; justify-content:center; gap:28px; min-height:220px; }
+  .kal-donut-leg{ display:flex; flex-direction:column; gap:8px; font-size:14px; min-width:0; }
   .kal-leg{ display:flex; align-items:center; gap:8px; } .kal-leg b{ font-weight:700; } .kal-leg-dot{ width:10px; height:10px; border-radius:50%; flex:none; }
   /* Books as two tiles. */
   /* Depth: a market row rises a little under the pointer, and shows the size sitting at the best bid and ask (contracts) with a bar for how the two compare. */
@@ -497,7 +501,7 @@
     .kal-console{ grid-template-columns:minmax(0,1fr); }
       .kal-tr{ grid-template-columns:minmax(0,1fr) auto; row-gap:2px; padding:10px 18px; }
     .kal-tr-head{ display:none; }
-    .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:11.5px; }
+    .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:12px; }
     .kal-tr > .kal-tr-f{ grid-column:1; font-weight:600; }
     .kal-tr > .kal-tr-s{ text-align:left; }
     .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
@@ -508,7 +512,7 @@
   @container (max-width:640px){
     .kal-tr{ grid-template-columns:minmax(0,1fr) auto; row-gap:2px; padding:10px 18px; }
     .kal-tr-head{ display:none; }
-    .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:11.5px; }
+    .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:12px; }
     .kal-tr > .kal-tr-f{ grid-column:1; font-weight:600; }
     .kal-tr > .kal-tr-s{ text-align:left; }
     .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
@@ -541,7 +545,7 @@
   .kal-tip-pnl{ font-size:15px; font-weight:700; }
   .tf-btn{
     background: transparent; border: 1px solid var(--border); color: var(--muted);
-    padding: 6px 12px; font-size: 11.5px; border-radius: 4px; cursor:pointer; transition: all .15s ease;
+    padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor:pointer; transition: all .15s ease;
   }
   .tf-btn:hover{ border-color: var(--amber-dim); color: var(--paper); }
   .tf-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
@@ -568,7 +572,7 @@
   .modal-error.show{ display:block; }
   .modal-btn-submit{
     background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
-    padding:12px 18px; border-radius:5px; font-size:12.5px; font-weight:600; cursor:pointer;
+    padding:12px 18px; border-radius:5px; font-size:13px; font-weight:600; cursor:pointer;
     font-family:'Public Sans', sans-serif;
   }
   .modal-btn-submit:hover{ background: var(--amber); color: var(--amber-contrast); }
@@ -613,11 +617,11 @@
   .win-num{ margin:10px 0 6px; font:800 30px/1.1 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
   .win-row b{ font:700 12.5px 'Public Sans', sans-serif; color:var(--paper); }
   .win-row span{ font-size:12px; color:var(--muted); }
-  .win-tile small{ font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  .win-tile small{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
   .win-tile b{ font:800 16px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
   .win-head{ font:800 15px 'Public Sans', sans-serif; color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .win-sub{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .front-sample{ position:absolute; left:0; bottom:12px; margin:0; max-width:420px; font-size:11.5px; color:var(--muted); z-index:5; }
+  .front-sample{ position:absolute; left:0; bottom:12px; margin:0; max-width:420px; font-size:12px; color:var(--muted); z-index:5; }
   .win-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-top:1px solid var(--border); }
   .win-tiles, .win-ix{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .win-ix{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
@@ -630,7 +634,7 @@
   .front-win-a{ right:15%; top:200px; width:min(480px, 44%); transform:rotate(-2deg); z-index:3; }
   @keyframes frontUp{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; } }
   @keyframes frontFloat{ 0%, 100%{ transform:translateY(0); } 50%{ transform:translateY(-9px); } }
-  .front-note{ margin:0 0 8px; color:var(--muted); font-size:11.5px; line-height:1.55; max-width:860px; position:relative; z-index:5; }
+  .front-note{ margin:0 0 8px; color:var(--muted); font-size:12px; line-height:1.55; max-width:860px; position:relative; z-index:5; }
   .front-note b{ color:var(--paper); }
   .front-foot{ color:var(--muted); font-size:12px; display:flex; justify-content:space-between; gap:12px 24px; flex-wrap:wrap; position:relative; z-index:5; }
   .front-foot a{ color:var(--paper); text-decoration:underline; text-underline-offset:3px; }
@@ -642,7 +646,7 @@
     .front-sample{ display:none; }
   }
   .auth-title{ font-family:'Public Sans', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
-  .auth-sub{ font-size:12.5px; color: var(--muted); margin:-8px 0 14px; }
+  .auth-sub{ font-size:13px; color: var(--muted); margin:-8px 0 14px; }
   .auth-status{ font-size:12px; color: var(--muted); margin-bottom:14px; }
   .auth-gate form{ text-align:left; }
   .auth-submit{ width:100%; margin-top:4px; }
@@ -654,7 +658,7 @@
   .auth-forgot:hover{ color: var(--paper); }
   .auth-remember-row{
     display:flex; align-items:center; gap:9px; margin:2px 0 12px 0;
-    font-size:12.5px; color: var(--muted); cursor:pointer;
+    font-size:13px; color: var(--muted); cursor:pointer;
     /* Same hitslop technique .auth-switch button already uses -- the row
        reads visually compact, but the real clickable/tappable area is
        taller than the text alone, comfortable on a touchscreen. */
@@ -663,7 +667,7 @@
   .auth-remember-row:hover{ color: var(--paper); }
   /* The sign-in on the front page is one compact row (labels stay for screen readers, placeholders show). */
   .front-signin .auth-title, .front-signin .modal-field label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
-  .front-signin .auth-status{ margin:0 0 6px; padding:0 2px; font-size:11.5px; }
+  .front-signin .auth-status{ margin:0 0 6px; padding:0 2px; font-size:12px; }
   .front-signin form{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; gap:8px; align-items:start; }
   .front-signin .modal-field{ margin:0; }
   .front-signin .modal-field input{ height:40px; padding:0 10px; border-radius:calc(var(--radius) - 2px); background:var(--panel-raised); }
@@ -671,10 +675,10 @@
   .front-signin .password-toggle{ width:36px; height:36px; }
   .front-signin .auth-submit{ grid-column:3; grid-row:1; width:auto; margin:0; height:40px; padding:0 18px; border-radius:calc(var(--radius) - 2px); background:var(--amber); border:1px solid var(--amber); color:var(--amber-contrast); font-weight:800; }
   .front-signin .auth-submit:hover{ filter:brightness(1.1); }
-  .front-signin .auth-remember-row{ grid-column:1 / -1; margin:0; padding:6px 2px; min-height:40px; font-size:11.5px; }
+  .front-signin .auth-remember-row{ grid-column:1 / -1; margin:0; padding:6px 2px; min-height:40px; font-size:12px; }
   .front-signin .modal-error{ grid-column:1 / -1; margin:0; }
   /* Remember me and Forgot password share one row: the button sits on the right of the same 40px line, so the box has no empty strip under it. */
-  .front-signin .auth-forgot{ position:absolute; right:12px; bottom:9px; margin:0; padding:0 4px; font-size:11.5px; height:40px; display:flex; align-items:center; }
+  .front-signin .auth-forgot{ position:absolute; right:12px; bottom:9px; margin:0; padding:0 4px; font-size:12px; height:40px; display:flex; align-items:center; }
   @media (max-width: 520px){
     .front-signin form{ grid-template-columns:minmax(0,1fr); }
     .front-signin .auth-submit{ grid-column:1; grid-row:auto; width:100%; }
@@ -687,7 +691,7 @@
     text-align:center; color: var(--muted); font-size: 11px; line-height:1.6;
     margin: 10px 28px 24px 28px; padding: 18px 0 0 0; border-top: 1px solid var(--border);
   }
-  .site-footer .footer-copyright{ color: var(--paper); font-size:11.5px; font-weight:600; margin-bottom:6px; }
+  .site-footer .footer-copyright{ color: var(--paper); font-size:12px; font-weight:600; margin-bottom:6px; }
   .site-footer p{ margin:0 0 6px 0; max-width:680px; margin-left:auto; margin-right:auto; }
   .site-footer p:last-child{ margin-bottom:0; }
   .site-footer details{ max-width:680px; margin:8px auto 0 auto; text-align:left; }
@@ -1103,26 +1107,27 @@
 
     <div class="topbar-right">
       <div class="clock">
-        <div class="time mono" id="clockTime">--:--:--</div>
+        <div class="time mono"><span id="clockTime">--:--</span><span class="clock-sec" id="clockSec"></span></div>
+        <div class="clock-sub" id="clockSub"></div>
       </div>
+      <nav class="side-nav" id="sideNav" aria-label="Main navigation">
+        <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span class="side-nav-label">Brief</span>
+        </button>
+        <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span class="side-nav-label">Bot</span>
+        </button>
+        <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span class="side-nav-label">Data</span>
+        </button>
+        <div class="side-nav-divider"></div>
+        <button class="side-nav-item nav-item" data-page="settings" title="Settings">
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span class="side-nav-label">Settings</span>
+        </button>
+      </nav>
     </div>
   </div>
 
-  <nav class="side-nav" id="sideNav" aria-label="Main navigation">
-    <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span class="side-nav-label">Brief</span>
-    </button>
-    <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span class="side-nav-label">Bot</span>
-    </button>
-    <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span class="side-nav-label">Data</span>
-    </button>
-    <div class="side-nav-divider"></div>
-    <button class="side-nav-item nav-item" data-page="settings" title="Settings">
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span class="side-nav-label">Settings</span>
-    </button>
-  </nav>
 
 
 
@@ -1576,15 +1581,19 @@
     var hours24 = now.getHours();
     var m = now.getMinutes().toString().padStart(2,'0');
     var s = now.getSeconds().toString().padStart(2,'0');
-    var timeStr;
+    var hm, sec;
     if(clockFormatPref === '12'){
       var suffix = hours24 >= 12 ? 'PM' : 'AM';
       var h12 = hours24 % 12; if(h12 === 0){ h12 = 12; }
-      timeStr = h12 + ':' + m + ':' + s + ' ' + suffix;
+      hm = h12 + ':' + m; sec = ':' + s + ' ' + suffix;
     } else {
-      timeStr = hours24.toString().padStart(2,'0') + ':' + m + ':' + s;
+      hm = hours24.toString().padStart(2,'0') + ':' + m; sec = ':' + s;
     }
-    document.getElementById('clockTime').textContent = timeStr + ' ' + getTzAbbrev(now);
+    document.getElementById('clockTime').textContent = hm;
+    document.getElementById('clockSec').textContent = sec;
+    var day = '';
+    try{ day = now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }); }catch(e){}
+    document.getElementById('clockSub').textContent = (day ? day + ' \u00B7 ' : '') + getTzAbbrev(now);
   }
   setInterval(updateClock, 1000);
 
@@ -1976,8 +1985,8 @@
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
       '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
-      '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15">' + esc(fmt(last.cum)) + '</text>' +
-      '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="11">' + points.length + ' settled trades, oldest to newest</text></svg>';
+      '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15" data-px="15">' + esc(fmt(last.cum)) + '</text>' +
+      '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="12" data-px="12">' + points.length + ' settled trades, oldest to newest</text></svg>';
   }
 
   // Pie of how the orders ended. Slices that are zero are left out; no orders at all says so.
@@ -2081,7 +2090,7 @@
     var wins = shown.filter(function(p){ return p.pnl > 0; }).length, losses = shown.filter(function(p){ return p.pnl < 0; }).length;
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Profit or loss of each of the last ' + shown.length + ' settled trades: ' + wins + ' wins, ' + losses + ' losses" style="width:100%;height:auto;display:block">' +
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)"/>' + bars + hits +
-      '<text x="' + L + '" y="' + (H - 5) + '" fill="var(--muted)" font-size="11">last ' + shown.length + ' settled trades: ' + wins + ' won, ' + losses + ' lost</text></svg>';
+      '<text x="' + L + '" y="' + (H - 5) + '" fill="var(--muted)" font-size="12" data-px="12">last ' + shown.length + ' settled trades: ' + wins + ' won, ' + losses + ' lost</text></svg>';
   }
 
   // Hover (and tap) details for the bars above: one tooltip element for the page, filled from the data-* of the hit column under the pointer. Where it goes is a pure function so the
@@ -2778,9 +2787,9 @@
     var bars = shown.map(function(w, i){
       var cx = L + slot * i + slot / 2, y0 = Y(0), y1 = Y(w.net), top = Math.min(y0, y1), h = Math.max(1.5, Math.abs(y1 - y0)), up = w.net >= 0;
       return '<rect class="data-bar" data-mark="1" style="--i:' + i + '" x="' + (cx - bw / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + (up ? 'var(--muted)' : 'var(--loss)') + '"' + (up ? ' fill-opacity="0.55"' : '') + '><title>' + esc('Week of ' + dataWeekLabel(w.key) + ': ' + fmt(w.net) + ' over ' + w.n + ' settled trades') + '</title></rect>' +
-        '<text class="kal-bub" x="' + cx.toFixed(1) + '" y="' + (up ? top - 6 : top + h + 15).toFixed(1) + '" text-anchor="middle" fill="var(--paper)" font-size="13">' + esc(fmt(w.net)) + '</text>' +
-        '<text x="' + cx.toFixed(1) + '" y="' + (H - 14) + '" text-anchor="middle" fill="var(--muted)" font-size="11">' + esc(dataWeekLabel(w.key)) + '</text>' +
-        '<text x="' + cx.toFixed(1) + '" y="' + (H - 2) + '" text-anchor="middle" fill="var(--muted)" font-size="10">' + w.n + ' trades</text>';
+        '<text class="kal-bub" x="' + cx.toFixed(1) + '" y="' + (up ? top - 6 : top + h + 15).toFixed(1) + '" text-anchor="middle" fill="var(--paper)" font-size="14" data-px="14">' + esc(fmt(w.net)) + '</text>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (H - 14) + '" text-anchor="middle" fill="var(--muted)" font-size="12" data-px="12">' + esc(dataWeekLabel(w.key)) + '</text>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (H - 2) + '" text-anchor="middle" fill="var(--muted)" font-size="11" data-px="11">' + w.n + ' trades</text>';
     }).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Settled result for each of the last ' + shown.length + ' weeks" style="width:100%;height:auto;display:block">' +
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)"/>' + bars + '</svg>';
@@ -2914,6 +2923,16 @@
       row('Orders carrying rng5', r.rngOrders ? r.rngLogged + ' of ' + r.rngOrders : 'none yet') +
       '<div class="kal-note" style="padding:10px 18px 14px">Checks that the new rules hold; they change nothing. Counted from 2026-10-22 (about 03:00 UTC for one crypto order per window, 17:00 UTC for rng5).</div>';
   }
+  // Text inside a chart is drawn in the chart's own units, so it grew with the chart (a caption meant to be 11px read as 17px on a wide card). Each chart text names the size it should be on screen (data-px), and this sets its
+  // size in chart units from the chart's real width, so a caption, a value and a label read the same size whatever the card width. Skipped while a chart is hidden (width 0).
+  function kalshiFitSvgText(root){
+    (root || document).querySelectorAll('svg[viewBox] text[data-px]').forEach(function(t){
+      var svg = t.ownerSVGElement, vb = svg && svg.viewBox && svg.viewBox.baseVal, w = svg ? svg.getBoundingClientRect().width : 0;
+      if(!vb || !vb.width || !(w > 0)){ return; }
+      t.setAttribute('font-size', (Number(t.getAttribute('data-px')) * vb.width / w).toFixed(2));
+    });
+  }
+  window.addEventListener('resize', function(){ kalshiFitSvgText(document); });
   function renderDataCenter(){
     var pg = document.getElementById('page-data');
     if(!pg || pg.hidden){ return; }
@@ -2929,6 +2948,7 @@
     set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
     set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoney));
     set('dataNote', 'As of ' + kalTime(Date.now()) + ' CT. Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
+    kalshiFitSvgText(pg);
   }
 
   function renderKalshiCharts(){
@@ -2942,6 +2962,7 @@
     kalshiSetBars(barsEl, barsEl ? kalshiBarsSvg(series, escapeHtml, kalshiMoney) : '');
     if(perfEl && !kalshiOrdersLoaded){ perfEl.innerHTML = '<div class="kal-empty">Loading the bot\'s trades...</div>'; }
     else if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
+    kalshiFitSvgText(document.getElementById('page-data'));
   }
   var kalshiChartRange = 'all';
   kalshiTipWire(document.getElementById('kalChartBars'));
