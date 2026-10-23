@@ -89,7 +89,7 @@
      box's own background -- body painting the SAME color as its own
      background would have silently covered it completely, exactly the
      bug this comment is warning off. */
-  html{ background-color: var(--ink); }
+  html{ background-color: var(--ink); background-image: radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%), linear-gradient(var(--ink), var(--front-g1)); background-attachment: fixed; }
   body{
     margin:0; padding:0;
     /* The ground is still furniture, not a mood board -- no per-page
@@ -103,101 +103,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ---------- Ambient background: texture + a slow drift, nothing else ----------
-     Two soft, blurred accent-color blobs drifting on a multi-minute loop,
-     plus a static film-grain layer for texture at rest. Both are capped low
-     enough (title-bar-glance test: does it read as "a colored patch" at any
-     point in the loop? if yes, it's too strong) that they never compete
-     with a P&L figure or a candle -- if this is ever pulled up in review and
-     it's noticeable at a glance, that's a bug in this rule, not a reason to
-     rip the whole thing out.
-     Fixed + z-index:-1, which only works because body itself carries NO
-     background-color (see the html/body split above) -- a negative
-     z-index escapes into the ROOT element's own stacking context, which
-     paints any IN-FLOW box's own background (body's own, if it painted
-     one) ABOVE a negative-z-index descendant. With body transparent,
-     there is nothing at that level to cover it, and everything real
-     (all genuinely in-flow content, plus every positioned overlay in
-     this app, which all carry their own z-index >= 0) still paints
-     above it as normal. Confirmed by inspecting computed styles before
-     this split existed: the layer had a real background and opacity and
-     still sampled as the plain page color at every single pixel --
-     z-index:-1 alone, against an opaque body, is a silent no-op, not a
-     visible-but-behind-content layer.
-     Not a pseudo-element on body for the same underlying reason bodies
-     historically get this wrong: had body kept its own background, a
-     body::before would have hit the identical bug.
-     aria-hidden and pointer-events:none: this is not content, and must
-     never intercept a click meant for whatever's actually on the page. */
-  .bg-ambient{
-    position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
-  }
-  /* A big ghost of the wordmark sits behind the page, straight (no tilt), outlined and barely filled, so the cards float over something. Static: no animation, so reduce-motion has nothing to stop.
-     It follows the theme and skin through --ghost-line and --ghost-fill and never carries a gain or loss colour. */
-  .bg-ghost{
-    position:absolute; left:50%; bottom:9vh; transform:translateX(-50%); white-space:nowrap; user-select:none;
-    font-family:'Titan One', 'Public Sans', sans-serif; font-size:min(18vw, 260px); line-height:1; letter-spacing:.03em;
-    color:var(--ghost-fill); -webkit-text-stroke:2px var(--ghost-line);
-  }
-  .bg-ambient::before, .bg-ambient::after{
-    content:''; position:absolute; width:60vmax; height:60vmax; border-radius:50%;
-    background: var(--amber); opacity:0.09; filter: blur(60px);
-    will-change: transform;
-  }
-  .bg-ambient::before{ top:-18vmax; left:-14vmax; animation: bgDriftA 100s ease-in-out infinite; }
-  .bg-ambient::after{ bottom:-22vmax; right:-18vmax; animation: bgDriftB 130s ease-in-out infinite; background: var(--gain); opacity:0.06; }
-  /* Same nominal alpha reads as noticeably fainter against dark theme's
-     near-black ground than against light theme's off-white one (blurred
-     low-alpha color has less to contrast against on a dark base) -- bumped
-     here rather than raising the light-mode values and overshooting the
-     "furniture, not decoration" bar there. */
-  @keyframes bgDriftA{
-    0%, 100%{ transform: translate(0, 0); }
-    50%{ transform: translate(8vmax, 10vmax); }
-  }
-  @keyframes bgDriftB{
-    0%, 100%{ transform: translate(0, 0); }
-    50%{ transform: translate(-10vmax, -6vmax); }
-  }
-  /* Grid: a faint drifting line grid layered under the grain, same
-     "furniture, not decoration" bar as the blobs above -- added
-     specifically because light mode's version of this whole background
-     read as noticeably flatter/more static than dark mode's (the blobs'
-     own dark-mode opacity bump helps dark mode more than it helps
-     light). A crisp thin line doesn't suffer the same contrast loss a
-     blurred blob does against a light ground, so this gets its OWN
-     opacity tuned directly against the light palette rather than
-     inheriting the blob's asymmetric light/dark split -- see the opacity
-     values below, chosen so light and dark read as comparably present
-     rather than assuming the blob's correction transfers.
-     Linear, not ease-in-out like the blobs -- a slow constant crawl
-     across exactly one tile (64px) loops seamlessly and reads as the
-     screen's own grid quietly scrolling, the "matrix-y" quality asked
-     for, rather than the blobs' breathing back-and-forth. */
-  .bg-grid{
-    position:absolute; inset:-64px;
-    background-image:
-      repeating-linear-gradient(0deg, var(--amber) 0, var(--amber) 1px, transparent 1px, transparent 64px),
-      repeating-linear-gradient(90deg, var(--amber) 0, var(--amber) 1px, transparent 1px, transparent 64px);
-    opacity: 0.05;
-    will-change: transform;
-    animation: bgGridDrift 160s linear infinite;
-  }
-  /* Readability (the owner, Oct 21, 2026: "hard to read" in both light modes). On a light ground the blurred blobs and the grid line grey the whole page behind the text, most of all in Mono Ink where --amber is black.
-     Quieter in the light themes only; dark is unchanged. */
-  /* Stat tiles sit straight on the page ground on the Data page, so in the light themes they get their own white fill: an outline alone read as a grey box on a grey page. */
-  @keyframes bgGridDrift{
-    0%{ transform: translate(0, 0); }
-    100%{ transform: translate(64px, 64px); }
-  }
-  /* Grain: a tiny inline SVG turbulence filter as a tiled data-URI, not a
-     network asset -- there is nothing to fail to load and nothing added to
-     the page's request count. Opacity low enough that it reads as texture
-     ("this isn't a flat vector fill") rather than as visible noise. */
-  .bg-grain{
-    position:absolute; inset:-10%; opacity:0.025; mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+  /* The ground is the front page's: one dark gradient with a soft light right of centre, fixed behind everything. No grid, no grain, no blobs and no ghost wordmark (the owner, Oct 23, 2026: "you still have the shwoop watermark, and some grid in there"). */
   /* The reduce-motion overrides for .bg-ambient and .bg-grid live in the
      single consolidated @media (prefers-reduced-motion: reduce) block and
      the matching [data-reduce-motion="true"] rules further down (see
@@ -228,88 +134,46 @@
   .app-layout{ display:flex; align-items:flex-start; }
   .app-pages{ flex:1; min-width:0; }
 
+  /* The navigation is the front page's window rail (docs/DESIGN_SYSTEM.md): a soft 16px window on the left, a small rounded square and the page name per row, the page you are on filled white with black text. On a phone it becomes the bottom bar. */
   .side-nav{
-    position:fixed; top:0; right:0; height:100vh; z-index:140;
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    padding:88px 10px 20px 10px; width:72px;
-    background: var(--panel);
-    border-left:1px solid var(--border);
-    overflow-y:auto; overflow-x:hidden;
+    position:fixed; top:96px; left:18px; width:176px; z-index:140;
+    display:flex; flex-direction:column; align-items:stretch; gap:6px;
+    padding:14px 9px;
+    background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%), var(--panel);
+    border:1px solid var(--border); border-radius:16px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.85);
+    max-height:calc(100vh - 120px); overflow-y:auto; overflow-x:hidden;
   }
-  .side-nav-divider{ width:32px; height:1px; background:var(--border); margin:6px 0; flex-shrink:0; }
+  .side-nav-divider{ height:1px; background:var(--border); margin:4px 2px; flex-shrink:0; }
   .side-nav-item{
     position:relative; background:none; border:none; color:var(--muted); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    width:100%; padding:11px 4px; border-radius:10px; font-size:9.5px; font-weight:600;
-    font-family:'Public Sans', sans-serif; text-align:center; flex-shrink:0;
-    transition: background .25s ease, color .25s ease, transform .2s cubic-bezier(.2,.8,.3,1.3), box-shadow .25s ease;
+    display:flex; flex-direction:row; align-items:center; gap:9px;
+    width:100%; padding:10px 10px; border-radius:8px; font-size:12px; font-weight:700;
+    font-family:'Public Sans', sans-serif; text-align:left; flex-shrink:0;
+    transition: background .2s ease, color .2s ease;
   }
-  /* The animated hover "glow" -- a soft accent-tinted radial highlight
-     that fades in behind the icon, combined with a slight lift/scale on
-     the whole button. Kept separate from the .current (active page)
-     state below so the page you're already on reads as calm/settled,
-     not glowing. */
-  .side-nav-item::before{
-    content:""; position:absolute; inset:0; border-radius:10px;
-    background: radial-gradient(circle at 50% 30%, var(--amber-glow), transparent 70%);
-    opacity:0; transition: opacity .3s ease;
-    pointer-events:none;
-  }
-  .side-nav-item:hover::before{ opacity:1; }
-  .side-nav-item:hover{
-    color: var(--paper); transform: translateX(-3px) scale(1.05);
-    box-shadow: 0 4px 14px rgba(16,24,43,0.10), inset 0 0 0 1px var(--border);
-  }
-  .side-nav-item:active{ transform: translateX(-1px) scale(0.98); }
-  .side-nav-item.current{ color: var(--amber); background: var(--panel-raised); }
-  .side-nav-icon{ font-size:18px; line-height:1; transition: transform .2s cubic-bezier(.2,.8,.3,1.3); }
-  .side-nav-item:hover .side-nav-icon{ transform: scale(1.15); }
+  .side-nav-item:hover{ color: var(--paper); background: rgba(255,255,255,.05); }
+  .side-nav-item.current{ color: var(--amber-contrast); background: var(--amber); }
+  .side-nav-icon{ width:9px; height:9px; border-radius:3px; background:currentColor; opacity:.6; flex-shrink:0; display:block; }
+  .side-nav-item.current .side-nav-icon{ opacity:.9; }
   .side-nav-label{ letter-spacing:.02em; }
-
-  /* Geometry Dash-style diamond shard burst -- a small starburst of tiny
-     diamonds pops outward from the icon on hover, echoing the diamond
-     player-icon shape used in the brand mark itself. Each shard shares
-     one keyframe but launches at its own fixed angle (--angle, set
-     inline per shard), so rotating the local coordinate frame first and
-     then translating along its own X-axis sends every shard outward in
-     a different direction with no per-shard math needed beyond the angle. */
-  .nav-shard{
-    position:absolute; top:50%; left:50%; width:5px; height:5px;
-    background: var(--amber); opacity:0; pointer-events:none; z-index:1;
-    transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) rotate(45deg);
-  }
-  .side-nav-item:hover .nav-shard{
-    animation: shardBurst .6s cubic-bezier(.2,.8,.3,1) both;
-  }
-  @keyframes shardBurst{
-    0%{ opacity:0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) rotate(45deg) scale(1); }
-    18%{ opacity:1; }
-    100%{ opacity:0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(24px) rotate(45deg) scale(.35); }
-  }
 
   @media (max-width: 900px){
     .side-nav{
-      top:auto; bottom:0; left:0; right:0; height:auto; width:100%;
+      top:auto; bottom:0; left:0; right:0; width:100%; max-height:none;
       flex-direction:row; justify-content:space-around; align-items:center;
       padding:8px 4px; overflow-x:auto; overflow-y:hidden;
-      border-left:none; border-top:1px solid var(--border);
+      border:0; border-top:1px solid var(--border); border-radius:0; box-shadow:none;
+      background: var(--panel);
     }
-    /* More nav items than fit on a narrow phone -- this bar scrolls
-       horizontally, so fade both edges to hint there's more to swipe to. */
-    .side-nav::before, .side-nav::after{
-      content:""; position:absolute; top:0; bottom:0; width:24px; z-index:2; pointer-events:none;
-    }
-    .side-nav::before{ left:0; background: linear-gradient(90deg, var(--panel), transparent); }
-    .side-nav::after{ right:0; background: linear-gradient(270deg, var(--panel), transparent); }
     .side-nav-divider{ display:none; }
-    .side-nav-item{ width:auto; min-width:50px; padding:6px 4px; }
-    .side-nav-item:hover{ transform: translateY(-3px) scale(1.05); }
+    .side-nav-item{ width:auto; min-width:50px; padding:6px 8px; flex-direction:column; gap:4px; text-align:center; font-size:11px; }
   }
   /* Room for the fixed sidebar so page content never sits underneath it --
      right-side padding on wide screens where the sidebar is a vertical
      rail, bottom padding on narrow screens where it becomes a bottom bar. */
-  .app{ padding-right: 92px; }
-  @media (max-width: 900px){ .app{ padding-right:0; padding-bottom:76px; } }
+  .app{ padding-left: 212px; }
+  @media (max-width: 900px){ .app{ padding-left:0; padding-bottom:76px; } }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -387,14 +251,48 @@
   .page[hidden]{ display:none; }
 
   /* ---------- Market Brief (home) page ---------- */
-  .brief-hero{ padding: 44px 0 8px 0; max-width: 760px; }
+  /* The Brief is a grid of soft windows, the same card the sign-in page shows (the owner, Oct 23, 2026: everything matches the front page; the Movers card was dropped). */
+  .brief-win{ background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%), var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow: var(--card-shadow); padding:20px 22px; min-width:0; }
+  .brief-win .breadth-widget, .brief-win .market-news-list, .brief-win .earnings-list{ background:none; border:0; box-shadow:none; padding:0; border-radius:0; }
+  .brief-win .brief-section-title{ margin:0 0 12px 0; }
+  .brief-grid{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"news side" "news earn"; gap:18px; align-items:start; margin-bottom:36px; }
+  .brief-news{ grid-area:news; } .brief-side{ grid-area:side; } .brief-earn{ grid-area:earn; }
+  @media (max-width: 900px){ .brief-grid{ grid-template-columns:1fr; grid-template-areas:"side" "news" "earn"; } }
+  .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:stretch; }
+  .brief-cat .brief-eyebrow, .brief-next .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
+  .brief-ev{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; border-top:1px solid var(--border); font-size:13px; }
+  .brief-ev:first-child{ border-top:0; }
+  .brief-ev-l{ display:flex; gap:16px; align-items:baseline; min-width:0; }
+  .brief-ev-t{ font:800 15px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; width:76px; flex:0 0 76px; }
+  .brief-ev-n{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .brief-ev-pill{ font:700 10.5px 'Public Sans', sans-serif; border:1.5px solid var(--border); border-radius:999px; padding:2px 10px; color:var(--muted); flex-shrink:0; }
+  .brief-ev-pill.hi{ border-color:var(--paper); color:var(--paper); }
+  .brief-next-time{ font:800 clamp(34px, 5vw, 54px)/1.05 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; margin:6px 0 8px; }
+  .brief-next-name{ color:var(--muted); font-size:14px; }
+  .brief-charts{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; margin-bottom:18px; }
+  @media (max-width: 1100px){ .brief-charts{ grid-template-columns:1fr; } }
+  @media (max-width: 900px){ .brief-top{ grid-template-columns:1fr; } }
+  .brief-chart-grp{ display:grid; gap:14px; }
+  .brief-chart{ border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:rgba(255,255,255,.025); min-width:0; }
+  .brief-chart-hd{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .brief-chart-name{ color:var(--muted); font-size:12px; }
+  .brief-chart-px{ font:800 20px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; margin:2px 0; }
+  .brief-chart-chg{ font-size:12px; }
+  .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss); }
+  .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; }
+  .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
+  .brief-chart svg line{ stroke:var(--border); stroke-width:1; stroke-dasharray:3 4; vector-effect:non-scaling-stroke; }
+  .brief-newswin{ margin-bottom:36px; }
+  .brief-hero .brief-lede{ margin-bottom:0; }
+  .index-card{ border-radius:16px; }
+  .brief-hero{ padding: 28px 30px; margin-top:18px; margin-bottom:18px; }
   .brief-page-header{ margin-bottom:22px; }
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
-  .brief-headline{ font-family:'Public Sans', sans-serif; font-size: 19px; font-weight:700; margin:0 0 14px 0; line-height:1.35; }
+  .brief-headline{ font-family:'Public Sans', sans-serif; font-size: 26px; font-weight:700; margin:0 0 14px 0; line-height:1.35; }
   .brief-lede{ font-size:15px; line-height:1.75; color:var(--muted); margin:0 0 32px 0; }
 
-  .brief-indices{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
-  .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
+  .brief-indices{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px; }
+  .index-card{ flex:1; min-width:150px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
   .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
   .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
   .index-card .ix-val{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; font-size:23px; letter-spacing:0; display:block; }
@@ -418,9 +316,6 @@
     letter-spacing:0; margin: 0 0 16px 0;
   }
 
-  .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
-  @media (max-width: 900px){ .brief-two-col{ grid-template-columns:1fr; gap:24px; } }
-  .brief-col .brief-section-title{ margin-bottom:12px; }
 
   .breadth-widget{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:18px 20px; box-shadow: var(--card-shadow); }
   .breadth-bar{ height:10px; border-radius:5px; background: var(--loss-glow); overflow:hidden; margin-bottom:14px; }
@@ -436,24 +331,12 @@
   .breadth-label.up{ border-color: rgba(15,157,88,0.35); color: var(--gain); }
   .breadth-label.down{ border-color: rgba(217,48,37,0.35); color: var(--loss); }
 
-  .movers-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  @media (max-width: 600px){ .movers-grid{ grid-template-columns:1fr; } }
-  .movers-col{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; min-width:0; box-shadow: var(--card-shadow); }
-  .movers-col-title{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color: var(--muted); margin-bottom:10px; }
-  .mover-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; font-size:12px; }
-  .mover-row + .mover-row{ border-top:1px solid var(--border); }
-  .mover-sym{ font-weight:600; }
-  .mover-price{ color: var(--muted); }
-  .mover-chg{ font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight:600; }
-  .mover-chg.up{ color: var(--gain); }
-  .mover-chg.down{ color: var(--loss); }
-
   .market-news-list, .earnings-list{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:6px 16px; min-height:60px; box-shadow: var(--card-shadow); }
   .news-placeholder{ padding:14px 0; font-size:12px; color: var(--muted); }
   .news-item{ display:flex; flex-direction:column; gap:3px; padding:11px 0; text-decoration:none; color: var(--paper); }
   .news-item + .news-item{ border-top:1px solid var(--border); }
   .news-item:hover .news-item-headline{ color: var(--amber); }
-  .news-item, .mover-row{ transition: transform .15s ease; } .news-item:hover, .mover-row:hover{ transform: translateX(3px); }
+  .news-item{ transition: transform .15s ease; } .news-item:hover{ transform: translateX(3px); }
   .news-item-headline{ font-size:12.5px; line-height:1.5; }
   .news-item-meta{ font-size:10.5px; color: var(--muted); }
   .earnings-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; font-size:12.5px; }
@@ -831,8 +714,8 @@
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
   /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One is only the wordmark. */
   .kal-bub{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; }
-  .kal-card, .settings-card, .breadth-widget, .movers-col, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
-  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
+  .kal-card, .settings-card, .breadth-widget, .brief-win, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
+  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .brief-win:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
   .kal-tile:hover{ transform: translateY(-2px) scale(1.02); border-color: var(--paper); }
   .kal-leg{ transition: transform .15s ease; } .kal-leg:hover{ transform: translateX(3px); }
@@ -844,39 +727,30 @@
   @keyframes cardRise{ from{ opacity:0; transform: translateY(14px) scale(.985); } to{ opacity:1; transform:none; } }
   @keyframes lineDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
   @keyframes markPop{ from{ opacity:0; transform: scaleY(.2); } to{ opacity:1; transform:none; } }
-  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .index-card, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .brief-win, .page.enter .index-card, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
     .front-eyebrow, .front-h1, .front-line, .front-win, .front-win-a .win{ animation: none; }
-    .side-nav-item:hover .nav-shard{ animation: none; display:none; }
-    .bg-ambient::before, .bg-ambient::after{ animation: none; }
-    .bg-grid{ animation: none; }
     .brand-name span{ transition: none; }
     .brand:hover .brand-name span{ transform: none; }
     .kal-console .kal-brow{ transition: none; }
     .kal-console .kal-brow:hover{ transform: none; }
-    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .index-card, .page.enter .kal-tile{ animation: none; }
+    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .brief-win, .page.enter .index-card, .page.enter .kal-tile{ animation: none; }
     .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
-    .news-item:hover, .mover-row:hover{ transform: none; }
-    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
+    .news-item:hover{ transform: none; }
+    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .brief-win:hover, .index-card:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
-  [data-reduce-motion="true"] .bg-ambient::before,
-  [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
-  [data-reduce-motion="true"] .bg-grid{ animation: none; }
   [data-reduce-motion="true"] .brand-name span{ transition: none; }
   [data-reduce-motion="true"] .brand:hover .brand-name span{ transform: none; }
-  /* Limit graphics (the same switch as reduce motion, renamed Oct 21, 2026): it also drops the glow, the grid and the ghost wordmark, so the page is plain panels on a flat ground. */
-  [data-reduce-motion="true"] .bg-ambient::before, [data-reduce-motion="true"] .bg-ambient::after, [data-reduce-motion="true"] .bg-ghost, [data-reduce-motion="true"] .bg-grid{ display:none; }
-  [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
   [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
-  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .movers-col, [data-reduce-motion="true"] .page.enter .index-card, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
+  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter .index-card, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
-  [data-reduce-motion="true"] .news-item:hover, [data-reduce-motion="true"] .mover-row:hover{ transform: none; }
-  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .movers-col:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
+  [data-reduce-motion="true"] .news-item:hover{ transform: none; }
+  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .brief-win:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
   [data-reduce-motion="true"] .front-eyebrow, [data-reduce-motion="true"] .front-h1, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-win, [data-reduce-motion="true"] .front-win-a .win{ animation: none; }
 </style>
 <script>
@@ -884,7 +758,6 @@
 </head>
 <body>
 
-<div class="bg-ambient" aria-hidden="true"><div class="bg-ghost">SHWOOP</div><div class="bg-grid"></div><div class="bg-grain"></div></div>
 
 <script>
   // Decouples the deferred Firebase module from the rest of the app so
@@ -1166,17 +1039,17 @@
 
   <nav class="side-nav" id="sideNav" aria-label="Main navigation">
     <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
-      <span class="side-nav-icon">◆</span><span class="side-nav-label">Brief</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Brief</span>
     </button>
     <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
-      <span class="side-nav-icon">◐</span><span class="side-nav-label">Bot</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Bot</span>
     </button>
     <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
-      <span class="side-nav-icon">▦</span><span class="side-nav-label">Data</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Data</span>
     </button>
     <div class="side-nav-divider"></div>
     <button class="side-nav-item nav-item" data-page="settings" title="Settings">
-      <span class="side-nav-icon">⚙</span><span class="side-nav-label">Settings</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Settings</span>
     </button>
   </nav>
 
@@ -1191,7 +1064,30 @@
     <div class="app-pages">
   <div class="tape" id="marketTape" role="region" aria-label="Markets" hidden></div>
   <main class="page" id="page-brief">
-    <div class="brief-hero">
+    <div class="brief-top">
+      <div class="brief-win brief-cat">
+        <div class="brief-eyebrow">Today's catalysts (CT)</div>
+        <div id="briefEvents"><div class="news-placeholder">No scheduled events loaded yet.</div></div>
+      </div>
+      <div class="brief-win brief-next">
+        <div class="brief-eyebrow">Next up</div>
+        <div class="brief-next-time mono" id="briefNextTime">&mdash;</div>
+        <div class="brief-next-name" id="briefNextName">Waiting for the calendar</div>
+      </div>
+    </div>
+
+    <div class="brief-charts" id="briefCharts"></div>
+
+    <div class="brief-win brief-newswin">
+      <div class="brief-section-title">Market News</div>
+      <div class="market-news-list" id="marketNewsList">
+        <div class="news-placeholder">Sign in to see real market headlines.</div>
+      </div>
+    </div>
+
+    <!-- The old Brief sections stay in the page, hidden, so the data code keeps its elements until the new design is chosen. -->
+    <div id="briefOld" hidden>
+    <div class="brief-hero brief-win">
       <div class="brief-page-header">
         <div class="trades-title">Market Brief</div>
         <div class="trades-sub">Today's read on what's moving the tape.</div>
@@ -1204,35 +1100,20 @@
     <div class="brief-indices" id="indexSnapshot"></div>
     <div class="brief-asof" id="briefAsOf"></div>
 
-    <div class="brief-two-col">
-      <div class="brief-col">
+    <div class="brief-grid">
+      <div class="brief-win brief-side">
         <div class="brief-section-title">Market Sentiment</div>
         <div class="breadth-widget" id="breadthWidget"></div>
       </div>
-      <div class="brief-col">
-        <div class="brief-section-title">Today's Movers</div>
-        <div class="movers-grid" id="moversGrid"></div>
-      </div>
-    </div>
-
-    <div class="brief-two-col">
-      <div class="brief-col">
-        <div class="brief-section-title">Market News</div>
-        <div class="market-news-list" id="marketNewsList">
-          <div class="news-placeholder">Sign in to see real market headlines.</div>
-        </div>
-      </div>
-      <div class="brief-col">
+      <div class="brief-win brief-earn">
         <div class="brief-section-title">Earnings This Week</div>
         <div class="earnings-list" id="earningsList">
           <div class="news-placeholder">Sign in to see upcoming earnings for your tracked stocks.</div>
         </div>
       </div>
     </div>
-
-
+    </div>
   </main>
-
 
 
   <!-- ================= SETTINGS ================= -->
@@ -1468,7 +1349,7 @@
   // real, current quote right up until the data goes stale and it is still
   // sitting there, with nothing to distinguish it from an actual
   // last-known-good price. Every reader of this watchlist (the index
-  // cards, the sentiment bar, the headline, the movers, the earnings
+  // cards, the sentiment bar, the headline, the earnings
   // filter) treats a still-null price/prevClose as legitimately
   // not-resolved-yet -- real quotes replace this once the first shared
   // snapshot arrives.
@@ -3527,7 +3408,7 @@
   }
   function pageEnter(pageEl){
     if(!pageEl || motionReduced()){ return; }
-    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .movers-col, .index-card, .kal-tile');
+    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .brief-win, .index-card, .kal-tile');
     for(var i = 0; i < items.length; i++){ items[i].style.setProperty('--i', String(Math.min(i, 12))); }
     pageEl.classList.remove('enter'); void pageEl.offsetWidth; pageEl.classList.add('enter');
     clearTimeout(pageEnterTimer);
@@ -3574,20 +3455,6 @@
         showPage(item.dataset.page);
       }
     });
-  });
-
-  // Geometry Dash-style shard burst: 5 tiny diamonds injected into each
-  // sidebar item, evenly spaced around a circle (360/5 = 72 degrees
-  // apart) so the burst radiates symmetrically outward on hover,
-  // regardless of which item it is.
-  document.querySelectorAll('.side-nav-item').forEach(function(item){
-    for(var i = 0; i < 5; i++){
-      var shard = document.createElement('span');
-      shard.className = 'nav-shard';
-      shard.style.setProperty('--angle', (i * 72) + 'deg');
-      shard.style.animationDelay = (i * 0.02) + 's';
-      item.appendChild(shard);
-    }
   });
 
   document.getElementById('brandHomeBtn').addEventListener('click', function(){
@@ -3966,41 +3833,6 @@
     ledeEl.textContent = ledeParts.join(' ');
   }
 
-  function renderMovers(){
-    var el = document.getElementById('moversGrid');
-    if(!el || watchlist.length === 0) return;
-    // Stocks only -- watchlist also carries the S&P/Nasdaq/Dow benchmark
-    // ETFs for the index cards above, and mixing those into gainers/losers
-    // meant an index sitting at a flat 0.00% could out-"lose" real stocks
-    // just for having a smaller move, despite being a different category
-    // of thing entirely. Also excludes
-    // anything not yet priced (still null, no fake placeholder anymore) --
-    // ranking against a still-unresolved quote would just be ranking
-    // against garbage (pct(null, null) is NaN, and Array.sort with NaN
-    // comparisons has no defined order).
-    var withChange = watchlist.filter(function(w){
-      return !INDEX_PROXIES.some(function(ix){ return ix.sym === w.sym; }) && w.price != null && w.prevClose != null;
-    }).map(function(w){
-      return { sym: w.sym, price: w.price, change: pct(w.price, w.prevClose) };
-    });
-    var sorted = withChange.slice().sort(function(a,b){ return b.change - a.change; });
-    var gainers = sorted.slice(0, 3);
-    var losers = sorted.slice(-3).reverse();
-    el.innerHTML =
-      '<div class="movers-col"><div class="movers-col-title">Top Gainers</div>' + gainers.map(moverRow).join('') + '</div>' +
-      '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(moverRow).join('') + '</div>';
-  }
-
-  // Used by the movers grid renderer.
-  function moverRow(m){
-    var up = m.change >= 0;
-    return '<div class="mover-row">' +
-      '<span class="mover-sym mono">' + m.sym + '</span>' +
-      '<span class="mover-price mono">' + fmt(m.price) + '</span>' +
-      '<span class="mover-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(m.change).toFixed(2) + '%</span>' +
-    '</div>';
-  }
-
   // ---------- Shared market snapshot (indices/watchlist quotes, news, earnings -- one doc for every signed-in account) ----------
   // shwoop-server writes shared/marketSnapshot once every 3 minutes (quotes,
   // headlines, earnings) and this page only reads it. null (no snapshot
@@ -4025,7 +3857,6 @@
     renderIndices();
     renderSentiment();
     renderBriefHeadline();
-    renderMovers();
     renderMarketNews(tapeNews() || data.news);
     renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
   }
@@ -4074,6 +3905,78 @@
     el.hidden = false;
     if(asof){ asof.textContent = a.text; asof.className = 'brief-asof' + (a.stale ? ' stale' : ''); }
   }
+
+  // ---------- The Brief (the owner chose concept B, Oct 23, 2026): the week's scheduled events with a countdown, three pairs of small charts (crypto, equities, commodities) and the news ----------
+  // Everything comes from shared/marketTape (written every 5 minutes by the keyless marketTapeTick); a symbol or the calendar that has not arrived is shown as missing, never as a made-up number.
+  var BRIEF_CHART_GROUPS = [
+    { title: 'Crypto', items: [{ sym: 'BTC-USD', name: 'Bitcoin' }, { sym: 'ETH-USD', name: 'Ethereum' }] },
+    { title: 'Equities', items: [{ sym: 'SPY', name: 'S&P 500 (SPY)' }, { sym: 'QQQ', name: 'Nasdaq 100 (QQQ)' }] },
+    { title: 'Commodities', items: [{ sym: 'GC=F', name: 'Gold' }, { sym: 'CL=F', name: 'Crude oil' }] }
+  ];
+  function briefChartHtml(it, q){
+    if(!q || !(q.price > 0) || !(q.prevClose > 0)){
+      return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span></div><div class="brief-chart-px mono">&mdash;</div></div>';
+    }
+    var d = pct(q.price, q.prevClose), up = d >= 0;
+    var dec = q.price >= 1000 ? 0 : 2;
+    var px = q.price.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    var svg = '';
+    var ser = Array.isArray(q.series) ? q.series.filter(function(v){ return typeof v === 'number' && isFinite(v); }) : [];
+    if(ser.length >= 2){
+      var lo = Math.min.apply(null, ser.concat([q.prevClose])), hi = Math.max.apply(null, ser.concat([q.prevClose]));
+      var span = (hi - lo) || 1;
+      var y = function(v){ return (58 - ((v - lo) / span) * 54).toFixed(1); };
+      var pts = ser.map(function(v, i){ return (i * (200 / (ser.length - 1))).toFixed(1) + ',' + y(v); }).join(' ');
+      svg = '<svg viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="200" y1="' + y(q.prevClose) + '" y2="' + y(q.prevClose) + '"></line><polyline points="' + pts + '"></polyline></svg>';
+    }
+    return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span>' +
+      '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(2) + '%</span></div>' +
+      '<div class="brief-chart-px mono">' + px + '</div>' + svg + '</div>';
+  }
+  function briefEventsList(now){
+    var ev = marketTapeData && Array.isArray(marketTapeData.events) ? marketTapeData.events : [];
+    return ev.filter(function(e){ return e && Number.isFinite(e.at) && e.at >= now - 30 * 60000; }).sort(function(a, b){ return a.at - b.at; });
+  }
+  function renderBriefEvents(){
+    var el = document.getElementById('briefEvents');
+    if(!el){ return; }
+    var now = Date.now();
+    var list = briefEventsList(now).slice(0, 7);
+    if(!list.length){ el.innerHTML = '<div class="news-placeholder">No scheduled events loaded yet.</div>'; return; }
+    var today = kalDate(now);
+    el.innerHTML = list.map(function(e){
+      var when = kalDate(e.at) === today ? kalTime(e.at) : kalDate(e.at);
+      return '<div class="brief-ev"><div class="brief-ev-l"><span class="brief-ev-t mono">' + escapeHtml(String(when)) + '</span><span class="brief-ev-n">' + escapeHtml(String(e.title || '')) + ' <span class="tape-asof">' + escapeHtml(String(e.country || '')) + '</span></span></div>' +
+        '<span class="brief-ev-pill' + (e.impact === 'High' ? ' hi' : '') + '">' + escapeHtml(String(e.impact || '')) + '</span></div>';
+    }).join('');
+  }
+  function briefCountdownText(ms){
+    var s = Math.max(0, Math.floor(ms / 1000));
+    var d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    var two = function(n){ return (n < 10 ? '0' : '') + n; };
+    return d > 0 ? d + 'd ' + two(h) + 'h' : two(h) + ':' + two(m) + ':' + two(sec);
+  }
+  function renderBriefNext(){
+    var t = document.getElementById('briefNextTime'), n = document.getElementById('briefNextName');
+    if(!t || !n){ return; }
+    var now = Date.now();
+    var next = briefEventsList(now).filter(function(e){ return e.at > now; })[0];
+    if(!next){ t.textContent = '\u2014'; n.textContent = 'No scheduled event loaded'; return; }
+    t.textContent = briefCountdownText(next.at - now);
+    n.textContent = 'until ' + String(next.title || '') + ' (' + String(next.country || '') + ')';
+  }
+  function renderBriefCharts(){
+    var el = document.getElementById('briefCharts');
+    if(!el){ return; }
+    var quotes = marketTapeData && marketTapeData.quotes ? marketTapeData.quotes : {};
+    el.innerHTML = BRIEF_CHART_GROUPS.map(function(g){
+      return '<div class="brief-win"><div class="brief-section-title">' + escapeHtml(g.title) + '</div><div class="brief-chart-grp">' +
+        g.items.map(function(it){ return briefChartHtml(it, quotes[it.sym]); }).join('') + '</div></div>';
+    }).join('');
+  }
+  function renderBriefPage(){ renderBriefEvents(); renderBriefNext(); renderBriefCharts(); }
+  setInterval(function(){ if(!document.hidden){ renderBriefNext(); } }, 1000);
+
   function handleMarketTapeUpdate(data){
     marketTapeData = data || null;
     if(data && data.quotes){
@@ -4087,9 +3990,9 @@
       renderIndices();
       renderSentiment();
       renderBriefHeadline();
-      renderMovers();
-    }
+      }
     renderMarketTape();
+    renderBriefPage();
     if(tapeNews()){ renderMarketNews(tapeNews()); }
   }
 
@@ -4180,16 +4083,17 @@
   }
   renderIndices();
   renderSentiment();
-  renderMovers();
   renderBriefHeadline();
+  renderBriefPage();
   updateClock();
 
   // A direct link (e.g. #settings) always wins. Then the Settings > Default
   // landing page preference, if set to something other than Auto. Otherwise
   // the brief.
   (function initLanding(){
+    // The landing page is never Settings (the owner, Oct 23, 2026): showPage writes the current page into the address, so a reload on Settings used to reopen Settings. Only the Brief is honoured from the address; everything else follows the landing choice.
     var hashPage = (location.hash || '').replace('#', '');
-    if(hashPage === 'brief' || hashPage === 'settings'){
+    if(hashPage === 'brief'){
       showPage(hashPage);
       return;
     }

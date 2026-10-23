@@ -123,6 +123,47 @@ gates.T7 = () => {
   assert.ok(!/finance\.yahoo|query1\.|cnbc\.com|dowjones/.test(html), 'the page itself calls no market-data host');
 };
 
+// The Brief's catalysts and small charts (Oct 23, 2026, the owner chose concept B). Each test states a consequence: only high and medium events of the major economies reach the page, past events and junk rows are dropped,
+// a quote carries a thinned day series of plain numbers, and a failed calendar never blanks the stored list.
+gates.T20 = () => {
+  const now = Date.parse('2026-10-23T10:00:00Z');
+  const rows = [
+    { title: 'CPI y/y', country: 'USD', date: '2026-10-23T12:30:00Z', impact: 'High' },
+    { title: 'Low thing', country: 'USD', date: '2026-10-23T13:00:00Z', impact: 'Low' },
+    { title: 'Other economy', country: 'AUD', date: '2026-10-23T13:00:00Z', impact: 'High' },
+    { title: 'Already past', country: 'USD', date: '2026-10-20T12:30:00Z', impact: 'High' },
+    { title: 'Bad time', country: 'USD', date: 'soon', impact: 'High' },
+    { title: 'Fed speaks', country: 'USD', date: '2026-10-23T14:00:00Z', impact: 'Medium' },
+    null, 'x', { title: 5, country: 'USD' },
+  ];
+  const ev = lib.parseEvents(rows, now);
+  assert.deepStrictEqual(ev.map((e) => e.title), ['CPI y/y', 'Fed speaks'], 'only upcoming high and medium events of listed economies, soonest first');
+  assert.deepStrictEqual(Object.keys(ev[0]).sort(), ['at', 'country', 'impact', 'title'], 'only the four fields the page shows');
+  assert.deepStrictEqual(lib.parseEvents({ not: 'a list' }, now), [], 'a wrong shape is an empty list, not a crash');
+  const many = Array.from({ length: 80 }, (_, i) => ({ title: 't' + i, country: 'USD', date: new Date(now + i * 60000).toISOString(), impact: 'High' }));
+  assert.ok(lib.parseEvents(many, now).length <= 40, 'the list is capped');
+};
+gates.T21 = () => {
+  const closes = Array.from({ length: 300 }, (_, i) => 100 + i);
+  closes[5] = null;
+  const ser = lib.chartSeries({ indicators: { quote: [{ close: closes }] } });
+  assert.ok(ser.length >= 2 && ser.length <= 100 && ser.every((v) => typeof v === 'number'), 'a thinned list of numbers');
+  assert.strictEqual(ser[ser.length - 1], 399, 'it always ends on the latest close');
+  assert.deepStrictEqual(lib.chartSeries({}), [], 'no data, no chart');
+  assert.deepStrictEqual(lib.chartSeries({ indicators: { quote: [{ close: [5] }] } }), [], 'one point is not a chart');
+  const q = lib.parseChart(chart({ indicators: { quote: [{ close: [1, 2, 3] }] } }), NOW);
+  assert.deepStrictEqual(q.series, [1, 2, 3], 'the series rides on the quote');
+};
+gates.T22 = () => {
+  const syms = lib.SYMBOLS.map((s) => s.sym);
+  for (const need of ['BTC-USD', 'ETH-USD', 'SPY', 'QQQ', 'GC=F', 'CL=F']) assert.ok(syms.includes(need), need + ' is read for the Brief charts');
+  assert.ok(lib.NEWS_FEEDS.some((f) => /coindesk/.test(f.url)) && lib.NEWS_FEEDS.some((f) => /bbci/.test(f.url)), 'crypto and world economy headlines are read');
+  const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(/if \(r\.events\) patch\.events = r\.events;/.test(idx), 'a failed calendar leaves the stored events alone (the patch is merged)');
+  assert.ok(!/faireconomy|coindesk|bbci/.test(html), 'the page itself calls none of these hosts');
+  assert.ok(/id="briefEvents"/.test(html) && /id="briefCharts"/.test(html) && /id="briefNextTime"/.test(html), 'the Brief has its catalysts, countdown and charts');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

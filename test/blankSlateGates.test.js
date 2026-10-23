@@ -119,7 +119,7 @@ gates.B8 = () => {
   const src = ['ensureInWatchlist', 'tapeNews', 'handleSharedMarketSnapshotUpdate'].map(fnSource).join('\n');
   const calls = [];
   const watchlist = [{ sym: 'PLTR', price: null, prevClose: null }];
-  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderIndices', 'renderSentiment', 'renderBriefHeadline', 'renderMovers', 'renderMarketNews', 'renderEarningsCalendar', 'marketTapeData',
+  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderIndices', 'renderSentiment', 'renderBriefHeadline', 'renderMarketNews', 'renderEarningsCalendar', 'marketTapeData',
     src + '\nreturn { handle: handleSharedMarketSnapshotUpdate, ensure: ensureInWatchlist };')(watchlist, [], () => {}, () => {}, () => {}, () => {}, (n) => calls.push(['news', n]), () => {}, null);
   f.handle(null);
   assert.deepStrictEqual(watchlist, [{ sym: 'PLTR', price: null, prevClose: null }], 'no snapshot yet leaves the page as it was');
