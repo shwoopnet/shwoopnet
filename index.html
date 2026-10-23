@@ -2363,6 +2363,13 @@
   var kalshiBotUnsub = null;
   var kalshiLiveEventsUnsub = null;
   var kalshiAcctTimer = null;
+  // A refused read (Kalshi answers 429 when the account, the exit watch and the page ask at once) must not wipe a good account card (the owner's phone, Oct 23, 2026: "The account could not be read: HTTP 429"). When the
+  // balance read failed and the last read that worked is under 10 minutes old, keep that read and note the time of the failed one; a read that worked always replaces it. Pure: reads nothing from the page.
+  function kalshiKeepLastRead(prev, next){
+    if(!prev || !next || !prev.balance || prev.balance.ok !== true || !next.balance || next.balance.ok === true){ return null; }
+    if(!(Number(next.at) - Number(prev.at) < 600000)){ return null; }
+    return Object.assign({}, prev, { busyAt: next.at });
+  }
   var kalshiAcctRefresh = function(){};
   var kalshiAcctFromServer = function(){};
 
@@ -2566,7 +2573,7 @@
     if(!a){
       h += '<div>Reading the account...</div>';
     } else if(!a.balance || !a.balance.ok){
-      h += '<div class="kal-neg">The account could not be read: ' + escapeHtml(a.balance ? ('HTTP ' + a.balance.status + ' ' + (a.balance.error || '')) : 'no balance') + '</div>';
+      h += a.balance && Number(a.balance.status) === 429 ? '<div class="kal-note">Kalshi is busy (too many requests). The account refreshes again within a minute.</div>' : '<div class="kal-neg">The account could not be read: ' + escapeHtml(a.balance ? ('HTTP ' + a.balance.status + ' ' + (a.balance.error || '')) : 'no balance') + '</div>';
     } else {
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
@@ -2594,7 +2601,7 @@
         if(!sizeKnown) stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
         else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
       }
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + stakeRow +
+      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
         // Funds on other shards cannot be spent by the bot, so they get a line only when there is something worth noting; otherwise the total is what the bot has.
         ((otherSum >= 0.5 || !useShard) ? '<div class="kal-rows"><div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars) : '$0.00') + '</b></div>' +
           (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum) + '</b></div>' : '') + '</div>' : '') +
@@ -3265,6 +3272,8 @@
         (err ? '<div class="kal-note">Could not read: ' + escapeHtml(err) + '</div>' : (rows.length ? rows.join('') : '<div class="kal-empty">None.</div>')) + '</div>';
     }
     function render(d){
+      var kept = kalshiKeepLastRead(kalshiLiveAcct, d);
+      if(kept){ kalshiLiveAcct = kept; renderKalshiBot(); return; }
       kalshiLiveAcct = d; renderKalshiBot();
       var b = d.balance, p = d.positions, f = d.fills;
       var shardRows = (b.ok ? b.shards : []).map(function(s){
