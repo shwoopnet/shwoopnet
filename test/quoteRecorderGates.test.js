@@ -22,11 +22,12 @@ gates.Q1 = () => {
 };
 
 gates.Q2 = () => {
-  assert.ok(/cron: "2 \* \* \* \*"/.test(wf), 'hourly, a little after the top of the hour');
+  assert.ok(/cron: "45 3,7,11,15,19,23 \* \* \*"/.test(wf) && /--cycle-hours 4/.test(wf), 'six 4 hour jobs a day, each starting 15 minutes before a boundary, so every close is recorded');
+  assert.ok(/timeout-minutes: 330/.test(wf), 'a job fits inside the 6 hour limit (at most 4.5 hours of recording)');
   assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf), 'the only secret it touches is the built-in token');
   assert.ok(/git push -q origin quote-data/.test(wf) && !/git push[^\n]*\bmain\b/.test(wf), 'it pushes the data branch only, never main');
   assert.ok(/permissions:\s*\n\s*contents: write/.test(wf), 'contents write and nothing wider');
-  assert.ok(/cancel-in-progress: false/.test(wf), 'two hourly runs never overlap');
+  assert.ok(/cancel-in-progress: false/.test(wf), 'two runs never overlap: the next job waits for this one');
 };
 
 gates.Q3 = () => {
@@ -47,6 +48,19 @@ print(json.dumps([
   assert.strictEqual(out[5], 605, 'a short run stops when asked');
   assert.deepStrictEqual(out[6], [1, 2, 'KXBTC15M-X', '0.38', '0.39', '5', '6', 81000.5, 'active'], 'a quote row keeps send and receive time, both sides and sizes');
   assert.strictEqual(out[7], 9, 'header and row are the same width');
+};
+
+// Consequence: back to back 4 hour jobs leave no 15 minute window uncovered, even when a job starts late.
+gates.Q6 = () => {
+  const H = 3600, D = 4 * H;
+  const out = JSON.parse(py(`
+print(json.dumps([
+  m.cycle_stop_time(3 * 3600 + 45 * 60, ${D}), m.cycle_stop_time(4 * 3600 + 5 * 60, ${D}), m.cycle_stop_time(3 * 3600 + 20 * 60, ${D}), m.cycle_stop_time(3 * 3600 + 59 * 60 + 30, ${D})]))`));
+  assert.strictEqual(out[0], 8 * H + 60, 'started 15 minutes early: runs through the next boundary and one minute past the one after');
+  assert.strictEqual(out[1], 8 * H + 60, 'started 5 minutes late: same stop, nothing earlier is lost');
+  assert.strictEqual(out[2], 4 * H + 60, 'started more than 30 minutes before a boundary: stops just after that boundary');
+  assert.ok(out[3] - (3 * H + 59 * 60 + 30) <= 4.6 * H, 'a job never runs past 4.6 hours, inside the limit');
+  assert.ok(/--cycle-hours/.test(script), 'the option exists');
 };
 
 // Consequence: each exchange's message is read into (asset, price, size, time); anything that is not a trade of a recorded asset is ignored.
