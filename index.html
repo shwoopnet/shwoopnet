@@ -3737,7 +3737,11 @@
     if(!el){ return; }
     var now = Date.now();
     var list = briefEventsList(now).slice(0, 7);
-    if(!list.length){ el.innerHTML = '<div class="news-placeholder">No scheduled events loaded yet.</div>'; return; }
+    if(!list.length){
+      var loaded = marketTapeData && Array.isArray(marketTapeData.events) && marketTapeData.events.length > 0;
+      el.innerHTML = '<div class="news-placeholder">' + (loaded ? 'No more scheduled events this week.' : 'No scheduled events loaded yet.') + '</div>';
+      return;
+    }
     var today = kalDate(now);
     el.innerHTML = list.map(function(e){
       var when = kalDate(e.at) === today ? kalTime(e.at) : kalDate(e.at);
