@@ -11,4 +11,5 @@ smooth = [cd(close - 900 + 60 * k, 0.50 + 0.04 * k, 0.51 + 0.04 * k) for k in ra
 mk = {"A": {"close": close, "res": "yes", "strike": 1.0, "c": smooth}}
 rows = T.series_rows("KXXRP15M", mk)
 assert len(rows) == 1 and abs(rows[0]["net"]) < 1e-9 and rows[0]["raw"] > 0        # the only entry is its own baseline
+assert T.forward(now=0.0).startswith("Refusing the registered read")
 print("ok")

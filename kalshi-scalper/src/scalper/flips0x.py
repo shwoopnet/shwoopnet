@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import statistics as st
 import sys
+import time
+from datetime import datetime, timezone
 
 from . import ideas100 as D
 from . import ideas20 as I
@@ -19,6 +21,11 @@ SERIES = ("KXXRP15M", "KXDOGE15M", "KXGOLD15M", "KXBNB15M", "KXHYPE15M", "KXNEAR
 BIG = ("KXXRP15M", "KXDOGE15M", "KXGOLD15M", "KXBNB15M", "KXHYPE15M")        # series with enough entries for a per-series sign
 MEAN_C, Z_BAR, PF_BAR, MIN_N, MIN_BIG_POS, FALSIFY_C, FALSIFY_Z = 0.010, 2.5, 1.3, 300, 3, 0.003, 1.0
 RESULT = DATA_DIR / "flips0x_result.txt"
+FWD_RESULT = DATA_DIR / "flips0f_result.txt"
+FWD_SERIES = ("KXBTC15M", "KXETH15M") + SERIES
+FWD_START = int(datetime(2026, 10, 24, tzinfo=timezone.utc).timestamp())
+FWD_READ_DATE = int(datetime(2026, 11, 12, tzinfo=timezone.utc).timestamp())
+FWD_MIN_N, FWD_C, FWD_Z, FWD_PF = 150, 0.010, 2.0, 1.3
 
 
 def series_rows(s: str, mk: dict) -> list[dict]:
@@ -51,7 +58,41 @@ def judge(rows: list[dict]) -> dict:
     return {"verdict": v, "n": len(rows), "mean": m, "z": z, "h1": h[0], "h2": h[1], "stress": ms, "pf": pf, "pos": pos, "raw": st.mean(r["raw"] for r in rows)}
 
 
+def forward(now: float | None = None) -> str:
+    """FLIPS0-F: FLIPS_0 at the 6 minute entry on Bitcoin, Ethereum and the sixteen other series, markets closing from 2026-10-24 only, each scored against its own series' L1 baseline of that period. Read once, on or after 2026-11-12."""
+    if (now if now is not None else time.time()) < FWD_READ_DATE:
+        return "Refusing the registered read: before 2026-11-12."
+    if FWD_RESULT.exists():
+        return f"Refusing to run again: {FWD_RESULT} exists."
+    I.SOURCES = ("fresh",)
+    rows = []
+    for s in FWD_SERIES:
+        mk = {tk: m for tk, m in I.load_btc(s).items() if m["close"] >= FWD_START}
+        if mk:
+            rows += series_rows(s, mk)
+    if len(rows) < FWD_MIN_N:
+        out = f"FLIPS0-F: NOT_ENOUGH_DATA (n={len(rows)}, need {FWD_MIN_N})"
+    else:
+        m, _, z = cluster_mean_z([(r["day"], r["net"]) for r in rows])
+        ds = sorted({r["day"] for r in rows})
+        mid = ds[len(ds) // 2]
+        h = [st.mean(r["net"] for r in rows if (r["day"] < mid) == first) for first in (True, False)]
+        w = sum(r["raw"] for r in rows if r["raw"] > 0)
+        l = -sum(r["raw"] for r in rows if r["raw"] < 0)
+        pf = w / l if l else float("inf")
+        ok = m >= FWD_C and z >= FWD_Z and h[0] > 0 and h[1] > 0 and pf >= FWD_PF
+        v = "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if (m < 0.003 or z < 1.0) else "NOT_ENOUGH_DATA")
+        btc_eth = [r for r in rows if r["series"] in ("KXBTC15M", "KXETH15M")]
+        out = (f"FLIPS0-F: {v}; n={len(rows)} adjusted mean {100 * m:+.2f}c z {z:+.2f} raw PF {pf:.2f} halves {100 * h[0]:+.2f}c / {100 * h[1]:+.2f}c; "
+               f"Bitcoin and Ethereum alone n={len(btc_eth)} adjusted {100 * st.mean(r['net'] for r in btc_eth):+.2f}c" if btc_eth else f"FLIPS0-F: {v}; n={len(rows)} adjusted mean {100 * m:+.2f}c z {z:+.2f}")
+    FWD_RESULT.write_text(out + "\n")
+    return out
+
+
 def main(argv: list[str]) -> None:
+    if len(argv) >= 2 and argv[1] == "forward":
+        print(forward())
+        return
     if len(argv) < 2 or argv[1] != "run":
         print(__doc__)
         return
