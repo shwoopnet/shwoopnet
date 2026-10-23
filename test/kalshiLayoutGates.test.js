@@ -740,16 +740,28 @@ gates.BS3 = () => {
 
 // BS4: the heartbeat monitor strip. Consequence: one beat per observed check, scrolling left and gone after two minutes; no beat for a while is a flat dashed line in the state's colour; a page that has not seen a beat draws a flat line, not an invented one.
 gates.BS4 = () => {
-  const f = liftBs(['kalshiBeatNote', 'kalshiHeartbeatPath', 'kalshiHeartbeatSvg'], 'var KAL_ECG = { W: 600, H: 70, B: 46, SPAN: 120000 };');
+  const f = liftBs(['kalshiBeatNote', 'kalshiEcgShapeAt', 'kalshiEcgNoise', 'kalshiHeartbeatPath', 'kalshiHeartbeatSvg'], 'var KAL_ECG = { W: 600, H: 70, B: 46, SPAN: 60000 }; var KAL_ECG_SHAPES = { beat: [[-14, 0], [-11, -3], [-8, 0], [-3, 0], [-1.5, 5], [0, -36], [2, 10], [4, 0], [9, 0], [13, -8], [17, 0]], read: [[-2, 0], [0, -9], [2, 3], [4, 0]], order: [[-6, 0], [-3, 8], [0, -44], [3, 14], [6, -16], [9, 0]] };');
   const NOW = 1000000000;
+  const ys = (svg) => (svg.split('kal-ecg-line')[0].split('<path d="')[1] || '').match(/[ML][\d.]+ (-?[\d.]+)/g).map((x) => Number(x.split(' ')[1]));
+  const tall = (svg, below) => { let runs = 0, inRun = false; for (const y of ys(svg)) { if (y < below && !inRun) runs++; inRun = y < below; } return runs; };
+  // Consequence: the line is never dead while the bot is checking in, and never invents a beat.
   const flat = f.kalshiHeartbeatSvg([], NOW, 'ok');
-  assert.ok(/kal-ecg ok/.test(flat) && !/L[\d.]+ -?\d+\.?\d* L/.test(flat.split('kal-ecg-line')[0].split('<path')[1] || ''), 'no beats seen: a flat line');
-  const one = f.kalshiHeartbeatSvg([NOW - 30000], NOW, 'ok');
-  assert.ok(/<path d="M0 46 L/.test(one) && (one.match(/L[\d.]+ 10 /g) || []).length === 1, 'one beat is one spike (36 above the baseline)');
-  const three = f.kalshiHeartbeatSvg([NOW - 20000, NOW - 60000, NOW - 100000], NOW, 'ok');
-  assert.strictEqual((three.match(/L[\d.]+ 10 /g) || []).length, 3, 'three beats, three spikes, oldest to the left');
-  assert.strictEqual((f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down').match(/L[\d.]+ 10 /g) || []).length, 0, 'a beat older than two minutes has scrolled off');
+  assert.ok(/kal-ecg ok/.test(flat) && ys(flat).every((y) => y === 46), 'no beats seen: a perfectly flat line, nothing invented');
+  const one = f.kalshiHeartbeatSvg([NOW - 20000], NOW, 'ok');
+  assert.ok(/<path d="M0\.0 4\d\.\d/.test(one) && tall(one, 14) === 1, 'one check is one tall beat: ' + tall(one, 14));
+  assert.ok(new Set(ys(one).filter((y) => y > 44 && y < 48)).size > 5, 'while checks arrive the baseline has a small tremor, so the line is alive');
+  const three = f.kalshiHeartbeatSvg([NOW - 10000, NOW - 30000, NOW - 50000], NOW, 'ok');
+  assert.strictEqual(tall(three, 14), 3, 'three checks, three beats, oldest to the left');
+  assert.strictEqual(tall(f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down'), 14), 0, 'a check older than a minute has scrolled off');
+  assert.ok(ys(f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down')).every((y) => y === 46), 'and with no recent check the line is flat, no tremor');
   assert.ok(/kal-ecg-gap down/.test(f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down')) && /kal-ecg-gap quiet/.test(f.kalshiHeartbeatSvg([NOW - 200000], NOW, 'quiet')) && !/kal-ecg-gap/.test(one), 'a quiet or down state draws the flat dashed gap, a healthy one does not');
+  // Market reads are small ticks and orders are tall spikes, each only where they really happened.
+  const reads = [NOW - 5000, NOW - 10000, NOW - 15000, NOW - 20000];
+  const withReads = f.kalshiHeartbeatSvg([NOW - 30000], NOW, 'ok', reads, []);
+  assert.strictEqual(tall(withReads, 14), 1, 'market reads are small ticks, not beats');
+  assert.ok(ys(withReads).filter((y) => y < 43).length >= reads.length, 'but each one is visible');
+  const withOrder = f.kalshiHeartbeatSvg([NOW - 30000], NOW, 'ok', [], [NOW - 12000]);
+  assert.ok(ys(withOrder).some((y) => y < 6), 'an order is a taller spike than a check (46 - 44)');
   const b = f.kalshiBeatNote([], 5); f.kalshiBeatNote(b, 5); f.kalshiBeatNote(b, 65);
   assert.deepStrictEqual(b, [5, 65], 'a check time is noted once, and a new one is added');
   assert.deepStrictEqual(f.kalshiBeatNote([1], NaN), [1], 'no check time, nothing added');
