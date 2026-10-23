@@ -737,7 +737,7 @@
 
   /* The signed-out screen (the owner, Oct 23, 2026: "we have to look and be professional now that we are an LLC", "simple", "a snapshot of our account page and our market brief"): black with one accent, the slogan, a small sign-in
      and two window snapshots of the Account page and the Market Brief. The snapshots are drawn in CSS with every figure and label blurred out to plain bars, because the page is public and makes no claim about size, markets or results.
-     It has its OWN palette on the gate (so the dashboard theme is untouched) in two colours, Emerald and White, and three layouts (Two windows, Side by side, Rising); Settings picks both (html[data-login-color], html[data-login-layout]).
+     It has its OWN palette on the gate (so the dashboard theme is untouched) in two colours, Emerald and White, and one layout (two windows); Settings picks the colour (html[data-login-color]).
      Motion is only a rise-in and a slow float, and both stop under reduced motion and the Settings switch. */
   .auth-gate{
     --ink:#050806; --panel:#0e1612; --panel-raised:#16221b; --border:#1d2c24; --paper:#f1f7f2; --muted:#9db0a4;
@@ -795,21 +795,9 @@
   .win-hl{ display:grid; gap:8px; margin-top:12px; }
   .win-list{ display:grid; gap:2px; }
   .bk{ display:inline-block; border-radius:6px; background:linear-gradient(90deg, rgba(255,255,255,.2), rgba(255,255,255,.07)); vertical-align:middle; }
-  /* Layout B, Two windows: the Brief behind, the Account in front, tilted a little each way. */
-  html:not([data-login-layout]) .front-win-b, html[data-login-layout="b"] .front-win-b{ right:0; top:40px; width:min(480px, 44%); transform:rotate(2deg); }
-  html:not([data-login-layout]) .front-win-a, html[data-login-layout="b"] .front-win-a{ right:15%; top:200px; width:min(480px, 44%); transform:rotate(-2deg); z-index:3; }
-  /* Layout F, Side by side: the Brief to the right, the Account overlapping it low on the left, both level. */
-  html[data-login-layout="f"] .front-win-b{ right:0; top:70px; width:min(420px, 39%); }
-  html[data-login-layout="f"] .front-win-a{ right:22%; top:240px; width:min(420px, 39%); z-index:3; }
-  /* Layout E, Rising: the slogan centred, the Account window rising from below in perspective, the Brief hidden. */
-  html[data-login-layout="e"] .front-copy{ left:0; right:0; width:auto; text-align:center; top:70px; }
-  html[data-login-layout="e"] .front-line{ margin-left:auto; margin-right:auto; }
-  html[data-login-layout="e"] .front-win-b{ display:none; }
-  html[data-login-layout="e"] .front-win-a .win{ aspect-ratio:16 / 5.4; }
-  html[data-login-layout="e"] .front-sample{ left:0; right:0; max-width:none; text-align:center; bottom:auto; top:350px; }
-  html[data-login-layout="e"] .front-win-a .win-tiles{ display:none; }
-  html[data-login-layout="e"] .front-win-a{ left:50%; top:385px; width:min(860px, 82%); margin-left:min(-430px, -41%); transform:perspective(1600px) rotateX(18deg); transform-origin:center top; }
-  html[data-login-layout="e"] .front-shots::after{ content:""; position:absolute; left:0; right:0; bottom:40px; height:130px; background:linear-gradient(transparent, var(--front-g1)); z-index:4; }
+  /* Two windows: the Brief behind, the Account in front, tilted a little each way. */
+  .front-win-b{ right:0; top:40px; width:min(480px, 44%); transform:rotate(2deg); }
+  .front-win-a{ right:15%; top:200px; width:min(480px, 44%); transform:rotate(-2deg); z-index:3; }
   @keyframes frontUp{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; } }
   @keyframes frontFloat{ 0%, 100%{ transform:translateY(0); } 50%{ transform:translateY(-9px); } }
   .front-note{ margin:0 0 8px; color:var(--muted); font-size:11.5px; line-height:1.55; max-width:860px; position:relative; z-index:5; }
@@ -820,7 +808,6 @@
     .front-top{ flex-direction:column; }
     .front-main{ min-height:0; }
     .front-copy{ position:static; width:auto; padding:34px 0 20px; }
-    html[data-login-layout="e"] .front-copy{ text-align:left; }
     .front-shots{ display:none; }
     .front-sample{ display:none; }
   }
@@ -954,8 +941,7 @@
       var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
       if(window.localStorage.getItem('shwoopnet:skin') === 'mono'){ document.documentElement.setAttribute('data-skin', 'mono'); }
-      var ll = window.localStorage.getItem('shwoopnet:loginLayout'), lc = window.localStorage.getItem('shwoopnet:loginColor');
-      if(ll === 'b' || ll === 'f' || ll === 'e'){ document.documentElement.setAttribute('data-login-layout', ll); }
+      var lc = window.localStorage.getItem('shwoopnet:loginColor');
       if(lc === 'em' || lc === 'wh'){ document.documentElement.setAttribute('data-login-color', lc); }
     }catch(e){}
   })();
@@ -1097,7 +1083,6 @@
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
         landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto',
         skin: s.skin === 'mono' ? 'mono' : (s.skin === 'ledger' ? 'ledger' : null), // null = no explicit choice synced yet, so this device's own choice stays
-        loginLayout: (s.loginLayout === 'b' || s.loginLayout === 'f' || s.loginLayout === 'e') ? s.loginLayout : null,
         loginColor: (s.loginColor === 'em' || s.loginColor === 'wh') ? s.loginColor : null
       };
     },
@@ -1492,18 +1477,6 @@
 
           <div class="settings-row">
             <div>
-              <div class="settings-row-title">Login page layout</div>
-              <div class="settings-row-desc">How the signed-out page is laid out. You see it after you sign out.</div>
-            </div>
-            <div class="settings-choice-group" id="loginLayoutChoice">
-              <button class="tf-btn" data-value="b">Two windows</button>
-              <button class="tf-btn" data-value="f">Side by side</button>
-              <button class="tf-btn" data-value="e">Rising</button>
-            </div>
-          </div>
-
-          <div class="settings-row">
-            <div>
               <div class="settings-row-title">Login page colour</div>
               <div class="settings-row-desc">Black with emerald, or black and white.</div>
             </div>
@@ -1883,24 +1856,22 @@
     applySkinPref(saved, true);
   })();
 
-  // ---------- Settings: login page look (layout and colour) ----------
-  // Only the signed-out page reads these, through two attributes on <html> that the inline head script sets before first paint. Stored on this device and synced with the account like the theme.
-  function applyLoginPref(kind, val, skipSync){
-    var isLayout = kind === 'loginLayout', ok = isLayout ? ['b', 'f', 'e'] : ['em', 'wh'];
-    if(ok.indexOf(val) < 0){ val = ok[0]; }
-    document.documentElement.setAttribute(isLayout ? 'data-login-layout' : 'data-login-color', val);
-    var group = document.getElementById(isLayout ? 'loginLayoutChoice' : 'loginColorChoice');
+  // ---------- Settings: login page colour ----------
+  // Only the signed-out page reads this, through one attribute on <html> that the inline head script sets before first paint. Stored on this device and synced with the account like the theme.
+  function applyLoginColor(val, skipSync){
+    if(val !== 'em' && val !== 'wh'){ val = 'em'; }
+    document.documentElement.setAttribute('data-login-color', val);
+    var group = document.getElementById('loginColorChoice');
     if(group){ group.querySelectorAll('.tf-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.value === val); }); }
-    try{ window.localStorage.setItem('shwoopnet:' + kind, val); }catch(e){}
-    if(!skipSync) syncUserSetting(kind, val);
+    try{ window.localStorage.setItem('shwoopnet:loginColor', val); }catch(e){}
+    if(!skipSync) syncUserSetting('loginColor', val);
   }
-  [['loginLayout', 'loginLayoutChoice', 'b'], ['loginColor', 'loginColorChoice', 'em']].forEach(function(q){
-    var group = document.getElementById(q[1]);
-    group.querySelectorAll('.tf-btn').forEach(function(b){ b.addEventListener('click', function(){ applyLoginPref(q[0], b.dataset.value); }); });
-    var saved = q[2];
-    try{ saved = window.localStorage.getItem('shwoopnet:' + q[0]) || q[2]; }catch(e){}
-    applyLoginPref(q[0], saved, true);
-  });
+  document.getElementById('loginColorChoice').querySelectorAll('.tf-btn').forEach(function(b){ b.addEventListener('click', function(){ applyLoginColor(b.dataset.value); }); });
+  (function initLoginColor(){
+    var saved = 'em';
+    try{ saved = window.localStorage.getItem('shwoopnet:loginColor') || 'em'; }catch(e){}
+    applyLoginColor(saved, true);
+  })();
 
   // ---------- Settings: clock format ----------
   var clockFormatEl = document.getElementById('clockFormatChoice');
@@ -3806,7 +3777,6 @@
       kalBotLayout: window.__kalBotLayout ? window.__kalBotLayout.get() : null,
       clockFormat: clockFormatPref || '24',
       landingPref: storedLandingPref,
-      loginLayout: document.documentElement.getAttribute('data-login-layout') || 'b',
       loginColor: document.documentElement.getAttribute('data-login-color') || 'em'
     };
     window.__shwoopAPI.saveUserSettings(currentUid, snapshot).catch(function(err){
@@ -3834,8 +3804,7 @@
     applyLandingPref(shaped.landingPref, true);
     if(shaped.skin !== null){ applySkinPref(shaped.skin, true); }
     applyClockFormat(shaped.clockFormat, true);
-    if(shaped.loginLayout !== null){ applyLoginPref('loginLayout', shaped.loginLayout, true); }
-    if(shaped.loginColor !== null){ applyLoginPref('loginColor', shaped.loginColor, true); }
+    if(shaped.loginColor !== null){ applyLoginColor(shaped.loginColor, true); }
     var dark = shaped.darkMode !== null ? shaped.darkMode
       : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     applyDarkModePref(dark, true);

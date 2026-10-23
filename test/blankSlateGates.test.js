@@ -54,7 +54,7 @@ gates.B2 = () => {
 gates.B3 = () => {
   const shape = new Function('return {' + /shapeUserSettings: (function[\s\S]*?\n    \}),\n/.exec(html)[1].replace(/^function/, 'shapeUserSettings: function') + '}')().shapeUserSettings;
   const out = shape({ settings: {} });
-  assert.deepStrictEqual(Object.keys(out).sort(), ['clockFormat', 'darkMode', 'kalBotLayout', 'landingPref', 'loginColor', 'loginLayout', 'reduceMotion', 'skin']);
+  assert.deepStrictEqual(Object.keys(out).sort(), ['clockFormat', 'darkMode', 'kalBotLayout', 'landingPref', 'loginColor', 'reduceMotion', 'skin']);
   assert.strictEqual(shape({}), null, 'never synced is null, not defaults');
   const hostile = shape({ settings: { tickerEnabled: false, hideAccountDock: true, soundAlerts: false, landingPref: 'trades', alpacaKeyId: 'x' } });
   assert.deepStrictEqual(Object.keys(hostile).sort(), Object.keys(out).sort(), 'old synced fields are ignored, not carried');
@@ -67,7 +67,7 @@ gates.B3 = () => {
 gates.B4 = () => {
   const page = /<main class="page" id="page-settings"[\s\S]*?<\/main>/.exec(code)[0];
   const titles = [...page.matchAll(/<div class="settings-row-title">([^<]*)<\/div>/g)].map((m) => m[1].trim());
-  assert.deepStrictEqual(titles, ['Account', 'Dark mode', 'Theme', 'Login page layout', 'Login page colour', 'Default landing page', 'Clock format', 'Limit graphics', 'Reset preferences']);
+  assert.deepStrictEqual(titles, ['Account', 'Dark mode', 'Theme', 'Login page colour', 'Default landing page', 'Clock format', 'Limit graphics', 'Reset preferences']);
   const landing = [...page.matchAll(/<button class="tf-btn" data-value="(\w+)"( id="landingKalshiBtn")?/g)].map((m) => m[1]);
   assert.ok(['auto', 'brief', 'kalshi'].every((v) => landing.includes(v)) && !landing.includes('trades'), 'the landing page choices are Auto, Brief and Kalshi');
 };

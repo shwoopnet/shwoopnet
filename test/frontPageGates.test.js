@@ -23,7 +23,7 @@ assert.ok(/front-win-a/.test(gate) && /front-win-b/.test(gate) && /Market Brief/
 assert.ok((shots.match(/Sample data/g) || []).length === 2 && /Sample screens with made-up numbers, shown for illustration only\. They are not real account data or results\./.test(gate), 'each window says Sample data and a caption says the numbers are made up and not real results');
 assert.ok(!/%|\+\s?\$|win rate|profit|return|performance|Bitcoin|gold|Kalshi|contracts?\b/i.test(shotText.replace(/Reinvest pool|Stake per trade/g, '')), 'the sample screens show no gain, percentage, result or market name, only obviously dummy numbers');
 assert.ok(!/class="[^"]*\b(g|gain|loss)\b/.test(shots), 'and nothing in them is coloured as a gain or a loss');
-assert.ok(/id="loginLayoutChoice"/.test(html) && /id="loginColorChoice"/.test(html) && /data-login-layout/.test(html) && /data-login-color/.test(html), 'Settings picks the login layout and colour, and the page reads them before first paint');
+assert.ok(/id="loginColorChoice"/.test(html) && /data-login-color/.test(html) && !/loginLayout|data-login-layout/.test(html), 'Settings picks only the login colour (one layout, two windows), and the page reads it before first paint');
 const front = (/\/\* The signed-out screen[\s\S]*?\.auth-title\{/.exec(html) || [''])[0].replace(/\/\*[\s\S]*?\*\//g, '');
 const palettes = [...front.matchAll(/\.auth-gate\{([^}]*)\}/g)].map((m) => m[1]);
 assert.ok(palettes.length >= 2 && /--amber:#1fd68a/.test(palettes.join('')) && /--amber:#ffffff/.test(palettes.join('')), 'the two palettes (emerald and white) are declared on the gate itself');
