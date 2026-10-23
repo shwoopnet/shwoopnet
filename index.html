@@ -172,8 +172,9 @@
   /* Room for the fixed sidebar so page content never sits underneath it --
      right-side padding on wide screens where the sidebar is a vertical
      rail, bottom padding on narrow screens where it becomes a bottom bar. */
-  .app{ padding-left: 212px; }
-  @media (max-width: 900px){ .app{ padding-left:0; padding-bottom:76px; } }
+  /* The page column hugs the rail instead of centring on a wide screen, so there is never a wide empty gap between the two (the owner, Oct 23, 2026: "fix this weird gap"). */
+  .app{ padding-left: 212px; margin-left: 0; margin-right: auto; }
+  @media (max-width: 900px){ .app{ padding-left:0; padding-bottom:76px; margin: 0 auto; } }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
