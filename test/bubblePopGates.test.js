@@ -22,7 +22,7 @@ function fnSource(name) {
 // The headings and market names (words) use the wordmark's font; every NUMBER stays in the plain font, tabular, so figures like 774.14 stay easy to read (the owner, Oct 21, 2026).
 gates.P1 = () => {
   // Titan One is the wordmark and its ghost only (the owner, Oct 21, 2026): headings and market names are in the plain font too, with no bubble shadow.
-  for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-brow-name', '.kal-tools-h', '.settings-section-title']) {
+  for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-tools-h', '.settings-section-title']) {
     const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
     assert.ok(m && !/Titan One/.test(m[2]) && /Public Sans/.test(m[2]) && !/text-shadow/.test(m[2]), sel + ' is in the plain font with no bubble shadow');
   }

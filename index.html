@@ -334,14 +334,7 @@
   .kal-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:20px; box-shadow:var(--card-shadow); }
   .kal-card-title{ font-family:'Public Sans', sans-serif; font-size:18px; font-weight:700; letter-spacing:0; margin-bottom:14px; }
   /* Books: the market and its price on one line, the figures under it. */
-  .kal-brow{ padding:10px 0; border-top:1px solid var(--border); }
-  .kal-brow:first-child{ border-top:0; padding-top:0; }
-  .kal-brow-main{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
-  .kal-brow-r{ text-align:right; }
-  .kal-brow-px{ font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; white-space:nowrap; }
-  .kal-brow-side{ font-weight:600; font-size:12px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
   .kal-status{ color:var(--muted); font-size:12.5px; }
-  .kal-books{ display:grid; gap:10px; }
   .kal-name{ font-weight:600; }
   .kal-empty{ color:var(--muted); font-size:13px; }
   .data-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-top:20px; }
@@ -444,21 +437,12 @@
   .kal-donut-leg{ display:flex; flex-direction:column; gap:6px; font-size:13px; min-width:0; }
   .kal-leg{ display:flex; align-items:center; gap:8px; } .kal-leg b{ font-weight:700; } .kal-leg-dot{ width:10px; height:10px; border-radius:50%; flex:none; }
   /* Books as two tiles. */
-  .kal-console .kal-books{ grid-template-columns:1fr 1fr; gap:16px; }
-  .kal-console .kal-brow{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--card-shadow); padding:16px 20px; }
   /* Depth: a market row rises a little under the pointer, and shows the size sitting at the best bid and ask (contracts) with a bar for how the two compare. */
-  .kal-console .kal-brow{ transition: box-shadow .2s ease, transform .2s ease; }
-  .kal-console .kal-brow:hover{ box-shadow: var(--card-shadow-lift); transform: translateY(-1px); }
-  .kal-depth{ display:flex; height:4px; border-radius:2px; overflow:hidden; margin-top:6px; background:var(--border); }
-  .kal-depth > i{ display:block; height:100%; background:var(--paper); opacity:.55; }
-  .kal-brow-name{ font-family:'Public Sans', sans-serif; font-weight:700; font-size:17px; letter-spacing:0; } .kal-brow-when{ color:var(--muted); font-size:12px; margin-top:2px; }
   /* Phones: the price lines under each market are hidden. The Performance card (P/L line, orders ring, settled-trade bars) came back on phones on Oct 21, 2026 at the owner's request, now that the calm view made
      it quiet enough to fit; it stacks to one column below. */
   @media (max-width:700px){
     /* The price block drops under the name instead of sharing its row, so "spread, round trip" and the size line stay on one line each. */
-    .kal-brow-main{ flex-direction:column; align-items:stretch; gap:6px; }
-    .kal-brow-r{ text-align:left; }
-    /* The Tools menu opens as a sheet above the bottom bar, the full width of the screen. Anchored to its button it ran off the left edge of a phone and cut the buttons in half. */
+        /* The Tools menu opens as a sheet above the bottom bar, the full width of the screen. Anchored to its button it ran off the left edge of a phone and cut the buttons in half. */
     .kal-tools-body{ position:fixed; left:12px; right:12px; top:auto; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); min-width:0; max-width:none; max-height:65vh; }
   }
   /* Phones (Oct 21, 2026 audit, measured on a 390px render): the smallest controls were 19 to 26px tall, under the 36 to 44px a thumb needs, and the bottom bar labels were 9.5px.
@@ -477,8 +461,7 @@
   }
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
-    .kal-console .kal-books{ grid-template-columns:1fr; }
-    .kal-tr{ grid-template-columns:minmax(0,1fr) auto; row-gap:2px; padding:10px 18px; }
+      .kal-tr{ grid-template-columns:minmax(0,1fr) auto; row-gap:2px; padding:10px 18px; }
     .kal-tr-head{ display:none; }
     .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:11.5px; }
     .kal-tr > .kal-tr-f{ grid-column:1; font-weight:600; }
@@ -501,7 +484,6 @@
   .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; cursor:grab; user-select:none; -webkit-user-select:none; }
   .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ opacity:.45; }
   .kal-move{ display:flex; justify-content:flex-end; gap:6px; margin-bottom:6px; }
-  .kal-bot-grid .kal-books{ grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr)); }
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
   .kal-fold[open] > summary{ margin-bottom:14px; }
   .kal-limits{ font-size:14px; line-height:1.7; }
@@ -514,7 +496,6 @@
      label of the P/L line and the losing bars. Every other figure (the stat tiles and the By market and By price paid rows) is plain text; its sign still says which way it went. The market rows
      keep the name, the time left and the YES price; the spread, round trip and size lines and the depth bar are one tap away in Copy all stats, not on the face of the page. */
   .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
-  .kal-brow-r .kal-brow-when, .kal-brow-r .kal-depth{ display:none; }
   /* Presentation view (the owner, Oct 21, 2026: a clean page to show people). The Privacy button (or the Layout menu checkbox) sets data-present on the page; it is never saved, so a reload is always the full page. It only HIDES:
      the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. Every number is still computed and the bot is untouched. */
   html[data-present="on"] #kalTools{ display:none; }
@@ -697,7 +678,7 @@
   /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One is only the wordmark. */
   .kal-bub{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; }
   /* Soft windows everywhere (docs/DESIGN_SYSTEM.md section 2): every page card is the front page's window (16px, a faint top highlight, the soft shadow) and every tile inside one is the small card (12px, a faint wash). */
-  .kal-card:not(.kal-card-bare), .settings-card, .market-news-list, .kal-console .kal-brow{
+  .kal-card:not(.kal-card-bare), .settings-card, .market-news-list{
     border-radius:16px; background-image:linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%);
   }
   .kal-tile, .data-tile{ border-radius:12px; background:rgba(255,255,255,.025); }
@@ -713,10 +694,9 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"acct acct" "books pos" "books trd"; grid-template-rows:auto auto 1fr; gap:18px; }
+  .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "pos" "trd"; gap:18px; }
   .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
   .kal-console [data-card="account"]{ grid-area:acct; }
-  .kal-console [data-card="books"]{ grid-area:books; align-self:start; }
   .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
   .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
@@ -728,12 +708,9 @@
   .kal-console [data-card="account"] #kalBotStatus .kal-rows > div, .kal-console [data-card="account"] #kalBotTotals .kal-rows > div{ flex-direction:column; justify-content:flex-start; gap:2px; }
   .kal-console [data-card="account"] #kalBotTotals{ grid-column:3; }
   .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
-  .kal-console [data-card="trades"] .kal-tr-head{ display:none; }
-  .kal-console .kal-books{ grid-template-columns:1fr; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
-  .kal-console .kal-brow-held{ border-color:var(--amber-dim); }
   @media (max-width:900px){
-    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "books" "pos" "trd"; grid-template-rows:none; }
+    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "pos" "trd"; }
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals{ grid-column:1; }
   }
@@ -762,9 +739,7 @@
     .front-eyebrow, .front-h1, .front-line, .front-win, .front-win-a .win{ animation: none; }
     .brand-name span{ transition: none; }
     .brand:hover .brand-name span{ transform: none; }
-    .kal-console .kal-brow{ transition: none; }
-    .kal-console .kal-brow:hover{ transform: none; }
-    .page.enter .kal-card, .page.enter .settings-card, .page.enter .brief-win, .page.enter .kal-tile{ animation: none; }
+        .page.enter .kal-card, .page.enter .settings-card, .page.enter .brief-win, .page.enter .kal-tile{ animation: none; }
     .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
     .tape-track{ animation: none; }
@@ -775,8 +750,6 @@
   }
   [data-reduce-motion="true"] .brand-name span{ transition: none; }
   [data-reduce-motion="true"] .brand:hover .brand-name span{ transform: none; }
-  [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
-  [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
   [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
@@ -1205,9 +1178,6 @@
       </div>
       </div>
       <div class="kal-main">
-      <div class="kal-card kal-card-bare" data-card="books">
-        <div id="kalBooks" class="kal-books"><div class="kal-empty">Loading...</div></div>
-      </div>
       <div class="kal-card kal-card-flush" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
@@ -2130,46 +2100,13 @@
 
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
 
-  // Top of book: how many contracts are waiting at the best bid and the best ask, and a bar for the bid's share of the two. Only drawn when both sizes are known; a thin side is plain to see.
-  function kalshiDepthHtml(m){
-    var b = Number(m && m.yesBidSz), a = Number(m && m.yesAskSz);
-    if(!(b >= 0) || !(a >= 0) || b + a <= 0 || m.yesBidSz == null || m.yesAskSz == null){ return ''; }
-    var fmt = function(v){ return v.toLocaleString('en-US', { maximumFractionDigits: 0 }); };
-    return '<div class="kal-brow-when" title="Contracts waiting at the best bid and the best ask">size ' + fmt(b) + ' bid / ' + fmt(a) + ' ask</div>' +
-      '<div class="kal-depth" aria-hidden="true"><i style="width:' + (b / (b + a) * 100).toFixed(1) + '%"></i></div>';
-  }
-
-  // The Bot page has no price charts any more (the owner, Oct 23, 2026: "remove charts from the bot page entirely"). A market the account holds a position in is marked with a brighter outline. Read from the account's own positions,
-  // the same list the Open positions card uses, so "in a trade" means a real position, not an order that was sent. No position, or positions not read yet, means no chart.
-  function kalshiInTrade(ticker){
-    var a = kalshiLiveAcct, list = a && a.positions && a.positions.ok && Array.isArray(a.positions.positions) ? a.positions.positions : [];
-    return list.some(function(p){ return p && p.ticker === ticker && Number.isFinite(Number(p.position)) && Number(p.position) !== 0; });
-  }
+  // The Bot page is the overview and the live watch, not a market list (the owner, Oct 23, 2026: "remove these too from bot page"). The relay is still read while the page is open, because the Open positions card
+  // takes each position's time left and price from it, but no market card is drawn.
   function renderKalshiBooks(data){
-    var el = document.getElementById('kalBooks');
     var st = document.getElementById('kalStatus');
     kalshiBooksLast = data || null;
     renderKalshiPositions();
-    // Only the markets the page knows. The deployed relay can lag the page by a deploy and still send a market that was dropped, which would show up as a bare ticker.
-    var rows = ((data && data.markets) || []).filter(function(m){ return m && ['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'].indexOf(m.series) > -1; });
-    if(!rows.length){
-      el.innerHTML = '<div class="kal-empty">No open markets right now.</div>';
-      st.textContent = 'No open markets';
-      return;
-    }
-    var now = Date.now();
-    var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: 'Ethereum 15m', KXXRP15M: 'XRP 15m', KXDOGE15M: 'Dogecoin 15m' };
-    el.innerHTML = rows.map(function(m){
-      var hasBook = m.yesBid != null && m.yesAsk != null;
-      var spread = hasBook ? m.yesAsk - m.yesBid : null;
-      var rt = hasBook ? kalshiRoundTrip(m.yesAsk, m.yesBid, 1) : null;
-      var left = kalshiSecsLeft(m.closeTime, now);
-      return '<div class="kal-brow' + (kalshiInTrade(m.ticker) ? ' kal-brow-held' : '') + '"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
-        '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
-        '<div class="kal-brow-r"><div class="kal-brow-px" title="The price of a YES contract: what buyers bid and what sellers ask. A NO contract costs 100c minus these.">' + (hasBook ? '<span class="kal-brow-side">Yes</span> ' + (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + '</div>';
-    }).join('');
-    st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
+    st.textContent = data && Number.isFinite(data.fetchedAt) ? 'Updated ' + kalTime(data.fetchedAt) + ' CT' : '';
   }
 
   var kalshiPollTimer = null;
@@ -2184,10 +2121,6 @@
       // short line, never the markup, and stop polling: the refusal is permanent
       // (it is about where the relay runs), so asking again every 5s only repeats it.
       var refused = m.indexOf('403') >= 0;
-      document.getElementById('kalBooks').innerHTML = '<div class="kal-empty">' +
-        (refused
-          ? 'Kalshi refuses requests from Google Cloud, which the live relay runs on, so live prices are not available here.'
-          : 'Could not load Kalshi data. The relay function may not be deployed yet.') + '</div>';
       st.textContent = refused ? 'Kalshi refused the request (HTTP 403)'
         : 'Error: ' + m.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
       if(refused){ stopKalshiPoll(); }
@@ -2196,7 +2129,7 @@
   function startKalshiPoll(){
     stopKalshiPoll();
     refreshKalshi();
-    kalshiPollTimer = setInterval(function(){ if(!document.hidden && !kalshiBooksHidden()){ refreshKalshi(); } }, 5000);
+    kalshiPollTimer = setInterval(function(){ if(!document.hidden){ refreshKalshi(); } }, 5000);
   }
   function stopKalshiPoll(){
     if(kalshiPollTimer){ clearInterval(kalshiPollTimer); kalshiPollTimer = null; }
@@ -2953,7 +2886,7 @@
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['positions', 'Open positions'], ['trades', 'Recent trades'], ['books', 'Live books']];
+    var OPTIONAL = [['positions', 'Open positions'], ['trades', 'Recent trades']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -3189,7 +3122,6 @@
   })();
 
   // One page: the bot, the session and the live books together. The books poll only while their card is showing.
-  function kalshiBooksHidden(){ var c = document.querySelector('#kalTabBot [data-card="books"]'); return !c || c.hidden; }
   function kalshiOnShow(){ startKalshiBot(); startKalshiPoll(); }
   function kalshiOnHide(){ stopKalshiPoll(); stopKalshiBot(); }
 

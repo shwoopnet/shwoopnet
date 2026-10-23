@@ -176,7 +176,7 @@ gates.G24 = () => {
 // On a phone the page must not scroll sideways: the live books grid may never ask for more than the card is wide, and the Layout menu's
 // controls are big enough to tap.
 gates.G25 = () => {
-  assert.ok(/\.kal-bot-grid \.kal-books\{ grid-template-columns:repeat\(auto-fit,minmax\(min\(380px,100%\),1fr\)\); \}/.test(html), 'books grid is capped at the card width');
+  assert.ok(!/kal-books|kalBooks/.test(html), 'the market list is gone, so there is no books grid to overflow');
   assert.ok(/\.kal-layout-body label\{[^}]*min-height:34px/.test(html) && /\.kal-layout-body input\[type=checkbox\]\{ width:18px; height:18px; \}/.test(html), 'layout controls are tappable');
 };
 
