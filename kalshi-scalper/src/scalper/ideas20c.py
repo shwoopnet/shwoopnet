@@ -6,9 +6,12 @@ from __future__ import annotations
 
 import statistics as st
 import sys
+import time
+from datetime import datetime, timezone
 
 from . import ideas20 as I
 from . import ideas20b as B
+from .calibration import cluster_mean_z
 from .paths import DATA_DIR
 
 SERIES = ("KXXRP15M", "KXDOGE15M", "KXGOLD15M")
@@ -42,7 +45,42 @@ def pooled(mks: dict[str, dict], name: str, cut: str | None = None):
     return rows
 
 
+FWD_RESULT = DATA_DIR / "absorb_f_result.txt"
+FWD_START = int(datetime(2026, 10, 24, tzinfo=timezone.utc).timestamp())
+FWD_READ_DATE = int(datetime(2026, 12, 1, tzinfo=timezone.utc).timestamp())
+FWD_MIN_N, FWD_C, FWD_Z, FWD_PF = 200, 0.010, 2.0, 1.3
+
+
+def absorb_forward(now: float | None = None) -> str:
+    """ABSORB-F: ABSORB (previous-minute volume >= 1.5x the one before while the mid moved under 3c, buy the L1 favourite) on XRP, Dogecoin and gold markets closing from
+    2026-10-24 only, scored against the same series' L1 baseline of that period. Read on or after 2026-12-01, once."""
+    if (now if now is not None else time.time()) < FWD_READ_DATE:
+        return "Refusing the registered read: before 2026-12-01."
+    if FWD_RESULT.exists():
+        return f"Refusing to run again: {FWD_RESULT} exists."
+    I.SOURCES = ("fresh",)
+    mks = {s: {tk: m for tk, m in I.load_btc(s).items() if m["close"] >= FWD_START} for s in SERIES}
+    rows = pooled(mks, "ABSORB", "9999-12-31")
+    if len(rows) < FWD_MIN_N:
+        out = f"ABSORB-F: NOT_ENOUGH_DATA (n={len(rows)}, need {FWD_MIN_N})"
+    else:
+        m, _, z = cluster_mean_z([(r["day"], r["net"]) for r in rows])
+        raw = I.pf([{**r, "net": r["raw"]} for r in rows])
+        ds = sorted({r["day"] for r in rows})
+        mid = ds[len(ds) // 2]
+        h = [st.mean(r["net"] for r in rows if (r["day"] < mid) == first) for first in (True, False)]
+        pos = sum(1 for s in SERIES if (v := [r["net"] for r in rows if r["series"] == s]) and st.mean(v) > 0)
+        ok = m >= FWD_C and z >= FWD_Z and raw >= FWD_PF and h[0] > 0 and h[1] > 0 and pos >= MIN_SERIES_POS
+        v = "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if (m < 0.003 or z < 1.0) else "NOT_ENOUGH_DATA")
+        out = f"ABSORB-F: {v}; n={len(rows)} adjusted mean {100 * m:+.2f}c z {z:+.2f} raw PF {raw:.2f} halves {100 * h[0]:+.2f}c / {100 * h[1]:+.2f}c series positive {pos} of 3"
+    FWD_RESULT.write_text(out + "\n")
+    return out
+
+
 def main(argv: list[str]) -> None:
+    if len(argv) >= 2 and argv[1] == "absorb_forward":
+        print(absorb_forward())
+        return
     if len(argv) < 2 or argv[1] != "run":
         print(__doc__)
         return
