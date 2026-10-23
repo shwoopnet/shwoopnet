@@ -5734,3 +5734,7 @@ Themes (information only):
 - **Prediction (now):** +0.5c, a miss: a rule picked after seeing the test days regresses.
 - **FALSIFIED** if R n >= 500 and (difference < +0.2c or z < 1.0); NOT_ENOUGH_DATA if n < 500; NOT_YET_FALSIFIED only if every condition holds. Read once now on 2026-10-14 to 10-22; a second, separate window (markets closing from 2026-10-24) is read with the other forward claims on 2026-11-12.
 - Tries: +11 for SCAN1 (10 rules) and +1 for SCAN2-F (running count about 4,718). Code: `scan1.scan2f`.
+
+### SCAN2-F result (2026-10-23, read once on 2026-10-14 to 10-22): FALSIFIED
+
+R (`spread <= 1.05c` AND 2 to 4 minutes in band): 790 entries at **+0.03c**, the rest 2,683 at **+0.70c** on 9 days; difference **-0.28c, z -0.39**; halves -0.45c and -0.14c; stress -0.26c; loss rate 5.4% against 6.4%. The only broad rule that carried from train to test did not carry to the fresh days (prediction: a miss at +0.5c; it was worse than that). Reading: the 23 test days were a single stretch that lifted that rule; rule mining on this history gives nothing that survives a third period. The second window (markets closing from 2026-10-24) is still read with the other forward claims on 2026-11-12, as registered. Tries: SCAN2-F counted above.
