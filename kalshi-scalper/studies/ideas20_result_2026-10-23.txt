@@ -1,0 +1,21 @@
+IDEAS20: 7393 Bitcoin markets, discovery before 2026-09-27, confirmation from 2026-09-27
+SURGE           NOT_ENOUGH_DATA    disc n=   20  +2.35c z +0.48 | conf n=   28  -1.34c z -0.32 | all  +0.20c z +0.06 PF 1.04
+QUIET           NOT_ENOUGH_DATA    disc n=   51  +7.72c z +19.87 | conf n=    9 -14.77c z -1.20 | all  +4.34c z +1.84 PF 2.43
+OIBUILD         NOT_ENOUGH_DATA    disc n=  732  +2.04c z +2.84 | conf n=  471  -1.11c z -0.94 | all  +0.81c z +1.22 PF 1.15
+OIFLAT          NOT_ENOUGH_DATA    disc n=  100  +2.53c z +1.04 | conf n=   28  +4.47c z +1.21 | all  +2.95c z +1.42 PF 1.70
+SURGE_FOLLOW    NOT_ENOUGH_DATA    disc n=  104  +0.80c z +0.22 | conf n=   23 -16.52c z -2.40 | all  -2.34c z -0.72 PF 0.88
+SURGE_FADE      NOT_ENOUGH_DATA    disc n=  102  -4.73c z -1.26 | conf n=   25 +18.74c z +2.99 | all  -0.11c z -0.03 PF 0.99
+ABSORB          NOT_ENOUGH_DATA    disc n=   45  +1.62c z +0.59 | conf n=   21  +6.01c z +11.85 | all  +3.02c z +1.55 PF 2.10
+TIGHT           FALSIFIED          disc n= 1483  +0.90c z +1.58 | conf n=  756  -0.75c z -0.76 | all  +0.34c z +0.67 PF 1.06
+WIDENING        NOT_ENOUGH_DATA    disc n=    1  +0.00c z +0.00 | conf n=    0  +0.00c z +0.00 | all  +0.00c z +0.00 PF inf
+SPREADCOLLAPSE  NOT_ENOUGH_DATA    disc n=   13  +6.76c z +9.10 | conf n=    2  +7.67c z +38.42 | all  +6.88c z +10.56 PF inf
+RANGE           FALSIFIED          disc n= 1140  +0.67c z +0.91 | conf n=  574  -0.82c z -0.66 | all  +0.17c z +0.27 PF 1.03
+LIFTING         FALSIFIED          disc n= 1160  +1.17c z +1.83 | conf n=  628  -0.92c z -0.78 | all  +0.43c z +0.73 PF 1.08
+PRIORMOVE       FALSIFIED          disc n=  412  +1.90c z +2.00 | conf n=  166  -4.02c z -1.71 | all  +0.20c z +0.20 PF 1.03
+CHOPPY          NOT_ENOUGH_DATA    disc n=  474  +1.41c z +1.27 | conf n=  231  -0.16c z -0.12 | all  +0.89c z +1.02 PF 1.16
+TREND           NOT_ENOUGH_DATA    disc n=  700  +1.98c z +2.70 | conf n=  339  -0.91c z -0.69 | all  +1.04c z +1.55 PF 1.21
+ROUND           NOT_ENOUGH_DATA    disc n=  131  +1.77c z +0.95 | conf n=   58  -2.17c z -0.62 | all  +0.56c z +0.32 PF 1.10
+MOM_FOLLOW      FALSIFIED          disc n= 1646  -0.83c z -0.74 | conf n=  708  +0.17c z +0.14 | all  -0.53c z -0.61 PF 0.97
+MOM_FADE        FALSIFIED          disc n= 1700  -2.90c z -2.61 | conf n=  723  -4.16c z -3.30 | all  -3.28c z -3.78 PF 0.84
+THIN            NOT_ENOUGH_DATA    disc n=   43  +7.87c z +18.78 | conf n=   19  -3.38c z -0.46 | all  +4.42c z +1.90 PF 2.46
+ARRIVED         FALSIFIED          disc n=  434  -0.79c z -0.56 | conf n=  192  -1.21c z -0.71 | all  -0.92c z -0.83 PF 0.89
