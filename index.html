@@ -749,10 +749,9 @@
   @media (max-width: 400px){
     .auth-box{ padding:24px 18px; }
   }
-  .auth-brand{
-    display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:26px;
-    font-family:'Public Sans', sans-serif; font-weight:700; font-size:16px; letter-spacing:.05em;
-  }
+  /* The sign-in box shows the same wordmark as the header (it used to show a wallet icon and plain text, a different logo from the rest of the site). Centred, with room under it for the extruded shadow. */
+  .auth-brand{ display:flex; flex-direction:column; align-items:center; margin-bottom:34px; }
+  .auth-brand .brand-fin{ padding-left:.5em; }
   .auth-title{ font-family:'Public Sans', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
   .auth-sub{ font-size:12.5px; color: var(--muted); margin:-8px 0 14px; }
   .auth-status{ font-size:12px; color: var(--muted); margin-bottom:14px; }
@@ -1081,15 +1080,9 @@
 
 <div class="auth-gate" id="authGate">
   <div class="auth-box">
-    <div class="auth-brand">
-      <svg viewBox="0 0 100 100" width="24" height="24" aria-hidden="true">
-        <line x1="2" y1="50" x2="8" y2="50" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
-        <line x1="12" y1="50" x2="20" y2="50" stroke="var(--amber)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
-        <line x1="22" y1="50" x2="27" y2="50" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-        <rect x="32" y="28" width="60" height="46" rx="10" fill="none" stroke="var(--amber)" stroke-width="6"/>
-        <circle cx="74" cy="51" r="7" fill="var(--amber)"/>
-      </svg>
-      SHWOOP
+    <div class="auth-brand" role="img" aria-label="Shwoop Financials">
+      <div class="brand-name" aria-hidden="true"><span>S</span><span>H</span><span>W</span><span>O</span><span>O</span><span>P</span></div>
+      <div class="brand-fin" aria-hidden="true">Financials</div>
     </div>
     <div class="auth-title">Sign in</div>
     <div class="auth-sub">Private trading dashboard. Authorized users only.</div>
