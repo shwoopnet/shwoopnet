@@ -5841,3 +5841,14 @@ Gold at 360 s, 1,609 entries, 85 losses (5.3%). Losers vs winners, 7 features pl
 - Side 43 no / 42 yes. Hour blocks and weekdays: small cells (6 to 23 losses), no pattern worth a test.
 - How losses unfold: mean mid of the losing side 0.88, 0.82, 0.70, 0.61, 0.47, then 0.03 at the last candle. 37 of 85 were still above 50c until the final minute (sudden last-minute reversals, nothing to react to). 36 of 85 fell to the 25c exit line at minutes 3 to 5. Only 4 of 1,524 winners touched the 25c line, so the 25c exit rarely cuts a winner.
 - Verdict: no pattern found. NOT_ENOUGH_DATA for any filter. No forward claim registered. Tries +20 (informational).
+
+## Pre-registration: GOLD2 (2026-10-23, before any gold outcome was split by these rules)
+
+Question: do the filters that failed pooled work inside gold alone? Gold only (KXGOLD15M, the `load()` history, 360 s entry, 1,397 entries on 63 days). Three fixed groups, each against the rest of gold, features only:
+- FLAT: rng5 <= 0.15 and |rise3| <= 0.05 (n 210, 54 days).
+- TIGHT: spread <= 0.005 (n 572, 43 days).
+- LONGBAND: tib >= 2 (n 583, 61 days).
+Group sizes were counted from features only. Tries +3 (z bar 2.4 for three).
+Prediction: all three fail (market is calibrated; pooled versions were fragile). 
+NOT_YET_FALSIFIED for a group needs: diff in mean net per contract >= +1.0c, day-clustered z >= 2.4, both halves of the days > 0, fee stress x1.2 > 0.
+FALSIFIED for a group: diff < +0.3c or z < 1.0. Otherwise NOT_ENOUGH_DATA. Run once (`python -m scalper.gold2 run`). Nothing means trade; a pass only registers a forward read on fresh days.
