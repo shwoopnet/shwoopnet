@@ -373,7 +373,7 @@ exports.kalshiL1Session = onCall(async (request) => {
   const events = db.collection("kalshiLiveEvents");
   if (!on) {
     await ref.set({ active: false, endedAt: Date.now(), endedBecause: "switched off by the owner" }, { merge: true });
-    await events.add({ ts: Date.now(), kind: "session ended", detail: "switched off by you" });
+    await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: Date.now(), kind: "session ended", detail: "switched off by you" });
     return { active: false };
   }
   if (CODE_KILL_SWITCH) {
@@ -397,7 +397,7 @@ exports.kalshiL1Session = onCall(async (request) => {
   await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
   // Flag the saved sizing state so the next review raises a collapsed cap to what a fresh start gives (see reviewSizing). Pool, savings and the loss-stop clock are kept.
   if (sizing) await db.collection("kalshiLiveControl").doc("sizing").set({ reseed: true }, { merge: true });
-  await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed every 3 days, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
+  await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed every 3 days, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
   return { active: true };
 });
 
@@ -416,14 +416,14 @@ exports.kalshiFlattenAll = onCall(
     await db.collection("kalshiLiveControl").doc("session").set({ active: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
     await db.collection("kalshiLiveControl").doc("arm").set({ armed: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
     const events = db.collection("kalshiLiveEvents");
-    await events.add({ ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
+    await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
     let out;
     try {
       out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now, store: firestoreLiveStore(db) });
     } catch (e) {
       out = { ok: false, reason: "The sells failed: " + String((e && e.message) || e).slice(0, 120), results: [] };
     }
-    try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
+    try { await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
     return { halted: true, ...out };
   }
 );
@@ -469,7 +469,7 @@ exports.kalshiLiveExit = onSchedule(
             store, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
             enabled: KALSHI_LIVE_ENABLED.value() === "on", setSession: (patch) => sessRef.set(patch, { merge: true }),
             logEvent: async (e) => {
-              await db.collection("kalshiLiveEvents").add(e);
+              await db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e });
               if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
             },
           });
@@ -501,7 +501,7 @@ exports.kalshiLiveArmed = onSchedule(
         recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
         // A session that ends by itself (the loss stop, a lost order answer) pushes an alert, if one is configured. The owner's own stops never come through here.
         logEvent: async (e) => {
-          await db.collection("kalshiLiveEvents").add(e);
+          await db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e });
           if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
         },
       };

@@ -847,7 +847,7 @@ async function runL1Tick(args) {
 
     const cid = "L1-" + ticker;
     const record = {
-      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", entryLead: lead, count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
+      accountId: DEFAULT_ACCOUNT_ID, ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", entryLead: lead, count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
       // Written false so the settle sweep can ask for "filled and not settled" and read a handful of documents each minute instead of every order ever filled (a Firestore read is billed).
@@ -1089,7 +1089,12 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
   return { ok: true, results };
 }
 
+// The account every order and event belongs to. There is one account today ("main"), so this changes no behaviour: it only stamps new records so a second account's records can
+// be told apart later (docs: second account design). Nothing reads it yet, and a record without it is "main".
+const DEFAULT_ACCOUNT_ID = "main";
+
 module.exports = {
+  DEFAULT_ACCOUNT_ID,
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
