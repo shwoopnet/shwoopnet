@@ -226,6 +226,24 @@ gates.TP1 = () => {
   assert.strictEqual(f(1, 0), '', 'no known cost: no percentage'); assert.strictEqual(f(NaN, 5), '', 'no result: no percentage');
   assert.ok(/kalshiMoney\(Math\.abs\(tp\.pnl\)\) \+ kalshiPctText\(/.test(html) && /kalshiMoney\(Math\.abs\(pnl\)\) \+ kalshiPctText\(/.test(html), 'both kinds of row carry it, after the dollar figure, so Privacy view masks the dollars and leaves the percentage');
 };
+// TS1: the Recent trades card opens with four monitoring figures for the last 24 hours that do not repeat the account strip (no result in dollars). Consequence: wrong win counts or a streak counted past a break would mislead.
+gates.TS1 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const names = ['kalshiOrderPnl', 'kalshiTradeStats', 'kalshiTradeStatsHtml'];
+  const f = new Function(names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  const now = Date.parse('2026-10-23T18:00:00Z');
+  const o = (min, side, result, extra) => Object.assign({ strategy: 'L1', ts: now - min * 60000, side, fillCount: 1, count: 1, maxCost: 0.9, settled: true, result, settledPnl: result === side ? 0.07 : -0.9, averageFeePaid: 0.01 }, extra || {});
+  const orders = [o(10, 'yes', 'yes'), o(40, 'yes', 'yes'), o(70, 'yes', 'no'), o(100, 'no', 'no'), o(130, 'yes', 'exit', { settledPnl: -0.7 }), o(2000, 'yes', 'yes')];
+  const st = f.kalshiTradeStats(orders, now);
+  assert.ok(st.total === 5 && st.settled === 5 && st.wins === 3, 'the order from over 24 hours ago is left out: ' + JSON.stringify(st));
+  assert.ok(st.streak === 2 && st.streakKind === 'win', 'the streak is the newest run: ' + st.streak + ' ' + st.streakKind);
+  assert.strictEqual(st.early, 1, 'one early sell');
+  assert.strictEqual(st.fees, 0.05, 'fees are what was charged on the filled orders');
+  assert.strictEqual(f.kalshiTradeStats([o(10, 'yes', 'no'), o(20, 'yes', 'yes')], now).streakKind, 'loss', 'a loss streak is named as one');
+  assert.strictEqual(f.kalshiTradeStatsHtml(f.kalshiTradeStats([], now), (x) => '$' + x), '', 'no trades: no tiles');
+  const h = f.kalshiTradeStatsHtml(st, (x) => '$' + x.toFixed(2));
+  assert.ok(/Win rate/.test(h) && /60%/.test(h) && /Streak/.test(h) && /Early sells/.test(h) && /Fees paid/.test(h) && !/Net|Today/.test(h), 'four tiles and no result figure (it is in the account strip already)');
+};
 gates.PC1 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPositionChartHtml', 'kalshiPositionsHtml'];

@@ -449,6 +449,13 @@
   .kal-tr-head{ background:var(--panel-raised); color:var(--muted); font-size:12px; font-weight:600; padding-top:8px; padding-bottom:8px; border-top:0; }
   /* The dollar result and its percentage are the same fact (the owner, Oct 23, 2026), so they share one size, weight and colour; only a quiet dot separates them. */
   .kal-tr-sep{ margin:0 7px; opacity:.5; font-weight:400; }
+  .kal-tr-stats{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:2px 22px 14px; }
+  .kal-mini-tile{ border:1px solid var(--border); border-radius:12px; padding:10px 14px; background:rgba(255,255,255,.025); min-width:0; }
+  .kal-mini-k{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .kal-mini-v{ font-size:20px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .kal-mini-s{ font-size:12px; color:var(--muted); margin-top:1px; }
+  .kal-tr-sub{ display:block; font-size:12px; color:var(--muted); margin-top:2px; }
+  @media screen and (max-width:700px){ .kal-tr-stats{ grid-template-columns:repeat(2,minmax(0,1fr)); padding:2px 18px 12px; } }
   .kal-tr-t, .kal-tr-s{ color:var(--muted); } .kal-tr-p, .kal-tr-s{ text-align:right; } .kal-tr-p{ font-family:'Public Sans', sans-serif; font-weight:700; }
   .kal-foot{ padding:12px 22px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); }
   .kal-perf{ padding:14px 22px 20px 22px; }
@@ -1255,6 +1262,7 @@
       <div class="kal-card kal-card-flush" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
+        <div id="kalBotStats"></div>
         <div class="kal-tr kal-tr-head"><span>Time</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
       </div>
@@ -1954,6 +1962,33 @@
   }
 
   // The bot's running settled result, one point per settled trade, oldest first.
+  // The last 24 hours of the bot's trades in four plain figures for the Recent trades card (the owner, Oct 23, 2026: more useful and good for monitoring, but nothing that repeats the account strip above, so no result in dollars here).
+  // Win rate and the current streak are over settled trades, newest first; early sells are positions the exit watch closed; fees are what Kalshi charged on the filled orders. Pure: orders in, numbers out.
+  function kalshiTradeStats(orders, now){
+    var since = now - 86400000;
+    var mine = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && Number(o.fillCount) > 0 && Number(o.ts) >= since && !(o.settled === true && o.result === 'hand'); })
+      .sort(function(a, b){ return Number(b.ts) - Number(a.ts); });
+    var done = mine.map(function(o){ return { o: o, p: kalshiOrderPnl(o) }; }).filter(function(r){ return r.p !== null; });
+    var wins = done.filter(function(r){ return r.p > 0; }).length, streak = 0, kind = '';
+    for(var i = 0; i < done.length; i++){
+      var k = done[i].p > 0 ? 'win' : 'loss';
+      if(!kind){ kind = k; }
+      if(k !== kind){ break; }
+      streak++;
+    }
+    var fees = 0, feeKnown = false;
+    mine.forEach(function(o){ var f = Number(o.averageFeePaid) * Number(o.fillCount); if(Number.isFinite(f) && f >= 0){ fees += f; feeKnown = true; } });
+    return { total: mine.length, settled: done.length, wins: wins, streak: streak, streakKind: kind, early: mine.filter(function(o){ return o.settled === true && o.result === 'exit'; }).length, fees: feeKnown ? Math.round(fees * 100) / 100 : null };
+  }
+  function kalshiTradeStatsHtml(st, money){
+    if(!st || !st.settled){ return ''; }
+    var tile = function(k, v, sub){ return '<div class="kal-mini-tile"><div class="kal-mini-k">' + k + '</div><div class="kal-mini-v">' + v + '</div><div class="kal-mini-s">' + sub + '</div></div>'; };
+    return '<div class="kal-tr-stats">' +
+      tile('Win rate', Math.round(st.wins / st.settled * 100) + '%', st.wins + ' of ' + st.settled + ' settled') +
+      tile('Streak', st.streak + (st.streakKind === 'win' ? (st.streak === 1 ? ' win' : ' wins') : (st.streak === 1 ? ' loss' : ' losses')), 'in a row, latest first') +
+      tile('Early sells', String(st.early), 'of ' + st.total + ' trades') +
+      (st.fees !== null ? tile('Fees paid', money(st.fees), 'last 24 hours') : tile('Last 24 hours', String(st.total), st.total === 1 ? 'trade' : 'trades')) + '</div>';
+  }
   function kalshiPnlSeries(orders, since){
     var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
       .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
@@ -2587,6 +2622,7 @@
     renderKalshiPositions();
 
     var trEl = document.getElementById('kalBotClosed');
+    var statsClear = document.getElementById('kalBotStats'); if(statsClear){ statsClear.innerHTML = ''; }
     if(!a){ trEl.innerHTML = ''; }
     else if(!a.fills || !a.fills.ok){ trEl.innerHTML = '<div class="kal-note">Could not read fills: ' + escapeHtml(a.fills ? 'HTTP ' + a.fills.status + ' ' + (a.fills.error || '') : '') + '</div>'; }
     else {
@@ -2620,7 +2656,11 @@
         var fillText, plCell;
         if(ord && (ord.side === 'yes' || ord.side === 'no')){
           var paidNow = Math.round((ord.side === 'yes' ? Number(x.price) : 1 - Number(x.price)) * 1000) / 10;
-          fillText = 'Bought ' + ord.side.toUpperCase() + ' ' + escapeHtml(String(x.count)) + (Number.isFinite(paidNow) ? ' at ' + paidNow.toFixed(1) + 'c' : '') + (Number(ord.exitCount) > 0 ? ', sold early' + (Number.isFinite(Number(ord.exitAvg)) ? ' at ' + (Math.round(Number(ord.exitAvg) * 1000) / 10).toFixed(1) + 'c' : '') : '');
+          var subBits = [];
+          if(ord.entryLead === '10m' || ord.entryLead === '6m'){ subBits.push((ord.entryLead === '10m' ? '10' : '6') + ' minute look'); }
+          var feeNow = Number(ord.averageFeePaid) * Number(x.count);
+          if(Number.isFinite(feeNow) && feeNow > 0){ subBits.push('fee ' + kalshiMoney(feeNow)); }
+          fillText = 'Bought ' + ord.side.toUpperCase() + ' ' + escapeHtml(String(x.count)) + (Number.isFinite(paidNow) ? ' at ' + paidNow.toFixed(1) + 'c' : '') + (Number(ord.exitCount) > 0 ? ', sold early' + (Number.isFinite(Number(ord.exitAvg)) ? ' at ' + (Math.round(Number(ord.exitAvg) * 1000) / 10).toFixed(1) + 'c' : '') : '') + (subBits.length ? '<span class="kal-tr-sub">' + escapeHtml(subBits.join(' \u00B7 ')) + '</span>' : '');
         } else {
           fillText = escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '');
         }
@@ -2636,6 +2676,8 @@
         foot.push('<button type="button" class="kal-link" data-trstep="newer" aria-label="Newer trades" title="Newer"' + (kalshiLiveShow.page <= 0 ? ' disabled style="opacity:.4"' : '') + '>&#8249;</button> Page ' + (kalshiLiveShow.page + 1) + ' of ' + pages + ' (' + allRows.length + ' trades) <button type="button" class="kal-link" data-trstep="older" aria-label="Older trades" title="Older"' + (kalshiLiveShow.page >= pages - 1 ? ' disabled style="opacity:.4"' : '') + '>&#8250;</button>');
         if(kalshiLiveShow.page >= pages - 1 && kalshiTradeFilter === 'all'){ foot.push('<span style="color:var(--muted)">Older bot trades are kept; manual trades older than the latest fills are not stored.</span>'); }
       }
+      var statsHtml = kalshiTradeStatsHtml(kalshiTradeStats(kalshiResolveOrders(kalshiLiveOrders, a.results, gfills), Date.now()), kalshiMoney);
+      var statsEl = document.getElementById('kalBotStats'); if(statsEl){ statsEl.innerHTML = statsHtml; }
       trEl.innerHTML = (allRows.length ? rowsHtml : '<div class="kal-foot">' + (kalshiTradeFilter === 'all' ? 'No trades yet.' : 'No bot trades yet.') + '</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
     }
 
