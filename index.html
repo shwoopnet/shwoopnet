@@ -173,8 +173,10 @@
      right-side padding on wide screens where the sidebar is a vertical
      rail, bottom padding on narrow screens where it becomes a bottom bar. */
   /* The page column hugs the rail instead of centring on a wide screen, so there is never a wide empty gap between the two (the owner, Oct 23, 2026: "fix this weird gap"). */
-  .app{ padding-left: 212px; margin-left: 0; margin-right: auto; }
-  @media (max-width: 900px){ .app{ padding-left:0; padding-bottom:76px; margin: 0 auto; } }
+  /* The header spans the whole width so the logo sits above the rail, flush with it (the owner, Oct 23, 2026: "it should be above the navigation bar"); only the content and the footer step over to clear the rail. */
+  .app{ margin-left: 0; margin-right: auto; }
+  .app-pages, .site-footer{ padding-left: 184px; }
+  @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -689,6 +691,19 @@
   .kal-tile, .data-tile{ border-radius:12px; background:rgba(255,255,255,.025); }
   .tape, .kal-layout-body, .kal-tip{ border-radius:12px; }
   select{ background:var(--panel-raised); color:var(--paper); border:1px solid var(--border); border-radius:8px; color-scheme:dark; }
+  /* Controls match the front page (docs/DESIGN_SYSTEM.md section 2): 10px corners, the primary action is the white fill with black text (the same as the page you are on in the rail), the quiet ones are an outline over a faint wash, and the choice buttons fill white when selected. */
+  .kal-btn{ border-radius:10px; padding:10px 18px; font-weight:700; transition: opacity .15s ease, transform .15s ease; }
+  .kal-btn:hover{ opacity:.9; }
+  .kal-btn-ghost, .kal-mini{ background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--paper); }
+  .kal-btn-ghost:hover, .kal-mini:hover{ background:rgba(255,255,255,.08); }
+  .kal-btn-danger{ border-radius:10px; }
+  .kal-mini{ border-radius:8px; }
+  .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
+  .tf-btn{ border-radius:8px; font-weight:700; }
+  .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
+  .tf-btn.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-contrast); }
+  .settings-reset-btn, #signOutBtn{ border-radius:10px; }
+  .modal-btn-submit{ border-radius:10px; }
   .kal-card, .settings-card, .brief-win{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
   .kal-card:hover, .settings-card:hover, .brief-win:hover:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
