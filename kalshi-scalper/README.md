@@ -5716,3 +5716,21 @@ Owner: "scan our recorded data and search for patterns or themes, certain rules 
 - **Prediction (now):** FALSIFIED (about 80%): mined rules usually shrink to nothing. If any survive I expect the firm and flat style conditions (low `rng5`, low `rise3`) and high price, the lead that is already known.
 - **Themes (information, not a claim):** among the top 100 train rules, how often each condition appears; the rules with the largest support whose train net is at least +1c ("populate more often"); each of those on the test days.
 - Tries: +10 (the 10 rules scored on the test days); the mining over about 4,500 rules is the search itself and is why only 10 reach the test (running count about 4,717). Run once: `python -m scalper.scan1 run`.
+
+### SCAN1 result (2026-10-23, run once): NOT_ENOUGH_DATA, a near miss with themes
+
+24,792 entries; train = first 46 days (to 2026-09-20), test = last 23 days. 4,504 rule instances seen, 1,911 with at least 400 train entries. Top 10 by train score; their union on the test days: 2,126 entries against 7,168 for the rest: **+1.07c, z 1.86**, halves +1.39c and +0.79c, fee stress +1.07c, **8 of 10 rules above the rest**. The claim needed z 2.0, so the word is NOT_ENOUGH_DATA, not falsified. Full table in `studies/scan1_result_2026-10-23.txt`. Note the test days are weaker than the train days: the rest of the test earns about -0.25c.
+
+Themes (information only):
+- **Hour of day dominates the top 100 train rules** (16 to 19Z in 29 of them, 20 to 23Z, 04 to 07Z) but is **not stable**: the 16 to 19Z rules, best on train (+3.0c to +3.7c), were -1.66c, -1.54c, -0.12c and +0.54c on the test days, while the 20 to 23Z rules held (+1.43c, +2.12c) and 04 to 07Z held (+1.09c). Time-of-day is mostly mined noise.
+- Other conditions recurring in the top 100: `dip` 0.50 to 0.75, side yes, weekday, `spread <= 1c`, `rng5` 0.10 to 0.25, price 0.92 to 0.95, `rise3` 0.02 to 0.10.
+- **Rules that populate most (largest support, train net >= +1c)** mostly faded to about zero on the test days (`rng5` 0.10 to 0.25: -0.14c; `rise3` 0.02 to 0.10: -0.11c), **except `spread <= 1c AND tib 2 to 4`: train 3,931 entries at +1.14c, test 2,365 at +1.03c**, against about -0.25c for the rest of the test. Tight spread (a liquid market) and 2 to 4 minutes already in the band is the only broad rule that carried over. It was picked after seeing the test days, so the test days no longer count for it.
+
+### Pre-registration: SCAN2-F (2026-10-23), the one rule that held, scored on fresh days it never saw
+
+- **Rule:** R = `spread <= 1.05c` AND `tib` 2 to 4 (minutes already in band, as in `feat1`), L1 entries at 6 minutes, band 0.88 to 0.97, all 18 series. R against the rest, each group from its own entries, compared per day (day-clustered).
+- **Data:** the fresh days only: markets closing 2026-10-14 through 2026-10-22 (full days; the 11 fresh days of the forward reads minus the partial day), from `data/fresh.sqlite`. None of them was used to pick R.
+- **Claim:** R minus rest >= +0.8c, day-clustered z >= 2.0, R n >= 500 over >= 8 days, same sign in both halves and under the x1.2 fee.
+- **Prediction (now):** +0.5c, a miss: a rule picked after seeing the test days regresses.
+- **FALSIFIED** if R n >= 500 and (difference < +0.2c or z < 1.0); NOT_ENOUGH_DATA if n < 500; NOT_YET_FALSIFIED only if every condition holds. Read once now on 2026-10-14 to 10-22; a second, separate window (markets closing from 2026-10-24) is read with the other forward claims on 2026-11-12.
+- Tries: +11 for SCAN1 (10 rules) and +1 for SCAN2-F (running count about 4,718). Code: `scan1.scan2f`.

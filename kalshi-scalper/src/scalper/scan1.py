@@ -123,3 +123,34 @@ def main(argv: list[str]) -> None:
 
 if __name__ == "__main__":
     main(sys.argv)
+
+
+# ---- SCAN2-F, fixed in the README before it was scored ----
+R_SPREAD, R_TIB = 0.0105, (2, 4)
+F_FROM, F_TO, F_DIFF_C, F_Z, F_MIN_N, F_MIN_DAYS, F_FALSIFY_C, F_FALSIFY_Z = "2026-10-14", "2026-10-22", 0.008, 2.0, 500, 8, 0.002, 1.0
+
+
+def in_r(r: dict) -> bool:
+    return r["x"][1] <= R_SPREAD and R_TIB[0] <= r["x"][4] <= R_TIB[1]
+
+
+def scan2f(markets: list[tuple], first: str = F_FROM, last: str = F_TO) -> str:
+    """SCAN2-F (README): R = spread <= 1.05c and 2 to 4 minutes in band, against the rest, on fresh days first..last."""
+    rows, _, _ = F.build(markets, 360)
+    rows = [r for r in rows if first <= r["day"] <= last]
+    a = [r for r in rows if in_r(r)]
+    b = [r for r in rows if not in_r(r)]
+    days = len({r["day"] for r in a})
+    if len(a) < F_MIN_N or days < F_MIN_DAYS or not b:
+        return f"SCAN2-F: NOT_ENOUGH_DATA (R n={len(a)} on {days} days, rest n={len(b)})"
+    m, z, nd = diff_z(a, b)
+    ms, _, _ = diff_z(a, b, "stress")
+    ds = sorted({r["day"] for r in rows})
+    mid = ds[len(ds) // 2]
+    h1 = diff_z([r for r in a if r["day"] < mid], [r for r in b if r["day"] < mid])[0]
+    h2 = diff_z([r for r in a if r["day"] >= mid], [r for r in b if r["day"] >= mid])[0]
+    ok = m >= F_DIFF_C and z >= F_Z and h1 > 0 and h2 > 0 and ms > 0
+    verdict = "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if (m < F_FALSIFY_C or z < F_FALSIFY_Z) else "NOT_ENOUGH_DATA")
+    c = lambda x: f"{x * 100:+.2f}c"
+    return (f"SCAN2-F {first}..{last}: R n={len(a)} at {c(st.mean(r['net'] for r in a))}, rest n={len(b)} at {c(st.mean(r['net'] for r in b))} on {nd} days; difference {c(m)} (day clustered z {z:+.2f}); "
+            f"halves {c(h1)} / {c(h2)}; stress {c(ms)}; loss R {100 * sum(1 for r in a if r['gross'] < 0) / len(a):.1f}% rest {100 * sum(1 for r in b if r['gross'] < 0) / len(b):.1f}%; VERDICT: {verdict}")

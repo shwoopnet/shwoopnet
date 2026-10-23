@@ -1,0 +1,28 @@
+SCAN1: 24792 entries, train 15498 (to 2026-09-20), test 9294; 4504 distinct rule instances seen, 1911 with support >= 400
+verdict: NOT_ENOUGH_DATA
+union of top 10 rules on test: n=2126 vs rest n=7168: diff +1.07c, z +1.86, days 23, halves +1.39c / +0.79c, stress +1.07c, rules above rest 8 of 10
+top rules: conjunction | train n, train net | test n, test net | test rest net
+p.92-.95 AND dip .50-.75 AND hour 16-19Z | 415, +3.70c | 253, -1.66c | -0.18c
+p.92-.95 AND spread<=1c AND hour 16-19Z | 533, +3.52c | 354, +0.54c | -0.25c
+rng5 .10-.25 AND side no AND hour 20-23Z | 545, +3.23c | 258, +1.43c | -0.27c
+tib2-4 AND side no AND hour 20-23Z | 479, +3.14c | 225, +2.12c | -0.28c
+p<.92 AND side yes AND hour 04-07Z | 477, +3.50c | 272, +1.09c | -0.26c
+spread>1c AND dip .50-.75 AND hour 16-19Z | 414, +3.28c | 231, -1.54c | -0.19c
+rng5 .10-.25 AND dip .50-.75 AND hour 16-19Z | 699, +3.04c | 445, -0.12c | -0.23c
+rng5<.10 AND side yes AND weekday | 799, +2.92c | 484, +0.77c | -0.27c
+rise3 .02-.10 AND rng5<.10 AND side yes | 513, +3.02c | 278, +1.10c | -0.26c
+p<.92 AND tib2-4 AND side yes | 569, +3.24c | 331, -0.03c | -0.23c
+info: conditions most often in the top 100 train rules: hour 16-19Z (29), dip .50-.75 (24), side yes (22), weekday (19), spread<=1c (18), rng5 .10-.25 (17), p.92-.95 (16), rise3 .02-.10 (15), rng5<.10 (14), side no (11), tib5+ (11), class btceth (11), hour 20-23Z (10), p>=.95 (10)
+info: largest-support rules with train net >= +1c: rule | train n, train net | test n, test net
+rng5 .10-.25 | 6216, +1.03c | 3725, -0.14c
+spread<=1c AND dip .50-.75 | 5655, +1.13c | 3347, +0.42c
+rise3 .02-.10 | 5118, +1.10c | 2990, -0.11c
+rng5 .10-.25 AND weekday | 4702, +1.11c | 3106, -0.53c
+rng5 .10-.25 AND dip .50-.75 | 4481, +1.31c | 2572, -0.44c
+spread<=1c AND dip .50-.75 AND weekday | 4334, +1.06c | 2733, +0.13c
+spread<=1c AND rng5 .10-.25 | 4289, +1.37c | 2637, +0.45c
+dip .50-.75 AND side yes | 4152, +1.15c | 2412, +0.08c
+spread<=1c AND tib2-4 | 3931, +1.14c | 2365, +1.03c
+rise3 .02-.10 AND weekday | 3859, +1.20c | 2494, -0.31c
+p<.92 AND spread<=1c | 3614, +1.00c | 2320, +0.14c
+spread<=1c AND rise3 .02-.10 | 3569, +1.25c | 2140, +0.51c
