@@ -1,0 +1,45 @@
+{
+ "formula": "p_yes = Phi( ln(S/K) / (sigma * sqrt(max(left-40,1))) ), sigma = stdev of 10-second log returns over the previous 900 s divided by sqrt(10); Phi = standard normal CDF",
+ "vectors": [
+  {
+   "spot": 81100.0,
+   "strike": 81000.0,
+   "sigma_per_sqrt_s_usd": 0.35,
+   "left_s": 120,
+   "p_yes": 1.0,
+   "sigma_log_per_sqrt_s": 4.315659679408138e-06
+  },
+  {
+   "spot": 81000.0,
+   "strike": 81000.0,
+   "sigma_per_sqrt_s_usd": 0.35,
+   "left_s": 90,
+   "p_yes": 0.5,
+   "sigma_log_per_sqrt_s": 4.3209876543209875e-06
+  },
+  {
+   "spot": 80950.0,
+   "strike": 81000.0,
+   "sigma_per_sqrt_s_usd": 0.3,
+   "left_s": 60,
+   "p_yes": 0.0,
+   "sigma_log_per_sqrt_s": 3.7059913526868435e-06
+  },
+  {
+   "spot": 81250.0,
+   "strike": 81000.0,
+   "sigma_per_sqrt_s_usd": 0.4,
+   "left_s": 120,
+   "p_yes": 1.0,
+   "sigma_log_per_sqrt_s": 4.923076923076923e-06
+  },
+  {
+   "spot": 80800.0,
+   "strike": 81000.0,
+   "sigma_per_sqrt_s_usd": 0.4,
+   "left_s": 90,
+   "p_yes": 0.0,
+   "sigma_log_per_sqrt_s": 4.950495049504951e-06
+  }
+ ]
+}
