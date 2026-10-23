@@ -5898,3 +5898,8 @@ Group sizes counted from features only. Fee 7%·p·(1-p) as live.
 Claim per group (any one group can pass; tries +4, z bar 2.6 for four groups): n >= 300, mean net per contract >= +2.0c, day-clustered z >= 2.6 against zero, both halves of the days > 0, fee stress x1.2 > 0, and profit factor (sum of winning nets over sum of losing nets) >= 1.3. FALSIFIED for a group: mean < +0.5c or z < 1.0. Otherwise NOT_ENOUGH_DATA. A pass only registers a forward read on fresh days (the markets after 2026-10-13 are held back from this test: `load()` history only), never a trade.
 Prediction (now): all four FALSIFIED. CONT and FADE cross a spread and a 1.75c fee at 50c, so they would need a 55% hit rate; AGREE and DISAGREE are L1 entries the market already prices as calibrated. If any passes, the first suspects are an open-arm quote that is stale and the prior result being leaked into the same day's cluster.
 Run once: `python -m scalper.btc1 run`.
+
+### BTC1 result (2026-10-23, run once): all four FALSIFIED (prediction held)
+- AGREE n 957: +0.33c, z +0.43, PF 1.06, loss 6.6%. DISAGREE n 1,001: +0.57c, z +0.73, PF 1.10, loss 6.4%. The prior window's result does not move an L1 entry's outcome (loss rates within 0.2 points).
+- CONT n 6,416: -1.87c, z -3.39, PF 0.92, loss 50.6%. FADE n 6,416: -2.31c, z -4.18, PF 0.90, loss 49.4%. At the open the next window is a coin flip (50.6% vs 49.4%); the loss is the spread plus fee. There is no momentum and no reversal between adjacent Bitcoin windows.
+Tries +4 (running count about 4,730). Bitcoin has now failed: per-window features (many), distance, the prior window, time of day, flow filters; its one live support is the 10 minute entry (FWD7, 2026-11-12).
