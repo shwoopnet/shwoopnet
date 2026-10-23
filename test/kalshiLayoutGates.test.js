@@ -216,10 +216,31 @@ gates.Y14 = () => {
 
 // Open positions, one readable row each: the side from the sign, cost from the bot's own fill, what it can win and lose, the chance now and the time left from
 // the live books. "Realized" and "Fees" are gone (an open position has no realized result). Show more / Show fewer are quiet links, not filled buttons.
+// PC1: an open position's row draws the chance of the side bought as a chart, from the reads the page has made. Consequence: with fewer than two points there is no chart (nothing invented); a quiet market is zoomed so it is not a flat line; the paid line is drawn at the entry; a chance is not a dollar figure, so the chart carries none.
+gates.PC1 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPositionChartHtml', 'kalshiPositionsHtml'];
+  const f = new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  const base = { ticker: 'KXGOLD15M-26OCT231215-15', title: 'GOLD 12:15 PM CT', side: 'no', count: 15, entry: 0.906, cost: 13.59, ifWin: 1.41, ifLose: -13.59, chance: 0.943, cashOut: 14.12, left: 145, bot: true };
+  assert.strictEqual(f.kalshiPositionChartHtml(Object.assign({}, base, { path: [] })), '', 'no reads yet: no chart');
+  assert.strictEqual(f.kalshiPositionChartHtml(Object.assign({}, base, { path: [0.9] })), '', 'one read is not a line');
+  const c = f.kalshiPositionChartHtml(Object.assign({}, base, { path: [0.9, 0.91, 0.93, 0.943] }));
+  assert.ok(/kal-hc-line/.test(c) && /kal-hc-paid/.test(c) && /Closes in/.test(c) && /Since this page opened/.test(c), 'the line, the paid line and the honest start label');
+  assert.ok(!/\$|\*\*\*\*/.test(c), 'it carries no dollar figure, so Privacy view has nothing to mask in it');
+  const ys = (/class="kal-hc-line" d="([^"]*)"/.exec(c)[1].match(/ ([\d.]+)/g) || []).map((x) => Number(x));
+  const flatC = f.kalshiPositionChartHtml(Object.assign({}, base, { entry: 0.94, path: [0.94, 0.9401, 0.94, 0.9401] }));
+  const fy = (/class="kal-hc-line" d="([^"]*)"/.exec(flatC)[1].match(/ ([\d.]+)/g) || []).map((x) => Number(x));
+  assert.ok(Math.max(...fy) - Math.min(...fy) < 40 && fy.every((y) => y > 20 && y < 90), 'a market that barely moved stays mid-chart instead of being stretched to the full height');
+  assert.ok(ys.length === 4 && ys[3] < ys[0], 'a rising chance rises on the chart (smaller y is higher)');
+  const html1 = f.kalshiPositionsHtml([Object.assign({}, base, { path: [0.9, 0.95] })], (x) => String(x), (x) => '$' + x);
+  assert.ok(/kal-hold-body/.test(html1) && /kal-hold-stats/.test(html1), 'the row is figures plus chart');
+  const html0 = f.kalshiPositionsHtml([Object.assign({}, base, { path: [] })], (x) => String(x), (x) => '$' + x);
+  assert.ok(!/kal-hold-body/.test(html0) && /kal-hold-stats/.test(html0), 'with no path the row is exactly the figures as before');
+};
 gates.Y15 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiGroupFills', 'kalshiOrderFor', 'kalshiPositionRows', 'kalshiPositionsHtml']);
+  const f = lift(['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiGroupFills', 'kalshiOrderFor', 'kalshiPositionRows', 'kalshiPositionChartHtml', 'kalshiPositionsHtml']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   const NOW = Date.parse('2026-10-08T14:40:00Z');

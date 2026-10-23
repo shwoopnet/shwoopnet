@@ -57,7 +57,7 @@ The Brief and the market strip make no market-data call of their own. (The Bot p
 
 ## What each page is for (Oct 23, 2026, the owner)
 
-**Bot** is the overview and the live watch: the account strip (state, balance, stake, pool, today), Open positions and Recent trades, and nothing else (no market list, no charts; the relay is still read in the background because Open positions takes each position's time left and price from it). **Data** is for deep dives. **Brief** is the news and all market information, the broader view. A new module goes on the page whose job it is.
+**Bot** is the overview and the live watch: the account strip (state, balance, stake, pool, today), Open positions and Recent trades, and nothing else (no market list; the one chart is inside Open positions, Oct 23, 2026: each position's row draws the chance of the side bought from the reads the page has made since it was opened, `kalshiPositionChartHtml`, test PC1, no price call of its own; the relay is still read in the background because Open positions takes each position's time left and price from it). **Data** is for deep dives. **Brief** is the news and all market information, the broader view. A new module goes on the page whose job it is.
 
 ## The Data page (Oct 21, 2026)
 

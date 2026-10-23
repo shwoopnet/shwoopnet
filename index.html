@@ -417,6 +417,17 @@
   .kal-hold-head .kal-name{ font-weight:700; font-size:14px; }
   .kal-side{ font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; border:1px solid var(--border); white-space:nowrap; }
   .kal-hold-stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  /* With a price path the row is two columns (the owner, Oct 23, 2026: "a lot of dead space", "fit a chart in here"): the three figures stack on the left and the chart fills the rest. */
+  .kal-hold-body{ display:grid; grid-template-columns:minmax(120px,170px) minmax(0,1fr); gap:10px 28px; align-items:stretch; }
+  .kal-hold-body .kal-hold-stats{ grid-template-columns:1fr; gap:10px; align-content:start; }
+  .kal-hold-chart{ min-width:0; display:flex; flex-direction:column; gap:6px; }
+  .kal-hold-chart svg{ display:block; width:100%; height:110px; }
+  .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:11px; color:var(--muted); }
+  .kal-hc-line{ fill:none; stroke:var(--paper); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
+  .kal-hc-fill{ fill:rgba(255,255,255,.06); stroke:none; }
+  .kal-hc-paid{ stroke:rgba(255,255,255,.3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
+  .kal-hc-dot{ fill:var(--paper); }
+  @media screen and (max-width:700px){ .kal-hold-body{ grid-template-columns:minmax(0,1fr); } .kal-hold-body .kal-hold-stats{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
   .kal-hold-stats .kal-lbl{ display:block; font-size:11px; color:var(--muted); } .kal-hold-stats b{ font-size:14px; font-weight:700; }
   .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
@@ -2440,6 +2451,24 @@
     });
   }
 
+  // The chance of the side you bought, drawn from the reads this page has made since it was opened (the page makes no price call of its own, so a position opened earlier shows a shorter line). Needs two points. Zoomed to what the
+  // line actually did (at least 6 points of chance tall) so a quiet market is not a flat line at the top. A chance is not a dollar figure, so Privacy view leaves it showing. Every value is a number the page computed.
+  function kalshiPositionChartHtml(r){
+    var p = r && Array.isArray(r.path) ? r.path.filter(function(x){ return Number.isFinite(x); }) : [];
+    if(p.length < 2){ return ''; }
+    var W = 600, H = 110, hasPaid = Number.isFinite(r.entry);
+    var lo = Math.min.apply(null, hasPaid ? p.concat([r.entry]) : p), hi = Math.max.apply(null, hasPaid ? p.concat([r.entry]) : p);
+    if(hi - lo < 0.06){ var mid = (hi + lo) / 2; lo = mid - 0.03; hi = mid + 0.03; }
+    var pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+    var X = function(i){ return (i / (p.length - 1) * W).toFixed(1); }, Y = function(v){ return ((hi - v) / (hi - lo) * H).toFixed(1); };
+    var d = p.map(function(v, i){ return (i ? 'L' : 'M') + X(i) + ' ' + Y(v); }).join(' ');
+    var left = Number.isFinite(r.left) ? (r.left > 0 ? 'Closes in ' + kalshiFmtLeft(r.left) : 'Waiting for the result') : '';
+    return '<div class="kal-hold-chart"><div class="kal-hc-top"><span>Chance of the side you bought</span>' + (hasPaid ? '<span>Dashed line: what you paid</span>' : '') + '</div>' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Chance of the side you bought since this page was opened">' +
+      (hasPaid ? '<line class="kal-hc-paid" x1="0" x2="' + W + '" y1="' + Y(r.entry) + '" y2="' + Y(r.entry) + '"/>' : '') +
+      '<path class="kal-hc-fill" d="' + d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z"/><path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(p.length - 1) + '" cy="' + Y(p[p.length - 1]) + '" r="4"/></svg>' +
+      '<div class="kal-hc-foot"><span>Since this page opened</span><span>Now</span><span>' + left + '</span></div></div>';
+  }
   function kalshiPositionsHtml(rows, esc, money){
     if(!rows || !rows.length){ return '<div class="kal-empty">No open positions.</div>'; }
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
@@ -2449,9 +2478,11 @@
       if(r.chance !== null){ sub.push('Chance now ' + (r.chance >= 0.9995 ? '99.9' : (r.chance * 100).toFixed(1)) + '%'); }
       if(r.left !== null){ sub.push(r.left > 0 ? 'closes in ' + kalshiFmtLeft(r.left) : 'waiting for the result'); }
       if(r.cashOut !== null){ sub.push('cash out now about ' + money(r.cashOut) + ' before fees'); }
+      var stats = '<div class="kal-hold-stats">' + stat('Cost', r.cost === null ? 'n/a' : money(r.cost)) + stat('If it wins', r.ifWin === null ? 'n/a' : sg(r.ifWin), r.ifWin === null ? '' : 'kal-pos') +
+        stat('If it loses', r.ifLose === null ? 'n/a' : sg(r.ifLose), r.ifLose === null ? '' : 'kal-neg') + '</div>';
+      var chart = kalshiPositionChartHtml(r);
       return '<div class="kal-hold"><div class="kal-hold-head"><div class="kal-name">' + esc(r.title) + '</div><span class="kal-side kal-side-' + r.side + '">' + esc(r.side.toUpperCase()) + ' x ' + esc(String(r.count)) + '</span></div>' +
-        '<div class="kal-hold-stats">' + stat('Cost', r.cost === null ? 'n/a' : money(r.cost)) + stat('If it wins', r.ifWin === null ? 'n/a' : sg(r.ifWin), r.ifWin === null ? '' : 'kal-pos') +
-        stat('If it loses', r.ifLose === null ? 'n/a' : sg(r.ifLose), r.ifLose === null ? '' : 'kal-neg') + '</div>' +
+        (chart ? '<div class="kal-hold-body">' + stats + chart + '</div>' : stats) +
         (sub.length ? '<div class="kal-hold-sub">' + esc(sub.join(' · ')) + '</div>' : '') +
         (r.bot ? '' : '<div class="kal-hold-sub">Not one of the bot\'s trades.</div>') + '</div>';
     }).join('');
@@ -2472,9 +2503,20 @@
     if(!a){ posEl.innerHTML = ''; return; }
     if(!a.positions || !a.positions.ok){ posEl.innerHTML = '<div class="kal-note">Could not read positions: ' + escapeHtml(a.positions ? 'HTTP ' + a.positions.status + ' ' + (a.positions.error || '') : '') + '</div>'; return; }
     var rows = kalshiPositionRows(a.positions.positions, kalshiLiveOrders, a.fills && a.fills.ok ? a.fills.fills : [], kalshiBooksLast && kalshiBooksLast.markets, Date.now());
+    // One point per read (every 5 seconds while the Bot page is showing) for each open position, kept only while it is open.
+    var openNow = {};
+    rows.forEach(function(r){
+      openNow[r.ticker] = true;
+      if(r.chance === null){ return; }
+      var list = kalshiPosPaths[r.ticker] || (kalshiPosPaths[r.ticker] = []);
+      if(!list.length || Date.now() - list[list.length - 1].t >= 4000){ list.push({ t: Date.now(), v: r.chance }); while(list.length > 240){ list.shift(); } }
+    });
+    Object.keys(kalshiPosPaths).forEach(function(k){ if(!openNow[k]){ delete kalshiPosPaths[k]; } });
+    rows.forEach(function(r){ r.path = (kalshiPosPaths[r.ticker] || []).map(function(x){ return x.v; }); });
     posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoneyK('positions'));
   }
   var kalshiBooksLast = null;
+  var kalshiPosPaths = {};   // ticker -> [{ t, v }]: the chance of each open position's side, one point per read since this page opened
 
   // Sound alerts (the owner's request, Oct 20, 2026): a short tone while THIS PAGE IS OPEN when the bot enters a trade, sells one, or hits a stop or an issue (a sell that errored, did not fill or
   // has an unknown answer, or a session that ended by itself). It is not a notification: nothing is requested from the browser, nothing leaves the device, and the choice lives in this browser's
