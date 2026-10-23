@@ -38,11 +38,6 @@ const NEWS_FEEDS = [
 const NEWS_KEEP = 12;
 // No single desk may fill the list: each feed contributes its newest few, then the lists are merged newest first.
 const NEWS_PER_FEED = 3;
-// The week's scheduled events (the Brief's catalysts): a public weekly calendar of economic releases. Unofficial, so a failure only leaves the last stored list in place. Only high and medium impact
-// events from the major economies are kept, as plain strings and numbers.
-const EVENTS_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json";
-const EVENT_COUNTRIES = ["USD", "EUR", "GBP", "JPY", "CNY"];
-const EVENTS_KEEP = 40;
 // The two fear and greed indexes for the Brief's risk mood: CNN's for stocks and alternative.me's for crypto, both public and keyless (unofficial, so each fails on its own and a failure leaves the stored value).
 const FG_STOCKS_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata";
 const FG_CRYPTO_URL = "https://api.alternative.me/fng/?limit=2";
@@ -102,22 +97,6 @@ function parseFearGreedCrypto(json) {
   const score = fgNum(d[0] && d[0].value);
   if (score === null) return null;
   return { score, rating: fgText(d[0].value_classification), prev: fgNum(d[1] && d[1].value) };
-}
-
-// The weekly calendar to {title, country, at (ms), impact}. Anything that is not a high or medium event of a listed economy, or has no readable time, is dropped. Text is cut and kept as a plain string.
-function parseEvents(json, nowMs) {
-  const rows = Array.isArray(json) ? json : [];
-  const out = [];
-  for (const e of rows) {
-    if (!e || typeof e.title !== "string" || typeof e.country !== "string") continue;
-    if (!EVENT_COUNTRIES.includes(e.country)) continue;
-    const impact = e.impact === "High" ? "High" : (e.impact === "Medium" ? "Medium" : null);
-    if (!impact) continue;
-    const at = Date.parse(e.date);
-    if (!Number.isFinite(at) || at < nowMs - 3 * 3600 * 1000) continue;
-    out.push({ title: e.title.slice(0, 120), country: e.country, at, impact });
-  }
-  return out.sort((a, b) => a.at - b.at).slice(0, EVENTS_KEEP);
 }
 
 function decodeEntities(s) {
@@ -195,14 +174,12 @@ async function readTape({ fetchFn, now }) {
     catch (e) { errors.push(f.source + ": " + String((e && e.message) || e).slice(0, 80)); }
   }));
   const news = lists.length ? mergeNews(lists) : null;
-  let events = null;
-  try { events = parseEvents(JSON.parse(await getText(fetchFn, EVENTS_URL)), nowMs); } catch (e) { errors.push("calendar: " + String((e && e.message) || e).slice(0, 80)); }
   const mood = {};
   await Promise.all([["stocks", FG_STOCKS_URL, parseFearGreedStocks], ["crypto", FG_CRYPTO_URL, parseFearGreedCrypto]].map(async (x) => {
     try { const v = x[2](JSON.parse(await getText(fetchFn, x[1]))); if (v) mood[x[0]] = Object.assign(v, { asOf: nowMs }); else throw new Error("no usable score"); }
     catch (e) { errors.push("fear and greed " + x[0] + ": " + String((e && e.message) || e).slice(0, 80)); }
   }));
-  return { quotes, news: news && news.length ? news : null, events: events && events.length ? events : null, mood: Object.keys(mood).length ? mood : null, errors };
+  return { quotes, news: news && news.length ? news : null, mood: Object.keys(mood).length ? mood : null, errors };
 }
 
-module.exports = { SYMBOLS, NEWS_FEEDS, EVENTS_URL, parseEvents, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
+module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };

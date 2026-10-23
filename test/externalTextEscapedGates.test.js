@@ -44,19 +44,11 @@ gates.X1 = () => {
 };
 
 gates.X2 = () => {
-  const doc = fakeDoc();
-  const src = ['escapeHtml', 'briefEventsList', 'renderBriefEvents'].map(fnSource).join('\n');
-  // Event titles come from a third-party calendar through the shared tape document: they are text, never elements.
-  const now = Date.parse('2026-10-23T10:00:00Z');
-  const f = new Function('document', 'marketTapeData', 'kalDate', 'kalTime', 'Date2', src + '\nreturn renderBriefEvents;');
-  const realNow = Date.now; Date.now = () => now;
-  try {
-    const render = f(doc, { events: [{ title: EVIL, country: '<b>USD</b>', at: now + 3600000, impact: 'High' }, { title: 'CPI', country: 'USD', at: now + 7200000, impact: '<script>' }] }, () => 'Oct 23', () => '11:00', null);
-    render();
-  } finally { Date.now = realNow; }
-  const out = doc.els.briefEvents.innerHTML;
-  assert.ok(!/<img|<script|<b>/i.test(out), 'a title, country or impact with markup is text, not elements');
-  assert.ok(/CPI/.test(out), 'and the real events are listed');
+  // The fear and greed rating comes from a third party through the shared tape document: it is text, never elements.
+  const g = new Function('escapeHtml', fnSource('briefGaugeHtml') + '\nreturn briefGaugeHtml;')((x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
+  const out = g(EVIL, { score: 40, rating: EVIL, prev: 30 });
+  assert.ok(!/<img/i.test(out), 'a rating or label with markup is text, not elements');
+  assert.ok(/mood-track/.test(out), 'and the gauge still draws');
 };
 
 gates.X3 = () => {

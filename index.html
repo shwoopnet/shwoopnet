@@ -129,7 +129,7 @@
     display:flex; align-items:center; justify-content:space-between;
     padding: 20px 28px 18px 28px;
     flex-wrap: wrap; gap: 14px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255,255,255,.06);
   }
   .app-layout{ display:flex; align-items:flex-start; }
   .app-pages{ flex:1; min-width:0; }
@@ -176,7 +176,7 @@
   /* The header spans the whole width so the logo sits above the rail, flush with it (the owner, Oct 23, 2026: "it should be above the navigation bar"); only the content and the footer step over to clear the rail. */
   .app{ margin-left: 0; margin-right: auto; }
   /* The header stays put on a wide screen so the rail below it never floats in the middle of a scrolled page (the owner, Oct 23, 2026: "bug in here"). */
-  @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:rgba(10,10,10,.88); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); } }
+  @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:linear-gradient(180deg, rgba(10,10,10,.55), rgba(10,10,10,0)); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); } }
   .app-pages, .site-footer{ padding-left: 184px; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   .brand{
@@ -259,7 +259,6 @@
   /* The Brief is a grid of soft windows, the same card the sign-in page shows (the owner, Oct 23, 2026: everything matches the front page; the Movers card was dropped). */
   .brief-win{ background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%), var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow: var(--card-shadow); padding:20px 22px; min-width:0; }
   .brief-win .market-news-list{ background:none; border:0; box-shadow:none; padding:0; border-radius:0; }
-  .brief-newswin{ margin-bottom:36px; }
   .mood-word{ font:800 clamp(30px, 4vw, 40px)/1.1 'Public Sans', sans-serif; margin:4px 0 12px; }
   .mood-g{ padding:10px 0; border-top:1px solid var(--border); }
   .mood-hd{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:13px; }
@@ -268,17 +267,11 @@
   .mood-track i{ position:absolute; top:-4px; width:3px; height:16px; margin-left:-1px; border-radius:2px; background:var(--paper); }
   .mood-ends{ display:flex; justify-content:space-between; color:var(--muted); font-size:10.5px; }
   .mood-kv{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); font-size:13px; }
-  .mood-kv span:first-child{ color:var(--muted); }
+  .mood-kv > span:first-child{ color:var(--muted); }
+  .mood-up{ color:var(--gain); } .mood-down{ color:var(--loss); }
   .brief-win .brief-section-title{ margin:0 0 12px 0; }
-  .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:stretch; }
-  .brief-cat .brief-eyebrow, .brief-mood .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
-  .brief-ev{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; border-top:1px solid var(--border); font-size:13px; }
-  .brief-ev:first-child{ border-top:0; }
-  .brief-ev-l{ display:flex; gap:16px; align-items:baseline; min-width:0; }
-  .brief-ev-t{ font:800 15px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; width:76px; flex:0 0 76px; }
-  .brief-ev-n{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .brief-ev-pill{ font:700 10.5px 'Public Sans', sans-serif; border:1.5px solid var(--border); border-radius:999px; padding:2px 10px; color:var(--muted); flex-shrink:0; }
-  .brief-ev-pill.hi{ border-color:var(--paper); color:var(--paper); }
+  .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:start; }
+  .brief-mood .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
   .brief-charts{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; margin-bottom:18px; }
   @media (max-width: 1100px){ .brief-charts{ grid-template-columns:1fr; } }
   @media (max-width: 900px){ .brief-top{ grid-template-columns:1fr; } }
@@ -295,14 +288,22 @@
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
 
   /* The market strip (every page) and the Brief's "as of" line. No animation: a still row that scrolls sideways on a narrow screen. */
-  .tape{ display:flex; align-items:baseline; gap:14px; overflow-x:auto; white-space:nowrap; padding:8px 14px; margin:8px 28px 0 28px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); font-size:12px; scrollbar-width:thin; }
+  .tape{ display:flex; align-items:center; white-space:nowrap; flex:1; min-width:0; margin:0 28px; padding:0; border:0; background:none; font-size:12.5px; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  /* The strip scrolls again like it used to (the owner, Oct 23, 2026: "make it scroll like it used to"): two copies of the row side by side slide left one copy's width and start over, so there is never a gap. It pauses under the pointer
+     and stops under the reduce-motion setting and the Settings switch, where it becomes a row you can scroll by hand. */
+  .tape-view{ flex:1; min-width:0; overflow:hidden; }
+  .tape-track{ display:inline-flex; animation: tapeScroll 60s linear infinite; will-change:transform; }
+  .tape-set{ display:inline-flex; align-items:baseline; gap:28px; padding:0 14px 0 14px; flex:none; }
+  .tape:hover .tape-track{ animation-play-state:paused; }
+  @media (max-width: 900px){ .tape{ order:3; flex-basis:100%; margin:0; } }
+  @keyframes tapeScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   .tape-item{ display:inline-flex; gap:6px; align-items:baseline; }
   .tape-name{ color:var(--muted); }
   .tape-px{ font-weight:600; }
   .tape-chg.up{ color:var(--gain); }
   .tape-chg.down{ color:var(--loss); }
   .tape-asof, .brief-asof{ color:var(--muted); font-size:11px; }
-  .tape-asof{ margin-left:auto; padding-left:12px; }
+  .tape-asof{ flex:none; padding:0 12px; position:relative; z-index:1; background:var(--panel); }
   .tape-asof.stale, .brief-asof.stale{ color:var(--loss); }
   .brief-asof{ margin:-6px 0 14px 2px; }
 
@@ -445,7 +446,6 @@
   /* Books as two tiles. */
   .kal-console .kal-books{ grid-template-columns:1fr 1fr; gap:16px; }
   .kal-console .kal-brow{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--card-shadow); padding:16px 20px; }
-  .kal-spark{ margin-top:10px; }
   /* Depth: a market row rises a little under the pointer, and shows the size sitting at the best bid and ask (contracts) with a bar for how the two compare. */
   .kal-console .kal-brow{ transition: box-shadow .2s ease, transform .2s ease; }
   .kal-console .kal-brow:hover{ box-shadow: var(--card-shadow-lift); transform: translateY(-1px); }
@@ -455,7 +455,6 @@
   /* Phones: the price lines under each market are hidden. The Performance card (P/L line, orders ring, settled-trade bars) came back on phones on Oct 21, 2026 at the owner's request, now that the calm view made
      it quiet enough to fit; it stacks to one column below. */
   @media (max-width:700px){
-    .kal-spark{ display:none; }
     /* The price block drops under the name instead of sharing its row, so "spread, round trip" and the size line stay on one line each. */
     .kal-brow-main{ flex-direction:column; align-items:stretch; gap:6px; }
     .kal-brow-r{ text-align:left; }
@@ -731,15 +730,12 @@
   .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
   .kal-console [data-card="trades"] .kal-tr-head{ display:none; }
   .kal-console .kal-books{ grid-template-columns:1fr; }
-  .kal-console .kal-brow{ display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:24px; align-items:center; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   .kal-console .kal-brow-held{ border-color:var(--amber-dim); }
-  .kal-console .kal-brow > .kal-spark{ grid-column:2; grid-row:1; width:280px; margin:0; }
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "books" "pos" "trd"; grid-template-rows:none; }
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals{ grid-column:1; }
-    .kal-console .kal-brow > .kal-spark{ grid-column:1; grid-row:auto; width:auto; margin-top:10px; }
   }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
@@ -771,6 +767,9 @@
     .page.enter .kal-card, .page.enter .settings-card, .page.enter .brief-win, .page.enter .kal-tile{ animation: none; }
     .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
+    .tape-track{ animation: none; }
+    .tape-set + .tape-set{ display:none; }
+    .tape-view{ overflow-x:auto; }
     .news-item:hover{ transform: none; }
     .kal-card:hover, .settings-card:hover, .brief-win:hover:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
@@ -781,6 +780,9 @@
   [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
+  [data-reduce-motion="true"] .tape-track{ animation: none; }
+  [data-reduce-motion="true"] .tape-set + .tape-set{ display:none; }
+  [data-reduce-motion="true"] .tape-view{ overflow-x:auto; }
   [data-reduce-motion="true"] .news-item:hover{ transform: none; }
   [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .brief-win:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
   [data-reduce-motion="true"] .front-eyebrow, [data-reduce-motion="true"] .front-h1, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-win, [data-reduce-motion="true"] .front-win-a .win{ animation: none; }
@@ -1062,6 +1064,8 @@
       </div>
     </button>
 
+    <div class="tape" id="marketTape" role="region" aria-label="Markets" hidden></div>
+
     <div class="topbar-right">
       <div class="clock">
         <div class="time mono" id="clockTime">--:--:--</div>
@@ -1094,12 +1098,13 @@
   <!-- ================= MARKET BRIEF (HOME) ================= -->
   <div class="app-layout">
     <div class="app-pages">
-  <div class="tape" id="marketTape" role="region" aria-label="Markets" hidden></div>
   <main class="page" id="page-brief">
     <div class="brief-top">
-      <div class="brief-win brief-cat">
-        <div class="brief-eyebrow">Today's catalysts (CT)</div>
-        <div id="briefEvents"><div class="news-placeholder">No scheduled events loaded yet.</div></div>
+      <div class="brief-win">
+        <div class="brief-section-title">Market News</div>
+        <div class="market-news-list" id="marketNewsList">
+          <div class="news-placeholder">Sign in to see real market headlines.</div>
+        </div>
       </div>
       <div class="brief-win brief-mood">
         <div class="brief-eyebrow">Risk mood</div>
@@ -1109,13 +1114,6 @@
 
     <div class="brief-charts" id="briefCharts"></div>
     <div class="brief-asof" id="briefAsOf"></div>
-
-    <div class="brief-win brief-newswin">
-      <div class="brief-section-title">Market News</div>
-      <div class="market-news-list" id="marketNewsList">
-        <div class="news-placeholder">Sign in to see real market headlines.</div>
-      </div>
-    </div>
 
   </main>
 
@@ -1330,7 +1328,7 @@
   <footer class="site-footer">
     <details class="footer-legal">
       <summary><span class="footer-copyright">&copy; 2026 Shwoop Financials</span> <span class="footer-sep">&middot;</span> Legal and risk disclosure</summary>
-      <p>Privacy: this is a private tool. Sign-in and saved settings run on a third-party cloud service, and your display choices are kept in this browser and in your account. The site has no advertising and no analytics. Its fonts and the Bot page's chart prices are loaded from third-party services in your browser, so those services can see your network address.</p>
+      <p>Privacy: this is a private tool. Sign-in and saved settings run on a third-party cloud service, and your display choices are kept in this browser and in your account. The site has no advertising and no analytics. Its fonts are served from this site and the page makes no market-data request of its own, so no third-party services other than the cloud service above can see your network address.</p>
       <p>Nothing on this site is investment, financial, legal or tax advice, or an offer or solicitation to buy or sell anything. Shwoop is not a broker-dealer, an investment adviser, a commodity trading advisor or an exchange, and it does not manage money for anyone else.</p>
       <p>Trading involves substantial risk of loss, including the loss of everything put into it. Automated trading can fail, act on bad data, or place orders you did not intend. A loss limit can end the bot after losses; it does not guarantee a maximum loss. Past performance does not guarantee future results.</p>
       <p>Paper and backtest results are hypothetical. They use no real money, leave out real-world costs and fills, and do not predict future results. Data from third parties can be late, incomplete or wrong.</p>
@@ -2130,122 +2128,6 @@
     }).join('') + '</div></div>';
   }
 
-  // A tiny line over one 15 minute market: points are {t (ms), v}, drawn across the market's whole window so it fills from the left as time passes.
-  // `ref` is an optional level (a strike) drawn as a dashed line and kept inside the range; `fmt` formats numbers. Pure: reads nothing from the page.
-  function kalshiSparkSvg(points, opts){
-    var pts = (points || []).filter(function(p){ return p && Number.isFinite(p.t) && Number.isFinite(p.v) && p.t >= opts.from - 1000 && p.t <= opts.to + 1000; });
-    if(pts.length < 1){ return '<div class="kal-empty">' + (opts.empty || 'A line appears in a minute.') + '</div>'; }   // one reading is drawn as a dot and its price, so a feed that has just started is not an empty box
-    var W = 360, H = 86, L = 6, R = 62, T = 8, B = 8;
-    var vals = pts.map(function(p){ return p.v; });
-    if(opts.ref != null){ vals.push(opts.ref); }
-    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), pad = (hi - lo) * 0.12 || Math.abs(hi) * 0.0005 || 0.5;
-    lo -= pad; hi += pad;
-    var X = function(t){ return L + (W - L - R) * Math.max(0, Math.min(1, (t - opts.from) / (opts.to - opts.from))); };
-    var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
-    var last = pts[pts.length - 1];
-    var col = opts.ref == null ? 'var(--paper)' : (last.v >= opts.ref ? 'var(--gain)' : 'var(--loss)');
-    var path = pts.map(function(p, i){ return (i ? 'L' : 'M') + X(p.t).toFixed(1) + ' ' + Y(p.v).toFixed(1); }).join(' ');
-    var ref = opts.ref == null ? '' : '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(opts.ref).toFixed(1) + '" y2="' + Y(opts.ref).toFixed(1) + '" stroke="var(--muted)" stroke-dasharray="4 4"/>' +
-      '<text x="' + (W - R + 6) + '" y="' + (Y(opts.ref) + 4).toFixed(1) + '" fill="var(--muted)" font-size="10">' + escapeHtml(opts.refLabel || 'target') + '</text>';
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + escapeHtml(opts.label || 'Price this market') + '" style="width:100%;height:auto;display:block">' + ref +
-      '<path d="' + path + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round"/>' +
-      '<circle cx="' + X(last.t).toFixed(1) + '" cy="' + Y(last.v).toFixed(1) + '" r="3" fill="' + col + '"/>' +
-      '<text x="' + (W - R + 6) + '" y="' + (Y(last.v) + (opts.ref != null && Math.abs(Y(last.v) - Y(opts.ref)) < 12 ? (last.v >= opts.ref ? -6 : 14) : 4)).toFixed(1) + '" fill="' + col + '" font-size="11" font-weight="700">' + escapeHtml(opts.fmt(last.v)) + '</text></svg>';
-  }
-
-  // Both lines are built from a minute history that is fetched at once plus live readings added every 10 seconds, so a chart is never empty when a market
-  // has just opened and never waits for the page to collect points.
-  // Bitcoin: Coinbase's BTC-USD candles and ticker (public, no key, the browser may call it). A stand-in for the index Kalshi settles on, so it can sit a little
-  // off the "to beat" line even when the market is right; the tile says so.
-  var kalshiSpot = { at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] };
-  var kalshiMid = {};
-  // ETH: the same recipe as Bitcoin, Coinbase's candles for the minute history and its ticker every 10 seconds.
-  var kalshiAlt = { ETH: { product: 'ETH-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] },
-    XRP: { product: 'XRP-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] },
-    DOGE: { product: 'DOGE-USD', at: 0, busy: false, tickAt: 0, tickBusy: false, pts: [], live: [] } };
-  function kalshiFetchAlt(key, now){
-    var a = kalshiAlt[key];
-    if(!a.busy && now - a.at >= 30000){
-      a.busy = true;
-      kalshiCandles(a.product, now).then(function(pts){ a.pts = pts; a.at = Date.now(); a.busy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); } })
-        .catch(function(){ a.at = Date.now(); a.busy = false; });
-    }
-    if(!a.tickBusy && now - a.tickAt >= 10000){
-      a.tickBusy = true;
-      kalshiTicker(a.product).then(function(v){
-        a.live.push({ t: Date.now(), v: v }); if(a.live.length > 300){ a.live.shift(); }
-        a.tickAt = Date.now(); a.tickBusy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
-      }).catch(function(){ a.tickAt = Date.now(); a.tickBusy = false; });
-    }
-  }
-  // Gold: the live price is gold-api.com (free, no key). Its history is Coinbase's PAXG-USD candles (tokenized gold, within a few dollars of spot), shifted by the
-  // gap between the two right now so the line ends on the real gold price. The shape of the earlier minutes is approximate; Kalshi settles gold on a Pyth feed.
-  var kalshiGold = { at: 0, busy: false, failed: false, pts: [], hist: [], histAt: 0, histBusy: false, off: null };
-  // Two lists of {t, v} joined in time order, one reading per second at most.
-  function kalshiJoinSeries(a, b){
-    var all = (a || []).concat(b || []).filter(function(p){ return p && Number.isFinite(p.t) && Number.isFinite(p.v); }).sort(function(x, y){ return x.t - y.t; });
-    return all.filter(function(p, i){ return i === 0 || p.t - all[i - 1].t >= 1000; });
-  }
-  var KAL_ISO = function(ms){ return new Date(ms).toISOString().slice(0, 19) + 'Z'; };
-  function kalshiCandles(product, now){
-    return fetch('https://api.exchange.coinbase.com/products/' + product + '/candles?granularity=60&start=' + KAL_ISO(now - 20 * 60000) + '&end=' + KAL_ISO(now))
-      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
-      .then(function(rows){
-        return (Array.isArray(rows) ? rows : []).map(function(c){ return { t: Math.min(Date.now(), (c[0] + 60) * 1000), v: Number(c[4]) }; })
-          .sort(function(a, b){ return a.t - b.t; });
-      });
-  }
-  function kalshiTicker(product){
-    return fetch('https://api.exchange.coinbase.com/products/' + product + '/ticker')
-      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
-      .then(function(j){ var v = Number(j && j.price); if(!(v > 0)){ throw new Error('no price'); } return v; });
-  }
-  function kalshiFetchSpot(now){
-    if(!kalshiSpot.busy && now - kalshiSpot.at >= 30000){
-      kalshiSpot.busy = true;
-      kalshiCandles('BTC-USD', now).then(function(pts){ kalshiSpot.pts = pts; kalshiSpot.at = Date.now(); kalshiSpot.busy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); } })
-        .catch(function(){ kalshiSpot.at = Date.now(); kalshiSpot.busy = false; });
-    }
-    if(!kalshiSpot.tickBusy && now - kalshiSpot.tickAt >= 10000){
-      kalshiSpot.tickBusy = true;
-      kalshiTicker('BTC-USD').then(function(v){
-        kalshiSpot.live.push({ t: Date.now(), v: v }); if(kalshiSpot.live.length > 300){ kalshiSpot.live.shift(); }
-        kalshiSpot.tickAt = Date.now(); kalshiSpot.tickBusy = false; if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
-      }).catch(function(){ kalshiSpot.tickAt = Date.now(); kalshiSpot.tickBusy = false; });
-    }
-  }
-  function kalshiSpotSeries(){ return kalshiJoinSeries(kalshiSpot.pts, kalshiSpot.live); }
-  function kalshiFetchGold(now){
-    if(!kalshiGold.histBusy && now - kalshiGold.histAt >= 30000){
-      kalshiGold.histBusy = true;
-      kalshiCandles('PAXG-USD', now).then(function(pts){ kalshiGold.hist = pts; kalshiGold.histAt = Date.now(); kalshiGold.histBusy = false; })
-        .catch(function(){ kalshiGold.histAt = Date.now(); kalshiGold.histBusy = false; });
-    }
-    if(kalshiGold.busy || now - kalshiGold.at < 10000){ return; }
-    kalshiGold.busy = true;
-    var paxg = kalshiTicker('PAXG-USD').catch(function(){ return null; });
-    fetch('https://api.gold-api.com/price/XAU')
-      .then(function(r){ if(!r.ok){ throw new Error('HTTP ' + r.status); } return r.json(); })
-      .then(function(j){
-        var v = Number(j && j.price);
-        if(!(v > 0)){ throw new Error('no price'); }
-        return paxg.then(function(p){
-          if(p !== null){ kalshiGold.off = v - p; }
-          var t = Date.now(), last = kalshiGold.pts[kalshiGold.pts.length - 1];
-          if(!last || t - last.t >= 5000){ kalshiGold.pts.push({ t: t, v: v }); if(kalshiGold.pts.length > 300){ kalshiGold.pts.shift(); } }
-          kalshiGold.at = t; kalshiGold.busy = false; kalshiGold.failed = false;
-          if(kalshiBooksLast){ renderKalshiBooks(kalshiBooksLast); }
-        });
-      })
-      .catch(function(){ kalshiGold.at = Date.now(); kalshiGold.busy = false; kalshiGold.failed = true; });
-  }
-  function kalshiGoldSeries(){
-    var off = kalshiGold.off;
-    var hist = off === null ? [] : kalshiGold.hist.map(function(p){ return { t: p.t, v: p.v + off }; });
-    var firstLive = kalshiGold.pts.length ? kalshiGold.pts[0].t : Infinity;
-    return kalshiJoinSeries(hist.filter(function(p){ return p.t < firstLive; }), kalshiGold.pts);
-  }
-
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
 
   // Top of book: how many contracts are waiting at the best bid and the best ask, and a bar for the bid's share of the two. Only drawn when both sizes are known; a thin side is plain to see.
@@ -2257,37 +2139,12 @@
       '<div class="kal-depth" aria-hidden="true"><i style="width:' + (b / (b + a) * 100).toFixed(1) + '%"></i></div>';
   }
 
-  // The small chart under a market row. Bitcoin: Coinbase's price against the strike ("to beat"). Gold: gold-api.com's price against the strike, as this page has
-  // seen it since it was opened; if that feed fails, the market's own YES price in cents instead.
-  var KAL_ALT_OF = { KXETH15M: 'ETH', KXXRP15M: 'XRP', KXDOGE15M: 'DOGE' }, KAL_ALT_NAME = { ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin' };
-  // A market's price chart shows only while the account holds a position in it (the owner's request, Oct 20, 2026, on desktop; phones never show these charts). Read from the account's own positions,
+  // The Bot page has no price charts any more (the owner, Oct 23, 2026: "remove charts from the bot page entirely"). A market the account holds a position in is marked with a brighter outline. Read from the account's own positions,
   // the same list the Open positions card uses, so "in a trade" means a real position, not an order that was sent. No position, or positions not read yet, means no chart.
   function kalshiInTrade(ticker){
     var a = kalshiLiveAcct, list = a && a.positions && a.positions.ok && Array.isArray(a.positions.positions) ? a.positions.positions : [];
     return list.some(function(p){ return p && p.ticker === ticker && Number.isFinite(Number(p.position)) && Number(p.position) !== 0; });
   }
-  function kalshiSparkFor(m){
-    var close = Date.parse(m.closeTime);
-    if(!Number.isFinite(close)){ return ''; }
-    var o = { from: close - 15 * 60000, to: close };
-    var body;
-    if(m.series === 'KXBTC15M' && m.strike != null){
-      body = kalshiSparkSvg(kalshiSpotSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Bitcoin price from Coinbase against the strike', empty: 'Loading the Bitcoin price...',
-        fmt: function(v){ return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 0 }); } });
-    } else if(KAL_ALT_OF[m.series] && m.strike != null){
-      var altKey = KAL_ALT_OF[m.series], alt = kalshiAlt[altKey], digits = altKey === 'ETH' ? 2 : 4;
-      body = kalshiSparkSvg(kalshiJoinSeries(alt.pts, alt.live), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: KAL_ALT_NAME[altKey] + ' price from Coinbase against the strike', empty: 'Loading the price...',
-        fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }); } });
-    } else if(m.series === 'KXGOLD15M' && m.strike != null && !kalshiGold.failed){
-      body = kalshiSparkSvg(kalshiGoldSeries(), { from: o.from, to: o.to, ref: Number(m.strike), refLabel: 'to beat', label: 'Gold price against the strike, since this page was opened', empty: 'Loading the gold price...',
-        fmt: function(v){ return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } });
-    } else {
-      body = kalshiSparkSvg(kalshiMid[m.ticker], { from: o.from, to: o.to, ref: null, label: 'YES price in cents since this page was opened', empty: 'A line appears after a minute of watching.',
-        fmt: function(v){ return v.toFixed(0) + 'c'; } });
-    }
-    return '<div class="kal-spark">' + body + '</div>';
-  }
-
   function renderKalshiBooks(data){
     var el = document.getElementById('kalBooks');
     var st = document.getElementById('kalStatus');
@@ -2302,17 +2159,6 @@
     }
     var now = Date.now();
     var names = { KXBTC15M: 'Bitcoin 15m', KXGOLD15M: 'Gold 15m', KXETH15M: 'Ethereum 15m', KXXRP15M: 'XRP 15m', KXDOGE15M: 'Dogecoin 15m' };
-    rows.forEach(function(m){
-      if(m.yesBid == null || m.yesAsk == null){ return; }
-      var h = kalshiMid[m.ticker] = kalshiMid[m.ticker] || [];
-      var mid = (m.yesBid + m.yesAsk) * 50;
-      if(!h.length || data.fetchedAt > h[h.length - 1].t){ h.push({ t: data.fetchedAt, v: mid }); if(h.length > 400){ h.shift(); } }
-    });
-    if(rows.some(function(m){ return m.series === 'KXBTC15M'; })){ kalshiFetchSpot(now); }
-    if(rows.some(function(m){ return m.series === 'KXGOLD15M'; })){ kalshiFetchGold(now); }
-    if(rows.some(function(m){ return m.series === 'KXETH15M'; })){ kalshiFetchAlt('ETH', now); }
-    if(rows.some(function(m){ return m.series === 'KXXRP15M'; })){ kalshiFetchAlt('XRP', now); }
-    if(rows.some(function(m){ return m.series === 'KXDOGE15M'; })){ kalshiFetchAlt('DOGE', now); }
     el.innerHTML = rows.map(function(m){
       var hasBook = m.yesBid != null && m.yesAsk != null;
       var spread = hasBook ? m.yesAsk - m.yesBid : null;
@@ -2321,7 +2167,7 @@
       return '<div class="kal-brow' + (kalshiInTrade(m.ticker) ? ' kal-brow-held' : '') + '"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
         '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
         '<div class="kal-brow-r"><div class="kal-brow-px" title="The price of a YES contract: what buyers bid and what sellers ask. A NO contract costs 100c minus these.">' + (hasBook ? '<span class="kal-brow-side">Yes</span> ' + (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + kalshiSparkFor(m) + '</div>';
+        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + '</div>';
     }).join('');
     st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
   }
@@ -3745,8 +3591,9 @@
     if(!el){ return; }
     if(!data || !data.quotes){ el.hidden = true; if(asof){ asof.textContent = ''; } return; }
     var a = tapeAsOfText(data, now);
-    el.innerHTML = TAPE_ITEMS.map(function(it){ return tapeItemHtml(it, data.quotes[it.sym]); }).join('') +
-      (a.stale ? '<span class="tape-asof stale">' + escapeHtml(a.text) + '</span>' : '');
+    var row = TAPE_ITEMS.map(function(it){ return tapeItemHtml(it, data.quotes[it.sym]); }).join('');
+    el.innerHTML = (a.stale ? '<span class="tape-asof stale">' + escapeHtml(a.text) + '</span>' : '') +
+      '<div class="tape-view"><div class="tape-track" style="animation-duration:' + (TAPE_ITEMS.length * 7) + 's"><div class="tape-set">' + row + '</div><div class="tape-set" aria-hidden="true">' + row + '</div></div></div>';
     el.hidden = false;
     if(asof){ asof.textContent = a.text; asof.className = 'brief-asof' + (a.stale ? ' stale' : ''); }
   }
@@ -3789,7 +3636,7 @@
       return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b>&mdash;</b></div></div>';
     }
     var score = Math.max(0, Math.min(100, m.score));
-    return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b>' + Math.round(score) + ' <span class="tape-asof">' + escapeHtml(String(m.rating || '')) + '</span></b></div>' +
+    return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b class="' + (score < 40 ? 'mood-down' : (score > 60 ? 'mood-up' : '')) + '">' + Math.round(score) + ' <span class="tape-asof">' + escapeHtml(String(m.rating || '')) + '</span></b></div>' +
       '<div class="mood-track"><i style="left:' + score.toFixed(1) + '%"></i></div>' +
       '<div class="mood-ends"><span>Fear</span>' + (Number.isFinite(m.prev) ? '<span>Yesterday ' + Math.round(m.prev) + '</span>' : '') + '<span>Greed</span></div></div>';
   }
@@ -3805,29 +3652,8 @@
     var vix = ok(q['^VIX']) ? kv('Fear index (VIX)', q['^VIX'].price.toFixed(1) + chg(pct(q['^VIX'].price, q['^VIX'].prevClose))) : kv('Fear index (VIX)', '&mdash;');
     var tnx = ok(q['^TNX']) ? kv('10 year yield', q['^TNX'].price.toFixed(2) + '%' + chg((q['^TNX'].price - q['^TNX'].prevClose) * 100, 'bp')) : kv('10 year yield', '&mdash;');
     var tlt = ok(q.TLT) ? kv('Long bonds (TLT)', q.TLT.price.toFixed(2) + chg(pct(q.TLT.price, q.TLT.prevClose))) : kv('Long bonds (TLT)', '&mdash;');
-    el.innerHTML = '<div class="mood-word">' + (word ? escapeHtml(word) : '&mdash;') + '</div>' +
+    el.innerHTML = '<div class="mood-word' + (word === 'Calm' ? ' mood-up' : (word === 'Nervous' || word === 'Stressed' ? ' mood-down' : '')) + '">' + (word ? escapeHtml(word) : '&mdash;') + '</div>' +
       briefGaugeHtml('Stocks fear and greed', mood.stocks) + briefGaugeHtml('Crypto fear and greed', mood.crypto) + vix + tnx + tlt;
-  }
-  function briefEventsList(now){
-    var ev = marketTapeData && Array.isArray(marketTapeData.events) ? marketTapeData.events : [];
-    return ev.filter(function(e){ return e && Number.isFinite(e.at) && e.at >= now - 30 * 60000; }).sort(function(a, b){ return a.at - b.at; });
-  }
-  function renderBriefEvents(){
-    var el = document.getElementById('briefEvents');
-    if(!el){ return; }
-    var now = Date.now();
-    var list = briefEventsList(now).slice(0, 7);
-    if(!list.length){
-      var loaded = marketTapeData && Array.isArray(marketTapeData.events) && marketTapeData.events.length > 0;
-      el.innerHTML = '<div class="news-placeholder">' + (loaded ? 'No more scheduled events this week.' : 'No scheduled events loaded yet.') + '</div>';
-      return;
-    }
-    var today = kalDate(now);
-    el.innerHTML = list.map(function(e){
-      var when = kalDate(e.at) === today ? kalTime(e.at) : kalDate(e.at);
-      return '<div class="brief-ev"><div class="brief-ev-l"><span class="brief-ev-t mono">' + escapeHtml(String(when)) + '</span><span class="brief-ev-n">' + escapeHtml(String(e.title || '')) + ' <span class="tape-asof">' + escapeHtml(String(e.country || '')) + '</span></span></div>' +
-        '<span class="brief-ev-pill' + (e.impact === 'High' ? ' hi' : '') + '">' + escapeHtml(String(e.impact || '')) + '</span></div>';
-    }).join('');
   }
   function renderBriefCharts(){
     var el = document.getElementById('briefCharts');
@@ -3838,7 +3664,7 @@
         g.items.map(function(it){ return briefChartHtml(it, quotes[it.sym]); }).join('') + '</div></div>';
     }).join('');
   }
-  function renderBriefPage(){ renderBriefEvents(); renderBriefMood(); renderBriefCharts(); }
+  function renderBriefPage(){ renderBriefMood(); renderBriefCharts(); }
 
   function handleMarketTapeUpdate(data){
     marketTapeData = data || null;

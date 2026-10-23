@@ -442,7 +442,6 @@ exports.marketTapeTick = onSchedule(
     const patch = { updatedAt: Date.now(), errors: r.errors };
     if (Object.keys(r.quotes).length) patch.quotes = r.quotes;
     if (r.news) patch.news = r.news;
-    if (r.events) patch.events = r.events;
     if (r.mood) patch.mood = r.mood;
     await db.collection("shared").doc("marketTape").set(patch, { merge: true });
     console.log("marketTapeTick: quotes=" + Object.keys(r.quotes).length + " news=" + (r.news ? r.news.length : 0) + " errors=" + r.errors.length);

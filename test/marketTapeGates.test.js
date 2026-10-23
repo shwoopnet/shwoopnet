@@ -123,26 +123,7 @@ gates.T7 = () => {
   assert.ok(!/finance\.yahoo|query1\.|cnbc\.com|dowjones/.test(html), 'the page itself calls no market-data host');
 };
 
-// The Brief's catalysts and small charts (Oct 23, 2026, the owner chose concept B). Each test states a consequence: only high and medium events of the major economies reach the page, past events and junk rows are dropped,
-// a quote carries a thinned day series of plain numbers, and a failed calendar never blanks the stored list.
-gates.T20 = () => {
-  const now = Date.parse('2026-10-23T10:00:00Z');
-  const rows = [
-    { title: 'CPI y/y', country: 'USD', date: '2026-10-23T12:30:00Z', impact: 'High' },
-    { title: 'Low thing', country: 'USD', date: '2026-10-23T13:00:00Z', impact: 'Low' },
-    { title: 'Other economy', country: 'AUD', date: '2026-10-23T13:00:00Z', impact: 'High' },
-    { title: 'Already past', country: 'USD', date: '2026-10-20T12:30:00Z', impact: 'High' },
-    { title: 'Bad time', country: 'USD', date: 'soon', impact: 'High' },
-    { title: 'Fed speaks', country: 'USD', date: '2026-10-23T14:00:00Z', impact: 'Medium' },
-    null, 'x', { title: 5, country: 'USD' },
-  ];
-  const ev = lib.parseEvents(rows, now);
-  assert.deepStrictEqual(ev.map((e) => e.title), ['CPI y/y', 'Fed speaks'], 'only upcoming high and medium events of listed economies, soonest first');
-  assert.deepStrictEqual(Object.keys(ev[0]).sort(), ['at', 'country', 'impact', 'title'], 'only the four fields the page shows');
-  assert.deepStrictEqual(lib.parseEvents({ not: 'a list' }, now), [], 'a wrong shape is an empty list, not a crash');
-  const many = Array.from({ length: 80 }, (_, i) => ({ title: 't' + i, country: 'USD', date: new Date(now + i * 60000).toISOString(), impact: 'High' }));
-  assert.ok(lib.parseEvents(many, now).length <= 40, 'the list is capped');
-};
+// The Brief's small charts (Oct 23, 2026, the owner chose concept B; the catalysts calendar was dropped the same day for the news feed): a quote carries a thinned day series of plain numbers.
 gates.T21 = () => {
   const closes = Array.from({ length: 300 }, (_, i) => 100 + i);
   closes[5] = null;
@@ -159,9 +140,8 @@ gates.T22 = () => {
   for (const need of ['BTC-USD', 'ETH-USD', 'SPY', 'QQQ', 'GC=F', 'CL=F']) assert.ok(syms.includes(need), need + ' is read for the Brief charts');
   assert.ok(lib.NEWS_FEEDS.some((f) => /coindesk|cointelegraph/.test(f.url)) && lib.NEWS_FEEDS.some((f) => /20910258|RSSWorldNews/.test(f.url)), 'crypto, economy and world headlines are read');
   const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
-  assert.ok(/if \(r\.events\) patch\.events = r\.events;/.test(idx), 'a failed calendar leaves the stored events alone (the patch is merged)');
   assert.ok(!/faireconomy|coindesk|cointelegraph|dowjones/.test(html), 'the page itself calls none of these hosts');
-  assert.ok(/id="briefEvents"/.test(html) && /id="briefCharts"/.test(html) && /id="briefMood"/.test(html), 'the Brief has its catalysts, charts and risk mood');
+  assert.ok(/id="marketNewsList"/.test(html) && /id="briefCharts"/.test(html) && /id="briefMood"/.test(html) && !/briefEvents/.test(html), 'the Brief has its news, charts and risk mood, and no calendar');
 };
 
 // No single desk fills the list (Oct 23, 2026): each feed contributes its newest few, so a busy crypto desk cannot push the economy and world headlines off the Brief.
@@ -192,6 +172,8 @@ gates.T25 = () => {
   assert.ok(/&mdash;/.test(g('Stocks', undefined)) && !/mood-track/.test(g('Stocks', undefined)), 'no reading: a dash, no gauge');
   assert.ok(/left:50\.0%/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })) && /Yesterday 68/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })), 'a reading places its marker and shows yesterday');
   assert.ok(/left:100\.0%/.test(g('x', { score: 250 })), 'a wild score cannot push the marker off the track');
+  assert.ok(/mood-down/.test(g('x', { score: 21 })) && /mood-up/.test(g('x', { score: 75 })) && !/mood-(up|down)/.test(g('x', { score: 50 })), 'fear reads red, greed green, the middle plain (the owner: green positive, red negative)');
+  assert.ok(/\.mood-kv > span:first-child/.test(html), 'the row label rule cannot reach the change inside the value, which stays green or red');
 };
 
 (async () => {
