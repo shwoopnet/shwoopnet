@@ -61,6 +61,11 @@ gates.SP3 = () => {
   assert.ok(/Tap again to set 20% \/ 80%/.test(page), 'setting it takes two taps');
 };
 
+gates.SP4 = () => {
+  const f = fnSrc.slice(fnSrc.indexOf('exports.kalshiShardSplit'), fnSrc.indexOf('exports.kalshiFlattenAll'));
+  assert.ok(/try \{\s*out = apply \? await live\.applyShardSplit\(args\)/.test(f) && /catch \(e\)/.test(f), 'a throw inside the split call is caught and reported with its own reason, not the page\'s blank "internal"');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
