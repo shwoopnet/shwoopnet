@@ -56,6 +56,8 @@ Public Sans everywhere, local files from `fonts/` (no font host). Titan One is f
 | Body | Public Sans 500, 15 to 17.5px, line-height 1.6, muted, with `<b>` in paper 800 for the key words |
 | Small / fine print | 11.5 to 12.5px, muted |
 
+**The scale (Oct 23, 2026, the owner: "make it look professional so we don't have to come back and adjust it later").** Whole pixel sizes only, in this order: 11 (labels, captions, table heads), 12 (hints, fine print, chart text), 13 (rows and body text in cards), 14 (emphasised rows, buttons, legends), 16 (figures that lead a card), 17 to 18 (card titles), 26 to 28 (page titles), 30 (the big account figure). No half pixels and nothing under 11. Weights: 500 text, 600 labels and secondary values, 700 titles and primary values, 800 only for page titles and big figures. **Two figures that are the same fact share one size, weight and colour** (a dollar result and its percentage, a ticker price and its change); only a quiet separator or the verdict colour tells them apart. Text inside a chart is sized in screen pixels, not chart units (`data-px` and `kalshiFitSvgText`), so a caption reads the same size on any card width.
+
 Every number is Public Sans with tabular digits, never Titan One. Headings are never uppercase except eyebrows and tile labels.
 
 ## 4. Background
