@@ -23,11 +23,8 @@ assert.ok(/front-win-a/.test(gate) && /front-win-b/.test(gate) && /Market Brief/
 assert.ok((shots.match(/Sample data/g) || []).length === 2 && /Sample screens with made-up numbers, shown for illustration only\. They are not real account data or results\./.test(gate), 'each window says Sample data and a caption says the numbers are made up and not real results');
 assert.ok(!/%|\+\s?\$|win rate|profit|return|performance|Bitcoin|gold|Kalshi|contracts?\b/i.test(shotText.replace(/Reinvest pool|Stake per trade/g, '')), 'the sample screens show no gain, percentage, result or market name, only obviously dummy numbers');
 assert.ok(!/class="[^"]*\b(g|gain|loss)\b/.test(shots), 'and nothing in them is coloured as a gain or a loss');
-assert.ok(/id="loginColorChoice"/.test(html) && /data-login-color/.test(html) && !/loginLayout|data-login-layout/.test(html), 'Settings picks only the login colour (one layout, two windows), and the page reads it before first paint');
+assert.ok(!/accentChoice|loginColorChoice|data-accent|data-login-color|loginLayout|data-login-layout/.test(html), 'there is no colour or layout choice: the whole site is black and white (the owner, Oct 23, 2026)');
 const front = (/\/\* The signed-out screen[\s\S]*?\.auth-title\{/.exec(html) || [''])[0].replace(/\/\*[\s\S]*?\*\//g, '');
-const palettes = [...front.matchAll(/\.auth-gate\{([^}]*)\}/g)].map((m) => m[1]);
-assert.ok(palettes.length >= 2 && /--amber:#1fd68a/.test(palettes.join('')) && /--amber:#ffffff/.test(palettes.join('')), 'the two palettes (emerald and white) are declared on the gate itself');
-assert.ok(!/#[0-9a-fA-F]{3,8}\b|rgb\(/.test(front.replace(/\.auth-gate\{[^}]*\}/g, '').replace(/html\[data-login-color="wh"\] \.auth-gate\{[^}]*\}/g, '').replace(/rgba\((0,0,0|255,255,255),[^)]*\)|#0F9D58/g, '')), 'everything else on the front page uses those tokens, not fixed colours (the gain green on the Running pill and plain black or white shades excepted)');
 const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(html.replace(/\/\*[\s\S]*?\*\//g, ''))[1];
 assert.ok(/\.front-eyebrow, \.front-h1, \.front-line, \.front-win, \.front-win-a \.win\{ animation: none; \}/.test(media) && /\[data-reduce-motion="true"\] \.front-win-a \.win/.test(html), 'the rise-in and the float stop under reduced motion and the Settings switch');
 assert.ok(/\.front-win \.win\{[^}]*aspect-ratio:16 \/ 10/.test(html), 'both snapshot windows share one landscape shape, so neither is taller than the other (the owner, Oct 23, 2026)');
