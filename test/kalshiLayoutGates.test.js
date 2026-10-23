@@ -335,7 +335,7 @@ gates.Y10 = () => {
   assert.ok(/BOT_SHARDS = \{ 2: 'crypto and natural gas', 0: 'gold, AUD\/USD, USD\/CAD' \}/.test(acct), 'the two shards the bot trades are named with what trades on them (shard 0 holds gold and the forex probes, so it is not "not usable")');
   assert.ok(/not used by the bot/.test(acct) && /x\.dollars >= 0\.5/.test(acct), 'any other shard is said to be unused, and only when there is real money on it');
   assert.ok(/a\.liveSwitch \? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
-  assert.ok(!/Shard ' \+/.test(acct), 'no per-shard rows');
+  assert.ok(/Shard ' \+/.test(acct), 'one row per shard the bot trades, so the owner can see where the money sits (the owner asked, Oct 23, 2026: where are the balances split)');
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
