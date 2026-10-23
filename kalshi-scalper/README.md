@@ -5869,3 +5869,6 @@ FALSIFIED: mean < +0.3c or z < 1.0. Otherwise NOT_ENOUGH_DATA. Tries +1. Run onc
 
 ### TAIL1 result (2026-10-23, run once)
 FALSIFIED (prediction held). Gold, underdog ask 0.04 to 0.10: n 923, mean -2.77c per contract, z -4.17, halves -3.60/-1.97, stress -2.86c. Not judged: all series pooled -2.19c (n 16,190, z -11.69); gold 0.01 to 0.04 -1.64c; gold 0.10 to 0.20 -3.57c. Buying the cheap side loses at every price, by about the spread plus fee. Gold's edge is on the favourite side only. Tries +1.
+
+### Scout follow-up check (2026-10-23, information only, no try)
+Looked at the scout table for unregistered leads. The economics category's +2.11c (316 entries) is the state and US gas price ladders (31 series) plus SOFR and Truflation EV, i.e. the gas family already registered as GAS1-F (read 2026-11-22). The top of the table (0% losses, +4c to +7c) has 4 to 60 entries per series and is a selection effect, as logged. Brent daily (60 entries, 10 days) is the only non-gas series with a clean top row and is too thin to register. No new series test is justified from current data.
