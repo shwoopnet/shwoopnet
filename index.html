@@ -441,8 +441,9 @@
   .kal-rows{ display:flex; flex-direction:column; gap:8px; padding-top:10px; border-top:1px solid var(--border); font-size:13px; }
   .kal-rows > div{ display:flex; justify-content:space-between; gap:12px; } .kal-rows .kal-k{ color:var(--muted); } .kal-rows b{ font-weight:600; }
   /* Trades as a table. */
-  .kal-tr{ display:grid; grid-template-columns:130px 150px minmax(0,1fr) 90px 70px; gap:12px; padding:11px 22px; border-top:1px solid var(--border); align-items:center; font-size:13.5px; }
+  .kal-tr{ display:grid; grid-template-columns:130px 150px minmax(0,1fr) 150px 70px; gap:12px; padding:11px 22px; border-top:1px solid var(--border); align-items:center; font-size:13.5px; }
   .kal-tr-head{ background:var(--panel-raised); color:var(--muted); font-size:11.5px; font-weight:600; padding-top:8px; padding-bottom:8px; border-top:0; }
+  .kal-tr-pct{ font-weight:500; font-size:12px; opacity:.85; }
   .kal-tr-t, .kal-tr-s{ color:var(--muted); } .kal-tr-p, .kal-tr-s{ text-align:right; } .kal-tr-p{ font-family:'Public Sans', sans-serif; font-weight:700; }
   .kal-foot{ padding:12px 22px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); }
   .kal-perf{ padding:14px 22px 20px 22px; }
@@ -2333,6 +2334,12 @@
     if(!fill || !fill.orderId){ return false; }
     return (orders || []).some(function(o){ return o && o.exitOrderId && o.exitOrderId === fill.orderId; });
   }
+  // A trade's result as a share of what it cost (the owner, Oct 23, 2026: "add % to the trade history"). cost is the money put in (price paid x contracts); '' when it is unknown. A percentage is never masked by Privacy view.
+  function kalshiPctText(pnl, cost){
+    if(!Number.isFinite(pnl) || !(cost > 0)){ return ''; }
+    var p = pnl / cost * 100;
+    return ' <span class="kal-tr-pct">(' + (p >= 0 ? '+' : '-') + Math.abs(p).toFixed(1) + '%)</span>';
+  }
   function kalshiTradePnl(fill, order, result){
     if(order && order.settled === true && order.result === 'hand'){ return null; }     // closed by hand (the server saw the account's own sell): no figure, the row says so
     if(order && order.settled === true && order.result === 'exit' && Number.isFinite(Number(order.settledPnl)) && fill && Number(fill.count) > 0){
@@ -2592,7 +2599,7 @@
       var rowsHtml = fillsShown.map(function(item){
         if(item.order){
           var o = item.order, pnl = kalshiOrderPnl(o), cnt = Number(o.fillCount), paid = Number.isFinite(Number(o.maxCost)) && Number(o.count) > 0 ? Number(o.maxCost) / Number(o.count) : Number(o.price);
-          var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl)) + '</span>' : (o.settled === true && o.result === 'hand' ? '<span style="color:var(--muted)">sold by hand</span>' : '<span style="color:var(--muted)">open</span>');
+          var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl)) + kalshiPctText(pnl, paid * cnt) + '</span>' : (o.settled === true && o.result === 'hand' ? '<span style="color:var(--muted)">sold by hand</span>' : '<span style="color:var(--muted)">open</span>');
           return '<div class="kal-tr"><span class="kal-tr-t">' + escapeHtml(kalshiWhen(o.ts, nowD.getTime())) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(o.ticker)) + '</span>' +
             '<span class="kal-tr-f">Bought ' + escapeHtml(String(o.side || '').toUpperCase()) + ' ' + escapeHtml(String(Math.round(cnt * 100) / 100)) + (Number.isFinite(paid) ? ' at ' + (Math.round(paid * 1000) / 10).toFixed(1) + 'c' : '') + '</span><span class="kal-tr-p">' + oPl + '</span><span class="kal-tr-s">bot</span></div>';
         }
@@ -2607,7 +2614,7 @@
         } else {
           fillText = escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '');
         }
-        if(tp){ settled++; sum += tp.pnl; plCell = '<span class="' + (tp.pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tp.pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tp.pnl)) + '</span>'; }
+        if(tp){ settled++; sum += tp.pnl; plCell = '<span class="' + (tp.pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tp.pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tp.pnl)) + kalshiPctText(tp.pnl, (Number.isFinite(tp.paid) ? tp.paid : (ord && ord.side === 'yes' ? Number(x.price) : 1 - Number(x.price))) * Number(x.count)) + '</span>'; }
         else if(ord && ord.settled === true && ord.result === 'hand'){ plCell = '<span style="color:var(--muted)">sold by hand</span>'; }
         else if(ord){ open++; plCell = '<span style="color:var(--muted)">open</span>'; }
         else { plCell = '<span style="color:var(--muted)">n/a</span>'; }
