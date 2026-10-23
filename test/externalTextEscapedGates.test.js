@@ -45,13 +45,18 @@ gates.X1 = () => {
 
 gates.X2 = () => {
   const doc = fakeDoc();
-  const src = ['escapeHtml', 'renderEarningsCalendar'].map(fnSource).join('\n');
-  // The filter only lets a tracked symbol through; escaping is the second wall, for the day that filter is relaxed.
-  const render = new Function('document', 'watchlist', src + '\nreturn renderEarningsCalendar;')(doc, [{ sym: EVIL }, { sym: 'AAPL' }]);
-  render({ earningsCalendar: [{ symbol: EVIL, date: '2026-10-14', hour: 'amc' }, { symbol: 'AAPL', date: '2026-10-15', hour: 'bmo' }, { symbol: 'ZZZZ', date: '2026-10-15', hour: 'bmo' }] });
-  const out = doc.els.earningsList.innerHTML;
-  assert.ok(!/<img/i.test(out), 'a symbol with markup is text, not elements');
-  assert.ok(/AAPL/.test(out) && !/ZZZZ/.test(out), 'only tracked symbols are listed');
+  const src = ['escapeHtml', 'briefEventsList', 'renderBriefEvents'].map(fnSource).join('\n');
+  // Event titles come from a third-party calendar through the shared tape document: they are text, never elements.
+  const now = Date.parse('2026-10-23T10:00:00Z');
+  const f = new Function('document', 'marketTapeData', 'kalDate', 'kalTime', 'Date2', src + '\nreturn renderBriefEvents;');
+  const realNow = Date.now; Date.now = () => now;
+  try {
+    const render = f(doc, { events: [{ title: EVIL, country: '<b>USD</b>', at: now + 3600000, impact: 'High' }, { title: 'CPI', country: 'USD', at: now + 7200000, impact: '<script>' }] }, () => 'Oct 23', () => '11:00', null);
+    render();
+  } finally { Date.now = realNow; }
+  const out = doc.els.briefEvents.innerHTML;
+  assert.ok(!/<img|<script|<b>/i.test(out), 'a title, country or impact with markup is text, not elements');
+  assert.ok(/CPI/.test(out), 'and the real events are listed');
 };
 
 gates.X3 = () => {

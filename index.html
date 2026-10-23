@@ -172,8 +172,9 @@
   /* Room for the fixed sidebar so page content never sits underneath it --
      right-side padding on wide screens where the sidebar is a vertical
      rail, bottom padding on narrow screens where it becomes a bottom bar. */
-  .app{ padding-left: 212px; }
-  @media (max-width: 900px){ .app{ padding-left:0; padding-bottom:76px; } }
+  /* The page column hugs the rail instead of centring on a wide screen, so there is never a wide empty gap between the two (the owner, Oct 23, 2026: "fix this weird gap"). */
+  .app{ padding-left: 212px; margin-left: 0; margin-right: auto; }
+  @media (max-width: 900px){ .app{ padding-left:0; padding-bottom:76px; margin: 0 auto; } }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -253,11 +254,9 @@
   /* ---------- Market Brief (home) page ---------- */
   /* The Brief is a grid of soft windows, the same card the sign-in page shows (the owner, Oct 23, 2026: everything matches the front page; the Movers card was dropped). */
   .brief-win{ background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%), var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow: var(--card-shadow); padding:20px 22px; min-width:0; }
-  .brief-win .breadth-widget, .brief-win .market-news-list, .brief-win .earnings-list{ background:none; border:0; box-shadow:none; padding:0; border-radius:0; }
+  .brief-win .market-news-list{ background:none; border:0; box-shadow:none; padding:0; border-radius:0; }
+  .brief-newswin{ margin-bottom:36px; }
   .brief-win .brief-section-title{ margin:0 0 12px 0; }
-  .brief-grid{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"news side" "news earn"; gap:18px; align-items:start; margin-bottom:36px; }
-  .brief-news{ grid-area:news; } .brief-side{ grid-area:side; } .brief-earn{ grid-area:earn; }
-  @media (max-width: 900px){ .brief-grid{ grid-template-columns:1fr; grid-template-areas:"side" "news" "earn"; } }
   .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:stretch; }
   .brief-cat .brief-eyebrow, .brief-next .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
   .brief-ev{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; border-top:1px solid var(--border); font-size:13px; }
@@ -282,23 +281,8 @@
   .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; }
   .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
   .brief-chart svg line{ stroke:var(--border); stroke-width:1; stroke-dasharray:3 4; vector-effect:non-scaling-stroke; }
-  .brief-newswin{ margin-bottom:36px; }
-  .brief-hero .brief-lede{ margin-bottom:0; }
-  .index-card{ border-radius:16px; }
-  .brief-hero{ padding: 28px 30px; margin-top:18px; margin-bottom:18px; }
-  .brief-page-header{ margin-bottom:22px; }
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
-  .brief-headline{ font-family:'Public Sans', sans-serif; font-size: 26px; font-weight:700; margin:0 0 14px 0; line-height:1.35; }
-  .brief-lede{ font-size:15px; line-height:1.75; color:var(--muted); margin:0 0 32px 0; }
 
-  .brief-indices{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px; }
-  .index-card{ flex:1; min-width:150px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
-  .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
-  .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
-  .index-card .ix-val{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; font-size:23px; letter-spacing:0; display:block; }
-  .index-card .ix-chg{ font-size:12px; margin-top:7px; display:block; }
-  .index-card .ix-chg.up{ color:var(--gain); }
-  .index-card .ix-chg.down{ color:var(--loss); }
   /* The market strip (every page) and the Brief's "as of" line. No animation: a still row that scrolls sideways on a narrow screen. */
   .tape{ display:flex; align-items:baseline; gap:14px; overflow-x:auto; white-space:nowrap; padding:8px 14px; margin:8px 28px 0 28px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); font-size:12px; scrollbar-width:thin; }
   .tape-item{ display:inline-flex; gap:6px; align-items:baseline; }
@@ -317,21 +301,8 @@
   }
 
 
-  .breadth-widget{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:18px 20px; box-shadow: var(--card-shadow); }
-  .breadth-bar{ height:10px; border-radius:5px; background: var(--loss-glow); overflow:hidden; margin-bottom:14px; }
-  .breadth-bar-up{ height:100%; background: var(--gain); }
-  .sentiment-rows{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
-  .sentiment-row{ display:flex; align-items:center; justify-content:space-between; font-size:13px; }
-  .sentiment-name{ color: var(--paper); }
-  .sentiment-chg{ font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight:600; }
-  .sentiment-chg.up{ color: var(--gain); }
-  .sentiment-chg.down{ color: var(--loss); }
-  .breadth-meta{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:12.5px; }
-  .breadth-label{ font-size:11.5px; padding:4px 10px; border-radius:3px; border:1px solid var(--border); color: var(--muted); }
-  .breadth-label.up{ border-color: rgba(15,157,88,0.35); color: var(--gain); }
-  .breadth-label.down{ border-color: rgba(217,48,37,0.35); color: var(--loss); }
 
-  .market-news-list, .earnings-list{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:6px 16px; min-height:60px; box-shadow: var(--card-shadow); }
+  .market-news-list{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:6px 16px; min-height:60px; box-shadow: var(--card-shadow); }
   .news-placeholder{ padding:14px 0; font-size:12px; color: var(--muted); }
   .news-item{ display:flex; flex-direction:column; gap:3px; padding:11px 0; text-decoration:none; color: var(--paper); }
   .news-item + .news-item{ border-top:1px solid var(--border); }
@@ -339,11 +310,6 @@
   .news-item{ transition: transform .15s ease; } .news-item:hover{ transform: translateX(3px); }
   .news-item-headline{ font-size:12.5px; line-height:1.5; }
   .news-item-meta{ font-size:10.5px; color: var(--muted); }
-  .earnings-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; font-size:12.5px; }
-  .earnings-row + .earnings-row{ border-top:1px solid var(--border); }
-  .earnings-sym{ font-weight:600; flex:0 0 60px; }
-  .earnings-date{ color: var(--muted); flex:1; }
-  .earnings-hour{ font-size:11px; color: var(--amber); }
 
   /* ---------- Trade Overview page ---------- */
   .trades-header{
@@ -369,6 +335,8 @@
   .data-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-top:20px; }
   .data-grid > .kal-card{ margin-bottom:0; min-width:0; }
   .data-tiles{ margin-top:6px; }
+  .data-grid > [data-card="data-markets"], .data-grid > [data-card="data-tests"], .data-grid > [data-card="data-bars"]{ grid-column:1 / -1; }
+  .data-sub{ padding:14px 22px 6px; border-top:1px solid var(--border); margin-top:6px; color:var(--muted); font:700 11px 'Public Sans', sans-serif; letter-spacing:.2em; text-transform:uppercase; }
   .data-details > summary{ cursor:pointer; list-style:none; margin:0; } .data-details[open] > summary{ margin-bottom:6px; } .data-details .kal-perf{ padding:6px 0 0 0; }
   .data-row{ display:grid; grid-template-columns:1.3fr repeat(5,minmax(0,1fr)); gap:6px; padding:9px 18px; font-size:12.5px; border-top:1px solid var(--border); align-items:center; }
   .data-row.data-head{ color:var(--muted); font-size:11px; border-top:0; }
@@ -714,8 +682,15 @@
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
   /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One is only the wordmark. */
   .kal-bub{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; }
-  .kal-card, .settings-card, .breadth-widget, .brief-win, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
-  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .brief-win:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
+  /* Soft windows everywhere (docs/DESIGN_SYSTEM.md section 2): every page card is the front page's window (16px, a faint top highlight, the soft shadow) and every tile inside one is the small card (12px, a faint wash). */
+  .kal-card:not(.kal-card-bare), .settings-card, .market-news-list, .kal-console .kal-brow{
+    border-radius:16px; background-image:linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%);
+  }
+  .kal-tile, .data-tile{ border-radius:12px; background:rgba(255,255,255,.025); }
+  .tape, .kal-layout-body, .kal-tip{ border-radius:12px; }
+  select{ background:var(--panel-raised); color:var(--paper); border:1px solid var(--border); border-radius:8px; color-scheme:dark; }
+  .kal-card, .settings-card, .brief-win{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
+  .kal-card:hover, .settings-card:hover, .brief-win:hover:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
   .kal-tile:hover{ transform: translateY(-2px) scale(1.02); border-color: var(--paper); }
   .kal-leg{ transition: transform .15s ease; } .kal-leg:hover{ transform: translateX(3px); }
@@ -727,7 +702,7 @@
   @keyframes cardRise{ from{ opacity:0; transform: translateY(14px) scale(.985); } to{ opacity:1; transform:none; } }
   @keyframes lineDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
   @keyframes markPop{ from{ opacity:0; transform: scaleY(.2); } to{ opacity:1; transform:none; } }
-  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .brief-win, .page.enter .index-card, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+  .page.enter .kal-card, .page.enter .settings-card, .page.enter .brief-win, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
@@ -736,21 +711,21 @@
     .brand:hover .brand-name span{ transform: none; }
     .kal-console .kal-brow{ transition: none; }
     .kal-console .kal-brow:hover{ transform: none; }
-    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .brief-win, .page.enter .index-card, .page.enter .kal-tile{ animation: none; }
+    .page.enter .kal-card, .page.enter .settings-card, .page.enter .brief-win, .page.enter .kal-tile{ animation: none; }
     .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
     .news-item:hover{ transform: none; }
-    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .brief-win:hover, .index-card:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
+    .kal-card:hover, .settings-card:hover, .brief-win:hover:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
   [data-reduce-motion="true"] .brand-name span{ transition: none; }
   [data-reduce-motion="true"] .brand:hover .brand-name span{ transform: none; }
   [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
   [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
-  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter .index-card, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
+  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .news-item:hover{ transform: none; }
-  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .brief-win:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
+  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .brief-win:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
   [data-reduce-motion="true"] .front-eyebrow, [data-reduce-motion="true"] .front-h1, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-win, [data-reduce-motion="true"] .front-win-a .win{ animation: none; }
 </style>
 <script>
@@ -1077,6 +1052,7 @@
     </div>
 
     <div class="brief-charts" id="briefCharts"></div>
+    <div class="brief-asof" id="briefAsOf"></div>
 
     <div class="brief-win brief-newswin">
       <div class="brief-section-title">Market News</div>
@@ -1085,34 +1061,6 @@
       </div>
     </div>
 
-    <!-- The old Brief sections stay in the page, hidden, so the data code keeps its elements until the new design is chosen. -->
-    <div id="briefOld" hidden>
-    <div class="brief-hero brief-win">
-      <div class="brief-page-header">
-        <div class="trades-title">Market Brief</div>
-        <div class="trades-sub">Today's read on what's moving the tape.</div>
-      </div>
-      <div class="brief-eyebrow" id="briefDate">—</div>
-      <h1 class="brief-headline">Loading today's brief…</h1>
-      <p class="brief-lede"></p>
-    </div>
-
-    <div class="brief-indices" id="indexSnapshot"></div>
-    <div class="brief-asof" id="briefAsOf"></div>
-
-    <div class="brief-grid">
-      <div class="brief-win brief-side">
-        <div class="brief-section-title">Market Sentiment</div>
-        <div class="breadth-widget" id="breadthWidget"></div>
-      </div>
-      <div class="brief-win brief-earn">
-        <div class="brief-section-title">Earnings This Week</div>
-        <div class="earnings-list" id="earningsList">
-          <div class="news-placeholder">Sign in to see upcoming earnings for your tracked stocks.</div>
-        </div>
-      </div>
-    </div>
-    </div>
   </main>
 
 
@@ -1224,15 +1172,13 @@
     <div class="data-grid">
       <div class="kal-card" data-card="data-weekly"><div class="kal-card-title">Result by week</div><div id="dataWeekly"></div></div>
       <div class="kal-card" data-card="data-growth"><div class="kal-card-title">Growth trend</div><div id="dataLine"></div></div>
-      <div class="kal-card" data-card="data-share"><div class="kal-card-title">Share of trades by market</div><div id="dataShare"></div></div>
       <div class="kal-card" data-card="data-ended"><div class="kal-card-title">How the orders ended</div><div class="kal-chart"><div id="kalChartPie"></div></div></div>
       <div class="kal-card kal-card-flush" data-card="data-stats"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">The strategy in numbers</div></div><div id="dataStats"></div></div>
-      <div class="kal-card kal-card-flush" data-card="data-live"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">Live tests</div></div><div id="dataLiveTests"></div></div>
       <div class="kal-card kal-card-flush" data-card="data-markets"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">By market</div></div><div id="dataMarkets"></div></div>
-      <div class="kal-card kal-card-flush" data-card="data-lead"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">Entry timing test</div></div><div id="dataLead"></div></div>
+      <div class="kal-card kal-card-flush data-tests" data-card="data-tests"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">Tests in progress</div></div><div id="dataLiveTests"></div><div class="data-sub">Entry timing</div><div id="dataLead"></div></div>
       <div class="kal-card" data-card="data-bars"><div class="kal-card-title">Each settled trade</div><div class="kal-chart"><div id="kalChartBars"></div></div></div>
     </div>
-    <details class="kal-card data-details" id="dataDetails" style="margin-top:20px"><summary class="kal-card-title">All the numbers</summary>
+    <details class="kal-card data-details" id="dataDetails" style="margin-top:20px"><summary class="kal-card-title">By price paid</summary>
       <div class="kal-perf" id="kalPerfWrapC"><div id="kalPerf"></div></div>
     </details>
     <div class="kal-note" id="dataNote"></div>
@@ -1295,7 +1241,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Limit graphics</div>
-              <div class="settings-row-desc">Stops animations and hover effects, the light that follows your cursor, and the glowing background.</div>
+              <div class="settings-row-desc">Stops animations and hover effects, and the soft light in the background.</div>
             </div>
             <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
               <span class="toggle-knob"></span>
@@ -1505,29 +1451,6 @@
   function pct(a,b){ return ((a-b)/b*100); }
   function findQuote(sym){ return watchlist.filter(function(w){ return w.sym === sym; })[0]; }
 
-  // ---------- Index snapshot (brief page) ----------
-  function renderIndices(){
-    var el = document.getElementById('indexSnapshot');
-    el.innerHTML = '';
-    indexReads().forEach(function(r){
-      var card = document.createElement('div');
-      card.className = 'index-card';
-      if(!r.loaded){
-        card.innerHTML =
-          '<span class="ix-name">' + r.name + ' <span class="ix-proxy">(' + r.sym + ')</span></span>' +
-          '<span class="ix-val mono">—</span>' +
-          '<span class="ix-chg">Loading…</span>';
-      } else {
-        var up = r.chg >= 0;
-        card.innerHTML =
-          '<span class="ix-name">' + r.name + ' <span class="ix-proxy">(' + r.sym + ')</span></span>' +
-          '<span class="ix-val mono">' + r.val.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}) + '</span>' +
-          '<span class="ix-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(r.chg).toFixed(2) + '% today</span>';
-      }
-      el.appendChild(card);
-    });
-  }
-
   // ---------- Clock ----------
   function getTzAbbrev(date){
     try{
@@ -1554,17 +1477,8 @@
       timeStr = hours24.toString().padStart(2,'0') + ':' + m + ':' + s;
     }
     document.getElementById('clockTime').textContent = timeStr + ' ' + getTzAbbrev(now);
-    var opts = { weekday:'long', month:'long', day:'numeric' };
-    document.getElementById('briefDate').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
   }
   setInterval(updateClock, 1000);
-  // The Market Brief greeting ("Good morning/afternoon/evening") only used
-  // to get recomputed as a side effect of a new snapshot arriving, which
-  // can go quiet for long stretches (market closed, tab backgrounded,
-  // etc.), leaving a stale greeting sitting on screen well past when it
-  // should have changed. A dedicated, independent timer means it's never
-  // more than a minute out of date.
-  setInterval(renderBriefHeadline, 60000);
 
   // ---------- Account-synced settings: write-through helper ----------
   // Every applyXPref below already writes its own localStorage key on
@@ -2147,30 +2061,17 @@
     return L.join('\n');
   }
 
-  // The tracker's numbers as tiles and two small tables. Nothing is shown as a figure until there is a settled trade to base it on.
-  function kalshiPerfHtml(st, esc, money, exitRep, afterMarket){
+  // By price paid: the one table that is only here. The headline figures are the tiles and The strategy in numbers, and By market has its own card, so none of them is repeated; every other stat is copied with
+  // the Copy all stats button in Tools (kalshiStatsText). Nothing is shown as a figure until there is a settled trade to base it on.
+  function kalshiPerfHtml(st, esc, money){
     if(!st || !st.n){ return '<div class="kal-empty">The tracker fills in after the first settled trade.</div>'; }
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    var tile = function(k, v, cls){ return '<div class="kal-tile"><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
     var pct = function(x){ return Math.round(x * 100) + '%'; };
-    var streak = st.streak.kind ? st.streak.n + ' ' + (st.streak.kind === 'win' ? (st.streak.n === 1 ? 'win' : 'wins') : (st.streak.n === 1 ? 'loss' : 'losses')) : 'none';
-    // Net is the all-time total (not on the account card any more) on the account card, so it is not a tile here; per trade takes its place.
-    var main = tile('Settled trades', String(st.n)) + tile('Win rate', pct(st.winRate) + ' (' + st.wins + ' / ' + st.losses + ')') +
-      tile('Profit factor', st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2)) +
-      tile('Average win', st.avgWin === null ? 'none yet' : sg(st.avgWin), 'kal-pos') + tile('Average loss', st.avgLoss === null ? 'none yet' : sg(st.avgLoss), st.avgLoss === null ? '' : 'kal-neg') +
-      tile('Expectancy', sg(st.expectancy), st.expectancy >= 0 ? 'kal-pos' : 'kal-neg');
-    var more = tile('Net', sg(st.total), st.total >= 0 ? 'kal-pos' : 'kal-neg') +
-      tile('Best / worst', sg(st.best) + ' / ' + sg(st.worst)) + tile('Deepest drawdown', st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none') +
-      tile('Streak now', streak) + tile('Longest losing run', String(st.longestLoss));
-    var table = function(title, rows){
-      if(!rows.length){ return ''; }
-      return '<div class="kal-perf-t' + (title === 'By price paid' ? ' kal-perf-band' : '') + '"><span class="kal-lbl">' + esc(title) + '</span>' + rows.map(function(r){
-        return '<div><span>' + esc(r.label) + '</span><span>' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + esc(sg(r.net)) + '</b></div>';
-      }).join('') + '</div>';
-    };
-    // Only the tiles, By market and By price paid are shown. Everything else (net, best and worst, drawdown, streaks, the exit at 25c block) stays computed from the stored orders and is copied
-    // with the Copy all stats button in Tools (kalshiStatsText), so it can be reviewed without cluttering the page.
-    return '<div class="kal-tiles">' + main + '</div><div class="kal-perf-tabs">' + table('By market', st.bySeries) + (afterMarket || '') + table('By price paid', st.byBand) + '</div>';
+    var rows = st.byBand;
+    if(!rows.length){ return ''; }
+    return '<div class="kal-perf-tabs"><div class="kal-perf-t kal-perf-band"><span class="kal-lbl">By price paid</span>' + rows.map(function(r){
+      return '<div><span>' + esc(r.label) + '</span><span>' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won</span><b class="' + (r.net >= 0 ? 'kal-pos' : 'kal-neg') + '">' + esc(sg(r.net)) + '</b></div>';
+    }).join('') + '</div></div>';
   }
 
   // A tiny line over one 15 minute market: points are {t (ms), v}, drawn across the market's whole window so it fills from the left as time passes.
@@ -2898,23 +2799,9 @@
     return Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.n - a.n; });
   }
   // A ring of how many settled trades each market had. One neutral tone per slice (lighter to darker), no red or green: this is a count, not a result.
-  function dataShareDonutHtml(rows, esc){
-    var total = (rows || []).reduce(function(n, r){ return n + r.n; }, 0);
-    if(!total){ return '<div class="kal-empty">No settled trades yet.</div>'; }
-    var offset = 25, segs = '', legend = '';
-    rows.forEach(function(r, i){
-      var pct = r.n / total * 100, op = Math.max(0.18, 0.95 - i * 0.14);
-      segs += '<circle data-seg="1" cx="21" cy="21" r="15.9155" fill="none" stroke="var(--paper)" stroke-opacity="' + op.toFixed(2) + '" stroke-width="6" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + offset.toFixed(3) + '"><title>' + esc(r.name) + ': ' + r.n + ' (' + Math.round(pct) + '%)</title></circle>';
-      offset -= pct;
-      legend += '<div class="kal-leg"><span class="kal-leg-dot" style="background:var(--paper);opacity:' + op.toFixed(2) + '"></span><span>' + esc(r.name) + '</span><b>' + r.n + '</b><span class="kal-lbl">' + Math.round(pct) + '%</span></div>';
-    });
-    return '<div class="kal-donut"><svg viewBox="0 0 42 42" role="img" aria-label="Share of ' + total + ' settled trades by market" style="width:140px;height:140px;flex:none"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--border)" stroke-width="6"/>' + segs +
-      '<text class="kal-bub" x="21" y="20" text-anchor="middle" font-size="7.5" fill="currentColor">' + total + '</text><text x="21" y="26" text-anchor="middle" font-size="3.4" fill="var(--muted)">settled</text></svg><div class="kal-legend">' + legend + '</div></div>';
-  }
   function dataTilesHtml(st, esc, money){
     var sign = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    var t = [['Settled trades', String(st.n)], ['Result', st.n ? sign(st.total) : 'none yet'], ['Won', st.winRate === null ? 'none yet' : Math.round(st.winRate * 100) + '%'],
-      ['Average trade', st.expectancy === null ? 'none yet' : sign(st.expectancy)], ['Worst trade', st.worst === null ? 'none yet' : sign(st.worst)]];
+    var t = [['Settled trades', String(st.n)], ['Result', st.n ? sign(st.total) : 'none yet'], ['Average trade', st.expectancy === null ? 'none yet' : sign(st.expectancy)], ['Worst trade', st.worst === null ? 'none yet' : sign(st.worst)]];
     return t.map(function(x){ return '<div class="kal-tile"><span class="kal-lbl">' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b></div>'; }).join('');
   }
   function dataMarketsHtml(rows, esc, money){
@@ -3039,7 +2926,6 @@
     set('dataTiles', dataTilesHtml(st, escapeHtml, kalshiMoney));
     set('dataWeekly', dataWeekBarsSvg(dataWeeklyRows(orders), escapeHtml, kalshiMoney));
     set('dataLine', kalshiLineSvg(kalshiPnlSeries(orders, 0), escapeHtml, kalshiMoney));
-    set('dataShare', dataShareDonutHtml(rows, escapeHtml));
     set('dataStats', dataStatsHtml(st, escapeHtml, kalshiMoney));
     set('dataLiveTests', dataLiveHtml(dataLiveTests(kalshiLiveOrders), escapeHtml));
     set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
@@ -3057,7 +2943,7 @@
     var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf');
     kalshiSetBars(barsEl, barsEl ? kalshiBarsSvg(series, escapeHtml, kalshiMoney) : '');
     if(perfEl && !kalshiOrdersLoaded){ perfEl.innerHTML = '<div class="kal-empty">Loading the bot\'s trades...</div>'; }
-    else if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney, kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results)); }
+    else if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
   }
   var kalshiChartRange = 'all';
   kalshiTipWire(document.getElementById('kalChartBars'));
@@ -3408,7 +3294,7 @@
   }
   function pageEnter(pageEl){
     if(!pageEl || motionReduced()){ return; }
-    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .brief-win, .index-card, .kal-tile');
+    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .brief-win, .kal-tile');
     for(var i = 0; i < items.length; i++){ items[i].style.setProperty('--i', String(Math.min(i, 12))); }
     pageEl.classList.remove('enter'); void pageEl.offsetWidth; pageEl.classList.add('enter');
     clearTimeout(pageEnterTimer);
@@ -3700,8 +3586,7 @@
         // Index and watchlist quotes, headlines and the earnings calendar come
         // from the one shared/marketSnapshot document the server computes on
         // its own 3-minute cycle. This page makes no market-data call of its
-        // own. Before the first snapshot lands the cards read "Loading…"
-        // (see indexReads) rather than a hardcoded level.
+        // own.
         sharedSnapshotUnsubscribe = api.watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate);
         tapeUnsubscribe = api.watchMarketTape(handleMarketTapeUpdate);
         INDEX_PROXIES.forEach(function(ix){
@@ -3732,107 +3617,6 @@
     { sym:'QQQ', name:'Nasdaq 100' },
     { sym:'DIA', name:'Dow Jones' }
   ];
-  // No hardcoded fallback price/change here -- a stale hardcoded index
-  // level looks exactly like real, current data (unlike an honest "—" or
-  // "Loading…"), and goes wrong fast: markets move, a fixed number
-  // doesn't (this used to show a flat "0.00% today" whenever a real quote
-  // hadn't resolved yet, and worse, a SPY level that drifted further from
-  // reality every month it went untouched). Every reader below treats a
-  // still-unresolved read as legitimately not-loaded-yet, not a number to
-  // build a percentage or a sentence out of.
-  function indexReads(){
-    return INDEX_PROXIES.map(function(ix){
-      var q = findQuote(ix.sym);
-      var loaded = !!(q && q.price != null && q.prevClose != null);
-      return {
-        name: ix.name, sym: ix.sym,
-        val: loaded ? q.price : null,
-        chg: loaded ? pct(q.price, q.prevClose) : null,
-        loaded: loaded
-      };
-    });
-  }
-
-  function renderSentiment(){
-    var el = document.getElementById('breadthWidget');
-    if(!el) return;
-    var reads = indexReads();
-    if(reads.some(function(r){ return !r.loaded; })){
-      el.innerHTML = '<div class="labs-backtest-status">Loading market data…</div>';
-      return;
-    }
-    var up = reads.filter(function(r){ return r.chg >= 0; }).length;
-    var total = reads.length;
-    var label = up === total ? 'Broadly positive' : up === 0 ? 'Broadly negative' :
-      up > total / 2 ? 'Mixed, leaning positive' : up < total / 2 ? 'Mixed, leaning negative' : 'Mixed';
-    var labelClass = up === total ? 'up' : up === 0 ? 'down' : '';
-    var upPct = (up / total) * 100;
-
-    el.innerHTML =
-      '<div class="breadth-bar"><div class="breadth-bar-up" style="width:' + upPct + '%"></div></div>' +
-      '<div class="sentiment-rows">' +
-        reads.map(function(r){
-          var isUp = r.chg >= 0;
-          return '<div class="sentiment-row"><span class="sentiment-name">' + r.name + '</span>' +
-            '<span class="sentiment-chg ' + (isUp?'up':'down') + '">' + (isUp?'▲':'▼') + ' ' + Math.abs(r.chg).toFixed(2) + '%</span></div>';
-        }).join('') +
-      '</div>' +
-      '<div class="breadth-meta">' +
-        '<span class="breadth-label ' + labelClass + '">' + label + '</span>' +
-      '</div>';
-  }
-
-  // ---------- Market Brief headline & lede (generated, not written) ----------
-  // Built entirely from data already on this page — the same index
-  // proxies renderSentiment uses. No separate data source, no AI call:
-  // just describing, in plain language, what the page already knows to be
-  // true right now.
-  function renderBriefHeadline(){
-    var headlineEl = document.querySelector('.brief-headline');
-    var ledeEl = document.querySelector('.brief-lede');
-    if(!headlineEl || !ledeEl) return;
-
-    var hour = new Date().getHours();
-    var greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-
-    var reads = indexReads();
-    if(reads.some(function(r){ return !r.loaded; })){
-      headlineEl.textContent = greeting + '. Loading today\'s market data…';
-      ledeEl.textContent = '';
-      return;
-    }
-    var avgChg = reads.reduce(function(sum, r){ return sum + r.chg; }, 0) / reads.length;
-    var spy = reads.filter(function(r){ return r.sym === 'SPY'; })[0];
-    var qqq = reads.filter(function(r){ return r.sym === 'QQQ'; })[0];
-    var marketOpen = isUsMarketOpen();
-    var session = getUsMarketSession();
-
-    var tone;
-    if(Math.abs(avgChg) < 0.15) tone = 'markets are quiet so far';
-    else if(avgChg >= 0.6) tone = 'markets are pushing higher';
-    else if(avgChg > 0) tone = 'markets are modestly higher';
-    else if(avgChg <= -0.6) tone = 'markets are under real pressure';
-    else tone = 'markets are drifting lower';
-
-    var sessionNote = '';
-    if(!marketOpen){
-      sessionNote = session.session === 'closed' ? ' (markets closed right now)' : ' (' + session.label.toLowerCase() + ')';
-    }
-    headlineEl.textContent = greeting + '. ' + tone.charAt(0).toUpperCase() + tone.slice(1) +
-      sessionNote + '.';
-
-    var ledeParts = [];
-    ledeParts.push('The S&P is ' + (spy.chg >= 0 ? 'up' : 'down') + ' ' + Math.abs(spy.chg).toFixed(2) +
-      '%, the Nasdaq ' + (qqq.chg >= 0 ? 'up' : 'down') + ' ' + Math.abs(qqq.chg).toFixed(2) + '%.');
-
-    if(Math.abs(qqq.chg - spy.chg) > 0.3){
-      ledeParts.push(qqq.chg > spy.chg ? 'Tech is outperforming the broader market today.' : 'Tech is lagging the broader market today.');
-    }
-
-
-    ledeEl.textContent = ledeParts.join(' ');
-  }
-
   // ---------- Shared market snapshot (indices/watchlist quotes, news, earnings -- one doc for every signed-in account) ----------
   // shwoop-server writes shared/marketSnapshot once every 3 minutes (quotes,
   // headlines, earnings) and this page only reads it. null (no snapshot
@@ -3854,11 +3638,7 @@
         watchlist.push({ sym: sym, price: q.price, prevClose: q.prevClose });
       }
     });
-    renderIndices();
-    renderSentiment();
-    renderBriefHeadline();
     renderMarketNews(tapeNews() || data.news);
-    renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
   }
 
   // ---------- The market tape (strip on every page, index cards, headlines, "as of") ----------
@@ -3987,10 +3767,7 @@
         if(existing){ existing.price = q.price; existing.prevClose = q.prevClose; existing.tapeAsOf = Number(q.asOf) || 0; }
         else { watchlist.push({ sym: sym, price: q.price, prevClose: q.prevClose, tapeAsOf: Number(q.asOf) || 0 }); }
       });
-      renderIndices();
-      renderSentiment();
-      renderBriefHeadline();
-      }
+            }
     renderMarketTape();
     renderBriefPage();
     if(tapeNews()){ renderMarketNews(tapeNews()); }
@@ -4030,34 +3807,6 @@
     }).join('');
   }
 
-  function renderEarningsCalendar(data){
-    var el = document.getElementById('earningsList');
-    if(!el) return;
-    var trackedSyms = watchlist.map(function(w){ return w.sym; });
-    var events = (data && Array.isArray(data.earningsCalendar))
-      ? data.earningsCalendar.filter(function(e){ return trackedSyms.indexOf(e.symbol) > -1; })
-      : [];
-    if(!events.length){
-      el.innerHTML = '<div class="news-placeholder">No earnings from your tracked stocks in the next 7 days.</div>';
-      return;
-    }
-    events.sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
-    el.innerHTML = events.map(function(e){
-      var dateLabel = new Date(e.date + 'T00:00:00').toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
-      var hourLabel = e.hour === 'bmo' ? 'Before open' : e.hour === 'amc' ? 'After close' : 'Time TBD';
-      // e.symbol is currently whitelisted by the trackedSyms filter above --
-      // it has to equal one of our own watchlist strings to get here at all,
-      // so this is not reachable today. Escaped anyway: the filter is a
-      // display decision that could reasonably be relaxed later, and it
-      // would not be obvious that relaxing it opens an injection.
-      return '<div class="earnings-row">' +
-        '<span class="earnings-sym mono">' + escapeHtml(e.symbol) + '</span>' +
-        '<span class="earnings-date">' + dateLabel + '</span>' +
-        '<span class="earnings-hour">' + hourLabel + '</span>' +
-      '</div>';
-    }).join('');
-  }
-
   // The signed-out copy is the page's INITIAL html, and renderMarketNews
   // only ever runs when a shared/marketSnapshot update arrives. So for a
   // signed-in account whose snapshot never lands -- the backend's
@@ -4066,24 +3815,15 @@
   // describes what is actually happening.
   function setNewsAndEarningsPending(){
     var newsEl = document.getElementById('marketNewsList');
-    var earningsEl = document.getElementById('earningsList');
     if(newsEl && /Sign in to see/.test(newsEl.textContent)){
       newsEl.innerHTML = '<div class="news-placeholder">Waiting for the market snapshot — headlines come from the server\u2019s own 3-minute cycle, not this browser.</div>';
-    }
-    if(earningsEl && /Sign in to see/.test(earningsEl.textContent)){
-      earningsEl.innerHTML = '<div class="news-placeholder">Waiting for the market snapshot — earnings come from the server\u2019s own 3-minute cycle, not this browser.</div>';
     }
   }
 
   function resetNewsAndEarnings(){
     var newsEl = document.getElementById('marketNewsList');
-    var earningsEl = document.getElementById('earningsList');
     if(newsEl){ newsEl.innerHTML = '<div class="news-placeholder">Sign in to see real market headlines.</div>'; }
-    if(earningsEl){ earningsEl.innerHTML = '<div class="news-placeholder">Sign in to see upcoming earnings for your tracked stocks.</div>'; }
   }
-  renderIndices();
-  renderSentiment();
-  renderBriefHeadline();
   renderBriefPage();
   updateClock();
 

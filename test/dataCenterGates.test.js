@@ -25,7 +25,7 @@ gates.D1 = () => {
   const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
   assert.ok(page.length > 200);
   assert.ok(!/<(button|input|select|textarea|form|a )\b/i.test(page), 'the Data page has no control in it');
-  const code = ['dataWeekKey', 'dataWeeklyRows', 'dataWeekBarsSvg', 'dataMarketRows', 'dataShareDonutHtml', 'dataTilesHtml', 'dataMarketsHtml', 'dataLeadRows', 'dataLeadHtml', 'dataStatsHtml', 'dataLiveTests', 'dataLiveHtml', 'renderDataCenter'].map(fnSource).join('\n');
+  const code = ['dataWeekKey', 'dataWeeklyRows', 'dataWeekBarsSvg', 'dataMarketRows', 'dataTilesHtml', 'dataMarketsHtml', 'dataLeadRows', 'dataLeadHtml', 'dataStatsHtml', 'dataLiveTests', 'dataLiveHtml', 'renderDataCenter'].map(fnSource).join('\n');
   assert.ok(!/api\.|window\.__shwoopAPI|fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code), 'and its code calls nothing: it only draws what the Kalshi page already loaded');
 };
 
@@ -71,11 +71,14 @@ gates.D7 = () => {
 
 // The share ring is a count: its slices add to the whole, and with no trades it says so instead of drawing an empty ring.
 gates.D4 = () => {
-  const f = lift(['dataShareDonutHtml']);
-  assert.ok(/No settled trades yet/.test(f.dataShareDonutHtml([], esc)));
-  const out = f.dataShareDonutHtml([{ name: 'Gold', n: 3 }, { name: 'Bitcoin', n: 1 }], esc);
-  assert.ok(out.includes('stroke-dasharray="75.000 25.000"') && out.includes('>4</text>') && out.includes('75%') && out.includes('25%'));
-  assert.ok(!/var\(--gain\)|var\(--loss\)/.test(out), 'a count is not a result: no red or green');
+  // Nothing on the page says the same thing twice (the owner, Oct 23, 2026: "reduce any redundancies"): the share ring repeated By market's Trades column, the Won tile repeated the win rate, and the fold repeated the tiles and By market.
+  const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
+  assert.ok(!/data-card="data-share"|dataShare/.test(page) && !/function dataShareDonutHtml/.test(html), 'the share ring is gone, By market has the same counts');
+  const f = lift(['dataTilesHtml']);
+  const tiles = f.dataTilesHtml({ n: 3, total: 1, winRate: 0.6, expectancy: 0.3, worst: -0.9 }, esc, money);
+  assert.ok(!/>Won</.test(tiles) && /Average trade/.test(tiles) && /Worst trade/.test(tiles), 'the tiles keep what nothing else shows; the win rate is in The strategy in numbers');
+  assert.ok(/<summary class="kal-card-title">By price paid<\/summary>/.test(page), 'the fold is the one table that is only there');
+  assert.ok(/data-card="data-tests"/.test(page) && /id="dataLiveTests"/.test(page) && /id="dataLead"/.test(page) && !/data-card="data-live"|data-card="data-lead"/.test(page), 'the two test cards are one card');
 };
 
 // Weekly bars: a losing week is the red bar below the line with its value under it, a winning week the muted bar above, and only the last 8 weeks are drawn.
