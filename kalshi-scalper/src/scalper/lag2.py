@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 from . import lstrats as L
 from .calibration import cluster_mean_z
-from .lag2_fetch import KALSHI, KRAKEN, markets
+from .lag2_fetch import KRAKEN, load_tape, markets
 from .paths import DATA_DIR
 
 # ---- fixed in the README before the data was scored ----
@@ -109,7 +109,7 @@ def main(argv: list[str]) -> None:
         print(f"Refusing to run again: {RESULT} exists. Delete it on purpose only for a crash fix, and log that in the README.")
         return
     sec = json.load(open(KRAKEN))["sec"]
-    tape = json.load(open(KALSHI))
+    tape = load_tape()
     ms = [m for m in markets() if m[0] in tape]
     rows = [t for m in ms if (t := trade_for(m, tape[m[0]], sec))]
     j = judge(rows)

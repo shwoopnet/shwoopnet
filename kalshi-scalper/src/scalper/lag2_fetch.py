@@ -1,6 +1,6 @@
 """LAG2 data fetch (README, Pre-registration: LAG2). Read-only public data, no key. Resumable: re-run after a restart.
   python -m scalper.lag2_fetch kraken     per-second last price of Kraken XBT/USD trades for the days covered by the Bitcoin markets
-  python -m scalper.lag2_fetch kalshi     Kalshi's public trades for each Bitcoin market from 150 s to 20 s before the close
+  python -m scalper.lag2_fetch kalshi [N k]   Kalshi's public trades for each Bitcoin market from 150 s to 20 s before the close
 """
 from __future__ import annotations
 
@@ -62,11 +62,26 @@ def fetch_kraken() -> None:
     print("done kraken", len(d["sec"]), flush=True)
 
 
-def fetch_kalshi() -> None:
-    ms = markets()
-    done = json.load(open(KALSHI)) if KALSHI.exists() else {}
+def shard_path(k: int):
+    return DATA_DIR / f"lag2_kalshi_{k}.json"
+
+
+def load_tape() -> dict:
+    """Every shard written by `kalshi N k` plus the original single file."""
+    out = json.load(open(KALSHI)) if KALSHI.exists() else {}
+    for f in sorted(DATA_DIR.glob("lag2_kalshi_*.json")):
+        out.update(json.load(open(f)))
+    return out
+
+
+def fetch_kalshi(n_shards: int = 1, shard: int = 0) -> None:
+    """Shard k of n takes the markets whose position in the list is k modulo n, and writes its own file, so shards never touch each other's data."""
+    ms = [m for i, m in enumerate(markets()) if i % n_shards == shard]
+    path = shard_path(shard) if n_shards > 1 else KALSHI
+    have = load_tape()
+    done = json.load(open(path)) if path.exists() else {}
     for i, (tk, close, strike, res) in enumerate(ms):
-        if tk in done:
+        if tk in done or tk in have:
             continue
         out, cur = [], None
         while True:
@@ -75,7 +90,8 @@ def fetch_kalshi() -> None:
                 p["cursor"] = cur
             try:
                 d = api._get("/markets/trades", p)
-            except Exception:
+            except Exception as e:
+                print("retry", str(e)[:80], flush=True)
                 time.sleep(5)
                 continue
             for t in d.get("trades", []):
@@ -85,13 +101,19 @@ def fetch_kalshi() -> None:
             if not cur or not d.get("trades"):
                 break
         done[tk] = out
-        if len(done) % 20 == 0:
-            json.dump(done, open(KALSHI, "w"))
-            print("kalshi", len(done), "of", len(ms), flush=True)
+        if len(done) % 5 == 0:
+            json.dump(done, open(path, "w"))
+            print("kalshi", shard, len(done), "of", len(ms), flush=True)
         time.sleep(0.1)
-    json.dump(done, open(KALSHI, "w"))
-    print("done kalshi", len(done), flush=True)
+    json.dump(done, open(path, "w"))
+    print("done kalshi", shard, len(done), flush=True)
 
 
 if __name__ == "__main__":
-    {"kraken": fetch_kraken, "kalshi": fetch_kalshi}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
+    a = sys.argv[1:]
+    if a[:1] == ["kalshi"]:
+        fetch_kalshi(*(int(x) for x in a[1:3]))
+    elif a[:1] == ["kraken"]:
+        fetch_kraken()
+    else:
+        print(__doc__)
