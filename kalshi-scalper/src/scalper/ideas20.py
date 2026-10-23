@@ -262,16 +262,16 @@ def stat(rows: list[dict]):
     return m, z
 
 
-def judge(rows: list[dict], cut_day: str, pf_rows: list[dict] | None = None) -> dict:
+def judge(rows: list[dict], cut_day: str, pf_rows: list[dict] | None = None, min_disc: int = MIN_N_DISC, min_conf: int = MIN_N_CONF, disc_z: float = DISC_Z) -> dict:
     d = [r for r in rows if r["day"] < cut_day]
     c = [r for r in rows if r["day"] >= cut_day]
     dm, dz = stat(d)
     cm, cz = stat(c)
     am, az = stat(rows)
     p = pf(pf_rows if pf_rows is not None else rows) if rows else 0.0
-    if len(d) < MIN_N_DISC or len(c) < MIN_N_CONF:
+    if len(d) < min_disc or len(c) < min_conf:
         v = "NOT_ENOUGH_DATA"
-    elif dm >= DISC_C and dz >= DISC_Z and cm >= CONF_C and cz >= CONF_Z and p >= PF_BAR and sum(r["stress"] for r in d) > 0 and sum(r["stress"] for r in c) > 0:
+    elif dm >= DISC_C and dz >= disc_z and cm >= CONF_C and cz >= CONF_Z and p >= PF_BAR and sum(r["stress"] for r in d) > 0 and sum(r["stress"] for r in c) > 0:
         v = "NOT_YET_FALSIFIED"
     else:
         v = "FALSIFIED" if (am < FALSIFY_C or az < FALSIFY_Z) else "NOT_ENOUGH_DATA"
