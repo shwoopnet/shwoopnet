@@ -52,7 +52,7 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 - **2026-11-16 and 2026-11-17:** the registered forward reads (E3F, FWD1, VOL1, PM3, OW7, then FWD2, FWD3 and GOLD1-F). One run each; nothing changes unless it passes.
 - **2026-12-01:** the default read date for FWD5, FWD6, FWD7 and FWD8, and a second snapshot of the research data (Kalshi's history only reaches back about 69 days).
 - **About 3 to 4 weeks:** a rerun of the funding study on the perps data the recorder is collecting.
-- **The first weekly size review after a stop:** a loss stop holds size increases for 7 days.
+- **The size review after a stop:** a loss stop no longer holds size increases (removed Oct 23, 2026 at the owner's request).
 
 ## Can wait
 

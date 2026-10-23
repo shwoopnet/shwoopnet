@@ -275,7 +275,7 @@ gates.N12 = () => {
   assert.ok(p.worst + 0.07 * p.worst * (1 - p.worst) < live.LIVE_CAP);
 };
 
-// The review (every 3 days): the cap follows the balance down at once, up by one step at most per review, and never within a week of a loss stop.
+// The review (every 3 days): the cap follows the balance down at once, up by one step at most per review, and a loss stop does not hold it (the owner, Oct 23, 2026).
 gates.N24 = async () => {
   const seed = (w, n, over) => { for (let i = 0; i < n; i++) { const [id, d] = botTrade(i, over); w.docs.set(id, d); } };
   const DAY = 86400000, W = live.SCALE_REVIEW_MS;
@@ -291,7 +291,7 @@ gates.N24 = async () => {
   assert.strictEqual(live.reviewSizing(later.state, 900, NOW + 2 * W).state.cap, 5, 'the next review, 3 days on, is the next step');
   assert.strictEqual(W, 3 * DAY, 'reviews are 3 days apart');
   assert.strictEqual((() => { const a = live.reviewSizing({ ...st, cap: 5 }, 130, NOW + DAY); return live.reviewSizing(a.state, 130, NOW + DAY + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 3, 'a balance that stays low cuts the cap, mid week, without waiting for a review');
-  assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + 6 * DAY).state.cap, 3, 'no rise within a week of a loss stop, even though reviews come every 3 days');
+  assert.strictEqual(live.reviewSizing({ ...st, lastStopAt: NOW + 2 * DAY }, 900, NOW + 6 * DAY).state.cap, 4, 'a loss stop does not hold the climb: the next review still steps up one (the owner, Oct 23, 2026)');
   assert.strictEqual(live.reviewSizing({ cap: live.L1_SIZE_CEILING, base: 5000, reviewedAt: NOW, lastStopAt: null }, 99999, NOW + 9 * W).state.cap, live.L1_SIZE_CEILING, 'the hard ceiling holds');
   // Through a tick: the stop follows the balance at the review, and the order uses the stored cap.
   const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '900.0000', exchange_index: 0 }] } });
@@ -304,7 +304,7 @@ gates.N24 = async () => {
   seed(stopW, 14, { count: 3, fillCount: '3.00', maxCost: 2.76 });
   const rec = [];
   await tick(stopW, { quotes: [gq()], sizingState: { cap: 3, base: 300, reviewedAt: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { rec.push(x); } });
-  assert.deepStrictEqual([stopW.sess.endedBecause, rec[rec.length - 1].lastStopAt], ['loss stop', NOW], 'a loss stop is remembered so the cap cannot rise for a week');
+  assert.deepStrictEqual([stopW.sess.endedBecause, rec[rec.length - 1].lastStopAt], ['loss stop', NOW], 'a loss stop is still recorded (when it happened), though it no longer holds the cap');
   const failSave = world({ session: { sizing: true } });
   await tick(failSave, { quotes: [gq()], sizingState: null, setSizingState: async () => { throw new Error('db down'); } });
   assert.strictEqual(failSave.posts.length, 0, 'a review that cannot be saved sends nothing');
@@ -548,12 +548,12 @@ gates.N31 = () => {
   assert.deepStrictEqual([back.state.cap, back.state.base, back.state.lowSince], [3, 344, null], 'money that comes back clears the wait');
   const stayed = live.reviewSizing(live.reviewSizing(st, 40, T0 + H).state, 40, T0 + H + live.SCALE_FALL_CONFIRM_MS);
   assert.strictEqual(stayed.state.cap, 1, 'a balance that stays low does cut the cap');
-  // Reseed (set by Start): raises a collapsed cap to what a fresh start gives, re-bases the stop, never lowers, never raises within a week of a loss stop.
+  // Reseed (set by Start): raises a collapsed cap to what a fresh start gives, re-bases the stop, never lowers, and a loss stop does not hold it.
   const lowSt = { cap: 1, base: 0.4, reviewedAt: T0, lastStopAt: null, reseed: true };
   const r = live.reviewSizing(lowSt, 509, T0 + H);
   assert.deepStrictEqual([r.state.cap, r.state.base, r.state.reseed], [11, 509, false], 'a collapsed cap goes straight to the balance target on Start');
   assert.strictEqual(live.reviewSizing({ ...lowSt, cap: 15 }, 509, T0 + H).state.cap, 15, 'a higher saved cap is never lowered by Start');
-  assert.strictEqual(live.reviewSizing({ ...lowSt, lastStopAt: T0 }, 509, T0 + H).state.cap, 1, 'no restoring within a week of a loss stop');
+  assert.strictEqual(live.reviewSizing({ ...lowSt, lastStopAt: T0 }, 509, T0 + H).state.cap, 11, 'Start goes straight to the balance target (509 / 43 = 11) even right after a loss stop (the owner, Oct 23, 2026)');
 };
 
 gates.N32 = async () => {
