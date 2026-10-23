@@ -1883,12 +1883,19 @@
     if(!/^KX[A-Z]+15M-[A-Z0-9]+-\d+: /.test(n)){ return null; }
     var parts = n.split('; ');
     if(n.length >= 300 && parts.length > 1){ parts.pop(); }
-    return parts.map(function(p){
+    // Kalshi keeps each market group's money on its own shard, and the API cannot move it (README, "exchange shards"), so a market whose shard holds none is skipped every minute. That is the bot failing closed, not a fault:
+    // those markets are said once, in one plain line, instead of one alarming line each every minute.
+    var noShard = [], lines = [];
+    parts.forEach(function(p){
       var m = /^KX([A-Z]+)15M-[A-Z0-9]+-\d+: ([\s\S]*)$/.exec(p);
-      if(!m){ return p; }
+      if(!m){ lines.push(p); return; }
+      var name = KAL_SERIES_NAMES[m[1]] || m[1];
+      if(/^only \$[\d.]+ on its shard/i.test(m[2])){ if(noShard.indexOf(name) < 0){ noShard.push(name); } return; }
       var why = m[2].replace(/^filled$/, 'bought').replace(/^./, function(c){ return c.toUpperCase(); });
-      return (KAL_SERIES_NAMES[m[1]] || m[1]) + ': ' + why;
-    }).join('\n');
+      lines.push(name + ': ' + why);
+    });
+    if(noShard.length){ lines.push(noShard.join(' and ') + ': no money on ' + (noShard.length > 1 ? 'their account shard' : 'its account shard') + ', so skipped. Move funds there in Kalshi to trade ' + (noShard.length > 1 ? 'them' : 'it') + '.'); }
+    return lines.join('\n');
   }
   function kalshiSkipNote(note, tickAt, now){
     var n = String(note || '');
