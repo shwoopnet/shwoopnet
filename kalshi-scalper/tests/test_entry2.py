@@ -19,4 +19,5 @@ assert T.baseline_entry(mkt(0.85, 0.95)) is not None
 assert T.pick(mkt(None, 0.98), 360, (0.97, 0.995)) == ("yes", 0.98)
 assert T.judge_mean([], 5)["verdict"] == "NOT_ENOUGH_DATA"
 assert T.forward(now=0.0).startswith("Refusing the registered read")
+assert T.EARLY_LEFT == 540 and T.EARLY_BAND == (0.80, 0.93) and T.judge_mean([], 5, 0.01, 2.0)["verdict"] == "NOT_ENOUGH_DATA"
 print("ok")

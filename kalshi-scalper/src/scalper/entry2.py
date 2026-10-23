@@ -22,6 +22,7 @@ START = int(datetime(2026, 10, 24, tzinfo=timezone.utc).timestamp())
 READ_DATE = int(datetime(2026, 11, 12, tzinfo=timezone.utc).timestamp())
 TIER_C, TIER_Z, LATE_C, LATE_Z, FALSIFY_C, FALSIFY_Z = 0.005, 2.0, 0.004, 2.0, 0.001, 1.0
 MIN_TIER, MIN_LATE_A, MIN_LATE_B = 300, 500, 800
+EARLY_SERIES, EARLY_LEFT, EARLY_BAND, MIN_EARLY, EARLY_C, EARLY_Z = ("KXBTC15M", "KXETH15M"), 540, (0.80, 0.93), 400, 0.010, 2.0
 RESULT = DATA_DIR / "entry2_result.txt"
 
 
@@ -55,7 +56,7 @@ def baseline_entry(market: tuple):
     return row(market, *p) if p else None
 
 
-def judge_mean(rows: list[dict], min_n: int) -> dict:
+def judge_mean(rows: list[dict], min_n: int, c_bar: float = LATE_C, z_bar: float = LATE_Z) -> dict:
     if len(rows) < min_n:
         return {"verdict": "NOT_ENOUGH_DATA", "n": len(rows)}
     m, _, z = cluster_mean_z([(r["day"], r["net"]) for r in rows])
@@ -63,7 +64,7 @@ def judge_mean(rows: list[dict], min_n: int) -> dict:
     mid = ds[len(ds) // 2]
     h = [st.mean(r["net"] for r in rows if (r["day"] < mid) == first) for first in (True, False)]
     ms = st.mean(r["stress"] for r in rows)
-    ok = m >= LATE_C and z >= LATE_Z and h[0] > 0 and h[1] > 0 and ms > 0
+    ok = m >= c_bar and z >= z_bar and h[0] > 0 and h[1] > 0 and ms > 0
     v = "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if (m < FALSIFY_C or z < FALSIFY_Z) else "NOT_ENOUGH_DATA")
     return {"verdict": v, "n": len(rows), "mean": m, "z": z, "h1": h[0], "h2": h[1], "stress": ms}
 
@@ -95,6 +96,9 @@ def forward(now: float | None = None) -> str:
         rows = [row(m, *p) for m in ms_ if (p := pick(m, left, band))]
         j = judge_mean(rows, min_n)
         out.append(f"{name}: {j['verdict']}; n={j['n']}" + (f"; mean {100 * j['mean']:+.2f}c z {j['z']:+.2f}; halves {100 * j['h1']:+.2f}c / {100 * j['h2']:+.2f}c; stress {100 * j['stress']:+.2f}c" if "mean" in j else ""))
+    early = [row(m, *p) for m in mk if m[1] in EARLY_SERIES and (p := pick(m, EARLY_LEFT, EARLY_BAND))]
+    j = judge_mean(early, MIN_EARLY, EARLY_C, EARLY_Z)
+    out.append(f"EARLY540: {j['verdict']}; n={j['n']}" + (f"; mean {100 * j['mean']:+.2f}c z {j['z']:+.2f}; halves {100 * j['h1']:+.2f}c / {100 * j['h2']:+.2f}c; stress {100 * j['stress']:+.2f}c" if "mean" in j else ""))
     text = "\n".join(out)
     RESULT.write_text(text + "\n")
     return text
