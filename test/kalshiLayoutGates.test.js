@@ -301,17 +301,22 @@ gates.Y11b = () => {
 gates.Y11c = () => {
   const m = /(function kalshiSetPresent\(on\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiSetPresent not found');
   const attrs = {}; const doc = { documentElement: { setAttribute: (k, v) => { attrs[k] = v; }, removeAttribute: (k) => { delete attrs[k]; } } };
-  const set = new Function('document', 'var kalshiMasked = false;' + m[1] + '; return { set: kalshiSetPresent, masked: function(){ return kalshiMasked; } };')(doc);
-  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on' }, 'on sets the page attribute'); assert.strictEqual(set.masked(), true, 'and masks the amounts');
-  set.set(false); assert.deepStrictEqual(attrs, {}, 'off removes it, back to the full page'); assert.strictEqual(set.masked(), false);
-  assert.ok(!/localStorage[^;]*[Pp]resent|[Pp]resent[^;]*localStorage/.test(html) && !/syncUserSetting\('kalPresent/.test(html), 'it is never saved, in this browser or in the account');
-  assert.ok(/id="kalPresent"/.test(html) && /id="kalPresent"[\s\S]{0,260}id="kalLayoutUnlock"/.test(html), 'a checkbox in the Layout menu');
+  const mk = (choice) => new Function('document', 'var kalshiMasked = false; var kalshiPrivacyChoice = ' + JSON.stringify(choice) + ';' + m[1] + '; return { set: kalshiSetPresent, masked: function(){ return kalshiMasked; } };')(doc);
+  let set = mk({ money: true, tools: true, lists: true });
+  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on', 'data-p-tools': 'on', 'data-p-lists': 'on' }, 'on sets the page attributes'); assert.strictEqual(set.masked(), true, 'and masks the amounts');
+  set.set(false); assert.deepStrictEqual(attrs, {}, 'off removes them, back to the full page'); assert.strictEqual(set.masked(), false);
+  set = mk({ money: false, tools: true, lists: false });
+  set.set(true); assert.deepStrictEqual(attrs, { 'data-present': 'on', 'data-p-tools': 'on' }, 'each sub option works on its own'); assert.strictEqual(set.masked(), false, 'amounts stay readable when that option is off'); set.set(false);
+  assert.ok(!/syncUserSetting\('(kalPresent|privacy)/.test(html), 'the view is never saved to the account');
+  assert.ok(!/localStorage[^;]*privacyOpts[^;]*present|data-present[^;]*localStorage/.test(html), 'the on/off state is not saved; only the three choices are, in this browser');
+  assert.ok(!/id="kalPresent"/.test(html), 'the Layout menu no longer carries a privacy checkbox');
+  for(const id of ['privacyToggle', 'privacyMoney', 'privacyTools', 'privacyLists']){ assert.ok(new RegExp('id="' + id + '" role="switch"').test(html), id + ' is a switch in Settings'); }
   assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Privacy<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header called Privacy, outside the Tools menu so the privacy view cannot hide it; there is no Data button (the sidebar has it)');
   assert.ok(!/id="kalDataBtn"/.test(html) && !/<div class="trades-title">Bot<\/div>/.test(html), 'and no big Bot title next to the updated time');
   assert.ok(!/html\[data-present="on"\] #kalPresentBtn/.test(html), 'and nothing hides the button that turns it off');
   // Oct 21, 2026 (the owner: "instead of hide, turn sensitive information into ****"): nothing is hidden any more except the Tools menu, which holds the raw account read; amounts are masked.
-  const css = /html\[data-present="on"\][^{]*\{[^}]*\}/.exec(html); assert.ok(css && /^html\[data-present="on"\] #kalTools\{ display:none; \}$/.test(css[0]), 'only the Tools menu is hidden: ' + (css && css[0]));
-  assert.ok(!/data-present="on"\] \[data-card|data-present="on"\] \.kal-acct-total|kal-perf-band/.test(html.slice(html.indexOf('<style>'), html.indexOf('</style>')).replace(/\/\*[\s\S]*?\*\//g, '')), 'no card or figure is hidden by the page attribute');
+  const css = /html\[data-present="on"\][^{]*\{[^}]*\}/.exec(html); assert.ok(css && /^html\[data-present="on"\]\[data-p-tools="on"\] #kalTools\{ display:none; \}$/.test(css[0]), 'the Tools menu is hidden by its own option: ' + (css && css[0]));
+  assert.ok(!/data-present="on"\] \.kal-acct-total|kal-perf-band/.test(html.slice(html.indexOf('<style>'), html.indexOf('</style>')).replace(/\/\*[\s\S]*?\*\//g, '')), 'no card or figure is hidden by the page attribute');
   // The amounts: one formatter masks every dollar figure and keeps the sign; the export formatter never masks.
   const f = new Function('var kalshiMasked = false;' + [/(function kalshiMoneyRaw\([^)]*\)\{[\s\S]*?\n  \})\n/, /(function kalshiMoney\([^)]*\)\{[\s\S]*?\n  \})\n/].map((re) => re.exec(html)[1]).join('\n') + '; return { money: kalshiMoney, raw: kalshiMoneyRaw, mask: function(v){ kalshiMasked = v; } };')();
   assert.strictEqual(f.money(-3.5), '-$3.50'); f.mask(true);
