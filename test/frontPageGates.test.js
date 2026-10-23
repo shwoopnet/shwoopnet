@@ -24,4 +24,5 @@ assert.ok(palettes.length >= 2 && /--amber:#1fd68a/.test(palettes.join('')) && /
 assert.ok(!/#[0-9a-fA-F]{3,8}\b|rgb\(/.test(front.replace(/\.auth-gate\{[^}]*\}/g, '').replace(/html\[data-login-color="wh"\] \.auth-gate\{[^}]*\}/g, '').replace(/rgba\((0,0,0|255,255,255),[^)]*\)|#0F9D58/g, '')), 'everything else on the front page uses those tokens, not fixed colours (the gain green on the Running pill and plain black or white shades excepted)');
 const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(html.replace(/\/\*[\s\S]*?\*\//g, ''))[1];
 assert.ok(/\.front-eyebrow, \.front-h1, \.front-line, \.front-win, \.front-win-a \.win\{ animation: none; \}/.test(media) && /\[data-reduce-motion="true"\] \.front-win-a \.win/.test(html), 'the rise-in and the float stop under reduced motion and the Settings switch');
+assert.ok(/\.front-win \.win\{[^}]*aspect-ratio:16 \/ 10/.test(html), 'both snapshot windows share one landscape shape, so neither is taller than the other (the owner, Oct 23, 2026)');
 console.log('frontPageGates: ok');

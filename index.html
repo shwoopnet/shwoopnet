@@ -767,7 +767,8 @@
   .front-line b{ color:var(--paper); font-weight:800; }
   .front-shots{ position:absolute; inset:0; pointer-events:none; }
   .front-win{ position:absolute; z-index:2; animation:frontUp 1s cubic-bezier(.2,.8,.2,1) .45s both; }
-  .front-win .win{ display:grid; grid-template-columns:96px 1fr; border-radius:16px; overflow:hidden; background:var(--panel); border:1px solid var(--border); box-shadow:0 40px 80px -30px rgba(0,0,0,.85); }
+  /* Both windows share one shape: landscape, 16 by 10, so neither reads taller than the other. Anything past the bottom edge is cropped, like a real window. */
+  .front-win .win{ display:grid; grid-template-columns:96px 1fr; aspect-ratio:16 / 10; border-radius:16px; overflow:hidden; background:var(--panel); border:1px solid var(--border); box-shadow:0 40px 80px -30px rgba(0,0,0,.85); }
   .front-win-a .win{ animation:frontFloat 7s ease-in-out infinite; }
   .win-rail{ background:rgba(0,0,0,.25); padding:14px 9px; display:grid; gap:6px; align-content:start; border-right:1px solid var(--border); }
   .win-rail i{ display:flex; align-items:center; gap:7px; font:700 11px 'Public Sans', sans-serif; font-style:normal; color:var(--muted); padding:7px 8px; border-radius:8px; }
@@ -788,11 +789,11 @@
   .win-list{ display:grid; gap:2px; }
   .bk{ display:inline-block; border-radius:6px; background:linear-gradient(90deg, rgba(255,255,255,.2), rgba(255,255,255,.07)); vertical-align:middle; }
   /* Layout B, Two windows: the Brief behind, the Account in front, tilted a little each way. */
-  html:not([data-login-layout]) .front-win-b, html[data-login-layout="b"] .front-win-b{ right:0; top:40px; width:min(470px, 44%); transform:rotate(2deg); }
-  html:not([data-login-layout]) .front-win-a, html[data-login-layout="b"] .front-win-a{ right:15%; top:210px; width:min(440px, 42%); transform:rotate(-2deg); z-index:3; }
+  html:not([data-login-layout]) .front-win-b, html[data-login-layout="b"] .front-win-b{ right:0; top:40px; width:min(480px, 44%); transform:rotate(2deg); }
+  html:not([data-login-layout]) .front-win-a, html[data-login-layout="b"] .front-win-a{ right:15%; top:200px; width:min(480px, 44%); transform:rotate(-2deg); z-index:3; }
   /* Layout F, Side by side: the Brief to the right, the Account overlapping it low on the left, both level. */
-  html[data-login-layout="f"] .front-win-b{ right:0; top:70px; width:min(400px, 38%); }
-  html[data-login-layout="f"] .front-win-a{ right:24%; top:250px; width:min(380px, 36%); z-index:3; }
+  html[data-login-layout="f"] .front-win-b{ right:0; top:70px; width:min(420px, 39%); }
+  html[data-login-layout="f"] .front-win-a{ right:22%; top:240px; width:min(420px, 39%); z-index:3; }
   /* Layout E, Rising: the slogan centred, the Account window rising from below in perspective, the Brief hidden. */
   html[data-login-layout="e"] .front-copy{ left:0; right:0; width:auto; text-align:center; top:70px; }
   html[data-login-layout="e"] .front-line{ margin-left:auto; margin-right:auto; }
