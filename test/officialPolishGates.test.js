@@ -37,7 +37,8 @@ gates.O3 = () => {
 
 // The signed-out page says what it is, and a keyboard user can see where they are on every control.
 gates.O4 = () => {
-  assert.ok(/<div class="auth-title">Sign in<\/div>\s*<div class="auth-sub">Private trading dashboard\. Authorized users only\.<\/div>/.test(html), 'the sign-in page says it is private');
+  // The sign-in box no longer carries a line under its title (the owner, Oct 23, 2026): the front page already says access is by invitation, and the box says only what it does.
+  assert.ok(/<div class="auth-title">Sign in<\/div>\s*<div class="auth-status" id="authStatus">/.test(html) && !/<div class="auth-sub">/.test(html), 'the sign-in box is just a title, the status and the form');
   const rule = html.match(/button:focus-visible[^{]*\{[^}]*\}/)[0];
   ['input:focus-visible', 'select:focus-visible', 'textarea:focus-visible', 'summary:focus-visible', 'a:focus-visible'].forEach((s) => assert.ok(rule.includes(s), s + ' has a visible focus ring'));
 };
