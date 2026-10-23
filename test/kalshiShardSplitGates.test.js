@@ -63,7 +63,7 @@ gates.SP3 = () => {
 
 gates.SP4 = () => {
   const f = fnSrc.slice(fnSrc.indexOf('exports.kalshiShardSplit'), fnSrc.indexOf('exports.kalshiFlattenAll'));
-  assert.ok(/try \{\s*out = apply \? await live\.applyShardSplit\(args\)/.test(f) && /catch \(e\)/.test(f), 'a throw inside the split call is caught and reported with its own reason, not the page\'s blank "internal"');
+  assert.ok(/try \{\s*ensureDefaultAdminApp\(\);[\s\S]*?KALSHI_LIVE_PRIVATE_KEY\.value\(\)[\s\S]*?out = apply \? await live\.applyShardSplit\(args\)/.test(f) && /catch \(e\)/.test(f), 'a throw inside the split call is caught and reported with its own reason, not the page\'s blank "internal"');
 };
 
 (async () => {
