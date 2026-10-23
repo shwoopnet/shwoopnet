@@ -680,7 +680,7 @@ gates.AK1 = () => {
 };
 
 // BS1 to BS3: the Bot page's status and risk cards (Oct 23, 2026, the owner chose "heartbeat and what it's doing" and "loss stop and risk meter"). Pure functions of the session, the orders and the clock.
-const liftBs = (names) => new Function(names.map((n) => (new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html) || assert.fail(n + ' not found'))[1]).join('\n') + '; return {' + names.join(',') + '};')();
+const liftBs = (names, pre) => new Function((pre || '') + names.map((n) => (new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html) || assert.fail(n + ' not found'))[1]).join('\n') + '; return {' + names.join(',') + '};')();
 gates.BS1 = () => {
   const f = liftBs(['kalshiHeartbeat', 'kalshiNextEntry']);
   const T0 = 10 * 900000;   // a quarter hour boundary
@@ -727,17 +727,17 @@ gates.BS3 = () => {
   assert.ok(/0\.12 \* base/.test(html) && /0\.055 \* base/.test(html), 'and the page uses those numbers');
 };
 
-// BS4: the heartbeat monitor strip. Consequence: one beat per observed check, scrolling left and gone after five minutes; no beat for a while is a flat dashed line in the state's colour; a page that has not seen a beat draws a flat line, not an invented one.
+// BS4: the heartbeat monitor strip. Consequence: one beat per observed check, scrolling left and gone after two minutes; no beat for a while is a flat dashed line in the state's colour; a page that has not seen a beat draws a flat line, not an invented one.
 gates.BS4 = () => {
-  const f = liftBs(['kalshiBeatNote', 'kalshiHeartbeatSvg']);
+  const f = liftBs(['kalshiBeatNote', 'kalshiHeartbeatPath', 'kalshiHeartbeatSvg'], 'var KAL_ECG = { W: 600, H: 70, B: 46, SPAN: 120000 };');
   const NOW = 1000000000;
   const flat = f.kalshiHeartbeatSvg([], NOW, 'ok');
   assert.ok(/kal-ecg ok/.test(flat) && !/L[\d.]+ -?\d+\.?\d* L/.test(flat.split('kal-ecg-line')[0].split('<path')[1] || ''), 'no beats seen: a flat line');
   const one = f.kalshiHeartbeatSvg([NOW - 30000], NOW, 'ok');
   assert.ok(/<path d="M0 46 L/.test(one) && (one.match(/L[\d.]+ 10 /g) || []).length === 1, 'one beat is one spike (36 above the baseline)');
-  const three = f.kalshiHeartbeatSvg([NOW - 20000, NOW - 80000, NOW - 140000], NOW, 'ok');
+  const three = f.kalshiHeartbeatSvg([NOW - 20000, NOW - 60000, NOW - 100000], NOW, 'ok');
   assert.strictEqual((three.match(/L[\d.]+ 10 /g) || []).length, 3, 'three beats, three spikes, oldest to the left');
-  assert.strictEqual((f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down').match(/L[\d.]+ 10 /g) || []).length, 0, 'a beat older than five minutes has scrolled off');
+  assert.strictEqual((f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down').match(/L[\d.]+ 10 /g) || []).length, 0, 'a beat older than two minutes has scrolled off');
   assert.ok(/kal-ecg-gap down/.test(f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down')) && /kal-ecg-gap quiet/.test(f.kalshiHeartbeatSvg([NOW - 200000], NOW, 'quiet')) && !/kal-ecg-gap/.test(one), 'a quiet or down state draws the flat dashed gap, a healthy one does not');
   const b = f.kalshiBeatNote([], 5); f.kalshiBeatNote(b, 5); f.kalshiBeatNote(b, 65);
   assert.deepStrictEqual(b, [5, 65], 'a check time is noted once, and a new one is added');
