@@ -760,23 +760,16 @@
   }
   /* Our story (the owner: eye catching, animated, heartfelt, the American dream). The lines rise in one after another and six steps climb, once, when the section scrolls into view (the sign-in code adds .is-in). It is transitions, not
      keyframes, and it moves no number: there is none. Reduced motion, or the Settings switch, shows the finished state at once. */
-  .front-story{ display:grid; grid-template-columns:minmax(0,1.3fr) minmax(220px,.7fr); gap:48px; align-items:end; padding:12px 0 8px; }
   .story-r{ opacity:0; transform:translateY(22px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); transition-delay:calc(var(--d) * 220ms); }
   .is-in .story-r{ opacity:1; transform:none; }
   .story-big{ font:800 clamp(28px, 4.4vw, 52px)/1.08 'Public Sans', sans-serif; letter-spacing:-.01em; margin:0 0 10px; color:var(--paper); }
   .story-dim{ color:var(--muted); }
   .story-body{ font:500 clamp(16px, 1.7vw, 18px)/1.7 'Public Sans', sans-serif; color:var(--muted); max-width:580px; margin:18px 0 0; }
   .story-big + .story-body{ margin-top:26px; }
-  .story-steps{ position:relative; height:260px; display:flex; align-items:flex-end; gap:10px; }
-  .story-steps span{ flex:1; border-radius:8px 8px 0 0; background:linear-gradient(180deg, var(--paper), color-mix(in srgb, var(--paper) 14%, transparent)); height:calc(26% + var(--i) * 13%); transform:scaleY(0); transform-origin:bottom; opacity:.9;
     transition:transform .9s cubic-bezier(.2,.9,.2,1); transition-delay:calc(var(--i) * 140ms + 500ms); }
-  .is-in .story-steps span{ transform:scaleY(1); }
-  .story-star{ position:absolute; right:-2px; top:-4px; font-size:30px; line-height:1; color:var(--paper); opacity:0; transform:scale(.4) rotate(-30deg); transition:opacity .6s ease, transform .8s cubic-bezier(.2,1.4,.3,1); transition-delay:1.7s; }
-  .is-in .story-star{ opacity:1; transform:none; }
-  [data-reduce-motion="true"] .front-fx i, [data-reduce-motion="true"] .front-h1 span, [data-reduce-motion="true"] .flow-line::after, [data-reduce-motion="true"] .is-in .story-steps span::after, [data-reduce-motion="true"] .is-in .story-star{ animation: none; }
+  [data-reduce-motion="true"] .front-fx i{ animation: none; }
   [data-reduce-motion="true"] .front-fx{ display:none; }
-  [data-reduce-motion="true"] .flow-card{ opacity:1; transform:none; transition:none; }
-  [data-reduce-motion="true"] .story-r, [data-reduce-motion="true"] .story-steps span, [data-reduce-motion="true"] .story-star{ opacity:1; transform:none; transition:none; }
+  [data-reduce-motion="true"] .story-r{ opacity:1; transform:none; transition:none; }
   /* Front page visuals (the owner: great visuals and animations on the login page). Everything here is decoration: soft drifting light behind the page, a slow sheen across "Live more.", a pulse that travels the three-step line, a shine that climbs the bars and a twinkling star.
      Keyframes move only transform, opacity and a background position; no number is animated; reduced motion and the Settings switch stop every one. */
   .front{ position:relative; isolation:isolate; }
@@ -789,31 +782,12 @@
   html[data-theme="light"] .front-fx i:nth-child(n+2){ opacity:.1; }
   @keyframes frontOrbA{ from{ transform:translate3d(0,0,0) scale(1); } to{ transform:translate3d(8vmax,6vmax,0) scale(1.18); } }
   @keyframes frontOrbB{ from{ transform:translate3d(0,0,0) scale(1.1); } to{ transform:translate3d(-9vmax,5vmax,0) scale(.9); } }
-  .front-h1 span{ background:linear-gradient(100deg, var(--muted) 38%, var(--paper) 50%, var(--muted) 62%) 100% 0 / 260% 100% no-repeat; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:frontSheen 6s ease-in-out 1.2s infinite; }
-  @keyframes frontSheen{ 0%{ background-position:100% 0; } 45%, 100%{ background-position:0 0; } }
-  .front-flow{ padding:6px 0 54px; }
-  .flow-line{ position:relative; height:2px; margin:0 0 26px; background:var(--border); overflow:hidden; border-radius:2px; }
-  .flow-line::after{ content:""; position:absolute; left:0; top:0; width:30%; height:100%; background:linear-gradient(90deg, transparent, var(--paper), transparent); transform:translateX(-100%); animation:frontPulse 4.5s ease-in-out infinite; }
-  @keyframes frontPulse{ from{ transform:translateX(-100%); } to{ transform:translateX(333%); } }
-  .flow-cards{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
-  .flow-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 22px 20px; transition:opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1), border-color .25s ease; transition-delay:calc(var(--d) * 220ms); }
-  .is-in .flow-card:hover{ transform:translateY(-3px); transition-delay:0s; }
-  .flow-card h3{ margin:0 0 8px; font:800 18px/1.2 'Public Sans', sans-serif; color:var(--paper); }
-  .flow-card p{ margin:0; font:500 15px/1.6 'Public Sans', sans-serif; color:var(--muted); }
-  .story-steps span{ overflow:hidden; position:relative; }
-  .is-in .story-steps span::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--paper) 55%, transparent) 50%, transparent 70%); transform:translateY(120%); animation:frontShine 5s ease-in-out calc(1.8s + var(--i) * .25s) infinite; }
-  @keyframes frontShine{ 0%{ transform:translateY(120%); } 40%, 100%{ transform:translateY(-120%); } }
-  .is-in .story-star{ animation:frontTwinkle 3.2s ease-in-out 2.6s infinite; }
-  @keyframes frontTwinkle{ 0%, 100%{ opacity:1; transform:scale(1) rotate(0deg); } 50%{ opacity:.55; transform:scale(.8) rotate(18deg); } }
   .front-note{ margin:40px 0 0; padding-top:24px; border-top:1px solid var(--border); color:var(--muted); font-size:12.5px; line-height:1.65; max-width:860px; }
   .front-note b{ color:var(--paper); }
   .front-foot{ margin-top:auto; padding-top:26px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; gap:12px 24px; flex-wrap:wrap; }
   .front-foot a{ color:var(--paper); text-decoration:underline; text-underline-offset:3px; }
   @media (max-width: 820px){
     .front-main{ grid-template-columns:minmax(0,1fr); gap:34px; padding:34px 0 40px; }
-    .front-story{ grid-template-columns:minmax(0,1fr); gap:30px; }
-    .story-steps{ height:150px; }
-    .flow-cards{ grid-template-columns:minmax(0,1fr); }
     .auth-box{ padding:24px 20px 18px; }
   }
   .auth-title{ font-family:'Public Sans', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
@@ -885,8 +859,8 @@
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
-    .story-r, .story-steps span, .story-star, .flow-card{ opacity:1; transform:none; transition:none; }
-    .front-fx i, .front-h1 span, .flow-line::after, .is-in .story-steps span::after, .is-in .story-star{ animation: none; }
+    .story-r{ opacity:1; transform:none; transition:none; }
+    .front-fx i{ animation: none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
     .bg-grid{ animation: none; }
@@ -1154,10 +1128,12 @@
       </div>
     </header>
     <main class="front-main">
-      <section class="front-hero">
-        <div class="front-eyebrow">Systematic trading</div>
-        <h1 class="front-h1">Trade less.<br><span>Live more.</span></h1>
-        <p class="front-sub">Shwoop Financials builds systematic trading tools: rules written in advance, run by software, reviewed by people.</p>
+      <section class="front-hero front-story" id="frontStory" aria-label="What is Shwoop">
+        <div class="front-eyebrow story-r" style="--d:0">What is Shwoop</div>
+        <p class="story-big story-r" style="--d:1">Your money, without the screen time.</p>
+        <p class="story-big story-dim story-r" style="--d:2">Shwoop Financials builds software that trades by the rules, so you never have to watch it.</p>
+        <p class="story-body story-r" style="--d:3">Most people lose sleep over the markets. They check prices all day, second-guess every move, and let fear or excitement make the call. Shwoop takes that out. The rules are written down ahead of time, the software follows them the same way every time, and people check on it.</p>
+        <p class="story-body story-r" style="--d:4">It's for anyone who wants their money working without their life revolving around a chart.</p>
       </section>
       <div class="auth-box">
         <div class="auth-title">Sign in</div>
@@ -1184,28 +1160,6 @@
     <button type="button" id="authForgotBtn" class="auth-forgot">Forgot password?</button>
       </div>
     </main>
-    <section class="front-flow" id="frontFlow" aria-label="How it works">
-      <div class="front-eyebrow story-r" style="--d:0">How it works</div>
-      <div class="flow-line" aria-hidden="true"></div>
-      <div class="flow-cards">
-        <div class="flow-card story-r" style="--d:1"><h3>Rules come first</h3><p>Every rule is written down before anything happens.</p></div>
-        <div class="flow-card story-r" style="--d:2"><h3>Software follows them</h3><p>The same way every time, with no second-guessing.</p></div>
-        <div class="flow-card story-r" style="--d:3"><h3>People check in</h3><p>Real people review how it is going, so you do not have to.</p></div>
-      </div>
-    </section>
-    <section class="front-story" id="frontStory" aria-label="What is Shwoop">
-      <div class="story-copy">
-        <div class="front-eyebrow story-r" style="--d:0">What is Shwoop</div>
-        <p class="story-big story-r" style="--d:1">Your money, without the screen time.</p>
-        <p class="story-big story-dim story-r" style="--d:2">Shwoop Financials builds software that trades by the rules, so you don't have to watch it.</p>
-        <p class="story-body story-r" style="--d:3">Most people lose sleep over the markets. They check prices all day, second-guess every move, and let fear or excitement make the call. Shwoop takes that out. The rules are written down ahead of time, the software follows them the same way every time, and people check on it.</p>
-        <p class="story-body story-r" style="--d:4">It's for anyone who wants their money working without their life revolving around a chart.</p>
-      </div>
-      <div class="story-steps" aria-hidden="true">
-        <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span>
-        <b class="story-star">&#10022;</b>
-      </div>
-    </section>
     <p class="front-note"><b>Important.</b> Shwoop Financials is not a broker, investment adviser or fund, and nothing on this site is an offer, advice or a solicitation to buy or sell any security or contract. Trading involves risk, including the loss of all capital invested. Past results do not predict future results.</p>
     <div class="front-foot"><span>&copy; 2026 Shwoop Financials</span><span>Contact: <a href="mailto:shwoopadvisor@gmail.com">shwoopadvisor@gmail.com</a></span></div>
   </div>
@@ -3811,7 +3765,7 @@
   var authGateEl = document.getElementById('authGate');
   // Our story on the front page: reveal once, when it scrolls into view inside the gate. Without IntersectionObserver the finished state is shown.
   (function(){
-    ['frontFlow', 'frontStory'].forEach(function(id){
+    ['frontStory'].forEach(function(id){
       var sec = document.getElementById(id);
       if(!sec){ return; }
       if(!('IntersectionObserver' in window)){ sec.classList.add('is-in'); return; }
