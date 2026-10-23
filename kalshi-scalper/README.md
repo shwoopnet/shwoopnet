@@ -5852,3 +5852,10 @@ Group sizes were counted from features only. Tries +3 (z bar 2.4 for three).
 Prediction: all three fail (market is calibrated; pooled versions were fragile). 
 NOT_YET_FALSIFIED for a group needs: diff in mean net per contract >= +1.0c, day-clustered z >= 2.4, both halves of the days > 0, fee stress x1.2 > 0.
 FALSIFIED for a group: diff < +0.3c or z < 1.0. Otherwise NOT_ENOUGH_DATA. Run once (`python -m scalper.gold2 run`). Nothing means trade; a pass only registers a forward read on fresh days.
+
+### GOLD2 result (2026-10-23, run once)
+All three FALSIFIED (prediction held). Gold 1,397 entries, 63 days.
+- FLAT n=210: +0.29c vs rest +1.76c, diff -2.74c, z -0.89, halves both negative. In gold the quiet entries are the worse ones.
+- TIGHT (spread <= 0.5c) n=572: +1.91c vs +1.28c, diff +0.64c, z +0.44.
+- LONGBAND (tib >= 2) n=583: +1.77c vs +1.36c, diff +1.53c would have met the size bar but z +1.00 fails (bar 2.4). Both halves positive, so it is the one to watch on fresh days, but nothing is registered.
+Tries +3. Gold has no useful entry filter; its edge is the series itself.
