@@ -331,9 +331,9 @@ gates.Y9 = () => {
 // Fit on a small screen: the account card lists only what the bot can spend (shard 2) and folds the rest into one line that appears only when it
 // matters, the order switch only speaks up when it is off, the Layout menu sits in the header, and the session card keeps four facts.
 gates.Y10 = () => {
-  const acct = html.slice(html.indexOf("var useShard = "), html.indexOf("    el.innerHTML = h;"));
-  assert.ok(/x\.shard === 2/.test(acct) && /Available to the bot/.test(acct), 'the line shown is the shard the bot can spend');
-  assert.ok(/otherSum >= 0\.5 \?/.test(acct) && /not usable/.test(acct), 'other shards are one line, and only when there is real money on them');
+  const acct = html.slice(html.indexOf("var BOT_SHARDS = "), html.indexOf("    el.innerHTML = h;"));
+  assert.ok(/BOT_SHARDS = \{ 2: 'crypto and natural gas', 0: 'gold, AUD\/USD, USD\/CAD' \}/.test(acct), 'the two shards the bot trades are named with what trades on them (shard 0 holds gold and the forex probes, so it is not "not usable")');
+  assert.ok(/not used by the bot/.test(acct) && /x\.dollars >= 0\.5/.test(acct), 'any other shard is said to be unused, and only when there is real money on it');
   assert.ok(/a\.liveSwitch \? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
   assert.ok(!/Shard ' \+/.test(acct), 'no per-shard rows');
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));

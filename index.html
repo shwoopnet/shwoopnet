@@ -2634,6 +2634,10 @@
     } else {
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
+      // Kalshi keeps each market group's money on its own shard (README, "exchange shards"). The bot trades two of them: shard 2 (Bitcoin, Ethereum, XRP, Dogecoin, natural gas) and shard 0 (gold, AUD/USD, USD/CAD). Any other shard is not used by the bot.
+      var BOT_SHARDS = { 2: 'crypto and natural gas', 0: 'gold, AUD/USD, USD/CAD' };
+      var shardRows = a.balance.shards.slice().sort(function(x, y){ return (x.shard === 2 ? 0 : x.shard === 0 ? 1 : 2) - (y.shard === 2 ? 0 : y.shard === 0 ? 1 : 2) || x.shard - y.shard; })
+        .filter(function(x){ return BOT_SHARDS[x.shard] || x.dollars >= 0.5; });
       var useShard = a.balance.shards.filter(function(x){ return x.shard === 2; })[0];
       var otherSum = a.balance.shards.filter(function(x){ return x.shard !== 2; }).reduce(function(n, x){ return n + x.dollars; }, 0);
       // What one order risks right now: contracts (the cap plus any profit add-on) at the cost per contract of the latest order, so it follows the real prices.
@@ -2660,8 +2664,9 @@
       }
       h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
         // Funds on other shards cannot be spent by the bot, so they get a line only when there is something worth noting; otherwise the total is what the bot has.
-        ((otherSum >= 0.5 || !useShard) ? '<div class="kal-rows"><div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars) : '$0.00') + '</b></div>' +
-          (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum) + '</b></div>' : '') + '</div>' : '') +
+        (shardRows.length ? '<div class="kal-rows">' + shardRows.map(function(x){
+          return '<div><span class="kal-k">Shard ' + escapeHtml(String(x.shard)) + ' (' + (BOT_SHARDS[x.shard] ? escapeHtml(BOT_SHARDS[x.shard]) : 'not used by the bot') + ')</span><b>' + kalshiMoney(x.dollars) + '</b></div>';
+        }).join('') + '</div>' : '') +
         (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
     }
     el.innerHTML = h;
