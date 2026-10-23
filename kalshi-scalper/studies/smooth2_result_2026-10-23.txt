@@ -1,0 +1,21 @@
+SMOOTH2: discovery 16 series, confirmation Bitcoin and Ethereum, entry L1360
+BIDMONO              NOT_ENOUGH_DATA    disc n=  560  +0.87c z +1.31 PF 1.48 | conf n=  250  +3.32c z +4.48 PF 3.59
+ASKMONO              NOT_ENOUGH_DATA    disc n=  606  +1.19c z +1.86 PF 1.61 | conf n=  255  +3.70c z +5.72 PF 4.87
+SPREADSTABLE         FALSIFIED          disc n= 2636  -0.26c z -0.69 PF 1.24 | conf n= 3219  -0.29c z -0.57 PF 1.02
+BIDLEADS             FALSIFIED          disc n= 6009  -0.05c z -0.18 PF 1.10 | conf n= 2654  -0.29c z -0.63 PF 1.03
+AGE80_GE3            FALSIFIED          disc n= 7624  +0.17c z +0.69 PF 1.16 | conf n= 2709  +0.64c z +1.35 PF 1.23
+AGE80_LE1            FALSIFIED          disc n= 2928  -0.62c z -1.17 PF 0.98 | conf n= 1132  -1.99c z -2.28 PF 0.83
+AGE70_GE4            FALSIFIED          disc n= 9144  +0.23c z +0.84 PF 1.16 | conf n= 3343  +0.19c z +0.43 PF 1.12
+AGE70_LE2            FALSIFIED          disc n= 2056  -0.43c z -0.73 PF 1.00 | conf n=  735  -1.84c z -1.56 PF 0.84
+CLEANSTART_SMOOTH    NOT_ENOUGH_DATA    disc n=  192  +2.56c z +2.63 PF 2.61 | conf n=   93  +4.08c z +3.86 PF 5.60
+OFFSTART_SMOOTH      NOT_ENOUGH_DATA    disc n=  342  +0.72c z +0.72 PF 1.48 | conf n=  154  +3.44c z +3.89 PF 4.29
+VOL_RISING           FALSIFIED          disc n=  825  -1.07c z -1.22 PF 0.94 | conf n=  346  +0.72c z +0.51 PF 1.23
+VOL_FALLING          FALSIFIED          disc n=  603  -0.57c z -0.57 PF 0.98 | conf n=  194  -0.67c z -0.35 PF 0.96
+OI_MONO_UP           FALSIFIED          disc n= 7543  +0.27c z +0.92 PF 1.20 | conf n= 3534  -0.12c z -0.29 PF 1.06
+OI_STALL             NOT_ENOUGH_DATA    disc n=  496  -2.80c z -2.15 PF 0.68 | conf n=   61  -1.18c z -0.30 PF 0.91
+SMOOTH_AND_OI        NOT_ENOUGH_DATA    disc n=  404  +1.19c z +1.37 PF 1.75 | conf n=  223  +3.48c z +4.69 PF 4.21
+SMOOTH_AND_VOLRISE   NOT_ENOUGH_DATA    disc n=  315  +0.74c z +0.78 PF 1.49 | conf n=  136  +5.06c z +24.74 PF inf
+SMOOTH_AND_TIGHT     NOT_ENOUGH_DATA    disc n=  433  +1.72c z +2.52 PF 2.23 | conf n=  244  +3.64c z +5.29 PF 4.65
+SMOOTH_AND_FAST      NOT_ENOUGH_DATA    disc n=   41  -2.71c z -0.65 PF 0.76 | conf n=   20  +2.25c z +0.50 PF 1.60
+LAST_STEP_BIG        FALSIFIED          disc n= 4719  -0.48c z -1.32 PF 1.01 | conf n= 1756  -1.00c z -1.44 PF 0.93
+LAST_STEP_SMALL      NOT_ENOUGH_DATA    disc n= 1181  +0.48c z +0.86 PF 1.22 | conf n=  401  +0.97c z +0.91 PF 1.35
