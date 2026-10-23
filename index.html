@@ -346,6 +346,8 @@
   .data-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-top:20px; }
   .data-grid > .kal-card{ margin-bottom:0; min-width:0; }
   .data-tiles{ margin-top:6px; }
+  .data-grid > [data-card="data-ended"]{ display:flex; flex-direction:column; }
+  .data-grid > [data-card="data-ended"] .kal-chart{ margin:auto 0; }
   .data-grid > [data-card="data-markets"], .data-grid > [data-card="data-tests"], .data-grid > [data-card="data-bars"]{ grid-column:1 / -1; }
   .data-sub{ padding:14px 22px 6px; border-top:1px solid var(--border); margin-top:6px; color:var(--muted); font:700 11px 'Public Sans', sans-serif; letter-spacing:.2em; text-transform:uppercase; }
   .data-details > summary{ cursor:pointer; list-style:none; margin:0; } .data-details[open] > summary{ margin-bottom:6px; } .data-details .kal-perf{ padding:6px 0 0 0; }
@@ -355,6 +357,8 @@
   .data-kv-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 18px; font-size:12.5px; border-top:1px solid var(--border); align-items:baseline; }
   .data-kv-row b{ font-weight:600; font-variant-numeric:tabular-nums; text-align:right; }
   .data-row span:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
+  /* On a phone the wide tables scroll inside their own card instead of squeezing seven columns together. */
+  @media screen and (max-width:700px){ #dataMarkets, #dataLead{ overflow-x:auto; } #dataMarkets .data-row, #dataLead .data-row{ min-width:560px; } }
   @media (max-width:900px){ .data-grid{ grid-template-columns:minmax(0,1fr); } .data-row{ padding:9px 14px; gap:4px; font-size:12px; } }
   .kal-note{ color:var(--muted); font-size:12px; margin-top:12px; line-height:1.5; }
   .kal-input{ width:120px; padding:8px 10px; background:var(--ink); color:var(--paper); border:1px solid var(--border); border-radius:6px; font:inherit; }
@@ -1871,7 +1875,7 @@
     var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     // The end label is right-aligned to the edge and the plot leaves room for its real length, so a bigger total (+$123.45, +$1,234.56) is not cut off by the viewBox.
     var endLabel = fmt(points[points.length - 1].cum);
-    var W = 640, H = 170, L = 8, R = Math.max(60, endLabel.length * 9 + 16), T = 14, B = 22;
+    var W = 460, H = 170, L = 8, R = Math.max(60, endLabel.length * 9 + 16), T = 14, B = 22;
     var vals = points.map(function(p){ return p.cum; }).concat([0]);
     var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
@@ -1907,7 +1911,7 @@
     var legend = parts.filter(function(x){ return x[1]; }).map(function(x){
       return '<div class="kal-leg"><span class="kal-leg-dot" style="background:' + x[2] + '"></span><span>' + esc(x[0]) + '</span><b>' + x[1] + '</b><span class="kal-lbl">' + Math.round(x[1] / total * 100) + '%</span></div>';
     }).join('') + (other ? '<div class="kal-leg"><span class="kal-leg-dot" style="background:var(--muted)"></span><span>Other</span><b>' + other + '</b></div>' : '');
-    return '<div class="kal-donut"><svg viewBox="0 0 42 42" role="img" aria-label="How ' + total + ' orders ended" style="width:120px;height:120px;flex:none"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--border)" stroke-width="6"/>' + segs +
+    return '<div class="kal-donut"><svg viewBox="0 0 42 42" role="img" aria-label="How ' + total + ' orders ended" style="width:170px;height:170px;flex:none"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--border)" stroke-width="6"/>' + segs +
       '<text class="kal-bub" x="21" y="20" text-anchor="middle" font-size="7.5" fill="currentColor">' + total + '</text><text x="21" y="26" text-anchor="middle" font-size="3.4" fill="var(--muted)">orders</text></svg><div class="kal-donut-leg">' + legend + '</div></div>';
   }
 
@@ -1977,7 +1981,7 @@
   // bar itself used to do this, but it showed only after a long hover and only over the bar's own pixels, and a win is about two pixels tall: most of the chart told you nothing.
   function kalshiBarsSvg(points, esc, money){
     if(!points || !points.length){ return '<div class="kal-empty">Bars appear after the first settled trade.</div>'; }
-    var shown = points.slice(-40), W = 800, H = 96, T = 8, B = 18, L = 4, R = 4;
+    var shown = points.slice(-40), W = 560, H = 96, T = 8, B = 18, L = 4, R = 4;
     var hi = Math.max.apply(null, shown.map(function(p){ return p.pnl; }).concat([0.05])), lo = Math.min.apply(null, shown.map(function(p){ return p.pnl; }).concat([-0.05]));
     var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
     var slot = (W - L - R) / shown.length, bw = Math.max(2, Math.min(18, slot * 0.7));
@@ -2824,7 +2828,7 @@
   // One bar per week (the last 8), the value above or below the bar, the week's Monday under it. Wins are the plain muted bar and losses the red one, as on the Kalshi page.
   function dataWeekBarsSvg(weeks, esc, money){
     if(!weeks || !weeks.length){ return '<div class="kal-empty">Bars appear after the first settled trade.</div>'; }
-    var shown = weeks.slice(-8), W = 640, H = 210, T = 26, B = 56, L = 8, R = 8;
+    var shown = weeks.slice(-8), W = 460, H = 210, T = 26, B = 56, L = 8, R = 8;
     var hi = Math.max.apply(null, shown.map(function(w){ return w.net; }).concat([0.05])), lo = Math.min.apply(null, shown.map(function(w){ return w.net; }).concat([-0.05]));
     var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
     var slot = (W - L - R) / shown.length, bw = Math.max(8, Math.min(48, slot * 0.55));
@@ -2944,7 +2948,7 @@
     return row('Profit factor', pf) + row('Win rate', st.winRate === null ? 'none yet' : (st.winRate * 100).toFixed(1) + '%') + row('Break-even win rate', be) +
       row('Average win', st.avgWin === null ? 'none yet' : '+' + money(st.avgWin)) + row('Average loss', st.avgLoss === null ? 'none yet' : '-' + money(Math.abs(st.avgLoss))) +
       row('Deepest drawdown', st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none yet') + row('Longest losing run', String(st.longestLoss)) +
-      '<div class="kal-note" style="padding:10px 18px 14px">Profit factor under 1.00 means the bot is losing. It needs a win rate above break-even to earn, and one loss costs about as much as many wins. Trust a market only after 30 or more trades.</div>';
+      '<div class="kal-note" style="padding:10px 18px 14px">Under 1.00 the bot is losing. It needs a win rate above break-even to earn. Trust a market only after 30 or more trades.</div>';
   }
   // Live tests (Oct 22, 2026): checks that the new rules do what they should. Read only; they change nothing. The two dates are when each change went live (approximate: the owner reported the deploys, not the minute).
   // One crypto order per window should leave NO window with two filled crypto orders; rng5 should be on (nearly) every order sent after its deploy.
@@ -2966,7 +2970,7 @@
     var row = function(l, v){ return '<div class="data-kv-row"><span>' + esc(l) + '</span><b>' + esc(v) + '</b></div>'; };
     return row('Windows with two filled crypto orders', r.windows ? r.twoFill + ' of ' + r.windows + ' (should stay 0)' : 'none yet') +
       row('Orders carrying rng5', r.rngOrders ? r.rngLogged + ' of ' + r.rngOrders : 'none yet') +
-      '<div class="kal-note" style="padding:10px 18px 14px">Checks that the new rules are doing their job. They change nothing. Counted from 2026-10-22 03:00 UTC (one crypto order per window) and 17:00 UTC (rng5); both times are approximate.</div>';
+      '<div class="kal-note" style="padding:10px 18px 14px">Checks that the new rules hold; they change nothing. Counted from 2026-10-22 (about 03:00 UTC for one crypto order per window, 17:00 UTC for rng5).</div>';
   }
   function renderDataCenter(){
     var pg = document.getElementById('page-data');
