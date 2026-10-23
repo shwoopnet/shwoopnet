@@ -1227,10 +1227,6 @@
           </div>
             <div class="kal-note" id="kalBookMsg"></div>
           </div>
-          <div class="kal-tools-group"><div class="kal-tools-h">Alerts</div>
-            <div class="kal-actions"><button class="kal-btn kal-btn-ghost" id="kalSoundToggle" type="button">Sound alerts: off</button> <button class="kal-btn kal-btn-ghost" id="kalPushToggle" type="button">Phone alerts: off</button></div>
-            <div class="kal-note" id="kalPushMsg"></div>
-          </div>
         </details>
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
@@ -1398,6 +1394,31 @@
         </div>
       </div>
 
+
+      <div class="settings-section" id="notifySection" hidden>
+        <div class="settings-section-title">Notifications</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Phone alerts</div>
+              <div class="settings-row-desc">A push to this device when the bot buys, sells early, a trade settles, or it stops or has an issue. On an iPhone, add the site to the Home Screen first.</div>
+              <div class="settings-row-desc" id="kalPushMsg"></div>
+            </div>
+            <button class="settings-toggle-switch" id="kalPushToggle" role="switch" aria-checked="false" aria-label="Toggle phone alerts">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Sound alerts</div>
+              <div class="settings-row-desc">A short tone for a buy, a sell, and a stop or issue, while this page is open. Kept on this device only.</div>
+            </div>
+            <button class="settings-toggle-switch" id="kalSoundToggle" role="switch" aria-checked="false" aria-label="Toggle sound alerts">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div class="settings-section">
         <div class="settings-section-title">Privacy</div>
@@ -2801,7 +2822,7 @@
     return out;
   }
   function kalshiPushSay(t){ var el = document.getElementById('kalPushMsg'); if(el){ el.textContent = t || ''; } }
-  function kalshiPushLabel(on){ document.getElementById('kalPushToggle').textContent = 'Phone alerts: ' + (on ? 'on' : 'off'); }
+  function kalshiPushLabel(on){ document.getElementById('kalPushToggle').setAttribute('aria-checked', on ? 'true' : 'false'); }
   function kalshiPushSupported(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
   function kalshiPushInit(){
     if(!kalshiPushSupported() || Notification.permission !== 'granted'){ return; }
@@ -2829,7 +2850,7 @@
   }
   document.getElementById('kalPushToggle').addEventListener('click', kalshiPushToggle);
   kalshiPushInit();
-  function kalshiSoundLabel(){ document.getElementById('kalSoundToggle').textContent = 'Sound alerts: ' + (kalshiSoundOn ? 'on' : 'off'); }
+  function kalshiSoundLabel(){ document.getElementById('kalSoundToggle').setAttribute('aria-checked', kalshiSoundOn ? 'true' : 'false'); }
   document.getElementById('kalSoundToggle').addEventListener('click', function(){
     kalshiSoundOn = !kalshiSoundOn;
     try{ window.localStorage.setItem('shwoopnet:kalSound', kalshiSoundOn ? 'on' : 'off'); }catch(e){}
@@ -3896,6 +3917,8 @@ kalshiStatusTick();
     if(dataNav) dataNav.hidden = !currentUserIsAdmin;
     var landKal = document.getElementById('landingKalshiBtn');
     if(landKal) landKal.hidden = !currentUserIsAdmin;
+    var notifySec = document.getElementById('notifySection');
+    if(notifySec) notifySec.hidden = !currentUserIsAdmin;     // the alerts only report the bot, which only the admin has
     // A Kalshi landing preference can only be honoured once the account is known to be the admin (the page is refused to anyone else), which is after the
     // first screen is already up. If the owner has not moved off that first screen yet, take them to Kalshi now.
     if(currentUserIsAdmin && landingKalshiPending){
