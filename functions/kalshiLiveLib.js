@@ -316,7 +316,7 @@ const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eli
 // entering earlier beats the 6 minute rule (the 69 day history says it might; it has not been tested live). It is the same rule on the same market, never a second position: both entries use the client
 // order id "L1-" + ticker, and these two series no longer have a 6 minute window at all, so a market is decided once, at 10 minutes. Every order records
 // which lead it was entered at (entryLead) so the two can be read apart afterwards.
-const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M", "KXBTC15M"];
+const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M"];   // Bitcoin left this list on Oct 23, 2026: it now decides at the 6 minute look, on a smooth climb only (SMOOTH_SERIES)
 const EARLY_WINDOW_MS = [570000, 640000];   // about 10 minutes left
 function entryLead(series, left) {
   // XRP and natural gas decide ONLY at 10 minutes (the owner's choice, Oct 21, 2026): a market not in the band then is skipped, not tried again at 6, so the 10 minute claim is tested on its own.
@@ -366,7 +366,8 @@ function flipsOf(mids) {
   for (let i = 1; i < steps.length; i++) if ((steps[i] > 0) !== (steps[i - 1] > 0)) flips++;
   return flips;
 }
-function pathShape(candles, side, nowSec) {
+// The favourite side's mid for every 1 minute candle up to the decision candle, oldest first; null when there is nothing or the latest candle is stale.
+function sideMids(candles, side, nowSec) {
   const mids = new Map();
   for (const c of Array.isArray(candles) ? candles : []) {
     const end = Number(c && c.end_period_ts), b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars);
@@ -375,9 +376,33 @@ function pathShape(candles, side, nowSec) {
   if (!mids.size) return null;
   const ends = [...mids.keys()].sort((x, y) => x - y);
   if (nowSec - ends[ends.length - 1] > 150) return null;    // stale: the decision candle must be from about now
-  const path = ends.map((e) => mids.get(e));
+  return ends.map((e) => mids.get(e));
+}
+function pathShape(candles, side, nowSec) {
+  const path = sideMids(candles, side, nowSec);
+  if (!path) return null;
   const flips = flipsOf(path), earlier = path.length - 1;
-  return { flips, flips0: earlier >= 4 && flips === 0, earlierCandles: earlier };
+  const steps = path.slice(1).map((v, i) => v - path[i]);
+  // minStep and climb are plain float arithmetic on the mids, exactly as the research session's parity vectors were made (a pullback of exactly 0.005 computes to -0.0050000000000000044 and is NOT smooth).
+  const minStep = steps.length ? Math.min(...steps) : null, climb = path[path.length - 1] - path[0];
+  return { flips, flips0: earlier >= 4 && flips === 0, earlierCandles: earlier, minStep: minStep === null ? null : Number(minStep.toFixed(4)), climb: Number(climb.toFixed(4)), smooth: earlier >= 4 && minStep !== null && minStep >= -SMOOTH_MIN_STEP && climb >= SMOOTH_MIN_CLIMB };
+}
+// Smooth climb only (Oct 23, 2026, the research session's SMOOTH2 lead, the owner: "1"): Bitcoin and Ethereum order ONLY when the side being bought has climbed without a real pullback since the market opened: at least 4 earlier
+// candles, no minute change below -0.005, and a total climb of at least 0.10. Anything else, or a path that cannot be read, places no order (fail closed). It only ever removes Bitcoin and Ethereum orders: size, band, stops,
+// caps, the 25c exit and the one crypto order per window are unchanged. Kill rules (registered in the README): 3 or more losses in the first 40 smooth fills, net under $0 after 100 fills, or the 2026-11-12 forward read falsified.
+const SMOOTH_SERIES = ["KXBTC15M", "KXETH15M"];
+const SMOOTH_MIN_STEP = 0.005, SMOOTH_MIN_CLIMB = 0.10;
+async function smoothGate({ fetchFn, series, ticker, side, nowMs }) {
+  try {
+    const nowSec = Math.floor(nowMs / 1000);
+    const res = await liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
+      params: { start_ts: String(nowSec - 7200), end_ts: String(nowSec + 60), period_interval: "1" }, nowMs });
+    if (res.status !== 200 || !res.body || !Array.isArray(res.body.candlesticks)) return { ok: false, reason: "no order: the price path could not be read (HTTP " + res.status + ")" };
+    const shape = pathShape(res.body.candlesticks, side, nowSec);
+    if (!shape) return { ok: false, reason: "no order: the price path is missing or out of date" };
+    if (!shape.smooth) return { ok: false, reason: "no order: not a smooth climb (" + shape.earlierCandles + " earlier candles, worst minute " + shape.minStep + ", climb " + shape.climb + ")" };
+    return { ok: true, shape };
+  } catch (e) { return { ok: false, reason: "no order: the price path could not be read" }; }
 }
 async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs, ask }) {
   try {
@@ -389,7 +414,7 @@ async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs, ask }
     if (!r && !shape) return false;
     await store.updateTest(cid, {
       ...(r ? { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen, ...(r.rng === null ? {} : { rng5: r.rng }) } : {}),
-      ...(shape ? { flips: shape.flips, flips0: shape.flips0, earlierCandles: shape.earlierCandles, ...(Number.isFinite(ask) ? { askAtDecision: ask } : {}) } : {}),
+      ...(shape ? { flips: shape.flips, flips0: shape.flips0, earlierCandles: shape.earlierCandles, minStep: shape.minStep, climb: shape.climb, smooth: shape.smooth, ...(Number.isFinite(ask) ? { askAtDecision: ask } : {}) } : {}),
     });
     return true;
   } catch (e) { return false; }      // logging only: never allowed to affect a trade
@@ -846,6 +871,11 @@ async function runL1Tick(args) {
     if (!["active", "open"].includes(m.status) || !lead) { results.push(ticker + ": not open in its entry window"); continue; }
     const pick = l1Pick(m);
     if (!pick) { results.push(ticker + ": no side is priced 88c to 97c"); continue; }
+    // Bitcoin and Ethereum only on a smooth climb (see SMOOTH_SERIES). Read after the band check so the candles are only fetched for a market that would otherwise be bought.
+    if (SMOOTH_SERIES.includes(c.series)) {
+      const sg = await smoothGate({ fetchFn, series: c.series, ticker, side: pick.side, nowMs: now });
+      if (!sg.ok) { results.push(ticker + ": " + sg.reason); continue; }
+    }
     const cost1 = pick.worst + bot.takerFee(pick.worst, 1);
     if (cost1 > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
     // The cash the size is judged on is what is left after this tick's earlier orders, so two markets cannot both take the full share.
@@ -1130,7 +1160,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
 const DEFAULT_ACCOUNT_ID = "main";
 
 module.exports = {
-  flipsOf, pathShape,
+  flipsOf, pathShape, sideMids, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
