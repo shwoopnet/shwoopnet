@@ -217,6 +217,15 @@ gates.Y14 = () => {
 // Open positions, one readable row each: the side from the sign, cost from the bot's own fill, what it can win and lose, the chance now and the time left from
 // the live books. "Realized" and "Fees" are gone (an open position has no realized result). Show more / Show fewer are quiet links, not filled buttons.
 // PC1: an open position's row draws the chance of the side bought as a chart, from the reads the page has made. Consequence: with fewer than two points there is no chart (nothing invented); a quiet market is zoomed so it is not a flat line; the paid line is drawn at the entry; a chance is not a dollar figure, so the chart carries none.
+// TP1: the trade list shows each result as a share of what the trade cost, beside the dollar figure. Consequence: a percentage that is not the pnl over the money put in would mislead, so it is checked on a win, a loss and a trade with no known cost.
+gates.TP1 = () => {
+  const m = /(function kalshiPctText\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiPctText not found');
+  const f = new Function(m[1] + '; return kalshiPctText;')();
+  assert.ok(/\+6\.2%$/.test(f(0.58, 9.3)) && !/\(/.test(f(0.58, 9.3)), 'a win of 58c on 9.30 at risk is +6.2%, plain, same strength as the dollars: ' + f(0.58, 9.3));
+  assert.ok(/-100\.0%$/.test(f(-9.3, 9.3)), 'a full loss is -100.0%: ' + f(-9.3, 9.3));
+  assert.strictEqual(f(1, 0), '', 'no known cost: no percentage'); assert.strictEqual(f(NaN, 5), '', 'no result: no percentage');
+  assert.ok(/kalshiMoney\(Math\.abs\(tp\.pnl\)\) \+ kalshiPctText\(/.test(html) && /kalshiMoney\(Math\.abs\(pnl\)\) \+ kalshiPctText\(/.test(html), 'both kinds of row carry it, after the dollar figure, so Privacy view masks the dollars and leaves the percentage');
+};
 gates.PC1 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPositionChartHtml', 'kalshiPositionsHtml'];
