@@ -701,7 +701,7 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"acct acct" "books pos" "books trd"; gap:18px; }
+  .kal-console{ grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"acct acct" "books pos" "books trd"; grid-template-rows:auto auto 1fr; gap:18px; }
   .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
   .kal-console [data-card="account"]{ grid-area:acct; }
   .kal-console [data-card="books"]{ grid-area:books; align-self:start; }
@@ -719,9 +719,11 @@
   .kal-console [data-card="trades"] .kal-tr-head{ display:none; }
   .kal-console .kal-books{ grid-template-columns:1fr; }
   .kal-console .kal-brow{ display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:24px; align-items:center; }
+  /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
+  .kal-console .kal-brow-held{ border-color:var(--amber-dim); }
   .kal-console .kal-brow > .kal-spark{ grid-column:2; grid-row:1; width:280px; margin:0; }
   @media (max-width:900px){
-    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "books" "pos" "trd"; }
+    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "books" "pos" "trd"; grid-template-rows:none; }
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals{ grid-column:1; }
     .kal-console .kal-brow > .kal-spark{ grid-column:1; grid-row:auto; width:auto; margin-top:10px; }
@@ -2304,10 +2306,10 @@
       var spread = hasBook ? m.yesAsk - m.yesBid : null;
       var rt = hasBook ? kalshiRoundTrip(m.yesAsk, m.yesBid, 1) : null;
       var left = kalshiSecsLeft(m.closeTime, now);
-      return '<div class="kal-brow"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
+      return '<div class="kal-brow' + (kalshiInTrade(m.ticker) ? ' kal-brow-held' : '') + '"><div class="kal-brow-main"><div><div class="kal-brow-name">' + escapeHtml(names[m.series] || m.series) + '</div>' +
         '<div class="kal-brow-when">Closes ' + escapeHtml(kalshiShortTicker(m.ticker).replace(/^[A-Z]+ /, '')) + ', ' + kalshiFmtLeft(left) + ' left</div></div>' +
         '<div class="kal-brow-r"><div class="kal-brow-px" title="The price of a YES contract: what buyers bid and what sellers ask. A NO contract costs 100c minus these.">' + (hasBook ? '<span class="kal-brow-side">Yes</span> ' + (m.yesBid * 100).toFixed(1) + 'c / ' + (m.yesAsk * 100).toFixed(1) + 'c' : '-') + '</div>' +
-        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + (kalshiInTrade(m.ticker) ? kalshiSparkFor(m) : '') + '</div>';
+        '<div class="kal-brow-when">spread ' + (spread != null ? (spread * 100).toFixed(1) + 'c' : '-') + ', round trip ' + (rt != null ? (rt * 100).toFixed(1) + 'c' : '-') + '</div>' + kalshiDepthHtml(m) + '</div></div>' + kalshiSparkFor(m) + '</div>';
     }).join('');
     st.textContent = 'Updated ' + kalTime(data.fetchedAt) + ' CT';
   }
