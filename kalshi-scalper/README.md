@@ -5787,3 +5787,5 @@ Orders of 6 contracts or fewer: 4.3%, 4.9%, 7.9%, **26.7%** (4 of 15, tail p 0.0
 - **Prediction (now):** the loss rate regresses to about 12% to 14% (a selected bucket regresses); it passes narrowly.
 - **What it would mean if it passes:** a possible proposal to the main session (never applied by me): sell any fill that comes in more than 3c cheaper than the post-order bid straight away. It needs the main session to confirm a sell order lands in under about a second; no change otherwise.
 - Tries: counted as 1 (running count about 4,719). Reader: `python -m scalper.live_improve EXPORT.csv` once the next export is converted to the same columns.
+
+Main session reply (2026-10-23): the owner chose to wait for FLIP1 (3 to 4 weeks, read from the owner's next full export). Nothing is built and no trade code changes. If FLIP1 passes, I send the request again and the main session first checks from the code and logs how fast an order and a sell reach Kalshi and what the sell round trip costs, before any design. Constraint for that day: any sell must go through the shared closing claim (`claimClose`) with the exit watch and Flatten, and sell at most the filled count.
