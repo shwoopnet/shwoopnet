@@ -10,3 +10,12 @@ polls = [{"t": 20_000 + i * 500, "bid": 0.50, "ask": 0.52} for i in range(4)] + 
 assert abs(T.follow_delay(polls, 20, 1) - 2.0) < 1e-9
 assert T.follow_delay(polls, 20, -1) is None
 print("ok")
+
+base = [{"t": i * 500, "bid": 0.93, "ask": 0.94} for i in range(10)]
+dip = base + [{"t": 5000, "bid": 0.88, "ask": 0.89}, {"t": 5500, "bid": 0.92, "ask": 0.93}] + [{"t": 6000 + i * 500, "bid": 0.93, "ask": 0.94} for i in range(4)]
+assert T.dips(dip, True) == [5000], T.dips(dip, True)
+assert T.dips(base, True) == []
+nobounce = base + [{"t": 5000, "bid": 0.88, "ask": 0.89}] + [{"t": 5500 + i * 500, "bid": 0.88, "ask": 0.89} for i in range(8)]
+assert T.dips(nobounce, True) == []            # a fall that stays down is not a dip and bounce
+assert T.dips([{"t": q["t"], "bid": 1 - q["ask"], "ask": 1 - q["bid"]} for q in dip], False) == [5000]
+print("ok2")
