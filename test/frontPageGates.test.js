@@ -15,7 +15,7 @@ assert.ok(/not a broker, investment adviser or fund/.test(gate) && /loss of all 
 assert.ok(/href="mailto:shwoopadvisor@gmail\.com"/.test(gate), 'the footer has the contact address the owner chose');
 assert.ok(!/<svg|<script|<img|href="http/.test(gate), 'no image, script or outside link in the front page');
 // Our story (Oct 23, 2026): it animates once, only with transitions, and stops when motion is not wanted.
-assert.ok(/id="frontStory"/.test(gate) && /American dream/.test(gate) && /class="story-steps"/.test(gate), 'the story section is on the front page');
+assert.ok(/id="frontStory"/.test(gate) && /Why I built this/.test(gate) && /class="story-steps"/.test(gate), 'the story section is on the front page');
 const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(html.replace(/\/\*[\s\S]*?\*\//g, ''))[1];
 assert.ok(/\.story-r, \.story-steps span, \.story-star/.test(media) && /\[data-reduce-motion="true"\] \.story-r/.test(html), 'it shows its finished state at once under reduced motion and the Settings switch');
 assert.ok(!/@keyframes\s+story|animation\s*:[^;]*story/.test(html), 'it uses transitions, no keyframe animation');
