@@ -5767,3 +5767,23 @@ Hypothesis from the live record (see "Slippage request" above): a fill cheaper t
 | More than 3c cheaper | 3,751 | **19.19%** | **-1.56c** |
 
 The filled entries (8,057) lose 12.68%. A favourite whose price keeps falling after the decision loses much more often than one whose price rises; the gradient is monotone and the last bucket is far from the pooled rate (tail p 0.000). **Caveats that matter:** (1) this uses the next minute's price, so it is a diagnostic of what a stale decision costs, not a rule one could apply in advance; (2) the live gap between the quote used for the decision and the order is not a minute (the main session said the latest candle can be up to 150 s old, and the order itself takes under a second), so the live fills are a milder version: the live fills lost 5.7% held to settlement, not 12.7%, and the live unfilled orders did worse than the fills (LIVE3), the opposite of this table, because the history's gap is longer; (3) one period, no holdout. The implementable question is: **if the bot re-reads the live ask just before sending and the ask is already lower than the candle quote it decided on by more than about 2c, does that order lose more often?** That is exactly what the table requested from the main session answers on the live export (fills by improvement bucket). If it shows the same gradient, it becomes a pre-registered forward claim on the next export (a "fresh quote check"), a protective rule with no new risk, not a source of income. Tries: none counted (information only).
+
+### Live fills by price improvement (2026-10-23, information only; table computed by me because the main session only holds a reduced extract)
+
+`studies/live_fills_with_quotes_2026-10-22.csv`: the 373 filled orders that carry a seen quote (Oct 8 to Oct 22), copied from the owner's full "Copy all orders" export; checksum against the condensed table for the same period: 373 rows, P/L -$12.10 on both sides, identical order keys. Tool: `python -m scalper.live_improve` (+ test). The seen quote is taken about 0.8 s after the order is sent (the `seenAt` in the diagnostics export), so it is the book just after the fill. Improvement = how much cheaper the fill was than that book (YES: seenAsk - avgFill; NO: avgFill - seenBid).
+
+| Improvement | Fills | Losses | P/L | Exited | Tail p (vs 7.0% pooled) |
+|---|---|---|---|---|---|
+| 0 or worse | 171 | 9 (5.3%) | +$15.72 | 7 | 0.85 |
+| 0 to 1c | 119 | 7 (5.9%) | -$10.93 | 6 | 0.73 |
+| 1c to 3c | 58 | 5 (8.6%) | -$7.84 | 5 | 0.38 |
+| **over 3c** | **25** | **5 (20.0%)** | **-$9.06** | 3 | **0.027** |
+
+Orders of 6 contracts or fewer: 4.3%, 4.9%, 7.9%, **26.7%** (4 of 15, tail p 0.015). Same direction as FILLIMP1 on the history (loss rate 19.2% in the more than 3c bucket against 5.8% at equal). If every over-3c fill had been sold into the bid seen about 0.8 s later, after both fees: +4.54c a contract, positive in all 25, +$5.80 against the -$9.06 actually realised; the 1c to 3c bucket would net +0.4c (77% positive), the smaller buckets lose to fees. One 12-contract Bitcoin loss (-$11.11) is a large part of the difference. Not a claim; the sample is 25 fills and the selection is over four buckets and three splits.
+
+### Pre-registration: FLIP1 (2026-10-23, forward, live orders only; a protective rule, not an income source)
+- **Data:** filled orders with `seenBid`, `seenAsk`, `avgFill` from the owner's order export, placed from **2026-10-22T17:00Z** (the deploy of `rng5` and the read retry) onward, so none of the 373 above is reused.
+- **Claim:** among fills more than 3c cheaper than the seen book, the loss rate is at least **12%** (against about 6% for the rest) AND selling into the post-order bid would have beaten holding by at least 3c a contract on average, with **at least 40** such fills. FALSIFIED if there are at least 40 such fills and the loss rate is under 9%. NOT_ENOUGH_DATA below 40 fills (at about 1.7 a day, expect 3 to 4 weeks), otherwise unreadable cases NOT_ENOUGH_DATA.
+- **Prediction (now):** the loss rate regresses to about 12% to 14% (a selected bucket regresses); it passes narrowly.
+- **What it would mean if it passes:** a possible proposal to the main session (never applied by me): sell any fill that comes in more than 3c cheaper than the post-order bid straight away. It needs the main session to confirm a sell order lands in under about a second; no change otherwise.
+- Tries: counted as 1 (running count about 4,719). Reader: `python -m scalper.live_improve EXPORT.csv` once the next export is converted to the same columns.
