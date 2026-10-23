@@ -7,6 +7,10 @@
   // Clickjacking guard (Oct 22, 2026): this page has Start, Pause and Flatten buttons, and the host cannot send a frame-blocking header, so if anything frames the page it hides itself and tries to leave the frame.
   if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) { /* a cross-origin parent may refuse; the page stays hidden */ } }
 </script>
+<script>
+  // Privacy view survives a reload (the owner, Oct 23, 2026: "we don't want to accidentally leak anything"). The choice is kept in THIS browser only and applied here, before anything is drawn, so a reload never flashes a dollar amount.
+  try { if (window.localStorage.getItem('shwoopnet:privacy') === 'on') { document.documentElement.setAttribute('data-present', 'on'); } } catch (e) { /* storage blocked: the view simply starts off */ }
+</script>
 <!-- A private dashboard on a public host: ask search engines not to list it (Oct 22, 2026). This only asks; the sign-in is what keeps it private. -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Private trading dashboard. Authorized users only.">
@@ -565,7 +569,7 @@
      label of the P/L line and the losing bars. Every other figure (the stat tiles and the By market and By price paid rows) is plain text; its sign still says which way it went. The market rows
      keep the name, the time left and the YES price; the spread, round trip and size lines and the depth bar are one tap away in Copy all stats, not on the face of the page. */
   .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
-  /* Presentation view (the owner, Oct 21, 2026: a clean page to show people). The Privacy button (or the Layout menu checkbox) sets data-present on the page; it is never saved, so a reload is always the full page. It only HIDES:
+  /* Presentation view (the owner, Oct 21, 2026: a clean page to show people). The Privacy button (or the Layout menu checkbox) sets data-present on the page; it is kept in this browser since Oct 23, 2026, so a reload keeps it. It only HIDES:
      the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. Every number is still computed and the bot is untouched. */
   html[data-present="on"] #kalTools{ display:none; }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
@@ -1426,7 +1430,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Privacy view</div>
-              <div class="settings-row-desc">Shows **** instead of dollar amounts and hides the Tools menu, for sharing your screen. Percentages stay visible. Switches off when the page reloads. The Privacy button on the Bot page does the same.</div>
+              <div class="settings-row-desc">Shows **** instead of dollar amounts and hides the Tools menu, for sharing your screen. Percentages stay visible. Stays on after a reload, on this device, until you switch it off. The Privacy button on the Bot page does the same.</div>
             </div>
             <button class="settings-toggle-switch" id="privacyToggle" role="switch" aria-checked="false" aria-label="Toggle privacy view">
               <span class="toggle-knob"></span>
@@ -1810,7 +1814,7 @@
 
   // Presentation view shows **** where an amount of money would be (the owner, Oct 21, 2026: "instead of hide, turn sensitive information into ****"). The sign stays, so a loss still reads as a loss; the figure does not.
   // Every dollar amount on the Bot and Data pages goes through kalshiMoney, so one flag masks them all, and the exports use kalshiMoneyRaw so a copied stat is always real.
-  var kalshiMasked = false;
+  var kalshiMasked = document.documentElement.getAttribute('data-present') === 'on';   // set by the head script when the owner left the view on
   function kalshiMoneyRaw(x){
     return (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   }
@@ -1888,18 +1892,20 @@
     return [cols.join(',')].concat(rows).join('\n');
   }
 
-  // Privacy view on or off (the owner, Oct 23, 2026: the switch lives in Settings; it is all or nothing). It is never saved: a reload is always the full page. This only sets one page attribute and one flag; the header button and
+  // Privacy view on or off (the owner, Oct 23, 2026: the switch lives in Settings; it is all or nothing). It is kept in this browser (localStorage, never the account) so a reload cannot reveal amounts by accident. This only sets one page attribute and one flag; the header button and
   // the Settings switch both call it.
   function kalshiSetPresent(on){
     var el = document.documentElement;
     if(on){ el.setAttribute('data-present', 'on'); } else { el.removeAttribute('data-present'); }
     kalshiMasked = !!on;
+    try{ if(on){ window.localStorage.setItem('shwoopnet:privacy', 'on'); } else { window.localStorage.removeItem('shwoopnet:privacy'); } }catch(e){}
     if(typeof kalshiPrivacyUi === 'function'){ kalshiPrivacyUi(!!on); }
     // Everything that already drew an amount draws it again, masked or not.
     if(typeof renderKalshiBot === 'function'){ renderKalshiBot(); }
     if(typeof renderKalshiCharts === 'function'){ renderKalshiCharts(); }
     if(typeof renderDataCenter === 'function'){ renderDataCenter(); }
   }
+  kalshiPrivacyUi(kalshiMasked);   // a reload with the view left on shows the switch and the header button as on
 
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
   // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
