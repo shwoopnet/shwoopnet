@@ -157,6 +157,17 @@
   .side-nav-item.current .side-nav-icon{ opacity:.9; }
   .side-nav-label{ letter-spacing:.02em; }
 
+  /* Desktop: a slim floating pill of icons on the left edge (the owner, Oct 23, 2026: "F was a good idea"). It takes no layout width beyond its own 56px; the page name shows as a tooltip on hover or keyboard focus. On a phone it is the bottom bar below. */
+  .side-nav-glyph{ display:none; }
+  @media (min-width: 901px){
+    .side-nav{ top:50%; transform:translateY(-50%); left:14px; width:56px; padding:6px; gap:4px; border-radius:16px; background:rgba(19,19,19,.82); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); overflow:visible; max-height:none; box-shadow:0 20px 40px -12px rgba(0,0,0,.85); }
+    .side-nav-item{ width:42px; height:42px; padding:0; justify-content:center; }
+    .side-nav-icon{ display:none; }
+    .side-nav-glyph{ display:block; width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .side-nav-label{ position:absolute; left:calc(100% + 12px); top:50%; transform:translateY(-50%); background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease; }
+    .side-nav-item:hover .side-nav-label, .side-nav-item:focus-visible .side-nav-label{ opacity:1; }
+    .side-nav-divider{ margin:2px 6px; }
+  }
   @media (max-width: 900px){
     .side-nav{
       top:auto; bottom:0; left:0; right:0; width:100%; max-height:none;
@@ -176,7 +187,7 @@
   .app{ margin-left: 0; margin-right: auto; max-width: 1800px; }
   /* The header stays put on a wide screen so the rail below it never floats in the middle of a scrolled page (the owner, Oct 23, 2026: "bug in here"). */
   @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:transparent; transition:background .25s, backdrop-filter .25s; } .topbar.scrolled{ background:linear-gradient(180deg, rgba(10,10,10,.72), rgba(10,10,10,0)); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); } }
-  .app-pages, .site-footer{ padding-left: 184px; }
+  .app-pages, .site-footer{ padding-left: 88px; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   .brand{
     display:flex; align-items:center; gap:12px;
@@ -1069,17 +1080,17 @@
 
   <nav class="side-nav" id="sideNav" aria-label="Main navigation">
     <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
-      <span class="side-nav-icon"></span><span class="side-nav-label">Brief</span>
+      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span class="side-nav-label">Brief</span>
     </button>
     <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
-      <span class="side-nav-icon"></span><span class="side-nav-label">Bot</span>
+      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span class="side-nav-label">Bot</span>
     </button>
     <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
-      <span class="side-nav-icon"></span><span class="side-nav-label">Data</span>
+      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span class="side-nav-label">Data</span>
     </button>
     <div class="side-nav-divider"></div>
     <button class="side-nav-item nav-item" data-page="settings" title="Settings">
-      <span class="side-nav-icon"></span><span class="side-nav-label">Settings</span>
+      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span class="side-nav-label">Settings</span>
     </button>
   </nav>
 

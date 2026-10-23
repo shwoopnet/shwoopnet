@@ -36,6 +36,7 @@ Rules:
 - **Card inside a window**: `border-radius:12px`, `1px solid var(--border)`, fill `rgba(255,255,255,.025)`, padding 12 to 16px.
 - **Rail item and small control**: `border-radius:8px`. **Pill / badge**: `border-radius:999px`, 1.5px border, 10.5px bold.
 - **Inputs and buttons**: 10 to 12px radius, 40px minimum height on a phone (mobile gates M1 to M3 stay).
+- **Navigation on desktop (Oct 23, 2026, the owner: "F was a good idea"):** a slim floating pill of four icons on the left edge (56px wide, glass fill, the open page filled white), no labels until hover or keyboard focus, where the page name shows as a tooltip. It takes no layout space beyond its own width. On a phone it is the bottom bar with labels. The window rail below is still the shape used for the sign-in page's sample windows.
 - **Window with a rail** (the signature): a 96px left rail (fill `rgba(0,0,0,.25)`, right border) listing the pages with a small rounded square, the active page filled white with black text, beside the main area. The app's navigation uses this shape.
 - Dividers are `1px solid var(--border)`. Rows are label left in muted, value right in paper, with a top border.
 - Nothing is square and nothing is sharper than 6px, except the thin rules.
