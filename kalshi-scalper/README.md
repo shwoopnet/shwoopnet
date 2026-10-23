@@ -5753,3 +5753,17 @@ Slippage request (2026-10-23): the order export already carries the decision-tim
 ## FILLIMP1 (2026-10-23), INFORMATION ONLY, no claim, no verdict, no try: do favourites that got cheaper before the order lose more often
 
 Hypothesis from the live record (see "Slippage request" above): a fill cheaper than the seen quote means the favourite's price fell before the order, and those fills lose more often. The history only has one-minute candles, so this is a rough version: decision at the candle ending 360 s before the close (the L1 entry, `feat1`), a one-minute gap, fill at the ask of the candle ending 300 s before the close, under the live immediate-or-cancel rule (limit = the decision ask: the order fills only if the next ask is no higher; fill price = the next ask). Improvement = decision ask minus next ask, in buckets: no fill (ask rose), 0, 0 to 1c, 1c to 3c, above 3c. Per bucket: entries, loss rate, mean net per contract at the fill price (no-fills: net had it filled at the decision ask), and the exact tail against the pooled loss rate of the filled entries. Nothing is concluded from it; a pattern would only be written up as a forward claim on the live export (the main session was asked for that table).
+
+### FILLIMP1 result (2026-10-23, information only): the price move after the decision predicts the outcome
+
+24,791 L1 entries at 6 minutes, fill one minute later under the immediate-or-cancel rule (limit = the decision ask). Fixed a tail calculation overflow in `fillimp.py` (tool bug, no change to the analysis). Table:
+
+| Next-minute ask against the decision ask | Entries | Loss rate | Net per contract |
+|---|---|---|---|
+| Rose (no fill at the limit) | 16,734 | **3.66%** | +3.00c had it filled at the decision ask |
+| Equal | 1,269 | 5.75% | +0.59c |
+| 0 to 1c cheaper | 1,071 | 5.88% | -0.04c |
+| 1c to 3c cheaper | 1,966 | 8.44% | -0.40c |
+| More than 3c cheaper | 3,751 | **19.19%** | **-1.56c** |
+
+The filled entries (8,057) lose 12.68%. A favourite whose price keeps falling after the decision loses much more often than one whose price rises; the gradient is monotone and the last bucket is far from the pooled rate (tail p 0.000). **Caveats that matter:** (1) this uses the next minute's price, so it is a diagnostic of what a stale decision costs, not a rule one could apply in advance; (2) the live gap between the quote used for the decision and the order is not a minute (the main session said the latest candle can be up to 150 s old, and the order itself takes under a second), so the live fills are a milder version: the live fills lost 5.7% held to settlement, not 12.7%, and the live unfilled orders did worse than the fills (LIVE3), the opposite of this table, because the history's gap is longer; (3) one period, no holdout. The implementable question is: **if the bot re-reads the live ask just before sending and the ask is already lower than the candle quote it decided on by more than about 2c, does that order lose more often?** That is exactly what the table requested from the main session answers on the live export (fills by improvement bucket). If it shows the same gradient, it becomes a pre-registered forward claim on the next export (a "fresh quote check"), a protective rule with no new risk, not a source of income. Tries: none counted (information only).

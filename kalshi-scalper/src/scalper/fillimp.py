@@ -24,7 +24,11 @@ def net_at(price: float, win: bool) -> float:
 
 
 def binom_tail(k: int, n: int, p: float) -> float:
-    return sum(math.comb(n, i) * p ** i * (1 - p) ** (n - i) for i in range(k, n + 1))
+    """P(X >= k), X ~ Binomial(n, p), summed in log space so large n does not overflow."""
+    if k <= 0:
+        return 1.0
+    lp, lq = math.log(p), math.log1p(-p)
+    return min(1.0, sum(math.exp(math.lgamma(n + 1) - math.lgamma(i + 1) - math.lgamma(n - i + 1) + i * lp + (n - i) * lq) for i in range(k, n + 1)))
 
 
 def bucket(improvement: float | None) -> int:
