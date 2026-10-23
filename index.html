@@ -782,6 +782,13 @@
     .news-item:hover{ transform: none; }
     .kal-card:hover, .settings-card:hover, .brief-win:hover:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
+  /* The slogan behind every signed-in page (the owner, Oct 23, 2026: "3 looks sick"): staggered, slightly tilted rows in the wordmark's lettering, very faint, fixed behind the cards so it only shows in the gaps. It is the same on every page and is
+     off with the Limit graphics setting, like the soft light. It carries no information and nothing on it moves. */
+  .bg-slogan{ position:fixed; inset:-40px; z-index:-1; pointer-events:none; transform:rotate(-8deg); overflow:hidden; font-family:'Titan One','Public Sans',sans-serif; font-size:74px; line-height:1.35; color:rgba(255,255,255,.035); user-select:none; }
+  .bg-slogan p{ margin:0; white-space:nowrap; }
+  .bg-slogan p:nth-child(even){ margin-left:-260px; }
+  @media (max-width:900px){ .bg-slogan{ font-size:44px; } }
+  [data-reduce-motion="true"] .bg-slogan{ display:none; }
   [data-reduce-motion="true"] .brand-name span{ transition: none; }
   [data-reduce-motion="true"] .brand:hover .brand-name span{ transform: none; }
   [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
@@ -799,6 +806,7 @@
 </script>
 </head>
 <body>
+<div class="bg-slogan" aria-hidden="true"><p>Trade less. Live more. Trade less. Live more. Trade less. Live more.</p><p>Trade less. Live more. Trade less. Live more. Trade less. Live more.</p><p>Trade less. Live more. Trade less. Live more. Trade less. Live more.</p><p>Trade less. Live more. Trade less. Live more. Trade less. Live more.</p><p>Trade less. Live more. Trade less. Live more. Trade less. Live more.</p><p>Trade less. Live more. Trade less. Live more. Trade less. Live more.</p><p>Trade less. Live more. Trade less. Live more. Trade less. Live more.</p></div>
 
 
 <script>
