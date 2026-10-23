@@ -17,7 +17,7 @@ from .calibration import cluster_mean_z
 from .paths import DATA_DIR
 
 # ---- fixed in the README before any of these rules was scored ----
-SERIES, SOURCES, BAND = "KXBTC15M", ("l1b", "book", "fresh"), L.L1["band"]
+SERIES, SOURCES, BAND = "KXBTC15M", ("l1b", "book", "e3b", "alts2", "fresh"), L.L1["band"]
 DISC_FRAC = 2 / 3
 MIN_N_DISC, MIN_N_CONF = 200, 100
 DISC_C, DISC_Z, CONF_C, CONF_Z, PF_BAR, FALSIFY_C, FALSIFY_Z = 0.015, 2.5, 0.010, 1.65, 1.3, 0.005, 1.0
@@ -25,17 +25,17 @@ RESULT = DATA_DIR / "ideas20_result.txt"
 Q = ("end", "bid", "ask", "bid_h", "bid_l", "ask_h", "ask_l", "vol", "oi", "last")
 
 
-def load_btc() -> dict[str, dict]:
+def load_btc(series: str = SERIES) -> dict[str, dict]:
     """ticker -> {close, result, strike, c: [candle dict sorted by end]} for settled Bitcoin markets with quotes, three sources, first seen wins."""
     out: dict[str, dict] = {}
     for name in SOURCES:
         db = sqlite3.connect(DATA_DIR / f"{name}.sqlite")
         by: dict = defaultdict(list)
         for tk, end, bc, ac, bh, bl, ah, al, vol, oi, last in db.execute(
-                "SELECT c.ticker, c.end_ts, c.bid_c, c.ask_c, c.bid_h, c.bid_l, c.ask_h, c.ask_l, c.volume, c.oi, c.price_c FROM candle c WHERE c.series = ? ORDER BY c.ticker, c.end_ts", (SERIES,)):
+                "SELECT c.ticker, c.end_ts, c.bid_c, c.ask_c, c.bid_h, c.bid_l, c.ask_h, c.ask_l, c.volume, c.oi, c.price_c FROM candle c WHERE c.series = ? ORDER BY c.ticker, c.end_ts", (series,)):
             if bc is not None and ac is not None:
                 by[tk].append(dict(zip(Q, (end, bc, ac, bh, bl, ah, al, vol or 0.0, oi or 0.0, last))))
-        for tk, close_ts, res, strike in db.execute("SELECT ticker, close_ts, result, strike FROM market WHERE series = ?", (SERIES,)):
+        for tk, close_ts, res, strike in db.execute("SELECT ticker, close_ts, result, strike FROM market WHERE series = ?", (series,)):
             if tk in by and tk not in out and res in ("yes", "no"):
                 out[tk] = {"close": close_ts, "res": res, "strike": strike, "c": by[tk]}
     return out
@@ -262,13 +262,13 @@ def stat(rows: list[dict]):
     return m, z
 
 
-def judge(rows: list[dict], cut_day: str) -> dict:
+def judge(rows: list[dict], cut_day: str, pf_rows: list[dict] | None = None) -> dict:
     d = [r for r in rows if r["day"] < cut_day]
     c = [r for r in rows if r["day"] >= cut_day]
     dm, dz = stat(d)
     cm, cz = stat(c)
     am, az = stat(rows)
-    p = pf(rows) if rows else 0.0
+    p = pf(pf_rows if pf_rows is not None else rows) if rows else 0.0
     if len(d) < MIN_N_DISC or len(c) < MIN_N_CONF:
         v = "NOT_ENOUGH_DATA"
     elif dm >= DISC_C and dz >= DISC_Z and cm >= CONF_C and cz >= CONF_Z and p >= PF_BAR and sum(r["stress"] for r in d) > 0 and sum(r["stress"] for r in c) > 0:
