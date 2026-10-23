@@ -5859,3 +5859,10 @@ All three FALSIFIED (prediction held). Gold 1,397 entries, 63 days.
 - TIGHT (spread <= 0.5c) n=572: +1.91c vs +1.28c, diff +0.64c, z +0.44.
 - LONGBAND (tib >= 2) n=583: +1.77c vs +1.36c, diff +1.53c would have met the size bar but z +1.00 fails (bar 2.4). Both halves positive, so it is the one to watch on fresh days, but nothing is registered.
 Tries +3. Gold has no useful entry filter; its edge is the series itself.
+
+## Pre-registration: TAIL1 (2026-10-23, before any tail outcome was computed)
+
+Question: is gold's edge a longshot effect, i.e. does buying the cheap side (the underdog) pay? Gold only (KXGOLD15M, `load()` history), decision candle 360 s before close, buy the side whose ask is 0.04 to 0.10 (either side qualifies, both can in the same market only if the quotes are crossed, counted once per side), hold to settlement, fee 7%·p·(1-p) as live. Group size counted from quotes only: n 923 on 61 days.
+Prediction: FALSIFIED. The market is calibrated at every price, so the mean should be about the cost of crossing the spread, negative.
+NOT_YET_FALSIFIED needs: mean net >= +1.0c per contract, day-clustered z >= 2.0 against zero, both halves of the days > 0, fee stress x1.2 > 0, n >= 500.
+FALSIFIED: mean < +0.3c or z < 1.0. Otherwise NOT_ENOUGH_DATA. Tries +1. Run once (`python -m scalper.tail1 run`). Also printed, not judged: the same rule on all series pooled, and the 0.01 to 0.04 and 0.10 to 0.20 neighbours.
