@@ -773,7 +773,38 @@
   .is-in .story-steps span{ transform:scaleY(1); }
   .story-star{ position:absolute; right:-2px; top:-4px; font-size:30px; line-height:1; color:var(--paper); opacity:0; transform:scale(.4) rotate(-30deg); transition:opacity .6s ease, transform .8s cubic-bezier(.2,1.4,.3,1); transition-delay:1.7s; }
   .is-in .story-star{ opacity:1; transform:none; }
+  [data-reduce-motion="true"] .front-fx i, [data-reduce-motion="true"] .front-h1 span, [data-reduce-motion="true"] .flow-line::after, [data-reduce-motion="true"] .is-in .story-steps span::after, [data-reduce-motion="true"] .is-in .story-star{ animation: none; }
+  [data-reduce-motion="true"] .front-fx{ display:none; }
+  [data-reduce-motion="true"] .flow-card{ opacity:1; transform:none; transition:none; }
   [data-reduce-motion="true"] .story-r, [data-reduce-motion="true"] .story-steps span, [data-reduce-motion="true"] .story-star{ opacity:1; transform:none; transition:none; }
+  /* Front page visuals (the owner: great visuals and animations on the login page). Everything here is decoration: soft drifting light behind the page, a slow sheen across "Live more.", a pulse that travels the three-step line, a shine that climbs the bars and a twinkling star.
+     Keyframes move only transform, opacity and a background position; no number is animated; reduced motion and the Settings switch stop every one. */
+  .front{ position:relative; isolation:isolate; }
+  .front-fx{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:-1; }
+  .front-fx i{ position:absolute; border-radius:50%; filter:blur(80px); opacity:.5; background:color-mix(in srgb, var(--brand-depth) 80%, transparent); animation:frontOrbA var(--dur, 22s) ease-in-out infinite alternate; }
+  .front-fx i:nth-child(1){ width:46vmax; height:46vmax; left:-14vmax; top:-18vmax; }
+  .front-fx i:nth-child(2){ width:34vmax; height:34vmax; right:-10vmax; top:22vh; opacity:.32; --dur:28s; animation-name:frontOrbB; }
+  .front-fx i:nth-child(3){ width:30vmax; height:30vmax; left:30vw; bottom:-16vmax; opacity:.28; --dur:34s; animation-direction:alternate-reverse; }
+  html[data-theme="light"] .front-fx i{ opacity:.14; }
+  html[data-theme="light"] .front-fx i:nth-child(n+2){ opacity:.1; }
+  @keyframes frontOrbA{ from{ transform:translate3d(0,0,0) scale(1); } to{ transform:translate3d(8vmax,6vmax,0) scale(1.18); } }
+  @keyframes frontOrbB{ from{ transform:translate3d(0,0,0) scale(1.1); } to{ transform:translate3d(-9vmax,5vmax,0) scale(.9); } }
+  .front-h1 span{ background:linear-gradient(100deg, var(--muted) 38%, var(--paper) 50%, var(--muted) 62%) 100% 0 / 260% 100% no-repeat; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:frontSheen 6s ease-in-out 1.2s infinite; }
+  @keyframes frontSheen{ 0%{ background-position:100% 0; } 45%, 100%{ background-position:0 0; } }
+  .front-flow{ padding:6px 0 54px; }
+  .flow-line{ position:relative; height:2px; margin:0 0 26px; background:var(--border); overflow:hidden; border-radius:2px; }
+  .flow-line::after{ content:""; position:absolute; left:0; top:0; width:30%; height:100%; background:linear-gradient(90deg, transparent, var(--paper), transparent); transform:translateX(-100%); animation:frontPulse 4.5s ease-in-out infinite; }
+  @keyframes frontPulse{ from{ transform:translateX(-100%); } to{ transform:translateX(333%); } }
+  .flow-cards{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
+  .flow-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px 22px 20px; transition:opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1), border-color .25s ease; transition-delay:calc(var(--d) * 220ms); }
+  .is-in .flow-card:hover{ transform:translateY(-3px); transition-delay:0s; }
+  .flow-card h3{ margin:0 0 8px; font:800 18px/1.2 'Public Sans', sans-serif; color:var(--paper); }
+  .flow-card p{ margin:0; font:500 15px/1.6 'Public Sans', sans-serif; color:var(--muted); }
+  .story-steps span{ overflow:hidden; position:relative; }
+  .is-in .story-steps span::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--paper) 55%, transparent) 50%, transparent 70%); transform:translateY(120%); animation:frontShine 5s ease-in-out calc(1.8s + var(--i) * .25s) infinite; }
+  @keyframes frontShine{ 0%{ transform:translateY(120%); } 40%, 100%{ transform:translateY(-120%); } }
+  .is-in .story-star{ animation:frontTwinkle 3.2s ease-in-out 2.6s infinite; }
+  @keyframes frontTwinkle{ 0%, 100%{ opacity:1; transform:scale(1) rotate(0deg); } 50%{ opacity:.55; transform:scale(.8) rotate(18deg); } }
   .front-note{ margin:40px 0 0; padding-top:24px; border-top:1px solid var(--border); color:var(--muted); font-size:12.5px; line-height:1.65; max-width:860px; }
   .front-note b{ color:var(--paper); }
   .front-foot{ margin-top:auto; padding-top:26px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; gap:12px 24px; flex-wrap:wrap; }
@@ -782,6 +813,7 @@
     .front-main{ grid-template-columns:minmax(0,1fr); gap:34px; padding:34px 0 40px; }
     .front-story{ grid-template-columns:minmax(0,1fr); gap:30px; }
     .story-steps{ height:150px; }
+    .flow-cards{ grid-template-columns:minmax(0,1fr); }
     .auth-box{ padding:24px 20px 18px; }
   }
   .auth-title{ font-family:'Public Sans', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
@@ -853,7 +885,8 @@
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
-    .story-r, .story-steps span, .story-star{ opacity:1; transform:none; transition:none; }
+    .story-r, .story-steps span, .story-star, .flow-card{ opacity:1; transform:none; transition:none; }
+    .front-fx i, .front-h1 span, .flow-line::after, .is-in .story-steps span::after, .is-in .story-star{ animation: none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
     .bg-grid{ animation: none; }
@@ -1113,6 +1146,7 @@
 
 <div class="auth-gate" id="authGate">
   <div class="front">
+    <div class="front-fx" aria-hidden="true"><i></i><i></i><i></i></div>
     <header class="front-top">
       <div class="front-brand" role="img" aria-label="Shwoop Financials">
         <div class="brand-name" aria-hidden="true"><span>S</span><span>H</span><span>W</span><span>O</span><span>O</span><span>P</span></div>
@@ -1150,6 +1184,15 @@
     <button type="button" id="authForgotBtn" class="auth-forgot">Forgot password?</button>
       </div>
     </main>
+    <section class="front-flow" id="frontFlow" aria-label="How it works">
+      <div class="front-eyebrow story-r" style="--d:0">How it works</div>
+      <div class="flow-line" aria-hidden="true"></div>
+      <div class="flow-cards">
+        <div class="flow-card story-r" style="--d:1"><h3>Rules come first</h3><p>Every rule is written down before anything happens.</p></div>
+        <div class="flow-card story-r" style="--d:2"><h3>Software follows them</h3><p>The same way every time, with no second-guessing.</p></div>
+        <div class="flow-card story-r" style="--d:3"><h3>People check in</h3><p>Real people review how it is going, so you do not have to.</p></div>
+      </div>
+    </section>
     <section class="front-story" id="frontStory" aria-label="What is Shwoop">
       <div class="story-copy">
         <div class="front-eyebrow story-r" style="--d:0">What is Shwoop</div>
@@ -3768,13 +3811,15 @@
   var authGateEl = document.getElementById('authGate');
   // Our story on the front page: reveal once, when it scrolls into view inside the gate. Without IntersectionObserver the finished state is shown.
   (function(){
-    var story = document.getElementById('frontStory');
-    if(!story){ return; }
-    if(!('IntersectionObserver' in window)){ story.classList.add('is-in'); return; }
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(en){ if(en.isIntersecting){ story.classList.add('is-in'); io.disconnect(); } });
-    }, { root: authGateEl, threshold: 0.25 });
-    io.observe(story);
+    ['frontFlow', 'frontStory'].forEach(function(id){
+      var sec = document.getElementById(id);
+      if(!sec){ return; }
+      if(!('IntersectionObserver' in window)){ sec.classList.add('is-in'); return; }
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){ if(en.isIntersecting){ sec.classList.add('is-in'); io.disconnect(); } });
+      }, { root: authGateEl, threshold: 0.25 });
+      io.observe(sec);
+    });
   })();
 
   function setupPasswordToggle(toggleBtnId, inputId){
