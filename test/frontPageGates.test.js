@@ -17,5 +17,5 @@ assert.ok(!/<svg|<script|<img|href="http/.test(gate), 'no image, script or outsi
 assert.ok(/<h1 class="front-h1" aria-label="Trade less\. Live more\.">/.test(gate) && /Systematic trading/.test(gate), 'the slogan and the Systematic trading label are on the front page');
 assert.ok(!/#[0-9a-fA-F]{3,8}\b|rgb\(/.test((/\/\* The signed-out screen[\s\S]*?\.auth-title\{/.exec(html) || [''])[0].replace(/rgba\(0,0,0,\.\d+\)/g, '').replace(/\/\*[\s\S]*?\*\//g, '')), 'the front page colours are theme tokens, not fixed colours (black shade overlays excepted)');
 const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(html.replace(/\/\*[\s\S]*?\*\//g, ''))[1];
-assert.ok(/\.front-h1 \.lt, \.front-h1 \.dr/.test(media) && /\[data-reduce-motion="true"\] \.front-h1 \.lt/.test(html), 'the spray, drips and sticker show their finished state at once under reduced motion and the Settings switch');
+assert.ok(/\.front-h1 \.lt,/.test(media) && /\.front-h1 \.dr/.test(media) && /\[data-reduce-motion="true"\] \.front-h1 \.lt/.test(html), 'the spray, drips and sticker show their finished state at once under reduced motion and the Settings switch');
 console.log('frontPageGates: ok');
