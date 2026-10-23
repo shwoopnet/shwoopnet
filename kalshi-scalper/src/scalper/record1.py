@@ -94,7 +94,7 @@ def trade_for(polls: list[dict], idx: dict[int, float], close_ms: int, result: s
         else:
             continue
         f = fee(price) * stress
-        return {"s": s, "side": side, "price": price, "p": p, "net": ((1 - price - f) if side == result else -(price + f)), "gap": p - (poll["ask"] if side == "yes" else 1 - poll["bid"])}
+        return {"s": s, "side": side, "price": price, "p": p, "net": ((1 - price - f) if side == result else -(price + f)), "gap": (p - poll["ask"]) if side == "yes" else ((1 - p) - (1 - poll["bid"]))}
     return None
 
 
