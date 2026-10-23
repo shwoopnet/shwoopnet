@@ -43,6 +43,9 @@ const NEWS_PER_FEED = 3;
 const EVENTS_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json";
 const EVENT_COUNTRIES = ["USD", "EUR", "GBP", "JPY", "CNY"];
 const EVENTS_KEEP = 40;
+// The two fear and greed indexes for the Brief's risk mood: CNN's for stocks and alternative.me's for crypto, both public and keyless (unofficial, so each fails on its own and a failure leaves the stored value).
+const FG_STOCKS_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata";
+const FG_CRYPTO_URL = "https://api.alternative.me/fng/?limit=2";
 const FETCH_TIMEOUT_MS = 8000;
 const UA = "Mozilla/5.0 (compatible; shwoopnet-market-tape)";
 
@@ -83,6 +86,22 @@ function chartSeries(r) {
   const step = Math.max(1, Math.ceil(closes.length / SERIES_MAX));
   const out = closes.filter((_, i) => i % step === 0 || i === closes.length - 1);
   return out.map((v) => Number(v.toPrecision(7)));
+}
+
+// A fear and greed reading to {score 0 to 100, rating, prev}. Only a finite score inside 0 to 100 counts; the rating is cut to a short plain string. null when the answer has no usable score.
+const fgNum = (v) => { const x = num(v); return x !== null && x >= 0 && x <= 100 ? Math.round(x * 10) / 10 : null; };
+const fgText = (v) => String(v || "").replace(/[^A-Za-z ]/g, "").trim().toLowerCase().slice(0, 24);
+function parseFearGreedStocks(json) {
+  const f = json && json.fear_and_greed;
+  const score = fgNum(f && f.score);
+  if (score === null) return null;
+  return { score, rating: fgText(f.rating), prev: fgNum(f.previous_close) };
+}
+function parseFearGreedCrypto(json) {
+  const d = json && Array.isArray(json.data) ? json.data : [];
+  const score = fgNum(d[0] && d[0].value);
+  if (score === null) return null;
+  return { score, rating: fgText(d[0].value_classification), prev: fgNum(d[1] && d[1].value) };
 }
 
 // The weekly calendar to {title, country, at (ms), impact}. Anything that is not a high or medium event of a listed economy, or has no readable time, is dropped. Text is cut and kept as a plain string.
@@ -178,7 +197,12 @@ async function readTape({ fetchFn, now }) {
   const news = lists.length ? mergeNews(lists) : null;
   let events = null;
   try { events = parseEvents(JSON.parse(await getText(fetchFn, EVENTS_URL)), nowMs); } catch (e) { errors.push("calendar: " + String((e && e.message) || e).slice(0, 80)); }
-  return { quotes, news: news && news.length ? news : null, events: events && events.length ? events : null, errors };
+  const mood = {};
+  await Promise.all([["stocks", FG_STOCKS_URL, parseFearGreedStocks], ["crypto", FG_CRYPTO_URL, parseFearGreedCrypto]].map(async (x) => {
+    try { const v = x[2](JSON.parse(await getText(fetchFn, x[1]))); if (v) mood[x[0]] = Object.assign(v, { asOf: nowMs }); else throw new Error("no usable score"); }
+    catch (e) { errors.push("fear and greed " + x[0] + ": " + String((e && e.message) || e).slice(0, 80)); }
+  }));
+  return { quotes, news: news && news.length ? news : null, events: events && events.length ? events : null, mood: Object.keys(mood).length ? mood : null, errors };
 }
 
-module.exports = { SYMBOLS, NEWS_FEEDS, EVENTS_URL, parseEvents, chartSeries, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
+module.exports = { SYMBOLS, NEWS_FEEDS, EVENTS_URL, parseEvents, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };

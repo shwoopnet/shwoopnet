@@ -260,9 +260,18 @@
   .brief-win{ background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%), var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow: var(--card-shadow); padding:20px 22px; min-width:0; }
   .brief-win .market-news-list{ background:none; border:0; box-shadow:none; padding:0; border-radius:0; }
   .brief-newswin{ margin-bottom:36px; }
+  .mood-word{ font:800 clamp(30px, 4vw, 40px)/1.1 'Public Sans', sans-serif; margin:4px 0 12px; }
+  .mood-g{ padding:10px 0; border-top:1px solid var(--border); }
+  .mood-hd{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:13px; }
+  .mood-hd b{ font-variant-numeric:tabular-nums; }
+  .mood-track{ position:relative; height:8px; border-radius:4px; background:rgba(255,255,255,.1); margin:10px 0 6px; }
+  .mood-track i{ position:absolute; top:-4px; width:3px; height:16px; margin-left:-1px; border-radius:2px; background:var(--paper); }
+  .mood-ends{ display:flex; justify-content:space-between; color:var(--muted); font-size:10.5px; }
+  .mood-kv{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); font-size:13px; }
+  .mood-kv span:first-child{ color:var(--muted); }
   .brief-win .brief-section-title{ margin:0 0 12px 0; }
   .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:stretch; }
-  .brief-cat .brief-eyebrow, .brief-next .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
+  .brief-cat .brief-eyebrow, .brief-mood .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
   .brief-ev{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; border-top:1px solid var(--border); font-size:13px; }
   .brief-ev:first-child{ border-top:0; }
   .brief-ev-l{ display:flex; gap:16px; align-items:baseline; min-width:0; }
@@ -270,8 +279,6 @@
   .brief-ev-n{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .brief-ev-pill{ font:700 10.5px 'Public Sans', sans-serif; border:1.5px solid var(--border); border-radius:999px; padding:2px 10px; color:var(--muted); flex-shrink:0; }
   .brief-ev-pill.hi{ border-color:var(--paper); color:var(--paper); }
-  .brief-next-time{ font:800 clamp(34px, 5vw, 54px)/1.05 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; margin:6px 0 8px; }
-  .brief-next-name{ color:var(--muted); font-size:14px; }
   .brief-charts{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; margin-bottom:18px; }
   @media (max-width: 1100px){ .brief-charts{ grid-template-columns:1fr; } }
   @media (max-width: 900px){ .brief-top{ grid-template-columns:1fr; } }
@@ -1090,10 +1097,9 @@
         <div class="brief-eyebrow">Today's catalysts (CT)</div>
         <div id="briefEvents"><div class="news-placeholder">No scheduled events loaded yet.</div></div>
       </div>
-      <div class="brief-win brief-next">
-        <div class="brief-eyebrow">Next up</div>
-        <div class="brief-next-time mono" id="briefNextTime">&mdash;</div>
-        <div class="brief-next-name" id="briefNextName">Waiting for the calendar</div>
+      <div class="brief-win brief-mood">
+        <div class="brief-eyebrow">Risk mood</div>
+        <div id="briefMood"><div class="news-placeholder">Waiting for the market data.</div></div>
       </div>
     </div>
 
@@ -3759,6 +3765,36 @@
       '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(2) + '%</span></div>' +
       '<div class="brief-chart-px mono">' + px + '</div>' + svg + '</div>';
   }
+  // The risk mood (the owner: "risk mood + maybe fear/greed index"): a one word read of the VIX, the VIX, the 10 year yield and long bonds, and the two fear and greed indexes (stocks from CNN, crypto from alternative.me). All of it
+  // comes from the tape; anything that has not arrived is a dash, never a made-up number.
+  function briefMoodWord(vix){
+    if(!(vix > 0)){ return null; }
+    return vix < 15 ? 'Calm' : (vix < 20 ? 'Normal' : (vix < 30 ? 'Nervous' : 'Stressed'));
+  }
+  function briefGaugeHtml(label, m){
+    if(!m || !Number.isFinite(m.score)){
+      return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b>&mdash;</b></div></div>';
+    }
+    var score = Math.max(0, Math.min(100, m.score));
+    return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b>' + Math.round(score) + ' <span class="tape-asof">' + escapeHtml(String(m.rating || '')) + '</span></b></div>' +
+      '<div class="mood-track"><i style="left:' + score.toFixed(1) + '%"></i></div>' +
+      '<div class="mood-ends"><span>Fear</span>' + (Number.isFinite(m.prev) ? '<span>Yesterday ' + Math.round(m.prev) + '</span>' : '') + '<span>Greed</span></div></div>';
+  }
+  function renderBriefMood(){
+    var el = document.getElementById('briefMood');
+    if(!el){ return; }
+    var q = marketTapeData && marketTapeData.quotes ? marketTapeData.quotes : {};
+    var mood = marketTapeData && marketTapeData.mood ? marketTapeData.mood : {};
+    var ok = function(x){ return x && x.price > 0 && x.prevClose > 0; };
+    var word = ok(q['^VIX']) ? briefMoodWord(q['^VIX'].price) : null;
+    var kv = function(l, v){ return '<div class="mood-kv"><span>' + escapeHtml(l) + '</span><b>' + v + '</b></div>'; };
+    var chg = function(d, unit){ return ' <span class="tape-chg ' + (d >= 0 ? 'up' : 'down') + '">' + (d >= 0 ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(unit === 'bp' ? 1 : 2) + (unit === 'bp' ? ' bp' : '%') + '</span>'; };
+    var vix = ok(q['^VIX']) ? kv('Fear index (VIX)', q['^VIX'].price.toFixed(1) + chg(pct(q['^VIX'].price, q['^VIX'].prevClose))) : kv('Fear index (VIX)', '&mdash;');
+    var tnx = ok(q['^TNX']) ? kv('10 year yield', q['^TNX'].price.toFixed(2) + '%' + chg((q['^TNX'].price - q['^TNX'].prevClose) * 100, 'bp')) : kv('10 year yield', '&mdash;');
+    var tlt = ok(q.TLT) ? kv('Long bonds (TLT)', q.TLT.price.toFixed(2) + chg(pct(q.TLT.price, q.TLT.prevClose))) : kv('Long bonds (TLT)', '&mdash;');
+    el.innerHTML = '<div class="mood-word">' + (word ? escapeHtml(word) : '&mdash;') + '</div>' +
+      briefGaugeHtml('Stocks fear and greed', mood.stocks) + briefGaugeHtml('Crypto fear and greed', mood.crypto) + vix + tnx + tlt;
+  }
   function briefEventsList(now){
     var ev = marketTapeData && Array.isArray(marketTapeData.events) ? marketTapeData.events : [];
     return ev.filter(function(e){ return e && Number.isFinite(e.at) && e.at >= now - 30 * 60000; }).sort(function(a, b){ return a.at - b.at; });
@@ -3780,21 +3816,6 @@
         '<span class="brief-ev-pill' + (e.impact === 'High' ? ' hi' : '') + '">' + escapeHtml(String(e.impact || '')) + '</span></div>';
     }).join('');
   }
-  function briefCountdownText(ms){
-    var s = Math.max(0, Math.floor(ms / 1000));
-    var d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-    var two = function(n){ return (n < 10 ? '0' : '') + n; };
-    return d > 0 ? d + 'd ' + two(h) + 'h' : two(h) + ':' + two(m) + ':' + two(sec);
-  }
-  function renderBriefNext(){
-    var t = document.getElementById('briefNextTime'), n = document.getElementById('briefNextName');
-    if(!t || !n){ return; }
-    var now = Date.now();
-    var next = briefEventsList(now).filter(function(e){ return e.at > now; })[0];
-    if(!next){ t.textContent = '\u2014'; n.textContent = 'No scheduled event loaded'; return; }
-    t.textContent = briefCountdownText(next.at - now);
-    n.textContent = 'until ' + String(next.title || '') + ' (' + String(next.country || '') + ')';
-  }
   function renderBriefCharts(){
     var el = document.getElementById('briefCharts');
     if(!el){ return; }
@@ -3804,8 +3825,7 @@
         g.items.map(function(it){ return briefChartHtml(it, quotes[it.sym]); }).join('') + '</div></div>';
     }).join('');
   }
-  function renderBriefPage(){ renderBriefEvents(); renderBriefNext(); renderBriefCharts(); }
-  setInterval(function(){ if(!document.hidden){ renderBriefNext(); } }, 1000);
+  function renderBriefPage(){ renderBriefEvents(); renderBriefMood(); renderBriefCharts(); }
 
   function handleMarketTapeUpdate(data){
     marketTapeData = data || null;

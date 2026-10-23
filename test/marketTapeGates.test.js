@@ -161,7 +161,7 @@ gates.T22 = () => {
   const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(/if \(r\.events\) patch\.events = r\.events;/.test(idx), 'a failed calendar leaves the stored events alone (the patch is merged)');
   assert.ok(!/faireconomy|coindesk|cointelegraph|dowjones/.test(html), 'the page itself calls none of these hosts');
-  assert.ok(/id="briefEvents"/.test(html) && /id="briefCharts"/.test(html) && /id="briefNextTime"/.test(html), 'the Brief has its catalysts, countdown and charts');
+  assert.ok(/id="briefEvents"/.test(html) && /id="briefCharts"/.test(html) && /id="briefMood"/.test(html), 'the Brief has its catalysts, charts and risk mood');
 };
 
 // No single desk fills the list (Oct 23, 2026): each feed contributes its newest few, so a busy crypto desk cannot push the economy and world headlines off the Brief.
@@ -171,6 +171,27 @@ gates.T23 = () => {
   assert.strictEqual(merged.filter((x) => x.source === 'Busy').length, 3, 'a busy feed contributes only its newest 3');
   assert.strictEqual(merged.filter((x) => x.source === 'Quiet').length, 2, 'a quiet feed is still there');
   assert.ok(merged.length <= 12, 'and the list is capped');
+};
+
+// The risk mood (Oct 23, 2026): two fear and greed indexes, each kept only with a score inside 0 to 100, plain-string ratings, and a failure of one never blanks the other or what is stored.
+gates.T24 = () => {
+  const s = lib.parseFearGreedStocks({ fear_and_greed: { score: 20.94, rating: 'extreme fear', previous_close: 19.81 } });
+  assert.deepStrictEqual([s.score, s.rating, s.prev], [20.9, 'extreme fear', 19.8], 'stocks: score, rating and yesterday');
+  const c = lib.parseFearGreedCrypto({ data: [{ value: '50', value_classification: 'Neutral' }, { value: '68', value_classification: 'Greed' }] });
+  assert.deepStrictEqual([c.score, c.rating, c.prev], [50, 'neutral', 68], 'crypto: score, rating and yesterday');
+  for (const bad of [null, {}, { fear_and_greed: { score: 140 } }, { fear_and_greed: { score: 'x' } }]) assert.strictEqual(lib.parseFearGreedStocks(bad), null, 'no usable score, no reading');
+  assert.strictEqual(lib.parseFearGreedCrypto({ data: [{ value: '-3' }] }), null, 'a score outside 0 to 100 is not stored');
+  assert.strictEqual(lib.parseFearGreedStocks({ fear_and_greed: { score: 40, rating: '<img src=x>' } }).rating, 'img srcx', 'a rating is letters and spaces only');
+  const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(/if \(r\.mood\) patch\.mood = r\.mood;/.test(idx), 'a failed read leaves the stored mood alone');
+};
+gates.T25 = () => {
+  const f = new Function(fnSource('briefMoodWord') + '\nreturn briefMoodWord;')();
+  assert.deepStrictEqual([f(12), f(16), f(24), f(35), f(0), f(null)], ['Calm', 'Normal', 'Nervous', 'Stressed', null, null], 'the one word comes from the VIX alone and is missing when the VIX is');
+  const g = new Function('escapeHtml', fnSource('briefGaugeHtml') + '\nreturn briefGaugeHtml;')((x) => String(x));
+  assert.ok(/&mdash;/.test(g('Stocks', undefined)) && !/mood-track/.test(g('Stocks', undefined)), 'no reading: a dash, no gauge');
+  assert.ok(/left:50\.0%/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })) && /Yesterday 68/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })), 'a reading places its marker and shows yesterday');
+  assert.ok(/left:100\.0%/.test(g('x', { score: 250 })), 'a wild score cannot push the marker off the track');
 };
 
 (async () => {
