@@ -65,6 +65,12 @@ const PROBE_SERIES = ["KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M"];
 // but a bad run on them costs about $0.90 a trade, not $4. A capped market earns its ladder size back only from its own live record (150 settled trades at one contract, a result above +0.5c a contract in
 // both halves) and a ladder-sized market drops back if its last 100 trades are negative: either is a reviewed edit of THIS list, never a stored value. The 12% stop, the 5.5% window limit and the 25c exit are unchanged.
 const CAPPED_SERIES = ["KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
+// FIXED ORDER SIZES (2026-10-23, the owner: "yeah build", on the research session's proposal from kalshi-scalper/README.md "Sizing look at a $500 balance"). With the balance near $500, three markets that
+// the history supports trade a little larger than the one-contract cap: XRP and Dogecoin 3 contracts, natural gas (a probe) 2. Bitcoin, Ethereum and the other probes stay at one contract, and gold keeps
+// the ladder. This is a hard list in code like the lists above: no stored value and no callable can change it. It is leverage on an edge that has to persist, not a new edge, so nothing else moves: the 12% loss
+// stop, the 5.5% window limit, one crypto order per window, the 25c exit and the profit add-on rule (still never used on these markets) are all unchanged. Review point: the owner's 2026-11-17 export; if the
+// Dogecoin or XRP loss rate is above 7% there, step back to 1 or 2 by editing this list.
+const FIXED_CONTRACTS = { KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 };
 const L1_SERIES = ["KXGOLD15M", "KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", ...PROBE_SERIES];
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
@@ -815,7 +821,7 @@ async function runL1Tick(args) {
     // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
     let addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
     // A probe market is one contract, always: no ladder step and no reinvested profit goes into a market that has not earned it.
-    if (PROBE_SERIES.includes(c.series) || CAPPED_SERIES.includes(c.series)) { count = 1; addonUsed = 0; }
+    if (PROBE_SERIES.includes(c.series) || CAPPED_SERIES.includes(c.series)) { count = sizing && FIXED_CONTRACTS[c.series] ? FIXED_CONTRACTS[c.series] : 1; addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
     // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.
@@ -1092,7 +1098,7 @@ const DEFAULT_ACCOUNT_ID = "main";
 
 module.exports = {
   DEFAULT_ACCOUNT_ID,
-  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
