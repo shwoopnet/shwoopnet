@@ -41,7 +41,9 @@ function world(opts = {}) {
     if (url.includes('/candlesticks')) {
       if (opts.candlesThrow) throw new Error('down');
       if (opts.candles === 'none') return reply(404, {});
-      return reply(200, { candlesticks: opts.candles || [] });
+      // The default path is a smooth climb of the YES side (0.50 up to 0.91), so a Bitcoin or Ethereum order passes the smooth-climb gate unless a test says otherwise.
+      const nowSecW = Math.floor(NOW / 1000), climb = [0.5, 0.58, 0.66, 0.74, 0.82, 0.91].map((m, i, arr) => ({ end_period_ts: nowSecW - 60 * (arr.length - 1 - i), yes_bid: { close_dollars: String(m - 0.01) }, yes_ask: { close_dollars: String(m + 0.01) } }));
+      return reply(200, { candlesticks: opts.candles === undefined ? climb : opts.candles });
     }
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
@@ -106,7 +108,9 @@ gates.N2 = async () => {
 
 // A NO order sells YES at the bid.
 gates.N3 = async () => {
-  const w = world({ fresh: { [T]: { yes_bid_dollars: '0.0800', yes_ask_dollars: '0.0900' } } });
+  // Bitcoin buys NO here, so its smooth-climb path is the NO side's: a YES mid that falls from 0.50 to 0.085 is a smooth climb for NO.
+  const nowS = Math.floor(NOW / 1000), noClimb = [0.5, 0.42, 0.34, 0.26, 0.18, 0.085].map((m, i, arr) => ({ end_period_ts: nowS - 60 * (arr.length - 1 - i), yes_bid_dollars: undefined, yes_bid: { close_dollars: String(m - 0.005) }, yes_ask: { close_dollars: String(m + 0.005) } }));
+  const w = world({ fresh: { [T]: { yes_bid_dollars: '0.0800', yes_ask_dollars: '0.0900' } }, candles: noClimb });
   await tick(w);
   assert.deepStrictEqual([w.posts[0].side, w.posts[0].price], ['ask', '0.08']);
 };
@@ -488,7 +492,7 @@ gates.N21 = async () => {
   const w = world();
   await tick(w, { quotes: [closing, later] });
   assert.strictEqual(w.posts.length, 0);
-  assert.strictEqual(w.sess.nextLookAt, NOW + 18 * 60000 - live.EARLY_WINDOW_MS[1], 'the next window opens 10:40 before the later close (Bitcoin decides at 10 minutes)');
+  assert.strictEqual(w.sess.nextLookAt, NOW + 18 * 60000 - live.L1_WINDOW_MS[1], 'the next window opens 6:40 before the later close (Bitcoin decides at 6 minutes since Oct 23, 2026)');
   assert.ok(w.sess.botNet === 0 && w.sess.botOpen === 0, 'the bot\'s running total is kept current on every tick, not only ticks that trade');
   assert.ok(/entry|6 minutes/.test(w.sess.lastNote) && !/about 6 minutes from its close right now/.test(w.sess.lastNote), 'the note says what the window is');
   const none = world(); await tick(none, { quotes: [closing] });
@@ -842,21 +846,21 @@ gates.CO3 = async () => {
 const XRP10 = 'KXXRP15M-26OCT071415-10';
 const q10 = (series, ticker, over = {}) => ({ series, m: Object.assign({ ticker, status: 'active', close_time: iso(NOW + 600000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
 gates.EP1 = async () => {
-  assert.deepStrictEqual(live.EARLY_PROBE_SERIES, ['KXXRP15M', 'KXNATGAS15M', 'KXBTC15M'], 'exactly XRP, natural gas and Bitcoin (the owner added Bitcoin, Oct 21, 2026)');
+  assert.deepStrictEqual(live.EARLY_PROBE_SERIES, ['KXXRP15M', 'KXNATGAS15M'], 'exactly XRP and natural gas (Bitcoin moved to the 6 minute look on a smooth climb, Oct 23, 2026)');
   assert.strictEqual(live.entryLead('KXXRP15M', 600000), '10m');
   assert.strictEqual(live.entryLead('KXXRP15M', 360000), null, 'XRP no longer decides at 6 minutes: it is 10 minutes only');
   assert.strictEqual(live.entryLead('KXNATGAS15M', 360000), null, 'nor does natural gas');
-  assert.strictEqual(live.entryLead('KXBTC15M', 360000), null, 'Bitcoin is 10 minutes only too');
+  assert.strictEqual(live.entryLead('KXBTC15M', 360000), '6m', 'Bitcoin decides at 6 minutes (on a smooth climb only)');
   assert.strictEqual(live.entryLead('KXETH15M', 360000), '6m', 'every other series is unchanged');
   assert.strictEqual(live.entryLead('KXXRP15M', 480000), null, 'between the two windows: nothing');
-  assert.strictEqual(live.entryLead('KXBTC15M', 600000), '10m');
+  assert.strictEqual(live.entryLead('KXBTC15M', 600000), null, 'and has no 10 minute window any more');
   assert.strictEqual(live.entryLead('KXETH15M', 600000), null, 'Ethereum has no early window, nor do gold, Dogecoin or the currency probes');
   assert.strictEqual(live.entryLead('KXGOLD15M', 600000), null);
   assert.strictEqual(live.entryLead('KXDOGE15M', 600000), null);
   const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) }, 'KXBTC15M-26OCT071430-10': { close_time: iso(NOW + 600000) } } });
   await tick(w, { quotes: [q10('KXXRP15M', XRP10), q10('KXBTC15M', 'KXBTC15M-26OCT071430-10')] });
-  assert.strictEqual(w.posts.length, 2, 'XRP and Bitcoin are both entered at 10 minutes');
-  assert.ok(w.posts.every((p) => Number(p.count) === 1) && w.posts.some((p) => p.ticker === XRP10), 'one contract each');
+  assert.strictEqual(w.posts.length, 1, 'XRP is entered at 10 minutes and Bitcoin is not');
+  assert.ok(Number(w.posts[0].count) === 1 && w.posts[0].ticker === XRP10, 'one contract');
   const w5 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { 'KXETH15M-26OCT071415-10': { close_time: iso(NOW + 600000) } } });
   await tick(w5, { quotes: [q10('KXETH15M', 'KXETH15M-26OCT071415-10')] });
   assert.strictEqual(w5.posts.length, 0, 'Ethereum is not entered at 10 minutes');
@@ -878,7 +882,7 @@ gates.EP2 = async () => {
   assert.strictEqual(w4.posts.length, 1, 'Ethereum is still entered at 6 minutes');
   const w6 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
   await tick(w6, { quotes: [quote({ close_time: iso(NOW + 360000) })] });
-  assert.strictEqual(w6.posts.length, 0, 'Bitcoin is not entered at 6 minutes any more');
+  assert.strictEqual(w6.posts.length, 1, 'Bitcoin is entered at 6 minutes now, on a smooth climb (default path)');
 };
 gates.EP3 = async () => {
   // The exit watch must be running when an early order lands: every minute from just before the 10 minute window to the end of the 6 minute window is a watch minute.
@@ -909,9 +913,9 @@ gates.RL1 = async () => {
   assert.ok(order.indexOf('POST orders') < order.findIndex((x) => /candlesticks/.test(x)), 'the candles are read AFTER the order is sent, never before');
   // a 6 minute order carries it too (the research session reads the lead on every order).
   const w6 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs });
-  await tick(w6, { quotes: [quote({}, 'KXETH15M', 'KXETH15M-26OCT071415-06')] });
+  await tick(w6, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')] });
   assert.strictEqual(w6.posts.length, 1);
-  const rec6 = w6.docs.get('L1-KXETH15M-26OCT071415-06');
+  const rec6 = w6.docs.get('L1-KXDOGE15M-26OCT071415-06');
   assert.ok(rec6.entryLead === '6m' && Math.abs(rec6.rise3 - 0.1) < 1e-9, 'a 6 minute order carries the rise too: ' + rec6.rise3);
   // a market that was not entered (not in the band) reads no candles.
   const wn = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs, fresh: { 'KXETH15M-26OCT071415-07': { yes_bid_dollars: '0.5000', yes_ask_dollars: '0.5100' } } });
@@ -964,8 +968,57 @@ gates.FL2 = async () => {
   assert.strictEqual(w.posts.length, 1); assert.deepStrictEqual(w.posts, w0.posts, 'the order sent does not depend on the path shape');
   const order = w.calls.map((c) => c.method + ' ' + c.url.split('/').slice(-1)[0].split('?')[0]);
   assert.ok(order.indexOf('POST orders') < order.findIndex((x) => /candlesticks/.test(x)), 'read after the order is sent');
-  const src = fnSrcLib(), at = src.indexOf('function pathShape'), body = src.slice(at, src.indexOf('async function logRise'));
+  const src = fnSrcLib(), at = src.indexOf('function pathShape'), body = src.slice(at, src.indexOf('// Smooth climb only'));
   assert.ok(!/store\.|fetchFn|liveRequest/.test(body), 'the shape is a pure function of the candles');
+};
+// SM1 to SM3: Bitcoin and Ethereum order ONLY on a smooth climb (the research session's SMOOTH2 lead, Oct 23, 2026, the owner: "1"). Consequence: the change can only remove Bitcoin and Ethereum orders; anything unreadable places nothing.
+// SM1 reproduces the research session's six parity vectors (smooth_parity_vectors_2026-10-23.json) to the decimal, including the two that sit exactly on and just past the -0.005 pullback line.
+gates.SM1 = () => {
+  const V = [
+    [[0.5, 0.58, 0.66, 0.74, 0.82, 0.91], 5, 0.08, 0.41, true], [[0.5, 0.58, 0.575, 0.74, 0.82, 0.91], 5, -0.005, 0.41, false], [[0.5, 0.58, 0.574, 0.74, 0.82, 0.91], 5, -0.006, 0.41, false],
+    [[0.6, 0.65, 0.7, 0.72, 0.74, 0.8], 5, 0.02, 0.2, true], [[0.5, 0.6, 0.7, 0.8, 0.9], 4, 0.1, 0.4, true], [[0.91, 0.92, 0.93, 0.92], 3, -0.01, 0.01, false],
+  ];
+  const nowSec = Math.floor(NOW / 1000);
+  for (const [mids, earlier, minStep, climb, smooth] of V) {
+    const cs = mids.map((m, i) => candle(nowSec - 60 * (mids.length - 1 - i), m - 0.01, m + 0.01));
+    const r = live.pathShape(cs, 'yes', nowSec);
+    assert.ok(r.earlierCandles === earlier && Math.abs(r.minStep - minStep) < 1e-9 && Math.abs(r.climb - climb) < 1e-9 && r.smooth === smooth, 'vector ' + JSON.stringify(mids) + ' gave ' + JSON.stringify(r));
+  }
+  assert.deepStrictEqual(live.SMOOTH_SERIES, ['KXBTC15M', 'KXETH15M'], 'exactly Bitcoin and Ethereum');
+};
+gates.SM2 = async () => {
+  const nowSec = Math.floor(NOW / 1000), mk = (mids) => mids.map((m, i) => candle(nowSec - 60 * (mids.length - 1 - i), m - 0.01, m + 0.01));
+  const run = async (series, ticker, candles, extra = {}) => { const w = world(Object.assign({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [ticker]: { close_time: iso(NOW + 360000) } }, candles }, extra)); await tick(w, { quotes: [quote({ close_time: iso(NOW + 360000) }, series, ticker)] }); return w; };
+  const smooth = mk([0.5, 0.58, 0.66, 0.74, 0.82, 0.91]), rough = mk([0.5, 0.58, 0.52, 0.74, 0.82, 0.91]), short = mk([0.8, 0.85, 0.9]);
+  for (const [series, ticker] of [['KXBTC15M', 'KXBTC15M-26OCT071415-06'], ['KXETH15M', 'KXETH15M-26OCT071415-06']]) {
+    const ok = await run(series, ticker, smooth);
+    assert.ok(ok.posts.length === 1 && Number(ok.posts[0].count) === 1, series + ': a smooth climb is ordered, one contract');
+    const rec = ok.docs.get('L1-' + ticker);
+    assert.ok(rec.smooth === true && rec.entryLead === '6m' && Number.isFinite(rec.minStep) && Number.isFinite(rec.climb), series + ': the record carries smooth, minStep and climb: ' + JSON.stringify([rec.smooth, rec.minStep, rec.climb]));
+    for (const [why, cs] of [['a pullback', rough], ['too few candles', short], ['no candles', []], ['an unreadable answer', 'none']]) {
+      const w = await run(series, ticker, cs);
+      assert.strictEqual(w.posts.length, 0, series + ' ' + why + ': no order');
+      assert.ok(/no order/.test(w.sess.lastNote || ''), series + ' ' + why + ': the note says why');
+    }
+    const thrown = await run(series, ticker, undefined, { candlesThrow: true });
+    assert.strictEqual(thrown.posts.length, 0, series + ': a failed read places nothing (fails closed)');
+  }
+  // Nothing else is affected: gold, XRP, Dogecoin and the probes never read the path before ordering, and still order on a rough path.
+  for (const [series, ticker, close] of [['KXDOGE15M', 'KXDOGE15M-26OCT071415-06', NOW + 360000], ['KXXRP15M', XRP10, NOW + 600000]]) {
+    const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [ticker]: { close_time: iso(close) } }, candles: rough });
+    await tick(w, { quotes: [quote({ close_time: iso(close) }, series, ticker)] });
+    assert.strictEqual(w.posts.length, 1, series + ' is not gated');
+    const order = w.calls.map((c) => c.method + ' ' + c.url.split('/').slice(-1)[0].split('?')[0]);
+    assert.ok(order.indexOf('POST orders') < order.findIndex((x) => /candlesticks/.test(x)), series + ': its candles are read only AFTER the order, for logging');
+  }
+};
+gates.SM3 = () => {
+  const src = fnSrcLib();
+  assert.ok(/const SMOOTH_MIN_STEP = 0\.005, SMOOTH_MIN_CLIMB = 0\.10;/.test(src), 'the two thresholds are constants in code, not stored values');
+  assert.ok(/const EARLY_PROBE_SERIES = \["KXXRP15M", "KXNATGAS15M"\];/.test(src), 'Bitcoin is not on the 10 minute list');
+  const at = src.indexOf('async function smoothGate'), body = src.slice(at, src.indexOf('async function logRise'));
+  assert.ok(!/keyId|pem|method: "POST"/.test(body), 'the gate reads public candles only: no key, no POST');
+  assert.ok(/return \{ ok: false/.test(body) && (body.match(/ok: false/g) || []).length >= 4, 'every unreadable or unsmooth case returns no order');
 };
 // GF1 to GF3: gold first (Oct 21, 2026, docs/GOLD_FIRST_PROPOSAL.md option A). Gold alone keeps the size ladder and is sent first; Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract; the lists change only by a code edit.
 gates.GF1 = async () => {
@@ -1284,7 +1337,7 @@ gates.FS1 = async () => {
   assert.strictEqual(xrp.posts.length === 1 && Number(xrp.posts[0].count), 3, 'XRP takes 3 contracts');
   const gas = await one('KXNATGAS15M', 'KXNATGAS15M-26OCT071415-10', NOW + 600000);
   assert.strictEqual(gas.posts.length === 1 && Number(gas.posts[0].count), 2, 'natural gas takes 2 contracts');
-  const btc = await one('KXBTC15M', 'KXBTC15M-26OCT071415-10', NOW + 600000);
+  const btc = await one('KXBTC15M', 'KXBTC15M-26OCT071415-06', NOW + 360000);
   assert.strictEqual(btc.posts.length === 1 && Number(btc.posts[0].count), 1, 'Bitcoin stays at 1 contract');
   const eth = await one('KXETH15M', 'KXETH15M-26OCT071415-06', NOW + 360000);
   assert.strictEqual(eth.posts.length === 1 && Number(eth.posts[0].count), 1, 'Ethereum stays at 1 contract');
@@ -1326,12 +1379,12 @@ gates.OS1 = async () => {
   // Quotes handed over in the OLD order (Bitcoin first) still resolve by list order: XRP wins at the 10 minute tick.
   const ten = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-10'], ['KXXRP15M', 'KXXRP15M-26OCT071415-10']], '10m');
   assert.strictEqual(ten.posts.length, 1, 'one crypto order in the window');
-  assert.ok(ten.posts[0].ticker.includes('KXXRP') && Number(ten.posts[0].count) === 3, 'XRP (3 contracts) takes the window from Bitcoin: ' + ten.posts.map((p) => p.ticker + 'x' + p.count));
+  assert.ok(ten.posts[0].ticker.includes('KXXRP') && Number(ten.posts[0].count) === 3, 'XRP (3 contracts) is the only one with a 10 minute look: ' + ten.posts.map((p) => p.ticker + 'x' + p.count));
   const six = await run([['KXETH15M', 'KXETH15M-26OCT071415-06'], ['KXDOGE15M', 'KXDOGE15M-26OCT071415-06']], '6m');
   assert.strictEqual(six.posts.length, 1);
   assert.ok(six.posts[0].ticker.includes('KXDOGE') && Number(six.posts[0].count) === 3, 'Dogecoin (3 contracts) takes the window from Ethereum: ' + six.posts.map((p) => p.ticker + 'x' + p.count));
   // Bitcoin and Ethereum still trade when their pair partner has no qualifying market (the order only decides ties).
-  const btc = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-10']], '10m');
+  const btc = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-06']], '6m');
   assert.ok(btc.posts.length === 1 && btc.posts[0].ticker.includes('KXBTC') && Number(btc.posts[0].count) === 1, 'Bitcoin alone still trades, at one contract');
   const src = fnSrcLib();
   assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M", \.\.\.PROBE_SERIES\];/.test(src), 'the order is a hard list in code');

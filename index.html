@@ -2961,7 +2961,7 @@
   }
   // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour; Bitcoin, XRP and natural gas are entered about 10 minutes before the close (minute 5 of the quarter), everything else about 6 minutes before (minute 9).
   function kalshiNextEntry(now){
-    var Q = 900000, base = Math.floor(now / Q) * Q, cands = [[base + 300000, '10 minute look: XRP, Bitcoin, natural gas'], [base + 540000, '6 minute look: gold, Dogecoin, Ethereum, AUD/USD, USD/CAD'], [base + Q + 300000, '10 minute look: XRP, Bitcoin, natural gas']];
+    var Q = 900000, base = Math.floor(now / Q) * Q, cands = [[base + 300000, '10 minute look: XRP, natural gas'], [base + 540000, '6 minute look: gold, Dogecoin, AUD/USD, USD/CAD, and Bitcoin and Ethereum on a smooth climb only'], [base + Q + 300000, '10 minute look: XRP, natural gas']];
     for(var i = 0; i < cands.length; i++){ if(cands[i][0] > now){ return { at: cands[i][0], inMs: cands[i][0] - now, label: cands[i][1] }; } }
     return null;
   }
