@@ -714,6 +714,13 @@
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
   /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One is only the wordmark. */
   .kal-bub{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; }
+  /* Soft windows everywhere (docs/DESIGN_SYSTEM.md section 2): every page card is the front page's window (16px, a faint top highlight, the soft shadow) and every tile inside one is the small card (12px, a faint wash). */
+  .kal-card:not(.kal-card-bare), .settings-card, .breadth-widget, .index-card, .market-news-list, .earnings-list, .kal-console .kal-brow{
+    border-radius:16px; background-image:linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%);
+  }
+  .kal-tile, .data-tile{ border-radius:12px; background:rgba(255,255,255,.025); }
+  .tape, .kal-layout-body, .kal-tip{ border-radius:12px; }
+  select{ background:var(--panel-raised); color:var(--paper); border:1px solid var(--border); border-radius:8px; color-scheme:dark; }
   .kal-card, .settings-card, .breadth-widget, .brief-win, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
   .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .brief-win:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
@@ -1295,7 +1302,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Limit graphics</div>
-              <div class="settings-row-desc">Stops animations and hover effects, the light that follows your cursor, and the glowing background.</div>
+              <div class="settings-row-desc">Stops animations and hover effects, and the soft light in the background.</div>
             </div>
             <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
               <span class="toggle-knob"></span>
