@@ -154,12 +154,14 @@ gates.D10 = () => {
 
 // D11: a skipped minute is said plainly on the Bot page, a 429 explains itself, and every other note is untouched.
 gates.D11 = () => {
-  const f = lift(['kalTime', 'kalDate', 'kalDayKey', 'kalshiWhen', 'kalshiSkipNote']);
+  const f = lift(['kalTime', 'kalDate', 'kalDayKey', 'kalshiWhen', 'kalshiMarketLines', 'kalshiSkipNote'], "var KAL_SERIES_NAMES = { GOLD: 'Gold', DOGE: 'Dogecoin' };");
   const now = Date.UTC(2026, 9, 22, 17, 0), tick = Date.UTC(2026, 9, 22, 16, 58);
   const skip = f.kalshiSkipNote('The balance could not be read (HTTP 429), so nothing was sent.', tick, now);
   assert.ok(/^Skipped a minute/.test(skip) && skip.includes('HTTP 429') && /asked once more/.test(skip) && /looks again every minute/.test(skip), 'a refused read is explained: ' + skip);
   const other = f.kalshiSkipNote('The balance could not be read (HTTP 500), so nothing was sent.', tick, now);
   assert.ok(/^Skipped a minute/.test(other) && !/asked once more/.test(other), 'another failure is a skip too, without the 429 line');
+  const lines = f.kalshiSkipNote('KXGOLD15M-26OCT231200-00: filled; KXDOGE15M-26OCT231200-00: another crypto market already holds this window', tick, now);
+  assert.strictEqual(lines, 'Gold: Bought\nDogecoin: Another crypto market already holds this window', 'a minute with several markets reads as one short line per market, not a wall of tickers');
   const watching = 'Watching. Orders go in about 6 minutes before a close, and no market is at that point right now.';
   assert.strictEqual(f.kalshiSkipNote(watching, tick, now), watching, 'an ordinary note is shown as written');
   assert.strictEqual(f.kalshiSkipNote(undefined, tick, now), '', 'no note, no line');
