@@ -450,12 +450,8 @@ gates.Y21 = () => {
 
 // Y22: Mono Ink is an optional skin chosen under Settings, Theme. It only re-points tokens, never the gain or loss colors, and it is applied before first paint.
 gates.Y22 = () => {
-  const light = /html\[data-skin="mono"\]\{([\s\S]*?)\}/.exec(html)[1], dark = /html\[data-skin="mono"\]\[data-theme="dark"\]\{([\s\S]*?)\}/.exec(html)[1];
-  assert.ok(/--paper: #000000/.test(light) && /--paper: #FFFFFF/.test(dark) && /--radius: 4px/.test(light), 'a light and a dark Mono Ink, with sharp corners');
-  assert.ok(!/--gain|--loss/.test(light + dark), 'gain and loss colors are never overridden by a skin (--loss is the live trading safety color)');
-  assert.ok(/shwoopnet:skin'\) === 'mono'\)\{ document\.documentElement\.setAttribute\('data-skin', 'mono'\)/.test(html), 'applied by the inline script before first paint');
-  assert.ok(/id="skinChoice"/.test(html) && /data-value="ledger">Ledger</.test(html) && /data-value="mono">Mono Ink</.test(html), 'a Theme choice in Settings');
-  assert.ok(/syncUserSetting\('skin', skin\)/.test(html) && /skin: s\.skin === 'mono' \? 'mono' : \(s\.skin === 'ledger' \? 'ledger' : null\)/.test(html) && /if\(shaped\.skin !== null\)\{ applySkinPref\(shaped\.skin, true\); \}/.test(html), 'synced with the account, and an unsynced account keeps the device choice');
+  assert.ok(!/data-skin|skinChoice|applySkinPref|applyDarkModePref|data-theme="dark"/.test(html), 'there is one theme, black and white: no skin, no dark-mode switch (the owner, Oct 23, 2026)');
+  assert.ok(/--gain: #0F9D58;/.test(html) && /--loss: #D93025;/.test(html), 'gain and loss stay fixed colours (--loss is the live trading safety color)');
 };
 
 // Y23: the Kalshi page uses more width on a wide monitor, and the other pages keep the 1400px column.
@@ -634,7 +630,7 @@ gates.Y42 = () => {
   assert.strictEqual(f({ yesBidSz: 0, yesAskSz: 0 }), '', 'an empty book draws nothing');
   assert.ok(/width:0\.0%/.test(f({ yesBidSz: 0, yesAskSz: 50 })) && /width:100\.0%/.test(f({ yesBidSz: 50, yesAskSz: 0 })), 'one empty side is a full bar the other way');
   assert.ok(/kalshiDepthHtml\(m\)/.test(html), 'the market row calls it');
-  assert.ok(/--card-shadow-lift:/.test(html) && /--card-shadow: none; --card-shadow-lift: none;/.test(html), 'a lift shadow exists and the Mono Ink skin keeps the page flat');
+  assert.ok(/--card-shadow-lift:/.test(html) && !/--card-shadow: none;/.test(html), 'a lift shadow exists');
   assert.ok(/\.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html) && /\[data-reduce-motion="true"\] \.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html), 'no lift for people who asked for no motion, by the OS or by the Settings toggle');
 };
 

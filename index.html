@@ -10,8 +10,7 @@
 <!-- A private dashboard on a public host: ask search engines not to list it (Oct 22, 2026). This only asks; the sign-in is what keeps it private. -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Private trading dashboard. Authorized users only.">
-<meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0a0a0a">
 <title>Shwoop Financials: Trade less. Live more.</title>
 <link rel="icon" type="image/png" href="favicon-64.png">
 <!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the bubbly white S on black (brand mark A, Oct 20, 2026), full bleed because iOS rounds the corners itself. -->
@@ -40,16 +39,16 @@
        two modes, and both render this exact same identity, just
        inverted. One optional second skin, Mono Ink, exists at the
        owner's request (Settings, Theme); no novelty packs beyond it. */
-    --ink: #FAFAF8;
-    --panel: #FFFFFF;
-    --panel-raised: #F5F6F8;
-    --border: #D3D8E1;
-    --paper: #10182B;
-    --muted: #525C70;
-    --amber: #0B5CD8;
-    --amber-dim: #0847AD;
-    --amber-glow: rgba(11,92,216,0.14);
-    --amber-contrast: #FFFFFF;
+    --ink: #0a0a0a;
+    --panel: #131313;
+    --panel-raised: #1c1c1c;
+    --border: #2a2a2a;
+    --paper: #ffffff;
+    --muted: #a0a0a0;
+    --amber: #ffffff;
+    --amber-dim: #8a8a8a;
+    --amber-glow: rgba(255,255,255,0.12);
+    --amber-contrast: #000000;
     /* Gain/loss and MA colors stay fixed regardless of everything
        else -- --loss also doubles as the live-trading safety color
        (the persistent red banner, the dock border), so it never
@@ -58,47 +57,14 @@
     --loss: #D93025;
     --loss-glow: rgba(217,48,37,0.14);
     --radius: 10px;
-    --card-shadow: 0 1px 2px rgba(16,24,43,0.06), 0 8px 20px -12px rgba(16,24,43,0.22);
-    --card-shadow-lift: 0 2px 4px rgba(16,24,43,0.08), 0 14px 28px -12px rgba(16,24,43,0.30);
-    --brand-depth: #2a3a5e; --ghost-line: rgba(16,24,43,0.07); --ghost-fill: rgba(16,24,43,0.025); --bubble-shadow: rgba(16,24,43,0.14);
+    --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.03);
+    --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.05);
+    --brand-depth: #555555; --ghost-line: rgba(255,255,255,0.07); --ghost-fill: rgba(255,255,255,0.02); --bubble-shadow: rgba(0,0,0,0.6);
+    --front-g1:#161616; --front-g2:rgba(255,255,255,.09);
   }
 
-  /* Dark mode -- same Ledger identity, inverted surfaces. Set on
-     <html> as early as possible (see the tiny inline script right
-     before </head>) so the very first paint already has the right
-     tokens -- toggled at runtime in Settings via applyDarkModePref.
-     Gain/loss intentionally NOT overridden here, same invariant as
-     the light palette above. */
-  html[data-theme="dark"]{
-    --ink: #11141B;
-    --panel: #181C25;
-    --panel-raised: #1F232E;
-    --border: #2A2F3B;
-    --paper: #EDEFF3;
-    --muted: #8891A3;
-    --amber: #5B9BFF;
-    --amber-dim: #3E76D6;
-    --amber-glow: rgba(91,155,255,0.18);
-    --amber-contrast: #0B1220;
-    --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
-    --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
-    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035); --bubble-shadow: rgba(0,0,0,0.6);
-  }
+  /* The ONE theme (the owner, Oct 23, 2026: "the theme needs to be for the whole site", then "stop with the black and emerald ... pivot to just black & white"): black and white, no colour choice, no light mode, no skin. Gain and loss colours are never overridden. */
 
-  /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
-     sharp corners and no shadows. Gain and loss colors are deliberately NOT overridden here (same invariant as the palettes above): --loss is also the
-     live-trading safety color. The ambient grid and glow follow --amber, so they turn white-on-black by themselves. */
-  html[data-skin="mono"]{
-    --ink: #EEEEEE; --panel: #FFFFFF; --panel-raised: #F4F4F4; --border: #B3B3B3; --paper: #000000; --muted: #454545;
-    --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
-    --radius: 4px; --card-shadow: none; --card-shadow-lift: none;
-    --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02); --bubble-shadow: rgba(0,0,0,0.16);
-  }
-  html[data-skin="mono"][data-theme="dark"]{
-    --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
-    --amber: #FFFFFF; --amber-dim: #CFCFCF; --amber-glow: rgba(255,255,255,0.12); --amber-contrast: #000000;
-    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02); --bubble-shadow: rgba(0,0,0,0.7);
-  }
 
   *{ box-sizing:border-box; }
 
@@ -175,7 +141,7 @@
   }
   .bg-ambient::before, .bg-ambient::after{
     content:''; position:absolute; width:60vmax; height:60vmax; border-radius:50%;
-    background: var(--amber); opacity:0.07; filter: blur(60px);
+    background: var(--amber); opacity:0.09; filter: blur(60px);
     will-change: transform;
   }
   .bg-ambient::before{ top:-18vmax; left:-14vmax; animation: bgDriftA 100s ease-in-out infinite; }
@@ -185,8 +151,6 @@
      low-alpha color has less to contrast against on a dark base) -- bumped
      here rather than raising the light-mode values and overshooting the
      "furniture, not decoration" bar there. */
-  html[data-theme="dark"] .bg-ambient::before{ opacity:0.09; }
-  html[data-theme="dark"] .bg-ambient::after{ opacity:0.07; }
   @keyframes bgDriftA{
     0%, 100%{ transform: translate(0, 0); }
     50%{ transform: translate(8vmax, 10vmax); }
@@ -219,15 +183,9 @@
     will-change: transform;
     animation: bgGridDrift 160s linear infinite;
   }
-  html[data-theme="dark"] .bg-grid{ opacity: 0.045; }
   /* Readability (the owner, Oct 21, 2026: "hard to read" in both light modes). On a light ground the blurred blobs and the grid line grey the whole page behind the text, most of all in Mono Ink where --amber is black.
      Quieter in the light themes only; dark is unchanged. */
-  html:not([data-theme="dark"]) .bg-grid{ opacity: 0.025; }
-  html:not([data-theme="dark"]) .bg-ambient::before{ opacity: 0.035; }
-  html:not([data-theme="dark"]) .bg-ambient::after{ opacity: 0.03; }
-  html[data-skin="mono"]:not([data-theme="dark"]) .bg-ghost{ color: transparent; -webkit-text-stroke-color: rgba(0,0,0,0.04); }
   /* Stat tiles sit straight on the page ground on the Data page, so in the light themes they get their own white fill: an outline alone read as a grey box on a grey page. */
-  html:not([data-theme="dark"]) .kal-tile{ background: var(--panel); }
   @keyframes bgGridDrift{
     0%{ transform: translate(0, 0); }
     100%{ transform: translate(64px, 64px); }
@@ -737,19 +695,11 @@
 
   /* The signed-out screen (the owner, Oct 23, 2026: "we have to look and be professional now that we are an LLC", "simple", "a snapshot of our account page and our market brief"): black with one accent, the slogan, a small sign-in
      and two window snapshots of the Account page and the Market Brief. The snapshots are drawn in CSS with every figure and label blurred out to plain bars, because the page is public and makes no claim about size, markets or results.
-     It has its OWN palette on the gate (so the dashboard theme is untouched) in two colours, Emerald and White, and three layouts (Two windows, Side by side, Rising); Settings picks both (html[data-login-color], html[data-login-layout]).
+     It has its OWN palette on the gate (so the dashboard theme is untouched) in black and white, and one layout (two windows).
      Motion is only a rise-in and a slow float, and both stop under reduced motion and the Settings switch. */
   .auth-gate{
-    --ink:#050806; --panel:#0e1612; --panel-raised:#16221b; --border:#1d2c24; --paper:#f1f7f2; --muted:#9db0a4;
-    --amber:#1fd68a; --amber-dim:#0f6e49; --amber-glow:rgba(31,214,138,.14); --amber-contrast:#04170e; --radius:10px; --brand-depth:#0f6e49;
-    --front-g1:#0b140e; --front-g2:rgba(31,214,138,.16);
     position:fixed; inset:0; z-index:500; overflow-y:auto; -webkit-overflow-scrolling:touch; color:var(--paper);
     background:radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%), linear-gradient(var(--ink), var(--front-g1));
-  }
-  html[data-login-color="wh"] .auth-gate{
-    --ink:#0a0a0a; --panel:#131313; --panel-raised:#1c1c1c; --border:#2a2a2a; --paper:#ffffff; --muted:#a0a0a0;
-    --amber:#ffffff; --amber-dim:#8a8a8a; --amber-glow:rgba(255,255,255,.12); --amber-contrast:#000000; --brand-depth:#555555;
-    --front-g1:#161616; --front-g2:rgba(255,255,255,.09);
   }
   .auth-gate[hidden]{ display:none; }
   .front{ position:relative; width:min(1160px, 100% - 40px); margin:0 auto; min-height:100%; display:flex; flex-direction:column; padding:0 0 22px; }
@@ -795,21 +745,9 @@
   .win-hl{ display:grid; gap:8px; margin-top:12px; }
   .win-list{ display:grid; gap:2px; }
   .bk{ display:inline-block; border-radius:6px; background:linear-gradient(90deg, rgba(255,255,255,.2), rgba(255,255,255,.07)); vertical-align:middle; }
-  /* Layout B, Two windows: the Brief behind, the Account in front, tilted a little each way. */
-  html:not([data-login-layout]) .front-win-b, html[data-login-layout="b"] .front-win-b{ right:0; top:40px; width:min(480px, 44%); transform:rotate(2deg); }
-  html:not([data-login-layout]) .front-win-a, html[data-login-layout="b"] .front-win-a{ right:15%; top:200px; width:min(480px, 44%); transform:rotate(-2deg); z-index:3; }
-  /* Layout F, Side by side: the Brief to the right, the Account overlapping it low on the left, both level. */
-  html[data-login-layout="f"] .front-win-b{ right:0; top:70px; width:min(420px, 39%); }
-  html[data-login-layout="f"] .front-win-a{ right:22%; top:240px; width:min(420px, 39%); z-index:3; }
-  /* Layout E, Rising: the slogan centred, the Account window rising from below in perspective, the Brief hidden. */
-  html[data-login-layout="e"] .front-copy{ left:0; right:0; width:auto; text-align:center; top:70px; }
-  html[data-login-layout="e"] .front-line{ margin-left:auto; margin-right:auto; }
-  html[data-login-layout="e"] .front-win-b{ display:none; }
-  html[data-login-layout="e"] .front-win-a .win{ aspect-ratio:16 / 5.4; }
-  html[data-login-layout="e"] .front-sample{ left:0; right:0; max-width:none; text-align:center; bottom:auto; top:350px; }
-  html[data-login-layout="e"] .front-win-a .win-tiles{ display:none; }
-  html[data-login-layout="e"] .front-win-a{ left:50%; top:385px; width:min(860px, 82%); margin-left:min(-430px, -41%); transform:perspective(1600px) rotateX(18deg); transform-origin:center top; }
-  html[data-login-layout="e"] .front-shots::after{ content:""; position:absolute; left:0; right:0; bottom:40px; height:130px; background:linear-gradient(transparent, var(--front-g1)); z-index:4; }
+  /* Two windows: the Brief behind, the Account in front, tilted a little each way. */
+  .front-win-b{ right:0; top:40px; width:min(480px, 44%); transform:rotate(2deg); }
+  .front-win-a{ right:15%; top:200px; width:min(480px, 44%); transform:rotate(-2deg); z-index:3; }
   @keyframes frontUp{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; } }
   @keyframes frontFloat{ 0%, 100%{ transform:translateY(0); } 50%{ transform:translateY(-9px); } }
   .front-note{ margin:0 0 8px; color:var(--muted); font-size:11.5px; line-height:1.55; max-width:860px; position:relative; z-index:5; }
@@ -820,7 +758,6 @@
     .front-top{ flex-direction:column; }
     .front-main{ min-height:0; }
     .front-copy{ position:static; width:auto; padding:34px 0 20px; }
-    html[data-login-layout="e"] .front-copy{ text-align:left; }
     .front-shots{ display:none; }
     .front-sample{ display:none; }
   }
@@ -943,22 +880,6 @@
   [data-reduce-motion="true"] .front-eyebrow, [data-reduce-motion="true"] .front-h1, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-win, [data-reduce-motion="true"] .front-win-a .win{ animation: none; }
 </style>
 <script>
-  // Runs synchronously before <body> paints anything, so dark mode is
-  // never a flash-of-light-then-dark -- a stored explicit choice wins,
-  // otherwise the OS preference decides (first visit only). Settings'
-  // applyDarkModePref re-runs this same resolution later just to wire
-  // up the toggle button itself; this copy exists purely for timing.
-  (function(){
-    try{
-      var saved = window.localStorage.getItem('shwoopnet:darkMode');
-      var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-      if(window.localStorage.getItem('shwoopnet:skin') === 'mono'){ document.documentElement.setAttribute('data-skin', 'mono'); }
-      var ll = window.localStorage.getItem('shwoopnet:loginLayout'), lc = window.localStorage.getItem('shwoopnet:loginColor');
-      if(ll === 'b' || ll === 'f' || ll === 'e'){ document.documentElement.setAttribute('data-login-layout', ll); }
-      if(lc === 'em' || lc === 'wh'){ document.documentElement.setAttribute('data-login-color', lc); }
-    }catch(e){}
-  })();
 </script>
 </head>
 <body>
@@ -1091,14 +1012,10 @@
       var s = (data && typeof data.settings === 'object' && data.settings) ? data.settings : null;
       if(!s) return null; // null, not defaults -- lets the caller tell "never synced" from "synced, all defaults"
       return {
-        darkMode: typeof s.darkMode === 'boolean' ? s.darkMode : null, // null here means "no explicit choice", same as an absent localStorage key -- OS preference decides
         reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : false,
         kalBotLayout: (s.kalBotLayout && typeof s.kalBotLayout === 'object') ? s.kalBotLayout : null,
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
-        landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto',
-        skin: s.skin === 'mono' ? 'mono' : (s.skin === 'ledger' ? 'ledger' : null), // null = no explicit choice synced yet, so this device's own choice stays
-        loginLayout: (s.loginLayout === 'b' || s.loginLayout === 'f' || s.loginLayout === 'e') ? s.loginLayout : null,
-        loginColor: (s.loginColor === 'em' || s.loginColor === 'wh') ? s.loginColor : null
+        landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto'
       };
     },
     // The halt switch (kalshiBotMeta/control). The page only watches it and flips it below; firestore.rules lets nobody
@@ -1217,7 +1134,7 @@
       </section>
       <div class="front-shots">
         <div class="front-win front-win-b" aria-hidden="true"><div class="win"><div class="win-rail"><i class="on"><u></u>Brief</i><i><u></u>Bot</i><i><u></u>Data</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Market Brief</b><span class="win-pill win-live">Sample data</span></div><div class="win-hl"><span class="win-head">Sample headline goes here</span><span class="win-sub">A second sample line sits under it</span></div></div><div class="win-ix"><div class="win-tile"><small>Index 1</small><b>1,234.56</b></div><div class="win-tile"><small>Index 2</small><b>2,345.67</b></div><div class="win-tile"><small>Index 3</small><b>3,456.78</b></div><div class="win-tile"><small>Index 4</small><b>4,567.89</b></div></div></div></div></div>
-        <div class="front-win front-win-a" aria-hidden="true"><div class="win"><div class="win-rail"><i class="on"><u></u>Brief</i><i><u></u>Bot</i><i><u></u>Data</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Account</b><span class="win-pill win-live">Sample data</span></div><div class="win-num">$1,234.56</div><div class="win-row"><span>Stake per trade</span><b>Sample</b></div><div class="win-row"><span>Reinvest pool</span><b>$12.34</b></div></div><div class="win-tiles"><div class="win-tile"><small>Settled</small><b>12</b></div><div class="win-tile"><small>Open</small><b>3</b></div></div></div></div></div>
+        <div class="front-win front-win-a" aria-hidden="true"><div class="win"><div class="win-rail"><i><u></u>Brief</i><i class="on"><u></u>Bot</i><i><u></u>Data</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Account</b><span class="win-pill win-live">Sample data</span></div><div class="win-num">$1,234.56</div><div class="win-row"><span>Stake per trade</span><b>Sample</b></div><div class="win-row"><span>Reinvest pool</span><b>$12.34</b></div></div><div class="win-tiles"><div class="win-tile"><small>Settled</small><b>12</b></div><div class="win-tile"><small>Open</small><b>3</b></div></div></div></div></div>
       </div>
       <p class="front-sample">Sample screens with made-up numbers, shown for illustration only. They are not real account data or results.</p>
     </main>
@@ -1469,49 +1386,6 @@
       <div class="settings-section">
         <div class="settings-section-title">Preferences</div>
         <div class="settings-card">
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Dark mode</div>
-              <div class="settings-row-desc">Dark palette. Follows your system setting the first time.</div>
-            </div>
-            <button class="settings-toggle-switch" id="darkModeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Theme</div>
-              <div class="settings-row-desc">Ledger or Mono Ink (black and white).</div>
-            </div>
-            <div class="settings-choice-group" id="skinChoice">
-              <button class="tf-btn" data-value="ledger">Ledger</button>
-              <button class="tf-btn" data-value="mono">Mono Ink</button>
-            </div>
-          </div>
-
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Login page layout</div>
-              <div class="settings-row-desc">How the signed-out page is laid out. You see it after you sign out.</div>
-            </div>
-            <div class="settings-choice-group" id="loginLayoutChoice">
-              <button class="tf-btn" data-value="b">Two windows</button>
-              <button class="tf-btn" data-value="f">Side by side</button>
-              <button class="tf-btn" data-value="e">Rising</button>
-            </div>
-          </div>
-
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Login page colour</div>
-              <div class="settings-row-desc">Black with emerald, or black and white.</div>
-            </div>
-            <div class="settings-choice-group" id="loginColorChoice">
-              <button class="tf-btn" data-value="em">Emerald</button>
-              <button class="tf-btn" data-value="wh">White</button>
-            </div>
-          </div>
 
           <div class="settings-row">
             <div>
@@ -1561,7 +1435,8 @@
         </div>
       </div>
 
-      <div class="settings-note">Your theme, clock, landing page and Bot page layout sync to your account.</div>
+
+      <div class="settings-note">Your clock, landing page and Bot page layout sync to your account.</div>
     </div>
   </main>
 
@@ -1865,42 +1740,6 @@
     applyLandingPref(saved);
   })();
 
-  // ---------- Settings: theme (Ledger or Mono Ink) ----------
-  var skinChoiceEl = document.getElementById('skinChoice');
-  function applySkinPref(val, skipSync){
-    var skin = val === 'mono' ? 'mono' : 'ledger';
-    if(skin === 'mono'){ document.documentElement.setAttribute('data-skin', 'mono'); } else { document.documentElement.removeAttribute('data-skin'); }
-    skinChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.value === skin); });
-    try{ window.localStorage.setItem('shwoopnet:skin', skin); }catch(e){}
-    if(!skipSync) syncUserSetting('skin', skin);
-  }
-  skinChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
-    b.addEventListener('click', function(){ applySkinPref(b.dataset.value); });
-  });
-  (function initSkinPref(){
-    var saved = 'ledger';
-    try{ saved = window.localStorage.getItem('shwoopnet:skin') || 'ledger'; }catch(e){}
-    applySkinPref(saved, true);
-  })();
-
-  // ---------- Settings: login page look (layout and colour) ----------
-  // Only the signed-out page reads these, through two attributes on <html> that the inline head script sets before first paint. Stored on this device and synced with the account like the theme.
-  function applyLoginPref(kind, val, skipSync){
-    var isLayout = kind === 'loginLayout', ok = isLayout ? ['b', 'f', 'e'] : ['em', 'wh'];
-    if(ok.indexOf(val) < 0){ val = ok[0]; }
-    document.documentElement.setAttribute(isLayout ? 'data-login-layout' : 'data-login-color', val);
-    var group = document.getElementById(isLayout ? 'loginLayoutChoice' : 'loginColorChoice');
-    if(group){ group.querySelectorAll('.tf-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.value === val); }); }
-    try{ window.localStorage.setItem('shwoopnet:' + kind, val); }catch(e){}
-    if(!skipSync) syncUserSetting(kind, val);
-  }
-  [['loginLayout', 'loginLayoutChoice', 'b'], ['loginColor', 'loginColorChoice', 'em']].forEach(function(q){
-    var group = document.getElementById(q[1]);
-    group.querySelectorAll('.tf-btn').forEach(function(b){ b.addEventListener('click', function(){ applyLoginPref(q[0], b.dataset.value); }); });
-    var saved = q[2];
-    try{ saved = window.localStorage.getItem('shwoopnet:' + q[0]) || q[2]; }catch(e){}
-    applyLoginPref(q[0], saved, true);
-  });
 
   // ---------- Settings: clock format ----------
   var clockFormatEl = document.getElementById('clockFormatChoice');
@@ -1920,28 +1759,6 @@
     var saved = '24';
     try{ saved = window.localStorage.getItem('shwoopnet:clockFormat') || '24'; }catch(e){}
     applyClockFormat(saved);
-  })();
-
-  // ---------- Settings: dark mode ----------
-  // Mirrors the tiny inline script right before </head>, which already
-  // set data-theme before first paint -- this re-derives the same value
-  // (rather than just reading the attribute back) purely to wire up the
-  // toggle button's own aria-checked state and click handler.
-  var darkModeToggleBtn = document.getElementById('darkModeToggle');
-  function applyDarkModePref(dark, skipSync){
-    darkModeToggleBtn.setAttribute('aria-checked', dark ? 'true' : 'false');
-    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-    try{ window.localStorage.setItem('shwoopnet:darkMode', dark ? 'true' : 'false'); }catch(e){}
-    if(!skipSync) syncUserSetting('darkMode', dark);
-  }
-  darkModeToggleBtn.addEventListener('click', function(){
-    applyDarkModePref(darkModeToggleBtn.getAttribute('aria-checked') !== 'true');
-  });
-  (function initDarkModePref(){
-    var saved = null;
-    try{ saved = window.localStorage.getItem('shwoopnet:darkMode'); }catch(e){}
-    var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    applyDarkModePref(dark);
   })();
 
   // ---------- Settings: reduce motion ----------
@@ -3801,13 +3618,10 @@
     var storedLandingPref = 'auto';
     try{ storedLandingPref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     var snapshot = {
-      darkMode: document.documentElement.getAttribute('data-theme') === 'dark',
       reduceMotion: motionToggleBtn.getAttribute('aria-checked') === 'true',
       kalBotLayout: window.__kalBotLayout ? window.__kalBotLayout.get() : null,
       clockFormat: clockFormatPref || '24',
-      landingPref: storedLandingPref,
-      loginLayout: document.documentElement.getAttribute('data-login-layout') || 'b',
-      loginColor: document.documentElement.getAttribute('data-login-color') || 'em'
+      landingPref: storedLandingPref
     };
     window.__shwoopAPI.saveUserSettings(currentUid, snapshot).catch(function(err){
       console.error('Failed to adopt local settings into account:', err);
@@ -3832,13 +3646,7 @@
     userSettingsAdoptionInFlight = null;
 
     applyLandingPref(shaped.landingPref, true);
-    if(shaped.skin !== null){ applySkinPref(shaped.skin, true); }
     applyClockFormat(shaped.clockFormat, true);
-    if(shaped.loginLayout !== null){ applyLoginPref('loginLayout', shaped.loginLayout, true); }
-    if(shaped.loginColor !== null){ applyLoginPref('loginColor', shaped.loginColor, true); }
-    var dark = shaped.darkMode !== null ? shaped.darkMode
-      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    applyDarkModePref(dark, true);
     applyMotionPref(shaped.reduceMotion, true);
     if(shaped.kalBotLayout && window.__kalBotLayout){ window.__kalBotLayout.set(shaped.kalBotLayout); }
   }
