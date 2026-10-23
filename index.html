@@ -160,7 +160,7 @@
   /* Desktop: a small group of four icons in the top right, beside the clock (the owner, Oct 23, 2026: "F was a good idea", then "move it to the top right next to the clock", then "#2 there is nice", the ghost look: no box, dimmed icons, a white tile on the open page). It is fixed so it stays put while the page scrolls, takes no width from the pages, and the page name shows as a tooltip on hover or keyboard focus. On a phone it is the bottom bar below. */
   .side-nav-glyph{ display:none; }
   @media (min-width: 901px){
-    .side-nav{ top:22px; right:18px; left:auto; width:auto; flex-direction:row; align-items:center; gap:4px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; overflow:visible; max-height:none; z-index:160; }
+    .side-nav{ position:relative; top:auto; right:auto; left:auto; width:auto; flex-direction:row; align-items:center; gap:4px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; overflow:visible; max-height:none; z-index:160; }
     .side-nav-item:not(.current){ opacity:.7; }
     .side-nav-item.current{ box-shadow:0 10px 24px -8px rgba(0,0,0,.9); }
     .side-nav-item{ width:36px; height:36px; padding:0; justify-content:center; border-radius:9px; }
@@ -169,7 +169,8 @@
     .side-nav-label{ position:absolute; right:0; top:calc(100% + 10px); background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease; }
     .side-nav-item:hover .side-nav-label, .side-nav-item:focus-visible .side-nav-label{ opacity:1; }
     .side-nav-divider{ width:1px; height:auto; align-self:stretch; margin:6px 2px; }
-    .topbar-right{ margin-right:176px; }
+    .topbar-right{ gap:18px; }
+    .clock{ padding-right:18px; border-right:1px solid var(--border); }
   }
   @media (max-width: 900px){
     .side-nav{
@@ -217,8 +218,11 @@
   .brand-fin{ font-family:'Public Sans', sans-serif; font-weight:800; font-size:11px; letter-spacing:.5em; text-transform:uppercase; color:var(--paper); margin-top:10px; padding-left:2px; line-height:1; }
 
   .topbar-right{ display:flex; align-items:center; gap:18px; }
-  .clock{ color: var(--muted); font-size: 13px; text-align:right; }
-  .clock .time{ color: var(--paper); font-size: 15px; }
+  /* The clock (the owner, Oct 23, 2026: "a weird text and a weird placement"): hours and minutes in the page font, the seconds quieter beside them, and a small line under it with the day and the time zone. On a desktop it sits right beside the page icons, with a hairline between. */
+  .clock{ color: var(--muted); text-align:right; line-height:1.2; font-variant-numeric:tabular-nums; }
+  .clock .time{ color: var(--paper); font-size:16px; font-weight:700; letter-spacing:.01em; }
+  .clock .clock-sec{ color:var(--muted); font-size:12.5px; font-weight:600; margin-left:2px; }
+  .clock .clock-sub{ font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--muted); margin-top:2px; white-space:nowrap; }
 
   .settings-page{ display:flex; flex-direction:column; gap:28px; margin-top:24px; }
   .settings-section-title{
@@ -1101,26 +1105,27 @@
 
     <div class="topbar-right">
       <div class="clock">
-        <div class="time mono" id="clockTime">--:--:--</div>
+        <div class="time mono"><span id="clockTime">--:--</span><span class="clock-sec" id="clockSec"></span></div>
+        <div class="clock-sub" id="clockSub"></div>
       </div>
+      <nav class="side-nav" id="sideNav" aria-label="Main navigation">
+        <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span class="side-nav-label">Brief</span>
+        </button>
+        <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span class="side-nav-label">Bot</span>
+        </button>
+        <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span class="side-nav-label">Data</span>
+        </button>
+        <div class="side-nav-divider"></div>
+        <button class="side-nav-item nav-item" data-page="settings" title="Settings">
+        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span class="side-nav-label">Settings</span>
+        </button>
+      </nav>
     </div>
   </div>
 
-  <nav class="side-nav" id="sideNav" aria-label="Main navigation">
-    <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span class="side-nav-label">Brief</span>
-    </button>
-    <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span class="side-nav-label">Bot</span>
-    </button>
-    <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span class="side-nav-label">Data</span>
-    </button>
-    <div class="side-nav-divider"></div>
-    <button class="side-nav-item nav-item" data-page="settings" title="Settings">
-      <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span class="side-nav-label">Settings</span>
-    </button>
-  </nav>
 
 
 
@@ -1574,15 +1579,19 @@
     var hours24 = now.getHours();
     var m = now.getMinutes().toString().padStart(2,'0');
     var s = now.getSeconds().toString().padStart(2,'0');
-    var timeStr;
+    var hm, sec;
     if(clockFormatPref === '12'){
       var suffix = hours24 >= 12 ? 'PM' : 'AM';
       var h12 = hours24 % 12; if(h12 === 0){ h12 = 12; }
-      timeStr = h12 + ':' + m + ':' + s + ' ' + suffix;
+      hm = h12 + ':' + m; sec = ':' + s + ' ' + suffix;
     } else {
-      timeStr = hours24.toString().padStart(2,'0') + ':' + m + ':' + s;
+      hm = hours24.toString().padStart(2,'0') + ':' + m; sec = ':' + s;
     }
-    document.getElementById('clockTime').textContent = timeStr + ' ' + getTzAbbrev(now);
+    document.getElementById('clockTime').textContent = hm;
+    document.getElementById('clockSec').textContent = sec;
+    var day = '';
+    try{ day = now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }); }catch(e){}
+    document.getElementById('clockSub').textContent = (day ? day + ' \u00B7 ' : '') + getTzAbbrev(now);
   }
   setInterval(updateClock, 1000);
 
