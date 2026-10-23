@@ -400,7 +400,7 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
 
 // The cap on contracts per order follows the account, slowly (the owner keeps adding to it like a savings account). One contract per
 // SCALE_DOLLARS_PER_CONTRACT of balance is the target. The cap FALLS to the target at once when the balance falls, and RISES at most one step
-// per SCALE_REVIEW_MS (3 days), and not at all within a week of a loss stop. The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
+// per SCALE_REVIEW_MS (3 days). A loss stop no longer holds the climb (the owner, Oct 23, 2026: "i asked to have that removed"; the add-on hold went on Oct 13, the cap hold was left in by mistake). The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
 // stop move together, every review. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
 // (3, what the owner was running), or lower if the balance is lower. Pure: the caller keeps the state.
 // Raised from 10 to 25 on Oct 9, 2026 with the 2% base, or the ceiling would hold the base near 1% of a $550 account; then to 40 at the owner's request, which keeps
@@ -414,10 +414,9 @@ const L1_SIZE_CEILING = 40;
 const L1_ORDER_CEILING = 50;
 // $43 (was $85) so the ladder's target is about 2% of balance at a 93c contract, matching L1_SIZE_FRACTION; at $85 it, not the 2% rule, would have set the base.
 const SCALE_DOLLARS_PER_CONTRACT = 43;
-// Steps were weekly at first and the owner asked for faster ones (Oct 8, 2026): a review, and at most one step up, every 3 days. A loss stop still holds the
-// cap for a full week (it used to hold the profit add-on too; that hold was removed Oct 13, 2026), so a bad run slows the climb more than a good one speeds it.
+// Steps were weekly at first and the owner asked for faster ones (Oct 8, 2026): a review, and at most one step up, every 3 days. Nothing holds the climb after a
+// loss stop any more (the profit add-on hold was removed Oct 13, 2026 and the cap hold Oct 23, 2026, both at the owner's request); the 12% loss stop is what bounds a bad run.
 const SCALE_REVIEW_MS = 3 * 24 * 3600 * 1000;
-const SCALE_STOP_PAUSE_MS = 7 * 24 * 3600 * 1000;
 const SCALE_STEP = 1;
 function scaleTarget(cash) {
   return Number.isFinite(cash) ? Math.max(1, Math.min(L1_SIZE_CEILING, Math.floor(cash / SCALE_DOLLARS_PER_CONTRACT + 1e-9))) : 1;
@@ -428,8 +427,7 @@ function scaleTarget(cash) {
 // the cap is cut only when the target has stayed below it for SCALE_FALL_CONFIRM_MS. Real losses are still bounded in the meantime by the loss stop (which keeps
 // its old base while waiting), and money that was only locked comes back inside the window and clears the wait.
 const SCALE_FALL_CONFIRM_MS = 2 * 3600 * 1000;
-// Starting a session with scaling on sets state.reseed. The next review then raises the cap to the balance's target (never lowers it, never raises it within
-// a week of a loss stop) and re-bases the stop on the current balance, so an owner who restarts after a collapse is not stuck waiting out the slow steps.
+// Starting a session with scaling on sets state.reseed. The next review then raises the cap to the balance's target (never lowers it) and re-bases the stop on the current balance, so an owner who restarts after a collapse is not stuck waiting out the slow steps.
 function reviewSizing(state, cash, now) {
   const target = scaleTarget(cash);
   if (!state || !Number.isInteger(state.cap) || !Number.isFinite(state.reviewedAt) || !Number.isFinite(state.base)) {
@@ -438,9 +436,8 @@ function reviewSizing(state, cash, now) {
   let { cap, base, reviewedAt } = state;
   let lowSince = Number.isFinite(state.lowSince) ? state.lowSince : null;
   const lastStopAt = Number.isFinite(state.lastStopAt) ? state.lastStopAt : null;
-  const paused = lastStopAt !== null && now - lastStopAt < SCALE_STOP_PAUSE_MS;
   if (state.reseed === true) {
-    if (!paused) cap = Math.max(cap, target);   // Start is the owner's deliberate act, so it goes straight to the target instead of the slow steps
+    cap = Math.max(cap, target);   // Start is the owner's deliberate act, so it goes straight to the target instead of the slow steps
     base = cash; reviewedAt = now; lowSince = null;
     cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
     return { state: { ...state, cap, base, reviewedAt, lastStopAt, reseed: false, lowSince }, changed: true };
@@ -452,7 +449,7 @@ function reviewSizing(state, cash, now) {
     lowSince = null;
     if (now - reviewedAt >= SCALE_REVIEW_MS) {
       base = cash; reviewedAt = now;
-      if (target > cap && !paused) cap = Math.min(cap + SCALE_STEP, target);
+      if (target > cap) cap = Math.min(cap + SCALE_STEP, target);
     }
   }
   cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
@@ -1098,5 +1095,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };
