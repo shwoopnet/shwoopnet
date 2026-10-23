@@ -449,6 +449,25 @@
   .kal-tr-head{ background:var(--panel-raised); color:var(--muted); font-size:12px; font-weight:600; padding-top:8px; padding-bottom:8px; border-top:0; }
   /* The dollar result and its percentage are the same fact (the owner, Oct 23, 2026), so they share one size, weight and colour; only a quiet dot separates them. */
   .kal-tr-sep{ margin:0 7px; opacity:.5; font-weight:400; }
+  /* The usual-day bar sits just left of Today in the account card. */
+  #kalBotTotals{ display:flex; align-items:center; gap:28px; }
+  .kal-range{ display:flex; flex-direction:column; gap:2px; min-width:190px; }
+  .kal-range .kal-k{ color:var(--muted); font-size:12px; }
+  .kal-range b{ font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .kal-range-bar{ position:relative; height:8px; border-radius:999px; background:rgba(255,255,255,.08); margin-top:7px; }
+  .kal-range-band{ position:absolute; top:0; bottom:0; border-radius:999px; background:rgba(255,255,255,.26); }
+  .kal-range-zero{ position:absolute; top:-3px; bottom:-3px; width:1px; background:rgba(255,255,255,.4); }
+  .kal-range-now{ position:absolute; top:-4px; width:6px; height:16px; border-radius:3px; background:var(--paper); }
+  .kal-week{ margin-top:16px; border-top:1px solid var(--border); padding-top:14px; }
+  .kal-week-k{ font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .kal-week svg{ display:block; width:100%; height:70px; }
+  .kal-week-band{ fill:rgba(255,255,255,.1); stroke:none; }
+  .kal-week-zero{ stroke:rgba(255,255,255,.25); stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
+  .kal-week-mid{ fill:none; stroke:var(--paper); stroke-width:2; vector-effect:non-scaling-stroke; stroke-linejoin:round; }
+  .kal-week-foot{ display:flex; flex-wrap:wrap; gap:6px 22px; font-size:13px; color:var(--muted); margin-top:10px; }
+  .kal-week-foot b{ color:var(--paper); font-weight:600; font-variant-numeric:tabular-nums; }
+  .kal-week-note{ font-size:12px; color:var(--muted); margin-top:6px; }
+  @media screen and (max-width:700px){ #kalBotTotals{ flex-wrap:wrap; gap:14px; } .kal-range{ min-width:0; flex:1 1 100%; } }
   .kal-tr-t, .kal-tr-s{ color:var(--muted); } .kal-tr-p, .kal-tr-s{ text-align:right; } .kal-tr-p{ font-family:'Public Sans', sans-serif; font-weight:700; }
   .kal-foot{ padding:12px 22px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); }
   .kal-perf{ padding:14px 22px 20px 22px; }
@@ -2432,6 +2451,48 @@
   // Today's result as a share of the account (Oct 22, 2026, the owner's request). The base is the account total at the START of today, taken as the total now minus today's bot result, so a good day is not
   // measured against a balance it already grew. The total includes anything done outside the bot (your own trades, deposits), which is why this is "of the account" and not a return on the bot alone.
   // '' when the total is unknown or not above zero. It is a percentage, not a dollar figure, so the Privacy toggle leaves it showing.
+  // How a usual day looks, from the bot's own past days (the owner, Oct 23, 2026: "the range is SICK"). Each completed US Central day's settled result is a percentage of the account at the start of today (the same base as the Today line, so a
+  // percentage means the same thing everywhere); today is kept apart. It needs at least 10 completed days to say anything, and it is a description of the past, never a promise. Pure: orders in, numbers out.
+  function kalshiDayStats(orders, base, now){
+    if(!(base > 0)){ return null; }
+    var todayKey = kalDayKey(now), sums = {}, since = now - 45 * 86400000;
+    (orders || []).forEach(function(o){
+      if(!o || o.strategy !== 'L1' || !Number.isFinite(Number(o.ts)) || Number(o.ts) < since){ return; }
+      var p = kalshiOrderPnl(o); if(p === null){ return; }
+      var k = kalDayKey(Number(o.ts)); sums[k] = (sums[k] || 0) + p;
+    });
+    var days = Object.keys(sums).filter(function(k){ return k !== todayKey; }).sort().map(function(k){ return sums[k] / base * 100; });
+    if(days.length < 10){ return null; }
+    var n = days.length, mean = days.reduce(function(a, x){ return a + x; }, 0) / n;
+    var sd = Math.sqrt(days.reduce(function(a, x){ return a + (x - mean) * (x - mean); }, 0) / (n - 1));
+    var srt = days.slice().sort(function(a, b){ return a - b; }), q = function(p){ return srt[Math.floor(p * (n - 1))]; };
+    var phi = function(z){ var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp(-z * z / 2), pr = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - pr : pr; };
+    var wk = { typical: mean * 7, lo: mean * 7 - 1.28 * sd * Math.sqrt(7), hi: mean * 7 + 1.28 * sd * Math.sqrt(7), losing: sd > 0 ? phi(-(mean * 7) / (sd * Math.sqrt(7))) : (mean < 0 ? 1 : 0) };
+    var todayPct = Object.prototype.hasOwnProperty.call(sums, todayKey) ? sums[todayKey] / base * 100 : null;
+    return { n: n, mean: mean, sd: sd, lo: q(0.1), hi: q(0.9), worst: srt[0], week: wk, today: todayPct };
+  }
+  function kalshiPctSigned(x, d){ return (x >= 0 ? '+' : '-') + Math.abs(x).toFixed(d === undefined ? 1 : d) + '%'; }
+  // A compact "usual day" bar for the account card: the middle 80% of past days as a band, today as a marker, and the plain range in words above it.
+  function kalshiRangeStripHtml(st){
+    if(!st){ return ''; }
+    var lo = Math.min(st.lo, st.today === null ? st.lo : st.today, 0) - 0.4, hi = Math.max(st.hi, st.today === null ? st.hi : st.today, 0) + 0.4;
+    var X = function(v){ return Math.max(1, Math.min(99, (v - lo) / (hi - lo) * 100)).toFixed(1); };
+    return '<div class="kal-range"><span class="kal-k">Usual day</span><b>' + kalshiPctSigned(st.lo) + ' to ' + kalshiPctSigned(st.hi) + '</b>' +
+      '<div class="kal-range-bar"><i class="kal-range-band" style="left:' + X(st.lo) + '%;width:' + (X(st.hi) - X(st.lo)).toFixed(1) + '%"></i><i class="kal-range-zero" style="left:' + X(0) + '%"></i>' + (st.today === null ? '' : '<i class="kal-range-now" style="left:calc(' + X(st.today) + '% - 3px)"></i>') + '</div></div>';
+  }
+  // The next 7 days as a band from the same past days, with three plain figures. A range, not a promise.
+  function kalshiWeekRangeHtml(st){
+    if(!st){ return ''; }
+    var W = 600, H = 70, wk = st.week, pts = function(k){ var a = []; for(var i = 0; i <= 7; i++){ a.push(st.mean * i + k * st.sd * Math.sqrt(i)); } return a; };
+    var hiA = pts(1.28), loA = pts(-1.28), midA = pts(0), mx = Math.max.apply(null, hiA.concat([0])), mn = Math.min.apply(null, loA.concat([0]));
+    var X = function(i){ return (i / 7 * W).toFixed(1); }, Y = function(v){ return (H - 4 - (v - mn) / ((mx - mn) || 1) * (H - 8)).toFixed(1); };
+    var line = function(a){ return a.map(function(v, i){ return X(i) + ',' + Y(v); }).join(' '); };
+    var band = line(hiA) + ' ' + line(loA).split(' ').reverse().join(' ');
+    return '<div class="kal-week"><div class="kal-week-k">Next 7 days, as a range</div>' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="A range for the next seven days built from past results"><polygon class="kal-week-band" points="' + band + '"/><line class="kal-week-zero" x1="0" x2="' + W + '" y1="' + Y(0) + '" y2="' + Y(0) + '"/><polyline class="kal-week-mid" points="' + line(midA) + '"/></svg>' +
+      '<div class="kal-week-foot"><span>Typical <b>' + kalshiPctSigned(wk.typical) + '</b></span><span>Range <b>' + kalshiPctSigned(wk.lo) + ' to ' + kalshiPctSigned(wk.hi) + '</b></span><span>Losing week <b>' + Math.round(wk.losing * 100) + '%</b></span></div>' +
+      '<div class="kal-week-note">From your last ' + st.n + ' days. A description of the past, not a promise.</div></div>';
+  }
   function kalshiTodayPct(botNet, total){
     var start = Number(total) - Number(botNet);
     if(total === null || total === undefined || !Number.isFinite(start) || !(start > 0)){ return ''; }
@@ -2457,6 +2518,7 @@
     posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoney);
   }
   var kalshiBooksLast = null;
+  var kalshiRangeFacts = null;   // the latest result of kalshiDayStats, set where the account card is drawn and read by the risk card
   var kalshiPosPaths = {};   // ticker -> [{ t, v }]: the chance of each open position's side, one point per read since this page opened
 
   // Sound alerts (the owner's request, Oct 20, 2026): a short tone while THIS PAGE IS OPEN when the bot enters a trade, sells one, or hits a stop or an issue (a sell that errored, did not fill or
@@ -2580,7 +2642,9 @@
       var todayOrders = botOrders.filter(function(o){ return Number.isFinite(o.ts) && kalDayKey(o.ts) === todayKey; });
       var botNet = kalshiPerfStats(todayOrders, 0).total;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
-      totEl.innerHTML = '<div class="kal-rows">' +
+      var statsNow = kalshiDayStats(botOrders, (a.balance && a.balance.ok && Number(a.balance.totalDollars) > 0) ? Number(a.balance.totalDollars) - botNet : NaN, Date.now());
+      kalshiRangeFacts = statsNow;
+      totEl.innerHTML = kalshiRangeStripHtml(statsNow) + '<div class="kal-rows">' +
         '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
     }
 
@@ -3137,7 +3201,7 @@
         return '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + pct(m.fraction) + ' of the loss stop used</span></div>' +
           '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
           '<div class="kal-rows"><div><span class="kal-k">' + (m.base ? 'Open orders, share of the account' : 'Open orders, share of the stop') + '</span><b>' + pct(openShare) + '</b></div>' +
-          (m.windowCap !== null && m.windowCap > 0 ? '<div><span class="kal-k">Fullest open window</span><b>' + pct(m.windowUsed / m.windowCap) + ' of its limit</b></div>' : '') + '</div>';
+          (m.windowCap !== null && m.windowCap > 0 ? '<div><span class="kal-k">Fullest open window</span><b>' + pct(m.windowUsed / m.windowCap) + ' of its limit</b></div>' : '') + '</div>' + kalshiWeekRangeHtml(kalshiRangeFacts);
       })();
 kalshiStatusTick();
   }

@@ -226,6 +226,27 @@ gates.TP1 = () => {
   assert.strictEqual(f(1, 0), '', 'no known cost: no percentage'); assert.strictEqual(f(NaN, 5), '', 'no result: no percentage');
   assert.ok(/kalshiMoney\(Math\.abs\(tp\.pnl\)\) \+ kalshiPctText\(/.test(html) && /kalshiMoney\(Math\.abs\(pnl\)\) \+ kalshiPctText\(/.test(html), 'both kinds of row carry it, after the dollar figure, so Privacy view masks the dollars and leaves the percentage');
 };
+// RG1: the usual-day range and the 7 day range come from the bot's own past days, in percent of the account. Consequence: with fewer than 10 completed days nothing is drawn (no range invented from three days), today is never counted in its own usual day, and the figures are a description of the past.
+gates.RG1 = () => {
+  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
+  const names = ['kalTime', 'kalDate', 'kalDayKey', 'kalshiOrderPnl', 'kalshiDayStats', 'kalshiPctSigned', 'kalshiRangeStripHtml', 'kalshiWeekRangeHtml'];
+  const f = new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+  const now = Date.parse('2026-10-23T18:00:00Z'), day = 86400000;
+  const mk = (daysAgo, pnl) => ({ strategy: 'L1', ts: now - daysAgo * day - 3600000, side: 'yes', fillCount: 1, count: 1, maxCost: 0.9, settled: true, result: pnl > 0 ? 'yes' : 'no', settledPnl: pnl });
+  const few = []; for (let d = 1; d <= 6; d++) few.push(mk(d, 1));
+  assert.strictEqual(f.kalshiDayStats(few, 500, now), null, 'six days is not enough to describe a usual day');
+  const pnls = [4, 6, -3, 5, 7, 2, -6, 5, 4, 9, 1, -2, 5, 3, 7, -4, 2, 6]; const many = pnls.map((p, i) => mk(i + 1, p)).concat([mk(0, 9.3)]);
+  const st = f.kalshiDayStats(many, 500, now);
+  assert.ok(st && st.n === 18, 'eighteen completed days, today left out of its own usual day: ' + (st && st.n));
+  assert.ok(Math.abs(st.today - 9.3 / 500 * 100) < 1e-9, 'today is kept apart, as a share of the account: ' + st.today);
+  assert.ok(st.lo < st.hi && st.worst === Math.min(...pnls) / 500 * 100, 'the band and the worst day come from the past days');
+  assert.strictEqual(f.kalshiDayStats(many, 0, now), null, 'no known account base: nothing');
+  const strip = f.kalshiRangeStripHtml(st), week = f.kalshiWeekRangeHtml(st);
+  assert.ok(/Usual day/.test(strip) && /kal-range-now/.test(strip) && /%/.test(strip) && !/\$/.test(strip), 'the strip is percentages only, with today marked');
+  assert.ok(/Next 7 days, as a range/.test(week) && /Losing week/.test(week) && /not a promise/.test(week) && !/\$/.test(week), 'the week range says it is a description of the past');
+  assert.strictEqual(f.kalshiRangeStripHtml(null) + f.kalshiWeekRangeHtml(null), '', 'nothing without history');
+  assert.ok(st.week.lo < st.week.typical && st.week.typical < st.week.hi && st.week.losing >= 0 && st.week.losing <= 1, 'the week range is ordered and the losing chance is a probability');
+};
 gates.PC1 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPositionChartHtml', 'kalshiPositionsHtml'];
