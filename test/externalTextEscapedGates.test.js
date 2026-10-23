@@ -45,9 +45,9 @@ gates.X1 = () => {
 
 gates.X2 = () => {
   // The fear and greed rating comes from a third party through the shared tape document: it is text, never elements.
-  const g = new Function('escapeHtml', fnSource('briefGaugeHtml') + '\nreturn briefGaugeHtml;')((x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
+  const g = new Function('escapeHtml', fnSource('briefSentiment') + '\n' + fnSource('briefGaugeHtml') + '\nreturn briefGaugeHtml;')((x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
   const out = g(EVIL, { score: 40, rating: EVIL, prev: 30 });
-  assert.ok(!/<img/i.test(out), 'a rating or label with markup is text, not elements');
+  assert.ok(!/<img/i.test(out) && !out.includes(EVIL), 'a rating or label with markup is text, not elements; the third party rating is not shown at all (the page uses its own words)');
   assert.ok(/mood-track/.test(out), 'and the gauge still draws');
 };
 
