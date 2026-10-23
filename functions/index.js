@@ -363,8 +363,9 @@ exports.kalshiL1Session = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
   ensureDefaultAdminApp();
   const on = request.data && request.data.on === true;
-  // Size scaling is off unless this is literally true. It is a choice made when starting, kept on the session, and cannot be changed mid-run.
-  const sizing = on && request.data.sizing === true;
+  // Size scaling is decided HERE, never by the page (the owner, Oct 23, 2026): a risk setting that can be chosen from the page can be chosen in a bad hour. Starting always means the
+  // gold size ladder (every other market is capped at one contract in code), which is what the old box did while it was ticked. Nothing in request.data can change it.
+  const sizing = on;
   // The high-point stop is likewise off unless this is literally true, chosen at the start and kept on the session.
   const trailing = on && request.data.trailing === true;
   const db = getFirestore();

@@ -364,7 +364,7 @@ gates.N13 = () => {
   // The page: two clicks, a server call only on the confirm click, and a visible stop.
   assert.ok(/kalL1Start'\)[\s\S]{0,400}addEventListener\('click', function\(\)\{ msg\.textContent = ''; ask\(true\); \}\)/.test(html), 'the first click only asks');
   const yes = html.slice(html.indexOf("yes.addEventListener('click', function(){\n      var api = window.__shwoopAPI;\n      if(!api || !api.kalshiL1Session"));
-  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(yes.slice(0, 800)), 'the confirm click starts it');
+  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(yes.slice(0, 800)), 'the confirm click starts it');
   assert.ok(!/id="kalL1Stop"/.test(html) && /id="kalBotHalt"/.test(html), 'one control stops entries (Pause, which can be resumed); there is no separate stop button');
   assert.ok(/api\.setKalshiHalt\(false\)/.test(html.slice(html.indexOf("var wasPaused"))), 'starting lifts a pause left on, so Start after a Flatten is one step');
   assert.ok(/httpsCallable\(functions, 'kalshiL1Session'\)/.test(html));
@@ -475,9 +475,10 @@ gates.N19 = async () => {
 // Only a literal true turns scaling on, and it is a choice made at the start of a session.
 gates.N20 = () => {
   const cb = /exports\.kalshiL1Session = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
-  assert.ok(/const sizing = on && request\.data\.sizing === true;/.test(cb), 'only the literal true counts');
+  assert.ok(/const sizing = on;/.test(cb) && !/request\.data\.sizing/.test(cb), 'size scaling is decided in code, never by anything the page sends');
   assert.ok(/startCash: null, sizing,/.test(cb), 'kept on the session record');
-  assert.ok(/id="kalL1Sizing"[^>]*checked/.test(html), 'the scaling box starts ticked, so a restart cannot silently drop the bot to one contract (it cannot be changed once the session runs)');
+  assert.ok(!/kalL1Sizing/.test(html), 'the page has no size box any more: a restart cannot drop the ladder and the page cannot raise it');
+  assert.ok(!/sizing:\s*sizing === true/.test(html) && /kalshiL1Session: function\(on, trailing\)/.test(html), 'and it does not send a size choice');
 };
 
 // "No market is about 6 minutes from its close" is true at 3 minutes before a close, and unhelpful: the session says when the next look is.
@@ -535,7 +536,7 @@ gates.N23 = async () => {
   const cb = /exports\.kalshiL1Session = onCall\(([\s\S]*?)\n\}\);/.exec(fnSrc)[1];
   assert.ok(/const trailing = on && request\.data\.trailing === true;/.test(cb) && /startCash: null, sizing, trailing,/.test(cb), 'only a literal true, kept on the session record');
   assert.ok(/id="kalL1Trailing"/.test(html) && !/id="kalL1Trailing"[^>]*checked/.test(html), 'the box starts unticked');
-  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Sizing'\)\.checked, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(html) && /trailing: trailing === true/.test(html), 'and passed to the server');
+  assert.ok(/api\.kalshiL1Session\(true, document\.getElementById\('kalL1Trailing'\)\.checked\)/.test(html) && /trailing: trailing === true/.test(html), 'and passed to the server');
 };
 
 gates.N31 = () => {
