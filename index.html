@@ -699,6 +699,33 @@
   .kal-btn-danger{ border-radius:10px; }
   .kal-mini{ border-radius:8px; }
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
+  /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
+     The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
+  .kal-console{ grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"acct acct" "books pos" "books trd"; gap:18px; }
+  .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
+  .kal-console [data-card="account"]{ grid-area:acct; }
+  .kal-console [data-card="books"]{ grid-area:books; align-self:start; }
+  .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
+  .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
+  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; padding:0; }
+  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; }
+  .kal-console [data-card="account"] #kalBotStatus{ grid-column:2; display:flex; align-items:center; gap:36px; flex-wrap:wrap; }
+  .kal-console [data-card="account"] #kalBotStatus .kal-acct-total{ margin:0; }
+  .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ flex-direction:row; gap:28px; border-top:0; padding-top:0; }
+  .kal-console [data-card="account"] #kalBotStatus .kal-rows > div, .kal-console [data-card="account"] #kalBotTotals .kal-rows > div{ flex-direction:column; justify-content:flex-start; gap:2px; }
+  .kal-console [data-card="account"] #kalBotTotals{ grid-column:3; }
+  .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
+  .kal-console [data-card="trades"] .kal-tr-head{ display:none; }
+  .kal-console .kal-books{ grid-template-columns:1fr; }
+  .kal-console .kal-brow{ display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:24px; align-items:center; }
+  .kal-console .kal-brow > .kal-spark{ grid-column:2; grid-row:1; width:280px; margin:0; }
+  @media (max-width:900px){
+    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "books" "pos" "trd"; }
+    .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
+    .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals{ grid-column:1; }
+    .kal-console .kal-brow > .kal-spark{ grid-column:1; grid-row:auto; width:auto; margin-top:10px; }
+  }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
   .tf-btn.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-contrast); }
