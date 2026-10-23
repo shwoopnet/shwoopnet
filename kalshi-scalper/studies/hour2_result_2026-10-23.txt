@@ -1,0 +1,5 @@
+HOUR2: verdict FALSIFIED
+entries 5586; NIGHT n=870 on 53 days, REST n=4716
+NIGHT mean +0.82c, REST mean -0.02c, diff -1.10c, z -0.52
+halves -4.62c / +2.30c, stress -1.10c, placebo 95th percentile z +1.98, series positive 4 of 6
+by series (night n, night minus rest c): SILVER (211, -0.71), PLATINUM (61, +3.74), PALLADIUM (72, -0.56), COPPER (150, +1.18), WTI (219, +0.45), NATGAS (157, +2.70)
