@@ -678,7 +678,7 @@ gates.X3 = async () => {
   assert.ok(eth && Number(eth.count) <= 3, 'a 3 contract cap holds for Ethereum too: ' + (eth && eth.count));
 };
 gates.X4 = () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'GOLD FIRST, then Bitcoin, Ethereum, XRP and Dogecoin, then the three probe markets LAST (the later ones yield when a window is full); Solana is not on it');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'GOLD FIRST, then Bitcoin, Ethereum, XRP and Dogecoin, then the three probe markets LAST (the later ones yield when a window is full); Solana is not on it');
   assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the older single-order path is untouched');
   assert.ok(!('EXTRA_LIVE_SERIES' in live) && !('extraLiveCounts' in live), 'no separate Ethereum switch is left in the library');
 };
@@ -696,7 +696,7 @@ gates.PR1 = async () => {
   assert.ok(rec.strategy === 'L1' && rec.series === 'KXAUDUSD15M' && !rec.addon && !rec.addonCost, 'it is an ordinary L1 order with no profit money in it, so the loss stop, pool and exit read it like any other');
 };
 gates.PR2 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES.slice(0, 5), ['KXGOLD15M', 'KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'gold, then the four capped markets, come first');
+  assert.deepStrictEqual(live.L1_SERIES.slice(0, 5), ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold, then the four capped markets, come first');
   assert.deepStrictEqual(live.L1_SERIES.slice(5), live.PROBE_SERIES, 'the probe markets come last, so they only take what a window has left');
   // a window already at its combined limit takes no probe order
   const w = world({ session: wsess({}), balance: rich });
@@ -941,9 +941,9 @@ gates.GF1 = async () => {
     sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   const by = (frag) => w.posts.filter((p) => p.ticker.includes(frag));
   assert.ok(by('KXGOLD').length === 1 && Number(by('KXGOLD')[0].count) > 2, 'gold takes the ladder size: ' + by('KXGOLD').map((p) => p.count));
-  // One crypto order per window: of the four capped markets sharing this window only the first in list order (Bitcoin) is sent, still at one contract.
+  // One crypto order per window: of the four capped markets sharing this window only the first in list order (XRP since Oct 23, 2026) is sent, at its fixed size.
   const crypto = w.posts.filter((p) => !p.ticker.includes('KXGOLD'));
-  assert.ok(crypto.length === 1 && crypto[0].ticker.includes('KXBTC') && Number(crypto[0].count) === 1, 'one capped market per window, at one contract even with a large ladder and a full pool: ' + crypto.map((p) => p.ticker + 'x' + p.count));
+  assert.ok(crypto.length === 1 && crypto[0].ticker.includes('KXXRP') && Number(crypto[0].count) === 3, 'one capped market per window, the first in list order (XRP since Oct 23, 2026) at its fixed size, never the ladder or the pool: ' + crypto.map((p) => p.ticker + 'x' + p.count));
   for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD')), 'a capped market never carries reinvested profit: ' + p.ticker); }
 };
 gates.GF2 = async () => {
@@ -1271,6 +1271,33 @@ gates.FS3 = () => {
   assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(!/FIXED_CONTRACTS|request\.data\.(ticker|price|count|side)/.test(idx), 'no callable or stored value can change an order size');
+};
+
+// OS1: series order (Oct 23, 2026, the owner's reorder after the research session's question). Consequence: when two capped crypto markets qualify in the same tick, the 3 contract market (XRP over Bitcoin, Dogecoin over Ethereum) gets the one crypto order of the window, and nothing else about the order changes.
+gates.OS1 = async () => {
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum, probes last');
+  assert.deepStrictEqual(live.CAPPED_SERIES.slice().sort(), ['KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXXRP15M'], 'the capped list is the same four markets');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 }, 'sizes unchanged');
+  const run = async (list, lead) => {
+    const close = NOW + (lead === '10m' ? 600000 : 360000);
+    const fresh = {}, quotes = [];
+    for (const [series, ticker] of list) { fresh[ticker] = { exchange_index: 0, close_time: iso(close) }; quotes.push(quote({ close_time: iso(close) }, series, ticker)); }
+    const w = world({ session: wsess({}), balance: rich, fresh });
+    await tick(w, { quotes, sizingState: { cap: 40, base: 1000, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+    return w;
+  };
+  // Quotes handed over in the OLD order (Bitcoin first) still resolve by list order: XRP wins at the 10 minute tick.
+  const ten = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-10'], ['KXXRP15M', 'KXXRP15M-26OCT071415-10']], '10m');
+  assert.strictEqual(ten.posts.length, 1, 'one crypto order in the window');
+  assert.ok(ten.posts[0].ticker.includes('KXXRP') && Number(ten.posts[0].count) === 3, 'XRP (3 contracts) takes the window from Bitcoin: ' + ten.posts.map((p) => p.ticker + 'x' + p.count));
+  const six = await run([['KXETH15M', 'KXETH15M-26OCT071415-06'], ['KXDOGE15M', 'KXDOGE15M-26OCT071415-06']], '6m');
+  assert.strictEqual(six.posts.length, 1);
+  assert.ok(six.posts[0].ticker.includes('KXDOGE') && Number(six.posts[0].count) === 3, 'Dogecoin (3 contracts) takes the window from Ethereum: ' + six.posts.map((p) => p.ticker + 'x' + p.count));
+  // Bitcoin and Ethereum still trade when their pair partner has no qualifying market (the order only decides ties).
+  const btc = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-10']], '10m');
+  assert.ok(btc.posts.length === 1 && btc.posts[0].ticker.includes('KXBTC') && Number(btc.posts[0].count) === 1, 'Bitcoin alone still trades, at one contract');
+  const src = fnSrcLib();
+  assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M", \.\.\.PROBE_SERIES\];/.test(src), 'the order is a hard list in code');
 };
 
 (async () => {
