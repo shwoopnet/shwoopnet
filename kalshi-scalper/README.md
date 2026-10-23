@@ -5738,3 +5738,8 @@ Themes (information only):
 ### SCAN2-F result (2026-10-23, read once on 2026-10-14 to 10-22): FALSIFIED
 
 R (`spread <= 1.05c` AND 2 to 4 minutes in band): 790 entries at **+0.03c**, the rest 2,683 at **+0.70c** on 9 days; difference **-0.28c, z -0.39**; halves -0.45c and -0.14c; stress -0.26c; loss rate 5.4% against 6.4%. The only broad rule that carried from train to test did not carry to the fresh days (prediction: a miss at +0.5c; it was worse than that). Reading: the 23 test days were a single stretch that lifted that rule; rule mining on this history gives nothing that survives a third period. The second window (markets closing from 2026-10-24) is still read with the other forward claims on 2026-11-12, as registered. Tries: SCAN2-F counted above.
+
+## Built from the data we have (2026-10-23, information tools, no claim, no try)
+- `python -m scalper.record_info` (+ `tests/test_record_info.py`): recorder coverage, how fast Kalshi quotes follow a 3 bp index jump, and book depth on the favourite side by seconds left. First look on 25 windows: quote followed in 10 of 22 jumps within 20 s (median 4.6 s, 90th percentile 8.7 s); size of at least 5 contracts on the favourite side at 60 s left in 56% of windows, 44% at 45 s, 20% at 30 s, 12% at 15 s. The book thins fast near the close, which limits any lag edge to the earlier seconds. Tiny sample.
+- `live_diag` now reads `rng5`, prints the live FLAT rate per series and settled FLAT against not-FLAT, and splits settled fills by fills in the same window (`tests/test_live_diag_flat.py`).
+- `studies/REVIEW_2026-11-17.md`: every live rule, its tripwire, the evidence so far, and the command that answers each question at the review.
