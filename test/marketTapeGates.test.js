@@ -167,12 +167,13 @@ gates.T24 = () => {
 };
 gates.T25 = () => {
   const f = new Function(fnSource('briefMoodWord') + '\nreturn briefMoodWord;')();
-  assert.deepStrictEqual([f(12), f(16), f(24), f(35), f(0), f(null)], ['Calm', 'Normal', 'Nervous', 'Stressed', null, null], 'the one word comes from the VIX alone and is missing when the VIX is');
+  assert.deepStrictEqual([f(12), f(16), f(24), f(35), f(0), f(null)], ['Calm', 'Normal', 'Elevated', 'High', null, null], 'the one word comes from the VIX alone and is missing when the VIX is');
   const g = new Function('escapeHtml', fnSource('briefGaugeHtml') + '\nreturn briefGaugeHtml;')((x) => String(x));
   assert.ok(/&mdash;/.test(g('Stocks', undefined)) && !/mood-track/.test(g('Stocks', undefined)), 'no reading: a dash, no gauge');
   assert.ok(/left:50\.0%/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })) && /Yesterday 68/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })), 'a reading places its marker and shows yesterday');
   assert.ok(/left:100\.0%/.test(g('x', { score: 250 })), 'a wild score cannot push the marker off the track');
-  assert.ok(/mood-down/.test(g('x', { score: 21 })) && /mood-up/.test(g('x', { score: 75 })) && !/mood-(up|down)/.test(g('x', { score: 50 })), 'fear reads red, greed green, the middle plain (the owner: green positive, red negative)');
+  assert.ok(!/mood-(up|down)/.test(g('x', { score: 21 })) && !/mood-(up|down)/.test(g('x', { score: 75 })), 'the mood is never red or green: it is information, not a verdict, and a red word can start a panic (the owner, Oct 23, 2026)');
+  assert.ok(!/Nervous|Stressed/.test(html.replace(/\/\*[\s\S]*?\*\//g, '')) && /Nothing here asks you to act/.test(html), 'calm wording, no alarm words');
   assert.ok(/\.mood-kv > span:first-child/.test(html), 'the row label rule cannot reach the change inside the value, which stays green or red');
 };
 

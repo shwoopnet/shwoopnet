@@ -291,7 +291,9 @@
   .mood-ends{ display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
   .mood-kv{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); font-size:13px; }
   .mood-kv > span:first-child{ color:var(--muted); }
-  .mood-up{ color:var(--gain); } .mood-down{ color:var(--loss); }
+  /* The mood is information, not a verdict on a trade (the owner, Oct 23, 2026: a red "Nervous" "could incite panic"), so the word, the two gauges and the changes under it are plain white and grey, never red or green. */
+  .mood-kv .tape-chg.up, .mood-kv .tape-chg.down{ color:var(--muted); }
+  .mood-sub{ font-size:13px; color:var(--muted); margin:-2px 0 12px; line-height:1.45; }
   .brief-win .brief-section-title{ margin:0 0 12px 0; }
   .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:stretch; }
   .brief-mood .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
@@ -3936,14 +3938,14 @@ kalshiStatusTick();
   // comes from the tape; anything that has not arrived is a dash, never a made-up number.
   function briefMoodWord(vix){
     if(!(vix > 0)){ return null; }
-    return vix < 15 ? 'Calm' : (vix < 20 ? 'Normal' : (vix < 30 ? 'Nervous' : 'Stressed'));
+    return vix < 15 ? 'Calm' : (vix < 20 ? 'Normal' : (vix < 30 ? 'Elevated' : 'High'));
   }
   function briefGaugeHtml(label, m){
     if(!m || !Number.isFinite(m.score)){
       return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b>&mdash;</b></div></div>';
     }
     var score = Math.max(0, Math.min(100, m.score));
-    return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b class="' + (score < 40 ? 'mood-down' : (score > 60 ? 'mood-up' : '')) + '">' + Math.round(score) + ' <span class="tape-asof">' + escapeHtml(String(m.rating || '')) + '</span></b></div>' +
+    return '<div class="mood-g"><div class="mood-hd"><span>' + escapeHtml(label) + '</span><b>' + Math.round(score) + ' <span class="tape-asof">' + escapeHtml(String(m.rating || '')) + '</span></b></div>' +
       '<div class="mood-track"><i style="left:' + score.toFixed(1) + '%"></i></div>' +
       '<div class="mood-ends"><span>Fear</span>' + (Number.isFinite(m.prev) ? '<span>Yesterday ' + Math.round(m.prev) + '</span>' : '') + '<span>Greed</span></div></div>';
   }
@@ -3959,7 +3961,8 @@ kalshiStatusTick();
     var vix = ok(q['^VIX']) ? kv('Fear index (VIX)', q['^VIX'].price.toFixed(1) + chg(pct(q['^VIX'].price, q['^VIX'].prevClose))) : kv('Fear index (VIX)', '&mdash;');
     var tnx = ok(q['^TNX']) ? kv('10 year yield', q['^TNX'].price.toFixed(2) + '%' + chg((q['^TNX'].price - q['^TNX'].prevClose) * 100, 'bp')) : kv('10 year yield', '&mdash;');
     var tlt = ok(q.TLT) ? kv('Long bonds (TLT)', q.TLT.price.toFixed(2) + chg(pct(q.TLT.price, q.TLT.prevClose))) : kv('Long bonds (TLT)', '&mdash;');
-    el.innerHTML = '<div class="mood-word' + (word === 'Calm' ? ' mood-up' : (word === 'Nervous' || word === 'Stressed' ? ' mood-down' : '')) + '">' + (word ? escapeHtml(word) : '&mdash;') + '</div>' +
+    var moodLine = { Calm: 'Markets are quiet.', Normal: 'Typical movement.', Elevated: 'Moving more than usual. Nothing here asks you to act.', High: 'Moving a lot. The rules were written for days like this.' }[word] || '';
+    el.innerHTML = '<div class="mood-word">' + (word ? escapeHtml(word) : '&mdash;') + '</div>' + (moodLine ? '<div class="mood-sub">' + escapeHtml(moodLine) + '</div>' : '') +
       briefGaugeHtml('Stocks fear and greed', mood.stocks) + briefGaugeHtml('Crypto fear and greed', mood.crypto) + vix + tnx + tlt;
   }
   function renderBriefCharts(){
