@@ -366,7 +366,7 @@ gates.Y11b = () => {
 };
 
 // Presentation view (Oct 21, 2026): one Layout-menu switch that only HIDES the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. It is a page
-// attribute and is never saved, so a reload is always the full page and nothing can look "gone" by accident; no number is changed.
+// attribute kept in this browser (Oct 23, 2026), so a reload cannot reveal amounts; no number is changed.
 gates.Y11c = () => {
   const m = /(function kalshiSetPresent\(on\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiSetPresent not found');
   const attrs = {}; const doc = { documentElement: { setAttribute: (k, v) => { attrs[k] = v; }, removeAttribute: (k) => { delete attrs[k]; } } };
@@ -376,8 +376,13 @@ gates.Y11c = () => {
   set.set(false); assert.deepStrictEqual(attrs, {}, 'off removes it, back to the full page'); assert.strictEqual(set.masked(), false);
   // All or nothing (the owner, Oct 23, 2026): one flag masks every dollar amount, and only dollar amounts. A percentage or a chance is never masked.
   assert.ok(!/kalshiPrivacyChoice|privacyOpts|kalshiMoneyK/.test(html), 'no per-figure choices any more');
+  // Oct 23, 2026 (the owner: "we don't want to accidentally leak anything"): the view now survives a reload, in this browser only (never the account), and is applied by a head script BEFORE anything draws.
   assert.ok(!/syncUserSetting\('(kalPresent|privacy)/.test(html), 'the view is never saved to the account');
-  assert.ok(!/localStorage[^;]*[Pp]rivacy|[Pp]resent[^;]*localStorage/.test(html), 'the view is never saved, in this browser or in the account');
+  const head = html.slice(0, html.indexOf('</head>'));
+  assert.ok(/getItem\('shwoopnet:privacy'\) === 'on'[\s\S]*?setAttribute\('data-present', 'on'\)/.test(head), 'a head script restores the view before first paint, so a reload never flashes an amount');
+  assert.ok(/var kalshiMasked = document\.documentElement\.getAttribute\('data-present'\) === 'on'/.test(html), 'and the amount flag starts from that attribute, so the very first draw is already masked');
+  assert.ok(/setItem\('shwoopnet:privacy', 'on'\)[\s\S]{0,60}removeItem\('shwoopnet:privacy'\)/.test(m[1]), 'switching it on stores it and switching it off clears it');
+  assert.ok(/kalshiPrivacyUi\(kalshiMasked\);/.test(html), 'a reload shows the switch and the button already on');
   assert.ok(!/id="kalPresent"/.test(html), 'the Layout menu no longer carries a privacy checkbox');
   for(const id of ['privacyToggle']){ assert.ok(new RegExp('id="' + id + '" role="switch"').test(html), id + ' is a switch in Settings'); }
   assert.ok(/<button class="kal-mini" id="kalPresentBtn"[^>]*>Privacy<\/button>\s*<details class="kal-layout" id="kalTools">/.test(html), 'the same switch is a button in the page header called Privacy, outside the Tools menu so the privacy view cannot hide it; there is no Data button (the sidebar has it)');
