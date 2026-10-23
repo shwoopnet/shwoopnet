@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-skin="mono" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +10,7 @@
 <!-- A private dashboard on a public host: ask search engines not to list it (Oct 22, 2026). This only asks; the sign-in is what keeps it private. -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Private trading dashboard. Authorized users only.">
-<meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#EEEEEE">
 <title>Shwoop Financials: Trade less. Live more.</title>
 <link rel="icon" type="image/png" href="favicon-64.png">
 <!-- Without this iOS makes its own icon: a plain letter "S" on a dark tile. It is the bubbly white S on black (brand mark A, Oct 20, 2026), full bleed because iOS rounds the corners itself. -->
@@ -66,26 +65,11 @@
   /* Dark mode -- same Ledger identity, inverted surfaces. Set on
      <html> as early as possible (see the tiny inline script right
      before </head>) so the very first paint already has the right
-     tokens -- toggled at runtime in Settings via applyDarkModePref.
+     tokens -- (removed Oct 23, 2026: there is no dark mode any more).
      Gain/loss intentionally NOT overridden here, same invariant as
      the light palette above. */
-  html[data-theme="dark"]{
-    --ink: #11141B;
-    --panel: #181C25;
-    --panel-raised: #1F232E;
-    --border: #2A2F3B;
-    --paper: #EDEFF3;
-    --muted: #8891A3;
-    --amber: #5B9BFF;
-    --amber-dim: #3E76D6;
-    --amber-glow: rgba(91,155,255,0.18);
-    --amber-contrast: #0B1220;
-    --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04);
-    --card-shadow-lift: 0 2px 4px rgba(0,0,0,0.55), 0 16px 30px -14px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
-    --brand-depth: #1b3566; --ghost-line: rgba(255,255,255,0.065); --ghost-fill: rgba(91,155,255,0.035); --bubble-shadow: rgba(0,0,0,0.6);
-  }
 
-  /* Mono Ink -- an optional second skin (the owner's choice, Oct 9, 2026), chosen under Settings, Theme. It only re-points the same tokens: black and white with
+  /* Mono Ink light is the ONLY theme since Oct 23, 2026 (the owner: "make the mono ink black and white our main theme and remove the others"): <html> carries data-skin="mono" data-theme="light" and nothing changes them. The Ledger palette above is only the base the skin re-points; the dark palettes and the Settings switches were removed. Mono Ink -- originally an optional second skin (the owner's choice, Oct 9, 2026). It only re-points the same tokens: black and white with
      sharp corners and no shadows. Gain and loss colors are deliberately NOT overridden here (same invariant as the palettes above): --loss is also the
      live-trading safety color. The ambient grid and glow follow --amber, so they turn white-on-black by themselves. */
   html[data-skin="mono"]{
@@ -93,11 +77,6 @@
     --amber: #000000; --amber-dim: #333333; --amber-glow: rgba(0,0,0,0.10); --amber-contrast: #FFFFFF;
     --radius: 4px; --card-shadow: none; --card-shadow-lift: none;
     --brand-depth: #8a8a8a; --ghost-line: rgba(0,0,0,0.08); --ghost-fill: rgba(0,0,0,0.02); --bubble-shadow: rgba(0,0,0,0.16);
-  }
-  html[data-skin="mono"][data-theme="dark"]{
-    --ink: #000000; --panel: #0B0B0B; --panel-raised: #151515; --border: #2B2B2B; --paper: #FFFFFF; --muted: #8E8E8E;
-    --amber: #FFFFFF; --amber-dim: #CFCFCF; --amber-glow: rgba(255,255,255,0.12); --amber-contrast: #000000;
-    --brand-depth: #3a3a3a; --ghost-line: rgba(255,255,255,0.08); --ghost-fill: rgba(255,255,255,0.02); --bubble-shadow: rgba(0,0,0,0.7);
   }
 
   *{ box-sizing:border-box; }
@@ -185,8 +164,6 @@
      low-alpha color has less to contrast against on a dark base) -- bumped
      here rather than raising the light-mode values and overshooting the
      "furniture, not decoration" bar there. */
-  html[data-theme="dark"] .bg-ambient::before{ opacity:0.09; }
-  html[data-theme="dark"] .bg-ambient::after{ opacity:0.07; }
   @keyframes bgDriftA{
     0%, 100%{ transform: translate(0, 0); }
     50%{ transform: translate(8vmax, 10vmax); }
@@ -219,15 +196,14 @@
     will-change: transform;
     animation: bgGridDrift 160s linear infinite;
   }
-  html[data-theme="dark"] .bg-grid{ opacity: 0.045; }
   /* Readability (the owner, Oct 21, 2026: "hard to read" in both light modes). On a light ground the blurred blobs and the grid line grey the whole page behind the text, most of all in Mono Ink where --amber is black.
      Quieter in the light themes only; dark is unchanged. */
-  html:not([data-theme="dark"]) .bg-grid{ opacity: 0.025; }
-  html:not([data-theme="dark"]) .bg-ambient::before{ opacity: 0.035; }
-  html:not([data-theme="dark"]) .bg-ambient::after{ opacity: 0.03; }
-  html[data-skin="mono"]:not([data-theme="dark"]) .bg-ghost{ color: transparent; -webkit-text-stroke-color: rgba(0,0,0,0.04); }
+  html .bg-grid{ opacity: 0.025; }
+  html .bg-ambient::before{ opacity: 0.035; }
+  html .bg-ambient::after{ opacity: 0.03; }
+  html[data-skin="mono"] .bg-ghost{ color: transparent; -webkit-text-stroke-color: rgba(0,0,0,0.04); }
   /* Stat tiles sit straight on the page ground on the Data page, so in the light themes they get their own white fill: an outline alone read as a grey box on a grey page. */
-  html:not([data-theme="dark"]) .kal-tile{ background: var(--panel); }
+  html .kal-tile{ background: var(--panel); }
   @keyframes bgGridDrift{
     0%{ transform: translate(0, 0); }
     100%{ transform: translate(64px, 64px); }
@@ -755,10 +731,9 @@
   .front-h1 .r2 .lt{ color:var(--front-accent); animation:frontSpray .7s cubic-bezier(.2,.9,.3,1.2) calc(var(--i) * .055s + 1s) both, frontBob 3.6s ease-in-out calc(var(--i) * .12s + 3.2s) infinite; }
   .front-h1 .dr{ position:absolute; left:40%; top:70%; width:.085em; min-width:7px; height:calc(var(--h) * 1px); background:var(--front-accent); border-radius:0 0 6px 6px; transform-origin:top; transform:scaleY(0); animation:frontDrip 2.4s ease-in var(--dl) forwards; }
   .front-h1 .dr::after{ content:""; position:absolute; bottom:-5px; left:-1px; width:calc(100% + 2px); aspect-ratio:1; border-radius:50%; background:inherit; }
-  .front-sticker{ position:absolute; right:3%; top:34%; width:132px; aspect-ratio:1; border-radius:50%; background:var(--front-accent); color:var(--ink); display:grid; place-items:center; text-align:center; font:800 15px/1.15 'Public Sans', sans-serif; letter-spacing:.06em; text-transform:uppercase; padding:20px; border:3px solid var(--front-bright); box-shadow:4px 4px 0 var(--brand-depth); transform:rotate(11deg); animation:frontStick .7s cubic-bezier(.2,1.6,.3,1) 3.4s both; }
+  .front-mascot{ position:absolute; right:4%; top:14%; width:min(24vw, 270px); aspect-ratio:320 / 360; background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 320 360%22%3E%3Cdefs%3E%3Cg id=%22r%22%3E%3Cg stroke=%22%230a0a0a%22 stroke-width=%227%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%0A%3Cline x1=%22150%22 y1=%2240%22 x2=%22150%22 y2=%2266%22/%3E%3Ccircle cx=%22150%22 cy=%2232%22 r=%229%22 fill=%22%23ffffff%22/%3E%0A%3Crect x=%2272%22 y=%22106%22 width=%2216%22 height=%2230%22 rx=%226%22 fill=%22%235a5a5a%22/%3E%3Crect x=%22212%22 y=%22106%22 width=%2216%22 height=%2230%22 rx=%226%22 fill=%22%235a5a5a%22/%3E%0A%3Crect x=%2286%22 y=%2272%22 width=%22128%22 height=%22100%22 rx=%2228%22 fill=%22%23ffffff%22/%3E%3Ccircle cx=%22124%22 cy=%22120%22 r=%2217%22 fill=%22%23fff%22/%3E%3Ccircle cx=%22176%22 cy=%22120%22 r=%2217%22 fill=%22%23fff%22/%3E%3Ccircle cx=%22130%22 cy=%22123%22 r=%227.5%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3Ccircle cx=%22170%22 cy=%22123%22 r=%227.5%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3Cpath d=%22M118 152 Q150 172 182 152%22 fill=%22none%22/%3E%3Cpath d=%22M104 100 L140 108%22 fill=%22none%22 stroke-width=%226%22/%3E%3Cpath d=%22M196 100 L160 108%22 fill=%22none%22 stroke-width=%226%22/%3E%3Cpath d=%22M88 84 Q150 36 212 84 L212 94 L88 94 Z%22 fill=%22%230a0a0a%22/%3E%3Crect x=%2262%22 y=%2286%22 width=%2256%22 height=%2213%22 rx=%226%22 fill=%22%230a0a0a%22/%3E%3Crect x=%22132%22 y=%2260%22 width=%2236%22 height=%2210%22 rx=%225%22 fill=%22%23fff%22 stroke=%22none%22/%3E%0A%3Crect x=%22104%22 y=%22182%22 width=%2292%22 height=%2298%22 rx=%2220%22 fill=%22%230a0a0a%22/%3E%0A%3Ccircle cx=%22150%22 cy=%22230%22 r=%2231%22 fill=%22%23ffffff%22/%3E%3Cpath d=%22M0.0 0.8930041152263374Q0.0 0.8161865569272977 0.02194787379972565 0.733196159122085Q0.0438957475994513 0.6502057613168724 0.07407407407407407 0.6502057613168724Q0.07956104252400548 0.6502057613168724 0.18792866941015088 0.6872427983539094Q0.2962962962962963 0.7242798353909465 0.35116598079561046 0.7242798353909465Q0.4060356652949246 0.7242798353909465 0.4224965706447188 0.7126200274348422Q0.438957475994513 0.700960219478738 0.438957475994513 0.6790123456790123Q0.438957475994513 0.6570644718792866 0.40877914951989025 0.639917695473251Q0.3786008230452675 0.6227709190672153 0.33333333333333337 0.6097393689986281Q0.2880658436213992 0.5967078189300411 0.23525377229080935 0.5720164609053497Q0.18244170096021947 0.5473251028806584 0.13717421124828533 0.5171467764060356Q0.09190672153635115 0.48696844993141286 0.06172839506172839 0.43141289437585734Q0.03155006858710562 0.3758573388203018 0.03155006858710562 0.30452674897119336Q0.03155006858710562 0.0 0.3950617283950617 0.0Q0.5308641975308641 0.0 0.6296296296296295 0.01714677640603568Q0.728395061728395 0.03429355281207136 0.7688614540466392 0.05555555555555558Q0.8093278463648833 0.0768175582990398 0.8093278463648833 0.09739368998628262Q0.8093278463648833 0.16872427983539096 0.7757201646090535 0.25102880658436216Q0.7421124828532235 0.33333333333333337 0.7105624142661179 0.33333333333333337Q0.7050754458161864 0.33333333333333337 0.6748971193415637 0.32098765432098764Q0.5843621399176954 0.2812071330589849 0.5246913580246912 0.2812071330589849Q0.46502057613168724 0.2812071330589849 0.443758573388203 0.29218106995884774Q0.4224965706447188 0.30315500685871055 0.4224965706447188 0.32578875171467764Q0.4224965706447188 0.3484224965706447 0.4526748971193416 0.3628257887517147Q0.4828532235939644 0.3772290809327846 0.5274348422496571 0.3888888888888889Q0.5720164609053497 0.40054869684499317 0.6248285322359396 0.42455418381344306Q0.6776406035665294 0.44855967078189296 0.7229080932784635 0.48079561042524005Q0.7681755829903977 0.5130315500685871 0.7983539094650205 0.5720164609053497Q0.8285322359396432 0.6310013717421125 0.8285322359396432 0.7091906721536351Q0.8285322359396432 0.7914951989026062 0.7860082304526748 0.8587105624142661Q0.7599451303155006 0.8998628257887517 0.7187928669410151 0.9300411522633745Q0.6776406035665294 0.9602194787379972 0.6042524005486968 0.9801097393689986Q0.5308641975308641 1.0 0.41495198902606306 1.0Q0.299039780521262 1.0 0.19478737997256518 0.98079561042524Q0.09053497942386832 0.9615912208504801 0.04526748971193416 0.9382716049382716Q0.0 0.914951989026063 0.0 0.8930041152263374Z%22 transform=%22translate(134.26%2C211.00) scale(38)%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%0A%3Crect x=%22114%22 y=%22278%22 width=%2226%22 height=%2240%22 rx=%2210%22 fill=%22%235a5a5a%22/%3E%3Crect x=%22160%22 y=%22278%22 width=%2226%22 height=%2240%22 rx=%2210%22 fill=%22%235a5a5a%22/%3E%0A%3Cellipse cx=%22124%22 cy=%22322%22 rx=%2222%22 ry=%2211%22 fill=%22%23ffffff%22/%3E%3Cellipse cx=%22176%22 cy=%22322%22 rx=%2222%22 ry=%2211%22 fill=%22%23ffffff%22/%3E%0A%3Cpath d=%22M104 204 Q78 250 54 250%22 fill=%22none%22 stroke-width=%2217%22 stroke=%22%230a0a0a%22/%3E%3Cpath d=%22M104 204 Q78 250 54 250%22 fill=%22none%22 stroke-width=%226%22 stroke=%22%23ffffff%22/%3E%3Ccircle cx=%2254%22 cy=%22250%22 r=%2212%22 fill=%22%23ffffff%22/%3E%0A%3Cpath d=%22M196 204 Q224 190 248 148%22 fill=%22none%22 stroke-width=%2217%22 stroke=%22%230a0a0a%22/%3E%3Cpath d=%22M196 204 Q224 190 248 148%22 fill=%22none%22 stroke-width=%226%22 stroke=%22%23ffffff%22/%3E%3Ccircle cx=%22248%22 cy=%22148%22 r=%2212%22 fill=%22%23ffffff%22/%3E%3Cg transform=%22translate(240 64) rotate(18)%22%3E%3Crect x=%220%22 y=%2216%22 width=%2236%22 height=%2266%22 rx=%228%22 fill=%22%23ffffff%22/%3E%3Crect x=%228%22 y=%220%22 width=%2220%22 height=%2220%22 rx=%224%22 fill=%22%230a0a0a%22/%3E%3Crect x=%220%22 y=%2238%22 width=%2236%22 height=%2216%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3C/g%3E%3Ccircle cx=%22284%22 cy=%2252%22 r=%227%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3Ccircle cx=%22296%22 cy=%2276%22 r=%225%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3Ccircle cx=%22274%22 cy=%2230%22 r=%226%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3Ccircle cx=%22298%22 cy=%2230%22 r=%224%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3Ccircle cx=%22262%22 cy=%2214%22 r=%225%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3Ccircle cx=%22286%22 cy=%2210%22 r=%223%22 fill=%22%230a0a0a%22 stroke=%22none%22/%3E%3C/g%3E%3C/g%3E%3Cfilter id=%22s%22 x=%22-20%25%22 y=%22-20%25%22 width=%22140%25%22 height=%22140%25%22%3E%3CfeFlood flood-color=%22%230a0a0a%22/%3E%3CfeComposite in2=%22SourceGraphic%22 operator=%22in%22/%3E%3C/filter%3E%3C/defs%3E%3Cg filter=%22url(%23s)%22 transform=%22translate(9 10)%22%3E%3Cuse href=%22%23r%22/%3E%3C/g%3E%3Cuse href=%22%23r%22/%3E%3C/svg%3E") center / contain no-repeat; pointer-events:none; }
   .front-spark{ position:absolute; left:var(--x); top:var(--y); font-size:var(--s, 34px); line-height:1; color:var(--front-accent); animation:frontPop .6s cubic-bezier(.2,1.6,.3,1) var(--d) both, frontTwinkle 3.2s ease-in-out calc(var(--d) + .8s) infinite; }
   @keyframes frontBob{ 0%, 70%, 100%{ transform:none; } 35%{ transform:translateY(-.07em) rotate(-2deg); } }
-  @keyframes frontStick{ from{ transform:rotate(-20deg) scale(2); opacity:0; } to{ transform:rotate(11deg) scale(1); opacity:1; } }
   @keyframes frontPop{ from{ transform:scale(0) rotate(-40deg); opacity:0; } to{ transform:scale(1) rotate(0deg); opacity:1; } }
   @keyframes frontTwinkle{ 0%, 100%{ opacity:1; transform:scale(1) rotate(0deg); } 50%{ opacity:.5; transform:scale(.75) rotate(20deg); } }
   .front-line{ margin:64px 0 0; font:600 clamp(17px, 1.9vw, 22px)/1.45 'Public Sans', sans-serif; max-width:560px; color:var(--muted); animation:frontFade .8s 2s both; }
@@ -777,7 +752,7 @@
   .front-foot a{ color:var(--paper); text-decoration:underline; text-underline-offset:3px; }
   @media (max-width: 820px){
     .front-top{ flex-direction:column; }
-    .front-arrow, .front-sticker{ display:none; }
+    .front-arrow, .front-mascot{ display:none; }
     .front-line{ margin-top:48px; }
   }
   .auth-title{ font-family:'Public Sans', sans-serif; font-size:19px; font-weight:700; margin-bottom:14px; }
@@ -872,7 +847,7 @@
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
     .bg-grid{ animation: none; }
-    .front-tag, .front-h1 .lt, .front-h1 .r2 .lt, .front-sticker, .front-spark, .front-h1 .dr, .front-line, .front-arrow, .front-signin .auth-box{ animation: none; }
+    .front-tag, .front-h1 .lt, .front-h1 .r2 .lt, .front-spark, .front-h1 .dr, .front-line, .front-arrow, .front-signin .auth-box{ animation: none; }
     .front-h1 .dr{ transform:scaleY(1); }
     .brand-name span{ transition: none; }
     .brand:hover .brand-name span{ transform: none; }
@@ -899,24 +874,9 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .news-item:hover, [data-reduce-motion="true"] .mover-row:hover{ transform: none; }
   [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .movers-col:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
-  [data-reduce-motion="true"] .front-tag, [data-reduce-motion="true"] .front-h1 .lt, [data-reduce-motion="true"] .front-h1 .r2 .lt, [data-reduce-motion="true"] .front-sticker, [data-reduce-motion="true"] .front-spark, [data-reduce-motion="true"] .front-h1 .dr, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-arrow, [data-reduce-motion="true"] .front-signin .auth-box{ animation: none; }
+  [data-reduce-motion="true"] .front-tag, [data-reduce-motion="true"] .front-h1 .lt, [data-reduce-motion="true"] .front-h1 .r2 .lt, [data-reduce-motion="true"] [data-reduce-motion="true"] .front-spark, [data-reduce-motion="true"] .front-h1 .dr, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-arrow, [data-reduce-motion="true"] .front-signin .auth-box{ animation: none; }
   [data-reduce-motion="true"] .front-h1 .dr{ transform:scaleY(1); }
 </style>
-<script>
-  // Runs synchronously before <body> paints anything, so dark mode is
-  // never a flash-of-light-then-dark -- a stored explicit choice wins,
-  // otherwise the OS preference decides (first visit only). Settings'
-  // applyDarkModePref re-runs this same resolution later just to wire
-  // up the toggle button itself; this copy exists purely for timing.
-  (function(){
-    try{
-      var saved = window.localStorage.getItem('shwoopnet:darkMode');
-      var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-      if(window.localStorage.getItem('shwoopnet:skin') === 'mono'){ document.documentElement.setAttribute('data-skin', 'mono'); }
-    }catch(e){}
-  })();
-</script>
 </head>
 <body>
 
@@ -1048,12 +1008,10 @@
       var s = (data && typeof data.settings === 'object' && data.settings) ? data.settings : null;
       if(!s) return null; // null, not defaults -- lets the caller tell "never synced" from "synced, all defaults"
       return {
-        darkMode: typeof s.darkMode === 'boolean' ? s.darkMode : null, // null here means "no explicit choice", same as an absent localStorage key -- OS preference decides
         reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : false,
         kalBotLayout: (s.kalBotLayout && typeof s.kalBotLayout === 'object') ? s.kalBotLayout : null,
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
         landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto',
-        skin: s.skin === 'mono' ? 'mono' : (s.skin === 'ledger' ? 'ledger' : null) // null = no explicit choice synced yet, so this device's own choice stays
       };
     },
     // The halt switch (kalshiBotMeta/control). The page only watches it and flips it below; firestore.rules lets nobody
@@ -1171,7 +1129,7 @@
       <div class="front-tag">Systematic trading</div>
       <h1 class="front-h1" aria-label="Trade less. Live more."><span class="row r1" aria-hidden="true"><span class="lt" style="--i:0">T</span><span class="lt" style="--i:1">r</span><span class="lt" style="--i:2">a</span><span class="lt" style="--i:3">d</span><span class="lt" style="--i:4">e</span><span class="sp"></span><span class="lt" style="--i:6">l</span><span class="lt" style="--i:7">e</span><span class="lt" style="--i:8">s</span><span class="lt" style="--i:9">s</span><span class="lt" style="--i:10">.</span></span><span class="row r2" aria-hidden="true"><span class="lt" style="--i:0">L<i class="dr" style="--h:46;--dl:2.4s"></i></span><span class="lt" style="--i:1">i</span><span class="lt" style="--i:2">v</span><span class="lt" style="--i:3">e</span><span class="sp"></span><span class="lt" style="--i:5">m</span><span class="lt" style="--i:6">o</span><span class="lt" style="--i:7">r<i class="dr" style="--h:58;--dl:2.8s"></i></span><span class="lt" style="--i:8">e</span><span class="lt" style="--i:9">.</span></span></h1>
       <span class="front-spark" style="--x:62%;--y:9%;--d:2.6s" aria-hidden="true">&#10022;</span><span class="front-spark" style="--x:91%;--y:46%;--s:26px;--d:2.9s" aria-hidden="true">&#10022;</span><span class="front-spark" style="--x:4%;--y:96%;--s:22px;--d:3.1s" aria-hidden="true">&#10022;</span>
-      <div class="front-sticker" aria-hidden="true">No screen time</div>
+      <div class="front-mascot" aria-hidden="true"></div>
       <p class="front-line"><b>Shwoop Financials builds systematic trading tools:</b> rules written in advance, run by software, reviewed by people.</p>
     </main>
     <p class="front-note"><b>Important.</b> Shwoop Financials is not a broker, investment adviser or fund, and nothing on this site is an offer, advice or a solicitation to buy or sell any security or contract. Trading involves risk, including the loss of all capital invested. Past results do not predict future results.</p>
@@ -1422,27 +1380,6 @@
       <div class="settings-section">
         <div class="settings-section-title">Preferences</div>
         <div class="settings-card">
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Dark mode</div>
-              <div class="settings-row-desc">Dark palette. Follows your system setting the first time.</div>
-            </div>
-            <button class="settings-toggle-switch" id="darkModeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Theme</div>
-              <div class="settings-row-desc">Ledger or Mono Ink (black and white).</div>
-            </div>
-            <div class="settings-choice-group" id="skinChoice">
-              <button class="tf-btn" data-value="ledger">Ledger</button>
-              <button class="tf-btn" data-value="mono">Mono Ink</button>
-            </div>
-          </div>
-
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Default landing page</div>
@@ -1795,24 +1732,6 @@
     applyLandingPref(saved);
   })();
 
-  // ---------- Settings: theme (Ledger or Mono Ink) ----------
-  var skinChoiceEl = document.getElementById('skinChoice');
-  function applySkinPref(val, skipSync){
-    var skin = val === 'mono' ? 'mono' : 'ledger';
-    if(skin === 'mono'){ document.documentElement.setAttribute('data-skin', 'mono'); } else { document.documentElement.removeAttribute('data-skin'); }
-    skinChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.value === skin); });
-    try{ window.localStorage.setItem('shwoopnet:skin', skin); }catch(e){}
-    if(!skipSync) syncUserSetting('skin', skin);
-  }
-  skinChoiceEl.querySelectorAll('.tf-btn').forEach(function(b){
-    b.addEventListener('click', function(){ applySkinPref(b.dataset.value); });
-  });
-  (function initSkinPref(){
-    var saved = 'ledger';
-    try{ saved = window.localStorage.getItem('shwoopnet:skin') || 'ledger'; }catch(e){}
-    applySkinPref(saved, true);
-  })();
-
   // ---------- Settings: clock format ----------
   var clockFormatEl = document.getElementById('clockFormatChoice');
   function applyClockFormat(val, skipSync){
@@ -1831,28 +1750,6 @@
     var saved = '24';
     try{ saved = window.localStorage.getItem('shwoopnet:clockFormat') || '24'; }catch(e){}
     applyClockFormat(saved);
-  })();
-
-  // ---------- Settings: dark mode ----------
-  // Mirrors the tiny inline script right before </head>, which already
-  // set data-theme before first paint -- this re-derives the same value
-  // (rather than just reading the attribute back) purely to wire up the
-  // toggle button's own aria-checked state and click handler.
-  var darkModeToggleBtn = document.getElementById('darkModeToggle');
-  function applyDarkModePref(dark, skipSync){
-    darkModeToggleBtn.setAttribute('aria-checked', dark ? 'true' : 'false');
-    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-    try{ window.localStorage.setItem('shwoopnet:darkMode', dark ? 'true' : 'false'); }catch(e){}
-    if(!skipSync) syncUserSetting('darkMode', dark);
-  }
-  darkModeToggleBtn.addEventListener('click', function(){
-    applyDarkModePref(darkModeToggleBtn.getAttribute('aria-checked') !== 'true');
-  });
-  (function initDarkModePref(){
-    var saved = null;
-    try{ saved = window.localStorage.getItem('shwoopnet:darkMode'); }catch(e){}
-    var dark = saved !== null ? saved === 'true' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    applyDarkModePref(dark);
   })();
 
   // ---------- Settings: reduce motion ----------
@@ -3712,7 +3609,6 @@
     var storedLandingPref = 'auto';
     try{ storedLandingPref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     var snapshot = {
-      darkMode: document.documentElement.getAttribute('data-theme') === 'dark',
       reduceMotion: motionToggleBtn.getAttribute('aria-checked') === 'true',
       kalBotLayout: window.__kalBotLayout ? window.__kalBotLayout.get() : null,
       clockFormat: clockFormatPref || '24',
@@ -3741,11 +3637,7 @@
     userSettingsAdoptionInFlight = null;
 
     applyLandingPref(shaped.landingPref, true);
-    if(shaped.skin !== null){ applySkinPref(shaped.skin, true); }
     applyClockFormat(shaped.clockFormat, true);
-    var dark = shaped.darkMode !== null ? shaped.darkMode
-      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    applyDarkModePref(dark, true);
     applyMotionPref(shaped.reduceMotion, true);
     if(shaped.kalBotLayout && window.__kalBotLayout){ window.__kalBotLayout.set(shaped.kalBotLayout); }
   }

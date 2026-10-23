@@ -11,7 +11,7 @@ const gates = {};
 gates.O1 = () => {
   assert.ok(/<meta name="robots" content="noindex, nofollow">/.test(html), 'the page asks not to be indexed');
   assert.ok(/<meta name="description" content="Private trading dashboard\. Authorized users only\.">/.test(html), 'it has a plain description');
-  assert.ok(/<meta name="theme-color" content="#FAFAF8" media="\(prefers-color-scheme: light\)">/.test(html) && /<meta name="theme-color" content="#000000" media="\(prefers-color-scheme: dark\)">/.test(html), 'the browser bar matches the theme');
+  assert.ok(/<meta name="theme-color" content="#EEEEEE">/.test(html), 'the browser bar matches the theme');
   const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
   assert.ok(/User-agent: \*\s*\nDisallow: \//.test(robots), 'robots.txt asks crawlers to stay out');
 };

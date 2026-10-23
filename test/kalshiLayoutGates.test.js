@@ -448,14 +448,14 @@ gates.Y21 = () => {
   assert.ok(/kalshiTradeFilter = sel\.value === 'all' \? 'all' : 'bot'; kalshiLiveShow\.page = 0;/.test(html), 'changing it returns to the first page');
 };
 
-// Y22: Mono Ink is an optional skin chosen under Settings, Theme. It only re-points tokens, never the gain or loss colors, and it is applied before first paint.
+// Y22: Mono Ink light is the ONLY theme (the owner, Oct 23, 2026). The page carries it from the first byte and nothing changes it: no dark palette, no theme choice in Settings, no stored preference read. It only re-points tokens, never the gain or loss colors.
 gates.Y22 = () => {
-  const light = /html\[data-skin="mono"\]\{([\s\S]*?)\}/.exec(html)[1], dark = /html\[data-skin="mono"\]\[data-theme="dark"\]\{([\s\S]*?)\}/.exec(html)[1];
-  assert.ok(/--paper: #000000/.test(light) && /--paper: #FFFFFF/.test(dark) && /--radius: 4px/.test(light), 'a light and a dark Mono Ink, with sharp corners');
-  assert.ok(!/--gain|--loss/.test(light + dark), 'gain and loss colors are never overridden by a skin (--loss is the live trading safety color)');
-  assert.ok(/shwoopnet:skin'\) === 'mono'\)\{ document\.documentElement\.setAttribute\('data-skin', 'mono'\)/.test(html), 'applied by the inline script before first paint');
-  assert.ok(/id="skinChoice"/.test(html) && /data-value="ledger">Ledger</.test(html) && /data-value="mono">Mono Ink</.test(html), 'a Theme choice in Settings');
-  assert.ok(/syncUserSetting\('skin', skin\)/.test(html) && /skin: s\.skin === 'mono' \? 'mono' : \(s\.skin === 'ledger' \? 'ledger' : null\)/.test(html) && /if\(shaped\.skin !== null\)\{ applySkinPref\(shaped\.skin, true\); \}/.test(html), 'synced with the account, and an unsynced account keeps the device choice');
+  assert.ok(/<html lang="en" data-skin="mono" data-theme="light">/.test(html), 'the page is Mono Ink light from the first paint');
+  const light = /html\[data-skin="mono"\]\{([\s\S]*?)\}/.exec(html)[1];
+  assert.ok(/--paper: #000000/.test(light) && /--radius: 4px/.test(light), 'black ink, sharp corners');
+  assert.ok(!/--gain|--loss/.test(light), 'gain and loss colors are never overridden by a skin (--loss is the live trading safety color)');
+  assert.ok(!/data-theme="dark"/.test(html.replace(/\/\*[\s\S]*?\*\//g, '').replace(/removed Oct 23[^\n]*/g, '')), 'no dark palette is left in the page');
+  assert.ok(!/id="skinChoice"|id="darkModeToggle"|applySkinPref|applyDarkModePref|shwoopnet:darkMode|shwoopnet:skin/.test(html), 'no theme switch and no stored theme choice is read or written');
 };
 
 // Y23: the Kalshi page uses more width on a wide monitor, and the other pages keep the 1400px column.
