@@ -2952,7 +2952,7 @@
     var limit = stopAt + addonAtRisk, used = Math.max(0, peak - worst);
     var winCap = sizing && Number.isFinite(base) ? 0.055 * base : null, winMax = 0;
     Object.keys(windowUsed).forEach(function(k){ if(windowUsed[k] > winMax){ winMax = windowUsed[k]; } });
-    return { net: net, openCost: openCost, used: used, limit: limit, fraction: limit > 0 ? Math.min(1, used / limit) : 0, windowUsed: winMax, windowCap: winCap, trades: trades };
+    return { base: Number.isFinite(base) && base > 0 ? base : null, net: net, openCost: openCost, used: used, limit: limit, fraction: limit > 0 ? Math.min(1, used / limit) : 0, windowUsed: winMax, windowCap: winCap, trades: trades };
   }
   // The heartbeat monitor (the owner, Oct 23, 2026: "an actual heartbeat monitor design"). A five minute strip like a hospital monitor: a flat line with one beat each time the bot checks, scrolling left as time passes, and the line
   // goes flat and red when the beats stop. Only beats this page has SEEN are drawn (the server keeps just the latest check time, so earlier minutes are not known after a reload); it fills in while the page stays open.
@@ -3032,11 +3032,16 @@
     var orders = kalshiResolveOrders(kalshiLiveOrders, a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
     var m = kalshiRiskMeter(orders, s, now);
     rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
-      '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + escapeHtml(kalshiMoney(m.used)) + ' of ' + escapeHtml(kalshiMoney(m.limit)) + ' used (' + Math.round(m.fraction * 100) + '%)</span></div>' +
-      '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
-      '<div class="kal-rows"><div><span class="kal-k">At risk in open orders now</span><b>' + escapeHtml(kalshiMoney(m.openCost)) + '</b></div>' +
-      (m.windowCap !== null ? '<div><span class="kal-k">Fullest open window</span><b>' + escapeHtml(kalshiMoney(m.windowUsed)) + ' of ' + escapeHtml(kalshiMoney(m.windowCap)) + '</b></div>' : '') + '</div>';
-    kalshiStatusTick();
+      (function(){
+        // Percentages only (the owner, Oct 23, 2026), so this card can stay readable under Privacy view: no dollar figure is drawn here.
+        var pct = function(x){ return Math.round(x * 100) + '%'; };
+        var openShare = m.base ? m.openCost / m.base : (m.limit > 0 ? m.openCost / m.limit : 0);
+        return '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + pct(m.fraction) + ' of the loss stop used</span></div>' +
+          '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
+          '<div class="kal-rows"><div><span class="kal-k">' + (m.base ? 'Open orders, share of the account' : 'Open orders, share of the stop') + '</span><b>' + pct(openShare) + '</b></div>' +
+          (m.windowCap !== null && m.windowCap > 0 ? '<div><span class="kal-k">Fullest open window</span><b>' + pct(m.windowUsed / m.windowCap) + ' of its limit</b></div>' : '') + '</div>';
+      })();
+kalshiStatusTick();
   }
   // Once a second, only the two lines that move: how long since the last check and the countdown to the next look.
   function kalshiStatusTick(){
