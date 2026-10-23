@@ -189,7 +189,13 @@
   /* The header spans the whole width so the logo sits above the rail, flush with it (the owner, Oct 23, 2026: "it should be above the navigation bar"); only the content and the footer step over to clear the rail. */
   .app{ margin-left: 0; margin-right: auto; max-width: 1800px; }
   /* The header stays put on a wide screen so the rail below it never floats in the middle of a scrolled page (the owner, Oct 23, 2026: "bug in here"). */
-  @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:transparent; transition:background .25s, backdrop-filter .25s; } .topbar.scrolled{ background:linear-gradient(180deg, rgba(10,10,10,.72), rgba(10,10,10,0)); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); } }
+  /* The header is a soft glass band that fades into the page (the owner, Oct 23, 2026: "it could flow / transition a little more, feels like no header almost"): a blurred, darkened wash that thins to nothing at its lower edge so the slogan wallpaper and the cards never meet a hard line, and a faint hairline that fades at both ends and gets stronger once the page has scrolled under it. */
+  @media (min-width: 901px){
+    .topbar{ position:sticky; top:0; z-index:150; }
+    .topbar::before{ content:''; position:absolute; inset:0 0 -26px 0; z-index:-1; pointer-events:none; background:linear-gradient(180deg, rgba(10,10,10,.84), rgba(10,10,10,.55) 55%, rgba(10,10,10,0)); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); -webkit-mask-image:linear-gradient(180deg, #000 58%, transparent); mask-image:linear-gradient(180deg, #000 58%, transparent); transition:opacity .25s ease; }
+    .topbar::after{ content:''; position:absolute; left:28px; right:28px; bottom:-1px; height:1px; pointer-events:none; background:linear-gradient(90deg, transparent, rgba(255,255,255,.16) 18%, rgba(255,255,255,.16) 82%, transparent); opacity:.45; transition:opacity .25s ease; }
+    .topbar.scrolled::after{ opacity:1; }
+  }
   .app-pages, .site-footer{ padding-left: 0; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   .brand{
