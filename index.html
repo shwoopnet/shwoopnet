@@ -157,16 +157,19 @@
   .side-nav-item.current .side-nav-icon{ opacity:.9; }
   .side-nav-label{ letter-spacing:.02em; }
 
-  /* Desktop: a slim floating pill of icons on the left edge (the owner, Oct 23, 2026: "F was a good idea"). It takes no layout width beyond its own 56px; the page name shows as a tooltip on hover or keyboard focus. On a phone it is the bottom bar below. */
+  /* Desktop: a small group of four icons in the top right, beside the clock (the owner, Oct 23, 2026: "F was a good idea", then "move it to the top right next to the clock", then "#2 there is nice", the ghost look: no box, dimmed icons, a white tile on the open page). It is fixed so it stays put while the page scrolls, takes no width from the pages, and the page name shows as a tooltip on hover or keyboard focus. On a phone it is the bottom bar below. */
   .side-nav-glyph{ display:none; }
   @media (min-width: 901px){
-    .side-nav{ top:50%; transform:translateY(-50%); left:14px; width:56px; padding:6px; gap:4px; border-radius:16px; background:rgba(19,19,19,.82); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); overflow:visible; max-height:none; box-shadow:0 20px 40px -12px rgba(0,0,0,.85); }
-    .side-nav-item{ width:42px; height:42px; padding:0; justify-content:center; }
+    .side-nav{ top:22px; right:18px; left:auto; width:auto; flex-direction:row; align-items:center; gap:4px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; overflow:visible; max-height:none; z-index:160; }
+    .side-nav-item:not(.current){ opacity:.7; }
+    .side-nav-item.current{ box-shadow:0 10px 24px -8px rgba(0,0,0,.9); }
+    .side-nav-item{ width:36px; height:36px; padding:0; justify-content:center; border-radius:9px; }
     .side-nav-icon{ display:none; }
-    .side-nav-glyph{ display:block; width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-    .side-nav-label{ position:absolute; left:calc(100% + 12px); top:50%; transform:translateY(-50%); background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease; }
+    .side-nav-glyph{ display:block; width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .side-nav-label{ position:absolute; right:0; top:calc(100% + 10px); background:var(--panel-raised); border:1px solid var(--border); color:var(--paper); font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease; }
     .side-nav-item:hover .side-nav-label, .side-nav-item:focus-visible .side-nav-label{ opacity:1; }
-    .side-nav-divider{ margin:2px 6px; }
+    .side-nav-divider{ width:1px; height:auto; align-self:stretch; margin:6px 2px; }
+    .topbar-right{ margin-right:176px; }
   }
   @media (max-width: 900px){
     .side-nav{
@@ -187,7 +190,7 @@
   .app{ margin-left: 0; margin-right: auto; max-width: 1800px; }
   /* The header stays put on a wide screen so the rail below it never floats in the middle of a scrolled page (the owner, Oct 23, 2026: "bug in here"). */
   @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:transparent; transition:background .25s, backdrop-filter .25s; } .topbar.scrolled{ background:linear-gradient(180deg, rgba(10,10,10,.72), rgba(10,10,10,0)); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); } }
-  .app-pages, .site-footer{ padding-left: 88px; }
+  .app-pages, .site-footer{ padding-left: 0; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   .brand{
     display:flex; align-items:center; gap:12px;
