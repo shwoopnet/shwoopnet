@@ -1,0 +1,86 @@
+{
+ "rule": "smooth = at least 4 earlier 1-minute candles AND every minute change of the favourite side's mid >= -0.005 AND (decision mid - first mid) >= 0.10",
+ "vectors": [
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.58,
+    0.66,
+    0.74,
+    0.82,
+    0.91
+   ],
+   "earlier_candles": 5,
+   "min_step": 0.08,
+   "climb": 0.41,
+   "smooth": true
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.58,
+    0.575,
+    0.74,
+    0.82,
+    0.91
+   ],
+   "earlier_candles": 5,
+   "min_step": -0.005,
+   "climb": 0.41,
+   "smooth": false
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.58,
+    0.574,
+    0.74,
+    0.82,
+    0.91
+   ],
+   "earlier_candles": 5,
+   "min_step": -0.006,
+   "climb": 0.41,
+   "smooth": false
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.6,
+    0.65,
+    0.7,
+    0.72,
+    0.74,
+    0.8
+   ],
+   "earlier_candles": 5,
+   "min_step": 0.02,
+   "climb": 0.2,
+   "smooth": true
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9
+   ],
+   "earlier_candles": 4,
+   "min_step": 0.1,
+   "climb": 0.4,
+   "smooth": true
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.91,
+    0.92,
+    0.93,
+    0.92
+   ],
+   "earlier_candles": 3,
+   "min_step": -0.01,
+   "climb": 0.01,
+   "smooth": false
+  }
+ ]
+}
