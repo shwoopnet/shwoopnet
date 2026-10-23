@@ -258,6 +258,31 @@
   .brief-grid{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"news side" "news earn"; gap:18px; align-items:start; margin-bottom:36px; }
   .brief-news{ grid-area:news; } .brief-side{ grid-area:side; } .brief-earn{ grid-area:earn; }
   @media (max-width: 900px){ .brief-grid{ grid-template-columns:1fr; grid-template-areas:"side" "news" "earn"; } }
+  .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:stretch; }
+  .brief-cat .brief-eyebrow, .brief-next .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
+  .brief-ev{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; border-top:1px solid var(--border); font-size:13px; }
+  .brief-ev:first-child{ border-top:0; }
+  .brief-ev-l{ display:flex; gap:16px; align-items:baseline; min-width:0; }
+  .brief-ev-t{ font:800 15px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; width:76px; flex:0 0 76px; }
+  .brief-ev-n{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .brief-ev-pill{ font:700 10.5px 'Public Sans', sans-serif; border:1.5px solid var(--border); border-radius:999px; padding:2px 10px; color:var(--muted); flex-shrink:0; }
+  .brief-ev-pill.hi{ border-color:var(--paper); color:var(--paper); }
+  .brief-next-time{ font:800 clamp(34px, 5vw, 54px)/1.05 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; margin:6px 0 8px; }
+  .brief-next-name{ color:var(--muted); font-size:14px; }
+  .brief-charts{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; margin-bottom:18px; }
+  @media (max-width: 1100px){ .brief-charts{ grid-template-columns:1fr; } }
+  @media (max-width: 900px){ .brief-top{ grid-template-columns:1fr; } }
+  .brief-chart-grp{ display:grid; gap:14px; }
+  .brief-chart{ border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:rgba(255,255,255,.025); min-width:0; }
+  .brief-chart-hd{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .brief-chart-name{ color:var(--muted); font-size:12px; }
+  .brief-chart-px{ font:800 20px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; margin:2px 0; }
+  .brief-chart-chg{ font-size:12px; }
+  .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss); }
+  .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; }
+  .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
+  .brief-chart svg line{ stroke:var(--border); stroke-width:1; stroke-dasharray:3 4; vector-effect:non-scaling-stroke; }
+  .brief-newswin{ margin-bottom:36px; }
   .brief-hero .brief-lede{ margin-bottom:0; }
   .index-card{ border-radius:16px; }
   .brief-hero{ padding: 28px 30px; margin-top:18px; margin-bottom:18px; }
@@ -1039,9 +1064,25 @@
     <div class="app-pages">
   <div class="tape" id="marketTape" role="region" aria-label="Markets" hidden></div>
   <main class="page" id="page-brief">
-    <div class="brief-win brief-blank">
-      <div class="trades-title">Market Brief</div>
-      <div class="trades-sub">Being redesigned.</div>
+    <div class="brief-top">
+      <div class="brief-win brief-cat">
+        <div class="brief-eyebrow">Today's catalysts (CT)</div>
+        <div id="briefEvents"><div class="news-placeholder">No scheduled events loaded yet.</div></div>
+      </div>
+      <div class="brief-win brief-next">
+        <div class="brief-eyebrow">Next up</div>
+        <div class="brief-next-time mono" id="briefNextTime">&mdash;</div>
+        <div class="brief-next-name" id="briefNextName">Waiting for the calendar</div>
+      </div>
+    </div>
+
+    <div class="brief-charts" id="briefCharts"></div>
+
+    <div class="brief-win brief-newswin">
+      <div class="brief-section-title">Market News</div>
+      <div class="market-news-list" id="marketNewsList">
+        <div class="news-placeholder">Sign in to see real market headlines.</div>
+      </div>
     </div>
 
     <!-- The old Brief sections stay in the page, hidden, so the data code keeps its elements until the new design is chosen. -->
@@ -1060,12 +1101,6 @@
     <div class="brief-asof" id="briefAsOf"></div>
 
     <div class="brief-grid">
-      <div class="brief-win brief-news">
-        <div class="brief-section-title">Market News</div>
-        <div class="market-news-list" id="marketNewsList">
-          <div class="news-placeholder">Sign in to see real market headlines.</div>
-        </div>
-      </div>
       <div class="brief-win brief-side">
         <div class="brief-section-title">Market Sentiment</div>
         <div class="breadth-widget" id="breadthWidget"></div>
@@ -3870,6 +3905,78 @@
     el.hidden = false;
     if(asof){ asof.textContent = a.text; asof.className = 'brief-asof' + (a.stale ? ' stale' : ''); }
   }
+
+  // ---------- The Brief (the owner chose concept B, Oct 23, 2026): the week's scheduled events with a countdown, three pairs of small charts (crypto, equities, commodities) and the news ----------
+  // Everything comes from shared/marketTape (written every 5 minutes by the keyless marketTapeTick); a symbol or the calendar that has not arrived is shown as missing, never as a made-up number.
+  var BRIEF_CHART_GROUPS = [
+    { title: 'Crypto', items: [{ sym: 'BTC-USD', name: 'Bitcoin' }, { sym: 'ETH-USD', name: 'Ethereum' }] },
+    { title: 'Equities', items: [{ sym: 'SPY', name: 'S&P 500 (SPY)' }, { sym: 'QQQ', name: 'Nasdaq 100 (QQQ)' }] },
+    { title: 'Commodities', items: [{ sym: 'GC=F', name: 'Gold' }, { sym: 'CL=F', name: 'Crude oil' }] }
+  ];
+  function briefChartHtml(it, q){
+    if(!q || !(q.price > 0) || !(q.prevClose > 0)){
+      return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span></div><div class="brief-chart-px mono">&mdash;</div></div>';
+    }
+    var d = pct(q.price, q.prevClose), up = d >= 0;
+    var dec = q.price >= 1000 ? 0 : 2;
+    var px = q.price.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    var svg = '';
+    var ser = Array.isArray(q.series) ? q.series.filter(function(v){ return typeof v === 'number' && isFinite(v); }) : [];
+    if(ser.length >= 2){
+      var lo = Math.min.apply(null, ser.concat([q.prevClose])), hi = Math.max.apply(null, ser.concat([q.prevClose]));
+      var span = (hi - lo) || 1;
+      var y = function(v){ return (58 - ((v - lo) / span) * 54).toFixed(1); };
+      var pts = ser.map(function(v, i){ return (i * (200 / (ser.length - 1))).toFixed(1) + ',' + y(v); }).join(' ');
+      svg = '<svg viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="200" y1="' + y(q.prevClose) + '" y2="' + y(q.prevClose) + '"></line><polyline points="' + pts + '"></polyline></svg>';
+    }
+    return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span>' +
+      '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(2) + '%</span></div>' +
+      '<div class="brief-chart-px mono">' + px + '</div>' + svg + '</div>';
+  }
+  function briefEventsList(now){
+    var ev = marketTapeData && Array.isArray(marketTapeData.events) ? marketTapeData.events : [];
+    return ev.filter(function(e){ return e && Number.isFinite(e.at) && e.at >= now - 30 * 60000; }).sort(function(a, b){ return a.at - b.at; });
+  }
+  function renderBriefEvents(){
+    var el = document.getElementById('briefEvents');
+    if(!el){ return; }
+    var now = Date.now();
+    var list = briefEventsList(now).slice(0, 7);
+    if(!list.length){ el.innerHTML = '<div class="news-placeholder">No scheduled events loaded yet.</div>'; return; }
+    var today = kalDate(now);
+    el.innerHTML = list.map(function(e){
+      var when = kalDate(e.at) === today ? kalTime(e.at) : kalDate(e.at);
+      return '<div class="brief-ev"><div class="brief-ev-l"><span class="brief-ev-t mono">' + escapeHtml(String(when)) + '</span><span class="brief-ev-n">' + escapeHtml(String(e.title || '')) + ' <span class="tape-asof">' + escapeHtml(String(e.country || '')) + '</span></span></div>' +
+        '<span class="brief-ev-pill' + (e.impact === 'High' ? ' hi' : '') + '">' + escapeHtml(String(e.impact || '')) + '</span></div>';
+    }).join('');
+  }
+  function briefCountdownText(ms){
+    var s = Math.max(0, Math.floor(ms / 1000));
+    var d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    var two = function(n){ return (n < 10 ? '0' : '') + n; };
+    return d > 0 ? d + 'd ' + two(h) + 'h' : two(h) + ':' + two(m) + ':' + two(sec);
+  }
+  function renderBriefNext(){
+    var t = document.getElementById('briefNextTime'), n = document.getElementById('briefNextName');
+    if(!t || !n){ return; }
+    var now = Date.now();
+    var next = briefEventsList(now).filter(function(e){ return e.at > now; })[0];
+    if(!next){ t.textContent = '\u2014'; n.textContent = 'No scheduled event loaded'; return; }
+    t.textContent = briefCountdownText(next.at - now);
+    n.textContent = 'until ' + String(next.title || '') + ' (' + String(next.country || '') + ')';
+  }
+  function renderBriefCharts(){
+    var el = document.getElementById('briefCharts');
+    if(!el){ return; }
+    var quotes = marketTapeData && marketTapeData.quotes ? marketTapeData.quotes : {};
+    el.innerHTML = BRIEF_CHART_GROUPS.map(function(g){
+      return '<div class="brief-win"><div class="brief-section-title">' + escapeHtml(g.title) + '</div><div class="brief-chart-grp">' +
+        g.items.map(function(it){ return briefChartHtml(it, quotes[it.sym]); }).join('') + '</div></div>';
+    }).join('');
+  }
+  function renderBriefPage(){ renderBriefEvents(); renderBriefNext(); renderBriefCharts(); }
+  setInterval(function(){ if(!document.hidden){ renderBriefNext(); } }, 1000);
+
   function handleMarketTapeUpdate(data){
     marketTapeData = data || null;
     if(data && data.quotes){
@@ -3885,6 +3992,7 @@
       renderBriefHeadline();
       }
     renderMarketTape();
+    renderBriefPage();
     if(tapeNews()){ renderMarketNews(tapeNews()); }
   }
 
@@ -3976,6 +4084,7 @@
   renderIndices();
   renderSentiment();
   renderBriefHeadline();
+  renderBriefPage();
   updateClock();
 
   // A direct link (e.g. #settings) always wins. Then the Settings > Default

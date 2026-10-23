@@ -19,6 +19,8 @@ const SYMBOLS = [
   { sym: "^VIX", name: "VIX", kind: "index", tape: true },
   { sym: "GC=F", name: "Gold", kind: "future", tape: true },
   { sym: "BTC-USD", name: "Bitcoin", kind: "crypto", tape: true },
+  { sym: "ETH-USD", name: "Ethereum", kind: "crypto", tape: false },
+  { sym: "CL=F", name: "Crude oil", kind: "future", tape: false },
   { sym: "SPY", name: "S&P 500 (SPY)", kind: "etf", tape: false },
   { sym: "QQQ", name: "Nasdaq 100 (QQQ)", kind: "etf", tape: false },
   { sym: "DIA", name: "Dow (DIA)", kind: "etf", tape: false },
@@ -27,8 +29,15 @@ const SYMBOLS = [
 const NEWS_FEEDS = [
   { source: "CNBC", url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114" },
   { source: "MarketWatch", url: "https://feeds.content.dowjones.io/public/rss/mw_topstories" },
+  { source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/" },
+  { source: "BBC Business", url: "https://feeds.bbci.co.uk/news/business/rss.xml" },
 ];
-const NEWS_KEEP = 6;
+const NEWS_KEEP = 10;
+// The week's scheduled events (the Brief's catalysts): a public weekly calendar of economic releases. Unofficial, so a failure only leaves the last stored list in place. Only high and medium impact
+// events from the major economies are kept, as plain strings and numbers.
+const EVENTS_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json";
+const EVENT_COUNTRIES = ["USD", "EUR", "GBP", "JPY", "CNY"];
+const EVENTS_KEEP = 40;
 const FETCH_TIMEOUT_MS = 8000;
 const UA = "Mozilla/5.0 (compatible; shwoopnet-market-tape)";
 
@@ -57,7 +66,34 @@ function parseChart(json, nowMs) {
     else if (p.post && t >= p.regular.end && t < p.post.end) state = "post";
     else state = "closed";
   }
-  return { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state };
+  return { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state, series: chartSeries(r) };
+}
+
+// The day's closes for the Brief's small charts: numbers only, gaps dropped, thinned to at most SERIES_MAX points. [] when the answer has none, so a chart simply does not draw.
+const SERIES_MAX = 96;
+function chartSeries(r) {
+  const q = r && r.indicators && Array.isArray(r.indicators.quote) ? r.indicators.quote[0] : null;
+  const closes = q && Array.isArray(q.close) ? q.close.map(num).filter((v) => v !== null && v > 0) : [];
+  if (closes.length < 2) return [];
+  const step = Math.max(1, Math.ceil(closes.length / SERIES_MAX));
+  const out = closes.filter((_, i) => i % step === 0 || i === closes.length - 1);
+  return out.map((v) => Number(v.toPrecision(7)));
+}
+
+// The weekly calendar to {title, country, at (ms), impact}. Anything that is not a high or medium event of a listed economy, or has no readable time, is dropped. Text is cut and kept as a plain string.
+function parseEvents(json, nowMs) {
+  const rows = Array.isArray(json) ? json : [];
+  const out = [];
+  for (const e of rows) {
+    if (!e || typeof e.title !== "string" || typeof e.country !== "string") continue;
+    if (!EVENT_COUNTRIES.includes(e.country)) continue;
+    const impact = e.impact === "High" ? "High" : (e.impact === "Medium" ? "Medium" : null);
+    if (!impact) continue;
+    const at = Date.parse(e.date);
+    if (!Number.isFinite(at) || at < nowMs - 3 * 3600 * 1000) continue;
+    out.push({ title: e.title.slice(0, 120), country: e.country, at, impact });
+  }
+  return out.sort((a, b) => a.at - b.at).slice(0, EVENTS_KEEP);
 }
 
 function decodeEntities(s) {
@@ -134,7 +170,9 @@ async function readTape({ fetchFn, now }) {
     catch (e) { errors.push(f.source + ": " + String((e && e.message) || e).slice(0, 80)); }
   }));
   const news = lists.length ? mergeNews(lists) : null;
-  return { quotes, news: news && news.length ? news : null, errors };
+  let events = null;
+  try { events = parseEvents(JSON.parse(await getText(fetchFn, EVENTS_URL)), nowMs); } catch (e) { errors.push("calendar: " + String((e && e.message) || e).slice(0, 80)); }
+  return { quotes, news: news && news.length ? news : null, events: events && events.length ? events : null, errors };
 }
 
-module.exports = { SYMBOLS, NEWS_FEEDS, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
+module.exports = { SYMBOLS, NEWS_FEEDS, EVENTS_URL, parseEvents, chartSeries, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };

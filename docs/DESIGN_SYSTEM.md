@@ -95,7 +95,7 @@ Nothing else. No grid, no grain, no drifting blobs, no ghost wordmark (the owner
 ## 9. Migration order
 
 1. Foundation (done): one black and white palette, the sign-in page.
-2. Market Brief: the first window-grid try was removed at the owner's request; new concepts are being chosen.
+2. Market Brief: concept B built (catalysts with countdown, crypto, equities and commodities charts, news); needs the market tape function deployed for the data.
 3. Navigation: done, the window rail (the owner: fine for now).
 4. Bot page, Data page, Settings.
 5. Shared parts: buttons, inputs, menus, toasts, tables, charts (white lines, gain and loss only for verdicts).
