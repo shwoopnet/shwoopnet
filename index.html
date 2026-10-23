@@ -245,6 +245,17 @@
   .settings-row:last-of-type{ border-bottom:none; }
   .settings-row-title{ font-size:13.5px; margin-bottom:4px; }
   .settings-row-desc{ font-size:11.5px; color: var(--muted); }
+  /* Privacy: one master switch and a short list of what it covers, indented under it so the two levels read at a glance (the owner, Oct 23, 2026: "make it look like a master switch and some sub options"). The list is quieter while the master is off but can still be set. */
+  .settings-subrows{ margin:0 22px 14px 34px; padding:2px 0 2px 18px; border-left:1px solid var(--border); transition:opacity .2s ease; }
+  .settings-sublabel{ font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:4px 0 6px; }
+  .settings-subrow{ padding:9px 0; border-bottom:0; min-height:0; }
+  .settings-subrow:hover{ background:none; }
+  .settings-subrow .settings-row-title{ margin:0; font-size:13px; }
+  .settings-subtext{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; min-width:0; }
+  .settings-row-hint{ font-size:11.5px; color:var(--muted); }
+  #privacyCard[data-master="off"] .settings-subrows{ opacity:.55; }
+  @media screen and (max-width:700px){ .settings-subrows{ margin-left:14px; margin-right:8px; padding-left:12px; } .settings-subtext{ display:block; } .settings-row-hint{ margin-top:2px; } }
+  .settings-page{ max-width:960px; }
   .settings-choice-group{ display:flex; gap:4px; }
 
   .settings-toggle-switch{
@@ -1356,69 +1367,54 @@
 
       <div class="settings-section">
         <div class="settings-section-title">Privacy</div>
-        <div class="settings-card">
+        <div class="settings-card" id="privacyCard" data-master="off">
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Privacy view</div>
-              <div class="settings-row-desc">Replaces the figures you pick below with **** on the Bot and Data pages, for showing someone your screen. The sign stays, so a loss still reads as a loss. It switches off when the page reloads. The Privacy button on the Bot page does the same.</div>
+              <div class="settings-row-desc">Shows **** instead of dollar amounts, for sharing your screen. Switches off when the page reloads.</div>
             </div>
             <button class="settings-toggle-switch" id="privacyToggle" role="switch" aria-checked="false" aria-label="Toggle privacy view">
               <span class="toggle-knob"></span>
             </button>
           </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide account balance</div>
-              <div class="settings-row-desc">The account total, stake per trade, reinvest pool and the dollar limit in the loss stop.</div>
+          <div class="settings-subrows" role="group" aria-label="What privacy view hides">
+            <div class="settings-sublabel">What it hides</div>
+            <div class="settings-row settings-subrow">
+              <div class="settings-subtext"><div class="settings-row-title">Account balance</div><div class="settings-row-hint">Total, stake, pool and the stop limit</div></div>
+              <button class="settings-toggle-switch" id="privacyBalance" role="switch" aria-checked="true" aria-label="Hide account balance">
+                <span class="toggle-knob"></span>
+              </button>
             </div>
-            <button class="settings-toggle-switch" id="privacyBalance" role="switch" aria-checked="true" aria-label="Hide account balance">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide today's result</div>
-              <div class="settings-row-desc">The Today line on the account card.</div>
+            <div class="settings-row settings-subrow">
+              <div class="settings-subtext"><div class="settings-row-title">Today's result</div><div class="settings-row-hint">The Today line</div></div>
+              <button class="settings-toggle-switch" id="privacyToday" role="switch" aria-checked="true" aria-label="Hide today's result">
+                <span class="toggle-knob"></span>
+              </button>
             </div>
-            <button class="settings-toggle-switch" id="privacyToday" role="switch" aria-checked="true" aria-label="Hide today's result">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide profit and loss on trades</div>
-              <div class="settings-row-desc">The result on each recent trade.</div>
+            <div class="settings-row settings-subrow">
+              <div class="settings-subtext"><div class="settings-row-title">Profit and loss on trades</div><div class="settings-row-hint">The result on each recent trade</div></div>
+              <button class="settings-toggle-switch" id="privacyTrades" role="switch" aria-checked="true" aria-label="Hide profit and loss on trades">
+                <span class="toggle-knob"></span>
+              </button>
             </div>
-            <button class="settings-toggle-switch" id="privacyTrades" role="switch" aria-checked="true" aria-label="Hide profit and loss on trades">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide open position figures</div>
-              <div class="settings-row-desc">Cost, if it wins, if it loses and cash out on each open position.</div>
+            <div class="settings-row settings-subrow">
+              <div class="settings-subtext"><div class="settings-row-title">Open position figures</div><div class="settings-row-hint">Cost, if it wins, if it loses, cash out</div></div>
+              <button class="settings-toggle-switch" id="privacyPositions" role="switch" aria-checked="true" aria-label="Hide open position figures">
+                <span class="toggle-knob"></span>
+              </button>
             </div>
-            <button class="settings-toggle-switch" id="privacyPositions" role="switch" aria-checked="true" aria-label="Hide open position figures">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide numbers on the Data page</div>
-              <div class="settings-row-desc">Every dollar figure in the Data page charts and tables.</div>
+            <div class="settings-row settings-subrow">
+              <div class="settings-subtext"><div class="settings-row-title">Data page numbers</div><div class="settings-row-hint">Every dollar figure on the Data page</div></div>
+              <button class="settings-toggle-switch" id="privacyData" role="switch" aria-checked="true" aria-label="Hide data page numbers">
+                <span class="toggle-knob"></span>
+              </button>
             </div>
-            <button class="settings-toggle-switch" id="privacyData" role="switch" aria-checked="true" aria-label="Hide numbers on the Data page">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide the Tools menu</div>
-              <div class="settings-row-desc">The Tools menu holds the raw account read and the exports.</div>
+            <div class="settings-row settings-subrow">
+              <div class="settings-subtext"><div class="settings-row-title">Tools menu</div><div class="settings-row-hint">Hidden entirely</div></div>
+              <button class="settings-toggle-switch" id="privacyTools" role="switch" aria-checked="true" aria-label="Hide tools menu">
+                <span class="toggle-knob"></span>
+              </button>
             </div>
-            <button class="settings-toggle-switch" id="privacyTools" role="switch" aria-checked="true" aria-label="Hide the Tools menu">
-              <span class="toggle-knob"></span>
-            </button>
           </div>
         </div>
       </div>
@@ -1756,6 +1752,7 @@
   var privacyBtns = { master: document.getElementById('privacyToggle'), balance: document.getElementById('privacyBalance'), today: document.getElementById('privacyToday'), trades: document.getElementById('privacyTrades'), positions: document.getElementById('privacyPositions'), data: document.getElementById('privacyData'), tools: document.getElementById('privacyTools') };
   function kalshiPrivacyUi(on){
     privacyBtns.master.setAttribute('aria-checked', on ? 'true' : 'false');
+    var pc = document.getElementById('privacyCard'); if(pc){ pc.setAttribute('data-master', on ? 'on' : 'off'); }
     var hb = document.getElementById('kalPresentBtn');
     if(hb){ hb.textContent = on ? 'Privacy on' : 'Privacy'; hb.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   }
