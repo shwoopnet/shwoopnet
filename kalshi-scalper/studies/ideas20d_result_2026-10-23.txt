@@ -1,0 +1,17 @@
+IDEAS20D: Bitcoin 7393 and Ethereum 7393 markets, discovery before 2026-09-27
+E540  SESSION_00_06   FALSIFIED          disc n=  672  -2.51c z -1.75 | conf n=  364  -0.41c z -0.22 | all  -1.77c z -1.55 PF 0.98 coins+ 0
+E540  SESSION_06_12   NOT_ENOUGH_DATA    disc n=  683  +2.44c z +1.95 | conf n=  375  +0.54c z +0.36 | all  +1.77c z +1.81 PF 1.40 coins+ 2
+E540  SESSION_12_18   FALSIFIED          disc n=  743  -0.31c z -0.25 | conf n=  391  -1.68c z -0.72 | all  -0.78c z -0.68 PF 1.07 coins+ 1
+E540  SESSION_18_24   FALSIFIED          disc n=  728  +0.34c z +0.29 | conf n=  348  +1.73c z +0.88 | all  +0.79c z +0.77 PF 1.26 coins+ 2
+E540  US_OPEN         NOT_ENOUGH_DATA    disc n=  205  -2.90c z -1.09 | conf n=   93  -6.38c z -1.42 | all  -3.99c z -1.72 PF 0.82 coins+ 0
+E540  DATA_0830ET     NOT_ENOUGH_DATA    disc n=  206  -0.71c z -0.30 | conf n=   98  -0.85c z -0.25 | all  -0.76c z -0.39 PF 1.08 coins+ 1
+E540  CROSS_AGREE     FALSIFIED          disc n= 1596  -0.71c z -0.69 | conf n=  838  -0.06c z -0.04 | all  -0.49c z -0.59 PF 1.11 coins+ 0
+E540  CROSS_ALONE     FALSIFIED          disc n= 1228  +0.90c z +0.98 | conf n=  640  +0.08c z +0.06 | all  +0.62c z +0.82 PF 1.22 coins+ 2
+L1360 SESSION_00_06   FALSIFIED          disc n=  795  -2.50c z -2.28 | conf n=  385  -0.60c z -0.48 | all  -1.88c z -2.21 PF 0.82 coins+ 0
+L1360 SESSION_06_12   FALSIFIED          disc n=  727  +0.14c z +0.19 | conf n=  368  +0.45c z +0.33 | all  +0.24c z +0.36 PF 1.12 coins+ 1
+L1360 SESSION_12_18   NOT_ENOUGH_DATA    disc n=  772  +2.42c z +3.89 | conf n=  369  -0.81c z -0.38 | all  +1.38c z +1.66 PF 1.40 coins+ 2
+L1360 SESSION_18_24   FALSIFIED          disc n=  789  +0.02c z +0.02 | conf n=  364  +1.01c z +0.69 | all  +0.33c z +0.44 PF 1.14 coins+ 1
+L1360 US_OPEN         NOT_ENOUGH_DATA    disc n=  201  +2.71c z +1.99 | conf n=   98  +0.31c z +0.12 | all  +1.92c z +1.52 PF 1.58 coins+ 2
+L1360 DATA_0830ET     NOT_ENOUGH_DATA    disc n=  187  +1.94c z +1.52 | conf n=   88  -0.68c z -0.19 | all  +1.10c z +0.77 PF 1.33 coins+ 2
+L1360 CROSS_AGREE     FALSIFIED          disc n= 1666  -0.41c z -0.73 | conf n=  744  -1.48c z -1.14 | all  -0.75c z -1.32 PF 0.96 coins+ 0
+L1360 CROSS_ALONE     NOT_ENOUGH_DATA    disc n= 1411  +0.46c z +0.92 | conf n=  740  +1.47c z +1.72 | all  +0.81c z +1.83 PF 1.23 coins+ 2
