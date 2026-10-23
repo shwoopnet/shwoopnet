@@ -61,7 +61,7 @@ Every number is Public Sans with tabular digits, never Titan One. Headings are n
 
 The same ground on every page, signed in or out, and it is the front page's: a vertical gradient from `--ink` to `--front-g1` with one soft light pooled right of centre (`radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%)`, white at 9%), fixed behind the content.
 
-Nothing else. No grid, no grain, no drifting blobs, no ghost wordmark (the owner, Oct 23, 2026: "you still have the shwoop watermark, and some grid in there"; an earlier line here that kept the grid was wrong, the front page never had one). The logo itself stays in the top bar.
+One addition (Oct 23, 2026, the owner: "3 looks sick"): the slogan **Trade less. Live more.** as faint wallpaper on every signed-in page, in staggered rows tilted 8 degrees, the wordmark's lettering at 3.5% white, fixed behind the cards so it only shows in the gaps; it is off with the Limit graphics setting and never moves. Titan One may be used for it (with the wordmark and the front page slogan). Nothing else. No grid, no grain, no drifting blobs, no ghost wordmark (the owner, Oct 23, 2026: "you still have the shwoop watermark, and some grid in there"; an earlier line here that kept the grid was wrong, the front page never had one). The logo itself stays in the top bar.
 
 ## 5. Layout
 

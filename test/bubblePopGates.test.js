@@ -20,6 +20,18 @@ function fnSource(name) {
 }
 
 // The headings and market names (words) use the wordmark's font; every NUMBER stays in the plain font, tabular, so figures like 774.14 stay easy to read (the owner, Oct 21, 2026).
+// BG1: the slogan wallpaper is behind every signed-in page, can never be read as content or clicked, carries no figure, and switches off with Limit graphics.
+gates.BG1 = () => {
+  const m = /<div class="bg-slogan" aria-hidden="true">([\s\S]*?)<\/div>/.exec(html);
+  assert.ok(m, 'the slogan layer exists once, hidden from screen readers');
+  assert.strictEqual((html.match(/class="bg-slogan"/g) || []).length, 1, 'only once, outside every page, so it is the same on all of them');
+  assert.ok(html.indexOf('class="bg-slogan"') < html.indexOf('id="page-brief"'), 'it sits before the pages, not inside one');
+  assert.ok(/^(\s*<p>(Trade less\. Live more\. ){2}Trade less\. Live more\.<\/p>\s*)+$/.test(m[1]) && !/\d/.test(m[1]), 'it says only the slogan, no figure');
+  const rule = /\.bg-slogan\{([^}]*)\}/.exec(css)[1];
+  assert.ok(/position:fixed/.test(rule) && /z-index:-1/.test(rule) && /pointer-events:none/.test(rule), 'fixed behind the content, never catching a click');
+  assert.ok(/color:rgba\(255,255,255,\.0[1-6]\d*\)/.test(rule), 'very faint, white at 6 percent or less');
+  assert.ok(/\[data-reduce-motion="true"\] \.bg-slogan\{ display:none; \}/.test(css), 'off with the Limit graphics setting');
+};
 gates.P1 = () => {
   // Titan One is the wordmark and its ghost only (the owner, Oct 21, 2026): headings and market names are in the plain font too, with no bubble shadow.
   for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-tools-h', '.settings-section-title']) {
@@ -28,7 +40,8 @@ gates.P1 = () => {
   }
   const users = css.split('\n').filter((l) => /Titan One/.test(l) && !/^\s*(\/\*|\*)/.test(l) && !/@font-face/.test(l));   // a @font-face rule loads the font, it does not use it
   // The signed-out front page's slogan (.front-h1) is the one deliberate exception, added at the owner's request (Oct 23, 2026: "that's a sick login page"); it is the brand's slogan lettering, not a heading or a number.
-  assert.ok(users.length <= 3 && users.every((l) => /\.brand-name|font-size:min\(18vw|\.front-h1/.test(l) || /bg-ghost/.test(css)), 'only the wordmark, its ghost and the front page slogan use Titan One: ' + users.map((l) => l.trim().slice(0, 50)).join(' | '));
+  // The slogan behind every signed-in page (.bg-slogan) is the second deliberate exception (the owner, Oct 23, 2026: "3 looks sick"): faint wallpaper lettering, never a heading or a number.
+  assert.ok(users.length <= 3 && users.every((l) => /\.brand-name|font-size:min\(18vw|\.front-h1|\.bg-slogan/.test(l) || /bg-ghost/.test(css)), 'only the wordmark, its ghost and the front page slogan use Titan One: ' + users.map((l) => l.trim().slice(0, 50)).join(' | '));
   for (const sel of ['.kal-tile b', '.kal-bub', '.kal-acct-total']) {
     const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
     assert.ok(m && !/Titan One/.test(m[2]) && /Public Sans/.test(m[2]), sel + ' (a number) is in the plain font');
