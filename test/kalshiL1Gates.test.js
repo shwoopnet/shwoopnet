@@ -1232,6 +1232,47 @@ gates.RL3 = async () => {
   assert.ok(w2.posts.length === 1 && rec2.rng5 === undefined && rec2.rise3 !== undefined, 'a five-mark read logs the rise and no range');
 };
 
+// FS1 to FS3: fixed order sizes (Oct 23, 2026, the owner: "yeah build", on the research session's sizing proposal at a $500 balance). XRP and Dogecoin trade 3 contracts, natural gas 2; Bitcoin and Ethereum stay at 1.
+// Consequence: the larger size reaches only the three markets the history supports, and never grows through the ladder, the profit add-on, a stored value or a second crypto order in the window.
+gates.FS1 = async () => {
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 }, 'exactly these three markets, at exactly these sizes');
+  const one = async (series, ticker, closeAt) => {
+    const w = world({ session: wsess({}), balance: rich, fresh: { [ticker]: { exchange_index: 0, close_time: iso(closeAt) } } });
+    await tick(w, { quotes: [quote({ close_time: iso(closeAt) }, series, ticker)], sizingState: { cap: 40, base: 1000, reviewedAt: NOW - 1000, pool: 50, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+    return w;
+  };
+  const doge = await one('KXDOGE15M', 'KXDOGE15M-26OCT071415-06', NOW + 360000);
+  assert.strictEqual(doge.posts.length === 1 && Number(doge.posts[0].count), 3, 'Dogecoin takes 3 contracts');
+  const xrp = await one('KXXRP15M', XRP10, NOW + 600000);
+  assert.strictEqual(xrp.posts.length === 1 && Number(xrp.posts[0].count), 3, 'XRP takes 3 contracts');
+  const gas = await one('KXNATGAS15M', 'KXNATGAS15M-26OCT071415-10', NOW + 600000);
+  assert.strictEqual(gas.posts.length === 1 && Number(gas.posts[0].count), 2, 'natural gas takes 2 contracts');
+  const btc = await one('KXBTC15M', 'KXBTC15M-26OCT071415-10', NOW + 600000);
+  assert.strictEqual(btc.posts.length === 1 && Number(btc.posts[0].count), 1, 'Bitcoin stays at 1 contract');
+  const eth = await one('KXETH15M', 'KXETH15M-26OCT071415-06', NOW + 360000);
+  assert.strictEqual(eth.posts.length === 1 && Number(eth.posts[0].count), 1, 'Ethereum stays at 1 contract');
+  const aud = await one('KXAUDUSD15M', 'KXAUDUSD15M-26OCT071415-06', NOW + 360000);
+  assert.strictEqual(aud.posts.length === 1 && Number(aud.posts[0].count), 1, 'the other probes stay at 1 contract');
+  for (const w of [doge, xrp, gas]) { const rec = w.docs.get('L1-' + w.posts[0].ticker); assert.ok(!rec.addon && !rec.addonCost, 'no reinvested profit goes into a fixed size, however full the pool is'); }
+};
+gates.FS2 = async () => {
+  // The window limit still holds: with a base too small to afford 3 Dogecoin contracts in one window the order is cut, and it is never cut below the first contract.
+  const tiny = { sizing: true, sizeCap: 1, sizeAddon: 0, sizeBase: 20, sizeNextReview: NOW + 86400000 };
+  const w = world({ session: tiny, balance: rich, fresh: { 'KXDOGE15M-26OCT071415-06': { exchange_index: 0 } } });
+  await tick(w, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')], sizingState: { cap: 1, base: 20, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
+  const n = w.posts.length === 1 ? Number(w.posts[0].count) : 0;
+  assert.ok(n >= 1 && n <= 3, 'a small base cuts the larger size down to what the window limit allows: ' + n);
+  const w2 = world({ session: wsess({}), balance: rich, fresh: { 'KXDOGE15M-26OCT071415-06': { exchange_index: 0 }, 'KXXRP15M-26OCT071415-06': { exchange_index: 0 } } });
+  await tick(w2, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06'), quote({}, 'KXXRP15M', 'KXXRP15M-26OCT071415-06')], sizingState: wstate, setSizingState: async () => {} });
+  assert.strictEqual(w2.posts.length, 1, 'still one crypto order per window, so 3 and 3 never stack');
+};
+gates.FS3 = () => {
+  const src = fnSrcLib();
+  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
+  const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(!/FIXED_CONTRACTS|request\.data\.(ticker|price|count|side)/.test(idx), 'no callable or stored value can change an order size');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
