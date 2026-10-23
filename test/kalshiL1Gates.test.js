@@ -930,6 +930,43 @@ gates.RL2 = async () => {
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.ok(!/keyId|pem/.test(src.slice(src.indexOf('async function logRise'), src.indexOf('async function logRise') + 900)), 'it reads public candles with no key');
 };
+// FL1 and FL2: the path shape flag flips0 is LOGGED on every new order (the research session's FLIPS0 lead, Oct 23, 2026, the owner: "go"). Logging only, same rules as rise3.
+// FL1 reproduces the research session's six parity vectors (flips0_parity_vectors_2026-10-23.json) exactly: a field that disagrees with them is not trusted.
+gates.FL1 = () => {
+  const V = [
+    [[0.5, 0.58, 0.66, 0.74, 0.82, 0.91], 5, 0, true], [[0.5, 0.58, 0.52, 0.74, 0.82, 0.91], 5, 2, false], [[0.5, 0.501, 0.6, 0.7, 0.8, 0.9], 5, 0, true],
+    [[0.62, 0.7, 0.69, 0.75, 0.74, 0.92], 5, 4, false], [[0.5, 0.55, 0.6, 0.8, 0.795, 0.9], 5, 2, false], [[0.9, 0.91, 0.92, 0.93], 3, 0, false],
+  ];
+  const nowSec = Math.floor(NOW / 1000);
+  for (const [mids, earlier, flips, flips0] of V) {
+    // as candles: the favourite is YES here, so the side mid is the YES mid (bid and ask 0.01 either side of it).
+    const cs = mids.map((m, i) => candle(nowSec - 60 * (mids.length - 1 - i), m - 0.01, m + 0.01));
+    const r = live.pathShape(cs, 'yes', nowSec);
+    assert.ok(r.flips === flips && r.flips0 === flips0 && r.earlierCandles === earlier, 'vector ' + JSON.stringify(mids) + ' gave ' + JSON.stringify(r));
+    assert.strictEqual(live.flipsOf(mids), flips, 'flipsOf agrees: ' + JSON.stringify(mids));
+    // a NO order reads the same path from the other side: its mids are one minus the YES mids, and the same shape comes out.
+    const no = live.pathShape(mids.map((m, i) => candle(nowSec - 60 * (mids.length - 1 - i), (1 - m) - 0.01, (1 - m) + 0.01)), 'no', nowSec);
+    assert.ok(no.flips === flips && no.flips0 === flips0, 'a NO side gives the same shape');
+  }
+  assert.strictEqual(live.pathShape([], 'yes', nowSec), null);
+  assert.strictEqual(live.pathShape([candle(nowSec - 600, 0.4, 0.42)], 'yes', nowSec), null, 'a stale latest candle logs nothing');
+};
+gates.FL2 = async () => {
+  const nowSec = Math.floor(NOW / 1000), mids = [0.5, 0.58, 0.66, 0.74, 0.82, 0.91];
+  const cs = mids.map((m, i) => candle(nowSec - 60 * (mids.length - 1 - i), m - 0.01, m + 0.01));
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } }, candles: cs });
+  await tick(w, { quotes: [q10('KXXRP15M', XRP10)] });
+  const rec = w.docs.get('L1-' + XRP10);
+  assert.ok(rec.flips === 0 && rec.flips0 === true && rec.earlierCandles === 5 && Number.isFinite(rec.askAtDecision), 'the order carries the flag: ' + JSON.stringify([rec.flips, rec.flips0, rec.earlierCandles, rec.askAtDecision]));
+  // logging only: the same market with no candles at all sends the identical order.
+  const w0 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } }, candles: [] });
+  await tick(w0, { quotes: [q10('KXXRP15M', XRP10)] });
+  assert.strictEqual(w.posts.length, 1); assert.deepStrictEqual(w.posts, w0.posts, 'the order sent does not depend on the path shape');
+  const order = w.calls.map((c) => c.method + ' ' + c.url.split('/').slice(-1)[0].split('?')[0]);
+  assert.ok(order.indexOf('POST orders') < order.findIndex((x) => /candlesticks/.test(x)), 'read after the order is sent');
+  const src = fnSrcLib(), at = src.indexOf('function pathShape'), body = src.slice(at, src.indexOf('async function logRise'));
+  assert.ok(!/store\.|fetchFn|liveRequest/.test(body), 'the shape is a pure function of the candles');
+};
 // GF1 to GF3: gold first (Oct 21, 2026, docs/GOLD_FIRST_PROPOSAL.md option A). Gold alone keeps the size ladder and is sent first; Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract; the lists change only by a code edit.
 gates.GF1 = async () => {
   assert.deepStrictEqual(live.CAPPED_SERIES, ['KXBTC15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'], 'exactly the four markets that have not earned the ladder');
