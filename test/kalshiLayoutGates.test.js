@@ -406,7 +406,7 @@ gates.Y16 = () => {
   assert.ok(/var\(--gain\)/.test(spark(pts, { from, to, ref: 82400, fmt })), 'green when over it');
   const ys = [...svg.matchAll(/ y1="([\d.]+)"/g)].map((x) => Number(x[1]));
   assert.ok(ys.length === 1 && ys[0] >= 0 && ys[0] <= 86, 'a strike far above the price stays inside the chart');
-  assert.ok(/\(kalshiInTrade\(m\.ticker\) \? kalshiSparkFor\(m\) : ''\) \+ '<\/div>'/.test(html), 'a market row carries its chart only while the account is in a trade in that market');
+  assert.ok(/kalshiSparkFor\(m\) \+ '<\/div>'/.test(html) && !/kalshiInTrade\(m\.ticker\) \? kalshiSparkFor/.test(html) && /kal-brow-held/.test(html), 'every market row carries its chart (the owner, Oct 23, 2026), and a market the account is in is marked, not the only one drawn');
   assert.ok(/fetch\('https:\/\/api\.gold-api\.com\/price\/XAU'\)/.test(html) && /m\.series === 'KXGOLD15M' && m\.strike != null && !kalshiGold\.failed/.test(html), 'gold draws its price against the strike, and falls back to the YES line if the feed fails');
   assert.ok(/now - kalshiGold\.at < 10000/.test(html), 'the gold feed is asked at most every 10 seconds');
   // History plus live readings, so a chart is never empty right after a market opens.
