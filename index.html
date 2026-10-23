@@ -228,88 +228,46 @@
   .app-layout{ display:flex; align-items:flex-start; }
   .app-pages{ flex:1; min-width:0; }
 
+  /* The navigation is the front page's window rail (docs/DESIGN_SYSTEM.md): a soft 16px window on the left, a small rounded square and the page name per row, the page you are on filled white with black text. On a phone it becomes the bottom bar. */
   .side-nav{
-    position:fixed; top:0; right:0; height:100vh; z-index:140;
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    padding:88px 10px 20px 10px; width:72px;
-    background: var(--panel);
-    border-left:1px solid var(--border);
-    overflow-y:auto; overflow-x:hidden;
+    position:fixed; top:96px; left:18px; width:176px; z-index:140;
+    display:flex; flex-direction:column; align-items:stretch; gap:6px;
+    padding:14px 9px;
+    background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%), var(--panel);
+    border:1px solid var(--border); border-radius:16px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.85);
+    max-height:calc(100vh - 120px); overflow-y:auto; overflow-x:hidden;
   }
-  .side-nav-divider{ width:32px; height:1px; background:var(--border); margin:6px 0; flex-shrink:0; }
+  .side-nav-divider{ height:1px; background:var(--border); margin:4px 2px; flex-shrink:0; }
   .side-nav-item{
     position:relative; background:none; border:none; color:var(--muted); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    width:100%; padding:11px 4px; border-radius:10px; font-size:9.5px; font-weight:600;
-    font-family:'Public Sans', sans-serif; text-align:center; flex-shrink:0;
-    transition: background .25s ease, color .25s ease, transform .2s cubic-bezier(.2,.8,.3,1.3), box-shadow .25s ease;
+    display:flex; flex-direction:row; align-items:center; gap:9px;
+    width:100%; padding:10px 10px; border-radius:8px; font-size:12px; font-weight:700;
+    font-family:'Public Sans', sans-serif; text-align:left; flex-shrink:0;
+    transition: background .2s ease, color .2s ease;
   }
-  /* The animated hover "glow" -- a soft accent-tinted radial highlight
-     that fades in behind the icon, combined with a slight lift/scale on
-     the whole button. Kept separate from the .current (active page)
-     state below so the page you're already on reads as calm/settled,
-     not glowing. */
-  .side-nav-item::before{
-    content:""; position:absolute; inset:0; border-radius:10px;
-    background: radial-gradient(circle at 50% 30%, var(--amber-glow), transparent 70%);
-    opacity:0; transition: opacity .3s ease;
-    pointer-events:none;
-  }
-  .side-nav-item:hover::before{ opacity:1; }
-  .side-nav-item:hover{
-    color: var(--paper); transform: translateX(-3px) scale(1.05);
-    box-shadow: 0 4px 14px rgba(16,24,43,0.10), inset 0 0 0 1px var(--border);
-  }
-  .side-nav-item:active{ transform: translateX(-1px) scale(0.98); }
-  .side-nav-item.current{ color: var(--amber); background: var(--panel-raised); }
-  .side-nav-icon{ font-size:18px; line-height:1; transition: transform .2s cubic-bezier(.2,.8,.3,1.3); }
-  .side-nav-item:hover .side-nav-icon{ transform: scale(1.15); }
+  .side-nav-item:hover{ color: var(--paper); background: rgba(255,255,255,.05); }
+  .side-nav-item.current{ color: var(--amber-contrast); background: var(--amber); }
+  .side-nav-icon{ width:9px; height:9px; border-radius:3px; background:currentColor; opacity:.6; flex-shrink:0; display:block; }
+  .side-nav-item.current .side-nav-icon{ opacity:.9; }
   .side-nav-label{ letter-spacing:.02em; }
-
-  /* Geometry Dash-style diamond shard burst -- a small starburst of tiny
-     diamonds pops outward from the icon on hover, echoing the diamond
-     player-icon shape used in the brand mark itself. Each shard shares
-     one keyframe but launches at its own fixed angle (--angle, set
-     inline per shard), so rotating the local coordinate frame first and
-     then translating along its own X-axis sends every shard outward in
-     a different direction with no per-shard math needed beyond the angle. */
-  .nav-shard{
-    position:absolute; top:50%; left:50%; width:5px; height:5px;
-    background: var(--amber); opacity:0; pointer-events:none; z-index:1;
-    transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) rotate(45deg);
-  }
-  .side-nav-item:hover .nav-shard{
-    animation: shardBurst .6s cubic-bezier(.2,.8,.3,1) both;
-  }
-  @keyframes shardBurst{
-    0%{ opacity:0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) rotate(45deg) scale(1); }
-    18%{ opacity:1; }
-    100%{ opacity:0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(24px) rotate(45deg) scale(.35); }
-  }
 
   @media (max-width: 900px){
     .side-nav{
-      top:auto; bottom:0; left:0; right:0; height:auto; width:100%;
+      top:auto; bottom:0; left:0; right:0; width:100%; max-height:none;
       flex-direction:row; justify-content:space-around; align-items:center;
       padding:8px 4px; overflow-x:auto; overflow-y:hidden;
-      border-left:none; border-top:1px solid var(--border);
+      border:0; border-top:1px solid var(--border); border-radius:0; box-shadow:none;
+      background: var(--panel);
     }
-    /* More nav items than fit on a narrow phone -- this bar scrolls
-       horizontally, so fade both edges to hint there's more to swipe to. */
-    .side-nav::before, .side-nav::after{
-      content:""; position:absolute; top:0; bottom:0; width:24px; z-index:2; pointer-events:none;
-    }
-    .side-nav::before{ left:0; background: linear-gradient(90deg, var(--panel), transparent); }
-    .side-nav::after{ right:0; background: linear-gradient(270deg, var(--panel), transparent); }
     .side-nav-divider{ display:none; }
-    .side-nav-item{ width:auto; min-width:50px; padding:6px 4px; }
-    .side-nav-item:hover{ transform: translateY(-3px) scale(1.05); }
+    .side-nav-item{ width:auto; min-width:50px; padding:6px 8px; flex-direction:column; gap:4px; text-align:center; font-size:11px; }
   }
   /* Room for the fixed sidebar so page content never sits underneath it --
      right-side padding on wide screens where the sidebar is a vertical
      rail, bottom padding on narrow screens where it becomes a bottom bar. */
-  .app{ padding-right: 92px; }
-  @media (max-width: 900px){ .app{ padding-right:0; padding-bottom:76px; } }
+  .app{ padding-left: 212px; }
+  @media (max-width: 900px){ .app{ padding-left:0; padding-bottom:76px; } }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -403,7 +361,7 @@
   .brief-lede{ font-size:15px; line-height:1.75; color:var(--muted); margin:0 0 32px 0; }
 
   .brief-indices{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px; }
-  .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
+  .index-card{ flex:1; min-width:150px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
   .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
   .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
   .index-card .ix-val{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; font-size:23px; letter-spacing:0; display:block; }
@@ -843,7 +801,6 @@
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
     .front-eyebrow, .front-h1, .front-line, .front-win, .front-win-a .win{ animation: none; }
-    .side-nav-item:hover .nav-shard{ animation: none; display:none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
     .bg-grid{ animation: none; }
     .brand-name span{ transition: none; }
@@ -863,7 +820,6 @@
   [data-reduce-motion="true"] .brand:hover .brand-name span{ transform: none; }
   /* Limit graphics (the same switch as reduce motion, renamed Oct 21, 2026): it also drops the glow, the grid and the ghost wordmark, so the page is plain panels on a flat ground. */
   [data-reduce-motion="true"] .bg-ambient::before, [data-reduce-motion="true"] .bg-ambient::after, [data-reduce-motion="true"] .bg-ghost, [data-reduce-motion="true"] .bg-grid{ display:none; }
-  [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
   [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
   [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter .index-card, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
@@ -1160,17 +1116,17 @@
 
   <nav class="side-nav" id="sideNav" aria-label="Main navigation">
     <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
-      <span class="side-nav-icon">◆</span><span class="side-nav-label">Brief</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Brief</span>
     </button>
     <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
-      <span class="side-nav-icon">◐</span><span class="side-nav-label">Bot</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Bot</span>
     </button>
     <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
-      <span class="side-nav-icon">▦</span><span class="side-nav-label">Data</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Data</span>
     </button>
     <div class="side-nav-divider"></div>
     <button class="side-nav-item nav-item" data-page="settings" title="Settings">
-      <span class="side-nav-icon">⚙</span><span class="side-nav-label">Settings</span>
+      <span class="side-nav-icon"></span><span class="side-nav-label">Settings</span>
     </button>
   </nav>
 
@@ -3559,20 +3515,6 @@
         showPage(item.dataset.page);
       }
     });
-  });
-
-  // Geometry Dash-style shard burst: 5 tiny diamonds injected into each
-  // sidebar item, evenly spaced around a circle (360/5 = 72 degrees
-  // apart) so the burst radiates symmetrically outward on hover,
-  // regardless of which item it is.
-  document.querySelectorAll('.side-nav-item').forEach(function(item){
-    for(var i = 0; i < 5; i++){
-      var shard = document.createElement('span');
-      shard.className = 'nav-shard';
-      shard.style.setProperty('--angle', (i * 72) + 'deg');
-      shard.style.animationDelay = (i * 0.02) + 's';
-      item.appendChild(shard);
-    }
   });
 
   document.getElementById('brandHomeBtn').addEventListener('click', function(){
