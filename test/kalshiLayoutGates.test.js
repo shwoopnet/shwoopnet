@@ -199,7 +199,7 @@ gates.Y14 = () => {
   assert.strictEqual(f.kalshiPerfStats([], 0).n, 0);
   assert.ok(/fills in after the first settled trade/.test(f.kalshiPerfHtml(f.kalshiPerfStats([], 0), esc, money)));
   const out = f.kalshiPerfHtml(st, esc, money);
-  assert.ok(/60% \(3 \/ 2\)/.test(out) && /By price paid/.test(out) && /By market/.test(out), 'the tiles and tables show the figures');
+  assert.ok(/By price paid/.test(out) && /90c to 92c/.test(out) && !/Win rate|Profit factor|By market/.test(out), 'the fold shows the price bands and nothing the rest of the page already shows');
   assert.ok(!/Deepest drawdown|Longest losing run|Streak now|Best \/ worst|Exit at/.test(out), 'the extra stats are not on the card');
   const text = f.kalshiStatsText(st, null, money);
   assert.ok(/Net: -\$1\.62/.test(text) && /Deepest drawdown:/.test(text) && /Streak now:/.test(text) && /Longest losing run:/.test(text) && /By market\n  Bitcoin: 3 trades/.test(text) && /By price paid\n  90c to 92c: 1 trades/.test(text) && /Exit at 25c\n  No position has fallen/.test(text), 'every stat is in the copied text, including the hidden ones');
@@ -435,7 +435,7 @@ gates.Y18 = () => {
   assert.ok(/Stake per trade/.test(html) && /var nC = ses\.sizing === true \? baseC \+ \(Number\.isFinite\(ses\.sizeAddon\) \? ses\.sizeAddon : 0\) : 1/.test(html) && /Math\.floor\(cashNow \* 0\.02 \/ perC/.test(html), 'the stake is the account-funded part (held to 2% of cash) plus the profit add-on outside it, or 1 when scaling is off');
   assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
   assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
-  assert.ok(/tile\('Expectancy'/.test(html) && !/tile\('Per trade'/.test(html), 'the expectancy tile does not share the stake row name');
+  assert.ok(!/tile\('Per trade'/.test(html), 'no tile reuses the stake row name (the expectancy tile itself left with the duplicate tiles in the fold, Oct 23, 2026; Average trade is on the Data page)');
   assert.ok(/kalshiMoney\(0\.12 \* base\)/.test(html), 'the status line quotes the 12% stop (through the money formatter, so presentation view masks it)');
 };
 
@@ -494,7 +494,7 @@ gates.Y20 = () => {
 // Y26: the stats card shows the six tiles, By market and By price paid and nothing else; every other stat is copied with the Copy all stats button instead of being shown.
 {
   assert.ok(!/kalshiMoreOpen|kal-more|More stats/.test(html), 'the More stats fold and its open/closed state are gone');
-  assert.ok(/table\('By market', st\.bySeries\) \+ \(afterMarket \|\| ''\) \+ table\('By price paid', st\.byBand\)/.test(html), 'By market and By price paid are the only tables on the card');
+  assert.ok(/function kalshiPerfHtml\(st, esc, money\)/.test(html) && !/table\('By market'/.test(html), 'By price paid is the only table in the fold; By market has its own card');
   assert.ok(/id="kalStatsCopy"/.test(html) && /function kalshiStatsText\(st, x, money\)/.test(html), 'the Copy all stats button and its text builder exist');
 }
 
