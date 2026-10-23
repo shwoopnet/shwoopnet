@@ -735,7 +735,7 @@
   }
   .modal-btn-submit:hover{ background: var(--amber); color: var(--amber-contrast); }
 
-  /* The signed-out screen (the owner, Oct 23, 2026): one screen on a brick wall, in the site's own themes. A big spray-paint slogan, one plain line, and a small sign-in in the top right; the longer "What is Shwoop" lives on a note that opens on tap.
+  /* The signed-out screen (the owner, Oct 23, 2026): one screen on a brick wall, in the site's own themes. A big spray-paint slogan, one plain line, and a small sign-in in the top right.
      Every colour is a theme token, so Ledger light and dark and Mono Ink all work. Motion is decoration only (spray-in letters, drips, a sticker that slaps on) and is stopped by reduced motion and the Settings switch.
      It says nothing about the bot's markets, size or results and makes no performance claim, because the page is public. */
   .auth-gate{
@@ -764,18 +764,9 @@
   .front-h1 .dr::after{ content:""; position:absolute; bottom:-5px; left:-1px; width:calc(100% + 2px); aspect-ratio:1; border-radius:50%; background:inherit; }
   .front-line{ margin:64px 0 0; font:600 clamp(17px, 1.9vw, 22px)/1.45 'Public Sans', sans-serif; max-width:560px; color:var(--muted); animation:frontFade .8s 2s both; }
   .front-line b{ color:var(--paper); }
-  .front-read{ margin-top:22px; font:800 13px 'Public Sans', sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--paper); background:none; border:2px solid var(--paper); border-radius:999px; padding:11px 18px; min-height:40px; cursor:pointer; animation:frontFade .8s 2.3s both; }
-  .front-read:hover, .front-read:focus-visible{ background:var(--paper); color:var(--ink); }
   .front-arrow{ position:absolute; right:20px; top:calc(100% + 12px); font:700 15px 'Public Sans', sans-serif; color:var(--amber); padding:34px 0 0 0; animation:frontFade .6s 3s both; }
   .front-arrow::before{ content:""; position:absolute; right:30px; top:0; width:42px; height:30px; border-top:3px solid currentColor; border-right:3px solid currentColor; border-radius:0 40px 0 0; }
   .front-arrow::after{ content:""; position:absolute; right:26px; top:-6px; width:11px; height:11px; border-top:3px solid currentColor; border-left:3px solid currentColor; transform:rotate(45deg); }
-  .front-dim{ position:fixed; inset:0; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:6; backdrop-filter:blur(3px); }
-  .front-dim.open{ opacity:1; pointer-events:auto; }
-  .front-notecard{ position:fixed; left:50%; top:50%; width:min(420px, 100% - 48px); background:var(--panel); color:var(--paper); border:1.5px solid var(--border); border-radius:3px; padding:30px 26px 22px; transform:translate(-50%,-46%) rotate(2deg) scale(.92); opacity:0; pointer-events:none; box-shadow:0 24px 60px rgba(0,0,0,.45); transition:transform .5s cubic-bezier(.2,1.4,.3,1), opacity .3s ease; z-index:7; }
-  .front-notecard.open{ transform:translate(-50%,-50%) rotate(2deg); opacity:1; pointer-events:auto; }
-  .front-notecard::before{ content:""; position:absolute; left:50%; top:-14px; width:96px; height:28px; margin-left:-48px; background:color-mix(in srgb, var(--amber) 28%, transparent); transform:rotate(-3deg); }
-  .front-notecard h2{ font:800 22px/1.2 'Public Sans', sans-serif; margin:0 0 10px; }
-  .front-notecard p{ margin:0 0 10px; font-size:14.5px; line-height:1.6; color:var(--muted); }
   .front-fx{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:-1; }
   .front-fx i{ position:absolute; border-radius:50%; filter:blur(80px); opacity:.5; background:color-mix(in srgb, var(--brand-depth) 80%, transparent); animation:frontOrbA var(--dur, 22s) ease-in-out infinite alternate; }
   .front-fx i:nth-child(1){ width:46vmax; height:46vmax; left:-14vmax; top:-18vmax; }
@@ -885,9 +876,8 @@
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
-    .front-fx i, .front-tag, .front-h1 .lt, .front-h1 .dr, .front-line, .front-read, .front-arrow, .front-signin .auth-box{ animation: none; }
+    .front-fx i, .front-tag, .front-h1 .lt, .front-h1 .dr, .front-line, .front-arrow, .front-signin .auth-box{ animation: none; }
     .front-h1 .dr{ transform:scaleY(1); }
-    .front-dim, .front-notecard{ transition:none; }
     .side-nav-item:hover .nav-shard{ animation: none; display:none; }
     .bg-ambient::before, .bg-ambient::after{ animation: none; }
     .bg-grid{ animation: none; }
@@ -916,10 +906,9 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .news-item:hover, [data-reduce-motion="true"] .mover-row:hover{ transform: none; }
   [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .movers-col:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
-  [data-reduce-motion="true"] .front-fx i, [data-reduce-motion="true"] .front-tag, [data-reduce-motion="true"] .front-h1 .lt, [data-reduce-motion="true"] .front-h1 .dr, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-read, [data-reduce-motion="true"] .front-arrow, [data-reduce-motion="true"] .front-signin .auth-box{ animation: none; }
+  [data-reduce-motion="true"] .front-fx i, [data-reduce-motion="true"] .front-tag, [data-reduce-motion="true"] .front-h1 .lt, [data-reduce-motion="true"] .front-h1 .dr, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-arrow, [data-reduce-motion="true"] .front-signin .auth-box{ animation: none; }
   [data-reduce-motion="true"] .front-h1 .dr{ transform:scaleY(1); }
   [data-reduce-motion="true"] .front-fx{ display:none; }
-  [data-reduce-motion="true"] .front-dim, [data-reduce-motion="true"] .front-notecard{ transition:none; }
 </style>
 <script>
   // Runs synchronously before <body> paints anything, so dark mode is
@@ -1189,14 +1178,7 @@
       <div class="front-tag">Systematic trading</div>
       <h1 class="front-h1" aria-label="Trade less. Live more."><span class="row r1" aria-hidden="true"><span class="lt" style="--i:0">T</span><span class="lt" style="--i:1">r</span><span class="lt" style="--i:2">a</span><span class="lt" style="--i:3">d</span><span class="lt" style="--i:4">e</span><span class="sp"></span><span class="lt" style="--i:6">l</span><span class="lt" style="--i:7">e</span><span class="lt" style="--i:8">s</span><span class="lt" style="--i:9">s</span><span class="lt" style="--i:10">.</span></span><span class="row r2" aria-hidden="true"><span class="lt" style="--i:0">L<i class="dr" style="--h:46;--dl:2.4s"></i></span><span class="lt" style="--i:1">i</span><span class="lt" style="--i:2">v</span><span class="lt" style="--i:3">e</span><span class="sp"></span><span class="lt" style="--i:5">m</span><span class="lt" style="--i:6">o</span><span class="lt" style="--i:7">r<i class="dr" style="--h:58;--dl:2.8s"></i></span><span class="lt" style="--i:8">e</span><span class="lt" style="--i:9">.</span></span></h1>
       <p class="front-line"><b>Software that trades by the rules,</b> so you never have to watch it.</p>
-      <button type="button" class="front-read" id="frontRead" aria-expanded="false" aria-controls="frontNote">What is Shwoop?</button>
     </main>
-    <div class="front-dim" id="frontDim"></div>
-    <div class="front-notecard" id="frontNote" role="dialog" aria-label="What is Shwoop" aria-hidden="true">
-      <h2>Your money, without the screen time.</h2>
-      <p>Most people lose sleep over the markets. They check prices all day, second-guess every move, and let fear or excitement make the call. Shwoop takes that out. The rules are written down ahead of time, the software follows them the same way every time, and people check on it.</p>
-      <p>It's for anyone who wants their money working without their life revolving around a chart.</p>
-    </div>
     <p class="front-note"><b>Important.</b> Shwoop Financials is not a broker, investment adviser or fund, and nothing on this site is an offer, advice or a solicitation to buy or sell any security or contract. Trading involves risk, including the loss of all capital invested. Past results do not predict future results.</p>
     <div class="front-foot"><span>&copy; 2026 Shwoop Financials</span><span>Contact: <a href="mailto:shwoopadvisor@gmail.com">shwoopadvisor@gmail.com</a></span></div>
   </div>
@@ -3800,19 +3782,6 @@
   })();
   var authSubmitBtn = document.getElementById('authSubmitBtn');
   var authGateEl = document.getElementById('authGate');
-  // "What is Shwoop?" note on the front page: opens on a tap, closes on the dim area, the button again or Escape. It only shows text; nothing here touches sign-in.
-  (function(){
-    var btn = document.getElementById('frontRead'), note = document.getElementById('frontNote'), dim = document.getElementById('frontDim');
-    if(!btn || !note || !dim){ return; }
-    function setOpen(on){
-      note.classList.toggle('open', on); dim.classList.toggle('open', on);
-      note.setAttribute('aria-hidden', on ? 'false' : 'true'); btn.setAttribute('aria-expanded', on ? 'true' : 'false');
-    }
-    btn.addEventListener('click', function(){ setOpen(!note.classList.contains('open')); });
-    dim.addEventListener('click', function(){ setOpen(false); });
-    document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ setOpen(false); } });
-  })();
-
   function setupPasswordToggle(toggleBtnId, inputId){
     var btn = document.getElementById(toggleBtnId);
     var input = document.getElementById(inputId);

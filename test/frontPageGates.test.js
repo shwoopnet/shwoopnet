@@ -13,9 +13,8 @@ assert.ok(!/\$\s?\d|\d\s?%|\bwin rate\b|\bprofit\b|\breturns?\b|\bperformance\b|
 assert.ok(/not a broker, investment adviser or fund/.test(gate) && /loss of all capital/.test(gate), 'the risk notice is there');
 assert.ok(/href="mailto:shwoopadvisor@gmail\.com"/.test(gate), 'the footer has the contact address the owner chose');
 assert.ok(!/<svg|<script|<img|href="http/.test(gate), 'no image, script or outside link in the front page');
-// The front page (Oct 23, 2026): one screen, the slogan, a small sign-in, and a note that opens on tap. Consequence: it follows the site's themes through tokens only, and every animation stops when motion is not wanted.
+// The front page (Oct 23, 2026): one screen, the slogan, a small sign-in, . Consequence: it follows the site's themes through tokens only, and every animation stops when motion is not wanted.
 assert.ok(/<h1 class="front-h1" aria-label="Trade less\. Live more\.">/.test(gate) && /Systematic trading/.test(gate), 'the slogan and the Systematic trading label are on the front page');
-assert.ok(/id="frontRead"/.test(gate) && /id="frontNote"/.test(gate) && /What is Shwoop/.test(gate) && /Your money, without the screen time/.test(gate), 'the What is Shwoop note is on the front page');
 assert.ok(!/#[0-9a-fA-F]{3,8}\b|rgb\(/.test((/\/\* The signed-out screen[\s\S]*?\.auth-title\{/.exec(html) || [''])[0].replace(/rgba\(0,0,0,\.\d+\)/g, '').replace(/\/\*[\s\S]*?\*\//g, '')), 'the front page colours are theme tokens, not fixed colours (black shade overlays excepted)');
 const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(html.replace(/\/\*[\s\S]*?\*\//g, ''))[1];
 assert.ok(/\.front-h1 \.lt, \.front-h1 \.dr/.test(media) && /\[data-reduce-motion="true"\] \.front-h1 \.lt/.test(html), 'the spray, drips and sticker show their finished state at once under reduced motion and the Settings switch');
