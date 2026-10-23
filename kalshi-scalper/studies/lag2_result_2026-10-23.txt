@@ -1,0 +1,1 @@
+LAG2: verdict NOT_ENOUGH_DATA; markets with a tape 1068, trades 15 on 8 days
