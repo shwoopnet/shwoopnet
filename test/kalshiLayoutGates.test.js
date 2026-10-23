@@ -48,7 +48,7 @@ gates.Y5 = () => {
   const rail = /<div class="kal-rail">([\s\S]*?)\n      <\/div>\n      <div class="kal-main">/.exec(seg);
   assert.ok(rail, 'the rail is there and the main column follows it');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(rail[1]), ['account', 'positions'], 'the rail holds the account (with the performance stats) and the positions');
+  assert.deepStrictEqual(names(rail[1]), ['account', 'status', 'risk', 'positions'], 'the rail holds the account strip, the bot status, the loss stop and risk card, and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
   assert.deepStrictEqual(names(main), ['trades'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
@@ -677,6 +677,54 @@ gates.AK1 = () => {
   assert.strictEqual(keep(null, bad(5)), null, 'with nothing good to keep the failure is shown');
   assert.strictEqual(keep(bad(1), bad(2)), null, 'a failed read is never kept');
   assert.ok(/Kalshi is busy \(too many requests\)/.test(html), 'a 429 says so in plain words, not as raw JSON');
+};
+
+// BS1 to BS3: the Bot page's status and risk cards (Oct 23, 2026, the owner chose "heartbeat and what it's doing" and "loss stop and risk meter"). Pure functions of the session, the orders and the clock.
+const liftBs = (names) => new Function(names.map((n) => (new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html) || assert.fail(n + ' not found'))[1]).join('\n') + '; return {' + names.join(',') + '};')();
+gates.BS1 = () => {
+  const f = liftBs(['kalshiHeartbeat', 'kalshiNextEntry']);
+  const T0 = 10 * 900000;   // a quarter hour boundary
+  assert.strictEqual(f.kalshiHeartbeat(null, T0).state, 'off', 'no session: not running');
+  assert.strictEqual(f.kalshiHeartbeat({ active: false }, T0).state, 'off');
+  assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 40000 }, T0).state, 'ok', 'a check 40 seconds ago is alive');
+  assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 200000 }, T0).state, 'quiet', 'over 2.5 minutes is quiet');
+  assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 400000 }, T0).state, 'down', 'over 5 minutes means the function is not running');
+  assert.strictEqual(f.kalshiHeartbeat({ active: true }, T0).state, 'quiet', 'running with no check recorded yet is waiting, not alive');
+  const a = f.kalshiNextEntry(T0 + 60000);
+  assert.deepStrictEqual([a.at, /10 minute/.test(a.label)], [T0 + 300000, true], 'a minute into a quarter the next look is the 10 minute one at minute 5');
+  const b = f.kalshiNextEntry(T0 + 330000);
+  assert.deepStrictEqual([b.at, /6 minute/.test(b.label)], [T0 + 540000, true], 'then the 6 minute one at minute 9');
+  const c = f.kalshiNextEntry(T0 + 600000);
+  assert.deepStrictEqual([c.at, /10 minute/.test(c.label)], [T0 + 900000 + 300000, true], 'after minute 9 it rolls to the next quarter');
+};
+gates.BS2 = () => {
+  const f = liftBs(['kalshiRiskMeter']);
+  const NOW = Date.parse('2026-10-23T15:00:00Z'), s = { sizing: true, sizeBase: 500 };
+  const o = (over) => Object.assign({ strategy: 'L1', ts: NOW - 3600000, fillCount: '1.00', count: 1, maxCost: 0.93, side: 'yes', ticker: 'KXBTC15M-26OCT231015-15', settled: true, result: 'yes' }, over);
+  let m = f.kalshiRiskMeter([], s, NOW);
+  assert.deepStrictEqual([m.used, m.limit, m.fraction], [0, 60, 0], 'nothing yet: 12% of a $500 base is the $60 limit and none is used');
+  m = f.kalshiRiskMeter([o({ result: 'no' }), o({ result: 'no' })], s, NOW);
+  assert.ok(Math.abs(m.used - 1.86) < 1e-9 && Math.abs(m.fraction - 1.86 / 60) < 1e-9, 'two lost orders use their whole cost: ' + m.used);
+  m = f.kalshiRiskMeter([o({ settled: false, result: undefined })], s, NOW);
+  assert.ok(Math.abs(m.used - 0.93) < 1e-9 && Math.abs(m.openCost - 0.93) < 1e-9, 'an open order counts as lost, and as money at risk now');
+  m = f.kalshiRiskMeter([o({ settled: false, result: undefined, count: 3, fillCount: '3.00', maxCost: 2.79, addonCost: 0.93 })], s, NOW);
+  assert.ok(Math.abs(m.limit - 60.93) < 1e-9 && Math.abs(m.used - 2.79) < 1e-9, 'the profit-funded part raises the limit instead of using it');
+  m = f.kalshiRiskMeter([o({ result: 'yes' }), o({ result: 'no' })], s, NOW);
+  assert.ok(Math.abs(m.used - 0.93 + 0.07) < 1e-9 || m.used === 0, 'a win offsets a loss (net 0.07 - 0.93)');
+  m = f.kalshiRiskMeter([o({ ts: NOW - 90000000, result: 'no' }), o({ settled: true, result: 'hand' })], s, NOW);
+  assert.strictEqual(m.used, 0, 'an order older than 24 hours and one closed by hand are not counted');
+  m = f.kalshiRiskMeter([o({ settled: true, result: 'exit', settledPnl: -0.75 })], s, NOW);
+  assert.ok(Math.abs(m.used - 0.75) < 1e-9, 'a sold-early order counts its realised result');
+  m = f.kalshiRiskMeter([o({ settled: false, result: undefined, ticker: 'KXBTC15M-26OCT231015-15' }), o({ settled: false, result: undefined, ticker: 'KXXRP15M-26OCT231015-15' })], s, NOW);
+  assert.ok(Math.abs(m.windowUsed - 1.86) < 1e-9 && Math.abs(m.windowCap - 27.5) < 1e-9, 'open orders in one window add up against the 5.5% window limit');
+  assert.strictEqual(f.kalshiRiskMeter([], { sizing: false, startCash: 100 }, NOW).limit, 10, 'without sizing the stop is $10');
+};
+gates.BS3 = () => {
+  assert.ok(/id="kalStatusBody"/.test(html) && /id="kalRiskBody"/.test(html) && /data-card="status"/.test(html) && /data-card="risk"/.test(html), 'the two cards are on the page');
+  assert.ok(/kalshiStatusTimer = setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiStatusTick\(\); \} \}, 1000\)/.test(html) && /clearInterval\(kalshiStatusTimer\)/.test(html), 'a one second tick moves the two live lines, only while the page is visible, and stops when it is left');
+  const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
+  assert.ok(/const L1_SIZED_STOP_FRACTION = 0\.12;/.test(src) && /const L1_WINDOW_CAP_FRACTION = 0\.055;/.test(src) && /const L1_LOSS_STOP = 10\.0;/.test(src), 'the meter quotes the same 12%, 5.5% and $10 the bot uses; change one and this gate names the other');
+  assert.ok(/0\.12 \* base/.test(html) && /0\.055 \* base/.test(html), 'and the page uses those numbers');
 };
 
 (async () => {

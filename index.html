@@ -694,9 +694,17 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "pos" "trd"; gap:18px; }
+  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"acct acct" "stat risk" "pos pos" "trd trd"; gap:18px; }
   .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
   .kal-console [data-card="account"]{ grid-area:acct; }
+  .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
+  .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
+  .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
+  .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
+  .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
+  .kal-meter.hot > i{ background:var(--loss); }
+  .kal-console [data-card="status"]{ grid-area:stat; align-self:stretch; }
+  .kal-console [data-card="risk"]{ grid-area:risk; align-self:stretch; }
   .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
   .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
@@ -710,7 +718,7 @@
   .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
-    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "pos" "trd"; }
+    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "risk" "pos" "trd"; }
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals{ grid-column:1; }
   }
@@ -1171,6 +1179,14 @@
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
+      </div>
+      <div class="kal-card" data-card="status">
+        <div class="kal-card-title">Bot status</div>
+        <div id="kalStatusBody"><div class="kal-empty">Reading the bot...</div></div>
+      </div>
+      <div class="kal-card" data-card="risk">
+        <div class="kal-card-title">Loss stop and risk</div>
+        <div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div>
       </div>
       <div class="kal-card" data-card="positions">
         <div class="kal-card-title">Open positions</div>
@@ -2347,6 +2363,7 @@
   }
   function renderKalshiBot(){
     renderDataCenter();
+    renderKalshiStatus();
     kalshiSoundCheck();
     var a = kalshiLiveAcct;
     var el = document.getElementById('kalBotStatus');
@@ -2795,6 +2812,99 @@
     if(sel){ sel.addEventListener('change', function(){ kalshiTradeFilter = sel.value === 'all' ? 'all' : 'bot'; kalshiLiveShow.page = 0; renderKalshiBot(); }); }
   })();
 
+  // Bot status and the loss stop (the owner, Oct 23, 2026: "heartbeat and what it's doing", "loss stop and risk meter"). Pure functions of the session document, the bot's orders and the clock, so they are tested without a page.
+  // The heartbeat is the session's own lastTickAt: the server writes it every minute it runs, so silence means the function is not running, not that the market is quiet.
+  function kalshiHeartbeat(s, now){
+    if(!s || s.active !== true){ return { state: 'off', ageSec: null }; }
+    if(!Number.isFinite(s.lastTickAt)){ return { state: 'quiet', ageSec: null }; }
+    var age = Math.max(0, Math.round((now - s.lastTickAt) / 1000));
+    return { state: age <= 150 ? 'ok' : (age <= 300 ? 'quiet' : 'down'), ageSec: age };
+  }
+  // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour; Bitcoin, XRP and natural gas are entered about 10 minutes before the close (minute 5 of the quarter), everything else about 6 minutes before (minute 9).
+  function kalshiNextEntry(now){
+    var Q = 900000, base = Math.floor(now / Q) * Q, cands = [[base + 300000, '10 minute entries: Bitcoin, XRP, natural gas'], [base + 540000, '6 minute entries: gold, Ethereum, Dogecoin and the rest'], [base + Q + 300000, '10 minute entries: Bitcoin, XRP, natural gas']];
+    for(var i = 0; i < cands.length; i++){ if(cands[i][0] > now){ return { at: cands[i][0], inMs: cands[i][0] - now, label: cands[i][1] }; } }
+    return null;
+  }
+  // How much of the loss stop the last 24 hours have used, counted the way the server counts it (botRisk and the stop in runL1Tick): the bot's filled orders, a settled one by its result, a partly sold one in proportion,
+  // an order closed by hand not at all, and an order still open counted as LOST. The part bought with reinvested profit (the add-on) that is lost or open raises the limit instead of using it. 12% of the balance at the last
+  // size review when sizing, otherwise $10. With the high point stop on, the loss is measured from the best settled result.
+  function kalshiRiskMeter(orders, s, now){
+    var from = now - 86400000, net = 0, openCost = 0, addonAtRisk = 0, windowUsed = {}, trades = 0;
+    (orders || []).forEach(function(t){
+      if(!t || t.strategy !== 'L1' || !(Number(t.fillCount) > 0) || !Number.isFinite(Number(t.maxCost)) || !(Number(t.ts) >= from)){ return; }
+      if(t.settled === true && t.result === 'hand'){ return; }
+      trades++;
+      var cost = Number(t.maxCost), want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want), paid = cost * (got / want);
+      var addonPaid = Number.isFinite(Number(t.addonCost)) && Number(t.addonCost) > 0 ? Number(t.addonCost) * (got / want) : 0;
+      if(t.settled === true && t.result === 'exit'){
+        var pnl = Number(t.settledPnl);
+        net += Number.isFinite(pnl) ? pnl : -paid;
+        if(!Number.isFinite(pnl) || pnl < 0){ addonAtRisk += paid > 0 ? (Number.isFinite(pnl) ? -pnl : paid) * (addonPaid / paid) : 0; }
+        return;
+      }
+      var sold = Number(t.exitCount) > 0 ? Math.min(Number(t.exitCount), got) : 0, soldShare = got > 0 ? sold / got : 0;
+      var proceeds = sold > 0 && Number.isFinite(Number(t.exitProceeds)) ? Number(t.exitProceeds) : 0;
+      var result = t.settled === true ? t.result : null;
+      if(result === 'yes' || result === 'no'){
+        net += (result === t.side ? got - sold : 0) + proceeds - paid;
+        if(result !== t.side){ addonAtRisk += addonPaid; }
+      } else {
+        net += proceeds - paid * soldShare; openCost += paid * (1 - soldShare); addonAtRisk += addonPaid * (1 - soldShare);
+        var wk = String(t.ticker || '').split('-')[1] || '';
+        windowUsed[wk] = (windowUsed[wk] || 0) + Math.max(0, paid * (1 - soldShare) - addonPaid * (1 - soldShare));
+      }
+    });
+    var sizing = !!(s && s.sizing === true), base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s && Number.isFinite(s.startCash) ? s.startCash : NaN);
+    var stopAt = sizing && Number.isFinite(base) ? 0.12 * base : 10;
+    var worst = net - openCost, peak = s && s.trailing === true ? Math.max(0, Number.isFinite(s.peakNet) ? s.peakNet : 0, net) : 0;
+    var limit = stopAt + addonAtRisk, used = Math.max(0, peak - worst);
+    var winCap = sizing && Number.isFinite(base) ? 0.055 * base : null, winMax = 0;
+    Object.keys(windowUsed).forEach(function(k){ if(windowUsed[k] > winMax){ winMax = windowUsed[k]; } });
+    return { net: net, openCost: openCost, used: used, limit: limit, fraction: limit > 0 ? Math.min(1, used / limit) : 0, windowUsed: winMax, windowCap: winCap, trades: trades };
+  }
+  function kalshiAgeText(sec){
+    return sec < 90 ? sec + ' seconds ago' : (sec < 5400 ? Math.round(sec / 60) + ' minutes ago' : Math.round(sec / 3600) + ' hours ago');
+  }
+  function renderKalshiStatus(){
+    var sEl = document.getElementById('kalStatusBody'), rEl = document.getElementById('kalRiskBody');
+    if(!sEl || !rEl){ return; }
+    var s = kalshiLiveCtl && kalshiLiveCtl.session, now = Date.now();
+    var running = !!(s && s.active === true);
+    var halted = !!(kalshiBotState.control && kalshiBotState.control.halt === true);
+    var hb = kalshiHeartbeat(s, now);
+    var line = hb.state === 'off' ? 'Not running' : (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while')));
+    var note = running && s.lastNote ? kalshiSkipNote(s.lastNote, s.lastTickAt, now) : '';
+    sEl.innerHTML = '<div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(line) + (hb.ageSec !== null && running ? '. Last check ' + escapeHtml(kalshiAgeText(hb.ageSec)) : '') + '</span></div>' +
+      (running ? '<div class="kal-rows"><div><span class="kal-k">Next look to buy</span><b id="kalNextIn">&mdash;</b></div><div><span class="kal-k">What it is looking at</span><b id="kalNextWhat">&mdash;</b></div></div>' : '') +
+      (note ? '<div class="kal-note">' + escapeHtml(note) + '</div>' : '');
+    var a = kalshiLiveAcct;
+    var orders = kalshiResolveOrders(kalshiLiveOrders, a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
+    var m = kalshiRiskMeter(orders, s, now);
+    rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
+      '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + escapeHtml(kalshiMoney(m.used)) + ' of ' + escapeHtml(kalshiMoney(m.limit)) + ' used (' + Math.round(m.fraction * 100) + '%)</span></div>' +
+      '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
+      '<div class="kal-rows"><div><span class="kal-k">At risk in open orders now</span><b>' + escapeHtml(kalshiMoney(m.openCost)) + '</b></div>' +
+      (m.windowCap !== null ? '<div><span class="kal-k">Fullest open window</span><b>' + escapeHtml(kalshiMoney(m.windowUsed)) + ' of ' + escapeHtml(kalshiMoney(m.windowCap)) + '</b></div>' : '') + '</div>' +
+      '<div class="kal-note">The last 24 hours, open orders counted as lost, the way the bot counts it. At the limit the bot stops itself.</div>';
+    kalshiStatusTick();
+  }
+  // Once a second, only the two lines that move: how long since the last check and the countdown to the next look.
+  function kalshiStatusTick(){
+    var s = kalshiLiveCtl && kalshiLiveCtl.session, now = Date.now();
+    var t = document.getElementById('kalHbText'), nx = document.getElementById('kalNextIn'), what = document.getElementById('kalNextWhat'), hbEl = document.getElementById('kalHb');
+    if(t && s && s.active === true){
+      var hb = kalshiHeartbeat(s, now), halted = !!(kalshiBotState.control && kalshiBotState.control.halt === true);
+      t.textContent = (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while'))) + (hb.ageSec !== null ? '. Last check ' + kalshiAgeText(hb.ageSec) : '');
+      if(hbEl){ hbEl.className = 'kal-hb ' + (halted ? '' : hb.state); }
+    }
+    if(nx){
+      var ne = kalshiNextEntry(now);
+      if(ne){ var sec = Math.ceil(ne.inMs / 1000); nx.textContent = Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60); if(what){ what.textContent = ne.label; } }
+    }
+  }
+  var kalshiStatusTimer = null;
+
   function renderKalshiL1(){
     kalshiSoundCheck();
     var s = kalshiLiveCtl.session, now = Date.now();
@@ -2819,6 +2929,7 @@
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
     renderKalshiCharts();
+    renderKalshiStatus();
   }
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
@@ -2839,6 +2950,7 @@
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
     kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
+    kalshiStatusTimer = setInterval(function(){ if(!document.hidden){ kalshiStatusTick(); } }, 1000);
   }
   function stopKalshiBot(){
     kalshiBotState.control = null; kalshiOrdersLoaded = false; kalshiSyncError = '';
@@ -2847,6 +2959,7 @@
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
+    if(kalshiStatusTimer){ clearInterval(kalshiStatusTimer); kalshiStatusTimer = null; }
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
   setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
@@ -2886,7 +2999,7 @@
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['positions', 'Open positions'], ['trades', 'Recent trades']];
+    var OPTIONAL = [['status', 'Bot status'], ['risk', 'Loss stop and risk'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
