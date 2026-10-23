@@ -352,15 +352,45 @@ function riseFromCandles(candles, side, nowSec) {
   const rng = marks.every(Number.isFinite) ? Number((Math.max(...marks) - Math.min(...marks)).toFixed(4)) : null;
   return { rise: Number((dir * (now - then)).toFixed(4)), midNow: Number(now.toFixed(4)), midThen: Number(then.toFixed(4)), candleAt: latest, rng };
 }
-async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs }) {
+// flips0 (Oct 23, 2026, the research session's FLIPS0 lead, the owner: "go", logging only). The path shape of the side being bought: the side's mid for every 1 minute candle from the market's first candle to the decision candle.
+// `flips` counts direction changes in that path after ignoring minute changes of 0.004 or less; `flips0` is true when there are at least 4 earlier candles and no flip at all (a steady climb). Same rules as rise3: written
+// after the orders are sent, from public candles, never able to change a trade. Parity vectors: test/kalshiL1Gates.test.js FL1 (from the research session's flips0_parity_vectors_2026-10-23.json).
+const FLIP_MIN_STEP = 0.004;
+function flipsOf(mids) {
+  const steps = [];
+  for (let i = 1; i < mids.length; i++) {
+    const d = Number((mids[i] - mids[i - 1]).toFixed(6));
+    if (Math.abs(d) > FLIP_MIN_STEP) steps.push(d);
+  }
+  let flips = 0;
+  for (let i = 1; i < steps.length; i++) if ((steps[i] > 0) !== (steps[i - 1] > 0)) flips++;
+  return flips;
+}
+function pathShape(candles, side, nowSec) {
+  const mids = new Map();
+  for (const c of Array.isArray(candles) ? candles : []) {
+    const end = Number(c && c.end_period_ts), b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars);
+    if (Number.isFinite(end) && Number.isFinite(b) && Number.isFinite(a) && end <= nowSec + 60) mids.set(end, side === "no" ? 1 - (b + a) / 2 : (b + a) / 2);
+  }
+  if (!mids.size) return null;
+  const ends = [...mids.keys()].sort((x, y) => x - y);
+  if (nowSec - ends[ends.length - 1] > 150) return null;    // stale: the decision candle must be from about now
+  const path = ends.map((e) => mids.get(e));
+  const flips = flipsOf(path), earlier = path.length - 1;
+  return { flips, flips0: earlier >= 4 && flips === 0, earlierCandles: earlier };
+}
+async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs, ask }) {
   try {
     const nowSec = Math.floor(nowMs / 1000);
     const res = await liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
-      params: { start_ts: String(nowSec - 900), end_ts: String(nowSec + 60), period_interval: "1" }, nowMs });
+      params: { start_ts: String(nowSec - 7200), end_ts: String(nowSec + 60), period_interval: "1" }, nowMs });
     if (res.status !== 200 || !res.body || !Array.isArray(res.body.candlesticks)) return false;
-    const r = riseFromCandles(res.body.candlesticks, side, nowSec);
-    if (!r) return false;
-    await store.updateTest(cid, { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen, ...(r.rng === null ? {} : { rng5: r.rng }) });
+    const r = riseFromCandles(res.body.candlesticks, side, nowSec), shape = pathShape(res.body.candlesticks, side, nowSec);
+    if (!r && !shape) return false;
+    await store.updateTest(cid, {
+      ...(r ? { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen, ...(r.rng === null ? {} : { rng5: r.rng }) } : {}),
+      ...(shape ? { flips: shape.flips, flips0: shape.flips0, earlierCandles: shape.earlierCandles, ...(Number.isFinite(ask) ? { askAtDecision: ask } : {}) } : {}),
+    });
     return true;
   } catch (e) { return false; }      // logging only: never allowed to affect a trade
 }
@@ -865,7 +895,7 @@ async function runL1Tick(args) {
     // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
     if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
-    riseLog.push({ cid, series: c.series, ticker, side: pick.side });
+    riseLog.push({ cid, series: c.series, ticker, side: pick.side, ask: pick.price });
     committed[shardKey] = (committed[shardKey] || 0) + cost;
     if (CAPPED_SERIES.includes(c.series)) cryptoTaken[wkey] = true;
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
@@ -900,7 +930,7 @@ async function runL1Tick(args) {
     await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
     return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
   }
-  for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now });
+  for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now, ask: r.ask });
   await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
   return { ok: true, results };
 }
@@ -1100,6 +1130,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
 const DEFAULT_ACCOUNT_ID = "main";
 
 module.exports = {
+  flipsOf, pathShape,
   DEFAULT_ACCOUNT_ID,
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
