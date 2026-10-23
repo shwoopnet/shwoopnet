@@ -17,7 +17,7 @@ from .paths import DATA_DIR
 DAYS = 12
 KRAKEN = DATA_DIR / "lag2_kraken.json"      # {"sec": {epoch second: [last price, quantity]}, "last": cursor}
 KALSHI = DATA_DIR / "lag2_kalshi.json"      # {ticker: [[epoch seconds float, yes price, taker outcome side, count], ...]}
-FROM_S, TO_S = 150, 20
+FROM_S, TO_S = 150, 38      # a 60 s decision fills no later than 60 - 2 - 20 = 38 s before the close, so later trades are never read
 
 
 def markets() -> list[tuple]:
