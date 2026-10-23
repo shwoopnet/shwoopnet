@@ -563,7 +563,11 @@
   .kal-card-flush{ padding:0; }
   .kal-rail .kal-acct-head{ padding:0 0 10px 0; }
   .kal-botmenu > summary.kal-pill{ cursor:pointer; user-select:none; }
+  /* The Running pill opens a small panel. It used to hang from the pill, narrower than the Account card and sticking out below it, so the card's edge showed behind it and it covered the next card's top. Now it is anchored to the whole card (the card is the positioned box, the pill's own box is not), the same width as the card, and lifted above the cards after it. */
+  .kal-rail .kal-card[data-card="account"]{ position:relative; z-index:6; }
+  .kal-rail .kal-botmenu{ position:static; }
   .kal-botmenu-body{ min-width:min(320px,86vw); right:0; top:30px; }
+  .kal-rail .kal-botmenu-body{ left:0; right:0; top:100%; min-width:0; margin-top:6px; z-index:30; box-shadow:0 14px 34px rgba(0,0,0,.28); }
   .kal-botmenu-body .kal-actions{ margin:4px 0 0 0; }
   .kal-card-head{ display:flex; justify-content:space-between; align-items:center; padding:18px 22px 12px 22px; }
   .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:12.5px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
