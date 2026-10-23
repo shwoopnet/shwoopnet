@@ -298,10 +298,20 @@ def stop_time(minutes, now):
     return min(now + minutes * 60, now - (now % 3600) + 3600 + 60)
 
 
-async def run(out_dir, minutes, quote_lead, spot_lead):
+def cycle_stop_time(now, cycle_s):
+    """For back to back jobs that start every `cycle_s` seconds, a little BEFORE a cycle boundary so a late start still catches the first close.
+    Stop a minute after the first boundary that leaves this job a full cycle, so the next job's early start is queued behind it and no 15 minute window falls between them."""
+    into = now % cycle_s
+    first_boundary = now - into + cycle_s
+    if cycle_s - into < 1800:
+        return first_boundary + cycle_s + 60
+    return first_boundary + 60
+
+
+async def run(out_dir, minutes, quote_lead, spot_lead, cycle_s=None):
     out = Out(out_dir)
     rec = Recorder(out, quote_lead, spot_lead)
-    stop_at = stop_time(minutes, time.time())
+    stop_at = cycle_stop_time(time.time(), cycle_s) if cycle_s else stop_time(minutes, time.time())
     tasks = [asyncio.create_task(ws_loop(n, u, s, p, rec, stop_at)) for n, u, s, p in FEEDS]
     tasks += [asyncio.create_task(rec.window_loop(stop_at)), asyncio.create_task(rec.result_loop(stop_at)), asyncio.create_task(rec.clock_loop(stop_at))]
     ticker = asyncio.create_task(flusher(out, stop_at))
@@ -322,10 +332,11 @@ def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("out_dir")
     ap.add_argument("--minutes", type=float, default=58)
+    ap.add_argument("--cycle-hours", type=float, default=0, help="back to back jobs: stop a minute after the cycle boundary that leaves one full cycle (see cycle_stop_time)")
     ap.add_argument("--quote-lead", type=float, default=QUOTE_LEAD_S)
     ap.add_argument("--spot-lead", type=float, default=SPOT_LEAD_S)
     a = ap.parse_args(argv)
-    asyncio.run(run(a.out_dir, a.minutes, a.quote_lead, a.spot_lead))
+    asyncio.run(run(a.out_dir, a.minutes, a.quote_lead, a.spot_lead, a.cycle_hours * 3600 if a.cycle_hours else None))
     return 0
 
 
