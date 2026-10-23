@@ -5969,3 +5969,11 @@ Owner: "there's got to be some way to be profitable trading [the Bitcoin] market
 **Prediction (now):** FALSIFIED (about 65%). Market makers react to spot in well under a second and my sigma is crude (Kraken is one of the index's venues, not the index). If it passes, the suspects are the fill model (trade prices that printed after the move, i.e. the trade itself already reflects spot) and the Kraken-to-index basis.
 **Not claimed even on a pass:** the book thins fast near the close (size of at least 5 on the favourite side in 56% of windows at 60 s left, 12% at 15 s), so a lag edge would carry one or two contracts per window, not a ladder; and a pass here would still need the RECORD1 quote-level read before anything is proposed.
 Run once after the fetches finish: `python -m scalper.lag2 run`.
+
+## Sizing look at a $500 balance (2026-10-23, information only, no try; owner asked about Bitcoin, Ethereum, natural gas, Dogecoin)
+
+History (feat1 L1 entries, Bitcoin and natural gas at the live 600 s entry, the others at 360 s; day-block bootstrap, 30 days, per-contract nets, k contracts per entry):
+- Edge per contract: Bitcoin(10 min) +2.13c (n 711, z 2.21), Ethereum +0.52c (z 1.17), Dogecoin +1.58c (z 3.79), natural gas(10 min) +2.58c (n 389, z 2.45); XRP +1.52c, gold +1.59c for comparison.
+- 30-day mean profit at k = 1 / 3 / 5 / 8 per series (5th percentile in brackets, single series): Dogecoin $14 / $42 / $71 / $113 ($4 / $12 / $21 / $32); natural gas $6 / $18 / $31 / $48 ($0.6 / $1.5 / $4 / $5); Bitcoin(10 min) $6 / $18 / $29 / $47 (-$1 / -$4 / -$7 / -$12); Ethereum $5 / $14 / $24 / $38 (-$6 / -$18 / -$29 / -$48).
+- All four together, one crypto order per window, same-day draws: k = 1 / 2 / 3 / 5 each: $20 / $39 / $59 / $98 per 30 days, 5th percentile +$4 / +$8 / +$10 / +$20, the 12% day stop ($60 at $500) hit in 0% of paths. The worst historical day at k = 1 each was -$4.45 (2026-10-21), so k = 5 would have been about -$22, 4.5% of $500.
+- Cautions: 79 days contain no crash; the fresh days (since Oct 13) are weaker for Dogecoin (+0.63c) and Bitcoin at 6 minutes (-0.4c), so halve the profit figures; a profit figure is only as good as the edge persisting; sizing is leverage on that edge (SIZE1), not a new edge. Ethereum's edge is the weakest, so extra size there adds variance for little expected gain.
