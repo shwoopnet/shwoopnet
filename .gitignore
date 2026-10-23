@@ -18,3 +18,6 @@ GATES.md
 # (Jekyll cannot resolve a dangling symlink), so ignore the name itself, not just a folder.
 kalshi-scalper/data
 kalshi-scalper/data/
+
+__pycache__/
+*.pyc
