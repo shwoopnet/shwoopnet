@@ -387,13 +387,22 @@
   .page[hidden]{ display:none; }
 
   /* ---------- Market Brief (home) page ---------- */
-  .brief-hero{ padding: 44px 0 8px 0; max-width: 760px; }
+  /* The Brief is a grid of soft windows, the same card the sign-in page shows (the owner, Oct 23, 2026: everything matches the front page; the Movers card was dropped). */
+  .brief-win{ background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%), var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow: var(--card-shadow); padding:20px 22px; min-width:0; }
+  .brief-win .breadth-widget, .brief-win .market-news-list, .brief-win .earnings-list{ background:none; border:0; box-shadow:none; padding:0; border-radius:0; }
+  .brief-win .brief-section-title{ margin:0 0 12px 0; }
+  .brief-grid{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); grid-template-areas:"news side" "news earn"; gap:18px; align-items:start; margin-bottom:36px; }
+  .brief-news{ grid-area:news; } .brief-side{ grid-area:side; } .brief-earn{ grid-area:earn; }
+  @media (max-width: 900px){ .brief-grid{ grid-template-columns:1fr; grid-template-areas:"side" "news" "earn"; } }
+  .brief-hero .brief-lede{ margin-bottom:0; }
+  .index-card{ border-radius:16px; }
+  .brief-hero{ padding: 28px 30px; margin-top:18px; margin-bottom:18px; }
   .brief-page-header{ margin-bottom:22px; }
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
-  .brief-headline{ font-family:'Public Sans', sans-serif; font-size: 19px; font-weight:700; margin:0 0 14px 0; line-height:1.35; }
+  .brief-headline{ font-family:'Public Sans', sans-serif; font-size: 26px; font-weight:700; margin:0 0 14px 0; line-height:1.35; }
   .brief-lede{ font-size:15px; line-height:1.75; color:var(--muted); margin:0 0 32px 0; }
 
-  .brief-indices{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
+  .brief-indices{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px; }
   .index-card{ flex:1; min-width:170px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow: var(--card-shadow); }
   .index-card .ix-name{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; display:block; }
   .index-card .ix-proxy{ text-transform:none; letter-spacing:0; opacity:.7; }
@@ -418,9 +427,6 @@
     letter-spacing:0; margin: 0 0 16px 0;
   }
 
-  .brief-two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom: 36px; }
-  @media (max-width: 900px){ .brief-two-col{ grid-template-columns:1fr; gap:24px; } }
-  .brief-col .brief-section-title{ margin-bottom:12px; }
 
   .breadth-widget{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:18px 20px; box-shadow: var(--card-shadow); }
   .breadth-bar{ height:10px; border-radius:5px; background: var(--loss-glow); overflow:hidden; margin-bottom:14px; }
@@ -436,24 +442,12 @@
   .breadth-label.up{ border-color: rgba(15,157,88,0.35); color: var(--gain); }
   .breadth-label.down{ border-color: rgba(217,48,37,0.35); color: var(--loss); }
 
-  .movers-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  @media (max-width: 600px){ .movers-grid{ grid-template-columns:1fr; } }
-  .movers-col{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; min-width:0; box-shadow: var(--card-shadow); }
-  .movers-col-title{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color: var(--muted); margin-bottom:10px; }
-  .mover-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; font-size:12px; }
-  .mover-row + .mover-row{ border-top:1px solid var(--border); }
-  .mover-sym{ font-weight:600; }
-  .mover-price{ color: var(--muted); }
-  .mover-chg{ font-family:'Public Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight:600; }
-  .mover-chg.up{ color: var(--gain); }
-  .mover-chg.down{ color: var(--loss); }
-
   .market-news-list, .earnings-list{ background: var(--panel); border:1px solid var(--border); border-radius: var(--radius); padding:6px 16px; min-height:60px; box-shadow: var(--card-shadow); }
   .news-placeholder{ padding:14px 0; font-size:12px; color: var(--muted); }
   .news-item{ display:flex; flex-direction:column; gap:3px; padding:11px 0; text-decoration:none; color: var(--paper); }
   .news-item + .news-item{ border-top:1px solid var(--border); }
   .news-item:hover .news-item-headline{ color: var(--amber); }
-  .news-item, .mover-row{ transition: transform .15s ease; } .news-item:hover, .mover-row:hover{ transform: translateX(3px); }
+  .news-item{ transition: transform .15s ease; } .news-item:hover{ transform: translateX(3px); }
   .news-item-headline{ font-size:12.5px; line-height:1.5; }
   .news-item-meta{ font-size:10.5px; color: var(--muted); }
   .earnings-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; font-size:12.5px; }
@@ -831,8 +825,8 @@
      little under the pointer, and chart marks draw in once. Every animation is in the reduce-motion blocks below (gate G1), and the pointer light is never wired when motion is reduced. Transform and opacity only (gate G3). */
   /* Chart figures (end label, ring total, weekly values) are NUMBERS, so they are in the plain font with tabular digits: the chunky Titan One made figures like 774.14 hard to read (the owner, Oct 21, 2026). Titan One is only the wordmark. */
   .kal-bub{ font-family:'Public Sans', sans-serif; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:0; }
-  .kal-card, .settings-card, .breadth-widget, .movers-col, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
-  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
+  .kal-card, .settings-card, .breadth-widget, .brief-win, .index-card{ transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, border-color .22s ease; }
+  .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .brief-win:hover, .index-card:hover{ transform: translateY(-2px); box-shadow: var(--card-shadow-lift); border-color: var(--border-strong, var(--border)); }
   .kal-tile{ transition: transform .18s cubic-bezier(.2,.8,.3,1), border-color .18s ease; }
   .kal-tile:hover{ transform: translateY(-2px) scale(1.02); border-color: var(--paper); }
   .kal-leg{ transition: transform .15s ease; } .kal-leg:hover{ transform: translateX(3px); }
@@ -844,7 +838,7 @@
   @keyframes cardRise{ from{ opacity:0; transform: translateY(14px) scale(.985); } to{ opacity:1; transform:none; } }
   @keyframes lineDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
   @keyframes markPop{ from{ opacity:0; transform: scaleY(.2); } to{ opacity:1; transform:none; } }
-  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .index-card, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+  .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .brief-win, .page.enter .index-card, .page.enter .kal-tile{ animation: cardRise .55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
@@ -856,11 +850,11 @@
     .brand:hover .brand-name span{ transform: none; }
     .kal-console .kal-brow{ transition: none; }
     .kal-console .kal-brow:hover{ transform: none; }
-    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .movers-col, .page.enter .index-card, .page.enter .kal-tile{ animation: none; }
+    .page.enter .kal-card, .page.enter .settings-card, .page.enter .breadth-widget, .page.enter .brief-win, .page.enter .index-card, .page.enter .kal-tile{ animation: none; }
     .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
-    .news-item:hover, .mover-row:hover{ transform: none; }
-    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .movers-col:hover, .index-card:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
+    .news-item:hover{ transform: none; }
+    .kal-card:hover, .settings-card:hover, .breadth-widget:hover, .brief-win:hover, .index-card:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
   [data-reduce-motion="true"] .bg-ambient::before,
   [data-reduce-motion="true"] .bg-ambient::after{ animation: none; }
@@ -872,11 +866,11 @@
   [data-reduce-motion="true"] .side-nav-item:hover .nav-shard{ animation: none; display:none; }
   [data-reduce-motion="true"] .kal-console .kal-brow{ transition: none; }
   [data-reduce-motion="true"] .kal-console .kal-brow:hover{ transform: none; }
-  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .movers-col, [data-reduce-motion="true"] .page.enter .index-card, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
+  [data-reduce-motion="true"] .page.enter .kal-card, [data-reduce-motion="true"] .page.enter .settings-card, [data-reduce-motion="true"] .page.enter .breadth-widget, [data-reduce-motion="true"] .page.enter .brief-win, [data-reduce-motion="true"] .page.enter .index-card, [data-reduce-motion="true"] .page.enter .kal-tile{ animation: none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
-  [data-reduce-motion="true"] .news-item:hover, [data-reduce-motion="true"] .mover-row:hover{ transform: none; }
-  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .movers-col:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
+  [data-reduce-motion="true"] .news-item:hover{ transform: none; }
+  [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .breadth-widget:hover, [data-reduce-motion="true"] .brief-win:hover, [data-reduce-motion="true"] .index-card:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
   [data-reduce-motion="true"] .front-eyebrow, [data-reduce-motion="true"] .front-h1, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-win, [data-reduce-motion="true"] .front-win-a .win{ animation: none; }
 </style>
 <script>
@@ -1191,7 +1185,7 @@
     <div class="app-pages">
   <div class="tape" id="marketTape" role="region" aria-label="Markets" hidden></div>
   <main class="page" id="page-brief">
-    <div class="brief-hero">
+    <div class="brief-hero brief-win">
       <div class="brief-page-header">
         <div class="trades-title">Market Brief</div>
         <div class="trades-sub">Today's read on what's moving the tape.</div>
@@ -1204,25 +1198,18 @@
     <div class="brief-indices" id="indexSnapshot"></div>
     <div class="brief-asof" id="briefAsOf"></div>
 
-    <div class="brief-two-col">
-      <div class="brief-col">
-        <div class="brief-section-title">Market Sentiment</div>
-        <div class="breadth-widget" id="breadthWidget"></div>
-      </div>
-      <div class="brief-col">
-        <div class="brief-section-title">Today's Movers</div>
-        <div class="movers-grid" id="moversGrid"></div>
-      </div>
-    </div>
-
-    <div class="brief-two-col">
-      <div class="brief-col">
+    <div class="brief-grid">
+      <div class="brief-win brief-news">
         <div class="brief-section-title">Market News</div>
         <div class="market-news-list" id="marketNewsList">
           <div class="news-placeholder">Sign in to see real market headlines.</div>
         </div>
       </div>
-      <div class="brief-col">
+      <div class="brief-win brief-side">
+        <div class="brief-section-title">Market Sentiment</div>
+        <div class="breadth-widget" id="breadthWidget"></div>
+      </div>
+      <div class="brief-win brief-earn">
         <div class="brief-section-title">Earnings This Week</div>
         <div class="earnings-list" id="earningsList">
           <div class="news-placeholder">Sign in to see upcoming earnings for your tracked stocks.</div>
@@ -1230,9 +1217,7 @@
       </div>
     </div>
 
-
   </main>
-
 
 
   <!-- ================= SETTINGS ================= -->
@@ -1468,7 +1453,7 @@
   // real, current quote right up until the data goes stale and it is still
   // sitting there, with nothing to distinguish it from an actual
   // last-known-good price. Every reader of this watchlist (the index
-  // cards, the sentiment bar, the headline, the movers, the earnings
+  // cards, the sentiment bar, the headline, the earnings
   // filter) treats a still-null price/prevClose as legitimately
   // not-resolved-yet -- real quotes replace this once the first shared
   // snapshot arrives.
@@ -3527,7 +3512,7 @@
   }
   function pageEnter(pageEl){
     if(!pageEl || motionReduced()){ return; }
-    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .movers-col, .index-card, .kal-tile');
+    var items = pageEl.querySelectorAll('.kal-card, .settings-card, .breadth-widget, .brief-win, .index-card, .kal-tile');
     for(var i = 0; i < items.length; i++){ items[i].style.setProperty('--i', String(Math.min(i, 12))); }
     pageEl.classList.remove('enter'); void pageEl.offsetWidth; pageEl.classList.add('enter');
     clearTimeout(pageEnterTimer);
@@ -3966,41 +3951,6 @@
     ledeEl.textContent = ledeParts.join(' ');
   }
 
-  function renderMovers(){
-    var el = document.getElementById('moversGrid');
-    if(!el || watchlist.length === 0) return;
-    // Stocks only -- watchlist also carries the S&P/Nasdaq/Dow benchmark
-    // ETFs for the index cards above, and mixing those into gainers/losers
-    // meant an index sitting at a flat 0.00% could out-"lose" real stocks
-    // just for having a smaller move, despite being a different category
-    // of thing entirely. Also excludes
-    // anything not yet priced (still null, no fake placeholder anymore) --
-    // ranking against a still-unresolved quote would just be ranking
-    // against garbage (pct(null, null) is NaN, and Array.sort with NaN
-    // comparisons has no defined order).
-    var withChange = watchlist.filter(function(w){
-      return !INDEX_PROXIES.some(function(ix){ return ix.sym === w.sym; }) && w.price != null && w.prevClose != null;
-    }).map(function(w){
-      return { sym: w.sym, price: w.price, change: pct(w.price, w.prevClose) };
-    });
-    var sorted = withChange.slice().sort(function(a,b){ return b.change - a.change; });
-    var gainers = sorted.slice(0, 3);
-    var losers = sorted.slice(-3).reverse();
-    el.innerHTML =
-      '<div class="movers-col"><div class="movers-col-title">Top Gainers</div>' + gainers.map(moverRow).join('') + '</div>' +
-      '<div class="movers-col"><div class="movers-col-title">Top Losers</div>' + losers.map(moverRow).join('') + '</div>';
-  }
-
-  // Used by the movers grid renderer.
-  function moverRow(m){
-    var up = m.change >= 0;
-    return '<div class="mover-row">' +
-      '<span class="mover-sym mono">' + m.sym + '</span>' +
-      '<span class="mover-price mono">' + fmt(m.price) + '</span>' +
-      '<span class="mover-chg ' + (up?'up':'down') + '">' + (up?'▲':'▼') + ' ' + Math.abs(m.change).toFixed(2) + '%</span>' +
-    '</div>';
-  }
-
   // ---------- Shared market snapshot (indices/watchlist quotes, news, earnings -- one doc for every signed-in account) ----------
   // shwoop-server writes shared/marketSnapshot once every 3 minutes (quotes,
   // headlines, earnings) and this page only reads it. null (no snapshot
@@ -4025,7 +3975,6 @@
     renderIndices();
     renderSentiment();
     renderBriefHeadline();
-    renderMovers();
     renderMarketNews(tapeNews() || data.news);
     renderEarningsCalendar({ earningsCalendar: data.earningsCalendar });
   }
@@ -4087,8 +4036,7 @@
       renderIndices();
       renderSentiment();
       renderBriefHeadline();
-      renderMovers();
-    }
+      }
     renderMarketTape();
     if(tapeNews()){ renderMarketNews(tapeNews()); }
   }
@@ -4180,7 +4128,6 @@
   }
   renderIndices();
   renderSentiment();
-  renderMovers();
   renderBriefHeadline();
   updateClock();
 
