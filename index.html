@@ -773,6 +773,8 @@
   /* Front page visuals (the owner: great visuals and animations on the login page). Everything here is decoration: soft drifting light behind the page, a slow sheen across "Live more.", a pulse that travels the three-step line, a shine that climbs the bars and a twinkling star.
      Keyframes move only transform, opacity and a background position; no number is animated; reduced motion and the Settings switch stop every one. */
   .front{ position:relative; isolation:isolate; }
+  .front-left{ min-width:0; }
+  .front-sys{ margin-bottom:44px; }
   .front-fx{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:-1; }
   .front-fx i{ position:absolute; border-radius:50%; filter:blur(80px); opacity:.5; background:color-mix(in srgb, var(--brand-depth) 80%, transparent); animation:frontOrbA var(--dur, 22s) ease-in-out infinite alternate; }
   .front-fx i:nth-child(1){ width:46vmax; height:46vmax; left:-14vmax; top:-18vmax; }
@@ -1128,13 +1130,20 @@
       </div>
     </header>
     <main class="front-main">
-      <section class="front-hero front-story" id="frontStory" aria-label="What is Shwoop">
+      <div class="front-left">
+      <section class="front-hero front-sys">
+        <div class="front-eyebrow">Systematic trading</div>
+        <h1 class="front-h1">Trade less.<br><span>Live more.</span></h1>
+        <p class="front-sub">Shwoop Financials builds systematic trading tools: rules written in advance, run by software, reviewed by people.</p>
+      </section>
+      <section class="front-story" id="frontStory" aria-label="What is Shwoop">
         <div class="front-eyebrow story-r" style="--d:0">What is Shwoop</div>
         <p class="story-big story-r" style="--d:1">Your money, without the screen time.</p>
         <p class="story-big story-dim story-r" style="--d:2">Shwoop Financials builds software that trades by the rules, so you never have to watch it.</p>
         <p class="story-body story-r" style="--d:3">Most people lose sleep over the markets. They check prices all day, second-guess every move, and let fear or excitement make the call. Shwoop takes that out. The rules are written down ahead of time, the software follows them the same way every time, and people check on it.</p>
         <p class="story-body story-r" style="--d:4">It's for anyone who wants their money working without their life revolving around a chart.</p>
       </section>
+      </div>
       <div class="auth-box">
         <div class="auth-title">Sign in</div>
     <div class="auth-status" id="authStatus">Connecting…</div>
