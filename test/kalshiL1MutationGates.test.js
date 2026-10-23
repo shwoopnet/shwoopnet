@@ -34,6 +34,11 @@ function world(opts = {}) {
   const fetchFn = async (url, o) => {
     calls.push({ url, method: o.method, headers: o.headers, body: o.body ? JSON.parse(o.body) : null });
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
+    if (url.includes('/candlesticks')) {
+      // The default path is a smooth climb of the YES side, so a Bitcoin or Ethereum order passes the smooth-climb gate.
+      const nowS = Math.floor(NOW / 1000);
+      return reply(200, { candlesticks: [0.5, 0.58, 0.66, 0.74, 0.82, 0.91].map((m, i, arr) => ({ end_period_ts: nowS - 60 * (arr.length - 1 - i), yes_bid: { close_dollars: String(m - 0.01) }, yes_ask: { close_dollars: String(m + 0.01) } })) });
+    }
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
       const over = (opts.fresh && opts.fresh[tk]) || {};
@@ -82,8 +87,8 @@ gates.M2 = () => {
 
 // A market 329 s or 401 s out is outside the 330 to 400 s window, on the list and on the fresh read; 331 s and 399 s are inside.
 gates.M3 = async () => {
-  // The edges of the entry windows: Bitcoin decides 10 minutes before the close (570 to 640 s), Ethereum 6 minutes (330 to 400 s). One second outside either is nothing.
-  for (const [series, ticker, cases] of [['KXBTC15M', T, [[569000, 0], [571000, 1], [639000, 1], [641000, 0], [360000, 0]]], ['KXETH15M', 'KXETH15M-26OCT071415-15', [[329000, 0], [331000, 1], [399000, 1], [401000, 0], [600000, 0]]]]) {
+  // The edges of the entry windows: XRP decides 10 minutes before the close (570 to 640 s), Bitcoin and Ethereum 6 minutes (330 to 400 s). One second outside either is nothing.
+  for (const [series, ticker, cases] of [['KXXRP15M', 'KXXRP15M-26OCT071415-15', [[569000, 0], [571000, 1], [639000, 1], [641000, 0], [360000, 0]]], ['KXBTC15M', T, [[329000, 0], [331000, 1], [399000, 1], [401000, 0], [600000, 0]]], ['KXETH15M', 'KXETH15M-26OCT071415-15', [[329000, 0], [331000, 1], [399000, 1], [401000, 0], [600000, 0]]]]) {
     for (const [ms, expect] of cases) {
       const close_time = iso(NOW + ms);
       const w = world({ fresh: { [ticker]: { close_time } } });

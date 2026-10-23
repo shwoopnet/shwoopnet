@@ -162,6 +162,8 @@ gates.D11 = () => {
   assert.ok(/^Skipped a minute/.test(other) && !/asked once more/.test(other), 'another failure is a skip too, without the 429 line');
   const lines = f.kalshiSkipNote('KXGOLD15M-26OCT231200-00: filled; KXDOGE15M-26OCT231200-00: another crypto market already holds this window', tick, now);
   assert.strictEqual(lines, 'Gold: Bought\nDogecoin: Another crypto market already holds this window', 'a minute with several markets reads as one short line per market, not a wall of tickers');
+  const shard = f.kalshiSkipNote('KXGOLD15M-26OCT231200-00: filled; KXDOGE15M-26OCT231200-00: only $0.00 on its shard, and money on another shard does not count; KXGOLD15M-26OCT231215-00: only $0.00 on its shard, and money on another shard does not count', tick, now);
+  assert.strictEqual(shard, 'Gold: Bought\nDogecoin and Gold: no money on their account shard, so skipped. Move funds there in Kalshi to trade them.', 'markets with no money on their shard are said once, plainly, not as an alarm each minute: ' + shard);
   const watching = 'Watching. Orders go in about 6 minutes before a close, and no market is at that point right now.';
   assert.strictEqual(f.kalshiSkipNote(watching, tick, now), watching, 'an ordinary note is shown as written');
   assert.strictEqual(f.kalshiSkipNote(undefined, tick, now), '', 'no note, no line');
