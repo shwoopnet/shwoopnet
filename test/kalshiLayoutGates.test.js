@@ -221,8 +221,8 @@ gates.Y14 = () => {
 gates.TP1 = () => {
   const m = /(function kalshiPctText\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiPctText not found');
   const f = new Function(m[1] + '; return kalshiPctText;')();
-  assert.ok(/\(\+6\.2%\)/.test(f(0.58, 9.3)), 'a win of 58c on 9.30 at risk is +6.2%: ' + f(0.58, 9.3));
-  assert.ok(/\(-100\.0%\)/.test(f(-9.3, 9.3)), 'a full loss is -100.0%: ' + f(-9.3, 9.3));
+  assert.ok(/\+6\.2%$/.test(f(0.58, 9.3)) && !/\(/.test(f(0.58, 9.3)), 'a win of 58c on 9.30 at risk is +6.2%, plain, same strength as the dollars: ' + f(0.58, 9.3));
+  assert.ok(/-100\.0%$/.test(f(-9.3, 9.3)), 'a full loss is -100.0%: ' + f(-9.3, 9.3));
   assert.strictEqual(f(1, 0), '', 'no known cost: no percentage'); assert.strictEqual(f(NaN, 5), '', 'no result: no percentage');
   assert.ok(/kalshiMoney\(Math\.abs\(tp\.pnl\)\) \+ kalshiPctText\(/.test(html) && /kalshiMoney\(Math\.abs\(pnl\)\) \+ kalshiPctText\(/.test(html), 'both kinds of row carry it, after the dollar figure, so Privacy view masks the dollars and leaves the percentage');
 };
