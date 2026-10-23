@@ -2537,7 +2537,7 @@
     var band = line(hiA) + ' ' + line(loA).split(' ').reverse().join(' ');
     return '<div class="kal-week"><div class="kal-week-k">Next 7 days, as a range</div>' +
       '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="A range for the next seven days built from past results"><polygon class="kal-week-band" points="' + band + '"/><line class="kal-week-zero" x1="0" x2="' + W + '" y1="' + Y(0) + '" y2="' + Y(0) + '"/><polyline class="kal-week-mid" points="' + line(midA) + '"/></svg>' +
-      '<div class="kal-week-foot"><span>Typical <b>' + kalshiPctSigned(wk.typical) + '</b></span><span>Range <b>' + kalshiPctSigned(wk.lo) + ' to ' + kalshiPctSigned(wk.hi) + '</b></span><span>Losing week <b>' + Math.round(wk.losing * 100) + '%</b></span></div>' +
+      '<div class="kal-week-foot"><span>Typical <b>' + kalshiPctSigned(wk.typical) + '</b></span><span>Range <b>' + kalshiPctSigned(wk.lo) + ' to ' + kalshiPctSigned(wk.hi) + '</b></span></div>' +
       '<div class="kal-week-note">From your last ' + st.n + ' days. A description of the past, not a promise.</div></div>';
   }
   function kalshiTodayPct(botNet, total){

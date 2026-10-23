@@ -243,7 +243,7 @@ gates.RG1 = () => {
   assert.strictEqual(f.kalshiDayStats(many, 0, now), null, 'no known account base: nothing');
   const strip = f.kalshiRangeStripHtml(st), week = f.kalshiWeekRangeHtml(st);
   assert.ok(/Usual day/.test(strip) && /kal-range-now/.test(strip) && /%/.test(strip) && !/\$/.test(strip), 'the strip is percentages only, with today marked');
-  assert.ok(/Next 7 days, as a range/.test(week) && /Losing week/.test(week) && /not a promise/.test(week) && !/\$/.test(week), 'the week range says it is a description of the past');
+  assert.ok(/Next 7 days, as a range/.test(week) && /not a promise/.test(week) && !/\$/.test(week), 'the week range says it is a description of the past'); assert.ok(!/Losing week/.test(week), 'no modelled chance of a losing week: a guess from a few days misleads (the owner removed it, Oct 23, 2026)');
   assert.strictEqual(f.kalshiRangeStripHtml(null) + f.kalshiWeekRangeHtml(null), '', 'nothing without history');
   assert.ok(st.week.lo < st.week.typical && st.week.typical < st.week.hi && st.week.losing >= 0 && st.week.losing <= 1, 'the week range is ordered and the losing chance is a probability');
 };
