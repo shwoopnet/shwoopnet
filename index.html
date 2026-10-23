@@ -3982,8 +3982,9 @@
   // landing page preference, if set to something other than Auto. Otherwise
   // the brief.
   (function initLanding(){
+    // The landing page is never Settings (the owner, Oct 23, 2026): showPage writes the current page into the address, so a reload on Settings used to reopen Settings. Only the Brief is honoured from the address; everything else follows the landing choice.
     var hashPage = (location.hash || '').replace('#', '');
-    if(hashPage === 'brief' || hashPage === 'settings'){
+    if(hashPage === 'brief'){
       showPage(hashPage);
       return;
     }
