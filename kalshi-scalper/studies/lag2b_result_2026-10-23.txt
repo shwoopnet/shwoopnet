@@ -1,0 +1,2 @@
+LAG2B: verdict FALSIFIED; markets with a tape 1068, trades 238 on 13 days
+mean -0.15c z -0.06 halves +4.29c / -3.01c stress -0.39c PF 0.99
