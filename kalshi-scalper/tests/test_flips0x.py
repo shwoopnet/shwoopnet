@@ -12,4 +12,5 @@ mk = {"A": {"close": close, "res": "yes", "strike": 1.0, "c": smooth}}
 rows = T.series_rows("KXXRP15M", mk)
 assert len(rows) == 1 and abs(rows[0]["net"]) < 1e-9 and rows[0]["raw"] > 0        # the only entry is its own baseline
 assert T.forward(now=0.0).startswith("Refusing the registered read")
+assert T.flip_count([0.5, 0.6, 0.7, 0.8]) == 0 and T.flip_count([0.5, 0.6, 0.55, 0.7]) == 2 and T.flip_count([0.5, 0.502, 0.6, 0.7]) == 0     # a 0.2c wiggle is ignored
 print("ok")

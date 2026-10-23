@@ -1,0 +1,81 @@
+{
+ "rule": "flips0 = at least 4 earlier 1-minute candles AND zero direction flips in the favourite side's mid path (changes of 0.004 or less ignored)",
+ "vectors": [
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.58,
+    0.66,
+    0.74,
+    0.82,
+    0.91
+   ],
+   "earlier_candles": 5,
+   "flips": 0,
+   "flips0": true
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.58,
+    0.52,
+    0.74,
+    0.82,
+    0.91
+   ],
+   "earlier_candles": 5,
+   "flips": 2,
+   "flips0": false
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.501,
+    0.6,
+    0.7,
+    0.8,
+    0.9
+   ],
+   "earlier_candles": 5,
+   "flips": 0,
+   "flips0": true
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.62,
+    0.7,
+    0.69,
+    0.75,
+    0.74,
+    0.92
+   ],
+   "earlier_candles": 5,
+   "flips": 4,
+   "flips0": false
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.5,
+    0.55,
+    0.6,
+    0.8,
+    0.795,
+    0.9
+   ],
+   "earlier_candles": 5,
+   "flips": 2,
+   "flips0": false
+  },
+  {
+   "favourite_side_mids_oldest_to_newest_including_decision_candle": [
+    0.9,
+    0.91,
+    0.92,
+    0.93
+   ],
+   "earlier_candles": 3,
+   "flips": 0,
+   "flips0": false
+  }
+ ]
+}

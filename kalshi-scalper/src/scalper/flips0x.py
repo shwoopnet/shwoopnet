@@ -28,6 +28,13 @@ FWD_READ_DATE = int(datetime(2026, 11, 12, tzinfo=timezone.utc).timestamp())
 FWD_MIN_N, FWD_C, FWD_Z, FWD_PF = 150, 0.010, 2.0, 1.3
 
 
+def flip_count(mids: list[float]) -> int:
+    """Direction flips of a favourite-side mid path: minute changes of 0.004 or less are ignored, then the sign changes between consecutive remaining changes are counted. Same rule as the FLIPS_0 bucket."""
+    ch = [b - a for a, b in zip(mids, mids[1:])]
+    mv = [x for x in ch if abs(x) > 0.004]
+    return sum(1 for a, b in zip(mv, mv[1:]) if (a > 0) != (b > 0))
+
+
 def series_rows(s: str, mk: dict) -> list[dict]:
     """FLIPS_0 entries of one series at the 6 minute entry, net and stress minus the series' own mean of all entries of that entry; `raw` is the unadjusted net."""
     left, band = D.ENTRIES["L1360"]
