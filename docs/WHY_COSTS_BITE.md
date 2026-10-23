@@ -7,9 +7,9 @@
 | | |
 |---|---|
 | Contracts bought | 2,147 |
-| Entry fees (Kalshi's 7% x price x (1 - price), about 0.44c a contract) | **$9.45**, which is 0.47% of the money staked |
-| Result before fees | **+$6.13** |
-| Result after fees | **-$3.32** |
+| Entry fees (Kalshi's 7% x price x (1 - price), about 0.44c a contract) | about 0.47% of the money staked |
+| Result before fees | **slightly positive** |
+| Result after fees | **slightly negative** |
 | Win rate | 93.4% |
 | Average win / average loss | +$0.41 / -$5.95 (one loss cancels about 14 wins) |
 | Win rate needed to break even at the average price paid (about 93.4c plus 0.44c fee) | about **93.9%** |
