@@ -704,6 +704,8 @@
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
   .kal-ecg-wrap{ border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; margin:0 0 10px; }
+  .kal-ecg-wrap.flash{ animation:ecgFlash .9s ease-out; }
+  @keyframes ecgFlash{ 0%{ box-shadow:0 0 0 1px rgba(15,157,88,.9), 0 0 18px rgba(15,157,88,.45); border-color:rgba(15,157,88,.9); } 100%{ box-shadow:0 0 0 0 rgba(15,157,88,0); } }
   .kal-ecg{ display:block; width:100%; height:72px; }
   .kal-ecg-grid{ stroke:rgba(255,255,255,.05); stroke-width:1; vector-effect:non-scaling-stroke; }
   .kal-ecg-line{ fill:none; stroke:var(--muted); stroke-width:1.8; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
@@ -762,6 +764,7 @@
     .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
     .tape-track{ animation: none; }
+    .kal-ecg-wrap.flash{ animation: none; }
     .tape-set + .tape-set{ display:none; }
     .tape-view{ overflow-x:auto; }
     .news-item:hover{ transform: none; }
@@ -773,6 +776,7 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .tape-track{ animation: none; }
+  [data-reduce-motion="true"] .kal-ecg-wrap.flash{ animation: none; }
   [data-reduce-motion="true"] .tape-set + .tape-set{ display:none; }
   [data-reduce-motion="true"] .tape-view{ overflow-x:auto; }
   [data-reduce-motion="true"] .news-item:hover{ transform: none; }
@@ -2882,12 +2886,11 @@
     while(beats.length > 30){ beats.shift(); }
     return beats;
   }
-  function kalshiHeartbeatSvg(beats, now, state){
-    var W = 600, H = 70, B = 46, SPAN = 300000, grid = '';
-    for(var gx = 0; gx <= W; gx += 20){ grid += '<line x1="' + gx + '" x2="' + gx + '" y1="0" y2="' + H + '" class="kal-ecg-grid"/>'; }
-    for(var gy = 6; gy < H; gy += 20){ grid += '<line x1="0" x2="' + W + '" y1="' + gy + '" y2="' + gy + '" class="kal-ecg-grid"/>'; }
-    var X = function(t){ return W - (now - t) / SPAN * W; };
-    var seen = (beats || []).filter(function(t){ return Number.isFinite(t) && now - t <= SPAN + 20000 && t <= now; }).sort(function(a, b){ return a - b; });
+  // The strip shows the last two minutes (5 pixels a second), so it visibly moves, and it is redrawn about 30 times a second while the page is showing, so the trace slides instead of stepping (the owner, Oct 23, 2026: "not real time").
+  var KAL_ECG = { W: 600, H: 70, B: 46, SPAN: 120000 };
+  function kalshiHeartbeatPath(beats, now){
+    var W = KAL_ECG.W, B = KAL_ECG.B, X = function(t){ return W - (now - t) / KAL_ECG.SPAN * W; };
+    var seen = (beats || []).filter(function(t){ return Number.isFinite(t) && now - t <= KAL_ECG.SPAN + 20000 && t <= now; }).sort(function(a, b){ return a - b; });
     var d = 'M0 ' + B;
     seen.forEach(function(t){
       var x = X(t);
@@ -2896,12 +2899,37 @@
         ' L' + (x + 9).toFixed(1) + ' ' + B + ' L' + (x + 13).toFixed(1) + ' ' + (B - 8) + ' L' + (x + 17).toFixed(1) + ' ' + B;
     });
     var last = seen.length ? seen[seen.length - 1] : null;
-    var tail = last === null ? 0 : Math.min(W, X(last) + 17);
-    d += ' L' + W + ' ' + B;
-    var gap = state === 'quiet' || state === 'down' ? '<line x1="' + tail.toFixed(1) + '" x2="' + W + '" y1="' + B + '" y2="' + B + '" class="kal-ecg-gap ' + state + '"/>' : '';
-    return '<svg class="kal-ecg ' + (state || 'off') + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Heartbeat of the bot over the last five minutes">' + grid +
-      '<path d="' + d + '" class="kal-ecg-line"/>' + gap + '</svg>';
+    return { d: d + ' L' + W + ' ' + B, tail: last === null ? 0 : Math.min(W, X(last) + 17) };
   }
+  function kalshiHeartbeatSvg(beats, now, state){
+    var W = KAL_ECG.W, H = KAL_ECG.H, B = KAL_ECG.B, grid = '';
+    for(var gx = 0; gx <= W; gx += 20){ grid += '<line x1="' + gx + '" x2="' + gx + '" y1="0" y2="' + H + '" class="kal-ecg-grid"/>'; }
+    for(var gy = 6; gy < H; gy += 20){ grid += '<line x1="0" x2="' + W + '" y1="' + gy + '" y2="' + gy + '" class="kal-ecg-grid"/>'; }
+    var p = kalshiHeartbeatPath(beats, now);
+    var gap = state === 'quiet' || state === 'down' ? '<line x1="' + p.tail.toFixed(1) + '" x2="' + W + '" y1="' + B + '" y2="' + B + '" class="kal-ecg-gap ' + state + '"/>' : '';
+    return '<svg class="kal-ecg ' + (state || 'off') + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Heartbeat of the bot over the last two minutes">' + grid +
+      '<path d="' + p.d + '" class="kal-ecg-line"/>' + gap + '</svg>';
+  }
+  // Redraws only the path (and the flat gap's start), about 30 times a second, while the Bot page is showing. A tab in the background draws nothing (the browser pauses frames), and under reduce motion the once a second tick is enough.
+  var kalshiEcgRaf = null, kalshiEcgLast = 0;
+  function kalshiEcgFrame(t){
+    kalshiEcgRaf = requestAnimationFrame(kalshiEcgFrame);
+    if(t - kalshiEcgLast < 33){ return; }
+    kalshiEcgLast = t;
+    var wrap = document.getElementById('kalEcg'), s = kalshiLiveCtl && kalshiLiveCtl.session;
+    if(!wrap || !s || s.active !== true){ return; }
+    var path = wrap.querySelector('.kal-ecg-line'), gap = wrap.querySelector('.kal-ecg-gap');
+    if(!path){ return; }
+    var p = kalshiHeartbeatPath(kalshiBeats, Date.now());
+    path.setAttribute('d', p.d);
+    if(gap){ gap.setAttribute('x1', p.tail.toFixed(1)); }
+  }
+  function kalshiEcgStart(){
+    kalshiEcgStop();
+    var calm = document.documentElement.getAttribute('data-reduce-motion') === 'true' || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if(!calm){ kalshiEcgRaf = requestAnimationFrame(kalshiEcgFrame); }
+  }
+  function kalshiEcgStop(){ if(kalshiEcgRaf){ cancelAnimationFrame(kalshiEcgRaf); kalshiEcgRaf = null; } }
   function kalshiAgeText(sec){
     return sec < 90 ? sec + ' seconds ago' : (sec < 5400 ? Math.round(sec / 60) + ' minutes ago' : Math.round(sec / 3600) + ' hours ago');
   }
@@ -2914,12 +2942,14 @@
     var hb = kalshiHeartbeat(s, now);
     var line = hb.state === 'off' ? 'Not running' : (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while')));
     var note = running && s.lastNote ? kalshiSkipNote(s.lastNote, s.lastTickAt, now) : '';
+    var beatsBefore = kalshiBeats.length;
     kalshiBeatNote(kalshiBeats, s && s.active === true ? s.lastTickAt : NaN);
+    var newBeat = kalshiBeats.length !== beatsBefore && beatsBefore > 0;
     sEl.innerHTML = '<div id="kalEcg" class="kal-ecg-wrap"></div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(line) + (hb.ageSec !== null && running ? '. Last check ' + escapeHtml(kalshiAgeText(hb.ageSec)) : '') + '</span></div>' +
       (running ? '<div class="kal-rows"><div><span class="kal-k">Next look to buy</span><b id="kalNextIn">&mdash;</b></div><div><span class="kal-k">What it is looking at</span><b id="kalNextWhat">&mdash;</b></div></div>' : '') +
       (note ? '<div class="kal-note">' + escapeHtml(note) + '</div>' : '');
     var ecgNow = document.getElementById('kalEcg');
-    if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state); }
+    if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
     var a = kalshiLiveAcct;
     var orders = kalshiResolveOrders(kalshiLiveOrders, a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
     var m = kalshiRiskMeter(orders, s, now);
@@ -2995,6 +3025,7 @@
     kalshiAcctRefresh();
     kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
     kalshiStatusTimer = setInterval(function(){ if(!document.hidden){ kalshiStatusTick(); } }, 1000);
+    kalshiEcgStart();
   }
   function stopKalshiBot(){
     kalshiBotState.control = null; kalshiOrdersLoaded = false; kalshiSyncError = '';
@@ -3004,6 +3035,7 @@
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
     if(kalshiStatusTimer){ clearInterval(kalshiStatusTimer); kalshiStatusTimer = null; }
+    kalshiEcgStop();
     kalshiBeats = [];
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
