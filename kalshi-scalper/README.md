@@ -5883,3 +5883,18 @@ Live orders 2026-10-07 to 10-23 (condensed export plus the new export): 447 fill
 - **Reading:** the edge is in XRP, DOGE and gold; Bitcoin and Ethereum at 6 minutes are about zero and weakening, yet Bitcoin carried the largest live size. Selected after the fact from 8 series, so a lead, not a claim; XRP is the most consistent (both halves and the fresh days).
 
 Correction (2026-10-23, from the main session): the cap I proposed already exists. `CAPPED_SERIES` (functions/kalshiLiveLib.js) holds Bitcoin, Ethereum, XRP and Dogecoin at one contract per order with no add-on since the Oct 21 gold-first change, plus one crypto order per window. The all-time Bitcoin and Ethereum figures above (1,041 and 530 contracts) mostly predate Oct 21. The current rule set's Bitcoin and Ethereum results (since Oct 22 03:00Z: +$0.70 on 10 orders and -$0.01 on 15) are at size 1, so the proposal changes nothing live; dropping them entirely is the only step left and needs the owner.
+
+## Pre-registration: BTC1 (2026-10-23, before any outcome was split by the prior window), a new mindset for Bitcoin: the window is not independent of the one before it
+
+Owner: Bitcoin's live record is poor; find an entirely new mindset and a strategy with a high profit factor. Every Bitcoin rule so far looked inside one window (price, rise, time in band, distance to strike). This asks the other question: **does the result of the window that just closed tell us anything about the next one?** Markets reset to a fresh strike each 15 minutes, so a market that prices each window as a fresh 50/50 would be missing any momentum or reversal between adjacent windows. KXBTC15M only, `load()` history (6,427 markets, 69 days), prior window = the market closing 900 s earlier, its settled result is known at the next window's open.
+
+Four fixed groups, each tested against zero (not against each other):
+- **AGREE:** the L1 entry (favourite 0.88 to 0.97, 360 s left, held) whose side equals the prior window's result (n 957).
+- **DISAGREE:** the L1 entry whose side is opposite (n 1,001).
+- **CONT:** at the open arm (the candle ending 780 s before close, about 2 minutes in), buy the side equal to the prior window's result at its ask, hold to settlement (n about 6,400).
+- **FADE:** same candle, buy the opposite side.
+Group sizes counted from features only. Fee 7%·p·(1-p) as live.
+
+Claim per group (any one group can pass; tries +4, z bar 2.6 for four groups): n >= 300, mean net per contract >= +2.0c, day-clustered z >= 2.6 against zero, both halves of the days > 0, fee stress x1.2 > 0, and profit factor (sum of winning nets over sum of losing nets) >= 1.3. FALSIFIED for a group: mean < +0.5c or z < 1.0. Otherwise NOT_ENOUGH_DATA. A pass only registers a forward read on fresh days (the markets after 2026-10-13 are held back from this test: `load()` history only), never a trade.
+Prediction (now): all four FALSIFIED. CONT and FADE cross a spread and a 1.75c fee at 50c, so they would need a 55% hit rate; AGREE and DISAGREE are L1 entries the market already prices as calibrated. If any passes, the first suspects are an open-arm quote that is stale and the prior result being leaked into the same day's cluster.
+Run once: `python -m scalper.btc1 run`.
