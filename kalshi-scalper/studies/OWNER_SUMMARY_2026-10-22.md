@@ -30,6 +30,8 @@ Rule: take an L1 favourite only if its 5-minute price range was 15c or less and 
 
 - **Update 2026-10-23 (11 fresh days, all 18 series, information only):** FLAT 477 entries at -0.08c against +0.66c for the rest, so FLAT is not carrying onto fresh days. The pooled 10-minute entry is +0.39c against +0.62c at 6 minutes (not better). The one fresh-day pattern pointing the right way at a useful size is CONC2-F (the crypto favourites the other crypto series contradict: 53 entries at +5.97c against -0.10c, z 1.97), still small. Registered reads are on 2026-11-12.
 
+- **Update 2026-10-23 (new export, 693 orders):** the last 24 hours were +$6.76 on 61 fills (2 small exit losses; gold +$5.95), so the cumulative settled P/L is about -$4.98 on 446 fills (from -$11.74). A good day, not evidence. Live FLAT rate is 15% (7 of 46), matching the history. FLIP1 has 0 of the 40 needed fills so far.
+
 ## 5. Tried this session and dead
 | Idea | Result |
 |---|---|
