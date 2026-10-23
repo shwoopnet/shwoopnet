@@ -391,30 +391,9 @@ gates.Y13 = () => {
 
 // The tiny chart under each market row: a line across the market's 15 minute window, the strike drawn and kept in range, and nothing drawn from too little data.
 gates.Y16 = () => {
-  const m = /(function kalshiSparkSvg\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html);
-  assert.ok(m, 'kalshiSparkSvg found');
-  const escapeHtml = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-  const spark = new Function('escapeHtml', m[1] + '; return kalshiSparkSvg;')(escapeHtml);
-  const from = 1000000, to = from + 900000, fmt = (v) => '$' + Math.round(v);
-  const pts = [0, 1, 2, 3].map((i) => ({ t: from + i * 60000, v: 82500 + i * 10 }));
-  assert.ok(/kal-empty/.test(spark([], { from, to, fmt })), 'no point draws nothing');
-  const one = spark([pts[0]], { from, to, fmt });
-  assert.ok(/<circle/.test(one) && !/kal-empty/.test(one) && /\$82500/.test(one), 'one reading is a dot and its price, not an empty box');
-  assert.ok(/kal-empty/.test(spark(pts.map((p) => ({ t: p.t + 5e6, v: p.v })), { from, to, fmt })), 'points from outside the window are not drawn');
-  const svg = spark(pts, { from, to, ref: 82676, refLabel: 'to beat', fmt });
-  assert.ok(/to beat/.test(svg) && /stroke-dasharray/.test(svg) && /var\(--loss\)/.test(svg), 'strike drawn, and the line is red while the price is under it');
-  assert.ok(/var\(--gain\)/.test(spark(pts, { from, to, ref: 82400, fmt })), 'green when over it');
-  const ys = [...svg.matchAll(/ y1="([\d.]+)"/g)].map((x) => Number(x[1]));
-  assert.ok(ys.length === 1 && ys[0] >= 0 && ys[0] <= 86, 'a strike far above the price stays inside the chart');
-  assert.ok(/kalshiSparkFor\(m\) \+ '<\/div>'/.test(html) && !/kalshiInTrade\(m\.ticker\) \? kalshiSparkFor/.test(html) && /kal-brow-held/.test(html), 'every market row carries its chart (the owner, Oct 23, 2026), and a market the account is in is marked, not the only one drawn');
-  assert.ok(/fetch\('https:\/\/api\.gold-api\.com\/price\/XAU'\)/.test(html) && /m\.series === 'KXGOLD15M' && m\.strike != null && !kalshiGold\.failed/.test(html), 'gold draws its price against the strike, and falls back to the YES line if the feed fails');
-  assert.ok(/now - kalshiGold\.at < 10000/.test(html), 'the gold feed is asked at most every 10 seconds');
-  // History plus live readings, so a chart is never empty right after a market opens.
-  const join = new Function(/(function kalshiJoinSeries\(a, b\)\{[\s\S]*?\n  \})\n/.exec(html)[1] + '; return kalshiJoinSeries;')();
-  const j = join([{ t: 3000, v: 3 }, { t: 1000, v: 1 }], [{ t: 3400, v: 99 }, { t: 5000, v: 5 }, { t: NaN, v: 1 }, { t: 6000, v: undefined }]);
-  assert.deepStrictEqual(j.map((p) => p.t), [1000, 3000, 5000], 'joined in time order, one reading a second at most, junk dropped');
-  assert.ok(/fetch\('https:\/\/api\.exchange\.coinbase\.com\/products\/' \+ product \+ '\/ticker'\)/.test(html) && /kalshiTicker\('BTC-USD'\)/.test(html) && /kalshiCandles\('PAXG-USD', now\)/.test(html), 'Bitcoin has a live ticker and gold has minute history, both from Coinbase');
-  assert.ok(/kalshiGold\.off = v - p/.test(html) && /v: p\.v \+ off/.test(html), 'gold history is shifted so the line ends on the real gold price');
+  // The Bot page has no price charts (the owner, Oct 23, 2026: "remove charts from the bot page entirely"). Consequence: no market row draws a line, and the page calls no price feed (Coinbase, gold-api) from the browser.
+  assert.ok(!/kalshiSparkSvg|kalshiSparkFor|kal-spark|kalshiFetchSpot|kalshiFetchAlt|kalshiFetchGold|kalshiCandles|kalshiTicker/.test(html), 'the chart code is gone');
+  assert.ok(!/coinbase\.com|gold-api\.com/.test(html), 'and so are the price feeds it read');
 };
 
 // The default landing page can be Kalshi, for the admin only: the button is hidden until the account is known to be the admin, and because that is
@@ -501,7 +480,6 @@ gates.Y20 = () => {
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
 gates.Y31 = () => {
   assert.ok(/KXETH15M: 'Ethereum 15m', KXXRP15M: 'XRP 15m', KXDOGE15M: 'Dogecoin 15m' \}/.test(html) && !/KXSOL15M|Solana/.test(html), 'Ethereum is an ordinary live market card; there is no Solana anywhere on the page');
-  assert.ok(/kalshiAlt = \{ ETH: \{ product: 'ETH-USD'/.test(html) && /XRP: \{ product: 'XRP-USD'/.test(html) && /DOGE: \{ product: 'DOGE-USD'/.test(html) && !/SOL-USD/.test(html) && /kalshiFetchAlt\('ETH', now\)/.test(html) && /kalshiFetchAlt\('XRP', now\)/.test(html) && /kalshiFetchAlt\('DOGE', now\)/.test(html) && !/kalshiFetchAlt\('SOL'/.test(html), 'Coinbase history and ticker for Ethereum, XRP and Dogecoin');
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
   assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M']);
@@ -638,7 +616,6 @@ gates.Y42 = () => {
 gates.Y43 = () => {
   const m = /@media \(max-width:700px\)\{([\s\S]*?)\n  \}/.exec(html);
   assert.ok(m, 'a 700px block exists');
-  assert.ok(/\.kal-spark\{ display:none; \}/.test(m[1]), 'the sparklines are hidden on a phone');
   assert.ok(!/data-card="performance"\]\{ display:none/.test(html), 'the Performance card is not hidden on a phone');
   assert.ok(!/\.kal-charts\b/.test(html), 'the old Performance charts grid is gone (the charts live on the Data page, whose grid stacks to one column on a narrow screen)');
   assert.ok(/@media \(max-width:900px\)\{ \.data-grid\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'and the Data page grid stacks to one column');

@@ -75,7 +75,7 @@ Nothing else. No grid, no grain, no drifting blobs, no ghost wordmark (the owner
 - Rise in once: `frontUp` (translateY 22px to 0, opacity, .9s, cubic-bezier(.2,.8,.2,1)), staggered .12s, .3s, .45s.
 - One slow float on the front window (7s, 9px).
 - Cards lift 2px on hover; chart lines draw in once; the grid drifts slowly.
-- Motion never touches a number. No count-ups.
+- Motion never touches a number, with one exception the owner asked for (Oct 23, 2026: "make it scroll like it used to"): the market strip in the header scrolls slowly, pauses under the pointer and stops under reduce motion. No count-ups.
 - All of it stops under the OS reduce-motion setting and the Settings "Limit graphics" switch, through the single consolidated `@media (prefers-reduced-motion: reduce)` block and the matching `[data-reduce-motion="true"]` lines (`motionHonestyGates`, `bubblePopGates`).
 
 ## 7. Voice and content
