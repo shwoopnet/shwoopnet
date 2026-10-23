@@ -530,7 +530,7 @@
   .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
   /* Presentation view (the owner, Oct 21, 2026: a clean page to show people). The Privacy button (or the Layout menu checkbox) sets data-present on the page; it is never saved, so a reload is always the full page. It only HIDES:
      the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. Every number is still computed and the bot is untouched. */
-  html[data-present="on"][data-p-tools="on"] #kalTools{ display:none; }
+  html[data-present="on"] #kalTools{ display:none; }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
   .kal-hit{ cursor:default; }
   .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
@@ -1360,63 +1360,9 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Privacy view</div>
-              <div class="settings-row-desc">Replaces the figures you pick below with **** on the Bot and Data pages, for showing someone your screen. The sign stays, so a loss still reads as a loss. It switches off when the page reloads. The Privacy button on the Bot page does the same.</div>
+              <div class="settings-row-desc">Shows **** instead of dollar amounts and hides the Tools menu, for sharing your screen. Percentages stay visible. Switches off when the page reloads. The Privacy button on the Bot page does the same.</div>
             </div>
             <button class="settings-toggle-switch" id="privacyToggle" role="switch" aria-checked="false" aria-label="Toggle privacy view">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide account balance</div>
-              <div class="settings-row-desc">The account total, stake per trade, reinvest pool and the dollar limit in the loss stop.</div>
-            </div>
-            <button class="settings-toggle-switch" id="privacyBalance" role="switch" aria-checked="true" aria-label="Hide account balance">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide today's result</div>
-              <div class="settings-row-desc">The Today line on the account card.</div>
-            </div>
-            <button class="settings-toggle-switch" id="privacyToday" role="switch" aria-checked="true" aria-label="Hide today's result">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide profit and loss on trades</div>
-              <div class="settings-row-desc">The result on each recent trade.</div>
-            </div>
-            <button class="settings-toggle-switch" id="privacyTrades" role="switch" aria-checked="true" aria-label="Hide profit and loss on trades">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide open position figures</div>
-              <div class="settings-row-desc">Cost, if it wins, if it loses and cash out on each open position.</div>
-            </div>
-            <button class="settings-toggle-switch" id="privacyPositions" role="switch" aria-checked="true" aria-label="Hide open position figures">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide numbers on the Data page</div>
-              <div class="settings-row-desc">Every dollar figure in the Data page charts and tables.</div>
-            </div>
-            <button class="settings-toggle-switch" id="privacyData" role="switch" aria-checked="true" aria-label="Hide numbers on the Data page">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Hide the Tools menu</div>
-              <div class="settings-row-desc">The Tools menu holds the raw account read and the exports.</div>
-            </div>
-            <button class="settings-toggle-switch" id="privacyTools" role="switch" aria-checked="true" aria-label="Hide the Tools menu">
               <span class="toggle-knob"></span>
             </button>
           </div>
@@ -1749,31 +1695,15 @@
   // The top bar is clear at rest and only gains a soft blurred fade once the page has scrolled under it.
   window.addEventListener('scroll', function(){ var tb = document.querySelector('.topbar'); if(tb){ tb.classList.toggle('scrolled', window.scrollY > 8); } }, { passive: true });
 
-  // ---------- Settings: privacy view and what it hides ----------
-  // The master switch is the same state as the Privacy button on the Bot page and is never saved. The three choices are kept in this browser only (not synced), each on or off by itself.
-  // Declared here, before initPrivacy runs: a var further down the script is hoisted but still undefined at this point, which stopped the whole script and left sign-in on Connecting.
-  var kalshiPrivacyChoice = { balance: true, today: true, trades: true, positions: true, data: true, tools: true };
-  var privacyBtns = { master: document.getElementById('privacyToggle'), balance: document.getElementById('privacyBalance'), today: document.getElementById('privacyToday'), trades: document.getElementById('privacyTrades'), positions: document.getElementById('privacyPositions'), data: document.getElementById('privacyData'), tools: document.getElementById('privacyTools') };
+  // ---------- Settings: privacy view ----------
+  // All or nothing (the owner, Oct 23, 2026, after trying one switch per kind of figure): one switch, the same state as the Privacy button on the Bot page, never saved.
+  var privacyToggleEl = document.getElementById('privacyToggle');
   function kalshiPrivacyUi(on){
-    privacyBtns.master.setAttribute('aria-checked', on ? 'true' : 'false');
+    privacyToggleEl.setAttribute('aria-checked', on ? 'true' : 'false');
     var hb = document.getElementById('kalPresentBtn');
     if(hb){ hb.textContent = on ? 'Privacy on' : 'Privacy'; hb.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   }
-  (function initPrivacy(){
-    var saved = null;
-    try{ saved = JSON.parse(window.localStorage.getItem('shwoopnet:privacyOpts') || 'null'); }catch(e){}
-    ['balance', 'today', 'trades', 'positions', 'data', 'tools'].forEach(function(k){
-      if(saved && typeof saved[k] === 'boolean'){ kalshiPrivacyChoice[k] = saved[k]; }
-      privacyBtns[k].setAttribute('aria-checked', kalshiPrivacyChoice[k] ? 'true' : 'false');
-      privacyBtns[k].addEventListener('click', function(){
-        kalshiPrivacyChoice[k] = privacyBtns[k].getAttribute('aria-checked') !== 'true';
-        privacyBtns[k].setAttribute('aria-checked', kalshiPrivacyChoice[k] ? 'true' : 'false');
-        try{ window.localStorage.setItem('shwoopnet:privacyOpts', JSON.stringify(kalshiPrivacyChoice)); }catch(e){}
-        kalshiSetPresent(document.documentElement.getAttribute('data-present') === 'on');
-      });
-    });
-    privacyBtns.master.addEventListener('click', function(){ kalshiSetPresent(privacyBtns.master.getAttribute('aria-checked') !== 'true'); });
-  })();
+  privacyToggleEl.addEventListener('click', function(){ kalshiSetPresent(privacyToggleEl.getAttribute('aria-checked') !== 'true'); });
 
   // ---------- Kalshi (admin only) ----------
   // Fee and limit math mirrors kalshi-scalper's fees.py and risk.py. The 0.07
@@ -1814,11 +1744,9 @@
   function kalshiMoneyRaw(x){
     return (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   }
-  // kind says which Settings choice covers this figure ('balance', 'today', 'trades', 'positions', 'data'); a figure with no kind is always masked while the privacy view is on.
-  function kalshiMoney(x, kind){
-    return kalshiMasked && (!kind || kalshiPrivacyChoice[kind] !== false) ? (x < 0 ? '-' : '') + '****' : kalshiMoneyRaw(x);
+  function kalshiMoney(x){
+    return kalshiMasked ? (x < 0 ? '-' : '') + '****' : kalshiMoneyRaw(x);
   }
-  function kalshiMoneyK(kind){ return function(x){ return kalshiMoney(x, kind); }; }
 
   // 'KXBTC15M-26OCT072015-15' -> 'BTC 7:15 PM CT'. Kalshi writes the close time in Eastern time inside the ticker; shown here one hour earlier, in Central. Anything that does not
   // match is returned as it came, so an unfamiliar ticker is never hidden or guessed at.
@@ -1890,15 +1818,11 @@
     return [cols.join(',')].concat(rows).join('\n');
   }
 
-  // Privacy view on or off (the owner, Oct 23, 2026: the switch lives in Settings, with sub options that turn on and off independently). The view itself is never saved: a reload is always the full page. WHAT it hides is a preference
-  // (kalshiPrivacyChoice: dollar amounts, the Tools menu, the positions and trades cards) and is kept in this browser only. This only sets page attributes and one flag; the header button and the Settings switch both call it.
+  // Privacy view on or off (the owner, Oct 23, 2026: the switch lives in Settings; it is all or nothing). It is never saved: a reload is always the full page. This only sets one page attribute and one flag; the header button and
+  // the Settings switch both call it.
   function kalshiSetPresent(on){
     var el = document.documentElement;
-    ['data-present', 'data-p-tools'].forEach(function(k){ el.removeAttribute(k); });
-    if(on){
-      el.setAttribute('data-present', 'on');
-      if(kalshiPrivacyChoice.tools){ el.setAttribute('data-p-tools', 'on'); }
-    }
+    if(on){ el.setAttribute('data-present', 'on'); } else { el.removeAttribute('data-present'); }
     kalshiMasked = !!on;
     if(typeof kalshiPrivacyUi === 'function'){ kalshiPrivacyUi(!!on); }
     // Everything that already drew an amount draws it again, masked or not.
@@ -2513,7 +2437,7 @@
     });
     Object.keys(kalshiPosPaths).forEach(function(k){ if(!openNow[k]){ delete kalshiPosPaths[k]; } });
     rows.forEach(function(r){ r.path = (kalshiPosPaths[r.ticker] || []).map(function(x){ return x.v; }); });
-    posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoneyK('positions'));
+    posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoney);
   }
   var kalshiBooksLast = null;
   var kalshiPosPaths = {};   // ticker -> [{ t, v }]: the chance of each open position's side, one point per read since this page opened
@@ -2603,15 +2527,15 @@
         var poolCell = '';
         if(ses.sizing === true && Number.isFinite(ses.sizePool)){
           var ex = Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0;
-          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool, 'balance') + ' / ' + kalshiMoney((ex + 1) * 0.93, 'balance') + '</b></div>';
+          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * 0.93) + '</b></div>';
         }
         if(!sizeKnown) stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
-        else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake, 'balance') + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
+        else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
       }
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars, 'balance')) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
+      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
         // Funds on other shards cannot be spent by the bot, so they get a line only when there is something worth noting; otherwise the total is what the bot has.
-        ((otherSum >= 0.5 || !useShard) ? '<div class="kal-rows"><div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars, 'balance') : '$0.00') + '</b></div>' +
-          (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum, 'balance') + '</b></div>' : '') + '</div>' : '') +
+        ((otherSum >= 0.5 || !useShard) ? '<div class="kal-rows"><div><span class="kal-k">Available to the bot</span><b>' + (useShard ? kalshiMoney(useShard.dollars) : '$0.00') + '</b></div>' +
+          (otherSum >= 0.5 ? '<div><span class="kal-k">On other shards (not usable)</span><b>' + kalshiMoney(otherSum) + '</b></div>' : '') + '</div>' : '') +
         (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
     }
     el.innerHTML = h;
@@ -2638,7 +2562,7 @@
       var todayKey = kalDayKey(Date.now());
       var todayOrders = botOrders.filter(function(o){ return Number.isFinite(o.ts) && kalDayKey(o.ts) === todayKey; });
       var botNet = kalshiPerfStats(todayOrders, 0).total;
-      var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v), 'today'); };
+      var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
         '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
     }
@@ -2668,7 +2592,7 @@
       var rowsHtml = fillsShown.map(function(item){
         if(item.order){
           var o = item.order, pnl = kalshiOrderPnl(o), cnt = Number(o.fillCount), paid = Number.isFinite(Number(o.maxCost)) && Number(o.count) > 0 ? Number(o.maxCost) / Number(o.count) : Number(o.price);
-          var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl), 'trades') + '</span>' : (o.settled === true && o.result === 'hand' ? '<span style="color:var(--muted)">sold by hand</span>' : '<span style="color:var(--muted)">open</span>');
+          var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl)) + '</span>' : (o.settled === true && o.result === 'hand' ? '<span style="color:var(--muted)">sold by hand</span>' : '<span style="color:var(--muted)">open</span>');
           return '<div class="kal-tr"><span class="kal-tr-t">' + escapeHtml(kalshiWhen(o.ts, nowD.getTime())) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(o.ticker)) + '</span>' +
             '<span class="kal-tr-f">Bought ' + escapeHtml(String(o.side || '').toUpperCase()) + ' ' + escapeHtml(String(Math.round(cnt * 100) / 100)) + (Number.isFinite(paid) ? ' at ' + (Math.round(paid * 1000) / 10).toFixed(1) + 'c' : '') + '</span><span class="kal-tr-p">' + oPl + '</span><span class="kal-tr-s">bot</span></div>';
         }
@@ -2683,7 +2607,7 @@
         } else {
           fillText = escapeHtml(String(x.action || '')) + ' ' + escapeHtml(String(x.side || '')) + ' ' + escapeHtml(String(x.count)) + (x.price !== null ? ' at ' + escapeHtml(x.price) : '');
         }
-        if(tp){ settled++; sum += tp.pnl; plCell = '<span class="' + (tp.pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tp.pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tp.pnl), 'trades') + '</span>'; }
+        if(tp){ settled++; sum += tp.pnl; plCell = '<span class="' + (tp.pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (tp.pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(tp.pnl)) + '</span>'; }
         else if(ord && ord.settled === true && ord.result === 'hand'){ plCell = '<span style="color:var(--muted)">sold by hand</span>'; }
         else if(ord){ open++; plCell = '<span style="color:var(--muted)">open</span>'; }
         else { plCell = '<span style="color:var(--muted)">n/a</span>'; }
@@ -2989,13 +2913,13 @@
     var set = function(id, h){ var el = document.getElementById(id); if(el){ el.innerHTML = h; } };
     if(!kalshiOrdersLoaded){ set('dataTiles', ''); set('dataWeekly', '<div class="kal-empty">Loading the bot\'s trades...</div>'); return; }
     var st = kalshiPerfStats(orders, 0), rows = dataMarketRows(orders, Date.now());
-    set('dataTiles', dataTilesHtml(st, escapeHtml, kalshiMoneyK('data')));
-    set('dataWeekly', dataWeekBarsSvg(dataWeeklyRows(orders), escapeHtml, kalshiMoneyK('data')));
-    set('dataLine', kalshiLineSvg(kalshiPnlSeries(orders, 0), escapeHtml, kalshiMoneyK('data')));
-    set('dataStats', dataStatsHtml(st, escapeHtml, kalshiMoneyK('data')));
+    set('dataTiles', dataTilesHtml(st, escapeHtml, kalshiMoney));
+    set('dataWeekly', dataWeekBarsSvg(dataWeeklyRows(orders), escapeHtml, kalshiMoney));
+    set('dataLine', kalshiLineSvg(kalshiPnlSeries(orders, 0), escapeHtml, kalshiMoney));
+    set('dataStats', dataStatsHtml(st, escapeHtml, kalshiMoney));
     set('dataLiveTests', dataLiveHtml(dataLiveTests(kalshiLiveOrders), escapeHtml));
-    set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoneyK('data')));
-    set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoneyK('data')));
+    set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
+    set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoney));
     set('dataNote', 'As of ' + kalTime(Date.now()) + ' CT. Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
   }
 
@@ -3007,9 +2931,9 @@
     var series = kalshiPnlSeries(orders, since);
     pieEl.innerHTML = kalshiDonutHtml(kalshiOutcomeCounts(orders, since), escapeHtml);
     var barsEl = document.getElementById('kalChartBars'), perfEl = document.getElementById('kalPerf');
-    kalshiSetBars(barsEl, barsEl ? kalshiBarsSvg(series, escapeHtml, kalshiMoneyK('data')) : '');
+    kalshiSetBars(barsEl, barsEl ? kalshiBarsSvg(series, escapeHtml, kalshiMoney) : '');
     if(perfEl && !kalshiOrdersLoaded){ perfEl.innerHTML = '<div class="kal-empty">Loading the bot\'s trades...</div>'; }
-    else if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoneyK('data')); }
+    else if(perfEl){ perfEl.innerHTML = kalshiPerfHtml(kalshiPerfStats(orders, since), escapeHtml, kalshiMoney); }
   }
   var kalshiChartRange = 'all';
   kalshiTipWire(document.getElementById('kalChartBars'));
@@ -3217,7 +3141,7 @@ kalshiStatusTick();
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
     var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
-    var stopAt = s && s.sizing === true && Number.isFinite(base) ? kalshiMoney(0.12 * base, 'balance') : kalshiMoney(10, 'balance');
+    var stopAt = s && s.sizing === true && Number.isFinite(base) ? kalshiMoney(0.12 * base) : kalshiMoney(10);
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.
     var doneLine = running ? 'Next look ' + (Number.isFinite(s.nextLookAt) && s.nextLookAt > now ? kalshiWhen(s.nextLookAt, now) : 'soon') + '. ' + (oc.won + oc.lost + oc.open) + ' filled, ' + oc.noFill + ' no fill.' : '';
     var peakAt = Number.isFinite(s && s.peakNet) ? Math.max(0, s.peakNet) : 0;

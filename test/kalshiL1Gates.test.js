@@ -502,7 +502,7 @@ gates.N22 = () => {
   const frac = Math.round(live.L1_SIZE_FRACTION * 1000) / 10, stop = Math.round(live.L1_SIZED_STOP_FRACTION * 100), flat = live.L1_LOSS_STOP;
   assert.ok(new RegExp('one contract per \\$' + live.SCALE_DOLLARS_PER_CONTRACT + ' of balance, up to ' + live.L1_SIZE_CEILING + ', raised one step every 3 days at most; stop at ' + stop + '% of the balance at the last review').test(html), 'the start confirmation');
   assert.ok(new RegExp('are down ' + stop + '% of the balance \\(otherwise \\$' + flat.toFixed(0) + '\\)').test(html), 'the rules text');
-  assert.ok(new RegExp("kalshiMoney\\(" + (stop / 100).toFixed(2) + " \\* base, 'balance'\\) : kalshiMoney\\(" + flat.toFixed(0) + ", 'balance'\\)").test(html), 'the status line');
+  assert.ok(new RegExp("kalshiMoney\\(" + (stop / 100).toFixed(2) + " \\* base\\) : kalshiMoney\\(" + flat.toFixed(0) + "\\)").test(html), 'the status line');
   assert.ok(/live\.SCALE_DOLLARS_PER_CONTRACT/.test(fnSrc) && /live\.L1_SIZED_STOP_FRACTION \* 100/.test(fnSrc), 'the session start log is built from the constants, not typed');
 };
 
