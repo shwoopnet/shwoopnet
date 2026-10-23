@@ -1,0 +1,21 @@
+INFORMATION LOOK, NOT THE REGISTERED READ (decides nothing): 14744 markets, 11 fresh days, last close 2026-10-23 00:45 UTC
+FWD7: 10 minute entries n=2166 on 11 days, net +0.39c (z +0.44); both halves positive False; at fees x1.2 +0.29c; series positive 9 of 18; 6 minute arm n=3958 at +0.62c; 10 minus 6 minute per day +0.54c (day clustered z +0.54); VERDICT: NOT_ENOUGH_DATA
+FWD7 secondary (YES favourite minus NO favourite at 10 minutes): YES n=1061 at +1.03c (z +0.96); NO n=1105 at -0.22c; difference per day +1.45c (day clustered z +1.06, 11 days); VERDICT: FALSIFIED
+JUMP1 (rise under 5c minus 5c or more): stable n=1016 at +1.25c (z +1.73); jumped n=2942 at +0.40c; difference per day +1.14c (day clustered z +1.39, 11 days); VERDICT: FALSIFIED
+JUMP1b (rise under 20c minus 20c or more): below 20c n=2795 at +0.79c (z +1.66); 20c or more n=1163 at +0.18c; difference per day +0.86c (day clustered z +0.95, 11 days); VERDICT: FALSIFIED
+TIB1 (4 or more minutes in band minus 1 or less): firm n=507 at +0.97c (z +2.10); new n=2520 at +0.66c; difference per day +0.71c (day clustered z +0.79, 11 days); VERDICT: FALSIFIED
+DIP1 (lowest earlier mid 0.60 or more minus below 0.60): never doubted n=1136 at +0.57c (z +0.87); doubted n=2822 at +0.63c; difference per day -0.10c (day clustered z -0.16, 11 days); VERDICT: FALSIFIED
+FWD10 KXBTC15M: NOT_ENOUGH_DATA (alone 50 on 10 days, crowded 230)
+FWD10 KXNATGAS15M: NOT_ENOUGH_DATA (alone 63 on 9 days, crowded 139)
+FWD10 KXDOGE15M: NOT_ENOUGH_DATA (alone 35 on 10 days, crowded 208)
+ML1 KXGOLD15M at 7 minutes: NOT_ENOUGH_DATA (9 days)
+ML1 KXBTC15M at 10 minutes: NOT_ENOUGH_DATA (11 days)
+ML1 KXETH15M at 9 minutes: NOT_ENOUGH_DATA (11 days)
+SQ1: entries n=3958 (firm 298); weighted return on capital deployed +73bp, flat +66bp; weighted minus flat per day +9bp (day clustered z +0.62, 11 days); VERDICT: FALSIFIED
+TS1: two-stage n=3431 at +0.93c (z +1.87); plain 360 n=3958 at +0.62c; difference per day +0.69c (day clustered z +1.70, 11 days); VERDICT: FALSIFIED
+CW10 KXCOPPER15M: NOT_ENOUGH_DATA (10 minute entries 68 on 8 days)
+CW10 KXWTI15M: NOT_ENOUGH_DATA (10 minute entries 71 on 9 days)
+FEAT2-F: NOT_ENOUGH_DATA (kept 1497 on 11 days; 0 dropped)
+FEAT4-F: NOT_ENOUGH_DATA (entries 3939 on 11 days)
+CONC2-F: DISAGREE n=53 on 9 days at +5.97c, AGREE n=864 at -0.10c; difference +5.17c (day clustered z +1.97); halves +4.46c / +7.61c; stress +5.16c; VERDICT: NOT_ENOUGH_DATA
+FLAT2-F: FLAT n=477 at -0.08c, MOVING n=3004 at +0.66c on 10 days; difference +0.26c (day clustered z +0.30); halves -0.69c / -0.78c; stress +0.26c; VERDICT: FALSIFIED

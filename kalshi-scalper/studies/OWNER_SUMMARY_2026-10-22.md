@@ -28,6 +28,8 @@ Rule: take an L1 favourite only if its 5-minute price range was 15c or less and 
 - Works on crypto, energy and metals at the 6-minute entry. **Does not work on gold, Dogecoin or FX.** Adds nothing at the 10-minute entry (Bitcoin, XRP, natural gas already use it).
 - **Decision taken:** log only. Re-propose a filter (Ethereum only, 6-minute entry) at the review if the live data supports it. Check then: live FLAT rate should be near 15%.
 
+- **Update 2026-10-23 (11 fresh days, all 18 series, information only):** FLAT 477 entries at -0.08c against +0.66c for the rest, so FLAT is not carrying onto fresh days. The pooled 10-minute entry is +0.39c against +0.62c at 6 minutes (not better). The one fresh-day pattern pointing the right way at a useful size is CONC2-F (the crypto favourites the other crypto series contradict: 53 entries at +5.97c against -0.10c, z 1.97), still small. Registered reads are on 2026-11-12.
+
 ## 5. Tried this session and dead
 | Idea | Result |
 |---|---|
