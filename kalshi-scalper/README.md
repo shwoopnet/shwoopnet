@@ -5866,3 +5866,6 @@ Question: is gold's edge a longshot effect, i.e. does buying the cheap side (the
 Prediction: FALSIFIED. The market is calibrated at every price, so the mean should be about the cost of crossing the spread, negative.
 NOT_YET_FALSIFIED needs: mean net >= +1.0c per contract, day-clustered z >= 2.0 against zero, both halves of the days > 0, fee stress x1.2 > 0, n >= 500.
 FALSIFIED: mean < +0.3c or z < 1.0. Otherwise NOT_ENOUGH_DATA. Tries +1. Run once (`python -m scalper.tail1 run`). Also printed, not judged: the same rule on all series pooled, and the 0.01 to 0.04 and 0.10 to 0.20 neighbours.
+
+### TAIL1 result (2026-10-23, run once)
+FALSIFIED (prediction held). Gold, underdog ask 0.04 to 0.10: n 923, mean -2.77c per contract, z -4.17, halves -3.60/-1.97, stress -2.86c. Not judged: all series pooled -2.19c (n 16,190, z -11.69); gold 0.01 to 0.04 -1.64c; gold 0.10 to 0.20 -3.57c. Buying the cheap side loses at every price, by about the spread plus fee. Gold's edge is on the favourite side only. Tries +1.
