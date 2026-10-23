@@ -50,7 +50,7 @@ gates.Y5 = () => {
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(names(rail[1]), ['account', 'positions'], 'the rail holds the account (with the performance stats) and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['books', 'trades'], 'the main column: books tiles and the trades (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
+  assert.deepStrictEqual(names(main), ['trades'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
@@ -479,7 +479,6 @@ gates.Y20 = () => {
 
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
 gates.Y31 = () => {
-  assert.ok(/KXETH15M: 'Ethereum 15m', KXXRP15M: 'XRP 15m', KXDOGE15M: 'Dogecoin 15m' \}/.test(html) && !/KXSOL15M|Solana/.test(html), 'Ethereum is an ordinary live market card; there is no Solana anywhere on the page');
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
   assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M']);
@@ -594,22 +593,13 @@ gates.Y38 = () => {
 
 // Y39: a market the page does not know is never shown. The deployed relay can lag the page by a deploy, and Solana once appeared as a bare "KXSOL15M" card after it was removed.
 gates.Y39 = () => {
-  assert.ok(/var rows = \(\(data && data\.markets\) \|\| \[\]\)\.filter\(function\(m\)\{ return m && \['KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'\]\.indexOf\(m\.series\) > -1; \}\);/.test(html), 'only Bitcoin, gold, Ethereum, XRP and Dogecoin cards are drawn');
+  assert.ok(!/var rows = \(\(data && data\.markets\)/.test(html) && !/KXBTC15M', 'KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXDOGE15M'\]\.indexOf/.test(html), 'the page draws no market cards at all (Oct 23, 2026): the Bot page is the overview and live watch');
 };
 
 // Y42: depth. Market rows show the contracts waiting at the best bid and ask with a bar, only when both sizes are known, and the card shadows are layered tokens that the Mono Ink skin turns off.
 gates.Y42 = () => {
-  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
-  const f = new Function(block(/(function kalshiDepthHtml\(m\)\{[\s\S]*?\n  \})\n/) + '; return kalshiDepthHtml;')();
-  const out = f({ yesBidSz: 1169.77, yesAskSz: 1069.44 });
-  assert.ok(/size 1,170 bid \/ 1,069 ask/.test(out) && /width:52\.2%/.test(out), 'sizes are rounded to contracts and the bar is the bid share');
-  assert.strictEqual(f({ yesBidSz: null, yesAskSz: 10 }), '', 'a missing size draws nothing');
-  assert.strictEqual(f({}), '');
-  assert.strictEqual(f({ yesBidSz: 0, yesAskSz: 0 }), '', 'an empty book draws nothing');
-  assert.ok(/width:0\.0%/.test(f({ yesBidSz: 0, yesAskSz: 50 })) && /width:100\.0%/.test(f({ yesBidSz: 50, yesAskSz: 0 })), 'one empty side is a full bar the other way');
-  assert.ok(/kalshiDepthHtml\(m\)/.test(html), 'the market row calls it');
-  assert.ok(/--card-shadow-lift:/.test(html) && !/--card-shadow: none;/.test(html), 'a lift shadow exists');
-  assert.ok(/\.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html) && /\[data-reduce-motion="true"\] \.kal-console \.kal-brow:hover\{ transform: none; \}/.test(html), 'no lift for people who asked for no motion, by the OS or by the Settings toggle');
+  assert.ok(/--card-shadow-lift:/.test(html), 'a lift shadow exists');
+  assert.ok(!/kalshiDepthHtml|kal-depth/.test(html), 'the book-size bar went with the market rows');
 };
 
 // Y43: on a phone (700px and narrower) the price line under each market is hidden; the Performance card is shown again (the owner, Oct 21, 2026, after the calm view); the stats card is not touched.
@@ -625,15 +615,7 @@ gates.Y43 = () => {
 // Y44: a market's price chart shows only while the account holds a position in it (the owner's request, Oct 20, 2026). "In a trade" is a real position, not an order that was sent; positions that
 // could not be read, or a position of zero, mean no chart.
 gates.Y44 = () => {
-  const m = /(function kalshiInTrade\([^)]*\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiInTrade not found');
-  const inTrade = (acct, ticker) => new Function('kalshiLiveAcct', m[1] + '; return kalshiInTrade;')(acct)(ticker);
-  const acct = (positions, ok = true) => ({ positions: { ok, positions } });
-  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 3 }]), 'A'), true, 'a held YES position shows its chart');
-  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: -2 }]), 'A'), true, 'a held NO position shows its chart');
-  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 3 }]), 'B'), false, 'another market stays chartless');
-  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 0 }]), 'A'), false, 'a closed position (zero) shows no chart');
-  assert.strictEqual(inTrade(acct([{ ticker: 'A', position: 3 }], false), 'A'), false, 'positions that could not be read show no chart');
-  assert.strictEqual(inTrade(null, 'A'), false, 'before the account is read there is no chart');
+  assert.ok(!/kalshiInTrade|kal-brow-held/.test(html), 'no market row exists to mark, so a held position is shown only in the Open positions card (the owner, Oct 23, 2026)');
 };
 
 // Y45: on a phone the Tools menu is a full-width sheet above the bottom bar. Anchored to its button it ran off the left edge and cut the buttons in half (owner's screenshot, Oct 20, 2026).
