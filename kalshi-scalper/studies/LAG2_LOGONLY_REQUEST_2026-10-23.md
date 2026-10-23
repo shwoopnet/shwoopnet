@@ -13,7 +13,7 @@ Add logging only, on the existing Bitcoin 15 minute decision path. **No order, n
 - `ref`: the yes price of the latest Kalshi trade in the previous 15 seconds (missing if none).
 - `signal`: `yes` if `p_yes - (ref + 0.01) >= 0.07`; `no` if `(1 - p_yes) - ((1 - ref) + 0.01) >= 0.07`; else none.
 - `yesBid`, `yesAsk`, `bidSize`, `askSize` at that moment (for the later quote-level read).
-Parity: `studies/lag2_parity_vectors_2026-10-23.json` gives five inputs and the exact `p_yes` outputs; the implementation must reproduce them to six decimals before any row is trusted.
+Parity: `studies/lag2_parity_vectors_2026-10-23.json` gives six inputs and the exact `p_yes` outputs; the implementation must reproduce them to six decimals before any row is trusted.
 
 ## Safety
 Read-only public data; a failed Kraken call logs `missing` and nothing else; the logging must never delay or block the order path. Nothing here may place, size or cancel an order.
