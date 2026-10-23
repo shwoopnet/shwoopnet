@@ -16,4 +16,11 @@ assert T.reference(trades, t) == 0.50
 assert T.fill(trades, t, "yes") == 0.52 and T.fill(trades, t, "no") == 0.52      # the no trade at yes 0.48 paid 0.52 for no
 assert T.fill([[t + 1, 0.5, "yes", 1.0]], t, "yes") is None                      # inside the 2 second latency
 assert T.judge([])["verdict"] == "NOT_ENOUGH_DATA"
+# LAG2B: a sparse feed (price only every other grid point) still gives a volatility, a feed with under 45 points does not
+sparse = {str(close - i): [100.0 + 0.01 * ((i // 20) % 2), 1.0] for i in range(0, 1200, 20)}
+sb = T.sigma_b(sparse, close - 120)
+assert sb is None or sb > 0
+dense = {str(close - i): [100.0 + 0.01 * ((i // 10) % 2), 1.0] for i in range(0, 1200)}
+assert T.sigma_b(dense, close - 120) > 0
+assert T.sigma_b({str(close - i): [100.0, 1.0] for i in range(0, 60)}, close - 120) is None        # too few points (and no movement)
 print("ok")
