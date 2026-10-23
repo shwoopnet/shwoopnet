@@ -706,6 +706,20 @@ gates.Y41 = () => {
 };
 
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
+// AK1: a refused account read (Kalshi's 429) does not wipe a good account card. Consequence: the balance, stake and today stay on screen with a note instead of turning into an error for a minute.
+gates.AK1 = () => {
+  const m = /(function kalshiKeepLastRead\(prev, next\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'kalshiKeepLastRead not found');
+  const keep = new Function(m[1] + '; return kalshiKeepLastRead;')();
+  const good = { at: 1000000, balance: { ok: true, totalDollars: 500 } }, bad = (at) => ({ at, balance: { ok: false, status: 429 } });
+  const k = keep(good, bad(1060000));
+  assert.ok(k && k.balance.ok === true && k.busyAt === 1060000 && k.at === 1000000, 'a refused read keeps the last good one and notes when it was refused');
+  assert.strictEqual(keep(good, { at: 1060000, balance: { ok: true, totalDollars: 501 } }), null, 'a read that worked always replaces it');
+  assert.strictEqual(keep(good, bad(1000000 + 700000)), null, 'after 10 minutes the failure is shown, not hidden');
+  assert.strictEqual(keep(null, bad(5)), null, 'with nothing good to keep the failure is shown');
+  assert.strictEqual(keep(bad(1), bad(2)), null, 'a failed read is never kept');
+  assert.ok(/Kalshi is busy \(too many requests\)/.test(html), 'a 429 says so in plain words, not as raw JSON');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
