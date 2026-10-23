@@ -26,6 +26,14 @@ gates.M3 = () => {
   assert.ok(/\.kal-tools-body\{ position:fixed; left:12px; right:12px;/.test(css), 'the Tools menu is a full-width sheet on a phone');
 };
 
+// An open Tools or Layout menu is painted above every card, the Account card included. The Account card sits at z-index 6 so the Running panel can hang over the cards after it; a menu at 5 was hidden behind it (the owner's phone screenshot, Oct 23, 2026).
+gates.M4 = () => {
+  const level = (re) => { const m = re.exec(css); assert.ok(m, 'rule found: ' + re); return Number(/z-index:\s*(\d+)/.exec(m[1])[1]); };
+  const acct = level(/\.kal-rail \.kal-card\[data-card="account"\]\{([^}]*)\}/);
+  const menus = [...css.matchAll(/\n\s*\.kal-layout-body\{([^}]*z-index[^}]*)\}/g)].map((m) => Number(/z-index:\s*(\d+)/.exec(m[1])[1]));
+  assert.ok(menus.length >= 1 && menus[menus.length - 1] > acct, 'the last .kal-layout-body z-index (' + menus[menus.length - 1] + ') is above the Account card (' + acct + ')');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
