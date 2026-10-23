@@ -18,6 +18,11 @@ from .paths import DATA_DIR
 SERIES = ("KXETH15M", "KXXRP15M", "KXDOGE15M", "KXBNB15M", "KXHYPE15M", "KXNEAR15M", "KXZEC15M")
 DIFF_C, Z_BAR, FALSIFY_C, FALSIFY_Z, MIN_SERIES_POS = 0.010, 2.0, 0.003, 1.0, 5
 RESULT = DATA_DIR / "hour3_result.txt"
+FWD_RESULT = DATA_DIR / "hour3f_result.txt"
+FWD_SERIES = SERIES + ("KXBTC15M",)
+FWD_START = int(datetime(2026, 10, 24, tzinfo=timezone.utc).timestamp())
+FWD_READ_DATE = int(datetime(2026, 11, 12, tzinfo=timezone.utc).timestamp())
+FWD_MIN_N = 600
 
 
 def on_hour(r: dict) -> bool:
@@ -28,7 +33,37 @@ def split(rows: list[dict]):
     return [r for r in rows if on_hour(r)], [r for r in rows if not on_hour(r)]
 
 
+def forward(now: float | None = None) -> str:
+    """HOUR3-F: the same claim, scored once on markets closing from 2026-10-24 (never seen by HOUR3), Bitcoin added. Read on or after 2026-11-12."""
+    import time
+    if (now if now is not None else time.time()) < FWD_READ_DATE:
+        return "Refusing the registered read: before 2026-11-12."
+    if FWD_RESULT.exists():
+        return f"Refusing to run again: {FWD_RESULT} exists."
+    mk = [m for m in load_fresh(series=FWD_SERIES, start_ts=FWD_START) if all(x[1] is not None and x[2] is not None for x in m[2])]
+    full = [(t, s, [(e, b, a, b, a) for e, b, a in c], cl, r) for t, s, c, cl, r in mk]
+    rows, _, _ = F.build(full, 360)
+    g, rest = split(rows)
+    if len(g) < FWD_MIN_N:
+        out = f"HOUR3-F: NOT_ENOUGH_DATA (HOUR n={len(g)}, need {FWD_MIN_N}; REST n={len(rest)})"
+    else:
+        m, z, nd = diff_z(g, rest)
+        ms = diff_z(g, rest, "stress")[0]
+        o = sorted({r["day"] for r in rows})
+        mid = o[len(o) // 2]
+        h1 = diff_z([r for r in g if r["day"] < mid], [r for r in rest if r["day"] < mid])[0]
+        h2 = diff_z([r for r in g if r["day"] >= mid], [r for r in rest if r["day"] >= mid])[0]
+        ok = m >= DIFF_C and z >= Z_BAR and h1 > 0 and h2 > 0 and ms > 0
+        v = "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if (m < FALSIFY_C or z < FALSIFY_Z) else "NOT_ENOUGH_DATA")
+        out = f"HOUR3-F: {v}; HOUR n={len(g)} REST n={len(rest)} on {nd} days; diff {100 * m:+.2f}c z {z:+.2f}; halves {100 * h1:+.2f}c / {100 * h2:+.2f}c; stress diff {100 * ms:+.2f}c"
+    FWD_RESULT.write_text(out + "\n")
+    return out
+
+
 def main(argv: list[str]) -> None:
+    if len(argv) >= 2 and argv[1] == "forward":
+        print(forward())
+        return
     if len(argv) < 2 or argv[1] != "run":
         print(__doc__)
         return
