@@ -5832,3 +5832,12 @@ The mechanism, if real: overnight (Asian and European) hours are quiet for metal
 Six non-gold metals and energy series, 5,586 entries, 53 days in the night block. NIGHT (04 to 07Z close) 870 entries at +0.82c against REST 4,716 at -0.02c; the day-clustered paired difference is **-1.10c, z -0.52** (the pooled means differ by +0.84c but the per-day pairing reverses it, a sign of how thin and uneven the night sample is); halves **-4.62c and +2.30c**, fee stress -1.10c, placebo 95th percentile z +1.98, 4 of 6 series positive (platinum +3.74c, natural gas +2.70c, copper +1.18c, WTI +0.45c, palladium -0.56c, silver -0.71c). The prediction (FALSIFIED, about 65%) held. The gold 04 to 07Z block (+4.2c, consistent in both halves, 22 live fills with no losses) is therefore a gold-only observation with no independent support; it stays a lead for a forward check only, not a rule. Tries: counted above (running count about 4,720).
 
 Capacity note on gold (information): live gold orders see ask sizes of about 1,500 to 5,000 contracts and bid sizes in the thousands, against tens to a few hundred for Ethereum, XRP and Dogecoin. Gold is the only series where order size could grow without moving the price; the constraint today is the account (about $190 with a 12% stop), not the book. The gold edge itself (+1.59c a contract, z 3.28 over 1,609 entries, positive in every 14-day block) is the most robust single-series result in this log.
+
+## GOLD-LOSS look (2026-10-23, information only, no claim)
+
+Gold at 360 s, 1,609 entries, 85 losses (5.3%). Losers vs winners, 7 features plus side, hour block, weekday (about 20 looks, none registered).
+- Price: losers 0.914 vs winners 0.927 (t -4.65). This is just the market pricing risk correctly (calibration), not a filter.
+- tib: losers 1.18 vs winners 1.54 (t -2.10). Not significant after counting about 20 looks. Spread, rise3, d1, dip, rng5: |t| < 1.6.
+- Side 43 no / 42 yes. Hour blocks and weekdays: small cells (6 to 23 losses), no pattern worth a test.
+- How losses unfold: mean mid of the losing side 0.88, 0.82, 0.70, 0.61, 0.47, then 0.03 at the last candle. 37 of 85 were still above 50c until the final minute (sudden last-minute reversals, nothing to react to). 36 of 85 fell to the 25c exit line at minutes 3 to 5. Only 4 of 1,524 winners touched the 25c line, so the 25c exit rarely cuts a winner.
+- Verdict: no pattern found. NOT_ENOUGH_DATA for any filter. No forward claim registered. Tries +20 (informational).
