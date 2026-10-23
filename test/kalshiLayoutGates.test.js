@@ -435,7 +435,7 @@ gates.Y22 = () => {
 
 // Y23: the Kalshi page uses more width on a wide monitor, and the other pages keep the 1400px column.
 gates.Y23 = () => {
-  assert.ok(/\.app\{ max-width: 1400px;/.test(html) && /\.app\.app-wide\{ max-width: 1640px; \}/.test(html), 'the base column stays 1400px; the wide class is 1640px');
+  assert.ok(/\.app\.app-wide\{ max-width: 1800px; \}/.test(html) && /\.app\{ margin-left: 0; margin-right: auto; max-width: 1800px; \}/.test(html), 'the base column and the wide class are both 1800px (widened Oct 23, 2026, the owner: the page stopped short on a wide screen)');
   assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi' \|\| name === 'data'\)/.test(html), 'only the Kalshi and Data pages turn it on, and every other page turns it off');
 };
 
@@ -725,6 +725,25 @@ gates.BS3 = () => {
   const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.ok(/const L1_SIZED_STOP_FRACTION = 0\.12;/.test(src) && /const L1_WINDOW_CAP_FRACTION = 0\.055;/.test(src) && /const L1_LOSS_STOP = 10\.0;/.test(src), 'the meter quotes the same 12%, 5.5% and $10 the bot uses; change one and this gate names the other');
   assert.ok(/0\.12 \* base/.test(html) && /0\.055 \* base/.test(html), 'and the page uses those numbers');
+};
+
+// BS4: the heartbeat monitor strip. Consequence: one beat per observed check, scrolling left and gone after five minutes; no beat for a while is a flat dashed line in the state's colour; a page that has not seen a beat draws a flat line, not an invented one.
+gates.BS4 = () => {
+  const f = liftBs(['kalshiBeatNote', 'kalshiHeartbeatSvg']);
+  const NOW = 1000000000;
+  const flat = f.kalshiHeartbeatSvg([], NOW, 'ok');
+  assert.ok(/kal-ecg ok/.test(flat) && !/L[\d.]+ -?\d+\.?\d* L/.test(flat.split('kal-ecg-line')[0].split('<path')[1] || ''), 'no beats seen: a flat line');
+  const one = f.kalshiHeartbeatSvg([NOW - 30000], NOW, 'ok');
+  assert.ok(/<path d="M0 46 L/.test(one) && (one.match(/L[\d.]+ 10 /g) || []).length === 1, 'one beat is one spike (36 above the baseline)');
+  const three = f.kalshiHeartbeatSvg([NOW - 20000, NOW - 80000, NOW - 140000], NOW, 'ok');
+  assert.strictEqual((three.match(/L[\d.]+ 10 /g) || []).length, 3, 'three beats, three spikes, oldest to the left');
+  assert.strictEqual((f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down').match(/L[\d.]+ 10 /g) || []).length, 0, 'a beat older than five minutes has scrolled off');
+  assert.ok(/kal-ecg-gap down/.test(f.kalshiHeartbeatSvg([NOW - 400000], NOW, 'down')) && /kal-ecg-gap quiet/.test(f.kalshiHeartbeatSvg([NOW - 200000], NOW, 'quiet')) && !/kal-ecg-gap/.test(one), 'a quiet or down state draws the flat dashed gap, a healthy one does not');
+  const b = f.kalshiBeatNote([], 5); f.kalshiBeatNote(b, 5); f.kalshiBeatNote(b, 65);
+  assert.deepStrictEqual(b, [5, 65], 'a check time is noted once, and a new one is added');
+  assert.deepStrictEqual(f.kalshiBeatNote([1], NaN), [1], 'no check time, nothing added');
+  const big = []; for (let i = 0; i < 40; i++) f.kalshiBeatNote(big, i);
+  assert.strictEqual(big.length, 30, 'the list stays short');
 };
 
 (async () => {

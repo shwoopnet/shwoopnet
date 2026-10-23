@@ -122,7 +122,7 @@
   .app{ max-width: 1400px; margin: 0 auto; padding: 0 0 40px 0; }
   /* The Kalshi page is a console, not an article: on a wide monitor it uses more of the width instead of leaving wide empty gutters (the owner's note, Oct 9, 2026).
      The other pages keep the 1400px column. */
-  .app.app-wide{ max-width: 1640px; }
+  .app.app-wide{ max-width: 1800px; }
 
   /* ---------- Topbar + nav ---------- */
   .topbar{
@@ -174,7 +174,7 @@
      rail, bottom padding on narrow screens where it becomes a bottom bar. */
   /* The page column hugs the rail instead of centring on a wide screen, so there is never a wide empty gap between the two (the owner, Oct 23, 2026: "fix this weird gap"). */
   /* The header spans the whole width so the logo sits above the rail, flush with it (the owner, Oct 23, 2026: "it should be above the navigation bar"); only the content and the footer step over to clear the rail. */
-  .app{ margin-left: 0; margin-right: auto; }
+  .app{ margin-left: 0; margin-right: auto; max-width: 1800px; }
   /* The header stays put on a wide screen so the rail below it never floats in the middle of a scrolled page (the owner, Oct 23, 2026: "bug in here"). */
   @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:linear-gradient(180deg, rgba(10,10,10,.55), rgba(10,10,10,0)); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); } }
   .app-pages, .site-footer{ padding-left: 184px; }
@@ -270,7 +270,7 @@
   .mood-kv > span:first-child{ color:var(--muted); }
   .mood-up{ color:var(--gain); } .mood-down{ color:var(--loss); }
   .brief-win .brief-section-title{ margin:0 0 12px 0; }
-  .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:start; }
+  .brief-top{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; margin:18px 0; align-items:stretch; }
   .brief-mood .brief-eyebrow{ color:var(--muted); font-weight:700; letter-spacing:.32em; }
   .brief-charts{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; margin-bottom:18px; }
   @media (max-width: 1100px){ .brief-charts{ grid-template-columns:1fr; } }
@@ -281,6 +281,9 @@
   .brief-chart-name{ color:var(--muted); font-size:12px; }
   .brief-chart-px{ font:800 20px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; margin:2px 0; }
   .brief-chart-chg{ font-size:12px; }
+  .brief-chart-d{ font:600 12px 'Public Sans', sans-serif; margin-left:6px; } .brief-chart-d.up{ color:var(--gain); } .brief-chart-d.down{ color:var(--loss); }
+  .brief-chart-ft{ display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
+  .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:10px; }
   .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss); }
   .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; }
   .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
@@ -700,6 +703,14 @@
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
+  .kal-ecg-wrap{ border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; margin:0 0 10px; }
+  .kal-ecg{ display:block; width:100%; height:72px; }
+  .kal-ecg-grid{ stroke:rgba(255,255,255,.05); stroke-width:1; vector-effect:non-scaling-stroke; }
+  .kal-ecg-line{ fill:none; stroke:var(--muted); stroke-width:1.8; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+  .kal-ecg.ok .kal-ecg-line{ stroke:var(--gain); filter:drop-shadow(0 0 3px rgba(15,157,88,.6)); }
+  .kal-ecg.quiet .kal-ecg-line{ stroke:var(--paper); }
+  .kal-ecg.down .kal-ecg-line{ stroke:var(--loss); }
+  .kal-ecg-gap{ stroke-width:2.2; vector-effect:non-scaling-stroke; stroke-dasharray:6 5; } .kal-ecg-gap.quiet{ stroke:var(--paper); } .kal-ecg-gap.down{ stroke:var(--loss); }
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
@@ -2863,6 +2874,34 @@
     Object.keys(windowUsed).forEach(function(k){ if(windowUsed[k] > winMax){ winMax = windowUsed[k]; } });
     return { net: net, openCost: openCost, used: used, limit: limit, fraction: limit > 0 ? Math.min(1, used / limit) : 0, windowUsed: winMax, windowCap: winCap, trades: trades };
   }
+  // The heartbeat monitor (the owner, Oct 23, 2026: "an actual heartbeat monitor design"). A five minute strip like a hospital monitor: a flat line with one beat each time the bot checks, scrolling left as time passes, and the line
+  // goes flat and red when the beats stop. Only beats this page has SEEN are drawn (the server keeps just the latest check time, so earlier minutes are not known after a reload); it fills in while the page stays open.
+  function kalshiBeatNote(beats, lastTickAt){
+    if(!Number.isFinite(lastTickAt)){ return beats; }
+    if(!beats.length || beats[beats.length - 1] !== lastTickAt){ beats.push(lastTickAt); }
+    while(beats.length > 30){ beats.shift(); }
+    return beats;
+  }
+  function kalshiHeartbeatSvg(beats, now, state){
+    var W = 600, H = 70, B = 46, SPAN = 300000, grid = '';
+    for(var gx = 0; gx <= W; gx += 20){ grid += '<line x1="' + gx + '" x2="' + gx + '" y1="0" y2="' + H + '" class="kal-ecg-grid"/>'; }
+    for(var gy = 6; gy < H; gy += 20){ grid += '<line x1="0" x2="' + W + '" y1="' + gy + '" y2="' + gy + '" class="kal-ecg-grid"/>'; }
+    var X = function(t){ return W - (now - t) / SPAN * W; };
+    var seen = (beats || []).filter(function(t){ return Number.isFinite(t) && now - t <= SPAN + 20000 && t <= now; }).sort(function(a, b){ return a - b; });
+    var d = 'M0 ' + B;
+    seen.forEach(function(t){
+      var x = X(t);
+      d += ' L' + (x - 14).toFixed(1) + ' ' + B + ' L' + (x - 11).toFixed(1) + ' ' + (B - 3) + ' L' + (x - 8).toFixed(1) + ' ' + B +
+        ' L' + (x - 3).toFixed(1) + ' ' + B + ' L' + (x - 1.5).toFixed(1) + ' ' + (B + 5) + ' L' + x.toFixed(1) + ' ' + (B - 36) + ' L' + (x + 2).toFixed(1) + ' ' + (B + 10) + ' L' + (x + 4).toFixed(1) + ' ' + B +
+        ' L' + (x + 9).toFixed(1) + ' ' + B + ' L' + (x + 13).toFixed(1) + ' ' + (B - 8) + ' L' + (x + 17).toFixed(1) + ' ' + B;
+    });
+    var last = seen.length ? seen[seen.length - 1] : null;
+    var tail = last === null ? 0 : Math.min(W, X(last) + 17);
+    d += ' L' + W + ' ' + B;
+    var gap = state === 'quiet' || state === 'down' ? '<line x1="' + tail.toFixed(1) + '" x2="' + W + '" y1="' + B + '" y2="' + B + '" class="kal-ecg-gap ' + state + '"/>' : '';
+    return '<svg class="kal-ecg ' + (state || 'off') + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Heartbeat of the bot over the last five minutes">' + grid +
+      '<path d="' + d + '" class="kal-ecg-line"/>' + gap + '</svg>';
+  }
   function kalshiAgeText(sec){
     return sec < 90 ? sec + ' seconds ago' : (sec < 5400 ? Math.round(sec / 60) + ' minutes ago' : Math.round(sec / 3600) + ' hours ago');
   }
@@ -2875,9 +2914,12 @@
     var hb = kalshiHeartbeat(s, now);
     var line = hb.state === 'off' ? 'Not running' : (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while')));
     var note = running && s.lastNote ? kalshiSkipNote(s.lastNote, s.lastTickAt, now) : '';
-    sEl.innerHTML = '<div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(line) + (hb.ageSec !== null && running ? '. Last check ' + escapeHtml(kalshiAgeText(hb.ageSec)) : '') + '</span></div>' +
+    kalshiBeatNote(kalshiBeats, s && s.active === true ? s.lastTickAt : NaN);
+    sEl.innerHTML = '<div id="kalEcg" class="kal-ecg-wrap"></div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(line) + (hb.ageSec !== null && running ? '. Last check ' + escapeHtml(kalshiAgeText(hb.ageSec)) : '') + '</span></div>' +
       (running ? '<div class="kal-rows"><div><span class="kal-k">Next look to buy</span><b id="kalNextIn">&mdash;</b></div><div><span class="kal-k">What it is looking at</span><b id="kalNextWhat">&mdash;</b></div></div>' : '') +
       (note ? '<div class="kal-note">' + escapeHtml(note) + '</div>' : '');
+    var ecgNow = document.getElementById('kalEcg');
+    if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state); }
     var a = kalshiLiveAcct;
     var orders = kalshiResolveOrders(kalshiLiveOrders, a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
     var m = kalshiRiskMeter(orders, s, now);
@@ -2893,6 +2935,8 @@
   function kalshiStatusTick(){
     var s = kalshiLiveCtl && kalshiLiveCtl.session, now = Date.now();
     var t = document.getElementById('kalHbText'), nx = document.getElementById('kalNextIn'), what = document.getElementById('kalNextWhat'), hbEl = document.getElementById('kalHb');
+    var ecg = document.getElementById('kalEcg');
+    if(ecg && s && s.active === true){ ecg.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, kalshiHeartbeat(s, now).state); }
     if(t && s && s.active === true){
       var hb = kalshiHeartbeat(s, now), halted = !!(kalshiBotState.control && kalshiBotState.control.halt === true);
       t.textContent = (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while'))) + (hb.ageSec !== null ? '. Last check ' + kalshiAgeText(hb.ageSec) : '');
@@ -2903,7 +2947,7 @@
       if(ne){ var sec = Math.ceil(ne.inMs / 1000); nx.textContent = Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60); if(what){ what.textContent = ne.label; } }
     }
   }
-  var kalshiStatusTimer = null;
+  var kalshiStatusTimer = null, kalshiBeats = [];
 
   function renderKalshiL1(){
     kalshiSoundCheck();
@@ -2960,6 +3004,7 @@
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
     if(kalshiStatusTimer){ clearInterval(kalshiStatusTimer); kalshiStatusTimer = null; }
+    kalshiBeats = [];
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
   setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
@@ -3666,9 +3711,17 @@
       var pts = ser.map(function(v, i){ return (i * (200 / (ser.length - 1))).toFixed(1) + ',' + y(v); }).join(' ');
       svg = '<svg viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="200" y1="' + y(q.prevClose) + '" y2="' + y(q.prevClose) + '"></line><polyline points="' + pts + '"></polyline></svg>';
     }
+    // Under the line: the day's low, the timeframe, the day's high (the owner, Oct 23, 2026: "some information or timeframe displayed"), all from the same series plus the current price.
+    var foot = '';
+    if(ser.length >= 2){
+      var fl = Math.min.apply(null, ser.concat([q.price])), fh = Math.max.apply(null, ser.concat([q.price]));
+      var fm = function(v){ return v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
+      foot = '<div class="brief-chart-ft"><span>Low ' + fm(fl) + '</span><span class="brief-chart-tf">1 day</span><span>High ' + fm(fh) + '</span></div>';
+    }
+    var delta = q.price - q.prevClose, dtxt = (delta >= 0 ? '+' : '-') + Math.abs(delta).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
     return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span>' +
       '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(2) + '%</span></div>' +
-      '<div class="brief-chart-px mono">' + px + '</div>' + svg + '</div>';
+      '<div class="brief-chart-px mono">' + px + ' <span class="brief-chart-d ' + (up ? 'up' : 'down') + '">' + dtxt + '</span></div>' + svg + foot + '</div>';
   }
   // The risk mood (the owner: "risk mood + maybe fear/greed index"): a one word read of the VIX, the VIX, the 10 year yield and long bonds, and the two fear and greed indexes (stocks from CNN, crypto from alternative.me). All of it
   // comes from the tape; anything that has not arrived is a dash, never a made-up number.
