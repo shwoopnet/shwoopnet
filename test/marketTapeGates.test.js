@@ -157,11 +157,20 @@ gates.T21 = () => {
 gates.T22 = () => {
   const syms = lib.SYMBOLS.map((s) => s.sym);
   for (const need of ['BTC-USD', 'ETH-USD', 'SPY', 'QQQ', 'GC=F', 'CL=F']) assert.ok(syms.includes(need), need + ' is read for the Brief charts');
-  assert.ok(lib.NEWS_FEEDS.some((f) => /coindesk/.test(f.url)) && lib.NEWS_FEEDS.some((f) => /bbci/.test(f.url)), 'crypto and world economy headlines are read');
+  assert.ok(lib.NEWS_FEEDS.some((f) => /coindesk|cointelegraph/.test(f.url)) && lib.NEWS_FEEDS.some((f) => /20910258|RSSWorldNews/.test(f.url)), 'crypto, economy and world headlines are read');
   const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(/if \(r\.events\) patch\.events = r\.events;/.test(idx), 'a failed calendar leaves the stored events alone (the patch is merged)');
-  assert.ok(!/faireconomy|coindesk|bbci/.test(html), 'the page itself calls none of these hosts');
+  assert.ok(!/faireconomy|coindesk|cointelegraph|dowjones/.test(html), 'the page itself calls none of these hosts');
   assert.ok(/id="briefEvents"/.test(html) && /id="briefCharts"/.test(html) && /id="briefNextTime"/.test(html), 'the Brief has its catalysts, countdown and charts');
+};
+
+// No single desk fills the list (Oct 23, 2026): each feed contributes its newest few, so a busy crypto desk cannot push the economy and world headlines off the Brief.
+gates.T23 = () => {
+  const mk = (src, n) => Array.from({ length: n }, (_, i) => ({ headline: src + ' ' + i, source: src, url: '', datetime: 1000 - i }));
+  const merged = lib.mergeNews([mk('Busy', 20), mk('Quiet', 2)].map((l, k) => k === 0 ? l.map((x) => Object.assign({}, x, { datetime: x.datetime + 500 })) : l));
+  assert.strictEqual(merged.filter((x) => x.source === 'Busy').length, 3, 'a busy feed contributes only its newest 3');
+  assert.strictEqual(merged.filter((x) => x.source === 'Quiet').length, 2, 'a quiet feed is still there');
+  assert.ok(merged.length <= 12, 'and the list is capped');
 };
 
 (async () => {

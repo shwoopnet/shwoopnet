@@ -26,13 +26,18 @@ const SYMBOLS = [
   { sym: "DIA", name: "Dow (DIA)", kind: "etf", tape: false },
 ];
 
+// Top stories, the economy, world news and two crypto desks (the owner, Oct 23, 2026: crypto and world economy news). BBC, the Guardian and NPR refused a plain request in a live check, so they are not here.
 const NEWS_FEEDS = [
   { source: "CNBC", url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114" },
+  { source: "CNBC Economy", url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258" },
+  { source: "WSJ World", url: "https://feeds.content.dowjones.io/public/rss/RSSWorldNews" },
   { source: "MarketWatch", url: "https://feeds.content.dowjones.io/public/rss/mw_topstories" },
   { source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/" },
-  { source: "BBC Business", url: "https://feeds.bbci.co.uk/news/business/rss.xml" },
+  { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
 ];
-const NEWS_KEEP = 10;
+const NEWS_KEEP = 12;
+// No single desk may fill the list: each feed contributes its newest few, then the lists are merged newest first.
+const NEWS_PER_FEED = 3;
 // The week's scheduled events (the Brief's catalysts): a public weekly calendar of economic releases. Unofficial, so a failure only leaves the last stored list in place. Only high and medium impact
 // events from the major economies are kept, as plain strings and numbers.
 const EVENTS_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json";
@@ -132,7 +137,8 @@ function parseRss(xml, source) {
 
 function mergeNews(lists) {
   const seen = new Set();
-  return [].concat(...lists).filter((a) => {
+  const capped = lists.map((l) => l.slice().sort((a, b) => b.datetime - a.datetime).slice(0, NEWS_PER_FEED));
+  return [].concat(...capped).filter((a) => {
     const k = a.headline.toLowerCase();
     if (seen.has(k)) return false;
     seen.add(k);
