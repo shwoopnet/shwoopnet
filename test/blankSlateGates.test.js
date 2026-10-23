@@ -67,7 +67,7 @@ gates.B3 = () => {
 gates.B4 = () => {
   const page = /<main class="page" id="page-settings"[\s\S]*?<\/main>/.exec(code)[0];
   const titles = [...page.matchAll(/<div class="settings-row-title">([^<]*)<\/div>/g)].map((m) => m[1].trim());
-  assert.deepStrictEqual(titles, ['Account', 'Default landing page', 'Clock format', 'Limit graphics', 'Reset preferences', 'Privacy view']);
+  assert.deepStrictEqual(titles, ['Account', 'Default landing page', 'Clock format', 'Limit graphics', 'Reset preferences', 'Phone alerts', 'Sound alerts', 'Privacy view']);
   const landing = [...page.matchAll(/<button class="tf-btn" data-value="(\w+)"( id="landingKalshiBtn")?/g)].map((m) => m[1]);
   assert.ok(['auto', 'brief', 'kalshi'].every((v) => landing.includes(v)) && !landing.includes('trades'), 'the landing page choices are Auto, Brief and Kalshi');
 };
