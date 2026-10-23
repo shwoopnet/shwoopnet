@@ -175,6 +175,8 @@
   /* The page column hugs the rail instead of centring on a wide screen, so there is never a wide empty gap between the two (the owner, Oct 23, 2026: "fix this weird gap"). */
   /* The header spans the whole width so the logo sits above the rail, flush with it (the owner, Oct 23, 2026: "it should be above the navigation bar"); only the content and the footer step over to clear the rail. */
   .app{ margin-left: 0; margin-right: auto; }
+  /* The header stays put on a wide screen so the rail below it never floats in the middle of a scrolled page (the owner, Oct 23, 2026: "bug in here"). */
+  @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:rgba(10,10,10,.88); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); } }
   .app-pages, .site-footer{ padding-left: 184px; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   .brand{
