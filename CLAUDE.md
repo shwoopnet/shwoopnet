@@ -85,6 +85,10 @@ A fourth page, **Data**, was added at the owner's request ("start building out a
 
 The keyless Ethereum and Solana simulation (`kalshiSimLib.js`, `kalshiSimTick`, `kalshiSimSession`, the page's simulation card) was removed on Oct 10, 2026 at the owner's request: Ethereum went live and Solana was dropped. Nothing in this repo places a simulated order. If a simulation is ever added again it must be keyless (no signing, no key, no `/portfolio` call, no POST, no secrets on its scheduled function) and, if promoted to real orders, its risk settings (one combined stop, one combined window limit) must scale with it.
 
+## Every page has its own address (Oct 23, 2026, the owner: navigating "feels a little weird")
+
+The four pages are `#brief`, `#bot`, `#data` and `#settings` (`PAGE_SLUGS`, `pageFromHash` in `index.html`; the old `#kalshi` still works). Clicking a nav item pushes a history entry, so Back, Forward, a refresh, a bookmark and a phone's back swipe all stay on the page they mean; a redirect the code makes itself (a non-admin sent to the Brief, an old link) replaces the current entry instead of pushing, so Back never lands on a page you were bounced from. A `#bot` or `#data` link waits for the account to be known to be the admin, the same wait the Bot landing choice uses, and a non-admin is still never shown them (`test/kalshiLayoutGates.test.js` Y60, Y17). It is still ONE `index.html` underneath; splitting it into four real files would mean moving the shared styles and scripts out first and was not done.
+
 ## Git workflow
 
 `main` is squash-merged, so a long-lived branch drifts fast. Always:

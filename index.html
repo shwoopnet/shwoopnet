@@ -3639,7 +3639,15 @@
     var gate = document.getElementById('authGate'), names = { brief: 'Market Brief', kalshi: 'Bot', data: 'Data', settings: 'Settings' };
     document.title = gate && !gate.hasAttribute('hidden') ? DEFAULT_PAGE_TITLE : (names[currentPageName] || 'Market Brief') + ' | Shwoop Financials';
   }
-  function showPage(name){
+  // Every page has its own address (#brief, #bot, #data, #settings), so Back and Forward, a refresh, a bookmark and a phone's back swipe all stay on the page they mean (the owner, Oct 23, 2026: navigating "feels a little weird").
+  // A click pushes a history entry; a redirect the code makes itself (an old link, a non-admin sent to the Brief) replaces the current one, so Back never lands on a page you were bounced from.
+  var PAGE_SLUGS = { brief: 'brief', kalshi: 'bot', data: 'data', settings: 'settings' }, pageShownOnce = false;
+  function pageFromHash(){
+    var h = (location.hash || '').replace('#', '').replace(/^\//, '');
+    if(h === 'bot'){ h = 'kalshi'; }
+    return (h === 'brief' || h === 'kalshi' || h === 'data' || h === 'settings') ? h : null;
+  }
+  function showPage(name, how){
     // Switching pages via nav used to leave the scroll position exactly
     // where it was on the PREVIOUS page -- landing on a short page already
     // scrolled halfway down a long one read as the new page failing to
@@ -3664,8 +3672,20 @@
     if(name === 'kalshi' || name === 'data'){ if(!kalshiWatching){ kalshiWatching = true; kalshiOnShow(); } } else if(kalshiWatching){ kalshiWatching = false; kalshiOnHide(); }
     if(name === 'data'){ renderDataCenter(); }
     pageEnter(document.getElementById('page-' + name));
-    try{ history.replaceState(null, '', '#' + name); }catch(e){}
+    try{
+      var wantHash = '#' + (PAGE_SLUGS[name] || name);
+      if(location.hash !== wantHash){
+        if(how === 'history' || how === 'replace' || !pageShownOnce){ history.replaceState({ page: name }, '', wantHash); } else { history.pushState({ page: name }, '', wantHash); }
+      }
+    }catch(e){}
+    pageShownOnce = true;
   }
+  window.addEventListener('popstate', function(){
+    var gate = document.getElementById('authGate');
+    if(gate && !gate.hasAttribute('hidden')){ return; }
+    var target = pageFromHash();
+    if(target && target !== currentPageName){ showPage(target, 'history'); }
+  });
 
   document.querySelectorAll('.nav-item').forEach(function(item){
     item.addEventListener('click', function(){
@@ -3875,7 +3895,7 @@
   // off the user-doc snapshot every sign-in (see the watchUserDoc callback below), never hardcoded here. There is no sign-up on this page: an account
   // is created by hand, and firestore.rules refuses to create a users document from a browser.
   var currentUserIsAdmin = false;
-  var landingKalshiPending = false, landingLoadedAt = Date.now();
+  var landingKalshiPending = false, landingDataPending = false, landingLoadedAt = Date.now();
 
   // The Kalshi page is admin-only: a non-admin account never even sees its nav item, on top of firestore.rules' own real enforcement. Called every
   // time currentUserIsAdmin changes: on each sign-in's first snapshot, and back to hidden on sign-out.
@@ -3894,12 +3914,17 @@
     if(currentUserIsAdmin && landingKalshiPending){
       landingKalshiPending = false;
       var briefPage = document.getElementById('page-brief');
-      if(briefPage && !briefPage.hidden && Date.now() - landingLoadedAt < 20000){ showPage('kalshi'); }
+      if(briefPage && !briefPage.hidden && Date.now() - landingLoadedAt < 20000){ showPage('kalshi', 'replace'); }
+    }
+    if(currentUserIsAdmin && landingDataPending){
+      landingDataPending = false;
+      var briefPage2 = document.getElementById('page-brief');
+      if(briefPage2 && !briefPage2.hidden && Date.now() - landingLoadedAt < 20000){ showPage('data', 'replace'); }
     }
     var kalPage = document.getElementById('page-kalshi');
-    if(!currentUserIsAdmin && kalPage && !kalPage.hidden){ showPage('brief'); }
+    if(!currentUserIsAdmin && kalPage && !kalPage.hidden){ showPage('brief', 'replace'); }
     var dataPage = document.getElementById('page-data');
-    if(!currentUserIsAdmin && dataPage && !dataPage.hidden){ showPage('brief'); }
+    if(!currentUserIsAdmin && dataPage && !dataPage.hidden){ showPage('brief', 'replace'); }
   }
 
   window.__onShwoopReady(function(api){
@@ -4292,26 +4317,32 @@
   // landing page preference, if set to something other than Auto. Otherwise
   // the brief.
   (function initLanding(){
-    var hashPage = (location.hash || '').replace('#', '');
+    var hashPage = pageFromHash();
     if(hashPage === 'brief' || hashPage === 'settings'){
-      showPage(hashPage);
+      showPage(hashPage, 'replace');
+      return;
+    }
+    // A link to #bot or #data can only be honoured once the account is known to be the admin (it arrives just after the first screen), the same wait the Kalshi landing choice uses.
+    if(hashPage === 'kalshi' || hashPage === 'data'){
+      if(hashPage === 'kalshi'){ landingKalshiPending = true; } else { landingDataPending = true; }
+      showPage('brief', 'replace');
       return;
     }
 
     var pref = 'auto';
     try{ pref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     if(pref === 'brief'){
-      showPage('brief');
+      showPage('brief', 'replace');
       return;
     }
     if(pref === 'kalshi'){
       // Not known to be the admin yet (that arrives with the account), so show the brief and move on to Kalshi when applyAdminUI confirms it.
       landingKalshiPending = true;
-      showPage('brief');
+      showPage('brief', 'replace');
       return;
     }
 
-    showPage('brief');
+    showPage('brief', 'replace');
   })();
 
 })();

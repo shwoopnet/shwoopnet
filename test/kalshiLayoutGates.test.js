@@ -423,9 +423,9 @@ gates.Y17 = () => {
   assert.ok(/<button class="tf-btn" data-value="kalshi" id="landingKalshiBtn" hidden>Bot<\/button>/.test(html), 'a Bot choice exists and starts hidden');
   assert.ok(/landKal\.hidden = !currentUserIsAdmin/.test(html), 'it is shown only to the admin');
   const init = html.slice(html.indexOf('(function initLanding(){'));
-  assert.ok(/if\(pref === 'kalshi'\)\{[\s\S]*?landingKalshiPending = true;[\s\S]*?showPage\('brief'\);[\s\S]*?return;/.test(init), 'a Kalshi preference lands on the brief and marks the move as pending');
+  assert.ok(/if\(pref === 'kalshi'\)\{[\s\S]*?landingKalshiPending = true;[\s\S]*?showPage\('brief', 'replace'\);[\s\S]*?return;/.test(init), 'a Kalshi preference lands on the brief and marks the move as pending');
   const admin = html.slice(html.indexOf('function applyAdminUI(){'), html.indexOf("document.getElementById('generateInviteBtn')"));
-  assert.ok(/currentUserIsAdmin && landingKalshiPending/.test(admin) && /!briefPage\.hidden && Date\.now\(\) - landingLoadedAt < 20000/.test(admin) && /showPage\('kalshi'\)/.test(admin), 'the move happens only for the admin, only if still on the first screen, and only within 20 seconds of loading');
+  assert.ok(/currentUserIsAdmin && landingKalshiPending/.test(admin) && /!briefPage\.hidden && Date\.now\(\) - landingLoadedAt < 20000/.test(admin) && /showPage\('kalshi', 'replace'\)/.test(admin), 'the move happens only for the admin, only if still on the first screen, and only within 20 seconds of loading');
   assert.ok(/pref === 'kalshi' && currentUserIsAdmin \? 'kalshi' : 'brief'/.test(html), 'the logo takes the admin home to Kalshi too, and anyone else to the brief');
   assert.ok(/if\(\(name === 'kalshi' \|\| name === 'data'\) && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi or Data page, whatever is saved');
 };
@@ -711,7 +711,16 @@ gates.Y41 = () => {
 
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
 (async () => {
-  let failed = 0;
+  
+// Every page has its own address (the owner, Oct 23, 2026): a click pushes a history entry so Back works, a redirect the code makes replaces one, a refresh or a pasted #bot / #data link opens that page, and a non-admin is still never shown the admin pages.
+gates.Y60 = () => {
+  assert.ok(/var PAGE_SLUGS = \{ brief: 'brief', kalshi: 'bot', data: 'data', settings: 'settings' \}/.test(html), 'four pages, four addresses');
+  assert.ok(/history\.pushState\(\{ page: name \}, '', wantHash\)/.test(html) && /history\.replaceState\(\{ page: name \}, '', wantHash\)/.test(html), 'clicks push, redirects replace');
+  assert.ok(/window\.addEventListener\('popstate'/.test(html) && /showPage\(target, 'history'\)/.test(html), 'Back and Forward move between pages');
+  assert.ok(/hashPage === 'kalshi' \|\| hashPage === 'data'/.test(html) && /landingDataPending/.test(html), 'a #bot or #data link waits for the account to be known to be the admin');
+};
+
+let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
     try { await fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); }
   }
