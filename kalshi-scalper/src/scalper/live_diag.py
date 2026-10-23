@@ -52,7 +52,7 @@ def load_orders(path: str) -> list[dict]:
             except Exception:
                 t = None
             rows.append({"t": t, "ticker": r.get("ticker", ""), "side": (r.get("side") or "").lower(), "status": r.get("status", ""), "count": fnum(r.get("fillCount")) or fnum(r.get("count")) or 0.0,
-                         "fill": fnum(r.get("avgFill")), "fee": fnum(r.get("avgFee")), "lead": r.get("entryLead") or "", "rise3": fnum(r.get("rise3")),
+                         "fill": fnum(r.get("avgFill")), "fee": fnum(r.get("avgFee")), "lead": r.get("entryLead") or "", "rise3": fnum(r.get("rise3")), "rng5": fnum(r.get("rng5")),
                          "bid": fnum(r.get("seenBid")), "ask": fnum(r.get("seenAsk")), "pnl": fnum(r.get("settledPnl")) if r.get("settledPnl") not in (None, "") else fnum(r.get("pnl")),
                          "result": (r.get("result") or "").lower()})
     return rows
@@ -152,6 +152,10 @@ def report(rows: list[dict]) -> str:
         out.append("\nBY QUOTE SPREAD AT THE DECISION:")
         out.append(line("spread over 3c", [o for o in settled if o["bid"] is not None and o["ask"] is not None and o["ask"] - o["bid"] > 0.03]))
         out.append(line("spread 3c or less", [o for o in settled if o["bid"] is not None and o["ask"] is not None and o["ask"] - o["bid"] <= 0.03]))
+    fl = flat_section(rows, settled)
+    if fl:
+        out.append(fl)
+    out.append(crowd_section(settled))
     out.append("\nBY UTC HOUR BLOCK:")
     for name, lo, hi in (("Asia 00-07", 0, 7), ("Europe 07-13", 7, 13), ("US 13-21", 13, 21), ("late 21-24", 21, 24)):
         out.append(line(name, [o for o in settled if o["t"] and lo <= o["t"].hour < hi]))
@@ -168,6 +172,44 @@ def report(rows: list[dict]) -> str:
         out.append(f"  {o['t'].strftime('%m-%d %H:%M') if o['t'] else '?'} {o['ticker']:34s} {o['side']:3s} paid {o['paid']:.3f} x{o['count']:.0f}  {o['pnl_c']:+.2f}$ lead {o['lead'] or '-'}")
     out.append("\nREADING: a group is only a leak if its P/L is negative AND its loss count is well above the history's expectation (tail p under about 0.10) on a few dozen orders; a handful of losses "
                "on 1-contract series is variance. Exit-watch sales are not modelled here (an exited order is scored as a held loss).")
+    return "\n".join(out)
+
+
+FLAT_RNG5, FLAT_RISE3 = 0.15, 0.05          # README FLAT2: rng5 <= 0.15 and |rise3| <= 0.05
+
+
+def is_flat(o: dict):
+    """True / False when both rng5 and rise3 were logged for the order, else None."""
+    if o.get("rng5") is None or o.get("rise3") is None:
+        return None
+    return o["rng5"] <= FLAT_RNG5 and abs(o["rise3"]) <= FLAT_RISE3
+
+
+def flat_section(rows: list[dict], settled: list[dict]) -> str:
+    """Live FLAT check: the share of ordered entries that are FLAT per series (history says about 15%), and settled FLAT against not-FLAT. Information only; the filter is NOT live."""
+    logged = [o for o in rows if is_flat(o) is not None]
+    if not logged:
+        return ""
+    out = ["\nFLAT CHECK (orders with rng5 and rise3 logged; the FLAT filter is NOT live, this only measures the record):"]
+    for s in sorted({o["ticker"].split("-")[0] for o in logged}):
+        g = [o for o in logged if o["ticker"].split("-")[0] == s]
+        out.append(f"  {s[2:-3]:6s} ordered {len(g):4d}, FLAT {sum(1 for o in g if is_flat(o)):4d} ({100 * sum(1 for o in g if is_flat(o)) / len(g):.0f}%)")
+    sl = [o for o in settled if is_flat(o) is not None]
+    if sl:
+        out.append(line("FLAT settled", [o for o in sl if is_flat(o)]))
+        out.append(line("not FLAT settled", [o for o in sl if not is_flat(o)]))
+    return "\n".join(out)
+
+
+def crowd_section(settled: list[dict]) -> str:
+    """Settled fills grouped by market window (the time part of the ticker): one fill against two or more, as in README LIVE2."""
+    by = defaultdict(list)
+    for o in settled:
+        by[o["ticker"].split("-")[1]].append(o)
+    out = ["\nBY FILLS IN THE SAME WINDOW (README LIVE2: crowded two-fill windows lost 14.3% against 4.4%):"]
+    for name, fn in (("1 fill", lambda n: n == 1), ("2 fills", lambda n: n == 2), ("3 or more", lambda n: n >= 3)):
+        g = [o for v in by.values() if fn(len(v)) for o in v]
+        out.append(line(name, g))
     return "\n".join(out)
 
 
