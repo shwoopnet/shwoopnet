@@ -1686,6 +1686,8 @@
 
   // ---------- Settings: privacy view and what it hides ----------
   // The master switch is the same state as the Privacy button on the Bot page and is never saved. The three choices are kept in this browser only (not synced), each on or off by itself.
+  // Declared here, before initPrivacy runs: a var further down the script is hoisted but still undefined at this point, which stopped the whole script and left sign-in on Connecting.
+  var kalshiPrivacyChoice = { money: true, tools: true, lists: true };
   var privacyBtns = { master: document.getElementById('privacyToggle'), money: document.getElementById('privacyMoney'), tools: document.getElementById('privacyTools'), lists: document.getElementById('privacyLists') };
   function kalshiPrivacyUi(on){
     privacyBtns.master.setAttribute('aria-checked', on ? 'true' : 'false');
@@ -1823,7 +1825,6 @@
 
   // Privacy view on or off (the owner, Oct 23, 2026: the switch lives in Settings, with sub options that turn on and off independently). The view itself is never saved: a reload is always the full page. WHAT it hides is a preference
   // (kalshiPrivacyChoice: dollar amounts, the Tools menu, the positions and trades cards) and is kept in this browser only. This only sets page attributes and one flag; the header button and the Settings switch both call it.
-  var kalshiPrivacyChoice = { money: true, tools: true, lists: true };
   function kalshiSetPresent(on){
     var el = document.documentElement;
     ['data-present', 'data-p-tools', 'data-p-lists'].forEach(function(k){ el.removeAttribute(k); });
