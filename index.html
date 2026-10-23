@@ -1167,7 +1167,7 @@
         <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div>
           <details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill" class="kal-pill">Not running</summary>
             <div class="kal-layout-body kal-botmenu-body">
-              <div id="kalL1Status" class="kal-note">Not running.</div>
+              <div id="kalL1Status" class="kal-note" style="white-space:pre-line">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
           <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) except gold, whose size scales with the account in code (one contract per $43 of balance, up to 40, raised one step every 3 days at most; stop at 12% of the balance at the last review).</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
@@ -1874,8 +1874,25 @@
     return new Date(ms).toLocaleDateString('en-CA', { timeZone: KAL_TZ });
   }
   // A minute the bot skipped, said plainly (Oct 22, 2026). The server writes why it sent nothing; a read Kalshi refused with 429 is now retried once on its own, so say so. Any other note is shown as written.
+  // A minute's result is one line per market the bot looked at ("KXGOLD15M-26OCT231200-00: filled; KXDOGE15M-...: another crypto market already holds this window"). Shown as it was written it is a wall of tickers, so each market
+  // becomes its own short line with the market's name. The server cuts the note at 300 characters; a last line that was cut off is dropped rather than shown half written.
+  var KAL_SERIES_NAMES = { GOLD: 'Gold', BTC: 'Bitcoin', ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin', AUDUSD: 'AUD/USD', USDCAD: 'USD/CAD', NATGAS: 'Natural gas', SOL: 'Solana' };
+  function kalshiMarketLines(note){
+    var n = String(note || '');
+    if(!/^KX[A-Z]+15M-[A-Z0-9]+-\d+: /.test(n)){ return null; }
+    var parts = n.split('; ');
+    if(n.length >= 300 && parts.length > 1){ parts.pop(); }
+    return parts.map(function(p){
+      var m = /^KX([A-Z]+)15M-[A-Z0-9]+-\d+: ([\s\S]*)$/.exec(p);
+      if(!m){ return p; }
+      var why = m[2].replace(/^filled$/, 'bought').replace(/^./, function(c){ return c.toUpperCase(); });
+      return (KAL_SERIES_NAMES[m[1]] || m[1]) + ': ' + why;
+    }).join('\n');
+  }
   function kalshiSkipNote(note, tickAt, now){
     var n = String(note || '');
+    var lines = kalshiMarketLines(n);
+    if(lines !== null){ return lines; }
     if(!/nothing (?:was|is) sent|so nothing/i.test(n)){ return n; }
     var at = Number.isFinite(tickAt) ? kalshiWhen(tickAt, now) : '';
     return 'Skipped a minute' + (at ? ' (' + at + ')' : '') + ': ' + n + (/HTTP 429/.test(n) ? ' Kalshi asked it to slow down; a refused read is now asked once more on its own.' : '') + ' It looks again every minute.';
@@ -3026,7 +3043,7 @@
     var newBeat = kalshiBeats.length !== beatsBefore && beatsBefore > 0;
     sEl.innerHTML = '<div id="kalEcg" class="kal-ecg-wrap"></div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(line) + (hb.ageSec !== null && running ? '. Last check ' + escapeHtml(kalshiAgeText(hb.ageSec)) : '') + '</span></div>' +
       (running ? '<div class="kal-rows"><div><span class="kal-k">Next look to buy</span><b id="kalNextIn">&mdash;</b></div><div><span class="kal-k">What it is looking at</span><b id="kalNextWhat">&mdash;</b></div></div>' : '') +
-      (note ? '<div class="kal-note">' + escapeHtml(note) + '</div>' : '');
+      (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
     var a = kalshiLiveAcct;
