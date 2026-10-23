@@ -129,7 +129,6 @@
     display:flex; align-items:center; justify-content:space-between;
     padding: 20px 28px 18px 28px;
     flex-wrap: wrap; gap: 14px;
-    border-bottom: 1px solid rgba(255,255,255,.06);
   }
   .app-layout{ display:flex; align-items:flex-start; }
   .app-pages{ flex:1; min-width:0; }
@@ -176,7 +175,7 @@
   /* The header spans the whole width so the logo sits above the rail, flush with it (the owner, Oct 23, 2026: "it should be above the navigation bar"); only the content and the footer step over to clear the rail. */
   .app{ margin-left: 0; margin-right: auto; max-width: 1800px; }
   /* The header stays put on a wide screen so the rail below it never floats in the middle of a scrolled page (the owner, Oct 23, 2026: "bug in here"). */
-  @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:linear-gradient(180deg, rgba(10,10,10,.55), rgba(10,10,10,0)); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); } }
+  @media (min-width: 901px){ .topbar{ position:sticky; top:0; z-index:150; background:transparent; transition:background .25s, backdrop-filter .25s; } .topbar.scrolled{ background:linear-gradient(180deg, rgba(10,10,10,.72), rgba(10,10,10,0)); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); } }
   .app-pages, .site-footer{ padding-left: 184px; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   .brand{
@@ -292,12 +291,11 @@
 
   /* The market strip (every page) and the Brief's "as of" line. No animation: a still row that scrolls sideways on a narrow screen. */
   .tape{ display:flex; align-items:center; white-space:nowrap; flex:1; min-width:0; margin:0 28px; padding:0; border:0; background:none; font-size:12.5px; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image:linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
-  /* The strip scrolls again like it used to (the owner, Oct 23, 2026: "make it scroll like it used to"): two copies of the row side by side slide left one copy's width and start over, so there is never a gap. It pauses under the pointer
+  /* The strip scrolls again like it used to (the owner, Oct 23, 2026: "make it scroll like it used to"): two copies of the row side by side slide left one copy's width and start over, so there is never a gap. It keeps scrolling under the pointer
      and stops under the reduce-motion setting and the Settings switch, where it becomes a row you can scroll by hand. */
   .tape-view{ flex:1; min-width:0; overflow:hidden; }
   .tape-track{ display:inline-flex; animation: tapeScroll 60s linear infinite; will-change:transform; }
   .tape-set{ display:inline-flex; align-items:baseline; gap:28px; padding:0 14px 0 14px; flex:none; }
-  .tape:hover .tape-track{ animation-play-state:paused; }
   @media (max-width: 900px){ .tape{ order:3; flex-basis:100%; margin:0; } }
   @keyframes tapeScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   .tape-item{ display:inline-flex; gap:6px; align-items:baseline; }
@@ -501,7 +499,8 @@
   .kal-tile .kal-pos, .kal-tile .kal-neg, .kal-perf-t .kal-pos, .kal-perf-t .kal-neg{ color:var(--paper); }
   /* Presentation view (the owner, Oct 21, 2026: a clean page to show people). The Privacy button (or the Layout menu checkbox) sets data-present on the page; it is never saved, so a reload is always the full page. It only HIDES:
      the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. Every number is still computed and the bot is untouched. */
-  html[data-present="on"] #kalTools{ display:none; }
+  html[data-present="on"][data-p-tools="on"] #kalTools{ display:none; }
+  html[data-present="on"][data-p-lists="on"] [data-card="positions"], html[data-present="on"][data-p-lists="on"] [data-card="trades"]{ display:none; }
   /* Hover details on the settled-trade bars. The hit columns are transparent and take the pointer over the whole plot height; the tooltip is one element, placed by kalshiTipPlace. */
   .kal-hit{ cursor:default; }
   .kal-hit:hover, .kal-hit.on{ fill:var(--paper); fill-opacity:0.07; }
@@ -1154,7 +1153,6 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
-            <label><input type="checkbox" id="kalPresent"> Privacy view (shows **** instead of every dollar amount and hides the Tools menu; reset when the page reloads)</label>
             <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its up and down arrows)</label>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
@@ -1317,6 +1315,48 @@
         </div>
       </div>
 
+
+      <div class="settings-section">
+        <div class="settings-section-title">Privacy</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Privacy view</div>
+              <div class="settings-row-desc">Hides what you pick below on the Bot and Data pages, for showing someone your screen. It switches off when the page reloads. The Privacy button on the Bot page does the same.</div>
+            </div>
+            <button class="settings-toggle-switch" id="privacyToggle" role="switch" aria-checked="false" aria-label="Toggle privacy view">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Hide dollar amounts</div>
+              <div class="settings-row-desc">Shows **** instead of every dollar amount. The sign stays, so a loss still reads as a loss.</div>
+            </div>
+            <button class="settings-toggle-switch" id="privacyMoney" role="switch" aria-checked="true" aria-label="Hide dollar amounts">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Hide the Tools menu</div>
+              <div class="settings-row-desc">The Tools menu holds the raw account read and the exports.</div>
+            </div>
+            <button class="settings-toggle-switch" id="privacyTools" role="switch" aria-checked="true" aria-label="Hide the Tools menu">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Hide positions and trades</div>
+              <div class="settings-row-desc">Hides the Open positions and Recent trades cards on the Bot page.</div>
+            </div>
+            <button class="settings-toggle-switch" id="privacyLists" role="switch" aria-checked="true" aria-label="Hide positions and trades">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div class="settings-note">Your clock, landing page and Bot page layout sync to your account.</div>
     </div>
@@ -1641,6 +1681,33 @@
   });
 
 
+  // The top bar is clear at rest and only gains a soft blurred fade once the page has scrolled under it.
+  window.addEventListener('scroll', function(){ var tb = document.querySelector('.topbar'); if(tb){ tb.classList.toggle('scrolled', window.scrollY > 8); } }, { passive: true });
+
+  // ---------- Settings: privacy view and what it hides ----------
+  // The master switch is the same state as the Privacy button on the Bot page and is never saved. The three choices are kept in this browser only (not synced), each on or off by itself.
+  var privacyBtns = { master: document.getElementById('privacyToggle'), money: document.getElementById('privacyMoney'), tools: document.getElementById('privacyTools'), lists: document.getElementById('privacyLists') };
+  function kalshiPrivacyUi(on){
+    privacyBtns.master.setAttribute('aria-checked', on ? 'true' : 'false');
+    var hb = document.getElementById('kalPresentBtn');
+    if(hb){ hb.textContent = on ? 'Privacy on' : 'Privacy'; hb.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+  }
+  (function initPrivacy(){
+    var saved = null;
+    try{ saved = JSON.parse(window.localStorage.getItem('shwoopnet:privacyOpts') || 'null'); }catch(e){}
+    ['money', 'tools', 'lists'].forEach(function(k){
+      if(saved && typeof saved[k] === 'boolean'){ kalshiPrivacyChoice[k] = saved[k]; }
+      privacyBtns[k].setAttribute('aria-checked', kalshiPrivacyChoice[k] ? 'true' : 'false');
+      privacyBtns[k].addEventListener('click', function(){
+        kalshiPrivacyChoice[k] = privacyBtns[k].getAttribute('aria-checked') !== 'true';
+        privacyBtns[k].setAttribute('aria-checked', kalshiPrivacyChoice[k] ? 'true' : 'false');
+        try{ window.localStorage.setItem('shwoopnet:privacyOpts', JSON.stringify(kalshiPrivacyChoice)); }catch(e){}
+        kalshiSetPresent(document.documentElement.getAttribute('data-present') === 'on');
+      });
+    });
+    privacyBtns.master.addEventListener('click', function(){ kalshiSetPresent(privacyBtns.master.getAttribute('aria-checked') !== 'true'); });
+  })();
+
   // ---------- Kalshi (admin only) ----------
   // Fee and limit math mirrors kalshi-scalper's fees.py and risk.py. The 0.07
   // taker rate matched one real fill (50 contracts at 39c) but is still an
@@ -1754,10 +1821,19 @@
     return [cols.join(',')].concat(rows).join('\n');
   }
 
-  // Presentation view on or off. Only sets (or removes) the page attribute the CSS reads; nothing is saved, so the next load is always the full page.
+  // Privacy view on or off (the owner, Oct 23, 2026: the switch lives in Settings, with sub options that turn on and off independently). The view itself is never saved: a reload is always the full page. WHAT it hides is a preference
+  // (kalshiPrivacyChoice: dollar amounts, the Tools menu, the positions and trades cards) and is kept in this browser only. This only sets page attributes and one flag; the header button and the Settings switch both call it.
+  var kalshiPrivacyChoice = { money: true, tools: true, lists: true };
   function kalshiSetPresent(on){
-    if(on){ document.documentElement.setAttribute('data-present', 'on'); } else { document.documentElement.removeAttribute('data-present'); }
-    kalshiMasked = !!on;
+    var el = document.documentElement;
+    ['data-present', 'data-p-tools', 'data-p-lists'].forEach(function(k){ el.removeAttribute(k); });
+    if(on){
+      el.setAttribute('data-present', 'on');
+      if(kalshiPrivacyChoice.tools){ el.setAttribute('data-p-tools', 'on'); }
+      if(kalshiPrivacyChoice.lists){ el.setAttribute('data-p-lists', 'on'); }
+    }
+    kalshiMasked = !!on && kalshiPrivacyChoice.money;
+    if(typeof kalshiPrivacyUi === 'function'){ kalshiPrivacyUi(!!on); }
     // Everything that already drew an amount draws it again, masked or not.
     if(typeof renderKalshiBot === 'function'){ renderKalshiBot(); }
     if(typeof renderKalshiCharts === 'function'){ renderKalshiCharts(); }
@@ -2837,7 +2913,7 @@
   }
   // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour; Bitcoin, XRP and natural gas are entered about 10 minutes before the close (minute 5 of the quarter), everything else about 6 minutes before (minute 9).
   function kalshiNextEntry(now){
-    var Q = 900000, base = Math.floor(now / Q) * Q, cands = [[base + 300000, '10 minute entries: Bitcoin, XRP, natural gas'], [base + 540000, '6 minute entries: gold, Ethereum, Dogecoin and the rest'], [base + Q + 300000, '10 minute entries: Bitcoin, XRP, natural gas']];
+    var Q = 900000, base = Math.floor(now / Q) * Q, cands = [[base + 300000, '10 minute look: XRP, Bitcoin, natural gas'], [base + 540000, '6 minute look: gold, Dogecoin, Ethereum, AUD/USD, USD/CAD'], [base + Q + 300000, '10 minute look: XRP, Bitcoin, natural gas']];
     for(var i = 0; i < cands.length; i++){ if(cands[i][0] > now){ return { at: cands[i][0], inMs: cands[i][0] - now, label: cands[i][1] }; } }
     return null;
   }
@@ -2942,6 +3018,8 @@
     var hb = kalshiHeartbeat(s, now);
     var line = hb.state === 'off' ? 'Not running' : (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while')));
     var note = running && s.lastNote ? kalshiSkipNote(s.lastNote, s.lastTickAt, now) : '';
+    // The routine "Watching." line says nothing the two lines above do not; only a skipped minute or a problem is worth showing.
+    if(/^\s*(watching|nothing to do)/i.test(note)){ note = ''; }
     var beatsBefore = kalshiBeats.length;
     kalshiBeatNote(kalshiBeats, s && s.active === true ? s.lastTickAt : NaN);
     var newBeat = kalshiBeats.length !== beatsBefore && beatsBefore > 0;
@@ -2957,8 +3035,7 @@
       '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + escapeHtml(kalshiMoney(m.used)) + ' of ' + escapeHtml(kalshiMoney(m.limit)) + ' used (' + Math.round(m.fraction * 100) + '%)</span></div>' +
       '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
       '<div class="kal-rows"><div><span class="kal-k">At risk in open orders now</span><b>' + escapeHtml(kalshiMoney(m.openCost)) + '</b></div>' +
-      (m.windowCap !== null ? '<div><span class="kal-k">Fullest open window</span><b>' + escapeHtml(kalshiMoney(m.windowUsed)) + ' of ' + escapeHtml(kalshiMoney(m.windowCap)) + '</b></div>' : '') + '</div>' +
-      '<div class="kal-note">The last 24 hours, open orders counted as lost, the way the bot counts it. At the limit the bot stops itself.</div>';
+      (m.windowCap !== null ? '<div><span class="kal-k">Fullest open window</span><b>' + escapeHtml(kalshiMoney(m.windowUsed)) + ' of ' + escapeHtml(kalshiMoney(m.windowCap)) + '</b></div>' : '') + '</div>';
     kalshiStatusTick();
   }
   // Once a second, only the two lines that move: how long since the last check and the countdown to the next look.
@@ -3115,12 +3192,9 @@
     }
     // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens.
     // Presentation view: a page attribute only, deliberately not stored anywhere (a reload is the full page again).
-    var presentBox = document.getElementById('kalPresent');
     var presentBtn = document.getElementById('kalPresentBtn');
-    var syncPresent = function(on){ if(presentBox){ presentBox.checked = on; } if(presentBtn){ presentBtn.textContent = on ? 'Privacy on' : 'Privacy'; presentBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); } };
-    if(presentBox){ presentBox.addEventListener('change', function(){ kalshiSetPresent(presentBox.checked); syncPresent(presentBox.checked); }); }
     // The same switch as a button in the page header (the Layout menu was too easy to miss): it only toggles the page attribute, and it is never hidden by it, so the page can always be brought back.
-    if(presentBtn){ presentBtn.addEventListener('click', function(){ var on = document.documentElement.getAttribute('data-present') !== 'on'; kalshiSetPresent(on); syncPresent(on); }); }
+    if(presentBtn){ presentBtn.addEventListener('click', function(){ kalshiSetPresent(document.documentElement.getAttribute('data-present') !== 'on'); }); }
     var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
     function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
     function commitOrder(){ layout.order = currentOrder(); save(); }
