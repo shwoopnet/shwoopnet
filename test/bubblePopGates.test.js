@@ -29,7 +29,7 @@ gates.P1 = () => {
   const users = css.split('\n').filter((l) => /Titan One/.test(l) && !/^\s*(\/\*|\*)/.test(l) && !/@font-face/.test(l));   // a @font-face rule loads the font, it does not use it
   // The signed-out front page's slogan (.front-h1) is the one deliberate exception, added at the owner's request (Oct 23, 2026: "that's a sick login page"); it is the brand's slogan lettering, not a heading or a number.
   assert.ok(users.length <= 3 && users.every((l) => /\.brand-name|font-size:min\(18vw|\.front-h1/.test(l) || /bg-ghost/.test(css)), 'only the wordmark, its ghost and the front page slogan use Titan One: ' + users.map((l) => l.trim().slice(0, 50)).join(' | '));
-  for (const sel of ['.kal-tile b', '.kal-bub', '.index-card .ix-val', '.kal-acct-total']) {
+  for (const sel of ['.kal-tile b', '.kal-bub', '.kal-acct-total']) {
     const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
     assert.ok(m && !/Titan One/.test(m[2]) && /Public Sans/.test(m[2]), sel + ' (a number) is in the plain font');
     if (sel !== '.kal-acct-total') assert.ok(/tabular-nums/.test(m[2]), sel + ' uses tabular digits');

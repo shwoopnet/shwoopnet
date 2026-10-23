@@ -94,24 +94,18 @@ gates.B6 = () => {
   assert.strictEqual(stored['shwoopnet:landingPref'], 'kalshi');
 };
 
-// The brief describes the indices and only the indices. It never states a number it was not given, and it never claims anything about a screener or a position.
+// The Brief draws only what the market tape gave it. A symbol that has not arrived is a dash, never a number it was not given, and a quote with a day series draws a line.
 gates.B7 = () => {
-  const src = [varSource('INDEX_PROXIES'), ...['indexReads', 'pct', 'findQuote', 'renderBriefHeadline'].map(fnSource)].join('\n');
-  function run(quotes) {
-    const els = { '.brief-headline': { textContent: '' }, '.brief-lede': { textContent: '' } };
-    const doc = { querySelector: (s) => els[s] };
-    const watchlist = Object.keys(quotes).map((sym) => ({ sym, price: quotes[sym][0], prevClose: quotes[sym][1] }));
-    const f = new Function('document', 'watchlist', 'isUsMarketOpen', 'getUsMarketSession', src + '\nreturn renderBriefHeadline;')(doc, watchlist, () => true, () => ({ session: 'regular', label: 'Regular session' }));
-    f();
-    return { head: els['.brief-headline'].textContent, lede: els['.brief-lede'].textContent };
-  }
-  const loading = run({ SPY: [null, null], QQQ: [null, null], DIA: [null, null] });
-  assert.ok(/Loading today's market data/.test(loading.head) && loading.lede === '', 'before the first snapshot it says it is loading and states nothing');
-  const up = run({ SPY: [512.4, 510.1], QQQ: [441.8, 438.9], DIA: [390.2, 391.0] });
-  assert.ok(/The S&P is up 0\.45%, the Nasdaq up 0\.66%\./.test(up.lede), up.lede);
-  assert.ok(!/screener|setup|Trade Overview|option|position|open/i.test(up.lede), 'the lede says nothing about trading: ' + up.lede);
-  const partial = run({ SPY: [512.4, 510.1], QQQ: [441.8, 438.9] });
-  assert.ok(/Loading/.test(partial.head), 'with one index missing it still says it is loading');
+  const src = ['pct', 'briefChartHtml'].map(fnSource).join('\n');
+  const f = new Function('escapeHtml', src + '\nreturn briefChartHtml;')((x) => String(x));
+  const missing = f({ sym: 'BTC-USD', name: 'Bitcoin' }, undefined);
+  assert.ok(/&mdash;/.test(missing) && !/<svg|%/.test(missing), 'no quote: a dash and no line, no percentage');
+  const half = f({ sym: 'BTC-USD', name: 'Bitcoin' }, { price: 68000, prevClose: 0 });
+  assert.ok(/&mdash;/.test(half) && !/%/.test(half), 'a half quote states nothing');
+  const full = f({ sym: 'SPY', name: 'S&P 500 (SPY)' }, { price: 510, prevClose: 500, series: [500, 505, 510] });
+  assert.ok(/2\.00%/.test(full) && /<polyline/.test(full) && /class="brief-chart-chg up"/.test(full), 'a quote shows its change and draws its line');
+  const flat = f({ sym: 'SPY', name: 'SPY' }, { price: 510, prevClose: 500, series: [] });
+  assert.ok(/2\.00%/.test(flat) && !/<polyline/.test(flat), 'no series, no line, the price and change still show');
 };
 
 // A snapshot adds symbols and prices and nothing else; the watchlist never invents a price.
@@ -119,8 +113,8 @@ gates.B8 = () => {
   const src = ['ensureInWatchlist', 'tapeNews', 'handleSharedMarketSnapshotUpdate'].map(fnSource).join('\n');
   const calls = [];
   const watchlist = [{ sym: 'PLTR', price: null, prevClose: null }];
-  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderIndices', 'renderSentiment', 'renderBriefHeadline', 'renderMarketNews', 'renderEarningsCalendar', 'marketTapeData',
-    src + '\nreturn { handle: handleSharedMarketSnapshotUpdate, ensure: ensureInWatchlist };')(watchlist, [], () => {}, () => {}, () => {}, () => {}, (n) => calls.push(['news', n]), () => {}, null);
+  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderMarketNews', 'marketTapeData',
+    src + '\nreturn { handle: handleSharedMarketSnapshotUpdate, ensure: ensureInWatchlist };')(watchlist, [], (n) => calls.push(['news', n]), null);
   f.handle(null);
   assert.deepStrictEqual(watchlist, [{ sym: 'PLTR', price: null, prevClose: null }], 'no snapshot yet leaves the page as it was');
   f.handle({ quotes: { PLTR: { price: 24.5, prevClose: 23.1 }, COIN: { price: 190, prevClose: 185 }, BAD: { price: null } }, news: [] });
