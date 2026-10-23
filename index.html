@@ -377,6 +377,19 @@
   .data-details > summary{ cursor:pointer; list-style:none; margin:0; } .data-details[open] > summary{ margin-bottom:6px; } .data-details .kal-perf{ padding:6px 0 0 0; }
   .data-row{ display:grid; grid-template-columns:1.3fr repeat(5,minmax(0,1fr)); gap:6px; padding:9px 18px; font-size:13px; border-top:1px solid var(--border); align-items:center; }
   .data-row.data-head{ color:var(--muted); font-size:11px; border-top:0; }
+  .data-qs{ display:flex; flex-direction:column; gap:12px; margin-top:20px; }
+  .data-qs > .kal-card{ margin-bottom:0; padding:0; }
+  .data-q > summary{ list-style:none; cursor:pointer; display:flex; flex-direction:column; gap:4px; padding:16px 22px; min-height:40px; }
+  .data-q > summary::-webkit-details-marker{ display:none; }
+  .data-q > summary b{ font:700 17px/1.3 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
+  .data-q > summary::after{ content:'Open the evidence'; color:var(--muted); font:600 12px 'Public Sans', sans-serif; }
+  .data-q[open] > summary::after{ content:'Close'; }
+  .data-q-body{ padding:0 0 8px 0; border-top:1px solid var(--border); }
+  .data-ag{ display:flex; gap:14px; align-items:flex-start; padding:12px 0; border-top:1px solid var(--border); font-size:14px; }
+  .data-ag:first-child{ border-top:0; }
+  .data-rank{ flex:none; width:26px; height:26px; border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font:700 12px 'Public Sans', sans-serif; }
+  .data-rank-later{ border-style:dashed; color:var(--muted); }
+  .data-row.data-row3{ grid-template-columns:1.3fr repeat(2,minmax(0,1fr)); }
   .data-row.data-row7{ grid-template-columns:1.3fr repeat(6,minmax(0,1fr)); }
   .data-kv-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 18px; font-size:13px; border-top:1px solid var(--border); align-items:baseline; }
   .data-kv-row b{ font-weight:600; font-variant-numeric:tabular-nums; text-align:right; }
@@ -1298,18 +1311,35 @@
 
   <main class="page" id="page-data" hidden>
     <div class="trades-header kal-header-bare">
-      <div><div class="trades-title">Data</div><div class="kal-note" style="margin:2px 0 0">The bot's settled trades, in charts. Read only: nothing here sends an order or changes a setting.</div></div>
+      <div><div class="trades-title">Data</div><div class="kal-note" style="margin:2px 0 0">What needs a look first, then the questions behind it. Read only: nothing here sends an order or changes a setting.</div></div>
     </div>
+    <div class="kal-card" data-card="data-agenda"><div class="kal-card-title">Needs your eye</div><div id="dataAgenda"></div></div>
+    <details class="kal-card data-details" data-card="data-order"><summary class="kal-card-title">How this list is ordered</summary>
+      <div class="kal-note">1. A rule on trial at or past its line. 2. A rule or the loss stop one step from its line (for a count, one loss away). 3. A market whose latest trades turned negative per contract, or fell to under half of the trades before them (at least 60 trades). 4. The machine: a shard holding under $2, or no check for 5 minutes. 5. The next scheduled read. Nothing in the first four: the list says so. Written in advance, so a bad week cannot move itself down it.</div>
+    </details>
     <div class="data-tiles kal-tiles" id="dataTiles"></div>
-    <div class="data-grid">
-      <div class="kal-card" data-card="data-weekly"><div class="kal-card-title">Result by week</div><div id="dataWeekly"></div></div>
-      <div class="kal-card" data-card="data-growth"><div class="kal-card-title">Growth trend</div><div id="dataLine"></div></div>
-      <div class="kal-card" data-card="data-ended"><div class="kal-card-title">How the orders ended</div><div class="kal-chart"><div id="kalChartPie"></div></div></div>
-      <div class="kal-card kal-card-flush" data-card="data-stats"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">The strategy in numbers</div></div><div id="dataStats"></div></div>
-      <div class="kal-card kal-card-flush" data-card="data-markets"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">By market</div></div><div id="dataMarkets"></div></div>
-      <div class="kal-card kal-card-flush data-tests" data-card="data-tests"><div class="kal-card-head"><div class="kal-card-title" style="margin:0">Tests in progress</div></div><div id="dataLiveTests"></div><div class="data-sub">Entry timing</div><div id="dataLead"></div></div>
-      <div class="kal-card" data-card="data-bars"><div class="kal-card-title">Each settled trade</div><div class="kal-chart"><div id="kalChartBars"></div></div></div>
+    <div class="data-qs">
+      <details class="kal-card data-q" data-card="data-edge"><summary><span class="kal-lbl">Is the edge still there?</span><b id="dataQa1"></b></summary>
+        <div class="data-q-body"><div id="dataStats"></div><div class="data-sub">By market</div><div id="dataMarkets"></div></div></details>
+      <details class="kal-card data-q" data-card="data-stop"><summary><span class="kal-lbl">Am I close to a stop?</span><b id="dataQa2"></b></summary>
+        <div class="data-q-body"><div id="dataStop"></div></div></details>
+      <details class="kal-card data-q" data-card="data-tests"><summary><span class="kal-lbl">What is on trial?</span><b id="dataQa3"></b></summary>
+        <div class="data-q-body"><div id="dataTrial"></div><div id="dataLiveTests"></div><div class="data-sub">Entry timing</div><div id="dataLead"></div></div></details>
+      <details class="kal-card data-q" data-card="data-break"><summary><span class="kal-lbl">Did anything break?</span><b id="dataQa4"></b></summary>
+        <div class="data-q-body"><div id="dataBreak"></div></div></details>
+      <details class="kal-card data-q" data-card="data-fees"><summary><span class="kal-lbl">Where is the money going?</span><b id="dataQa5"></b></summary>
+        <div class="data-q-body"><div id="dataFees"></div></div></details>
+      <details class="kal-card data-q" data-card="data-changes"><summary><span class="kal-lbl">What changed lately?</span><b id="dataQa6"></b></summary>
+        <div class="data-q-body"><div id="dataChanges"></div></div></details>
     </div>
+    <details class="kal-card data-details" id="dataCharts" style="margin-top:20px"><summary class="kal-card-title">Charts and history</summary>
+      <div class="data-grid">
+        <div class="kal-card" data-card="data-weekly"><div class="kal-card-title">Result by week</div><div id="dataWeekly"></div></div>
+        <div class="kal-card" data-card="data-growth"><div class="kal-card-title">Growth trend</div><div id="dataLine"></div></div>
+        <div class="kal-card" data-card="data-ended"><div class="kal-card-title">How the orders ended</div><div class="kal-chart"><div id="kalChartPie"></div></div></div>
+        <div class="kal-card" data-card="data-bars"><div class="kal-card-title">Each settled trade</div><div class="kal-chart"><div id="kalChartBars"></div></div></div>
+      </div>
+    </details>
     <details class="kal-card data-details" id="dataDetails" style="margin-top:20px"><summary class="kal-card-title">By price paid</summary>
       <div class="kal-perf" id="kalPerfWrapC"><div id="kalPerf"></div></div>
     </details>
@@ -3092,6 +3122,124 @@
       row('Orders carrying rng5', r.rngOrders ? r.rngLogged + ' of ' + r.rngOrders : 'none yet') +
       '<div class="kal-note" style="padding:10px 18px 14px">Checks that the new rules hold; they change nothing. Counted from 2026-10-22 (about 03:00 UTC for one crypto order per window, 17:00 UTC for rng5).</div>';
   }
+  // The Data page's questions and agenda (Oct 23, 2026, the owner chose "Questions + agenda": the page puts what needs a look first, by rules written down in advance, and folds the rest). Everything below is pure: orders and the
+  // account read in, plain text out, no call to anything. The rules for the list are the ones the page prints under "How this list is ordered"; a bad week cannot move itself down it.
+  // The dates are approximate, taken from when the owner reported each deploy; a number before a change is not compared with a number after it.
+  var DATA_SMOOTH_FROM = Date.UTC(2026, 9, 23, 18, 15, 0);
+  var DATA_RULES = [
+    { at: Date.UTC(2026, 9, 23, 18, 15, 0), text: 'Bitcoin and Ethereum buy only on a smooth climb', check: Date.UTC(2026, 10, 12, 12, 0, 0), checkText: 'Smooth-climb forward read' },
+    { at: Date.UTC(2026, 9, 23, 17, 0, 0), text: 'Series order: gold, XRP, Bitcoin, Dogecoin, Ethereum', check: null, checkText: '' },
+    { at: Date.UTC(2026, 9, 22, 3, 0, 0), text: 'One crypto order per 15 minute window', check: Date.UTC(2026, 10, 17, 12, 0, 0), checkText: 'Export review (size, 10 minute look)' },
+    { at: Date.UTC(2026, 9, 21, 12, 0, 0), text: 'Gold first, probe markets added', check: Date.UTC(2026, 10, 30, 12, 0, 0), checkText: 'Probe drop rule check' }
+  ];
+  // The smooth-climb rule on trial: the first 40 smooth fills may lose at most 2 (a third ends Bitcoin and Ethereum), and after 100 settled fills their combined result must not be under zero.
+  function dataTrial(orders){
+    var fills = (orders || []).filter(function(o){
+      return o && o.smooth === true && Number(o.fillCount) > 0 && Number(o.ts) >= DATA_SMOOTH_FROM && (kalshiMarketName(o) === 'Bitcoin' || kalshiMarketName(o) === 'Ethereum');
+    }).sort(function(a, b){ return a.ts - b.ts; });
+    var settled = fills.filter(function(o){ return kalshiOrderPnl(o) !== null; });
+    var lost40 = settled.slice(0, 40).filter(function(o){ return kalshiOrderPnl(o) < 0; }).length;
+    var net = settled.reduce(function(n, o){ return n + kalshiOrderPnl(o); }, 0);
+    return { fills: fills.length, settled: settled.length, lost40: lost40, net: net, past: lost40 >= 3 || (settled.length >= 100 && net < 0), near: lost40 === 2 };
+  }
+  // A market with enough trades is compared with itself: its latest window against the window before (up to 100 trades each, at least 30). Fewer than 60 trades says nothing.
+  function dataMarketTrend(orders){
+    var by = {};
+    (orders || []).forEach(function(o){
+      var p = kalshiOrderPnl(o);
+      if(p === null){ return; }
+      var nm = kalshiMarketName(o);
+      (by[nm] || (by[nm] = [])).push({ t: o.ts, p: p, c: Number(o.fillCount) || 0 });
+    });
+    var per = function(a){ var n = 0, c = 0; a.forEach(function(x){ n += x.p; c += x.c; }); return c > 0 ? n / c * 100 : null; };
+    return Object.keys(by).map(function(k){
+      var a = by[k].sort(function(x, y){ return x.t - y.t; }), n = a.length, w = Math.min(100, Math.floor(n / 2));
+      if(n < 60 || w < 30){ return { name: k, n: n, enough: false }; }
+      var r = per(a.slice(n - w)), q = per(a.slice(n - 2 * w, n - w));
+      return { name: k, n: n, w: w, enough: true, recent: r, prior: q, flag: r !== null && (r < 0 || (q !== null && q > 0 && r < q / 2)) };
+    });
+  }
+  function dataFeeRows(orders){
+    var by = {};
+    (orders || []).forEach(function(o){
+      var p = kalshiOrderPnl(o);
+      if(p === null){ return; }
+      var nm = kalshiMarketName(o), m = by[nm] || (by[nm] = { name: nm, fees: 0, net: 0 }), fee = Number(o.averageFeePaid) * (Number(o.fillCount) || 0);
+      if(Number.isFinite(fee) && fee > 0){ m.fees += fee; }
+      m.net += p;
+    });
+    return Object.keys(by).map(function(k){ var m = by[k]; m.share = m.net + m.fees > 0 ? m.fees / (m.net + m.fees) : null; return m; }).sort(function(a, b){ return b.fees - a.fees; });
+  }
+  function dataBreakEven(st){
+    return st && st.avgWin !== null && st.avgLoss !== null ? (-st.avgLoss / (st.avgWin - st.avgLoss) * 100).toFixed(1) + '%' : null;
+  }
+  var DATA_SHARD_NAMES = { 0: 'gold, AUD/USD, USD/CAD', 2: 'crypto and natural gas' };
+  // The list, in the order written on the page: 1 a rule past its line, 2 a rule or the stop one step from its line, 3 a market that turned negative or halved, 4 the machine (an unfunded shard, no check for 5 minutes), 5 the next scheduled read.
+  function dataAgenda(c){
+    var items = [], money = c.money, pct = function(x){ return Math.round(x * 100) + '%'; }, fmt = function(v){ return (v >= 0 ? '+' : '-') + Math.abs(v).toFixed(1) + 'c'; };
+    var t = c.trial;
+    if(t && t.past){ items.push({ rank: 1, text: 'Smooth climb has crossed its line.', detail: t.lost40 + ' losses in the first ' + Math.min(40, t.settled) + ' smooth fills, ' + t.settled + ' settled, combined ' + (t.net >= 0 ? '+' : '-') + money(Math.abs(t.net)) + '. Its kill rule is written in the README.' }); }
+    else if(t && t.near){ items.push({ rank: 2, text: 'Smooth climb is one loss from its line.', detail: '2 losses in the first ' + Math.min(40, t.settled) + ' smooth fills. A third ends the rule for Bitcoin and Ethereum.' }); }
+    if(c.risk && c.risk.fraction >= 0.75){ items.push({ rank: 2, text: 'The loss stop is ' + pct(c.risk.fraction) + ' used.', detail: 'The bot stops itself at 100% of the last 24 hours.' }); }
+    (c.trend || []).forEach(function(m){
+      if(m.enough && m.flag){ items.push({ rank: 3, text: m.name + ' is ' + fmt(m.recent) + ' per contract over its last ' + m.w + ' trades.', detail: 'The ' + m.w + ' before were ' + (m.prior === null ? 'unknown' : fmt(m.prior)) + '.' }); }
+    });
+    (c.shards || []).forEach(function(x){
+      if(Number.isFinite(x.dollars) && x.dollars < 2){ items.push({ rank: 4, text: 'Shard ' + x.shard + ' holds only ' + money(x.dollars) + '.', detail: 'Markets on it (' + (DATA_SHARD_NAMES[x.shard] || 'other') + ') cannot place orders until it is funded.' }); }
+    });
+    if(c.hb === 'down'){ items.push({ rank: 4, text: 'The bot has not checked in for over 5 minutes.', detail: 'The exit watch runs separately and is not affected.' }); }
+    var next = DATA_RULES.filter(function(r){ return r.check && r.check > c.now; }).sort(function(a, b){ return a.check - b.check; })[0];
+    if(next){ items.push({ rank: 5, text: next.checkText + ' on ' + kalDate(next.check) + '.', detail: 'In ' + Math.max(1, Math.round((next.check - c.now) / 86400000)) + ' days. Nothing to do before then.' }); }
+    return items.map(function(x, i){ x.i = i; return x; }).sort(function(a, b){ return a.rank - b.rank || a.i - b.i; });
+  }
+  function dataAgendaHtml(items, esc){
+    var needs = items.filter(function(x){ return x.rank < 5; }), later = items.filter(function(x){ return x.rank === 5; });
+    var row = function(x, n){ return '<div class="data-ag"><span class="data-rank' + (x.rank === 5 ? ' data-rank-later' : '') + '">' + n + '</span><div><b>' + esc(x.text) + '</b><div class="kal-note" style="margin:2px 0 0">' + esc(x.detail) + '</div></div></div>'; };
+    return (needs.length ? needs.map(function(x, i){ return row(x, i + 1); }).join('') : '<div class="kal-empty" style="padding:6px 0 10px">Nothing needs you.</div>') + later.map(function(x){ return row(x, '&middot;'); }).join('');
+  }
+  // Six questions, each with a one line answer built from facts. The answers say what the numbers are; they never say good or bad.
+  function dataAnswers(c){
+    var money = c.money, rows = (c.orders || []).filter(function(o){ return kalshiOrderPnl(o) !== null; }).sort(function(a, b){ return a.ts - b.ts; }).slice(-100);
+    var gw = 0, gl = 0;
+    rows.forEach(function(o){ var p = kalshiOrderPnl(o); if(p > 0){ gw += p; } else if(p < 0){ gl += -p; } });
+    var be = dataBreakEven(c.st), a = [];
+    a.push(rows.length ? 'Profit factor ' + (gl > 0 ? (gw / gl).toFixed(2) : 'no losses') + ' over the last ' + rows.length + ' trades.' + (c.st && c.st.winRate !== null ? ' Win rate ' + (c.st.winRate * 100).toFixed(1) + '%' + (be ? ', needs ' + be : '') + '.' : '') : 'No settled trades yet.');
+    a.push(c.risk ? Math.round(c.risk.fraction * 100) + '% of the loss stop is used.' : 'The loss stop is not known yet.');
+    a.push('Smooth climb: ' + c.trial.fills + ' fills, ' + c.trial.lost40 + ' lost. Two crypto orders in one window: ' + (c.live.windows ? c.live.twoFill + ' of ' + c.live.windows : 'none yet') + '.');
+    var s = c.session, hb = c.hbState;
+    a.push(!s || s.active !== true ? 'The bot is not running.' : (hb && hb.ageSec !== null ? 'Last check ' + kalshiAgeText(hb.ageSec) + '.' : 'No check seen yet.'));
+    var f = (c.fees || []), ft = f.reduce(function(n, m){ return n + m.fees; }, 0), nt = f.reduce(function(n, m){ return n + m.net; }, 0);
+    a.push(f.length ? 'Fees paid ' + money(ft) + (nt + ft > 0 ? ', ' + Math.round(ft / (nt + ft) * 100) + '% of the result before fees.' : '.') : 'No settled trades yet.');
+    var recent = DATA_RULES.filter(function(r){ return c.now - r.at <= 7 * 86400000; }).length;
+    a.push(recent + (recent === 1 ? ' rule change' : ' rule changes') + ' in the last 7 days.');
+    return a;
+  }
+  function dataTrialHtml(t, esc){
+    var row = function(l, v){ return '<div class="data-kv-row"><span>' + esc(l) + '</span><b>' + esc(v) + '</b></div>'; };
+    return row('Smooth climb, Bitcoin and Ethereum', t.fills ? t.fills + ' fills, ' + t.settled + ' settled' : 'no fills yet') +
+      row('Losses in the first 40 (the line is 3)', t.settled ? String(t.lost40) : 'none yet') + '<div class="kal-note" style="padding:6px 18px 14px">Ends Bitcoin and Ethereum at 3 losses in the first 40, or a combined result under zero after 100 fills, or a falsified read on Nov 12.</div>';
+  }
+  function dataStopHtml(risk, st, esc, money){
+    var row = function(l, v){ return '<div class="data-kv-row"><span>' + esc(l) + '</span><b>' + esc(v) + '</b></div>'; };
+    return (risk ? row('Loss stop used (last 24 hours)', Math.round(risk.fraction * 100) + '%') : '') + row('Deepest drawdown', st && st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none yet') + row('Longest losing run', st ? String(st.longestLoss) : 'none yet') +
+      '<div class="kal-note" style="padding:6px 18px 14px">The stop is 12% of the balance at the last size review. The Bot page shows the live version.</div>';
+  }
+  function dataBreakHtml(s, hb, esc){
+    var row = function(l, v){ return '<div class="data-kv-row"><span>' + esc(l) + '</span><b>' + esc(v) + '</b></div>'; };
+    var note = s && s.lastNote ? String(s.lastNote).slice(0, 160) : '';
+    return row('State', !s || s.active !== true ? 'Not running' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while'))) + row('Last check', hb && hb.ageSec !== null ? kalshiAgeText(hb.ageSec) : 'none yet') + (note ? '<div class="kal-note" style="padding:6px 18px 14px">' + esc(note) + '</div>' : '');
+  }
+  function dataFeesHtml(rows, esc, money){
+    if(!rows.length){ return '<div class="kal-empty" style="padding:0 22px 18px">No settled trades yet.</div>'; }
+    return '<div class="data-row data-row3 data-head"><span>Market</span><span>Fees</span><span>Of result before fees</span></div>' + rows.map(function(m){
+      return '<div class="data-row data-row3"><span>' + esc(m.name) + '</span><span>' + esc(money(m.fees)) + '</span><span>' + (m.share === null ? 'none' : Math.round(m.share * 100) + '%') + '</span></div>';
+    }).join('');
+  }
+  function dataChangesHtml(now, esc){
+    return DATA_RULES.map(function(r){
+      return '<div class="data-kv-row"><span>' + esc(kalDate(r.at)) + ' &middot; ' + esc(r.text) + '</span><b>' + (r.check ? esc('read ' + kalDate(r.check)) : '') + '</b></div>';
+    }).join('') + '<div class="kal-note" style="padding:6px 18px 14px">Dates are approximate. A number from before a change is not compared with one after it.</div>';
+  }
   // Text inside a chart is drawn in the chart's own units, so it grew with the chart (a caption meant to be 11px read as 17px on a wide card). Each chart text names the size it should be on screen (data-px), and this sets its
   // size in chart units from the chart's real width, so a caption, a value and a label read the same size whatever the card width. Skipped while a chart is hidden (width 0).
   function kalshiFitSvgText(root){
@@ -3102,6 +3250,7 @@
     });
   }
   window.addEventListener('resize', function(){ kalshiFitSvgText(document); });
+  (function(){ var d = document.getElementById('dataCharts'); if(d){ d.addEventListener('toggle', function(){ kalshiFitSvgText(d); }); } })();
   function renderDataCenter(){
     var pg = document.getElementById('page-data');
     if(!pg || pg.hidden){ return; }
@@ -3116,6 +3265,17 @@
     set('dataLiveTests', dataLiveHtml(dataLiveTests(kalshiLiveOrders), escapeHtml));
     set('dataMarkets', dataMarketsHtml(rows, escapeHtml, kalshiMoney));
     set('dataLead', dataLeadHtml(dataLeadRows(orders), escapeHtml, kalshiMoney));
+    var ses = kalshiLiveCtl && kalshiLiveCtl.session, nowMs = Date.now(), hbS = kalshiHeartbeat(ses, nowMs), liveT = dataLiveTests(kalshiLiveOrders), trial = dataTrial(orders), trend = dataMarketTrend(orders), feeRows = dataFeeRows(orders);
+    var risk = kalshiRiskMeter(orders, ses, nowMs);
+    var shards = kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok && Array.isArray(kalshiLiveAcct.balance.shards) ? kalshiLiveAcct.balance.shards.filter(function(x){ return x.shard === 0 || x.shard === 2; }) : [];
+    set('dataAgenda', dataAgendaHtml(dataAgenda({ trial: trial, risk: risk, trend: trend, shards: shards, hb: hbS.state, now: nowMs, money: kalshiMoney }), escapeHtml));
+    var ans = dataAnswers({ orders: orders, st: st, risk: risk, trial: trial, live: liveT, session: ses, hbState: hbS, fees: feeRows, now: nowMs, money: kalshiMoney });
+    ans.forEach(function(t, i){ set('dataQa' + (i + 1), escapeHtml(t)); });
+    set('dataTrial', dataTrialHtml(trial, escapeHtml));
+    set('dataStop', dataStopHtml(risk, st, escapeHtml, kalshiMoney));
+    set('dataBreak', dataBreakHtml(ses, hbS, escapeHtml));
+    set('dataFees', dataFeesHtml(feeRows, escapeHtml, kalshiMoney));
+    set('dataChanges', dataChangesHtml(nowMs, escapeHtml));
     set('dataNote', 'As of ' + kalTime(Date.now()) + ' CT. Only the orders the bot sent are counted; a trade closed by hand is left out. Per contract is the settled result divided by the contracts that filled.');
     kalshiFitSvgText(pg);
   }

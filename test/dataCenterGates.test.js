@@ -25,7 +25,7 @@ gates.D1 = () => {
   const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
   assert.ok(page.length > 200);
   assert.ok(!/<(button|input|select|textarea|form|a )\b/i.test(page), 'the Data page has no control in it');
-  const code = ['dataWeekKey', 'dataWeeklyRows', 'dataWeekBarsSvg', 'dataMarketRows', 'dataTilesHtml', 'dataMarketsHtml', 'dataLeadRows', 'dataLeadHtml', 'dataStatsHtml', 'dataLiveTests', 'dataLiveHtml', 'renderDataCenter'].map(fnSource).join('\n');
+  const code = ['dataWeekKey', 'dataWeeklyRows', 'dataWeekBarsSvg', 'dataMarketRows', 'dataTilesHtml', 'dataMarketsHtml', 'dataLeadRows', 'dataLeadHtml', 'dataStatsHtml', 'dataLiveTests', 'dataLiveHtml', 'dataTrial', 'dataMarketTrend', 'dataFeeRows', 'dataBreakEven', 'dataAgenda', 'dataAgendaHtml', 'dataAnswers', 'dataTrialHtml', 'dataStopHtml', 'dataBreakHtml', 'dataFeesHtml', 'dataChangesHtml', 'renderDataCenter'].map(fnSource).join('\n');
   assert.ok(!/api\.|window\.__shwoopAPI|fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code), 'and its code calls nothing: it only draws what the Kalshi page already loaded');
 };
 
@@ -201,6 +201,59 @@ gates.D12 = () => {
   assert.strictEqual(f.kalshiTodayPct(1, null), '', 'unknown balance: nothing');
   assert.strictEqual(f.kalshiTodayPct(5, 5), '', 'a start of zero: nothing');
   assert.ok(/kalshiTodayPct\(botNet/.test(html), 'the Today line uses it');
+};
+
+
+// DQ: the questions and agenda (Oct 23, 2026, the owner chose "Questions + agenda"). Consequences: what needs a look is ranked by rules written in advance, a rule on trial that crosses its line goes first, a quiet account says "Nothing needs you",
+// and the page is six questions that fold open, with no control in them.
+const dqNames = ['kalshiOrderPnl', 'kalshiMarketName', 'kalDate', 'dataTrial', 'dataMarketTrend', 'dataFeeRows', 'dataBreakEven', 'dataAgenda', 'dataAgendaHtml', 'dataAnswers'];
+const dqExtra = html.slice(html.indexOf('  var DATA_SMOOTH_FROM'), html.indexOf('  // The smooth-climb rule on trial')) + html.slice(html.indexOf('  var DATA_SHARD_NAMES'), html.indexOf('  // The list, in the order written on the page'));
+const dqLift = () => lift(dqNames, dqExtra + "\nfunction kalshiAgeText(s){ return s + ' seconds ago'; }");
+const dqOrder = (series, ts, pnl, extra) => Object.assign({ ts, series, settled: true, fillCount: '1.00', settledPnl: pnl, smooth: undefined }, extra || {});
+
+gates.DQ1 = () => {
+  const f = dqLift();
+  const after = Date.UTC(2026, 9, 24, 12), before = Date.UTC(2026, 9, 20, 12);
+  const sm = (n, lost) => Array.from({ length: n }, (_, i) => dqOrder('KXBTC15M', after + i * 1000, i < lost ? -0.9 : 0.06, { smooth: true }));
+  assert.strictEqual(f.dataTrial([...sm(10, 2), dqOrder('KXBTC15M', before, -0.9, { smooth: true }), dqOrder('KXGOLD15M', after, -3, { smooth: true })]).fills, 10, 'only Bitcoin and Ethereum smooth fills after the deploy are on trial');
+  assert.strictEqual(f.dataTrial(sm(10, 2)).near, true, 'two losses is one step from the line');
+  assert.strictEqual(f.dataTrial(sm(10, 3)).past, true, 'three losses in the first 40 crosses it');
+  assert.strictEqual(f.dataTrial(sm(100, 0).map((o) => Object.assign(o, { settledPnl: -0.01 }))).past, true, 'a combined result under zero after 100 fills crosses it');
+  const money = (v) => '$' + v.toFixed(2);
+  const now = Date.UTC(2026, 9, 25);
+  const quiet = f.dataAgenda({ trial: f.dataTrial([]), risk: { fraction: 0.1 }, trend: [], shards: [{ shard: 0, dollars: 100 }, { shard: 2, dollars: 300 }], hb: 'ok', now, money });
+  assert.deepStrictEqual(quiet.map((x) => x.rank), [5], 'a quiet account has only the next scheduled read');
+  const out = f.dataAgendaHtml(quiet, esc);
+  assert.ok(/Nothing needs you/.test(out) && /Smooth-climb forward read/.test(out), 'and says so, with the date of the next read');
+  const busy = f.dataAgenda({ trial: f.dataTrial(sm(10, 3)), risk: { fraction: 0.8 }, trend: [{ name: 'Bitcoin', enough: true, flag: true, recent: -0.4, prior: -0.5, w: 33, n: 66 }], shards: [{ shard: 0, dollars: 0.5 }], hb: 'down', now, money });
+  assert.deepStrictEqual(busy.map((x) => x.rank), [1, 2, 3, 4, 4, 5], 'a rule past its line first, then the stop, the market, the machine, the next read: ' + JSON.stringify(busy.map((x) => x.text)));
+  assert.ok(/Shard 0 holds only \$0\.50/.test(busy[3].text) && /Bitcoin is -0\.4c/.test(busy[2].text), 'the figures are in the lines');
+};
+
+gates.DQ2 = () => {
+  const f = dqLift();
+  const o = (i, p) => dqOrder('KXXRP15M', i * 1000, p, { ts: i * 1000 });
+  const mk = (n, recent) => Array.from({ length: n }, (_, i) => o(i, i >= n / 2 ? recent : 0.05));
+  const t59 = f.dataMarketTrend(mk(59, -0.1)), t60 = f.dataMarketTrend(mk(60, -0.1))[0];
+  assert.strictEqual(t59[0].enough, false, 'fewer than 60 trades says nothing');
+  assert.ok(t60.enough && t60.w === 30 && t60.flag === true && t60.recent < 0 && t60.prior > 0, 'a market whose latest 30 are negative against 30 positive is flagged');
+  assert.strictEqual(f.dataMarketTrend(mk(60, 0.05))[0].flag, false, 'an unchanged market is not');
+  assert.strictEqual(f.dataMarketTrend(mk(60, 0.02))[0].flag, true, 'a result that fell to under half of the one before is flagged');
+  const fees = f.dataFeeRows([dqOrder('KXGOLD15M', 1, 0.3, { averageFeePaid: 0.02, fillCount: '5.00' }), dqOrder('KXGOLD15M', 2, -0.1, { averageFeePaid: 0.02, fillCount: '5.00' })]);
+  assert.ok(Math.abs(fees[0].fees - 0.2) < 1e-9 && Math.abs(fees[0].share - 0.5) < 1e-9, 'fees are the fee per contract times contracts, as a share of the result before fees: 0.20 / (0.20 + 0.20)');
+};
+
+gates.DQ3 = () => {
+  const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
+  assert.strictEqual((page.match(/<details class="kal-card data-q"/g) || []).length, 6, 'six questions, each one a fold that opens');
+  ['Is the edge still there?', 'Am I close to a stop?', 'What is on trial?', 'Did anything break?', 'Where is the money going?', 'What changed lately?'].forEach((q) => assert.ok(page.includes(q), q));
+  for (let i = 1; i <= 6; i++) assert.ok(page.includes('id="dataQa' + i + '"'), 'answer ' + i);
+  assert.ok(/id="dataAgenda"/.test(page) && page.indexOf('data-card="data-agenda"') < page.indexOf('data-card="data-edge"'), 'the agenda is above the questions');
+  assert.ok(/How this list is ordered/.test(page) && /Written in advance/.test(page), 'the ordering rules are printed on the page');
+  assert.ok(page.indexOf('id="dataStats"') > page.indexOf('data-card="data-edge"') && page.indexOf('id="dataLead"') > page.indexOf('data-card="data-tests"'), 'the existing cards live inside the questions, not beside them');
+  assert.ok(/<details class="kal-card data-details" id="dataCharts"/.test(page), 'the charts are folded under one heading');
+  const code = ['dataAnswers', 'dataAgenda'].map(fnSource).join('\n');
+  assert.ok(!/good|bad|great|terrible|should|must/i.test(code.replace(/\/\/.*$/gm, '').replace(/'The bot stops itself[^']*'/, '')), 'the answers state facts and never judge them');
 };
 
 let failed = 0;
