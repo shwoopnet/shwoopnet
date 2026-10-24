@@ -48,7 +48,12 @@ gates.PL1 = () => {
   const money = (v) => '$' + v.toFixed(2);
   const out = f.kalshiPnlCardHtml(orders, '3M', now, esc, money);
   assert.ok(out.includes('+$6.50') && /<svg/.test(out), 'the total and the line');
-  assert.ok(/back to /.test(f.kalshiPnlCardHtml([o(2, 2), o(0.1, 0.5)], '3M', now, esc, money)), 'a range longer than the loaded orders says how far back they go');
+  assert.ok(!/back to |settled trades, oldest/.test(out), 'no caption text on the card (removed Oct 24, 2026, the owner)');
+  const withPct = f.kalshiPnlCardHtml(orders, '3M', now, esc, money, 506.5);
+  assert.ok(/\+1\.3%/.test(withPct), 'the result as a share of the account at the start of the range: 6.50 / (506.50 - 6.50) = +1.3%: ' + withPct.replace(/<[^>]*>/g, ' '));
+  const masked = f.kalshiPnlCardHtml(orders, '3M', now, esc, (v) => '****', 506.5);
+  assert.ok(/\+1\.3%/.test(masked) && /\*\*\*\*/.test(masked) && !/\$/.test(masked), 'under Privacy view the dollars are masked and the percentage still shows');
+  assert.ok(!/%/.test(f.kalshiPnlCardHtml(orders, '3M', now, esc, money, null).replace(/<[^>]*>/g, ' ')), 'no balance known: no percentage, never a wrong one');
   assert.ok(/\*\*\*\*/.test(f.kalshiPnlCardHtml(orders, '1M', now, esc, (v) => '****')) && !/\$/.test(f.kalshiPnlCardHtml(orders, '1M', now, esc, (v) => '****')), 'Privacy view masks every dollar figure on it');
 };
 
