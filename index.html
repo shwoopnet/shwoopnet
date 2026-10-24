@@ -2562,12 +2562,16 @@
 
   // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
   // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
-  function kalshiLineSvg(points, esc, money){
+  function kalshiLineSvg(points, esc, money, total){
     if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
     var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     // The end label is right-aligned to the edge and the plot leaves room for its real length, so a bigger total (+$123.45, +$1,234.56) is not cut off by the viewBox.
     var endLabel = fmt(points[points.length - 1].cum);
-    var W = 460, H = 170, L = 8, R = Math.max(60, endLabel.length * 9 + 16), T = 14, B = 22;
+    // The result as a share of the account at the start of the range (the total now minus this range's result), so it is a percentage and Privacy view, which masks dollars only, leaves it showing.
+    // Nothing when the total is unknown or the start would not be above zero. Deposits and your own trades are in the total, so it is "of the account", not a return on the bot alone.
+    var net = points[points.length - 1].cum, startBal = Number(total) - net;
+    var pctLabel = Number.isFinite(startBal) && startBal > 0 ? (net >= 0 ? '+' : '-') + Math.abs(net / startBal * 100).toFixed(1) + '%' : '';
+    var W = 460, H = 170, L = 8, R = Math.max(60, Math.max(endLabel.length, pctLabel.length) * 9 + 16), T = 14, B = 10;
     var vals = points.map(function(p){ return p.cum; }).concat([0]);
     var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
@@ -2584,12 +2588,12 @@
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
       '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
       '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15" data-px="15">' + esc(fmt(last.cum)) + '</text>' +
-      '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="12" data-px="12">' + points.length + ' settled trades, oldest to newest</text></svg>';
+      (pctLabel ? '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 24).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15" data-px="15">' + esc(pctLabel) + '</text>' : '') + '</svg>';
   }
 
   // Account result line (Oct 24, 2026, the owner: "bring back our account PnL line ... with a date filter"). The running settled result of the bot's orders,
   // cut to a range. It reads only what the Bot page already loaded (the last 1,000 orders), so a long range reaches back only as far as those orders do, and
-  // the note says so instead of drawing a flat start that is not real. Read only: the buttons change what is drawn, nothing else.
+  // the line simply starts where the orders do. Read only: the buttons change what is drawn, nothing else.
   var KAL_PNL_RANGES = [{ key: '1D', label: 'Today' }, { key: '1W', label: '1W' }, { key: '1M', label: '1M' }, { key: '3M', label: '3M' }, { key: 'YTD', label: 'YTD' }, { key: '1Y', label: '1Y' }, { key: 'ALL', label: 'All' }];
   var kalshiPnlRange = '1M';
   function kalshiPnlRangeStart(key, nowMs){
@@ -2602,12 +2606,8 @@
     if(key === '1Y'){ return nowMs - 365 * day; }
     return 0;
   }
-  function kalshiPnlCardHtml(orders, key, nowMs, esc, money){
-    var since = kalshiPnlRangeStart(key, nowMs), pts = kalshiPnlSeries(orders, since);
-    var all = kalshiPnlSeries(orders, 0), oldest = all.length ? all[0].t : null;
-    var short = oldest !== null && since < oldest && key !== 'ALL' && key !== '1D';
-    var note = short ? 'The bot has ' + all.length + ' settled trades loaded, back to ' + kalDate(oldest) + '. A longer range cannot show more than that.' : '';
-    return kalshiLineSvg(pts, esc, money) + (note ? '<div class="kal-note">' + esc(note) + '</div>' : '');
+  function kalshiPnlCardHtml(orders, key, nowMs, esc, money, total){
+    return kalshiLineSvg(kalshiPnlSeries(orders, kalshiPnlRangeStart(key, nowMs)), esc, money, total);
   }
   // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
   var kalshiPnlFetched = {}, kalshiPnlFetching = '';
@@ -2637,7 +2637,7 @@
       }
     }
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney));
+    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null));
   }
   (function(){
     var bar = document.getElementById('kalPnlRanges');
