@@ -35,7 +35,7 @@ gates.D1 = () => {
 
 // The account result line: the range cuts the running settled result, and the line starts at zero at the start of the range, so a long range is never drawn from a total the range did not earn.
 gates.PL1 = () => {
-  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPnlRangeStart', 'kalshiLineSvg', 'kalshiPnlCardHtml']);
+  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPnlRangeStart', 'kalshiPnlGeometry', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
   const now = Date.UTC(2026, 9, 24, 18), day = 86400000;
   const o = (d, p) => ({ ts: now - d * day, series: 'KXGOLD15M', settled: true, fillCount: '1.00', settledPnl: p });
   const orders = [o(40, 5), o(20, -1), o(2, 2), o(0.1, 0.5)];
@@ -104,6 +104,20 @@ gates.D12 = () => {
   assert.ok(/kalshiTodayPct\(botNet/.test(html), 'the Today line uses it');
 };
 
+
+// PL2: scrubbing the result line. Consequence: the percentage at any point is that point's result over the balance at the start of the range, signed, and blank when the balance is unknown; the pointer reads the same geometry the line was drawn with.
+gates.PL2 = () => {
+  const f = lift(['kalshiPnlGeometry', 'kalshiPnlPct']);
+  assert.strictEqual(f.kalshiPnlPct(6.5, 500), '+1.3%');
+  assert.strictEqual(f.kalshiPnlPct(-2.5, 250), '-1.0%');
+  assert.strictEqual(f.kalshiPnlPct(1, NaN), '', 'no balance: no percentage');
+  assert.strictEqual(f.kalshiPnlPct(1, 0), '', 'a start of zero: no percentage');
+  const g = f.kalshiPnlGeometry([{ cum: 0 }, { cum: 5 }, { cum: -5 }]);
+  assert.ok(g.X(0) === g.L && g.X(2) === g.W - g.R, 'the first and last points sit at the edges of the plot');
+  assert.ok(g.Y(5) < g.Y(0) && g.Y(0) < g.Y(-5), 'a higher result is higher on the chart');
+  assert.ok(/kalshiMoney\(Math\.abs\(cum\)\)/.test(html) && /kalDateTime\(pt\.t\)\)/.test(html) && !/kalDateTime\(pt\.t\) \+ ' CT'/.test(html), 'the scrubbed figure goes through the money formatter (masked in Privacy view) and shows the trade time (the formatter already says CT, once)');
+  assert.ok(/#kalPnlBody svg\{ touch-action:pan-y/.test(html), 'a finger on the line still scrolls the page');
+};
 
 // DS: there is no Data page and no record card. Everything the Data page carried (tiles, tables, rings, folds, the headline, the rules on trial) is gone from the site.
 gates.DS1 = () => {

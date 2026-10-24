@@ -432,6 +432,7 @@
   .kal-hold-stats .kal-lbl{ display:block; font-size:12px; color:var(--muted); } .kal-hold-stats b{ font-size:14px; font-weight:700; }
   .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
   .kal-pnl-ranges{ display:flex; gap:6px; flex-wrap:wrap; } .kal-pnl-ranges .kal-pill{ background:none; cursor:pointer; min-height:40px; padding:0 14px; font-family:inherit; } .kal-pnl-ranges .kal-pill.on{ color:var(--paper); border-color:var(--paper); }
+  #kalPnlBody{ position:relative; } #kalPnlBody svg{ touch-action:pan-y; cursor:crosshair; } .kal-pnl-dot{ position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--paper); pointer-events:none; } .kal-pnl-when{ margin-left:auto; font-size:13px; font-weight:400; color:var(--muted); }
   .kal-pnl-head{ display:flex; align-items:baseline; gap:12px; margin:4px 0 10px; font-variant-numeric:tabular-nums; } .kal-pnl-head b{ font-size:28px; font-weight:800; line-height:1.1; letter-spacing:-.01em; } .kal-pnl-head span{ font-size:18px; font-weight:700; }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss-text); border-color:var(--loss); }
@@ -2565,25 +2566,24 @@
   // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
   // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
   // The line only: the figures are drawn above it as ordinary text (see kalshiPnlCardHtml), because text inside a scaled SVG shrank to about 10px on a phone.
-  function kalshiLineSvg(points, esc, money){
-    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
-    var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+  // The line's geometry in one place, so the drawing and the pointer that scrubs it agree on where every point is.
+  function kalshiPnlGeometry(points){
     var W = 460, H = 150, L = 8, R = 8, T = 10, B = 10;
     var vals = points.map(function(p){ return p.cum; }).concat([0]);
     var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
-    var X = function(i){ return L + (W - L - R) * (i / (points.length - 1)); };
-    var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+    return { W: W, H: H, L: L, R: R, X: function(i){ return L + (W - L - R) * (i / (points.length - 1)); }, Y: function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); } };
+  }
+  function kalshiLineSvg(points, esc, money){
+    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
+    var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    var g = kalshiPnlGeometry(points), X = g.X, Y = g.Y;
     var last = points[points.length - 1];
     var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
-    // Calm view: the line is one plain stroke and the points are invisible hover targets (a green or red dot per trade was hundreds of lights).
-    var dots = points.map(function(p, i){
-      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="transparent"><title>' +
-        esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
-    }).join('');
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
-      '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
-      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots + '</svg>';
+    // The line is one plain stroke; the pointer, not hundreds of invisible hover targets, finds the trade under it (see the scrub handler after renderKalshiPnl).
+    return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
+      '<line x1="' + g.L + '" x2="' + (g.W - g.R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
+      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/></svg>';
   }
 
   // Account result line (Oct 24, 2026, the owner: "bring back our account PnL line ... with a date filter"). The running settled result of the bot's orders,
@@ -2601,14 +2601,18 @@
     if(key === '1Y'){ return nowMs - 365 * day; }
     return 0;
   }
+  var kalshiPnlScrub = null;
+  // A result as a share of a starting balance, signed; '' when the start is unknown or not above zero (never a wrong percentage).
+  function kalshiPnlPct(net, startBal){ return Number.isFinite(startBal) && startBal > 0 ? (net >= 0 ? '+' : '-') + Math.abs(net / startBal * 100).toFixed(1) + '%' : ''; }
   function kalshiPnlCardHtml(orders, key, nowMs, esc, money, total){
     var pts = kalshiPnlSeries(orders, kalshiPnlRangeStart(key, nowMs));
     if(pts.length < 2){ return kalshiLineSvg(pts, esc, money); }
     // The result as a share of the account at the start of the range (the total now minus this range's result), so it is a percentage and Privacy view, which masks dollars only, leaves it showing.
     // Nothing when the total is unknown or the start would not be above zero. Deposits and your own trades are in the total, so it is "of the account", not a return on the bot alone.
     var net = pts[pts.length - 1].cum, startBal = Number(total) - net, sign = net >= 0 ? '+' : '-';
-    var pct = Number.isFinite(startBal) && startBal > 0 ? sign + Math.abs(net / startBal * 100).toFixed(1) + '%' : '';
-    return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '</div>' + kalshiLineSvg(pts, esc, money);
+    var pct = kalshiPnlPct(net, startBal);
+    kalshiPnlScrub = { pts: pts, startBal: startBal };
+    return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '<small class="kal-pnl-when"></small></div>' + kalshiLineSvg(pts, esc, money);
   }
   // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
   var kalshiPnlFetched = {}, kalshiPnlFetching = '';
@@ -2640,6 +2644,49 @@
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null));
   }
+  // Touch or hover on the result line (the owner, Oct 24, 2026: "do that with our account balance chart too"): a guide and a dot follow the pointer to the nearest trade, and the figure at the top shows the running result at
+  // that trade with its date and time (Central), as dollars (masked in Privacy view) and as a share of the account at the start of the range. It goes back to the range's result when the pointer leaves. Reads only the points drawn.
+  (function(){
+    var host = document.getElementById('kalPnlBody');
+    if(!host){ return; }
+    var shown = null;
+    function paint(head, cum, pctText, when){
+      var b = head.querySelector('b'), s = head.querySelector('span'), w = head.querySelector('.kal-pnl-when');
+      if(b){ b.textContent = (cum >= 0 ? '+' : '-') + kalshiMoney(Math.abs(cum)); }
+      if(s){ s.textContent = pctText; }
+      if(w){ w.textContent = when; }
+      head.className = 'kal-pnl-head ' + (cum >= 0 ? 'kal-pos' : 'kal-neg');
+    }
+    function clear(){
+      if(!shown){ return; }
+      var d = kalshiPnlScrub, head = host.querySelector('.kal-pnl-head');
+      if(d && head){ var last = d.pts[d.pts.length - 1].cum; paint(head, last, kalshiPnlPct(last, d.startBal), ''); }
+      var g = host.querySelector('.kal-pnl-guide'), dot = host.querySelector('.kal-pnl-dot');
+      if(g && g.parentNode){ g.parentNode.removeChild(g); } if(dot && dot.parentNode){ dot.parentNode.removeChild(dot); }
+      shown = null;
+    }
+    function move(e){
+      var svg = host.querySelector('svg'), d = kalshiPnlScrub, head = host.querySelector('.kal-pnl-head');
+      if(!svg || !d || !head || !d.pts || d.pts.length < 2){ return; }
+      var r = svg.getBoundingClientRect(), c = host.getBoundingClientRect();
+      if(!(r.width > 0)){ return; }
+      var geo = kalshiPnlGeometry(d.pts), frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), i = Math.round(((frac * geo.W - geo.L) / (geo.W - geo.L - geo.R)) * (d.pts.length - 1));
+      i = Math.max(0, Math.min(d.pts.length - 1, i));
+      var pt = d.pts[i], x = geo.X(i), y = geo.Y(pt.cum);
+      var g = svg.querySelector('.kal-pnl-guide');
+      if(!g){ g = document.createElementNS('http://www.w3.org/2000/svg', 'line'); g.setAttribute('class', 'kal-pnl-guide'); g.setAttribute('y1', '0'); g.setAttribute('y2', String(geo.H)); g.setAttribute('stroke', 'var(--muted)'); g.setAttribute('stroke-width', '1'); g.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(g); }
+      g.setAttribute('x1', x.toFixed(1)); g.setAttribute('x2', x.toFixed(1));
+      var dot = host.querySelector('.kal-pnl-dot');
+      if(!dot){ dot = document.createElement('span'); dot.className = 'kal-pnl-dot'; host.appendChild(dot); }
+      dot.style.left = (r.left - c.left + x / geo.W * r.width) + 'px'; dot.style.top = (r.top - c.top + y / geo.H * r.height) + 'px';
+      shown = true;
+      paint(head, pt.cum, kalshiPnlPct(pt.cum, d.startBal), kalDateTime(pt.t));
+    }
+    host.addEventListener('pointermove', move);
+    host.addEventListener('pointerleave', clear);
+    host.addEventListener('pointercancel', clear);
+    host.addEventListener('pointerup', function(e){ if(e.pointerType !== 'mouse'){ clear(); } });
+  })();
   (function(){
     var bar = document.getElementById('kalPnlRanges');
     if(bar){ bar.addEventListener('click', function(e){ var k = e.target && e.target.getAttribute ? e.target.getAttribute('data-pnlrange') : null; if(k){ kalshiPnlRange = k; renderKalshiPnl(); } }); }
