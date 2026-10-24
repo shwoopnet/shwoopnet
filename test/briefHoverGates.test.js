@@ -1,0 +1,44 @@
+'use strict';
+// The Brief's charts answer a finger or a pointer (the owner, Oct 24, 2026). Consequences: the figure shown while scrubbing is the price at that point and its move against the previous close, worked out the same way as the resting figure; the line
+// never claims a time it does not have (the series has no timestamps); touching a chart must not stop the page scrolling up and down; and the page still makes no market-data call of its own.
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const gates = {};
+function fnSource(name) {
+  const start = html.indexOf('function ' + name + '(');
+  assert.ok(start >= 0, name + ' exists');
+  let i = html.indexOf('{', html.indexOf(')', start)), depth = 0;
+  for (; i < html.length; i++) {
+    if (html[i] === '{') depth++;
+    else if (html[i] === '}' && --depth === 0) return html.slice(start, i + 1);
+  }
+  throw new Error('unbalanced ' + name);
+}
+const f = new Function('escapeHtml', 'var briefChartQuotes = {};\n' + ['pct', 'briefChartFigures', 'briefChartHtml'].map(fnSource).join('\n') + '\nreturn { briefChartFigures: briefChartFigures, briefChartHtml: briefChartHtml, quotes: briefChartQuotes };')((x) => String(x));
+
+gates.H1 = () => {
+  const a = f.briefChartFigures(612.4, 625);
+  assert.deepStrictEqual([a.up, a.pctText, a.px, a.dtxt], [false, '\u25BC 2.02%', '612.40', '-12.60'], 'a price under the previous close reads down, to the cent, in points and percent');
+  const b = f.briefChartFigures(81479, 80000);
+  assert.deepStrictEqual([b.up, b.px, b.dtxt], [true, '81,479', '+1,479'], 'a price of 1,000 or more has no decimals, like the resting figure');
+};
+gates.H2 = () => {
+  const out = f.briefChartHtml({ sym: 'SPY', name: 'SPY' }, { price: 510, prevClose: 500, series: [500, 505, 510] });
+  assert.ok(/data-sym="SPY"/.test(out), 'each chart says which symbol it is, so the pointer can find its series');
+  assert.deepStrictEqual(f.quotes.SPY.ser, [500, 505, 510], 'and the series it scrubs is the one drawn');
+  assert.strictEqual(f.quotes.SPY.price, 510, 'with the resting price kept to go back to');
+};
+gates.H3 = () => {
+  const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
+  assert.ok(/\.brief-chart svg\{[^}]*touch-action:pan-y/.test(css), 'a finger on a chart still scrolls the page up and down');
+  const code = html.slice(html.indexOf("var host = document.getElementById('briefCharts');"), html.indexOf('  // The risk mood (the owner:'));
+  assert.ok(!/fetch\(|XMLHttpRequest|api\.|toLocaleTimeString|getHours|Date\(/.test(code), 'it makes no call and never prints a time: the series has none');
+  assert.ok(/pointermove/.test(code) && /pointerleave/.test(code) && /pointercancel/.test(code), 'it follows the pointer and lets go when it leaves');
+};
+let failed = 0;
+for (const [name, fn] of Object.entries(gates)) {
+  try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
+}
+process.exit(failed ? 1 : 0);

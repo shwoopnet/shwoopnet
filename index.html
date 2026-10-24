@@ -318,7 +318,10 @@
   .brief-chart-ft{ display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
   .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:12px; }
   .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss-text); }
-  .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; }
+  .brief-chart{ position:relative; }
+  .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; touch-action:pan-y; cursor:crosshair; }
+  .brief-chart svg line.brief-chart-guide{ stroke:var(--muted); stroke-dasharray:none; }
+  .brief-chart-dot{ position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--paper); pointer-events:none; }
   .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
   .brief-chart svg line{ stroke:var(--border); stroke-width:1; stroke-dasharray:3 4; vector-effect:non-scaling-stroke; }
   .brief-eyebrow{ color:var(--amber-dim); text-transform:uppercase; letter-spacing:.08em; font-size:12px; margin-bottom:12px; }
@@ -3606,15 +3609,21 @@ kalshiStatusTick();
     { title: 'Equities', items: [{ sym: 'SPY', name: 'S&P 500 (SPY)' }, { sym: 'QQQ', name: 'Nasdaq 100 (QQQ)' }] },
     { title: 'Commodities', items: [{ sym: 'GC=F', name: 'Gold' }, { sym: 'CL=F', name: 'Crude oil' }] }
   ];
+  // The number a chart shows for a price: the price, its move against the previous close in points and in percent, and which way. Used for the resting figure and while a finger or the pointer is on the line, so both read the same way.
+  function briefChartFigures(price, prevClose){
+    var d = pct(price, prevClose), up = d >= 0, dec = price >= 1000 ? 0 : 2, f = { minimumFractionDigits: dec, maximumFractionDigits: dec };
+    var delta = price - prevClose;
+    return { up: up, pctText: (up ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(2) + '%', px: price.toLocaleString('en-US', f), dtxt: (delta >= 0 ? '+' : '-') + Math.abs(delta).toLocaleString('en-US', f) };
+  }
+  var briefChartQuotes = {};
   function briefChartHtml(it, q){
     if(!q || !(q.price > 0) || !(q.prevClose > 0)){
       return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span></div><div class="brief-chart-px mono">&mdash;</div></div>';
     }
-    var d = pct(q.price, q.prevClose), up = d >= 0;
-    var dec = q.price >= 1000 ? 0 : 2;
-    var px = q.price.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    var fg = briefChartFigures(q.price, q.prevClose), up = fg.up, dec = q.price >= 1000 ? 0 : 2;
     var svg = '';
     var ser = Array.isArray(q.series) ? q.series.filter(function(v){ return typeof v === 'number' && isFinite(v); }) : [];
+    briefChartQuotes[it.sym] = ser.length >= 2 ? { ser: ser, prev: q.prevClose, price: q.price } : null;
     if(ser.length >= 2){
       var lo = Math.min.apply(null, ser.concat([q.prevClose])), hi = Math.max.apply(null, ser.concat([q.prevClose]));
       var span = (hi - lo) || 1;
@@ -3629,11 +3638,53 @@ kalshiStatusTick();
       var fm = function(v){ return v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
       foot = '<div class="brief-chart-ft"><span>Low ' + fm(fl) + '</span><span class="brief-chart-tf">1 day</span><span>High ' + fm(fh) + '</span></div>';
     }
-    var delta = q.price - q.prevClose, dtxt = (delta >= 0 ? '+' : '-') + Math.abs(delta).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-    return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span>' +
-      '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(2) + '%</span></div>' +
-      '<div class="brief-chart-px mono">' + px + ' <span class="brief-chart-d ' + (up ? 'up' : 'down') + '">' + dtxt + '</span></div>' + svg + foot + '</div>';
+    return '<div class="brief-chart" data-sym="' + escapeHtml(it.sym) + '"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span>' +
+      '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + fg.pctText + '</span></div>' +
+      '<div class="brief-chart-px mono">' + fg.px + ' <span class="brief-chart-d ' + (up ? 'up' : 'down') + '">' + fg.dtxt + '</span></div>' + svg + foot + '</div>';
   }
+  // Touch or hover on a chart (the owner, Oct 24, 2026: the charts "feel like there should be some sort of interaction"): a guide line and a dot follow the pointer along the day's line, and the price and move at the top change to
+  // that point's, then go back when the pointer leaves. The series has no timestamps (it is the day's closes, thinned), so it shows a price and its move against the previous close, never a time. It reads only what the page already holds.
+  (function(){
+    var host = document.getElementById('briefCharts');
+    if(!host){ return; }
+    var active = null;
+    function paint(card, price, prev){
+      var fg = briefChartFigures(price, prev), px = card.querySelector('.brief-chart-px'), chg = card.querySelector('.brief-chart-chg');
+      if(px){ px.innerHTML = escapeHtml(fg.px) + ' <span class="brief-chart-d ' + (fg.up ? 'up' : 'down') + '">' + escapeHtml(fg.dtxt) + '</span>'; }
+      if(chg){ chg.className = 'brief-chart-chg ' + (fg.up ? 'up' : 'down'); chg.textContent = fg.pctText; }
+    }
+    function clear(){
+      if(!active){ return; }
+      var d = briefChartQuotes[active.getAttribute('data-sym')];
+      if(d){ paint(active, d.price, d.prev); }
+      var g = active.querySelector('.brief-chart-guide'), dot = active.querySelector('.brief-chart-dot');
+      if(g && g.parentNode){ g.parentNode.removeChild(g); } if(dot && dot.parentNode){ dot.parentNode.removeChild(dot); }
+      active = null;
+    }
+    function move(e){
+      var card = e.target && e.target.closest ? e.target.closest('.brief-chart') : null;
+      var svg = card ? card.querySelector('svg') : null, d = card ? briefChartQuotes[card.getAttribute('data-sym')] : null;
+      if(!svg || !d){ clear(); return; }
+      if(active && active !== card){ clear(); }
+      active = card;
+      var r = svg.getBoundingClientRect(), c = card.getBoundingClientRect();
+      if(!(r.width > 0)){ return; }
+      var n = d.ser.length, frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), i = Math.round(frac * (n - 1)), v = d.ser[i];
+      var lo = Math.min.apply(null, d.ser.concat([d.prev])), hi = Math.max.apply(null, d.ser.concat([d.prev])), span = (hi - lo) || 1;
+      var x = i / (n - 1) * 200, yv = 58 - ((v - lo) / span) * 54;
+      var g = svg.querySelector('.brief-chart-guide');
+      if(!g){ g = document.createElementNS('http://www.w3.org/2000/svg', 'line'); g.setAttribute('class', 'brief-chart-guide'); g.setAttribute('y1', '0'); g.setAttribute('y2', '60'); svg.appendChild(g); }
+      g.setAttribute('x1', x.toFixed(1)); g.setAttribute('x2', x.toFixed(1));
+      var dot = card.querySelector('.brief-chart-dot');
+      if(!dot){ dot = document.createElement('span'); dot.className = 'brief-chart-dot'; card.appendChild(dot); }
+      dot.style.left = (r.left - c.left + x / 200 * r.width) + 'px'; dot.style.top = (r.top - c.top + yv / 60 * r.height) + 'px';
+      paint(card, v, d.prev);
+    }
+    host.addEventListener('pointermove', move);
+    host.addEventListener('pointerleave', clear);
+    host.addEventListener('pointercancel', clear);
+    host.addEventListener('pointerup', function(e){ if(e.pointerType !== 'mouse'){ clear(); } });
+  })();
   // The risk mood (the owner: "risk mood + maybe fear/greed index"): a one word read of the VIX, the VIX, the 10 year yield and long bonds, and the two fear and greed indexes (stocks from CNN, crypto from alternative.me). All of it
   // comes from the tape; anything that has not arrived is a dash, never a made-up number.
   // The Brief's sentiment card (the owner, Oct 23, 2026: back to the fear and greed index and market sentiment, but "as little panic-y as possible"). The two readings (stocks, crypto) are CNN's and alternative.me's public fear and greed
