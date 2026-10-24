@@ -418,7 +418,7 @@
   /* With a price path the row is two columns (the owner, Oct 23, 2026: "a lot of dead space", "fit a chart in here"): the three figures stack on the left and the chart fills the rest. */
   .kal-hold-body{ display:grid; grid-template-columns:minmax(120px,170px) minmax(0,1fr); gap:10px 28px; align-items:stretch; }
   .kal-hold-body .kal-hold-stats{ grid-template-columns:1fr; gap:10px; align-content:start; }
-  .kal-hold-chart{ min-width:0; display:flex; flex-direction:column; gap:6px; }
+  .kal-hold-chart{ min-width:0; display:flex; flex-direction:row; align-items:stretch; gap:10px; } .kal-hold-chart svg{ flex:1 1 auto; min-width:0; } .kal-hc-y{ display:flex; flex-direction:column; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; text-align:right; min-width:36px; }
   .kal-hold-chart svg{ display:block; width:100%; height:110px; }
   .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); }
   .kal-hc-line{ fill:none; stroke:var(--paper); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
@@ -2216,18 +2216,18 @@
   function kalshiPositionChartHtml(r){
     var p = r && Array.isArray(r.path) ? r.path.filter(function(x){ return Number.isFinite(x); }) : [];
     if(p.length < 2){ return ''; }
-    var W = 600, H = 110, hasPaid = Number.isFinite(r.entry);
-    var lo = Math.min.apply(null, hasPaid ? p.concat([r.entry]) : p), hi = Math.max.apply(null, hasPaid ? p.concat([r.entry]) : p);
+    var W = 600, H = 110;
+    var dmin = Math.min.apply(null, p), dmax = Math.max.apply(null, p), lo = dmin, hi = dmax;
     if(hi - lo < 0.06){ var mid = (hi + lo) / 2; lo = mid - 0.03; hi = mid + 0.03; }
     var pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
     var X = function(i){ return (i / (p.length - 1) * W).toFixed(1); }; var Y = function(v){ return ((hi - v) / (hi - lo) * H).toFixed(1); };
     var d = p.map(function(v, i){ return (i ? 'L' : 'M') + X(i) + ' ' + Y(v); }).join(' ');
-    var left = Number.isFinite(r.left) ? (r.left > 0 ? 'Closes in ' + kalshiFmtLeft(r.left) : 'Waiting for the result') : '';
-    return '<div class="kal-hold-chart"><div class="kal-hc-top"><span>Chance of the side you bought</span>' + (hasPaid ? '<span>Dashed line: what you paid</span>' : '') + '</div>' +
+    // A plain chart (the owner, Oct 24, 2026: "just make it a normal chart"): the line, a soft fill, a dot at the latest read and the high and low as percentages down the side. No captions; what was paid is the Cost beside it.
+    var pc = function(v){ return (v >= 0.9995 ? '99.9' : (v * 100).toFixed(v >= 0.995 ? 1 : 0)) + '%'; };
+    return '<div class="kal-hold-chart">' +
       '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Chance of the side you bought since this page was opened">' +
-      (hasPaid ? '<line class="kal-hc-paid" x1="0" x2="' + W + '" y1="' + Y(r.entry) + '" y2="' + Y(r.entry) + '"/>' : '') +
       '<path class="kal-hc-fill" d="' + d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z"/><path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(p.length - 1) + '" cy="' + Y(p[p.length - 1]) + '" r="4"/></svg>' +
-      '<div class="kal-hc-foot"><span>Since this page opened</span><span>Now</span><span>' + left + '</span></div></div>';
+      '<div class="kal-hc-y"><span>' + pc(dmax) + '</span><span>' + pc(dmin) + '</span></div></div>';
   }
   function kalshiPositionsHtml(rows, esc, money){
     if(!rows || !rows.length){ return '<div class="kal-empty">No open positions.</div>'; }
@@ -2236,8 +2236,6 @@
       var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
       var sub = [];
       if(r.chance !== null){ sub.push('Chance now ' + (r.chance >= 0.9995 ? '99.9' : (r.chance * 100).toFixed(1)) + '%'); }
-      if(r.left !== null){ sub.push(r.left > 0 ? 'closes in ' + kalshiFmtLeft(r.left) : 'waiting for the result'); }
-      if(r.cashOut !== null){ sub.push('cash out now about ' + money(r.cashOut) + ' before fees'); }
       var stats = '<div class="kal-hold-stats">' + stat('Cost', r.cost === null ? 'n/a' : money(r.cost)) + stat('If it wins', r.ifWin === null ? 'n/a' : sg(r.ifWin), r.ifWin === null ? '' : 'kal-pos') +
         stat('If it loses', r.ifLose === null ? 'n/a' : sg(r.ifLose), r.ifLose === null ? '' : 'kal-neg') + '</div>';
       var chart = kalshiPositionChartHtml(r);
