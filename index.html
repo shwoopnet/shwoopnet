@@ -427,6 +427,7 @@
   @media screen and (max-width:700px){ .kal-hold-body{ grid-template-columns:minmax(0,1fr); } .kal-hold-body .kal-hold-stats{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
   .kal-hold-stats .kal-lbl{ display:block; font-size:11px; color:var(--muted); } .kal-hold-stats b{ font-size:14px; font-weight:700; }
   .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
+  .kal-pnl-ranges{ display:flex; gap:6px; flex-wrap:wrap; } .kal-pnl-ranges .kal-pill{ background:none; cursor:pointer; min-height:40px; padding:0 14px; font-family:inherit; } .kal-pnl-ranges .kal-pill.on{ color:var(--paper); border-color:var(--paper); }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss); border-color:var(--loss); }
   .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
@@ -837,13 +838,6 @@
   [data-reduce-motion="true"] .news-item:hover{ transform: none; }
   [data-reduce-motion="true"] .kal-card:hover, [data-reduce-motion="true"] .settings-card:hover, [data-reduce-motion="true"] .brief-win:hover, [data-reduce-motion="true"] .kal-tile:hover, [data-reduce-motion="true"] .kal-leg:hover, [data-reduce-motion="true"] .data-bar:hover{ transform: none; }
   [data-reduce-motion="true"] .front-eyebrow, [data-reduce-motion="true"] .front-h1, [data-reduce-motion="true"] .front-line, [data-reduce-motion="true"] .front-win, [data-reduce-motion="true"] .front-win-a .win{ animation: none; }
-  .data-hero{ padding:22px 24px; }
-  .data-verdict{ font:800 26px/1.25 'Public Sans', sans-serif; letter-spacing:-.01em; margin-top:8px; }
-  .data-rule{ padding:14px 0; border-top:1px solid var(--border); } .data-rule:first-child{ border-top:0; padding-top:4px; }
-  .data-rule-top{ display:flex; justify-content:space-between; gap:14px; align-items:baseline; flex-wrap:wrap; font-size:14px; }
-  .data-bar{ height:8px; border-radius:4px; background:rgba(255,255,255,.1); margin-top:10px; overflow:hidden; } .data-bar i{ display:block; height:100%; background:var(--paper); border-radius:4px; }
-  .data-headline{ font:800 clamp(44px, 9vw, 72px)/1 'Public Sans', sans-serif; letter-spacing:-.02em; margin:10px 0 12px; }
-  .data-hero .data-verdict{ font-size:18px; font-weight:600; color:var(--muted); }
 </style>
 <script>
 </script>
@@ -1265,20 +1259,16 @@
       </div>
       </div>
       <div class="kal-main">
+      <div class="kal-card" data-card="pnl" id="kalPnl">
+        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Account result</div><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div>
+        <div id="kalPnlBody"></div>
+      </div>
       <div class="kal-card kal-card-flush" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div id="kalBotStats"></div>
         <div class="kal-tr kal-tr-head"><span>Time</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
-      </div>
-      <div class="kal-card data-hero" data-card="record" id="kalRecord">
-        <div class="kal-lbl">The record, last 30 days of the account</div>
-        <div class="data-headline" id="dataHead"></div>
-        <div id="dataVerdict"></div>
-        <div class="kal-card-title" style="margin:22px 0 4px">Rules on trial</div>
-        <div id="dataTrial"></div>
-        <div class="kal-note" id="dataNote"></div>
       </div>
       </div>
     </div>
@@ -1867,7 +1857,6 @@
     if(typeof kalshiPrivacyUi === 'function'){ kalshiPrivacyUi(!!on); }
     // Everything that already drew an amount draws it again, masked or not.
     if(typeof renderKalshiBot === 'function'){ renderKalshiBot(); }
-    if(typeof renderKalshiRecord === 'function'){ renderKalshiRecord(); }
   }
   kalshiPrivacyUi(kalshiMasked);   // a reload with the view left on shows the switch and the header button as on
 
@@ -2481,8 +2470,8 @@
     else if(fire.enter){ kalshiSoundTone('enter'); }
   }
   function renderKalshiBot(){
-    renderKalshiRecord();
     renderKalshiStatus();
+    renderKalshiPnl();
     kalshiSoundCheck();
     var a = kalshiLiveAcct;
     var el = document.getElementById('kalBotStatus');
@@ -2790,122 +2779,78 @@
     f.srcdoc = html;
     document.body.appendChild(f);
   }
-  // Live tests (Oct 22, 2026): checks that the new rules do what they should. Read only; they change nothing. The two dates are when each change went live (approximate: the owner reported the deploys, not the minute).
-  // One crypto order per window should leave NO window with two filled crypto orders; rng5 should be on (nearly) every order sent after its deploy.
-  function dataLiveTests(orders){
-    var ONE_FROM = Date.UTC(2026, 9, 22, 3, 0, 0), RNG_FROM = Date.UTC(2026, 9, 22, 17, 0, 0), wins = {}, rngN = 0, rngOf = 0;
-    (orders || []).forEach(function(o){
-      if(!o || !Number.isFinite(o.ts)){ return; }
-      if(o.ts >= RNG_FROM){ rngOf++; if(o.rng5 !== undefined && o.rng5 !== null && o.rng5 !== '' && Number.isFinite(Number(o.rng5))){ rngN++; } }
-      var t = String(o.ticker || '');
-      if(o.ts >= ONE_FROM && /^(KXBTC15M|KXETH15M|KXXRP15M|KXDOGE15M)-/.test(t) && Number(o.fillCount) > 0){
-        var k = t.split('-')[1];
-        if(k){ (wins[k] || (wins[k] = {}))[t] = 1; }
-      }
-    });
-    var keys = Object.keys(wins);
-    return { windows: keys.length, twoFill: keys.filter(function(k){ return Object.keys(wins[k]).length >= 2; }).length, rngLogged: rngN, rngOrders: rngOf };
-  }
-  // The Data page's questions and agenda (Oct 23, 2026, the owner chose "Questions + agenda": the page puts what needs a look first, by rules written down in advance, and folds the rest). Everything below is pure: orders and the
-  // account read in, plain text out, no call to anything. The rules for the list are the ones the page prints under "How this list is ordered"; a bad week cannot move itself down it.
-  // The dates are approximate, taken from when the owner reported each deploy; a number before a change is not compared with a number after it.
-  var DATA_SMOOTH_FROM = Date.UTC(2026, 9, 23, 18, 15, 0);
-  var DATA_RULES = [
-    { at: Date.UTC(2026, 9, 23, 18, 15, 0), text: 'Bitcoin and Ethereum buy only on a smooth climb', check: Date.UTC(2026, 10, 12, 12, 0, 0), checkText: 'Smooth-climb forward read' },
-    { at: Date.UTC(2026, 9, 23, 17, 0, 0), text: 'Series order: gold, XRP, Bitcoin, Dogecoin, Ethereum', check: null, checkText: '' },
-    { at: Date.UTC(2026, 9, 22, 3, 0, 0), text: 'One crypto order per 15 minute window', check: Date.UTC(2026, 10, 17, 12, 0, 0), checkText: 'Export review (size, 10 minute look)' },
-    { at: Date.UTC(2026, 9, 21, 12, 0, 0), text: 'Gold first, probe markets added', check: Date.UTC(2026, 10, 30, 12, 0, 0), checkText: 'Probe drop rule check' }
-  ];
-  // The smooth-climb rule on trial: the first 40 smooth fills may lose at most 2 (a third ends Bitcoin and Ethereum), and after 100 settled fills their combined result must not be under zero.
-  function dataTrial(orders){
-    var fills = (orders || []).filter(function(o){
-      return o && o.smooth === true && Number(o.fillCount) > 0 && Number(o.ts) >= DATA_SMOOTH_FROM && (kalshiMarketName(o) === 'Bitcoin' || kalshiMarketName(o) === 'Ethereum');
-    }).sort(function(a, b){ return a.ts - b.ts; });
-    var settled = fills.filter(function(o){ return kalshiOrderPnl(o) !== null; });
-    var lost40 = settled.slice(0, 40).filter(function(o){ return kalshiOrderPnl(o) < 0; }).length;
-    var net = settled.reduce(function(n, o){ return n + kalshiOrderPnl(o); }, 0);
-    return { fills: fills.length, settled: settled.length, lost40: lost40, net: net, past: lost40 >= 3 || (settled.length >= 100 && net < 0), near: lost40 === 2 };
-  }
-  // A market with enough trades is compared with itself: its latest window against the window before (up to 100 trades each, at least 30). Fewer than 60 trades says nothing.
-  function dataMarketTrend(orders){
-    var by = {};
-    (orders || []).forEach(function(o){
-      var p = kalshiOrderPnl(o);
-      if(p === null){ return; }
-      var nm = kalshiMarketName(o);
-      (by[nm] || (by[nm] = [])).push({ t: o.ts, p: p, c: Number(o.fillCount) || 0 });
-    });
-    var per = function(a){ var n = 0, c = 0; a.forEach(function(x){ n += x.p; c += x.c; }); return c > 0 ? n / c * 100 : null; };
-    return Object.keys(by).map(function(k){
-      var a = by[k].sort(function(x, y){ return x.t - y.t; }), n = a.length, w = Math.min(100, Math.floor(n / 2));
-      if(n < 60 || w < 30){ return { name: k, n: n, enough: false }; }
-      var r = per(a.slice(n - w)), q = per(a.slice(n - 2 * w, n - w));
-      return { name: k, n: n, w: w, enough: true, recent: r, prior: q, flag: r !== null && (r < 0 || (q !== null && q > 0 && r < q / 2)) };
-    });
-  }
   var DATA_SHARD_LOW = 30;   // dollars: under this a shard is called low (a gold order can need $10 or more; the owner tops up by hand)
-  var DATA_SHARD_NAMES = { 0: 'gold, AUD/USD, USD/CAD', 2: 'crypto and natural gas' };
-  // The list, in the order written on the page: 1 a rule past its line, 2 a rule or the stop one step from its line, 3 a market that turned negative or halved, 4 the machine (an unfunded shard, no check for 5 minutes), 5 the next scheduled read.
-  function dataAgenda(c){
-    var items = [], money = c.money, pct = function(x){ return Math.round(x * 100) + '%'; }, fmt = function(v){ return (v >= 0 ? '+' : '-') + Math.abs(v).toFixed(1) + 'c'; };
-    var t = c.trial;
-    if(t && t.past){ items.push({ rank: 1, text: 'Smooth climb has crossed its line.', detail: t.lost40 + ' losses in the first ' + Math.min(40, t.settled) + ' smooth fills, ' + t.settled + ' settled, combined ' + (t.net >= 0 ? '+' : '-') + money(Math.abs(t.net)) + '. Its kill rule is written in the README.' }); }
-    else if(t && t.near){ items.push({ rank: 2, text: 'Smooth climb is one loss from its line.', detail: '2 losses in the first ' + Math.min(40, t.settled) + ' smooth fills. A third ends the rule for Bitcoin and Ethereum.' }); }
-    if(c.risk && c.risk.fraction >= 0.75){ items.push({ rank: 2, text: 'The loss stop is ' + pct(c.risk.fraction) + ' used.', detail: 'The bot stops itself at 100% of the last 24 hours.' }); }
-    (c.trend || []).forEach(function(m){
-      if(m.enough && m.flag){ items.push({ rank: 3, text: m.name + ' is ' + fmt(m.recent) + ' per contract over its last ' + m.w + ' trades.', detail: 'The ' + m.w + ' before were ' + (m.prior === null ? 'unknown' : fmt(m.prior)) + '.' }); }
-    });
-    (c.shards || []).forEach(function(x){
-      if(Number.isFinite(x.dollars) && x.dollars < DATA_SHARD_LOW){ items.push({ rank: 4, text: 'Shard ' + x.shard + ' is low, ' + money(x.dollars) + '.', detail: 'Markets on it (' + (DATA_SHARD_NAMES[x.shard] || 'other') + ') stop placing orders when it runs out. Top it up in Kalshi under Transfers.' }); }
-    });
-    if(c.hb === 'down'){ items.push({ rank: 4, text: 'The bot has not checked in for over 5 minutes.', detail: 'The exit watch runs separately and is not affected.' }); }
-    var next = DATA_RULES.filter(function(r){ return r.check && r.check > c.now; }).sort(function(a, b){ return a.check - b.check; })[0];
-    if(next){ items.push({ rank: 5, text: next.checkText + ' on ' + kalDate(next.check) + '.', detail: 'In ' + Math.max(1, Math.round((next.check - c.now) / 86400000)) + ' days. Nothing to do before then.' }); }
-    return items.map(function(x, i){ x.i = i; return x; }).sort(function(a, b){ return a.rank - b.rank || a.i - b.i; });
+
+  function kalshiPnlSeries(orders, since){
+    var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
+      .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
+      .sort(function(x, y){ return x.t - y.t; });
+    var cum = 0;
+    return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum, m: r.m }; });
   }
-  // The headline (Oct 24, 2026, the owner chose the "own look, more visual" direction): the last 30 days of settled results as a share of the account, in one plain phrase. The base is the account total now minus those 30 days,
-  // like the Today line, so a deposit still reads as a gain here; it says "of the account" for that reason. Not a dollar figure, so Privacy view leaves it showing.
-  function dataHeadline(orders, total, now){
-    var from = now - 30 * 86400000, net = 0, n = 0;
-    (orders || []).forEach(function(o){ var p = kalshiOrderPnl(o); if(p !== null && Number(o.ts) >= from){ net += p; n++; } });
-    if(!n){ return 'No trades in 30 days.'; }
-    var base = Number(total) - net;
-    if(total === null || total === undefined || !(base > 0)){ return n + (n === 1 ? ' trade' : ' trades') + ' in 30 days.'; }
-    var pct = net / base * 100;
-    return Math.abs(pct) < 0.05 ? 'Flat.' : (pct > 0 ? 'Up ' : 'Down ') + Math.abs(pct).toFixed(1) + '%.';
+
+  // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
+  // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
+  function kalshiLineSvg(points, esc, money){
+    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
+    var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    // The end label is right-aligned to the edge and the plot leaves room for its real length, so a bigger total (+$123.45, +$1,234.56) is not cut off by the viewBox.
+    var endLabel = fmt(points[points.length - 1].cum);
+    var W = 460, H = 170, L = 8, R = Math.max(60, endLabel.length * 9 + 16), T = 14, B = 22;
+    var vals = points.map(function(p){ return p.cum; }).concat([0]);
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
+    var X = function(i){ return L + (W - L - R) * (i / (points.length - 1)); };
+    var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+    var last = points[points.length - 1], up = last.cum >= 0, col = up ? 'var(--gain)' : 'var(--loss)';
+    var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
+    // Calm view: the line is one plain stroke and the points are invisible hover targets (a green or red dot per trade was hundreds of lights); only the end label carries the colour.
+    var dots = points.map(function(p, i){
+      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="transparent"><title>' +
+        esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
+    }).join('');
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
+      '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
+      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
+      '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15" data-px="15">' + esc(fmt(last.cum)) + '</text>' +
+      '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="12" data-px="12">' + points.length + ' settled trades, oldest to newest</text></svg>';
   }
-  // One plain sentence for the top of the page: the first thing that needs a look (the list's own rules, see dataAgenda), or that nothing does. The rest of what the agenda would list is the next read date.
-  function dataVerdictHtml(items, esc){
-    var needs = items.filter(function(x){ return x.rank < 5; }), next = items.filter(function(x){ return x.rank === 5; })[0];
-    var head = needs.length ? esc(needs[0].text) : 'Nothing needs you.';
-    var more = needs.length > 1 ? ' ' + (needs.length - 1) + ' more on the Bot page and in the exports.' : '';
-    return '<div class="data-verdict">' + head + '</div><div class="kal-note" style="margin:6px 0 0">' + (needs.length ? esc(needs[0].detail) + esc(more) : (next ? esc(next.text + ' ' + next.detail) : 'No read is scheduled.')) + '</div>';
+
+  // Account result line (Oct 24, 2026, the owner: "bring back our account PnL line ... with a date filter"). The running settled result of the bot's orders,
+  // cut to a range. It reads only what the Bot page already loaded (the last 1,000 orders), so a long range reaches back only as far as those orders do, and
+  // the note says so instead of drawing a flat start that is not real. Read only: the buttons change what is drawn, nothing else.
+  var KAL_PNL_RANGES = [{ key: '1D', label: 'Today' }, { key: '1W', label: '1W' }, { key: '1M', label: '1M' }, { key: '3M', label: '3M' }, { key: 'YTD', label: 'YTD' }, { key: 'ALL', label: 'All' }];
+  var kalshiPnlRange = '1M';
+  function kalshiPnlRangeStart(key, nowMs){
+    var day = 86400000, p = kalDayKey(nowMs).split('-').map(Number);
+    if(key === '1D'){ return Date.UTC(p[0], p[1] - 1, p[2], 6, 0, 0); }   // the Central day starts at 05:00 or 06:00 UTC; 06:00 is exact in winter and an hour late in summer, so the line starts at the first trade of the day either way
+    if(key === '1W'){ return nowMs - 7 * day; }
+    if(key === '1M'){ return nowMs - 30 * day; }
+    if(key === '3M'){ return nowMs - 90 * day; }
+    if(key === 'YTD'){ return Date.UTC(p[0], 0, 1, 6, 0, 0); }
+    return 0;
   }
-  // The rules on trial, each with how far it has got and the date it is read. A bar and one line; no figure that is not a count of what the rule counts.
-  function dataRulesHtml(t, live, now, esc){
-    var row = function(name, line, frac, date){
-      return '<div class="data-rule"><div class="data-rule-top"><b>' + esc(name) + '</b><span class="kal-note" style="margin:0">' + esc(line) + '</span></div>' + (frac === null ? '' : '<div class="data-bar"><i style="width:' + Math.round(Math.max(0, Math.min(1, frac)) * 100) + '%"></i></div>') + (date ? '<div class="kal-note" style="margin:6px 0 0">' + esc(date) + '</div>' : '') + '</div>';
-    };
-    var smooth = DATA_RULES[0], one = DATA_RULES[2], gold = DATA_RULES[3];
-    return row('Smooth climb, Bitcoin and Ethereum', t.settled ? t.settled + ' fills settled, ' + t.lost40 + ' lost (the line is 3 in the first 40)' : (t.fills ? t.fills + ' fills, none settled yet' : 'no fills yet'), t.settled / 40, 'Read ' + kalDate(smooth.check)) +
-      row('One crypto order per window', live.windows ? live.twoFill + ' windows with two, of ' + live.windows + ' (should stay 0)' : 'no windows yet', null, 'Export review ' + kalDate(one.check)) +
-      row('Probe markets drop rule', 'AUD/USD, USD/CAD and natural gas, at 200 entries each', null, 'Check ' + kalDate(gold.check));
+  function kalshiPnlCardHtml(orders, key, nowMs, esc, money){
+    var since = kalshiPnlRangeStart(key, nowMs), pts = kalshiPnlSeries(orders, since);
+    var all = kalshiPnlSeries(orders, 0), oldest = all.length ? all[0].t : null;
+    var short = oldest !== null && since < oldest && key !== 'ALL' && key !== '1D';
+    var note = short ? 'The bot has ' + all.length + ' settled trades loaded, back to ' + kalDate(oldest) + '. A longer range cannot show more than that.' : '';
+    return kalshiLineSvg(pts, esc, money) + (note ? '<div class="kal-note">' + esc(note) + '</div>' : '');
   }
-  function renderKalshiRecord(){
-    var card = document.getElementById('kalRecord');
+  function renderKalshiPnl(){
+    var card = document.getElementById('kalPnl');
     if(!card){ return; }
-    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var set = function(id, h){ var el = document.getElementById(id); if(el){ el.innerHTML = h; } };
-    if(!kalshiOrdersLoaded){ set('dataVerdict', '<div class="kal-empty">Loading the bot\'s trades...</div>'); return; }
-    var ses = kalshiLiveCtl && kalshiLiveCtl.session, nowMs = Date.now(), hbS = kalshiHeartbeat(ses, nowMs), trial = dataTrial(orders), trend = dataMarketTrend(orders);
-    var risk = kalshiRiskMeter(orders, ses, nowMs);
-    var shards = kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok && Array.isArray(kalshiLiveAcct.balance.shards) ? kalshiLiveAcct.balance.shards.filter(function(x){ return x.shard === 0 || x.shard === 2; }) : [];
-    var balNow = kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null;
-    set('dataHead', escapeHtml(dataHeadline(orders, balNow, nowMs)));
-    set('dataVerdict', dataVerdictHtml(dataAgenda({ trial: trial, risk: risk, trend: trend, shards: shards, hb: hbS.state, now: nowMs, money: kalshiMoney }), escapeHtml));
-    set('dataTrial', dataRulesHtml(trial, dataLiveTests(kalshiLiveOrders), nowMs, escapeHtml));
-    set('dataNote', 'As of ' + kalTime(nowMs) + ' CT. Only the orders the bot sent are counted; a trade closed by hand is left out.');
+    var bar = document.getElementById('kalPnlRanges');
+    if(bar){ bar.innerHTML = KAL_PNL_RANGES.map(function(r){ return '<button type="button" class="kal-pill' + (r.key === kalshiPnlRange ? ' on' : '') + '" data-pnlrange="' + escapeHtml(r.key) + '" aria-pressed="' + (r.key === kalshiPnlRange) + '">' + escapeHtml(r.label) + '</button>'; }).join(''); }
+    if(!kalshiOrdersLoaded){ set('kalPnlBody', '<div class="kal-empty">Loading the bot\'s trades...</div>'); return; }
+    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    set('kalPnlBody', kalshiPnlCardHtml(orders, kalshiPnlRange, Date.now(), escapeHtml, kalshiMoney));
   }
+  (function(){
+    var bar = document.getElementById('kalPnlRanges');
+    if(bar){ bar.addEventListener('click', function(e){ var k = e.target && e.target.getAttribute ? e.target.getAttribute('data-pnlrange') : null; if(k){ kalshiPnlRange = k; renderKalshiPnl(); } }); }
+  })();
 
   var kalshiTradeFilter = 'bot';   // 'bot' hides manual trades from the Recent trades card, 'all' shows both
   (function(){

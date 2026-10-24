@@ -50,13 +50,12 @@ gates.Y5 = () => {
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(names(rail[1]), ['account', 'status', 'risk', 'positions'], 'the rail holds the account strip, the bot status, the loss stop and risk card, and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['trades', 'record'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
+  assert.deepStrictEqual(names(main), ['pnl', 'trades'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
   const dataPage0 = html.slice(html.indexOf('id="page-data"'), html.indexOf('id="page-settings"'));
-  for (const id of ['dataHead', 'dataVerdict', 'dataTrial']) assert.ok(html.indexOf('id="' + id + '"') > html.indexOf('data-card="record"'), id + ' lives in the record card on the Bot page (the Data page was removed Oct 24, 2026)');
   assert.ok(!/data-card="performance"/.test(html) && !/id="kalChartRange"/.test(html) && !/id="kalChartLine"/.test(html), 'and the Performance card, its range choice and its duplicate line are gone from the Bot page');
   // Oct 21, 2026 cleanup: the stat tiles and tables left the account card (a tall column) and live in the Data page's "All the numbers" fold; the account card is the status and the controls.
   assert.ok(!/id="kalPerf"/.test(rail[1]), 'the stat tiles and tables are not in the rail');

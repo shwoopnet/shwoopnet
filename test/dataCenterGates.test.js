@@ -20,13 +20,33 @@ const lift = (names, extra) => new Function("var KAL_TZ = 'America/Chicago';\n" 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const money = (v) => '$' + v.toFixed(2);
 
-// Nothing on the page can send an order or change a setting: the page has no button, input, select, textarea or form inside it.
+// Nothing on the account result card can send an order or change a setting: its only controls are the range buttons, and its code calls nothing.
 gates.D1 = () => {
-  const page = html.slice(html.indexOf('id="kalRecord"'), html.indexOf('</main>', html.indexOf('id="kalRecord"')));
-  assert.ok(page.length > 200);
-  assert.ok(!/<(button|input|select|textarea|form|a )\b/i.test(page), 'the record card has no control in it');
-  const code = ['dataMarketRows', 'dataTrial', 'dataMarketTrend', 'dataAgenda', 'dataVerdictHtml', 'dataRulesHtml', 'dataHeadline', 'dataLiveTests', 'renderKalshiRecord'].map(fnSource).join('\n');
+  const card = html.slice(html.indexOf('id="kalPnl"'), html.indexOf('data-card="trades"', html.indexOf('id="kalPnl"')));
+  assert.ok(card.length > 100);
+  assert.ok(!/<(input|select|textarea|form|a )\b/i.test(card), 'the card has no input, select or form');
+  const code = ['kalshiPnlSeries', 'kalshiPnlRangeStart', 'kalshiPnlCardHtml', 'renderKalshiPnl', 'kalshiLineSvg'].map(fnSource).join('\n');
   assert.ok(!/api\.|window\.__shwoopAPI|fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code), 'and its code calls nothing: it only draws what the Bot page already loaded');
+  assert.ok(!/id="kalRecord"|data-card="record"|renderKalshiRecord/.test(html), 'the record card (headline and rules on trial) is gone (removed Oct 24, 2026, the owner)');
+};
+
+// The account result line: the range cuts the running settled result, and the line starts at zero at the start of the range, so a long range is never drawn from a total the range did not earn.
+gates.PL1 = () => {
+  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPnlRangeStart', 'kalshiLineSvg', 'kalshiPnlCardHtml']);
+  const now = Date.UTC(2026, 9, 24, 18), day = 86400000;
+  const o = (d, p) => ({ ts: now - d * day, series: 'KXGOLD15M', settled: true, fillCount: '1.00', settledPnl: p });
+  const orders = [o(40, 5), o(20, -1), o(2, 2), o(0.1, 0.5)];
+  const total = (k) => { const s = f.kalshiPnlSeries(orders, f.kalshiPnlRangeStart(k, now)); return s.length ? s[s.length - 1].cum : null; };
+  assert.strictEqual(total('1M'), 1.5, '30 days: -1 + 2 + 0.5 (the 40 day old trade is out, and the line starts at zero)');
+  assert.strictEqual(total('1W'), 2.5);
+  assert.strictEqual(total('1D'), 0.5, 'today only');
+  assert.strictEqual(total('ALL'), 6.5);
+  assert.strictEqual(total('YTD'), 6.5, 'the year to date holds all four');
+  const money = (v) => '$' + v.toFixed(2);
+  const out = f.kalshiPnlCardHtml(orders, '3M', now, esc, money);
+  assert.ok(out.includes('+$6.50') && /<svg/.test(out), 'the total and the line');
+  assert.ok(/back to /.test(f.kalshiPnlCardHtml([o(2, 2), o(0.1, 0.5)], '3M', now, esc, money)), 'a range longer than the loaded orders says how far back they go');
+  assert.ok(/\*\*\*\*/.test(f.kalshiPnlCardHtml(orders, '1M', now, esc, (v) => '****')) && !/\$/.test(f.kalshiPnlCardHtml(orders, '1M', now, esc, (v) => '****')), 'Privacy view masks every dollar figure on it');
 };
 
 // Per contract is the settled result over the contracts that FILLED, so a 4 contract trade is not 4 trades; trades closed by hand are not in the table at all.
@@ -110,78 +130,11 @@ gates.D12 = () => {
 };
 
 
-// DQ: the questions and agenda (Oct 23, 2026, the owner chose "Questions + agenda"). Consequences: what needs a look is ranked by rules written in advance, a rule on trial that crosses its line goes first, a quiet account says "Nothing needs you",
-// and the page is six questions that fold open, with no control in them.
-const dqNames = ['kalshiOrderPnl', 'kalshiMarketName', 'kalDate', 'dataTrial', 'dataMarketTrend', 'dataAgenda', 'dataVerdictHtml', 'dataRulesHtml'];
-const dqExtra = html.slice(html.indexOf('  var DATA_SMOOTH_FROM'), html.indexOf('  // The smooth-climb rule on trial')) + html.slice(html.indexOf('  var DATA_SHARD_LOW'), html.indexOf('  // The list, in the order written on the page'));
-const dqLift = () => lift(dqNames, dqExtra + "\nfunction kalshiAgeText(s){ return s + ' seconds ago'; }");
-const dqOrder = (series, ts, pnl, extra) => Object.assign({ ts, series, settled: true, fillCount: '1.00', settledPnl: pnl, smooth: undefined }, extra || {});
-
-gates.DQ1 = () => {
-  const f = dqLift();
-  const after = Date.UTC(2026, 9, 24, 12), before = Date.UTC(2026, 9, 20, 12);
-  const sm = (n, lost) => Array.from({ length: n }, (_, i) => dqOrder('KXBTC15M', after + i * 1000, i < lost ? -0.9 : 0.06, { smooth: true }));
-  assert.strictEqual(f.dataTrial([...sm(10, 2), dqOrder('KXBTC15M', before, -0.9, { smooth: true }), dqOrder('KXGOLD15M', after, -3, { smooth: true })]).fills, 10, 'only Bitcoin and Ethereum smooth fills after the deploy are on trial');
-  assert.strictEqual(f.dataTrial(sm(10, 2)).near, true, 'two losses is one step from the line');
-  assert.strictEqual(f.dataTrial(sm(10, 3)).past, true, 'three losses in the first 40 crosses it');
-  assert.strictEqual(f.dataTrial(sm(100, 0).map((o) => Object.assign(o, { settledPnl: -0.01 }))).past, true, 'a combined result under zero after 100 fills crosses it');
-  const money = (v) => '$' + v.toFixed(2);
-  const now = Date.UTC(2026, 9, 25);
-  const quiet = f.dataAgenda({ trial: f.dataTrial([]), risk: { fraction: 0.1 }, trend: [], shards: [{ shard: 0, dollars: 100 }, { shard: 2, dollars: 300 }], hb: 'ok', now, money });
-  assert.deepStrictEqual(quiet.map((x) => x.rank), [5], 'a quiet account has only the next scheduled read');
-  const out = f.dataVerdictHtml(quiet, esc);
-  assert.ok(/Nothing needs you/.test(out) && /Smooth-climb forward read/.test(out), 'and says so, with the date of the next read');
-  const loud = f.dataVerdictHtml(f.dataAgenda({ trial: f.dataTrial(sm(10, 3)), risk: { fraction: 0.1 }, trend: [], shards: [], hb: 'ok', now, money }), esc);
-  assert.ok(/Smooth climb has crossed its line/.test(loud) && !/Nothing needs you/.test(loud), 'a rule past its line is the sentence at the top');
-  const busy = f.dataAgenda({ trial: f.dataTrial(sm(10, 3)), risk: { fraction: 0.8 }, trend: [{ name: 'Bitcoin', enough: true, flag: true, recent: -0.4, prior: -0.5, w: 33, n: 66 }], shards: [{ shard: 0, dollars: 0.5 }], hb: 'down', now, money });
-  assert.deepStrictEqual(busy.map((x) => x.rank), [1, 2, 3, 4, 4, 5], 'a rule past its line first, then the stop, the market, the machine, the next read: ' + JSON.stringify(busy.map((x) => x.text)));
-  const low = f.dataAgenda({ trial: f.dataTrial([]), risk: { fraction: 0.1 }, trend: [], shards: [{ shard: 0, dollars: 25 }, { shard: 2, dollars: 300 }], hb: 'ok', now, money });
-  assert.deepStrictEqual(low.map((x) => x.rank), [4, 5], 'a shard under $30 is called out while there is still time to top it up by hand');
-  assert.ok(/Shard 0 is low/.test(low[0].text) && /Transfers/.test(low[0].detail), 'and says where to top it up');
-  assert.ok(/Shard 0 is low/.test(busy[3].text) && /Bitcoin is -0\.4c/.test(busy[2].text), 'the figures are in the lines');
-};
-
-gates.DQ2 = () => {
-  const f = dqLift();
-  const o = (i, p) => dqOrder('KXXRP15M', i * 1000, p, { ts: i * 1000 });
-  const mk = (n, recent) => Array.from({ length: n }, (_, i) => o(i, i >= n / 2 ? recent : 0.05));
-  const t59 = f.dataMarketTrend(mk(59, -0.1)), t60 = f.dataMarketTrend(mk(60, -0.1))[0];
-  assert.strictEqual(t59[0].enough, false, 'fewer than 60 trades says nothing');
-  assert.ok(t60.enough && t60.w === 30 && t60.flag === true && t60.recent < 0 && t60.prior > 0, 'a market whose latest 30 are negative against 30 positive is flagged');
-  assert.strictEqual(f.dataMarketTrend(mk(60, 0.05))[0].flag, false, 'an unchanged market is not');
-  assert.strictEqual(f.dataMarketTrend(mk(60, 0.02))[0].flag, true, 'a result that fell to under half of the one before is flagged');
-};
-
-// DS: the page is one screen (Oct 23, 2026, the owner: "do we need a data page?", then "shrink to one screen"). Consequences: a verdict sentence, the growth line and the rules on trial are all there is; everything else the page used to carry
-// (tiles, strategy numbers, by-market table, weekly bars, order ring, each-trade bars, entry timing, price bands, the six question folds) is gone, and the page still has no control.
+// DS: there is no Data page and no record card. Everything the Data page carried (tiles, tables, rings, folds, the headline, the rules on trial) is gone from the site.
 gates.DS1 = () => {
   assert.ok(!/id="page-data"|data-page="data"/.test(html), 'there is no Data page and no nav button for it (removed Oct 24, 2026 at the owner\'s request)');
-  const card = html.slice(html.indexOf('data-card="record"'), html.indexOf('</main>', html.indexOf('data-card="record"')));
-  ['dataHead', 'dataVerdict', 'dataTrial', 'dataNote'].forEach((id) => assert.ok(card.includes('id="' + id + '"'), id + ' is in the record card on the Bot page'));
-  ['dataTiles', 'dataWeekly', 'dataStats', 'dataMarkets', 'dataLead', 'dataLiveTests', 'kalChartPie', 'kalChartBars', 'kalPerf', 'dataQa1', 'dataAgenda', 'dataLine', 'dataDots'].forEach((id) => assert.ok(!html.includes('id="' + id + '"'), id + ' is gone'));
-  assert.ok(/data-card="trades"[\s\S]*data-card="record"/.test(html), 'the record sits below Recent trades, at the bottom of the Bot page');
-  assert.ok(!/<details/.test(card), 'nothing folds');
-};
-gates.DS2 = () => {
-  const f = lift(['kalDate', 'dataTrial', 'dataLiveTests', 'dataRulesHtml', 'kalshiOrderPnl', 'kalshiMarketName'], html.slice(html.indexOf('  var DATA_SMOOTH_FROM'), html.indexOf('  // The smooth-climb rule on trial')));
-  const out = f.dataRulesHtml(f.dataTrial([]), f.dataLiveTests([]), Date.UTC(2026, 9, 25), esc);
-  assert.ok(/Smooth climb, Bitcoin and Ethereum/.test(out) && /no fills yet/.test(out) && /One crypto order per window/.test(out) && /Probe markets drop rule/.test(out), 'three rules, each saying what it has so far');
-  assert.ok(/Read Nov 12/.test(out) && /Export review Nov 17/.test(out) && /Check Nov 30/.test(out), 'each with the date it is read');
-  assert.ok(!/<(button|input|select|a )\b/i.test(out), 'plain, no control');
-};
-
-// DT: the headline and the dots (Oct 24, 2026). Consequences: the headline is the last 30 days as a share of the account (not a dollar figure), a win is a dot that is brighter the bigger it was, a loss is a red ring, hover text goes through the money
-// formatter so Privacy view masks it, and no dot is a control.
-gates.DT1 = () => {
-  const f = lift(['kalshiOrderPnl', 'dataHeadline']);
-  const now = Date.UTC(2026, 9, 24, 12), day = 86400000;
-  const o = (d, p) => ({ ts: now - d * day, settled: true, fillCount: '1.00', settledPnl: p });
-  assert.strictEqual(f.dataHeadline([o(1, 10), o(2, -2), o(40, 99)], 508, now), 'Up 1.6%.', 'the 40 day old trade is left out: 8 / (508 - 8)');
-  assert.strictEqual(f.dataHeadline([o(1, -5)], 495, now), 'Down 1.0%.', '-5 / (495 + 5)');
-  assert.strictEqual(f.dataHeadline([o(1, 0.1)], 500, now), 'Flat.', 'under 0.05% is flat');
-  assert.strictEqual(f.dataHeadline([o(40, 5)], 500, now), 'No trades in 30 days.');
-  assert.strictEqual(f.dataHeadline([o(1, 1), o(2, 1)], null, now), '2 trades in 30 days.', 'an unknown balance gives a count, never a wrong percentage');
-  assert.ok(!/\$/.test(f.dataHeadline([o(1, 10)], 508, now)), 'not a dollar figure, so Privacy view leaves it showing');
+  ['dataHead', 'dataVerdict', 'dataTrial', 'dataNote', 'dataTiles', 'dataWeekly', 'dataStats', 'dataMarkets', 'dataLead', 'kalChartPie', 'kalChartBars', 'kalPerf', 'dataQa1', 'dataAgenda', 'dataLine', 'dataDots'].forEach((id) => assert.ok(!html.includes('id="' + id + '"'), id + ' is gone'));
+  assert.ok(/data-card="pnl"[\s\S]*data-card="trades"/.test(html), 'the account result line sits above Recent trades on the Bot page');
 };
 
 let failed = 0;
