@@ -186,7 +186,7 @@
       background: var(--panel);
     }
     .side-nav-divider{ display:none; }
-    .side-nav-item{ width:auto; min-width:50px; padding:6px 8px; flex-direction:column; gap:4px; text-align:center; font-size:11px; }
+    .side-nav-item{ width:auto; min-width:50px; padding:6px 8px; flex-direction:column; gap:4px; text-align:center; font-size:12px; }
   }
   /* Room for the fixed sidebar so page content never sits underneath it --
      right-side padding on wide screens where the sidebar is a vertical
@@ -228,7 +228,7 @@
   .clock .time{ color: var(--paper); font-size:16px; font-weight:700; letter-spacing:.01em; }
   /* Hours, minutes and seconds are one number (the owner, Oct 23, 2026), so the seconds share the same size, weight and colour. */
   .clock .clock-sec{ font-size:inherit; font-weight:inherit; color:inherit; margin-left:0; }
-  .clock .clock-sub{ font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--muted); margin-top:2px; white-space:nowrap; }
+  .clock .clock-sub{ font-size:12px; font-weight:600; letter-spacing:.04em; color:var(--muted); margin-top:2px; white-space:nowrap; }
 
   .settings-page{ display:flex; flex-direction:column; gap:28px; margin-top:24px; }
   .settings-section-title{
@@ -254,7 +254,7 @@
   .settings-row[hidden]{ display:none; }
   .settings-row:last-of-type{ border-bottom:none; }
   .settings-row-title{ font-size:14px; margin-bottom:4px; }
-  .settings-row-desc{ font-size:12px; color: var(--muted); }
+  .settings-row-desc{ font-size:13px; line-height:1.5; max-width:64ch; color: var(--muted); }
   .settings-choice-group{ display:flex; gap:4px; }
 
   .settings-toggle-switch{
@@ -269,17 +269,17 @@
   .settings-toggle-switch[aria-checked="true"]{ border-color: var(--amber-dim); background: var(--amber-glow); }
   .settings-toggle-switch[aria-checked="true"] .toggle-knob{ background: var(--amber); transform: translateX(16px); }
   .settings-reset-btn{
-    background: transparent; border:1px solid var(--loss); color: var(--loss);
+    background: transparent; border:1px solid var(--loss); color: var(--loss-text);
     padding:8px 16px; border-radius:5px; font-size:12px; cursor:pointer;
   }
   .settings-reset-btn:hover{ background: var(--loss-glow); }
   .settings-reset-btn[disabled]{ opacity:.6; cursor:default; }
-  .settings-note{ font-size:11px; color: var(--muted); margin-top:20px; line-height:1.6; }
+  .settings-note{ font-size:12px; color: var(--muted); margin-top:20px; line-height:1.6; }
 
   .labs-backtest-status{ font-size:12px; color: var(--muted); margin-bottom:16px; }
   .labs-backtest-status.ok{ color: var(--gain); }
-  .labs-backtest-status.fail{ color: var(--loss); }
-  .labs-backtest-status.down{ color: var(--loss); }
+  .labs-backtest-status.fail{ color: var(--loss-text); }
+  .labs-backtest-status.down{ color: var(--loss-text); }
 
   .page{ padding: 0 28px 40px 28px; }
   .page[hidden]{ display:none; }
@@ -299,7 +299,7 @@
   /* The mood is a feeling, not a verdict on a trade (the owner, Oct 23, 2026: "as little panic-y as possible"), so it is white and grey, never red or green. */
   .mood-kv .tape-chg.up, .mood-kv .tape-chg.down{ color:var(--muted); }
   .mood-track i{ position:absolute; top:-4px; width:3px; height:16px; margin-left:-1px; border-radius:2px; background:var(--paper); }
-  .mood-ends{ display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+  .mood-ends{ display:flex; justify-content:space-between; color:var(--muted); font-size:12px; }
   .mood-kv{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); font-size:13px; }
   .mood-kv > span:first-child{ color:var(--muted); }
   .brief-win .brief-section-title{ margin:0 0 12px 0; }
@@ -314,10 +314,10 @@
   .brief-chart-name{ color:var(--muted); font-size:12px; }
   .brief-chart-px{ font:800 20px 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; margin:2px 0; }
   .brief-chart-chg{ font-size:12px; }
-  .brief-chart-d{ font:600 12px 'Public Sans', sans-serif; margin-left:6px; } .brief-chart-d.up{ color:var(--gain); } .brief-chart-d.down{ color:var(--loss); }
-  .brief-chart-ft{ display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
-  .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:11px; }
-  .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss); }
+  .brief-chart-d{ font:600 12px 'Public Sans', sans-serif; margin-left:6px; } .brief-chart-d.up{ color:var(--gain); } .brief-chart-d.down{ color:var(--loss-text); }
+  .brief-chart-ft{ display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+  .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:12px; }
+  .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss-text); }
   .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; }
   .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
   .brief-chart svg line{ stroke:var(--border); stroke-width:1; stroke-dasharray:3 4; vector-effect:non-scaling-stroke; }
@@ -336,10 +336,10 @@
   .tape-name{ color:var(--muted); }
   .tape-px, .tape-chg{ font-weight:600; }
   .tape-chg.up{ color:var(--gain); }
-  .tape-chg.down{ color:var(--loss); }
-  .tape-asof, .brief-asof{ color:var(--muted); font-size:11px; }
+  .tape-chg.down{ color:var(--loss-text); }
+  .tape-asof, .brief-asof{ color:var(--muted); font-size:12px; }
   .tape-asof{ flex:none; padding:0 12px; position:relative; z-index:1; background:var(--panel); }
-  .tape-asof.stale, .brief-asof.stale{ color:var(--loss); }
+  .tape-asof.stale, .brief-asof.stale{ color:var(--loss-text); }
   .brief-asof{ margin:-6px 0 14px 2px; }
 
   .brief-section-title{
@@ -356,7 +356,7 @@
   .news-item:hover .news-item-headline{ color: var(--amber); }
   .news-item{ transition: transform .15s ease; } .news-item:hover{ transform: translateX(3px); }
   .news-item-headline{ font-size:13px; line-height:1.5; }
-  .news-item-meta{ font-size:11px; color: var(--muted); }
+  .news-item-meta{ font-size:12px; color: var(--muted); }
 
   /* ---------- Trade Overview page ---------- */
   .trades-header{
@@ -420,7 +420,7 @@
   .kal-hold-body .kal-hold-stats{ grid-template-columns:1fr; gap:10px; align-content:start; }
   .kal-hold-chart{ min-width:0; display:flex; flex-direction:column; gap:6px; }
   .kal-hold-chart svg{ display:block; width:100%; height:110px; }
-  .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:11px; color:var(--muted); }
+  .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); }
   .kal-hc-line{ fill:none; stroke:var(--paper); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
   .kal-hc-fill{ fill:rgba(255,255,255,.06); stroke:none; }
   .kal-hc-paid{ stroke:rgba(255,255,255,.3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
@@ -429,6 +429,7 @@
   .kal-hold-stats .kal-lbl{ display:block; font-size:12px; color:var(--muted); } .kal-hold-stats b{ font-size:14px; font-weight:700; }
   .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
   .kal-pnl-ranges{ display:flex; gap:6px; flex-wrap:wrap; } .kal-pnl-ranges .kal-pill{ background:none; cursor:pointer; min-height:40px; padding:0 14px; font-family:inherit; } .kal-pnl-ranges .kal-pill.on{ color:var(--paper); border-color:var(--paper); }
+  .kal-pnl-head{ display:flex; align-items:baseline; gap:12px; margin:4px 0 10px; font-variant-numeric:tabular-nums; } .kal-pnl-head b{ font-size:28px; font-weight:800; line-height:1.1; letter-spacing:-.01em; } .kal-pnl-head span{ font-size:18px; font-weight:700; }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss-text); border-color:var(--loss); }
   .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
@@ -499,7 +500,7 @@
     .settings-toggle-switch::after{ content:''; position:absolute; inset:-10px -6px; }
   }
   @media (max-width:900px){
-    .side-nav-item{ font-size:11px; min-width:64px; }
+    .side-nav-item{ font-size:12px; min-width:64px; }
   }
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
@@ -549,7 +550,7 @@
   .tf-btn.active{ background: var(--amber-glow); border-color: var(--amber-dim); color: var(--amber); }
   .modal-field{ margin-bottom:14px; }
   .modal-field label{
-    display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    display:block; font-size:12px; text-transform:uppercase; letter-spacing:.05em;
     color: var(--muted); margin-bottom:6px;
   }
   .modal-field input{
@@ -566,7 +567,7 @@
     padding:0; border-radius:4px;
   }
   .password-toggle:hover{ color: var(--paper); }
-  .modal-error{ font-size:11px; color: var(--loss); margin-top:2px; display:none; }
+  .modal-error{ font-size:12px; color: var(--loss-text); margin-top:2px; display:none; }
   .modal-error.show{ display:block; }
   .modal-btn-submit{
     background: var(--amber-glow); border:1px solid var(--amber-dim); color: var(--amber);
@@ -649,7 +650,7 @@
   .auth-gate form{ text-align:left; }
   .auth-submit{ width:100%; margin-top:4px; }
   .auth-forgot{
-    background:none; border:none; color: var(--muted); font-size:11px; cursor:pointer;
+    background:none; border:none; color: var(--muted); font-size:12px; cursor:pointer;
     text-decoration:underline;
     margin-top:2px; padding:14px 4px; margin-left:-4px; margin-right:-4px;
   }
@@ -686,7 +687,7 @@
   }
 
   .site-footer{
-    text-align:center; color: var(--muted); font-size: 11px; line-height:1.6;
+    text-align:center; color: var(--muted); font-size: 12px; line-height:1.6;
     margin: 10px 28px 24px 28px; padding: 18px 0 0 0; border-top: 1px solid var(--border);
   }
   .site-footer .footer-copyright{ color: var(--paper); font-size:12px; font-weight:600; margin-bottom:6px; }
@@ -806,7 +807,7 @@
   }
   /* The slogan behind every signed-in page (the owner, Oct 23, 2026: "3 looks sick"): staggered, slightly tilted rows in the wordmark's lettering, very faint, fixed behind the cards so it only shows in the gaps. It is the same on every page and is
      off under the device reduce-motion setting, like the soft light. It carries no information and nothing on it moves. */
-  .bg-slogan{ position:fixed; inset:-40px; z-index:-1; pointer-events:none; transform:rotate(-8deg); overflow:hidden; font-family:'Titan One','Public Sans',sans-serif; font-size:74px; line-height:1.35; color:rgba(255,255,255,.035); user-select:none; }
+  .bg-slogan{ position:fixed; inset:-40px; z-index:-1; pointer-events:none; transform:rotate(-8deg); overflow:hidden; font-family:'Titan One','Public Sans',sans-serif; font-size:74px; line-height:1.35; color:rgba(255,255,255,.025); user-select:none; }
   .bg-slogan p{ margin:0; white-space:nowrap; }
   .bg-slogan p:nth-child(even){ margin-left:-260px; }
   @media (max-width:900px){ .bg-slogan{ font-size:44px; } }
@@ -2562,33 +2563,26 @@
 
   // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
   // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
-  function kalshiLineSvg(points, esc, money, total){
+  // The line only: the figures are drawn above it as ordinary text (see kalshiPnlCardHtml), because text inside a scaled SVG shrank to about 10px on a phone.
+  function kalshiLineSvg(points, esc, money){
     if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
     var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    // The end label is right-aligned to the edge and the plot leaves room for its real length, so a bigger total (+$123.45, +$1,234.56) is not cut off by the viewBox.
-    var endLabel = fmt(points[points.length - 1].cum);
-    // The result as a share of the account at the start of the range (the total now minus this range's result), so it is a percentage and Privacy view, which masks dollars only, leaves it showing.
-    // Nothing when the total is unknown or the start would not be above zero. Deposits and your own trades are in the total, so it is "of the account", not a return on the bot alone.
-    var net = points[points.length - 1].cum, startBal = Number(total) - net;
-    var pctLabel = Number.isFinite(startBal) && startBal > 0 ? (net >= 0 ? '+' : '-') + Math.abs(net / startBal * 100).toFixed(1) + '%' : '';
-    var W = 460, H = 170, L = 8, R = Math.max(60, Math.max(endLabel.length, pctLabel.length) * 9 + 16), T = 14, B = 10;
+    var W = 460, H = 150, L = 8, R = 8, T = 10, B = 10;
     var vals = points.map(function(p){ return p.cum; }).concat([0]);
     var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
     var X = function(i){ return L + (W - L - R) * (i / (points.length - 1)); };
     var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
-    var last = points[points.length - 1], up = last.cum >= 0, col = up ? 'var(--gain)' : 'var(--loss)';
+    var last = points[points.length - 1];
     var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
-    // Calm view: the line is one plain stroke and the points are invisible hover targets (a green or red dot per trade was hundreds of lights); only the end label carries the colour.
+    // Calm view: the line is one plain stroke and the points are invisible hover targets (a green or red dot per trade was hundreds of lights).
     var dots = points.map(function(p, i){
       return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="transparent"><title>' +
         esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
     }).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
       '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
-      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
-      '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15" data-px="15">' + esc(fmt(last.cum)) + '</text>' +
-      (pctLabel ? '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 24).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15" data-px="15">' + esc(pctLabel) + '</text>' : '') + '</svg>';
+      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots + '</svg>';
   }
 
   // Account result line (Oct 24, 2026, the owner: "bring back our account PnL line ... with a date filter"). The running settled result of the bot's orders,
@@ -2607,7 +2601,13 @@
     return 0;
   }
   function kalshiPnlCardHtml(orders, key, nowMs, esc, money, total){
-    return kalshiLineSvg(kalshiPnlSeries(orders, kalshiPnlRangeStart(key, nowMs)), esc, money, total);
+    var pts = kalshiPnlSeries(orders, kalshiPnlRangeStart(key, nowMs));
+    if(pts.length < 2){ return kalshiLineSvg(pts, esc, money); }
+    // The result as a share of the account at the start of the range (the total now minus this range's result), so it is a percentage and Privacy view, which masks dollars only, leaves it showing.
+    // Nothing when the total is unknown or the start would not be above zero. Deposits and your own trades are in the total, so it is "of the account", not a return on the bot alone.
+    var net = pts[pts.length - 1].cum, startBal = Number(total) - net, sign = net >= 0 ? '+' : '-';
+    var pct = Number.isFinite(startBal) && startBal > 0 ? sign + Math.abs(net / startBal * 100).toFixed(1) + '%' : '';
+    return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '</div>' + kalshiLineSvg(pts, esc, money);
   }
   // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
   var kalshiPnlFetched = {}, kalshiPnlFetching = '';
