@@ -39,9 +39,9 @@ gates.G2 = () => {
 // The blank slate (Oct 12, 2026, at the owner's request: "an anti-degen proof website ... to prevent myself from full porting"). The site is three pages, and four since the read-only Data page (Oct 21, 2026).
 gates.G3 = () => {
   const pages = [...code.matchAll(/<main class="page" id="(page-[\w-]+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(pages, ['page-brief', 'page-kalshi', 'page-data', 'page-settings'], 'the site is the Brief, Kalshi, Data (read only, admin only, added Oct 21, 2026 at the owner\'s request) and Settings and nothing else');
+  assert.deepStrictEqual(pages, ['page-brief', 'page-kalshi', 'page-settings'], 'the site is the Brief, Kalshi and Settings and nothing else (the Data page was added Oct 21, 2026 and removed Oct 24, 2026 at the owner\'s request)');
   const nav = [...code.matchAll(/<button class="side-nav-item nav-item"[^>]*\bdata-page="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(nav, ['brief', 'kalshi', 'data', 'settings'], 'and the sidebar says the same');
+  assert.deepStrictEqual(nav, ['brief', 'kalshi', 'settings'], 'and the sidebar says the same');
   assert.ok(!/data-action="(notepad|history)"/.test(code), 'no notepad or history buttons');
   ['page-trades', 'page-journal', 'page-changelog', 'alpacaDock', 'tradeModal', 'tradeModalBackdrop', 'notepadPanel', 'historySidebar', 'tickerTape', 'exitTradeModal',
    'toastContainer', 'globalPausedBanner', 'headerLiveStatus', 'whatToWatchList', 'ctaToTrades'].forEach((id) =>

@@ -22,11 +22,11 @@ const money = (v) => '$' + v.toFixed(2);
 
 // Nothing on the page can send an order or change a setting: the page has no button, input, select, textarea or form inside it.
 gates.D1 = () => {
-  const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
+  const page = html.slice(html.indexOf('id="kalRecord"'), html.indexOf('</main>', html.indexOf('id="kalRecord"')));
   assert.ok(page.length > 200);
-  assert.ok(!/<(button|input|select|textarea|form|a )\b/i.test(page), 'the Data page has no control in it');
-  const code = ['dataMarketRows', 'dataTrial', 'dataMarketTrend', 'dataAgenda', 'dataVerdictHtml', 'dataRulesHtml', 'dataHeadline', 'dataDotsHtml', 'dataLiveTests', 'renderDataCenter'].map(fnSource).join('\n');
-  assert.ok(!/api\.|window\.__shwoopAPI|fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code), 'and its code calls nothing: it only draws what the Kalshi page already loaded');
+  assert.ok(!/<(button|input|select|textarea|form|a )\b/i.test(page), 'the record card has no control in it');
+  const code = ['dataMarketRows', 'dataTrial', 'dataMarketTrend', 'dataAgenda', 'dataVerdictHtml', 'dataRulesHtml', 'dataHeadline', 'dataLiveTests', 'renderKalshiRecord'].map(fnSource).join('\n');
+  assert.ok(!/api\.|window\.__shwoopAPI|fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code), 'and its code calls nothing: it only draws what the Bot page already loaded');
 };
 
 // Per contract is the settled result over the contracts that FILLED, so a 4 contract trade is not 4 trades; trades closed by hand are not in the table at all.
@@ -45,14 +45,16 @@ gates.D3 = () => {
 gates.D6 = () => {
   const calls = [];
   const page = () => ({ hidden: true, classList: { add() {}, remove() {}, toggle() {} }, querySelectorAll: () => [], offsetWidth: 1 });
-  const pages = { 'page-brief': page(), 'page-kalshi': page(), 'page-data': page(), 'page-settings': page() };
+  const pages = { 'page-brief': page(), 'page-kalshi': page(), 'page-settings': page() };
   const f = new Function('document', 'window', 'history', 'calls', 'var currentUserIsAdmin = true; var kalshiWatching = false; var pageEnterTimer = null;\nfunction kalshiOnShow(){ calls.push("show"); } function kalshiOnHide(){ calls.push("hide"); } function renderDataCenter(){} function pageEnter(){} var currentPageName; function setPageTitle(){}\n' + fnSource('showPage') + '; return showPage;')(
     { getElementById: (id) => pages[id] || null, querySelectorAll: () => [], querySelector: () => null }, { scrollTo() {} }, { replaceState() {} }, calls);
-  f('kalshi'); f('data'); f('kalshi');
-  assert.deepStrictEqual(calls, ['show'], 'one start for any number of switches between Bot and Data');
+  f('kalshi'); f('kalshi');
+  assert.deepStrictEqual(calls, ['show'], 'one start for the Bot page however often it is shown');
   f('brief');
-  assert.deepStrictEqual(calls, ['show', 'hide'], 'leaving both stops them');
+  assert.deepStrictEqual(calls, ['show', 'hide'], 'leaving it stops the listeners');
   f('data');
+  assert.deepStrictEqual(calls, ['show', 'hide'], 'an old #data link lands on the Brief and starts nothing');
+  f('kalshi');
   assert.deepStrictEqual(calls, ['show', 'hide', 'show'], 'and coming back starts them once');
 };
 
@@ -153,11 +155,12 @@ gates.DQ2 = () => {
 // DS: the page is one screen (Oct 23, 2026, the owner: "do we need a data page?", then "shrink to one screen"). Consequences: a verdict sentence, the growth line and the rules on trial are all there is; everything else the page used to carry
 // (tiles, strategy numbers, by-market table, weekly bars, order ring, each-trade bars, entry timing, price bands, the six question folds) is gone, and the page still has no control.
 gates.DS1 = () => {
-  const page = html.slice(html.indexOf('<main class="page" id="page-data"'), html.indexOf('<main class="page" id="page-settings"'));
-  ['dataHead', 'dataVerdict', 'dataLine', 'dataDots', 'dataTrial', 'dataNote'].forEach((id) => assert.ok(page.includes('id="' + id + '"'), id + ' is on the page'));
-  assert.strictEqual((page.match(/data-card="/g) || []).length, 4, 'four cards: the headline, the growth line, every trade as a dot, the rules on trial');
-  ['dataTiles', 'dataWeekly', 'dataStats', 'dataMarkets', 'dataLead', 'dataLiveTests', 'kalChartPie', 'kalChartBars', 'kalPerf', 'dataQa1', 'dataAgenda'].forEach((id) => assert.ok(!page.includes('id="' + id + '"'), id + ' is gone'));
-  assert.ok(!/<details/.test(page), 'nothing folds: there is nothing hidden to open');
+  assert.ok(!/id="page-data"|data-page="data"/.test(html), 'there is no Data page and no nav button for it (removed Oct 24, 2026 at the owner\'s request)');
+  const card = html.slice(html.indexOf('data-card="record"'), html.indexOf('</main>', html.indexOf('data-card="record"')));
+  ['dataHead', 'dataVerdict', 'dataTrial', 'dataNote'].forEach((id) => assert.ok(card.includes('id="' + id + '"'), id + ' is in the record card on the Bot page'));
+  ['dataTiles', 'dataWeekly', 'dataStats', 'dataMarkets', 'dataLead', 'dataLiveTests', 'kalChartPie', 'kalChartBars', 'kalPerf', 'dataQa1', 'dataAgenda', 'dataLine', 'dataDots'].forEach((id) => assert.ok(!html.includes('id="' + id + '"'), id + ' is gone'));
+  assert.ok(/data-card="trades"[\s\S]*data-card="record"/.test(html), 'the record sits below Recent trades, at the bottom of the Bot page');
+  assert.ok(!/<details/.test(card), 'nothing folds');
 };
 gates.DS2 = () => {
   const f = lift(['kalDate', 'dataTrial', 'dataLiveTests', 'dataRulesHtml', 'kalshiOrderPnl', 'kalshiMarketName'], html.slice(html.indexOf('  var DATA_SMOOTH_FROM'), html.indexOf('  // The smooth-climb rule on trial')));
@@ -179,20 +182,6 @@ gates.DT1 = () => {
   assert.strictEqual(f.dataHeadline([o(40, 5)], 500, now), 'No trades in 30 days.');
   assert.strictEqual(f.dataHeadline([o(1, 1), o(2, 1)], null, now), '2 trades in 30 days.', 'an unknown balance gives a count, never a wrong percentage');
   assert.ok(!/\$/.test(f.dataHeadline([o(1, 10)], 508, now)), 'not a dollar figure, so Privacy view leaves it showing');
-};
-gates.DT2 = () => {
-  const f = lift(['kalDateTime', 'kalshiOrderPnl', 'kalshiMarketName', 'dataDotsHtml']);
-  const o = (h, series, p) => ({ ts: Date.UTC(2026, 9, 14, h), series, settled: true, fillCount: '1.00', settledPnl: p });
-  const out = f.dataDotsHtml([o(18, 'KXGOLD15M', -3.8), o(16, 'KXGOLD15M', 0.4), o(17, 'KXBTC15M', 0.1)], esc, money);
-  assert.strictEqual((out.match(/class="dd"/g) || []).length, 2, 'two wins are dots');
-  assert.strictEqual((out.match(/class="dd dd-loss"/g) || []).length, 1, 'one loss is a ring');
-  assert.ok(out.indexOf('Gold \u00b7 +$0.40') < out.indexOf('Bitcoin \u00b7 +$0.10') && out.indexOf('Bitcoin \u00b7 +$0.10') < out.indexOf('Gold \u00b7 -$3.80'), 'oldest first, each with its market and signed result');
-  assert.ok(/opacity:1\.00/.test(out) && /opacity:0\.51/.test(out), 'the biggest win is fully bright, a quarter of it is dimmer: 0.35 + 0.65 * 0.25');
-  assert.ok(/3 trades, 1 loss/.test(out) && !/<(button|input|select|a )\b/i.test(out), 'it says what it shows and has no control');
-  assert.ok(/Dots appear after the first settled trade/.test(f.dataDotsHtml([], esc, money)), 'nothing yet says so');
-  const masked = f.dataDotsHtml([o(16, 'KXGOLD15M', 0.4)], esc, (x) => '****');
-  assert.ok(masked.includes('+****') && !/\$0\.40/.test(masked), 'hover text goes through the money formatter');
-  assert.ok(/dataDotsHtml\(orders, escapeHtml, kalshiMoney\)/.test(html), 'and the page passes the masking formatter');
 };
 
 let failed = 0;
