@@ -1159,26 +1159,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
 // be told apart later (docs: second account design). Nothing reads it yet, and a record without it is "main".
 const DEFAULT_ACCOUNT_ID = "main";
 
-// Automatic shard split (Oct 23, 2026, the owner: "an easier way ... where the bot can automatically pull money from the total balance into whatever shard it needs", after losing money moving funds by hand).
-// Kalshi keeps each market group's money on its own shard and offers an opt-in auto-rebalance (docs: "Exchange Sharding", "Auto-Rebalancing"): the account holder sets a target percentage per shard and every 10 seconds Kalshi
-// moves funds to restore it, counting resting orders. This sets that target ONCE, to a split fixed in code, so the money follows the account as it grows. Shard 0 carries gold and the AUD/USD and USD/CAD probes, shard 2 carries
-// Bitcoin, Ethereum, XRP, Dogecoin and natural gas. It moves nothing out of the account, places no order, and the page can only ask for "apply" or "read": the percentages are never taken from the caller. Percentages avoid the
-// transfer unit surprise (README: the transfer amount is not in cents). Applying twice is harmless (it replaces the target with the same one).
-const SHARD_SPLIT = [{ exchange_index: 0, percent: 20 }, { exchange_index: 2, percent: 80 }];
-async function readShardSplit({ fetchFn, keyId, pem, nowMs }) {
-  const r = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/target_balance_allocation", nowMs });
-  if (r.status !== 200 || !r.body || typeof r.body !== "object") return { ok: false, status: r.status, reason: "could not read the split (HTTP " + r.status + ")" };
-  const rows = Array.isArray(r.body.allocations) ? r.body.allocations.filter((x) => x && Number.isFinite(Number(x.exchange_index)) && Number.isFinite(Number(x.percent))).map((x) => ({ exchange_index: Number(x.exchange_index), percent: Number(x.percent) })) : [];
-  return { ok: true, status: 200, allocations: rows };
-}
-async function applyShardSplit({ fetchFn, keyId, pem, nowMs }) {
-  const r = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/target_balance_allocation", body: { allocations: SHARD_SPLIT }, nowMs });
-  if (r.status !== 200) return { ok: false, status: r.status, reason: "Kalshi did not accept the split (HTTP " + r.status + (typeof r.body === "string" ? " " + r.body.slice(0, 80) : "") + ")" };
-  return readShardSplit({ fetchFn, keyId, pem, nowMs });
-}
-
 module.exports = {
-  SHARD_SPLIT, readShardSplit, applyShardSplit,
   flipsOf, pathShape, sideMids, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
