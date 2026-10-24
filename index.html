@@ -444,25 +444,8 @@
   .kal-tr-head{ background:var(--panel-raised); color:var(--muted); font-size:12px; font-weight:600; padding-top:8px; padding-bottom:8px; border-top:0; }
   /* The dollar result and its percentage are the same fact (the owner, Oct 23, 2026), so they share one size, weight and colour; only a quiet dot separates them. */
   .kal-tr-sep{ margin:0 7px; opacity:.5; font-weight:400; }
-  /* The usual-day bar sits just left of Today in the account card. */
   #kalBotTotals{ display:flex; align-items:center; gap:28px; }
-  .kal-range{ display:flex; flex-direction:column; gap:2px; min-width:190px; }
-  .kal-range .kal-k{ color:var(--muted); font-size:12px; }
-  .kal-range b{ font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
-  .kal-range-bar{ position:relative; height:8px; border-radius:999px; background:rgba(255,255,255,.08); margin-top:7px; }
-  .kal-range-band{ position:absolute; top:0; bottom:0; border-radius:999px; background:rgba(255,255,255,.26); }
-  .kal-range-zero{ position:absolute; top:-3px; bottom:-3px; width:1px; background:rgba(255,255,255,.4); }
-  .kal-range-now{ position:absolute; top:-4px; width:6px; height:16px; border-radius:3px; background:var(--paper); }
-  .kal-week{ margin-top:16px; border-top:1px solid var(--border); padding-top:14px; }
-  .kal-week-k{ font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-  .kal-week svg{ display:block; width:100%; height:70px; }
-  .kal-week-band{ fill:rgba(255,255,255,.1); stroke:none; }
-  .kal-week-zero{ stroke:rgba(255,255,255,.25); stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
-  .kal-week-mid{ fill:none; stroke:var(--paper); stroke-width:2; vector-effect:non-scaling-stroke; stroke-linejoin:round; }
-  .kal-week-foot{ display:flex; flex-wrap:wrap; gap:6px 22px; font-size:13px; color:var(--muted); margin-top:10px; }
-  .kal-week-foot b{ color:var(--paper); font-weight:600; font-variant-numeric:tabular-nums; }
-  .kal-week-note{ font-size:12px; color:var(--muted); margin-top:6px; }
-  @media screen and (max-width:700px){ #kalBotTotals{ flex-wrap:wrap; gap:14px; } .kal-range{ min-width:0; flex:1 1 100%; } }
+  @media screen and (max-width:700px){ #kalBotTotals{ flex-wrap:wrap; gap:14px; } }
   .kal-tr-stats{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:2px 22px 14px; }
   .kal-mini-tile{ border:1px solid var(--border); border-radius:12px; padding:10px 14px; background:rgba(255,255,255,.025); min-width:0; }
   .kal-mini-k{ font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
@@ -1194,14 +1177,9 @@
             <details class="kal-fold"><summary class="kal-lbl">Raw account read</summary><div id="kalAcctBody"><div class="kal-empty">Press Refresh to read the account.</div></div></details>
           </div>
           <div class="kal-tools-group"><div class="kal-tools-h">Export</div>
-            <div class="kal-actions"><button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button> <button class="kal-btn kal-btn-ghost" id="kalStatsCopy" type="button">Copy all stats</button></div>
+            <div class="kal-actions"><button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button></div>
             <div class="kal-note" id="kalDiagMsg"></div>
             <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
-            <div class="kal-actions">
-              <label class="kal-note" style="margin:0">Statement <select class="kal-input" id="kalStmtPeriod" style="width:auto"><option value="0">This month</option><option value="1">Last month</option></select></label>
-              <button class="kal-btn kal-btn-ghost" id="kalStmtPrint" type="button">Print statement</button>
-            </div>
-            <div class="kal-note" id="kalStmtMsg"></div>
             <div class="kal-actions">
             <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
             <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
@@ -1257,7 +1235,7 @@
         <div id="kalStatusBody"><div class="kal-empty">Reading the bot...</div></div>
       </div>
       <div class="kal-card" data-card="risk">
-        <div class="kal-card-title">Loss stop and risk</div>
+        <div class="kal-card-title">Stop Loss and Risk</div>
         <div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div>
       </div>
       <div class="kal-card" data-card="positions">
@@ -2084,70 +2062,6 @@
   // chart would be dismissed by the first chart's "tap elsewhere" listener.
   // A chart's markup is only replaced when it changes (per chart): this runs on every bot update, and replacing it under the pointer closed the hover tip.
 
-  // The exit watch, read back from the bot's own order records (no download needed): how many positions fell to 25c, what the sells got, and what holding would have paid.
-  // `results` is the account read's market results by ticker; when a market's result is not known yet the hold figure is left out rather than guessed.
-  // "Touched" is an order the watch acted on or logged (exitStatus or exitShadow); a logged-only order was held to settlement, so its real result IS the hold result.
-  // The line was 70c, then 50c, until Oct 12, 2026 (server EXIT_THRESHOLD). A record whose trigger bid was above 25c was taken under an earlier line and is not a fall to 25c, so it is
-  // counted apart (`earlier`) instead of being mixed into figures that are labelled 25c.
-  function kalshiExitReport(orders, results){
-    var AT = 0.25;
-    var r = { at: AT, earlier: 0, touched: 0, loggedOnly: 0, sold: 0, partly: 0, failed: 0, avgBid: null, avgFill: null, avgSlip: null, realised: 0, known: 0, recovered: 0, exitMinusHold: 0, holdKnownSold: 0 };
-    // Sold orders that have both the trigger bid and the fill price. The three averages are over these same orders, so trigger bid minus sold-at IS the slip. (The bid used to be averaged over
-    // every order the watch touched, logged-only ones included, so the three figures could not be subtracted from each other: 36c, 24c and a 4c slip.)
-    var pairs = [];
-    var num = function(v){ return v !== undefined && v !== null && v !== '' && Number.isFinite(Number(v)) ? Number(v) : null; };
-    (orders || []).forEach(function(o){
-      if(!o || !(Number(o.fillCount) > 0) || !(o.exitStatus || o.exitShadow)){ return; }
-      var trig = (o.exitBid !== undefined && o.exitBid !== null && Number.isFinite(Number(o.exitBid))) ? Number(o.exitBid)
-        : ((o.exitShadow && o.exitShadow.bid !== undefined && o.exitShadow.bid !== null && Number.isFinite(Number(o.exitShadow.bid))) ? Number(o.exitShadow.bid) : null);
-      if(trig !== null && trig > AT + 1e-9){ r.earlier++; return; }
-      r.touched++;
-      var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount), want), cost = (Number(o.maxCost) || 0) * (got / want);
-      var res = o.settled === true && (o.result === 'yes' || o.result === 'no') ? o.result : (results && (results[o.ticker] === 'yes' || results[o.ticker] === 'no') ? results[o.ticker] : null);
-      var holdPnl = res ? Math.round(((res === o.side ? got : 0) - cost) * 10000) / 10000 : null;
-      if(Number(o.exitCount) > 0){
-        if(o.exitStatus === 'partly sold'){ r.partly++; } else { r.sold++; }
-        if(num(o.exitBid) !== null && num(o.exitAvg) !== null){ pairs.push([num(o.exitBid), num(o.exitAvg)]); }
-        var p = kalshiOrderPnl(o); if(p !== null){ r.realised += p; }
-        if(holdPnl !== null && p !== null){ r.holdKnownSold++; r.exitMinusHold += p - holdPnl; }
-      } else if(o.exitStatus){
-        r.failed++;
-      } else {
-        r.loggedOnly++;
-      }
-      if(holdPnl !== null){ r.known++; if(res === o.side){ r.recovered++; } }
-    });
-    var avg = function(a){ return a.length ? a.reduce(function(x, y){ return x + y; }, 0) / a.length : null; };
-    r.avgBid = avg(pairs.map(function(x){ return x[0]; })); r.avgFill = avg(pairs.map(function(x){ return x[1]; })); r.avgSlip = avg(pairs.map(function(x){ return x[0] - x[1]; }));
-    return r;
-  }
-
-  // Every stat the tracker computes, as plain text, for the Copy all stats button: the tiles on the page, the ones that are no longer shown, both tables and the exit at 25c block.
-  function kalshiStatsText(st, x, money){
-    if(!st || !st.n){ return 'No settled trades yet.'; }
-    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); }, pct = function(v){ return Math.round(v * 100) + '%'; };
-    var c = function(v){ return v === null || v === undefined ? 'n/a' : (v * 100).toFixed(1) + 'c'; };
-    var streak = st.streak && st.streak.kind ? st.streak.n + ' ' + (st.streak.kind === 'win' ? 'win(s)' : 'loss(es)') : 'none';
-    var L = ['Settled trades: ' + st.n, 'Win rate: ' + pct(st.winRate) + ' (' + st.wins + ' won, ' + st.losses + ' lost)', 'Profit factor: ' + (st.profitFactor === null ? 'no losses yet' : st.profitFactor.toFixed(2)),
-      'Average win: ' + (st.avgWin === null ? 'none' : sg(st.avgWin)), 'Average loss: ' + (st.avgLoss === null ? 'none' : sg(st.avgLoss)), 'Expectancy per trade: ' + sg(st.expectancy),
-      'Net: ' + sg(st.total), 'Best / worst: ' + sg(st.best) + ' / ' + sg(st.worst), 'Deepest drawdown: ' + (st.maxDrawdown > 0 ? '-' + money(st.maxDrawdown) : 'none'),
-      'Streak now: ' + streak, 'Longest losing run: ' + st.longestLoss, '', 'By market'];
-    (st.bySeries || []).forEach(function(r){ L.push('  ' + r.label + ': ' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won, ' + sg(r.net)); });
-    L.push('', 'By price paid');
-    (st.byBand || []).forEach(function(r){ L.push('  ' + r.label + ': ' + r.n + ' trades, ' + pct(r.wins / r.n) + ' won, ' + sg(r.net)); });
-    L.push('', 'Exit at ' + (x ? Math.round(x.at * 100) : 25) + 'c');
-    if(!x || !x.touched){ L.push('  No position has fallen to the line yet.'); }
-    else {
-      L.push('  Fell to the line: ' + x.touched, '  Sold: ' + x.sold + (x.partly ? ', partly sold: ' + x.partly : ''), '  Sell failed or skipped: ' + x.failed, '  Logged, not sent: ' + x.loggedOnly,
-        '  Trigger bid (avg): ' + c(x.avgBid), '  Sold at (avg): ' + c(x.avgFill), '  Slip (avg): ' + c(x.avgSlip), '  Realised on sells: ' + sg(x.realised),
-        '  Won after falling: ' + (x.known ? x.recovered + ' of ' + x.known : 'none known yet'));
-      if(x.holdKnownSold){ L.push('  Sells vs holding: ' + sg(x.exitMinusHold) + ' over ' + x.holdKnownSold + ' sold position(s)'); }
-      if(x.earlier){ L.push('  Older records taken under an earlier exit line, left out: ' + x.earlier); }
-    }
-    return L.join('\n');
-  }
-
-
   // ---- live books tab (the relay is read-only; see functions/index.js) ----
 
   // The Bot page is the overview and the live watch, not a market list (the owner, Oct 23, 2026: "remove these too from bot page"). The relay is still read while the page is open, because the Open positions card
@@ -2356,48 +2270,6 @@
   // Today's result as a share of the account (Oct 22, 2026, the owner's request). The base is the account total at the START of today, taken as the total now minus today's bot result, so a good day is not
   // measured against a balance it already grew. The total includes anything done outside the bot (your own trades, deposits), which is why this is "of the account" and not a return on the bot alone.
   // '' when the total is unknown or not above zero. It is a percentage, not a dollar figure, so the Privacy toggle leaves it showing.
-  // How a usual day looks, from the bot's own past days (the owner, Oct 23, 2026: "the range is SICK"). Each completed US Central day's settled result is a percentage of the account at the start of today (the same base as the Today line, so a
-  // percentage means the same thing everywhere); today is kept apart. It needs at least 10 completed days to say anything, and it is a description of the past, never a promise. Pure: orders in, numbers out.
-  function kalshiDayStats(orders, base, now){
-    if(!(base > 0)){ return null; }
-    var todayKey = kalDayKey(now), sums = {}, since = now - 45 * 86400000;
-    (orders || []).forEach(function(o){
-      if(!o || o.strategy !== 'L1' || !Number.isFinite(Number(o.ts)) || Number(o.ts) < since){ return; }
-      var p = kalshiOrderPnl(o); if(p === null){ return; }
-      var k = kalDayKey(Number(o.ts)); sums[k] = (sums[k] || 0) + p;
-    });
-    var days = Object.keys(sums).filter(function(k){ return k !== todayKey; }).sort().map(function(k){ return sums[k] / base * 100; });
-    if(days.length < 10){ return null; }
-    var n = days.length, mean = days.reduce(function(a, x){ return a + x; }, 0) / n;
-    var sd = Math.sqrt(days.reduce(function(a, x){ return a + (x - mean) * (x - mean); }, 0) / (n - 1));
-    var srt = days.slice().sort(function(a, b){ return a - b; }), q = function(p){ return srt[Math.floor(p * (n - 1))]; };
-    var phi = function(z){ var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp(-z * z / 2), pr = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - pr : pr; };
-    var wk = { typical: mean * 7, lo: mean * 7 - 1.28 * sd * Math.sqrt(7), hi: mean * 7 + 1.28 * sd * Math.sqrt(7), losing: sd > 0 ? phi(-(mean * 7) / (sd * Math.sqrt(7))) : (mean < 0 ? 1 : 0) };
-    var todayPct = Object.prototype.hasOwnProperty.call(sums, todayKey) ? sums[todayKey] / base * 100 : null;
-    return { n: n, mean: mean, sd: sd, lo: q(0.1), hi: q(0.9), worst: srt[0], week: wk, today: todayPct };
-  }
-  function kalshiPctSigned(x, d){ return (x >= 0 ? '+' : '-') + Math.abs(x).toFixed(d === undefined ? 1 : d) + '%'; }
-  // A compact "usual day" bar for the account card: the middle 80% of past days as a band, today as a marker, and the plain range in words above it.
-  function kalshiRangeStripHtml(st){
-    if(!st){ return ''; }
-    var lo = Math.min(st.lo, st.today === null ? st.lo : st.today, 0) - 0.4, hi = Math.max(st.hi, st.today === null ? st.hi : st.today, 0) + 0.4;
-    var X = function(v){ return Math.max(1, Math.min(99, (v - lo) / (hi - lo) * 100)).toFixed(1); };
-    return '<div class="kal-range"><span class="kal-k">Usual day</span><b>' + kalshiPctSigned(st.lo) + ' to ' + kalshiPctSigned(st.hi) + '</b>' +
-      '<div class="kal-range-bar"><i class="kal-range-band" style="left:' + X(st.lo) + '%;width:' + (X(st.hi) - X(st.lo)).toFixed(1) + '%"></i><i class="kal-range-zero" style="left:' + X(0) + '%"></i>' + (st.today === null ? '' : '<i class="kal-range-now" style="left:calc(' + X(st.today) + '% - 3px)"></i>') + '</div></div>';
-  }
-  // The next 7 days as a band from the same past days, with three plain figures. A range, not a promise.
-  function kalshiWeekRangeHtml(st){
-    if(!st){ return ''; }
-    var W = 600, H = 70, wk = st.week, pts = function(k){ var a = []; for(var i = 0; i <= 7; i++){ a.push(st.mean * i + k * st.sd * Math.sqrt(i)); } return a; };
-    var hiA = pts(1.28), loA = pts(-1.28), midA = pts(0), mx = Math.max.apply(null, hiA.concat([0])), mn = Math.min.apply(null, loA.concat([0]));
-    var X = function(i){ return (i / 7 * W).toFixed(1); }; var Y = function(v){ return (H - 4 - (v - mn) / ((mx - mn) || 1) * (H - 8)).toFixed(1); };
-    var line = function(a){ return a.map(function(v, i){ return X(i) + ',' + Y(v); }).join(' '); };
-    var band = line(hiA) + ' ' + line(loA).split(' ').reverse().join(' ');
-    return '<div class="kal-week"><div class="kal-week-k">Next 7 days, as a range</div>' +
-      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="A range for the next seven days built from past results"><polygon class="kal-week-band" points="' + band + '"/><line class="kal-week-zero" x1="0" x2="' + W + '" y1="' + Y(0) + '" y2="' + Y(0) + '"/><polyline class="kal-week-mid" points="' + line(midA) + '"/></svg>' +
-      '<div class="kal-week-foot"><span>Typical <b>' + kalshiPctSigned(wk.typical) + '</b></span><span>Range <b>' + kalshiPctSigned(wk.lo) + ' to ' + kalshiPctSigned(wk.hi) + '</b></span></div>' +
-      '<div class="kal-week-note">From your last ' + st.n + ' days. A description of the past, not a promise.</div></div>';
-  }
   function kalshiTodayPct(botNet, total){
     var start = Number(total) - Number(botNet);
     if(total === null || total === undefined || !Number.isFinite(start) || !(start > 0)){ return ''; }
@@ -2423,7 +2295,6 @@
     posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoney);
   }
   var kalshiBooksLast = null;
-  var kalshiRangeFacts = null;   // the latest result of kalshiDayStats, set where the account card is drawn and read by the risk card
   var kalshiPosPaths = {};   // ticker -> [{ t, v }]: the chance of each open position's side, one point per read since this page opened
 
   // Sound alerts (the owner's request, Oct 20, 2026): a short tone while THIS PAGE IS OPEN when the bot enters a trade, sells one, or hits a stop or an issue (a sell that errored, did not fill or
@@ -2492,15 +2363,6 @@
     } else {
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
-      // Kalshi keeps each market group's money on its own shard (README, "exchange shards"). The bot trades two of them: shard 2 (Bitcoin, Ethereum, XRP, Dogecoin, natural gas) and shard 0 (gold, AUD/USD, USD/CAD). Any other shard is not used by the bot.
-      var BOT_SHARDS = { 2: 'crypto and natural gas', 0: 'gold, AUD/USD, USD/CAD' };
-      var shardRows = a.balance.shards.slice().sort(function(x, y){ return (x.shard === 2 ? 0 : x.shard === 0 ? 1 : 2) - (y.shard === 2 ? 0 : y.shard === 0 ? 1 : 2) || x.shard - y.shard; })
-        .filter(function(x){ return BOT_SHARDS[x.shard] || x.dollars >= 0.5; });
-      // An order needs money on ITS shard and the page cannot move money (the auto-rebalance needs a key permission this bot does not have), so a low shard is said plainly while there is still time to top it up by hand: Kalshi, Transfers.
-      var shardLow = shardRows.filter(function(x){ return BOT_SHARDS[x.shard] && x.dollars < DATA_SHARD_LOW; }).map(function(x){ return 'Shard ' + x.shard + ' (' + BOT_SHARDS[x.shard] + ') is low. Top it up in Kalshi under Transfers.'; }).join(' ');
-      shardLow = shardLow ? '<div class="kal-note">' + escapeHtml(shardLow) + '</div>' : '';
-      var useShard = a.balance.shards.filter(function(x){ return x.shard === 2; })[0];
-      var otherSum = a.balance.shards.filter(function(x){ return x.shard !== 2; }).reduce(function(n, x){ return n + x.dollars; }, 0);
       // What one order risks right now: contracts (the cap plus any profit add-on) at the cost per contract of the latest order, so it follows the real prices.
       var ses = kalshiLiveCtl && kalshiLiveCtl.session, stakeRow = '';
       if(ses && ses.active === true){
@@ -2524,11 +2386,6 @@
         else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
       }
       h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
-        // Funds on other shards cannot be spent by the bot, so they get a line only when there is something worth noting; otherwise the total is what the bot has.
-        (shardRows.length ? '<div class="kal-rows">' + shardRows.map(function(x){
-          return '<div><span class="kal-k">Shard ' + escapeHtml(String(x.shard)) + ' (' + (BOT_SHARDS[x.shard] ? escapeHtml(BOT_SHARDS[x.shard]) : 'not used by the bot') + ')</span><b>' + kalshiMoney(x.dollars) + '</b></div>';
-        }).join('') + '</div>' : '') +
-        shardLow +
         (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
     }
     el.innerHTML = h;
@@ -2556,9 +2413,7 @@
       var todayOrders = botOrders.filter(function(o){ return Number.isFinite(o.ts) && kalDayKey(o.ts) === todayKey; });
       var botNet = kalshiPerfStats(todayOrders, 0).total;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
-      var statsNow = kalshiDayStats(botOrders, (a.balance && a.balance.ok && Number(a.balance.totalDollars) > 0) ? Number(a.balance.totalDollars) - botNet : NaN, Date.now());
-      kalshiRangeFacts = statsNow;
-      totEl.innerHTML = kalshiRangeStripHtml(statsNow) + '<div class="kal-rows">' +
+      totEl.innerHTML = '<div class="kal-rows">' +
         '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
     }
 
@@ -2708,25 +2563,6 @@
       navigator.clipboard.writeText(csv).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied ' + n + ' orders.'; }, manual);
     } else { manual(); }
   });
-  document.getElementById('kalStmtPrint').addEventListener('click', function(){
-    var back = document.getElementById('kalStmtPeriod').value === '1' ? 1 : 0, msg = document.getElementById('kalStmtMsg'), now = Date.now();
-    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    var key = kalshiStatementMonth(now, back);
-    if(!orders.some(function(o){ return o && Number.isFinite(o.ts) && kalshiOrderPnl(o) !== null && kalDayKey(o.ts).slice(0, 7) === key; })){ msg.textContent = 'No settled trades in that month yet.'; return; }
-    kalshiPrintHtml(kalshiStatementHtml(orders, key, now, escapeHtml));
-    msg.textContent = 'Opening the print dialog. Choose Save as PDF to keep a copy.';
-  });
-  // Copies every stat the tracker computes, including the ones the page no longer shows, as plain text. Same clipboard fallback as the diagnostics button.
-  document.getElementById('kalStatsCopy').addEventListener('click', function(){
-    var since = 0;
-    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    var text = kalshiStatsText(kalshiPerfStats(orders, since), kalshiExitReport(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), kalshiMoneyRaw);
-    var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
-    var manual = function(){ box.style.display = ''; box.value = text; box.focus(); box.select(); msg.textContent = 'Select all and copy the text below.'; };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(function(){ box.style.display = 'none'; msg.textContent = 'Copied all stats.'; }, manual);
-    } else { manual(); }
-  });
   // The page buttons are re-created on every render, so one listener on their container does it.
   document.getElementById('kalBotClosed').addEventListener('click', function(e){
     var t = e.target && e.target.getAttribute ? e.target.getAttribute('data-trstep') : null;
@@ -2736,58 +2572,6 @@
 
   var kalshiLiveCtl = { arm: null, last: null, session: null };
   var kalshiLiveCtlUnsub = null;
-  // Settled trades per market, the order the markets are sent in the bot's code first (gold, then the rest), then by size.
-  function dataMarketRows(orders, nowMs){
-    var by = {}, weekAgo = nowMs - 7 * 86400000;
-    (orders || []).forEach(function(o){
-      var p = kalshiOrderPnl(o);
-      if(p === null){ return; }
-      var name = kalshiMarketName(o), m = by[name] || (by[name] = { name: name, n: 0, wins: 0, net: 0, contracts: 0, week: 0, gw: 0, gl: 0 });
-      m.n++; m.net += p; m.contracts += Number(o.fillCount) || 0; if(p > 0){ m.wins++; m.gw += p; } else if(p < 0){ m.gl += -p; } if(o.ts >= weekAgo){ m.week += p; }
-    });
-    return Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.n - a.n; });
-  }
-  // The statement (Oct 22, 2026, the owner: make the site feel official). A printable month of the bot's settled trades, drawn from the same orders and the same figures as the Data page, opened in a quiet
-  // frame so the browser's own print dialog can save it as a PDF. It is an export, so its dollar figures are raw and not masked by Privacy, like Copy all orders. It reads only what the page already holds.
-  function kalshiStatementMonth(nowMs, back){
-    var p = kalDayKey(nowMs).split('-').map(Number), y = p[0], m = p[1] - (back || 0);
-    while(m < 1){ m += 12; y--; }
-    return y + '-' + (m < 10 ? '0' : '') + m;
-  }
-  function kalshiStatementHtml(orders, monthKey, nowMs, esc){
-    var rows = (orders || []).filter(function(o){ return o && Number.isFinite(o.ts) && kalshiOrderPnl(o) !== null && kalDayKey(o.ts).slice(0, 7) === monthKey; }).sort(function(a, b){ return a.ts - b.ts; });
-    var st = kalshiPerfStats(rows, 0), mk = dataMarketRows(rows, nowMs), sg = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoneyRaw(Math.abs(v)); };
-    var ym = monthKey.split('-').map(Number), label = new Date(Date.UTC(ym[0], ym[1] - 1, 1)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long', year: 'numeric' });
-    var be = st.avgWin !== null && st.avgLoss !== null ? (-st.avgLoss / (st.avgWin - st.avgLoss) * 100).toFixed(1) + '%' : 'n/a';
-    var kv = function(k, v){ return '<tr><td>' + esc(k) + '</td><td class="r">' + esc(v) + '</td></tr>'; };
-    var summary = kv('Settled trades', String(st.n)) + kv('Result', sg(st.total)) + kv('Win rate', st.winRate === null ? 'n/a' : (st.winRate * 100).toFixed(1) + '%') + kv('Break-even win rate', be) +
-      kv('Profit factor', st.profitFactor === null ? (st.losses ? 'n/a' : 'no losses') : st.profitFactor.toFixed(2)) + kv('Average win', st.avgWin === null ? 'n/a' : '+' + kalshiMoneyRaw(st.avgWin)) +
-      kv('Average loss', st.avgLoss === null ? 'n/a' : '-' + kalshiMoneyRaw(Math.abs(st.avgLoss))) + kv('Worst trade', st.worst === null ? 'n/a' : sg(st.worst)) + kv('Deepest drawdown in the month', st.maxDrawdown > 0 ? '-' + kalshiMoneyRaw(st.maxDrawdown) : 'none');
-    var markets = mk.map(function(r){ return '<tr><td>' + esc(r.name) + '</td><td class="r">' + r.n + '</td><td class="r">' + Math.round(r.wins / r.n * 100) + '%</td><td class="r">' + esc(r.n < 30 ? 'too few' : (r.gl > 0 ? (r.gw / r.gl).toFixed(2) : 'no losses')) + '</td><td class="r">' + esc(sg(r.net)) + '</td></tr>'; }).join('');
-    var trades = rows.map(function(o){
-      var c = Number(o.fillCount) || 0, px = Number(o.price);
-      return '<tr><td>' + esc(kalDateTime(o.ts)) + '</td><td>' + esc(kalshiMarketName(o)) + '</td><td>' + esc(String(o.side || '').toUpperCase()) + '</td><td class="r">' + (Number.isFinite(px) ? (px * 100).toFixed(1) + 'c' : '') +
-        '</td><td class="r">' + esc(String(Math.round(c * 100) / 100)) + '</td><td class="r">' + esc(sg(kalshiOrderPnl(o))) + '</td></tr>';
-    }).join('');
-    var css = '@page{margin:14mm}body{font:12px/1.45 Helvetica,Arial,sans-serif;color:#111;margin:0}h1{font-size:20px;margin:0 0 2px}h2{font-size:13px;margin:22px 0 6px;border-bottom:1px solid #111;padding-bottom:3px}' +
-      '.sub{color:#444;margin:0 0 14px}table{width:100%;border-collapse:collapse}td,th{padding:4px 6px;border-bottom:1px solid #ddd;text-align:left;font-variant-numeric:tabular-nums}th{font-weight:600;color:#444;font-size:11px}.r{text-align:right}' +
-      '.fine{color:#555;font-size:10.5px;margin-top:22px}tr{page-break-inside:avoid}';
-    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Shwoop Financials statement, ' + esc(label) + '</title><style>' + css + '</style></head><body>' +
-      '<h1>Shwoop Financials</h1><p class="sub">Trading activity statement for ' + esc(label) + ' (US Central time). Generated ' + esc(kalDateTime(nowMs)) + '.</p>' +
-      (st.n ? '<h2>Summary</h2><table>' + summary + '</table><h2>By market</h2><table><tr><th>Market</th><th class="r">Trades</th><th class="r">Won</th><th class="r">Profit factor</th><th class="r">Result</th></tr>' + markets + '</table>' +
-        '<h2>Settled trades</h2><table><tr><th>Time</th><th>Market</th><th>Side</th><th class="r">Price</th><th class="r">Contracts</th><th class="r">Result</th></tr>' + trades + '</table>' : '<p>No settled trades in this month.</p>') +
-      '<p class="fine">Only orders the bot sent are counted; a trade closed by hand is left out. Results are the settled result of each order after fees as recorded; they are not audited. Nothing in this statement is investment, financial, legal or tax advice. ' +
-      'Trading involves substantial risk of loss. Past performance does not guarantee future results.</p></body></html>';
-  }
-  function kalshiPrintHtml(html){
-    var f = document.createElement('iframe');
-    f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
-    f.onload = function(){ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} setTimeout(function(){ if(f.parentNode){ f.parentNode.removeChild(f); } }, 60000); };
-    f.srcdoc = html;
-    document.body.appendChild(f);
-  }
-  var DATA_SHARD_LOW = 30;   // dollars: under this a shard is called low (a gold order can need $10 or more; the owner tops up by hand)
-
   function kalshiPnlSeries(orders, since){
     var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
       .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
@@ -3047,11 +2831,8 @@
       (function(){
         // Percentages only (the owner, Oct 23, 2026), so this card can stay readable under Privacy view: no dollar figure is drawn here.
         var pct = function(x){ return Math.round(x * 100) + '%'; };
-        var openShare = m.base ? m.openCost / m.base : (m.limit > 0 ? m.openCost / m.limit : 0);
         return '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + pct(m.fraction) + ' of the loss stop used</span></div>' +
-          '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
-          '<div class="kal-rows"><div><span class="kal-k">' + (m.base ? 'Open orders, share of the account' : 'Open orders, share of the stop') + '</span><b>' + pct(openShare) + '</b></div>' +
-          (m.windowCap !== null && m.windowCap > 0 ? '<div><span class="kal-k">Fullest open window</span><b>' + pct(m.windowUsed / m.windowCap) + ' of its limit</b></div>' : '') + '</div>' + kalshiWeekRangeHtml(kalshiRangeFacts);
+          '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>';
       })();
 kalshiStatusTick();
   }
@@ -3169,7 +2950,7 @@ kalshiStatusTick();
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['status', 'Bot status'], ['risk', 'Loss stop and risk'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
+    var OPTIONAL = [['status', 'Bot status'], ['risk', 'Stop Loss and Risk'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');

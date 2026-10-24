@@ -123,7 +123,7 @@ gates.Y8 = () => {
 gates.Y14 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiStatsText']);
+  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // A filled order the server left unsettled: with the market's result known it is settled here, by the server's own rule.
@@ -163,9 +163,6 @@ gates.Y14 = () => {
   assert.deepStrictEqual(st.byBand.map((r) => [r.label, r.n]), [['90c to 92c', 1], ['92c to 95c', 3], ['95c to 97c', 1]], 'by the price paid');
   assert.strictEqual(f.kalshiPerfStats([t(1, 0.08, 'KXBTC15M', 0.92)], 0).profitFactor, null, 'no losses: no profit factor, not an infinite one');
   assert.strictEqual(f.kalshiPerfStats([], 0).n, 0);
-  const text = f.kalshiStatsText(st, null, money);
-  assert.ok(/Net: -\$1\.62/.test(text) && /Deepest drawdown:/.test(text) && /Streak now:/.test(text) && /Longest losing run:/.test(text) && /By market\n  Bitcoin: 3 trades/.test(text) && /By price paid\n  90c to 92c: 1 trades/.test(text) && /Exit at 25c\n  No position has fallen/.test(text), 'every stat is in the copied text, including the hidden ones');
-  assert.strictEqual(f.kalshiStatsText(f.kalshiPerfStats([], 0), null, money), 'No settled trades yet.');
   // In this palette --ink is the page background and --paper is the text colour (inverted names), and --card does not exist: a select styled with them showed dark text on dark in dark mode.
   // This used to read one named rule (.kal-perf-head select), which no markup used, so it guarded nothing; it now reads every rule that touches a select.
   const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
@@ -186,27 +183,6 @@ gates.TP1 = () => {
   assert.ok(/-100\.0%$/.test(f(-9.3, 9.3)), 'a full loss is -100.0%: ' + f(-9.3, 9.3));
   assert.strictEqual(f(1, 0), '', 'no known cost: no percentage'); assert.strictEqual(f(NaN, 5), '', 'no result: no percentage');
   assert.ok(/kalshiMoney\(Math\.abs\(tp\.pnl\)\) \+ kalshiPctText\(/.test(html) && /kalshiMoney\(Math\.abs\(pnl\)\) \+ kalshiPctText\(/.test(html), 'both kinds of row carry it, after the dollar figure, so Privacy view masks the dollars and leaves the percentage');
-};
-// RG1: the usual-day range and the 7 day range come from the bot's own past days, in percent of the account. Consequence: with fewer than 10 completed days nothing is drawn (no range invented from three days), today is never counted in its own usual day, and the figures are a description of the past.
-gates.RG1 = () => {
-  const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
-  const names = ['kalTime', 'kalDate', 'kalDayKey', 'kalshiOrderPnl', 'kalshiDayStats', 'kalshiPctSigned', 'kalshiRangeStripHtml', 'kalshiWeekRangeHtml'];
-  const f = new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const now = Date.parse('2026-10-23T18:00:00Z'), day = 86400000;
-  const mk = (daysAgo, pnl) => ({ strategy: 'L1', ts: now - daysAgo * day - 3600000, side: 'yes', fillCount: 1, count: 1, maxCost: 0.9, settled: true, result: pnl > 0 ? 'yes' : 'no', settledPnl: pnl });
-  const few = []; for (let d = 1; d <= 6; d++) few.push(mk(d, 1));
-  assert.strictEqual(f.kalshiDayStats(few, 500, now), null, 'six days is not enough to describe a usual day');
-  const pnls = [4, 6, -3, 5, 7, 2, -6, 5, 4, 9, 1, -2, 5, 3, 7, -4, 2, 6]; const many = pnls.map((p, i) => mk(i + 1, p)).concat([mk(0, 9.3)]);
-  const st = f.kalshiDayStats(many, 500, now);
-  assert.ok(st && st.n === 18, 'eighteen completed days, today left out of its own usual day: ' + (st && st.n));
-  assert.ok(Math.abs(st.today - 9.3 / 500 * 100) < 1e-9, 'today is kept apart, as a share of the account: ' + st.today);
-  assert.ok(st.lo < st.hi && st.worst === Math.min(...pnls) / 500 * 100, 'the band and the worst day come from the past days');
-  assert.strictEqual(f.kalshiDayStats(many, 0, now), null, 'no known account base: nothing');
-  const strip = f.kalshiRangeStripHtml(st), week = f.kalshiWeekRangeHtml(st);
-  assert.ok(/Usual day/.test(strip) && /kal-range-now/.test(strip) && /%/.test(strip) && !/\$/.test(strip), 'the strip is percentages only, with today marked');
-  assert.ok(/Next 7 days, as a range/.test(week) && /not a promise/.test(week) && !/\$/.test(week), 'the week range says it is a description of the past'); assert.ok(!/Losing week/.test(week), 'no modelled chance of a losing week: a guess from a few days misleads (the owner removed it, Oct 23, 2026)');
-  assert.strictEqual(f.kalshiRangeStripHtml(null) + f.kalshiWeekRangeHtml(null), '', 'nothing without history');
-  assert.ok(st.week.lo < st.week.typical && st.week.typical < st.week.hi && st.week.losing >= 0 && st.week.losing <= 1, 'the week range is ordered and the losing chance is a probability');
 };
 // TS1: the Recent trades card opens with four monitoring figures for the last 24 hours that do not repeat the account strip (no result in dollars). Consequence: wrong win counts or a streak counted past a break would mislead.
 gates.TS1 = () => {
@@ -292,11 +268,9 @@ gates.Y9 = () => {
 // Fit on a small screen: the account card lists only what the bot can spend (shard 2) and folds the rest into one line that appears only when it
 // matters, the order switch only speaks up when it is off, the Layout menu sits in the header, and the session card keeps four facts.
 gates.Y10 = () => {
-  const acct = html.slice(html.indexOf("var BOT_SHARDS = "), html.indexOf("    el.innerHTML = h;"));
-  assert.ok(/BOT_SHARDS = \{ 2: 'crypto and natural gas', 0: 'gold, AUD\/USD, USD\/CAD' \}/.test(acct), 'the two shards the bot trades are named with what trades on them (shard 0 holds gold and the forex probes, so it is not "not usable")');
-  assert.ok(/not used by the bot/.test(acct) && /x\.dollars >= 0\.5/.test(acct), 'any other shard is said to be unused, and only when there is real money on it');
+  const acct = html.slice(html.indexOf('// What one order risks right now:'), html.indexOf("    el.innerHTML = h;"));
+  assert.ok(!/BOT_SHARDS|shardLow|DATA_SHARD_LOW/.test(html) && !/Shard '|shardRows/.test(acct), 'no shard balances or low-shard warning on the page (removed Oct 24, 2026, the owner: the shard stuff can go)');
   assert.ok(/a\.liveSwitch \? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
-  assert.ok(/Shard ' \+/.test(acct), 'one row per shard the bot trades, so the owner can see where the money sits (the owner asked, Oct 23, 2026: where are the balances split)');
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
@@ -356,7 +330,6 @@ gates.Y11c = () => {
   const f = new Function('var kalshiMasked = false;' + [/(function kalshiMoneyRaw\([^)]*\)\{[\s\S]*?\n  \})\n/, /(function kalshiMoney\([^)]*\)\{[\s\S]*?\n  \})\n/].map((re) => re.exec(html)[1]).join('\n') + '; return { money: kalshiMoney, raw: kalshiMoneyRaw, mask: function(v){ kalshiMasked = v; } };')();
   assert.strictEqual(f.money(-3.5), '-$3.50'); f.mask(true);
   assert.deepStrictEqual([f.money(-3.5), f.money(12.34), f.raw(-3.5)], ['-****', '****', '-$3.50'], 'masked: the sign stays, the figure does not, and the raw formatter used by the exports is unchanged');
-  assert.ok(/kalshiStatsText\([^;]*kalshiMoneyRaw\);/.test(html), 'Copy all stats exports real figures');
 };
 
 // The order diagnostics export: one row per order with what the bot saw when it decided, nothing invented, nothing secret, safe to paste.
@@ -508,7 +481,7 @@ gates.Y20 = () => {
 // Y26: the stats card shows the six tiles, By market and By price paid and nothing else; every other stat is copied with the Copy all stats button instead of being shown.
 {
   assert.ok(!/kalshiMoreOpen|kal-more|More stats/.test(html), 'the More stats fold and its open/closed state are gone');
-  assert.ok(/id="kalStatsCopy"/.test(html) && /function kalshiStatsText\(st, x, money\)/.test(html), 'the Copy all stats button and its text builder exist');
+  assert.ok(!/id="kalStatsCopy"|kalshiStatsText|kalshiExitReport|id="kalStmtPrint"|kalshiStatementHtml/.test(html), 'Copy all stats and Print statement are gone (removed Oct 24, 2026, the owner)');
 }
 
 // Y31: ETH and SOL appear on the Live books tab as read-only cards fed by Coinbase, labelled as simulated only, and the shared series list the live bot and recorder read is untouched.
@@ -559,43 +532,6 @@ gates.Y35 = () => {
   assert.deepStrictEqual(['KXAUDUSD15M-26OCT201615-T1', 'KXUSDCAD15M-X', 'KXNATGAS15M-X', 'KXBTC15M-X', 'KXETH15M-X'].map((t) => name({ ticker: t })), ['AUD/USD', 'USD/CAD', 'Natural gas', 'Bitcoin', 'Ethereum']);
 };
 
-// Y37: the exit watch read back from the bot's own order records (the numbers behind Copy all stats; the on-page block was removed in the tidy-up, Oct 21, 2026). Consequences: slip is trigger bid minus fill, "better or worse than holding" is only
-// computed where the market's result is known, and a logged-only order (held to settlement) counts its real outcome as the hold result.
-gates.Y37 = () => {
-  const grab = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'missing ' + n); return m[1]; };
-  const f = new Function(['kalshiOrderPnl', 'kalshiExitReport'].map(grab).join('\n') + '; return { kalshiExitReport };')();
-  const base = { side: 'yes', count: 10, fillCount: '10', maxCost: 9.6, strategy: 'L1' };
-  const sold = Object.assign({}, base, { ticker: 'A', exitStatus: 'sold', exitCount: 10, exitBid: 0.24, exitAvg: 0.21, settled: true, result: 'exit', settledPnl: -3.0 });
-  const heldLost = Object.assign({}, base, { ticker: 'B', exitShadow: { bid: 0.23 }, settled: true, result: 'no', settledPnl: -9.6 });
-  const heldWon = Object.assign({}, base, { ticker: 'C', exitShadow: { bid: 0.25 }, settled: true, result: 'yes', settledPnl: 0.4 });
-  const untouched = Object.assign({}, base, { ticker: 'D', settled: true, result: 'yes', settledPnl: 0.4 });
-  const r = f.kalshiExitReport([sold, heldLost, heldWon, untouched], { A: 'no' });
-  assert.deepStrictEqual([r.touched, r.sold, r.loggedOnly], [3, 1, 2], 'an order the watch never touched is not counted');
-  assert.ok(Math.abs(r.avgSlip - 0.03) < 1e-9, 'slip is the trigger bid minus the fill: ' + r.avgSlip);
-  assert.strictEqual(r.realised, -3.0);
-  assert.ok(Math.abs(r.exitMinusHold - (-3.0 - (-9.6))) < 1e-9 && r.holdKnownSold === 1, 'selling beat holding by $6.60 where the market went against us');
-  assert.deepStrictEqual([r.known, r.recovered], [3, 1], 'recovered = the side won after touching 25c');
-  // Records taken under an earlier line (a trigger bid above 25c: the 50c and 70c lines) are not a fall to 25c: they are counted apart and never mixed into figures labelled 25c.
-  const older = Object.assign({}, base, { ticker: 'E', exitShadow: { bid: 0.49 }, settled: true, result: 'yes', settledPnl: 0.4 });
-  const oldSold = Object.assign({}, base, { ticker: 'F', exitStatus: 'sold', exitCount: 10, exitBid: 0.7, exitAvg: 0.68, settled: true, result: 'exit', settledPnl: -2.0 });
-  const mixed = f.kalshiExitReport([sold, heldLost, heldWon, untouched, older, oldSold], { A: 'no' });
-  assert.deepStrictEqual([mixed.touched, mixed.earlier], [3, 2], 'two records from the earlier lines are set apart, the three real 25c touches are counted');
-  assert.strictEqual(mixed.realised, -3.0, 'and the earlier sale is not added into the 25c result');
-  // The three sell figures are over the SAME sold orders, so they can be subtracted: trigger bid minus sold at is the slip. A logged-only order's bid (here 20c) and a sold order with no bid on record
-  // (here a null, which must not count as a 0c bid) are not in them.
-  const sold2 = Object.assign({}, base, { ticker: 'S', exitStatus: 'sold', exitCount: 10, exitBid: 0.2, exitAvg: 0.15, settled: true, result: 'exit', settledPnl: -3.6 });
-  const deep = Object.assign({}, base, { ticker: 'G', exitShadow: { bid: 0.2 }, settled: true, result: 'no', settledPnl: -9.6 });
-  const noBid = Object.assign({}, base, { ticker: 'H', exitStatus: 'sold', exitCount: 10, exitBid: null, exitAvg: 0.3, settled: true, result: 'exit', settledPnl: -3.4 });
-  const co = f.kalshiExitReport([sold, sold2, deep, noBid], {});
-  assert.deepStrictEqual([co.touched, co.sold], [4, 3], 'all three sells are counted as sells');
-  assert.ok(Math.abs(co.avgBid - 0.22) < 1e-9 && Math.abs(co.avgFill - 0.18) < 1e-9 && Math.abs(co.avgSlip - 0.04) < 1e-9, 'averaged over the two sells that have both numbers: ' + [co.avgBid, co.avgFill, co.avgSlip]);
-  assert.ok(Math.abs((co.avgBid - co.avgFill) - co.avgSlip) < 1e-9, 'trigger bid minus sold at equals the slip');
-  const win = f.kalshiExitReport([Object.assign({}, sold)], { A: 'yes' });
-  assert.ok(Math.abs(win.exitMinusHold - (-3.0 - 0.4)) < 1e-9, 'when the side would have won, selling was worse than holding by the win it gave up (fees included in cost)');
-  assert.strictEqual(f.kalshiExitReport([Object.assign({}, sold)], null).holdKnownSold, 0, 'no market result, no hold comparison: never guessed');
-  assert.strictEqual(f.kalshiExitReport([untouched], {}).touched, 0);
-  assert.ok(/kalshiExitReport\(kalshiLiveOrders/.test(html) && /kalshiStatsText\(kalshiPerfStats\(orders, since\), kalshiExitReport\(/.test(html), 'the exit report is still computed (for the copied stats)');
-};
 
 // Y36: the Account card says why the bot is not trading, without opening the bot menu.
 gates.Y36 = () => {
