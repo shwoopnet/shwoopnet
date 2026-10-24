@@ -666,7 +666,7 @@ gates.Y45 = () => {
 // NOT when a touch "leaves" (a touch has no hover, so hiding on leave would close the tip the instant the finger lifts), and the chart is only rebuilt when its markup changes, because
 // replacing it under the pointer closed the tip. Gain and loss text share the bars' tokens: one green, one red.
 gates.Y40 = () => {
-  assert.ok(/\.kal-pos\{ color:var\(--gain\); \}/.test(html) && /\.kal-neg\{ color:var\(--loss\); \}/.test(html), 'gain and loss text use the same tokens as the bars: one green, one red');
+  assert.ok(/\.kal-pos\{ color:var\(--gain\); \}/.test(html) && /\.kal-neg\{ color:var\(--loss-text\); \}/.test(html) && /--loss-text: #F0554B;/.test(html), 'loss text uses a lighter red (5.4:1 on the cards, the bars keep the 3.9:1 safety red), gain text matches the bars');
   assert.ok(!/#1f9d55|#d64545/i.test(html), 'and the two stray hard-coded copies of them are gone');
 };
 

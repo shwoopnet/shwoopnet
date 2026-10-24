@@ -59,6 +59,7 @@
        varies with the rest of the palette. */
     --gain: #0F9D58;
     --loss: #D93025;
+    --loss-text: #F0554B;   /* loss as TEXT on the dark cards: --loss itself is 3.9:1 there, this is 5.4:1. Bars, rings and buttons keep --loss. */
     --loss-glow: rgba(217,48,37,0.14);
     --radius: 10px;
     --card-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 10px 24px -14px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.03);
@@ -429,7 +430,7 @@
   .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
   .kal-pnl-ranges{ display:flex; gap:6px; flex-wrap:wrap; } .kal-pnl-ranges .kal-pill{ background:none; cursor:pointer; min-height:40px; padding:0 14px; font-family:inherit; } .kal-pnl-ranges .kal-pill.on{ color:var(--paper); border-color:var(--paper); }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
-  .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss); border-color:var(--loss); }
+  .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss-text); border-color:var(--loss); }
   .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
   .kal-rail .kal-card{ padding:16px 20px; }
   .kal-rail .kal-note{ margin-top:8px; }
@@ -549,7 +550,7 @@
      These two used to be hard-coded copies of their own and sat next to the charts as a slightly different green and red. */
   .kal-pos{ color:var(--gain); }
   .kal-warn{ color:#c58a00; }
-  .kal-neg{ color:var(--loss); }
+  .kal-neg{ color:var(--loss-text); }
   /* Calm view (the owner, Oct 21, 2026: shown from across a room the page "looks like a christmas tree"). Green and red stay for the few things that carry the verdict: the "Today" line, the end
      label of the P/L line and the losing bars. Every other figure (the stat tiles and the By market and By price paid rows) is plain text; its sign still says which way it went. The market rows
      keep the name, the time left and the YES price; the spread, round trip and size lines and the depth bar are one tap away in Copy all stats, not on the face of the page. */
@@ -751,7 +752,7 @@
   .kal-console [data-card="account"]{ grid-area:acct; }
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
-  .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
+  .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
   .kal-ecg-wrap{ border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; margin:0 0 10px; }
   .kal-ecg-wrap.flash{ animation:ecgFlash .9s ease-out; }
   @keyframes ecgFlash{ 0%{ box-shadow:0 0 0 1px rgba(15,157,88,.9), 0 0 18px rgba(15,157,88,.45); border-color:rgba(15,157,88,.9); } 100%{ box-shadow:0 0 0 0 rgba(15,157,88,0); } }
