@@ -99,7 +99,8 @@ gates.P5 = () => {
 
 // Limit graphics is the old reduce-motion switch under a wider name: one stored setting, and it also removes the glow, the grid and the ghost wordmark.
 gates.P6 = () => {
-  assert.ok(/<div class="settings-row-title">Limit graphics<\/div>/.test(html) && !/<div class="settings-row-title">Reduce motion<\/div>/.test(html), 'the Settings row says Limit graphics');
+  assert.ok(!/Limit graphics|id="motionToggle"|applyMotionPref/.test(html.replace(/\/\*[\s\S]*?\*\//g, '')), 'there is no Limit graphics switch (removed Oct 24, 2026); the device reduce-motion setting is the only input');
+  assert.ok(/data-reduce-motion', reduced \? 'true' : 'false'/.test(html) && /prefers-reduced-motion: reduce\)'\)\.matches/.test(html), 'and it still sets the same attribute the motion rules read');
   assert.ok(!/bg-ghost|bg-grid|bg-ambient|bg-grain/.test(html.replace(/\/\*[\s\S]*?\*\//g, '')), 'the ghost wordmark, the grid, the grain and the blobs are gone from the ground (the owner, Oct 23, 2026); the ground is the front page gradient');
 };
 

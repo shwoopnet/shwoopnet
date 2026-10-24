@@ -209,7 +209,7 @@
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
   }
   /* Hover (the owner, Oct 21, 2026): the wordmark used to turn --amber under the pointer, which is BLACK in Mono Ink, so the white letters went dark. No colour change now; the letters hop one after another instead.
-     Transform only, off under the OS reduce-motion setting and the Limit graphics switch. */
+     Transform only, off under the device reduce-motion setting. */
   .brand-name span{ display:inline-block; transition: transform .25s cubic-bezier(.2,.9,.3,1.5) calc(var(--i) * 40ms); }
   .brand:hover .brand-name span{ transform: translateY(-5px); }
   .brand-text{ position:relative; }
@@ -730,7 +730,7 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"acct acct" "stat risk" "pos pos" "trd trd"; gap:18px; }
+  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"acct acct" "stat pnl" "pos pos" "trd trd"; gap:18px; }
   .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
   .kal-console [data-card="account"]{ grid-area:acct; }
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
@@ -750,7 +750,8 @@
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
   .kal-console [data-card="status"]{ grid-area:stat; align-self:stretch; }
-  .kal-console [data-card="risk"]{ grid-area:risk; align-self:stretch; }
+  .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1 / -1; margin-top:6px; padding-top:12px; border-top:1px solid var(--border); } .kal-acct-risk .kal-k{ color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+  .kal-console [data-card="pnl"]{ grid-area:pnl; align-self:stretch; }
   .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
   .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
@@ -764,7 +765,7 @@
   .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
-    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "risk" "pos" "trd"; }
+    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "trd"; }
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals{ grid-column:1; }
   }
@@ -804,7 +805,7 @@
     .kal-card:hover, .settings-card:hover, .brief-win:hover:hover, .kal-tile:hover, .kal-leg:hover, .data-bar:hover{ transform: none; }
   }
   /* The slogan behind every signed-in page (the owner, Oct 23, 2026: "3 looks sick"): staggered, slightly tilted rows in the wordmark's lettering, very faint, fixed behind the cards so it only shows in the gaps. It is the same on every page and is
-     off with the Limit graphics setting, like the soft light. It carries no information and nothing on it moves. */
+     off under the device reduce-motion setting, like the soft light. It carries no information and nothing on it moves. */
   .bg-slogan{ position:fixed; inset:-40px; z-index:-1; pointer-events:none; transform:rotate(-8deg); overflow:hidden; font-family:'Titan One','Public Sans',sans-serif; font-size:74px; line-height:1.35; color:rgba(255,255,255,.035); user-select:none; }
   .bg-slogan p{ margin:0; white-space:nowrap; }
   .bg-slogan p:nth-child(even){ margin-left:-260px; }
@@ -956,7 +957,6 @@
       var s = (data && typeof data.settings === 'object' && data.settings) ? data.settings : null;
       if(!s) return null; // null, not defaults -- lets the caller tell "never synced" from "synced, all defaults"
       return {
-        reduceMotion: typeof s.reduceMotion === 'boolean' ? s.reduceMotion : false,
         kalBotLayout: (s.kalBotLayout && typeof s.kalBotLayout === 'object') ? s.kalBotLayout : null,
         clockFormat: typeof s.clockFormat === 'string' ? s.clockFormat : '24',
         landingPref: typeof s.landingPref === 'string' ? s.landingPref : 'auto'
@@ -1229,14 +1229,11 @@
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
+        <div class="kal-acct-risk"><div class="kal-k">Stop Loss and Risk</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
       </div>
       <div class="kal-card" data-card="status">
         <div class="kal-card-title">Bot status</div>
         <div id="kalStatusBody"><div class="kal-empty">Reading the bot...</div></div>
-      </div>
-      <div class="kal-card" data-card="risk">
-        <div class="kal-card-title">Stop Loss and Risk</div>
-        <div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div>
       </div>
       <div class="kal-card" data-card="positions">
         <div class="kal-card-title">Open positions</div>
@@ -1245,7 +1242,7 @@
       </div>
       <div class="kal-main">
       <div class="kal-card" data-card="pnl" id="kalPnl">
-        <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Account result</div><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div>
+        <div class="kal-card-head" style="padding:0 0 12px"><div class="kal-card-title" style="margin:0">Account result</div><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div>
         <div id="kalPnlBody"></div>
       </div>
       <div class="kal-card kal-card-flush" data-card="trades">
@@ -1314,15 +1311,6 @@
           </div>
 
 
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-title">Limit graphics</div>
-              <div class="settings-row-desc">Stops animations and hover effects, and the soft light in the background.</div>
-            </div>
-            <button class="settings-toggle-switch" id="motionToggle" role="switch" aria-checked="false" aria-label="Toggle reduced motion">
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
 
 
 
@@ -1676,21 +1664,13 @@
     applyClockFormat(saved);
   })();
 
-  // ---------- Settings: reduce motion ----------
-  var motionToggleBtn = document.getElementById('motionToggle');
-  function applyMotionPref(reduced, skipSync){
-    motionToggleBtn.setAttribute('aria-checked', reduced ? 'true' : 'false');
-    document.documentElement.setAttribute('data-reduce-motion', reduced ? 'true' : 'false');
-    try{ window.localStorage.setItem('shwoopnet:reduceMotion', reduced ? 'true' : 'false'); }catch(e){}
-    if(!skipSync) syncUserSetting('reduceMotion', reduced);
-  }
-  motionToggleBtn.addEventListener('click', function(){
-    applyMotionPref(motionToggleBtn.getAttribute('aria-checked') !== 'true');
-  });
+  // ---------- Motion ----------
+  // There is no switch for this any more (the owner removed the graphics switch, Oct 24, 2026). The only input is the device's own reduce-motion setting, which turns on the same
+  // [data-reduce-motion="true"] rules the switch used to: no animation, no hover lift, no soft light or slogan wallpaper.
   (function initMotionPref(){
-    var saved = 'false';
-    try{ saved = window.localStorage.getItem('shwoopnet:reduceMotion') || 'false'; }catch(e){}
-    applyMotionPref(saved === 'true');
+    var reduced = false;
+    try{ reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }catch(e){}
+    document.documentElement.setAttribute('data-reduce-motion', reduced ? 'true' : 'false');
   })();
 
   // ---------- Settings: reset all preferences ----------
@@ -2986,7 +2966,7 @@ kalshiStatusTick();
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['status', 'Bot status'], ['risk', 'Stop Loss and Risk'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
+    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -3309,7 +3289,6 @@ kalshiStatusTick();
     var storedLandingPref = 'auto';
     try{ storedLandingPref = window.localStorage.getItem('shwoopnet:landingPref') || 'auto'; }catch(e){}
     var snapshot = {
-      reduceMotion: motionToggleBtn.getAttribute('aria-checked') === 'true',
       kalBotLayout: window.__kalBotLayout ? window.__kalBotLayout.get() : null,
       clockFormat: clockFormatPref || '24',
       landingPref: storedLandingPref
@@ -3338,7 +3317,6 @@ kalshiStatusTick();
 
     applyLandingPref(shaped.landingPref, true);
     applyClockFormat(shaped.clockFormat, true);
-    applyMotionPref(shaped.reduceMotion, true);
     if(shaped.kalBotLayout && window.__kalBotLayout){ window.__kalBotLayout.set(shaped.kalBotLayout); }
   }
   var userDocUnsubscribe = null;
