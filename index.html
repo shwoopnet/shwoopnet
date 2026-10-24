@@ -532,7 +532,7 @@
   /* Gain and loss text use the same two tokens as the chart bars, the line and the background glow, so there is one green and one red on the page.
      These two used to be hard-coded copies of their own and sat next to the charts as a slightly different green and red. */
   .kal-pos{ color:var(--gain); }
-  .kal-warn{ color:#c58a00; }
+  .kal-warn{ color:#c58a00; } .kal-silent{ margin-top:12px; border-left:3px solid #c58a00; padding-left:12px; } .kal-silent .kal-note{ color:var(--paper); margin-top:4px; }
   .kal-neg{ color:var(--loss-text); }
   /* Calm view (the owner, Oct 21, 2026: shown from across a room the page "looks like a christmas tree"). Green and red stay for the few things that carry the verdict: the "Today" line, the end
      label of the P/L line and the losing bars. Every other figure (the stat tiles and the By market and By price paid rows) is plain text; its sign still says which way it went. The market rows
@@ -2684,6 +2684,37 @@
     for(var i = 0; i < cands.length; i++){ if(cands[i][0] > now){ return { at: cands[i][0], inMs: cands[i][0] - now, label: cands[i][1] }; } }
     return null;
   }
+  // Silent-market warning (Oct 24, 2026, the owner: "make a warning in case a strategy stops running for whatever reason"). The bot as a whole already says when it stops (the Running pill, the reason under it, the heartbeat). This is
+  // the other failure: one market quietly stops sending orders while the rest carry on (a shard out of money, a market the bot dropped, a bug). A market is called silent when it has sent no order, filled or not, for far longer than its
+  // own usual gap: 8 times the median gap of its last 3 days, and never under 3 hours. It needs 8 orders in those 3 days to know what usual is. Bitcoin and Ethereum are left out on purpose: the smooth climb rule removes most of their
+  // orders by design, so their silence says nothing. Gold, the forex pairs and natural gas do not trade over the weekend, so for them the clock starts at Sunday 18:00 Central and nothing is said from Friday 17:00 to then; XRP and
+  // Dogecoin trade all week. Pure: orders in, sentences out. It only reads; it can warn wrongly (a holiday), never act.
+  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false }, { name: 'Dogecoin', weekdays: false }, { name: 'AUD/USD', weekdays: true }, { name: 'USD/CAD', weekdays: true }, { name: 'Natural gas', weekdays: true }];
+  function kalshiCtWeekMinute(ms){
+    var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
+    parts.forEach(function(x){ o[x.type] = x.value; });
+    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(o.weekday) * 1440 + Number(o.hour) * 60 + Number(o.minute);
+  }
+  function kalshiDurationText(ms){
+    var m = Math.round(ms / 60000);
+    return m < 90 ? m + ' minutes' : (m < 2880 ? Math.round(m / 60) + ' hours' : Math.round(m / 1440) + ' days');
+  }
+  function kalshiSilentMarkets(orders, s, now){
+    if(!s || s.active !== true){ return []; }
+    var wm = kalshiCtWeekMinute(now), closed = wm >= 7200 + 1020 || wm < 1080, reopen = now - ((wm - 1080 + 10080) % 10080) * 60000, out = [];
+    KAL_WATCH.forEach(function(w){
+      if(w.weekdays && closed){ return; }
+      var ts = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && Number.isFinite(Number(o.ts)) && kalshiMarketName(o) === w.name; }).map(function(o){ return Number(o.ts); }).sort(function(a, b){ return a - b; });
+      var recent = ts.filter(function(x){ return x >= now - 3 * 86400000; });
+      if(recent.length < 8){ return; }
+      var gaps = []; for(var i = 1; i < recent.length; i++){ gaps.push(recent[i] - recent[i - 1]); }
+      gaps.sort(function(a, b){ return a - b; });
+      var usual = gaps[Math.floor(gaps.length / 2)], line = Math.max(3 * 3600000, 8 * usual);
+      var from = ts[ts.length - 1]; if(w.weekdays && from < reopen){ from = reopen; }
+      if(now - from > line){ out.push(w.name + ' has sent no order for ' + kalshiDurationText(now - from) + ' (it usually sends one about every ' + kalshiDurationText(usual) + ').'); }
+    });
+    return out;
+  }
   // How much of the loss stop the last 24 hours have used, counted the way the server counts it (botRisk and the stop in runL1Tick): the bot's filled orders, a settled one by its result, a partly sold one in proportion,
   // an order closed by hand not at all, and an order still open counted as LOST. The part bought with reinvested profit (the add-on) that is lost or open raises the limit instead of using it. 12% of the balance at the last
   // size review when sizing, otherwise $10. With the high point stop on, the loss is measured from the best settled result.
@@ -2826,6 +2857,11 @@
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
     var a = kalshiLiveAcct;
     var orders = kalshiResolveOrders(kalshiLiveOrders, a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
+    var silent = kalshiOrdersLoaded ? kalshiSilentMarkets(orders, s, now) : [];
+    if(silent.length){
+      var silentEscaped = silent.map(function(x){ return escapeHtml(x); }).join('</div><div class="kal-note">');
+      sEl.insertAdjacentHTML('beforeend', '<div class="kal-warn kal-silent"><b>Needs a look</b><div class="kal-note">' + silentEscaped + '</div><div class="kal-note">Check the bot note above and the money on each Kalshi shard.</div></div>');
+    }
     var m = kalshiRiskMeter(orders, s, now);
     rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
       (function(){
