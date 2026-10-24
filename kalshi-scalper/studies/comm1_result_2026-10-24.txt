@@ -1,0 +1,27 @@
+COMM1: 23063 markets in 6 series, discovery before 2026-09-28
+E360  SESSION_00_06      FALSIFIED          disc n= 1057  -0.14c z -0.16 | conf n=  782  -0.07c z -0.09 | all  -0.11c z -0.18 PF 1.03
+E360  SESSION_06_12      FALSIFIED          disc n=  865  -1.24c z -1.82 | conf n=  685  +0.23c z +0.26 | all  -0.59c z -1.06 PF 0.95
+E360  SESSION_12_18      FALSIFIED          disc n=  950  +0.70c z +0.92 | conf n=  772  -0.93c z -0.85 | all  -0.03c z -0.05 PF 1.05
+E360  SESSION_18_24      NOT_ENOUGH_DATA    disc n=  859  +0.65c z +0.98 | conf n=  587  +1.04c z +0.89 | all  +0.81c z +1.31 PF 1.23
+E360  WEEKEND            NOT_ENOUGH_DATA    disc n=  166  +1.03c z +0.75 | conf n=   44  -6.39c z -3.20 | all  -0.53c z -0.40 PF 0.97
+E360  WEEKDAY            FALSIFIED          disc n= 3565  -0.05c z -0.11 | conf n= 2782  +0.10c z +0.25 | all  +0.02c z +0.06 PF 1.06
+E360  MAXPULL_LE_010     FALSIFIED          disc n=  308  -0.19c z -0.14 | conf n=  252  +1.96c z +2.36 | all  +0.77c z +0.90 PF 1.30
+E360  EFF_LE_11          NOT_ENOUGH_DATA    disc n=  506  +0.13c z +0.15 | conf n=  422  +1.61c z +2.30 | all  +0.80c z +1.32 PF 1.31
+E360  NO_DOWN_MINUTE     NOT_ENOUGH_DATA    disc n=  207  +0.04c z +0.02 | conf n=  199  +2.21c z +2.41 | all  +1.10c z +1.06 PF 1.43
+E360  BAND_80_880        FALSIFIED          disc n= 2435  -0.33c z -0.54 | conf n= 1945  -0.95c z -1.45 | all  -0.60c z -1.33 PF 0.98
+E360  BAND_88_930        FALSIFIED          disc n= 2006  -0.16c z -0.29 | conf n= 1537  -0.59c z -0.84 | all  -0.35c z -0.78 PF 1.00
+E360  BAND_93_970        FALSIFIED          disc n= 1960  +0.19c z +0.37 | conf n= 1466  +0.42c z +1.27 | all  +0.29c z +0.89 PF 1.15
+E360  BAND_97_995        FALSIFIED          disc n= 1142  -0.19c z -0.46 | conf n= 1099  +0.51c z +2.11 | all  +0.15c z +0.64 PF 1.25
+E600  SESSION_00_06      FALSIFIED          disc n=  418  -1.20c z -0.80 | conf n=  335  -0.95c z -0.61 | all  -1.09c z -1.00 PF 0.95
+E600  SESSION_06_12      NOT_ENOUGH_DATA    disc n=  319  +2.34c z +1.67 | conf n=  292  +1.20c z +0.92 | all  +1.80c z +1.86 PF 1.54
+E600  SESSION_12_18      FALSIFIED          disc n=  380  +0.07c z +0.05 | conf n=  315  -1.00c z -0.50 | all  -0.42c z -0.36 PF 1.05
+E600  SESSION_18_24      FALSIFIED          disc n=  345  -0.79c z -0.42 | conf n=  196  +1.43c z +0.77 | all  +0.02c z +0.01 PF 1.12
+E600  WEEKEND            NOT_ENOUGH_DATA    disc n=   49  -3.11c z -0.74 | conf n=   14  +5.96c z +9.67 | all  -1.09c z -0.32 PF 0.98
+E600  WEEKDAY            FALSIFIED          disc n= 1413  +0.11c z +0.13 | conf n= 1124  -0.07c z -0.08 | all  +0.03c z +0.04 PF 1.12
+E600  MAXPULL_LE_010     FALSIFIED          disc n=  741  +0.22c z +0.22 | conf n=  586  -0.94c z -0.70 | all  -0.29c z -0.36 PF 1.07
+E600  EFF_LE_11          FALSIFIED          disc n=  817  +0.05c z +0.04 | conf n=  652  -0.47c z -0.37 | all  -0.18c z -0.22 PF 1.09
+E600  NO_DOWN_MINUTE     FALSIFIED          disc n=  676  +0.74c z +0.76 | conf n=  543  -1.18c z -0.84 | all  -0.12c z -0.14 PF 1.10
+E600  BAND_80_880        FALSIFIED          disc n= 2093  -0.03c z -0.04 | conf n= 1676  -1.46c z -1.31 | all  -0.67c z -0.97 PF 1.01
+E600  BAND_88_930        FALSIFIED          disc n= 1072  +0.42c z +0.49 | conf n=  833  +0.07c z +0.07 | all  +0.27c z +0.41 PF 1.14
+E600  BAND_93_970        FALSIFIED          disc n=  481  -0.95c z -0.73 | conf n=  366  -0.91c z -0.99 | all  -0.93c z -1.12 PF 0.97
+E600  BAND_97_995        NOT_ENOUGH_DATA    disc n=  103  +0.63c z +0.61 | conf n=   91  -0.99c z -0.71 | all  -0.13c z -0.15 PF 1.47
