@@ -842,6 +842,11 @@
   .data-rule{ padding:14px 0; border-top:1px solid var(--border); } .data-rule:first-child{ border-top:0; padding-top:4px; }
   .data-rule-top{ display:flex; justify-content:space-between; gap:14px; align-items:baseline; flex-wrap:wrap; font-size:14px; }
   .data-bar{ height:8px; border-radius:4px; background:rgba(255,255,255,.1); margin-top:10px; overflow:hidden; } .data-bar i{ display:block; height:100%; background:var(--paper); border-radius:4px; }
+  .data-headline{ font:800 clamp(44px, 9vw, 72px)/1 'Public Sans', sans-serif; letter-spacing:-.02em; margin:10px 0 12px; }
+  .data-hero .data-verdict{ font-size:18px; font-weight:600; color:var(--muted); }
+  .dd-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(13px, 1fr)); gap:6px; }
+  .dd{ aspect-ratio:1; border-radius:50%; background:var(--paper); display:block; }
+  .dd-loss{ background:transparent; box-shadow:inset 0 0 0 2px var(--loss); opacity:1; }
 </style>
 <script>
 </script>
@@ -1281,8 +1286,9 @@
     <div class="trades-header kal-header-bare">
       <div><div class="trades-title">Data</div><div class="kal-note" style="margin:2px 0 0">The record on one screen. Read only: nothing here sends an order or changes a setting.</div></div>
     </div>
-    <div class="kal-card data-hero" data-card="data-verdict"><div class="kal-lbl">Right now</div><div id="dataVerdict"></div></div>
+    <div class="kal-card data-hero" data-card="data-verdict"><div class="kal-lbl">Last 30 days, of the account</div><div class="data-headline" id="dataHead"></div><div id="dataVerdict"></div></div>
     <div class="kal-card" data-card="data-growth" style="margin-top:18px"><div class="kal-card-title">Growth</div><div id="dataLine"></div></div>
+    <div class="kal-card" data-card="data-dots" style="margin-top:18px"><div class="kal-card-title">Every trade</div><div id="dataDots"></div></div>
     <div class="kal-card" data-card="data-rules" style="margin-top:18px"><div class="kal-card-title">Rules on trial</div><div id="dataTrial"></div></div>
     <div class="kal-note" id="dataNote"></div>
   </main>
@@ -2898,6 +2904,31 @@
     if(next){ items.push({ rank: 5, text: next.checkText + ' on ' + kalDate(next.check) + '.', detail: 'In ' + Math.max(1, Math.round((next.check - c.now) / 86400000)) + ' days. Nothing to do before then.' }); }
     return items.map(function(x, i){ x.i = i; return x; }).sort(function(a, b){ return a.rank - b.rank || a.i - b.i; });
   }
+  // The headline (Oct 24, 2026, the owner chose the "own look, more visual" direction): the last 30 days of settled results as a share of the account, in one plain phrase. The base is the account total now minus those 30 days,
+  // like the Today line, so a deposit still reads as a gain here; it says "of the account" for that reason. Not a dollar figure, so Privacy view leaves it showing.
+  function dataHeadline(orders, total, now){
+    var from = now - 30 * 86400000, net = 0, n = 0;
+    (orders || []).forEach(function(o){ var p = kalshiOrderPnl(o); if(p !== null && Number(o.ts) >= from){ net += p; n++; } });
+    if(!n){ return 'No trades in 30 days.'; }
+    var base = Number(total) - net;
+    if(total === null || total === undefined || !(base > 0)){ return n + (n === 1 ? ' trade' : ' trades') + ' in 30 days.'; }
+    var pct = net / base * 100;
+    return Math.abs(pct) < 0.05 ? 'Flat.' : (pct > 0 ? 'Up ' : 'Down ') + Math.abs(pct).toFixed(1) + '%.';
+  }
+  // One dot per settled trade, oldest first. A win is a white dot, brighter the bigger it was; a loss is a red ring (the one place red is used here, like the losing bars). Hover shows when, which market and the result, through
+  // kalshiMoney so Privacy view masks it. No dot is a control: the page stays read only. Only the latest 800 are drawn.
+  function dataDotsHtml(orders, esc, money){
+    var rows = (orders || []).map(function(o){ return { o: o, p: kalshiOrderPnl(o) }; }).filter(function(r){ return r.p !== null; }).sort(function(a, b){ return a.o.ts - b.o.ts; });
+    if(!rows.length){ return '<div class="kal-empty">Dots appear after the first settled trade.</div>'; }
+    var shown = rows.slice(-800), maxWin = 0.0001, losses = 0;
+    shown.forEach(function(r){ if(r.p > maxWin){ maxWin = r.p; } if(r.p < 0){ losses++; } });
+    var dots = shown.map(function(r){
+      var title = kalDateTime(r.o.ts) + ' \u00b7 ' + kalshiMarketName(r.o) + ' \u00b7 ' + (r.p >= 0 ? '+' : '-') + money(Math.abs(r.p));
+      return r.p < 0 ? '<span class="dd dd-loss" title="' + esc(title) + '"></span>' : '<span class="dd" style="opacity:' + (0.35 + 0.65 * Math.min(1, r.p / maxWin)).toFixed(2) + '" title="' + esc(title) + '"></span>';
+    }).join('');
+    return '<div class="dd-grid" role="img" aria-label="' + esc(shown.length + ' settled trades, ' + losses + ' of them losses') + '">' + dots + '</div>' +
+      '<div class="kal-note" style="margin:12px 0 0">' + esc(shown.length + (shown.length === 1 ? ' trade' : ' trades') + ', ' + losses + (losses === 1 ? ' loss' : ' losses') + '. Oldest at top left, newest at bottom right. A brighter dot is a bigger win, a red ring is a loss.' + (rows.length > shown.length ? ' Older trades are not drawn.' : '')) + '</div>';
+  }
   // One plain sentence for the top of the page: the first thing that needs a look (the list's own rules, see dataAgenda), or that nothing does. The rest of what the agenda would list is the next read date.
   function dataVerdictHtml(items, esc){
     var needs = items.filter(function(x){ return x.rank < 5; }), next = items.filter(function(x){ return x.rank === 5; })[0];
@@ -2934,6 +2965,9 @@
     var ses = kalshiLiveCtl && kalshiLiveCtl.session, nowMs = Date.now(), hbS = kalshiHeartbeat(ses, nowMs), trial = dataTrial(orders), trend = dataMarketTrend(orders);
     var risk = kalshiRiskMeter(orders, ses, nowMs);
     var shards = kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok && Array.isArray(kalshiLiveAcct.balance.shards) ? kalshiLiveAcct.balance.shards.filter(function(x){ return x.shard === 0 || x.shard === 2; }) : [];
+    var balNow = kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null;
+    set('dataHead', escapeHtml(dataHeadline(orders, balNow, nowMs)));
+    set('dataDots', dataDotsHtml(orders, escapeHtml, kalshiMoney));
     set('dataVerdict', dataVerdictHtml(dataAgenda({ trial: trial, risk: risk, trend: trend, shards: shards, hb: hbS.state, now: nowMs, money: kalshiMoney }), escapeHtml));
     set('dataLine', kalshiLineSvg(kalshiPnlSeries(orders, 0), escapeHtml, kalshiMoney));
     set('dataTrial', dataRulesHtml(trial, dataLiveTests(kalshiLiveOrders), nowMs, escapeHtml));
