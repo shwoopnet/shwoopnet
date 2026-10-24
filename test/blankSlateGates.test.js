@@ -97,8 +97,8 @@ gates.B6 = () => {
 
 // The Brief draws only what the market tape gave it. A symbol that has not arrived is a dash, never a number it was not given, and a quote with a day series draws a line.
 gates.B7 = () => {
-  const src = ['pct', 'briefChartFigures', 'briefChartHtml'].map(fnSource).join('\n');
-  const f = new Function('escapeHtml', 'var briefChartQuotes = {};\n' + src + '\nreturn briefChartHtml;')((x) => String(x));
+  const src = ['pct', 'kalTime', 'kalDate', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'briefChartFigures', 'briefChartHtml'].map(fnSource).join('\n');
+  const f = new Function('escapeHtml', "var KAL_TZ = 'America/Chicago'; var briefChartQuotes = {};\n" + src + '\nreturn briefChartHtml;')((x) => String(x));
   const missing = f({ sym: 'BTC-USD', name: 'Bitcoin' }, undefined);
   assert.ok(/&mdash;/.test(missing) && !/<svg|%/.test(missing), 'no quote: a dash and no line, no percentage');
   const half = f({ sym: 'BTC-USD', name: 'Bitcoin' }, { price: 68000, prevClose: 0 });
