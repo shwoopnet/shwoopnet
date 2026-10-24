@@ -589,6 +589,8 @@
     background:radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%), linear-gradient(var(--ink), var(--front-g1));
   }
   .auth-gate[hidden]{ display:none; }
+  /* The sign-in screen is a fixed layer over the whole window, but the signed-in app is still laid out underneath it, so the document grew a scroll bar that scrolled nothing you could see (the owner, Oct 24, 2026: "it builds a scroll bar a lot of the time and it doesnt actually scroll anything"). While the gate is up the document itself does not scroll; the gate scrolls itself when its own content is taller than the window. */
+  html:has(#authGate:not([hidden])), html:has(#authGate:not([hidden])) body{ overflow:hidden; }
   .front{ position:relative; width:min(1160px, 100% - 40px); margin:0 auto; min-height:100%; display:flex; flex-direction:column; padding:0 0 22px; }
   .front-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; padding:28px 0 0; position:relative; z-index:6; }
   .front-brand{ display:inline-flex; flex-direction:column; align-items:flex-start; }
