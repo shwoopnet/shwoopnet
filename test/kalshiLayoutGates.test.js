@@ -210,7 +210,7 @@ gates.PC1 = () => {
   assert.strictEqual(f.kalshiPositionChartHtml(Object.assign({}, base, { path: [] })), '', 'no reads yet: no chart');
   assert.strictEqual(f.kalshiPositionChartHtml(Object.assign({}, base, { path: [0.9] })), '', 'one read is not a line');
   const c = f.kalshiPositionChartHtml(Object.assign({}, base, { path: [0.9, 0.91, 0.93, 0.943] }));
-  assert.ok(/kal-hc-line/.test(c) && /kal-hc-paid/.test(c) && /Closes in/.test(c) && /Since this page opened/.test(c), 'the line, the paid line and the honest start label');
+  assert.ok(/kal-hc-line/.test(c) && !/kal-hc-paid|Closes in|Dashed line|Since this page opened/.test(c) && /<span>94%<\/span><span>90%<\/span>/.test(c), 'a plain chart: the line, and the high and low as percentages down the side, no captions and no paid line (the owner, Oct 24, 2026)');
   assert.ok(!/\$|\*\*\*\*/.test(c), 'it carries no dollar figure, so Privacy view has nothing to mask in it');
   const ys = (/class="kal-hc-line" d="([^"]*)"/.exec(c)[1].match(/ ([\d.]+)/g) || []).map((x) => Number(x));
   const flatC = f.kalshiPositionChartHtml(Object.assign({}, base, { entry: 0.94, path: [0.94, 0.9401, 0.94, 0.9401] }));
@@ -239,7 +239,7 @@ gates.Y15 = () => {
   assert.strictEqual(r.cashOut, 1.99, 'cashing out a NO sells at 1 minus the YES ask');
   assert.strictEqual(r.left, 300);
   const out = f.kalshiPositionsHtml([r], esc, money);
-  assert.ok(/NO x 2/.test(out) && /Cost[\s\S]*\$1\.92/.test(out) && /\+\$0\.08/.test(out) && /-\$1\.92/.test(out) && /Chance now 99\.6%/.test(out) && /closes in 5:00/.test(out) && /about \$1\.99 before fees/.test(out), 'the row says it all');
+  assert.ok(/NO x 2/.test(out) && /Cost[\s\S]*\$1\.92/.test(out) && /\+\$0\.08/.test(out) && /-\$1\.92/.test(out) && /Chance now 99\.6%/.test(out) && !/closes in|waiting for the result/.test(out) && !/before fees/.test(out), 'the row says it all');
   assert.ok(!/Realized|Fees/.test(out) && !/Realized|feesPaid/.test(html.slice(html.indexOf('function kalshiPositionsHtml'), html.indexOf('function renderKalshiBot'))), 'no realized or fee line on an open position');
   // A position the bot did not open, with no books: no invented figures.
   const manual = f.kalshiPositionRows([{ ticker: 'KXGOLD15M-26OCT081045-45', position: 3 }], orders, fills, [], NOW)[0];
