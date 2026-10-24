@@ -26,7 +26,10 @@ gates.D1 = () => {
   assert.ok(card.length > 100);
   assert.ok(!/<(input|select|textarea|form|a )\b/i.test(card), 'the card has no input, select or form');
   const code = ['kalshiPnlSeries', 'kalshiPnlRangeStart', 'kalshiPnlCardHtml', 'renderKalshiPnl', 'kalshiLineSvg'].map(fnSource).join('\n');
-  assert.ok(!/api\.|window\.__shwoopAPI|fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code), 'and its code calls nothing: it only draws what the Bot page already loaded');
+  assert.ok(!/fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code.replace(/api\.kalshiOrdersSince/g, '')), 'and its code writes and calls nothing: it draws what the page loaded, plus one read of older orders');
+  assert.ok((code.match(/api\.\w+/g) || []).every((c) => c === 'api.kalshiOrdersSince'), 'the only API it touches is the read of older orders');
+  const mod = html.slice(html.indexOf('kalshiOrdersSince: function'), html.indexOf('kalshiBookSnaps: function'));
+  assert.ok(/getDocs\(query\(collection\(db, 'kalshiLiveOrders'\)/.test(mod) && !/setDoc|updateDoc|addDoc/.test(mod), 'that read is a plain query of the bot orders, admin read only by the rules');
   assert.ok(!/id="kalRecord"|data-card="record"|renderKalshiRecord/.test(html), 'the record card (headline and rules on trial) is gone (removed Oct 24, 2026, the owner)');
 };
 

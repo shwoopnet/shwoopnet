@@ -1044,6 +1044,12 @@
     kalshiBookStatus: function(){
       return getDoc(doc(db, 'kalshiBookMeta', 'status')).then(function(s){ return s.exists() ? s.data() : null; });
     },
+    // Every order the bot sent from a time on (admin read only), for the account result line's longer ranges. Read once per range and kept for ten minutes, never on a timer.
+    kalshiOrdersSince: function(sinceMs){
+      return getDocs(query(collection(db, 'kalshiLiveOrders'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(20000))).then(function(q){
+        return q.docs.map(function(d){ return d.data(); });
+      });
+    },
     kalshiBookSnaps: function(sinceMs){
       return getDocs(query(collection(db, 'kalshiBookSnaps'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(1500))).then(function(q){
         return q.docs.map(function(d){ return d.data(); });
@@ -2819,7 +2825,7 @@
   // Account result line (Oct 24, 2026, the owner: "bring back our account PnL line ... with a date filter"). The running settled result of the bot's orders,
   // cut to a range. It reads only what the Bot page already loaded (the last 1,000 orders), so a long range reaches back only as far as those orders do, and
   // the note says so instead of drawing a flat start that is not real. Read only: the buttons change what is drawn, nothing else.
-  var KAL_PNL_RANGES = [{ key: '1D', label: 'Today' }, { key: '1W', label: '1W' }, { key: '1M', label: '1M' }, { key: '3M', label: '3M' }, { key: 'YTD', label: 'YTD' }, { key: 'ALL', label: 'All' }];
+  var KAL_PNL_RANGES = [{ key: '1D', label: 'Today' }, { key: '1W', label: '1W' }, { key: '1M', label: '1M' }, { key: '3M', label: '3M' }, { key: 'YTD', label: 'YTD' }, { key: '1Y', label: '1Y' }, { key: 'ALL', label: 'All' }];
   var kalshiPnlRange = '1M';
   function kalshiPnlRangeStart(key, nowMs){
     var day = 86400000, p = kalDayKey(nowMs).split('-').map(Number);
@@ -2828,6 +2834,7 @@
     if(key === '1M'){ return nowMs - 30 * day; }
     if(key === '3M'){ return nowMs - 90 * day; }
     if(key === 'YTD'){ return Date.UTC(p[0], 0, 1, 6, 0, 0); }
+    if(key === '1Y'){ return nowMs - 365 * day; }
     return 0;
   }
   function kalshiPnlCardHtml(orders, key, nowMs, esc, money){
@@ -2837,6 +2844,8 @@
     var note = short ? 'The bot has ' + all.length + ' settled trades loaded, back to ' + kalDate(oldest) + '. A longer range cannot show more than that.' : '';
     return kalshiLineSvg(pts, esc, money) + (note ? '<div class="kal-note">' + esc(note) + '</div>' : '');
   }
+  // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
+  var kalshiPnlFetched = {}, kalshiPnlFetching = '';
   function renderKalshiPnl(){
     var card = document.getElementById('kalPnl');
     if(!card){ return; }
@@ -2844,8 +2853,26 @@
     var bar = document.getElementById('kalPnlRanges');
     if(bar){ bar.innerHTML = KAL_PNL_RANGES.map(function(r){ return '<button type="button" class="kal-pill' + (r.key === kalshiPnlRange ? ' on' : '') + '" data-pnlrange="' + escapeHtml(r.key) + '" aria-pressed="' + (r.key === kalshiPnlRange) + '">' + escapeHtml(r.label) + '</button>'; }).join(''); }
     if(!kalshiOrdersLoaded){ set('kalPnlBody', '<div class="kal-empty">Loading the bot\'s trades...</div>'); return; }
-    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    set('kalPnlBody', kalshiPnlCardHtml(orders, kalshiPnlRange, Date.now(), escapeHtml, kalshiMoney));
+    var nowMs = Date.now(), key = kalshiPnlRange, since = kalshiPnlRangeStart(key, nowMs);
+    var loaded = (kalshiLiveOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); });
+    var oldest = loaded.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
+    var source = kalshiLiveOrders;
+    if(loaded.length >= 1000 && since < oldest){
+      var hit = kalshiPnlFetched[key];
+      if(hit && nowMs - hit.at < 600000){ source = hit.orders; }
+      else {
+        var api = window.__shwoopAPI;
+        if(!api || !api.kalshiOrdersSince){ set('kalPnlBody', '<div class="kal-empty">Older orders are not available right now.</div>'); return; }
+        if(kalshiPnlFetching !== key){
+          kalshiPnlFetching = key;
+          api.kalshiOrdersSince(since).then(function(o){ kalshiPnlFetched[key] = { at: Date.now(), orders: o }; kalshiPnlFetching = ''; renderKalshiPnl(); },
+            function(){ kalshiPnlFetched[key] = { at: Date.now(), orders: loaded }; kalshiPnlFetching = ''; renderKalshiPnl(); });
+        }
+        set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); return;
+      }
+    }
+    var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney));
   }
   (function(){
     var bar = document.getElementById('kalPnlRanges');
