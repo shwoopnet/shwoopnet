@@ -69,19 +69,28 @@ function parseChart(json, nowMs) {
     else if (p.post && t >= p.regular.end && t < p.post.end) state = "post";
     else state = "closed";
   }
-  return { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state, series: chartSeries(r) };
+  const pts = chartPoints(r);
+  // seriesT (Oct 24, 2026, the owner: charts with a real time axis): the unix second of each point in `series`, same thinning, so the page can label the x axis. [] whenever the answer carried no timestamps.
+  return { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state, series: pts.series, seriesT: pts.times };
 }
 
 // The day's closes for the Brief's small charts: numbers only, gaps dropped, thinned to at most SERIES_MAX points. [] when the answer has none, so a chart simply does not draw.
 const SERIES_MAX = 96;
-function chartSeries(r) {
+function chartPoints(r) {
   const q = r && r.indicators && Array.isArray(r.indicators.quote) ? r.indicators.quote[0] : null;
-  const closes = q && Array.isArray(q.close) ? q.close.map(num).filter((v) => v !== null && v > 0) : [];
-  if (closes.length < 2) return [];
-  const step = Math.max(1, Math.ceil(closes.length / SERIES_MAX));
-  const out = closes.filter((_, i) => i % step === 0 || i === closes.length - 1);
-  return out.map((v) => Number(v.toPrecision(7)));
+  const stamps = r && Array.isArray(r.timestamp) ? r.timestamp : [];
+  const raw = q && Array.isArray(q.close) ? q.close : [];
+  const pairs = [];
+  raw.forEach((c, i) => { const v = num(c); if (v !== null && v > 0) pairs.push([v, num(stamps[i])]); });
+  if (pairs.length < 2) return { series: [], times: [] };
+  const step = Math.max(1, Math.ceil(pairs.length / SERIES_MAX));
+  const kept = pairs.filter((_, i) => i % step === 0 || i === pairs.length - 1);
+  const series = kept.map((x) => Number(x[0].toPrecision(7)));
+  // Times only when EVERY kept point has one: a partly labelled axis would be worse than none.
+  const times = kept.every((x) => x[1] !== null) ? kept.map((x) => x[1]) : [];
+  return { series, times };
 }
+function chartSeries(r) { return chartPoints(r).series; }
 
 // A fear and greed reading to {score 0 to 100, rating, prev}. Only a finite score inside 0 to 100 counts; the rating is cut to a short plain string. null when the answer has no usable score.
 const fgNum = (v) => { const x = num(v); return x !== null && x >= 0 && x <= 100 ? Math.round(x * 10) / 10 : null; };
@@ -182,4 +191,4 @@ async function readTape({ fetchFn, now }) {
   return { quotes, news: news && news.length ? news : null, mood: Object.keys(mood).length ? mood : null, errors };
 }
 
-module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
+module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, chartPoints, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };

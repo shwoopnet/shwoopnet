@@ -16,7 +16,7 @@ function fnSource(name) {
   }
   throw new Error('unbalanced ' + name);
 }
-const f = new Function('escapeHtml', 'var briefChartQuotes = {};\n' + ['pct', 'briefChartFigures', 'briefChartHtml'].map(fnSource).join('\n') + '\nreturn { briefChartFigures: briefChartFigures, briefChartHtml: briefChartHtml, quotes: briefChartQuotes };')((x) => String(x));
+const f = new Function('escapeHtml', "var KAL_TZ = 'America/Chicago'; var briefChartQuotes = {};\n" + ['pct', 'kalTime', 'kalDate', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'briefChartFigures', 'briefChartHtml'].map(fnSource).join('\n') + '\nreturn { briefChartFigures: briefChartFigures, briefChartHtml: briefChartHtml, quotes: briefChartQuotes };')((x) => String(x));
 
 gates.H1 = () => {
   const a = f.briefChartFigures(612.4, 625);
@@ -36,6 +36,16 @@ gates.H3 = () => {
   const code = html.slice(html.indexOf("var host = document.getElementById('briefCharts');"), html.indexOf('  // The risk mood (the owner:'));
   assert.ok(!/fetch\(|XMLHttpRequest|api\.|toLocaleTimeString|getHours|Date\(/.test(code), 'it makes no call and never prints a time: the series has none');
   assert.ok(/pointermove/.test(code) && /pointerleave/.test(code) && /pointercancel/.test(code), 'it follows the pointer and lets go when it leaves');
+};
+gates.H4 = () => {
+  const t0 = Date.UTC(2026, 9, 24, 13, 0) / 1000;
+  const withT = f.briefChartHtml({ sym: 'SPY', name: 'SPY' }, { price: 512, prevClose: 500, series: [500, 505, 510, 512], seriesT: [t0, t0 + 14400, t0 + 28800, t0 + 43200] });
+  assert.ok(/class="brief-yaxis"/.test(withT) && /\+\d+(\.\d)?%/.test(withT) && />0%</.test(withT), 'a y axis in percent against the previous close, with 0% for the previous close');
+  assert.ok(/class="brief-xaxis"/.test(withT) && /\d+ (AM|PM)/.test(withT) && !/Day start/.test(withT), 'with timestamps the x axis is Central clock times');
+  const noT = f.briefChartHtml({ sym: 'SPY', name: 'SPY' }, { price: 512, prevClose: 500, series: [500, 505, 510, 512] });
+  assert.ok(/Day start/.test(noT) && />Now</.test(noT) && !/\d+ (AM|PM)/.test(noT), 'without timestamps it says only what it knows: the start of the data and now, never a made-up time');
+  const partial = f.briefChartHtml({ sym: 'SPY', name: 'SPY' }, { price: 512, prevClose: 500, series: [500, 505, 510, 512], seriesT: [t0, t0 + 14400] });
+  assert.ok(/Day start/.test(partial), 'a timestamp list that does not match the series is ignored');
 };
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {

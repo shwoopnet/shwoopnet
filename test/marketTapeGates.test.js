@@ -135,6 +135,18 @@ gates.T21 = () => {
   const q = lib.parseChart(chart({ indicators: { quote: [{ close: [1, 2, 3] }] } }), NOW);
   assert.deepStrictEqual(q.series, [1, 2, 3], 'the series rides on the quote');
 };
+// The chart times (Oct 24, 2026, the owner: charts with a real x axis): each kept point carries its unix second, thinned the same way, and only when every kept point has one.
+gates.T21b = () => {
+  const r = { indicators: { quote: [{ close: [1, null, 3, 4] }] }, timestamp: [100, 200, 300, 400] };
+  assert.deepStrictEqual(lib.chartPoints(r), { series: [1, 3, 4], times: [100, 300, 400] }, 'a gap drops its time with its price, so they stay paired');
+  assert.deepStrictEqual(lib.chartPoints({ indicators: { quote: [{ close: [1, 2] }] } }).times, [], 'no timestamps: no times, never invented ones');
+  assert.deepStrictEqual(lib.chartPoints({ indicators: { quote: [{ close: [1, 2, 3] }] }, timestamp: [100, null, 300] }).times, [], 'a partly stamped list is dropped whole');
+  const closes = Array.from({ length: 300 }, (_, i) => 100 + i), ts = closes.map((_, i) => 1000 + i * 300);
+  const big = lib.chartPoints({ indicators: { quote: [{ close: closes }] }, timestamp: ts });
+  assert.ok(big.series.length === big.times.length && big.times[big.times.length - 1] === ts[ts.length - 1], 'thinned together, ending on the latest');
+  const q = lib.parseChart(chart({ indicators: { quote: [{ close: [1, 2, 3] }] }, timestamp: [10, 20, 30] }), NOW);
+  assert.deepStrictEqual(q.seriesT, [10, 20, 30], 'the times ride on the quote');
+};
 gates.T22 = () => {
   const syms = lib.SYMBOLS.map((s) => s.sym);
   for (const need of ['BTC-USD', 'ETH-USD', 'SPY', 'QQQ', 'GC=F', 'CL=F']) assert.ok(syms.includes(need), need + ' is read for the Brief charts');
