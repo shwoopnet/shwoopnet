@@ -1833,7 +1833,7 @@
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
   // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
   function kalshiAllOrdersCsv(orders){
-    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5'];
+    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5', 'smooth', 'flips0', 'twoStageLeft', 'ask10', 'side10', 'inBand10', 'ask8', 'side8', 'inBand8', 'ask6', 'side6', 'inBand6'];
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -1841,7 +1841,7 @@
     };
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return a.ts - b.ts; }).map(function(o){
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.side, o.price, o.count, o.fillCount, o.maxCost, o.status, o.settled === true ? 'yes' : '', o.result, kalshiOrderPnl(o),
-        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5].map(cell).join(',');
+        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5, o.smooth, o.flips0, o.twoStageLeft, o.ask10, o.side10, o.inBand10, o.ask8, o.side8, o.inBand8, o.ask6, o.side6, o.inBand6].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }
