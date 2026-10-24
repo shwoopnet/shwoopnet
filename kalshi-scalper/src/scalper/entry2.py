@@ -99,6 +99,10 @@ def forward(now: float | None = None) -> str:
     early = [row(m, *p) for m in mk if m[1] in EARLY_SERIES and (p := pick(m, EARLY_LEFT, EARLY_BAND))]
     j = judge_mean(early, MIN_EARLY, EARLY_C, EARLY_Z)
     out.append(f"EARLY540: {j['verdict']}; n={j['n']}" + (f"; mean {100 * j['mean']:+.2f}c z {j['z']:+.2f}; halves {100 * j['h1']:+.2f}c / {100 * j['h2']:+.2f}c; stress {100 * j['stress']:+.2f}c" if "mean" in j else ""))
+    for name, series, left, min_n in (("SILVER6", "KXSILVER15M", 360, 250), ("WTI10", "KXWTI15M", 600, 250)):          # L1 on a series that is not live today, registered 2026-10-24 before any market after 10-24 was scored
+        rows = [row(m, *p) for m in mk if m[1] == series and (p := pick(m, left, L.L1["band"]))]
+        j = judge_mean(rows, min_n, 0.010, 2.0)
+        out.append(f"{name}: {j['verdict']}; n={j['n']}" + (f"; mean {100 * j['mean']:+.2f}c z {j['z']:+.2f}; halves {100 * j['h1']:+.2f}c / {100 * j['h2']:+.2f}c; stress {100 * j['stress']:+.2f}c" if "mean" in j else ""))
     text = "\n".join(out)
     RESULT.write_text(text + "\n")
     return text
