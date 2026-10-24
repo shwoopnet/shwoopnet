@@ -100,7 +100,7 @@ One addition (Oct 23, 2026, the owner: "3 looks sick"): the slogan **Trade less.
 1. Foundation (done): one black and white palette, the sign-in page.
 2. Market Brief: concept B built (catalysts with countdown, crypto, equities and commodities charts, news); needs the market tape function deployed for the data.
 3. Navigation: done, the window rail (the owner: fine for now).
-4. Bot page, Data page, Settings.
+4. Bot page, Settings (the Data page was removed Oct 24, 2026).
 5. Shared parts: buttons, inputs, menus, toasts, tables, charts (white lines, gain and loss only for verdicts).
 6. Background: the gradient ground on every page, done Oct 23, 2026 (grid, grain, blobs and ghost wordmark removed).
 

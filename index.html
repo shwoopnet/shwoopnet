@@ -844,9 +844,6 @@
   .data-bar{ height:8px; border-radius:4px; background:rgba(255,255,255,.1); margin-top:10px; overflow:hidden; } .data-bar i{ display:block; height:100%; background:var(--paper); border-radius:4px; }
   .data-headline{ font:800 clamp(44px, 9vw, 72px)/1 'Public Sans', sans-serif; letter-spacing:-.02em; margin:10px 0 12px; }
   .data-hero .data-verdict{ font-size:18px; font-weight:600; color:var(--muted); }
-  .dd-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(13px, 1fr)); gap:6px; }
-  .dd{ aspect-ratio:1; border-radius:50%; background:var(--paper); display:block; }
-  .dd-loss{ background:transparent; box-shadow:inset 0 0 0 2px var(--loss); opacity:1; }
 </style>
 <script>
 </script>
@@ -1140,9 +1137,6 @@
         <button class="side-nav-item nav-item" data-page="kalshi" title="Bot" hidden>
         <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span class="side-nav-label">Bot</span>
         </button>
-        <button class="side-nav-item nav-item" data-page="data" title="Data" hidden>
-        <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span class="side-nav-label">Data</span>
-        </button>
         <div class="side-nav-divider"></div>
         <button class="side-nav-item nav-item" data-page="settings" title="Settings">
         <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span class="side-nav-label">Settings</span>
@@ -1278,20 +1272,18 @@
         <div class="kal-tr kal-tr-head"><span>Time</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
       </div>
+      <div class="kal-card data-hero" data-card="record" id="kalRecord">
+        <div class="kal-lbl">The record, last 30 days of the account</div>
+        <div class="data-headline" id="dataHead"></div>
+        <div id="dataVerdict"></div>
+        <div class="kal-card-title" style="margin:22px 0 4px">Rules on trial</div>
+        <div id="dataTrial"></div>
+        <div class="kal-note" id="dataNote"></div>
+      </div>
       </div>
     </div>
   </main>
 
-  <main class="page" id="page-data" hidden>
-    <div class="trades-header kal-header-bare">
-      <div><div class="trades-title">Data</div><div class="kal-note" style="margin:2px 0 0">The record on one screen. Read only: nothing here sends an order or changes a setting.</div></div>
-    </div>
-    <div class="kal-card data-hero" data-card="data-verdict"><div class="kal-lbl">Last 30 days, of the account</div><div class="data-headline" id="dataHead"></div><div id="dataVerdict"></div></div>
-    <div class="kal-card" data-card="data-growth" style="margin-top:18px"><div class="kal-card-title">Growth</div><div id="dataLine"></div></div>
-    <div class="kal-card" data-card="data-dots" style="margin-top:18px"><div class="kal-card-title">Every trade</div><div id="dataDots"></div></div>
-    <div class="kal-card" data-card="data-rules" style="margin-top:18px"><div class="kal-card-title">Rules on trial</div><div id="dataTrial"></div></div>
-    <div class="kal-note" id="dataNote"></div>
-  </main>
 
   <main class="page" id="page-settings" hidden>
     <div class="trades-header">
@@ -1875,7 +1867,7 @@
     if(typeof kalshiPrivacyUi === 'function'){ kalshiPrivacyUi(!!on); }
     // Everything that already drew an amount draws it again, masked or not.
     if(typeof renderKalshiBot === 'function'){ renderKalshiBot(); }
-    if(typeof renderDataCenter === 'function'){ renderDataCenter(); }
+    if(typeof renderKalshiRecord === 'function'){ renderKalshiRecord(); }
   }
   kalshiPrivacyUi(kalshiMasked);   // a reload with the view left on shows the switch and the header button as on
 
@@ -2025,40 +2017,7 @@
       tile('Early sells', String(st.early), 'of ' + st.total + ' trades') +
       (st.fees !== null ? tile('Fees paid', money(st.fees), 'last 24 hours') : tile('Last 24 hours', String(st.total), st.total === 1 ? 'trade' : 'trades')) + '</div>';
   }
-  function kalshiPnlSeries(orders, since){
-    var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
-      .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
-      .sort(function(x, y){ return x.t - y.t; });
-    var cum = 0;
-    return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum, m: r.m }; });
-  }
 
-  // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
-  // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
-  function kalshiLineSvg(points, esc, money){
-    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
-    var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    // The end label is right-aligned to the edge and the plot leaves room for its real length, so a bigger total (+$123.45, +$1,234.56) is not cut off by the viewBox.
-    var endLabel = fmt(points[points.length - 1].cum);
-    var W = 460, H = 170, L = 8, R = Math.max(60, endLabel.length * 9 + 16), T = 14, B = 22;
-    var vals = points.map(function(p){ return p.cum; }).concat([0]);
-    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
-    if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
-    var X = function(i){ return L + (W - L - R) * (i / (points.length - 1)); };
-    var Y = function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
-    var last = points[points.length - 1], up = last.cum >= 0, col = up ? 'var(--gain)' : 'var(--loss)';
-    var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
-    // Calm view: the line is one plain stroke and the points are invisible hover targets (a green or red dot per trade was hundreds of lights); only the end label carries the colour.
-    var dots = points.map(function(p, i){
-      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.cum).toFixed(1) + '" r="3" fill="transparent"><title>' +
-        esc(kalDateTime(p.t) + ': ' + (p.pnl >= 0 ? '+' : '-') + money(Math.abs(p.pnl)) + ', total ' + (p.cum >= 0 ? '+' : '-') + money(Math.abs(p.cum))) + '</title></circle>';
-    }).join('');
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
-      '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
-      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/>' + dots +
-      '<text class="kal-bub" x="' + (W - 4) + '" y="' + (Y(last.cum) + 5).toFixed(1) + '" text-anchor="end" fill="' + col + '" font-size="15" data-px="15">' + esc(fmt(last.cum)) + '</text>' +
-      '<text x="' + L + '" y="' + (H - 6) + '" fill="var(--muted)" font-size="12" data-px="12">' + points.length + ' settled trades, oldest to newest</text></svg>';
-  }
 
 
   // An order the bot filled whose market has since settled, but which the server never marked settled (its checks stop when a session ends, so a loss that
@@ -2370,7 +2329,7 @@
     var lo = Math.min.apply(null, hasPaid ? p.concat([r.entry]) : p), hi = Math.max.apply(null, hasPaid ? p.concat([r.entry]) : p);
     if(hi - lo < 0.06){ var mid = (hi + lo) / 2; lo = mid - 0.03; hi = mid + 0.03; }
     var pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
-    var X = function(i){ return (i / (p.length - 1) * W).toFixed(1); }, Y = function(v){ return ((hi - v) / (hi - lo) * H).toFixed(1); };
+    var X = function(i){ return (i / (p.length - 1) * W).toFixed(1); }; var Y = function(v){ return ((hi - v) / (hi - lo) * H).toFixed(1); };
     var d = p.map(function(v, i){ return (i ? 'L' : 'M') + X(i) + ' ' + Y(v); }).join(' ');
     var left = Number.isFinite(r.left) ? (r.left > 0 ? 'Closes in ' + kalshiFmtLeft(r.left) : 'Waiting for the result') : '';
     return '<div class="kal-hold-chart"><div class="kal-hc-top"><span>Chance of the side you bought</span>' + (hasPaid ? '<span>Dashed line: what you paid</span>' : '') + '</div>' +
@@ -2435,7 +2394,7 @@
     if(!st){ return ''; }
     var W = 600, H = 70, wk = st.week, pts = function(k){ var a = []; for(var i = 0; i <= 7; i++){ a.push(st.mean * i + k * st.sd * Math.sqrt(i)); } return a; };
     var hiA = pts(1.28), loA = pts(-1.28), midA = pts(0), mx = Math.max.apply(null, hiA.concat([0])), mn = Math.min.apply(null, loA.concat([0]));
-    var X = function(i){ return (i / 7 * W).toFixed(1); }, Y = function(v){ return (H - 4 - (v - mn) / ((mx - mn) || 1) * (H - 8)).toFixed(1); };
+    var X = function(i){ return (i / 7 * W).toFixed(1); }; var Y = function(v){ return (H - 4 - (v - mn) / ((mx - mn) || 1) * (H - 8)).toFixed(1); };
     var line = function(a){ return a.map(function(v, i){ return X(i) + ',' + Y(v); }).join(' '); };
     var band = line(hiA) + ' ' + line(loA).split(' ').reverse().join(' ');
     return '<div class="kal-week"><div class="kal-week-k">Next 7 days, as a range</div>' +
@@ -2522,7 +2481,7 @@
     else if(fire.enter){ kalshiSoundTone('enter'); }
   }
   function renderKalshiBot(){
-    renderDataCenter();
+    renderKalshiRecord();
     renderKalshiStatus();
     kalshiSoundCheck();
     var a = kalshiLiveAcct;
@@ -2915,20 +2874,6 @@
     var pct = net / base * 100;
     return Math.abs(pct) < 0.05 ? 'Flat.' : (pct > 0 ? 'Up ' : 'Down ') + Math.abs(pct).toFixed(1) + '%.';
   }
-  // One dot per settled trade, oldest first. A win is a white dot, brighter the bigger it was; a loss is a red ring (the one place red is used here, like the losing bars). Hover shows when, which market and the result, through
-  // kalshiMoney so Privacy view masks it. No dot is a control: the page stays read only. Only the latest 800 are drawn.
-  function dataDotsHtml(orders, esc, money){
-    var rows = (orders || []).map(function(o){ return { o: o, p: kalshiOrderPnl(o) }; }).filter(function(r){ return r.p !== null; }).sort(function(a, b){ return a.o.ts - b.o.ts; });
-    if(!rows.length){ return '<div class="kal-empty">Dots appear after the first settled trade.</div>'; }
-    var shown = rows.slice(-800), maxWin = 0.0001, losses = 0;
-    shown.forEach(function(r){ if(r.p > maxWin){ maxWin = r.p; } if(r.p < 0){ losses++; } });
-    var dots = shown.map(function(r){
-      var title = kalDateTime(r.o.ts) + ' \u00b7 ' + kalshiMarketName(r.o) + ' \u00b7 ' + (r.p >= 0 ? '+' : '-') + money(Math.abs(r.p));
-      return r.p < 0 ? '<span class="dd dd-loss" title="' + esc(title) + '"></span>' : '<span class="dd" style="opacity:' + (0.35 + 0.65 * Math.min(1, r.p / maxWin)).toFixed(2) + '" title="' + esc(title) + '"></span>';
-    }).join('');
-    return '<div class="dd-grid" role="img" aria-label="' + esc(shown.length + ' settled trades, ' + losses + ' of them losses') + '">' + dots + '</div>' +
-      '<div class="kal-note" style="margin:12px 0 0">' + esc(shown.length + (shown.length === 1 ? ' trade' : ' trades') + ', ' + losses + (losses === 1 ? ' loss' : ' losses') + '. Oldest at top left, newest at bottom right. A brighter dot is a bigger win, a red ring is a loss.' + (rows.length > shown.length ? ' Older trades are not drawn.' : '')) + '</div>';
-  }
   // One plain sentence for the top of the page: the first thing that needs a look (the list's own rules, see dataAgenda), or that nothing does. The rest of what the agenda would list is the next read date.
   function dataVerdictHtml(items, esc){
     var needs = items.filter(function(x){ return x.rank < 5; }), next = items.filter(function(x){ return x.rank === 5; })[0];
@@ -2946,19 +2891,9 @@
       row('One crypto order per window', live.windows ? live.twoFill + ' windows with two, of ' + live.windows + ' (should stay 0)' : 'no windows yet', null, 'Export review ' + kalDate(one.check)) +
       row('Probe markets drop rule', 'AUD/USD, USD/CAD and natural gas, at 200 entries each', null, 'Check ' + kalDate(gold.check));
   }
-  // Text inside a chart is drawn in the chart's own units, so it grew with the chart (a caption meant to be 11px read as 17px on a wide card). Each chart text names the size it should be on screen (data-px), and this sets its
-  // size in chart units from the chart's real width, so a caption, a value and a label read the same size whatever the card width. Skipped while a chart is hidden (width 0).
-  function kalshiFitSvgText(root){
-    (root || document).querySelectorAll('svg[viewBox] text[data-px]').forEach(function(t){
-      var svg = t.ownerSVGElement, vb = svg && svg.viewBox && svg.viewBox.baseVal, w = svg ? svg.getBoundingClientRect().width : 0;
-      if(!vb || !vb.width || !(w > 0)){ return; }
-      t.setAttribute('font-size', (Number(t.getAttribute('data-px')) * vb.width / w).toFixed(2));
-    });
-  }
-  window.addEventListener('resize', function(){ kalshiFitSvgText(document); });
-  function renderDataCenter(){
-    var pg = document.getElementById('page-data');
-    if(!pg || pg.hidden){ return; }
+  function renderKalshiRecord(){
+    var card = document.getElementById('kalRecord');
+    if(!card){ return; }
     var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var set = function(id, h){ var el = document.getElementById(id); if(el){ el.innerHTML = h; } };
     if(!kalshiOrdersLoaded){ set('dataVerdict', '<div class="kal-empty">Loading the bot\'s trades...</div>'); return; }
@@ -2967,12 +2902,9 @@
     var shards = kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok && Array.isArray(kalshiLiveAcct.balance.shards) ? kalshiLiveAcct.balance.shards.filter(function(x){ return x.shard === 0 || x.shard === 2; }) : [];
     var balNow = kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null;
     set('dataHead', escapeHtml(dataHeadline(orders, balNow, nowMs)));
-    set('dataDots', dataDotsHtml(orders, escapeHtml, kalshiMoney));
     set('dataVerdict', dataVerdictHtml(dataAgenda({ trial: trial, risk: risk, trend: trend, shards: shards, hb: hbS.state, now: nowMs, money: kalshiMoney }), escapeHtml));
-    set('dataLine', kalshiLineSvg(kalshiPnlSeries(orders, 0), escapeHtml, kalshiMoney));
     set('dataTrial', dataRulesHtml(trial, dataLiveTests(kalshiLiveOrders), nowMs, escapeHtml));
     set('dataNote', 'As of ' + kalTime(nowMs) + ' CT. Only the orders the bot sent are counted; a trade closed by hand is left out.');
-    kalshiFitSvgText(pg);
   }
 
   var kalshiTradeFilter = 'bot';   // 'bot' hides manual trades from the Recent trades card, 'all' shows both
@@ -3533,22 +3465,20 @@ kalshiStatusTick();
     // Instant (no smooth-scroll animation) regardless of the reduce-motion
     // setting -- this is a position reset, not a decorative transition.
     try{ window.scrollTo(0, 0); }catch(e){}
-    // Four pages are left (Data joined Oct 21, 2026, admin only like Kalshi). Anything else (an old #trades link, a stored landing choice) lands on the brief.
-    if(name !== 'brief' && name !== 'kalshi' && name !== 'data' && name !== 'settings'){ name = 'brief'; }
-    if((name === 'kalshi' || name === 'data') && !currentUserIsAdmin){ name = 'brief'; }
+    // Three pages are left (Data was removed Oct 24, 2026). Anything else (an old #trades link, a stored landing choice) lands on the brief.
+    if(name !== 'brief' && name !== 'kalshi' && name !== 'settings'){ name = 'brief'; }
+    if(name === 'kalshi' && !currentUserIsAdmin){ name = 'brief'; }
     currentPageName = name; setPageTitle();
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-kalshi').hidden = (name !== 'kalshi');
-    document.getElementById('page-data').hidden = (name !== 'data');
-    var appEl = document.querySelector('.app'); if(appEl){ appEl.classList.toggle('app-wide', name === 'kalshi' || name === 'data'); }
+    var appEl = document.querySelector('.app'); if(appEl){ appEl.classList.toggle('app-wide', name === 'kalshi'); }
     document.getElementById('page-settings').hidden = (name !== 'settings');
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
       item.classList.toggle('current', item.dataset.page === name);
     });
     // Bot and Data share one set of live listeners (the last 1,000 orders, the events, the account). Moving between the two must not tear them down and re-read everything, which billed about
     // 1,200 Firestore reads on every switch (Oct 21, 2026 cost review); they start when either page is first shown and stop when the owner leaves both.
-    if(name === 'kalshi' || name === 'data'){ if(!kalshiWatching){ kalshiWatching = true; kalshiOnShow(); } } else if(kalshiWatching){ kalshiWatching = false; kalshiOnHide(); }
-    if(name === 'data'){ renderDataCenter(); }
+    if(name === 'kalshi'){ if(!kalshiWatching){ kalshiWatching = true; kalshiOnShow(); } } else if(kalshiWatching){ kalshiWatching = false; kalshiOnHide(); }
     pageEnter(document.getElementById('page-' + name));
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
@@ -3752,8 +3682,6 @@ kalshiStatusTick();
     // the journal field from anyone else.
     var kalNav = document.querySelector('.nav-item[data-page="kalshi"]');
     if(kalNav) kalNav.hidden = !currentUserIsAdmin;
-    var dataNav = document.querySelector('.nav-item[data-page="data"]');
-    if(dataNav) dataNav.hidden = !currentUserIsAdmin;
     var landKal = document.getElementById('landingKalshiBtn');
     if(landKal) landKal.hidden = !currentUserIsAdmin;
     var notifySec = document.getElementById('notifySection');
@@ -3767,8 +3695,6 @@ kalshiStatusTick();
     }
     var kalPage = document.getElementById('page-kalshi');
     if(!currentUserIsAdmin && kalPage && !kalPage.hidden){ showPage('brief'); }
-    var dataPage = document.getElementById('page-data');
-    if(!currentUserIsAdmin && dataPage && !dataPage.hidden){ showPage('brief'); }
   }
 
   window.__onShwoopReady(function(api){

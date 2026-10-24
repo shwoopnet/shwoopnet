@@ -50,13 +50,13 @@ gates.Y5 = () => {
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(names(rail[1]), ['account', 'status', 'risk', 'positions'], 'the rail holds the account strip, the bot status, the loss stop and risk card, and the positions');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['trades'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
+  assert.deepStrictEqual(names(main), ['trades', 'record'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
   const dataPage0 = html.slice(html.indexOf('id="page-data"'), html.indexOf('id="page-settings"'));
-  for (const id of ['dataVerdict', 'dataLine', 'dataTrial']) assert.ok(dataPage0.indexOf('id="' + id + '"') > -1, id + ' lives on the Data page (the page is one screen since Oct 23, 2026)');
+  for (const id of ['dataHead', 'dataVerdict', 'dataTrial']) assert.ok(html.indexOf('id="' + id + '"') > html.indexOf('data-card="record"'), id + ' lives in the record card on the Bot page (the Data page was removed Oct 24, 2026)');
   assert.ok(!/data-card="performance"/.test(html) && !/id="kalChartRange"/.test(html) && !/id="kalChartLine"/.test(html), 'and the Performance card, its range choice and its duplicate line are gone from the Bot page');
   // Oct 21, 2026 cleanup: the stat tiles and tables left the account card (a tall column) and live in the Data page's "All the numbers" fold; the account card is the status and the controls.
   assert.ok(!/id="kalPerf"/.test(rail[1]), 'the stat tiles and tables are not in the rail');
@@ -91,7 +91,7 @@ gates.Y7 = () => {
 gates.Y8 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiLineSvg']);
+  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiShortTicker', 'kalshiWhen', 'kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // Ticker to a time. An unfamiliar ticker or an impossible time is shown as it is, never invented.
@@ -118,23 +118,13 @@ gates.Y8 = () => {
   const o = (ts, status, side, result, fill) => ({ ts, status, side, result, settled: result ? true : undefined, fillCount: fill });
   const c = f.kalshiOutcomeCounts([o(5, 'filled', 'no', 'no', '1'), o(6, 'filled', 'yes', 'no', '1'), o(7, 'filled', 'no', null, '1'), o(8, 'no fill', 'yes', null, '0'), o(9, 'error', 'yes', null, '0'), o(1, 'filled', 'no', 'no', '1'), null], 5);
   assert.deepStrictEqual(c, { won: 1, lost: 1, open: 1, noFill: 1, other: 1 }, 'older orders are left out, an errored one is "other"');
-  // The running line: oldest first, cumulative, only settled trades.
-  const ser = f.kalshiPnlSeries([{ ts: 3, settled: true, fillCount: '1', settledPnl: -0.93 }, { ts: 1, settled: true, fillCount: '1', settledPnl: 0.08 }, { ts: 2, settled: true, fillCount: '1', settledPnl: 0.09 }, { ts: 4, fillCount: '1' }], 0);
-  assert.deepStrictEqual(ser.map((p) => [p.pnl, p.cum]), [[0.08, 0.08], [0.09, 0.17], [-0.93, -0.76]], 'cumulative in time order, the unsettled trade is not in it');
-  // The chart: nothing to draw below two points; a loss ends red; text from the page is escaped.
-  assert.ok(/two settled trades/.test(f.kalshiLineSvg([{ cum: 1, pnl: 1, t: 1 }], esc, money)));
-  const svg = f.kalshiLineSvg(ser, esc, money);
-  assert.ok(/<svg/.test(svg) && /fill="var\(--loss\)" font-size="15"[^>]*>-\$0\.76/.test(svg) && /3 settled trades/.test(svg), 'a falling line is labelled in red with where it ended');
-  // Calm view (Oct 21, 2026): the line itself is one plain stroke and the per-trade points are invisible hover targets, so the only colour on the chart is the end label.
-  assert.ok(/stroke="var\(--paper\)"/.test(svg) && !/<circle[^>]*fill="var\(--(gain|loss)\)"/.test(svg) && /<circle[^>]*fill="transparent"><title>/.test(svg), 'a plain line, no coloured dots, the points still carry their hover text');
-  assert.ok(/fill="var\(--gain\)" font-size="15"[^>]*>\+\$0\.20/.test(f.kalshiLineSvg([{ cum: 0.1, pnl: 0.1, t: 1 }, { cum: 0.2, pnl: 0.1, t: 2 }], esc, money)), 'a rising line is labelled in green');
 };
 
 // The performance tracker: a loss is settled and drawn like a win, even when the server never marked it, and the numbers are the plain arithmetic of the trades.
 gates.Y14 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiStatsText']);
+  const f = lift(['kalshiOrderPnl', 'kalshiOutcomeCounts', 'kalshiMarketName', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiStatsText']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // A filled order the server left unsettled: with the market's result known it is settled here, by the server's own rule.
@@ -158,9 +148,6 @@ gates.Y14 = () => {
   const sv = f.kalshiResolveOrders([Object.assign({}, server, { orderId: 'ord-2', averageFeePaid: '0.0100' })], null, [{ orderId: 'ord-2', count: 2, price: '0.9300' }])[0];
   assert.ok(sv.exact === true && sv.settledPnl === -1.88, 'a trade the server settled also takes the exact figure');
   assert.deepStrictEqual(f.kalshiOutcomeCounts(res, 0), { won: 1, lost: 1, open: 1, noFill: 0, other: 0 }, 'the loss reaches the pie');
-  const series = f.kalshiPnlSeries(res, 0);
-  assert.deepStrictEqual(series.map((p) => p.pnl), [0.16, -1.86], 'and the line');
-  assert.deepStrictEqual(series.map((p) => p.m), ['Gold', 'Bitcoin'], 'each point knows its market, by the same rule as the By market table');
   // The tracker's arithmetic.
   const t = (ts, pnl, series, price) => ({ ts, settled: true, fillCount: '1', settledPnl: pnl, series, price });
   const st = f.kalshiPerfStats([t(1, 0.08, 'KXBTC15M', 0.92), t(2, 0.08, 'KXGOLD15M', 0.91), t(3, -0.92, 'KXBTC15M', 0.92), t(4, -0.92, 'KXBTC15M', 0.94), t(5, 0.06, 'KXGOLD15M', 0.96), t(6, null, 'KXBTC15M', 0.9)], 0);
@@ -460,7 +447,7 @@ gates.Y17 = () => {
   const admin = html.slice(html.indexOf('function applyAdminUI(){'), html.indexOf("document.getElementById('generateInviteBtn')"));
   assert.ok(/currentUserIsAdmin && landingKalshiPending/.test(admin) && /!briefPage\.hidden && Date\.now\(\) - landingLoadedAt < 20000/.test(admin) && /showPage\('kalshi'\)/.test(admin), 'the move happens only for the admin, only if still on the first screen, and only within 20 seconds of loading');
   assert.ok(/pref === 'kalshi' && currentUserIsAdmin \? 'kalshi' : 'brief'/.test(html), 'the logo takes the admin home to Kalshi too, and anyone else to the brief');
-  assert.ok(/if\(\(name === 'kalshi' \|\| name === 'data'\) && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi or Data page, whatever is saved');
+  assert.ok(/if\(name === 'kalshi' && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi page, whatever is saved');
 };
 
 // The Account card says what one order risks right now (contracts times the latest order's cost per contract), and the profit tile is named so it cannot be mistaken for it.
@@ -490,7 +477,7 @@ gates.Y22 = () => {
 // Y23: the Kalshi page uses more width on a wide monitor, and the other pages keep the 1400px column.
 gates.Y23 = () => {
   assert.ok(/\.app\.app-wide\{ max-width: 1800px; \}/.test(html) && /\.app\{ margin-left: 0; margin-right: auto; max-width: 1800px; \}/.test(html), 'the base column and the wide class are both 1800px (widened Oct 23, 2026, the owner: the page stopped short on a wide screen)');
-  assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi' \|\| name === 'data'\)/.test(html), 'only the Kalshi and Data pages turn it on, and every other page turns it off');
+  assert.ok(/appEl\.classList\.toggle\('app-wide', name === 'kalshi'\)/.test(html), 'only the Kalshi page turns it on, and every other page turns it off');
 };
 
 // Y24 (retired Oct 21, 2026): the bouncing logo cube and its ground flash were dead CSS (no markup used them) and were removed in the tidy-up; this gate now says they stay gone.
@@ -517,11 +504,6 @@ gates.Y20 = () => {
 {
   assert.ok(/getElementById\('kalFlattenMsg'\); if\(fm\)\{ fm\.textContent = ''; \}/.test(html), 'Start clears the old Flatten all message');
   assert.ok(/'No open positions'\)\.replace\(\/\\\.\\s\*\$\/, ''\) \+ '\. The bot is halted/.test(html) && !/'No open positions\.'\) \+ '\. The bot/.test(html), 'no doubled period after "No open positions"');
-}
-
-// Y27: the end label of the profit line is right-aligned to the edge and the plot makes room for its length, so a larger total is never cut off.
-{
-  assert.ok(/R = Math\.max\(60, endLabel\.length \* 9 \+ 16\)/.test(html) && /x="' \+ \(W - 4\) \+ '" y="' \+ \(Y\(last\.cum\) \+ 5\)\.toFixed\(1\) \+ '" text-anchor="end"/.test(html), 'the end label is right-anchored with room reserved for it');
 }
 
 // Y26: the stats card shows the six tiles, By market and By price paid and nothing else; every other stat is copied with the Copy all stats button instead of being shown.
