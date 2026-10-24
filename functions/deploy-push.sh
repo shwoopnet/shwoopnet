@@ -3,7 +3,7 @@
 #
 #   git clone https://github.com/shwoopnet/shwoopnet && bash shwoopnet/functions/deploy-push.sh
 #
-# Deploys ONLY: kalshiLiveExit and kalshiFlattenAll (the shared closing claim), kalshiShardSplit (the automatic shard split), and the five phone alert functions (kalshiPushKey, kalshiPushSubscribe, kalshiPushUnsubscribe, kalshiPushOrder,
+# Deploys ONLY: kalshiLiveExit and kalshiFlattenAll (the shared closing claim), and the five phone alert functions (kalshiPushKey, kalshiPushSubscribe, kalshiPushUnsubscribe, kalshiPushOrder,
 # kalshiPushSession). kalshiLiveExit reads KALSHI_LIVE_ENABLED, and functions/.env is gitignored, so a fresh clone has none: a deploy without KALSHI_LIVE_ENABLED=on would turn the exit watch's
 # selling OFF. This script writes that line first and refuses to deploy without it, like deploy-sizing.sh.
 # It also makes the phone alerts' one secret, the VAPID private key, ONLY if it does not exist yet (replacing it would orphan every subscribed phone). The key is generated here, written to a
@@ -14,7 +14,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV_FILE=functions/.env
 PROJECT=shwoopnet
-ONLY=functions:kalshiLiveExit,functions:kalshiFlattenAll,functions:kalshiShardSplit,functions:kalshiPushKey,functions:kalshiPushSubscribe,functions:kalshiPushUnsubscribe,functions:kalshiPushOrder,functions:kalshiPushSession
+ONLY=functions:kalshiLiveExit,functions:kalshiFlattenAll,functions:kalshiPushKey,functions:kalshiPushSubscribe,functions:kalshiPushUnsubscribe,functions:kalshiPushOrder,functions:kalshiPushSession
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 

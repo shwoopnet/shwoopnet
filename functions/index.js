@@ -405,28 +405,6 @@ exports.kalshiL1Session = onCall(async (request) => {
 // Order matters: the bot is stopped FIRST (halt switch on, session ended, any armed single order disarmed) with nothing but database writes, so
 // it cannot add to the account while the sells go out, and a failure of the exchange calls cannot leave it running. Then every open position is
 // sold (kalshiLiveLib.flattenAll). Takes nothing from the page.
-// The automatic shard split (see applyShardSplit in kalshiLiveLib.js). Admin only. "read" shows the target Kalshi has now; "apply" sets the fixed 20 / 80 split. Nothing in the request chooses a percentage.
-exports.kalshiShardSplit = onCall(
-  { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30 },
-  async (request) => {
-    await assertKalshiAdmin(request.auth);
-    const apply = !!(request.data && request.data.action === "apply");
-    // Anything that throws (a signing problem, an unreadable secret) is reported as its own message instead of the page's blank "internal", so the owner can see WHY it did not work. No secret value is in these messages.
-    let out;
-    try {
-      ensureDefaultAdminApp();
-      const args = { fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), nowMs: Date.now() };
-      out = apply ? await live.applyShardSplit(args) : await live.readShardSplit(args);
-    } catch (e) {
-      out = { ok: false, status: 0, reason: "The split call failed before Kalshi answered: " + String((e && e.name) || "Error") + ": " + String((e && e.message) || e).slice(0, 140) };
-    }
-    if (apply) {
-      try { await getFirestore().collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: Date.now(), kind: "shard split", detail: out.ok ? "target set: " + out.allocations.map((x) => "shard " + x.exchange_index + " " + x.percent + "%").join(", ") : String(out.reason || "failed").slice(0, 120) }); } catch (e) { /* the event is a note, never a reason to fail */ }
-    }
-    return { applied: apply, target: live.SHARD_SPLIT, ...out };
-  }
-);
-
 exports.kalshiFlattenAll = onCall(
   { secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 60 },
   async (request) => {

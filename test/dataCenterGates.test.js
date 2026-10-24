@@ -111,7 +111,7 @@ gates.D12 = () => {
 // DQ: the questions and agenda (Oct 23, 2026, the owner chose "Questions + agenda"). Consequences: what needs a look is ranked by rules written in advance, a rule on trial that crosses its line goes first, a quiet account says "Nothing needs you",
 // and the page is six questions that fold open, with no control in them.
 const dqNames = ['kalshiOrderPnl', 'kalshiMarketName', 'kalDate', 'dataTrial', 'dataMarketTrend', 'dataAgenda', 'dataVerdictHtml', 'dataRulesHtml'];
-const dqExtra = html.slice(html.indexOf('  var DATA_SMOOTH_FROM'), html.indexOf('  // The smooth-climb rule on trial')) + html.slice(html.indexOf('  var DATA_SHARD_NAMES'), html.indexOf('  // The list, in the order written on the page'));
+const dqExtra = html.slice(html.indexOf('  var DATA_SMOOTH_FROM'), html.indexOf('  // The smooth-climb rule on trial')) + html.slice(html.indexOf('  var DATA_SHARD_LOW'), html.indexOf('  // The list, in the order written on the page'));
 const dqLift = () => lift(dqNames, dqExtra + "\nfunction kalshiAgeText(s){ return s + ' seconds ago'; }");
 const dqOrder = (series, ts, pnl, extra) => Object.assign({ ts, series, settled: true, fillCount: '1.00', settledPnl: pnl, smooth: undefined }, extra || {});
 
@@ -133,7 +133,10 @@ gates.DQ1 = () => {
   assert.ok(/Smooth climb has crossed its line/.test(loud) && !/Nothing needs you/.test(loud), 'a rule past its line is the sentence at the top');
   const busy = f.dataAgenda({ trial: f.dataTrial(sm(10, 3)), risk: { fraction: 0.8 }, trend: [{ name: 'Bitcoin', enough: true, flag: true, recent: -0.4, prior: -0.5, w: 33, n: 66 }], shards: [{ shard: 0, dollars: 0.5 }], hb: 'down', now, money });
   assert.deepStrictEqual(busy.map((x) => x.rank), [1, 2, 3, 4, 4, 5], 'a rule past its line first, then the stop, the market, the machine, the next read: ' + JSON.stringify(busy.map((x) => x.text)));
-  assert.ok(/Shard 0 holds only \$0\.50/.test(busy[3].text) && /Bitcoin is -0\.4c/.test(busy[2].text), 'the figures are in the lines');
+  const low = f.dataAgenda({ trial: f.dataTrial([]), risk: { fraction: 0.1 }, trend: [], shards: [{ shard: 0, dollars: 25 }, { shard: 2, dollars: 300 }], hb: 'ok', now, money });
+  assert.deepStrictEqual(low.map((x) => x.rank), [4, 5], 'a shard under $30 is called out while there is still time to top it up by hand');
+  assert.ok(/Shard 0 is low/.test(low[0].text) && /Transfers/.test(low[0].detail), 'and says where to top it up');
+  assert.ok(/Shard 0 is low/.test(busy[3].text) && /Bitcoin is -0\.4c/.test(busy[2].text), 'the figures are in the lines');
 };
 
 gates.DQ2 = () => {
