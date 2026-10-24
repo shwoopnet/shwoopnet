@@ -15,9 +15,9 @@ gates.M1 = () => {
   assert.ok(/min-height:40px/.test(block[0]) && /\.settings-toggle-switch::after\{ content:''; position:absolute; inset:-10px -6px; \}/.test(block[0]), 'at least 40px, and the switch has a larger hit area');
 };
 
-// The bottom bar labels are readable (11px), not 9.5px.
+// The bottom bar labels are readable (12px), not 9.5px.
 gates.M2 = () => {
-  assert.ok(/@media \(max-width:900px\)\{\s*\.side-nav-item\{ font-size:11px; min-width:64px; \}/.test(css), 'the bottom bar items are 11px with room for a thumb');
+  assert.ok(/@media \(max-width:900px\)\{\s*\.side-nav-item\{ font-size:12px; min-width:64px; \}/.test(css), 'the bottom bar items are 12px with room for a thumb');
 };
 
 // A phone has the viewport meta, and the menus that open on it are sheets the width of the screen, not boxes anchored to a button that run off an edge.
