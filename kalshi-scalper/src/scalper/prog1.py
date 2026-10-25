@@ -142,5 +142,67 @@ def main(argv):
     print("\n".join(out))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and (len(sys.argv) < 2 or sys.argv[1] != "p6"):
     main(sys.argv)
+
+
+# ---- P6: adaptive timing-and-series allocator with shrinkage (README, Pre-registration: P6) ----
+P6_LEFTS = (540, 450, 360, 270)
+P6_SHRINK, P6_MIN_SERIES, P6_THRESHOLD = 30, 30, 0.005
+
+
+def allocator_p6(cands: list[dict]) -> tuple[list[dict], list[dict]]:
+    """cands: L1-band entries tagged with their entry time `left`. Past 14 days only; shrink the (series, left, bucket) cell towards the (series, left) mean."""
+    days = sorted({r["day"] for r in cands})
+    dix = {d: i for i, d in enumerate(days)}
+    cell = defaultdict(lambda: defaultdict(list))
+    par = defaultdict(lambda: defaultdict(list))
+    for r in cands:
+        cell[(r["series"], r["left"], hour_bucket(r["close_ts"]))][dix[r["day"]]].append(r["net"])
+        par[(r["series"], r["left"])][dix[r["day"]]].append(r["net"])
+    by_w = defaultdict(list)
+    for r in cands:
+        by_w[r["close_ts"]].append(r)
+    picked, pool = [], []
+    for w in sorted(by_w):
+        cs = by_w[w]
+        d = dix[cs[0]["day"]]
+        if d < FIRST_DAY:
+            continue
+        best, best_s = None, P6_THRESHOLD
+        for r in cs:
+            lo = max(0, d - CELL_DAYS)
+            ph = [x for k in range(lo, d) for x in par[(r["series"], r["left"])].get(k, [])]
+            if len(ph) < P6_MIN_SERIES:
+                continue
+            ch = [x for k in range(lo, d) for x in cell[(r["series"], r["left"], hour_bucket(r["close_ts"]))].get(k, [])]
+            mp = st.mean(ph)
+            sc = (len(ch) * (st.mean(ch) if ch else 0.0) + P6_SHRINK * mp) / (len(ch) + P6_SHRINK)
+            if sc > best_s:
+                best, best_s = r, sc
+        pool.extend(cs)
+        if best is not None:
+            picked.append(best)
+    return picked, pool
+
+
+def run_p6() -> str:
+    mk = {}
+    for m in load() + load_fresh():
+        if all(x[1] is not None and x[2] is not None for x in m[2]) and m[4] in ("yes", "no"):
+            mk[m[0]] = (m[0], m[1], [(e, b, a, b, a) for e, b, a, *_ in m[2]], m[3], m[4])
+    cands = []
+    for left in P6_LEFTS:
+        rows, _, _ = F.build(list(mk.values()), left)
+        for r in rows:
+            cands.append({**r, "left": left, "raw": r["net"], "raw_stress": r["stress"]})
+    cands.sort(key=lambda r: r["close_ts"])
+    picked, pool = allocator_p6(cands)
+    res = judge_alloc(picked, pool)
+    return f"P6 adaptive allocator ({len(cands)} candidates over {len(P6_LEFTS)} entry times)   {res}"
+
+
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "p6":
+    out = run_p6()
+    (DATA_DIR / "p6_result.txt").write_text(out + "\n")
+    print(out)

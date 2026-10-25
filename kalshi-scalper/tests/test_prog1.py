@@ -18,3 +18,15 @@ rows = [row("d", 10_000 + 900 * k, "A", -1.0 if k == 0 else 0.1, gross=-1.0 if k
 pl = P.previous_losses(rows)
 assert pl[10_000] == 0 and pl[10_900] == 1 and pl[10_000 + 900 * 5] == 0 and pl[10_000 + 900 * 4] == 1
 print("prog1 tests ok")
+# P6: only earlier days feed the score, so a cell that is great only on the scored day is not picked on it
+rows = []
+for d in range(20):
+    day = f"2026-09-{d + 1:02d}"; base = 1_790_000_000 + d * 86400
+    for left in (540, 360):
+        for s_ in ("A", "B"):
+            for k in range(40):          # enough earlier entries per cell to clear the minimum
+                net = 0.02 if (s_ == "A") else (0.30 if (d == 19 and left == 360) else -0.03)
+                rows.append({"day": day, "close_ts": base + 900 * k, "series": s_, "left": left, "net": net, "raw": net, "stress": net, "raw_stress": net, "gross": net})
+picked, pool = P.allocator_p6(rows)
+assert picked and all(not (r["series"] == "B") for r in picked), [(r["series"], r["day"]) for r in picked if r["series"] == "B"]
+print("p6 tests ok")
