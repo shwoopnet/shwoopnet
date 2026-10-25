@@ -35,7 +35,7 @@ gates.D1 = () => {
 
 // The account result line: the range cuts the running settled result, and the line starts at zero at the start of the range, so a long range is never drawn from a total the range did not earn.
 gates.PL1 = () => {
-  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalshiPnlGeometry', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
+  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalTime', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
   const now = Date.UTC(2026, 9, 24, 18), day = 86400000;
   const o = (d, p) => ({ ts: now - d * day, series: 'KXGOLD15M', settled: true, fillCount: '1.00', settledPnl: p });
   const orders = [o(40, 5), o(20, -1), o(2, 2), o(0.1, 0.5)];
@@ -112,11 +112,36 @@ gates.PL2 = () => {
   assert.strictEqual(f.kalshiPnlPct(-2.5, 250), '-1.0%');
   assert.strictEqual(f.kalshiPnlPct(1, NaN), '', 'no balance: no percentage');
   assert.strictEqual(f.kalshiPnlPct(1, 0), '', 'a start of zero: no percentage');
-  const g = f.kalshiPnlGeometry([{ cum: 0 }, { cum: 5 }, { cum: -5 }]);
-  assert.ok(g.X(0) === g.L && g.X(2) === g.W - g.R, 'the first and last points sit at the edges of the plot');
+  const g = f.kalshiPnlGeometry([{ cum: 0 }, { cum: 5 }, { cum: -5 }], 1000, 5000);
+  assert.ok(g.X(1000) === g.L && g.X(5000) === g.W - g.R, 'the start and the end of the range sit at the edges of the plot');
+  assert.ok(Math.abs(g.X(3000) - (g.L + g.W - g.R) / 2) < 1e-9, 'x is time: halfway through the range is halfway across');
   assert.ok(g.Y(5) < g.Y(0) && g.Y(0) < g.Y(-5), 'a higher result is higher on the chart');
   assert.ok(/kalshiMoney\(Math\.abs\(cum\)\)/.test(html) && /kalDateTime\(pt\.t\)\)/.test(html) && !/kalDateTime\(pt\.t\) \+ ' CT'/.test(html), 'the scrubbed figure goes through the money formatter (masked in Privacy view) and shows the trade time (the formatter already says CT, once)');
   assert.ok(/#kalPnlBody svg\{ touch-action:pan-y/.test(html), 'a finger on the line still scrolls the page');
+};
+
+// PL3: the axes. Consequence: ticks are round numbers that cover the data, zero is always one of them, time ticks land on Central-clock hours or midnights, and the card shows both axes with the y labels in percent of the account.
+gates.PL3 = () => {
+  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPnlRangeStart', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
+  const lift2 = f;
+  assert.deepStrictEqual(lift2.chartValueTicks(-0.8, 1.2, 5), [-0.5, 0, 0.5, 1], 'round steps inside the data, with zero');
+  assert.deepStrictEqual(lift2.chartValueTicks(0, 0, 5), [], 'no range, no ticks');
+  assert.strictEqual(lift2.chartPctLabel(0, 0.5), '0%'); assert.strictEqual(lift2.chartPctLabel(0.5, 0.5), '+0.5%'); assert.strictEqual(lift2.chartPctLabel(-2, 2), '-2%');
+  const t0 = Date.UTC(2026, 9, 22, 17, 0), day = lift2.chartTimeTicks(t0, t0 + 12 * 3600000, 5);
+  assert.deepStrictEqual(day.map((x) => x.label), ['12 PM', '3 PM', '6 PM', '9 PM', '12 AM'], 'half a day: every 3 hours on the Central clock (12:00 PM CT is 17:00 UTC in October)');
+  const days = lift2.chartTimeTicks(t0, t0 + 4 * 86400000, 5);
+  assert.deepStrictEqual(days.map((x) => x.label), ['Oct 23', 'Oct 24', 'Oct 25', 'Oct 26'], 'four days: one tick a day, on Central midnights, as dates');
+  const now = Date.UTC(2026, 9, 24, 18), d = 86400000;
+  const o = (ago, p) => ({ ts: now - ago * d, series: 'KXGOLD15M', settled: true, fillCount: '1.00', settledPnl: p });
+  const orders = [o(20, -1), o(10, 2), o(2, 2), o(0.1, 0.5)];
+  const out = lift2.kalshiPnlCardHtml(orders, '1M', now, (x) => String(x), (v) => '$' + v.toFixed(2), 1003.5);
+  assert.ok(/class="kal-yaxis"/.test(out) && /class="kal-xaxis"/.test(out), 'both axes are on the card');
+  const yl = [...out.matchAll(/<div class="kal-yaxis">([\s\S]*?)<\/div>/g)][0][1];
+  const ylt = yl.replace(/<[^>]*>/g, ' ');
+  assert.ok(/0%/.test(ylt) && /\+[\d.]+%/.test(ylt) && !/\$/.test(ylt), 'the y labels are percentages of the account, with a 0% line: ' + ylt);
+  assert.ok(/Oct \d+/.test([...out.matchAll(/<div class="kal-xaxis">([\s\S]*?)<\/div>/g)][0][1]), 'the x labels are dates');
+  const noBal = lift2.kalshiPnlCardHtml(orders, '1M', now, (x) => String(x), (v) => '****', null);
+  assert.ok(!/%/.test([...noBal.matchAll(/<div class="kal-yaxis">([\s\S]*?)<\/div>/g)][0][1].replace(/<[^>]*>/g, ' ')), 'no known balance: the y axis is dollars (masked), never a made-up percentage');
 };
 
 // PL4: "Today" means one thing. Consequence (the owner, Oct 25, 2026: the Account card said +$0.03 and the result line's Today said -$0.41): the result line's Today range starts at 00:00 Central exactly, in summer (05:00 UTC) and winter (06:00 UTC), so it holds the same

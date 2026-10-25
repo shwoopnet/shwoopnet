@@ -319,7 +319,10 @@
   .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:12px; }
   .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss-text); }
   .brief-chart{ position:relative; }
-  .brief-chart svg{ display:block; width:100%; height:64px; margin-top:6px; touch-action:pan-y; cursor:crosshair; }
+  .brief-plot{ position:relative; margin:6px 46px 0 0; } .brief-yaxis{ position:absolute; left:100%; top:0; bottom:0; width:46px; } .brief-yaxis span{ position:absolute; left:6px; transform:translateY(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .brief-xaxis{ position:relative; height:18px; margin:3px 46px 0 0; } .brief-xaxis span{ position:absolute; top:0; transform:translateX(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; } .brief-xaxis span.l{ transform:none; } .brief-xaxis span.r{ transform:translateX(-100%); }
+  .brief-chart svg{ display:block; width:100%; height:92px; touch-action:pan-y; cursor:crosshair; }
+  .brief-chart svg line.grid{ stroke:var(--border); stroke-opacity:.55; stroke-dasharray:none; }
   .brief-chart svg line.brief-chart-guide{ stroke:var(--muted); stroke-dasharray:none; }
   .brief-chart-dot{ position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--paper); pointer-events:none; }
   .brief-chart svg polyline{ fill:none; stroke:var(--paper); stroke-width:1.6; vector-effect:non-scaling-stroke; }
@@ -432,7 +435,8 @@
   .kal-hold-stats .kal-lbl{ display:block; font-size:12px; color:var(--muted); } .kal-hold-stats b{ font-size:14px; font-weight:700; }
   .kal-hold-sub{ font-size:12px; color:var(--muted); line-height:1.5; }
   .kal-pnl-ranges{ display:flex; gap:6px; flex-wrap:wrap; } .kal-pnl-ranges .kal-pill{ background:none; cursor:pointer; min-height:40px; padding:0 14px; font-family:inherit; } .kal-pnl-ranges .kal-pill.on{ color:var(--paper); border-color:var(--paper); }
-  #kalPnlBody{ position:relative; } #kalPnlBody svg{ touch-action:pan-y; cursor:crosshair; } .kal-pnl-dot{ position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--paper); pointer-events:none; } .kal-pnl-when{ margin-left:auto; font-size:13px; font-weight:400; color:var(--muted); }
+  #kalPnlBody{ position:relative; } .kal-plot{ position:relative; margin-right:50px; } .kal-yaxis{ position:absolute; left:100%; top:0; bottom:0; width:50px; } .kal-yaxis span{ position:absolute; left:8px; transform:translateY(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .kal-xaxis{ position:relative; height:20px; margin:4px 50px 0 0; } .kal-xaxis span{ position:absolute; top:0; transform:translateX(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; } .kal-xaxis span.l{ transform:none; } .kal-xaxis span.r{ transform:translateX(-100%); } #kalPnlBody svg{ touch-action:pan-y; cursor:crosshair; } .kal-pnl-dot{ position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--paper); pointer-events:none; } .kal-pnl-when{ margin-left:auto; font-size:13px; font-weight:400; color:var(--muted); }
   .kal-pnl-head{ display:flex; align-items:baseline; gap:12px; margin:4px 0 10px; font-variant-numeric:tabular-nums; } .kal-pnl-head b{ font-size:28px; font-weight:800; line-height:1.1; letter-spacing:-.01em; } .kal-pnl-head span{ font-size:18px; font-weight:700; }
   .kal-notif{ position:relative; display:inline-block; }
   .kal-notif-btn{ position:relative; display:inline-flex; align-items:center; gap:6px; }
@@ -2594,6 +2598,39 @@
 
   var kalshiLiveCtl = { arm: null, last: null, session: null };
   var kalshiLiveCtlUnsub = null;
+  // Chart axes (the owner, Oct 24, 2026: "include like an x/y axis for % (y) and date (x) on the charts"). Pure helpers shared by the Account result line and the Brief charts: round tick values, a Central-time tick for every hour or day step, and
+  // the label for each. Labels are plain HTML laid over the chart, not text inside the scaled SVG, so they stay a readable 12px on a phone.
+  function chartNiceStep(span, maxTicks){
+    var raw = span / Math.max(1, maxTicks), mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / mag;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+  }
+  // Multiples of a round step inside [lo, hi]; zero is one of them whenever it is inside. At most about maxTicks.
+  function chartValueTicks(lo, hi, maxTicks){
+    if(!(hi > lo)){ return []; }
+    var step = chartNiceStep(hi - lo, Math.max(1, maxTicks - 1)), out = [];
+    for(var i = Math.ceil(lo / step - 1e-9); i * step <= hi + 1e-9; i++){ out.push(Number((i * step).toFixed(6))); }
+    return out;
+  }
+  function chartPctLabel(p, step){
+    if(p === 0){ return '0%'; }
+    var d = step >= 1 ? 0 : (step >= 0.1 ? 1 : 2);
+    return (p > 0 ? '+' : '-') + Math.abs(p).toFixed(d) + '%';
+  }
+  // Central time's offset from UTC at a moment, in ms (negative), so hour and day ticks fall on Central clock hours and midnights.
+  function chartCtOffset(ms){
+    var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
+    parts.forEach(function(x){ o[x.type] = Number(x.value); });
+    return Date.UTC(o.year, o.month - 1, o.day, o.hour, o.minute) - Math.floor(ms / 60000) * 60000;
+  }
+  // Time ticks across [t0, t1] (ms): the smallest round step (1, 2, 3, 6, 12 hours, then 1, 2, 7, 14, 30 days) that gives at most maxTicks, each on a Central-clock boundary. Labels are the time for steps under a day, the date otherwise.
+  function chartTimeTicks(t0, t1, maxTicks){
+    if(!(t1 > t0)){ return []; }
+    var steps = [1, 2, 3, 6, 12, 24, 48, 168, 336, 720, 1440].map(function(h){ return h * 3600000; }), step = steps[steps.length - 1];
+    for(var k = 0; k < steps.length; k++){ if((t1 - t0) / steps[k] <= maxTicks){ step = steps[k]; break; } }
+    var off = chartCtOffset(t0), out = [];
+    for(var t = Math.ceil((t0 + off) / step) * step - off; t <= t1; t += step){ out.push({ t: t, label: step < 86400000 ? kalTime(t).replace(':00 ', ' ') : kalDate(t) }); }
+    return out;
+  }
   function kalshiPnlSeries(orders, since){
     var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
       .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
@@ -2605,26 +2642,6 @@
   // Line of the running settled result, one step per trade (not per hour, so a quiet night does not flatten it). Inline SVG that uses the
   // page's own colour variables, so it follows light and dark. Fewer than two settled trades is not a line: it says what it is waiting for.
   // The line only: the figures are drawn above it as ordinary text (see kalshiPnlCardHtml), because text inside a scaled SVG shrank to about 10px on a phone.
-  // The line's geometry in one place, so the drawing and the pointer that scrubs it agree on where every point is.
-  function kalshiPnlGeometry(points){
-    var W = 460, H = 150, L = 8, R = 8, T = 10, B = 10;
-    var vals = points.map(function(p){ return p.cum; }).concat([0]);
-    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
-    if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
-    return { W: W, H: H, L: L, R: R, X: function(i){ return L + (W - L - R) * (i / (points.length - 1)); }, Y: function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); } };
-  }
-  function kalshiLineSvg(points, esc, money){
-    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
-    var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    var g = kalshiPnlGeometry(points), X = g.X, Y = g.Y;
-    var last = points[points.length - 1];
-    var path = points.map(function(p, i){ return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.cum).toFixed(1); }).join(' ');
-    // The line is one plain stroke; the pointer, not hundreds of invisible hover targets, finds the trade under it (see the scrub handler after renderKalshiPnl).
-    return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' +
-      '<line x1="' + g.L + '" x2="' + (g.W - g.R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="var(--border)" stroke-dasharray="4 4"/>' +
-      '<path d="' + path + '" pathLength="1" fill="none" stroke="var(--paper)" stroke-opacity="0.85" stroke-width="1.75" stroke-linejoin="round"/></svg>';
-  }
-
   // Account result line (Oct 24, 2026, the owner: "bring back our account PnL line ... with a date filter"). The running settled result of the bot's orders,
   // cut to a range. It reads only what the Bot page already loaded (the last 1,000 orders), so a long range reaches back only as far as those orders do, and
   // the line simply starts where the orders do. Read only: the buttons change what is drawn, nothing else.
@@ -2651,18 +2668,58 @@
     if(key === '1Y'){ return nowMs - 365 * day; }
     return 0;
   }
+  // The line's geometry in one place, so the drawing and the pointer that scrubs it agree on where every point is. The x axis is TIME (t0 to t1), so a quiet night or a weekend shows as the flat stretch it was.
+  function kalshiPnlGeometry(points, t0, t1){
+    var W = 460, H = 170, L = 8, R = 8, T = 12, B = 12;
+    var vals = points.map(function(p){ return p.cum; }).concat([0]);
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if(hi - lo < 0.2){ hi += 0.1; lo -= 0.1; }
+    var pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    var span = (t1 - t0) || 1;
+    return { W: W, H: H, L: L, R: R, lo: lo, hi: hi, t0: t0, t1: t1,
+      X: function(tm){ return L + (W - L - R) * ((tm - t0) / span); }, Y: function(v){ return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); } };
+  }
+  // The y ticks: round percentages of the account at the start of the range when that is known, else round dollars (masked in Privacy view like every dollar figure).
+  function kalshiPnlYTicks(g, startBal, money){
+    var out = [];
+    if(Number.isFinite(startBal) && startBal > 0){
+      var ps = chartValueTicks(g.lo / startBal * 100, g.hi / startBal * 100, 5), step = ps.length > 1 ? ps[1] - ps[0] : 1;
+      ps.forEach(function(p){ out.push({ v: p / 100 * startBal, label: chartPctLabel(p, step) }); });
+    } else {
+      chartValueTicks(g.lo, g.hi, 5).forEach(function(v){ out.push({ v: v, label: v === 0 ? '0' : (v > 0 ? '+' : '-') + money(Math.abs(v)) }); });
+    }
+    return out;
+  }
+  function kalshiLineSvg(points, esc, money, g, yTicks){
+    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
+    var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    var X = g.X, Y = g.Y, last = points[points.length - 1];
+    // A step line: the result holds until the next trade changes it, and holds on to the right edge (now).
+    var path = 'M' + X(points[0].t).toFixed(1) + ' ' + Y(0).toFixed(1) + ' V' + Y(points[0].cum).toFixed(1);
+    for(var i = 1; i < points.length; i++){ path += ' H' + X(points[i].t).toFixed(1) + ' V' + Y(points[i].cum).toFixed(1); }
+    path += ' H' + X(g.t1).toFixed(1);
+    var grid = (yTicks || []).map(function(tk){ return '<line x1="' + g.L + '" x2="' + (g.W - g.R) + '" y1="' + Y(tk.v).toFixed(1) + '" y2="' + Y(tk.v).toFixed(1) + '" stroke="var(--border)" stroke-width="1" vector-effect="non-scaling-stroke"' + (tk.v === 0 ? ' stroke-dasharray="4 4" stroke-opacity="1"' : ' stroke-opacity=".55"') + '/>'; }).join('');
+    return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' + grid +
+      '<path d="' + path + '" fill="none" stroke="var(--paper)" stroke-opacity="0.9" stroke-width="1.75" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>';
+  }
   var kalshiPnlScrub = null;
   // A result as a share of a starting balance, signed; '' when the start is unknown or not above zero (never a wrong percentage).
   function kalshiPnlPct(net, startBal){ return Number.isFinite(startBal) && startBal > 0 ? (net >= 0 ? '+' : '-') + Math.abs(net / startBal * 100).toFixed(1) + '%' : ''; }
   function kalshiPnlCardHtml(orders, key, nowMs, esc, money, total){
-    var pts = kalshiPnlSeries(orders, kalshiPnlRangeStart(key, nowMs));
+    var since = kalshiPnlRangeStart(key, nowMs), pts = kalshiPnlSeries(orders, since);
     if(pts.length < 2){ return kalshiLineSvg(pts, esc, money); }
     // The result as a share of the account at the start of the range (the total now minus this range's result), so it is a percentage and Privacy view, which masks dollars only, leaves it showing.
     // Nothing when the total is unknown or the start would not be above zero. Deposits and your own trades are in the total, so it is "of the account", not a return on the bot alone.
     var net = pts[pts.length - 1].cum, startBal = Number(total) - net, sign = net >= 0 ? '+' : '-';
     var pct = kalshiPnlPct(net, startBal);
-    kalshiPnlScrub = { pts: pts, startBal: startBal };
-    return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '<small class="kal-pnl-when"></small></div>' + kalshiLineSvg(pts, esc, money);
+    // The x axis runs from the start of the range (or the first trade, when the bot is younger than the range) to now.
+    var t0 = Math.max(since, pts[0].t), t1 = Math.max(nowMs, pts[pts.length - 1].t);
+    var g = kalshiPnlGeometry(pts, t0, t1), yt = kalshiPnlYTicks(g, startBal, money);
+    kalshiPnlScrub = { pts: pts, startBal: startBal, t0: t0, t1: t1 };
+    var ylab = yt.map(function(tk){ return '<span style="top:' + (g.Y(tk.v) / g.H * 100).toFixed(1) + '%">' + esc(tk.label) + '</span>'; }).join('');
+    var xlab = chartTimeTicks(t0, t1, 5).map(function(tk){ var left = g.X(tk.t) / g.W * 100; return '<span class="' + (left < 7 ? 'l' : (left > 93 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + esc(tk.label) + '</span>'; }).join('');
+    return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '<small class="kal-pnl-when"></small></div>' +
+      '<div class="kal-plot">' + kalshiLineSvg(pts, esc, money, g, yt) + '<div class="kal-yaxis">' + ylab + '</div></div><div class="kal-xaxis">' + xlab + '</div>';
   }
   // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
   var kalshiPnlFetched = {}, kalshiPnlFetching = '';
@@ -2720,9 +2777,11 @@
       if(!svg || !d || !head || !d.pts || d.pts.length < 2){ return; }
       var r = svg.getBoundingClientRect(), c = host.getBoundingClientRect();
       if(!(r.width > 0)){ return; }
-      var geo = kalshiPnlGeometry(d.pts), frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), i = Math.round(((frac * geo.W - geo.L) / (geo.W - geo.L - geo.R)) * (d.pts.length - 1));
-      i = Math.max(0, Math.min(d.pts.length - 1, i));
-      var pt = d.pts[i], x = geo.X(i), y = geo.Y(pt.cum);
+      var geo = kalshiPnlGeometry(d.pts, d.t0, d.t1), frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      // The pointer's time on the x axis, then the nearest trade to it.
+      var tm = d.t0 + ((frac * geo.W - geo.L) / (geo.W - geo.L - geo.R)) * (d.t1 - d.t0), i = 0;
+      for(var k = 1; k < d.pts.length; k++){ if(Math.abs(d.pts[k].t - tm) < Math.abs(d.pts[i].t - tm)){ i = k; } }
+      var pt = d.pts[i], x = geo.X(pt.t), y = geo.Y(pt.cum);
       var g = svg.querySelector('.kal-pnl-guide');
       if(!g){ g = document.createElementNS('http://www.w3.org/2000/svg', 'line'); g.setAttribute('class', 'kal-pnl-guide'); g.setAttribute('y1', '0'); g.setAttribute('y2', String(geo.H)); g.setAttribute('stroke', 'var(--muted)'); g.setAttribute('stroke-width', '1'); g.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(g); }
       g.setAttribute('x1', x.toFixed(1)); g.setAttribute('x2', x.toFixed(1));
@@ -3835,27 +3894,35 @@ kalshiStatusTick();
     if(!q || !(q.price > 0) || !(q.prevClose > 0)){
       return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span></div><div class="brief-chart-px mono">&mdash;</div></div>';
     }
-    var fg = briefChartFigures(q.price, q.prevClose), up = fg.up, dec = q.price >= 1000 ? 0 : 2;
-    var svg = '';
-    var ser = Array.isArray(q.series) ? q.series.filter(function(v){ return typeof v === 'number' && isFinite(v); }) : [];
-    briefChartQuotes[it.sym] = ser.length >= 2 ? { ser: ser, prev: q.prevClose, price: q.price } : null;
+    var fg = briefChartFigures(q.price, q.prevClose), up = fg.up;
+    var plot = '', xaxis = '';
+    var raw = Array.isArray(q.series) ? q.series : [];
+    var ser = raw.filter(function(v){ return typeof v === 'number' && isFinite(v); });
+    briefChartQuotes[it.sym] = null;
     if(ser.length >= 2){
-      var lo = Math.min.apply(null, ser.concat([q.prevClose])), hi = Math.max.apply(null, ser.concat([q.prevClose]));
-      var span = (hi - lo) || 1;
-      var y = function(v){ return (58 - ((v - lo) / span) * 54).toFixed(1); };
-      var pts = ser.map(function(v, i){ return (i * (200 / (ser.length - 1))).toFixed(1) + ',' + y(v); }).join(' ');
-      svg = '<svg viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="200" y1="' + y(q.prevClose) + '" y2="' + y(q.prevClose) + '"></line><polyline points="' + pts + '"></polyline></svg>';
-    }
-    // Under the line: the day's low, the timeframe, the day's high (the owner, Oct 23, 2026: "some information or timeframe displayed"), all from the same series plus the current price.
-    var foot = '';
-    if(ser.length >= 2){
-      var fl = Math.min.apply(null, ser.concat([q.price])), fh = Math.max.apply(null, ser.concat([q.price]));
-      var fm = function(v){ return v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
-      foot = '<div class="brief-chart-ft"><span>Low ' + fm(fl) + '</span><span class="brief-chart-tf">1 day</span><span>High ' + fm(fh) + '</span></div>';
+      // x: real time when the tape sent a timestamp for every point (seriesT), else even spacing; y: the move against the previous close, in percent, with the previous close as the dashed zero.
+      var tms = Array.isArray(q.seriesT) && q.seriesT.length === ser.length && raw.length === ser.length && q.seriesT.every(function(v){ return typeof v === 'number' && isFinite(v); }) ? q.seriesT.map(function(v){ return v * 1000; }) : null;
+      var xs = ser.map(function(v, i){ return tms && tms[ser.length - 1] > tms[0] ? (tms[i] - tms[0]) / (tms[ser.length - 1] - tms[0]) : i / (ser.length - 1); });
+      var pcs = ser.map(function(v){ return (v / q.prevClose - 1) * 100; });
+      var lo = Math.min.apply(null, pcs.concat([0])), hi = Math.max.apply(null, pcs.concat([0]));
+      if(hi - lo < 0.1){ hi += 0.05; lo -= 0.05; }
+      var padp = (hi - lo) * 0.1; lo -= padp; hi += padp;
+      var H = 80, T = 4, B = 4, y = function(pc){ return T + (H - T - B) * (1 - (pc - lo) / (hi - lo)); };
+      var ticks = chartValueTicks(lo, hi, 4), tstep = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
+      var grid = ticks.map(function(pc){ return '<line class="' + (pc === 0 ? 'zero' : 'grid') + '" x1="0" x2="200" y1="' + y(pc).toFixed(1) + '" y2="' + y(pc).toFixed(1) + '"></line>'; }).join('');
+      var pts = ser.map(function(v, i){ return (xs[i] * 200).toFixed(1) + ',' + y(pcs[i]).toFixed(1); }).join(' ');
+      var ylab = ticks.map(function(pc){ return '<span style="top:' + (y(pc) / H * 100).toFixed(1) + '%">' + escapeHtml(chartPctLabel(pc, tstep)) + '</span>'; }).join('');
+      plot = '<div class="brief-plot"><svg viewBox="0 0 200 ' + H + '" preserveAspectRatio="none" aria-hidden="true">' + grid + '<polyline points="' + pts + '"></polyline></svg><div class="brief-yaxis">' + ylab + '</div></div>';
+      if(tms){
+        xaxis = '<div class="brief-xaxis">' + chartTimeTicks(tms[0], tms[tms.length - 1], 3).map(function(tk){ var left = (tk.t - tms[0]) / (tms[tms.length - 1] - tms[0]) * 100; return '<span class="' + (left < 8 ? 'l' : (left > 92 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + escapeHtml(tk.label) + '</span>'; }).join('') + '</div>';
+      } else {
+        xaxis = '<div class="brief-xaxis"><span class="l" style="left:0">Day start</span><span class="r" style="left:100%">Now</span></div>';
+      }
+      briefChartQuotes[it.sym] = { ser: ser, xs: xs, ys: pcs.map(y), H: H, prev: q.prevClose, price: q.price };
     }
     return '<div class="brief-chart" data-sym="' + escapeHtml(it.sym) + '"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span>' +
       '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + fg.pctText + '</span></div>' +
-      '<div class="brief-chart-px mono">' + fg.px + ' <span class="brief-chart-d ' + (up ? 'up' : 'down') + '">' + fg.dtxt + '</span></div>' + svg + foot + '</div>';
+      '<div class="brief-chart-px mono">' + fg.px + ' <span class="brief-chart-d ' + (up ? 'up' : 'down') + '">' + fg.dtxt + '</span></div>' + plot + xaxis + '</div>';
   }
   // Touch or hover on a chart (the owner, Oct 24, 2026: the charts "feel like there should be some sort of interaction"): a guide line and a dot follow the pointer along the day's line, and the price and move at the top change to
   // that point's, then go back when the pointer leaves. The series has no timestamps (it is the day's closes, thinned), so it shows a price and its move against the previous close, never a time. It reads only what the page already holds.
@@ -3884,15 +3951,16 @@ kalshiStatusTick();
       active = card;
       var r = svg.getBoundingClientRect(), c = card.getBoundingClientRect();
       if(!(r.width > 0)){ return; }
-      var n = d.ser.length, frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), i = Math.round(frac * (n - 1)), v = d.ser[i];
-      var lo = Math.min.apply(null, d.ser.concat([d.prev])), hi = Math.max.apply(null, d.ser.concat([d.prev])), span = (hi - lo) || 1;
-      var x = i / (n - 1) * 200, yv = 58 - ((v - lo) / span) * 54;
+      var frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), i = 0, v;
+      for(var k = 1; k < d.xs.length; k++){ if(Math.abs(d.xs[k] - frac) < Math.abs(d.xs[i] - frac)){ i = k; } }
+      v = d.ser[i];
+      var x = d.xs[i] * 200, yv = d.ys[i];
       var g = svg.querySelector('.brief-chart-guide');
-      if(!g){ g = document.createElementNS('http://www.w3.org/2000/svg', 'line'); g.setAttribute('class', 'brief-chart-guide'); g.setAttribute('y1', '0'); g.setAttribute('y2', '60'); svg.appendChild(g); }
+      if(!g){ g = document.createElementNS('http://www.w3.org/2000/svg', 'line'); g.setAttribute('class', 'brief-chart-guide'); g.setAttribute('y1', '0'); g.setAttribute('y2', String(d.H)); svg.appendChild(g); }
       g.setAttribute('x1', x.toFixed(1)); g.setAttribute('x2', x.toFixed(1));
       var dot = card.querySelector('.brief-chart-dot');
       if(!dot){ dot = document.createElement('span'); dot.className = 'brief-chart-dot'; card.appendChild(dot); }
-      dot.style.left = (r.left - c.left + x / 200 * r.width) + 'px'; dot.style.top = (r.top - c.top + yv / 60 * r.height) + 'px';
+      dot.style.left = (r.left - c.left + x / 200 * r.width) + 'px'; dot.style.top = (r.top - c.top + yv / d.H * r.height) + 'px';
       paint(card, v, d.prev);
     }
     host.addEventListener('pointermove', move);
