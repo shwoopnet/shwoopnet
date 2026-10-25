@@ -6232,3 +6232,13 @@ Asked by the owner. Same hold-to-settlement rule as L1, all 18 series, 93,309 se
 | 7 min | 0.55 to 0.65 | 16,300 | 59.5% | -2.20c | -5.5 |
 
 At 10 minutes and 0.55 to 0.65 no series is positive beyond noise (best: copper +0.40c z +0.3, platinum +0.14c z +0.1; worst: NEAR -4.04c z -3.8). The win rate equals the price (59.4% against 0.600), so the cost is the fee (about 1.7c at 60%) plus a small remainder. A price-and-time rule cannot win here; only information the price does not already contain could, and LAG2 (spot lead) was the one such test, falsified on 238 trades.
+
+## Pre-registration: QUIRK1, does any series resolve one way more often than its opening price says (written 2026-10-25 before any result; 36 tries, running count about 5,240)
+
+**Idea.** Settlement quirks (ties at the strike, a settlement average that lags spot, coarse price steps on low-priced or FX series) would show up as a series whose outcomes lean one way against the price paid for that side at the start of the market. This is not a price-and-time rule: it asks whether any series is mispriced at its open.
+
+**Rule.** For each of the 18 series, at the first candle (about 14 minutes left), buy YES at its ask on every market (side "yes"), and separately NO at 1 minus its bid (side "no"). Hold to settlement. Fee as everywhere (7%·p·(1-p)). 36 tries.
+
+**Pass bar (all must hold).** On the older half of the days (discovery): net per contract of +1.0c or more and day-clustered z of 3.0 or more. On the newer half (confirmation): same sign, net above 0. The 36-try bar is z 3.0, not 2.1.
+
+**Prediction.** None passes. Expected net per contract is about -2.5c to -3c (fee about 1.75c plus half the spread), and the price at the first candle already equals the probability. **Kill.** Any cell failing the bar is `FALSIFIED`; a cell passing discovery only is `NOT_ENOUGH_DATA`; a cell passing both is `NOT_YET_FALSIFIED` and goes to a forward read on new days. Nothing here means "trade".
