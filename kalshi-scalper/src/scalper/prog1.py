@@ -252,3 +252,60 @@ def run_p6f() -> str:
 
 if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "p6f":
     print(run_p6f())
+
+
+# ---- P6R: the allocator restricted to five series (README, Registered: P6R). Forward read only counts; the in-sample figure is biased by construction. ----
+P6R_SERIES = ("KXXRP15M", "KXDOGE15M", "KXWTI15M", "KXNATGAS15M", "KXSILVER15M")
+
+
+def _cands_all() -> list[dict]:
+    mk = {}
+    for m in load() + load_fresh():
+        if all(x[1] is not None and x[2] is not None for x in m[2]) and m[4] in ("yes", "no"):
+            mk[m[0]] = (m[0], m[1], [(e, b, a, b, a) for e, b, a, *_ in m[2]], m[3], m[4])
+    cands = []
+    for left in P6_LEFTS:
+        rows, _, _ = F.build(list(mk.values()), left)
+        for r in rows:
+            cands.append({**r, "left": left, "raw": r["net"], "raw_stress": r["stress"]})
+    cands.sort(key=lambda r: r["close_ts"])
+    return cands
+
+
+def pf_of(v: list[dict], key: str = "raw") -> float:
+    w = sum(r[key] for r in v if r[key] > 0)
+    l = -sum(r[key] for r in v if r[key] < 0)
+    return w / l if l else float("inf")
+
+
+def run_p6r(forward: bool) -> str:
+    cands = [r for r in _cands_all() if r["series"] in P6R_SERIES]
+    picked, pool = allocator_p6(cands)
+    if forward:
+        picked = [r for r in picked if r["day"] >= P6F_CUT]
+        pool = [r for r in pool if r["day"] >= P6F_CUT]
+    if len(picked) < 5:
+        return "no selections"
+    m, _, z = cluster_mean_z([(r["day"], r["raw"]) for r in picked])
+    return (f"P6R {'FORWARD' if forward else 'IN-SAMPLE (biased: the five series were named after seeing P6)'}: n {len(picked)}  mean {100*m:+.2f}c  z {z:+.2f}  "
+            f"PF {pf_of(picked):.2f} (fees x1.2 {pf_of(picked, 'raw_stress'):.2f})  pool mean {100*st.mean(r['raw'] for r in pool):+.2f}c  loss rate {100*sum(1 for r in picked if r['gross'] < 0)/len(picked):.1f}%")
+
+
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "p6r":
+    print(run_p6r(forward=False))
+
+
+def run_p6rf() -> str:
+    import time
+    out_path = DATA_DIR / "p6rf_result.txt"
+    if time.strftime("%Y-%m-%d", time.gmtime()) < "2026-11-12":
+        return "P6R forward refuses before 2026-11-12."
+    if out_path.exists():
+        return f"Refusing to run again: {out_path} exists."
+    text = run_p6r(forward=True)
+    out_path.write_text(text + "\n")
+    return text
+
+
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "p6rf":
+    print(run_p6rf())
