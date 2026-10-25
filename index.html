@@ -10,6 +10,8 @@
 <script>
   // Privacy view survives a reload (the owner, Oct 23, 2026: "we don't want to accidentally leak anything"). The choice is kept in THIS browser only and applied here, before anything is drawn, so a reload never flashes a dollar amount.
   try { if (window.localStorage.getItem('shwoopnet:privacy') === 'on') { document.documentElement.setAttribute('data-present', 'on'); } } catch (e) { /* storage blocked: the view simply starts off */ }
+  // Hide logo (the owner, Oct 25, 2026, to present the site as project work): same idea, kept in this browser only and applied before first paint.
+  try { if (window.localStorage.getItem('shwoopnet:hideLogo') === 'on') { document.documentElement.setAttribute('data-hidelogo', 'on'); } } catch (e) { /* storage blocked: the logo simply shows */ }
 </script>
 <!-- A private dashboard on a public host: ask search engines not to list it (Oct 22, 2026). This only asks; the sign-in is what keeps it private. -->
 <meta name="robots" content="noindex, nofollow">
@@ -221,6 +223,8 @@
     text-shadow: -2px -2px 0 #000, 0 -2px 0 #000, 2px -2px 0 #000, 2px 0 0 #000, 2px 2px 0 #000, 0 2px 0 #000, -2px 2px 0 #000, -2px 0 0 #000, -1px -2px 0 #000, 1px -2px 0 #000, 2px -1px 0 #000, 2px 1px 0 #000, 1px 2px 0 #000, -1px 2px 0 #000, -2px 1px 0 #000, -2px -1px 0 #000, 2.9px 3.1px 0 var(--brand-depth), 3.8px 4.2px 0 var(--brand-depth), 4.7px 5.3px 0 var(--brand-depth), 5.6px 6.4px 0 var(--brand-depth), 6.5px 7.5px 0 var(--brand-depth), 7.4px 8.6px 0 var(--brand-depth), 8.3px 9.7px 0 var(--brand-depth), 9.2px 10.8px 0 var(--brand-depth), 12px 15px 10px rgba(0,0,0,0.45);
     }
   /* FINANCIALS under the wordmark (the company is Shwoop Financials): plain spaced capitals, so the bubbly letters stay the one loud thing. No line, no arrow (the owner dropped both). */
+  /* Hidden, not removed: it keeps its space so nothing in the header moves, and the page name and navigation are untouched. Only the SIGNED-IN header logo; the sign-in screen is not part of a presentation. */
+  html[data-hidelogo="on"] #brandHomeBtn{ visibility:hidden; }
   .brand-fin{ font-family:'Public Sans', sans-serif; font-weight:800; font-size:11px; letter-spacing:.5em; text-transform:uppercase; color:var(--paper); margin-top:10px; padding-left:2px; line-height:1; }
 
   .topbar-right{ display:flex; align-items:center; gap:18px; }
@@ -1428,6 +1432,15 @@
               <span class="toggle-knob"></span>
             </button>
           </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Hide logo</div>
+              <div class="settings-row-desc">Hides the Shwoop Financials logo in the header, for presenting the site as project work. Stays on after a reload, on this device, until you switch it off.</div>
+            </div>
+            <button class="settings-toggle-switch" id="hideLogoToggle" role="switch" aria-checked="false" aria-label="Toggle hide logo">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1441,6 +1454,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 25</div>
                 <ul class="changelog-list">
+                  <li>Settings has a Hide logo switch for presenting the site (#569)</li>
                   <li>Phone: Reset layout button made big enough to tap (#566)</li>
                   <li>Phone: bottom bar buttons and notification tabs made big enough to tap (#565)</li>
                   <li>Settings has a Changelog row, written from the merged pull requests (#564)</li>
@@ -1816,6 +1830,16 @@
     if(hb){ hb.textContent = on ? 'Privacy on' : 'Privacy'; hb.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   }
   privacyToggleEl.addEventListener('click', function(){ kalshiSetPresent(privacyToggleEl.getAttribute('aria-checked') !== 'true'); });
+  // Hide logo: one attribute on the page, kept in this browser only (never the account), restored before first paint by the head script.
+  var hideLogoToggleEl = document.getElementById('hideLogoToggle');
+  function hideLogoSet(on){
+    var el = document.documentElement;
+    if(on){ el.setAttribute('data-hidelogo', 'on'); } else { el.removeAttribute('data-hidelogo'); }
+    hideLogoToggleEl.setAttribute('aria-checked', on ? 'true' : 'false');
+    try{ if(on){ window.localStorage.setItem('shwoopnet:hideLogo', 'on'); } else { window.localStorage.removeItem('shwoopnet:hideLogo'); } }catch(e){}
+  }
+  hideLogoToggleEl.setAttribute('aria-checked', document.documentElement.getAttribute('data-hidelogo') === 'on' ? 'true' : 'false');
+  hideLogoToggleEl.addEventListener('click', function(){ hideLogoSet(hideLogoToggleEl.getAttribute('aria-checked') !== 'true'); });
 
   // ---------- Kalshi (admin only) ----------
   // Fee and limit math mirrors kalshi-scalper's fees.py and risk.py. The 0.07
