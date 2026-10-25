@@ -449,7 +449,7 @@
   @media (min-width:901px){ .kal-notif-badge{ top:-5px; right:-5px; } }
   .kal-notif-panel{ position:absolute; right:0; top:calc(100% + 8px); z-index:160; width:min(420px, 92vw); max-height:min(70vh, 560px); display:flex; flex-direction:column; background:var(--panel-raised); border:1px solid var(--border); border-radius:14px; box-shadow:0 18px 44px rgba(0,0,0,.55); overflow:hidden; }
   .kal-notif-panel[hidden]{ display:none; }
-  .kal-notif-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px 8px; } .kal-notif-head b{ font-size:16px; }
+  .kal-notif-head{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px 8px; } .kal-notif-head b{ font-size:16px; }
   .kal-notif-tabs{ display:flex; gap:8px; padding:0 16px 10px; } .kal-notif-tabs .kal-pill{ background:none; cursor:pointer; min-height:34px; padding:0 14px; font-family:inherit; } .kal-notif-tabs .kal-pill.on{ color:var(--paper); border-color:var(--paper); }
   .kal-notif-list{ overflow-y:auto; padding:0 0 8px; border-top:1px solid var(--border); }
   .kal-notif-item{ display:grid; grid-template-columns:14px minmax(0,1fr); gap:10px; padding:12px 16px; border-bottom:1px solid var(--border); }
@@ -459,6 +459,7 @@
   .kal-notif-item.warning .kal-notif-dot{ background:#c58a00; opacity:1; } .kal-notif-item.critical .kal-notif-dot{ background:var(--loss); opacity:1; }
   .kal-notif-item.unread .kal-notif-title{ font-weight:800; }
   .kal-notif-title{ font-size:14px; font-weight:600; line-height:1.35; } .kal-notif-body{ font-size:13px; color:var(--muted); line-height:1.45; margin-top:2px; } .kal-notif-time{ font-size:12px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums; }
+  .kal-notif-actions{ display:inline-flex; gap:8px; flex-wrap:nowrap; justify-content:flex-end; margin-left:auto; }
   .kal-notif-empty{ padding:22px 16px; font-size:13px; color:var(--muted); }
   .kal-alert{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; margin:0 0 14px; padding:14px 18px; border-radius:14px; background:var(--loss); color:#fff; font-size:14px; line-height:1.45; }
   .kal-alert[hidden]{ display:none; } .kal-alert b{ font-size:15px; font-weight:800; } .kal-alert-open{ margin-left:auto; background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:999px; padding:0 14px; min-height:34px; font:600 13px inherit; font-family:inherit; cursor:pointer; }
@@ -1173,7 +1174,7 @@
         <div class="kal-notif" id="kalNotif" hidden>
         <button class="side-nav-item kal-notif-btn" id="kalNotifBtn" type="button" title="Notifications" aria-haspopup="true" aria-expanded="false" aria-label="Notifications"><span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="side-nav-label">Alerts</span><span class="kal-notif-badge" id="kalNotifBadge" hidden>0</span></button>
         <div class="kal-notif-panel" id="kalNotifPanel" hidden>
-          <div class="kal-notif-head"><b>Notifications</b><button type="button" class="kal-mini" id="kalNotifReadAll">Mark all as read</button></div>
+          <div class="kal-notif-head"><b>Notifications</b><span class="kal-notif-actions"><button type="button" class="kal-mini" id="kalNotifReadAll">Mark all as read</button><button type="button" class="kal-mini" id="kalNotifClear">Clear</button></span></div>
           <div class="kal-notif-tabs" role="group" aria-label="Which notifications"><button type="button" class="kal-pill on" data-notif-tab="important" aria-pressed="true">Important</button><button type="button" class="kal-pill" data-notif-tab="all" aria-pressed="false">Everything</button></div>
           <div class="kal-notif-list" id="kalNotifList"></div>
         </div>
@@ -1441,6 +1442,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 25</div>
                 <ul class="changelog-list">
+                  <li>Notification panel has a Clear button (#567)</li>
                   <li>Phone: Reset layout button made big enough to tap (#566)</li>
                   <li>Phone: bottom bar buttons and notification tabs made big enough to tap (#565)</li>
                   <li>Settings has a Changelog row, written from the merged pull requests (#564)</li>
@@ -2942,7 +2944,15 @@
     if(s.active === true && hbState === 'down'){ return { title: 'The bot has not checked in', text: 'No check for several minutes. If it does not come back, the exit watch may not be running.' }; }
     return null;
   }
-  var KAL_NOTIF_KEY = 'shwoopnet:notifRead', kalshiNotifTab = 'important', kalshiNotifLastRead = null;
+  var KAL_NOTIF_KEY = 'shwoopnet:notifRead', KAL_NOTIF_CLEAR_KEY = 'shwoopnet:notifCleared', kalshiNotifTab = 'important', kalshiNotifLastRead = null, kalshiNotifClearedAt = null;
+  // Clear (the owner, Oct 25, 2026: "there should be a clear option on here as well"): hides every line up to the click, kept in this browser only like Mark all as read. It never touches the red banner, which stays while its condition is true, and a new event after the click shows again.
+  function kalshiNotifLoadCleared(){
+    if(kalshiNotifClearedAt !== null){ return kalshiNotifClearedAt; }
+    var v = 0;
+    try{ v = Number(window.localStorage.getItem(KAL_NOTIF_CLEAR_KEY)) || 0; }catch(e){}
+    kalshiNotifClearedAt = v;
+    return v;
+  }
   function kalshiNotifLoadRead(){
     if(kalshiNotifLastRead !== null){ return kalshiNotifLastRead; }
     var v = null;
@@ -2957,7 +2967,8 @@
     if(!kalshiOrdersLoaded){ list.innerHTML = '<div class="kal-notif-empty">Loading what the bot did...</div>'; return; }
     var now = Date.now(), lastRead = kalshiNotifLoadRead();
     var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    var items = kalshiNotifFeed(kalshiLiveEvents, orders, now, kalshiMoney), n = kalshiNotifUnread(items, lastRead);
+    var clearedAt = kalshiNotifLoadCleared();
+    var items = kalshiNotifFeed(kalshiLiveEvents, orders, now, kalshiMoney).filter(function(x){ return x.ts > clearedAt; }), n = kalshiNotifUnread(items, lastRead);
     badge.textContent = n > 99 ? '99+' : String(n); badge.hidden = n === 0;
     var shown = items.filter(function(x){ return kalshiNotifTab === 'all' || x.level !== 'info'; });
     list.innerHTML = shown.length ? shown.map(function(x){
@@ -2979,6 +2990,11 @@
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !panel.hidden){ setOpen(false); btn.focus(); } });
     document.getElementById('kalNotifReadAll').addEventListener('click', function(){
       kalshiNotifLastRead = Date.now(); try{ window.localStorage.setItem(KAL_NOTIF_KEY, String(kalshiNotifLastRead)); }catch(e){}
+      renderKalshiNotifications();
+    });
+    document.getElementById('kalNotifClear').addEventListener('click', function(){
+      kalshiNotifClearedAt = Date.now(); kalshiNotifLastRead = kalshiNotifClearedAt;
+      try{ window.localStorage.setItem(KAL_NOTIF_CLEAR_KEY, String(kalshiNotifClearedAt)); window.localStorage.setItem(KAL_NOTIF_KEY, String(kalshiNotifLastRead)); }catch(e){}
       renderKalshiNotifications();
     });
     panel.addEventListener('click', function(e){
