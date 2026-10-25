@@ -46,13 +46,14 @@ const UA = "Mozilla/5.0 (compatible; shwoopnet-market-tape)";
 
 const num = (v) => { const x = Number(v); return v !== null && v !== undefined && v !== "" && Number.isFinite(x) ? x : null; };
 
-function chartUrl(sym) {
-  return "https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?range=1d&interval=5m&includePrePost=true";
+function chartUrl(sym, range) {
+  return "https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?range=" + (range || "1d") + "&interval=5m&includePrePost=true";
 }
 
 // One Yahoo chart answer to one quote. null when the answer has no usable price or previous close: a half quote is never stored. `state` is where the trading day stands for
 // that instrument (the chart meta carries the pre, regular and post periods); instruments without periods (crypto, some futures) report "open".
-function parseChart(json, nowMs) {
+function parseChart(json, nowMs, fallbackJson) {
+  const fallbackResult = fallbackJson && fallbackJson.chart && Array.isArray(fallbackJson.chart.result) ? fallbackJson.chart.result[0] : null;
   const r = json && json.chart && Array.isArray(json.chart.result) ? json.chart.result[0] : null;
   const m = r && r.meta;
   if (!m) return null;
@@ -69,7 +70,8 @@ function parseChart(json, nowMs) {
     else if (p.post && t >= p.regular.end && t < p.post.end) state = "post";
     else state = "closed";
   }
-  const pts = chartPoints(r);
+  let pts = chartPoints(r);
+  if (!pts.series.length && fallbackResult) pts = chartPoints(lastSession(fallbackResult));
   // seriesT (Oct 24, 2026, the owner: charts with a real time axis): the unix second of each point in `series`, same thinning, so the page can label the x axis. [] whenever the answer carried no timestamps.
   return { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state, series: pts.series, seriesT: pts.times };
 }
@@ -91,6 +93,21 @@ function chartPoints(r) {
   return { series, times };
 }
 function chartSeries(r) { return chartPoints(r).series; }
+
+// Oct 25, 2026 (the owner: "commodities has no charts"): while a futures market is closed (gold and crude on a weekend) Yahoo answers range=1d with a price and NO bars, so the Brief drew a price without a line. A 5 day answer still holds the last session; this keeps only its newest run of bars (a gap of more than 3 hours starts a new session) so the chart shows the last day traded, not a week.
+const SESSION_GAP_S = 3 * 3600;
+function lastSession(r) {
+  const q = r && r.indicators && Array.isArray(r.indicators.quote) ? r.indicators.quote[0] : null;
+  const stamps = r && Array.isArray(r.timestamp) ? r.timestamp : [];
+  const raw = q && Array.isArray(q.close) ? q.close : [];
+  const rows = [];
+  raw.forEach((c, i) => { const t = num(stamps[i]); if (num(c) !== null && t !== null) rows.push([t, c]); });
+  if (rows.length < 2) return r;
+  let from = 0;
+  for (let i = 1; i < rows.length; i++) if (rows[i][0] - rows[i - 1][0] > SESSION_GAP_S) from = i;
+  const kept = rows.slice(from);
+  return { indicators: { quote: [{ close: kept.map((x) => x[1]) }] }, timestamp: kept.map((x) => x[0]) };
+}
 
 // A fear and greed reading to {score 0 to 100, rating, prev}. Only a finite score inside 0 to 100 counts; the rating is cut to a short plain string. null when the answer has no usable score.
 const fgNum = (v) => { const x = num(v); return x !== null && x >= 0 && x <= 100 ? Math.round(x * 10) / 10 : null; };
@@ -172,7 +189,12 @@ async function readTape({ fetchFn, now }) {
   const quotes = {}, errors = [];
   await Promise.all(SYMBOLS.map(async (s) => {
     try {
-      const q = parseChart(JSON.parse(await getText(fetchFn, chartUrl(s.sym))), nowMs);
+      const json = JSON.parse(await getText(fetchFn, chartUrl(s.sym)));
+      let q = parseChart(json, nowMs);
+      if (q && !q.series.length) {
+        // Closed market, no bars today: ask for 5 days and keep the last session. A failure here leaves the price-only quote as it was.
+        try { q = parseChart(json, nowMs, JSON.parse(await getText(fetchFn, chartUrl(s.sym, "5d")))) || q; } catch (e) { /* keep q */ }
+      }
       if (!q) throw new Error("no usable price");
       quotes[s.sym] = q;
     } catch (e) { errors.push(s.sym + ": " + String((e && e.message) || e).slice(0, 80)); }
@@ -191,4 +213,4 @@ async function readTape({ fetchFn, now }) {
   return { quotes, news: news && news.length ? news : null, mood: Object.keys(mood).length ? mood : null, errors };
 }
 
-module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, chartPoints, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
+module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, chartPoints, lastSession, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
