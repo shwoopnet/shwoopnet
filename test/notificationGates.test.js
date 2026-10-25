@@ -88,7 +88,12 @@ gates.N4 = () => {
 };
 gates.N5 = () => {
   const page = html.slice(html.indexOf('<main class="page" id="page-kalshi"'), html.indexOf('<main class="page" id="page-settings"'));
-  assert.ok(/id="kalNotifBtn"/.test(page) && /id="kalNotifBadge"/.test(page) && /id="kalNotifReadAll">Mark all as read</.test(page), 'a bell with a bubble and a Mark all as read, on the Bot page');
+  // Oct 25, 2026 (the owner: "notification bell needs to be up here to the left of brief", "not down by layout/privacy in bot"): the bell sits in the top navigation, first, left of Brief, and not in the Bot page header.
+  const nav = html.slice(html.indexOf('<nav class="side-nav"'), html.indexOf('</nav>', html.indexOf('<nav class="side-nav"')));
+  assert.ok(/id="kalNotifBtn"/.test(nav) && /id="kalNotifBadge"/.test(nav) && /id="kalNotifReadAll">Mark all as read</.test(nav), 'a bell with a bubble and a Mark all as read, in the navigation');
+  assert.ok(nav.indexOf('id="kalNotif"') < nav.indexOf('data-page="brief"'), 'to the left of Brief');
+  assert.ok(!/kalNotif/.test(page.replace(/id="kalNotifList"/g, '')), 'not in the Bot page header');
+  assert.ok(/kalBell\.hidden = !currentUserIsAdmin/.test(html), 'only the admin sees it');
   assert.ok(/<div class="kal-alert" id="kalAlert" role="alert" hidden>/.test(page), 'the banner is an alert and hidden until needed');
   assert.ok(page.indexOf('id="kalAlert"') < page.indexOf('id="kalTabBot"'), 'across the top of the Bot page, above every card');
   assert.ok(/\.kal-notif-badge\{[^}]*background:var\(--loss\)/.test(html) && /\.kal-alert\{[^}]*background:var\(--loss\)/.test(html), 'red bubble, red banner');
