@@ -6422,3 +6422,12 @@ The predictions held: the win rate equals the price paid to within a point in ev
 **Prediction.** No survivor on either asset (prior 10% that one asset has one). Reason: the price is the probability on every band, entry time and side, and every exit variant only changes the payoff shape, not the expected value; the fee (about 1.7c at 50c, 0.5c at 90c) is paid on every buy and on every sell. The largest discovery t among 2,115 will look good (about 3.5 to 4.5) and fall inside the null.
 
 **What happens to a survivor.** It is a forward claim, not a deployment: it goes to the build session as a paper-trade log (1 contract, logging only) for 4 weeks, with kill rules registered before the first logged trade; live money only on the owner's direct word in the build session.
+
+## Result: FACT1, 4,230 complete strategies for Bitcoin and Ethereum (run once on 2026-10-25): NOT_ENOUGH_DATA, nothing deployable
+
+79 days, 7,393 markets each; discovery 47 days, confirmation 16, holdout 16. Strategies with at least 150 discovery entries: Bitcoin 1,447, Ethereum 1,509.
+
+- **Bitcoin:** best discovery t **4.59** against a Reality Check 95th percentile of **3.80** (median of the best-of-1,447: 2.96). One strategy above it: 9 minutes left, favourite 0.88 to 0.97, sell at 2 minutes left, 06:00 to 12:00 UTC, +4.85c on 154 entries. **Confirmation -0.04c (t -0.01): fails.** No survivor.
+- **Ethereum:** best discovery t **3.94** against a critical value of **3.84** (median 2.98). Two above it. One passes confirmation: 7 minutes left, favourite 0.88 to 0.97, sell at 2 minutes left, 18:00 to 24:00 UTC: discovery t 3.87 (+2.86c, 328 entries), confirmation **+2.27c (t 1.97, 91 entries)**, holdout **-0.42c (t -0.19, 94 entries): fails.** `NOT_ENOUGH_DATA` by the registered wording.
+- **What appears:** every top strategy is L1's own band (0.88 to 0.97) entered a little earlier with a time exit or none, in one six-hour gate. No underdog (UND5, UND20), no spot-momentum, no fade, no 50% to 88% favourite strategy is near the top on either asset. Entering earlier than 6 minutes, selling before settlement and take-profit/stop exits add nothing the hold does not already have; the top rows with `hold`, `tp20` and `tp10` are the same trades.
+- **Against chance:** three strategies above a 5% family-wise critical value across two correlated families is at the edge of what chance gives (about 10% to see one in either asset), and none held out. 4,230 tries added; running count about 14,500. Code `src/scalper/fact1.py`, tests `tests/test_fact1.py`.
