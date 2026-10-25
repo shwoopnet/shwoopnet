@@ -438,10 +438,11 @@
   #kalPnlBody{ position:relative; } .kal-plot{ position:relative; margin-right:50px; } .kal-yaxis{ position:absolute; left:100%; top:0; bottom:0; width:50px; } .kal-yaxis span{ position:absolute; left:8px; transform:translateY(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .kal-xaxis{ position:relative; height:20px; margin:4px 50px 0 0; } .kal-xaxis span{ position:absolute; top:0; transform:translateX(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; } .kal-xaxis span.l{ transform:none; } .kal-xaxis span.r{ transform:translateX(-100%); } #kalPnlBody svg{ touch-action:pan-y; cursor:crosshair; } .kal-pnl-dot{ position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--paper); pointer-events:none; } .kal-pnl-when{ margin-left:auto; font-size:13px; font-weight:400; color:var(--muted); }
   .kal-pnl-head{ display:flex; align-items:baseline; gap:12px; margin:4px 0 10px; font-variant-numeric:tabular-nums; } .kal-pnl-head b{ font-size:28px; font-weight:800; line-height:1.1; letter-spacing:-.01em; } .kal-pnl-head span{ font-size:18px; font-weight:700; }
-  .kal-notif{ position:relative; display:inline-block; }
+  .kal-notif{ position:relative; display:flex; flex-shrink:0; } .kal-notif[hidden]{ display:none; }
   .kal-notif-btn{ position:relative; display:inline-flex; align-items:center; gap:6px; }
   .kal-notif-badge{ position:absolute; top:-7px; right:-7px; min-width:19px; height:19px; padding:0 5px; border-radius:999px; background:var(--loss); color:#fff; font-size:12px; font-weight:800; line-height:19px; text-align:center; font-variant-numeric:tabular-nums; box-shadow:0 0 0 2px var(--ink); }
   .kal-notif-badge[hidden]{ display:none; }
+  @media (min-width:901px){ .kal-notif-badge{ top:-5px; right:-5px; } }
   .kal-notif-panel{ position:absolute; right:0; top:calc(100% + 8px); z-index:160; width:min(420px, 92vw); max-height:min(70vh, 560px); display:flex; flex-direction:column; background:var(--panel-raised); border:1px solid var(--border); border-radius:14px; box-shadow:0 18px 44px rgba(0,0,0,.55); overflow:hidden; }
   .kal-notif-panel[hidden]{ display:none; }
   .kal-notif-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px 8px; } .kal-notif-head b{ font-size:16px; }
@@ -457,7 +458,7 @@
   .kal-notif-empty{ padding:22px 16px; font-size:13px; color:var(--muted); }
   .kal-alert{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; margin:0 0 14px; padding:14px 18px; border-radius:14px; background:var(--loss); color:#fff; font-size:14px; line-height:1.45; }
   .kal-alert[hidden]{ display:none; } .kal-alert b{ font-size:15px; font-weight:800; } .kal-alert-open{ margin-left:auto; background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:999px; padding:0 14px; min-height:34px; font:600 13px inherit; font-family:inherit; cursor:pointer; }
-  @media screen and (max-width:700px){ .kal-notif-panel{ position:fixed; left:12px; right:12px; top:auto; bottom:84px; width:auto; max-height:70vh; } }
+  @media screen and (max-width:900px){ .kal-notif-panel{ position:fixed; left:12px; right:12px; top:auto; bottom:84px; width:auto; max-height:70vh; } }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss-text); border-color:var(--loss); }
   .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
@@ -1153,6 +1154,14 @@
         <div class="clock-sub" id="clockSub"></div>
       </div>
       <nav class="side-nav" id="sideNav" aria-label="Main navigation">
+        <div class="kal-notif" id="kalNotif" hidden>
+        <button class="side-nav-item kal-notif-btn" id="kalNotifBtn" type="button" title="Notifications" aria-haspopup="true" aria-expanded="false" aria-label="Notifications"><span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="side-nav-label">Alerts</span><span class="kal-notif-badge" id="kalNotifBadge" hidden>0</span></button>
+        <div class="kal-notif-panel" id="kalNotifPanel" hidden>
+          <div class="kal-notif-head"><b>Notifications</b><button type="button" class="kal-mini" id="kalNotifReadAll">Mark all as read</button></div>
+          <div class="kal-notif-tabs" role="group" aria-label="Which notifications"><button type="button" class="kal-pill on" data-notif-tab="important" aria-pressed="true">Important</button><button type="button" class="kal-pill" data-notif-tab="all" aria-pressed="false">Everything</button></div>
+          <div class="kal-notif-list" id="kalNotifList"></div>
+        </div>
+        </div>
         <button class="side-nav-item nav-item" data-page="brief" title="Market Brief">
         <span class="side-nav-icon"></span><svg class="side-nav-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span class="side-nav-label">Brief</span>
         </button>
@@ -1201,14 +1210,6 @@
   <main class="page" id="page-kalshi" hidden>
     <div class="trades-header kal-header-bare">
       <div class="trades-header-right"><span class="kal-status" id="kalStatus"></span>
-        <div class="kal-notif" id="kalNotif">
-          <button class="kal-mini kal-notif-btn" id="kalNotifBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Notifications"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="kal-notif-badge" id="kalNotifBadge" hidden>0</span></button>
-          <div class="kal-notif-panel" id="kalNotifPanel" hidden>
-            <div class="kal-notif-head"><b>Notifications</b><button type="button" class="kal-mini" id="kalNotifReadAll">Mark all as read</button></div>
-            <div class="kal-notif-tabs" role="group" aria-label="Which notifications"><button type="button" class="kal-pill on" data-notif-tab="important" aria-pressed="true">Important</button><button type="button" class="kal-pill" data-notif-tab="all" aria-pressed="false">Everything</button></div>
-            <div class="kal-notif-list" id="kalNotifList"></div>
-          </div>
-        </div>
         <button class="kal-mini" id="kalPresentBtn" type="button" aria-pressed="false" title="Shows **** instead of dollar amounts">Privacy</button>
         <details class="kal-layout" id="kalTools"><summary class="kal-mini">Tools &#9662;</summary>
           <div class="kal-layout-body kal-tools-body">
@@ -2882,7 +2883,8 @@
   }
   function renderKalshiNotifications(){
     var list = document.getElementById('kalNotifList'), badge = document.getElementById('kalNotifBadge'), bannerEl = document.getElementById('kalAlert');
-    if(!list || !badge || !bannerEl || !kalshiOrdersLoaded){ return; }
+    if(!list || !badge || !bannerEl){ return; }
+    if(!kalshiOrdersLoaded){ list.innerHTML = '<div class="kal-notif-empty">Nothing loaded yet. Open the Bot page once and it fills in.</div>'; return; }
     var now = Date.now(), lastRead = kalshiNotifLoadRead();
     var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var items = kalshiNotifFeed(kalshiLiveEvents, orders, now, kalshiMoney), n = kalshiNotifUnread(items, lastRead);
@@ -3725,6 +3727,8 @@ kalshiStatusTick();
     // the journal field from anyone else.
     var kalNav = document.querySelector('.nav-item[data-page="kalshi"]');
     if(kalNav) kalNav.hidden = !currentUserIsAdmin;
+    var kalBell = document.getElementById('kalNotif');
+    if(kalBell) kalBell.hidden = !currentUserIsAdmin;     // the bell reports only the bot, which only the admin has
     var landKal = document.getElementById('landingKalshiBtn');
     if(landKal) landKal.hidden = !currentUserIsAdmin;
     var notifySec = document.getElementById('notifySection');
