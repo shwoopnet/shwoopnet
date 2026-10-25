@@ -1,6 +1,6 @@
 # Career portfolio notes
 
-Private working notes for résumé, interviews and a portfolio write-up. Last refreshed: 2026-10-22 (US Central). Everything below is checkable in the git history (PR numbers #300 and up) and the tests. Edit freely; keep it honest.
+Private working notes for résumé, interviews and a portfolio write-up. Last refreshed: 2026-10-25 (US Central). Numbers are unchanged since 2026-10-22 and keep their caveats. Everything below is checkable in the git history (PR numbers #300 and up) and the tests. Edit freely; keep it honest.
 
 ## One paragraph
 

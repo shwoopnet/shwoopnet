@@ -1,6 +1,6 @@
 # Shwoop project overview
 
-Last refreshed: 2026-10-22, late morning (US Central). Refresh weekly; see `docs/README.md`. The bot, page, research state and incident sections are updated for 2026-10-22; the 2026-10-08 research notes keep their date.
+Last refreshed: 2026-10-25 (US Central). Refresh weekly; see `docs/README.md`. The bot rules, page and incident sections are updated for 2026-10-25. **The live record figures (settled trades, wins, net, balance) were NOT re-read in this refresh** (they come from an order export only the owner can copy), so any such figure below keeps its own date; the 2026-10-08 research notes keep theirs.
 
 ## What it is
 
@@ -8,7 +8,7 @@ Shwoop (Pocket Advisor) is a personal trading app with three parts that live in 
 
 | Part | Where | What it does |
 |---|---|---|
-| Frontend | this repo, `index.html` | One file, no build step. Firebase auth and Firestore. Hosted on GitHub Pages. Four pages: the Market Brief, the admin-only Bot page (called Kalshi in the code), the read-only Data page (2026-10-21) and Settings. The equities pages, the broker and market-data integrations and sign-up were removed on 2026-10-12. |
+| Frontend | this repo, `index.html` | One file, no build step. Firebase auth and Firestore. Hosted on GitHub Pages. Three pages: the Market Brief, the admin-only Bot page (called Kalshi in the code) and Settings. The Data page lived from 2026-10-21 to 2026-10-24 and was removed. The equities pages, the broker and market-data integrations and sign-up were removed on 2026-10-12. |
 | Cloud Functions | this repo, `functions/` | The Kalshi bot, the order-book recorder, the account reads and the emergency controls. Deployed with `firebase deploy --only functions`. |
 | Equities trading server | separate repo `shwoop-server`, on Render | Runs the equities and options cycles against Alpaca for every connected account, and writes the shared market snapshot the Brief reads. Not touched from this repo; reviewed read only. **The page no longer shows or pauses it.** |
 
@@ -16,13 +16,15 @@ This document is mostly about the Kalshi subsystem, because it is where most of 
 
 ## The Kalshi bot (strategy L1)
 
-**Markets (2026-10-21):** the 15 minute gold (`KXGOLD15M`), Bitcoin, Ethereum, XRP and Dogecoin markets, then three one-contract probe markets last in the list: AUD/USD, USD/CAD and natural gas. Gold is first and is the only market that keeps the size ladder; Bitcoin, Ethereum, XRP and Dogecoin are capped at one contract until each earns the ladder back from its own live record (gold-first, `docs/GOLD_FIRST_PROPOSAL.md`). The list is a hard list in `functions/kalshiLiveLib.js` (`L1_SERIES`, `CAPPED_SERIES`, `PROBE_SERIES`); nothing stored can add a series. Equities are untouched by it.
+**Markets (2026-10-25):** the 15 minute gold (`KXGOLD15M`), XRP, Bitcoin, Dogecoin and Ethereum markets (that list order since 2026-10-23), then three one-contract probe markets last in the list: AUD/USD, USD/CAD and natural gas. Gold is first and is the only market that keeps the size ladder. Fixed sizes since 2026-10-23: Dogecoin 3 contracts, natural gas 2, everything else one; **XRP went back from 3 to 1 on 2026-10-25** (24 fills, 4 losses, -$4.87 since 2026-10-23; merged, goes live with `deploy-sizing.sh`). The capped markets earn the ladder back only from its own live record (gold-first, `docs/GOLD_FIRST_PROPOSAL.md`). The list is a hard list in `functions/kalshiLiveLib.js` (`L1_SERIES`, `CAPPED_SERIES`, `PROBE_SERIES`); nothing stored can add a series. Equities are untouched by it.
 
 **Rule:** buy the side priced 88c to 97c at the touch with one immediate-or-cancel order, then hold to settlement. Gold, Ethereum, Dogecoin and the currency probes enter about 6 minutes before the close. **Bitcoin, XRP and natural gas enter about 10 minutes before it instead (live test since 2026-10-21 about 2:15 PM CT, orders tagged `entryLead: "10m"`).** A market is decided once. A win pays about 3c to 12c per contract. A loss costs the whole price.
 
 **One crypto order per window (2026-10-22):** of Bitcoin, Ethereum, XRP and Dogecoin only the first in list order places an order in a given 15 minute window; an order that did not fill does not hold the window. Gold and the probes are not part of it. It came from the research session's diagnosis of the live account (below) and is a test, read on the live record. **Logging only, no effect on any order:** every new order records `rise3` (how far the bought side's price rose over 3 minutes) and `rng5` (its 5 minute range) from public candles, written after the minute's orders are sent. **A refused read is asked once more:** a Kalshi read answered with 429 (too many requests) is retried once after 1.2 seconds; an order is never retried.
 
 **Probe drop rule (2026-10-21):** a probe market is dropped when its last 200 settled entries net negative. It is an admission filter for unproven markets only; the five main markets are never subject to it. It cannot fire for 2 to 4 days after deploy.
+
+**Bitcoin and Ethereum trade only on a smooth climb (2026-10-23):** at the 6 minute look the bought side's 1 minute path must have at least 4 earlier candles, no minute change below -0.005 and a total climb of at least 0.10, or no order is placed (`smoothGate`). Kill rules are registered: remove them if 3 of the first 40 smooth fills lose, or their net is under $0 after 100 fills, or the 2026-11-12 read is falsified. **More logging only (2026-10-23 to 10-24):** `flips`, `flips0`, `earlierCandles`, `askAtDecision` and the two-stage look (`ask10`, `side10`, `inBand10`, `ask8` ... `twoStageLeft`), all from public candles and none read by any order. The full order export carries them all.
 
 **Runs:** 24/7 since 2026-10-08 (it used to be a 24 hour session). It runs until the owner stops it or a stop ends it.
 
@@ -39,7 +41,7 @@ This document is mostly about the Kalshi subsystem, because it is where most of 
 
 ## The Kalshi page (admin only)
 
-**Bot page:** account card (balance, stake, pool, **Today** result, Running menu with Start, Pause or Resume, and Flatten all), open positions, a live strip per market, and recent trades. Privacy (masks dollar amounts as ****), Tools and Layout menus in the header. **Data page (read only):** stat tiles, result by week, growth trend, share of trades by market, how the orders ended, a by-market table, each settled trade, and a closed "All the numbers" fold. Titan One is used only for the SHWOOP wordmark; headings and every number are plain Public Sans. Times are US Central. Order exports (Copy order diagnostics, Copy all orders) carry the entry tag. Mock-ups in `docs/mockups/` are older fixture renders.
+**Bot page:** the account result line with a date filter (Today to All) and real percent and date axes with a touch scrub, the Account card (balance, stake, pool, **Today** result, Running menu with Start, Pause or Resume, and Flatten all, and Stop Loss and Risk at the bottom), Bot status, open positions with a small chance chart each, and recent trades. A silent-market warning ("Needs a look") appears when a market stops sending orders for far longer than its own usual gap. Privacy (masks dollar amounts as ****, kept in this browser only) and Tools menus in the header. **Notification center (2026-10-25):** a bell in the top navigation, left of Brief, admin only, with a red unread bubble, Important and Everything tabs and Mark all as read; the worst cases (bot stopped itself, an order needing a check, no check for minutes) also raise a red banner across the Bot page. **The Data page, the Print statement and Copy all stats were removed (2026-10-24).** The Brief's charts have percent and Central hour axes and a hover scrub; gold and crude now fall back to the last session when their futures are closed. Titan One is used only for the SHWOOP wordmark; headings and every number are plain Public Sans. Times are US Central. Order exports (Copy order diagnostics, Copy all orders) carry the entry tag. Mock-ups in `docs/mockups/` are older fixture renders.
 
 ## Research method
 
@@ -67,6 +69,8 @@ State on 2026-10-08:
 
 ## Incidents that shaped the code
 
+- **Gold and crude had no charts at weekends (found and fixed 2026-10-25):** Yahoo answers a closed futures market's one-day read with a price and no bars, so the Brief drew a price with no line. The tape now asks for 5 days and keeps the last session (#557, test T21c). Needs `marketTapeTick` redeployed.
+- **The scroll bar behind the sign-in screen and a Today figure that did not match (2026-10-24 to 10-25):** the signed-in page laid out under the fixed sign-in layer (now locked), and the result line's Today started at 06:00 UTC all year instead of Central midnight (#554, #555).
 - **The live account lost money in clusters (diagnosed 2026-10-22):** 72% of recent loss dollars came from three windows where two crypto series flipped together, plus the two large Bitcoin losses before the one-contract cap. The 25c exit and the fill rule were checked and are not the cause. Fix for the clusters: one crypto order per window (#459, test OC1). Not yet readable: it went live the same morning.
 - **A refused Kalshi read skipped a minute and blanked the account card (2026-10-22):** one 429 on the balance read meant no entries that minute and an error line on the Bot page. Reads are now retried once (#460, test RR1; gate L10 narrowed to keep orders unretried).
 - **Every NO order read as sold by hand (found 2026-10-21):** Kalshi books a NO buy on the YES side, so the bot's own entry fill looked like a manual sale and those orders, losses included, were left out of the stats, the loss stop and the pool. Fixed in #432 with a repair pass; tests H5 and H11 to H13.
