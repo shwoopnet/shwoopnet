@@ -231,6 +231,9 @@
   .clock .clock-sub{ font-size:12px; font-weight:600; letter-spacing:.04em; color:var(--muted); margin-top:2px; white-space:nowrap; }
 
   .settings-page{ display:flex; flex-direction:column; gap:28px; margin-top:24px; }
+  .changelog-details summary{ cursor:pointer; font-size:13px; font-weight:700; color:var(--paper); min-height:40px; display:flex; align-items:center; }
+  .changelog-day{ margin:14px 0 6px; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .changelog-list{ margin:0; padding-left:18px; font-size:13px; line-height:1.5; color:var(--paper); } .changelog-list li{ margin:0 0 6px; }
   .settings-section-title{
     font-family:'Public Sans', sans-serif; font-size:17px; color:var(--paper);
     letter-spacing:0; font-weight:700; margin: 0 0 12px 2px;
@@ -1422,6 +1425,58 @@
             <button class="settings-toggle-switch" id="privacyToggle" role="switch" aria-checked="false" aria-label="Toggle privacy view">
               <span class="toggle-knob"></span>
             </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Changelog</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">Changelog</div>
+              <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
+              <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 25</div>
+                <ul class="changelog-list">
+                  <li>Settings has a Changelog row, written from the merged pull requests (#564)</li>
+                  <li>The notification bell fills on every page, not only the Bot page (#563)</li>
+                  <li>Notification bell in the top navigation, left of Brief (#561)</li>
+                  <li>Gold and crude oil keep a chart when their markets are closed, using the last session (#557)</li>
+                  <li>XRP back to 1 contract after 4 losses in 24 fills (#560)</li>
+                  <li>Copy all orders carries the smooth climb and two-stage fields (#559)</li>
+                  <li>Phone tap targets made big enough on every control (#558)</li>
+                  <li>Notification center with a red unread bubble, Mark all as read and a red banner for the worst cases (#556)</li>
+                  <li>Today on the account result line starts at midnight Central, so it matches the Account card (#555)</li>
+                  <li>No phantom scroll bar behind the sign-in screen (#554)</li>
+                </ul>
+                <div class="changelog-day">Oct 24</div>
+                <ul class="changelog-list">
+                  <li>The bot now logs a two-stage look at 10, 8 and 6 minutes before each close, logging only (#553)</li>
+                  <li>Charts: real percent and time axes on the account line and the Brief charts (#552)</li>
+                  <li>Account result line and Brief charts can be scrubbed by hover or touch (#551, #550)</li>
+                  <li>Plain Open positions chart (#549)</li>
+                  <li>Account result shows a percentage beside the dollars (#547)</li>
+                  <li>Stop Loss and Risk moves into the Account card; one settings switch removed (#546)</li>
+                  <li>Warning when a market goes quiet for far longer than usual (#545)</li>
+                  <li>Bot page trimmed: shard lines, usual-day bar, 7-day range, two exports removed (#544)</li>
+                  <li>Account result line is back, with Today to All date filters (#543)</li>
+                  <li>Data page removed (#542, #541, #539)</li>
+                  <li>Automatic shard split removed after Kalshi refused it (#540)</li>
+                </ul>
+                <div class="changelog-day">Oct 23 and earlier</div>
+                <ul class="changelog-list">
+                  <li>Bitcoin and Ethereum only order on a smooth climb (#522)</li>
+                  <li>Order of markets: gold, XRP, Bitcoin, Dogecoin, Ethereum, then the test markets (#504)</li>
+                  <li>Privacy view stays on after a reload (#536)</li>
+                  <li>Phone and sound alert switches moved to Settings (#533)</li>
+                  <li>Recent trades show each result as a percentage of its cost (#519, #524)</li>
+                  <li>Open positions get a small chart each (#516)</li>
+                  <li>Slogan wallpaper behind every signed-in page (#514)</li>
+                  <li>Bot page cut down to the account strip, open positions and recent trades (#500)</li>
+                </ul>
+              </details>
+            </div>
           </div>
         </div>
       </div>

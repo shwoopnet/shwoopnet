@@ -68,7 +68,9 @@ gates.B3 = () => {
 gates.B4 = () => {
   const page = /<main class="page" id="page-settings"[\s\S]*?<\/main>/.exec(code)[0];
   const titles = [...page.matchAll(/<div class="settings-row-title">([^<]*)<\/div>/g)].map((m) => m[1].trim());
-  assert.deepStrictEqual(titles, ['Account', 'Default landing page', 'Clock format', 'Reset preferences', 'Phone alerts', 'Sound alerts', 'Privacy view']);
+  assert.deepStrictEqual(titles, ['Account', 'Default landing page', 'Clock format', 'Reset preferences', 'Phone alerts', 'Sound alerts', 'Privacy view', 'Changelog']);
+  // The changelog (the owner, Oct 25, 2026: "i also dont see ... the changelog in the settings page"): static text, newest first, every line naming its pull request. Each merged change adds one line.
+  assert.ok(/<div class="changelog-day">Oct 25<\/div>/.test(page) && (page.match(/<li>[^<]*\(#\d+(, #\d+)*\)<\/li>/g) || []).length >= 20, 'a dated changelog of plain lines, each with its pull request number');
   const landing = [...page.matchAll(/<button class="tf-btn" data-value="(\w+)"( id="landingKalshiBtn")?/g)].map((m) => m[1]);
   assert.ok(['auto', 'brief', 'kalshi'].every((v) => landing.includes(v)) && !landing.includes('trades'), 'the landing page choices are Auto, Brief and Kalshi');
 };
