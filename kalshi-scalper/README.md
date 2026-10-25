@@ -6304,3 +6304,13 @@ Predicted, and it came out as predicted: the market's own mid is the best probab
 **Prediction.** No rule clears (1). The maximum discovery z over the 5,000 rules lands inside the null distribution (it will look impressive in isolation, about 4 to 5, and the shuffled data will produce the same). Prior that at least one rule survives all four steps: 10%; if one does, it is most likely a smooth-climb relative (already live at 1 contract), so I will report how many survivors are just rewordings of it (rise, range and flip features).
 
 **Limits, stated now.** The 5,000 rules share 35 features and 78 days, so they are far from independent and the effective number of tests is smaller than 5,000; I count 5,000 anyway. The perpetual is a proxy for the settlement index; the strike proxy is the perpetual at the open minute. Funding is published every 8 hours, so its "change" is a step, not a signal in the last minutes.
+
+## Result: SEARCH5K (run once on 2026-10-25): FALSIFIED
+
+4,558 Bitcoin and Ethereum L1 entries over 79 days (2,243 and 2,315); discovery 2,819 entries (before 2026-09-22), confirmation 918 (before 2026-10-08), holdout 821 (not opened: no rule reached it). 34 features, 131 conditions, 5,000 rules (4,576 with enough discovery entries). Corrections to the pre-registration text, none involving an outcome: the feature count was 34 (30 numeric and 4 calendar), the single-condition count 131.
+
+**The null.** The best z over all 5,000 rules on shuffled outcomes had a median of **5.00**, a 95th percentile of **7.59** and a maximum of 13.42 over 300 shuffles. The best observed rule had z **6.14**, below even the null median-to-95th range top. **Zero rules** cleared step 1; zero cleared steps 1 to 3. A z of 6 out of 5,000 correlated rules is what chance alone produces.
+
+**Top by discovery (information only):** `rv15 top quartile AND 12 to 18 UTC` +5.15c z 6.14 (confirmation +0.20c z 0.07); `rise3 bottom quartile AND quarter-hour slot 2` +4.65c z 5.32 (confirmation -3.00c); `range15 top quartile AND 12 to 18 UTC` +4.53c z 5.23 (confirmation +2.29c z 0.96); `ret15 top quartile AND 12 to 18 UTC` +4.45c z 5.02 (confirmation +3.44c z 1.43). Seven of the top ten contain the 12 to 18 UTC bucket. That bucket is also where gold, XRP and Dogecoin had no losses in 33 fills (order scan, 2026-10-25), so it is a single, simple, three-market-consistent observation; it is not a SEARCH5K result (the bucket alone did not clear the null). **No claim is registered from it here.** Implied volatility, funding, cross-asset moves and perpetual volume produced no rule that survived.
+
+Count: 5,000 tries added, about 10,260. Code `src/scalper/search5k.py`, tests `tests/test_search5k.py`, result `data/search5k_result.txt`.
