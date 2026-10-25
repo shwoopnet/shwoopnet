@@ -25,7 +25,7 @@ gates.D1 = () => {
   const card = html.slice(html.indexOf('id="kalPnl"'), html.indexOf('data-card="trades"', html.indexOf('id="kalPnl"')));
   assert.ok(card.length > 100);
   assert.ok(!/<(input|select|textarea|form|a )\b/i.test(card), 'the card has no input, select or form');
-  const code = ['kalshiPnlSeries', 'kalshiPnlRangeStart', 'kalshiPnlCardHtml', 'renderKalshiPnl', 'kalshiLineSvg'].map(fnSource).join('\n');
+  const code = ['kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalshiPnlCardHtml', 'renderKalshiPnl', 'kalshiLineSvg'].map(fnSource).join('\n');
   assert.ok(!/fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code.replace(/api\.kalshiOrdersSince/g, '')), 'and its code writes and calls nothing: it draws what the page loaded, plus one read of older orders');
   assert.ok((code.match(/api\.\w+/g) || []).every((c) => c === 'api.kalshiOrdersSince'), 'the only API it touches is the read of older orders');
   const mod = html.slice(html.indexOf('kalshiOrdersSince: function'), html.indexOf('kalshiBookSnaps: function'));
@@ -35,7 +35,7 @@ gates.D1 = () => {
 
 // The account result line: the range cuts the running settled result, and the line starts at zero at the start of the range, so a long range is never drawn from a total the range did not earn.
 gates.PL1 = () => {
-  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPnlRangeStart', 'kalTime', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
+  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalTime', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
   const now = Date.UTC(2026, 9, 24, 18), day = 86400000;
   const o = (d, p) => ({ ts: now - d * day, series: 'KXGOLD15M', settled: true, fillCount: '1.00', settledPnl: p });
   const orders = [o(40, 5), o(20, -1), o(2, 2), o(0.1, 0.5)];
@@ -142,6 +142,24 @@ gates.PL3 = () => {
   assert.ok(/Oct \d+/.test([...out.matchAll(/<div class="kal-xaxis">([\s\S]*?)<\/div>/g)][0][1]), 'the x labels are dates');
   const noBal = lift2.kalshiPnlCardHtml(orders, '1M', now, (x) => String(x), (v) => '****', null);
   assert.ok(!/%/.test([...noBal.matchAll(/<div class="kal-yaxis">([\s\S]*?)<\/div>/g)][0][1].replace(/<[^>]*>/g, ' ')), 'no known balance: the y axis is dollars (masked), never a made-up percentage');
+};
+
+// PL4: "Today" means one thing. Consequence (the owner, Oct 25, 2026: the Account card said +$0.03 and the result line's Today said -$0.41): the result line's Today range starts at 00:00 Central exactly, in summer (05:00 UTC) and winter (06:00 UTC), so it holds the same
+// orders as the Account card's Today, which counts every order whose Central date is today. It used to start at 06:00 UTC all year and dropped the first hour of every summer day.
+gates.PL4 = () => {
+  const f = lift(['kalDayKey', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiOutcomeCounts', 'kalshiTradePnl', 'kalDateTime', 'kalshiResolveOrders', 'kalshiPerfStats', 'kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart']);
+  const at = (iso) => Date.parse(iso);
+  assert.strictEqual(f.kalshiPnlRangeStart('1D', at('2026-10-25T12:00:00Z')), at('2026-10-25T05:00:00Z'), 'summer: the Central day begins at 05:00 UTC');
+  assert.strictEqual(f.kalshiPnlRangeStart('1D', at('2026-12-05T12:00:00Z')), at('2026-12-05T06:00:00Z'), 'winter: at 06:00 UTC');
+  assert.strictEqual(f.kalshiPnlRangeStart('1D', at('2026-11-01T15:00:00Z')), at('2026-11-01T05:00:00Z'), 'the day daylight saving ends still begins at 00:00 Central');
+  assert.strictEqual(f.kalshiPnlRangeStart('1D', at('2026-03-08T15:00:00Z')), at('2026-03-08T06:00:00Z'), 'and the day it starts');
+  assert.strictEqual(f.kalshiPnlRangeStart('YTD', at('2026-10-25T12:00:00Z')), at('2026-01-01T06:00:00Z'), 'the year begins at 00:00 Central on Jan 1');
+  const o = (iso, p) => ({ ts: at(iso), series: 'KXGOLD15M', settled: true, fillCount: '1.00', settledPnl: p });
+  const orders = [o('2026-10-25T04:30:00Z', -9), o('2026-10-25T05:10:00Z', 0.44), o('2026-10-25T05:50:00Z', 0.1), o('2026-10-25T12:00:00Z', -0.51)];
+  const now = at('2026-10-25T18:00:00Z'), today = f.kalDayKey(now);
+  const card = f.kalshiPerfStats(orders.filter((x) => f.kalDayKey(x.ts) === today), 0).total;
+  const series = f.kalshiPnlSeries(orders, f.kalshiPnlRangeStart('1D', now)), line = series.length ? series[series.length - 1].cum : 0;
+  assert.ok(Math.abs(card - line) < 1e-9 && Math.abs(card - 0.03) < 1e-9, 'the Account card and the result line agree on Today: ' + card + ' vs ' + line + ' (the 04:30 UTC order is yesterday, Central, and is in neither)');
 };
 
 // DS: there is no Data page and no record card. Everything the Data page carried (tiles, tables, rings, folds, the headline, the rules on trial) is gone from the site.

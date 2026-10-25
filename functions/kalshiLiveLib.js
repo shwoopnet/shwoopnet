@@ -404,17 +404,46 @@ async function smoothGate({ fetchFn, series, ticker, side, nowMs }) {
     return { ok: true, shape };
   } catch (e) { return { ok: false, reason: "no order: the price path could not be read" }; }
 }
-async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs, ask }) {
+// Two-stage entry, LOGGING ONLY (Oct 24, 2026, the research session's TWOSTAGE log request, the owner said "go" there and "Yes, build it (log only)" here). For one market, at the three looks 600, 480 and 360 seconds before the close, the side
+// whose price is inside the entry band (l1Pick's rule applied to that minute's candle: YES at its ask, NO at 1 minus the YES bid), its price, and whether there was one; and `twoStageLeft`, the earliest of the three looks that was in
+// band. The candle used is the one whose end is EXACTLY that many seconds before the close: a neighbouring candle is never substituted, and a missing candle means no value (null), not "not in band". It decides nothing: it is written
+// on the order record after the orders are sent, from public candles, and no order, size, entry time, cap or series reads it. An XRP or natural gas order (decided at 10 minutes) has no 8 or 6 minute candle yet, so those stay null.
+const TWO_STAGE_LOOKS = [[600, "10"], [480, "8"], [360, "6"]];
+function twoStageFromCandles(candles, closeSec) {
+  if (!Number.isFinite(closeSec)) return null;
+  const byEnd = new Map();
+  for (const c of Array.isArray(candles) ? candles : []) {
+    const end = Number(c && c.end_period_ts), b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars);
+    if (Number.isFinite(end) && Number.isFinite(b) && Number.isFinite(a)) byEnd.set(end, { bid: b, ask: a });
+  }
+  const out = {}, r4 = (x) => Math.round(x * 10000) / 10000, lo = L1_BAND[0] - 1e-9, hi = L1_BAND[1] + 1e-9;
+  let left = null, any = false;
+  for (const [secs, tag] of TWO_STAGE_LOOKS) {
+    const q = byEnd.get(closeSec - secs);
+    if (!q || !bot.validQuote(q.bid, q.ask)) { out["ask" + tag] = null; out["side" + tag] = null; out["inBand" + tag] = null; continue; }
+    any = true;
+    let side = null, price = null;
+    if (r4(q.ask) >= lo && r4(q.ask) <= hi) { side = "yes"; price = r4(q.ask); }
+    else if (r4(1 - q.bid) >= lo && r4(1 - q.bid) <= hi) { side = "no"; price = r4(1 - q.bid); }
+    out["ask" + tag] = price; out["side" + tag] = side; out["inBand" + tag] = side !== null;
+    if (side !== null && left === null) left = secs;
+  }
+  if (!any) return null;
+  out.twoStageLeft = left;
+  return out;
+}
+async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs, ask, closeSec }) {
   try {
     const nowSec = Math.floor(nowMs / 1000);
     const res = await liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
       params: { start_ts: String(nowSec - 7200), end_ts: String(nowSec + 60), period_interval: "1" }, nowMs });
     if (res.status !== 200 || !res.body || !Array.isArray(res.body.candlesticks)) return false;
-    const r = riseFromCandles(res.body.candlesticks, side, nowSec), shape = pathShape(res.body.candlesticks, side, nowSec);
-    if (!r && !shape) return false;
+    const r = riseFromCandles(res.body.candlesticks, side, nowSec), shape = pathShape(res.body.candlesticks, side, nowSec), two = twoStageFromCandles(res.body.candlesticks, closeSec);
+    if (!r && !shape && !two) return false;
     await store.updateTest(cid, {
       ...(r ? { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen, ...(r.rng === null ? {} : { rng5: r.rng }) } : {}),
       ...(shape ? { flips: shape.flips, flips0: shape.flips0, earlierCandles: shape.earlierCandles, minStep: shape.minStep, climb: shape.climb, smooth: shape.smooth, ...(Number.isFinite(ask) ? { askAtDecision: ask } : {}) } : {}),
+      ...(two || {}),
     });
     return true;
   } catch (e) { return false; }      // logging only: never allowed to affect a trade
@@ -925,7 +954,7 @@ async function runL1Tick(args) {
     // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
     if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
-    riseLog.push({ cid, series: c.series, ticker, side: pick.side, ask: pick.price });
+    riseLog.push({ cid, series: c.series, ticker, side: pick.side, ask: pick.price, closeSec: Date.parse(m.close_time) / 1000 });
     committed[shardKey] = (committed[shardKey] || 0) + cost;
     if (CAPPED_SERIES.includes(c.series)) cryptoTaken[wkey] = true;
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
@@ -960,7 +989,7 @@ async function runL1Tick(args) {
     await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
     return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
   }
-  for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now, ask: r.ask });
+  for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now, ask: r.ask, closeSec: r.closeSec });
   await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
   return { ok: true, results };
 }
@@ -1160,7 +1189,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
 const DEFAULT_ACCOUNT_ID = "main";
 
 module.exports = {
-  flipsOf, pathShape, sideMids, SMOOTH_SERIES, smoothGate,
+  flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
