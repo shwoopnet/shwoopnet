@@ -6259,3 +6259,14 @@ At 10 minutes and 0.55 to 0.65 no series is positive beyond noise (best: copper 
 - **Information, decides nothing:** the Brier score of p_iv, of p_rv and of the market's own mid (0.5 x (bid + ask)) over all markets; if p_iv does not beat the market mid, the market already knows more than the option-implied volatility says.
 
 **Prediction.** `FALSIFIED` for both. Brier: market mid best, p_iv worst. Reason, stated now: DVOL is a 30 day average, flat across the day, while intraday volatility swings by a factor of two with the clock; a model that uses it will be most wrong exactly when it disagrees most with the market, so its largest "edges" will be its largest errors. Prior for a pass: under 5%.
+
+## Result: IV1, implied-volatility fair value (run 2026-10-25; first read discarded for a lookahead bug, corrected read stands)
+
+**Disclosure.** The first run showed Bitcoin +2.02c (z 3.46) and, on the realised-sigma comparator, +3.57c (z 7.08). A result that strong for an idea whose siblings (H7, L8, L9) were `FALSIFIED` was treated as a bug until shown otherwise. It was one: Deribit stamps a bar with its start, so the bar stamped at the decision minute closes one minute later, and the model saw one minute of the future. Fixed (the last usable bar starts 60 s before the decision, the strike proxy and DVOL likewise; test T in `tests/test_iv1.py` now fails if a later bar is read), and the corrected run is the read. The first numbers are not evidence of anything. No rule, threshold or data changed between the two runs. Tries unchanged (2).
+
+| Series | Entries | Net per contract | z | Halves | Fee x1.2 | Brier: p_iv / p_rv / market mid | Verdict |
+|---|---|---|---|---|---|---|---|
+| Bitcoin | 5,423 of 7,308 | -0.97c | -1.64 | -0.67 / -1.28 | -1.18c | 0.1550 / 0.1476 / **0.1401** | `FALSIFIED` |
+| Ethereum | 5,601 of 7,308 | -2.13c | -4.39 | -1.97 / -2.29 | -2.32c | 0.1477 / 0.1358 / **0.1289** | `FALSIFIED` |
+
+Predicted, and it came out as predicted: the market's own mid is the best probability, the realised-volatility model is second and the implied-volatility model is worst on both series. The information-only realised-sigma entries also lose (Bitcoin -1.00c, Ethereum -1.31c). So an options-style fair value from implied volatility does not beat the price; the 15 minute market already prices distance and time better than a model that has Deribit's volatility. Code: `src/scalper/iv1.py`, data `data/iv1.sqlite` (not committed). Nothing to build.
