@@ -27,6 +27,10 @@ gates.M3 = () => {
 };
 
 // M4: the small tap targets found by measuring the phone layout (Oct 25, 2026). Consequence: a thumb can hit the trade list's page arrows, the Running pill, the legal line, the contact email and the Layout menu's tick boxes, and the Bot header's buttons sit on one row under the status.
+// M5: found by a touch scan at 360, 390 and 430 wide (Oct 25, 2026): the bottom bar buttons were 39px and the notification panel's tabs 34px. Consequence: a thumb can hit every tab of the bar and of the panel.
+gates.M5 = () => {
+  assert.ok(/@media \(max-width: 900px\)\{[\s\S]*?\.side-nav-item\{ min-height:44px; \}/.test(css) && /max-width:900px\)\{ \.kal-notif-tabs \.kal-pill\{ min-height:40px; \}/.test(css), 'bottom bar items are 44px and the panel tabs 40px on a phone');
+};
 gates.M4 = () => {
   const m = /@media screen and \(max-width:700px\)\{\s*\.kal-link\{([^}]*)\}([\s\S]*?)\n  \}/.exec(css);
   assert.ok(m, 'a phone block for tap targets exists');
