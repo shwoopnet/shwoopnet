@@ -206,3 +206,49 @@ if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "p6":
     out = run_p6()
     (DATA_DIR / "p6_result.txt").write_text(out + "\n")
     print(out)
+
+
+# ---- P6F: the forward read of P6 (README, Registered: P6F). Needs data/fresh.sqlite refreshed (python -m scalper.fresh_update). Once. ----
+P6F_CUT = "2026-10-26"
+P6F_MIN_N, P6F_C, P6F_OVER, P6F_Z = 300, 0.005, 0.003, 2.0
+
+
+def run_p6f() -> str:
+    import time
+    if time.strftime("%Y-%m-%d", time.gmtime()) < "2026-11-12":
+        return "P6F refuses before 2026-11-12 (the read day); nothing was computed."
+    out_path = DATA_DIR / "p6f_result.txt"
+    if out_path.exists():
+        return f"Refusing to run again: {out_path} exists."
+    mk = {}
+    for m in load() + load_fresh():
+        if all(x[1] is not None and x[2] is not None for x in m[2]) and m[4] in ("yes", "no"):
+            mk[m[0]] = (m[0], m[1], [(e, b, a, b, a) for e, b, a, *_ in m[2]], m[3], m[4])
+    cands = []
+    for left in P6_LEFTS:
+        rows, _, _ = F.build(list(mk.values()), left)
+        for r in rows:
+            cands.append({**r, "left": left, "raw": r["net"], "raw_stress": r["stress"]})
+    cands.sort(key=lambda r: r["close_ts"])
+    picked, pool = allocator_p6(cands)           # walk-forward over all days; only days from the cut on are scored
+    picked = [r for r in picked if r["day"] >= P6F_CUT]
+    pool = [r for r in pool if r["day"] >= P6F_CUT]
+    if len(picked) < P6F_MIN_N:
+        res = {"verdict": "NOT_ENOUGH_DATA", "n": len(picked)}
+    else:
+        m, _, z = cluster_mean_z([(r["day"], r["raw"]) for r in picked])
+        pm = st.mean(r["raw"] for r in pool)
+        ordered = sorted(picked, key=lambda r: r["close_ts"])
+        h = len(ordered) // 2
+        h1, h2 = st.mean(r["raw"] for r in ordered[:h]), st.mean(r["raw"] for r in ordered[h:])
+        s = st.mean(r["raw_stress"] for r in picked)
+        ok = m >= P6F_C and m - pm >= P6F_OVER and z >= P6F_Z and h1 > 0 and h2 > 0 and s > 0
+        res = {"verdict": "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if m <= 0 else "NOT_ENOUGH_DATA"), "n": len(picked), "mean_c": 100 * m, "pool_c": 100 * pm, "z": z,
+               "h1_c": 100 * h1, "h2_c": 100 * h2, "stress_c": 100 * s}
+    text = f"P6F forward (days from {P6F_CUT})   {res}"
+    out_path.write_text(text + "\n")
+    return text
+
+
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "p6f":
+    print(run_p6f())
