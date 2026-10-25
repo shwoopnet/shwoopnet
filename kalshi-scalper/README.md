@@ -6200,3 +6200,20 @@ Hand-tallied from the 821-order export pasted 2026-10-25 (orders since 15:15Z on
 | Ethereum | 1 | 0 | +$0.02 | 6m lead, 10-24 11:24Z; only one order since the smooth-only change |
 
 Dogecoin lost no window to a Bitcoin order (Bitcoin placed none). Not checkable from this export: minStep, climb, smooth, flips, flips0, earlierCandles, askAtDecision are not among its columns (it stops at rise3, rng5), so the smooth gate cannot be verified; the build session should add them to "Copy all orders". Smooth-only kill-rule count: 0 smooth Bitcoin fills, 1 Ethereum fill, 0 losses (rules need 40 and 100). Also seen, unrequested: 1-contract orders on KXUSDCAD15M and KXAUDUSD15M on 10-23 from 18:24Z to 20:09Z (5 fills, 5 wins, +$0.43), none since. XRP's 0.88 to 0.905 band (9 fills, 4 losses) is a post hoc cut on a small sample; not a claim until registered forward.
+
+### Order scan, 2026-10-25 (post hoc, about 45 slices counted; running Kalshi tries about 5,180)
+
+Source: the 821-order export (544 filled and settled). All of this was found by looking, so none of it is a result. Each item below is a forward claim, registered before any later fill is read.
+
+What the scan showed (per contract, filled orders only):
+- Price paid under 0.905: 131 fills, loss 13.0%, PF 0.81. At 0.905 and above: 412 fills, loss 4.4%, PF 1.15. For gold/XRP/DOGE since Oct 20: 17.0% against 3.6%. XRP alone under 0.905: 17 fills, 5 losses.
+- Thin ask depth (askSize under 20): 80 fills, loss 12.5%, -5.0c. Depth over 1,000: 194 fills, loss 4.1%, +3.3c.
+- Fills more than 2c cheaper than the order price: 75 fills, loss 16.0%, -5.4c (the adverse-selection finding again; cannot be filtered before the fill).
+- XRP "no": 22 fills, 6 losses (PF 0.15). XRP "yes": 32 fills, 1 loss. Gold is the same on both sides (loss 3.1% yes, 3.7% no), so there is no yes/no pattern to copy from gold.
+- Gold/XRP/DOGE by UTC time since Oct 20: 12:00 to 18:00 had 0 losses in 33 fills; 00:00 to 06:00 and 18:00 to 24:00 lost 10% and 12%.
+- Nothing in rise3 or rng5.
+
+Registered forward claims (fills placed after 2026-10-25T14:00Z, read on or after 2026-11-12, one read each, from a fresh export; the export stays out of the repo because Pages publishes it):
+- FLOOR1: XRP fills at a price under 0.905. Prediction: loss rate 25% or more. Kill: FALSIFIED if 12 or more such fills have a loss rate of 7% or less; NOT_YET_FALSIFIED if 12 or more have a loss rate above 10% and a lower net per contract than XRP fills at 0.905 or above; otherwise NOT_ENOUGH_DATA. Counts by price paid, whatever the order size.
+- THIN1: all series, fills where askSize is under 20. Prediction: loss rate 10% or more. Kill: FALSIFIED if 60 or more such fills have a loss rate of 7% or less; NOT_YET_FALSIFIED if 60 or more have a loss rate above 9%; otherwise NOT_ENOUGH_DATA.
+Neither is a trading rule. Verdict words decide nothing.
