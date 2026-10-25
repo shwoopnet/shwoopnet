@@ -479,6 +479,10 @@ Only `L1_SERIES` in `functions/kalshiLiveLib.js` (Bitcoin, gold, Ethereum, XRP, 
 
 **Hand-sold check, fixed Oct 21, 2026.** `closedByHand` (#407) marked every NO order the bot bought as "sold by hand": Kalshi books a NO buy on the YES side (sent as `ask`), so the bot's own entry fill read as a sale, and those orders (losses included) were left out of the stats, the loss stop and the pool. It now ignores the entry order's own fill, does not call an order hand without its entry id, and no longer takes the exit watch's `skipped` as proof; `settleOpenOrders` re-asks every order already marked hand once and settles the wrong ones as what they were (`handRepaired`). Tests H5, H11 to H13.
 
+## XRP back to 1 contract (Oct 25, 2026, the owner, on the research session's read)
+
+`FIXED_CONTRACTS` now has XRP at 1 (Dogecoin 3, natural gas 2 unchanged). Why: since 15:15Z on Oct 23, XRP had 24 fills, 4 losses (16.7% against 7% break-even) and -$4.87, all four losses at a price of 0.903 or lower. Order, entry time and every cap are unchanged; tests FS1, GF1 and OS1 pin the size. Needs `bash functions/deploy-sizing.sh`.
+
 ## Series order (Oct 23, 2026, the owner)
 
 `L1_SERIES` is now gold, XRP, Bitcoin, Dogecoin, Ethereum, then the probes (older sections above list the earlier order). Why: within a tick markets are tried in list order and only one capped crypto order goes out per window, and XRP and Dogecoin trade 3 contracts against Bitcoin's and Ethereum's 1, so a 1 contract order was taking the window from a 3 contract one when they tied (Bitcoin and XRP tie at the 10 minute look, Ethereum and Dogecoin at the 6 minute look). Sizes, stops, window limit, entry times and the one-crypto-order rule are unchanged. Test OS1. Needs `bash functions/deploy-sizing.sh`.

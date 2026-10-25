@@ -147,6 +147,20 @@ gates.T21b = () => {
   const q = lib.parseChart(chart({ indicators: { quote: [{ close: [1, 2, 3] }] }, timestamp: [10, 20, 30] }), NOW);
   assert.deepStrictEqual(q.seriesT, [10, 20, 30], 'the times ride on the quote');
 };
+// Closed futures (Oct 25, 2026, the owner: "commodities has no charts"): a 1d answer with a price and no bars falls back to the last session of a 5d answer, never a week of it.
+gates.T21c = () => {
+  const day = 86400, base = 1700000000;
+  const old = [1, 2, 3].map((v, i) => [base + i * 300, 50 + v]);
+  const last = [1, 2, 3, 4].map((v, i) => [base + day + i * 300, 100 + v]);
+  const five = { chart: { result: [{ indicators: { quote: [{ close: old.concat(last).map((x) => x[1]) }] }, timestamp: old.concat(last).map((x) => x[0]) }] } };
+  const s = lib.lastSession(five.chart.result[0]);
+  assert.deepStrictEqual(s.indicators.quote[0].close, [101, 102, 103, 104], 'only the newest session, not the week');
+  const q = lib.parseChart(chart({}), NOW, five);
+  assert.deepStrictEqual(q.series, [101, 102, 103, 104], 'a quote with no bars today takes the last session');
+  assert.strictEqual(q.seriesT.length, 4, 'with its times');
+  const own = lib.parseChart(chart({ indicators: { quote: [{ close: [7, 8] }] } }), NOW, five);
+  assert.deepStrictEqual(own.series, [7, 8], "today's own bars win over the fallback");
+};
 gates.T22 = () => {
   const syms = lib.SYMBOLS.map((s) => s.sym);
   for (const need of ['BTC-USD', 'ETH-USD', 'SPY', 'QQQ', 'GC=F', 'CL=F']) assert.ok(syms.includes(need), need + ' is read for the Brief charts');

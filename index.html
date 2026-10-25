@@ -459,6 +459,17 @@
   .kal-alert{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; margin:0 0 14px; padding:14px 18px; border-radius:14px; background:var(--loss); color:#fff; font-size:14px; line-height:1.45; }
   .kal-alert[hidden]{ display:none; } .kal-alert b{ font-size:15px; font-weight:800; } .kal-alert-open{ margin-left:auto; background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:999px; padding:0 14px; min-height:34px; font:600 13px inherit; font-family:inherit; cursor:pointer; }
   @media screen and (max-width:900px){ .kal-notif-panel{ position:fixed; left:12px; right:12px; top:auto; bottom:84px; width:auto; max-height:70vh; } }
+  /* Phone touch targets (the owner, Oct 25, 2026: "scan over mobile UI"). Measured at 360, 390 and 430 wide: the trade list's page arrows were 8px wide, the Running pill 34px tall, the legal line and the contact email about 14 to 19px, and the Layout menu's tick boxes 18px. Each is now at least 40px to tap, and the Bot page header holds its buttons on one row under the status. */
+  @media screen and (max-width:700px){
+    .kal-link{ min-width:40px; min-height:40px; padding:0 12px; margin-left:0; }
+    #kalL1Pill{ min-height:40px; display:inline-flex; align-items:center; }
+    .site-footer summary{ padding:12px 8px; }
+    .front-foot a{ display:inline-block; padding:12px 0; }
+    .kal-layout-body label{ display:flex; align-items:center; gap:10px; min-height:40px; }
+    .kal-layout-body input[type="checkbox"]{ width:22px; height:22px; flex:none; }
+    .trades-header-right{ gap:8px; }
+    .trades-header-right .kal-status{ flex:1 0 100%; }
+  }
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss-text); border-color:var(--loss); }
   .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
@@ -1876,7 +1887,7 @@
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
   // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
   function kalshiAllOrdersCsv(orders){
-    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5', 'smooth', 'flips0', 'twoStageLeft', 'ask10', 'side10', 'inBand10', 'ask8', 'side8', 'inBand8', 'ask6', 'side6', 'inBand6'];
+    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5', 'minStep', 'climb', 'smooth', 'flips', 'flips0', 'earlierCandles', 'askAtDecision', 'twoStageLeft', 'ask10', 'side10', 'inBand10', 'ask8', 'side8', 'inBand8', 'ask6', 'side6', 'inBand6'];
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -1884,7 +1895,7 @@
     };
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return a.ts - b.ts; }).map(function(o){
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.side, o.price, o.count, o.fillCount, o.maxCost, o.status, o.settled === true ? 'yes' : '', o.result, kalshiOrderPnl(o),
-        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5, o.smooth, o.flips0, o.twoStageLeft, o.ask10, o.side10, o.inBand10, o.ask8, o.side8, o.inBand8, o.ask6, o.side6, o.inBand6].map(cell).join(',');
+        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5, o.minStep, o.climb, o.smooth, o.flips, o.flips0, o.earlierCandles, o.askAtDecision, o.twoStageLeft, o.ask10, o.side10, o.inBand10, o.ask8, o.side8, o.inBand8, o.ask6, o.side6, o.inBand6].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }

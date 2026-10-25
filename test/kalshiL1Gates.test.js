@@ -1033,7 +1033,7 @@ gates.GF1 = async () => {
   assert.ok(by('KXGOLD').length === 1 && Number(by('KXGOLD')[0].count) > 2, 'gold takes the ladder size: ' + by('KXGOLD').map((p) => p.count));
   // One crypto order per window: of the four capped markets sharing this window only the first in list order (XRP since Oct 23, 2026) is sent, at its fixed size.
   const crypto = w.posts.filter((p) => !p.ticker.includes('KXGOLD'));
-  assert.ok(crypto.length === 1 && crypto[0].ticker.includes('KXXRP') && Number(crypto[0].count) === 3, 'one capped market per window, the first in list order (XRP since Oct 23, 2026) at its fixed size, never the ladder or the pool: ' + crypto.map((p) => p.ticker + 'x' + p.count));
+  assert.ok(crypto.length === 1 && crypto[0].ticker.includes('KXXRP') && Number(crypto[0].count) === 1, 'one capped market per window, the first in list order (XRP since Oct 23, 2026) at its fixed size, never the ladder or the pool: ' + crypto.map((p) => p.ticker + 'x' + p.count));
   for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD')), 'a capped market never carries reinvested profit: ' + p.ticker); }
 };
 gates.GF2 = async () => {
@@ -1325,7 +1325,7 @@ gates.RL3 = async () => {
 // FS1 to FS3: fixed order sizes (Oct 23, 2026, the owner: "yeah build", on the research session's sizing proposal at a $500 balance). XRP and Dogecoin trade 3 contracts, natural gas 2; Bitcoin and Ethereum stay at 1.
 // Consequence: the larger size reaches only the three markets the history supports, and never grows through the ladder, the profit add-on, a stored value or a second crypto order in the window.
 gates.FS1 = async () => {
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 }, 'exactly these three markets, at exactly these sizes');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXDOGE15M: 3, KXNATGAS15M: 2 }, 'exactly these three markets, at exactly these sizes');
   const one = async (series, ticker, closeAt) => {
     const w = world({ session: wsess({}), balance: rich, fresh: { [ticker]: { exchange_index: 0, close_time: iso(closeAt) } } });
     await tick(w, { quotes: [quote({ close_time: iso(closeAt) }, series, ticker)], sizingState: { cap: 40, base: 1000, reviewedAt: NOW - 1000, pool: 50, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
@@ -1334,7 +1334,7 @@ gates.FS1 = async () => {
   const doge = await one('KXDOGE15M', 'KXDOGE15M-26OCT071415-06', NOW + 360000);
   assert.strictEqual(doge.posts.length === 1 && Number(doge.posts[0].count), 3, 'Dogecoin takes 3 contracts');
   const xrp = await one('KXXRP15M', XRP10, NOW + 600000);
-  assert.strictEqual(xrp.posts.length === 1 && Number(xrp.posts[0].count), 3, 'XRP takes 3 contracts');
+  assert.strictEqual(xrp.posts.length === 1 && Number(xrp.posts[0].count), 1, 'XRP takes 1 contract (back from 3 on Oct 25, 2026)');
   const gas = await one('KXNATGAS15M', 'KXNATGAS15M-26OCT071415-10', NOW + 600000);
   assert.strictEqual(gas.posts.length === 1 && Number(gas.posts[0].count), 2, 'natural gas takes 2 contracts');
   const btc = await one('KXBTC15M', 'KXBTC15M-26OCT071415-06', NOW + 360000);
@@ -1358,7 +1358,7 @@ gates.FS2 = async () => {
 };
 gates.FS3 = () => {
   const src = fnSrcLib();
-  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
+  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 1, KXDOGE15M: 3, KXNATGAS15M: 2 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(!/FIXED_CONTRACTS|request\.data\.(ticker|price|count|side)/.test(idx), 'no callable or stored value can change an order size');
 };
@@ -1367,7 +1367,7 @@ gates.FS3 = () => {
 gates.OS1 = async () => {
   assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum, probes last');
   assert.deepStrictEqual(live.CAPPED_SERIES.slice().sort(), ['KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXXRP15M'], 'the capped list is the same four markets');
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 }, 'sizes unchanged');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXDOGE15M: 3, KXNATGAS15M: 2 }, 'sizes unchanged');
   const run = async (list, lead) => {
     const close = NOW + (lead === '10m' ? 600000 : 360000);
     const fresh = {}, quotes = [];
@@ -1379,7 +1379,7 @@ gates.OS1 = async () => {
   // Quotes handed over in the OLD order (Bitcoin first) still resolve by list order: XRP wins at the 10 minute tick.
   const ten = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-10'], ['KXXRP15M', 'KXXRP15M-26OCT071415-10']], '10m');
   assert.strictEqual(ten.posts.length, 1, 'one crypto order in the window');
-  assert.ok(ten.posts[0].ticker.includes('KXXRP') && Number(ten.posts[0].count) === 3, 'XRP (3 contracts) is the only one with a 10 minute look: ' + ten.posts.map((p) => p.ticker + 'x' + p.count));
+  assert.ok(ten.posts[0].ticker.includes('KXXRP') && Number(ten.posts[0].count) === 1, 'XRP (1 contract) is the only one with a 10 minute look: ' + ten.posts.map((p) => p.ticker + 'x' + p.count));
   const six = await run([['KXETH15M', 'KXETH15M-26OCT071415-06'], ['KXDOGE15M', 'KXDOGE15M-26OCT071415-06']], '6m');
   assert.strictEqual(six.posts.length, 1);
   assert.ok(six.posts[0].ticker.includes('KXDOGE') && Number(six.posts[0].count) === 3, 'Dogecoin (3 contracts) takes the window from Ethereum: ' + six.posts.map((p) => p.ticker + 'x' + p.count));
