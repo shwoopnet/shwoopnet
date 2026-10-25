@@ -417,6 +417,22 @@ gates.N17 = async () => {
   assert.strictEqual(bare.docs.get('L1-' + T).seen.askSize, null, 'a field Kalshi did not send is null, not a guess');
 };
 
+// DD1: the depth log (the research session's request, the owner: "2", Oct 25, 2026). Consequence: the share of the resting size an order takes is on the record before slippage shows in P&L, and it can never change an order.
+gates.DD1 = async () => {
+  const w = world({ fresh: { [T]: { yes_ask_size_fp: '3.00', yes_bid_size_fp: '12.00' } }, post: { status: 201, body: { order_id: 'o1', fill_count: '1.00', remaining_count: '0.00' } } });
+  await tick(w);
+  const rec = w.docs.get('L1-' + T);
+  assert.strictEqual(rec.side, 'yes', 'this fixture buys YES, which meets the YES ask');
+  assert.deepStrictEqual([rec.depthAtLimit, rec.depthLevels], [3, 'top'], 'depth is the top level on the side being hit, and the record says it is only the top level');
+  assert.strictEqual(rec.shareOfDepth, Number((rec.count / 3).toFixed(4)), 'share is count over that depth');
+  const bare = world(); await tick(bare);
+  const b = bare.docs.get('L1-' + T);
+  assert.ok(b.depthAtLimit === null && b.shareOfDepth === null, 'a size Kalshi did not send is null, not a guess');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
+  assert.ok(/pick\.side === "yes" \? record\.seen\.askSize : record\.seen\.bidSize/.test(src), 'a NO buy meets the YES bid, so it reads the bid size');
+  assert.ok(!/depthAtLimit|shareOfDepth/.test(src.replace(/record\.depthAtLimit[^;]*;|record\.shareOfDepth[^;]*;/g, '').replace(/\/\/[^\n]*/g, '')), 'nothing that decides an order reads the depth fields');
+};
+
 // Size scaling: off unless the session was started with it, never fewer than one or more than three contracts, and the
 // money it risks is counted in the loss stop.
 gates.N18 = async () => {

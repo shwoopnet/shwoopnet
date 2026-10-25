@@ -951,6 +951,11 @@ async function runL1Tick(args) {
       // explained afterwards: thin size at the touch, or a price that moved away.
       seen: bookSeen(m),
     };
+    // Depth log (the research session's request, the owner: "2", Oct 25, 2026): how big this order is against what rests at the touch it hits, so a size cap shows before slippage shows in P&L. LOGGING ONLY: it reads two numbers already in hand and nothing that decides an order reads them. Kalshi's market object carries ONLY the top level of the book, so depthAtLimit is the size at the best price on the side being hit (a YES buy meets the YES ask, a NO buy meets the YES bid), not a sum over levels, and depthLevels says so.
+    const depthTop = pick.side === "yes" ? record.seen.askSize : record.seen.bidSize;
+    record.depthAtLimit = Number.isFinite(depthTop) && depthTop > 0 ? depthTop : null;
+    record.shareOfDepth = record.depthAtLimit ? Number((count / record.depthAtLimit).toFixed(4)) : null;
+    record.depthLevels = "top";
     // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
     if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
