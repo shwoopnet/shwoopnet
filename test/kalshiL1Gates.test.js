@@ -1390,6 +1390,51 @@ gates.OS1 = async () => {
   assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M", \.\.\.PROBE_SERIES\];/.test(src), 'the order is a hard list in code');
 };
 
+
+// TS1 to TS3: the two-stage look is LOGGED on every new order (the research session's TWOSTAGE log request, Oct 24, 2026; the owner: "Yes, build it (log only)"). Consequences: it reads exact candles only (no neighbour is
+// substituted, a missing candle is no value rather than "not in band"), it records the earliest look that was in the band, and it never changes an order, a size, an entry time or a series.
+const tsCandle = (endSec, bid, ask) => candle(endSec, bid, ask);
+gates.TS1 = () => {
+  const C = 1800000000;
+  const yes = (e) => tsCandle(e, 0.89, 0.91), mid = (e) => tsCandle(e, 0.5, 0.52), noSide = (e) => tsCandle(e, 0.05, 0.07);
+  const a = live.twoStageFromCandles([yes(C - 600), mid(C - 480), noSide(C - 360)], C);
+  assert.deepStrictEqual([a.ask10, a.side10, a.inBand10, a.ask8, a.side8, a.inBand8, a.ask6, a.side6, a.inBand6, a.twoStageLeft],
+    [0.91, 'yes', true, null, null, false, 0.95, 'no', true, 600], 'the favourite side and its price at each look, and the earliest look in band');
+  const b = live.twoStageFromCandles([mid(C - 480), noSide(C - 360)], C);
+  assert.deepStrictEqual([b.ask10, b.side10, b.inBand10, b.inBand8, b.inBand6, b.twoStageLeft], [null, null, null, false, true, 360], 'a missing 10 minute candle is no value (null), not "not in band", and the earliest in band is 6 minutes');
+  assert.strictEqual(live.twoStageFromCandles([yes(C - 540), yes(C - 420)], C), null, 'a neighbouring candle is never substituted: no exact candle, nothing logged');
+  assert.strictEqual(live.twoStageFromCandles([], C), null); assert.strictEqual(live.twoStageFromCandles([yes(C - 600)], NaN), null);
+  const none = live.twoStageFromCandles([mid(C - 600), mid(C - 480), mid(C - 360)], C);
+  assert.ok(none.inBand10 === false && none.inBand8 === false && none.inBand6 === false && none.twoStageLeft === null, 'candles present but never in band: twoStageLeft is null');
+  const edge = live.twoStageFromCandles([tsCandle(C - 600, 0.87, 0.88), tsCandle(C - 480, 0.02, 0.03)], C);
+  assert.deepStrictEqual([edge.side10, edge.ask10, edge.side8, edge.inBand8], ['yes', 0.88, null, false], 'the band is 0.88 to 0.97 inclusive, judged on the real price: a YES at 0.88 is in, a NO at 0.98 is out');
+};
+gates.TS2 = async () => {
+  const closeSec = (NOW + 360000) / 1000;
+  const cs = [candle(closeSec - 600, 0.89, 0.91), candle(closeSec - 480, 0.90, 0.92), candle(closeSec - 360, 0.91, 0.93)];
+  const withLog = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs });
+  await tick(withLog, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')] });
+  const without = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: 'none' });
+  await tick(without, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')] });
+  assert.strictEqual(withLog.posts.length, 1);
+  assert.deepStrictEqual(withLog.posts, without.posts, 'the order sent is byte for byte the same with or without the log');
+  const rec = withLog.docs.get('L1-KXDOGE15M-26OCT071415-06');
+  assert.deepStrictEqual([rec.ask10, rec.side10, rec.inBand10, rec.ask8, rec.inBand8, rec.ask6, rec.inBand6, rec.twoStageLeft], [0.91, 'yes', true, 0.92, true, 0.93, true, 600], 'the order record carries the three looks and the earliest in band');
+  assert.strictEqual(without.docs.get('L1-KXDOGE15M-26OCT071415-06').twoStageLeft, undefined, 'no candles, nothing logged, the order is as it was');
+};
+gates.TS3 = async () => {
+  // A 10 minute order (XRP) has no 8 or 6 minute candle yet: only the 10 minute look is written.
+  const closeSec = (NOW + 600000) / 1000;
+  const cs = [candle(closeSec - 600, 0.89, 0.91)];
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } }, candles: cs });
+  await tick(w, { quotes: [q10('KXXRP15M', XRP10)] });
+  const rec = w.docs.get('L1-' + XRP10);
+  assert.deepStrictEqual([rec.ask10, rec.inBand10, rec.ask8, rec.inBand8, rec.inBand6, rec.twoStageLeft], [0.91, true, null, null, null, 600], 'only the look that exists is written; later looks are null, not "not in band"');
+  const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
+  assert.strictEqual((src.match(/twoStageFromCandles\(/g) || []).length, 2, 'it is defined once and called once, in logRise, after the orders: nothing that decides an order reads it');
+  assert.ok(!/keyId|pem/.test(src.slice(src.indexOf('function twoStageFromCandles'), src.indexOf('async function logRise'))), 'public candles only, no key');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
