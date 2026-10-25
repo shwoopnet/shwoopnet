@@ -6374,3 +6374,7 @@ Gold's ask shows about 2,000 to 2,500 contracts and the live size is 10 to 15; t
 - **New fields:** minStep, climb, smooth, flips, flips0, earlierCandles, askAtDecision populate on every order since 2026-10-23 17:09Z; the two-stage fields (twoStageLeft, ask10/side10/inBand10, ask8, ask6) appear from 2026-10-25 14:39Z (6 orders so far, 5 filled, 5 won, 0 lost).
 - **XRP at 1 contract:** not yet visible. The last XRP order (2026-10-25 15:35Z) is still 3 contracts and predates the owner's deploy message (16:12Z); no XRP order since.
 - Not done: dollar P&L (the export has no realised-P&L column; the owner's account line is the dollar truth).
+
+## Information: how many of the SEARCH5K rules look "profitable", against what shuffled data gives (2026-10-25; a look at the same rows, not a new try)
+
+Of the rules with enough entries in all three parts (3,750), **44** earned at least +2c a contract in discovery and in confirmation and were positive in the holdout. The same count on outcomes shuffled within each series and day (150 shuffles, same rules, same cuts): median **33**, mean 36.3, 5th to 95th percentile 17 to 64, maximum 82. So 44 is what chance alone gives; none of the 5,000 is deployable. Bitcoin-only subsets of the same rules show 65 "passes", which is the same effect (more slices, smaller groups). The registered verdict stands: `FALSIFIED` (0 rules above the family-wise null).
