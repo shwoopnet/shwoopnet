@@ -6314,3 +6314,15 @@ Predicted, and it came out as predicted: the market's own mid is the best probab
 **Top by discovery (information only):** `rv15 top quartile AND 12 to 18 UTC` +5.15c z 6.14 (confirmation +0.20c z 0.07); `rise3 bottom quartile AND quarter-hour slot 2` +4.65c z 5.32 (confirmation -3.00c); `range15 top quartile AND 12 to 18 UTC` +4.53c z 5.23 (confirmation +2.29c z 0.96); `ret15 top quartile AND 12 to 18 UTC` +4.45c z 5.02 (confirmation +3.44c z 1.43). Seven of the top ten contain the 12 to 18 UTC bucket. That bucket is also where gold, XRP and Dogecoin had no losses in 33 fills (order scan, 2026-10-25), so it is a single, simple, three-market-consistent observation; it is not a SEARCH5K result (the bucket alone did not clear the null). **No claim is registered from it here.** Implied volatility, funding, cross-asset moves and perpetual volume produced no rule that survived.
 
 Count: 5,000 tries added, about 10,260. Code `src/scalper/search5k.py`, tests `tests/test_search5k.py`, result `data/search5k_result.txt`.
+
+## Pre-registration: RT1, take the 99c and come back at 92c (written 2026-10-25 before any result; 2 tries, running count about 10,262)
+
+**Idea (owner's).** Enter the L1 favourite, sell it the moment it touches 99c, and if it later dips back to 92c buy it again and sell at 99c again: scalp the same contract repeatedly instead of holding to settlement.
+
+**Rule A (take 99).** Entries are the L1 entries (favourite ask 0.88 to 0.97 at 6 minutes left) on gold, XRP, Dogecoin (the paying series; Bitcoin and Ethereum shown for information). After the entry, the first later candle in which the bought side's bid high reaches 0.99 triggers a sell at 0.99 (taker fee 7%·0.99·0.01). Otherwise hold to settlement. Compared with holding every entry, on the same entries.
+
+**Rule B (re-entry).** After rule A sold, the first later candle in which the same side's ask low is at 0.92 or lower triggers a buy at 0.92 (fee included); then sell at 0.99 on the first later candle with bid high 0.99, else hold to settlement.
+
+**Fill assumption (flattering, stated).** A candle touch is not a fill: the bid high or ask low prints only if someone traded there. Every number here is an upper bound; a rule that does not win on touches cannot win on fills.
+
+**Prediction.** A earns about 1c per entry LESS than holding: it gives up 1c on every winner (the 99c exit vs the 100c settlement, plus a second fee) and the reversals it saves after a 99c touch are almost nonexistent. B fires on under 3% of entries and loses. **Kill.** A: `FALSIFIED` if its net per contract minus hold's is 0 or below. B: `FALSIFIED` if its net is 0 or below or it has under 100 re-entries (`NOT_ENOUGH_DATA` then). Verdict words only. Run once.
