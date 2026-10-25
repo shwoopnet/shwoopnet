@@ -26,6 +26,17 @@ gates.M3 = () => {
   assert.ok(/\.kal-tools-body\{ position:fixed; left:12px; right:12px;/.test(css), 'the Tools menu is a full-width sheet on a phone');
 };
 
+// M4: the small tap targets found by measuring the phone layout (Oct 25, 2026). Consequence: a thumb can hit the trade list's page arrows, the Running pill, the legal line, the contact email and the Layout menu's tick boxes, and the Bot header's buttons sit on one row under the status.
+gates.M4 = () => {
+  const m = /@media screen and \(max-width:700px\)\{\s*\.kal-link\{([^}]*)\}([\s\S]*?)\n  \}/.exec(css);
+  assert.ok(m, 'a phone block for tap targets exists');
+  assert.ok(/min-width:40px/.test(m[1]) && /min-height:40px/.test(m[1]), 'the page arrows are 40px');
+  const all = m[0];
+  assert.ok(/#kalL1Pill\{ min-height:40px/.test(all) && /\.site-footer summary\{ padding:12px 8px; \}/.test(all) && /\.front-foot a\{ display:inline-block; padding:12px 0; \}/.test(all), 'the Running pill, the legal line and the contact email are 40px or more');
+  assert.ok(/\.kal-layout-body label\{[^}]*min-height:40px/.test(all) && /input\[type="checkbox"\]\{ width:22px; height:22px/.test(all), 'the Layout menu rows are 40px with a 22px tick box');
+  assert.ok(/\.trades-header-right \.kal-status\{ flex:1 0 100%; \}/.test(all), 'the status takes its own line, so Privacy, Tools, Layout and the bell fit on one');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
