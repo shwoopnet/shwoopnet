@@ -2948,7 +2948,7 @@
   function renderKalshiNotifications(){
     var list = document.getElementById('kalNotifList'), badge = document.getElementById('kalNotifBadge'), bannerEl = document.getElementById('kalAlert');
     if(!list || !badge || !bannerEl){ return; }
-    if(!kalshiOrdersLoaded){ list.innerHTML = '<div class="kal-notif-empty">Nothing loaded yet. Open the Bot page once and it fills in.</div>'; return; }
+    if(!kalshiOrdersLoaded){ list.innerHTML = '<div class="kal-notif-empty">Loading what the bot did...</div>'; return; }
     var now = Date.now(), lastRead = kalshiNotifLoadRead();
     var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var items = kalshiNotifFeed(kalshiLiveEvents, orders, now, kalshiMoney), n = kalshiNotifUnread(items, lastRead);
@@ -3241,36 +3241,50 @@ kalshiStatusTick();
 
   // There is no switch for the exit (fixed at 25c, always selling) or the pool rule (always after every win): both live in the server code, on purpose (Oct 12, 2026).
 
-  function startKalshiBot(){
-    stopKalshiBot();
+  // The notification bell fills from the same listeners as the Bot page, but they now run for the admin from sign-in on (the owner, Oct 25, 2026: "constantly filling up, regardless of whether I have the bot panel open"), not only while the Bot page is showing. The timers, the account read and the heartbeat strip stay Bot page only.
+  var kalshiFeedOn = false;
+  function kalshiFeedRender(){
+    if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiBot(); } else { renderKalshiNotifications(); }
+  }
+  function startKalshiFeed(){
+    if(kalshiFeedOn){ return; }
     var api = window.__shwoopAPI;
     if(!api || !api.watchKalshiBot || !currentUserIsAdmin){ return; }
+    kalshiFeedOn = true;
     kalshiBotUnsub = api.watchKalshiBot({
-      control: function(c){ kalshiBotState.control = c || {}; renderKalshiBot(); },
-      error: function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; renderKalshiBot(); }
+      control: function(c){ kalshiBotState.control = c || {}; kalshiFeedRender(); },
+      error: function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; kalshiFeedRender(); }
     });
-    if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; renderKalshiBot(); }, function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; renderKalshiBot(); }); }
-    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } renderKalshiL1(); renderKalshiBot(); }); }
-    if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; renderKalshiBot(); }); }
-    // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
-    kalshiAcctRefresh();
-    kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
-    kalshiStatusTimer = setInterval(function(){ if(!document.hidden){ kalshiStatusTick(); } }, 1000);
-    kalshiEcgStart();
+    if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; kalshiFeedRender(); }, function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; kalshiFeedRender(); }); }
+    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiL1(); } kalshiFeedRender(); }); }
+    if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; kalshiFeedRender(); }); }
   }
-  function stopKalshiBot(){
+  function stopKalshiFeed(){
+    kalshiFeedOn = false;
     kalshiBotState.control = null; kalshiOrdersLoaded = false; kalshiSyncError = '';
     if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }
     if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
+  }
+  function startKalshiBot(){
+    stopKalshiBot();
+    startKalshiFeed();
+    // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
+    kalshiAcctRefresh();
+    kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
+    kalshiStatusTimer = setInterval(function(){ if(!document.hidden){ kalshiStatusTick(); } }, 1000);
+    kalshiEcgStart();
+    renderKalshiBot();
+  }
+  function stopKalshiBot(){
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
     if(kalshiStatusTimer){ clearInterval(kalshiStatusTimer); kalshiStatusTimer = null; }
     kalshiEcgStop();
     kalshiBeats = []; kalshiReads = [];
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
-  setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ renderKalshiBot(); } }, 15000);
+  setInterval(function(){ if(kalshiBotUnsub && !document.hidden){ kalshiFeedRender(); } }, 15000);
 
   // Flatten all + halt asks twice: the first click only asks, the confirm click is the only one that sends. The server stops the bot before it sells.
   (function(){
@@ -3791,6 +3805,7 @@ kalshiStatusTick();
     // the journal field from anyone else.
     var kalNav = document.querySelector('.nav-item[data-page="kalshi"]');
     if(kalNav) kalNav.hidden = !currentUserIsAdmin;
+    if(currentUserIsAdmin){ startKalshiFeed(); } else { stopKalshiFeed(); }
     var kalBell = document.getElementById('kalNotif');
     if(kalBell) kalBell.hidden = !currentUserIsAdmin;     // the bell reports only the bot, which only the admin has
     var landKal = document.getElementById('landingKalshiBtn');

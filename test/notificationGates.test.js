@@ -102,6 +102,14 @@ gates.N5 = () => {
   assert.ok(/shwoopnet:notifRead/.test(code) && /localStorage/.test(code), 'what has been read is kept in this browser only');
   assert.ok(/renderKalshiNotifications\(\);\n    kalshiSoundCheck\(\);/.test(html), 'it redraws with every bot update, so Privacy view masks it too');
 };
+// The bell fills on every page (the owner, Oct 25, 2026: "constantly filling up, regardless of whether I have the bot panel open"): the listeners start for the admin from sign-in, not when the Bot page is shown.
+gates.N6 = () => {
+  const admin = html.slice(html.indexOf('function applyAdminUI'), html.indexOf('function applyAdminUI') + 900);
+  assert.ok(/if\(currentUserIsAdmin\)\{ startKalshiFeed\(\); \} else \{ stopKalshiFeed\(\); \}/.test(admin), 'the feed starts with the admin account and stops on sign-out');
+  assert.ok(/function kalshiOnShow\(\)\{ startKalshiBot\(\); startKalshiPoll\(\); \}/.test(html) && !/function stopKalshiBot\(\)\{[^}]*kalshiLiveUnsub/.test(html), 'leaving the Bot page no longer stops the listeners');
+  assert.ok(/function kalshiFeedRender\(\)\{[\s\S]*?renderKalshiNotifications\(\)/.test(html), 'with the Bot page hidden an update still redraws the bell and the banner');
+  assert.ok(!/Open the Bot page once/.test(html), 'no more asking the owner to open the Bot page');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
