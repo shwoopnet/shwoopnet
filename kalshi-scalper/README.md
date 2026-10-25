@@ -6326,3 +6326,17 @@ Count: 5,000 tries added, about 10,260. Code `src/scalper/search5k.py`, tests `t
 **Fill assumption (flattering, stated).** A candle touch is not a fill: the bid high or ask low prints only if someone traded there. Every number here is an upper bound; a rule that does not win on touches cannot win on fills.
 
 **Prediction.** A earns about 1c per entry LESS than holding: it gives up 1c on every winner (the 99c exit vs the 100c settlement, plus a second fee) and the reversals it saves after a 99c touch are almost nonexistent. B fires on under 3% of entries and loses. **Kill.** A: `FALSIFIED` if its net per contract minus hold's is 0 or below. B: `FALSIFIED` if its net is 0 or below or it has under 100 re-entries (`NOT_ENOUGH_DATA` then). Verdict words only. Run once.
+
+## Result: RT1, take 99c and re-enter at 92c (run once on 2026-10-25): both FALSIFIED
+
+Candle touches are an upper bound on fills (stated before the run). L1 entries, hold to settlement against rule A, per contract:
+
+| Series | Entries | Hold | A (sell at 99c) | Sold early | B re-entries | B net | B losses |
+|---|---|---|---|---|---|---|---|
+| Gold | 1,613 | +1.60c | +0.78c | 94% | 30 | -0.11c | 2 |
+| XRP | 2,479 | +1.52c | +0.91c | 95% | 52 | -10.71c | 9 |
+| Dogecoin | 2,338 | +1.58c | +1.24c | 96% | 69 | -16.48c | 16 |
+| Bitcoin (info) | 2,247 | +0.37c | +0.39c | 94% | 75 | -23.91c | 23 |
+| Ethereum (info) | 2,322 | +0.54c | +0.30c | 95% | 103 | -10.87c | 18 |
+
+**A:** selling at 99c earns 0.3c to 0.8c LESS than holding on gold, XRP and Dogecoin, even with every touch counted as a fill (it gives up the last 1c on the 95% that settle at 100 and the saved reversals are too rare to repay it). `FALSIFIED`. **B:** on gold, XRP and Dogecoin together 151 re-entries average about -11c; a favourite that has touched 99c and then falls back to 92c is usually reversing, so buying the dip is buying the losers (XRP 9 of 52, Dogecoin 16 of 69 lost). `FALSIFIED`. As predicted. Count: 2 tries, about 10,262. Nothing to build.
