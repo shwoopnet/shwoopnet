@@ -6366,3 +6366,11 @@ Only **60 events** over the whole history (the five series, 79 days): the rule n
 ## Information: size cap and depth (2026-10-25; no try)
 
 Gold's ask shows about 2,000 to 2,500 contracts and the live size is 10 to 15; the rule of thumb (1% of median two-minute volume) is about 195 for gold, 106 for Ethereum, 48 for XRP, 23 for Dogecoin and 18 for natural gas. The loss rules (5.5% a window, 12% a day) bind well before gold's depth does. Owner asked (2026-10-25, "2") for an early warning: a log-only request went to the build session for `depthAtLimit` (contracts resting at or below the limit on the side bought) and `shareOfDepth` (count over that depth) on every order, to be confirmed with the owner there; nothing live changes. Planned read: gold's shareOfDepth against fill slippage on 2026-11-12 and 2026-11-17.
+
+## Information: live export check, 2026-10-25 18:10Z (829 orders; counts only, no dollar figures)
+
+- **Owner's observation checked:** since 2026-10-25 00:00Z, 26 fills (XRP 7, Dogecoin 19), **0 losses**. Since 2026-10-23 15:15Z: XRP 25 fills, 4 losses (none since 2026-10-24 07:05Z); Dogecoin 30 fills, 1 loss; gold 4 fills, 0 losses (gold has placed no order since 2026-10-23 20:54Z; Saturday and Sunday are closed for commodities, so this is the weekend, not a fault).
+- **Smooth-only gate (checklist from 2026-10-23):** passed. No Bitcoin order at all after 18:30Z on 10-23; one Ethereum order since (2026-10-24 11:24Z, 6m lead, smooth true, climb 0.6725, minStep -0.001, earlierCandles 9), filled, won. Smooth fills so far against the kill rules: Bitcoin 0, Ethereum 1, 0 losses (rules need 40 and 100).
+- **New fields:** minStep, climb, smooth, flips, flips0, earlierCandles, askAtDecision populate on every order since 2026-10-23 17:09Z; the two-stage fields (twoStageLeft, ask10/side10/inBand10, ask8, ask6) appear from 2026-10-25 14:39Z (6 orders so far, 5 filled, 5 won, 0 lost).
+- **XRP at 1 contract:** not yet visible. The last XRP order (2026-10-25 15:35Z) is still 3 contracts and predates the owner's deploy message (16:12Z); no XRP order since.
+- Not done: dollar P&L (the export has no realised-P&L column; the owner's account line is the dollar truth).
