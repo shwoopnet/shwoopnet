@@ -6403,3 +6403,22 @@ Of the rules with enough entries in all three parts (3,750), **44** earned at le
 | BK2 streak continue (4 in a row), Bitcoin | 830 | -1.23c | -0.69 | -3.38 / +0.91 | -1.56c | 47.7% vs 0.473 |
 
 The predictions held: the win rate equals the price paid to within a point in every case (BK1's laggard market is priced exactly like its siblings imply), so the cost is the fee. The fade loses most because the opening ask is a little above 50c on the side it buys. Count: 4 tries, about 10,267. Nothing to build.
+
+## Pre-registration: FACT1, a factory of 4,230 complete strategies for Bitcoin and Ethereum with a Reality Check (written 2026-10-25 before any strategy was simulated; 4,230 tries, running count about 14,500)
+
+**Owner's instruction.** Many full strategies for Bitcoin and Ethereum, replace the struggling ones, deploy what has an edge. A strategy is an **entry** (when, which side, which price band), an **exit** (hold, take profit, stop, or a time exit) and an optional **time-of-day gate**. Unlike SEARCH5K (which only filtered L1's favourite-at-6-minutes entries), this varies the entry time, the side and the exit.
+
+**The grid (per asset, Bitcoin and Ethereum separately).**
+- *Entry time (left):* 13, 11, 9, 7, 5, 4 and 3 minutes.
+- *Side rule (9):* FAV50 (favourite's ask 0.50 to 0.70), FAV70 (0.70 to 0.88), FAV88 (0.88 to 0.97, L1's band); UND5 (underdog ask 0.03 to 0.12), UND20 (0.12 to 0.30); SPOT_UP-lo and SPOT_UP-hi (buy the side the perpetual's last 5 minutes moved toward, at least 3 basis points, ask 0.30 to 0.60 or 0.60 to 0.88); FADE-lo and FADE-hi (the opposite side, same bands).
+- *Exit (up to 7):* hold to settlement; take profit when the closing bid reaches the entry ask +0.10, or +0.20; stop when it falls to the entry ask -0.10, or -0.20; sell at the close-of-candle bid at 4 minutes left (only if entered at 5 minutes or earlier) or at 2 minutes left. Exits read later closing quotes only, so a gap through a stop fills at the gapped price. A sell pays the 7%·p·(1-p) fee; settlement pays none.
+- *Gate (5):* all hours; 00-06, 06-12, 12-18 or 18-24 UTC.
+- *Valid combinations:* 47 entry-and-exit pairs x 9 side rules x 5 gates = 2,115 per asset, **4,230 in all**. One contract per entry, one entry per market.
+
+**Data.** The same 79 days of Bitcoin and Ethereum 15 minute candles (closing bid and ask), Deribit perpetual bars for the spot-direction rules (bars usable only from their close, as in IV1 and SEARCH5K).
+
+**Judging (the Reality Check, White 2000).** Daily profit and loss per strategy (one contract per entry, zero on days without entries). Discovery = first 60% of days. For each strategy, t = mean daily P&L over its standard error. The null is built by resampling discovery days with replacement 1,000 times, jointly for all strategies of one asset, centred on each strategy's own mean; the family-wise critical value is the 95th percentile of the maximum t over all strategies. **A strategy is a survivor only if** (1) its discovery t is above that critical value, (2) it has at least 150 discovery entries, (3) confirmation (next 20% of days) mean net per entry above 0 with t of 1.64 or more, (4) positive with fees x1.2 in both parts, (5) holdout (last 20%) mean above 0 with t of 1.0 or more. One run; a second is refused.
+
+**Prediction.** No survivor on either asset (prior 10% that one asset has one). Reason: the price is the probability on every band, entry time and side, and every exit variant only changes the payoff shape, not the expected value; the fee (about 1.7c at 50c, 0.5c at 90c) is paid on every buy and on every sell. The largest discovery t among 2,115 will look good (about 3.5 to 4.5) and fall inside the null.
+
+**What happens to a survivor.** It is a forward claim, not a deployment: it goes to the build session as a paper-trade log (1 contract, logging only) for 4 weeks, with kill rules registered before the first logged trade; live money only on the owner's direct word in the build session.
