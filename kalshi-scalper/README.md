@@ -6344,3 +6344,17 @@ Candle touches are an upper bound on fills (stated before the run). L1 entries, 
 ## Information: what the live exit sells did against holding (2026-10-25, from the 821-order export; not a try, nothing counted)
 
 23 orders marked sold (6 more have no settled result in my history) with the market's result from the public candles. Realised **-0.748** a contract; the same entries held to settlement **-0.690**, so the sells cost about 5.8c a contract overall. **5 of 23 would have won if held** (+0.06 to +0.10 each instead of about -0.4 to -0.8 realised); the other 18 lost either way, and selling saved about 0.17 on each of those. Since the 25c line (Oct 12): 21 sells, realised -0.767 against held -0.717, 4 of 21 would have won. Neutral to slightly negative, which is what the 40 day backtest said (-0.03c to +0.13c). A tighter line sells more winners at a bid near 0.2 to 0.5; a lower line sells fewer and saves nothing because these markets fall in jumps. No exit variant is registered from this.
+
+## Pre-registration: RT2, reverse when a 99c favourite drops to 92c (written 2026-10-25 before any result; 1 try pooled, running count about 10,263)
+
+**Idea (owner's).** RT1 found that buying the favourite back at 92c after it touched 99c lost about 11c a contract: the dip is usually a real reversal. The mirror image: buy the OTHER side when that happens.
+
+**Event.** An L1 entry (favourite ask 0.88 to 0.97 at 6 minutes left). After the entry, the favourite's bid high reaches 0.99 in some candle (a touch). Then, in a LATER candle i, the favourite's ask low is 0.92 or less AND its closing bid is 0.92 or less (the dip is still there when the candle ends; this removes the "touch is not a fill" flattery). One event per market (the first).
+
+**Trade.** At the close of candle i, buy the opposite side at its closing ask (1 minus the favourite's closing bid), at most 0.20 (a dearer opposite side is no trade). Hold to settlement. Taker fee 7%·p·(1-p). One order per market.
+
+**Series.** Gold, XRP, Dogecoin, Bitcoin and Ethereum pooled (the candle history for the five); per series shown for information. 1 try pooled.
+
+**Bar.** At least 200 events; mean net per contract above 0 with day-clustered z of 2.1 or more; positive in both halves of the days; positive with fees x1.2. Fewer than 200 events is `NOT_ENOUGH_DATA`. Verdict words only.
+
+**Prediction.** The mirror is only as good as the spread allows: the opposite side's ask is 1c to 2c above the favourite bid, and its loss rate must beat that. Expected gross about +8c, net after spread and fees about +2c to +4c with z about 1.5 on roughly 250 events: `NOT_ENOUGH_DATA` or `FALSIFIED`. Prior for a pass: 15%. If it does pass, it is a bet that costs the opposite price (8c to 20c) to win 80c to 92c: a lottery-ticket shape, which is the shape the owner asked for. Run once.
