@@ -6217,3 +6217,18 @@ Registered forward claims (fills placed after 2026-10-25T14:00Z, read on or afte
 - FLOOR1: XRP fills at a price under 0.905. Prediction: loss rate 25% or more. Kill: FALSIFIED if 12 or more such fills have a loss rate of 7% or less; NOT_YET_FALSIFIED if 12 or more have a loss rate above 10% and a lower net per contract than XRP fills at 0.905 or above; otherwise NOT_ENOUGH_DATA. Counts by price paid, whatever the order size.
 - THIN1: all series, fills where askSize is under 20. Prediction: loss rate 10% or more. Kill: FALSIFIED if 60 or more such fills have a loss rate of 7% or less; NOT_YET_FALSIFIED if 60 or more have a loss rate above 9%; otherwise NOT_ENOUGH_DATA.
 Neither is a trading rule. Verdict words decide nothing.
+
+### Information look, 2026-10-25: buying the favourite near 60% at 10 minutes left (decides nothing; tries about 5,200)
+
+Asked by the owner. Same hold-to-settlement rule as L1, all 18 series, 93,309 settled markets, day-clustered z, taker fee included:
+
+| Left | Price band | Markets | Win | Net per contract | z |
+|---|---|---|---|---|---|
+| 10 min | 0.55 to 0.65 | 24,798 | 59.4% | -2.28c | -6.3 |
+| 10 min | 0.60 to 0.70 | 24,699 | 64.0% | -2.53c | -7.7 |
+| 10 min | 0.70 to 0.80 | 23,891 | 74.6% | -1.61c | -4.9 |
+| 10 min | 0.80 to 0.88 | 17,535 | 83.5% | -1.24c | -4.1 |
+| 8 min | 0.55 to 0.65 | 18,817 | 59.6% | -2.17c | -5.3 |
+| 7 min | 0.55 to 0.65 | 16,300 | 59.5% | -2.20c | -5.5 |
+
+At 10 minutes and 0.55 to 0.65 no series is positive beyond noise (best: copper +0.40c z +0.3, platinum +0.14c z +0.1; worst: NEAR -4.04c z -3.8). The win rate equals the price (59.4% against 0.600), so the cost is the fee (about 1.7c at 60%) plus a small remainder. A price-and-time rule cannot win here; only information the price does not already contain could, and LAG2 (spot lead) was the one such test, falsified on 238 trades.
