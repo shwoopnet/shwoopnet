@@ -32,6 +32,18 @@ gates.BG1 = () => {
   assert.ok(/color:rgba\(255,255,255,\.0[1-6]\d*\)/.test(rule), 'very faint, white at 6 percent or less');
   assert.ok(/\[data-reduce-motion="true"\] \.bg-slogan\{ display:none; \}/.test(css), 'off with the Limit graphics setting');
 };
+
+// BG2: the same slogan wallpaper sits behind the sign-in screen (the owner, Oct 25, 2026), as faint as the one behind the pages, inside the gate so it scrolls with nothing and covers no control.
+gates.BG2 = () => {
+  const gate = html.slice(html.indexOf('<div class="auth-gate" id="authGate">'), html.indexOf('</div>', html.indexOf('class="gate-slogan"')) + 6);
+  assert.ok(/<div class="auth-gate" id="authGate">\s*<div class="gate-slogan" aria-hidden="true">/.test(gate), 'the first thing inside the gate, hidden from screen readers');
+  const inner = /<div class="gate-slogan" aria-hidden="true">([\s\S]*?)<\/div>/.exec(html)[1];
+  assert.ok(/^(\s*<p>(Trade less\. Live more\. ){2}Trade less\. Live more\.<\/p>\s*)+$/.test(inner) && !/\d/.test(inner), 'it says only the slogan, no figure');
+  const rule = /\.gate-slogan\{([^}]*)\}/.exec(css)[1], pageRule = /\.bg-slogan\{([^}]*)\}/.exec(css)[1];
+  assert.strictEqual(rule, pageRule, 'exactly the same look as the one behind the pages: same size, tilt and faintness');
+  assert.ok(/pointer-events:none/.test(rule) && /z-index:-1/.test(rule), 'it never catches a click and sits behind the sign-in content');
+  assert.ok(/\[data-reduce-motion="true"\] \.gate-slogan\{ display:none; \}/.test(css), 'and it goes with the reduced-motion setting too');
+};
 gates.P1 = () => {
   // Titan One is the wordmark and its ghost only (the owner, Oct 21, 2026): headings and market names are in the plain font too, with no bubble shadow.
   for (const sel of ['.trades-title', '.kal-card-title', '.brief-section-title', '.kal-tools-h', '.settings-section-title']) {
@@ -41,7 +53,8 @@ gates.P1 = () => {
   const users = css.split('\n').filter((l) => /Titan One/.test(l) && !/^\s*(\/\*|\*)/.test(l) && !/@font-face/.test(l));   // a @font-face rule loads the font, it does not use it
   // The signed-out front page's slogan (.front-h1) is the one deliberate exception, added at the owner's request (Oct 23, 2026: "that's a sick login page"); it is the brand's slogan lettering, not a heading or a number.
   // The slogan behind every signed-in page (.bg-slogan) is the second deliberate exception (the owner, Oct 23, 2026: "3 looks sick"): faint wallpaper lettering, never a heading or a number.
-  assert.ok(users.length <= 3 && users.every((l) => /\.brand-name|font-size:min\(18vw|\.front-h1|\.bg-slogan/.test(l) || /bg-ghost/.test(css)), 'only the wordmark, its ghost and the front page slogan use Titan One: ' + users.map((l) => l.trim().slice(0, 50)).join(' | '));
+  // The same wallpaper behind the sign-in screen (.gate-slogan) is the third (the owner, Oct 25, 2026): the identical faint lettering, checked equal to .bg-slogan in BG2.
+  assert.ok(users.length <= 4 && users.every((l) => /\.brand-name|font-size:min\(18vw|\.front-h1|\.bg-slogan|\.gate-slogan/.test(l) || /bg-ghost/.test(css)), 'only the wordmark, its ghost and the front page slogan use Titan One: ' + users.map((l) => l.trim().slice(0, 50)).join(' | '));
   for (const sel of ['.kal-tile b', '.kal-bub', '.kal-acct-total']) {
     const m = new RegExp('(^|\\n)\\s*' + sel.replace(/[.]/g, '\\.') + '\\{([^}]*)\\}').exec(css);
     assert.ok(m && !/Titan One/.test(m[2]) && /Public Sans/.test(m[2]), sel + ' (a number) is in the plain font');
