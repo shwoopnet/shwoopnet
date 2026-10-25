@@ -68,7 +68,7 @@ gates.B3 = () => {
 gates.B4 = () => {
   const page = /<main class="page" id="page-settings"[\s\S]*?<\/main>/.exec(code)[0];
   const titles = [...page.matchAll(/<div class="settings-row-title">([^<]*)<\/div>/g)].map((m) => m[1].trim());
-  assert.deepStrictEqual(titles, ['Account', 'Default landing page', 'Clock format', 'Reset preferences', 'Phone alerts', 'Sound alerts', 'Privacy view', 'Changelog']);
+  assert.deepStrictEqual(titles, ['Account', 'Default landing page', 'Clock format', 'Reset preferences', 'Phone alerts', 'Sound alerts', 'Privacy view', 'Hide logo', 'Changelog']);
   // The changelog (the owner, Oct 25, 2026: "i also dont see ... the changelog in the settings page"): static text, newest first, every line naming its pull request. Each merged change adds one line.
   assert.ok(/<div class="changelog-day">Oct 25<\/div>/.test(page) && (page.match(/<li>[^<]*\(#\d+(, #\d+)*\)<\/li>/g) || []).length >= 20, 'a dated changelog of plain lines, each with its pull request number');
   const landing = [...page.matchAll(/<button class="tf-btn" data-value="(\w+)"( id="landingKalshiBtn")?/g)].map((m) => m[1]);
@@ -124,6 +124,14 @@ gates.B8 = () => {
   assert.deepStrictEqual(watchlist.map((w) => [w.sym, w.price]), [['PLTR', 24.5], ['COIN', 190]], 'priced symbols are added or updated, an unpriced one is skipped');
   f.ensure('PLTR', 1, 1);
   assert.strictEqual(watchlist[0].price, 24.5, 'ensuring a symbol that is already tracked never overwrites its price');
+};
+
+// Hide logo (the owner, Oct 25, 2026, to present the site as project work): a switch in Settings that hides the signed-in header logo, kept in this browser only and restored before first paint.
+gates.B8 = () => {
+  assert.ok(/html\[data-hidelogo="on"\] #brandHomeBtn\{ visibility:hidden; \}/.test(code), 'hidden but keeps its space, so the header does not move');
+  assert.ok(/getItem\('shwoopnet:hideLogo'\) === 'on'[\s\S]{0,120}data-hidelogo/.test(code), 'restored by the head script before anything is drawn');
+  const sw = code.slice(code.indexOf('function hideLogoSet'), code.indexOf('function hideLogoSet') + 500);
+  assert.ok(/localStorage\.setItem\('shwoopnet:hideLogo'/.test(sw) && !/setDoc|updateDoc|fetch\(/.test(sw), 'kept in this browser, never the account');
 };
 
 (async () => {
