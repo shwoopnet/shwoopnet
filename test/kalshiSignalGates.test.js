@@ -93,10 +93,13 @@ gates.G21 = () => {
   assert.ok(/var haltUnset = kalshiBotState\.control !== null && kalshiBotState\.control\.halt === undefined;/.test(html) && /if\(haltUnset\)\{ el\.innerHTML \+= '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted/.test(html), 'an unsaved halt setting must not read as "not halted"');
   assert.ok(/if\(halted && !window\.confirm\(/.test(html), 'resuming entries must ask first');
   assert.ok(/function kalshiOnHide\(\)\{ stopKalshiPoll\(\); stopKalshiBot\(\); \}/.test(html), 'leaving the page must stop listening');
+  const feed = block(/function startKalshiFeed\(\)\{([\s\S]*?)\n  \}\n  function stopKalshiFeed/, html);
+  assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(feed + ')'), 'only an admin may subscribe');
   const start = block(/function startKalshiBot\(\)\{([\s\S]*?)\n  \}\n  function stopKalshiBot/, html);
-  assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(start + ')'), 'only an admin may subscribe');
+  const stopFeed = block(/function stopKalshiFeed\(\)\{([\s\S]*?)\n  \}\n/, html);
   const stop = block(/function stopKalshiBot\(\)\{([\s\S]*?)\n  \}\n/, html);
-  assert.ok(/clearInterval\(kalshiAcctTimer\)/.test(stop) && /kalshiLiveEventsUnsub\(\)/.test(stop), 'leaving the tab stops the account timer and every listener');
+  assert.ok(/kalshiLiveEventsUnsub\(\)/.test(stopFeed) && /stopKalshiFeed\(\)/.test(html.slice(html.indexOf('function applyAdminUI'), html.indexOf('function applyAdminUI') + 900)), 'signing out (a non-admin) stops every listener; the bell feed runs for the admin from sign-in, on any page');
+  assert.ok(/clearInterval\(kalshiAcctTimer\)/.test(stop), 'leaving the Bot tab stops the account timer');
   assert.ok(/setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiAcctRefresh\(\); \} \}, 600000\)/.test(start), 'the account is re-read once every 10 minutes, only while the tab is visible');
 };
 

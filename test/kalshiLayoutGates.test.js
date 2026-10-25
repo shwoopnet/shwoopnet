@@ -556,8 +556,8 @@ gates.Y36 = () => {
 gates.Y38 = () => {
   assert.ok(/var kalshiBotState = \{ control: null \};/.test(html), 'control starts as not loaded (null), not as an empty saved setting');
   assert.ok(/var haltUnset = kalshiBotState\.control !== null && kalshiBotState\.control\.halt === undefined;/.test(html), 'the never-saved warning needs a loaded document');
-  assert.ok(/function stopKalshiBot\(\)\{\n    kalshiBotState\.control = null; kalshiOrdersLoaded = false;/.test(html), 'leaving the tab resets it, so the next open is loading again');
-  assert.ok(/kalshiOrdersLoaded = true; renderKalshiBot\(\)/.test(html) && /<b>loading\.\.\.<\/b>/.test(html) && /Loading the bot\\'s trades\.\.\./.test(html), 'figures say loading until the orders arrive, never +$0.00');
+  assert.ok(/function stopKalshiFeed\(\)\{\n    kalshiFeedOn = false;\n    kalshiBotState\.control = null; kalshiOrdersLoaded = false;/.test(html), 'signing out resets it, so the next sign-in is loading again');
+  assert.ok(/kalshiOrdersLoaded = true; kalshiFeedRender\(\)/.test(html) && /<b>loading\.\.\.<\/b>/.test(html) && /Loading the bot\\'s trades\.\.\./.test(html), 'figures say loading until the orders arrive, never +$0.00');
   assert.ok(/error: function\(err\)\{ kalshiSyncError/.test(html) && /Reload the page; if it keeps happening/.test(html), 'a listener that fails is shown, not left as an endless loading state');
 };
 
