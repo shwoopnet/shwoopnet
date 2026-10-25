@@ -70,7 +70,7 @@ const CAPPED_SERIES = ["KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
 // the ladder. This is a hard list in code like the lists above: no stored value and no callable can change it. It is leverage on an edge that has to persist, not a new edge, so nothing else moves: the 12% loss
 // stop, the 5.5% window limit, one crypto order per window, the 25c exit and the profit add-on rule (still never used on these markets) are all unchanged. Review point: the owner's 2026-11-17 export; if the
 // Dogecoin or XRP loss rate is above 7% there, step back to 1 or 2 by editing this list.
-const FIXED_CONTRACTS = { KXXRP15M: 3, KXDOGE15M: 3, KXNATGAS15M: 2 };
+const FIXED_CONTRACTS = { KXXRP15M: 1, KXDOGE15M: 3, KXNATGAS15M: 2 };   // XRP back to 1 on Oct 25, 2026 (the owner, on the research session's read): 24 fills since Oct 23, 4 losses (16.7% against 7% break-even), -$4.87, all four at 0.903 or lower.
 // SERIES ORDER (2026-10-23, the owner: "reorder so XRP comes before Bitcoin and Dogecoin before Ethereum, gold stays first"). Markets are tried in this order within a tick, and only ONE capped crypto order is placed per 15 minute window, so the order decides which
 // crypto market gets the window when several qualify at once. XRP and Dogecoin trade 3 contracts (FIXED_CONTRACTS) and Bitcoin and Ethereum one, so a 1 contract order no longer takes the slot from a 3 contract one in the same tick. The research session raised it: Bitcoin and XRP are both
 // looked at about 10 minutes before the close, Ethereum and Dogecoin about 6, so the pairs that tie within a tick are exactly these. Nothing else moves: sizes, stops, window limit, entry times and the one crypto order per window rule are unchanged.
