@@ -2591,13 +2591,24 @@
   // the line simply starts where the orders do. Read only: the buttons change what is drawn, nothing else.
   var KAL_PNL_RANGES = [{ key: '1D', label: 'Today' }, { key: '1W', label: '1W' }, { key: '1M', label: '1M' }, { key: '3M', label: '3M' }, { key: 'YTD', label: 'YTD' }, { key: '1Y', label: '1Y' }, { key: 'ALL', label: 'All' }];
   var kalshiPnlRange = '1M';
+  // The UTC moment a Central calendar day begins (00:00 Central), exact in summer (05:00 UTC) and in winter (06:00 UTC). The day the page calls "today" everywhere else (kalDayKey) is the Central date, so a range called Today must start at
+  // the same instant or it drops the first hour of the day (the owner, Oct 25, 2026: the Account card's Today and the result line's Today did not match). Two passes settle the offset even on a daylight saving change day.
+  function kalshiCtMidnight(y, m, d){
+    var guess = Date.UTC(y, m - 1, d, 0, 0, 0), t = guess;
+    for(var i = 0; i < 2; i++){
+      var parts = new Intl.DateTimeFormat('en-US', { timeZone: KAL_TZ, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(t)), o = {};
+      parts.forEach(function(x){ o[x.type] = Number(x.value); });
+      t = guess - (Date.UTC(o.year, o.month - 1, o.day, o.hour, o.minute) - Math.floor(t / 60000) * 60000);
+    }
+    return t;
+  }
   function kalshiPnlRangeStart(key, nowMs){
     var day = 86400000, p = kalDayKey(nowMs).split('-').map(Number);
-    if(key === '1D'){ return Date.UTC(p[0], p[1] - 1, p[2], 6, 0, 0); }   // the Central day starts at 05:00 or 06:00 UTC; 06:00 is exact in winter and an hour late in summer, so the line starts at the first trade of the day either way
+    if(key === '1D'){ return kalshiCtMidnight(p[0], p[1], p[2]); }
     if(key === '1W'){ return nowMs - 7 * day; }
     if(key === '1M'){ return nowMs - 30 * day; }
     if(key === '3M'){ return nowMs - 90 * day; }
-    if(key === 'YTD'){ return Date.UTC(p[0], 0, 1, 6, 0, 0); }
+    if(key === 'YTD'){ return kalshiCtMidnight(p[0], 1, 1); }
     if(key === '1Y'){ return nowMs - 365 * day; }
     return 0;
   }
