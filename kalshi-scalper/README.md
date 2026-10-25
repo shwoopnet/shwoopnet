@@ -6392,3 +6392,14 @@ Of the rules with enough entries in all three parts (3,750), **44** earned at le
 **Predictions (stated now).** BK1: `FALSIFIED`, win rate close to the price paid; the siblings are priced by the same makers at the same instant, so there is no lag to catch (win rate about 1 point below the price paid, net about -2c). BK2: `FALSIFIED` both ways; windows are independent coin flips and the opening price is 50c. Prior of any pass: 8%.
 
 **Not testable with the data held, and what would unlock it.** (3) A market-maker strategy that earns the spread with resting orders: needs queue position and the full book history (the recorder holds only the last 150 seconds). (4) A news and event strategy (CPI, FOMC, large prints): needs a timestamped event calendar and tick-level spot; neither is held. (5) A two-leg hedge (the favourite plus the cheap underdog as insurance) is an insurance premium paid at the market price: expected value is the sum of the two legs' (negative) edges, so it needs no test to know it lowers variance and not expectancy.
+
+## Result: BTCBOOK (run once on 2026-10-25): all four FALSIFIED
+
+| Strategy | Entries | Net per contract | z | Halves | Fee x1.2 | Win rate vs price paid |
+|---|---|---|---|---|---|---|
+| BK1 sibling catch-up, target Bitcoin | 740 | -1.45c | -1.02 | -3.38 / +0.48 | -1.68c | 78.4% vs 0.787 |
+| BK1 sibling catch-up, target Ethereum | 515 | -1.01c | -0.55 | -4.70 / +2.66 | -1.24c | 78.4% vs 0.783 |
+| BK2 streak fade (4 in a row), Bitcoin | 830 | -3.06c | -1.70 | -0.92 / -5.19 | -3.38c | 52.3% vs 0.537 |
+| BK2 streak continue (4 in a row), Bitcoin | 830 | -1.23c | -0.69 | -3.38 / +0.91 | -1.56c | 47.7% vs 0.473 |
+
+The predictions held: the win rate equals the price paid to within a point in every case (BK1's laggard market is priced exactly like its siblings imply), so the cost is the fee. The fade loses most because the opening ask is a little above 50c on the side it buys. Count: 4 tries, about 10,267. Nothing to build.
