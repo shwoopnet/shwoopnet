@@ -609,6 +609,8 @@
     background:radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%), linear-gradient(var(--ink), var(--front-g1));
   }
   .auth-gate[hidden]{ display:none; }
+  /* The sign-in screen is a fixed layer over the whole window, but the signed-in app is still laid out underneath it, so the document grew a scroll bar that scrolled nothing you could see (the owner, Oct 24, 2026: "it builds a scroll bar a lot of the time and it doesnt actually scroll anything"). While the gate is up the document itself does not scroll; the gate scrolls itself when its own content is taller than the window. */
+  html:has(#authGate:not([hidden])), html:has(#authGate:not([hidden])) body{ overflow:hidden; }
   .front{ position:relative; width:min(1160px, 100% - 40px); margin:0 auto; min-height:100%; display:flex; flex-direction:column; padding:0 0 22px; }
   .front-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; padding:28px 0 0; position:relative; z-index:6; }
   .front-brand{ display:inline-flex; flex-direction:column; align-items:flex-start; }
@@ -1869,7 +1871,7 @@
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
   // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
   function kalshiAllOrdersCsv(orders){
-    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5'];
+    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5', 'smooth', 'flips0', 'twoStageLeft', 'ask10', 'side10', 'inBand10', 'ask8', 'side8', 'inBand8', 'ask6', 'side6', 'inBand6'];
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -1877,7 +1879,7 @@
     };
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return a.ts - b.ts; }).map(function(o){
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.side, o.price, o.count, o.fillCount, o.maxCost, o.status, o.settled === true ? 'yes' : '', o.result, kalshiOrderPnl(o),
-        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5].map(cell).join(',');
+        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5, o.smooth, o.flips0, o.twoStageLeft, o.ask10, o.side10, o.inBand10, o.ask8, o.side8, o.inBand8, o.ask6, o.side6, o.inBand6].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }
@@ -2628,13 +2630,24 @@
   // the line simply starts where the orders do. Read only: the buttons change what is drawn, nothing else.
   var KAL_PNL_RANGES = [{ key: '1D', label: 'Today' }, { key: '1W', label: '1W' }, { key: '1M', label: '1M' }, { key: '3M', label: '3M' }, { key: 'YTD', label: 'YTD' }, { key: '1Y', label: '1Y' }, { key: 'ALL', label: 'All' }];
   var kalshiPnlRange = '1M';
+  // The UTC moment a Central calendar day begins (00:00 Central), exact in summer (05:00 UTC) and in winter (06:00 UTC). The day the page calls "today" everywhere else (kalDayKey) is the Central date, so a range called Today must start at
+  // the same instant or it drops the first hour of the day (the owner, Oct 25, 2026: the Account card's Today and the result line's Today did not match). Two passes settle the offset even on a daylight saving change day.
+  function kalshiCtMidnight(y, m, d){
+    var guess = Date.UTC(y, m - 1, d, 0, 0, 0), t = guess;
+    for(var i = 0; i < 2; i++){
+      var parts = new Intl.DateTimeFormat('en-US', { timeZone: KAL_TZ, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(t)), o = {};
+      parts.forEach(function(x){ o[x.type] = Number(x.value); });
+      t = guess - (Date.UTC(o.year, o.month - 1, o.day, o.hour, o.minute) - Math.floor(t / 60000) * 60000);
+    }
+    return t;
+  }
   function kalshiPnlRangeStart(key, nowMs){
     var day = 86400000, p = kalDayKey(nowMs).split('-').map(Number);
-    if(key === '1D'){ return Date.UTC(p[0], p[1] - 1, p[2], 6, 0, 0); }   // the Central day starts at 05:00 or 06:00 UTC; 06:00 is exact in winter and an hour late in summer, so the line starts at the first trade of the day either way
+    if(key === '1D'){ return kalshiCtMidnight(p[0], p[1], p[2]); }
     if(key === '1W'){ return nowMs - 7 * day; }
     if(key === '1M'){ return nowMs - 30 * day; }
     if(key === '3M'){ return nowMs - 90 * day; }
-    if(key === 'YTD'){ return Date.UTC(p[0], 0, 1, 6, 0, 0); }
+    if(key === 'YTD'){ return kalshiCtMidnight(p[0], 1, 1); }
     if(key === '1Y'){ return nowMs - 365 * day; }
     return 0;
   }
