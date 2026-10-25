@@ -128,7 +128,7 @@ gates.B8 = () => {
 
 // Hide logo (the owner, Oct 25, 2026, to present the site as project work): a switch in Settings that hides the signed-in header logo, kept in this browser only and restored before first paint.
 gates.B8 = () => {
-  assert.ok(/html\[data-hidelogo="on"\] #brandHomeBtn\{ visibility:hidden; \}/.test(code), 'hidden but keeps its space, so the header does not move');
+  assert.ok(/html\[data-hidelogo="on"\] #brandHomeBtn, html\[data-hidelogo="on"\] \.front-brand\{ visibility:hidden; \}/.test(code), 'the header logo and the sign-in screen logo are hidden but keep their space, so nothing moves');
   assert.ok(/getItem\('shwoopnet:hideLogo'\) === 'on'[\s\S]{0,120}data-hidelogo/.test(code), 'restored by the head script before anything is drawn');
   const sw = code.slice(code.indexOf('function hideLogoSet'), code.indexOf('function hideLogoSet') + 500);
   assert.ok(/localStorage\.setItem\('shwoopnet:hideLogo'/.test(sw) && !/setDoc|updateDoc|fetch\(/.test(sw), 'kept in this browser, never the account');
