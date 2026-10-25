@@ -110,6 +110,15 @@ gates.N6 = () => {
   assert.ok(/function kalshiFeedRender\(\)\{[\s\S]*?renderKalshiNotifications\(\)/.test(html), 'with the Bot page hidden an update still redraws the bell and the banner');
   assert.ok(!/Open the Bot page once/.test(html), 'no more asking the owner to open the Bot page');
 };
+// Clear (the owner, Oct 25, 2026): hides what is listed so far, in this browser only, and never the banner.
+gates.N7 = () => {
+  assert.ok(/id="kalNotifClear">Clear</.test(html), 'the panel has a Clear button beside Mark all as read');
+  assert.ok(/shwoopnet:notifCleared/.test(html) && /\.filter\(function\(x\)\{ return x\.ts > clearedAt; \}\)/.test(html), 'lines up to the click are hidden, newer ones still show');
+  const code = html.slice(html.indexOf('function kalshiNotifLoadCleared'), html.indexOf("var kalshiTradeFilter = 'bot';"));
+  assert.ok(!/fetch\(|setDoc|updateDoc|addDoc|callable/.test(code), 'clearing writes nothing to the account');
+  const render = html.slice(html.indexOf('function renderKalshiNotifications'), html.indexOf('function renderKalshiNotifications') + 2200);
+  assert.ok(/bannerEl\.hidden = !crit/.test(render) && !/clearedAt[^;]*crit/.test(render), 'the red banner does not depend on Clear');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
