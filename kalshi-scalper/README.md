@@ -6242,3 +6242,7 @@ At 10 minutes and 0.55 to 0.65 no series is positive beyond noise (best: copper 
 **Pass bar (all must hold).** On the older half of the days (discovery): net per contract of +1.0c or more and day-clustered z of 3.0 or more. On the newer half (confirmation): same sign, net above 0. The 36-try bar is z 3.0, not 2.1.
 
 **Prediction.** None passes. Expected net per contract is about -2.5c to -3c (fee about 1.75c plus half the spread), and the price at the first candle already equals the probability. **Kill.** Any cell failing the bar is `FALSIFIED`; a cell passing discovery only is `NOT_ENOUGH_DATA`; a cell passing both is `NOT_YET_FALSIFIED` and goes to a forward read on new days. Nothing here means "trade".
+
+## Result: QUIRK1 (run once on 2026-10-25)
+
+79 days, split at 2026-09-14. 28 of the 36 cells had enough days in both halves; **none passed** (the best discovery cells were XRP yes -0.78c z -0.9 and BNB yes -1.09c z -1.4; every other cell was -1.5c to -5.5c, most with z beyond -2, and every confirmation half was negative). The other 8 cells (EUR/USD, GBP/USD, USD/JPY, palladium and platinum, both sides) have no days in the older half and are `NOT_ENOUGH_DATA`. 28 `FALSIFIED`, as predicted: buying either side at the first candle loses the fee plus the spread on every series, so no series leans one way against its opening price. Count: 36 tries added, about 5,240. Nothing to build.
