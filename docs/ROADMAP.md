@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 2026-10-22, late morning. Written in plain words on purpose.
+Last updated: 2026-10-25. The live record line below is still the 2026-10-22 reading; it was not re-read this week. Written in plain words on purpose.
 
 ## The goal
 
@@ -12,12 +12,13 @@ Make money on Kalshi without having to watch it. One bot trades for you. The pla
 - **The live record so far (bot only, 2026-10-22 about 11 AM CT):** 414 settled trades, 93% won, net slightly negative. At 386 trades gold was clearly positive and every other market slightly negative. A win earns about $0.36 and a loss costs about $5, so the bot needs about 93.5 wins in 100 to break even and sits at 93. The diagnosis: about two thirds of the loss is the two big Bitcoin losses on Oct 9 to 10 (capped now) and windows where two crypto markets lost together. The 25c exit is not the leak.
 - **New on 2026-10-22:** only one of Bitcoin, Ethereum, XRP and Dogecoin may place an order per 15 minute window (a test: it should roughly halve crypto profit and remove the worst clusters); a refused Kalshi read is retried once; every order also logs `rise3` and `rng5` for the research reads. None of the logging changes an order.
 - **Safety:** one combined limit per 15 minute window (5.5% of the base), a stop at **12%** of the base, a sell at 25c (a study this week found the line barely matters on Bitcoin, XRP and natural gas, so it stays), a one-click pause and flatten, phone alerts, and a rule that drops a probe market whose last 200 trades net negative.
-- **The website** has four pages: Market Brief, Bot, Data (read only) and Settings. This week: Privacy toggle, a Today line, readable light themes, plain headings and numbers with the bubble font only on the logo, and a layout fix so the trades list no longer squeezes into four-line rows.
+- **Since 2026-10-23:** series order gold, XRP, Bitcoin, Dogecoin, Ethereum; fixed sizes (Dogecoin 3, natural gas 2, **XRP back to 1 on 2026-10-25**); Bitcoin and Ethereum only on a smooth climb (kill rules registered, read 2026-11-12 and 2026-11-17); extra logging fields (flips, two-stage look) that no order reads.
+- **The website** has three pages: Market Brief, Bot and Settings (the Data page was tried and removed). New this week: a notification center (bell left of Brief, red bubble, banner for the worst cases), the account result line with date filter and axes, chart hover and axes on the Brief, a silent-market warning, a trimmed Bot page, phone tap targets. Before that: Privacy toggle, a Today line, readable light themes, plain headings and numbers with the bubble font only on the logo, and a layout fix so the trades list no longer squeezes into four-line rows.
 - **We have tried about 4,640 ideas on the same data. None passed the bar for a deployable edge.** This week's tries (decision trees, volatility-managed ETFs, risk parity, factor ETFs, hedges, scale-outs) were all falsified. Capital, not ideas, is the limit: slow strategies tested so far are worth about $5 to $9 a year at $200.
 
 ## What you need to do now
 
-1. Re-copy **Tools, Copy all orders** in a day or two so the one-crypto-per-window rule and the first `rng5` values can be read.
+1. Run `bash functions/deploy-sizing.sh` (XRP to 1 contract) and `npx firebase-tools deploy --only functions:marketTapeTick --project shwoopnet` (commodity charts), then re-copy **Tools, Copy all orders** so the smooth-climb and two-stage fields can be read.
 2. Send your balance history since Oct 7, and whether the loss stop fired during the gap from Oct 17 to Oct 20.
 3. Watch the Bot page for "Running" and for any repeat of the "HTTP 429" line.
 4. Merge this refresh when you are ready.
@@ -63,6 +64,7 @@ See `docs/PROPOSALS.md`. In short: core savings in a retirement account first, k
 
 ## Done recently
 
+- 2026-10-23 to 2026-10-25: notification center and red banner; account result line with date filter, percent and date axes, and touch scrub; Brief chart axes, times and hover; silent-market warning; Bot page trim (shards, usual-day bar, next-7-days chart, print statement and Copy all stats removed; Stop Loss and Risk into the Account card); landing page wallpaper and scroll fix; Today figure fix; XRP back to 1 contract; fixed sizes; smooth climb for Bitcoin and Ethereum; two-stage and flips logging; the order export carries every logged field; gold and crude charts when futures are closed; phone tap targets.
 - 2026-10-22: live-account diagnosis with the research session; one crypto order per window (#459); a refused Kalshi read retried once (#460); `rise3` and `rng5` logged on every order (#458, #461); order exports carry entry time, fills, fees, book sizes, `rise3` and `rng5`; the Bot page Today line; the weekly health check rewritten for the Kalshi bot.
 - 2026-10-21 (afternoon): the 10 minute entry for Bitcoin, XRP and natural gas went live; the probe drop rule and a cost cut (about $2 a month, and roughly $3 a month of that is given back by the exit watch running through the early minutes) went live; light themes made readable; numbers and headings in the plain font, the bubble font kept for the logo and a hop on hover; Today line; order exports with the entry tag (open); a perps recorder; the hand-sold fix and repair; gold-first sizing; the Data page.
 - 2026-10-21 (morning): three live probe markets; the stop set to 12%; paper card removed; Copy all orders; new logo, icon and share card; footer disclosure.
