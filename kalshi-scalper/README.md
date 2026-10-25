@@ -6185,3 +6185,18 @@ Information (2026-10-24; owner: how many losses if we sell at 1 or 2 minutes lef
 ### RECORD1 information look, 2026-10-25 (decides nothing)
 
 12 runs landed, 490 windows caught, 111,745 polls, 429 share 0.0%, clock offsets fine. Qualifying trades 44 of the 300 needed, over 4 of the 10 dates needed. Verdict so far `NOT_ENOUGH_DATA`; the read was not run (it refuses before 300 trades over 10 dates). Model, thresholds and claim unchanged.
+
+### Live export check, 2026-10-25 (information, decides nothing)
+
+Hand-tallied from the 821-order export pasted 2026-10-25 (orders since 15:15Z on 10-23, when XRP/Dogecoin went to 3 contracts):
+
+| Series | Fills | Losses | Net | Note |
+|---|---|---|---|---|
+| XRP | 24 | 4 (16.7%) | -$4.87 | all 4 losses at a price of 0.903 or lower; 15 fills above 0.905 had 0 losses |
+| Dogecoin | 25 | 1 (4.0%) | +$2.13 | |
+| Natural gas | 0 | 0 | $0 | 2 orders, no fill |
+| Gold | 4 | 0 | +$3.55 | sizes 10 to 15 |
+| Bitcoin | 0 | | | no order at all after 15:05Z on 10-23 (so none with a 10m lead after 18:30Z: pass) |
+| Ethereum | 1 | 0 | +$0.02 | 6m lead, 10-24 11:24Z; only one order since the smooth-only change |
+
+Dogecoin lost no window to a Bitcoin order (Bitcoin placed none). Not checkable from this export: minStep, climb, smooth, flips, flips0, earlierCandles, askAtDecision are not among its columns (it stops at rise3, rng5), so the smooth gate cannot be verified; the build session should add them to "Copy all orders". Smooth-only kill-rule count: 0 smooth Bitcoin fills, 1 Ethereum fill, 0 losses (rules need 40 and 100). Also seen, unrequested: 1-contract orders on KXUSDCAD15M and KXAUDUSD15M on 10-23 from 18:24Z to 20:09Z (5 fills, 5 wins, +$0.43), none since. XRP's 0.88 to 0.905 band (9 fills, 4 losses) is a post hoc cut on a small sample; not a claim until registered forward.
