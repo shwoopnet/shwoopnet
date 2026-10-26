@@ -178,33 +178,57 @@ exports.kalshiBooks = onCall(async (request) => {
 // read only: it never signs a request, touches the account or writes anything. Only a market the bot trades is accepted (see validTicker), and one read is bounded in pages and age.
 const KALSHI_TAPE_CACHE_MS = 15000;
 const kalshiTapeCache = new Map();
+// One market's public trades inside a window, newest first as Kalshi sends them; follows the cursor for at most MAX_PAGES pages. `budget.left` is shared across a whole-series read so one busy day cannot run away.
+async function kalshiReadTrades(ticker, win, budget) {
+  const trades = [];
+  let cursor = "";
+  for (let page = 0; page < footprint.MAX_PAGES; page++) {
+    const q = "/markets/trades?ticker=" + encodeURIComponent(ticker) + "&min_ts=" + Math.floor(win.fromMs / 1000) + "&max_ts=" + Math.ceil(win.toMs / 1000) +
+      "&limit=" + footprint.PAGE_LIMIT + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
+    const body = await kalshiGetJson(q);
+    const got = Array.isArray(body && body.trades) ? body.trades : [];
+    got.forEach((t) => trades.push(t));
+    budget.left -= got.length;
+    cursor = body && body.cursor ? String(body.cursor) : "";
+    if (!cursor || !got.length) return { trades, truncated: false };
+    if (budget.left <= 0) return { trades, truncated: true };
+  }
+  return { trades, truncated: true };
+}
 exports.kalshiTape = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
   const data = request.data || {};
+  const now = Date.now();
+  const wholeSeries = typeof data.series === "string" && data.series !== "";
   const ticker = String(data.ticker || "");
-  if (!footprint.validTicker(ticker, live.L1_SERIES)) {
+  if (wholeSeries ? !footprint.validSeries(data.series, live.L1_SERIES) : !footprint.validTicker(ticker, live.L1_SERIES)) {
     throw new HttpsError("invalid-argument", "That is not a market the bot trades.");
   }
-  const now = Date.now();
-  const win = footprint.readWindow(data.toMs, now);
-  const key = ticker + "|" + Math.floor(win.toMs / KALSHI_TAPE_CACHE_MS);
+  const win = wholeSeries ? footprint.seriesWindow(data.spanMin, data.toMs, now) : footprint.readWindow(data.toMs, now);
+  const key = (wholeSeries ? "S:" + data.series + ":" + win.spanMin : "T:" + ticker) + "|" + Math.floor(win.toMs / KALSHI_TAPE_CACHE_MS);
   const hit = kalshiTapeCache.get(key);
   if (hit && now - hit.at < KALSHI_TAPE_CACHE_MS) return hit.body;
   try {
-    const trades = [];
-    let cursor = "";
+    let trades = [];
     let truncated = false;
-    for (let page = 0; page < footprint.MAX_PAGES; page++) {
-      const q = "/markets/trades?ticker=" + encodeURIComponent(ticker) + "&min_ts=" + Math.floor(win.fromMs / 1000) + "&max_ts=" + Math.ceil(win.toMs / 1000) +
-        "&limit=" + footprint.PAGE_LIMIT + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
-      const body = await kalshiGetJson(q);
-      const got = Array.isArray(body && body.trades) ? body.trades : [];
-      got.forEach((t) => trades.push(t));
-      cursor = body && body.cursor ? String(body.cursor) : "";
-      if (!cursor || !got.length) break;
-      if (page === footprint.MAX_PAGES - 1) truncated = true;
+    let windows = null;
+    if (wholeSeries) {
+      const list = await kalshiGetJson("/markets?series_ticker=" + encodeURIComponent(data.series) + "&min_close_ts=" + Math.floor(win.fromMs / 1000) + "&max_close_ts=" + Math.ceil((win.toMs + 15 * 60000) / 1000) + "&limit=20");
+      windows = footprint.windowsFromMarkets(list && list.markets, data.series, win.fromMs, win.toMs);
+      const budget = { left: footprint.MAX_SERIES_TRADES };
+      for (const w of windows) {
+        if (budget.left <= 0) { truncated = true; break; }
+        const r = await kalshiReadTrades(w.ticker, win, budget);
+        r.trades.forEach((t) => trades.push(t));
+        if (r.truncated) truncated = true;
+      }
+    } else {
+      const r = await kalshiReadTrades(ticker, win, { left: footprint.PAGE_LIMIT * footprint.MAX_PAGES });
+      trades = r.trades;
+      truncated = r.truncated;
     }
-    const out = { ticker, fromMs: win.fromMs, toMs: win.toMs, fetchedAt: now, trades: trades.length, truncated, bars: footprint.buildFootprint(trades, win.fromMs, win.toMs) };
+    const out = { ticker: wholeSeries ? "" : ticker, series: wholeSeries ? data.series : "", spanMin: wholeSeries ? win.spanMin : null, windows, fromMs: win.fromMs, toMs: win.toMs, fetchedAt: now, trades: trades.length, truncated,
+      bars: footprint.buildFootprint(trades, win.fromMs, win.toMs) };
     if (kalshiTapeCache.size > 40) kalshiTapeCache.clear();
     kalshiTapeCache.set(key, { at: now, body: out });
     return out;

@@ -72,4 +72,32 @@ function buildFootprint(trades, fromMs, toMs) {
   return bars;
 }
 
-module.exports = { BAR_MS, WINDOW_MS, PAGE_LIMIT, MAX_PAGES, MAX_AGE_MS, validTicker, readWindow, parseTrade, buildFootprint };
+// The whole-series view (the owner, Oct 26, 2026: "30 minutes or 1 hour, since we work in 15 minute increments"): the last 30 or 60 minutes of ONE series, stitched across its consecutive 15 minute markets.
+// Only a series the bot trades is accepted, and only those two spans; anything else becomes 30 minutes.
+const SERIES_SPANS = [30, 60];
+const MAX_SERIES_MARKETS = 6;          // one hour is four windows, plus the one that is open now and one of slack
+const MAX_SERIES_TRADES = 8000;
+function validSeries(series, allowedSeries) {
+  return typeof series === "string" && /^KX[A-Z0-9]+$/.test(series) && Array.isArray(allowedSeries) && allowedSeries.includes(series);
+}
+function seriesWindow(spanMin, toMs, nowMs) {
+  const span = SERIES_SPANS.includes(Number(spanMin)) ? Number(spanMin) : 30;
+  const w = readWindow(toMs, nowMs);
+  return { spanMin: span, fromMs: w.toMs - span * 60000, toMs: w.toMs };
+}
+// Kalshi's market list for the series -> the windows inside [fromMs, toMs]: [{ ticker, closeMs }] oldest first, only a market that closes after the window starts and was open before it ends (a market closes
+// 15 minutes after it opens), only a valid ticker of this series, at most MAX_SERIES_MARKETS (the newest).
+function windowsFromMarkets(markets, series, fromMs, toMs) {
+  const out = [];
+  (markets || []).forEach((m) => {
+    const closeMs = Date.parse(m && m.close_time);
+    const ticker = m && m.ticker;
+    if (!Number.isFinite(closeMs) || typeof ticker !== "string" || !ticker.startsWith(series + "-") || !validTicker(ticker, [series])) return;
+    if (closeMs <= fromMs || closeMs - 15 * 60000 >= toMs) return;
+    out.push({ ticker, closeMs });
+  });
+  out.sort((a, b) => a.closeMs - b.closeMs);
+  return out.slice(-MAX_SERIES_MARKETS);
+}
+
+module.exports = { BAR_MS, WINDOW_MS, PAGE_LIMIT, MAX_PAGES, MAX_AGE_MS, SERIES_SPANS, MAX_SERIES_MARKETS, MAX_SERIES_TRADES, validTicker, validSeries, readWindow, seriesWindow, windowsFromMarkets, parseTrade, buildFootprint };
