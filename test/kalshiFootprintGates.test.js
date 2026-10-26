@@ -19,7 +19,7 @@ function fnSource(name) {
   }
   throw new Error('unbalanced ' + name);
 }
-const page = new Function('var KAL_FP_MAX_ROWS = 40;\n' + ['kalshiFpModel'].map(fnSource).join('\n') + '; return { kalshiFpModel };')();
+const page = new Function('var KAL_FP_MAX_ROWS = 30;\n' + ['kalshiFpModel'].map(fnSource).join('\n') + '; return { kalshiFpModel };')();
 
 const T0 = Date.parse('2026-10-26T14:00:00Z');
 const MIN = 60000;
@@ -86,11 +86,19 @@ gates.F7 = () => {
   assert.deepStrictEqual(m.prices, [95, 94, 93], 'highest price first');
 };
 gates.F8 = () => {
-  // A wide market is cropped around its busiest price, and the page says so.
+  // Condensed: a wide market keeps only its busiest prices, never an empty row, and minutes before the first trade are left out.
   const levels = []; for (let p = 20; p <= 90; p++) levels.push([p, 1, 1 + (p === 60 ? 500 : 0)]);
-  const m = page.kalshiFpModel({ bars: [{ t: T0 / 1000, l: levels, buy: 0, sell: 0, delta: 0, cum: 0, poc: 60 }] }, 20);
-  assert.strictEqual(m.prices.length, 40);
-  assert.ok(m.cropped && m.prices.includes(60));
+  const wide = page.kalshiFpModel({ bars: [{ t: T0 / 1000, l: levels, buy: 0, sell: 0, delta: 0, cum: 0, poc: 60 }] }, 20);
+  assert.strictEqual(wide.prices.length, 30);
+  assert.ok(wide.cropped && wide.prices.includes(60));
+  const sparse = page.kalshiFpModel({ bars: [
+    { t: T0 / 1000, l: [], buy: 0, sell: 0, delta: 0, cum: 0, poc: null },
+    { t: T0 / 1000 + 60, l: [], buy: 0, sell: 0, delta: 0, cum: 0, poc: null },
+    { t: T0 / 1000 + 120, l: [[99, 0, 10], [71, 5, 0]], buy: 10, sell: 5, delta: 5, cum: 5, poc: 99 },
+    { t: T0 / 1000 + 180, l: [[98, 3, 3]], buy: 3, sell: 3, delta: 0, cum: 5, poc: 98 },
+  ] }, 20);
+  assert.deepStrictEqual(sparse.prices, [99, 98, 71], 'only prices that traded, highest first');
+  assert.strictEqual(sparse.cols.length, 2, 'the two empty minutes before the first trade are dropped');
   assert.strictEqual(page.kalshiFpModel(null, 20).any, false, 'no data is an empty view, not an error');
 };
 gates.F9 = () => {
