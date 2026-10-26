@@ -1454,7 +1454,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
-                  <li>Bot status says what today's orders did: sent, filled, not filled, and the last order (#575)</li>
+                  <li>Bot status says what today's orders did and whether the win rate beats break-even, with the best and worst market of the week (#575)</li>
                 </ul>
                 <div class="changelog-day">Oct 25</div>
                 <ul class="changelog-list">
@@ -3213,6 +3213,27 @@
   function kalshiAgeText(sec){
     return sec < 90 ? sec + ' seconds ago' : (sec < 5400 ? Math.round(sec / 60) + ' minutes ago' : Math.round(sec / 3600) + ' hours ago');
   }
+  // Edge check on the Bot status card (the owner, Oct 26, 2026: fill the gap with something useful). The strategy pays only if the win rate beats the average price paid, so this puts the two side by side over the last 100 settled
+  // trades, with the edge in cents per contract, and names the best and worst market of the last 7 days. Percentages and cents are never masked; dollar figures go through kalshiMoney at the call. Read only.
+  var KAL_EDGE_MIN = 20;
+  function kalshiEdgeCheck(orders, nowMs){
+    var rows = (orders || []).filter(function(o){ return kalshiOrderPnl(o) !== null && Number(o.count) > 0; }).sort(function(a, b){ return a.ts - b.ts; }).slice(-100);
+    var out = { n: rows.length, enough: rows.length >= KAL_EDGE_MIN, winRate: null, breakEven: null, edgeCents: null, best: null, worst: null };
+    if(rows.length){
+      var contracts = 0, cost = 0, net = 0, wins = 0;
+      rows.forEach(function(o){
+        var c = Number(o.fillCount) > 0 ? Number(o.fillCount) : Number(o.count), px = Number(o.averageFillPrice) > 0 ? Number(o.averageFillPrice) : Number(o.price);
+        contracts += c; cost += Number.isFinite(px) ? px * c : 0; net += kalshiOrderPnl(o); if(kalshiOrderPnl(o) > 0){ wins++; }
+      });
+      out.winRate = wins / rows.length * 100; out.breakEven = contracts > 0 ? cost / contracts * 100 : null; out.edgeCents = contracts > 0 ? net / contracts * 100 : null;
+    }
+    var wk = kalshiPerfStats(orders, nowMs - 7 * 86400000).bySeries.filter(function(x){ return x.n >= 3; });
+    if(wk.length >= 2){
+      wk.sort(function(a, b){ return b.net - a.net; });
+      out.best = wk[0]; out.worst = wk[wk.length - 1];
+    }
+    return out;
+  }
   // Today's work on the Bot status card (the owner, Oct 26, 2026: something useful there that does not repeat the rest of the page). Counts the bot's own orders from today's US Central date by what happened to them:
   // sent, filled, sent but not filled (an immediate-or-cancel order can miss, and nothing else shows it) and "needs a look" (the answer was lost or refused). Read only, from orders the page already loads.
   function kalshiTodayWork(orders, nowMs){
@@ -3250,6 +3271,13 @@
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalWork"><div><span class="kal-k">Orders today</span><b>' + escapeHtml(sentText) + '</b></div>' +
         (work.problem ? '<div><span class="kal-k">Needs a look</span><b>' + escapeHtml(problemText) + '</b></div>' : '') +
         (lastText ? '<div><span class="kal-k">Last order</span><b>' + escapeHtml(lastText) + '</b></div>' : '') + '</div>');
+      var edgeAcct = kalshiLiveAcct, edge = kalshiEdgeCheck(kalshiResolveOrders(kalshiLiveOrders, edgeAcct && edgeAcct.results, edgeAcct && edgeAcct.fills && edgeAcct.fills.ok ? kalshiGroupFills(edgeAcct.fills.fills) : []), now), sg = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
+      var edgeText = !edge.enough ? 'too few trades yet' : edge.winRate.toFixed(1) + '% against ' + (edge.breakEven === null ? 'n/a' : edge.breakEven.toFixed(1) + '%') + ' to break even';
+      var centsText = !edge.enough || edge.edgeCents === null ? '' : (edge.edgeCents >= 0 ? '+' : '-') + Math.abs(edge.edgeCents).toFixed(1) + 'c a contract';
+      var bestText = edge.best ? edge.best.label + ' ' + sg(edge.best.net) : '', worstText = edge.worst ? edge.worst.label + ' ' + sg(edge.worst.net) : '';
+      sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalEdge"><div><span class="kal-k">Win rate, last ' + escapeHtml(String(edge.n)) + '</span><b>' + escapeHtml(edgeText) + '</b></div>' +
+        (centsText ? '<div><span class="kal-k">Edge</span><b>' + escapeHtml(centsText) + '</b></div>' : '') +
+        (bestText ? '<div><span class="kal-k">Best market, 7 days</span><b>' + escapeHtml(bestText) + '</b></div><div><span class="kal-k">Worst market, 7 days</span><b>' + escapeHtml(worstText) + '</b></div>' : '') + '</div>');
     }
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }

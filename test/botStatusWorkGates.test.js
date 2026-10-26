@@ -16,7 +16,8 @@ function fnSource(name) {
   }
   throw new Error('unbalanced ' + name);
 }
-const f = new Function("var KAL_TZ = 'America/Chicago';\n" + ['kalDayKey', 'kalshiTodayWork'].map(fnSource).join('\n') + '; return { kalshiTodayWork };')();
+const KAL_EDGE = /var KAL_EDGE_MIN = [^\n]*\n/.exec(html)[0];
+const f = new Function("var KAL_TZ = 'America/Chicago';\n" + KAL_EDGE + ['kalDayKey', 'kalshiTodayWork', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPerfStats', 'kalshiEdgeCheck'].map(fnSource).join('\n') + '; return { kalshiTodayWork, kalshiEdgeCheck };')();
 const NOW = Date.parse('2026-10-26T18:00:00Z');   // 1 PM Central
 const MIN = 60000;
 
@@ -48,6 +49,30 @@ gates.W3 = () => {
   assert.ok(/running && kalshiOrdersLoaded/.test(render), 'rows need a running bot and loaded orders');
   const helper = fnSource('kalshiTodayWork');
   assert.ok(!/setDoc|httpsCallable|runTransaction/.test(helper), 'read only');
+};
+
+// Settled orders: 'win' pays (1 - price) a contract, a loss costs the price.
+const settled = (series, n, price, lossEvery, endTs) => Array.from({ length: n }, (_, i) => {
+  const loss = lossEvery && i % lossEvery === lossEvery - 1;
+  return { strategy: 'L1', series, ts: endTs - (n - i) * 60000, settled: true, count: 2, fillCount: '2', price, averageFillPrice: String(price), settledPnl: loss ? -price * 2 : (1 - price) * 2 };
+});
+gates.W4 = () => {
+  // The edge is the win rate against the average price paid: 9 wins in 10 at 93c is losing money, and the card must say so.
+  const e = f.kalshiEdgeCheck(settled('KXGOLD15M', 40, 0.93, 10, NOW - 8 * 86400000), NOW);
+  assert.ok(e.enough && Math.abs(e.winRate - 90) < 1e-9 && Math.abs(e.breakEven - 93) < 1e-9, 'win rate ' + e.winRate + ' against ' + e.breakEven);
+  assert.ok(e.edgeCents < 0, 'a win rate under break-even is a negative edge');
+};
+gates.W5 = () => {
+  // A handful of trades says nothing, so no verdict is drawn; and only the last 100 count.
+  assert.strictEqual(f.kalshiEdgeCheck(settled('KXGOLD15M', 5, 0.93, 0, NOW), NOW).enough, false);
+  assert.strictEqual(f.kalshiEdgeCheck(settled('KXGOLD15M', 150, 0.93, 0, NOW), NOW).n, 100);
+};
+gates.W6 = () => {
+  // Best and worst market need at least two markets with a few trades each in the last 7 days.
+  const gold = settled('KXGOLD15M', 6, 0.93, 0, NOW), btc = settled('KXBTC15M', 6, 0.93, 2, NOW);
+  const e = f.kalshiEdgeCheck(gold.concat(btc), NOW);
+  assert.ok(e.best && e.worst && e.best.net > e.worst.net, 'best beats worst');
+  assert.strictEqual(f.kalshiEdgeCheck(gold, NOW).best, null);
 };
 
 let failed = 0;
