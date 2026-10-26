@@ -6546,3 +6546,18 @@ KX10 ideas 6 and 7. Both are classic favourite-longshot and public-bias question
 **F6, tennis favourites.** Data: the tennis match-winner markets already being fetched for SC1 (six series, 45 days). Pre-match price = the closing quote of the last candle in the window 6 hours to 5 hours before the close (a match lasts under 3 hours, so this is before play; markets with no quote there are dropped and counted). In each match (the two markets sharing an event ticker) take the **favourite** (higher mid) if its spread is at most 3c and its ask is **0.75 to 0.95**; buy it at the ask and hold to settlement, taker fee. *Why:* low-level tennis (Challenger, ITF) is information-poor, retail loves the underdog payout, so the favourite should win more than its price says. *Bar:* at least 500 matches on at least 25 days, mean net at least +1.0c, day-clustered z at least 2.5, positive in both halves, positive with fees x1.2. *Prediction:* about -1c to -2c (fee about 0.5c to 1.3c plus a 1c spread, win rate equal to the price); prior of a pass 10%. Information: the same table for 0.55 to 0.75 and for underdogs under 0.35.
 
 **F7, game totals, the under.** Data: settled markets of the basketball, football and hockey game-total ladders and the first-half total ladders (`KXNBATOTAL`, `KXNFLTOTAL`, `KXNHLTOTAL`, `KXNBA1HTOTAL`, `KXNFL1HTOTAL`), last 45 days, pre-game price = the last candle 8 to 5 hours before the close (same rule). *Why:* the public bets overs, so the over is priced above its frequency near the middle of the ladder. *Rule:* every market whose spread is at most 3c and whose YES mid is **0.40 to 0.60**: buy NO at its ask, hold to settlement. *Bar:* at least 1,000 markets on at least 25 days; mean net at least +1.0c; day-clustered z at least 2.5; positive in both halves and positive with fees x1.2. *Prediction:* about -2c (fee 1.7c plus spread); prior of a pass 8%. Information: buying YES instead, and each league separately. Each run once.
+
+## Result: LAD1, option-style fair value on the hourly Bitcoin ladder (run once on 2026-10-26): all six FALSIFIED
+
+704 hourly closes over 30 days, 4,296 strikes kept (chosen from the quotes 30 minutes before the close, never from the outcome). Entries (the model beats the price by more than 3c net of the fee; spread at most 2c; ask 0.10 to 0.90):
+
+| Time before close | Sigma | Entries | Hours | Net per contract | z | Halves | Win rate vs price paid |
+|---|---|---|---|---|---|---|---|
+| 45 min | implied (DVOL) | 1,698 | 635 | -2.07c | -1.89 | -3.04 / -1.10 | 32.5% vs 0.334 |
+| 45 min | realised | 1,236 | 510 | -2.48c | -1.98 | -1.88 / -3.09 | 35.4% vs 0.366 |
+| 30 min | implied | 1,642 | 640 | -2.02c | -1.88 | -1.05 / -3.00 | 33.6% vs 0.344 |
+| 30 min | realised | 1,346 | 561 | **+0.10c** | +0.08 | +0.89 / -0.69 | 38.1% vs 0.368 |
+| 15 min | implied | 1,156 | 607 | -1.65c | -1.52 | -1.18 / -2.13 | 34.0% vs 0.345 |
+| 15 min | realised | 999 | 582 | -1.46c | -1.41 | -1.41 / -1.51 | 33.7% vs 0.340 |
+
+Predicted: `FALSIFIED` all six, win rate below the price paid. Confirmed. The model's picks win 32% to 38% of the time against 33% to 37% priced, so the hourly ladder (deep, 1c wide) is priced as well as the model prices it, and the model's "edges" are mostly the flat-volatility error in the wings. Count: 6 tries, about 14,546. Code `src/scalper/lad1.py`, tests `tests/test_lad1.py`. Nothing to build.
