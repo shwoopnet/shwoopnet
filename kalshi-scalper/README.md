@@ -6606,3 +6606,15 @@ No survivor on either asset or mode. Every spot strategy is negative in discover
 **Bar.** Per rule and k: net per contract at least +1.0c after fee and spread, day-clustered z at least 2.0, positive in both halves, positive with fees x1.2, at least 150 events on at least 12 days. Also must beat SC1's own unfiltered rule on the same events by at least +1.0c. `NOT_YET_FALSIFIED` only if all hold; `FALSIFIED` if net is under +0.3c or z under 1.0; fewer than 150 events is `NOT_ENOUGH_DATA`. Run once.
 
 **Prediction.** Neither passes: the quote already moves with the buying, so the footprint repeats what the price says (TAPE20 found the same on 15 minute markets). Prior of a pass 8%. The most likely outcome is that CONFIRMED jumps follow through by less than the cost of crossing the spread twice.
+
+## Pre-registration: FP2, gold footprint as a loss warning: does opposing taker flow before the 6 minute decision mark the losers? (written 2026-10-26 before any gold tape was fetched or split; 2 tries, running count about 14,546)
+
+**Why.** Gold is the only series that earns (profit factor 1.33) and one loss wipes about 12 wins. A filter that removes even a third of the losses without removing many wins is worth far more than a new entry rule. TAPE20 pooled five series and used 21 days; this asks only about gold, over every gold market on file, with one footprint measure.
+
+**Data.** Every gold 15 minute L1 entry (favourite ask 0.88 to 0.97 at 6 minutes left, `feat1.build`) from all gold markets on file (about 80 days). For each, every trade in the 3 minutes before the decision (9 to 6 minutes before close), as taker contracts toward and against the favourite (`data/fp2_tape.json`, resumable, `python -m scalper.fp2 fetch`).
+
+**The one rule.** OPPOSED: contracts taken against the favourite are at least 100 and at least 40% of all taker contracts in those 3 minutes. Entries that are OPPOSED would be skipped. Thresholds fixed now, no second cut tried. A control, FLOW_TOWARD (toward share at least 70%), is reported for information only.
+
+**Judging.** Compare OPPOSED entries with the rest (net per contract, fee included, same entries). Split by day: discovery first 60%, confirmation last 40%. `NOT_YET_FALSIFIED` needs OPPOSED worse than the rest by at least 3.0c with day-clustered z at least 2.0 on discovery, at least 1.5c with z 1.0 on confirmation, and OPPOSED loss rate at least 1.5x the rest in both. `FALSIFIED` if the all-days gap is under 1.0c or z under 1.0. Fewer than 40 OPPOSED entries in discovery or 20 in confirmation is `NOT_ENOUGH_DATA`. Run once: `python -m scalper.fp2 run`.
+
+**Prediction.** FALSIFIED or NOT_ENOUGH_DATA. The price at 6 minutes already contains the flow (TAPE20), and the Oct 25 gold loss showed normal flow before entry. Prior of a pass 8%. Even a pass is only a candidate skip rule for a forward read, never a live change.
