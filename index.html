@@ -1452,6 +1452,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 26</div>
+                <ul class="changelog-list">
+                  <li>Bot status says what today's orders did: sent, filled, not filled, and the last order (#PRNUM)</li>
+                </ul>
                 <div class="changelog-day">Oct 25</div>
                 <ul class="changelog-list">
                   <li>The old equities server is suspended and retired; it was behind the biggest avoidable cost (#574)</li>
@@ -3209,6 +3213,18 @@
   function kalshiAgeText(sec){
     return sec < 90 ? sec + ' seconds ago' : (sec < 5400 ? Math.round(sec / 60) + ' minutes ago' : Math.round(sec / 3600) + ' hours ago');
   }
+  // Today's work on the Bot status card (the owner, Oct 26, 2026: something useful there that does not repeat the rest of the page). Counts the bot's own orders from today's US Central date by what happened to them:
+  // sent, filled, sent but not filled (an immediate-or-cancel order can miss, and nothing else shows it) and "needs a look" (the answer was lost or refused). Read only, from orders the page already loads.
+  function kalshiTodayWork(orders, nowMs){
+    var key = kalDayKey(nowMs), out = { sent: 0, filled: 0, noFill: 0, problem: 0, lastTs: null };
+    (orders || []).forEach(function(o){
+      if(!o || o.strategy !== 'L1' || !Number.isFinite(o.ts) || kalDayKey(o.ts) !== key){ return; }
+      out.sent++;
+      if(o.status === 'filled'){ out.filled++; } else if(o.status === 'no fill'){ out.noFill++; } else if(o.status === 'unknown' || o.status === 'error'){ out.problem++; }
+      if(out.lastTs === null || o.ts > out.lastTs){ out.lastTs = o.ts; }
+    });
+    return out;
+  }
   function renderKalshiStatus(){
     var sEl = document.getElementById('kalStatusBody'), rEl = document.getElementById('kalRiskBody');
     if(!sEl || !rEl){ return; }
@@ -3226,6 +3242,15 @@
     sEl.innerHTML = '<div id="kalEcg" class="kal-ecg-wrap"></div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(line) + (hb.ageSec !== null && running ? '. Last check ' + escapeHtml(kalshiAgeText(hb.ageSec)) : '') + '</span></div>' +
       (running ? '<div class="kal-rows"><div><span class="kal-k">Next look to buy</span><b id="kalNextIn">&mdash;</b></div><div><span class="kal-k">What it is looking at</span><b id="kalNextWhat">&mdash;</b></div></div>' : '') +
       (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
+    if(running && kalshiOrdersLoaded){
+      var work = kalshiTodayWork(kalshiLiveOrders, now);
+      var sentText = work.sent === 0 ? 'none yet' : work.sent + ' sent, ' + work.filled + ' filled' + (work.noFill ? ', ' + work.noFill + ' not filled' : '');
+      var problemText = work.problem + (work.problem === 1 ? ' order whose answer was lost or refused' : ' orders whose answer was lost or refused');
+      var lastText = work.lastTs === null ? '' : kalshiAgeText(Math.max(0, Math.round((now - work.lastTs) / 1000)));
+      sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalWork"><div><span class="kal-k">Orders today</span><b>' + escapeHtml(sentText) + '</b></div>' +
+        (work.problem ? '<div><span class="kal-k">Needs a look</span><b>' + escapeHtml(problemText) + '</b></div>' : '') +
+        (lastText ? '<div><span class="kal-k">Last order</span><b>' + escapeHtml(lastText) + '</b></div>' : '') + '</div>');
+    }
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
     var a = kalshiLiveAcct;
