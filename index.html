@@ -1494,6 +1494,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>Order flow says what to do when its function is not deployed yet, instead of "internal" (#578)</li>
                   <li>Order flow: a read only footprint of one market's trades, per minute and per price, from the Bot page (#577)</li>
                   <li>The loss stop meter is a small line in the Account card instead of its own full-width panel (#576)</li>
                   <li>Bot status says what today's orders did and whether the win rate beats break-even, with the best and worst market of the week (#575)</li>
@@ -2360,7 +2361,10 @@
       kalshiFpBusy = false; if(ticker !== kalshiFpTicker){ return; } kalshiFpData = d; renderKalshiFootprint();
     }).catch(function(err){
       kalshiFpBusy = false;
-      if(st){ st.textContent = 'Could not read the trades: ' + String((err && err.message) || 'unknown').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90); }
+      // "internal" or "not found" from a callable means the function is not reachable, which is what an undeployed one looks like (the owner's first read, Oct 26, 2026): say what to do instead of the bare word.
+      var code = String((err && err.code) || ''), msg = String((err && err.message) || 'unknown');
+      var unreachable = /internal|not-found|unavailable/.test(code) && /^(internal|not.?found)$/i.test(msg.trim());
+      if(st){ st.textContent = unreachable ? 'The order flow function is not reachable. It needs its one-time deploy: npx firebase-tools deploy --only functions:kalshiTape --project shwoopnet' : 'Could not read the trades: ' + msg.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90); }
       renderKalshiFootprint();
     });
   }
