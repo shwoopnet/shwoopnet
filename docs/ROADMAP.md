@@ -22,13 +22,13 @@ Make money on Kalshi without having to watch it. One bot trades for you. The pla
 2. Send your balance history since Oct 7, and whether the loss stop fired during the gap from Oct 17 to Oct 20.
 3. Watch the Bot page for "Running" and for any repeat of the "HTTP 429" line.
 4. Merge this refresh when you are ready.
-5. Nothing about Render: it is free and left running (decided 2026-10-22).
+5. Render: the old equities server was suspended on 2026-10-26 to stop a cost. Finish the cut: delete the Alpaca fields from your user document and revoke the Alpaca keys.
 
 ## What I am doing next
 
 | Job | In plain words | Done when |
 |---|---|---|
-| Render (decided 2026-10-22) | The equities server is on Render's free plan, so it costs nothing, and it feeds the Brief's movers and earnings. The owner chose to leave it running as is | Revisit only if it starts trading unexpectedly or the free plan changes |
+| Render and Alpaca (decided 2026-10-26) | The equities server was suspended. It cost nothing on Render but its Firestore reads from outside Google cost about $15 a month in data transfer | Billing, SKU report: data transfer out near zero within two days |
 | Read the 10 minute entry | Bitcoin, XRP and natural gas now enter earlier. Orders are tagged `10m`. Few markets are in the band at 10 minutes, so this fills slowly | FWD8 reads at 60 filled orders per series or 2026-12-01 |
 | Read the probes | AUD/USD, USD/CAD and gas, one contract each, plus the drop rule | FWD5 reads at 100 orders per group or 2026-12-01 |
 | Gold first, forward scoreboard | Gold earns; the others have to earn the ladder back from their own live record (150 settled trades, a result above +0.5c in both halves) | Rules already written, reads as the trades arrive |
