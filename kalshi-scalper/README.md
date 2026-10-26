@@ -6594,3 +6594,15 @@ No survivor on either asset or mode. Every spot strategy is negative in discover
 ### RECORD1 information look, 2026-10-26 14:00Z (decides nothing)
 
 17 runs landed, 685 windows caught, 154,975 polls, 429 share 0.0%, clocks ok. Qualifying trades 56 over 5 dates (need 300 over 10), so the registered read has not been run. Look verdict `NOT_ENOUGH_DATA`: mean +6.4c, z 1.41, stress +6.3c, 2 of 4 assets positive (not a result). Model, thresholds and claim unchanged.
+
+## Pre-registration: FP1, footprint on tennis jumps: does real buying behind a 5c jump keep it going? (written 2026-10-26 before any tape was fetched for tennis events and before the SC1 read; 4 tries, running count about 14,544)
+
+**Why.** SC1 asks whether any 5c jump in a tennis match market is worth following or fading. A candle cannot say whether the jump came from real aggressive buying (many takers lifting the ask) or from one thin print through an empty book. The public trade tape can (`footprint.py`: taker buys vs sells per minute). A footprint is the only new information here; the price rule is SC1's own.
+
+**Events.** SC1's events, unchanged (5c mid jump in one minute, spread at most 3c, mid 0.15 to 0.85, minute volume at least 100, 10 quiet minutes before). For each, the tape of the jump minute and the two minutes before it (`/markets/trades`, resumable download, only if SC1 has at least 400 events).
+
+**Footprint measures (fixed now).** DELTA_SHARE = taker contracts on the side of the jump divided by all taker contracts in the jump minute. CONFIRMED: DELTA_SHARE at least 0.70 and at least 100 contracts. THIN: DELTA_SHARE under 0.55 or under 50 contracts. Two rules: CONF_MOM (follow a CONFIRMED jump) and THIN_FADE (fade a THIN jump). Fill, hold k (2 and 5 minutes), fees and spread exactly as SC1 (next minute's closing quote). Nothing else is tried.
+
+**Bar.** Per rule and k: net per contract at least +1.0c after fee and spread, day-clustered z at least 2.0, positive in both halves, positive with fees x1.2, at least 150 events on at least 12 days. Also must beat SC1's own unfiltered rule on the same events by at least +1.0c. `NOT_YET_FALSIFIED` only if all hold; `FALSIFIED` if net is under +0.3c or z under 1.0; fewer than 150 events is `NOT_ENOUGH_DATA`. Run once.
+
+**Prediction.** Neither passes: the quote already moves with the buying, so the footprint repeats what the price says (TAPE20 found the same on 15 minute markets). Prior of a pass 8%. The most likely outcome is that CONFIRMED jumps follow through by less than the cost of crossing the spread twice.
