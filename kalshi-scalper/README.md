@@ -6618,3 +6618,26 @@ No survivor on either asset or mode. Every spot strategy is negative in discover
 **Judging.** Compare OPPOSED entries with the rest (net per contract, fee included, same entries). Split by day: discovery first 60%, confirmation last 40%. `NOT_YET_FALSIFIED` needs OPPOSED worse than the rest by at least 3.0c with day-clustered z at least 2.0 on discovery, at least 1.5c with z 1.0 on confirmation, and OPPOSED loss rate at least 1.5x the rest in both. `FALSIFIED` if the all-days gap is under 1.0c or z under 1.0. Fewer than 40 OPPOSED entries in discovery or 20 in confirmation is `NOT_ENOUGH_DATA`. Run once: `python -m scalper.fp2 run`.
 
 **Prediction.** FALSIFIED or NOT_ENOUGH_DATA. The price at 6 minutes already contains the flow (TAPE20), and the Oct 25 gold loss showed normal flow before entry. Prior of a pass 8%. Even a pass is only a candidate skip rule for a forward read, never a live change.
+
+## Pre-registration: FP3, footprint micro-scalps on deep markets, traded as a price move and not as a yes or no (written 2026-10-26 before any footprint trigger was computed on tennis events; 80 tries, running count about 14,626)
+
+**The owner's frame (kept).** Do not wait for settlement. Enter at 20c and sell at 40c because the flow says it will move; earn the spread; trade other people's behaviour. This test treats a contract as a price series and scores every trade from entry quote to exit quote, never to settlement.
+
+**Cost, stated first.** Fee is 7% x p x (1-p) per contract per side: 1.1c at 20c, 1.75c at 50c. Round trip plus a 1c to 3c spread is about 3c to 6c. A 20c target at a 10c stop only needs a hit rate near 40% before cost; a 3c target needs about 65%. So the test is the hit rate that each footprint trigger buys, not the size of the move.
+
+**Universe.** Tennis match winner markets in `data/sc1.sqlite` (in-play, mid 0.15 to 0.85, spread at most 3c at entry, minute volume at least 100), with the trade tape fetched for each trigger minute and the two before it. Basketball totals and the hourly Bitcoin ladder stay information only until tennis reads. One position per market at a time, no overlap with the live L1 series (different markets by construction).
+
+**Triggers (5, fixed now, computed from the tape up to the end of the trigger minute only).**
+1. STACK: three or more adjacent YES price levels in the minute, each with taker contracts one side at least 3 to 1 and at least 20 contracts.
+2. DELTA_BREAK: minute net delta (taker buys minus sells) in the top 5% of that market's own earlier minutes, same sign as the mid move.
+3. ABSORB: minute volume at least 3x the market's trailing median while the mid moved under 1c (heavy flow, no price change).
+4. BIG_PRINT: a single taker print of at least 10x the trailing median print.
+5. SPREAD_CAPTURE: spread at least 3c and the last two minutes balanced (delta share 0.45 to 0.55); post at the bid, sell at the ask. Fill assumed only when a later candle's ask low reaches the bid and bid high reaches the ask (flattering; queue position is unknown, so this one is an upper bound).
+
+**Directions.** Follow (trade with the flow) and fade (against it), both counted. SPREAD_CAPTURE has one direction.
+
+**Exits.** Target T = 3, 5, 10 or 20c from the entry quote; stop S = T/2 or T; forced exit after 5 minutes at the then bid. Entries and exits at the next minute's closing quote (a taker pays the ask in, hits the bid out), fee both sides, and an unfilled exit at a gap is taken at the next quote, not the stop price. 4 triggers x 2 directions x 4 targets x 2 stops = 64, plus SPREAD_CAPTURE x 4 targets x 2 stops = 8, plus 8 control rules (same exits entered at random minutes in the same markets) = 80.
+
+**Judging.** Family-wise: shuffle trigger minutes among eligible minutes of the same market and day-block bootstrap (300 reps) to get the null distribution of the best of 72 rules. `NOT_YET_FALSIFIED` needs for a rule: net mean at least +1.0c after fees with day-clustered z above the null 95th percentile, positive in both halves and with fees x1.2, at least 200 trades on at least 12 days, and above its random-entry control by at least +1.0c. `FALSIFIED` if no rule clears +0.3c. Fewer than 200 trades for the best rule is `NOT_ENOUGH_DATA`. SPREAD_CAPTURE can never reach more than `NOT_ENOUGH_DATA` without a queue-position recording (RECORD1-style) because its fill is assumed. Run once.
+
+**Prediction.** FALSIFIED. Each trigger mostly repeats what the price already shows (TAPE20 on the 15 minute markets), and 3c to 6c of round-trip cost eats a 3c to 5c target before the hit rate matters. The best chance is the large-target rules (20c / 10c stop) on STACK follow, where cost is small against the move, but a 20c continuation in one to five minutes should be rare. Prior of any pass 8%.
