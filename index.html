@@ -803,24 +803,26 @@
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
   .kal-console [data-card="status"]{ grid-area:stat; align-self:stretch; }
-  .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1 / -1; margin-top:6px; padding-top:12px; border-top:1px solid var(--border); } .kal-acct-risk .kal-k{ color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+  .kal-console [data-card="account"] .kal-acct-risk{ grid-column:3; grid-row:1; justify-self:center; width:100%; max-width:280px; display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 12px; } .kal-acct-risk .kal-k{ order:1; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin:0; }
+  /* The loss stop sits in the gap between the reinvest pool and Today (the owner, Oct 26, 2026: it was too big, then "fill that gap"): the label and the share used on one line, a thin bar under them. */
+  .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-meter{ order:3; flex:0 0 100%; height:4px; border-radius:2px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:2px; } .kal-acct-risk .kal-hb{ order:2; font-size:13px; white-space:nowrap; margin:0; }
   .kal-console [data-card="pnl"]{ grid-area:pnl; align-self:stretch; }
   .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
   .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
-  .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
   .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; padding:0; }
   .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; }
   .kal-console [data-card="account"] #kalBotStatus{ grid-column:2; display:flex; align-items:center; gap:36px; flex-wrap:wrap; }
   .kal-console [data-card="account"] #kalBotStatus .kal-acct-total{ margin:0; }
   .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ flex-direction:row; gap:28px; border-top:0; padding-top:0; }
   .kal-console [data-card="account"] #kalBotStatus .kal-rows > div, .kal-console [data-card="account"] #kalBotTotals .kal-rows > div{ flex-direction:column; justify-content:flex-start; gap:2px; }
-  .kal-console [data-card="account"] #kalBotTotals{ grid-column:3; }
+  .kal-console [data-card="account"] #kalBotTotals{ grid-column:4; grid-row:1; }
   .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "trd"; }
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
-    .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals{ grid-column:1; }
+    .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1; grid-row:auto; justify-self:stretch; max-width:none; }
   }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
@@ -1298,7 +1300,7 @@
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
-        <div class="kal-acct-risk"><div class="kal-k">Stop Loss and Risk</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
+        <div class="kal-acct-risk"><div class="kal-k">Loss stop</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
       </div>
       <div class="kal-card" data-card="status">
         <div class="kal-card-title">Bot status</div>
@@ -1454,6 +1456,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>The loss stop meter is a small line in the Account card instead of its own full-width panel (#576)</li>
                   <li>Bot status says what today's orders did and whether the win rate beats break-even, with the best and worst market of the week (#575)</li>
                 </ul>
                 <div class="changelog-day">Oct 25</div>
@@ -3293,8 +3296,8 @@
       (function(){
         // Percentages only (the owner, Oct 23, 2026), so this card can stay readable under Privacy view: no dollar figure is drawn here.
         var pct = function(x){ return Math.round(x * 100) + '%'; };
-        return '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + pct(m.fraction) + ' of the loss stop used</span></div>' +
-          '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>';
+        return '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
+          '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + pct(m.fraction) + ' used</span></div>';
       })();
 kalshiStatusTick();
   }
