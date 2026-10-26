@@ -33,8 +33,9 @@ function orderKinds(before, after) {
   const out = [];
   if (now.i && !was.i) out.push("issue");
   if (now.s && !was.s) out.push("sell");
-  // Oct 26, 2026 (the owner: "my phone gets notifications constantly", then "add in closes, we can completely eliminate the entries"): a buy never buzzes the phone. Every CLOSE does: an early sell above, and a trade settling here, win or loss, with its amount. The page's sound alerts and the notification bell are unchanged.
-  if (now.d && !was.d) out.push("settled");
+  // Oct 26, 2026 (the owner: "my phone gets notifications constantly"): the phone only buzzes for what needs the owner. A buy never does, and a settlement only when it LOST; a win is silent. A settlement with no readable result is treated as a loss, so a doubtful one still tells the owner. The page's sound alerts and the notification bell are unchanged.
+  const pnl = Number(after && after.settledPnl);
+  if (now.d && !was.d && !(Number.isFinite(pnl) && pnl >= 0)) out.push("settled");
   return out;
 }
 // The session ending by itself (the loss stop, a lost order answer) is an issue; the owner's own Stop and Flatten are not, because the owner just did them.

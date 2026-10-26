@@ -29,8 +29,9 @@ gates.P1 = () => {
   assert.deepStrictEqual(push.orderKinds(null, order({ strategy: 'OW1', fillCount: 4 })), [], 'only L1 orders alert');
   // A trade that finishes on its own alerts once, as a win or a loss; one the exit sold is a sell, not also a settlement; one already settled before the alerts existed stays silent.
   const held = order({ fillCount: 4, status: 'filled' });
-  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), ['settled'], 'a win alerts as a close');
-  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'no', settledPnl: -3.6 })), ['settled'], 'a loss alerts as a close');
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), [], 'a win is silent');
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'no', settledPnl: -3.6 })), ['settled'], 'a loss still alerts');
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'no' })), ['settled'], 'a settlement with no readable amount still alerts, so a doubtful one is not hidden');
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4, status: 'filled', settled: true, result: 'yes' }), order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), [], 'rewritten after it settled: silent');
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4, exitStatus: 'sold' }), order({ fillCount: 4, exitStatus: 'sold', settled: true, result: 'exit', settledPnl: -2.7 })), [], 'an exit already alerted as a sell, and result exit is not a settlement');
   assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', exitStatus: 'sold', settled: true, result: 'exit', settledPnl: -2.7 })), ['sell'], 'sold and closed in one write is one sell alert');
