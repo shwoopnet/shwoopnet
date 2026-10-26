@@ -27,7 +27,7 @@ DB = DATA_DIR / "lad1.sqlite"
 RESULT = DATA_DIR / "lad1_result.txt"
 SERIES = "KXBTCD"
 DAYS = 30
-PROBE_S = (1860, 1740)              # the one minute at 30 minutes before the close used to pick which strikes to keep
+PROBE_S = (2100, 1500)              # a ten minute window around 30 minutes before the close (a one minute window misses strikes that did not trade in that minute)
 WINDOW_S = (3300, 60)               # candles from 55 minutes to 1 minute before the close
 LEFTS = (45, 30, 15)                # minutes before the close
 SIGMAS = ("iv", "rv")
@@ -92,8 +92,9 @@ def fetch() -> None:
             got = api.batch_candlesticks([m["ticker"] for m in ch], close_ts - PROBE_S[0], close_ts - PROBE_S[1])
             for m in ch:
                 rows = [r for r in (backfill.parse_candle(x, m["ticker"], SERIES) for x in got.get(m["ticker"], [])) if r]
-                if rows and rows[-1][3] is not None and rows[-1][7] is not None:
-                    mid = (rows[-1][6] + rows[-1][10]) / 2 if rows[-1][6] is not None and rows[-1][10] is not None else None
+                last = [r for r in rows if r[6] is not None and r[10] is not None]
+                if last:
+                    mid = (last[-1][6] + last[-1][10]) / 2
                     if mid is not None and 0.03 <= mid <= 0.97:
                         keep.append(m)
             time.sleep(PAUSE)

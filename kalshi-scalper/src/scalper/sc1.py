@@ -61,10 +61,13 @@ def fetch() -> None:
             time.sleep(PAUSE)
         for hour in sorted(by_close):
             for item in by_close[hour]:
-                batch.append(item)
-                if len(batch) >= 40:
+                if batch and (len(batch) >= 20 or abs(item[1] - batch[0][1]) > 3600):
                     flush(batch)
                     batch = []
+                batch.append(item)
+            if batch:                      # one request never spans more than one close hour, so the window stays about 7 hours
+                flush(batch)
+                batch = []
         if batch:
             flush(batch)
         print(f"  {series} done", flush=True)

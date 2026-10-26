@@ -6525,3 +6525,16 @@ Owner pasted two blocks of unsourced claims (sports "67% to 100% win rates", eve
 **Rules (4 tries).** Decision at the close of minute t; the order fills at the closing quote of minute **t+1** (a one minute latency, stricter than a real bot). MOM: buy the side that jumped at its ask. FADE: buy the other side at its ask. Exit by selling at the closing bid k minutes after the entry minute, **k = 2 or k = 5** (so MOM2, MOM5, FADE2, FADE5). Fee 7%·p·(1-p) on the buy and on the sell. If a needed candle is missing the event is skipped and counted. One contract.
 
 **Pass bar.** At least 1,000 events on at least 30 days, mean net per event of at least +1.0c, day-clustered z of at least 3.0 (4 tries), positive in both halves of the days, positive with fees x1.2. **Prediction:** all four negative, about -3c to -4c: spread and two fees cost about 3.5c to 4c at mid prices and a jump of 5c carries no systematic follow-through or reversal after one minute. Prior of a pass: 10% (a break of serve is a real information shock that might overshoot in thin matches). Run once.
+
+## KX10: ten different Kalshi ideas, with where each stands (2026-10-26, at the owner's request; none is a 15 minute price-and-time rule)
+
+1. **Hourly Bitcoin ladder, option-style fair value (LAD1).** Deep (20,000 to 47,000 contracts a day on the top strikes, 1c spreads). Pre-registered, 30 days being fetched. *Prior: 5%.*
+2. **In-play tennis scalping after a price jump (SC1).** The one setting the owner's pasted scalping claim is about: 660,000 contracts in one Challenger match. Pre-registered, 45 days being fetched. *Prior: 10%.*
+3. **Cross-strike ladder arbitrage.** Snapshot of 4,064 strike pairs: 0 locks after fees. *Dead.*
+4. **Post-peak weather certainty** (buy the bracket that already holds the day's high). Brackets were already 0.99 / 1.00 at 8:35 PM ET. *Dead.*
+5. **State gas-price ladders** (50 states a day; forecast from the published number's own path). GAS1-F forward read 2026-11-22. *Running.*
+6. **Tennis favourite-longshot by tour level** (Challenger and ITF are information-poor): reuses SC1's candles for a price-bucket table. *Next.*
+7. **Basketball and football totals "under" bias.** Basketball season is 5 days old and football props thin; not enough history yet. *Waiting.*
+8. **Mention markets, NO side carry.** FLB1 hinted (+0.5c to +3.9c, z 0.2 to 1.4); needs more settled history. *Waiting.*
+9. **First-half against full-game consistency in sports** (a cross-market relation between two lines of one game). Not built.
+10. **A portfolio of many weak edges, sized by Kelly lower bounds** (measured daily correlation across our series is +0.02, so each added positive series lowers the swings). Forward reads of the allocators 2026-11-12. *Running.*
