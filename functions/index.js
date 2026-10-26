@@ -434,7 +434,7 @@ exports.kalshiFlattenAll = onCall(
 // Eastern, news behind a paid key). Quotes are merged into the stored document one symbol at a time, so a symbol or feed that fails keeps its older value with its own asOf
 // and the page says how old it is; `errors` names what failed on the last run.
 exports.marketTapeTick = onSchedule(
-  { schedule: "every 5 minutes", timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },
+  { schedule: "every 15 minutes", timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },   // every 5 minutes until Oct 26, 2026, when the owner asked for fewer runs to cut cost; the Brief chart is now a week, so a quarter hour is fresh enough
   async () => {
     ensureDefaultAdminApp();
     const db = getFirestore();

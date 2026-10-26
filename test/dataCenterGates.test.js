@@ -126,7 +126,8 @@ gates.PL3 = () => {
   const lift2 = f;
   assert.deepStrictEqual(lift2.chartValueTicks(-0.8, 1.2, 5), [-0.5, 0, 0.5, 1], 'round steps inside the data, with zero');
   assert.deepStrictEqual(lift2.chartValueTicks(0, 0, 5), [], 'no range, no ticks');
-  assert.strictEqual(lift2.chartPctLabel(0, 0.5), '0%'); assert.strictEqual(lift2.chartPctLabel(0.5, 0.5), '+0.5%'); assert.strictEqual(lift2.chartPctLabel(-2, 2), '-2%');
+  assert.strictEqual(lift2.chartPctLabel(0, 0.5), '0%'); assert.strictEqual(lift2.chartPctLabel(0.5, 0.5), '+0.5%'); assert.strictEqual(lift2.chartPctLabel(-2, 2), '-2%'); // Oct 25, 2026 (the owner's screenshot): a 2.5 step must not read -3, 0, +3, +5, which looks unevenly spaced.
+  assert.deepStrictEqual([-2.5, 0, 2.5, 5].map((v) => lift2.chartPctLabel(v, 2.5)), ['-2.5%', '0%', '+2.5%', '+5.0%'], 'a step of 2.5 keeps its decimal'); assert.strictEqual(lift2.chartPctLabel(3, 3), '+3%');
   const t0 = Date.UTC(2026, 9, 22, 17, 0), day = lift2.chartTimeTicks(t0, t0 + 12 * 3600000, 5);
   assert.deepStrictEqual(day.map((x) => x.label), ['12 PM', '3 PM', '6 PM', '9 PM', '12 AM'], 'half a day: every 3 hours on the Central clock (12:00 PM CT is 17:00 UTC in October)');
   const days = lift2.chartTimeTicks(t0, t0 + 4 * 86400000, 5);

@@ -30,6 +30,16 @@ gates.H2 = () => {
   assert.deepStrictEqual(f.quotes.SPY.ser, [500, 505, 510], 'and the series it scrubs is the one drawn');
   assert.strictEqual(f.quotes.SPY.price, 510, 'with the resting price kept to go back to');
 };
+// Weekly charts (the owner, Oct 26, 2026): a line marked range 7d is measured from its own first point, so the header and the zero line both mean "since the start of the week", not "since yesterday's close".
+gates.H5 = () => {
+  const out = f.briefChartHtml({ sym: 'GC=F', name: 'Gold' }, { price: 4200, prevClose: 4180, range: '7d', series: [4000, 4100, 4200], seriesT: [1000, 2000, 3000] });
+  assert.ok(/\u25B2 5\.00%/.test(out), 'up 5% from the first point of the week, not 0.48% from the previous close');
+  assert.strictEqual(f.quotes['GC=F'].prev, 4000, 'and the scrub reads against that same start');
+  const day = f.briefChartHtml({ sym: 'SPY', name: 'SPY' }, { price: 510, prevClose: 500, series: [505, 510] });
+  assert.ok(/\u25B2 2\.00%/.test(day) && /Day start/.test(day), 'a line without the marker is still today against the previous close');
+  const noT = f.briefChartHtml({ sym: 'QQQ', name: 'QQQ' }, { price: 510, prevClose: 500, range: '7d', series: [500, 510] });
+  assert.ok(/Week start/.test(noT), 'without times the weekly line says so, not "Day start"');
+};
 gates.H3 = () => {
   const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
   assert.ok(/\.brief-chart svg\{[^}]*touch-action:pan-y/.test(css), 'a finger on a chart still scrolls the page up and down');

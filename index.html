@@ -1143,8 +1143,8 @@
         <p class="front-line"><b>Shwoop Financials builds systematic trading tools:</b> rules written in advance, run by software, reviewed by people.</p>
       </section>
       <div class="front-shots">
-        <div class="front-win front-win-b" aria-hidden="true"><div class="win"><div class="win-rail"><i class="on"><u></u>Brief</i><i><u></u>Bot</i><i><u></u>Data</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Market Brief</b><span class="win-pill win-live">Sample data</span></div><div class="win-hl"><span class="win-head">Sample headline goes here</span><span class="win-sub">A second sample line sits under it</span></div></div><div class="win-ix"><div class="win-tile"><small>Index 1</small><b>1,234.56</b></div><div class="win-tile"><small>Index 2</small><b>2,345.67</b></div><div class="win-tile"><small>Index 3</small><b>3,456.78</b></div><div class="win-tile"><small>Index 4</small><b>4,567.89</b></div></div></div></div></div>
-        <div class="front-win front-win-a" aria-hidden="true"><div class="win"><div class="win-rail"><i><u></u>Brief</i><i class="on"><u></u>Bot</i><i><u></u>Data</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Account</b><span class="win-pill win-live">Sample data</span></div><div class="win-num">$1,234.56</div><div class="win-row"><span>Stake per trade</span><b>Sample</b></div><div class="win-row"><span>Reinvest pool</span><b>$12.34</b></div></div><div class="win-tiles"><div class="win-tile"><small>Settled</small><b>12</b></div><div class="win-tile"><small>Open</small><b>3</b></div></div></div></div></div>
+        <div class="front-win front-win-b" aria-hidden="true"><div class="win"><div class="win-rail"><i class="on"><u></u>Brief</i><i><u></u>Bot</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Market Brief</b><span class="win-pill win-live">Sample data</span></div><div class="win-hl"><span class="win-head">Sample headline goes here</span><span class="win-sub">A second sample line sits under it</span></div></div><div class="win-ix"><div class="win-tile"><small>Index 1</small><b>1,234.56</b></div><div class="win-tile"><small>Index 2</small><b>2,345.67</b></div><div class="win-tile"><small>Index 3</small><b>3,456.78</b></div><div class="win-tile"><small>Index 4</small><b>4,567.89</b></div></div></div></div></div>
+        <div class="front-win front-win-a" aria-hidden="true"><div class="win"><div class="win-rail"><i><u></u>Brief</i><i class="on"><u></u>Bot</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Account</b><span class="win-pill win-live">Sample data</span></div><div class="win-num">$1,234.56</div><div class="win-row"><span>Stake per trade</span><b>Sample</b></div><div class="win-row"><span>Reinvest pool</span><b>$12.34</b></div></div><div class="win-tiles"><div class="win-tile"><small>Settled</small><b>12</b></div><div class="win-tile"><small>Open</small><b>3</b></div></div></div></div></div>
       </div>
       <p class="front-sample">Sample screens with made-up numbers, shown for illustration only. They are not real account data or results.</p>
     </main>
@@ -1330,7 +1330,6 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Settings</div>
-        <div class="trades-sub">Display preferences.</div>
       </div>
     </div>
 
@@ -1359,7 +1358,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Default landing page</div>
-              <div class="settings-row-desc">What opens when you return later today.</div>
+              <div class="settings-row-desc">What opens first.</div>
             </div>
             <div class="settings-choice-group" id="landingChoice">
               <button class="tf-btn" data-value="auto">Auto</button>
@@ -1436,7 +1435,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Hide logo</div>
-              <div class="settings-row-desc">Hides the Shwoop Financials logo in the header, for presenting the site as project work. Stays on after a reload, on this device, until you switch it off.</div>
+              <div class="settings-row-desc">Hides the Shwoop Financials logo in the header, for presenting. Stays on after a reload, on this device, until you switch it off.</div>
             </div>
             <button class="settings-toggle-switch" id="hideLogoToggle" role="switch" aria-checked="false" aria-label="Toggle hide logo">
               <span class="toggle-knob"></span>
@@ -1456,6 +1455,9 @@
                 <div class="changelog-day">Oct 25</div>
                 <ul class="changelog-list">
                   <li>Phone alerts for closes, stops and issues only: no more alert for every buy (#573)</li>
+                  <li>Brief charts are now a week, and the market data refreshes every 15 minutes instead of 5 (#572)</li>
+                  <li>Wording cleaned up: tiles and Settings lose filler text, the sign-in preview no longer lists the removed Data page (#571)</li>
+                  <li>Account result axis labels no longer round 2.5 steps to whole numbers (#570)</li>
                   <li>Settings has a Hide logo switch for presenting the site (#569)</li>
                   <li>Every order logs the size at the price it hits and its share of it, logging only (#568)</li>
                   <li>Notification panel has a Clear button (#567)</li>
@@ -2110,12 +2112,12 @@
   }
   function kalshiTradeStatsHtml(st, money){
     if(!st || !st.settled){ return ''; }
-    var tile = function(k, v, sub){ return '<div class="kal-mini-tile"><div class="kal-mini-k">' + k + '</div><div class="kal-mini-v">' + v + '</div><div class="kal-mini-s">' + sub + '</div></div>'; };
+    var tile = function(k, v, sub){ return '<div class="kal-mini-tile"><div class="kal-mini-k">' + k + '</div><div class="kal-mini-v">' + v + '</div>' + (sub ? '<div class="kal-mini-s">' + sub + '</div>' : '') + '</div>'; };
     return '<div class="kal-tr-stats">' +
       tile('Win rate', Math.round(st.wins / st.settled * 100) + '%', st.wins + ' of ' + st.settled + ' settled') +
-      tile('Streak', st.streak + (st.streakKind === 'win' ? (st.streak === 1 ? ' win' : ' wins') : (st.streak === 1 ? ' loss' : ' losses')), 'in a row, latest first') +
+      tile('Streak', st.streak + (st.streakKind === 'win' ? (st.streak === 1 ? ' win' : ' wins') : (st.streak === 1 ? ' loss' : ' losses')), '') +
       tile('Early sells', String(st.early), 'of ' + st.total + ' trades') +
-      (st.fees !== null ? tile('Fees paid', money(st.fees), 'last 24 hours') : tile('Last 24 hours', String(st.total), st.total === 1 ? 'trade' : 'trades')) + '</div>';
+      (st.fees !== null ? tile('Fees paid', money(st.fees), 'last 24 hours') : tile('Last 24 hours', String(st.total), '')) + '</div>';
   }
 
 
@@ -2712,7 +2714,8 @@
   }
   function chartPctLabel(p, step){
     if(p === 0){ return '0%'; }
-    var d = step >= 1 ? 0 : (step >= 0.1 ? 1 : 2);
+    // A step like 2.5 needs a decimal: rounded to whole numbers its ticks read -3, 0, +3, +5 and the axis looks unevenly spaced (the owner's screenshot, Oct 25, 2026).
+    var d = step >= 1 && Math.abs(step - Math.round(step)) < 1e-9 ? 0 : (step >= 0.1 ? 1 : 2);
     return (p > 0 ? '+' : '-') + Math.abs(p).toFixed(d) + '%';
   }
   // Central time's offset from UTC at a moment, in ms (negative), so hour and day ticks fall on Central clock hours and midnights.
@@ -3000,7 +3003,7 @@
     list.innerHTML = shown.length ? shown.map(function(x){
       return '<div class="kal-notif-item ' + x.level + (x.ts > lastRead ? ' unread' : '') + '"><span class="kal-notif-dot"></span><div><div class="kal-notif-title">' + escapeHtml(x.title) + '</div>' +
         (x.body ? '<div class="kal-notif-body">' + escapeHtml(x.body) + '</div>' : '') + '<div class="kal-notif-time">' + escapeHtml(kalDateTime(x.ts)) + '</div></div></div>';
-    }).join('') : '<div class="kal-notif-empty">' + (kalshiNotifTab === 'all' ? 'Nothing yet.' : 'Nothing important. Buys and wins are under Everything.') + '</div>';
+    }).join('') : '<div class="kal-notif-empty">' + (kalshiNotifTab === 'all' ? 'Nothing yet.' : 'Nothing important.') + '</div>';
     var ses = kalshiLiveCtl && kalshiLiveCtl.session, endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
     var stopText = kalshiStopReason(ses, endedEv, false, false, function(ms){ return kalshiWhen(ms, now); });
     var crit = kalshiCriticalNow(ses, orders, kalshiHeartbeat(ses, now).state, now, stopText);
@@ -3968,7 +3971,7 @@ kalshiStatusTick();
     { sym:'^RUT', name:'Russell 2000', kind:'index' }, { sym:'^TNX', name:'10Y yield', kind:'yield' }, { sym:'TLT', name:'Long bonds', kind:'etf' },
     { sym:'^VIX', name:'VIX', kind:'index' }, { sym:'GC=F', name:'Gold', kind:'future' }, { sym:'BTC-USD', name:'Bitcoin', kind:'crypto' }
   ];
-  var TAPE_STALE_MS = 20 * 60 * 1000;
+  var TAPE_STALE_MS = 45 * 60 * 1000;   // the tape is written every 15 minutes (it was every 5 until Oct 26, 2026), so three missed runs before the page says the feed may be down
   var marketTapeData = null;
   function tapeNews(){ return marketTapeData && marketTapeData.news && marketTapeData.news.length ? marketTapeData.news : null; }
   function tapeStateWord(s){ return s === 'pre' ? 'Pre-market' : (s === 'post' ? 'After hours' : (s === 'closed' ? 'Market closed' : 'Market open')); }
@@ -4025,16 +4028,18 @@ kalshiStatusTick();
     if(!q || !(q.price > 0) || !(q.prevClose > 0)){
       return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span></div><div class="brief-chart-px mono">&mdash;</div></div>';
     }
-    var fg = briefChartFigures(q.price, q.prevClose), up = fg.up;
-    var plot = '', xaxis = '';
     var raw = Array.isArray(q.series) ? q.series : [];
     var ser = raw.filter(function(v){ return typeof v === 'number' && isFinite(v); });
+    // A weekly line (range 7d, Oct 26, 2026, the owner: weekly charts) is measured from its own first point, so the move in the header and the dashed zero mean "since the start of the week". Without it (an older tape, or the weekly read failed) it is today's line against the previous close, as before.
+    var base = q.range === '7d' && ser.length >= 2 && ser[0] > 0 ? ser[0] : q.prevClose;
+    var fg = briefChartFigures(q.price, base), up = fg.up;
+    var plot = '', xaxis = '';
     briefChartQuotes[it.sym] = null;
     if(ser.length >= 2){
       // x: real time when the tape sent a timestamp for every point (seriesT), else even spacing; y: the move against the previous close, in percent, with the previous close as the dashed zero.
       var tms = Array.isArray(q.seriesT) && q.seriesT.length === ser.length && raw.length === ser.length && q.seriesT.every(function(v){ return typeof v === 'number' && isFinite(v); }) ? q.seriesT.map(function(v){ return v * 1000; }) : null;
       var xs = ser.map(function(v, i){ return tms && tms[ser.length - 1] > tms[0] ? (tms[i] - tms[0]) / (tms[ser.length - 1] - tms[0]) : i / (ser.length - 1); });
-      var pcs = ser.map(function(v){ return (v / q.prevClose - 1) * 100; });
+      var pcs = ser.map(function(v){ return (v / base - 1) * 100; });
       var lo = Math.min.apply(null, pcs.concat([0])), hi = Math.max.apply(null, pcs.concat([0]));
       if(hi - lo < 0.1){ hi += 0.05; lo -= 0.05; }
       var padp = (hi - lo) * 0.1; lo -= padp; hi += padp;
@@ -4047,9 +4052,9 @@ kalshiStatusTick();
       if(tms){
         xaxis = '<div class="brief-xaxis">' + chartTimeTicks(tms[0], tms[tms.length - 1], 3).map(function(tk){ var left = (tk.t - tms[0]) / (tms[tms.length - 1] - tms[0]) * 100; return '<span class="' + (left < 8 ? 'l' : (left > 92 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + escapeHtml(tk.label) + '</span>'; }).join('') + '</div>';
       } else {
-        xaxis = '<div class="brief-xaxis"><span class="l" style="left:0">Day start</span><span class="r" style="left:100%">Now</span></div>';
+        xaxis = '<div class="brief-xaxis"><span class="l" style="left:0">' + (q.range === '7d' ? 'Week start' : 'Day start') + '</span><span class="r" style="left:100%">Now</span></div>';
       }
-      briefChartQuotes[it.sym] = { ser: ser, xs: xs, ys: pcs.map(y), H: H, prev: q.prevClose, price: q.price };
+      briefChartQuotes[it.sym] = { ser: ser, xs: xs, ys: pcs.map(y), H: H, prev: base, price: q.price };
     }
     return '<div class="brief-chart" data-sym="' + escapeHtml(it.sym) + '"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span>' +
       '<span class="brief-chart-chg ' + (up ? 'up' : 'down') + '">' + fg.pctText + '</span></div>' +
@@ -4214,7 +4219,7 @@ kalshiStatusTick();
   function setNewsAndEarningsPending(){
     var newsEl = document.getElementById('marketNewsList');
     if(newsEl && /Sign in to see/.test(newsEl.textContent)){
-      newsEl.innerHTML = '<div class="news-placeholder">Waiting for the market snapshot — headlines come from the server\u2019s own 3-minute cycle, not this browser.</div>';
+      newsEl.innerHTML = '<div class="news-placeholder">Waiting for the market data.</div>';
     }
   }
 
