@@ -818,6 +818,7 @@
   .kal-fp .mk-entry, .kal-fp .mk-exit, .kal-fp .mk-close{ box-shadow:inset 2px 0 0 var(--paper); } .kal-fp .mk-exit{ box-shadow:inset 2px 0 0 var(--muted); } .kal-fp .mk-close{ box-shadow:inset 2px 0 0 rgba(255,255,255,.4); }
   .kal-fp-d{ display:flex; flex-direction:column; align-items:stretch; height:56px; font-size:11px; color:var(--muted); }
   .kal-fp-d .up, .kal-fp-d .dn{ flex:1; display:flex; } .kal-fp-d .up{ align-items:flex-end; } .kal-fp-d .up span{ display:block; width:100%; background:var(--paper); border-radius:2px 2px 0 0; } .kal-fp-d .dn span{ display:block; width:100%; background:var(--muted); border-radius:0 0 2px 2px; }
+  .kal-fp > .kal-fp-gap{ min-height:0; height:0; border-top:1px dashed rgba(255,255,255,.18); margin:3px 0; }
   .kal-fp-n{ font-size:11px; color:var(--muted); text-align:center; }
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
@@ -1494,6 +1495,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>Order flow is condensed: only prices that traded get a row, empty minutes before the first trade are dropped, gaps are marked (#579)</li>
                   <li>Order flow says what to do when its function is not deployed yet, instead of "internal" (#578)</li>
                   <li>Order flow: a read only footprint of one market's trades, per minute and per price, from the Bot page (#577)</li>
                   <li>The loss stop meter is a small line in the Account card instead of its own full-width panel (#576)</li>
@@ -2279,7 +2281,7 @@
   // ---- order flow: the footprint view (read only) ----
   // The owner, Oct 26, 2026: "build the footprint view". One market at a time; one column per minute, one row per YES price in cents; each cell is the contracts takers sold and bought there. The numbers come from the owner's
   // own function kalshiTape (public trades, admin only, GET only), only while the card is open, and nothing is written anywhere. Calm view: white and grey, no green or red.
-  var KAL_FP_MAX_ROWS = 40;
+  var KAL_FP_MAX_ROWS = 30;
   // The data -> the columns and rows to draw. Pure: no page state. span is how many minutes to show (the last ones). marks are minutes (ms) to flag: entry, exit and close.
   function kalshiFpModel(data, span, marks){
     var bars = (data && Array.isArray(data.bars)) ? data.bars.slice(-Math.max(1, Number(span) || 20)) : [];
@@ -2294,12 +2296,16 @@
       var mark = m.exit === tMs ? 'exit' : (m.entry === tMs ? 'entry' : (m.close === tMs ? 'close' : ''));
       return { t: tMs, levels: levels, delta: Number(b.delta) || 0, cum: Number(b.cum) || 0, mark: mark };
     });
-    var list = Object.keys(prices).map(Number).sort(function(a, b){ return b - a; }), cropped = false;
+    // Condensed (the owner, Oct 26, 2026: "not filling it up with all this pointless space"): only prices that actually traded in the minutes shown get a row, and the minutes before the first trade are left out. A busy market keeps its
+    // KAL_FP_MAX_ROWS busiest prices. Gaps between the rows are marked by the drawing, so a jump from 99c to 71c is not mistaken for neighbouring prices.
+    var list = Object.keys(prices).map(Number), cropped = false;
     if(list.length > KAL_FP_MAX_ROWS){
-      var busiest = list.slice().sort(function(a, b){ return volByPrice[b] - volByPrice[a]; })[0], at = list.indexOf(busiest);
-      var from = Math.max(0, Math.min(list.length - KAL_FP_MAX_ROWS, at - Math.floor(KAL_FP_MAX_ROWS / 2)));
-      list = list.slice(from, from + KAL_FP_MAX_ROWS); cropped = true;
+      list.sort(function(a, b){ return volByPrice[b] - volByPrice[a]; }); list = list.slice(0, KAL_FP_MAX_ROWS); cropped = true;
     }
+    list.sort(function(a, b){ return b - a; });
+    var first = 0;
+    while(first < cols.length - 1 && !Object.keys(cols[first].levels).length){ first++; }
+    cols = cols.slice(first);
     var maxDelta = cols.reduce(function(a, c){ return Math.max(a, Math.abs(c.delta)); }, 0);
     return { cols: cols, prices: list, cropped: cropped, any: any, maxDelta: maxDelta };
   }
@@ -2334,13 +2340,14 @@
     var close = kalshiCloseFromTicker(kalshiFpTicker), entry = null, exit = null;
     (kalshiLiveOrders || []).forEach(function(o){ if(o && o.strategy === 'L1' && o.ticker === kalshiFpTicker){ entry = Math.floor(o.ts / 60000) * 60000; if(Number.isFinite(o.exitAt)){ exit = Math.floor(o.exitAt / 60000) * 60000; } } });
     var model = kalshiFpModel(kalshiFpData, span, { entry: entry, exit: exit, close: close === null ? null : Math.floor(close / 60000) * 60000 - 60000 });
-    if(st){ st.textContent = (kalshiFpData.truncated ? 'Busy market: the oldest trades are left out. ' : '') + (model.cropped ? 'Showing the ' + KAL_FP_MAX_ROWS + ' prices around the busiest. ' : '') + 'Read ' + kalTime(kalshiFpData.fetchedAt) + ' CT'; }
+    if(st){ st.textContent = (kalshiFpData.truncated ? 'Busy market: the oldest trades are left out. ' : '') + (model.cropped ? 'Showing the ' + KAL_FP_MAX_ROWS + ' busiest prices. ' : '') + 'Read ' + kalTime(kalshiFpData.fetchedAt) + ' CT'; }
     if(!model.any){ body.innerHTML = '<div class="kal-empty">No trades in this window.</div>'; return; }
     var n = model.cols.length, cols = '40px repeat(' + n + ', minmax(54px, 1fr))';
     var cls = function(c){ return c.mark ? ' mk-' + c.mark : ''; };
     var markWord = { entry: 'Bought', exit: 'Sold', close: 'Close' };
     var h = '<div class="kal-fp-scroll"><div class="kal-fp" style="grid-template-columns:' + cols + '"><div class="kal-fp-h"></div>' + model.cols.map(function(c){ return '<div class="kal-fp-h' + cls(c) + '">' + escapeHtml(kalTime(c.t).replace(/ ?[AP]M$/, '')) + (c.mark ? '<br>' + markWord[c.mark] : '') + '</div>'; }).join('');
-    model.prices.forEach(function(px){
+    model.prices.forEach(function(px, i){
+      if(i > 0 && model.prices[i - 1] - px > 1){ h += '<div class="kal-fp-gap" style="grid-column:1 / -1"></div>'; }
       h += '<div class="kal-fp-p">' + px + 'c</div>' + model.cols.map(function(c){
         var lv = c.levels[px];
         return lv ? '<div class="kal-fp-c' + (lv.imb ? ' imb-' + lv.imb : '') + (lv.poc ? ' poc' : '') + cls(c) + '" title="' + escapeHtml(px + 'c, sold ' + lv.sell + ', bought ' + lv.buy) + '"><i>' + (lv.sell ? escapeHtml(kalshiFpNum(lv.sell)) : '') + '</i><b>' + (lv.buy ? escapeHtml(kalshiFpNum(lv.buy)) : '') + '</b></div>' : '<div class="kal-fp-c kal-fp-e' + cls(c) + '"></div>';
