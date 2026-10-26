@@ -6590,3 +6590,7 @@ Predicted: `FALSIFIED` all six, win rate below the price paid. Confirmed. The mo
 | Ethereum spot | -0.26 | 3.03 | 0 | BRK L168 H48: -0.121%, -0.338%, -1.049% |
 
 No survivor on either asset or mode. Every spot strategy is negative in discovery (0.60% round trip exceeds any slow edge, as predicted). The best perpetual strategies are positive before the family-wise test but not above its critical value (best t 1.02 against 3.15), and their holdout years are negative or near zero. The prediction (spot: nothing; perpetual: 25% to pass discovery plus confirmation) held on the first half and the perpetual best (Ethereum BRK L168 H48, +0.98% in 2024, +0.06% after) is a lead of the kind this log has seen before: one good year. 384 tries, running count about 14,930. Code `src/scalper/crypto1.py`, tests `tests/test_crypto1.py`. Nothing to build, and leverage does not change a negative or zero edge.
+
+### RECORD1 information look, 2026-10-26 14:00Z (decides nothing)
+
+17 runs landed, 685 windows caught, 154,975 polls, 429 share 0.0%, clocks ok. Qualifying trades 56 over 5 dates (need 300 over 10), so the registered read has not been run. Look verdict `NOT_ENOUGH_DATA`: mean +6.4c, z 1.41, stress +6.3c, 2 of 4 assets positive (not a result). Model, thresholds and claim unchanged.
