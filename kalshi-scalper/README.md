@@ -6561,3 +6561,19 @@ KX10 ideas 6 and 7. Both are classic favourite-longshot and public-bias question
 | 15 min | realised | 999 | 582 | -1.46c | -1.41 | -1.41 / -1.51 | 33.7% vs 0.340 |
 
 Predicted: `FALSIFIED` all six, win rate below the price paid. Confirmed. The model's picks win 32% to 38% of the time against 33% to 37% priced, so the hourly ladder (deep, 1c wide) is priced as well as the model prices it, and the model's "edges" are mostly the flat-volatility error in the wings. Count: 6 tries, about 14,546. Code `src/scalper/lad1.py`, tests `tests/test_lad1.py`. Nothing to build.
+
+## Pre-registration: CRYPTO1, slow Bitcoin and Ethereum strategies on spot and perpetual costs, 2019 to 2026 (written 2026-10-26 before any hourly bar was fetched; 384 tries, running count about 14,930)
+
+**Owner's request (2026-10-26):** trade the actual coins, perhaps with leverage, on a real exchange; "potentially an edge in the market". Earlier crypto work (Alpaca, 2026-08) died on cost: a 0.62% gross edge per trade against a 0.70% round trip. This tests whether anything slow enough to beat realistic costs exists, on 8 years of history instead of 82 days.
+
+**Data.** Deribit `BTC-PERPETUAL` (from 2019-01-01) and `ETH-PERPETUAL` (from its listing, about 2019-03) hourly bars (open, high, low, close) and hourly funding history, public and keyless, into `data/crypto1.sqlite`. Signals use only bars closed before the decision; the fill is the OPEN of the next hour.
+
+**Grid.** Rule families: MOM (long if the last L hours' return is positive, short if negative), REV (the opposite), BRK (long when the close exceeds the highest high of the previous L hours, short when it falls below the lowest low, else flat), VMOM (MOM only when the last 24 hour realised volatility is below its median over the previous 90 days). L = 6, 12, 24, 48, 96, 168 hours; hold H = 4, 12, 24, 48 hours; one position at a time, a new signal is taken only after the previous trade is closed. 4 rules x 6 L x 4 H = 96 strategies; 2 assets; 2 cost modes = **384 tries**. *Perpetual mode:* long and short, round-trip cost **0.14%** (0.05% taker fee each side plus 0.02% slippage each side) plus the actual hourly funding paid or received while held. *Spot mode:* long only (a short signal means flat), round-trip cost **0.60%** (0.30% each side, the top retail tier on most US spot exchanges), no funding.
+
+**What is scored.** Per trade: position x (return over the holding window minus the average return of all windows of the same length in the discovery years) minus costs. The subtraction removes the free ride a long-only rule gets from crypto's upward drift; it tests timing skill, not exposure. Daily P&L = the sum of the trades closed that day.
+
+**Splits.** Discovery 2019-01 to 2023-12, confirmation 2024, holdout 2025-01 to 2026-10.
+
+**Judging (Reality Check, per asset and cost mode, 1,000 resamples of 7-day blocks of discovery days).** Survivor needs: (1) discovery t above the 95th percentile of the best-of-96 maximum; at least 150 discovery trades; (2) confirmation mean net per trade above 0 with t at least 1.64; (3) positive with all costs x1.5 in discovery and confirmation; (4) holdout mean above 0 with t at least 1.0. Verdicts: `NOT_YET_FALSIFIED` all four, `NOT_ENOUGH_DATA` if the holdout fails, `FALSIFIED` otherwise. One run; refused a second time.
+
+**Prediction.** Spot mode: nothing survives (0.60% eats any slow edge). Perpetual mode: time-series momentum is documented in crypto before 2023 but has decayed; expected best discovery t about 3 to 3.5 near the Reality Check threshold; probability that at least one perpetual strategy passes discovery plus confirmation 25%, and clears the holdout 10%. If one survives it is a candidate for a paper test, not a deployment; leverage and live money are decisions for the owner in the build session after a four week paper log with kill rules registered first.
