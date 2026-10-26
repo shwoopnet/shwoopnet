@@ -17,7 +17,7 @@ const order = (extra) => Object.assign({ strategy: 'L1', series: 'KXBTC15M', tic
 // An entry, a sell and an issue each alert once, on the CHANGE; a rewrite with the same facts is silent; only L1 orders count.
 gates.P1 = () => {
   assert.deepStrictEqual(push.orderKinds(null, order()), [], 'an order sent but not filled is nothing yet');
-  assert.deepStrictEqual(push.orderKinds(order(), order({ fillCount: 4, status: 'filled' })), ['enter']);
+  assert.deepStrictEqual(push.orderKinds(order(), order({ fillCount: 4, status: 'filled' })), [], 'a buy never buzzes the phone (Oct 26, 2026)');
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4, status: 'filled' }), order({ fillCount: 4, status: 'filled', price: 0.93 })), [], 'the same facts again are silent');
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4 }), order({ fillCount: 4, exitStatus: 'sold' })), ['sell']);
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4 }), order({ fillCount: 4, exitStatus: 'partly sold' })), ['sell']);
@@ -25,11 +25,13 @@ gates.P1 = () => {
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4 }), order({ fillCount: 4, exitStatus: 'unknown' })), ['issue']);
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4 }), order({ fillCount: 4, exitStatus: 'no fill' })), ['issue']);
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4 }), order({ fillCount: 4, exitStatus: 'skipped' })), [], 'a position already gone is not an issue');
-  assert.deepStrictEqual(push.orderKinds(null, order({ fillCount: 4, status: 'filled' })), ['enter'], 'created already filled counts');
+  assert.deepStrictEqual(push.orderKinds(null, order({ fillCount: 4, status: 'filled' })), [], 'a buy created already filled is silent too');
   assert.deepStrictEqual(push.orderKinds(null, order({ strategy: 'OW1', fillCount: 4 })), [], 'only L1 orders alert');
   // A trade that finishes on its own alerts once, as a win or a loss; one the exit sold is a sell, not also a settlement; one already settled before the alerts existed stays silent.
   const held = order({ fillCount: 4, status: 'filled' });
-  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), ['settled']);
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), [], 'a win is silent');
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'no', settledPnl: -3.6 })), ['settled'], 'a loss still alerts');
+  assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', settled: true, result: 'no' })), ['settled'], 'a settlement with no readable amount still alerts, so a doubtful one is not hidden');
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4, status: 'filled', settled: true, result: 'yes' }), order({ fillCount: 4, status: 'filled', settled: true, result: 'yes', settledPnl: 0.24 })), [], 'rewritten after it settled: silent');
   assert.deepStrictEqual(push.orderKinds(order({ fillCount: 4, exitStatus: 'sold' }), order({ fillCount: 4, exitStatus: 'sold', settled: true, result: 'exit', settledPnl: -2.7 })), [], 'an exit already alerted as a sell, and result exit is not a settlement');
   assert.deepStrictEqual(push.orderKinds(held, order({ fillCount: 4, status: 'filled', exitStatus: 'sold', settled: true, result: 'exit', settledPnl: -2.7 })), ['sell'], 'sold and closed in one write is one sell alert');
