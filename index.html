@@ -783,7 +783,7 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"acct acct" "stat pnl" "pos pos" "trd trd"; gap:18px; }
+  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"acct acct" "stat pnl" "pos pos" "fp fp" "trd trd"; gap:18px; }
   .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
   .kal-console [data-card="account"]{ grid-area:acct; }
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
@@ -799,6 +799,26 @@
   .kal-ecg.quiet .kal-ecg-line{ stroke:var(--paper); }
   .kal-ecg.down .kal-ecg-line{ stroke:var(--loss); }
   .kal-ecg-gap{ stroke-width:2.2; vector-effect:non-scaling-stroke; stroke-dasharray:6 5; } .kal-ecg-gap.quiet{ stroke:var(--paper); } .kal-ecg-gap.down{ stroke:var(--loss); }
+
+  /* Order flow (the owner, Oct 26, 2026): a read only footprint of one market's trades. One column per minute, one row per YES price in cents; each cell is the contracts takers sold (left) and bought (right).
+     Calm view: white and grey only, no green or red, since order flow is a reading and not a verdict. */
+  #kalFpFold > summary{ cursor:pointer; list-style:none; } #kalFpFold > summary::-webkit-details-marker{ display:none; }
+  .kal-fp-bar{ display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin:12px 0; }
+  .kal-fp-scroll{ overflow-x:auto; padding-bottom:6px; }
+  .kal-fp{ display:grid; gap:2px; font-variant-numeric:tabular-nums; min-width:min-content; }
+  .kal-fp > div{ min-height:20px; }
+  .kal-fp-h{ font-size:11px; color:var(--muted); text-align:center; padding-bottom:2px; white-space:nowrap; }
+  .kal-fp-p{ font-size:11px; color:var(--muted); text-align:right; padding-right:6px; align-self:center; }
+  .kal-fp-c{ display:flex; justify-content:space-between; gap:4px; font-size:11px; padding:2px 5px; border-radius:3px; background:rgba(255,255,255,.04); min-width:0; }
+  .kal-fp-c i{ font-style:normal; color:var(--muted); } .kal-fp-c b{ font-weight:600; }
+  .kal-fp-c.imb-b{ background:rgba(255,255,255,.2); } .kal-fp-c.imb-b b{ color:var(--paper); }
+  .kal-fp-c.imb-s{ background:rgba(255,255,255,.1); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); } .kal-fp-c.imb-s i{ color:var(--paper); }
+  .kal-fp-c.poc{ outline:1px solid var(--paper); outline-offset:-1px; }
+  .kal-fp-e{ background:none; }
+  .kal-fp .mk-entry, .kal-fp .mk-exit, .kal-fp .mk-close{ box-shadow:inset 2px 0 0 var(--paper); } .kal-fp .mk-exit{ box-shadow:inset 2px 0 0 var(--muted); } .kal-fp .mk-close{ box-shadow:inset 2px 0 0 rgba(255,255,255,.4); }
+  .kal-fp-d{ display:flex; flex-direction:column; align-items:stretch; height:56px; font-size:11px; color:var(--muted); }
+  .kal-fp-d .up, .kal-fp-d .dn{ flex:1; display:flex; } .kal-fp-d .up{ align-items:flex-end; } .kal-fp-d .up span{ display:block; width:100%; background:var(--paper); border-radius:2px 2px 0 0; } .kal-fp-d .dn span{ display:block; width:100%; background:var(--muted); border-radius:0 0 2px 2px; }
+  .kal-fp-n{ font-size:11px; color:var(--muted); text-align:center; }
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
@@ -808,6 +828,7 @@
   .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-meter{ order:3; flex:0 0 100%; height:4px; border-radius:2px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:2px; } .kal-acct-risk .kal-hb{ order:2; font-size:13px; white-space:nowrap; margin:0; }
   .kal-console [data-card="pnl"]{ grid-area:pnl; align-self:stretch; }
   .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
+  .kal-console [data-card="footprint"]{ grid-area:fp; align-self:start; }
   .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
   .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; padding:0; }
@@ -820,7 +841,7 @@
   .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
-    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "trd"; }
+    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "fp" "trd"; }
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1; grid-row:auto; justify-self:stretch; max-width:none; }
   }
@@ -937,6 +958,7 @@
   const db = getFirestore(app);
   const functions = getFunctions(app);
   var kalshiBooksFn = httpsCallable(functions, 'kalshiBooks');
+  var kalshiTapeFn = httpsCallable(functions, 'kalshiTape');
   var kalshiL1SessionFn = httpsCallable(functions, 'kalshiL1Session');
   var kalshiFlattenAllFn = httpsCallable(functions, 'kalshiFlattenAll');
   var kalshiLiveAccountFn = httpsCallable(functions, 'kalshiLiveAccount');
@@ -1083,6 +1105,10 @@
     kalshiPushUnsubscribe: function(endpoint){ return kalshiPushUnsubscribeFn({ endpoint: endpoint }).then(function(res){ return res.data; }); },
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
+    },
+    // The footprint view's read (Oct 26, 2026): one market's public trades from the owner's own function, admin only, read only. toMs is the window's end (the close, or now while it is open).
+    kalshiTape: function(ticker, toMs){
+      return kalshiTapeFn({ ticker: String(ticker || ''), toMs: Number(toMs) || 0 }).then(function(res){ return res.data; });
     },
     // The recorder's stored order-book snapshots (one document per minute, admin read only), oldest first, from a time. At most 1,500 minutes.
     // The recorder's own heartbeat document (when it last ran and how many snapshots and errors it had).
@@ -1310,6 +1336,18 @@
         <div class="kal-card-title">Open positions</div>
         <div id="kalBotOpen"></div>
       </div>
+      <div class="kal-card" data-card="footprint">
+        <details id="kalFpFold">
+          <summary class="kal-card-title" style="margin:0">Order flow &#9662;</summary>
+          <div class="kal-fp-bar">
+            <label class="kal-lbl" for="kalFpMarket">Market <select class="kal-input" id="kalFpMarket" style="width:auto"></select></label>
+            <label class="kal-lbl" for="kalFpSpan">Show <select class="kal-input" id="kalFpSpan" style="width:auto"><option value="20">last 20 minutes</option><option value="40">last 40 minutes</option></select></label>
+            <span class="kal-note" id="kalFpStatus"></span>
+          </div>
+          <div id="kalFpBody"><div class="kal-empty">Open a market to read its trades.</div></div>
+          <div class="kal-note">Each cell: contracts takers sold on the left, bought on the right, at that YES price in cents. A bright cell is a 3 to 1 imbalance of at least 50 contracts; an outlined cell is the busiest price of its minute. Public trades only. This view reads and shows, it never trades.</div>
+        </details>
+      </div>
       </div>
       <div class="kal-main">
       <div class="kal-card" data-card="pnl" id="kalPnl">
@@ -1456,6 +1494,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>Order flow: a read only footprint of one market's trades, per minute and per price, from the Bot page (#PRNUM)</li>
                   <li>The loss stop meter is a small line in the Account card instead of its own full-width panel (#576)</li>
                   <li>Bot status says what today's orders did and whether the win rate beats break-even, with the best and worst market of the week (#575)</li>
                 </ul>
@@ -2235,6 +2274,112 @@
   function stopKalshiPoll(){
     if(kalshiPollTimer){ clearInterval(kalshiPollTimer); kalshiPollTimer = null; }
   }
+
+  // ---- order flow: the footprint view (read only) ----
+  // The owner, Oct 26, 2026: "build the footprint view". One market at a time; one column per minute, one row per YES price in cents; each cell is the contracts takers sold and bought there. The numbers come from the owner's
+  // own function kalshiTape (public trades, admin only, GET only), only while the card is open, and nothing is written anywhere. Calm view: white and grey, no green or red.
+  var KAL_FP_MAX_ROWS = 40;
+  // The data -> the columns and rows to draw. Pure: no page state. span is how many minutes to show (the last ones). marks are minutes (ms) to flag: entry, exit and close.
+  function kalshiFpModel(data, span, marks){
+    var bars = (data && Array.isArray(data.bars)) ? data.bars.slice(-Math.max(1, Number(span) || 20)) : [];
+    var m = marks || {}, prices = {}, volByPrice = {}, any = false;
+    var cols = bars.map(function(b){
+      var tMs = Number(b.t) * 1000, levels = {};
+      (b.l || []).forEach(function(r){
+        var s = Number(r[1]) || 0, bu = Number(r[2]) || 0;
+        levels[r[0]] = { sell: s, buy: bu, imb: bu >= 3 * Math.max(s, 1) && bu >= 50 ? 'b' : (s >= 3 * Math.max(bu, 1) && s >= 50 ? 's' : ''), poc: r[0] === b.poc };
+        prices[r[0]] = true; volByPrice[r[0]] = (volByPrice[r[0]] || 0) + s + bu; any = true;
+      });
+      var mark = m.exit === tMs ? 'exit' : (m.entry === tMs ? 'entry' : (m.close === tMs ? 'close' : ''));
+      return { t: tMs, levels: levels, delta: Number(b.delta) || 0, cum: Number(b.cum) || 0, mark: mark };
+    });
+    var list = Object.keys(prices).map(Number).sort(function(a, b){ return b - a; }), cropped = false;
+    if(list.length > KAL_FP_MAX_ROWS){
+      var busiest = list.slice().sort(function(a, b){ return volByPrice[b] - volByPrice[a]; })[0], at = list.indexOf(busiest);
+      var from = Math.max(0, Math.min(list.length - KAL_FP_MAX_ROWS, at - Math.floor(KAL_FP_MAX_ROWS / 2)));
+      list = list.slice(from, from + KAL_FP_MAX_ROWS); cropped = true;
+    }
+    var maxDelta = cols.reduce(function(a, c){ return Math.max(a, Math.abs(c.delta)); }, 0);
+    return { cols: cols, prices: list, cropped: cropped, any: any, maxDelta: maxDelta };
+  }
+  function kalshiFpNum(n){ n = Number(n) || 0; return n >= 10000 ? Math.round(n / 1000) + 'k' : (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(Math.round(n))); }
+  var kalshiFpData = null, kalshiFpTicker = '', kalshiFpTimer = null, kalshiFpBusy = false;
+  // The markets worth looking at: the ones open now (from the books read) and the bot's own recent ones, newest close first.
+  function kalshiFpMarkets(){
+    var seen = {}, out = [], now = Date.now();
+    var add = function(ticker, tag){
+      if(!ticker || seen[ticker]){ return; }
+      var close = kalshiCloseFromTicker(ticker); if(close === null){ return; }
+      seen[ticker] = true; out.push({ ticker: ticker, close: close, label: kalshiShortTicker(ticker) + (close > now ? ' (open)' : '') + (tag || '') });
+    };
+    ((kalshiBooksLast && kalshiBooksLast.markets) || []).forEach(function(mk){ if(mk && mk.ticker && /^KX(GOLD|XRP|BTC|DOGE|ETH)/.test(mk.ticker)){ add(mk.ticker, ''); } });
+    (kalshiLiveOrders || []).filter(function(o){ return o && o.strategy === 'L1' && o.ticker; }).sort(function(a, b){ return b.ts - a.ts; }).slice(0, 24).forEach(function(o){ add(o.ticker, ' (bot order)'); });
+    return out.sort(function(a, b){ return b.close - a.close; }).slice(0, 18);
+  }
+  function kalshiFpFillMarkets(){
+    var sel = document.getElementById('kalFpMarket'); if(!sel){ return; }
+    var list = kalshiFpMarkets(), keep = sel.value || kalshiFpTicker;
+    sel.innerHTML = list.map(function(x){ return '<option value="' + escapeHtml(x.ticker) + '">' + escapeHtml(x.label) + '</option>'; }).join('');
+    if(!list.length){ sel.innerHTML = '<option value="">No market yet</option>'; }
+    var still = list.some(function(x){ return x.ticker === keep; });
+    sel.value = still ? keep : (list.length ? list[0].ticker : '');
+    kalshiFpTicker = sel.value;
+  }
+  function renderKalshiFootprint(){
+    var body = document.getElementById('kalFpBody'), st = document.getElementById('kalFpStatus');
+    if(!body){ return; }
+    if(!kalshiFpData || kalshiFpData.ticker !== kalshiFpTicker){ body.innerHTML = '<div class="kal-empty">' + (kalshiFpBusy ? 'Reading the trades...' : 'Open a market to read its trades.') + '</div>'; return; }
+    var span = Number((document.getElementById('kalFpSpan') || {}).value) || 20;
+    var close = kalshiCloseFromTicker(kalshiFpTicker), entry = null, exit = null;
+    (kalshiLiveOrders || []).forEach(function(o){ if(o && o.strategy === 'L1' && o.ticker === kalshiFpTicker){ entry = Math.floor(o.ts / 60000) * 60000; if(Number.isFinite(o.exitAt)){ exit = Math.floor(o.exitAt / 60000) * 60000; } } });
+    var model = kalshiFpModel(kalshiFpData, span, { entry: entry, exit: exit, close: close === null ? null : Math.floor(close / 60000) * 60000 - 60000 });
+    if(st){ st.textContent = (kalshiFpData.truncated ? 'Busy market: the oldest trades are left out. ' : '') + (model.cropped ? 'Showing the ' + KAL_FP_MAX_ROWS + ' prices around the busiest. ' : '') + 'Read ' + kalTime(kalshiFpData.fetchedAt) + ' CT'; }
+    if(!model.any){ body.innerHTML = '<div class="kal-empty">No trades in this window.</div>'; return; }
+    var n = model.cols.length, cols = '40px repeat(' + n + ', minmax(54px, 1fr))';
+    var cls = function(c){ return c.mark ? ' mk-' + c.mark : ''; };
+    var markWord = { entry: 'Bought', exit: 'Sold', close: 'Close' };
+    var h = '<div class="kal-fp-scroll"><div class="kal-fp" style="grid-template-columns:' + cols + '"><div class="kal-fp-h"></div>' + model.cols.map(function(c){ return '<div class="kal-fp-h' + cls(c) + '">' + escapeHtml(kalTime(c.t).replace(/ ?[AP]M$/, '')) + (c.mark ? '<br>' + markWord[c.mark] : '') + '</div>'; }).join('');
+    model.prices.forEach(function(px){
+      h += '<div class="kal-fp-p">' + px + 'c</div>' + model.cols.map(function(c){
+        var lv = c.levels[px];
+        return lv ? '<div class="kal-fp-c' + (lv.imb ? ' imb-' + lv.imb : '') + (lv.poc ? ' poc' : '') + cls(c) + '" title="' + escapeHtml(px + 'c, sold ' + lv.sell + ', bought ' + lv.buy) + '"><i>' + (lv.sell ? escapeHtml(kalshiFpNum(lv.sell)) : '') + '</i><b>' + (lv.buy ? escapeHtml(kalshiFpNum(lv.buy)) : '') + '</b></div>' : '<div class="kal-fp-c kal-fp-e' + cls(c) + '"></div>';
+      }).join('');
+    });
+    var barH = function(v){ return model.maxDelta > 0 ? Math.max(2, Math.round(Math.abs(v) / model.maxDelta * 22)) : 0; };
+    h += '<div class="kal-fp-p">Delta</div>' + model.cols.map(function(c){ return '<div class="kal-fp-d' + cls(c) + '" title="' + escapeHtml('bought minus sold: ' + c.delta) + '"><div class="up">' + (c.delta > 0 ? '<span style="height:' + barH(c.delta) + 'px"></span>' : '') + '</div><div class="dn">' + (c.delta < 0 ? '<span style="height:' + barH(c.delta) + 'px"></span>' : '') + '</div></div>'; }).join('');
+    h += '<div class="kal-fp-p">Net</div>' + model.cols.map(function(c){ return '<div class="kal-fp-n' + cls(c) + '">' + escapeHtml((c.delta > 0 ? '+' : '') + kalshiFpNum(c.delta)) + '</div>'; }).join('');
+    h += '<div class="kal-fp-p">Total</div>' + model.cols.map(function(c){ return '<div class="kal-fp-n' + cls(c) + '">' + escapeHtml((c.cum > 0 ? '+' : '') + kalshiFpNum(c.cum)) + '</div>'; }).join('');
+    body.innerHTML = h + '</div></div>';
+  }
+  function loadKalshiFootprint(){
+    var api = window.__shwoopAPI, st = document.getElementById('kalFpStatus');
+    if(!api || !api.kalshiTape || !kalshiFpTicker || kalshiFpBusy){ return; }
+    var close = kalshiCloseFromTicker(kalshiFpTicker), ticker = kalshiFpTicker;
+    kalshiFpBusy = true; renderKalshiFootprint();
+    api.kalshiTape(ticker, close === null ? Date.now() : Math.min(close, Date.now())).then(function(d){
+      kalshiFpBusy = false; if(ticker !== kalshiFpTicker){ return; } kalshiFpData = d; renderKalshiFootprint();
+    }).catch(function(err){
+      kalshiFpBusy = false;
+      if(st){ st.textContent = 'Could not read the trades: ' + String((err && err.message) || 'unknown').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90); }
+      renderKalshiFootprint();
+    });
+  }
+  (function(){
+    var fold = document.getElementById('kalFpFold'), mk = document.getElementById('kalFpMarket'), sp = document.getElementById('kalFpSpan');
+    if(!fold){ return; }
+    fold.addEventListener('toggle', function(){
+      if(kalshiFpTimer){ clearInterval(kalshiFpTimer); kalshiFpTimer = null; }
+      if(!fold.open){ return; }
+      kalshiFpFillMarkets(); loadKalshiFootprint();
+      // Refreshed every 30 seconds while the card is open and on screen, and only for a market that has not closed: a finished window does not change.
+      kalshiFpTimer = setInterval(function(){
+        var close = kalshiCloseFromTicker(kalshiFpTicker);
+        if(!document.hidden && fold.offsetParent !== null && (close === null || close > Date.now() - 60000)){ loadKalshiFootprint(); }
+      }, 30000);
+    });
+    if(mk){ mk.addEventListener('change', function(){ kalshiFpTicker = mk.value; kalshiFpData = null; loadKalshiFootprint(); }); }
+    if(sp){ sp.addEventListener('change', renderKalshiFootprint); }
+  })();
 
   // ---- server bot tab (read only, plus one halt switch) ----
 
@@ -3429,7 +3574,7 @@ kalshiStatusTick();
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
+    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['footprint', 'Order flow'], ['trades', 'Recent trades']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');

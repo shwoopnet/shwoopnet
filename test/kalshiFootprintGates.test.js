@@ -1,0 +1,115 @@
+'use strict';
+// The order flow (footprint) view is a READING tool (the owner, Oct 26, 2026): it sums Kalshi's public trades per minute and per price and can never place an order, sign a request or write anything.
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const lib = require('../functions/kalshiFootprintLib');
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const server = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+const libSrc = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiFootprintLib.js'), 'utf8');
+const gates = {};
+
+function fnSource(name) {
+  const start = html.indexOf('function ' + name + '(');
+  assert.ok(start >= 0, name + ' exists');
+  let i = html.indexOf('{', html.indexOf(')', start)), depth = 0;
+  for (; i < html.length; i++) {
+    if (html[i] === '{') depth++;
+    else if (html[i] === '}' && --depth === 0) return html.slice(start, i + 1);
+  }
+  throw new Error('unbalanced ' + name);
+}
+const page = new Function('var KAL_FP_MAX_ROWS = 40;\n' + ['kalshiFpModel'].map(fnSource).join('\n') + '; return { kalshiFpModel };')();
+
+const T0 = Date.parse('2026-10-26T14:00:00Z');
+const MIN = 60000;
+const trade = (offsetMs, priceDollars, count, taker) => ({ created_time: new Date(T0 + offsetMs).toISOString(), yes_price_dollars: String(priceDollars), count_fp: String(count), taker_outcome_side: taker });
+
+gates.F1 = () => {
+  // A taker buying YES lifts the ask (a buy); a taker buying NO hits the bid (a sell). Reversing this would show the opposite market.
+  assert.deepStrictEqual(lib.parseTrade(trade(0, 0.93, 5, 'yes')), { ts: T0, price: 93, size: 5, side: 1 });
+  assert.deepStrictEqual(lib.parseTrade(trade(0, 0.93, 5, 'no')), { ts: T0, price: 93, size: 5, side: -1 });
+};
+gates.F2 = () => {
+  // Per minute and per price: sells, buys, delta, the running total and the busiest price.
+  const bars = lib.buildFootprint([
+    trade(1000, 0.93, 10, 'yes'), trade(2000, 0.93, 4, 'no'), trade(3000, 0.94, 3, 'yes'),
+    trade(MIN + 1000, 0.92, 20, 'no'),
+  ], T0, T0 + 2 * MIN);
+  assert.strictEqual(bars.length, 2, 'two minutes, none for the minute that starts at the end');
+  assert.deepStrictEqual(bars[0].l, [[93, 4, 10], [94, 0, 3]]);
+  assert.strictEqual(bars[0].delta, 9);
+  assert.strictEqual(bars[0].poc, 93);
+  assert.strictEqual(bars[1].delta, -20);
+  assert.strictEqual(bars[1].cum, -11, 'the running total carries over');
+};
+gates.F3 = () => {
+  // Quiet minutes stay in, so the page's columns line up with the clock.
+  const bars = lib.buildFootprint([trade(5 * MIN + 1000, 0.9, 1, 'yes')], T0, T0 + 8 * MIN);
+  assert.strictEqual(bars.length, 8);
+  assert.strictEqual(bars[2].l.length, 0);
+  assert.strictEqual(bars[2].poc, null);
+};
+gates.F4 = () => {
+  // Only a market the bot trades is accepted, and nothing else reaches Kalshi.
+  const allowed = ['KXGOLD15M', 'KXBTC15M'];
+  assert.ok(lib.validTicker('KXGOLD15M-26OCT261530-30', allowed));
+  assert.ok(!lib.validTicker('KXNFLGAME-26OCT261530-30', allowed), 'a series the bot does not trade');
+  assert.ok(!lib.validTicker('KXGOLD15M-26OCT261530-30&limit=1', allowed), 'no extra query text');
+  assert.ok(!lib.validTicker('', allowed) && !lib.validTicker(null, allowed));
+};
+gates.F5 = () => {
+  // The read is bounded in age: never older than 48 hours, never past a minute from now.
+  const now = T0;
+  assert.strictEqual(lib.readWindow(now + 3600000, now).toMs, now + 60000);
+  assert.strictEqual(lib.readWindow(now - 30 * 86400000, now).toMs, now - 48 * 3600000);
+  assert.strictEqual(lib.readWindow('junk', now).toMs, now);
+  assert.strictEqual(lib.readWindow(now, now).toMs - lib.readWindow(now, now).fromMs, lib.WINDOW_MS);
+};
+gates.F6 = () => {
+  // Garbage is dropped, not counted: bad prices, zero sizes, unknown taker sides.
+  assert.strictEqual(lib.parseTrade({ created_time: 'x', yes_price_dollars: '0.5', count_fp: '1', taker_outcome_side: 'yes' }), null);
+  assert.strictEqual(lib.parseTrade(trade(0, 1.2, 1, 'yes')), null);
+  assert.strictEqual(lib.parseTrade(trade(0, 0.5, 0, 'yes')), null);
+  assert.strictEqual(lib.parseTrade(trade(0, 0.5, 1, 'maybe')), null);
+  assert.deepStrictEqual(lib.parseTrade({ created_time: new Date(T0).toISOString(), yes_price: 93, count: 2, taker_side: 'no' }), { ts: T0, price: 93, size: 2, side: -1 }, 'the older cent fields still read');
+};
+gates.F7 = () => {
+  // The page model: a 3 to 1 imbalance of at least 50 contracts is flagged, a thin one is not, and the busiest price is outlined.
+  const data = { bars: [{ t: T0 / 1000, l: [[93, 10, 80], [94, 60, 10], [95, 4, 9]], buy: 99, sell: 74, delta: 25, cum: 25, poc: 93 }] };
+  const m = page.kalshiFpModel(data, 20, { entry: T0 });
+  assert.strictEqual(m.cols[0].levels[93].imb, 'b');
+  assert.strictEqual(m.cols[0].levels[94].imb, 's');
+  assert.strictEqual(m.cols[0].levels[95].imb, '', 'under 50 contracts is not an imbalance');
+  assert.strictEqual(m.cols[0].levels[93].poc, true);
+  assert.strictEqual(m.cols[0].mark, 'entry');
+  assert.deepStrictEqual(m.prices, [95, 94, 93], 'highest price first');
+};
+gates.F8 = () => {
+  // A wide market is cropped around its busiest price, and the page says so.
+  const levels = []; for (let p = 20; p <= 90; p++) levels.push([p, 1, 1 + (p === 60 ? 500 : 0)]);
+  const m = page.kalshiFpModel({ bars: [{ t: T0 / 1000, l: levels, buy: 0, sell: 0, delta: 0, cum: 0, poc: 60 }] }, 20);
+  assert.strictEqual(m.prices.length, 40);
+  assert.ok(m.cropped && m.prices.includes(60));
+  assert.strictEqual(page.kalshiFpModel(null, 20).any, false, 'no data is an empty view, not an error');
+};
+gates.F9 = () => {
+  // Read only, end to end. The function checks the admin first, makes only GET reads through the shared keyless helper, and the library holds no key or order code.
+  const fn = server.slice(server.indexOf('exports.kalshiTape'), server.indexOf('// ---- Kalshi market reads'));
+  assert.ok(fn.indexOf('assertKalshiAdmin') > 0 && fn.indexOf('assertKalshiAdmin') < fn.indexOf('validTicker'), 'admin first');
+  assert.ok(/kalshiGetJson\(/.test(fn) && !/method\s*:|POST|signRequest|PRIVATE|secret|setDoc|getFirestore|collection\(|\.doc\(/i.test(fn), 'GET reads only, no writes');
+  assert.ok(!/require\(|fetch\(|POST|PRIVATE|secret|sign/i.test(libSrc.replace(/\/\/.*$/gm, '')), 'the library only sums');
+};
+gates.F10 = () => {
+  // The page reaches the tape only through the owner's callable, only while the card is open, and the card is a fold that starts closed.
+  assert.ok(/httpsCallable\(functions, 'kalshiTape'\)/.test(html));
+  assert.ok(/<details id="kalFpFold">/.test(html) && !/<details id="kalFpFold" open/.test(html), 'closed by default');
+  assert.ok(/fold\.addEventListener\('toggle'/.test(html) && /if\(!fold\.open\)\{ return; \}/.test(html), 'nothing is read until it is opened');
+  assert.ok(!/api\.elections|external-api\.kalshi|trade-api/.test(html), 'the page names no Kalshi host');
+};
+
+let failed = 0;
+for (const [name, fn] of Object.entries(gates)) {
+  try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
+}
+if (failed) process.exit(1);
