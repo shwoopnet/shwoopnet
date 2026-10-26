@@ -6577,3 +6577,16 @@ Predicted: `FALSIFIED` all six, win rate below the price paid. Confirmed. The mo
 **Judging (Reality Check, per asset and cost mode, 1,000 resamples of 7-day blocks of discovery days).** Survivor needs: (1) discovery t above the 95th percentile of the best-of-96 maximum; at least 150 discovery trades; (2) confirmation mean net per trade above 0 with t at least 1.64; (3) positive with all costs x1.5 in discovery and confirmation; (4) holdout mean above 0 with t at least 1.0. Verdicts: `NOT_YET_FALSIFIED` all four, `NOT_ENOUGH_DATA` if the holdout fails, `FALSIFIED` otherwise. One run; refused a second time.
 
 **Prediction.** Spot mode: nothing survives (0.60% eats any slow edge). Perpetual mode: time-series momentum is documented in crypto before 2023 but has decayed; expected best discovery t about 3 to 3.5 near the Reality Check threshold; probability that at least one perpetual strategy passes discovery plus confirmation 25%, and clears the holdout 10%. If one survives it is a candidate for a paper test, not a deployment; leverage and live money are decisions for the owner in the build session after a four week paper log with kill rules registered first.
+
+## Result: CRYPTO1, slow Bitcoin and Ethereum strategies, 2019 to 2026 (run once on 2026-10-26): FALSIFIED
+
+7.8 years of hourly perpetual bars and funding (Bitcoin 68,522 bars, Ethereum 66,770). 384 strategies (MOM, REV, BRK, VMOM; L 6 to 168 hours; hold 4 to 48 hours; perpetual long and short at 0.14% round trip plus funding, spot long only at 0.60%). Score: position times (return minus the average same-length return in the discovery years) minus costs.
+
+| Asset and mode | Best discovery t | Reality Check 95th pct | Above it | Best strategy: per trade (discovery, confirmation, holdout) |
+|---|---|---|---|---|
+| Bitcoin perpetual | 1.02 | 3.15 | 0 | VMOM L48 H24: +0.099% (n 1,058), -0.069%, **-0.191% (t -1.93)** |
+| Bitcoin spot | -0.82 | 3.21 | 0 | BRK L168 H48: -0.318%, -0.005%, -0.952% |
+| Ethereum perpetual | 0.75 | 3.11 | 0 | BRK L168 H48: +0.292% (n 297), +0.982% (t 1.85), +0.064% (t 0.11) |
+| Ethereum spot | -0.26 | 3.03 | 0 | BRK L168 H48: -0.121%, -0.338%, -1.049% |
+
+No survivor on either asset or mode. Every spot strategy is negative in discovery (0.60% round trip exceeds any slow edge, as predicted). The best perpetual strategies are positive before the family-wise test but not above its critical value (best t 1.02 against 3.15), and their holdout years are negative or near zero. The prediction (spot: nothing; perpetual: 25% to pass discovery plus confirmation) held on the first half and the perpetual best (Ethereum BRK L168 H48, +0.98% in 2024, +0.06% after) is a lead of the kind this log has seen before: one good year. 384 tries, running count about 14,930. Code `src/scalper/crypto1.py`, tests `tests/test_crypto1.py`. Nothing to build, and leverage does not change a negative or zero edge.
