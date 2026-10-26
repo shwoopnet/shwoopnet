@@ -116,6 +116,45 @@ gates.F10 = () => {
   assert.ok(!/api\.elections|external-api\.kalshi|trade-api/.test(html), 'the page names no Kalshi host');
 };
 
+gates.F11 = () => {
+  // The whole-series view: only a series the bot trades, only 30 or 60 minutes, and the window ends where the single-market window would.
+  const allowed = ['KXGOLD15M', 'KXBTC15M'];
+  assert.ok(lib.validSeries('KXGOLD15M', allowed) && !lib.validSeries('KXNFLGAME', allowed) && !lib.validSeries('KXGOLD15M-26OCT261045-30', allowed) && !lib.validSeries(null, allowed));
+  const w60 = lib.seriesWindow(60, T0, T0), w30 = lib.seriesWindow(30, T0, T0);
+  assert.strictEqual(w60.toMs - w60.fromMs, 60 * MIN);
+  assert.strictEqual(w30.toMs - w30.fromMs, 30 * MIN);
+  assert.strictEqual(lib.seriesWindow(1000, T0, T0).spanMin, 30, 'any other span becomes 30 minutes');
+  assert.strictEqual(lib.seriesWindow(60, T0 - 30 * 86400000, T0).toMs, T0 - 48 * 3600000, 'still no older than 48 hours');
+};
+gates.F12 = () => {
+  // The windows of a series come from Kalshi's market list: only this series, only markets that overlap the span, oldest first, at most six.
+  const close = (m) => new Date(T0 + m * MIN).toISOString();
+  let seq = 1000;
+  const mk = (series, m) => ({ ticker: series + '-26OCT26' + (seq++) + '-30', close_time: close(m) });
+  const list = [mk('KXGOLD15M', 15), mk('KXGOLD15M', 0), mk('KXGOLD15M', -15), mk('KXGOLD15M', -45), mk('KXGOLD15M', -75), mk('KXBTC15M', 0), { ticker: 'KXGOLD15M-bad', close_time: close(0) }, { ticker: 'KXGOLD15M-26OCT261045-30', close_time: 'x' }];
+  const w = lib.windowsFromMarkets(list, 'KXGOLD15M', T0 - 60 * MIN, T0);
+  assert.deepStrictEqual(w.map((x) => x.closeMs - T0), [-45 * MIN, -15 * MIN, 0], 'a market opens 15 minutes before it closes: it must start before the span ends and close after it begins');
+  assert.ok(w.every((x) => x.ticker.startsWith('KXGOLD15M-')), 'only this series');
+  const many = Array.from({ length: 12 }, (_, i) => mk('KXGOLD15M', -i * 5));
+  assert.ok(lib.windowsFromMarkets(many, 'KXGOLD15M', T0 - 90 * MIN, T0 + 15 * MIN).length <= 6);
+};
+gates.F13 = () => {
+  // The page model flags several entries, exits and closes at once (a stitched hour holds several windows) and honours a larger row cap.
+  const bars = [0, 1, 2].map((i) => ({ t: T0 / 1000 + i * 60, l: [[90 + i, 5, 5]], buy: 5, sell: 5, delta: 0, cum: 0, poc: 90 + i }));
+  const m = page.kalshiFpModel({ bars }, 60, { entries: [T0], closes: [T0 + 2 * MIN], exits: [] });
+  assert.deepStrictEqual(m.cols.map((c) => c.mark), ['entry', '', 'close']);
+  const levels = []; for (let p = 20; p <= 79; p++) levels.push([p, 1, 5]);
+  const big = page.kalshiFpModel({ bars: [{ t: T0 / 1000, l: levels, buy: 0, sell: 0, delta: 0, cum: 0, poc: 20 }] }, 60, null, 40);
+  assert.strictEqual(big.prices.length, 40);
+  assert.strictEqual(big.maxRows, 40);
+};
+gates.F14 = () => {
+  // The page offers each live series as a whole, with 30 minute and one hour spans for it and 20 and 40 minute spans for one market; it still reads only through the owner's callable.
+  assert.ok(/KAL_FP_SERIES = \[\['KXGOLD15M', 'Gold'\]/.test(html) && /last 30 minutes/.test(html) && /last hour/.test(html));
+  assert.ok(/series: key\.slice\(7\), spanMin: spanSel/.test(html));
+  assert.ok(/body = r\.series \? \{ series: String\(r\.series\), spanMin: Number\(r\.spanMin\) \|\| 30 \}/.test(html));
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

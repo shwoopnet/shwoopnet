@@ -1108,8 +1108,11 @@
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     },
     // The footprint view's read (Oct 26, 2026): one market's public trades from the owner's own function, admin only, read only. toMs is the window's end (the close, or now while it is open).
-    kalshiTape: function(ticker, toMs){
-      return kalshiTapeFn({ ticker: String(ticker || ''), toMs: Number(toMs) || 0 }).then(function(res){ return res.data; });
+    // Either one market ({ ticker, toMs }) or a whole series over the last 30 or 60 minutes ({ series, spanMin }), stitched across its 15 minute windows.
+    kalshiTape: function(req){
+      var r = req || {};
+      var body = r.series ? { series: String(r.series), spanMin: Number(r.spanMin) || 30 } : { ticker: String(r.ticker || ''), toMs: Number(r.toMs) || 0 };
+      return kalshiTapeFn(body).then(function(res){ return res.data; });
     },
     // The recorder's stored order-book snapshots (one document per minute, admin read only), oldest first, from a time. At most 1,500 minutes.
     // The recorder's own heartbeat document (when it last ran and how many snapshots and errors it had).
@@ -1495,6 +1498,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>Order flow can show a whole series over the last 30 minutes or hour, stitched across its 15 minute windows (#PRNUM)</li>
                   <li>Order flow is condensed: only prices that traded get a row, empty minutes before the first trade are dropped, gaps are marked (#579)</li>
                   <li>Order flow says what to do when its function is not deployed yet, instead of "internal" (#578)</li>
                   <li>Order flow: a read only footprint of one market's trades, per minute and per price, from the Bot page (#577)</li>
@@ -2283,7 +2287,7 @@
   // own function kalshiTape (public trades, admin only, GET only), only while the card is open, and nothing is written anywhere. Calm view: white and grey, no green or red.
   var KAL_FP_MAX_ROWS = 30;
   // The data -> the columns and rows to draw. Pure: no page state. span is how many minutes to show (the last ones). marks are minutes (ms) to flag: entry, exit and close.
-  function kalshiFpModel(data, span, marks){
+  function kalshiFpModel(data, span, marks, maxRows){
     var bars = (data && Array.isArray(data.bars)) ? data.bars.slice(-Math.max(1, Number(span) || 20)) : [];
     var m = marks || {}, prices = {}, volByPrice = {}, any = false;
     var cols = bars.map(function(b){
@@ -2293,25 +2297,30 @@
         levels[r[0]] = { sell: s, buy: bu, imb: bu >= 3 * Math.max(s, 1) && bu >= 50 ? 'b' : (s >= 3 * Math.max(bu, 1) && s >= 50 ? 's' : ''), poc: r[0] === b.poc };
         prices[r[0]] = true; volByPrice[r[0]] = (volByPrice[r[0]] || 0) + s + bu; any = true;
       });
-      var mark = m.exit === tMs ? 'exit' : (m.entry === tMs ? 'entry' : (m.close === tMs ? 'close' : ''));
+      var has = function(one, many){ return one === tMs || (Array.isArray(many) && many.indexOf(tMs) > -1); };
+      var mark = has(m.exit, m.exits) ? 'exit' : (has(m.entry, m.entries) ? 'entry' : (has(m.close, m.closes) ? 'close' : ''));
       return { t: tMs, levels: levels, delta: Number(b.delta) || 0, cum: Number(b.cum) || 0, mark: mark };
     });
     // Condensed (the owner, Oct 26, 2026: "not filling it up with all this pointless space"): only prices that actually traded in the minutes shown get a row, and the minutes before the first trade are left out. A busy market keeps its
     // KAL_FP_MAX_ROWS busiest prices. Gaps between the rows are marked by the drawing, so a jump from 99c to 71c is not mistaken for neighbouring prices.
     var list = Object.keys(prices).map(Number), cropped = false;
-    if(list.length > KAL_FP_MAX_ROWS){
-      list.sort(function(a, b){ return volByPrice[b] - volByPrice[a]; }); list = list.slice(0, KAL_FP_MAX_ROWS); cropped = true;
+    var cap = Number(maxRows) > 0 ? Number(maxRows) : KAL_FP_MAX_ROWS;
+    if(list.length > cap){
+      list.sort(function(a, b){ return volByPrice[b] - volByPrice[a]; }); list = list.slice(0, cap); cropped = true;
     }
     list.sort(function(a, b){ return b - a; });
     var first = 0;
     while(first < cols.length - 1 && !Object.keys(cols[first].levels).length){ first++; }
     cols = cols.slice(first);
     var maxDelta = cols.reduce(function(a, c){ return Math.max(a, Math.abs(c.delta)); }, 0);
-    return { cols: cols, prices: list, cropped: cropped, any: any, maxDelta: maxDelta };
+    return { cols: cols, prices: list, cropped: cropped, any: any, maxDelta: maxDelta, maxRows: cap };
   }
   function kalshiFpNum(n){ n = Number(n) || 0; return n >= 10000 ? Math.round(n / 1000) + 'k' : (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(Math.round(n))); }
   var kalshiFpData = null, kalshiFpTicker = '', kalshiFpTimer = null, kalshiFpBusy = false;
-  // The markets worth looking at: the ones open now (from the books read) and the bot's own recent ones, newest close first.
+  // The five markets the bot trades for real, by series: choosing one shows its last 30 minutes or hour stitched across its 15 minute windows (the owner, Oct 26, 2026: "we work in 15 min increments").
+  var KAL_FP_SERIES = [['KXGOLD15M', 'Gold'], ['KXXRP15M', 'XRP'], ['KXBTC15M', 'Bitcoin'], ['KXDOGE15M', 'Dogecoin'], ['KXETH15M', 'Ethereum']];
+  function kalshiFpIsSeries(v){ return String(v || '').indexOf('series:') === 0; }
+  // The markets worth looking at: the whole series first, then the ones open now (from the books read) and the bot's own recent ones, newest close first.
   function kalshiFpMarkets(){
     var seen = {}, out = [], now = Date.now();
     var add = function(ticker, tag){
@@ -2321,28 +2330,40 @@
     };
     ((kalshiBooksLast && kalshiBooksLast.markets) || []).forEach(function(mk){ if(mk && mk.ticker && /^KX(GOLD|XRP|BTC|DOGE|ETH)/.test(mk.ticker)){ add(mk.ticker, ''); } });
     (kalshiLiveOrders || []).filter(function(o){ return o && o.strategy === 'L1' && o.ticker; }).sort(function(a, b){ return b.ts - a.ts; }).slice(0, 24).forEach(function(o){ add(o.ticker, ' (bot order)'); });
-    return out.sort(function(a, b){ return b.close - a.close; }).slice(0, 18);
+    var single = out.sort(function(a, b){ return b.close - a.close; }).slice(0, 18);
+    var whole = KAL_FP_SERIES.map(function(x){ return { ticker: 'series:' + x[0], label: x[1] + ', all windows' }; });
+    return whole.concat(single);
+  }
+  function kalshiFpFillSpans(){
+    var sp = document.getElementById('kalFpSpan'); if(!sp){ return; }
+    var series = kalshiFpIsSeries(kalshiFpTicker), keep = sp.value;
+    var opts = series ? [['30', 'last 30 minutes'], ['60', 'last hour']] : [['20', 'last 20 minutes'], ['40', 'last 40 minutes']];
+    sp.innerHTML = opts.map(function(o){ return '<option value="' + escapeHtml(o[0]) + '">' + escapeHtml(o[1]) + '</option>'; }).join('');
+    sp.value = opts.some(function(o){ return o[0] === keep; }) ? keep : opts[0][0];
   }
   function kalshiFpFillMarkets(){
     var sel = document.getElementById('kalFpMarket'); if(!sel){ return; }
     var list = kalshiFpMarkets(), keep = sel.value || kalshiFpTicker;
     sel.innerHTML = list.map(function(x){ return '<option value="' + escapeHtml(x.ticker) + '">' + escapeHtml(x.label) + '</option>'; }).join('');
-    if(!list.length){ sel.innerHTML = '<option value="">No market yet</option>'; }
     var still = list.some(function(x){ return x.ticker === keep; });
     sel.value = still ? keep : (list.length ? list[0].ticker : '');
     kalshiFpTicker = sel.value;
+    kalshiFpFillSpans();
   }
   function renderKalshiFootprint(){
     var body = document.getElementById('kalFpBody'), st = document.getElementById('kalFpStatus');
     if(!body){ return; }
-    if(!kalshiFpData || kalshiFpData.ticker !== kalshiFpTicker){ body.innerHTML = '<div class="kal-empty">' + (kalshiFpBusy ? 'Reading the trades...' : 'Open a market to read its trades.') + '</div>'; return; }
-    var span = Number((document.getElementById('kalFpSpan') || {}).value) || 20;
-    var close = kalshiCloseFromTicker(kalshiFpTicker), entry = null, exit = null;
-    (kalshiLiveOrders || []).forEach(function(o){ if(o && o.strategy === 'L1' && o.ticker === kalshiFpTicker){ entry = Math.floor(o.ts / 60000) * 60000; if(Number.isFinite(o.exitAt)){ exit = Math.floor(o.exitAt / 60000) * 60000; } } });
-    var model = kalshiFpModel(kalshiFpData, span, { entry: entry, exit: exit, close: close === null ? null : Math.floor(close / 60000) * 60000 - 60000 });
-    if(st){ st.textContent = (kalshiFpData.truncated ? 'Busy market: the oldest trades are left out. ' : '') + (model.cropped ? 'Showing the ' + KAL_FP_MAX_ROWS + ' busiest prices. ' : '') + 'Read ' + kalTime(kalshiFpData.fetchedAt) + ' CT'; }
+    var series = kalshiFpIsSeries(kalshiFpTicker), spanSel = Number((document.getElementById('kalFpSpan') || {}).value) || (series ? 30 : 20);
+    var fits = kalshiFpData && (series ? (kalshiFpData.series && 'series:' + kalshiFpData.series === kalshiFpTicker && kalshiFpData.spanMin === spanSel) : kalshiFpData.ticker === kalshiFpTicker);
+    if(!fits){ body.innerHTML = '<div class="kal-empty">' + (kalshiFpBusy ? 'Reading the trades...' : 'Open a market to read its trades.') + '</div>'; return; }
+    var marks = { entries: [], exits: [], closes: [] }, tickers = {};
+    if(series){ (kalshiFpData.windows || []).forEach(function(w){ tickers[w.ticker] = true; marks.closes.push(Math.floor(w.closeMs / 60000) * 60000 - 60000); }); }
+    else { tickers[kalshiFpTicker] = true; var cl = kalshiCloseFromTicker(kalshiFpTicker); if(cl !== null){ marks.closes.push(Math.floor(cl / 60000) * 60000 - 60000); } }
+    (kalshiLiveOrders || []).forEach(function(o){ if(o && o.strategy === 'L1' && tickers[o.ticker]){ marks.entries.push(Math.floor(o.ts / 60000) * 60000); if(Number.isFinite(o.exitAt)){ marks.exits.push(Math.floor(o.exitAt / 60000) * 60000); } } });
+    var model = kalshiFpModel(kalshiFpData, spanSel, marks, series ? 40 : KAL_FP_MAX_ROWS);
+    if(st){ st.textContent = (series ? (kalshiFpData.windows || []).length + ' windows. ' : '') + (kalshiFpData.truncated ? 'Busy market: the oldest trades are left out. ' : '') + (model.cropped ? 'Showing the ' + model.maxRows + ' busiest prices. ' : '') + 'Read ' + kalTime(kalshiFpData.fetchedAt) + ' CT'; }
     if(!model.any){ body.innerHTML = '<div class="kal-empty">No trades in this window.</div>'; return; }
-    var n = model.cols.length, cols = '40px repeat(' + n + ', minmax(54px, 1fr))';
+    var n = model.cols.length, cols = '40px repeat(' + n + ', minmax(' + (n > 45 ? 42 : 54) + 'px, 1fr))';
     var cls = function(c){ return c.mark ? ' mk-' + c.mark : ''; };
     var markWord = { entry: 'Bought', exit: 'Sold', close: 'Close' };
     var h = '<div class="kal-fp-scroll"><div class="kal-fp" style="grid-template-columns:' + cols + '"><div class="kal-fp-h"></div>' + model.cols.map(function(c){ return '<div class="kal-fp-h' + cls(c) + '">' + escapeHtml(kalTime(c.t).replace(/ ?[AP]M$/, '')) + (c.mark ? '<br>' + markWord[c.mark] : '') + '</div>'; }).join('');
@@ -2362,10 +2383,12 @@
   function loadKalshiFootprint(){
     var api = window.__shwoopAPI, st = document.getElementById('kalFpStatus');
     if(!api || !api.kalshiTape || !kalshiFpTicker || kalshiFpBusy){ return; }
-    var close = kalshiCloseFromTicker(kalshiFpTicker), ticker = kalshiFpTicker;
+    var key = kalshiFpTicker, series = kalshiFpIsSeries(key), spanSel = Number((document.getElementById('kalFpSpan') || {}).value) || (series ? 30 : 20);
+    var close = series ? null : kalshiCloseFromTicker(key);
     kalshiFpBusy = true; renderKalshiFootprint();
-    api.kalshiTape(ticker, close === null ? Date.now() : Math.min(close, Date.now())).then(function(d){
-      kalshiFpBusy = false; if(ticker !== kalshiFpTicker){ return; } kalshiFpData = d; renderKalshiFootprint();
+    var req = series ? { series: key.slice(7), spanMin: spanSel } : { ticker: key, toMs: close === null ? Date.now() : Math.min(close, Date.now()) };
+    api.kalshiTape(req).then(function(d){
+      kalshiFpBusy = false; if(key !== kalshiFpTicker){ return; } kalshiFpData = d; renderKalshiFootprint();
     }).catch(function(err){
       kalshiFpBusy = false;
       // "internal" or "not found" from a callable means the function is not reachable, which is what an undeployed one looks like (the owner's first read, Oct 26, 2026): say what to do instead of the bare word.
@@ -2382,14 +2405,14 @@
       if(kalshiFpTimer){ clearInterval(kalshiFpTimer); kalshiFpTimer = null; }
       if(!fold.open){ return; }
       kalshiFpFillMarkets(); loadKalshiFootprint();
-      // Refreshed every 30 seconds while the card is open and on screen, and only for a market that has not closed: a finished window does not change.
+      // Refreshed every 30 seconds while the card is open and on screen. A whole series is always live; one market stops when it has closed, since a finished window does not change.
       kalshiFpTimer = setInterval(function(){
-        var close = kalshiCloseFromTicker(kalshiFpTicker);
+        var close = kalshiFpIsSeries(kalshiFpTicker) ? null : kalshiCloseFromTicker(kalshiFpTicker);
         if(!document.hidden && fold.offsetParent !== null && (close === null || close > Date.now() - 60000)){ loadKalshiFootprint(); }
       }, 30000);
     });
-    if(mk){ mk.addEventListener('change', function(){ kalshiFpTicker = mk.value; kalshiFpData = null; loadKalshiFootprint(); }); }
-    if(sp){ sp.addEventListener('change', renderKalshiFootprint); }
+    if(mk){ mk.addEventListener('change', function(){ kalshiFpTicker = mk.value; kalshiFpData = null; kalshiFpFillSpans(); loadKalshiFootprint(); }); }
+    if(sp){ sp.addEventListener('change', function(){ if(kalshiFpIsSeries(kalshiFpTicker)){ kalshiFpData = null; loadKalshiFootprint(); } else { renderKalshiFootprint(); } }); }
   })();
 
   // ---- server bot tab (read only, plus one halt switch) ----
