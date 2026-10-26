@@ -52,7 +52,15 @@ def fetch() -> None:
             for i in range(0, len(items), 50):
                 batch = items[i:i + 50]
                 lo, hi = min(c for _, c in batch) - PRE_FROM, max(c for _, c in batch) - PRE_TO
-                got = api.batch_candlesticks([m["ticker"] for m, _ in batch], lo, hi)
+                try:
+                    got = api.batch_candlesticks([m["ticker"] for m, _ in batch], lo, hi)
+                except RuntimeError:                  # a bad batch (the endpoint answers 400): ask ticker by ticker with its own window and skip any that still fail
+                    got = {}
+                    for m, c in batch:
+                        try:
+                            got.update(api.batch_candlesticks([m["ticker"]], c - PRE_FROM, c - PRE_TO))
+                        except RuntimeError:
+                            pass
                 for m, c in batch:
                     t = m["ticker"]
                     rows = [r for r in (backfill.parse_candle(x, t, series) for x in got.get(t, [])) if r and c - PRE_FROM <= r[2] <= c - PRE_TO]
