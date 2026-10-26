@@ -46,13 +46,16 @@ const UA = "Mozilla/5.0 (compatible; shwoopnet-market-tape)";
 
 const num = (v) => { const x = Number(v); return v !== null && v !== undefined && v !== "" && Number.isFinite(x) ? x : null; };
 
+// range 1d at 5 minutes is the quote (price, previous close, session state); range 7d at 1 hour is the Brief chart (Oct 26, 2026, the owner: weekly charts, updated less often, to cut cost).
 function chartUrl(sym, range) {
-  return "https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?range=" + (range || "1d") + "&interval=5m&includePrePost=true";
+  const r = range || "1d";
+  return "https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?range=" + r + "&interval=" + (r === "7d" ? "1h" : "5m") + "&includePrePost=true";
 }
 
 // One Yahoo chart answer to one quote. null when the answer has no usable price or previous close: a half quote is never stored. `state` is where the trading day stands for
 // that instrument (the chart meta carries the pre, regular and post periods); instruments without periods (crypto, some futures) report "open".
-function parseChart(json, nowMs, fallbackJson) {
+function parseChart(json, nowMs, fallbackJson, weeklyJson) {
+  const weeklyResult = weeklyJson && weeklyJson.chart && Array.isArray(weeklyJson.chart.result) ? weeklyJson.chart.result[0] : null;
   const fallbackResult = fallbackJson && fallbackJson.chart && Array.isArray(fallbackJson.chart.result) ? fallbackJson.chart.result[0] : null;
   const r = json && json.chart && Array.isArray(json.chart.result) ? json.chart.result[0] : null;
   const m = r && r.meta;
@@ -70,10 +73,15 @@ function parseChart(json, nowMs, fallbackJson) {
     else if (p.post && t >= p.regular.end && t < p.post.end) state = "post";
     else state = "closed";
   }
-  let pts = chartPoints(r);
-  if (!pts.series.length && fallbackResult) pts = chartPoints(lastSession(fallbackResult));
+  // The chart is the week when the weekly answer has one; the quote above stays today's, so the header strip keeps its daily move. Otherwise it is today's line, as before.
+  let pts = chartPoints(r), range;
+  const week = weeklyResult ? chartPoints(weeklyResult) : null;
+  if (week && week.series.length >= 2) { pts = week; range = "7d"; }
+  else if (!pts.series.length && fallbackResult) pts = chartPoints(lastSession(fallbackResult));
   // seriesT (Oct 24, 2026, the owner: charts with a real time axis): the unix second of each point in `series`, same thinning, so the page can label the x axis. [] whenever the answer carried no timestamps.
-  return { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state, series: pts.series, seriesT: pts.times };
+  const out = { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state, series: pts.series, seriesT: pts.times };
+  if (range) out.range = range;
+  return out;
 }
 
 // The day's closes for the Brief's small charts: numbers only, gaps dropped, thinned to at most SERIES_MAX points. [] when the answer has none, so a chart simply does not draw.
@@ -190,11 +198,10 @@ async function readTape({ fetchFn, now }) {
   await Promise.all(SYMBOLS.map(async (s) => {
     try {
       const json = JSON.parse(await getText(fetchFn, chartUrl(s.sym)));
-      let q = parseChart(json, nowMs);
-      if (q && !q.series.length) {
-        // Closed market, no bars today: ask for 5 days and keep the last session. A failure here leaves the price-only quote as it was.
-        try { q = parseChart(json, nowMs, JSON.parse(await getText(fetchFn, chartUrl(s.sym, "5d")))) || q; } catch (e) { /* keep q */ }
-      }
+      // The week for the Brief chart. A failure here leaves today's quote and today's line as they were.
+      let week = null;
+      try { week = JSON.parse(await getText(fetchFn, chartUrl(s.sym, "7d"))); } catch (e) { /* today's line */ }
+      const q = parseChart(json, nowMs, week, week);
       if (!q) throw new Error("no usable price");
       quotes[s.sym] = q;
     } catch (e) { errors.push(s.sym + ": " + String((e && e.message) || e).slice(0, 80)); }

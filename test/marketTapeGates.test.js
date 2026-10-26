@@ -68,7 +68,7 @@ gates.T3 = async () => {
 // The scheduled function holds no secret, places nothing, merges quotes one symbol at a time, and only writes what it read.
 gates.T4 = () => {
   const fn = idx.slice(idx.indexOf('exports.marketTapeTick = onSchedule'), idx.indexOf('exports.kalshiLiveExit = onSchedule'));
-  assert.ok(/schedule: "every 5 minutes"/.test(fn), 'every 5 minutes');
+  assert.ok(/schedule: "every 15 minutes"/.test(fn), 'every 15 minutes (it was every 5 until Oct 26, 2026, to cut cost)');
   assert.ok(!/secrets:|KALSHI|signRequest|\/portfolio|createOrder|process\.env/.test(fn), 'no secret, no key, no order code');
   assert.ok(/\.set\(patch, \{ merge: true \}\)/.test(fn) && /if \(Object\.keys\(r\.quotes\)\.length\) patch\.quotes = r\.quotes;/.test(fn) && /if \(r\.news\) patch\.news = r\.news;/.test(fn), 'merged, and quotes and news only when something was read');
   assert.ok(/collection\("shared"\)\.doc\("marketTape"\)/.test(fn), 'the one shared document');
@@ -84,7 +84,7 @@ const lift = () => {
   assert.ok(items, 'TAPE_ITEMS');
   const src = ['tapeStateWord', 'tapeAsOfText', 'tapeItemHtml', 'tapeNews'].map(fnSource).join('\n');
   return new Function('kalTime', 'kalDate', 'pct', 'marketTapeData',
-    'var TAPE_STALE_MS = 20 * 60 * 1000; var TAPE_ITEMS = ' + items[1] + ';\n' + src + '\nreturn { TAPE_ITEMS, tapeAsOfText, tapeItemHtml, tapeStateWord, tapeNews };')(
+    'var TAPE_STALE_MS = 45 * 60 * 1000; var TAPE_ITEMS = ' + items[1] + ';\n' + src + '\nreturn { TAPE_ITEMS, tapeAsOfText, tapeItemHtml, tapeStateWord, tapeNews };')(
     (ms) => 'T' + ms, (ms) => 'D' + ms, (a, b) => (a - b) / b * 100, { news: [{ headline: 'x' }] });
 };
 gates.T5 = () => {
@@ -160,6 +160,16 @@ gates.T21c = () => {
   assert.strictEqual(q.seriesT.length, 4, 'with its times');
   const own = lib.parseChart(chart({ indicators: { quote: [{ close: [7, 8] }] } }), NOW, five);
   assert.deepStrictEqual(own.series, [7, 8], "today's own bars win over the fallback");
+};
+// The Brief chart is the week (Oct 26, 2026, the owner: weekly charts, updated less often): the quote stays today's, the line comes from the 7 day read, marked range 7d. No weekly answer: today's line, no marker.
+gates.T21d = () => {
+  assert.ok(/range=7d&interval=1h/.test(lib.chartUrl('BTC-USD', '7d')) && /range=1d&interval=5m/.test(lib.chartUrl('BTC-USD')), 'one read for the quote, one for the week');
+  const week = { chart: { result: [{ indicators: { quote: [{ close: [100, 101, 102, 103] }] }, timestamp: [1000, 4600, 8200, 11800] }] } };
+  const today = chart({ indicators: { quote: [{ close: [9, 10] }] }, timestamp: [1, 2] });
+  const q = lib.parseChart(today, NOW, week, week);
+  assert.deepStrictEqual([q.series, q.seriesT, q.range, q.prevClose], [[100, 101, 102, 103], [1000, 4600, 8200, 11800], '7d', q.prevClose], 'the line is the week, marked');
+  const d = lib.parseChart(today, NOW, null, null);
+  assert.ok(d.range === undefined && d.series.length === 2, 'no weekly answer keeps today\'s line and no marker');
 };
 gates.T22 = () => {
   const syms = lib.SYMBOLS.map((s) => s.sym);
