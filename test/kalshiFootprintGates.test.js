@@ -150,7 +150,7 @@ gates.F13 = () => {
 };
 gates.F14 = () => {
   // The page offers each live series as a whole, with 30 minute and one hour spans for it and 20 and 40 minute spans for one market; it still reads only through the owner's callable.
-  assert.ok(/KAL_FP_SERIES = \[\['KXGOLD15M', 'Gold'\]/.test(html) && /last 15 minutes/.test(html) && /last 30 minutes/.test(html) && /last hour/.test(html));
+  assert.ok(/KAL_FP_SERIES = \[\['KXGOLD15M', 'Gold'\]/.test(html) && /Last 15 minutes/.test(html) && /Last 30 minutes/.test(html) && /Last hour/.test(html));
   assert.ok(/series: key\.slice\(7\), spanMin: Math\.max\(30, spanSel\)/.test(html), 'a 15 minute view reads 30 minutes and shows the last 15');
   assert.ok(/body = r\.series \? \{ series: String\(r\.series\), spanMin: Number\(r\.spanMin\) \|\| 30 \}/.test(html));
 };
