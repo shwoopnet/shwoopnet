@@ -134,6 +134,14 @@ gates.B8 = () => {
   assert.ok(/localStorage\.setItem\('shwoopnet:hideLogo'/.test(sw) && !/setDoc|updateDoc|fetch\(/.test(sw), 'kept in this browser, never the account');
 };
 
+// Wording (the owner, Oct 26, 2026: "remove this text. do a once over for useless" filler): captions that only restate what is on screen stay out.
+gates.B9 = () => {
+  assert.ok(!/in a row, latest first/.test(code) && !/Display preferences\./.test(code) && !/return later today/.test(code), 'the filler captions are gone');
+  assert.ok(!/Waiting for the market snapshot\s*\u2014/.test(code) && !/Waiting for the market snapshot -/.test(code), 'no long explanation (and no em dash) in the empty news state');
+  assert.ok(!/<i><u><\/u>Data<\/i>/.test(code), 'the sign-in preview does not list the removed Data page');
+  assert.ok(/\(sub \? '<div class="kal-mini-s">'/.test(code), 'a tile with no caption draws no empty line');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

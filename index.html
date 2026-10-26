@@ -1143,8 +1143,8 @@
         <p class="front-line"><b>Shwoop Financials builds systematic trading tools:</b> rules written in advance, run by software, reviewed by people.</p>
       </section>
       <div class="front-shots">
-        <div class="front-win front-win-b" aria-hidden="true"><div class="win"><div class="win-rail"><i class="on"><u></u>Brief</i><i><u></u>Bot</i><i><u></u>Data</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Market Brief</b><span class="win-pill win-live">Sample data</span></div><div class="win-hl"><span class="win-head">Sample headline goes here</span><span class="win-sub">A second sample line sits under it</span></div></div><div class="win-ix"><div class="win-tile"><small>Index 1</small><b>1,234.56</b></div><div class="win-tile"><small>Index 2</small><b>2,345.67</b></div><div class="win-tile"><small>Index 3</small><b>3,456.78</b></div><div class="win-tile"><small>Index 4</small><b>4,567.89</b></div></div></div></div></div>
-        <div class="front-win front-win-a" aria-hidden="true"><div class="win"><div class="win-rail"><i><u></u>Brief</i><i class="on"><u></u>Bot</i><i><u></u>Data</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Account</b><span class="win-pill win-live">Sample data</span></div><div class="win-num">$1,234.56</div><div class="win-row"><span>Stake per trade</span><b>Sample</b></div><div class="win-row"><span>Reinvest pool</span><b>$12.34</b></div></div><div class="win-tiles"><div class="win-tile"><small>Settled</small><b>12</b></div><div class="win-tile"><small>Open</small><b>3</b></div></div></div></div></div>
+        <div class="front-win front-win-b" aria-hidden="true"><div class="win"><div class="win-rail"><i class="on"><u></u>Brief</i><i><u></u>Bot</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Market Brief</b><span class="win-pill win-live">Sample data</span></div><div class="win-hl"><span class="win-head">Sample headline goes here</span><span class="win-sub">A second sample line sits under it</span></div></div><div class="win-ix"><div class="win-tile"><small>Index 1</small><b>1,234.56</b></div><div class="win-tile"><small>Index 2</small><b>2,345.67</b></div><div class="win-tile"><small>Index 3</small><b>3,456.78</b></div><div class="win-tile"><small>Index 4</small><b>4,567.89</b></div></div></div></div></div>
+        <div class="front-win front-win-a" aria-hidden="true"><div class="win"><div class="win-rail"><i><u></u>Brief</i><i class="on"><u></u>Bot</i><i><u></u>Settings</i></div><div class="win-main"><div class="win-card"><div class="win-ct"><b>Account</b><span class="win-pill win-live">Sample data</span></div><div class="win-num">$1,234.56</div><div class="win-row"><span>Stake per trade</span><b>Sample</b></div><div class="win-row"><span>Reinvest pool</span><b>$12.34</b></div></div><div class="win-tiles"><div class="win-tile"><small>Settled</small><b>12</b></div><div class="win-tile"><small>Open</small><b>3</b></div></div></div></div></div>
       </div>
       <p class="front-sample">Sample screens with made-up numbers, shown for illustration only. They are not real account data or results.</p>
     </main>
@@ -1330,7 +1330,6 @@
     <div class="trades-header">
       <div>
         <div class="trades-title">Settings</div>
-        <div class="trades-sub">Display preferences.</div>
       </div>
     </div>
 
@@ -1359,7 +1358,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Default landing page</div>
-              <div class="settings-row-desc">What opens when you return later today.</div>
+              <div class="settings-row-desc">What opens first.</div>
             </div>
             <div class="settings-choice-group" id="landingChoice">
               <button class="tf-btn" data-value="auto">Auto</button>
@@ -1436,7 +1435,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-title">Hide logo</div>
-              <div class="settings-row-desc">Hides the Shwoop Financials logo in the header, for presenting the site as project work. Stays on after a reload, on this device, until you switch it off.</div>
+              <div class="settings-row-desc">Hides the Shwoop Financials logo in the header, for presenting. Stays on after a reload, on this device, until you switch it off.</div>
             </div>
             <button class="settings-toggle-switch" id="hideLogoToggle" role="switch" aria-checked="false" aria-label="Toggle hide logo">
               <span class="toggle-knob"></span>
@@ -1455,6 +1454,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 25</div>
                 <ul class="changelog-list">
+                  <li>Wording cleaned up: tiles and Settings lose filler text, the sign-in preview no longer lists the removed Data page (#572)</li>
                   <li>Settings has a Hide logo switch for presenting the site (#569)</li>
                   <li>Every order logs the size at the price it hits and its share of it, logging only (#568)</li>
                   <li>Notification panel has a Clear button (#567)</li>
@@ -2109,12 +2109,12 @@
   }
   function kalshiTradeStatsHtml(st, money){
     if(!st || !st.settled){ return ''; }
-    var tile = function(k, v, sub){ return '<div class="kal-mini-tile"><div class="kal-mini-k">' + k + '</div><div class="kal-mini-v">' + v + '</div><div class="kal-mini-s">' + sub + '</div></div>'; };
+    var tile = function(k, v, sub){ return '<div class="kal-mini-tile"><div class="kal-mini-k">' + k + '</div><div class="kal-mini-v">' + v + '</div>' + (sub ? '<div class="kal-mini-s">' + sub + '</div>' : '') + '</div>'; };
     return '<div class="kal-tr-stats">' +
       tile('Win rate', Math.round(st.wins / st.settled * 100) + '%', st.wins + ' of ' + st.settled + ' settled') +
-      tile('Streak', st.streak + (st.streakKind === 'win' ? (st.streak === 1 ? ' win' : ' wins') : (st.streak === 1 ? ' loss' : ' losses')), 'in a row, latest first') +
+      tile('Streak', st.streak + (st.streakKind === 'win' ? (st.streak === 1 ? ' win' : ' wins') : (st.streak === 1 ? ' loss' : ' losses')), '') +
       tile('Early sells', String(st.early), 'of ' + st.total + ' trades') +
-      (st.fees !== null ? tile('Fees paid', money(st.fees), 'last 24 hours') : tile('Last 24 hours', String(st.total), st.total === 1 ? 'trade' : 'trades')) + '</div>';
+      (st.fees !== null ? tile('Fees paid', money(st.fees), 'last 24 hours') : tile('Last 24 hours', String(st.total), '')) + '</div>';
   }
 
 
@@ -2999,7 +2999,7 @@
     list.innerHTML = shown.length ? shown.map(function(x){
       return '<div class="kal-notif-item ' + x.level + (x.ts > lastRead ? ' unread' : '') + '"><span class="kal-notif-dot"></span><div><div class="kal-notif-title">' + escapeHtml(x.title) + '</div>' +
         (x.body ? '<div class="kal-notif-body">' + escapeHtml(x.body) + '</div>' : '') + '<div class="kal-notif-time">' + escapeHtml(kalDateTime(x.ts)) + '</div></div></div>';
-    }).join('') : '<div class="kal-notif-empty">' + (kalshiNotifTab === 'all' ? 'Nothing yet.' : 'Nothing important. Buys and wins are under Everything.') + '</div>';
+    }).join('') : '<div class="kal-notif-empty">' + (kalshiNotifTab === 'all' ? 'Nothing yet.' : 'Nothing important.') + '</div>';
     var ses = kalshiLiveCtl && kalshiLiveCtl.session, endedEv = kalshiLiveEvents.filter(function(e){ return e && e.kind === 'session ended'; })[0];
     var stopText = kalshiStopReason(ses, endedEv, false, false, function(ms){ return kalshiWhen(ms, now); });
     var crit = kalshiCriticalNow(ses, orders, kalshiHeartbeat(ses, now).state, now, stopText);
@@ -4213,7 +4213,7 @@ kalshiStatusTick();
   function setNewsAndEarningsPending(){
     var newsEl = document.getElementById('marketNewsList');
     if(newsEl && /Sign in to see/.test(newsEl.textContent)){
-      newsEl.innerHTML = '<div class="news-placeholder">Waiting for the market snapshot — headlines come from the server\u2019s own 3-minute cycle, not this browser.</div>';
+      newsEl.innerHTML = '<div class="news-placeholder">Waiting for the market data.</div>';
     }
   }
 
