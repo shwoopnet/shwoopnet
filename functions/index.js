@@ -54,6 +54,7 @@ const book = require("./kalshiBookLib");
 const marketTape = require("./marketTapeLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
+const footprint = require("./kalshiFootprintLib");
 const paper = require("./kalshiPaperLib");
 const push = require("./kalshiPushLib");
 const webpush = require("web-push");
@@ -170,6 +171,47 @@ exports.kalshiBooks = onCall(async (request) => {
     if (e instanceof HttpsError) throw e;
     console.error("kalshiBooks failed:", e);
     throw new HttpsError("unavailable", "Relay error: " + String((e && e.message) || e).slice(0, 120));
+  }
+});
+
+// The footprint view on the Bot page (the owner, Oct 26, 2026): per minute and per YES price, how much the takers sold and bought, from Kalshi's PUBLIC trade tape. Admin only, GET only, keyless,
+// read only: it never signs a request, touches the account or writes anything. Only a market the bot trades is accepted (see validTicker), and one read is bounded in pages and age.
+const KALSHI_TAPE_CACHE_MS = 15000;
+const kalshiTapeCache = new Map();
+exports.kalshiTape = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const data = request.data || {};
+  const ticker = String(data.ticker || "");
+  if (!footprint.validTicker(ticker, live.L1_SERIES)) {
+    throw new HttpsError("invalid-argument", "That is not a market the bot trades.");
+  }
+  const now = Date.now();
+  const win = footprint.readWindow(data.toMs, now);
+  const key = ticker + "|" + Math.floor(win.toMs / KALSHI_TAPE_CACHE_MS);
+  const hit = kalshiTapeCache.get(key);
+  if (hit && now - hit.at < KALSHI_TAPE_CACHE_MS) return hit.body;
+  try {
+    const trades = [];
+    let cursor = "";
+    let truncated = false;
+    for (let page = 0; page < footprint.MAX_PAGES; page++) {
+      const q = "/markets/trades?ticker=" + encodeURIComponent(ticker) + "&min_ts=" + Math.floor(win.fromMs / 1000) + "&max_ts=" + Math.ceil(win.toMs / 1000) +
+        "&limit=" + footprint.PAGE_LIMIT + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
+      const body = await kalshiGetJson(q);
+      const got = Array.isArray(body && body.trades) ? body.trades : [];
+      got.forEach((t) => trades.push(t));
+      cursor = body && body.cursor ? String(body.cursor) : "";
+      if (!cursor || !got.length) break;
+      if (page === footprint.MAX_PAGES - 1) truncated = true;
+    }
+    const out = { ticker, fromMs: win.fromMs, toMs: win.toMs, fetchedAt: now, trades: trades.length, truncated, bars: footprint.buildFootprint(trades, win.fromMs, win.toMs) };
+    if (kalshiTapeCache.size > 40) kalshiTapeCache.clear();
+    kalshiTapeCache.set(key, { at: now, body: out });
+    return out;
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    console.error("kalshiTape failed:", e);
+    throw new HttpsError("unavailable", "Trade tape error: " + String((e && e.message) || e).slice(0, 120));
   }
 });
 
