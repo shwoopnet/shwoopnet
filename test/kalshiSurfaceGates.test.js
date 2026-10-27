@@ -16,40 +16,41 @@ function fnSource(name) {
   }
   throw new Error('unbalanced ' + name);
 }
-const VARS = /var KAL_SURF_MIN = [^\n]*\n/.exec(html)[0];
+const VARS = /var KAL_SURF_MIN = [^\n]*\n/.exec(html)[0] + /var KAL_SURF_DETAIL = \{[\s\S]*?\n  \};\n/.exec(html)[0];
 const f = new Function("var KAL_TZ = 'America/Chicago';\n" + VARS + ['kalCentralHour', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPricePaid', 'kalshiEdgeModel'].map(fnSource).join('\n') + '; return { kalshiEdgeModel, kalshiPricePaid };')();
 const T0 = Date.parse('2026-10-26T18:00:00Z');   // 1 PM Central, inside the 12p block
 const mk = (over) => Object.assign({ strategy: 'L1', series: 'KXGOLD15M', side: 'yes', count: 1, fillCount: '1', averageFillPrice: '0.93', maxCost: 0.93, settled: true, settledPnl: 0.06, result: 'yes', ts: T0, entryLead: '6m' }, over);
 const many = (n, over) => Array.from({ length: n }, () => mk(over));
-const cell = (m, hourBlock, cents) => m.cells[hourBlock][m.cols.indexOf(cents)];
+const FINE = { detail: 'fine' };
+const cell = (m, hourBlock, cents) => m.cells[hourBlock][cents === 88 ? 0 : cents - 88];   // fine bins: 88c or less, then 89 to 96, then 97c or more
 
 gates.S1 = () => {
   // A NO buy is written by Kalshi at the YES price: 7c on the book is 93c paid. Read as it stands it would sit in the 7c column, which does not exist, and the whole NO side of the record would vanish from the chart.
   assert.strictEqual(Math.round(f.kalshiPricePaid(mk({ side: 'no', averageFillPrice: '0.07' })) * 100), 93);
-  const m = f.kalshiEdgeModel(many(10, { side: 'no', averageFillPrice: '0.07', result: 'no' }));
+  const m = f.kalshiEdgeModel(many(10, { side: 'no', averageFillPrice: '0.07', result: 'no' }), FINE);
   assert.strictEqual(cell(m, 4, 93).n, 10, 'ten NO orders at 93c paid land in the 93c column at 12p');
   assert.strictEqual(m.outside, 0);
 };
 gates.S2 = () => {
   // The honest part: a cell under the minimum carries no edge and is not readable, so the page never draws a hill out of a handful of trades.
-  const m = f.kalshiEdgeModel(many(9, {}));
+  const m = f.kalshiEdgeModel(many(9, {}), FINE);
   const c = cell(m, 4, 93);
   assert.deepStrictEqual([c.n, c.ok, c.edge, c.win], [9, false, null, null]);
   assert.strictEqual(m.okCells, 0);
-  const m2 = f.kalshiEdgeModel(many(10, {}));
+  const m2 = f.kalshiEdgeModel(many(10, {}), FINE);
   assert.strictEqual(cell(m2, 4, 93).ok, true);
 };
 gates.S3 = () => {
   // Height is the net result per contract: 8 wins of 6c and 2 losses of 93c over 10 one-contract orders is (0.48 - 1.86) / 10 = -13.8c.
   const o = many(8, {}).concat(many(2, { settledPnl: -0.93, result: 'no' }));
-  const c = cell(f.kalshiEdgeModel(o), 4, 93);
+  const c = cell(f.kalshiEdgeModel(o, FINE), 4, 93);
   assert.ok(Math.abs(c.edge - (-13.8)) < 1e-9, 'edge ' + c.edge);
   assert.strictEqual(c.win, 80);
 };
 gates.S4 = () => {
   // Orders that are not the bot's outcome stay out: hand closed, unsettled, another strategy, outside the band.
   const o = many(10, {}).concat([mk({ result: 'hand' }), mk({ settled: false, settledPnl: null }), mk({ strategy: 'OW1' }), mk({ averageFillPrice: '0.5', maxCost: 0.5 })]);
-  const m = f.kalshiEdgeModel(o);
+  const m = f.kalshiEdgeModel(o, FINE);
   assert.strictEqual(m.n, 10);
   assert.strictEqual(m.outside, 1);
 };
@@ -62,10 +63,21 @@ gates.S5 = () => {
 };
 gates.S6 = () => {
   // Time of day is US Central, not the browser's: 1 PM Central is the 12p block wherever the page is opened.
-  const m = f.kalshiEdgeModel(many(10, { ts: Date.parse('2026-10-26T18:00:00Z') }));
+  const m = f.kalshiEdgeModel(many(10, { ts: Date.parse('2026-10-26T18:00:00Z') }), FINE);
   assert.strictEqual(cell(m, 4, 93).n, 10);
-  const m2 = f.kalshiEdgeModel(many(10, { ts: Date.parse('2026-10-27T05:30:00Z') }));   // 12:30 AM Central
+  const m2 = f.kalshiEdgeModel(many(10, { ts: Date.parse('2026-10-27T05:30:00Z') }), FINE);   // 12:30 AM Central
   assert.strictEqual(cell(m2, 0, 93).n, 10);
+};
+gates.S9 = () => {
+  // The default is wide cells (the live record is a few hundred trades, and at 10 by 8 nearly every cell was a hole): 5 price bands by 4 parts of the day. The end bands take every price beyond them, so a trade bought at 86c or 99c is kept.
+  const o = many(10, {}).concat(many(10, { averageFillPrice: '0.86', maxCost: 0.86 }), many(10, { averageFillPrice: '0.99', maxCost: 0.99 }));
+  const m = f.kalshiEdgeModel(o);
+  assert.deepStrictEqual([m.cols.length, m.rows.length], [5, 4]);
+  assert.strictEqual(m.cells[2][2].n, 10, '93c at 1 PM Central is the 92 to 93c band in the 12p block');
+  assert.strictEqual(m.cells[2][0].n, 10, '86c lands in the 88c or less band');
+  assert.strictEqual(m.cells[2][4].n, 10, '99c lands in the 96c or more band');
+  assert.strictEqual(m.n, 30);
+  assert.strictEqual(m.outside, 0);
 };
 gates.S7 = () => {
   // It reads and draws and nothing else: no call to the server API, no storage, no timers, no animation, no order or setting words, and the card sits in the console grid.

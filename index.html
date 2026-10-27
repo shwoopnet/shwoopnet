@@ -1381,10 +1381,11 @@
           <div class="kal-fp-bar">
             <label class="kal-lbl" for="kalSfMarket">Market <select class="kal-input" id="kalSfMarket" style="width:auto"></select></label>
             <label class="kal-lbl" for="kalSfLead">Bought <select class="kal-input" id="kalSfLead" style="width:auto"><option value="all">At any time</option><option value="10m">10 minutes before</option><option value="6m">6 minutes before</option></select></label>
+            <label class="kal-lbl" for="kalSfDetail">Detail <select class="kal-input" id="kalSfDetail" style="width:auto"><option value="coarse">Wide cells</option><option value="fine">Fine cells</option></select></label>
             <span class="kal-note" id="kalSfStatus"></span>
           </div>
           <div id="kalSfBody"><div class="kal-empty">Open this to read the orders.</div></div>
-          <div class="kal-note">Each point is the bot's settled trades at that price paid (across) and Central time of day it was bought (down, three hour blocks); its height is the net result in cents per contract after fees, white above zero and red below. A cell with fewer than 10 trades is a hole in the surface. Touch or hover a point for its trades and win rate. This looks back at what already happened: it does not place, size or change any order, and a pattern here is a question for the research session, not a rule.</div>
+          <div class="kal-note">Each point is the bot's settled trades at that price paid (across, in bands; the end bands take everything beyond them) and Central time of day it was bought (down, three hour blocks); its height is the net result in cents per contract after fees, white above zero and red below. A cell with fewer than 10 trades is a hole in the surface. Touch or hover a point for its trades and win rate. This looks back at what already happened: it does not place, size or change any order, and a pattern here is a question for the research session, not a rule.</div>
         </details>
       </div>
       </div>
@@ -1534,6 +1535,7 @@
                 <div class="changelog-day">Oct 27</div>
                 <ul class="changelog-list">
                   <li>Bot page: "Where the edge is", a read only look at what the bot earned by price paid and time of day, as a surface you can turn; thin cells are left as holes (#590)</li>
+                  <li>Where the edge is: wide cells by default, so a few hundred trades are enough to draw a surface, and trades bought just outside 88c to 97c are kept (#591)</li>
                   <li>Brief charts: the line no longer runs straight across a weekend gap, and the hover dot sits on the line on a big monitor (also fixed on the Account result line) (#589)</li>
                   <li>On a big monitor the whole page scales up and centres instead of staying a small block in the left corner</li>
                 </ul>
@@ -2478,14 +2480,20 @@
   // The edge surface (the owner, Oct 27, 2026: "build out our own formational chart ... with a REAL strategy behind it"). Where does L1 actually earn? Every settled order of the bot is put in a cell by the price it PAID for the side
   // bought (88c to 97c, across) and the Central time of day it was bought (three hour blocks, down); a cell's height is its net result in cents per contract after fees. A cell with fewer than KAL_SURF_MIN trades is left blank, never
   // drawn: a landscape fitted to thin data is the same trap as the backtests that were withdrawn. It reads the orders the page already holds, writes nothing and changes no order. It is a reading tool, not a signal.
-  var KAL_SURF_MIN = 10, KAL_SURF_PRICES = [88, 89, 90, 91, 92, 93, 94, 95, 96, 97], KAL_SURF_BLOCKS = 8, KAL_SURF_LABELS = ['12a', '3a', '6a', '9a', '12p', '3p', '6p', '9p'];
+  var KAL_SURF_MIN = 10, KAL_SURF_MAXPX = 100, KAL_SURF_MINPX = 80;
+  // Cells are wide by default (5 prices by 4 parts of the day) because the live record is a few hundred trades: at 10 by 8 most cells held under 10 trades and the surface was holes (the owner's first live look, Oct 27, 2026). The end bins take every
+  // price beyond them (down to 80c and up to 100c) so no trade is dropped for being bought just outside the 88c to 97c band. Fine (10 by 8) is for when the record has grown.
+  var KAL_SURF_DETAIL = {
+    coarse: { px: [[0, 89, '88c or less'], [90, 91, '90 to 91c'], [92, 93, '92 to 93c'], [94, 95, '94 to 95c'], [96, 100, '96c or more']], labels: ['12a', '6a', '12p', '6p'] },
+    fine: { px: [[0, 88, '88c or less'], [89, 89, '89c'], [90, 90, '90c'], [91, 91, '91c'], [92, 92, '92c'], [93, 93, '93c'], [94, 94, '94c'], [95, 95, '95c'], [96, 96, '96c'], [97, 100, '97c or more']], labels: ['12a', '3a', '6a', '9a', '12p', '3p', '6p', '9p'] }
+  };
   function kalCentralHour(ms){
     var h = Number(new Date(ms).toLocaleString('en-US', { timeZone: KAL_TZ, hour: 'numeric', hour12: false }));
     return h === 24 ? 0 : h;
   }
   function kalshiEdgeModel(orders, opts){
     opts = opts || {};
-    var nc = KAL_SURF_PRICES.length, nr = KAL_SURF_BLOCKS, span = 24 / nr, cells = [], r, c;
+    var det = KAL_SURF_DETAIL[opts.detail] || KAL_SURF_DETAIL.coarse, bins = det.px, nc = bins.length, nr = det.labels.length, span = 24 / nr, cells = [], r, c;
     for(r = 0; r < nr; r++){ cells.push([]); for(c = 0; c < nc; c++){ cells[r].push({ n: 0, c: 0, net: 0, w: 0, ok: false, edge: null, win: null }); } }
     var used = 0, outside = 0;
     (orders || []).forEach(function(o){
@@ -2493,7 +2501,8 @@
       if(pnl === null || !o || o.strategy !== 'L1' || o.result === 'hand' || !Number.isFinite(o.ts)){ return; }
       if(opts.market && opts.market !== 'all' && kalshiMarketName(o) !== opts.market){ return; }
       if(opts.lead && opts.lead !== 'all' && (o.entryLead || '6m') !== opts.lead){ return; }
-      var px = kalshiPricePaid(o), cents = Number.isFinite(px) ? Math.round(px * 100) : NaN, ci = KAL_SURF_PRICES.indexOf(cents);
+      var px = kalshiPricePaid(o), cents = Number.isFinite(px) ? Math.round(px * 100) : NaN, ci = -1;
+      if(cents >= KAL_SURF_MINPX && cents <= KAL_SURF_MAXPX){ bins.forEach(function(b, i){ if(cents >= b[0] && cents <= b[1] && ci < 0){ ci = i; } }); }
       if(ci < 0){ outside++; return; }
       var cell = cells[Math.floor(kalCentralHour(o.ts) / span)][ci], k = Number(o.fillCount) > 0 ? Number(o.fillCount) : Number(o.count);
       cell.n++; cell.c += k; cell.net += pnl; if(pnl > 0){ cell.w++; }
@@ -2503,12 +2512,12 @@
     cells.forEach(function(row){ row.forEach(function(x){
       if(x.n >= KAL_SURF_MIN && x.c > 0){ x.ok = true; x.edge = x.net / x.c * 100; x.win = x.w / x.n * 100; okCells++; if(Math.abs(x.edge) > maxAbs){ maxAbs = Math.abs(x.edge); } }
     }); });
-    return { cols: KAL_SURF_PRICES, rows: KAL_SURF_LABELS, cells: cells, n: used, outside: outside, maxAbs: maxAbs, okCells: okCells };
+    return { cols: bins.map(function(b){ return b[2]; }), rows: det.labels, cells: cells, n: used, outside: outside, maxAbs: maxAbs, okCells: okCells };
   }
   var kalSurf = { view: 'heat', yaw: -0.55, pitch: 0.95, drag: null };
   function kalSurfCellTitle(m, r, c){
     var x = m.cells[r][c], when = m.rows[r] + ' to ' + m.rows[(r + 1) % m.rows.length];
-    return m.cols[c] + 'c, ' + when + ': ' + (x.ok ? x.n + ' trades, ' + x.win.toFixed(0) + '% won, ' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + 'c per contract' : x.n + ' trades, too few to read');
+    return m.cols[c] + ', ' + when + ': ' + (x.ok ? x.n + ' trades, ' + x.win.toFixed(0) + '% won, ' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + 'c per contract' : x.n + ' trades, too few to read');
   }
   var KAL_SURF_MARKETS = ['Gold', 'XRP', 'Bitcoin', 'Dogecoin', 'Ethereum'];
   // The wireframe mesh (closest to the surface in the mock-up): points at the centre of every readable cell, joined to the neighbours that are also readable, so a thin cell leaves a hole in the sheet and the sheet never claims
@@ -2552,7 +2561,7 @@
     if(hov){ var hp = hit.filter(function(h){ return h.r === hov.r && h.c === hov.c; })[0]; if(hp){ cx.beginPath(); cx.arc(hp.x, hp.y, 5, 0, 6.2832); cx.fillStyle = paper; cx.fill(); cx.lineWidth = 2; cx.strokeStyle = 'rgba(0,0,0,.6)'; cx.stroke(); } }
     cx.fillStyle = muted; cx.font = '11px "Public Sans", sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
     var nearY = P(0, -(nr - 1) / 2, 0).d > P(0, (nr - 1) / 2, 0).d ? 1 : -1, nearX = P(-(nc - 1) / 2, 0, 0).d > P((nc - 1) / 2, 0, 0).d ? 1 : -1;
-    for(c = 0; c < nc; c += 2){ var t1 = T(P(c - (nc - 1) / 2, nearY * ((nr - 1) / 2 + 0.9), 0)); cx.fillText(m.cols[c] + 'c', t1[0], t1[1]); }
+    for(c = 0; c < nc; c += (nc > 6 ? 2 : 1)){ var t1 = T(P(c - (nc - 1) / 2, nearY * ((nr - 1) / 2 + 0.9), 0)); cx.fillText(m.cols[c], t1[0], t1[1]); }
     for(r = 0; r < nr; r++){ var t2 = T(P(nearX * ((nc - 1) / 2 + 1.1), r - (nr - 1) / 2, 0)); cx.fillText(m.rows[r], t2[0], t2[1]); }
   }
   function renderKalshiSurface(){
@@ -2560,8 +2569,8 @@
     if(!fold || !fold.open || !body){ return; }
     var mk = document.getElementById('kalSfMarket'), ld = document.getElementById('kalSfLead');
     if(!kalshiOrdersLoaded){ body.innerHTML = '<div class="kal-empty">Reading the orders...</div>'; return; }
-    var m = kalshiEdgeModel(kalshiLiveOrders, { market: mk ? mk.value : 'all', lead: ld ? ld.value : 'all' });
-    if(st){ st.textContent = m.n + ' settled trades read. ' + m.okCells + ' of ' + (m.cols.length * m.rows.length) + ' cells have ' + KAL_SURF_MIN + ' or more.' + (m.outside ? ' ' + m.outside + ' bought outside 88c to 97c are left out.' : ''); }
+    var dt = document.getElementById('kalSfDetail'), m = kalshiEdgeModel(kalshiLiveOrders, { market: mk ? mk.value : 'all', lead: ld ? ld.value : 'all', detail: dt ? dt.value : 'coarse' });
+    if(st){ st.textContent = m.n + ' settled trades read. ' + m.okCells + ' of ' + (m.cols.length * m.rows.length) + ' cells have ' + KAL_SURF_MIN + ' or more.' + (m.outside ? ' ' + m.outside + ' bought below 80c are left out.' : ''); }
     if(!m.okCells){ body.innerHTML = '<div class="kal-empty">No cell has ' + escapeHtml(String(KAL_SURF_MIN)) + ' trades yet, so there is nothing honest to draw. Pick all markets or all entry times.</div>'; return; }
     body.innerHTML = '<canvas class="kal-sf-cv" id="kalSfCv" role="img" aria-label="Edge in cents per contract by price paid and time of day, as a surface you can turn"></canvas><div class="kal-sf-read" id="kalSfRead">Drag sideways to turn it. Touch or hover a point for its trades.</div>';
     var cv = document.getElementById('kalSfCv'), rd = document.getElementById('kalSfRead'), start = null, hov = null;
@@ -2584,7 +2593,7 @@
     var mk = document.getElementById('kalSfMarket');
     if(mk){ ['all'].concat(KAL_SURF_MARKETS).forEach(function(n){ var op = document.createElement('option'); op.value = n; op.textContent = n === 'all' ? 'All markets' : n; mk.appendChild(op); }); }
     fold.addEventListener('toggle', renderKalshiSurface);
-    ['kalSfMarket', 'kalSfLead'].forEach(function(id){ var el = document.getElementById(id); if(el){ el.addEventListener('change', renderKalshiSurface); } });
+    ['kalSfMarket', 'kalSfLead', 'kalSfDetail'].forEach(function(id){ var el = document.getElementById(id); if(el){ el.addEventListener('change', renderKalshiSurface); } });
   })();
 
   // ---- server bot tab (read only, plus one halt switch) ----
