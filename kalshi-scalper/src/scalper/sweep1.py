@@ -156,13 +156,15 @@ def main(argv: list[str]) -> None:
         for tk in meta:
             if meta[tk][3] == name:
                 cands[tk] = {r[0] // 60: (r[1], r[2]) for r in db.execute("select end_ts, bid_c, ask_c from candle where ticker=? and bid_c is not null and ask_c is not null", (tk,))}
+    seen_tk = set()
     recs = []  # (day, kind, sign, [outcomes follow], [outcomes fade], [stress follow], [stress fade], delta_sign_flag)
     ctrl_recs = []
     for f in sorted(DATA_DIR.glob("sweep1_*.sqlite")):
         d = sqlite3.connect(f)
         for (tk, n_tr, trig_s, dm_s) in d.execute("select ticker, n, trig, dm from done"):
-            if tk not in meta:
+            if tk not in meta or tk in seen_tk:
                 continue
+            seen_tk.add(tk)
             close_ts, res = meta[tk][1], meta[tk][2]
             by = dict(cands.get(tk, {})); by["res"] = res
             if n_tr < 100 or len(by) < 20:
