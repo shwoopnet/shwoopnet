@@ -150,9 +150,43 @@ gates.F13 = () => {
 };
 gates.F14 = () => {
   // The page offers each live series as a whole, with 30 minute and one hour spans for it and 20 and 40 minute spans for one market; it still reads only through the owner's callable.
-  assert.ok(/KAL_FP_SERIES = \[\['KXGOLD15M', 'Gold'\]/.test(html) && /last 15 minutes/.test(html) && /last 30 minutes/.test(html) && /last hour/.test(html));
+  assert.ok(/KAL_FP_SERIES = \[\['KXGOLD15M', 'Gold'\]/.test(html) && /Last 15 minutes/.test(html) && /Last 30 minutes/.test(html) && /Last hour/.test(html));
   assert.ok(/series: key\.slice\(7\), spanMin: Math\.max\(30, spanSel\)/.test(html), 'a 15 minute view reads 30 minutes and shows the last 15');
   assert.ok(/body = r\.series \? \{ series: String\(r\.series\), spanMin: Number\(r\.spanMin\) \|\| 30 \}/.test(html));
+};
+
+gates.F15 = () => {
+  // Whales: a print is BIG only when it is several times the usual size AND not small in absolute terms; a quiet market's largest trade is listed but not called unusual.
+  const trades = [];
+  for (let i = 0; i < 20; i++) trades.push(trade(1000 + i * 1000, 0.93, 4, i % 2 ? 'yes' : 'no'));
+  trades.push(trade(30000, 0.94, 300, 'yes'));
+  const r = lib.bigPrints(trades, T0, T0 + MIN);
+  assert.strictEqual(r.median, 4);
+  assert.strictEqual(r.prints[r.prints.length - 1].size <= 300, true);
+  const big = r.prints.find((p) => p.size === 300);
+  assert.ok(big.big && big.times === 75 && big.side === 1 && big.price === 94, 'a 300 contract print among 4 contract trades is big');
+  const quiet = lib.bigPrints([trade(1000, 0.9, 6, 'yes'), trade(2000, 0.9, 1, 'no'), trade(3000, 0.9, 1, 'no')], T0, T0 + MIN);
+  assert.ok(quiet.prints.every((p) => !p.big), '6 contracts is 6 times the median but under 50, so not unusual');
+};
+gates.F16 = () => {
+  // The list is bounded, newest first, ignores garbage and trades outside the window, and an empty window is empty, not an error.
+  const many = Array.from({ length: 30 }, (_, i) => trade(i * 1000, 0.9, 10 + i, 'yes'));
+  const r = lib.bigPrints(many.concat([{ created_time: 'x' }, null]), T0, T0 + MIN);
+  assert.strictEqual(r.prints.length, lib.MAX_PRINTS);
+  assert.ok(r.prints.every((p, i, a) => i === 0 || a[i - 1].t >= p.t), 'newest first');
+  assert.deepStrictEqual(lib.bigPrints([], T0, T0 + MIN), { prints: [], median: 0 });
+  assert.strictEqual(lib.bigPrints([trade(-5 * MIN, 0.9, 500, 'yes')], T0, T0 + MIN).prints.length, 0, 'outside the window');
+};
+gates.F17 = () => {
+  // The page rings a cell that holds a big print, keeps only the prints inside the shown minutes, and the function returns them with the footprint (still read only).
+  const bars = [0, 1, 2].map((i) => ({ t: T0 / 1000 + i * 60, l: [[93, 5, 5]], buy: 5, sell: 5, delta: 0, cum: 0, poc: 93 }));
+  const prints = [{ t: T0 + MIN + 5000, price: 93, size: 400, side: 1, times: 80, big: true }, { t: T0 - 10 * MIN, price: 90, size: 60, side: -1, times: 9, big: true }];
+  const m = page.kalshiFpModel({ bars, prints }, 60);
+  assert.strictEqual(m.cols[1].levels[93].whale, true);
+  assert.strictEqual(m.cols[0].levels[93].whale, false);
+  assert.strictEqual(m.prints.length, 1, 'a print before the first shown minute is left out');
+  const fn = server.slice(server.indexOf('exports.kalshiTape'), server.indexOf('// ---- Kalshi market reads'));
+  assert.ok(/footprint\.bigPrints\(/.test(fn));
 };
 
 let failed = 0;
