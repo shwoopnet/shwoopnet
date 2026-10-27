@@ -6647,3 +6647,7 @@ No survivor on either asset or mode. Every spot strategy is negative in discover
 20,278 tennis match-winner markets with candles over 46 days, 62,747 jump events. Net per contract after fee and spread, entry and exit at the next minute's closing quote: MOM2 (follow, hold 2 minutes) **-4.29c** (n 62,165, z -119.5, halves -4.30 / -4.27); MOM5 -4.16c (z -72.0); FADE2 -4.51c (z -116.0); FADE5 -4.52c (z -71.1). All four are negative in both halves and with fees x1.2 (-4.7c to -5.1c). Following and fading lose about the same, so the loss is cost (fee plus crossing the spread twice), not direction: a 5c jump neither continues nor reverses enough to pay about 4.3c of round-trip cost.
 
 **Meaning for the footprint tests.** FP1 and FP3 start from this baseline, not from zero: a footprint filter has to lift the average by more than 4.3c before it is even break-even. The prior for FP1 drops from 8% to about 4%. FP3's large-target rules are the only place the cost is small against the move. Tries: 4 added, about 14,630. Result file `data/sc1_result.txt`.
+
+### RECORD1 information look, 2026-10-27 14:20Z (decides nothing)
+
+21 runs, 840 windows, 189,850 polls, 429 share 0.0%. Qualifying trades 79 over 6 dates (need 300 over 10), so the registered read has not been run. Look verdict `NOT_ENOUGH_DATA`: mean +12.4c, z 2.26, 4 of 4 assets positive, but `clock_ok` is now False (it was True at the first look); a clock-offset problem would invalidate the read, so it is flagged for the next look. Model, thresholds and claim unchanged.
