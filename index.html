@@ -826,6 +826,7 @@
   .kal-fp-d .up, .kal-fp-d .dn{ flex:1; display:flex; } .kal-fp-d .up{ align-items:flex-end; } .kal-fp-d .up span{ display:block; width:100%; background:var(--paper); border-radius:2px 2px 0 0; } .kal-fp-d .dn span{ display:block; width:100%; background:var(--muted); border-radius:0 0 2px 2px; }
   .kal-fp > .kal-fp-gap{ min-height:0; height:0; border-top:1px dashed rgba(255,255,255,.18); margin:3px 0; }
   .kal-fp-c.kal-fp-k{ justify-content:center; padding:2px 0; font-size:10px; overflow:hidden; } .kal-fp-k.kb{ background:rgba(255,255,255,.24); } .kal-fp-k.ks{ background:rgba(255,255,255,.08); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); }
+  .kal-fp.dense .kal-fp-k b{ display:none; } .kal-fp.dense .kal-fp-h{ font-size:10px; overflow:visible; }
   .kal-fp-n{ font-size:11px; color:var(--muted); text-align:center; }
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
@@ -1351,11 +1352,11 @@
         <details id="kalFpFold">
           <summary class="kal-card-title" style="margin:0">Order flow &#9662;</summary>
           <div class="kal-fp-bar">
-            <label class="kal-lbl" for="kalFpMarket">Market <select class="kal-input" id="kalFpMarket" style="width:auto"></select></label>
-            <label class="kal-lbl" for="kalFpSpan">Show <select class="kal-input" id="kalFpSpan" style="width:auto"><option value="20">last 20 minutes</option><option value="40">last 40 minutes</option></select></label>
+            <label class="kal-lbl" for="kalFpMarket">Product <select class="kal-input" id="kalFpMarket" style="width:auto"></select></label>
+            <label class="kal-lbl" for="kalFpSpan">Time frame <select class="kal-input" id="kalFpSpan" style="width:auto"><option value="15">Last 15 minutes</option><option value="30">Last 30 minutes</option><option value="60">Last hour</option></select></label>
             <span class="kal-note" id="kalFpStatus"></span>
           </div>
-          <div id="kalFpBody"><div class="kal-empty">Open a market to read its trades.</div></div>
+          <div id="kalFpBody"><div class="kal-empty">Open a product to read its trades.</div></div>
           <div class="kal-note">Each cell: contracts takers sold on the left, bought on the right, at that YES price in cents. A bright cell is a 3 to 1 imbalance of at least 50 contracts; an outlined cell is the busiest price of its minute. On views longer than 24 minutes a cell shows the contracts traded: bright when buyers were the heavier side, outlined when sellers were (hover for both counts). Public trades only. This view reads and shows, it never trades.</div>
         </details>
       </div>
@@ -1509,6 +1510,7 @@
                 </ul>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>Order flow's picker is the product only; the time frame (15 minutes, 30 minutes, hour) sets how much of its recent windows to show (#582)</li>
                   <li>Order flow has a last 15 minutes view, for one market or a whole series (#581)</li>
                   <li>Order flow can show a whole series over the last 30 minutes or hour, stitched across its 15 minute windows (#580)</li>
                   <li>Order flow is condensed: only prices that traded get a row, empty minutes before the first trade are dropped, gaps are marked (#579)</li>
@@ -2332,24 +2334,14 @@
   // The five markets the bot trades for real, by series: choosing one shows its last 30 minutes or hour stitched across its 15 minute windows (the owner, Oct 26, 2026: "we work in 15 min increments").
   var KAL_FP_SERIES = [['KXGOLD15M', 'Gold'], ['KXXRP15M', 'XRP'], ['KXBTC15M', 'Bitcoin'], ['KXDOGE15M', 'Dogecoin'], ['KXETH15M', 'Ethereum']];
   function kalshiFpIsSeries(v){ return String(v || '').indexOf('series:') === 0; }
-  // The markets worth looking at: the whole series first, then the ones open now (from the books read) and the bot's own recent ones, newest close first.
+  // The picker is the PRODUCT only (the owner, Oct 26, 2026: "it should just be the product selection and not individual historical stuff"); the time frame beside it decides how much of that product's recent windows to show.
   function kalshiFpMarkets(){
-    var seen = {}, out = [], now = Date.now();
-    var add = function(ticker, tag){
-      if(!ticker || seen[ticker]){ return; }
-      var close = kalshiCloseFromTicker(ticker); if(close === null){ return; }
-      seen[ticker] = true; out.push({ ticker: ticker, close: close, label: kalshiShortTicker(ticker) + (close > now ? ' (open)' : '') + (tag || '') });
-    };
-    ((kalshiBooksLast && kalshiBooksLast.markets) || []).forEach(function(mk){ if(mk && mk.ticker && /^KX(GOLD|XRP|BTC|DOGE|ETH)/.test(mk.ticker)){ add(mk.ticker, ''); } });
-    (kalshiLiveOrders || []).filter(function(o){ return o && o.strategy === 'L1' && o.ticker; }).sort(function(a, b){ return b.ts - a.ts; }).slice(0, 24).forEach(function(o){ add(o.ticker, ' (bot order)'); });
-    var single = out.sort(function(a, b){ return b.close - a.close; }).slice(0, 18);
-    var whole = KAL_FP_SERIES.map(function(x){ return { ticker: 'series:' + x[0], label: x[1] + ', all windows' }; });
-    return whole.concat(single);
+    return KAL_FP_SERIES.map(function(x){ return { ticker: 'series:' + x[0], label: x[1] }; });
   }
   function kalshiFpFillSpans(){
     var sp = document.getElementById('kalFpSpan'); if(!sp){ return; }
     var series = kalshiFpIsSeries(kalshiFpTicker), keep = sp.value;
-    var opts = series ? [['15', 'last 15 minutes'], ['30', 'last 30 minutes'], ['60', 'last hour']] : [['15', 'last 15 minutes'], ['20', 'last 20 minutes'], ['40', 'last 40 minutes']];
+    var opts = series ? [['15', 'Last 15 minutes'], ['30', 'Last 30 minutes'], ['60', 'Last hour']] : [['15', 'Last 15 minutes'], ['20', 'Last 20 minutes'], ['40', 'Last 40 minutes']];
     sp.innerHTML = opts.map(function(o){ return '<option value="' + escapeHtml(o[0]) + '">' + escapeHtml(o[1]) + '</option>'; }).join('');
     sp.value = opts.some(function(o){ return o[0] === keep; }) ? keep : opts[0][0];
   }
@@ -2367,7 +2359,7 @@
     if(!body){ return; }
     var series = kalshiFpIsSeries(kalshiFpTicker), spanSel = Number((document.getElementById('kalFpSpan') || {}).value) || (series ? 30 : 20);
     var fits = kalshiFpData && (series ? (kalshiFpData.series && 'series:' + kalshiFpData.series === kalshiFpTicker && kalshiFpData.spanMin === Math.max(30, spanSel)) : kalshiFpData.ticker === kalshiFpTicker);
-    if(!fits){ body.innerHTML = '<div class="kal-empty">' + (kalshiFpBusy ? 'Reading the trades...' : 'Open a market to read its trades.') + '</div>'; return; }
+    if(!fits){ body.innerHTML = '<div class="kal-empty">' + (kalshiFpBusy ? 'Reading the trades...' : 'Open a product to read its trades.') + '</div>'; return; }
     var marks = { entries: [], exits: [], closes: [] }, tickers = {};
     if(series){ (kalshiFpData.windows || []).forEach(function(w){ tickers[w.ticker] = true; marks.closes.push(Math.floor(w.closeMs / 60000) * 60000 - 60000); }); }
     else { tickers[kalshiFpTicker] = true; var cl = kalshiCloseFromTicker(kalshiFpTicker); if(cl !== null){ marks.closes.push(Math.floor(cl / 60000) * 60000 - 60000); } }
@@ -2378,10 +2370,12 @@
     // More than 24 minutes cannot show two numbers per cell on one screen (the owner, Oct 26, 2026: "a lot to fit on one screen"), so a long view fits the width instead: one number per cell (the contracts traded), shaded by who was the
     // heavier side, with the sold and bought counts in the hover; time labels every 5 minutes.
     var n = model.cols.length, compact = n > 24, cols = '40px repeat(' + n + ', minmax(0, 1fr))';
+    // On a phone the cells are too narrow for any figure (under 22px each): shade only, label the quarter hours, and keep the numbers in the hover.
+    var dense = compact && (body.clientWidth - 48) / n < 22;
     if(!compact){ cols = '40px repeat(' + n + ', minmax(54px, 1fr))'; }
     var cls = function(c){ return c.mark ? ' mk-' + c.mark : ''; };
     var markWord = { entry: 'Bought', exit: 'Sold', close: 'Close' };
-    var h = '<div class="kal-fp-scroll"><div class="kal-fp" style="grid-template-columns:' + cols + '"><div class="kal-fp-h"></div>' + model.cols.map(function(c){ var lab = kalTime(c.t).replace(/ ?[AP]M$/, ''); var show = !compact || c.mark || /[05]$/.test(lab); return '<div class="kal-fp-h' + cls(c) + '">' + (show ? escapeHtml(lab) : '') + (c.mark ? '<br>' + markWord[c.mark] : '') + '</div>'; }).join('');
+    var h = '<div class="kal-fp-scroll"><div class="kal-fp' + (dense ? ' dense' : '') + '" style="grid-template-columns:' + cols + '"><div class="kal-fp-h"></div>' + model.cols.map(function(c){ var lab = kalTime(c.t).replace(/ ?[AP]M$/, ''); var show = !compact || (dense ? /:(00|15|30|45)$/.test(lab) : (c.mark || /[05]$/.test(lab))); return '<div class="kal-fp-h' + cls(c) + '">' + (show ? escapeHtml(lab) : '') + (c.mark ? '<br>' + markWord[c.mark] : '') + '</div>'; }).join('');
     model.prices.forEach(function(px, i){
       if(i > 0 && model.prices[i - 1] - px > 1){ h += '<div class="kal-fp-gap" style="grid-column:1 / -1"></div>'; }
       h += '<div class="kal-fp-p">' + px + 'c</div>' + model.cols.map(function(c){
@@ -2396,7 +2390,7 @@
     var barH = function(v){ return model.maxDelta > 0 ? Math.max(2, Math.round(Math.abs(v) / model.maxDelta * 22)) : 0; };
     h += '<div class="kal-fp-p">Delta</div>' + model.cols.map(function(c){ return '<div class="kal-fp-d' + cls(c) + '" title="' + escapeHtml('bought minus sold: ' + c.delta) + '"><div class="up">' + (c.delta > 0 ? '<span style="height:' + barH(c.delta) + 'px"></span>' : '') + '</div><div class="dn">' + (c.delta < 0 ? '<span style="height:' + barH(c.delta) + 'px"></span>' : '') + '</div></div>'; }).join('');
     // On a long view the net and total are written only under the labelled minutes, so the figures do not run into each other.
-    var showNum = function(c){ return !compact || c.mark || /[05]$/.test(kalTime(c.t).replace(/ ?[AP]M$/, '')); };
+    var showNum = function(c){ return !dense && (!compact || c.mark || /[05]$/.test(kalTime(c.t).replace(/ ?[AP]M$/, ''))); };
     h += '<div class="kal-fp-p">Net</div>' + model.cols.map(function(c){ return '<div class="kal-fp-n' + cls(c) + '">' + (showNum(c) ? escapeHtml((c.delta > 0 ? '+' : '') + kalshiFpNum(c.delta)) : '') + '</div>'; }).join('');
     h += '<div class="kal-fp-p">Total</div>' + model.cols.map(function(c){ return '<div class="kal-fp-n' + cls(c) + '">' + (showNum(c) ? escapeHtml((c.cum > 0 ? '+' : '') + kalshiFpNum(c.cum)) : '') + '</div>'; }).join('');
     body.innerHTML = h + '</div></div>';
