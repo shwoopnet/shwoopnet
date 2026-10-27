@@ -6711,3 +6711,7 @@ HUNT1 only looked inside the 6 minute, 0.88 to 0.97 trade. This opens the grid: 
 ### FP3 implementation notes (added 2026-10-27 before any FP3 trigger was computed or any outcome simulated)
 
 Universe fixed to the 250 most liquid tennis matches in `sc1.sqlite` by candle volume (one market per match, ATP, WTA and the two Challenger series), whole trade tape downloaded (`src/scalper/fp3.py fetch`). Eligible minute: minute volume at least 100, spread at most 3c, mid 0.15 to 0.85 at the trigger minute, next minute quoted. Entry at the next minute's closing quote, exit scan over the following 5 minutes on closing quotes (target, stop, or the 5th minute's quote). Controls: every eligible minute entered in the direction of that minute's net delta (follow) or against it (fade) with the same exits. Family-wise null: 300 draws of random eligible minutes, same count per rule, best day-clustered z over the 64 rules. SPREAD_CAPTURE is not run (its fill needs queue position). 64 rules = 4 triggers x 2 directions x 4 targets x 2 stops. Tests: none beyond a dry import; the module is research-only.
+
+## Result: WX3 (run once on 2026-10-27): FALSIFIED
+
+269 daily-high events scanned (9 cities, 30 days; Houston returned no markets), 2,698 hours in which every bucket of an event traded. **One** hour showed a buy-all lock after fees (1.41c, one event) and none showed a sell-all lock. The ladders sum to about $1.00 as expected; there is no riskless arbitrage in them. Tries: 1, about 17,504.
