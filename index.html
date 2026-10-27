@@ -834,27 +834,31 @@
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
   .kal-console [data-card="status"]{ grid-area:stat; align-self:stretch; }
-  .kal-console [data-card="account"] .kal-acct-risk{ grid-column:3; grid-row:1; justify-self:center; width:100%; max-width:280px; display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 12px; } .kal-acct-risk .kal-k{ order:1; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin:0; }
-  /* The loss stop sits in the gap between the reinvest pool and Today (the owner, Oct 26, 2026: it was too big, then "fill that gap"): the label and the share used on one line, a thin bar under them. */
-  .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-meter{ order:3; flex:0 0 100%; height:4px; border-radius:2px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:2px; } .kal-acct-risk .kal-hb{ order:2; font-size:13px; white-space:nowrap; margin:0; }
   .kal-console [data-card="pnl"]{ grid-area:pnl; align-self:stretch; }
   .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
   .kal-console [data-card="footprint"]{ grid-area:fp; align-self:start; }
   .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
-  .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
-  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; padding:0; }
-  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; }
-  .kal-console [data-card="account"] #kalBotStatus{ grid-column:2; display:flex; align-items:center; gap:36px; flex-wrap:wrap; }
-  .kal-console [data-card="account"] #kalBotStatus .kal-acct-total{ margin:0; }
-  .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ flex-direction:row; gap:28px; border-top:0; padding-top:0; }
-  .kal-console [data-card="account"] #kalBotStatus .kal-rows > div, .kal-console [data-card="account"] #kalBotTotals .kal-rows > div{ flex-direction:column; justify-content:flex-start; gap:2px; }
-  .kal-console [data-card="account"] #kalBotTotals{ grid-column:4; grid-row:1; }
-  .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
+  /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
+     the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1.15fr) repeat(3, minmax(0,1fr)); gap:10px 20px; align-items:center; padding:20px 22px; }
+  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; grid-row:1; padding:0; gap:14px; }
+  .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ display:contents; }
+  .kal-console [data-card="account"] .kal-acct-total{ grid-column:1; grid-row:2; margin:0; font-size:46px; line-height:1; }
+  .kal-console [data-card="account"] .kal-today{ grid-column:1; grid-row:3; display:flex; flex-direction:row; align-items:baseline; gap:8px; }
+  .kal-console [data-card="account"] .kal-today{ justify-content:flex-start; } .kal-console [data-card="account"] .kal-today b{ font-size:16px; }
+  .kal-console [data-card="account"] .kal-sub{ font-size:12px; color:var(--muted); }
+  .kal-console [data-card="account"] .kal-tile, .kal-console [data-card="account"] .kal-acct-risk{ grid-row:1 / 4; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .kal-console [data-card="account"] .kal-tile b{ font:800 20px/1.15 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
+  .kal-console [data-card="account"] .kal-tile .kal-k, .kal-console [data-card="account"] .kal-acct-risk .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:none; margin:0; }
+  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1 / -1; grid-row:5; }
+  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:4; }
+  .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-k{ order:1; } .kal-acct-risk .kal-hb{ order:2; margin:0; font:800 20px/1.15 'Public Sans', sans-serif; } .kal-acct-risk .kal-meter{ order:3; height:5px; border-radius:3px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:3px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "fp" "trd"; }
-    .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
-    .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1; grid-row:auto; justify-self:stretch; max-width:none; }
+    .kal-console [data-card="account"]{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
+    .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1 / -1; grid-row:auto; }
+    .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
   }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
@@ -1512,6 +1516,7 @@
                 </ul>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>The Account card has the balance as its hero with Today under it, and stake, pool and loss stop as three tiles (#584)</li>
                   <li>Order flow lists the biggest single trades and rings the cell of any print at least 5 times the usual size (#583)</li>
                   <li>Order flow's picker is the product only; the time frame (15 minutes, 30 minutes, hour) sets how much of its recent windows to show (#582)</li>
                   <li>Order flow has a last 15 minutes view, for one market or a whole series (#581)</li>
@@ -2724,10 +2729,10 @@
         var poolCell = '';
         if(ses.sizing === true && Number.isFinite(ses.sizePool)){
           var ex = Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0;
-          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * 0.93) + '</b></div>';
+          poolCell = '<div class="kal-tile"><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + '</b><span class="kal-sub">of ' + kalshiMoney((ex + 1) * 0.93) + ' to the next contract</span></div>';
         }
-        if(!sizeKnown) stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
-        else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
+        if(!sizeKnown) stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
+        else stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + '</b><span class="kal-sub">' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '% of the account)' : '') + '</span></div>' + poolCell + '</div>';
       }
       h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
         (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
@@ -2747,7 +2752,7 @@
     if(!a){
       totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
     } else if(!kalshiOrdersLoaded){
-      totEl.innerHTML = '<div class="kal-rows"><div><span class="kal-k">Today</span><b>loading...</b></div></div>';
+      totEl.innerHTML = '<div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div>';
     } else {
       // Today's result (the owner, Oct 21, 2026: this line used to be "Bot since <date>", the all-time total). Only the BOT's settled trades whose
       // order time falls on today's US Central date, the same clock as the rest of the page, so it starts again at midnight CT. Deposits,
@@ -2758,7 +2763,7 @@
       var botNet = kalshiPerfStats(todayOrders, 0).total;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
+        '<div class="kal-today"><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
     }
 
     renderKalshiPositions();
