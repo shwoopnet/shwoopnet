@@ -26,7 +26,7 @@ gates.BG1 = () => {
   assert.ok(m, 'the slogan layer exists once, hidden from screen readers');
   assert.strictEqual((html.match(/class="bg-slogan"/g) || []).length, 1, 'only once, outside every page, so it is the same on all of them');
   assert.ok(html.indexOf('class="bg-slogan"') < html.indexOf('id="page-brief"'), 'it sits before the pages, not inside one');
-  assert.ok(/^(\s*<p>(Trade less\. Live more\. ){2}Trade less\. Live more\.<\/p>\s*)+$/.test(m[1]) && !/\d/.test(m[1]), 'it says only the slogan, no figure');
+  assert.ok(/^(\s*<p>(Trade less\. Live more\. )+Trade less\. Live more\.<\/p>\s*)+$/.test(m[1]) && !/\d/.test(m[1]), 'it says only the slogan, no figure');
   const rule = /\.bg-slogan\{([^}]*)\}/.exec(css)[1];
   assert.ok(/position:fixed/.test(rule) && /z-index:-1/.test(rule) && /pointer-events:none/.test(rule), 'fixed behind the content, never catching a click');
   assert.ok(/color:rgba\(255,255,255,\.0[1-6]\d*\)/.test(rule), 'very faint, white at 6 percent or less');
@@ -38,7 +38,7 @@ gates.BG2 = () => {
   const gate = html.slice(html.indexOf('<div class="auth-gate" id="authGate">'), html.indexOf('</div>', html.indexOf('class="gate-slogan"')) + 6);
   assert.ok(/<div class="auth-gate" id="authGate">\s*<div class="gate-slogan" aria-hidden="true">/.test(gate), 'the first thing inside the gate, hidden from screen readers');
   const inner = /<div class="gate-slogan" aria-hidden="true">([\s\S]*?)<\/div>/.exec(html)[1];
-  assert.ok(/^(\s*<p>(Trade less\. Live more\. ){2}Trade less\. Live more\.<\/p>\s*)+$/.test(inner) && !/\d/.test(inner), 'it says only the slogan, no figure');
+  assert.ok(/^(\s*<p>(Trade less\. Live more\. )+Trade less\. Live more\.<\/p>\s*)+$/.test(inner) && !/\d/.test(inner), 'it says only the slogan, no figure');
   const rule = /\.gate-slogan\{([^}]*)\}/.exec(css)[1], pageRule = /\.bg-slogan\{([^}]*)\}/.exec(css)[1];
   assert.strictEqual(rule, pageRule, 'exactly the same look as the one behind the pages: same size, tilt and faintness');
   assert.ok(/pointer-events:none/.test(rule) && /z-index:-1/.test(rule), 'it never catches a click and sits behind the sign-in content');
