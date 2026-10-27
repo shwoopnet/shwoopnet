@@ -17,7 +17,7 @@ function fnSource(name) {
   throw new Error('unbalanced ' + name);
 }
 const KAL_EDGE = /var KAL_EDGE_MIN = [^\n]*\n/.exec(html)[0];
-const f = new Function("var KAL_TZ = 'America/Chicago';\n" + KAL_EDGE + ['kalDayKey', 'kalshiTodayWork', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPerfStats', 'kalshiEdgeCheck'].map(fnSource).join('\n') + '; return { kalshiTodayWork, kalshiEdgeCheck };')();
+const f = new Function("var KAL_TZ = 'America/Chicago';\n" + KAL_EDGE + ['kalDayKey', 'kalshiTodayWork', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPerfStats', 'kalshiPricePaid', 'kalshiEdgeCheck'].map(fnSource).join('\n') + '; return { kalshiTodayWork, kalshiEdgeCheck };')();
 const NOW = Date.parse('2026-10-26T18:00:00Z');   // 1 PM Central
 const MIN = 60000;
 
