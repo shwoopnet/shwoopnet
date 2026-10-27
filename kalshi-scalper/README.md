@@ -6823,3 +6823,11 @@ Question: does any series earn on a particular weekday (UTC) at the 6 minute L1 
 **Judging.** Mean net per contract, day-clustered z, halves of the days, fees x1.2. `NOT_YET_FALSIFIED` needs at least 150 trades on at least 8 days, mean at least +1.0c, z at least 2.0, both halves positive, positive at fees x1.2. `FALSIFIED` if the mean is under +0.3c. Fewer than 150 trades: `NOT_ENOUGH_DATA`. Run once.
 
 **Prediction.** FALSIFIED or NOT_ENOUGH_DATA: Kalshi's ladder is deep and tight (1c spreads, 20k+ contracts) and tracks the spot, so any Polymarket "lead" is the same spot information, and the settlement bases differ. Prior of a pass 5%.
+
+## Result: PM1 (run once on 2026-10-27): NOT_ENOUGH_DATA (0 strike-time pairs; the test could not be made)
+
+20 days with both venues listed, 0 usable strike-time pairs. Polymarket's strikes are $2,000 apart and the Kalshi markets with the same strike are 1c to 2c illiquid in the hours before noon (a 6 hour window of the 88,000 and 90,000 strikes shows one hourly candle, at expiry, quoting 0.00 / 0.01). Only the strikes within about $300 of the spot trade, and Polymarket has almost none there. Polymarket's finer 'what price will Bitcoin hit' and 'above on' ladders are the thing to try if this is revisited; the result is "could not test", not "no edge". Tries: 1, about 20,915.
+
+## Gold in the live record (owner's question, 2026-10-27; my arithmetic on the export of orders from 2026-10-07 to 2026-10-26, not the account line)
+
+Estimated net by series over the whole export: **gold +$43.49 (155 fills, 6 losses, worst trade -$9.47), Dogecoin +$6.47, ETH +$5.15, natural gas +$0.89, USDCAD +$0.28, AUDUSD +$0.06, XRP -$9.51, Bitcoin -$11.92 (153 fills, 11 losses, worst trade -$20.15)**. Total +$34.92; without gold -$8.57. Capping the gold ladder at 10 contracts would have cost about $1.11 and cut the worst trade from -$9.47 to -$7.28; at 8 contracts -$4.53 and -$5.83; at 5 contracts -$16.15 and -$4.48. Pulling gold would remove all of the profit. The worst single losses in the export are Bitcoin and XRP.
