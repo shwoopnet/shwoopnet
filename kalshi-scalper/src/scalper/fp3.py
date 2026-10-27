@@ -33,9 +33,9 @@ def fee(p: float, mult: float = 1.0) -> float:
     return mult * 0.07 * p * (1 - p)
 
 
-def fetch() -> None:
+def fetch(shard: int = 0, shards: int = 1) -> None:
     src = sqlite3.connect(SC1)
-    db = sqlite3.connect(DB)
+    db = sqlite3.connect(DB, timeout=120)
     db.execute("CREATE TABLE IF NOT EXISTS trade(ticker TEXT, ts REAL, price INTEGER, size REAL, side INTEGER)")
     db.execute("CREATE TABLE IF NOT EXISTS done(ticker TEXT PRIMARY KEY, n INTEGER)")
     rows = src.execute("SELECT m.ticker, m.series, m.close_ts, SUM(c.volume), MIN(c.end_ts) FROM market m JOIN candle c ON c.ticker=m.ticker "
@@ -48,6 +48,7 @@ def fetch() -> None:
         seen.add(ev); pick.append((tk, close_ts, first))
         if len(pick) >= N_MATCHES:
             break
+    pick = pick[shard::shards]
     done = {r[0] for r in db.execute("SELECT ticker FROM done")}
     print(len(pick), "matches;", len(done), "done", flush=True)
     for k, (tk, close_ts, first) in enumerate(pick):
@@ -181,7 +182,7 @@ def main(argv: list[str]) -> None:
     if len(argv) < 2 or argv[1] not in ("fetch", "run"):
         print(__doc__); return
     if argv[1] == "fetch":
-        fetch(); return
+        fetch(int(argv[2]) if len(argv) > 2 else 0, int(argv[3]) if len(argv) > 3 else 1); return
     if RESULT.exists():
         print(f"Refusing to run again: {RESULT} exists."); return
     ev = build_events()
