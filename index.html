@@ -1522,6 +1522,7 @@
                 </ul>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>Fix: the break-even in Bot status read a NO order's price as the YES price (it showed 46.7%); it now uses the price paid for the side bought (#586)</li>
                   <li>On a phone the notification bell sits in the header beside the clock; the bottom bar keeps Brief, Bot and Settings (#585)</li>
                   <li>The Account card has the balance as its hero with Today under it, and stake, pool and loss stop as three tiles (#584)</li>
                   <li>Order flow lists the biggest single trades and rings the cell of any print at least 5 times the usual size (#583)</li>
@@ -3446,7 +3447,11 @@
     if(rows.length){
       var contracts = 0, cost = 0, net = 0, wins = 0;
       rows.forEach(function(o){
-        var c = Number(o.fillCount) > 0 ? Number(o.fillCount) : Number(o.count), px = Number(o.averageFillPrice) > 0 ? Number(o.averageFillPrice) : Number(o.price);
+        var c = Number(o.fillCount) > 0 ? Number(o.fillCount) : Number(o.count);
+        // The price PAID for the side bought. Kalshi books a NO buy on the YES side, so a NO order's average fill is written as the YES price (7c for a 93c NO); read as it stands it would pull the break-even
+        // toward 50% (the owner's first real read, Oct 27, 2026: "not quite sure these stats are accurate"). A NO order is converted, and the cost over the count is the fallback.
+        var avg = Number(o.averageFillPrice), perC = Number(o.maxCost) > 0 && Number(o.count) > 0 ? Number(o.maxCost) / Number(o.count) : Number(o.price);
+        var px = avg > 0 ? (o.side === 'no' ? 1 - avg : avg) : perC;
         contracts += c; cost += Number.isFinite(px) ? px * c : 0; net += kalshiOrderPnl(o); if(kalshiOrderPnl(o) > 0){ wins++; }
       });
       out.winRate = wins / rows.length * 100; out.breakEven = contracts > 0 ? cost / contracts * 100 : null; out.edgeCents = contracts > 0 ? net / contracts * 100 : null;
