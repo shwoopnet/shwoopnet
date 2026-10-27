@@ -75,6 +75,16 @@ gates.W6 = () => {
   assert.strictEqual(f.kalshiEdgeCheck(gold, NOW).best, null);
 };
 
+gates.W7 = () => {
+  // A NO order's average fill is written as the YES price (7c for a 93c NO). The break-even is what was PAID for the side bought, so a mixed book of YES and NO buys at 93c breaks even at 93%, not 50%.
+  const mk = (i, side) => ({ strategy: 'L1', series: 'KXGOLD15M', ts: NOW - (40 - i) * 60000, settled: true, side, count: 1, fillCount: '1', maxCost: 0.93, price: 0.93,
+    averageFillPrice: side === 'no' ? '0.07' : '0.93', settledPnl: i % 10 === 9 ? -0.93 : 0.07 });
+  const orders = Array.from({ length: 40 }, (_, i) => mk(i, i % 2 ? 'no' : 'yes'));
+  const e = f.kalshiEdgeCheck(orders, NOW);
+  assert.ok(Math.abs(e.breakEven - 93) < 0.5, 'break-even ' + e.breakEven);
+  assert.ok(Math.abs(e.winRate - 90) < 1e-9);
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
