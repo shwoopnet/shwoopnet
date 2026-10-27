@@ -6651,3 +6651,13 @@ No survivor on either asset or mode. Every spot strategy is negative in discover
 ### RECORD1 information look, 2026-10-27 14:20Z (decides nothing)
 
 21 runs, 840 windows, 189,850 polls, 429 share 0.0%. Qualifying trades 79 over 6 dates (need 300 over 10), so the registered read has not been run. Look verdict `NOT_ENOUGH_DATA`: mean +12.4c, z 2.26, 4 of 4 assets positive, but `clock_ok` is now False (it was True at the first look); a clock-offset problem would invalidate the read, so it is flagged for the next look. Model, thresholds and claim unchanged.
+
+## Pre-registration: HOURS1, trade the L1 rule only in 12 to 18 UTC (forward claim; written 2026-10-27 after seeing the numbers below, so the numbers are NOT evidence; 1 try, running count about 14,631)
+
+**Where it came from (post hoc, stated).** Three looks at the same bucket: SEARCH5K (7 of the top 10 discovery rules contained 12 to 18 UTC; none cleared the family-wise null), the 2026-10-25 order scan (gold, XRP, Dogecoin: no losses in 33 fills), and the owner's export ending 2026-10-26T17:39Z. In that export, all series, fills settled since 2026-10-20 (est. net, my arithmetic, not the account line): **12 to 18 UTC 89 fills, 3 losses, profit factor 5.0, +$15.15; all other hours 256 fills, 22 losses, profit factor 0.94, -$3.18.** The chance of 3 or fewer losses in 89 at the 6.8% break-even loss rate is about 14%, so this is not significant by itself and the three looks overlap in data.
+
+**Claim (forward only).** Live L1 fills opened from 2026-10-28T00:00Z with fill time 12:00 to 17:59 UTC, all live series pooled, scored against the same period's fills in other hours. Bar: at least 150 in-window fills, profit factor at least 2.0 (computed from account-line P&L per order), loss rate under 5%, in-window profit factor above the other-hours profit factor, both halves of the period profit factor above 1.5. `FALSIFIED` if the in-window profit factor is under 1.3 with at least 150 fills. `NOT_ENOUGH_DATA` below 150 fills. Verdict words only.
+
+**Why a restriction is the one safe live change.** It can only remove trades, never add risk or size. It does not raise the edge of a trade; it removes the hours where the record is flat to negative. Cost: about 74% fewer trades, so a slower ladder and less compounding if the effect is real.
+
+**Prediction.** The in-window profit factor falls toward 1.3 to 1.8 (regression from a small sample); other hours stay near 1.0. Prior that the bar is met: 20%.
