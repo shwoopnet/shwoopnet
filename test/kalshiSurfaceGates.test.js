@@ -79,6 +79,15 @@ gates.S9 = () => {
   assert.strictEqual(m.n, 30);
   assert.strictEqual(m.outside, 0);
 };
+gates.S10 = () => {
+  // CAD style controls (the owner, Oct 27, 2026): free orbit with the tilt held to straight over or under (no flipping upside down), zoom, pan, the four standard views and a reset, and nothing that turns by itself.
+  const src = html.slice(html.indexOf('function kalSurfAttach('), html.indexOf('var KAL_SURF_MARKETS'));
+  assert.ok(/Math\.max\(-1\.5708, Math\.min\(1\.5708, kalSurf\.pitch/.test(src), 'tilt is clamped to straight up and straight down');
+  assert.ok(/'wheel'/.test(src) && /pinch/.test(src) && /mode = 'pan'/.test(src) && /'keydown'/.test(src), 'wheel, pinch, pan and keys');
+  assert.ok(['Iso', 'Top', 'Front', 'Side', 'Reset'].every((w) => src.indexOf("'" + w + "'") > -1), 'view buttons');
+  assert.ok(!/setInterval|setTimeout|requestAnimationFrame/.test(src), 'it moves only while the pointer is down');
+  assert.ok(/touch-action:none/.test(html.slice(html.indexOf('.kal-sf-cv{'), html.indexOf('.kal-sf-cv{') + 200)), 'a drag on the chart turns it instead of scrolling the page');
+};
 gates.S7 = () => {
   // It reads and draws and nothing else: no call to the server API, no storage, no timers, no animation, no order or setting words, and the card sits in the console grid.
   const start = html.indexOf('var KAL_SURF_MIN');
