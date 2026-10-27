@@ -17,11 +17,13 @@ function fnSource(name) {
   throw new Error('unbalanced ' + name);
 }
 const VARS = /var KAL_SURF_MIN = [^\n]*\n/.exec(html)[0] + /var KAL_SURF_DETAIL = \{[\s\S]*?\n  \};\n/.exec(html)[0];
-const f = new Function("var KAL_TZ = 'America/Chicago';\n" + VARS + ['kalCentralHour', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPricePaid', 'kalshiEdgeModel'].map(fnSource).join('\n') + '; return { kalshiEdgeModel, kalshiPricePaid };')();
+const page = {};
+const f = new Function("var KAL_TZ = 'America/Chicago';\n" + VARS + ['kalCentralHour', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPricePaid', 'kalshiEdgeModel', 'kalSurfCellTitle'].map(fnSource).join('\n') + '; return { kalshiEdgeModel, kalshiPricePaid, kalSurfCellTitle };')();
 const T0 = Date.parse('2026-10-26T18:00:00Z');   // 1 PM Central, inside the 12p block
 const mk = (over) => Object.assign({ strategy: 'L1', series: 'KXGOLD15M', side: 'yes', count: 1, fillCount: '1', averageFillPrice: '0.93', maxCost: 0.93, settled: true, settledPnl: 0.06, result: 'yes', ts: T0, entryLead: '6m' }, over);
 const many = (n, over) => Array.from({ length: n }, () => mk(over));
 const FINE = { detail: 'fine' };
+Object.assign(page, { kalSurfCellTitle: f.kalSurfCellTitle });
 const cell = (m, hourBlock, cents) => m.cells[hourBlock][cents === 88 ? 0 : cents - 88];   // fine bins: 88c or less, then 89 to 96, then 97c or more
 
 gates.S1 = () => {
@@ -87,6 +89,16 @@ gates.S10 = () => {
   assert.ok(['Iso', 'Top', 'Front', 'Side', 'Reset'].every((w) => src.indexOf("'" + w + "'") > -1), 'view buttons');
   assert.ok(!/setInterval|setTimeout|requestAnimationFrame/.test(src), 'it moves only while the pointer is down');
   assert.ok(/touch-action:none/.test(html.slice(html.indexOf('.kal-sf-cv{'), html.indexOf('.kal-sf-cv{') + 200)), 'a drag on the chart turns it instead of scrolling the page');
+};
+gates.S11 = () => {
+  // The hover says how far a cell could be off. 10 trades, 8 wins of 6c and 2 losses of 93c: mean -13.8c, sample sd 41.7c, so give or take 2 x 41.7 / sqrt(10) = 26.4c, and a -13.8c edge is inside the noise. A cell that never loses is not "inside the noise".
+  const o = many(8, {}).concat(many(2, { settledPnl: -0.93, result: 'no' }));
+  const m = f.kalshiEdgeModel(o, FINE), c = cell(m, 4, 93);
+  assert.ok(Math.abs(c.pm - 26.4) < 0.1, 'range ' + c.pm);
+  assert.ok(/give or take 2\d\.\dc \(inside the noise\)/.test(page.kalSurfCellTitle(m, 4, 5)), page.kalSurfCellTitle(m, 4, 5));
+  const calm = f.kalshiEdgeModel(many(30, {}), FINE), cc = cell(calm, 4, 93);
+  assert.strictEqual(cc.pm, 0);
+  assert.ok(!/inside the noise/.test(page.kalSurfCellTitle(calm, 4, 5)), 'thirty wins at 6c is a real +6c with no spread');
 };
 gates.S7 = () => {
   // It reads and draws and nothing else: no call to the server API, no storage, no timers, no animation, no order or setting words, and the card sits in the console grid.
