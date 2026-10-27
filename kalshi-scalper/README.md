@@ -6661,3 +6661,9 @@ No survivor on either asset or mode. Every spot strategy is negative in discover
 **Why a restriction is the one safe live change.** It can only remove trades, never add risk or size. It does not raise the edge of a trade; it removes the hours where the record is flat to negative. Cost: about 74% fewer trades, so a slower ladder and less compounding if the effect is real.
 
 **Prediction.** The in-window profit factor falls toward 1.3 to 1.8 (regression from a small sample); other hours stay near 1.0. Prior that the bar is met: 20%.
+
+## Pre-registration: HOURS2, is the 12 to 18 UTC effect in the whole history? (written 2026-10-27 before any history was split by hour; 4 tries, running count about 14,635)
+
+HOURS1 rests on 19 days. This asks the same question on every L1 entry on file (favourite ask 0.88 to 0.97 at 6 minutes left, all 15 minute series with candles, pooled; entry hour = UTC hour of close minus 6 minutes). Four 6-hour buckets (0-6, 6-12, 12-18, 18-24). For each: mean net per contract, profit factor, and the day-clustered difference against the other three buckets, in two halves of the days (first half discovery, second half confirmation). `NOT_YET_FALSIFIED` for the 12-18 bucket only if it beats the rest by at least +1.0c with z at least 2.0 in discovery AND at least +0.5c with z at least 1.0 in confirmation. `FALSIFIED` if the all-days difference is under +0.3c or z under 1.0. The other three buckets are reported for information (counted as tries, not claims). Run once.
+
+**Prediction.** FALSIFIED or NOT_ENOUGH_DATA: the earlier P1 (US hours) read +0.65c z 1.41 and SEARCH5K's 12-18 bucket alone did not clear its null. Prior of a pass 15%.
