@@ -207,6 +207,12 @@
   }
   .app-pages, .site-footer{ padding-left: 0; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
+  /* Big monitors scale the whole page up instead of leaving it a small block in one corner (the owner, Oct 27, 2026: "maybe some scaling would be nice?", a 4K and ultrawide screenshot where the page filled a third of the width with 12px text). The 1800px column and every size inside it grow together by the step, and the column is centred. Phones and ordinary laptops are untouched. */
+  @media (min-width: 1921px){ .app{ zoom:1.2; margin-left:auto; margin-right:auto; } }
+  @media (min-width: 2560px){ .app{ zoom:1.5; } }
+  @media (min-width: 3200px){ .app{ zoom:1.8; } }
+  @media (min-width: 3840px){ .app{ zoom:2.1; } }
+  @media (min-width: 4500px){ .app{ zoom:2.5; } }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -1497,6 +1503,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 27</div>
+                <ul class="changelog-list">
+                  <li>On a big monitor the whole page scales up and centres instead of staying a small block in the left corner</li>
+                </ul>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
                   <li>Order flow has a last 15 minutes view, for one market or a whole series (#581)</li>
