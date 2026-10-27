@@ -228,7 +228,7 @@ exports.kalshiTape = onCall(async (request) => {
       truncated = r.truncated;
     }
     const out = { ticker: wholeSeries ? "" : ticker, series: wholeSeries ? data.series : "", spanMin: wholeSeries ? win.spanMin : null, windows, fromMs: win.fromMs, toMs: win.toMs, fetchedAt: now, trades: trades.length, truncated,
-      bars: footprint.buildFootprint(trades, win.fromMs, win.toMs) };
+      bars: footprint.buildFootprint(trades, win.fromMs, win.toMs), ...footprint.bigPrints(trades, win.fromMs, win.toMs) };
     if (kalshiTapeCache.size > 40) kalshiTapeCache.clear();
     kalshiTapeCache.set(key, { at: now, body: out });
     return out;
