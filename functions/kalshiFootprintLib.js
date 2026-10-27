@@ -72,6 +72,26 @@ function buildFootprint(trades, fromMs, toMs) {
   return bars;
 }
 
+// Big prints (the owner, Oct 26, 2026: "do we have any highlights for unusual activity, whales?"): the largest single trades in the window, each with how many times the usual (median) trade size it is. A print counts as BIG when it is
+// at least BIG_MULTIPLE times the median and at least BIG_MIN_SIZE contracts, so a quiet market's biggest trade is listed but is not called unusual. Newest first. Read only, from the same trades the footprint sums.
+const BIG_MULTIPLE = 5;
+const BIG_MIN_SIZE = 50;
+const MAX_PRINTS = 8;
+function bigPrints(trades, fromMs, toMs, limit) {
+  const parsed = [];
+  (trades || []).forEach((raw) => {
+    const t = raw && raw.price !== undefined && raw.side !== undefined ? raw : parseTrade(raw);
+    if (t && t.ts >= fromMs && t.ts < toMs) parsed.push(t);
+  });
+  if (!parsed.length) return { prints: [], median: 0 };
+  const sizes = parsed.map((t) => t.size).sort((a, b) => a - b);
+  const mid = Math.floor(sizes.length / 2);
+  const median = sizes.length % 2 ? sizes[mid] : (sizes[mid - 1] + sizes[mid]) / 2;
+  const top = parsed.slice().sort((a, b) => b.size - a.size || b.ts - a.ts).slice(0, Math.max(1, limit || MAX_PRINTS));
+  const prints = top.sort((a, b) => b.ts - a.ts).map((t) => ({ t: t.ts, price: t.price, size: t.size, side: t.side, times: median > 0 ? Math.round(t.size / median * 10) / 10 : 0, big: median > 0 && t.size >= BIG_MULTIPLE * median && t.size >= BIG_MIN_SIZE }));
+  return { prints, median };
+}
+
 // The whole-series view (the owner, Oct 26, 2026: "30 minutes or 1 hour, since we work in 15 minute increments"): the last 30 or 60 minutes of ONE series, stitched across its consecutive 15 minute markets.
 // Only a series the bot trades is accepted, and only those two spans; anything else becomes 30 minutes.
 const SERIES_SPANS = [30, 60];
@@ -100,4 +120,4 @@ function windowsFromMarkets(markets, series, fromMs, toMs) {
   return out.slice(-MAX_SERIES_MARKETS);
 }
 
-module.exports = { BAR_MS, WINDOW_MS, PAGE_LIMIT, MAX_PAGES, MAX_AGE_MS, SERIES_SPANS, MAX_SERIES_MARKETS, MAX_SERIES_TRADES, validTicker, validSeries, readWindow, seriesWindow, windowsFromMarkets, parseTrade, buildFootprint };
+module.exports = { BAR_MS, WINDOW_MS, PAGE_LIMIT, MAX_PAGES, MAX_AGE_MS, SERIES_SPANS, MAX_SERIES_MARKETS, MAX_SERIES_TRADES, BIG_MULTIPLE, BIG_MIN_SIZE, MAX_PRINTS, bigPrints, validTicker, validSeries, readWindow, seriesWindow, windowsFromMarkets, parseTrade, buildFootprint };

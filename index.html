@@ -207,6 +207,12 @@
   }
   .app-pages, .site-footer{ padding-left: 0; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
+  /* Big monitors scale the whole page up instead of leaving it a small block in one corner (the owner, Oct 27, 2026: "maybe some scaling would be nice?", a 4K and ultrawide screenshot where the page filled a third of the width with 12px text). The 1800px column and every size inside it grow together by the step, and the column is centred. Phones and ordinary laptops are untouched. */
+  @media (min-width: 1921px){ .app{ zoom:1.2; margin-left:auto; margin-right:auto; } }
+  @media (min-width: 2560px){ .app{ zoom:1.5; } }
+  @media (min-width: 3200px){ .app{ zoom:1.8; } }
+  @media (min-width: 3840px){ .app{ zoom:2.1; } }
+  @media (min-width: 4500px){ .app{ zoom:2.5; } }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -467,7 +473,13 @@
   .kal-notif-empty{ padding:22px 16px; font-size:13px; color:var(--muted); }
   .kal-alert{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; margin:0 0 14px; padding:14px 18px; border-radius:14px; background:var(--loss); color:#fff; font-size:14px; line-height:1.45; }
   .kal-alert[hidden]{ display:none; } .kal-alert b{ font-size:15px; font-weight:800; } .kal-alert-open{ margin-left:auto; background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:999px; padding:0 14px; min-height:34px; font:600 13px inherit; font-family:inherit; cursor:pointer; }
-  @media screen and (max-width:900px){ .kal-notif-tabs .kal-pill{ min-height:40px; } .kal-notif-panel{ position:fixed; left:12px; right:12px; top:auto; bottom:84px; width:auto; max-height:70vh; } }
+  @media screen and (max-width:900px){ .kal-notif-tabs .kal-pill{ min-height:40px; } .kal-notif-panel{ position:fixed; left:12px; right:12px; top:84px; bottom:auto; width:auto; max-height:70vh; }
+    /* On a phone the bell sits in the header beside the clock (the owner, Oct 27, 2026: "notification bell up here on mobile"), as a bare icon, and the bottom bar keeps Brief, Bot and Settings. */
+    .topbar-right .kal-notif{ order:-1; align-self:center; margin-right:6px; }
+    .topbar-right .kal-notif-btn{ flex-direction:row; min-width:44px; min-height:44px; width:44px; padding:0; justify-content:center; border-radius:12px; }
+    .topbar-right .kal-notif-btn .side-nav-label, .topbar-right .kal-notif-btn .side-nav-icon{ display:none; }
+    .topbar-right .kal-notif-btn .side-nav-glyph{ display:block; width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .topbar-right .kal-notif-badge{ top:2px; right:2px; } }
   /* Phone touch targets (the owner, Oct 25, 2026: "scan over mobile UI"). Measured at 360, 390 and 430 wide: the trade list's page arrows were 8px wide, the Running pill 34px tall, the legal line and the contact email about 14 to 19px, and the Layout menu's tick boxes 18px. Each is now at least 40px to tap, and the Bot page header holds its buttons on one row under the status. */
   @media screen and (max-width:700px){
     .kal-link{ min-width:40px; min-height:40px; padding:0 12px; margin-left:0; }
@@ -820,32 +832,39 @@
   .kal-fp-d .up, .kal-fp-d .dn{ flex:1; display:flex; } .kal-fp-d .up{ align-items:flex-end; } .kal-fp-d .up span{ display:block; width:100%; background:var(--paper); border-radius:2px 2px 0 0; } .kal-fp-d .dn span{ display:block; width:100%; background:var(--muted); border-radius:0 0 2px 2px; }
   .kal-fp > .kal-fp-gap{ min-height:0; height:0; border-top:1px dashed rgba(255,255,255,.18); margin:3px 0; }
   .kal-fp-c.kal-fp-k{ justify-content:center; padding:2px 0; font-size:10px; overflow:hidden; } .kal-fp-k.kb{ background:rgba(255,255,255,.24); } .kal-fp-k.ks{ background:rgba(255,255,255,.08); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); }
+  .kal-fp-prints{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; } .kal-fp-prints span{ border:1px solid var(--border); border-radius:999px; padding:4px 10px; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; } .kal-fp-prints span.big{ color:var(--paper); border-color:var(--paper); font-weight:600; }
+  .kal-fp-c.wh{ position:relative; box-shadow:0 0 0 2px var(--paper); z-index:1; } .kal-fp-c.wh::after{ content:'\25C6'; position:absolute; top:-7px; right:-4px; font-size:9px; line-height:1; color:var(--paper); }
+  .kal-fp.dense .kal-fp-k b{ display:none; } .kal-fp.dense .kal-fp-h{ font-size:10px; overflow:visible; }
   .kal-fp-n{ font-size:11px; color:var(--muted); text-align:center; }
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
   .kal-console [data-card="status"]{ grid-area:stat; align-self:stretch; }
-  .kal-console [data-card="account"] .kal-acct-risk{ grid-column:3; grid-row:1; justify-self:center; width:100%; max-width:280px; display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 12px; } .kal-acct-risk .kal-k{ order:1; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin:0; }
-  /* The loss stop sits in the gap between the reinvest pool and Today (the owner, Oct 26, 2026: it was too big, then "fill that gap"): the label and the share used on one line, a thin bar under them. */
-  .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-meter{ order:3; flex:0 0 100%; height:4px; border-radius:2px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:2px; } .kal-acct-risk .kal-hb{ order:2; font-size:13px; white-space:nowrap; margin:0; }
   .kal-console [data-card="pnl"]{ grid-area:pnl; align-self:stretch; }
   .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
   .kal-console [data-card="footprint"]{ grid-area:fp; align-self:start; }
   .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
-  .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:6px 32px; align-items:center; padding:16px 22px; }
-  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; padding:0; }
-  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; }
-  .kal-console [data-card="account"] #kalBotStatus{ grid-column:2; display:flex; align-items:center; gap:36px; flex-wrap:wrap; }
-  .kal-console [data-card="account"] #kalBotStatus .kal-acct-total{ margin:0; }
-  .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ flex-direction:row; gap:28px; border-top:0; padding-top:0; }
-  .kal-console [data-card="account"] #kalBotStatus .kal-rows > div, .kal-console [data-card="account"] #kalBotTotals .kal-rows > div{ flex-direction:column; justify-content:flex-start; gap:2px; }
-  .kal-console [data-card="account"] #kalBotTotals{ grid-column:4; grid-row:1; }
-  .kal-console [data-card="account"] .kal-acct-head{ gap:14px; }
+  /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
+     the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1.15fr) repeat(3, minmax(0,1fr)); gap:10px 20px; align-items:center; padding:20px 22px; }
+  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; grid-row:1; padding:0; gap:14px; }
+  .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ display:contents; }
+  .kal-console [data-card="account"] .kal-acct-total{ grid-column:1; grid-row:2; margin:0; font-size:46px; line-height:1; }
+  .kal-console [data-card="account"] .kal-today{ grid-column:1; grid-row:3; display:flex; flex-direction:row; align-items:baseline; gap:8px; }
+  .kal-console [data-card="account"] .kal-today{ justify-content:flex-start; } .kal-console [data-card="account"] .kal-today b{ font-size:16px; }
+  .kal-console [data-card="account"] .kal-sub{ font-size:12px; color:var(--muted); }
+  .kal-console [data-card="account"] .kal-tile, .kal-console [data-card="account"] .kal-acct-risk{ grid-row:1 / 4; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .kal-console [data-card="account"] .kal-tile b{ font:800 20px/1.15 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
+  .kal-console [data-card="account"] .kal-tile .kal-k, .kal-console [data-card="account"] .kal-acct-risk .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:none; margin:0; }
+  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1 / -1; grid-row:5; }
+  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:4; }
+  .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-k{ order:1; } .kal-acct-risk .kal-hb{ order:2; margin:0; font:800 20px/1.15 'Public Sans', sans-serif; } .kal-acct-risk .kal-meter{ order:3; height:5px; border-radius:3px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:3px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "fp" "trd"; }
-    .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); }
-    .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1; grid-row:auto; justify-self:stretch; max-width:none; }
+    .kal-console [data-card="account"]{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
+    .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1 / -1; grid-row:auto; }
+    .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
   }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
@@ -1345,12 +1364,12 @@
         <details id="kalFpFold">
           <summary class="kal-card-title" style="margin:0">Order flow &#9662;</summary>
           <div class="kal-fp-bar">
-            <label class="kal-lbl" for="kalFpMarket">Market <select class="kal-input" id="kalFpMarket" style="width:auto"></select></label>
-            <label class="kal-lbl" for="kalFpSpan">Show <select class="kal-input" id="kalFpSpan" style="width:auto"><option value="20">last 20 minutes</option><option value="40">last 40 minutes</option></select></label>
+            <label class="kal-lbl" for="kalFpMarket">Product <select class="kal-input" id="kalFpMarket" style="width:auto"></select></label>
+            <label class="kal-lbl" for="kalFpSpan">Time frame <select class="kal-input" id="kalFpSpan" style="width:auto"><option value="15">Last 15 minutes</option><option value="30">Last 30 minutes</option><option value="60">Last hour</option></select></label>
             <span class="kal-note" id="kalFpStatus"></span>
           </div>
-          <div id="kalFpBody"><div class="kal-empty">Open a market to read its trades.</div></div>
-          <div class="kal-note">Each cell: contracts takers sold on the left, bought on the right, at that YES price in cents. A bright cell is a 3 to 1 imbalance of at least 50 contracts; an outlined cell is the busiest price of its minute. On views longer than 24 minutes a cell shows the contracts traded: bright when buyers were the heavier side, outlined when sellers were (hover for both counts). Public trades only. This view reads and shows, it never trades.</div>
+          <div id="kalFpBody"><div class="kal-empty">Open a product to read its trades.</div></div>
+          <div class="kal-note">Each cell: contracts takers sold on the left, bought on the right, at that YES price in cents. A bright cell is a 3 to 1 imbalance of at least 50 contracts; an outlined cell is the busiest price of its minute. A ringed cell with a diamond holds a big print: one trade at least 5 times the usual size and 50 contracts or more (listed above the grid). On views longer than 24 minutes a cell shows the contracts traded: bright when buyers were the heavier side, outlined when sellers were (hover for both counts). Public trades only. This view reads and shows, it never trades.</div>
         </details>
       </div>
       </div>
@@ -1497,9 +1516,17 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 27</div>
+                <ul class="changelog-list">
+                  <li>On a big monitor the whole page scales up and centres instead of staying a small block in the left corner</li>
+                </ul>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
                   <li>Fix: the break-even in Bot status read a NO order's price as the YES price (it showed 46.7%); it now uses the price paid for the side bought (#586)</li>
+                  <li>On a phone the notification bell sits in the header beside the clock; the bottom bar keeps Brief, Bot and Settings (#585)</li>
+                  <li>The Account card has the balance as its hero with Today under it, and stake, pool and loss stop as three tiles (#584)</li>
+                  <li>Order flow lists the biggest single trades and rings the cell of any print at least 5 times the usual size (#583)</li>
+                  <li>Order flow's picker is the product only; the time frame (15 minutes, 30 minutes, hour) sets how much of its recent windows to show (#582)</li>
                   <li>Order flow has a last 15 minutes view, for one market or a whole series (#581)</li>
                   <li>Order flow can show a whole series over the last 30 minutes or hour, stitched across its 15 minute windows (#580)</li>
                   <li>Order flow is condensed: only prices that traded get a row, empty minutes before the first trade are dropped, gaps are marked (#579)</li>
@@ -2292,12 +2319,13 @@
   // The data -> the columns and rows to draw. Pure: no page state. span is how many minutes to show (the last ones). marks are minutes (ms) to flag: entry, exit and close.
   function kalshiFpModel(data, span, marks, maxRows){
     var bars = (data && Array.isArray(data.bars)) ? data.bars.slice(-Math.max(1, Number(span) || 20)) : [];
-    var m = marks || {}, prices = {}, volByPrice = {}, any = false;
+    var m = marks || {}, prices = {}, volByPrice = {}, any = false, whales = {};
+    ((data && data.prints) || []).forEach(function(pr){ if(pr && pr.big){ whales[Math.floor(Number(pr.t) / 60000) * 60000 + '|' + pr.price] = true; } });
     var cols = bars.map(function(b){
       var tMs = Number(b.t) * 1000, levels = {};
       (b.l || []).forEach(function(r){
         var s = Number(r[1]) || 0, bu = Number(r[2]) || 0;
-        levels[r[0]] = { sell: s, buy: bu, imb: bu >= 3 * Math.max(s, 1) && bu >= 50 ? 'b' : (s >= 3 * Math.max(bu, 1) && s >= 50 ? 's' : ''), poc: r[0] === b.poc };
+        levels[r[0]] = { whale: whales[tMs + '|' + r[0]] === true, sell: s, buy: bu, imb: bu >= 3 * Math.max(s, 1) && bu >= 50 ? 'b' : (s >= 3 * Math.max(bu, 1) && s >= 50 ? 's' : ''), poc: r[0] === b.poc };
         prices[r[0]] = true; volByPrice[r[0]] = (volByPrice[r[0]] || 0) + s + bu; any = true;
       });
       var has = function(one, many){ return one === tMs || (Array.isArray(many) && many.indexOf(tMs) > -1); };
@@ -2316,31 +2344,23 @@
     while(first < cols.length - 1 && !Object.keys(cols[first].levels).length){ first++; }
     cols = cols.slice(first);
     var maxDelta = cols.reduce(function(a, c){ return Math.max(a, Math.abs(c.delta)); }, 0);
-    return { cols: cols, prices: list, cropped: cropped, any: any, maxDelta: maxDelta, maxRows: cap };
+    var fromT = cols.length ? cols[0].t : 0;
+    var prints = ((data && data.prints) || []).filter(function(pr){ return pr && Number(pr.t) >= fromT; });
+    return { cols: cols, prices: list, cropped: cropped, any: any, maxDelta: maxDelta, maxRows: cap, prints: prints };
   }
   function kalshiFpNum(n){ n = Number(n) || 0; return n >= 10000 ? Math.round(n / 1000) + 'k' : (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(Math.round(n))); }
   var kalshiFpData = null, kalshiFpTicker = '', kalshiFpTimer = null, kalshiFpBusy = false;
   // The five markets the bot trades for real, by series: choosing one shows its last 30 minutes or hour stitched across its 15 minute windows (the owner, Oct 26, 2026: "we work in 15 min increments").
   var KAL_FP_SERIES = [['KXGOLD15M', 'Gold'], ['KXXRP15M', 'XRP'], ['KXBTC15M', 'Bitcoin'], ['KXDOGE15M', 'Dogecoin'], ['KXETH15M', 'Ethereum']];
   function kalshiFpIsSeries(v){ return String(v || '').indexOf('series:') === 0; }
-  // The markets worth looking at: the whole series first, then the ones open now (from the books read) and the bot's own recent ones, newest close first.
+  // The picker is the PRODUCT only (the owner, Oct 26, 2026: "it should just be the product selection and not individual historical stuff"); the time frame beside it decides how much of that product's recent windows to show.
   function kalshiFpMarkets(){
-    var seen = {}, out = [], now = Date.now();
-    var add = function(ticker, tag){
-      if(!ticker || seen[ticker]){ return; }
-      var close = kalshiCloseFromTicker(ticker); if(close === null){ return; }
-      seen[ticker] = true; out.push({ ticker: ticker, close: close, label: kalshiShortTicker(ticker) + (close > now ? ' (open)' : '') + (tag || '') });
-    };
-    ((kalshiBooksLast && kalshiBooksLast.markets) || []).forEach(function(mk){ if(mk && mk.ticker && /^KX(GOLD|XRP|BTC|DOGE|ETH)/.test(mk.ticker)){ add(mk.ticker, ''); } });
-    (kalshiLiveOrders || []).filter(function(o){ return o && o.strategy === 'L1' && o.ticker; }).sort(function(a, b){ return b.ts - a.ts; }).slice(0, 24).forEach(function(o){ add(o.ticker, ' (bot order)'); });
-    var single = out.sort(function(a, b){ return b.close - a.close; }).slice(0, 18);
-    var whole = KAL_FP_SERIES.map(function(x){ return { ticker: 'series:' + x[0], label: x[1] + ', all windows' }; });
-    return whole.concat(single);
+    return KAL_FP_SERIES.map(function(x){ return { ticker: 'series:' + x[0], label: x[1] }; });
   }
   function kalshiFpFillSpans(){
     var sp = document.getElementById('kalFpSpan'); if(!sp){ return; }
     var series = kalshiFpIsSeries(kalshiFpTicker), keep = sp.value;
-    var opts = series ? [['15', 'last 15 minutes'], ['30', 'last 30 minutes'], ['60', 'last hour']] : [['15', 'last 15 minutes'], ['20', 'last 20 minutes'], ['40', 'last 40 minutes']];
+    var opts = series ? [['15', 'Last 15 minutes'], ['30', 'Last 30 minutes'], ['60', 'Last hour']] : [['15', 'Last 15 minutes'], ['20', 'Last 20 minutes'], ['40', 'Last 40 minutes']];
     sp.innerHTML = opts.map(function(o){ return '<option value="' + escapeHtml(o[0]) + '">' + escapeHtml(o[1]) + '</option>'; }).join('');
     sp.value = opts.some(function(o){ return o[0] === keep; }) ? keep : opts[0][0];
   }
@@ -2358,7 +2378,7 @@
     if(!body){ return; }
     var series = kalshiFpIsSeries(kalshiFpTicker), spanSel = Number((document.getElementById('kalFpSpan') || {}).value) || (series ? 30 : 20);
     var fits = kalshiFpData && (series ? (kalshiFpData.series && 'series:' + kalshiFpData.series === kalshiFpTicker && kalshiFpData.spanMin === Math.max(30, spanSel)) : kalshiFpData.ticker === kalshiFpTicker);
-    if(!fits){ body.innerHTML = '<div class="kal-empty">' + (kalshiFpBusy ? 'Reading the trades...' : 'Open a market to read its trades.') + '</div>'; return; }
+    if(!fits){ body.innerHTML = '<div class="kal-empty">' + (kalshiFpBusy ? 'Reading the trades...' : 'Open a product to read its trades.') + '</div>'; return; }
     var marks = { entries: [], exits: [], closes: [] }, tickers = {};
     if(series){ (kalshiFpData.windows || []).forEach(function(w){ tickers[w.ticker] = true; marks.closes.push(Math.floor(w.closeMs / 60000) * 60000 - 60000); }); }
     else { tickers[kalshiFpTicker] = true; var cl = kalshiCloseFromTicker(kalshiFpTicker); if(cl !== null){ marks.closes.push(Math.floor(cl / 60000) * 60000 - 60000); } }
@@ -2369,25 +2389,35 @@
     // More than 24 minutes cannot show two numbers per cell on one screen (the owner, Oct 26, 2026: "a lot to fit on one screen"), so a long view fits the width instead: one number per cell (the contracts traded), shaded by who was the
     // heavier side, with the sold and bought counts in the hover; time labels every 5 minutes.
     var n = model.cols.length, compact = n > 24, cols = '40px repeat(' + n + ', minmax(0, 1fr))';
+    // On a phone the cells are too narrow for any figure (under 22px each): shade only, label the quarter hours, and keep the numbers in the hover.
+    var dense = compact && (body.clientWidth - 48) / n < 22;
     if(!compact){ cols = '40px repeat(' + n + ', minmax(54px, 1fr))'; }
     var cls = function(c){ return c.mark ? ' mk-' + c.mark : ''; };
     var markWord = { entry: 'Bought', exit: 'Sold', close: 'Close' };
-    var h = '<div class="kal-fp-scroll"><div class="kal-fp" style="grid-template-columns:' + cols + '"><div class="kal-fp-h"></div>' + model.cols.map(function(c){ var lab = kalTime(c.t).replace(/ ?[AP]M$/, ''); var show = !compact || c.mark || /[05]$/.test(lab); return '<div class="kal-fp-h' + cls(c) + '">' + (show ? escapeHtml(lab) : '') + (c.mark ? '<br>' + markWord[c.mark] : '') + '</div>'; }).join('');
+    // The biggest single trades of the window, newest first (the owner, Oct 26, 2026: whales). A print at least 5 times the usual size and 50 contracts is "big": bold here, ringed with a diamond in the grid.
+    var strip = '';
+    if(model.prints.length){
+      strip = '<div class="kal-fp-prints" title="Largest single trades in this window">' + model.prints.map(function(pr){
+        var txt = kalTime(pr.t).replace(/ ?[AP]M$/, '') + ' ' + (pr.side > 0 ? 'bought ' : 'sold ') + kalshiFpNum(pr.size) + ' at ' + pr.price + 'c' + (pr.times > 0 ? ' (' + pr.times + 'x usual)' : '');
+        return '<span class="' + (pr.big ? 'big' : '') + '">' + (pr.big ? '&#9670; ' : '') + escapeHtml(txt) + '</span>';
+      }).join('') + '</div>';
+    }
+    var h = strip + '<div class="kal-fp-scroll"><div class="kal-fp' + (dense ? ' dense' : '') + '" style="grid-template-columns:' + cols + '"><div class="kal-fp-h"></div>' + model.cols.map(function(c){ var lab = kalTime(c.t).replace(/ ?[AP]M$/, ''); var show = !compact || c.mark || /[05]$/.test(lab); return '<div class="kal-fp-h' + cls(c) + '">' + (show ? escapeHtml(lab) : '') + (c.mark ? '<br>' + markWord[c.mark] : '') + '</div>'; }).join('');
     model.prices.forEach(function(px, i){
       if(i > 0 && model.prices[i - 1] - px > 1){ h += '<div class="kal-fp-gap" style="grid-column:1 / -1"></div>'; }
       h += '<div class="kal-fp-p">' + px + 'c</div>' + model.cols.map(function(c){
         var lv = c.levels[px];
         if(compact){
           var heavy = lv ? (lv.buy > 1.5 * lv.sell ? ' kb' : (lv.sell > 1.5 * lv.buy ? ' ks' : '')) : '';
-          return lv ? '<div class="kal-fp-c kal-fp-k' + heavy + (lv.poc ? ' poc' : '') + cls(c) + '" title="' + escapeHtml(px + 'c, sold ' + lv.sell + ', bought ' + lv.buy) + '"><b>' + escapeHtml(kalshiFpNum(lv.sell + lv.buy)) + '</b></div>' : '<div class="kal-fp-c kal-fp-e' + cls(c) + '"></div>';
+          return lv ? '<div class="kal-fp-c kal-fp-k' + heavy + (lv.poc ? ' poc' : '') + (lv.whale ? ' wh' : '') + cls(c) + '" title="' + escapeHtml(px + 'c, sold ' + lv.sell + ', bought ' + lv.buy) + '"><b>' + escapeHtml(kalshiFpNum(lv.sell + lv.buy)) + '</b></div>' : '<div class="kal-fp-c kal-fp-e' + cls(c) + '"></div>';
         }
-        return lv ? '<div class="kal-fp-c' + (lv.imb ? ' imb-' + lv.imb : '') + (lv.poc ? ' poc' : '') + cls(c) + '" title="' + escapeHtml(px + 'c, sold ' + lv.sell + ', bought ' + lv.buy) + '"><i>' + (lv.sell ? escapeHtml(kalshiFpNum(lv.sell)) : '') + '</i><b>' + (lv.buy ? escapeHtml(kalshiFpNum(lv.buy)) : '') + '</b></div>' : '<div class="kal-fp-c kal-fp-e' + cls(c) + '"></div>';
+        return lv ? '<div class="kal-fp-c' + (lv.imb ? ' imb-' + lv.imb : '') + (lv.poc ? ' poc' : '') + (lv.whale ? ' wh' : '') + cls(c) + '" title="' + escapeHtml(px + 'c, sold ' + lv.sell + ', bought ' + lv.buy) + '"><i>' + (lv.sell ? escapeHtml(kalshiFpNum(lv.sell)) : '') + '</i><b>' + (lv.buy ? escapeHtml(kalshiFpNum(lv.buy)) : '') + '</b></div>' : '<div class="kal-fp-c kal-fp-e' + cls(c) + '"></div>';
       }).join('');
     });
     var barH = function(v){ return model.maxDelta > 0 ? Math.max(2, Math.round(Math.abs(v) / model.maxDelta * 22)) : 0; };
     h += '<div class="kal-fp-p">Delta</div>' + model.cols.map(function(c){ return '<div class="kal-fp-d' + cls(c) + '" title="' + escapeHtml('bought minus sold: ' + c.delta) + '"><div class="up">' + (c.delta > 0 ? '<span style="height:' + barH(c.delta) + 'px"></span>' : '') + '</div><div class="dn">' + (c.delta < 0 ? '<span style="height:' + barH(c.delta) + 'px"></span>' : '') + '</div></div>'; }).join('');
     // On a long view the net and total are written only under the labelled minutes, so the figures do not run into each other.
-    var showNum = function(c){ return !compact || c.mark || /[05]$/.test(kalTime(c.t).replace(/ ?[AP]M$/, '')); };
+    var showNum = function(c){ return !dense && (!compact || c.mark || /[05]$/.test(kalTime(c.t).replace(/ ?[AP]M$/, ''))); };
     h += '<div class="kal-fp-p">Net</div>' + model.cols.map(function(c){ return '<div class="kal-fp-n' + cls(c) + '">' + (showNum(c) ? escapeHtml((c.delta > 0 ? '+' : '') + kalshiFpNum(c.delta)) : '') + '</div>'; }).join('');
     h += '<div class="kal-fp-p">Total</div>' + model.cols.map(function(c){ return '<div class="kal-fp-n' + cls(c) + '">' + (showNum(c) ? escapeHtml((c.cum > 0 ? '+' : '') + kalshiFpNum(c.cum)) : '') + '</div>'; }).join('');
     body.innerHTML = h + '</div></div>';
@@ -2707,10 +2737,10 @@
         var poolCell = '';
         if(ses.sizing === true && Number.isFinite(ses.sizePool)){
           var ex = Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0;
-          poolCell = '<div><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + ' / ' + kalshiMoney((ex + 1) * 0.93) + '</b></div>';
+          poolCell = '<div class="kal-tile"><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + '</b><span class="kal-sub">of ' + kalshiMoney((ex + 1) * 0.93) + ' to the next contract</span></div>';
         }
-        if(!sizeKnown) stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
-        else stakeRow = '<div class="kal-rows"><div><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + ', ' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '%)' : '') + '</b></div>' + poolCell + '</div>';
+        if(!sizeKnown) stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
+        else stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + '</b><span class="kal-sub">' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '% of the account)' : '') + '</span></div>' + poolCell + '</div>';
       }
       h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
         (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
@@ -2730,7 +2760,7 @@
     if(!a){
       totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
     } else if(!kalshiOrdersLoaded){
-      totEl.innerHTML = '<div class="kal-rows"><div><span class="kal-k">Today</span><b>loading...</b></div></div>';
+      totEl.innerHTML = '<div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div>';
     } else {
       // Today's result (the owner, Oct 21, 2026: this line used to be "Bot since <date>", the all-time total). Only the BOT's settled trades whose
       // order time falls on today's US Central date, the same clock as the rest of the page, so it starts again at midnight CT. Deposits,
@@ -2741,7 +2771,7 @@
       var botNet = kalshiPerfStats(todayOrders, 0).total;
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
+        '<div class="kal-today"><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
     }
 
     renderKalshiPositions();
@@ -3621,6 +3651,19 @@ kalshiStatusTick();
       document.getElementById('kalBotHaltMsg').textContent = 'Could not change it: ' + ((err && err.message) || 'unknown');
     });
   });
+
+  // The bell lives in the navigation rail on a wide screen and in the header, beside the clock, on a phone (the owner, Oct 27, 2026). One element moves between the two, so every id and listener stays the same.
+  (function(){
+    var bell = document.getElementById('kalNotif'), nav = document.getElementById('sideNav'), right = document.querySelector('.topbar-right'), clock = right ? right.querySelector('.clock') : null;
+    if(!bell || !nav || !right || !window.matchMedia){ return; }
+    var mq = window.matchMedia('(max-width: 900px)');
+    function place(){
+      if(mq.matches){ if(bell.parentNode !== right){ right.insertBefore(bell, clock || right.firstChild); } }
+      else if(bell.parentNode !== nav){ nav.insertBefore(bell, nav.firstChild); }
+    }
+    place();
+    if(mq.addEventListener){ mq.addEventListener('change', place); } else if(mq.addListener){ mq.addListener(place); }
+  })();
 
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
