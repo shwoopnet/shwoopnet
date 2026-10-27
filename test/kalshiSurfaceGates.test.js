@@ -76,7 +76,7 @@ gates.S7 = () => {
 };
 gates.S8 = () => {
   // Calm view: the only colours are the paper white and the loss red, and a figure is never set in the wordmark font.
-  const css = html.slice(html.indexOf('.kal-sf-heat{'), html.indexOf('.kal-fp-n{'));
+  const css = html.slice(html.indexOf('.kal-sf-cv{'), html.indexOf('.kal-fp-n{'));
   assert.ok(!/#[0-9a-fA-F]{3,6}|rgb\(/.test(css.replace(/rgba\(0,0,0/g, '')), 'the card styles use the design tokens only');
   assert.ok(!/Titan One/.test(css));
 };

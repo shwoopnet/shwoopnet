@@ -836,13 +836,7 @@
   .kal-fp-c.wh{ position:relative; box-shadow:0 0 0 2px var(--paper); z-index:1; } .kal-fp-c.wh::after{ content:'\25C6'; position:absolute; top:-7px; right:-4px; font-size:9px; line-height:1; color:var(--paper); }
   .kal-fp.dense .kal-fp-k b{ display:none; } .kal-fp.dense .kal-fp-h{ font-size:10px; overflow:visible; }
   #kalSfFold > summary{ cursor:pointer; list-style:none; } #kalSfFold > summary::-webkit-details-marker{ display:none; }
-  .kal-sf-heat{ display:grid; gap:3px; margin:0 0 12px; font-variant-numeric:tabular-nums; } .kal-sf-h{ font-size:11px; color:var(--muted); text-align:center; align-self:center; } .kal-sf-r{ text-align:right; padding-right:4px; }
-  .kal-sf-c{ min-height:34px; border-radius:6px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:var(--paper); } .kal-sf-c.ok{ border-color:transparent; }
-  .kal-sf-svg{ display:block; width:100%; height:auto; margin:0 0 12px; } .kal-sf-svg .rdt, .kal-sf-multi .rdt{ fill:var(--muted); font-size:10px; } .kal-sf-svg .rd0, .kal-sf-multi .rd0{ stroke:var(--muted); stroke-opacity:.35; stroke-dasharray:3 3; }
-  .kal-sf-svg .rdf{ fill:var(--panel); } .kal-sf-svg .rdp, .kal-sf-svg .bbp{ stroke:var(--paper); fill:var(--paper); stroke-width:1.5; } .kal-sf-svg .rdn, .kal-sf-svg .bbn{ stroke:var(--loss); fill:var(--loss); stroke-width:1.5; } .kal-sf-svg .bbp, .kal-sf-svg .bbn{ stroke:none; } .kal-sf-svg .bbx{ fill:none; stroke:var(--muted); stroke-opacity:.5; stroke-dasharray:2 2; }
-  .kal-sf-multi{ display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px; margin:0 0 12px; } .kal-sf-pn{ border:1px solid var(--border); border-radius:10px; padding:8px 10px 4px; } .kal-sf-pt{ display:flex; justify-content:space-between; font-size:12px; margin-bottom:2px; } .kal-sf-pt span{ color:var(--muted); font-variant-numeric:tabular-nums; } .kal-sf-pn svg{ display:block; width:100%; height:auto; }
-  .kal-sf-multi .cvl{ fill:none; stroke:var(--paper); stroke-width:1.6; } .kal-sf-multi .cvb{ fill:var(--paper); fill-opacity:.14; stroke:none; } .kal-sf-multi .cvd{ fill:var(--paper); }
-  .kal-sf-cv{ display:block; width:100%; height:440px; margin:0 0 12px; cursor:grab; touch-action:pan-y; } .kal-sf-cv:active{ cursor:grabbing; }
+  .kal-sf-cv{ display:block; width:100%; height:420px; margin:0 0 12px; cursor:grab; touch-action:pan-y; } .kal-sf-cv:active{ cursor:grabbing; }
   .kal-fp-n{ font-size:11px; color:var(--muted); text-align:center; }
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
@@ -1387,11 +1381,10 @@
           <div class="kal-fp-bar">
             <label class="kal-lbl" for="kalSfMarket">Market <select class="kal-input" id="kalSfMarket" style="width:auto"></select></label>
             <label class="kal-lbl" for="kalSfLead">Bought <select class="kal-input" id="kalSfLead" style="width:auto"><option value="all">At any time</option><option value="10m">10 minutes before</option><option value="6m">6 minutes before</option></select></label>
-            <label class="kal-lbl" for="kalSfView">View <select class="kal-input" id="kalSfView" style="width:auto"><option value="heat">Heatmap</option><option value="mesh">Mesh surface (drag to turn)</option><option value="ridge">Ridge lines</option><option value="curve">Price curves with a band</option><option value="bubble">Bubbles (size is trades)</option><option value="3d">Columns (drag to turn)</option></select></label>
             <span class="kal-note" id="kalSfStatus"></span>
           </div>
           <div id="kalSfBody"><div class="kal-empty">Open this to read the orders.</div></div>
-          <div class="kal-note">Each cell is the bot's settled trades at that price paid (across) and Central time of day it was bought (down, three hour blocks). The number is the net result in cents per contract after fees; white is a gain, red is a loss. A cell with fewer than 10 trades is left blank. Hover a heatmap cell for its trades and win rate. This looks back at what already happened: it does not place, size or change any order, and a pattern here is a question for the research session, not a rule.</div>
+          <div class="kal-note">Each point is the bot's settled trades at that price paid (across) and Central time of day it was bought (down, three hour blocks); its height is the net result in cents per contract after fees, white above zero and red below. A cell with fewer than 10 trades is a hole in the surface. Touch or hover a point for its trades and win rate. This looks back at what already happened: it does not place, size or change any order, and a pattern here is a question for the research session, not a rule.</div>
         </details>
       </div>
       </div>
@@ -1540,7 +1533,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 27</div>
                 <ul class="changelog-list">
-                  <li>Bot page: "Where the edge is", a read only look at what the bot earned by price paid and time of day, as a heatmap or columns you can turn; thin cells are left blank (#590)</li>
+                  <li>Bot page: "Where the edge is", a read only look at what the bot earned by price paid and time of day, as a surface you can turn; thin cells are left as holes (#590)</li>
                   <li>On a big monitor the whole page scales up and centres instead of staying a small block in the left corner</li>
                 </ul>
                 <div class="changelog-day">Oct 26</div>
@@ -2516,144 +2509,10 @@
     var x = m.cells[r][c], when = m.rows[r] + ' to ' + m.rows[(r + 1) % m.rows.length];
     return m.cols[c] + 'c, ' + when + ': ' + (x.ok ? x.n + ' trades, ' + x.win.toFixed(0) + '% won, ' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + 'c per contract' : x.n + ' trades, too few to read');
   }
-  function kalSurfHeatHtml(m){
-    var h = '<div class="kal-sf-heat" style="grid-template-columns:34px repeat(' + m.cols.length + ', minmax(0, 1fr))"><div></div>' + m.cols.map(function(p){ return '<div class="kal-sf-h">' + p + 'c</div>'; }).join('');
-    m.rows.forEach(function(lab, r){
-      h += '<div class="kal-sf-h kal-sf-r">' + escapeHtml(lab) + '</div>';
-      m.cells[r].forEach(function(x, c){
-        if(!x.ok){ h += '<div class="kal-sf-c" title="' + escapeHtml(kalSurfCellTitle(m, r, c)) + '"></div>'; return; }
-        var a = m.maxAbs > 0 ? Math.round(14 + Math.abs(x.edge) / m.maxAbs * 62) : 14;
-        h += '<div class="kal-sf-c ok" style="background:color-mix(in srgb, ' + (x.edge >= 0 ? 'var(--paper)' : 'var(--loss)') + ' ' + a + '%, transparent)" title="' + escapeHtml(kalSurfCellTitle(m, r, c)) + '">' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + '</div>';
-      });
-    });
-    return h + '</div>';
-  }
-  // The 3D view: one column per cell that is readable, standing on a grid, up for a gain and down for a loss, turned by dragging sideways. Columns, not a stretched sheet, so nothing is drawn between cells that has no data.
-  function kalSurfDraw(cv, m){
-    var W = cv.clientWidth || 640, H = cv.clientHeight || 340, dpr = window.devicePixelRatio || 1;
-    if(cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    var cx = cv.getContext('2d'); if(!cx){ return; }
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H);
-    var cs = window.getComputedStyle(document.documentElement), paper = (cs.getPropertyValue('--paper') || '#fff').trim(), loss = (cs.getPropertyValue('--loss') || '#D93025').trim(), muted = (cs.getPropertyValue('--muted') || '#999').trim();
-    var nc = m.cols.length, nr = m.rows.length, zmax = Math.max(nc, nr) * 0.32, cyw = Math.cos(kalSurf.yaw), syw = Math.sin(kalSurf.yaw), cp = Math.cos(kalSurf.pitch), sp = Math.sin(kalSurf.pitch);
-    function P(x, y, z){ var x1 = x * cyw - y * syw, y1 = x * syw + y * cyw; return { x: x1, y: -(y1 * sp + z * cp), d: y1 * cp - z * sp }; }
-    var ox = -nc / 2, oy = -nr / 2, pts = [], boxes = [], r, c;
-    function V(x, y, z){ var p = P(ox + x, oy + y, z); pts.push(p); return p; }
-    for(r = 0; r <= nr; r++){ V(0, r, 0); V(nc, r, 0); } for(c = 0; c <= nc; c++){ V(c, 0, 0); V(c, nr, 0); }
-    for(r = 0; r < nr; r++){ for(c = 0; c < nc; c++){
-      var x = m.cells[r][c]; if(!x.ok){ continue; }
-      var z1 = m.maxAbs > 0 ? x.edge / m.maxAbs * zmax : 0, i = 0.1, q = [V(c + i, r + i, 0), V(c + 1 - i, r + i, 0), V(c + 1 - i, r + 1 - i, 0), V(c + i, r + 1 - i, 0), V(c + i, r + i, z1), V(c + 1 - i, r + i, z1), V(c + 1 - i, r + 1 - i, z1), V(c + i, r + 1 - i, z1)];
-      boxes.push({ q: q, up: x.edge >= 0, d: P(ox + c + 0.5, oy + r + 0.5, 0).d });
-    } }
-    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    pts.forEach(function(p){ minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); });
-    var pad = 26, k = Math.min((W - 2 * pad) / Math.max(maxX - minX, 1e-6), (H - 2 * pad) / Math.max(maxY - minY, 1e-6)), offX = (W - (maxX - minX) * k) / 2 - minX * k, offY = (H - (maxY - minY) * k) / 2 - minY * k;
-    function T(p){ return [p.x * k + offX, p.y * k + offY]; }
-    function line(a, b){ var s = T(a), e = T(b); cx.beginPath(); cx.moveTo(s[0], s[1]); cx.lineTo(e[0], e[1]); cx.stroke(); }
-    cx.lineWidth = 1; cx.strokeStyle = muted; cx.globalAlpha = 0.28;
-    for(r = 0; r <= nr; r++){ line(P(ox, oy + r, 0), P(ox + nc, oy + r, 0)); } for(c = 0; c <= nc; c++){ line(P(ox + c, oy, 0), P(ox + c, oy + nr, 0)); }
-    cx.globalAlpha = 1;
-    boxes.sort(function(a, b){ return b.d - a.d; });
-    function face(idx, q, col, alpha){ cx.beginPath(); idx.forEach(function(j, n){ var t = T(q[j]); if(n){ cx.lineTo(t[0], t[1]); } else { cx.moveTo(t[0], t[1]); } }); cx.closePath(); cx.globalAlpha = alpha; cx.fillStyle = col; cx.fill(); cx.globalAlpha = 0.5; cx.strokeStyle = 'rgba(0,0,0,.55)'; cx.stroke(); cx.globalAlpha = 1; }
-    boxes.forEach(function(b){
-      var col = b.up ? paper : loss, sides = [[0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]].map(function(s){ return { s: s, d: (b.q[s[0]].d + b.q[s[2]].d) / 2 }; }).sort(function(a, c2){ return c2.d - a.d; });
-      sides.forEach(function(s, n){ face(s.s, b.q, col, 0.28 + n * 0.08); });
-      face([4, 5, 6, 7], b.q, col, 0.92);
-    });
-    // Price labels on the nearer long edge and time labels on the nearer short edge.
-    cx.fillStyle = muted; cx.font = '11px "Public Sans", sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-    var nearY = P(ox, oy, 0).d > P(ox, oy + nr, 0).d ? nr : 0, nearX = P(ox, oy, 0).d > P(ox + nc, oy, 0).d ? nc : 0;
-    for(c = 0; c < nc; c += 1){ var t1 = T(P(ox + c + 0.5, oy + nearY + (nearY ? 0.55 : -0.55), 0)); if(c % 2 === 0){ cx.fillText(m.cols[c] + 'c', t1[0], t1[1]); } }
-    for(r = 0; r < nr; r++){ var t2 = T(P(ox + nearX + (nearX ? 0.7 : -0.7), oy + r + 0.5, 0)); cx.fillText(m.rows[r], t2[0], t2[1]); }
-  }
   var KAL_SURF_MARKETS = ['Gold', 'XRP', 'Bitcoin', 'Dogecoin', 'Ethereum'];
-  // More ways to see the same cells (the owner, Oct 27, 2026: "build a couple different renderings"). Every one reads the same model, leaves a cell under KAL_SURF_MIN blank, and draws no animation.
-  // Ridge lines: one line per time block, price across, height is the edge. Each line hides the one behind it, so the shape reads like a landscape without a 3D view that can hide a cell.
-  function kalSurfRidgeHtml(m){
-    var W = 600, padL = 34, padR = 10, padT = 18, rowH = 40, H = padT + rowH * m.rows.length + 26, nc = m.cols.length, amp = rowH * 1.25;
-    function X(c){ return padL + (W - padL - padR) * c / (nc - 1); }
-    var g = '', r, c;
-    for(r = 0; r < m.rows.length; r++){
-      var base = padT + rowH * r + rowH, pts = [];
-      for(c = 0; c < nc; c++){ var x = m.cells[r][c]; pts.push(x.ok ? { x: X(c), y: base - (m.maxAbs > 0 ? x.edge / m.maxAbs : 0) * amp * 0.5, e: x.edge } : null); }
-      var runs = [[]]; pts.forEach(function(p){ if(p){ runs[runs.length - 1].push(p); } else if(runs[runs.length - 1].length){ runs.push([]); } });
-      g += '<line class="rd0" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + base + '" y2="' + base + '"></line>';
-      runs.forEach(function(run){
-        if(run.length < 2){ if(run.length === 1){ g += '<circle cx="' + run[0].x.toFixed(1) + '" cy="' + run[0].y.toFixed(1) + '" r="2.2" class="' + (run[0].e >= 0 ? 'rdp' : 'rdn') + '"></circle>'; } return; }
-        var d = run.map(function(p, i){ return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join('');
-        g += '<path d="' + d + 'L' + run[run.length - 1].x.toFixed(1) + ' ' + base + 'L' + run[0].x.toFixed(1) + ' ' + base + 'Z" class="rdf"></path>';
-        for(var i = 1; i < run.length; i++){ g += '<line x1="' + run[i - 1].x.toFixed(1) + '" y1="' + run[i - 1].y.toFixed(1) + '" x2="' + run[i].x.toFixed(1) + '" y2="' + run[i].y.toFixed(1) + '" class="' + ((run[i - 1].e + run[i].e) / 2 >= 0 ? 'rdp' : 'rdn') + '"></line>'; }
-      });
-      g += '<text x="' + (padL - 6) + '" y="' + (base - 3) + '" text-anchor="end" class="rdt">' + escapeHtml(m.rows[r]) + '</text>';
-    }
-    for(c = 0; c < nc; c += 1){ g += '<text x="' + X(c).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="rdt">' + m.cols[c] + 'c</text>'; }
-    return '<svg class="kal-sf-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Edge by price paid, one line for each part of the day">' + g + '</svg>';
-  }
-  // Bubbles: the size of a circle is how many trades are behind a cell, its colour the edge. It answers "can I believe this cell" at a glance: a big white bubble is a lot of evidence, a small one is a few trades.
-  function kalSurfBubbleHtml(m){
-    var W = 600, padL = 34, padT = 16, cw = (W - padL - 8) / m.cols.length, rh = 34, H = padT + rh * m.rows.length + 24, maxN = 1, g = '', r, c;
-    m.cells.forEach(function(row){ row.forEach(function(x){ if(x.n > maxN){ maxN = x.n; } }); });
-    for(r = 0; r < m.rows.length; r++){
-      g += '<text x="' + (padL - 6) + '" y="' + (padT + rh * r + rh / 2 + 4) + '" text-anchor="end" class="rdt">' + escapeHtml(m.rows[r]) + '</text>';
-      for(c = 0; c < m.cols.length; c++){
-        var x = m.cells[r][c], cx = padL + cw * c + cw / 2, cy = padT + rh * r + rh / 2, rad = x.n ? 2 + Math.sqrt(x.n / maxN) * (rh / 2 - 2) : 0;
-        if(!x.n){ continue; }
-        if(!x.ok){ g += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + rad.toFixed(1) + '" class="bbx"><title>' + escapeHtml(kalSurfCellTitle(m, r, c)) + '</title></circle>'; continue; }
-        var a = m.maxAbs > 0 ? 0.25 + Math.abs(x.edge) / m.maxAbs * 0.7 : 0.4;
-        g += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + rad.toFixed(1) + '" class="' + (x.edge >= 0 ? 'bbp' : 'bbn') + '" style="fill-opacity:' + a.toFixed(2) + '"><title>' + escapeHtml(kalSurfCellTitle(m, r, c)) + '</title></circle>';
-      }
-    }
-    for(c = 0; c < m.cols.length; c++){ g += '<text x="' + (padL + cw * c + cw / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" class="rdt">' + m.cols[c] + 'c</text>'; }
-    return '<svg class="kal-sf-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Number of trades and edge by price paid and time of day">' + g + '</svg>';
-  }
-  // Price curves: the edge at each price paid for all markets and for each market, with a band of two standard errors. This is the honest one: a line whose band crosses zero everywhere is a line with no proof in it.
-  // Each point is the net result per contract at that price (every time of day together); a price with fewer than KAL_SURF_MIN trades is a gap.
-  function kalshiEdgeCurves(orders, opts){
-    opts = opts || {};
-    var names = ['All'].concat(KAL_SURF_MARKETS), acc = {};
-    names.forEach(function(n){ acc[n] = KAL_SURF_PRICES.map(function(){ return { n: 0, c: 0, net: 0, s: 0, s2: 0 }; }); });
-    (orders || []).forEach(function(o){
-      var pnl = kalshiOrderPnl(o);
-      if(pnl === null || !o || o.strategy !== 'L1' || o.result === 'hand' || !Number.isFinite(o.ts)){ return; }
-      if(opts.lead && opts.lead !== 'all' && (o.entryLead || '6m') !== opts.lead){ return; }
-      var px = kalshiPricePaid(o), ci = KAL_SURF_PRICES.indexOf(Number.isFinite(px) ? Math.round(px * 100) : NaN);
-      if(ci < 0){ return; }
-      var k = Number(o.fillCount) > 0 ? Number(o.fillCount) : Number(o.count), per = pnl / k * 100, mkn = kalshiMarketName(o);
-      [acc.All, acc[mkn]].forEach(function(a){ if(!a){ return; } var x = a[ci]; x.n++; x.c += k; x.net += pnl; x.s += per; x.s2 += per * per; });
-    });
-    var out = {};
-    names.forEach(function(n){ out[n] = acc[n].map(function(x, i){
-      if(x.n < KAL_SURF_MIN || !(x.c > 0)){ return { c: KAL_SURF_PRICES[i], n: x.n, ok: false }; }
-      var mean = x.s / x.n, v = Math.max(0, x.s2 / x.n - mean * mean) * x.n / Math.max(1, x.n - 1);
-      return { c: KAL_SURF_PRICES[i], n: x.n, ok: true, edge: x.net / x.c * 100, se: Math.sqrt(v / x.n) };
-    }); });
-    return out;
-  }
-  function kalSurfCurveHtml(cur){
-    var names = Object.keys(cur), lo = 0, hi = 0;
-    names.forEach(function(n){ cur[n].forEach(function(p){ if(p.ok){ lo = Math.min(lo, p.edge - 2 * p.se); hi = Math.max(hi, p.edge + 2 * p.se); } }); });
-    if(hi - lo < 1){ hi += 0.5; lo -= 0.5; }
-    var W = 190, H = 110, pl = 4, pr = 4, pt = 8, pb = 16, h = '<div class="kal-sf-multi">';
-    function X(i){ return pl + (W - pl - pr) * i / (KAL_SURF_PRICES.length - 1); } function Y(v){ return pt + (H - pt - pb) * (1 - (v - lo) / (hi - lo)); }
-    names.forEach(function(n){
-      var pts = cur[n], g = '<line class="rd0" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '"></line>', runs = [[]];
-      pts.forEach(function(p, i){ if(p.ok){ runs[runs.length - 1].push({ x: X(i), e: p.edge, u: p.edge + 2 * p.se, l: p.edge - 2 * p.se }); } else if(runs[runs.length - 1].length){ runs.push([]); } });
-      runs.forEach(function(run){
-        if(!run.length){ return; }
-        if(run.length > 1){
-          g += '<path class="cvb" d="' + run.map(function(p, i){ return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + Y(p.u).toFixed(1); }).join('') + run.slice().reverse().map(function(p){ return 'L' + p.x.toFixed(1) + ' ' + Y(p.l).toFixed(1); }).join('') + 'Z"></path>';
-          g += '<path class="cvl" d="' + run.map(function(p, i){ return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + Y(p.e).toFixed(1); }).join('') + '"></path>';
-        } else { g += '<circle class="cvd" cx="' + run[0].x.toFixed(1) + '" cy="' + Y(run[0].e).toFixed(1) + '" r="2"></circle>'; }
-      });
-      var tot = pts.reduce(function(a, p){ return a + p.n; }, 0);
-      h += '<div class="kal-sf-pn"><div class="kal-sf-pt"><b>' + escapeHtml(n) + '</b><span>' + tot + ' trades</span></div><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + escapeHtml(n + ': edge by price paid') + '">' + g +
-        '<text x="' + pl + '" y="' + (H - 3) + '" class="rdt">88c</text><text x="' + (W - pr) + '" y="' + (H - 3) + '" text-anchor="end" class="rdt">97c</text></svg></div>';
-    });
-    return h + '</div>';
-  }
   // The wireframe mesh (closest to the surface in the mock-up): points at the centre of every readable cell, joined to the neighbours that are also readable, so a thin cell leaves a hole in the sheet and the sheet never claims
   // a value it was not given. White above zero, red below. Drag sideways to turn.
-  function kalSurfMeshDraw(cv, m){
+  function kalSurfMeshDraw(cv, m, hov){
     var W = cv.clientWidth || 640, H = cv.clientHeight || 340, dpr = window.devicePixelRatio || 1;
     if(cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     var cx = cv.getContext('2d'); if(!cx){ return; }
@@ -2661,7 +2520,7 @@
     var cs = window.getComputedStyle(document.documentElement), paper = (cs.getPropertyValue('--paper') || '#fff').trim(), loss = (cs.getPropertyValue('--loss') || '#D93025').trim(), muted = (cs.getPropertyValue('--muted') || '#999').trim();
     var nc = m.cols.length, nr = m.rows.length, zmax = Math.max(nc, nr) * 0.3, cyw = Math.cos(kalSurf.yaw), syw = Math.sin(kalSurf.yaw), cp = Math.cos(kalSurf.pitch), sp = Math.sin(kalSurf.pitch), r, c;
     function P(x, y, z){ var x1 = x * cyw - y * syw, y1 = x * syw + y * cyw; return { x: x1, y: -(y1 * sp + z * cp), d: y1 * cp - z * sp }; }
-    var V = [], all = [];
+    var V = [], all = [], hit = [];
     for(r = 0; r < nr; r++){ V.push([]); for(c = 0; c < nc; c++){ var x = m.cells[r][c], p = P(c - (nc - 1) / 2, r - (nr - 1) / 2, x.ok ? (m.maxAbs > 0 ? x.edge / m.maxAbs * zmax : 0) : 0); V[r].push(x.ok ? { p: p, e: x.edge } : null); all.push(p); } }
     [[-0.5, -0.5], [nc - 0.5, -0.5], [nc - 0.5, nr - 0.5], [-0.5, nr - 0.5]].forEach(function(q){ all.push(P(q[0] - (nc - 1) / 2, q[1] - (nr - 1) / 2, 0)); });
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
@@ -2687,6 +2546,9 @@
     cx.lineWidth = 1.2;
     segs.sort(function(a, b){ return (b[0].p.d + b[1].p.d) - (a[0].p.d + a[1].p.d); });
     segs.forEach(function(s){ var a = T(s[0].p), b = T(s[1].p); cx.beginPath(); cx.moveTo(a[0], a[1]); cx.lineTo(b[0], b[1]); cx.strokeStyle = (s[0].e + s[1].e) / 2 >= 0 ? paper : loss; cx.globalAlpha = 0.85; cx.stroke(); cx.globalAlpha = 1; });
+    for(r = 0; r < nr; r++){ for(c = 0; c < nc; c++){ if(V[r][c]){ var tp = T(V[r][c].p); hit.push({ x: tp[0], y: tp[1], r: r, c: c }); } } }
+    cv.kalHit = hit;
+    if(hov){ var hp = hit.filter(function(h){ return h.r === hov.r && h.c === hov.c; })[0]; if(hp){ cx.beginPath(); cx.arc(hp.x, hp.y, 5, 0, 6.2832); cx.fillStyle = paper; cx.fill(); cx.lineWidth = 2; cx.strokeStyle = 'rgba(0,0,0,.6)'; cx.stroke(); } }
     cx.fillStyle = muted; cx.font = '11px "Public Sans", sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
     var nearY = P(0, -(nr - 1) / 2, 0).d > P(0, (nr - 1) / 2, 0).d ? 1 : -1, nearX = P(-(nc - 1) / 2, 0, 0).d > P((nc - 1) / 2, 0, 0).d ? 1 : -1;
     for(c = 0; c < nc; c += 2){ var t1 = T(P(c - (nc - 1) / 2, nearY * ((nr - 1) / 2 + 0.9), 0)); cx.fillText(m.cols[c] + 'c', t1[0], t1[1]); }
@@ -2695,32 +2557,25 @@
   function renderKalshiSurface(){
     var fold = document.getElementById('kalSfFold'), body = document.getElementById('kalSfBody'), st = document.getElementById('kalSfStatus');
     if(!fold || !fold.open || !body){ return; }
-    var mk = document.getElementById('kalSfMarket'), ld = document.getElementById('kalSfLead'), vw = document.getElementById('kalSfView');
+    var mk = document.getElementById('kalSfMarket'), ld = document.getElementById('kalSfLead');
     if(!kalshiOrdersLoaded){ body.innerHTML = '<div class="kal-empty">Reading the orders...</div>'; return; }
     var m = kalshiEdgeModel(kalshiLiveOrders, { market: mk ? mk.value : 'all', lead: ld ? ld.value : 'all' });
     if(st){ st.textContent = m.n + ' settled trades read. ' + m.okCells + ' of ' + (m.cols.length * m.rows.length) + ' cells have ' + KAL_SURF_MIN + ' or more.' + (m.outside ? ' ' + m.outside + ' bought outside 88c to 97c are left out.' : ''); }
     if(!m.okCells){ body.innerHTML = '<div class="kal-empty">No cell has ' + escapeHtml(String(KAL_SURF_MIN)) + ' trades yet, so there is nothing honest to draw. Pick all markets or all entry times.</div>'; return; }
-    var view = vw ? vw.value : 'heat';
-    if(view === '3d' || view === 'mesh'){
-      var draw = view === 'mesh' ? kalSurfMeshDraw : kalSurfDraw;
-      body.innerHTML = '<canvas class="kal-sf-cv" id="kalSfCv" role="img" aria-label="Edge in cents per contract by price paid and time of day, as a shape you can turn"></canvas>';
-      var cv = document.getElementById('kalSfCv');
-      draw(cv, m);
-      var start = null;
-      cv.addEventListener('pointerdown', function(e){ start = { x: e.clientX, yaw: kalSurf.yaw }; try { cv.setPointerCapture(e.pointerId); } catch(err){} });
-      cv.addEventListener('pointermove', function(e){ if(!start){ return; } kalSurf.yaw = start.yaw + (e.clientX - start.x) * 0.01; draw(cv, m); });
-      cv.addEventListener('pointerup', function(){ start = null; });
-      cv.addEventListener('pointercancel', function(){ start = null; });
-      cv.addEventListener('dblclick', function(){ kalSurf.yaw = -0.55; draw(cv, m); });
-    } else if(view === 'ridge'){
-      body.innerHTML = kalSurfRidgeHtml(m);
-    } else if(view === 'bubble'){
-      body.innerHTML = kalSurfBubbleHtml(m);
-    } else if(view === 'curve'){
-      body.innerHTML = kalSurfCurveHtml(kalshiEdgeCurves(kalshiLiveOrders, { lead: ld ? ld.value : 'all' }));
-    } else {
-      body.innerHTML = kalSurfHeatHtml(m);
-    }
+    body.innerHTML = '<canvas class="kal-sf-cv" id="kalSfCv" role="img" aria-label="Edge in cents per contract by price paid and time of day, as a surface you can turn"></canvas><div class="kal-sf-read" id="kalSfRead">Drag sideways to turn it. Touch or hover a point for its trades.</div>';
+    var cv = document.getElementById('kalSfCv'), rd = document.getElementById('kalSfRead'), start = null, hov = null;
+    kalSurfMeshDraw(cv, m, null);
+    cv.addEventListener('pointerdown', function(e){ start = { x: e.clientX, yaw: kalSurf.yaw }; try { cv.setPointerCapture(e.pointerId); } catch(err){} });
+    cv.addEventListener('pointermove', function(e){
+      if(start){ kalSurf.yaw = start.yaw + (e.clientX - start.x) * 0.01; kalSurfMeshDraw(cv, m, hov); return; }
+      var rc = cv.getBoundingClientRect(), z = rc.width / (cv.clientWidth || rc.width), px = (e.clientX - rc.left) / z, py = (e.clientY - rc.top) / z, best = null, bd = 20 * 20;
+      (cv.kalHit || []).forEach(function(h){ var d = (h.x - px) * (h.x - px) + (h.y - py) * (h.y - py); if(d < bd){ bd = d; best = h; } });
+      hov = best; kalSurfMeshDraw(cv, m, hov);
+      if(rd){ rd.textContent = best ? kalSurfCellTitle(m, best.r, best.c) : 'Drag sideways to turn it. Touch or hover a point for its trades.'; }
+    });
+    cv.addEventListener('pointerup', function(){ start = null; });
+    cv.addEventListener('pointercancel', function(){ start = null; });
+    cv.addEventListener('dblclick', function(){ kalSurf.yaw = -0.55; kalSurfMeshDraw(cv, m, hov); });
   }
   (function(){
     var fold = document.getElementById('kalSfFold');
@@ -2728,7 +2583,7 @@
     var mk = document.getElementById('kalSfMarket');
     if(mk){ ['all'].concat(KAL_SURF_MARKETS).forEach(function(n){ var op = document.createElement('option'); op.value = n; op.textContent = n === 'all' ? 'All markets' : n; mk.appendChild(op); }); }
     fold.addEventListener('toggle', renderKalshiSurface);
-    ['kalSfMarket', 'kalSfLead', 'kalSfView'].forEach(function(id){ var el = document.getElementById(id); if(el){ el.addEventListener('change', renderKalshiSurface); } });
+    ['kalSfMarket', 'kalSfLead'].forEach(function(id){ var el = document.getElementById(id); if(el){ el.addEventListener('change', renderKalshiSurface); } });
   })();
 
   // ---- server bot tab (read only, plus one halt switch) ----
