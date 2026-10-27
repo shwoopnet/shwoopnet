@@ -473,7 +473,13 @@
   .kal-notif-empty{ padding:22px 16px; font-size:13px; color:var(--muted); }
   .kal-alert{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; margin:0 0 14px; padding:14px 18px; border-radius:14px; background:var(--loss); color:#fff; font-size:14px; line-height:1.45; }
   .kal-alert[hidden]{ display:none; } .kal-alert b{ font-size:15px; font-weight:800; } .kal-alert-open{ margin-left:auto; background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:999px; padding:0 14px; min-height:34px; font:600 13px inherit; font-family:inherit; cursor:pointer; }
-  @media screen and (max-width:900px){ .kal-notif-tabs .kal-pill{ min-height:40px; } .kal-notif-panel{ position:fixed; left:12px; right:12px; top:auto; bottom:84px; width:auto; max-height:70vh; } }
+  @media screen and (max-width:900px){ .kal-notif-tabs .kal-pill{ min-height:40px; } .kal-notif-panel{ position:fixed; left:12px; right:12px; top:84px; bottom:auto; width:auto; max-height:70vh; }
+    /* On a phone the bell sits in the header beside the clock (the owner, Oct 27, 2026: "notification bell up here on mobile"), as a bare icon, and the bottom bar keeps Brief, Bot and Settings. */
+    .topbar-right .kal-notif{ order:-1; align-self:center; margin-right:6px; }
+    .topbar-right .kal-notif-btn{ flex-direction:row; min-width:44px; min-height:44px; width:44px; padding:0; justify-content:center; border-radius:12px; }
+    .topbar-right .kal-notif-btn .side-nav-label, .topbar-right .kal-notif-btn .side-nav-icon{ display:none; }
+    .topbar-right .kal-notif-btn .side-nav-glyph{ display:block; width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .topbar-right .kal-notif-badge{ top:2px; right:2px; } }
   /* Phone touch targets (the owner, Oct 25, 2026: "scan over mobile UI"). Measured at 360, 390 and 430 wide: the trade list's page arrows were 8px wide, the Running pill 34px tall, the legal line and the contact email about 14 to 19px, and the Layout menu's tick boxes 18px. Each is now at least 40px to tap, and the Bot page header holds its buttons on one row under the status. */
   @media screen and (max-width:700px){
     .kal-link{ min-width:40px; min-height:40px; padding:0 12px; margin-left:0; }
@@ -1516,6 +1522,7 @@
                 </ul>
                 <div class="changelog-day">Oct 26</div>
                 <ul class="changelog-list">
+                  <li>On a phone the notification bell sits in the header beside the clock; the bottom bar keeps Brief, Bot and Settings (#585)</li>
                   <li>The Account card has the balance as its hero with Today under it, and stake, pool and loss stop as three tiles (#584)</li>
                   <li>Order flow lists the biggest single trades and rings the cell of any print at least 5 times the usual size (#583)</li>
                   <li>Order flow's picker is the product only; the time frame (15 minutes, 30 minutes, hour) sets how much of its recent windows to show (#582)</li>
@@ -3639,6 +3646,19 @@ kalshiStatusTick();
       document.getElementById('kalBotHaltMsg').textContent = 'Could not change it: ' + ((err && err.message) || 'unknown');
     });
   });
+
+  // The bell lives in the navigation rail on a wide screen and in the header, beside the clock, on a phone (the owner, Oct 27, 2026). One element moves between the two, so every id and listener stays the same.
+  (function(){
+    var bell = document.getElementById('kalNotif'), nav = document.getElementById('sideNav'), right = document.querySelector('.topbar-right'), clock = right ? right.querySelector('.clock') : null;
+    if(!bell || !nav || !right || !window.matchMedia){ return; }
+    var mq = window.matchMedia('(max-width: 900px)');
+    function place(){
+      if(mq.matches){ if(bell.parentNode !== right){ right.insertBefore(bell, clock || right.firstChild); } }
+      else if(bell.parentNode !== nav){ nav.insertBefore(bell, nav.firstChild); }
+    }
+    place();
+    if(mq.addEventListener){ mq.addEventListener('change', place); } else if(mq.addListener){ mq.addListener(place); }
+  })();
 
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
